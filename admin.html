@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>데이터 관리 | POT LAB</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+  :root{
+    --ink:#0e1214; --dim:#697680; --line:#e4e8ea; --bg:#f4f6f6; --card:#fff;
+    --accent:#0d5c4f; --accent-soft:#e8f3f0; --warn:#b4432c; --warn-soft:#fdf1ec;
+    --sand:#f0ece3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    font-size:15px;line-height:1.55}
+  .wrap{max-width:820px;margin:0 auto;padding:16px 14px 60px}
+
+  h1{font-size:18px;margin:0 0 3px;letter-spacing:-.02em}
+  .lead{font-size:12.5px;color:var(--dim);margin:0 0 16px}
+
+  .tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+  .tb{flex:0 0 auto;padding:8px 14px;border:1px solid var(--line);background:#fff;
+    border-radius:20px;font-family:inherit;font-size:13px;cursor:pointer;color:var(--dim);
+    white-space:nowrap;-webkit-tap-highlight-color:transparent;
+    transition:background-color .2s,color .2s,border-color .2s,transform .22s}
+  .tb:active{transform:scale(.95)}
+  .tb.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+  .tb .n{opacity:.6;margin-left:5px;font-size:11.5px}
+  .tb.on .n{opacity:.75}
+
+  .row{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px;
+    margin-bottom:8px;transition:opacity .2s}
+  .row.off{opacity:.5;background:#fafbfb}
+  .row.flag{border-color:#f0cfc4;background:var(--warn-soft)}
+  .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .sal{font-size:19px;font-weight:800;letter-spacing:-.02em}
+  .sal.bad{color:var(--warn)}
+  .meta{font-size:12.5px;color:var(--dim);flex:1;min-width:0}
+  .pill{font-size:10.5px;padding:2px 8px;border-radius:20px;font-weight:700}
+  .pill.stu{background:var(--accent-soft);color:var(--accent)}
+  .pill.off{background:#eceff0;color:var(--dim)}
+  .pill.flag{background:#f6ddd4;color:var(--warn)}
+  .det{font-size:12.5px;color:var(--dim);line-height:1.75}
+  .note{background:var(--sand);border-radius:8px;padding:9px;font-size:12.5px;
+    margin-top:8px;line-height:1.7}
+  .note b{display:block;font-size:11px;color:var(--dim);margin-bottom:3px;letter-spacing:.03em}
+
+  .acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+  button{font-family:inherit;font-size:13px;padding:7px 13px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--line);background:#fff;-webkit-tap-highlight-color:transparent;
+    transition:transform .22s,background-color .2s}
+  button:active{transform:scale(.95)}
+  .ex{color:var(--warn);border-color:#f0d6d2}
+  .re{color:var(--accent);border-color:#c9e2da}
+  .idcopy{margin-left:auto;font-size:10.5px;color:#b6c0c4;align-self:center;
+    font-family:ui-monospace,Menlo,monospace}
+
+  .empty{border:1px dashed var(--line);border-radius:12px;padding:26px;text-align:center;
+    color:var(--dim);font-size:13.5px;background:#fbfcfc}
+  .loading{text-align:center;color:var(--dim);padding:32px;font-size:13px}
+  .keybox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px;
+    margin-bottom:14px}
+  .keybox input{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;
+    font-family:inherit;font-size:15px;margin-bottom:8px}
+  .go{width:100%;padding:12px;border:none;border-radius:9px;background:var(--ink);color:#fff;
+    font-weight:700;font-size:14.5px}
+  #msg{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(80px);
+    background:var(--ink);color:#fff;padding:11px 18px;border-radius:9px;font-size:13.5px;
+    transition:transform .22s;z-index:9}
+  #msg.show{transform:translateX(-50%) translateY(0)}
+  .hide{display:none}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>데이터 관리</h1>
+  <p class="lead">이상치를 통계에서 빼거나 되돌립니다. 원본은 지워지지 않습니다.</p>
+
+  <div class="keybox" id="keyBox">
+    <input type="password" id="key" placeholder="관리자 키" onkeydown="if(event.key==='Enter')unlock()">
+    <button class="go" onclick="unlock()">열기</button>
+  </div>
+
+  <div id="main" class="hide">
+    <div class="tabs">
+      <button class="tb on" data-f="flag" onclick="load('flag')">확인 필요<span class="n" id="c-flag"></span></button>
+      <button class="tb" data-f="note" onclick="load('note')">특이사항<span class="n" id="c-note"></span></button>
+      <button class="tb" data-f="excluded" onclick="load('excluded')">제외됨<span class="n" id="c-excluded"></span></button>
+      <button class="tb" data-f="all" onclick="load('all')">전체<span class="n" id="c-all"></span></button>
+    </div>
+    <div id="list"><div class="loading">불러오는 중</div></div>
+  </div>
+</div>
+<div id="msg"></div>
+
+<script src="app.js"></script>
+<script>
+var KEY='';
+function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
+  clearTimeout(m._t);m._t=setTimeout(function(){m.className='';},2400);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function unlock(){
+  KEY=document.getElementById('key').value.trim();
+  if(!KEY){msg('키를 입력해주세요');return;}
+  load('flag');
+}
+
+function load(f){
+  document.querySelectorAll('.tb').forEach(function(b){
+    b.className='tb'+(b.dataset.f===f?' on':'');
+  });
+  document.getElementById('list').innerHTML='<div class="loading">불러오는 중</div>';
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){msg(r.message);return;}
+    document.getElementById('keyBox').className='keybox hide';
+    document.getElementById('main').className='';
+    ['all','flag','excluded','note'].forEach(function(k){
+      document.getElementById('c-'+k).textContent=r.counts[k];
+    });
+    draw(r.rows);
+  }).withFailureHandler(function(e){msg(e.message);}).adminList(KEY,f);
+}
+
+function draw(rows){
+  var box=document.getElementById('list');
+  if(!rows.length){box.innerHTML='<div class="empty">해당하는 데이터가 없습니다</div>';return;}
+  box.innerHTML=rows.map(function(r){
+    var cls='row'+(r.excluded?' off':(r.flag?' flag':''));
+    var h='<div class="'+cls+'" id="r-'+r.id+'">'
+      + '<div class="top">'
+      + (r.role==='학생'
+          ? '<span class="pill stu">학생</span>'
+          : '<span class="sal'+(r.flag?' bad':'')+'">'+(r.salary||0)+'만원</span>')
+      + (r.job?'<span class="pill" style="background:#eef3fd;color:#2a4a7c">'+esc(r.job.slice(0,2))+'</span>':'')
+      + (r.nick?'<span class="pill stu">'+esc(r.nick)+'</span>':'')
+      + '<span class="meta">'+esc(r.type||'')+(r.years?' · '+r.years+'년차('+r.startYear+' 입사)':'')
+      + (r.region?' · '+esc(r.region):'')+(r.birthYear?' · '+r.birthYear+'년생(만 '+r.age+')':'')+'</span>'
+      + (r.flag&&!r.excluded?'<span class="pill flag">확인</span>':'')
+      + (r.excluded?'<span class="pill off">제외됨</span>':'')
+      + '</div>'
+      + '<div class="det">'
+      + esc(r.employment||'')
+      + (r.bonus?' · 상여 연 '+r.bonus+'만':'')
+      + (r.duty?' · 당직 '+r.duty+'회':'')
+      + (r.weekend?' · 주말 '+r.weekend+'회':'')
+      + (r.school?' · '+esc(r.school):'')
+      + (r.gpa?' '+r.gpa+'/'+r.gpaMax:'')
+      + ' · '+esc(r.at)
+      + '</div>';
+    if(r.note) h+='<div class="note"><b>특이사항</b>'+esc(r.note)+'</div>';
+    h+='<div class="acts">'
+      + '<button class="'+(r.excluded?'re':'ex')+'" onclick="toggle(\'' + r.id + '\')">'
+      + (r.excluded?'통계에 되돌리기':'통계에서 빼기')+'</button>'
+      + (r.role!=='학생'
+          ? '<button onclick="edit(\'' + r.id + '\','+(r.salary||0)+')">금액 수정</button>' : '')
+      + '<span class="idcopy">'+esc(r.id)+'</span>'
+      + '</div></div>';
+    return h;
+  }).join('');
+}
+
+function toggle(id){
+  var reason=null;
+  var el=document.getElementById('r-'+id);
+  var isOff=el.className.indexOf('off')>-1;
+  if(!isOff){
+    reason=prompt('제외 사유를 적어주세요 (기록용)','오입력으로 보임');
+    if(reason===null) return;
+  }
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){msg(r.message);return;}
+    msg(r.excluded?'통계에서 뺐습니다':'통계로 되돌렸습니다');
+    var f=document.querySelector('.tb.on').dataset.f;
+    load(f);
+  }).withFailureHandler(function(e){msg(e.message);}).adminToggle(KEY,id,reason);
+}
+
+function edit(id, cur){
+  var v=prompt('월 실수령액을 다시 입력하세요 (만원)', cur);
+  if(v===null) return;
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){msg(r.message);return;}
+    msg('수정했습니다');
+    load(document.querySelector('.tb.on').dataset.f);
+  }).withFailureHandler(function(e){msg(e.message);}).adminEditSalary(KEY,id,v);
+}
+</script>
+</body>
+</html>

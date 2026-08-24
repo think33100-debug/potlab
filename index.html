@@ -1,0 +1,3376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#0d5c4f">
+<title>작업·물리치료사 급여 통계 | POT LAB</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="description" content="작업치료사·물리치료사 급여를 직접 모아 만든 통계. 내 위치, 이직 시 차이, 병원별 치료사 인원까지.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="작업·물리치료사 급여 통계">
+<meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다. 병원별 치료사 인원·병상까지.">
+<meta property="og:image" content="og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="POT LAB">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  :root{
+    --ink:#0e1214; --dim:#5a6870; --line:#e4e8ea; --bg:#f4f6f6; --card:#fff;
+    --accent:#0d5c4f; --accent-2:#127764; --accent-soft:#e8f3f0; --warn:#b4432c;
+    --sand:#f0ece3;
+  }
+  /* 물리치료사 모드 — 색이 바뀝니다 */
+  body[data-job="물리치료사"]{
+    --accent:#1f4f8f; --accent-2:#2a63ad; --accent-soft:#e9f0fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    font-size:15px;line-height:1.6}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 14px 70px}
+
+  .hero{margin-bottom:18px}
+  .hero h1{font-size:20px;margin:0 0 6px;letter-spacing:-.03em;font-weight:800}
+  .hero p{margin:0;color:var(--dim);font-size:13.5px}
+
+  .tabs{display:flex;gap:6px;margin-bottom:16px}
+  .tab{flex:1;padding:10px;border:1px solid var(--line);background:#fff;border-radius:9px;
+    font-family:inherit;font-size:14px;cursor:pointer;color:var(--dim);
+    -webkit-tap-highlight-color:transparent;
+    transition:background-color .26s ease,color .26s ease,border-color .26s ease,transform .26s}
+  .tab:active{transform:scale(.97)}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:15px;margin-bottom:12px}
+  .card h2{font-size:14px;margin:0 0 4px;letter-spacing:-.01em}
+  .card .sub{font-size:13px;color:#5a6870;margin:0 0 12px}
+
+  .f{margin-bottom:13px}
+  .f label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
+  .f .hint{font-size:12px;color:#66737a;font-weight:400;margin-left:4px}
+  input,select,textarea{display:block;width:100%;max-width:100%;box-sizing:border-box;
+    padding:10px;border:1px solid var(--line);border-radius:8px;
+    font-family:inherit;font-size:15px;background:#fff;color:var(--ink)}
+  textarea{font-size:14.5px;line-height:1.65;resize:vertical;min-height:90px}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .two{display:flex;gap:8px}
+  .two>*{flex:1;min-width:0}
+  .unit{display:flex;align-items:center;gap:7px}
+  .unit span{font-size:13px;color:var(--dim);white-space:nowrap}
+
+  .rule{background:var(--accent-soft);border-radius:9px;padding:12px;margin-bottom:14px;
+    font-size:12.5px;line-height:1.75}
+  .rule b{display:block;margin-bottom:5px;font-size:13px;color:var(--accent)}
+  .rule .no{color:var(--warn)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chips.grouped{display:block}
+  .grp{margin-bottom:7px}
+  .chip.par{display:inline-flex;align-items:center;gap:7px;font-weight:600}
+  .chip.par .car{color:#b8c2c6;font-size:15px;
+    transition:transform .3s cubic-bezier(.2,.9,.25,1);display:inline-block}
+  .chip.par.open .car{transform:rotate(90deg)}
+  .chip.par.has{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+  .chip.par .cnt2{font-size:11px;font-weight:800;min-width:15px}
+  .subs{display:none;flex-wrap:wrap;gap:6px;padding:9px 0 4px 13px;
+    margin-top:6px;border-left:2px solid var(--line)}
+  .subs.on{display:flex}
+  .chip.sub{font-size:12.5px;padding:5px 11px}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;
+    font-size:13px;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;
+    transition:transform .26s cubic-bezier(.2,.9,.25,1), background-color .2s, border-color .2s}
+  .chip:active{transform:scale(.92)}
+  .chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  .addrow{display:flex;gap:6px;margin-top:8px}
+  .addrow input{flex:1;min-width:0;font-size:13.5px;padding:9px}
+  .addrow button{flex:0 0 auto;padding:9px 15px;font-size:13.5px;background:var(--ink);
+    color:#fff;border-color:var(--ink);font-weight:600}
+  .chip.mine{background:var(--sand);border-color:#ddd6c6}
+  .chip.mine.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .mecard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;
+    margin-bottom:12px}
+  .mecard .hd{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+  .mecard .av{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+  .mecard .hd b{font-size:14.5px}
+  .mecard .hd span.jobchip{margin-left:auto;background:var(--accent);color:#fff;
+    border-radius:7px;padding:4px 11px;font-size:12.5px;font-weight:800;letter-spacing:-.01em}
+  .tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+  .tags i{font-style:normal;font-size:12px;background:var(--sand);border-radius:6px;
+    padding:4px 9px;color:#4a555a}
+  .tags i.hi{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  .tier{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 13px;
+    font-size:12.5px;font-weight:800;letter-spacing:-.01em;margin-bottom:9px}
+  .tier .dot2{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .t1{background:#e3f4ec;color:#0a6b4a}
+  .t2{background:#e8f3f0;color:#12775f}
+  .t3{background:#eef1f3;color:#4f5d64}
+  .t4{background:#fdf3e6;color:#8a5c14}
+  .t5{background:#fdeeeb;color:#a8402a}
+
+  .gauge{margin:12px 0 4px}
+  .gauge .track{position:relative;height:9px;border-radius:5px;overflow:hidden;
+    background:linear-gradient(90deg,#a8402a 0%,#d69a3a 32%,#9aa6ab 52%,#3f9c7f 74%,#0a6b4a 100%)}
+  .gauge .pin{position:absolute;top:-4px;width:4px;height:17px;border-radius:3px;
+    background:var(--ink);box-shadow:0 0 0 2.5px #fff;
+    transition:left 1.15s cubic-bezier(.16,.84,.28,1)}
+  .gauge .ends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim);
+    margin-top:6px}
+
+  .verdict{border-top:1px solid var(--line);padding-top:13px;font-size:13.5px;line-height:1.85;
+    word-break:keep-all}
+  .verdict .big2{font-size:22px;font-weight:800;letter-spacing:-.02em;display:block;
+    margin:5px 0 3px}
+  .verdict .up{color:var(--accent)}
+  .verdict .down{color:var(--warn)}
+  .verdict em{font-style:normal;font-weight:700}
+  .verdict em.up{color:var(--accent)}
+  .verdict em.down{color:var(--warn)}
+  .intro .lead2{background:linear-gradient(160deg,var(--accent) 0%,var(--accent-2) 100%);
+    color:#fff;border-radius:16px;padding:24px 20px;margin-bottom:13px}
+  .intro .lead2 h2{margin:0 0 11px;font-size:19px;line-height:1.45;letter-spacing:-.03em;
+    word-break:keep-all}
+  .intro .lead2 p{margin:0;font-size:13.5px;line-height:1.85;opacity:.9;word-break:keep-all}
+  .intro .lead2 .quote{margin-top:15px;padding-top:14px;
+    border-top:1px solid rgba(255,255,255,.22);font-size:14px;font-weight:700;line-height:1.6}
+
+  .unlock{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px;
+    margin-bottom:13px}
+  .unlock h3{margin:0 0 3px;font-size:15px}
+  .unlock .sub3{font-size:12px;color:var(--dim);margin-bottom:13px}
+  .ul{display:flex;gap:11px;align-items:flex-start;margin-bottom:12px}
+  .ul .k2{width:26px;height:26px;border-radius:8px;background:var(--accent-soft);
+    color:var(--accent);display:flex;align-items:center;justify-content:center;
+    font-size:13px;flex-shrink:0}
+  .ul .t2{font-size:13.5px;line-height:1.6}
+  .ul .t2 b{display:block;margin-bottom:1px}
+  .ul .t2 span{font-size:12px;color:var(--dim)}
+
+  .privacy{background:var(--sand);border-radius:13px;padding:16px;margin-bottom:14px}
+  .privacy b{display:flex;align-items:center;gap:7px;font-size:14px;margin-bottom:9px}
+  .privacy ul{margin:0;padding-left:17px;font-size:13.5px;line-height:1.9;color:#39454b}
+  .privacy ul li{word-break:keep-all}
+
+  .hres{background:#fff;border:1px solid var(--line);border-radius:13px;padding:15px;
+    margin-bottom:8px}
+  .hres .hn{font-size:15px;font-weight:700;margin-bottom:11px;letter-spacing:-.01em;
+    word-break:keep-all}
+  .staff{display:flex;gap:8px}
+  .staff .box{flex:1;border-radius:10px;padding:11px 10px;text-align:center}
+  .staff .box.ot{background:var(--accent-soft)}
+  .staff .box.pt{background:#eef3fd}
+  .staff .box.sw{background:var(--sand)}
+  .staff .box .lb{font-size:11px;color:var(--dim);margin-bottom:3px}
+  .staff .box .vv{font-size:21px;font-weight:800;letter-spacing:-.02em}
+  .staff .box.ot .vv{color:var(--accent)}
+  .staff .box.pt .vv{color:#2a4a7c}
+  .staff .box.sw .vv{color:#7a6a48}
+  .hrank{font-size:12px;color:var(--dim);margin-top:10px;line-height:1.7}
+  .rk{display:flex;align-items:center;gap:11px;padding:10px 0;
+    border-bottom:1px solid var(--line);font-size:13.5px}
+  .rk:last-child{border:none}
+  .rk .no2{width:26px;font-weight:800;color:var(--dim);font-size:13px;text-align:center;
+    flex-shrink:0}
+  .rk .no2.top{color:var(--accent)}
+  .rk .nm2{flex:1;min-width:0;word-break:keep-all}
+  .rk .vl{font-weight:800;font-size:14.5px}
+  .sect{padding:26px 0;border-top:1px solid var(--line)}
+  .sect:first-of-type{border-top:none}
+  .pickhint{font-size:12px;font-weight:700;color:#5a6870;margin:0 0 8px;letter-spacing:-.01em}
+  .jobduo{display:flex;gap:7px;margin-bottom:15px}
+  .jobduo .jd{flex:1;font-size:14px;font-weight:800;border-radius:11px;padding:12px 8px;
+    letter-spacing:-.02em;border:1.5px solid var(--line);background:#fff;color:#8b979d;
+    font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:transform .22s,border-color .2s,background-color .2s,color .2s}
+  .jobduo .jd:active{transform:scale(.97)}
+  .jobduo .jd.ot.on{background:#e8f3f0;color:#0d5c4f;border-color:#0d5c4f}
+  .jobduo .jd.pt.on{background:#e9f0fa;color:#1f4f8f;border-color:#1f4f8f}
+  .kicker{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+    color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:4px 10px;
+    margin:0 0 11px}
+  .h2{font-size:22px;line-height:1.4;letter-spacing:-.035em;margin:0 0 15px;
+    word-break:keep-all;font-weight:800}
+  .body{font-size:15px;line-height:1.8;color:#2f3a3f;margin:0 0 13px;word-break:keep-all}
+  .pull{border-left:3px solid var(--accent);padding:3px 0 3px 15px;margin:19px 0 6px;
+    font-size:15.5px;font-weight:700;line-height:1.65;letter-spacing:-.02em;word-break:keep-all}
+  .note2{font-size:12.5px;color:var(--dim);line-height:1.8;margin:13px 0 0;word-break:keep-all}
+
+  .feat{display:flex;gap:14px;margin-bottom:26px}
+  .fno{font-size:12px;font-weight:800;color:var(--accent);flex-shrink:0;width:22px;
+    padding-top:3px;letter-spacing:.03em}
+  .fbody{flex:1;min-width:0}
+  .fbody h3{margin:0 0 7px;font-size:16.5px;letter-spacing:-.025em;word-break:keep-all}
+  .fbody p{margin:0;font-size:14px;line-height:1.75;color:#3f4c52;word-break:keep-all}
+  .ill{width:100%;height:auto;display:block;margin-top:12px;border-radius:11px}
+  .mock{background:#fff;border:1px solid var(--line);border-radius:11px;padding:13px;
+    margin-top:11px;display:flex;flex-direction:column;gap:3px}
+  .mock .mtier{font-size:20px;font-weight:800;color:var(--accent);letter-spacing:-.02em}
+  .mock .mtxt{font-size:12.5px;color:var(--dim)}
+  .mock .mup{font-size:16px;font-weight:800;color:var(--accent)}
+  .mock .mnum{font-size:16px;font-weight:800}
+
+  .stepline{display:flex;flex-direction:column;gap:14px;margin-bottom:15px}
+  .stp{display:flex;gap:13px;align-items:flex-start}
+  .stp .sn{width:25px;height:25px;border-radius:50%;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;
+    flex-shrink:0}
+  .stp b{display:block;font-size:14.5px;margin-bottom:2px}
+  .stp span{font-size:13px;color:#4d5a61;line-height:1.6}
+
+  .cta-fix{padding:22px 0 6px;border-top:1px solid var(--line)}
+  .cta-fix .go{margin-bottom:8px}
+
+  .welcome{background:linear-gradient(160deg,var(--accent) 0%,var(--accent-2) 100%);
+    color:#fff;border-radius:16px;padding:24px 20px;margin-bottom:13px;position:relative;
+    overflow:hidden;animation:rise .55s cubic-bezier(.2,.9,.25,1) both}
+  .welcome::after{content:'';position:absolute;right:-60px;top:-60px;width:170px;height:170px;
+    border-radius:50%;background:rgba(255,255,255,.07)}
+  .welcome>*{position:relative;z-index:1}
+  .welcome .hi{font-size:12px;opacity:.8;margin-bottom:6px;letter-spacing:.02em}
+  .welcome h3{margin:0 0 5px;font-size:22px;letter-spacing:-.03em;line-height:1.4}
+  .welcome .jobtag{display:inline-block;background:rgba(255,255,255,.2);
+    border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:5px 15px;
+    font-size:14px;font-weight:800;letter-spacing:-.01em;margin:4px 0 10px}
+  .welcome .cheer{font-size:13.5px;opacity:.88;line-height:1.7}
+  .welcome .since{display:inline-block;margin-top:13px;background:rgba(255,255,255,.14);
+    border-radius:20px;padding:5px 13px;font-size:11.5px;font-weight:700}
+
+  .myspec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;
+    margin-bottom:12px}
+  .myspec h4{margin:0 0 11px;font-size:13px;color:var(--dim);letter-spacing:.03em;
+    font-weight:800}
+  .sp{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;
+    border-bottom:1px solid #f0f3f4;font-size:13.5px}
+  .sp:last-child{border:none}
+  .sp .k3{color:var(--dim);font-size:12.5px}
+  .sp .v3{font-weight:700}
+  .sp .v3.acc{color:var(--accent)}
+  .spchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+  .spchips i{font-style:normal;font-size:11.5px;background:var(--sand);border-radius:6px;
+    padding:4px 9px;color:#4a555a}
+
+  .hres .hmeta{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+  .hres .hmeta i{font-style:normal;font-size:11.5px;background:var(--sand);border-radius:6px;
+    padding:4px 9px;color:#4a555a}
+  .hres .hmeta i.kd{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  .hres .haddr{font-size:11.5px;color:var(--dim);margin-top:9px;line-height:1.6;
+    word-break:keep-all}
+  .hint2{font-size:11.5px;color:var(--dim);margin-top:7px;line-height:1.6}
+  .sugbox{margin-top:6px}
+  .sugbox .sg{display:flex;align-items:center;gap:9px;padding:9px 11px;background:#fff;
+    border:1px solid var(--line);border-radius:9px;margin-bottom:5px;cursor:pointer;
+    font-size:13px}
+  .sugbox .sg:active{background:var(--accent-soft)}
+  .sugbox .sg b{flex:1;min-width:0;font-weight:700;word-break:keep-all}
+  .sugbox .sg span{font-size:11px;color:var(--dim);flex-shrink:0}
+  .sugbox .none{font-size:12px;color:var(--dim);padding:7px 2px}
+
+  .cmp{display:flex;gap:9px;margin-bottom:12px}
+  .cmpcol{flex:1;min-width:0;background:#fff;border:1px solid var(--line);border-radius:13px;
+    padding:14px;text-align:center}
+  .cmpcol.win{border-color:var(--accent);background:var(--accent-soft)}
+  .cmpcol h4{margin:0 0 4px;font-size:14px;letter-spacing:-.02em;word-break:keep-all}
+  .cmpcol .cm{font-size:11px;color:var(--dim);margin-bottom:11px;line-height:1.5}
+  .cmprow{display:flex;align-items:center;gap:8px;padding:9px 0;
+    border-bottom:1px solid #f0f3f4;font-size:13px}
+  .cmprow:last-child{border:none}
+  .cmprow .cl{width:96px;flex-shrink:0;color:var(--dim);font-size:12px}
+  .cmprow .cv{flex:1;text-align:center;font-weight:700}
+  .cmprow .cv.hi{color:var(--accent);font-weight:800}
+  .cardprev{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:11px}
+  .cardprev canvas{width:100%;max-width:300px;display:block;margin:0 auto;border-radius:10px;
+    box-shadow:0 3px 14px rgba(14,18,20,.12)}
+  .primary2{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+  .dens{border-radius:12px;padding:14px;margin-top:11px}
+  .dens.l1{background:#fdeeeb}
+  .dens.l2{background:#fdf3e6}
+  .dens.l3{background:#eef1f3}
+  .dens.l4{background:#eaf4f0}
+  .dens.l5{background:#e3f4ec}
+  .dens .dtop{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .dens .dlab{font-size:15px;font-weight:800;letter-spacing:-.02em}
+  .dens.l1 .dlab{color:#a8402a} .dens.l2 .dlab{color:#8a5c14}
+  .dens.l3 .dlab{color:#4f5d64} .dens.l4 .dlab{color:#12775f} .dens.l5 .dlab{color:#0a6b4a}
+  .dens .dpct{margin-left:auto;font-size:11.5px;color:var(--dim);font-weight:700}
+  .dscale{position:relative;height:8px;border-radius:4px;margin:11px 0 7px;
+    background:linear-gradient(90deg,#e0a294,#e6c88c,#b9c4c8,#7fc3ab,#4fae8c)}
+  .dscale .dpin{position:absolute;top:-4px;width:4px;height:16px;border-radius:3px;
+    background:var(--ink);box-shadow:0 0 0 2.5px #fff;
+    transition:left 1.15s cubic-bezier(.16,.84,.28,1)}
+  .dends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim)}
+  .hire{border-radius:11px;padding:13px;margin-top:11px;background:rgba(255,255,255,.75)}
+  .hire .hh{display:flex;align-items:flex-start;gap:8px;font-size:13.5px;font-weight:800;
+    letter-spacing:-.01em;margin-bottom:6px;word-break:keep-all;line-height:1.5}
+  .hire .hicon{font-size:15px;line-height:1.3;flex-shrink:0}
+  .hire p{margin:0;font-size:12.5px;line-height:1.75;color:#4a555a;word-break:keep-all}
+  .hire.high .hh{color:#0a6b4a}
+  .hire.low .hh{color:#8a5c14}
+  .hire.mid .hh{color:#4f5d64}
+  .dcmp{display:flex;gap:8px;margin-top:10px}
+  .dcmp .dc{flex:1;background:rgba(255,255,255,.7);border-radius:9px;padding:9px;
+    text-align:center}
+  .dcmp .dc span{display:block;font-size:10.5px;color:var(--dim);margin-bottom:2px;
+    word-break:keep-all;line-height:1.4}
+  .dcmp .dc b{font-size:14px}
+  .dnote{font-size:12.5px;line-height:1.75;margin-top:9px;word-break:keep-all;color:#3d484d}
+  .dfig{display:flex;gap:8px;margin-top:10px}
+  .dfig div{flex:1;background:rgba(255,255,255,.7);border-radius:9px;padding:9px;
+    text-align:center}
+  .dfig .dl{font-size:10.5px;color:var(--dim);margin-bottom:2px}
+  .dfig .dv{font-size:15px;font-weight:800}
+  .jlink{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);
+    border-radius:13px;padding:15px;margin-bottom:8px;text-decoration:none;color:var(--ink)}
+  .jlink:active{background:var(--accent-soft)}
+  .jlink .ji{width:38px;height:38px;border-radius:11px;background:var(--sand);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:18px}
+  .jlink .jt{flex:1;min-width:0}
+  .jlink .jt b{display:block;font-size:14.5px;margin-bottom:2px}
+  .jlink .jt span{font-size:12px;color:#5a6870}
+  .jlink .jo{color:#c6ced1;font-size:17px}
+  .hpick{display:flex;align-items:center;gap:10px;padding:13px 0;
+    border-bottom:1px solid #f0f3f4;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;transition:background-color .18s}
+  .hpick:last-child{border:none}
+  .hpick:active{background:var(--accent-soft);border-radius:9px;
+    padding-left:9px;padding-right:9px}
+  .hpick .hpi{flex:1;min-width:0}
+  .hpick .hpi b{display:block;font-size:14px;font-weight:700;word-break:keep-all;
+    margin-bottom:2px}
+  .hpick .hpi span{font-size:11.5px;color:var(--dim)}
+  .hpick .hpn{flex-shrink:0;text-align:right}
+  .hpick .hpn em{display:block;font-style:normal;font-size:12px;font-weight:800;
+    color:var(--accent);line-height:1.4}
+  .hpick .hpn em.pt{color:#2a4a7c;opacity:.85;font-size:11.5px}
+  .hitem{display:flex;align-items:center;gap:10px;padding:11px 0;
+    border-bottom:1px solid #f0f3f4}
+  .hitem:last-child{border:none}
+  .hitem .hno{width:24px;text-align:center;font-size:12px;font-weight:800;color:var(--dim);
+    flex-shrink:0}
+  .hitem .hno.t3{color:var(--accent)}
+  .hitem .hinfo{flex:1;min-width:0}
+  .hitem .hinfo b{display:block;font-size:13.5px;font-weight:700;word-break:keep-all}
+  .hitem .hinfo span{font-size:11.5px;color:var(--dim)}
+  .hitem .hcnt{font-weight:800;font-size:15px;flex-shrink:0}
+  .hitem .hcnt small{font-size:11px;font-weight:400;color:var(--dim)}
+  .rgrow{display:flex;align-items:center;gap:11px;padding:9px 0;
+    border-bottom:1px solid #f0f3f4;font-size:13.5px;cursor:pointer}
+  .rgrow:last-child{border:none}
+  .rgrow .rn{width:24px;text-align:center;font-size:12px;font-weight:800;color:var(--dim);
+    flex-shrink:0}
+  .rgrow .rn.t3{color:var(--accent)}
+  .rgrow .rs{flex:1;min-width:0}
+  .rgrow .rbar{width:78px;height:7px;background:#eef1f3;border-radius:4px;overflow:hidden;
+    flex-shrink:0}
+  .rgrow .rbar i{display:block;height:100%;background:var(--accent);
+    animation:grow .85s cubic-bezier(.2,.9,.25,1) both}
+  .rgrow .rv{width:52px;text-align:right;font-weight:800;font-size:14px;flex-shrink:0}
+  .rgrow .arw2{color:#c6ced1;font-size:16px}
+  .rgrow.on{background:var(--accent-soft);border-radius:8px;padding-left:8px;padding-right:8px}
+  .mixgrid{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+  .mixgrid i{font-style:normal;font-size:11.5px;background:var(--sand);border-radius:7px;
+    padding:5px 10px;color:#4a555a}
+  .mixgrid i b{color:var(--ink)}
+  .loadwrap{text-align:center;padding:44px 20px}
+  .spin{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--accent);
+    border-radius:50%;margin:0 auto 14px;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loadwrap p{margin:0;font-size:13.5px;color:var(--dim)}
+  .sumcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;
+    margin-top:16px}
+  .sline{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;
+    font-size:13px}
+  .sline span{color:var(--dim)}
+  .sline b{font-size:13.5px}
+
+  .mvhead{font-size:12px;font-weight:800;color:var(--dim);letter-spacing:.04em;
+    margin:15px 0 7px;padding-top:11px;border-top:1px solid var(--line)}
+  .mv{display:flex;align-items:center;gap:10px;padding:11px 0;font-size:13.5px;
+    border-bottom:1px solid #f2f5f6}
+  .mv:last-child{border:none}
+  .mvn{flex:1;min-width:0;word-break:keep-all}
+  .mvn2{display:block;font-size:11px;color:var(--dim);margin-top:2px}
+  .mvv2{text-align:right;flex-shrink:0}
+  .mvm{font-weight:800;font-size:14.5px;line-height:1.25}
+  .mvm.up{color:var(--accent)} .mvm.down{color:var(--warn)}
+  .mvy{font-size:12px;font-weight:700;opacity:.75;line-height:1.35}
+  .mvy.up{color:var(--accent)} .mvy.down{color:var(--warn)}
+  .mvn .now{font-size:10.5px;background:var(--sand);color:var(--dim);border-radius:5px;
+    padding:2px 6px;font-weight:700}
+  .mvv{font-weight:800;font-size:14.5px;min-width:74px;text-align:right}
+  .mvv.up{color:var(--accent)}
+  .mvv.down{color:var(--warn)}
+  .mvs{font-size:11.5px;color:var(--dim);min-width:36px;text-align:right}
+  .bestbox{background:var(--accent);color:#fff;border-radius:12px;padding:15px;margin-top:15px}
+  .bestbox b{display:block;font-size:11.5px;opacity:.75;letter-spacing:.05em;margin-bottom:5px}
+  .bestbox .bg{display:block;font-size:24px;font-weight:800;margin-top:6px;letter-spacing:-.03em}
+  .bestbox .bs{display:block;font-size:13px;opacity:.8;margin-top:2px}
+  .bestbox small{display:block;font-size:11.5px;opacity:.7;margin-top:4px}
+  .donebox{background:linear-gradient(160deg,var(--accent) 0%,var(--accent-2) 100%);
+    color:#fff;border-radius:16px;padding:24px 20px;text-align:center;margin-bottom:12px;
+    position:relative;overflow:hidden}
+  .donebox::after{content:'';position:absolute;right:-50px;top:-50px;width:150px;height:150px;
+    border-radius:50%;background:rgba(255,255,255,.07)}
+  .donebox>*{position:relative;z-index:1}
+  .donebox .dh{font-size:12.5px;opacity:.82;margin-bottom:9px;letter-spacing:.02em}
+  .donebox .dsub{font-size:14px;font-weight:700;opacity:.92;margin-bottom:6px}
+  .donebox .dbig{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1.15}
+  .donebox .drank{font-size:13.5px;opacity:.9;margin-top:7px}
+  .donebox .drank b{font-weight:800;font-size:15px}
+  .donebox p{margin:0;font-size:13px;line-height:1.75;opacity:.88;word-break:keep-all}
+  .lockcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px;
+    margin-bottom:12px}
+  .lchead{font-size:14.5px;font-weight:800;letter-spacing:-.02em;margin-bottom:11px}
+  .lclist{margin:0;padding-left:18px;font-size:13.5px;line-height:2;color:#3f4c52}
+  .lcfree{background:var(--accent-soft);border-radius:9px;padding:11px;margin-top:12px;
+    text-align:center;font-size:13.5px;color:var(--accent)}
+  .lcfree b{font-weight:800}
+  .roompts{list-style:none;margin:0 0 13px;padding:0;font-size:12.8px;line-height:1.95;
+    opacity:.85;text-align:left;display:inline-block}
+  .roompts li::before{content:'· ';opacity:.6}
+  .codebox{background:var(--ink);color:#fff;border-radius:16px;padding:26px 20px;
+    text-align:center;margin-bottom:13px}
+  .codebox .step2{font-size:11.5px;letter-spacing:.1em;opacity:.6;font-weight:800;
+    margin-bottom:11px}
+  .codebox h3{margin:0 0 11px;font-size:19px;letter-spacing:-.025em;line-height:1.45}
+  .codebox p{margin:0;font-size:13.5px;line-height:1.8;opacity:.8;word-break:keep-all}
+  .codebox .nickshow{background:rgba(255,255,255,.12);border-radius:10px;padding:12px;
+    margin:15px 0;font-size:17px;font-weight:800;letter-spacing:.02em}
+  .codebox .nickshow small{display:block;font-size:11px;opacity:.6;font-weight:400;
+    margin-bottom:3px;letter-spacing:0}
+  .lockbadge{font-size:10.5px;background:#eceff0;color:var(--dim);border-radius:20px;
+    padding:2px 8px;margin-left:6px;font-weight:700}
+  .hintbox{background:var(--accent-soft);border-radius:9px;padding:11px 13px;font-size:12.5px;
+    line-height:1.75;margin-top:8px;color:#22423b;word-break:keep-all}
+  .basis{background:var(--sand);border-radius:9px;padding:10px 12px;font-size:12.5px;
+    line-height:1.7;margin:10px 0 11px;color:#4a555a}
+  .basis b{display:block;font-size:12px;color:var(--dim);margin-bottom:2px}
+  .submeta{font-size:12px;color:var(--dim);margin-top:7px;line-height:1.65}
+  .sharebar{display:flex;gap:7px;margin-top:12px}
+  .sharebar button{flex:1;padding:11px;font-size:13.5px;font-weight:600}
+  .sharebar .kko{background:#FEE500;border-color:#FEE500;color:#191600}
+  .rowitem{display:flex;gap:6px;margin-bottom:6px;align-items:center}
+  .rowitem select,.rowitem input{font-size:13.5px;padding:8px}
+  .rowitem .x{border:none;background:none;color:var(--dim);font-size:18px;cursor:pointer;padding:0 4px}
+  .addbtn{border:1px dashed var(--line);background:#fff;border-radius:8px;padding:8px;
+    width:100%;font-size:13px;color:var(--dim);cursor:pointer;font-family:inherit;margin-top:4px}
+
+  .go{position:relative;overflow:hidden;width:100%;padding:14px;border:none;border-radius:11px;
+    background:var(--ink);color:#fff;font-size:15.5px;font-weight:700;font-family:inherit;
+    cursor:pointer;margin-top:6px;-webkit-tap-highlight-color:transparent;
+    transition:transform .3s cubic-bezier(.2,.9,.25,1), box-shadow .3s ease}
+  .go:active{transform:scale(.978);box-shadow:0 2px 10px rgba(14,18,20,.16)}
+  .go:disabled{opacity:.5}
+  .ghost{width:100%;padding:11px;border:1px solid var(--line);background:#fff;border-radius:9px;
+    font-family:inherit;font-size:14px;cursor:pointer;margin-top:8px}
+
+  .code{background:var(--ink);color:#fff;border-radius:12px;padding:20px;text-align:center;
+    margin-bottom:12px}
+  .code .big{font-size:30px;font-weight:800;letter-spacing:.06em;margin:8px 0}
+  .code p{margin:0;font-size:13px;opacity:.85}
+
+  .stat{border-bottom:1px solid var(--line);padding:11px 0;display:flex;align-items:baseline}
+  .stat:last-child{border:none}
+  .stat .k{font-size:13px;color:var(--dim);width:120px;flex-shrink:0}
+  .stat .v{font-size:16px;font-weight:700}
+  .stat .v small{font-weight:400;font-size:12px;color:var(--dim);margin-left:5px}
+
+  .pos{background:var(--accent);color:#fff;border-radius:14px;padding:19px;margin-bottom:12px;
+    animation:rise .55s cubic-bezier(.2,.9,.25,1) both}
+  .pos .num{animation:pop .6s cubic-bezier(.2,1.5,.4,1) .16s both}
+  @keyframes pop{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
+  .pos .lead{font-size:13px;opacity:.9;margin-bottom:6px}
+  .pos .num{font-size:28px;font-weight:800;letter-spacing:-.02em}
+  .pos .ranknote{font-size:14px;opacity:.92;margin:2px 0 6px}
+  .pos .ranknote b{font-weight:800;font-size:16px}
+  .ranknote2{font-size:13px;color:#4d5a61;margin:-2px 0 6px}
+  .ranknote2 b{font-weight:800;font-size:14.5px;color:var(--ink)}
+  .pos .note{font-size:12.5px;opacity:.9;margin-top:8px;line-height:1.6}
+
+  .invite{border:1px solid var(--line);border-radius:13px;padding:18px 16px;background:#fff;
+    text-align:center}
+  .invite b{display:block;margin-bottom:7px;font-size:14.5px;letter-spacing:-.01em}
+  .invite p{margin:0;font-size:13px;line-height:1.75;color:var(--dim);
+    word-break:keep-all;max-width:300px;margin-left:auto;margin-right:auto}
+
+  .thin{font-size:12px;color:var(--dim);text-align:center;margin-top:10px;line-height:1.6}
+  .bar{height:7px;background:#eef0f3;border-radius:4px;overflow:hidden;margin-top:5px}
+  .bar i{display:block;height:100%;background:var(--accent);
+    animation:grow .85s cubic-bezier(.2,.9,.25,1) both}
+  @keyframes grow{from{width:0 !important}}
+  .distrow{margin-bottom:9px}
+  .distrow .lab{display:flex;justify-content:space-between;font-size:12.5px}
+  #msg{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(80px);
+    background:var(--ink);color:#fff;padding:11px 18px;border-radius:9px;font-size:13.5px;
+    transition:transform .22s;z-index:9}
+  #msg.show{transform:translateX(-50%) translateY(0)}
+  .hide{display:none}
+  .hr{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+  .hr .top{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+  .hr .big{font-size:26px;font-weight:800;letter-spacing:-.02em}
+  .hr .tag{font-size:11.5px;padding:3px 9px;border-radius:20px;font-weight:700}
+  .hr .tag.up{background:var(--accent-soft);color:var(--accent)}
+  .hr .tag.down{background:#fdeceb;color:var(--warn)}
+  .hr .exp{font-size:12.5px;color:var(--dim);line-height:1.7}
+  .spec .item{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .spec .nm{font-size:13px;width:118px;flex-shrink:0}
+  .spec .bar2{flex:1;height:9px;background:#eef0f3;border-radius:5px;overflow:hidden}
+  .spec .bar2 i{display:block;height:100%;background:var(--accent);
+    animation:grow .8s cubic-bezier(.2,.9,.25,1) both}
+  .spec .pc{font-size:12.5px;font-weight:700;width:42px;text-align:right}
+  .warnbox{background:#fdf6ec;border-radius:9px;padding:12px;font-size:12.5px;color:#6a4d14;
+    line-height:1.7;margin-top:10px;word-break:keep-all}
+  .brand{position:relative;text-align:center;padding:34px 20px 30px;margin:-16px -14px 16px;
+    background:linear-gradient(160deg,var(--accent) 0%,var(--accent-2) 100%);color:#fff;
+    overflow:hidden}
+  .brand::after{content:'';position:absolute;right:-70px;top:-70px;width:200px;height:200px;
+    border-radius:50%;background:rgba(255,255,255,.06)}
+  .brand::before{content:'';position:absolute;left:-50px;bottom:-90px;width:180px;height:180px;
+    border-radius:50%;background:rgba(255,255,255,.05)}
+  .brand>*{position:relative;z-index:1}
+  .brand img{max-width:168px;max-height:60px;display:block;margin:0 auto 12px;
+    filter:brightness(0) invert(1)}
+  .brand .wordmark{font-size:30px;font-weight:800;letter-spacing:.1em;margin-bottom:9px}
+  .brand .tag{font-size:13.5px;opacity:.82;letter-spacing:.01em}
+  .brand .rule{width:34px;height:2px;background:rgba(255,255,255,.4);margin:14px auto 0}
+
+  .badge-by{display:inline-flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.22);
+    border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;
+    margin-bottom:15px;letter-spacing:.08em}
+  .roomcard{position:relative;overflow:hidden;background:#FEE500;border-radius:16px;
+    padding:22px 19px;margin-bottom:14px;text-align:center;color:#191600;display:block;
+    text-decoration:none;box-shadow:0 6px 20px rgba(254,229,0,.3);
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .34s cubic-bezier(.2,.9,.25,1), box-shadow .34s ease}
+  .roomcard:active{transform:scale(.977);box-shadow:0 2px 8px rgba(254,229,0,.26)}
+  .roomcard .cta{transition:transform .34s cubic-bezier(.2,.9,.25,1)}
+  .roomcard:active .cta{transform:scale(.96)}
+
+  .roomcard .eyebrow{font-size:11.5px;font-weight:700;opacity:.62;margin-bottom:6px;
+    letter-spacing:.03em}
+  .roomcard h3{margin:0 0 7px;font-size:17.5px;letter-spacing:-.02em}
+  .roomcard p{margin:0 0 13px;font-size:12.8px;line-height:1.75;opacity:.75}
+  .roomcard .cta{display:inline-block;background:#191600;color:#FEE500;border-radius:9px;
+    padding:11px 26px;font-weight:800;font-size:14.5px}
+  .roomcard .cnt{font-size:11.5px;margin-top:9px;opacity:.62}
+  .menu{display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
+  .mcat{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--dim);
+    margin:16px 0 8px;padding-left:2px}
+  .mcat:first-child{margin-top:2px}
+  .mi{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;background:#fff;
+    border:1px solid var(--line);border-radius:14px;padding:16px 15px;text-align:left;
+    font-family:inherit;cursor:pointer;text-decoration:none;color:var(--ink);width:100%;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .32s cubic-bezier(.2,.9,.25,1),
+               border-color .25s ease, box-shadow .32s cubic-bezier(.2,.9,.25,1)}
+  .mi:active{transform:scale(.972);border-color:#cbd4d7;box-shadow:0 1px 3px rgba(14,18,20,.06)}
+  .mi .ic{font-size:19px;width:38px;height:38px;line-height:38px;text-align:center;flex-shrink:0;
+    background:var(--sand);border-radius:11px;
+    transition:transform .38s cubic-bezier(.2,.9,.25,1), background-color .25s ease}
+  .mi:active .ic{background:#e6e0d3}
+
+  .mi.hi .ic{background:var(--accent)}
+
+
+  /* 등장 */
+  @keyframes rise{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:none}}
+  .enter{animation:rise .48s cubic-bezier(.2,.9,.25,1) both}
+
+  /* 스크롤하며 나타나기 */
+  .reveal{opacity:0;transform:translateY(18px)}
+  .reveal.in{animation:rise .68s cubic-bezier(.16,.84,.28,1) forwards}
+  .mi.reveal{transform:translateY(12px)}
+  .hitem.reveal,.rgrow.reveal{transform:translateY(8px)}
+  .hitem.reveal.in,.rgrow.reveal.in{animation-duration:.45s}
+
+  /* 숫자 카운트업 */
+  @keyframes popin{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}
+  .countup{animation:popin .5s cubic-bezier(.2,1.4,.4,1) both}
+
+  /* 막대 */
+  @keyframes grow{from{width:0 !important}}
+  @keyframes growv{from{transform:scaleY(0)}}
+
+
+
+
+
+  .mi .tx{flex:1;min-width:0}
+  .mi .tx b{display:block;font-size:15px;margin-bottom:3px;letter-spacing:-.01em}
+  .mi .tx span{font-size:12.5px;color:#5a6870}
+  .mi .arw{color:#c6ced1;font-size:19px}
+  .mi.hi{border-color:var(--accent);background:var(--accent-soft)}
+  .mi.hi .tx b{color:var(--accent)}
+  .mi.ch{border-color:#FEE500;background:#fffdf0}
+  .mi.kakao{background:#FEE500;border-color:#FEE500}
+  .mi.off{opacity:.5}
+
+  .back{display:inline-flex;align-items:center;gap:7px;
+    border:1px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:15px;font-weight:700;letter-spacing:-.01em;
+    cursor:pointer;padding:11px 18px 11px 14px;border-radius:11px;margin-bottom:14px;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .26s cubic-bezier(.2,.9,.25,1),background-color .2s,border-color .2s}
+  .back:active{transform:scale(.96);background:var(--accent-soft);border-color:var(--accent)}
+  .back .bicon{font-size:19px;line-height:1;color:var(--accent);font-weight:800}
+  .srcbox{display:flex;gap:7px;margin:14px 0 22px}
+  .srcbox .sc{flex:1;background:#fff;border:1px solid var(--line);border-radius:11px;
+    padding:12px 8px;text-align:center}
+  .srcbox .sc b{display:block;font-size:17px;font-weight:800;letter-spacing:-.03em;
+    color:var(--accent);margin-bottom:2px}
+  .srcbox .sc span{font-size:11px;color:#5a6870}
+  .bignum{background:linear-gradient(160deg,var(--accent) 0%,var(--accent-2) 100%);
+    color:#fff;border-radius:15px;padding:24px 20px;text-align:center;margin-bottom:11px;
+    position:relative;overflow:hidden}
+  .bignum::after{content:'';position:absolute;right:-46px;top:-46px;width:140px;height:140px;
+    border-radius:50%;background:rgba(255,255,255,.07)}
+  .bignum>*{position:relative;z-index:1}
+  .bnlead{font-size:13px;opacity:.85;margin-bottom:7px;letter-spacing:-.01em}
+  .bnv{font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1.15;margin-bottom:5px}
+  .bntail{font-size:13.5px;opacity:.9;letter-spacing:-.01em}
+  .growtable{margin-top:16px}
+  .gr{display:flex;align-items:center;gap:11px;padding:9px 0;font-size:13px}
+  .gr .gn{width:46px;font-weight:800;color:var(--dim);flex-shrink:0}
+  .gr .gb{flex:1;height:8px;background:#eef1f3;border-radius:4px;overflow:hidden}
+  .gr .gb i{display:block;height:100%;background:#b9c4c8;border-radius:4px}
+  .gr .gl{width:104px;text-align:right;font-size:12px;color:#4d5a61;flex-shrink:0;
+    word-break:keep-all;font-weight:600}
+  .gr.on .gn{color:var(--accent)}
+  .gr.on .gb i{background:var(--accent)}
+  .gr.on .gl{color:var(--accent);font-weight:700}
+  .grow2{background:linear-gradient(160deg,var(--accent) 0%,var(--accent-2) 100%);
+    color:#fff;border-radius:15px;padding:20px;margin-bottom:12px;position:relative;
+    overflow:hidden}
+  .grow2::after{content:'';position:absolute;right:-50px;top:-50px;width:150px;height:150px;
+    border-radius:50%;background:rgba(255,255,255,.07)}
+  .grow2>*{position:relative;z-index:1}
+  .grow2 .gt{font-size:16px;font-weight:800;letter-spacing:-.025em;margin-bottom:8px;
+    line-height:1.5;word-break:keep-all}
+  .grow2 .gd{font-size:13px;line-height:1.8;opacity:.88;word-break:keep-all;margin-bottom:14px}
+  .grow2 .gd b{font-weight:800;opacity:1}
+  .growbar{background:rgba(255,255,255,.16);border-radius:8px;height:9px;overflow:hidden;
+    margin-bottom:7px}
+  .growbar i{display:block;height:100%;background:#fff;border-radius:8px;
+    animation:grow 1s cubic-bezier(.2,.9,.25,1) both}
+  .growmeta{display:flex;justify-content:space-between;font-size:11.5px;opacity:.8;
+    margin-bottom:15px}
+  .growbtns{display:flex;gap:7px}
+  .growbtns button{flex:1;padding:12px;border:none;border-radius:10px;font-size:13.5px;
+    font-weight:700;font-family:inherit}
+  .growbtns .b1{background:#fff;color:var(--accent)}
+  .growbtns .b2{background:rgba(255,255,255,.18);color:#fff}
+  .banner{position:relative;display:block;background:#fff;border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;text-decoration:none;color:var(--ink);
+    margin:18px 0 6px;-webkit-tap-highlight-color:transparent;
+    transition:transform .26s cubic-bezier(.2,.9,.25,1),border-color .2s}
+  .banner:active{transform:scale(.985);border-color:#cbd4d7}
+  .banner .bimg{width:100%;display:block;aspect-ratio:3/1;object-fit:cover;background:var(--sand)}
+  .banner .btx{padding:15px 16px}
+  .banner .bad{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.08em;
+    color:var(--dim);background:var(--bg);border-radius:5px;padding:2px 7px;margin-bottom:7px}
+  .banner .bt{font-size:15px;font-weight:800;letter-spacing:-.025em;line-height:1.45;
+    word-break:keep-all;margin-bottom:4px}
+  .banner .bd{font-size:12.5px;color:var(--dim);line-height:1.6;word-break:keep-all;
+    margin-bottom:11px}
+  .banner .bc{display:inline-flex;align-items:center;gap:5px;background:var(--accent);
+    color:#fff;border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:700}
+  .bdots{display:flex;justify-content:center;gap:5px;margin-top:9px}
+  .bdots i{width:6px;height:6px;border-radius:50%;background:var(--line);
+    transition:background-color .3s,width .3s}
+  .bdots i.on{background:var(--accent);width:16px;border-radius:3px}
+  .bfade{animation:bfade .45s ease both}
+  @keyframes bfade{from{opacity:0}to{opacity:1}}
+  .foot{text-align:center;font-size:11.5px;color:var(--dim);margin-top:24px;line-height:1.8}
+  .flag{border-radius:10px;padding:12px;margin-top:9px;font-size:12.5px;line-height:1.7;
+    display:none}
+  .flag.on{display:block}
+  .flag.low{background:#fdf1ec;color:#8c3a20}
+  .flag.high{background:#eef3fd;color:#2a4a7c}
+  .flag b{display:block;margin-bottom:4px;font-size:13px}
+
+  .calcout{background:var(--accent);color:#fff;border-radius:14px;padding:20px;margin-bottom:12px;
+    animation:rise .5s cubic-bezier(.2,.9,.25,1) both}
+  .calcout .lead{font-size:12.5px;opacity:.85;margin-bottom:5px}
+  .calcout .big{font-size:34px;font-weight:800;letter-spacing:-.02em;margin-bottom:3px}
+  .calcout .sub2{font-size:13px;opacity:.85}
+  .brk{border-top:1px solid rgba(255,255,255,.2);margin-top:14px;padding-top:12px}
+  .brk .ln{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;opacity:.9}
+  .brk .ln.tot{font-weight:800;opacity:1;margin-top:5px;padding-top:8px;
+    border-top:1px solid rgba(255,255,255,.2)}
+
+  .inapp{position:fixed;inset:0;background:rgba(14,18,20,.93);z-index:50;display:none;
+    align-items:center;justify-content:center;padding:26px}
+  .inapp.on{display:flex}
+  .inapp .bx{background:#fff;border-radius:16px;padding:24px;max-width:330px;text-align:center}
+  .inapp h3{margin:0 0 9px;font-size:17px}
+  .inapp p{margin:0 0 16px;font-size:13.5px;color:var(--dim);line-height:1.75}
+  .inapp .copyurl{background:var(--bg);border-radius:9px;padding:10px;font-size:11.5px;
+    word-break:break-all;color:var(--dim);margin-bottom:13px}
+  .addhome{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);
+    border-radius:13px;padding:14px;margin-bottom:13px}
+  .addhome .ic{width:40px;height:40px;border-radius:11px;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+  .addhome .tx{flex:1;min-width:0}
+  .addhome .tx b{display:block;font-size:14px;margin-bottom:2px}
+  .addhome .tx span{font-size:12px;color:var(--dim);line-height:1.6}
+  .addhome .x{border:none;background:none;color:#c2cbce;font-size:19px;padding:0 3px;
+    align-self:flex-start}
+
+  .guide{background:#fff;border:1px solid var(--line);border-radius:13px;padding:17px;
+    margin-bottom:12px}
+  .guide h3{margin:0 0 4px;font-size:15px}
+  .guide .os{font-size:11.5px;color:var(--dim);margin-bottom:13px}
+  .step{display:flex;gap:12px;margin-bottom:13px}
+  .step .no{width:24px;height:24px;border-radius:50%;background:var(--sand);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+  .step .tx{font-size:13.5px;line-height:1.65;padding-top:2px}
+  .step .tx b{background:var(--accent-soft);color:var(--accent);border-radius:5px;
+    padding:1px 6px;font-size:13px}
+  .whoami{display:flex;align-items:center;gap:10px;background:var(--accent-soft);
+    border-radius:12px;padding:12px 14px;margin-bottom:13px}
+  .whoami .av{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;
+    flex-shrink:0}
+  .whoami .tx{flex:1;min-width:0}
+  .whoami .tx b{display:block;font-size:15.5px;letter-spacing:-.02em;margin-bottom:3px}
+  .whoami .tx .jb{display:inline-block;background:var(--accent);color:#fff;border-radius:7px;
+    padding:3px 10px;font-size:12.5px;font-weight:800;letter-spacing:-.01em;margin-right:6px}
+  .whoami .tx .sm{font-size:11.5px;color:var(--dim)}
+  .whoami button{font-size:12px;padding:6px 11px;color:var(--dim)}
+  .tcount{text-align:right;font-size:11.5px;color:#7c888e;margin-top:5px}
+  .tcount.warn{color:#b4432c;font-weight:700}
+  .nickchk{font-size:12px;margin-top:6px;min-height:17px}
+  .nickchk.ok{color:var(--accent);font-weight:600}
+  .nickchk.no{color:var(--warn);font-weight:600}
+  .altlink{text-align:center;margin-top:12px}
+  .altlink button{border:none;background:none;color:var(--dim);font-size:12.5px;
+    text-decoration:underline}
+  .anon{display:flex;gap:11px;align-items:flex-start;background:var(--sand);border-radius:12px;
+    padding:14px;margin-bottom:15px}
+  .anon .lk{font-size:19px;line-height:1.2}
+  .anon div b{display:block;font-size:13px;margin-bottom:4px}
+  .anon div span{font-size:12px;color:#5d6a6f;line-height:1.7}
+  .stepbox{margin-bottom:16px}
+  .stephead{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:800;
+    letter-spacing:-.02em;margin-bottom:10px}
+  .stephead .sq{width:22px;height:22px;border-radius:7px;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+  .jobnote{background:var(--accent-soft);border-radius:10px;padding:11px 13px;margin-top:10px;
+    font-size:12.5px;line-height:1.7;color:var(--accent);font-weight:600;word-break:keep-all}
+  .pick{display:flex;gap:9px;margin-bottom:0}
+  .pick button{flex:1;padding:18px 10px;border:1.5px solid var(--line);background:#fff;
+    border-radius:12px;font-family:inherit;cursor:pointer;text-align:center}
+  .pick button b{display:block;font-size:15.5px;margin-bottom:3px}
+  .pick button span{font-size:11.5px;color:var(--dim)}
+  .pick button.on{border-color:var(--accent);background:var(--accent-soft)}
+  .pick button.on b{color:var(--accent)}
+  .pick button.on.ptmode{border-color:#1f4f8f;background:#e9f0fa}
+  .pick button.on.ptmode b{color:#1f4f8f}
+  .notice{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;text-align:center}
+  .notice .icon{font-size:30px;margin-bottom:8px}
+  .notice h3{margin:0 0 7px;font-size:16px}
+  .notice p{margin:0 0 14px;font-size:13.5px;color:var(--dim);line-height:1.7}
+  .roombtn{display:block;width:100%;padding:13px;background:#FEE500;color:#191600;
+    border-radius:10px;text-decoration:none;font-weight:700;font-size:15px}
+  #cardCanvas{width:100%;max-width:340px;display:block;margin:0 auto 10px;border-radius:12px}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ 홈 ============ -->
+  <div id="pane-home">
+    <div class="brand" id="brandBox"></div>
+    <div id="whoBox"></div>
+    <div id="addHomeBox"></div>
+
+    <div class="sect">
+      <p class="pickhint">직군을 골라주세요</p>
+      <div class="jobduo">
+        <button class="jd ot on" id="hjOT" onclick="setJob('작업치료사')">작업치료사</button>
+        <button class="jd pt" id="hjPT" onclick="setJob('물리치료사')">물리치료사</button>
+      </div>
+      <h2 class="h2">내 연봉,<br>어디쯤일까</h2>
+      <p class="body">
+        물어보기도 민망하고, 물어봐도 한 사람 이야기입니다.<br>
+        치료사 급여는 어느 통계에도 없습니다.
+      </p>
+      <div class="pull">그래서 직접 모읍니다.</div>
+      <div id="sumBox"></div>
+    </div>
+
+    <div class="sect">
+      <p class="kicker">주 기능 · 급여</p>
+      <h2 class="h2">내 연봉을<br>숫자로 확인합니다</h2>
+      <p class="body" style="margin-bottom:20px">
+        작업치료사·물리치료사 각각 따로 집계합니다. 섞이지 않습니다.
+      </p>
+
+      <div class="feat">
+        <div class="fno">01</div>
+        <div class="fbody">
+          <h3>내 위치</h3>
+          <p>같은 직군·연차·병원유형에서 상위 몇 %인지. 상여까지 넣은 연 환산 기준.</p>
+          <svg class="ill" viewBox="0 0 320 106" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="106" rx="12" fill="#fff" stroke="#e4e8ea"/>
+            <rect x="18" y="18" width="76" height="18" rx="9" fill="#e8f3f0"/>
+            <text x="56" y="31" font-size="11" font-weight="700" fill="#0d5c4f"
+                  text-anchor="middle">상위권</text>
+            <text x="18" y="63" font-size="25" font-weight="800" fill="#0e1214">상위 23%</text>
+            <text x="18" y="80" font-size="10" fill="#697680">같은 조건 47명 중</text>
+            <rect x="18" y="90" width="284" height="7" rx="4" fill="url(#g1)"/>
+            <rect x="232" y="87" width="4" height="14" rx="2" fill="#0e1214"/>
+            <defs><linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0" stop-color="#e0a294"/><stop offset="0.5" stop-color="#b9c4c8"/>
+              <stop offset="1" stop-color="#0a6b4a"/></linearGradient></defs>
+          </svg>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="fno">02</div>
+        <div class="fbody">
+          <h3>이직하면 얼마나</h3>
+          <p>병원유형·지역을 바꿨을 때 중위값 차이. 월과 연 단위로.</p>
+          <svg class="ill" viewBox="0 0 320 96" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="96" rx="12" fill="#fff" stroke="#e4e8ea"/>
+            <text x="18" y="34" font-size="12" fill="#0e1214">대학병원</text>
+            <text x="302" y="30" font-size="13" font-weight="800" fill="#0d5c4f"
+                  text-anchor="end">+31만원</text>
+            <text x="302" y="45" font-size="10.5" font-weight="700" fill="#0d5c4f"
+                  text-anchor="end" opacity="0.75">연 +372만원</text>
+            <line x1="18" y1="56" x2="302" y2="56" stroke="#f0f3f4"/>
+            <text x="18" y="76" font-size="12" fill="#697680">요양병원 (지금)</text>
+            <text x="302" y="76" font-size="13" font-weight="700" fill="#697680"
+                  text-anchor="end">±0</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="fno">03</div>
+        <div class="fbody">
+          <h3>진짜 시급</h3>
+          <p>당직·주말까지 넣어 계산. 월급은 상위인데 시급은 하위인 경우가 드러납니다.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="fno">04</div>
+        <div class="fbody">
+          <h3>세전 · 세후 계산기</h3>
+          <p>2026년 요율 기준. 공제 내역까지.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="fno">05</div>
+        <div class="fbody">
+          <h3>결과 카드</h3>
+          <p>금액 없이 상위 %만 담긴 이미지. 부담 없이 공유.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <p class="kicker">취업 · 이직</p>
+      <h2 class="h2">이직을 준비 중이시라면<br>꼭 활용해 보세요</h2>
+      <div class="bignum">
+        <div class="bnlead">작업치료사 · 물리치료사를 위해</div>
+        <div class="bnv"><span data-count="664465" data-suf="건">0건</span></div>
+        <div class="bntail">의 자료를 취합해 만들었습니다</div>
+      </div>
+      <div class="srcbox">
+        <div class="sc"><b>12,407</b><span>병원</span></div>
+        <div class="sc"><b>9,876</b><span>작업치료사</span></div>
+        <div class="sc"><b>52,598</b><span>물리치료사</span></div>
+      </div>
+      <p class="body" style="margin-bottom:22px">
+        인력 · 병상 · 진료과목을 병원 한 곳 단위로 다시 묶어
+        치료사에게 필요한 것만 남겼습니다.
+      </p>
+
+      <div class="feat">
+        <div class="fno">06</div>
+        <div class="fbody">
+          <h3>병원 뜯어보기</h3>
+          <p>치료사 인원 · 병상 · 재활의학과 전문의까지 한 화면에.</p>
+          <svg class="ill" viewBox="0 0 320 128" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="128" rx="12" fill="#fff" stroke="#e4e8ea"/>
+            <text x="18" y="27" font-size="14" font-weight="700" fill="#0e1214">○○재활병원</text>
+            <rect x="18" y="37" width="66" height="17" rx="6" fill="#f0ece3"/>
+            <text x="51" y="49" font-size="9" fill="#4a555a" text-anchor="middle">290병상</text>
+            <rect x="89" y="37" width="104" height="17" rx="6" fill="#e8f3f0"/>
+            <text x="141" y="49" font-size="9" font-weight="700" fill="#0d5c4f"
+                  text-anchor="middle">재활의학과 7명</text>
+            <rect x="18" y="64" width="88" height="44" rx="9" fill="#e8f3f0"/>
+            <text x="62" y="80" font-size="9" fill="#697680" text-anchor="middle">작업치료사</text>
+            <text x="62" y="99" font-size="19" font-weight="800" fill="#0d5c4f"
+                  text-anchor="middle">24</text>
+            <rect x="114" y="64" width="88" height="44" rx="9" fill="#e9f0fa"/>
+            <text x="158" y="80" font-size="9" fill="#697680" text-anchor="middle">물리치료사</text>
+            <text x="158" y="99" font-size="19" font-weight="800" fill="#1f4f8f"
+                  text-anchor="middle">38</text>
+            <rect x="210" y="64" width="92" height="44" rx="9" fill="#f0ece3"/>
+            <text x="256" y="80" font-size="9" fill="#697680" text-anchor="middle">1인당 병상</text>
+            <text x="256" y="99" font-size="19" font-weight="800" fill="#7a6a48"
+                  text-anchor="middle">12.1</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="fno">07</div>
+        <div class="fbody">
+          <h3>사람 뽑을 곳인지</h3>
+          <p>병상 대비 치료사 수를 같은 종별끼리 비교.
+             적으면 업무는 많아도 <b>채용 가능성이 높습니다.</b></p>
+          <svg class="ill" viewBox="0 0 320 104" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="104" rx="12" fill="#fdf3e6" stroke="#f0dcc0"/>
+            <text x="18" y="30" font-size="15" font-weight="800" fill="#8a5c14">평균 이하</text>
+            <text x="302" y="30" font-size="9.5" fill="#a08a5e" text-anchor="end">요양병원 기준</text>
+            <rect x="18" y="44" width="284" height="8" rx="4" fill="url(#g2)"/>
+            <rect x="96" y="40" width="4" height="16" rx="2" fill="#0e1214"/>
+            <text x="18" y="80" font-size="12.5" font-weight="700" fill="#8a5c14">채용 가능성 높음</text>
+            <text x="18" y="95" font-size="10" fill="#a08a5e">인력이 부족한 만큼 자리가 날 여지</text>
+            <defs><linearGradient id="g2" x1="0" x2="1">
+              <stop offset="0" stop-color="#e0a294"/><stop offset="0.5" stop-color="#b9c4c8"/>
+              <stop offset="1" stop-color="#4fae8c"/></linearGradient></defs>
+          </svg>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="fno">08</div>
+        <div class="fbody">
+          <h3>두 곳 비교</h3>
+          <p>고민되는 병원 둘을 나란히. 분점도 다 나옵니다.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="fno">09</div>
+        <div class="fbody">
+          <h3>지역별 병원 찾기</h3>
+          <p>내 지역에서 치료사가 근무하는 병원 목록. 공고가 없어도 미리.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <p class="kicker">함께 만듭니다</p>
+      <h2 class="h2">한 명이 더 넣을수록<br>정확해집니다</h2>
+      <div class="growtable">
+        <div class="gr"><span class="gn">5명</span>
+          <div class="gb"><i style="width:12%"></i></div>
+          <span class="gl">참고만</span></div>
+        <div class="gr"><span class="gn">30명</span>
+          <div class="gb"><i style="width:33%"></i></div>
+          <span class="gl">연차별</span></div>
+        <div class="gr"><span class="gn">100명</span>
+          <div class="gb"><i style="width:66%"></i></div>
+          <span class="gl">지역·유형별</span></div>
+        <div class="gr on"><span class="gn">300명</span>
+          <div class="gb"><i style="width:100%"></i></div>
+          <span class="gl">세부 조건까지</span></div>
+      </div>
+      <p class="body" style="margin-top:15px">
+        내 숫자 하나가 다음 사람의 기준이 됩니다.
+      </p>
+    </div>
+
+    <div class="sect">
+      <p class="kicker">익명</p>
+      <h2 class="h2">이름은 묻지 않습니다</h2>
+      <div class="privacy">
+        <b>🔒 받지 않는 것</b>
+        <ul>
+          <li>이름 · 연락처 · 이메일</li>
+          <li>내가 다니는 병원 이름</li>
+          <li>생년월일 · 상세 주소</li>
+        </ul>
+      </div>
+      <div class="privacy" style="background:var(--accent-soft)">
+        <b>✓ 받는 것</b>
+        <ul>
+          <li>닉네임 (본명 아님)</li>
+          <li>권역 · 출생연도</li>
+          <li>연차 · 병원유형 · 급여</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sect">
+      <p class="kicker">이용 방법</p>
+      <h2 class="h2">3분이면 됩니다</h2>
+      <div class="stepline">
+        <div class="stp"><div class="sn">1</div>
+          <div><b>내 정보 등록</b><span>연차 · 병원유형 · 급여</span></div></div>
+        <div class="stp"><div class="sn">2</div>
+          <div><b>단톡방에서 코드 확인</b><span>공지에 적혀 있습니다</span></div></div>
+        <div class="stp"><div class="sn">3</div>
+          <div><b>닉네임 + 코드로 열기</b><span>이후 이 기기에서는 바로</span></div></div>
+      </div>
+    </div>
+
+    <div class="cta-fix">
+      <button class="go" onclick="tab('input')">등록하러 가기 · 약 3분</button>
+      <button class="ghost" onclick="tab('unlock')">이미 등록했어요 · 코드로 열기</button>
+    </div>
+
+    <div id="bannerHome"></div>
+    <p class="foot" id="footBox"></p>
+    <div class="menu" id="menuBox"></div>
+  </div>
+
+  <div id="subhead" class="hide">
+    <button class="back" onclick="goBack()"><span class="bicon">‹</span>뒤로</button>
+    <div class="hero">
+      <h1 id="subTitle">치료사 급여·스펙 통계</h1>
+      <p id="subDesc">국가 통계에 없는 우리 직군의 숫자를, 직접 모읍니다</p>
+    </div>
+    <div class="tabs" id="statTabs">
+      <button class="tab on" id="t1" onclick="tab('input')">입력하기</button>
+      <button class="tab" id="t2" onclick="tab('view')">조회하기</button>
+    </div>
+  </div>
+
+  <!-- ============ 병원 찾기 ============ -->
+  <div id="pane-hosp" class="hide">
+    <div class="tabs" style="margin-bottom:13px">
+      <button class="tab on" id="hb1" onclick="hospTab('search')">이름</button>
+      <button class="tab" id="hb2" onclick="hospTab('region')">지역</button>
+      <button class="tab" id="hb3" onclick="hospTab('cmp')">두 곳 비교</button>
+      <button class="tab" id="hb4" onclick="tab('region')">기관 수</button>
+    </div>
+
+    <div id="hsub-search">
+      <div class="card">
+        <div class="f">
+          <input type="text" id="hq" placeholder="예) 보바스, 국립재활원, 재활"
+            onkeydown="if(event.key==='Enter')doHosp()">
+          <div class="hint2">이름 일부만 넣으면 분점·계열 병원이 함께 나옵니다</div>
+        </div>
+        <button class="go" onclick="doHosp()">검색</button>
+      </div>
+    </div>
+
+    <div id="hsub-region" class="hide">
+      <div class="card">
+        <div class="two">
+          <select id="hJob" onchange="doRegionJob()">
+            <option>작업치료사</option>
+            <option>물리치료사</option>
+          </select>
+          <select id="hSido" onchange="doRegionList()">
+            <option value="">지역 선택</option>
+          </select>
+        </div>
+        <div class="two" style="margin-top:8px">
+          <select id="hKind" onchange="doRegionList()">
+            <option value="">종별 전체</option>
+          </select>
+          <select id="hSort" onchange="doRegionList()">
+            <option value="staff">인원 많은 순</option>
+            <option value="name">이름순</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="hsub-cmp" class="hide">
+      <div class="card">
+        <p class="sub" style="margin-top:0">비교할 병원 두 곳을 고르세요.</p>
+        <div class="f">
+          <label>병원 A</label>
+          <input type="text" id="cmpA" placeholder="병원 이름 입력" oninput="sugg('A')">
+          <div class="sugbox" id="sugA"></div>
+        </div>
+        <div class="f">
+          <label>병원 B</label>
+          <input type="text" id="cmpB" placeholder="병원 이름 입력" oninput="sugg('B')">
+          <div class="sugbox" id="sugB"></div>
+        </div>
+        <div class="f">
+          <label>기준 직군</label>
+          <select id="cmpJob">
+            <option>작업치료사</option>
+            <option>물리치료사</option>
+          </select>
+        </div>
+        <button class="go" onclick="doCompare()">비교하기</button>
+      </div>
+    </div>
+
+    <div id="hospBox"></div>
+    <div class="hintbox">
+      기관이 신고한 자료를 정리한 것이라 현재 인원과 다를 수 있습니다.
+      '여유 / 적음'은 <b>같은 종별끼리 비교한 분포</b>이며 적정 인력 기준이 아닙니다.
+    </div>
+  </div>
+
+  <!-- ============ 채용공고 바로가기 ============ -->
+  <div id="pane-jobs" class="hide">
+    <div class="card">
+      <h2>채용공고 바로가기</h2>
+      <p class="sub">치료사 공고가 모이는 곳들입니다. 검색창에 <b>작업치료사</b> 또는
+        <b>물리치료사</b>를 넣어보세요.</p>
+      <div id="jobLinkBox"></div>
+      <div class="hintbox">
+        아직 공고를 모아서 정리해드리지는 못합니다.
+        준비되면 단톡방에 매일 올려드리겠습니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 지역 현황 ============ -->
+  <div id="pane-region" class="hide">
+    <div class="card">
+      <h2>지역별 의료기관 현황</h2>
+      <p class="sub">어느 지역에 어떤 병원이 얼마나 있는지 봅니다.</p>
+      <div class="f">
+        <label>기관 유형</label>
+        <select id="rType" onchange="doRegion()">
+          <option>요양병원</option>
+          <option>병원</option>
+          <option>종합병원</option>
+          <option>상급종합병원</option>
+          <option>정신병원</option>
+          <option>한방병원</option>
+          <option>의원</option>
+          <option>보건의료원</option>
+        </select>
+      </div>
+      <div class="hintbox">
+        기관 수 집계입니다. 병원 이름과 치료사 인원은
+        <b>병원별 치료사 인원</b> 메뉴에서 확인하세요.
+      </div>
+    </div>
+    <div id="regionBox"><div class="loading">불러오는 중<span class="dots"><i>.</i><i>.</i><i>.</i></span><div class="barwrap"><i></i></div></div></div>
+  </div>
+
+  <!-- ============ 입력 ============ -->
+  <div id="pane-input">
+    <div class="stepbox">
+      <div class="stephead"><span class="sq">1</span>어느 쪽이신가요</div>
+      <div class="pick">
+        <button id="roPro" onclick="setRole('현직')">
+          <b>현직 치료사</b><span>급여 + 스펙</span></button>
+        <button id="roStu" onclick="setRole('학생')">
+          <b>학생 · 취준생</b><span>스펙만 입력</span></button>
+      </div>
+    </div>
+
+    <div class="stepbox hide" id="jobStep">
+      <div class="stephead"><span class="sq">2</span>직군을 골라주세요</div>
+      <div class="pick">
+        <button id="jbOT" onclick="setJob('작업치료사')">
+          <b>작업치료사</b><span>OT</span></button>
+        <button id="jbPT" onclick="setJob('물리치료사')">
+          <b>물리치료사</b><span>PT</span></button>
+      </div>
+    </div>
+
+    <div id="formBody" class="hide">
+
+
+    <div class="card" id="cardNick">
+      <h2>닉네임 정하기</h2>
+      <p class="sub">다음에 이 이름으로 바로 들어옵니다. 본명 금지.</p>
+      <div class="f">
+        <label>닉네임 <span class="hint">2~12자</span></label>
+        <input type="text" id="nick" maxlength="12" placeholder="예) 김오티"
+          oninput="nickTyped()">
+        <div class="nickchk" id="nickChk"></div>
+      </div>
+    </div>
+
+    <div class="card" id="cardPay">
+      <h2>1단계 · 급여</h2>
+      <p class="sub">모두 필수입니다. 30초면 끝납니다.</p>
+
+      <div class="rule">
+        <b>월 실수령 기준</b>
+        <span>✅ 기본급 + 매달 고정 수당 · <b style="display:inline">세후</b></span><br>
+        <span class="no">❌ 성과금 · 상여 · 당직/주말 수당</span><br>
+        <span class="no">상여·당직은 아래에 따로 적습니다</span>
+      </div>
+
+      <div class="f">
+        <label>첫 입사연도 <span class="hint">치료사로 처음 일 시작한 해</span></label>
+        <div class="unit">
+          <input type="number" id="startYear" min="1970" max="2026" placeholder="2021"
+            oninput="showYears()"><span id="yearsEcho">년 입사</span>
+        </div>
+      </div>
+
+      <div class="f">
+        <label>지금 병원 입사연도 <span class="hint">첫 직장이면 위와 같게</span></label>
+        <div class="unit">
+          <input type="number" id="curStartYear" min="1970" max="2026" placeholder="2024"
+            oninput="showCurYears()"><span id="curYearsEcho">년 입사</span>
+        </div>
+      </div>
+
+      <div class="f">
+        <label>지역 <span class="hint">근무지 기준</span></label>
+        <select id="region">
+          <option value="">선택</option>
+          <option>서울</option><option>경기·인천</option><option>대전·충청</option>
+          <option>대구·경북</option><option>부산·울산·경남</option><option>광주·전라</option>
+          <option>강원</option><option>제주</option>
+        </select>
+      </div>
+
+      <div class="f">
+        <label>병원·기관 유형 <span class="hint">국립대병원은 대학병원 선택</span></label>
+        <select id="hospitalType" onchange="checkSalary()">
+          <option value="">선택</option>
+          <option>대학병원</option>
+          <option>종합병원</option>
+          <option>의료원(지방의료원 등)</option>
+          <option>재활병원</option>
+          <option>요양병원</option>
+          <option>병(의)원</option>
+          <option>복지관·센터</option>
+          <option>아동·발달센터</option>
+          <option>공공기관(병원) — 건보공단 일산병원, 보훈병원 등</option>
+          <option>공공기관(비병원) — 건보공단·심평원 등 심사·행정</option>
+          <option>기타</option>
+        </select>
+      </div>
+
+      <div class="f">
+        <label>고용형태</label>
+        <select id="employment" onchange="checkEmp()">
+          <option value="">선택</option>
+          <option>정규직</option>
+          <option>무기계약직</option>
+          <option>계약직</option>
+          <option>인턴</option>
+          <option>프리랜서</option>
+        </select>
+        <div class="flag high" id="flagEmp">
+          <b>모두 집계됩니다</b>
+          인턴·프리랜서도 포함되며, 조회할 때 따로 걸러 볼 수 있습니다.
+        </div>
+      </div>
+
+      <div class="f">
+        <label>고정 월 실수령액 <span class="hint">세금 떼고 통장에 들어오는 금액</span></label>
+        <div class="unit"><input type="number" id="salary" placeholder="250"
+          oninput="checkSalary()"><span>만원</span></div>
+        <div class="flag low" id="flagLow">
+          <b>세후 금액이 맞나요?</b>
+          세전을 적으신 건 아닌지 확인해주세요. 맞다면 특이사항에 사정을 적어주세요.
+        </div>
+        <div class="flag high" id="flagHigh">
+          <b>높은 편입니다</b>
+          당직·수당이 포함된 건 아닌지 확인해주세요. 맞다면 특이사항에 적어주세요.
+        </div>
+      </div>
+
+      <div class="f">
+        <label>월 당직 횟수 <span class="hint">없으면 0</span></label>
+        <div class="unit"><input type="number" id="nightDuty" min="0" placeholder="0"><span>회</span></div>
+      </div>
+
+      <div class="f">
+        <label>월 주말근무 횟수 <span class="hint">없으면 0</span></label>
+        <div class="unit"><input type="number" id="weekendWork" min="0" placeholder="0"><span>회</span></div>
+      </div>
+
+      <div class="f">
+        <label>연간 상여 총액 <span class="hint">순위 계산에 반영됩니다 · 없으면 0</span></label>
+        <div class="unit"><input type="number" id="bonus" min="0" placeholder="0"><span>만원</span></div>
+        <div class="hintbox">1년치 상여·성과금 합계.
+          <b>고정급 12개월 + 상여</b>로 비교하니 빠뜨리면 낮게 나옵니다.</div>
+      </div>
+
+      <div class="f">
+        <label>출생연도 <span class="hint">또래 비교에 쓰입니다 · 선택</span></label>
+        <div class="unit">
+          <input type="number" id="birthYear" min="1940" max="2009" placeholder="1997"
+            oninput="showAge()"><span id="ageEcho">년생</span>
+        </div>
+      </div>
+
+      <div class="f">
+        <label>특이사항 <span class="hint">선택 · 남들과 다른 조건이 있다면</span></label>
+        <textarea id="note" rows="4" maxlength="300" oninput="cnt('note',300)"
+          placeholder="예) 야간전담이라 수당이 큽니다 / 겸직 수당 포함 / 주 4일제라 낮게 나옵니다"></textarea>
+        <div class="tcount" id="cnt-note">0 / 300</div>
+      </div>
+    </div>
+
+    <div class="card" id="cardSpec">
+      <h2 id="specTitle">2단계 · 스펙 <span style="font-weight:400;color:var(--dim);font-size:12px">(선택)</span></h2>
+      <p class="sub" id="specSub">여기까지 채우면 합격 스펙 통계도 볼 수 있습니다.</p>
+
+      <div class="f stu-only hide">
+        <label>학년</label>
+        <select id="grade">
+          <option value="">선택</option>
+          <option>1학년</option><option>2학년</option><option>3학년</option>
+          <option>4학년</option><option>졸업예정</option><option>졸업(취준)</option>
+        </select>
+      </div>
+
+      <div class="f">
+        <label id="schoolLabel">최종 학력</label>
+        <select id="school">
+          <option value="">선택</option>
+          <optgroup label="전문학사 (3년제)">
+            <option>수도권 3년제</option>
+            <option>지방 3년제</option>
+          </optgroup>
+          <optgroup label="학사 (4년제)">
+            <option>수도권 4년제</option>
+            <option>지방 4년제</option>
+          </optgroup>
+          <optgroup label="전공심화">
+            <option>수도권 전공심화</option>
+            <option>지방 전공심화</option>
+          </optgroup>
+          <optgroup label="대학원">
+            <option>석사</option>
+            <option>박사</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="f">
+        <label>학점</label>
+        <div class="two">
+          <div class="unit"><input type="number" step="0.01" id="gpa" placeholder="3.8"><span>점</span></div>
+          <div class="unit"><span>만점기준</span><input type="number" step="0.1" id="gpaMax" placeholder="4.5"></div>
+        </div>
+      </div>
+
+      <div class="f">
+        <label>자격증 <span class="hint">해당되는 것 모두</span></label>
+        <div class="chips" id="certs"></div>
+        <div class="addrow">
+          <input type="text" id="certEtc" placeholder="목록에 없는 자격증"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addCustom('certs');}">
+          <button type="button" onclick="addCustom('certs')">추가</button>
+        </div>
+      </div>
+
+      <div class="f">
+        <label>교육 이수 내용 <span class="hint">협회·학회 교육 등</span></label>
+        <div class="chips" id="courses"></div>
+        <div class="addrow">
+          <input type="text" id="courseEtc" placeholder="목록에 없는 교육"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addCustom('courses');}">
+          <button type="button" onclick="addCustom('courses')">추가</button>
+        </div>
+      </div>
+
+      <div class="f">
+        <label>어학</label>
+        <select id="lang">
+          <option value="">선택</option>
+          <option>없음</option><option>토익</option><option>토스·오픽</option><option>기타</option>
+        </select>
+      </div>
+
+      <div class="f stu-only hide">
+        <label>실습 <span class="hint">최대 5개</span></label>
+        <div id="practiceList"></div>
+        <button class="addbtn" onclick="addRow('practice')">+ 실습 추가</button>
+      </div>
+
+      <div class="f pro-only">
+        <label>경력 <span class="hint">이전 근무지 포함, 최대 5개</span></label>
+        <div id="careerList"></div>
+        <button class="addbtn" onclick="addRow('career')">+ 경력 추가</button>
+      </div>
+
+      <div class="f stu-only hide">
+        <label>희망 취업 유형</label>
+        <select id="wantType"><option value="">선택</option></select>
+      </div>
+
+      <div class="f stu-only hide">
+        <label>희망 지역</label>
+        <select id="wantRegion">
+          <option value="">선택</option>
+          <option>서울</option><option>경기·인천</option><option>대전·충청</option>
+          <option>대구·경북</option><option>부산·울산·경남</option><option>광주·전라</option>
+          <option>강원</option><option>제주</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="go" id="submitBtn" onclick="submit()">제출하고 통계 보기</button>
+    <p class="thin">병원 이름은 받지 않습니다</p>
+    </div>
+  </div>
+
+  <!-- ============ 완료 ============ -->
+  <div id="pane-done" class="hide">
+    <div id="donePos"></div>
+
+    <div class="lockcard">
+      <div class="lchead">🔓 코드를 넣으면 전부 열립니다</div>
+      <ul class="lclist">
+        <li>이직하면 얼마나 오를지</li>
+        <li>병원별 치료사 인원 · 12,407곳</li>
+        <li>실질 시급 · 연봉 계산기</li>
+        <li>지역별 병원 찾기 · 두 곳 비교</li>
+      </ul>
+      <div class="lcfree">코드 하나면 <b>평생 무료</b>입니다</div>
+    </div>
+
+    <div id="doneRoom"></div>
+    <button class="go" onclick="tab('unlock')">코드 확인했어요 · 열기</button>
+    <p class="thin">내 닉네임 <b id="doneCode">-</b> · 캡처해두시면 편합니다</p>
+  </div>
+
+  <!-- ============ 잠금 해제 ============ -->
+  <div id="pane-unlock" class="hide">
+    <div class="card">
+      <h2>닉네임과 코드 입력</h2>
+      <p class="sub">등록하실 때 정한 닉네임과, 단톡방 공지의 코드를 넣어주세요.</p>
+      <div class="f">
+        <label>닉네임</label>
+        <input type="text" id="uNick" placeholder="등록하신 닉네임">
+      </div>
+      <div class="f">
+        <label>이용 코드 <span class="hint">단톡방 공지에 있습니다</span></label>
+        <input type="text" id="uCode" placeholder="코드 입력"
+          onkeydown="if(event.key==='Enter')doUnlock()">
+      </div>
+      <button class="go" onclick="doUnlock()">열기</button>
+      <div id="unlockMsg"></div>
+    </div>
+    <div id="unlockRoom"></div>
+    <div class="altlink">
+      <button onclick="tab('input')">아직 등록 안 하셨나요? 등록하러 가기</button>
+    </div>
+  </div>
+
+  <!-- ============ 대시보드 ============ -->
+  <div id="pane-dash" class="hide">
+    <div id="dashBox"><div class="loading">불러오는 중<span class="dots"><i>.</i><i>.</i><i>.</i></span><div class="barwrap"><i></i></div></div></div>
+    <div id="myPos"></div>
+    <div id="hourlyBox"></div>
+    <div id="specBox"></div>
+    <div class="card hide" id="cardWrap">
+      <h2>결과 카드</h2>
+      <p class="sub">금액은 들어가지 않습니다. 인스타 스토리에 올리기 좋은 정사각 이미지입니다.</p>
+      <div class="cardprev"><canvas id="cardCanvas" width="1080" height="1080"></canvas></div>
+      <div class="two">
+        <button onclick="saveCard()">이미지 저장</button>
+        <button class="primary2" onclick="shareCard()">공유하기</button>
+      </div>
+    </div>
+    <div class="menu" id="dashMenu"></div>
+    <div id="bannerDash"></div>
+  </div>
+
+  <!-- ============ 조회 ============ -->
+  <div id="pane-view" class="hide">
+    <div id="viewNotice"></div>
+    <div class="card">
+      <div class="f">
+        <label>직군</label>
+        <select id="fJob">
+          <option>작업치료사</option>
+          <option>물리치료사</option>
+        </select>
+      </div>
+      <div class="two">
+        <select id="fRegion"><option value="">지역 전체</option></select>
+        <select id="fType"><option value="">유형 전체</option></select>
+      </div>
+      <div class="two" style="margin-top:8px">
+        <select id="fBand">
+          <option value="">연차 전체</option>
+          <option>1년차</option><option>2-3년차</option><option>4-6년차</option>
+          <option>7-10년차</option><option>11년차 이상</option>
+        </select>
+        <select id="fEmp">
+          <option value="">고용형태 전체</option>
+          <option>정규직</option>
+          <option>무기계약직</option>
+          <option>계약직</option>
+          <option>인턴</option>
+          <option>프리랜서</option>
+        </select>
+      </div>
+      <button class="go" onclick="loadStats()">통계 보기</button>
+    </div>
+    <div id="statBox"></div>
+  </div>
+
+  <!-- ============ 연봉 계산기 ============ -->
+  <div id="pane-calc" class="hide">
+    <div class="card">
+      <h2>내 연봉 계산기</h2>
+      <p class="sub">세전·세후를 서로 바꿔 계산합니다. 또래 위치도 같이 나옵니다.</p>
+
+      <div class="f">
+        <label>무엇을 알고 계신가요?</label>
+        <select id="cMode">
+          <option value="grossMonth">세전 월급을 안다</option>
+          <option value="grossYear">세전 연봉을 안다</option>
+          <option value="netMonth">세후 월급(실수령)을 안다</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>금액</label>
+        <div class="unit"><input type="number" id="cAmount" placeholder="300"><span>만원</span></div>
+      </div>
+      <div class="f">
+        <label>출생연도 <span class="hint">또래 비교용 · 선택</span></label>
+        <div class="unit">
+          <input type="number" id="cBirth" min="1940" max="2009" placeholder="1997"
+            oninput="showAge2()"><span id="cAgeEcho">년생</span>
+        </div>
+      </div>
+      <div class="warnbox" style="margin-top:0;margin-bottom:12px">
+        <b>2026년 기준 · 부양가족 없이 본인만</b><br>
+        국민연금 4.75% · 건강보험 3.595% · 장기요양(건보료의 13.14%) · 고용보험 0.9%<br>
+        비과세 식대 20만원을 가정한 추정치입니다.
+      </div>
+      <button class="go" onclick="runCalc()">계산하기</button>
+    </div>
+    <div id="calcBox"></div>
+  </div>
+
+  <!-- ============ 홈 화면에 추가 ============ -->
+  <div id="pane-install" class="hide">
+    <div class="guide" id="guideBox"></div>
+    <div class="card">
+      <p class="sub" style="margin:0">
+        홈 화면에 추가하면 아이콘을 눌러 바로 들어올 수 있습니다.
+        설치가 아니라 바로가기라 저장 공간을 쓰지 않고, 언제든 아이콘을 지우면 됩니다.
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ 운영자에게 한마디 ============ -->
+  <div id="pane-feedback" class="hide">
+    <div class="anon">
+      <div class="lk">🔒</div>
+      <div>
+        <b>익명으로 전달됩니다</b>
+        <span>이름·아이디·접속 정보를 저장하지 않습니다. 연락처는 답변이 필요할 때만
+        적어주세요 — 적지 않으셔도 내용은 그대로 전달됩니다.</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>운영자에게 한마디</h2>
+      <p class="sub">불편한 점, 있었으면 하는 기능, 무엇이든 좋습니다.</p>
+      <div class="f">
+        <label>분류</label>
+        <select id="fbKind">
+          <option>있었으면 하는 기능</option>
+          <option>불편한 점</option>
+          <option>데이터가 이상해요</option>
+          <option>제휴·병원 문의</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>내용</label>
+        <textarea id="fbBody" style="min-height:130px" maxlength="500"
+          oninput="cnt('fbBody',500)" placeholder="편하게 적어주세요"></textarea>
+        <div class="tcount" id="cnt-fbBody">0 / 500</div>
+      </div>
+      <div class="f">
+        <label>연락처 <span class="hint">답변을 원하실 때만</span></label>
+        <input type="text" id="fbContact" placeholder="비워두면 완전 익명입니다">
+      </div>
+      <button class="go" onclick="sendFeedback()">익명으로 보내기</button>
+      <p class="thin">운영자만 확인합니다. 방에 공개되지 않습니다.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="inapp" id="inappBox">
+  <div class="bx">
+    <h3>브라우저에서 열어주세요</h3>
+    <p>지금 앱 안의 브라우저로 보고 계십니다.<br>
+       일부 기능(이미지 저장·입력)이 제대로 동작하지 않을 수 있습니다.<br>
+       오른쪽 위 <b>⋯</b> 를 눌러 <b>다른 브라우저로 열기</b>를 선택해주세요.</p>
+    <div class="copyurl" id="inappUrl"></div>
+    <button class="go" onclick="copyUrl()">주소 복사</button>
+    <button class="ghost" onclick="document.getElementById('inappBox').className='inapp'">
+      그냥 계속 볼게요</button>
+  </div>
+</div>
+
+<div id="msg"></div>
+
+<script src="app.js"></script>
+<script>
+var CERTS = [
+  { n:'컴퓨터활용능력', s:['1급','2급'] },
+  { n:'한국사능력검정', s:['1급','2급','3급'] },
+  { n:'사회복지사',     s:['1급','2급'] },
+  { n:'보조공학사',     s:[] },
+  { n:'요양보호사',     s:[] },
+  { n:'운전면허',       s:[] }
+];
+var COURSES = [
+  { n:'대한연하재활학회', s:['성인연하-기본','성인연하-심화','소아연하-기본','소아연하-심화',
+                            '학생-소개','구강운동촉진기술 OMPT','연하재활 기능적전기자극치료'] },
+  { n:'대한인지재활학회', s:['성인 소개강좌','성인 기본강좌','성인 심화강좌','성인 전문가과정',
+                            '아동 소개강좌','아동 기본강좌','아동 심화강좌','아동 전문가과정'] },
+  { n:'대한연하장애학회', s:['전문치료과정(기초)','전문치료과정(심화)'] },
+  { n:'보바스',          s:['작업치료 소개','기본강좌','심화강좌'] },
+  { n:'PNF',            s:[] }
+];
+var HOSPITALS = ['대학병원','종합병원','의료원','재활병원','요양병원','병(의)원','복지관·센터','아동·발달센터','공공기관(병원)','공공기관(비병원)','기타'];
+var picked = {certs:[], courses:[]};
+var rows = {practice:[], career:[]};
+var lastId = null;
+var role = '현직';
+var ME = null;   // {nick, id, role, job}
+var JOB = '작업치료사';
+
+function setJob(j){
+  JOB = j;
+  var a=document.getElementById('jbOT'), b=document.getElementById('jbPT');
+  if(a) a.className = (j==='작업치료사'?'on':'');
+  if(b) b.className = (j==='물리치료사'?'on ptmode':'');
+  var ha=document.getElementById('hjOT'), hb=document.getElementById('hjPT');
+  if(ha) ha.className = 'jd ot'+(j==='작업치료사'?' on':'');
+  if(hb) hb.className = 'jd pt'+(j==='물리치료사'?' on':'');
+  document.body.setAttribute('data-job', j);
+  var f=document.getElementById('fJob'); if(f) f.value=j;
+  var hj=document.getElementById('hJob'); if(hj) hj.value=j;
+
+
+  var body=document.getElementById('formBody');
+  if(body) body.className='';
+  var sub=document.getElementById('subTitle');
+  if(sub && document.getElementById('pane-input').className==='')
+    sub.textContent = j+' 정보 등록';
+}
+
+function setRole(r){
+  role = r;
+  document.getElementById('roPro').className = (r==='현직'?'on':'');
+  document.getElementById('roStu').className = (r==='학생'?'on':'');
+  document.getElementById('jobStep').className='stepbox';
+
+  document.getElementById('cardPay').className = (r==='학생'?'card hide':'card');
+  document.querySelectorAll('.stu-only').forEach(function(el){
+    el.className = el.className.replace(' hide','') + (r==='학생'?'':' hide');
+  });
+  document.querySelectorAll('.pro-only').forEach(function(el){
+    el.className = el.className.replace(' hide','') + (r==='학생'?' hide':'');
+  });
+  document.getElementById('specTitle').innerHTML = (r==='학생')
+    ? '내 스펙 입력'
+    : '2단계 · 스펙 <span style="font-weight:400;color:var(--dim);font-size:12px">(선택)</span>';
+  document.getElementById('specSub').textContent = (r==='학생')
+    ? '급여는 받지 않습니다. 스펙만 넣으면 내 위치와 갈 수 있는 곳이 나옵니다.'
+    : '여기까지 채우면 합격 스펙 통계도 볼 수 있습니다.';
+  document.getElementById('schoolLabel').textContent = (r==='학생')?'재학 과정':'최종 학력';
+  document.getElementById('submitBtn').textContent = (r==='학생')
+    ? '제출하고 내 위치 보기' : '제출하고 통계 보기';
+}
+
+function saveMe(m){
+  ME = m;
+  try{ localStorage.setItem('potlab_me', JSON.stringify(m)); }catch(e){}
+}
+function loadMe(){
+  try{
+    var raw = localStorage.getItem('potlab_me');
+    if(raw) ME = JSON.parse(raw);
+  }catch(e){ ME = null; }
+  return ME;
+}
+function clearMe(){
+  ME = null;
+  try{ localStorage.removeItem('potlab_me'); }catch(e){}
+}
+function cred(){
+  return { nick: ME ? ME.nick : '', code: ME ? (ME.code||'') : '',
+           id: ME ? ME.id : '', job: (ME && ME.job) ? ME.job : JOB };
+}
+function unlocked(){ return !!(ME && ME.nick && ME.code); }
+function goBack(){ tab(unlocked() ? 'dash' : 'home'); }
+
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  });
+}
+
+function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
+  clearTimeout(m._t);m._t=setTimeout(function(){m.className='';},2500);}
+
+function tab(which){
+  ['home','input','view','done','unlock','dash','feedback','calc','install','hosp','region','jobs'].forEach(function(p){
+    var el=document.getElementById('pane-'+p);
+    if(el) el.className = (p===which?'':'hide');
+  });
+  var isStat = (which==='view');
+  var sub=document.getElementById('subhead');
+  sub.className = (which==='home'||which==='dash')?'hide':'';
+  document.getElementById('statTabs').className = isStat?'tabs':'tabs hide';
+  var TT={input:['내 정보 등록','약 3분이면 끝납니다'],
+          done:['등록 완료','코드를 받으러 가실 차례입니다'],
+          unlock:['잠금 해제','닉네임과 코드를 넣어주세요'],
+          view:['통계 조회','조건을 걸어 살펴보세요'],
+          calc:['내 연봉 계산기','2026년 기준 세전↔세후'],
+          hosp:['병원별 치료사 인원','정리한 자료 기준'],
+          feedback:['운영자에게 한마디','익명으로 전달됩니다'],
+          region:['지역별 의료기관 현황','분기 집계 기준'],
+          jobs:['채용공고 바로가기','치료사 공고가 모이는 곳'],
+          install:['홈 화면에 추가','아이콘으로 바로 들어오기']};
+  if(TT[which]){
+    document.getElementById('subTitle').textContent=TT[which][0];
+    document.getElementById('subDesc').textContent=TT[which][1];
+  }
+  document.getElementById('t1').className='tab'+(which==='input'?' on':'');
+  document.getElementById('t2').className='tab'+(which==='view'?' on':'');
+  if(which==='install') drawGuide();
+  if(which==='dash') drawDash();
+  if(which==='region') doRegion();
+  if(which==='jobs') drawJobLinks();
+  if(which==='view'){ drawViewNotice(); if(unlocked()) doStats(); }
+  window.scrollTo({top:0, behavior:'smooth'});
+
+}
+
+var BRANDC = null;
+
+function drawHome(b){
+  BRANDC = b;
+  var brand=document.getElementById('brandBox');
+  brand.innerHTML = '<div class="badge-by">POT LAB 공식 운영</div>'
+    + (b.logo ? '<img src="'+b.logo+'" alt="'+esc(b.name)+'">'
+              : '<div class="wordmark">'+esc(b.name)+'</div>')
+    + '<div class="tag">'+esc(b.tagline)+'</div>'
+    + '<div class="rule"></div>';
+
+  document.getElementById('footBox').innerHTML =
+    '이 페이지와 단톡방은 <b>'+esc(b.name)+'</b>이 운영합니다<br>'
+    + '치료사가 만드는 치료사 정보';
+
+  drawWho();
+  drawAddHome();
+  startBanner(b.banners);
+  attachRipple();
+  revealHome();
+  animateNumbers('#pane-home');
+
+  google.script.run.withSuccessHandler(function(c){
+    var el=document.getElementById('sumBox');
+    if(!el||!c) return;
+    var parts=[];
+    JOBSL.forEach(function(j){
+      if(c[j]&&c[j].n) parts.push('<div class="sline"><span>'+j+'</span><b>'
+        + c[j].n+'명 참여'+(c[j].median?' · 중위 '+c[j].median+'만원':'')+'</b></div>');
+    });
+    if(c.hospitals) parts.push('<div class="sline"><span>등록된 병원</span><b>'
+      + c.hospitals.toLocaleString('ko-KR')+'곳</b></div>');
+    if(parts.length) el.innerHTML='<div class="sumcard">'+parts.join('')+'</div>';
+  }).getPublicSummary();
+}
+
+function roomCard(b){
+  var rooms=(b&&b.rooms&&b.rooms.length)?b.rooms:(b&&b.room?[{job:'',name:b.roomName,url:b.room}]:[]);
+  if(!rooms.length) return '';
+  var myJob=(ME&&ME.job)?ME.job:null;
+  var pts=(b&&b.roomPoints)||[];
+
+  return '<div class="roomcard">'
+    + '<div class="eyebrow">POT LAB 공식 커뮤니티</div>'
+    + '<h3>코드는 단톡방 공지에 있습니다</h3>'
+    + (pts.length?'<ul class="roompts">'
+        + pts.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>':'')
+    + '<p style="margin-bottom:12px"><b>코드 하나면 평생 무료입니다.</b><br>'
+    + '치료사 정보는 치료사가 만듭니다.</p>'
+    + '<div style="display:flex;flex-direction:column;gap:7px">'
+    + rooms.map(function(rm){
+        var hi=myJob&&rm.job===myJob;
+        return '<a class="cta" style="display:block;text-align:center'
+          +(hi?';background:#0d5c4f;color:#fff':'')+'" href="'+rm.url+'" '
+          +'target="_blank" rel="noopener">'+esc(rm.name)+(hi?' ★':'')+'</a>';
+      }).join('')
+    + '</div>'
+    + '<div class="cnt" id="roomCnt"></div>'
+    + '</div>';
+}
+
+function menuItem(cls, ic, title, desc, action){
+  return '<'+(action.href?'a':'button')+' class="mi '+cls+'" '
+    + (action.href?('href="'+action.href+'" target="_blank" rel="noopener"')
+                  :('onclick="'+action.fn+'"'))
+    + '><div class="ic">'+ic+'</div><div class="tx"><b>'+title+'</b><span>'+desc+'</span></div>'
+    + '<div class="arw">›</div></'+(action.href?'a':'button')+'>';
+}
+
+function doUnlock(){
+  var n=document.getElementById('uNick').value.trim();
+  var c=document.getElementById('uCode').value.trim();
+  var box=document.getElementById('unlockMsg');
+  if(!n){ msg('닉네임을 입력해주세요'); return; }
+  if(!c){ msg('코드를 입력해주세요'); return; }
+  box.innerHTML='<div class="loadwrap" style="padding:26px 0"><div class="spin"></div>'
+    + '<p>확인하고 있습니다</p></div>';
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){
+      box.innerHTML=failCard(r);
+      document.getElementById('unlockRoom').innerHTML =
+        (r.reason==='nonick') ? '' : roomCard(BRANDC);
+      attachRipple();
+      return;
+    }
+    box.innerHTML='';
+    document.getElementById('unlockRoom').innerHTML='';
+    saveMe({nick:r.nick, id:r.id, role:r.role, job:r.job, code:c,
+            joinedAt:r.joinedAt, days:r.days});
+    setJob(r.job||JOB);
+    tab('dash');
+  }).withFailureHandler(function(e){document.getElementById('hospBox').innerHTML=errBox(e);attachRipple();}).unlockAccess(n,c);
+}
+
+function greeting(){
+  var h=new Date().getHours();
+  if(h<6)  return '늦은 시간까지 고생 많으십니다';
+  if(h<11) return '오늘도 좋은 하루 되세요';
+  if(h<14) return '점심은 챙기셨나요';
+  if(h<18) return '오후도 힘내세요';
+  if(h<22) return '오늘 하루도 수고하셨습니다';
+  return '오늘도 수고 많으셨습니다';
+}
+
+function welcomeCard(){
+  if(!ME) return '';
+  var first = !ME.days || ME.days < 1;
+  return '<div class="welcome">'
+    + '<div class="hi">'+(first?'환영합니다':'다시 만나서 반갑습니다')+'</div>'
+    + '<h3>'+esc(ME.nick)+'님</h3>'
+    + '<div class="jobtag">'+esc((ME&&ME.job)||'')+'</div>'
+    + '<div class="cheer">'+greeting()+' 💪</div>'
+    + (ME.joinedAt ? '<div class="since">'
+        + (first ? '오늘 등록하셨습니다'
+                 : ME.joinedAt+' 등록 · '+ME.days+'일째')
+        + '</div>' : '')
+    + '</div>';
+}
+
+function mySpecCard(m){
+  if(!m) return '';
+  var t='<div class="myspec"><h4>내가 등록한 정보</h4>';
+  if(m.job) t+=sp('직군', m.job, true);
+  if(m.role==='학생'){
+    if(m.school) t+=sp('과정', m.school);
+    if(m.gpa&&m.gpaMax) t+=sp('학점', m.gpa+' / '+m.gpaMax, true);
+  }else{
+    if(m.years)   t+=sp('연차', m.years+'년차'+(m.startYear?' ('+m.startYear+' 입사)':''), true);
+    if(m.curYears&&m.curYears!==m.years) t+=sp('지금 병원', m.curYears+'년차');
+    if(m.hospitalType) t+=sp('병원 유형', m.hospitalType);
+    if(m.region)  t+=sp('지역', m.region);
+    if(m.employment) t+=sp('고용형태', m.employment);
+    if(m.salary)  t+=sp('월 실수령', m.salary+'만원', true);
+    if(m.bonus)   t+=sp('연간 상여', m.bonus+'만원');
+    if(m.annual)  t+=sp('연 환산', man10(m.annual), true);
+    if(m.nightDuty||m.weekendWork)
+      t+=sp('당직 · 주말', (m.nightDuty||0)+'회 · '+(m.weekendWork||0)+'회');
+    if(m.school)  t+=sp('학력', m.school+(m.gpa&&m.gpaMax?' · '+m.gpa+'/'+m.gpaMax:''));
+    if(m.age)     t+=sp('나이', '만 '+m.age+'세');
+  }
+  return t+'<div style="margin-top:11px"><button class="ghost" style="margin:0"'
+    + ' onclick="tab(\'input\')">정보 수정하기</button></div></div>';
+}
+
+function sp(k,v,acc){
+  return '<div class="sp"><span class="k3">'+k+'</span>'
+    + '<span class="v3'+(acc?' acc':'')+'">'+esc(v)+'</span></div>';
+}
+
+function drawDash(){
+  if(BN.list.length) paintBanner();
+  var box=document.getElementById('dashBox');
+  box.innerHTML='<div class="loadwrap"><div class="spin"></div>'
+    + '<p>'+esc((ME&&ME.nick)||'')+'님 정보를 불러오는 중입니다</p></div>';
+  drawDashMenu();
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+    var h=welcomeCard();
+    h+=mySpecCard(r.me);
+    h+=meCard(r);
+    box.innerHTML=h;
+    revealIn(); animateNumbers(); slidePins();
+    google.script.run.withSuccessHandler(drawMove).getMoveEstimate(cred());
+    google.script.run.withSuccessHandler(function(bd){
+      if(!bd||!bd.ok) return;
+      if(bd.role==='학생'){ showStudent(bd.student); drawStudentCard(bd.card); }
+      else { showPos(bd.position); showHourly(bd.hourly);
+             showSpec(bd.spec); drawCard(bd.card); }
+    }).getResultBundle(cred(), (ME&&ME.id)||'', (ME&&ME.role)||'현직');
+  }).withFailureHandler(function(e){
+    box.innerHTML='<div class="card"><p class="sub">'+esc(e.message)+'</p></div>';
+  }).getStats(cred(), {job:(ME&&ME.job)||JOB});
+}
+
+function drawMove(r){
+  if(!r||!r.ok||r.student||r.noSalary) return;
+  var box=document.getElementById('dashBox');
+  var h='<div class="card"><h2>이직하면 얼마나 오를까</h2>'
+    + '<p class="sub">'+esc(r.band)+' · 같은 연차 '+r.poolSize+'명 기준</p>';
+
+  if(r.types.length){
+    h+='<div class="mvhead">병원 유형을 바꾸면</div>';
+    h+=r.types.map(function(t){ return mvRow(t, r.nowType.name); }).join('');
+  }
+  if(r.regions.length){
+    h+='<div class="mvhead">지역을 옮기면</div>';
+    h+=r.regions.map(function(t){ return mvRow(t, r.nowRegion.name); }).join('');
+  }
+  if(r.best && r.best.diff!==null && r.best.diff>0){
+    h+='<div class="bestbox"><b>가장 크게 오르는 조합</b>'
+     + esc(r.best.region)+' · '+esc(r.best.type)
+     + '<span class="bg">연 +'+Math.round(r.best.yearDiff||r.best.diff*12).toLocaleString('ko-KR')+'만원</span>'
+     + '<span class="bs">월 +'+r.best.diff+'만원</span>'
+     + '<small>표본 '+r.best.n+'명</small></div>';
+  }
+  h+='<div class="warnbox">같은 연차 사람들의 중위값 차이입니다. '
+   + '옮기면 반드시 그만큼 오른다는 뜻은 아닙니다.</div></div>';
+  box.innerHTML += h;
+  attachRipple(); revealIn(); animateNumbers(); slidePins();
+}
+
+function mvRow(t, nowName){
+  var up=t.diff>0, same=Math.abs(t.diff)<0.5;
+  var cls=same?'':(up?'up':'down');
+  return '<div class="mv"><div class="mvn">'+esc(t.name)
+    + (t.name===nowName?' <span class="now">지금</span>':'')
+    + '<span class="mvn2">'+t.n+'명 · 중위 '+t.median+'만원</span></div>'
+    + '<div class="mvv2">'
+    + '<div class="mvm '+cls+'">'+(same?'±0':(up?'+':'')+t.diff+'만원')+'</div>'
+    + '<div class="mvy '+cls+'">'
+    + (same?'연 ±0':'연 '+(up?'+':'')+Math.round(t.yearDiff).toLocaleString('ko-KR')+'만원')
+    + '</div></div></div>';
+}
+
+function drawDashMenu(){
+  var b=BRANDC||{};
+  var m='<div class="mcat">급여</div>';
+  m+=menuItem('hi','📊','급여 통계 조회','지역·유형·연차로 걸러 보기',{fn:"tab(\'view\')"});
+  m+=menuItem('','🧮','내 연봉 계산기','세전↔세후 · 또래 비교',{fn:"tab(\'calc\')"});
+  m+='<div class="mcat">취업 · 이직</div>';
+  m+=menuItem('','🏥','병원 찾기·비교','인원·병상·전문의 · 지역별 목록',{fn:"tab(\'hosp\')"});
+  m+=menuItem('','📋','채용공고 바로가기','공공기관·워크넷 통합 검색',{fn:"tab(\'jobs\')"});
+  m+=b.klass
+     ? menuItem('','🎯','공공기관 집중 준비반','공고 알림 + 준비 자료',{href:b.klass})
+     : menuItem('off','🎯','공공기관 집중 준비반','1기 모집 준비 중',{fn:"msg(\'곧 열립니다\')"});
+  if(b.potlab) m+=menuItem('','📚','피오티랩 전자책','면접·실무 전자책 보러가기',{href:b.potlab});
+  m+=b.channel
+     ? menuItem('ch','📩','피오티랩 문의','카카오톡 채널로 1:1 상담',{href:b.channel})
+     : menuItem('off','📩','피오티랩 문의','카카오톡 채널 준비 중',{fn:"msg(\'곧 열립니다\')"});
+  if(device()!=='pc' && !isStandalone())
+    m+=menuItem('','📲','홈 화면에 추가','아이콘으로 바로 들어오기',{fn:"tab(\'install\')"});
+  m+='<div class="mcat">그 외</div>';
+  m+=menuItem('','💬','운영자에게 한마디','익명 건의 남기기',{fn:"tab(\'feedback\')"});
+  m+=menuItem('','🔄','내 정보 수정','바뀐 급여로 갱신하기',{fn:"tab(\'input\')"});
+  document.getElementById('dashMenu').innerHTML=m;
+  attachRipple();
+}
+
+/* ===== 기기 판별 ===== */
+function device(){
+  var ua=navigator.userAgent||'';
+  if(/iPad|iPhone|iPod/.test(ua)) return 'ios';
+  if(/Android/i.test(ua)) return 'android';
+  return 'pc';
+}
+function isStandalone(){
+  return window.navigator.standalone === true
+    || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+}
+
+/* ===== 모션 ===== */
+function attachRipple(){ /* 리플 효과는 사용하지 않습니다 */ }
+/* 숫자를 0에서 목표까지 굴려 올림 */
+function countTo(el, target, opts){
+  opts = opts || {};
+  var dur = opts.dur || 900, dec = opts.dec || 0;
+  var pre = opts.pre || '', suf = opts.suf || '';
+  var start = null, from = 0;
+  el.classList.add('countup');
+  function step(ts){
+    if(!start) start = ts;
+    var t = Math.min((ts - start) / dur, 1);
+    var e = 1 - Math.pow(1 - t, 3);          // ease-out cubic
+    var v = from + (target - from) * e;
+    el.textContent = pre + (dec ? v.toFixed(dec) : Math.round(v)).toLocaleString('ko-KR') + suf;
+    if(t < 1) requestAnimationFrame(step);
+    else el.textContent = pre + (dec ? target.toFixed(dec) : Math.round(target)).toLocaleString('ko-KR') + suf;
+  }
+  requestAnimationFrame(step);
+}
+
+/* 화면에 들어온 요소만 순서대로 나타나게 */
+var _io = null;
+function revealHome(){ /* 홈은 그대로 보여줍니다 */ }
+
+function revealIn(root){
+  var box = root ? document.querySelector(root) : document;
+  if(!box) return;
+  var els = box.querySelectorAll('.pos, .welcome, .mecard');
+  if(!('IntersectionObserver' in window)){
+    els.forEach(function(el){ el.classList.remove('reveal'); });
+    return;
+  }
+  if(!_io){
+    _io = new IntersectionObserver(function(list){
+      list.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add('in'); _io.unobserve(en.target); }
+      });
+    }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+  }
+  els.forEach(function(el, i){
+    if(el._rv) return;
+    el._rv = true;
+    el.classList.add('reveal');
+    el.style.animationDelay = Math.min(i, 6) * 60 + 'ms';
+    _io.observe(el);
+  });
+}
+
+/* 숫자 요소에 카운트업 적용 */
+/* 게이지 핀이 왼쪽에서 미끄러져 제자리에 멈춥니다 */
+function slidePins(scope){
+  var box = scope ? document.querySelector(scope) : document;
+  if(!box) return;
+  box.querySelectorAll('[data-left]').forEach(function(el){
+    if(el._pin) return;
+    el._pin = true;
+    var to = el.dataset.left;
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ el.style.left = to + '%'; });
+    });
+  });
+}
+
+function animateNumbers(scope){
+  var box = scope ? document.querySelector(scope) : document;
+  if(!box) return;
+  box.querySelectorAll('[data-count]').forEach(function(el){
+    if(el._cnt) return;
+    el._cnt = true;
+    var t = parseFloat(el.dataset.count);
+    if(isNaN(t)) return;
+    countTo(el, t, { dec: parseInt(el.dataset.dec || '0', 10),
+                     pre: el.dataset.pre || '', suf: el.dataset.suf || '' });
+  });
+}
+
+function staggerIn(sel){ /* 순차 등장은 사용하지 않습니다 */ }
+
+/* ===== 내 정보 배너 ===== */
+/* ===== 배너 ===== */
+var BN = { list: [], i: 0, timer: null };
+
+function bannerHTML(b){
+  return '<a class="banner bfade" href="'+esc(b.url)+'" target="_blank" rel="noopener">'
+    + (b.img?'<img class="bimg" src="'+esc(b.img)+'" alt="'+esc(b.title)+'"'
+        + ' onerror="this.style.display=\'none\'">':'')
+    + '<div class="btx">'
+    + '<span class="bad">POT LAB</span>'
+    + (b.title?'<div class="bt">'+esc(b.title)+'</div>':'')
+    + (b.desc?'<div class="bd">'+esc(b.desc)+'</div>':'')
+    + '<span class="bc">'+esc(b.cta)+' ›</span>'
+    + '</div></a>';
+}
+
+function paintBanner(){
+  var b = BN.list[BN.i];
+  if(!b) return;
+  var dots = BN.list.length>1
+    ? '<div class="bdots">'+BN.list.map(function(_,k){
+        return '<i class="'+(k===BN.i?'on':'')+'"></i>';
+      }).join('')+'</div>' : '';
+  ['bannerHome','bannerDash'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.innerHTML = bannerHTML(b) + dots;
+  });
+  attachRipple();
+}
+
+function startBanner(list){
+  BN.list = (list||[]).filter(function(b){ return b && (b.title || b.img); });
+  if(!BN.list.length){
+    ['bannerHome','bannerDash'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.innerHTML='';
+    });
+    return;
+  }
+  BN.i = 0;
+  paintBanner();
+  if(BN.timer) clearInterval(BN.timer);
+  if(BN.list.length>1){
+    BN.timer = setInterval(function(){
+      BN.i = (BN.i + 1) % BN.list.length;
+      paintBanner();
+    }, 6000);
+  }
+}
+
+function drawWho(){
+  var box=document.getElementById('whoBox');
+  if(!box) return;
+  if(!unlocked()){ box.innerHTML=''; return; }
+  box.innerHTML='<div class="whoami">'
+    + '<div class="av">'+esc(ME.nick.slice(0,1))+'</div>'
+    + '<div class="tx"><b>'+esc(ME.nick)+'</b>'
+    + '<span class="jb">'+esc(ME.job||'')+'</span>'
+    + '<span class="sm">바로 이용 가능</span></div>'
+    + '<button onclick="logout()">해제</button></div>';
+}
+function logout(){
+  if(!confirm('이 기기에서 닉네임 기억을 지웁니다. 등록한 데이터는 그대로 남습니다.')) return;
+  clearMe(); drawWho(); msg('해제했습니다'); tab('home');
+}
+
+/* ===== 홈 화면에 추가 ===== */
+function drawAddHome(){
+  var box=document.getElementById('addHomeBox');
+  if(!box) return;
+  var d=device();
+  if(d==='pc' || isStandalone()){ box.innerHTML=''; return; }
+  var hidden=false;
+  try{ hidden = localStorage.getItem('potlab_addhome_off')==='1'; }catch(e){}
+  if(hidden){ box.innerHTML=''; return; }
+  box.innerHTML='<div class="addhome">'
+    + '<div class="ic">📲</div>'
+    + '<div class="tx"><b>홈 화면에 추가하기</b>'
+    + '<span>아이콘 하나로 바로 들어올 수 있습니다</span></div>'
+    + '<button onclick="tab(\'install\')" style="font-size:12.5px;padding:7px 12px">방법</button>'
+    + '<button class="x" onclick="hideAddHome()">×</button>'
+    + '</div>';
+}
+function hideAddHome(){
+  try{ localStorage.setItem('potlab_addhome_off','1'); }catch(e){}
+  document.getElementById('addHomeBox').innerHTML='';
+}
+function drawGuide(){
+  var d=device(), box=document.getElementById('guideBox'), h='';
+  function st(n,t){ return '<div class="step"><div class="no">'+n+'</div><div class="tx">'+t+'</div></div>'; }
+  if(d==='ios'){
+    h='<h3>아이폰 · 아이패드</h3><div class="os">Safari에서 진행해주세요</div>'
+     + st(1,'화면 아래 가운데 <b>공유 버튼</b>을 누릅니다')
+     + st(2,'목록을 내려 <b>홈 화면에 추가</b>를 누릅니다')
+     + st(3,'이름을 확인하고 <b>추가</b>를 누릅니다')
+     + '<div class="warnbox">카톡·인스타 안에서 열었다면 먼저 Safari로 열어야 합니다.</div>';
+  } else if(d==='android'){
+    h='<h3>안드로이드</h3><div class="os">Chrome에서 진행해주세요</div>'
+     + st(1,'오른쪽 위 <b>⋮</b> 버튼을 누릅니다')
+     + st(2,'<b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 누릅니다')
+     + st(3,'이름을 확인하고 <b>추가</b>를 누릅니다')
+     + '<div class="warnbox">카톡·인스타 안에서 열었다면 먼저 Chrome으로 열어야 합니다.</div>';
+  } else {
+    h='<h3>PC에서 보고 계십니다</h3><div class="os">홈 화면 추가는 휴대폰에서만 됩니다</div>'
+     + st(1,'휴대폰에서 이 주소를 열어주세요')
+     + '<div style="margin-top:6px"><button class="go" onclick="copyUrl()">주소 복사</button></div>';
+  }
+  box.innerHTML=h;
+}
+
+/* ===== 입력 보조 ===== */
+var THIS_YEAR = new Date().getFullYear();
+var nickTimer=null;
+
+/* 글자 수 표시 — 한도에 가까워지면 붉게 */
+function cnt(id, max){
+  var el=document.getElementById(id);
+  var box=document.getElementById('cnt-'+id);
+  if(!el||!box) return;
+  var n=el.value.length;
+  box.textContent = n + ' / ' + max;
+  box.className = 'tcount' + (n >= max*0.9 ? ' warn' : '');
+}
+
+function nickTyped(){
+  var el=document.getElementById('nickChk');
+  var v=val('nick');
+  el.className='nickchk'; el.textContent='';
+  clearTimeout(nickTimer);
+  if(v.length<2) return;
+  el.textContent='확인 중...';
+  nickTimer=setTimeout(function(){
+    google.script.run.withSuccessHandler(function(r){
+      el.className='nickchk '+(r.ok?'ok':'no');
+      el.textContent=r.message;
+    }).checkNick(v);
+  }, 450);
+}
+
+function showYears(){
+  var y = parseInt(val('startYear'),10);
+  var el = document.getElementById('yearsEcho');
+  if(!y || y < 1970 || y > THIS_YEAR){ el.textContent='년 입사'; return; }
+  el.textContent = '년 입사 · ' + (THIS_YEAR - y + 1) + '년차';
+}
+function showCurYears(){
+  var y = parseInt(val('curStartYear'),10);
+  var el = document.getElementById('curYearsEcho');
+  if(!y || y < 1970 || y > THIS_YEAR){ el.textContent='년 입사'; return; }
+  el.textContent = '년 입사 · 이 병원 ' + (THIS_YEAR - y + 1) + '년차';
+}
+function ageFrom(y){
+  y = parseInt(y,10);
+  if(!y || y < 1940 || y > THIS_YEAR-17) return null;
+  return THIS_YEAR - y;
+}
+function showAge(){
+  var a = ageFrom(val('birthYear'));
+  document.getElementById('ageEcho').textContent = a ? ('년생 · 만 '+a+'세') : '년생';
+}
+function showAge2(){
+  var a = ageFrom(document.getElementById('cBirth').value);
+  document.getElementById('cAgeEcho').textContent = a ? ('년생 · 만 '+a+'세') : '년생';
+}
+
+var HIGH_EXEMPT=['대학병원','공공기관(병원)','공공기관(비병원)','의료원(지방의료원 등)'];
+function checkEmp(){
+  var v=val('employment');
+  var el=document.getElementById('flagEmp');
+  el.className='flag high'+((v==='인턴'||v==='프리랜서')?' on':'');
+  checkSalary();
+}
+
+function checkSalary(){
+  var v=parseFloat(val('salary'))||0;
+  var type=val('hospitalType');
+  var lo=document.getElementById('flagLow'), hi=document.getElementById('flagHigh');
+  var exempt=HIGH_EXEMPT.some(function(t){return type.indexOf(t.split(' —')[0])===0;});
+  lo.className='flag low'+(v>0&&v<180?' on':'');
+  hi.className='flag high'+((v>=400&&!exempt)?' on':'');
+}
+
+/* ===== 실패 안내 ===== */
+function failCard(r){
+  if(r.reason==='empty') return '<div class="card"><p class="sub">'+esc(r.message)+'</p></div>';
+  var icon = r.reason==='rotated' ? '🔄' : (r.reason==='nonick' ? '👤' : '🔒');
+  return '<div class="notice">'
+    + '<div class="icon">'+icon+'</div>'
+    + '<h3>'+esc(r.message)+'</h3>'
+    + '<p>'+esc(r.detail||'')+'</p>'
+    + (r.reason==='nonick'
+        ? '<button class="go" onclick="tab(\'input\')">등록하러 가기</button>'
+        : (r.roomUrl?'<a class="roombtn" href="'+r.roomUrl+'" target="_blank" rel="noopener">'
+            + esc(r.roomName||'단톡방')+'에서 코드 확인</a>':''))
+    + '</div>';
+}
+
+/* ===== 계산기 ===== */
+function man(n){return n?n.toLocaleString('ko-KR'):'—';}
+function ln(k,v){
+  return '<div class="ln"><span>'+k+'</span><span>-'+(v||0).toLocaleString('ko-KR')+'원</span></div>';
+}
+function runCalc(){
+  if(!unlocked()){ msg('먼저 등록하고 코드를 입력해주세요'); tab('unlock'); return; }
+  var amt=document.getElementById('cAmount').value.trim();
+  if(!amt){msg('금액을 입력해주세요');return;}
+  document.getElementById('calcBox').innerHTML=loading('계산하는 중');
+  google.script.run.withSuccessHandler(drawCalc)
+    .withFailureHandler(function(e){document.getElementById('hospBox').innerHTML=errBox(e);attachRipple();})
+    .calcSalary({
+      cred:cred(),
+      mode:document.getElementById('cMode').value,
+      amount:amt,
+      birthYear:document.getElementById('cBirth').value
+    });
+}
+function drawCalc(r){
+  var box=document.getElementById('calcBox');
+  if(!r.ok){box.innerHTML=failCard(r);attachRipple();return;}
+  var c=r.calc;
+  var h='<div class="calcout">'
+    + '<div class="lead">세후 월급 (실수령) · '+(r.year||2026)+'년 기준</div>'
+    + '<div class="big">'+man(Math.round(c.net/10000))+'만원</div>'
+    + '<div class="sub2">세전 월 '+man(Math.round(c.gross/10000))+'만원 · '
+    + '세전 연봉 '+man(Math.round(c.grossYear/10000))+'만원</div>'
+    + '<div class="sub2">세후 연 '+man(Math.round(c.netYear/10000))+'만원</div>'
+    + '<div class="brk">'
+    + ln('국민연금',c.pension)+ln('건강보험',c.health)+ln('장기요양',c.care)
+    + ln('고용보험',c.employ)+ln('소득세',c.incomeTax)+ln('지방소득세',c.localTax)
+    + '<div class="ln tot"><span>공제 합계</span><span>'
+    + c.totalDeduct.toLocaleString('ko-KR')+'원</span></div>'
+    + '</div></div>';
+  if(r.peer){
+    if(r.peer.notEnough){
+      h+='<div class="card"><p class="sub">만 '+r.peer.age+'세 전후 데이터가 '
+        + r.peer.n+'명뿐입니다. 3명 이상 모이면 또래 비교가 열립니다.</p></div>';
+    }else{
+      h+='<div class="pos"><div class="lead">만 '+r.peer.age+'세 전후 '+r.peer.n+'명 중</div>'
+       + '<div class="num">상위 '+r.peer.topPercent+'%</div>'
+       + '<div class="note">또래 중위 '+r.peer.median+'만원 · 내 실수령 '+r.peer.mine+'만원</div></div>';
+    }
+  }
+  h+='<div class="warnbox"><b>'+(r.year||2026)+'년 요율 기준 추정치</b><br>'
+   + '부양가족 없이 본인만, 비과세 식대 20만원을 가정했습니다. '
+   + '정확한 금액은 급여명세서를 확인해주세요.</div>';
+  box.innerHTML=h;
+  attachRipple(); revealIn(); animateNumbers(); slidePins();
+}
+
+/* ===== 인앱 브라우저 ===== */
+function checkInApp(){
+  var ua=navigator.userAgent||'';
+  var inapp=/KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\//i.test(ua);
+  if(!inapp) return;
+  document.getElementById('inappUrl').textContent=location.href;
+  document.getElementById('inappBox').className='inapp on';
+}
+function copyUrl(){
+  var t=document.createElement('textarea');
+  t.value=location.href; document.body.appendChild(t); t.select();
+  try{ document.execCommand('copy'); msg('주소를 복사했습니다'); }
+  catch(e){ msg('주소를 길게 눌러 복사해주세요'); }
+  t.remove();
+}
+
+function sendFeedback(){
+  var body=document.getElementById('fbBody').value.trim();
+  if(!body){msg('내용을 입력해주세요');return;}
+  google.script.run.withSuccessHandler(function(r){
+    msg(r.message);
+    if(r.ok){
+      document.getElementById('fbBody').value='';
+      document.getElementById('fbContact').value='';
+      setTimeout(function(){tab('home');
+checkInApp();},900);
+    }
+  }).withFailureHandler(function(e){document.getElementById('hospBox').innerHTML=errBox(e);attachRipple();})
+    .submitFeedback({
+      kind:document.getElementById('fbKind').value,
+      body:body,
+      contact:document.getElementById('fbContact').value
+    });
+}
+
+/* 2단계 선택 — 상위 항목을 누르면 세부 항목이 펼쳐집니다 */
+function chips(id, list, key){
+  var box=document.getElementById(id);
+  box.className='grouped';
+  box.innerHTML = list.map(function(g,i){
+    var gid = key+'-'+i;
+    if(!g.s.length){
+      return '<div class="grp"><button type="button" class="chip" data-v="'+esc(g.n)+'" '
+        + 'onclick="toggleChip(this,\''+key+'\')">'+esc(g.n)+'</button></div>';
+    }
+    return '<div class="grp">'
+      + '<button type="button" class="chip par" id="par-'+gid+'" '
+      + 'onclick="toggleGroup(\''+gid+'\')">'+esc(g.n)
+      + '<span class="cnt2" id="cnt-'+gid+'"></span>'
+      + '<span class="car">›</span></button>'
+      + '<div class="subs" id="sub-'+gid+'">'
+      + g.s.map(function(v){
+          var full = g.n+' - '+v;
+          return '<button type="button" class="chip sub" data-v="'+esc(full)+'" '
+            + 'onclick="toggleChip(this,\''+key+'\',\''+gid+'\')">'+esc(v)+'</button>';
+        }).join('')
+      + '</div></div>';
+  }).join('');
+}
+
+function toggleGroup(gid){
+  var sub=document.getElementById('sub-'+gid);
+  var par=document.getElementById('par-'+gid);
+  var open = sub.className.indexOf('on')>-1;
+  sub.className = open ? 'subs' : 'subs on';
+  par.className = par.className.replace(' open','') + (open?'':' open');
+}
+
+function toggleChip(el, key, gid){
+  var v=el.dataset.v, i=picked[key].indexOf(v);
+  var base='chip'+(el.className.indexOf('sub')>-1?' sub':'')
+          +(el.className.indexOf('mine')>-1?' mine':'');
+  if(i>-1){picked[key].splice(i,1); el.className=base;}
+  else{picked[key].push(v); el.className=base+' on';}
+  if(gid) updateGroupCount(key, gid);
+}
+
+function updateGroupCount(key, gid){
+  var wrap=document.getElementById('sub-'+gid);
+  var n=wrap.querySelectorAll('.chip.on').length;
+  var badge=document.getElementById('cnt-'+gid);
+  var par=document.getElementById('par-'+gid);
+  badge.textContent = n ? n : '';
+  par.className = par.className.replace(' has','') + (n?' has':'');
+}
+
+/* 목록에 없는 항목을 직접 추가 */
+function addCustom(key){
+  var input=document.getElementById(key==='certs'?'certEtc':'courseEtc');
+  var v=input.value.trim().replace(/\s+/g,' ');
+  if(!v){ msg('내용을 입력해주세요'); input.focus(); return; }
+  if(v.length>30){ msg('30자 이내로 적어주세요'); return; }
+  if(picked[key].indexOf(v)>-1){ msg('이미 추가되어 있습니다'); input.value=''; return; }
+
+  picked[key].push(v);
+  var box=document.getElementById(key);
+  var wrap=document.createElement('div');
+  wrap.className='grp';
+  var b=document.createElement('button');
+  b.type='button'; b.className='chip mine on'; b.dataset.v=v; b.textContent=v;
+  b.onclick=function(){ toggleChip(b,key); };
+  wrap.appendChild(b);
+  box.appendChild(wrap);
+  input.value='';
+  msg('추가했습니다');
+}
+
+function addRow(kind){
+  if(rows[kind].length>=5){msg('최대 5개까지 가능합니다');return;}
+  rows[kind].push({hospital:'',months:''});
+  drawRows(kind);
+}
+function drawRows(kind){
+  var box=document.getElementById(kind+'List');
+  box.innerHTML = rows[kind].map(function(r,i){
+    return '<div class="rowitem">'
+      + '<select onchange="rows.'+kind+'['+i+'].hospital=this.value">'
+      + '<option value="">병원 유형</option>'
+      + HOSPITALS.map(function(h){return '<option'+(r.hospital===h?' selected':'')+'>'+h+'</option>';}).join('')
+      + '</select>'
+      + '<input type="number" style="max-width:88px" placeholder="개월" value="'+(r.months||'')+'" '
+      + 'oninput="rows.'+kind+'['+i+'].months=this.value">'
+      + '<button class="x" onclick="rows.'+kind+'.splice('+i+',1);drawRows(\''+kind+'\')">×</button>'
+      + '</div>';
+  }).join('');
+}
+
+function val(id){return document.getElementById(id).value.trim();}
+
+function submit(){
+  if(val('nick').length<2){ msg('닉네임을 2자 이상 정해주세요');
+    document.getElementById('nick').focus(); return; }
+  var req = (role==='학생')
+    ? ['grade','school','wantType']
+    : ['startYear','region','hospitalType','employment','salary'];
+  for(var i=0;i<req.length;i++){
+    if(!val(req[i])){
+      msg(role==='학생'?'학년·과정·희망 유형은 필수입니다':'1단계 항목을 모두 채워주세요');
+      document.getElementById(req[i]).focus(); return;
+    }
+  }
+  var extra=function(id){var v=val(id);return v?[v.trim()]:[];};
+  var data={
+    role:role, nick:val('nick'), job:JOB,
+    startYear:val('startYear'), curStartYear:val('curStartYear')||val('startYear'),
+    region:val('region'), hospitalType:val('hospitalType').split(' —')[0],
+    employment:val('employment'), salary:val('salary'),
+    nightDuty:val('nightDuty')||0, weekendWork:val('weekendWork')||0, bonus:val('bonus')||0,
+    grade:val('grade'), wantType:val('wantType'), wantRegion:val('wantRegion'),
+    birthYear:val('birthYear'), note:document.getElementById('note').value,
+    school:val('school'), gpa:val('gpa'), gpaMax:val('gpaMax'),
+    certs:picked.certs.concat(extra('certEtc')),
+    courses:picked.courses.concat(extra('courseEtc')).concat(val('lang')?['어학:'+val('lang')]:[]),
+    practice:rows.practice.filter(function(r){return r.hospital;}),
+    career:rows.career.filter(function(r){return r.hospital;})
+  };
+  var btn=document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent='제출 중...';
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ btn.disabled=false; btn.textContent='제출하고 통계 보기'; msg(r.message); return; }
+    lastId=r.id;
+    saveMe({nick:r.nick, id:r.id, role:r.role, job:r.job||JOB,
+            code:(ME&&ME.code)||''});
+    document.getElementById('doneCode').textContent=r.nick;
+    document.getElementById('uNick').value=r.nick;
+    document.getElementById('doneRoom').innerHTML=roomCard(BRANDC);
+    document.getElementById('donePos').innerHTML=loading('내 위치를 계산하는 중');
+    tab('done');
+    google.script.run.withSuccessHandler(drawDonePos)
+      .withFailureHandler(function(){document.getElementById('donePos').innerHTML='';})
+      .getPreview(r.nick, r.id);
+
+    window.scrollTo(0,0);
+  }).withFailureHandler(function(e){
+    btn.disabled=false; btn.textContent='제출하고 통계 보기'; msg(e.message);
+  }).submitWage(data);
+}
+
+/* 등록 직후 미리보기 — 내 위치만 보여주고 나머지는 코드로 */
+function drawDonePos(p){
+  var box=document.getElementById('donePos');
+  if(!box) return;
+  if(!p||!p.ok){ box.innerHTML=''; return; }
+
+  if(p.topPercent===null){
+    box.innerHTML='<div class="donebox"><div class="dh">등록이 끝났습니다</div>'
+      + '<div class="dsub">'+esc(p.band||'')+(p.type?' · '+esc(p.type):'')+'</div>'
+      + '<p>같은 조건 참여자가 '+(p.peerCount||0)+'명이라 아직 순위가 나오지 않습니다.<br>'
+      + '3명이 넘으면 바로 보입니다.</p></div>';
+    return;
+  }
+
+  box.innerHTML='<div class="donebox">'
+    + '<div class="dh">등록이 끝났습니다 · 내 위치</div>'
+    + '<div class="dsub">'+esc(p.band||'')+(p.type?' · '+esc(p.type):'')+'</div>'
+    + '<div class="dbig" data-count="'+p.topPercent+'" data-pre="상위 " data-suf="%">상위 0%</div>'
+    + '<div class="drank">'+p.peerCount+'명 중 <b>'+p.rank+'등</b>'
+    + (p.median?' · 중위 '+p.median+'만원':'')+'</div>'
+    + '</div>';
+  animateNumbers('#donePos');
+}
+
+function showPos(p){
+  var box=document.getElementById('myPos');
+  if(!p||!p.ok||!p.peerStats||p.topPercent===null){
+    box.innerHTML='<div class="card"><h2>내 위치</h2>'
+      + '<p class="sub">같은 조건(연차·병원유형) 참여자가 '
+      + ((p&&p.peerCount)||0)+'명입니다. 3명이 넘으면 상위 몇 %인지 나옵니다.</p></div>'
+      + growCard((p&&p.peerCount)||0, '같은 조건 동료들');
+    attachRipple();
+    return;
+  }
+  var s=p.peerStats;
+  box.innerHTML='<div class="pos">'
+    + '<div class="lead">'+esc(p.band)+' · '+esc(p.me.hospitalType)+'</div>'
+    + '<div class="num" data-count="'+p.topPercent+'" data-pre="상위 " data-suf="%">상위 0%</div>'
+    + (p.rank?'<div class="ranknote">'+p.peerCount+'명 중 <b>'+p.rank+'등</b></div>':'')
+    + '<div class="note">중위 '+s.median+'만원'
+    + (p.me.salary>=s.median?' (당신이 '+(p.me.salary-s.median).toFixed(1)+'만원 위)':' (당신이 '+(s.median-p.me.salary).toFixed(1)+'만원 아래)')
+    + (p.myAnnual?'<br>내 연 환산 '+man10(p.myAnnual)
+        +(p.peerAnnual?' · 또래 중위 '+man10(p.peerAnnual.median):''):'')
+    + '</div></div>'
+    + growCard(p.peerCount, '같은 조건 동료들');
+  attachRipple(); animateNumbers('#myPos');
+}
+
+function showStudent(d){
+  if(!d.ok){document.getElementById('myPos').innerHTML=failCard(d);return;}
+  var p=d.peer, h='';
+
+  h+='<div class="pos"><div class="lead">'+esc(d.me.grade||'')+' · '+esc(d.me.school||'')+'</div>'
+   + (p.topPercent!==null
+      ? '<div class="num" data-count="'+p.topPercent+'" data-pre="상위 " data-suf="%">상위 0%</div>'
+      : '<div class="num" style="font-size:22px">비교 준비 중</div>')
+   + '<div class="note">'
+   + (p.topPercent!==null ? '같은 학년 '+p.n+'명 중'
+      : '같은 학년 참여자가 '+p.n+'명입니다. 3명이 넘으면 열립니다')
+   + (p.gpa45?' · 내 학점 '+p.gpa45+'/4.5':'')
+   + (p.gpaAvg?' · 같은 학년 평균 '+p.gpaAvg.avg45:'')
+   + '</div></div>';
+  document.getElementById('myPos').innerHTML=h;
+
+  var r=d.reach, box=document.getElementById('specBox'), h2='';
+  if(!r.enough){
+    h2='<div class="card"><h2>갈 수 있는 곳</h2><p class="sub">현직 스펙 데이터가 '
+      + r.have+'명입니다. '+r.need+'명이 넘으면 열립니다.</p></div>';
+  }else{
+    h2='<div class="card spec"><h2>갈 수 있는 곳</h2>'
+      + '<p class="sub">현직 '+r.base+'명 기준'+(d.wantType?' · 희망: '+d.wantType:'')+'</p>'
+      + r.types.map(function(t){
+          var hl = (t.type===d.wantType);
+          return '<div class="item"><div class="nm"'+(hl?' style="font-weight:800"':'')+'>'+t.type+'</div>'
+            + '<div class="bar2"><i style="width:'+t.rate+'%"></i></div>'
+            + '<div class="pc">'+t.rate+'%</div></div>';
+        }).join('')
+      + '<div class="warnbox">각 유형 현직자 중 내 스펙과 같거나 낮은 사람의 비율입니다. '
+      + '합격 확률이 아니라 참여자 분포입니다.</div></div>';
+  }
+
+  if(d.rookieSalary && d.rookieSalary.length){
+    h2+='<div class="card"><h2>유형별 신입 급여</h2><p class="sub">연차 2년 이하 · 고정 월 실수령 중위값</p>'
+      + d.rookieSalary.map(function(x){
+          return row(x.type + (x.type===d.wantType?' ★':''), x.median+'만원 <small>'+x.n+'명</small>');
+        }).join('')
+      + '</div>';
+  }
+  box.innerHTML=h2;
+  document.getElementById('hourlyBox').innerHTML='';
+}
+
+var SIDOS=['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원',
+           '충북','충남','전북','전남','경북','경남','제주'];
+
+function hospTab(w){
+  ['search','region','cmp'].forEach(function(k){
+    document.getElementById('hsub-'+k).className=(k===w)?'':'hide';
+  });
+  document.getElementById('hb1').className='tab'+(w==='search'?' on':'');
+  document.getElementById('hb2').className='tab'+(w==='region'?' on':'');
+  document.getElementById('hb3').className='tab'+(w==='cmp'?' on':'');
+  var b4=document.getElementById('hb4'); if(b4) b4.className='tab';
+  document.getElementById('hospBox').innerHTML='';
+  if(w==='region') doRegionJob();
+}
+
+/* ===== 두 곳 비교 ===== */
+var sugTimer={};
+function sugg(which){
+  var inp=document.getElementById('cmp'+which);
+  var box=document.getElementById('sug'+which);
+  var q=inp.value.trim();
+  clearTimeout(sugTimer[which]);
+  if(q.length<2){ box.innerHTML=''; return; }
+  sugTimer[which]=setTimeout(function(){
+    google.script.run.withSuccessHandler(function(r){
+      if(!r.ok||!r.rows.length){ box.innerHTML='<div class="none">검색 결과가 없습니다</div>'; return; }
+      box.innerHTML=r.rows.slice(0,8).map(function(x){
+        return '<div class="sg" onclick="pickCmp(\''+which+'\',\''
+          + esc(x.name).replace(/'/g,"\\'")+'\')">'
+          + '<b>'+esc(x.name)+'</b>'
+          + '<span>'+esc(x.kind)+' · '+esc(x.sgg)+' · OT'+x.ot+'</span></div>';
+      }).join('') + (r.total>8?'<div class="none">그 외 '+(r.total-8)+'곳 더 있습니다</div>':'');
+    }).suggestHospitals(cred(), q);
+  }, 350);
+}
+
+function pickCmp(which, name){
+  document.getElementById('cmp'+which).value=name;
+  document.getElementById('sug'+which).innerHTML='';
+}
+
+function doCompare(){
+  var a=document.getElementById('cmpA').value.trim();
+  var b=document.getElementById('cmpB').value.trim();
+  if(!a||!b){ msg('두 곳 모두 입력해주세요'); return; }
+  document.getElementById('hospBox').innerHTML=loading('비교하는 중');
+  google.script.run.withSuccessHandler(drawCompare)
+    .withFailureHandler(function(e){document.getElementById('hospBox').innerHTML=errBox(e);attachRipple();})
+    .compareHospitals(cred(), a, b, document.getElementById('cmpJob').value);
+}
+
+function drawCompare(r){
+  var box=document.getElementById('hospBox');
+  if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+  var A=r.a, B=r.b;
+  var key=(r.job==='물리치료사')?'pt':'ot';
+  var perKey=(r.job==='물리치료사')?'ptPer100':'otPer100';
+
+  function col(x, win){
+    return '<div class="cmpcol'+(win?' win':'')+'">'
+      + '<h4>'+esc(x.name)+'</h4>'
+      + '<div class="cm">'+esc(x.kind)+'<br>'+esc(x.sido)+' '+esc(x.sgg)+'</div>'
+      + '<div style="font-size:26px;font-weight:800">'+x[key]+'<span style="font-size:13px;font-weight:400">명</span></div>'
+      + '<div style="font-size:11px;color:var(--dim)">'+esc(r.job)+'</div></div>';
+  }
+  function cmpRow(label, va, vb, better, unit){
+    var hiA=false, hiB=false;
+    if(va!==null&&vb!==null&&va!==vb){
+      if(better==='high'){ hiA=va>vb; hiB=vb>va; }
+      else if(better==='low'){ hiA=va<vb; hiB=vb<va; }
+    }
+    var f=function(v){ return (v===null||v===undefined)?'—':(v+(unit||'')); };
+    return '<div class="cmprow"><div class="cl">'+label+'</div>'
+      + '<div class="cv'+(hiA?' hi':'')+'">'+f(va)+'</div>'
+      + '<div class="cv'+(hiB?' hi':'')+'">'+f(vb)+'</div></div>';
+  }
+
+  var h='<div class="cmp">'+col(A, A[key]>B[key])+col(B, B[key]>A[key])+'</div>'
+    + '<div class="card">'
+    + cmpRow('병상수', A.bed||null, B.bed||null, null, '')
+    + cmpRow('100병상당 '+r.job, A[perKey], B[perKey], 'high', '명')
+    + cmpRow(r.job+' 1인당 병상', A.bedsPerOT, B.bedsPerOT, 'low', '')
+    + cmpRow('물리치료사', A.pt||null, B.pt||null, null, '명')
+    + cmpRow('재활의학과 전문의', A.rehab||null, B.rehab||null, 'high', '명')
+    + cmpRow('전체 의사', A.doc||null, B.doc||null, null, '명')
+    + cmpRow('사회복지사', A.sw||null, B.sw||null, null, '명')
+    + cmpRow('종별 내 위치',
+        (A.density&&A.density.enough)?(100-A.density.base.pct):null,
+        (B.density&&B.density.enough)?(100-B.density.base.pct):null, 'low', '% 상위')
+    + '<div class="warnbox">초록색은 그 항목에서 수치가 앞선 쪽입니다. '
+    + '종별이 다르면 100병상당 인원을 직접 비교하기 어렵습니다 — '
+    + '같은 종별끼리 비교하실 때 의미가 있습니다.</div>'
+    + '</div>';
+
+  h+='<div class="card"><h2>'+esc(A.name)+'</h2>'+densBlock(A.density, r.job)+'</div>';
+  h+='<div class="card"><h2>'+esc(B.name)+'</h2>'+densBlock(B.density, r.job)+'</div>';
+
+  box.innerHTML=h;
+  attachRipple(); revealIn(); animateNumbers(); slidePins();
+}
+
+function drawJobLinks(){
+  var box=document.getElementById('jobLinkBox');
+  var list=(BRANDC&&BRANDC.jobLinks)||[];
+  if(!list.length){ box.innerHTML='<div class="empty">준비 중입니다</div>'; return; }
+  box.innerHTML=list.map(function(x){
+    return '<a class="jlink" href="'+esc(x.url)+'" target="_blank" rel="noopener">'
+      + '<div class="ji">🔎</div>'
+      + '<div class="jt"><b>'+esc(x.name)+'</b><span>'+esc(x.desc||'')+'</span></div>'
+      + '<div class="jo">↗</div></a>';
+  }).join('');
+}
+
+function doHosp(){
+  var q=val('hq');
+  if(q.length<2){ msg('두 글자 이상 입력해주세요'); return; }
+  document.getElementById('hospBox').innerHTML=loading('병원을 찾는 중');
+  google.script.run.withSuccessHandler(drawHosp)
+    .withFailureHandler(function(e){document.getElementById('regionBox').innerHTML=errBox(e);attachRipple();}).searchHospital(cred(), q);
+}
+
+function drawHosp(r){
+  var box=document.getElementById('hospBox');
+  if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+  if(!r.total){
+    box.innerHTML='<div class="empty">「'+esc(r.query)+'」로 찾은 결과가 없습니다.<br>'
+      + '이름 일부만 넣어보세요 (예: 재활, 보훈)</div>';
+    return;
+  }
+
+  // 한 곳만 나오면 바로 상세로
+  if(r.total===1){ openHosp(r.rows[0].idx); return; }
+
+  var h='<div class="card"><h2>'+r.total+'곳 찾았습니다</h2>'
+    + '<p class="sub">보실 병원을 눌러주세요'
+    + (r.total>30?' · 상위 30곳만 표시':'')+'</p>'
+    + r.rows.map(function(x,i){
+        return '<div class="hpick" onclick="openHosp('+x.idx+')">'
+          + '<div class="hpi">'
+          + '<b>'+esc(x.name)+'</b>'
+          + '<span>'+esc(x.kind)+' · '+esc(x.sido)+' '+esc(x.sgg)
+          + (x.bed?' · '+x.bed.toLocaleString('ko-KR')+'병상':'')+'</span></div>'
+          + '<div class="hpn">'
+          + '<em>OT '+x.ot+'</em><em class="pt">PT '+x.pt+'</em></div>'
+          + '<div class="arw2">›</div></div>';
+      }).join('')
+    + '</div>';
+  box.innerHTML=h;
+  attachRipple();
+}
+
+function openHosp(idx){
+  var box=document.getElementById('hospBox');
+  box.innerHTML=loading('병원 정보를 불러오는 중');
+  google.script.run.withSuccessHandler(function(x){
+    if(!x){ box.innerHTML=errBox('빈 응답', 'hospitalDetail'); return; }
+    drawHospDetail(x);
+  }).withFailureHandler(function(e){
+    box.innerHTML=errBox(e, 'hospitalDetail'); attachRipple();
+  }).hospitalDetail(cred(), idx);
+}
+
+function drawHospDetail(x){
+  var box=document.getElementById('hospBox');
+  if(!x.ok){ box.innerHTML=failCard(x); attachRipple(); return; }
+
+  var t='<button class="back" onclick="doHosp()"><span class="bicon">‹</span>목록으로</button>'
+    + '<div class="hres"><div class="hn">'+esc(x.name)+'</div>'
+    + '<div class="hmeta">'
+    + (x.kind?'<i class="kd">'+esc(x.kind)+'</i>':'')
+    + (x.sido?'<i>'+esc(x.sido)+(x.sgg?' '+esc(x.sgg):'')+'</i>':'')
+    + (x.bed?'<i>'+x.bed.toLocaleString('ko-KR')+'병상</i>':'')
+    + (x.rehab?'<i class="kd">재활의학과 전문의 '+x.rehab+'명</i>':'')
+    + (x.doc?'<i>전체 의사 '+x.doc+'명</i>':'')
+    + '</div>'
+    + '<div class="staff">'
+    + '<div class="box ot"><div class="lb">작업치료사</div>'
+    + '<div class="vv" data-count="'+x.ot+'">0</div></div>'
+    + '<div class="box pt"><div class="lb">물리치료사</div>'
+    + '<div class="vv" data-count="'+x.pt+'">0</div></div>'
+    + (x.sw?'<div class="box sw"><div class="lb">사회복지사</div><div class="vv">'+x.sw+'</div></div>':'')
+    + '</div>';
+
+  t+=densBlock(x.densityOT, '작업치료사');
+
+  var rk=[];
+  if(x.rank.ot) rk.push('작업치료사 전국 '+x.rank.ot+'위 / '+x.rank.otTotal+'곳');
+  if(x.rank.pt) rk.push('물리치료사 전국 '+x.rank.pt+'위 / '+x.rank.ptTotal+'곳');
+  if(rk.length) t+='<div class="hrank">'+rk.join('<br>')+'</div>';
+  if(x.addr) t+='<div class="haddr">'+esc(x.addr)+(x.tel?' · '+esc(x.tel):'')+'</div>';
+  t+='</div>';
+
+  if(x.siblings && x.siblings.length){
+    t+='<div class="card"><h2>같은 이름의 다른 병원</h2>'
+     + '<p class="sub">이름이 비슷한 '+x.siblings.length+'곳이 더 있습니다</p>'
+     + x.siblings.map(function(sb){
+         return '<div class="hpick" onclick="openHosp('+sb.idx+')">'
+           + '<div class="hpi"><b>'+esc(sb.name)+'</b>'
+           + '<span>'+esc(sb.kind)+' · '+esc(sb.sido)+' '+esc(sb.sgg)+'</span></div>'
+           + '<div class="hpn"><em>OT '+sb.ot+'</em><em class="pt">PT '+sb.pt+'</em></div>'
+           + '<div class="arw2">›</div></div>';
+       }).join('')
+     + '</div>';
+  }
+
+  box.innerHTML=t;
+  attachRipple(); revealIn('#pane-hosp'); animateNumbers('#hospBox'); slidePins('#hospBox');
+}
+
+/* ===== 지역으로 찾기 ===== */
+function doRegionJob(){
+  var job=document.getElementById('hJob').value;
+  document.getElementById('hospBox').innerHTML=loading();
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ document.getElementById('hospBox').innerHTML=failCard(r); attachRipple(); return; }
+    var sel=document.getElementById('hSido');
+    if(sel.options.length<=1){
+      r.rows.forEach(function(x){
+        sel.innerHTML+='<option>'+esc(x.sido)+'</option>';
+      });
+      if(ME&&ME.region){
+        var guess=ME.region.split('·')[0].replace('특별시','').replace('광역시','');
+        for(var i=0;i<sel.options.length;i++)
+          if(sel.options[i].value.indexOf(guess)===0){ sel.selectedIndex=i; break; }
+      }
+    }
+    drawJobRegion(r);
+    if(document.getElementById('hSido').value) doRegionList();
+  }).withFailureHandler(function(e){document.getElementById('regionBox').innerHTML=errBox(e);attachRipple();}).jobRegionSummary(cred(), job);
+}
+
+function drawJobRegion(r){
+  var max=r.rows.length?r.rows[0].n:1;
+  var kinds=Object.keys(r.kinds).sort(function(a,b){return r.kinds[b]-r.kinds[a];});
+  var h='<div class="card"><h2>전국 '+esc(r.job)+' '+r.nation.toLocaleString('ko-KR')+'명</h2>'
+    + '<p class="sub">'+r.orgs.toLocaleString('ko-KR')+'곳에 근무 · '+r.basis+'</p>'
+    + '<div class="mixgrid">'
+    + kinds.map(function(k){ return '<i>'+esc(k)+' <b>'+r.kinds[k]+'명</b></i>'; }).join('')
+    + '</div><div style="margin-top:14px">'
+    + r.rows.map(function(x,i){
+        var w=Math.round(x.n/max*100);
+        return '<div class="rgrow" onclick="pickSido(\''+esc(x.sido)+'\')">'
+          + '<div class="rn'+(i<3?' t3':'')+'">'+(i+1)+'</div>'
+          + '<div class="rs">'+esc(x.sido)+' <span style="color:var(--dim);font-size:11.5px">'
+          + x.orgs+'곳</span></div>'
+          + '<div class="rbar"><i style="width:'+w+'%;animation-delay:'+(i*45)+'ms"></i></div>'
+          + '<div class="rv">'+x.n.toLocaleString('ko-KR')+'</div>'
+          + '<div class="arw2">›</div></div>';
+      }).join('')
+    + '</div></div>';
+  document.getElementById('hospBox').innerHTML=h;
+  attachRipple();
+}
+
+function pickSido(sido){
+  document.getElementById('hSido').value=sido;
+  doRegionList();
+}
+
+function doRegionList(){
+  var sido=document.getElementById('hSido').value;
+  if(!sido){ doRegionJob(); return; }
+  var job=document.getElementById('hJob').value;
+  var kind=document.getElementById('hKind').value;
+  var sort=document.getElementById('hSort').value;
+  document.getElementById('hospBox').innerHTML=loading();
+  google.script.run.withSuccessHandler(drawRegionList)
+    .withFailureHandler(function(e){document.getElementById('calcBox').innerHTML=errBox(e);attachRipple();})
+    .regionHospitals(cred(), sido, job, kind, sort);
+}
+
+function drawRegionList(r){
+  var box=document.getElementById('hospBox');
+  if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+
+  var ks=document.getElementById('hKind');
+  var cur=ks.value;
+  ks.innerHTML='<option value="">종별 전체</option>'
+    + Object.keys(r.kinds).sort(function(a,b){return r.kinds[b]-r.kinds[a];})
+      .map(function(k){ return '<option'+(k===cur?' selected':'')+'>'+esc(k)+'</option>'; }).join('');
+
+  var key=(r.job==='물리치료사')?'pt':'ot';
+  var h='<div class="card">'
+    + '<button class="back" onclick="doRegionJob()"><span class="bicon">‹</span>전국으로</button>'
+    + '<h2>'+esc(r.sido)+' · '+esc(r.job)+'</h2>'
+    + '<p class="sub">'+r.total+'곳 · '+r.people.toLocaleString('ko-KR')+'명'
+    + (r.kind?' · '+esc(r.kind):'')+' · '+r.basis
+    + (r.total>120?' · 120곳만 표시':'')+'</p>'
+    + r.rows.map(function(x,i){
+        return '<div class="hitem"><div class="hno'+(i<3?' t3':'')+'">'+(i+1)+'</div>'
+          + '<div class="hinfo"><b>'+esc(x.name)+'</b>'
+          + '<span>'+esc(x.kind)+' · '+esc(x.sgg)+'</span></div>'
+          + '<div class="hcnt">'+x[key]+'<small>명</small></div></div>';
+      }).join('')
+    + '</div>';
+  box.innerHTML=h;
+  attachRipple(); revealIn(); animateNumbers(); slidePins();
+}
+
+/* ===== 지역별 의료기관 현황 (기관 수 집계) ===== */
+function doRegion(){
+  var t=document.getElementById('rType').value;
+  document.getElementById('regionBox').innerHTML=loading();
+  google.script.run.withSuccessHandler(drawRegion)
+    .withFailureHandler(function(e){msg(e.message);}).regionOverview(cred(), t);
+}
+
+function drawRegion(r){
+  var box=document.getElementById('regionBox');
+  if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+  var max=r.rows.length?r.rows[0].n:1;
+  var h='<div class="card"><h2>전국 '+esc(r.type)+' '+r.nation.toLocaleString('ko-KR')+'곳</h2>'
+    + '<p class="sub">'+r.basis+' · 시도를 누르면 시군구별로 나뉩니다</p>'
+    + r.rows.map(function(x,i){
+        var w=Math.round(x.n/max*100);
+        return '<div class="rgrow" onclick="doRegionDetail(\''+esc(x.sido)+'\')">'
+          + '<div class="rn'+(i<3?' t3':'')+'">'+(i+1)+'</div>'
+          + '<div class="rs">'+esc(x.sido)+'</div>'
+          + '<div class="rbar"><i style="width:'+w+'%;animation-delay:'+(i*45)+'ms"></i></div>'
+          + '<div class="rv">'+x.n.toLocaleString('ko-KR')+'</div>'
+          + '<div class="arw2">›</div></div>';
+      }).join('')
+    + '</div>';
+  box.innerHTML=h;
+  attachRipple(); revealIn(); animateNumbers(); slidePins();
+}
+
+function doRegionDetail(sido){
+  var t=document.getElementById('rType').value;
+  document.getElementById('regionBox').innerHTML=loading();
+  google.script.run.withSuccessHandler(drawRegionDetail)
+    .withFailureHandler(function(e){msg(e.message);}).regionDetail(cred(), sido, t);
+}
+
+function drawRegionDetail(r){
+  var box=document.getElementById('regionBox');
+  if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+  var max=r.rows.length?r.rows[0].n:1;
+  var mix=Object.keys(r.byType).filter(function(k){return r.byType[k]>0;})
+    .map(function(k){ return '<i>'+esc(k)+' <b>'+r.byType[k].toLocaleString('ko-KR')+'</b></i>'; })
+    .join('');
+  var h='<div class="card">'
+    + '<button class="back" onclick="doRegion()"><span class="bicon">‹</span>전국으로</button>'
+    + '<h2>'+esc(r.sido)+' · '+esc(r.type)+' '+r.total.toLocaleString('ko-KR')+'곳</h2>'
+    + '<p class="sub">'+r.basis+'</p>'
+    + '<div class="mixgrid">'+mix+'</div>'
+    + '<div style="margin-top:14px">'
+    + r.rows.map(function(x,i){
+        var w=Math.round(x.n/max*100);
+        return '<div class="rgrow" style="cursor:default">'
+          + '<div class="rn'+(i<3?' t3':'')+'">'+(i+1)+'</div>'
+          + '<div class="rs">'+esc(x.sgg)+'</div>'
+          + '<div class="rbar"><i style="width:'+w+'%"></i></div>'
+          + '<div class="rv">'+x.n+'</div></div>';
+      }).join('')
+    + '</div></div>';
+  box.innerHTML=h;
+  attachRipple(); revealIn(); animateNumbers(); slidePins();
+}
+
+function drawViewNotice(){
+  var box=document.getElementById('viewNotice');
+  if(!box) return;
+  if(unlocked()){ box.innerHTML=''; return; }
+  box.innerHTML='<div class="privacy" style="background:var(--accent-soft)">'
+    + '<b>🔓 아직 등록하지 않으셨네요</b>'
+    + '<ul><li>내 연봉을 넣으면 내 위치·시급·스펙 비교가 모두 열립니다</li>'
+    + '<li>이름·병원명은 받지 않습니다. 닉네임 하나면 됩니다</li></ul>'
+    + '<button class="go" style="margin-top:12px" onclick="tab(\'home\')">'
+    + '먼저 등록하기</button></div>';
+  attachRipple();
+}
+
+function loadStats(){
+  if(!unlocked()){ msg('먼저 등록하고 코드를 입력해주세요'); tab('unlock'); return; }
+  doStats();
+}
+
+function doStats(){
+  document.getElementById('statBox').innerHTML=loading();
+  var f={job:val('fJob')||JOB, region:val('fRegion'), hospitalType:val('fType'),
+         yearsBand:val('fBand'), employment:val('fEmp')};
+  google.script.run.withSuccessHandler(drawStats)
+    .withFailureHandler(function(e){msg(e.message);}).getStats(cred(),f);
+}
+
+function drawStats(r){
+  var box=document.getElementById('statBox');
+  if(!r.ok){box.innerHTML=failCard(r);return;}
+  if(!r.matched){box.innerHTML='<div class="card"><p class="sub">조건에 맞는 데이터가 아직 없습니다. 필터를 넓혀보세요.</p></div>';return;}
+  var s=r.salary, a=r.annual;
+
+  var h = meCard(r);
+  h+='<div class="card"><h2>고정 월 실수령</h2><p class="sub">'
+    +(r.job||'')+' · '+r.matched+'명 기준 (해당 직군 전체 '+r.total+'명)</p>';
+  if(s){
+    h+=row('중위값', s.median+'만원')
+     + row('상위 25%', s.q3+'만원')
+     + row('하위 25%', s.q1+'만원')
+     + row('범위', s.min+' ~ '+s.max+'만원');
+  }
+  h+=row('월 당직', r.avgNightDuty.toFixed(1)+'회')
+   + row('월 주말근무', r.avgWeekend.toFixed(1)+'회')
+   + '</div>';
+
+  if(r.empDist && Object.keys(r.empDist).length){
+    h+='<div class="card"><h2>고용형태</h2>'
+     + '<p class="sub">모든 고용형태가 포함된 숫자입니다. '
+     + '위 필터에서 하나만 골라 보실 수도 있습니다.</p>'
+     + dist(r.empDist, r.matched)+'</div>';
+  }
+
+  if(a){
+    h+='<div class="card"><h2>연 환산</h2>'
+     + '<p class="sub">고정급 12개월 + 연간 상여</p>'
+     + row('중위값', man10(a.median))
+     + row('상위 25%', man10(a.q3))
+     + row('하위 25%', man10(a.q1))
+     + '</div>';
+  }
+
+  if(r.gpaAvg||Object.keys(r.schoolDist).length){
+    h+='<div class="card"><h2>스펙</h2><p class="sub">스펙까지 입력한 사람 기준</p>';
+    if(r.gpaAvg) h+=row('평균 학점', r.gpaAvg.avg45+' <small>/ 4.5 환산, '+r.gpaAvg.n+'명</small>');
+    h+=dist(r.schoolDist, r.matched)+'</div>';
+  }
+  if(Object.keys(r.courseDist).length){
+    h+='<div class="card"><h2>많이 이수한 교육</h2>'+dist(r.courseDist, r.matched)+'</div>';
+  }
+  if(Object.keys(r.certDist).length){
+    h+='<div class="card"><h2>보유 자격증</h2>'+dist(r.certDist, r.matched)+'</div>';
+  }
+
+  h+=growCard(r.matched, (r.job||'우리'));
+
+  box.innerHTML=h;
+  attachRipple(); revealIn(); animateNumbers(); slidePins();
+}
+
+/** 상위 % → 등급 · 색 · 한 줄 평 */
+function tierOf(p){
+  if(p<=10) return {cls:'t1', label:'최상위권',
+    note:'같은 조건에서 손에 꼽히는 수준입니다.'};
+  if(p<=25) return {cls:'t2', label:'상위권',
+    note:'또래보다 확실히 높은 편입니다.'};
+  if(p<=50) return {cls:'t3', label:'중위권',
+    note:'평균 언저리입니다.'};
+  if(p<=75) return {cls:'t4', label:'중위권 아래',
+    note:'조건을 한 번 따져볼 만합니다.'};
+  return {cls:'t5', label:'하위권',
+    note:'당직·수당 조건이 다른 곳과 비교해보시길 권합니다.'};
+}
+
+function meCard(r){
+  var m=r.me;
+  if(!m) return '';
+  var t='';
+
+  t+='<div class="mecard"><div class="hd">'
+   + '<div class="av">'+esc((m.nick||'?').slice(0,1))+'</div>'
+   + '<b>'+esc(m.nick||'내 정보')+'</b>'
+   + '<span>'+esc(m.job||'')+'</span></div>';
+
+  var tags=[];
+  if(m.role==='학생'){
+    if(m.school) tags.push(esc(m.school));
+    if(m.gpa&&m.gpaMax) tags.push('학점 '+m.gpa+'/'+m.gpaMax);
+  }else{
+    if(m.years) tags.push('<i class="hi">'+m.years+'년차</i>');
+    if(m.curYears&&m.curYears!==m.years) tags.push('이 병원 '+m.curYears+'년차');
+    if(m.hospitalType) tags.push(esc(m.hospitalType));
+    if(m.region) tags.push(esc(m.region));
+    if(m.employment) tags.push(esc(m.employment));
+    if(m.salary) tags.push('<i class="hi">월 '+m.salary+'만원</i>');
+    if(m.annual) tags.push('연 '+man10(m.annual));
+    if(m.nightDuty) tags.push('당직 '+m.nightDuty+'회');
+    if(m.weekendWork) tags.push('주말 '+m.weekendWork+'회');
+    if(m.age) tags.push('만 '+m.age+'세');
+  }
+  t+='<div class="tags">'
+   + tags.map(function(x){ return x.indexOf('<i')===0 ? x : '<i>'+x+'</i>'; }).join('')
+   + '</div>';
+
+  // 비교 문장
+  var k=r.myRank;
+  if(k){
+    var tr=tierOf(k.topPercent);
+    var up = k.diff>=0;
+    var pinLeft = Math.max(2, Math.min(98, 100 - k.topPercent));
+    var ann = (k.basis==='annual');
+    var unit = function(v){ return ann ? man10(v) : (v+'만원'); };
+
+    t+='<div class="verdict">'
+     + '<span class="tier '+tr.cls+'"><span class="dot2"></span>'+tr.label+'</span>'
+     + '<div style="font-size:13px;color:var(--dim);margin-bottom:2px">'
+     + '같은 조건 '+k.n+'명 중 · '
+     + (ann?'연 환산 기준':'고정 월급 기준')+'</div>'
+     + '<span class="big2 '+(up?'up':'down')+'" data-count="'+k.topPercent+'" '
+     + 'data-pre="상위 " data-suf="%">상위 0%</span>'
+     + (k.rank?'<div class="ranknote2">'+k.n+'명 중 <b>'+k.rank+'등</b></div>':'')
+     + '<div style="font-size:12px;color:var(--dim);margin-bottom:4px">'
+     + '숫자가 <em>작을수록</em> 많이 받는다는 뜻입니다</div>'
+
+     + '<div class="gauge"><div class="track">'
+     + '<span class="pin" data-left="'+pinLeft+'" style="left:0%"></span></div>'
+     + '<div class="ends"><span>하위</span><span>중위</span><span>상위</span></div></div>';
+
+    if(ann){
+      t+='<div class="basis">'
+       + '<b>연 환산</b> = 고정 월급 '+m.salary+'만원 × 12'
+       + (k.hasBonus ? ' + 상여 '+m.bonus+'만원' : ' (상여 없음)')
+       + ' = <em>'+man10(k.mine)+'</em></div>';
+    }
+
+    t+='내 '+(ann?'연 환산':'월 실수령')+' <em>'+unit(k.mine)+'</em> · '
+     + '중위값 <em>'+unit(k.median)+'</em><br>'
+     + (Math.abs(k.diff)<(ann?5:0.5)
+        ? '중위값과 거의 같습니다. ' + tr.note
+        : (up ? '중위값보다 <em class="up">'+unit(Math.abs(k.diff))+' 많습니다.</em> ' + tr.note
+              : '중위값보다 <em class="down">'+unit(Math.abs(k.diff))+' 적습니다.</em> ' + tr.note));
+
+    if(ann && k.monthly){
+      t+='<div class="submeta">고정 월급만 놓고 보면 상위 '+k.monthly.topPercent+'%'
+       + ' (중위 '+k.monthly.median+'만원)</div>';
+    }
+
+    t+=(k.inFilter?'':'<div class="submeta">'
+        + '지금 걸어둔 필터에는 내 조건이 포함되지 않습니다</div>')
+     + '</div>';
+  } else if(m.role!=='학생'){
+    t+='<div class="verdict">비교할 데이터가 아직 부족합니다. '
+     + '같은 조건 참여자가 늘면 내 위치가 나옵니다.</div>';
+  }
+
+  t+='</div>';
+  return t;
+}
+
+function man10(v){
+  // 만원 단위 → 억/만원 표기
+  if(v>=10000) return (v/10000).toFixed(2).replace(/\.?0+$/,'')+'억원';
+  return Math.round(v).toLocaleString('ko-KR')+'만원';
+}
+
+/**
+ * 표본이 늘수록 정확해진다는 걸 숫자로 보여줍니다.
+ * n = 현재 조건 표본, what = 무엇에 대한 통계인지
+ */
+function growCard(n, what){
+  n = n || 0;
+  var goal, msgTxt, tone;
+  if(n < 10){ goal = 10;
+    msgTxt = '지금은 <b>참고 수준</b>입니다. 10명만 넘어도 중위값이 눈에 띄게 안정됩니다.';
+  } else if(n < 30){ goal = 30;
+    msgTxt = '조금씩 모양이 잡히고 있습니다. <b>30명</b>이 되면 연차별로 나눠 볼 수 있습니다.';
+  } else if(n < 100){ goal = 100;
+    msgTxt = '쓸 만한 수준입니다. <b>100명</b>이 넘으면 지역·병원유형별로 정확해집니다.';
+  } else { goal = Math.ceil((n+1)/100)*100;
+    msgTxt = '이미 신뢰할 만한 표본입니다. 더 모이면 <b>세부 조건</b>까지 갈라볼 수 있습니다.';
+  }
+  var pct = Math.min(Math.round(n/goal*100), 100);
+
+  return '<div class="grow2">'
+    + '<div class="gt">이 숫자는 '+esc(what||'우리')+'가 함께 만듭니다</div>'
+    + '<div class="gd">'+msgTxt+'</div>'
+    + '<div class="growbar"><i style="width:'+pct+'%"></i></div>'
+    + '<div class="growmeta"><span>현재 '+n+'명</span><span>다음 목표 '+goal+'명</span></div>'
+    + '<div class="growbtns">'
+    + '<button class="b1" onclick="shareLink()">동료에게 공유하기</button>'
+    + '<button class="b2" onclick="copyUrl()">주소 복사</button>'
+    + '</div></div>';
+}
+
+function shareLink(){
+  var txt = (JOB||'치료사') + ' 연봉 통계 만들고 있습니다.\n'
+    + '한 사람이 더 넣을 때마다 숫자가 정확해집니다. 3분이면 됩니다.';
+  if(navigator.share){
+    navigator.share({title:'POT LAB', text:txt, url:location.href})
+      .catch(function(){});
+  } else {
+    copyUrl();
+  }
+}
+
+function row(k,v){return '<div class="stat"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>';}
+
+function dist(obj, total){
+  var arr=Object.keys(obj).map(function(k){return [k,obj[k]];})
+    .sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  return arr.map(function(p,i){
+    var pct=Math.round(p[1]/total*100);
+    return '<div class="distrow"><div class="lab"><span>'+p[0]+'</span><span>'+p[1]+'명 ('+pct+'%)</span></div>'
+      + '<div class="bar"><i style="width:'+pct+'%;animation-delay:'+(i*60)+'ms"></i></div></div>';
+  }).join('');
+}
+
+function won(n){return n?n.toLocaleString('ko-KR'):'—';}
+
+function showHourly(h){
+  var box=document.getElementById('hourlyBox');
+  if(!h.ok||!h.mine){box.innerHTML='';return;}
+  var down = h.verdict==='below';
+  var cmp = h.peer ? ('같은 조건 중위 '+won(h.peer.median)+'원 · '
+        + (down?'시간당 '+won(h.gap)+'원 낮습니다':'시간당 '+won(h.gap)+'원 높습니다')) : '비교 표본 없음';
+  box.innerHTML='<div class="hr">'
+    + '<div class="top"><span class="big">시급 '+won(h.mine)+'원</span>'
+    + (h.peer?'<span class="tag '+(down?'down':'up')+'">'+(down?'중위 아래':'중위 이상')+'</span>':'')
+    + '</div>'
+    + '<div class="exp">'
+    + '월 총수령 '+h.monthlyTotal+'만원 (고정급 + 상여 월분할)<br>'
+    + '기본 174시간'+(h.extraHours?' + 당직·주말 '+h.extraHours+'시간':'')+' 기준<br>'
+    + cmp
+    + '</div>'
+    + (h.extraHours>=32?'<div class="warnbox">당직·주말이 월 '+h.extraHours+'시간입니다. '
+        + '월급이 높아 보여도 시급으로 보면 손해일 수 있습니다.</div>':'')
+    + '</div>';
+}
+
+function showSpec(sp){
+  var box=document.getElementById('specBox');
+  if(!sp.ok){box.innerHTML='';return;}
+  if(!sp.enough){
+    box.innerHTML='<div class="card"><h2>스펙으로 갈 수 있는 곳</h2>'
+      + '<p class="sub">스펙까지 입력한 사람이 '+sp.have+'명입니다. '
+      + sp.need+'명이 넘으면 열립니다.</p></div>';
+    return;
+  }
+  var rows=sp.types.map(function(t,i){
+    return '<div class="item"><div class="nm">'+t.type+'</div>'
+      + '<div class="bar2"><i style="width:'+t.rate+'%;animation-delay:'+(i*60)+'ms"></i></div>'
+      + '<div class="pc">'+t.rate+'%</div></div>';
+  }).join('');
+  box.innerHTML='<div class="card spec"><h2>스펙으로 갈 수 있는 곳</h2>'
+    + '<p class="sub">'+sp.base+'명 기준 · 내 스펙 점수 '+sp.myScore+'</p>'
+    + rows
+    + '<div class="warnbox">각 유형 재직자 중 내 스펙과 같거나 낮은 사람의 비율입니다. '
+    + '합격 확률이 아니라 참여자 분포입니다.</div></div>';
+}
+
+function cardBase(x, W, title){
+  x.fillStyle='#0d5c4f'; x.fillRect(0,0,W,W);
+  x.fillStyle='rgba(255,255,255,.06)';
+  x.beginPath(); x.arc(W*0.88, W*0.12, W*0.26, 0, Math.PI*2); x.fill();
+  x.beginPath(); x.arc(W*0.08, W*0.94, W*0.22, 0, Math.PI*2); x.fill();
+  x.textAlign='center';
+  x.fillStyle='rgba(255,255,255,.72)';
+  x.font='700 34px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText(title, W/2, 120);
+}
+function cardFoot(x, W){
+  x.font='400 30px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillStyle='rgba(255,255,255,.55)';
+  x.fillText('아무도 모르는 통계, 우리가 만들어 갑니다', W/2, 900);
+  x.font='800 42px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillStyle='#fff';
+  x.fillText('POT LAB', W/2, 972);
+}
+
+function drawCard(d){
+  if(!d||!d.ok) return;
+  var c=document.getElementById('cardCanvas'), x=c.getContext('2d'), W=1080;
+  cardBase(x, W, (d.job||'치료사')+' 급여 통계');
+
+  x.fillStyle='#fff';
+  x.font='700 46px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText((d.region||'')+(d.region?' · ':'')+(d.hospitalType||''), W/2, 240);
+  x.font='400 36px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillStyle='rgba(255,255,255,.72)';
+  x.fillText(d.band||'', W/2, 296);
+
+  if(d.tier){
+    x.fillStyle='rgba(255,255,255,.16)';
+    roundRect(x, W/2-150, 350, 300, 66, 33); x.fill();
+    x.fillStyle='#fff';
+    x.font='800 36px -apple-system,"Apple SD Gothic Neo",sans-serif';
+    x.fillText(d.tier, W/2, 394);
+  }
+
+  x.fillStyle='#fff';
+  x.font='800 132px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText(d.topPercent!==null?('상위 '+d.topPercent+'%'):'첫 참여', W/2, 570);
+
+  x.font='400 34px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillStyle='rgba(255,255,255,.8)';
+  x.fillText('같은 조건 '+(d.peerCount||0)+'명 중', W/2, 640);
+  if(d.hourlyTop){
+    x.fillText('실질 시급은 '+d.hourlyTop, W/2, 700);
+  }
+
+  cardFoot(x, W);
+  document.getElementById('cardWrap').className='card';
+}
+
+function drawStudentCard(d){
+  if(!d||!d.ok) return;
+  var c=document.getElementById('cardCanvas'), x=c.getContext('2d'), W=1080;
+  cardBase(x, W, '작업치료 학생 스펙 통계');
+
+  x.fillStyle='#fff';
+  x.font='700 46px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText((d.grade||'')+' · '+(d.school||''), W/2, 250);
+
+  x.font='800 132px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText(d.topPercent!==null?('상위 '+d.topPercent+'%'):'첫 참여', W/2, 470);
+
+  x.font='400 34px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillStyle='rgba(255,255,255,.8)';
+  x.fillText('같은 학년 '+(d.peerCount||0)+'명 중', W/2, 540);
+
+  if(d.wantType){
+    x.fillStyle='#fff';
+    x.font='700 42px -apple-system,"Apple SD Gothic Neo",sans-serif';
+    x.fillText('희망 · '+d.wantType, W/2, 640);
+    if(d.wantRate!==null&&d.wantRate!==undefined){
+      x.font='400 36px -apple-system,"Apple SD Gothic Neo",sans-serif';
+      x.fillStyle='rgba(255,255,255,.8)';
+      x.fillText('스펙 도달 '+d.wantRate+'%', W/2, 696);
+    }
+  }
+  cardFoot(x, W);
+  document.getElementById('cardWrap').className='card';
+}
+
+function roundRect(x, l, t, w, h, r){
+  x.beginPath();
+  x.moveTo(l+r, t);
+  x.arcTo(l+w, t, l+w, t+h, r);
+  x.arcTo(l+w, t+h, l, t+h, r);
+  x.arcTo(l, t+h, l, t, r);
+  x.arcTo(l, t, l+w, t, r);
+  x.closePath();
+}
+
+function shareCard(){
+  var c=document.getElementById('cardCanvas');
+  if(!navigator.share || !c.toBlob){ saveCard(); return; }
+  c.toBlob(function(blob){
+    if(!blob){ saveCard(); return; }
+    var f=new File([blob],'potlab.png',{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[f]})){
+      navigator.share({files:[f], text:'내 위치 확인해봤습니다'}).catch(function(){});
+    } else { saveCard(); }
+  }, 'image/png');
+}
+
+function saveCard(){
+  var c=document.getElementById('cardCanvas');
+  try{
+    var a=document.createElement('a');
+    a.download='potlab_salary_card.png';
+    a.href=c.toDataURL('image/png');
+    a.click();
+    msg('저장했습니다');
+  }catch(e){ msg('이미지를 길게 눌러 저장해주세요'); }
+}
+
+// 초기화
+chips('certs', CERTS, 'certs');
+chips('courses', COURSES, 'courses');
+addRow('practice');
+['서울','경기·인천','대전·충청','대구·경북','부산·울산·경남','광주·전라','강원','제주']
+  .forEach(function(v){document.getElementById('fRegion').innerHTML+='<option>'+v+'</option>';});
+HOSPITALS.forEach(function(v){
+  document.getElementById('fType').innerHTML+='<option>'+v+'</option>';
+  document.getElementById('wantType').innerHTML+='<option>'+v+'</option>';
+});
+loadMe();
+role='현직';
+JOB = (ME&&ME.job) ? ME.job : '작업치료사';
+document.body.setAttribute('data-job', JOB);
+if(ME&&ME.job){ setRole(ME.role==='학생'?'학생':'현직'); setJob(ME.job); }
+google.script.run.withSuccessHandler(drawHome).getBrand();
+tab('home');
+</script>
+</body>
+</html>
