@@ -2,11 +2,15 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0d5c4f">
 <title>작업·물리치료사 급여 통계 | POT LAB</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
 <meta name="description" content="작업치료사·물리치료사 급여를 직접 모아 만든 통계.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="작업·물리치료사 급여 통계">
@@ -899,7 +903,7 @@
       <h2 class="h2">이직을 준비 중이시라면<br>꼭 활용해 보세요</h2>
       <div class="bignum">
         <div class="bnlead">작업치료사 · 물리치료사를 위해</div>
-        <div class="bnv"><span data-count="664465" data-suf="건">0건</span></div>
+        <div class="bnv"><span data-count="664465" data-suf="건">664,465건</span></div>
         <div class="bntail">의 자료를 취합해 만들었습니다</div>
       </div>
       <div class="srcbox">
@@ -2022,6 +2026,7 @@ function countTo(el, target, opts){
   var pre = opts.pre || '', suf = opts.suf || '';
   var start = null, from = 0;
   el.classList.add('countup');
+  el.textContent = pre + (dec ? from.toFixed(dec) : from).toLocaleString('ko-KR') + suf;
   function step(ts){
     if(!start) start = ts;
     var t = Math.min((ts - start) / dur, 1);

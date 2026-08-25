@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>연결 확인</title>
+<style>
+ body{font-family:-apple-system,"Apple SD Gothic Neo",sans-serif;margin:0;padding:20px;
+   background:#f4f6f6;color:#0e1214;line-height:1.7}
+ h1{font-size:19px;margin:0 0 16px}
+ .row{background:#fff;border:1px solid #e4e8ea;border-radius:11px;padding:14px;margin-bottom:9px}
+ .row b{display:block;font-size:14px;margin-bottom:5px}
+ .row span{font-size:12.5px;color:#5a6870;word-break:break-all}
+ .ok{border-color:#0d5c4f;background:#e8f3f0}
+ .ng{border-color:#d9a598;background:#fdeeeb}
+ .ok b{color:#0d5c4f} .ng b{color:#a8402a}
+ code{display:block;background:#0e1214;color:#8fe3c6;border-radius:8px;padding:11px;
+   font-size:11px;margin-top:8px;word-break:break-all;white-space:pre-wrap}
+</style></head><body>
+<h1>서버 연결 확인</h1>
+<div id="out"><div class="row"><b>확인 중...</b></div></div>
+<script src="app.js"></script>
+<script>
+var out=document.getElementById('out');
+function line(ok,title,detail){
+  out.innerHTML += '<div class="row '+(ok?'ok':'ng')+'"><b>'+(ok?'✅ ':'❌ ')+title+'</b>'
+    + '<span>'+detail+'</span></div>';
+}
+out.innerHTML='';
+line(true,'API 주소', API_URL);
+
+var tests=[
+  ['getBrand', function(cb,eb){google.script.run.withSuccessHandler(cb).withFailureHandler(eb).getBrand();},
+    function(d){return '브랜드 '+d.name+' · 배너 '+d.banners.length+'개';}],
+  ['countByJob', function(cb,eb){google.script.run.withSuccessHandler(cb).withFailureHandler(eb).countByJob();},
+    function(d){return '총 '+d.total+'명 등록';}],
+  ['getPublicSummary', function(cb,eb){google.script.run.withSuccessHandler(cb).withFailureHandler(eb).getPublicSummary();},
+    function(d){return '병원 '+(d.hospitals||0).toLocaleString()+'곳';}],
+  ['searchHospital', function(cb,eb){google.script.run.withSuccessHandler(cb).withFailureHandler(eb)
+      .searchHospital({nick:'',code:''},'보바스');},
+    function(d){return d.ok?('검색 '+d.total+'곳'):('코드 필요 — 정상 ('+d.reason+')');}]
+];
+var i=0;
+function next(){
+  if(i>=tests.length){ line(true,'확인 끝','문제가 있으면 위 붉은 줄을 캡처해 보내주세요'); return; }
+  var t=tests[i++];
+  t[1](function(d){ try{line(true,t[0],t[2](d));}catch(e){line(true,t[0],'응답 받음');} next(); },
+       function(e){ line(false,t[0],(e&&e.message)||'실패'); next(); });
+}
+next();
+</script></body></html>
