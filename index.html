@@ -2074,7 +2074,7 @@ var REVEAL_SEL = '.card, .hres, .dens, .pos, .myspec, .welcome, .grow2, .mecard,
                + '.roomcard, .mi, .banner, .lockcard, .donebox, .calcout, .notice, .empty';
 
 /* 그림·표는 따로 관찰해서, 화면에 닿는 순간 움직이게 합니다 */
-var MOTION_SEL = '.ill, .growtable, .dscale, .gauge';
+var MOTION_SEL = '.ill, .growtable, .dscale, .gauge, .bignum, [data-count]';
 
 function startSvgAnims(el){
   if(!el || !el.querySelectorAll) return;
@@ -2151,7 +2151,7 @@ function watchMotion(root){
   if(!('IntersectionObserver' in window) || reduce){
     Array.prototype.forEach.call(els, function(el){
       el.classList.add('on');
-      startSvgAnims(el); slidePinsEl(el);
+      startSvgAnims(el); slidePinsEl(el); animateNumbersEl(el, true);
       Array.prototype.forEach.call(el.querySelectorAll('[style*="--w"]'), function(b){
         b.style.animationPlayState='running';
       });
@@ -2168,6 +2168,7 @@ function watchMotion(root){
           el.classList.add('on');
           startSvgAnims(el);
           slidePinsEl(el);
+          animateNumbersEl(el, true);
           Array.prototype.forEach.call(el.querySelectorAll('[style*="--w"]'), function(b){
             b.style.animation='none';
             void b.offsetWidth;
@@ -2194,12 +2195,14 @@ function revealFallback(){
 }
 
 /* ===== 숫자 카운트업 ===== */
-function animateNumbersEl(box){
+function animateNumbersEl(box, force){
   if(!box) return;
-  var list = (box.dataset && box.dataset.count !== undefined)
-    ? [box] : (box.querySelectorAll ? box.querySelectorAll('[data-count]') : []);
+  var self = (box.dataset && box.dataset.count !== undefined);
+  var list = self ? [box] : (box.querySelectorAll ? box.querySelectorAll('[data-count]') : []);
   Array.prototype.forEach.call(list, function(el){
     if(el._cnt) return;
+    // 따로 관찰 중인 숫자는 그때 가서 돌립니다
+    if(!self && !force && el._mw) return;
     el._cnt = true;
     var t = parseFloat(el.dataset.count);
     if(isNaN(t)) return;
@@ -2212,7 +2215,8 @@ function animateNumbers(scope){
   if(!box) return;
   Array.prototype.forEach.call(box.querySelectorAll('[data-count]'), function(el){
     if(el.closest && el.closest('.reveal:not(.in)')) return;   // 나타날 때 처리
-    animateNumbersEl(el);
+    if(el._mw && !el.classList.contains('forced')) return;     // 관찰 중이면 그때
+    animateNumbersEl(el, true);
   });
 }
 
