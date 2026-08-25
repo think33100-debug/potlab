@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0d5c4f">
 <title>작업·물리치료사 급여 통계 | POT LAB</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
@@ -17,6 +16,7 @@
 <meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다. 병원별 치료사 인원·병상까지.">
 <meta property="og:image" content="og.png">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0d5c4f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="POT LAB">
@@ -376,7 +376,7 @@
   .rgrow .rbar{width:78px;height:7px;background:#eef1f3;border-radius:4px;overflow:hidden;
     flex-shrink:0}
   .rgrow .rbar i{display:block;height:100%;background:var(--accent);
-    animation:grow 1s cubic-bezier(.16,.84,.28,1) both}
+    width:0;animation:grow 1s cubic-bezier(.16,.84,.28,1) forwards}
   .rgrow .rv{width:52px;text-align:right;font-weight:800;font-size:14px;flex-shrink:0}
   .rgrow .arw2{color:#c6ced1;font-size:16px}
   .rgrow.on{background:var(--accent-soft);border-radius:8px;padding-left:8px;padding-right:8px}
@@ -509,13 +509,8 @@
   .thin{font-size:12px;color:var(--dim);text-align:center;margin-top:10px;line-height:1.6}
   .bar{height:7px;background:#eef0f3;border-radius:4px;overflow:hidden;margin-top:5px}
   .bar i{display:block;height:100%;background:var(--accent);
-    animation:grow 1s cubic-bezier(.16,.84,.28,1) both}
-  @keyframes grow{from{width:0 !important}}
-  @keyframes growbar{
-    0%{width:0}
-    72%{width:var(--w)}
-    100%{width:var(--w)}
-  }
+    width:0;animation:grow 1s cubic-bezier(.16,.84,.28,1) forwards}
+  @keyframes grow{from{width:0}to{width:var(--w)}}
   .distrow{margin-bottom:9px}
   .distrow .lab{display:flex;justify-content:space-between;font-size:12.5px}
   #msg{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(80px);
@@ -534,17 +529,15 @@
   .spec .nm{font-size:13px;width:118px;flex-shrink:0}
   .spec .bar2{flex:1;height:9px;background:#eef0f3;border-radius:5px;overflow:hidden}
   .spec .bar2 i{display:block;height:100%;background:var(--accent);
-    animation:grow .8s cubic-bezier(.2,.9,.25,1) both}
+    width:0;animation:grow 1s cubic-bezier(.16,.84,.28,1) forwards}
   .spec .pc{font-size:12.5px;font-weight:700;width:42px;text-align:right}
   .warnbox{background:#fdf6ec;border-radius:9px;padding:12px;font-size:12.5px;color:#6a4d14;
     line-height:1.7;margin-top:10px;word-break:keep-all}
-  .backdash{display:flex;align-items:center;gap:9px;background:var(--accent);color:#fff;
-    border:none;border-radius:11px;padding:12px 15px;width:100%;font-family:inherit;
-    font-size:14px;font-weight:700;letter-spacing:-.01em;margin-bottom:14px;cursor:pointer;
+  .heroBtn{display:inline-block;background:#fff;color:var(--accent);border:none;
+    border-radius:22px;padding:11px 22px;margin-top:15px;font-family:inherit;font-size:14px;
+    font-weight:800;letter-spacing:-.02em;cursor:pointer;
     -webkit-tap-highlight-color:transparent;transition:transform .22s}
-  .backdash:active{transform:scale(.98)}
-  .backdash .bd1{flex:1;text-align:left}
-  .backdash .bd2{opacity:.75;font-size:18px}
+  .heroBtn:active{transform:scale(.96)}
   .brand{position:relative;text-align:center;padding:34px 20px 30px;margin:-16px -14px 16px;
     background:linear-gradient(160deg,var(--accent) 0%,var(--accent-2) 100%);color:#fff;
     overflow:hidden}
@@ -604,24 +597,17 @@
 
   /* 스크롤하며 나타나기 */
   .reveal{opacity:0;transform:translateY(20px);
-    transition:opacity .6s ease, transform .6s cubic-bezier(.16,.84,.28,1)}
+    transition:opacity .55s ease, transform .55s cubic-bezier(.16,.84,.28,1)}
   .reveal.in{opacity:1;transform:none}
-  /* 화면에 나타나기 전에는 안쪽 움직임도 멈춰둡니다 */
+  /* 나타나기 전에는 안쪽 막대도 멈춰둡니다 */
   .reveal:not(.in) *{animation-play-state:paused !important}
-  .mi.reveal{transform:translateY(13px)}
-  .hitem.reveal,.rgrow.reveal{transform:translateY(9px);transition-duration:.42s}
+  .mi.reveal{transform:translateY(12px)}
 
   /* 숫자 카운트업 */
   @keyframes popin{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}
   .countup{animation:popin .5s cubic-bezier(.2,1.4,.4,1) both}
 
   /* 막대 */
-  @keyframes grow{from{width:0 !important}}
-  @keyframes growbar{
-    0%{width:0}
-    72%{width:var(--w)}
-    100%{width:var(--w)}
-  }
   @keyframes growv{from{transform:scaleY(0)}}
 
 
@@ -665,7 +651,10 @@
   .gr{display:flex;align-items:center;gap:11px;padding:9px 0;font-size:13px}
   .gr .gn{width:46px;font-weight:800;color:var(--dim);flex-shrink:0}
   .gr .gb{flex:1;height:8px;background:#eef1f3;border-radius:4px;overflow:hidden}
-  .gr .gb i{display:block;height:100%;background:#b9c4c8;border-radius:4px}
+  .gr .gb i{display:block;height:100%;background:#b9c4c8;border-radius:4px;
+    width:0;animation:grow 1.1s cubic-bezier(.16,.84,.28,1) forwards;
+    animation-play-state:paused}
+  .growtable.on .gb i{animation-play-state:running}
   .gr .gl{width:104px;text-align:right;font-size:12px;color:#4d5a61;flex-shrink:0;
     word-break:keep-all;font-weight:600}
   .gr.on .gn{color:var(--accent)}
@@ -684,7 +673,7 @@
   .growbar{background:rgba(255,255,255,.16);border-radius:8px;height:9px;overflow:hidden;
     margin-bottom:7px}
   .growbar i{display:block;height:100%;background:#fff;border-radius:8px;
-    animation:grow 1s cubic-bezier(.2,.9,.25,1) both}
+    width:0;animation:grow 1s cubic-bezier(.16,.84,.28,1) forwards}
   .growmeta{display:flex;justify-content:space-between;font-size:11.5px;opacity:.8;
     margin-bottom:15px}
   .growbtns{display:flex;gap:7px}
@@ -817,7 +806,6 @@
 
   <!-- ============ 홈 ============ -->
   <div id="pane-home">
-    <div id="backDash"></div>
     <div class="brand" id="brandBox"></div>
     <div id="whoBox"></div>
     <div id="addHomeBox"></div>
@@ -857,7 +845,11 @@
             <text x="18" y="63" font-size="25" font-weight="800" fill="#0e1214">상위 23%</text>
             <text x="18" y="80" font-size="10" fill="#697680">같은 조건 47명 중</text>
             <rect x="18" y="90" width="284" height="7" rx="4" fill="url(#g1)"/>
-            <rect x="232" y="87" width="4" height="14" rx="2" fill="#0e1214"/>
+            <rect x="18" y="87" width="4" height="14" rx="2" fill="#0e1214">
+              <animate attributeName="x" from="18" to="232" dur="1.2s"
+                       begin="indefinite" fill="freeze"
+                       calcMode="spline" keySplines="0.16 0.84 0.28 1" keyTimes="0;1"/>
+            </rect>
             <defs><linearGradient id="g1" x1="0" x2="1">
               <stop offset="0" stop-color="#e0a294"/><stop offset="0.5" stop-color="#b9c4c8"/>
               <stop offset="1" stop-color="#0a6b4a"/></linearGradient></defs>
@@ -872,6 +864,10 @@
           <p>병원유형·지역을 바꿨을 때 중위값 차이. 월과 연 단위로.</p>
           <svg class="ill" viewBox="0 0 320 96" xmlns="http://www.w3.org/2000/svg">
             <rect width="320" height="96" rx="12" fill="#fff" stroke="#e4e8ea"/>
+            <rect x="18" y="20" width="0" height="1" fill="none">
+              <animate attributeName="width" from="0" to="284" dur="0.8s"
+                       begin="indefinite" fill="freeze"/>
+            </rect>
             <text x="18" y="34" font-size="12" fill="#0e1214">대학병원</text>
             <text x="302" y="30" font-size="13" font-weight="800" fill="#0d5c4f"
                   text-anchor="end">+31만원</text>
@@ -968,7 +964,11 @@
             <text x="18" y="30" font-size="15" font-weight="800" fill="#8a5c14">평균 이하</text>
             <text x="302" y="30" font-size="9.5" fill="#a08a5e" text-anchor="end">요양병원 기준</text>
             <rect x="18" y="44" width="284" height="8" rx="4" fill="url(#g2)"/>
-            <rect x="96" y="40" width="4" height="16" rx="2" fill="#0e1214"/>
+            <rect x="18" y="40" width="4" height="16" rx="2" fill="#0e1214">
+              <animate attributeName="x" from="18" to="96" dur="1.2s"
+                       begin="indefinite" fill="freeze"
+                       calcMode="spline" keySplines="0.16 0.84 0.28 1" keyTimes="0;1"/>
+            </rect>
             <text x="18" y="80" font-size="12.5" font-weight="700" fill="#8a5c14">채용 가능성 높음</text>
             <text x="18" y="95" font-size="10" fill="#a08a5e">인력이 부족한 만큼 자리가 날 여지</text>
             <defs><linearGradient id="g2" x1="0" x2="1">
@@ -1000,16 +1000,16 @@
       <h2 class="h2">한 명이 더 넣을수록<br>정확해집니다</h2>
       <div class="growtable">
         <div class="gr"><span class="gn">5명</span>
-          <div class="gb"><i style="width:12%"></i></div>
+          <div class="gb"><i style="--w:12%;animation-delay:0ms"></i></div>
           <span class="gl">참고만</span></div>
         <div class="gr"><span class="gn">30명</span>
-          <div class="gb"><i style="width:33%"></i></div>
+          <div class="gb"><i style="--w:33%;animation-delay:110ms"></i></div>
           <span class="gl">연차별</span></div>
         <div class="gr"><span class="gn">100명</span>
-          <div class="gb"><i style="width:66%"></i></div>
+          <div class="gb"><i style="--w:66%;animation-delay:220ms"></i></div>
           <span class="gl">지역·유형별</span></div>
         <div class="gr on"><span class="gn">300명</span>
-          <div class="gb"><i style="width:100%"></i></div>
+          <div class="gb"><i style="--w:100%;animation-delay:330ms"></i></div>
           <span class="gl">세부 조건까지</span></div>
       </div>
       <p class="body" style="margin-top:15px">
@@ -1644,7 +1644,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js"></script>
+<script src="app.js?v=8"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1669,6 +1669,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
+var APP_VER = 'v8 · 2026-08-25';
 var JOB = '작업치료사';
 
 function setJob(j){
@@ -1772,7 +1773,8 @@ function tab(which){
   document.getElementById('t1').className='tab'+(which==='input'?' on':'');
   document.getElementById('t2').className='tab'+(which==='view'?' on':'');
   if(which==='install') drawGuide();
-  if(which==='home') drawHomeCTA();
+  if(which==='home'){ drawHomeCTA(); revealHome(); }
+  setTimeout(function(){ revealIn('#pane-'+which); watchMotion('#pane-'+which); }, 30);
   if(which==='dash') drawDash();
   if(which==='region') doRegion();
   if(which==='jobs') drawJobLinks();
@@ -1790,11 +1792,15 @@ function drawHome(b){
     + (b.logo ? '<img src="'+b.logo+'" alt="'+esc(b.name)+'">'
               : '<div class="wordmark">'+esc(b.name)+'</div>')
     + '<div class="tag">'+esc(b.tagline)+'</div>'
+    + (unlocked()
+        ? '<button class="heroBtn" onclick="tab(\'dash\')">내 통계 보러 가기 ›</button>'
+        : '')
     + '<div class="rule"></div>';
 
   document.getElementById('footBox').innerHTML =
     '이 페이지와 단톡방은 <b>'+esc(b.name)+'</b>이 운영합니다<br>'
-    + '치료사가 만드는 치료사 정보';
+    + '치료사가 만드는 치료사 정보'
+    + '<br><span style="opacity:.5;font-size:10.5px">'+APP_VER+'</span>';
 
   drawHomeCTA();
   drawWho();
@@ -2055,63 +2061,143 @@ function countTo(el, target, opts){
   requestAnimationFrame(step);
 }
 
-/* 화면에 들어온 요소만 순서대로 나타나게 */
+/* ===================== 등장 · 움직임 =====================
+ * 규칙 하나로 통일합니다.
+ *  · reveal 클래스가 붙은 요소는 화면에 들어올 때 나타납니다
+ *  · 나타난 직후에 안쪽 숫자·막대·게이지가 움직입니다
+ *  · 관찰이 안 되는 환경이면 그냥 바로 보여줍니다
+ * ======================================================== */
 var _io = null;
-function revealHome(){ /* 홈은 그대로 보여줍니다 */ }
+
+var REVEAL_SEL = '.card, .hres, .dens, .pos, .myspec, .welcome, .grow2, .mecard,'
+               + '.sect, .feat, .privacy, .bignum, .srcbox, .growtable, .stepline,'
+               + '.roomcard, .mi, .banner, .lockcard, .donebox, .calcout, .notice, .empty';
+
+/* 그림·표는 따로 관찰해서, 화면에 닿는 순간 움직이게 합니다 */
+var MOTION_SEL = '.ill, .growtable, .dscale, .gauge';
+
+function startSvgAnims(el){
+  if(!el || !el.querySelectorAll) return;
+  Array.prototype.forEach.call(el.querySelectorAll('animate'), function(a){
+    if(a._on) return;
+    a._on = true;
+    try{ a.beginElement(); }catch(e){}
+  });
+}
+
+function showNow(el){
+  el.classList.add('in');
+  var d = el._delay || 0;
+  setTimeout(function(){
+    slidePinsEl(el);
+    animateNumbersEl(el);
+    startSvgAnims(el);
+  }, d + 120);
+}
 
 function revealIn(root){
   var box = root ? document.querySelector(root) : document;
   if(!box) return;
-  var els = box.querySelectorAll('.pos, .welcome, .mecard');
-  if(!('IntersectionObserver' in window)){
-    els.forEach(function(el){ el.classList.remove('reveal'); });
+  var els = box.querySelectorAll(REVEAL_SEL);
+  if(!els.length) return;
+
+  // 관찰 기능이 없거나 모션을 줄인 기기 → 즉시 표시
+  var reduce = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!('IntersectionObserver' in window) || reduce){
+    Array.prototype.forEach.call(els, function(el){
+      el.classList.remove('reveal'); el.classList.add('in');
+      slidePinsEl(el); animateNumbersEl(el); startSvgAnims(el);
+    });
     return;
   }
+
   if(!_io){
     _io = new IntersectionObserver(function(list){
       list.forEach(function(en){
-        if(en.isIntersecting){ en.target.classList.add('in'); _io.unobserve(en.target); }
+        if(!en.isIntersecting) return;
+        _io.unobserve(en.target);
+        showNow(en.target);
       });
-    }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+    }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
   }
-  els.forEach(function(el, i){
+
+  var seen = 0;
+  var vh = window.innerHeight || 800;
+  Array.prototype.forEach.call(els, function(el){
     if(el._rv) return;
     el._rv = true;
+    var top = el.getBoundingClientRect().top;
+    // 이미 보이는 것은 차례로, 아래쪽은 스크롤할 때 바로
+    el._delay = (top < vh * 0.95) ? Math.min(seen++, 6) * 70 : 0;
+    el.style.transitionDelay = el._delay + 'ms';
     el.classList.add('reveal');
-    el.style.animationDelay = Math.min(i, 6) * 60 + 'ms';
     _io.observe(el);
   });
 }
 
-/* 숫자 요소에 카운트업 적용 */
-/* 게이지 핀이 왼쪽에서 미끄러져 제자리에 멈춥니다 */
-function slidePinsEl(box){
+function revealHome(){ revealIn('#pane-home'); watchMotion('#pane-home'); }
+
+/* 그림 안의 움직임을 화면에 닿을 때 시작합니다 */
+var _mo = null;
+function watchMotion(root){
+  var box = root ? document.querySelector(root) : document;
   if(!box) return;
-  var list = box.querySelectorAll ? box.querySelectorAll('[data-left]') : [];
-  if(box.dataset && box.dataset.left !== undefined) list = [box];
-  Array.prototype.forEach.call(list, function(el){
-    if(el._pin) return;
-    el._pin = true;
-    var to = el.dataset.left;
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){ el.style.left = to + '%'; });
+  var els = box.querySelectorAll(MOTION_SEL);
+  if(!els.length) return;
+
+  var reduce = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!('IntersectionObserver' in window) || reduce){
+    Array.prototype.forEach.call(els, function(el){
+      el.classList.add('on');
+      startSvgAnims(el); slidePinsEl(el);
+      Array.prototype.forEach.call(el.querySelectorAll('[style*="--w"]'), function(b){
+        b.style.animationPlayState='running';
+      });
     });
-  });
-}
-function slidePins(scope){
-  var box = scope ? document.querySelector(scope) : document;
-  if(!box) return;
-  // 숨겨진(등장 대기) 요소는 나타날 때 처리하므로 건너뜁니다
-  Array.prototype.forEach.call(box.querySelectorAll('[data-left]'), function(el){
-    if(el.closest && el.closest('.reveal:not(.in)')) return;
-    slidePinsEl(el);
+    return;
+  }
+  if(!_mo){
+    _mo = new IntersectionObserver(function(list){
+      list.forEach(function(en){
+        if(!en.isIntersecting) return;
+        _mo.unobserve(en.target);
+        var el = en.target;
+        setTimeout(function(){
+          el.classList.add('on');
+          startSvgAnims(el);
+          slidePinsEl(el);
+          Array.prototype.forEach.call(el.querySelectorAll('[style*="--w"]'), function(b){
+            b.style.animation='none';
+            void b.offsetWidth;
+            b.style.animation='';
+          });
+        }, 120);
+      });
+    }, { threshold: 0.25, rootMargin: '0px 0px -6% 0px' });
+  }
+  Array.prototype.forEach.call(els, function(el){
+    if(el._mw) return;
+    el._mw = true;
+    _mo.observe(el);
   });
 }
 
+/* 안전망 — 어떤 이유로든 안 나타나면 강제로 보여줍니다 */
+function revealFallback(){
+  var vh = window.innerHeight || 800;
+  Array.prototype.forEach.call(
+    document.querySelectorAll('.reveal:not(.in)'), function(el){
+      if(el.getBoundingClientRect().top < vh + 300) showNow(el);
+    });
+}
+
+/* ===== 숫자 카운트업 ===== */
 function animateNumbersEl(box){
   if(!box) return;
-  var list = box.querySelectorAll ? box.querySelectorAll('[data-count]') : [];
-  if(box.dataset && box.dataset.count !== undefined) list = [box];
+  var list = (box.dataset && box.dataset.count !== undefined)
+    ? [box] : (box.querySelectorAll ? box.querySelectorAll('[data-count]') : []);
   Array.prototype.forEach.call(list, function(el){
     if(el._cnt) return;
     el._cnt = true;
@@ -2125,8 +2211,31 @@ function animateNumbers(scope){
   var box = scope ? document.querySelector(scope) : document;
   if(!box) return;
   Array.prototype.forEach.call(box.querySelectorAll('[data-count]'), function(el){
-    if(el.closest && el.closest('.reveal:not(.in)')) return;
+    if(el.closest && el.closest('.reveal:not(.in)')) return;   // 나타날 때 처리
     animateNumbersEl(el);
+  });
+}
+
+/* ===== 게이지 핀 이동 ===== */
+function slidePinsEl(box){
+  if(!box) return;
+  var list = (box.dataset && box.dataset.left !== undefined)
+    ? [box] : (box.querySelectorAll ? box.querySelectorAll('[data-left]') : []);
+  Array.prototype.forEach.call(list, function(el){
+    if(el._pin) return;
+    el._pin = true;
+    var to = el.dataset.left;
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ el.style.left = to + '%'; });
+    });
+  });
+}
+function slidePins(scope){
+  var box = scope ? document.querySelector(scope) : document;
+  if(!box) return;
+  Array.prototype.forEach.call(box.querySelectorAll('[data-left]'), function(el){
+    if(el.closest && el.closest('.reveal:not(.in)')) return;
+    slidePinsEl(el);
   });
 }
 
@@ -2183,20 +2292,13 @@ function startBanner(list){
 
 /* 이미 열려 있으면 홈에서도 대시보드로 돌아갈 수 있게 */
 function drawHomeCTA(){
-  var back=document.getElementById('backDash');
   var cta=document.getElementById('ctaBox');
-  if(!back||!cta) return;
-
-  if(unlocked()){
-    back.innerHTML='<button class="backdash" onclick="tab(\'dash\')">'
-      + '<span class="bd1">내 통계 보러 가기</span><span class="bd2">›</span></button>';
-    cta.innerHTML='<button class="go" onclick="tab(\'dash\')">내 통계 보러 가기</button>'
-      + '<button class="ghost" onclick="tab(\'input\')">내 정보 수정하기</button>';
-  }else{
-    back.innerHTML='';
-    cta.innerHTML='<button class="go" onclick="tab(\'input\')">등록하러 가기 · 약 3분</button>'
+  if(!cta) return;
+  cta.innerHTML = unlocked()
+    ? '<button class="go" onclick="tab(\'dash\')">내 통계 보러 가기</button>'
+      + '<button class="ghost" onclick="tab(\'input\')">내 정보 수정하기</button>'
+    : '<button class="go" onclick="tab(\'input\')">등록하러 가기 · 약 3분</button>'
       + '<button class="ghost" onclick="tab(\'unlock\')">이미 등록했어요 · 코드로 열기</button>';
-  }
   attachRipple();
 }
 
@@ -2651,7 +2753,7 @@ function showStudent(d){
       + r.types.map(function(t){
           var hl = (t.type===d.wantType);
           return '<div class="item"><div class="nm"'+(hl?' style="font-weight:800"':'')+'>'+t.type+'</div>'
-            + '<div class="bar2"><i style="width:'+t.rate+'%"></i></div>'
+            + '<div class="bar2"><i style="--w:'+t.rate+'%"></i></div>'
             + '<div class="pc">'+t.rate+'%</div></div>';
         }).join('')
       + '<div class="warnbox">각 유형 현직자 중 내 스펙과 같거나 낮은 사람의 비율입니다. '
@@ -2914,7 +3016,7 @@ function drawJobRegion(r){
           + '<div class="rn'+(i<3?' t3':'')+'">'+(i+1)+'</div>'
           + '<div class="rs">'+esc(x.sido)+' <span style="color:var(--dim);font-size:11.5px">'
           + x.orgs+'곳</span></div>'
-          + '<div class="rbar"><i style="width:'+w+'%;animation-delay:'+(i*45)+'ms"></i></div>'
+          + '<div class="rbar"><i style="--w:'+w+'%;animation-delay:'+(i*45)+'ms"></i></div>'
           + '<div class="rv">'+x.n.toLocaleString('ko-KR')+'</div>'
           + '<div class="arw2">›</div></div>';
       }).join('')
@@ -2987,7 +3089,7 @@ function drawRegion(r){
         return '<div class="rgrow" onclick="doRegionDetail(\''+esc(x.sido)+'\')">'
           + '<div class="rn'+(i<3?' t3':'')+'">'+(i+1)+'</div>'
           + '<div class="rs">'+esc(x.sido)+'</div>'
-          + '<div class="rbar"><i style="width:'+w+'%;animation-delay:'+(i*45)+'ms"></i></div>'
+          + '<div class="rbar"><i style="--w:'+w+'%;animation-delay:'+(i*45)+'ms"></i></div>'
           + '<div class="rv">'+x.n.toLocaleString('ko-KR')+'</div>'
           + '<div class="arw2">›</div></div>';
       }).join('')
@@ -3021,7 +3123,7 @@ function drawRegionDetail(r){
         return '<div class="rgrow" style="cursor:default">'
           + '<div class="rn'+(i<3?' t3':'')+'">'+(i+1)+'</div>'
           + '<div class="rs">'+esc(x.sgg)+'</div>'
-          + '<div class="rbar"><i style="width:'+w+'%"></i></div>'
+          + '<div class="rbar"><i style="--w:'+w+'%"></i></div>'
           + '<div class="rv">'+x.n+'</div></div>';
       }).join('')
     + '</div></div>';
@@ -3234,7 +3336,7 @@ function growCard(n, what){
   return '<div class="grow2">'
     + '<div class="gt">이 숫자는 '+esc(what||'우리')+'가 함께 만듭니다</div>'
     + '<div class="gd">'+msgTxt+'</div>'
-    + '<div class="growbar"><i style="width:'+pct+'%"></i></div>'
+    + '<div class="growbar"><i style="--w:'+pct+'%"></i></div>'
     + '<div class="growmeta"><span>현재 '+n+'명</span><span>다음 목표 '+goal+'명</span></div>'
     + '<div class="growbtns">'
     + '<button class="b1" onclick="shareLink()">동료에게 공유하기</button>'
@@ -3261,7 +3363,7 @@ function dist(obj, total){
   return arr.map(function(p,i){
     var pct=Math.round(p[1]/total*100);
     return '<div class="distrow"><div class="lab"><span>'+p[0]+'</span><span>'+p[1]+'명 ('+pct+'%)</span></div>'
-      + '<div class="bar"><i style="width:'+pct+'%;animation-delay:'+(i*60)+'ms"></i></div></div>';
+      + '<div class="bar"><i style="--w:'+pct+'%;animation-delay:'+(i*60)+'ms"></i></div></div>';
   }).join('');
 }
 
@@ -3298,7 +3400,7 @@ function showSpec(sp){
   }
   var rows=sp.types.map(function(t,i){
     return '<div class="item"><div class="nm">'+t.type+'</div>'
-      + '<div class="bar2"><i style="width:'+t.rate+'%;animation-delay:'+(i*60)+'ms"></i></div>'
+      + '<div class="bar2"><i style="--w:'+t.rate+'%;animation-delay:'+(i*60)+'ms"></i></div>'
       + '<div class="pc">'+t.rate+'%</div></div>';
   }).join('');
   box.innerHTML='<div class="card spec"><h2>스펙으로 갈 수 있는 곳</h2>'
@@ -3441,7 +3543,7 @@ JOB = (ME&&ME.job) ? ME.job : '작업치료사';
 document.body.setAttribute('data-job', JOB);
 if(ME&&ME.job){ setRole(ME.role==='학생'?'학생':'현직'); setJob(ME.job); }
 tab('home');
-revealHome();                    // 서버 응답과 무관하게 먼저 걸어둡니다
+revealHome();
 checkInApp();
 
 google.script.run.withSuccessHandler(function(b){
@@ -3451,17 +3553,11 @@ google.script.run.withSuccessHandler(function(b){
   // 서버가 안 되더라도 화면은 뜨게 합니다
   drawHome({ name:'POT LAB', tagline:'작업치료사 · 물리치료사를 위한 급여 통계',
              logo:'', rooms:[], roomPoints:[], jobLinks:[], banners:[] });
-  if(window.console) console.warn('getBrand 실패', e && e.message);
+  if(window.console) console.warn('getBrand 실패:', e && e.message);
 }).getBrand();
 
-/* 어떤 이유로든 등장이 안 걸리면 1.6초 뒤 보이게 합니다 */
-setTimeout(function(){
-  Array.prototype.forEach.call(
-    document.querySelectorAll('.reveal:not(.in)'), function(el){
-      var r = el.getBoundingClientRect();
-      if(r.top < window.innerHeight + 240) el.classList.add('in');
-    });
-}, 1600);
+window.addEventListener('load', revealFallback);
+setTimeout(revealFallback, 1500);
 </script>
 </body>
 </html>
