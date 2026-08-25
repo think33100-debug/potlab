@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<meta name="description" content="작업치료사·물리치료사 급여를 직접 모아 만든 통계. 내 위치, 이직 시 차이, 병원별 치료사 인원까지.">
+<meta name="description" content="작업치료사·물리치료사 급여를 직접 모아 만든 통계.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="작업·물리치료사 급여 통계">
 <meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다. 병원별 치료사 인원·병상까지.">
@@ -119,7 +119,7 @@
     background:linear-gradient(90deg,#a8402a 0%,#d69a3a 32%,#9aa6ab 52%,#3f9c7f 74%,#0a6b4a 100%)}
   .gauge .pin{position:absolute;top:-4px;width:4px;height:17px;border-radius:3px;
     background:var(--ink);box-shadow:0 0 0 2.5px #fff;
-    transition:left 1.15s cubic-bezier(.16,.84,.28,1)}
+    transition:left 1.3s cubic-bezier(.16,.84,.28,1)}
   .gauge .ends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim);
     margin-top:6px}
 
@@ -302,7 +302,7 @@
     background:linear-gradient(90deg,#e0a294,#e6c88c,#b9c4c8,#7fc3ab,#4fae8c)}
   .dscale .dpin{position:absolute;top:-4px;width:4px;height:16px;border-radius:3px;
     background:var(--ink);box-shadow:0 0 0 2.5px #fff;
-    transition:left 1.15s cubic-bezier(.16,.84,.28,1)}
+    transition:left 1.3s cubic-bezier(.16,.84,.28,1)}
   .dends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim)}
   .hire{border-radius:11px;padding:13px;margin-top:11px;background:rgba(255,255,255,.75)}
   .hire .hh{display:flex;align-items:flex-start;gap:8px;font-size:13.5px;font-weight:800;
@@ -368,7 +368,7 @@
   .rgrow .rbar{width:78px;height:7px;background:#eef1f3;border-radius:4px;overflow:hidden;
     flex-shrink:0}
   .rgrow .rbar i{display:block;height:100%;background:var(--accent);
-    animation:grow .85s cubic-bezier(.2,.9,.25,1) both}
+    animation:grow 1s cubic-bezier(.16,.84,.28,1) both}
   .rgrow .rv{width:52px;text-align:right;font-weight:800;font-size:14px;flex-shrink:0}
   .rgrow .arw2{color:#c6ced1;font-size:16px}
   .rgrow.on{background:var(--accent-soft);border-radius:8px;padding-left:8px;padding-right:8px}
@@ -501,8 +501,13 @@
   .thin{font-size:12px;color:var(--dim);text-align:center;margin-top:10px;line-height:1.6}
   .bar{height:7px;background:#eef0f3;border-radius:4px;overflow:hidden;margin-top:5px}
   .bar i{display:block;height:100%;background:var(--accent);
-    animation:grow .85s cubic-bezier(.2,.9,.25,1) both}
+    animation:grow 1s cubic-bezier(.16,.84,.28,1) both}
   @keyframes grow{from{width:0 !important}}
+  @keyframes growbar{
+    0%{width:0}
+    72%{width:var(--w)}
+    100%{width:var(--w)}
+  }
   .distrow{margin-bottom:9px}
   .distrow .lab{display:flex;justify-content:space-between;font-size:12.5px}
   #msg{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(80px);
@@ -583,11 +588,13 @@
   .enter{animation:rise .48s cubic-bezier(.2,.9,.25,1) both}
 
   /* 스크롤하며 나타나기 */
-  .reveal{opacity:0;transform:translateY(18px)}
-  .reveal.in{animation:rise .68s cubic-bezier(.16,.84,.28,1) forwards}
-  .mi.reveal{transform:translateY(12px)}
-  .hitem.reveal,.rgrow.reveal{transform:translateY(8px)}
-  .hitem.reveal.in,.rgrow.reveal.in{animation-duration:.45s}
+  .reveal{opacity:0;transform:translateY(20px);
+    transition:opacity .6s ease, transform .6s cubic-bezier(.16,.84,.28,1)}
+  .reveal.in{opacity:1;transform:none}
+  /* 화면에 나타나기 전에는 안쪽 움직임도 멈춰둡니다 */
+  .reveal:not(.in) *{animation-play-state:paused !important}
+  .mi.reveal{transform:translateY(13px)}
+  .hitem.reveal,.rgrow.reveal{transform:translateY(9px);transition-duration:.42s}
 
   /* 숫자 카운트업 */
   @keyframes popin{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}
@@ -595,6 +602,11 @@
 
   /* 막대 */
   @keyframes grow{from{width:0 !important}}
+  @keyframes growbar{
+    0%{width:0}
+    72%{width:var(--w)}
+    100%{width:var(--w)}
+  }
   @keyframes growv{from{transform:scaleY(0)}}
 
 
@@ -781,6 +793,7 @@
   #cardCanvas{width:100%;max-width:340px;display:block;margin:0 auto 10px;border-radius:12px}
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{transition:none!important;animation:none!important}
+    .reveal{opacity:1!important;transform:none!important}
   }
 </style>
 </head>
@@ -1770,8 +1783,7 @@ function drawHome(b){
   drawAddHome();
   startBanner(b.banners);
   attachRipple();
-  revealHome();
-  animateNumbers('#pane-home');
+  revealHome();                 // 새로 그려진 요소도 걸어줍니다
 
   google.script.run.withSuccessHandler(function(c){
     var el=document.getElementById('sumBox');
@@ -2052,10 +2064,11 @@ function revealIn(root){
 
 /* 숫자 요소에 카운트업 적용 */
 /* 게이지 핀이 왼쪽에서 미끄러져 제자리에 멈춥니다 */
-function slidePins(scope){
-  var box = scope ? document.querySelector(scope) : document;
+function slidePinsEl(box){
   if(!box) return;
-  box.querySelectorAll('[data-left]').forEach(function(el){
+  var list = box.querySelectorAll ? box.querySelectorAll('[data-left]') : [];
+  if(box.dataset && box.dataset.left !== undefined) list = [box];
+  Array.prototype.forEach.call(list, function(el){
     if(el._pin) return;
     el._pin = true;
     var to = el.dataset.left;
@@ -2064,17 +2077,35 @@ function slidePins(scope){
     });
   });
 }
-
-function animateNumbers(scope){
+function slidePins(scope){
   var box = scope ? document.querySelector(scope) : document;
   if(!box) return;
-  box.querySelectorAll('[data-count]').forEach(function(el){
+  // 숨겨진(등장 대기) 요소는 나타날 때 처리하므로 건너뜁니다
+  Array.prototype.forEach.call(box.querySelectorAll('[data-left]'), function(el){
+    if(el.closest && el.closest('.reveal:not(.in)')) return;
+    slidePinsEl(el);
+  });
+}
+
+function animateNumbersEl(box){
+  if(!box) return;
+  var list = box.querySelectorAll ? box.querySelectorAll('[data-count]') : [];
+  if(box.dataset && box.dataset.count !== undefined) list = [box];
+  Array.prototype.forEach.call(list, function(el){
     if(el._cnt) return;
     el._cnt = true;
     var t = parseFloat(el.dataset.count);
     if(isNaN(t)) return;
     countTo(el, t, { dec: parseInt(el.dataset.dec || '0', 10),
                      pre: el.dataset.pre || '', suf: el.dataset.suf || '' });
+  });
+}
+function animateNumbers(scope){
+  var box = scope ? document.querySelector(scope) : document;
+  if(!box) return;
+  Array.prototype.forEach.call(box.querySelectorAll('[data-count]'), function(el){
+    if(el.closest && el.closest('.reveal:not(.in)')) return;
+    animateNumbersEl(el);
   });
 }
 
@@ -3369,8 +3400,28 @@ role='현직';
 JOB = (ME&&ME.job) ? ME.job : '작업치료사';
 document.body.setAttribute('data-job', JOB);
 if(ME&&ME.job){ setRole(ME.role==='학생'?'학생':'현직'); setJob(ME.job); }
-google.script.run.withSuccessHandler(drawHome).getBrand();
 tab('home');
+revealHome();                    // 서버 응답과 무관하게 먼저 걸어둡니다
+checkInApp();
+
+google.script.run.withSuccessHandler(function(b){
+  drawHome(b);
+  if(unlocked()) tab('dash');
+}).withFailureHandler(function(e){
+  // 서버가 안 되더라도 화면은 뜨게 합니다
+  drawHome({ name:'POT LAB', tagline:'작업치료사 · 물리치료사를 위한 급여 통계',
+             logo:'', rooms:[], roomPoints:[], jobLinks:[], banners:[] });
+  if(window.console) console.warn('getBrand 실패', e && e.message);
+}).getBrand();
+
+/* 어떤 이유로든 등장이 안 걸리면 1.6초 뒤 보이게 합니다 */
+setTimeout(function(){
+  Array.prototype.forEach.call(
+    document.querySelectorAll('.reveal:not(.in)'), function(el){
+      var r = el.getBoundingClientRect();
+      if(r.top < window.innerHeight + 240) el.classList.add('in');
+    });
+}, 1600);
 </script>
 </body>
 </html>
