@@ -720,14 +720,6 @@
   .brk .ln.tot{font-weight:800;opacity:1;margin-top:5px;padding-top:8px;
     border-top:1px solid rgba(255,255,255,.2)}
 
-  .inapp{position:fixed;inset:0;background:rgba(14,18,20,.93);z-index:50;display:none;
-    align-items:center;justify-content:center;padding:26px}
-  .inapp.on{display:flex}
-  .inapp .bx{background:#fff;border-radius:16px;padding:24px;max-width:330px;text-align:center}
-  .inapp h3{margin:0 0 9px;font-size:17px}
-  .inapp p{margin:0 0 16px;font-size:13.5px;color:var(--dim);line-height:1.75}
-  .inapp .copyurl{background:var(--bg);border-radius:9px;padding:10px;font-size:11.5px;
-    word-break:break-all;color:var(--dim);margin-bottom:13px}
   .addhome{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);
     border-radius:13px;padding:14px;margin-bottom:13px}
   .addhome .ic{width:40px;height:40px;border-radius:11px;background:var(--accent);color:#fff;
@@ -1629,18 +1621,7 @@
 
 </div>
 
-<div class="inapp" id="inappBox">
-  <div class="bx">
-    <h3>브라우저에서 열어주세요</h3>
-    <p>지금 앱 안의 브라우저로 보고 계십니다.<br>
-       일부 기능(이미지 저장·입력)이 제대로 동작하지 않을 수 있습니다.<br>
-       오른쪽 위 <b>⋯</b> 를 눌러 <b>다른 브라우저로 열기</b>를 선택해주세요.</p>
-    <div class="copyurl" id="inappUrl"></div>
-    <button class="go" onclick="copyUrl()">주소 복사</button>
-    <button class="ghost" onclick="document.getElementById('inappBox').className='inapp'">
-      그냥 계속 볼게요</button>
-  </div>
-</div>
+
 
 <div id="msg"></div>
 
@@ -2506,13 +2487,8 @@ function drawCalc(r){
 }
 
 /* ===== 인앱 브라우저 ===== */
-function checkInApp(){
-  var ua=navigator.userAgent||'';
-  var inapp=/KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\//i.test(ua);
-  if(!inapp) return;
-  document.getElementById('inappUrl').textContent=location.href;
-  document.getElementById('inappBox').className='inapp on';
-}
+function checkInApp(){ /* 안내창은 사용하지 않습니다 */ }
+
 function copyUrl(){
   var t=document.createElement('textarea');
   t.value=location.href; document.body.appendChild(t); t.select();
@@ -2529,10 +2505,9 @@ function sendFeedback(){
     if(r.ok){
       document.getElementById('fbBody').value='';
       document.getElementById('fbContact').value='';
-      setTimeout(function(){tab('home');
-checkInApp();},900);
+      setTimeout(function(){ goBack(); },900);
     }
-  }).withFailureHandler(function(e){document.getElementById('hospBox').innerHTML=errBox(e);attachRipple();})
+  }).withFailureHandler(function(e){ msg((e&&e.message)||'전송에 실패했습니다'); })
     .submitFeedback({
       kind:document.getElementById('fbKind').value,
       body:body,
@@ -3548,7 +3523,6 @@ document.body.setAttribute('data-job', JOB);
 if(ME&&ME.job){ setRole(ME.role==='학생'?'학생':'현직'); setJob(ME.job); }
 tab('home');
 revealHome();
-checkInApp();
 
 google.script.run.withSuccessHandler(function(b){
   drawHome(b);
