@@ -8,12 +8,11 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="format-detection" content="telephone=no">
 <meta name="description" content="작업치료사·물리치료사 급여를 직접 모아 만든 통계.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="작업·물리치료사 급여 통계">
-<meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다. 병원별 치료사 인원·병상까지.">
+<meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다.">
 <meta property="og:image" content="og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0d5c4f">
@@ -294,8 +293,13 @@
   .cardprev{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:11px}
   .cardprev canvas{width:100%;max-width:300px;display:block;margin:0 auto;border-radius:10px;
     box-shadow:0 3px 14px rgba(14,18,20,.12)}
-  .primary2{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
-  .dens{border-radius:12px;padding:14px;margin-top:11px}
+  .cardbtns button{background:#fff;color:var(--ink);border:1px solid var(--line);
+    border-radius:11px;padding:13px;font-family:inherit;font-size:14px;font-weight:700;
+    letter-spacing:-.01em;cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:transform .22s,background-color .2s,border-color .2s}
+  .cardbtns button:active{transform:scale(.97);background:var(--accent-soft);
+    border-color:var(--accent);color:var(--accent)}
+  .densOLD{border-radius:12px;padding:14px;margin-top:11px}
   .dens.l1{background:#fdeeeb}
   .dens.l2{background:#fdf3e6}
   .dens.l3{background:#eef1f3}
@@ -624,7 +628,7 @@
   .mi.kakao{background:#FEE500;border-color:#FEE500}
   .mi.off{opacity:.5}
 
-  .backbar{display:flex;gap:7px;margin-bottom:12px}
+  .backbar{display:flex;gap:7px;margin-bottom:14px;flex-wrap:nowrap}
   .backbar button{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;
     border:1px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
     font-size:14px;font-weight:700;letter-spacing:-.01em;padding:10px 16px 10px 13px;
@@ -801,6 +805,82 @@
     *,*::before,*::after{transition:none!important;animation:none!important}
     .reveal{opacity:1!important;transform:none!important}
   }
+  .two2{display:flex;gap:8px}
+  .two2 .unit{flex:1}
+  .hourEcho{margin-top:8px;background:var(--accent-soft);border-radius:9px;padding:10px 12px;
+    font-size:12.5px;color:#22423b;line-height:1.7}
+  .hourEcho b{font-weight:800}
+  .chk{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-weight:400}
+  .chk input{width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:var(--accent)}
+  .chk span b{display:block;font-size:14px;font-weight:700;margin-bottom:2px}
+  .chk span em{font-style:normal;font-size:12px;color:#5a6870}
+  .load{border-radius:14px;padding:16px;margin-top:11px}
+  .load.l1{background:#eaf4f0}
+  .load.l2{background:#f3f0e8}
+  .load.l3{background:#fdf0eb}
+
+  .ldhead{display:flex;align-items:center;gap:12px;margin-bottom:13px}
+  .ldface{font-size:30px;line-height:1;flex-shrink:0}
+  .ldtx{flex:1;min-width:0}
+  .ldtx b{display:block;font-size:19px;font-weight:800;letter-spacing:-.03em;
+    line-height:1.3;margin-bottom:3px}
+  .load.l1 .ldtx b{color:#0a6b4a}
+  .load.l2 .ldtx b{color:#7a6320}
+  .load.l3 .ldtx b{color:#a8402a}
+  .ldtx span{font-size:13px;color:#3f4c52;line-height:1.55;word-break:keep-all}
+
+  .ldbar{height:11px;border-radius:6px;overflow:hidden;
+    background:linear-gradient(90deg,#d5e8e0,#ece2c9,#f5d2c4)}
+  .ldbar i{display:block;height:100%;border-radius:6px;width:0;
+    animation:grow 1s cubic-bezier(.16,.84,.28,1) forwards}
+  .load.l1 .ldbar i{background:#4fae8c}
+  .load.l2 .ldbar i{background:#c9a94e}
+  .load.l3 .ldbar i{background:#d9694a}
+  .ldends{display:flex;justify-content:space-between;font-size:11px;color:#5a6870;
+    margin-top:7px;font-weight:600}
+
+  .ldwhy{display:flex;gap:8px;margin-top:14px}
+  .ldwhy .wr{flex:1;background:rgba(255,255,255,.8);border-radius:11px;padding:13px 10px;
+    text-align:center}
+  .ldwhy .wn{display:block;font-size:26px;font-weight:800;letter-spacing:-.03em;
+    line-height:1.1;margin-bottom:5px}
+  .load.l1 .ldwhy .wn{color:#0a6b4a}
+  .load.l2 .ldwhy .wn{color:#7a6320}
+  .load.l3 .ldwhy .wn{color:#a8402a}
+  .ldwhy .wt{font-size:11.5px;color:#4a565c;line-height:1.5;word-break:keep-all}
+  .ldwhy .wt b{font-weight:700;color:var(--ink)}
+
+  .ldcert2{background:rgba(255,255,255,.8);border-radius:11px;padding:12px;margin-top:9px;
+    font-size:12.5px;line-height:1.65}
+  .ldcert2 b{font-weight:800}
+  .ldcert2 span{display:block;margin-top:4px;color:#4a565c;font-size:12px;
+    word-break:keep-all}
+
+  .ldnote{font-size:13px;line-height:1.75;margin-top:11px;color:#3f4c52;
+    word-break:keep-all}
+  .ldwarn{display:block;margin-top:9px;padding-top:9px;
+    border-top:1px solid rgba(0,0,0,.08);font-size:11.5px;color:#5a6870;line-height:1.7}
+  .hrbig{display:flex;align-items:baseline;gap:8px;margin:4px 0 8px}
+  .hrbig .hv{font-size:38px;font-weight:800;letter-spacing:-.04em;color:var(--accent)}
+  .hrbig .hu{font-size:14px;color:#5a6870;font-weight:700}
+  .hrrank{font-size:14px;margin-bottom:14px}
+  .hrrank b{font-weight:800}
+  .hrrank .hrp{background:var(--accent-soft);color:var(--accent);border-radius:6px;
+    padding:3px 9px;font-size:12px;font-weight:800;margin-left:4px}
+  .hrcalc{display:flex;align-items:stretch;gap:8px;margin-bottom:10px}
+  .hrcalc .hc{flex:1;background:#fff;border:1px solid var(--line);border-radius:11px;
+    padding:12px;text-align:center}
+  .hrcalc .hc span{display:block;font-size:11px;color:#5a6870;margin-bottom:4px}
+  .hrcalc .hc b{font-size:17px;font-weight:800;letter-spacing:-.02em}
+  .hrcalc .hcop{display:flex;align-items:center;font-size:17px;color:#9aa6ab;font-weight:800}
+  .hrnote{font-size:12px;color:#5a6870;line-height:1.75;margin:0 0 12px}
+  .hrcmp{border-radius:11px;padding:13px;margin-bottom:4px}
+  .hrcmp.lo{background:#fdf3e6}
+  .hrcmp.hi{background:var(--accent-soft)}
+  .hrcmp b{display:block;font-size:13.5px;margin-bottom:3px}
+  .hrcmp.lo b{color:#8a5c14}
+  .hrcmp.hi b{color:var(--accent)}
+  .hrcmp span{font-size:13px;color:#3f4c52}
   .wantbox{background:var(--accent-soft);border-radius:11px;padding:14px;margin-bottom:13px}
   .wantbox b{display:block;font-size:12.5px;color:var(--accent);margin-bottom:4px}
   .wantbox .wr{display:block;font-size:24px;font-weight:800;letter-spacing:-.03em;
@@ -989,21 +1069,21 @@
       <div class="feat">
         <div class="fno">07</div>
         <div class="fbody">
-          <h3>사람 뽑을 곳인지</h3>
-          <p>병상 대비 치료사 수를 같은 종별끼리 비교.
-             적으면 업무는 많아도 <b>채용 가능성이 높습니다.</b></p>
+          <h3>얼마나 바쁜 곳인지</h3>
+          <p>치료사 한 명이 몇 명을 맡는지, 재활 환자가 많은 병원인지 따져서
+             <b>바쁜 곳 · 보통 · 여유로운 곳</b>으로 알려드립니다.</p>
           <svg class="ill" viewBox="0 0 320 104" xmlns="http://www.w3.org/2000/svg">
             <rect width="320" height="104" rx="12" fill="#fdf3e6" stroke="#f0dcc0"/>
-            <text x="18" y="30" font-size="15" font-weight="800" fill="#8a5c14">평균 이하</text>
-            <text x="302" y="30" font-size="9.5" fill="#a08a5e" text-anchor="end">요양병원 기준</text>
+            <text x="18" y="30" font-size="15" font-weight="800" fill="#8a5c14">🔥 바쁜 곳</text>
+            <text x="302" y="30" font-size="9.5" fill="#a08a5e" text-anchor="end">회복기 재활병원</text>
             <rect x="18" y="44" width="284" height="8" rx="4" fill="url(#g2)"/>
             <rect x="18" y="40" width="4" height="16" rx="2" fill="#0e1214">
               <animate attributeName="x" from="18" to="96" dur="1.2s"
                        begin="indefinite" fill="freeze"
                        calcMode="spline" keySplines="0.16 0.84 0.28 1" keyTimes="0;1"/>
             </rect>
-            <text x="18" y="80" font-size="12.5" font-weight="700" fill="#8a5c14">채용 가능성 높음</text>
-            <text x="18" y="95" font-size="10" fill="#a08a5e">인력이 부족한 만큼 자리가 날 여지</text>
+            <text x="18" y="80" font-size="12.5" font-weight="700" fill="#8a5c14">사람 뽑을 가능성 높음</text>
+            <text x="18" y="95" font-size="10" fill="#a08a5e">일이 많은 만큼 사람이 더 필요합니다</text>
             <defs><linearGradient id="g2" x1="0" x2="1">
               <stop offset="0" stop-color="#e0a294"/><stop offset="0.5" stop-color="#b9c4c8"/>
               <stop offset="1" stop-color="#4fae8c"/></linearGradient></defs>
@@ -1096,7 +1176,6 @@
 
   <div id="backBar" class="hide"></div>
   <div id="subhead" class="hide">
-    <button class="back" onclick="goBack()"><span class="bicon">‹</span>뒤로</button>
     <div class="hero">
       <h1 id="subTitle">치료사 급여·스펙 통계</h1>
       <p id="subDesc">국가 통계에 없는 우리 직군의 숫자를, 직접 모읍니다</p>
@@ -1177,7 +1256,7 @@
     <div id="hospBox"></div>
     <div class="hintbox">
       기관이 신고한 자료를 정리한 것이라 현재 인원과 다를 수 있습니다.
-      '여유 / 적음'은 <b>같은 종별끼리 비교한 분포</b>이며 적정 인력 기준이 아닙니다.
+      업무 강도는 <b>여러 자료를 종합해 추정한 값</b>이라 실제와 차이가 있을 수 있습니다.
     </div>
   </div>
 
@@ -1343,13 +1422,35 @@
       </div>
 
       <div class="f">
-        <label>월 당직 횟수 <span class="hint">없으면 0</span></label>
-        <div class="unit"><input type="number" id="nightDuty" min="0" placeholder="0"><span>회</span></div>
+        <label>당직 <span class="hint">퇴근 후 더 남는 근무 · 없으면 0</span></label>
+        <div class="two2">
+          <div class="unit"><input type="number" id="nightDuty" min="0" max="31" placeholder="0"
+            oninput="showWorkHours()"><span>회 / 월</span></div>
+          <div class="unit"><input type="number" id="dutyHours" min="0" max="24" value="2"
+            oninput="showWorkHours()"><span>시간씩</span></div>
+        </div>
       </div>
 
       <div class="f">
-        <label>월 주말근무 횟수 <span class="hint">없으면 0</span></label>
-        <div class="unit"><input type="number" id="weekendWork" min="0" placeholder="0"><span>회</span></div>
+        <label>주말근무 <span class="hint">반나절이면 4시간 · 없으면 0</span></label>
+        <div class="two2">
+          <div class="unit"><input type="number" id="weekendWork" min="0" max="10" placeholder="0"
+            oninput="showWorkHours()"><span>회 / 월</span></div>
+          <div class="unit"><input type="number" id="weekendHours" min="0" max="24" value="4"
+            oninput="showWorkHours()"><span>시간씩</span></div>
+        </div>
+        <div class="hourEcho" id="hourEcho">기본 174시간 · 주 5일 기준</div>
+      </div>
+
+      <div class="f">
+        <label class="chk">
+          <input type="checkbox" id="extraPay" onchange="toggleExtraPay()">
+          <span><b>기본 치료 외에 추가 수당이 있습니다</b>
+            <em>건수·실적에 따라 더 받는 경우</em></span>
+        </label>
+        <div class="hintbox" id="extraNote" style="display:none">
+          위 <b>월 실수령</b>에는 추가 수당까지 더한 금액을 적어주세요.
+        </div>
       </div>
 
       <div class="f">
@@ -1533,9 +1634,9 @@
       <h2>결과 카드</h2>
       <p class="sub">금액은 들어가지 않습니다. 인스타 스토리에 올리기 좋은 정사각 이미지입니다.</p>
       <div class="cardprev"><canvas id="cardCanvas" width="1080" height="1080"></canvas></div>
-      <div class="two">
+      <div class="two cardbtns">
         <button onclick="saveCard()">이미지 저장</button>
-        <button class="primary2" onclick="shareCard()">공유하기</button>
+        <button onclick="shareCard()">공유하기</button>
       </div>
     </div>
     <div class="menu" id="dashMenu"></div>
@@ -1668,7 +1769,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=14"></script>
+<script src="app.js?v=19"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1693,7 +1794,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v14 · 2026-08-25';
+var APP_VER = 'v19 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2054,7 +2155,10 @@ function mySpecCard(m){
     if(m.bonus)   t+=sp('연간 상여', m.bonus+'만원');
     if(m.annual)  t+=sp('연 환산', man10(m.annual), true);
     if(m.nightDuty||m.weekendWork)
-      t+=sp('당직 · 주말', (m.nightDuty||0)+'회 · '+(m.weekendWork||0)+'회');
+      t+=sp('당직 · 주말',
+        (m.nightDuty||0)+'회('+(m.dutyHours||2)+'h) · '+(m.weekendWork||0)+'회('+(m.weekendHours||4)+'h)');
+    if(m.workHours) t+=sp('월 근무시간', m.workHours+'시간');
+    if(m.extraPay) t+=sp('추가 수당', '있음');
     if(m.school)  t+=sp('학력', m.school+(m.gpa&&m.gpaMax?' · '+m.gpa+'/'+m.gpaMax:''));
     if(m.age)     t+=sp('나이', '만 '+m.age+'세');
   }
@@ -2572,6 +2676,29 @@ function checkEmp(){
   checkSalary();
 }
 
+/* 입력하는 대로 월 근무시간을 보여줍니다 */
+function showWorkHours(){
+  var el=document.getElementById('hourEcho');
+  if(!el) return;
+  var dn=parseInt(val('nightDuty'),10)||0;
+  var dh=parseFloat(val('dutyHours'));
+  var wn=parseInt(val('weekendWork'),10)||0;
+  var wh=parseFloat(val('weekendHours'));
+  if(isNaN(dh)) dh=2;
+  if(isNaN(wh)) wh=4;
+  var extra = dn*dh + wn*wh;
+  var total = 174 + extra;
+  el.innerHTML = extra
+    ? '기본 174시간 + 당직·주말 '+Math.round(extra)+'시간 = <b>월 '+Math.round(total)+'시간</b>'
+    : '기본 174시간 · 주 5일 기준';
+}
+
+function toggleExtraPay(){
+  var c=document.getElementById('extraPay');
+  var n=document.getElementById('extraNote');
+  if(c&&n) n.style.display = c.checked ? '' : 'none';
+}
+
 function checkSalary(){
   var v=parseFloat(val('salary'))||0;
   var type=val('hospitalType');
@@ -2668,47 +2795,52 @@ function drawCalc(r){
 /* ===== 인앱 브라우저 ===== */
 /* ===== 기다리는 중 표시 ===== */
 /* ===== 인력 밀도 표시 ===== */
+/* ===== 얼마나 바쁜 곳인지 =====
+ * 점수와 계산식은 보여주지 않습니다. 결과와 쉬운 설명만 냅니다.
+ */
 function densBlock(d, job){
-  if(!d) return '';
-  if(!d.enough){
-    return '<div class="dens l3"><div class="dnote">'
-      + '같은 종별 병원 표본이 부족해 비교하지 않았습니다.'
-      + (d.mine?' (100병상당 '+d.mine+'명)':'')+'</div></div>';
+  if(!d || !d.enough) return '';
+  var pct = Math.round(d.score / 10 * 100);
+  var face = d.level===3 ? '🔥' : (d.level===1 ? '🌿' : '⚖️');
+
+  var t = '<div class="load l'+d.level+'">'
+    + '<div class="ldhead">'
+    + '<span class="ldface">'+face+'</span>'
+    + '<div class="ldtx"><b>'+esc(d.label)+'</b>'
+    + '<span>'+esc(d.oneLine)+'</span></div>'
+    + '</div>'
+
+    + '<div class="ldbar"><i style="--w:'+pct+'%"></i></div>'
+    + '<div class="ldends"><span>여유</span><span>보통</span><span>바쁨</span></div>';
+
+  // 왜 그런지 — 숫자를 문장으로
+  t += '<div class="ldwhy">'
+    + '<div class="wr"><span class="wn">'+d.bedsPerStaff+'</span>'
+    + '<span class="wt">'+esc(job||'치료사')+' 한 명이<br>맡는 <b>침대 수</b></span></div>';
+  if(d.bedsPerDoc !== null){
+    t += '<div class="wr"><span class="wn">'+d.bedsPerDoc+'</span>'
+      + '<span class="wt">재활 담당 의사 한 명이<br>맡는 <b>침대 수</b></span></div>';
   }
-  var pin=Math.max(2,Math.min(98,d.percentile));
-  var t='<div class="dens l'+d.level+'">'
-    + '<div class="dtop"><span class="dlab">'+esc(d.label)+'</span>'
-    + '<span class="dpct">'+esc(d.kind)+' 기준</span></div>'
-    + '<div class="dscale"><span class="dpin" data-left="'+pin+'" style="left:0%"></span></div>'
-    + '<div class="dends"><span>적음</span><span>평균</span><span>많음</span></div>'
-    + '<div class="dfig">'
-    + '<div><div class="dl">100병상당</div><div class="dv">'+d.mine+'명</div></div>'
-    + '<div><div class="dl">'+esc(d.kind)+' 중위</div><div class="dv">'+d.base.median+'명</div></div>'
-    + '<div><div class="dl">1인당 병상</div><div class="dv">'+d.bedsPerStaff+'</div></div>'
-    + '</div>';
+  t += '</div>';
+
+  if(d.rehabCert){
+    t += '<div class="ldcert2">🏥 <b>회복기 재활의료기관</b>'
+      + '<span>나라에서 정한 기준을 통과한 재활 전문 병원입니다. '
+      + '집중 재활치료를 해야 해서 일이 많은 편입니다.</span></div>';
+  }
 
   if(d.hire){
-    t+='<div class="hire '+d.hire.tone+'">'
-     + '<div class="hh"><span class="hicon">'
-     + (d.hire.tone==='high'?'📈':(d.hire.tone==='low'?'📉':'➖'))
-     + '</span>'+esc(d.hire.head)+'</div>'
-     + '<p>'+esc(d.hire.body)+'</p></div>';
+    t += '<div class="hire '+d.hire.tone+'">'
+      + '<div class="hh"><span class="hicon">'
+      + (d.hire.tone==='high'?'📈':(d.hire.tone==='low'?'📉':'➖'))
+      + '</span>'+esc(d.hire.head)+'</div>'
+      + '<p>'+esc(d.hire.body)+'</p></div>';
   }
 
-  t+='<div class="dcmp">'
-   + '<div class="dc"><span>'+esc(d.kind)+' '+d.base.n+'곳 중</span>'
-   + '<b>상위 '+(100-d.base.pct)+'%</b></div>';
-  if(d.whole){
-    t+='<div class="dc"><span>치료사 있는 전체 '+d.whole.n.toLocaleString('ko-KR')+'곳 중</span>'
-     + '<b>상위 '+(100-d.whole.pct)+'%</b></div>';
-  }
-  t+='</div>';
-
-  t+='<div class="dnote">'+esc(d.note)
-   + ' <span style="color:var(--dim)">같은 '+esc(d.kind)+'은 보통 '+esc(job||'치료사')
-   + ' 1명이 '+(d.medianBedsPerStaff||'—')+'병상을 맡습니다. '
-   + '종별마다 환자 성격이 달라 같은 종별끼리 비교합니다.</span></div>'
-   + '</div>';
+  t += '<div class="ldnote">'+esc(d.why)
+    + '<span class="ldwarn">병원이 신고한 자료로 <b>추측한 결과</b>입니다. '
+    + '실제로 다닐 때 느끼는 것과 다를 수 있으니 참고만 해주세요.</span></div>'
+    + '</div>';
   return t;
 }
 
@@ -2873,7 +3005,10 @@ function submit(){
     startYear:val('startYear'), curStartYear:val('curStartYear')||val('startYear'),
     region:val('region'), hospitalType:val('hospitalType').split(' —')[0],
     employment:val('employment'), salary:val('salary'),
-    nightDuty:val('nightDuty')||0, weekendWork:val('weekendWork')||0, bonus:val('bonus')||0,
+    nightDuty:val('nightDuty')||0, dutyHours:val('dutyHours')||2,
+    weekendWork:val('weekendWork')||0, weekendHours:val('weekendHours')||4,
+    extraPay:(document.getElementById('extraPay')||{}).checked?'Y':'',
+    bonus:val('bonus')||0,
     grade:val('grade'), wantType:val('wantType'), wantRegion:val('wantRegion'),
     birthYear:val('birthYear'), note:document.getElementById('note').value,
     school:val('school'), gpa:val('gpa'), gpaMax:val('gpaMax'),
@@ -3081,19 +3216,18 @@ function drawCompare(r){
 
   var h='<div class="cmp">'+col(A, A[key]>B[key])+col(B, B[key]>A[key])+'</div>'
     + '<div class="card">'
-    + cmpRow('병상수', A.bed||null, B.bed||null, null, '')
-    + cmpRow('100병상당 '+r.job, A[perKey], B[perKey], 'high', '명')
-    + cmpRow(r.job+' 1인당 병상', A.bedsPerOT, B.bedsPerOT, 'low', '')
+    + cmpRow('침대 수', A.bed||null, B.bed||null, null, '개')
+    + cmpRow('침대 100개당 '+r.job, A[perKey], B[perKey], 'high', '명')
     + cmpRow('물리치료사', A.pt||null, B.pt||null, null, '명')
-    + cmpRow('재활의학과 전문의', A.rehab||null, B.rehab||null, 'high', '명')
+    + cmpRow('재활 담당 의사', A.rehab||null, B.rehab||null, 'high', '명')
     + cmpRow('전체 의사', A.doc||null, B.doc||null, null, '명')
+    + cmpRow('회복기 재활병원',
+        A.rehabCert?1:null, B.rehabCert?1:null, null, '곳')
     + cmpRow('사회복지사', A.sw||null, B.sw||null, null, '명')
-    + cmpRow('종별 내 위치',
-        (A.density&&A.density.enough)?(100-A.density.base.pct):null,
-        (B.density&&B.density.enough)?(100-B.density.base.pct):null, 'low', '% 상위')
+    + cmpRow('치료사 1명당 침대',
+        A.bedsPerOT, B.bedsPerOT, 'low', '개')
     + '<div class="warnbox">초록색은 그 항목에서 수치가 앞선 쪽입니다. '
-    + '종별이 다르면 100병상당 인원을 직접 비교하기 어렵습니다 — '
-    + '같은 종별끼리 비교하실 때 의미가 있습니다.</div>'
+    + '업무 강도는 공개 자료로 계산한 <b>추정값</b>이라 실제와 다를 수 있습니다.</div>'
     + '</div>';
 
   h+='<div class="card"><h2>'+esc(A.name)+'</h2>'+densBlock(A.density, r.job)+'</div>';
@@ -3145,7 +3279,8 @@ function drawHosp(r){
           + '<div class="hpi">'
           + '<b>'+esc(x.name)+'</b>'
           + '<span>'+esc(x.kind)+' · '+esc(x.sido)+' '+esc(x.sgg)
-          + (x.bed?' · '+x.bed.toLocaleString('ko-KR')+'병상':'')+'</span></div>'
+          + (x.bed?' · '+x.bed.toLocaleString('ko-KR')+'병상':'')
+          + (x.rehabCert?' · <b style="color:var(--accent)">재활 전문</b>':'')+'</span></div>'
           + '<div class="hpn">'
           + '<em>OT '+x.ot+'</em><em class="pt">PT '+x.pt+'</em></div>'
           + '<div class="arw2">›</div></div>';
@@ -3184,6 +3319,7 @@ function drawHospDetail(x){
     + '<div class="hres"><div class="hn">'+esc(x.name)+'</div>'
     + '<div class="hmeta">'
     + (x.kind?'<i class="kd">'+esc(x.kind)+'</i>':'')
+    + (x.rehabCert?'<i class="kd">🏥 회복기 재활병원</i>':'')
     + (x.sido?'<i>'+esc(x.sido)+(x.sgg?' '+esc(x.sgg):'')+'</i>':'')
     + (x.bed?'<i>'+x.bed.toLocaleString('ko-KR')+'병상</i>':'')
     + (x.rehab?'<i class="kd">재활의학과 전문의 '+x.rehab+'명</i>':'')
@@ -3615,21 +3751,54 @@ function won(n){return n?n.toLocaleString('ko-KR'):'—';}
 function showHourly(h){
   var box=document.getElementById('hourlyBox');
   if(!h.ok||!h.mine){box.innerHTML='';return;}
-  var down = h.verdict==='below';
-  var cmp = h.peer ? ('같은 조건 중위 '+won(h.peer.median)+'원 · '
-        + (down?'시간당 '+won(h.gap)+'원 낮습니다':'시간당 '+won(h.gap)+'원 높습니다')) : '비교 표본 없음';
-  box.innerHTML='<div class="hr">'
-    + '<div class="top"><span class="big">시급 '+won(h.mine)+'원</span>'
-    + (h.peer?'<span class="tag '+(down?'down':'up')+'">'+(down?'중위 아래':'중위 이상')+'</span>':'')
-    + '</div>'
-    + '<div class="exp">'
-    + '월 총수령 '+h.monthlyTotal+'만원 (고정급 + 상여 월분할)<br>'
-    + '기본 174시간'+(h.extraHours?' + 당직·주말 '+h.extraHours+'시간':'')+' 기준<br>'
-    + cmp
-    + '</div>'
-    + (h.extraHours>=32?'<div class="warnbox">당직·주말이 월 '+h.extraHours+'시간입니다. '
-        + '월급이 높아 보여도 시급으로 보면 손해일 수 있습니다.</div>':'')
-    + '</div>';
+
+  var t='<div class="card"><h2>한 시간에 얼마 버나</h2>'
+    + '<p class="sub">월급을 실제 일한 시간으로 나눈 금액입니다.</p>';
+
+  // 큰 숫자
+  t+='<div class="hrbig"><span class="hv" data-count="'+h.mine+'" data-suf="원">0원</span>'
+   + '<span class="hu">시간당</span></div>';
+
+  // 등수
+  if(h.rank){
+    t+='<div class="hrrank">같은 조건 <b>'+h.n+'명 중 '+h.rank+'등</b>'
+     + ' <span class="hrp">상위 '+h.topPercent+'%</span></div>';
+  }else{
+    t+='<div class="hrrank" style="color:var(--dim)">비교할 사람이 '+h.n+'명뿐이라 '
+     + '아직 등수가 나오지 않습니다</div>';
+  }
+
+  // 계산 과정을 눈에 보이게
+  t+='<div class="hrcalc">'
+   + '<div class="hc"><span>한 달에 받는 돈</span><b>'+h.monthlyTotal+'만원</b></div>'
+   + '<div class="hcop">÷</div>'
+   + '<div class="hc"><span>한 달에 일하는 시간</span><b>'+h.workHours+'시간</b></div>'
+   + '</div>'
+   + '<p class="hrnote">받는 돈에는 <b>상여를 12로 나눈 금액</b>도 넣었습니다.<br>'
+   + '일하는 시간 = 기본 '+(h.baseHours||174)+'시간'
+   + (h.extraHours ? ' + 당직·주말 '+h.extraHours+'시간' : '')
+   + '<br><span style="opacity:.75">기본 174시간은 주 5일·하루 8시간 기준입니다</span></p>';
+
+  // 또래 비교
+  if(h.peer && h.peer.median){
+    var down = h.mine < h.peer.median;
+    t+='<div class="hrcmp '+(down?'lo':'hi')+'">'
+     + '<b>같은 조건 사람들은 시간당 '+won(h.peer.median)+'원</b>'
+     + '<span>나는 시간당 '+won(h.gap)+'원 '+(down?'적게':'많이')+' 법니다</span>'
+     + '</div>';
+  }
+
+  // 당직이 많으면 짚어주기
+  if(h.extraHours>=32){
+    t+='<div class="warnbox"><b>당직·주말이 월 '+h.extraHours+'시간입니다</b><br>'
+     + '월급이 많아 보여도 그만큼 더 일한 것이라, '
+     + '시간으로 따지면 손해일 수 있습니다.</div>';
+  }
+
+  t+='</div>';
+  box.innerHTML=t;
+  animateNumbersEl(box);
+  attachRipple();
 }
 
 function showSpec(sp){
@@ -3697,13 +3866,16 @@ function drawCard(d){
 
   x.fillStyle='#fff';
   x.font='800 132px -apple-system,"Apple SD Gothic Neo",sans-serif';
-  x.fillText(d.topPercent!==null?('상위 '+d.topPercent+'%'):'첫 참여', W/2, 570);
+  x.fillText(d.topPercent!==null?('상위 '+d.topPercent+'%'):'첫 참여', W/2, 560);
 
+  x.font='700 40px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillStyle='rgba(255,255,255,.92)';
+  if(d.rank) x.fillText('같은 조건 '+d.peerCount+'명 중 '+d.rank+'등', W/2, 632);
+  else x.fillText('같은 조건 '+(d.peerCount||0)+'명 중', W/2, 632);
   x.font='400 34px -apple-system,"Apple SD Gothic Neo",sans-serif';
   x.fillStyle='rgba(255,255,255,.8)';
-  x.fillText('같은 조건 '+(d.peerCount||0)+'명 중', W/2, 640);
-  if(d.hourlyTop){
-    x.fillText('실질 시급은 '+d.hourlyTop, W/2, 700);
+  if(d.hourlyRank){
+    x.fillText('시급은 '+d.hourlyRank.n+'명 중 '+d.hourlyRank.rank+'등', W/2, 700);
   }
 
   cardFoot(x, W);
