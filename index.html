@@ -881,6 +881,28 @@
   .hrcmp.lo b{color:#8a5c14}
   .hrcmp.hi b{color:var(--accent)}
   .hrcmp span{font-size:13px;color:#3f4c52}
+  .specscore{border-radius:14px;padding:17px;margin-bottom:12px;color:#fff}
+  .specscore.tS{background:linear-gradient(160deg,#0a6b4a,#12886a)}
+  .specscore.tA{background:linear-gradient(160deg,#0d5c4f,#127764)}
+  .specscore.tB{background:linear-gradient(160deg,#1f4f8f,#2a63ad)}
+  .specscore.tC{background:linear-gradient(160deg,#7a6320,#9a7f2c)}
+  .specscore.tD{background:linear-gradient(160deg,#5f5750,#7a716a)}
+  .ssh{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .ssh .sst{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.2);
+    display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;
+    flex-shrink:0}
+  .ssh b{display:block;font-size:16px;font-weight:800;letter-spacing:-.03em;
+    line-height:1.35;margin-bottom:2px;word-break:keep-all}
+  .ssh span{font-size:12.5px;opacity:.85;line-height:1.5;word-break:keep-all}
+  .ssnum{display:flex;align-items:baseline;gap:6px;margin-bottom:14px}
+  .ssnum span{font-size:52px;font-weight:800;letter-spacing:-.05em;line-height:1}
+  .ssnum em{font-style:normal;font-size:15px;opacity:.75;font-weight:700}
+  .ssparts{display:flex;flex-direction:column;gap:8px}
+  .sp2 .spl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+  .sp2 .spl b{font-weight:700;opacity:.9}
+  .sp2 .spb{height:7px;border-radius:4px;background:rgba(255,255,255,.2);overflow:hidden}
+  .sp2 .spb i{display:block;height:100%;background:#fff;border-radius:4px;width:0;
+    animation:grow .9s cubic-bezier(.16,.84,.28,1) forwards}
   .wantbox{background:var(--accent-soft);border-radius:11px;padding:14px;margin-bottom:13px}
   .wantbox b{display:block;font-size:12.5px;color:var(--accent);margin-bottom:4px}
   .wantbox .wr{display:block;font-size:24px;font-weight:800;letter-spacing:-.03em;
@@ -1014,7 +1036,7 @@
         <div class="fno">05</div>
         <div class="fbody">
           <h3>결과 카드</h3>
-          <p>금액 없이 상위 %만 담긴 이미지. 부담 없이 공유.</p>
+          <p>내 위치를 담은 이미지로 저장하거나, 링크로 친구에게 보낼 수 있습니다.</p>
         </div>
       </div>
     </div>
@@ -1632,12 +1654,13 @@
     <div id="specBox"></div>
     <div class="card hide" id="cardWrap">
       <h2>결과 카드</h2>
-      <p class="sub">금액은 들어가지 않습니다. 인스타 스토리에 올리기 좋은 정사각 이미지입니다.</p>
+      <p class="sub" id="cardSub"></p>
       <div class="cardprev"><canvas id="cardCanvas" width="1080" height="1080"></canvas></div>
       <div class="two cardbtns">
         <button onclick="saveCard()">이미지 저장</button>
-        <button onclick="shareCard()">공유하기</button>
+        <button onclick="shareCard()">링크 공유</button>
       </div>
+      <p class="thin" id="cardHint"></p>
     </div>
     <div class="menu" id="dashMenu"></div>
     <div id="bannerDash"></div>
@@ -1769,7 +1792,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=19"></script>
+<script src="app.js?v=20"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1794,7 +1817,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v19 · 2026-08-25';
+var APP_VER = 'v20 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -1835,7 +1858,7 @@ function setRole(r){
     ? '내 스펙 입력'
     : '2단계 · 스펙 <span style="font-weight:400;color:var(--dim);font-size:12px">(선택)</span>';
   document.getElementById('specSub').textContent = (r==='학생')
-    ? '급여는 받지 않습니다. 스펙만 넣으면 내 위치와 갈 수 있는 곳이 나옵니다.'
+    ? '급여는 받지 않습니다. 스펙을 넣으면 내 점수와 갈 수 있는 곳이 나옵니다.'
     : '여기까지 채우면 합격 스펙 통계도 볼 수 있습니다.';
   document.getElementById('schoolLabel').textContent = (r==='학생')?'재학 과정':'최종 학력';
   document.getElementById('submitBtn').textContent = (r==='학생')
@@ -3088,10 +3111,30 @@ function showPos(p){
   attachRipple(); animateNumbers('#myPos');
 }
 
+function ssPart(label, got, max){
+  var pct=Math.round(got/max*100);
+  return '<div class="sp2"><div class="spl"><span>'+label+'</span><b>'+got+'/'+max+'</b></div>'
+    + '<div class="spb"><i style="--w:'+pct+'%"></i></div></div>';
+}
+
 function showStudent(d){
   if(!d.ok){document.getElementById('myPos').innerHTML=failCard(d);return;}
   var p=d.peer, h='';
 
+  if(d.spec){
+    h+='<div class="specscore t'+esc(d.spec.tier)+'">'
+     + '<div class="ssh"><span class="sst">'+esc(d.spec.tier)+'</span>'
+     + '<div><b>'+esc(d.spec.headline)+'</b><span>'+esc(d.spec.comment)+'</span></div></div>'
+     + '<div class="ssnum"><span data-count="'+d.spec.score+'">0</span>'
+     + '<em>점 / 100점</em></div>'
+     + '<div class="ssparts">'
+     + ssPart('학력', d.spec.parts.school, 22)
+     + ssPart('학점', d.spec.parts.gpa, 26)
+     + ssPart('자격증', d.spec.parts.certs, 16)
+     + ssPart('이수 교육', d.spec.parts.courses, 18)
+     + ssPart('실습', d.spec.parts.practice, 18)
+     + '</div></div>';
+  }
   h+='<div class="pos"><div class="lead">'+esc(d.me.grade||'')+' · '+esc(d.me.school||'')+'</div>'
    + (p.topPercent!==null
       ? '<div class="num" data-count="'+p.topPercent+'" data-pre="상위 " data-suf="%">상위 0%</div>'
@@ -3822,6 +3865,19 @@ function showSpec(sp){
     + '합격 확률이 아니라 참여자 분포입니다.</div></div>';
 }
 
+/* 카드 영역을 켜고 안내 문구를 상황에 맞게 */
+function showCardBox(kind){
+  var wrap=document.getElementById('cardWrap');
+  if(wrap) wrap.className='card';
+  var sub=document.getElementById('cardSub');
+  var hint=document.getElementById('cardHint');
+  if(sub) sub.textContent = (kind==='student')
+    ? '내 스펙이 몇 점인지 담긴 카드입니다.'
+    : '금액은 들어가지 않습니다. 상위 몇 %인지만 담겨 있습니다.';
+  if(hint) hint.textContent = '링크 공유를 누르면 이 화면 주소가 전달됩니다. '
+    + '받은 사람도 직접 확인해볼 수 있습니다.';
+}
+
 function cardBase(x, W, title){
   x.fillStyle='#0d5c4f'; x.fillRect(0,0,W,W);
   x.fillStyle='rgba(255,255,255,.06)';
@@ -3879,7 +3935,7 @@ function drawCard(d){
   }
 
   cardFoot(x, W);
-  document.getElementById('cardWrap').className='card';
+  showCardBox('pro');
 }
 
 function drawStudentCard(d){
@@ -3888,31 +3944,86 @@ function drawStudentCard(d){
   if(!c||!c.getContext) return;
   var x=c.getContext('2d'), W=1080;
   if(!x) return;
-  cardBase(x, W, '작업치료 학생 스펙 통계');
 
+  var TONE = { S:'#0a6b4a', A:'#0d5c4f', B:'#1f4f8f', C:'#7a6320', D:'#6b5f56' };
+  var base = TONE[d.tier] || '#0d5c4f';
+
+  // 배경
+  x.fillStyle=base; x.fillRect(0,0,W,W);
+  x.fillStyle='rgba(255,255,255,.07)';
+  x.beginPath(); x.arc(W*0.88, W*0.1, W*0.3, 0, Math.PI*2); x.fill();
+  x.beginPath(); x.arc(W*0.06, W*0.95, W*0.24, 0, Math.PI*2); x.fill();
+  x.textAlign='center';
+
+  // 머리말
+  x.fillStyle='rgba(255,255,255,.7)';
+  x.font='700 32px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText((d.job||'치료사')+' 준비 점수', W/2, 108);
+
+  // 등급 배지
+  x.fillStyle='rgba(255,255,255,.16)';
+  roundRect(x, W/2-70, 148, 140, 76, 38); x.fill();
   x.fillStyle='#fff';
+  x.font='800 52px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText(d.tier, W/2, 202);
+
+  // 점수
+  x.font='800 190px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText(String(d.score), W/2, 400);
   x.font='700 46px -apple-system,"Apple SD Gothic Neo",sans-serif';
-  x.fillText((d.grade||'')+' · '+(d.school||''), W/2, 250);
+  x.fillStyle='rgba(255,255,255,.72)';
+  x.fillText('점 / 100점', W/2, 462);
 
-  x.font='800 132px -apple-system,"Apple SD Gothic Neo",sans-serif';
-  x.fillText(d.topPercent!==null?('상위 '+d.topPercent+'%'):'첫 참여', W/2, 470);
+  // 한마디
+  x.fillStyle='#fff';
+  x.font='800 52px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText(d.headline||'', W/2, 566);
+  x.font='400 36px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillStyle='rgba(255,255,255,.82)';
+  x.fillText(d.comment||'', W/2, 622);
 
-  x.font='400 34px -apple-system,"Apple SD Gothic Neo",sans-serif';
-  x.fillStyle='rgba(255,255,255,.8)';
-  x.fillText('같은 학년 '+(d.peerCount||0)+'명 중', W/2, 540);
-
-  if(d.wantType){
+  // 항목별 막대
+  var parts = d.parts || {};
+  var items = [
+    ['학력', parts.school||0, 22],
+    ['학점', parts.gpa||0, 26],
+    ['자격증', parts.certs||0, 16],
+    ['이수 교육', parts.courses||0, 18],
+    ['실습', parts.practice||0, 18]
+  ];
+  var top=690, gap=46, barX=380, barW=460;
+  x.textAlign='left';
+  items.forEach(function(it,i){
+    var y = top + i*gap;
+    x.fillStyle='rgba(255,255,255,.8)';
+    x.font='700 28px -apple-system,"Apple SD Gothic Neo",sans-serif';
+    x.fillText(it[0], 190, y+8);
+    x.fillStyle='rgba(255,255,255,.18)';
+    roundRect(x, barX, y-12, barW, 22, 11); x.fill();
+    var w = Math.max(6, barW * (it[1]/it[2]));
     x.fillStyle='#fff';
-    x.font='700 42px -apple-system,"Apple SD Gothic Neo",sans-serif';
-    x.fillText('희망 · '+d.wantType, W/2, 640);
-    if(d.wantRate!==null&&d.wantRate!==undefined){
-      x.font='400 36px -apple-system,"Apple SD Gothic Neo",sans-serif';
-      x.fillStyle='rgba(255,255,255,.8)';
-      x.fillText('스펙 도달 '+d.wantRate+'%', W/2, 696);
-    }
+    roundRect(x, barX, y-12, w, 22, 11); x.fill();
+    x.fillStyle='rgba(255,255,255,.85)';
+    x.font='700 24px -apple-system,"Apple SD Gothic Neo",sans-serif';
+    x.fillText(it[1]+'/'+it[2], barX+barW+16, y+7);
+  });
+
+  x.textAlign='center';
+  if(d.percentile!==null && d.percentile!==undefined && d.peerCount>=3){
+    x.fillStyle='rgba(255,255,255,.72)';
+    x.font='400 30px -apple-system,"Apple SD Gothic Neo",sans-serif';
+    x.fillText('같은 학년 '+d.peerCount+'명 중 상위 '+(100-d.percentile)+'%', W/2, 940);
   }
-  cardFoot(x, W);
-  document.getElementById('cardWrap').className='card';
+
+  // 꼬리말
+  x.font='400 28px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillStyle='rgba(255,255,255,.55)';
+  x.fillText('내 점수도 확인해보세요', W/2, 1000);
+  x.font='800 38px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillStyle='#fff';
+  x.fillText('POT LAB', W/2, 1044);
+
+  showCardBox('student');
 }
 
 function roundRect(x, l, t, w, h, r){
@@ -3925,17 +4036,25 @@ function roundRect(x, l, t, w, h, r){
   x.closePath();
 }
 
+/* 링크로 공유합니다 — 받은 사람이 눌러서 직접 확인하게 */
 function shareCard(){
-  var c=document.getElementById('cardCanvas');
-  if(!c){ return; }
-  if(!navigator.share || !c.toBlob){ saveCard(); return; }
-  c.toBlob(function(blob){
-    if(!blob){ saveCard(); return; }
-    var f=new File([blob],'potlab.png',{type:'image/png'});
-    if(navigator.canShare && navigator.canShare({files:[f]})){
-      navigator.share({files:[f], text:'내 위치 확인해봤습니다'}).catch(function(){});
-    } else { saveCard(); }
-  }, 'image/png');
+  var role = (ME && ME.role) === '학생' ? '학생' : '현직';
+  var txt = (role === '학생')
+    ? '내 스펙 몇 점인지 나왔습니다.\n작업·물리치료사 스펙 점수 내보기'
+    : '내 연봉이 어디쯤인지 나왔습니다.\n작업·물리치료사 급여 통계';
+  var url = location.origin + location.pathname;
+
+  if(navigator.share){
+    navigator.share({ title: 'POT LAB', text: txt, url: url })
+      .catch(function(){});
+    return;
+  }
+  var t=document.createElement('textarea');
+  t.value = txt + '\n' + url;
+  document.body.appendChild(t); t.select();
+  try{ document.execCommand('copy'); msg('링크를 복사했습니다'); }
+  catch(e){ msg('주소를 길게 눌러 복사해주세요'); }
+  t.remove();
 }
 
 function saveCard(){
