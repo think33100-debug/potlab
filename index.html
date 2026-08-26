@@ -624,6 +624,16 @@
   .mi.kakao{background:#FEE500;border-color:#FEE500}
   .mi.off{opacity:.5}
 
+  .backbar{display:flex;gap:7px;margin-bottom:12px}
+  .backbar button{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;
+    border:1px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+    font-size:14px;font-weight:700;letter-spacing:-.01em;padding:10px 16px 10px 13px;
+    border-radius:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:transform .22s,background-color .2s,border-color .2s}
+  .backbar button:active{transform:scale(.96);background:var(--accent-soft);
+    border-color:var(--accent)}
+  .backbar .ic2{font-size:17px;line-height:1;color:var(--accent);font-weight:800}
+  .backbar .home{margin-left:auto;padding:10px 16px}
   .back{display:inline-flex;align-items:center;gap:7px;
     border:1px solid var(--line);background:#fff;color:var(--ink);
     font-family:inherit;font-size:15px;font-weight:700;letter-spacing:-.01em;
@@ -1084,6 +1094,7 @@
     <div class="menu" id="menuBox"></div>
   </div>
 
+  <div id="backBar" class="hide"></div>
   <div id="subhead" class="hide">
     <button class="back" onclick="goBack()"><span class="bicon">‹</span>뒤로</button>
     <div class="hero">
@@ -1657,7 +1668,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=12"></script>
+<script src="app.js?v=14"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1682,7 +1693,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v12 · 2026-08-25';
+var APP_VER = 'v14 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -1750,7 +1761,86 @@ function cred(){
            id: ME ? ME.id : '', job: (ME && ME.job) ? ME.job : JOB };
 }
 function unlocked(){ return !!(ME && ME.nick && ME.code); }
-function goBack(){ tab(unlocked() ? 'dash' : 'home'); }
+/* ===== 화면 이동 기록 =====
+ * 뒤로 가면 직전 화면으로, 그때 보던 내용까지 되살립니다.
+ */
+var NAV = [];                 // 지나온 화면
+var SNAP = {};                // 화면별로 보던 내용
+
+function snapshot(which){
+  if(which === 'hosp'){
+    SNAP.hosp = {
+      tab:  (document.getElementById('hb2')||{}).className &&
+            document.getElementById('hb2').className.indexOf('on')>-1 ? 'region'
+            : ((document.getElementById('hb3')||{}).className||'').indexOf('on')>-1 ? 'cmp' : 'search',
+      q:    val('hq'),
+      html: (document.getElementById('hospBox')||{}).innerHTML || '',
+      job:  (document.getElementById('hJob')||{}).value || '',
+      sido: (document.getElementById('hSido')||{}).value || '',
+      kind: (document.getElementById('hKind')||{}).value || '',
+      sort: (document.getElementById('hSort')||{}).value || '',
+      cmpA: val('cmpA'), cmpB: val('cmpB'),
+      scroll: window.scrollY || 0
+    };
+  } else if(which === 'view'){
+    SNAP.view = {
+      html: (document.getElementById('statBox')||{}).innerHTML || '',
+      region:(document.getElementById('fRegion')||{}).value || '',
+      type: (document.getElementById('fType')||{}).value || '',
+      band: (document.getElementById('fBand')||{}).value || '',
+      emp:  (document.getElementById('fEmp')||{}).value || '',
+      job:  (document.getElementById('fJob')||{}).value || '',
+      scroll: window.scrollY || 0
+    };
+  } else if(which === 'calc'){
+    SNAP.calc = { html:(document.getElementById('calcBox')||{}).innerHTML||'',
+                  mode:(document.getElementById('cMode')||{}).value||'',
+                  amount: val('cAmount'), birth: val('cBirth') };
+  } else if(which === 'region'){
+    SNAP.region = { html:(document.getElementById('regionBox')||{}).innerHTML||'',
+                    type:(document.getElementById('rType')||{}).value||'' };
+  }
+}
+
+function restore(which){
+  var st = SNAP[which];
+  if(!st) return false;
+  var set = function(id,v){ var e=document.getElementById(id); if(e && v!==undefined) e.value=v; };
+
+  if(which === 'hosp'){
+    hospTab(st.tab || 'search');
+    set('hq', st.q); set('hJob', st.job); set('hSido', st.sido);
+    set('hKind', st.kind); set('hSort', st.sort);
+    set('cmpA', st.cmpA); set('cmpB', st.cmpB);
+    document.getElementById('hospBox').innerHTML = st.html;
+  } else if(which === 'view'){
+    set('fRegion', st.region); set('fType', st.type); set('fBand', st.band);
+    set('fEmp', st.emp); set('fJob', st.job);
+    document.getElementById('statBox').innerHTML = st.html;
+  } else if(which === 'calc'){
+    set('cMode', st.mode); set('cAmount', st.amount); set('cBirth', st.birth);
+    document.getElementById('calcBox').innerHTML = st.html;
+  } else if(which === 'region'){
+    set('rType', st.type);
+    document.getElementById('regionBox').innerHTML = st.html;
+  }
+  attachRipple();
+  if(st.scroll) setTimeout(function(){ window.scrollTo(0, st.scroll); }, 60);
+  return true;
+}
+
+/* 뒤로 — 직전 화면으로 */
+function goBack(){
+  var prev = NAV.pop();
+  if(prev && prev !== CURRENT){ tab(prev, true); return; }
+  tab(unlocked() ? 'dash' : 'home', true);
+}
+
+/* 홈 — 기록을 비우고 처음으로 */
+function goHome(){
+  NAV = [];
+  tab('home', true);
+}
 
 function esc(s){
   return String(s==null?'':s).replace(/[&<>"]/g,function(c){
@@ -1761,7 +1851,23 @@ function esc(s){
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
   clearTimeout(m._t);m._t=setTimeout(function(){m.className='';},2500);}
 
-function tab(which){
+var CURRENT = 'home';
+var SUBMITTED = false;   // 제출을 끝냈으면 이탈 경고를 끕니다
+
+/**
+ * 화면 전환
+ *  back=true 면 기록을 남기지 않고, 저장해둔 내용을 되살립니다
+ */
+function tab(which, back){
+  // 떠나기 전에 보던 내용을 저장합니다
+  if(CURRENT && CURRENT !== which) snapshot(CURRENT);
+  if(!back && CURRENT && CURRENT !== which){
+    NAV.push(CURRENT);
+    if(NAV.length > 20) NAV.shift();
+  }
+  CURRENT = which;
+  try{ history.pushState({p:which}, '', location.href); }catch(e){}
+
   ['home','input','view','done','unlock','dash','feedback','calc','install','hosp','region','jobs'].forEach(function(p){
     var el=document.getElementById('pane-'+p);
     if(el) el.className = (p===which?'':'hide');
@@ -1786,14 +1892,22 @@ function tab(which){
   }
   document.getElementById('t1').className='tab'+(which==='input'?' on':'');
   document.getElementById('t2').className='tab'+(which==='view'?' on':'');
-  if(which==='install') drawGuide();
   if(which==='home'){ drawHomeCTA(); revealHome(); }
   setTimeout(function(){ revealIn('#pane-'+which); watchMotion('#pane-'+which); }, 30);
+  drawBackBar(which);
   if(which==='dash') drawDash();
-  if(which==='region') doRegion();
+  if(which==='region'){ if(!(back && restore('region'))) doRegion(); }
   if(which==='jobs') drawJobLinks();
-  if(which==='view'){ drawViewNotice(); if(unlocked()) doStats(); }
-  window.scrollTo({top:0, behavior:'smooth'});
+  if(which==='view'){
+    drawViewNotice();
+    if(!(back && restore('view')) && unlocked()) doStats();
+  }
+  if(which==='hosp'){ if(!(back && restore('hosp'))) hospTab('search'); }
+  if(which==='calc'){ if(back) restore('calc'); }
+  if(which==='install') drawGuide();
+
+  // 되살린 화면은 보던 위치를 유지합니다
+  if(!(back && SNAP[which])) window.scrollTo({top:0, behavior:'smooth'});
 
 }
 
@@ -2311,6 +2425,19 @@ function startBanner(list){
 }
 
 /* 이미 열려 있으면 홈에서도 대시보드로 돌아갈 수 있게 */
+/* 화면 위 이동 막대 — 뒤로 / 홈 */
+function drawBackBar(which){
+  var bar=document.getElementById('backBar');
+  if(!bar) return;
+  if(which==='home' || which==='dash'){ bar.className='hide'; bar.innerHTML=''; return; }
+  bar.className='backbar';
+  bar.innerHTML =
+      '<button onclick="goBack()"><span class="ic2">‹</span>뒤로</button>'
+    + '<button class="home" onclick="goHome()">홈</button>'
+    + (unlocked()?'<button onclick="tab(\'dash\')">내 통계</button>':'');
+  attachRipple();
+}
+
 function drawHomeCTA(){
   var cta=document.getElementById('ctaBox');
   if(!cta) return;
@@ -2760,6 +2887,7 @@ function submit(){
   google.script.run.withSuccessHandler(function(r){
     if(!r.ok){ btn.disabled=false; btn.textContent='제출하고 통계 보기'; msg(r.message); return; }
     lastId=r.id;
+    SUBMITTED = true;
     saveMe({nick:r.nick, id:r.id, role:r.role, job:r.job||JOB,
             code:(ME&&ME.code)||''});
     document.getElementById('doneCode').textContent=r.nick;
@@ -3027,7 +3155,17 @@ function drawHosp(r){
   attachRipple();
 }
 
+var LIST_HTML = '';   // 검색 목록을 기억해둡니다
+
+function backToList(){
+  var box=document.getElementById('hospBox');
+  if(LIST_HTML){ box.innerHTML=LIST_HTML; attachRipple(); return; }
+  doHosp();
+}
+
 function openHosp(idx){
+  var cur=document.getElementById('hospBox');
+  if(cur && cur.innerHTML.indexOf('hpick')>-1) LIST_HTML = cur.innerHTML;
   var box=document.getElementById('hospBox');
   box.innerHTML=loading('병원 정보를 불러오는 중');
   google.script.run.withSuccessHandler(function(x){
@@ -3042,7 +3180,7 @@ function drawHospDetail(x){
   var box=document.getElementById('hospBox');
   if(!x.ok){ box.innerHTML=failCard(x); attachRipple(); return; }
 
-  var t='<button class="back" onclick="doHosp()"><span class="bicon">‹</span>목록으로</button>'
+  var t='<button class="back" onclick="backToList()"><span class="bicon">‹</span>목록으로</button>'
     + '<div class="hres"><div class="hn">'+esc(x.name)+'</div>'
     + '<div class="hmeta">'
     + (x.kind?'<i class="kd">'+esc(x.kind)+'</i>':'')
@@ -3667,6 +3805,64 @@ google.script.run.withSuccessHandler(function(b){
              logo:'', rooms:[], roomPoints:[], jobLinks:[], banners:[] });
   if(window.console) console.warn('getBrand 실패:', e && e.message);
 }).getBrand();
+
+/* ===== 나가기 방지 =====
+ * ① 뒤로 갈 곳이 있으면 화면 이동
+ * ② 더 갈 곳이 없으면 "한 번 더 누르면 나갑니다" 안내
+ * ③ 입력 중이면 브라우저가 다시 묻습니다
+ */
+var EXIT_ARMED = false;
+
+try{
+  history.replaceState({p:'root'}, '', location.href);
+  history.pushState({p:'app'}, '', location.href);
+
+  window.addEventListener('popstate', function(){
+    // 갈 곳이 남아 있으면 화면만 되돌립니다
+    if(NAV.length){
+      goBack();
+      try{ history.pushState({p:CURRENT}, '', location.href); }catch(e){}
+      return;
+    }
+    // 홈이 아니면 홈으로
+    if(CURRENT !== 'home' && CURRENT !== 'dash'){
+      tab(unlocked() ? 'dash' : 'home', true);
+      try{ history.pushState({p:CURRENT}, '', location.href); }catch(e){}
+      return;
+    }
+    // 여기서 한 번 더 누르면 정말 나갑니다
+    if(EXIT_ARMED){ history.back(); return; }
+    EXIT_ARMED = true;
+    msg('한 번 더 누르면 나갑니다');
+    try{ history.pushState({p:'app'}, '', location.href); }catch(e){}
+    setTimeout(function(){ EXIT_ARMED = false; }, 2000);
+  });
+}catch(e){}
+
+/* 입력하던 게 있으면 나가기 전에 확인합니다 */
+window.addEventListener('beforeunload', function(e){
+  if(!isTyping()) return;
+  e.preventDefault();
+  e.returnValue = '';   // 브라우저가 기본 확인창을 띄웁니다
+  return '';
+});
+
+/* 등록·건의 화면에서 뭔가 적고 있는지 */
+function isTyping(){
+  if(SUBMITTED) return false;
+  if(CURRENT === 'input'){
+    var ids = ['nick','salary','startYear','bonus','note','gpa','birthYear'];
+    for(var i=0;i<ids.length;i++){
+      var el = document.getElementById(ids[i]);
+      if(el && String(el.value||'').trim()) return true;
+    }
+  }
+  if(CURRENT === 'feedback'){
+    var fb = document.getElementById('fbBody');
+    if(fb && String(fb.value||'').trim()) return true;
+  }
+  return false;
+}
 
 window.addEventListener('load', revealFallback);
 setTimeout(revealFallback, 1500);
