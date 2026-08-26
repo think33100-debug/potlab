@@ -37,7 +37,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
       return;
     }
 
-    var name = '__potlab_cb_' + (++seq) + '_' + Date.now();
+    var name = '__potlab_cb_' + (++seq) + '_' + Date.now();   // 서버가 이 형식만 허용합니다
     var url = API_URL
       + (API_URL.indexOf('?') > -1 ? '&' : '?')
       + 'callback=' + name

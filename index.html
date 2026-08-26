@@ -791,6 +791,37 @@
     *,*::before,*::after{transition:none!important;animation:none!important}
     .reveal{opacity:1!important;transform:none!important}
   }
+  .wantbox{background:var(--accent-soft);border-radius:11px;padding:14px;margin-bottom:13px}
+  .wantbox b{display:block;font-size:12.5px;color:var(--accent);margin-bottom:4px}
+  .wantbox .wr{display:block;font-size:24px;font-weight:800;letter-spacing:-.03em;
+    color:var(--accent)}
+  .wantbox small{display:block;font-size:11.5px;color:#4f6b64;margin-top:5px;line-height:1.6}
+
+  .empty{text-align:center;color:#5a6870;padding:30px 20px;font-size:13.5px;line-height:1.8;
+    background:#fff;border:1px solid var(--line);border-radius:12px}
+
+  /* 기다리는 중 */
+  .loading{text-align:center;color:#5a6870;padding:34px 20px;font-size:13.5px}
+  .loading .dots{display:inline-block;width:22px;text-align:left}
+  .loading .dots i{opacity:0;font-style:normal;animation:dotblink 1.4s infinite}
+  .loading .dots i:nth-child(1){animation-delay:0s}
+  .loading .dots i:nth-child(2){animation-delay:.22s}
+  .loading .dots i:nth-child(3){animation-delay:.44s}
+  @keyframes dotblink{0%,60%,100%{opacity:0}30%{opacity:1}}
+  .loading .barwrap{width:150px;height:3px;background:var(--line);border-radius:2px;
+    margin:14px auto 0;overflow:hidden}
+  .loading .barwrap i{display:block;width:40%;height:100%;background:var(--accent);
+    border-radius:2px;animation:slidebar 1.15s ease-in-out infinite}
+  @keyframes slidebar{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
+
+  /* 실패 안내 */
+  .errbox{background:#fdeeeb;border:1px solid #f2d5cf;border-radius:12px;padding:16px;
+    font-size:13px;line-height:1.75;color:#8c3a20;word-break:keep-all}
+  .errbox b{display:block;font-size:14px;margin-bottom:5px}
+  .errbox code{display:block;background:rgba(255,255,255,.65);border-radius:7px;padding:9px;
+    margin-top:9px;font-size:11.5px;color:#7a4030;word-break:break-all;
+    font-family:ui-monospace,Menlo,monospace}
+
 </style>
 </head>
 <body>
@@ -1229,7 +1260,7 @@
       <div class="f">
         <label>첫 입사연도 <span class="hint">치료사로 처음 일 시작한 해</span></label>
         <div class="unit">
-          <input type="number" id="startYear" min="1970" max="2026" placeholder="2021"
+          <input type="number" min="1970" max="2026" id="startYear" min="1970" max="2026" placeholder="2021"
             oninput="showYears()"><span id="yearsEcho">년 입사</span>
         </div>
       </div>
@@ -1237,7 +1268,7 @@
       <div class="f">
         <label>지금 병원 입사연도 <span class="hint">첫 직장이면 위와 같게</span></label>
         <div class="unit">
-          <input type="number" id="curStartYear" min="1970" max="2026" placeholder="2024"
+          <input type="number" min="1970" max="2026" id="curStartYear" min="1970" max="2026" placeholder="2024"
             oninput="showCurYears()"><span id="curYearsEcho">년 입사</span>
         </div>
       </div>
@@ -1288,7 +1319,7 @@
 
       <div class="f">
         <label>고정 월 실수령액 <span class="hint">세금 떼고 통장에 들어오는 금액</span></label>
-        <div class="unit"><input type="number" id="salary" placeholder="250"
+        <div class="unit"><input type="number" min="1" max="2000" id="salary" placeholder="250"
           oninput="checkSalary()"><span>만원</span></div>
         <div class="flag low" id="flagLow">
           <b>세후 금액이 맞나요?</b>
@@ -1312,7 +1343,7 @@
 
       <div class="f">
         <label>연간 상여 총액 <span class="hint">순위 계산에 반영됩니다 · 없으면 0</span></label>
-        <div class="unit"><input type="number" id="bonus" min="0" placeholder="0"><span>만원</span></div>
+        <div class="unit"><input type="number" min="0" max="9999" id="bonus" min="0" placeholder="0"><span>만원</span></div>
         <div class="hintbox">1년치 상여·성과금 합계.
           <b>고정급 12개월 + 상여</b>로 비교하니 빠뜨리면 낮게 나옵니다.</div>
       </div>
@@ -1543,15 +1574,16 @@
 
       <div class="f">
         <label>무엇을 알고 계신가요?</label>
-        <select id="cMode">
-          <option value="grossMonth">세전 월급을 안다</option>
+        <select id="cMode" onchange="calcHint()">
           <option value="grossYear">세전 연봉을 안다</option>
+          <option value="grossMonth">세전 월급을 안다</option>
           <option value="netMonth">세후 월급(실수령)을 안다</option>
         </select>
       </div>
       <div class="f">
         <label>금액</label>
-        <div class="unit"><input type="number" id="cAmount" placeholder="300"><span>만원</span></div>
+        <div class="unit"><input type="number" min="1" max="15000" id="cAmount" placeholder="3400"><span>만원</span></div>
+        <div class="hint2" id="cHint">연 3,400만원처럼 <b>연봉</b>을 넣어주세요</div>
       </div>
       <div class="f">
         <label>출생연도 <span class="hint">또래 비교용 · 선택</span></label>
@@ -1625,7 +1657,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=12"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1650,7 +1682,8 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v8 · 2026-08-25';
+var APP_VER = 'v12 · 2026-08-25';
+var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
 function setJob(j){
@@ -1859,7 +1892,9 @@ function doUnlock(){
             joinedAt:r.joinedAt, days:r.days});
     setJob(r.job||JOB);
     tab('dash');
-  }).withFailureHandler(function(e){document.getElementById('hospBox').innerHTML=errBox(e);attachRipple();}).unlockAccess(n,c);
+  }).withFailureHandler(function(e){
+    box.innerHTML=errBox(e,'unlockAccess'); attachRipple();
+  }).unlockAccess(n,c);
 }
 
 function greeting(){
@@ -2422,6 +2457,10 @@ function checkSalary(){
 /* ===== 실패 안내 ===== */
 function failCard(r){
   if(r.reason==='empty') return '<div class="card"><p class="sub">'+esc(r.message)+'</p></div>';
+  // 코드·닉네임 문제가 아니면 입력값 안내로 보여줍니다
+  if(!r.reason){
+    return '<div class="warnbox" style="margin-top:0">'+esc(r.message||'다시 확인해주세요')+'</div>';
+  }
   var icon = r.reason==='rotated' ? '🔄' : (r.reason==='nonick' ? '👤' : '🔒');
   return '<div class="notice">'
     + '<div class="icon">'+icon+'</div>'
@@ -2439,14 +2478,27 @@ function man(n){return n?n.toLocaleString('ko-KR'):'—';}
 function ln(k,v){
   return '<div class="ln"><span>'+k+'</span><span>-'+(v||0).toLocaleString('ko-KR')+'원</span></div>';
 }
+function calcHint(){
+  var m=document.getElementById('cMode').value;
+  var el=document.getElementById('cAmount');
+  var h=document.getElementById('cHint');
+  if(m==='grossYear'){ el.max=15000; el.placeholder='3400';
+    h.innerHTML='연 3,400만원처럼 <b>연봉</b>을 넣어주세요'; }
+  else if(m==='grossMonth'){ el.max=2000; el.placeholder='290';
+    h.innerHTML='월 290만원처럼 <b>세전 월급</b>을 넣어주세요'; }
+  else { el.max=2000; el.placeholder='260';
+    h.innerHTML='월 260만원처럼 <b>통장에 찍히는 금액</b>을 넣어주세요'; }
+}
+
 function runCalc(){
   if(!unlocked()){ msg('먼저 등록하고 코드를 입력해주세요'); tab('unlock'); return; }
   var amt=document.getElementById('cAmount').value.trim();
   if(!amt){msg('금액을 입력해주세요');return;}
   document.getElementById('calcBox').innerHTML=loading('계산하는 중');
   google.script.run.withSuccessHandler(drawCalc)
-    .withFailureHandler(function(e){document.getElementById('hospBox').innerHTML=errBox(e);attachRipple();})
-    .calcSalary({
+    .withFailureHandler(function(e){
+      document.getElementById('calcBox').innerHTML=errBox(e,'calcSalary'); attachRipple();
+    }).calcSalary({
       cred:cred(),
       mode:document.getElementById('cMode').value,
       amount:amt,
@@ -2487,6 +2539,73 @@ function drawCalc(r){
 }
 
 /* ===== 인앱 브라우저 ===== */
+/* ===== 기다리는 중 표시 ===== */
+/* ===== 인력 밀도 표시 ===== */
+function densBlock(d, job){
+  if(!d) return '';
+  if(!d.enough){
+    return '<div class="dens l3"><div class="dnote">'
+      + '같은 종별 병원 표본이 부족해 비교하지 않았습니다.'
+      + (d.mine?' (100병상당 '+d.mine+'명)':'')+'</div></div>';
+  }
+  var pin=Math.max(2,Math.min(98,d.percentile));
+  var t='<div class="dens l'+d.level+'">'
+    + '<div class="dtop"><span class="dlab">'+esc(d.label)+'</span>'
+    + '<span class="dpct">'+esc(d.kind)+' 기준</span></div>'
+    + '<div class="dscale"><span class="dpin" data-left="'+pin+'" style="left:0%"></span></div>'
+    + '<div class="dends"><span>적음</span><span>평균</span><span>많음</span></div>'
+    + '<div class="dfig">'
+    + '<div><div class="dl">100병상당</div><div class="dv">'+d.mine+'명</div></div>'
+    + '<div><div class="dl">'+esc(d.kind)+' 중위</div><div class="dv">'+d.base.median+'명</div></div>'
+    + '<div><div class="dl">1인당 병상</div><div class="dv">'+d.bedsPerStaff+'</div></div>'
+    + '</div>';
+
+  if(d.hire){
+    t+='<div class="hire '+d.hire.tone+'">'
+     + '<div class="hh"><span class="hicon">'
+     + (d.hire.tone==='high'?'📈':(d.hire.tone==='low'?'📉':'➖'))
+     + '</span>'+esc(d.hire.head)+'</div>'
+     + '<p>'+esc(d.hire.body)+'</p></div>';
+  }
+
+  t+='<div class="dcmp">'
+   + '<div class="dc"><span>'+esc(d.kind)+' '+d.base.n+'곳 중</span>'
+   + '<b>상위 '+(100-d.base.pct)+'%</b></div>';
+  if(d.whole){
+    t+='<div class="dc"><span>치료사 있는 전체 '+d.whole.n.toLocaleString('ko-KR')+'곳 중</span>'
+     + '<b>상위 '+(100-d.whole.pct)+'%</b></div>';
+  }
+  t+='</div>';
+
+  t+='<div class="dnote">'+esc(d.note)
+   + ' <span style="color:var(--dim)">같은 '+esc(d.kind)+'은 보통 '+esc(job||'치료사')
+   + ' 1명이 '+(d.medianBedsPerStaff||'—')+'병상을 맡습니다. '
+   + '종별마다 환자 성격이 달라 같은 종별끼리 비교합니다.</span></div>'
+   + '</div>';
+  return t;
+}
+
+function loading(txt){
+  return '<div class="loading">'+esc(txt||'불러오는 중')
+    + '<span class="dots"><i>.</i><i>.</i><i>.</i></span>'
+    + '<div class="barwrap"><i></i></div></div>';
+}
+
+/* ===== 실패 안내 ===== */
+function errBox(e, where){
+  var m = (e && e.message) ? e.message : String(e || '알 수 없는 오류');
+  var hint = '';
+  if(/is not a function|not defined|찾을 수 없|알 수 없는 요청/.test(m))
+    hint = '서버 코드(Wage.gs)가 최신이 아닐 수 있습니다. '
+         + 'Apps Script에서 다시 붙여넣고 <b>새 버전으로 재배포</b>해 주세요.';
+  else if(/응답이 없|연결하지 못/.test(m))
+    hint = '잠시 후 다시 시도해 주세요. 계속 그러면 배포 설정의 '
+         + '<b>액세스 권한</b>이 «모든 사용자»인지 확인해 주세요.';
+  return '<div class="errbox"><b>불러오지 못했습니다</b>'
+    + (hint || '잠시 후 다시 시도해 주세요.')
+    + '<code>'+esc(where?where+' · ':'')+esc(m)+'</code></div>';
+}
+
 function checkInApp(){ /* 안내창은 사용하지 않습니다 */ }
 
 function copyUrl(){
@@ -2728,7 +2847,12 @@ function showStudent(d){
       + r.have+'명입니다. '+r.need+'명이 넘으면 열립니다.</p></div>';
   }else{
     h2='<div class="card spec"><h2>갈 수 있는 곳</h2>'
-      + '<p class="sub">현직 '+r.base+'명 기준'+(d.wantType?' · 희망: '+d.wantType:'')+'</p>'
+      + '<p class="sub">현직 '+r.base+'명 기준'+(d.wantType?' · 희망: '+esc(d.wantType):'')+'</p>'
+      + (d.want && d.want.rate!==null && d.want.rate!==undefined
+          ? '<div class="wantbox"><b>희망 · '+esc(d.want.type)+'</b>'
+            + '<span class="wr">스펙 도달 '+d.want.rate+'%</span>'
+            + '<small>그곳 현직자 '+d.want.n+'명 중 내 스펙 이하가 '+d.want.rate+'%입니다</small></div>'
+          : '')
       + r.types.map(function(t){
           var hl = (t.type===d.wantType);
           return '<div class="item"><div class="nm"'+(hl?' style="font-weight:800"':'')+'>'+t.type+'</div>'
@@ -2868,7 +2992,9 @@ function doHosp(){
   if(q.length<2){ msg('두 글자 이상 입력해주세요'); return; }
   document.getElementById('hospBox').innerHTML=loading('병원을 찾는 중');
   google.script.run.withSuccessHandler(drawHosp)
-    .withFailureHandler(function(e){document.getElementById('regionBox').innerHTML=errBox(e);attachRipple();}).searchHospital(cred(), q);
+    .withFailureHandler(function(e){
+      document.getElementById('hospBox').innerHTML=errBox(e,'searchHospital'); attachRipple();
+    }).searchHospital(cred(), q);
 }
 
 function drawHosp(r){
@@ -3410,7 +3536,10 @@ function cardFoot(x, W){
 
 function drawCard(d){
   if(!d||!d.ok) return;
-  var c=document.getElementById('cardCanvas'), x=c.getContext('2d'), W=1080;
+  var c=document.getElementById('cardCanvas');
+  if(!c||!c.getContext) return;
+  var x=c.getContext('2d'), W=1080;
+  if(!x) return;
   cardBase(x, W, (d.job||'치료사')+' 급여 통계');
 
   x.fillStyle='#fff';
@@ -3445,7 +3574,10 @@ function drawCard(d){
 
 function drawStudentCard(d){
   if(!d||!d.ok) return;
-  var c=document.getElementById('cardCanvas'), x=c.getContext('2d'), W=1080;
+  var c=document.getElementById('cardCanvas');
+  if(!c||!c.getContext) return;
+  var x=c.getContext('2d'), W=1080;
+  if(!x) return;
   cardBase(x, W, '작업치료 학생 스펙 통계');
 
   x.fillStyle='#fff';
@@ -3485,6 +3617,7 @@ function roundRect(x, l, t, w, h, r){
 
 function shareCard(){
   var c=document.getElementById('cardCanvas');
+  if(!c){ return; }
   if(!navigator.share || !c.toBlob){ saveCard(); return; }
   c.toBlob(function(blob){
     if(!blob){ saveCard(); return; }
@@ -3497,6 +3630,7 @@ function shareCard(){
 
 function saveCard(){
   var c=document.getElementById('cardCanvas');
+  if(!c||!c.toDataURL){ msg('이 브라우저에서는 저장이 어렵습니다'); return; }
   try{
     var a=document.createElement('a');
     a.download='potlab_salary_card.png';
