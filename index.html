@@ -9,13 +9,12 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="POT LAB">
 <meta name="format-detection" content="telephone=no">
 <meta name="description" content="작업치료사·물리치료사 급여를 직접 모아 만든 통계.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="작업·물리치료사 급여 통계">
-<meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다. 병원별 치료사 인원·병상까지.">
+<meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다.">
 <meta property="og:image" content="og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0d5c4f">
@@ -1552,6 +1551,12 @@
       </div>
 
       <div class="f">
+        <label>어학 점수 <span class="hint">토익 기준 · 없으면 비워두세요</span></label>
+        <div class="unit"><input type="number" id="toeic" min="0" max="990"
+          placeholder="800"><span>점</span></div>
+      </div>
+
+      <div class="f">
         <label>자격증 <span class="hint">해당되는 것 모두</span></label>
         <div class="chips" id="certs"></div>
         <div class="addrow">
@@ -1801,7 +1806,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=25"></script>
+<script src="app.js?v=26"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1826,7 +1831,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v25 · 2026-08-25';
+var APP_VER = 'v26 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -3044,7 +3049,7 @@ function submit(){
     bonus:val('bonus')||0,
     grade:val('grade'), wantType:val('wantType'), wantRegion:val('wantRegion'),
     birthYear:val('birthYear'), note:document.getElementById('note').value,
-    school:val('school'), gpa:val('gpa'), gpaMax:val('gpaMax'),
+    school:val('school'), gpa:val('gpa'), gpaMax:val('gpaMax'), toeic:val('toeic'),
     certs:picked.certs.concat(extra('certEtc')),
     courses:picked.courses.concat(extra('courseEtc')).concat(val('lang')?['어학:'+val('lang')]:[]),
     practice:rows.practice.filter(function(r){return r.hospital;}),
@@ -3142,14 +3147,13 @@ function showStudent(d){
      + '<div class="ssparts">'
      + ssPart('학점', d.spec.parts.gpa, d.spec.max.gpa, d.spec.raw.gpa)
      + ssPart('자격증', d.spec.parts.certs, d.spec.max.certs, d.spec.raw.certs)
+     + ssPart('어학', d.spec.parts.toeic, d.spec.max.toeic, d.spec.raw.toeic)
      + ssPart('학력', d.spec.parts.school, d.spec.max.school, d.spec.raw.school)
      + ssPart('이수 교육', d.spec.parts.courses, d.spec.max.courses, d.spec.raw.courses)
      + ssPart('실습', d.spec.parts.practice, d.spec.max.practice, d.spec.raw.practice)
      + '</div>'
-     + (d.spec.next
-        ? '<div class="ssnext"><b>다음에 채울 것 · '+esc(d.spec.next.key)+'</b>'
-          + '<span>'+esc(d.spec.next.tip)+' (최대 +'+d.spec.next.left+'점)</span></div>'
-        : '')
+     + (d.spec.cheer
+        ? '<div class="ssnext"><span>'+esc(d.spec.cheer)+'</span></div>' : '')
      + '</div>';
   }
   h+='<div class="pos"><div class="lead">'+esc(d.me.grade||'')+' · '+esc(d.me.school||'')+'</div>'
@@ -3979,35 +3983,32 @@ function drawStudentCard(d){
 
   // 머리말
   x.fillStyle='rgba(255,255,255,.7)';
-  x.font='700 32px -apple-system,"Apple SD Gothic Neo",sans-serif';
-  x.fillText((d.job||'치료사')+' 준비 점수', W/2, 108);
+  x.font='700 34px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText((d.job||'치료사')+' 준비 점수', W/2, 112);
 
   // 등급 배지
   x.fillStyle='rgba(255,255,255,.16)';
-  roundRect(x, W/2-96, 146, 192, 80, 40); x.fill();
-  x.font='46px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  roundRect(x, W/2-104, 152, 208, 88, 44); x.fill();
+  x.font='52px -apple-system,"Apple SD Gothic Neo",sans-serif';
   x.textAlign='right';
-  x.fillText(d.icon||'', W/2+4, 200);
+  x.fillText(d.icon||'', W/2+2, 212);
   x.fillStyle='#fff';
-  x.font='800 50px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.font='800 56px -apple-system,"Apple SD Gothic Neo",sans-serif';
   x.textAlign='left';
-  x.fillText(d.tier, W/2+22, 201);
+  x.fillText(d.tier, W/2+24, 213);
   x.textAlign='center';
 
-  // 점수
-  x.font='800 190px -apple-system,"Apple SD Gothic Neo",sans-serif';
-  x.fillText(String(d.score), W/2, 400);
-  x.font='700 46px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  // 점수 — 크게
+  x.font='800 250px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText(String(d.score), W/2, 470);
+  x.font='700 50px -apple-system,"Apple SD Gothic Neo",sans-serif';
   x.fillStyle='rgba(255,255,255,.72)';
-  x.fillText('점 / 100점', W/2, 462);
+  x.fillText('점 / 100점', W/2, 540);
 
-  // 한마디
+  // 한마디 — 한 줄만
   x.fillStyle='#fff';
-  x.font='800 52px -apple-system,"Apple SD Gothic Neo",sans-serif';
-  x.fillText(d.headline||'', W/2, 566);
-  x.font='400 36px -apple-system,"Apple SD Gothic Neo",sans-serif';
-  x.fillStyle='rgba(255,255,255,.82)';
-  x.fillText(d.comment||'', W/2, 622);
+  x.font='700 42px -apple-system,"Apple SD Gothic Neo",sans-serif';
+  x.fillText(d.place||d.comment||'', W/2, 620);
 
   // 항목별 막대
   var parts = d.parts || {}, mx = d.max || {gpa:40,certs:30,school:15,courses:10,practice:5};
@@ -4015,11 +4016,12 @@ function drawStudentCard(d){
   var items = [
     ['학점', parts.gpa||0, mx.gpa, rw.gpa||''],
     ['자격증', parts.certs||0, mx.certs, rw.certs||''],
+    ['어학', parts.toeic||0, mx.toeic, rw.toeic||''],
     ['학력', parts.school||0, mx.school, rw.school||''],
     ['이수 교육', parts.courses||0, mx.courses, rw.courses||''],
     ['실습', parts.practice||0, mx.practice, rw.practice||'']
   ];
-  var top=690, gap=46, barX=350, barW=380;
+  var top=690, gap=44, barX=340, barW=390;
   x.textAlign='left';
   items.forEach(function(it,i){
     var y = top + i*gap;
@@ -4037,11 +4039,6 @@ function drawStudentCard(d){
   });
 
   x.textAlign='center';
-  if(d.place){
-    x.fillStyle='rgba(255,255,255,.8)';
-    x.font='400 30px -apple-system,"Apple SD Gothic Neo",sans-serif';
-    x.fillText(d.place, W/2, 660);
-  }
   if(d.percentile!==null && d.percentile!==undefined && d.peerCount>=3){
     x.fillStyle='rgba(255,255,255,.72)';
     x.font='400 30px -apple-system,"Apple SD Gothic Neo",sans-serif';
