@@ -5,14 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>작업·물리치료사 급여 통계 | POT LAB</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="POT LAB">
 <meta name="format-detection" content="telephone=no">
 <meta name="description" content="작업치료사·물리치료사 급여를 직접 모아 만든 통계.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="작업·물리치료사 급여 통계">
-<meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다.">
+<meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다. 병원별 치료사 인원·병상까지.">
 <meta property="og:image" content="og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0d5c4f">
@@ -897,6 +900,11 @@
   .ssnum{display:flex;align-items:baseline;gap:6px;margin-bottom:14px}
   .ssnum span{font-size:52px;font-weight:800;letter-spacing:-.05em;line-height:1}
   .ssnum em{font-style:normal;font-size:15px;opacity:.75;font-weight:700}
+  .ssplace{background:rgba(255,255,255,.16);border-radius:10px;padding:10px 12px;
+    font-size:12.5px;line-height:1.6;margin-bottom:13px;word-break:keep-all}
+  .ssnext{background:rgba(255,255,255,.16);border-radius:10px;padding:11px 12px;margin-top:12px}
+  .ssnext b{display:block;font-size:12px;font-weight:800;margin-bottom:3px;opacity:.9}
+  .ssnext span{font-size:12.5px;line-height:1.6;opacity:.9;word-break:keep-all}
   .ssparts{display:flex;flex-direction:column;gap:8px}
   .sp2 .spl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
   .sp2 .spl b{font-weight:700;opacity:.9}
@@ -1792,7 +1800,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=22"></script>
+<script src="app.js?v=24"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1817,7 +1825,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v22 · 2026-08-25';
+var APP_VER = 'v24 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -3111,9 +3119,10 @@ function showPos(p){
   attachRipple(); animateNumbers('#myPos');
 }
 
-function ssPart(label, got, max){
+function ssPart(label, got, max, raw){
   var pct=Math.round(got/max*100);
-  return '<div class="sp2"><div class="spl"><span>'+label+'</span><b>'+got+'/'+max+'</b></div>'
+  return '<div class="sp2"><div class="spl"><span>'+label+'</span>'
+    + '<b>'+esc(raw!==undefined?raw:(got+'/'+max))+'</b></div>'
     + '<div class="spb"><i style="--w:'+pct+'%"></i></div></div>';
 }
 
@@ -3127,13 +3136,19 @@ function showStudent(d){
      + '<div><b>'+esc(d.spec.headline)+'</b><span>'+esc(d.spec.comment)+'</span></div></div>'
      + '<div class="ssnum"><span data-count="'+d.spec.score+'">0</span>'
      + '<em>점 / 100점</em></div>'
+     + (d.spec.place?'<div class="ssplace">'+esc(d.spec.place)+'</div>':'')
      + '<div class="ssparts">'
-     + ssPart('학점', d.spec.parts.gpa, d.spec.max.gpa)
-     + ssPart('자격증', d.spec.parts.certs, d.spec.max.certs)
-     + ssPart('학력', d.spec.parts.school, d.spec.max.school)
-     + ssPart('이수 교육', d.spec.parts.courses, d.spec.max.courses)
-     + ssPart('실습', d.spec.parts.practice, d.spec.max.practice)
-     + '</div></div>';
+     + ssPart('학점', d.spec.parts.gpa, d.spec.max.gpa, d.spec.raw.gpa)
+     + ssPart('자격증', d.spec.parts.certs, d.spec.max.certs, d.spec.raw.certs)
+     + ssPart('학력', d.spec.parts.school, d.spec.max.school, d.spec.raw.school)
+     + ssPart('이수 교육', d.spec.parts.courses, d.spec.max.courses, d.spec.raw.courses)
+     + ssPart('실습', d.spec.parts.practice, d.spec.max.practice, d.spec.raw.practice)
+     + '</div>'
+     + (d.spec.next
+        ? '<div class="ssnext"><b>다음에 채울 것 · '+esc(d.spec.next.key)+'</b>'
+          + '<span>'+esc(d.spec.next.tip)+' (최대 +'+d.spec.next.left+'점)</span></div>'
+        : '')
+     + '</div>';
   }
   h+='<div class="pos"><div class="lead">'+esc(d.me.grade||'')+' · '+esc(d.me.school||'')+'</div>'
    + (p.topPercent!==null
@@ -3178,6 +3193,9 @@ function showStudent(d){
   }
   box.innerHTML=h2;
   document.getElementById('hourlyBox').innerHTML='';
+  animateNumbersEl(document.getElementById('myPos'));
+  animateNumbersEl(box);
+  attachRipple();
 }
 
 var SIDOS=['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원',
@@ -3989,14 +4007,15 @@ function drawStudentCard(d){
 
   // 항목별 막대
   var parts = d.parts || {}, mx = d.max || {gpa:40,certs:30,school:15,courses:10,practice:5};
+  var rw = d.raw || {};
   var items = [
-    ['학점', parts.gpa||0, mx.gpa],
-    ['자격증', parts.certs||0, mx.certs],
-    ['학력', parts.school||0, mx.school],
-    ['이수 교육', parts.courses||0, mx.courses],
-    ['실습', parts.practice||0, mx.practice]
+    ['학점', parts.gpa||0, mx.gpa, rw.gpa||''],
+    ['자격증', parts.certs||0, mx.certs, rw.certs||''],
+    ['학력', parts.school||0, mx.school, rw.school||''],
+    ['이수 교육', parts.courses||0, mx.courses, rw.courses||''],
+    ['실습', parts.practice||0, mx.practice, rw.practice||'']
   ];
-  var top=690, gap=46, barX=380, barW=460;
+  var top=690, gap=46, barX=350, barW=380;
   x.textAlign='left';
   items.forEach(function(it,i){
     var y = top + i*gap;
@@ -4010,10 +4029,15 @@ function drawStudentCard(d){
     roundRect(x, barX, y-12, w, 22, 11); x.fill();
     x.fillStyle='rgba(255,255,255,.85)';
     x.font='700 24px -apple-system,"Apple SD Gothic Neo",sans-serif';
-    x.fillText(it[1]+'/'+it[2], barX+barW+16, y+7);
+    x.fillText(it[3]||(it[1]+'/'+it[2]), barX+barW+16, y+7);
   });
 
   x.textAlign='center';
+  if(d.place){
+    x.fillStyle='rgba(255,255,255,.8)';
+    x.font='400 30px -apple-system,"Apple SD Gothic Neo",sans-serif';
+    x.fillText(d.place, W/2, 660);
+  }
   if(d.percentile!==null && d.percentile!==undefined && d.peerCount>=3){
     x.fillStyle='rgba(255,255,255,.72)';
     x.font='400 30px -apple-system,"Apple SD Gothic Neo",sans-serif';
