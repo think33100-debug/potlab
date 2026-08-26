@@ -847,6 +847,7 @@
     text-align:center}
   .ldwhy .wn{display:block;font-size:26px;font-weight:800;letter-spacing:-.03em;
     line-height:1.1;margin-bottom:5px}
+  .ldwhy .wn em{font-style:normal;font-size:14px;font-weight:700;margin-left:2px;opacity:.75}
   .load.l1 .ldwhy .wn{color:#0a6b4a}
   .load.l2 .ldwhy .wn{color:#7a6320}
   .load.l3 .ldwhy .wn{color:#a8402a}
@@ -1800,7 +1801,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=24"></script>
+<script src="app.js?v=25"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1825,7 +1826,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v24 · 2026-08-25';
+var APP_VER = 'v25 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2846,18 +2847,19 @@ function densBlock(d, job){
 
   // 왜 그런지 — 숫자를 문장으로
   t += '<div class="ldwhy">'
-    + '<div class="wr"><span class="wn">'+d.bedsPerStaff+'</span>'
-    + '<span class="wt">'+esc(job||'치료사')+' 한 명이<br>맡는 <b>침대 수</b></span></div>';
+    + '<div class="wr"><span class="wn">'+d.bedsPerStaff+'<em>명</em></span>'
+    + '<span class="wt">'+esc(job||'치료사')+' 한 명이<br><b>담당하는 환자 수</b></span></div>';
   if(d.bedsPerDoc !== null){
-    t += '<div class="wr"><span class="wn">'+d.bedsPerDoc+'</span>'
-      + '<span class="wt">재활 담당 의사 한 명이<br>맡는 <b>침대 수</b></span></div>';
+    t += '<div class="wr"><span class="wn">'+d.bedsPerDoc+'<em>명</em></span>'
+      + '<span class="wt">재활 담당 의사 한 명이<br><b>담당하는 환자 수</b></span></div>';
   }
   t += '</div>';
 
   if(d.rehabCert){
     t += '<div class="ldcert2">🏥 <b>회복기 재활의료기관</b>'
-      + '<span>나라에서 정한 기준을 통과한 재활 전문 병원입니다. '
-      + '집중 재활치료를 해야 해서 일이 많은 편입니다.</span></div>';
+      + '<span>뇌졸중·척수손상·골절 등으로 수술이나 급성기 치료를 마친 뒤, '
+      + '집중 재활이 필요한 환자를 받는 병원입니다. '
+      + '나라에서 인력·시설 기준을 심사해 지정합니다.</span></div>';
   }
 
   if(d.hire){
@@ -3277,16 +3279,16 @@ function drawCompare(r){
 
   var h='<div class="cmp">'+col(A, A[key]>B[key])+col(B, B[key]>A[key])+'</div>'
     + '<div class="card">'
-    + cmpRow('침대 수', A.bed||null, B.bed||null, null, '개')
-    + cmpRow('침대 100개당 '+r.job, A[perKey], B[perKey], 'high', '명')
+    + cmpRow('병상 수', A.bed||null, B.bed||null, null, '개')
+    + cmpRow('병상 100개당 '+r.job, A[perKey], B[perKey], 'high', '명')
     + cmpRow('물리치료사', A.pt||null, B.pt||null, null, '명')
     + cmpRow('재활 담당 의사', A.rehab||null, B.rehab||null, 'high', '명')
     + cmpRow('전체 의사', A.doc||null, B.doc||null, null, '명')
     + cmpRow('회복기 재활병원',
         A.rehabCert?1:null, B.rehabCert?1:null, null, '곳')
     + cmpRow('사회복지사', A.sw||null, B.sw||null, null, '명')
-    + cmpRow('치료사 1명당 침대',
-        A.bedsPerOT, B.bedsPerOT, 'low', '개')
+    + cmpRow('치료사 1명당 담당 환자',
+        A.bedsPerOT, B.bedsPerOT, 'low', '명')
     + '<div class="warnbox">초록색은 그 항목에서 수치가 앞선 쪽입니다. '
     + '업무 강도는 공개 자료로 계산한 <b>추정값</b>이라 실제와 다를 수 있습니다.</div>'
     + '</div>';
@@ -3887,6 +3889,8 @@ function showSpec(sp){
 function showCardBox(kind){
   var wrap=document.getElementById('cardWrap');
   if(wrap) wrap.className='card';
+  var cv=document.getElementById('cardCanvas');
+  if(cv) cv.style.display='';
   var sub=document.getElementById('cardSub');
   var hint=document.getElementById('cardHint');
   if(sub) sub.textContent = (kind==='student')
@@ -3957,9 +3961,9 @@ function drawCard(d){
 }
 
 function drawStudentCard(d){
-  if(!d||!d.ok) return;
+  if(!d||!d.ok){ if(window.console) console.warn('학생 카드 데이터 없음', d); return; }
   var c=document.getElementById('cardCanvas');
-  if(!c||!c.getContext) return;
+  if(!c||!c.getContext){ if(window.console) console.warn('캔버스 없음'); return; }
   var x=c.getContext('2d'), W=1080;
   if(!x) return;
 
