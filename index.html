@@ -3,23 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>작업·물리치료사 급여 통계 | POT LAB</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<title>POT JOB · 작업·물리치료사 급여와 채용</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="POT LAB">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="POT JOB">
+<meta name="theme-color" content="#0d5c4f">
 <meta name="format-detection" content="telephone=no">
-<meta name="description" content="작업치료사·물리치료사 급여를 직접 모아 만든 통계.">
+<meta name="description" content="치료사들이 더 좋은 곳에 취업할 때까지. 작업·물리치료사 급여 통계, 병원별 인원, 공공기관 채용공고를 한곳에서.">
+<link rel="canonical" href="https://potjob.kr/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="작업·물리치료사 급여 통계">
-<meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다.">
-<meta property="og:image" content="og.png">
+<meta property="og:url" content="https://potjob.kr/">
+<meta property="og:site_name" content="POT JOB">
+<meta property="og:title" content="POT JOB · 작업·물리치료사 급여와 채용">
+<meta property="og:description" content="내 연봉이 어디쯤인지 3분이면 나옵니다. 병원별 치료사 인원, 공공기관 채용공고까지.">
+<meta property="og:image" content="https://potjob.kr/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+
+<!-- 아이폰 실행 화면 -->
+<link rel="apple-touch-startup-image" href="/splash-1125x2436.png"
+  media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)">
+<link rel="apple-touch-startup-image" href="/splash-1242x2688.png"
+  media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)">
+<link rel="apple-touch-startup-image" href="/splash-828x1792.png"
+  media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)">
+<link rel="apple-touch-startup-image" href="/splash-750x1334.png"
+  media="(device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2)">
+<link rel="apple-touch-startup-image" href="/splash-1536x2048.png"
+  media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)">
+<link rel="apple-touch-startup-image" href="/splash.png">
 <meta name="theme-color" content="#0d5c4f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="POT LAB">
+<meta name="apple-mobile-web-app-title" content="POT JOB">
 <meta name="mobile-web-app-capable" content="yes">
 <style>
   :root{
@@ -1947,12 +1968,12 @@
     </div>
   </div>
 
-  <p class="copyfoot">Copyright © 2026 피오티랩 All rights reserved.</p>
+  <p class="copyfoot">Copyright © 2026 피오티잡 All rights reserved.</p>
 </div>
 
 <div id="msg"></div>
 
-<script src="app.js?v=47"></script>
+<script src="/app.js?v=48"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1998,7 +2019,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v47 · 2026-08-25';
+var APP_VER = 'v48 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2245,7 +2266,7 @@ var BRANDC = null;
 function drawHome(b){
   BRANDC = b;
   var brand=document.getElementById('brandBox');
-  brand.innerHTML = '<div class="badge-by">POT LAB 공식 운영</div>'
+  brand.innerHTML = '<div class="badge-by">POT JOB 공식 운영</div>'
     + (b.logo ? '<img src="'+b.logo+'" alt="'+esc(b.name)+'">'
               : '<div class="wordmark">'+esc(b.name)+'</div>')
     + '<div class="tag">'+esc(b.tagline)+'</div>'
@@ -2284,7 +2305,7 @@ function roomCard(b){
   var pts=(b&&b.roomPoints)||[];
 
   return '<div class="roomcard">'
-    + '<div class="eyebrow">POT LAB 공식 커뮤니티</div>'
+    + '<div class="eyebrow">POT JOB 공식 커뮤니티</div>'
     + '<h3>코드는 단톡방 공지에 있습니다</h3>'
     + (pts.length?'<ul class="roompts">'
         + pts.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>':'')
@@ -2786,7 +2807,7 @@ function bannerHTML(b){
     + (b.img?'<img class="bimg" src="'+esc(b.img)+'" alt="'+esc(b.title)+'"'
         + ' onerror="this.style.display=\'none\'">':'')
     + '<div class="btx">'
-    + '<span class="bad">POT LAB</span>'
+    + '<span class="bad">POT JOB</span>'
     + (b.title?'<div class="bt">'+esc(b.title)+'</div>':'')
     + (b.desc?'<div class="bd">'+esc(b.desc)+'</div>':'')
     + '<span class="bc">'+esc(b.cta)+' ›</span>'
@@ -3048,7 +3069,7 @@ function phoneHome(){
     + '<rect x="49" y="70" width="42" height="42" rx="12" fill="none" stroke="#d9694a"'
       + ' stroke-width="2.5" stroke-dasharray="4 3"/>'
     + '<text x="70" y="124" font-size="9" font-weight="700" fill="#20404d"'
-      + ' text-anchor="middle">POT LAB</text>'
+      + ' text-anchor="middle">POT JOB</text>'
     + '<rect x="90" y="76" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
     + '<rect x="20" y="140" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
     + '<rect x="55" y="140" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
@@ -4314,7 +4335,7 @@ function shareLink(){
   var txt = (JOB||'치료사') + ' 연봉 통계 만들고 있습니다.\n'
     + '한 사람이 더 넣을 때마다 숫자가 정확해집니다. 3분이면 됩니다.';
   if(navigator.share){
-    navigator.share({title:'POT LAB', text:txt, url:location.href})
+    navigator.share({title:'POT JOB', text:txt, url:location.href})
       .catch(function(){});
   } else {
     copyUrl();
@@ -4440,7 +4461,7 @@ function cardFoot(x, W){
   x.fillText('아무도 모르는 통계, 우리가 만들어 갑니다', W/2, 900);
   x.font='800 42px -apple-system,"Apple SD Gothic Neo",sans-serif';
   x.fillStyle='#fff';
-  x.fillText('POT LAB', W/2, 972);
+  x.fillText('POT JOB', W/2, 972);
 }
 
 function drawCard(d){
@@ -4571,7 +4592,7 @@ function drawStudentCard(d){
   x.fillText('내 점수도 확인해보세요', W/2, 1000);
   x.font='800 38px -apple-system,"Apple SD Gothic Neo",sans-serif';
   x.fillStyle='#fff';
-  x.fillText('POT LAB', W/2, 1044);
+  x.fillText('POT JOB', W/2, 1044);
 
   showCardBox('student');
 }
@@ -4595,7 +4616,7 @@ function shareCard(){
   var url = location.origin + location.pathname;
 
   if(navigator.share){
-    navigator.share({ title: 'POT LAB', text: txt, url: url })
+    navigator.share({ title: 'POT JOB', text: txt, url: url })
       .catch(function(){});
     return;
   }
@@ -4642,7 +4663,7 @@ google.script.run.withSuccessHandler(function(b){
   if(unlocked()) tab('dash');
 }).withFailureHandler(function(e){
   // 서버가 안 되더라도 화면은 뜨게 합니다
-  drawHome({ name:'POT LAB', tagline:'작업치료사 · 물리치료사를 위한 급여 통계',
+  drawHome({ name:'POT JOB', tagline:'작업치료사 · 물리치료사를 위한 급여 통계',
              logo:'', rooms:[], roomPoints:[], jobLinks:[], banners:[] });
   if(window.console) console.warn('getBrand 실패:', e && e.message);
 }).getBrand();

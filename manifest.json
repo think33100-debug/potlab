@@ -1,12 +1,12 @@
 {
-  "name": "작업·물리치료사 급여 통계",
-  "short_name": "POT LAB",
-  "description": "작업치료사·물리치료사 급여를 직접 모아 만든 통계",
-  "start_url": "./index.html",
-  "scope": "./",
+  "name": "POT JOB · 작업·물리치료사 급여와 채용",
+  "short_name": "POT JOB",
+  "description": "치료사들이 더 좋은 곳에 취업할 때까지. 급여 통계·병원 정보·채용공고를 한곳에서.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f4f6f6",
+  "background_color": "#c7e3f2",
   "theme_color": "#0d5c4f",
   "lang": "ko",
   "icons": [
