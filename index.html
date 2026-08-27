@@ -690,6 +690,10 @@
   .ptags i{font-style:normal;font-size:11px;background:#f1f5f4;color:#3f4c52;
     border-radius:6px;padding:4px 8px}
   .ptags i.jb{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  .phist{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);
+    font-size:11.5px;color:#5a6870}
+  .phist b{font-weight:800;color:#3f4c52}
+  .ptags i.mx{background:#f3f0e8;color:#7a6320;font-weight:700}
   .pf{display:flex;align-items:center;font-size:11.5px;color:#5a6870}
   .pgo{margin-left:auto;color:var(--accent);font-weight:700}
 
@@ -1887,7 +1891,10 @@
     <div id="postBox"></div>
     <div class="hintbox" style="margin-top:12px">
       공공기관이 공시한 채용정보를 하루 세 번 모읍니다.
-      <b>사립병원 공고는 아직 포함되지 않습니다.</b>
+      <b>사립병원 공고는 아직 포함되지 않습니다.</b><br>
+      <span style="color:#7a6320">여러 직군 통합</span> 표시가 있으면
+      치료사 전용 공고가 아니라 다른 직군과 함께 뽑는 공고입니다.<br>
+      지난 공고 날짜는 <b>모으기 시작한 뒤</b>부터 쌓입니다.
     </div>
   </div>
 
@@ -1945,7 +1952,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=45"></script>
+<script src="app.js?v=47"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1991,7 +1998,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v45 · 2026-08-25';
+var APP_VER = 'v47 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -3793,6 +3800,7 @@ function showPosts(r){
       + '<div class="pt">'+esc(x.title)+'</div>'
       + '<div class="ptags">'
         + (x.job&&x.job!=='공통'?'<i class="jb">'+esc(x.job)+'</i>':'')
+        + (x.mixed?'<i class="mx">여러 직군 통합</i>':'')
         + (x.kind?'<i>'+esc(x.kind)+'</i>':'')
         + (x.hire?'<i>'+esc(String(x.hire).split(',')[0])+'</i>':'')
         + (x.region?'<i>'+esc(String(x.region).split(',').slice(0,2).join('·'))+'</i>':'')
@@ -3802,7 +3810,13 @@ function showPosts(r){
         + (x.edu?esc(String(x.edu).split(',')[0])+' · ':'')
         + (x.to?'~'+esc(x.to):'')
         + '<span class="pgo">공고 보기 ›</span>'
-      + '</div></a>';
+      + '</div>'
+      + (x.prevFrom
+          ? '<div class="phist">지난 공고 <b>'+esc(x.prevFrom)+'</b>'
+            + (x.prevGap?' · '+esc(x.prevGap):'')
+            + (x.pastCount>1?' · 모은 뒤 '+x.pastCount+'번째':'')+'</div>'
+          : '')
+      + '</a>';
   });
 
   box.innerHTML=h;
