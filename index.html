@@ -666,6 +666,13 @@
   .whybox .wl em{font-style:normal;flex:1;min-width:0}
   .whybox .wl b{font-weight:700;color:var(--ink)}
 
+  .already{display:flex;align-items:center;justify-content:center;gap:9px;
+    background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:12px;margin-bottom:16px;font-size:13.5px;color:#3f4c52}
+  .already button{background:none;border:0;color:var(--accent);font-family:inherit;
+    font-size:13.5px;font-weight:800;cursor:pointer;text-decoration:underline;
+    text-underline-offset:3px;padding:2px 0;-webkit-tap-highlight-color:transparent}
+
   .addbar{display:flex;align-items:center;gap:12px;
     background:linear-gradient(135deg,#e8f4ef 0%,#f0f7f3 100%);
     border:1.5px solid #a9d4c5;border-radius:14px;padding:14px 13px 14px 16px;
@@ -1461,6 +1468,11 @@
     <div class="card" id="cardNick">
       <h2>닉네임(아이디) 정하기</h2>
       <p class="sub">다음에 이 이름으로 바로 들어옵니다. 본명 금지.</p>
+      <div class="already" id="alreadyBox">
+        이미 등록하셨나요?
+        <button onclick="tab('unlock')">로그인하기</button>
+      </div>
+
       <div class="f">
         <label>닉네임(아이디) <span class="hint">2~12자 · 다음에 이걸로 들어옵니다</span></label>
         <input type="text" id="nick" maxlength="12" placeholder="예) 김오티"
@@ -1735,7 +1747,7 @@
   <!-- ============ 잠금 해제 ============ -->
   <div id="pane-unlock" class="hide">
     <div class="card">
-      <h2>닉네임(아이디)과 코드 입력</h2>
+      <h2>로그인</h2>
       <p class="sub">등록하실 때 정한 닉네임(아이디)과 단톡방 공지의 코드를 넣어주세요.</p>
       <div class="f">
         <label>닉네임(아이디)</label>
@@ -1900,7 +1912,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=43"></script>
+<script src="app.js?v=44"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1946,7 +1958,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v43 · 2026-08-25';
+var APP_VER = 'v44 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -1973,6 +1985,11 @@ function setJob(j){
   var sub=document.getElementById('subTitle');
   if(sub && document.getElementById('pane-input').className==='')
     sub.textContent = j+' 정보 등록';
+}
+
+function hideAlready(){
+  var b=document.getElementById('alreadyBox');
+  if(b) b.className = unlocked() ? 'already hide' : 'already';
 }
 
 function setRole(r){
@@ -2164,6 +2181,7 @@ function tab(which, back){
   if(which==='hosp'){ if(!(back && restore('hosp'))) hospTab('search'); }
   if(which==='calc'){ if(back) restore('calc'); }
   if(which==='install') drawGuide();
+  if(which==='input') hideAlready();
 
   // 되살린 화면은 보던 위치를 유지합니다
   if(!(back && SNAP[which])) window.scrollTo({top:0, behavior:'smooth'});
@@ -2776,7 +2794,7 @@ function drawHomeCTA(){
     ? '<button class="go" onclick="tab(\'dash\')">내 통계 보러 가기</button>'
       + '<button class="ghost" onclick="tab(\'input\')">내 정보 수정하기</button>'
     : '<button class="go" onclick="tab(\'input\')">등록하러 가기 · 약 3분</button>'
-      + '<button class="ghost" onclick="tab(\'unlock\')">이미 등록했어요 · 코드로 열기</button>';
+      + '<button class="ghost" onclick="tab(\'unlock\')">이미 등록했어요 · 로그인</button>';
   attachRipple();
 }
 
@@ -3081,6 +3099,15 @@ function checkSalary(){
 }
 
 /* ===== 실패 안내 ===== */
+/* 닉네임을 다시 넣게 돌려보냅니다 */
+function retryLogin(){
+  var box=document.getElementById('unlockMsg');
+  if(box) box.innerHTML='';
+  tab('unlock');
+  var n=document.getElementById('uNick');
+  if(n){ n.focus(); n.select(); }
+}
+
 function failCard(r){
   if(r.reason==='empty') return '<div class="card"><p class="sub">'+esc(r.message)+'</p></div>';
   // 코드·닉네임 문제가 아니면 입력값 안내로 보여줍니다
@@ -3093,7 +3120,8 @@ function failCard(r){
     + '<h3>'+esc(r.message)+'</h3>'
     + '<p>'+esc(r.detail||'')+'</p>'
     + (r.reason==='nonick'
-        ? '<button class="go" onclick="tab(\'input\')">등록하러 가기</button>'
+        ? '<button class="ghost" onclick="retryLogin()">닉네임 다시 입력</button>'
+          + '<button class="go" onclick="tab(\'input\')">처음이에요 · 등록하기</button>'
         : (r.roomUrl?'<a class="roombtn" href="'+r.roomUrl+'" target="_blank" rel="noopener">'
             + esc(r.roomName||'단톡방')+'에서 코드 확인</a>':''))
     + '</div>';
