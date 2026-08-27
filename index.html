@@ -954,6 +954,10 @@
   .ldwhy .wt{font-size:11.5px;color:#4a565c;line-height:1.5;word-break:keep-all}
   .ldwhy .wt b{font-weight:700;color:var(--ink)}
 
+  .ldraw{background:rgba(255,255,255,.7);border-radius:10px;padding:10px 12px;margin-top:9px;
+    font-size:12.5px;color:#3f4c52;text-align:center;line-height:1.6;word-break:keep-all}
+  .ldraw b{font-weight:800;color:var(--ink)}
+
   .ldcert2{background:rgba(255,255,255,.8);border-radius:11px;padding:12px;margin-top:9px;
     font-size:12.5px;line-height:1.65}
   .ldcert2 b{font-weight:800}
@@ -1899,7 +1903,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=39"></script>
+<script src="app.js?v=40"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1945,7 +1949,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v39 · 2026-08-25';
+var APP_VER = 'v40 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -3133,15 +3137,21 @@ function densBlock(d, job){
     + '<div class="ldbar"><i style="--w:'+pct+'%"></i></div>'
     + '<div class="ldends"><span>여유</span><span>보통</span><span>바쁨</span></div>';
 
-  // 왜 그런지 — 숫자를 문장으로
+  // 왜 그런지 — 실제 인원을 그대로 보여줍니다
   t += '<div class="ldwhy">'
-    + '<div class="wr"><span class="wn">'+d.bedsPerStaff+'<em>명</em></span>'
-    + '<span class="wt">'+esc(job||'치료사')+' 한 명이<br><b>담당하는 환자 수</b></span></div>';
-  if(d.bedsPerDoc !== null){
-    t += '<div class="wr"><span class="wn">'+d.bedsPerDoc+'<em>명</em></span>'
-      + '<span class="wt">재활 담당 의사 한 명이<br><b>담당하는 환자 수</b></span></div>';
+    + '<div class="wr"><span class="wn">'+d.per100+'<em>명</em></span>'
+    + '<span class="wt">병상 100개당<br><b>'+esc(job||'치료사')+' 수</b></span></div>';
+  if(d.docPer100 !== null){
+    t += '<div class="wr"><span class="wn">'+d.docPer100+'<em>명</em></span>'
+      + '<span class="wt">병상 100개당<br><b>재활 담당 의사 수</b></span></div>';
   }
   t += '</div>';
+
+  // 실제 숫자 한 줄로
+  t += '<div class="ldraw">병상 <b>'+d.bed+'개</b>'
+    + ' · '+esc(job||'치료사')+' <b>'+d.staff+'명</b>'
+    + (d.docs ? ' · 재활 담당 의사 <b>'+d.docs+'명</b>' : '')
+    + '</div>';
 
   if(d.rehabCert){
     t += '<div class="ldcert2">🏥 <b>회복기 재활의료기관</b>'
