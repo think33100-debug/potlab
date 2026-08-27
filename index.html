@@ -536,6 +536,12 @@
   .spec .bar2 i{display:block;height:100%;background:var(--accent);
     width:0;animation:grow 1s cubic-bezier(.16,.84,.28,1) forwards}
   .spec .pc{font-size:12.5px;font-weight:700;width:42px;text-align:right}
+  .gpics{display:flex;gap:10px;margin:14px 0 4px}
+  .gpics figure{flex:1;margin:0;text-align:center}
+  .gpics svg{width:100%;max-width:150px;display:block;margin:0 auto}
+  .gpics figcaption{margin-top:7px;font-size:12px;font-weight:700;color:#3f4c52}
+  .step .ico{margin-left:2px}
+  .thin2{color:#5a6870;font-size:12.5px}
   .warnbox{background:#fdf6ec;border-radius:9px;padding:12px;font-size:12.5px;color:#6a4d14;
     line-height:1.7;margin-top:10px;word-break:keep-all}
   .heroBtn{display:inline-block;background:#fff;color:var(--accent);border:none;
@@ -628,6 +634,74 @@
   .mi.ch{border-color:#FEE500;background:#fffdf0}
   .mi.kakao{background:#FEE500;border-color:#FEE500}
   .mi.off{opacity:.5}
+
+  .whybox{background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px;margin:12px 0 16px}
+  .whybox .wl{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;
+    line-height:1.6;color:#3f4c52;word-break:keep-all}
+  .whybox .wl+.wl{margin-top:9px}
+  .whybox .wl span{font-size:15px;flex-shrink:0;line-height:1.45}
+  .whybox .wl b{font-weight:700;color:var(--ink)}
+
+  .addbar{display:flex;align-items:center;gap:11px;
+    background:linear-gradient(135deg,#e8f4ef 0%,#f0f7f3 100%);
+    border:1.5px solid #a9d4c5;border-radius:14px;padding:13px 12px 13px 15px;
+    margin-bottom:12px;position:relative;overflow:hidden;
+    box-shadow:0 2px 10px rgba(13,92,79,.07);
+    animation:addIn .5s cubic-bezier(.16,.84,.28,1) both}
+  @keyframes addIn{
+    from{opacity:0;transform:translateY(-8px)}
+    to{opacity:1;transform:none}
+  }
+
+  /* 왼쪽에서 오른쪽으로 은은하게 훑고 지나갑니다 */
+  .addbar::after{content:'';position:absolute;top:0;left:-60%;width:45%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);
+    animation:addShine 4.5s ease-in-out 1.2s infinite;pointer-events:none}
+  @keyframes addShine{
+    0%{left:-60%}
+    35%{left:120%}
+    100%{left:120%}
+  }
+
+  .addbar .ai{font-size:23px;line-height:1;flex-shrink:0;
+    animation:addNudge 3.2s ease-in-out .8s infinite}
+  @keyframes addNudge{
+    0%,72%,100%{transform:translateY(0)}
+    78%{transform:translateY(-4px)}
+    84%{transform:translateY(0)}
+    90%{transform:translateY(-2px)}
+    95%{transform:translateY(0)}
+  }
+
+  .addbar .at{flex:1;min-width:0;position:relative;z-index:1}
+  .addbar .at b{display:block;font-size:13.5px;font-weight:800;letter-spacing:-.02em;
+    color:#0d5c4f;line-height:1.4;margin-bottom:2px;word-break:keep-all}
+  .addbar .at span{font-size:11.5px;color:#3f6259;line-height:1.5}
+  .addbar .at span b{display:inline;font-size:11.5px;color:#0d5c4f}
+
+  .addbar .ab{flex-shrink:0;position:relative;z-index:1;
+    background:var(--accent);color:#fff;border:0;border-radius:10px;
+    padding:10px 13px;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;white-space:nowrap;
+    box-shadow:0 2px 8px rgba(13,92,79,.25);
+    animation:addPulse 3.2s ease-in-out .8s infinite;
+    transition:transform .2s}
+  @keyframes addPulse{
+    0%,74%,100%{box-shadow:0 2px 8px rgba(13,92,79,.25)}
+    82%{box-shadow:0 2px 8px rgba(13,92,79,.25),0 0 0 6px rgba(13,92,79,.10)}
+    92%{box-shadow:0 2px 8px rgba(13,92,79,.25),0 0 0 10px rgba(13,92,79,0)}
+  }
+  .addbar .ab:active{transform:scale(.95)}
+
+  .addbar .ax{flex-shrink:0;position:relative;z-index:1;
+    background:none;border:0;color:#8aa9a0;font-size:15px;
+    padding:4px 2px 4px 4px;cursor:pointer;line-height:1}
+
+  @media (prefers-reduced-motion:reduce){
+    .addbar,.addbar .ai,.addbar .ab{animation:none}
+    .addbar::after{display:none}
+  }
 
   .backbar{display:flex;gap:7px;margin-bottom:14px;flex-wrap:nowrap}
   .backbar button{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;
@@ -1207,6 +1281,7 @@
     <div class="menu" id="menuBox"></div>
   </div>
 
+  <div id="addBar" class="hide"></div>
   <div id="backBar" class="hide"></div>
   <div id="subhead" class="hide">
     <div class="hero">
@@ -1751,7 +1826,7 @@
     <div class="guide" id="guideBox"></div>
     <div class="card">
       <p class="sub" style="margin:0">
-        홈 화면에 추가하면 아이콘을 눌러 바로 들어올 수 있습니다.
+        홈 화면에 추가하면 앱처럼 아이콘 하나로 열립니다.
         설치가 아니라 바로가기라 저장 공간을 쓰지 않고, 언제든 아이콘을 지우면 됩니다.
       </p>
     </div>
@@ -1800,7 +1875,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=33"></script>
+<script src="app.js?v=37"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1846,7 +1921,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v33 · 2026-08-25';
+var APP_VER = 'v37 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2043,7 +2118,7 @@ function tab(which, back){
           feedback:['운영자에게 한마디','익명으로 전달됩니다'],
           region:['지역별 의료기관 현황','분기 집계 기준'],
           jobs:['채용공고 바로가기','치료사 공고가 모이는 곳'],
-          install:['홈 화면에 추가','아이콘으로 바로 들어오기']};
+          install:['앱처럼 쓰기','주소 안 찾고 한 번에 열기']};
   if(TT[which]){
     document.getElementById('subTitle').textContent=TT[which][0];
     document.getElementById('subDesc').textContent=TT[which][1];
@@ -2053,6 +2128,7 @@ function tab(which, back){
   if(which==='home'){ drawHomeCTA(); revealHome(); }
   setTimeout(function(){ revealIn('#pane-'+which); watchMotion('#pane-'+which); }, 30);
   drawBackBar(which);
+  drawAddBar();
   if(which==='dash') drawDash();
   if(which==='region'){ if(!(back && restore('region'))) doRegion(); }
   if(which==='jobs') drawJobLinks();
@@ -2315,7 +2391,7 @@ function drawDashMenu(){
      ? menuItem('ch','📩','피오티랩 문의','카카오톡 채널로 1:1 상담',{href:b.channel})
      : menuItem('off','📩','피오티랩 문의','카카오톡 채널 준비 중',{fn:"msg(\'곧 열립니다\')"});
   if(device()!=='pc' && !isStandalone())
-    m+=menuItem('','📲','홈 화면에 추가','아이콘으로 바로 들어오기',{fn:"tab(\'install\')"});
+    m+=menuItem('','📲','앱처럼 쓰기','주소 안 찾고 한 번에 열기',{fn:"tab(\'install\')"});
   m+='<div class="mcat">그 외</div>';
   m+=menuItem('','🏠','소개 화면 보기','이 서비스로 할 수 있는 것들',{fn:"tab(\'home\')"});
   m+=menuItem('','💬','운영자에게 한마디','익명 건의 남기기',{fn:"tab(\'feedback\')"});
@@ -2331,6 +2407,68 @@ function device(){
   if(/Android/i.test(ua)) return 'android';
   return 'pc';
 }
+/* ===== 홈 화면에 추가 안내 띠 =====
+ * 추가하기 전까지 계속 보여줍니다. 추가한 뒤에는 사라집니다.
+ */
+var DEFER_PROMPT = null;   // 안드로이드가 주는 설치 요청
+
+function addBarShouldShow(){
+  if(isStandalone()) return false;              // 이미 추가함
+  if(device() === 'pc') return false;           // 컴퓨터는 안 됨
+  if(sessionStorage.getItem('potlab_add_hide')) return false;  // 이번만 닫기
+  return true;
+}
+
+function drawAddBar(){
+  var bar = document.getElementById('addBar');
+  if(!bar) return;
+  if(!addBarShouldShow()){ bar.className='hide'; bar.innerHTML=''; return; }
+
+  bar.className = 'addbar';
+  bar.innerHTML =
+      '<span class="ai">📲</span>'
+    + '<div class="at"><b>앱처럼 쓰기</b>'
+    + '<span>다음부터 주소 찾을 필요 없이 <b>한 번에</b> 열립니다</span></div>'
+    + '<button class="ab" onclick="addNow()">앱으로 쓰기</button>'
+    + '<button class="ax" onclick="hideAddBar()" aria-label="닫기">✕</button>';
+  attachRipple();
+}
+
+function addNow(){
+  // 안드로이드는 바로 설치창을 띄울 수 있습니다
+  if(DEFER_PROMPT){
+    DEFER_PROMPT.prompt();
+    DEFER_PROMPT.userChoice.then(function(r){
+      if(r && r.outcome === 'accepted'){
+        DEFER_PROMPT = null;
+        drawAddBar();
+      }
+    });
+    return;
+  }
+  tab('install');
+}
+
+function hideAddBar(){
+  try{ sessionStorage.setItem('potlab_add_hide','1'); }catch(e){}
+  drawAddBar();
+}
+
+/* 안드로이드가 설치 가능 신호를 주면 잡아둡니다 */
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  DEFER_PROMPT = e;
+  drawAddBar();
+});
+
+/* 추가가 끝나면 띠를 없앱니다 */
+window.addEventListener('appinstalled', function(){
+  DEFER_PROMPT = null;
+  try{ sessionStorage.setItem('potlab_add_hide','1'); }catch(e){}
+  drawAddBar();
+  msg('홈 화면에 추가됐습니다');
+});
+
 function isStandalone(){
   return window.navigator.standalone === true
     || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
@@ -2643,7 +2781,7 @@ function drawAddHome(){
   if(hidden){ box.innerHTML=''; return; }
   box.innerHTML='<div class="addhome">'
     + '<div class="ic">📲</div>'
-    + '<div class="tx"><b>홈 화면에 추가하기</b>'
+    + '<div class="tx"><b>앱처럼 쓰기</b>'
     + '<span>아이콘 하나로 바로 들어올 수 있습니다</span></div>'
     + '<button onclick="tab(\'install\')" style="font-size:12.5px;padding:7px 12px">방법</button>'
     + '<button class="x" onclick="hideAddHome()">×</button>'
@@ -2656,24 +2794,94 @@ function hideAddHome(){
 function drawGuide(){
   var d=device(), box=document.getElementById('guideBox'), h='';
   function st(n,t){ return '<div class="step"><div class="no">'+n+'</div><div class="tx">'+t+'</div></div>'; }
+
+  var why = '<div class="whybox">'
+    + '<div class="wl"><span>⚡</span>주소 안 찾고 <b>한 번에</b> 열립니다</div>'
+    + '<div class="wl"><span>📱</span>주소창 없이 <b>화면을 넓게</b> 씁니다</div>'
+    + '<div class="wl"><span>🔑</span>코드를 <b>다시 넣지 않아도</b> 됩니다</div>'
+    + '</div>';
+
   if(d==='ios'){
-    h='<h3>아이폰 · 아이패드</h3><div class="os">Safari에서 진행해주세요</div>'
-     + st(1,'화면 아래 가운데 <b>공유 버튼</b>을 누릅니다')
-     + st(2,'목록을 내려 <b>홈 화면에 추가</b>를 누릅니다')
-     + st(3,'이름을 확인하고 <b>추가</b>를 누릅니다')
-     + '<div class="warnbox">카톡·인스타 안에서 열었다면 먼저 Safari로 열어야 합니다.</div>';
+    h='<h3>앱처럼 쓰기</h3>' + why
+     + '<div class="os">아이폰은 <b>사파리</b>에서만 됩니다</div>'
+     + st(1,'화면 <b>아래 가운데</b>에 있는 <b>공유 버튼</b>을 누릅니다 <span class="ico">⬆️</span>')
+     + st(2,'목록을 아래로 내려 <b>홈 화면에 추가</b>를 누릅니다')
+     + st(3,'오른쪽 위 <b>추가</b>를 누르면 끝입니다')
+     + guidePics('ios')
+     + '<div class="warnbox"><b>카톡·인스타에서 열었다면 안 보입니다</b><br>'
+       + '오른쪽 위 <b>···</b> → <b>사파리로 열기</b>를 먼저 눌러주세요.</div>';
+
   } else if(d==='android'){
-    h='<h3>안드로이드</h3><div class="os">Chrome에서 진행해주세요</div>'
-     + st(1,'오른쪽 위 <b>⋮</b> 버튼을 누릅니다')
-     + st(2,'<b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 누릅니다')
-     + st(3,'이름을 확인하고 <b>추가</b>를 누릅니다')
-     + '<div class="warnbox">카톡·인스타 안에서 열었다면 먼저 Chrome으로 열어야 합니다.</div>';
+    h='<h3>앱처럼 쓰기</h3>' + why
+     + '<div class="os">크롬 · 삼성 인터넷 · 네이버 앱 모두 됩니다</div>'
+     + st(1,'오른쪽 위 <b>⋮</b> 또는 <b>≡</b> 버튼을 누릅니다')
+     + st(2,'<b>홈 화면에 추가</b>를 누릅니다 <span class="thin2">(앱 설치라고 나오기도 합니다)</span>')
+     + st(3,'<b>추가</b>를 누르면 끝입니다')
+     + guidePics('and')
+     + '<div class="warnbox"><b>카톡·인스타에서 열었다면 안 보입니다</b><br>'
+       + '오른쪽 위 <b>⋮</b> → <b>다른 브라우저로 열기</b>를 먼저 눌러주세요.</div>';
+
   } else {
-    h='<h3>PC에서 보고 계십니다</h3><div class="os">홈 화면 추가는 휴대폰에서만 됩니다</div>'
-     + st(1,'휴대폰에서 이 주소를 열어주세요')
-     + '<div style="margin-top:6px"><button class="go" onclick="copyUrl()">주소 복사</button></div>';
+    h='<h3>앱처럼 쓰기</h3>' + why
+     + '<div class="os">휴대폰에서만 됩니다</div>'
+     + st(1,'휴대폰으로 이 주소를 열어주세요')
+     + '<div style="margin-top:10px"><button class="go" onclick="copyUrl()">주소 복사하기</button></div>';
   }
   box.innerHTML=h;
+  attachRipple();
+}
+
+/* 설치 안내 그림 — 메뉴 누르는 모습 · 아이콘 생긴 모습 */
+function guidePics(os){
+  var menu = (os==='ios')
+    ? '<circle cx="70" cy="176" r="15" fill="none" stroke="#0d5c4f" stroke-width="2.5"/>'
+      + '<path d="M70 169v14M64 174l6-6 6 6" stroke="#0d5c4f" stroke-width="2.5"'
+      + ' fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+    : '<circle cx="118" cy="26" r="1.8" fill="#0d5c4f"/>'
+      + '<circle cx="118" cy="32" r="1.8" fill="#0d5c4f"/>'
+      + '<circle cx="118" cy="38" r="1.8" fill="#0d5c4f"/>';
+  var label = (os==='ios') ? '공유 버튼' : '⋮ 버튼';
+  var labelY = (os==='ios') ? 200 : 56;
+  var labelX = (os==='ios') ? 70 : 112;
+
+  return '<div class="gpics">'
+  // ① 누르는 화면
+  + '<figure><svg viewBox="0 0 140 230" xmlns="http://www.w3.org/2000/svg">'
+    + '<rect x="6" y="6" width="128" height="218" rx="16" fill="#fff" stroke="#dbe3e1" stroke-width="2"/>'
+    + '<rect x="14" y="14" width="112" height="18" rx="9" fill="#eef3f1"/>'
+    + '<rect x="22" y="20" width="60" height="6" rx="3" fill="#c3d0cc"/>'
+    + '<rect x="20" y="46" width="100" height="12" rx="6" fill="#e7edeb"/>'
+    + '<rect x="20" y="66" width="72" height="8" rx="4" fill="#eef3f1"/>'
+    + '<rect x="20" y="86" width="100" height="46" rx="10" fill="#f2f7f5"/>'
+    + '<rect x="20" y="142" width="100" height="14" rx="7" fill="#eef3f1"/>'
+    + menu
+    + '<circle cx="'+labelX+'" cy="'+(labelY-14)+'" r="17" fill="none" stroke="#d9694a"'
+      + ' stroke-width="2.5" stroke-dasharray="4 3"/>'
+    + '<text x="70" y="'+(labelY+6)+'" font-size="11" font-weight="700" fill="#d9694a"'
+      + ' text-anchor="middle">'+label+'</text>'
+  + '</svg><figcaption>① 여기를 누릅니다</figcaption></figure>'
+
+  // ② 홈 화면에 생긴 모습
+  + '<figure><svg viewBox="0 0 140 230" xmlns="http://www.w3.org/2000/svg">'
+    + '<rect x="6" y="6" width="128" height="218" rx="16" fill="#dceaf5" stroke="#dbe3e1" stroke-width="2"/>'
+    + '<rect x="20" y="30" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
+    + '<rect x="55" y="30" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
+    + '<rect x="90" y="30" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
+    + '<rect x="20" y="76" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
+    + '<g>'
+      + '<rect x="55" y="76" width="30" height="30" rx="8" fill="#0d5c4f"/>'
+      + '<text x="70" y="96" font-size="13" text-anchor="middle" fill="#fff">🩺</text>'
+      + '<rect x="49" y="70" width="42" height="42" rx="12" fill="none" stroke="#d9694a"'
+        + ' stroke-width="2.5" stroke-dasharray="4 3"/>'
+      + '<text x="70" y="124" font-size="9" font-weight="700" fill="#20404d"'
+        + ' text-anchor="middle">POT LAB</text>'
+    + '</g>'
+    + '<rect x="90" y="76" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
+    + '<rect x="20" y="140" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
+    + '<rect x="55" y="140" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
+    + '<rect x="20" y="192" width="100" height="24" rx="12" fill="#fff" opacity=".55"/>'
+  + '</svg><figcaption>② 이렇게 생깁니다</figcaption></figure>'
+  + '</div>';
 }
 
 /* ===== 입력 보조 ===== */
