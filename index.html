@@ -666,9 +666,9 @@
   .whybox .wl em{font-style:normal;flex:1;min-width:0}
   .whybox .wl b{font-weight:700;color:var(--ink)}
 
-  .addbar{display:flex;align-items:center;gap:11px;
+  .addbar{display:flex;align-items:center;gap:12px;
     background:linear-gradient(135deg,#e8f4ef 0%,#f0f7f3 100%);
-    border:1.5px solid #a9d4c5;border-radius:14px;padding:13px 12px 13px 15px;
+    border:1.5px solid #a9d4c5;border-radius:14px;padding:14px 13px 14px 16px;
     margin-bottom:12px;position:relative;overflow:hidden;
     box-shadow:0 2px 10px rgba(13,92,79,.07);
     animation:addIn .5s cubic-bezier(.16,.84,.28,1) both}
@@ -687,7 +687,7 @@
     100%{left:120%}
   }
 
-  .addbar .ai{font-size:23px;line-height:1;flex-shrink:0;
+  .addbar .ai{font-size:25px;line-height:1;flex-shrink:0;
     animation:addNudge 3.2s ease-in-out .8s infinite}
   @keyframes addNudge{
     0%,72%,100%{transform:translateY(0)}
@@ -697,15 +697,13 @@
     95%{transform:translateY(0)}
   }
 
-  .addbar .at{flex:1;min-width:0;position:relative;z-index:1}
-  .addbar .at b{display:block;font-size:13.5px;font-weight:800;letter-spacing:-.02em;
-    color:#0d5c4f;line-height:1.4;margin-bottom:2px;word-break:keep-all}
-  .addbar .at span{font-size:11.5px;color:#3f6259;line-height:1.5}
-  .addbar .at span b{display:inline;font-size:11.5px;color:#0d5c4f}
+  .addbar .at{flex:1;min-width:0;position:relative;z-index:1;
+    font-size:16px;font-weight:800;letter-spacing:-.03em;color:#0d5c4f;
+    line-height:1.35;word-break:keep-all}
 
   .addbar .ab{flex-shrink:0;position:relative;z-index:1;
-    background:var(--accent);color:#fff;border:0;border-radius:10px;
-    padding:10px 13px;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;
+    background:var(--accent);color:#fff;border:0;border-radius:11px;
+    padding:11px 17px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;
     -webkit-tap-highlight-color:transparent;white-space:nowrap;
     box-shadow:0 2px 8px rgba(13,92,79,.25);
     animation:addPulse 3.2s ease-in-out .8s infinite;
@@ -718,7 +716,7 @@
   .addbar .ab:active{transform:scale(.95)}
 
   .addbar .ax{flex-shrink:0;position:relative;z-index:1;
-    background:none;border:0;color:#8aa9a0;font-size:15px;
+    background:none;border:0;color:#8aa9a0;font-size:16px;
     padding:4px 2px 4px 4px;cursor:pointer;line-height:1}
 
   @media (prefers-reduced-motion:reduce){
@@ -1902,7 +1900,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=42"></script>
+<script src="app.js?v=43"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1948,7 +1946,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v42 · 2026-08-25';
+var APP_VER = 'v43 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2456,9 +2454,8 @@ function drawAddBar(){
   bar.className = 'addbar';
   bar.innerHTML =
       '<span class="ai">📲</span>'
-    + '<div class="at"><b>앱처럼 쓰기</b>'
-    + '<span>다음부터 주소 찾을 필요 없이 <b>한 번에</b> 열립니다</span></div>'
-    + '<button class="ab" onclick="addNow()">앱으로 쓰기</button>'
+    + '<b class="at">어플처럼 사용하기</b>'
+    + '<button class="ab" onclick="addNow()">알아보기</button>'
     + '<button class="ax" onclick="hideAddBar()" aria-label="닫기">✕</button>';
   attachRipple();
 }
