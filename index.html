@@ -238,6 +238,12 @@
   .welcome>*{position:relative;z-index:1}
   .welcome .hi{font-size:12px;opacity:.8;margin-bottom:6px;letter-spacing:.02em}
   .welcome h3{margin:0 0 5px;font-size:22px;letter-spacing:-.03em;line-height:1.4}
+  .welcome .jobtag .stu{display:inline-block;font-style:normal;font-size:11px;font-weight:800;
+    background:rgba(255,255,255,.28);border-radius:20px;padding:2px 8px;margin-left:6px;
+    letter-spacing:-.01em}
+  .stu2{display:inline-block;font-style:normal;font-size:11px;font-weight:800;
+    background:var(--accent-soft);color:var(--accent);border-radius:20px;
+    padding:2px 8px;margin-left:5px}
   .welcome .jobtag{display:inline-block;background:rgba(255,255,255,.2);
     border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:5px 15px;
     font-size:14px;font-weight:800;letter-spacing:-.01em;margin:4px 0 10px}
@@ -541,7 +547,7 @@
   .gpics svg{width:100%;max-width:150px;display:block;margin:0 auto}
   .gpics figcaption{margin-top:7px;font-size:12px;font-weight:700;color:#3f4c52}
   .step .ico{margin-left:2px}
-  .thin2{color:#5a6870;font-size:12.5px}
+  .thin2{display:block;color:#5a6870;font-size:12px;margin-top:3px;line-height:1.5}
   .warnbox{background:#fdf6ec;border-radius:9px;padding:12px;font-size:12.5px;color:#6a4d14;
     line-height:1.7;margin-top:10px;word-break:keep-all}
   .heroBtn{display:inline-block;background:#fff;color:var(--accent);border:none;
@@ -635,12 +641,30 @@
   .mi.kakao{background:#FEE500;border-color:#FEE500}
   .mi.off{opacity:.5}
 
+  .inapp2{background:#fdf3e6;border:1.5px solid #e8cfa4;border-radius:13px;
+    padding:15px;margin-bottom:16px}
+  .inapp2 .ih{font-size:14.5px;font-weight:800;color:#8a5c14;letter-spacing:-.02em;
+    margin-bottom:6px;word-break:keep-all}
+  .inapp2 p{font-size:13px;color:#6b5220;line-height:1.7;margin:0 0 12px;word-break:keep-all}
+  .inapp2 .isteps{margin-bottom:13px}
+  .inapp2 .is{display:flex;align-items:flex-start;gap:9px;font-size:13px;
+    color:#5d4715;line-height:1.6;word-break:keep-all}
+  .inapp2 .is+.is{margin-top:8px}
+  .inapp2 .is i{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#8a5c14;
+    color:#fff;font-style:normal;font-size:11.5px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .inapp2 .is b{font-weight:800;color:#4a3810}
+  .inapp2 .go{width:100%;background:#8a5c14;border-color:#8a5c14}
+  .inapp2 .ialt{font-size:11.5px;color:#8a7a52;margin:10px 0 0;text-align:center;
+    line-height:1.6}
+
   .whybox{background:#fff;border:1px solid var(--line);border-radius:12px;
     padding:14px 15px;margin:12px 0 16px}
   .whybox .wl{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;
     line-height:1.6;color:#3f4c52;word-break:keep-all}
   .whybox .wl+.wl{margin-top:9px}
   .whybox .wl span{font-size:15px;flex-shrink:0;line-height:1.45}
+  .whybox .wl em{font-style:normal;flex:1;min-width:0}
   .whybox .wl b{font-weight:700;color:var(--ink)}
 
   .addbar{display:flex;align-items:center;gap:11px;
@@ -1875,7 +1899,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=37"></script>
+<script src="app.js?v=39"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1921,7 +1945,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v37 · 2026-08-25';
+var APP_VER = 'v39 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2258,7 +2282,8 @@ function welcomeCard(){
   return '<div class="welcome">'
     + '<div class="hi">'+(first?'환영합니다':'다시 만나서 반갑습니다')+'</div>'
     + '<h3>'+esc(ME.nick)+'님</h3>'
-    + '<div class="jobtag">'+esc((ME&&ME.job)||'')+'</div>'
+    + '<div class="jobtag">'+esc((ME&&ME.job)||'')
+      + ((ME&&ME.role==='학생')?'<i class="stu">학생</i>':'')+'</div>'
     + '<div class="cheer">'+greeting()+' 💪</div>'
     + '<button class="tohome" onclick="tab(\'home\')">소개 화면 ›</button>'
     + (ME.joinedAt ? '<div class="since">'
@@ -2271,7 +2296,7 @@ function welcomeCard(){
 function mySpecCard(m){
   if(!m) return '';
   var t='<div class="myspec"><h4>내가 등록한 정보</h4>';
-  if(m.job) t+=sp('직군', m.job, true);
+  if(m.job) t+=sp('직군', m.job, true, m.role==='학생' ? '학생' : '');
   if(m.role==='학생'){
     if(m.school) t+=sp('과정', m.school);
     if(m.gpa&&m.gpaMax) t+=sp('학점', m.gpa+' / '+m.gpaMax, true);
@@ -2296,9 +2321,10 @@ function mySpecCard(m){
     + ' onclick="tab(\'input\')">정보 수정하기</button></div></div>';
 }
 
-function sp(k,v,acc){
+function sp(k,v,acc,tag){
   return '<div class="sp"><span class="k3">'+k+'</span>'
-    + '<span class="v3'+(acc?' acc':'')+'">'+esc(v)+'</span></div>';
+    + '<span class="v3'+(acc?' acc':'')+'">'+esc(v)
+    + (tag?'<i class="stu2">'+esc(tag)+'</i>':'')+'</span></div>';
 }
 
 function drawDash(){
@@ -2795,31 +2821,53 @@ function drawGuide(){
   var d=device(), box=document.getElementById('guideBox'), h='';
   function st(n,t){ return '<div class="step"><div class="no">'+n+'</div><div class="tx">'+t+'</div></div>'; }
 
+  // 카톡·인스타 안에서 열었으면 그것부터 안내합니다
+  var ua = navigator.userAgent || '';
+  var inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps/i.test(ua);
+  var netName = (d === 'ios') ? '사파리' : '크롬·삼성 인터넷';
+  var openWord = (d === 'ios')
+    ? '오른쪽 아래 <b>···</b> 눌러<br><b>기본 브라우저로 열기</b>'
+    : '오른쪽 위 <b>⋮</b> 눌러<br><b>다른 브라우저로 열기</b>';
+
+  var inAppBox = inApp ? ('<div class="inapp2">'
+    + '<div class="ih">여기서는 추가할 수 없습니다</div>'
+    + '<p>지금은 <b>카톡·인스타 안</b>에서 보고 계십니다.<br>'
+    + '<b>' + esc(netName) + '</b>에서 열면 추가할 수 있습니다.</p>'
+    + '<div class="isteps">'
+      + '<div class="is"><i>1</i><span>아래 <b>주소 복사</b>를 누릅니다</span></div>'
+      + '<div class="is"><i>2</i><span><b>' + esc(netName) + '</b> 앱을 엽니다</span></div>'
+      + '<div class="is"><i>3</i><span>주소창을 <b>길게 눌러</b> 붙여넣습니다</span></div>'
+    + '</div>'
+    + '<button class="go" onclick="copyUrl()">주소 복사하기</button>'
+    + '<p class="ialt">또는 ' + openWord + '</p>'
+    + '</div>') : '';
+
   var why = '<div class="whybox">'
-    + '<div class="wl"><span>⚡</span>주소 안 찾고 <b>한 번에</b> 열립니다</div>'
-    + '<div class="wl"><span>📱</span>주소창 없이 <b>화면을 넓게</b> 씁니다</div>'
-    + '<div class="wl"><span>🔑</span>코드를 <b>다시 넣지 않아도</b> 됩니다</div>'
+    + '<div class="wl"><span>⚡</span><em>주소 안 찾고 <b>한 번에</b> 열립니다</em></div>'
+    + '<div class="wl"><span>📱</span><em>주소창 없이 <b>화면을 넓게</b> 씁니다</em></div>'
+    + '<div class="wl"><span>🔑</span><em>코드를 <b>다시 넣지 않아도</b> 됩니다</em></div>'
     + '</div>';
 
   if(d==='ios'){
-    h='<h3>앱처럼 쓰기</h3>' + why
+    h='<h3>앱처럼 쓰기</h3>' + inAppBox + why
      + '<div class="os">아이폰은 <b>사파리</b>에서만 됩니다</div>'
-     + st(1,'화면 <b>아래 가운데</b>에 있는 <b>공유 버튼</b>을 누릅니다 <span class="ico">⬆️</span>')
-     + st(2,'목록을 아래로 내려 <b>홈 화면에 추가</b>를 누릅니다')
-     + st(3,'오른쪽 위 <b>추가</b>를 누르면 끝입니다')
+     + st(1,'화면 아래 <b>공유 버튼</b>을 누릅니다 <span class="ico">⬆️</span>')
+     + st(2,'내려서 <b>홈 화면에 추가</b>를 누릅니다')
+     + st(3,'오른쪽 위 <b>추가</b>를 누르면 끝')
      + guidePics('ios')
-     + '<div class="warnbox"><b>카톡·인스타에서 열었다면 안 보입니다</b><br>'
-       + '오른쪽 위 <b>···</b> → <b>사파리로 열기</b>를 먼저 눌러주세요.</div>';
+     + (inApp ? '' : '<div class="warnbox"><b>카톡·인스타에서 열었다면 안 보입니다</b><br>'
+       + '오른쪽 아래 <b>···</b> → <b>기본 브라우저로 열기</b>를 먼저 눌러주세요.</div>');
 
   } else if(d==='android'){
-    h='<h3>앱처럼 쓰기</h3>' + why
-     + '<div class="os">크롬 · 삼성 인터넷 · 네이버 앱 모두 됩니다</div>'
-     + st(1,'오른쪽 위 <b>⋮</b> 또는 <b>≡</b> 버튼을 누릅니다')
-     + st(2,'<b>홈 화면에 추가</b>를 누릅니다 <span class="thin2">(앱 설치라고 나오기도 합니다)</span>')
-     + st(3,'<b>추가</b>를 누르면 끝입니다')
+    h='<h3>앱처럼 쓰기</h3>' + inAppBox + why
+     + '<div class="os">크롬 · 삼성 인터넷에서 됩니다</div>'
+     + st(1,'오른쪽 위 <b>⋮</b> 버튼을 누릅니다')
+     + st(2,'<b>홈 화면에 추가</b>를 누릅니다'
+         + '<span class="thin2">앱 설치라고 나오기도 합니다</span>')
+     + st(3,'<b>추가</b>를 누르면 끝')
      + guidePics('and')
-     + '<div class="warnbox"><b>카톡·인스타에서 열었다면 안 보입니다</b><br>'
-       + '오른쪽 위 <b>⋮</b> → <b>다른 브라우저로 열기</b>를 먼저 눌러주세요.</div>';
+     + (inApp ? '' : '<div class="warnbox"><b>카톡·인스타에서 열었다면 안 보입니다</b><br>'
+       + '오른쪽 위 <b>⋮</b> → <b>다른 브라우저로 열기</b>를 먼저 눌러주세요.</div>');
 
   } else {
     h='<h3>앱처럼 쓰기</h3>' + why
@@ -2869,8 +2917,9 @@ function guidePics(os){
     + '<rect x="90" y="30" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
     + '<rect x="20" y="76" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
     + '<g>'
-      + '<rect x="55" y="76" width="30" height="30" rx="8" fill="#0d5c4f"/>'
-      + '<text x="70" y="96" font-size="13" text-anchor="middle" fill="#fff">🩺</text>'
+      + '<clipPath id="icClip"><rect x="55" y="76" width="30" height="30" rx="8"/></clipPath>'
+      + '<image href="icon-192.png" x="55" y="76" width="30" height="30"'
+      + ' clip-path="url(#icClip)" preserveAspectRatio="xMidYMid slice"/>'
       + '<rect x="49" y="70" width="42" height="42" rx="12" fill="none" stroke="#d9694a"'
         + ' stroke-width="2.5" stroke-dasharray="4 3"/>'
       + '<text x="70" y="124" font-size="9" font-weight="700" fill="#20404d"'
@@ -3932,7 +3981,7 @@ function meCard(r){
   t+='<div class="mecard"><div class="hd">'
    + '<div class="av">'+esc((m.nick||'?').slice(0,1))+'</div>'
    + '<b>'+esc(m.nick||'내 정보')+'</b>'
-   + '<span>'+esc(m.job||'')+'</span></div>';
+   + '<span>'+esc(m.job||'')+((m.role==='학생')?' · 학생':'')+'</span></div>';
 
   var tags=[];
   if(m.role==='학생'){
