@@ -542,10 +542,11 @@
   .spec .bar2 i{display:block;height:100%;background:var(--accent);
     width:0;animation:grow 1s cubic-bezier(.16,.84,.28,1) forwards}
   .spec .pc{font-size:12.5px;font-weight:700;width:42px;text-align:right}
-  .gpics{display:flex;gap:10px;margin:14px 0 4px}
+  .gpics{display:flex;gap:7px;margin:14px 0 4px}
   .gpics figure{flex:1;margin:0;text-align:center}
-  .gpics svg{width:100%;max-width:150px;display:block;margin:0 auto}
-  .gpics figcaption{margin-top:7px;font-size:12px;font-weight:700;color:#3f4c52}
+  .gpics svg{width:100%;display:block;margin:0 auto}
+  .gpics figcaption{margin-top:7px;font-size:11px;font-weight:700;color:#3f4c52;
+    line-height:1.4;word-break:keep-all}
   .step .ico{margin-left:2px}
   .thin2{display:block;color:#5a6870;font-size:12px;margin-top:3px;line-height:1.5}
   .warnbox{background:#fdf6ec;border-radius:9px;padding:12px;font-size:12.5px;color:#6a4d14;
@@ -655,8 +656,6 @@
     display:flex;align-items:center;justify-content:center;margin-top:1px}
   .inapp2 .is b{font-weight:800;color:#4a3810}
   .inapp2 .go{width:100%;background:#8a5c14;border-color:#8a5c14}
-  .inapp2 .ialt{font-size:11.5px;color:#8a7a52;margin:10px 0 0;text-align:center;
-    line-height:1.6}
 
   .whybox{background:#fff;border:1px solid var(--line);border-radius:12px;
     padding:14px 15px;margin:12px 0 16px}
@@ -1903,7 +1902,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=40"></script>
+<script src="app.js?v=41"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1949,7 +1948,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v40 · 2026-08-25';
+var APP_VER = 'v41 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2829,9 +2828,6 @@ function drawGuide(){
   var ua = navigator.userAgent || '';
   var inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps/i.test(ua);
   var netName = (d === 'ios') ? '사파리' : '크롬·삼성 인터넷';
-  var openWord = (d === 'ios')
-    ? '오른쪽 아래 <b>···</b> 눌러<br><b>기본 브라우저로 열기</b>'
-    : '오른쪽 위 <b>⋮</b> 눌러<br><b>다른 브라우저로 열기</b>';
 
   var inAppBox = inApp ? ('<div class="inapp2">'
     + '<div class="ih">여기서는 추가할 수 없습니다</div>'
@@ -2843,7 +2839,6 @@ function drawGuide(){
       + '<div class="is"><i>3</i><span>주소창을 <b>길게 눌러</b> 붙여넣습니다</span></div>'
     + '</div>'
     + '<button class="go" onclick="copyUrl()">주소 복사하기</button>'
-    + '<p class="ialt">또는 ' + openWord + '</p>'
     + '</div>') : '';
 
   var why = '<div class="whybox">'
@@ -2853,7 +2848,7 @@ function drawGuide(){
     + '</div>';
 
   if(d==='ios'){
-    h='<h3>앱처럼 쓰기</h3>' + inAppBox + why
+    h=inAppBox + why
      + '<div class="os">아이폰은 <b>사파리</b>에서만 됩니다</div>'
      + st(1,'화면 아래 <b>공유 버튼</b>을 누릅니다 <span class="ico">⬆️</span>')
      + st(2,'내려서 <b>홈 화면에 추가</b>를 누릅니다')
@@ -2863,18 +2858,18 @@ function drawGuide(){
        + '오른쪽 아래 <b>···</b> → <b>기본 브라우저로 열기</b>를 먼저 눌러주세요.</div>');
 
   } else if(d==='android'){
-    h='<h3>앱처럼 쓰기</h3>' + inAppBox + why
+    h=inAppBox + why
      + '<div class="os">크롬 · 삼성 인터넷에서 됩니다</div>'
      + st(1,'오른쪽 위 <b>⋮</b> 버튼을 누릅니다')
-     + st(2,'<b>홈 화면에 추가</b>를 누릅니다'
-         + '<span class="thin2">앱 설치라고 나오기도 합니다</span>')
-     + st(3,'<b>추가</b>를 누르면 끝')
+     + st(2,'<b>설치 및 바로가기 만들기</b>를 누릅니다'
+         + '<span class="thin2">홈 화면에 추가·앱 설치로 나오기도 합니다</span>')
+     + st(3,'<b>바로가기 만들기</b>를 누르면 끝')
      + guidePics('and')
      + (inApp ? '' : '<div class="warnbox"><b>카톡·인스타에서 열었다면 안 보입니다</b><br>'
        + '오른쪽 위 <b>⋮</b> → <b>다른 브라우저로 열기</b>를 먼저 눌러주세요.</div>');
 
   } else {
-    h='<h3>앱처럼 쓰기</h3>' + why
+    h=why
      + '<div class="os">휴대폰에서만 됩니다</div>'
      + st(1,'휴대폰으로 이 주소를 열어주세요')
      + '<div style="margin-top:10px"><button class="go" onclick="copyUrl()">주소 복사하기</button></div>';
@@ -2883,21 +2878,14 @@ function drawGuide(){
   attachRipple();
 }
 
-/* 설치 안내 그림 — 메뉴 누르는 모습 · 아이콘 생긴 모습 */
+/* 설치 안내 그림 — 누를 곳 · 메뉴 · 생긴 모습 */
 function guidePics(os){
-  var menu = (os==='ios')
-    ? '<circle cx="70" cy="176" r="15" fill="none" stroke="#0d5c4f" stroke-width="2.5"/>'
-      + '<path d="M70 169v14M64 174l6-6 6 6" stroke="#0d5c4f" stroke-width="2.5"'
-      + ' fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
-    : '<circle cx="118" cy="26" r="1.8" fill="#0d5c4f"/>'
-      + '<circle cx="118" cy="32" r="1.8" fill="#0d5c4f"/>'
-      + '<circle cx="118" cy="38" r="1.8" fill="#0d5c4f"/>';
-  var label = (os==='ios') ? '공유 버튼' : '⋮ 버튼';
-  var labelY = (os==='ios') ? 200 : 56;
-  var labelX = (os==='ios') ? 70 : 112;
+  if(os === 'ios') return picsIOS();
+  return picsAND();
+}
 
+function picsIOS(){
   return '<div class="gpics">'
-  // ① 누르는 화면
   + '<figure><svg viewBox="0 0 140 230" xmlns="http://www.w3.org/2000/svg">'
     + '<rect x="6" y="6" width="128" height="218" rx="16" fill="#fff" stroke="#dbe3e1" stroke-width="2"/>'
     + '<rect x="14" y="14" width="112" height="18" rx="9" fill="#eef3f1"/>'
@@ -2905,36 +2893,99 @@ function guidePics(os){
     + '<rect x="20" y="46" width="100" height="12" rx="6" fill="#e7edeb"/>'
     + '<rect x="20" y="66" width="72" height="8" rx="4" fill="#eef3f1"/>'
     + '<rect x="20" y="86" width="100" height="46" rx="10" fill="#f2f7f5"/>'
-    + '<rect x="20" y="142" width="100" height="14" rx="7" fill="#eef3f1"/>'
-    + menu
-    + '<circle cx="'+labelX+'" cy="'+(labelY-14)+'" r="17" fill="none" stroke="#d9694a"'
+    + '<rect x="14" y="188" width="112" height="26" rx="8" fill="#f4f7f6"/>'
+    + '<circle cx="70" cy="201" r="14" fill="none" stroke="#0d5c4f" stroke-width="2.5"/>'
+    + '<path d="M70 194v14M64 199l6-6 6 6" stroke="#0d5c4f" stroke-width="2.5"'
+      + ' fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+    + '<circle cx="70" cy="201" r="21" fill="none" stroke="#d9694a"'
       + ' stroke-width="2.5" stroke-dasharray="4 3"/>'
-    + '<text x="70" y="'+(labelY+6)+'" font-size="11" font-weight="700" fill="#d9694a"'
-      + ' text-anchor="middle">'+label+'</text>'
-  + '</svg><figcaption>① 여기를 누릅니다</figcaption></figure>'
+    + '<text x="70" y="178" font-size="11" font-weight="700" fill="#d9694a"'
+      + ' text-anchor="middle">공유 버튼</text>'
+  + '</svg><figcaption>① 화면 아래 공유</figcaption></figure>'
 
-  // ② 홈 화면에 생긴 모습
   + '<figure><svg viewBox="0 0 140 230" xmlns="http://www.w3.org/2000/svg">'
+    + '<rect x="6" y="6" width="128" height="218" rx="16" fill="#f4f6f6" stroke="#dbe3e1" stroke-width="2"/>'
+    + '<rect x="14" y="20" width="112" height="30" rx="9" fill="#fff"/>'
+    + '<rect x="22" y="30" width="56" height="6" rx="3" fill="#c3d0cc"/>'
+    + '<rect x="22" y="40" width="76" height="5" rx="2.5" fill="#dde5e3"/>'
+    + '<rect x="14" y="58" width="112" height="26" rx="8" fill="#fff"/>'
+    + '<rect x="24" y="68" width="52" height="6" rx="3" fill="#dde5e3"/>'
+    + '<rect x="14" y="90" width="112" height="26" rx="8" fill="#fff"/>'
+    + '<rect x="24" y="100" width="60" height="6" rx="3" fill="#dde5e3"/>'
+    + '<rect x="14" y="122" width="112" height="30" rx="8" fill="#fff"'
+      + ' stroke="#d9694a" stroke-width="2.5" stroke-dasharray="4 3"/>'
+    + '<rect x="24" y="131" width="14" height="14" rx="4" fill="#0d5c4f" opacity=".18"/>'
+    + '<text x="44" y="142" font-size="9.5" font-weight="800" fill="#0d5c4f">홈 화면에 추가</text>'
+    + '<rect x="14" y="158" width="112" height="26" rx="8" fill="#fff"/>'
+    + '<rect x="24" y="168" width="46" height="6" rx="3" fill="#dde5e3"/>'
+  + '</svg><figcaption>② 내려서 이걸 선택</figcaption></figure>'
+
+  + phoneHome()
+  + '</div>';
+}
+
+function picsAND(){
+  return '<div class="gpics">'
+  + '<figure><svg viewBox="0 0 140 230" xmlns="http://www.w3.org/2000/svg">'
+    + '<rect x="6" y="6" width="128" height="218" rx="16" fill="#2b2f31"/>'
+    + '<rect x="18" y="22" width="60" height="6" rx="3" fill="#565c5f"/>'
+    + '<rect x="18" y="42" width="72" height="6" rx="3" fill="#565c5f"/>'
+    + '<rect x="18" y="62" width="52" height="6" rx="3" fill="#565c5f"/>'
+    + '<rect x="18" y="82" width="66" height="6" rx="3" fill="#565c5f"/>'
+    + '<rect x="12" y="100" width="116" height="26" rx="7" fill="#3c4245"'
+      + ' stroke="#d9694a" stroke-width="2.5" stroke-dasharray="4 3"/>'
+    + '<text x="21" y="117" font-size="8.5" font-weight="800" fill="#fff">설치 및 바로가기 만들기</text>'
+    + '<rect x="18" y="140" width="58" height="6" rx="3" fill="#565c5f"/>'
+    + '<rect x="18" y="160" width="44" height="6" rx="3" fill="#565c5f"/>'
+    + '<rect x="18" y="180" width="70" height="6" rx="3" fill="#565c5f"/>'
+    + '<circle cx="122" cy="14" r="1.6" fill="#8b9295"/>'
+    + '<circle cx="122" cy="19" r="1.6" fill="#8b9295"/>'
+    + '<circle cx="122" cy="24" r="1.6" fill="#8b9295"/>'
+  + '</svg><figcaption>① ⋮ 눌러 이걸 선택</figcaption></figure>'
+
+  + '<figure><svg viewBox="0 0 140 230" xmlns="http://www.w3.org/2000/svg">'
+    + '<rect x="6" y="6" width="128" height="218" rx="16" fill="#2b2f31"/>'
+    + '<text x="70" y="34" font-size="10" font-weight="800" fill="#e6eaec"'
+      + ' text-anchor="middle">설치 및 바로가기 만들기</text>'
+    + '<rect x="14" y="52" width="112" height="44" rx="10" fill="#3c4245"/>'
+    + '<clipPath id="gi1"><rect x="22" y="62" width="24" height="24" rx="7"/></clipPath>'
+    + '<image href="icon-192.png" x="22" y="62" width="24" height="24"'
+      + ' clip-path="url(#gi1)" preserveAspectRatio="xMidYMid slice"/>'
+    + '<text x="54" y="72" font-size="8.5" font-weight="700" fill="#e6eaec">앱 설치</text>'
+    + '<text x="54" y="84" font-size="7.5" fill="#9aa1a5">홈 화면에 추가됩니다</text>'
+    + '<rect x="14" y="102" width="112" height="44" rx="10" fill="#3c4245"'
+      + ' stroke="#d9694a" stroke-width="2.5" stroke-dasharray="4 3"/>'
+    + '<clipPath id="gi2"><rect x="22" y="112" width="24" height="24" rx="7"/></clipPath>'
+    + '<image href="icon-192.png" x="22" y="112" width="24" height="24"'
+      + ' clip-path="url(#gi2)" preserveAspectRatio="xMidYMid slice"/>'
+    + '<text x="54" y="122" font-size="8.5" font-weight="800" fill="#fff">바로가기 만들기</text>'
+    + '<text x="54" y="134" font-size="7.5" fill="#9aa1a5">둘 중 아무거나 됩니다</text>'
+  + '</svg><figcaption>② 둘 중 하나 선택</figcaption></figure>'
+
+  + phoneHome()
+  + '</div>';
+}
+
+/* 홈 화면에 아이콘이 생긴 모습 */
+function phoneHome(){
+  return '<figure><svg viewBox="0 0 140 230" xmlns="http://www.w3.org/2000/svg">'
     + '<rect x="6" y="6" width="128" height="218" rx="16" fill="#dceaf5" stroke="#dbe3e1" stroke-width="2"/>'
     + '<rect x="20" y="30" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
     + '<rect x="55" y="30" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
     + '<rect x="90" y="30" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
     + '<rect x="20" y="76" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
-    + '<g>'
-      + '<clipPath id="icClip"><rect x="55" y="76" width="30" height="30" rx="8"/></clipPath>'
-      + '<image href="icon-192.png" x="55" y="76" width="30" height="30"'
-      + ' clip-path="url(#icClip)" preserveAspectRatio="xMidYMid slice"/>'
-      + '<rect x="49" y="70" width="42" height="42" rx="12" fill="none" stroke="#d9694a"'
-        + ' stroke-width="2.5" stroke-dasharray="4 3"/>'
-      + '<text x="70" y="124" font-size="9" font-weight="700" fill="#20404d"'
-        + ' text-anchor="middle">POT LAB</text>'
-    + '</g>'
+    + '<clipPath id="hmClip"><rect x="55" y="76" width="30" height="30" rx="8"/></clipPath>'
+    + '<image href="icon-192.png" x="55" y="76" width="30" height="30"'
+      + ' clip-path="url(#hmClip)" preserveAspectRatio="xMidYMid slice"/>'
+    + '<rect x="49" y="70" width="42" height="42" rx="12" fill="none" stroke="#d9694a"'
+      + ' stroke-width="2.5" stroke-dasharray="4 3"/>'
+    + '<text x="70" y="124" font-size="9" font-weight="700" fill="#20404d"'
+      + ' text-anchor="middle">POT LAB</text>'
     + '<rect x="90" y="76" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
     + '<rect x="20" y="140" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
     + '<rect x="55" y="140" width="30" height="30" rx="8" fill="#fff" opacity=".55"/>'
     + '<rect x="20" y="192" width="100" height="24" rx="12" fill="#fff" opacity=".55"/>'
-  + '</svg><figcaption>② 이렇게 생깁니다</figcaption></figure>'
-  + '</div>';
+  + '</svg><figcaption>③ 이렇게 생깁니다</figcaption></figure>';
 }
 
 /* ===== 입력 보조 ===== */
