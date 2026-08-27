@@ -673,6 +673,26 @@
     font-size:13.5px;font-weight:800;cursor:pointer;text-decoration:underline;
     text-underline-offset:3px;padding:2px 0;-webkit-tap-highlight-color:transparent}
 
+  .post{display:block;background:#fff;border:1px solid var(--line);border-radius:13px;
+    padding:14px;margin-bottom:9px;text-decoration:none;color:inherit;
+    -webkit-tap-highlight-color:transparent;transition:transform .2s,border-color .2s}
+  .post:active{transform:scale(.99);border-color:var(--accent)}
+  .post.soon{border-color:#f0cdbe;background:#fffaf8}
+  .ph{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .porg{flex:1;min-width:0;font-size:12px;color:#5a6870;font-weight:700;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pd{flex-shrink:0;font-size:11px;font-weight:800;background:#eef3f1;color:#3f4c52;
+    border-radius:20px;padding:3px 9px}
+  .pd.hot{background:#fdeeeb;color:#a8402a}
+  .post .pt{font-size:15px;font-weight:800;letter-spacing:-.02em;line-height:1.45;
+    margin-bottom:9px;word-break:keep-all}
+  .ptags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+  .ptags i{font-style:normal;font-size:11px;background:#f1f5f4;color:#3f4c52;
+    border-radius:6px;padding:4px 8px}
+  .ptags i.jb{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  .pf{display:flex;align-items:center;font-size:11.5px;color:#5a6870}
+  .pgo{margin-left:auto;color:var(--accent);font-weight:700}
+
   .addbar{display:flex;align-items:center;gap:12px;
     background:linear-gradient(135deg,#e8f4ef 0%,#f0f7f3 100%);
     border:1.5px solid #a9d4c5;border-radius:14px;padding:14px 13px 14px 16px;
@@ -1858,6 +1878,19 @@
     <div id="calcBox"></div>
   </div>
 
+  <!-- ============ 채용공고 ============ -->
+  <div id="pane-post" class="hide">
+    <div class="tabs" id="postTabs">
+      <button class="tab on" id="pt1" onclick="postTab('mine')">내 직군</button>
+      <button class="tab" id="pt2" onclick="postTab('all')">전체</button>
+    </div>
+    <div id="postBox"></div>
+    <div class="hintbox" style="margin-top:12px">
+      공공기관이 공시한 채용정보를 하루 세 번 모읍니다.
+      <b>사립병원 공고는 아직 포함되지 않습니다.</b>
+    </div>
+  </div>
+
   <!-- ============ 홈 화면에 추가 ============ -->
   <div id="pane-install" class="hide">
     <div class="guide" id="guideBox"></div>
@@ -1912,7 +1945,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=44"></script>
+<script src="app.js?v=45"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1958,7 +1991,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v44 · 2026-08-25';
+var APP_VER = 'v45 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2074,6 +2107,9 @@ function snapshot(which){
   } else if(which === 'region'){
     SNAP.region = { html:(document.getElementById('regionBox')||{}).innerHTML||'',
                     type:(document.getElementById('rType')||{}).value||'' };
+  } else if(which === 'post'){
+    SNAP.post = { html:(document.getElementById('postBox')||{}).innerHTML||'',
+                  mode: POST_MODE, scroll: window.scrollY || 0 };
   }
 }
 
@@ -2098,6 +2134,11 @@ function restore(which){
   } else if(which === 'region'){
     set('rType', st.type);
     document.getElementById('regionBox').innerHTML = st.html;
+  } else if(which === 'post'){
+    POST_MODE = st.mode || 'mine';
+    document.getElementById('pt1').className = 'tab' + (POST_MODE==='mine'?' on':'');
+    document.getElementById('pt2').className = 'tab' + (POST_MODE==='all'?' on':'');
+    document.getElementById('postBox').innerHTML = st.html;
   }
   attachRipple();
   if(st.scroll) setTimeout(function(){ window.scrollTo(0, st.scroll); }, 60);
@@ -2143,7 +2184,7 @@ function tab(which, back){
   CURRENT = which;
   try{ history.pushState({p:which}, '', location.href); }catch(e){}
 
-  ['home','input','view','done','unlock','dash','feedback','calc','install','hosp','region','jobs'].forEach(function(p){
+  ['home','input','view','done','unlock','dash','feedback','calc','install','hosp','region','jobs','post'].forEach(function(p){
     var el=document.getElementById('pane-'+p);
     if(el) el.className = (p===which?'':'hide');
   });
@@ -2151,6 +2192,8 @@ function tab(which, back){
   var sub=document.getElementById('subhead');
   sub.className = (which==='home'||which==='dash')?'hide':'';
   document.getElementById('statTabs').className = isStat?'tabs':'tabs hide';
+  var ptb=document.getElementById('postTabs');
+  if(ptb) ptb.className = (which==='post')?'tabs':'tabs hide';
   var TT={input:['내 정보 등록','약 3분이면 끝납니다'],
           done:['등록 완료','코드를 받으러 가실 차례입니다'],
           unlock:['잠금 해제','닉네임과 코드를 넣어주세요'],
@@ -2159,7 +2202,8 @@ function tab(which, back){
           hosp:['병원별 치료사 인원','정리한 자료 기준'],
           feedback:['운영자에게 한마디','익명으로 전달됩니다'],
           region:['지역별 의료기관 현황','분기 집계 기준'],
-          jobs:['채용공고 바로가기','치료사 공고가 모이는 곳'],
+          post:['공공기관 채용공고','자동으로 모아드립니다'],
+          jobs:['채용 사이트 모음','고용24·사람인 바로가기'],
           install:['앱처럼 쓰기','주소 안 찾고 한 번에 열기']};
   if(TT[which]){
     document.getElementById('subTitle').textContent=TT[which][0];
@@ -2182,6 +2226,7 @@ function tab(which, back){
   if(which==='calc'){ if(back) restore('calc'); }
   if(which==='install') drawGuide();
   if(which==='input') hideAlready();
+  if(which==='post'){ if(!(back && restore('post'))) doPosts(); }
 
   // 되살린 화면은 보던 위치를 유지합니다
   if(!(back && SNAP[which])) window.scrollTo({top:0, behavior:'smooth'});
@@ -2427,7 +2472,8 @@ function drawDashMenu(){
   m+=menuItem('','🧮','내 연봉 계산기','세전↔세후 · 또래 비교',{fn:"tab(\'calc\')"});
   m+='<div class="mcat">취업 · 이직</div>';
   m+=menuItem('','🏥','병원 찾기·비교','인원·병상·전문의 · 지역별 목록',{fn:"tab(\'hosp\')"});
-  m+=menuItem('','📋','채용공고 바로가기','공공기관·워크넷 통합 검색',{fn:"tab(\'jobs\')"});
+  m+=menuItem('','📢','공공기관 채용공고','자동으로 모아드립니다',{fn:"tab(\'post\')"});
+  m+=menuItem('','📋','채용 사이트 모음','고용24·사람인 바로가기',{fn:"tab(\'jobs\')"});
   m+=b.klass
      ? menuItem('','🎯','공공기관 집중 준비반','공고 알림 + 준비 자료',{href:b.klass})
      : menuItem('off','🎯','공공기관 집중 준비반','1기 모집 준비 중',{fn:"msg(\'곧 열립니다\')"});
@@ -3691,6 +3737,77 @@ function drawCompare(r){
 
   box.innerHTML=h;
   attachRipple(); revealIn(); animateNumbers(); slidePins();
+}
+
+/* ===== 채용공고 ===== */
+var POST_MODE = 'mine';
+
+function postTab(m){
+  POST_MODE = m;
+  document.getElementById('pt1').className = 'tab' + (m==='mine'?' on':'');
+  document.getElementById('pt2').className = 'tab' + (m==='all'?' on':'');
+  doPosts();
+}
+
+function doPosts(){
+  var box=document.getElementById('postBox');
+  box.innerHTML=loading('공고를 불러오는 중');
+  var job = (POST_MODE==='mine') ? ((ME&&ME.job)||JOB) : '';
+  google.script.run.withSuccessHandler(showPosts)
+    .withFailureHandler(function(e){ box.innerHTML=errBox(e,'getJobPosts'); attachRipple(); })
+    .getJobPosts(cred(), job);
+}
+
+function dday(to){
+  if(!to) return null;
+  var t=String(to).replace(/[^0-9]/g,'');
+  if(t.length!==8) return null;
+  var end=new Date(+t.slice(0,4), +t.slice(4,6)-1, +t.slice(6,8));
+  var now=new Date(); now.setHours(0,0,0,0);
+  return Math.round((end-now)/86400000);
+}
+
+function showPosts(r){
+  var box=document.getElementById('postBox');
+  if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+
+  if(!r.rows.length){
+    box.innerHTML='<div class="empty"><b>아직 올라온 공고가 없습니다</b><br>'
+      + '새 공고가 뜨면 바로 여기에 올라옵니다.</div>';
+    attachRipple(); return;
+  }
+
+  var h='<p class="thin" style="margin:0 0 10px">'
+    + (POST_MODE==='mine' ? esc((ME&&ME.job)||JOB)+' 관련 ' : '전체 ')
+    + '<b>'+r.total+'건</b> · 마감이 가까운 순</p>';
+
+  r.rows.forEach(function(x){
+    var d = dday(x.to);
+    var soon = (d!==null && d<=7);
+    h+='<a class="post'+(soon?' soon':'')+'" href="'+esc(x.url||'#')+'"'
+      + ' target="_blank" rel="noopener">'
+      + '<div class="ph"><span class="porg">'+esc(x.org)+'</span>'
+      + (d!==null ? '<span class="pd'+(soon?' hot':'')+'">'
+          + (d<0?'마감':(d===0?'오늘 마감':'D-'+d))+'</span>' : '')
+      + '</div>'
+      + '<div class="pt">'+esc(x.title)+'</div>'
+      + '<div class="ptags">'
+        + (x.job&&x.job!=='공통'?'<i class="jb">'+esc(x.job)+'</i>':'')
+        + (x.kind?'<i>'+esc(x.kind)+'</i>':'')
+        + (x.hire?'<i>'+esc(String(x.hire).split(',')[0])+'</i>':'')
+        + (x.region?'<i>'+esc(String(x.region).split(',').slice(0,2).join('·'))+'</i>':'')
+        + (x.nope?'<i>'+x.nope+'명</i>':'')
+      + '</div>'
+      + '<div class="pf">'
+        + (x.edu?esc(String(x.edu).split(',')[0])+' · ':'')
+        + (x.to?'~'+esc(x.to):'')
+        + '<span class="pgo">공고 보기 ›</span>'
+      + '</div></a>';
+  });
+
+  box.innerHTML=h;
+  attachRipple();
+  revealIn('#pane-post');
 }
 
 function drawJobLinks(){
