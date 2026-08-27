@@ -1554,7 +1554,7 @@
       </div>
 
       <div class="f">
-        <label>어학 점수 <span class="hint">토익 기준 · 없으면 비워두세요</span></label>
+        <label>어학 점수 <span class="hint">토익 기준 · 20점 배점 · 없으면 비워두세요</span></label>
         <div class="unit"><input type="number" id="toeic" min="0" max="990"
           placeholder="800"><span>점</span></div>
       </div>
@@ -1577,14 +1577,6 @@
             onkeydown="if(event.key==='Enter'){event.preventDefault();addCustom('courses');}">
           <button type="button" onclick="addCustom('courses')">추가</button>
         </div>
-      </div>
-
-      <div class="f">
-        <label>어학</label>
-        <select id="lang">
-          <option value="">선택</option>
-          <option>없음</option><option>토익</option><option>토스·오픽</option><option>기타</option>
-        </select>
       </div>
 
       <div class="f stu-only hide">
@@ -1808,7 +1800,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=31"></script>
+<script src="app.js?v=33"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1854,7 +1846,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v31 · 2026-08-25';
+var APP_VER = 'v33 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2253,9 +2245,14 @@ function drawDash(){
       if(ME && bd.role && ME.role!==bd.role){
         ME.role = bd.role; saveMe(ME);
       }
-      if(bd.role==='학생'){ showStudent(bd.student); drawStudentCard(bd.card); }
-      else { showPos(bd.position); showHourly(bd.hourly);
-             showSpec(bd.spec); drawCard(bd.card); }
+      if(bd.role==='학생'){
+        showStudent(bd.student);
+        document.getElementById('hourlyBox').innerHTML='';
+        drawStudentCard(bd.card);
+      } else {
+        showPos(bd.position); showHourly(bd.hourly);
+        showSpec(bd.spec); drawCard(bd.card);
+      }
     }).getResultBundle(cred(), (ME&&ME.id)||'', (ME&&ME.role)||'현직');
   }).withFailureHandler(function(e){
     box.innerHTML='<div class="card"><p class="sub">'+esc(e.message)+'</p></div>';
@@ -3080,7 +3077,7 @@ function submit(){
     birthYear:val('birthYear'), note:document.getElementById('note').value,
     school:val('school'), gpa:val('gpa'), gpaMax:val('gpaMax'), toeic:val('toeic'),
     certs:picked.certs.concat(extra('certEtc')),
-    courses:picked.courses.concat(extra('courseEtc')).concat(val('lang')?['어학:'+val('lang')]:[]),
+    courses:picked.courses.concat(extra('courseEtc')),
     practice:rows.practice.filter(function(r){return r.hospital;}),
     career:rows.career.filter(function(r){return r.hospital;})
   };
@@ -3197,8 +3194,8 @@ function showStudent(d){
      + ssPart('학점', d.spec.parts.gpa, d.spec.max.gpa, d.spec.raw.gpa)
      + ssPart('자격증', d.spec.parts.certs, d.spec.max.certs, d.spec.raw.certs)
      + ssPart('어학', d.spec.parts.toeic, d.spec.max.toeic, d.spec.raw.toeic)
-     + ssPart('학력', d.spec.parts.school, d.spec.max.school, d.spec.raw.school)
      + ssPart('이수 교육', d.spec.parts.courses, d.spec.max.courses, d.spec.raw.courses)
+     + ssPart('학력', d.spec.parts.school, d.spec.max.school, d.spec.raw.school)
      + ssPart('실습', d.spec.parts.practice, d.spec.max.practice, d.spec.raw.practice)
      + '</div>'
      + (d.spec.cheer
@@ -4066,8 +4063,8 @@ function drawStudentCard(d){
     ['학점', parts.gpa||0, mx.gpa, rw.gpa||''],
     ['자격증', parts.certs||0, mx.certs, rw.certs||''],
     ['어학', parts.toeic||0, mx.toeic, rw.toeic||''],
-    ['학력', parts.school||0, mx.school, rw.school||''],
     ['이수 교육', parts.courses||0, mx.courses, rw.courses||''],
+    ['학력', parts.school||0, mx.school, rw.school||''],
     ['실습', parts.practice||0, mx.practice, rw.practice||'']
   ];
   var top=690, gap=44, barX=340, barW=390;
