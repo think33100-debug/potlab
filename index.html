@@ -1902,7 +1902,7 @@
 
 <div id="msg"></div>
 
-<script src="app.js?v=41"></script>
+<script src="app.js?v=42"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -1948,7 +1948,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v41 · 2026-08-25';
+var APP_VER = 'v42 · 2026-08-25';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2848,7 +2848,7 @@ function drawGuide(){
     + '</div>';
 
   if(d==='ios'){
-    h=inAppBox + why
+    h=why + inAppBox
      + '<div class="os">아이폰은 <b>사파리</b>에서만 됩니다</div>'
      + st(1,'화면 아래 <b>공유 버튼</b>을 누릅니다 <span class="ico">⬆️</span>')
      + st(2,'내려서 <b>홈 화면에 추가</b>를 누릅니다')
@@ -2858,7 +2858,7 @@ function drawGuide(){
        + '오른쪽 아래 <b>···</b> → <b>기본 브라우저로 열기</b>를 먼저 눌러주세요.</div>');
 
   } else if(d==='android'){
-    h=inAppBox + why
+    h=why + inAppBox
      + '<div class="os">크롬 · 삼성 인터넷에서 됩니다</div>'
      + st(1,'오른쪽 위 <b>⋮</b> 버튼을 누릅니다')
      + st(2,'<b>설치 및 바로가기 만들기</b>를 누릅니다'
