@@ -22,8 +22,11 @@ self.addEventListener('push', function (e) {
   var title = d.title || 'POT JOB';
   var opts = {
     body: d.body || '새 소식이 있습니다',
-    icon: '/icon-192.png',      // 알림 오른쪽에 뜨는 큰 그림
-    badge: '/badge-96.png',     // 상태표시줄의 작은 표시
+    /* 오른쪽 큰 그림 — 여기는 컬러 그대로 나옵니다 */
+    icon: '/icon-192.png',
+    /* 상태표시줄의 작은 표시(badge)는 넣지 않습니다.
+       안드로이드가 색을 지우고 한 색으로 칠해버려서 무엇을 넣어도
+       덩어리로 보입니다. 비워두면 크롬 아이콘이 대신 나옵니다. */
     tag: d.tag || 'potjob',          // 같은 tag 는 덮어씁니다 (알림이 쌓이지 않게)
     renotify: true,
     data: { url: d.url || '/' }
