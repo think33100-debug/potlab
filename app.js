@@ -19,15 +19,14 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
 
   /* 화면에서 부르는 서버 함수 목록 — Wage.gs 의 API 와 같아야 합니다 */
   var METHODS = [
-    'getBrand', 'getPreview', 'getPublicSummary', 'countByJob', 'totalCount',
-    'checkNick', 'submitWage', 'unlockAccess', 'loginByNick',
-    'getStats', 'getResultBundle', 'getMyPosition', 'getHourly',
-    'getSpecMatch', 'getCardData', 'getStudentResult', 'getStudentCard',
-    'getMoveEstimate', 'calcSalary',
-    'searchHospital', 'suggestHospitals', 'hospitalDetail', 'compareHospitals',
-    'topHospitals', 'jobRegionSummary', 'regionHospitals', 'densityTable',
-    'regionOverview', 'regionDetail',
-    'submitFeedback', 'adminList', 'adminToggle', 'adminEditSalary'
+    'getBrand', 'getJobPosts', 'getNoti', 'saveNoti', 'countNewJobs',
+    'getPreview', 'getPublicSummary', 'countByJob', 'totalCount', 'checkNick',
+    'submitWage', 'unlockAccess', 'loginByNick', 'getStats', 'getResultBundle',
+    'getMyPosition', 'getHourly', 'getSpecMatch', 'getCardData', 'getStudentResult',
+    'getStudentCard', 'getMoveEstimate', 'calcSalary', 'searchHospital', 'suggestHospitals',
+    'hospitalDetail', 'compareHospitals', 'topHospitals', 'jobRegionSummary', 'regionHospitals',
+    'densityTable', 'regionOverview', 'regionDetail', 'submitFeedback', 'adminList',
+    'adminToggle', 'adminEditSalary', 'adminGetBanners', 'adminSaveBanners'
   ];
 
   /** 브라우저가 막지 않는 방식(JSONP)으로 요청합니다 */

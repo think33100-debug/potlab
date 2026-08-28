@@ -72,6 +72,29 @@
   #msg.show{transform:translateX(-50%) translateY(0)}
   .hide{display:none}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  .bhelp{font-size:13px;color:#5a6870;line-height:1.7;margin:0 0 14px;
+    background:#f4f6f6;border-radius:10px;padding:12px 14px}
+  .bempty{text-align:center;color:#8b979d;padding:30px 0;font-size:13.5px}
+  .bcard{background:#fff;border:1px solid #e3e8e7;border-radius:12px;
+    padding:15px;margin-bottom:12px}
+  .bhead{display:flex;align-items:center;margin-bottom:10px}
+  .bhead b{flex:1;font-size:14px;font-weight:800}
+  .bdel{background:none;border:1px solid #e8d5cf;color:#a8402a;border-radius:8px;
+    padding:5px 11px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+  .bl{display:block;font-size:12px;font-weight:700;color:#3f4c52;margin:10px 0 4px}
+  .bl span{font-weight:400;color:#8b979d;margin-left:5px}
+  .bi{width:100%;box-sizing:border-box;border:1px solid #dde5e3;border-radius:9px;
+    padding:10px 11px;font-family:inherit;font-size:13.5px;background:#fbfcfc}
+  .bi:focus{outline:none;border-color:#0d5c4f;background:#fff}
+  .bprev{width:100%;margin-top:11px;border-radius:9px;display:block;
+    aspect-ratio:3/1;object-fit:cover;background:#f0f2f2}
+  .brow2{display:flex;gap:9px;margin-top:6px}
+  .brow2 .add{flex:1;background:#fff;border:1px dashed #cbd4d7;color:#3f4c52;
+    border-radius:11px;padding:13px;font-family:inherit;font-size:14px;
+    font-weight:700;cursor:pointer}
+  .brow2 .save{flex:1;background:#0d5c4f;border:0;color:#fff;border-radius:11px;
+    padding:13px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer}
+  .hide{display:none}
 </style>
 </head>
 <body>
@@ -90,13 +113,24 @@
       <button class="tb" data-f="note" onclick="load('note')">특이사항<span class="n" id="c-note"></span></button>
       <button class="tb" data-f="excluded" onclick="load('excluded')">제외됨<span class="n" id="c-excluded"></span></button>
       <button class="tb" data-f="all" onclick="load('all')">전체<span class="n" id="c-all"></span></button>
+      <button class="tb" data-f="banner" onclick="openBanner()">배너 관리</button>
     </div>
     <div id="list"><div class="loading">불러오는 중</div></div>
+
+    <div id="bannerWrap" class="hide">
+      <p class="bhelp">앱 홈과 대시보드에 뜨는 광고 판넬입니다.
+        여러 개를 넣으면 <b>5초마다 바뀌면서</b> 돌아갑니다.</p>
+      <div id="bnList"></div>
+      <div class="brow2">
+        <button class="add" onclick="addBanner()">+ 배너 추가</button>
+        <button class="save" onclick="saveBanners()">저장하기</button>
+      </div>
+    </div>
   </div>
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=49"></script>
+<script src="/app.js?v=55"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -192,5 +226,88 @@ function edit(id, cur){
 </script>
   <p style="text-align:center;font-size:11px;color:#8b979d;margin:26px 0 12px">
     Copyright © 2026 피오티잡 All rights reserved.</p>
+<script>
+/* ===== 배너 관리 ===== */
+var BN_LIST = [];
+
+function openBanner(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tb').forEach(function(b){
+    b.className = 'tb' + (b.dataset.f === 'banner' ? ' on' : '');
+  });
+  document.getElementById('list').className = 'hide';
+  document.getElementById('bannerWrap').className = '';
+  document.getElementById('bnList').innerHTML = '<div class="loading">불러오는 중</div>';
+
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    BN_LIST = r.rows || [];
+    drawBanners();
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminGetBanners(KEY);
+}
+
+function drawBanners(){
+  var box = document.getElementById('bnList');
+  if(!BN_LIST.length){
+    box.innerHTML = '<p class="bempty">아직 배너가 없습니다. 아래에서 추가해주세요.</p>';
+    return;
+  }
+  box.innerHTML = BN_LIST.map(function(b, i){
+    return '<div class="bcard">'
+      + '<div class="bhead"><b>' + (i+1) + '번</b>'
+      + '<button class="bdel" onclick="delBanner(' + i + ')">삭제</button></div>'
+      + bf(i,'img','이미지 주소', b.img, '비워두면 글자만 나옵니다')
+      + bf(i,'title','제목', b.title, '')
+      + bf(i,'desc','설명', b.desc, '')
+      + bf(i,'cta','버튼 문구', b.cta, '예) 보러가기')
+      + bf(i,'url','눌렀을 때 갈 주소', b.url, 'https://')
+      + (b.img ? '<img class="bprev" src="' + esc(b.img) + '" alt="">' : '')
+      + '</div>';
+  }).join('');
+}
+
+function bf(i, key, label, val, hint){
+  return '<label class="bl">' + label
+    + (hint ? '<span>' + hint + '</span>' : '') + '</label>'
+    + '<input class="bi" value="' + esc(val || '') + '"'
+    + ' oninput="setBanner(' + i + ',\'' + key + '\',this.value)">';
+}
+
+function setBanner(i, key, v){ BN_LIST[i][key] = v; }
+
+function addBanner(){
+  BN_LIST.push({ img:'', title:'', desc:'', cta:'자세히 보기', url:'' });
+  drawBanners();
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+function delBanner(i){
+  if(!confirm((i+1) + '번 배너를 지울까요?')) return;
+  BN_LIST.splice(i, 1);
+  drawBanners();
+}
+
+function saveBanners(){
+  var bad = BN_LIST.filter(function(b){ return !b.title && !b.img; });
+  if(bad.length){ msg('제목이나 이미지 중 하나는 넣어주세요'); return; }
+  msg('저장하고 있습니다');
+  google.script.run.withSuccessHandler(function(r){
+    msg(r.message || (r.ok ? '저장했습니다' : '실패'));
+    if(r.ok) openBanner();
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminSaveBanners(KEY, BN_LIST);
+}
+
+/* 목록 탭을 누르면 배너 화면을 닫습니다 */
+(function(){
+  var orig = window.load;
+  window.load = function(f){
+    document.getElementById('bannerWrap').className = 'hide';
+    document.getElementById('list').className = '';
+    return orig.apply(null, arguments);
+  };
+})();
+</script>
 </body>
 </html>

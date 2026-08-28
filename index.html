@@ -37,6 +37,7 @@
 <link rel="apple-touch-startup-image" href="/splash-1536x2048.png"
   media="(device-width:768px) and (device-height:1024px) and (-webkit-device-pixel-ratio:2)">
 <link rel="apple-touch-startup-image" href="/splash.png">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d5c4f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -711,12 +712,62 @@
   .ptags i{font-style:normal;font-size:11px;background:#f1f5f4;color:#3f4c52;
     border-radius:6px;padding:4px 8px}
   .ptags i.jb{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  .nb{display:inline-flex;align-items:center;justify-content:center;min-width:19px;
+    height:19px;padding:0 6px;border-radius:20px;background:#d9694a;color:#fff;
+    font-size:11px;font-weight:800;margin-left:6px;line-height:1}
+  .pnew{flex-shrink:0;font-size:9.5px;font-weight:800;letter-spacing:.04em;
+    background:#d9694a;color:#fff;border-radius:5px;padding:3px 6px;margin-right:6px}
+  .newnote{background:var(--accent-soft);border-radius:10px;padding:11px 13px;
+    font-size:12.5px;color:#22423b;line-height:1.6;margin-bottom:11px;word-break:keep-all}
+  .newnote b{font-weight:800}
   .phist{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);
     font-size:11.5px;color:#5a6870}
   .phist b{font-weight:800;color:#3f4c52}
   .ptags i.mx{background:#f3f0e8;color:#7a6320;font-weight:700}
   .pf{display:flex;align-items:center;font-size:11.5px;color:#5a6870}
   .pgo{margin-left:auto;color:var(--accent);font-weight:700}
+
+  .notibox{background:var(--accent-soft);border:1px solid #cfe3dc;border-radius:12px;
+    padding:14px;margin-bottom:16px}
+  .notipick{margin-top:12px;padding-top:12px;border-top:1px solid #cfe3dc}
+  .notipick .np{font-size:12.5px;font-weight:800;color:#22423b;margin:0 0 9px}
+  .notipick .nq{font-size:11.5px;color:#4f6b64;margin:10px 0 0;line-height:1.6}
+  .nk{display:flex;align-items:flex-start;gap:9px;cursor:pointer;padding:7px 0}
+  .nk input{width:19px;height:19px;flex-shrink:0;margin-top:1px;accent-color:var(--accent)}
+  .nk b{display:block;font-size:13.5px;font-weight:700;margin-bottom:1px}
+  .nk em{font-style:normal;font-size:11.5px;color:#4f6b64;line-height:1.5}
+
+  .consult{background:#fff;border:1.5px solid #cfe3dc;border-radius:14px;
+    padding:16px;margin-top:16px}
+  .consult .ch{display:flex;align-items:flex-start;gap:11px;margin-bottom:12px}
+  .consult .cic{font-size:24px;line-height:1.1;flex-shrink:0}
+  .consult .ch b{display:block;font-size:15.5px;font-weight:800;letter-spacing:-.02em;
+    color:var(--accent);margin-bottom:3px;word-break:keep-all}
+  .consult .ch span{font-size:12.5px;color:#4a565c;line-height:1.55;word-break:keep-all}
+  .consult .cl{margin:0 0 14px;padding-left:18px}
+  .consult .cl li{font-size:13px;color:#3f4c52;line-height:1.9;word-break:keep-all}
+  .consult .cbtn{display:block;width:100%;box-sizing:border-box;text-align:center;
+    background:var(--accent);color:#fff;border:0;border-radius:11px;padding:14px;
+    font-family:inherit;font-size:14.5px;font-weight:800;text-decoration:none;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
+  .consult .cbtn:active{transform:scale(.98)}
+  .consult .cbtn.off{background:#b9c4c8}
+  .consult .cnote{font-size:11.5px;color:#5a6870;line-height:1.7;margin:10px 0 0;
+    text-align:center;word-break:keep-all}
+
+  .notistat{border-radius:13px;padding:16px;margin-bottom:13px}
+  .notistat.on{background:var(--accent-soft);border:1px solid #a9d4c5}
+  .notistat.off{background:#f4f6f6;border:1px solid var(--line)}
+  .notistat b{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em;
+    margin-bottom:4px}
+  .notistat.on b{color:var(--accent)}
+  .notistat span{font-size:13px;color:#3f4c52;line-height:1.6}
+
+  .oldsrv{background:#fdf0eb;border:1.5px solid #f0cdbe;border-radius:12px;
+    padding:12px 14px;margin-bottom:12px;font-size:13px;color:#a8402a;line-height:1.6}
+  .oldsrv b{font-weight:800}
+  .oldsrv span{display:block;font-size:12px;color:#8c3a20;margin-top:3px;
+    word-break:keep-all}
 
   .addbar{display:flex;align-items:center;gap:12px;
     background:linear-gradient(135deg,#e8f4ef 0%,#f0f7f3 100%);
@@ -1358,6 +1409,7 @@
     <div class="menu" id="menuBox"></div>
   </div>
 
+  <div id="oldSrv" class="hide"></div>
   <div id="addBar" class="hide"></div>
   <div id="backBar" class="hide"></div>
   <div id="subhead" class="hide">
@@ -1632,6 +1684,19 @@
         <div class="hourEcho" id="hourEcho">기본 174시간 · 주 5일 기준</div>
       </div>
 
+      <div class="f notibox">
+        <label class="chk">
+          <input type="checkbox" id="notiAgree" onchange="toggleNoti()">
+          <span><b>알림 받기 (선택)</b>
+            <em>새 공고나 소식이 있을 때 알려드립니다</em></span>
+        </label>
+        <div id="notiPick" class="notipick hide">
+          <p class="np">어떤 알림을 받으실까요?</p>
+          <div id="notiKinds"></div>
+          <p class="nq">언제든 <b>알림 설정</b>에서 해제할 수 있습니다.</p>
+        </div>
+      </div>
+
       <div class="f">
         <label class="chk">
           <input type="checkbox" id="extraPay" onchange="toggleExtraPay()">
@@ -1903,6 +1968,11 @@
     <div id="calcBox"></div>
   </div>
 
+  <!-- ============ 알림 설정 ============ -->
+  <div id="pane-noti" class="hide">
+    <div id="notiBox"></div>
+  </div>
+
   <!-- ============ 채용공고 ============ -->
   <div id="pane-post" class="hide">
     <div class="tabs" id="postTabs">
@@ -1973,7 +2043,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=49"></script>
+<script src="/app.js?v=55"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2019,7 +2089,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v49 · 2026-08-25';
+var APP_VER = 'v55 · 2026-08-28';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2212,7 +2282,7 @@ function tab(which, back){
   CURRENT = which;
   try{ history.pushState({p:which}, '', location.href); }catch(e){}
 
-  ['home','input','view','done','unlock','dash','feedback','calc','install','hosp','region','jobs','post'].forEach(function(p){
+  ['home','input','view','done','unlock','dash','feedback','calc','install','hosp','region','jobs','post','noti'].forEach(function(p){
     var el=document.getElementById('pane-'+p);
     if(el) el.className = (p===which?'':'hide');
   });
@@ -2231,6 +2301,7 @@ function tab(which, back){
           feedback:['운영자에게 한마디','익명으로 전달됩니다'],
           region:['지역별 의료기관 현황','분기 집계 기준'],
           post:['공공기관 채용공고','자동으로 모아드립니다'],
+          noti:['알림 설정','받을 알림을 고르거나 해제합니다'],
           jobs:['채용 사이트 모음','고용24·사람인 바로가기'],
           install:['앱처럼 쓰기','주소 안 찾고 한 번에 열기']};
   if(TT[which]){
@@ -2243,7 +2314,7 @@ function tab(which, back){
   setTimeout(function(){ revealIn('#pane-'+which); watchMotion('#pane-'+which); }, 30);
   drawBackBar(which);
   drawAddBar();
-  if(which==='dash') drawDash();
+  if(which==='dash'){ drawDash(); setTimeout(checkNewJobs, 400); }
   if(which==='region'){ if(!(back && restore('region'))) doRegion(); }
   if(which==='jobs') drawJobLinks();
   if(which==='view'){
@@ -2255,6 +2326,7 @@ function tab(which, back){
   if(which==='install') drawGuide();
   if(which==='input') hideAlready();
   if(which==='post'){ if(!(back && restore('post'))) doPosts(); }
+  if(which==='noti') drawNoti();
 
   // 되살린 화면은 보던 위치를 유지합니다
   if(!(back && SNAP[which])) window.scrollTo({top:0, behavior:'smooth'});
@@ -2263,8 +2335,22 @@ function tab(which, back){
 
 var BRANDC = null;
 
+/* 서버가 최신인지 확인합니다 */
+function checkServer(b){
+  var bar = document.getElementById('oldSrv');
+  if(!bar) return;
+  var sv = (b && b.ver) || '';
+  if(sv){ bar.className='hide'; bar.innerHTML=''; return; }
+
+  bar.className = 'oldsrv';
+  bar.innerHTML = '⚠️ <b>서버가 옛 버전입니다</b>'
+    + '<span>채용공고·알림 기능이 안 열릴 수 있습니다. '
+    + '운영자에게 알려주세요.</span>';
+}
+
 function drawHome(b){
   BRANDC = b;
+  checkServer(b);
   var brand=document.getElementById('brandBox');
   brand.innerHTML = '<div class="badge-by">POT JOB 공식 운영</div>'
     + (b.logo ? '<img src="'+b.logo+'" alt="'+esc(b.name)+'">'
@@ -2377,7 +2463,7 @@ function welcomeCard(){
     + '<div class="jobtag">'+esc((ME&&ME.job)||'')
       + ((ME&&ME.role==='학생')?'<i class="stu">학생</i>':'')+'</div>'
     + '<div class="cheer">'+greeting()+' 💪</div>'
-    + '<button class="tohome" onclick="tab(\'home\')">소개 화면 ›</button>'
+    + '<button class="tohome" onclick="tab(\'home\')">🏠 홈으로</button>'
     + (ME.joinedAt ? '<div class="since">'
         + (first ? '오늘 등록하셨습니다'
                  : ME.joinedAt+' 등록 · '+ME.days+'일째')
@@ -2500,19 +2586,18 @@ function drawDashMenu(){
   m+=menuItem('','🧮','내 연봉 계산기','세전↔세후 · 또래 비교',{fn:"tab(\'calc\')"});
   m+='<div class="mcat">취업 · 이직</div>';
   m+=menuItem('','🏥','병원 찾기·비교','인원·병상·전문의 · 지역별 목록',{fn:"tab(\'hosp\')"});
-  m+=menuItem('','📢','공공기관 채용공고','자동으로 모아드립니다',{fn:"tab(\'post\')"});
+  m+=menuItem('','📢','공공기관 채용공고<span id="newJobBadge" class="nb hide"></span>',
+      '자동으로 모아드립니다',{fn:"tab(\'post\')"});
   m+=menuItem('','📋','채용 사이트 모음','고용24·사람인 바로가기',{fn:"tab(\'jobs\')"});
   m+=b.klass
      ? menuItem('','🎯','공공기관 집중 준비반','공고 알림 + 준비 자료',{href:b.klass})
      : menuItem('off','🎯','공공기관 집중 준비반','1기 모집 준비 중',{fn:"msg(\'곧 열립니다\')"});
   if(b.potlab) m+=menuItem('','📚','피오티랩 전자책','면접·실무 전자책 보러가기',{href:b.potlab});
-  m+=b.channel
-     ? menuItem('ch','📩','피오티랩 문의','카카오톡 채널로 1:1 상담',{href:b.channel})
-     : menuItem('off','📩','피오티랩 문의','카카오톡 채널 준비 중',{fn:"msg(\'곧 열립니다\')"});
+  m+=menuItem('','🔔','알림 설정','받을 알림 고르기 · 해제',{fn:"tab(\'noti\')"});
   if(device()!=='pc' && !isStandalone())
     m+=menuItem('','📲','앱처럼 쓰기','주소 안 찾고 한 번에 열기',{fn:"tab(\'install\')"});
   m+='<div class="mcat">그 외</div>';
-  m+=menuItem('','🏠','소개 화면 보기','이 서비스로 할 수 있는 것들',{fn:"tab(\'home\')"});
+  m+=menuItem('','🏠','홈으로 가기','이 서비스로 할 수 있는 것들',{fn:"goHome()"});
   m+=menuItem('','💬','운영자에게 한마디','익명 건의 남기기',{fn:"tab(\'feedback\')"});
   m+=menuItem('','🔄','내 정보 수정','바뀐 급여로 갱신하기',{fn:"tab(\'input\')"});
   document.getElementById('dashMenu').innerHTML=m;
@@ -3157,6 +3242,95 @@ function showWorkHours(){
     : '기본 174시간 · 주 5일 기준';
 }
 
+/* ===== 알림 설정 ===== */
+var NOTI_KINDS = [
+  { key:'job',    name:'새 채용공고',   desc:'내 직군 공고가 올라오면' },
+  { key:'urgent', name:'마감 임박',     desc:'관심 공고 마감 3일 전' },
+  { key:'stat',   name:'통계 업데이트', desc:'참여자가 늘어 순위가 바뀌면' },
+  { key:'notice', name:'공지사항',      desc:'새 기능·점검 안내' }
+];
+
+function toggleNoti(){
+  var c=document.getElementById('notiAgree');
+  var box=document.getElementById('notiPick');
+  if(!c||!box) return;
+  box.className = c.checked ? 'notipick' : 'notipick hide';
+  if(c.checked && !document.getElementById('notiKinds').innerHTML){
+    document.getElementById('notiKinds').innerHTML = NOTI_KINDS.map(function(k){
+      return '<label class="nk"><input type="checkbox" class="nkc" value="'+k.key+'"'
+        + (k.key==='job'?' checked':'')+'>'
+        + '<span><b>'+k.name+'</b><em>'+k.desc+'</em></span></label>';
+    }).join('');
+  }
+}
+
+function pickedNoti(){
+  var out=[];
+  document.querySelectorAll('.nkc').forEach(function(c){ if(c.checked) out.push(c.value); });
+  return out;
+}
+
+/* 알림 설정 화면 */
+function drawNoti(){
+  var box=document.getElementById('notiBox');
+  box.innerHTML=loading('불러오는 중');
+  google.script.run.withSuccessHandler(showNoti)
+    .withFailureHandler(function(e){ box.innerHTML=errBox(e,'getNoti'); attachRipple(); })
+    .getNoti(cred(), (ME&&ME.id)||'');
+}
+
+function showNoti(r){
+  var box=document.getElementById('notiBox');
+  if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+
+  var h = '<div class="notistat '+(r.agreed?'on':'off')+'">'
+    + '<b>'+(r.agreed?'🔔 알림을 받고 있습니다':'🔕 알림을 받지 않습니다')+'</b>'
+    + '<span>'+(r.agreed
+        ? '아래에서 받을 항목을 바꾸거나, 전부 끄면 해제됩니다.'
+        : '받고 싶은 항목을 고르고 저장하면 알림이 켜집니다.')+'</span></div>';
+
+  h += '<div class="card"><h2>받을 알림</h2>';
+  r.kinds.forEach(function(k){
+    h += '<label class="nk" style="padding:11px 0;border-bottom:1px solid var(--line)">'
+      + '<input type="checkbox" class="nsc" value="'+k.key+'"'+(k.on?' checked':'')+'>'
+      + '<span><b>'+esc(k.name)+'</b><em>'+esc(k.desc)+'</em></span></label>';
+  });
+  h += '<div class="two" style="margin-top:14px">'
+    + '<button class="ghost" onclick="offNoti()">전체 해제</button>'
+    + '<button class="go" onclick="saveNotiNow()">저장하기</button>'
+    + '</div></div>';
+
+  if(r.agreedAt) h += '<p class="thin">알림 동의 '+esc(r.agreedAt)+'</p>';
+  else if(r.offAt) h += '<p class="thin">알림 해제 '+esc(r.offAt)+'</p>';
+
+  h += '<div class="hintbox">알림은 <b>홈 화면에 추가한 뒤</b>부터 받을 수 있습니다. '
+    + '아이폰은 사파리에서 추가하셔야 합니다.</div>';
+
+  box.innerHTML=h;
+  attachRipple();
+}
+
+function saveNotiNow(){
+  var keys=[];
+  document.querySelectorAll('.nsc').forEach(function(c){ if(c.checked) keys.push(c.value); });
+  sendNoti(keys.length>0, keys);
+}
+
+function offNoti(){
+  if(!confirm('알림을 모두 해제할까요?')) return;
+  sendNoti(false, []);
+}
+
+function sendNoti(agree, keys){
+  var box=document.getElementById('notiBox');
+  box.innerHTML=loading('저장하는 중');
+  google.script.run.withSuccessHandler(function(r){
+    msg(r.message||'저장했습니다');
+    drawNoti();
+  }).withFailureHandler(function(e){ box.innerHTML=errBox(e,'saveNoti'); attachRipple(); })
+    .saveNoti(cred(), (ME&&ME.id)||'', agree, keys);
+}
+
 function toggleExtraPay(){
   var c=document.getElementById('extraPay');
   var n=document.getElementById('extraNote');
@@ -3489,6 +3663,8 @@ function submit(){
     nightDuty:val('nightDuty')||0, dutyHours:val('dutyHours')||2,
     weekendWork:val('weekendWork')||0, weekendHours:val('weekendHours')||4,
     extraPay:(document.getElementById('extraPay')||{}).checked?'Y':'',
+    notiAgree:(document.getElementById('notiAgree')||{}).checked?true:false,
+    notiKinds:pickedNoti(),
     bonus:val('bonus')||0,
     grade:val('grade'), wantType:val('wantType'), wantRegion:val('wantRegion'),
     birthYear:val('birthYear'), note:document.getElementById('note').value,
@@ -3498,6 +3674,19 @@ function submit(){
     practice:rows.practice.filter(function(r){return r.hospital;}),
     career:rows.career.filter(function(r){return r.hospital;})
   };
+
+  /* 학생은 급여를 받지 않습니다.
+     현직으로 적다가 학생으로 바꾸면 급여 카드는 숨겨지지만 값은 칸에 남습니다.
+     그대로 보내면 학생 줄에 엉뚱한 금액이 저장되므로 여기서 비웁니다.
+     (칸의 값 자체는 지우지 않습니다. 다시 현직으로 바꾸면 그대로 씁니다.) */
+  if(role==='학생'){
+    data.salary=''; data.bonus=0;
+    data.startYear=''; data.curStartYear='';
+    data.region=''; data.hospitalType=''; data.employment='';
+    data.nightDuty=0; data.dutyHours=0;
+    data.weekendWork=0; data.weekendHours=0;
+    data.extraPay='';
+  }
   var btn=document.getElementById('submitBtn');
   btn.disabled=true; btn.textContent='제출 중...';
   google.script.run.withSuccessHandler(function(r){
@@ -3769,6 +3958,53 @@ function drawCompare(r){
 
 /* ===== 채용공고 ===== */
 var POST_MODE = 'mine';
+var NEWJOB = { count: 0, since: '' };
+
+/* 마지막으로 본 날짜 — 직군별로 따로 기억합니다 */
+function seenKey(){ return 'potjob_seen_' + ((ME&&ME.job) || JOB || '작업치료사'); }
+
+function loadSeen(){
+  try { return localStorage.getItem(seenKey()) || ''; } catch(e){ return ''; }
+}
+function saveSeen(v){
+  try { localStorage.setItem(seenKey(), v); } catch(e){}
+}
+
+/* 새 공고가 몇 건인지 확인해서 배지를 붙입니다 */
+function checkNewJobs(){
+  if(!unlocked()) return;
+  var job = (ME&&ME.job) || JOB;
+  try{
+    var run = google.script.run
+      .withSuccessHandler(function(r){
+        if(!r || !r.ok) return;
+        NEWJOB.count = r.count || 0;
+        NEWJOB.since = loadSeen();
+        NEWJOB.newest = r.newest || '';
+        paintNewBadge();
+      })
+      .withFailureHandler(function(){});
+    // 서버가 아직 옛 버전이면 이 함수가 없습니다
+    if(typeof run.countNewJobs !== 'function') return;
+    run.countNewJobs(cred(), job, loadSeen());
+  }catch(e){}
+}
+
+/* 메뉴에 배지를 그립니다 */
+function paintNewBadge(){
+  var el = document.getElementById('newJobBadge');
+  if(!el) return;
+  if(!NEWJOB.count){ el.className = 'nb hide'; el.textContent = ''; return; }
+  el.className = 'nb';
+  el.textContent = NEWJOB.count > 99 ? '99+' : NEWJOB.count;
+}
+
+/* 사람이 읽기 쉬운 날짜 */
+function shortDate(v){
+  var t = String(v||'').replace(/[^0-9]/g,'');
+  if(t.length !== 8) return '';
+  return (+t.slice(4,6)) + '/' + (+t.slice(6,8));
+}
 
 function postTab(m){
   POST_MODE = m;
@@ -3777,13 +4013,38 @@ function postTab(m){
   doPosts();
 }
 
+var POST_T = null;
+
 function doPosts(){
   var box=document.getElementById('postBox');
   box.innerHTML=loading('공고를 불러오는 중');
   var job = (POST_MODE==='mine') ? ((ME&&ME.job)||JOB) : '';
-  google.script.run.withSuccessHandler(showPosts)
-    .withFailureHandler(function(e){ box.innerHTML=errBox(e,'getJobPosts'); attachRipple(); })
+
+  // 응답이 안 오면 왜 그런지 알려줍니다
+  if(POST_T) clearTimeout(POST_T);
+  POST_T = setTimeout(function(){
+    box.innerHTML = '<div class="errbox"><b>응답이 오지 않습니다</b>'
+      + '서버가 최신이 아닐 수 있습니다. 잠시 뒤 다시 열어보시고, '
+      + '계속 그러면 운영자에게 알려주세요.'
+      + '<code>getJobPosts · 시간 초과</code></div>'
+      + '<button class="ghost" onclick="doPosts()" style="margin-top:10px">다시 시도</button>';
+    attachRipple();
+  }, 12000);
+
+  google.script.run.withSuccessHandler(function(r){
+      if(POST_T) clearTimeout(POST_T);
+      showPosts(r);
+    })
+    .withFailureHandler(function(e){
+      if(POST_T) clearTimeout(POST_T);
+      box.innerHTML=errBox(e,'getJobPosts'); attachRipple();
+    })
     .getJobPosts(cred(), job);
+
+  // 본 시점을 기록합니다 (다음부터 이 뒤에 올라온 것만 셉니다)
+  if(NEWJOB.newest) saveSeen(NEWJOB.newest);
+  NEWJOB.count = 0;
+  paintNewBadge();
 }
 
 function dday(to){
@@ -3805,16 +4066,25 @@ function showPosts(r){
     attachRipple(); return;
   }
 
-  var h='<p class="thin" style="margin:0 0 10px">'
+  var h='';
+  if(NEWJOB.since){
+    var since = shortDate(NEWJOB.since.replace(/-/g,''));
+    if(since) h += '<div class="newnote">'+since+' 이후 확인하신 뒤 올라온 공고를 '
+      + '<b>새 공고</b>로 표시합니다</div>';
+  }
+  h += '<p class="thin" style="margin:0 0 10px">'
     + (POST_MODE==='mine' ? esc((ME&&ME.job)||JOB)+' 관련 ' : '전체 ')
     + '<b>'+r.total+'건</b> · 마감이 가까운 순</p>';
 
   r.rows.forEach(function(x){
     var d = dday(x.to);
     var soon = (d!==null && d<=7);
+    var isNew = NEWJOB.since && String(x.at||'') > NEWJOB.since;
     h+='<a class="post'+(soon?' soon':'')+'" href="'+esc(x.url||'#')+'"'
       + ' target="_blank" rel="noopener">'
-      + '<div class="ph"><span class="porg">'+esc(x.org)+'</span>'
+      + '<div class="ph">'
+      + (isNew?'<span class="pnew">NEW</span>':'')
+      + '<span class="porg">'+esc(x.org)+'</span>'
       + (d!==null ? '<span class="pd'+(soon?' hot':'')+'">'
           + (d<0?'마감':(d===0?'오늘 마감':'D-'+d))+'</span>' : '')
       + '</div>'
@@ -3840,9 +4110,33 @@ function showPosts(r){
       + '</a>';
   });
 
+  // 목록 아래에 취업 상담 안내
+  h += consultCard();
+
   box.innerHTML=h;
   attachRipple();
   revealIn('#pane-post');
+}
+
+/* 취업 컨설팅 — 오픈채팅으로 1:1 (익명) */
+function consultCard(){
+  var url = (BRANDC && BRANDC.consult) || '';
+  return '<div class="consult">'
+    + '<div class="ch"><span class="cic">💬</span>'
+    + '<div><b>어디에 넣을지 고민되시나요</b>'
+    + '<span>공고 보고 궁금한 걸 익명으로 물어보세요</span></div></div>'
+    + '<ul class="cl">'
+      + '<li>내 스펙으로 지원해도 될지</li>'
+      + '<li>자기소개서·면접에서 뭘 준비할지</li>'
+      + '<li>그 기관 분위기가 어떤지</li>'
+    + '</ul>'
+    + (url
+        ? '<a class="cbtn" href="'+esc(url)+'" target="_blank" rel="noopener">'
+          + '취업 상담 신청하기</a>'
+        : '<button class="cbtn off" onclick="msg(\'곧 열립니다\')">준비 중입니다</button>')
+    + '<p class="cnote">카카오톡 오픈채팅으로 연결됩니다. '
+    + '<b>닉네임만 보이고 프로필은 공개되지 않습니다.</b></p>'
+    + '</div>';
 }
 
 function drawJobLinks(){
