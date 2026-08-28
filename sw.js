@@ -45,7 +45,8 @@ self.addEventListener('notificationclick', function (e) {
         for (var i = 0; i < list.length; i++) {
           var c = list[i];
           if (c.url.indexOf(self.location.origin) === 0 && 'focus' in c) {
-            c.navigate(url);
+            /* 이미 열려 있으면 새로 고치지 않고 화면만 바꿉니다 */
+            if (c.postMessage) c.postMessage({ go: url });
             return c.focus();
           }
         }
