@@ -56,48 +56,78 @@ function makeBody(posts) {
            url: '/' };
 }
 
+/* 한 번에 몇 명씩 동시에 보낼지.
+   너무 크게 잡으면 구글·애플 서버가 막을 수 있어 50 정도가 무난합니다. */
+const BATCH = 50;
+
+/* 한 사람에게 보냅니다. 결과만 돌려주고 여기서 멈추지 않습니다. */
+async function sendOne(s, posts) {
+  const payload = JSON.stringify(
+    Object.assign(makeBody(posts), { tag: 'potjob-job' }));
+  try {
+    await webpush.sendNotification(
+      { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+      payload
+    );
+    return { kind: 'sent' };
+  } catch (e) {
+    const code = e.statusCode || 0;
+    if (code === 404 || code === 410) return { kind: 'gone', endpoint: s.endpoint };
+    return { kind: 'fail', code: code, nick: s.nick, message: e.message };
+  }
+}
+
 (async () => {
   const d = await call('pushPending', [KEY]);
 
   if (!d.posts.length) { console.log('보낼 공고가 없습니다'); return; }
   if (!d.subs.length) { console.log('등록된 기기가 없습니다'); await call('pushDone', [KEY, d.stamp]); return; }
 
-  console.log('공고 ' + d.posts.length + '건 · 기기 ' + d.subs.length + '대');
-
-  let sent = 0, dropped = 0, failed = 0;
-
+  /* 보낼 사람만 먼저 골라둡니다 */
+  const jobs = [];
   for (const s of d.subs) {
-    /* 이 사람이 새 공고 알림을 받기로 했는지 */
-    if (!s.kinds.includes('job')) continue;
-
-    /* 고른 직군에 맞는 공고만 (공통 공고는 모두에게) */
+    if (!s.kinds.includes('job')) continue;                       // 공고 알림을 끈 사람
     const mine = d.posts.filter(p => p.job === '공통' || s.jobs.includes(p.job));
-    if (!mine.length) continue;
+    if (!mine.length) continue;                                   // 내 직군 공고가 없는 사람
+    jobs.push({ sub: s, posts: mine });
+  }
 
-    const payload = JSON.stringify(
-      Object.assign(makeBody(mine), { tag: 'potjob-job' }));
+  console.log('공고 ' + d.posts.length + '건 · 기기 ' + d.subs.length + '대 · 보낼 곳 ' + jobs.length + '곳');
+  if (!jobs.length) { await call('pushDone', [KEY, d.stamp]); console.log('받을 사람이 없습니다'); return; }
 
-    try {
-      await webpush.sendNotification(
-        { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-        payload
-      );
-      sent++;
-    } catch (e) {
-      const code = e.statusCode || 0;
-      if (code === 404 || code === 410) {
-        /* 기기가 사라졌습니다 — 목록에서 지웁니다 */
-        await call('pushDrop', [KEY, s.endpoint]);
-        dropped++;
-      } else {
+  const t0 = Date.now();
+  let sent = 0, dropped = 0, failed = 0;
+  const gone = [];
+
+  /* BATCH 명씩 묶어 동시에 보냅니다 */
+  for (let i = 0; i < jobs.length; i += BATCH) {
+    const slice = jobs.slice(i, i + BATCH);
+    const out = await Promise.all(slice.map(j => sendOne(j.sub, j.posts)));
+
+    out.forEach(function (r) {
+      if (r.kind === 'sent') sent++;
+      else if (r.kind === 'gone') { dropped++; gone.push(r.endpoint); }
+      else {
         failed++;
-        console.warn('실패(' + code + ') ' + s.nick + ': ' + e.message);
+        console.warn('실패(' + r.code + ') ' + r.nick + ': ' + r.message);
       }
+    });
+
+    const done = Math.min(i + BATCH, jobs.length);
+    if (jobs.length > BATCH) {
+      console.log('  ' + done + '/' + jobs.length + ' 진행 · '
+        + Math.round((Date.now() - t0) / 1000) + '초');
     }
   }
 
+  /* 사라진 기기는 한 번에 정리합니다 (시트를 여러 번 두드리지 않게) */
+  for (const ep of gone) {
+    try { await call('pushDrop', [KEY, ep]); } catch (e) {}
+  }
+
   await call('pushDone', [KEY, d.stamp]);
-  console.log('보냄 ' + sent + ' · 지움 ' + dropped + ' · 실패 ' + failed);
+  console.log('보냄 ' + sent + ' · 지움 ' + dropped + ' · 실패 ' + failed
+    + ' · ' + Math.round((Date.now() - t0) / 1000) + '초');
 })().catch(e => {
   console.error(e.message);
   process.exit(1);
