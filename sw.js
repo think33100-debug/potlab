@@ -22,8 +22,8 @@ self.addEventListener('push', function (e) {
   var title = d.title || 'POT JOB';
   var opts = {
     body: d.body || '새 소식이 있습니다',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
+    icon: '/icon-192.png',      // 알림 오른쪽에 뜨는 큰 그림
+    badge: '/badge-96.png',     // 상태표시줄의 작은 표시
     tag: d.tag || 'potjob',          // 같은 tag 는 덮어씁니다 (알림이 쌓이지 않게)
     renotify: true,
     data: { url: d.url || '/' }
