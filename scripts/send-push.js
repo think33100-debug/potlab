@@ -42,18 +42,21 @@ async function call(action, args) {
   return out.data;
 }
 
-/* 여러 건이면 묶어서 한 줄로 만듭니다 */
+/* 여러 건이면 묶어서 한 줄로 만듭니다.
+   누르면 바깥 공고 사이트가 아니라 우리 앱의 공고 목록이 열립니다. */
+const OPEN_POSTS = '/#post';
+
 function makeBody(posts) {
   if (posts.length === 1) {
     const p = posts[0];
     return { title: '새 채용공고 · ' + p.org,
              body: p.title.slice(0, 80) + (p.to ? '\n~' + p.to : ''),
-             url: p.url || '/' };
+             url: OPEN_POSTS };
   }
   const orgs = [...new Set(posts.map(p => p.org))].slice(0, 3).join(', ');
   return { title: '새 채용공고 ' + posts.length + '건',
            body: orgs + (posts.length > 3 ? ' 외' : ''),
-           url: '/' };
+           url: OPEN_POSTS };
 }
 
 /* 한 번에 몇 명씩 동시에 보낼지.
