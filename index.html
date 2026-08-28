@@ -957,7 +957,11 @@
   .whoami .tx .jb{display:inline-block;background:var(--accent);color:#fff;border-radius:7px;
     padding:3px 10px;font-size:12.5px;font-weight:800;letter-spacing:-.01em;margin-right:6px}
   .whoami .tx .sm{font-size:11.5px;color:var(--dim)}
-  .whoami button{font-size:12px;padding:6px 11px;color:var(--dim)}
+  .whoami .logout{background:none;border:0;padding:6px 2px;font-family:inherit;
+    font-size:12.5px;color:#8b979d;cursor:pointer;flex-shrink:0;
+    text-decoration:underline;text-underline-offset:3px;
+    -webkit-tap-highlight-color:transparent}
+  .whoami .logout:active{color:var(--accent)}
   .tcount{text-align:right;font-size:11.5px;color:#7c888e;margin-top:5px}
   .tcount.warn{color:#b4432c;font-weight:700}
   .nickchk{font-size:12px;margin-top:6px;min-height:17px}
@@ -1766,7 +1770,7 @@
       </div>
 
       <div class="f">
-        <label>어학 점수 <span class="hint">토익 기준 · 20점 배점 · 없으면 비워두세요</span></label>
+        <label>어학 점수 <span class="hint">토익 기준 · 25점 배점 · 없으면 비워두세요</span></label>
         <div class="unit"><input type="number" id="toeic" min="0" max="990"
           placeholder="800"><span>점</span></div>
       </div>
@@ -2033,7 +2037,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=59"></script>
+<script src="/app.js?v=60"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2079,7 +2083,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v59 · 2026-08-28';
+var APP_VER = 'v60 · 2026-08-28';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2348,8 +2352,7 @@ function drawHome(b){
     + '<div class="tag">'+esc(b.tagline)+'</div>'
     + (unlocked()
         ? '<button class="heroBtn" onclick="tab(\'dash\')">내 통계 보러 가기 ›</button>'
-        : '')
-    + '<div class="rule"></div>';
+        : '');
 
   document.getElementById('footBox').innerHTML = '';
 
@@ -2951,16 +2954,17 @@ function drawWho(){
   var box=document.getElementById('whoBox');
   if(!box) return;
   if(!unlocked()){ box.innerHTML=''; return; }
+  var isStu = (ME.role === '학생');
   box.innerHTML='<div class="whoami">'
     + '<div class="av">'+esc(ME.nick.slice(0,1))+'</div>'
-    + '<div class="tx"><b>'+esc(ME.nick)+'</b>'
-    + '<span class="jb">'+esc(ME.job||'')+'</span>'
+    + '<div class="tx"><b>'+esc(ME.nick)+'님</b>'
+    + '<span class="jb">'+esc(ME.job||'')+(isStu?' 학생':'')+'</span>'
     + '<span class="sm">바로 이용 가능</span></div>'
-    + '<button onclick="logout()">해제</button></div>';
+    + '<button class="logout" onclick="logout()">로그아웃</button></div>';
 }
 function logout(){
-  if(!confirm('이 기기에서 닉네임 기억을 지웁니다. 등록한 데이터는 그대로 남습니다.')) return;
-  clearMe(); drawWho(); msg('해제했습니다'); tab('home');
+  if(!confirm('로그아웃할까요?\n\n이 기기에서 닉네임 기억만 지웁니다.\n등록하신 정보는 그대로 남아 있고, 다시 로그인하면 됩니다.')) return;
+  clearMe(); drawWho(); msg('로그아웃했습니다'); tab('home');
 }
 
 /* ===== 홈 화면에 추가 ===== */
