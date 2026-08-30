@@ -84,7 +84,16 @@ async function sendOne(s, posts) {
   const d = await call('pushPending', [KEY]);
 
   if (!d.posts.length) { console.log('보낼 공고가 없습니다'); return; }
-  if (!d.subs.length) { console.log('등록된 기기가 없습니다'); await call('pushDone', [KEY, d.stamp]); return; }
+
+  /* 보낸 공고에 표시를 남깁니다. 날짜로 견주지 않고 공고 번호로 세어
+     같은 공고가 두 번 가지 않게 합니다. */
+  const ids = d.posts.map(p => p.id).filter(Boolean);
+
+  if (!d.subs.length) {
+    console.log('등록된 기기가 없습니다 · 공고 ' + d.posts.length + '건은 보낸 것으로 표시');
+    await call('pushDone', [KEY, ids]);
+    return;
+  }
 
   /* 보낼 사람만 먼저 골라둡니다 */
   const jobs = [];
@@ -96,7 +105,7 @@ async function sendOne(s, posts) {
   }
 
   console.log('공고 ' + d.posts.length + '건 · 기기 ' + d.subs.length + '대 · 보낼 곳 ' + jobs.length + '곳');
-  if (!jobs.length) { await call('pushDone', [KEY, d.stamp]); console.log('받을 사람이 없습니다'); return; }
+  if (!jobs.length) { await call('pushDone', [KEY, ids]); console.log('받을 사람이 없습니다'); return; }
 
   const t0 = Date.now();
   let sent = 0, dropped = 0, failed = 0;
@@ -128,7 +137,8 @@ async function sendOne(s, posts) {
     try { await call('pushDrop', [KEY, ep]); } catch (e) {}
   }
 
-  await call('pushDone', [KEY, d.stamp]);
+  const mark = await call('pushDone', [KEY, ids]);
+  console.log('공고 ' + (mark.marked || 0) + '건을 보낸 것으로 표시');
   console.log('보냄 ' + sent + ' · 지움 ' + dropped + ' · 실패 ' + failed
     + ' · ' + Math.round((Date.now() - t0) / 1000) + '초');
 })().catch(e => {
