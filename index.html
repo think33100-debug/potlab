@@ -1154,10 +1154,12 @@
     <div id="addHomeBox"></div>
 
     <div class="sect">
-      <p class="pickhint">직군을 골라주세요</p>
-      <div class="jobduo">
-        <button class="jd ot on" id="hjOT" onclick="setJob('작업치료사')">작업치료사</button>
-        <button class="jd pt" id="hjPT" onclick="setJob('물리치료사')">물리치료사</button>
+      <div id="homeJobPick">
+        <p class="pickhint">직군을 골라주세요</p>
+        <div class="jobduo">
+          <button class="jd ot on" id="hjOT" onclick="setJob('작업치료사')">작업치료사</button>
+          <button class="jd pt" id="hjPT" onclick="setJob('물리치료사')">물리치료사</button>
+        </div>
       </div>
       <h2 class="h2">내 연봉,<br>어디쯤일까</h2>
       <p class="body">
@@ -1711,6 +1713,15 @@
       </div>
 
       <div class="f">
+        <label>성별 <span class="hint">남녀 급여 차이를 보는 데 쓰입니다 · 선택</span></label>
+        <select id="sex">
+          <option value="">고르지 않음</option>
+          <option value="남">남</option>
+          <option value="여">여</option>
+        </select>
+      </div>
+
+      <div class="f">
         <label>출생연도 <span class="hint">또래 비교에 쓰입니다 · 선택</span></label>
         <div class="unit">
           <input type="number" id="birthYear" min="1940" max="2009" placeholder="1997"
@@ -2038,7 +2049,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=61"></script>
+<script src="/app.js?v=64"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2084,7 +2095,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v61 · 2026-08-28';
+var APP_VER = 'v64 · 2026-08-28';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2954,6 +2965,11 @@ function drawHomeCTA(){
 }
 
 function drawWho(){
+  /* 등록할 때 직군을 이미 골랐으므로, 로그인 상태에서는
+     홈의 직군 고르기를 감춥니다. 눌러도 바뀌지 않아 헷갈립니다. */
+  var pick=document.getElementById('homeJobPick');
+  if(pick) pick.className = unlocked() ? 'hide' : '';
+
   var box=document.getElementById('whoBox');
   if(!box) return;
   if(!unlocked()){ box.innerHTML=''; return; }
@@ -3793,7 +3809,8 @@ function submit(){
     notiKinds:pickedNoti(),
     bonus:val('bonus')||0,
     grade:val('grade'), wantType:val('wantType'), wantRegion:val('wantRegion'),
-    birthYear:val('birthYear'), note:document.getElementById('note').value,
+    birthYear:val('birthYear'),
+    sex:val('sex'), note:document.getElementById('note').value,
     school:val('school'), gpa:val('gpa'), gpaMax:val('gpaMax'), toeic:val('toeic'),
     certs:picked.certs.concat(extra('certEtc')),
     courses:picked.courses.concat(extra('courseEtc')),
