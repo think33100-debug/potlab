@@ -25,7 +25,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
     'getMyPosition', 'getHourly', 'getSpecMatch', 'getCardData', 'getStudentResult',
     'getStudentCard', 'getMoveEstimate', 'calcSalary', 'searchHospital', 'suggestHospitals',
     'hospitalDetail', 'compareHospitals', 'topHospitals', 'jobRegionSummary', 'regionHospitals',
-    'densityTable', 'regionOverview', 'regionDetail', 'submitFeedback', 'adminList',
+    'densityTable', 'regionOverview', 'regionDetail', 'regionSggHospitals', 'submitFeedback', 'adminList',
     'adminToggle', 'adminEditSalary', 'adminGetBanners', 'adminSaveBanners'
   ];
 

@@ -377,6 +377,18 @@
   .hpick .hpn{flex-shrink:0;text-align:right}
   .hpick .hpn em{display:block;font-style:normal;font-size:12px;font-weight:800;
     color:var(--accent);line-height:1.4}
+  .ldwhy .wr.me{outline:2px solid var(--accent);outline-offset:-2px}
+  .clinfold{margin-top:10px;border-top:1px solid var(--line);padding-top:6px}
+  .clinfold summary{cursor:pointer;padding:12px 4px;font-size:13.5px;font-weight:700;
+    color:var(--dim);list-style:none;display:flex;align-items:center;gap:8px;
+    -webkit-tap-highlight-color:transparent}
+  .clinfold summary::-webkit-details-marker{display:none}
+  .clinfold summary::before{content:'▸';font-size:12px;transition:transform .2s}
+  .clinfold[open] summary::before{transform:rotate(90deg)}
+  .clinfold summary:hover{color:var(--ink)}
+  .hpick .lt{font-weight:800}
+  .hpick .lt.hot{color:#b4432c}
+  .hpick .lt.cool{color:#2a7a5f}
   .hpick .hpn em.pt{color:#2a4a7c;opacity:.85;font-size:11.5px}
   .hitem{display:flex;align-items:center;gap:10px;padding:11px 0;
     border-bottom:1px solid #f0f3f4}
@@ -2136,7 +2148,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=87"></script>
+<script src="/app.js?v=88"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2182,7 +2194,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v87 · 2026-08-31';
+var APP_VER = 'v88 · 2026-08-31';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -3761,10 +3773,16 @@ function densBlock(d, job){
     + '<div class="ldbar"><i style="--w:'+pct+'%"></i></div>'
     + '<div class="ldends"><span>여유</span><span>보통</span><span>바쁨</span></div>';
 
-  // 왜 그런지 — 실제 인원을 그대로 보여줍니다
+  // 왜 그런지 — 실제 인원을 그대로 보여줍니다.
+  // 두 직군을 다 보여줍니다. 한쪽만 보이면 다른 직군은 자기 것이 아닌 줄 압니다.
+  var otPer = d.bed ? Math.round((d.otN||0)/d.bed*1000)/10 : 0;
+  var ptPer = d.bed ? Math.round((d.ptN||0)/d.bed*1000)/10 : 0;
+  var mine = (job==='물리치료사') ? 'pt' : 'ot';
   t += '<div class="ldwhy">'
-    + '<div class="wr"><span class="wn">'+d.per100+'<em>명</em></span>'
-    + '<span class="wt">병상 100개당<br><b>'+esc(job||'치료사')+' 수</b></span></div>';
+    + '<div class="wr'+(mine==='ot'?' me':'')+'"><span class="wn">'+otPer+'<em>명</em></span>'
+    + '<span class="wt">병상 100개당<br><b>작업치료사</b></span></div>'
+    + '<div class="wr'+(mine==='pt'?' me':'')+'"><span class="wn">'+ptPer+'<em>명</em></span>'
+    + '<span class="wt">병상 100개당<br><b>물리치료사</b></span></div>';
   if(d.docPer100 !== null){
     t += '<div class="wr"><span class="wn">'+d.docPer100+'<em>명</em></span>'
       + '<span class="wt">병상 100개당<br><b>재활 담당 의사 수</b></span></div>';
@@ -4187,7 +4205,7 @@ function sugg(which){
         return '<div class="sg" onclick="pickCmp(\''+which+'\',\''
           + esc(x.name).replace(/'/g,"\\'")+'\')">'
           + '<b>'+esc(x.name)+'</b>'
-          + '<span>'+esc(x.kind)+' · '+esc(x.sgg)+' · OT'+x.ot+'</span></div>';
+          + '<span>'+esc(kindLabel(x.kind))+' · '+esc(x.sgg)+' · OT'+x.ot+'</span></div>';
       }).join('') + (r.total>8?'<div class="none">그 외 '+(r.total-8)+'곳 더 있습니다</div>':'');
     }).suggestHospitals(cred(), q);
   }, 350);
@@ -4218,7 +4236,7 @@ function drawCompare(r){
   function col(x, win){
     return '<div class="cmpcol'+(win?' win':'')+'">'
       + '<h4>'+esc(x.name)+'</h4>'
-      + '<div class="cm">'+esc(x.kind)+'<br>'+esc(x.sido)+' '+esc(x.sgg)+'</div>'
+      + '<div class="cm">'+esc(kindLabel(x.kind))+'<br>'+esc(x.sido)+' '+esc(x.sgg)+'</div>'
       + '<div style="font-size:26px;font-weight:800">'+x[key]+'<span style="font-size:13px;font-weight:400">명</span></div>'
       + '<div style="font-size:11px;color:var(--dim)">'+esc(r.job)+'</div></div>';
   }
@@ -4396,7 +4414,7 @@ function showPosts(r){
       + '<div class="ptags">'
         + (x.job&&x.job!=='공통'?'<i class="jb">'+esc(x.job)+'</i>':'')
         + (x.mixed?'<i class="mx">여러 직군 통합</i>':'')
-        + (x.kind?'<i>'+esc(x.kind)+'</i>':'')
+        + (x.kind?'<i>'+esc(kindLabel(x.kind))+'</i>':'')
         + (x.hire?'<i>'+esc(String(x.hire).split(',')[0])+'</i>':'')
         + (x.region?'<i>'+esc(String(x.region).split(',').slice(0,2).join('·'))+'</i>':'')
         + (x.nope?'<i>'+x.nope+'명</i>':'')
@@ -4479,21 +4497,40 @@ function drawHosp(r){
   // 한 곳만 나오면 바로 상세로
   if(r.total===1){ openHosp(r.rows[0].idx); return; }
 
+  /* 병원급과 의원급을 갈라 그립니다.
+     세브란스처럼 이름이 같은 곳이 여럿이면 동 이름으로 가릅니다. */
+  var hosp = r.rows.filter(function(x){ return !x.clinic; });
+  var clin = r.rows.filter(function(x){ return x.clinic; });
+
+  function row(x){
+    return '<div class="hpick" onclick="openHosp('+x.idx+')">'
+      + '<div class="hpi">'
+      + '<b>'+esc(x.name)+'</b>'
+      + '<span>'+esc(kindLabel(x.kind))+' · '+esc(x.sido)+' '+esc(x.sgg)
+      + (x.dong?' '+esc(x.dong):'')
+      + (x.bed?' · '+x.bed.toLocaleString('ko-KR')+'병상':'')
+      + (x.rehabCert?' · <b style="color:var(--accent)">재활 전문</b>':'')+'</span></div>'
+      + '<div class="hpn">'
+      + '<em>OT '+x.ot+'</em><em class="pt">PT '+x.pt+'</em></div>'
+      + '<div class="arw2">›</div></div>';
+  }
+
   var h='<div class="card"><h2>'+r.total+'곳 찾았습니다</h2>'
     + '<p class="sub">보실 병원을 눌러주세요'
-    + (r.total>30?' · 상위 30곳만 표시':'')+'</p>'
-    + r.rows.map(function(x,i){
-        return '<div class="hpick" onclick="openHosp('+x.idx+')">'
-          + '<div class="hpi">'
-          + '<b>'+esc(x.name)+'</b>'
-          + '<span>'+esc(x.kind)+' · '+esc(x.sido)+' '+esc(x.sgg)
-          + (x.bed?' · '+x.bed.toLocaleString('ko-KR')+'병상':'')
-          + (x.rehabCert?' · <b style="color:var(--accent)">재활 전문</b>':'')+'</span></div>'
-          + '<div class="hpn">'
-          + '<em>OT '+x.ot+'</em><em class="pt">PT '+x.pt+'</em></div>'
-          + '<div class="arw2">›</div></div>';
-      }).join('')
-    + '</div>';
+    + (r.hospCount>30?' · 병원 상위 30곳만 표시':'')+'</p>';
+
+  if(hosp.length) h += hosp.map(row).join('');
+
+  /* 의원급은 접어둡니다. 치료사 자리가 거의 없어 대개 안 봅니다. */
+  if(clin.length){
+    var more = r.clinicCount > clin.length ? ' (상위 '+clin.length+'곳)' : '';
+    h += '<details class="clinfold"'+(hosp.length?'':' open')+'>'
+      + '<summary>의원 · 보건소 '+r.clinicCount+'곳'+more+' 보기</summary>'
+      + clin.map(row).join('')
+      + '</details>';
+  }
+
+  h += '</div>';
   box.innerHTML=h;
   attachRipple();
 }
@@ -4526,7 +4563,7 @@ function drawHospDetail(x){
   var t='<button class="back" onclick="backToList()"><span class="bicon">‹</span>목록으로</button>'
     + '<div class="hres"><div class="hn">'+esc(x.name)+'</div>'
     + '<div class="hmeta">'
-    + (x.kind?'<i class="kd">'+esc(x.kind)+'</i>':'')
+    + (x.kind?'<i class="kd">'+esc(kindLabel(x.kind))+'</i>':'')
     + (x.rehabCert?'<i class="kd">🏥 회복기 재활병원</i>':'')
     + (x.sido?'<i>'+esc(x.sido)+(x.sgg?' '+esc(x.sgg):'')+'</i>':'')
     + (x.bed?'<i>'+x.bed.toLocaleString('ko-KR')+'병상</i>':'')
@@ -4649,7 +4686,7 @@ function drawRegionList(r){
     + r.rows.map(function(x,i){
         return '<div class="hitem"><div class="hno'+(i<3?' t3':'')+'">'+(i+1)+'</div>'
           + '<div class="hinfo"><b>'+esc(x.name)+'</b>'
-          + '<span>'+esc(x.kind)+' · '+esc(x.sgg)+'</span></div>'
+          + '<span>'+esc(kindLabel(x.kind))+' · '+esc(x.sgg)+'</span></div>'
           + '<div class="hcnt">'+x[key]+'<small>명</small></div></div>';
       }).join('')
     + '</div>';
@@ -4699,23 +4736,81 @@ function drawRegionDetail(r){
   var mix=Object.keys(r.byType).filter(function(k){return r.byType[k]>0;})
     .map(function(k){ return '<i>'+esc(k)+' <b>'+r.byType[k].toLocaleString('ko-KR')+'</b></i>'; })
     .join('');
+  REGION_LAST = r;   // 시군구 목록에서 돌아올 때 다시 그리려고 기억해둡니다
+
   var h='<div class="card">'
     + '<button class="back" onclick="doRegion()"><span class="bicon">‹</span>전국으로</button>'
-    + '<h2>'+esc(r.sido)+' · '+esc(r.type)+' '+r.total.toLocaleString('ko-KR')+'곳</h2>'
-    + '<p class="sub">'+r.basis+'</p>'
+    + '<h2>'+esc(r.sido)+' · '+esc(kindLabel(r.type))+' '+r.total.toLocaleString('ko-KR')+'곳</h2>'
+    + '<p class="sub">'+r.basis+' · 지역을 누르면 병원 이름이 나옵니다</p>'
     + '<div class="mixgrid">'+mix+'</div>'
     + '<div style="margin-top:14px">'
     + r.rows.map(function(x,i){
         var w=Math.round(x.n/max*100);
-        return '<div class="rgrow" style="cursor:default">'
+        return '<div class="rgrow" onclick="openSgg(\''+esc(r.sido)+'\',\''+esc(x.sgg)+'\',\''+esc(r.type)+'\')">'
           + '<div class="rn'+(i<3?' t3':'')+'">'+(i+1)+'</div>'
           + '<div class="rs">'+esc(x.sgg)+'</div>'
           + '<div class="rbar"><i style="--w:'+w+'%"></i></div>'
-          + '<div class="rv">'+x.n+'</div></div>';
+          + '<div class="rv">'+x.n+'</div>'
+          + '<div class="arw2">›</div></div>';
       }).join('')
     + '</div></div>';
   box.innerHTML=h;
   attachRipple(); revealIn(); animateNumbers(); slidePins();
+}
+
+var REGION_LAST = null;
+
+/* 종별 이름 — '병원' 만 있으면 무슨 뜻인지 모릅니다 */
+function kindLabel(k){
+  var map = { '병원':'병원(일반)', '상급종합':'상급종합병원', '상급종합병원':'상급종합병원' };
+  return map[k] || k;
+}
+
+/* 시군구를 눌렀을 때 — 그 안의 병원 목록 */
+function openSgg(sido, sgg, type){
+  var box=document.getElementById('regionBox');
+  box.innerHTML=loading(sgg+' 병원을 찾는 중');
+  google.script.run.withSuccessHandler(drawSgg)
+    .withFailureHandler(function(e){ box.innerHTML=errBox(e,'regionSggHospitals'); attachRipple(); })
+    .regionSggHospitals(cred(), sido, sgg, type);
+}
+
+function drawSgg(r){
+  var box=document.getElementById('regionBox');
+  if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+
+  var h='<div class="card">'
+    + '<button class="back" onclick="backToSido()"><span class="bicon">‹</span>'+esc(r.sido)+'</button>'
+    + '<h2>'+esc(r.sgg)+' · '+esc(kindLabel(r.type))+' '+r.total+'곳</h2>'
+    + '<p class="sub">치료사가 많은 순 · 누르면 자세히 봅니다</p>';
+
+  if(!r.rows.length){
+    h += '<div class="empty">이 지역에는 아직 자료가 없습니다</div></div>';
+    box.innerHTML=h; return;
+  }
+
+  h += r.rows.map(function(x){
+    var tag = x.load ? x.load.label : '';
+    var tone = x.load ? (x.load.level===3?'hot':(x.load.level===1?'cool':'')) : '';
+    return '<div class="hpick" onclick="openHosp('+x.idx+')">'
+      + '<div class="hpi">'
+      + '<b>'+esc(x.name)+'</b>'
+      + '<span>'+esc(x.dong||'')
+      + (x.bed?' · '+x.bed.toLocaleString('ko-KR')+'병상':'')
+      + (x.rehabCert?' · <b style="color:var(--accent)">재활 전문</b>':'')
+      + (tag?' · <b class="lt '+tone+'">'+esc(tag)+'</b>':'')
+      + '</span></div>'
+      + '<div class="hpn"><em>OT '+x.ot+'</em><em class="pt">PT '+x.pt+'</em></div>'
+      + '<div class="arw2">›</div></div>';
+  }).join('') + '</div>';
+
+  box.innerHTML=h;
+  attachRipple(); revealIn();
+}
+
+function backToSido(){
+  if(REGION_LAST) drawRegionDetail(REGION_LAST);
+  else doRegion();
 }
 
 function drawViewNotice(){
