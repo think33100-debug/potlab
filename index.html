@@ -1955,19 +1955,19 @@
     <div id="donePos"></div>
 
     <div class="lockcard">
-      <div class="lchead">🔓 코드를 넣으면 전부 열립니다</div>
+      <div class="lchead">🔓 이제 전부 열렸습니다</div>
       <ul class="lclist">
         <li>이직하면 얼마나 오를지</li>
         <li>병원별 치료사 인원 · 12,407곳</li>
         <li>실질 시급 · 연봉 계산기</li>
         <li>지역별 병원 찾기 · 두 곳 비교</li>
       </ul>
-      <div class="lcfree">코드 하나면 <b>평생 무료</b>입니다</div>
+      <div class="lcfree">언제나 <b>무료</b>입니다</div>
     </div>
 
     <div id="doneRoom"></div>
-    <button class="go" onclick="tab('unlock')">코드 확인했어요 · 열기</button>
-    <p class="thin">내 닉네임(아이디) <b id="doneCode">-</b> · 캡처해두시면 편합니다</p>
+    <button class="go" onclick="tab('dash')">내 화면으로 가기</button>
+    <p class="thin">내 닉네임 <b id="doneCode">-</b></p>
   </div>
 
   <!-- ============ 로그인 ============ -->
@@ -2154,7 +2154,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=91"></script>
+<script src="/app.js?v=92"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2298,18 +2298,87 @@ function saveToken(t){
   }catch(e){}
 }
 
-/* 카카오에서 돌아오면 주소 뒤에 토큰이 붙어 옵니다 */
-function catchToken(){
-  var h = location.hash || '';
-  if(h.indexOf('t=') < 0) return false;
-  var m = h.match(/[#&]t=([^&]+)/);
-  var n = h.match(/[#&]n=([^&]*)/);
-  if(!m) return false;
-  saveToken(decodeURIComponent(m[1]));
-  KNICK = n ? decodeURIComponent(n[1]) : '';
-  try{ history.replaceState(null, '', location.pathname + location.search); }
-  catch(e){ location.hash = ''; }
-  return true;
+/* 카카오에서 우리 사이트로 돌아오면 주소 뒤에 ?code= 가 붙어 옵니다.
+   그 코드를 서버에 보내 토큰으로 바꿉니다. 시크릿은 서버에만 있습니다. */
+function catchCode(done){
+  var q = location.search || '';
+  var m = q.match(/[?&]code=([^&]+)/);
+  var err = q.match(/[?&]error=([^&]+)/);
+
+  function wipe(){
+    try{ history.replaceState(null, '', location.pathname); }catch(e){}
+  }
+
+  if(err){ wipe(); msg('로그인을 취소했습니다'); done(false); return; }
+  if(!m){ done(false); return; }
+
+  var code = decodeURIComponent(m[1]);
+  wipe();
+  busy(true, '로그인하고 있습니다');
+
+  google.script.run.withSuccessHandler(function(r){
+    busy(false);
+    if(!r || !r.ok){ msg((r&&r.message) || '로그인하지 못했습니다'); done(false); return; }
+    saveToken(r.token);
+    KNICK = r.nickname || '';
+    done(true, r);
+  }).withFailureHandler(function(e){
+    busy(false); msg(e.message || '로그인하지 못했습니다'); done(false);
+  }).kakaoExchange(code);
+}
+
+/* 첫 화면이 뜬 뒤에 로그인 상태를 정리합니다.
+   서버가 실패해도 이건 돌아야 합니다. */
+var BOOTED = false;
+function afterBoot(){
+  if(BOOTED) return;
+  BOOTED = true;
+
+  catchCode(function(came, r){
+    if(came){
+      if(r && r.registered){
+        checkKakao(function(ok){
+          if(ok){
+            setRole(ME && ME.role === '학생' ? '학생' : '현직');
+            msg('돌아오셨네요');
+            if(!openFromHash()) tab('dash');
+          }
+        });
+      }else{
+        /* 처음 오신 분 — 바로 등록 화면으로 보냅니다 */
+        GO_AFTER_LOGIN = '';
+        tab('input');
+        var nk = document.getElementById('nick');
+        if(nk && !nk.value && KNICK) nk.value = KNICK;
+        msg('환영합니다. 3분이면 끝납니다');
+      }
+      return;
+    }
+
+    checkKakao(function(ok){
+      if(ok){
+        setRole(ME && ME.role === '학생' ? '학생' : '현직');
+        if(!openFromHash()) tab('dash');
+      }else{
+        openFromHash();
+      }
+    });
+  });
+}
+
+/* 로그인 중이라고 알려주는 덮개 */
+function busy(on, text){
+  var el = document.getElementById('kbusy');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'kbusy';
+    el.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;'
+      + 'align-items:center;justify-content:center;background:rgba(255,255,255,.94);'
+      + 'font-size:15px;color:#3f4c52;font-weight:600';
+    document.body.appendChild(el);
+  }
+  el.textContent = text || '';
+  el.style.display = on ? 'flex' : 'none';
 }
 
 function goKakao(){
@@ -2319,11 +2388,7 @@ function goKakao(){
   }).withFailureHandler(function(e){ msg(e.message); }).kakaoLogin();
 }
 
-function logout(){
-  saveToken(''); clearMe(); KNICK='';
-  tab('home');
-  msg('로그아웃했습니다');
-}
+
 /* ===== 화면 이동 기록 =====
  * 뒤로 가면 직전 화면으로, 그때 보던 내용까지 되살립니다.
  */
@@ -2430,6 +2495,13 @@ var SUBMITTED = false;   // 제출을 끝냈으면 이탈 경고를 끕니다
  *  back=true 면 기록을 남기지 않고, 저장해둔 내용을 되살립니다
  */
 function tab(which, back){
+  /* 등록 폼은 로그인부터 합니다.
+     3분 걸려 다 채운 뒤에 막히면 전부 날아가기 때문입니다. */
+  if(which === 'input' && !KTOKEN){
+    GO_AFTER_LOGIN = 'input';
+    msg('먼저 카카오로 로그인해주세요');
+    which = 'unlock';
+  }
   // 떠나기 전에 보던 내용을 저장합니다
   if(CURRENT && CURRENT !== which) snapshot(CURRENT);
   if(!back && CURRENT && CURRENT !== which){
@@ -2450,8 +2522,8 @@ function tab(which, back){
   var ptb=document.getElementById('postTabs');
   if(ptb) ptb.className = (which==='post')?'tabs':'tabs hide';
   var TT={input:['내 정보 등록','약 3분이면 끝납니다'],
-          done:['등록 완료','코드를 받으러 가실 차례입니다'],
-          unlock:['잠금 해제','닉네임과 코드를 넣어주세요'],
+          done:['등록 완료','이제 통계를 보실 수 있습니다'],
+          unlock:['로그인','카카오로 3초면 됩니다'],
           view:['통계 조회','조건을 걸어 살펴보세요'],
           calc:['내 연봉 계산기','2026년 기준 세전↔세후'],
           hosp:['병원별 치료사 인원','정리한 자료 기준'],
@@ -3192,8 +3264,9 @@ function drawWho(){
     + '<button class="logout" onclick="logout()">로그아웃</button></div>';
 }
 function logout(){
-  if(!confirm('로그아웃할까요?\n\n이 기기에서 닉네임 기억만 지웁니다.\n등록하신 정보는 그대로 남아 있고, 다시 로그인하면 됩니다.')) return;
-  clearMe(); drawWho(); msg('로그아웃했습니다'); tab('home');
+  if(!confirm('로그아웃할까요?\n\n이 기기에서 로그인 기억만 지웁니다.\n등록하신 정보는 그대로 남아 있고, 카카오로 다시 들어오시면 됩니다.')) return;
+  saveToken(''); clearMe(); KNICK='';
+  drawWho(); msg('로그아웃했습니다'); tab('home');
 }
 
 /* ===== 홈 화면에 추가 ===== */
@@ -3743,7 +3816,7 @@ function calcHint(){
 }
 
 function runCalc(){
-  if(!unlocked()){ msg('먼저 등록하고 코드를 입력해주세요'); tab('unlock'); return; }
+  if(!unlocked()){ msg('먼저 로그인하고 내 정보를 등록해주세요'); tab('unlock'); return; }
   var amt=document.getElementById('cAmount').value.trim();
   if(!amt){msg('금액을 입력해주세요');return;}
   document.getElementById('calcBox').innerHTML=loading('계산하는 중');
@@ -4913,7 +4986,7 @@ function drawViewNotice(){
 }
 
 function loadStats(){
-  if(!unlocked()){ msg('먼저 등록하고 코드를 입력해주세요'); tab('unlock'); return; }
+  if(!unlocked()){ msg('먼저 로그인하고 내 정보를 등록해주세요'); tab('unlock'); return; }
   doStats();
 }
 
@@ -5469,7 +5542,6 @@ HOSPITALS.forEach(function(v){
   document.getElementById('fType').innerHTML+='<option>'+v+'</option>';
   document.getElementById('wantType').innerHTML+='<option>'+v+'</option>';
 });
-catchToken();
 loadToken();
 loadMe();
 role='현직';
@@ -5482,14 +5554,14 @@ revealHome();
 google.script.run.withSuccessHandler(function(b){
   drawHome(b);
   /* 알림으로 들어왔으면 그 화면, 아니면 평소대로 */
-  checkKakao(function(ok){
-    if(ok && !openFromHash()) tab('dash');
-  });
+  afterBoot();
 }).withFailureHandler(function(e){
   // 서버가 안 되더라도 화면은 뜨게 합니다
   drawHome({ name:'POT JOB', tagline:'작업치료사 · 물리치료사를 위한 급여 통계',
              logo:'', rooms:[], roomPoints:[], jobLinks:[], banners:[] });
   if(window.console) console.warn('getBrand 실패:', e && e.message);
+  /* 홈이 안 떠도 로그인은 이어져야 합니다 */
+  afterBoot();
 }).getBrand();
 
 /* ===== 나가기 방지 =====
