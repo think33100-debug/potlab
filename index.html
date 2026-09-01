@@ -1973,19 +1973,22 @@
   <!-- ============ 로그인 ============ -->
   <div id="pane-unlock" class="hide">
     <div class="card">
-      <h2>로그인</h2>
-      <p class="sub">카카오로 3초면 들어옵니다. 이메일이나 전화번호는 받지 않습니다.</p>
+      <h2>확인 한 번만 하겠습니다</h2>
+      <p class="sub">여기 있는 급여 자료는 치료사들이 하나씩 적어서 모은 것입니다.<br>
+        한 사람이 여러 번 적으면 숫자가 흔들립니다. 그래서 확인합니다.</p>
+
       <button class="go" id="kakaoBtn" onclick="goKakao()"
         style="background:#FEE500;color:#181600;font-weight:800">
-        카카오로 시작하기</button>
-      <p class="sub" style="margin-top:12px;font-size:12.5px">
-        카카오에서 <b>닉네임</b>만 받아옵니다.</p>
+        카카오로 계속하기</button>
+
+      <ul class="lclist" style="margin-top:16px">
+        <li>받는 것은 <b>닉네임</b> 하나뿐입니다</li>
+        <li>이메일도 전화번호도 받지 않습니다</li>
+        <li>적으신 급여는 통계로만 쓰이고, 누가 적었는지는 아무도 못 봅니다</li>
+      </ul>
       <div id="unlockMsg"></div>
     </div>
     <div id="unlockRoom"></div>
-    <div class="altlink">
-      <button onclick="tab('input')">아직 등록 안 하셨나요? 등록하러 가기</button>
-    </div>
   </div>
 
   <!-- ============ 대시보드 ============ -->
@@ -2154,7 +2157,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=92"></script>
+<script src="/app.js?v=93"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2309,21 +2312,33 @@ function catchCode(done){
     try{ history.replaceState(null, '', location.pathname); }catch(e){}
   }
 
-  if(err){ wipe(); msg('로그인을 취소했습니다'); done(false); return; }
+  if(err){
+    wipe(); done(false);
+    tab('unlock');
+    kmsg('카카오에서 동의하지 않으셨습니다. 다시 눌러주세요.');
+    return;
+  }
   if(!m){ done(false); return; }
 
   var code = decodeURIComponent(m[1]);
   wipe();
-  busy(true, '로그인하고 있습니다');
+  busy(true, '들어가는 중입니다');
+
+  function fail(why){
+    busy(false);
+    done(false);
+    tab('unlock');
+    kmsg(why);
+  }
 
   google.script.run.withSuccessHandler(function(r){
     busy(false);
-    if(!r || !r.ok){ msg((r&&r.message) || '로그인하지 못했습니다'); done(false); return; }
+    if(!r || !r.ok){ fail('로그인하지 못했습니다. ' + ((r && r.message) || '')); return; }
     saveToken(r.token);
     KNICK = r.nickname || '';
     done(true, r);
   }).withFailureHandler(function(e){
-    busy(false); msg(e.message || '로그인하지 못했습니다'); done(false);
+    fail('서버에 연결하지 못했습니다. ' + ((e && e.message) || ''));
   }).kakaoExchange(code);
 }
 
@@ -2382,10 +2397,31 @@ function busy(on, text){
 }
 
 function goKakao(){
+  var btn = document.getElementById('kakaoBtn');
+  if(btn){ btn.disabled = true; btn.textContent = '카카오로 넘어가는 중'; }
+
+  function back(why){
+    if(btn){ btn.disabled = false; btn.textContent = '카카오로 계속하기'; }
+    kmsg(why);
+  }
+
   google.script.run.withSuccessHandler(function(r){
-    if(r && r.url) location.href = r.url;
-    else msg('로그인 주소를 받지 못했습니다');
-  }).withFailureHandler(function(e){ msg(e.message); }).kakaoLogin();
+    if(r && r.url){ location.href = r.url; return; }
+    back('로그인 주소를 받지 못했습니다. 잠시 뒤 다시 눌러주세요.');
+  }).withFailureHandler(function(e){
+    back('서버에 연결하지 못했습니다. ' + ((e && e.message) || ''));
+  }).kakaoLogin();
+}
+
+/* 로그인 화면 안에 남는 안내 — 잠깐 떴다 사라지는 알림과 달리
+   무엇이 잘못됐는지 계속 볼 수 있어야 합니다 */
+function kmsg(text){
+  var box = document.getElementById('unlockMsg');
+  if(!box){ msg(text); return; }
+  box.innerHTML = text
+    ? '<p class="sub" style="margin-top:14px;padding:11px 13px;border-radius:9px;'
+      + 'background:#fdf1ec;color:#a8402a;line-height:1.6">' + esc(text) + '</p>'
+    : '';
 }
 
 
@@ -2651,8 +2687,11 @@ function doUnlock(){ goKakao(); }
 function checkKakao(after){
   if(!KTOKEN){ if(after) after(false); return; }
   google.script.run.withSuccessHandler(function(r){
-    if(!r.ok){
-      if(r.reason === 'nologin'){ saveToken(''); clearMe(); }
+    if(!r || !r.ok){
+      if(r && r.reason === 'nologin'){
+        saveToken(''); clearMe();
+        kmsg('로그인이 만료되었습니다. 다시 들어와주세요.');
+      }
       if(after) after(false, r);
       return;
     }
