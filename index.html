@@ -378,6 +378,17 @@
   .hpick .hpn em{display:block;font-style:normal;font-size:12px;font-weight:800;
     color:var(--accent);line-height:1.4}
   .ldwhy .wr.me{outline:2px solid var(--accent);outline-offset:-2px}
+  .ladder{display:flex;gap:5px;margin:12px 0 14px}
+  .ladder .ld{flex:1;text-align:center;padding:9px 2px 7px;border-radius:10px;
+    background:rgba(0,0,0,.05);opacity:.55}
+  .ladder .ld b{display:block;font-size:15px;font-weight:800}
+  .ladder .ld span{display:block;font-size:10.5px;margin-top:2px;white-space:nowrap}
+  .ladder .ld em{display:block;font-style:normal;font-size:9.5px;opacity:.7;margin-top:2px}
+  .ladder .ld.on{opacity:1;background:var(--ink);color:#fff;transform:scale(1.06)}
+  .pfind{margin:2px 0 12px}
+  .pfind input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;
+    font-size:15px;background:#fff;font-family:inherit}
+  .pfind input:focus{outline:none;border-color:var(--accent)}
   .clinfold{margin-top:10px;border-top:1px solid var(--line);padding-top:6px}
   .clinfold summary{cursor:pointer;padding:12px 4px;font-size:13.5px;font-weight:700;
     color:var(--dim);list-style:none;display:flex;align-items:center;gap:8px;
@@ -1959,21 +1970,16 @@
     <p class="thin">내 닉네임(아이디) <b id="doneCode">-</b> · 캡처해두시면 편합니다</p>
   </div>
 
-  <!-- ============ 잠금 해제 ============ -->
+  <!-- ============ 로그인 ============ -->
   <div id="pane-unlock" class="hide">
     <div class="card">
       <h2>로그인</h2>
-      <p class="sub">등록하실 때 정한 닉네임(아이디)과 단톡방 공지의 코드를 넣어주세요.</p>
-      <div class="f">
-        <label>닉네임(아이디)</label>
-        <input type="text" id="uNick" placeholder="등록하신 닉네임(아이디)">
-      </div>
-      <div class="f">
-        <label>이용 코드 <span class="hint">단톡방 공지에 있습니다</span></label>
-        <input type="text" id="uCode" placeholder="코드 입력"
-          onkeydown="if(event.key==='Enter')doUnlock()">
-      </div>
-      <button class="go" onclick="doUnlock()">열기</button>
+      <p class="sub">카카오로 3초면 들어옵니다. 이메일이나 전화번호는 받지 않습니다.</p>
+      <button class="go" id="kakaoBtn" onclick="goKakao()"
+        style="background:#FEE500;color:#181600;font-weight:800">
+        카카오로 시작하기</button>
+      <p class="sub" style="margin-top:12px;font-size:12.5px">
+        카카오에서 <b>닉네임</b>만 받아옵니다.</p>
       <div id="unlockMsg"></div>
     </div>
     <div id="unlockRoom"></div>
@@ -2148,7 +2154,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=88"></script>
+<script src="/app.js?v=91"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2194,7 +2200,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v88 · 2026-08-31';
+var APP_VER = 'v90 · 2026-08-31';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -2268,10 +2274,56 @@ function clearMe(){
   try{ localStorage.removeItem('potlab_me'); }catch(e){}
 }
 function cred(){
-  return { nick: ME ? ME.nick : '', code: ME ? (ME.code||'') : '',
-           id: ME ? ME.id : '', job: (ME && ME.job) ? ME.job : JOB };
+  return { token: KTOKEN, id: ME ? ME.id : '',
+           job: (ME && ME.job) ? ME.job : JOB };
 }
-function unlocked(){ return !!(ME && ME.nick && ME.code); }
+function unlocked(){ return !!(KTOKEN && ME && ME.id); }
+
+/* ===== 카카오 로그인 =====
+ * 카카오는 "누구인지"만 확인합니다.
+ * 급여·입사연도 같은 정보는 등록 폼에서 그대로 받습니다.
+ */
+var KTOKEN = '';
+var KNICK  = '';
+
+function loadToken(){
+  try{ KTOKEN = localStorage.getItem('potjob_token') || ''; }catch(e){ KTOKEN=''; }
+  return KTOKEN;
+}
+function saveToken(t){
+  KTOKEN = t || '';
+  try{
+    if(t) localStorage.setItem('potjob_token', t);
+    else  localStorage.removeItem('potjob_token');
+  }catch(e){}
+}
+
+/* 카카오에서 돌아오면 주소 뒤에 토큰이 붙어 옵니다 */
+function catchToken(){
+  var h = location.hash || '';
+  if(h.indexOf('t=') < 0) return false;
+  var m = h.match(/[#&]t=([^&]+)/);
+  var n = h.match(/[#&]n=([^&]*)/);
+  if(!m) return false;
+  saveToken(decodeURIComponent(m[1]));
+  KNICK = n ? decodeURIComponent(n[1]) : '';
+  try{ history.replaceState(null, '', location.pathname + location.search); }
+  catch(e){ location.hash = ''; }
+  return true;
+}
+
+function goKakao(){
+  google.script.run.withSuccessHandler(function(r){
+    if(r && r.url) location.href = r.url;
+    else msg('로그인 주소를 받지 못했습니다');
+  }).withFailureHandler(function(e){ msg(e.message); }).kakaoLogin();
+}
+
+function logout(){
+  saveToken(''); clearMe(); KNICK='';
+  tab('home');
+  msg('로그아웃했습니다');
+}
 /* ===== 화면 이동 기록 =====
  * 뒤로 가면 직전 화면으로, 그때 보던 내용까지 되살립니다.
  */
@@ -2407,7 +2459,6 @@ function tab(which, back){
           region:['지역별 의료기관 현황','분기 집계 기준'],
           post:['공공기관 채용공고','자동으로 모아드립니다'],
           noti:['알림 설정','받을 알림을 고르거나 해제합니다'],
-          jobs:['채용 사이트 모음','고용24·사람인 바로가기'],
           install:['앱처럼 쓰기','주소 안 찾고 한 번에 열기']};
   if(TT[which]){
     document.getElementById('subTitle').textContent=TT[which][0];
@@ -2521,33 +2572,23 @@ function menuItem(cls, ic, title, desc, action){
     + '<div class="arw">›</div></'+(action.href?'a':'button')+'>';
 }
 
-function doUnlock(){
-  var n=document.getElementById('uNick').value.trim();
-  var c=document.getElementById('uCode').value.trim();
-  var box=document.getElementById('unlockMsg');
-  if(!n){ msg('닉네임을 입력해주세요'); return; }
-  if(!c){ msg('코드를 입력해주세요'); return; }
-  box.innerHTML='<div class="loadwrap" style="padding:26px 0"><div class="spin"></div>'
-    + '<p>확인하고 있습니다</p></div>';
+/* 로그인 화면 — 카카오 버튼 하나뿐입니다 */
+function doUnlock(){ goKakao(); }
+
+/* 토큰으로 내가 누구인지 확인합니다 */
+function checkKakao(after){
+  if(!KTOKEN){ if(after) after(false); return; }
   google.script.run.withSuccessHandler(function(r){
     if(!r.ok){
-      box.innerHTML=failCard(r);
-      document.getElementById('unlockRoom').innerHTML =
-        (r.reason==='nonick') ? '' : roomCard(BRANDC);
-      attachRipple();
+      if(r.reason === 'nologin'){ saveToken(''); clearMe(); }
+      if(after) after(false, r);
       return;
     }
-    box.innerHTML='';
-    document.getElementById('unlockRoom').innerHTML='';
-    saveMe({nick:r.nick, id:r.id, role:r.role||'현직', job:r.job||'작업치료사', code:c,
+    saveMe({nick:r.nick, id:r.id, role:r.role||'현직', job:r.job||'작업치료사',
             joinedAt:r.joinedAt, days:r.days});
     setJob(r.job||JOB);
-    /* 알림을 눌러 들어왔다면 원래 가려던 화면으로 */
-    var go = GO_AFTER_LOGIN; GO_AFTER_LOGIN = '';
-    tab(go || 'dash');
-  }).withFailureHandler(function(e){
-    box.innerHTML=errBox(e,'unlockAccess'); attachRipple();
-  }).unlockAccess(n,c);
+    if(after) after(true, r);
+  }).withFailureHandler(function(){ if(after) after(false); }).kakaoMe(KTOKEN);
 }
 
 function greeting(){
@@ -2694,7 +2735,6 @@ function drawDashMenu(){
   m+=menuItem('','🏥','병원 찾기·비교','인원·병상·전문의 · 지역별 목록',{fn:"tab(\'hosp\')"});
   m+=menuItem('','📢','공공기관 채용공고<span id="newJobBadge" class="nb hide"></span>',
       '자동으로 모아드립니다',{fn:"tab(\'post\')"});
-  m+=menuItem('','📋','채용 사이트 모음','고용24·사람인 바로가기',{fn:"tab(\'jobs\')"});
   m+=b.klass
      ? menuItem('','🎯','공공기관 집중 준비반','공고 알림 + 준비 자료',{href:b.klass})
      : menuItem('off','🎯','공공기관 집중 준비반','1기 모집 준비 중',{fn:"msg(\'곧 열립니다\')"});
@@ -3664,8 +3704,6 @@ function retryLogin(){
   var box=document.getElementById('unlockMsg');
   if(box) box.innerHTML='';
   tab('unlock');
-  var n=document.getElementById('uNick');
-  if(n){ n.focus(); n.select(); }
 }
 
 function failCard(r){
@@ -3974,6 +4012,7 @@ function submit(){
   }
   var extra=function(id){var v=val(id);return v?[v.trim()]:[];};
   var data={
+    token:KTOKEN,
     role:role, nick:val('nick'), job:JOB,
     startYear:val('startYear'), curStartYear:val('curStartYear')||val('startYear'),
     region:val('region'), hospitalType:val('hospitalType').split(' —')[0],
@@ -4032,10 +4071,8 @@ function submit(){
     }
     lastId=r.id;
     SUBMITTED = true;
-    saveMe({nick:r.nick, id:r.id, role:r.role, job:r.job||JOB,
-            code:(ME&&ME.code)||''});
+    saveMe({nick:r.nick, id:r.id, role:r.role, job:r.job||JOB});
     document.getElementById('doneCode').textContent=r.nick;
-    document.getElementById('uNick').value=r.nick;
     document.getElementById('doneRoom').innerHTML=roomCard(BRANDC);
     document.getElementById('donePos').innerHTML=loading('내 위치를 계산하는 중');
     tab('done');
@@ -4104,6 +4141,25 @@ function ssPart(label, got, max, raw){
     + '<div class="spb"><i style="--w:'+pct+'%"></i></div></div>';
 }
 
+/* 다섯 등급을 한 줄로 놓고 지금 자리를 표시합니다.
+   내 등급만 보면 위에 뭐가 있는지 모릅니다. */
+function tierLadder(mine){
+  var steps = [
+    ['D','짐 싸는 중',   '~39'],
+    ['C','대기표',       '40'],
+    ['B','일반석',       '55'],
+    ['A','VIP석',        '70'],
+    ['S','하이패스',     '85']
+  ];
+  return '<div class="ladder">'
+    + steps.map(function(x){
+        var on = x[0]===mine;
+        return '<div class="ld'+(on?' on':'')+'">'
+          + '<b>'+x[0]+'</b><span>'+x[1]+'</span><em>'+x[2]+'점</em></div>';
+      }).join('')
+    + '</div>';
+}
+
 function showStudent(d){
   if(!d.ok){document.getElementById('myPos').innerHTML=failCard(d);return;}
   var p=d.peer, h='';
@@ -4115,6 +4171,7 @@ function showStudent(d){
      + '<div class="ssnum"><span data-count="'+d.spec.score+'">0</span>'
      + '<em>점 / 100점</em></div>'
      + (d.spec.place?'<div class="ssplace">'+esc(d.spec.place)+'</div>':'')
+     + tierLadder(d.spec.tier)
      + '<div class="ssparts">'
      + ssPart('학점', d.spec.parts.gpa, d.spec.max.gpa, d.spec.raw.gpa)
      + ssPart('자격증', d.spec.parts.certs, d.spec.max.certs, d.spec.raw.certs)
@@ -4395,6 +4452,10 @@ function showPosts(r){
     + (POST_MODE==='mine' ? esc((ME&&ME.job)||JOB)+' 관련 ' : '전체 ')
     + '<b>'+r.total+'건</b> · 마감이 가까운 순</p>';
 
+  /* 기관·공고 이름으로 거르기 — 받아둔 목록에서 화면이 거릅니다 */
+  h += '<div class="pfind"><input type="search" id="postFind" placeholder="기관·공고 이름으로 찾기"'
+    + ' oninput="filterPosts(this.value)" autocomplete="off"></div>';
+
   /* 넓은 화면에서 두 칸으로 펴려면 감싸는 상자가 있어야 합니다 */
   h += '<div class="plist">';
 
@@ -4403,6 +4464,7 @@ function showPosts(r){
     var soon = (d!==null && d<=7);
     var isNew = NEWJOB.since && String(x.at||'') > NEWJOB.since;
     h+='<a class="post'+(soon?' soon':'')+'" href="'+esc(x.url||'#')+'"'
+      + ' data-find="'+esc((x.org+' '+x.title).toLowerCase())+'"'
       + ' target="_blank" rel="noopener">'
       + '<div class="ph">'
       + (isNew?'<span class="pnew">NEW</span>':'')
@@ -4412,7 +4474,9 @@ function showPosts(r){
       + '</div>'
       + '<div class="pt">'+esc(x.title)+'</div>'
       + '<div class="ptags">'
-        + (x.job&&x.job!=='공통'?'<i class="jb">'+esc(x.job)+'</i>':'')
+        + (x.job==='공통'
+            ? '<i class="jb">작업치료사</i><i class="jb">물리치료사</i>'
+            : (x.job?'<i class="jb">'+esc(x.job)+'</i>':''))
         + (x.mixed?'<i class="mx">여러 직군 통합</i>':'')
         + (x.kind?'<i>'+esc(kindLabel(x.kind))+'</i>':'')
         + (x.hire?'<i>'+esc(String(x.hire).split(',')[0])+'</i>':'')
@@ -4434,7 +4498,7 @@ function showPosts(r){
 
   h += '</div>';
 
-  // 목록 아래에 취업 상담 안내
+  // 목록 아래에 문의 안내
   h += consultCard();
 
   box.innerHTML=h;
@@ -4442,12 +4506,34 @@ function showPosts(r){
   revealIn('#pane-post');
 }
 
-/* 취업 컨설팅 — 오픈채팅으로 1:1 (익명) */
+/* 기관·공고 이름으로 거릅니다. 서버를 다시 부르지 않습니다. */
+function filterPosts(q){
+  q = String(q||'').trim().toLowerCase();
+  var cards = document.querySelectorAll('#pane-post .post');
+  var shown = 0;
+  cards.forEach(function(c){
+    var hit = !q || (c.getAttribute('data-find')||'').indexOf(q) > -1;
+    c.style.display = hit ? '' : 'none';
+    if(hit) shown++;
+  });
+  var none = document.getElementById('postNone');
+  if(!shown && q){
+    if(!none){
+      none = document.createElement('div');
+      none.id = 'postNone'; none.className = 'empty';
+      var list = document.querySelector('#pane-post .plist');
+      if(list) list.parentNode.insertBefore(none, list.nextSibling);
+    }
+    none.textContent = '「'+q+'」로 찾은 공고가 없습니다';
+  } else if(none){ none.remove(); }
+}
+
+/* 문의 — 오픈채팅으로 1:1 (익명) */
 function consultCard(){
   var url = (BRANDC && BRANDC.consult) || '';
   return '<div class="consult">'
     + '<div class="ch"><span class="cic">💬</span>'
-    + '<div><b>어디에 넣을지 고민되시나요</b>'
+    + '<div><b>먼저 합격한 사람에게 물어보세요</b>'
     + '<span>공고 보고 궁금한 걸 익명으로 물어보세요</span></div></div>'
     + '<ul class="cl">'
       + '<li>내 스펙으로 지원해도 될지</li>'
@@ -4456,7 +4542,7 @@ function consultCard(){
     + '</ul>'
     + (url
         ? '<a class="cbtn" href="'+esc(url)+'" target="_blank" rel="noopener">'
-          + '취업 상담 신청하기</a>'
+          + '먼저 합격한 사람한테 문의하기</a>'
         : '<button class="cbtn off" onclick="msg(\'곧 열립니다\')">준비 중입니다</button>')
     + '<p class="cnote">카카오톡 오픈채팅으로 연결됩니다. '
     + '<b>닉네임만 보이고 프로필은 공개되지 않습니다.</b></p>'
@@ -5383,6 +5469,8 @@ HOSPITALS.forEach(function(v){
   document.getElementById('fType').innerHTML+='<option>'+v+'</option>';
   document.getElementById('wantType').innerHTML+='<option>'+v+'</option>';
 });
+catchToken();
+loadToken();
 loadMe();
 role='현직';
 JOB = (ME&&ME.job) ? ME.job : '작업치료사';
@@ -5394,7 +5482,9 @@ revealHome();
 google.script.run.withSuccessHandler(function(b){
   drawHome(b);
   /* 알림으로 들어왔으면 그 화면, 아니면 평소대로 */
-  if(!openFromHash() && unlocked()) tab('dash');
+  checkKakao(function(ok){
+    if(ok && !openFromHash()) tab('dash');
+  });
 }).withFailureHandler(function(e){
   // 서버가 안 되더라도 화면은 뜨게 합니다
   drawHome({ name:'POT JOB', tagline:'작업치료사 · 물리치료사를 위한 급여 통계',

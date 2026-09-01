@@ -21,7 +21,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
   var METHODS = [
     'getBrand', 'getJobPosts', 'getNoti', 'saveNoti', 'countNewJobs',
     'getPreview', 'getPublicSummary', 'countByJob', 'totalCount', 'checkNick',
-    'submitWage', 'unlockAccess', 'loginByNick', 'getStats', 'getResultBundle',
+    'submitWage', 'kakaoLogin', 'kakaoMe', 'getStats', 'getResultBundle',
     'getMyPosition', 'getHourly', 'getSpecMatch', 'getCardData', 'getStudentResult',
     'getStudentCard', 'getMoveEstimate', 'calcSalary', 'searchHospital', 'suggestHospitals',
     'hospitalDetail', 'compareHospitals', 'topHospitals', 'jobRegionSummary', 'regionHospitals',
