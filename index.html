@@ -547,14 +547,14 @@
   @keyframes bump{0%{transform:none}40%{transform:scale(1.07)}100%{transform:none}}
   .bump{animation:bump .34s cubic-bezier(.2,1.5,.4,1)}
 
-  @keyframes catflash{0%{background:transparent}
-    30%{background:var(--accent-soft)}100%{background:transparent}}
-  .mcat.flash{animation:catflash 1.1s ease;border-radius:8px}
-
   .topbtns{position:absolute;top:16px;right:16px;display:flex;gap:6px}
   .topbtns .tohome{position:static}
 
   .jbtns{margin-top:14px}
+  /* 담아두기 — 눈에 띄어야 누릅니다 */
+  .starbtn{border-width:1.5px;border-color:#c9e2da;background:var(--accent-soft)}
+  .starbtn .si{background:#fff;color:var(--accent)}
+  .starbtn b{color:var(--accent)}
   /* 전형 일정 세로줄 */
   .tline{position:relative;padding-left:26px;margin-top:14px}
   .tline::before{content:'';position:absolute;left:6px;top:8px;bottom:8px;
@@ -666,6 +666,32 @@
   .fbnote b{display:block;font-size:15px;font-weight:800;color:var(--accent);
     letter-spacing:-.02em;margin:10px 0 8px;line-height:1.5}
   .fbnote span{display:block;font-size:13px;color:#4a6a62;line-height:1.8}
+
+  /* 공고 안 업무 강도 */
+  .jload{background:#fff;border-radius:12px;padding:14px 15px;margin-top:11px}
+  .jload.hard{background:#fdf2ee}
+  .jload.easy{background:#eef7f2}
+  .jload .jlh{display:flex;align-items:baseline;gap:7px;margin-bottom:10px}
+  .jload .jlh b{font-size:15px;font-weight:800;letter-spacing:-.02em}
+  .jload.hard .jlh b{color:#b4432c}
+  .jload.easy .jlh b{color:var(--accent)}
+  .jload .jlh span{font-size:11.5px;color:var(--dim);margin-left:auto}
+  .jlbar{height:7px;border-radius:4px;background:#eef1f1;overflow:hidden}
+  .jlbar i{display:block;height:7px;border-radius:4px;
+    background:linear-gradient(90deg,#9ecabd,#0d5c4f);
+    animation:grow .5s cubic-bezier(.16,.84,.28,1) forwards}
+  .jload.hard .jlbar i{background:linear-gradient(90deg,#e8ab90,#b4432c)}
+  .jlw{display:flex;justify-content:space-between;font-size:10.5px;color:#9aa6ab;
+    margin-top:5px}
+  .jload p{font-size:13px;line-height:1.7;color:#3f4c52;margin:11px 0 0}
+  .jlnum{font-size:12px;color:var(--dim);margin-top:8px;
+    border-top:1px solid #eef1f1;padding-top:9px}
+  .jlhire{margin-top:10px;border-radius:9px;padding:11px 12px;font-size:12.5px;
+    line-height:1.65;background:#f6f8f8;color:#3f4c52}
+  .jlhire b{display:block;font-size:13.5px;font-weight:800;margin-bottom:3px}
+  .jlhire.high{background:#eef7f2;color:#2e5b4e}
+  .jlhire.high b{color:var(--accent)}
+  .jlhire.low{background:#f6f8f8}
 
   /* 순위 */
   .hrank{background:#f6f8f8;border-radius:11px;padding:13px 14px;margin-top:12px}
@@ -2526,6 +2552,7 @@
   <!-- ============ 채용 캘린더 ============ -->
   <div id="pane-cal" class="hide"><div id="calBox"></div></div>
   <div id="pane-star" class="hide"><div id="starBox"></div></div>
+  <div id="pane-setting" class="hide"><div id="settingBox"></div></div>
 
   <!-- ============ 커뮤니티 ============ -->
   <div id="pane-comm" class="hide">
@@ -2729,7 +2756,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=113"></script>
+<script src="/app.js?v=114"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3149,7 +3176,7 @@ function tab(which, back){
   CURRENT = which;
   try{ history.pushState({p:which}, '', location.href); }catch(e){}
 
-  ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star'].forEach(function(p){
+  ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting'].forEach(function(p){
     var el=document.getElementById('pane-'+p);
     if(el) el.className = (p===which?'':'hide');
   });
@@ -3159,7 +3186,8 @@ function tab(which, back){
   document.getElementById('statTabs').className = isStat?'tabs':'tabs hide';
   var ptb=document.getElementById('postTabs');
   if(ptb) ptb.className = (which==='post')?'tabs':'tabs hide';
-  var TT={star:['담아둔 공고','마감 하루 전에 알려드립니다'],
+  var TT={setting:['설정','알림 · 프로필 · 내 정보'],
+          star:['담아둔 공고','마감 하루 전에 알려드립니다'],
           job:['채용공고','기관 정보와 접수 기간'],
           cal:['채용 캘린더','언제부터 언제까지'],
           sev:['퇴직금 계산기','받을 수 있는 금액'],
@@ -3531,6 +3559,9 @@ function drawDashMenu(){
   var m='', cat='';
   list.forEach(function(it){
     if(it.off) return;
+    /* 설정은 홈 위쪽 「⚙️ 설정」 버튼에서 따로 봅니다.
+       아래에 길게 늘어놓으면 매번 스크롤을 지나쳐야 합니다. */
+    if(it.cat === '설정') return;
     var a=ACT[it.key];
     if(!a) return;
     if(a.onlyApp && (device()==='pc' || isStandalone())) return;
@@ -3830,20 +3861,60 @@ function celebrate(icon, text, sub){
 }
 
 /* 버튼을 잠깐 부풀립니다 */
-/* 메뉴의 「설정」 묶음으로 데려갑니다 */
+/* 설정 화면 — 홈에서 「⚙️ 설정」을 누르면 열립니다 */
 function goSettings(){
-  if(CURRENT!=='dash') tab('dash');
-  setTimeout(function(){
-    var cats=document.querySelectorAll('#dashMenu .mcat');
-    for(var i=0;i<cats.length;i++){
-      if(cats[i].textContent.indexOf('설정')>-1){
-        cats[i].scrollIntoView({behavior:'smooth', block:'start'});
-        cats[i].classList.remove('flash'); void cats[i].offsetWidth;
-        cats[i].classList.add('flash');
-        return;
-      }
-    }
-  }, CURRENT==='dash' ? 60 : 420);
+  tab('setting');
+  var box=document.getElementById('settingBox');
+  var b=BRANDC||{};
+  var list=(b.menu&&b.menu.length)?b.menu:null;
+
+  var ACT={
+    noti:    {ic:'🔔', fn:"tab('noti')"},
+    mine:    {ic:'📝', fn:"openMine()"},
+    avatar:  {ic:'🎨', fn:"openAvatar()"},
+    input:   {ic:'🔄', fn:"tab('input')"},
+    install: {ic:'📲', fn:"tab('install')", onlyApp:true},
+    feedback:{ic:'💬', fn:"tab('feedback')"},
+    home:    {ic:'🏠', fn:"goHome()"},
+    biz:     {ic:'🤝', href:b.biz}
+  };
+
+  if(!list){
+    list=[
+      {key:'noti',cat:'설정',name:'알림 설정',desc:'받을 알림 고르기 · 해제'},
+      {key:'mine',cat:'설정',name:'내가 쓴 글',desc:'커뮤니티 글·댓글 보기 · 지우기'},
+      {key:'avatar',cat:'설정',name:'프로필 꾸미기',desc:'이모지와 색 고르기'},
+      {key:'input',cat:'설정',name:'내 정보 수정',desc:'바뀐 급여로 갱신하기'},
+      {key:'install',cat:'설정',name:'앱처럼 쓰기',desc:'주소 안 찾고 한 번에 열기'},
+      {key:'feedback',cat:'설정',name:'운영자에게 한마디',desc:'익명 건의 남기기'},
+      {key:'home',cat:'설정',name:'서비스 소개',desc:'이 서비스로 할 수 있는 것들'},
+      {key:'biz',cat:'설정',name:'협업 · 제휴 문의',desc:'병원 · 협회 · 학교 · 업체'}
+    ];
+  }
+
+  var m='<div class="menu">';
+  list.forEach(function(it){
+    if(it.off || it.cat!=='설정') return;
+    var a=ACT[it.key];
+    if(!a) return;
+    if(a.onlyApp && (device()==='pc' || isStandalone())) return;
+    if(a.href!==undefined && !a.href) return;
+    m += a.href
+      ? menuItem('', a.ic, esc(it.name), esc(it.desc), {href:a.href})
+      : menuItem('', a.ic, esc(it.name), esc(it.desc), {fn:a.fn});
+  });
+  m+='</div>';
+
+  if(ME && ME.nick){
+    m+='<div class="card"><h2>로그인 정보</h2>'
+      + '<p class="sub">'+avOf(ME.av, ME.nick, 26)+' <b>'+esc(ME.nick)+'</b>님 · '
+      + esc(ME.job||'')+(ME.role==='학생'?' 학생':'')+'</p>'
+      + '<button class="ghost2" style="margin-top:8px" onclick="logout()">로그아웃</button>'
+      + '</div>';
+  }
+
+  box.innerHTML=m;
+  attachRipple(); revealIn();
 }
 
 function bump(el){
@@ -4190,11 +4261,38 @@ function loadJobHosp(x){
       h+='<div class="jm" style="margin-top:10px">병상 100개당 작업치료사 <b>'+otPer+'명</b>'
         + ' · 물리치료사 <b>'+ptPer+'명</b></div>';
     }
+
+    /* 업무 강도 — 이미 만들어둔 자료라 안 쓸 이유가 없습니다 */
+    var mine = ((ME&&ME.job)==='물리치료사') ? hp.densityPT : hp.densityOT;
+    if(mine){
+      var tone = mine.level===3 ? 'hard' : (mine.level===1 ? 'easy' : 'mid');
+      h+='<div class="jload '+tone+'">'
+        + '<div class="jlh">'+(mine.level===3?'🔥':(mine.level===1?'🌿':'⚖️'))
+        + ' <b>'+esc(mine.label)+'</b>'
+        + '<span>'+esc(((ME&&ME.job)||'작업치료사'))+' 기준</span></div>'
+        + '<div class="jlbar"><i style="width:'+Math.round(mine.score*10)+'%"></i></div>'
+        + '<div class="jlw"><span>여유</span><span>보통</span><span>바쁨</span></div>'
+        + '<p>'+esc(mine.oneLine)+'</p>'
+        + (mine.bedsPerStaff?'<div class="jlnum">치료사 1명당 병상 <b>'
+            + mine.bedsPerStaff+'개</b>'
+            + (mine.docPer100!==null&&mine.docPer100!==undefined
+                ?' · 병상 100개당 재활의학과 <b>'+mine.docPer100+'명</b>':'')
+            + '</div>':'')
+        + (mine.hire?'<div class="jlhire '+mine.hire.tone+'"><b>'
+            + esc(mine.hire.head)+'</b>'+esc(mine.hire.body)+'</div>':'')
+        + '</div>';
+    }
+
     if(hp.tips && hp.tips.length){
       h+='<div class="jm" style="margin-top:9px;color:#8a5a1e"><b>⚠ '
         + esc(hp.tips[0].head)+'</b></div>';
     }
-    h+='<button class="more" onclick="openHosp('+hp.idx+')">병원 정보 자세히 보기</button>'
+    if(hp.rank && hp.rank.bed){
+      h+='<div class="jm" style="margin-top:9px">전국 병상 규모 <b>'
+        + hp.rank.bed.toLocaleString('ko-KR')+'위</b> / '
+        + hp.rank.bedTotal.toLocaleString('ko-KR')+'곳</div>';
+    }
+    h+='<button class="more" onclick="openHosp('+hp.idx+')">병원 정보 더 보기</button>'
       + '</div>';
 
     box.innerHTML=h;
