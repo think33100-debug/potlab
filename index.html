@@ -418,7 +418,9 @@
   /* 글 한 칸 */
   .chead{display:flex;align-items:center;gap:7px;margin-bottom:9px}
   .chead .cn{font-size:12.5px;font-weight:700;color:var(--ink)}
-  .chead .cd{font-size:11.5px;color:#9aa6ab;flex:1;min-width:0}
+  /* 캘린더의 .cd 와 이름이 겹쳐서 회색 네모가 늘어났습니다.
+     커뮤니티 쪽은 .cmeta 로 따로 씁니다. */
+  .chead .cmeta{font-size:11.5px;color:#9aa6ab;flex:1;min-width:0}
   .chead .cch2{font-size:11px;font-weight:700;color:var(--accent);
     background:var(--accent-soft);border-radius:20px;padding:3px 9px;flex-shrink:0}
   .cstat{display:flex;align-items:center;gap:4px;margin-top:11px;
@@ -2759,7 +2761,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=116"></script>
+<script src="/app.js?v=117"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3674,7 +3676,7 @@ function loadCommPosts(){
       h+='<button class="cpost" onclick="cvOpen(\''+x.id+'\')">'
         + '<div class="chead">'+avOf(x.av,x.nick,26)
         + '<span class="cn">'+esc(x.nick)+'</span>'
-        + '<span class="cd">'+esc(x.job||'')+(x.role==='학생'?' 학생':'')
+        + '<span class="cmeta">'+esc(x.job||'')+(x.role==='학생'?' 학생':'')
         + ' · '+esc(x.ago)+'</span>'
         + '<span class="cch2">'+esc(x.chName)+'</span></div>'
         + '<div class="ctt">'+esc(x.title)+'</div>'
@@ -4735,7 +4737,7 @@ function openMine(){
       h+='<div class="mcat">내 글</div>';
       r.posts.forEach(function(x){
         h+='<button class="cpost" onclick="cvOpen(\''+x.id+'\')">'
-          + '<div class="chead"><span class="cd">'+esc(x.ago)+'</span>'
+          + '<div class="chead"><span class="cmeta">'+esc(x.ago)+'</span>'
           + '<span class="cch2">'+esc(x.chName)+'</span></div>'
           + '<div class="ctt">'+esc(x.title)+'</div>'
           + (x.preview?'<div class="cpv">'+esc(x.preview)+'</div>':'')
