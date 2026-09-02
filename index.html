@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- 이 파일은 캐시하지 않습니다.
+     서비스 워커나 브라우저가 옛 화면을 물고 있으면
+     새 코드를 올려도 바뀌지 않습니다. -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>POT JOB · 작업·물리치료사 급여와 채용</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -2723,7 +2729,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=112"></script>
+<script src="/app.js?v=113"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3375,13 +3381,23 @@ function sp(k,v,acc,tag){
     + (tag?'<i class="stu2">'+esc(tag)+'</i>':'')+'</span></div>';
 }
 
+var DASH_BUSY = false;
 function drawDash(){
+  /* 이미 그리는 중이면 겹쳐 그리지 않습니다.
+     겹치면 화면이 올라왔다가 다시 "불러오는 중"으로 되돌아갑니다. */
+  if(DASH_BUSY) return;
+  DASH_BUSY = true;
+
   if(BN.list.length) paintBanner();
   var box=document.getElementById('dashBox');
-  box.innerHTML='<div class="loadwrap"><div class="spin"></div>'
-    + '<p>'+esc((ME&&ME.nick)||'')+'님 정보를 불러오는 중입니다</p></div>';
+  /* 이미 불러오는 중이면 그대로 둡니다 */
+  if(box.innerHTML.indexOf('loadwrap') < 0){
+    box.innerHTML='<div class="loadwrap"><div class="spin"></div>'
+      + '<p>'+esc((ME&&ME.nick)||'')+'님 정보를 불러오는 중입니다</p></div>';
+  }
   drawDashMenu();
   google.script.run.withSuccessHandler(function(r){
+    DASH_BUSY = false;
     if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
     box.innerHTML=welcomeCard();
     var mb=document.getElementById('meBox');
@@ -3404,6 +3420,7 @@ function drawDash(){
       }
     }).getResultBundle(cred(), (ME&&ME.id)||'', (ME&&ME.role)||'현직');
   }).withFailureHandler(function(e){
+    DASH_BUSY = false;
     box.innerHTML='<div class="card"><p class="sub">'+esc(e.message)+'</p></div>';
   }).getStats(cred(), {job:(ME&&ME.job)||JOB});
 }
@@ -7591,12 +7608,34 @@ window.addEventListener('load', function(){
   setTimeout(maybeOpenAddPop, 300);
 });
 
-/* 서비스 워커를 미리 깔아둡니다. 알림 권한은 사용자가 누를 때만 묻습니다. */
+/* 서비스 워커를 미리 깔아둡니다. 알림 권한은 사용자가 누를 때만 묻습니다.
+ *
+ * updateViaCache:'none' 을 주지 않으면 브라우저가 옛 sw.js 를 캐시해서
+ * 새 코드를 올려도 예전 화면이 계속 뜹니다.
+ * 새 워커가 준비되면 한 번만 새로고침해서 최신 화면으로 맞춥니다. */
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/sw.js').catch(function(e){
-      if(window.console) console.warn('sw 등록 실패:', e);
-    });
+    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+      .then(function(reg){
+        reg.update();
+        /* 새 워커가 자리를 잡으면 한 번만 다시 불러옵니다 */
+        reg.addEventListener('updatefound', function(){
+          var w = reg.installing;
+          if(!w) return;
+          w.addEventListener('statechange', function(){
+            if(w.state === 'installed' && navigator.serviceWorker.controller){
+              try{
+                if(sessionStorage.getItem('potjob_reloaded') === '1') return;
+                sessionStorage.setItem('potjob_reloaded', '1');
+              }catch(e){}
+              location.reload();
+            }
+          });
+        });
+      })
+      .catch(function(e){
+        if(window.console) console.warn('sw 등록 실패:', e);
+      });
   });
 }
 
