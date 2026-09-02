@@ -430,13 +430,28 @@
   .ci b{display:block;font-size:14px;font-weight:700;letter-spacing:-.01em}
   .ci span{display:block;font-size:12.5px;color:var(--dim);line-height:1.6;margin-top:3px}
 
+  /* 로딩 덮개 — 이 순간이 첫인상이라 비워두면 안 됩니다 */
+  #kbusy{position:fixed;inset:0;z-index:9998;display:none;
+    align-items:center;justify-content:center;background:var(--accent);color:#fff}
+  #kbusy.on{display:flex;animation:fadein .2s ease both}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  .kbin{text-align:center;animation:spup .4s cubic-bezier(.2,1.3,.4,1) both}
+  .kbin p{font-size:15px;font-weight:700;margin:18px 0 0;letter-spacing:-.01em}
+  .kbring{display:flex;gap:8px;justify-content:center}
+  .kbring i{width:11px;height:11px;border-radius:50%;background:#fff;
+    animation:kbb 1s ease-in-out infinite}
+  .kbring i:nth-child(2){animation-delay:.15s}
+  .kbring i:nth-child(3){animation-delay:.3s}
+  @keyframes kbb{0%,80%,100%{opacity:.3;transform:scale(.7)}
+                 40%{opacity:1;transform:scale(1.15)}}
+
   /* 앱 첫 화면 */
   #splash{position:fixed;inset:0;z-index:9999;background:var(--accent);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     color:#fff;text-align:center;padding:0 28px;
     transition:opacity .34s ease}
   #splash.out{opacity:0;pointer-events:none}
-  #splash .lg{font-size:31px;font-weight:800;letter-spacing:-.03em;
+  #splash .lg{font-size:32px;font-weight:800;letter-spacing:.04em;
     animation:spup .5s cubic-bezier(.2,1.3,.4,1) both}
   #splash .tl{font-size:14px;opacity:.9;line-height:1.7;margin-top:11px;
     animation:spup .5s cubic-bezier(.2,1.3,.4,1) .1s both}
@@ -478,12 +493,70 @@
   @keyframes bump{0%{transform:none}40%{transform:scale(1.07)}100%{transform:none}}
   .bump{animation:bump .34s cubic-bezier(.2,1.5,.4,1)}
 
+  @keyframes catflash{0%{background:transparent}
+    30%{background:var(--accent-soft)}100%{background:transparent}}
+  .mcat.flash{animation:catflash 1.1s ease;border-radius:8px}
+
+  .topbtns{position:absolute;top:16px;right:16px;display:flex;gap:6px}
+  .topbtns .tohome{position:static}
+
+  .jbtns{margin-top:14px}
+  /* 전형 일정 세로줄 */
+  .tline{position:relative;padding-left:26px;margin-top:14px}
+  .tline::before{content:'';position:absolute;left:6px;top:8px;bottom:8px;
+    width:2px;background:var(--line)}
+  .ti{position:relative;padding:9px 0}
+  .ti i{position:absolute;left:-26px;top:14px;width:14px;height:14px;
+    border-radius:50%;background:#fff;border:2px solid var(--line);box-sizing:border-box}
+  .ti.done i{background:var(--line);border-color:var(--line)}
+  .ti.now i{background:var(--accent);border-color:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-soft)}
+  .ti.wait i{border-color:#c9d5d2}
+  .tb b{display:block;font-size:14.5px;font-weight:800;letter-spacing:-.01em}
+  .tb em{font-style:normal;font-size:11px;font-weight:800;color:#fff;
+    background:var(--accent);border-radius:20px;padding:2px 8px;margin-left:6px;
+    vertical-align:2px}
+  .tb span{display:block;font-size:12.5px;color:var(--dim);margin-top:3px;line-height:1.6}
+  .ti.done .tb b{color:var(--dim)}
+
+  /* 연봉·문의처 */
+  .qrow{display:flex;gap:8px;margin-bottom:12px}
+  .qb{flex:1;background:var(--sand);border-radius:10px;padding:11px 12px}
+  .qb .k{font-size:11px;color:var(--dim);font-weight:700}
+  .qb .v{font-size:14px;font-weight:800;margin-top:3px;letter-spacing:-.01em;
+    word-break:break-all}
+
+  /* 접었다 펴는 칸 */
+  .acc{border-bottom:1px solid #f0f3f3}
+  .acc:last-of-type{border-bottom:0}
+  .ach{width:100%;display:flex;align-items:center;justify-content:space-between;
+    background:none;border:0;padding:14px 2px;font-family:inherit;cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .ach b{font-size:14px;font-weight:700;color:var(--ink)}
+  .arw{font-size:18px;color:var(--dim);transition:transform .22s}
+  .acc.on .arw{transform:rotate(90deg)}
+  .acb{max-height:0;overflow:hidden;transition:max-height .28s ease}
+  .acc.on .acb{max-height:1400px}
+  .acb p{font-size:13.5px;line-height:1.85;color:#3f4c52;white-space:pre-wrap;
+    margin:0 0 14px;word-break:break-word}
+  .sitelink{display:block;margin-top:14px;padding:12px;text-align:center;
+    background:var(--sand);border-radius:10px;font-size:13.5px;font-weight:700;
+    color:var(--accent);text-decoration:none}
+
   .starbtn{width:100%;margin-top:9px;padding:14px;border:1px solid var(--line);
-    background:#fff;border-radius:11px;font-family:inherit;font-size:14.5px;
-    font-weight:700;color:var(--dim);cursor:pointer;
-    -webkit-tap-highlight-color:transparent;transition:transform .25s}
+    background:#fff;border-radius:11px;font-family:inherit;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .25s,background-color .2s,border-color .2s}
   .starbtn:active{transform:scale(.97)}
-  .starbtn.on{background:var(--accent-soft);border-color:#c9e2da;color:var(--accent)}
+  .starbtn b{display:block;font-size:14.5px;font-weight:800;color:var(--ink);
+    letter-spacing:-.01em}
+  .starbtn span{display:block;font-size:12px;color:var(--dim);margin-top:3px}
+  .starbtn.on{background:var(--accent-soft);border-color:#9ecabd}
+  .starbtn.on b{color:var(--accent)}
+  .starbtn.on span{color:#4a6a62}
+  .ghost2{width:100%;margin-top:9px;padding:13px;border:1px solid var(--line);
+    background:transparent;border-radius:11px;font-family:inherit;font-size:14px;
+    color:var(--dim);cursor:pointer;-webkit-tap-highlight-color:transparent}
 
   /* 공고 상세 */
   .jch{font-size:11.5px;font-weight:800;color:var(--accent)}
@@ -953,9 +1026,16 @@
     font-size:13.5px;font-weight:800;cursor:pointer;text-decoration:underline;
     text-underline-offset:3px;padding:2px 0;-webkit-tap-highlight-color:transparent}
 
-  .post{display:block;background:#fff;border:1px solid var(--line);border-radius:13px;
-    padding:14px;margin-bottom:9px;text-decoration:none;color:inherit;
+  .post{display:flex;flex-direction:column;width:100%;box-sizing:border-box;
+    text-align:left;font-family:inherit;cursor:pointer;
+    background:#fff;border:1px solid var(--line);border-radius:13px;
+    padding:15px 14px;margin-bottom:9px;text-decoration:none;color:inherit;
+    min-height:138px;
     -webkit-tap-highlight-color:transparent;transition:transform .2s,border-color .2s}
+  /* 제목 길이가 달라도 카드 높이가 들쭉날쭉하지 않게 두 줄로 맞춥니다 */
+  .post .pt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    overflow:hidden;min-height:2.9em}
+  .post .pf{margin-top:auto}
   .post:active{transform:scale(.99);border-color:var(--accent)}
   .post.soon{border-color:#f0cdbe;background:#fffaf8}
   .ph{display:flex;align-items:center;gap:8px;margin-bottom:6px}
@@ -1499,6 +1579,11 @@
 </style>
 </head>
 <body>
+<div id="splash">
+  <div class="lg">POT JOB</div>
+  <div class="tl">작업치료사와 물리치료사를 위한<br>가장 빠른 취업 정보</div>
+  <div class="sl">치료사가 더 나은 자리로 옮겨갈 수 있게</div>
+</div>
 <div class="wrap">
 
   <!-- ============ 홈 ============ -->
@@ -2016,6 +2101,17 @@
       </div>
 
       <div class="f">
+        <label class="chk">
+          <input type="checkbox" id="extraPay" onchange="toggleExtraPay()">
+          <span><b>기본 치료 외에 추가 수당이 있습니다</b>
+            <em>건수·실적에 따라 더 받는 경우</em></span>
+        </label>
+        <div class="hintbox" id="extraNote" style="display:none">
+          위 <b>월 실수령</b>에는 추가 수당까지 더한 금액을 적어주세요.
+        </div>
+      </div>
+
+      <div class="f">
         <label>당직 <span class="hint">퇴근 후 더 남는 근무 · 없으면 0</span></label>
         <div class="two2">
           <div class="unit"><input type="number" id="nightDuty" min="0" max="31" placeholder="0"
@@ -2046,17 +2142,6 @@
           <p class="np">어떤 알림을 받으실까요?</p>
           <div id="notiKinds"></div>
           <p class="nq">언제든 <b>알림 설정</b>에서 해제할 수 있습니다.</p>
-        </div>
-      </div>
-
-      <div class="f">
-        <label class="chk">
-          <input type="checkbox" id="extraPay" onchange="toggleExtraPay()">
-          <span><b>기본 치료 외에 추가 수당이 있습니다</b>
-            <em>건수·실적에 따라 더 받는 경우</em></span>
-        </label>
-        <div class="hintbox" id="extraNote" style="display:none">
-          위 <b>월 실수령</b>에는 추가 수당까지 더한 금액을 적어주세요.
         </div>
       </div>
 
@@ -2575,7 +2660,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=103"></script>
+<script src="/app.js?v=105"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2815,13 +2900,14 @@ function busy(on, text){
   if(!el){
     el = document.createElement('div');
     el.id = 'kbusy';
-    el.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;'
-      + 'align-items:center;justify-content:center;background:rgba(255,255,255,.94);'
-      + 'font-size:15px;color:#3f4c52;font-weight:600';
     document.body.appendChild(el);
   }
-  el.textContent = text || '';
-  el.style.display = on ? 'flex' : 'none';
+  if(on){
+    el.innerHTML = '<div class="kbin">'
+      + '<div class="kbring"><i></i><i></i><i></i></div>'
+      + '<p>'+esc(text||'')+'</p></div>';
+  }
+  el.className = on ? 'on' : '';
 }
 
 function goNaver(){
@@ -3181,7 +3267,10 @@ function welcomeCard(){
     + '<div class="jobtag">'+esc((ME&&ME.job)||'')
       + ((ME&&ME.role==='학생')?'<i class="stu">학생</i>':'')+'</div>'
     + '<div class="cheer">'+greeting()+' 💪</div>'
+    + '<div class="topbtns">'
     + '<button class="tohome" onclick="tab(\'home\')">🏠 홈으로</button>'
+    + '<button class="tohome" onclick="goSettings()">⚙️ 설정</button>'
+    + '</div>'
     + (ME.joinedAt ? '<div class="since">'
         + (first ? '오늘 등록하셨습니다'
                  : ME.joinedAt+' 등록 · '+ME.days+'일째')
@@ -3309,7 +3398,6 @@ function drawDashMenu(){
     sev:     {ic:'💰', fn:"tab('sev')"},
     ann:     {ic:'📅', fn:"tab('ann')"},
     ui:      {ic:'🛟', fn:"tab('ui')"},
-    cal:     {ic:'🗓️', fn:"openCal()"},
     star:    {ic:'⭐', fn:"openStars()"},
     invite:  {ic:'🤝', fn:"openInvite()"},
     comm:    {ic:'💭', fn:"openComm('')", hi:true},
@@ -3331,21 +3419,23 @@ function drawDashMenu(){
   /* 서버 순서가 없으면 코드에 적힌 기본 순서로 */
   if(!list){
     list=[
+      {key:'post',cat:'취업',name:'공공기관 채용공고',desc:'자동으로 모아드립니다'},
+      {key:'star',cat:'취업',name:'담아둔 공고',desc:'마감 하루 전에 알려드립니다'},
+      {key:'hosp',cat:'취업',name:'병원 찾기·비교',desc:'인원·병상·전문의 · 지역별 목록'},
+      {key:'room',cat:'취업',name:'새 공고 바로 받기',desc:'단톡방에서 올라오는 대로 알려드립니다'},
+      {key:'klass',cat:'취업',name:'공공기관 집중 준비반',desc:'공고 알림 + 준비 자료'},
+      {key:'potlab',cat:'취업',name:'피오티랩 전자책',desc:'면접·실무 전자책 보러가기'},
+
       {key:'me',cat:'급여',name:'내 정보 확인하기',desc:'내 위치 · 이직 예상 · 결과 카드'},
       {key:'view',cat:'급여',name:'급여 통계 조회',desc:'지역·유형·연차로 걸러 보기'},
       {key:'calc',cat:'급여',name:'내 연봉 계산기',desc:'세전↔세후 · 또래 비교'},
       {key:'sev',cat:'급여',name:'퇴직금 계산기',desc:'얼마 받고 나올 수 있나'},
       {key:'ann',cat:'급여',name:'연차 계산기',desc:'올해 며칠 쓸 수 있나'},
       {key:'ui',cat:'급여',name:'실업급여 계산기',desc:'쉬는 동안 얼마나 나오나'},
-      {key:'invite',cat:'커뮤니티',name:'친구 초대',desc:'같이 쓰면 통계가 정확해집니다'},
+
       {key:'comm',cat:'커뮤니티',name:'POT 커뮤니티',desc:'치료사끼리 묻고 답하는 곳'},
-      {key:'post',cat:'취업',name:'공공기관 채용공고',desc:'자동으로 모아드립니다'},
-      {key:'star',cat:'취업',name:'담아둔 공고',desc:'마감 하루 전에 알려드립니다'},
-      {key:'cal',cat:'취업',name:'채용 캘린더',desc:'언제부터 언제까지 접수하나'},
-      {key:'hosp',cat:'취업',name:'병원 찾기·비교',desc:'인원·병상·전문의 · 지역별 목록'},
-      {key:'room',cat:'취업',name:'새 공고 바로 받기',desc:'단톡방에서 올라오는 대로 알려드립니다'},
-      {key:'klass',cat:'취업',name:'공공기관 집중 준비반',desc:'공고 알림 + 준비 자료'},
-      {key:'potlab',cat:'취업',name:'피오티랩 전자책',desc:'면접·실무 전자책 보러가기'},
+      {key:'invite',cat:'커뮤니티',name:'친구 초대',desc:'같이 쓰면 통계가 정확해집니다'},
+
       {key:'noti',cat:'설정',name:'알림 설정',desc:'받을 알림 고르기 · 해제'},
       {key:'mine',cat:'설정',name:'내가 쓴 글',desc:'커뮤니티 글·댓글 보기 · 지우기'},
       {key:'avatar',cat:'설정',name:'프로필 꾸미기',desc:'이모지와 색 고르기'},
@@ -3355,6 +3445,7 @@ function drawDashMenu(){
       {key:'home',cat:'설정',name:'서비스 소개',desc:'이 서비스로 할 수 있는 것들'},
       {key:'biz',cat:'설정',name:'협업 · 제휴 문의',desc:'병원 · 협회 · 학교 · 업체'}
     ];
+
   }
 
   var m='', cat='';
@@ -3613,6 +3704,22 @@ function celebrate(icon, text, sub){
 }
 
 /* 버튼을 잠깐 부풀립니다 */
+/* 메뉴의 「설정」 묶음으로 데려갑니다 */
+function goSettings(){
+  if(CURRENT!=='dash') tab('dash');
+  setTimeout(function(){
+    var cats=document.querySelectorAll('#dashMenu .mcat');
+    for(var i=0;i<cats.length;i++){
+      if(cats[i].textContent.indexOf('설정')>-1){
+        cats[i].scrollIntoView({behavior:'smooth', block:'start'});
+        cats[i].classList.remove('flash'); void cats[i].offsetWidth;
+        cats[i].classList.add('flash');
+        return;
+      }
+    }
+  }, CURRENT==='dash' ? 60 : 420);
+}
+
 function bump(el){
   if(!el) return;
   el.classList.remove('bump');
@@ -3635,11 +3742,16 @@ function toggleStar(id){
     if(btn) btn.disabled=false;
     if(!r.ok){ msg(r.message||'실패했습니다'); return; }
     STARS[id]=r.on; if(!r.on) delete STARS[id];
-    if(r.message) msg(r.message);
     if(btn){
       btn.className='starbtn'+(r.on?' on':'');
-      btn.textContent = r.on ? '★ 담아둠 · 마감 하루 전에 알려드립니다' : '☆ 담아두기';
+      btn.innerHTML = '<b>'+(r.on?'★ 담아뒀습니다':'☆ 담아두기')+'</b>'
+        + '<span>'+(r.on
+            ? '마감 하루 전에 알림을 보내드립니다'
+            : '마감을 놓치지 않게 하루 전에 알려드립니다')+'</span>';
+      bump(btn);
     }
+    if(r.on) celebrate('⭐', '담아뒀습니다', '마감 하루 전에 알려드리겠습니다');
+    else if(r.message) msg(r.message);
   }).withFailureHandler(function(e){
     if(btn) btn.disabled=false; msg(e.message);
   }).starJob(cred(), id, on);
@@ -3737,22 +3849,126 @@ function openJob(id){
     ? '<div class="warnbox">접수가 끝난 공고입니다. 원문은 내려갔을 수 있습니다.</div>'
     : '';
 
-  h+='<a class="go" style="display:block;text-align:center;text-decoration:none" '
+  /* 전형 일정 */
+  h+=jobSchedule(x);
+
+  /* 자세한 내용 — 길어서 접어둡니다 */
+  h+=jobMore(x);
+
+  /* 기관 정보를 먼저 보여주고, 버튼은 맨 아래에 둡니다 */
+  h+='<div id="jobHosp"></div>';
+
+  h+='<div class="jbtns">'
+    + '<a class="go" style="display:block;text-align:center;text-decoration:none;margin:0" '
     + 'href="'+esc(x.url||'#')+'" target="_blank" rel="noopener">공고 확인하러 가기</a>'
     + (shut ? ''
         : '<button class="starbtn'+(STARS[x.id]?' on':'')+'" id="starBtn" '
           + 'onclick="toggleStar(\''+x.id+'\')">'
-          + (STARS[x.id]?'★ 담아둠 · 마감 하루 전에 알려드립니다':'☆ 담아두기')+'</button>')
-    + '<div class="two" style="margin-top:9px">'
-    + '<button onclick="tab(\'post\',true)">목록으로</button>'
-    + '<button onclick="openCal()">채용 캘린더</button>'
+          + '<b>'+(STARS[x.id]?'★ 담아뒀습니다':'☆ 담아두기')+'</b>'
+          + '<span>'+(STARS[x.id]
+              ? '마감 하루 전에 알림을 보내드립니다'
+              : '마감을 놓치지 않게 하루 전에 알려드립니다')+'</span></button>')
+    + '<button class="ghost2" onclick="tab(\'post\',true)">목록으로 돌아가기</button>'
     + '</div>';
-
-  h+='<div id="jobHosp"></div>';
 
   document.getElementById('jobBox').innerHTML=h;
   attachRipple(); revealIn();
   loadJobHosp(x.org);
+}
+
+/* ── 전형 일정 ───────────────────────────────────────
+   공고문에서 뽑아낸 단계별 날짜를 세로로 그립니다.
+   못 뽑았으면 접수 기간만 보여주고 공고문을 보라고 안내합니다. */
+function jobSchedule(x){
+  var st = x.sched || [];
+  var today = new Date();
+  var t8 = today.getFullYear()
+    + ('0'+(today.getMonth()+1)).slice(-2) + ('0'+today.getDate()).slice(-2);
+
+  var fmt = function(v){
+    var s=String(v||'');
+    if(s.length!==8) return s;
+    return s.slice(0,4)+'.'+s.slice(4,6)+'.'+s.slice(6,8);
+  };
+  var dow = function(v){
+    var s=String(v||''); if(s.length!==8) return '';
+    var d=new Date(+s.slice(0,4), +s.slice(4,6)-1, +s.slice(6,8));
+    return '('+['일','월','화','수','목','금','토'][d.getDay()]+')';
+  };
+
+  if(!st.length){
+    if(!x.from && !x.to) return '';
+    return '<div class="card"><h2>일정</h2>'
+      + '<div class="tline">'
+      + '<div class="ti done"><i></i><div class="tb"><b>접수</b>'
+      + '<span>'+esc(x.from||'?')+' ~ '+esc(x.to||'?')+'</span></div></div>'
+      + '<div class="ti wait"><i></i><div class="tb"><b>이후 일정</b>'
+      + '<span>공고문에 적혀 있습니다. 아래 「공고 확인하러 가기」에서 보실 수 있습니다.</span>'
+      + '</div></div></div></div>';
+  }
+
+  var h='<div class="card"><h2>전형 일정</h2>'
+    + '<p class="sub">공고문에서 뽑아낸 것입니다. 바뀔 수 있으니 원문도 확인해주세요.</p>'
+    + '<div class="tline">';
+
+  st.forEach(function(s){
+    var end = s.to || s.at;
+    var state = (end < t8) ? 'done' : ((s.at <= t8 && t8 <= end) ? 'now' : 'wait');
+    h+='<div class="ti '+state+'"><i></i><div class="tb">'
+      + '<b>'+esc(s.name)+(state==='now'?' <em>진행 중</em>':'')+'</b>'
+      + '<span>'+fmt(s.at)+' '+dow(s.at)
+      + (s.to && s.to!==s.at ? ' ~ '+fmt(s.to)+' '+dow(s.to) : '')
+      + '</span></div></div>';
+  });
+
+  return h+'</div></div>';
+}
+
+/* ── 자세한 내용 ─────────────────────────────────────
+   지원자격·우대사항 같은 건 길어서 접어둡니다. */
+function jobMore(x){
+  var items=[
+    ['지원 자격', x.qual],
+    ['전형 방법', x.how],
+    ['필요 자격증', x.lic],
+    ['우대 사항', x.pref],
+    ['제출 서류', x.docs],
+    ['접수 방법', x.howto],
+    ['결격 사유', x.dis]
+  ].filter(function(p){ return p[1] && String(p[1]).trim(); });
+
+  var quick=[];
+  if(x.pay)  quick.push(['연봉', x.pay]);
+  if(x.tel)  quick.push(['문의처', x.tel]);
+
+  if(!items.length && !quick.length) return '';
+
+  var h='<div class="card"><h2>자세한 내용</h2>';
+
+  if(quick.length){
+    h+='<div class="qrow">'+quick.map(function(q){
+      return '<div class="qb"><div class="k">'+esc(q[0])+'</div>'
+        + '<div class="v">'+esc(q[1])+'</div></div>';
+    }).join('')+'</div>';
+  }
+
+  items.forEach(function(p,i){
+    h+='<div class="acc" id="acc'+i+'">'
+      + '<button class="ach" onclick="accToggle('+i+')">'
+      + '<b>'+esc(p[0])+'</b><span class="arw">›</span></button>'
+      + '<div class="acb"><p>'+esc(p[1])+'</p></div></div>';
+  });
+
+  if(x.site){
+    h+='<a class="sitelink" href="'+esc(x.site)+'" target="_blank" rel="noopener">'
+      + '기관 채용 홈페이지 ›</a>';
+  }
+  return h+'</div>';
+}
+
+function accToggle(i){
+  var el=document.getElementById('acc'+i);
+  if(el) el.className = (el.className.indexOf('on')>-1) ? 'acc' : 'acc on';
 }
 
 /* 공고를 낸 곳이 병원 목록에 있으면 그 정보를 붙입니다.
@@ -5876,7 +6092,7 @@ function drawCompare(r){
     + cmpRow('병상 수', A.bed||null, B.bed||null, null, '개')
     + cmpRow('병상 100개당 '+r.job, A[perKey], B[perKey], 'high', '명')
     + cmpRow('물리치료사', A.pt||null, B.pt||null, null, '명')
-    + cmpRow('재활 담당 의사', A.rehab||null, B.rehab||null, 'high', '명')
+    + cmpRow('재활의학과 전문의', A.rehab||null, B.rehab||null, 'high', '명')
     + cmpRow('전체 의사', A.doc||null, B.doc||null, null, '명')
     + cmpRow('회복기 재활병원',
         A.rehabCert?1:null, B.rehabCert?1:null, null, '곳')
