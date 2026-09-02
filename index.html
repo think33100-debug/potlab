@@ -782,6 +782,20 @@
   .avb.co{width:38px;height:38px;border-radius:50%}
   .avb.co.on{box-shadow:0 0 0 3px var(--accent-soft);border-color:var(--accent)}
 
+  /* 교육 소식 */
+  .edu{display:block;background:#fff;border:1px solid var(--line);border-radius:13px;
+    padding:14px 15px;margin-bottom:8px;text-decoration:none;color:inherit;
+    -webkit-tap-highlight-color:transparent;transition:transform .2s,border-color .2s}
+  .edu:active{transform:scale(.99)}
+  .ehead{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .ek{font-size:11px;font-weight:800;border-radius:20px;padding:3px 9px}
+  .ek.k1{background:#fdf1e8;color:#b06f2c}
+  .ek.k2{background:var(--accent-soft);color:var(--accent)}
+  .ed{font-size:11.5px;color:#9aa6ab;margin-left:auto}
+  .et{font-size:14.5px;font-weight:700;letter-spacing:-.01em;line-height:1.5;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .ef{font-size:12px;color:var(--accent);font-weight:700;margin-top:8px}
+
   .empty2{border:1px dashed var(--line);border-radius:13px;padding:34px 20px;
     text-align:center;color:var(--dim);font-size:13.5px;line-height:1.8;background:#fbfcfc}
 
@@ -2558,6 +2572,7 @@
   <div id="pane-cal" class="hide"><div id="calBox"></div></div>
   <div id="pane-star" class="hide"><div id="starBox"></div></div>
   <div id="pane-setting" class="hide"><div id="settingBox"></div></div>
+  <div id="pane-edu" class="hide"><div id="eduBox"></div></div>
 
   <!-- ============ 커뮤니티 ============ -->
   <div id="pane-comm" class="hide">
@@ -2761,7 +2776,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=117"></script>
+<script src="/app.js?v=118"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3181,7 +3196,7 @@ function tab(which, back){
   CURRENT = which;
   try{ history.pushState({p:which}, '', location.href); }catch(e){}
 
-  ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting'].forEach(function(p){
+  ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting','edu'].forEach(function(p){
     var el=document.getElementById('pane-'+p);
     if(el) el.className = (p===which?'':'hide');
   });
@@ -3191,7 +3206,8 @@ function tab(which, back){
   document.getElementById('statTabs').className = isStat?'tabs':'tabs hide';
   var ptb=document.getElementById('postTabs');
   if(ptb) ptb.className = (which==='post')?'tabs':'tabs hide';
-  var TT={setting:['설정','알림 · 프로필 · 내 정보'],
+  var TT={edu:['교육 · 학술','협회 보수교육 · 학회 · 세미나'],
+          setting:['설정','알림 · 프로필 · 내 정보'],
           star:['담아둔 공고','마감 하루 전에 알려드립니다'],
           job:['채용공고','기관 정보와 접수 기간'],
           cal:['채용 캘린더','언제부터 언제까지'],
@@ -3514,6 +3530,7 @@ function drawDashMenu(){
     star:    {ic:'⭐', fn:"openStars()"},
     invite:  {ic:'🤝', fn:"openInvite()"},
     comm:    {ic:'💭', fn:"openComm('')", hi:true},
+    edu:     {ic:'🎓', fn:"openEdu()"},
     post:    {ic:'📢', fn:"tab('post')", badge:true},
     hosp:    {ic:'🏥', fn:"tab('hosp')"},
     room:    {ic:'💬', href:b.room, cls:'kko'},
@@ -3537,6 +3554,7 @@ function drawDashMenu(){
       {key:'hosp',cat:'취업',name:'병원 찾기·비교',desc:'인원·병상·전문의 · 지역별 목록'},
       {key:'room',cat:'취업',name:'새 공고 바로 받기',desc:'단톡방에서 올라오는 대로 알려드립니다'},
       {key:'klass',cat:'취업',name:'공공기관 집중 준비반',desc:'공고 알림 + 준비 자료'},
+      {key:'edu',cat:'취업',name:'교육 · 학술',desc:'협회 보수교육 · 학회 · 세미나'},
       {key:'potlab',cat:'취업',name:'피오티랩 전자책',desc:'면접·실무 전자책 보러가기'},
 
       {key:'me',cat:'급여',name:'내 정보 확인하기',desc:'내 위치 · 이직 예상 · 결과 카드'},
@@ -3972,6 +3990,64 @@ function toggleStar(id){
 }
 
 /* 담아둔 공고 목록 */
+var EDU_KIND = '';
+function openEdu(){
+  tab('edu');
+  var box=document.getElementById('eduBox');
+  box.innerHTML=loading('불러오는 중');
+
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+
+    var h='<div class="card"><h2>교육 · 학술</h2>'
+      + '<p class="sub">협회 보수교육과 학회·세미나 소식입니다. '
+      + '누르면 협회 홈페이지 원문으로 갑니다.</p></div>';
+
+    h+='<div class="chbar">'
+      + '<button class="chip3'+(EDU_KIND===''?' on':'')+'" data-k="" onclick="pickEdu(\'\')">전체</button>'
+      + '<button class="chip3'+(EDU_KIND==='보수교육'?' on':'')+'" data-k="보수교육" onclick="pickEdu(\'보수교육\')">보수교육</button>'
+      + '<button class="chip3'+(EDU_KIND==='학술·행사'?' on':'')+'" data-k="학술·행사" onclick="pickEdu(\'학술·행사\')">학술·행사</button>'
+      + '</div><div id="eduList"></div>';
+
+    box.innerHTML=h;
+    attachRipple();
+    drawEdu(r);
+  }).withFailureHandler(function(e){
+    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
+  }).getEdu(cred(), EDU_KIND);
+}
+
+function pickEdu(k){
+  EDU_KIND=k;
+  document.querySelectorAll('#pane-edu .chip3').forEach(function(b){
+    b.className='chip3'+((b.getAttribute('data-k')||'')===k?' on':'');
+  });
+  var box=document.getElementById('eduList');
+  if(box) box.innerHTML=loading('불러오는 중');
+  google.script.run.withSuccessHandler(function(r){
+    if(r.ok) drawEdu(r);
+  }).withFailureHandler(function(){}).getEdu(cred(), EDU_KIND);
+}
+
+function drawEdu(r){
+  var box=document.getElementById('eduList');
+  if(!box) return;
+  if(!r.rows.length){
+    box.innerHTML='<div class="empty2">아직 모인 소식이 없습니다.<br>'
+      + '하루 한 번 협회 게시판에서 새로 가져옵니다.</div>';
+    return;
+  }
+  box.innerHTML=r.rows.map(function(x){
+    return '<a class="edu" href="'+esc(x.url)+'" target="_blank" rel="noopener">'
+      + '<div class="ehead"><span class="ek '+(x.kind==='보수교육'?'k1':'k2')+'">'
+      + esc(x.kind)+'</span>'
+      + '<span class="ed">'+esc(x.date)+'</span></div>'
+      + '<div class="et">'+esc(x.title)+'</div>'
+      + '<div class="ef">'+esc(x.assoc)+' · 원문 보기 ›</div></a>';
+  }).join('');
+  attachRipple(); revealIn();
+}
+
 function openStars(){
   tab('star');
   var box=document.getElementById('starBox');
