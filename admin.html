@@ -95,6 +95,26 @@
   .brow2 .save{flex:1;background:#0d5c4f;border:0;color:#fff;border-radius:11px;
     padding:13px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer}
   .hide{display:none}
+  .cwq{background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:13px;margin-bottom:8px}
+  .cwq.hid{opacity:.55;background:#fafbfb}
+  .cwq.rep{border-color:#f0cfc4;background:var(--warn-soft)}
+  .cwq .ch{font-size:11px;font-weight:800;color:var(--accent)}
+  .cwq .tt{font-size:15px;font-weight:700;margin:5px 0 6px;line-height:1.45}
+  .cwq .bd{font-size:13px;color:#3f4c52;line-height:1.7;white-space:pre-wrap;
+    max-height:120px;overflow:auto;background:var(--sand);border-radius:8px;padding:9px}
+  .cwq .mt{font-size:11.5px;color:var(--dim);margin-top:8px}
+  .mrow{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
+    border-radius:11px;padding:10px 11px;margin-bottom:7px}
+  .mrow.off{opacity:.5}
+  .mrow .ord{display:flex;flex-direction:column;gap:2px}
+  .mrow .ord button{padding:1px 7px;font-size:11px;line-height:1.5}
+  .mrow .mi2{flex:1;min-width:0}
+  .mrow .mi2 input{width:100%;box-sizing:border-box;border:1px solid var(--line);
+    border-radius:7px;padding:6px 8px;font-family:inherit;font-size:13px;margin-bottom:4px}
+  .mrow .mi2 input.d{font-size:11.5px;color:var(--dim)}
+  .mrow .cat{font-size:11px;font-weight:800;color:var(--accent);width:52px;flex-shrink:0}
+  .mrow label{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:3px}
 </style>
 </head>
 <body>
@@ -114,8 +134,29 @@
       <button class="tb" data-f="excluded" onclick="load('excluded')">제외됨<span class="n" id="c-excluded"></span></button>
       <button class="tb" data-f="all" onclick="load('all')">전체<span class="n" id="c-all"></span></button>
       <button class="tb" data-f="banner" onclick="openBanner()">배너 관리</button>
+      <button class="tb" data-f="comm" onclick="openComm2('all')">커뮤니티<span class="n" id="c-comm"></span></button>
+      <button class="tb" data-f="menu" onclick="openMenu()">메뉴 순서</button>
     </div>
     <div id="list"><div class="loading">불러오는 중</div></div>
+
+    <div id="commWrap" class="hide">
+      <div class="tabs" style="margin-bottom:12px">
+        <button class="tb on" id="cm-flag" onclick="openComm2('flag')">신고된 글</button>
+        <button class="tb" id="cm-hidden" onclick="openComm2('hidden')">감춘 글</button>
+        <button class="tb" id="cm-all" onclick="openComm2('all')">전체</button>
+      </div>
+      <div id="commList"></div>
+    </div>
+
+    <div id="menuWrap" class="hide">
+      <p class="bhelp">앱 아래쪽 메뉴에 뜨는 항목입니다.
+        <b>위아래 화살표로 순서를 바꾸고</b>, 숨김에 체크하면 안 보입니다.
+        이름과 설명도 여기서 고칠 수 있습니다.</p>
+      <div id="menuList"></div>
+      <div class="brow2">
+        <button class="save" onclick="saveMenu()">저장하기</button>
+      </div>
+    </div>
 
     <div id="bannerWrap" class="hide">
       <p class="bhelp">앱 홈과 대시보드에 뜨는 광고 판넬입니다.
@@ -130,7 +171,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=88"></script>
+<script src="/app.js?v=103"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -235,8 +276,7 @@ function openBanner(){
   document.querySelectorAll('.tb').forEach(function(b){
     b.className = 'tb' + (b.dataset.f === 'banner' ? ' on' : '');
   });
-  document.getElementById('list').className = 'hide';
-  document.getElementById('bannerWrap').className = '';
+  shell('bannerWrap');
   document.getElementById('bnList').innerHTML = '<div class="loading">불러오는 중</div>';
 
   google.script.run.withSuccessHandler(function(r){
@@ -299,12 +339,129 @@ function saveBanners(){
     .adminSaveBanners(KEY, BN_LIST);
 }
 
-/* 목록 탭을 누르면 배너 화면을 닫습니다 */
+/* ===== 커뮤니티 관리 ===== */
+function shell(which){
+  ['list','bannerWrap','commWrap','menuWrap'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.className = (id===which ? '' : 'hide');
+  });
+}
+
+function openComm2(mode){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className = 'tb' + (b.dataset.f==='comm' ? ' on' : '');
+  });
+  ['flag','hidden','all'].forEach(function(k){
+    var el=document.getElementById('cm-'+k);
+    if(el) el.className = 'tb' + (k===mode ? ' on' : '');
+  });
+  shell('commWrap');
+  document.getElementById('commList').innerHTML = '<div class="loading">불러오는 중</div>';
+
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    var el=document.getElementById('c-comm');
+    if(el) el.textContent = r.counts.flag || '';
+    drawComm2(r.rows, mode);
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminCommList(KEY, mode);
+}
+
+function drawComm2(rows, mode){
+  var box=document.getElementById('commList');
+  if(!rows.length){
+    box.innerHTML='<div class="empty">'
+      + (mode==='flag'?'신고된 글이 없습니다':'해당하는 글이 없습니다')+'</div>';
+    return;
+  }
+  box.innerHTML=rows.map(function(x){
+    var cls='cwq'+(x.hidden?' hid':(x.reports?' rep':''));
+    return '<div class="'+cls+'">'
+      + '<div class="ch">'+esc(x.ch)+(x.reports?' · 신고 '+x.reports+'건':'')
+      + (x.hidden?' · 감춤('+esc(x.hideWhy)+')':'')+'</div>'
+      + '<div class="tt">'+esc(x.title)+'</div>'
+      + '<div class="bd">'+esc(x.body)+'</div>'
+      + '<div class="mt">'+esc(x.nick)+' · '+esc(x.job)+' · '+esc(x.at)+'</div>'
+      + '<div class="acts">'
+      + '<button class="'+(x.hidden?'re':'ex')+'" onclick="hidePost(\'' + x.id + '\','+(x.hidden?1:0)+')">'
+      + (x.hidden?'다시 보이기':'감추기')+'</button>'
+      + '<span class="idcopy">'+esc(x.id)+'</span></div></div>';
+  }).join('');
+}
+
+function hidePost(id, isHidden){
+  var why=null;
+  if(!isHidden){
+    why=prompt('감추는 이유를 적어주세요 (기록용)','규칙 위반');
+    if(why===null) return;
+  }
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    msg(r.message);
+    var on=document.querySelector('#commWrap .tb.on');
+    openComm2(on ? on.id.replace('cm-','') : 'flag');
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminCommHide(KEY, id, why);
+}
+
+/* ===== 메뉴 순서 ===== */
+var MN=[];
+
+function openMenu(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className = 'tb' + (b.dataset.f==='menu' ? ' on' : '');
+  });
+  shell('menuWrap');
+  document.getElementById('menuList').innerHTML='<div class="loading">불러오는 중</div>';
+
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    MN=r.rows||[];
+    drawMenu();
+  }).withFailureHandler(function(e){ msg(e.message); }).adminGetMenu(KEY);
+}
+
+function drawMenu(){
+  document.getElementById('menuList').innerHTML = MN.map(function(m,i){
+    return '<div class="mrow'+(m.off?' off':'')+'">'
+      + '<div class="ord">'
+      + '<button onclick="mvMenu('+i+',-1)">▲</button>'
+      + '<button onclick="mvMenu('+i+',1)">▼</button></div>'
+      + '<input class="cat" value="'+esc(m.cat)+'" style="width:58px"'
+      + ' oninput="setMenu('+i+',\'cat\',this.value)">'
+      + '<div class="mi2">'
+      + '<input value="'+esc(m.name)+'" oninput="setMenu('+i+',\'name\',this.value)">'
+      + '<input class="d" value="'+esc(m.desc)+'" oninput="setMenu('+i+',\'desc\',this.value)">'
+      + '</div>'
+      + '<label><input type="checkbox"'+(m.off?' checked':'')
+      + ' onchange="setMenu('+i+',\'off\',this.checked);drawMenu()">숨김</label>'
+      + '</div>';
+  }).join('');
+}
+
+function setMenu(i,k,v){ MN[i][k]=v; }
+
+function mvMenu(i,d){
+  var j=i+d;
+  if(j<0||j>=MN.length) return;
+  var t=MN[i]; MN[i]=MN[j]; MN[j]=t;
+  drawMenu();
+}
+
+function saveMenu(){
+  msg('저장하고 있습니다');
+  google.script.run.withSuccessHandler(function(r){
+    msg(r.message||'저장했습니다');
+  }).withFailureHandler(function(e){ msg(e.message); }).adminSaveMenu(KEY, MN);
+}
+
+/* 목록 탭을 누르면 다른 화면을 닫습니다 */
 (function(){
   var orig = window.load;
   window.load = function(f){
-    document.getElementById('bannerWrap').className = 'hide';
-    document.getElementById('list').className = '';
+    shell('list');
     return orig.apply(null, arguments);
   };
 })();
