@@ -30,7 +30,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
     'commChannels', 'commList', 'commRead', 'commWrite', 'commDelete', 'commReport',
     'adminCommList', 'adminCommHide',
     'commComment', 'commCommentDelete', 'commMine', 'commAvatars', 'commSetAvatar',
-    'adminGetMenu', 'adminSaveMenu', 'starJob', 'myStars', 'naverLogin', 'naverExchange', 'hospByName'
+    'adminGetMenu', 'adminSaveMenu', 'starJob', 'myStars', 'naverLogin', 'naverExchange', 'hospByName', 'jobOne'
   ];
 
   /** 브라우저가 막지 않는 방식(JSONP)으로 요청합니다 */

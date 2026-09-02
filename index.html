@@ -453,11 +453,15 @@
   #splash.out{opacity:0;pointer-events:none}
   #splash .lg{font-size:32px;font-weight:800;letter-spacing:.04em;
     animation:spup .5s cubic-bezier(.2,1.3,.4,1) both}
-  #splash .tl{font-size:14px;opacity:.9;line-height:1.7;margin-top:11px;
-    animation:spup .5s cubic-bezier(.2,1.3,.4,1) .1s both}
-  #splash .sl{font-size:12px;opacity:.62;margin-top:22px;
-    animation:spup .5s ease .22s both}
+  #splash .tl{font-size:15px;opacity:.94;line-height:1.75;margin-top:14px;
+    animation:spup .55s cubic-bezier(.2,1.3,.4,1) .3s both}
+  #splash .sl{font-size:12.5px;opacity:.62;margin-top:26px;
+    animation:spup .55s ease .68s both}
   @keyframes spup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  /* 아래에서 천천히 차오르는 줄 — 곧 넘어간다는 신호입니다 */
+  #splash .bar{position:absolute;left:0;bottom:0;height:3px;width:0;
+    background:rgba(255,255,255,.55);animation:spbar 2.2s linear both}
+  @keyframes spbar{from{width:0}to{width:100%}}
 
   .ppbox{background:#f0f2f2;border-radius:11px;padding:15px;font-size:13px;
     color:#697680;line-height:1.7;text-align:center}
@@ -509,8 +513,15 @@
   .ti i{position:absolute;left:-26px;top:14px;width:14px;height:14px;
     border-radius:50%;background:#fff;border:2px solid var(--line);box-sizing:border-box}
   .ti.done i{background:var(--line);border-color:var(--line)}
+  /* 지금 진행 중인 단계 — 숨쉬듯 커졌다 작아집니다 */
   .ti.now i{background:var(--accent);border-color:var(--accent);
-    box-shadow:0 0 0 4px var(--accent-soft)}
+    animation:tpulse 1.9s ease-in-out infinite}
+  @keyframes tpulse{
+    0%,100%{box-shadow:0 0 0 3px var(--accent-soft)}
+    50%{box-shadow:0 0 0 8px rgba(13,92,79,.10)}}
+  .ti.now .tb b{color:var(--accent)}
+  @media (prefers-reduced-motion:reduce){
+    .ti.now i{animation:none;box-shadow:0 0 0 4px var(--accent-soft)}}
   .ti.wait i{border-color:#c9d5d2}
   .tb b{display:block;font-size:14.5px;font-weight:800;letter-spacing:-.01em}
   .tb em{font-style:normal;font-size:11px;font-weight:800;color:#fff;
@@ -548,12 +559,19 @@
     -webkit-tap-highlight-color:transparent;
     transition:transform .25s,background-color .2s,border-color .2s}
   .starbtn:active{transform:scale(.97)}
+  .starbtn{display:flex;align-items:center;gap:12px;text-align:left}
+  .starbtn .si{width:38px;height:38px;border-radius:11px;background:var(--sand);
+    display:flex;align-items:center;justify-content:center;color:var(--dim);
+    flex-shrink:0;transition:background-color .22s,color .22s}
+  .starbtn .st{flex:1;min-width:0}
   .starbtn b{display:block;font-size:14.5px;font-weight:800;color:var(--ink);
     letter-spacing:-.01em}
-  .starbtn span{display:block;font-size:12px;color:var(--dim);margin-top:3px}
+  .starbtn em{display:block;font-style:normal;font-size:12px;color:var(--dim);
+    margin-top:2px;line-height:1.5}
   .starbtn.on{background:var(--accent-soft);border-color:#9ecabd}
+  .starbtn.on .si{background:var(--accent);color:#fff}
   .starbtn.on b{color:var(--accent)}
-  .starbtn.on span{color:#4a6a62}
+  .starbtn.on em{color:#4a6a62}
   .ghost2{width:100%;margin-top:9px;padding:13px;border:1px solid var(--line);
     background:transparent;border-radius:11px;font-family:inherit;font-size:14px;
     color:var(--dim);cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -1583,6 +1601,7 @@
   <div class="lg">POT JOB</div>
   <div class="tl">작업치료사와 물리치료사를 위한<br>가장 빠른 취업 정보</div>
   <div class="sl">치료사가 더 나은 자리로 옮겨갈 수 있게</div>
+  <div class="bar"></div>
 </div>
 <div class="wrap">
 
@@ -2660,7 +2679,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=105"></script>
+<script src="/app.js?v=108"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3734,6 +3753,21 @@ function bump(el){
 var POST_MAP = {};
 var STARS = {};      // 담아둔 공고
 
+/* 담아두기 버튼 속 내용.
+   별표 대신 책갈피 모양을 씁니다. */
+function starFace(on){
+  var ic = on
+    ? '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">'
+      + '<path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" fill="currentColor"/></svg>'
+    : '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">'
+      + '<path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" fill="none" '
+      + 'stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+  return '<span class="si">'+ic+'</span>'
+    + '<span class="st"><b>'+(on?'담아뒀습니다':'담아두기')+'</b>'
+    + '<em>'+(on ? '마감 하루 전에 알려드립니다'
+                 : '마감을 놓치지 않게 하루 전에 알려드립니다')+'</em></span>';
+}
+
 function toggleStar(id){
   var on = !STARS[id];
   var btn=document.getElementById('starBtn');
@@ -3744,10 +3778,7 @@ function toggleStar(id){
     STARS[id]=r.on; if(!r.on) delete STARS[id];
     if(btn){
       btn.className='starbtn'+(r.on?' on':'');
-      btn.innerHTML = '<b>'+(r.on?'★ 담아뒀습니다':'☆ 담아두기')+'</b>'
-        + '<span>'+(r.on
-            ? '마감 하루 전에 알림을 보내드립니다'
-            : '마감을 놓치지 않게 하루 전에 알려드립니다')+'</span>';
+      btn.innerHTML = starFace(r.on);
       bump(btn);
     }
     if(r.on) celebrate('⭐', '담아뒀습니다', '마감 하루 전에 알려드리겠습니다');
@@ -3766,6 +3797,7 @@ function openStars(){
   google.script.run.withSuccessHandler(function(r){
     if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
     STARS={}; (r.ids||[]).forEach(function(i){ STARS[i]=true; });
+    STARS_LOADED = true;
 
     if(!r.rows.length){
       box.innerHTML='<div class="card"><h2>담아둔 공고</h2>'
@@ -3852,8 +3884,8 @@ function openJob(id){
   /* 전형 일정 */
   h+=jobSchedule(x);
 
-  /* 자세한 내용 — 길어서 접어둡니다 */
-  h+=jobMore(x);
+  /* 자세한 내용은 열 때 따로 받습니다 (목록을 가볍게 두려고) */
+  h+='<div id="jobMore"></div>';
 
   /* 기관 정보를 먼저 보여주고, 버튼은 맨 아래에 둡니다 */
   h+='<div id="jobHosp"></div>';
@@ -3864,16 +3896,49 @@ function openJob(id){
     + (shut ? ''
         : '<button class="starbtn'+(STARS[x.id]?' on':'')+'" id="starBtn" '
           + 'onclick="toggleStar(\''+x.id+'\')">'
-          + '<b>'+(STARS[x.id]?'★ 담아뒀습니다':'☆ 담아두기')+'</b>'
-          + '<span>'+(STARS[x.id]
-              ? '마감 하루 전에 알림을 보내드립니다'
-              : '마감을 놓치지 않게 하루 전에 알려드립니다')+'</span></button>')
+          + starFace(STARS[x.id])+'</button>')
     + '<button class="ghost2" onclick="tab(\'post\',true)">목록으로 돌아가기</button>'
     + '</div>';
 
   document.getElementById('jobBox').innerHTML=h;
   attachRipple(); revealIn();
-  loadJobHosp(x.org);
+  if(x.hasMore) loadJobMore(x.id);
+  loadJobHosp(x);
+  loadStarsOnce(x.id);
+}
+
+/* 담아둔 공고 목록을 한 번만 받아옵니다.
+   이게 없으면 목록에서 바로 들어갔을 때
+   이미 담아둔 공고도 ☆ 로 보입니다. */
+var STARS_LOADED = false;
+function loadStarsOnce(id){
+  if(STARS_LOADED) return;
+  google.script.run.withSuccessHandler(function(r){
+    if(!r || !r.ok) return;
+    STARS_LOADED = true;
+    STARS = {};
+    (r.ids||[]).forEach(function(k){ STARS[k]=true; });
+
+    var btn=document.getElementById('starBtn');
+    if(btn && STARS[id]){
+      btn.className='starbtn on';
+      btn.innerHTML=starFace(true);
+    }
+  }).withFailureHandler(function(){}).myStars(cred());
+}
+
+/* 지원자격·전형방법 같은 긴 글을 따로 받아옵니다 */
+function loadJobMore(id){
+  var box=document.getElementById('jobMore');
+  if(!box) return;
+  box.innerHTML='<p class="thin" style="margin:12px 0 0">자세한 내용을 불러오는 중입니다</p>';
+
+  google.script.run.withSuccessHandler(function(r){
+    if(!r || !r.ok){ box.innerHTML=''; return; }
+    box.innerHTML=jobMore(r);
+    attachRipple(); revealIn();
+  }).withFailureHandler(function(){ box.innerHTML=''; })
+    .jobOne(cred(), id);
 }
 
 /* ── 전형 일정 ───────────────────────────────────────
@@ -3898,10 +3963,14 @@ function jobSchedule(x){
 
   if(!st.length){
     if(!x.from && !x.to) return '';
+    var e8 = String(x.to||'').replace(/[^0-9]/g,'');
+    var live = !e8 || e8 >= t8;
     return '<div class="card"><h2>일정</h2>'
       + '<div class="tline">'
-      + '<div class="ti done"><i></i><div class="tb"><b>접수</b>'
-      + '<span>'+esc(x.from||'?')+' ~ '+esc(x.to||'?')+'</span></div></div>'
+      + '<div class="ti '+(live?'now':'done')+'"><i></i><div class="tb">'
+      + '<b>접수'+(live?' <em>지금 여기</em>':'')+'</b>'
+      + '<span>'+esc(x.from||'?')+' ~ '+esc(x.to||'?')
+      + (live && e8 ? ' · '+leftDays(e8) : '')+'</span></div></div>'
       + '<div class="ti wait"><i></i><div class="tb"><b>이후 일정</b>'
       + '<span>공고문에 적혀 있습니다. 아래 「공고 확인하러 가기」에서 보실 수 있습니다.</span>'
       + '</div></div></div></div>';
@@ -3915,13 +3984,22 @@ function jobSchedule(x){
     var end = s.to || s.at;
     var state = (end < t8) ? 'done' : ((s.at <= t8 && t8 <= end) ? 'now' : 'wait');
     h+='<div class="ti '+state+'"><i></i><div class="tb">'
-      + '<b>'+esc(s.name)+(state==='now'?' <em>진행 중</em>':'')+'</b>'
+      + '<b>'+esc(s.name)+(state==='now'?' <em>지금 여기</em>':'')+'</b>'
       + '<span>'+fmt(s.at)+' '+dow(s.at)
       + (s.to && s.to!==s.at ? ' ~ '+fmt(s.to)+' '+dow(s.to) : '')
+      + (state==='now' && end>=t8 ? ' · '+leftDays(end) : '')
       + '</span></div></div>';
   });
 
   return h+'</div></div>';
+}
+
+/* 며칠 남았는지 */
+function leftDays(v){
+  var s=String(v||''); if(s.length!==8) return '';
+  var d=new Date(+s.slice(0,4), +s.slice(4,6)-1, +s.slice(6,8));
+  var n=Math.round((d - new Date().setHours(0,0,0,0))/86400000);
+  return n<=0 ? '오늘까지' : n+'일 남음';
 }
 
 /* ── 자세한 내용 ─────────────────────────────────────
@@ -3973,47 +4051,49 @@ function accToggle(i){
 
 /* 공고를 낸 곳이 병원 목록에 있으면 그 정보를 붙입니다.
    이미 12,407곳 자료를 갖고 있으니 안 쓸 이유가 없습니다. */
-function loadJobHosp(org){
+function loadJobHosp(x){
   var box=document.getElementById('jobHosp');
-  if(!box || !org) return;
+  if(!box || !x) return;
+  var org=x.org||'';
+  if(!org && !x.title) return;
   box.innerHTML='<p class="thin" style="margin:12px 0 0">병원 정보를 찾는 중입니다</p>';
 
-  google.script.run.withSuccessHandler(function(x){
-    if(!x || !x.ok){ box.innerHTML=''; return; }
-    JHOSP_IDX = x.idx;
+  google.script.run.withSuccessHandler(function(hp){
+    if(!hp || !hp.ok){ box.innerHTML=''; return; }
+    JHOSP_IDX = hp.idx;
 
-    var otPer = x.bed ? Math.round((x.ot||0)/x.bed*1000)/10 : null;
-    var ptPer = x.bed ? Math.round((x.pt||0)/x.bed*1000)/10 : null;
+    var otPer = hp.bed ? Math.round((hp.ot||0)/hp.bed*1000)/10 : null;
+    var ptPer = hp.bed ? Math.round((hp.pt||0)/hp.bed*1000)/10 : null;
 
     var h='<div class="jhosp"><div class="jt">이 기관은 이런 곳입니다</div>'
-      + '<div class="jn">'+esc(x.name)+'</div>'
-      + '<div class="jm">'+esc(kindLabel(x.kind)||'')
-      + (x.rehabCert?' · 회복기 재활의료기관':'')
-      + (x.sido?' · '+esc(x.sido)+(x.sgg?' '+esc(x.sgg):''):'')
-      + (x.bed?' · '+x.bed.toLocaleString('ko-KR')+'병상':'')
+      + '<div class="jn">'+esc(hp.name)+'</div>'
+      + '<div class="jm">'+esc(kindLabel(hp.kind)||'')
+      + (hp.rehabCert?' · 회복기 재활의료기관':'')
+      + (hp.sido?' · '+esc(hp.sido)+(hp.sgg?' '+esc(hp.sgg):''):'')
+      + (hp.bed?' · '+Number(hp.bed).toLocaleString('ko-KR')+'병상':'')
       + '</div>'
       + '<div class="jrow">'
-      + '<div class="jbx"><div class="k">작업치료사</div><div class="v">'+(x.ot||0)+'명</div></div>'
-      + '<div class="jbx"><div class="k">물리치료사</div><div class="v">'+(x.pt||0)+'명</div></div>'
-      + (x.rehab?'<div class="jbx"><div class="k">재활의학과</div><div class="v">'
-          + x.rehab+'명</div></div>':'')
+      + '<div class="jbx"><div class="k">작업치료사</div><div class="v">'+(hp.ot||0)+'명</div></div>'
+      + '<div class="jbx"><div class="k">물리치료사</div><div class="v">'+(hp.pt||0)+'명</div></div>'
+      + (hp.rehab?'<div class="jbx"><div class="k">재활의학과</div><div class="v">'
+          + hp.rehab+'명</div></div>':'')
       + '</div>';
 
     if(otPer!==null){
       h+='<div class="jm" style="margin-top:10px">병상 100개당 작업치료사 <b>'+otPer+'명</b>'
         + ' · 물리치료사 <b>'+ptPer+'명</b></div>';
     }
-    if(x.tips && x.tips.length){
+    if(hp.tips && hp.tips.length){
       h+='<div class="jm" style="margin-top:9px;color:#8a5a1e"><b>⚠ '
-        + esc(x.tips[0].head)+'</b></div>';
+        + esc(hp.tips[0].head)+'</b></div>';
     }
-    h+='<button class="more" onclick="openHosp('+x.idx+')">병원 정보 자세히 보기</button>'
+    h+='<button class="more" onclick="openHosp('+hp.idx+')">병원 정보 자세히 보기</button>'
       + '</div>';
 
     box.innerHTML=h;
     attachRipple(); revealIn();
   }).withFailureHandler(function(){ box.innerHTML=''; })
-    .hospByName(cred(), org);
+    .hospByName(cred(), org, x.title||'', x.region||'');
 }
 
 var JHOSP_IDX = null;
@@ -7294,7 +7374,7 @@ HOSPITALS.forEach(function(v){
   setTimeout(function(){
     sp.className='out';
     setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); }, 400);
-  }, reduce ? 200 : 1100);
+  }, reduce ? 300 : 2200);
 })();
 
 loadToken();
