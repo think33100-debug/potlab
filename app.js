@@ -29,7 +29,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
     'adminToggle', 'adminEditSalary', 'adminGetBanners', 'adminSaveBanners',
     'commChannels', 'commList', 'commRead', 'commWrite', 'commDelete', 'commReport',
     'adminCommList', 'adminCommHide',
-    'commComment', 'commCommentDelete', 'commMine', 'commAvatars', 'commSetAvatar',
+    'commComment', 'commCommentDelete', 'commLike', 'commMine', 'commAvatars', 'commSetAvatar',
     'adminGetMenu', 'adminSaveMenu', 'starJob', 'myStars', 'naverLogin', 'naverExchange', 'hospByName', 'jobOne'
   ];
 
