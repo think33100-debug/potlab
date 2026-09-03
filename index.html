@@ -1520,7 +1520,8 @@
   .copy{display:block;margin-top:10px;font-size:11px;color:#8b979d;letter-spacing:-.01em}
   .ver{display:block;margin-top:4px;font-size:10.5px;color:#b3bcc0}
   .copyfoot{text-align:center;font-size:11px;color:#8b979d;letter-spacing:-.01em;
-    margin:26px 0 8px;line-height:1.6}
+    margin:26px 0 8px;line-height:1.7}
+  .copyfoot .regno{font-size:10px;color:#a8b2b6}
   .foot{text-align:center;font-size:11.5px;color:var(--dim);margin-top:24px;line-height:1.8}
   .flag{border-radius:10px;padding:12px;margin-top:9px;font-size:12.5px;line-height:1.7;
     display:none}
@@ -2835,12 +2836,13 @@
     </div>
   </div>
 
-  <p class="copyfoot">Copyright © 2026 피오티랩 All rights reserved.</p>
+  <p class="copyfoot">Copyright © 2026 피오티잡 · 주식회사 빈틈<br>
+    <span class="regno">직업정보제공사업 신고번호 J1401020260007</span></p>
 </div>
 
 <div id="msg"></div>
 
-<script src="/app.js?v=134"></script>
+<script src="/app.js?v=135"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3345,7 +3347,7 @@ function drawHome(b){
   BRANDC = b;
   checkServer(b);
   var brand=document.getElementById('brandBox');
-  brand.innerHTML = '<div class="badge-by">피오티랩 공식 운영</div>'
+  brand.innerHTML = '<div class="badge-by">피오티잡 공식 운영</div>'
     + (b.logo ? '<img src="'+b.logo+'" alt="'+esc(b.name)+'">'
               : '<div class="wordmark">'+esc(b.name)+'</div>')
     + '<div class="tag">'+esc(b.tagline)+'</div>'
@@ -3383,7 +3385,7 @@ function roomCard(b){
   var pts=(b&&b.roomPoints)||[];
 
   return '<div class="roomcard">'
-    + '<div class="eyebrow">피오티랩 공식 커뮤니티</div>'
+    + '<div class="eyebrow">피오티잡 공식 커뮤니티</div>'
     + '<h3>코드는 단톡방 공지에 있습니다</h3>'
     + (pts.length?'<ul class="roompts">'
         + pts.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>':'')
@@ -5479,7 +5481,7 @@ function bannerHTML(b){
     + (b.img?'<img class="bimg" src="'+esc(b.img)+'" alt="'+esc(b.title)+'"'
         + ' onerror="this.style.display=\'none\'">':'')
     + '<div class="btx">'
-    + '<span class="bad">피오티랩</span>'
+    + '<span class="bad">피오티잡</span>'
     + (b.title?'<div class="bt">'+esc(b.title)+'</div>':'')
     + (b.desc?'<div class="bd">'+esc(b.desc)+'</div>':'')
     + '<span class="bc">'+esc(b.cta)+' ›</span>'
