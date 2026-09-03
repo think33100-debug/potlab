@@ -2838,7 +2838,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=129"></script>
+<script src="/app.js?v=130"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -4359,9 +4359,12 @@ function jobMore(x){
     ['결격 사유', x.dis]
   ].filter(function(p){ return p[1] && String(p[1]).trim(); });
 
+  /* 연봉 자리에 URL 이 잘못 들어간 옛 공고가 있어서, http 로 시작하면 무시합니다.
+     (수집 코드는 고쳤지만 이미 밀려 저장된 공고 대비) */
   var quick=[];
-  if(x.pay)  quick.push(['연봉', x.pay]);
-  if(x.tel)  quick.push(['문의처', x.tel]);
+  var payOk = x.pay && !/^https?:\/\//i.test(String(x.pay).trim());
+  if(payOk) quick.push(['연봉', x.pay]);
+  if(x.tel && !/^https?:\/\//i.test(String(x.tel).trim())) quick.push(['문의처', x.tel]);
 
   if(!items.length && !quick.length) return '';
 
