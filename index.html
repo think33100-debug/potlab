@@ -2838,7 +2838,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=130"></script>
+<script src="/app.js?v=131"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -4398,18 +4398,104 @@ function accToggle(i){
 
 /* 공고를 낸 곳이 병원 목록에 있으면 그 정보를 붙입니다.
    이미 12,407곳 자료를 갖고 있으니 안 쓸 이유가 없습니다. */
+/* ═══ 병원 데이터를 브라우저에서 직접 (제미나이 3번 제안) ═══ */
+var HOSP=null, HOSP_LOADING=null;
+function loadHospData(){
+  if(HOSP) return Promise.resolve(HOSP);
+  if(HOSP_LOADING) return HOSP_LOADING;
+  HOSP_LOADING=new Promise(function(resolve){
+    try{ var c=localStorage.getItem('hosp_2026Q2'); if(c){ HOSP=JSON.parse(c); resolve(HOSP); return; } }catch(e){}
+    fetch('https://potjob.co.kr/hospital_data.json').then(function(r){return r.json();})
+      .then(function(d){ HOSP=d; try{localStorage.setItem('hosp_2026Q2',JSON.stringify(d));}catch(e){} resolve(d); })
+      .catch(function(){ resolve(null); });
+  });
+  return HOSP_LOADING;
+}
+function hospCols_(){ var C={}; HOSP.cols.forEach(function(c,i){C[c]=i;}); return C; }
+function hospMatchLocal(org,title,region){
+  if(!HOSP||!HOSP.rows) return null;
+  var C=hospCols_(), norm=function(s){return String(s||'').replace(/\s+/g,'');};
+  var orgN=norm(org), ttl=String(title||''), marks=[];
+  var br=ttl.match(/[\[(【]([^\])】]{2,20})[\])】]/g)||[];
+  br.forEach(function(b){var inner=b.slice(1,-1).replace(/\s+/g,'');if(/병원|의료원|센터|요양원|보건소|재활원/.test(inner))marks.push(inner);});
+  var bare=ttl.replace(/\s+/g,'').match(/[가-힣A-Za-z0-9]{2,12}(?:병원|의료원|재활원|요양원)/g)||[];
+  bare.forEach(function(b){if(marks.indexOf(b)<0)marks.push(b);});
+  var tries=[]; marks.forEach(function(m){if(orgN)tries.push(orgN+m);}); marks.forEach(function(m){tries.push(m);});
+  var rows=HOSP.rows, sido=norm(region);
+  for(var t=0;t<tries.length;t++){ var q=tries[t]; if(q.length<3)continue;
+    var cand=[]; for(var i=0;i<rows.length;i++){if(norm(rows[i][C.name])===q)cand.push(i);}
+    if(!cand.length)for(var i2=0;i2<rows.length;i2++){if(norm(rows[i2][C.name]).indexOf(q)>-1)cand.push(i2);}
+    if(!cand.length)continue;
+    if(sido&&cand.length>1){var words=sido.split(/[,·]/).filter(function(w){return w.length>=2;});
+      if(words.length){var by=cand.filter(function(idx){var s=norm(rows[idx][C.sido])+norm(rows[idx][C.sgg])+norm(rows[idx][C.addr]);return words.some(function(w){return s.indexOf(w)>-1;});}); if(by.length>=1)cand=by;}}
+    if(cand.length!==1)continue;
+    return rowToHospLocal(cand[0]);
+  }
+  return null;
+}
+function rowToHospLocal(idx){
+  var C=hospCols_(), r=HOSP.rows[idx];
+  var h={ localIdx:idx, name:r[C.name], kind:r[C.kind], sido:r[C.sido], sgg:r[C.sgg],
+    ot:r[C.ot], pt:r[C.pt], sw:r[C.sw], bed:r[C.bed], doc:r[C.doc], rehab:r[C.rehab],
+    im:r[C.im], nr:r[C.nr], ns:r[C.ns], os:r[C.os], fm:r[C.fm], addr:r[C.addr], tel:r[C.tel], ok:true };
+  h.densityOT=densLocal(h,'ot'); h.densityPT=densLocal(h,'pt');
+  return h;
+}
+function densLocal(h,key){
+  var bed=h.bed,ot=h.ot,pt=h.pt,rehab=h.rehab;
+  if(!bed||bed<20||h[key]<=0) return null;
+  var tot=ot+pt, bpa=tot?bed/tot:null, nm=h.name, kd=h.kind;
+  var univ=(kd.indexOf('상급종합')>-1)||((nm.indexOf('대학교')>-1||nm.indexOf('의과대학')>-1)&&kd.indexOf('종합병원')>-1);
+  var eff; if(tot<17)eff=rehab; else if(univ)eff=rehab+h.im+h.nr+h.ns+h.os+h.fm;
+  else{var cap=Math.max(3,tot*0.3);eff=rehab+Math.min(h.im+h.nr+h.os,cap)*0.5;}
+  var dT=function(b){return b<=40?1:b<=60?.85:b<=90?.6:b<=150?.3:.1;};
+  var aT=function(b){return b===null?0:b<=1.5?1:b<=3?.85:b<=4.5?.7:b<=6?.55:b<=10?.3:b<=20?.1:0;};
+  var bpd=eff>0?bed/eff:null;
+  var s=bpd!==null?4.5*dT(bpd)+4.5*aT(bpa):9*aT(bpa);
+  s+=univ?(bed>=1000?2.5:bed>=500?1.5:0):(tot>=60?4:tot>=50?3.5:tot>=40?2.5:tot>=30?1.5:tot>=25?.5:0);
+  if(nm.indexOf('보훈')>-1)s-=4;
+  s=Math.round(Math.min(Math.max(s,0),10)*10)/10;
+  var lv=s>=6?3:s>=3?2:1; if((ot>=20||tot>=25)&&lv<2)lv=2;
+  return{ enough:true,score:s,level:lv,
+    label:['여유로운 편','보통','바쁜 편'][lv-1],
+    oneLine:['재활을 받는 환자가 적은 병원입니다','재활 비중이 평균 수준인 병원입니다','환자 대부분이 재활을 받는 병원입니다'][lv-1],
+    bed:bed,otN:ot,ptN:pt };
+}
+
 function loadJobHosp(x){
   var box=document.getElementById('jobHosp');
   if(!box || !x) return;
-  var org=x.org||'';
-  if(!org && !x.title) return;
+  if(!(x.org||'') && !x.title) return;
   box.innerHTML='<div class="skel"><div class="sk-t"></div>'
     + '<div class="sk-row"><span></span><span></span><span></span></div>'
     + '<div class="sk-note">이 기관의 병원 정보를 불러오는 중이에요</div></div>';
 
-  google.script.run.withSuccessHandler(function(hp){
+  /* 먼저 브라우저에서 찾습니다 (서버 안 거침, 0.1초) */
+  loadHospData().then(function(d){
+    if(d){
+      var hp = hospMatchLocal(x.org, x.title, x.region);
+      if(hp) drawJobHosp(hp);
+      else box.innerHTML='';
+    } else {
+      /* JSON 못 받으면 서버로 폴백 */
+      google.script.run.withSuccessHandler(function(hp){
+        if(!hp||!hp.ok){ box.innerHTML=''; return; }
+        drawJobHosp(hp);
+      }).withFailureHandler(function(){ box.innerHTML=''; })
+        .hospByName(cred(), x.org||'', x.title||'', x.region||'');
+    }
+  });
+}
+
+/* 병원 정보 카드 그리기 (로컬·서버 공통) */
+function drawJobHosp(hp){
+  var box=document.getElementById('jobHosp');
+  if(!box) return;
+
     if(!hp || !hp.ok){ box.innerHTML=''; return; }
-    JHOSP_IDX = hp.idx;
+    /* 로컬 검색이면 localIdx, 서버면 idx */
+    JHOSP_IDX = (hp.localIdx!=null) ? hp.localIdx : hp.idx;
+    var openArg = (hp.localIdx!=null) ? ("'L"+hp.localIdx+"'") : hp.idx;
 
     var otPer = hp.bed ? Math.round((hp.ot||0)/hp.bed*1000)/10 : null;
     var ptPer = hp.bed ? Math.round((hp.pt||0)/hp.bed*1000)/10 : null;
@@ -4463,13 +4549,12 @@ function loadJobHosp(x){
         + hp.rank.bed.toLocaleString('ko-KR')+'위</b> / '
         + hp.rank.bedTotal.toLocaleString('ko-KR')+'곳</div>';
     }
-    h+='<button class="more" onclick="openHosp('+hp.idx+')">병원 정보 더 보기</button>'
+    h+='<button class="more" onclick="openHospAny('+openArg+')">병원 정보 더 보기</button>'
       + '</div>';
 
     box.innerHTML=h;
     attachRipple(); revealIn();
-  }).withFailureHandler(function(){ box.innerHTML=''; })
-    .hospByName(cred(), org, x.title||'', x.region||'');
+  
 }
 
 var JHOSP_IDX = null;
@@ -6911,6 +6996,22 @@ function backToList(){
   var box=document.getElementById('hospBox');
   if(LIST_HTML){ box.innerHTML=LIST_HTML; attachRipple(); return; }
   doHosp();
+}
+
+/* 병원 상세 열기 — 로컬('L숫자') 이면 브라우저 데이터로, 아니면 서버로 */
+function openHospAny(arg){
+  if(typeof arg==='string' && arg.charAt(0)==='L'){
+    var idx=parseInt(arg.slice(1),10);
+    if(CURRENT!=='hosp') tab('hosp');
+    var box=document.getElementById('hospBox');
+    var hp=rowToHospLocal(idx);
+    hp.idx=null;
+    /* 순위·형제병원은 로컬에선 생략하고 기본 정보만 */
+    hp.rank={}; hp.tips=[]; hp.siblings=[];
+    drawHospDetail(hp);
+    return;
+  }
+  openHosp(arg);
 }
 
 function openHosp(idx){
