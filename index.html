@@ -475,6 +475,24 @@
      흔한 무단 전재(드래그 복사)는 걸러집니다. */
   .noselect{-webkit-user-select:none;-moz-user-select:none;user-select:none;
     -webkit-touch-callout:none}
+  /* 로딩 스켈레톤 — "찾는 중" 글자보다 자리가 먼저 보여 덜 답답합니다 */
+  .skel{margin-top:12px;background:#fff;border:1px solid var(--line);
+    border-radius:13px;padding:16px}
+  .skel.s2{background:transparent;border:0;padding:8px 0 0}
+  .sk-t{height:16px;width:55%;border-radius:6px;margin-bottom:14px;
+    background:linear-gradient(90deg,#eef1f1 25%,#f6f8f8 50%,#eef1f1 75%);
+    background-size:200% 100%;animation:shim 1.2s infinite}
+  .sk-row{display:flex;gap:8px}
+  .sk-row span{flex:1;height:52px;border-radius:10px;
+    background:linear-gradient(90deg,#eef1f1 25%,#f6f8f8 50%,#eef1f1 75%);
+    background-size:200% 100%;animation:shim 1.2s infinite}
+  .sk-note{font-size:12px;color:#9aa6ab;text-align:center;margin-top:13px}
+  .sk-line{height:13px;border-radius:5px;margin-bottom:9px;
+    background:linear-gradient(90deg,#eef1f1 25%,#f6f8f8 50%,#eef1f1 75%);
+    background-size:200% 100%;animation:shim 1.2s infinite}
+  .sk-line.w70{width:70%}
+  @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
   .miniload{font-size:13px;color:var(--dim);margin:14px 0 0;padding:2px}
   .miniload .dots i{animation:blink 1.2s infinite}
   .miniload .dots i:nth-child(2){animation-delay:.2s}
@@ -2817,7 +2835,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=126"></script>
+<script src="/app.js?v=127"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -4249,7 +4267,8 @@ function loadStarsOnce(id){
 function loadJobMore(id){
   var box=document.getElementById('jobMore');
   if(!box) return;
-  box.innerHTML='<div class="miniload">자세한 내용 불러오는 중<span class="dots"><i>.</i><i>.</i><i>.</i></span></div>';
+  box.innerHTML='<div class="skel s2"><div class="sk-line"></div>'
+    + '<div class="sk-line w70"></div></div>';
 
   google.script.run.withSuccessHandler(function(r){
     if(!r || !r.ok){ box.innerHTML=''; return; }
@@ -4374,7 +4393,9 @@ function loadJobHosp(x){
   if(!box || !x) return;
   var org=x.org||'';
   if(!org && !x.title) return;
-  box.innerHTML='<div class="miniload">병원 정보를 찾는 중<span class="dots"><i>.</i><i>.</i><i>.</i></span></div>';
+  box.innerHTML='<div class="skel"><div class="sk-t"></div>'
+    + '<div class="sk-row"><span></span><span></span><span></span></div>'
+    + '<div class="sk-note">이 기관의 병원 정보를 불러오는 중이에요</div></div>';
 
   google.script.run.withSuccessHandler(function(hp){
     if(!hp || !hp.ok){ box.innerHTML=''; return; }
