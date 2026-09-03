@@ -757,8 +757,11 @@
   .hrl{color:var(--dim)}
   .hrv{color:var(--ink)}
   .hrv b{font-weight:800;font-size:15px;letter-spacing:-.02em}
-  .hrv em{font-style:normal;font-size:11.5px;color:var(--accent);font-weight:700;
-    background:var(--accent-soft);border-radius:20px;padding:2px 8px;margin-left:7px}
+  .hrv em{font-style:normal;font-size:11.5px;font-weight:700;
+    border-radius:20px;padding:2px 8px;margin-left:7px}
+  .hrv em.hi{color:var(--accent);background:var(--accent-soft)}
+  .hrv em.mid{color:#8a6d1e;background:#faf3e0}
+  .hrv em.lo{color:#9aa6ab;background:#f0f3f3}
 
   /* 지원 전 확인 */
   .tipcard{border-color:#f0d9c4;background:#fffaf3}
@@ -2835,7 +2838,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=127"></script>
+<script src="/app.js?v=129"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3513,28 +3516,32 @@ function loadMeData(force){
   box.innerHTML='<div class="loadwrap"><div class="spin"></div>'
     + '<p>불러오는 중입니다</p></div>';
 
-  google.script.run.withSuccessHandler(function(r){
-    if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+  /* 서버를 한 번만 부릅니다. getResultBundle 이 통계·이직까지 다 담아옵니다.
+     예전엔 3번 왕복(getStats·getResultBundle·getMoveEstimate)이라 3배 느렸습니다. */
+  google.script.run.withSuccessHandler(function(bd){
+    if(!bd||!bd.ok){ box.innerHTML=failCard(bd||{message:'불러오지 못했습니다'}); attachRipple(); return; }
     ME_LOADED = true;
-    box.innerHTML = mySpecCard(r.me) + meCard(r);
-    revealIn(); animateNumbers(); slidePins();
 
-    google.script.run.withSuccessHandler(drawMove).getMoveEstimate(cred());
-    google.script.run.withSuccessHandler(function(bd){
-      if(!bd||!bd.ok) return;
-      if(ME && bd.role && ME.role!==bd.role){ ME.role = bd.role; saveMe(ME); }
-      if(bd.role==='학생'){
-        showStudent(bd.student);
-        var hb=document.getElementById('hourlyBox'); if(hb) hb.innerHTML='';
-        drawStudentCard(bd.card);
-      } else {
-        showPos(bd.position); showHourly(bd.hourly);
-        showSpec(bd.spec); drawCard(bd.card);
-      }
-    }).getResultBundle(cred(), (ME&&ME.id)||'', (ME&&ME.role)||'현직');
+    if(ME && bd.role && ME.role!==bd.role){ ME.role = bd.role; saveMe(ME); }
+
+    /* 통계로 내 정보 카드부터 그립니다 */
+    if(bd.stats && bd.stats.ok){
+      box.innerHTML = mySpecCard(bd.stats.me||{}) + meCard(bd.stats);
+      revealIn(); animateNumbers(); slidePins();
+    }
+
+    if(bd.role==='학생'){
+      showStudent(bd.student);
+      var hb=document.getElementById('hourlyBox'); if(hb) hb.innerHTML='';
+      drawStudentCard(bd.card);
+    } else {
+      showPos(bd.position); showHourly(bd.hourly);
+      showSpec(bd.spec); drawCard(bd.card);
+    }
+    if(bd.move) drawMove(bd.move);
   }).withFailureHandler(function(e){
     box.innerHTML='<div class="card"><p class="sub">'+esc(e.message)+'</p></div>';
-  }).getStats(cred(), {job:(ME&&ME.job)||JOB});
+  }).getResultBundle(cred(), (ME&&ME.id)||'', (ME&&ME.role)||'현직');
 }
 
 function drawMove(r){
@@ -6935,10 +6942,10 @@ function drawHospDetail(x){
     + '</div>'
     + '<div class="staff">'
     + '<div class="box ot"><div class="lb">작업치료사</div>'
-    + '<div class="vv" data-count="'+x.ot+'">0</div></div>'
+    + '<div class="vv" data-count="'+x.ot+'" data-suf="명">0명</div></div>'
     + '<div class="box pt"><div class="lb">물리치료사</div>'
-    + '<div class="vv" data-count="'+x.pt+'">0</div></div>'
-    + (x.sw?'<div class="box sw"><div class="lb">사회복지사</div><div class="vv">'+x.sw+'</div></div>':'')
+    + '<div class="vv" data-count="'+x.pt+'" data-suf="명">0명</div></div>'
+    + (x.sw?'<div class="box sw"><div class="lb">사회복지사</div><div class="vv">'+x.sw+'명</div></div>':'')
     + '</div>';
 
   t+=densBlock(x.densityOT, '작업치료사');
@@ -6950,11 +6957,18 @@ function drawHospDetail(x){
   if(rk.length){
     t+='<div class="hrank"><div class="hrt">전국에서 몇 번째인가</div>'
       + rk.map(function(r){
+          /* r[1]=내 등수, r[2]=전체. 상위 몇 %인지 정확히 계산.
+             등수가 앞(작을수록) = 상위. 700/1098 이면 상위 64%가 맞지만
+             "상위"라는 말이 헷갈리니, 상위권/하위권을 명확히 나눕니다. */
           var pct=Math.round(r[1]/r[2]*100);
+          var tag = pct<=10?'상위 '+Math.max(pct,1)+'%'
+                  : pct<=50?'상위 '+pct+'%'
+                  : '하위 '+(100-pct)+'%';
+          var cls = pct<=30?'hi':(pct<=60?'mid':'lo');
           return '<div class="hrr"><span class="hrl">'+r[0]+'</span>'
             + '<span class="hrv"><b>'+r[1].toLocaleString('ko-KR')+'위</b>'
             + ' / '+r[2].toLocaleString('ko-KR')+'곳'
-            + '<em>상위 '+(pct<1?1:pct)+'%</em></span></div>';
+            + '<em class="'+cls+'">'+tag+'</em></span></div>';
         }).join('')
       + '</div>';
   }
