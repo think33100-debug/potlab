@@ -817,7 +817,8 @@
   /* 교육 소식 */
   /* 큼직한 탭 */
   .etabs{display:flex;gap:8px;margin-bottom:14px}
-  .etab{flex:1;padding:12px 0;border:1px solid var(--line);background:#fff;
+  .etab{flex:1;padding:12px 4px;border:1px solid var(--line);background:#fff;
+    white-space:nowrap;font-size:13px;
     border-radius:12px;font-family:inherit;font-size:14.5px;font-weight:700;
     color:var(--dim);cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:background-color .2s,color .2s,border-color .2s}
@@ -2816,7 +2817,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=125"></script>
+<script src="/app.js?v=126"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -4062,8 +4063,8 @@ function openEdu(){
 
     h+='<div class="etabs">'
       + '<button class="etab'+(EDU_KIND===''?' on':'')+'" onclick="pickEdu(\'\')">전체</button>'
-      + '<button class="etab'+(EDU_KIND==='보수교육'?' on':'')+'" onclick="pickEdu(\'보수교육\')">교육</button>'
-      + '<button class="etab'+(EDU_KIND==='학술·행사'?' on':'')+'" onclick="pickEdu(\'학술·행사\')">학술</button>'
+      + '<button class="etab'+(EDU_KIND==='보수교육'?' on':'')+'" onclick="pickEdu(\'보수교육\')">보수교육</button>'
+      + '<button class="etab'+(EDU_KIND==='학술·행사'?' on':'')+'" onclick="pickEdu(\'학술·행사\')">교육 및 학술</button>'
       + '</div><div id="eduList"></div>';
 
     box.innerHTML=h;
@@ -4076,7 +4077,7 @@ function openEdu(){
 
 function pickEdu(k){
   EDU_KIND=k;
-  var names={'':'전체','보수교육':'교육','학술·행사':'학술'};
+  var names={'':'전체','보수교육':'보수교육','학술·행사':'교육 및 학술'};
   document.querySelectorAll('#pane-edu .etab').forEach(function(b){
     b.className='etab'+(b.textContent===names[k]?' on':'');
   });
