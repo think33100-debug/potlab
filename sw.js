@@ -1,61 +1,69 @@
-/* ============================================================
- * sw.js — 푸시 알림을 받는 일꾼
- * ------------------------------------------------------------
- * 브라우저가 꺼져 있어도 이 파일이 대신 깨어나 알림을 띄웁니다.
- * 저장소 맨 위(루트)에 두어야 사이트 전체를 맡을 수 있습니다.
- * ============================================================ */
+/* ═══════════════════════════════════════════════════════════════
+ *  POT JOB 서비스 워커
+ *
+ *  이 파일의 유일한 일은 「푸시 알림 받기」입니다.
+ *  화면(HTML·JS)은 절대 캐시하지 않습니다.
+ *
+ *  예전 sw.js 가 index.html 을 캐시하는 바람에, 새 코드를 올려도
+ *  옛 화면이 계속 떴습니다. 이 버전은 아무것도 캐시하지 않아서
+ *  항상 최신 화면이 뜹니다.
+ *
+ *  ── 올리는 법 ──
+ *  이 파일을 GitHub 저장소 맨 위(index.html 옆)에 sw.js 로 올리세요.
+ *  기존 sw.js 를 덮어씁니다.
+ * ═══════════════════════════════════════════════════════════════ */
 
-/* 이 줄이 바뀌면 브라우저가 새 파일로 알아차립니다.
-   sw.js 를 고칠 때마다 숫자를 올려주세요. */
-const SW_VER = 'v3 · 2026-08-28';
+const SW_VERSION = 'potjob-2026-09-03';
 
-/* 설치되면 기다리지 않고 바로 일을 시작합니다 */
-self.addEventListener('install', function (e) {
+/* 새 워커가 뜨면 기다리지 않고 바로 활성화합니다 */
+self.addEventListener('install', function () {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', function (e) {
-  e.waitUntil(self.clients.claim());
+/* 활성화되면 예전 캐시를 통째로 지웁니다.
+   과거 sw.js 가 만들어둔 화면 캐시를 여기서 청소합니다. */
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    caches.keys().then(function (names) {
+      return Promise.all(names.map(function (n) { return caches.delete(n); }));
+    }).then(function () {
+      return self.clients.claim();
+    })
+  );
 });
 
-/* 알림이 도착했을 때 */
-self.addEventListener('push', function (e) {
-  var d = {};
-  try { d = e.data ? e.data.json() : {}; } catch (err) { d = {}; }
+/* fetch 는 건드리지 않습니다.
+   여기에 캐시 로직이 있으면 옛 화면이 뜹니다. 그래서 아무것도 안 합니다.
+   모든 요청은 네트워크로 그대로 나갑니다 = 항상 최신. */
 
-  var title = d.title || 'POT JOB';
-  var opts = {
-    body: d.body || '새 소식이 있습니다',
-    /* 오른쪽 큰 그림 — 여기는 컬러 그대로 나옵니다 */
-    icon: '/icon-192.png',
-    /* 상태표시줄의 작은 표시.
-       안드로이드가 색을 지우고 모양만 남기므로 글자 P 하나만 씁니다.
-       그림을 넣으면 22픽셀에서 덩어리로 뭉개집니다. */
-    badge: '/badge-96.png',
-    tag: d.tag || 'potjob',          // 같은 tag 는 덮어씁니다 (알림이 쌓이지 않게)
-    renotify: true,
-    data: { url: d.url || '/' }
+/* ── 푸시 알림 ── */
+self.addEventListener('push', function (event) {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
+
+  const title = data.title || 'POT JOB';
+  const options = {
+    body: data.body || '새 소식이 있습니다',
+    icon: data.icon || '/icon-192.png',
+    badge: '/icon-192.png',
+    data: { url: data.url || 'https://potjob.co.kr/' },
+    tag: data.tag || 'potjob'
   };
-  e.waitUntil(self.registration.showNotification(title, opts));
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-/* 알림을 눌렀을 때 — 이미 열린 창이 있으면 그 창으로 */
-self.addEventListener('notificationclick', function (e) {
-  e.notification.close();
-  var url = (e.notification.data && e.notification.data.url) || '/';
-
-  e.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then(function (list) {
-        for (var i = 0; i < list.length; i++) {
-          var c = list[i];
-          if (c.url.indexOf(self.location.origin) === 0 && 'focus' in c) {
-            /* 이미 열려 있으면 새로 고치지 않고 화면만 바꿉니다 */
-            if (c.postMessage) c.postMessage({ go: url });
-            return c.focus();
-          }
+/* 알림을 누르면 앱을 엽니다 */
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || 'https://potjob.co.kr/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].url.indexOf('potjob.co.kr') > -1 && 'focus' in list[i]) {
+          return list[i].focus();
         }
-        if (self.clients.openWindow) return self.clients.openWindow(url);
-      })
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(url);
+    })
   );
 });
