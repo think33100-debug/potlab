@@ -475,6 +475,8 @@
      흔한 무단 전재(드래그 복사)는 걸러집니다. */
   .noselect{-webkit-user-select:none;-moz-user-select:none;user-select:none;
     -webkit-touch-callout:none}
+  .nopehint{font-size:11.5px;color:var(--dim);font-weight:600;margin-left:6px;
+    background:#f0f3f3;border-radius:20px;padding:2px 8px;white-space:nowrap}
   /* 로딩 스켈레톤 — "찾는 중" 글자보다 자리가 먼저 보여 덜 답답합니다 */
   .skel{margin-top:12px;background:#fff;border:1px solid var(--line);
     border-radius:13px;padding:16px}
@@ -2838,7 +2840,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=132"></script>
+<script src="/app.js?v=134"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3687,14 +3689,22 @@ function openComm(ch){
   CH_NOW = ch || '';
   tab('comm');
   var box=document.getElementById('commBox');
-  box.innerHTML=loading('불러오는 중');
+
+  /* 이번 세션에 본 채널이 있으면 즉시 표시, 뒤에서 갱신 */
+  var shown=false;
+  try{
+    var c=sessionStorage.getItem('comm_ch');
+    if(c){ var r0=JSON.parse(c); CH_LIST=r0.rows||[]; drawComm(r0); shown=true; }
+  }catch(e){}
+  if(!shown) box.innerHTML=loading('불러오는 중');
 
   google.script.run.withSuccessHandler(function(r){
-    if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+    if(!r.ok){ if(!shown){ box.innerHTML=failCard(r); attachRipple(); } return; }
+    try{ sessionStorage.setItem('comm_ch', JSON.stringify(r)); }catch(e){}
     CH_LIST = r.rows||[];
     drawComm(r);
   }).withFailureHandler(function(e){
-    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
+    if(!shown) box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
   }).commChannels(cred());
 }
 
@@ -3921,6 +3931,7 @@ function cwSend(){
       return;
     }
     CH_NOW=ch;
+    try{ sessionStorage.removeItem('comm_ch'); }catch(e){}  // 내 새 글 바로 보이게
     openComm(ch);
     celebrate('✍️', '올렸습니다', '치료사들이 곧 볼 거예요');
   }).withFailureHandler(function(e){ msg(e.message); })
@@ -4194,6 +4205,17 @@ function openStars(){
   }).myStars(cred());
 }
 
+/* 뽑는 인원 표시. 여러 직군 통합이면 그걸 알려줍니다. */
+function nopeLabel(x){
+  if(!x.nope) return '';
+  var jobs = x.alljobs || [];
+  var others = jobs.filter(function(j){ return j!=='작업치료사' && j!=='물리치료사'; });
+  var ours = jobs.filter(function(j){ return j==='작업치료사' || j==='물리치료사'; });
+  if(jobs.length<=1 || others.length===0) return x.nope+'명';
+  var ourTxt = ours.map(function(j){ return j==='작업치료사'?'작업':'물리'; }).join('·');
+  return x.nope+'명 <span class="nopehint">'+ourTxt+' 외 '+others.length+'직군 통합</span>';
+}
+
 function openJob(id){
   var x=POST_MAP[id];
   if(!x){ msg('공고를 찾지 못했습니다'); return; }
@@ -4220,7 +4242,7 @@ function openJob(id){
     + line('고용 형태', x.hire)
     + line('근무 지역', x.region)
     + line('학력', x.edu)
-    + line('뽑는 인원', x.nope?x.nope+'명':'')
+    + line('뽑는 인원', nopeLabel(x))
     + line('접수 시작', x.from)
     + line('접수 마감', x.to)
     + (x.prevFrom
