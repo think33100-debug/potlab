@@ -475,6 +475,11 @@
      흔한 무단 전재(드래그 복사)는 걸러집니다. */
   .noselect{-webkit-user-select:none;-moz-user-select:none;user-select:none;
     -webkit-touch-callout:none}
+  .miniload{font-size:13px;color:var(--dim);margin:14px 0 0;padding:2px}
+  .miniload .dots i{animation:blink 1.2s infinite}
+  .miniload .dots i:nth-child(2){animation-delay:.2s}
+  .miniload .dots i:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
   /* 조회 제한 경고 */
   .blockcard{background:#fff;border:1px solid #f0d6d2;border-radius:16px;
     padding:30px 22px;text-align:center;margin-top:8px}
@@ -2811,7 +2816,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=123"></script>
+<script src="/app.js?v=125"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3278,6 +3283,7 @@ function tab(which, back){
   drawBackBar(which);
   drawAddBar();
   if(which==='dash' && !BOOT_DASH){ drawDash(); setTimeout(checkNewJobs, 400); }
+  if(which==='me'){ loadMeData(); }
   if(which==='region'){ if(!(back && restore('region'))) doRegion(); }
   if(which==='jobs') drawJobLinks();
   if(which==='view'){
@@ -3466,37 +3472,41 @@ function sp(k,v,acc,tag){
 }
 
 var DASH_BUSY = false;
+/* 대시보드는 인사말 + 메뉴만 그립니다.
+   내 위치·이직·통계는 안 보이는 화면이라 여기서 안 부릅니다.
+   그것들은 「내 정보 확인하기」(me 탭)를 열 때만 부릅니다.
+   → 대시보드 진입이 3번 왕복에서 0번으로 줄어 즉시 뜹니다. */
 function drawDash(){
-  /* 이미 그리는 중이면 겹쳐 그리지 않습니다.
-     겹치면 화면이 올라왔다가 다시 "불러오는 중"으로 되돌아갑니다. */
-  if(DASH_BUSY) return;
-  DASH_BUSY = true;
-
   if(BN.list.length) paintBanner();
   var box=document.getElementById('dashBox');
-  /* 이미 불러오는 중이면 그대로 둡니다 */
-  if(box.innerHTML.indexOf('loadwrap') < 0){
-    box.innerHTML='<div class="loadwrap"><div class="spin"></div>'
-      + '<p>'+esc((ME&&ME.nick)||'')+'님 정보를 불러오는 중입니다</p></div>';
-  }
+  box.innerHTML=welcomeCard();
   drawDashMenu();
+  revealIn();
+}
+
+/* 내 정보 화면을 열 때 통계를 불러옵니다 (한 번만, 캐시) */
+var ME_LOADED = false;
+function loadMeData(force){
+  var box=document.getElementById('meBox');
+  if(!box) return;
+  if(ME_LOADED && !force) return;     // 이미 불렀으면 다시 안 부름
+
+  box.innerHTML='<div class="loadwrap"><div class="spin"></div>'
+    + '<p>불러오는 중입니다</p></div>';
+
   google.script.run.withSuccessHandler(function(r){
-    DASH_BUSY = false;
     if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
-    box.innerHTML=welcomeCard();
-    var mb=document.getElementById('meBox');
-    if(mb) mb.innerHTML = mySpecCard(r.me) + meCard(r);
+    ME_LOADED = true;
+    box.innerHTML = mySpecCard(r.me) + meCard(r);
     revealIn(); animateNumbers(); slidePins();
+
     google.script.run.withSuccessHandler(drawMove).getMoveEstimate(cred());
     google.script.run.withSuccessHandler(function(bd){
       if(!bd||!bd.ok) return;
-      // 서버가 알려준 역할이 기기 저장값과 다르면 맞춰둡니다
-      if(ME && bd.role && ME.role!==bd.role){
-        ME.role = bd.role; saveMe(ME);
-      }
+      if(ME && bd.role && ME.role!==bd.role){ ME.role = bd.role; saveMe(ME); }
       if(bd.role==='학생'){
         showStudent(bd.student);
-        document.getElementById('hourlyBox').innerHTML='';
+        var hb=document.getElementById('hourlyBox'); if(hb) hb.innerHTML='';
         drawStudentCard(bd.card);
       } else {
         showPos(bd.position); showHourly(bd.hourly);
@@ -3504,7 +3514,6 @@ function drawDash(){
       }
     }).getResultBundle(cred(), (ME&&ME.id)||'', (ME&&ME.role)||'현직');
   }).withFailureHandler(function(e){
-    DASH_BUSY = false;
     box.innerHTML='<div class="card"><p class="sub">'+esc(e.message)+'</p></div>';
   }).getStats(cred(), {job:(ME&&ME.job)||JOB});
 }
@@ -4239,7 +4248,7 @@ function loadStarsOnce(id){
 function loadJobMore(id){
   var box=document.getElementById('jobMore');
   if(!box) return;
-  box.innerHTML='<p class="thin" style="margin:12px 0 0">자세한 내용을 불러오는 중입니다</p>';
+  box.innerHTML='<div class="miniload">자세한 내용 불러오는 중<span class="dots"><i>.</i><i>.</i><i>.</i></span></div>';
 
   google.script.run.withSuccessHandler(function(r){
     if(!r || !r.ok){ box.innerHTML=''; return; }
@@ -4364,7 +4373,7 @@ function loadJobHosp(x){
   if(!box || !x) return;
   var org=x.org||'';
   if(!org && !x.title) return;
-  box.innerHTML='<p class="thin" style="margin:12px 0 0">병원 정보를 찾는 중입니다</p>';
+  box.innerHTML='<div class="miniload">병원 정보를 찾는 중<span class="dots"><i>.</i><i>.</i><i>.</i></span></div>';
 
   google.script.run.withSuccessHandler(function(hp){
     if(!hp || !hp.ok){ box.innerHTML=''; return; }
@@ -6873,6 +6882,9 @@ function backToList(){
 }
 
 function openHosp(idx){
+  /* 공고 상세 등 다른 화면에서 눌러도 병원 화면으로 넘어갑니다.
+     이게 없으면 hospBox 가 안 보이는 화면에서 눌러 반응이 없어 보입니다. */
+  if(CURRENT !== 'hosp') tab('hosp');
   var cur=document.getElementById('hospBox');
   if(cur && cur.innerHTML.indexOf('hpick')>-1) LIST_HTML = cur.innerHTML;
   var box=document.getElementById('hospBox');
