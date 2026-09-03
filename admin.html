@@ -136,6 +136,7 @@
       <button class="tb" data-f="banner" onclick="openBanner()">배너 관리</button>
       <button class="tb" data-f="comm" onclick="openComm2('all')">커뮤니티<span class="n" id="c-comm"></span></button>
       <button class="tb" data-f="menu" onclick="openMenu()">메뉴 순서</button>
+      <button class="tb" data-f="access" onclick="openAccess()">이상 조회</button>
     </div>
     <div id="list"><div class="loading">불러오는 중</div></div>
 
@@ -146,6 +147,13 @@
         <button class="tb" id="cm-all" onclick="openComm2('all')">전체</button>
       </div>
       <div id="commList"></div>
+    </div>
+
+    <div id="accessWrap" class="hide">
+      <p class="bhelp">짧은 시간에 지나치게 많이 조회한 계정입니다.
+        분당 20번을 넘으면 기록하고, 40번을 넘으면 잠깐 막습니다.
+        <b>자동 수집이 의심되는 계정</b>을 여기서 확인하세요.</p>
+      <div id="accessList"></div>
     </div>
 
     <div id="menuWrap" class="hide">
@@ -171,7 +179,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=118"></script>
+<script src="/app.js?v=123"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -341,7 +349,7 @@ function saveBanners(){
 
 /* ===== 커뮤니티 관리 ===== */
 function shell(which){
-  ['list','bannerWrap','commWrap','menuWrap'].forEach(function(id){
+  ['list','bannerWrap','commWrap','menuWrap','accessWrap'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.className = (id===which ? '' : 'hide');
   });
@@ -455,6 +463,34 @@ function saveMenu(){
   google.script.run.withSuccessHandler(function(r){
     msg(r.message||'저장했습니다');
   }).withFailureHandler(function(e){ msg(e.message); }).adminSaveMenu(KEY, MN);
+}
+
+/* ===== 이상 조회 ===== */
+function openAccess(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className = 'tb' + (b.dataset.f==='access' ? ' on' : '');
+  });
+  shell('accessWrap');
+  document.getElementById('accessList').innerHTML = '<div class="loading">불러오는 중</div>';
+
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    var box=document.getElementById('accessList');
+    if(!r.rows.length){
+      box.innerHTML='<p class="bempty">이상 조회한 계정이 없습니다.</p>';
+      return;
+    }
+    box.innerHTML = r.rows.map(function(x){
+      return '<div class="cwq'+(x.blocked?' rep':'')+'">'
+        + '<div class="ch">'+esc(x.date)+' · 마지막 '+esc(x.last)
+        + (x.blocked?' · 차단됨':'')+'</div>'
+        + '<div class="tt">'+esc(x.nick||'(닉네임 없음)')+'</div>'
+        + '<div class="mt">최다 분당 '+x.peak+'번 조회'
+        + (x.blocked?' · 40번 넘겨 잠시 막힘':' · 지켜보는 중')+'</div></div>';
+    }).join('');
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminAccessLog(KEY);
 }
 
 /* 목록 탭을 누르면 다른 화면을 닫습니다 */

@@ -55,8 +55,13 @@
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
-    font-size:15px;line-height:1.6}
-  .wrap{max-width:640px;margin:0 auto;padding:16px 14px 70px}
+    font-size:15px;line-height:1.6;
+    /* 아이폰 노치·홈바: 안전영역만큼 안쪽으로 들입니다 */
+    padding-top:env(safe-area-inset-top);
+    padding-left:env(safe-area-inset-left);
+    padding-right:env(safe-area-inset-right)}
+  .wrap{max-width:640px;margin:0 auto;
+    padding:16px 14px calc(70px + env(safe-area-inset-bottom))}
 
   .hero{margin-bottom:18px}
   .hero h1{font-size:20px;margin:0 0 6px;letter-spacing:-.03em;font-weight:800}
@@ -465,6 +470,25 @@
   .cpost .cmt b{color:var(--dim);font-weight:700}
 
   .cbody{font-size:15px;line-height:1.85;white-space:pre-wrap;word-break:break-word}
+  /* 남의 글이 드래그로 통째로 긁혀 나가지 않게 합니다.
+     캡처나 손으로 옮겨적는 것까지 막지는 못하지만,
+     흔한 무단 전재(드래그 복사)는 걸러집니다. */
+  .noselect{-webkit-user-select:none;-moz-user-select:none;user-select:none;
+    -webkit-touch-callout:none}
+  /* 조회 제한 경고 */
+  .blockcard{background:#fff;border:1px solid #f0d6d2;border-radius:16px;
+    padding:30px 22px;text-align:center;margin-top:8px}
+  .blockcard .bkic{font-size:42px;line-height:1}
+  .blockcard h3{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:12px 0 8px;
+    color:var(--warn)}
+  .blockcard p{font-size:14px;line-height:1.75;color:#3f4c52;margin:0}
+  .blockcard .bkwarn{margin-top:16px;background:var(--warn-soft);border-radius:10px;
+    padding:12px 14px;font-size:12.5px;color:var(--warn);font-weight:700;line-height:1.6}
+  .hshare{width:100%;margin-top:14px;padding:14px;border:1px solid #c9e2da;
+    background:var(--accent-soft);color:var(--accent);border-radius:12px;
+    font-family:inherit;font-size:14.5px;font-weight:800;cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .hshare:active{transform:scale(.98)}
   .cvhead{border-bottom:1px solid var(--line);padding-bottom:13px;margin-bottom:15px}
   .cvhead h2{margin:6px 0 8px}
   .cvact{display:flex;gap:8px;margin-top:20px}
@@ -472,7 +496,7 @@
     border-radius:10px;font-family:inherit;font-size:13.5px;cursor:pointer;color:var(--dim)}
   .cvact button.del{color:var(--warn);border-color:#f0d6d2}
 
-  .cwrite{position:fixed;right:16px;bottom:88px;z-index:8;
+  .cwrite{position:fixed;right:16px;bottom:calc(24px + env(safe-area-inset-bottom));z-index:8;
     background:var(--accent);color:#fff;border:0;border-radius:30px;
     padding:14px 20px;font-family:inherit;font-size:14.5px;font-weight:800;
     box-shadow:0 6px 18px rgba(13,92,79,.28);cursor:pointer}
@@ -504,6 +528,9 @@
   #splash{position:fixed;inset:0;z-index:9999;background:var(--accent);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     color:#fff;text-align:center;padding:0 28px;
+    /* 아이폰 노치·홈바 영역까지 초록으로 덮습니다 */
+    padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+    height:100vh;height:100dvh;
     transition:opacity .34s ease}
   #splash.out{opacity:0;pointer-events:none}
   #splash .lg{font-size:32px;font-weight:800;letter-spacing:.04em;
@@ -783,8 +810,16 @@
   .avb.co.on{box-shadow:0 0 0 3px var(--accent-soft);border-color:var(--accent)}
 
   /* 교육 소식 */
-  .edu{display:block;background:#fff;border:1px solid var(--line);border-radius:13px;
-    padding:14px 15px;margin-bottom:8px;text-decoration:none;color:inherit;
+  /* 큼직한 탭 */
+  .etabs{display:flex;gap:8px;margin-bottom:14px}
+  .etab{flex:1;padding:12px 0;border:1px solid var(--line);background:#fff;
+    border-radius:12px;font-family:inherit;font-size:14.5px;font-weight:700;
+    color:var(--dim);cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:background-color .2s,color .2s,border-color .2s}
+  .etab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .edu{display:block;background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:16px;margin-bottom:10px;text-decoration:none;color:inherit;
     -webkit-tap-highlight-color:transparent;transition:transform .2s,border-color .2s}
   .edu:active{transform:scale(.99)}
   .ehead{display:flex;align-items:center;gap:8px;margin-bottom:7px}
@@ -792,8 +827,8 @@
   .ek.k1{background:#fdf1e8;color:#b06f2c}
   .ek.k2{background:var(--accent-soft);color:var(--accent)}
   .ed{font-size:11.5px;color:#9aa6ab;margin-left:auto}
-  .et{font-size:14.5px;font-weight:700;letter-spacing:-.01em;line-height:1.5;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .et{font-size:15px;font-weight:700;letter-spacing:-.01em;line-height:1.6;
+    word-break:keep-all;margin:2px 0}
   .ef{font-size:12px;color:var(--accent);font-weight:700;margin-top:8px}
 
   .empty2{border:1px dashed var(--line);border-radius:13px;padding:34px 20px;
@@ -2776,7 +2811,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=118"></script>
+<script src="/app.js?v=123"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3728,7 +3763,7 @@ function cvOpen(id){
       + '<p class="thin" style="margin:0">'+avOf(r.av,r.nick,24)
       + ' <b>'+esc(r.nick)+'</b> · '
       + esc(r.job||'')+(r.role==='학생'?' 학생':'')+' · '+esc(r.at)+'</p></div>'
-      + '<div class="cbody">'+esc(r.body)+'</div>'
+      + '<div class="cbody noselect">'+esc(r.body)+'</div>'
       + '<div class="likebar">'
       + '<button class="likebtn'+(r.liked?' on':'')+'" id="likeBtn" onclick="cvLike()">'
       + ico('heart')+'<b>'+(r.likes||0)+'</b></button>'
@@ -3738,6 +3773,7 @@ function cvOpen(id){
       + (r.mine
           ? '<button class="del" onclick="cvDel()">글 지우기</button>'
           : '<button onclick="cvReport()">신고하기</button>')
+      + '<button onclick="shareComm()">공유</button>'
       + '<button onclick="openComm(CH_NOW)">목록으로</button>'
       + '</div>'
       + drawCmts(r.comments||[])
@@ -3746,6 +3782,18 @@ function cvOpen(id){
   }).withFailureHandler(function(e){
     box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
   }).commRead(cred(), id);
+}
+
+/* 글 공유 — 링크만 보냅니다. 본문은 안 실어 보냅니다.
+   받는 사람도 로그인해야 볼 수 있어서 그대로 퍼지지 않습니다. */
+function shareComm(){
+  var url='https://potjob.co.kr/';
+  var text='POT 커뮤니티에 이런 글이 올라왔어요';
+  if(navigator.share){
+    navigator.share({ title:'POT JOB', text:text, url:url }).catch(function(){});
+  }else{
+    copyText(url, '링크를 복사했습니다');
+  }
 }
 
 function cvLike(){
@@ -4003,10 +4051,10 @@ function openEdu(){
       + '<p class="sub">협회 보수교육과 학회·세미나 소식입니다. '
       + '누르면 협회 홈페이지 원문으로 갑니다.</p></div>';
 
-    h+='<div class="chbar">'
-      + '<button class="chip3'+(EDU_KIND===''?' on':'')+'" data-k="" onclick="pickEdu(\'\')">전체</button>'
-      + '<button class="chip3'+(EDU_KIND==='보수교육'?' on':'')+'" data-k="보수교육" onclick="pickEdu(\'보수교육\')">보수교육</button>'
-      + '<button class="chip3'+(EDU_KIND==='학술·행사'?' on':'')+'" data-k="학술·행사" onclick="pickEdu(\'학술·행사\')">학술·행사</button>'
+    h+='<div class="etabs">'
+      + '<button class="etab'+(EDU_KIND===''?' on':'')+'" onclick="pickEdu(\'\')">전체</button>'
+      + '<button class="etab'+(EDU_KIND==='보수교육'?' on':'')+'" onclick="pickEdu(\'보수교육\')">교육</button>'
+      + '<button class="etab'+(EDU_KIND==='학술·행사'?' on':'')+'" onclick="pickEdu(\'학술·행사\')">학술</button>'
       + '</div><div id="eduList"></div>';
 
     box.innerHTML=h;
@@ -4019,8 +4067,9 @@ function openEdu(){
 
 function pickEdu(k){
   EDU_KIND=k;
-  document.querySelectorAll('#pane-edu .chip3').forEach(function(b){
-    b.className='chip3'+((b.getAttribute('data-k')||'')===k?' on':'');
+  var names={'':'전체','보수교육':'교육','학술·행사':'학술'};
+  document.querySelectorAll('#pane-edu .etab').forEach(function(b){
+    b.className='etab'+(b.textContent===names[k]?' on':'');
   });
   var box=document.getElementById('eduList');
   if(box) box.innerHTML=loading('불러오는 중');
@@ -5872,6 +5921,19 @@ function retryLogin(){
 
 function failCard(r){
   if(r.reason==='empty') return '<div class="card"><p class="sub">'+esc(r.message)+'</p></div>';
+
+  /* 조회가 너무 잦아 막힌 경우 — 이유와 경고를 함께 보여줍니다 */
+  if(r.reason==='busy'){
+    return '<div class="blockcard">'
+      + '<div class="bkic">🚫</div>'
+      + '<h3>잠시 멈췄습니다</h3>'
+      + '<p>짧은 시간에 너무 많이 조회해서 잠시 이용이 제한됐습니다.<br>'
+      + '<b>1분 뒤에 다시 접속</b>해주세요.</p>'
+      + '<div class="bkwarn">이런 행동이 계속되면 계정 이용이 '
+      + '영구히 제한될 수 있습니다.</div>'
+      + '</div>';
+  }
+
   // 코드·닉네임 문제가 아니면 입력값 안내로 보여줍니다
   if(!r.reason){
     return '<div class="warnbox" style="margin-top:0">'+esc(r.message||'다시 확인해주세요')+'</div>';
@@ -6887,8 +6949,25 @@ function drawHospDetail(x){
      + '</div>';
   }
 
+  /* 공유 — 병원 자료를 긁는 게 아니라, 우리 페이지에서 보게 링크만 보냅니다.
+     받는 사람도 로그인해야 봅니다. */
+  t += '<button class="hshare" onclick="shareHosp('
+    + (x.idx!=null?x.idx:-1) + ',\''+esc(x.name).replace(/\\/g,'').replace(/'/g,"\\'")+'\')">'
+    + '이 병원 정보 공유하기</button>';
+
   box.innerHTML=t;
   attachRipple(); revealIn('#pane-hosp'); animateNumbers('#hospBox'); slidePins('#hospBox');
+}
+
+/* 병원 공유 — 우리 페이지 링크만. 자료 자체는 안 넘깁니다. */
+function shareHosp(idx, name){
+  var url='https://potjob.co.kr/';
+  var text=(name||'이 병원')+'의 치료사 인원·업무 강도를 POT JOB 에서 확인하세요';
+  if(navigator.share){
+    navigator.share({ title:'POT JOB', text:text, url:url }).catch(function(){});
+  }else{
+    copyText(url, '링크를 복사했습니다');
+  }
 }
 
 /* ===== 지역으로 찾기 ===== */
@@ -7671,16 +7750,24 @@ HOSPITALS.forEach(function(v){
   document.getElementById('fType').innerHTML+='<option>'+v+'</option>';
   document.getElementById('wantType').innerHTML+='<option>'+v+'</option>';
 });
-/* 첫 화면을 잠깐 보여주고 접습니다 */
+/* 첫 화면 — 처음 오신 분에게만 온전히 보여줍니다.
+   이미 다녀간 분은 새로고침 때마다 3초씩 기다리면 짜증나므로 스쳐 보냅니다. */
 (function(){
   var sp=document.getElementById('splash');
   if(!sp) return;
+
+  var seen=false;
+  try{ seen = localStorage.getItem('potjob_splash')==='1'; }catch(e){}
   var reduce = window.matchMedia
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var wait = reduce ? 200 : (seen ? 550 : 2600);
+  if(!seen){ try{ localStorage.setItem('potjob_splash','1'); }catch(e){} }
+
   setTimeout(function(){
     sp.className='out';
-    setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); }, 400);
-  }, reduce ? 300 : 3200);
+    setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); }, 380);
+  }, wait);
 })();
 
 loadToken();
