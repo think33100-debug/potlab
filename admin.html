@@ -177,6 +177,7 @@
         <button class="tb on" id="jb-live" onclick="openJobs('live')">접수 중</button>
         <button class="tb" id="jb-all" onclick="openJobs('all')">전체</button>
         <button class="tb" id="jb-fixed" onclick="openJobs('fixed')">고친 것</button>
+        <button class="tb" id="jb-suspect" onclick="openJobs('suspect')">정리 후보</button>
         <button class="tb" id="jb-hidden" onclick="openJobs('hidden')">숨긴 것</button>
       </div>
       <div class="jsrch">
@@ -184,6 +185,7 @@
           onkeydown="if(event.key==='Enter')openJobs(J_SPAN)">
         <button onclick="openJobs(J_SPAN)">찾기</button>
       </div>
+      <div id="jobsHelp" class="hide"></div>
       <div id="jobsList"></div>
     </div>
 
@@ -226,7 +228,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=138"></script>
+<script src="/app.js?v=139"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -542,6 +544,7 @@ function openAccess(){
 
 /* ===== 공고 관리 ===== */
 var J_SPAN = 'live';
+var J_ROWS = [];
 var J_OPEN = '';          // 지금 펼쳐놓은 공고
 var J_FORM = null;        // 펼친 공고의 원래 값·고친 값
 
@@ -568,7 +571,7 @@ function openJobs(span){
   document.querySelectorAll('.tabs .tb').forEach(function(b){
     if(b.dataset.f) b.className = 'tb' + (b.dataset.f==='jobs' ? ' on' : '');
   });
-  ['live','all','fixed','hidden'].forEach(function(k){
+  ['live','all','fixed','suspect','hidden'].forEach(function(k){
     var el=document.getElementById('jb-'+k);
     if(el) el.className = 'tb' + (k===J_SPAN ? ' on' : '');
   });
@@ -580,15 +583,53 @@ function openJobs(span){
     if(!r.ok){ msg(r.message); return; }
     var el=document.getElementById('c-jobs');
     if(el) el.textContent = r.counts.live || '';
+    J_ROWS = r.rows;
+    drawJobsHelp(r.counts);
     drawJobs(r.rows);
   }).withFailureHandler(function(e){ msg(e.message); })
     .adminJobList(KEY, q, J_SPAN);
 }
 
+/* 「정리 후보」 안내와 전부 숨기기 단추 */
+function drawJobsHelp(counts){
+  var box=document.getElementById('jobsHelp');
+  if(!box) return;
+  if(J_SPAN!=='suspect'){ box.className='hide'; box.innerHTML=''; return; }
+  box.className='';
+  var n=(J_ROWS||[]).length;
+  box.innerHTML='<p class="bhelp">제목에 <b>우리 직군이 아닌 자격</b>이 적힌 공고입니다. '
+    + '언어재활사·간호사·임상병리사 같은 것들입니다.<br>'
+    + '여러 자리를 함께 뽑는 공고(공개채용·괄호에 자리 여럿)는 '
+    + '「보건직」 안에 우리 직군이 묶여 있을 수 있어 여기 안 나옵니다.<br>'
+    + '<b>하나씩 제목을 보고</b> 숨기세요. 지우는 게 아니라 숨기는 것이라 '
+    + '「숨긴 것」에서 언제든 되돌릴 수 있습니다.</p>'
+    + (n ? '<div class="brow2" style="margin-bottom:10px">'
+         + '<button class="save" style="background:#a8402a" onclick="hideAllSuspect()">'
+         + '이 ' + n + '건 모두 숨기기</button></div>'
+       : '');
+}
+
+function hideAllSuspect(){
+  var rows=J_ROWS||[];
+  if(!rows.length){ msg('숨길 공고가 없습니다'); return; }
+  if(!confirm(rows.length + '건을 모두 숨길까요?\n\n'
+    + '지워지지 않고 「숨긴 것」에서 되돌릴 수 있습니다.')) return;
+  var ids=rows.map(function(r){ return r.id; });
+  msg('숨기는 중입니다');
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    msg(r.hidden + '건을 숨겼습니다');
+    openJobs('suspect');
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminJobHideMany(KEY, ids, '우리 직군 아님');
+}
+
 function drawJobs(rows){
   var box=document.getElementById('jobsList');
   if(!rows.length){
-    box.innerHTML='<div class="empty">해당하는 공고가 없습니다</div>';
+    box.innerHTML='<div class="empty">'
+      + (J_SPAN==='suspect' ? '정리할 공고가 없습니다. 깨끗합니다.'
+                            : '해당하는 공고가 없습니다')+'</div>';
     return;
   }
   box.innerHTML = rows.map(function(r){
