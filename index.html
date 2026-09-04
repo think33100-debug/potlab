@@ -1546,6 +1546,12 @@
   @keyframes bfade{from{opacity:0}to{opacity:1}}
   .copy{display:block;margin-top:10px;font-size:11px;color:#8b979d;letter-spacing:-.01em}
   .ver{display:block;margin-top:4px;font-size:10.5px;color:#b3bcc0}
+  /* 신입 초임 — 숫자 하나만 크게 */
+  .paybig{font-size:38px;font-weight:800;letter-spacing:-.04em;color:var(--accent);
+    line-height:1.15;margin:6px 0 6px}
+  .paybig em{font-style:normal;font-size:17px;font-weight:700;margin-left:4px;
+    letter-spacing:-.02em}
+  .paynote{font-size:12px;color:var(--dim);line-height:1.6;word-break:keep-all}
   .copyfoot{text-align:center;font-size:11px;color:#8b979d;letter-spacing:-.01em;
     margin:26px 0 8px;line-height:1.7}
   .copyfoot .regno{font-size:10px;color:#a8b2b6}
@@ -2916,7 +2922,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v94 · 2026-09-04';
+var APP_VER = 'v95 · 2026-09-04';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -4365,13 +4371,9 @@ function openJob(id){
 
   document.getElementById('jobBox').innerHTML=h;
   attachRipple(); revealIn();
-  /* 상세가 없는 공고(나라일터 등)는 서버를 다녀올 것 없이
-     바로 안내만 띄웁니다. 칸 자체는 어느 공고에나 있어야 합니다. */
-  if(x.hasMore) loadJobMore(x.id);
-  else {
-    var mb=document.getElementById('jobMore');
-    if(mb) mb.innerHTML=jobMore({ ok:true, site:x.url||'' });
-  }
+  /* 초임은 서버(jobOne)에서만 옵니다.
+     상세가 없는 공고라도 불러야 초임이 뜹니다. */
+  loadJobMore(x.id);
   loadJobHosp(x);
   loadStarsOnce(x.id);
 }
@@ -4475,67 +4477,17 @@ function leftDays(v){
 /* ── 자세한 내용 ─────────────────────────────────────
    지원자격·우대사항 같은 건 길어서 접어둡니다. */
 function jobMore(x){
-  var items=[
-    ['지원 자격', x.qual],
-    ['전형 방법', x.how],
-    ['필요 자격증', x.lic],
-    ['우대 사항', x.pref],
-    ['제출 서류', x.docs],
-    ['접수 방법', x.howto],
-    ['결격 사유', x.dis]
-  ].filter(function(p){ return p[1] && String(p[1]).trim(); });
+  /* 지원자격·전형방법 같은 건 공고문에 다 있습니다. 여기서는 안 보여줍니다.
+     이 칸의 일은 하나 — 이 기관 신입사원 평균 초임을 딱 알려주는 것입니다. */
+  if(!x.basePay) return '';
 
-  /* 연봉 자리에 URL 이 잘못 들어간 옛 공고가 있어서, http 로 시작하면 무시합니다.
-     (수집 코드는 고쳤지만 이미 밀려 저장된 공고 대비) */
-  var quick=[];
-  var payOk = x.pay && !/^https?:\/\//i.test(String(x.pay).trim());
-  if(payOk) quick.push(['연봉', x.pay]);
-  if(x.tel && !/^https?:\/\//i.test(String(x.tel).trim())) quick.push(['문의처', x.tel]);
-
-  /* 공고에 연봉이 없으면 그 기관의 신입사원 평균 초임을 참고로 보여줍니다.
-     직군을 가리지 않은 기관 전체 평균이라 그 점을 반드시 밝힙니다. */
-  var baseBox='';
-  if(!payOk && x.basePay){
-    baseBox='<div class="basis"><b>이 기관 신입사원 평균 초임</b>'
-      + '약 ' + esc(String(x.basePay)) + '만원'
-      + (x.baseYear ? ' (' + esc(x.baseYear) + '년 공시)' : '')
-      + '<br>작업치료사·물리치료사만의 초임이 아니라 '
-      + '<b>이 기관 신입사원 전체 평균</b>입니다. '
-      + '직군과 고용형태에 따라 다릅니다. 실제 급여는 공고문을 확인해주세요.</div>';
-  }
-
-  /* 자세한 내용은 어느 공고에나 보여줍니다.
-     어떤 공고는 있고 어떤 공고는 아예 칸이 없으면 빠뜨린 것처럼 보입니다.
-     받아온 게 없으면 공고문을 보라고 안내합니다. */
-  var h='<div class="card"><h2>자세한 내용</h2>';
-
-  if(quick.length){
-    h+='<div class="qrow">'+quick.map(function(q){
-      return '<div class="qb"><div class="k">'+esc(q[0])+'</div>'
-        + '<div class="v">'+esc(q[1])+'</div></div>';
-    }).join('')+'</div>';
-  }
-
-  h+=baseBox;
-
-  if(items.length){
-    items.forEach(function(p,i){
-      h+='<div class="acc" id="acc'+i+'">'
-        + '<button class="ach" onclick="accToggle('+i+')">'
-        + '<b>'+esc(p[0])+'</b><span class="arw">›</span></button>'
-        + '<div class="acb"><p>'+esc(p[1])+'</p></div></div>';
-    });
-  } else {
-    h+='<p class="sub" style="margin:0">지원 자격 · 전형 방법 · 제출 서류는 '
-      + '이 공고에서 받아오지 못했습니다. '
-      + '아래 「공고 확인하러 가기」에서 공고문으로 보실 수 있습니다.</p>';
-  }
-
-  if(x.site){
-    h+='<a class="sitelink" href="'+esc(x.site)+'" target="_blank" rel="noopener">'
-      + '기관 채용 홈페이지 ›</a>';
-  }
-  return h+'</div>';
+  var won = Number(x.basePay).toLocaleString('ko-KR');
+  return '<div class="card">'
+    + '<h2>이 기관 신입사원 평균 초임</h2>'
+    + '<div class="paybig">' + won + '<em>만원</em></div>'
+    + '<div class="paynote">직군 구분 없는 기관 전체 평균입니다'
+    + (x.baseYear ? ' · ' + esc(x.baseYear) + '년 공시' : '') + '</div>'
+    + '</div>';
 }
 
 function accToggle(i){
