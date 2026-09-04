@@ -478,30 +478,39 @@
   /* 시작 화면 — 로고가 먼저 뜨고, 그 아래 배너(전자책)가 자연스럽게 이어짐 */
   /* 시작 화면 — 로고가 가운데서 스르르 떴다가, 자료가 오면 스르르 사라집니다.
      홈 화면 조각이 그대로 비치면 어수선해 보여서 화면 가운데를 통째로 씁니다. */
-  .bootwrap{min-height:62vh;display:flex;flex-direction:column;
+  .bootwrap{min-height:60vh;display:flex;flex-direction:column;
     align-items:center;justify-content:center;text-align:center;
-    padding:24px 0;transition:opacity .34s ease, transform .34s ease}
-  .bootwrap.out{opacity:0;transform:translateY(-8px)}
+    padding:20px 0;transition:opacity .38s ease, transform .38s ease}
+  .bootwrap.out{opacity:0;transform:translateY(-10px)}
+  /* 로고 그림 — /logo-wordmark.png 를 올리면 이게 뜨고,
+     없으면 아래 글자 로고가 대신 뜹니다 */
+  .bootimg{width:172px;max-width:56vw;height:auto;display:block;
+    animation:bootIn .55s cubic-bezier(.2,.9,.25,1) both}
   .bootlogo{font-size:30px;font-weight:800;letter-spacing:.03em;color:var(--accent);
-    animation:bootIn .5s cubic-bezier(.2,.9,.25,1) both}
-  .boottag{font-size:13px;color:var(--dim);margin-top:8px;
-    animation:bootIn .5s cubic-bezier(.2,.9,.25,1) .14s both}
+    animation:bootIn .55s cubic-bezier(.2,.9,.25,1) both}
+  .boottag{font-size:13px;color:var(--dim);margin-top:10px;
+    animation:bootIn .55s cubic-bezier(.2,.9,.25,1) .16s both}
   /* 로고 아래에서 좌우로 천천히 오가는 줄 — 기다리는 동안 볼 것을 줍니다 */
-  .bootbar{width:120px;height:3px;border-radius:2px;background:var(--line);
-    margin:22px auto 0;overflow:hidden;
-    animation:bootIn .5s ease .26s both}
+  .bootbar{width:110px;height:3px;border-radius:2px;background:var(--line);
+    margin:20px auto 0;overflow:hidden;
+    animation:bootIn .55s ease .28s both}
   .bootbar i{display:block;width:40%;height:100%;border-radius:2px;
     background:var(--accent);animation:bootSlide 1.15s ease-in-out infinite}
-  @keyframes bootIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes bootIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
   @keyframes bootSlide{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
   .bootspin{display:flex;align-items:center;justify-content:center;gap:10px;
-    margin-top:18px;color:#9aa6ab;font-size:13px;
-    animation:bootIn .5s ease .38s both}
+    margin-top:16px;color:#9aa6ab;font-size:13px;
+    animation:bootIn .55s ease .4s both}
   .bootspin .spin{width:18px;height:18px}
+  /* 우리 광고 — 로고보다 한 박자 늦게 가운데로 떠오릅니다 */
+  .bootad{width:100%;max-width:330px;margin:30px auto 0;
+    animation:bootIn .6s cubic-bezier(.2,.9,.25,1) .62s both}
+  .bootad .banner{margin:0}
+  .bootad .bdots{margin-top:10px}
   @media (prefers-reduced-motion:reduce){
-    .bootwrap,.bootlogo,.boottag,.bootbar,.bootbar i,.bootspin{animation:none;transition:none}
+    .bootwrap,.bootimg,.bootlogo,.boottag,.bootbar,.bootbar i,.bootspin,.bootad{
+      animation:none;transition:none}
   }
-  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   .nopehint{font-size:11.5px;color:var(--dim);font-weight:600;margin-left:6px;
     background:#f0f3f3;border-radius:20px;padding:2px 8px;white-space:nowrap}
   /* 로딩 스켈레톤 — "찾는 중" 글자보다 자리가 먼저 보여 덜 답답합니다 */
@@ -2922,7 +2931,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v99 · 2026-09-04';
+var APP_VER = 'v101 · 2026-09-04';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3549,6 +3558,35 @@ var DASH_BUSY = false;
    내 위치·이직·통계는 안 보이는 화면이라 여기서 안 부릅니다.
    그것들은 「내 정보 확인하기」(me 탭)를 열 때만 부릅니다.
    → 대시보드 진입이 3번 왕복에서 0번으로 줄어 즉시 뜹니다. */
+/* 시작 화면 한 벌.
+   로고 그림(/logo-wordmark.png)이 있으면 그것을, 없으면 글자 로고를 씁니다.
+   아래 광고 자리는 로고보다 한 박자 늦게 떠올랐다가 함께 사라집니다. */
+function bootHTML(sub){
+  return '<div class="bootwrap">'
+    + '<img class="bootimg" src="/logo-wordmark.png" alt="POT JOB"'
+    + ' onerror="this.style.display=\'none\';'
+    + 'var t=document.getElementById(\'bootTxt\'); if(t) t.style.display=\'block\';">'
+    + '<div class="bootlogo" id="bootTxt" style="display:none">POT JOB</div>'
+    + '<div class="boottag">치료사가 더 나은 자리로</div>'
+    + '<div class="bootbar"><i></i></div>'
+    + '<div class="bootspin"><span>'+sub+'</span></div>'
+    + '<div class="bootad" id="bannerBoot"></div>'
+    + '</div>';
+}
+
+/* 시작 화면이 떠 있는 동안은 로고만 보이게 합니다.
+   메뉴와 배너가 그 아래 형제로 붙어 있어서, 안 감추면
+   로고 밑에 광고가 같이 떠서 어수선합니다. */
+function bootQuiet(on){
+  ['dashMenu','bannerDash'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el) return;
+    el.style.visibility = on ? 'hidden' : '';
+    el.style.opacity    = on ? '0' : '';
+    el.style.transition = on ? '' : 'opacity .34s ease';
+  });
+}
+
 function drawDash(){
   var box=document.getElementById('dashBox');
   /* 시작 화면이 떠 있으면 툭 바뀌지 않게 스르르 지운 뒤 그립니다 */
@@ -3558,9 +3596,10 @@ function drawDash(){
     setTimeout(drawDash, 300);
     return;
   }
-  if(BN.list.length) paintBanner();
   box.innerHTML=welcomeCard();
   drawDashMenu();
+  bootQuiet(false);
+  if(BN.list.length) paintBanner();
   revealIn();
 }
 
@@ -5559,7 +5598,9 @@ function paintBanner(){
     ? '<div class="bdots">'+BN.list.map(function(_,k){
         return '<i class="'+(k===BN.i?'on':'')+'"></i>';
       }).join('')+'</div>' : '';
-  ['bannerHome','bannerDash'].forEach(function(id){
+  /* bannerBoot 은 시작 화면 안에 있습니다.
+     로고 아래 가운데에 떠올랐다가 시작 화면과 함께 사라집니다. */
+  ['bannerHome','bannerDash','bannerBoot'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.innerHTML = bannerHTML(b) + dots;
   });
@@ -8057,12 +8098,8 @@ if(KTOKEN && ME && ME.id){
   tab('dash');
   BOOT_DASH = false;
   document.getElementById('dashBox').innerHTML =
-    '<div class="bootwrap">'
-    + '<div class="bootlogo">POT JOB</div>'
-    + '<div class="boottag">치료사가 더 나은 자리로</div>'
-    + '<div class="bootbar"><i></i></div>'
-    + '<div class="bootspin"><span>'+esc(ME.nick||'')+'님, 잠시만요</span></div>'
-    + '</div>';
+    bootHTML(esc(ME.nick||'')+'님, 잠시만요');
+  bootQuiet(true);
   /* 메뉴는 여기서 그리지 않습니다.
      아직 서버에서 받은 것이 없어 단톡방·준비반 항목이 빠진 채로 그려지고,
      잠시 뒤 다시 그리면서 메뉴가 바뀌어 보입니다. */
@@ -8070,13 +8107,8 @@ if(KTOKEN && ME && ME.id){
   BOOT_DASH = true;
   tab('dash');
   BOOT_DASH = false;
-  document.getElementById('dashBox').innerHTML =
-    '<div class="bootwrap">'
-    + '<div class="bootlogo">POT JOB</div>'
-    + '<div class="boottag">치료사가 더 나은 자리로</div>'
-    + '<div class="bootbar"><i></i></div>'
-    + '<div class="bootspin"><span>들어가는 중입니다</span></div>'
-    + '</div>';
+  document.getElementById('dashBox').innerHTML = bootHTML('들어가는 중입니다');
+  bootQuiet(true);
 }else{
   tab('home');
   revealHome();
