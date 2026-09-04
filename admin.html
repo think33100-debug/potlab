@@ -115,6 +115,34 @@
   .mrow .mi2 input.d{font-size:11.5px;color:var(--dim)}
   .mrow .cat{font-size:11px;font-weight:800;color:var(--accent);width:52px;flex-shrink:0}
   .mrow label{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:3px}
+
+  /* ===== 공고 관리 ===== */
+  .jsrch{display:flex;gap:6px;margin-bottom:10px}
+  .jsrch input{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;
+    padding:10px 12px;font-family:inherit;font-size:14px;background:#fff}
+  .jsrch input:focus{outline:none;border-color:var(--accent)}
+  .jrow{background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:13px;margin-bottom:8px}
+  .jrow.hid{opacity:.55;background:#fafbfb}
+  .jrow.fix{border-color:#c9e2da;background:var(--accent-soft)}
+  .jrow .jo{font-size:11.5px;font-weight:800;color:var(--accent)}
+  .jrow .jt{font-size:14.5px;font-weight:700;margin:4px 0 6px;line-height:1.45}
+  .jrow .jm{font-size:12px;color:var(--dim);line-height:1.75}
+  .jbadge{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:20px;
+    font-weight:700;margin-left:5px}
+  .jbadge.f{background:#d9ece5;color:var(--accent)}
+  .jbadge.h{background:#eceff0;color:var(--dim)}
+  .jbadge.c{background:#f6ddd4;color:var(--warn)}
+  .jedit{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+  .jf{margin-bottom:9px}
+  .jf label{display:block;font-size:11.5px;font-weight:700;color:#3f4c52;margin-bottom:3px}
+  .jf label span{font-weight:400;color:#8b979d;margin-left:5px}
+  .jf input,.jf select{width:100%;box-sizing:border-box;border:1px solid #dde5e3;
+    border-radius:8px;padding:9px 10px;font-family:inherit;font-size:13.5px;background:#fbfcfc}
+  .jf input:focus,.jf select:focus{outline:none;border-color:var(--accent);background:#fff}
+  .jf input.chg,.jf select.chg{background:#fffdf0;border-color:#e8cfa4}
+  .jgrid{display:flex;gap:9px}
+  .jgrid>*{flex:1;min-width:0}
 </style>
 </head>
 <body>
@@ -133,12 +161,31 @@
       <button class="tb" data-f="note" onclick="load('note')">특이사항<span class="n" id="c-note"></span></button>
       <button class="tb" data-f="excluded" onclick="load('excluded')">제외됨<span class="n" id="c-excluded"></span></button>
       <button class="tb" data-f="all" onclick="load('all')">전체<span class="n" id="c-all"></span></button>
+      <button class="tb" data-f="jobs" onclick="openJobs('live')">공고 관리<span class="n" id="c-jobs"></span></button>
       <button class="tb" data-f="banner" onclick="openBanner()">배너 관리</button>
       <button class="tb" data-f="comm" onclick="openComm2('all')">커뮤니티<span class="n" id="c-comm"></span></button>
       <button class="tb" data-f="menu" onclick="openMenu()">메뉴 순서</button>
       <button class="tb" data-f="access" onclick="openAccess()">이상 조회</button>
     </div>
     <div id="list"><div class="loading">불러오는 중</div></div>
+
+    <div id="jobsWrap" class="hide">
+      <p class="bhelp">공고가 잘못 들어왔을 때 고칩니다.
+        고친 값은 따로 적어두기 때문에 <b>수집이 다시 돌아도 안 지워집니다.</b>
+        칸을 비우면 원래 값으로 돌아가고, <b>빗금(-) 하나만 적으면 빈 칸</b>이 됩니다.</p>
+      <div class="tabs" style="margin-bottom:12px">
+        <button class="tb on" id="jb-live" onclick="openJobs('live')">접수 중</button>
+        <button class="tb" id="jb-all" onclick="openJobs('all')">전체</button>
+        <button class="tb" id="jb-fixed" onclick="openJobs('fixed')">고친 것</button>
+        <button class="tb" id="jb-hidden" onclick="openJobs('hidden')">숨긴 것</button>
+      </div>
+      <div class="jsrch">
+        <input id="jq" placeholder="기관명·제목으로 찾기"
+          onkeydown="if(event.key==='Enter')openJobs(J_SPAN)">
+        <button onclick="openJobs(J_SPAN)">찾기</button>
+      </div>
+      <div id="jobsList"></div>
+    </div>
 
     <div id="commWrap" class="hide">
       <div class="tabs" style="margin-bottom:12px">
@@ -179,7 +226,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=123"></script>
+<script src="/app.js?v=137"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -349,7 +396,7 @@ function saveBanners(){
 
 /* ===== 커뮤니티 관리 ===== */
 function shell(which){
-  ['list','bannerWrap','commWrap','menuWrap','accessWrap'].forEach(function(id){
+  ['list','bannerWrap','commWrap','menuWrap','accessWrap','jobsWrap'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.className = (id===which ? '' : 'hide');
   });
@@ -491,6 +538,158 @@ function openAccess(){
     }).join('');
   }).withFailureHandler(function(e){ msg(e.message); })
     .adminAccessLog(KEY);
+}
+
+/* ===== 공고 관리 ===== */
+var J_SPAN = 'live';
+var J_OPEN = '';          // 지금 펼쳐놓은 공고
+var J_FORM = null;        // 펼친 공고의 원래 값·고친 값
+
+/* 고칠 수 있는 항목. [시트 이름, 화면에 보일 이름, 도움말] */
+var J_FIELDS = [
+  ['기관명',   '기관명',   ''],
+  ['공고명',   '공고 제목', ''],
+  ['인원',     '뽑는 인원', '숫자만'],
+  ['근무지',   '근무지',   '예) 대구'],
+  ['접수시작', '접수 시작', 'yyyy.MM.dd'],
+  ['접수마감', '접수 마감', 'yyyy.MM.dd'],
+  ['채용구분', '채용 구분', ''],
+  ['고용형태', '고용 형태', ''],
+  ['학력',     '학력',     ''],
+  ['링크',     '공고 주소', 'https://'],
+  ['직군',     '직군',     '작업치료사 · 물리치료사 · 공통'],
+  ['형태',     '통합 여부', '포함 이라고 적으면 통합 채용']
+];
+
+function openJobs(span){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  J_SPAN = span || 'live';
+  J_OPEN = '';
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className = 'tb' + (b.dataset.f==='jobs' ? ' on' : '');
+  });
+  ['live','all','fixed','hidden'].forEach(function(k){
+    var el=document.getElementById('jb-'+k);
+    if(el) el.className = 'tb' + (k===J_SPAN ? ' on' : '');
+  });
+  shell('jobsWrap');
+  document.getElementById('jobsList').innerHTML='<div class="loading">불러오는 중</div>';
+
+  var q = (document.getElementById('jq').value || '').trim();
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    var el=document.getElementById('c-jobs');
+    if(el) el.textContent = r.counts.live || '';
+    drawJobs(r.rows);
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminJobList(KEY, q, J_SPAN);
+}
+
+function drawJobs(rows){
+  var box=document.getElementById('jobsList');
+  if(!rows.length){
+    box.innerHTML='<div class="empty">해당하는 공고가 없습니다</div>';
+    return;
+  }
+  box.innerHTML = rows.map(function(r){
+    var cls='jrow'+(r.hidden?' hid':(r.fixed?' fix':''));
+    return '<div class="'+cls+'" id="j-'+esc(r.id)+'">'
+      + '<div class="jo">'+esc(r.org||'(기관명 없음)')
+      + (r.fixed?'<span class="jbadge f">고침 '+r.fixedKeys+'</span>':'')
+      + (r.hidden?'<span class="jbadge h">숨김</span>':'')
+      + (r.closed?'<span class="jbadge c">마감</span>':'')
+      + '</div>'
+      + '<div class="jt">'+esc(r.title||'(제목 없음)')+'</div>'
+      + '<div class="jm">'
+      + esc(r.job||'-')+' · '+esc(r.region||'지역 없음')
+      + ' · '+(r.nope===''?'인원 없음':esc(r.nope)+'명')
+      + '<br>접수 '+esc(r.from||'-')+' ~ '+esc(r.to||'-')
+      + ' · 수집 '+esc(r.at||'-')
+      + '</div>'
+      + '<div class="acts">'
+      + '<button onclick="jobEdit(\'' + esc(r.id) + '\')">고치기</button>'
+      + '<button class="'+(r.hidden?'re':'ex')+'" onclick="jobHide(\'' + esc(r.id) + '\','+(r.hidden?1:0)+')">'
+      + (r.hidden?'다시 보이기':'숨기기')+'</button>'
+      + (r.url?'<button onclick="window.open(\'' + esc(r.url) + '\',\'_blank\')">원문</button>':'')
+      + '<span class="idcopy">'+esc(r.id)+'</span>'
+      + '</div>'
+      + '<div class="jedit hide" id="je-'+esc(r.id)+'"></div>'
+      + '</div>';
+  }).join('');
+}
+
+function jobEdit(id){
+  var box=document.getElementById('je-'+id);
+  if(!box) return;
+  /* 이미 펼쳐져 있으면 접습니다 */
+  if(J_OPEN===id){ box.className='jedit hide'; J_OPEN=''; return; }
+  if(J_OPEN){
+    var prev=document.getElementById('je-'+J_OPEN);
+    if(prev) prev.className='jedit hide';
+  }
+  J_OPEN=id;
+  box.className='jedit';
+  box.innerHTML='<div class="loading">불러오는 중</div>';
+
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); box.className='jedit hide'; J_OPEN=''; return; }
+    J_FORM = r;
+    drawJobForm(id);
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminJobGet(KEY, id);
+}
+
+function drawJobForm(id){
+  var box=document.getElementById('je-'+id);
+  if(!box || !J_FORM) return;
+  var o=J_FORM.orig||{}, f=J_FORM.fix||{};
+  box.innerHTML = J_FIELDS.map(function(x){
+    var name=x[0], label=x[1], hint=x[2];
+    var cur=f[name]||'';
+    var was=o[name]||'';
+    var help = (was ? '원래: ' + was : '원래 값 없음') + (hint ? ' · ' + hint : '');
+    return '<div class="jf">'
+      + '<label>'+esc(label)+'<span>'+esc(help)+'</span></label>'
+      + '<input'+(cur?' class="chg"':'')+' value="'+esc(cur)+'"'
+      + ' placeholder="'+esc(was||'(비어 있음)')+'"'
+      + ' data-k="'+esc(name)+'"'
+      + ' oninput="this.className=this.value?\'chg\':\'\'">'
+      + '</div>';
+  }).join('')
+  + '<div class="brow2">'
+  + '<button class="add" onclick="jobEdit(\'' + esc(id) + '\')">닫기</button>'
+  + '<button class="save" onclick="jobSave(\'' + esc(id) + '\')">저장하기</button>'
+  + '</div>';
+}
+
+function jobSave(id){
+  var box=document.getElementById('je-'+id);
+  if(!box) return;
+  var vals={};
+  box.querySelectorAll('input[data-k]').forEach(function(el){
+    vals[el.dataset.k] = el.value.trim();
+  });
+  msg('저장하고 있습니다');
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    msg(r.cleared ? '원래 값으로 되돌렸습니다' : (r.saved + '개 항목을 고쳤습니다'));
+    openJobs(J_SPAN);
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminJobFix(KEY, id, vals);
+}
+
+function jobHide(id, isHidden){
+  var why=null;
+  if(!isHidden){
+    why=prompt('숨기는 이유를 적어주세요 (기록용)','잘못 올라온 공고');
+    if(why===null) return;
+  }
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    msg(r.hidden ? '숨겼습니다' : '다시 보이게 했습니다');
+    openJobs(J_SPAN);
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminJobHide(KEY, id, !isHidden, why);
 }
 
 /* 목록 탭을 누르면 다른 화면을 닫습니다 */
