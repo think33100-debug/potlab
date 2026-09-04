@@ -476,12 +476,31 @@
   .noselect{-webkit-user-select:none;-moz-user-select:none;user-select:none;
     -webkit-touch-callout:none}
   /* 시작 화면 — 로고가 먼저 뜨고, 그 아래 배너(전자책)가 자연스럽게 이어짐 */
-  .bootwrap{text-align:center;padding:40px 0 24px;animation:fadein .4s ease}
-  .bootlogo{font-size:30px;font-weight:800;letter-spacing:.03em;color:var(--accent)}
-  .boottag{font-size:13px;color:var(--dim);margin-top:8px}
+  /* 시작 화면 — 로고가 가운데서 스르르 떴다가, 자료가 오면 스르르 사라집니다.
+     홈 화면 조각이 그대로 비치면 어수선해 보여서 화면 가운데를 통째로 씁니다. */
+  .bootwrap{min-height:62vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+    padding:24px 0;transition:opacity .34s ease, transform .34s ease}
+  .bootwrap.out{opacity:0;transform:translateY(-8px)}
+  .bootlogo{font-size:30px;font-weight:800;letter-spacing:.03em;color:var(--accent);
+    animation:bootIn .5s cubic-bezier(.2,.9,.25,1) both}
+  .boottag{font-size:13px;color:var(--dim);margin-top:8px;
+    animation:bootIn .5s cubic-bezier(.2,.9,.25,1) .14s both}
+  /* 로고 아래에서 좌우로 천천히 오가는 줄 — 기다리는 동안 볼 것을 줍니다 */
+  .bootbar{width:120px;height:3px;border-radius:2px;background:var(--line);
+    margin:22px auto 0;overflow:hidden;
+    animation:bootIn .5s ease .26s both}
+  .bootbar i{display:block;width:40%;height:100%;border-radius:2px;
+    background:var(--accent);animation:bootSlide 1.15s ease-in-out infinite}
+  @keyframes bootIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes bootSlide{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
   .bootspin{display:flex;align-items:center;justify-content:center;gap:10px;
-    margin-top:26px;color:#9aa6ab;font-size:13px}
+    margin-top:18px;color:#9aa6ab;font-size:13px;
+    animation:bootIn .5s ease .38s both}
   .bootspin .spin{width:18px;height:18px}
+  @media (prefers-reduced-motion:reduce){
+    .bootwrap,.bootlogo,.boottag,.bootbar,.bootbar i,.bootspin{animation:none;transition:none}
+  }
   @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   .nopehint{font-size:11.5px;color:var(--dim);font-weight:600;margin-left:6px;
     background:#f0f3f3;border-radius:20px;padding:2px 8px;white-space:nowrap}
@@ -2896,7 +2915,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v92 · 2026-09-04';
+var APP_VER = 'v93 · 2026-09-04';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -3055,7 +3074,7 @@ function afterBoot(){
         checkKakao(function(ok){
           if(ok){
             setRole(ME && ME.role === '학생' ? '학생' : '현직');
-            msg('돌아오셨네요');
+            msg('반갑습니다, ' + ((ME && ME.nick) ? ME.nick : '') + '님');
             if(!openFromHash()) tab('dash');
           }
         });
@@ -3511,8 +3530,15 @@ var DASH_BUSY = false;
    그것들은 「내 정보 확인하기」(me 탭)를 열 때만 부릅니다.
    → 대시보드 진입이 3번 왕복에서 0번으로 줄어 즉시 뜹니다. */
 function drawDash(){
-  if(BN.list.length) paintBanner();
   var box=document.getElementById('dashBox');
+  /* 시작 화면이 떠 있으면 툭 바뀌지 않게 스르르 지운 뒤 그립니다 */
+  var boot = box && box.querySelector('.bootwrap');
+  if(boot && !boot.classList.contains('out')){
+    boot.classList.add('out');
+    setTimeout(drawDash, 300);
+    return;
+  }
+  if(BN.list.length) paintBanner();
   box.innerHTML=welcomeCard();
   drawDashMenu();
   revealIn();
@@ -8053,6 +8079,11 @@ if(ME&&ME.job){ setRole(ME.role==='학생'?'학생':'현직'); setJob(ME.job); }
    다만 여기서 drawDash 를 부르면 안 됩니다.
    잠시 뒤 checkKakao 가 끝나고 한 번 더 그리게 되어
    화면이 두 번 바뀌기 때문입니다. */
+/* 로그인하고 돌아오는 길이면 홈을 아예 띄우지 않습니다.
+   주소에 code(성공)나 error(취소)가 붙어 있으면 그 길입니다.
+   홈이 번쩍했다가 「들어가는 중」으로 바뀌는 게 어수선해서요. */
+var BACK_FROM_LOGIN = /[?&](code|error)=/.test(location.search || '');
+
 if(KTOKEN && ME && ME.id){
   BOOT_DASH = true;
   tab('dash');
@@ -8061,12 +8092,23 @@ if(KTOKEN && ME && ME.id){
     '<div class="bootwrap">'
     + '<div class="bootlogo">POT JOB</div>'
     + '<div class="boottag">치료사가 더 나은 자리로</div>'
-    + '<div class="bootspin"><div class="spin"></div>'
-    + '<span>'+esc(ME.nick||'')+'님, 잠시만요</span></div>'
+    + '<div class="bootbar"><i></i></div>'
+    + '<div class="bootspin"><span>'+esc(ME.nick||'')+'님, 잠시만요</span></div>'
     + '</div>';
   /* 메뉴는 여기서 그리지 않습니다.
      아직 서버에서 받은 것이 없어 단톡방·준비반 항목이 빠진 채로 그려지고,
      잠시 뒤 다시 그리면서 메뉴가 바뀌어 보입니다. */
+}else if(BACK_FROM_LOGIN){
+  BOOT_DASH = true;
+  tab('dash');
+  BOOT_DASH = false;
+  document.getElementById('dashBox').innerHTML =
+    '<div class="bootwrap">'
+    + '<div class="bootlogo">POT JOB</div>'
+    + '<div class="boottag">치료사가 더 나은 자리로</div>'
+    + '<div class="bootbar"><i></i></div>'
+    + '<div class="bootspin"><span>들어가는 중입니다</span></div>'
+    + '</div>';
 }else{
   tab('home');
   revealHome();
