@@ -116,7 +116,113 @@
   .mrow .cat{font-size:11px;font-weight:800;color:var(--accent);width:52px;flex-shrink:0}
   .mrow label{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:3px}
 
-  /* ===== 공고 관리 ===== */
+  /* ===== 수집 주기 ===== */
+var SC = null;
+
+function openSched(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className='tb'+(b.dataset.f==='sched'?' on':'');
+  });
+  shell('schedWrap');
+  document.getElementById('schedBox').innerHTML='<div class="loading">불러오는 중</div>';
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    SC = r;
+    drawSched();
+  }).withFailureHandler(function(e){ msg(e.message); }).adminGetSchedule(KEY);
+}
+
+function schedCost(c){
+  var ticks = Math.max(0,(c.toHour-c.fromHour))*2;
+  return { ticks:ticks, total: ticks*5 + (c.heavyHours||[]).length*103 };
+}
+
+function drawSched(){
+  var c = SC.cfg, rec = SC.recommend;
+  var cost = schedCost(c);
+  var days = c.weekdayOnly ? 5 : 7;
+  var h='<div class="bcard">';
+
+  h+='<label class="bl">수집 켜기<span>끄면 새 공고가 안 들어옵니다</span></label>'
+   + '<label style="display:flex;align-items:center;gap:8px;font-size:14px">'
+   + '<input type="checkbox"'+(c.on?' checked':'')
+   + ' onchange="SC.cfg.on=this.checked;drawSched()" style="width:20px;height:20px">'
+   + (c.on?'켜짐':'꺼짐')+'</label>';
+
+  h+='<label class="bl">도는 요일<span>추천: 평일만 · 기관은 주말에 공고를 안 올립니다</span></label>'
+   + '<label style="display:flex;align-items:center;gap:8px;font-size:14px">'
+   + '<input type="checkbox"'+(c.weekdayOnly?' checked':'')
+   + ' onchange="SC.cfg.weekdayOnly=this.checked;drawSched()" style="width:20px;height:20px">'
+   + '평일(월~금)만</label>';
+
+  h+='<label class="bl">도는 시간대<span>추천: '+rec.fromHour+'시 ~ '+rec.toHour+'시</span></label>'
+   + '<div style="display:flex;align-items:center;gap:8px">'
+   + hourSel('fromHour', c.fromHour) + '<span style="font-size:14px">시부터</span>'
+   + hourSel('toHour', c.toHour) + '<span style="font-size:14px">시까지</span></div>';
+
+  h+='<label class="bl">무거운 수집 시각'
+   + '<span>추천: '+rec.heavyHours.join('시, ')+'시 · 잡플러스와 나라일터를 이때만 긁습니다</span></label>'
+   + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">';
+  for(var i=c.fromHour;i<c.toHour;i++){
+    var on=(c.heavyHours||[]).indexOf(i)>=0;
+    h+='<button onclick="toggleHeavy('+i+')" style="padding:8px 12px;'
+      + (on?'background:#0d5c4f;color:#fff;border-color:#0d5c4f;font-weight:700':'')
+      + '">'+i+'시</button>';
+  }
+  h+='</div>';
+
+  h+='<div class="note" style="margin-top:14px"><b>이렇게 하면 하루에</b>'
+   + '깨어나는 횟수 '+cost.ticks+'번 · <b>API '+cost.total.toLocaleString()+'번</b>'
+   + ' (하루 한도 20,000번)<br>'
+   + '주 '+days+'일 기준입니다.'
+   + (cost.total>6000?'<br><b style="color:#b4432c">호출이 많습니다. 무거운 시각을 줄여보세요.</b>':'')
+   + '</div>';
+
+  h+='</div>'
+   + '<div class="brow2">'
+   + '<button class="add" onclick="useRecommend()">추천값으로</button>'
+   + '<button class="save" onclick="saveSched()">저장하기</button></div>';
+
+  document.getElementById('schedBox').innerHTML=h;
+}
+
+function hourSel(k,v){
+  var o='';
+  for(var i=0;i<=24;i++){
+    if(k==='fromHour'&&i>23) continue;
+    if(k==='toHour'&&i<1) continue;
+    o+='<option value="'+i+'"'+(i===v?' selected':'')+'>'+i+'</option>';
+  }
+  return '<select onchange="SC.cfg.'+k+'=Number(this.value);drawSched()"'
+    + ' style="width:80px">'+o+'</select>';
+}
+
+function toggleHeavy(h){
+  var a = SC.cfg.heavyHours || [];
+  var i = a.indexOf(h);
+  if(i>=0) a.splice(i,1); else a.push(h);
+  a.sort(function(x,y){return x-y;});
+  SC.cfg.heavyHours = a;
+  drawSched();
+}
+
+function useRecommend(){
+  SC.cfg = JSON.parse(JSON.stringify(SC.recommend));
+  drawSched();
+  msg('추천값을 넣었습니다. 저장을 눌러주세요');
+}
+
+function saveSched(){
+  msg('저장하고 있습니다');
+  google.script.run.withSuccessHandler(function(r){
+    msg(r.message || (r.ok?'저장했습니다':'실패'));
+    if(r.ok) openSched();
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminSaveSchedule(KEY, SC.cfg);
+}
+
+/* ===== 공고 관리 ===== */
   .jsrch{display:flex;gap:6px;margin-bottom:10px}
   .jsrch input{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;
     padding:10px 12px;font-family:inherit;font-size:14px;background:#fff}
@@ -162,6 +268,7 @@
       <button class="tb" data-f="excluded" onclick="load('excluded')">제외됨<span class="n" id="c-excluded"></span></button>
       <button class="tb" data-f="all" onclick="load('all')">전체<span class="n" id="c-all"></span></button>
       <button class="tb" data-f="jobs" onclick="openJobs('live')">공고 관리<span class="n" id="c-jobs"></span></button>
+      <button class="tb" data-f="sched" onclick="openSched()">수집 주기</button>
       <button class="tb" data-f="banner" onclick="openBanner()">배너 관리</button>
       <button class="tb" data-f="comm" onclick="openComm2('all')">커뮤니티<span class="n" id="c-comm"></span></button>
       <button class="tb" data-f="menu" onclick="openMenu()">메뉴 순서</button>
@@ -190,6 +297,15 @@
       </div>
       <div id="jobsHelp" class="hide"></div>
       <div id="jobsList"></div>
+    </div>
+
+    <div id="schedWrap" class="hide">
+      <p class="bhelp">공고를 <b>얼마나 자주 긁어올지</b> 정합니다.
+        30분마다 깨어나되, 매번 전부 긁지는 않습니다.<br>
+        <b>가벼운 것(알리오·중앙 공공기관)</b>은 깨어날 때마다 — API 5번이라 부담이 없습니다.<br>
+        <b>무거운 것(잡플러스·나라일터)</b>은 정해진 시각에만 — 나라일터가 상세를 열어
+        API 86번을 씁니다. 지자체 공고는 30분마다 새로 뜨지 않습니다.</p>
+      <div id="schedBox"></div>
     </div>
 
     <div id="commWrap" class="hide">
@@ -231,7 +347,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=140"></script>
+<script src="/app.js?v=141"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -401,7 +517,8 @@ function saveBanners(){
 
 /* ===== 커뮤니티 관리 ===== */
 function shell(which){
-  ['list','bannerWrap','commWrap','menuWrap','accessWrap','jobsWrap'].forEach(function(id){
+  ['list','bannerWrap','commWrap','menuWrap','accessWrap','jobsWrap',
+   'schedWrap'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.className = (id===which ? '' : 'hide');
   });
