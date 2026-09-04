@@ -10,6 +10,10 @@
 
 var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtSeIQpBmt0rGvhlWpTrLwS1x5C3l3_HxvZgjVQUxYwnR/exec';
 
+/* 이 파일이 최신인지 화면 아래에서 바로 확인하려고 둡니다.
+   index.html 이 이 값을 읽어 버전과 함께 찍습니다. */
+var APP_JS_VER = 'a5 · 2026-09-04';
+
 (function () {
   'use strict';
 
@@ -30,8 +34,13 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
     'commChannels', 'commList', 'commRead', 'commWrite', 'commDelete', 'commReport',
     'adminCommList', 'adminCommHide',
     'commComment', 'commCommentDelete', 'commLike', 'commMine', 'commAvatars', 'commSetAvatar',
-    'adminGetMenu', 'adminSaveMenu', 'adminAccessLog', 'starJob', 'myStars', 'naverLogin', 'naverExchange', 'hospByName', 'jobOne', 'getEdu'
+    'adminGetMenu', 'adminSaveMenu', 'adminAccessLog', 'starJob', 'myStars', 'naverLogin', 'naverExchange', 'hospByName', 'jobOne', 'getEdu',
+    'adminJobList', 'adminJobGet', 'adminJobFix', 'adminJobHide', 'serverVersion'
   ];
+
+  /* ※ 서버(Wage.gs)에 함수를 새로 만들면 위 목록에도 반드시 넣어야 합니다.
+        여기 없는 이름은 화면에서 부를 수가 없습니다 —
+        오류도 안 나고 그냥 아무 일도 안 일어납니다. 찾기 어려운 사고입니다. */
 
   /** 브라우저가 막지 않는 방식(JSONP)으로 요청합니다 */
   function call(action, args, onOk, onErr) {

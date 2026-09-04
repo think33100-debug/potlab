@@ -2864,12 +2864,13 @@
   </div>
 
   <p class="copyfoot">Copyright © 2026 피오티잡 · 주식회사 빈틈<br>
-    <span class="regno">직업정보제공사업 신고번호 J1401020260007</span></p>
+    <span class="regno">직업정보제공사업 신고번호 J1401020260007</span><br>
+    <span class="regno" id="verFoot"></span></p>
 </div>
 
 <div id="msg"></div>
 
-<script src="/app.js?v=137"></script>
+<script src="/app.js?v=138"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2915,7 +2916,19 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v93 · 2026-09-04';
+var APP_VER = 'v94 · 2026-09-04';
+
+/* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
+   「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
+function showVersions(){
+  var el = document.getElementById('verFoot');
+  if(!el) return;
+  var js = (typeof APP_JS_VER !== 'undefined') ? APP_JS_VER : '(옛 app.js)';
+  el.textContent = '화면 ' + APP_VER + ' · 다리 ' + js;
+  google.script.run.withSuccessHandler(function(v){
+    el.textContent = '화면 ' + APP_VER + ' · 다리 ' + js + ' · 서버 ' + (v || '?');
+  }).withFailureHandler(function(){}).serverVersion();
+}
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -3067,6 +3080,7 @@ var BOOTED = false;
 function afterBoot(){
   if(BOOTED) return;
   BOOTED = true;
+  showVersions();
 
   catchCode(function(came, r){
     if(came){
