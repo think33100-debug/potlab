@@ -34,8 +34,6 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 
-<!-- 아이폰 실행 화면 — 파일 하나로 씁니다 -->
-<link rel="apple-touch-startup-image" href="/splash.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d5c4f">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -478,16 +476,22 @@
   /* 시작 화면 — 로고가 먼저 뜨고, 그 아래 배너(전자책)가 자연스럽게 이어짐 */
   /* 시작 화면 — 로고가 가운데서 스르르 떴다가, 자료가 오면 스르르 사라집니다.
      홈 화면 조각이 그대로 비치면 어수선해 보여서 화면 가운데를 통째로 씁니다. */
-  .bootwrap{min-height:60vh;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;text-align:center;
+  .bootwrap{min-height:80vh;display:flex;flex-direction:column;
+    align-items:center;text-align:center;
     padding:20px 0;transition:opacity .38s ease, transform .38s ease}
+  /* 로고 묶음이 남는 자리를 다 먹고 가운데에 섭니다 */
+  .bootmid{flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;width:100%}
   .bootwrap.out{opacity:0;transform:translateY(-10px)}
-  /* 로고 그림 — /logo-wordmark.png 를 올리면 이게 뜨고,
-     없으면 아래 글자 로고가 대신 뜹니다 */
-  .bootimg{width:172px;max-width:56vw;height:auto;display:block;
+  /* 로고 — 그림 대신 글자로 그립니다.
+     222픽셀짜리 그림을 쓰면 고해상도 폰(2~3배)에서 흐려집니다.
+     글자는 화면이 아무리 촘촘해도 또렷합니다. */
+  .bootlogo{font-size:46px;font-weight:900;letter-spacing:-.01em;color:#1F2937;
+    line-height:1.05;
+    font-family:'Poppins','Montserrat',-apple-system,BlinkMacSystemFont,
+      'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
     animation:bootIn .55s cubic-bezier(.2,.9,.25,1) both}
-  .bootlogo{font-size:30px;font-weight:800;letter-spacing:.03em;color:var(--accent);
-    animation:bootIn .55s cubic-bezier(.2,.9,.25,1) both}
+  @media (min-width:900px){ .bootlogo{font-size:58px} }
   .boottag{font-size:13px;color:var(--dim);margin-top:10px;
     animation:bootIn .55s cubic-bezier(.2,.9,.25,1) .16s both}
   /* 로고 아래에서 좌우로 천천히 오가는 줄 — 기다리는 동안 볼 것을 줍니다 */
@@ -502,13 +506,13 @@
     margin-top:16px;color:#9aa6ab;font-size:13px;
     animation:bootIn .55s ease .4s both}
   .bootspin .spin{width:18px;height:18px}
-  /* 우리 광고 — 로고보다 한 박자 늦게 가운데로 떠오릅니다 */
-  .bootad{width:100%;max-width:330px;margin:30px auto 0;
+  /* 우리 광고 — 로고보다 한 박자 늦게, 아래에서 5분의 1쯤 되는 자리에 떠오릅니다 */
+  .bootad{width:100%;max-width:330px;margin:0 auto 14vh;
     animation:bootIn .6s cubic-bezier(.2,.9,.25,1) .62s both}
   .bootad .banner{margin:0}
   .bootad .bdots{margin-top:10px}
   @media (prefers-reduced-motion:reduce){
-    .bootwrap,.bootimg,.bootlogo,.boottag,.bootbar,.bootbar i,.bootspin,.bootad{
+    .bootwrap,.bootmid,.bootlogo,.boottag,.bootbar,.bootbar i,.bootspin,.bootad{
       animation:none;transition:none}
   }
   .nopehint{font-size:11.5px;color:var(--dim);font-weight:600;margin-left:6px;
@@ -584,27 +588,6 @@
   .kbring i:nth-child(3){animation-delay:.3s}
   @keyframes kbb{0%,80%,100%{opacity:.3;transform:scale(.7)}
                  40%{opacity:1;transform:scale(1.15)}}
-
-  /* 앱 첫 화면 */
-  #splash{position:fixed;inset:0;z-index:9999;background:var(--accent);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    color:#fff;text-align:center;padding:0 28px;
-    /* 아이폰 노치·홈바 영역까지 초록으로 덮습니다 */
-    padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
-    height:100vh;height:100dvh;
-    transition:opacity .34s ease}
-  #splash.out{opacity:0;pointer-events:none}
-  #splash .lg{font-size:32px;font-weight:800;letter-spacing:.04em;
-    animation:spup .5s cubic-bezier(.2,1.3,.4,1) both}
-  #splash .tl{font-size:15px;opacity:.94;line-height:1.75;margin-top:14px;
-    animation:spup .6s cubic-bezier(.2,1.3,.4,1) .45s both}
-  #splash .sl{font-size:12.5px;opacity:.62;margin-top:26px;
-    animation:spup .6s ease 1.1s both}
-  @keyframes spup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-  /* 아래에서 천천히 차오르는 줄 — 곧 넘어간다는 신호입니다 */
-  #splash .bar{position:absolute;left:0;bottom:0;height:3px;width:0;
-    background:rgba(255,255,255,.55);animation:spbar 3.2s linear both}
-  @keyframes spbar{from{width:0}to{width:100%}}
 
   .ppbox{background:#f0f2f2;border-radius:11px;padding:15px;font-size:13px;
     color:#697680;line-height:1.7;text-align:center}
@@ -1799,12 +1782,6 @@
 </style>
 </head>
 <body>
-<div id="splash">
-  <div class="lg">POT JOB</div>
-  <div class="tl">작업치료사와 물리치료사를 위한<br>가장 빠른 취업 정보</div>
-  <div class="sl">치료사가 더 나은 자리로 옮겨갈 수 있게</div>
-  <div class="bar"></div>
-</div>
 <div class="wrap">
 
   <!-- ============ 홈 ============ -->
@@ -2931,7 +2908,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v101 · 2026-09-04';
+var APP_VER = 'v104 · 2026-09-04';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3559,17 +3536,16 @@ var DASH_BUSY = false;
    그것들은 「내 정보 확인하기」(me 탭)를 열 때만 부릅니다.
    → 대시보드 진입이 3번 왕복에서 0번으로 줄어 즉시 뜹니다. */
 /* 시작 화면 한 벌.
-   로고 그림(/logo-wordmark.png)이 있으면 그것을, 없으면 글자 로고를 씁니다.
+   로고는 글자로 그립니다 — 그림은 고해상도 폰에서 흐려집니다.
    아래 광고 자리는 로고보다 한 박자 늦게 떠올랐다가 함께 사라집니다. */
 function bootHTML(sub){
   return '<div class="bootwrap">'
-    + '<img class="bootimg" src="/logo-wordmark.png" alt="POT JOB"'
-    + ' onerror="this.style.display=\'none\';'
-    + 'var t=document.getElementById(\'bootTxt\'); if(t) t.style.display=\'block\';">'
-    + '<div class="bootlogo" id="bootTxt" style="display:none">POT JOB</div>'
-    + '<div class="boottag">치료사가 더 나은 자리로</div>'
-    + '<div class="bootbar"><i></i></div>'
-    + '<div class="bootspin"><span>'+sub+'</span></div>'
+    + '<div class="bootmid">'
+    +   '<div class="bootlogo">POT JOB</div>'
+    +   '<div class="boottag">치료사가 더 나은 자리로</div>'
+    +   '<div class="bootbar"><i></i></div>'
+    +   '<div class="bootspin"><span>'+sub+'</span></div>'
+    + '</div>'
     + '<div class="bootad" id="bannerBoot"></div>'
     + '</div>';
 }
@@ -8056,26 +8032,6 @@ HOSPITALS.forEach(function(v){
   document.getElementById('fType').innerHTML+='<option>'+v+'</option>';
   document.getElementById('wantType').innerHTML+='<option>'+v+'</option>';
 });
-/* 첫 화면 — 처음 오신 분에게만 온전히 보여줍니다.
-   이미 다녀간 분은 새로고침 때마다 3초씩 기다리면 짜증나므로 스쳐 보냅니다. */
-(function(){
-  var sp=document.getElementById('splash');
-  if(!sp) return;
-
-  var seen=false;
-  try{ seen = localStorage.getItem('potjob_splash')==='1'; }catch(e){}
-  var reduce = window.matchMedia
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  var wait = reduce ? 200 : (seen ? 550 : 2600);
-  if(!seen){ try{ localStorage.setItem('potjob_splash','1'); }catch(e){} }
-
-  setTimeout(function(){
-    sp.className='out';
-    setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); }, 380);
-  }, wait);
-})();
-
 loadToken();
 loadMe();
 role='현직';
