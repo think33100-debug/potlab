@@ -2850,7 +2850,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=136"></script>
+<script src="/app.js?v=137"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2896,7 +2896,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v90 · 2026-08-31';
+var APP_VER = 'v92 · 2026-09-04';
 var JOBSL = ['작업치료사','물리치료사'];
 var JOB = '작업치료사';
 
@@ -4216,28 +4216,46 @@ function openStars(){
 }
 
 /* 뽑는 인원 표시. 여러 직군 통합이면 그걸 알려줍니다. */
-function nopeLabel(x){
-  if(!x.nope) return '';
+/* 여러 자리를 한 공고로 뽑는지 가립니다.
+   뽑는 인원 글자와 아래 설명이 같은 기준을 쓰도록 한 곳에 모아둡니다. */
+function mixInfo(x){
   var jobs = x.alljobs || [];
   var others = jobs.filter(function(j){ return j!=='작업치료사' && j!=='물리치료사'; });
   var ours = jobs.filter(function(j){ return j==='작업치료사' || j==='물리치료사'; });
-
-  /* 여러 직군이 명시된 경우 */
   if(others.length>0 && jobs.length>1){
-    var ourTxt = ours.map(function(j){ return j==='작업치료사'?'작업':'물리'; }).join('·');
-    return x.nope+'명 <span class="nopehint">'+ourTxt+' 외 '+others.length+'직군 통합</span>';
+    return { mixed:true, ours:ours, others:others.length };
   }
-
-  /* 통합채용 신호(청년인턴·공개채용·통합·신규직원 등)가 있고 인원이 여러 명이면,
-     직군이 제목에 안 적혀도 통합 인원일 가능성이 높습니다.
-     "5명이 작업치료사 5명"으로 오해하지 않게 안내합니다. */
+  /* 직군이 다 안 적혀 있어도 통합채용 신호가 있고 인원이 여러 명이면 통합입니다 */
   var t = String(x.title||'') + ' ' + String(x.hire||'') + ' ' + String(x.kind||'');
   var bulk = /청년인턴|인턴|공개채용|신규직원|일반직|통합|공채|일괄/.test(t);
-  if(bulk && Number(x.nope) >= 2){
-    return x.nope+'명 <span class="nopehint">여러 직군 통합 · 직군별 인원은 공고문 확인</span>';
-  }
+  if(bulk && Number(x.nope) >= 2) return { mixed:true, ours:ours, others:0 };
+  if(x.mixed && Number(x.nope) >= 2) return { mixed:true, ours:ours, others:0 };
+  return { mixed:false, ours:ours, others:0 };
+}
 
-  return x.nope+'명';
+function nopeLabel(x){
+  if(!x.nope) return '';
+  var m = mixInfo(x);
+  if(!m.mixed) return x.nope+'명';
+
+  /* 순수 텍스트만 돌려줍니다. HTML 태그를 넣으면 line() 이 esc 해서
+     화면에 <span ...> 이 글자 그대로 나옵니다. */
+  if(m.others > 0){
+    var ourTxt = m.ours.map(function(j){ return j==='작업치료사'?'작업':'물리'; }).join('·');
+    return x.nope+'명 (' + ourTxt + ' 외 ' + m.others + '직군 통합)';
+  }
+  return x.nope+'명 (여러 직군 통합 · 공고문 확인)';
+}
+
+/* 통합채용이 뭔지 모르는 분이 많습니다.
+   숫자만 보면 우리 직군을 그만큼 뽑는 줄 압니다. 그래서 풀어서 적습니다. */
+function mixNote(x){
+  if(!x.nope) return '';
+  if(!mixInfo(x).mixed) return '';
+  return '<div class="hintbox"><b>여러 자리를 한 공고로 뽑습니다.</b><br>'
+    + '위 ' + esc(x.nope) + '명은 우리 직군만이 아니라 다른 직군까지 '
+    + '모두 합친 수입니다. 우리 직군을 몇 명 뽑는지는 '
+    + '아래 「공고 확인하러 가기」의 공고문에 적혀 있습니다.</div>';
 }
 
 function openJob(id){
@@ -4274,6 +4292,9 @@ function openJob(id){
         : '')
     + '</div>';
 
+  /* 통합채용이면 숫자 아래에 풀어서 설명합니다 */
+  h+=mixNote(x);
+
   if(x.prevFrom){
     h+='<div class="hintbox">이 기관은 전에도 뽑은 적이 있습니다. '
       + '놓치셨다면 <b>채용 캘린더</b>에서 언제쯤 다시 뜨는지 가늠해보세요.</div>';
@@ -4304,7 +4325,13 @@ function openJob(id){
 
   document.getElementById('jobBox').innerHTML=h;
   attachRipple(); revealIn();
+  /* 상세가 없는 공고(나라일터 등)는 서버를 다녀올 것 없이
+     바로 안내만 띄웁니다. 칸 자체는 어느 공고에나 있어야 합니다. */
   if(x.hasMore) loadJobMore(x.id);
+  else {
+    var mb=document.getElementById('jobMore');
+    if(mb) mb.innerHTML=jobMore({ ok:true, site:x.url||'' });
+  }
   loadJobHosp(x);
   loadStarsOnce(x.id);
 }
@@ -4425,8 +4452,21 @@ function jobMore(x){
   if(payOk) quick.push(['연봉', x.pay]);
   if(x.tel && !/^https?:\/\//i.test(String(x.tel).trim())) quick.push(['문의처', x.tel]);
 
-  if(!items.length && !quick.length) return '';
+  /* 공고에 연봉이 없으면 그 기관의 신입사원 평균 초임을 참고로 보여줍니다.
+     직군을 가리지 않은 기관 전체 평균이라 그 점을 반드시 밝힙니다. */
+  var baseBox='';
+  if(!payOk && x.basePay){
+    baseBox='<div class="basis"><b>이 기관 신입사원 평균 초임</b>'
+      + '약 ' + esc(String(x.basePay)) + '만원'
+      + (x.baseYear ? ' (' + esc(x.baseYear) + '년 공시)' : '')
+      + '<br>작업치료사·물리치료사만의 초임이 아니라 '
+      + '<b>이 기관 신입사원 전체 평균</b>입니다. '
+      + '직군과 고용형태에 따라 다릅니다. 실제 급여는 공고문을 확인해주세요.</div>';
+  }
 
+  /* 자세한 내용은 어느 공고에나 보여줍니다.
+     어떤 공고는 있고 어떤 공고는 아예 칸이 없으면 빠뜨린 것처럼 보입니다.
+     받아온 게 없으면 공고문을 보라고 안내합니다. */
   var h='<div class="card"><h2>자세한 내용</h2>';
 
   if(quick.length){
@@ -4436,12 +4476,20 @@ function jobMore(x){
     }).join('')+'</div>';
   }
 
-  items.forEach(function(p,i){
-    h+='<div class="acc" id="acc'+i+'">'
-      + '<button class="ach" onclick="accToggle('+i+')">'
-      + '<b>'+esc(p[0])+'</b><span class="arw">›</span></button>'
-      + '<div class="acb"><p>'+esc(p[1])+'</p></div></div>';
-  });
+  h+=baseBox;
+
+  if(items.length){
+    items.forEach(function(p,i){
+      h+='<div class="acc" id="acc'+i+'">'
+        + '<button class="ach" onclick="accToggle('+i+')">'
+        + '<b>'+esc(p[0])+'</b><span class="arw">›</span></button>'
+        + '<div class="acb"><p>'+esc(p[1])+'</p></div></div>';
+    });
+  } else {
+    h+='<p class="sub" style="margin:0">지원 자격 · 전형 방법 · 제출 서류는 '
+      + '이 공고에서 받아오지 못했습니다. '
+      + '아래 「공고 확인하러 가기」에서 공고문으로 보실 수 있습니다.</p>';
+  }
 
   if(x.site){
     h+='<a class="sitelink" href="'+esc(x.site)+'" target="_blank" rel="noopener">'
