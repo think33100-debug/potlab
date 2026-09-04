@@ -475,6 +475,14 @@
      흔한 무단 전재(드래그 복사)는 걸러집니다. */
   .noselect{-webkit-user-select:none;-moz-user-select:none;user-select:none;
     -webkit-touch-callout:none}
+  /* 시작 화면 — 로고가 먼저 뜨고, 그 아래 배너(전자책)가 자연스럽게 이어짐 */
+  .bootwrap{text-align:center;padding:40px 0 24px;animation:fadein .4s ease}
+  .bootlogo{font-size:30px;font-weight:800;letter-spacing:.03em;color:var(--accent)}
+  .boottag{font-size:13px;color:var(--dim);margin-top:8px}
+  .bootspin{display:flex;align-items:center;justify-content:center;gap:10px;
+    margin-top:26px;color:#9aa6ab;font-size:13px}
+  .bootspin .spin{width:18px;height:18px}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   .nopehint{font-size:11.5px;color:var(--dim);font-weight:600;margin-left:6px;
     background:#f0f3f3;border-radius:20px;padding:2px 8px;white-space:nowrap}
   /* 로딩 스켈레톤 — "찾는 중" 글자보다 자리가 먼저 보여 덜 답답합니다 */
@@ -2842,7 +2850,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=135"></script>
+<script src="/app.js?v=136"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -4213,9 +4221,23 @@ function nopeLabel(x){
   var jobs = x.alljobs || [];
   var others = jobs.filter(function(j){ return j!=='작업치료사' && j!=='물리치료사'; });
   var ours = jobs.filter(function(j){ return j==='작업치료사' || j==='물리치료사'; });
-  if(jobs.length<=1 || others.length===0) return x.nope+'명';
-  var ourTxt = ours.map(function(j){ return j==='작업치료사'?'작업':'물리'; }).join('·');
-  return x.nope+'명 <span class="nopehint">'+ourTxt+' 외 '+others.length+'직군 통합</span>';
+
+  /* 여러 직군이 명시된 경우 */
+  if(others.length>0 && jobs.length>1){
+    var ourTxt = ours.map(function(j){ return j==='작업치료사'?'작업':'물리'; }).join('·');
+    return x.nope+'명 <span class="nopehint">'+ourTxt+' 외 '+others.length+'직군 통합</span>';
+  }
+
+  /* 통합채용 신호(청년인턴·공개채용·통합·신규직원 등)가 있고 인원이 여러 명이면,
+     직군이 제목에 안 적혀도 통합 인원일 가능성이 높습니다.
+     "5명이 작업치료사 5명"으로 오해하지 않게 안내합니다. */
+  var t = String(x.title||'') + ' ' + String(x.hire||'') + ' ' + String(x.kind||'');
+  var bulk = /청년인턴|인턴|공개채용|신규직원|일반직|통합|공채|일괄/.test(t);
+  if(bulk && Number(x.nope) >= 2){
+    return x.nope+'명 <span class="nopehint">여러 직군 통합 · 직군별 인원은 공고문 확인</span>';
+  }
+
+  return x.nope+'명';
 }
 
 function openJob(id){
@@ -7988,8 +8010,12 @@ if(KTOKEN && ME && ME.id){
   tab('dash');
   BOOT_DASH = false;
   document.getElementById('dashBox').innerHTML =
-    '<div class="loadwrap"><div class="spin"></div>'
-    + '<p>'+esc(ME.nick||'')+'님 정보를 불러오는 중입니다</p></div>';
+    '<div class="bootwrap">'
+    + '<div class="bootlogo">POT JOB</div>'
+    + '<div class="boottag">치료사가 더 나은 자리로</div>'
+    + '<div class="bootspin"><div class="spin"></div>'
+    + '<span>'+esc(ME.nick||'')+'님, 잠시만요</span></div>'
+    + '</div>';
   /* 메뉴는 여기서 그리지 않습니다.
      아직 서버에서 받은 것이 없어 단톡방·준비반 항목이 빠진 채로 그려지고,
      잠시 뒤 다시 그리면서 메뉴가 바뀌어 보입니다. */
