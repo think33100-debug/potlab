@@ -170,6 +170,9 @@
     <div id="list"><div class="loading">불러오는 중</div></div>
 
     <div id="jobsWrap" class="hide">
+      <div class="brow2" style="margin-bottom:12px">
+        <button class="add" onclick="mixedCheck(false)">통합채용 다시 매기기 (미리보기)</button>
+      </div>
       <p class="bhelp">공고가 잘못 들어왔을 때 고칩니다.
         고친 값은 따로 적어두기 때문에 <b>수집이 다시 돌아도 안 지워집니다.</b>
         칸을 비우면 원래 값으로 돌아가고, <b>빗금(-) 하나만 적으면 빈 칸</b>이 됩니다.</p>
@@ -228,7 +231,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=139"></script>
+<script src="/app.js?v=140"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -607,6 +610,24 @@ function drawJobsHelp(counts){
          + '<button class="save" style="background:#a8402a" onclick="hideAllSuspect()">'
          + '이 ' + n + '건 모두 숨기기</button></div>'
        : '');
+}
+
+/* 「형태」 열은 수집할 때 한 번 적히고 끝이라, 판정 규칙을 고쳐도
+   이미 쌓인 공고는 옛 값 그대로입니다. 여기서 다시 매깁니다. */
+function mixedCheck(apply){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  msg(apply ? '고치는 중입니다' : '살펴보는 중입니다');
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    if(!r.changed){ alert('다시 매길 공고가 없습니다.'); return; }
+    if(apply){
+      alert(r.message);
+      openJobs(J_SPAN);
+      return;
+    }
+    if(confirm(r.message + '\n\n이대로 고칠까요?')) mixedCheck(true);
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminRefixMixed(KEY, apply);
 }
 
 function hideAllSuspect(){
