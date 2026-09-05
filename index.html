@@ -1201,6 +1201,12 @@
   .volrow .vtags i.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
   .volrow .vcnt{margin-left:auto;font-size:11.5px;color:var(--accent);font-weight:700}
 
+  .volrow.tap{cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:transform .22s}
+  .volrow.tap:active{transform:scale(.985);background:#fbfcfc}
+  .volrow .volgo{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);
+    font-size:12.5px;font-weight:700;color:var(--accent);text-align:right}
+
   /* ===== 가입 완료 ===== */
   /* 완료 화면은 좁게 — 넓은 화면에서 버튼이 끝까지 늘어나면 보기 나쁩니다 */
   .donewrap{max-width:460px;margin:0 auto}
@@ -3185,7 +3191,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v131 · 2026-09-05';
+var APP_VER = 'v132 · 2026-09-05';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3643,7 +3649,14 @@ function tab(which, back){
           install:['앱처럼 쓰기','주소 안 찾고 한 번에 열기']};
   if(TT[which]){
     document.getElementById('subTitle').textContent=TT[which][0];
-    document.getElementById('subDesc').textContent=TT[which][1];
+    /* 커뮤니티 소제목은 학생과 치료사에게 다릅니다.
+       메뉴에서 갈라놓고 여기만 안 바꾸면 어긋나 보입니다. */
+    var dsc = TT[which][1];
+    if(which==='comm'){
+      var st2 = !!(ME && ME.role === '학생');
+      dsc = T(st2?'menu.comm.stu.d':'menu.comm.pro.d', dsc);
+    }
+    document.getElementById('subDesc').textContent=dsc;
   }
   document.getElementById('t1').className='tab'+(which==='input'?' on':'');
   document.getElementById('t2').className='tab'+(which==='view'?' on':'');
@@ -4256,7 +4269,10 @@ function drawComm(r){
 
   document.getElementById('commBox').innerHTML=h;
   attachRipple();
-  loadCommPosts();
+  /* 채널을 골랐을 때만 목록을 부릅니다.
+     「전체」일 때는 묶음 화면(paintDigest)이 그리므로,
+     여기서 부르면 「글을 불러오는 중」이 그대로 남습니다. */
+  if(CH_NOW) loadCommPosts();
 }
 
 var IS_STU = false;
@@ -4970,7 +4986,9 @@ function loadVol(){
 
 function volCard(x){
   var left = (x.need && x.joined <= x.need) ? (x.need - x.joined) : 0;
-  return '<div class="volrow">'
+  /* 누르면 VMS 상세로 갑니다. 신청은 거기서 해야 합니다. */
+  return '<div class="volrow'+(x.url?' tap':'')+'"'
+    + (x.url?' onclick="window.open(\''+esc(x.url)+'\',\'_blank\')"':'')+'>'
     + '<div class="vt">'+esc(x.title)+'</div>'
     + '<div class="vm">'
     + esc(x.req||x.cent)
@@ -4984,7 +5002,9 @@ function volCard(x){
     + (x.teen?'<i>청소년 가능</i>':'')
     + (x.need?'<span class="vcnt">'+x.joined+'/'+x.need+'명'
         +(left?' · '+left+'자리':'')+'</span>':'')
-    + '</div></div>';
+    + '</div>'
+    + (x.url?'<div class="volgo">신청하러 가기 ›</div>':'')
+    + '</div>';
 }
 
 function volCentCard(x){
