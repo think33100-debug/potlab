@@ -1114,24 +1114,26 @@
   .cnotice ul{margin:6px 0 0;padding-left:16px}
   .cnotice li{margin-bottom:3px}
 
-  /* 종료 물어보기 */
-  .exitpop{position:fixed;inset:0;z-index:950;display:flex;
-    align-items:center;justify-content:center;padding:24px}
-  .exitpop .exbg{position:absolute;inset:0;background:rgba(12,20,18,.5)}
-  .exitpop .exbox{position:relative;width:100%;max-width:300px;background:#fff;
-    border-radius:18px;padding:26px 20px 16px;text-align:center;
-    box-shadow:0 12px 40px rgba(0,0,0,.24);
-    animation:popup2 .22s cubic-bezier(.16,1,.3,1) both}
-  @keyframes popup2{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
-  .exitpop .exh{font-size:16.5px;font-weight:800;letter-spacing:-.02em;
-    color:var(--ink);margin-bottom:20px;word-break:keep-all}
-  .exitpop .exbtns{display:flex;gap:8px}
-  .exitpop .exbtns button{flex:1;padding:13px;border-radius:11px;
-    font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;
-    -webkit-tap-highlight-color:transparent}
-  .exitpop .exno{border:1px solid var(--line);background:#fff;color:var(--dim)}
-  .exitpop .exyes{border:0;background:var(--ink);color:#fff}
-  .exitpop .exno:active,.exitpop .exyes:active{transform:scale(.96)}
+  /* 나가기 전 알림 띠 — 화면 아래에 잠깐 떴다 사라집니다 */
+  .exittoast{position:fixed;left:50%;z-index:960;
+    bottom:calc(26px + env(safe-area-inset-bottom));
+    transform:translateX(-50%) translateY(90px);
+    display:flex;align-items:center;gap:11px;
+    background:rgba(28,30,33,.94);color:#fff;
+    border-radius:30px;padding:11px 20px 11px 11px;
+    box-shadow:0 6px 24px rgba(0,0,0,.28);
+    max-width:calc(100vw - 40px);
+    opacity:0;transition:transform .26s cubic-bezier(.2,.9,.25,1),opacity .26s ease}
+  .exittoast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  /* 앱 아이콘 — 홈 화면과 같은 아이보리 바탕에 진한 글자.
+     어두운 띠 위에 놓이니 밝은 쪽이 눈에 잡힙니다. */
+  .exittoast .etlogo{flex-shrink:0;width:32px;height:32px;border-radius:50%;
+    background:var(--sand);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:900;letter-spacing:-.02em;
+    font-family:'Poppins','Montserrat',sans-serif}
+  .exittoast .ettx{font-size:14.5px;font-weight:600;letter-spacing:-.01em;
+    white-space:nowrap}
 
   /* ===== 가입 완료 ===== */
   /* 완료 화면은 좁게 — 넓은 화면에서 버튼이 끝까지 늘어나면 보기 나쁩니다 */
@@ -3110,7 +3112,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v120 · 2026-09-05';
+var APP_VER = 'v122 · 2026-09-05';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -8542,43 +8544,37 @@ try{
       try{ history.pushState({p:CURRENT}, '', location.href); }catch(e){}
       return;
     }
-    /* 홈에서 한 번 더 누르면 앱이 꺼집니다.
-       전에는 「한 번 더 누르면 나갑니다」 를 잠깐 띄웠는데,
-       못 보고 또 누르면 그냥 꺼져버렸습니다. 물어보고 끕니다. */
+    /* 홈에서 뒤로를 누르면 알리고, 2초 안에 또 누르면 나갑니다.
+       자리를 「먼저」 다시 쌓아둡니다. 안 그러면 알림을 띄우는 사이에
+       한 번 더 눌렀을 때 그냥 나가버립니다. */
+    if(EXIT_ARMED){
+      EXIT_ARMED = false;
+      history.back();
+      return;
+    }
     try{ history.pushState({p:'app'}, '', location.href); }catch(e){}
-    askExit();
+    EXIT_ARMED = true;
+    exitToast();
+    setTimeout(function(){ EXIT_ARMED = false; }, 2000);
   });
 }catch(e){}
 
-/* 정말 나갈지 물어봅니다.
-   「예」를 누르면 뒤로 두 번 가서 앱을 벗어납니다. */
-function askExit(){
-  if(document.getElementById('exitPop')) return;   // 이미 떠 있으면 그만
-  var d=document.createElement('div');
-  d.id='exitPop';
-  d.className='exitpop';
-  d.innerHTML='<div class="exbg" onclick="closeExit()"></div>'
-    + '<div class="exbox">'
-    + '<div class="exh">POT JOB을 종료할까요?</div>'
-    + '<div class="exbtns">'
-    + '<button class="exno" onclick="closeExit()">아니요</button>'
-    + '<button class="exyes" onclick="doExit()">예</button>'
-    + '</div></div>';
-  document.body.appendChild(d);
-}
-
-function closeExit(){
-  var d=document.getElementById('exitPop');
-  if(d && d.parentNode) d.parentNode.removeChild(d);
-}
-
-function doExit(){
-  closeExit();
-  EXIT_ARMED = true;
-  /* 우리가 쌓아둔 자리를 지나 밖으로 나갑니다 */
-  try{ history.go(-2); }catch(e){ history.back(); }
-  /* 그래도 안 닫히면 (앱으로 설치한 경우) 창을 닫아봅니다 */
-  setTimeout(function(){ try{ window.close(); }catch(e){} }, 300);
+/* 나가기 전 한 번 더 —
+   가운데 창을 띄우면 무겁습니다. 아래에 잠깐 떴다 사라지는 띠로 알립니다.
+   2초 안에 뒤로를 한 번 더 누르면 정말 나갑니다. */
+function exitToast(){
+  var t=document.getElementById('exitToast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='exitToast';
+    t.className='exittoast';
+    t.innerHTML='<span class="etlogo">POT</span>'
+      + '<span class="ettx">' + T('exit.msg','한 번 더 누르면 앱이 종료됩니다.') + '</span>';
+    document.body.appendChild(t);
+  }
+  t.className='exittoast show';
+  clearTimeout(t._t);
+  t._t=setTimeout(function(){ t.className='exittoast'; }, 2000);
 }
 
 /* 입력하던 게 있으면 나가기 전에 확인합니다 */
