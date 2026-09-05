@@ -1189,6 +1189,18 @@
   .bzstat.wait{background:#fdf3e6;color:#8a5c14}
   .bzstat.done{background:var(--accent-soft);color:var(--accent)}
 
+  /* 봉사활동 */
+  .volrow{background:#fff;border:1px solid var(--line);border-radius:13px;
+    padding:15px;margin-bottom:8px}
+  .volrow .vt{font-size:15px;font-weight:700;letter-spacing:-.01em;line-height:1.45;
+    word-break:keep-all;margin-bottom:7px}
+  .volrow .vm{font-size:12.5px;color:var(--dim);line-height:1.75;word-break:keep-all}
+  .volrow .vtags{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+  .volrow .vtags i{font-style:normal;font-size:11px;background:#f1f5f4;color:#3f4c52;
+    border-radius:6px;padding:4px 8px}
+  .volrow .vtags i.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  .volrow .vcnt{margin-left:auto;font-size:11.5px;color:var(--accent);font-weight:700}
+
   /* ===== 가입 완료 ===== */
   /* 완료 화면은 좁게 — 넓은 화면에서 버튼이 끝까지 늘어나면 보기 나쁩니다 */
   .donewrap{max-width:460px;margin:0 auto}
@@ -3005,6 +3017,8 @@
 
   <div id="pane-bizjob" class="hide bizmode"><div id="bizJobBox"></div></div>
 
+  <div id="pane-vol" class="hide"><div id="volBox"></div></div>
+
   <div id="pane-invite" class="hide"><div id="inviteBox"></div></div>
   <div id="pane-mine" class="hide"><div id="mineBox"></div></div>
   <div id="pane-avatar" class="hide"><div id="avBox"></div></div>
@@ -3171,7 +3185,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v128 · 2026-09-05';
+var APP_VER = 'v129 · 2026-09-05';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3588,7 +3602,7 @@ function tab(which, back){
   CURRENT = which;
   try{ history.pushState({p:which}, '', location.href); }catch(e){}
 
-  ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting','edu','biz','bizok','bizjob'].forEach(function(p){
+  ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting','edu','biz','bizok','bizjob','vol'].forEach(function(p){
     var el=document.getElementById('pane-'+p);
     if(el) el.className = (p===which?'':'hide');
   });
@@ -3601,6 +3615,7 @@ function tab(which, back){
   var ptb=document.getElementById('postTabs');
   if(ptb) ptb.className = (which==='post')?'tabs':'tabs hide';
   var TT={edu:['교육 · 학술','협회 보수교육 · 학회 · 세미나'],
+          vol:['봉사활동 찾기','지역과 분야로 봉사할 곳을 찾습니다'],
           setting:['설정','알림 · 프로필 · 내 정보'],
           star:['담아둔 공고','마감 하루 전에 알려드립니다'],
           job:['채용공고','기관 정보와 접수 기간'],
@@ -4021,6 +4036,7 @@ function drawDashMenu(){
     potlab:  {ic:'📚', href:b.potlab},
     noti:    {ic:'🔔', fn:"tab('noti')"},
     mine:    {ic:'📝', fn:"openMine()"},
+    vol:     {ic:'🤝', fn:"openVol()"},
     biz:     {ic:'🏢', fn:"openBiz()"},
     avatar:  {ic:'🎨', fn:"openAvatar()"},
     input:   {ic:'🔄', fn:"tab('input')"},
@@ -4869,6 +4885,119 @@ function bjSubmit(){
     if(btn){ btn.disabled=false; btn.textContent='공고 올리기'; }
     msg('올리지 못했습니다. 잠시 후 다시 눌러주세요');
   }).bizPostJob(cred(), d);
+}
+
+/* ═══════════════════ 봉사활동 ═══════════════════
+ * 치료사는 봉사 실적이 필요할 때가 있습니다.
+ * 지역과 분야로 걸러 어디서 받아주는지 찾습니다.
+ */
+var VOL = { tab:'list', area:'', status:'1', type:'004' };
+
+function openVol(){
+  tab('vol');
+  drawVol();
+  loadVol();
+}
+
+function drawVol(){
+  var h='<div class="tabs">'
+    + '<button class="tab'+(VOL.tab==='list'?' on':'')+'" onclick="volTab(\'list\')">모집 중인 봉사</button>'
+    + '<button class="tab'+(VOL.tab==='cent'?' on':'')+'" onclick="volTab(\'cent\')">봉사활동처 찾기</button>'
+    + '</div>'
+    + '<div class="psort">'
+    + '<select id="volArea" onchange="VOL.area=this.value;loadVol()"></select>'
+    + (VOL.tab==='cent'
+        ? '<select id="volType" onchange="VOL.type=this.value;loadVol()"></select>'
+        : '<select id="volStatus" onchange="VOL.status=this.value;loadVol()">'
+          + '<option value="1">모집 중</option><option value="2">모집 완료</option></select>')
+    + '</div>'
+    + '<div id="volList"></div>';
+  document.getElementById('volBox').innerHTML=h;
+}
+
+function volTab(t){ VOL.tab=t; drawVol(); loadVol(); }
+
+function volFill(r){
+  var a=document.getElementById('volArea');
+  if(a && !a.options.length){
+    a.innerHTML=(r.areas||[]).map(function(x){
+      return '<option value="'+x.cd+'"'+(x.cd===r.area?' selected':'')+'>'+esc(x.name)+'</option>';
+    }).join('');
+    VOL.area=r.area;
+  }
+  var t=document.getElementById('volType');
+  if(t && !t.options.length){
+    t.innerHTML=(r.types||[]).map(function(x){
+      return '<option value="'+x.cd+'"'+(x.cd===r.type?' selected':'')+'>'+esc(x.name)+'</option>';
+    }).join('');
+  }
+  var st=document.getElementById('volStatus');
+  if(st) st.value=VOL.status;
+}
+
+function loadVol(){
+  var box=document.getElementById('volList');
+  if(!box) return;
+  box.innerHTML=loading('찾는 중');
+
+  var done=function(r){
+    if(!r.ok){ box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(r.message||'')+'</div>'; return; }
+    volFill(r);
+    if(!r.rows.length){
+      box.innerHTML='<div class="empty2">'+esc(r.areaName)+'에 지금 올라온 것이 없습니다.<br>'
+        + '다른 지역을 골라보세요.</div>';
+      return;
+    }
+    box.innerHTML='<p class="sub" style="margin:2px 0 10px">'
+      + esc(r.areaName)+' <b>'+r.total+'곳</b>'
+      + (VOL.tab==='list' ? ' · '+esc(r.from)+' ~ '+esc(r.to) : ' · '+esc(r.typeName))
+      + '</p>'
+      + r.rows.map(VOL.tab==='list'?volCard:volCentCard).join('');
+  };
+
+  if(VOL.tab==='list'){
+    google.script.run.withSuccessHandler(done)
+      .withFailureHandler(function(e){
+        box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>잠시 후 다시 열어주세요.</div>';
+      }).volList(cred(), VOL.area, VOL.status, 1);
+  }else{
+    google.script.run.withSuccessHandler(done)
+      .withFailureHandler(function(e){
+        box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>잠시 후 다시 열어주세요.</div>';
+      }).volCenters(cred(), VOL.area, VOL.type, 1);
+  }
+}
+
+function volCard(x){
+  var left = (x.need && x.joined <= x.need) ? (x.need - x.joined) : 0;
+  return '<div class="volrow">'
+    + '<div class="vt">'+esc(x.title)+'</div>'
+    + '<div class="vm">'
+    + esc(x.req||x.cent)
+    + (x.place?'<br>'+esc(x.place):'')
+    + (x.area?' · '+esc(x.area):'')
+    + '</div>'
+    + '<div class="vtags">'
+    + (x.act?'<i class="on">'+esc(x.act)+'</i>':'')
+    + (x.term?'<i>'+esc(x.term)+'</i>':'')
+    + (x.status?'<i>'+esc(x.status)+'</i>':'')
+    + (x.teen?'<i>청소년 가능</i>':'')
+    + (x.need?'<span class="vcnt">'+x.joined+'/'+x.need+'명'
+        +(left?' · '+left+'자리':'')+'</span>':'')
+    + '</div></div>';
+}
+
+function volCentCard(x){
+  return '<div class="volrow">'
+    + '<div class="vt">'+esc(x.name)+'</div>'
+    + '<div class="vm">'
+    + (x.addr?esc(x.addr):esc(x.area))
+    + (x.tel?'<br>'+esc(x.tel):'')
+    + '</div>'
+    + '<div class="vtags">'
+    + (x.type?'<i class="on">'+esc(x.type)+'</i>':'')
+    + (x.area?'<i>'+esc(x.area)+'</i>':'')
+    + '</div></div>';
 }
 
 /* ═══════════════════ 축하 ═══════════════════
