@@ -3211,7 +3211,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v138 · 2026-09-05';
+var APP_VER = 'v144 · 2026-09-06';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3642,7 +3642,7 @@ function tab(which, back){
   if(ptb) ptb.className = (which==='post')?'tabs':'tabs hide';
   var TT={edu:['교육 · 학술','협회 보수교육 · 학회 · 세미나'],
           vol:['봉사활동 찾기','지역과 분야로 봉사할 곳을 찾습니다'],
-          wf:['장애인복지관','전국 266곳 · 종사자 많은 순'],
+          wf:['복지관 · 발달재활','장애인복지관과 바우처 기관을 함께 봅니다'],
           setting:['설정','알림 · 프로필 · 내 정보'],
           star:['담아둔 공고','마감 하루 전에 알려드립니다'],
           job:['채용공고','기관 정보와 접수 기간'],
@@ -5051,7 +5051,13 @@ function volCentCard(x){
  * 병원과 성격이 다릅니다. 병상이 없어 업무강도를 낼 수 없습니다.
  * 대신 규모 — 종사자 수와 그 순위를 보여줍니다.
  */
-var WF = { sido:'', q:'' };
+var WF = { tab:'wf', sido:'', q:'' };
+
+function wfTab(t){
+  WF.tab=t; WF.sido=''; WF.q='';
+  drawWfShell();
+  loadWf();
+}
 
 function openWf(){
   tab('wf');
@@ -5061,11 +5067,16 @@ function openWf(){
 
 function drawWfShell(){
   document.getElementById('wfBox').innerHTML =
-      '<div class="psort">'
+      '<div class="tabs">'
+    + '<button class="tab'+(WF.tab!=='vc'?' on':'')+'" onclick="wfTab(\'wf\')">장애인복지관</button>'
+    + '<button class="tab'+(WF.tab==='vc'?' on':'')+'" onclick="wfTab(\'vc\')">발달재활 · 바우처</button>'
+    + '</div>'
+    + '<div class="psort">'
     + '<select id="wfSido" onchange="WF.sido=this.value;loadWf()"></select>'
     + '</div>'
     + '<div class="f" style="margin-bottom:12px">'
-    + '<input id="wfQ" placeholder="복지관 이름 · 지역으로 찾기" autocomplete="off"'
+    + '<input id="wfQ" placeholder="'
+    + (WF.tab==='vc'?'기관 이름 · 서비스로 찾기':'복지관 이름 · 지역으로 찾기')+'" autocomplete="off"'
     + ' oninput="WF.q=this.value" onkeydown="if(event.key===\'Enter\')loadWf()">'
     + '</div>'
     + '<div id="wfList"></div>';
@@ -5075,7 +5086,7 @@ function loadWf(){
   var box=document.getElementById('wfList');
   if(!box) return;
   box.innerHTML=loading('찾는 중');
-  google.script.run.withSuccessHandler(function(r){
+  var done=function(r){
     if(!r.ok){ box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(r.message||'')+'</div>'; return; }
 
     var sel=document.getElementById('wfSido');
@@ -5087,17 +5098,43 @@ function loadWf(){
     }
 
     if(!r.rows.length){
-      box.innerHTML='<div class="empty2">찾으시는 복지관이 없습니다.</div>';
+      box.innerHTML='<div class="empty2">'
+        + (r.message?esc(r.message):'찾으시는 기관이 없습니다.')+'</div>';
       return;
     }
     box.innerHTML='<p class="sub" style="margin:2px 0 10px">'
       + (r.sido?esc(r.sido):'전국')+' <b>'+r.total+'곳</b>'
-      + (r.sido?'':' · 종사자 '+r.people.toLocaleString('ko-KR')+'명')
-      + ' · 종사자 많은 순</p>'
-      + r.rows.map(wfCard).join('');
-  }).withFailureHandler(function(){
+      + (WF.tab==='vc'
+          ? ' · 발달재활 · 아동심리 등 바우처 기관'
+          : (r.sido?'':' · 종사자 '+(r.people||0).toLocaleString('ko-KR')+'명')+' · 종사자 많은 순')
+      + '</p>'
+      + r.rows.map(WF.tab==='vc'?vcCard:wfCard).join('');
+  };
+  var fail=function(){
     box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>잠시 후 다시 열어주세요.</div>';
-  }).wfList(cred(), WF.sido, WF.q);
+  };
+
+  if(WF.tab==='vc'){
+    google.script.run.withSuccessHandler(done).withFailureHandler(fail)
+      .vcList(cred(), WF.sido, WF.q);
+  }else{
+    google.script.run.withSuccessHandler(done).withFailureHandler(fail)
+      .wfList(cred(), WF.sido, WF.q);
+  }
+}
+
+/* 바우처 기관 — 종사자 수가 없어 규모 순위를 못 냅니다.
+   대신 무슨 서비스를 하는 곳인지 보여줍니다. */
+function vcCard(x){
+  return '<div class="wfrow">'
+    + '<div class="wh"><span class="wn">'+esc(x.name)+'</span></div>'
+    + '<div class="wa">'+esc(x.sgg||x.sido)
+    + (x.addr?'<br>'+esc(x.addr):'')
+    + (x.tel?'<br>'+esc(x.tel):'')+'</div>'
+    + '<div class="vtags" style="margin-top:9px">'
+    + (x.svc?'<i class="on">'+esc(x.svc)+'</i>':'')
+    + (x.biz?'<i>'+esc(x.biz)+'</i>':'')
+    + '</div></div>';
 }
 
 function wfCard(x){
