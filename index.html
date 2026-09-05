@@ -3112,7 +3112,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v122 · 2026-09-05';
+var APP_VER = 'v123 · 2026-09-05';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3464,6 +3464,32 @@ function goBack(){
 function goHome(){
   NAV = [];
   tab('home', true);
+}
+
+/* innerHTML 로 화면에 글을 넣을 때마다 위 clean 을 자동으로 거칩니다.
+   174군데를 손으로 고치면 반드시 빠뜨립니다. 한 곳에서 걸어둡니다. */
+(function(){
+  try{
+    var d = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+    if(!d || !d.set) return;
+    Object.defineProperty(Element.prototype, 'innerHTML', {
+      configurable: true,
+      enumerable: d.enumerable,
+      get: d.get,
+      set: function(v){ d.set.call(this, clean(v)); }
+    });
+  }catch(e){}
+})();
+
+/* ── 마지막 안전망 ──
+   화면에 넣는 글에 undefined · null · NaN 이 글자로 섞이면 지웁니다.
+   값을 만드는 곳이 백 군데가 넘어서 하나씩 막으면 반드시 빠뜨립니다.
+   여기서 한 번에 걸러냅니다. 원인은 따로 고치되, 새는 것은 여기서 막습니다. */
+function clean(h){
+  return String(h == null ? '' : h)
+    .replace(/(^|[>\s(])undefined([<\s),.·%]|$)/g, '$1-$2')
+    .replace(/(^|[>\s(])NaN([<\s),.·%]|$)/g, '$1-$2')
+    .replace(/(^|[>\s(])null([<\s),.·%]|$)/g, '$1-$2');
 }
 
 function esc(s){
@@ -5015,10 +5041,14 @@ function densLocal(h,key){
   if(nm.indexOf('보훈')>-1)s-=4;
   s=Math.round(Math.min(Math.max(s,0),10)*10)/10;
   var lv=s>=6?3:s>=3?2:1; if((ot>=20||tot>=25)&&lv<2)lv=2;
+  /* 서버(densityOf_)가 주는 것과 같은 모양이어야 합니다.
+     여기서 docPer100 · docs 를 빠뜨려서 화면에 「undefined」 가 찍혔습니다. */
   return{ enough:true,score:s,level:lv,
     label:['여유로운 편','보통','바쁜 편'][lv-1],
     oneLine:['재활을 받는 환자가 적은 병원입니다','재활 비중이 평균 수준인 병원입니다','환자 대부분이 재활을 받는 병원입니다'][lv-1],
-    bed:bed,otN:ot,ptN:pt };
+    bed:bed,otN:ot,ptN:pt,
+    docs:rehab||0,
+    docPer100: rehab ? Math.round(rehab/bed*100*10)/10 : null };
 }
 
 function loadJobHosp(x){
@@ -6748,7 +6778,10 @@ function densBlock(d, job){
     + '<span class="wt">병상 100개당<br><b>작업치료사</b></span></div>'
     + '<div class="wr'+(mine==='pt'?' me':'')+'"><span class="wn">'+ptPer+'<em>명</em></span>'
     + '<span class="wt">병상 100개당<br><b>물리치료사</b></span></div>';
-  if(d.docPer100 !== null){
+  /* 서버가 이 값을 아예 안 보낼 때가 있습니다.
+     그때는 undefined 인데, undefined !== null 이 참이라 그냥 통과해
+     화면에 「undefined」 가 글자로 찍혔습니다. 숫자일 때만 보여줍니다. */
+  if(typeof d.docPer100 === 'number' && isFinite(d.docPer100)){
     t += '<div class="wr"><span class="wn">'+d.docPer100+'<em>명</em></span>'
       + '<span class="wt">병상 100개당<br><b>재활의학과 전문의</b></span></div>';
   }
