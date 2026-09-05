@@ -141,7 +141,9 @@ function drawBiz(rows){
       + '<div class="ch">'+esc(x.at)+' · '+esc(x.jobs)
       + (x.verified?' · 인증 완료':' · 인증 대기')+'</div>'
       + '<div class="tt">'+esc(x.org)+'</div>'
-      + '<div class="mt">사업자 '+esc(x.bizNo)
+      + '<div class="mt">'
+      + (x.bizNo ? '사업자 '+esc(x.bizNo)
+                 : '<b style="color:#b4432c">사업자번호 없음</b>')
       + ' · '+esc(x.name)+(x.title?' '+esc(x.title):'')
       + '<br>'+esc(x.tel)+' · '+esc(x.email)+'</div>'
       + (x.memo?'<div class="note"><b>메모</b>'+esc(x.memo)+'</div>':'')
@@ -485,7 +487,7 @@ function saveSched(){
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=143"></script>
+<script src="/app.js?v=144"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
