@@ -1135,6 +1135,60 @@
   .exittoast .ettx{font-size:14.5px;font-weight:600;letter-spacing:-.01em;
     white-space:nowrap}
 
+
+  /* ═══ 기업(채용담당자) ═══
+   * 치료사 화면과 색을 달리해 「여기는 다른 곳」 임을 알립니다.
+   * 쨍한 주황은 눈이 아파서 한 단계 눌러 씁니다. */
+  .bizmode{--bz:#c96a2b;--bz-soft:#fbf1e8;--bz-line:#ecd9c6;--bz-deep:#a5541f}
+  .bizmode .bzh{font-size:21px;font-weight:800;letter-spacing:-.03em;
+    color:var(--bz-deep);word-break:keep-all;margin:0 0 8px}
+  .bizmode .bzsub{font-size:13.5px;color:#6b5a4d;line-height:1.8;
+    word-break:keep-all;margin:0 0 16px}
+  .bizmode .card{border-color:var(--bz-line)}
+  .bizmode .f label{color:#5c4a3c}
+  .bizmode input:focus,.bizmode select:focus,.bizmode textarea:focus{border-color:var(--bz)}
+  .bizmode .go{background:var(--bz)}
+  .bizmode .ghost{border-color:var(--bz-line);color:var(--bz-deep)}
+  .bizmode .back{border-color:var(--bz-line)}
+  .bizmode .back .bicon{color:var(--bz)}
+  .bzreq{color:#b4432c;font-weight:700;margin-left:2px}
+  .bznote{background:var(--bz-soft);border-radius:10px;padding:12px 13px;
+    font-size:12.5px;color:#6b5a4d;line-height:1.75;word-break:keep-all;margin-top:10px}
+  .bznote b{color:var(--bz-deep)}
+  /* 직군 고르기 */
+  .bzjobs{display:flex;gap:6px}
+  .bzjobs button{flex:1;padding:11px 4px;border:1px solid var(--line);background:#fff;
+    border-radius:9px;font-family:inherit;font-size:13.5px;color:var(--dim);cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .bzjobs button.on{border:1.5px solid var(--bz);background:var(--bz-soft);
+    color:var(--bz-deep);font-weight:700}
+  /* 약관 */
+  .bzterm{border:1px solid var(--bz-line);border-radius:11px;background:#fff;
+    padding:13px 14px;font-size:12.5px;line-height:1.85;color:#5c4a3c;
+    max-height:190px;overflow-y:auto;word-break:keep-all}
+  .bzterm b{color:var(--bz-deep);display:inline-block;margin-top:6px}
+  .bzagree{display:flex;align-items:flex-start;gap:10px;margin-top:11px;
+    font-size:13.5px;color:var(--ink);cursor:pointer;word-break:keep-all;line-height:1.6}
+  .bzagree input{width:21px;height:21px;flex-shrink:0;margin-top:1px;accent-color:var(--bz)}
+  /* 인증 */
+  .bzmail{font-size:15px;font-weight:700;margin:3px 0 14px;word-break:break-all}
+  .bzcode{display:flex;gap:8px}
+  .bzcode input{flex:1;min-width:0;font-size:19px;letter-spacing:.2em;text-align:center}
+  .bzcode button{flex:0 0 auto;padding:11px 14px;border:1px solid var(--line);
+    background:#fff;border-radius:8px;font-family:inherit;font-size:13.5px;
+    color:var(--dim);cursor:pointer;white-space:nowrap}
+  .bzdoc{background:#fdf3e6;border:1px solid #e8cfa4;border-radius:11px;
+    padding:13px 14px;margin-top:11px;font-size:12.5px;color:#6b5220;line-height:1.75;
+    word-break:keep-all}
+  .bzdoc b{display:block;color:#8a5c14;margin-bottom:4px;font-size:13px}
+  .bzfile{display:block;width:100%;box-sizing:border-box;text-align:center;margin-top:10px;
+    border:1px dashed #d8b98a;background:#fff;border-radius:10px;padding:14px;
+    font-family:inherit;font-size:14px;color:#8a5c14;cursor:pointer}
+  .bzstat{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;
+    border-radius:20px;padding:4px 11px;margin-bottom:10px}
+  .bzstat.wait{background:#fdf3e6;color:#8a5c14}
+  .bzstat.done{background:var(--accent-soft);color:var(--accent)}
+
   /* ===== 가입 완료 ===== */
   /* 완료 화면은 좁게 — 넓은 화면에서 버튼이 끝까지 늘어나면 보기 나쁩니다 */
   .donewrap{max-width:460px;margin:0 auto}
@@ -2946,6 +3000,11 @@
     </div>
   </div>
 
+  <div id="pane-biz" class="hide bizmode"><div id="bizBox"></div></div>
+  <div id="pane-bizok" class="hide bizmode"><div id="bizOkBox"></div></div>
+
+  <div id="pane-bizjob" class="hide bizmode"><div id="bizJobBox"></div></div>
+
   <div id="pane-invite" class="hide"><div id="inviteBox"></div></div>
   <div id="pane-mine" class="hide"><div id="mineBox"></div></div>
   <div id="pane-avatar" class="hide"><div id="avBox"></div></div>
@@ -3112,7 +3171,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v125 · 2026-09-05';
+var APP_VER = 'v126 · 2026-09-05';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3529,10 +3588,12 @@ function tab(which, back){
   CURRENT = which;
   try{ history.pushState({p:which}, '', location.href); }catch(e){}
 
-  ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting','edu'].forEach(function(p){
+  ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting','edu','biz','bizok','bizjob'].forEach(function(p){
     var el=document.getElementById('pane-'+p);
     if(el) el.className = (p===which?'':'hide');
   });
+  if(which === 'bizjob') drawBizJob();
+
   var isStat = (which==='view');
   var sub=document.getElementById('subhead');
   sub.className = (which==='home'||which==='dash')?'hide':'';
@@ -3960,6 +4021,7 @@ function drawDashMenu(){
     potlab:  {ic:'📚', href:b.potlab},
     noti:    {ic:'🔔', fn:"tab('noti')"},
     mine:    {ic:'📝', fn:"openMine()"},
+    biz:     {ic:'🏢', fn:"openBiz()"},
     avatar:  {ic:'🎨', fn:"openAvatar()"},
     input:   {ic:'🔄', fn:"tab('input')"},
     install: {ic:'📲', fn:"tab('install')", onlyApp:true},
@@ -4470,6 +4532,335 @@ function cwSend(){
     .commWrite(cred(), ch, t, b);
 }
 
+
+/* ═══════════════════ 기업(채용담당자) ═══════════════════
+ * 치료사·학생과 다른 계정입니다. 공고 등록만 할 수 있습니다.
+ * 커뮤니티와 급여 통계는 서버에서 막혀 있습니다.
+ */
+var BZ = { org:'', bizNo:'', name:'', tel:'', title:'', email:'', jobs:'', agree:false };
+
+function openBiz(){
+  if(!KTOKEN){ GO_AFTER_LOGIN='biz'; msg('먼저 로그인해주세요'); tab('unlock'); return; }
+  tab('biz');
+  var box=document.getElementById('bizBox');
+  box.innerHTML=loading('불러오는 중');
+  google.script.run.withSuccessHandler(function(r){
+    if(r && r.joined){ BZ = r.biz; drawBizOk(r.biz); return; }
+    drawBizForm();
+  }).withFailureHandler(function(e){
+    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
+  }).bizMe(cred());
+}
+
+function drawBizForm(){
+  var h='<button class="back" onclick="tab(\'dash\')"><span class="bicon">‹</span>돌아가기</button>'
+    + '<h2 class="bzh">' + T('biz.h','채용담당자로 시작하기') + '</h2>'
+    + '<p class="bzsub">' + T('biz.sub','공고를 직접 올리실 수 있습니다.<br>커뮤니티와 급여 통계는 보이지 않습니다.') + '</p>'
+
+    + '<div class="card">'
+    + '<div class="f"><label>기관<span class="bzreq">*</span></label>'
+    + '<input id="bzOrg" placeholder="병원 이름으로 찾기" oninput="bzFind(this.value)" autocomplete="off">'
+    + '<div id="bzSug" class="sugbox"></div>'
+    + '<div class="hint2">등록된 병원에서 고릅니다. 직접 적을 수 없습니다.</div></div>'
+
+    + '<div class="f"><label>사업자등록번호<span class="bzreq">*</span></label>'
+    + '<input id="bzNo" placeholder="000-00-00000" inputmode="numeric"></div>'
+
+    + '<div class="two">'
+    + '<div class="f"><label>담당자<span class="bzreq">*</span></label>'
+    + '<input id="bzName" placeholder="이름"></div>'
+    + '<div class="f"><label>직책 <span class="hint">선택</span></label>'
+    + '<input id="bzTitle" placeholder="예) 팀장"></div></div>'
+
+    + '<div class="f"><label>연락처<span class="bzreq">*</span></label>'
+    + '<input id="bzTel" placeholder="010-0000-0000" inputmode="tel"></div>'
+
+    + '<div class="f"><label>업무 이메일<span class="bzreq">*</span></label>'
+    + '<input id="bzEmail" placeholder="name@hospital.or.kr" inputmode="email" autocapitalize="off">'
+    + '<div class="hint2">이 주소로 인증번호를 보냅니다.</div></div>'
+
+    + '<div class="f"><label>뽑는 직군<span class="bzreq">*</span></label>'
+    + '<div class="bzjobs">'
+    + '<button onclick="bzJob(\'작업치료사\')" id="bzJ1">작업치료사</button>'
+    + '<button onclick="bzJob(\'물리치료사\')" id="bzJ2">물리치료사</button>'
+    + '<button onclick="bzJob(\'공통\')" id="bzJ3">둘 다</button>'
+    + '</div></div>'
+    + '</div>'
+
+    + '<div class="card">'
+    + '<h2>개인정보 수집·이용 동의</h2>'
+    + '<div class="bzterm">' + T('biz.privacy','') + '</div>'
+    + '<label class="bzagree"><input type="checkbox" id="bzAgree">'
+    + '<span>' + T('biz.agree','위 내용을 확인했고, 개인정보 수집·이용에 동의합니다') + '</span></label>'
+    + '</div>'
+
+    + '<div class="bznote">담당자 이름과 연락처는 <b>공개되지 않습니다.</b> '
+    + '문제가 생겼을 때 저희가 연락드리는 용도입니다.</div>'
+
+    + '<button class="go" id="bzGo" onclick="bzSubmit()">다음</button>';
+
+  document.getElementById('bizBox').innerHTML=h;
+  attachRipple();
+}
+
+function bzJob(j){
+  BZ.jobs=j;
+  ['bzJ1','bzJ2','bzJ3'].forEach(function(id,i){
+    var want=['작업치료사','물리치료사','공통'][i];
+    var el=document.getElementById(id);
+    if(el) el.className = (want===j) ? 'on' : '';
+  });
+}
+
+/* 병원 자료에서 찾습니다 — 직접 적지 못하게 해서 가짜 기관을 막습니다 */
+function bzFind(v){
+  var box=document.getElementById('bzSug');
+  if(!box) return;
+  var q=(v||'').trim();
+  BZ.org='';
+  if(q.length<2){ box.innerHTML=''; return; }
+  loadHospData().then(function(d){
+    if(!d){ box.innerHTML='<div class="none">병원 자료를 불러오지 못했습니다</div>'; return; }
+    var hit=d.filter(function(x){ return x.name.indexOf(q)>-1; }).slice(0,8);
+    if(!hit.length){ box.innerHTML='<div class="none">찾지 못했습니다</div>'; return; }
+    box.innerHTML=hit.map(function(x){
+      return '<div class="sg" onclick="bzPick(\''+esc(x.name).replace(/'/g,"\\'")+'\')">'
+        + '<b>'+esc(x.name)+'</b><span>'+esc(x.sido||'')+' '+esc(x.sgg||'')+'</span></div>';
+    }).join('');
+  });
+}
+
+function bzPick(name){
+  BZ.org=name;
+  var el=document.getElementById('bzOrg');
+  if(el) el.value=name;
+  var box=document.getElementById('bzSug');
+  if(box) box.innerHTML='';
+}
+
+function bzSubmit(){
+  var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
+  BZ.bizNo=g('bzNo'); BZ.name=g('bzName'); BZ.tel=g('bzTel');
+  BZ.title=g('bzTitle'); BZ.email=g('bzEmail');
+  var ag=document.getElementById('bzAgree');
+  BZ.agree = !!(ag && ag.checked);
+
+  if(!BZ.org){ msg('기관을 검색해서 골라주세요'); return; }
+  if(!BZ.jobs){ msg('뽑는 직군을 골라주세요'); return; }
+  if(!BZ.agree){ msg('개인정보 수집·이용에 동의해주세요'); return; }
+
+  var btn=document.getElementById('bzGo');
+  if(btn){ btn.disabled=true; btn.textContent='보내는 중입니다'; }
+
+  google.script.run.withSuccessHandler(function(r){
+    if(btn){ btn.disabled=false; btn.textContent='다음'; }
+    if(!r.ok){ msg(r.message); return; }
+    openBiz();
+  }).withFailureHandler(function(e){
+    if(btn){ btn.disabled=false; btn.textContent='다음'; }
+    msg('보내지 못했습니다. 잠시 후 다시 눌러주세요');
+  }).bizSignup(cred(), BZ);
+}
+
+/* ── 인증 화면 ── */
+function drawBizOk(b){
+  tab('bizok');
+  var h='<button class="back" onclick="tab(\'dash\')"><span class="bicon">‹</span>돌아가기</button>';
+
+  if(b.verified){
+    h+='<span class="bzstat done">인증 완료</span>'
+      + '<h2 class="bzh">'+esc(b.org)+'</h2>'
+      + '<p class="bzsub">이제 채용공고를 올리실 수 있습니다.</p>'
+      + '<button class="go" onclick="tab(\'bizjob\')">채용공고 올리기</button>';
+    document.getElementById('bizOkBox').innerHTML=h;
+    attachRipple();
+    return;
+  }
+
+  h+='<span class="bzstat wait">인증 대기</span>'
+    + '<h2 class="bzh">업무 이메일 인증</h2>'
+    + '<p class="bzsub">인증을 마치면 공고를 올리실 수 있습니다.</p>'
+    + '<div class="card">'
+    + '<p class="sub" style="margin:0">보낸 곳</p>'
+    + '<div class="bzmail">'+esc(b.email)+'</div>'
+    + '<div class="f"><label>인증번호 6자리</label>'
+    + '<div class="bzcode"><input id="bzCode" inputmode="numeric" maxlength="6" placeholder="000000">'
+    + '<button onclick="bzSend()">번호 받기</button></div>'
+    + '<div class="hint2">10분 안에 넣어주세요. 다섯 번 틀리면 다시 받으셔야 합니다.</div></div>'
+    + '<button class="go" onclick="bzCheck()">인증하기</button>'
+    + '</div>';
+
+  if(b.doc){
+    h+='<div class="bzdoc"><b>재직증명서를 받았습니다</b>'
+      + esc(b.docAt)+'에 올려주셨습니다. 확인하고 열어드리겠습니다. '
+      + '보통 하루 안에 처리됩니다.</div>';
+  }else{
+    h+='<div class="bzdoc"><b>기관 메일이 없으신가요?</b>'
+      + T('biz.nomail','원장님 개인 메일만 쓰는 병원도 많습니다. 재직증명서를 올려주시면 확인 후 직접 열어드립니다.')
+      + '<input type="file" id="bzDoc" accept="image/*,.pdf" style="display:none" onchange="bzUpload(this)">'
+      + '<button class="bzfile" onclick="document.getElementById(\'bzDoc\').click()">'
+      + '재직증명서 올리기</button></div>';
+  }
+
+  document.getElementById('bizOkBox').innerHTML=h;
+  attachRipple();
+}
+
+function bzSend(){
+  msg('보내고 있습니다');
+  google.script.run.withSuccessHandler(function(r){
+    msg(r.ok ? (r.already?'이미 인증하셨습니다':'인증번호를 보냈습니다') : r.message);
+  }).withFailureHandler(function(e){ msg('보내지 못했습니다'); })
+    .bizSendCode(cred());
+}
+
+function bzCheck(){
+  var el=document.getElementById('bzCode');
+  var v=el?el.value.trim():'';
+  if(v.length!==6){ msg('여섯 자리를 넣어주세요'); return; }
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    celebrate('✅','인증했습니다','이제 공고를 올리실 수 있습니다');
+    openBiz();
+  }).withFailureHandler(function(e){ msg('확인하지 못했습니다'); })
+    .bizVerify(cred(), v);
+}
+
+/* 재직증명서 올리기 —
+   파일은 주소에 실을 수 없어서 글자로 바꿔 form 으로 보냅니다.
+   보낸 뒤 세중님께 메일이 갑니다. */
+function bzUpload(input){
+  var f=input.files && input.files[0];
+  if(!f) return;
+  if(f.size > 8*1024*1024){ msg('8MB 이하 파일만 올릴 수 있습니다'); return; }
+  msg('올리는 중입니다');
+
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message||'올리지 못했습니다'); return; }
+    var rd=new FileReader();
+    rd.onerror=function(){ msg('파일을 읽지 못했습니다'); };
+    rd.onload=function(){
+      var b64=String(rd.result).split(',')[1]||'';
+      var fm=document.createElement('form');
+      fm.method='POST'; fm.action=r.url; fm.target='bzFrame';
+      fm.style.display='none';
+      [['action','bizDoc'],['token',KTOKEN||''],['name',f.name],
+       ['mime',f.type||'application/octet-stream'],['file',b64]].forEach(function(kv){
+        var t=document.createElement('textarea');
+        t.name=kv[0]; t.value=kv[1];
+        fm.appendChild(t);
+      });
+      var fr=document.getElementById('bzFrame');
+      if(!fr){
+        fr=document.createElement('iframe');
+        fr.name='bzFrame'; fr.id='bzFrame'; fr.style.display='none';
+        document.body.appendChild(fr);
+      }
+      document.body.appendChild(fm);
+      fm.submit();
+      setTimeout(function(){
+        if(fm.parentNode) fm.parentNode.removeChild(fm);
+        celebrate('📄','올렸습니다','확인하고 열어드리겠습니다');
+        openBiz();
+      }, 1800);
+    };
+    rd.readAsDataURL(f);
+  }).withFailureHandler(function(e){ msg('올리지 못했습니다'); })
+    .bizDocUrl(cred());
+}
+
+/* ── 채용공고 올리기 ──
+   꼭 받아야 하는 것은 셋뿐입니다. 제목·직군·마감일.
+   나머지를 한 화면에 다 펴놓으면 길어서 중간에 나갑니다. 접어둡니다. */
+function drawBizJob(){
+  var h='<button class="back" onclick="openBiz()"><span class="bicon">‹</span>돌아가기</button>'
+    + '<h2 class="bzh">채용공고 올리기</h2>'
+    + '<p class="bzsub">' + esc(BZ.org||'') + ' 이름으로 올라갑니다.<br>'
+    + '올리시면 바로 화면에 뜹니다.</p>'
+
+    + '<div class="card">'
+    + '<div class="f"><label>공고 제목<span class="bzreq">*</span></label>'
+    + '<input id="bjTitle" placeholder="예) 2026년 작업치료사 채용"></div>'
+
+    + '<div class="f"><label>직군<span class="bzreq">*</span></label>'
+    + '<div class="bzjobs">'
+    + '<button onclick="bjJob(\'작업치료사\')" id="bjJ1">작업치료사</button>'
+    + '<button onclick="bjJob(\'물리치료사\')" id="bjJ2">물리치료사</button>'
+    + '<button onclick="bjJob(\'공통\')" id="bjJ3">둘 다</button>'
+    + '</div></div>'
+
+    + '<div class="two">'
+    + '<div class="f"><label>접수 시작</label>'
+    + '<input id="bjFrom" type="date"></div>'
+    + '<div class="f"><label>접수 마감<span class="bzreq">*</span></label>'
+    + '<input id="bjTo" type="date"></div></div>'
+    + '</div>'
+
+    + '<details class="clinfold"><summary>더 적기 (안 적으셔도 됩니다)</summary>'
+    + '<div class="card" style="margin-top:8px">'
+    + '<div class="two">'
+    + '<div class="f"><label>뽑는 인원</label><input id="bjNope" inputmode="numeric" placeholder="예) 2"></div>'
+    + '<div class="f"><label>연봉</label><input id="bjPay" placeholder="예) 3400만원 이상"></div></div>'
+    + '<div class="two">'
+    + '<div class="f"><label>채용 구분</label><input id="bjKind" placeholder="예) 신입+경력"></div>'
+    + '<div class="f"><label>고용 형태</label><input id="bjHire" placeholder="예) 정규직"></div></div>'
+    + '<div class="two">'
+    + '<div class="f"><label>근무 지역</label><input id="bjRegion" placeholder="예) 대구"></div>'
+    + '<div class="f"><label>학력</label><input id="bjEdu" placeholder="예) 학력무관"></div></div>'
+    + '<div class="f"><label>지원 자격</label>'
+    + '<textarea id="bjQual" placeholder="면허, 경력 등"></textarea></div>'
+    + '<div class="f"><label>전형 방법</label>'
+    + '<textarea id="bjHow" placeholder="서류 → 면접"></textarea></div>'
+    + '<div class="f"><label>공고 주소</label>'
+    + '<input id="bjUrl" placeholder="https://" inputmode="url" autocapitalize="off">'
+    + '<div class="hint2">병원 홈페이지 공고 주소가 있으면 넣어주세요.</div></div>'
+    + '</div></details>'
+
+    + '<div class="bznote">올리신 공고는 <b>「직접 등록」 표시</b>와 함께 바로 올라갑니다. '
+    + '잘못 올리셨으면 저희에게 알려주세요.</div>'
+
+    + '<button class="go" id="bjGo" onclick="bjSubmit()">공고 올리기</button>';
+
+  document.getElementById('bizJobBox').innerHTML=h;
+  attachRipple();
+  if(BZ.jobs) bjJob(BZ.jobs);
+}
+
+var BJ_JOB='';
+function bjJob(j){
+  BJ_JOB=j;
+  ['bjJ1','bjJ2','bjJ3'].forEach(function(id,i){
+    var want=['작업치료사','물리치료사','공통'][i];
+    var el=document.getElementById(id);
+    if(el) el.className=(want===j)?'on':'';
+  });
+}
+
+function bjSubmit(){
+  var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
+  var d={ title:g('bjTitle'), job:BJ_JOB,
+          from:g('bjFrom').replace(/-/g,'.'), to:g('bjTo').replace(/-/g,'.'),
+          nope:g('bjNope'), pay:g('bjPay'), kind:g('bjKind'), hire:g('bjHire'),
+          region:g('bjRegion'), edu:g('bjEdu'), qual:g('bjQual'),
+          how:g('bjHow'), url:g('bjUrl') };
+
+  if(!d.title){ msg('공고 제목을 적어주세요'); return; }
+  if(!d.job){ msg('직군을 골라주세요'); return; }
+  if(!d.to){ msg('접수 마감일을 골라주세요'); return; }
+
+  var btn=document.getElementById('bjGo');
+  if(btn){ btn.disabled=true; btn.textContent='올리는 중입니다'; }
+
+  google.script.run.withSuccessHandler(function(r){
+    if(btn){ btn.disabled=false; btn.textContent='공고 올리기'; }
+    if(!r.ok){ msg(r.message); return; }
+    celebrate('📢','올렸습니다','치료사들이 곧 볼 거예요');
+    openBiz();
+  }).withFailureHandler(function(e){
+    if(btn){ btn.disabled=false; btn.textContent='공고 올리기'; }
+    msg('올리지 못했습니다. 잠시 후 다시 눌러주세요');
+  }).bizPostJob(cred(), d);
+}
 
 /* ═══════════════════ 축하 ═══════════════════
  * 뭔가 해냈을 때 잠깐 터집니다. 0.9초면 끝납니다.
