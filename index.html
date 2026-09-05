@@ -3112,7 +3112,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v123 · 2026-09-05';
+var APP_VER = 'v125 · 2026-09-05';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -8560,41 +8560,92 @@ google.script.run.withSuccessHandler(function(b){
  */
 var EXIT_ARMED = false;
 
-try{
-  history.replaceState({p:'root'}, '', location.href);
-  history.pushState({p:'app'}, '', location.href);
+/* 뒤로 갈 자리를 쌓아둡니다.
+   자리가 없으면 뒤로를 누르는 순간 브라우저가 그냥 나가버립니다.
+   ※ 예전에는 이 줄과 아래 popstate 등록이 같은 try 안에 있었습니다.
+      history 호출이 한 번만 막혀도 popstate 등록까지 통째로 건너뛰어
+      뒤로가기 감지가 아예 안 걸렸습니다. 그래서 떼어놓았습니다. */
+function seedHistory(){
+  try{ history.pushState({p:'app'}, '', location.href); }catch(e){}
+}
+try{ history.replaceState({p:'root'}, '', location.href); }catch(e){}
+seedHistory();
+seedHistory();          // 두 겹으로 쌓아 여유를 둡니다
 
-  window.addEventListener('popstate', function(){
-    // 갈 곳이 남아 있으면 화면만 되돌립니다
-    if(NAV.length){
-      goBack();
-      try{ history.pushState({p:CURRENT}, '', location.href); }catch(e){}
-      return;
-    }
-    // 홈이 아니면 홈으로
-    if(CURRENT !== 'home' && CURRENT !== 'dash'){
-      tab(unlocked() ? 'dash' : 'home', true);
-      try{ history.pushState({p:CURRENT}, '', location.href); }catch(e){}
-      return;
-    }
-    /* 홈에서 뒤로를 누르면 알리고, 2초 안에 또 누르면 나갑니다.
-       자리를 「먼저」 다시 쌓아둡니다. 안 그러면 알림을 띄우는 사이에
-       한 번 더 눌렀을 때 그냥 나가버립니다. */
-    if(EXIT_ARMED){
-      EXIT_ARMED = false;
-      history.back();
-      return;
-    }
-    try{ history.pushState({p:'app'}, '', location.href); }catch(e){}
-    EXIT_ARMED = true;
-    exitToast();
-    setTimeout(function(){ EXIT_ARMED = false; }, 2000);
-  });
-}catch(e){}
+/* 앱으로 돌아왔을 때 자리가 비어 있을 수 있어 다시 채웁니다 */
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden && history.state && history.state.p === 'root') seedHistory();
+});
+
+var POP_ON = false;
+window.addEventListener('popstate', function(){
+  dbg('뒤로 눌림 · NAV=' + NAV.length + ' · 화면=' + CURRENT
+    + ' · 대기중=' + EXIT_ARMED);
+  // 갈 곳이 남아 있으면 화면만 되돌립니다
+  if(NAV.length){
+    goBack();
+    seedHistory();
+    return;
+  }
+  // 홈이 아니면 홈으로
+  if(CURRENT !== 'home' && CURRENT !== 'dash'){
+    tab(unlocked() ? 'dash' : 'home', true);
+    seedHistory();
+    return;
+  }
+  /* 홈에서 뒤로를 누르면 알리고, 2초 안에 또 누르면 나갑니다.
+     자리를 「먼저」 다시 쌓습니다. 안 그러면 알림을 띄우는 사이에
+     한 번 더 눌렀을 때 그냥 나가버립니다. */
+  if(EXIT_ARMED){
+    EXIT_ARMED = false;
+    history.back();
+    return;
+  }
+  seedHistory();
+  EXIT_ARMED = true;
+  dbg('  → 띠를 띄웁니다');
+  exitToast();
+  setTimeout(function(){ EXIT_ARMED = false; }, 2000);
+});
+POP_ON = true;
 
 /* 나가기 전 한 번 더 —
    가운데 창을 띄우면 무겁습니다. 아래에 잠깐 떴다 사라지는 띠로 알립니다.
    2초 안에 뒤로를 한 번 더 누르면 정말 나갑니다. */
+/* ── 확인용 ──
+   주소 끝에 ?back 을 붙이면 화면 위에 상태가 계속 보입니다.
+   무엇이 막혔는지 짐작하지 않고 눈으로 봅니다. 확인 끝나면 뺍니다. */
+var DBG = false;
+try{ DBG = /[?&]back/.test(location.search); }catch(e){}
+
+function dbg(t){
+  if(!DBG) return;
+  var d=document.getElementById('dbgBar');
+  if(!d){
+    d=document.createElement('div');
+    d.id='dbgBar';
+    d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;'
+      + 'background:#111;color:#0f0;font:12px/1.5 monospace;padding:6px 8px;'
+      + 'white-space:pre-wrap;max-height:38vh;overflow:auto';
+    document.body.appendChild(d);
+  }
+  d.textContent = t + '\n' + d.textContent;
+}
+
+try{
+  if(DBG){
+    setTimeout(function(){
+      dbg('띠 시험 — 아래에 검은 띠가 보이면 띠는 정상');
+      exitToast();
+    }, 2500);
+    setTimeout(function(){
+      dbg('시작: 감지 걸림=' + (POP_ON?'예':'★아니요★')
+        + ' · 쌓인 자리=' + history.length
+        + ' · 지금 화면=' + CURRENT);
+    }, 1200);
+  }
+}catch(e){}
+
 function exitToast(){
   var t=document.getElementById('exitToast');
   if(!t){
