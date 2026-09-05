@@ -249,7 +249,7 @@
     display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;
     flex-shrink:0}
   .stp b{display:block;font-size:14.5px;margin-bottom:2px}
-  .stp span{font-size:13px;color:#4d5a61;line-height:1.6}
+  .stp span{font-size:13px;color:#4d5a61;line-height:1.6;word-break:keep-all}
 
   .cta-fix{padding:22px 0 6px;border-top:1px solid var(--line)}
   .cta-fix .go{margin-bottom:8px}
@@ -467,7 +467,9 @@
   .cpost .cmt{font-size:11.5px;color:#9aa6ab;margin-top:8px}
   .cpost .cmt b{color:var(--dim);font-weight:700}
 
-  .cbody{font-size:15px;line-height:1.85;white-space:pre-wrap;word-break:break-word}
+  /* 한글은 단어를 자르지 않습니다. 주소처럼 띄어쓰기 없는 긴 것만 끊습니다. */
+  .cbody{font-size:15px;line-height:1.85;white-space:pre-wrap;
+    word-break:keep-all;overflow-wrap:break-word}
   /* 남의 글이 드래그로 통째로 긁혀 나가지 않게 합니다.
      캡처나 손으로 옮겨적는 것까지 막지는 못하지만,
      흔한 무단 전재(드래그 복사)는 걸러집니다. */
@@ -572,7 +574,8 @@
   .ci i{font-style:normal;font-size:20px;width:34px;height:34px;line-height:34px;
     text-align:center;background:var(--sand);border-radius:10px;flex-shrink:0}
   .ci b{display:block;font-size:14px;font-weight:700;letter-spacing:-.01em}
-  .ci span{display:block;font-size:12.5px;color:var(--dim);line-height:1.6;margin-top:3px}
+  .ci span{display:block;font-size:12.5px;color:var(--dim);line-height:1.6;margin-top:3px;
+    word-break:keep-all}
 
   /* 로딩 덮개 — 이 순간이 첫인상이라 비워두면 안 됩니다 */
   #kbusy{position:fixed;inset:0;z-index:9998;display:none;
@@ -675,7 +678,7 @@
   .acb{max-height:0;overflow:hidden;transition:max-height .28s ease}
   .acc.on .acb{max-height:1400px}
   .acb p{font-size:13.5px;line-height:1.85;color:#3f4c52;white-space:pre-wrap;
-    margin:0 0 14px;word-break:break-word}
+    margin:0 0 14px;word-break:keep-all;overflow-wrap:break-word}
   .sitelink{display:block;margin-top:14px;padding:12px;text-align:center;
     background:var(--sand);border-radius:10px;font-size:13.5px;font-weight:700;
     color:var(--accent);text-decoration:none}
@@ -833,7 +836,8 @@
   .cmb{flex:1;min-width:0}
   .cmn{font-size:11.5px;color:#9aa6ab;margin-bottom:4px}
   .cmn b{color:var(--dim);font-weight:700}
-  .cmx{font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+  .cmx{font-size:14px;line-height:1.7;white-space:pre-wrap;
+    word-break:keep-all;overflow-wrap:break-word}
   .cmdel{background:none;border:0;color:var(--warn);font-family:inherit;
     font-size:11.5px;padding:0;cursor:pointer;text-decoration:underline}
   .cmwrite{margin-top:14px}
@@ -983,13 +987,16 @@
   .donebox .drank b{font-weight:800;font-size:15px}
   .donebox p{margin:0;font-size:13px;line-height:1.75;opacity:.88;word-break:keep-all}
   /* ===== 가입 완료 ===== */
+  /* 완료 화면은 좁게 — 넓은 화면에서 버튼이 끝까지 늘어나면 보기 나쁩니다 */
+  .donewrap{max-width:460px;margin:0 auto}
+
   .welcomedone{text-align:center;padding:44px 20px 34px;
     animation:rise .5s cubic-bezier(.2,.9,.25,1) both}
   .wdlogo{font-size:38px;font-weight:900;letter-spacing:-.01em;color:#1F2937;
     font-family:'Poppins','Montserrat',-apple-system,BlinkMacSystemFont,
       'Apple SD Gothic Neo','Malgun Gothic',sans-serif;line-height:1.05}
   .wdmsg{font-size:19px;font-weight:800;letter-spacing:-.03em;margin-top:20px;
-    color:var(--accent)}
+    color:var(--accent);word-break:keep-all}
   .wdsub{font-size:14px;color:#4d5a61;line-height:1.85;margin:10px 0 0;
     word-break:keep-all}
 
@@ -998,24 +1005,29 @@
     font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:transform .26s cubic-bezier(.2,.9,.25,1)}
   .wdgo:active{transform:scale(.978)}
-  .wdgo b{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em}
-  .wdgo span{display:block;font-size:12.5px;opacity:.72;margin-top:4px}
+  .wdgo b{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em;
+    word-break:keep-all}
+  .wdgo span{display:block;font-size:12.5px;opacity:.72;margin-top:4px;
+    word-break:keep-all;line-height:1.6}
 
   .wdroom{display:block;width:100%;text-align:left;background:#FEE500;color:#191600;
     border:0;border-radius:14px;padding:18px 20px;
     font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:transform .26s cubic-bezier(.2,.9,.25,1)}
   .wdroom:active{transform:scale(.978)}
-  .wdroom b{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em}
-  .wdroom span{display:block;font-size:12.5px;opacity:.66;margin-top:4px}
+  .wdroom b{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em;
+    word-break:keep-all;line-height:1.4}
+  .wdroom span{display:block;font-size:12.5px;opacity:.66;margin-top:4px;
+    word-break:keep-all;line-height:1.6}
 
   /* 입장 코드 — 눌렀을 때 펼쳐집니다 */
   .wdcode{background:#fffbe6;border:1.5px solid #f2e4a0;border-radius:14px;
     padding:18px 20px;margin-top:9px;text-align:center;
     animation:rise .34s cubic-bezier(.2,.9,.25,1) both}
   .wdcode .cl{font-size:12.5px;color:#7a6320;font-weight:700}
-  .wdcode .cv{font-size:34px;font-weight:900;letter-spacing:.14em;color:#191600;
-    margin:8px 0 4px;font-variant-numeric:tabular-nums}
+  /* 숫자만이면 자간을 넓게, 글자가 섞이면 좁게 — 넘치지 않게 */
+  .wdcode .cv{font-size:30px;font-weight:900;letter-spacing:.05em;color:#191600;
+    margin:8px 0 4px;word-break:break-all;line-height:1.25}
   .wdcode .cn{font-size:12px;color:#7a6320;line-height:1.7;word-break:keep-all}
   .wdcode .cgo{display:block;width:100%;box-sizing:border-box;text-align:center;
     background:#191600;color:#FEE500;border:0;border-radius:11px;padding:14px;
@@ -1837,12 +1849,12 @@
           <button class="jd pt" id="hjPT" onclick="setJob('물리치료사')">물리치료사</button>
         </div>
       </div>
-      <h2 class="h2">내 연봉,<br>어디쯤일까</h2>
-      <p class="body">
+      <h2 class="h2" data-t="home.h1">내 연봉,<br>어디쯤일까</h2>
+      <p class="body" data-t="home.lead">
         물어보기도 민망하고, 물어봐도 한 사람 이야기입니다.<br>
         치료사 급여는 어느 통계에도 없습니다.
       </p>
-      <div class="pull">그래서 직접 모읍니다.</div>
+      <div class="pull" data-t="home.pull">그래서 직접 모읍니다.</div>
       <div id="sumBox"></div>
     </div>
 
@@ -2040,7 +2052,7 @@
 
     <div class="sect">
       <p class="kicker">익명</p>
-      <h2 class="h2">이름은 묻지 않습니다</h2>
+      <h2 class="h2" data-t="home.anon.h">이름은 묻지 않습니다</h2>
       <div class="privacy">
         <b>🔒 받지 않는 것</b>
         <ul>
@@ -2061,21 +2073,21 @@
 
     <div class="sect">
       <p class="kicker">이용 방법</p>
-      <h2 class="h2">3분이면 됩니다</h2>
+      <h2 class="h2" data-t="step.h">3분이면 됩니다</h2>
       <div class="stepline">
         <div class="stp"><div class="sn">1</div>
-          <div><b>카카오 · 네이버로 로그인</b><span>이름이나 연락처는 넘어오지 않습니다</span></div></div>
+          <div><b data-t="step.1t">카카오 · 네이버로 로그인</b><span data-t="step.1s">이름이나 연락처는 넘어오지 않습니다</span></div></div>
         <div class="stp"><div class="sn">2</div>
-          <div><b>내 정보 등록</b><span>연차 · 병원유형 · 급여 · 약 3분</span></div></div>
+          <div><b data-t="step.2t">내 정보 등록</b><span data-t="step.2s">연차 · 병원유형 · 급여 · 약 3분</span></div></div>
         <div class="stp"><div class="sn">3</div>
-          <div><b>단톡방 입장</b>
-            <span>가입하신 분만 들어갑니다 · 새 공고를 가장 먼저 받습니다</span></div></div>
+          <div><b data-t="step.3t">단톡방 입장</b>
+            <span data-t="step.3s">가입하신 분만 들어갑니다 · 새 공고를 가장 먼저 받습니다</span></div></div>
       </div>
     </div>
 
     <div class="cta-fix" id="ctaBox">
-      <button class="go" onclick="tab('unlock')">시작하기 · 약 3분</button>
-      <button class="ghost" onclick="tab('unlock')">이미 등록했어요 · 로그인</button>
+      <button class="go" data-t="home.cta1" onclick="tab('unlock')">시작하기 · 약 3분</button>
+      <button class="ghost" data-t="home.cta2" onclick="tab('unlock')">이미 등록했어요 · 로그인</button>
     </div>
 
     <div id="bannerHome"></div>
@@ -2520,37 +2532,37 @@
 
   <!-- ============ 완료 ============ -->
   <div id="pane-done" class="hide">
-    <div class="welcomedone">
-      <div class="wdlogo">POT JOB</div>
-      <div class="wdmsg">가입해주셔서 고맙습니다</div>
-      <p class="wdsub">여러분이 더 나은 곳으로 옮겨갈 수 있게<br>계속 만들어가겠습니다</p>
+    <div class="donewrap">
+      <div class="welcomedone">
+        <div class="wdlogo">POT JOB</div>
+        <div class="wdmsg" data-t="done.h">가입해주셔서 감사합니다</div>
+        <p class="wdsub" data-t="done.sub">여러분이 더 나은 곳으로 옮겨갈 수 있게<br>만들어가겠습니다</p>
+      </div>
+
+      <button class="wdgo" onclick="tab('dash')">
+        <b data-t="done.btn">급여 통계 · 채용공고 보러가기</b>
+        <span data-t="done.btns">내 위치, 병원별 인원, 공공기관 공고까지</span>
+      </button>
+
+      <div id="doneRoom"></div>
+      <p class="thin">내 닉네임 <b id="doneCode">-</b></p>
     </div>
-
-    <button class="wdgo" onclick="tab('dash')">
-      <b>급여 통계 · 채용공고 보러가기</b>
-      <span>내 위치, 병원별 인원, 공공기관 공고까지</span>
-    </button>
-
-    <div id="doneRoom"></div>
-
-    <div id="donePos"></div>
-    <p class="thin">내 닉네임 <b id="doneCode">-</b></p>
   </div>
 
   <!-- ============ 로그인 ============ -->
   <div id="pane-unlock" class="hide">
     <div class="card">
-      <h2>로그인하고 시작하세요</h2>
-      <p class="sub"><b>중복 등록을 막기 위해서입니다.</b><br>
+      <h2 data-t="login.h">로그인하고 시작하세요</h2>
+      <p class="sub" data-t="login.sub"><b>중복 등록을 막기 위해서입니다.</b><br>
         한 사람이 여러 번 적으면 평균이 흔들립니다.
         한 계정에 한 번만 받으면 그만큼 믿을 수 있는 자료가 됩니다.</p>
 
       <button class="go" id="kakaoBtn" onclick="goKakao()"
         style="background:#FEE500;color:#181600;font-weight:800">
-        카카오로 계속하기</button>
+        <span data-t="login.kakao">카카오로 계속하기</span></button>
       <button class="go" id="naverBtn" onclick="goNaver()"
         style="background:#03C75A;color:#fff;font-weight:800;margin-top:9px">
-        네이버로 계속하기</button>
+        <span data-t="login.naver">네이버로 계속하기</span></button>
 
       <ul class="lclist" style="margin-top:16px">
         <li>받는 것은 <b>닉네임</b> 하나뿐입니다</li>
@@ -2561,7 +2573,7 @@
     </div>
 
     <div class="card">
-      <h2>로그인하면 할 수 있는 것</h2>
+      <h2 data-t="login.can.h">로그인하면 할 수 있는 것</h2>
       <p class="sub">치료사가 더 나은 자리로 옮겨갈 수 있게, 필요한 것을 모아뒀습니다.</p>
       <div class="canlist">
         <div class="ci"><i>📊</i><div><b>내 연봉이 어디쯤인지</b>
@@ -2808,8 +2820,8 @@
     </div>
     <div id="postBox"></div>
     <div class="hintbox" style="margin-top:12px">
-      전국 채용사이트에서 공고를 자동으로 수집합니다.
-      <b>사립병원 공고는 아직 포함되지 않습니다.</b><br>
+      <span data-t="job.note">전국 채용사이트에서 공고를 자동으로 수집합니다.
+      <b>사립병원 공고는 아직 포함되지 않습니다.</b></span><br>
       <span style="color:#7a6320">여러 직군 통합</span> 표시가 있으면
       치료사 전용 공고가 아니라 다른 직군과 함께 뽑는 공고입니다.<br>
       지난 공고 날짜는 <b>모으기 시작한 뒤</b>부터 쌓입니다.
@@ -2903,7 +2915,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=141"></script>
+<script src="/app.js?v=142"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2949,7 +2961,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v110 · 2026-09-04';
+var APP_VER = 'v113 · 2026-09-04';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3419,6 +3431,10 @@ function checkServer(b){
 
 function drawHome(b){
   BRANDC = b;
+  /* 관리자 화면에서 고친 문구를 먼저 얹습니다.
+     고치지 않은 것은 HTML 에 있는 기본값이 그대로 남습니다. */
+  TXT = (b && b.texts) || {};
+  applyTexts();
   checkServer(b);
   var brand=document.getElementById('brandBox');
   brand.innerHTML = '<div class="badge-by">피오티잡 공식 운영</div>'
@@ -3452,6 +3468,21 @@ function drawHome(b){
   }).getPublicSummary();
 }
 
+/* 관리자 화면에서 고친 문구를 화면에 얹습니다.
+   기본값은 HTML 에 그대로 두고 덮어쓰기만 합니다 —
+   시트가 비거나 서버가 늦어도 화면은 멀쩡합니다. */
+var TXT = {};
+function T(key, def){
+  var v = TXT[key];
+  return (v===undefined || v===null || v==='') ? def : v;
+}
+function applyTexts(){
+  document.querySelectorAll('[data-t]').forEach(function(el){
+    var v = TXT[el.getAttribute('data-t')];
+    if(v) el.innerHTML = v;
+  });
+}
+
 /* 단톡방 칸 — 사이트에 가입한 분만 들어갈 수 있습니다.
    누르면 입장 코드가 펼쳐지고, 그 아래 버튼으로 바로 넘어갑니다. */
 function roomCard(b){
@@ -3468,8 +3499,9 @@ function roomCard(b){
   ROOM_PICK = pick;
 
   return '<button class="wdroom" onclick="openRoomCode()">'
-    + '<b>채용공고 바로 받아보는 단톡방 입장하기</b>'
-    + '<span>' + esc(pick.name) + ' · 가입하신 분만 들어갈 수 있습니다</span>'
+    + '<b>' + T('room.btn','채용공고 바로 받아보는 단톡방 입장하기') + '</b>'
+    + '<span>' + esc(pick.name) + ' · '
+    + T('room.btns','가입하신 분만 들어갈 수 있습니다') + '</span>'
     + '</button>'
     + '<div id="roomCodeBox"></div>';
 }
@@ -3484,13 +3516,15 @@ function openRoomCode(){
 
   box.innerHTML='<div class="wdcode">'
     + (r.code
-        ? '<div class="cl">입장 코드</div>'
+        ? '<div class="cl">' + T('room.codeL','입장 코드') + '</div>'
           + '<div class="cv">'+esc(r.code)+'</div>'
-          + '<div class="cn">카카오톡 오픈채팅으로 넘어가면 이 코드를 넣어주세요.<br>'
-          + '가입하신 분에게만 보여드립니다.</div>'
+          + '<div class="cn">'
+          + T('room.codeN','카카오톡 오픈채팅으로 넘어가면 이 코드를 넣어주세요.<br>'
+              + '가입하신 분에게만 보여드립니다.') + '</div>'
         : '<div class="cl">'+esc(r.name)+'</div>'
           + '<div class="cn" style="margin-top:6px">코드 없이 바로 들어가실 수 있습니다.</div>')
-    + '<a class="cgo" href="'+esc(r.url)+'" target="_blank" rel="noopener">바로 이동하기</a>'
+    + '<a class="cgo" href="'+esc(r.url)+'" target="_blank" rel="noopener">'
+    + T('room.go','바로 이동하기') + '</a>'
     + '</div>';
   if(r.code){
     try{ navigator.clipboard.writeText(r.code); msg('코드를 복사했습니다'); }catch(e){}
@@ -3604,7 +3638,7 @@ function bootHTML(sub){
   return '<div class="bootwrap">'
     + '<div class="bootmid">'
     +   '<div class="bootlogo">POT JOB</div>'
-    +   '<div class="boottag">치료사가 더 나은 자리로</div>'
+    +   '<div class="boottag">' + T('boot.tag','치료사가 더 나은 자리로') + '</div>'
     +   '<div class="bootbar"><i></i></div>'
     +   '<div class="bootspin"><span>'+sub+'</span></div>'
     + '</div>'
@@ -4375,7 +4409,8 @@ function nopeLabel(x){
 function mixNote(x){
   if(!x.nope) return '';
   if(!mixInfo(x).mixed) return '';
-  return '<div class="hintbox"><b>여러 자리를 한 공고로 뽑습니다.</b><br>'
+  return '<div class="hintbox"><b>'
+    + T('job.mixH','여러 자리를 한 공고로 뽑습니다.') + '</b><br>'
     + '위 ' + esc(x.nope) + '명은 우리 직군만이 아니라 다른 직군까지 '
     + '모두 합친 수입니다. 우리 직군을 몇 명 뽑는지는 '
     + '아래 「공고 확인하러 가기」의 공고문에 적혀 있습니다.</div>';
@@ -4562,9 +4597,9 @@ function jobMore(x){
 
   var won = Number(x.basePay).toLocaleString('ko-KR');
   return '<div class="card">'
-    + '<h2>이 기관 신입사원 평균 초임</h2>'
+    + '<h2>' + T('job.payH','이 기관 신입사원 평균 초임') + '</h2>'
     + '<div class="paybig">' + won + '<em>만원</em></div>'
-    + '<div class="paynote">직군 구분 없는 기관 전체 평균입니다'
+    + '<div class="paynote">' + T('job.payN','직군 구분 없는 기관 전체 평균입니다')
     + (x.baseYear ? ' · ' + esc(x.baseYear) + '년 공시' : '') + '</div>'
     + '</div>';
 }
@@ -6607,12 +6642,10 @@ function submit(){
     saveMe({nick:r.nick, id:r.id, role:r.role, job:r.job||JOB});
     document.getElementById('doneCode').textContent=r.nick;
     document.getElementById('doneRoom').innerHTML=roomCard(BRANDC);
-    document.getElementById('donePos').innerHTML=loading('내 위치를 계산하는 중');
     tab('done');
-    google.script.run.withSuccessHandler(drawDonePos)
-      .withFailureHandler(function(){document.getElementById('donePos').innerHTML='';})
-      .getPreview(r.nick, r.id);
-
+    /* 상위 몇 %는 여기서 안 보여줍니다.
+       참여자가 적을 때 「3명 중 3등」처럼 나와 첫인상이 나쁩니다.
+       내 화면에서 제대로 보여드립니다. */
     window.scrollTo(0,0);
   }).withFailureHandler(function(e){
     btn.disabled=false; btn.textContent='제출하고 통계 보기'; msg(e.message);

@@ -116,7 +116,64 @@
   .mrow .cat{font-size:11px;font-weight:800;color:var(--accent);width:52px;flex-shrink:0}
   .mrow label{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:3px}
 
-  /* ===== 수집 주기 ===== */
+  /* ===== 화면 문구 ===== */
+var TX = [];
+
+function openTexts(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className='tb'+(b.dataset.f==='texts'?' on':'');
+  });
+  shell('textsWrap');
+  document.getElementById('textsBox').innerHTML='<div class="loading">불러오는 중</div>';
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    TX = r.rows || [];
+    drawTexts();
+  }).withFailureHandler(function(e){ msg(e.message); }).adminGetTexts(KEY);
+}
+
+function drawTexts(){
+  var box=document.getElementById('textsBox');
+  if(!TX.length){ box.innerHTML='<div class="empty">문구가 없습니다</div>'; return; }
+
+  /* 페이지별로 묶습니다 */
+  var pages=[], byPage={};
+  TX.forEach(function(t,i){
+    if(!byPage[t.page]){ byPage[t.page]=[]; pages.push(t.page); }
+    byPage[t.page].push(i);
+  });
+
+  box.innerHTML = pages.map(function(pg){
+    var edited = byPage[pg].filter(function(i){ return TX[i].cur; }).length;
+    return '<div class="bcard">'
+      + '<div class="bhead"><b>' + esc(pg) + '</b>'
+      + (edited ? '<span class="pill stu">' + edited + '개 고침</span>' : '')
+      + '</div>'
+      + byPage[pg].map(function(i){
+          var t=TX[i];
+          return '<label class="bl">' + esc(t.label)
+            + '<span>' + esc(t.def.replace(/<br>/g,' ').replace(/<\/?b>/g,'')) + '</span></label>'
+            + '<textarea class="bi" rows="2"'
+            + (t.cur ? ' style="background:#fffdf0;border-color:#e8cfa4"' : '')
+            + ' oninput="TX[' + i + '].cur=this.value"'
+            + ' placeholder="' + esc(t.def.replace(/"/g,'&quot;')) + '">'
+            + esc(t.cur) + '</textarea>';
+        }).join('')
+      + '</div>';
+  }).join('');
+}
+
+function saveTexts(){
+  msg('저장하고 있습니다');
+  google.script.run.withSuccessHandler(function(r){
+    msg(r.message || (r.ok?'저장했습니다':'실패'));
+    if(r.ok) openTexts();
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminSaveTexts(KEY, TX.map(function(t){ return { key:t.key, cur:t.cur }; }));
+}
+
+/* ===== 수집 주기 ===== */
 var SC = null;
 
 function openSched(){
@@ -268,6 +325,7 @@ function saveSched(){
       <button class="tb" data-f="excluded" onclick="load('excluded')">제외됨<span class="n" id="c-excluded"></span></button>
       <button class="tb" data-f="all" onclick="load('all')">전체<span class="n" id="c-all"></span></button>
       <button class="tb" data-f="jobs" onclick="openJobs('live')">공고 관리<span class="n" id="c-jobs"></span></button>
+      <button class="tb" data-f="texts" onclick="openTexts()">화면 문구</button>
       <button class="tb" data-f="sched" onclick="openSched()">수집 주기</button>
       <button class="tb" data-f="banner" onclick="openBanner()">배너 관리</button>
       <button class="tb" data-f="comm" onclick="openComm2('all')">커뮤니티<span class="n" id="c-comm"></span></button>
@@ -297,6 +355,17 @@ function saveSched(){
       </div>
       <div id="jobsHelp" class="hide"></div>
       <div id="jobsList"></div>
+    </div>
+
+    <div id="textsWrap" class="hide">
+      <p class="bhelp">앱 화면에 나가는 글을 고칩니다. <b>페이지별로 묶어뒀습니다.</b><br>
+        칸을 비우면 <b>원래 문구로 돌아갑니다</b>. 회색 글씨가 원래 문구입니다.<br>
+        줄을 바꾸려면 <b>&lt;br&gt;</b>, 굵게 하려면 <b>&lt;b&gt;굵게&lt;/b&gt;</b> 로 적으세요.</p>
+      <div id="textsBox"></div>
+      <div class="brow2" style="position:sticky;bottom:10px">
+        <button class="add" onclick="openTexts()">되돌리기</button>
+        <button class="save" onclick="saveTexts()">저장하기</button>
+      </div>
     </div>
 
     <div id="schedWrap" class="hide">
@@ -347,7 +416,7 @@ function saveSched(){
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=141"></script>
+<script src="/app.js?v=142"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -518,7 +587,7 @@ function saveBanners(){
 /* ===== 커뮤니티 관리 ===== */
 function shell(which){
   ['list','bannerWrap','commWrap','menuWrap','accessWrap','jobsWrap',
-   'schedWrap'].forEach(function(id){
+   'schedWrap','textsWrap'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.className = (id===which ? '' : 'hide');
   });
