@@ -12,7 +12,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
 
 /* 이 파일이 최신인지 화면 아래에서 바로 확인하려고 둡니다.
    index.html 이 이 값을 읽어 버전과 함께 찍습니다. */
-var APP_JS_VER = 'a9 · 2026-09-04';
+var APP_JS_VER = 'a11 · 2026-09-05';
 
 (function () {
   'use strict';
@@ -31,11 +31,13 @@ var APP_JS_VER = 'a9 · 2026-09-04';
     'hospitalDetail', 'compareHospitals', 'topHospitals', 'jobRegionSummary', 'regionHospitals',
     'densityTable', 'regionOverview', 'regionDetail', 'regionSggHospitals', 'submitFeedback', 'adminList',
     'adminToggle', 'adminEditSalary', 'adminGetBanners', 'adminSaveBanners',
-    'commChannels', 'commList', 'commRead', 'commWrite', 'commDelete', 'commReport',
+    'commChannels', 'commOpen', 'commList', 'commRead', 'commWrite', 'commDelete', 'commReport',
     'adminCommList', 'adminCommHide',
     'commComment', 'commCommentDelete', 'commLike', 'commMine', 'commAvatars', 'commSetAvatar',
     'adminGetMenu', 'adminSaveMenu', 'adminAccessLog', 'starJob', 'myStars', 'naverLogin', 'naverExchange', 'hospByName', 'jobOne', 'getEdu',
-    'adminJobList', 'adminJobGet', 'adminJobFix', 'adminJobHide', 'adminJobHideMany', 'adminRefixMixed', 'adminGetSchedule', 'adminSaveSchedule', 'adminGetTexts', 'adminSaveTexts', 'serverVersion'
+    'adminJobList', 'adminJobGet', 'adminJobFix', 'adminJobHide', 'adminJobHideMany', 'adminRefixMixed', 'adminGetSchedule', 'adminSaveSchedule', 'adminGetTexts', 'adminSaveTexts',
+    'bizMe', 'bizSignup', 'bizSendCode', 'bizVerify', 'bizPostJob',
+    'adminBizList', 'adminBizVerify', 'serverVersion'
   ];
 
   /* ※ 서버(Wage.gs)에 함수를 새로 만들면 위 목록에도 반드시 넣어야 합니다.

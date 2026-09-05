@@ -299,7 +299,7 @@
   .hres .hmeta i.kd{background:var(--accent-soft);color:var(--accent);font-weight:700}
   .hres .haddr{font-size:11.5px;color:var(--dim);margin-top:9px;line-height:1.6;
     word-break:keep-all}
-  .hint2{font-size:11.5px;color:var(--dim);margin-top:7px;line-height:1.6}
+  .hint2{font-size:11.5px;color:var(--dim);margin-top:7px;line-height:1.6;word-break:keep-all}
   .sugbox{margin-top:6px}
   .sugbox .sg{display:flex;align-items:center;gap:9px;padding:9px 11px;background:#fff;
     border:1px solid var(--line);border-radius:9px;margin-bottom:5px;cursor:pointer;
@@ -530,7 +530,7 @@
   .sk-row span{flex:1;height:52px;border-radius:10px;
     background:linear-gradient(90deg,#eef1f1 25%,#f6f8f8 50%,#eef1f1 75%);
     background-size:200% 100%;animation:shim 1.2s infinite}
-  .sk-note{font-size:12px;color:#9aa6ab;text-align:center;margin-top:13px}
+  .sk-note{font-size:12px;color:#9aa6ab;text-align:center;margin-top:13px;word-break:keep-all}
   .sk-line{height:13px;border-radius:5px;margin-bottom:9px;
     background:linear-gradient(90deg,#eef1f1 25%,#f6f8f8 50%,#eef1f1 75%);
     background-size:200% 100%;animation:shim 1.2s infinite}
@@ -824,6 +824,7 @@
   .invlink{background:var(--sand);border-radius:10px;padding:14px;text-align:center;
     font-size:15px;font-weight:700;word-break:break-all;margin-top:14px}
   .invmsg{background:var(--sand);border-radius:10px;padding:14px;font-size:13.5px;
+    word-break:keep-all;overflow-wrap:break-word;
     line-height:1.8;white-space:pre-wrap;margin-top:12px;color:#3f4c52}
 
   .avx{display:inline-block;border-radius:50%;text-align:center;color:#fff;
@@ -986,6 +987,152 @@
   .donebox .drank{font-size:13.5px;opacity:.9;margin-top:7px}
   .donebox .drank b{font-weight:800;font-size:15px}
   .donebox p{margin:0;font-size:13px;line-height:1.75;opacity:.88;word-break:keep-all}
+
+  /* ═══════════════════════════════════════════
+   *  커뮤니티 — 여기만 검정 바탕입니다.
+   *  통계·공고는 일하는 곳, 커뮤니티는 떠드는 곳.
+   *  화면이 바뀌면 말투도 바뀝니다.
+   * ═══════════════════════════════════════════ */
+  body.commmode{background:#0b0b0d}
+  body.commmode .wrap{padding-top:0}
+  .cdark{--cbg:#0b0b0d;--ccard:#16171a;--cline:#26282d;
+    --ctxt:#e8e9ea;--cdim:#8b8f96;--cred:#e8352e}
+
+  /* 진입 화면 — 빨간 로고, 검정 바탕 */
+  .cboot{position:fixed;inset:0;z-index:600;background:#0b0b0d;
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:env(safe-area-inset-top);
+    transition:opacity .32s ease}
+  .cboot.out{opacity:0;pointer-events:none}
+  .cbmid{flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;width:100%}
+  .cblogo{font-size:46px;font-weight:900;letter-spacing:-.01em;color:#e8352e;
+    font-family:'Poppins','Montserrat',-apple-system,BlinkMacSystemFont,
+      'Apple SD Gothic Neo','Malgun Gothic',sans-serif;line-height:1.05;
+    animation:bootIn .5s cubic-bezier(.2,.9,.25,1) both}
+  .cbtag{font-size:13.5px;color:#8b8f96;margin-top:12px;word-break:keep-all;
+    animation:bootIn .5s cubic-bezier(.2,.9,.25,1) .15s both}
+  .cbbar{width:110px;height:3px;border-radius:2px;background:#26282d;
+    margin:22px auto 0;overflow:hidden;animation:bootIn .5s ease .27s both}
+  .cbbar i{display:block;width:40%;height:100%;border-radius:2px;
+    background:#e8352e;animation:bootSlide 1.15s ease-in-out infinite}
+  .cbad{width:100%;max-width:330px;margin:0 auto 14vh;
+    animation:bootIn .55s cubic-bezier(.2,.9,.25,1) .6s both}
+  .cbad .banner{margin:0;background:#16171a;border-color:#26282d}
+  .cbad .banner .bt{color:#e8e9ea}
+  .cbad .banner .bd{color:#8b8f96}
+  .cbad .banner .bad{background:#0b0b0d;color:#8b8f96}
+  .cbad .banner .bc{background:#e8352e}
+
+  /* 머리 */
+  .chead2{display:flex;align-items:center;gap:10px;
+    margin:0 -14px 12px;padding:14px;background:#0b0b0d;
+    border-bottom:1px solid #26282d;position:sticky;top:0;z-index:5}
+  .chead2 .lg{font-size:19px;font-weight:900;color:#e8352e;letter-spacing:-.02em;
+    font-family:'Poppins','Montserrat',sans-serif}
+  .chead2 .rl{font-size:11.5px;font-weight:700;color:#8b8f96;
+    border:1px solid #26282d;border-radius:20px;padding:3px 9px}
+  .chead2 .bk{margin-left:auto;background:none;border:0;color:#8b8f96;
+    font-family:inherit;font-size:13.5px;padding:6px 2px;cursor:pointer}
+
+  /* 채널 */
+  .cdark .chbar{padding-bottom:10px}
+  .cdark .chip3{background:#16171a;border-color:#26282d;color:#8b8f96;
+    font-size:13px;padding:7px 13px}
+  .cdark .chip3.on{background:#e8352e;border-color:#e8352e;color:#fff}
+  .cdark .csort .cs{color:#61656c}
+  .cdark .csort .cs.on{background:#1e2024;color:#e8e9ea}
+  .cdark .csn{color:#61656c}
+
+  /* 글 한 줄 — 카드보다 목록에 가깝게. 한 화면에 더 많이 들어옵니다. */
+  .cdark .cpost{background:transparent;border:0;border-bottom:1px solid #1c1e22;
+    border-radius:0;margin:0;padding:15px 2px}
+  .cdark .cpost:active{transform:none;background:#131417}
+  .cdark .cpost .cch{color:#e8352e;font-size:11px;font-weight:800}
+  .cdark .cpost .ctt{color:#e8e9ea;font-size:15.5px;font-weight:700;
+    margin:6px 0 5px;line-height:1.42;word-break:keep-all}
+  .cdark .cpost .cpv{color:#8b8f96;font-size:13px;line-height:1.55}
+  .cdark .cpost .cmt{color:#61656c;font-size:11.5px;margin-top:9px}
+  .cdark .cpost .cmt b{color:#8b8f96}
+  .cdark .empty2,.cdark .empty{background:#131417;border-color:#26282d;color:#8b8f96}
+  .cdark .loading{color:#8b8f96}
+
+  /* 글쓰기 단추 */
+  .cdark .cwrite{background:#e8352e;box-shadow:0 6px 18px rgba(232,53,46,.32)}
+
+  .cdark .card{background:#16171a;border-color:#26282d}
+  .cdark .card h2,.cdark .cvhead h2{color:#e8e9ea}
+  .cdark .card .sub,.cdark .thin{color:#8b8f96}
+  .cdark .f label{color:#c9cbcd}
+  .cdark input,.cdark select,.cdark textarea{background:#0f1013;border-color:#2d3037;color:#e8e9ea}
+  .cdark input:focus,.cdark textarea:focus,.cdark select:focus{border-color:#e8352e}
+  .cdark .go{background:#e8352e}
+  .cdark .ghost,.cdark .cvact button{background:#16171a;border-color:#2d3037;color:#c9cbcd}
+  .cdark .cbody{color:#e8e9ea}
+  .cdark .cvhead{border-color:#26282d}
+  .cdark .cmts{border-color:#26282d}
+  .cdark .cmt{border-color:#1c1e22}
+  .cdark .cmx{color:#e8e9ea}
+  .cdark .cmn{color:#61656c}
+  .cdark .cmn b{color:#8b8f96}
+  .cdark .likebtn{background:#16171a;border-color:#2d3037;color:#8b8f96}
+  .cdark .likebtn.on{background:#2a1416;border-color:#5a2226;color:#ff6b64}
+  .cdark .vw{color:#61656c}
+  .cdark .back{background:#16171a;border-color:#2d3037;color:#c9cbcd}
+  .cdark .back .bicon{color:#e8352e}
+  .cdark .cmwrite textarea{background:#0f1013}
+  .cdark .cmwrite button{background:#e8352e}
+  /* 커뮤니티 첫 화면 — 채널마다 최신 글을 몇 개씩 보여줍니다.
+     눌러 들어가지 않아도 어디에 뭐가 올라왔는지 보입니다. */
+  .dgsec{margin-bottom:22px}
+  .dghead{display:flex;align-items:baseline;gap:8px;margin-bottom:2px;padding:0 2px}
+  .dghead b{font-size:17px;font-weight:800;letter-spacing:-.03em;color:#e8e9ea}
+  .dghead span{font-size:11.5px;color:#61656c}
+  .dghead .mo{margin-left:auto;background:none;border:0;color:#8b8f96;
+    font-family:inherit;font-size:12.5px;cursor:pointer;padding:4px 2px;
+    -webkit-tap-highlight-color:transparent}
+  .dghead .mo:active{color:#e8352e}
+  .dgrow{display:flex;align-items:center;gap:10px;width:100%;
+    background:none;border:0;border-bottom:1px solid #1c1e22;
+    padding:12px 2px;font-family:inherit;text-align:left;cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .dgrow:active{background:#131417}
+  .dgrow .tt{flex:1;min-width:0;font-size:14.5px;color:#c9cbcd;line-height:1.45;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dgrow .nw{flex-shrink:0;font-size:9.5px;font-weight:800;color:#fff;
+    background:#e8352e;border-radius:4px;padding:2px 5px;line-height:1}
+  .dgrow .vw2{flex-shrink:0;font-size:11.5px;color:#61656c;
+    display:flex;align-items:center;gap:3px}
+  .dgrow .cm2{flex-shrink:0;font-size:11.5px;color:#e8352e;font-weight:700}
+  /* 안내·경고 */
+  .cnotice{background:#16171a;border:1px solid #26282d;border-radius:12px;
+    padding:13px 14px;margin-bottom:12px;font-size:12.5px;line-height:1.75;
+    color:#8b8f96;word-break:keep-all}
+  .cnotice b{color:#e8e9ea;display:block;margin-bottom:5px;font-size:13px}
+  .cnotice.warn{border-color:#4a2320;background:#1a1211}
+  .cnotice.warn b{color:#e8352e}
+  .cnotice ul{margin:6px 0 0;padding-left:16px}
+  .cnotice li{margin-bottom:3px}
+
+  /* 종료 물어보기 */
+  .exitpop{position:fixed;inset:0;z-index:950;display:flex;
+    align-items:center;justify-content:center;padding:24px}
+  .exitpop .exbg{position:absolute;inset:0;background:rgba(12,20,18,.5)}
+  .exitpop .exbox{position:relative;width:100%;max-width:300px;background:#fff;
+    border-radius:18px;padding:26px 20px 16px;text-align:center;
+    box-shadow:0 12px 40px rgba(0,0,0,.24);
+    animation:popup2 .22s cubic-bezier(.16,1,.3,1) both}
+  @keyframes popup2{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+  .exitpop .exh{font-size:16.5px;font-weight:800;letter-spacing:-.02em;
+    color:var(--ink);margin-bottom:20px;word-break:keep-all}
+  .exitpop .exbtns{display:flex;gap:8px}
+  .exitpop .exbtns button{flex:1;padding:13px;border-radius:11px;
+    font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;
+    -webkit-tap-highlight-color:transparent}
+  .exitpop .exno{border:1px solid var(--line);background:#fff;color:var(--dim)}
+  .exitpop .exyes{border:0;background:var(--ink);color:#fff}
+  .exitpop .exno:active,.exitpop .exyes:active{transform:scale(.96)}
+
   /* ===== 가입 완료 ===== */
   /* 완료 화면은 좁게 — 넓은 화면에서 버튼이 끝까지 늘어나면 보기 나쁩니다 */
   .donewrap{max-width:460px;margin:0 auto}
@@ -1060,7 +1207,7 @@
   .basis{background:var(--sand);border-radius:9px;padding:10px 12px;font-size:12.5px;
     line-height:1.7;margin:10px 0 11px;color:#4a555a}
   .basis b{display:block;font-size:12px;color:var(--dim);margin-bottom:2px}
-  .submeta{font-size:12px;color:var(--dim);margin-top:7px;line-height:1.65}
+  .submeta{font-size:12px;color:var(--dim);margin-top:7px;line-height:1.65;word-break:keep-all}
   .sharebar{display:flex;gap:7px;margin-top:12px}
   .sharebar button{flex:1;padding:11px;font-size:13.5px;font-weight:600}
   .sharebar .kko{background:#FEE500;border-color:#FEE500;color:#191600}
@@ -1108,7 +1255,8 @@
   .invite p{margin:0;font-size:13px;line-height:1.75;color:var(--dim);
     word-break:keep-all;max-width:300px;margin-left:auto;margin-right:auto}
 
-  .thin{font-size:12px;color:var(--dim);text-align:center;margin-top:10px;line-height:1.6}
+  .thin{font-size:12px;color:var(--dim);text-align:center;margin-top:10px;line-height:1.6;
+    word-break:keep-all}
   .bar{height:7px;background:#eef0f3;border-radius:4px;overflow:hidden;margin-top:5px}
   .bar i{display:block;height:100%;background:var(--accent);
     width:0;animation:grow .5s cubic-bezier(.16,.84,.28,1) forwards}
@@ -1139,7 +1287,8 @@
   .gpics figcaption{margin-top:7px;font-size:11px;font-weight:700;color:#3f4c52;
     line-height:1.4;word-break:keep-all}
   .step .ico{margin-left:2px}
-  .thin2{display:block;color:#5a6870;font-size:12px;margin-top:3px;line-height:1.5}
+  .thin2{display:block;color:#5a6870;font-size:12px;margin-top:3px;line-height:1.5;
+    word-break:keep-all}
   .warnbox{background:#fdf6ec;border-radius:9px;padding:12px;font-size:12.5px;color:#6a4d14;
     line-height:1.7;margin-top:10px;word-break:keep-all}
   .heroBtn{display:inline-block;background:#fff;color:var(--accent);border:none;
@@ -2445,15 +2594,15 @@
         <select id="school">
           <option value="">선택</option>
           <optgroup label="전문학사 (3년제)">
-            <option>수도권 3년제</option>
+            <option>서울·경기 3년제</option>
             <option>지방 3년제</option>
           </optgroup>
           <optgroup label="학사 (4년제)">
-            <option>수도권 4년제</option>
+            <option>서울·경기 4년제</option>
             <option>지방 4년제</option>
           </optgroup>
           <optgroup label="전공심화">
-            <option>수도권 전공심화</option>
+            <option>서울·경기 전공심화</option>
             <option>지방 전공심화</option>
           </optgroup>
           <optgroup label="대학원">
@@ -2712,11 +2861,11 @@
   <div id="pane-edu" class="hide"><div id="eduBox"></div></div>
 
   <!-- ============ 커뮤니티 ============ -->
-  <div id="pane-comm" class="hide">
+  <div id="pane-comm" class="hide cdark">
     <div id="commBox"></div>
   </div>
 
-  <div id="pane-commwrite" class="hide">
+  <div id="pane-commwrite" class="hide cdark">
     <div class="card">
       <div class="f">
         <label>어느 채널에 쓸까요</label>
@@ -2737,7 +2886,7 @@
     </div>
   </div>
 
-  <div id="pane-commview" class="hide">
+  <div id="pane-commview" class="hide cdark">
     <div id="cvBox"></div>
   </div>
 
@@ -2812,8 +2961,8 @@
         <option value="past">지난 공고만</option>
       </select>
       <select id="postSort" onchange="doPosts()">
-        <option value="deadline">마감 가까운 순</option>
         <option value="new">최신순</option>
+        <option value="deadline">마감 가까운 순</option>
         <option value="public">공공기관 우선</option>
         <option value="univ">대학병원 우선</option>
       </select>
@@ -2915,7 +3064,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=142"></script>
+<script src="/app.js?v=143"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -2961,7 +3110,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v113 · 2026-09-04';
+var APP_VER = 'v120 · 2026-09-05';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3263,7 +3412,7 @@ function snapshot(which){
   } else if(which === 'post'){
     SNAP.post = { html:(document.getElementById('postBox')||{}).innerHTML||'',
                   mode: POST_MODE, scroll: window.scrollY || 0,
-                  sort:(document.getElementById('postSort')||{}).value||'deadline',
+                  sort:(document.getElementById('postSort')||{}).value||'new',
                   span:(document.getElementById('postSpan')||{}).value||'live' };
   }
 }
@@ -3291,7 +3440,7 @@ function restore(which){
     document.getElementById('regionBox').innerHTML = st.html;
   } else if(which === 'post'){
     POST_MODE = st.mode || 'mine';
-    var ps=document.getElementById('postSort'); if(ps) ps.value = st.sort || 'deadline';
+    var ps=document.getElementById('postSort'); if(ps) ps.value = st.sort || 'new';
     var pn=document.getElementById('postSpan'); if(pn) pn.value = st.span || 'live';
     document.getElementById('pt1').className = 'tab' + (POST_MODE==='mine'?' on':'');
     document.getElementById('pt2').className = 'tab' + (POST_MODE==='all'?' on':'');
@@ -3332,6 +3481,10 @@ var SUBMITTED = false;   // 제출을 끝냈으면 이탈 경고를 끕니다
  *  back=true 면 기록을 남기지 않고, 저장해둔 내용을 되살립니다
  */
 function tab(which, back){
+  /* 커뮤니티에서만 검정 바탕입니다. 나가면 걷어냅니다. */
+  if(which !== 'comm' && which !== 'commwrite' && which !== 'commview'){
+    document.body.classList.remove('commmode');
+  }
   /* 등록 폼은 로그인부터 합니다.
      3분 걸려 다 채운 뒤에 막히면 전부 날아가기 때문입니다. */
   if(which === 'input' && !KTOKEN){
@@ -3673,6 +3826,8 @@ function drawDash(){
   bootQuiet(false);
   if(BN.list.length) paintBanner();
   revealIn();
+  /* 화면이 다 뜬 뒤에 조용히 커뮤니티를 받아둡니다 */
+  setTimeout(preloadComm, 900);
 }
 
 /* 내 정보 화면을 열 때 통계를 불러옵니다 (한 번만, 캐시) */
@@ -3852,33 +4007,115 @@ var CH_NOW  = '';      // 고른 채널. 빈 값이면 전체
 var CH_SORT = 'new';   // new 최신순 · hot 인기순(댓글 많은 순)
 var CV_ID   = '';      // 지금 보고 있는 글
 
+/* 커뮤니티를 미리 받아둡니다.
+   본화면을 보고 계시는 동안 뒤에서 조용히 다녀옵니다.
+   눌렀을 때는 이미 자료가 있어서 기다림이 없습니다.
+   Apps Script 왕복 자체가 1초쯤 걸려서, 줄이는 게 아니라 미리 하는 게 답입니다. */
+var COMM_PRE = null;
+function preloadComm(){
+  if(COMM_PRE || !KTOKEN) return;
+  COMM_PRE = 'wait';
+  google.script.run.withSuccessHandler(function(r){
+    COMM_PRE = (r && r.ok) ? r : null;
+    if(r && r.ok){
+      try{ sessionStorage.setItem('comm_pre', JSON.stringify(r)); }catch(e){}
+    }
+  }).withFailureHandler(function(){ COMM_PRE = null; })
+    .commOpen(cred(), '', 'new');
+}
+
+/* 커뮤니티에 들어올 때 한 번 스치는 화면.
+   통계·공고와 다른 곳이라는 신호를 줍니다. 이번 세션에 한 번만 뜹니다. */
+var CBOOT_DONE = false;
+function commBoot(){
+  if(CBOOT_DONE) return;
+  try{ if(sessionStorage.getItem('cboot')==='1'){ CBOOT_DONE=true; return; } }catch(e){}
+  CBOOT_DONE = true;
+  try{ sessionStorage.setItem('cboot','1'); }catch(e){}
+
+  var d=document.createElement('div');
+  d.className='cboot';
+  d.innerHTML='<div class="cbmid">'
+    + '<div class="cblogo">POT JOB</div>'
+    + '<div class="cbtag">' + T('comm.tag','여기서는 편하게 이야기하세요') + '</div>'
+    + '<div class="cbbar"><i></i></div>'
+    + '</div>'
+    + '<div class="cbad" id="cbootAd"></div>';
+  document.body.appendChild(d);
+
+  /* 광고는 로고보다 한 박자 늦게 */
+  var ad=d.querySelector('#cbootAd');
+  if(ad && BN.list.length){
+    var b=BN.list[BN.i];
+    if(b) ad.innerHTML = bannerHTML(b);
+  }
+  setTimeout(function(){
+    d.className='cboot out';
+    setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, 340);
+  }, 1500);
+}
+
 function openComm(ch){
   CH_NOW = ch || '';
   tab('comm');
+  document.body.classList.add('commmode');
+  commBoot();
   var box=document.getElementById('commBox');
 
-  /* 이번 세션에 본 채널이 있으면 즉시 표시, 뒤에서 갱신 */
   var shown=false;
-  try{
-    var c=sessionStorage.getItem('comm_ch');
-    if(c){ var r0=JSON.parse(c); CH_LIST=r0.rows||[]; drawComm(r0); shown=true; }
-  }catch(e){}
+
+  /* ① 미리 받아둔 게 있으면 그대로 씁니다 — 기다림 없음 */
+  var pre = (COMM_PRE && COMM_PRE !== 'wait') ? COMM_PRE : null;
+  if(!pre){
+    try{ var q=sessionStorage.getItem('comm_pre'); if(q) pre=JSON.parse(q); }catch(e){}
+  }
+  if(pre && pre.channels){
+    CH_LIST = pre.channels.rows||[];
+    DIGEST = pre.digest || null;
+    drawComm(pre.channels);
+    if(DIGEST && !CH_NOW) paintDigest(DIGEST);
+    else if(pre.list) paintPosts(pre.list);
+    shown = true;
+  }
+
+  /* ② 없으면 지난번에 본 채널이라도 먼저 그립니다 */
+  if(!shown){
+    try{
+      var c=sessionStorage.getItem('comm_ch');
+      if(c){ var r0=JSON.parse(c); CH_LIST=r0.rows||[]; drawComm(r0); shown=true; }
+    }catch(e){}
+  }
   if(!shown) box.innerHTML=loading('불러오는 중');
 
+  /* 채널과 글을 한 번에 받습니다. 예전에는 두 번 다녀와서 그만큼 느렸습니다. */
   google.script.run.withSuccessHandler(function(r){
     if(!r.ok){ if(!shown){ box.innerHTML=failCard(r); attachRipple(); } return; }
-    try{ sessionStorage.setItem('comm_ch', JSON.stringify(r)); }catch(e){}
-    CH_LIST = r.rows||[];
-    drawComm(r);
+    var chs = r.channels || r;
+    try{ sessionStorage.setItem('comm_ch', JSON.stringify(chs)); }catch(e){}
+    CH_LIST = chs.rows||[];
+    drawComm(chs);
+    DIGEST = r.digest || null;
+    if(DIGEST && !CH_NOW) paintDigest(DIGEST);
+    else if(r.list) paintPosts(r.list);
+    COMM_PRE = r;
+    try{ sessionStorage.setItem('comm_pre', JSON.stringify(r)); }catch(e){}
   }).withFailureHandler(function(e){
     if(!shown) box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
-  }).commChannels(cred());
+  }).commOpen(cred(), CH_NOW, CH_SORT);
 }
 
 function drawComm(r){
+  IS_STU = !!r.student;
+
+  var h='<div class="chead2">'
+    + '<span class="lg">POT JOB</span>'
+    + '<span class="rl">' + (IS_STU ? '학생' : '치료사') + '</span>'
+    + '<button class="bk" onclick="leaveComm()">나가기</button>'
+    + '</div>';
+
   /* 채널은 위에 한 줄로 두고 손으로 넘깁니다.
      글이 먼저 보여야 사람들이 읽습니다. */
-  var h='<div class="chbar" id="chBar">'
+  h+='<div class="chbar" id="chBar">'
     + '<button class="chip3'+(CH_NOW===''?' on':'')+'" data-ch="" onclick="pickCh(\'\')">'
     + '전체</button>';
   CH_LIST.forEach(function(c){
@@ -3895,13 +4132,71 @@ function drawComm(r){
     + '인기순</button>'
     + '<span class="csn" id="csNote"></span>'
     + '</div>';
+  h = h.replace('<div class="csort">',
+                '<div class="csort' + (CH_NOW ? '' : ' hide') + '">');
 
+  h+=commNotice();
+  h+='<div id="commDigest"></div>';
   h+='<div id="commPosts"></div>';
   h+='<button class="cwrite" onclick="cwOpen()">글쓰기</button>';
 
   document.getElementById('commBox').innerHTML=h;
   attachRipple();
   loadCommPosts();
+}
+
+var IS_STU = false;
+var DIGEST = null;
+
+/* 커뮤니티를 나갈 때 검정 바탕을 걷어냅니다 */
+function leaveComm(){
+  document.body.classList.remove('commmode');
+  tab('dash');
+}
+
+/* 안내와 경고. 학생은 처음 오는 분이 많아 더 자세히 적습니다. */
+function commNotice(){
+  if(IS_STU){
+    return '<div class="cnotice"><b>' + T('comm.stu.h','학생 게시판입니다') + '</b>'
+      + T('comm.stu.b','닉네임과 학교(유형·권역)만 보입니다. 이름도 학번도 안 보입니다. '
+          + '시험·실습·학점·첫직장, 뭐든 편하게 물어보세요.') + '</div>'
+      + '<div class="cnotice warn"><b>' + T('comm.stu.wh','이건 지켜주세요') + '</b>'
+      + '<ul>'
+      + '<li>교수님·병원·사람 이름을 적지 마세요</li>'
+      + '<li>기출문제를 그대로 옮겨 적으면 안 됩니다</li>'
+      + '<li>실습지 흉을 볼 때도 어디인지 특정되지 않게</li>'
+      + '<li>신고가 쌓이면 글이 가려지고, 반복되면 이용이 막힙니다</li>'
+      + '</ul></div>';
+  }
+  return '<div class="cnotice"><b>' + T('comm.pro.h','치료사 게시판입니다') + '</b>'
+    + T('comm.pro.b','닉네임과 직군만 보입니다. 병원 이름은 적지 마세요. '
+        + '구인·구직 글은 올릴 수 없습니다.') + '</div>';
+}
+
+/* 채널별 묶음 — 메디잡처럼 채널마다 최신 글 몇 개씩 */
+function paintDigest(list){
+  var box=document.getElementById('commDigest');
+  var posts=document.getElementById('commPosts');
+  if(!box) return;
+  if(!list || !list.length){ box.innerHTML=''; return; }
+  if(posts) posts.innerHTML='';          // 묶음을 보여줄 땐 평평한 목록을 감춥니다
+
+  box.innerHTML = list.map(function(c){
+    return '<div class="dgsec">'
+      + '<div class="dghead"><b>'+esc(c.name)+'</b>'
+      + '<span>'+esc(c.desc||'')+'</span>'
+      + '<button class="mo" onclick="pickCh(\''+c.id+'\')">더보기 ›</button></div>'
+      + c.rows.map(function(x){
+          CV_SEEN[x.id] = CV_SEEN[x.id] || { id:x.id, title:x.title, chName:c.name };
+          return '<button class="dgrow" onclick="cvOpen(\''+x.id+'\')">'
+            + '<span class="tt">'+esc(x.title)+'</span>'
+            + (x.fresh?'<span class="nw">N</span>':'')
+            + (x.cmts?'<span class="cm2">'+x.cmts+'</span>':'')
+            + '<span class="vw2">'+ico('eye')+(x.views||0)+'</span>'
+            + '</button>';
+        }).join('')
+      + '</div>';
+  }).join('');
 }
 
 function pickSort(s){
@@ -3921,16 +4216,25 @@ function pickCh(id){
     b.className='chip3'+(on?' on':'');
     if(on && b.scrollIntoView) b.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
   });
+  var dg=document.getElementById('commDigest');
+  var so=document.querySelector('.csort');
+
+  if(!id){
+    /* 전체로 돌아오면 묶음 화면입니다. 정렬 단추는 채널 안에서만 씁니다. */
+    if(so) so.className='csort hide';
+    if(DIGEST){ paintDigest(DIGEST); return; }
+  }
+  if(so) so.className='csort';
+  if(dg) dg.innerHTML='';
   loadCommPosts();
 }
 
-function loadCommPosts(){
+/* 글 목록 그리기 — 서버에서 받은 자료로 화면만 만듭니다.
+   commOpen 이 글까지 같이 주면 이걸 바로 부릅니다. */
+function paintPosts(r){
   var box=document.getElementById('commPosts');
   if(!box) return;
-  box.innerHTML=loading('글을 불러오는 중');
-
-  google.script.run.withSuccessHandler(function(r){
-    if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+  if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
     if(!r.rows.length){
       box.innerHTML='<div class="empty2">아직 글이 없습니다.<br>'
         + '첫 글을 남겨보시겠어요?</div>';
@@ -3938,10 +4242,11 @@ function loadCommPosts(){
     }
     var h='';
     r.rows.forEach(function(x){
+      CV_SEEN[x.id] = x;                     // 눌렀을 때 바로 보여주려고 담아둡니다
       h+='<button class="cpost" onclick="cvOpen(\''+x.id+'\')">'
         + '<div class="chead">'+avOf(x.av,x.nick,26)
         + '<span class="cn">'+esc(x.nick)+'</span>'
-        + '<span class="cmeta">'+esc(x.job||'')+(x.role==='학생'?' 학생':'')
+        + '<span class="cmeta">'+esc(x.who||x.job||'')
         + ' · '+esc(x.ago)+'</span>'
         + '<span class="cch2">'+esc(x.chName)+'</span></div>'
         + '<div class="ctt">'+esc(x.title)+'</div>'
@@ -3955,17 +4260,40 @@ function loadCommPosts(){
     });
     box.innerHTML=h;
     attachRipple();
-  }).withFailureHandler(function(e){
-    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
-  }).commList(cred(), CH_NOW, CH_SORT);
+}
+
+function loadCommPosts(){
+  var box=document.getElementById('commPosts');
+  if(!box) return;
+  box.innerHTML=loading('글을 불러오는 중');
+  google.script.run.withSuccessHandler(paintPosts)
+    .withFailureHandler(function(e){
+      box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
+    }).commList(cred(), CH_NOW, CH_SORT);
 }
 
 /* ── 글 보기 ───────────────────────────────────────── */
+/* 목록에서 이미 받은 자료 — 본문을 기다리는 동안 제목이라도 먼저 띄웁니다 */
+var CV_SEEN = {};
+
 function cvOpen(id){
   CV_ID=id;
   tab('commview');
   var box=document.getElementById('cvBox');
-  box.innerHTML=loading('불러오는 중');
+
+  /* 제목·글쓴이는 목록에 이미 있습니다. 흰 화면을 안 보여줍니다. */
+  var pre = CV_SEEN[id];
+  if(pre){
+    box.innerHTML='<div class="card">'
+      + '<div class="cvhead"><div class="cch">'+esc(pre.chName||'')+'</div>'
+      + '<h2>'+esc(pre.title)+'</h2>'
+      + '<p class="thin" style="margin:0">'+avOf(pre.av,pre.nick,24)
+      + ' <b>'+esc(pre.nick)+'</b> · '+esc(pre.who||pre.job||'')+'</p></div>'
+      + '<div class="cbody noselect">'+esc(pre.preview||'')+'</div>'
+      + '</div>' + loading('나머지를 불러오는 중');
+  }else{
+    box.innerHTML=loading('불러오는 중');
+  }
 
   google.script.run.withSuccessHandler(function(r){
     if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
@@ -3974,7 +4302,7 @@ function cvOpen(id){
       + '<h2>'+esc(r.title)+'</h2>'
       + '<p class="thin" style="margin:0">'+avOf(r.av,r.nick,24)
       + ' <b>'+esc(r.nick)+'</b> · '
-      + esc(r.job||'')+(r.role==='학생'?' 학생':'')+' · '+esc(r.at)+'</p></div>'
+      + esc(r.who||r.job||'')+' · '+esc(r.at)+'</p></div>'
       + '<div class="cbody noselect">'+esc(r.body)+'</div>'
       + '<div class="likebar">'
       + '<button class="likebtn'+(r.liked?' on':'')+'" id="likeBtn" onclick="cvLike()">'
@@ -4022,6 +4350,7 @@ function cvLike(){
   }).withFailureHandler(function(e){
     if(btn) btn.disabled=false; msg(e.message);
   }).commLike(cred(), CV_ID);
+  commStale();
 }
 
 function cvDel(){
@@ -4030,6 +4359,7 @@ function cvDel(){
     msg(r.message);
     if(r.ok) openComm(CH_NOW);
   }).withFailureHandler(function(e){ msg(e.message); }).commDelete(cred(), CV_ID);
+  commStale();
 }
 
 function cvReport(){
@@ -4078,6 +4408,12 @@ function cwCount(){
   if(el) el.textContent=v.length+' / 3000';
 }
 
+/* 글·댓글이 올라가면 미리 받아둔 것이 옛것이 됩니다. 버립니다. */
+function commStale(){
+  COMM_PRE = null;
+  try{ sessionStorage.removeItem('comm_pre'); }catch(e){}
+}
+
 function cwSend(){
   var ch=document.getElementById('cwCh').value;
   var t=document.getElementById('cwTitle').value.trim();
@@ -4099,6 +4435,7 @@ function cwSend(){
     }
     CH_NOW=ch;
     try{ sessionStorage.removeItem('comm_ch'); }catch(e){}  // 내 새 글 바로 보이게
+    commStale();                                            // 미리 받아둔 것도 버립니다
     openComm(ch);
     celebrate('✍️', '올렸습니다', '치료사들이 곧 볼 거예요');
   }).withFailureHandler(function(e){ msg(e.message); })
@@ -4369,6 +4706,11 @@ function openStars(){
     attachRipple(); revealIn();
   }).withFailureHandler(function(e){
     box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
+  }).withFailureHandler(function(e){
+    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'
+      + '잠시 후 다시 열어주세요.</div>';
+  }).withFailureHandler(function(){
+    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>잠시 후 다시 열어주세요.</div>';
   }).myStars(cred());
 }
 
@@ -4790,7 +5132,7 @@ function openCal(){
       if(r.ok) r.rows.forEach(function(x){ POST_MAP[x.id]=x; });
       drawCal();
     }).withFailureHandler(function(){ drawCal(); })
-      .getJobPosts(cred(), job, 'deadline', 'all');
+      .getJobPosts(cred(), job, 'new', 'all');
     return;
   }
   drawCal();
@@ -5175,6 +5517,7 @@ function cmSend(){
     cvOpen(CV_ID);
   }).withFailureHandler(function(e){ el.disabled=false; msg(e.message); })
     .commComment(cred(), CV_ID, v);
+  commStale();
 }
 
 function cmDel(id){
@@ -5183,6 +5526,7 @@ function cmDel(id){
     msg(r.message);
     if(r.ok) cvOpen(CV_ID);
   }).withFailureHandler(function(e){ msg(e.message); }).commCommentDelete(cred(), id);
+  commStale();
 }
 
 /* ── 내가 쓴 글 ───────────────────────────────────── */
@@ -5227,6 +5571,11 @@ function openMine(){
     attachRipple();
   }).withFailureHandler(function(e){
     box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
+  }).withFailureHandler(function(e){
+    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'
+      + '잠시 후 다시 열어주세요.</div>';
+  }).withFailureHandler(function(){
+    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>잠시 후 다시 열어주세요.</div>';
   }).commMine(cred());
 }
 
@@ -5269,6 +5618,11 @@ function openAvatar(){
     attachRipple();
   }).withFailureHandler(function(e){
     box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(e.message)+'</div>';
+  }).withFailureHandler(function(e){
+    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'
+      + '잠시 후 다시 열어주세요.</div>';
+  }).withFailureHandler(function(){
+    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>잠시 후 다시 열어주세요.</div>';
   }).commAvatars(cred());
 }
 
@@ -5965,6 +6319,8 @@ function nickTyped(){
     google.script.run.withSuccessHandler(function(r){
       el.className='nickchk '+(r.ok?'ok':'no');
       el.textContent=r.message;
+    }).withFailureHandler(function(){
+      el.className='nickchk'; el.textContent='';
     }).checkNick(v);
   }, 450);
 }
@@ -6649,32 +7005,15 @@ function submit(){
     window.scrollTo(0,0);
   }).withFailureHandler(function(e){
     btn.disabled=false; btn.textContent='제출하고 통계 보기'; msg(e.message);
+  }).withFailureHandler(function(e){
+    /* 통신이 끊기면 버튼을 되살립니다.
+       안 그러면 3분 적은 걸 눌러놓고 아무 반응 없이 멈춰 있습니다. */
+    btn.disabled=false;
+    btn.textContent = (role==='학생') ? '제출하고 내 위치 보기' : '제출하고 통계 보기';
+    msg('보내지 못했습니다. 잠시 후 다시 눌러주세요');
   }).submitWage(data);
 }
 
-/* 등록 직후 미리보기 — 내 위치만 보여주고 나머지는 코드로 */
-function drawDonePos(p){
-  var box=document.getElementById('donePos');
-  if(!box) return;
-  if(!p||!p.ok){ box.innerHTML=''; return; }
-
-  if(p.topPercent===null){
-    box.innerHTML='<div class="donebox"><div class="dh">등록이 끝났습니다</div>'
-      + '<div class="dsub">'+esc(p.band||'')+(p.type?' · '+esc(p.type):'')+'</div>'
-      + '<p>같은 조건 참여자가 '+(p.peerCount||0)+'명이라 아직 순위가 나오지 않습니다.<br>'
-      + '3명이 넘으면 바로 보입니다.</p></div>';
-    return;
-  }
-
-  box.innerHTML='<div class="donebox">'
-    + '<div class="dh">등록이 끝났습니다 · 내 위치</div>'
-    + '<div class="dsub">'+esc(p.band||'')+(p.type?' · '+esc(p.type):'')+'</div>'
-    + '<div class="dbig" data-count="'+p.topPercent+'" data-pre="상위 " data-suf="%">상위 0%</div>'
-    + '<div class="drank">'+p.peerCount+'명 중 <b>'+p.rank+'등</b>'
-    + (p.median?' · 중위 '+p.median+'만원':'')+'</div>'
-    + '</div>';
-  animateNumbers('#donePos');
-}
 
 function showPos(p){
   var box=document.getElementById('myPos');
@@ -6830,6 +7169,8 @@ function sugg(which){
           + '<b>'+esc(x.name)+'</b>'
           + '<span>'+esc(kindLabel(x.kind))+' · '+esc(x.sgg)+' · OT'+x.ot+'</span></div>';
       }).join('') + (r.total>8?'<div class="none">그 외 '+(r.total-8)+'곳 더 있습니다</div>':'');
+    }).withFailureHandler(function(){
+      box.innerHTML='<div class="none">지금은 찾을 수 없습니다</div>';
     }).suggestHospitals(cred(), q);
   }, 350);
 }
@@ -6961,7 +7302,7 @@ function doPosts(){
   var box=document.getElementById('postBox');
   var job = (POST_MODE==='mine') ? ((ME&&ME.job)||JOB) : '';
   var sel = document.getElementById('postSort');
-  var srt = sel ? sel.value : 'deadline';
+  var srt = sel ? sel.value : 'new';
   var spEl = document.getElementById('postSpan');
   var spn = spEl ? spEl.value : 'live';
 
@@ -7031,11 +7372,11 @@ function showPosts(r){
   var SN={deadline:'마감이 가까운 순', new:'최근에 올라온 순',
           public:'공공기관 먼저', univ:'대학병원·의료원 먼저'};
   var SP={live:'접수 중', all:'지난 공고 포함', past:'지난 공고'};
-  var sv=(document.getElementById('postSort')||{}).value||'deadline';
+  var sv=(document.getElementById('postSort')||{}).value||'new';
   var pv=(document.getElementById('postSpan')||{}).value||'live';
   h += '<p class="thin" style="margin:0 0 10px">'
     + (POST_MODE==='mine' ? esc((ME&&ME.job)||JOB)+' 관련 ' : '전체 ')
-    + (SP[pv]||SP.live)+' <b>'+r.total+'건</b> · '+(SN[sv]||SN.deadline)+'</p>';
+    + (SP[pv]||SP.live)+' <b>'+r.total+'건</b> · '+(SN[sv]||SN.new)+'</p>';
 
   if(pv==='past'){
     h += '<div class="hintbox" style="margin:0 0 12px">지나간 공고입니다. '
@@ -8201,14 +8542,44 @@ try{
       try{ history.pushState({p:CURRENT}, '', location.href); }catch(e){}
       return;
     }
-    // 여기서 한 번 더 누르면 정말 나갑니다
-    if(EXIT_ARMED){ history.back(); return; }
-    EXIT_ARMED = true;
-    msg('한 번 더 누르면 나갑니다');
+    /* 홈에서 한 번 더 누르면 앱이 꺼집니다.
+       전에는 「한 번 더 누르면 나갑니다」 를 잠깐 띄웠는데,
+       못 보고 또 누르면 그냥 꺼져버렸습니다. 물어보고 끕니다. */
     try{ history.pushState({p:'app'}, '', location.href); }catch(e){}
-    setTimeout(function(){ EXIT_ARMED = false; }, 2000);
+    askExit();
   });
 }catch(e){}
+
+/* 정말 나갈지 물어봅니다.
+   「예」를 누르면 뒤로 두 번 가서 앱을 벗어납니다. */
+function askExit(){
+  if(document.getElementById('exitPop')) return;   // 이미 떠 있으면 그만
+  var d=document.createElement('div');
+  d.id='exitPop';
+  d.className='exitpop';
+  d.innerHTML='<div class="exbg" onclick="closeExit()"></div>'
+    + '<div class="exbox">'
+    + '<div class="exh">POT JOB을 종료할까요?</div>'
+    + '<div class="exbtns">'
+    + '<button class="exno" onclick="closeExit()">아니요</button>'
+    + '<button class="exyes" onclick="doExit()">예</button>'
+    + '</div></div>';
+  document.body.appendChild(d);
+}
+
+function closeExit(){
+  var d=document.getElementById('exitPop');
+  if(d && d.parentNode) d.parentNode.removeChild(d);
+}
+
+function doExit(){
+  closeExit();
+  EXIT_ARMED = true;
+  /* 우리가 쌓아둔 자리를 지나 밖으로 나갑니다 */
+  try{ history.go(-2); }catch(e){ history.back(); }
+  /* 그래도 안 닫히면 (앱으로 설치한 경우) 창을 닫아봅니다 */
+  setTimeout(function(){ try{ window.close(); }catch(e){} }, 300);
+}
 
 /* 입력하던 게 있으면 나가기 전에 확인합니다 */
 window.addEventListener('beforeunload', function(e){

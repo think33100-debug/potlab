@@ -116,7 +116,67 @@
   .mrow .cat{font-size:11px;font-weight:800;color:var(--accent);width:52px;flex-shrink:0}
   .mrow label{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:3px}
 
-  /* ===== 화면 문구 ===== */
+  /* ===== 기업 계정 ===== */
+function openBiz(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className='tb'+(b.dataset.f==='biz'?' on':'');
+  });
+  shell('bizWrap');
+  document.getElementById('bizList').innerHTML='<div class="loading">불러오는 중</div>';
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    var wait=(r.rows||[]).filter(function(x){ return !x.verified; }).length;
+    var el=document.getElementById('c-biz');
+    if(el) el.textContent = wait || '';
+    drawBiz(r.rows||[]);
+  }).withFailureHandler(function(e){ msg(e.message); }).adminBizList(KEY);
+}
+
+function drawBiz(rows){
+  var box=document.getElementById('bizList');
+  if(!rows.length){ box.innerHTML='<div class="empty">아직 가입한 기업이 없습니다</div>'; return; }
+  box.innerHTML=rows.map(function(x){
+    return '<div class="cwq'+(x.verified?'':' rep')+'">'
+      + '<div class="ch">'+esc(x.at)+' · '+esc(x.jobs)
+      + (x.verified?' · 인증 완료':' · 인증 대기')+'</div>'
+      + '<div class="tt">'+esc(x.org)+'</div>'
+      + '<div class="mt">사업자 '+esc(x.bizNo)
+      + ' · '+esc(x.name)+(x.title?' '+esc(x.title):'')
+      + '<br>'+esc(x.tel)+' · '+esc(x.email)+'</div>'
+      + (x.memo?'<div class="note"><b>메모</b>'+esc(x.memo)+'</div>':'')
+      + '<div class="acts">'
+      + '<button class="'+(x.verified?'ex':'re')+'" onclick="bizOk('+x.line+','+(x.verified?0:1)+')">'
+      + (x.verified?'인증 취소':'인증 열어주기')+'</button>'
+      + '<button onclick="bizMemo('+x.line+')">메모</button>'
+      + '<span class="idcopy">'+esc(x.id)+'</span></div></div>';
+  }).join('');
+}
+
+function bizOk(line, on){
+  var memo=null;
+  if(on){
+    memo=prompt('어떻게 확인하셨나요? (기록용)','전화로 재직 확인');
+    if(memo===null) return;
+  }
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    msg(r.verified?'열어줬습니다':'인증을 취소했습니다');
+    openBiz();
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminBizVerify(KEY, line, !!on, memo);
+}
+
+function bizMemo(line){
+  var v=prompt('메모');
+  if(v===null) return;
+  google.script.run.withSuccessHandler(function(r){
+    msg('저장했습니다'); openBiz();
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminBizVerify(KEY, line, undefined, v);
+}
+
+/* ===== 화면 문구 ===== */
 var TX = [];
 
 function openTexts(){
@@ -325,6 +385,7 @@ function saveSched(){
       <button class="tb" data-f="excluded" onclick="load('excluded')">제외됨<span class="n" id="c-excluded"></span></button>
       <button class="tb" data-f="all" onclick="load('all')">전체<span class="n" id="c-all"></span></button>
       <button class="tb" data-f="jobs" onclick="openJobs('live')">공고 관리<span class="n" id="c-jobs"></span></button>
+      <button class="tb" data-f="biz" onclick="openBiz()">기업 계정<span class="n" id="c-biz"></span></button>
       <button class="tb" data-f="texts" onclick="openTexts()">화면 문구</button>
       <button class="tb" data-f="sched" onclick="openSched()">수집 주기</button>
       <button class="tb" data-f="banner" onclick="openBanner()">배너 관리</button>
@@ -355,6 +416,14 @@ function saveSched(){
       </div>
       <div id="jobsHelp" class="hide"></div>
       <div id="jobsList"></div>
+    </div>
+
+    <div id="bizWrap" class="hide">
+      <p class="bhelp">채용담당자 계정입니다. 커뮤니티와 급여 통계는 안 보입니다.<br>
+        <b>업무 이메일 인증을 마쳐야 공고를 올릴 수 있습니다.</b>
+        도메인 메일이 없는 병원은 여기서 직접 열어주세요.<br>
+        전화로 재직을 확인하신 뒤 여시고, 메모에 남겨두시면 나중에 찾기 쉽습니다.</p>
+      <div id="bizList"></div>
     </div>
 
     <div id="textsWrap" class="hide">
@@ -416,7 +485,7 @@ function saveSched(){
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=142"></script>
+<script src="/app.js?v=143"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -587,7 +656,7 @@ function saveBanners(){
 /* ===== 커뮤니티 관리 ===== */
 function shell(which){
   ['list','bannerWrap','commWrap','menuWrap','accessWrap','jobsWrap',
-   'schedWrap','textsWrap'].forEach(function(id){
+   'schedWrap','textsWrap','bizWrap'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.className = (id===which ? '' : 'hide');
   });
