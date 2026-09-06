@@ -134,289 +134,6 @@
   .mrow .cat{font-size:11px;font-weight:800;color:var(--accent);width:52px;flex-shrink:0}
   .mrow label{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:3px}
 
-  /* 메뉴·문구·배너는 서버가 30분 캐시합니다.
-   고친 것을 바로 보고 싶을 때 누릅니다. */
-function doRefresh(){
-  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
-  msg('비우는 중입니다');
-  google.script.run.withSuccessHandler(function(r){
-    if(!r.ok){ msg(r.message); return; }
-    alert(r.message);
-  }).withFailureHandler(function(e){
-    alert('바로 반영하기를 쓸 수 없습니다.\n\n'
-      + ((e&&e.message)||'서버가 응답하지 않았습니다')
-      + '\n\n서버가 옛 판이면 이 기능이 없습니다.\n'
-      + 'Apps Script 에서 새 버전으로 배포했는지 확인해주세요.');
-  }).adminRefresh(KEY);
-}
-
-/* ===== 기업 계정 ===== */
-function openBiz(){
-  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
-  document.querySelectorAll('.tabs .tb').forEach(function(b){
-    if(b.dataset.f) b.className='tb'+(b.dataset.f==='biz'?' on':'');
-  });
-  shell('bizWrap');
-  if(PRE.biz) drawBiz(PRE.biz.rows||[]);
-  else document.getElementById('bizList').innerHTML='<div class="loading">불러오는 중</div>';
-  google.script.run.withSuccessHandler(function(r){
-    PRE.biz=r;
-    if(!r.ok){ msg(r.message); return; }
-    var wait=(r.rows||[]).filter(function(x){ return !x.verified; }).length;
-    var el=document.getElementById('c-biz');
-    if(el) el.textContent = wait || '';
-    drawBiz(r.rows||[]);
-  }).withFailureHandler(function(e){ boxFail('bizList','기업 계정',e); }).adminBizList(KEY);
-}
-
-function drawBiz(rows){
-  var box=document.getElementById('bizList');
-  if(!rows.length){ box.innerHTML='<div class="empty">아직 가입한 기업이 없습니다</div>'; return; }
-  box.innerHTML=rows.map(function(x){
-    return '<div class="cwq'+(x.verified?'':' rep')+'">'
-      + '<div class="ch">'+esc(x.at)+' · '+esc(x.jobs)
-      + (x.verified?' · 인증 완료':' · 인증 대기')+'</div>'
-      + '<div class="tt">'+esc(x.org)+'</div>'
-      + '<div class="mt">'
-      + (x.bizNo ? '사업자 '+esc(x.bizNo)
-                 : '<b style="color:#b4432c">사업자번호 없음</b>')
-      + ' · '+esc(x.name)+(x.title?' '+esc(x.title):'')
-      + '<br>'+esc(x.tel)+' · '+esc(x.email)+'</div>'
-      + (x.memo?'<div class="note"><b>메모</b>'+esc(x.memo)+'</div>':'')
-      + '<div class="acts">'
-      + '<button class="'+(x.verified?'ex':'re')+'" onclick="bizOk('+x.line+','+(x.verified?0:1)+')">'
-      + (x.verified?'인증 취소':'인증 열어주기')+'</button>'
-      + '<button onclick="bizMemo('+x.line+')">메모</button>'
-      + '<span class="idcopy">'+esc(x.id)+'</span></div></div>';
-  }).join('');
-}
-
-function bizOk(line, on){
-  var memo=null;
-  if(on){
-    memo=prompt('어떻게 확인하셨나요? (기록용)','전화로 재직 확인');
-    if(memo===null) return;
-  }
-  google.script.run.withSuccessHandler(function(r){
-    if(!r.ok){ msg(r.message); return; }
-    msg(r.verified?'열어줬습니다':'인증을 취소했습니다');
-    openBiz();
-  }).withFailureHandler(function(e){ msg(e.message); })
-    .adminBizVerify(KEY, line, !!on, memo);
-}
-
-function bizMemo(line){
-  var v=prompt('메모');
-  if(v===null) return;
-  google.script.run.withSuccessHandler(function(r){
-    msg('저장했습니다'); openBiz();
-  }).withFailureHandler(function(e){ msg(e.message); })
-    .adminBizVerify(KEY, line, undefined, v);
-}
-
-/* ===== 화면 문구 ===== */
-var TX = [];
-
-function openTexts(){
-  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
-  document.querySelectorAll('.tabs .tb').forEach(function(b){
-    if(b.dataset.f) b.className='tb'+(b.dataset.f==='texts'?' on':'');
-  });
-  shell('textsWrap');
-  if(PRE.texts){ TX=PRE.texts.rows||[]; drawTexts(); }
-  else document.getElementById('textsBox').innerHTML='<div class="loading">불러오는 중</div>';
-  google.script.run.withSuccessHandler(function(r){
-    if(!r.ok){ msg(r.message); return; }
-    PRE.texts=r; TX = r.rows || [];
-    drawTexts();
-  }).withFailureHandler(function(e){ boxFail('textsBox','화면 문구',e); }).adminGetTexts(KEY);
-}
-
-function drawTexts(){
-  var box=document.getElementById('textsBox');
-  if(!TX.length){ box.innerHTML='<div class="empty">문구가 없습니다</div>'; return; }
-
-  /* 페이지별로 묶습니다 */
-  var pages=[], byPage={};
-  TX.forEach(function(t,i){
-    if(!byPage[t.page]){ byPage[t.page]=[]; pages.push(t.page); }
-    byPage[t.page].push(i);
-  });
-
-  box.innerHTML = pages.map(function(pg){
-    var edited = byPage[pg].filter(function(i){ return TX[i].cur; }).length;
-    return '<div class="bcard">'
-      + '<div class="bhead"><b>' + esc(pg) + '</b>'
-      + (edited ? '<span class="pill stu">' + edited + '개 고침</span>' : '')
-      + '</div>'
-      + byPage[pg].map(function(i){
-          var t=TX[i];
-          return '<label class="bl">' + esc(t.label)
-            + '<span>' + esc(t.def.replace(/<br>/g,' ').replace(/<\/?b>/g,'')) + '</span></label>'
-            + '<textarea class="bi" rows="2"'
-            + (t.cur ? ' style="background:#fffdf0;border-color:#e8cfa4"' : '')
-            + ' oninput="TX[' + i + '].cur=this.value;txLen(' + i + ',this)"'
-            + ' placeholder="' + esc(t.def.replace(/"/g,'&quot;')) + '">'
-            + esc(t.cur) + '</textarea>'
-            + '<div class="txlen" id="txl' + i + '">'
-            + (t.cur ? t.cur.length + '자' : '') + '</div>';
-        }).join('')
-      + '</div>';
-  }).join('');
-}
-
-function txLen(i, el){
-  var d=document.getElementById('txl'+i);
-  if(!d) return;
-  var v=String(el.value||'');
-  var over = v.length>2000;
-  d.textContent = v ? v.length+'자'+(over?' · 너무 깁니다':'') : '';
-  d.className = 'txlen'+(over?' over':'');
-}
-
-function saveTexts(){
-  /* 보내기 전에 화면에서 먼저 봅니다. 서버까지 안 가고 바로 알려줍니다. */
-  var bad=[];
-  TX.forEach(function(t){
-    var v=String(t.cur||'').trim();
-    if(!v) return;
-    if(v.length>2000) bad.push(t.page+' · '+t.label+' — 너무 깁니다 ('+v.length+'자)');
-    var open=(v.match(/<(b|br|span|em|i)\b/gi)||[]).length;
-    var close=(v.match(/<\/(b|span|em|i)>/gi)||[]).length
-            + (v.match(/<br\s*\/?>/gi)||[]).length;
-    if(open!==close) bad.push(t.page+' · '+t.label+' — 태그 짝이 안 맞습니다');
-  });
-  if(bad.length){
-    alert('아래를 고쳐주세요\n\n'+bad.join('\n'));
-    return;
-  }
-
-  msg('저장하고 있습니다');
-  google.script.run.withSuccessHandler(function(r){
-    if(!r.ok){
-      if(r.bad && r.bad.length){
-        alert('저장하지 않았습니다\n\n'
-          + r.bad.map(function(b){ return b.page+' · '+b.label+' — '+b.why; }).join('\n'));
-      }else{
-        msg(r.message||'저장하지 못했습니다');
-      }
-      return;
-    }
-    msg(r.message||'저장했습니다');
-    openTexts();
-  }).withFailureHandler(function(e){ msg('저장하지 못했습니다. 잠시 후 다시 눌러주세요'); })
-    .adminSaveTexts(KEY, TX.map(function(t){ return { key:t.key, cur:t.cur }; }));
-}
-
-/* ===== 수집 주기 ===== */
-var SC = null;
-
-function openSched(){
-  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
-  document.querySelectorAll('.tabs .tb').forEach(function(b){
-    if(b.dataset.f) b.className='tb'+(b.dataset.f==='sched'?' on':'');
-  });
-  shell('schedWrap');
-  if(PRE.sched){ SC=PRE.sched; drawSched(); }
-  else document.getElementById('schedBox').innerHTML='<div class="loading">불러오는 중</div>';
-  google.script.run.withSuccessHandler(function(r){
-    if(!r.ok){ msg(r.message); return; }
-    PRE.sched=r; SC = r;
-    drawSched();
-  }).withFailureHandler(function(e){ boxFail('schedBox','수집 주기',e); }).adminGetSchedule(KEY);
-}
-
-function schedCost(c){
-  var ticks = Math.max(0,(c.toHour-c.fromHour))*2;
-  return { ticks:ticks, total: ticks*5 + (c.heavyHours||[]).length*103 };
-}
-
-function drawSched(){
-  var c = SC.cfg, rec = SC.recommend;
-  var cost = schedCost(c);
-  var days = c.weekdayOnly ? 5 : 7;
-  var h='<div class="bcard">';
-
-  h+='<label class="bl">수집 켜기<span>끄면 새 공고가 안 들어옵니다</span></label>'
-   + '<label style="display:flex;align-items:center;gap:8px;font-size:14px">'
-   + '<input type="checkbox"'+(c.on?' checked':'')
-   + ' onchange="SC.cfg.on=this.checked;drawSched()" style="width:20px;height:20px">'
-   + (c.on?'켜짐':'꺼짐')+'</label>';
-
-  h+='<label class="bl">도는 요일<span>추천: 평일만 · 기관은 주말에 공고를 안 올립니다</span></label>'
-   + '<label style="display:flex;align-items:center;gap:8px;font-size:14px">'
-   + '<input type="checkbox"'+(c.weekdayOnly?' checked':'')
-   + ' onchange="SC.cfg.weekdayOnly=this.checked;drawSched()" style="width:20px;height:20px">'
-   + '평일(월~금)만</label>';
-
-  h+='<label class="bl">도는 시간대<span>추천: '+rec.fromHour+'시 ~ '+rec.toHour+'시</span></label>'
-   + '<div style="display:flex;align-items:center;gap:8px">'
-   + hourSel('fromHour', c.fromHour) + '<span style="font-size:14px">시부터</span>'
-   + hourSel('toHour', c.toHour) + '<span style="font-size:14px">시까지</span></div>';
-
-  h+='<label class="bl">무거운 수집 시각'
-   + '<span>추천: '+rec.heavyHours.join('시, ')+'시 · 잡플러스와 나라일터를 이때만 긁습니다</span></label>'
-   + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">';
-  for(var i=c.fromHour;i<c.toHour;i++){
-    var on=(c.heavyHours||[]).indexOf(i)>=0;
-    h+='<button onclick="toggleHeavy('+i+')" style="padding:8px 12px;'
-      + (on?'background:#0d5c4f;color:#fff;border-color:#0d5c4f;font-weight:700':'')
-      + '">'+i+'시</button>';
-  }
-  h+='</div>';
-
-  h+='<div class="note" style="margin-top:14px"><b>이렇게 하면 하루에</b>'
-   + '깨어나는 횟수 '+cost.ticks+'번 · <b>API '+cost.total.toLocaleString()+'번</b>'
-   + ' (하루 한도 20,000번)<br>'
-   + '주 '+days+'일 기준입니다.'
-   + (cost.total>6000?'<br><b style="color:#b4432c">호출이 많습니다. 무거운 시각을 줄여보세요.</b>':'')
-   + '</div>';
-
-  h+='</div>'
-   + '<div class="brow2">'
-   + '<button class="add" onclick="useRecommend()">추천값으로</button>'
-   + '<button class="save" onclick="saveSched()">저장하기</button></div>';
-
-  document.getElementById('schedBox').innerHTML=h;
-}
-
-function hourSel(k,v){
-  var o='';
-  for(var i=0;i<=24;i++){
-    if(k==='fromHour'&&i>23) continue;
-    if(k==='toHour'&&i<1) continue;
-    o+='<option value="'+i+'"'+(i===v?' selected':'')+'>'+i+'</option>';
-  }
-  return '<select onchange="SC.cfg.'+k+'=Number(this.value);drawSched()"'
-    + ' style="width:80px">'+o+'</select>';
-}
-
-function toggleHeavy(h){
-  var a = SC.cfg.heavyHours || [];
-  var i = a.indexOf(h);
-  if(i>=0) a.splice(i,1); else a.push(h);
-  a.sort(function(x,y){return x-y;});
-  SC.cfg.heavyHours = a;
-  drawSched();
-}
-
-function useRecommend(){
-  SC.cfg = JSON.parse(JSON.stringify(SC.recommend));
-  drawSched();
-  msg('추천값을 넣었습니다. 저장을 눌러주세요');
-}
-
-function saveSched(){
-  msg('저장하고 있습니다');
-  google.script.run.withSuccessHandler(function(r){
-    msg(r.message || (r.ok?'저장했습니다':'실패'));
-    PRE.sched=null;
-    if(r.ok) openSched();
-  }).withFailureHandler(function(e){ msg(e.message); })
-    .adminSaveSchedule(KEY, SC.cfg);
-}
-
-/* ===== 공고 관리 ===== */
   .jsrch{display:flex;gap:6px;margin-bottom:10px}
   .jsrch input{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;
     padding:10px 12px;font-family:inherit;font-size:14px;background:#fff}
@@ -577,7 +294,7 @@ function saveSched(){
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=147"></script>
+<script src="/app.js?v=148"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -1169,6 +886,290 @@ function jobHide(id, isHidden){
     return orig.apply(null, arguments);
   };
 })();
+
+  /* 메뉴·문구·배너는 서버가 30분 캐시합니다.
+   고친 것을 바로 보고 싶을 때 누릅니다. */
+function doRefresh(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  msg('비우는 중입니다');
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    alert(r.message);
+  }).withFailureHandler(function(e){
+    alert('바로 반영하기를 쓸 수 없습니다.\n\n'
+      + ((e&&e.message)||'서버가 응답하지 않았습니다')
+      + '\n\n서버가 옛 판이면 이 기능이 없습니다.\n'
+      + 'Apps Script 에서 새 버전으로 배포했는지 확인해주세요.');
+  }).adminRefresh(KEY);
+}
+
+/* ===== 기업 계정 ===== */
+function openBiz(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className='tb'+(b.dataset.f==='biz'?' on':'');
+  });
+  shell('bizWrap');
+  if(PRE.biz) drawBiz(PRE.biz.rows||[]);
+  else document.getElementById('bizList').innerHTML='<div class="loading">불러오는 중</div>';
+  google.script.run.withSuccessHandler(function(r){
+    PRE.biz=r;
+    if(!r.ok){ msg(r.message); return; }
+    var wait=(r.rows||[]).filter(function(x){ return !x.verified; }).length;
+    var el=document.getElementById('c-biz');
+    if(el) el.textContent = wait || '';
+    drawBiz(r.rows||[]);
+  }).withFailureHandler(function(e){ boxFail('bizList','기업 계정',e); }).adminBizList(KEY);
+}
+
+function drawBiz(rows){
+  var box=document.getElementById('bizList');
+  if(!rows.length){ box.innerHTML='<div class="empty">아직 가입한 기업이 없습니다</div>'; return; }
+  box.innerHTML=rows.map(function(x){
+    return '<div class="cwq'+(x.verified?'':' rep')+'">'
+      + '<div class="ch">'+esc(x.at)+' · '+esc(x.jobs)
+      + (x.verified?' · 인증 완료':' · 인증 대기')+'</div>'
+      + '<div class="tt">'+esc(x.org)+'</div>'
+      + '<div class="mt">'
+      + (x.bizNo ? '사업자 '+esc(x.bizNo)
+                 : '<b style="color:#b4432c">사업자번호 없음</b>')
+      + ' · '+esc(x.name)+(x.title?' '+esc(x.title):'')
+      + '<br>'+esc(x.tel)+' · '+esc(x.email)+'</div>'
+      + (x.memo?'<div class="note"><b>메모</b>'+esc(x.memo)+'</div>':'')
+      + '<div class="acts">'
+      + '<button class="'+(x.verified?'ex':'re')+'" onclick="bizOk('+x.line+','+(x.verified?0:1)+')">'
+      + (x.verified?'인증 취소':'인증 열어주기')+'</button>'
+      + '<button onclick="bizMemo('+x.line+')">메모</button>'
+      + '<span class="idcopy">'+esc(x.id)+'</span></div></div>';
+  }).join('');
+}
+
+function bizOk(line, on){
+  var memo=null;
+  if(on){
+    memo=prompt('어떻게 확인하셨나요? (기록용)','전화로 재직 확인');
+    if(memo===null) return;
+  }
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    msg(r.verified?'열어줬습니다':'인증을 취소했습니다');
+    openBiz();
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminBizVerify(KEY, line, !!on, memo);
+}
+
+function bizMemo(line){
+  var v=prompt('메모');
+  if(v===null) return;
+  google.script.run.withSuccessHandler(function(r){
+    msg('저장했습니다'); openBiz();
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminBizVerify(KEY, line, undefined, v);
+}
+
+/* ===== 화면 문구 ===== */
+var TX = [];
+
+function openTexts(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className='tb'+(b.dataset.f==='texts'?' on':'');
+  });
+  shell('textsWrap');
+  if(PRE.texts){ TX=PRE.texts.rows||[]; drawTexts(); }
+  else document.getElementById('textsBox').innerHTML='<div class="loading">불러오는 중</div>';
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    PRE.texts=r; TX = r.rows || [];
+    drawTexts();
+  }).withFailureHandler(function(e){ boxFail('textsBox','화면 문구',e); }).adminGetTexts(KEY);
+}
+
+function drawTexts(){
+  var box=document.getElementById('textsBox');
+  if(!TX.length){ box.innerHTML='<div class="empty">문구가 없습니다</div>'; return; }
+
+  /* 페이지별로 묶습니다 */
+  var pages=[], byPage={};
+  TX.forEach(function(t,i){
+    if(!byPage[t.page]){ byPage[t.page]=[]; pages.push(t.page); }
+    byPage[t.page].push(i);
+  });
+
+  box.innerHTML = pages.map(function(pg){
+    var edited = byPage[pg].filter(function(i){ return TX[i].cur; }).length;
+    return '<div class="bcard">'
+      + '<div class="bhead"><b>' + esc(pg) + '</b>'
+      + (edited ? '<span class="pill stu">' + edited + '개 고침</span>' : '')
+      + '</div>'
+      + byPage[pg].map(function(i){
+          var t=TX[i];
+          return '<label class="bl">' + esc(t.label)
+            + '<span>' + esc(t.def.replace(/<br>/g,' ').replace(/<\/?b>/g,'')) + '</span></label>'
+            + '<textarea class="bi" rows="2"'
+            + (t.cur ? ' style="background:#fffdf0;border-color:#e8cfa4"' : '')
+            + ' oninput="TX[' + i + '].cur=this.value;txLen(' + i + ',this)"'
+            + ' placeholder="' + esc(t.def.replace(/"/g,'&quot;')) + '">'
+            + esc(t.cur) + '</textarea>'
+            + '<div class="txlen" id="txl' + i + '">'
+            + (t.cur ? t.cur.length + '자' : '') + '</div>';
+        }).join('')
+      + '</div>';
+  }).join('');
+}
+
+function txLen(i, el){
+  var d=document.getElementById('txl'+i);
+  if(!d) return;
+  var v=String(el.value||'');
+  var over = v.length>2000;
+  d.textContent = v ? v.length+'자'+(over?' · 너무 깁니다':'') : '';
+  d.className = 'txlen'+(over?' over':'');
+}
+
+function saveTexts(){
+  /* 보내기 전에 화면에서 먼저 봅니다. 서버까지 안 가고 바로 알려줍니다. */
+  var bad=[];
+  TX.forEach(function(t){
+    var v=String(t.cur||'').trim();
+    if(!v) return;
+    if(v.length>2000) bad.push(t.page+' · '+t.label+' — 너무 깁니다 ('+v.length+'자)');
+    var open=(v.match(/<(b|br|span|em|i)\b/gi)||[]).length;
+    var close=(v.match(/<\/(b|span|em|i)>/gi)||[]).length
+            + (v.match(/<br\s*\/?>/gi)||[]).length;
+    if(open!==close) bad.push(t.page+' · '+t.label+' — 태그 짝이 안 맞습니다');
+  });
+  if(bad.length){
+    alert('아래를 고쳐주세요\n\n'+bad.join('\n'));
+    return;
+  }
+
+  msg('저장하고 있습니다');
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){
+      if(r.bad && r.bad.length){
+        alert('저장하지 않았습니다\n\n'
+          + r.bad.map(function(b){ return b.page+' · '+b.label+' — '+b.why; }).join('\n'));
+      }else{
+        msg(r.message||'저장하지 못했습니다');
+      }
+      return;
+    }
+    msg(r.message||'저장했습니다');
+    openTexts();
+  }).withFailureHandler(function(e){ msg('저장하지 못했습니다. 잠시 후 다시 눌러주세요'); })
+    .adminSaveTexts(KEY, TX.map(function(t){ return { key:t.key, cur:t.cur }; }));
+}
+
+/* ===== 수집 주기 ===== */
+var SC = null;
+
+function openSched(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className='tb'+(b.dataset.f==='sched'?' on':'');
+  });
+  shell('schedWrap');
+  if(PRE.sched){ SC=PRE.sched; drawSched(); }
+  else document.getElementById('schedBox').innerHTML='<div class="loading">불러오는 중</div>';
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    PRE.sched=r; SC = r;
+    drawSched();
+  }).withFailureHandler(function(e){ boxFail('schedBox','수집 주기',e); }).adminGetSchedule(KEY);
+}
+
+function schedCost(c){
+  var ticks = Math.max(0,(c.toHour-c.fromHour))*2;
+  return { ticks:ticks, total: ticks*5 + (c.heavyHours||[]).length*103 };
+}
+
+function drawSched(){
+  var c = SC.cfg, rec = SC.recommend;
+  var cost = schedCost(c);
+  var days = c.weekdayOnly ? 5 : 7;
+  var h='<div class="bcard">';
+
+  h+='<label class="bl">수집 켜기<span>끄면 새 공고가 안 들어옵니다</span></label>'
+   + '<label style="display:flex;align-items:center;gap:8px;font-size:14px">'
+   + '<input type="checkbox"'+(c.on?' checked':'')
+   + ' onchange="SC.cfg.on=this.checked;drawSched()" style="width:20px;height:20px">'
+   + (c.on?'켜짐':'꺼짐')+'</label>';
+
+  h+='<label class="bl">도는 요일<span>추천: 평일만 · 기관은 주말에 공고를 안 올립니다</span></label>'
+   + '<label style="display:flex;align-items:center;gap:8px;font-size:14px">'
+   + '<input type="checkbox"'+(c.weekdayOnly?' checked':'')
+   + ' onchange="SC.cfg.weekdayOnly=this.checked;drawSched()" style="width:20px;height:20px">'
+   + '평일(월~금)만</label>';
+
+  h+='<label class="bl">도는 시간대<span>추천: '+rec.fromHour+'시 ~ '+rec.toHour+'시</span></label>'
+   + '<div style="display:flex;align-items:center;gap:8px">'
+   + hourSel('fromHour', c.fromHour) + '<span style="font-size:14px">시부터</span>'
+   + hourSel('toHour', c.toHour) + '<span style="font-size:14px">시까지</span></div>';
+
+  h+='<label class="bl">무거운 수집 시각'
+   + '<span>추천: '+rec.heavyHours.join('시, ')+'시 · 잡플러스와 나라일터를 이때만 긁습니다</span></label>'
+   + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">';
+  for(var i=c.fromHour;i<c.toHour;i++){
+    var on=(c.heavyHours||[]).indexOf(i)>=0;
+    h+='<button onclick="toggleHeavy('+i+')" style="padding:8px 12px;'
+      + (on?'background:#0d5c4f;color:#fff;border-color:#0d5c4f;font-weight:700':'')
+      + '">'+i+'시</button>';
+  }
+  h+='</div>';
+
+  h+='<div class="note" style="margin-top:14px"><b>이렇게 하면 하루에</b>'
+   + '깨어나는 횟수 '+cost.ticks+'번 · <b>API '+cost.total.toLocaleString()+'번</b>'
+   + ' (하루 한도 20,000번)<br>'
+   + '주 '+days+'일 기준입니다.'
+   + (cost.total>6000?'<br><b style="color:#b4432c">호출이 많습니다. 무거운 시각을 줄여보세요.</b>':'')
+   + '</div>';
+
+  h+='</div>'
+   + '<div class="brow2">'
+   + '<button class="add" onclick="useRecommend()">추천값으로</button>'
+   + '<button class="save" onclick="saveSched()">저장하기</button></div>';
+
+  document.getElementById('schedBox').innerHTML=h;
+}
+
+function hourSel(k,v){
+  var o='';
+  for(var i=0;i<=24;i++){
+    if(k==='fromHour'&&i>23) continue;
+    if(k==='toHour'&&i<1) continue;
+    o+='<option value="'+i+'"'+(i===v?' selected':'')+'>'+i+'</option>';
+  }
+  return '<select onchange="SC.cfg.'+k+'=Number(this.value);drawSched()"'
+    + ' style="width:80px">'+o+'</select>';
+}
+
+function toggleHeavy(h){
+  var a = SC.cfg.heavyHours || [];
+  var i = a.indexOf(h);
+  if(i>=0) a.splice(i,1); else a.push(h);
+  a.sort(function(x,y){return x-y;});
+  SC.cfg.heavyHours = a;
+  drawSched();
+}
+
+function useRecommend(){
+  SC.cfg = JSON.parse(JSON.stringify(SC.recommend));
+  drawSched();
+  msg('추천값을 넣었습니다. 저장을 눌러주세요');
+}
+
+function saveSched(){
+  msg('저장하고 있습니다');
+  google.script.run.withSuccessHandler(function(r){
+    msg(r.message || (r.ok?'저장했습니다':'실패'));
+    PRE.sched=null;
+    if(r.ok) openSched();
+  }).withFailureHandler(function(e){ msg(e.message); })
+    .adminSaveSchedule(KEY, SC.cfg);
+}
+
+/* ===== 공고 관리 ===== */
 </script>
 </body>
 </html>
