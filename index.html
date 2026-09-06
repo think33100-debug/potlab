@@ -3216,7 +3216,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v150 · 2026-09-06';
+var APP_VER = 'v151 · 2026-09-06';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -5170,6 +5170,37 @@ function wfCard(x){
 }
 
 /* 채용공고에서 부릅니다 — 복지관이 낸 공고면 그 시설 정보를 붙입니다 */
+/* 발달재활·아동심리 센터가 낸 공고면 그 기관 정보를 붙입니다.
+   바우처 기관 37,661곳에서 이름으로 찾습니다. */
+function loadJobVc(x){
+  var box=document.getElementById('jobHosp');
+  if(!box || !x) return false;
+  var org=String(x.org||'');
+  if(org.length<3) return false;
+  /* 병원·복지관은 앞에서 걸러졌으니 여기 오는 건 민간 센터입니다 */
+  if(!/센터|아동|발달|재활|심리|치료|교육원|연구소/.test(org)) return false;
+
+  google.script.run.withSuccessHandler(function(r){
+    if(!r || !r.ok) return;
+    box.innerHTML='<div class="card"><h2>이 기관은 이런 곳입니다</h2>'
+      + '<div class="wfrow" style="border:0;padding:0;margin:0">'
+      + '<div class="wh"><span class="wn">'+esc(r.name)+'</span></div>'
+      + '<div class="wa">'+esc(r.sgg||r.sido)
+      + (r.addr?'<br>'+esc(r.addr):'')
+      + (r.tel?'<br>'+esc(r.tel):'')+'</div>'
+      + ((r.svcs&&r.svcs.length)
+          ? '<div class="vtags" style="margin-top:10px">'
+            + r.svcs.map(function(v){ return '<i class="on">'+esc(v)+'</i>'; }).join('')
+            + (r.biz?'<i>'+esc(r.biz)+'</i>':'')
+            + '</div>'
+          : '')
+      + '</div>'
+      + '<p class="sub" style="margin:12px 0 0">보건복지부 사회서비스 바우처 제공기관 자료입니다. '
+      + '치료사가 몇 명인지는 나오지 않습니다.</p></div>';
+  }).withFailureHandler(function(){}).vcOne(cred(), org);
+  return true;
+}
+
 function loadJobWf(x){
   var box=document.getElementById('jobHosp');
   if(!box || !x) return false;
@@ -5587,8 +5618,10 @@ function openJob(id){
      예전에는 여기서 서버를 한 번 더 다녀오느라 눈에 띄게 느렸습니다. */
   var mb=document.getElementById('jobMore');
   if(mb) mb.innerHTML=jobMore(x);
-  /* 복지관 공고면 복지관 정보를, 아니면 병원 정보를 붙입니다 */
-  if(!loadJobWf(x)) loadJobHosp(x);
+  /* 기관 종류에 따라 붙일 정보가 다릅니다.
+     복지관 → 발달재활·바우처 센터 → 병원 순으로 찾습니다.
+     앞에서 찾으면 뒤는 안 봅니다. */
+  if(!loadJobWf(x) && !loadJobVc(x)) loadJobHosp(x);
   loadStarsOnce(x.id);
 }
 
