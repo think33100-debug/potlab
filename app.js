@@ -8,11 +8,61 @@
  *        Apps Script → 배포 → 웹 앱 → 액세스: 모든 사용자
  * ============================================================ */
 
+/* 긴 요청은 주소가 아니라 form 으로 보냅니다.
+   답은 iframe 안에 들어오므로 그 내용을 꺼내 씁니다. */
+function postCall(action, args, onOk, onErr) {
+  var id = 'pf_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+  var fr = document.createElement('iframe');
+  fr.name = id; fr.id = id; fr.style.display = 'none';
+  document.body.appendChild(fr);
+
+  var done = false;
+  var timer = setTimeout(function () {
+    if (done) return;
+    done = true; clean();
+    onErr(new Error('응답이 없습니다. 잠시 후 다시 시도해주세요.'));
+  }, 30000);
+
+  function clean() {
+    clearTimeout(timer);
+    setTimeout(function () {
+      if (fm && fm.parentNode) fm.parentNode.removeChild(fm);
+      if (fr && fr.parentNode) fr.parentNode.removeChild(fr);
+    }, 100);
+  }
+
+  fr.onload = function () {
+    if (done) return;
+    done = true;
+    var txt = '';
+    try { txt = fr.contentDocument.body.innerText || ''; } catch (e) {}
+    clean();
+    if (!txt) { onErr(new Error('답을 읽지 못했습니다.')); return; }
+    var r = null;
+    try { r = JSON.parse(txt); } catch (e) {
+      onErr(new Error('답이 올바르지 않습니다.')); return;
+    }
+    onOk(r);
+  };
+
+  var fm = document.createElement('form');
+  fm.method = 'POST'; fm.action = API_URL; fm.target = id;
+  fm.style.display = 'none';
+  [['action', 'call'], ['fn', action],
+   ['args', JSON.stringify(args || [])]].forEach(function (kv) {
+    var t = document.createElement('textarea');
+    t.name = kv[0]; t.value = kv[1];
+    fm.appendChild(t);
+  });
+  document.body.appendChild(fm);
+  fm.submit();
+}
+
 var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtSeIQpBmt0rGvhlWpTrLwS1x5C3l3_HxvZgjVQUxYwnR/exec';
 
 /* 이 파일이 최신인지 화면 아래에서 바로 확인하려고 둡니다.
    index.html 이 이 값을 읽어 버전과 함께 찍습니다. */
-var APP_JS_VER = 'a18 · 2026-09-06';
+var APP_JS_VER = 'a19 · 2026-09-06';
 
 (function () {
   'use strict';
@@ -59,8 +109,12 @@ var APP_JS_VER = 'a18 · 2026-09-06';
       + '&args=' + encodeURIComponent(JSON.stringify(args || []))
       + '&t=' + Date.now();
 
+    /* 주소가 길면 form 으로 보냅니다.
+       한글은 주소에서 한 글자가 9자로 부풀어, 메뉴 25개만 돼도 한도를 넘습니다.
+       예전에는 여기서 그냥 「너무 깁니다」 를 띄우고 끝냈습니다 —
+       서버까지 가지도 못하고, 무엇이 문제인지도 알 수 없었습니다. */
     if (url.length > MAX_URL) {
-      onErr(new Error('보내는 내용이 너무 깁니다. 글자 수를 줄여주세요.'));
+      postCall(action, args, onOk, onErr);
       return;
     }
 

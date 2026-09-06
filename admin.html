@@ -362,7 +362,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=151"></script>
+<script src="/app.js?v=152"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -910,13 +910,9 @@ function saveMenu(){
     }
     msg(r.message||'저장했습니다');
   }).withFailureHandler(function(e){
-    /* 여기 걸린다는 것은 서버까지 못 갔다는 뜻입니다.
-       대부분 서버가 옛 판이라 이 함수가 없는 경우입니다. */
     alert('저장하지 못했습니다.\n\n'
       + ((e&&e.message)||'서버가 응답하지 않았습니다')
-      + '\n\n· 서버(Wage.gs)를 새 버전으로 배포했는지'
-      + '\n· 화면 위 띠에 「모든 탭을 쓸 수 있습니다」 가 뜨는지'
-      + '\n확인해주세요.');
+      + '\n\n서버(Wage.gs)를 새 버전으로 배포했는지 확인해주세요.');
   }).adminSaveMenu(KEY, MN);
 }
 
