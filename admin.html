@@ -89,6 +89,20 @@
     padding:7px 9px;font-family:inherit;font-size:13.5px;font-weight:700;background:#fff}
   .catin input:focus{outline:none;border-color:var(--accent)}
   .catin span{font-size:11.5px;color:var(--dim)}
+  .catin .cmv{border:0;background:none;color:#8b979d;font-size:12px;
+    padding:4px 3px;cursor:pointer}
+  .catin .cmv:disabled{opacity:.25;cursor:default}
+  .catin .cdel{border:0;background:none;color:#c0392b;font-size:15px;
+    padding:2px 5px;cursor:pointer;opacity:.5}
+  .catin .cdel:active{opacity:1}
+  .cadd{border:1px dashed #cbd4d7;background:#fff;color:#5a6870;border-radius:9px;
+    padding:9px 14px;font-family:inherit;font-size:13px;cursor:pointer}
+  .cathead{font-size:12px;font-weight:800;color:var(--accent);
+    margin:16px 0 7px;padding-left:3px;letter-spacing:.02em}
+  .catsel{flex-shrink:0;width:74px;border:1px solid var(--line);border-radius:7px;
+    padding:7px 5px;font-family:inherit;font-size:11.5px;background:#fff;color:var(--accent);
+    font-weight:700}
+  .catsel:focus{outline:none;border-color:var(--accent)}
   .mrow .catlab{flex-shrink:0;width:56px;font-size:11px;font-weight:800;
     color:var(--accent);text-align:center}
   .mrow.bad{border-color:#e8352e;background:#fdf1ec}
@@ -348,7 +362,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=150"></script>
+<script src="/app.js?v=151"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -663,48 +677,148 @@ function openMenu(){
 var MENU_MAX = { name:30, desc:60, cat:12 };
 
 function drawMenu(){
-  /* 묶음 이름(취업·급여·커뮤니티·설정)을 위에서 한 번에 바꿉니다.
-     예전에는 줄마다 따로 적어야 해서, 「취업」 을 고치려면
-     여섯 줄을 다 고쳐야 했습니다. */
+  /* 묶음을 먼저 정하고, 그 아래에 항목을 늘어놓습니다.
+     예전에는 항목만 죽 늘어놔서 묶음을 만들거나 옮길 방법이 없었습니다. */
   var cats=[];
-  MN.forEach(function(m){ if(m.cat && cats.indexOf(m.cat)<0) cats.push(m.cat); });
+  MN.forEach(function(m){
+    var c=m.cat||'기타';
+    if(cats.indexOf(c)<0) cats.push(c);
+  });
+  MENU_CATS = cats;
 
-  var top='<div class="catbox"><b>묶음 이름</b>'
-    + '<p>앱 메뉴에서 항목을 나누는 큰 제목입니다. 여기서 바꾸면 그 묶음에 든 항목이 모두 함께 바뀝니다.</p>'
+  var top='<div class="catbox"><b>묶음</b>'
+    + '<p>앱 메뉴를 나누는 큰 제목입니다. 이름을 바꾸면 그 묶음 항목이 함께 바뀝니다. '
+    + '◀ ▶ 로 묶음 순서를, 항목의 묶음 칸으로 소속을 바꿉니다.</p>'
     + '<div class="catrow">'
     + cats.map(function(c,ci){
-        var n=MN.filter(function(m){ return m.cat===c; }).length;
-        return '<div class="catin"><input value="'+esc(c)+'" data-old="'+esc(c)+'"'
-          + ' maxlength="'+MENU_MAX.cat+'"'
-          + ' onchange="renameCat(this)"><span>'+n+'개</span></div>';
+        var n=MN.filter(function(m){ return (m.cat||'기타')===c; }).length;
+        return '<div class="catin">'
+          + '<button class="cmv" onclick="mvCat('+ci+',-1)"'+(ci===0?' disabled':'')+'>◀</button>'
+          + '<input value="'+esc(c)+'" data-old="'+esc(c)+'" maxlength="'+MENU_MAX.cat+'"'
+          + ' onchange="renameCat(this)">'
+          + '<span>'+n+'</span>'
+          + '<button class="cmv" onclick="mvCat('+ci+',1)"'+(ci===cats.length-1?' disabled':'')+'>▶</button>'
+          + '<button class="cdel" onclick="delCat('+ci+')" title="묶음 없애기">×</button>'
+          + '</div>';
       }).join('')
+    + '<button class="cadd" onclick="addCat()">+ 묶음 추가</button>'
     + '</div></div>';
 
-  var list = MN.map(function(m,i){
-    var over = {
-      name: (m.name||'').length > MENU_MAX.name,
-      desc: (m.desc||'').length > MENU_MAX.desc
-    };
-    return '<div class="mrow'+(m.off?' off':'')
-      + ((over.name||over.desc)?' bad':'')+'" id="mrow'+i+'">'
-      + '<div class="ord">'
-      + '<button onclick="mvMenu('+i+',-1)">▲</button>'
-      + '<button onclick="mvMenu('+i+',1)">▼</button></div>'
-      + '<span class="catlab">'+esc(m.cat||'')+'</span>'
-      + '<div class="mi2">'
-      + '<input'+(over.name?' class="over"':'')+' value="'+esc(m.name)+'"'
-      + ' oninput="setMenu('+i+',\'name\',this.value);mLen('+i+')">'
-      + '<div class="mlen" id="mn'+i+'">'+mNote(m.name,MENU_MAX.name)+'</div>'
-      + '<input class="d'+(over.desc?' over':'')+'" value="'+esc(m.desc)+'"'
-      + ' oninput="setMenu('+i+',\'desc\',this.value);mLen('+i+')">'
-      + '<div class="mlen" id="md'+i+'">'+mNote(m.desc,MENU_MAX.desc)+'</div>'
-      + '</div>'
-      + '<label><input type="checkbox"'+(m.off?' checked':'')
-      + ' onchange="setMenu('+i+',\'off\',this.checked);drawMenu()">숨김</label>'
-      + '</div>';
-  }).join('');
+  /* 묶음 차례대로 항목을 늘어놓습니다 */
+  var list='';
+  cats.forEach(function(c){
+    list += '<div class="cathead">'+esc(c)+'</div>';
+    MN.forEach(function(m,i){
+      if((m.cat||'기타')!==c) return;
+      var on=(m.name||'').length>MENU_MAX.name;
+      var od=(m.desc||'').length>MENU_MAX.desc;
+      list += '<div class="mrow'+(m.off?' off':'')+((on||od)?' bad':'')+'" id="mrow'+i+'">'
+        + '<div class="ord">'
+        + '<button onclick="mvMenu('+i+',-1)">▲</button>'
+        + '<button onclick="mvMenu('+i+',1)">▼</button></div>'
+        + '<select class="catsel" onchange="setMenu('+i+',\'cat\',this.value);drawMenu()">'
+        + cats.map(function(x){
+            return '<option'+(x===c?' selected':'')+'>'+esc(x)+'</option>';
+          }).join('')
+        + '</select>'
+        + '<div class="mi2">'
+        + '<input'+(on?' class="over"':'')+' value="'+esc(m.name)+'"'
+        + ' oninput="setMenu('+i+',\'name\',this.value);mLen('+i+')">'
+        + '<div class="mlen" id="mn'+i+'">'+mNote(m.name,MENU_MAX.name)+'</div>'
+        + '<input class="d'+(od?' over':'')+'" value="'+esc(m.desc)+'"'
+        + ' oninput="setMenu('+i+',\'desc\',this.value);mLen('+i+')">'
+        + '<div class="mlen" id="md'+i+'">'+mNote(m.desc,MENU_MAX.desc)+'</div>'
+        + '</div>'
+        + '<label><input type="checkbox"'+(m.off?' checked':'')
+        + ' onchange="setMenu('+i+',\'off\',this.checked);drawMenu()">숨김</label>'
+        + '</div>';
+    });
+  });
 
   document.getElementById('menuList').innerHTML = top + list;
+}
+
+var MENU_CATS=[];
+
+/* 묶음 순서 — 그 묶음에 든 항목을 통째로 옮깁니다 */
+function mvCat(ci, d){
+  var a=MENU_CATS.slice();
+  var j=ci+d;
+  if(j<0||j>=a.length) return;
+  var t=a[ci]; a[ci]=a[j]; a[j]=t;
+  var out=[];
+  a.forEach(function(c){
+    MN.forEach(function(m){ if((m.cat||'기타')===c) out.push(m); });
+  });
+  MN=out;
+  drawMenu();
+}
+
+function addCat(){
+  var v=prompt('새 묶음 이름','새 묶음');
+  if(v===null) return;
+  v=v.trim();
+  if(!v){ msg('이름을 적어주세요'); return; }
+  if(v.length>MENU_MAX.cat){ msg(MENU_MAX.cat+'자까지 됩니다'); return; }
+  if(MENU_CATS.indexOf(v)>=0){ msg('이미 있는 묶음입니다'); return; }
+  MENU_CATS.push(v);
+  /* 빈 묶음은 다시 그리면 사라지므로, 첫 항목을 옮겨 담습니다 */
+  msg('「'+v+'」 를 만들었습니다. 항목의 묶음 칸에서 골라주세요');
+  var sel=MN[0];
+  if(sel && !confirm('빈 묶음은 저장되지 않습니다.\n'
+      + '첫 항목 「'+sel.name+'」 을(를) 「'+v+'」 로 옮길까요?')) return;
+  if(sel){ sel.cat=v; drawMenu(); }
+}
+
+function delCat(ci){
+  var c=MENU_CATS[ci];
+  var n=MN.filter(function(m){ return (m.cat||'기타')===c; });
+  if(!n.length) return;
+  var other=MENU_CATS.filter(function(x){ return x!==c; });
+  if(!other.length){ msg('마지막 묶음은 없앨 수 없습니다'); return; }
+  var to=prompt('「'+c+'」 의 '+n.length+'개 항목을 어느 묶음으로 옮길까요?\n\n'
+    + other.join(' · '), other[0]);
+  if(to===null) return;
+  to=to.trim();
+  if(other.indexOf(to)<0){ msg('그런 묶음이 없습니다'); return; }
+  n.forEach(function(m){ m.cat=to; });
+  msg(c+' → '+to+' · '+n.length+'개 옮겼습니다');
+  drawMenu();
+}
+
+function mNote(v,max){
+  v=String(v||'');
+  if(!v) return '';
+  return v.length>max
+    ? '<b>'+v.length+'자 · '+max+'자까지 됩니다</b>'
+    : v.length+'/'+max+'자';
+}
+
+function mLen(i){
+  var m=MN[i];
+  var a=document.getElementById('mn'+i), b=document.getElementById('md'+i);
+  if(a) a.innerHTML=mNote(m.name,MENU_MAX.name);
+  if(b) b.innerHTML=mNote(m.desc,MENU_MAX.desc);
+  var row=document.getElementById('mrow'+i);
+  if(!row) return;
+  var on=(m.name||'').length>MENU_MAX.name;
+  var od=(m.desc||'').length>MENU_MAX.desc;
+  row.className='mrow'+(m.off?' off':'')+((on||od)?' bad':'');
+  var ins=row.querySelectorAll('.mi2 input');
+  if(ins[0]) ins[0].className = on?'over':'';
+  if(ins[1]) ins[1].className = 'd'+(od?' over':'');
+}
+
+function renameCat(el){
+  var was=el.getAttribute('data-old');
+  var now=el.value.trim();
+  if(!now){ el.value=was; msg('묶음 이름은 비울 수 없습니다'); return; }
+  if(now===was) return;
+  if(now.length>MENU_MAX.cat){ el.value=was; msg(MENU_MAX.cat+'자까지 됩니다'); return; }
+  var n=0;
+  MN.forEach(function(m){ if((m.cat||'기타')===was){ m.cat=now; n++; } });
+  msg(was+' → '+now+' · '+n+'개 바꿨습니다');
+  drawMenu();
 }
 
 function mNote(v,max){
@@ -744,9 +858,20 @@ function renameCat(el){
 
 function setMenu(i,k,v){ MN[i][k]=v; }
 
+/* ▲▼ 는 같은 묶음 안에서만 움직입니다.
+   묶음을 넘나들면 화면이 갑자기 튀어 어디로 갔는지 알 수 없습니다.
+   묶음을 바꾸려면 옆의 묶음 칸에서 고르시면 됩니다. */
 function mvMenu(i,d){
-  var j=i+d;
-  if(j<0||j>=MN.length) return;
+  var c=(MN[i].cat||'기타');
+  var same=[];
+  MN.forEach(function(m,k){ if((m.cat||'기타')===c) same.push(k); });
+  var at=same.indexOf(i);
+  var to=at+d;
+  if(to<0||to>=same.length){
+    msg(d<0?'이 묶음에서 맨 위입니다':'이 묶음에서 맨 아래입니다');
+    return;
+  }
+  var j=same[to];
   var t=MN[i]; MN[i]=MN[j]; MN[j]=t;
   drawMenu();
 }
@@ -784,8 +909,15 @@ function saveMenu(){
       return;
     }
     msg(r.message||'저장했습니다');
-  }).withFailureHandler(function(e){ msg('저장하지 못했습니다. 잠시 후 다시 눌러주세요'); })
-    .adminSaveMenu(KEY, MN);
+  }).withFailureHandler(function(e){
+    /* 여기 걸린다는 것은 서버까지 못 갔다는 뜻입니다.
+       대부분 서버가 옛 판이라 이 함수가 없는 경우입니다. */
+    alert('저장하지 못했습니다.\n\n'
+      + ((e&&e.message)||'서버가 응답하지 않았습니다')
+      + '\n\n· 서버(Wage.gs)를 새 버전으로 배포했는지'
+      + '\n· 화면 위 띠에 「모든 탭을 쓸 수 있습니다」 가 뜨는지'
+      + '\n확인해주세요.');
+  }).adminSaveMenu(KEY, MN);
 }
 
 /* ===== 이상 조회 ===== */
