@@ -1189,6 +1189,11 @@
   .bzstat.wait{background:#fdf3e6;color:#8a5c14}
   .bzstat.done{background:var(--accent-soft);color:var(--accent)}
 
+  /* 정원보다 사람이 적은 곳 — 자리가 비어 있다는 신호 */
+  .wfgap{background:var(--accent-soft);border-radius:10px;padding:11px 13px;
+    margin-top:8px;font-size:12.5px;color:#2e5b4e;line-height:1.7;word-break:keep-all}
+  .wfgap b{display:block;font-size:13.5px;font-weight:800;color:var(--accent);
+    margin-bottom:2px}
   /* 봉사활동 */
   .volrow{background:#fff;border:1px solid var(--line);border-radius:13px;
     padding:15px;margin-bottom:8px}
@@ -3211,7 +3216,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v145 · 2026-09-06';
+var APP_VER = 'v148 · 2026-09-06';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -5108,6 +5113,9 @@ function loadWf(){
           ? ' · 발달재활 · 아동심리 등 바우처 기관'
           : (r.sido?'':' · 종사자 '+(r.people||0).toLocaleString('ko-KR')+'명')+' · 종사자 많은 순')
       + '</p>'
+      + (WF.tab==='vc'?''
+          : '<div class="hintbox" style="margin-top:0">보건복지부 장애인복지관 현황 '
+            + '<b>2024년 4월</b> 기준입니다. 지금과 다를 수 있습니다.</div>')
       + r.rows.map(WF.tab==='vc'?vcCard:wfCard).join('');
   };
   var fail=function(){
@@ -5138,6 +5146,8 @@ function vcCard(x){
 }
 
 function wfCard(x){
+  /* 설명 문구를 없앴습니다. 목록을 내리면 같은 말이 계속 반복돼
+     아무도 안 읽었습니다. 숫자와 순위만 남깁니다. */
   return '<div class="wfrow">'
     + '<div class="wh"><span class="wn">'+esc(x.name)+'</span>'
     + (x.rank?'<span class="wr">전국 '+x.rank+'위</span>':'')+'</div>'
@@ -5146,9 +5156,13 @@ function wfCard(x){
     + (x.tel?'<br>'+esc(x.tel):'')+'</div>'
     + (x.staff
         ? '<div class="wfbar"><span class="bn">'+x.staff+'<em>명</em></span>'
-          + '<span class="bt"><b>'+esc(x.size)+'</b> · '+esc(x.sizeNote)
-          + (x.sidoRank?'<br>'+esc(x.sido)+' '+x.sidoRank+'위 / '+x.sidoTotal+'곳':'')
+          + '<span class="bt">'
+          + (x.sidoRank?'<b>'+esc(x.sido)+' '+x.sidoRank+'위</b> / '+x.sidoTotal+'곳':'')
+          + (x.quota?'<br>정원 '+x.quota+'명':'')
           + '</span></div>'
+        : '')
+    + (x.gapKind==='less'
+        ? '<div class="wfgap"><b>'+esc(x.gapLine)+'</b>'+esc(x.gapNote)+'</div>'
         : '')
     + '</div>';
 }
@@ -5170,13 +5184,17 @@ function loadJobWf(x){
       + (r.addr?'<br>'+esc(r.addr):'')+'</div>'
       + (r.staff
           ? '<div class="wfbar"><span class="bn">'+r.staff+'<em>명</em></span>'
-            + '<span class="bt"><b>'+esc(r.size)+'</b> · '+esc(r.sizeNote)
-            + (r.sidoRank?'<br>'+esc(r.sido)+' '+r.sidoRank+'위 / '+r.sidoTotal+'곳':'')
+            + '<span class="bt">'
+            + (r.sidoRank?'<b>'+esc(r.sido)+' '+r.sidoRank+'위</b> / '+r.sidoTotal+'곳':'')
+            + (r.quota?'<br>정원 '+r.quota+'명':'')
             + '</span></div>'
           : '')
+      + (r.gapKind==='less'
+          ? '<div class="wfgap"><b>'+esc(r.gapLine)+'</b>'+esc(r.gapNote)+'</div>'
+          : '')
       + '</div>'
-      + '<p class="sub" style="margin:12px 0 0">보건복지부 장애인복지관 현황 기준입니다. '
-      + '치료사가 몇 명인지는 따로 나오지 않습니다.</p></div>';
+      + '<p class="sub" style="margin:12px 0 0">보건복지부 장애인복지관 현황 '
+      + '<b>2024년 4월</b> 기준입니다. 치료사가 몇 명인지는 따로 나오지 않습니다.</p></div>';
   }).withFailureHandler(function(){}).wfOne(cred(), org);
   return true;
 }
