@@ -76,6 +76,25 @@
   .verbar.ok{background:var(--accent-soft);color:var(--accent)}
   .verbar.bad{background:var(--warn-soft);color:var(--warn);border:1px solid #f0cfc4}
   .verbar.gone{display:none}
+  /* 묶음 이름 — 여기서 바꾸면 그 묶음 항목이 다 바뀝니다 */
+  .catbox{background:#fff;border:1px solid var(--line);border-radius:13px;
+    padding:15px;margin-bottom:12px}
+  .catbox b{font-size:14px;font-weight:800}
+  .catbox p{font-size:12.5px;color:var(--dim);line-height:1.7;margin:5px 0 11px;
+    word-break:keep-all}
+  .catrow{display:flex;flex-wrap:wrap;gap:8px}
+  .catin{display:flex;align-items:center;gap:6px;background:var(--bg);
+    border-radius:9px;padding:6px 10px 6px 6px}
+  .catin input{width:96px;border:1px solid var(--line);border-radius:7px;
+    padding:7px 9px;font-family:inherit;font-size:13.5px;font-weight:700;background:#fff}
+  .catin input:focus{outline:none;border-color:var(--accent)}
+  .catin span{font-size:11.5px;color:var(--dim)}
+  .mrow .catlab{flex-shrink:0;width:56px;font-size:11px;font-weight:800;
+    color:var(--accent);text-align:center}
+  .mrow.bad{border-color:#e8352e;background:#fdf1ec}
+  .mi2 input.over{border-color:#e8352e;background:#fff5f2}
+  .mlen{font-size:10.5px;color:#9aa6ab;text-align:right;margin:-1px 0 4px}
+  .mlen b{color:#b4432c;font-weight:700}
   .tgrp{font-size:11.5px;font-weight:800;color:var(--dim);letter-spacing:.03em;
     margin:14px 0 6px;padding-left:2px}
   .tgrp:first-of-type{margin-top:0}
@@ -329,7 +348,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=149"></script>
+<script src="/app.js?v=150"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -641,22 +660,86 @@ function openMenu(){
   }).withFailureHandler(function(e){ boxFail('menuList','메뉴 순서',e); }).adminGetMenu(KEY);
 }
 
+var MENU_MAX = { name:30, desc:60, cat:12 };
+
 function drawMenu(){
-  document.getElementById('menuList').innerHTML = MN.map(function(m,i){
-    return '<div class="mrow'+(m.off?' off':'')+'">'
+  /* 묶음 이름(취업·급여·커뮤니티·설정)을 위에서 한 번에 바꿉니다.
+     예전에는 줄마다 따로 적어야 해서, 「취업」 을 고치려면
+     여섯 줄을 다 고쳐야 했습니다. */
+  var cats=[];
+  MN.forEach(function(m){ if(m.cat && cats.indexOf(m.cat)<0) cats.push(m.cat); });
+
+  var top='<div class="catbox"><b>묶음 이름</b>'
+    + '<p>앱 메뉴에서 항목을 나누는 큰 제목입니다. 여기서 바꾸면 그 묶음에 든 항목이 모두 함께 바뀝니다.</p>'
+    + '<div class="catrow">'
+    + cats.map(function(c,ci){
+        var n=MN.filter(function(m){ return m.cat===c; }).length;
+        return '<div class="catin"><input value="'+esc(c)+'" data-old="'+esc(c)+'"'
+          + ' maxlength="'+MENU_MAX.cat+'"'
+          + ' onchange="renameCat(this)"><span>'+n+'개</span></div>';
+      }).join('')
+    + '</div></div>';
+
+  var list = MN.map(function(m,i){
+    var over = {
+      name: (m.name||'').length > MENU_MAX.name,
+      desc: (m.desc||'').length > MENU_MAX.desc
+    };
+    return '<div class="mrow'+(m.off?' off':'')
+      + ((over.name||over.desc)?' bad':'')+'" id="mrow'+i+'">'
       + '<div class="ord">'
       + '<button onclick="mvMenu('+i+',-1)">▲</button>'
       + '<button onclick="mvMenu('+i+',1)">▼</button></div>'
-      + '<input class="cat" value="'+esc(m.cat)+'" style="width:58px"'
-      + ' oninput="setMenu('+i+',\'cat\',this.value)">'
+      + '<span class="catlab">'+esc(m.cat||'')+'</span>'
       + '<div class="mi2">'
-      + '<input value="'+esc(m.name)+'" oninput="setMenu('+i+',\'name\',this.value)">'
-      + '<input class="d" value="'+esc(m.desc)+'" oninput="setMenu('+i+',\'desc\',this.value)">'
+      + '<input'+(over.name?' class="over"':'')+' value="'+esc(m.name)+'"'
+      + ' oninput="setMenu('+i+',\'name\',this.value);mLen('+i+')">'
+      + '<div class="mlen" id="mn'+i+'">'+mNote(m.name,MENU_MAX.name)+'</div>'
+      + '<input class="d'+(over.desc?' over':'')+'" value="'+esc(m.desc)+'"'
+      + ' oninput="setMenu('+i+',\'desc\',this.value);mLen('+i+')">'
+      + '<div class="mlen" id="md'+i+'">'+mNote(m.desc,MENU_MAX.desc)+'</div>'
       + '</div>'
       + '<label><input type="checkbox"'+(m.off?' checked':'')
       + ' onchange="setMenu('+i+',\'off\',this.checked);drawMenu()">숨김</label>'
       + '</div>';
   }).join('');
+
+  document.getElementById('menuList').innerHTML = top + list;
+}
+
+function mNote(v,max){
+  v=String(v||'');
+  if(!v) return '';
+  return v.length>max
+    ? '<b>'+v.length+'자 · '+max+'자까지 됩니다</b>'
+    : v.length+'/'+max+'자';
+}
+
+function mLen(i){
+  var m=MN[i];
+  var a=document.getElementById('mn'+i), b=document.getElementById('md'+i);
+  if(a) a.innerHTML=mNote(m.name,MENU_MAX.name);
+  if(b) b.innerHTML=mNote(m.desc,MENU_MAX.desc);
+  var row=document.getElementById('mrow'+i);
+  if(!row) return;
+  var on=(m.name||'').length>MENU_MAX.name;
+  var od=(m.desc||'').length>MENU_MAX.desc;
+  row.className='mrow'+(m.off?' off':'')+((on||od)?' bad':'');
+  var ins=row.querySelectorAll('.mi2 input');
+  if(ins[0]) ins[0].className = on?'over':'';
+  if(ins[1]) ins[1].className = 'd'+(od?' over':'');
+}
+
+/* 묶음 이름을 바꾸면 그 묶음에 든 항목을 다 바꿉니다 */
+function renameCat(el){
+  var was=el.getAttribute('data-old');
+  var now=el.value.trim();
+  if(!now){ el.value=was; msg('묶음 이름은 비울 수 없습니다'); return; }
+  if(now===was) return;
+  var n=0;
+  MN.forEach(function(m){ if(m.cat===was){ m.cat=now; n++; } });
+  msg(was+' → '+now+' · '+n+'개 바꿨습니다');
+  drawMenu();
 }
 
 function setMenu(i,k,v){ MN[i][k]=v; }
@@ -669,11 +752,40 @@ function mvMenu(i,d){
 }
 
 function saveMenu(){
+  /* 보내기 전에 화면에서 먼저 봅니다. 어느 줄인지 바로 알려줍니다. */
+  var bad=[];
+  MN.forEach(function(m,i){
+    if((m.name||'').length>MENU_MAX.name)
+      bad.push((i+1)+'번째 「'+(m.name||'').slice(0,12)+'」 이름 '+m.name.length+'자 ('+MENU_MAX.name+'자까지)');
+    if((m.desc||'').length>MENU_MAX.desc)
+      bad.push((i+1)+'번째 「'+(m.name||'').slice(0,12)+'」 설명 '+m.desc.length+'자 ('+MENU_MAX.desc+'자까지)');
+    if((m.cat||'').length>MENU_MAX.cat)
+      bad.push('묶음 이름 「'+m.cat+'」 '+m.cat.length+'자 ('+MENU_MAX.cat+'자까지)');
+  });
+  if(bad.length){
+    alert('아래를 줄여주세요\n\n'+bad.join('\n'));
+    var first=MN.findIndex(function(m){
+      return (m.name||'').length>MENU_MAX.name || (m.desc||'').length>MENU_MAX.desc; });
+    if(first>=0){
+      var el=document.getElementById('mrow'+first);
+      if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+    return;
+  }
+
   msg('저장하고 있습니다');
   google.script.run.withSuccessHandler(function(r){
     PRE.menu=null;
+    if(!r.ok){
+      if(r.bad && r.bad.length){
+        alert('저장하지 않았습니다\n\n'
+          + r.bad.map(function(b){ return '「'+b.name+'」 '+b.why; }).join('\n'));
+      }else msg(r.message||'저장하지 못했습니다');
+      return;
+    }
     msg(r.message||'저장했습니다');
-  }).withFailureHandler(function(e){ msg(e.message); }).adminSaveMenu(KEY, MN);
+  }).withFailureHandler(function(e){ msg('저장하지 못했습니다. 잠시 후 다시 눌러주세요'); })
+    .adminSaveMenu(KEY, MN);
 }
 
 /* ===== 이상 조회 ===== */
