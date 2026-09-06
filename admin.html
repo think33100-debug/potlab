@@ -33,7 +33,42 @@
     transition:background-color .2s,color .2s,border-color .2s,transform .22s}
   .tb:active{transform:scale(.95)}
   .tb.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
-  .txlen{font-size:11px;color:#9aa6ab;text-align:right;margin:2px 0 4px}
+  /* ===== 화면 문구 ===== */
+  .pgbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .pgchip{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;
+    border:1px solid var(--line);background:#fff;border-radius:20px;
+    font-family:inherit;font-size:13px;color:var(--dim);cursor:pointer;
+    -webkit-tap-highlight-color:transparent;transition:all .18s}
+  .pgchip span{font-size:11px;opacity:.55}
+  .pgchip b{font-size:10.5px;font-weight:800;background:var(--accent);color:#fff;
+    border-radius:20px;padding:1px 6px}
+  .pgchip.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+  .pgchip.on span{opacity:.7}
+  .txfind input{width:100%;box-sizing:border-box;border:1px solid var(--line);
+    border-radius:10px;padding:11px 13px;font-family:inherit;font-size:14px;background:#fff}
+  .txfind input:focus{outline:none;border-color:var(--accent)}
+  .pgnote{font-size:12px;color:var(--dim);margin:12px 0 8px;padding-left:2px}
+
+  .txc{background:#fff;border:1px solid var(--line);border-radius:13px;
+    padding:14px;margin-bottom:9px}
+  .txc.edited{border-color:#c9e2da;background:#fbfefd}
+  .txh{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+  .txh b{font-size:13px;font-weight:700;color:#3f4c52}
+  .txb{font-size:10.5px;font-weight:800;background:var(--accent-soft);color:var(--accent);
+    border-radius:20px;padding:2px 8px}
+  /* 지금 화면에 어떻게 나오는지 — 앱과 같은 모양으로 */
+  .txprev{background:var(--bg);border-radius:9px;padding:12px 13px;
+    font-size:14px;line-height:1.7;color:var(--ink);word-break:keep-all;
+    border-left:3px solid var(--accent)}
+  .txin{width:100%;box-sizing:border-box;border:1px solid #dde5e3;border-radius:9px;
+    padding:10px 11px;margin-top:8px;font-family:inherit;font-size:13.5px;
+    line-height:1.6;background:#fbfcfc;resize:vertical}
+  .txin:focus{outline:none;border-color:var(--accent);background:#fff}
+  .txfoot{display:flex;align-items:center;gap:5px;margin-top:7px}
+  .txt2{padding:5px 10px;border:1px solid var(--line);background:#fff;border-radius:7px;
+    font-family:inherit;font-size:11.5px;color:var(--dim);cursor:pointer}
+  .txt2:active{background:var(--accent-soft);color:var(--accent)}
+  .txlen{margin-left:auto;font-size:11px;color:#9aa6ab}
   .txlen.over{color:#b4432c;font-weight:700}
   .verbar{border-radius:11px;padding:12px 14px;margin-bottom:14px;
     font-size:12.5px;line-height:1.75;word-break:keep-all}
@@ -294,7 +329,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=148"></script>
+<script src="/app.js?v=149"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -989,33 +1024,102 @@ function drawTexts(){
   var box=document.getElementById('textsBox');
   if(!TX.length){ box.innerHTML='<div class="empty">문구가 없습니다</div>'; return; }
 
-  /* 페이지별로 묶습니다 */
   var pages=[], byPage={};
   TX.forEach(function(t,i){
     if(!byPage[t.page]){ byPage[t.page]=[]; pages.push(t.page); }
     byPage[t.page].push(i);
   });
 
-  box.innerHTML = pages.map(function(pg){
-    var edited = byPage[pg].filter(function(i){ return TX[i].cur; }).length;
-    return '<div class="bcard">'
-      + '<div class="bhead"><b>' + esc(pg) + '</b>'
-      + (edited ? '<span class="pill stu">' + edited + '개 고침</span>' : '')
-      + '</div>'
-      + byPage[pg].map(function(i){
-          var t=TX[i];
-          return '<label class="bl">' + esc(t.label)
-            + '<span>' + esc(t.def.replace(/<br>/g,' ').replace(/<\/?b>/g,'')) + '</span></label>'
-            + '<textarea class="bi" rows="2"'
-            + (t.cur ? ' style="background:#fffdf0;border-color:#e8cfa4"' : '')
-            + ' oninput="TX[' + i + '].cur=this.value;txLen(' + i + ',this)"'
-            + ' placeholder="' + esc(t.def.replace(/"/g,'&quot;')) + '">'
-            + esc(t.cur) + '</textarea>'
-            + '<div class="txlen" id="txl' + i + '">'
-            + (t.cur ? t.cur.length + '자' : '') + '</div>';
-        }).join('')
-      + '</div>';
+  /* 어느 페이지에 몇 개가 있고 몇 개를 고쳤는지 위에 먼저 보여줍니다.
+     153개를 한 줄로 늘어놓으면 찾을 수가 없습니다. */
+  var chips = pages.map(function(pg){
+    var n=byPage[pg].length;
+    var e=byPage[pg].filter(function(i){ return TX[i].cur; }).length;
+    return '<button class="pgchip'+(TX_PG===pg?' on':'')+'" onclick="pgPick(\''+esc(pg)+'\')">'
+      + esc(pg)+'<span>'+n+'</span>'+(e?'<b>'+e+'</b>':'')+'</button>';
   }).join('');
+
+  var pg = TX_PG || pages[0];
+  if(!byPage[pg]) pg = pages[0];
+  TX_PG = pg;
+
+  var find=(TX_Q||'').replace(/\s/g,'');
+  var list=byPage[pg].filter(function(i){
+    if(!find) return true;
+    var t=TX[i];
+    return (t.label+t.def+(t.cur||'')).replace(/\s/g,'').indexOf(find)>-1;
+  });
+
+  box.innerHTML =
+      '<div class="pgbar">'+chips+'</div>'
+    + '<div class="txfind"><input placeholder="문구 안에서 찾기" value="'+esc(TX_Q||'')+'"'
+    + ' oninput="TX_Q=this.value;drawTexts()"></div>'
+    + '<div class="pgnote">' + esc(pg) + ' · ' + list.length + '개'
+    + (find?' (찾은 것)':'') + '</div>'
+    + (list.length ? list.map(txCard).join('')
+        : '<div class="empty">찾는 문구가 없습니다</div>');
+}
+
+/* 문구 한 칸 — 지금 화면에 어떻게 나오는지 미리 보여줍니다 */
+function txCard(i){
+  var t=TX[i];
+  var now = t.cur || t.def;
+  return '<div class="txc'+(t.cur?' edited':'')+'">'
+    + '<div class="txh"><b>'+esc(t.label)+'</b>'
+    + (t.cur?'<span class="txb">고침</span>':'')
+    + '</div>'
+    + '<div class="txprev">'+now+'</div>'
+    + '<textarea class="txin" rows="2" placeholder="'+esc(t.def.replace(/"/g,'&quot;'))+'"'
+    + ' oninput="TX['+i+'].cur=this.value;txLen('+i+',this);txPrev('+i+',this)">'
+    + esc(t.cur)+'</textarea>'
+    + '<div class="txfoot">'
+    + '<button class="txt2" onclick="txIns('+i+',\'<br>\')">줄바꿈</button>'
+    + '<button class="txt2" onclick="txWrap('+i+',\'b\')">굵게</button>'
+    + '<button class="txt2" onclick="txReset('+i+')">원래대로</button>'
+    + '<span class="txlen" id="txl'+i+'">'+(t.cur?t.cur.length+'자':'')+'</span>'
+    + '</div></div>';
+}
+
+var TX_PG='', TX_Q='';
+function pgPick(pg){ TX_PG=pg; TX_Q=''; drawTexts(); window.scrollTo(0,0); }
+
+/* 적는 대로 위쪽 미리보기가 바뀝니다 */
+function txPrev(i, el){
+  var c=el.closest('.txc');
+  if(!c) return;
+  var pv=c.querySelector('.txprev');
+  if(pv) pv.innerHTML = el.value || TX[i].def;
+  c.className='txc'+(el.value?' edited':'');
+}
+
+function txIns(i, tag){
+  var el=document.querySelectorAll('.txin')[docIdx(i)];
+  if(!el) return;
+  el.value=(el.value||TX[i].def)+tag;
+  TX[i].cur=el.value; txLen(i,el); txPrev(i,el); el.focus();
+}
+function txWrap(i, tag){
+  var el=document.querySelectorAll('.txin')[docIdx(i)];
+  if(!el) return;
+  var v=el.value||TX[i].def;
+  var a=el.selectionStart, b=el.selectionEnd;
+  if(a===b){ el.value=v+'<'+tag+'>굵게</'+tag+'>'; }
+  else { el.value=v.slice(0,a)+'<'+tag+'>'+v.slice(a,b)+'</'+tag+'>'+v.slice(b); }
+  TX[i].cur=el.value; txLen(i,el); txPrev(i,el); el.focus();
+}
+function txReset(i){
+  var el=document.querySelectorAll('.txin')[docIdx(i)];
+  TX[i].cur='';
+  if(el){ el.value=''; txLen(i,el); txPrev(i,el); }
+  drawTexts();
+}
+/* 화면에 그려진 순서에서 이 문구가 몇 번째인지 */
+function docIdx(i){
+  var all=[].slice.call(document.querySelectorAll('.txin'));
+  for(var k=0;k<all.length;k++){
+    if(all[k].getAttribute('oninput').indexOf('TX['+i+']')>-1) return k;
+  }
+  return -1;
 }
 
 function txLen(i, el){
