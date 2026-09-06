@@ -35,6 +35,12 @@
   .tb.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
   .txlen{font-size:11px;color:#9aa6ab;text-align:right;margin:2px 0 4px}
   .txlen.over{color:#b4432c;font-weight:700}
+  .verbar{border-radius:11px;padding:12px 14px;margin-bottom:14px;
+    font-size:12.5px;line-height:1.75;word-break:keep-all}
+  .verbar b{display:block;font-size:13.5px;margin-bottom:4px}
+  .verbar.ok{background:var(--accent-soft);color:var(--accent)}
+  .verbar.bad{background:var(--warn-soft);color:var(--warn);border:1px solid #f0cfc4}
+  .verbar.gone{display:none}
   .tgrp{font-size:11.5px;font-weight:800;color:var(--dim);letter-spacing:.03em;
     margin:14px 0 6px;padding-left:2px}
   .tgrp:first-of-type{margin-top:0}
@@ -136,7 +142,12 @@ function doRefresh(){
   google.script.run.withSuccessHandler(function(r){
     if(!r.ok){ msg(r.message); return; }
     alert(r.message);
-  }).withFailureHandler(function(e){ msg(e.message); }).adminRefresh(KEY);
+  }).withFailureHandler(function(e){
+    alert('바로 반영하기를 쓸 수 없습니다.\n\n'
+      + ((e&&e.message)||'서버가 응답하지 않았습니다')
+      + '\n\n서버가 옛 판이면 이 기능이 없습니다.\n'
+      + 'Apps Script 에서 새 버전으로 배포했는지 확인해주세요.');
+  }).adminRefresh(KEY);
 }
 
 /* ===== 기업 계정 ===== */
@@ -155,7 +166,7 @@ function openBiz(){
     var el=document.getElementById('c-biz');
     if(el) el.textContent = wait || '';
     drawBiz(r.rows||[]);
-  }).withFailureHandler(function(e){ msg(e.message); }).adminBizList(KEY);
+  }).withFailureHandler(function(e){ boxFail('bizList','기업 계정',e); }).adminBizList(KEY);
 }
 
 function drawBiz(rows){
@@ -218,7 +229,7 @@ function openTexts(){
     if(!r.ok){ msg(r.message); return; }
     PRE.texts=r; TX = r.rows || [];
     drawTexts();
-  }).withFailureHandler(function(e){ msg(e.message); }).adminGetTexts(KEY);
+  }).withFailureHandler(function(e){ boxFail('textsBox','화면 문구',e); }).adminGetTexts(KEY);
 }
 
 function drawTexts(){
@@ -312,7 +323,7 @@ function openSched(){
     if(!r.ok){ msg(r.message); return; }
     PRE.sched=r; SC = r;
     drawSched();
-  }).withFailureHandler(function(e){ msg(e.message); }).adminGetSchedule(KEY);
+  }).withFailureHandler(function(e){ boxFail('schedBox','수집 주기',e); }).adminGetSchedule(KEY);
 }
 
 function schedCost(c){
@@ -445,6 +456,7 @@ function saveSched(){
   </div>
 
   <div id="main" class="hide">
+    <div id="verBar" class="verbar hide"></div>
     <div class="tgrp">급여 자료</div>
     <div class="tabs">
       <button class="tb on" data-f="flag" onclick="load('flag')">확인 필요<span class="n" id="c-flag"></span></button>
@@ -565,11 +577,22 @@ function saveSched(){
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=146"></script>
+<script src="/app.js?v=147"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
   clearTimeout(m._t);m._t=setTimeout(function(){m.className='';},2400);}
+
+/* 탭이 안 열릴 때 조용히 넘어가지 않게 합니다.
+   대부분은 서버가 옛 판이라 그 함수가 없는 경우입니다. */
+function boxFail(id, what, e){
+  var box=document.getElementById(id);
+  var why=(e && e.message) ? e.message : '서버가 응답하지 않았습니다';
+  if(box) box.innerHTML='<div class="verbar bad"><b>'+esc(what)+'을(를) 열지 못했습니다</b>'
+    + esc(why) + '<br><br>서버가 옛 판이면 이 탭이 없습니다. '
+    + 'Apps Script 에서 <b>새 버전으로 배포</b>했는지 확인해주세요.</div>';
+  msg(what+' 을 열지 못했습니다');
+}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
@@ -590,10 +613,39 @@ function preload(){
   });
 }
 
+/* 서버가 몇 판인지 화면 위에 띄웁니다.
+   탭이 안 열릴 때 「서버가 옛것이라 그렇다」 를 바로 알 수 있게 합니다. */
+function showVer(){
+  var bar=document.getElementById('verBar');
+  if(!bar) return;
+  google.script.run.withSuccessHandler(function(v){
+    var sv=String(v||'');
+    var num=Number((sv.match(/v(\d+)/)||[])[1]||0);
+    var need=[['화면 문구',113],['수집 주기',107],['기업 계정',120],['바로 반영하기',131]];
+    var miss=need.filter(function(x){ return num < x[1]; });
+    if(!num){ bar.className='verbar bad'; bar.textContent='서버 판을 확인하지 못했습니다'; return; }
+    if(miss.length){
+      bar.className='verbar bad';
+      bar.innerHTML='<b>서버가 옛 판입니다 — '+esc(sv)+'</b>'
+        + '아래 탭이 안 열립니다: '+miss.map(function(x){return x[0];}).join(' · ')+'<br>'
+        + 'Apps Script → 배포 → 배포 관리 → 연필 → 버전 <b>새 버전</b> → 배포';
+    }else{
+      bar.className='verbar ok';
+      bar.textContent='서버 '+sv+' · 모든 탭을 쓸 수 있습니다';
+      setTimeout(function(){ bar.className='verbar ok gone'; }, 4000);
+    }
+  }).withFailureHandler(function(){
+    bar.className='verbar bad';
+    bar.innerHTML='<b>서버에 연결하지 못했습니다</b>'
+      + 'app.js 가 GitHub 에 올라갔는지, Apps Script 가 배포됐는지 확인해주세요.';
+  }).serverVersion();
+}
+
 function unlock(){
   KEY=document.getElementById('key').value.trim();
   if(!KEY){msg('키를 입력해주세요');return;}
   load('flag');
+  showVer();
   setTimeout(preload, 800);
 }
 
@@ -834,7 +886,7 @@ function openMenu(){
     if(!r.ok){ msg(r.message); return; }
     PRE.menu=r; MN=r.rows||[];
     drawMenu();
-  }).withFailureHandler(function(e){ msg(e.message); }).adminGetMenu(KEY);
+  }).withFailureHandler(function(e){ boxFail('menuList','메뉴 순서',e); }).adminGetMenu(KEY);
 }
 
 function drawMenu(){
