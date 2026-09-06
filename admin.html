@@ -20,13 +20,25 @@
   h1{font-size:18px;margin:0 0 3px;letter-spacing:-.02em}
   .lead{font-size:12.5px;color:var(--dim);margin:0 0 16px}
 
-  .tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+  /* 예전에는 한 줄로 두고 옆으로 밀었습니다.
+     탭이 13개가 되자 「전체」 뒤가 화면 밖으로 나가 안 보였습니다.
+     넘길 수 있다는 표시도 없어서 거기서 끝인 줄 알게 됐습니다.
+     줄바꿈으로 바꿔 전부 보이게 합니다. */
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  /* 화면 안쪽 작은 탭은 그대로 한 줄로 둡니다 */
+  #commWrap .tabs,#jobsWrap .tabs{flex-wrap:nowrap;overflow-x:auto}
   .tb{flex:0 0 auto;padding:8px 14px;border:1px solid var(--line);background:#fff;
     border-radius:20px;font-family:inherit;font-size:13px;cursor:pointer;color:var(--dim);
     white-space:nowrap;-webkit-tap-highlight-color:transparent;
     transition:background-color .2s,color .2s,border-color .2s,transform .22s}
   .tb:active{transform:scale(.95)}
   .tb.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+  .txlen{font-size:11px;color:#9aa6ab;text-align:right;margin:2px 0 4px}
+  .txlen.over{color:#b4432c;font-weight:700}
+  .tgrp{font-size:11.5px;font-weight:800;color:var(--dim);letter-spacing:.03em;
+    margin:14px 0 6px;padding-left:2px}
+  .tgrp:first-of-type{margin-top:0}
+  .tb.go2{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
   .tb .n{opacity:.6;margin-left:5px;font-size:11.5px}
   .tb.on .n{opacity:.75}
 
@@ -134,8 +146,10 @@ function openBiz(){
     if(b.dataset.f) b.className='tb'+(b.dataset.f==='biz'?' on':'');
   });
   shell('bizWrap');
-  document.getElementById('bizList').innerHTML='<div class="loading">불러오는 중</div>';
+  if(PRE.biz) drawBiz(PRE.biz.rows||[]);
+  else document.getElementById('bizList').innerHTML='<div class="loading">불러오는 중</div>';
   google.script.run.withSuccessHandler(function(r){
+    PRE.biz=r;
     if(!r.ok){ msg(r.message); return; }
     var wait=(r.rows||[]).filter(function(x){ return !x.verified; }).length;
     var el=document.getElementById('c-biz');
@@ -198,10 +212,11 @@ function openTexts(){
     if(b.dataset.f) b.className='tb'+(b.dataset.f==='texts'?' on':'');
   });
   shell('textsWrap');
-  document.getElementById('textsBox').innerHTML='<div class="loading">불러오는 중</div>';
+  if(PRE.texts){ TX=PRE.texts.rows||[]; drawTexts(); }
+  else document.getElementById('textsBox').innerHTML='<div class="loading">불러오는 중</div>';
   google.script.run.withSuccessHandler(function(r){
     if(!r.ok){ msg(r.message); return; }
-    TX = r.rows || [];
+    PRE.texts=r; TX = r.rows || [];
     drawTexts();
   }).withFailureHandler(function(e){ msg(e.message); }).adminGetTexts(KEY);
 }
@@ -229,20 +244,56 @@ function drawTexts(){
             + '<span>' + esc(t.def.replace(/<br>/g,' ').replace(/<\/?b>/g,'')) + '</span></label>'
             + '<textarea class="bi" rows="2"'
             + (t.cur ? ' style="background:#fffdf0;border-color:#e8cfa4"' : '')
-            + ' oninput="TX[' + i + '].cur=this.value"'
+            + ' oninput="TX[' + i + '].cur=this.value;txLen(' + i + ',this)"'
             + ' placeholder="' + esc(t.def.replace(/"/g,'&quot;')) + '">'
-            + esc(t.cur) + '</textarea>';
+            + esc(t.cur) + '</textarea>'
+            + '<div class="txlen" id="txl' + i + '">'
+            + (t.cur ? t.cur.length + '자' : '') + '</div>';
         }).join('')
       + '</div>';
   }).join('');
 }
 
+function txLen(i, el){
+  var d=document.getElementById('txl'+i);
+  if(!d) return;
+  var v=String(el.value||'');
+  var over = v.length>2000;
+  d.textContent = v ? v.length+'자'+(over?' · 너무 깁니다':'') : '';
+  d.className = 'txlen'+(over?' over':'');
+}
+
 function saveTexts(){
+  /* 보내기 전에 화면에서 먼저 봅니다. 서버까지 안 가고 바로 알려줍니다. */
+  var bad=[];
+  TX.forEach(function(t){
+    var v=String(t.cur||'').trim();
+    if(!v) return;
+    if(v.length>2000) bad.push(t.page+' · '+t.label+' — 너무 깁니다 ('+v.length+'자)');
+    var open=(v.match(/<(b|br|span|em|i)\b/gi)||[]).length;
+    var close=(v.match(/<\/(b|span|em|i)>/gi)||[]).length
+            + (v.match(/<br\s*\/?>/gi)||[]).length;
+    if(open!==close) bad.push(t.page+' · '+t.label+' — 태그 짝이 안 맞습니다');
+  });
+  if(bad.length){
+    alert('아래를 고쳐주세요\n\n'+bad.join('\n'));
+    return;
+  }
+
   msg('저장하고 있습니다');
   google.script.run.withSuccessHandler(function(r){
-    msg(r.message || (r.ok?'저장했습니다':'실패'));
-    if(r.ok) openTexts();
-  }).withFailureHandler(function(e){ msg(e.message); })
+    if(!r.ok){
+      if(r.bad && r.bad.length){
+        alert('저장하지 않았습니다\n\n'
+          + r.bad.map(function(b){ return b.page+' · '+b.label+' — '+b.why; }).join('\n'));
+      }else{
+        msg(r.message||'저장하지 못했습니다');
+      }
+      return;
+    }
+    msg(r.message||'저장했습니다');
+    openTexts();
+  }).withFailureHandler(function(e){ msg('저장하지 못했습니다. 잠시 후 다시 눌러주세요'); })
     .adminSaveTexts(KEY, TX.map(function(t){ return { key:t.key, cur:t.cur }; }));
 }
 
@@ -255,10 +306,11 @@ function openSched(){
     if(b.dataset.f) b.className='tb'+(b.dataset.f==='sched'?' on':'');
   });
   shell('schedWrap');
-  document.getElementById('schedBox').innerHTML='<div class="loading">불러오는 중</div>';
+  if(PRE.sched){ SC=PRE.sched; drawSched(); }
+  else document.getElementById('schedBox').innerHTML='<div class="loading">불러오는 중</div>';
   google.script.run.withSuccessHandler(function(r){
     if(!r.ok){ msg(r.message); return; }
-    SC = r;
+    PRE.sched=r; SC = r;
     drawSched();
   }).withFailureHandler(function(e){ msg(e.message); }).adminGetSchedule(KEY);
 }
@@ -347,6 +399,7 @@ function saveSched(){
   msg('저장하고 있습니다');
   google.script.run.withSuccessHandler(function(r){
     msg(r.message || (r.ok?'저장했습니다':'실패'));
+    PRE.sched=null;
     if(r.ok) openSched();
   }).withFailureHandler(function(e){ msg(e.message); })
     .adminSaveSchedule(KEY, SC.cfg);
@@ -392,20 +445,33 @@ function saveSched(){
   </div>
 
   <div id="main" class="hide">
+    <div class="tgrp">급여 자료</div>
     <div class="tabs">
       <button class="tb on" data-f="flag" onclick="load('flag')">확인 필요<span class="n" id="c-flag"></span></button>
       <button class="tb" data-f="note" onclick="load('note')">특이사항<span class="n" id="c-note"></span></button>
       <button class="tb" data-f="excluded" onclick="load('excluded')">제외됨<span class="n" id="c-excluded"></span></button>
       <button class="tb" data-f="all" onclick="load('all')">전체<span class="n" id="c-all"></span></button>
+    </div>
+
+    <div class="tgrp">공고 · 기업</div>
+    <div class="tabs">
       <button class="tb" data-f="jobs" onclick="openJobs('live')">공고 관리<span class="n" id="c-jobs"></span></button>
       <button class="tb" data-f="biz" onclick="openBiz()">기업 계정<span class="n" id="c-biz"></span></button>
-      <button class="tb" onclick="doRefresh()">바로 반영하기</button>
+    </div>
+
+    <div class="tgrp">앱 화면 꾸미기</div>
+    <div class="tabs">
       <button class="tb" data-f="texts" onclick="openTexts()">화면 문구</button>
-      <button class="tb" data-f="sched" onclick="openSched()">수집 주기</button>
-      <button class="tb" data-f="banner" onclick="openBanner()">배너 관리</button>
-      <button class="tb" data-f="comm" onclick="openComm2('all')">커뮤니티<span class="n" id="c-comm"></span></button>
       <button class="tb" data-f="menu" onclick="openMenu()">메뉴 순서</button>
+      <button class="tb" data-f="banner" onclick="openBanner()">배너 관리</button>
+    </div>
+
+    <div class="tgrp">운영</div>
+    <div class="tabs">
+      <button class="tb" data-f="sched" onclick="openSched()">수집 주기</button>
+      <button class="tb" data-f="comm" onclick="openComm2('all')">커뮤니티<span class="n" id="c-comm"></span></button>
       <button class="tb" data-f="access" onclick="openAccess()">이상 조회</button>
+      <button class="tb go2" onclick="doRefresh()">바로 반영하기</button>
     </div>
     <div id="list"><div class="loading">불러오는 중</div></div>
 
@@ -499,7 +565,7 @@ function saveSched(){
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=145"></script>
+<script src="/app.js?v=146"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -507,10 +573,28 @@ function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
+/* 탭을 누를 때마다 서버를 다녀오면 매번 1초씩 기다립니다.
+   열쇠를 넣는 순간 가벼운 것들을 미리 받아둡니다.
+   누르면 이미 자료가 있어서 바로 뜹니다. */
+var PRE = {};
+function preload(){
+  var jobs=[['texts','adminGetTexts'],['sched','adminGetSchedule'],
+            ['biz','adminBizList'],['menu','adminGetMenu'],
+            ['banner','adminGetBanners']];
+  jobs.forEach(function(j,i){
+    setTimeout(function(){
+      google.script.run.withSuccessHandler(function(r){
+        if(r && r.ok) PRE[j[0]]=r;
+      }).withFailureHandler(function(){})[j[1]](KEY);
+    }, 400*(i+1));
+  });
+}
+
 function unlock(){
   KEY=document.getElementById('key').value.trim();
   if(!KEY){msg('키를 입력해주세요');return;}
   load('flag');
+  setTimeout(preload, 800);
 }
 
 function load(f){
@@ -743,11 +827,12 @@ function openMenu(){
     if(b.dataset.f) b.className = 'tb' + (b.dataset.f==='menu' ? ' on' : '');
   });
   shell('menuWrap');
-  document.getElementById('menuList').innerHTML='<div class="loading">불러오는 중</div>';
+  if(PRE.menu){ MN=PRE.menu.rows||[]; drawMenu(); }
+  else document.getElementById('menuList').innerHTML='<div class="loading">불러오는 중</div>';
 
   google.script.run.withSuccessHandler(function(r){
     if(!r.ok){ msg(r.message); return; }
-    MN=r.rows||[];
+    PRE.menu=r; MN=r.rows||[];
     drawMenu();
   }).withFailureHandler(function(e){ msg(e.message); }).adminGetMenu(KEY);
 }
@@ -782,6 +867,7 @@ function mvMenu(i,d){
 function saveMenu(){
   msg('저장하고 있습니다');
   google.script.run.withSuccessHandler(function(r){
+    PRE.menu=null;
     msg(r.message||'저장했습니다');
   }).withFailureHandler(function(e){ msg(e.message); }).adminSaveMenu(KEY, MN);
 }
