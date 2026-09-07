@@ -1212,6 +1212,13 @@
   .ythrow .yf{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
   .ythrow .yf i{font-style:normal;font-size:11px;background:#f1f5f4;color:#3f4c52;
     border-radius:6px;padding:4px 8px}
+  .ythrow.tap{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
+  .ythrow.tap:active{transform:scale(.985);background:#fbfcfc}
+  .ythrow .yf i.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  .ythrow .yq{margin-top:8px;font-size:11.5px;color:#8b979d;line-height:1.6;
+    word-break:keep-all}
+  .ythrow .ygo{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);
+    font-size:12.5px;font-weight:700;color:var(--accent);text-align:right}
   /* 봉사활동 */
   .volrow{background:#fff;border:1px solid var(--line);border-radius:13px;
     padding:15px;margin-bottom:8px}
@@ -3235,7 +3242,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v164 · 2026-09-07';
+var APP_VER = 'v166 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -5287,8 +5294,13 @@ function loadYth(){
 
     var a=document.getElementById('ythArea');
     if(a && !a.options.length){
-      a.innerHTML='<option value="">내 지역 + 전국</option>'
-        + (r.areas||[]).map(function(x){
+      /* 「전국」 은 교육부·한국장학재단 같은 중앙부처 사업입니다.
+         어디 살든 신청할 수 있어서 따로 골라볼 수 있게 했습니다. */
+      var nat=(r.areas||[]).filter(function(x){ return x.name==='전국'; })[0];
+      var rest=(r.areas||[]).filter(function(x){ return x.name!=='전국'; });
+      a.innerHTML='<option value="">'+(r.mine?esc(r.mine):'내 지역')+' 정책</option>'
+        + (nat?'<option value="전국">전국 공통 '+nat.n+'건</option>':'')
+        + rest.map(function(x){
             return '<option value="'+esc(x.name)+'">'+esc(x.name)+' '+x.n+'건</option>';
           }).join('');
     }
@@ -5302,13 +5314,20 @@ function loadYth(){
 
     if(!r.rows.length){
       box.innerHTML='<div class="empty2">'
-        + (r.message?esc(r.message):'찾으시는 정책이 없습니다.')+'</div>';
+        + (r.message?esc(r.message)
+           : (r.mine&&!r.area?esc(r.mine)+'에 해당하는 정책이 없습니다.<br>'
+              +'위에서 <b>전국 공통</b>을 골라보세요.'
+              :'찾으시는 정책이 없습니다.'))+'</div>';
       return;
     }
+    var head = r.area==='전국' ? '전국 공통'
+             : (r.area ? esc(r.area) : (r.mine?esc(r.mine):'내 지역'));
     box.innerHTML='<p class="sub" style="margin:2px 0 10px">'
-      + (r.area?esc(r.area):(r.mine?esc(r.mine)+' + 전국':'전국'))
-      + ' <b>'+r.total+'건</b></p>'
+      + head + ' <b>'+r.total+'건</b></p>'
       + '<div class="hintbox" style="margin-top:0">'
+      + (r.area==='전국'
+          ? '중앙부처가 하는 사업이라 <b>어디 사시든 신청할 수 있습니다.</b><br>'
+          : '')
       + '신청 조건과 기간은 바뀔 수 있습니다. <b>자세한 내용은 운영기관에 확인해주세요.</b></div>'
       + r.rows.map(ythCard).join('');
   }).withFailureHandler(function(){
@@ -5317,7 +5336,10 @@ function loadYth(){
 }
 
 function ythCard(x){
-  return '<div class="ythrow">'
+  /* 누르면 그 정책 안내 쪽으로 갑니다.
+     주소가 없는 정책도 있어서, 있을 때만 누를 수 있게 합니다. */
+  return '<div class="ythrow'+(x.url?' tap':'')+'"'
+    + (x.url?' onclick="window.open(\''+esc(x.url)+'\',\'_blank\')"':'')+'>'
     + '<div class="yh"><span class="yn">'+esc(x.name)+'</span>'
     + (x.area?'<span class="ya'+(x.area==='전국'?' all':'')+'">'+esc(x.area)+'</span>':'')
     + '</div>'
@@ -5326,11 +5348,18 @@ function ythCard(x){
     + (x.sprt?'<div class="ys"><b>지원 내용</b>'
         +esc(String(x.sprt).slice(0,220))
         +(String(x.sprt).length>220?'…':'')+'</div>':'')
+    + (x.how?'<div class="ys"><b>신청 방법</b>'
+        +esc(String(x.how).slice(0,160))
+        +(String(x.how).length>160?'…':'')+'</div>':'')
     + '<div class="yf">'
+    + (x.period?'<i class="on">'+esc(x.period)+'</i>':'')
+    + (x.age?'<i>'+esc(x.age)+'</i>':'')
     + (x.mcls?'<i>'+esc(x.mcls)+'</i>':'')
     + (x.oper?'<i>'+esc(x.oper)+'</i>':'')
-    + (x.period&&x.period!==' ~ '?'<i>'+esc(x.period)+'</i>':'')
-    + '</div></div>';
+    + '</div>'
+    + (x.etc?'<div class="yq">'+esc(String(x.etc).slice(0,120))+'</div>':'')
+    + (x.url?'<div class="ygo">자세히 보러 가기 ›</div>':'')
+    + '</div>';
 }
 
 /* ═══════════════════ 축하 ═══════════════════
