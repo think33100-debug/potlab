@@ -1198,27 +1198,27 @@
   .ptags .pf2{background:#efe9f7;color:#5b3d8a;font-weight:700}
   /* 청년정책 */
   .ythrow{background:#fff;border:1px solid var(--line);border-radius:13px;
-    padding:15px;margin-bottom:8px}
+    padding:14px;margin-bottom:7px}
   .ythrow .yh{display:flex;align-items:baseline;gap:7px;margin-bottom:7px}
   .ythrow .yn{flex:1;min-width:0;font-size:15px;font-weight:700;letter-spacing:-.02em;
     line-height:1.45;word-break:keep-all}
   .ythrow .ya{flex-shrink:0;font-size:11px;font-weight:800;border-radius:20px;
     padding:3px 9px;background:var(--accent-soft);color:var(--accent)}
   .ythrow .ya.all{background:#f1f5f4;color:#5a6870}
-  .ythrow .ye{font-size:12.5px;color:var(--dim);line-height:1.75;word-break:keep-all}
-  .ythrow .ys{background:var(--sand);border-radius:9px;padding:11px 12px;margin-top:9px;
-    font-size:12.5px;color:#4a555a;line-height:1.75;word-break:keep-all}
-  .ythrow .ys b{display:block;color:var(--accent);font-size:11.5px;margin-bottom:3px}
-  .ythrow .yf{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+  .ythrow .ys{background:var(--sand);border-radius:9px;padding:10px 12px;margin-top:8px;
+    font-size:12.5px;color:#4a555a;line-height:1.7;word-break:keep-all}
+  .ythrow .ymore{color:#9aa6ab}
+  /* 아래 한 줄 — 운영기관과 「자세히」 */
+  .ythrow .yb{display:flex;align-items:center;gap:8px;margin-top:9px}
+  .ythrow .yb span{flex:1;min-width:0;font-size:11.5px;color:#8b979d;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ythrow .yb b{flex-shrink:0;font-size:12px;font-weight:700;color:var(--accent)}
+  .ythrow .yf{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
   .ythrow .yf i{font-style:normal;font-size:11px;background:#f1f5f4;color:#3f4c52;
     border-radius:6px;padding:4px 8px}
   .ythrow.tap{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
   .ythrow.tap:active{transform:scale(.985);background:#fbfcfc}
   .ythrow .yf i.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
-  .ythrow .yq{margin-top:8px;font-size:11.5px;color:#8b979d;line-height:1.6;
-    word-break:keep-all}
-  .ythrow .ygo{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);
-    font-size:12.5px;font-weight:700;color:var(--accent);text-align:right}
   /* 봉사활동 */
   .volrow{background:#fff;border:1px solid var(--line);border-radius:13px;
     padding:15px;margin-bottom:8px}
@@ -3242,7 +3242,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v166 · 2026-09-07';
+var APP_VER = 'v168 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -5335,30 +5335,39 @@ function loadYth(){
   }).ythList(cred(), YTH.area, YTH.cat, YTH.q);
 }
 
+/* 줄마다 나눠 보여줍니다. 원문이 여러 줄로 오는 것을 살립니다. */
+function yLines(v, max){
+  var t = String(v||'').trim();
+  if(!t) return '';
+  var L = t.split('\n').filter(function(x){ return x.trim(); });
+  var cut = L.slice(0, max||3);
+  var more = L.length > cut.length;
+  return cut.map(function(x){ return esc(x.trim()); }).join('<br>')
+    + (more ? '<span class="ymore">…</span>' : '');
+}
+
 function ythCard(x){
-  /* 누르면 그 정책 안내 쪽으로 갑니다.
-     주소가 없는 정책도 있어서, 있을 때만 누를 수 있게 합니다. */
+  /* 설명을 뺐습니다. 지원 내용과 겹쳐서 같은 말이 두 번 나왔습니다.
+     정작 알고 싶은 것은 「얼마를, 언제까지, 어떻게」 입니다.
+     누르면 그 정책 안내 쪽으로 갑니다. 주소가 없으면 안 눌립니다. */
   return '<div class="ythrow'+(x.url?' tap':'')+'"'
     + (x.url?' onclick="window.open(\''+esc(x.url)+'\',\'_blank\')"':'')+'>'
     + '<div class="yh"><span class="yn">'+esc(x.name)+'</span>'
     + (x.area?'<span class="ya'+(x.area==='전국'?' all':'')+'">'+esc(x.area)+'</span>':'')
     + '</div>'
-    + (x.expl?'<div class="ye">'+esc(String(x.expl).slice(0,200))
-        +(String(x.expl).length>200?'…':'')+'</div>':'')
-    + (x.sprt?'<div class="ys"><b>지원 내용</b>'
-        +esc(String(x.sprt).slice(0,220))
-        +(String(x.sprt).length>220?'…':'')+'</div>':'')
-    + (x.how?'<div class="ys"><b>신청 방법</b>'
-        +esc(String(x.how).slice(0,160))
-        +(String(x.how).length>160?'…':'')+'</div>':'')
     + '<div class="yf">'
     + (x.period?'<i class="on">'+esc(x.period)+'</i>':'')
     + (x.age?'<i>'+esc(x.age)+'</i>':'')
     + (x.mcls?'<i>'+esc(x.mcls)+'</i>':'')
-    + (x.oper?'<i>'+esc(x.oper)+'</i>':'')
     + '</div>'
-    + (x.etc?'<div class="yq">'+esc(String(x.etc).slice(0,120))+'</div>':'')
-    + (x.url?'<div class="ygo">자세히 보러 가기 ›</div>':'')
+    + (x.sprt?'<div class="ys">'+yLines(x.sprt,3)+'</div>'
+             :(x.expl?'<div class="ys">'+yLines(x.expl,2)+'</div>':''))
+    + '<div class="yb">'
+    + (x.oper?'<span>'+esc(x.oper)+'</span>':'')
+    /* 원문 주소가 있으면 그리로, 없으면 정책 이름으로 찾아보게 합니다.
+       아무 데도 못 가는 것보다 낫습니다. */
+    + (x.url?'<b>'+(x.isSearch?'찾아보기 ›':'자세히 ›')+'</b>':'')
+    + '</div>'
     + '</div>';
 }
 
