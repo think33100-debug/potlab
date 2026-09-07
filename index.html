@@ -3261,7 +3261,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v208 · 2026-09-07';
+var APP_VER = 'v210 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -5754,6 +5754,11 @@ function openStars(){
 /* 여러 자리를 한 공고로 뽑는지 가립니다.
    뽑는 인원 글자와 아래 설명이 같은 기준을 쓰도록 한 곳에 모아둡니다. */
 function mixInfo(x){
+  /* 치매센터 공고(ND)는 공고문 PDF 에서 우리 직군 인원만 뽑아 왔습니다.
+     여러 직군이 함께 적혀 있어도 그 인원은 통합 인원이 아닙니다.
+     그래서 「외 N직군 통합」 안내를 띄우면 안 됩니다. */
+  if(String(x.id||'').indexOf('ND')===0) return { mixed:false, ours:[], others:0 };
+
   var jobs = x.alljobs || [];
   var others = jobs.filter(function(j){ return j!=='작업치료사' && j!=='물리치료사'; });
   var ours = jobs.filter(function(j){ return j==='작업치료사' || j==='물리치료사'; });
