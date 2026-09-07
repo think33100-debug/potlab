@@ -1229,16 +1229,15 @@
   .ythrow .ymeta .off{color:#9aa6ab}
   .ythrow .ymeta .none{color:#9aa6ab;font-size:11.5px}
 
-  .ythrow .yb{display:flex;align-items:center;gap:8px;margin-top:12px;
-    padding-top:11px;border-top:1px solid #eef1f2}
-  .ythrow .yb span{flex:1;min-width:0;font-size:11.5px;color:#8b979d;
+  .ythrow .yb{margin-top:10px}
+  .ythrow .yb span{display:block;font-size:11.5px;color:#8b979d;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .ythrow .yb b{flex-shrink:0;font-size:12.5px;font-weight:700;color:var(--accent)}
-  /* 기관이 직접 올린 안내가 따로 있을 때 */
-  .ythrow .yinst{margin-top:8px;padding:9px 12px;background:var(--bg);border-radius:9px;
-    font-size:12px;font-weight:700;color:#3f4c52;text-align:center;
-    -webkit-tap-highlight-color:transparent}
-  .ythrow .yinst:active{background:var(--accent-soft);color:var(--accent)}
+  /* 하나뿐인 버튼이라 눈에 띄게 둡니다 */
+  .ythrow .ygo{margin-top:10px;padding:13px 12px;background:var(--accent);
+    border-radius:11px;font-size:13.5px;font-weight:800;color:#fff;text-align:center;
+    letter-spacing:-.01em;-webkit-tap-highlight-color:transparent;transition:opacity .18s}
+  .ythrow .ygo:active{opacity:.8}
+  .ythrow.over .ygo{background:#aab4b8}
   /* 봉사활동 */
   .volrow{background:#fff;border:1px solid var(--line);border-radius:13px;
     padding:15px;margin-bottom:8px}
@@ -3262,7 +3261,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v175 · 2026-09-07';
+var APP_VER = 'v178 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -5381,8 +5380,11 @@ function ythCard(x){
   var over = x.end && x.end < ymd;
   var soon = x.end && !over && (Number(x.end) - Number(ymd) < 15);
 
-  return '<div class="ythrow'+(x.url?' tap':'')+(over?' over':'')+'"'
-    + (x.url?' onclick="window.open(\''+esc(x.url)+'\',\'_blank\')"':'')+'>'
+  /* 어디로 보낼지 하나만 정합니다 */
+  var go = x.instUrl || x.url || '';
+
+  return '<div class="ythrow'+(go?' tap':'')+(over?' over':'')+'"'
+    + (go?' onclick="window.open(\''+esc(go)+'\',\'_blank\')"':'')+'>'
 
     + '<div class="ycat">'+esc(x.mcls||x.lcls||'청년정책')
     + (x.area?'<em>'+esc(x.area)+'</em>':'')+'</div>'
@@ -5400,17 +5402,14 @@ function ythCard(x){
     + (x.age && x.age!=='나이 제한 없음' ? '<span>'+esc(x.age)+'</span>' : '')
     + '</div>'
 
-    + '<div class="yb">'
-    + (x.oper?'<span>'+esc(x.oper)+'</span>':'')
-    /* 정책번호로 온통청년 상세를 열 수 있게 돼서
-       이제 모든 정책이 자기 안내 쪽으로 갑니다.
-       「찾아보기」(검색으로 넘기던 것)는 더 필요 없어졌습니다. */
-    + (x.url?'<b>자세히 알아보기 ›</b>':'')
-    + '</div>'
-    + (x.instUrl
-        ? '<div class="yinst" onclick="event.stopPropagation();'
-          + 'window.open(\''+esc(x.instUrl)+'\',\'_blank\')">'
-          + '기관 안내 쪽으로 바로 가기 ›</div>'
+    + '<div class="yb"><span>'+esc(x.oper||'')+'</span></div>'
+    /* 버튼은 하나만 둡니다.
+       기관이 올린 안내가 있으면 그리로, 없으면 온통청년 상세로 갑니다.
+       기관 링크는 일부 정책에만 있어서 그것만 두면 대부분 못 갑니다. */
+    + (go
+        ? '<div class="ygo" onclick="event.stopPropagation();'
+          + 'window.open(\''+esc(go)+'\',\'_blank\')">'
+          + (x.instUrl?'기관 안내 쪽으로 바로 가기':'자세히 알아보기')+' ›</div>'
         : '')
     + '</div>';
 }
