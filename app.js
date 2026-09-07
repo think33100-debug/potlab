@@ -35,7 +35,7 @@ var APP_JS_VER = 'a23 · 2026-09-07';
     'adminCommList', 'adminCommHide',
     'commComment', 'commCommentDelete', 'commLike', 'commMine', 'commAvatars', 'commSetAvatar',
     'adminGetMenu', 'adminSaveMenu', 'adminAccessLog', 'starJob', 'myStars', 'naverLogin', 'naverExchange', 'hospByName', 'jobOne', 'getEdu',
-    'adminJobList', 'adminHoldList', 'adminHoldDo', 'adminOrgList', 'adminJobGet', 'adminJobFix', 'adminJobHide', 'adminJobHideMany', 'adminRefixMixed', 'adminGetSchedule', 'adminSaveSchedule', 'adminRefresh', 'adminGetTexts', 'adminSaveTexts',
+    'adminJobList', 'adminHoldList', 'adminHoldDo', 'adminOrgList', 'adminOrgList', 'adminJobGet', 'adminJobFix', 'adminJobHide', 'adminJobHideMany', 'adminRefixMixed', 'adminGetSchedule', 'adminSaveSchedule', 'adminRefresh', 'adminGetTexts', 'adminSaveTexts',
     'bizMe', 'bizSignup', 'bizSendCode', 'bizVerify', 'bizPostJob', 'bizDocUrl', 'volList', 'volCenters', 'wfList', 'wfOne', 'vcList', 'vcOne', 'ythList',
     'adminBizList', 'adminBizVerify', 'serverVersion',
     'bigPut', 'bigRun'
