@@ -3261,7 +3261,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v220 · 2026-09-07';
+var APP_VER = 'v227 · 2026-09-08';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -5349,7 +5349,7 @@ function loadJobWf(x){
  * 채용공고와 성격이 완전히 달라 탭을 따로 뒀습니다.
  * 내 지역 것을 위로 올리고, 전국 사업도 함께 보여줍니다.
  */
-var YTH = { area:null, cat:'', q:'' };
+var YTH = { area:null, cat:'', q:'', span:'' };
 
 function openYth(){
   tab('yth');
@@ -5360,7 +5360,14 @@ function openYth(){
 function drawYthShell(){
   document.getElementById('ythBox').innerHTML =
       '<div class="psort">'
+    + '<select id="ythSpan" onchange="YTH.span=this.value;loadYth()">'
+    + '<option value="">신청할 수 있는 것</option>'
+    + '<option value="past">신청이 끝난 것</option>'
+    + '<option value="all">전부 보기</option>'
+    + '</select>'
     + '<select id="ythArea" onchange="YTH.area=this.value;loadYth()"></select>'
+    + '</div>'
+    + '<div class="psort">'
     + '<select id="ythCat" onchange="YTH.cat=this.value;loadYth()"></select>'
     + '</div>'
     + '<div class="f" style="margin-bottom:12px">'
@@ -5399,15 +5406,24 @@ function loadYth(){
     if(!r.rows.length){
       box.innerHTML='<div class="empty2">'
         + (r.message?esc(r.message)
-           : (r.mine&&!r.area?esc(r.mine)+'에 해당하는 정책이 없습니다.<br>'
-              +'위에서 <b>전국 공통</b>을 골라보세요.'
-              :'찾으시는 정책이 없습니다.'))+'</div>';
+           : (r.span!=='past' && r.over
+              ? '지금 '+(r.area?esc(r.area):(r.mine?esc(r.mine):''))
+                +'에서 신청할 수 있는 정책이 없습니다.<br>'
+                +'<b>지난 정책 '+r.over+'건</b>은 위에서 보실 수 있습니다.<br>'
+                +'<span style="color:#9aa6ab">해마다 비슷한 시기에 다시 열립니다.</span>'
+              : (r.mine&&!r.area?esc(r.mine)+'에 해당하는 정책이 없습니다.<br>'
+                 +'위에서 <b>전국 공통</b>을 골라보세요.'
+                 :'찾으시는 정책이 없습니다.')))+'</div>';
       return;
     }
     var head = r.area==='전국' ? '전국 공통'
              : (r.area ? esc(r.area) : (r.mine?esc(r.mine):'내 지역'));
     box.innerHTML='<p class="sub" style="margin:2px 0 10px">'
-      + head + ' <b>'+r.total+'건</b></p>'
+      + head + ' <b>'+r.total+'건</b>'
+      + (r.span==='past' ? ' · 신청이 끝난 것'
+         : r.span==='all' ? ' · 전부'
+         : (r.over ? ' <span style="color:#9aa6ab">· 끝난 것 '+r.over+'건 숨김</span>' : ''))
+      + '</p>'
       + '<div class="hintbox" style="margin-top:0">'
       + (r.area==='전국'
           ? '중앙부처가 하는 사업이라 <b>어디 사시든 신청할 수 있습니다.</b><br>'
@@ -5416,7 +5432,7 @@ function loadYth(){
       + r.rows.map(ythCard).join('');
   }).withFailureHandler(function(){
     box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>잠시 후 다시 열어주세요.</div>';
-  }).ythList(cred(), YTH.area, YTH.cat, YTH.q);
+  }).ythList(cred(), YTH.area, YTH.cat, YTH.q, YTH.span);
 }
 
 /* 줄마다 나눠 보여줍니다. 원문이 여러 줄로 오는 것을 살립니다. */
