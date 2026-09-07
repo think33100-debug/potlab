@@ -3261,7 +3261,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v186 · 2026-09-07';
+var APP_VER = 'v187 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3445,7 +3445,7 @@ function afterBoot(){
                늘 본화면으로 갔습니다. */
             if(GO_AFTER_LOGIN && KEEP_HASH[GO_AFTER_LOGIN]){
               var go = GO_AFTER_LOGIN; GO_AFTER_LOGIN = '';
-              tab(go);
+              openScreen(go);
             }
             else if(!openFromHash()) tab('dash');
           }
@@ -3467,7 +3467,7 @@ function afterBoot(){
         /* 새로고침으로 들어왔으면 보던 화면으로 돌아갑니다 */
         if(GO_AFTER_LOGIN && KEEP_HASH[GO_AFTER_LOGIN]){
           var go2 = GO_AFTER_LOGIN; GO_AFTER_LOGIN = '';
-          tab(go2);
+          openScreen(go2);
         }
         else if(!openFromHash() && CURRENT !== 'dash') tab('dash');
         else if(CURRENT === 'dash') drawDash();
@@ -3686,6 +3686,14 @@ var SUBMITTED = false;   // 제출을 끝냈으면 이탈 경고를 끕니다
    #yth 같은 표시가 날아가 새로고침이 소용없어집니다. */
 var URL_READY = false;
 
+/* 뒤로 갈 자리를 채워둡니다.
+   자리가 바닥나면 브라우저가 앱을 그냥 닫아버립니다. */
+function keepSeed(){
+  try{
+    history.pushState({ p:'app' }, '', location.href);
+  }catch(e){}
+}
+
 var START_HASH = (function(){
   try{ return String(location.hash || '').replace('#',''); }catch(e){ return ''; }
 })();
@@ -3730,6 +3738,10 @@ function tab(which, back){
       history.pushState({p:which}, '', location.pathname + location.search);
     }
   }catch(e){}
+  /* 뒤로 갈 자리를 다시 채웁니다.
+     자리가 바닥나면 브라우저가 토스트를 띄울 틈도 없이 그냥 나갑니다.
+     예전에는 시작할 때 두 개만 쌓아둬서 화면 몇 번 옮기면 동났습니다. */
+  if(URL_READY){ try{ keepSeed(); }catch(e){} }
 
   ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting','edu','biz','bizok','bizjob','vol','wf','yth'].forEach(function(p){
     var el=document.getElementById('pane-'+p);
@@ -9482,8 +9494,35 @@ function openFromHash(){
   }
   START_HASH = '';
   URL_READY = true;
-  tab(h);
+  openScreen(h);
   return true;
+}
+
+/* 화면을 열고 자료까지 불러옵니다.
+ *
+ * tab() 은 화면만 바꿉니다. 자료는 openYth() · openVol() 같은
+ * 함수가 따로 불러옵니다. 그래서 새로고침하면 화면은 맞는데
+ * 내용이 텅 비어 있었습니다.
+ * ACT 표에 화면마다 부를 함수가 이미 적혀 있으니 그것을 씁니다. */
+/* 화면마다 자료를 불러오는 함수.
+   ACT 표에 적힌 실제 이름과 맞췄습니다.
+   여기 없는 화면은 tab() 만으로 충분한 곳입니다. */
+var OPENERS = {
+  yth:'openYth', vol:'openVol', wf:'openWf', edu:'openEdu',
+  star:'openStars', mine:'openMine', avatar:'openAvatar',
+  invite:'openInvite', dash:'drawDash'
+};
+
+function openScreen(which){
+  /* 커뮤니티는 인자가 필요해 따로 부릅니다 */
+  if(which === 'comm' && typeof openComm === 'function'){
+    try{ openComm(''); return; }catch(e){}
+  }
+  var fn = OPENERS[which];
+  if(fn && typeof window[fn] === 'function'){
+    try{ window[fn](); return; }catch(e){}
+  }
+  tab(which);
 }
 
 
