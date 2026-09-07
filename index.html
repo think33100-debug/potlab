@@ -3261,7 +3261,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v185 · 2026-09-07';
+var APP_VER = 'v186 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3681,6 +3681,11 @@ var SUBMITTED = false;   // 제출을 끝냈으면 이탈 경고를 끕니다
  * 주소를 pathname 으로 갈아치웁니다. 그 순간 #yth 가 날아갔습니다.
  * openFromHash 는 그 뒤에 불려서 볼 게 없었습니다.
  * 그래서 지워지기 전에 여기서 먼저 담아둡니다. */
+/* 첫 화면을 그리는 동안에는 주소를 건드리지 않습니다.
+   시작하자마자 tab('home') 이 도는데, 그때 주소를 갈아치우면
+   #yth 같은 표시가 날아가 새로고침이 소용없어집니다. */
+var URL_READY = false;
+
 var START_HASH = (function(){
   try{ return String(location.hash || '').replace('#',''); }catch(e){ return ''; }
 })();
@@ -3711,12 +3716,19 @@ function tab(which, back){
   }
   CURRENT = which;
   /* 주소 뒤에 지금 화면을 남깁니다.
-     예전에는 location.href 를 그대로 넣어서, 새로고침하면
-     주소에 아무 표시가 없어 늘 첫 화면으로 돌아갔습니다.
-     이제 새로고침해도 보던 자리에 그대로 있습니다. */
+   *
+   * ※ 시작하자마자 tab('home') 이 한 번 도는데,
+   *   그때 주소를 pathname 으로 갈아치우면 #yth 같은 표시가 날아갑니다.
+   *   openFromHash 는 그 뒤에 불려서 볼 게 없었습니다.
+   *   그래서 「아직 시작 중」 이면 주소를 건드리지 않습니다. */
   try{
-    var hash = KEEP_HASH[which] ? '#' + which : location.pathname;
-    history.pushState({p:which}, '', hash);
+    if(!URL_READY){
+      /* 시작하는 동안에는 그대로 둡니다 */
+    }else if(KEEP_HASH[which]){
+      history.pushState({p:which}, '', '#' + which);
+    }else{
+      history.pushState({p:which}, '', location.pathname + location.search);
+    }
   }catch(e){}
 
   ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting','edu','biz','bizok','bizjob','vol','wf','yth'].forEach(function(p){
@@ -9465,9 +9477,11 @@ function openFromHash(){
     GO_AFTER_LOGIN = h;
     msg('로그인하면 바로 보여드리겠습니다');
     tab('unlock');
+    URL_READY = true;
     return true;             // START_HASH 는 남겨둡니다
   }
   START_HASH = '';
+  URL_READY = true;
   tab(h);
   return true;
 }
@@ -9532,6 +9546,16 @@ if(KTOKEN && ME && ME.id){
   tab('home');
   revealHome();
 }
+
+/* 첫 화면을 그렸으니 이제부터 화면 이동을 주소에 남깁니다.
+ * 여기서 켜는 이유 —
+ *   afterBoot 은 서버(getBrand) 응답을 기다립니다.
+ *   서버가 느리면 그동안 주소가 안 남아 새로고침이 소용없습니다.
+ *   첫 화면이 뜬 시점이면 시작은 끝난 것이므로 여기가 맞습니다. */
+URL_READY = true;
+/* 주소에 남아 있던 화면이 있으면 지금 열어줍니다.
+   로그인이 필요하면 openFromHash 가 알아서 로그인으로 보냅니다. */
+try{ openFromHash(); }catch(e){}
 
 google.script.run.withSuccessHandler(function(b){
   drawHome(b);
