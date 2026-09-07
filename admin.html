@@ -115,6 +115,19 @@
     padding:12px;font-size:12.5px;color:var(--dim);text-align:center}
   .osum b{display:block;font-size:20px;font-weight:800;color:var(--ink);margin-top:3px}
   .osum .on b{color:#b4432c}
+  .osec{font-size:14px;font-weight:800;margin:26px 0 4px;color:var(--ink)}
+  .arow{background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:13px;margin-bottom:7px}
+  .arow.off{opacity:.6;background:#fafbfb}
+  .arow .ah{display:flex;align-items:center;gap:8px}
+  .arow .ah b{flex:1;min-width:0;font-size:13.5px;font-weight:700}
+  .arow .ast{flex-shrink:0;font-size:11px;font-weight:800;border-radius:20px;
+    padding:3px 9px;background:var(--accent-soft);color:var(--accent)}
+  .arow.off .ast{background:#f1f3f4;color:#8b979d}
+  .arow .aw{margin-top:5px;font-size:12.5px;color:#3f4c52;line-height:1.5;word-break:keep-all}
+  .arow .af{margin-top:5px;font-size:11.5px;color:#8b979d}
+  .arow .af code{background:#f1f5f4;border-radius:4px;padding:1px 5px;font-size:11px;color:var(--accent)}
+  .arow .au{margin-top:4px;font-size:11px;color:#aab4b8;word-break:break-all}
   .orow{background:#fff;border:1px solid var(--line);border-radius:12px;
     padding:13px;margin-bottom:7px}
   .orow.no{border-color:#f0cfc4;background:#fdf6f3}
@@ -337,6 +350,10 @@
       한 번이라도 자동으로 모았으면 「됨」으로 남습니다.<br>
       한글 첨부만 올리는 곳은 「안 됨」이고, 그런 공고는 확인 필요로 넘어갑니다.</p>
     <div id="orgList"></div>
+
+    <h3 class="osec">쓰고 있는 API</h3>
+    <p class="hint">어디서 무엇을 가져오는지 정리한 것입니다.</p>
+    <div id="apiList"></div>
   </div>
 
   <div id="holdWrap" class="hide">
@@ -413,7 +430,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=157"></script>
+<script src="/app.js?v=158"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -1292,6 +1309,28 @@ function openOrg(){
     if(!r.ok){ msg(r.message); return; }
     drawOrg(r);
   }).withFailureHandler(function(e){ boxFail('orgList','기관 목록',e); }).adminOrgList(KEY);
+
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok) return;
+    drawApi(r);
+  }).withFailureHandler(function(){}).adminApiList(KEY);
+}
+
+function drawApi(r){
+  var rows=r.rows||[];
+  document.getElementById('apiList').innerHTML =
+      '<div class="osum"><span class="oy">쓰는 중 <b>'+r.on+'</b></span>'
+    + '<span class="on">못 붙임 <b>'+r.off+'</b></span></div>'
+    + rows.map(function(x){
+        return '<div class="arow'+(x.on?'':' off')+'">'
+          + '<div class="ah"><b>'+esc(x.name)+'</b>'
+          + '<span class="ast">'+(x.on?'쓰는 중':'못 붙임')+'</span></div>'
+          + '<div class="aw">'+esc(x.what)+'</div>'
+          + '<div class="af">'+esc(x.who)
+          + (x.fn?' · <code>'+esc(x.fn)+'</code>':'')+'</div>'
+          + '<div class="au">'+esc(x.url)+'</div>'
+          + '</div>';
+      }).join('');
 }
 
 function drawOrg(r){

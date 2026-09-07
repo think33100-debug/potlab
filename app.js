@@ -12,7 +12,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
 
 /* 이 파일이 최신인지 화면 아래에서 바로 확인하려고 둡니다.
    index.html 이 이 값을 읽어 버전과 함께 찍습니다. */
-var APP_JS_VER = 'a23 · 2026-09-07';
+var APP_JS_VER = 'a24 · 2026-09-07';
 
 (function () {
   'use strict';
@@ -35,7 +35,7 @@ var APP_JS_VER = 'a23 · 2026-09-07';
     'adminCommList', 'adminCommHide',
     'commComment', 'commCommentDelete', 'commLike', 'commMine', 'commAvatars', 'commSetAvatar',
     'adminGetMenu', 'adminSaveMenu', 'adminAccessLog', 'starJob', 'myStars', 'naverLogin', 'naverExchange', 'hospByName', 'jobOne', 'getEdu',
-    'adminJobList', 'adminHoldList', 'adminHoldDo', 'adminOrgList', 'adminOrgList', 'adminJobGet', 'adminJobFix', 'adminJobHide', 'adminJobHideMany', 'adminRefixMixed', 'adminGetSchedule', 'adminSaveSchedule', 'adminRefresh', 'adminGetTexts', 'adminSaveTexts',
+    'adminJobList', 'adminHoldList', 'adminHoldDo', 'adminOrgList', 'adminApiList', 'adminOrgList', 'adminJobGet', 'adminJobFix', 'adminJobHide', 'adminJobHideMany', 'adminRefixMixed', 'adminGetSchedule', 'adminSaveSchedule', 'adminRefresh', 'adminGetTexts', 'adminSaveTexts',
     'bizMe', 'bizSignup', 'bizSendCode', 'bizVerify', 'bizPostJob', 'bizDocUrl', 'volList', 'volCenters', 'wfList', 'wfOne', 'vcList', 'vcOne', 'ythList',
     'adminBizList', 'adminBizVerify', 'serverVersion',
     'bigPut', 'bigRun'
