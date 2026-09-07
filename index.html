@@ -1197,28 +1197,48 @@
   /* 대학 교수·전임교원 공고 — 병원 공고와 성격이 달라 표시해줍니다 */
   .ptags .pf2{background:#efe9f7;color:#5b3d8a;font-weight:700}
   /* 청년정책 */
-  .ythrow{background:#fff;border:1px solid var(--line);border-radius:13px;
-    padding:14px;margin-bottom:7px}
-  .ythrow .yh{display:flex;align-items:baseline;gap:7px;margin-bottom:7px}
-  .ythrow .yn{flex:1;min-width:0;font-size:15px;font-weight:700;letter-spacing:-.02em;
-    line-height:1.45;word-break:keep-all}
-  .ythrow .ya{flex-shrink:0;font-size:11px;font-weight:800;border-radius:20px;
-    padding:3px 9px;background:var(--accent-soft);color:var(--accent)}
-  .ythrow .ya.all{background:#f1f5f4;color:#5a6870}
-  .ythrow .ys{background:var(--sand);border-radius:9px;padding:10px 12px;margin-top:8px;
-    font-size:12.5px;color:#4a555a;line-height:1.7;word-break:keep-all}
-  .ythrow .ymore{color:#9aa6ab}
-  /* 아래 한 줄 — 운영기관과 「자세히」 */
-  .ythrow .yb{display:flex;align-items:center;gap:8px;margin-top:9px}
-  .ythrow .yb span{flex:1;min-width:0;font-size:11.5px;color:#8b979d;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .ythrow .yb b{flex-shrink:0;font-size:12px;font-weight:700;color:var(--accent)}
-  .ythrow .yf{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
-  .ythrow .yf i{font-style:normal;font-size:11px;background:#f1f5f4;color:#3f4c52;
-    border-radius:6px;padding:4px 8px}
+  .ythrow{background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:15px;margin-bottom:8px}
   .ythrow.tap{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s}
   .ythrow.tap:active{transform:scale(.985);background:#fbfcfc}
-  .ythrow .yf i.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  .ythrow.over{opacity:.55}
+
+  /* 분야 — 무엇에 관한 것인지 제일 먼저 */
+  .ythrow .ycat{display:flex;align-items:center;gap:7px;font-size:11.5px;
+    font-weight:800;color:var(--accent);letter-spacing:.01em;margin-bottom:6px}
+  .ythrow .ycat em{font-style:normal;font-size:11px;font-weight:700;color:#8b979d;
+    padding-left:7px;border-left:1px solid var(--line)}
+
+  .ythrow .yn{font-size:15.5px;font-weight:700;letter-spacing:-.02em;
+    line-height:1.45;word-break:keep-all;color:var(--ink)}
+
+  /* 지원 내용 — 줄마다 나눠 보여줍니다 */
+  .ythrow .ys{margin-top:10px}
+  .ythrow .ys span{display:block;position:relative;padding-left:11px;
+    font-size:13px;color:#3f4c52;line-height:1.7;word-break:keep-all;margin-bottom:2px}
+  .ythrow .ys span::before{content:'';position:absolute;left:0;top:9px;
+    width:3px;height:3px;border-radius:50%;background:#b6c0c4}
+  .ythrow .ys .ymore{color:#9aa6ab;font-size:12px}
+  .ythrow .ys .ymore::before{display:none}
+
+  /* 신청 기간 · 나이 */
+  .ythrow .ymeta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:11px}
+  .ythrow .ymeta span{font-size:12px;color:var(--dim)}
+  .ythrow .ymeta .day{font-weight:700;color:var(--accent)}
+  .ythrow .ymeta .hot{font-weight:800;color:#b4432c}
+  .ythrow .ymeta .off{color:#9aa6ab}
+  .ythrow .ymeta .none{color:#9aa6ab;font-size:11.5px}
+
+  .ythrow .yb{display:flex;align-items:center;gap:8px;margin-top:12px;
+    padding-top:11px;border-top:1px solid #eef1f2}
+  .ythrow .yb span{flex:1;min-width:0;font-size:11.5px;color:#8b979d;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ythrow .yb b{flex-shrink:0;font-size:12.5px;font-weight:700;color:var(--accent)}
+  /* 기관이 직접 올린 안내가 따로 있을 때 */
+  .ythrow .yinst{margin-top:8px;padding:9px 12px;background:var(--bg);border-radius:9px;
+    font-size:12px;font-weight:700;color:#3f4c52;text-align:center;
+    -webkit-tap-highlight-color:transparent}
+  .ythrow .yinst:active{background:var(--accent-soft);color:var(--accent)}
   /* 봉사활동 */
   .volrow{background:#fff;border:1px solid var(--line);border-radius:13px;
     padding:15px;margin-bottom:8px}
@@ -3242,7 +3262,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v168 · 2026-09-07';
+var APP_VER = 'v171 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -5341,33 +5361,57 @@ function yLines(v, max){
   if(!t) return '';
   var L = t.split('\n').filter(function(x){ return x.trim(); });
   var cut = L.slice(0, max||3);
-  var more = L.length > cut.length;
-  return cut.map(function(x){ return esc(x.trim()); }).join('<br>')
-    + (more ? '<span class="ymore">…</span>' : '');
+  return cut.map(function(x){
+    return '<span>'+esc(x.trim())+'</span>';
+  }).join('') + (L.length>cut.length ? '<span class="ymore">그 밖에 '+(L.length-cut.length)+'가지 더</span>' : '');
 }
 
 function ythCard(x){
-  /* 설명을 뺐습니다. 지원 내용과 겹쳐서 같은 말이 두 번 나왔습니다.
-     정작 알고 싶은 것은 「얼마를, 언제까지, 어떻게」 입니다.
-     누르면 그 정책 안내 쪽으로 갑니다. 주소가 없으면 안 눌립니다. */
-  return '<div class="ythrow'+(x.url?' tap':'')+'"'
+  /* 순서를 바꿨습니다.
+   *   1) 분야 — 무엇에 관한 것인지 제일 먼저
+   *   2) 제목
+   *   3) 지원 내용 — 얼마를 주는지
+   *   4) 신청 기간 · 나이 — 아래에
+   *
+   * 회색 알약을 여러 개 늘어놓으면 읽기 어려워서
+   * 분야만 색으로 두고 나머지는 글로 풀었습니다. */
+  var today = new Date();
+  var ymd = today.getFullYear()
+    + ('0'+(today.getMonth()+1)).slice(-2) + ('0'+today.getDate()).slice(-2);
+  var over = x.end && x.end < ymd;
+  var soon = x.end && !over && (Number(x.end) - Number(ymd) < 15);
+
+  return '<div class="ythrow'+(x.url?' tap':'')+(over?' over':'')+'"'
     + (x.url?' onclick="window.open(\''+esc(x.url)+'\',\'_blank\')"':'')+'>'
-    + '<div class="yh"><span class="yn">'+esc(x.name)+'</span>'
-    + (x.area?'<span class="ya'+(x.area==='전국'?' all':'')+'">'+esc(x.area)+'</span>':'')
-    + '</div>'
-    + '<div class="yf">'
-    + (x.period?'<i class="on">'+esc(x.period)+'</i>':'')
-    + (x.age?'<i>'+esc(x.age)+'</i>':'')
-    + (x.mcls?'<i>'+esc(x.mcls)+'</i>':'')
-    + '</div>'
+
+    + '<div class="ycat">'+esc(x.mcls||x.lcls||'청년정책')
+    + (x.area?'<em>'+esc(x.area)+'</em>':'')+'</div>'
+
+    + '<div class="yn">'+esc(x.name)+'</div>'
+
     + (x.sprt?'<div class="ys">'+yLines(x.sprt,3)+'</div>'
              :(x.expl?'<div class="ys">'+yLines(x.expl,2)+'</div>':''))
+
+    + '<div class="ymeta">'
+    + (x.period
+        ? '<span class="'+(over?'off':(soon?'hot':'day'))+'">'
+          + (over?'마감됨 · ':(soon?'마감 임박 · ':'신청 '))+esc(x.period)+'</span>'
+        : '<span class="none">신청 기간은 기관에 확인해주세요</span>')
+    + (x.age && x.age!=='나이 제한 없음' ? '<span>'+esc(x.age)+'</span>' : '')
+    + '</div>'
+
     + '<div class="yb">'
     + (x.oper?'<span>'+esc(x.oper)+'</span>':'')
-    /* 원문 주소가 있으면 그리로, 없으면 정책 이름으로 찾아보게 합니다.
-       아무 데도 못 가는 것보다 낫습니다. */
-    + (x.url?'<b>'+(x.isSearch?'찾아보기 ›':'자세히 ›')+'</b>':'')
+    /* 정책번호로 온통청년 상세를 열 수 있게 돼서
+       이제 모든 정책이 자기 안내 쪽으로 갑니다.
+       「찾아보기」(검색으로 넘기던 것)는 더 필요 없어졌습니다. */
+    + (x.url?'<b>자세히 알아보기 ›</b>':'')
     + '</div>'
+    + (x.instUrl
+        ? '<div class="yinst" onclick="event.stopPropagation();'
+          + 'window.open(\''+esc(x.instUrl)+'\',\'_blank\')">'
+          + '기관 안내 쪽으로 바로 가기 ›</div>'
+        : '')
     + '</div>';
 }
 
