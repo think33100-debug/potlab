@@ -1194,6 +1194,24 @@
     margin-top:8px;font-size:12.5px;color:#2e5b4e;line-height:1.7;word-break:keep-all}
   .wfgap b{display:block;font-size:13.5px;font-weight:800;color:var(--accent);
     margin-bottom:2px}
+  /* 대학 교수·전임교원 공고 — 병원 공고와 성격이 달라 표시해줍니다 */
+  .ptags .pf2{background:#efe9f7;color:#5b3d8a;font-weight:700}
+  /* 청년정책 */
+  .ythrow{background:#fff;border:1px solid var(--line);border-radius:13px;
+    padding:15px;margin-bottom:8px}
+  .ythrow .yh{display:flex;align-items:baseline;gap:7px;margin-bottom:7px}
+  .ythrow .yn{flex:1;min-width:0;font-size:15px;font-weight:700;letter-spacing:-.02em;
+    line-height:1.45;word-break:keep-all}
+  .ythrow .ya{flex-shrink:0;font-size:11px;font-weight:800;border-radius:20px;
+    padding:3px 9px;background:var(--accent-soft);color:var(--accent)}
+  .ythrow .ya.all{background:#f1f5f4;color:#5a6870}
+  .ythrow .ye{font-size:12.5px;color:var(--dim);line-height:1.75;word-break:keep-all}
+  .ythrow .ys{background:var(--sand);border-radius:9px;padding:11px 12px;margin-top:9px;
+    font-size:12.5px;color:#4a555a;line-height:1.75;word-break:keep-all}
+  .ythrow .ys b{display:block;color:var(--accent);font-size:11.5px;margin-bottom:3px}
+  .ythrow .yf{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+  .ythrow .yf i{font-style:normal;font-size:11px;background:#f1f5f4;color:#3f4c52;
+    border-radius:6px;padding:4px 8px}
   /* 봉사활동 */
   .volrow{background:#fff;border:1px solid var(--line);border-radius:13px;
     padding:15px;margin-bottom:8px}
@@ -3049,6 +3067,7 @@
 
   <div id="pane-vol" class="hide"><div id="volBox"></div></div>
   <div id="pane-wf" class="hide"><div id="wfBox"></div></div>
+  <div id="pane-yth" class="hide"><div id="ythBox"></div></div>
 
   <div id="pane-invite" class="hide"><div id="inviteBox"></div></div>
   <div id="pane-mine" class="hide"><div id="mineBox"></div></div>
@@ -3216,7 +3235,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v155 · 2026-09-06';
+var APP_VER = 'v164 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3633,7 +3652,7 @@ function tab(which, back){
   CURRENT = which;
   try{ history.pushState({p:which}, '', location.href); }catch(e){}
 
-  ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting','edu','biz','bizok','bizjob','vol','wf'].forEach(function(p){
+  ['home','input','view','done','unlock','dash','me','feedback','calc','install','hosp','region','jobs','post','noti','comm','commwrite','commview','mine','avatar','sev','ann','ui','invite','job','cal','star','setting','edu','biz','bizok','bizjob','vol','wf','yth'].forEach(function(p){
     var el=document.getElementById('pane-'+p);
     if(el) el.className = (p===which?'':'hide');
   });
@@ -3648,6 +3667,7 @@ function tab(which, back){
   var TT={edu:['교육 · 학술','협회 보수교육 · 학회 · 세미나'],
           vol:['봉사활동 찾기','지역과 분야로 봉사할 곳을 찾습니다'],
           wf:['복지관 · 발달재활','장애인복지관과 바우처 기관을 함께 봅니다'],
+          yth:['청년정책','취업·교육비·주거 지원을 지역별로 찾습니다'],
           setting:['설정','알림 · 프로필 · 내 정보'],
           star:['담아둔 공고','마감 하루 전에 알려드립니다'],
           job:['채용공고','기관 정보와 접수 기간'],
@@ -4079,6 +4099,7 @@ function drawDashMenu(){
     mine:    {ic:'📝', fn:"openMine()"},
     vol:     {ic:'🤝', fn:"openVol()"},
     wf:      {ic:'🏫', fn:"openWf()"},
+    yth:     {ic:'💰', fn:"openYth()"},
     biz:     {ic:'🏢', fn:"openBiz()"},
     avatar:  {ic:'🎨', fn:"openAvatar()"},
     input:   {ic:'🔄', fn:"tab('input')"},
@@ -5230,6 +5251,86 @@ function loadJobWf(x){
       + '<b>2024년 4월</b> 기준입니다. 치료사가 몇 명인지는 따로 나오지 않습니다.</p></div>';
   }).withFailureHandler(function(){}).wfOne(cred(), org);
   return true;
+}
+
+/* ═══════════════════ 청년정책 ═══════════════════
+ * 취업 지원금, 교육비, 주거, 자격증 응시료 같은 것들입니다.
+ * 채용공고와 성격이 완전히 달라 탭을 따로 뒀습니다.
+ * 내 지역 것을 위로 올리고, 전국 사업도 함께 보여줍니다.
+ */
+var YTH = { area:null, cat:'', q:'' };
+
+function openYth(){
+  tab('yth');
+  drawYthShell();
+  loadYth();
+}
+
+function drawYthShell(){
+  document.getElementById('ythBox').innerHTML =
+      '<div class="psort">'
+    + '<select id="ythArea" onchange="YTH.area=this.value;loadYth()"></select>'
+    + '<select id="ythCat" onchange="YTH.cat=this.value;loadYth()"></select>'
+    + '</div>'
+    + '<div class="f" style="margin-bottom:12px">'
+    + '<input id="ythQ" placeholder="정책 이름·내용으로 찾기" autocomplete="off"'
+    + ' oninput="YTH.q=this.value" onkeydown="if(event.key===\'Enter\')loadYth()"></div>'
+    + '<div id="ythList"></div>';
+}
+
+function loadYth(){
+  var box=document.getElementById('ythList');
+  if(!box) return;
+  box.innerHTML=loading('찾는 중');
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>'+esc(r.message||'')+'</div>'; return; }
+
+    var a=document.getElementById('ythArea');
+    if(a && !a.options.length){
+      a.innerHTML='<option value="">내 지역 + 전국</option>'
+        + (r.areas||[]).map(function(x){
+            return '<option value="'+esc(x.name)+'">'+esc(x.name)+' '+x.n+'건</option>';
+          }).join('');
+    }
+    var c=document.getElementById('ythCat');
+    if(c && !c.options.length){
+      c.innerHTML='<option value="">모든 분야</option>'
+        + (r.cats||[]).map(function(x){
+            return '<option value="'+esc(x.name)+'">'+esc(x.name)+' '+x.n+'건</option>';
+          }).join('');
+    }
+
+    if(!r.rows.length){
+      box.innerHTML='<div class="empty2">'
+        + (r.message?esc(r.message):'찾으시는 정책이 없습니다.')+'</div>';
+      return;
+    }
+    box.innerHTML='<p class="sub" style="margin:2px 0 10px">'
+      + (r.area?esc(r.area):(r.mine?esc(r.mine)+' + 전국':'전국'))
+      + ' <b>'+r.total+'건</b></p>'
+      + '<div class="hintbox" style="margin-top:0">'
+      + '신청 조건과 기간은 바뀔 수 있습니다. <b>자세한 내용은 운영기관에 확인해주세요.</b></div>'
+      + r.rows.map(ythCard).join('');
+  }).withFailureHandler(function(){
+    box.innerHTML='<div class="errbox"><b>불러오지 못했습니다</b>잠시 후 다시 열어주세요.</div>';
+  }).ythList(cred(), YTH.area, YTH.cat, YTH.q);
+}
+
+function ythCard(x){
+  return '<div class="ythrow">'
+    + '<div class="yh"><span class="yn">'+esc(x.name)+'</span>'
+    + (x.area?'<span class="ya'+(x.area==='전국'?' all':'')+'">'+esc(x.area)+'</span>':'')
+    + '</div>'
+    + (x.expl?'<div class="ye">'+esc(String(x.expl).slice(0,200))
+        +(String(x.expl).length>200?'…':'')+'</div>':'')
+    + (x.sprt?'<div class="ys"><b>지원 내용</b>'
+        +esc(String(x.sprt).slice(0,220))
+        +(String(x.sprt).length>220?'…':'')+'</div>':'')
+    + '<div class="yf">'
+    + (x.mcls?'<i>'+esc(x.mcls)+'</i>':'')
+    + (x.oper?'<i>'+esc(x.oper)+'</i>':'')
+    + (x.period&&x.period!==' ~ '?'<i>'+esc(x.period)+'</i>':'')
+    + '</div></div>';
 }
 
 /* ═══════════════════ 축하 ═══════════════════
@@ -8211,6 +8312,8 @@ function showPosts(r){
         + (x.job==='공통'
             ? '<i class="jb">작업치료사</i><i class="jb">물리치료사</i>'
             : (x.job?'<i class="jb">'+esc(x.job)+'</i>':''))
+        + (x.prof==='prof'?'<i class="pf2">🎓 대학 교수</i>'
+           : x.prof==='lab'?'<i class="pf2">🔬 연구직</i>':'')
         + (x.mixed?'<i class="mx">여러 직군 통합</i>':'')
         + (x.kind?'<i>'+esc(kindLabel(x.kind))+'</i>':'')
         + (x.hire?'<i>'+esc(String(x.hire).split(',')[0])+'</i>':'')
