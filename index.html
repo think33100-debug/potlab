@@ -3261,7 +3261,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v187 · 2026-09-07';
+var APP_VER = 'v188 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -9624,8 +9624,10 @@ function seedHistory(){
   try{ history.pushState({p:'app'}, '', location.href); }catch(e){}
 }
 try{ history.replaceState({p:'root'}, '', location.href); }catch(e){}
-seedHistory();
-seedHistory();          // 두 겹으로 쌓아 여유를 둡니다
+/* 자리를 넉넉히 쌓습니다.
+   두 겹이면 화면 몇 번 옮기다 바닥나서, 뒤로를 누르는 순간
+   토스트를 띄울 틈도 없이 브라우저가 나가버렸습니다. */
+for(var _s=0; _s<5; _s++) seedHistory();
 
 /* 앱으로 돌아왔을 때 자리가 비어 있을 수 있어 다시 채웁니다 */
 document.addEventListener('visibilitychange', function(){
@@ -9656,9 +9658,12 @@ window.addEventListener('popstate', function(){
     history.back();
     return;
   }
+  /* 두 겹으로 채웁니다. 한 겹이면 다음 뒤로에서 바닥나
+     토스트가 뜬 상태로 또 나가버립니다. */
+  seedHistory();
   seedHistory();
   EXIT_ARMED = true;
-  dbg('  → 띠를 띄웁니다');
+  dbg('  → 띠를 띄웁니다 · 남은 자리=' + history.length);
   exitToast();
   setTimeout(function(){ EXIT_ARMED = false; }, 2000);
 });
@@ -9694,9 +9699,15 @@ try{
       exitToast();
     }, 2500);
     setTimeout(function(){
+      var pwa = false;
+      try{
+        pwa = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+              || window.navigator.standalone === true;
+      }catch(e){}
       dbg('시작: 감지 걸림=' + (POP_ON?'예':'★아니요★')
         + ' · 쌓인 자리=' + history.length
-        + ' · 지금 화면=' + CURRENT);
+        + ' · 지금 화면=' + CURRENT
+        + '\n설치앱(PWA)=' + (pwa ? '★예 — 뒤로가기를 웹에서 못 막습니다★' : '아니요(브라우저)'));
     }, 1200);
   }
 }catch(e){}
