@@ -3215,7 +3215,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=154"></script>
+<script src="/app.js?v=155"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3261,7 +3261,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v203 · 2026-09-07';
+var APP_VER = 'v208 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -9518,11 +9518,14 @@ function openScreen(which){
   if(which === 'comm' && typeof openComm === 'function'){
     try{ openComm(''); return; }catch(e){}
   }
+  /* 화면부터 엽니다.
+     drawDash 처럼 그리기만 하고 화면을 안 바꾸는 함수가 있어서,
+     tab() 을 먼저 부르지 않으면 엉뚱한 화면에 머물렀습니다. */
+  tab(which);
   var fn = OPENERS[which];
   if(fn && typeof window[fn] === 'function'){
-    try{ window[fn](); return; }catch(e){}
+    try{ window[fn](); }catch(e){}
   }
-  tab(which);
 }
 
 
