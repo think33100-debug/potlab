@@ -3261,7 +3261,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v179 · 2026-09-07';
+var APP_VER = 'v183 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3379,7 +3379,13 @@ function catchCode(done){
   var err = q.match(/[?&]error=([^&]+)/);
 
   function wipe(){
-    try{ history.replaceState(null, '', location.pathname); }catch(e){}
+    /* 카카오가 붙여 보낸 ?code= 만 지웁니다.
+       예전에는 location.pathname 으로 통째로 갈아치워서
+       주소 뒤의 #yth 같은 화면 표시까지 함께 날아갔습니다.
+       그래서 새로고침하면 늘 첫 화면으로 돌아갔습니다. */
+    try{
+      history.replaceState(null, '', location.pathname + (location.hash || ''));
+    }catch(e){}
   }
 
   if(err){
@@ -3434,7 +3440,14 @@ function afterBoot(){
           if(ok){
             setRole(ME && ME.role === '학생' ? '학생' : '현직');
             msg('반갑습니다, ' + ((ME && ME.nick) ? ME.nick : '') + '님');
-            if(!openFromHash()) tab('dash');
+            /* 로그인하기 전에 보려던 화면이 있으면 그리로 보냅니다.
+               예전에는 GO_AFTER_LOGIN 을 담아두기만 하고 쓰지 않아
+               늘 본화면으로 갔습니다. */
+            if(GO_AFTER_LOGIN && KEEP_HASH[GO_AFTER_LOGIN]){
+              var go = GO_AFTER_LOGIN; GO_AFTER_LOGIN = '';
+              tab(go);
+            }
+            else if(!openFromHash()) tab('dash');
           }
         });
       }else{
@@ -3451,7 +3464,12 @@ function afterBoot(){
     checkKakao(function(ok){
       if(ok){
         setRole(ME && ME.role === '학생' ? '학생' : '현직');
-        if(!openFromHash() && CURRENT !== 'dash') tab('dash');
+        /* 새로고침으로 들어왔으면 보던 화면으로 돌아갑니다 */
+        if(GO_AFTER_LOGIN && KEEP_HASH[GO_AFTER_LOGIN]){
+          var go2 = GO_AFTER_LOGIN; GO_AFTER_LOGIN = '';
+          tab(go2);
+        }
+        else if(!openFromHash() && CURRENT !== 'dash') tab('dash');
         else if(CURRENT === 'dash') drawDash();
       }else{
         /* 토큰이 없거나 만료됐으면 홈으로 되돌립니다 */
@@ -9419,6 +9437,16 @@ var BOOT_DASH = false;   // 부팅 중에는 대시보드를 두 번 그리지 �
 /* 주소에 남길 화면.
  * 글쓰기·인증처럼 도중에 끊기면 곤란한 화면은 뺐습니다.
  * 그런 화면에서 새로고침하면 앞 화면으로 돌아가는 게 맞습니다. */
+/* 앱이 시작될 때 주소에 있던 화면을 미리 붙잡아 둡니다.
+ *
+ * 시작 과정에서 tab('home') 이 먼저 도는데, home 은 아래 목록에 없어
+ * 주소를 pathname 으로 갈아치웁니다. 그 순간 #yth 가 날아갔습니다.
+ * openFromHash 는 그 뒤에 불려서 볼 게 없었습니다.
+ * 그래서 지워지기 전에 여기서 먼저 담아둡니다. */
+var START_HASH = (function(){
+  try{ return String(location.hash || '').replace('#',''); }catch(e){ return ''; }
+})();
+
 var KEEP_HASH = {
   dash:1, view:1, post:1, hosp:1, jobs:1, region:1, calc:1, sev:1, ann:1, ui:1,
   noti:1, cal:1, star:1, setting:1, edu:1, vol:1, wf:1, yth:1,
@@ -9426,25 +9454,24 @@ var KEEP_HASH = {
 };
 
 function openFromHash(){
-  var h = String(location.hash || '').replace('#', '');
+  /* 주소에 남아 있으면 그것을, 이미 지워졌으면 시작할 때 담아둔 것을 씁니다.
+     로그인 확인이 끝나기 전에 불릴 수 있어, 로그인이 안 됐으면
+     START_HASH 를 지우지 않고 남겨둡니다. 확인이 끝난 뒤 다시 쓰입니다. */
+  var h = String(location.hash || '').replace('#', '') || START_HASH;
   if(!h) return false;
-  /* 예전에는 여기서 주소를 지웠습니다.
-     그러면 한 번 더 새로고침할 때 다시 첫 화면으로 갔습니다. 그대로 둡니다. */
+  if(!KEEP_HASH[h]) { START_HASH = ''; return false; }
 
-  /* 알림으로 들어올 때뿐 아니라, 새로고침으로 돌아올 때도 씁니다.
-     그래서 주소에 남기는 화면 전부를 받습니다. */
-  if(!KEEP_HASH[h]) return false;
-  var want = h;
-
-  if(!unlocked() && want !== 'home'){
-    GO_AFTER_LOGIN = want;
+  if(!unlocked()){
+    GO_AFTER_LOGIN = h;
     msg('로그인하면 바로 보여드리겠습니다');
     tab('unlock');
-    return true;
+    return true;             // START_HASH 는 남겨둡니다
   }
-  tab(want);
+  START_HASH = '';
+  tab(h);
   return true;
 }
+
 
 /* 앱이 이미 열려 있을 때 서비스 워커가 보내는 신호 */
 if('serviceWorker' in navigator){
