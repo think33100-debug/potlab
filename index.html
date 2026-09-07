@@ -3215,7 +3215,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=156"></script>
+<script src="/app.js?v=157"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3261,7 +3261,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v215 · 2026-09-07';
+var APP_VER = 'v216 · 2026-09-07';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -8365,6 +8365,16 @@ function doPosts(){
     var cached=sessionStorage.getItem(pkey);
     if(cached){ showPosts(JSON.parse(cached)); shown=true; }
   }catch(e){}
+
+  /* 방금 받은 것이면 서버를 다시 부르지 않습니다.
+     「내 직군 ↔ 전체」 를 오갈 때마다 매번 불러서 느렸습니다.
+     공고는 하루에 몇 번 들어오니 2분이면 넉넉합니다. */
+  var tkey = pkey + '_t';
+  if(shown){
+    var last = 0;
+    try{ last = Number(sessionStorage.getItem(tkey)) || 0; }catch(e){}
+    if(Date.now() - last < 120000) return;
+  }
   if(!shown) box.innerHTML=loading('공고를 불러오는 중');
 
   // 응답이 안 오면 왜 그런지 알려줍니다
@@ -8380,7 +8390,10 @@ function doPosts(){
 
   google.script.run.withSuccessHandler(function(r){
       if(POST_T) clearTimeout(POST_T);
-      try{ sessionStorage.setItem(pkey, JSON.stringify(r)); }catch(e){}
+      try{
+        sessionStorage.setItem(pkey, JSON.stringify(r));
+        sessionStorage.setItem(tkey, String(Date.now()));
+      }catch(e){}
       showPosts(r);
     })
     .withFailureHandler(function(e){
