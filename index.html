@@ -863,6 +863,32 @@
 
   /* 교육 소식 */
   /* 큼직한 탭 */
+  /* 홈 맨 위 바로가기 */
+  .quickwrap{margin:14px 0 4px}
+  .quickhi{font-size:12.5px;font-weight:800;color:var(--dim);margin:0 0 8px}
+  .quickgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+  .qbox{background:#fff;border:1.5px solid var(--line);border-radius:16px;
+    padding:18px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;
+    font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:transform .16s,border-color .16s}
+  .qbox:active{transform:scale(.96)}
+  .qbox i{font-size:32px;font-style:normal;line-height:1}
+  .qbox b{font-size:13.5px;font-weight:800;color:var(--ink)}
+  /* 직군·분류 고르는 네모 — 크게, 이모티콘 크게 */
+  .pickgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .pickbox{background:#fff;border:1.5px solid var(--line);border-radius:16px;
+    padding:22px 12px;display:flex;flex-direction:column;align-items:center;gap:5px;
+    font-family:inherit;cursor:pointer;text-align:center;
+    -webkit-tap-highlight-color:transparent;transition:transform .16s,border-color .16s}
+  .pickbox:active{transform:scale(.97)}
+  .pickbox i{font-size:38px;font-style:normal;line-height:1.1}
+  .pickbox b{font-size:15px;font-weight:800;color:var(--ink);margin-top:3px}
+  .pickbox span{font-size:11.5px;color:var(--dim);font-weight:600}
+  .pickbox.ot{border-color:#cfe3dd}
+  .pickbox.ot b{color:var(--accent)}
+  .pickbox.pt{border-color:#d3dded}
+  .pickbox.pt b{color:#1d4e89}
+  .pickbox.on{border-width:2px;border-color:var(--accent);background:var(--accent-soft)}
   .etabs{display:flex;gap:8px;margin-bottom:14px}
   .etab{flex:1;padding:12px 4px;border:1px solid var(--line);background:#fff;
     white-space:nowrap;font-size:13px;
@@ -1037,6 +1063,16 @@
 
   /* 채널 */
   .cdark .chbar{padding-bottom:10px}
+  /* 커뮤니티 방 고르기 — 큰 네모 */
+  .chgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0 4px}
+  .chbox{background:#16171a;border:1px solid #26282d;border-radius:16px;
+    padding:20px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-family:inherit;cursor:pointer;text-align:center;
+    -webkit-tap-highlight-color:transparent;transition:transform .16s,border-color .16s}
+  .chbox:active{transform:scale(.96);border-color:#3a3d44}
+  .chbox i{font-size:32px;font-style:normal;line-height:1.1}
+  .chbox b{font-size:14px;font-weight:800;color:#eef1f4;margin-top:3px}
+  .chbox span{font-size:11px;color:#8b8f96;line-height:1.5;word-break:keep-all}
   .cdark .chip3{background:#16171a;border-color:#26282d;color:#8b8f96;
     font-size:13px;padding:7px 13px}
   .cdark .chip3.on{background:#e8352e;border-color:#e8352e;color:#fff}
@@ -1871,6 +1907,13 @@
     margin-bottom:11px}
   .banner .bc{display:inline-flex;align-items:center;gap:5px;background:var(--accent);
     color:#fff;border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:700}
+  /* 커뮤니티 배너는 가운데로. 왼쪽에 몰려 있어 어색했습니다. */
+  .cbad .banner .btx{text-align:center;padding:18px 16px}
+  .cbad .banner .bad{margin-left:auto;margin-right:auto}
+  .cbad .banner .bt,.cbad .banner .bd{text-align:center}
+  .cbad .banner .bc{margin:0 auto}
+  .bootad .banner .btx{text-align:center}
+  .bootad .banner .bad,.bootad .banner .bc{margin-left:auto;margin-right:auto}
   .bdots{display:flex;justify-content:center;gap:5px;margin-top:9px}
   .bdots i{width:6px;height:6px;border-radius:50%;background:var(--line);
     transition:background-color .3s,width .3s}
@@ -2129,6 +2172,9 @@
   <div id="pane-home">
     <div class="brand" id="brandBox"></div>
     <div id="whoBox"></div>
+    <!-- 이미 쓰시는 분은 소개글을 다시 볼 이유가 없습니다.
+         맨 위에서 바로 들어가게 합니다. -->
+    <div id="quickBox" class="hide"></div>
     <div id="addHomeBox"></div>
 
     <div class="sect">
@@ -3215,7 +3261,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=161"></script>
+<script src="/app.js?v=162"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3261,7 +3307,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v252 · 2026-09-08';
+var APP_VER = 'v257 · 2026-09-08';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3859,7 +3905,7 @@ function drawHome(b){
   drawHomeCTA();
   drawWho();
   drawAddHome();
-  startBanner(b.banners);
+  startBanner(b.banners, b.bannerSpot);
   attachRipple();
   revealHome();                 // 새로 그려진 요소도 걸어줍니다
 
@@ -4383,14 +4429,26 @@ function drawComm(r){
 
   /* 채널은 위에 한 줄로 두고 손으로 넘깁니다.
      글이 먼저 보여야 사람들이 읽습니다. */
-  h+='<div class="chbar" id="chBar">'
-    + '<button class="chip3'+(CH_NOW===''?' on':'')+'" data-ch="" onclick="pickCh(\'\')">'
-    + '전체</button>';
-  CH_LIST.forEach(function(c){
-    h+='<button class="chip3'+(CH_NOW===c.id?' on':'')+'" data-ch="'+c.id+'" '
-      + 'onclick="pickCh(\''+c.id+'\')">'+esc(c.name)+'</button>';
-  });
-  h+='</div>';
+  /* 「전체」 일 때는 큰 네모로 보여줍니다. 고르기 쉽고 한눈에 들어옵니다.
+     방을 고른 뒤에는 가로 칩으로 바꿔서 글 읽을 자리를 넓힙니다. */
+  if(!CH_NOW){
+    h+='<div class="chgrid">';
+    CH_LIST.forEach(function(c){
+      h+='<button class="chbox" onclick="pickCh(\''+c.id+'\')">'
+        + '<i>'+chIcon(c.id)+'</i>'
+        + '<b>'+esc(c.name)+'</b>'
+        + '<span>'+esc(c.desc||'')+'</span></button>';
+    });
+    h+='</div>';
+  } else {
+    h+='<div class="chbar" id="chBar">'
+      + '<button class="chip3" data-ch="" onclick="pickCh(\'\')">전체</button>';
+    CH_LIST.forEach(function(c){
+      h+='<button class="chip3'+(CH_NOW===c.id?' on':'')+'" data-ch="'+c.id+'" '
+        + 'onclick="pickCh(\''+c.id+'\')">'+esc(c.name)+'</button>';
+    });
+    h+='</div>';
+  }
 
   /* 최신순 · 인기순 */
   h+='<div class="csort">'
@@ -4478,6 +4536,14 @@ function pickSort(s){
   var n=document.getElementById('csNote');
   if(n) n.textContent = (s==='hot') ? '댓글이 많은 글부터' : '';
   loadCommPosts();
+}
+
+/* 방마다 이모티콘. 글자만 있으면 다 비슷해 보입니다. */
+function chIcon(id){
+  var m={ free:'💬', life:'🌙', love:'💗', edurv:'📚',
+          clinic:'🩺', pay:'💰', move:'🚪', itv:'🎤', cert:'📜', biz:'🏠',
+          exam:'📝', prac:'🏥', grade:'📖', first:'🚀', campus:'🎒', path:'🧭' };
+  return m[id] || '💬';
 }
 
 function pickCh(id){
@@ -5664,12 +5730,49 @@ function openEdu(){
 }
 
 /* 교육 화면 전체 그리기 (저장된 것·새로 받은 것 공통) */
+/* 교육은 지금 작업치료사 것만 모으고 있습니다.
+   물리치료사 것은 아직 없어서, 직군을 먼저 고르게 하고
+   물리치료사를 고르면 준비 중이라고 알립니다. */
+var EDU_JOB = '';
+
 function drawEduFull(r){
   var box=document.getElementById('eduBox');
   if(!box) return;
+
+  /* 직군을 안 골랐으면 고르는 화면부터 */
+  if(!EDU_JOB){
+    box.innerHTML='<div class="card"><h2>교육 · 학술</h2>'
+      + '<p class="sub">보수교육과 학회·세미나 소식입니다.<br>'
+      + '어느 직군의 교육을 보시겠어요?</p></div>'
+      + '<div class="pickgrid">'
+      + '<button class="pickbox ot" onclick="pickEduJob(\'작업치료사\')">'
+        + '<i>🧠</i><b>작업치료사</b><span>보수교육 · 학술</span></button>'
+      + '<button class="pickbox pt" onclick="pickEduJob(\'물리치료사\')">'
+        + '<i>🦴</i><b>물리치료사</b><span>준비 중</span></button>'
+      + '</div>';
+    attachRipple();
+    return;
+  }
+
+  /* 물리치료사는 아직 준비 중 */
+  if(EDU_JOB==='물리치료사'){
+    box.innerHTML='<div class="card"><h2>교육 · 학술</h2>'
+      + '<p class="sub">물리치료사 교육 소식</p></div>'
+      + '<div class="empty2" style="margin-top:12px">'
+      + '<b style="font-size:15px">준비 중입니다</b><br>'
+      + '물리치료사 보수교육·학술 소식은 아직 모으는 중입니다.<br>'
+      + '곧 열어드리겠습니다.</div>'
+      + '<button class="ghost" style="margin-top:12px;width:100%" '
+      + 'onclick="pickEduJob(\'\')">다른 직군 고르기</button>';
+    attachRipple();
+    return;
+  }
+
   var h='<div class="card"><h2>교육 · 학술</h2>'
-    + '<p class="sub">협회 보수교육과 학회·세미나 소식입니다. '
-    + '누르면 협회 홈페이지 원문으로 갑니다.</p></div>';
+    + '<p class="sub">작업치료사 보수교육과 학회·세미나 소식입니다. '
+    + '누르면 협회 홈페이지 원문으로 갑니다.</p>'
+    + '<button class="ghost" style="margin-top:9px" '
+    + 'onclick="pickEduJob(\'\')">직군 다시 고르기</button></div>';
   h+='<div class="etabs">'
     + '<button class="etab'+(EDU_KIND===''?' on':'')+'" onclick="pickEdu(\'\')">전체</button>'
     + '<button class="etab'+(EDU_KIND==='보수교육'?' on':'')+'" onclick="pickEdu(\'보수교육\')">보수교육</button>'
@@ -5678,6 +5781,18 @@ function drawEduFull(r){
   box.innerHTML=h;
   attachRipple();
   drawEdu(r);
+}
+
+function pickEduJob(j){
+  EDU_JOB=j;
+  if(!j){ drawEduFull({ok:true,rows:[]}); return; }
+  if(j==='물리치료사'){ drawEduFull({ok:true,rows:[]}); return; }
+  var box=document.getElementById('eduBox');
+  if(box) box.innerHTML=loading('불러오는 중');
+  google.script.run.withSuccessHandler(function(r){
+    if(r.ok) drawEduFull(r);
+  }).withFailureHandler(function(e){ boxFail('eduBox','교육',e); })
+    .getEdu(cred(), EDU_KIND);
 }
 
 function pickEdu(k){
@@ -5748,7 +5863,7 @@ function openStars(){
           + '<div class="cch">'+esc(x.org)
           + (x.closed?' · 마감':(d!==null?' · '+(d===0?'오늘 마감':'D-'+d):''))+'</div>'
           + '<div class="ctt">'+esc(x.title)+'</div>'
-          + '<div class="cmt2">'+esc(x.from||'?')+' ~ '+esc(x.to||'?')+'</div></button>';
+          + '<div class="cmt2">'+esc(dateLine(x)||dateNone())+'</div></button>';
       });
     };
     if(live.length){ h+='<div class="mcat">접수 중</div>'; draw(live); }
@@ -5842,7 +5957,8 @@ function openJob(id){
     + line('근무 지역', x.region)
     + line('학력', x.edu)
     + line('뽑는 인원', nopeLabel(x))
-    + line('접수 시작', x.from)
+    + (x.from ? line('접수 시작', x.from) : '')
+    + (!x.from && x.workFrom ? line('근무 시작', x.workFrom) : '')
     + line('접수 마감', x.to)
     + (x.prevFrom
         ? line('지난 공고', x.prevFrom + (x.prevGap?' ('+x.prevGap+')':''))
@@ -5956,7 +6072,7 @@ function jobSchedule(x){
       + '<div class="tline">'
       + '<div class="ti '+(live?'now':'done')+'"><i></i><div class="tb">'
       + '<b>접수'+(live?' <em>지금 여기</em>':'')+'</b>'
-      + '<span>'+esc(x.from||'?')+' ~ '+esc(x.to||'?')
+      + '<span>'+esc(dateLine(x)||dateNone())
       + (live && e8 ? ' · '+leftDays(e8) : '')+'</span></div></div>'
       + '<div class="ti wait"><i></i><div class="tb"><b>이후 일정</b>'
       + '<span>공고문에 적혀 있습니다. 아래 「공고 확인하러 가기」에서 보실 수 있습니다.</span>'
@@ -5991,6 +6107,28 @@ function leftDays(v){
 
 /* ── 자세한 내용 ─────────────────────────────────────
    지원자격·우대사항 같은 건 길어서 접어둡니다. */
+/* 접수 기간을 한 가지 모양으로 보여줍니다.
+ *
+ * 예전에는 시작일이 없으면 「? ~ 2026.09.17」 처럼 나왔습니다.
+ * 물음표는 뭔가 잘못된 것처럼 보입니다.
+ * 시작일을 모르면 마감만, 둘 다 모르면 공고문을 보라고 알립니다.
+ */
+function dateLine(x){
+  var f = String(x.from||'').trim(), t = String(x.to||'').trim();
+  /* 시작일을 모르면 날짜를 지어내지 않습니다.
+     「공고 2026.09.02」 처럼 붙이면 접수 시작일로 오해합니다.
+     모르는 것은 「접수일」 이라고만 적습니다. */
+  if(f && t) return f + ' ~ ' + t;
+  if(t) return '접수일 ~ ' + t;
+  if(f) return f + '부터';
+  return '접수일 · 공고문 확인';
+}
+
+/* 접수 기간이 없을 때 안내할 말 */
+function dateNone(){
+  return '접수일 · 공고문 확인';
+}
+
 function jobMore(x){
   /* 지원자격·전형방법 같은 건 공고문에 다 있습니다. 여기서는 안 보여줍니다.
      이 칸의 일은 하나 — 이 기관 신입사원 평균 초임을 딱 알려주는 것입니다.
@@ -6278,7 +6416,7 @@ function drawCal(){
         + '<div class="ctt">'+esc(x.title)+'</div>'
         + '<div class="calbar"><i style="left:'+barL(it,lastD,y,mo)
         + '%;width:'+barW(it,lastD,y,mo)+'%"></i></div>'
-        + '<div class="cmt2">'+esc(x.from||'?')+' ~ '+esc(x.to||'?')
+        + '<div class="cmt2">'+esc(dateLine(x)||dateNone())
         + (x.closed?' · 마감':'')+'</div></button>';
     });
   }
@@ -6957,6 +7095,26 @@ function revealIn(root){
   });
 }
 
+/* 로그인한 분에게 홈 맨 위에 바로가기를 보여줍니다.
+   소개글을 지나 아래로 내려갈 필요가 없습니다. */
+function drawQuick(){
+  var box=document.getElementById('quickBox');
+  if(!box) return;
+  if(!KTOKEN || !ME){ box.className='hide'; return; }
+  box.className='';
+  box.innerHTML='<div class="quickwrap">'
+    + '<p class="quickhi">바로 이용하러 가기</p>'
+    + '<div class="quickgrid">'
+    + '<button class="qbox" onclick="openScreen(\'view\')">'
+      + '<i>💰</i><b>급여</b></button>'
+    + '<button class="qbox" onclick="openScreen(\'hosp\')">'
+      + '<i>🏥</i><b>병원</b></button>'
+    + '<button class="qbox" onclick="openScreen(\'post\')">'
+      + '<i>📋</i><b>공고</b></button>'
+    + '</div></div>';
+  attachRipple();
+}
+
 function revealHome(){ revealIn('#pane-home'); watchMotion('#pane-home'); }
 
 /* 그림 안의 움직임을 화면에 닿을 때 시작합니다 */
@@ -7068,7 +7226,7 @@ function staggerIn(sel){ /* 순차 등장은 사용하지 않습니다 */ }
 
 /* ===== 내 정보 배너 ===== */
 /* ===== 배너 ===== */
-var BN = { list: [], i: 0, timer: null };
+var BN = { list: [], i: 0, timer: null, spot: null };
 
 function bannerHTML(b){
   return '<a class="banner bfade" href="'+esc(b.url)+'" target="_blank" rel="noopener">'
@@ -7091,14 +7249,22 @@ function paintBanner(){
       }).join('')+'</div>' : '';
   /* bannerBoot 은 시작 화면 안에 있습니다.
      로고 아래 가운데에 떠올랐다가 시작 화면과 함께 사라집니다. */
-  ['bannerHome','bannerDash','bannerBoot'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el) el.innerHTML = bannerHTML(b) + dots;
+  /* 광고가 뜨는 자리는 셋입니다. 관리자에서 각각 켜고 끌 수 있습니다.
+       bannerBoot  새로고침할 때 시작 화면
+       bannerHome  홈 맨 아래
+       bannerDash  커뮤니티 들어갈 때 */
+  var spot = BN.spot || { boot:true, home:true, dash:true };
+  [['bannerHome','home'],['bannerDash','dash'],['bannerBoot','boot']].forEach(function(t){
+    var el=document.getElementById(t[0]);
+    if(!el) return;
+    if(spot[t[1]] === false){ el.innerHTML=''; return; }
+    el.innerHTML = bannerHTML(b) + dots;
   });
   attachRipple();
 }
 
-function startBanner(list){
+function startBanner(list, spot){
+  if(spot) BN.spot = spot;
   BN.list = (list||[]).filter(function(b){ return b && (b.title || b.img); });
   if(!BN.list.length){
     ['bannerHome','bannerDash'].forEach(function(id){
@@ -7143,6 +7309,8 @@ function drawHomeCTA(){
 }
 
 function drawWho(){
+  /* 로그인 상태가 바뀔 때마다 바로가기도 함께 다시 그립니다 */
+  try{ drawQuick(); }catch(e){}
   /* 등록할 때 직군을 이미 골랐으므로, 로그인 상태에서는
      홈의 직군 고르기를 감춥니다. 눌러도 바뀌지 않아 헷갈립니다. */
   var pick=document.getElementById('homeJobPick');

@@ -115,6 +115,15 @@
     padding:12px;font-size:12.5px;color:var(--dim);text-align:center}
   .osum b{display:block;font-size:20px;font-weight:800;color:var(--ink);margin-top:3px}
   .osum .on b{color:#b4432c}
+  /* 광고 자리 */
+  .spotrow{display:flex;align-items:center;gap:11px;background:#fff;
+    border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;
+    margin-bottom:8px;cursor:pointer}
+  .spotrow.on{border-color:var(--accent);background:var(--accent-soft)}
+  .spotrow input{width:19px;height:19px;flex-shrink:0;accent-color:var(--accent)}
+  .spotrow .st{display:flex;flex-direction:column;gap:2px}
+  .spotrow .st b{font-size:13.5px;font-weight:700}
+  .spotrow .st i{font-style:normal;font-size:11.5px;color:var(--dim)}
   .osec{font-size:14px;font-weight:800;margin:26px 0 4px;color:var(--ink)}
   .arow{background:#fff;border:1px solid var(--line);border-radius:12px;
     padding:13px;margin-bottom:7px}
@@ -140,23 +149,35 @@
   .orow .of{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
   .orow .of i{font-style:normal;font-size:11px;color:#8b979d;
     background:var(--bg);border-radius:6px;padding:3px 8px}
+  /* 확인 필요 탭 — 제일 자주 쓰는 곳이라 눈에 띄게 */
+  .tabs .tb.urg{border-color:#e8a894;color:#b4432c;font-weight:800}
+  .tabs .tb.urg .n{background:#b4432c;color:#fff;font-weight:800}
+  .tabs .tb.urg.on{background:#b4432c;border-color:#b4432c;color:#fff}
+  .tabs .tb.urg.on .n{background:#fff;color:#b4432c}
+  /* 공고 확인하러 가기 — 크게 눈에 띄게 */
+  .jgo{background:var(--accent);color:#fff;border-radius:10px;padding:11px;
+    text-align:center;font-size:13px;font-weight:800;margin-top:9px;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;transition:opacity .18s}
+  .jgo:active{opacity:.8}
+  .jgo.off{background:#eef1f2;color:#9aa6ab;cursor:default;font-weight:700}
   /* 확인 필요 (보류함) */
-  .hrow{background:#fff;border:1px solid var(--line);border-radius:13px;
-    padding:14px;margin-bottom:9px}
+  .hrow{background:#fff;border:2px solid #f0cfc4;border-radius:13px;
+    padding:15px;margin-bottom:11px;box-shadow:0 1px 3px rgba(180,67,44,.06)}
   .hrow .hh{display:flex;align-items:baseline;gap:8px;margin-bottom:5px}
-  .hrow .hh b{font-size:14px;font-weight:800}
+  .hrow .hh b{font-size:15.5px;font-weight:800;color:#0e1214}
   .hrow .hto{margin-left:auto;font-size:11.5px;color:var(--dim)}
-  .hrow .ht{font-size:13.5px;color:#3f4c52;line-height:1.55;word-break:keep-all}
-  .hrow .hw{margin-top:8px;background:#fdf3e6;border-radius:8px;padding:8px 11px;
-    font-size:12px;color:#8a5c14;line-height:1.6}
+  .hrow .ht{font-size:14.5px;color:#0e1214;line-height:1.55;word-break:keep-all;
+    font-weight:600;margin-top:3px}
+  .hrow .hw{margin-top:9px;background:#fdece6;border-radius:9px;padding:10px 12px;
+    font-size:12.5px;color:#b4432c;line-height:1.6;font-weight:600}
   .hrow .hb{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:11px}
   .hrow .hlink{flex:1;min-width:150px;font-size:12.5px;font-weight:700;color:var(--accent)}
   .hrow select{border:1px solid var(--line);border-radius:8px;padding:7px 9px;
     font-family:inherit;font-size:12.5px;background:#fff}
-  .hrow .hup{background:var(--accent);color:#fff;border:0;border-radius:8px;
-    padding:9px 15px;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer}
-  .hrow .hdr{background:#fff;color:#b4432c;border:1px solid #f0cfc4;border-radius:8px;
-    padding:9px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+  .hrow .hup{flex:1;background:var(--accent);color:#fff;border:0;border-radius:9px;
+    padding:12px 15px;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer}
+  .hrow .hdr{background:#fff;color:#b4432c;border:1.5px solid #e8a894;border-radius:9px;
+    padding:12px 18px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
   .tgrp{font-size:11.5px;font-weight:800;color:var(--dim);letter-spacing:.03em;
     margin:14px 0 6px;padding-left:2px}
   .tgrp:first-of-type{margin-top:0}
@@ -302,7 +323,7 @@
     <div class="tabs">
       <button class="tb" data-f="jobs" onclick="openJobs('live')">공고 관리<span class="n" id="c-jobs"></span></button>
       <button class="tb" data-f="biz" onclick="openBiz()">기업 계정<span class="n" id="c-biz"></span></button>
-      <button class="tb" data-f="hold" onclick="openHold()">확인 필요<span class="n" id="c-hold"></span></button>
+      <button class="tb urg" data-f="hold" onclick="openHold()">확인 필요<span class="n" id="c-hold"></span></button>
       <button class="tb" data-f="org" onclick="openOrg()">기관 목록<span class="n" id="c-org"></span></button>
     </div>
 
@@ -345,14 +366,18 @@
       <div id="jobsList"></div>
     </div>
 
-    <div id="orgWrap" class="hide">
+    <div id="spotWrap" class="hide"></div>
+
+  <div id="orgWrap" class="hide">
     <p class="hint">공고를 <b>자동으로 모을 수 있는 기관</b>과 <b>안 되는 기관</b>입니다.
       한 번이라도 자동으로 모았으면 「됨」으로 남습니다.<br>
       한글 첨부만 올리는 곳은 「안 됨」이고, 그런 공고는 확인 필요로 넘어갑니다.</p>
     <div id="orgList"></div>
 
     <h3 class="osec">쓰고 있는 API</h3>
-    <p class="hint">어디서 무엇을 가져오는지 정리한 것입니다.</p>
+    <p class="hint">어디서 무엇을 가져오는지 정리한 것입니다.<br>
+      <b>└ 로 시작하는 줄</b>은 신청은 했지만 쓸모가 없어 안 쓰는 기능입니다.
+      같은 것을 다시 뒤지지 않도록 이유를 적어뒀습니다.</p>
     <div id="apiList"></div>
   </div>
 
@@ -425,12 +450,16 @@
         <button class="add" onclick="addBanner()">+ 배너 추가</button>
         <button class="save" onclick="saveBanners()">저장하기</button>
       </div>
+
+      <h3 class="osec">광고가 뜨는 자리</h3>
+      <p class="bhelp">광고를 어디에 띄울지 고릅니다. 끄면 그 자리에는 안 나옵니다.</p>
+      <div id="spotBox"></div>
     </div>
   </div>
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=158"></script>
+<script src="/app.js?v=162"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -653,6 +682,7 @@ function openBanner(){
     drawBanners();
   }).withFailureHandler(function(e){ msg(e.message); })
     .adminGetBanners(KEY);
+  drawSpot(null);
 }
 
 function drawBanners(){
@@ -1186,11 +1216,16 @@ function drawJobs(rows){
       + '<br>접수 '+esc(r.from||'-')+' ~ '+esc(r.to||'-')
       + ' · 수집 '+esc(r.at||'-')
       + '</div>'
+      /* 공고를 봐야 숨길지 말지 정합니다.
+         작은 「원문」 버튼이라 눈에 안 띄어서 크게 올렸습니다. */
+      + (r.url
+          ? '<div class="jgo" onclick="window.open(\'' + esc(r.url) + '\',\'_blank\')">'
+            + '공고 확인하러 가기 ›</div>'
+          : '<div class="jgo off">공고 주소가 없습니다</div>')
       + '<div class="acts">'
       + '<button onclick="jobEdit(\'' + esc(r.id) + '\')">고치기</button>'
       + '<button class="'+(r.hidden?'re':'ex')+'" onclick="jobHide(\'' + esc(r.id) + '\','+(r.hidden?1:0)+')">'
       + (r.hidden?'다시 보이기':'숨기기')+'</button>'
-      + (r.url?'<button onclick="window.open(\'' + esc(r.url) + '\',\'_blank\')">원문</button>':'')
       + '<span class="idcopy">'+esc(r.id)+'</span>'
       + '</div>'
       + '<div class="jedit hide" id="je-'+esc(r.id)+'"></div>'
@@ -1316,6 +1351,42 @@ function openOrg(){
   }).withFailureHandler(function(){}).adminApiList(KEY);
 }
 
+/* ===== 광고 자리 =====
+   광고가 뜨는 곳은 셋입니다. 각각 켜고 끌 수 있습니다. */
+var SPOT = { boot:true, home:true, dash:true };
+
+function drawSpot(spot){
+  if(spot) SPOT = spot;
+  var box=document.getElementById('spotBox');
+  if(!box) return;
+  var rows=[
+    ['boot','새로고침 화면','앱을 열 때 로고 아래'],
+    ['home','홈 맨 아래','홈 화면을 끝까지 내렸을 때'],
+    ['dash','커뮤니티','커뮤니티에 들어갈 때']
+  ];
+  box.innerHTML = rows.map(function(t){
+    var on = SPOT[t[0]] !== false;
+    return '<label class="spotrow'+(on?' on':'')+'">'
+      + '<input type="checkbox" '+(on?'checked':'')+' '
+      + 'onchange="SPOT[\''+t[0]+'\']=this.checked;'
+      + 'this.parentNode.className=\'spotrow\'+(this.checked?\' on\':\'\')">'
+      + '<span class="st"><b>'+t[1]+'</b><i>'+t[2]+'</i></span></label>';
+  }).join('')
+  + '<button class="save" style="width:100%;margin-top:10px" onclick="saveSpot()">'
+  + '광고 자리 저장</button>';
+}
+
+function saveSpot(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  msg('저장하는 중입니다');
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    msg(r.message);
+    if(r.spot) SPOT=r.spot;
+  }).withFailureHandler(function(){ msg('저장하지 못했습니다'); })
+    .adminSetBannerSpot(KEY, SPOT);
+}
+
 function drawApi(r){
   var rows=r.rows||[];
   document.getElementById('apiList').innerHTML =
@@ -1390,8 +1461,11 @@ function drawHold(rows){
       + (r.to?'<span class="hto">~'+esc(r.to)+'</span>':'')+'</div>'
       + '<div class="ht">'+esc(r.title)+'</div>'
       + '<div class="hw">'+esc(r.why||'직군을 가릴 수 없습니다')+'</div>'
+      + (r.url
+          ? '<div class="jgo" onclick="window.open(\''+esc(r.url)+'\',\'_blank\')">'
+            + '공고 확인하러 가기 ›</div>'
+          : '<div class="jgo off">공고 주소가 없습니다</div>')
       + '<div class="hb">'
-      + (r.url?'<a href="'+esc(r.url)+'" target="_blank" class="hlink">공고 원문 열기 ›</a>':'')
       + '<select id="hj'+r.line+'">'
       + '<option value="">직군 그대로</option>'
       + '<option value="작업치료사">작업치료사</option>'

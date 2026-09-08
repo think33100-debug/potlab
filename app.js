@@ -12,7 +12,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
 
 /* 이 파일이 최신인지 화면 아래에서 바로 확인하려고 둡니다.
    index.html 이 이 값을 읽어 버전과 함께 찍습니다. */
-var APP_JS_VER = 'a24 · 2026-09-07';
+var APP_JS_VER = 'a25 · 2026-09-08';
 
 (function () {
   'use strict';
@@ -30,7 +30,7 @@ var APP_JS_VER = 'a24 · 2026-09-07';
     'getStudentCard', 'getMoveEstimate', 'calcSalary', 'searchHospital', 'suggestHospitals',
     'hospitalDetail', 'compareHospitals', 'topHospitals', 'jobRegionSummary', 'regionHospitals',
     'densityTable', 'regionOverview', 'regionDetail', 'regionSggHospitals', 'submitFeedback', 'adminList',
-    'adminToggle', 'adminEditSalary', 'adminGetBanners', 'adminSaveBanners',
+    'adminToggle', 'adminEditSalary', 'adminGetBanners', 'adminSetBannerSpot', 'adminSaveBanners',
     'commChannels', 'commOpen', 'commList', 'commRead', 'commWrite', 'commDelete', 'commReport',
     'adminCommList', 'adminCommHide',
     'commComment', 'commCommentDelete', 'commLike', 'commMine', 'commAvatars', 'commSetAvatar',
