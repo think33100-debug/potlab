@@ -3281,7 +3281,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=163"></script>
+<script src="/app.js?v=164"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3327,7 +3327,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v258 · 2026-09-09';
+var APP_VER = 'v259 · 2026-09-09';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -5975,7 +5975,7 @@ function openJob(id){
     + line('직군', x.job==='공통'?'작업치료사 · 물리치료사':x.job)
     + (x.mixed?line('참고','여러 직군을 함께 뽑는 공고입니다'):'')
     + line('채용 구분', kindLabel(x.kind))
-    + line('고용 형태', x.hire)
+    + line('고용 형태', hireLabel(x.hire))
     + line('근무 지역', x.region)
     + line('학력', x.edu)
     + line('뽑는 인원', nopeLabel(x))
@@ -8718,10 +8718,8 @@ function showPosts(r){
       + ' onclick="openJob(\''+x.id+'\')">'
       + '<div class="ph">'
       + (isNew?'<span class="pnew">NEW</span>':'')
-      + '<span class="porg">'+esc(x.org)
-      /* 기관명 글자로 어림한 분류는 밝힙니다. 심평원 종별·수집처로 가른 것은 표시 없음 */
-      + (x.basis==='이름' ? '<span class="pest" title="기관 종류를 이름으로 어림했습니다">분류 추정</span>' : '')
-      + '</span>'
+      /* 「분류 추정」 표시는 관리자 화면에만 둡니다. 회원에게는 안 보입니다 (2026-09-09) */
+      + '<span class="porg">'+esc(x.org)+'</span>'
       + (shut
           ? '<span class="pclosed">마감</span>'
           : (d!==null ? '<span class="pd'+(soon?' hot':'')+'">'
@@ -8736,8 +8734,9 @@ function showPosts(r){
            : x.prof==='lab'?'<i class="pf2">🔬 연구직</i>':'')
         + (x.mixed?'<i class="mx">여러 직군 통합</i>':'')
         + (x.kind?'<i>'+esc(kindLabel(x.kind))+'</i>':'')
-        + (x.hire?'<i>'+esc(String(x.hire).split(',')[0])+'</i>':'')
-        + (x.region?'<i>'+esc(String(x.region).split(',').slice(0,2).join('·'))+'</i>':'')
+        + (x.hire?'<i>'+esc(hireLabel(String(x.hire).split(',')[0]))+'</i>':'')
+        /* 「전남광주통합특별시」 는 「전남」 으로. 화성시 만세구·효행구, 인천 서해구는 실제 지명이라 그대로 */
+        + (x.region?'<i>'+esc(String(x.region).replace(/전남광주(통합특별시)?/g,'전남').split(',').slice(0,2).join('·'))+'</i>':'')
         + (x.nope?'<i>'+x.nope+'명</i>':'')
       + '</div>'
       + '<div class="pf">'
@@ -9169,6 +9168,14 @@ var REGION_LAST = null;
 function kindLabel(k){
   var map = { '병원':'병원(일반)', '상급종합':'상급종합병원', '상급종합병원':'상급종합병원' };
   return map[k] || k;
+}
+/* 워크넷 고용형태가 코드(10·20)로 오는 것을 말로 바꿉니다. 코드가 아니면 그대로 */
+var HIRE_CODE = { '4':'파견', '10':'정규직', '11':'정규직(시간선택제)',
+                  '20':'계약직', '21':'계약직(시간선택제)', 'Y':'대체인력' };
+function hireLabel(v){
+  var t = String(v==null?'':v).trim();
+  if(!t) return '';
+  return t.split(',').map(function(x){ x=x.trim(); return HIRE_CODE[x] || x; }).join(', ');
 }
 
 /* 시군구를 눌렀을 때 — 그 안의 병원 목록 */

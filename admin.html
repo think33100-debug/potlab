@@ -287,6 +287,7 @@
   .jbadge.f{background:#d9ece5;color:var(--accent)}
   .jbadge.h{background:#eceff0;color:var(--dim)}
   .jbadge.c{background:#f6ddd4;color:var(--warn)}
+  .jbadge.e{background:#fff3d6;color:#8a5a00}   /* 기관 종류를 이름으로 어림한 것 */
   .jedit{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
   .jf{margin-bottom:9px}
   .jf label{display:block;font-size:11.5px;font-weight:700;color:#3f4c52;margin-bottom:3px}
@@ -459,7 +460,7 @@
 </div>
 <div id="msg"></div>
 
-<script src="/app.js?v=162"></script>
+<script src="/app.js?v=164"></script>
 <script>
 var KEY='';
 function msg(t){var m=document.getElementById('msg');m.textContent=t;m.className='show';
@@ -1208,10 +1209,13 @@ function drawJobs(rows){
       + (r.fixed?'<span class="jbadge f">고침 '+r.fixedKeys+'</span>':'')
       + (r.hidden?'<span class="jbadge h">숨김</span>':'')
       + (r.closed?'<span class="jbadge c">마감</span>':'')
+      /* 기관 종류를 이름으로 어림한 것 — 회원 화면에는 안 보이고 여기서만 확인합니다 */
+      + (r.basis==='이름'?'<span class="jbadge e" title="기관 종류를 이름으로 어림했습니다">분류 추정</span>':'')
       + '</div>'
       + '<div class="jt">'+esc(r.title||'(제목 없음)')+'</div>'
       + '<div class="jm">'
       + esc(r.job||'-')+' · '+esc(r.region||'지역 없음')
+      + (r.cls?' · '+esc(r.cls):'')
       + ' · '+(r.nope===''?'인원 없음':esc(r.nope)+'명')
       + '<br>접수 '+esc(r.from||'-')+' ~ '+esc(r.to||'-')
       + ' · 수집 '+esc(r.at||'-')
