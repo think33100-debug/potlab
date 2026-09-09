@@ -72,6 +72,20 @@
     transition:background-color .26s ease,color .26s ease,border-color .26s ease,transform .26s}
   .tab:active{transform:scale(.97)}
   .tab.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+  /* 채용공고 기관 종류 탭 — 탭마다 색이 다르고, 고른 탭은 그 색으로 꽉 채웁니다 */
+  .ctabs{display:flex;gap:6px;margin:-6px 0 14px}
+  .ctab{flex:1;padding:9px 4px;border:2px solid var(--c);background:#fff;color:var(--c);
+    border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
+    line-height:1.25;-webkit-tap-highlight-color:transparent;
+    transition:background-color .2s ease,color .2s ease,box-shadow .2s ease}
+  .ctab b{display:block;font-size:15px;font-weight:800;margin-top:2px}
+  .ctab b:empty{display:none}
+  .ctab.on{background:var(--c);color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+  .ctab.c1{--c:#0d5c4f}   /* 공공기관·대학·종합 — 진한 녹색 */
+  .ctab.c2{--c:#1f5fa8}   /* 재활·요양병원·의원 — 파랑 */
+  .ctab.c3{--c:#b8761a}   /* 요양원·노인센터 — 갈색 */
+  .pest{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;
+    background:#fff3d6;color:#8a5a00;font-size:11px;font-weight:600;vertical-align:middle}
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
     padding:15px;margin-bottom:12px}
@@ -2919,7 +2933,7 @@
           <span>병원유형과 지역을 바꿨을 때 중위값 차이를 월·연 단위로</span></div></div>
         <div class="ci"><i>⏱️</i><div><b>진짜 시급</b>
           <span>당직과 주말까지 넣어 계산합니다. 월급은 높은데 시급은 낮은 경우가 드러납니다</span></div></div>
-        <div class="ci"><i>📢</i><div><b>공공기관 채용공고</b>
+        <div class="ci"><i>📢</i><div><b>실시간 채용공고 확인하기</b>
           <span>전국 채용사이트에서 공고를 자동으로 모읍니다. 마감 지난 건 안 올립니다</span></div></div>
         <div class="ci"><i>💬</i><div><b>단톡방 입장</b>
           <span>가입하신 분만 들어갑니다. 새 공고가 뜨면 방에 바로 올라옵니다</span></div></div>
@@ -3151,6 +3165,12 @@
       <button class="tab on" id="pt1" onclick="postTab('mine')">내 직군</button>
       <button class="tab" id="pt2" onclick="postTab('all')">전체</button>
     </div>
+    <!-- 기관 종류 셋 — 숫자는 받아온 목록에서 셉니다. 색을 달리해 지금 보는 탭이 바로 보이게 합니다 -->
+    <div class="ctabs" id="postCls">
+      <button class="ctab c1 on" id="pc1" onclick="postCls('공공기관·대학·종합')">공공기관·대학·종합<b id="pcn1"></b></button>
+      <button class="ctab c2" id="pc2" onclick="postCls('재활·요양병원·의원')">재활·요양병원·의원<b id="pcn2"></b></button>
+      <button class="ctab c3" id="pc3" onclick="postCls('요양원·노인센터')">요양원·노인센터<b id="pcn3"></b></button>
+    </div>
     <div class="psort">
       <select id="postSpan" onchange="doPosts()">
         <option value="live">접수 중인 공고만</option>
@@ -3261,7 +3281,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=162"></script>
+<script src="/app.js?v=163"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3307,7 +3327,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v257 · 2026-09-08';
+var APP_VER = 'v258 · 2026-09-09';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3626,7 +3646,7 @@ function snapshot(which){
                     type:(document.getElementById('rType')||{}).value||'' };
   } else if(which === 'post'){
     SNAP.post = { html:(document.getElementById('postBox')||{}).innerHTML||'',
-                  mode: POST_MODE, scroll: window.scrollY || 0,
+                  mode: POST_MODE, cls: POST_CLS, scroll: window.scrollY || 0,
                   sort:(document.getElementById('postSort')||{}).value||'new',
                   span:(document.getElementById('postSpan')||{}).value||'live' };
   }
@@ -3655,6 +3675,8 @@ function restore(which){
     document.getElementById('regionBox').innerHTML = st.html;
   } else if(which === 'post'){
     POST_MODE = st.mode || 'mine';
+    POST_CLS = st.cls || POST_CLS_LIST[0];
+    paintClsTabs();
     var ps=document.getElementById('postSort'); if(ps) ps.value = st.sort || 'new';
     var pn=document.getElementById('postSpan'); if(pn) pn.value = st.span || 'live';
     document.getElementById('pt1').className = 'tab' + (POST_MODE==='mine'?' on':'');
@@ -3827,7 +3849,7 @@ function tab(which, back){
           hosp:['병원별 치료사 인원','정리한 자료 기준'],
           feedback:['운영자에게 한마디','익명으로 전달됩니다'],
           region:['지역별 의료기관 현황','분기 집계 기준'],
-          post:['공공기관 채용공고','자동으로 모아드립니다'],
+          post:['실시간 채용공고 확인하기','자동으로 모아드립니다'],
           noti:['알림 설정','받을 알림을 고르거나 해제합니다'],
           install:['앱처럼 쓰기','주소 안 찾고 한 번에 열기']};
   if(TT[which]){
@@ -4249,7 +4271,7 @@ function drawDashMenu(){
   /* 서버 순서가 없으면 코드에 적힌 기본 순서로 */
   if(!list){
     list=[
-      {key:'post',cat:'취업',name:'공공기관 채용공고',desc:'자동으로 모아드립니다'},
+      {key:'post',cat:'취업',name:'실시간 채용공고 확인하기',desc:'자동으로 모아드립니다'},
       {key:'star',cat:'취업',name:'담아둔 공고',desc:'마감 하루 전에 알려드립니다'},
       {key:'hosp',cat:'취업',name:'병원 찾기·비교',desc:'인원·병상·전문의 · 지역별 목록'},
       {key:'room',cat:'취업',name:'새 공고 바로 받기',desc:'단톡방에서 올라오는 대로 알려드립니다'},
@@ -8476,6 +8498,32 @@ function drawCompare(r){
 
 /* ===== 채용공고 ===== */
 var POST_MODE = 'mine';
+
+/* 기관 종류 탭 — 서버가 공고마다 cls 를 실어 보내고, 화면이 받아둔 목록에서 가릅니다.
+   서버를 다시 부르지 않습니다. */
+var POST_CLS = '공공기관·대학·종합';
+var POST_CLS_LIST = ['공공기관·대학·종합','재활·요양병원·의원','요양원·노인센터'];
+var LAST_POSTS = null;          // 마지막으로 받은 목록 — 탭을 바꿀 때 다시 그립니다
+function postCls(c){
+  POST_CLS = c;
+  paintClsTabs();
+  if(LAST_POSTS) showPosts(LAST_POSTS);
+}
+function paintClsTabs(){
+  POST_CLS_LIST.forEach(function(c,i){
+    var el = document.getElementById('pc'+(i+1));
+    if(el) el.className = 'ctab c'+(i+1) + (POST_CLS===c?' on':'');
+  });
+}
+/* 탭에 건수를 적습니다. 옛 서버라 cls 가 없으면 전부 첫 탭으로 셉니다 */
+function paintClsCounts(rows){
+  var n = {};
+  (rows||[]).forEach(function(x){ var c = x.cls || POST_CLS_LIST[0]; n[c] = (n[c]||0)+1; });
+  POST_CLS_LIST.forEach(function(c,i){
+    var el = document.getElementById('pcn'+(i+1));
+    if(el) el.textContent = n[c] ? String(n[c]) : '0';
+  });
+}
 var NEWJOB = { count: 0, since: '' };
 
 /* 마지막으로 본 날짜 — 직군별로 따로 기억합니다 */
@@ -8535,6 +8583,12 @@ var POST_T = null;
 
 function doPosts(){
   var box=document.getElementById('postBox');
+  /* 로그인 전에는 직군을 모르니 「내 직군」 을 못 씁니다. 전체로 돌립니다 */
+  if(!(ME&&ME.job) && POST_MODE==='mine'){
+    POST_MODE='all';
+    var t1=document.getElementById('pt1'), t2=document.getElementById('pt2');
+    if(t1) t1.className='tab'; if(t2) t2.className='tab on';
+  }
   var job = (POST_MODE==='mine') ? ((ME&&ME.job)||JOB) : '';
   var sel = document.getElementById('postSort');
   var srt = sel ? sel.value : 'new';
@@ -8604,10 +8658,23 @@ function dday(to){
 function showPosts(r){
   var box=document.getElementById('postBox');
   if(!r.ok){ box.innerHTML=failCard(r); attachRipple(); return; }
+  LAST_POSTS = r;
 
   if(!r.rows.length){
+    paintClsCounts([]);
     box.innerHTML='<div class="empty"><b>아직 올라온 공고가 없습니다</b><br>'
       + '새 공고가 뜨면 바로 여기에 올라옵니다.</div>';
+    attachRipple(); return;
+  }
+
+  /* 기관 종류 탭 — 건수를 적고, 고른 종류만 남깁니다.
+     옛 서버라 cls 가 없으면 전부 첫 탭으로 봅니다. */
+  paintClsCounts(r.rows);
+  paintClsTabs();
+  var rows = r.rows.filter(function(x){ return (x.cls || POST_CLS_LIST[0]) === POST_CLS; });
+  if(!rows.length){
+    box.innerHTML='<div class="empty"><b>'+esc(POST_CLS)+' 공고가 없습니다</b><br>'
+      + '다른 탭에 '+r.rows.length+'건이 있습니다.</div>';
     attachRipple(); return;
   }
 
@@ -8624,7 +8691,9 @@ function showPosts(r){
   var pv=(document.getElementById('postSpan')||{}).value||'live';
   h += '<p class="thin" style="margin:0 0 10px">'
     + (POST_MODE==='mine' ? esc((ME&&ME.job)||JOB)+' 관련 ' : '전체 ')
-    + (SP[pv]||SP.live)+' <b>'+r.total+'건</b> · '+(SN[sv]||SN.new)+'</p>';
+    + esc(POST_CLS)+' · '+(SP[pv]||SP.live)+' <b>'+rows.length+'건</b>'
+    + (rows.length!==r.rows.length ? ' <span class="thin">(전체 '+r.rows.length+'건)</span>' : '')
+    + ' · '+(SN[sv]||SN.new)+'</p>';
 
   if(pv==='past'){
     h += '<div class="hintbox" style="margin:0 0 12px">지나간 공고입니다. '
@@ -8638,7 +8707,7 @@ function showPosts(r){
   /* 넓은 화면에서 두 칸으로 펴려면 감싸는 상자가 있어야 합니다 */
   h += '<div class="plist">';
 
-  r.rows.forEach(function(x){
+  rows.forEach(function(x){
     var d = dday(x.to);
     var shut = !!x.closed;
     var soon = (!shut && d!==null && d<=7);
@@ -8649,7 +8718,10 @@ function showPosts(r){
       + ' onclick="openJob(\''+x.id+'\')">'
       + '<div class="ph">'
       + (isNew?'<span class="pnew">NEW</span>':'')
-      + '<span class="porg">'+esc(x.org)+'</span>'
+      + '<span class="porg">'+esc(x.org)
+      /* 기관명 글자로 어림한 분류는 밝힙니다. 심평원 종별·수집처로 가른 것은 표시 없음 */
+      + (x.basis==='이름' ? '<span class="pest" title="기관 종류를 이름으로 어림했습니다">분류 추정</span>' : '')
+      + '</span>'
       + (shut
           ? '<span class="pclosed">마감</span>'
           : (d!==null ? '<span class="pd'+(soon?' hot':'')+'">'
@@ -8669,7 +8741,6 @@ function showPosts(r){
         + (x.nope?'<i>'+x.nope+'명</i>':'')
       + '</div>'
       + '<div class="pf">'
-        + (x.edu?esc(String(x.edu).split(',')[0])+' · ':'')
         + (x.to?'~'+esc(x.to):'')
         + '<span class="pgo">공고 보기 ›</span>'
       + '</div>'
