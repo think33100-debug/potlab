@@ -1207,6 +1207,11 @@
   .bizmode .back{border-color:var(--bz-line)}
   .bizmode .back .bicon{color:var(--bz)}
   .bzreq{color:#b4432c;font-weight:700;margin-left:2px}
+  /* 기업 공고 등록 · 고정 접수 기간 · 작은 라벨 · 틀린 칸 표시 (2026-09-10) */
+  .bzfixed{padding:12px 13px;border-radius:12px;background:#f3f5f7;font-size:14px;color:#2b3238}
+  .bzfixed b{color:#0d5c4f}
+  .lab2{font-size:12px;color:#5a6870}
+  #bizJobBox input.bad,#bizJobBox textarea.bad{border-color:#d9534f;box-shadow:0 0 0 3px rgba(217,83,79,.18)}
   .bznote{background:var(--bz-soft);border-radius:10px;padding:12px 13px;
     font-size:12.5px;color:#6b5a4d;line-height:1.75;word-break:keep-all;margin-top:10px}
   .bznote b{color:var(--bz-deep)}
@@ -3287,7 +3292,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=167"></script>
+<script src="/app.js?v=168"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3333,7 +3338,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v268 · 2026-09-09';
+var APP_VER = 'v269 · 2026-09-10';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -4836,6 +4841,7 @@ function drawBizForm(){
     + '<div class="f"><label>기관<span class="bzreq">*</span></label>'
     + '<input id="bzOrg" placeholder="병원 이름으로 찾기" oninput="bzFind(this.value)" autocomplete="off">'
     + '<div id="bzSug" class="sugbox"></div>'
+    + '<div class="hint2">사업자등록증에 적힌 이름 그대로 적어 주세요.</div>'
     + '<div class="hint2">등록된 병원에서 고릅니다. 직접 적을 수 없습니다.</div></div>'
 
     + '<div class="f"><label>사업자등록번호 <span class="hint">선택</span></label>'
@@ -5056,7 +5062,8 @@ function drawBizJob(){
 
     + '<div class="card">'
     + '<div class="f"><label data-t="lab.37">공고 제목<span class="bzreq">*</span></label>'
-    + '<input id="bjTitle" placeholder="예) 2026년 작업치료사 채용"></div>'
+    + '<input id="bjTitle" maxlength="30" placeholder="예) 2026년 작업치료사 채용" oninput="bjCount(\'bjTitle\',\'bjTitleN\',30)">'
+    + '<div class="hint2">30자까지 · 한글·숫자·영문·띄어쓰기만 (기호는 안 돼요) <span id="bjTitleN">0/30</span></div></div>'
 
     + '<div class="f"><label>직군<span class="bzreq">*</span></label>'
     + '<div class="bzjobs">'
@@ -5065,28 +5072,38 @@ function drawBizJob(){
     + '<button onclick="bjJob(\'공통\')" id="bjJ3">둘 다</button>'
     + '</div></div>'
 
+    + '<div class="f"><label>접수 기간</label>'
+    + '<div class="bzfixed">오늘부터 7일 · <b>' + bjPlus(7) + '</b>까지</div>'
+    + '<div class="hint2">접수 기간은 7일로 정해져 있어요. 바꿀 수 없어요.</div></div>'
+
+    + '<div class="f"><label>초봉 (만원)<span class="bzreq">*</span></label>'
+    + '<input id="bjPayNum" inputmode="numeric" placeholder="예) 3200">'
+    + '<div class="hint2">1년 초봉을 숫자로만 적어 주세요. <b>퇴직금은 뺀 금액</b>이에요. 「면접 후 협의」 처럼 글로는 올릴 수 없어요.</div></div>'
+
+    + '<div class="f"><label>전형 일정<span class="bzreq">*</span></label>'
     + '<div class="two">'
-    + '<div class="f"><label data-t="lab.38">접수 시작</label>'
-    + '<input id="bjFrom" type="date"></div>'
-    + '<div class="f"><label data-t="lab.39">접수 마감<span class="bzreq">*</span></label>'
-    + '<input id="bjTo" type="date"></div></div>'
+    + '<div class="f"><label class="lab2">서류 발표</label><input id="bjDoc" type="date" min="' + bjPlus(8, true) + '"></div>'
+    + '<div class="f"><label class="lab2">면접</label><input id="bjInt" type="date" min="' + bjPlus(8, true) + '"></div></div>'
+    + '<div class="f"><label class="lab2">최종 합격 발표</label><input id="bjFin" type="date" min="' + bjPlus(8, true) + '"></div>'
+    + '<div class="hint2">셋 다 날짜를 골라 주세요. 접수 마감 다음 날부터 고를 수 있어요.</div></div>'
+
+    + '<div class="f"><label>담당자 이름<span class="bzreq">*</span></label>'
+    + '<input id="bjName" placeholder="이름" value="' + esc(BZ.name||'') + '"></div>'
+
+    + '<div class="f"><label>공고 본문<span class="bzreq">*</span></label>'
+    + '<textarea id="bjBody" maxlength="1500" rows="8" placeholder="하는 일, 근무 시간, 지원 방법 등을 적어 주세요" oninput="bjCount(\'bjBody\',\'bjBodyN\',1500)"></textarea>'
+    + '<div class="hint2">1,500자까지 · 사진·이미지는 넣을 수 없어요 <span id="bjBodyN">0/1500</span></div></div>'
     + '</div>'
 
     + '<details class="clinfold"><summary>더 적기 (안 적으셔도 됩니다)</summary>'
     + '<div class="card" style="margin-top:8px">'
     + '<div class="two">'
     + '<div class="f"><label data-t="lab.40">뽑는 인원</label><input id="bjNope" inputmode="numeric" placeholder="예) 2"></div>'
-    + '<div class="f"><label data-t="lab.41">연봉</label><input id="bjPay" placeholder="예) 3400만원 이상"></div></div>'
+    + '<div class="f"><label data-t="lab.43">근무 지역</label><input id="bjRegion" placeholder="예) 대구"></div></div>'
     + '<div class="two">'
     + '<div class="f"><label data-t="lab.42">채용 구분</label><input id="bjKind" placeholder="예) 신입+경력"></div>'
     + '<div class="f"><label data-t="lab.32">고용 형태</label><input id="bjHire" placeholder="예) 정규직"></div></div>'
-    + '<div class="two">'
-    + '<div class="f"><label data-t="lab.43">근무 지역</label><input id="bjRegion" placeholder="예) 대구"></div>'
-    + '<div class="f"><label data-t="lab.33">학력</label><input id="bjEdu" placeholder="예) 학력무관"></div></div>'
-    + '<div class="f"><label data-t="lab.44">지원 자격</label>'
-    + '<textarea id="bjQual" placeholder="면허, 경력 등"></textarea></div>'
-    + '<div class="f"><label data-t="lab.45">전형 방법</label>'
-    + '<textarea id="bjHow" placeholder="서류 → 면접"></textarea></div>'
+    + '<div class="f"><label data-t="lab.33">학력</label><input id="bjEdu" placeholder="예) 학력무관"></div>'
     + '<div class="f"><label data-t="lab.34">공고 주소</label>'
     + '<input id="bjUrl" placeholder="https://" inputmode="url" autocapitalize="off">'
     + '<div class="hint2">병원 홈페이지 공고 주소가 있으면 넣어주세요.</div></div>'
@@ -5094,6 +5111,7 @@ function drawBizJob(){
 
     + '<div class="bznote">올리신 공고는 <b>「직접 등록」 표시</b>와 함께 바로 올라갑니다. '
     + '잘못 올리셨으면 저희에게 알려주세요.</div>'
+    + '<div id="bjErr" class="errbox" style="display:none"></div>'
 
     + '<button class="go" id="bjGo" onclick="bjSubmit()" data-t="btn.36">공고 올리기</button>';
 
@@ -5102,6 +5120,27 @@ function drawBizJob(){
   if(BZ.jobs) bjJob(BZ.jobs);
 }
 
+/* 오늘 + n일 — 화면 표시용(M월 D일) 과 date 입력 min 용(yyyy-mm-dd) */
+function bjPlus(n, iso){
+  var d=new Date(); d.setDate(d.getDate()+n);
+  var y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), dd=('0'+d.getDate()).slice(-2);
+  if(iso) return y+'-'+m+'-'+dd;
+  return (d.getMonth()+1)+'월 '+d.getDate()+'일('+['일','월','화','수','목','금','토'][d.getDay()]+')';
+}
+function bjCount(id, nId, max){
+  var e=document.getElementById(id), n=document.getElementById(nId);
+  if(e&&n) n.textContent=e.value.length+'/'+max;
+}
+/* 규칙에 안 맞으면 어디가 틀렸는지 칸 위에 빨갛게, 아래 상자에도 적습니다 */
+function bjShowErr(field, text){
+  var box=document.getElementById('bjErr');
+  if(box){ box.style.display=''; box.innerHTML='<b>아직 올릴 수 없어요</b>'+esc(text); }
+  var ids={title:'bjTitle',payNum:'bjPayNum',docDate:'bjDoc',interviewDate:'bjInt',finalDate:'bjFin',name:'bjName',body:'bjBody'};
+  var el=document.getElementById(ids[field]||'');
+  document.querySelectorAll('#bizJobBox .bad').forEach(function(x){ x.classList.remove('bad'); });
+  if(el){ el.classList.add('bad'); el.scrollIntoView({block:'center'}); try{ el.focus(); }catch(e){} }
+  msg(text);
+}
 var BJ_JOB='';
 function bjJob(j){
   BJ_JOB=j;
@@ -5114,22 +5153,40 @@ function bjJob(j){
 
 function bjSubmit(){
   var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
-  var d={ title:g('bjTitle'), job:BJ_JOB,
-          from:g('bjFrom').replace(/-/g,'.'), to:g('bjTo').replace(/-/g,'.'),
-          nope:g('bjNope'), pay:g('bjPay'), kind:g('bjKind'), hire:g('bjHire'),
-          region:g('bjRegion'), edu:g('bjEdu'), qual:g('bjQual'),
-          how:g('bjHow'), url:g('bjUrl') };
+  var d={ title:g('bjTitle'), job:BJ_JOB, payNum:g('bjPayNum'),
+          docDate:g('bjDoc'), interviewDate:g('bjInt'), finalDate:g('bjFin'),
+          name:g('bjName'), body:g('bjBody'),
+          nope:g('bjNope'), kind:g('bjKind'), hire:g('bjHire'),
+          region:g('bjRegion'), edu:g('bjEdu'), url:g('bjUrl') };
 
-  if(!d.title){ msg('공고 제목을 적어주세요'); return; }
-  if(!d.job){ msg('직군을 골라주세요'); return; }
-  if(!d.to){ msg('접수 마감일을 골라주세요'); return; }
+  /* 서버(bizRules_)와 같은 규칙 · 같은 문구. 여기서 걸러도 서버가 다시 봅니다 */
+  var bad=d.title.match(/[^가-힣0-9A-Za-z ]/);
+  if(!d.title){ bjShowErr('title','공고 제목을 적어 주세요.'); return; }
+  if(d.title.length>30){ bjShowErr('title','공고 제목은 30자까지예요. 지금 '+d.title.length+'자예요.'); return; }
+  if(bad){ bjShowErr('title','공고 제목에는 한글·숫자·영문·띄어쓰기만 쓸 수 있어요. 「'+bad[0]+'」 는 빼 주세요.'); return; }
+  if(!d.job){ bjShowErr('job','직군을 골라 주세요.'); return; }
+  var pn=d.payNum.replace(/[,\s만원]/g,'');
+  if(!pn){ bjShowErr('payNum','초봉을 숫자로 적어 주세요. 예) 3200 (만원). 「면접 후 협의」 처럼 글로는 올릴 수 없어요.'); return; }
+  if(!/^\d+$/.test(pn)){ bjShowErr('payNum','초봉은 숫자만 적어 주세요. 예) 3200 (만원 단위).'); return; }
+  if(+pn<1500||+pn>15000){ bjShowErr('payNum','초봉이 맞는지 확인해 주세요. 1,500만원 ~ 1억 5,000만원 사이여야 해요. (만원 단위로 적어요)'); return; }
+  if(!d.docDate){ bjShowErr('docDate','서류 발표 날짜를 골라 주세요.'); return; }
+  if(!d.interviewDate){ bjShowErr('interviewDate','면접 날짜를 골라 주세요.'); return; }
+  if(!d.finalDate){ bjShowErr('finalDate','최종 합격 발표 날짜를 골라 주세요.'); return; }
+  if(d.docDate<=bjPlus(7,true)){ bjShowErr('docDate','서류 발표는 접수 마감('+bjPlus(7)+') 다음 날부터 골라 주세요.'); return; }
+  if(d.interviewDate<d.docDate){ bjShowErr('interviewDate','면접 날짜는 서류 발표 뒤여야 해요.'); return; }
+  if(d.finalDate<d.interviewDate){ bjShowErr('finalDate','최종 합격 발표는 면접 뒤여야 해요.'); return; }
+  if(!d.name){ bjShowErr('name','담당자 이름을 적어 주세요.'); return; }
+  if(!d.body){ bjShowErr('body','공고 본문을 적어 주세요. 하는 일, 근무 시간, 지원 방법을 적으면 좋아요.'); return; }
+  if(/<img|data:image|\.(png|jpe?g|gif|webp|bmp)(\?|\s|$)/i.test(d.body)){ bjShowErr('body','본문에는 사진·이미지를 넣을 수 없어요. 글로만 적어 주세요.'); return; }
+  if(d.body.length>1500){ bjShowErr('body','본문은 1,500자까지예요. 지금 '+d.body.length+'자예요.'); return; }
+  var eb=document.getElementById('bjErr'); if(eb) eb.style.display='none';
 
   var btn=document.getElementById('bjGo');
   if(btn){ btn.disabled=true; btn.textContent='올리는 중입니다'; }
 
   google.script.run.withSuccessHandler(function(r){
     if(btn){ btn.disabled=false; btn.textContent='공고 올리기'; }
-    if(!r.ok){ msg(r.message); return; }
+    if(!r.ok){ bjShowErr(r.field||'', r.message||'올리지 못했습니다'); return; }
     celebrate('📢','올렸습니다','치료사들이 곧 볼 거예요');
     openBiz();
   }).withFailureHandler(function(e){
@@ -8043,6 +8100,20 @@ function densBlock(d, job){
   return t;
 }
 
+/* 근무지 글자 정리 — 전남광주통합특별시(2026-07 출범)는 광주 5개 구면 「광주 광산구」, 나머지는 「전남 목포시」.
+   화성시 만세구·효행구·병점구·동탄구(2026-02) · 인천 서해구·검단구·제물포구·영종구(2026-07) 는 실제 구라 그대로 둡니다 */
+function regionShow(v){
+  var SIDO={충청북:'충북',충청남:'충남',전라북:'전북',전라남:'전남',경상북:'경북',경상남:'경남'};
+  return String(v||'').split(',').slice(0,2).map(function(s){
+    return s.trim()
+      .replace(/^전남광주(통합특별시)?\s*(동구|서구|남구|북구|광산구)/,'광주 $2')
+      .replace(/^전남광주(통합특별시)?\s*/,'전남 ')
+      .replace(/^(경기|강원|충청북|충청남|전라북|전라남|경상북|경상남|제주|전북)(특별자치)?도\s/,function(_,a){ return (SIDO[a]||a)+' '; })
+      .replace(/^(서울|부산|대구|인천|광주|대전|울산)(특별시|광역시)\s/,'$1 ')
+      .replace(/^세종특별자치시/,'세종');
+  }).join('·');
+}
+
 function loading(txt){
   return '<div class="loading">'+esc(txt||'불러오는 중')
     + '<span class="dots"><i>.</i><i>.</i><i>.</i></span>'
@@ -8053,15 +8124,23 @@ function loading(txt){
 function errBox(e, where){
   var m = (e && e.message) ? e.message : String(e || '알 수 없는 오류');
   var hint = '';
+  /* 회원이 보는 글입니다. 배포·서버 코드 얘기는 운영자만 알면 되니 code 줄에만 남깁니다 (2026-09-10) */
   if(/is not a function|not defined|찾을 수 없|알 수 없는 요청/.test(m))
-    hint = '서버 코드(Wage.gs)가 최신이 아닐 수 있습니다. '
-         + 'Apps Script에서 다시 붙여넣고 <b>새 버전으로 재배포</b>해 주세요.';
+    hint = '앱을 한 번 새로고침해 주세요. 계속 그러면 아래 글과 함께 저희에게 알려주세요.';
   else if(/응답이 없|연결하지 못/.test(m))
-    hint = '잠시 후 다시 시도해 주세요. 계속 그러면 배포 설정의 '
-         + '<b>액세스 권한</b>이 «모든 사용자»인지 확인해 주세요.';
+    hint = '서버가 잠깐 늦고 있습니다. 잠시 뒤 <b>다시 시도</b>를 눌러주세요.';
   return '<div class="errbox"><b>불러오지 못했습니다</b>'
     + (hint || '잠시 후 다시 시도해 주세요.')
     + '<code>'+esc(where?where+' · ':'')+esc(m)+'</code></div>';
+}
+
+/* 상자 하나에 실패 안내를 넣습니다. 교육 화면이 부르는데 정의가 없었습니다 (2026-09-10) */
+function boxFail(id, what, e){
+  var b=document.getElementById(id);
+  if(!b) return;
+  b.innerHTML=errBox(e, what)
+    + '<button class="ghost" onclick="location.reload()" style="margin-top:10px">다시 시도</button>';
+  attachRipple();
 }
 
 function checkInApp(){ /* 안내창은 사용하지 않습니다 */ }
@@ -8624,13 +8703,12 @@ function doPosts(){
 
   // 응답이 안 오면 왜 그런지 알려줍니다
   if(POST_T) clearTimeout(POST_T);
+  /* 12초가 지나도 응답이 없으면 기다리는 중이라는 것만 알립니다.
+     예전에는 여기서 「응답이 오지 않습니다」 로 바꿔 버려서, 15초 뒤에 온 답이 버려졌습니다 (2026-09-10) */
   POST_T = setTimeout(function(){
-    box.innerHTML = '<div class="errbox"><b>응답이 오지 않습니다</b>'
-      + '서버가 최신이 아닐 수 있습니다. 잠시 뒤 다시 열어보시고, '
-      + '계속 그러면 운영자에게 알려주세요.'
-      + '<code>getJobPosts · 시간 초과</code></div>'
-      + '<button class="ghost" onclick="doPosts()" style="margin-top:10px">다시 시도</button>';
-    attachRipple();
+    var l = box.querySelector('.loading');
+    if(l) l.insertAdjacentHTML('beforeend',
+      '<div class="hint2" style="margin-top:10px">조금 더 걸리고 있어요. 잠시만 기다려 주세요.</div>');
   }, 12000);
 
   google.script.run.withSuccessHandler(function(r){
@@ -8743,7 +8821,7 @@ function showPosts(r){
         + (x.kind?'<i>'+esc(kindLabel(x.kind))+'</i>':'')
         + (x.hire?'<i>'+esc(hireLabel(String(x.hire).split(',')[0]))+'</i>':'')
         /* 「전남광주통합특별시」 는 「전남」 으로. 화성시 만세구·효행구, 인천 서해구는 실제 지명이라 그대로 */
-        + (x.region?'<i>'+esc(String(x.region).replace(/전남광주(통합특별시)?/g,'전남').split(',').slice(0,2).join('·'))+'</i>':'')
+        + (x.region?'<i>'+esc(regionShow(x.region))+'</i>':'')
         + (x.nope?'<i>'+x.nope+'명</i>':'')
       + '</div>'
       + '<div class="pf">'

@@ -12,7 +12,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
 
 /* 이 파일이 최신인지 화면 아래에서 바로 확인하려고 둡니다.
    index.html 이 이 값을 읽어 버전과 함께 찍습니다. */
-var APP_JS_VER = 'a26 · 2026-09-09';
+var APP_JS_VER = 'a27 · 2026-09-10';
 
 (function () {
   'use strict';
@@ -81,7 +81,15 @@ var APP_JS_VER = 'a26 · 2026-09-09';
   }
 
   /** 브라우저가 막지 않는 방식(JSONP)으로 요청합니다 */
+  /* 응답이 안 오면(구글 서버가 가끔 40초 넘게 잡고 있습니다 · 2026-09-10 열두 번 중 한 번)
+     한 번은 말없이 다시 보냅니다. 두 번째도 안 오면 그때 실패로 알립니다. */
   function call(action, args, onOk, onErr) {
+    callOnce(action, args, onOk, function (e) {
+      if (e && /응답이 없습니다/.test(e.message)) callOnce(action, args, onOk, onErr);
+      else onErr(e);
+    });
+  }
+  function callOnce(action, args, onOk, onErr) {
     if (!API_URL || API_URL.indexOf('/exec') < 0) {
       onErr(new Error('API_URL 이 올바르지 않습니다. app.js 를 확인해주세요.'));
       return;
