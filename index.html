@@ -3292,7 +3292,7 @@
 
 <div id="msg"></div>
 
-<script src="/app.js?v=168"></script>
+<script src="/app.js?v=169"></script>
 <script>
 var CERTS = [
   { n:'컴퓨터활용능력', s:['1급','2급'] },
@@ -3338,7 +3338,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v271 · 2026-09-10';
+var APP_VER = 'v272 · 2026-09-10';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3801,6 +3801,7 @@ function tab(which, back){
     NAV.push(CURRENT);
     if(NAV.length > 20) NAV.shift();
   }
+  if(CURRENT==='job' && which!=='job' && typeof trkLeave==='function') trkLeave();   // 상세에 머문 시간 기록
   CURRENT = which;
   /* 주소 뒤에 지금 화면을 남깁니다.
    *
@@ -5784,7 +5785,7 @@ function toggleStar(id){
       btn.innerHTML = starFace(r.on);
       bump(btn);
     }
-    if(r.on) celebrate('⭐', '담아뒀습니다', '마감 하루 전에 알려드리겠습니다');
+    if(r.on){ celebrate('⭐', '담아뒀습니다', '마감 하루 전에 알려드리겠습니다'); trk(id,'star'); }
     else if(r.message) msg(r.message);
   }).withFailureHandler(function(e){
     if(btn) btn.disabled=false; msg(e.message);
@@ -6016,10 +6017,46 @@ function mixNote(x){
     + '아래 「공고 확인하러 가기」의 공고문에 적혀 있습니다.</div>';
 }
 
+/* ── 공고 반응 기록 (2026-09-10) ──
+   목록 클릭 · 상세에 머문 초 · 「공고 확인하러 가기」 · 담아두기를 모아 15초마다, 화면을 떠날 때 서버(jobTrack)로 보냅니다.
+   지금은 기록만 합니다. 정렬·점수에는 안 씁니다 (회원이 적어 다 0점이면 좋은 공고가 묻힘). */
+var TRK=[], TRK_T=null, JOB_OPEN={id:'',at:0};
+function trk(id, ev, v){
+  if(!id) return;
+  TRK.push({id:String(id), ev:ev, v:v||0});
+  if(TRK.length>=8) trkFlush();
+  else if(!TRK_T) TRK_T=setTimeout(trkFlush, 15000);
+}
+function trkFlush(){
+  if(TRK_T){ clearTimeout(TRK_T); TRK_T=null; }
+  if(!TRK.length) return;
+  var batch=TRK.splice(0,50);
+  try{
+    google.script.run.withSuccessHandler(function(){}).withFailureHandler(function(){}).jobTrack(cred(), batch);
+  }catch(e){}
+}
+/* 상세 화면을 떠날 때 머문 시간을 적습니다 */
+function trkLeave(){
+  if(!JOB_OPEN.id) return;
+  var sec=Math.round((Date.now()-JOB_OPEN.at)/1000);
+  if(sec>=1) trk(JOB_OPEN.id,'stay',sec);
+  JOB_OPEN={id:'',at:0};
+}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState!=='hidden') return;
+  if(JOB_OPEN.id && CURRENT==='job'){
+    var sec=Math.round((Date.now()-JOB_OPEN.at)/1000);
+    if(sec>=1) trk(JOB_OPEN.id,'stay',sec);
+    JOB_OPEN.at=Date.now();
+  }
+  trkFlush();
+});
+
 function openJob(id){
   var x=POST_MAP[id];
   if(!x){ msg('공고를 찾지 못했습니다'); return; }
   tab('job');
+  trkLeave(); trk(id,'click'); JOB_OPEN={id:String(id), at:Date.now()};
 
   var d=dday(x.to);
   var shut=!!x.closed;
@@ -6075,7 +6112,7 @@ function openJob(id){
   h+='<div class="jbtns">'
     + '<a class="go" style="display:block;text-align:center;text-decoration:none;margin:0" '
     /* 시트에 「&amp;」 로 든 주소가 와도 열리게 한 번 더 풉니다 (워크넷 246건이 그랬음 · 2026-09-09) */
-    + 'href="'+esc(String(x.url||'#').replace(/&amp;/g,'&'))+'" target="_blank" rel="noopener" data-t="btn.09">공고 확인하러 가기</a>'
+    + 'href="'+esc(String(x.url||'#').replace(/&amp;/g,'&'))+'" target="_blank" rel="noopener" data-t="btn.09" onclick="trk(''+String(x.id).replace(/[\']/g,'')+'','out')">공고 확인하러 가기</a>'
     + (shut ? ''
         : '<button class="starbtn'+(STARS[x.id]?' on':'')+'" id="starBtn" '
           + 'onclick="toggleStar(\''+x.id+'\')">'
