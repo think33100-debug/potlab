@@ -940,10 +940,12 @@
   .post.closed .dd{background:#eceff0;color:#8b979d}
   .pclosed{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;
     border-radius:20px;background:#eceff0;color:#697680;margin-left:6px}
-  .pfind{margin:2px 0 12px}
+  .pfind{margin:2px 0 12px;display:flex;gap:8px}
   .pfind input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;
     font-size:15px;background:#fff;font-family:inherit}
   .pfind input:focus{outline:none;border-color:var(--accent)}
+  .pfind select{flex:0 0 auto;max-width:42%;padding:0 10px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:14px;color:var(--ink)}
+  .pfind input{flex:1 1 auto;min-width:0;width:auto}
   .clinfold{margin-top:10px;border-top:1px solid var(--line);padding-top:6px}
   .clinfold summary{cursor:pointer;padding:12px 4px;font-size:13.5px;font-weight:700;
     color:var(--dim);list-style:none;display:flex;align-items:center;gap:8px;
@@ -3193,6 +3195,7 @@
         <option value="deadline">마감 가까운 순</option>
         <option value="public">공공기관 우선</option>
         <option value="univ">대학병원 우선</option>
+        <option value="hot">인기순</option>
       </select>
     </div>
     <div id="postBox"></div>
@@ -3338,7 +3341,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v276 · 2026-09-10';
+var APP_VER = 'v277 · 2026-09-10';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -8847,7 +8850,7 @@ function showPosts(r){
       + '<b>새 공고</b>로 표시합니다</div>';
   }
   var SN={deadline:'마감이 가까운 순', new:'최근에 올라온 순',
-          public:'공공기관 먼저', univ:'대학병원·의료원 먼저'};
+          public:'공공기관 먼저', univ:'대학병원·의료원 먼저', hot:'많이 본 순'};
   var SP={live:'접수 중', all:'지난 공고 포함', past:'지난 공고'};
   var sv=(document.getElementById('postSort')||{}).value||'new';
   var pv=(document.getElementById('postSpan')||{}).value||'live';
@@ -8862,8 +8865,23 @@ function showPosts(r){
       + '지원은 못 하지만 <b>어느 기관이 언제쯤 뽑는지</b> 가늠할 수 있습니다.</div>';
   }
 
+  if(sv==='hot'){
+    h += '<div class="hintbox" style="margin:0 0 12px">회원들이 많이 열어 보고, 원문으로 가고, 담아둔 순서입니다. '
+      + '아직 회원이 적어 순위가 크게 의미 있지는 않습니다. 같은 점수는 마감이 가까운 순으로 둡니다.</div>';
+  }
+  /* 지역으로 거르기 — 근무지의 시도 (2026-09-10). 받아둔 목록에서 화면이 거릅니다 */
+  var regCnt={};
+  rows.forEach(function(x){ var s=regionSido(x.region); regCnt[s]=(regCnt[s]||0)+1; });
+  var REG_ORDER=['서울','경기','인천','강원','충북','충남','대전','세종','전북','전남','광주','경북','대구','경남','부산','울산','제주','전국','지역 없음'];
+  var regOpts=REG_ORDER.filter(function(s){ return regCnt[s]; }).map(function(s){
+    return '<option value="'+esc(s)+'"'+(POST_REGION===s?' selected':'')+'>'+esc(s)+' ('+regCnt[s]+')</option>';
+  }).join('');
+  if(POST_REGION && !regCnt[POST_REGION]) POST_REGION='';
   /* 기관·공고 이름으로 거르기 — 받아둔 목록에서 화면이 거릅니다 */
-  h += '<div class="pfind"><input type="search" id="postFind" placeholder="기관·공고 이름으로 찾기"'
+  h += '<div class="pfind">'
+    + '<select id="postRegion" onchange="POST_REGION=this.value;filterPosts()">'
+    + '<option value="">지역 전체 ('+rows.length+')</option>'+regOpts+'</select>'
+    + '<input type="search" id="postFind" placeholder="기관·공고 이름으로 찾기"'
     + ' oninput="filterPosts(this.value)" autocomplete="off"></div>';
 
   /* 넓은 화면에서 두 칸으로 펴려면 감싸는 상자가 있어야 합니다 */
@@ -8876,7 +8894,7 @@ function showPosts(r){
     var isNew = !shut && NEWJOB.since && String(x.at||'') > NEWJOB.since;
     POST_MAP[x.id]=x;
     h+='<button class="post'+(soon?' soon':'')+(shut?' closed':'')+'"'
-      + ' data-find="'+esc((x.org+' '+x.title).toLowerCase())+'"'
+      + ' data-find="'+esc((x.org+' '+x.title).toLowerCase())+'" data-region="'+esc(regionSido(x.region))+'"'
       + ' onclick="openJob(\''+x.id+'\')">'
       + '<div class="ph">'
       + (isNew?'<span class="pnew">NEW</span>':'')
@@ -8902,7 +8920,7 @@ function showPosts(r){
         + (x.nope?'<i>'+x.nope+'명</i>':'')
       + '</div>'
       + '<div class="pf">'
-        + (x.to?'~'+esc(x.to):'')
+        + (x.from && x.to ? esc(x.from)+' ~ '+esc(x.to) : x.to ? '~'+esc(x.to) : '')
         + '<span class="pgo">공고 보기 ›</span>'
       + '</div>'
       + (x.prevFrom
@@ -8924,12 +8942,23 @@ function showPosts(r){
 }
 
 /* 기관·공고 이름으로 거릅니다. 서버를 다시 부르지 않습니다. */
+var POST_REGION='';
+/* 근무지 글자에서 시도 하나 — 「광주 북구」→광주 · 「전남 목포시」→전남 · 「서울, 경기」→서울 · 빈 값→지역 없음 */
+function regionSido(v){
+  var s=regionShow(v).split('·')[0].trim().split(' ')[0];
+  if(!s) return '지역 없음';
+  if(/^전국/.test(s)) return '전국';
+  return s;
+}
 function filterPosts(q){
+  if(q===undefined){ var fi=document.getElementById('postFind'); q=fi?fi.value:''; }
   q = String(q||'').trim().toLowerCase();
+  var reg = POST_REGION;
   var cards = document.querySelectorAll('#pane-post .post');
   var shown = 0;
   cards.forEach(function(c){
-    var hit = !q || (c.getAttribute('data-find')||'').indexOf(q) > -1;
+    var hit = (!q || (c.getAttribute('data-find')||'').indexOf(q) > -1)
+           && (!reg || (c.getAttribute('data-region')||'') === reg);
     c.style.display = hit ? '' : 'none';
     if(hit) shown++;
   });
@@ -8942,6 +8971,14 @@ function filterPosts(q){
       if(list) list.parentNode.insertBefore(none, list.nextSibling);
     }
     none.textContent = '「'+q+'」로 찾은 공고가 없습니다';
+  } else if(!shown && reg){
+    if(!none){
+      none = document.createElement('div');
+      none.id = 'postNone'; none.className = 'empty';
+      var list2 = document.querySelector('#pane-post .plist');
+      if(list2) list2.parentNode.insertBefore(none, list2.nextSibling);
+    }
+    none.textContent = reg+' 공고가 없습니다';
   } else if(none){ none.remove(); }
 }
 
