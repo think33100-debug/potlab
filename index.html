@@ -3346,7 +3346,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v279 · 2026-09-10';
+var APP_VER = 'v280 · 2026-09-10';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3412,12 +3412,13 @@ function prepEditForm(){
   google.script.run.withSuccessHandler(function(r){
     if(!r||!r.ok||!r.row){ if(note) note.innerHTML='등록된 값을 못 불러왔습니다. 바뀐 항목을 적고 저장하시면 됩니다.'; return; }
     fillMyForm(r.row);
+    if(btn) btn.textContent='수정해서 저장하기';   // setRole 이 글자를 되돌려서 다시 씁니다
     if(note) note.innerHTML='<b>등록된 값을 채워 두었습니다.</b> 바뀐 것만 고치고 아래 <b>수정해서 저장하기</b>를 누르세요. 닉네임은 그대로 두셔도 됩니다.';
   }).withFailureHandler(function(){ if(note) note.innerHTML='등록된 값을 못 불러왔습니다. 바뀐 항목을 적고 저장하시면 됩니다.'; })
     .getMyForm(cred());
 }
 function fillMyForm(o){
-  var set=function(id,v){ var el=document.getElementById(id); if(!el) return; v=(v===null||v===undefined)?'':String(v); if(el.tagName==='SELECT'){ var ok=false; for(var i=0;i<el.options.length;i++){ var t=el.options[i].text.split(' —')[0].trim(); if(t===v||el.options[i].value===v){ el.selectedIndex=i; ok=true; break; } } if(!ok && v) el.value=v; } else if(el.type==='checkbox'){ el.checked=(v==='Y'||v===true); } else el.value=v; };
+  var set=function(id,v){ var el=document.getElementById(id); if(!el) return; v=(v===null||v===undefined)?'':String(v); if(el.tagName==='SELECT'){ var ok=false; for(var i=0;i<el.options.length;i++){ var t=el.options[i].text.split(' —')[0].trim(); if(v && (t===v||el.options[i].value===v||t.indexOf(v)===0||v.indexOf(t)===0&&t.length>=3)){ el.selectedIndex=i; ok=true; break; } } if(!ok && v) el.value=v; } else if(el.type==='checkbox'){ el.checked=(v==='Y'||v===true); } else el.value=v; };
   try{ setRole(o['구분']==='학생'?'학생':'현직'); }catch(e){}
   set('nick',o['닉네임']); set('startYear',o['입사연도']); set('curStartYear',o['현직장입사연도']);
   set('region',o['지역']); set('hospitalType',o['병원유형']); set('employment',o['고용형태']);
