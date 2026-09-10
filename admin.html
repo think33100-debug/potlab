@@ -353,6 +353,7 @@
       <button class="tb" data-f="biz" onclick="openBiz()">기업 계정<span class="n" id="c-biz"></span></button>
       <button class="tb urg" data-f="hold" onclick="openHold()">보류함<span class="n" id="c-hold"></span></button>
       <button class="tb" data-f="org" onclick="openOrg()">기관 목록<span class="n" id="c-org"></span></button>
+      <button class="tb" data-f="drop" onclick="openDrop()">버림 규칙<span class="n" id="c-drop"></span></button>
     </div>
 
     <div class="tgrp">앱 화면 꾸미기</div>
@@ -407,6 +408,17 @@
       <b>└ 로 시작하는 줄</b>은 신청은 했지만 쓸모가 없어 안 쓰는 기능입니다.
       같은 것을 다시 뒤지지 않도록 이유를 적어뒀습니다.</p>
     <div id="apiList"></div>
+  </div>
+
+  <div id="dropWrap" class="hide">
+    <p class="hint">세중님이 <b>버린 공고</b>를 하루 두 번(9시·18시) 모아 왜 버렸는지 짐작하고, 같은 모양이 되풀이되면 <b>규칙</b>으로 만들어 다음부터 안 받습니다.<br>
+      규칙은 <b>제안</b>으로 시작해 2번(기관 전체는 3번) 버리면 <b>적용</b>됩니다. 잘못 만들어진 규칙은 <b>끔</b>을 눌러 주세요.</p>
+    <div class="brow2" style="margin-bottom:10px"><button class="save" onclick="runDrop()">지금 분석하기</button></div>
+    <pre id="dropText" style="white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12.5px;line-height:1.55;margin:0 0 14px"></pre>
+    <h3 class="osec">규칙 표</h3>
+    <div id="dropRules"></div>
+    <h3 class="osec">최근에 버린 공고</h3>
+    <div id="dropRecent"></div>
   </div>
 
   <div id="holdWrap" class="hide">
@@ -802,7 +814,7 @@ function saveBanners(){
 /* ===== 커뮤니티 관리 ===== */
 function shell(which){
   ['list','bannerWrap','commWrap','menuWrap','accessWrap','jobsWrap',
-   'schedWrap','textsWrap','bizWrap','holdWrap','orgWrap'].forEach(function(id){
+   'schedWrap','textsWrap','bizWrap','holdWrap','orgWrap','dropWrap'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.className = (id===which ? '' : 'hide');
   });
@@ -1493,6 +1505,58 @@ function drawOrg(r){
           + (x.seen?'<i>'+esc(x.seen)+'</i>':'')
           + '</div></div>';
       }).join('');
+}
+
+/* ===== 버림 규칙 ===== */
+function openDrop(){
+  if(!KEY){ msg('먼저 키를 넣고 열어주세요'); return; }
+  document.querySelectorAll('.tabs .tb').forEach(function(b){
+    if(b.dataset.f) b.className='tb'+(b.dataset.f==='drop'?' on':'');
+  });
+  shell('dropWrap');
+  document.getElementById('dropText').textContent='불러오는 중';
+  google.script.run.withSuccessHandler(function(r){
+    if(!r.ok){ msg(r.message); return; }
+    drawDrop(r);
+  }).withFailureHandler(function(e){ boxFail('dropRules','버림 규칙',e); }).adminDropRules(KEY);
+}
+function runDrop(){
+  if(!KEY) return;
+  document.getElementById('dropText').textContent='분석 중 (공고 전체를 훑습니다)';
+  google.script.run.withSuccessHandler(function(r){ if(r&&!r.ok){ msg(r.message); return; } openDrop(); })
+    .withFailureHandler(function(e){ msg('분석 실패: '+(e&&e.message||e)); }).adminDropRun(KEY);
+}
+function drawDrop(r){
+  document.getElementById('dropText').textContent = r.text || '';
+  var rules=r.rules||[];
+  var b=document.getElementById('c-drop');
+  if(b) b.textContent = rules.filter(function(x){return x.state==='적용';}).length || '';
+  var box=document.getElementById('dropRules');
+  if(!rules.length){ box.innerHTML='<div class="empty">아직 규칙이 없습니다. 공고를 버리면 여기에 쌓입니다.</div>'; }
+  else box.innerHTML = rules.map(function(x){
+    var st = x.state==='적용' ? '<span class="ost" style="background:#e8f3f0;color:#0d5c4f">적용 중</span>'
+           : x.state==='끔' ? '<span class="ost" style="background:#eee;color:#888">끔</span>'
+           : '<span class="ost" style="background:#fdf1ec;color:#b4432c">제안</span>';
+    var k=x.key.replace(/'/g,"\\'");
+    return '<div class="orow'+(x.state==='끔'?' no':'')+'">'
+      + '<div class="oh"><b>'+esc(x.desc)+'</b>'+st+'</div>'
+      + '<div class="ow">'+esc(x.type)+' · 버림 '+x.n+'번 · 막음 '+x.blocked+'건'+(x.last?' · 마지막 '+esc(x.last):'')+(x.ex?'<br>예) '+esc(x.ex).replace(/\n/g,' / '):'')+'</div>'
+      + '<div class="of">'
+      + (x.state!=='적용' ? '<button class="save" style="padding:6px 10px" onclick="setDrop(\''+k+'\',\'적용\')">적용</button>' : '')
+      + (x.state!=='끔' ? '<button class="save" style="padding:6px 10px;background:#8b979d" onclick="setDrop(\''+k+'\',\'끔\')">끔</button>' : '')
+      + '</div></div>';
+  }).join('');
+  var rec=r.recent||[];
+  document.getElementById('dropRecent').innerHTML = !rec.length ? '<div class="empty">아직 없음</div>'
+    : rec.map(function(x){
+        return '<div class="orow"><div class="oh"><b>'+esc(x.org)+' · '+esc(x.title)+'</b></div>'
+          + '<div class="ow">['+esc(x.src)+'] '+esc(x.how)+' → '+esc(x.why)+'</div>'
+          + '<div class="of"><i>'+esc(x.at)+'</i><i>'+esc(x.keys)+'</i></div></div>';
+      }).join('');
+}
+function setDrop(key, state){
+  google.script.run.withSuccessHandler(function(r){ if(!r.ok){ msg(r.message); return; } msg('바꿨습니다'); openDrop(); })
+    .withFailureHandler(function(e){ msg('실패: '+(e&&e.message||e)); }).adminDropRuleSet(KEY, key, state);
 }
 
 /* ===== 확인 필요 (보류함) ===== */
