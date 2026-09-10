@@ -745,6 +745,7 @@
   .cd.empty{background:transparent}
   .cd i{font-style:normal;font-size:12px;color:var(--dim)}
   .cd em{font-style:normal;font-size:10px;font-weight:800;margin-top:1px}
+  .cd .edot{position:absolute;right:4px;top:4px;width:6px;height:6px;border-radius:50%;background:#e5484d}
   .cd.lv1{background:#dcece7} .cd.lv1 i,.cd.lv1 em{color:#0d5c4f}
   .cd.lv2{background:#9ecabd} .cd.lv2 i,.cd.lv2 em{color:#0a4034}
   .cd.lv3{background:#0d5c4f} .cd.lv3 i,.cd.lv3 em{color:#fff}
@@ -1585,7 +1586,7 @@
 
 
   .mi .tx{flex:1;min-width:0}
-  .mi .tx b{display:block;font-size:15px;margin-bottom:3px;letter-spacing:-.01em}
+  .mi .tx b{display:block;font-size:15px;margin-bottom:3px;letter-spacing:-.01em;word-break:keep-all;line-height:1.3}
   .mi .tx span{font-size:12.5px;color:#5a6870}
   .mi .arw{color:#c6ced1;font-size:19px}
   .mi.hi{border-color:var(--accent);background:var(--accent-soft)}
@@ -1651,7 +1652,7 @@
   .ptags i.jb{background:var(--accent-soft);color:var(--accent);font-weight:700}
   .nb.hide{display:none}
   .nb{display:inline-flex;align-items:center;justify-content:center;min-width:19px;
-    height:19px;padding:0 6px;border-radius:20px;background:#d9694a;color:#fff;
+    height:19px;padding:0 6px;border-radius:20px;background:#e5484d;color:#fff;
     font-size:11px;font-weight:800;margin-left:6px;line-height:1}
   .pnew{flex-shrink:0;font-size:9.5px;font-weight:800;letter-spacing:.04em;
     background:#d9694a;color:#fff;border-radius:5px;padding:3px 6px;margin-right:6px}
@@ -3191,11 +3192,11 @@
         <option value="past">지난 공고만</option>
       </select>
       <select id="postSort" onchange="doPosts()">
+        <option value="hot" selected>인기순</option>
         <option value="new">최신순</option>
         <option value="deadline">마감 가까운 순</option>
         <option value="public">공공기관 우선</option>
         <option value="univ">대학병원 우선</option>
-        <option value="hot">인기순</option>
       </select>
     </div>
     <div id="postBox"></div>
@@ -3341,7 +3342,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v277 · 2026-09-10';
+var APP_VER = 'v278 · 2026-09-10';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3661,7 +3662,7 @@ function snapshot(which){
   } else if(which === 'post'){
     SNAP.post = { html:(document.getElementById('postBox')||{}).innerHTML||'',
                   mode: POST_MODE, cls: POST_CLS, scroll: window.scrollY || 0,
-                  sort:(document.getElementById('postSort')||{}).value||'new',
+                  sort:(document.getElementById('postSort')||{}).value||'hot',
                   span:(document.getElementById('postSpan')||{}).value||'live' };
   }
 }
@@ -3691,7 +3692,7 @@ function restore(which){
     POST_MODE = st.mode || 'mine';
     POST_CLS = st.cls || POST_CLS_LIST[0];
     paintClsTabs();
-    var ps=document.getElementById('postSort'); if(ps) ps.value = st.sort || 'new';
+    var ps=document.getElementById('postSort'); if(ps) ps.value = st.sort || 'hot';
     var pn=document.getElementById('postSpan'); if(pn) pn.value = st.span || 'live';
     document.getElementById('pt1').className = 'tab' + (POST_MODE==='mine'?' on':'');
     document.getElementById('pt2').className = 'tab' + (POST_MODE==='all'?' on':'');
@@ -5867,7 +5868,7 @@ function drawEduFull(r){
     + '<button class="etab'+(EDU_KIND===''?' on':'')+'" onclick="pickEdu(\'\')">전체</button>'
     + '<button class="etab'+(EDU_KIND==='보수교육'?' on':'')+'" onclick="pickEdu(\'보수교육\')">보수교육</button>'
     + '<button class="etab'+(EDU_KIND==='학술·행사'?' on':'')+'" onclick="pickEdu(\'학술·행사\')">교육 및 학술</button>'
-    + '</div><div id="eduList"></div>';
+    + '</div><div id="eduCal"></div><div id="eduList"></div>';
   box.innerHTML=h;
   attachRipple();
   drawEdu(r);
@@ -5898,9 +5899,76 @@ function pickEdu(k){
   }).withFailureHandler(function(){}).getEdu(cred(), EDU_KIND);
 }
 
+/* ── 교육 달력 (2026-09-10) ──
+   협회 글 본문에서 뽑은 교육일·접수기간을 달력에 그립니다. 날짜를 못 읽은 글(그림 포스터 등)은 달력 밑에 따로 셉니다. */
+var EDU_ROWS=[], EDU_CAL_M=null;
+function eduCalMove(n){ EDU_CAL_M=new Date(EDU_CAL_M.getFullYear(), EDU_CAL_M.getMonth()+n, 1); drawEduCal(); }
+function eduD8(v){ return String(v||'').replace(/[^0-9]/g,'').slice(0,8); }
+function eduMD(v){ var s=eduD8(v); return s.length===8 ? (+s.slice(4,6))+'.'+(+s.slice(6,8)) : ''; }
+function drawEduCal(rows){
+  if(rows) EDU_ROWS=rows;
+  var box=document.getElementById('eduCal');
+  if(!box) return;
+  var dated=EDU_ROWS.filter(function(x){ return eduD8(x.start).length===8; });
+  var undated=EDU_ROWS.length-dated.length;
+  if(!dated.length){ box.innerHTML=''; return; }
+  var today=new Date(), t8=eduD8(today.getFullYear()+'.'+('0'+(today.getMonth()+1)).slice(-2)+'.'+('0'+today.getDate()).slice(-2));
+  if(!EDU_CAL_M){
+    /* 이 달에 교육이 없으면 가장 가까운 앞 교육이 있는 달부터 */
+    var up=dated.map(function(x){return eduD8(x.start);}).filter(function(d){return d>=t8;}).sort()[0];
+    var base=up||t8;
+    EDU_CAL_M=new Date(+base.slice(0,4), +base.slice(4,6)-1, 1);
+  }
+  var y=EDU_CAL_M.getFullYear(), mo=EDU_CAL_M.getMonth();
+  var lastD=new Date(y,mo+1,0).getDate(), pad=new Date(y,mo,1).getDay();
+  var m1=String(y)+('0'+(mo+1)).slice(-2)+'01', m2=String(y)+('0'+(mo+1)).slice(-2)+('0'+lastD).slice(-2);
+  var list=dated.map(function(x){ var a=eduD8(x.start), b=eduD8(x.end)||a; return {x:x,a:a,b:(b<a?a:b), ra:eduD8(x.rcvFrom), rb:eduD8(x.rcvTo)}; })
+    .filter(function(it){ return !(it.b<m1 || it.a>m2) || (it.ra && it.rb && !(it.rb<m1 || it.ra>m2)); })
+    .sort(function(p,q){ return p.a<q.a?-1:1; });
+  var cnt={}, rcv={};
+  list.forEach(function(it){
+    for(var d=1; d<=lastD; d++){
+      var key=String(y)+('0'+(mo+1)).slice(-2)+('0'+d).slice(-2);
+      if(key>=it.a && key<=it.b) cnt[d]=(cnt[d]||0)+1;
+      if(it.ra && it.rb && key>=it.ra && key<=it.rb) rcv[d]=(rcv[d]||0)+1;
+    }
+  });
+  var isNow=(today.getFullYear()===y && today.getMonth()===mo);
+  var h='<div class="card"><h2>교육 달력</h2>'
+    + '<p class="sub">교육이 열리는 날은 <b>진한 칸</b>, 신청을 받는 날은 <b>점</b>으로 표시합니다. 협회 글에서 읽은 날짜라 원문도 확인해 주세요.</p>'
+    + '<div class="calhead"><button onclick="eduCalMove(-1)">‹</button><b>'+y+'년 '+(mo+1)+'월</b><button onclick="eduCalMove(1)">›</button></div>'
+    + '<div class="calgrid">'
+    + ['일','월','화','수','목','금','토'].map(function(d,i){ return '<div class="cw'+(i===0?' sun':(i===6?' sat':''))+'">'+d+'</div>'; }).join('');
+  for(var i=0;i<pad;i++) h+='<div class="cd empty"></div>';
+  for(var d=1; d<=lastD; d++){
+    var n=cnt[d]||0, r=rcv[d]||0;
+    var lv=n===0?0:(n>=3?3:(n>=2?2:1));
+    h+='<div class="cd'+(isNow&&today.getDate()===d?' today':'')+' lv'+lv+'">'
+      + '<i>'+d+'</i>'+(n?'<em>'+n+'</em>':'')+(r?'<span class="edot" title="신청 받는 날"></span>':'')+'</div>';
+  }
+  h+='</div></div>';
+  if(!list.length){
+    h+='<div class="empty2">이 달에 열리는 교육이 없습니다.<br>화살표로 다른 달을 보실 수 있습니다.</div>';
+  }else{
+    h+='<div class="mcat">'+(mo+1)+'월 교육 '+list.length+'건</div>';
+    list.forEach(function(it){
+      var x=it.x;
+      h+='<a class="edu" href="'+esc(x.url)+'" target="_blank" rel="noopener">'
+        + '<div class="ehead"><span class="ek '+(x.kind==='보수교육'?'k1':'k2')+'">'+esc(x.kind)+'</span>'
+        + '<span class="ed">교육 '+eduMD(x.start)+(it.b!==it.a?' ~ '+eduMD(x.end):'')+'</span></div>'
+        + '<div class="et">'+esc(x.title)+'</div>'
+        + '<div class="ef">'+(x.rcvTo?'신청 '+(x.rcvFrom&&x.rcvFrom!==x.rcvTo?eduMD(x.rcvFrom)+' ~ ':'~')+eduMD(x.rcvTo)+' · ':'')+(x.place?esc(x.place.slice(0,24))+' · ':'')+esc(x.assoc)+' · 원문 보기 ›</div></a>';
+    });
+  }
+  if(undated) h+='<div class="hintbox">날짜를 읽지 못한 소식 '+undated+'건(포스터 그림으로 올라온 월별 보수교육 일정 등)은 아래 목록에서 원문을 확인해 주세요.</div>';
+  box.innerHTML=h;
+  attachRipple(); revealIn();
+}
+
 function drawEdu(r){
   var box=document.getElementById('eduList');
   if(!box) return;
+  drawEduCal(r.rows||[]);
   if(!r.rows.length){
     box.innerHTML='<div class="empty2">아직 모인 소식이 없습니다.<br>'
       + '하루 한 번 협회 게시판에서 새로 가져옵니다.</div>';
@@ -8757,7 +8825,7 @@ function doPosts(){
   }
   var job = (POST_MODE==='mine') ? ((ME&&ME.job)||JOB) : '';
   var sel = document.getElementById('postSort');
-  var srt = sel ? sel.value : 'new';
+  var srt = sel ? sel.value : 'hot';
   var spEl = document.getElementById('postSpan');
   var spn = spEl ? spEl.value : 'live';
 
@@ -8852,7 +8920,7 @@ function showPosts(r){
   var SN={deadline:'마감이 가까운 순', new:'최근에 올라온 순',
           public:'공공기관 먼저', univ:'대학병원·의료원 먼저', hot:'많이 본 순'};
   var SP={live:'접수 중', all:'지난 공고 포함', past:'지난 공고'};
-  var sv=(document.getElementById('postSort')||{}).value||'new';
+  var sv=(document.getElementById('postSort')||{}).value||'hot';
   var pv=(document.getElementById('postSpan')||{}).value||'live';
   h += '<p class="thin" style="margin:0 0 10px">'
     + (POST_MODE==='mine' ? esc((ME&&ME.job)||JOB)+' 관련 ' : '전체 ')
