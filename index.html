@@ -2930,7 +2930,7 @@
         <span data-t="login.kakao">카카오로 계속하기</span></button>
       <button class="go" id="naverBtn" onclick="goNaver()"
         style="background:#03C75A;color:#fff;font-weight:800;margin-top:9px">
-        <span data-t="login.naver">네이버로 계속하기</span> <small style="font-weight:600;opacity:.85">· 준비 중</small></button>
+        <span data-t="login.naver">네이버로 계속하기</span></button>
 
       <ul class="lclist" style="margin-top:16px">
         <li>받는 것은 <b>닉네임</b> 하나뿐입니다</li>
@@ -3346,7 +3346,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v281 · 2026-09-10';
+var APP_VER = 'v282 · 2026-09-10';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -3627,7 +3627,7 @@ function busy(on, text){
   el.className = on ? 'on' : '';
 }
 
-var NAVER_READY = false;   // 네이버 개발자센터 검수가 끝나면 true (2026-09-10 · 검수 전엔 등록된 시험 계정만 로그인됨)
+var NAVER_READY = true;    // 검수용 캡처를 위해 열어 둠 (2026-09-10). 검수 전엔 테스터 ID 로 등록된 네이버 계정만 통과함
 function goNaver(){
   if(!NAVER_READY){ kmsg('네이버 로그인은 네이버 쪽 검수가 끝나면 열립니다. 지금은 카카오로 시작해 주세요.'); return; }
   var btn = document.getElementById('naverBtn');
