@@ -3338,7 +3338,7 @@ var rows = {practice:[], career:[]};
 var lastId = null;
 var role = '현직';
 var ME = null;   // {nick, id, role, job}
-var APP_VER = 'v273 · 2026-09-10';
+var APP_VER = 'v274 · 2026-09-10';
 
 /* 화면·다리(app.js)·서버 버전을 한 줄에 찍습니다.
    「고쳤는데 안 바뀐다」 할 때 어느 파일이 안 올라갔는지 여기서 바로 보입니다. */
@@ -6358,7 +6358,7 @@ function loadJobHosp(x){
     if(d){
       var hp = hospMatchLocal(x.org, x.title, x.region);
       if(hp) drawJobHosp(hp);
-      else box.innerHTML='';
+      else jobHospServer(x);   // 병원 자료에 없으면 서버가 요양원·주야간보호(장기요양기관)에서 찾습니다 (2026-09-10)
     } else {
       /* JSON 못 받으면 서버로 폴백 */
       google.script.run.withSuccessHandler(function(hp){
@@ -6370,12 +6370,39 @@ function loadJobHosp(x){
   });
 }
 
+/* 서버에서 찾기 — 병원목록 → 장기요양기관 순 */
+function jobHospServer(x){
+  var box=document.getElementById('jobHosp');
+  google.script.run.withSuccessHandler(function(hp){
+    if(!hp||!hp.ok){ if(box) box.innerHTML=''; return; }
+    drawJobHosp(hp);
+  }).withFailureHandler(function(){ if(box) box.innerHTML=''; })
+    .hospByName(cred(), x.org||'', x.title||'', x.region||'');
+}
+/* 요양원·주야간보호·재가센터 카드 (장기요양기관 자료) */
+function drawCareCard(hp){
+  var n=function(v){ return Number(v||0).toLocaleString('ko-KR'); };
+  return '<div class="jhosp"><div class="jt">이 기관은 이런 곳입니다</div>'
+    + '<div class="jn">'+esc(hp.name)+'</div>'
+    + '<div class="jm">'+esc(hp.kind||'장기요양기관')
+    + (hp.sido?' · '+esc(hp.sido)+(hp.sgg?' '+esc(hp.sgg):''):'')
+    + (hp.bed?' · 정원 '+n(hp.bed)+'명':'')+'</div>'
+    + '<div class="jrow">'
+    + '<div class="jbx"><div class="k">작업치료사</div><div class="v">'+n(hp.ot)+'명</div></div>'
+    + '<div class="jbx"><div class="k">물리치료사</div><div class="v">'+n(hp.pt)+'명</div></div>'
+    + '<div class="jbx"><div class="k">요양보호사</div><div class="v">'+n(hp.cg)+'명</div></div>'
+    + '</div>'
+    + (hp.addr?'<div class="jm" style="margin-top:8px">'+esc(hp.addr)+'</div>':'')
+    + '<div class="jm" style="margin-top:9px">'+esc(hp.basis||'국민건강보험공단 장기요양기관 현황')+' 기준 · 기관이 신고한 인력이라 지금과 다를 수 있습니다</div>'
+    + '</div>';
+}
 /* 병원 정보 카드 그리기 (로컬·서버 공통) */
 function drawJobHosp(hp){
   var box=document.getElementById('jobHosp');
   if(!box) return;
 
     if(!hp || !hp.ok){ box.innerHTML=''; return; }
+    if(hp.care){ box.innerHTML=drawCareCard(hp); attachRipple(); revealIn(); return; }
     /* 로컬 검색이면 localIdx, 서버면 idx */
     JHOSP_IDX = (hp.localIdx!=null) ? hp.localIdx : hp.idx;
     var openArg = (hp.localIdx!=null) ? ("'L"+hp.localIdx+"'") : hp.idx;
