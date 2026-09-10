@@ -1,0 +1,13 @@
+{
+ "name": "경희대학교병원",
+ "type": "html",
+ "url": "https://recruit.incruit.com/khmc/job/",
+ "enc": "EUC-KR",
+ "base": "https://recruit.incruit.com",
+ "row": "<li><div class=\"inner-box\">[\\s\\S]*?</li>",
+ "title": "<span class=\"title\">([\\s\\S]*?)</span>",
+ "link": "<a href=\"([^\"]*/khmc/job/\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "인크루트 채용관. 접수기간 '2026.09.09 00:00~2026.09.16 23:59'. 마감 건도 목록에 포함(span.state deadline)."
+}

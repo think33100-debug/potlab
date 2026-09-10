@@ -1,0 +1,13 @@
+{
+ "name": "원광대학교병원",
+ "type": "html",
+ "url": "https://www.wkuh.org/recruit/jobs/recruit_notice.do?recruit_type=list&sh_rc_type=validity",
+ "base": "https://www.wkuh.org",
+ "row": "<div class=\"list_bbs_title\">[\\s\\S]*?<\\/div>",
+ "title": "<p><a[^>]*>([\\s\\S]*?)<\\/a><\\/p>",
+ "link": "rc_idx=(\\d+)",
+ "linkFmt": "https://www.wkuh.org/recruit/jobs/recruit_notice.do?recruit_type=view&rc_idx={1}&sh_rc_type=validity",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "ul/li 목록. 접수기간 'YYYY.MM.DD(요일) HH:MM ~ YYYY.MM.DD(요일) HH:MM' → from/to. 링크는 rc_idx 로 조립(sh_rc_type=validity 는 진행중만)"
+}

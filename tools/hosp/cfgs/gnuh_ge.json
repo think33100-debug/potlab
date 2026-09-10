@@ -1,0 +1,12 @@
+{
+ "name": "경상국립대학교병원",
+ "type": "html",
+ "url": "https://recruit.gnuh.co.kr:8443/recruit/02_general/01_notice/ge_notice.jsp",
+ "base": "https://recruit.gnuh.co.kr:8443/recruit/02_general/01_notice",
+ "row": "<td class=\"tlt\">[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|^공지|사이트 이전",
+ "note": "일반직 목록에는 현재 '채용공고 사이트 이전'(2026-07-31~) 안내글 1건뿐 → skip 으로 제외해 0건. 일반직 공고는 https://gnuh.recruiter.co.kr (JobFlex SPA, curl 불가) 로 이전됨."
+}

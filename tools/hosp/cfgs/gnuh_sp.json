@@ -1,0 +1,12 @@
+{
+ "name": "경상국립대학교병원",
+ "type": "html",
+ "url": "https://recruit.gnuh.co.kr:8443/recruit/01_specialist/01_notice/sp_notice.jsp",
+ "base": "https://recruit.gnuh.co.kr:8443/recruit/01_specialist/01_notice",
+ "row": "<td class=\"tlt\">[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|^공지",
+ "note": "의사직 채용공고. 상세 sp_notice_view.jsp?idx=N (상대경로, base 는 목록 디렉터리)."
+}

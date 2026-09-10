@@ -1,0 +1,13 @@
+{
+ "name": "학교법인성균관대학삼성창원병원",
+ "type": "html",
+ "url": "https://smc.skku.edu/recruit/recruit/recruitInfo/list.do?mId=42",
+ "base": "https://smc.skku.edu",
+ "row": "<td class=\"title left\">[\\s\\S]*?<\\/tr>",
+ "title": "<span class=\"title-wrapper\">(?:\\s*<span class=\"mobile-icon-notice\">[^<]*<\\/span>)?([\\s\\S]*?)<\\/span>",
+ "link": "fn_goDtl\\('(\\d+)'",
+ "linkFmt": "https://smc.skku.edu/recruit/recruit/recruitInfo/view.do?mId=42&seq={1}",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "목록은 onclick fn_goDtl('seq',idx) 로 POST 폼 제출이지만 GET view.do?mId=42&seq=N 도 200 으로 열림(확인). tr.notice 의 '공지' 모바일 아이콘 span 은 title 정규식에서 제외."
+}

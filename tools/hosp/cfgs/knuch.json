@@ -1,0 +1,13 @@
+{
+ "name": "칠곡경북대학교병원",
+ "type": "html",
+ "url": "https://www.knuch.kr:442/content/04info/11_01.asp",
+ "base": "https://www.knuch.kr:442",
+ "row": "<tr[^>]*>\\s*<td[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*href=\"\\?proc_type=view[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\?proc_type=view[^\"]+)\"",
+ "linkFmt": "https://www.knuch.kr:442/content/04info/11_01.asp{1}",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "nninc_simple 게시판(경북대병원과 동일 엔진) · 날짜는 등록일 1개(to)."
+}

@@ -1,0 +1,11 @@
+{
+ "name": "고신대학교복음병원",
+ "type": "html",
+ "url": "https://www.kosinmed.or.kr/service/service_3.php",
+ "base": "https://www.kosinmed.or.kr",
+ "row": "<a href=\"\\/service\\/service_3\\.php\\?boardid=recruit&mode=view&idx=\\d+\" class=\"row[^\"]*\">\\s*<p class=\"no\">(?!<span class=\"tag gray\">)[\\s\\S]*?<\\/a>",
+ "title": "<p class=\"tit\">([\\s\\S]*?)<\\/p>",
+ "link": "href=\"([^\"]+)\"",
+ "skip": "합격자|발표|결과|^공지",
+ "note": "목록에 날짜 없음(모집중/마감 태그만). '<span class=\"tag gray\">마감' 행은 row 정규식(부정 전방탐색)으로 제외 — 마감 글의 상세는 alert('이미 마감된 게시글 입니다.')만 나옴. 2026-09-10 현재 1페이지 10건 전부 마감이라 0건. HTML 주석 안 샘플 행(service_3_view.php)은 idx 조건으로 제외. 상세 ?boardid=recruit&mode=view&idx=N (HTTP 200 확인)."
+}

@@ -1,0 +1,12 @@
+{
+ "name": "삼성서울병원",
+ "type": "html",
+ "url": "https://www.samsunghospital.com/home/recruit/recruitInfo/recruitNotice.do",
+ "base": "https://www.samsunghospital.com",
+ "row": "<tr>\\s*<td>[\\s\\S]*?recruitNoticeView\\.do[\\s\\S]*?</tr>",
+ "title": "<a href=\"/home/recruit/recruitInfo/recruitNoticeView\\.do[^>]*>([\\s\\S]*?)</a>",
+ "link": "href=\"(/home/recruit/recruitInfo/recruitNoticeView\\.do\\?RECRUIT_CD=[^\"]+)\"",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "번호 셀이 '공지' 로 표시되는 것은 상단 고정 채용공고이므로 skip 하지 않음(제목 기준 skip). 접수기간 셀 '2026.09.10<br />~ 2026.09.17'. 파일명 smc.json 은 삼성창원병원이 쓰고 있어 samsung_seoul.json 으로 둠."
+}

@@ -1,0 +1,13 @@
+{
+ "name": "인제대학교부산백병원",
+ "type": "html",
+ "url": "https://www.paik.ac.kr/busan/user/job/list.do?menuNo=900101",
+ "base": "https://www.paik.ac.kr",
+ "row": "<td class=\"tal\"><a href=\"javascript:view\\('\\d+'\\);\">[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "view\\('(\\d+)'\\)",
+ "linkFmt": "https://www.paik.ac.kr/recruit/user/job/view.do?menuNo=2400004&jobId={1}",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "view(id) 는 form name=item(POST /recruit/user/job/view.do, hidden menuNo=2400004, jobId) 제출. 같은 URL 을 GET 으로 열어도 200·제목 포함 확인. 접수기간이 '2026-08-14 ~ 채용시까지' 처럼 마감이 없는 행은 날짜 1개 → 파서 규칙상 to 에 시작일이 들어감."
+}

@@ -1,0 +1,13 @@
+{
+ "name": "가톨릭대학교인천성모병원",
+ "type": "html",
+ "url": "https://www.cmcism.or.kr/center/recruit_list",
+ "base": "https://www.cmcism.or.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"text_left\"><a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/center\\/recruit_view\\?seq=\\d+)",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "표 열: No·제목·마감날짜·상태. 날짜는 마감일 하나만(to). 상세 /center/recruit_view?seq=N",
+ "single": "deadline"
+}

@@ -1,0 +1,12 @@
+{
+ "name": "동아대학교병원",
+ "type": "html",
+ "url": "https://www.damc.or.kr/05/03_2017.php",
+ "base": "https://www.damc.or.kr/05",
+ "row": "<td\\s+class=\"tal_D\">\\s*<a href=\"03_2017_view\\.php[^\"]*\">[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "합격자|발표|결과|^공지",
+ "note": "표: 번호·모집분야·제목·모집기간·모집상태. 게시기간이 지난 글은 href=\"#모집공고\"+alert 라 row 정규식에서 제외(링크 있는 행만). 상세 03_2017_view.php?hire_web_sqno=N."
+}

@@ -1,0 +1,12 @@
+{
+ "name": "강릉아산병원",
+ "type": "html",
+ "url": "https://www.gnah.co.kr/kor/CMS/RecruitMgr/list.do?mCode=MN122",
+ "base": "https://www.gnah.co.kr",
+ "row": "<td class=\"index\">[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|^공지",
+ "note": "표: 번호·모집분야·공고명·진행상황·접수기간(시각 포함). 상세 view.do?mCode=MN122&recruit_seq=N GET 정상."
+}

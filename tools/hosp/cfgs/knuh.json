@@ -1,0 +1,13 @@
+{
+ "name": "경북대학교병원",
+ "type": "html",
+ "url": "https://knuh.kr/content/04information/02_01.asp",
+ "base": "https://knuh.kr",
+ "row": "<tr[^>]*>\\s*<td[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*href=\"\\?proc_type=view[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\?proc_type=view[^\"]+)\"",
+ "linkFmt": "https://knuh.kr/content/04information/02_01.asp{1}",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "공지|합격자|발표|결과|구게시판",
+ "note": "nninc_simple 게시판 · 날짜는 등록일 1개(to). 상단고정(진행중) 줄이 위에 오며 일반 목록과 b_num 이 겹치지 않음. 상태(진행중/마감) 열은 별도 파싱 안 함."
+}

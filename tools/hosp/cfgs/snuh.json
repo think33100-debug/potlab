@@ -1,0 +1,12 @@
+{
+ "name": "서울대학교병원",
+ "type": "html",
+ "url": "https://www.snuh.org/about/news/recruit/recruList.do",
+ "base": "https://www.snuh.org/about/news/recruit",
+ "row": "<tr>\\s*<td class=\"board__num\">[\\s\\S]*?</tr>",
+ "title": "<td class=\"alignL board__tit\"><a href=\"[^\"]*\">([\\s\\S]*?)</a>",
+ "link": "href=\"\\./(recruView\\.do\\?recruit_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "공지|합격자|발표|결과|시험 및|시험 안내",
+ "note": "모집기간 'YYYY-MM-DD ~ YYYY-MM-DD'. 링크는 ./recruView.do 상대경로라 base 를 목록 디렉터리로 둠. 합격자 발표·필기/면접시험 일정 안내 글이 많아 skip 으로 거름."
+}

@@ -1,0 +1,12 @@
+{
+ "name": "조선대학교병원",
+ "type": "html",
+ "url": "https://hosp.chosun.ac.kr/bbs/?b_id=recruit&site=hospital&mn=211",
+ "base": "https://hosp.chosun.ac.kr",
+ "row": "<td class=\"title\">[\\s\\S]*?<\\/td>",
+ "title": "<a href=\"[^\"]*w_id=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*b_id=recruit[^\"]*w_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "title 셀 안에 등록일 span 과 '~ 마감일' span. 둘 다 있으면 from=등록일·to=마감일, 수시접수(공지 배지) 글은 마감 span 이 비어 등록일만 잡힘(to=등록일). 상세 &type=view&w_id=N"
+}

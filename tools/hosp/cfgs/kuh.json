@@ -1,0 +1,12 @@
+{
+ "name": "건국대학교병원",
+ "type": "html",
+ "url": "https://www.kuh.ac.kr/recruit/apply/noticeList.do",
+ "base": "https://www.kuh.ac.kr",
+ "row": "<tr>\\s*<td>[^<]*</td>\\s*<td class=\"alignL\">[\\s\\S]*?</tr>",
+ "title": "<a href=\"/recruit/apply/noticeView\\.do[^>]*>([\\s\\S]*?)</a>",
+ "link": "href=\"(/recruit/apply/noticeView\\.do\\?anc_seq=\\d+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "기간 셀 '2026-09-09 08:00 ~ 2026-09-15 23:59' 에서 시작·마감 추출. 마감된 공고도 목록에 남음(stateNotice 마감)."
+}

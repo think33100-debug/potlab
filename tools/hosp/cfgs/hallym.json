@@ -1,0 +1,13 @@
+{
+ "name": "한림대학교성심병원",
+ "type": "html",
+ "url": "https://recruit.hallym.or.kr/hrt_p10_list.jsp?inggbn=ing&movePage=1",
+ "base": "https://recruit.hallym.or.kr",
+ "row": "<a href =\"\\/hrt_p20_detail\\.jsp\\?locate=7&[^\"]*inggbn=ing[^\"]*\">[\\s\\S]*?<\\/a>",
+ "title": "<\\/span>\\s*([^<]+?)\\s*<span>",
+ "link": "href =\"([^\"]+)\"",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "합격자|발표|결과|^공지",
+ "note": "한림대의료원 통합 목록. locate=7(한림대학교성심병원)·inggbn=ing 만 row 로 잡음(같은 페이지에 숨겨진 마감 목록 inggbn=end 도 있어 제외). 카드에는 마감일 하나만 있어 to 만 채워짐.",
+ "single": "deadline"
+}

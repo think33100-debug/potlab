@@ -1,0 +1,13 @@
+{
+ "name": "이화여자대학교의과대학부속목동병원",
+ "type": "html",
+ "url": "https://mokdong.eumc.ac.kr/intro/recrut/list.do?bid_status=I",
+ "base": "https://mokdong.eumc.ac.kr/intro/recrut",
+ "row": "<li>\\s*<a href=\"\\./view\\.do[\\s\\S]*?</li>",
+ "title": "<strong class=\"title\">(?:\\s*<span[^>]*>[^<]*</span>)?([\\s\\S]*?)</strong>",
+ "link": "href=\"\\./(view\\.do\\?bbs_no=\\d+[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "진행중 탭(bid_status=I)만. 제목 앞 D-n 배지가 함께 붙음. 접수기간 '2026-09-09 00:00:00 ~ 2026-09-15 23:59:00'. 의료원 전체(목동·서울·융합의학연구원) 공고가 섞임.",
+ "not": "서울병원"
+}

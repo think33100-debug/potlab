@@ -1,0 +1,13 @@
+{
+ "name": "계명대학교동산병원",
+ "type": "html",
+ "url": "https://dongsan.dsmc.or.kr:49870/content/03intro/04_01.php",
+ "base": "https://dongsan.dsmc.or.kr:49870",
+ "row": "<tr[^>]*>\\s*<td[\\s\\S]*?<\\/tr>",
+ "title": "<\\/span>\\s*([^<]+)<span class=\"reply_count\"",
+ "link": "href=['\"](\\?proc_type=view[^'\"]+)['\"]",
+ "linkFmt": "https://dongsan.dsmc.or.kr:49870/content/03intro/04_01.php{1}",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "nninc_simple 게시판 · 제목 앞의 D-day/상시모집 배지(<span class=label>)는 제목 정규식이 마지막 </span> 뒤 텍스트만 잡아 제외. 날짜는 등록일 1개(to). href 가 작은따옴표."
+}

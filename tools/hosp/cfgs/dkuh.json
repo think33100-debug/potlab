@@ -1,0 +1,12 @@
+{
+ "name": "단국대학교의과대학부속병원",
+ "type": "html",
+ "url": "https://www.dkuh.co.kr/board5/bbs/board.php?bo_table=01_03_05",
+ "base": "https://www.dkuh.co.kr",
+ "row": "<td class=\"td_subject\"[\\s\\S]*?<td class=\"td_name[\\s\\S]*?<\\/td>",
+ "title": "<a href=\"[^\"]*wr_id=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=01_03_05[^\"]*wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "그누보드. 채용기간 YYYY-MM-DD~YYYY-MM-DD → from/to. 상시글은 끝이 2999-12-31 인데 ymd() 가 20xx 만 받아 버려지므로 시작일 하나만 잡혀 to 에 들어감(실제론 시작일). 진행중 글은 bo_notice(공지 배지) 행이지만 제목엔 공지 없음. 링크는 절대주소(:443 포함, 200 확인)"
+}

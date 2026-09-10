@@ -1,0 +1,13 @@
+{
+ "name": "연세대학교 원주세브란스기독병원",
+ "type": "html",
+ "url": "https://www.ywmc.or.kr/web/www/employment_notice",
+ "base": "https://www.ywmc.or.kr",
+ "row": "<tr[^>]*>\\s*<td class=\"tac\">[\\s\\S]*?</tr>",
+ "title": "<a href=\"javascript:_board_WAR_bbsportlet_viewMessage\\(\\d+\\);\">([\\s\\S]*?)</a>",
+ "link": "viewMessage\\((\\d+)\\)",
+ "linkFmt": "https://www.ywmc.or.kr/web/www/employment_notice?p_p_id=board_WAR_bbsportlet&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_board_WAR_bbsportlet_sCurPage=1&_board_WAR_bbsportlet_action=view_message&_board_WAR_bbsportlet_messageId={1}",
+ "date": "(20\\d{2}\\.\\s?\\d{1,2}\\.\\s?\\d{1,2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "Liferay 게시판(수련/기타). 접수기간 없음 — 작성일('2026. 08. 04')만 있어 단일 날짜(to)로 들어감. 일반직 공고는 별도 페이지(online_company_application2)."
+}

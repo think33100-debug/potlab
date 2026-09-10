@@ -1,0 +1,13 @@
+{
+ "name": "학교법인 건양교육재단 건양대학교병원",
+ "type": "html",
+ "url": "https://www.kyuh.ac.kr/prog/recruitNotice/list.do?lyMcd=sub01_01&pageUnit=15",
+ "base": "https://www.kyuh.ac.kr",
+ "row": "<button[^>]*fn_search_view\\([\\s\\S]*?<\\/button>",
+ "title": "<em>([^<]+)<\\/em>\\s*<\\/strong>",
+ "link": "fn_search_view\\('([^']+)'\\)",
+ "linkFmt": "https://www.kyuh.ac.kr/prog/recruitNotice/view.do?noticeId={1}",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "카드형 목록 · 상세는 JS fn_search_view(noticeId) 가 form 을 /prog/recruitNotice/view.do?noticeId=… 로 POST 하지만 GET 으로도 200 열림(확인). 날짜는 접수시작/종료일 from~to. 목록 기본은 공고중+접수중(searchSttus=T,R)."
+}

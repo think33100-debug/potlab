@@ -1,0 +1,12 @@
+{
+ "name": "영남대학교병원",
+ "type": "html",
+ "url": "https://yumc.ac.kr/apply/web/recruit/RecruitList.do?agp=20",
+ "base": "https://yumc.ac.kr/apply/web/recruit",
+ "row": "<tr[^>]*>\\s*<td[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"RecruitView\\.do[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(RecruitView\\.do[^\"]+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "agp=20 계약직 탭 · 접수기간 시작~종료(둘 다 있으면 from~to, '~채용시까지'면 시작일 1개만 잡혀 to 로 들어감). agp=30 의사직 탭도 같은 구조."
+}

@@ -1,0 +1,13 @@
+{
+ "name": "대구가톨릭대학교병원",
+ "type": "html",
+ "url": "https://www.dcmc.co.kr/content/06customer/10_03.asp",
+ "base": "https://www.dcmc.co.kr",
+ "row": "<tr[^>]*>\\s*<td[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*href=\"\\?proc_type=view[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\?proc_type=view[^\"]+)\"",
+ "linkFmt": "https://www.dcmc.co.kr/content/06customer/10_03.asp{1}",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "nninc_simple 게시판 · 날짜는 등록일 1개(to). 상태 열(상시모집/진행중/마감)은 파싱 안 함."
+}

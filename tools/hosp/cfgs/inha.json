@@ -1,0 +1,13 @@
+{
+ "name": "인하대학교의과대학부속병원",
+ "type": "html",
+ "url": "https://www.inha.com/page/about/recruit/list",
+ "base": "https://www.inha.com",
+ "row": "<tr onclick='page\\.clickArticle\\(\"\\d+\"\\);'>[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"title\"><a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "clickArticle\\(\"(\\d+)\"\\)",
+ "linkFmt": "https://www.inha.com/page/about/recruit/detail/{1}",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "공지|합격자|발표|결과",
+ "note": "표 열: 번호·지원구분·제목·채용기간(YYYY.MM.DD ~ YYYY.MM.DD → from/to)·상태·조회수. 링크는 tr onclick 의 id 로 조립"
+}
