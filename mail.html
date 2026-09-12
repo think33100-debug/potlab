@@ -11,41 +11,66 @@
   body.bad{background:#7a2e2e}
   .t{font-size:26px;font-weight:800}
   .b{margin-top:10px;font-size:15px;opacity:.9;white-space:pre-wrap;word-break:keep-all}
-  a.go{display:inline-block;margin-top:24px;background:#fff;color:#0d5c4f;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:800}
+  .d{margin-top:14px;font-size:11.5px;opacity:.6;word-break:break-all}
+  a.go,button.go{display:inline-block;margin:24px 4px 0;background:#fff;color:#0d5c4f;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:800;border:0;font-size:15px;cursor:pointer}
+  .hide{display:none}
 </style>
 </head>
 <body>
 <div>
   <div class="t" id="t">처리 중…</div>
   <div class="b" id="b">잠시만요</div>
-  <a class="go" href="https://potjob.co.kr/admin.html">관리자 화면 열기</a>
+  <div class="d" id="d"></div>
+  <div>
+    <button class="go hide" id="retry" onclick="go(0)">다시 시도</button>
+    <a class="go hide" id="direct" href="#">구글 쪽에서 바로 처리</a>
+    <a class="go" href="https://potjob.co.kr/admin.html">관리자 화면 열기</a>
+  </div>
 </div>
 <script>
 /* 보류 메일의 「버리기」 「올리기」 버튼이 여기로 옵니다.
-   script.google.com 페이지를 바로 여는 방식은 메일 앱에서 「없는 페이지」 로 뜨는 일이 있어, 우리 도메인에서 JSONP 로 서버(mailAct)를 부릅니다. */
+   ① 우리 앱과 같은 길(JSONP)로 서버(mailAct)를 부릅니다.
+   ② 안 되면 1.5초 뒤 한 번 더.
+   ③ 그래도 안 되면 구글 스크립트 주소로 곧장 넘어가 서버가 결과 화면을 그리게 합니다 (2026-09-12) */
 var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtSeIQpBmt0rGvhlWpTrLwS1x5C3l3_HxvZgjVQUxYwnR/exec';
 function q(k){ var m = location.search.match(new RegExp('[?&]' + k + '=([^&]*)')); return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : ''; }
-function show(ok, title, body){
+var id = q('id'), act = q('act'), job = q('job'), tok = q('tok');
+var DIRECT = API_URL + '?mail=1&act=' + encodeURIComponent(act) + '&id=' + encodeURIComponent(id) + (job ? '&job=' + encodeURIComponent(job) : '') + '&tok=' + encodeURIComponent(tok);
+function show(ok, title, body, detail){
   document.body.className = ok ? '' : 'bad';
   document.getElementById('t').textContent = title;
   document.getElementById('b').textContent = body || '';
+  document.getElementById('d').textContent = detail || '';
 }
-(function(){
-  var id = q('id'), act = q('act'), job = q('job'), tok = q('tok');
-  if (!id || !act || !tok) { show(false, '주소가 잘못됐습니다', '메일의 버튼을 그대로 눌러 주세요.'); return; }
-  var name = '__potlab_cb_1_' + Date.now();
-  var timer = setTimeout(function(){ show(false, '서버가 응답하지 않습니다', '잠시 뒤 메일의 버튼을 다시 눌러 주세요.'); }, 25000);
-  window[name] = function(r){
-    clearTimeout(timer);
-    if (!r || !r.ok) { show(false, '처리하지 못했습니다', (r && r.error) || ''); return; }
-    var d = r.data || {};
-    show(!!d.ok, d.title || '', d.body || '');
-  };
-  var s = document.createElement('script');
-  s.src = API_URL + '?callback=' + name + '&action=mailAct&args=' + encodeURIComponent(JSON.stringify([id, act, job, tok])) + '&t=' + Date.now();
-  s.onerror = function(){ clearTimeout(timer); show(false, '서버에 닿지 못했습니다', '인터넷 연결을 확인하고 다시 눌러 주세요.'); };
-  document.head.appendChild(s);
-})();
+function fail(why){
+  show(false, '서버에 닿지 못했습니다', '아래 「구글 쪽에서 바로 처리」 를 눌러 주세요. 같은 일을 다른 길로 합니다.', why);
+  document.getElementById('retry').className = 'go';
+  var a = document.getElementById('direct'); a.href = DIRECT; a.className = 'go';
+}
+var tries = 0;
+function go(delay){
+  document.getElementById('retry').className = 'go hide';
+  document.getElementById('direct').className = 'go hide';
+  show(true, tries ? '다시 시도 중…' : '처리 중…', '잠시만요');
+  setTimeout(function(){
+    tries++;
+    var name = '__potlab_cb_' + tries + '_' + Date.now();
+    var done = false;
+    var timer = setTimeout(function(){ if (done) return; done = true; if (tries < 2) go(1500); else fail('응답 없음 (25초) · ' + tries + '번 시도'); }, 25000);
+    window[name] = function(r){
+      if (done) return; done = true; clearTimeout(timer);
+      if (!r || !r.ok) { show(false, '처리하지 못했습니다', (r && r.error) || ''); return; }
+      var d = r.data || {};
+      show(!!d.ok, d.title || '', d.body || '');
+    };
+    var s = document.createElement('script');
+    s.src = API_URL + '?callback=' + name + '&action=mailAct&args=' + encodeURIComponent(JSON.stringify([id, act, job, tok])) + '&t=' + Date.now();
+    s.onerror = function(){ if (done) return; done = true; clearTimeout(timer); if (tries < 2) go(1500); else fail('스크립트를 못 불러옴 · ' + tries + '번 시도 · ' + (navigator.userAgent || '').slice(0, 80)); };
+    document.head.appendChild(s);
+  }, delay || 0);
+}
+if (!id || !act || !tok) show(false, '주소가 잘못됐습니다', '메일의 버튼을 그대로 눌러 주세요.');
+else go(0);
 </script>
 </body>
 </html>
