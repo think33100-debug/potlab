@@ -43,7 +43,7 @@ function show(ok, title, body, detail){
   document.getElementById('d').textContent = detail || '';
 }
 function fail(why){
-  show(false, '서버에 닿지 못했습니다', '아래 「구글 쪽에서 바로 처리」 를 눌러 주세요. 같은 일을 다른 길로 합니다.', why);
+  show(false, '서버에 닿지 못했습니다', '아래 「구글 쪽에서 바로 처리」 를 눌러 주세요. 같은 일을 다른 길로 합니다. 그래도 안 되면 시크릿 창에 이 주소를 붙여 열어 주세요 — 구글 계정이 여럿 잡혀 있으면 막힙니다.', why);
   document.getElementById('retry').className = 'go';
   var a = document.getElementById('direct'); a.href = DIRECT; a.className = 'go';
 }
@@ -64,6 +64,7 @@ function go(delay){
       show(!!d.ok, d.title || '', d.body || '');
     };
     var s = document.createElement('script');
+    s.crossOrigin = 'anonymous';   /* 쿠키 없이 — 구글 계정이 잡혀 있으면 /u/1/ 로 넘어가 404 (2026-09-18) */
     s.src = API_URL + '?callback=' + name + '&action=mailAct&args=' + encodeURIComponent(JSON.stringify([id, act, job, tok])) + '&t=' + Date.now();
     s.onerror = function(){ if (done) return; done = true; clearTimeout(timer); if (tries < 2) go(1500); else fail('스크립트를 못 불러옴 · ' + tries + '번 시도 · ' + (navigator.userAgent || '').slice(0, 80)); };
     document.head.appendChild(s);

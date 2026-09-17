@@ -313,8 +313,8 @@ API 한 번이면 끝날 일을 화면 긁기·PDF 읽기로 헤맸습니다.
 
 ```
 1. node --check                문법
-2. audit.py                    API 등록 · 함수 존재 · style/script 섞임
-3. check1.py                   tab() 라우팅 · 버튼 함수
+2. node tools/check.js         API 표 ↔ app.js METHODS 대조 · 중복 이름
+3. (check1.py 는 없습니다 — tab() 라우팅은 아직 손으로 봅니다)
 4. 새 이름을 grep 으로 검색      중복 선언 방지
 5. 화면↔서버 항목 이름 일치
 6. 버전 올리기                  SERVER_VER · APP_VER · app.js?v=

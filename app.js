@@ -12,7 +12,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
 
 /* 이 파일이 최신인지 화면 아래에서 바로 확인하려고 둡니다.
    index.html 이 이 값을 읽어 버전과 함께 찍습니다. */
-var APP_JS_VER = 'a30 · 2026-09-17';
+var APP_JS_VER = 'a31 · 2026-09-18';
 
 (function () {
   'use strict';
@@ -126,6 +126,12 @@ var APP_JS_VER = 'a30 · 2026-09-17';
     }
 
     var script = document.createElement('script');
+    /* 쿠키를 안 보냅니다.
+       브라우저에 구글 계정이 잡혀 있으면 구글이 /exec 를
+       /u/1/macros/s/.../exec 로 넘기는데 그 주소는 404 입니다
+       (「현재 파일을 열 수 없습니다」). 쿠키가 없으면 안 넘깁니다.
+       2026-09-18 — 다른 구글 계정으로 열면 전부 막히던 것. */
+    script.crossOrigin = 'anonymous';
     var timer = setTimeout(function () {
       cleanup();
       onErr(new Error('응답이 없습니다. 잠시 후 다시 시도해주세요.'));
