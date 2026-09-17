@@ -1,0 +1,13 @@
+{
+ "name": "새통영병원",
+ "type": "html",
+ "url": "http://www.saety.co.kr/Module/MBoard/MBoard.asp?Gubun=4",
+ "base": "http://www.saety.co.kr",
+ "row": "<tr align=\"center\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href='[^']*PState=View'>([\\s\\S]*?)<\\/a>",
+ "link": "href='([^']*PState=View)'",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|\\(종료\\)|채용완료|입사지원서",
+ "single": "posted",
+ "note": "ASP 게시판 채용공고(Gubun=4). 표: 번호·제목·작성자·작성일·조회. href 작은따옴표. 끝난 글은 제목에 (종료) 붙임 → skip. 작성일 하나. robots.txt 404."
+}

@@ -1,0 +1,7 @@
+{
+ "name": "대자인병원",
+ "type": "greeting",
+ "host": "https://designhosp.career.greetinghr.com",
+ "url": "https://designhosp.career.greetinghr.com/ko/home",
+ "note": "대자인병원(전주 덕진구) 그리팅 채용사이트. /ko/guide 는 404 라 /ko/home 을 씀 — home 페이지 __NEXT_DATA__ dehydratedState 에 queryKey [\"openings\"] 있음(2026-09 기준 신규 간호사·약사·임상심리사 등). workspace id 2873. robots: /o/*/apply, /m/*, /a/* 만 Disallow"
+}

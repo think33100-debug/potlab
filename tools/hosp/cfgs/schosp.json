@@ -1,0 +1,11 @@
+{
+ "name": "성남중앙병원",
+ "type": "html",
+ "url": "https://schosp.co.kr/sub/sub0604.php",
+ "base": "https://schosp.co.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>\\s*<td class=\"title\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/sub\\/sub0604\\.php\\?[^\"]*mode=read\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/sub\\/sub0604\\.php\\?[^\"]*mode=read)\"",
+ "skip": "합격자|발표|결과",
+ "note": "자체 PHP 게시판(고객서비스>채용공고). 표: 번호·제목·작성일(25-12-30 처럼 두 자리 연도라 날짜 못 뽑음 → 날짜 없음)·조회·진행사항(진행중/마감). 제목에 (25.05.23~) 식 기간이 붙기도 함. www.schosp.co.kr 은 schosp.co.kr 로 302. robots.txt 는 302(없음)"
+}

@@ -1,0 +1,13 @@
+{
+ "name": "학교법인 춘해병원",
+ "type": "html",
+ "url": "https://www.choonhae.or.kr/board/%EA%B3%A0%EA%B0%9D%EC%84%9C%EB%B9%84%EC%8A%A4/%EC%B1%84%EC%9A%A9%EC%A0%95%EB%B3%B4",
+ "base": "https://www.choonhae.or.kr",
+ "row": "<div class=\"board\">\\s*<a href=\"#[^\"]*\" onclick=\"javascript:viewDetail\\(this, \\d+[\\s\\S]*?<\\/a>",
+ "title": "<span class=\"title\">([\\s\\S]*?)<\\/span>",
+ "link": "viewDetail\\(this, (\\d+)",
+ "linkFmt": "https://www.choonhae.or.kr/board/%EA%B3%A0%EA%B0%9D%EC%84%9C%EB%B9%84%EC%8A%A4/%EC%B1%84%EC%9A%A9%EC%A0%95%EB%B3%B4?command=view&id={1}",
+ "date": "<span class=\"date\">(20\\d{2}\\.\\d{2}\\.\\d{2})<\\/span>",
+ "skip": "합격자|발표|결과",
+ "note": "춘해병원 고객서비스>채용정보(div.board_list > div.board > a). 경로에 한글이 있어 percent-encoding 으로 적음. 링크는 onclick viewDetail(this, id, url) → board.js 가 GET url?command=view&id=N 으로 이동 · 같은 주소 GET 200·제목 포함 확인. 날짜는 등록일 하나(posted). robots: * Allow / (/management 만 금지). 총 35건, 1페이지 10건."
+}

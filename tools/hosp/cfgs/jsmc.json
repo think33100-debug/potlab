@@ -1,0 +1,12 @@
+{
+ "name": "전라남도 순천의료원",
+ "type": "html",
+ "url": "https://jsmc.or.kr/?contentId=c9f0f895fb98ab9159f51fd0297e236d",
+ "base": "https://jsmc.or.kr",
+ "row": "<tr><td class=\"td_num\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\?command=view&contentId=c9f0f895fb98ab9159f51fd0297e236d&wr_id=\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\?command=view&contentId=c9f0f895fb98ab9159f51fd0297e236d&wr_id=\\d+[^\"]*)\"",
+ "skip": "합격자|발표|서류전형|면접대상|양식",
+ "note": "자체 게시판(?contentId=). 진행현황 열: 지원 접수/채용시까지 는 <a>, 지원 마감 은 <div> 라 마감 글은 자동으로 빠짐. 날짜가 YY.MM.DD 라 안 뽑음. robots: 다른 contentId 하나만 Disallow",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

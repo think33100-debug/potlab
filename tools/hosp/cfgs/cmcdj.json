@@ -1,0 +1,14 @@
+{
+ "name": "학교법인 가톨릭학원 가톨릭대학교 대전성모병원",
+ "type": "html",
+ "url": "https://recruit.cmcnu.or.kr/cmcdj/index.do",
+ "enc": "EUC-KR",
+ "base": "https://recruit.cmcnu.or.kr",
+ "row": "<li>\\s*<a href=\"\\/cmcdj\\/application\\/appView\\.do\\?seq_no=\\d+[^\"]*\">[\\s\\S]*?<\\/li>",
+ "title": "<strong class=\"reduce[^\"]*\">\\s*(?:<!--[\\s\\S]*?-->\\s*)?([\\s\\S]*?)<\\/strong>",
+ "link": "href=\"(\\/cmcdj\\/application\\/appView\\.do\\?seq_no=\\d+[^\"]*)\"",
+ "date": "<em class=\"data\">(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/em>",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "가톨릭중앙의료원 통합 채용사이트(recruit.cmcnu.or.kr)의 대전성모 구역. MS949(EUC-KR). 목록은 index.do 의 li 카드(공지 라벨·제목·등록일). 제목 <strong> 안에 HTML 주석이 있어 title 에서 건너뜀. 등록일 1개(posted, 접수기간은 상세). 상세 appView.do?seq_no=N. 병원 홈페이지(cmcdj.or.kr) 는 cmc 계열 /api/article 이 아니라 여기로 연결. robots: /marecruitnager/ 만 차단, Allow /"
+}

@@ -1,0 +1,11 @@
+{
+ "name": "전라남도 강진의료원",
+ "type": "html",
+ "url": "https://www.gjmed.or.kr/bbs/board.php?bo_table=notice3",
+ "base": "https://www.gjmed.or.kr",
+ "row": "<tr class=\"[^\"]*\">\\s*<td class=\"td_num mo_none\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"https:\\/\\/www\\.gjmed\\.or\\.kr\\/bbs\\/board\\.php\\?bo_table=notice3&amp;wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(https:\\/\\/www\\.gjmed\\.or\\.kr\\/bbs\\/board\\.php\\?bo_table=notice3&amp;wr_id=\\d+)\"",
+ "skip": "합격자|발표|결과|서식|양식|임용후보",
+ "note": "그누보드5 표. 날짜가 MM-DD 만 있어 연도 없음 → 날짜 안 뽑음(상세에서). 공지 행(증명서 서식)은 skip. robots Allow /"
+}

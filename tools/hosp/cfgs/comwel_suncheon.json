@@ -1,0 +1,15 @@
+{
+ "name": "근로복지공단 순천병원",
+ "type": "html",
+ "url": "https://www.comwel.or.kr/suncheon/info/rcrt.jsp",
+ "base": "https://www.comwel.or.kr",
+ "row": "<td class=\"td\">\\s*\\d+<\\/td>[\\s\\S]*?<td class=\"tdlast\">",
+ "title": "<a href=\"\\?mode=view[^\"]*\"\\s*>([\\s\\S]*?)<\\/a>",
+ "link": "article_no=(\\d+)",
+ "linkFmt": "https://www.comwel.or.kr/suncheon/info/rcrt.jsp?mode=view&article_no={1}&board_no=128",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격|발표|결과|양식",
+ "single": "posted",
+ "note": "근로복지공단 순천병원 채용정보(board_no=128). 표: 번호·제목·등록일·조회. 제목 뒤 HTML 주석에 제목이 한 번 더 있으나 stripTags 로 지워짐. 날짜는 등록일 하나(마감은 본문·첨부). robots.txt 는 Disallow / 에 Allow /suncheon/ 예외. 같은 공고가 알리오(근로복지공단)에도 올라옴 → 중복 주의.",
+ "off": "구글 서버에서 못 엶(HTTP 400) 2026-09-17 · 컴퓨터에서는 열림"
+}

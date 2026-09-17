@@ -1,0 +1,13 @@
+{
+ "name": "성심의료재단강동성심병원",
+ "type": "html",
+ "url": "https://recruit.kdh.or.kr/sub_51.php",
+ "base": "https://recruit.kdh.or.kr",
+ "row": "<tr style=\"cursor:pointer;\">[\\s\\S]*?<\\/tr>",
+ "title": "<div class=\"register_view\" data-index=\"\\d+\">([\\s\\S]*?)<\\/div>",
+ "link": "data-index=\"(\\d+)\"",
+ "linkFmt": "https://recruit.kdh.or.kr/sub_51_view.php?id={1}",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "강동성심병원 자체 채용사이트(recruit.kdh.or.kr · 한림의료원 통합 recruit.hallym.or.kr 에는 없음). 접수중 탭 sub_51.php. 표: 제목·등록일·마감일 → 날짜 둘(등록일, 마감일)이라 from=등록일 to=마감일. 상세 sub_51_view.php?id=N (data-index). robots.txt 요청은 WAF 차단 페이지가 옴(Disallow 없음)."
+}

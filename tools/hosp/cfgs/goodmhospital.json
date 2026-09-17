@@ -1,0 +1,13 @@
+{
+ "name": "의료법인백송의료재단 굿모닝병원",
+ "type": "html",
+ "url": "https://www.goodmhospital.co.kr/app/communication/recruit.php",
+ "base": "https://www.goodmhospital.co.kr",
+ "row": "<li>\\s*<a href=\"\\/app\\/communication\\/recruit\\.php\\?[^\"]*B_IDX=\\d+\"[\\s\\S]*?<\\/a>\\s*<\\/li>",
+ "title": "<span class=\"tit\">([\\s\\S]*?)<\\/span>",
+ "link": "href=\"([^\"]+B_IDX=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "평택 굿모닝병원. ul.b_lst > li > a 구조, 날짜 하나(등록일). robots.txt 없음(404). 상세는 같은 recruit.php?B_IDX=N"
+}

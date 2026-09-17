@@ -1,0 +1,13 @@
+{
+ "name": "서울특별시서울의료원",
+ "type": "html",
+ "url": "https://www.seoulmc.or.kr/pms/board/list.do?boardidn=216&menucdv=06030000",
+ "base": "https://www.seoulmc.or.kr",
+ "row": "<td class=\"left\">[\\s\\S]*?gotoView\\(216,\\s*\\d+\\)[\\s\\S]*?<!-- 접수기간 -->\\s*<td>[^<]*<\\/td>",
+ "title": "<a href=\"#\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "gotoView\\(216,\\s*(\\d+)\\)",
+ "linkFmt": "https://www.seoulmc.or.kr/pms/board/detail.do?boardidn=216&boardseqn={1}&menucdv=06030000",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|안내",
+ "note": "채용공고 게시판(boardidn=216). 표: 번호·모집분야·접수기간·파일·조회수. row 를 제목칸~접수기간칸까지만 잡음. 접수기간 '2026-09-10 ~ 2026-09-20' → from/to. 공지(고정) 행도 실제 공고라 포함. 상단에 마이다스 JobFlex 신규채용사이트(smc.recruiter.co.kr/career/home) 링크도 있으나 이 게시판에도 계속 올라옴(2026-09 확인). robots: /pms/admin/ 만 Disallow."
+}

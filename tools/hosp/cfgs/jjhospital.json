@@ -1,0 +1,13 @@
+{
+ "name": "의료법인영경의료재단전주병원",
+ "type": "html",
+ "url": "https://www.jjhospital.co.kr/bbs/recruit",
+ "base": "https://www.jjhospital.co.kr",
+ "row": "<li class=\"clr\">[\\s\\S]*?<\\/li>",
+ "title": "<a href=\"\\/bbs_shop\\/read\\.htm\\?[^\"]*board_code=recruit[^\"]*idx=\\d+\">\\s*<span>([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(\\/bbs_shop\\/read\\.htm\\?[^\"]*board_code=recruit[^\"]*idx=\\d+)\"",
+ "date": "col_date\">(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "양식|복리후생|담당자|이메일|합격자|발표|결과",
+ "single": "posted",
+ "note": "아임웹류(bbs_shop) ul/li 목록. 공지 2건(지원서 양식·복리후생)은 skip. 작성일 하나. 호성전주병원(hsjjhosp)과 다른 곳 — 영경의료재단은 jjhospital.co.kr(완산구 중화산동). robots 는 문서 확장자만 Disallow"
+}

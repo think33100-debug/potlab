@@ -1,0 +1,14 @@
+{
+ "name": "현대병원",
+ "type": "html",
+ "url": "https://www.hdgh.co.kr/intro/recruit.php?m_menu_code=MM0010&s_menu_code=SM1004&m_seq=4&s_seq=78",
+ "base": "https://www.hdgh.co.kr",
+ "row": "<div class=\"col-md-5 list[^\"]*\">[\\s\\S]*?<\\/a>",
+ "title": "<span class=\"title\">([\\s\\S]*?)<\\/span>",
+ "link": "submit_view\\('(\\d+)'\\)",
+ "linkFmt": "https://www.hdgh.co.kr/intro/recruit_view.php?m_menu_code=MM0010&s_menu_code=SM1004&m_seq=4&s_seq=78&page=1&mode=view&board_seq={1}",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "남양주 현대병원(중앙대의료원 교육협력). 진행중 탭이 기본. 카드 div.col-md-5.list > a onclick=submit_view('board_seq'). 기간은 「시작일시 ~ 채용시 마감」 이라 날짜 하나(시작=posted). robots.txt 없음(HTML 응답)."
+}

@@ -1,0 +1,13 @@
+{
+ "name": "의료법인인봉의료재단뉴고려병원",
+ "type": "html",
+ "url": "https://www.nkhospital.net/notice/notice.php?jb_code=100",
+ "base": "https://www.nkhospital.net/notice",
+ "row": "<li>\\s*<a href='notice\\.php\\?jb_code=100&jb_mode=tdetail&jb_idx=\\d+[^']*'>[\\s\\S]*?<\\/a>\\s*<\\/li>",
+ "title": "<span class='subject'>([\\s\\S]*?)<\\/span>",
+ "link": "href='([^']+)'",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "김포 뉴고려병원 채용정보(jb_code=100). ul.cardList > li > a, 링크는 작은따옴표·상대경로(notice.php?...) 라 base 를 /notice 까지. 날짜 하나(등록일). robots.txt 없음(404)"
+}

@@ -1,0 +1,15 @@
+{
+ "name": "대동병원",
+ "type": "html",
+ "url": "https://www.ddh.co.kr/board/%EA%B3%A0%EA%B0%9D%EC%84%9C%EB%B9%84%EC%8A%A4/%EC%B1%84%EC%9A%A9%EC%86%8C%EC%8B%9D",
+ "base": "https://www.ddh.co.kr",
+ "row": "<tr>\\s*<th scope=\"row\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"#[^\"]*\" class=\"article_subject\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "viewDetail\\(this,\\s*(\\d+),",
+ "linkFmt": "https://www.ddh.co.kr/board/%EA%B3%A0%EA%B0%9D%EC%84%9C%EB%B9%84%EC%8A%A4/%EC%B1%84%EC%9A%A9%EC%86%8C%EC%8B%9D?command=view&id={1}",
+ "date": "<td>(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "대동병원(부산 동래구 충렬대로 187) 홈페이지 고객서비스 > 채용소식 게시판. 경로가 한글(/board/고객서비스/채용소식)이라 URL 인코딩해 둠. 자체 CMS 표(번호·제목·작성자·등록일·조회). 링크는 onclick viewDetail(this, id, url) 의 id 를 잡아 ?command=view&id=N 으로 조립(GET 200 확인). 등록일 1개(posted, 접수기간은 본문). 이력서 양식은 hwp 링크. robots: Allow / · /management 만 차단",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

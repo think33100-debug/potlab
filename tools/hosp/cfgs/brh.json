@@ -1,0 +1,12 @@
+{
+ "name": "재단법인 아산사회복지재단 부속 보령아산병원",
+ "type": "html",
+ "url": "https://brh.asanfoundation.or.kr/asan/depts/D136/K/bbs.do?menuId=4984",
+ "base": "https://brh.asanfoundation.or.kr",
+ "row": "<tr>\\s*<td class=\"title\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/asan\\/depts\\/D136\\/K\\/bbsDetail\\.do\\?menuId=4984&contentId=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "contentId=(\\d+)",
+ "linkFmt": "https://brh.asanfoundation.or.kr/asan/depts/D136/K/bbsDetail.do?menuId=4984&contentId={1}",
+ "skip": "합격자|발표|결과|양식",
+ "note": "아산재단 산하병원 공통 CMS(D136=보령). 목록에 제목만 있고 등록일 열은 주석 처리돼 있어 날짜 미수집 → 마감은 본문. robots: /asan/search 등만 차단, 게시판은 허용"
+}

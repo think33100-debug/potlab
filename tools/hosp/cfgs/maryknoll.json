@@ -1,0 +1,15 @@
+{
+ "name": "재단법인천주교부산교구유지재단 메리놀병원",
+ "type": "html",
+ "url": "https://www.maryknoll.co.kr/05_community/04.php?sort=b_gid&sort_state=option1",
+ "enc": "EUC-KR",
+ "base": "https://www.maryknoll.co.kr",
+ "row": "<tr\\s*>\\s*<td[^>]*>[\\s\\S]*?<td class=\"tal\"[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"tal\"[^>]*>\\s*<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "bbs_id=jobInfo&amp;mode=view&amp;b_id=(\\d+)",
+ "linkFmt": "https://www.maryknoll.co.kr/05_community/04.php?sort=b_gid&sort_state=option1&bbs_id=jobInfo&mode=view&b_id={1}",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|서류 반환|반환요청|서식|입사지원서",
+ "single": "deadline",
+ "note": "EUC-KR. 고객서비스>채용안내(bbs_id=jobInfo). 공지줄(상단, 배경색)에 현재 채용중 공고가 몰려 있고 마감은 '채용시까지' 또는 'YYYY-MM-DD'(deadline). 일반줄은 날짜 칸이 비어 있음. 제목이 '..' 로 잘려 나오는 줄 있음."
+}

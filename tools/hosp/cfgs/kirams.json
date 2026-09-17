@@ -1,0 +1,14 @@
+{
+ "name": "한국원자력의학원원자력병원",
+ "type": "html",
+ "url": "https://www.kirams.re.kr/board/generalBoardList7.do",
+ "base": "https://www.kirams.re.kr",
+ "row": "<tr>\\s*<td class=\"td_num\">[\\s\\S]*?<td class=\"td_date\">",
+ "title": "<span class=\"t\">([\\s\\S]*?)<\\/span>",
+ "link": "page_move\\(\\s*'generalBoardView7',\\s*\\{\\s*no:\\s*(\\d+)\\s*\\}",
+ "linkFmt": "https://www.kirams.re.kr/board/generalBoardView7.do?no={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "원자력의학원(원자력병원) 홈 소식/공지 > 채용공고. 표: 번호·상태(접수중)·제목·접수기간·등록일. row 를 td_num~td_date 앞까지만 잡아 등록일 혼입 방지. 접수기간 「2026-09-01~ 채용시」 처럼 시작일만 있으면 posted 로. 링크는 JS page_move → generalBoardView7.do?no=N 조립(GET 200 확인). robots.txt 에 User-agent * 블록 없음(Yeti·Googlebot 만)."
+}

@@ -1,0 +1,14 @@
+{
+ "name": "광주보훈병원",
+ "type": "html",
+ "url": "https://www.bohun.or.kr/gwangju/na/ntt/selectNttList.do?mi=32890&bbsId=1158",
+ "base": "https://www.bohun.or.kr",
+ "row": "<tr>\\s*<td class=\"modNone\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"javascript:\" data-id=\"\\d+\" class=\"nttInfoBtn\">(?:\\s*<!--[\\s\\S]*?-->)?([\\s\\S]*?)<\\/a>",
+ "link": "data-id=\"(\\d+)\"",
+ "linkFmt": "https://www.bohun.or.kr/gwangju/na/ntt/selectNttInfo.do?mi=32890&bbsId=1158&bbsSysId=gwangju&nttSn={1}",
+ "date": "<em class=\"mTit\">등록일<\\/em>\\s*(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|안내|현황",
+ "single": "posted",
+ "note": "한국보훈복지의료공단 공통 CMS(bohun.or.kr/gwangju). gwangju.bohun.or.kr 은 www.bohun.or.kr/gwangju/main.do 로 넘김. 표: 번호·제목·작성자·등록일·조회. 링크가 data-id(nttSn) 이고 원래는 form submit 이지만 GET selectNttInfo.do 로도 200. 제목 안 HTML 주석에 날짜(2025.10.27)가 있어 date 는 등록일 칸만 잡음. 등록일 하나뿐. robots: /bohunDesign/ /common/ 등만 Disallow."
+}

@@ -1,0 +1,12 @@
+{
+ "name": "창원파티마병원",
+ "type": "html",
+ "url": "https://www.fatimahosp.co.kr/api/article/3?instNo=1&boardNo=3&startIndex=1&pageRow=20",
+ "base": "https://www.fatimahosp.co.kr",
+ "row": "<list>[\\s\\S]*?<\\/list>",
+ "title": "<title>([\\s\\S]*?)<\\/title>",
+ "link": "<articleNo>(\\d+)<\\/articleNo>",
+ "linkFmt": "https://www.fatimahosp.co.kr/kr/job/view.do?boardNo=3&articleNo={1}",
+ "skip": "합격자|발표|결과|입사지원서",
+ "note": "홈페이지가 Vue SPA(/kr/job/list.do 는 빈 껍데기) 라 화면 코드(app.js)에서 찾은 목록 API 를 그대로 긁음: GET /api/article/3 (boardNo=3 = 채용정보) 이 XML(<HashMap><list>…</list>) 로 옴. 날짜는 createdDt 가 epoch ms 라 못 잡음. 상세는 SPA 주소 /kr/job/view.do?boardNo=3&articleNo=N (서버 HTML 엔 제목 없음 · 브라우저에서만 보임). 글이 5건뿐(최근 2024-07 주말약사) → 실제 채용은 다른 경로 가능성. robots.txt 없음(SPA index 가 옴)"
+}

@@ -1,0 +1,13 @@
+{
+ "name": "강남병원",
+ "type": "html",
+ "url": "https://www.knmc.or.kr/board/bbs.list.php?B_GUBUN=C",
+ "base": "https://www.knmc.or.kr/board",
+ "row": "<li>\\s*<a href=\"bbs\\.read\\.php[^\"]*B_GUBUN=C&B_IDX=\\d+\">[\\s\\S]*?<\\/a>\\s*<\\/li>",
+ "title": "<span class=\"tit\">([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(bbs\\.read\\.php[^\"]+)\"",
+ "date": "<span class=\"date\">(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/span>",
+ "skip": "합격자|발표|결과|고지|양식|안내",
+ "single": "posted",
+ "note": "용인 강남병원(knmc.or.kr) 자체 게시판 B_GUBUN=C 병원채용. ul.b_lst > li > a 카드: 번호(공지)·제목(span.tit)·요약(span.ct)·날짜(span.date 등록일). 링크 상대경로(bbs.read.php?...&B_IDX=N) 라 base 를 /board 까지 둠. 공지 2건(서류반환 고지·지원서 양식)은 skip 으로 제외. robots.txt: Allow /"
+}

@@ -1,0 +1,14 @@
+{
+ "name": "의료법인한성재단포항세명기독병원",
+ "type": "html",
+ "url": "https://www.phgidok.com/main/custom/recruiter/",
+ "base": "https://www.phgidok.com",
+ "row": "<td class=\"subject[^\"]*\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*mode=read[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "mode=read&amp;idx=(\\d+)",
+ "linkFmt": "https://www.phgidok.com/main/custom/recruiter/?mode=read&idx={1}",
+ "date": "<abbr title=\"(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|마감",
+ "single": "posted",
+ "note": "홈페이지 인재채용 게시판(XE/아이비 계열). 표: 번호·제목·작성자·작성일·조회. 링크가 ?boardTheme=…&mode=read&idx=N 상대 주소라 idx 를 잡아 linkFmt. 작성일은 abbr title 의 2026-09-04 (표시는 26-09-04) → 올린 날 하나. 마감된 글은 제목 끝에 「（마감）」 → skip. 알림게시물(toptr) 행이 일반 행과 중복될 수 있음. robots: _xnmAdmin·_Document·_TEST·sso 만 금지"
+}

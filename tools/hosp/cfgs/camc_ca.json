@@ -1,0 +1,13 @@
+{
+ "name": "의료법인청아의료재단청아병원",
+ "type": "html",
+ "url": "http://www.camc.co.kr/ca/board/recruit100",
+ "base": "http://www.camc.co.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*\\/recruit100\\/post\\/\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*\\/recruit100\\/post\\/\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "창원 청아병원(camc.co.kr/ca · cfgs/camc.json 의 충남대병원과 다른 곳). 채용정보 게시판. 공지 행(번호 자리에 label)은 row 에서 제외해 중복 방지. 날짜는 등록일 하나. 상세 /ca/recruit100/post/N. robots.txt 없음(404). 글이 드묾(연 1~2건)"
+}

@@ -1,0 +1,14 @@
+{
+ "name": "추병원",
+ "type": "html",
+ "url": "http://www.choomc.com/bbs_data/common/list.asp?table=choo_data&category=12",
+ "enc": "EUC-KR",
+ "base": "http://www.choomc.com",
+ "row": "<tr>\\s*<td width=\"50\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/bbs_data\\/common\\/list\\.asp\\?show_idx=\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/bbs_data\\/common\\/list\\.asp\\?show_idx=\\d+[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|이력서 양식|게시판입니다",
+ "single": "posted",
+ "note": "의정부 추병원. EUC-KR ASP 게시판(채용안내 = category=12). 표: 아이콘·첨부·제목·(빈)·등록일·(빈). 상세도 같은 list.asp?show_idx=N. 등록일 하나. robots.txt 404."
+}

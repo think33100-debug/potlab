@@ -1,0 +1,14 @@
+{
+ "name": "충청남도 홍성의료원",
+ "type": "html",
+ "url": "https://www.hsmc.or.kr/board/syfsx",
+ "base": "https://www.hsmc.or.kr",
+ "row": "<td scope=\"row\" class=\"num\">\\d+<\\/td>[\\s\\S]*?<td class=\"rdate\">[^<]*<\\/td>",
+ "title": "<a href=\"\\/board\\/view\\/[^\"]+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/board\\/view\\/[^\"]+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식|친인척|현황",
+ "single": "posted",
+ "note": "충남 지방의료원 공통 CMS. 표: 번호·제목·작성자·등록일·조회. 공지(고정) 행은 번호가 img 라 제외. 상세 /board/view/syfsx/N",
+ "off": "구글 서버에서 못 엶(HTTP 0 Address unavailable) 2026-09-17 · 컴퓨터에서는 열림"
+}

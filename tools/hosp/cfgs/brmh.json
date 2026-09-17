@@ -1,0 +1,12 @@
+{
+ "name": "서울특별시보라매병원",
+ "type": "html",
+ "url": "https://www.brmh.org/job/list.do",
+ "base": "https://www.brmh.org/job",
+ "row": "<td class=\"left list_txt\">\\s*<a href=\"\\.\\/view\\.do[\\s\\S]*?<\\/td>\\s*<td>[\\s\\S]*?<\\/td>",
+ "title": "<a href=\"\\.\\/view\\.do[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"\\.\\/(view\\.do[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|공지",
+ "note": "표: 번호·제목·공고모집기간·진행상황·등록일·조회·첨부. row 를 제목칸+모집기간칸까지만 잡아 등록일이 날짜에 섞이지 않게 함(모집기간 '2026-03-26 ~ 2027-02-28' → from/to, 모집기간 빈 행은 날짜 없음). 공지(고정) 행도 실제 공고라 포함. 상세 /job/view.do?site=001&user_code=&no=N. robots: * Allow /."
+}

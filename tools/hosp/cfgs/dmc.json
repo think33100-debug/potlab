@@ -1,0 +1,15 @@
+{
+ "name": "대진의료재단 분당제생병원",
+ "type": "html",
+ "url": "https://www.dmc.or.kr/recruit/recruit/list.do",
+ "base": "https://www.dmc.or.kr",
+ "row": "<td class=\"noti_txt01\">[\\s\\S]*?<\\/td>\\s*<td>\\d+<\\/td>",
+ "title": "<a href=\"javascript: page_move[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "no:\\s*(\\d+)",
+ "linkFmt": "https://www.dmc.or.kr/recruit/recruit/view.do?no={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "자체 채용 사이트(/recruit). 표: 상태·채용공고명·지원접수기간·조회수·작성일. row 는 조회수 td 까지만 잡아 작성일이 마감으로 오인되지 않게 함. 「채용시까지」는 날짜 하나 → posted. 제목 앞 [온라인] 접수방식 표기가 붙음. 상세 view.do?no=N. robots: Yeti 만 명시, * 없음",
+ "off": "구글 서버에서 못 엶(HTTP 0 Address unavailable) 2026-09-17 · 컴퓨터에서는 열림"
+}

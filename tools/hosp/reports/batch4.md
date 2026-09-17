@@ -1,0 +1,35 @@
+# batch4 조사 보고 (경남 10 · 경북 21)
+
+| 병원명 | 시도 | 결과 | 목록 주소 | 뽑힌 줄 수 | 비고 |
+|---|---|---|---|---|---|
+| 의료법인석영의료재단창원제일종합병원 | 경남 | 자동 html | https://www.mjeilh.co.kr/bbs/board.php?bo_table=06_01&sfl=wr_subject&stx=%EC%B1%84%EC%9A%A9 | 6 | 채용 전용 게시판 없음 · 「병원365&채용정보」(그누보드) 제목검색 「채용」 결과를 목록으로 씀. 연 1건(신규간호사). cfgs/mjeilh.json |
+| 의료법인숭인의료재단 김해복음병원 | 경남 | 자동 html | http://www.gimhaebokum.com/05_community/community_07.php?code=employ | 3 | EUC-KR. [마감] 제목은 skip. robots 는 /board 만 Disallow. cfgs/gimhaebokum.json |
+| 의료법인청아의료재단청아병원 | 경남 | 자동 html | http://www.camc.co.kr/ca/board/recruit100 | 16 | 신규간호사 연 1~2건. 공지 행 제외로 중복 방지. robots 없음. cfgs/camc_ca.json |
+| 의료법인합포의료재단에스엠지연세병원 | 경남 | 자동 html | https://www.smgysh.co.kr/news/employment.php | 16 | 카드형 목록 · 기간 두 날짜(상시는 하나). [마감] 카드도 남아 있음(마감일로 걸러짐). cfgs/smgysh.json |
+| 의료법인환명의료재단 조은금강병원 | 경남 | 사람인만 | https://www.ggmc.or.kr:451/html/?pCode=308 | - | 홈페이지 메뉴 전체(pCode 3~308)에 채용 게시판 없음 · 「공고」(pCode=308) 는 결산·기부금 공고뿐. 사람인 9건 진행중(2026) |
+| 한일병원 | 경남 | 자동 html | https://www.hanilhosp.co.kr/sub.html?w=01_07&style=01&tb=tb_job01 | 8 | 진주 한일병원(서울 한전 한일병원과 다름). 제목에 ○채용공고○/채용마감■ 표기 → 마감은 skip. 공지행·일반행 중복 가능. cfgs/hanilhosp.json |
+| 제일병원 | 경남 | 자동 html | http://chinjujeil.co.kr/information/recurit/ | 8 | 진주 제일병원. www 호스트는 TLS 오류라 http://chinjujeil.co.kr 로. 마감된 글은 제목 끝에 「마감되었습니다」. robots Crawl-delay 60. cfgs/chinjujeil.json |
+| 창원한마음병원 | 경남 | 자동 html | https://recruit.hanheart.co.kr/02_recruit/01_recruit.php | 8 | 한마음의료원 채용사이트 · 상남한마음병원 공고도 섞여 옴(제목에 병원명 있음). 기간 두 날짜. cfgs/hanheart.json |
+| 창원경상국립대학교병원 | 경남 | 자동 html | https://recruit.gnuch.co.kr/recruit/02_general/01_notice/ge_notice.jsp | 3 (+전문직 6) | 자체 채용시스템(recruit.gnuch.co.kr). 일반직 cfgs/gnuch_ge.json · 전문직(촉탁의) cfgs/gnuch_sp.json. 채용기간 두 날짜. www 호스트 robots 는 전체 Disallow 이나 recruit 호스트는 robots.txt 없음(404) |
+| 경상북도김천의료원 | 경북 | 자동 html | https://www.gcmc.or.kr/news/news_03.php | 10 | 이미 있던 cfgs/gcmc.json 그대로(수정 없음) · 동작 확인. 접수기간 두 날짜. robots.txt 비어 있음. 별도 JobFlex 채용사이트(gcmc.recruiter.co.kr)는 못 긁음 — 홈페이지 게시판이 같은 공고 실음 |
+| 경상북도안동의료원 | 경북 | 손 확인(robots) | http://www.amc.or.kr/front/bbsList.do?bbsId=BBS_0002 | - | 채용정보 게시판(표: 번호·제목·작성자·등록일·조회, 상세는 onclick fnViewArticle('4158','BBS_0002')) 이 있으나 robots.txt 에 `User-agent: * / Disallow: /front/bbsList.do` → 긁지 않음. 2026-09 공고 다수(간호사·간호조무사 등) |
+| 경상북도포항의료원 | 경북 | 손 확인(robots) | http://www.pmc.or.kr/front/bbsList.do?bbsId=BBS_0003 | - | 안동의료원과 같은 CMS. 채용공고 게시판 있으나 robots.txt 에 `User-agent: * / Disallow: /front/bbsList.do` → 긁지 않음. 최근 공고 2026-08-07 |
+| 상주적십자병원 | 경북 | 자동 html | https://www.rch.or.kr/web/rchsanju/bbs/employment | 3 | 대한적십자사 공통 CMS · rch_seoul.json 과 같은 구조. 게시일자 두 자리 연도라 날짜 없음. 합격자 공고 skip. robots Allow /. cfgs/rch_sanju.json |
+| 영주적십자병원 | 경북 | 자동 html | https://www.rch.or.kr/web/rchyoungju/bbs/employment | 3 | 상주적십자와 동일 구조. 날짜 없음. cfgs/rch_youngju.json |
+| 구미강동병원 | 경북 | 자동 html | http://www.gumigd.com/about/jobnotice_announcement.html | 3 | 이미 있던 cfgs/gumigd.json 그대로(수정 없음) · 동작 확인. 접수기간 「2026-09-14 ~ 채용시 까지」 는 날짜 하나(올린 날). robots Allow / |
+| 동국대학교의과대학경주병원 | 경북 | 손 확인(robots) | https://gj.dumc.or.kr/main/contents.do?a_num=44801314 | - | 병원소식 > 채용정보 게시판(nninc_recruit · 제목·[간호사 채용] 분류·기간 2026-09-15 ~) 이 있으나 robots.txt 에 `User-agent: * / Disallow: /` (Yeti·Googlebot 만 Allow) → 긁지 않음. 2026-09 공고 다수 |
+| 순천향대학교 부속 구미병원 | 경북 | 손 확인(JSON API · 미지원 유형) | https://jobapplication.schmc.ac.kr/recruit/biz/job/recruiteList | - | 홈페이지 인재채용(contents.do?key=3614)은 안내문뿐이고 순천향 중앙의료원 공통 온라인 채용시스템으로 감. 목록은 빈 껍데기 + `POST /recruit/biz/job/getJobAllListFromFrontNew` (JSON body {"searchword":"","currentpage":1,"recordnumberperpage":10,"totalcount":0,"departmentidx":190005,"careeridx":0}) 가 JSON 배열(jobtitle·sdate·edate·projectidx·isclosed) 로 줌 — 확인 200. hs_test 의 html/appsite/greeting/cmc 어디에도 안 맞아 설정 안 만듦. robots.txt 404 |
+| 에스포항병원 | 경북 | 자동 html | https://pssh.kr/RecruitmentAnnouncement | 10 | 이미 있던 cfgs/pssh.json 그대로(수정 없음) · 동작 확인. 아임웹 · 작성일 하나. 페이지 470KB |
+| 영남대학교의과대학부속영천병원 | 경북 | 자동 html | https://yumc.ac.kr:8443/bbs/List.do?bbsId=news5 | 15 | 이미 있던 cfgs/yumc_yc.json 그대로(수정 없음) · 동작 확인. 작성일 하나 · 마감 상태는 제목에 없음 |
+| 의료법인 근원의료재단 경산중앙병원 | 경북 | 자동 html | https://www.gsjoongang.com/bbs/board.php?bo_table=resume | 15 | 이미 있던 cfgs/gsjoongang.json 그대로(수정 없음) · 동작 확인. 그누보드 · 기간 두 날짜 |
+| 의료법인덕산의료재단김천제일병원 | 경북 | 자동 html | https://www.jeilh.com/employ/recruit_notice/list.do | 2 | 이미 있던 cfgs/jeilh.json 그대로(수정 없음) · 동작 확인. 신규간호사 연 1~2건(2025-11·12) |
+| 의료법인동춘의료재단문경제일병원 | 경북 | 자동 html | https://www.mgjh.co.kr/bbs/board.php?bo_table=job_01 | 2 | 그누보드 채용정보. 날짜가 MM-DD 뿐이라 날짜 없음. 마감 글은 제목 끝 [마감]/[채용마감] → skip. 상세 링크 200·제목 확인. robots 404. cfgs/mgjh.json |
+| 의료법인삼백의료재단상주성모병원 | 경북 | 손 확인(robots) | https://www.ssmh.co.kr/main/sub.html?pageCode=23 | - | 병원소식 > 채용공고 게시판(anyboard · 제목·첨부 hwp) 이 있으나 robots.txt 에 `User-agent: * / Disallow: /` (Yeti 만 Allow) → 긁지 않음. 최근 글 「수술실 경력 간호사 및 병동 간호조무사 모집 공고」(num=438) |
+| 의료법인안동병원 | 경북 | 자동 html | https://www.andonghospital.co.kr/recruit/job/list.do | 12 | 안동병원 인재채용 홈페이지(/recruit/). 표: 진행상태·제목·모집기간(2026-08-27 ~ 채용시까지 → 날짜 하나). 링크가 page_move('view',{no:N}) → view.do?no=N 조립(200·제목 확인). 공지행 중복. 안동요양병원 공고 섞임(제목에 표기). robots 에 * 규칙 없음. cfgs/andonghospital.json |
+| 의료법인한성재단포항세명기독병원 | 경북 | 자동 html | https://www.phgidok.com/main/custom/recruiter/ | 7 | 이미 있던 cfgs/phgidok.json 그대로(수정 없음) · 동작 확인. 2026-09 공고 다수 |
+| 포항성모병원 | 경북 | 손 확인(robots) | https://www.pohangsmh.co.kr/content/01intro/12_01.php | - | 인재채용 > 채용공고 표(번호·채용중·제목·작성자 · 날짜 없음) 가 있으나 robots.txt 에 `User-agent: * / Disallow: /` (Yeti 만 Allow) → 긁지 않음. 2026-09 「2027년 신규간호사 공채」 등 채용중 12건 |
+| 안동성소병원 | 경북 | 자동 html | https://sungso.com/bj_board/bjbrd_list.htm?board_id=0505 | 11 | 홈페이지 sungso.com(EUC-KR · sungso.or.kr 은 교회, sungso.co.kr 은 기도원) 채용공고 게시판. 날짜가 26.08.20 두 자리 연도라 날짜 없음. 제목 앞 [채용중]. 공지행(신규/경력간호사)은 tr 형식이 달라 안 잡힘. 상세 링크 200·제목 확인. robots * Allow. cfgs/sungso.json |
+| 창원파티마병원 | 경남 | 자동 html | https://www.fatimahosp.co.kr/api/article/3?instNo=1&boardNo=3&startIndex=1&pageRow=20 | 3 | 홈페이지가 Vue SPA 라 목록 페이지(/kr/job/list.do)는 빈 껍데기 → app.js 에서 찾은 목록 API(XML) 를 html 형식 정규식으로 긁음. 날짜는 epoch ms 라 없음. 상세는 SPA 주소(서버 HTML 엔 제목 없음). 게시판 글 5건뿐 · 최근 2024-07 주말약사 → 실제 채용은 딴 데(사람인 등) 가능성. robots 없음. cfgs/fatimahosp.json |
+| 의료법인은성의료재단좋은선린병원 | 경북 | 자동 html | http://www.goodsunlin.or.kr/sunlin/board/list.do?mId=67 | 1 | goodsunlin.or.kr(좋은병원들 공통 CMS · http 만) 채용정보 카드 목록. 접수기간 「채용시 까지」 면 날짜 없음. 「입사지원서 양식」 글 skip. 현재 공고 1건(조리사·조리원). 상세 200·제목 확인. robots * Allow. cfgs/goodsunlin.json |
+| 의료법인 서명의료재단 세명종합병원 | 경북 | 자동 html | https://www.smhospital.kr/front/info/recruit1.php | 10 | 경산 세명종합병원은 smhospital.kr (검색에 나오는 smhospital.co.kr 은 창원 진해 세명병원 · 다른 곳). 표: 구분·직종·제목·접수기간 두 날짜·진행현황(접수중/마감 · 제목엔 없음). 공지행 중복. 상세 200·제목 확인. robots * Allow. cfgs/smhospital_kr.json |
+| 차의과학대학교부속구미차병원 | 경북 | 손 확인(Angular SPA) | https://recruit.chamc.co.kr/page.ckd#/family/announcement/GMCBW | - | 홈페이지 채용소식이 차병원 공통 채용사이트(recruit.chamc.co.kr · requireJS+Angular 해시 라우팅)로 감. 목록이 서버 HTML 에 없고 route-config.js·app.js·main.js 에서 목록 API 를 못 찾음(/recruit/announcement 는 404). robots 는 Yeti 규칙만 |

@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 동강의료재단 동천동강병원",
+ "type": "html",
+ "url": "https://dc.dkmc.or.kr/medical/medical06_01.php",
+ "base": "https://dc.dkmc.or.kr",
+ "row": "<tr class=\"[^\"]*\">\\s*<td class=\"\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/medical\\/medical06_01\\.php\\?bid=[^\"]*exec=view[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/medical\\/medical06_01\\.php\\?bid=[^\"]*exec=view[^\"]+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "자체 게시판. 표: 번호·제목·상태(접수 중/채용마감 td)·등록일·조회. 날짜는 등록일 하나(마감은 본문). 채용마감 상태는 제목에 없어 걸러지지 않음. robots * 는 /_admin 등만 차단."
+}

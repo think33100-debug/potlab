@@ -1,0 +1,12 @@
+{
+ "name": "순천의료재단 성남정병원",
+ "type": "html",
+ "url": "https://www.chungsh.com/index.php/board/list/job/35",
+ "base": "https://www.chungsh.com",
+ "row": "<ul class=\"listul\">[\\s\\S]*?<\\/ul>",
+ "title": "<a href=\"\\/index\\.php\\/board\\/view\\/job\\/35\\/\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/index\\.php\\/board\\/view\\/job\\/35\\/\\d+[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|반환",
+ "note": "자체 CMS(index.php/board). 항목마다 ul.listul: 분류·제목·진행중/종료·기간(시작~마감). 「채용서류 반환 안내」 상시글은 skip. robots: /medis/ /xmldata/ /lib/ 만 차단"
+}

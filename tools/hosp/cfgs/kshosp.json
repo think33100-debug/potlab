@@ -1,0 +1,13 @@
+{
+ "name": "KS병원",
+ "type": "html",
+ "url": "http://www.kshosp.com/Module/Board/Board.asp?ModuleID=2",
+ "base": "http://www.kshosp.com",
+ "row": "<tr>\\s*<td class=\"tbl-el-none p-color02\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href='\\/Module\\/Board\\/Board\\.asp\\?[^']*Mode=V&IDX=\\d+'[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href='(\\/Module\\/Board\\/Board\\.asp\\?[^']*Mode=V&IDX=\\d+)'",
+ "date": "<td class=\"tbl-el-none p-color02\">(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|입사지원서|고지",
+ "single": "posted",
+ "note": "홈페이지 채용정보 게시판(ASP, UTF-8). 표: 번호·제목·작성자·등록일·조회. 신규간호사 공채(연 1회)만 올리고 나머지는 잡코리아. 등록일 하나뿐. https 없음. robots: /admin/ 과 이미지만 Disallow."
+}

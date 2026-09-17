@@ -1,0 +1,12 @@
+{
+ "name": "의료법인 근원의료재단 경산중앙병원",
+ "type": "html",
+ "url": "https://www.gsjoongang.com/bbs/board.php?bo_table=resume",
+ "base": "https://www.gsjoongang.com",
+ "row": "<td class=\"td_subject\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*wr_id=\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "그누보드 채용공고(bo_table=resume). 표: 번호·고용형태·직종·제목·기간(2026-08-21 <br> ~ 2026-08-26 두 날짜)·상태(모집중/마감)·조회. 상세 board.php?bo_table=resume&wr_id=N. robots: bo_table=mortuary 만 Disallow"
+}

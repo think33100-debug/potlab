@@ -1,0 +1,11 @@
+{
+ "name": "광주병원",
+ "type": "html",
+ "url": "http://www.gwangjuhosp.co.kr/bbs/board.php?bo_table=recruit",
+ "base": "http://www.gwangjuhosp.co.kr",
+ "row": "<tr class=\"[^\"]*\">\\s*<td class=\"td_num2\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"http:\\/\\/www\\.gwangjuhosp\\.co\\.kr\\/bbs\\/board\\.php\\?bo_table=recruit&amp;wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(http:\\/\\/www\\.gwangjuhosp\\.co\\.kr\\/bbs\\/board\\.php\\?bo_table=recruit&amp;wr_id=\\d+)\"",
+ "skip": "합격자|발표|결과|양식",
+ "note": "홈페이지 채용정보 게시판(그누보드 recruit). 표: 번호·제목·글쓴이·조회·날짜. 날짜 칸이 MM-DD(연도 없음)라 date 를 비워 날짜 없음(마감은 본문·첨부). 광주 북구 광주병원(gwangjuhosp.co.kr) — 같은 이름의 다른 지역 병원 아님. 신규간호사 공채(연 1~2회)만 올리는 편. https 없음. robots * Allow /."
+}

@@ -1,0 +1,12 @@
+{
+ "name": "전주고려병원",
+ "type": "html",
+ "url": "http://www.jkhospital.co.kr/bbs/board.php?bo_table=sub06_01",
+ "base": "http://www.jkhospital.co.kr",
+ "row": "<tr class=\"[^\"]*\">\\s*<td class=\"td_num\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"http:\\/\\/www\\.jkhospital\\.co\\.kr\\/bbs\\/board\\.php\\?bo_table=sub06_01&amp;wr_id=\\d+\">\\s*([^<]*(?:모집|채용)[^<]*)<\\/a>",
+ "link": "href=\"(http:\\/\\/www\\.jkhospital\\.co\\.kr\\/bbs\\/board\\.php\\?bo_table=sub06_01&amp;wr_id=\\d+)\"",
+ "skip": "합격자|발표|결과|양식",
+ "note": "그누보드5. sub06_01 은 채용 글과 공지(CCTV·독감백신 등)가 섞인 게시판이라 제목에 모집|채용 있는 것만 뽑음. 날짜 MM-DD 라 안 뽑음. 글이 드묾(연 1회 간호사 모집). http 만. robots.txt 없음",
+ "off": "구글 서버에서 못 엶(HTTP 0 Address unavailable) 2026-09-17 · 컴퓨터에서는 열림"
+}

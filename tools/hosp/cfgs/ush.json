@@ -1,0 +1,14 @@
+{
+ "name": "울산병원",
+ "type": "html",
+ "url": "https://ush.kr/bbs/board.php?bo_table=incur_notice",
+ "base": "https://ush.kr",
+ "row": "<tr class=\"[^\"]*\">(?:(?!<\\/tr>)[\\s\\S])*?채용진행중[\\s\\S]*?<td class=\"td_num register\">",
+ "title": "<div class=\"bo_tit\">\\s*<a href=\"[^\"]*wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "<div class=\"bo_tit\">\\s*<a href=\"([^\"]*wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|안내|양식",
+ "single": "posted",
+ "note": "울산 남구 울산병원(ush.kr) 그누보드 채용안내 게시판(incur_notice). 표: 번호·구분(신입/경력)·제목+상태(채용진행중/마감완료)·접수기간(시작~마감)·등록일. row 를 「채용진행중」 이 있는 행만, 등록일 칸(td_num register) 앞까지 잡아 from/to 만 나옴. 링크 절대주소(&amp; 는 abs 가 풀어줌). robots: /adm/ 만 Disallow.",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

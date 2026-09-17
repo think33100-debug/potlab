@@ -1,0 +1,14 @@
+{
+ "name": "강원특별자치도삼척의료원",
+ "type": "html",
+ "url": "https://www.ksmc.or.kr/board/bbs/board.php?bo_table=recruit",
+ "base": "https://www.ksmc.or.kr",
+ "row": "<td class=\"job-title\">[\\s\\S]*?<td class=\"job-dday\">",
+ "title": "<a href=\"[^\"]*wr_id=\\d+\">[\\s\\S]*?<\\/i>([\\s\\S]*?)<span class=\"sound_only\">",
+ "link": "href=\"([^\"]*bo_table=recruit&amp;wr_id=\\d+)\"",
+ "date": "datetime=\"(20\\d{2}-\\d{2}-\\d{2})\"",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "그누보드 recruit 게시판. 열: 채용분야·채용공고·접수기간(<time datetime> 둘: 시작·마감)·남은기간·상태. robots.txt 없음(404). 상세 board.php?bo_table=recruit&wr_id=N",
+ "off": "구글 서버에서 못 엶(HTTP 0 Address unavailable) 2026-09-17 · 컴퓨터에서는 열림"
+}

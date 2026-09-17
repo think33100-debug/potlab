@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 오성의료재단 동군산병원",
+ "type": "html",
+ "url": "https://www.donggunsanhosp.co.kr/kor/recruit.cs",
+ "base": "https://www.donggunsanhosp.co.kr",
+ "row": "<tr>\\s*<td class=\"brdNum\">[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"subject brdSubject\"><a href=\"\\?act=view&rcrId=\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"\\?act=view&rcrId=(\\d+)",
+ "linkFmt": "https://www.donggunsanhosp.co.kr/kor/recruit.cs?act=view&rcrId={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})(?=[^<]*<\\/td>)",
+ "skip": "합격자|발표|결과|양식",
+ "note": "자체 채용 게시판(recruit.cs). 표: 번호·제목·모집기간(시작 ~ 종료)·직종명·진행상황(지원접수/마감). robots.txt 없음(200 아님)",
+ "off": "구글 서버에서 못 엶(HTTP 0 Address unavailable) 2026-09-17 · 컴퓨터에서는 열림"
+}

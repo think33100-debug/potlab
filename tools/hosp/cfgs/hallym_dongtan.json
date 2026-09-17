@@ -1,0 +1,13 @@
+{
+ "name": "한림대학교동탄성심병원",
+ "type": "html",
+ "url": "https://recruit.hallym.or.kr/",
+ "base": "https://recruit.hallym.or.kr",
+ "row": "<div class=\"main_rctbox\">\\s*<a href=\"hrt_p20_detail\\.jsp\\?locate=9&[^\"]*inggbn=ing[^\"]*\">[\\s\\S]*?<\\/a>",
+ "title": "<\\/li>\\s*<li>([^<]+?)\\s*<\\/li>\\s*<\\/ul>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "합격자|발표|결과|^공지",
+ "single": "deadline",
+ "note": "한림대의료원 통합 채용 사이트. 목록(hrt_p10_list.jsp)은 10건씩 페이지가 나뉘어 동탄 글이 2쪽에 밀리므로, 진행중 공고 전부(17건)를 한 번에 보여주는 메인 페이지를 씀. locate=9 가 동탄성심병원(1=의료원 2=한강 3=강남 5=춘천 7=성심). div.main_rctbox > a 카드, 제목은 data_title 의 둘째 li, 날짜는 마감일 하나. robots.txt 없음(404→메인으로 리다이렉트)."
+}

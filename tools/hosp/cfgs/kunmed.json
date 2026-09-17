@@ -1,0 +1,14 @@
+{
+ "name": "전북특별자치도 군산의료원",
+ "type": "html",
+ "url": "https://www.kunmed.or.kr/board/bbs/board.php?bo_table=recruit",
+ "base": "https://www.kunmed.or.kr",
+ "row": "<tr>\\s*<td class=\"text_center\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href='\\.\\.\\/bbs\\/board\\.php\\?bo_table=recruit&wr_id=\\d+'>([\\s\\S]*?)<\\/a>",
+ "link": "href='\\.\\.\\/bbs\\/board\\.php\\?bo_table=recruit&wr_id=(\\d+)'",
+ "linkFmt": "https://www.kunmed.or.kr/board/bbs/board.php?bo_table=recruit&wr_id={1}",
+ "date": "<td class=\"text_center\">(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식|자기소개서",
+ "single": "posted",
+ "note": "그누보드4 표: 번호·제목·작성자·등록일·상태(진행중/마감)·조회. 제목이 …로 잘림. 등록일 하나. robots Allow / (admin 만 Disallow)"
+}

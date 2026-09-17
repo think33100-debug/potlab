@@ -1,0 +1,13 @@
+{
+ "name": "선한병원",
+ "type": "html",
+ "url": "http://www.shhospital.co.kr/0709",
+ "base": "http://www.shhospital.co.kr",
+ "row": "<tr>\\s*<td class=\"list\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/0709\\/view\\/id\\/\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/0709\\/view\\/id\\/\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "마감|양식|반환|합격|발표",
+ "single": "posted",
+ "note": "광주 서구 선한병원. 진행 중 공고를 공지(고정) 행으로 올리고 끝나면 번호 행으로 내리며 제목에 (마감) 붙임 → 공지·번호 행 모두 잡고 마감은 skip. 날짜는 등록일 하나. robots.txt 는 오류 페이지(없음). 상세 /0709/view/id/N"
+}

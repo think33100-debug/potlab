@@ -1,0 +1,13 @@
+{
+ "name": "오산한국병원",
+ "type": "html",
+ "url": "http://www.oshankook.net/bbs/board.php?bo_table=sub08_01",
+ "base": "http://www.oshankook.net",
+ "row": "<div class=\"bo_subject\">[\\s\\S]*?<span class=\"bo_date\">[\\s\\S]*?<\\/span>",
+ "title": "<a href=\"[^\"]*bo_table=sub08_01&amp;wr_id=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=sub08_01&amp;wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "공지|합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "그누보드 갤러리형 스킨(div.bo_subject / span.bo_date). http 만(https 미확인). 등록일 하나. 「지원양식」 공지글 skip. robots 404"
+}

@@ -1,0 +1,13 @@
+{
+ "name": "구포성심병원",
+ "type": "html",
+ "url": "https://www.guposs.com/kr/?pCode=recruit",
+ "base": "https://www.guposs.com",
+ "row": "<tr class=\"child_\\d+\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href='\\/kr\\/index\\.php\\?pCode=recruit&mode=view&idx=\\d+' ><span>([\\s\\S]*?)<\\/span>",
+ "link": "href='(\\/kr\\/index\\.php\\?pCode=recruit&mode=view&idx=\\d+)'",
+ "date": "<td class=\"f-date date\"><p>(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/p>",
+ "skip": "합격자|발표|결과|양식|\\[마감\\]",
+ "single": "posted",
+ "note": "구포성심병원 채용정보(index.php?pCode=recruit). 부산의료원(busanmc.json)과 같은 CMS 표: 번호·제목·작성자·등록일·조회. 공지 고정 행(입사지원서 양식)은 class=isnotice 라 row 에서 제외. 마감된 글은 제목에 [마감]. 등록일 1개(posted)"
+}

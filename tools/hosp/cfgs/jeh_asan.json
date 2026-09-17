@@ -1,0 +1,13 @@
+{
+ "name": "재단법인 아산사회복지재단 정읍아산병원",
+ "type": "html",
+ "url": "https://jeh.asanfoundation.or.kr/asan/depts/D139/K/bbs.do?menuId=2930",
+ "base": "https://jeh.asanfoundation.or.kr",
+ "row": "<tr>\\s*<td class=\"title\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/asan\\/depts\\/D139\\/K\\/bbsDetail\\.do\\?menuId=2930&contentId=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/asan\\/depts\\/D139\\/K\\/bbsDetail\\.do\\?menuId=2930&contentId=\\d+)\"",
+ "date": "basicListTh3\">(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "\\[마감\\]|합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "아산재단 홈빌더 게시판. 목록에 제목만 보이고 등록일 td 는 HTML 주석 안에 있음(주석에서 뽑음). 마감 글은 제목에 [마감]. robots 는 다른 경로만 Disallow"
+}

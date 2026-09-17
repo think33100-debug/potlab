@@ -1,0 +1,12 @@
+{
+ "name": "의료법인칠석의료재단사랑의병원",
+ "type": "html",
+ "url": "https://www.sarangmc.co.kr/index.php/board/list/employment/694",
+ "base": "https://www.sarangmc.co.kr",
+ "row": "<li>\\s*<a href=\"\\/index\\.php\\/board\\/view\\/employment\\/694\\/\\d+[^\"]*\">[\\s\\S]*?<\\/a>\\s*<\\/li>",
+ "title": "<h3>([\\s\\S]*?)<\\/h3>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "안산 사랑의병원 채용 게시판(employment/694). li > a 카드형, 분류(접수중/마감)·제목 h3·기간 시작~마감. robots: * Allow / (Crawl-delay 3600 · /medis /lib 등만 차단). 제목이 목록에서 잘림(..)"
+}

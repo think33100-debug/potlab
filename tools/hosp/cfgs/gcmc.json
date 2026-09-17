@@ -1,0 +1,12 @@
+{
+ "name": "경상북도김천의료원",
+ "type": "html",
+ "url": "https://www.gcmc.or.kr/news/news_03.php",
+ "base": "https://www.gcmc.or.kr",
+ "row": "<tr[^>]*>\\s*<td>[\\s\\S]*?<td>20\\d{2}-\\d{1,2}-\\d{1,2} ~ 20\\d{2}-\\d{1,2}-\\d{1,2}<\\/td>",
+ "title": "<a href=\"[^\"]*boardid=job&mode=view[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*boardid=job&mode=view[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "홈페이지 채용정보 게시판(boardid=job). 표: 번호·제목·접수기간(시작 ~ 마감)·상태(모집중/마감)·작성자·등록일·조회. row 를 접수기간 셀에서 끊어 등록일이 마감으로 잡히지 않게 함. 공지 행도 포함(같은 글 중복 가능). 별도 채용사이트 gcmc.recruiter.co.kr(JobFlex) 는 긁지 못함 — 홈페이지 게시판이 동일 공고를 실음"
+}

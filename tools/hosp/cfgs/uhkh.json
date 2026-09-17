@@ -1,0 +1,13 @@
+{
+ "name": "운암한국병원",
+ "type": "html",
+ "url": "http://uhkh.co.kr/Module/Board/Board.asp?ModuleID=5",
+ "base": "http://uhkh.co.kr",
+ "row": "<td class=\"tbl-el-none p-color02\">(?:공지|\\d+)<\\/td>[\\s\\S]*?<span class=\"\">20\\d{2}-\\d{2}-\\d{2}<\\/span>",
+ "title": "<a href='\\/Module\\/Board\\/Board\\.asp[^']*Mode=V[^']*'[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href='(\\/Module\\/Board\\/Board\\.asp[^']*Mode=V[^']*)'",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "마감|양식|반환|합격|발표",
+ "single": "posted",
+ "note": "광주 북구 운암한국병원. 일곡·미래로21 과 같은 ASP CMS. 진행 중 공고를 공지(고정) 행으로 올리고 끝나면 제목에 (마감)/마감 붙임 → 공지·번호 행 모두 잡고 마감은 skip. 공지 행은 </tr> 이 없어 작성일 span 까지만 블록으로 잡음. 날짜는 작성일 하나. robots Disallow /admin/ 만. 상세 &Mode=V&IDX=N"
+}

@@ -1,0 +1,15 @@
+{
+ "name": "익산병원",
+ "type": "html",
+ "url": "http://www.iksanhp.com/07_community/contents.asp?code=291",
+ "enc": "EUC-KR",
+ "base": "http://www.iksanhp.com",
+ "row": "<tr>\\s*<t[hd] scope=\"row\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href='\\?b_no=32&mg_no=2[^']*b_idx=\\d+[^']*'>([\\s\\S]*?)<\\/a>",
+ "link": "b_idx=(\\d+)&gotopage=\\d+&b_type=v",
+ "linkFmt": "http://www.iksanhp.com/07_community/contents.asp?code=291&b_no=32&mg_no=2&b_idx={1}&b_type=v",
+ "date": "<td>(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|양식|서류 반환|반환",
+ "single": "posted",
+ "note": "EUC-KR ASP 게시판. 표: 번호·제목·작성자·등록일·조회. 공지 2건(신입 확인·채용서류 반환)은 skip. 등록일 하나. http 만. robots.txt 없음"
+}

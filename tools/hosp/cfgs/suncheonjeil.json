@@ -1,0 +1,14 @@
+{
+ "name": "의료법인청언의료재단 순천제일병원",
+ "type": "html",
+ "url": "https://suncheonjeil.com/content08/",
+ "base": "https://suncheonjeil.com",
+ "row": "<td class=\"kboard-list-uid\">[\\s\\S]*?<span class=\"contents-item kboard-date\">20\\d{2}\\.\\d{2}\\.\\d{2}<\\/span>",
+ "title": "<a href=\"\\/content08\\/\\?mod=document&#038;uid=\\d+\">\\s*<div class=\"kboard-default-cut-strings\">([\\s\\S]*?)<span",
+ "link": "href=\"\\/content08\\/\\?mod=document&#038;uid=(\\d+)\"",
+ "linkFmt": "https://suncheonjeil.com/content08/?mod=document&uid={1}",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "휴진|예방접종|처리방침|협약|예방수칙|캠페인|오픈|운영 안내|양식|서식|합격|발표",
+ "single": "posted",
+ "note": "순천제일병원 새 홈페이지(suncheonjeil.com, 워드프레스 KBoard). 「채용안내」 메뉴가 공지사항·채용정보 카테고리를 합친 게시판(content08)인데 채용정보 카테고리에는 이력서 양식뿐이고 실제 채용 공고(2026년도 신규 및 경력 간호사 채용 공고)는 카테고리 없이 올라옴 → 전체 목록을 긁고 휴진·캠페인 등 공지는 skip. 채용 아닌 공지가 섞일 수 있음. 작성일이 두 번 나와 첫 span 까지만 블록. 옛 주소 scjh.co.kr 은 접속 안 됨. robots Disallow 없음. 목록 링크의 &#038; 는 abs() 가 안 풀고 # 가 fragment 로 잘리므로 uid 만 잡아 linkFmt 로 조립."
+}

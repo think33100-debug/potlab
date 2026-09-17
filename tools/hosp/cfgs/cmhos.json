@@ -1,0 +1,12 @@
+{
+ "name": "의료법인 영서의료재단 천안충무병원",
+ "type": "html",
+ "url": "https://www.cmhos.co.kr/cmhos/community/employ_bbs_list.asp",
+ "base": "https://www.cmhos.co.kr",
+ "row": "<tr>\\s*<td class=\"t_center\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"javascript:fncBbsDetail\\('M','\\d+'\\)\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "fncBbsDetail\\('M','(\\d+)'\\)",
+ "linkFmt": "https://www.cmhos.co.kr/cmhos/community/employ_bbs_detail.asp?bbsKey={1}",
+ "skip": "합격자|발표|결과|양식",
+ "note": "ASP 게시판. 표: 번호·제목·조회수 — 목록에 날짜가 없음(마감은 본문·제목의 [마감] 표시). 제목 링크는 onclick(fncBbsDetail) 이라 bbsKey 로 상세 GET 조립(확인됨 200). robots.txt 없음(404)"
+}

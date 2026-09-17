@@ -1,0 +1,14 @@
+{
+ "name": "광주기독병원",
+ "type": "html",
+ "url": "https://www.kch.or.kr/user/board/lists/board_cd/notice",
+ "base": "https://www.kch.or.kr",
+ "row": "<tr>\\s*<td><div class=\"f14\">(?:공지|\\d+)<\\/div><\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/user\\/board\\/view\\/board_cd\\/notice\\/wr_no\\/\\d+\"><span class=\"txt\">([^<]*(?:채용|모집|구인)[^<]*)<\\/span><\\/a>",
+ "link": "href=\"(\\/user\\/board\\/view\\/board_cd\\/notice\\/wr_no\\/\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "채용 전용 게시판 없음 — 공지사항(board_cd/notice) 에 채용공고를 섞어 올려 title 정규식이 채용·모집·구인 제목만 잡음. 표: 번호(공지/숫자)·제목·등록일(YYYY.MM.DD)·조회. 등록일 하나뿐(마감은 본문). 공지 행은 번호 행과 중복되지 않음. robots * : Disallow /a /s /_ 접두어뿐이라 /user 는 허용.",
+ "off": "구글 서버에서 못 엶(HTTP 0 Address unavailable) 2026-09-17 · 컴퓨터에서는 열림"
+}

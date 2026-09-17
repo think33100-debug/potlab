@@ -1,0 +1,14 @@
+{
+ "name": "좋은문화병원",
+ "type": "html",
+ "url": "https://www.moonhwa.or.kr/news/recruit",
+ "base": "https://www.moonhwa.or.kr",
+ "row": "<tr data-slot=\"list-row\"[\\s\\S]*?<p class=\"typo-label-medium font-medium text-grey-70\">20\\d{2}\\.\\d{2}\\.\\d{2}<\\/p>",
+ "title": "<p class=\"typo-body-large typo-bold[^\"]*\">([\\s\\S]*?)<\\/p>",
+ "link": "(list-row)",
+ "linkFmt": "https://www.moonhwa.or.kr/news/recruit",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "양식|합격자|발표|결과",
+ "single": "posted",
+ "note": "좋은문화병원 새 홈페이지(React Router SSR, moonhwa.or.kr) 뉴스>채용공고 표(tr[data-slot=list-row]). 줄에 링크가 없고(클릭은 JS, 상세 uuid 는 loader 데이터 안에만 있음) 제목·날짜가 데스크톱/모바일용으로 두 번 반복돼 row 를 첫 날짜에서 끊음. url 은 목록 페이지 고정(linkFmt 에 {1} 없음). 날짜는 게시일 하나(posted) · 마감일은 상세에만. 상태 배지 접수중/상시채용/마감 은 제목에 없음. '전공의 지원서…양식' 글은 skip. robots: * Allow / (/admin /my-page /api 만 금지). 페이지 820KB 로 큼."
+}

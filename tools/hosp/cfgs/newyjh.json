@@ -1,0 +1,14 @@
+{
+ "name": "의료법인서울효천의료재단 에이치플러스양지병원",
+ "type": "html",
+ "url": "https://www.newyjh.com/hospital/hospital-100200.html",
+ "base": "https://www.newyjh.com/hospital",
+ "row": "<tr class=\"table-padding\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"JavaScript:document\\.mainFrm\\.Idx\\.value='\\d+'[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "Idx\\.value='(\\d+)'",
+ "linkFmt": "https://www.newyjh.com/hospital/hospital-100200_view.html?Idx={1}&Mode=V",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "에이치플러스 양지병원(관악구) 채용공고 게시판. 표: 번호·제목·상태(모집중/마감)·등록일·조회수 → 등록일 하나뿐이라 posted. 제목 링크는 JS(mainFrm Idx/Mode=V GET 제출) → hospital-100200_view.html?Idx=N&Mode=V 로 조립. robots: * Allow / (Disallow /*?*Page= 만)."
+}

@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 석경의료재단 센트럴병원",
+ "type": "html",
+ "url": "https://www.cmch.co.kr/sub_hospital/recruit_list.php",
+ "base": "https://www.cmch.co.kr",
+ "row": "<tr[^>]*>\\s*<td class=\"w_no\">[\\s\\S]*?<td class=\"w_date\">[^<]*<\\/td>",
+ "title": "<a href=\"\\/sub_hospital\\/recruit_list\\.php\\?mode=view&number=\\d+[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/sub_hospital\\/recruit_list\\.php\\?mode=view&number=\\d+[^\"]*)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "자체 PHP 게시판(채용안내). 표: 번호·제목·작성자·작성일(등록일 하나)·조회. 공지글은 별도 표에 위쪽 고정(같은 규칙으로 잡힘). 신규간호사 공채 위주, 수시는 사람인·잡코리아. robots: * Allow / (ISAF·sub_mypage 만 차단)"
+}

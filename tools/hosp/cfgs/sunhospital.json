@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 영훈의료재단 대전선병원",
+ "type": "html",
+ "url": "https://www.sunhospital.com/sub5_4.html",
+ "base": "https://www.sunhospital.com",
+ "row": "<a class=\"board_thumb_item card_item item\\d+\" href=\"sub5_4\\.html\\?mode=view&bid=\\d+\"[\\s\\S]*?<\\/a>",
+ "title": "<div class=\"board_card_title align_left\">([\\s\\S]*?)<\\/div>",
+ "link": "href=\"(sub5_4\\.html\\?mode=view&bid=\\d+)\"",
+ "date": "fa-calendar[^>]*><\\/i>\\s*(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|실시하지 않음",
+ "single": "posted",
+ "note": "선병원 채용안내 카드 목록(a.board_thumb_item). 대전선병원·유성선병원이 같은 게시판을 공유(yuseongsunhospital.com 도 동일 목록) → 제목의 병원명으로 구분. 날짜는 카드의 작성일 1개(posted). 상세 sub5_4.html?mode=view&bid=N. robots: MJ12bot·Semrush 등만 차단"
+}

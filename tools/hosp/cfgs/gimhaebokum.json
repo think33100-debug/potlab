@@ -1,0 +1,15 @@
+{
+ "name": "의료법인숭인의료재단 김해복음병원",
+ "type": "html",
+ "url": "http://www.gimhaebokum.com/05_community/community_07.php?code=employ",
+ "enc": "EUC-KR",
+ "base": "http://www.gimhaebokum.com",
+ "row": "<tr >[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"subject\"><a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href='([^']+)'",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "^\\[마감\\]|합격자|발표|서식|반환",
+ "single": "posted",
+ "note": "채용공고 게시판(code=employ). EUC-KR. 표: 번호·제목·작성자·등록일. 마감된 글은 제목 앞에 [마감] 이 붙어 skip. robots: /board 등만 Disallow, 이 경로는 허용. 상세는 같은 php 에 bbsData=…&mode=view",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

@@ -1,0 +1,13 @@
+{
+ "name": "경찰병원",
+ "type": "html",
+ "url": "https://www.nph.go.kr/nph/bbs/B0000018/list.do?menuNo=200110",
+ "base": "https://www.nph.go.kr",
+ "row": "<tr>\\s*<td[^>]*>[^<]*<\\/td>\\s*<td class=\"tit\">[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"tit\">\\s*<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "nttId=(\\d+)",
+ "linkFmt": "https://www.nph.go.kr/nph/bbs/B0000018/view.do?nttId={1}&menuNo=200110",
+ "date": "<td>(20\\d{2}-\\d{2}-\\d{2})<\\/td>",
+ "skip": "합격자|발표|결과",
+ "note": "경찰병원 채용정보 게시판(B0000018) 표. 날짜는 등록일 하나(posted). robots.txt 는 User-Agent: Googlebot 에만 /nph/bbs/ 금지 · User-agent: * 규칙 없음. 상세 view.do?nttId=N&menuNo=200110 GET 200."
+}

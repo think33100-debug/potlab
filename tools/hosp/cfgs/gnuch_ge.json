@@ -1,0 +1,12 @@
+{
+ "name": "창원경상국립대학교병원",
+ "type": "html",
+ "url": "https://recruit.gnuch.co.kr/recruit/02_general/01_notice/ge_notice.jsp",
+ "base": "https://recruit.gnuch.co.kr/recruit/02_general/01_notice",
+ "row": "<td class=\"tlt\">[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "창원경상국립대학교병원 채용시스템(recruit.gnuch.co.kr) 일반직 목록. 표: 번호·제목·채용기간(2026-09-11~2026-09-17)·진행상황. 상세 ge_notice_view.jsp?idx=N. 전문직(촉탁의) 목록은 cfgs/gnuch_sp.json. www.gnuch.co.kr robots 는 전체 Disallow 이나 recruit 호스트는 robots.txt 없음(404)"
+}

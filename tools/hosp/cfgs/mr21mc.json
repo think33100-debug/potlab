@@ -1,0 +1,13 @@
+{
+ "name": "미래로21병원",
+ "type": "html",
+ "url": "https://www.mr21mc.kr/Module/Board/Board.asp?ModuleID=4",
+ "base": "https://www.mr21mc.kr",
+ "row": "<td class=\"tbl-el-none p-color02\">\\d+<\\/td>[\\s\\S]*?<span class=\"\">20\\d{2}-\\d{2}-\\d{2}<\\/span>",
+ "title": "<a href='\\/Module\\/Board\\/Board\\.asp[^']*Mode=V[^']*'[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href='(\\/Module\\/Board\\/Board\\.asp[^']*Mode=V[^']*)'",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "양식|반환|합격|발표",
+ "single": "posted",
+ "note": "광주일곡병원과 같은 ASP CMS. 공지 행(번호 자리가 '공지')은 채용안내·서류반환 안내라 숫자 행만 잡음. 작성일이 span 과 td 에 두 번 나와 첫 span 까지만 블록으로 잡음. 날짜는 작성일 하나. robots Disallow /admin/ 만. 상세 &Mode=V&IDX=N"
+}

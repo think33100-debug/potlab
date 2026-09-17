@@ -1,0 +1,14 @@
+{
+ "name": "메디인병원",
+ "type": "html",
+ "url": "https://www.medi-in.co.kr/backend/api/recruit?page=1&limit=20",
+ "base": "https://www.medi-in.co.kr",
+ "row": "\\{\"id\":\"\\d+\",\"title\":\"[^\"]*\"[\\s\\S]*?\"period_end\":\"[^\"]*\"\\}",
+ "title": "\"title\":\"([^\"]*)\"",
+ "link": "\"id\":\"(\\d+)\"",
+ "linkFmt": "https://www.medi-in.co.kr/news/recruit/{1}",
+ "date": "\"period_(?:start|end)\":\"(20\\d{2}-\\d{1,2}-\\d{1,2})\"",
+ "skip": "합격자|발표|결과",
+ "note": "홈페이지는 React SPA(GitHub Pages) 라 목록 HTML 이 없고 /backend/api/recruit 가 JSON 을 줌. JSON 을 정규식으로 긁음(줄=항목 객체, 날짜=period_start·period_end). 상세는 SPA 경로 /news/recruit/{id}(항상 200 껍데기, 제목은 JS 로 그려짐). 공고가 그림(thumbnail)으로만 올라오는 경우가 많음. robots.txt 없음(SPA 셸 반환)",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

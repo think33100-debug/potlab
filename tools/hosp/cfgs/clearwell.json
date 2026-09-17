@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 성념의료재단맑은샘병원",
+ "type": "html",
+ "url": "http://clearwell.kr/waybbs/board.php?bo_table=board7",
+ "base": "http://clearwell.kr",
+ "row": "<tr class=\"[^\"]*\">[\\s\\S]*?<\\/tr>",
+ "title": "title-wrapper\">(?:\\s*<span[^>]*>[^<]*<\\/span>)?\\s*([^<]+?)\\s*<\\/span>",
+ "link": "href=\"([^\"]*bo_table=board7&amp;wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|입사지원서|\\(마감\\)",
+ "single": "posted",
+ "note": "거제 맑은샘병원 채용정보. sub01/sub06.php 가 iframe 으로 /waybbs/board.php?bo_table=board7 을 띄움 → 게시판 주소를 직접 씀. 그누보드 표(공지 notice 행 + 일반 행), 제목 span.title-wrapper(공지 span 제외), 작성일 하나. robots.txt 404."
+}

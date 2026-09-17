@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 은성의료재단 좋은삼선병원",
+ "type": "html",
+ "url": "https://www.samsun.or.kr/samsun/board/list.do?mId=67",
+ "base": "https://www.samsun.or.kr/samsun/board",
+ "row": "<div class=\"recruitment\">[\\s\\S]*?<\\/a>",
+ "title": "<strong class=\"title\">\\s*<span>([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(view\\.do\\?mId=67&brdIdx=\\d+)\"",
+ "date": "(20\\d{2}[.\\-]\\d{1,2}[.\\-]\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "deadline",
+ "note": "좋은강안병원(gangan.json) 과 같은 좋은병원들 공통 게시판. 주의: curl -L 로 열면 서버가 엉뚱한 사이트(안동 성소병원)를 줄 때가 있었음 · 리다이렉트 없이 직접 열면 정상. 날짜는 마감일 하나(deadline). 상세 view.do?mId=67&brdIdx=N.",
+ "off": "구글 서버에서 못 엶(HTTP 0 Timeout) 2026-09-17 · 컴퓨터에서는 열림"
+}

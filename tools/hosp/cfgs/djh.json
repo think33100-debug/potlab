@@ -1,0 +1,14 @@
+{
+ "name": "대전한국병원",
+ "type": "html",
+ "url": "https://djh.kr/community/recruit",
+ "base": "https://djh.kr",
+ "row": "<tr>\\s*<td class=\"txt_center\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/community\\/recruit\\/view\\/\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/community\\/recruit\\/view\\/\\d+)\"",
+ "date": "<td class=\"txt_center\">(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|면접|제출서류",
+ "single": "posted",
+ "note": "대전한국병원(djh.kr) 채용정보 표: 번호·제목·작성자·등록일·조회. 공지 고정 글(모집일정 안내·제출서류)이 위에 한 번 더 나와 같은 글이 두 번 잡힐 수 있음. 등록일 1개(posted). 신규간호사 연 1회 정도만 올림. robots: /*act /*ajax /*delete 만 차단",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

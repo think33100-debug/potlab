@@ -1,0 +1,8 @@
+{
+ "name": "삼육서울병원",
+ "type": "appsite",
+ "host": "https://symcs.recruiter.co.kr",
+ "sn": 10388,
+ "settingType": "B",
+ "note": "삼육서울병원 채용사이트(마이다스 appsite, www.symcs.co.kr 인재채용 메뉴가 여기로 감). /appsite/company/index 의 hidden appsiteSn=10388 · settingType=B. getMainView JSON jobnoticeInProgressList 6건(2026-09-16). robots `Disallow: /` 이나 `Allow: /appsite/` 명시."
+}

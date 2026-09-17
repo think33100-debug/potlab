@@ -1,0 +1,13 @@
+{
+ "name": "한일병원",
+ "type": "html",
+ "url": "https://www.hanilhosp.co.kr/sub.html?w=01_07&style=01&tb=tb_job01",
+ "base": "https://www.hanilhosp.co.kr",
+ "row": "<tr[^>]*>[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"title\">[\\s\\S]*?<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href='([^']+)'",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "채용마감|필요한 서류|반환|고지|합격자|발표",
+ "single": "posted",
+ "note": "진주 한일병원(hanilhosp.co.kr · 서울 한전 한일병원 hanilmed.net 과 다름). 채용정보 게시판 tb_job01. 진행중 글은 ○채용공고○, 끝난 글은 채용마감■ 로 제목 표기 → skip. 공지 행(tr.notice)과 일반 행 모두 잡음(같은 글이 두 번 나올 수 있음). 날짜는 등록일 하나. robots.txt 없음"
+}

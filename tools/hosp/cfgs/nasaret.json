@@ -1,0 +1,13 @@
+{
+ "name": "(의)나사렛의료재단 나사렛국제병원",
+ "type": "html",
+ "url": "https://www.nasaret.co.kr/sub04/sub04-8.php",
+ "base": "https://www.nasaret.co.kr",
+ "row": "<tr>\\s*<td>\\s*(?:공지|\\d+)\\s*<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/sub04\\/sub04-8-read\\.php\\?bkey=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/sub04\\/sub04-8-read\\.php\\?bkey=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "자체 채용정보 게시판. 표: No(공지/번호)·제목·작성일·조회수. 날짜는 작성일 하나(마감은 본문). 공지 행도 실제 공고라 포함. robots * Allow /."
+}

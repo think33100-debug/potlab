@@ -1,0 +1,14 @@
+{
+ "name": "부평세림병원",
+ "type": "html",
+ "url": "https://www.iserim.co.kr/html/?pmode=bbsdat&spag=notice&&pseq=1",
+ "base": "https://www.iserim.co.kr",
+ "row": "<li>\\s*<div>\\s*<span>[\\s\\S]*?name=\"btnBbsView\" seq=\"\\d+\"[^>]*>[\\s\\S]*?<\\/a>",
+ "title": "<p>([^<]*(?:채용|모집|구인)[^<]*)<\\/p>",
+ "link": "name=\"btnBbsView\" seq=\"(\\d+)\"",
+ "linkFmt": "https://www.iserim.co.kr/html/?pmode=bbsdat&spag=notice&smode=view&pseq=1&seq={1}",
+ "date": "작성일<\\/span>(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "채용 전용 게시판이 없고 공지사항 게시판에 채용공고를 섞어 올림 → title 정규식이 채용|모집|구인 이 든 제목만 잡음. 카드형(li > div > p 제목 · 작성일 · a[name=btnBbsView seq]). 링크는 seq 로 view 주소 조립. 작성일 하나뿐. robots: cote1/cote2/influenza 만 Disallow."
+}

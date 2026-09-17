@@ -1,0 +1,11 @@
+{
+ "name": "의료법인 성수의료재단 인천백병원",
+ "type": "html",
+ "url": "http://ib.ibsh.kr/bbs/board.php?bo_table=notice",
+ "base": "http://ib.ibsh.kr",
+ "row": "<tr class=\"(?:bo_notice)?\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"http:\\/\\/ib\\.ibsh\\.kr\\/bbs\\/board\\.php\\?bo_table=notice&amp;wr_id=\\d+\">\\s*([^<]*(?:채용|모집|구인)[^<]*?)\\s*<\\/a>",
+ "link": "href=\"(http:\\/\\/ib\\.ibsh\\.kr\\/bbs\\/board\\.php\\?bo_table=notice&amp;wr_id=\\d+)\"",
+ "skip": "합격자|발표|결과|양식",
+ "note": "채용 게시판 없음(bo_table=hire 는 오류 페이지). 병원소식(그누보드 notice) 에 채용 안내를 섞어 올려 title 정규식이 채용|모집|구인 제목만 잡음. 날짜 칸이 MM-DD(연도 없음)라 date 비움 → 날짜 없음. 실제 공고는 잡코리아·사람인. https 없음. robots * Allow /."
+}

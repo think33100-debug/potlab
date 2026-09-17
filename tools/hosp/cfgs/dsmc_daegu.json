@@ -1,0 +1,13 @@
+{
+ "name": "계명대학교대구동산병원",
+ "type": "html",
+ "url": "https://daegu.dsmc.or.kr:49880/content/03use/07_03.php",
+ "base": "https://daegu.dsmc.or.kr:49880",
+ "row": "<li[^>]*>\\s*<a href='\\?proc_type=view[\\s\\S]*?<\\/li>",
+ "title": "<strong>([\\s\\S]*?)<\\/strong>",
+ "link": "href='(\\?proc_type=view[^']+)'",
+ "linkFmt": "https://daegu.dsmc.or.kr:49880/content/03use/07_03.php{1}",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "nninc_simple 게시판(li 목록) · 제목은 <strong> 안, D-day/공지 배지는 span 이라 제외. 날짜는 등록일 1개(posted). href 가 작은따옴표. robots Allow: /"
+}

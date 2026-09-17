@@ -1,0 +1,14 @@
+{
+ "name": "영광종합병원",
+ "type": "html",
+ "url": "https://ygmc.co.kr/?pn=board.list&_menu=jobs",
+ "base": "https://ygmc.co.kr",
+ "row": "<tr[^>]*>\\s*<td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"#none\" onclick=\"location\\.href='[^']*board\\.view[^']*'[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "_uid=(\\d+)",
+ "linkFmt": "https://ygmc.co.kr/?pn=board.view&_uid={1}",
+ "date": "(20\\d{2}[.\\-/]\\d{1,2}[.\\-/]\\d{1,2})",
+ "skip": "마감|합격|발표|양식",
+ "single": "posted",
+ "note": "전남 영광군 영광종합병원(ygmc.co.kr). 「상시채용」 게시판(_menu=jobs). 링크가 onclick 안의 location.href 라 _uid 를 잡아 linkFmt 로 조립. 글 1개(공지: 신규 및 경력 간호사 모집)뿐이고 공지 행은 날짜 열이 없어 날짜없음. robots.txt 404."
+}

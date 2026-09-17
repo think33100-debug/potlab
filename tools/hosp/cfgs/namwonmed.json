@@ -1,0 +1,13 @@
+{
+ "name": "전북특별자치도 남원의료원",
+ "type": "html",
+ "url": "https://www.namwonmed.or.kr/content/hire_notice",
+ "base": "https://www.namwonmed.or.kr",
+ "row": "<tr>\\s*<td class=\"num\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"#none\"\\s*class=\"recruit-view-btn\" data-idx=\"\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "class=\"recruit-view-btn\" data-idx=\"(\\d+)\"",
+ "linkFmt": "https://www.namwonmed.or.kr/content/hire_notice#tr_{1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})(?=[^<]*<\\/td>)",
+ "skip": "합격자|발표|결과|양식",
+ "note": "자체 게시판. 상세 페이지가 따로 없고 목록 행 아래에 접힌 상세(tr#tr_N)+hwp 첨부 → 링크는 목록 주소+#tr_N. 모집기간 시작~종료 두 날짜. robots 전부 주석(허용)"
+}

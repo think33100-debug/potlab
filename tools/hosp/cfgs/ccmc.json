@@ -1,0 +1,12 @@
+{
+ "name": "청주성모병원",
+ "type": "html",
+ "url": "https://www.ccmc.or.kr/bbs/board.php?bo_table=commu_02",
+ "base": "https://www.ccmc.or.kr",
+ "row": "<tr[^>]*>[\\s\\S]*?<\\/tr>",
+ "title": "<div class=\"bo_tit\">\\s*<a href=\"[^\"]*wr_id=\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "<div class=\"bo_tit\">\\s*<a href=\"([^\"]*wr_id=\\d+[^\"]*)\"",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "청주성모병원(ccmc.or.kr) 그누보드 채용정보. 목록 날짜가 MM-DD 뿐이라 날짜 미수집 → 마감은 본문. 분류(간호부 채용·임상과장초빙 등)와 모집중/마감 표시(td.cate span.ok)가 행에 있음. 공지(bo_notice) 행 포함. robots.txt 404"
+}

@@ -1,0 +1,15 @@
+{
+ "name": "(의)성세의료재단 뉴성민병원",
+ "type": "html",
+ "url": "http://www.smgh.co.kr/smgh/main2/board?menuID=service&menuSubID=recruit",
+ "base": "http://www.smgh.co.kr",
+ "row": "<tr>\\s*(?:<!--[\\s\\S]*?-->\\s*)?<td class=\"first(?:_notice)?\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"#(?:none)?\" on[cC]lick=\"doCommit\\('VIEW', '\\d+'\\);\"[^>]*>(?:\\s*<!--[\\s\\S]*?-->)?([\\s\\S]*?)<\\/a>",
+ "link": "doCommit\\('VIEW', '(\\d+)'\\)",
+ "linkFmt": "http://www.smgh.co.kr/smgh/main2/board?menuID=service&menuSubID=recruit&CRUD=VIEW&bdSeqNo={1}",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|\\[마감\\]",
+ "single": "posted",
+ "note": "홈페이지 인재채용 게시판(자체 CMS). 표: 번호·제목·파일·작성일·조회수. 링크가 onclick doCommit('VIEW','N') 이라 linkFmt 로 GET 조립(확인 200). 마지막 글이 2016년 — 실제 채용은 사람인에 올림. https 없음. robots * Allow /.",
+ "off": "구글 서버에서 못 엶(HTTP 0 Address unavailable) 2026-09-17 · 컴퓨터에서는 열림"
+}

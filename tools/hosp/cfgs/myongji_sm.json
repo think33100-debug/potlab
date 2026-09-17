@@ -1,0 +1,12 @@
+{
+ "name": "명지성모병원",
+ "type": "html",
+ "url": "https://www.myongji-sm.co.kr/index.php/board/list/job/31",
+ "base": "https://www.myongji-sm.co.kr",
+ "row": "<ul class=\"listul\">[\\s\\S]*?<\\/ul>",
+ "title": "<li class=\"title\"><a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/index\\.php\\/board\\/view\\/job\\/31\\/\\d+[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "명지성모병원 병원소개>채용안내(jobnotice ul.listul). 진행중/마감 표시(span.oning) · 접수기간 '2026-08-03~2026-12-31' 두 날짜(from~to). robots.txt: * Allow / (medis/xmldata/lib/counsel 만 금지) · Crawl-delay:3600 이라 하루 한두 번만 긁을 것. 상세 /index.php/board/view/job/31/N/cpage/1."
+}

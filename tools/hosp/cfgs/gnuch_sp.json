@@ -1,0 +1,12 @@
+{
+ "name": "창원경상국립대학교병원",
+ "type": "html",
+ "url": "https://recruit.gnuch.co.kr/recruit/01_specialist/01_notice/sp_notice.jsp",
+ "base": "https://recruit.gnuch.co.kr/recruit/01_specialist/01_notice",
+ "row": "<td class=\"tlt\">[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "창원경상국립대학교병원 채용시스템 전문직(촉탁의·전문의) 목록. 구조는 gnuch_ge.json 과 같음. 상세 sp_notice_view.jsp?idx=N"
+}

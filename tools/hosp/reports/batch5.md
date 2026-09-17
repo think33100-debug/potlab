@@ -1,0 +1,35 @@
+# batch5 보고서 (대구·대전·부산 종합병원 31곳)
+
+| 병원명 | 시도 | 결과 | 목록 주소 | 뽑힌 줄 수 | 비고 |
+|---|---|---|---|---|---|
+| (재)미리내천주성삼성직수도회천주성삼병원 | 대구 | 손 확인(robots) | http://www.sungsam21.com/Board/list.asp?Board=recruit&Gubun=1 | - | robots.txt `User-agent: *` 에 `Disallow: /` 및 `/board/` → 긁지 않음. 채용공고 게시판 자체는 있음(list.asp?Board=recruit) |
+| 계명대학교대구동산병원 | 대구 | 자동 html | https://daegu.dsmc.or.kr:49880/content/03use/07_03.php | 6 | cfgs/dsmc_daegu.json · nninc_simple li 목록 · 등록일 1개(posted) · robots Allow: / |
+| 나사렛종합병원 | 대구 | 게시판 없음 | http://nazareth.co.kr/main/index.php | - | 홈페이지(프레임셋) 메뉴에 채용 항목 없음. 병원소식(bbs_list.php?code=notice)에도 채용 글 0건. 사람인/잡코리아 링크도 없음 — 간호학과 게시판에 공문으로만 뿌림 |
+| 대구가톨릭대학교 칠곡가톨릭병원 | 대구 | 자동 html | http://www.tcmcch.co.kr/content/04client/02_01.php | 2 | cfgs/tcmcch.json · 목록의 링크가 전부 javascript:alert(심사중/모집완료) 라 상세 없음 → 링크는 목록페이지#번호. [마감] 제목은 skip. 등록일 1개(posted) |
+| 강남종합병원 | 대구 | 게시판 없음 | https://gangnamhosp.co.kr/ | - | 홈페이지에 병원소식(ajax JSON)만 있고 채용 게시판 없음. 병원소식 46건에 채용 글 없음. 사람인·너스케입에 공고 올림(검색결과) |
+| 곽병원 | 대구 | 손 확인(게시판 비어 있어 검증 불가) | https://kwakh.co.kr/bbs/board.php?bo_table=c05 | 0 | 그누보드(APMS) 채용공고 게시판이 있으나 「게시물이 없습니다」 → 목록 구조를 검증 못 해 cfg 미작성. 공지(c02)·병원소식(c00)에도 채용 글 없음. 신규간호사 공고는 간호학과 게시판으로만 확인됨. robots 는 adm/plugin 만 금지 |
+| 삼일병원 | 대구 | 게시판 없음 | https://31hosp.co.kr/pg/bbs/board.php?bo_table=info1 | - | 채용 전용 게시판 없음. 공지사항(info1)에 「2026년 간호사모집 공고」 1건이 서식·안내 글과 섞여 있음. 워크넷에도 공고(검색결과) |
+| 대구굿모닝병원 | 대구 | 자동 html | https://www.gmhospital.co.kr/pg/bbs/board.php?bo_table=info3 | 9 | cfgs/gmhospital.json · 그누보드 표 · 등록일 1개(posted) · 합격자 발표 글 skip · robots Allow:/ |
+| 대구의료원 | 대구 | 손 확인(robots) | https://www.daegumc.co.kr/main/contents.do?a_num=65192217 | - | robots.txt `User-agent: *` `Disallow: /` (Yeti 만 허용) → 긁지 않음. 게시판(nanum 표)에는 공고·합격자발표가 활발히 올라옴. 지방의료원이라 워크넷·지역거점공공병원알리미(rhs.mohw.go.kr)에도 게시 |
+| 대구파티마병원 | 대구 | 자동 html | https://www.fatima.or.kr/employ/recruit_notice/list.do | 3 | cfgs/fatima.json · 채용정보센터 li 목록 · 접수기간 두 날짜(from~to) · 의사 채용은 ?v_rc_type=doctor 별도 |
+| 더블유병원 | 대구 | 자동 html | https://www.w-hospital.co.kr/board/recruit | 3 | cfgs/w_hospital.json · 자체 표 · 작성일 1개(posted) · 양식/반환안내 공지 skip · 달서구 달구벌대로 1632 확인 |
+| 드림종합병원 | 대구 | 게시판 없음 | http://www.dreamh.co.kr/front/board/list.php?code=notice | - | 채용 전용 게시판 없음. 공지사항(code=notice)에 「2026년 신규 간호사 채용」 등 채용 글이 보도자료·서식 글과 섞여 있음(연 1~2건). 사람인·잡플래닛에도 올림(검색결과). robots Allow:/ |
+| 의료법인구의료재단 구병원 | 대구 | 손 확인(게시판 비어 있어 검증 불가) | https://kooh.co.kr/employ/recruit_notice/list.do | 0 | 나눔 CMS 채용정보센터(대구파티마 fatima.json 과 같은 템플릿). 현재 「등록된 채용공고가 없습니다」(전체 0개) 라 목록 구조를 검증 못 해 cfg 미작성 — 공고가 올라오면 fatima.json 을 복사해 host 만 바꾸면 될 가능성 높음. robots.txt 200(빈 내용). 달서구 감삼북길 141 확인 |
+| 한국보훈복지의료공단 대구보훈병원 | 대구 | 자동 html | https://www.bohun.or.kr/daegu/na/ntt/selectNttList.do?mi=33151&bbsId=1158 | 5 | cfgs/bohun_daegu.json · daegu.bohun.or.kr 은 www.bohun.or.kr/daegu 로 넘김 · 보훈공단 공통 CMS 표 · 링크는 data-id → linkFmt(selectNttInfo.do) · 제목 안 HTML 주석의 날짜를 피하려 date 를 등록일 칸으로 한정 · 등록일 1개(posted) · 전형 안내·합격자 글 skip · robots 게시판 허용 |
+| 대전보훈병원 | 대전 | 자동 html | https://www.bohun.or.kr/daejeon/na/ntt/selectNttList.do?mi=33414&bbsId=1158 | 3 | cfgs/bohun_daejeon.json · 대구보훈과 같은 구조(mi=33414) · 등록일 1개(posted) · 상세 200 확인 |
+| 동남권원자력의학원원자력병원 | 부산 | 손 확인(JobFlex) | https://diramsjob.recruiter.co.kr/career/home | - | 홈페이지(dirams.re.kr) 인재채용 메뉴가 마이다스 JobFlex(recruiter.co.kr/career) 로 감 → 긁지 않음. 메인 공지 롤링에 「2027년도 신규 간호사 75명 공개 채용」 글이 보이나 링크가 # 이라 목록 주소 없음. dirams.re.kr/robots.txt 는 에러 페이지(HTML) |
+| 근로복지공단 대전병원 | 대전 | 자동 html | https://www.comwel.or.kr/daejeon/info/rcrt.jsp | 10 | cfgs/comwel_daejeon.json · 순천·동해와 같은 공단 공통 게시판(board_no=176) · linkFmt(article_no) · 등록일만(posted) · robots Disallow / 이나 Allow /daejeon/ 명시 · 상세 200·제목 확인 · 알리오 중복 주의 |
+| 대전한국병원 | 대전 | 자동 html | https://djh.kr/community/recruit | 4 | cfgs/djh.json · 자체 표(번호·제목·작성자·등록일) · 등록일 1개(posted) · 면접·합격자·제출서류 글 skip · 신규간호사 연 1회 정도 · 상세 200 확인 · robots 는 act/ajax/delete 만 차단 |
+| 의료법인 영훈의료재단 대전선병원 | 대전 | 자동 html | https://www.sunhospital.com/sub5_4.html | 12 | cfgs/sunhospital.json · 카드형 목록(a.board_thumb_item) · 작성일 1개(posted) · 대전선·유성선이 같은 게시판을 공유(제목에 병원명) → 유성선 cfg 와 같은 글이 겹침 · 상세 200 확인 |
+| 의료법인영훈의료재단 유성선병원 | 대전 | 자동 html | https://www.yuseongsunhospital.com/sub5_4.html | 12 | cfgs/yuseongsun.json · 대전선병원과 같은 게시판(다른 호스트) · 작성일 1개(posted) · 상세 200 확인 |
+| 학교법인 을지학원 대전을지대학교병원 | 대전 | 자동 html | https://www.emc.ac.kr/info/info_pg06_04.jsp | 4 | cfgs/emc_daejeon.json · 을지 CMS 표(번호·제목·등록일·조회, 의정부 uemc 보다 단순) · [마감] 붙은 글·합격자 발표 skip · 등록일 1개(posted) · 입사지원은 을지통합채용시스템(eams.eulji.net) · robots Allow / · 상세 200 확인 |
+| 부산광역시의료원 | 부산 | 자동 html | https://www.busanmc.or.kr/busanmc/index.php?pCode=recruit | 5 | cfgs/busanmc.json · 자체 CMS 표(tr.child_N, 진행/완료 뱃지) · 등록일 1개(posted) · 합격자·면접 안내 skip(10건 중 5건) · robots 는 /_* 자원 폴더만 차단 · 상세 200 확인 · 지방의료원이라 워크넷·rhs 알리미에도 게시 |
+| 대청병원 | 대전 | 자동 html | https://www.dchp.or.kr/board/recruit/ | 7 | cfgs/dchp.json(이전 실행에서 작성) 재검증 · Nuxt SSR 카드 목록이라 제목만 서버가 그려 줌 · 링크는 목록 페이지로 고정 · 날짜 없음(마감은 본문) · robots.txt 404 · 새 글은 사람이 목록에서 열어 확인 |
+| 학교법인 가톨릭학원 가톨릭대학교 대전성모병원 | 대전 | 자동 html | https://recruit.cmcnu.or.kr/cmcdj/index.do | 14 | cfgs/cmcdj.json(이전 실행에서 작성) 재검증 · 가톨릭중앙의료원 통합 채용사이트(EUC-KR) · 페이지에 박스형·목록형 두 블록이 있어 같은 공고가 2번 뽑힘(고유 7건, 주소로 중복 제거 필요) · 등록일 1개(posted) · robots Allow / · 상세 200·제목 확인 |
+| 구포성심병원 | 부산 | 자동 html | https://www.guposs.com/kr/?pCode=recruit | 5 | cfgs/guposs.json(이전 실행에서 작성) 재검증 · 부산의료원과 같은 CMS 표 · 등록일 1개(posted) · [마감]·양식 글 skip · robots 는 /_* 자원 폴더만 차단 · 상세 200·제목 확인 |
+| 동래봉생병원 | 부산 | 자동 html | https://www.drbs.or.kr/page/board/board.php?tno=1415 | 20 | cfgs/drbs.json(이전 실행에서 작성) 재검증 · 봉생 템플릿 카드 목록 · 접수기간 두 날짜(from~to), '~채용시' 는 시작일만 · 「입사지원서 다운로드」 안내 글 1건이 skip 에 안 걸려 같이 뽑힘(기존 cfg 는 손대지 않음) · robots `User-agent: *` Allow / · 상세 200·제목 확인 |
+| 부산성모병원(재단법인 천주교부산교구유지재단) | 부산 | 자동 html | https://www.bsm.or.kr/05_comm/0501.asp | 12 | cfgs/bsm.json(이전 실행에서 작성) 재검증 · ASP 표(번호·제목·마감일시·상태) · 마감일 1개(deadline) · 마감 칸 빈 글(상시)은 날짜 없음 · 링크 &uid=N 포함(hs_test 출력은 110자로 잘려 보일 뿐) · robots 는 /06love/ /intranet/ /bsm_admin/ 만 차단 · 상세(uid=634) 200·제목 확인 |
+| 비에이치에스한서병원 | 부산 | 자동 html | https://www.hanseohospital.or.kr/board/board.asp?gubun=4 | 10 | cfgs/hanseo.json(이전 실행에서 작성) 재검증 · ASP 표 · 등록일 1개(posted) · 신규간호사 연 1회 + 레지던트 공고 위주 · robots.txt 404(IIS) · 상세 200·제목 확인 |
+| 빌리브세웅병원 | 부산 | 자동 html | https://believesewoong.co.kr/board/recruit | 2 | cfgs/believesewoong.json(이전 실행에서 작성) 재검증 · ul.g_board li 목록 · 등록일 1개(posted) · 신규간호사 연 1회(2025·2026) · robots /admin 만 차단 · 상세 200·제목 확인 |
+| 삼육부산병원 | 부산 | 자동 greeting | https://36busanah.career.greetinghr.com/ko/guide | 0 | cfgs/symcb.json(이전 실행에서 작성) 재검증 · 홈(symcb.co.kr) 채용 메뉴가 그리팅으로 넘김(확인) · guide __NEXT_DATA__ 에 queryKey ["openings"] 있음(workspace 17338 삼육부산병원) · 현재 openings 가 빈 배열이라 0건 · robots Allow / (apply 만 차단) |
+| 대동병원 | 부산 | 자동 html | https://www.ddh.co.kr/board/고객서비스/채용소식 | 2 | cfgs/ddh.json 신규 · 홈페이지(ddh.co.kr, 동래구 충렬대로 187) 고객서비스>채용소식 · 경로가 한글이라 cfg 에는 URL 인코딩 · 자체 CMS 표(번호·제목·작성자·등록일·조회) · 링크는 onclick viewDetail(this,id,url) 의 id → ?command=view&id=N 조립(상세 200·제목 확인) · 등록일 1개(posted) · 현재 2건(간호사·예약상담원) · 사람인·인재채움뱅크에도 병행 게시 · robots Allow / (/management 만 차단) |

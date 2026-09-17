@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 건명의료재단 중앙제일병원",
+ "type": "html",
+ "url": "https://joongangjeil.co.kr/introduction/recruit.php",
+ "base": "https://joongangjeil.co.kr",
+ "row": "<li class=\"list_tr list_hover\">[\\s\\S]*?<\\/li>",
+ "title": "<div class=\"list_td list_subject\">[\\s\\S]*?<h5>([\\s\\S]*?)<\\/h5>",
+ "link": "href=\"\\s*(\\/introduction\\/recruit\\.php\\?ptype=view&idx=\\d+[^\"]*?)\\s*\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "진천 중앙제일병원(중앙대의료원 진료협력). 자체 PHP · li 목록(list_tr). 열: 번호·현황(모집)·제목·작성자·등록일·조회. 등록일 하나(posted). 입사지원서양식 공지 skip. robots: /admin/ /member/ /comm/ /consulting/ 만 차단",
+ "off": "구글 서버에서 못 엶(HTTP 406) 2026-09-17 · 컴퓨터에서는 열림"
+}

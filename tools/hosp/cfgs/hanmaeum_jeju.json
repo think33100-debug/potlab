@@ -1,0 +1,14 @@
+{
+ "name": "한마음병원",
+ "type": "html",
+ "url": "http://www.hanmaeum.jeju.kr/board/list.do?tblNm=Hire",
+ "base": "http://www.hanmaeum.jeju.kr",
+ "row": "<li>\\s*<span class=\"w50 num\">[\\s\\S]*?<span class=\"w50 hit\">",
+ "title": "<a href=\"\\/board\\/view\\.do\\?brdSq=[0-9a-f]+&tblNm=Hire[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/board\\/view\\.do\\?brdSq=[0-9a-f]+&tblNm=Hire)",
+ "date": "class=\"w100 date\">(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "양식|지원서|반환|합격자|발표|결과|-\\s*마감",
+ "single": "posted",
+ "note": "제주 한마음병원(한마음국제의료재단, 제주시 연신로) 자체 게시판 tblNm=Hire. ul/li 목록: 번호(공지)·제목·작성자·날짜·조회. 공지(입사지원서·채용서류 반환청구서)는 skip. 등록일 하나. 제목에 「- 진행중」「- 모집중」 표시. http 만. robots.txt 없음(접속 불가)",
+ "off": "구글 서버에서 못 엶(HTTP 0 Address unavailable) 2026-09-17 · 컴퓨터에서는 열림"
+}

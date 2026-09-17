@@ -1,0 +1,12 @@
+{
+ "name": "대청병원",
+ "type": "html",
+ "url": "https://www.dchp.or.kr/board/recruit/",
+ "base": "https://www.dchp.or.kr",
+ "row": "<div class=\"board_community_card[^\"]*\"[^>]*>[\\s\\S]*?<p class=\"ma-0 font-weight-medium ellipsis\"[^>]*>[\\s\\S]*?<\\/p>",
+ "title": "<p class=\"ma-0 font-weight-medium ellipsis\"[^>]*>([\\s\\S]*?)<\\/p>",
+ "link": "(board_community_card)",
+ "linkFmt": "https://www.dchp.or.kr/board/recruit/",
+ "skip": "합격자|발표|결과",
+ "note": "대청병원 채용공고(Nuxt SSR). 목록 카드에 제목은 서버가 그려 주지만 링크·날짜가 없음(클릭은 JS, 날짜는 'N일 전'). __NUXT__ 데이터의 글 id 는 함수 인자로 치환돼 있어 정규식으로 못 잡음 → 링크는 목록 페이지로 고정, 날짜 없음(마감은 본문). 새 글이 뜨면 사람이 목록에서 열어 확인. robots.txt 404"
+}

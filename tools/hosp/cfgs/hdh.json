@@ -1,0 +1,12 @@
+{
+ "name": "의료법인 행도의료재단 해동병원",
+ "type": "html",
+ "url": "https://www.hdh.co.kr/gnuboard/bbs/board.php?bo_table=jobboard",
+ "base": "https://www.hdh.co.kr",
+ "row": "<tr class=\"[^\"]*\">[\\s\\S]*?<\\/tr>",
+ "title": "<div class=\"bo_tit\">\\s*<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=jobboard&amp;wr_id=\\d+)\"",
+ "date": "td_datetime[^>]*>(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "그누보드 '구인구직' 게시판. 날짜는 td_datetime 의 작성일 하나(posted). 글이 적음(총 5건). 상세 board.php?bo_table=jobboard&wr_id=N GET 200."
+}

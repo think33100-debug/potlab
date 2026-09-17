@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 정산의료재단 효성병원",
+ "type": "html",
+ "url": "http://106.248.126.61/hyosung/forum.cfm?forum=66",
+ "base": "http://106.248.126.61/hyosung",
+ "row": "<tr class=\"bg1\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"forum\\.cfm\\?forum=66&id=\\d+[^\"]*\"[^>]*title=\"([^\"]*)\"",
+ "link": "href=\"(forum\\.cfm\\?forum=66&id=\\d+[^\"]*)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "청주 효성병원. 공식 주소 5388hyosunghospital.com 은 hyosunghosp.co.kr 프레임 → 그 도메인은 http://106.248.126.61/hyosung/default.cfm 으로 302(ColdFusion). 도메인으로는 forum.cfm 이 404 라 IP 주소를 그대로 씀(IP 가 바뀌면 깨짐 · 주기적 확인 필요). 표: 번호·제목·글쓴이·날짜·조회. 제목은 a 의 title 속성(전체 제목). 등록일 하나(posted) · (마감) 은 제목에 표시. robots.txt 404"
+}

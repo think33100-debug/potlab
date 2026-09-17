@@ -1,0 +1,12 @@
+{
+ "name": "의료법인동춘의료재단문경제일병원",
+ "type": "html",
+ "url": "https://www.mgjh.co.kr/bbs/board.php?bo_table=job_01",
+ "base": "https://www.mgjh.co.kr",
+ "row": "<td class=\"td_subject\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*bo_table=job_01&amp;wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=job_01&amp;wr_id=\\d+)\"",
+ "skip": "합격자|발표|결과|양식|마감",
+ "note": "홈페이지 채용정보 게시판(그누보드 bo_table=job_01). 표: 번호·제목·글쓴이·날짜(MM-DD, 연도 없음 → 날짜 못 잡음)·조회. 마감된 글은 제목 끝에 [마감]/[채용마감] → skip. 공지행(입사지원서(양식))은 양식 으로 skip. 링크는 절대주소(:443 포함). robots.txt 없음(404)",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

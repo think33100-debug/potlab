@@ -1,0 +1,13 @@
+{
+ "name": "연세에스병원",
+ "type": "html",
+ "url": "http://www.yonseis.com/cscenter/recruit.php",
+ "base": "http://www.yonseis.com",
+ "row": "<li>\\s*<h5>[\\s\\S]*?<\\/li>",
+ "title": "<span class=\"title\">([\\s\\S]*?)<\\/span>",
+ "link": "href=\"([^\"]*mode=view[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "진해 연세에스병원. ul.board_ul > li > h5 > a(bbsData=base64 링크, &amp; 포함) · span.title 제목 · div.boardInfo span.date 날짜(등록일 하나). robots * Allow / (Disallow /wssm)."
+}

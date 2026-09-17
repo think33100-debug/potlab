@@ -1,0 +1,11 @@
+{
+ "name": "서울적십자병원",
+ "type": "html",
+ "url": "https://www.rch.or.kr/web/rchseoul/bbs/employment",
+ "base": "https://www.rch.or.kr",
+ "row": "<tr class=\"mb-3 lg:mb-0 text-left\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/web\\/rchseoul\\/bbs\\/employment\\/\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/web\\/rchseoul\\/bbs\\/employment\\/\\d+)",
+ "skip": "합격자|발표|결과|공지",
+ "note": "대한적십자사 공통 CMS(rch.or.kr/web/rchseoul). 표: 번호·제목·첨부·게시일자. 게시일자가 26-09-04 처럼 두 자리 연도라 ymd 규칙(20YY)에 안 맞아 date 를 비움 → 날짜 없음. 상세 /web/rchseoul/bbs/employment/N. robots: * Allow /."
+}

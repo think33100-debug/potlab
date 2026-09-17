@@ -1,0 +1,12 @@
+{
+ "name": "여수전남병원",
+ "type": "html",
+ "url": "https://www.yscnhosp.com/ych_recruit",
+ "base": "https://www.yscnhosp.com",
+ "row": "<li class=\"d-md-table-row[\\s\\S]*?<\\/li>",
+ "title": "class=\"na-subject\">\\s*<div[^>]*>[\\s\\S]*?<\\/div>\\s*([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(https:\\/\\/www\\.yscnhosp\\.com\\/ych_recruit\\/\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격|발표|양식",
+ "note": "여수전남병원(YCH). 그누보드 개조 목록(ul.na-table > li). 열: 번호·진행상태(stepbox: 마감 등)·제목·모집기간(시작 ~ 마감)·조회. 제목 a 안에 모바일용 상태 div 가 먼저 오므로 그 뒤 텍스트만 캡처. 날짜 둘(시작~마감). 글 3개뿐(2025-08~10, 모두 마감). robots Allow /. 상세 /ych_recruit/N"
+}

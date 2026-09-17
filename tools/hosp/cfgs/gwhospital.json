@@ -1,0 +1,13 @@
+{
+ "name": "의료법인우리의료재단김포우리병원",
+ "type": "html",
+ "url": "https://www.gwhospital.co.kr/intro/recruit_list.php",
+ "base": "https://www.gwhospital.co.kr",
+ "row": "<tr>\\s*<td class=\"ta_center\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<td><a href=\"#none\" name=\"lnkView\" data-id=\"\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "data-id=\"(\\d+)\"",
+ "linkFmt": "https://www.gwhospital.co.kr/intro/recruit_view.php?idx={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "김포우리병원 자체 게시판. 표: 번호·직종·제목·접수기간(시작~마감)·진행상황. 링크는 data-id 로 recruit_view.php?idx=N 조립(JS 가 form GET 으로 넘김). robots: * Allow 전체. 나인하이어(l2av0tfl.ninehire.site)도 따로 있음"
+}

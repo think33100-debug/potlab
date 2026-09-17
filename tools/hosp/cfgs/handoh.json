@@ -1,0 +1,13 @@
+{
+ "name": "대아의료재단한도병원",
+ "type": "html",
+ "url": "https://www.handoh.com/sub_board/recruit.php",
+ "base": "https://www.handoh.com",
+ "row": "<td class=\"w_no\">\\d+<\\/td>[\\s\\S]*?<td class=\"w_hit\">",
+ "title": "<p class=\"title\">([\\s\\S]*?)<\\/p>",
+ "link": "href=\"(\\/sub_board\\/recruit\\.php\\?mode=view&number=\\d+[^\"]*)\"",
+ "date": "<td class=\"w_date\">(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|안내",
+ "single": "posted",
+ "note": "한도병원 자체 게시판(bbs_sun recruit). 표: 번호·첨부미리보기·제목(p.title, 안에 첨부 아이콘 <i>)·요약(p.txt)·등록일·조회. <tr> 대신 w_no~w_hit 셀 범위를 row 로 잡음. 상세 /sub_board/recruit.php?mode=view&number=N (200 확인). robots.txt: Googlebot 만 차단, * 는 Allow /"
+}

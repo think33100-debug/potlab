@@ -1,0 +1,12 @@
+{
+ "name": "대구굿모닝병원",
+ "type": "html",
+ "url": "https://www.gmhospital.co.kr/pg/bbs/board.php?bo_table=info3",
+ "base": "https://www.gmhospital.co.kr",
+ "row": "<tr class=\"[^\"]*\">[\\s\\S]*?<\\/tr>",
+ "title": "<div class=\"bo_tit\">\\s*<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=info3&amp;wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "그누보드 basic 스킨 표(번호·제목·글쓴이·조회·날짜). 날짜는 등록일 1개(posted). 공지(bo_notice) 줄도 같은 구조라 함께 잡힘. robots Allow:/"
+}

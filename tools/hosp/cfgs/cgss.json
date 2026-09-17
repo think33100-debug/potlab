@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 청구성심병원",
+ "type": "html",
+ "url": "https://cgss.co.kr/career",
+ "base": "https://cgss.co.kr",
+ "row": "<ul class=\"li_body  holder\">[\\s\\S]*?<\\/ul>",
+ "title": "<a class=\"list_text_title _fade_link\"[^>]*>\\s*<span>([\\s\\S]*?)<\\/span>",
+ "link": "<a class=\"list_text_title _fade_link\"\\s+href=\"([^\"]+)\"",
+ "date": "<li class=\"time\"[^>]*>\\s*(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "청구성심병원(은평구) 아임웹 사이트의 채용 안내 게시판(/career). 항목마다 ul.li_body: 제목·작성자·등록일(li.time)·조회 → 등록일 하나뿐이라 posted. 상세 /career/?q=…&bmode=view&idx=N&t=board. 페이지가 460KB 로 큼."
+}

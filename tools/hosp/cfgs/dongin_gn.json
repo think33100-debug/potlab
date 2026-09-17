@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 강릉동인병원",
+ "type": "html",
+ "url": "http://www.dong-in.or.kr/portal/bbs02/list.do?menuNo=2040200",
+ "base": "http://www.dong-in.or.kr",
+ "row": "<div class=\"board_list_tr\">[\\s\\S]*?<div class=\"bl_view\">",
+ "title": "fn_egov_inquire_articledetail\\('\\d+'\\);\">([\\s\\S]*?)<\\/a>",
+ "link": "fn_egov_inquire_articledetail\\('(\\d+)'\\)",
+ "linkFmt": "http://www.dong-in.or.kr/portal/bbs02/view.do?menuNo=2040200&nttId={1}",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})\\s*~|~\\s*20\\d{2}-\\d{2}-\\d{2}",
+ "skip": "합격자|발표|결과|안내",
+ "single": "posted",
+ "note": "전자정부 eGov 게시판(div 목록). 열: 번호·제목·첨부·접수기간(bl_employ: 시작 ~ 마감)·등록일(bl_date)·조회. 목록 링크는 JS(POST view.do) 이지만 GET view.do?menuNo=2040200&nttId=N 도 200 이라 linkFmt 로 조립. 등록일이 마감으로 잡히지 않도록 date 는 「~」 앞뒤 날짜만 잡음. robots.txt 없음(오류 페이지). http 만 확인함"
+}

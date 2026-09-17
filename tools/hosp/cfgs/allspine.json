@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 토마스의료재단 윌스기념병원",
+ "type": "html",
+ "url": "https://allspine.com/intro/intro06_03.html",
+ "base": "https://allspine.com/intro",
+ "row": "<li class=\"[^\"]*rowdata\"[^>]*>[\\s\\S]*?<\\/li>",
+ "title": "<span class='subject'><strong>제목<\\/strong>([\\s\\S]*?)<\\/span>",
+ "link": "href='(intro06_03\\.html\\?jb_code=20&jb_idx=\\d+)",
+ "linkFmt": "https://allspine.com/intro/{1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "공지사항|반환|합격자|발표|결과",
+ "note": "수원 윌스기념병원(allspine.com) 병원소개>채용안내. ul > li.rowdata > a(작은따옴표 href). 제목은 목록에서 '...' 로 잘림. 접수기간 '2025-08-01 ~ 2026-12-31' → from~to, 일부 글은 '20260501 ~ 20260531' 처럼 구분자 없어 날짜 없음. 진행여부 span.status(end=마감). 공지(채용서류 반환) skip. robots: hosp01 등 몇 페이지만 차단, Allow /"
+}

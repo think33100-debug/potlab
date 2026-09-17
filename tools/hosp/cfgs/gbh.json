@@ -1,0 +1,12 @@
+{
+ "name": "의료법인 거붕 백병원",
+ "type": "html",
+ "url": "http://www.gbh.or.kr/info/info04.html",
+ "base": "http://www.gbh.or.kr/info",
+ "row": "<li class=\"[^\"]*rowdata\"[\\s\\S]*?<span class='status[^']*'>[\\s\\S]*?<\\/span>",
+ "title": "<span class='subject'><strong>제목<\\/strong>([\\s\\S]*?)<\\/span>",
+ "link": "href='(info04\\.html\\?jb_code=\\d+&jb_idx=\\d+[^']*)'",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "거제 거붕백병원 채용정보. li.rowdata > a(작은따옴표 href, info04.html?jb_code=50&jb_idx=N) · span.subject 제목 · span.date 접수기간(시작~마감) · span.status 진행중/마감. 지난 공고도 목록에 남으나 마감일로 걸러짐. robots * Allow /."
+}

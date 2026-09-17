@@ -1,0 +1,7 @@
+{
+ "name": "가톨릭대학교의정부성모병원",
+ "type": "cmc",
+ "url": "https://www.cmcujb.or.kr/api/article/128?page=1&size=12",
+ "base": "https://www.cmcujb.or.kr",
+ "note": "가톨릭 CMC 공통(Vue board-list, board-no=128 recruit). JSON 배열: title·articleNo·createdDt·recruitClosedDt·recruitClosedYn·linkUrl. 상세 /page/board/recruit/{articleNo}. robots.txt: * 는 첨부 경로 하나만 차단"
+}

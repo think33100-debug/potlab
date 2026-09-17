@@ -1,0 +1,12 @@
+{
+ "name": "의료법인 양진의료재단 평택성모병원",
+ "type": "html",
+ "url": "https://www.ptsm.co.kr/bbs/board.php?tbl=bbs52",
+ "base": "https://www.ptsm.co.kr",
+ "row": "<li>\\s*<a href=\"\\/bbs\\/board\\.php\\?tbl=bbs52&mode=VIEW&num=\\d+[^\"]*\">[\\s\\S]*?<\\/a>\\s*<\\/li>",
+ "title": ">([^<>]+)<\\/h5>",
+ "link": "href=\"(\\/bbs\\/board\\.php\\?tbl=bbs52&mode=VIEW&num=\\d+[^\"]*)\"",
+ "skip": "합격자|발표|결과",
+ "note": "자체 PHP 카드형 목록(ul > li > a). h5.tit01 안에 신입/경력 em 뒤에 제목 텍스트가 오므로 </h5> 바로 앞 텍스트를 제목으로 잡음. 목록에 날짜 없음(상세에서). http 는 https 로 JS 리다이렉트. robots: * Allow /",
+ "off": "구글 서버에서 못 엶(HTTP 200) 2026-09-17 · 컴퓨터에서는 열림"
+}

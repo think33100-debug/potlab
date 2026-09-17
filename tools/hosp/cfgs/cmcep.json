@@ -1,0 +1,7 @@
+{
+ "name": "가톨릭대학교 은평성모병원",
+ "type": "cmc",
+ "url": "https://www.cmcep.or.kr/api/article/837?page=1&size=12",
+ "base": "https://www.cmcep.or.kr",
+ "note": "가톨릭 CMC 공통(Vue board-list, /page/board/recruit 의 board-no=837). JSON 배열: title·articleNo·createdDt·recruitClosedDt·recruitClosedYn·linkUrl(recruit.cmcnu.or.kr/cmcep 지원 페이지). 상세 /page/board/recruit/{articleNo}. robots.txt: * 는 Allow / (AhrefsBot 만 차단)"
+}

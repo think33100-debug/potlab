@@ -1,0 +1,13 @@
+{
+ "name": "국립중앙의료원",
+ "type": "html",
+ "url": "https://www.nmc.or.kr/nmc/board/B0000007",
+ "base": "https://www.nmc.or.kr",
+ "row": "<tr class=\"[^\"]*\">\\s*<td class=\"post_number\">[\\s\\S]*?<\\/tr>",
+ "title": "goToPostDetail\\(this, '[^']*'\\)\">([\\s\\S]*?)<\\/button>",
+ "link": "goToPostDetail\\(this, '(\\/nmc\\/board\\/B0000007\\/\\d+)'\\)",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|등록안내",
+ "note": "국립중앙의료원 채용공고 게시판(B0000007) 표. 제목은 button onclick goToPostDetail 안의 경로 · 접수기간 '2026-09-16 ~ 2026-09-28' 두 날짜(from~to). 고용형태·상태(공고/마감) 칸 있음. 첨부 PDF 는 downloadF 버튼. robots 는 user/mypage/B0000019 만 금지. 상세 /nmc/board/B0000007/N GET 200.",
+ "off": "구글 서버에서 못 엶(HTTP 0 Timeout) 2026-09-17 · 컴퓨터에서는 열림"
+}

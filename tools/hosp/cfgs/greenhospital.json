@@ -1,0 +1,13 @@
+{
+ "name": "녹색병원",
+ "type": "html",
+ "url": "https://www.greenhospital.co.kr/bbs/board.php?tbl=bbs65",
+ "base": "https://www.greenhospital.co.kr",
+ "row": "<tr height=\"45\" align=\"center\"[^>]*>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*mode=VIEW[^\"]*\">\\s*([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*mode=VIEW[^\"]*)\"",
+ "date": "tablet_regist_date\">(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "녹색병원 채용공고 게시판(tbl=bbs65) 표. http 는 https 로 302. 제목 <a> 안에 닫는 </span> 만 남아 있음(stripTags 로 제거). 날짜는 등록일 하나(posted). robots.txt 는 Yeti 만 명시(* 규칙 없음). 상세 board.php?tbl=bbs65&mode=VIEW&num=N GET 200.",
+ "off": "구글 서버에서 못 엶(HTTP 200) 2026-09-17 · 컴퓨터에서는 열림"
+}

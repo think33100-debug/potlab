@@ -1,0 +1,13 @@
+{
+ "name": "여천전남병원",
+ "type": "html",
+ "url": "http://www.yccnhosp.com/Board/boardList.asp?Gubun=1&Key=&KeyWord=&page=1&pagesize=10",
+ "base": "http://www.yccnhosp.com/Board",
+ "row": "<td align=\"center\" class=\"num\">(?:<img[^>]*alt='공지'[^>]*>|\\d+)<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href='BoardView\\.asp\\?Srno=\\d+[^']*'>([\\s\\S]*?)<\\/a>",
+ "link": "href='(BoardView\\.asp\\?Srno=\\d+[^']*)'",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "휴진|진료시간|본인확인|비상진료|합격|발표|양식|안내문",
+ "single": "posted",
+ "note": "여천전남병원. 「채용정보」 게시판(Gubun=5)은 2012년 글 1개뿐이고 실제 채용 글(신입간호사 모집·레지던트 모집 등)은 공지사항(Gubun=1) 에 섞여 올라옴 → 공지사항을 긁고 휴진·제도 안내 등은 skip. 채용 글이 아닌 공지도 섞일 수 있어 직군 필터에 맡김. 날짜는 작성일 하나(2025.11.05 형식). 링크가 상대경로(BoardView.asp) 라 base 를 /Board 까지. robots.txt 404(IIS)."
+}

@@ -1,0 +1,14 @@
+{
+ "name": "강원대학교병원",
+ "type": "html",
+ "url": "https://www.knuh.or.kr/hospitalinfo/hospitalinfo_03_05_list.asp",
+ "enc": "EUC-KR",
+ "base": "https://www.knuh.or.kr/hospitalinfo",
+ "row": "<tr>\\s*<td>\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"align_l\"><a href=\"hospitalinfo_03_05_view\\.asp[^\"]*\"[\\s\\S]*?'>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(hospitalinfo_03_05_view\\.asp[^\"]+)\"",
+ "date": "<td>(20\\d{2}\\/\\d{1,2}\\/\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|안내|변경",
+ "single": "posted",
+ "note": "ASP 게시판 EUC-KR (bid=5 채용공고). 표: 번호·제목·첨부·작성자·등록일·조회. 제목은 목록에서 잘려 '...' 로 끝날 수 있음. 첨부 링크의 rDate= 날짜를 피하려고 date 를 <td> 로 감쌈. 링크는 상대경로(hospitalinfo_03_05_view.asp?...) 라 base 를 /hospitalinfo 까지 둠. robots.txt 는 Yeti 규칙만 있음. 연구원·타기관(공공보건의료지원단) 공고도 섞여 있음"
+}

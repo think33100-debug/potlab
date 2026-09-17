@@ -1,0 +1,11 @@
+{
+ "name": "안성성모병원",
+ "type": "html",
+ "url": "http://www.ansmc.co.kr/bbs/board.php?bo_table=sub05_05",
+ "base": "http://www.ansmc.co.kr",
+ "row": "<td class=\"td_subject\"[\\s\\S]*?<td class=\"td_datetime\">[^<]*<\\/td>",
+ "title": "<a href=\"[^\"]*bo_table=sub05_05&amp;wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=sub05_05&amp;wr_id=\\d+)\"",
+ "skip": "양식|합격자|발표|결과",
+ "note": "그누보드(sm2018 홈페이지 > 인재채용 > 채용정보). 등록일이 월-일(09-08)만 있어 날짜 못 뽑음. http 만(https 응답 없음). 마지막 글 2023 신규간호사 모집이라 갱신 드묾. 「입사지원서 양식」 글 skip. robots: * Allow /"
+}

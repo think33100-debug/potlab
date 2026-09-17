@@ -1,0 +1,12 @@
+{
+ "name": "한림병원",
+ "type": "html",
+ "url": "https://recruit.hallym.net/job_posting/job_posting.php",
+ "base": "https://recruit.hallym.net",
+ "row": "<li tabindex=\"0\" class=\"\"[^>]*>\\s*<div class=\"txt\">[\\s\\S]*?<\\/li>",
+ "title": "<div class=\"tit\">([\\s\\S]*?)<\\/div>",
+ "link": "href=\"(\\/job_posting\\/detail\\.php\\?mode=view&idx=\\d+)\"",
+ "date": "(20\\d{2}\\/\\d{1,2}\\/\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "note": "인천 계양구 인성의료재단 한림병원(hallym.net · 한림대 병원 아님). 병원 홈 채용공고(hallym.net/news/announcement.php)는 2023년에 멈춘 옛 게시판(링크 javascript:void)이고 실제 공고는 재단 채용정보센터 recruit.hallym.net 의 카드 목록(ul.job_posting li). 마감 카드는 class=\"end\" 이고 링크가 javascript:avoid(0) 이라 class=\"\" 인 진행 카드만 잡음. 카드: 기관 태그(한림병원)·제목·기간 「YYYY/MM/DD~YYYY/MM/DD」 또는 「채용시까지」(날짜 없음)·D-day. 상세 /job_posting/detail.php?mode=view&idx=N (200 확인, 주소 계양구 장제로 722). robots.txt 404."
+}

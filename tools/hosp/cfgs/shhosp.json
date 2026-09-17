@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 남촌의료재단 시화병원",
+ "type": "html",
+ "url": "https://www.shhosp.co.kr/group/intro/job/noticeList.do",
+ "base": "https://www.shhosp.co.kr",
+ "row": "<li>\\s*<a href=\"javascript:void\\(0\\);\" onclick=\"javascript:fn_Detail\\('\\d+'\\);\"[\\s\\S]*?<\\/a>\\s*<\\/li>",
+ "title": "<span class=\"b_title\">([\\s\\S]*?)<\\/span>",
+ "link": "fn_Detail\\('(\\d+)'\\)",
+ "linkFmt": "https://www.shhosp.co.kr/group/intro/job/noticeView.do?jobNoticeNo={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "시화병원 채용공고(갤러리형 ul.gellay_list, 한 페이지 8건·진행중만 기본 노출). 링크가 onclick fn_Detail('N') → POST 폼이지만 GET noticeView.do?jobNoticeNo=N 도 200. b_date '2026-03-12 ~ 2999-12-31'(상시는 2999) → from~to. 숨은 span.update 는 점(.) 날짜라 안 잡힘. robots: Yeti 만 명시(* 없음)"
+}

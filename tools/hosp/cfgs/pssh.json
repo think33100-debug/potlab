@@ -1,0 +1,13 @@
+{
+ "name": "에스포항병원",
+ "type": "html",
+ "url": "https://pssh.kr/RecruitmentAnnouncement",
+ "base": "https://pssh.kr",
+ "row": "<ul class=\"li_body[^>]*>[\\s\\S]*?<\\/ul>",
+ "title": "<a class=\"list_text_title[^>]*>\\s*<span>([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(\\/RecruitmentAnnouncement\\/\\?[^\"]*bmode=view[^\"]*)\"",
+ "date": "<li class=\"time\" title=\"(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "아임웹(imweb) 게시판 「채용공고」. 각 ul.li_body 가 한 글: 카테고리(채용중/채용마감 · 제목에는 없음)·제목·작성시간·조회수. 날짜는 작성일 하나(올린 날). 마감 여부는 카테고리 ?category=5q870rX5x3(채용마감) 로만 구분되어 목록에서는 못 거름. 페이지 470KB. robots: Allow / (/?mode* 등만 금지 → 목록 주소는 허용)"
+}

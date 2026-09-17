@@ -1,0 +1,12 @@
+{
+ "name": "의료법인동신의료재단 동신병원",
+ "type": "html",
+ "url": "https://dshospital.co.kr/index.php/board/list/jab/32",
+ "base": "https://dshospital.co.kr",
+ "row": "<ul class=\"listul\">[\\s\\S]*?<\\/ul>",
+ "title": "<li class=\"title\"><a href=\"[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "<li class=\"title\"><a href=\"([^\"]+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "동신병원(서대문구) 인재채용 게시판(board/list/jab/32). 항목마다 ul.listul: 진행중 배지·제목·기간 '2025-12-01~2026-12-31' → from/to. 상세 /index.php/board/view/jab/32/N/cpage/1. 공고가 드묾(2026-09 현재 1건). robots: * Allow / · Crawl-delay 3600."
+}

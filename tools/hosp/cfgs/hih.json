@@ -1,0 +1,13 @@
+{
+ "name": "홍익병원",
+ "type": "html",
+ "url": "https://hih.or.kr/about/employ_list.php",
+ "base": "https://hih.or.kr/about",
+ "row": "<div class=\"board_list_tr\">[\\s\\S]*?<div class=\"bl_data\">",
+ "title": "<div class=\"bl_title\"><a href=\"employ_view[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "<div class=\"bl_title\"><a href=\"(employ_view[^\"]+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|명단|발표|결과",
+ "single": "posted",
+ "note": "양천구 홍익병원(hih.or.kr) 병원소개 > 채용공고. div 표: 번호·제목·공고기간(시작~마감)·파일·등록일·조회. row 를 bl_data(파일) 앞까지만 잡아 등록일 혼입 방지 → 공고기간이 from/to. 링크 상대(employ_view.php?board_seq=N&navi=60) 라 base 를 /about 까지. 합격자 명단 글 skip. robots.txt 404."
+}

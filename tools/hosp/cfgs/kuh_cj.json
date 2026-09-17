@@ -1,0 +1,14 @@
+{
+ "name": "건국대학교 충주병원",
+ "type": "html",
+ "url": "https://www.kuh.co.kr/bbs/data/list.do?per_menu_idx=51&tabCnt=3&menu_idx=134",
+ "base": "https://www.kuh.co.kr",
+ "row": "<tr[^>]*>(?:(?!<\\/tr>)[\\s\\S])*?fn_view\\('BM0000000112'[\\s\\S]*?<\\/tr>",
+ "title": "fn_view\\('BM\\d+','BD\\d+',''\\);\">\\s*([\\s\\S]*?)<\\/a>",
+ "link": "fn_view\\('(BM\\d+)','(BD\\d+)'",
+ "linkFmt": "https://www.kuh.co.kr/bbs/data/view.do?bbs_mst_idx={1}&data_idx={2}&menu_idx=134",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "충주건대병원(kuh.co.kr · 서울 건국대학교병원 kuh.ac.kr 과 다름). ibuilder CMS. 제목 링크는 onclick fn_view(bbs_mst_idx, data_idx) → view.do GET 으로 조립(확인 200). 표: 제목·접수기간(26-09-11 ~ 26-10-31 처럼 두 자리 연도라 못 잡음)·첨부·부서·등록일·조회. 등록일 하나만 수집(posted) · 마감은 본문. 목록 제목이 '...' 로 잘림. robots.txt 404"
+}

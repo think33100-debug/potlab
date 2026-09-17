@@ -1,0 +1,12 @@
+{
+ "name": "검단탑병원",
+ "type": "html",
+ "url": "https://www.tophospital.co.kr/about/recruit.html",
+ "base": "https://www.tophospital.co.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/about\\/recruit\\.html\\?bmain=view&uid=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/about\\/recruit\\.html\\?bmain=view&uid=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "note": "자체 채용안내 게시판. 표: 번호·제목·작성자·기간(YYYY-MM-DD~YYYY-MM-DD)·상태(채용중/채용완료). 공지(양식) 행은 번호가 아이콘이라 제외. 상태 칸은 제목에 없어 채용완료를 못 거름(기간으로 판단). robots * Allow /."
+}

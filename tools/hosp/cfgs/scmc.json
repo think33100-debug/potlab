@@ -1,0 +1,12 @@
+{
+ "name": "성남시의료원",
+ "type": "html",
+ "url": "https://www.scmc.kr/recruit/recruitList/",
+ "base": "https://www.scmc.kr",
+ "row": "<td class=\"no\">\\d+<\\/td>[\\s\\S]*?<td class=\"status\">[^<]*<\\/td>",
+ "title": "<a href=\"\\/recruit\\/recruitView\\/\\?seq=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/recruit\\/recruitView\\/\\?seq=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|서류전형|면접전형",
+ "note": "홈페이지 채용공고 표: 번호·구분·제목·모집기간(시작~마감)·모집인원·모집여부. 합격자 공고가 같은 게시판에 섞여 skip. 별도로 scmc.recruiter.co.kr(JobFlex) 지원 사이트가 있으나 공고 목록은 홈페이지에 다 올라옴. robots: Yeti 만 명시"
+}

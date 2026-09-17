@@ -1,0 +1,12 @@
+{
+ "name": "상무병원",
+ "type": "html",
+ "url": "https://www.sangmoohospital.co.kr/bbs/board.php?bo_table=recruit",
+ "base": "https://www.sangmoohospital.co.kr",
+ "row": "<tr class=\"bo_notice\">[\\s\\S]*?<\\/tr>|<tr class=\"\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"https:\\/\\/www\\.sangmoohospital\\.co\\.kr[^\"]*wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(https:\\/\\/www\\.sangmoohospital\\.co\\.kr[^\"]*wr_id=\\d+)\"",
+ "skip": "반환|양식|합격|발표",
+ "note": "광주 서구 상무병원(치평동). 그누보드 기본 스킨. 글이 공지 2개뿐(간호사 상시모집 · 채용서류 반환). 날짜가 월-일(09-24)뿐이라 date 없음 → 날짜없음. robots Allow /. 실제 직종별 공고는 사람인 등에 올리는 듯.",
+ "off": "구글 서버에서 못 엶(HTTP 0 Timeout) 2026-09-17 · 컴퓨터에서는 열림"
+}

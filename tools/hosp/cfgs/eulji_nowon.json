@@ -1,0 +1,13 @@
+{
+ "name": "노원을지대학교병원",
+ "type": "html",
+ "url": "https://www.eulji.or.kr/info/info_pg06_04.jsp",
+ "base": "https://www.eulji.or.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>\\s*<td class=\"td_al title\"><a href=\"\\/info\\/info_pg06_05\\.jsp\\?board_code=BOARD_4&board_sequence=\\d+\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/info\\/info_pg06_05\\.jsp[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(?<!<!--)<td>\\s*(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})|~\\s*(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "노원을지대학교병원(eulji.or.kr) 인재채용 목록 · 의정부을지대병원(uemc.json) 과 같은 을지의료원 공통 구조. 표: 번호·제목·(빈칸)·접수기간(시작 ~ [마감])·상태. 행 안에 주석 <!--<td>날짜 ~ </td>--> 이 겹쳐 있어 date 는 주석 앞 <td> 를 lookbehind 로 제외. 마감이 '채용시까지'면 날짜 하나 → posted(시작일). 제목 앞 [마감] 붙는 글 있음. robots: * Allow / (/emc_manage 만 차단)"
+}

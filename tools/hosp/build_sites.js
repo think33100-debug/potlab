@@ -17,13 +17,18 @@ const jsonSites = [
   /* 위탁 운영 공공병원 — 알리오·나라일터에 안 뜸. 그리팅(greetinghr) __NEXT_DATA__ openings (2026-09-12) */
   { name: '국립교통재활병원', type: 'greeting', host: 'https://ntrh.career.greetinghr.com', url: 'https://ntrh.career.greetinghr.com/ko/guide' }
 ];
-const KEYS = ['name', 'type', 'url', 'host', 'base', 'enc', 'sn', 'settingType', 'dept', 'row', 'title', 'link', 'linkFmt', 'date', 'skip', 'single', 'only', 'not', 'note'];
+const KEYS = ['name', 'type', 'url', 'host', 'base', 'enc', 'sn', 'settingType', 'dept', 'row', 'title', 'link', 'linkFmt', 'date', 'skip', 'single', 'only', 'not', 'off', 'note'];
 function lit(v) { return typeof v === 'number' ? String(v) : "'" + String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'"; }
 const all = jsonSites.slice();
 fs.readdirSync(dir).filter(f => f.endsWith('.json')).sort().forEach(f => {
   const c = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
-  if (!c.name || !c.row || !c.title || !c.url) { console.error('빠진 항목: ' + f); process.exit(1); }
-  c.type = 'html'; all.push(c);
+  /* type 이 적혀 있으면(appsite·listjson·cmc·schmc·greeting) 그대로, 없으면 html */
+  if (!c.type) c.type = 'html';
+  if (c.type === 'html' && (!c.name || !c.row || !c.title || !c.url)) { console.error('빠진 항목: ' + f); process.exit(1); }
+  if (c.type === 'appsite' && (!c.name || !c.host || !c.sn)) { console.error('appsite 항목 부족: ' + f); process.exit(1); }
+  if (c.type === 'greeting' && (!c.name || !c.host || !c.url)) { console.error('greeting 항목 부족: ' + f); process.exit(1); }
+  if (all.some(x => x.name === c.name && x.type === c.type && (x.url || x.host) === (c.url || c.host))) { console.error('같은 사이트가 두 번: ' + f); process.exit(1); }
+  all.push(c);
 });
 const lines = all.map(s => '  { ' + KEYS.filter(k => s[k] !== undefined && s[k] !== '').map(k => k + ': ' + lit(s[k])).join(', ') + ' }');
 const out = '/* 설정표 — name 은 심평원 병원목록 이름 그대로. html 은 hs_test.js 로 검증한 것만. (' + new Date().toISOString().slice(0, 10) + ' · ' + all.length + '곳) */\nconst HOSP_SITES = [\n' + lines.join(',\n') + '\n];\n';

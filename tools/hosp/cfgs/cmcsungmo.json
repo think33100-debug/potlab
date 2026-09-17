@@ -1,0 +1,7 @@
+{
+ "name": "가톨릭대학교 여의도성모병원",
+ "type": "cmc",
+ "url": "https://www.cmcsungmo.or.kr/api/article/115?page=1&size=12",
+ "base": "https://www.cmcsungmo.or.kr",
+ "note": "가톨릭 CMC 공통(Vue board-list, /page/board/recruit 의 board-no=115). JSON 배열: title·articleNo·createdDt·recruitClosedDt·recruitClosedYn·category(여의도성모)·linkUrl. 상세 /page/board/recruit/{articleNo}. robots.txt: * 는 Allow / (AhrefsBot 만 차단)"
+}

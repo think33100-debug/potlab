@@ -1,0 +1,13 @@
+{
+ "name": "해피뷰병원",
+ "type": "html",
+ "url": "http://www.hview.co.kr/Module/Board/Board.asp?ModuleID=2",
+ "base": "http://www.hview.co.kr",
+ "row": "<tr>\\s*<td class=\"tbl-el-none p-color02\">[\\s\\S]*?<td class=\"tbl-el-none p-color02\">20\\d{2}-\\d{1,2}-\\d{1,2}<\\/td>",
+ "title": "<a href='\\/Module\\/Board\\/Board\\.asp\\?ModuleID=2&[^']*Mode=V&IDX=\\d+'[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href='(\\/Module\\/Board\\/Board\\.asp\\?ModuleID=2&[^']*Mode=V&IDX=\\d+)'",
+ "date": "<td class=\"tbl-el-none p-color02\">(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/td>",
+ "skip": "양식|합격자|발표|결과",
+ "single": "posted",
+ "note": "drline ASP 게시판(채용안내 ModuleID=2). 표: 번호·제목·작성자·작성일. 첫 행(공지)은 </tr> 이 빠진 HTML 이라 row 끝을 작성일 td 로 잡음. 공지(입사지원서 양식)는 skip. 작성일 하나. 글이 드묾(연 1회 신규 간호사). http 만. robots.txt 없음(접속 불가)"
+}

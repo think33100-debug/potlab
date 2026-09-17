@@ -1,0 +1,12 @@
+{
+ "name": "의료법인 송은의료재단 울산시티병원",
+ "type": "html",
+ "url": "https://www.cityhospital.co.kr/recruit01.html",
+ "base": "https://www.cityhospital.co.kr",
+ "row": "<li>\\s*<a href=\"recruit01_view\\.html[^\"]*\">[\\s\\S]*?<\\/li>",
+ "title": "<p>([\\s\\S]*?)<\\/p>",
+ "link": "href=\"(recruit01_view\\.html\\?act=view&no=\\d+[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "채용마감|양식|합격자|발표|결과|회보서|발급방법",
+ "note": "자체 채용안내 목록(ul/li). 접수기간 「YYYY-MM-DD ~ YYYY-MM-DD」 또는 「상시접수」(날짜 없음). 공지 고정 글은 번호가 img. 마감 글은 제목 앞 (채용마감) 로 걸러짐. robots.txt 없음(404)."
+}

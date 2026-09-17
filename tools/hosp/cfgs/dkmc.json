@@ -1,0 +1,12 @@
+{
+ "name": "의료법인 동강의료재단 동강병원",
+ "type": "html",
+ "url": "https://www.dkmc.or.kr/hosguide/hosguide04_01.php",
+ "base": "https://www.dkmc.or.kr",
+ "row": "<tr>\\s*<td class=\"\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/hosguide\\/hosguide04_01\\.php\\?exec=view[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/hosguide\\/hosguide04_01\\.php\\?exec=view[^\"]+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "note": "자체 채용 게시판. 표: 번호·공고명·지원시작일·지원종료일·진행상태·조회. 날짜 둘(시작~마감). robots * 는 /_admin 등만 차단."
+}

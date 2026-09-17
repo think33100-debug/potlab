@@ -1,0 +1,13 @@
+{
+ "name": "인제대학교 해운대백병원",
+ "type": "html",
+ "url": "https://www.paik.ac.kr/haeundae/user/job/list.do?menuNo=900101",
+ "base": "https://www.paik.ac.kr",
+ "row": "<td class=\"tal\"><a href=\"javascript:view\\('\\d+'\\);\">[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "view\\('(\\d+)'\\)",
+ "linkFmt": "https://www.paik.ac.kr/recruit/user/job/view.do?menuNo=2400004&jobId={1}",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "부산백병원(paik.json) 과 같은 인제대 채용 시스템. view(id) 는 form name=item(POST /recruit/user/job/view.do, menuNo=2400004, jobId) 제출 · 같은 URL GET 200·제목 포함 확인. 접수기간 '2026-09-16 ~ 채용시까지' 처럼 마감 없는 줄은 날짜 1개(posted)."
+}

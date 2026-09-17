@@ -1,0 +1,13 @@
+{
+ "name": "강원특별자치도원주의료원",
+ "type": "html",
+ "url": "https://www.kwmc.or.kr/comm/recruit.html",
+ "base": "https://www.kwmc.or.kr/comm",
+ "row": "<tr>\\s*<td class=\"td_b td_r text-center\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"recruit\\.html[^\"]*b_num=\\d+\"[^>]*class=\"b_subject\" title=\"([^\"]*)\"",
+ "link": "href=\"(recruit\\.html[^\"]*b_num=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|안내|현황",
+ "single": "posted",
+ "note": "자체 게시판(_mboard). 표: 번호·제목·작성자·등록일·조회. 제목은 목록에서 잘리므로 a 의 title 속성(전체 제목)을 씀. 링크는 상대경로(recruit.html?...&b_num=N) 라 base 를 /comm 까지 둠. robots.txt: Disallow /_ 만. 등록일 하나뿐"
+}

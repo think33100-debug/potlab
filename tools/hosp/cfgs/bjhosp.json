@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 백제병원",
+ "type": "html",
+ "url": "https://www.bjhosp.co.kr/RecruitInfo/RecruitInfoList.asp",
+ "base": "https://www.bjhosp.co.kr/RecruitInfo",
+ "row": "<tr>\\s*<td align=\"center\" class=\"num\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href='RecruitInfoView\\.asp\\?Srno=\\d+[^']*'>([\\s\\S]*?)<\\/a>",
+ "link": "Srno=(\\d+)&",
+ "linkFmt": "https://www.bjhosp.co.kr/RecruitInfo/RecruitInfoView.asp?Srno={1}&Page=1&Gubun=1",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|양식|입사지원서|우선채용",
+ "single": "posted",
+ "note": "논산 백제종합병원(bjhosp.co.kr, http→https 301). ASP · UTF-8(2026-09-16 확인: 바이트가 UTF-8이라 enc 제거). 표: 번호(공지는 img)·제목·작성자·등록일·첨부·조회. 링크는 작은따옴표 href. 논산시립노인전문병원 공고도 섞여 올라옴. robots.txt 없음(404)"
+}

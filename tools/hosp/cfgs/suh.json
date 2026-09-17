@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 록향의료재단 신천연합병원",
+ "type": "html",
+ "url": "https://suh.or.kr/service_03.html",
+ "enc": "EUC-KR",
+ "base": "https://suh.or.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/service_03\\.html\\?query=view[^\"]*bid=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/service_03\\.html\\?query=view[^\"]*bid=\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "자체 게시판(LimBo, EUC-KR, 프레임셋 안 service_03.html). 표: 번호·제목·지원서 접수기간(2026.07.15~2026.07.21 → from~to · '7/1 ~ 7/14' 처럼 연도 없는 글은 날짜 없음)·직종명·진행상황(지원마감). robots.txt 404"
+}

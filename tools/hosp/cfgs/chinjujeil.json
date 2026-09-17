@@ -1,0 +1,13 @@
+{
+ "name": "제일병원",
+ "type": "html",
+ "url": "http://chinjujeil.co.kr/information/recurit/",
+ "base": "http://chinjujeil.co.kr/information/recurit",
+ "row": "<tr class='list'>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\?pg=\\d+&amp;no=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\?pg=\\d+&amp;no=\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "이력서|자기소개서|반환|고지|합격자|발표|결과",
+ "single": "posted",
+ "note": "진주 제일병원(chinjujeil.co.kr · www. 붙이면 TLS 오류라 http 로). 채용정보 게시판(iez ez_board). 공지 2건(이력서 양식·서류반환 고지)은 skip. 날짜는 등록일 하나. robots: Crawl-delay 60 만 있고 Disallow 없음"
+}

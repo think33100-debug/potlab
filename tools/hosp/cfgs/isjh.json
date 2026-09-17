@@ -1,0 +1,13 @@
+{
+ "name": "서산중앙병원",
+ "type": "html",
+ "url": "https://www.isjh.co.kr/careers_3",
+ "base": "https://www.isjh.co.kr",
+ "row": "<a class=\"rp-tr\"[\\s\\S]*?<\\/a>",
+ "title": "<span class=\"title dotdotdot\">\\s*<b>([\\s\\S]*?)<\\/b>",
+ "link": "href=\"(\\/careers_3\\/view\\/\\d+)",
+ "date": "rp-td-date\">\\s*<span>(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "양식|합격자|발표|결과",
+ "single": "posted",
+ "note": "아임웹류 CMS(rp-tr div 표). 채용정보>채용공고(careers_3). 번호·제목·작성자·등록일·조회·채용기간(「채용시 마감」 라벨). 등록일 하나. robots: /root/ 만 Disallow"
+}

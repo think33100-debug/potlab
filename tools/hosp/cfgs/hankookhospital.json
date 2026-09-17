@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 혜인의료재단 한국병원",
+ "type": "html",
+ "url": "https://www.hankookhospital.co.kr/bbs/board.php?bo_table=recruit",
+ "base": "https://www.hankookhospital.co.kr",
+ "row": "<li class=\"[^\"]*\">\\s*<div class=\"td td-no[\\s\\S]*?<\\/li>",
+ "title": "<span class=\"cate\">[^<]*<\\/span>\\s*([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(https:\\/\\/www\\.hankookhospital\\.co\\.kr\\/recruit\\/[^\"]+)\"",
+ "date": "td-date\">[\\s\\S]*?(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "\\(마감\\)|양식|합격자|발표|결과",
+ "single": "posted",
+ "note": "제주 한국병원(제주시 서광로) 그누보드5 ul/li 목록. 카테고리(진행중/마감)가 제목 앞 span 이라 그 뒤만 제목으로. 마감 글은 li 에 closed 클래스·제목에 (마감). 상세 주소는 /recruit/<한글슬러그>/ 형식. 작성일 하나. robots: /adm /cs /rsv 등만 Disallow"
+}

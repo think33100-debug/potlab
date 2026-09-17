@@ -1,0 +1,14 @@
+{
+ "name": "동아병원",
+ "type": "html",
+ "url": "https://dongahospital.co.kr/bbs/board.php?bo_table=0403",
+ "base": "https://dongahospital.co.kr",
+ "row": "<tr class=\" text-center\">[\\s\\S]*?<\\/tr>",
+ "title": "<span class=\"sub\">([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(https:\\/\\/dongahospital\\.co\\.kr[^\"]*wr_id=\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "마감|양식|지원서|반환|합격|발표",
+ "single": "posted",
+ "note": "광주 남구 동아병원(관절전문). 그누보드. 공지 행(bo_notice)은 양식·반환청구서라 일반 행만 잡음. 날짜는 등록일(DATE : 2026.09.04) 하나. 마감되면 제목에 (마감) 붙임. 링크는 :443 포함 절대주소. robots Allow /.",
+ "off": "구글 서버에서 못 엶(HTTP 200) 2026-09-17 · 컴퓨터에서는 열림"
+}

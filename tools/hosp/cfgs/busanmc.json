@@ -1,0 +1,13 @@
+{
+ "name": "부산광역시의료원",
+ "type": "html",
+ "url": "https://www.busanmc.or.kr/busanmc/index.php?pCode=recruit",
+ "base": "https://www.busanmc.or.kr",
+ "row": "<tr class=\"child_\\d+\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href='\\/busanmc\\/index\\.php\\?pCode=recruit&mode=view&idx=\\d+' ><span>([\\s\\S]*?)<\\/span>",
+ "link": "href='(\\/busanmc\\/index\\.php\\?pCode=recruit&mode=view&idx=\\d+)'",
+ "date": "<td class=\"f-date date\"><p>(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/p>",
+ "skip": "합격자|발표|면접일정|안내",
+ "single": "posted",
+ "note": "부산의료원 채용정보(index.php?pCode=recruit). 표: 번호·제목(진행/완료 상태 뱃지)·작성자·등록일. 링크는 작은따옴표 href. 등록일 1개(posted, 마감은 본문·첨부). 합격자 발표·면접 안내 글 skip. robots: 'User-agent : *' 줄이 공백 포함이라 형식 불량, Disallow 는 /_* 자원 폴더뿐 → 게시판 허용"
+}

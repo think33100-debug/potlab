@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 인화재단 한국병원",
+ "type": "html",
+ "url": "http://www.hanhsp.co.kr/Sub05/Sub05_12.asp?ModuleID=6",
+ "base": "http://www.hanhsp.co.kr",
+ "row": "<td align=\"center\" class=\"num\">(?:<img[^>]*>|\\d+)<\\/td>\\s*<td align=\"left\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href='[^']*Srno=\\d+'[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "Srno=(\\d+)'",
+ "linkFmt": "http://www.hanhsp.co.kr/Sub05/Sub05_12.asp?ModuleID=6&Mode=V&Srno={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "청주 한국병원(hanhsp.co.kr · http 만). ASP 게시판 · HTML 이 깨져 있어(<tr> 여는 태그가 대부분 없음) 번호 셀부터 </tr> 까지를 한 줄로 잡음. 공지 행(상단)과 일반 행이 같은 Srno 로 중복 → 주소로 중복 제거 필요. 제목에 [모집]/[마감] 표시. 등록일 하나(posted). 인코딩 UTF-8. robots: /admin/ 과 이미지만 차단"
+}

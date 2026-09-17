@@ -1,0 +1,14 @@
+{
+ "name": "의료법인한마음의료재단 여수제일병원",
+ "type": "html",
+ "url": "https://jeilhp.com/recruit",
+ "base": "https://jeilhp.com",
+ "row": "<tr class=\"notice\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"https:\\/\\/jeilhp\\.com\\/recruit\\/[^\"]+\"[^>]*class=\"title_text\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(https:\\/\\/jeilhp\\.com\\/recruit\\/[^\"]+)\"",
+ "date": "column-created_at\" title=\"(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "양식|합격자|발표|결과",
+ "single": "posted",
+ "note": "XE3 게시판. 공지·일반 행 모두 tr.notice. 글이 「직원 상시 채용공고」 1건뿐이고 상세에 직종별 내용. 날짜는 등록일 하나. robots Allow /",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

@@ -1,0 +1,11 @@
+{
+ "name": "양산성모병원",
+ "type": "html",
+ "url": "https://www.yangsansm.com/recruit",
+ "base": "https://www.yangsansm.com",
+ "row": "<tr class=\"group[^\"]*\">[\\s\\S]*?<\\/tr>",
+ "title": "<div class=\"bo_tit[^\"]*\">\\s*<a href=\"[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(https:\\/\\/www\\.yangsansm\\.com\\/recruit\\/\\d+)\"",
+ "skip": "합격자|발표|결과",
+ "note": "양산성모병원(구 웅상중앙병원) 채용공고. 그누보드 기반 tailwind 표(tr.group). 제목 div.bo_tit > a href=/recruit/N. 날짜가 「09-15」 처럼 연도 없이 나와 date 를 안 잡음(제목·링크만). robots * Allow /."
+}

@@ -1,0 +1,15 @@
+{
+ "name": "의료법인 중앙의료재단 중앙병원",
+ "type": "html",
+ "url": "https://www.jeju-jungangh.com/kor/wpbbs/list.php?wpboard=recruit",
+ "base": "https://www.jeju-jungangh.com",
+ "row": "<tr>\\s*<td class=\"wpb_num\">[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"wpb_title\"><a href=\"view\\.php\\?wpboard=recruit&amp;bno=\\d+[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"view\\.php\\?wpboard=recruit&amp;bno=(\\d+)",
+ "linkFmt": "https://www.jeju-jungangh.com/kor/wpbbs/view.php?wpboard=recruit&bno={1}",
+ "date": "<td class=\"wpb_date\">(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "\\(마감\\)|합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "제주 중앙병원(웹플랜 wpbbs). 표: 번호·제목·작성자·파일·작성일·조회. 마감되면 제목에 (마감) 붙임 → skip. 등록일 하나. robots 는 관리자·팝업 경로만 Disallow",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

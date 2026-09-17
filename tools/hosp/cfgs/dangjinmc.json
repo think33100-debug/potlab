@@ -1,0 +1,14 @@
+{
+ "name": "당진종합병원",
+ "type": "html",
+ "url": "http://www.dangjinmc.co.kr/ds7_4_1.html",
+ "enc": "EUC-KR",
+ "base": "http://www.dangjinmc.co.kr",
+ "row": "<tr align='center' height='27'[\\s\\S]*?<\\/tr>",
+ "title": "<a href='\\/ds7_4_1\\.html\\?db=ds7_4_1&no=\\d+&c=view[^']*'[^>]*>\\s*<font[^>]*>([\\s\\S]*?)<\\/font>",
+ "link": "href='(\\/ds7_4_1\\.html\\?db=ds7_4_1&no=\\d+&c=view[^']*)'",
+ "date": "<td>(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/td>",
+ "skip": "양식|입사지원서|합격자|발표|결과",
+ "single": "posted",
+ "note": "EUC-KR 자체(duri) 게시판 「채용소식」. 표: [공지]·제목·등록일·조회. 2026-09 기준 공지 2건뿐(부서별 간호사 채용모집 등, 상시) 이고 일반 글은 없음 — 잡코리아 공고가 홈페이지엔 안 올라옴. http 만. robots.txt 없음(접속 불가)"
+}

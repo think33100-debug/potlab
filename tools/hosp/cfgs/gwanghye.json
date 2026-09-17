@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 광혜의료재단 광혜병원",
+ "type": "html",
+ "url": "https://www.gwanghyehospital.com/bbs/board.php?bo_table=K050500",
+ "base": "https://www.gwanghyehospital.com",
+ "row": "<li[^>]*>\\s*<span class=\"selectButton\">[\\s\\S]*?<\\/li>",
+ "title": "<span class=\"subject\">([\\s\\S]*?)<\\/span>\\s*<span class=\"name\">",
+ "link": "wr_id=(\\d+)",
+ "linkFmt": "https://www.gwanghyehospital.com/bbs/board.php?bo_table=K050500&wr_id={1}",
+ "date": "<span class=\"date\">(20\\d{2}-\\d{2}-\\d{2})<\\/span>",
+ "skip": "합격자|발표|결과|양식",
+ "note": "그누보드 계열 li 목록. 공지글이 위(공지)와 아래(일반 목록)에 두 번 나와 같은 wr_id 가 중복될 수 있음. 제목 앞에 '공지 ' 가 붙음. 날짜는 등록일 하나(posted). 상세 board.php?bo_table=K050500&wr_id=N GET 200.",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

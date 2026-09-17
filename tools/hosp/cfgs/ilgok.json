@@ -1,0 +1,13 @@
+{
+ "name": "광주일곡병원",
+ "type": "html",
+ "url": "https://www.ilgok.co.kr/Module/Board/Board.asp?ModuleID=2",
+ "base": "https://www.ilgok.co.kr",
+ "row": "<td class=\"tbl-el-none p-color02\">\\d+<\\/td>[\\s\\S]*?<span class=\"\">20\\d{2}-\\d{2}-\\d{2}<\\/span>",
+ "title": "<a href='\\/Module\\/Board\\/Board\\.asp[^']*Mode=V[^']*'[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href='(\\/Module\\/Board\\/Board\\.asp[^']*Mode=V[^']*)'",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "지원서|양식|합격|발표",
+ "single": "posted",
+ "note": "글이 2개뿐(입사지원서 양식 2026-07, 「2026년 간호사 모집 안내」 작성일 2022-10-06). 게시판이 거의 안 쓰임 — 실제 공고는 사람인·잡코리아·사랑방에 올림. 작성일이 span 과 td 에 두 번 나와 첫 span 까지만 블록으로 잡음. robots Allow /. 상세 &Mode=V&IDX=N"
+}

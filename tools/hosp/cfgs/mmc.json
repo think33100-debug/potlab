@@ -1,0 +1,14 @@
+{
+ "name": "경상남도마산의료원",
+ "type": "html",
+ "url": "https://www.mmc.or.kr/board/list?id=12&menuId=112",
+ "base": "https://www.mmc.or.kr",
+ "row": "<td class=\"subject\">\\s*<a target=\"_self\" href=\"\\/board\\/view[^\"]*\">[\\s\\S]*?<\\/tr>",
+ "title": "<strong>([\\s\\S]*?)<\\/strong>\\s*<\\/a>",
+ "link": "\\/board\\/view[^\"]*\\?id=(\\d+)",
+ "linkFmt": "https://www.mmc.or.kr/board/view?id={1}&boardConfigId=12&menuId=112",
+ "date": "data-name=\"(?:작성일|마감일)\">(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|친인척|현황|양식",
+ "note": "마산의료원 채용정보 게시판(boardConfigId=12). 표: 번호·구분(접수중/마감)·제목·작성일·마감일·첨부·조회. 접수마감 행은 링크 없이 onclick alert 라 row 를 subject 셀의 a[href=/board/view] 로 시작해 접수중 행만 잡음. 링크에 ;jsessionid 가 붙어 id 만 잡아 linkFmt 로 조립. 날짜 둘(작성일→from, 마감일→to). [공지] 친인척 채용인원 글은 skip. robots.txt: Googlebot 만 /board/ 차단, * 규칙 없음.",
+ "off": "구글 서버에서 못 엶(HTTP 0 Address unavailable) 2026-09-17 · 컴퓨터에서는 열림"
+}

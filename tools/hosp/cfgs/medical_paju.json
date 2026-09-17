@@ -1,0 +1,14 @@
+{
+ "name": "경기도의료원파주병원",
+ "type": "html",
+ "url": "https://www.medical.or.kr/front/boardList.do?brd_mgrno=253&menu_no=850",
+ "base": "https://www.medical.or.kr",
+ "row": "<tr>\\s*<td class=\"number\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"title\">\\s*<a href=\"javascript:fView\\('\\d+'\\)\">\\s*([\\s\\S]*?)<\\/a>",
+ "link": "fView\\('(\\d+)'\\)",
+ "linkFmt": "https://www.medical.or.kr/front/boardView.do?brd_mgrno=253&menu_no=850&brd_no={1}",
+ "date": "<td>(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|안내|현황|면접",
+ "single": "posted",
+ "note": "경기도의료원 공통 CMS(/front/boardList.do). 표: 번호·제목·글쓴이·날짜·조회. 링크는 JS fView('brd_no') 로 POST 하지만 GET boardView.do?brd_mgrno=253&menu_no=850&brd_no=N 도 200 이라 linkFmt 로 조립. 날짜는 등록일 하나뿐. robots.txt 없음(404). 면접·응시현황 안내 글이 섞여 있어 skip 에 포함"
+}

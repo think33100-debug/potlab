@@ -1,0 +1,12 @@
+{
+ "name": "안동성소병원",
+ "type": "html",
+ "url": "https://sungso.com/bj_board/bjbrd_list.htm?board_id=0505",
+ "enc": "EUC-KR",
+ "base": "https://sungso.com/bj_board",
+ "row": "<tr height=25>[\\s\\S]*?<\\/tr>",
+ "title": "<td><a href=\"bjbrd_view\\.htm\\?board_id=0505[^\"]*num=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(bjbrd_view\\.htm\\?board_id=0505[^\"]*num=\\d+)\"",
+ "skip": "합격자|발표|결과|\\[마감\\]|채용마감",
+ "note": "홈페이지(sungso.com · EUC-KR) 채용공고 게시판 board_id=0505 (자체 bj_board). 표: 번호·제목·글쓴이·날짜(26.08.20 두 자리 연도 → 날짜 못 잡음)·조회. 제목 앞에 [채용중] 표시. 상세 bjbrd_view.htm?board_id=0505&...&num=N. robots: * Allow /"
+}

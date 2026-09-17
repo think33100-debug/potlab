@@ -1,0 +1,13 @@
+{
+ "name": "학교법인 을지학원 대전을지대학교병원",
+ "type": "html",
+ "url": "https://www.emc.ac.kr/info/info_pg06_04.jsp",
+ "base": "https://www.emc.ac.kr",
+ "row": "<tr>\\s*(?:<!--[^>]*-->\\s*)?<td>\\d+<\\/td>\\s*<td class=\"td_al\"><a href=\"\\/info\\/info_pg06_05\\.jsp\\?board_code=BOARD_4&board_sequence=\\d+\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/info\\/info_pg06_05\\.jsp[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "<td>\\s*(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})\\s*<\\/td>",
+ "skip": "합격자|발표|결과|\\[마감\\]",
+ "single": "posted",
+ "note": "대전을지대학교병원(emc.ac.kr) 인재채용 목록. 의정부(uemc.json)와 같은 을지 CMS 이나 열이 번호·제목·(빈칸)·등록일·조회 로 단순함. 행 첫머리에 HTML 주석(XSS 조치 메모)이 있어 row 에서 허용. 마감된 글은 제목에 [마감] 이 붙어 skip. 등록일 1개(posted). 입사지원은 을지통합채용시스템(eams.eulji.net). robots: * Allow / (/emc_manage 만 차단)"
+}

@@ -1,0 +1,12 @@
+{
+ "name": "인천힘찬종합병원",
+ "type": "html",
+ "url": "https://himchangeneral.com/05_community/community_list.php?board_type=community06",
+ "base": "https://himchangeneral.com",
+ "row": "<tr>\\s*(?:<!--[^>]*-->\\s*)*<td>\\s*\\d+\\s*<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/05_community\\/community_view\\.php\\?board_type=community06&amp;no=\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/05_community\\/community_view\\.php\\?board_type=community06&amp;no=\\d+[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "홈페이지 인재채용 게시판(community06). 표: 번호·제목·기간(YYYY-MM-DD ~ YYYY-MM-DD). <tr> 뒤에 HTML 주석이 있어 row 에서 허용. robots(2026-09 신설): /adm/ 등만 Disallow · Crawl-delay 2."
+}

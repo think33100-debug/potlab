@@ -1,0 +1,8 @@
+{
+ "name": "서울특별시 동부병원",
+ "type": "appsite",
+ "host": "https://dbhosp.recruiter.co.kr",
+ "sn": 1900,
+ "settingType": "C",
+ "note": "홈(dbhosp.go.kr)의 채용 링크가 마이다스 구형 appsite(dbhosp.recruiter.co.kr)로 감. index 의 hidden id=appsiteSn 1900 · settingType C. getMainView JSON 의 jobnoticeInProgressList 에 applyStartDate/applyEndDate/receiptState 있음. robots: * Disallow / 이지만 Allow /appsite/ 로 허용."
+}

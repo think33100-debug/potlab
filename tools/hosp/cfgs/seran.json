@@ -1,0 +1,13 @@
+{
+ "name": "세란병원",
+ "type": "html",
+ "url": "https://www.seran.co.kr/index.php/board/list/recruit/70",
+ "base": "https://www.seran.co.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/index\\.php\\/board\\/view\\/recruit\\/70\\/\\d+[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/index\\.php\\/board\\/view\\/recruit\\/70\\/\\d+[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|지원서 다운로드",
+ "single": "posted",
+ "note": "「채용 및 대외공고」 게시판(id=listtable). 표: 번호·제목·등록일. 공지(지원서 다운로드) 행은 번호가 div 라 row 에서 제외. 등록일 하나뿐 → posted. robots: Allow / · Crawl-delay 3600 이라 하루 1회 정도만."
+}

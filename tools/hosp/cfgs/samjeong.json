@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 은성의료재단 좋은삼정병원",
+ "type": "html",
+ "url": "http://www.sam-jeong.or.kr/samjeong/board/list.do?mId=67",
+ "base": "http://www.sam-jeong.or.kr/samjeong/board",
+ "row": "<div class=\"recruitment\">[\\s\\S]*?<\\/a>\\s*<\\/div>",
+ "title": "<strong class=\"title\">\\s*<span>([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(view\\.do\\?mId=67&brdIdx=\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "deadline",
+ "note": "자체 CMS 채용정보(div.recruitment 카드). 접수기간 「YYYY.MM.DD 까지」(마감 1개) 또는 「채용시 까지」(날짜 없음). 상대 링크 view.do 라 base 를 /samjeong/board 까지 둠. http 만(https 없음). robots * 는 mId=172 만 차단."
+}

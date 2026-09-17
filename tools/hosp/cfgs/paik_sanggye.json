@@ -1,0 +1,13 @@
+{
+ "name": "인제대학교 상계백병원",
+ "type": "html",
+ "url": "https://www.paik.ac.kr/sanggye/user/job/list.do?menuNo=700029",
+ "base": "https://www.paik.ac.kr",
+ "row": "<td class=\"tal\"><a href=\"javascript:view\\('\\d+'\\);\">[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "view\\('(\\d+)'\\)",
+ "linkFmt": "https://www.paik.ac.kr/recruit/user/job/view.do?menuNo=2400004&jobId={1}",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "인제대 백병원 공통 CMS(부산백병원 paik.json 과 같은 구조, sanggye 경로·menuNo=700029). view(id) 는 form item(POST /recruit/user/job/view.do, jobId) 제출이나 GET 으로도 200. 접수기간 '2026-09-14 ~ 2026-09-27'. robots: * Allow."
+}

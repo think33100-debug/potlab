@@ -1,0 +1,14 @@
+{
+ "name": "동국대학교일산불교병원",
+ "type": "html",
+ "url": "http://www.dumc.or.kr/hospital/recruit/hospitalRecruitList.jsp?nowPageInfo=ILSH&nowMenuId=00000130",
+ "enc": "EUC-KR",
+ "base": "http://www.dumc.or.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"javascript:fnView\\([^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "fnView\\('(\\d+)'",
+ "linkFmt": "http://www.dumc.or.kr/hospital/recruit/hospitalRecruitView.jsp?nowPageInfo=ILSH&nowMenuId=00000130&SEQNO={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "동국대일산병원 채용공고(EUC-KR). https 는 TLS 핸드셰이크 실패라 http 로 받음. 표: 번호·구분(진행/종료)·제목·지원기간(시작~마감). 종료 글은 fnView 가 alert 만 띄우지만 SEQNO 로 직접 열면 200. 상세 SEQNO=N"
+}

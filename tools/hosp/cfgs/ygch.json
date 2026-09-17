@@ -1,0 +1,14 @@
+{
+ "name": "의료법인거명의료재단 영광기독병원",
+ "type": "html",
+ "url": "https://www.ygch.co.kr/?page_id=3917",
+ "base": "https://www.ygch.co.kr",
+ "row": "<td class=\"kboard-list-uid\">[\\s\\S]*?<span class=\"contents-item kboard-date\">20\\d{2}\\.\\d{2}\\.\\d{2}<\\/span>",
+ "title": "<a href=\"\\/\\?page_id=3917&mod=document&uid=\\d+\">\\s*<div class=\"kboard-default-cut-strings\">([\\s\\S]*?)<span",
+ "link": "href=\"(\\/\\?page_id=3917&mod=document&uid=\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "마감|양식|서식|합격|발표|자원봉사",
+ "single": "posted",
+ "note": "영광기독병원(ygch.co.kr) 워드프레스 KBoard 「채용안내」. 작성일이 모바일 span 과 td 에 두 번 나오므로 첫 span 까지만 블록으로 잡아 날짜 하나(작성일). 공지 행([상시모집] 간호사·입사지원서식)과 번호 행 모두 잡고 서식은 skip. 2026-09 에도 글 올림. robots Allow /. 상세 /?page_id=3917&mod=document&uid=N",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

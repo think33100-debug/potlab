@@ -1,0 +1,13 @@
+{
+ "name": "영남대학교의과대학부속영천병원",
+ "type": "html",
+ "url": "https://yumc.ac.kr:8443/bbs/List.do?bbsId=news5",
+ "base": "https://yumc.ac.kr:8443",
+ "row": "<td class=\"t_left\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href='[^']*wr_id=\\d+'>([\\s\\S]*?)<\\/a>",
+ "link": "href='([^']*wr_id=\\d+)'",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "영남대학교영천병원 홈페이지(yumc.ac.kr:8443) 병원소개 > 채용정보 게시판(bbsId=news5). 표: 번호·제목·작성자·작성일·상태(진행/마감). 작성일 하나 = 올린 날. 상태 「마감」 은 제목에 없어 목록에서 못 거름. 링크는 작은따옴표 href. 영남대학교병원 본원은 별도 채용사이트(yumc_10/20.json). robots: Allow /medical/, Disallow /data/rules/ 만"
+}

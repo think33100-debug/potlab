@@ -1,0 +1,14 @@
+{
+ "name": "국립암센터",
+ "type": "html",
+ "url": "https://www.ncc.re.kr/board.ncc?uri=notice06&searchKey=total&searchValue=&pageNum=1",
+ "base": "https://www.ncc.re.kr",
+ "row": "<tr>\\s*<td class=\"td_title\">[\\s\\S]*?<\\/tr>",
+ "title": "onclick=\"fncView\\(\\d+\\);\">([\\s\\S]*?)<\\/a>",
+ "link": "fncView\\((\\d+)\\)",
+ "linkFmt": "https://www.ncc.re.kr/boardView.ncc?uri=notice06&ntcId={1}&searchKey=total&searchValue=&pageNum=1",
+ "date": "<td>(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|안내|현황",
+ "single": "posted",
+ "note": "자체 게시판(board.ncc uri=notice06 채용공고). 표: 제목·등록일. 링크는 JS fncView(ntcId) → boardView.ncc?uri=notice06&ntcId=N 으로 조립. 등록일 하나뿐. robots.txt 에 notice06 은 없음(다른 경로만 차단). 연구소·부속병원·청년인턴 공고가 함께 실림"
+}

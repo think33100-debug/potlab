@@ -1,0 +1,8 @@
+{
+ "name": "연세대학교 의과대학 용인세브란스병원",
+ "type": "appsite",
+ "host": "https://yuhs.recruiter.co.kr",
+ "sn": 4468,
+ "settingType": "A",
+ "note": "연세의료원 공동 채용사이트(마이다스 appsite, yi.severance.healthcare 채용 메뉴 → 채용(일반직) 링크). 신촌·강남·용인 공고가 한 목록에 섞이며 제목 접두어 [일반-신촌] [일반-강남] [용인] 으로 구분됨 → [용인] 만 골라 써야 함. 수련직/교원직은 yi.severance.healthcare/recruit/recruit.do 별도. getMainView 항목: jobnoticeSn·jobnoticeName·recruitClassName(용인)·applyStartDate·applyEndDate·receiptState. recruitClassName 이 '용인' 인 것만 쓰면 됨"
+}

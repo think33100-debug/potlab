@@ -1,0 +1,14 @@
+{
+ "name": "원광대학교 산본병원",
+ "type": "html",
+ "url": "https://www.wmcsb.co.kr/bbs/board.php?bo_table=hospnews_04",
+ "base": "https://www.wmcsb.co.kr",
+ "row": "<td class=\"td_subject\"[\\s\\S]*?<td class=\"td_datetime\">[^<]*<\\/td>",
+ "title": "<a href=\"[^\"]*bo_table=hospnews_04&amp;wr_id=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=hospnews_04&amp;wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "그누보드. 표: 번호·분류(모집공고)·제목·진행상태(진행중/마감)·작성자·조회·등록일. 등록일 하나뿐(마감은 본문). 진행중 글은 공지(bo_notice)로 위에 고정. robots: * Allow /",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

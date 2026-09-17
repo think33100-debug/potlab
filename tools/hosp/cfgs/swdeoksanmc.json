@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 덕산의료재단 수원덕산병원",
+ "type": "html",
+ "url": "https://www.swdeoksanmc.com/employ/recruit_notice/list.do",
+ "base": "https://www.swdeoksanmc.com/employ/recruit_notice",
+ "row": "<div class=\"list_bbs_title\">[\\s\\S]*?<\\/span>",
+ "title": "<a href=\"view\\.do\\?rc_idx=\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(view\\.do\\?rc_idx=\\d+)",
+ "linkFmt": "https://www.swdeoksanmc.com/employ/recruit_notice/{1}",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "채용정보센터(/employ). 항목: 직종·제목·「시작일시 ~ 상시채용」(또는 마감일시). 날짜 둘이면 from~to, 「상시채용」이면 시작일 하나 → posted. 상세 view.do?rc_idx=N"
+}

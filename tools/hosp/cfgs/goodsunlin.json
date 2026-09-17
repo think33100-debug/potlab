@@ -1,0 +1,12 @@
+{
+ "name": "의료법인은성의료재단좋은선린병원",
+ "type": "html",
+ "url": "http://www.goodsunlin.or.kr/sunlin/board/list.do?mId=67",
+ "base": "http://www.goodsunlin.or.kr/sunlin/board",
+ "row": "<div class=\"recruitment\">\\s*<a href=\"view\\.do\\?mId=67&brdIdx=\\d+\"[\\s\\S]*?<\\/a>",
+ "title": "<strong class=\"title\">\\s*<span>([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(view\\.do\\?mId=67&brdIdx=\\d+)\"",
+ "date": "(20\\d{2}[.\\-]\\d{1,2}[.\\-]\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "note": "좋은선린병원 홈페이지(goodsunlin.or.kr/sunlin · 좋은병원들 공통 CMS) 채용정보 카드 목록(div.recruitment). 카드: 진행상태(진행중)·제목·직종·접수기간(「채용시 까지」 면 날짜 없음, 날짜가 있으면 시작~마감)·조회. 「입사지원서 양식」 글은 양식 으로 skip. 상세 view.do?mId=67&brdIdx=N. https 없음(http). robots: * Allow / (samjeong 한 페이지만 금지)"
+}

@@ -1,0 +1,13 @@
+{
+ "name": "빌리브세웅병원",
+ "type": "html",
+ "url": "https://believesewoong.co.kr/board/recruit",
+ "base": "https://believesewoong.co.kr",
+ "row": "<li>\\s*<div class=\"tit\">[\\s\\S]*?<\\/li>",
+ "title": "<div class=\"tit\">\\s*<span>([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(\\/board\\/view\\/\\d+)\"",
+ "date": "<div class=\"date\">(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})<\\/div>",
+ "skip": "합격자|명단|양식|발표|결과",
+ "single": "posted",
+ "note": "빌리브세웅병원 채용정보(ul.g_board li). 제목 span·등록일·상세보기(/board/view/N). 등록일 1개(posted). 합격자 명단·양식 안내 글 skip. robots: /admin 만 차단"
+}

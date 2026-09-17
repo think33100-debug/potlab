@@ -1,0 +1,13 @@
+{
+ "name": "부산성모병원(재단법인 천주교부산교구유지재단)",
+ "type": "html",
+ "url": "https://www.bsm.or.kr/05_comm/0501.asp",
+ "base": "https://www.bsm.or.kr",
+ "row": "<tr>\\s*<td class=\"tac\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/05_comm\\/0501\\.asp\\?pmode=read&bbs_id=new_gg_bbs_jobs[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/05_comm\\/0501\\.asp\\?pmode=read&bbs_id=new_gg_bbs_jobs[^\"]*)\"",
+ "date": "<td class=\"tac\">(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "입사지원서|반환청구서|합격자|발표|결과",
+ "single": "deadline",
+ "note": "부산성모병원 채용정보(05_comm/0501.asp, bbs_id=new_gg_bbs_jobs). 표: 번호·제목·마감일시·상태(진행중/마감). 날짜는 마감일 하나(deadline) · 마감 칸이 빈 글은 날짜 없음(상시). 공지 고정 글(입사지원서·반환청구서)은 번호 칸이 숫자가 아니거나 제목으로 skip. robots: /06love/ /intranet/ /bsm_admin/ 만 차단"
+}

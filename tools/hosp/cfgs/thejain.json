@@ -1,0 +1,14 @@
+{
+ "name": "의료법인자인의료재단(더자인병원)",
+ "type": "html",
+ "url": "https://www.the-jain.co.kr/bbs/board.php?bo_table=ot",
+ "base": "https://www.the-jain.co.kr",
+ "row": "<div class=\"bl-list[^\"]*\">[\\s\\S]*?<div class=\"bl-mobile",
+ "title": "<span class=\"subj\">([\\s\\S]*?)<\\/span>",
+ "link": "href=\"([^\"]*bo_table=ot&amp;wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "고양 더자인병원 채용정보(그누보드 bo_table=ot, div.bl-list 행). 제목 span.subj · 날짜(등록일 하나) div.bl-item.text-gray. 홈페이지 게시판은 드물게 씀(최근 글 2024-12) → 사람인·잡코리아가 주. robots * Allow /.",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

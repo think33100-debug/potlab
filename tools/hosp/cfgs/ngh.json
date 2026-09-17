@@ -1,0 +1,13 @@
+{
+ "name": "나주종합병원",
+ "type": "html",
+ "url": "http://www.ngh.co.kr/cms/bbs/cms.php?dk_cms=comm_02",
+ "base": "http://www.ngh.co.kr",
+ "row": "<tr>\\s*<td scope=\"col\">\\s*\\d+\\s*<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"list\" title=\"([^\"]*)\"",
+ "link": "href='\\.\\.\\/bbs\\/(cms\\.php\\?dk_cms=comm_02&dk_id=\\d+)'",
+ "linkFmt": "http://www.ngh.co.kr/cms/bbs/{1}",
+ "skip": "마감|양식|합격|발표",
+ "note": "그누보드 계열 CMS. 목록 날짜가 월-일(09-01)뿐이라 연도 없음 → date 없음(날짜없음으로 들어감). 제목은 td title 속성(잘리지 않은 전문). 매달 「<2026년 9월 채용공고>」 식으로 올리고 지난 것은 [마감] 붙임. robots.txt 는 Yeti 만 /cms/bbs 금지, * 규칙 없음. 상세 /cms/bbs/cms.php?dk_cms=comm_02&dk_id=N",
+ "off": "구글 서버에서 못 엶(HTTP 0 Timeout) 2026-09-17 · 컴퓨터에서는 열림"
+}

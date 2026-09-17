@@ -1,0 +1,13 @@
+{
+ "name": "부천우리병원",
+ "type": "html",
+ "url": "https://urimedi.com/bbs/board.php?bo_table=Recruit",
+ "base": "https://urimedi.com",
+ "row": "<td class=\"td_subject\"[\\s\\S]*?<td class=\"td_datetime\">[^<]*<\\/td>",
+ "title": "<a href=\"[^\"]*bo_table=Recruit&amp;wr_id=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=Recruit&amp;wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "그누보드. 날짜는 등록일(td_datetime) 하나. robots: Yeti 만 명시. 마지막 글 2025-08 이라 갱신 드묾"
+}

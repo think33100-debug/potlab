@@ -1,0 +1,12 @@
+{
+ "name": "의료법인 서명의료재단 세명종합병원",
+ "type": "html",
+ "url": "https://www.smhospital.kr/front/info/recruit1.php",
+ "base": "https://www.smhospital.kr",
+ "row": "<tr(?: class=\"crucial\")?>\\s*<td[^>]*>(?:공지|\\d+)<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=['\"]\\/front\\/info\\/view\\.php\\?no=\\d+['\"]>([\\s\\S]*?)<\\/a>",
+ "link": "href=['\"](\\/front\\/info\\/view\\.php\\?no=\\d+)['\"]",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "경산 세명종합병원(smhospital.kr · 창원 진해 세명병원 smhospital.co.kr 과 다른 곳) 병원안내 > 인재채용 > 채용공고 표: 번호·구분·직종·제목·접수기간(2026-08-26 ~ 2026-10-25 두 날짜 · 없으면 「 ~ 」)·진행현황(접수중/마감 · 제목엔 없음)·조회. 공지행(tr.crucial)이 일반행과 중복. 링크는 따옴표가 섞임(\" 와 '). 상세 /front/info/view.php?no=N. robots: * Allow /"
+}

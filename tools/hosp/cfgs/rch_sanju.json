@@ -1,0 +1,11 @@
+{
+ "name": "상주적십자병원",
+ "type": "html",
+ "url": "https://www.rch.or.kr/web/rchsanju/bbs/employment",
+ "base": "https://www.rch.or.kr",
+ "row": "<tr class=\"mb-3 lg:mb-0 text-left\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/web\\/rchsanju\\/bbs\\/employment\\/\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/web\\/rchsanju\\/bbs\\/employment\\/\\d+)",
+ "skip": "합격자|발표|결과|공지",
+ "note": "대한적십자사 공통 CMS(rch.or.kr/web/rchsanju) · rch_seoul.json 과 같은 구조. 게시일자가 26-09-02 처럼 두 자리 연도라 date 비움 → 날짜 없음. 상세 /web/rchsanju/bbs/employment/N. robots: * Allow /."
+}

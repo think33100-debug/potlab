@@ -1,0 +1,13 @@
+{
+ "name": "의료법인현경의료재단 광양서울병원",
+ "type": "html",
+ "url": "https://www.gsh119.co.kr/bbs/board2",
+ "base": "https://www.gsh119.co.kr",
+ "row": "<tr[^>]*>\\s*<td class=\"no\">[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"subject\">\\s*<a href=\"[^\"]*board_code=board2[^\"]*idx=\\d+\">\\s*([^<]*(?:채용|모집)[^<]*)",
+ "link": "href=\"([^\"]*board_code=board2[^\"]*idx=\\d+)\"",
+ "date": "class=\"date inline\">(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "채용 게시판이 따로 없고 공지사항(bbs_shop board2)에 채용 글이 공지로 올라옴 → 제목에 채용|모집 있는 것만. 2026-09 기준 「2024 광양서울병원 간호사 채용 안내」(2022-12 등록·상시) 1건. 등록일 하나. m.gsh119.co.kr 도 같은 게시판. robots.txt 미확인(아임웹류)"
+}

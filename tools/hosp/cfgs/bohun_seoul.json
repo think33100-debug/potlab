@@ -1,0 +1,14 @@
+{
+ "name": "한국보훈복지의료공단 중앙보훈병원",
+ "type": "html",
+ "url": "https://www.bohun.or.kr/seoul/na/ntt/selectNttList.do?mi=32253&bbsId=1158",
+ "base": "https://www.bohun.or.kr",
+ "row": "<tr>\\s*<td class=\"(?:modNone|mPre)\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"javascript:\" data-id=\"\\d+\" class=\"nttInfoBtn\">([\\s\\S]*?)<\\/a>",
+ "link": "data-id=\"(\\d+)\"",
+ "linkFmt": "https://www.bohun.or.kr/seoul/na/ntt/selectNttInfo.do?mi=32253&nttSn={1}",
+ "date": "<em class=\"mTit\">등록일<\\/em>\\s*(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|안내",
+ "single": "posted",
+ "note": "보훈공단 공통 CMS(www.bohun.or.kr/seoul · 부산·대구보훈병원 cfg 와 같은 구조). seoul.bohun.or.kr 은 여기로 넘김. 표: 번호·제목·작성자·등록일·조회. 상단 고정(mPre 「공지」) 행은 상시채용 공고라 modNone 일반 행과 함께 잡음. 링크가 javascript: + data-id 라 linkFmt 로 selectNttInfo.do 조립. 등록일 하나(posted). 면접·필기전형 안내 글은 skip. robots: /seoul/na/ntt/ 허용"
+}

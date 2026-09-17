@@ -1,0 +1,12 @@
+{
+ "name": "재단법인예수병원유지재단예수병원",
+ "type": "html",
+ "url": "https://www.jesushospital.com/khospital/khospital01_04_01?lang=kor",
+ "base": "https://www.jesushospital.com",
+ "row": "<tr>\\s*<td style=\"text-align:center;\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/khospital\\/khospital01_04_01_post\\/\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/khospital\\/khospital01_04_01_post\\/\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})(?=[^<]*<\\/td>)",
+ "skip": "합격자|발표|결과|양식",
+ "note": "자체 게시판. 표: 번호·제목·모집기간(시작 ~ 종료)·조회수·상태(진행중/마감). robots User-agent:* 만 있고 Disallow 없음"
+}

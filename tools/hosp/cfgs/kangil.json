@@ -1,0 +1,13 @@
+{
+ "name": "강일병원",
+ "type": "html",
+ "url": "http://kang-il-hospital.co.kr/kr/index.php?pCode=notice02",
+ "base": "http://kang-il-hospital.co.kr",
+ "row": "<tr class=\"child_\\d+\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href='[^']*mode=view&idx=\\d+'\\s*><span>([\\s\\S]*?)<\\/span>",
+ "link": "href='([^']*pCode=notice02&mode=view&idx=\\d+)'",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "김해 강일병원 채용공고(pCode=notice02). 표: 번호·제목(a 작은따옴표 href > span)·작성자·등록일·조회. 글 2건. 등록일 하나. robots * Allow / (_Admin 등만 차단)."
+}

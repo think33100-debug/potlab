@@ -1,0 +1,13 @@
+{
+ "name": "비에이치에스한서병원",
+ "type": "html",
+ "url": "https://www.hanseohospital.or.kr/board/board.asp?gubun=4",
+ "base": "https://www.hanseohospital.or.kr/board",
+ "row": "<tr>\\s*<td align=\"center\" class=\"num\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href='BoardView\\.asp\\?Srno=\\d+[^']*'>([\\s\\S]*?)<\\/a>",
+ "link": "href='(BoardView\\.asp\\?Srno=\\d+[^']*)'",
+ "date": "<td align=\"center\" class=\"num\">(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "BHS한서병원 채용공고(board.asp?gubun=4 → boardList.asp 로 넘어감). ASP 표: 번호·제목·작성자·첨부·등록일·조회. 링크는 상대경로 BoardView.asp?Srno=N (&amp; 포함, abs 에서 풀림) 이라 base 를 /board 까지 둠. 등록일 1개(posted). robots.txt 는 404(IIS 오류 페이지)"
+}

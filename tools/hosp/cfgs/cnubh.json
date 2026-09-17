@@ -1,0 +1,8 @@
+{
+ "name": "빛고을전남대학교병원",
+ "type": "appsite",
+ "host": "https://cnuh.recruiter.co.kr",
+ "sn": 4978,
+ "settingType": "E",
+ "note": "빛고을전남대학교병원 홈페이지(cnubh.com sub.cs?m=165) 의 채용정보가 전남대학교병원 공용 마이다스 appsite(cnuh.recruiter.co.kr, appsiteSn 4978) 로 감. 공고명이 「전남대학교병원 직원 …」 「화순전남대학교병원 …」 식이라 빛고을 것만 따로 가려낼 수 없음(빛고을 인원은 본원 공고에 포함). 전남대학교병원 cfg 가 따로 있으면 중복이므로 하나만 켤 것."
+}

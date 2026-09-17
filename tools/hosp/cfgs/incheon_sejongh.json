@@ -1,0 +1,12 @@
+{
+ "name": "인천세종병원",
+ "type": "html",
+ "url": "https://incheon.sejongh.co.kr/recruit?cate1=178&cate2=321&html_mode=board&Depth=2",
+ "base": "https://incheon.sejongh.co.kr",
+ "row": "<tr class=\"[^\"]*\">\\s*<td class=\"td_num2 no-border\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"http:\\/\\/recruit\\.sejongh\\.co\\.kr\\/_page\\/notice\\/view\\?id=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(http:\\/\\/recruit\\.sejongh\\.co\\.kr\\/_page\\/notice\\/view\\?id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "인천세종병원 홈 채용안내 페이지가 세종병원그룹 채용사이트(recruit.sejongh.co.kr) 의 인천세종 공고를 서버에서 그려 줌(채용사이트 자체 목록 listIC 는 ajax 라 못 씀). 표: 번호·제목·접수기간(YYYY-MM-DD ~ YYYY-MM-DD). 상세는 recruit.sejongh.co.kr/_page/notice/view?id=N. robots: incheon * Allow / · recruit 는 robots 없음."
+}

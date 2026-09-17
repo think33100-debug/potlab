@@ -1,0 +1,13 @@
+{
+ "name": "광양사랑병원",
+ "type": "html",
+ "url": "http://www.gysarang.com/Module/MBoard/MBoard.asp?Page=1&PageSize=10&Gubun=21&Divide=Normal",
+ "base": "http://www.gysarang.com",
+ "row": "<tr align=\"center\">\\s*<td >\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href='\\/Module\\/MBoard\\/MBoard\\.asp\\?[^']*Srno=\\d+&PState=View'>([\\s\\S]*?)<\\/a>",
+ "link": "href='(\\/Module\\/MBoard\\/MBoard\\.asp\\?[^']*Srno=\\d+&PState=View)'",
+ "date": "<td >(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|\\[마감\\]|^마감\\)",
+ "single": "posted",
+ "note": "홈페이지 커뮤니티 > 채용정보 게시판(ASP, UTF-8, 한 줄 HTML). 표: 번호·제목·작성자·등록일·조회. 등록일 하나뿐. 마감된 글은 제목 앞에 [마감]/마감) 을 붙임. https 없음. robots 404."
+}

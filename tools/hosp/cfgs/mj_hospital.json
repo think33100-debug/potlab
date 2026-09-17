@@ -1,0 +1,13 @@
+{
+ "name": "의료법인목포구암의료재단 목포중앙병원",
+ "type": "html",
+ "url": "http://www.mj-hospital.co.kr/Module/Board/Board.asp?ModuleID=3",
+ "base": "http://www.mj-hospital.co.kr",
+ "row": "<td class=\"tbl-el-none p-color02\">(?:공지|\\d+)<\\/td>[\\s\\S]*?<span class=\"\">20\\d{2}-\\d{2}-\\d{2}<\\/span>",
+ "title": "<a href='\\/Module\\/Board\\/Board\\.asp[^']*Mode=V[^']*'[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href='(\\/Module\\/Board\\/Board\\.asp[^']*Mode=V[^']*)'",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "마\\s*감|양식|반환|합격|발표",
+ "single": "posted",
+ "note": "목포중앙병원(mj-hospital.co.kr). 일곡·미래로21·운암한국 과 같은 ASP CMS. 채용정보 ModuleID=3, 한 달에 여러 건 올림. 끝난 공고는 제목에 ( * 채용마감 * ) 또는 ( * 채 용 마 감 * ) 처럼 띄어 붙임 → 마\\s*감 으로 skip. 날짜는 작성일 하나. robots Disallow /admin/ 만. 상세 &Mode=V&IDX=N"
+}

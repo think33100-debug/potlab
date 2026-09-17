@@ -1,0 +1,12 @@
+{
+ "name": "인천광역시의료원",
+ "type": "html",
+ "url": "http://www.icmc.or.kr/med_info/med_info8.php?tsort=6&msort=80",
+ "base": "http://www.icmc.or.kr",
+ "row": "<tr>\\s*<td class=\"num\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"tit ?\"><a href='[^']*'>([\\s\\S]*?)<\\/a>",
+ "link": "href='(\\/med_info\\/med_info8\\.php[^']*mode=detail[^']*)'",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|현황|안내 공고",
+ "note": "자체 채용안내 게시판. 표: 번호·제목·파일·기간(YYYY-MM-DD~YYYY-MM-DD)·상태(진행/마감임박/마감). 「주요」 고정 행은 번호 행과 중복이라 번호 행만 잡음. 상태 칸은 제목에 없어 기간으로 판단. 첨부는 PDF. https 없음(http). robots: Disallow 가 /ap /co 등 접두어뿐이라 /med_info 는 허용."
+}

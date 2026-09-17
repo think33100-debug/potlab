@@ -1,0 +1,281 @@
+[
+ {
+  "name": "강원대학교병원",
+  "est": "공립",
+  "sido": "강원",
+  "sgg": "춘천시",
+  "pub": "공립(기타)",
+  "home": "http://www.knuh.or.kr",
+  "pubOrg": "교육부"
+ },
+ {
+  "name": "강원특별자치도강릉의료원",
+  "est": "공립",
+  "sido": "강원",
+  "sgg": "강릉시",
+  "pub": "공립(지방의료원)",
+  "home": "http://www.gnmc.or.kr",
+  "pubOrg": "강원특별자치도"
+ },
+ {
+  "name": "강원특별자치도삼척의료원",
+  "est": "공립",
+  "sido": "강원",
+  "sgg": "삼척시",
+  "pub": "공립(지방의료원)",
+  "home": "https://www.ksmc.or.kr/",
+  "pubOrg": "강원특별자치도"
+ },
+ {
+  "name": "강원특별자치도속초의료원",
+  "est": "공립",
+  "sido": "강원",
+  "sgg": "속초시",
+  "pub": "공립(지방의료원)",
+  "home": "http://www.sokchomc.co.kr",
+  "pubOrg": "강원특별자치도"
+ },
+ {
+  "name": "강원특별자치도영월의료원",
+  "est": "공립",
+  "sido": "강원",
+  "sgg": "영월군",
+  "pub": "공립(지방의료원)",
+  "home": "https://www.youngwol.org/",
+  "pubOrg": "강원특별자치도"
+ },
+ {
+  "name": "강원특별자치도원주의료원",
+  "est": "공립",
+  "sido": "강원",
+  "sgg": "원주시",
+  "pub": "공립(지방의료원)",
+  "home": "https://www.kwmc.or.kr/",
+  "pubOrg": "강원특별자치도"
+ },
+ {
+  "name": "근로복지공단 동해병원",
+  "est": "공립",
+  "sido": "강원",
+  "sgg": "동해시",
+  "pub": "공립(기타)",
+  "home": "www.comwel.or.kr/donghae",
+  "pubOrg": "고용노동부"
+ },
+ {
+  "name": "근로복지공단 태백병원",
+  "est": "공립",
+  "sido": "강원",
+  "sgg": "태백시",
+  "pub": "공립(기타)",
+  "home": "www.comwel.or.kr/taebaek",
+  "pubOrg": "고용노동부"
+ },
+ {
+  "name": "온재병원",
+  "est": "의료법인",
+  "sido": "강원",
+  "sgg": "속초시",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "의료법인 강릉동인병원",
+  "est": "의료법인",
+  "sido": "강원",
+  "sgg": "강릉시",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "의료법인 동해동인병원",
+  "est": "의료법인",
+  "sido": "강원",
+  "sgg": "동해시",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "의산의료재단 강릉고려병원",
+  "est": "의료법인",
+  "sido": "강원",
+  "sgg": "강릉시",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "한림대학교춘천성심병원",
+  "est": "학교법인",
+  "sido": "강원",
+  "sgg": "춘천시",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "홍천아산병원",
+  "est": "재단법인",
+  "sido": "강원",
+  "sgg": "홍천군",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "(의)영문의료재단 다보스병원",
+  "est": "의료법인",
+  "sido": "경기",
+  "sgg": "용인처인구",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "가톨릭대학교부천성모병원",
+  "est": "학교법인",
+  "sido": "경기",
+  "sgg": "부천원미구",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "가톨릭대학교의정부성모병원",
+  "est": "학교법인",
+  "sido": "경기",
+  "sgg": "의정부시",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "강남병원",
+  "est": "개인",
+  "sido": "경기",
+  "sgg": "용인기흥구",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "경기도의료원 수원병원",
+  "est": "공립",
+  "sido": "경기",
+  "sgg": "수원장안구",
+  "pub": "공립(지방의료원)",
+  "home": "www.medical.or.kr/suwon/index.do",
+  "pubOrg": "경기도"
+ },
+ {
+  "name": "경기도의료원 안성병원",
+  "est": "공립",
+  "sido": "경기",
+  "sgg": "안성시",
+  "pub": "공립(지방의료원)",
+  "home": "www.medical.or.kr/ansung/index.do",
+  "pubOrg": "경기도"
+ },
+ {
+  "name": "경기도의료원 이천병원",
+  "est": "공립",
+  "sido": "경기",
+  "sgg": "이천시",
+  "pub": "공립(지방의료원)",
+  "home": "www.medical.or.kr/icheon/index.do",
+  "pubOrg": "경기도"
+ },
+ {
+  "name": "경기도의료원의정부병원",
+  "est": "공립",
+  "sido": "경기",
+  "sgg": "의정부시",
+  "pub": "공립(지방의료원)",
+  "home": "www.medical.or.kr/uijeongbu/index.do",
+  "pubOrg": "경기도"
+ },
+ {
+  "name": "경기도의료원파주병원",
+  "est": "공립",
+  "sido": "경기",
+  "sgg": "파주시",
+  "pub": "공립(지방의료원)",
+  "home": "www.medical.or.kr/paju/index.do",
+  "pubOrg": "경기도"
+ },
+ {
+  "name": "경기도의료원포천병원",
+  "est": "공립",
+  "sido": "경기",
+  "sgg": "포천시",
+  "pub": "공립(지방의료원)",
+  "home": "www.medical.or.kr/pocheon/index.do",
+  "pubOrg": "경기도"
+ },
+ {
+  "name": "광명성애병원",
+  "est": "의료법인",
+  "sido": "경기",
+  "sgg": "광명시",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "국군수도병원",
+  "est": "군병원",
+  "sido": "경기",
+  "sgg": "성남분당구",
+  "pub": "군병원",
+  "home": "https://afmd.mnd.go.kr/mbshome/mbs/afmd/",
+  "pubOrg": "국방부"
+ },
+ {
+  "name": "국립암센터",
+  "est": "공립",
+  "sido": "경기",
+  "sgg": "고양일산동구",
+  "pub": "공립(기타)",
+  "home": "www.ncc.re.kr",
+  "pubOrg": "보건복지부"
+ },
+ {
+  "name": "국민건강보험공단일산병원",
+  "est": "공립",
+  "sido": "경기",
+  "sgg": "고양일산동구",
+  "pub": "공립(기타)",
+  "home": "www.nhimc.or.kr",
+  "pubOrg": "보건복지부"
+ },
+ {
+  "name": "근로복지공단안산병원",
+  "est": "공립",
+  "sido": "경기",
+  "sgg": "안산상록구",
+  "pub": "공립(기타)",
+  "home": "www.comwel.or.kr/ansan",
+  "pubOrg": "고용노동부"
+ },
+ {
+  "name": "남양주 한양병원",
+  "est": "의료법인",
+  "sido": "경기",
+  "sgg": "남양주시",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ },
+ {
+  "name": "대아의료재단한도병원",
+  "est": "의료법인",
+  "sido": "경기",
+  "sgg": "안산단원구",
+  "pub": "",
+  "home": "",
+  "pubOrg": ""
+ }
+]

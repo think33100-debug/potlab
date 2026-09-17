@@ -1,0 +1,14 @@
+{
+ "name": "창원한마음병원",
+ "type": "html",
+ "url": "https://recruit.hanheart.co.kr/02_recruit/01_recruit.php",
+ "base": "https://recruit.hanheart.co.kr",
+ "row": "<div class=\"item[^>]*>[\\s\\S]*?<\\/ul>",
+ "title": "<h4>([\\s\\S]*?)<\\/h4>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "deadline",
+ "note": "한마음의료원 채용사이트(recruit.hanheart.co.kr · 창원한마음·상남한마음 공고가 같이 올라옴). 카드 목록, 기간 「2026.09.16~2026.09.28」 두 날짜. 상시채용은 날짜 하나일 수 있어 single=deadline 은 보수적으로. 페이지가 11쪽까지 있으나 1쪽만 봄. 메인은 meta refresh 로 /main/main.php 로 감. robots.txt 없음(404)",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

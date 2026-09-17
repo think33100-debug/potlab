@@ -1,0 +1,12 @@
+{
+ "name": "학교법인)동의병원",
+ "type": "html",
+ "url": "https://www.demc.kr/05_plaza/?mcode=0405030000",
+ "base": "https://www.demc.kr",
+ "row": "<tr(?: class=\"bg\")?>\\s*<td class=\"num[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"link\"><a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "<td class=\"link\"><a href=\"([^\"]+)\"",
+ "date": "<td class=\"date\">(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과|서식|반환|안내$",
+ "note": "동의광장>채용정보. 날짜는 등록일 하나(posted). 주의: User-Agent 가 'Mozilla/5.0' 처럼 짧으면 999 를 돌려줌 · 브라우저형 UA 또는 Apps Script UA 로는 200. 공지줄(class=bg)에 서식·반환 안내가 섞여 skip."
+}

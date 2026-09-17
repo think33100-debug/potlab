@@ -1,0 +1,14 @@
+{
+ "name": "제주특별자치도 서귀포의료원",
+ "type": "html",
+ "url": "https://www.jjsmc.or.kr/bbs/board.php?bo_table=4_5_1_1",
+ "base": "https://www.jjsmc.or.kr",
+ "row": "<tr class=\"bg\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href='\\.\\.\\/bbs\\/board\\.php\\?bo_table=4_5_1_1&wr_id=\\d+'>([\\s\\S]*?)<\\/a>",
+ "link": "href='\\.\\.\\/bbs\\/board\\.php\\?bo_table=4_5_1_1&wr_id=(\\d+)'",
+ "linkFmt": "https://www.jjsmc.or.kr/bbs/board.php?bo_table=4_5_1_1&wr_id={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})(?=[^<]*<\\/td>)",
+ "skip": "합격자|발표|결과|양식|구비서류|결격사유",
+ "note": "그누보드4 표: 번호·제목(+hwp 첨부)·모집기간(시작 ~ 종료)·상태(진행/마감)·조회. 공지 3건(양식·서류·결격사유)은 skip. 답글(합격자 발표)도 skip. robots /adm/ 만 Disallow",
+ "off": "구글 서버에서 못 엶(HTTP 0 Timeout) 2026-09-17 · 컴퓨터에서는 열림"
+}

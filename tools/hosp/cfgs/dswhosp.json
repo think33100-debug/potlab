@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 녹산의료재단동수원병원",
+ "type": "html",
+ "url": "https://www.dswhosp.co.kr/support/recruit.php",
+ "base": "https://www.dswhosp.co.kr",
+ "row": "<li class=\"list_tr\">[\\s\\S]*?<\\/li>",
+ "title": "<div class=\"list_td list_subject\"><p class=\"only_m\">제목<\\/p>\\s*<p>([\\s\\S]*?)<\\/p>",
+ "link": "href=\"(\\/support\\/recruit\\.php\\?ptype=view&idx=\\d+[^\"]*)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "자체 PHP 게시판(li.list_tr). 제목 앞 [진행]/[마감] 표기. 날짜는 작성일 하나. robots: /admin/ /member/ /comm/ /consulting/ 만 차단",
+ "off": "구글 서버에서 못 엶(HTTP 406) 2026-09-17 · 컴퓨터에서는 열림"
+}

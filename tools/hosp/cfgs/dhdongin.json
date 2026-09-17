@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 동해동인병원",
+ "type": "html",
+ "url": "http://www.dhdongin.or.kr/Board/boardList.asp?Gubun=7&Key=&KeyWord=&page=1&pagesize=10",
+ "base": "http://www.dhdongin.or.kr/Board",
+ "row": "<tr>\\s*<td align=\"center\" class=\"num\">\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href='BoardView\\.asp\\?Srno=\\d+[^']*'>([\\s\\S]*?)<\\/a>",
+ "link": "href='(BoardView\\.asp\\?Srno=\\d+[^']*)'",
+ "date": "<td align=\"center\" class=\"num\">(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|안내",
+ "single": "posted",
+ "note": "동해동인병원 ASP 자체 게시판(Gubun=7 채용정보). /Board/Board.asp?Gubun=7 은 boardList.asp 로 302. 표: 번호·제목·작성자·첨부·등록일·조회. 링크 작은따옴표 상대경로(BoardView.asp?Srno=N&...) 라 base 를 /Board 까지 둠. 2026-09 현재 글 5건, 마지막 2020-05 로 오래됨 — 최근 공고는 사람인에 올리는 듯. http 만. robots.txt 없음"
+}

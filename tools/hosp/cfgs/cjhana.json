@@ -1,0 +1,14 @@
+{
+ "name": "의료법인한마음의료재단하나병원",
+ "type": "html",
+ "url": "https://www.cjhana.co.kr/board/board_list.php?board_name=recruit",
+ "base": "https://www.cjhana.co.kr",
+ "row": "<tr class=\"hover_list[^\"]*\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*view_id=\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "view_id=(\\d+)",
+ "linkFmt": "https://www.cjhana.co.kr/board/board_view.php?view_id={1}&board_name=recruit",
+ "date": "<td>(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "청주 하나병원 자체 PHP 게시판. 링크가 ../board/ 상대경로라 view_id 로 조립. 표: 번호·제목·작성자·등록일·조회. 공고가 드묾(연 1~2건, 신규간호사 위주). robots: /admin/ 만 차단"
+}

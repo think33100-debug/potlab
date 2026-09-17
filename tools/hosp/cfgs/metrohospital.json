@@ -1,0 +1,13 @@
+{
+ "name": "인산의료재단 메트로병원",
+ "type": "html",
+ "url": "http://www.metrohospital.co.kr/bbs_list.php?menu_number=527&tb=board_recruitment",
+ "base": "http://www.metrohospital.co.kr",
+ "row": "<table[^>]*onMouseOver[\\s\\S]*?bbs_rows_date\">[^<]*<\\/p>",
+ "title": "bbs_rows_title[^>]*>\\s*<a href=\"[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(bbs_detail\\.php\\?bbs_num=\\d+[^\"]*)\"",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "\\[마감\\]|합격자|발표|결과",
+ "single": "posted",
+ "note": "안양 메트로병원 채용공고 게시판. 위 갤러리 카드 3개는 빼고, 아래 표 행(table onMouseOver …)만 잡음. 행을 첫 bbs_rows_date p(접수기간 「시작 ~ 마감」 또는 「시작 ~ 」)까지로 잘라 등록일 p 는 제외. 제목 앞 [모집중]/[마감]. 임상시험 자원자 모집 글이 섞여 있음. robots * 는 /data/ /tpl/ 등만 차단."
+}

@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 자산의료재단 제천서울병원",
+ "type": "html",
+ "url": "http://www.seoulhp.co.kr/news/recruit/index.jsp",
+ "base": "http://www.seoulhp.co.kr",
+ "row": "<tr>\\s*<td class=\"none1000 num\">[\\s\\S]*?<\\/tr>",
+ "title": "<p class=\"mw100\">(?:\\s*<span class=\"noti_icon\">[^<]*<\\/span>)?([\\s\\S]*?)<\\/p>",
+ "link": "read\\.jsp\\?reqPageNo=\\d+&no=(\\d+)",
+ "linkFmt": "http://www.seoulhp.co.kr/news/recruit/read.jsp?reqPageNo=1&no={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "제천서울병원(seoulhp.co.kr · http 만). JSP 게시판 · 제목 셀 onclick location.href='read.jsp?…no=N' 으로 상세 조립. 공지 행은 제목 앞에 '공지' 글자가 붙음. 등록일 하나(posted). 게시판에 글이 2건뿐(2022~2023) → 실제 채용은 드물게 올라오는 듯. robots.txt 404"
+}

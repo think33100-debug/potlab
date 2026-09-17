@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 갈렌의료재단 박병원",
+ "type": "html",
+ "url": "https://www.parkmedical.co.kr/board/recruit",
+ "base": "https://www.parkmedical.co.kr",
+ "row": "<a class=\"group flex[^\"]*\" href=\"\\/board\\/recruit\\/\\d+\">[\\s\\S]*?<\\/a>",
+ "title": "<span[^>]*><span[^>]*>([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(\\/board\\/recruit\\/\\d+)\"",
+ "date": "<time[^>]*>(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/time>",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "PMC박병원 Next.js 홈페이지지만 목록이 서버에서 그려짐(li > a.group). 제목 span·등록일 time 하나. 상세 /board/recruit/N. robots: * Allow / (/api /admin 등만 차단)"
+}

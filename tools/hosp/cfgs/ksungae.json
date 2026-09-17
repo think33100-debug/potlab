@@ -1,0 +1,13 @@
+{
+ "name": "광명성애병원",
+ "type": "html",
+ "url": "https://www.ksungae.co.kr/square/recruitlist.do",
+ "base": "https://www.ksungae.co.kr",
+ "row": "<tr>\\s*<td class=\"center[^\"]*\">[\\s\\S]*?<\\/tr>",
+ "title": "<td><a href=\"\\/square\\/recruitview\\.do[^\"]*\">\\s*([\\s\\S]*?)\\s*<\\/a>",
+ "link": "href=\"(\\/square\\/recruitview\\.do\\?bid=\\d+)",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|안내",
+ "single": "posted",
+ "note": "광명성애병원 자체 게시판(성애광장 > 채용정보). 표: 번호(공지)·제목·등록일·마감일·첨부·조회. 날짜 둘(등록일→from, 마감일→to). 공지 행도 채용공고라 포함. 상세 /square/recruitview.do?bid=N. robots.txt: Allow / · Disallow /upload/ 만"
+}

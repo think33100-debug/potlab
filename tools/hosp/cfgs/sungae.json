@@ -1,0 +1,12 @@
+{
+ "name": "성애의료재단 성애병원",
+ "type": "html",
+ "url": "https://h.sungae.co.kr/square/recruitlist.do",
+ "base": "https://h.sungae.co.kr",
+ "row": "<tr>\\s*<td class=\"center seoul bold\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/square\\/recruitview\\.do[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/square\\/recruitview\\.do\\?bid=\\d+)",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "합격자|발표|결과|양식|일정|공지",
+ "note": "성애병원(영등포) 채용정보 게시판. 표: 번호·제목·등록일·마감일·첨부·조회수 → 날짜 둘(등록일, 마감일)이라 from=등록일 to=마감일. 제목에 [성애병원]/[광명성애병원] 접두어가 붙어 재단 공통 게시판일 수 있음(광명성애병원은 ksungae.co.kr 별도). 상세 /square/recruitview.do?bid=N. robots: * Allow / (Disallow /upload/)."
+}

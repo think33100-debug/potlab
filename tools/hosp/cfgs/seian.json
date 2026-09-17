@@ -1,0 +1,12 @@
+{
+ "name": "의료법인해민의료재단 세안종합병원",
+ "type": "html",
+ "url": "https://seian.kr/default/1004web/cc/c02.php",
+ "enc": "EUC-KR",
+ "base": "https://seian.kr",
+ "row": "<tr align='center' height='32' onclick=[\\s\\S]*?<\\/tr>",
+ "title": "<a href='\\/default\\/1004web\\/cc\\/c02\\.php\\?com_board_basic=read_form[^']*'>([\\s\\S]*?)<\\/a>",
+ "link": "href='(\\/default\\/1004web\\/cc\\/c02\\.php\\?com_board_basic=read_form[^']+)'",
+ "skip": "합격자|발표|결과|양식",
+ "note": "EUC-KR 자체 게시판(1004web). 표: 번호·제목·조회수 — 목록에 날짜가 없음(상세에서 확인). 링크는 &&가 겹친 형태 그대로 씀. robots Allow /"
+}

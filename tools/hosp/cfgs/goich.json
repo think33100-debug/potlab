@@ -1,0 +1,14 @@
+{
+ "name": "인천기독병원",
+ "type": "html",
+ "url": "https://www.goich.co.kr/bbs.html?code=bbs2",
+ "base": "https://www.goich.co.kr",
+ "row": "<tr onclick='goview\\(\\d+,\"bbs_view\\.html\"\\);'[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"txt-title\">([\\s\\S]*?)<\\/td>",
+ "link": "goview\\((\\d+),",
+ "linkFmt": "https://www.goich.co.kr/bbs_view.html?code=bbs2&bbsid={1}",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|\\(마감\\)|마감$",
+ "single": "posted",
+ "note": "홈페이지 인재채용 > 채용정보 게시판(bbs2). 행은 <tr onclick='goview(번호,\"bbs_view.html\")'> 이라 번호를 잡아 bbs_view.html?code=bbs2&bbsid=N 으로 조립. 표: 번호·제목·작성일(YYYY.MM.DD)·조회. 등록일 하나뿐(마감은 본문·제목의 「(11.28 마감)」). 마감된 글은 제목 끝에 「(마감)」 → skip. robots: Yeti 만 적혀 있고 * 규칙 없음."
+}

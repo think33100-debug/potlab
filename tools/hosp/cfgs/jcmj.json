@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 명지의료재단 명지병원",
+ "type": "html",
+ "url": "http://jcmj.co.kr/web/bbs/board.php?bo_table=d06",
+ "base": "http://jcmj.co.kr",
+ "row": "<tr class=\"[^\"]*\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*wr_id=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*wr_id=\\d+)\"",
+ "date": "class=\"td_datetime[^\"]*\"\\s*>\\s*(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식|입사지원서",
+ "single": "posted",
+ "note": "제천 명지병원(jcmj.co.kr · https 없음 · http 만). 그누보드. 한 행에 작성일이 두 번(모바일용 gall_date + td_datetime) 있어 td_datetime 것만 잡음(둘 다 잡으면 마감일로 오해). 공지(bo_notice) 행도 포함. robots.txt 는 302→404(없음)"
+}

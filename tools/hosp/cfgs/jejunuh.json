@@ -1,0 +1,13 @@
+{
+ "name": "제주대학교병원",
+ "type": "html",
+ "url": "https://www.jejunuh.co.kr/prog/rcrutPbanc/main/sub05_03_03_01/list.do",
+ "base": "https://www.jejunuh.co.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"javascript:fn_search_detail\\('\\d+'\\);\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "fn_search_detail\\('(\\d+)'\\)",
+ "linkFmt": "https://www.jejunuh.co.kr/prog/rcrutPbanc/main/sub05_03_03_01/view.do?rcrutPbancNo={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "제주대병원 홈페이지 채용공고(rcrutPbanc). 표: 번호·제목·상태(접수중/마감)·접수기간(시작 ~ 종료, 시각 포함). 공지 행(tr.notice)은 번호 행에도 다시 나와서 번호 행만 잡음(중복 방지). 상세는 JS 폼 POST 지만 view.do?rcrutPbancNo=N GET 도 200. /news/recruit/_/list.do 는 400. 인크루트(recruit.incruit.com/jejunuh)·마이다스(jejunuh.recruiter.co.kr) 채용사이트도 있으나 홈페이지 목록에 같이 올라옴. robots: /main/search.do, /proxy/api/ 만 Disallow"
+}

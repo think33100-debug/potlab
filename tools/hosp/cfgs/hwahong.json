@@ -1,0 +1,12 @@
+{
+ "name": "의료법인 명인의료재단 화홍병원",
+ "type": "html",
+ "url": "https://www.hwahonghospital.com/page/intro/news/hire.php",
+ "base": "https://www.hwahonghospital.com",
+ "row": "<article class=\"board-cont[^\"]*\">[\\s\\S]*?<\\/article>",
+ "title": "<h4>([\\s\\S]*?)<\\/h4>",
+ "link": "href=\"(\\/page\\/intro\\/news\\/hire_view\\.php\\?b_idx=\\d+)\"",
+ "skip": "합격자|발표|결과",
+ "note": "자체 PHP 카드형 게시판(article.board-cont). 날짜가 25-11-28 처럼 두 자리 연도라 못 뽑음(날짜 없음). 현재 글 1건(2026 신규간호사 모집)뿐 — 수시 채용은 사람인·너스케입에 올림. robots: * Allow /",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

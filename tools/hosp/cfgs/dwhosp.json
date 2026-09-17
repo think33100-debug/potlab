@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 플러스의료재단 단원병원",
+ "type": "html",
+ "url": "https://www.dwhosp.co.kr/bbs/board.php?bo_table=recruit",
+ "base": "https://www.dwhosp.co.kr",
+ "row": "<td class=\"subject\">[\\s\\S]*?<\\/td>\\s*<td>[^<]*<\\/td>",
+ "title": "<a href='[^']*bo_table=recruit&wr_id=\\d+'>([\\s\\S]*?)<\\/a>",
+ "link": "wr_id=(\\d+)'",
+ "linkFmt": "https://www.dwhosp.co.kr/bbs/board.php?bo_table=recruit&wr_id={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|입사지원서|동의서",
+ "single": "posted",
+ "note": "그누보드 변형 스킨(td.subject, 작은따옴표 href '../bbs/...' 라 wr_id 로 linkFmt 조립). 등록일 하나. 공지(notice) 글이 위에 한 번 더 나와 중복 가능. 제목 끝 '-마감' 표기. robots: User-agent: * 만 있고 Disallow 없음"
+}

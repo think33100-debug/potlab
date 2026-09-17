@@ -1,0 +1,13 @@
+{
+ "name": "의료법인합포의료재단에스엠지연세병원",
+ "type": "html",
+ "url": "https://www.smgysh.co.kr/news/employment.php",
+ "base": "https://www.smgysh.co.kr",
+ "row": "<div class=\"emBox[^>]*>[\\s\\S]*?<em class=\"date\">[^<]*<\\/em>",
+ "title": "<p class=\"tlt\">([\\s\\S]*?)<\\/p>",
+ "link": "href=\"([^\"]+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "채용정보 카드 목록(div.emBox). 각 카드에 직군·고용형태·경력 태그와 기간 「2026.09.14 ~ 2026.09.30」 또는 「2026.07.08 ~ 채용 시 마감」(상시 → 날짜 하나 = 올린 날). 마감 지난 카드도 목록에 남음. robots.txt 없음(404)"
+}

@@ -1,0 +1,14 @@
+{
+ "name": "의료법인 문병욱의료재단 진주고려병원",
+ "type": "html",
+ "url": "https://jinjukoreahospital.co.kr/story/careers/",
+ "base": "https://jinjukoreahospital.co.kr",
+ "row": "<tr class='list'>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\?pg=\\d+&amp;no=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "no=(\\d+)\"",
+ "linkFmt": "https://jinjukoreahospital.co.kr/story/careers/?pg=1&no={1}",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "합격자|발표|결과|반환|고지|\\(마감\\)",
+ "single": "posted",
+ "note": "WordPress + ez_board. tr.list 행: 번호·제목(a href=\"?pg=1&no=N\" 상대링크라 linkFmt 조립)·작성자·등록일자·조회. 글이 3건뿐(간호사모집 상시 공지 등). robots: Crawl-delay 60, /story/ 차단 없음."
+}

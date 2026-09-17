@@ -1,0 +1,12 @@
+{
+ "name": "대구파티마병원",
+ "type": "html",
+ "url": "https://www.fatima.or.kr/employ/recruit_notice/list.do",
+ "base": "https://www.fatima.or.kr/employ/recruit_notice",
+ "row": "<li>\\s*<div class=\"list_bbs_type\">[\\s\\S]*?<\\/li>",
+ "title": "<div class=\"list_bbs_title\">\\s*<p><a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(view\\.do\\?rc_idx=\\d+[^\"]*)\"",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "합격자|발표|결과",
+ "note": "채용정보센터 자체 목록(li). 직종·제목·접수기간(시작~마감 두 날짜)·D-day·지원가능 버튼. 의사 채용은 ?v_rc_type=doctor 별도 탭. 상세 view.do?rc_idx=N. robots Allow:/ (ko_admin 만 금지)"
+}

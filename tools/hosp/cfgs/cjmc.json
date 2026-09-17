@@ -1,0 +1,11 @@
+{
+ "name": "충청북도 청주의료원",
+ "type": "html",
+ "url": "https://www.cjmc.or.kr/bbs/board.php?bo_table=recurit_new",
+ "base": "https://www.cjmc.or.kr",
+ "row": "<tr class=\"\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*wr_id=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*wr_id=\\d+)\"",
+ "skip": "합격자|발표|결과|양식|친인척|현황",
+ "note": "그누보드. 채용정보 메뉴(/n_sub3_2_list.php?mm=3)가 iframe 으로 이 게시판을 품음. 목록 날짜가 MM-DD 뿐(연도 없음)이라 date 를 안 잡음 → 마감은 본문 확인. 링크는 절대주소(:443 포함). robots: User-agent Yeti 만 Allow, * 규칙 없음"
+}

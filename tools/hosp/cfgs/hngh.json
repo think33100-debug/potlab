@@ -1,0 +1,13 @@
+{
+ "name": "의료법인행촌의료재단 해남종합병원",
+ "type": "html",
+ "url": "https://hngh.kr/pages/page_85.php",
+ "base": "https://hngh.kr",
+ "row": "<tr class=\"bg[01]\">[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"title[^\"]*\"><a href=\"[^\"]+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/pages\\/page_85\\.php\\?act_module=board_board_2&act_type=read&sn=\\d+)",
+ "date": "<td title='(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "입사지원서|양식|합격자|발표|결과",
+ "single": "posted",
+ "note": "자체 PHP 게시판(cgi_bank). 표: 번호·제목·이름·등록일·조회. 글 5건(연 1회 채용공고 + 지원서 양식). 날짜는 등록일 하나. robots Allow /"
+}

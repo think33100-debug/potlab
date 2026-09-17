@@ -1,0 +1,13 @@
+{
+ "name": "아산충무병원",
+ "type": "html",
+ "url": "https://www.asancm.co.kr/about/news/recruit/",
+ "base": "https://www.asancm.co.kr",
+ "row": "<tr class=\"be-table-row[^\"]*\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"\\/board\\/recruit\\/\\d+\\/\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/board\\/recruit\\/\\d+\\/)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "2026년 새 홈페이지(Django/Wagtail 풍). 표: 번호·제목·작성자·작성일·조회. 행에 채용중/마감 배지(be-row-closed)가 있어 마감 여부는 클래스로도 알 수 있으나 날짜는 작성일 하나뿐. 옛 주소 /cmhos/community/employ_bbs_list.asp 는 여기로 301. robots: * Allow /"
+}

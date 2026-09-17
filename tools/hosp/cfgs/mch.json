@@ -1,0 +1,12 @@
+{
+ "name": "목포기독병원",
+ "type": "html",
+ "url": "https://www.mch.co.kr/bbs/board.php?bo_table=employ_notice",
+ "base": "https://www.mch.co.kr",
+ "row": "<td class=\"td_num2\">\\s*\\d+\\s*<\\/td>\\s*<td>20\\d{2}-[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(https:\\/\\/www\\.mch\\.co\\.kr[^\"]*wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격|발표|양식",
+ "note": "그누보드 개조. 표: 번호·공고기간(시작 ~ 마감)·채용공고명·조회·진행상태. 마감 지난 글은 a 태그를 빼서 링크 없이 나옴(title 정규식이 a 를 요구하므로 접수중만 뽑힘). 날짜 둘(시작~마감). 위쪽 카드 영역(시행/마감)은 td_num2 로 시작하지 않아 안 잡힘. robots.txt 없음(302→404)."
+}

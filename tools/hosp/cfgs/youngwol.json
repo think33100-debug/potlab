@@ -1,0 +1,13 @@
+{
+ "name": "강원특별자치도영월의료원",
+ "type": "html",
+ "url": "https://www.youngwol.org/bbs/board.php?bo_table=info_05",
+ "base": "https://www.youngwol.org",
+ "row": "<tr class=\"\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"https:\\/\\/www\\.youngwol\\.org\\/bbs\\/board\\.php\\?bo_table=info_05&amp;wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(https:\\/\\/www\\.youngwol\\.org\\/bbs\\/board\\.php\\?bo_table=info_05&amp;wr_id=\\d+)\"",
+ "date": "(20\\d{2}[.\\-/]\\d{1,2}[.\\-/]\\d{1,2})",
+ "skip": "합격자|발표|결과|안내",
+ "single": "posted",
+ "note": "그누보드 info_05(채용정보). 표: 번호·제목·글쓴이·날짜·조회. 목록 날짜가 두 자리 연도(26-09-02)라 date 정규식에 안 잡혀 날짜 없이 뽑힘(상세에서 확인 필요). 공지행(bo_notice) 제외. robots.txt 없음(404). 상세 board.php?bo_table=info_05&wr_id=N"
+}

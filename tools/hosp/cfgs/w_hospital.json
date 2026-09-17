@@ -1,0 +1,12 @@
+{
+ "name": "더블유병원",
+ "type": "html",
+ "url": "https://www.w-hospital.co.kr/board/recruit",
+ "base": "https://www.w-hospital.co.kr",
+ "row": "<tr>\\s*<td>[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"subject\">\\s*<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(\\/board\\/recruit\\/view\\?id=\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+ "skip": "양식|반환 안내|합격자|발표|결과",
+ "note": "자체 표(번호·제목·작성자·작성일). 공지 줄(입사지원서 양식·채용서류 반환 안내)은 skip. 날짜는 작성일 1개(posted). robots.txt 는 빈 파일(200)."
+}

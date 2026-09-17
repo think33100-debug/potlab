@@ -1,0 +1,14 @@
+{
+ "name": "온재병원",
+ "type": "html",
+ "url": "http://www.xn--hc0bs21a7cp8rsyh23j.com/04_customer/customer_07.php",
+ "base": "http://www.xn--hc0bs21a7cp8rsyh23j.com",
+ "row": "<tr >\\s*<td>[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"subject\"><a href='[^']*'>([\\s\\S]*?)<\\/a>",
+ "link": "href='(\\/04_customer\\/customer_07\\.php\\?code=jop[^']*mode=view)'",
+ "date": "<td>(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/td>",
+ "skip": "합격자|발표|결과|안내|양식",
+ "single": "posted",
+ "note": "온재병원(구 속초보광병원) 한글 도메인(온재병원.com → punycode xn--hc0bs21a7cp8rsyh23j.com) 자체 게시판(code=jop 채용공고). 표: 번호/공지아이콘·제목·작성자·등록일. 링크 작은따옴표·&amp; 포함 상대경로. 공지(응시원서 양식 안내)는 skip. robots.txt: Disallow /wssm /board /modulex /member — /04_customer 는 허용. http 만",
+ "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+}

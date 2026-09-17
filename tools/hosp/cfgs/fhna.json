@@ -1,0 +1,13 @@
+{
+ "name": "국립소방병원",
+ "type": "html",
+ "url": "https://recruit.incruit.com/fhna/job/",
+ "enc": "EUC-KR",
+ "base": "https://recruit.incruit.com",
+ "row": "<li><div class=\"inner-box\">[\\s\\S]*?<\\/li>",
+ "title": "<span class=\"title\">([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(\\/\\/recruit\\.incruit\\.com\\/fhna\\/job\\/\\d+)\"",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "인크루트 채용홈(EUC-KR). 목록 한 줄에 상태(모집중/마감)·접수기간(시작~마감)·제목·상세 링크(//recruit.incruit.com/fhna/job/N). 날짜 둘 → 시작~마감. 마감된 공고도 목록에 남으므로 마감일로 걸러야 함. robots: * 규칙 없음(Google 등 특정 봇만)"
+}

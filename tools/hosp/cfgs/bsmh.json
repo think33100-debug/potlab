@@ -1,0 +1,12 @@
+{
+ "name": "의료법인정화의료재단 봉생기념병원",
+ "type": "html",
+ "url": "http://bsmh.or.kr/page/board/board.php?tno=1415",
+ "base": "http://bsmh.or.kr",
+ "row": "<a href='[^']*bbs=see[^']*' class='recruitment-information-wrapper'[\\s\\S]*?<\\/a>",
+ "title": "<strong>([\\s\\S]*?)<\\/strong>",
+ "link": "href='([^']+)'",
+ "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "note": "UTF-8(응답 헤더·meta 모두 utf-8 · 처음 EUC-KR 로 적혀 있던 것을 고침). ul.recruitment-list-wrapper 안 a.recruitment-information-wrapper 블록. '접수기간 2026.09.02 ~ 채용시' 처럼 시작일만 있는 줄은 날짜 1개(posted=시작일). 링크 href 에 base64 data 와 '||' 가 그대로 들어감 · GET 200 확인. 총 310건, 1페이지 약 60건."
+}

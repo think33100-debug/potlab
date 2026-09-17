@@ -1,0 +1,12 @@
+{
+ "name": "대림성모병원",
+ "type": "html",
+ "url": "https://www.drh.co.kr/new/front/index.php?g_page=intro&m_page=intro08",
+ "base": "https://www.drh.co.kr/new/front",
+ "row": "<tr>\\s*<td>\\s*\\d+<\\/td>\\s*<td class=\"subject\">[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"subject\">\\s*<a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "<td class=\"subject\">\\s*<a href=\"([^\"]+)\"",
+ "date": "<td class=\"mb_none\">(20\\d{2}\\.\\d{2}\\.\\d{2})<\\/td>",
+ "skip": "합격자|발표|결과",
+ "note": "대림성모병원 병원소개>채용공고(dkboard 표: 번호·제목·채용담당자·첨부·날짜·조회). 링크는 ./index.php?...&bb_code=...&view=read 상대경로 → base /new/front 에 붙임. 날짜는 등록일 하나(posted). robots.txt 없음(404)."
+}

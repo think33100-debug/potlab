@@ -1,0 +1,13 @@
+{
+ "name": "강원특별자치도강릉의료원",
+ "type": "html",
+ "url": "https://www.gnmc.or.kr/recruit",
+ "base": "https://www.gnmc.or.kr",
+ "row": "<tr class=\"\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"https:\\/\\/www\\.gnmc\\.or\\.kr\\/recruit\\/\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"(https:\\/\\/www\\.gnmc\\.or\\.kr\\/recruit\\/\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|안내|양식",
+ "single": "posted",
+ "note": "표: 번호·제목·접수기간(시작 ~ 마감)·남은시간·접수형태·진행상황. 공지 행(tr.bo_notice)은 row 에서 제외. robots.txt 는 403(없음). 상세 /recruit/N"
+}

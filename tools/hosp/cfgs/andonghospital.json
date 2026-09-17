@@ -1,0 +1,15 @@
+{
+ "name": "의료법인안동병원",
+ "type": "html",
+ "url": "https://www.andonghospital.co.kr/recruit/job/list.do",
+ "base": "https://www.andonghospital.co.kr",
+ "row": "<td class=\"td_tit\">[\\s\\S]*?<\\/tr>",
+ "title": "<span class=\"t\">([\\s\\S]*?)<\\/span>",
+ "link": "page_move\\( 'view', \\{ no: (\\d+) \\}",
+ "linkFmt": "https://www.andonghospital.co.kr/recruit/job/view.do?no={1}",
+ "date": "(20\\d{2}-\\d{2}-\\d{2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "안동병원 인재채용 홈페이지(/recruit/) 채용공고 표: 번호·진행상태(진행중)·제목·모집기간(2026-08-27 00:00 ~ 채용시까지 → 날짜 하나=올린 날, 마감 있으면 두 날짜). 링크가 page_move('view',{no:N}) → view.do?no=N 으로 조립(확인 200). 공지행(tr_notice)이 일반행과 중복. 안동의료재단 산하 안동요양병원 공고도 섞임(제목에 [안동의료재단_안동요양병원]). robots: Yeti 규칙만 있고 * 없음",
+ "off": "구글 서버에서 못 엶(HTTP 0 Timeout) 2026-09-17 · 컴퓨터에서는 열림"
+}

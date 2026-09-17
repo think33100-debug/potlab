@@ -1,0 +1,13 @@
+{
+ "name": "의료법인 예당의료재단 예산종합병원",
+ "type": "html",
+ "url": "http://www.yshospital.com/customer-service/recruitment.php",
+ "base": "http://www.yshospital.com/customer-service",
+ "row": "<li class=\"listItem\">[\\s\\S]*?<\\/li>",
+ "title": "<div class=\"title\">([\\s\\S]*?)<\\/div>",
+ "link": "href=\"(recruitment_view\\.php\\?[^\"]+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|양식",
+ "single": "posted",
+ "note": "예산종합병원(yshospital.com). 자체 PHP · ul.noticeList li.listItem 카드 목록. 링크가 상대경로(recruitment_view.php?bid=notice&pid=N&cate=recruit) 라 base 를 /customer-service 로. 등록일 하나(posted). 공고가 드묾(연 1~2건). robots.txt 404"
+}
