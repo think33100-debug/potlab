@@ -12,7 +12,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxNKMarYQIwgcz5jHcn-dHYtS
 
 /* 이 파일이 최신인지 화면 아래에서 바로 확인하려고 둡니다.
    index.html 이 이 값을 읽어 버전과 함께 찍습니다. */
-var APP_JS_VER = 'a29 · 2026-09-10';
+var APP_JS_VER = 'a30 · 2026-09-17';
 
 (function () {
   'use strict';
@@ -35,7 +35,10 @@ var APP_JS_VER = 'a29 · 2026-09-10';
     'adminCommList', 'adminCommHide',
     'commComment', 'commCommentDelete', 'commLike', 'commMine', 'commAvatars', 'commSetAvatar',
     'adminGetMenu', 'adminSaveMenu', 'adminAccessLog', 'starJob', 'myStars', 'jobTrack', 'getMyForm', 'naverLogin', 'naverExchange', 'hospByName', 'jobOne', 'getEdu',
-    'adminJobList', 'adminHoldList', 'adminHoldDo', 'adminTodo', 'adminOrgList', 'adminApiList', 'adminOrgList', 'adminJobGet', 'adminJobFix', 'adminJobHide', 'adminJobHideMany', 'adminRefixMixed', 'adminGetSchedule', 'adminSaveSchedule', 'adminRefresh', 'adminGetTexts', 'adminSaveTexts',
+    'adminJobList', 'adminHoldList', 'adminHoldDo', 'adminTodo', 'adminOrgList', 'adminApiList', 'adminJobGet', 'adminJobFix', 'adminJobHide', 'adminJobHideMany', 'adminRefixMixed', 'adminGetSchedule', 'adminSaveSchedule', 'adminRefresh', 'adminGetTexts', 'adminSaveTexts',
+    /* 버림 규칙 화면 (admin.html:1521·1527·1559) — 서버 API 표에는 있었는데 여기에 빠져 있어
+       「버림 규칙」 이 열리지 않았습니다 (2026-09-17) */
+    'adminDropRules', 'adminDropRun', 'adminDropRuleSet',
     'bizMe', 'bizSignup', 'bizSendCode', 'bizVerify', 'bizPostJob', 'bizDocUrl', 'volList', 'volCenters', 'wfList', 'wfOne', 'vcList', 'vcOne', 'ythList',
     'adminBizList', 'adminBizVerify', 'serverVersion',
     'bigPut', 'bigRun'
