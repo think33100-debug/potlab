@@ -18,3 +18,10 @@ node_modules/
 
 # 열쇠 — 저장소에 올리면 안 됩니다
 .env.local
+
+# Next.js (web/)
+web/node_modules/
+web/.next/
+web/out/
+web/.env*.local
+web/next-env.d.ts
