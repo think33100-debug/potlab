@@ -18,12 +18,16 @@
 | 20260918002804 | `step9_harden` | `pg_trgm` 을 `extensions` 로 · 트리거 함수 EXECUTE 회수 |
 | 20260918002825 | `step10_grants` | 표 권한(GRANT) — **이게 없으면 RLS 를 잘 짜도 안 열립니다** |
 | 20260918002857 | `step11_score_column` | `job_scores` 뷰 → `job_posts.score` 칸 · `refresh_job_scores()` |
+| 20260918041338 | `step12_org_reference_tables` | 기관 자료 표 9개 + 색인 + RLS |
+| 20260918041821 | `step13_service_role_grants` | **service_role 권한** — 없으면 수집기·적재기가 막힙니다 |
+| 20260918041852 | `step14_org_directory` | `org_directory` 대조용 한 장 (trgm) |
 
 ## 지금 상태
 
 ```
-표 24개 · 전부 RLS 켜짐 · 규칙 45개
-자료 0줄 (공고 0 · 회원 0 · auth 계정 0)
+표 33개 · 전부 RLS 켜짐 · 대조용 뷰 org_directory 1개
+기관 자료 62,749줄 (1단계 완료)
+공고 0 · 회원 1(세중 · 관리자) · auth 계정 1(kakao)
 버킷 2개 (post-images 공개 · chat-images 비공개, 둘 다 2MB 제한 · webp/jpeg/png)
 ```
 
@@ -43,6 +47,14 @@ delete from storage.buckets where id in ('post-images','chat-images');
 ### 한 단계씩
 
 ```sql
+-- 14
+drop materialized view org_directory;
+-- 13
+revoke all on all tables in schema public from service_role;
+-- 12
+drop table hospitals, public_hospitals, dementia_safe_centers, dementia_centers,
+           dev_rehab_orgs, ltc_facilities, mental_centers,
+           welfare_centers, welfare_facilities cascade;
 -- 11
 alter table job_posts drop column score, drop column score_at;
 drop function refresh_job_scores();
@@ -93,6 +105,11 @@ RLS 는 「이미 닿을 수 있는 것」 을 좁히는 장치입니다. 규칙
 `permission denied for table job_posts` 가 납니다. 실제로 그렇게 막혔고 10단계에서 고쳤습니다.
 **표를 새로 만들 때마다 GRANT 를 같이 주십시오.**
 
+**①-2 `service_role` 도 GRANT 가 필요합니다.**
+RLS 는 통과하지만 표 권한까지 통과하지는 않습니다. 10단계에서 `anon`·`authenticated` 만 주고
+빠뜨려서 기관 자료 적재가 `403 permission denied` 로 막혔습니다 (2026-09-18).
+13단계에서 `alter default privileges` 까지 걸어 **앞으로 만드는 표에는 자동으로 붙습니다.**
+
 **② 규칙이 하나도 없는 표 둘은 의도한 것입니다.**
 `collector_state` · `seen_postings` 는 RLS 를 켜고 규칙을 안 만들어 `service_role` 만 닿습니다.
 점검에 INFO 로 계속 뜨는데 고칠 것이 아닙니다.
@@ -110,5 +127,28 @@ Supabase 가 프로젝트에 넣어둔 이벤트 트리거로, `public` 에 표�
 글을 지울 때 저장소 파일을 같이 지우는 일은 **아직 없습니다.** `on delete cascade` 는 DB 줄만 지웁니다.
 화면을 만들 때 지우는 함수에 같이 넣거나, 주인 없는 파일을 치우는 일을 하나 두십시오.
 
-**⑥ 안 만든 것** — 기관 자료 8개 표(1단계에서 CSV 붓기), `drop_analysis`(버림분석 · 수집기 이관 때),
-`hosp_sites`(병원 게시판 설정 288줄 · 수집기 이관 때).
+**⑥ 안 만든 것** — `drop_analysis`(버림분석 · 수집기 이관 때), `hosp_sites`(병원 게시판 설정 288줄 · 수집기 이관 때).
+
+## 1단계 — 기관 자료 (2026-09-18 완료)
+
+```
+표                      원본        DB        결과
+hospitals              15332     15332     맞음
+public_hospitals         231       231     맞음
+dementia_safe_centers    256       256     맞음
+dementia_centers         317       317     맞음
+dev_rehab_orgs           305       305     맞음
+ltc_facilities         30595     30595     맞음
+mental_centers           737       737     맞음
+welfare_centers          266       266     맞음
+welfare_facilities     14710     14710     맞음
+합계 62,749줄
+```
+
+붓는 도구는 `tools/load_orgs.js` 입니다. 표를 비우고 다시 붓고 건수를 대조합니다.
+열쇠는 `.env.local`(저장소에 안 올라감)에서 읽습니다. 원본이 갱신되면 그냥 다시 돌리면 됩니다.
+
+확인한 것 — 상급종합 47곳(실제와 일치) · 작업치료사 합계 11,071 · 물리치료사 54,880 ·
+치매센터 남는 칸 6개가 `extra` jsonb 에 317줄 다 들어감.
+
+`org_directory` 는 원본을 다시 부은 뒤 `refresh materialized view org_directory;` 를 돌려야 합니다.

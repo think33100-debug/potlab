@@ -15,3 +15,6 @@ node_modules/
 # 이 컴퓨터에서만 쓰는 설정 (Supabase 프로젝트 주소 등이 들어 있습니다)
 .claude/
 .mcp.json
+
+# 열쇠 — 저장소에 올리면 안 됩니다
+.env.local
