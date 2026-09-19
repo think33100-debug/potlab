@@ -1,5 +1,8 @@
 import Link from 'next/link';
-import { supabase, LIST_COLS, SOURCE_NAME, type JobListItem } from '@/lib/supabase';
+import {
+  supabase, LIST_COLS, SOURCE_NAME, TABS, tabLabel, type JobListItem,
+} from '@/lib/supabase';
+import { OrgCard } from './org-card';
 
 export const dynamic = 'force-dynamic';   // 공고는 자주 바뀝니다
 
@@ -18,28 +21,49 @@ function dday(to: string | null) {
   return { text: 'D-' + left, urgent: left <= 3, over: false };
 }
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ job?: string; sido?: string; all?: string }>;
-}) {
+type SP = { job?: string; sido?: string; all?: string; tab?: string; q?: string };
+
+export default async function Home({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const today = new Date().toISOString().slice(0, 10);
+  const q = (sp.q ?? '').trim();
+  const searching = q.length > 0;
 
-  let q = supabase
-    .from('job_posts')
-    .select(LIST_COLS)
-    .order('posted_at', { ascending: false, nullsFirst: false })
-    .limit(100);
+  /* 거르기는 탭·검색과 상관없이 늘 같게 겁니다.
+     숨김·보류는 여기서 안 뺍니다 — RLS 가 이미 뺀 것만 내려줍니다 */
+  const base = () => {
+    let b = supabase.from('job_posts').select(LIST_COLS);
+    if (sp.job) b = b.eq('job_group', sp.job);
+    if (sp.sido) b = b.eq('sido', sp.sido);
+    if (!sp.all) b = b.or(`apply_to.gte.${today},apply_to.is.null`);
+    if (searching) b = b.or(`title.ilike.%${q}%,org_name.ilike.%${q}%`);
+    return b;
+  };
 
-  if (sp.job) q = q.eq('job_group', sp.job);
-  if (sp.sido) q = q.eq('sido', sp.sido);
-  if (!sp.all) q = q.or(`apply_to.gte.${today},apply_to.is.null`);
+  /* 탭별 건수 — 줄은 안 받고 세기만 합니다 (head: true) */
+  const counts = await Promise.all(
+    TABS.map(async (t) => {
+      let c = supabase.from('job_posts').select('id', { count: 'exact', head: true });
+      if (sp.job) c = c.eq('job_group', sp.job);
+      if (sp.sido) c = c.eq('sido', sp.sido);
+      if (!sp.all) c = c.or(`apply_to.gte.${today},apply_to.is.null`);
+      if (searching) c = c.or(`title.ilike.%${q}%,org_name.ilike.%${q}%`);
+      const { count } = await c.like('tab', t.like);
+      return count ?? 0;
+    }),
+  );
+  const total = counts.reduce((a, b) => a + b, 0);
 
-  const { data, error } = await q;
+  /* 검색 중에는 탭을 안 씁니다 — 전체에서 찾고, 어느 탭 공고인지 줄마다 붙입니다 */
+  const active = searching ? null : (TABS.find((t) => t.key === sp.tab) ?? TABS[0]);
+
+  let list = base().order('posted_at', { ascending: false, nullsFirst: false }).limit(100);
+  if (active) list = list.like('tab', active.like);
+
+  const { data, error } = await list;
   const rows = (data ?? []) as unknown as JobListItem[];
 
-  const link = (patch: Record<string, string | undefined>) => {
+  const link = (patch: Partial<Record<keyof SP, string | undefined>>) => {
     const next = { ...sp, ...patch };
     const p = new URLSearchParams();
     Object.entries(next).forEach(([k, v]) => { if (v) p.set(k, v); });
@@ -48,13 +72,66 @@ export default async function Home({
   };
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-7 md:px-7">
+    <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
       <header className="mb-7">
         <h1 className="text-h1 font-bold">채용공고</h1>
         <p className="mt-1 text-lg text-gray-500">
           작업치료사 · 물리치료사 · 공공기관과 병원에서 모읍니다
         </p>
       </header>
+
+      {/* 검색 — 서버가 받게 GET 폼입니다. 자바스크립트 없이도 됩니다 */}
+      <form action="/" method="get" role="search" className="mb-6 flex gap-2">
+        {sp.job && <input type="hidden" name="job" value={sp.job} />}
+        {sp.sido && <input type="hidden" name="sido" value={sp.sido} />}
+        {sp.all && <input type="hidden" name="all" value={sp.all} />}
+        <input
+          type="search"
+          name="q"
+          defaultValue={q}
+          placeholder="기관 이름이나 공고 제목으로 찾기"
+          aria-label="공고 검색"
+          className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-950"
+        />
+        <button
+          type="submit"
+          className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98]"
+        >
+          찾기
+        </button>
+      </form>
+
+      {searching ? (
+        <div className="mb-6 flex flex-wrap items-baseline gap-3">
+          <p className="text-lg text-gray-700 dark:text-gray-300">
+            <span className="font-bold">{q}</span> — 네 탭 전체에서 {total}건
+          </p>
+          <Link href={link({ q: undefined })} className="text-sm text-interaction-blue hover:underline">
+            검색 지우기
+          </Link>
+        </div>
+      ) : (
+        <nav className="mb-6 flex flex-wrap gap-2" aria-label="탭">
+          {TABS.map((t, i) => (
+            <Link
+              key={t.key}
+              href={link({ tab: t.key })}
+              aria-current={active?.key === t.key ? 'page' : undefined}
+              className={
+                'rounded-md border px-6 py-4 text-lg font-medium transition-colors ' +
+                (active?.key === t.key
+                  ? 'border-teal-strong bg-teal-strong text-white'
+                  : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950')
+              }
+            >
+              {t.label}
+              <span className={'ml-2 text-sm ' + (active?.key === t.key ? 'text-white/70' : 'text-gray-400')}>
+                {counts[i]}
+              </span>
+            </Link>
+          ))}
+        </nav>
+      )}
 
       <nav className="mb-7 space-y-2" aria-label="거르기">
         <div className="flex flex-wrap gap-2">
@@ -76,6 +153,9 @@ export default async function Home({
         </div>
       </nav>
 
+      {/* 기관 이름으로 찾으면 그 기관이 어떤 곳인지 먼저 보여줍니다 */}
+      {searching && <OrgCard name={q} />}
+
       {error && (
         <p className="rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
           공고를 불러오지 못했습니다 — {error.message}
@@ -84,7 +164,7 @@ export default async function Home({
 
       {!error && rows.length === 0 && (
         <p className="py-8 text-center text-lg text-gray-500">
-          조건에 맞는 공고가 없습니다.
+          {searching ? `「${q}」 로 찾은 공고가 없습니다.` : '조건에 맞는 공고가 없습니다.'}
         </p>
       )}
 
@@ -110,6 +190,12 @@ export default async function Home({
                 </div>
                 <p className="mt-1 text-body-lg font-medium">{r.title}</p>
                 <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
+                  {/* 검색 결과에서는 어느 탭 공고인지 밝힙니다 */}
+                  {searching && r.tab && (
+                    <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
+                      {tabLabel(r.tab)}
+                    </span>
+                  )}
                   {r.job_group && <span className="font-medium text-gray-700 dark:text-gray-300">{r.job_group}</span>}
                   {r.work_place && <span>{r.work_place}</span>}
                   {r.employ_type && <span>{r.employ_type}</span>}
@@ -124,7 +210,10 @@ export default async function Home({
       </ul>
 
       <p className="mt-7 text-sm text-gray-400">
-        {rows.length}건 · 최근 올라온 순 · 한 번에 100건까지 보여줍니다
+        {searching
+          ? `${rows.length}건 보임 · 네 탭 전체에서 찾았습니다`
+          : `${active?.label} ${counts[TABS.findIndex((t) => t.key === active?.key)]}건 중 ${rows.length}건 보임`}
+        {' · 최근 올라온 순 · 한 번에 100건까지'}
       </p>
     </main>
   );

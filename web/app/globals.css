@@ -110,6 +110,9 @@
   --spacing-*: initial;
   --spacing: initial;
 
+  /* 0 은 눈금 밖이 아닙니다. 이게 없으면 bottom-0 · inset-x-0 · top-0 이
+     CSS 를 못 만들어 fixed·sticky 가 좌표를 잃습니다 */
+  --spacing-0: 0px;
   --spacing-1: 4px;
   --spacing-2: 6px;
   --spacing-3: 8px;
@@ -136,6 +139,19 @@
                0 1px 3px oklch(0.164 0.011 268 / 0.06);
   --shadow-lg: 0 12px 28px oklch(0.164 0.011 268 / 0.14),
                0 4px 10px oklch(0.164 0.011 268 / 0.08);
+
+  /* ── 움직임 ───────────────────────────────────────── */
+  --animate-toast-in: toast-in 0.18s ease-out;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 움직임을 줄여달라는 설정을 존중합니다 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-toast-in { animation: none; }
 }
 
 @layer base {
