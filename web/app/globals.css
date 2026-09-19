@@ -1,26 +1,156 @@
+/* Pretendard Variable — teamsparta.md 의 기본 글꼴입니다.
+   tailwindcss 가 통째로 펼쳐지므로 이 줄이 맨 위여야 합니다.
+   @import 는 다른 규칙보다 앞에 와야 한다는 CSS 규칙에 걸립니다.
+   ponytail: CDN 한 줄로 끝냅니다. 자체 호스팅으로 바꿔도 자폭이 같아 화면은 안 흔들립니다 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ────────────────────────────────────────────────────────────────
+   teamsparta.md 의 토큰입니다. 값을 여기서 바꾸지 말고 그쪽을 고치세요.
+   Tailwind v4 는 tailwind.config.js 가 없습니다 — 이 @theme 가 설정입니다.
+   각 묶음 첫 줄의 `*: initial` 은 Tailwind 기본 팔레트·눈금을 지웁니다.
+   기본값이 남아 있으면 「적용됐나」를 눈으로 못 가리기 때문입니다.
+   `static` 은 안 쓰는 토큰까지 전부 내보냅니다. 기본값이면 Tailwind 가
+   쓰는 것만 남기는데, 그러면 개발자도구에서 「무슨 토큰이 있나」를 못 봅니다.
+   ──────────────────────────────────────────────────────────────── */
+@theme static {
+  /* ── 색 ───────────────────────────────────────────── */
+  --color-*: initial;
+
+  /* 브랜드·상호작용 */
+  --color-brand-red: oklch(0.613 0.214 19);            /* 아이덴티티 · primary CTA */
+  --color-brand-red-dark: oklch(0.525 0.197 21);       /* CTA hover/pressed */
+  --color-brand-red-soft: oklch(0.944 0.029 7);        /* 빨강 배지 · 옅은 경고면 */
+  --color-interaction-blue: oklch(0.429 0.297 264);    /* 링크·정보·포커스. sRGB 색역 밖 — 브라우저가 클리핑합니다 */
+  --color-interaction-blue-soft: oklch(0.958 0.020 280);
+  --color-teal-strong: oklch(0.378 0.066 224);         /* 켜진 내비 · 정보성 상태 */
+
+  /* 중립 */
+  --color-white: oklch(1.000 0.000 0);
+  --color-gray-50: oklch(0.979 0.003 265);
+  --color-gray-100: oklch(0.954 0.005 258);
+  --color-gray-200: oklch(0.910 0.007 269);
+  --color-gray-300: oklch(0.829 0.009 265);
+  --color-gray-400: oklch(0.729 0.013 271);
+  --color-gray-500: oklch(0.569 0.011 267);
+  --color-gray-600: oklch(0.420 0.012 267);
+  --color-gray-700: oklch(0.298 0.011 271);
+  --color-gray-800: oklch(0.210 0.008 275);
+  --color-gray-900: oklch(0.164 0.011 268);
+  --color-gray-950: oklch(0.164 0.007 271);
+  --color-black: oklch(0.000 0.000 0);
+
+  /* 상태 */
+  --color-success: oklch(0.627 0.170 149);
+  --color-warning: oklch(0.769 0.165 70);
+  --color-danger: oklch(0.613 0.214 19);
+  --color-info: oklch(0.429 0.297 264);
+
+  /* 배지면 */
+  --color-badge-blue-bg: oklch(0.932 0.034 286);
+  --color-badge-teal-bg: oklch(0.941 0.021 208);
+  --color-badge-green-bg: oklch(0.962 0.043 157);
+
+  /* 별칭 */
+  --color-focus-ring: oklch(0.429 0.297 264 / 0.32);
+  --color-modal-backdrop: oklch(0.000 0.000 0 / 0.48);
+
+  /* ── 글꼴 ─────────────────────────────────────────── */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+               system-ui, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ── 글자 크기 ────────────────────────────────────────
+     굵기는 토큰에 안 넣습니다. 넣으면 같은 태그에 쓴 font-bold 와
+     누가 이기는지가 생성 순서에 달려 헷갈립니다 — 굵기는 마크업에서 씁니다.
+     ─────────────────────────────────────────────────── */
+  --text-*: initial;
+
+  --text-xs: 10px;                     /* 오버라인 라벨 (700) */
+  --text-xs--line-height: 1.20;
+  --text-xs--letter-spacing: 0.08em;
+
+  --text-sm: 12px;                     /* 메타데이터·배지 (500) */
+  --text-sm--line-height: 1.40;
+  --text-sm--letter-spacing: 0.01em;
+
+  --text-md: 13px;
+  --text-md--line-height: 1.50;
+
+  --text-lg: 14px;                     /* 본문 기본 */
+  --text-lg--line-height: 1.55;
+
+  --text-xl: 15px;
+  --text-xl--line-height: 1.55;
+
+  --text-body-lg: 16px;                /* 목록 제목 (500) */
+  --text-body-lg--line-height: 1.55;
+
+  --text-h3: 18px;
+  --text-h3--line-height: 1.35;
+
+  --text-h2: 22px;
+  --text-h2--line-height: 1.30;
+  --text-h2--letter-spacing: -0.01em;
+
+  --text-h1: 32px;
+  --text-h1--line-height: 1.375;
+  --text-h1--letter-spacing: -0.015em;
+
+  --text-display: 44px;
+  --text-display--line-height: 1.20;
+  --text-display--letter-spacing: -0.02em;
+
+  /* ── 여백 ─────────────────────────────────────────────
+     `--spacing` 을 지워 Tailwind 의 4px 배수 자동 생성을 끕니다.
+     이게 있으면 p-5 가 20px 로 살아나는데, teamsparta.md 가
+     15px 와 32px 사이에 20·24px 단계를 만들지 말라고 못박은 자리입니다.
+     이제 눈금 밖 클래스는 아무 CSS 도 안 나옵니다 — 화면에서 바로 들통납니다.
+     ─────────────────────────────────────────────────── */
+  --spacing-*: initial;
+  --spacing: initial;
+
+  --spacing-1: 4px;
+  --spacing-2: 6px;
+  --spacing-3: 8px;
+  --spacing-4: 10px;
+  --spacing-5: 12px;
+  --spacing-6: 15px;   /* 모바일 거터 · 카드 사이 */
+  --spacing-7: 32px;   /* 데스크톱 거터 · 구획 사이 */
+  --spacing-8: 40px;
+
+  /* ── 모서리 ───────────────────────────────────────── */
+  --radius-*: initial;
+  --radius-xs: 6px;    /* 입력칸·툴팁·체크박스 */
+  --radius-sm: 16px;   /* 카드·모달·미디어 */
+  --radius-md: 50px;   /* 알약·아바타·태그·primary CTA */
+
+  /* ── 그림자 ───────────────────────────────────────────
+     flat-first 입니다. 기본 카드·행·탑바에는 쓰지 않습니다.
+     떠 있는 것(드롭다운·토스트·모달)에만 씁니다.
+     ─────────────────────────────────────────────────── */
+  --shadow-*: initial;
+  --shadow-sm: 0 1px 2px oklch(0.164 0.011 268 / 0.06),
+               0 1px 1px oklch(0.164 0.011 268 / 0.04);
+  --shadow-md: 0 4px 10px oklch(0.164 0.011 268 / 0.08),
+               0 1px 3px oklch(0.164 0.011 268 / 0.06);
+  --shadow-lg: 0 12px 28px oklch(0.164 0.011 268 / 0.14),
+               0 4px 10px oklch(0.164 0.011 268 / 0.08);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    font-family: var(--font-sans);
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* 숫자는 대시보드에서 훑는 대상입니다 — 자리를 고정합니다 */
+  body {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 포커스를 보더 색만으로 알리지 않습니다 */
+  :focus-visible {
+    outline: 3px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
 }

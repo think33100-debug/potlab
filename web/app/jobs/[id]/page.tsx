@@ -18,8 +18,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
   if (error) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-8">
-        <p className="rounded-lg bg-red-50 p-4 text-sm text-red-700">
+      <main className="mx-auto max-w-2xl px-6 py-7 md:px-7">
+        <p className="rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
           공고를 불러오지 못했습니다 — {error.message}
         </p>
       </main>
@@ -35,13 +35,14 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   ];
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <Link href="/" className="text-sm text-neutral-500 hover:underline">← 목록</Link>
+    <main className="mx-auto max-w-2xl px-6 py-7 md:px-7">
+      {/* 링크·보조 이동은 interaction blue 입니다 */}
+      <Link href="/" className="text-lg text-interaction-blue hover:underline">← 목록</Link>
 
-      <header className="mt-4 border-b border-neutral-200 pb-5 dark:border-neutral-800">
-        <p className="text-sm text-neutral-500">{j.org_name}</p>
-        <h1 className="mt-1 text-xl font-bold leading-snug">{j.title}</h1>
-        <dl className="mt-4 grid grid-cols-[5.5rem_1fr] gap-y-1.5 text-sm">
+      <header className="mt-6 border-b border-gray-200 pb-6 dark:border-gray-800">
+        <p className="text-lg text-gray-500">{j.org_name}</p>
+        <h1 className="mt-1 text-h2 font-bold">{j.title}</h1>
+        <dl className="mt-6 grid grid-cols-[5.5rem_1fr] gap-y-2 text-lg">
           <Row label="직군" v={j.job_group} />
           <Row label="근무지" v={j.work_place} />
           <Row label="고용형태" v={j.employ_type} />
@@ -58,30 +59,32 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
           href={j.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-5 inline-block rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white dark:bg-white dark:text-neutral-900"
+          /* primary CTA — Sparta red · 50px 알약 · 700.
+             hover 는 그림자를 키우지 않고 빨강을 어둡게, press 는 scale(0.98) */
+          className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-lg font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98]"
         >
           원문 공고 열기
         </a>
       </header>
 
       {keys.length > 0 ? (
-        <div className="mt-6 space-y-5">
+        <div className="mt-7 space-y-6">
           {keys.map((k) => (
             <section key={k}>
-              <h2 className="text-sm font-semibold">{k}</h2>
-              <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">
+              <h2 className="text-lg font-bold">{k}</h2>
+              <p className="mt-1 whitespace-pre-wrap break-words text-lg text-gray-700 dark:text-gray-300">
                 {detail[k]}
               </p>
             </section>
           ))}
         </div>
       ) : (
-        <p className="mt-6 text-sm text-neutral-500">
+        <p className="mt-7 text-lg text-gray-500">
           이 공고는 본문을 못 받아왔습니다. 위 「원문 공고 열기」 를 눌러 주세요.
         </p>
       )}
 
-      <footer className="mt-10 border-t border-neutral-200 pt-4 text-xs text-neutral-400 dark:border-neutral-800">
+      <footer className="mt-8 border-t border-gray-200 pt-6 text-sm text-gray-400 dark:border-gray-800">
         <p>출처 {SOURCE_NAME[j.source] ?? j.source} · 수집 {j.collected_at?.slice(0, 10)}</p>
         {j.evidence?.['탭근거'] && <p className="mt-1">분류 근거 — {j.evidence['탭근거']}</p>}
       </footer>
@@ -93,7 +96,7 @@ function Row({ label, v }: { label: string; v: string | null }) {
   if (!v) return null;
   return (
     <>
-      <dt className="text-neutral-500">{label}</dt>
+      <dt className="text-gray-500">{label}</dt>
       <dd className="break-words">{v}</dd>
     </>
   );
