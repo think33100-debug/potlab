@@ -14,6 +14,7 @@ import { useAuth } from '../auth';
 const MENU = [
   { href: '/admin', label: '홈 꾸미기' },
   { href: '/admin/jobs', label: '공고' },
+  { href: '/admin/reset', label: '내 계정 초기화' },
 ];
 
 export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
