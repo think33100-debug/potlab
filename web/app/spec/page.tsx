@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { man10 } from '@/lib/pay';
 import { PART_LABEL, PART_MAX, cheerOf, gaps, tierOf, type PartKey } from '@/lib/spec';
 
 /* 스펙쌓기. 옛 앱의 학생 결과 화면(getStudentResult)을 옮긴 것입니다.
@@ -182,10 +183,65 @@ export default function SpecPage() {
             )}
           </section>
 
+          <Rookie job={me.job_group} />
           <Score100 />
         </>
       )}
     </main>
+  );
+}
+
+/* 유형별 신입 급여 — 학생이 제일 궁금해하는 숫자입니다.
+   옛 앱 rookieSalary 와 같게 연차 2년 이하 · 3명 미만인 유형은 안 보여줍니다 */
+function Rookie({ job }: { job: string | null }) {
+  const [d, setD] = useState<{
+    job: string | null; min_n: number; base: number;
+    types: { type: string; n: number; median: number; median_year: number }[];
+  } | null>(null);
+
+  useEffect(() => {
+    browserSupabase().rpc('rookie_salary', { p_job: job })
+      .then(({ data }) => setD(data ?? null));
+  }, [job]);
+
+  if (!d) return null;
+
+  return (
+    <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
+      <h2 className="text-h3 font-bold">여기 가면 얼마 받나요</h2>
+      <p className="mt-1 text-sm text-gray-500">
+        {d.job ?? '치료사'} 중 <b>연차 2년 이하</b>가 적어준 고정 월 실수령이에요
+      </p>
+
+      {d.types.length === 0 ? (
+        <p className="mt-5 text-lg text-gray-500">
+          신입 급여가 아직 {d.min_n}명은 모이지 않았어요. 지금은 {d.base}명이에요
+        </p>
+      ) : (
+        <>
+          <div className="mt-5">
+            {d.types.map((t) => (
+              <div key={t.type}
+                className="flex items-baseline justify-between border-b border-gray-50 py-5 last:border-0 dark:border-gray-800">
+                <span className="min-w-0 text-lg font-medium">
+                  {t.type}
+                  <span className="ml-2 text-sm text-gray-400">{t.n}명</span>
+                </span>
+                <span className="shrink-0 text-right">
+                  <b className="text-h3">{t.median}만원</b>
+                  <span className="block text-sm text-gray-400">
+                    연 {man10(t.median_year)}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-5 text-sm text-gray-400">
+            가운데 값(중위값)이에요. {d.min_n}명이 안 되는 유형은 안 보여드려요
+          </p>
+        </>
+      )}
+    </section>
   );
 }
 

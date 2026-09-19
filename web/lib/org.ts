@@ -40,7 +40,41 @@ export async function findOrg(orgName: string): Promise<OrgInfo | null> {
     row = (like.data ?? [])[0] as OrgInfo | undefined;
   }
   if (!row) return null;
+  return withExtras(row);
+}
 
+/* 병원정보 찾기에서 고른 기관.
+
+   한 기관이 자료 여러 곳에 들어 있습니다 — 경북대학교병원은 심평원·
+   공공보건의료기관·정신건강시설 셋에 있습니다. 하나만 보면 치료사 인원이
+   있는 자료를 놓칠 수 있어서, 이름이 같은 줄을 전부 보고 합칩니다.
+   지역까지 같이 보는 이유는 분원 때문입니다. */
+export async function findOrgMerged(orgName: string, sido: string | null): Promise<OrgInfo[]> {
+  const { data } = await supabase.from('org_directory').select(COLS).eq('name', orgName).limit(20);
+  let rows = (data ?? []) as OrgInfo[];
+  if (sido) {
+    const same = rows.filter((r) => sidoOf(r) === sido);
+    if (same.length) rows = same;
+  }
+  return Promise.all(rows.map(withExtras));
+}
+
+/* DB 의 org_sido() 와 같은 규칙입니다. 자료마다 「경기도」와 「경기」가 섞여 있어서요 */
+export function sidoOf(r: { sido: string | null; addr: string | null }): string | null {
+  const s = (r.sido?.trim() || r.addr || '').trim();
+  const two: [string, string][] = [
+    ['서울', '서울'], ['부산', '부산'], ['대구', '대구'], ['인천', '인천'],
+    ['광주', '광주'], ['대전', '대전'], ['울산', '울산'], ['세종', '세종'],
+    ['경기', '경기'], ['강원', '강원'], ['제주', '제주'],
+    ['충청북', '충북'], ['충북', '충북'], ['충청남', '충남'], ['충남', '충남'],
+    ['전라북', '전북'], ['전북', '전북'], ['전라남', '전남'], ['전남', '전남'],
+    ['경상북', '경북'], ['경북', '경북'], ['경상남', '경남'], ['경남', '경남'],
+  ];
+  for (const [pre, out] of two) if (s.startsWith(pre)) return out;
+  return null;
+}
+
+async function withExtras(row: OrgInfo): Promise<OrgInfo> {
   const out: OrgInfo = {
     ...row, beds: null, est_type: null, pt: null, ot: null, capacity: null,
   };
@@ -75,3 +109,20 @@ export async function ourNumbers() {
   ]);
   return { jobs: jobs.count ?? 0, orgs: orgs.count ?? 0 };
 }
+
+/* 장기요양 종별은 「노인요양시설·치매전담실가형1실·치매전담실가형2실…」 처럼
+   길어서 줄을 다 잡아먹습니다. 앞의 둘만 보여주고 나머지는 셉니다 */
+export function shortKinds(kinds: string[] | null): string {
+  const xs = kinds ?? [];
+  if (xs.length === 0) return '';
+  const head = xs.slice(0, 2).map((k) => (k.length > 18 ? k.slice(0, 18) + '…' : k));
+  return xs.length > 2 ? `${head.join(' · ')} 외 ${xs.length - 2}개` : head.join(' · ');
+}
+
+/* 자료에 따라 시군구가 「대구중구」처럼 시도를 이미 달고 옵니다. 두 번 안 적습니다 */
+export function place(sido: string | null, sgg: string | null): string {
+  if (!sido) return sgg ?? '';
+  if (!sgg) return sido;
+  return sgg.startsWith(sido) ? sgg : `${sido} ${sgg}`;
+}
+

@@ -13,7 +13,7 @@ export const ROUTES: { href: string; label: string; soon?: string }[] = [
   { href: '/community',          label: '커뮤니티' },
   { href: '/pay',                label: '월급 확인' },
   { href: '/spec',               label: '스펙쌓기' },
-  { href: '/orgs',        label: '병원정보 찾기',  soon: 'orgs' },
+  { href: '/orgs',               label: '병원정보 찾기' },
 ];
 
 const BY_HREF = Object.fromEntries(ROUTES.map((r) => [r.href, r]));
