@@ -12,7 +12,7 @@ export const ROUTES: { href: string; label: string; soon?: string }[] = [
   { href: '/jobs?sort=deadline', label: '채용공고 · 마감 임박' },
   { href: '/community',          label: '커뮤니티' },
   { href: '/pay',                label: '월급 확인' },
-  { href: '/spec',        label: '스펙쌓기',       soon: 'spec' },
+  { href: '/spec',               label: '스펙쌓기' },
   { href: '/orgs',        label: '병원정보 찾기',  soon: 'orgs' },
 ];
 
