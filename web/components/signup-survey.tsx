@@ -102,7 +102,7 @@ export function SignupSurvey({
         body: (
           <>
             <Sel k="grade" label="학년" v={f.grade} on={set} opts={GRADES} req />
-            <Schools v={f.school_type} on={set} />
+            <Schools v={f.school_type} on={set} req />
           </>
         ),
       },
@@ -378,11 +378,12 @@ function Sel({
   );
 }
 
-/* 최종 학력만 묶음이 있어서 따로 뒀습니다 */
-function Schools({ v, on }: { v?: string; on: (k: string, v: string) => void }) {
+/* 최종 학력만 묶음이 있어서 따로 뒀습니다.
+   학생은 필수, 현직은 선택입니다 — 옛 submit 의 req 배열과 같습니다 */
+function Schools({ v, on, req }: { v?: string; on: (k: string, v: string) => void; req?: boolean }) {
   return (
     <label className="mt-5 block first:mt-0">
-      <Label label="최종 학력" req k="school_type" />
+      <Label label="최종 학력" req={req} k="school_type" />
       <select value={v ?? ''} onChange={(e) => on('school_type', e.target.value)} className={INPUT + ' mt-2'}>
         <option value="">선택</option>
         {SCHOOLS.map((g) => (
