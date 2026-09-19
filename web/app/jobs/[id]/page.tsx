@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { supabase, SOURCE_NAME, type JobPost } from '@/lib/supabase';
+import { AdminJobTools } from '@/components/admin-job-tools';
+import { OrgPanel } from '@/components/org-panel';
+import { supabase, JOB_ONE_COLS, type JobPost } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +14,9 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   const { data, error } = await supabase
     .from('job_posts')
-    .select('*')
+    /* select('*') 를 쓰면 안 됩니다 — 출처·수집일 칸은 회원에게 권한이 없어
+       통째로 거절당합니다. 볼 수 있는 칸만 적습니다 */
+    .select(JOB_ONE_COLS)
     .eq('id', id)
     .maybeSingle();
 
@@ -84,10 +88,11 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
         </p>
       )}
 
-      <footer className="mt-8 border-t border-gray-200 pt-6 text-sm text-gray-400 dark:border-gray-800">
-        <p>출처 {SOURCE_NAME[j.source] ?? j.source} · 수집 {j.collected_at?.slice(0, 10)}</p>
-        {j.evidence?.['탭근거'] && <p className="mt-1">분류 근거 — {j.evidence['탭근거']}</p>}
-      </footer>
+      {/* 이 기관이 어떤 곳인지 · 같은 기관의 다른 공고 */}
+      <OrgPanel orgName={j.org_name} exceptJobId={j.id} />
+
+      {/* 출처·수집일·분류근거와 편집 단추. 관리자에게만 보입니다 */}
+      <AdminJobTools id={j.id} />
     </main>
   );
 }

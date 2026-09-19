@@ -9,11 +9,28 @@ export const supabase = createClient(
   { auth: { persistSession: false } }
 );
 
+/* 공고 상세가 받는 칸입니다.
+
+   source · collected_at · evidence 는 여기 없습니다 — 관리자만 보는 값이라
+   회원에게는 DB 가 칸 자체를 안 내줍니다 (칸 단위 권한).
+   관리자는 job_meta 뷰로 따로 받습니다. select('*') 를 쓰면 권한 오류가 납니다. */
+export const JOB_ONE_COLS =
+  'id,org_name,title,hire_type,employ_type,work_place,sido,sgg,edu,headcount,'
+  + 'apply_from,apply_to,posted_at,url,job_group,org_kind,tab,detail';
+
+export type JobMeta = {
+  id: string;
+  source: string;
+  collected_at: string;
+  evidence: Record<string, string> | null;
+  hidden: boolean;
+  hold: boolean;
+};
+
 /* 지금 화면이 쓰는 칸만 적습니다.
    표 전체 타입이 필요해지면 그때 만들면 됩니다 (supabase gen types). */
 export type JobPost = {
   id: string;
-  source: string;
   org_name: string;
   title: string;
   hire_type: string | null;
@@ -31,17 +48,16 @@ export type JobPost = {
   org_kind: string | null;
   tab: string | null;
   detail: Record<string, string>;
-  evidence: Record<string, string>;
-  collected_at: string;
 };
 
-/* 목록에서는 본문(detail)을 안 받습니다 — 전송량이 열 배 차이납니다 */
+/* 목록에서는 본문(detail)을 안 받습니다 — 전송량이 열 배 차이납니다.
+   source 도 없습니다 — 출처는 관리자만 봅니다 */
 export const LIST_COLS =
-  'id,source,org_name,title,employ_type,work_place,sido,job_group,org_kind,tab,apply_from,apply_to,posted_at,headcount';
+  'id,org_name,title,employ_type,work_place,sido,job_group,org_kind,tab,apply_from,apply_to,posted_at,headcount';
 
 export type JobListItem = Pick<
   JobPost,
-  'id' | 'source' | 'org_name' | 'title' | 'employ_type' | 'work_place'
+  'id' | 'org_name' | 'title' | 'employ_type' | 'work_place'
   | 'sido' | 'job_group' | 'org_kind' | 'tab'
   | 'apply_from' | 'apply_to' | 'posted_at' | 'headcount'
 >;

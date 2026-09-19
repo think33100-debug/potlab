@@ -20,12 +20,13 @@ type Auth = {
   loading: boolean;
   session: Session | null;
   me: Me | null;          // profiles 줄. 가입을 마치기 전에는 null 입니다
+  isAdmin: boolean;       // 단추를 보일지 말지에만 씁니다 — 막는 자리는 DB 입니다
   reload: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const Ctx = createContext<Auth>({
-  loading: true, session: null, me: null,
+  loading: true, session: null, me: null, isAdmin: false,
   reload: async () => {}, signOut: async () => {},
 });
 
@@ -40,15 +41,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [me, setMe] = useState<Me | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const loadMe = useCallback(async (s: Session | null) => {
-    if (!s) { setMe(null); return; }
-    const { data } = await sb
-      .from('profiles')
-      .select('id,nickname,avatar,job_group,role,nickname_changes')
-      .eq('id', s.user.id)
-      .maybeSingle();
-    setMe((data as Me) ?? null);
+    if (!s) { setMe(null); setIsAdmin(false); return; }
+
+    const [prof, admin] = await Promise.all([
+      sb.from('profiles')
+        .select('id,nickname,avatar,job_group,role,nickname_changes')
+        .eq('id', s.user.id).maybeSingle(),
+      /* 관리자인지는 DB 에 물어봅니다. 이 값은 단추를 보일지 말지에만 씁니다 —
+         진짜로 막는 자리는 RLS 와 칸 단위 권한입니다.
+         여기서 true 로 만들어도 서버가 안 해줍니다 */
+      sb.rpc('is_admin'),
+    ]);
+
+    setMe((prof.data as Me) ?? null);
+    setIsAdmin(admin.data === true);
   }, [sb]);
 
   /* getSession() 은 브라우저에 저장된 것을 읽기만 하고 서버에 물어보지 않습니다.
@@ -93,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [sb, loadMe, verify]);
 
   const value = useMemo<Auth>(() => ({
-    loading, session, me,
+    loading, session, me, isAdmin,
     reload: async () => {
       const { data } = await sb.auth.getSession();
       await loadMe(data.session);
@@ -103,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setMe(null);
       router.push('/');
     },
-  }), [loading, session, me, sb, loadMe, router]);
+  }), [loading, session, me, isAdmin, sb, loadMe, router]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

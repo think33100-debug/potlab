@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {
-  supabase, LIST_COLS, SOURCE_NAME, TABS, tabLabel, type JobListItem,
+  supabase, LIST_COLS, TABS, tabLabel, type JobListItem,
 } from '@/lib/supabase';
 import { OrgCard } from './org-card';
 
@@ -201,7 +201,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
                   {r.employ_type && <span>{r.employ_type}</span>}
                   {r.headcount ? <span>{r.headcount}명</span> : null}
                   {r.apply_to && <span>~{d(r.apply_to)}</span>}
-                  <span className="text-gray-400">{SOURCE_NAME[r.source] ?? r.source}</span>
                 </div>
               </Link>
             </li>
