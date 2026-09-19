@@ -1,6 +1,6 @@
 import { supabase, ORG_SOURCE_NAME, type OrgRow } from '@/lib/supabase';
 
-/* 「이 기관은 이런 곳입니다」 — org_directory 에서 찾아 붙입니다.
+/* 「이 기관은 이런 곳이에요」 — org_directory 에서 찾아 붙입니다.
 
    ponytail: 이름이 겹치면 첫 줄을 씁니다. 「제주한라병원」 처럼 이름을 통째로
    치는 경우가 대부분이라 이걸로 충분합니다. 헛짚는 게 보이면 그때 pg_trgm
@@ -20,7 +20,7 @@ export async function OrgCard({ name }: { name: string }) {
   if (error) {
     return (
       <p className="mb-6 rounded-sm border border-gray-200 p-6 text-sm text-gray-500 dark:border-gray-800">
-        기관 정보를 못 읽었습니다 — {error.message}
+        기관 정보를 못 읽었어요 — {error.message}
         {error.code ? ` (${error.code})` : ''}
         <br />
         org_directory 는 머티리얼라이즈드 뷰라 RLS 가 안 붙습니다.
@@ -37,7 +37,7 @@ export async function OrgCard({ name }: { name: string }) {
 
   return (
     <section className="mb-6 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-      <p className="text-xs text-gray-400">이 기관은 이런 곳입니다</p>
+      <p className="text-xs text-gray-400">이 기관은 이런 곳이에요</p>
       <p className="mt-2 text-h3 font-bold">{org.name}</p>
 
       <div className="mt-2 flex flex-wrap gap-2">

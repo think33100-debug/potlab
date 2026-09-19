@@ -15,8 +15,8 @@ type Show = (text: string, opts?: Opts) => void;
 
    쓰는 쪽:
      const toast = useToast();
-     toast('저장됐습니다');
-     toast('불러오지 못했습니다', { tone: 'danger' });
+     toast('저장됐어요');
+     toast('불러오지 못했어요', { tone: 'danger' });
 
    ponytail: 한 번에 하나만 띄웁니다. 새 토스트가 앞의 것을 덮습니다.
    줄 세우기(queue)는 두 개가 동시에 뜨는 화면이 생기면 그때 만듭니다 */

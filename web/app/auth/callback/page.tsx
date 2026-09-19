@@ -31,7 +31,7 @@ export default function AuthCallback() {
       const { data, error } = await sb.auth.getSession();
       if (!alive) return;
       if (error) { setErr(error.message); return; }
-      if (!data.session) { setErr('세션을 받지 못했습니다. 다시 눌러 주세요'); return; }
+      if (!data.session) { setErr('로그인을 못 마쳤어요. 다시 눌러 주세요'); return; }
 
       const { data: prof } = await sb
         .from('profiles').select('id').eq('id', data.session.user.id).maybeSingle();
@@ -48,14 +48,14 @@ export default function AuthCallback() {
     <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
       {err ? (
         <div className="rounded-sm bg-brand-red-soft p-6">
-          <p className="text-lg font-bold text-brand-red-dark">로그인을 마치지 못했습니다</p>
+          <p className="text-lg font-bold text-brand-red-dark">로그인을 마치지 못했어요</p>
           <p className="mt-2 text-lg text-brand-red-dark">{err}</p>
           <a href="/login" className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-lg font-bold text-white">
             다시 해보기
           </a>
         </div>
       ) : (
-        <p className="text-lg text-gray-500">로그인을 마치는 중입니다…</p>
+        <p className="text-lg text-gray-500">로그인을 마치는 중이에요…</p>
       )}
     </main>
   );

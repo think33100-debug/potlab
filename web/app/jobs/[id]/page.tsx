@@ -20,7 +20,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     return (
       <main className="mx-auto max-w-2xl px-6 py-7 md:px-7">
         <p className="rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
-          공고를 불러오지 못했습니다 — {error.message}
+          공고를 불러오지 못했어요 — {error.message}
         </p>
       </main>
     );
@@ -80,7 +80,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
         </div>
       ) : (
         <p className="mt-7 text-lg text-gray-500">
-          이 공고는 본문을 못 받아왔습니다. 위 「원문 공고 열기」 를 눌러 주세요.
+          이 공고는 본문을 못 받아왔어요. 위 「원문 공고 열기」를 눌러 주세요
         </p>
       )}
 

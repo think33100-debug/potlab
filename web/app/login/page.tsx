@@ -32,7 +32,7 @@ const METHODS: Method[] = [
   { key: 'naver', label: '네이버로 시작하기', cls: 'bg-[#03C75A] text-white', oauth: 'custom:naver' },
   {
     key: 'apple', label: 'Apple로 시작하기', cls: 'bg-black text-white',
-    why: 'Apple 은 아직 열쇠를 못 받았습니다. 자리만 잡아둡니다',
+    why: 'Apple은 아직 준비 중이에요',
   },
 ];
 
@@ -51,7 +51,7 @@ export default function Login() {
       <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
         <div className="mx-auto w-full max-w-[22rem]">
           <p className="text-lg text-gray-700 dark:text-gray-300">
-            이미 로그인되어 있습니다{me ? ` — ${me.nickname} 님` : ''}.
+            이미 로그인되어 있어요{me ? ` — ${me.nickname} 님` : ''}.
           </p>
           <button
             type="button"
@@ -87,7 +87,7 @@ export default function Login() {
        「로그인에 실패했습니다」 로는 무엇을 고쳐야 할지 알 수 없습니다 */
     if (error) {
       setBusy(null);
-      toast(`${m.key} 로그인을 시작하지 못했습니다 — ${error.message}`, { tone: 'danger', ms: 4000 });
+      toast(`${m.key} 로그인을 시작하지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 });
     }
   };
 
@@ -134,7 +134,7 @@ export default function Login() {
         </div>
 
         <p className="mt-7 text-sm text-gray-400">
-          마지막에 쓴 수단은 이 기계에만 기억합니다. 서버로 보내지 않습니다
+          마지막에 쓴 수단은 이 기기에만 기억해요. 서버로 보내지 않아요
         </p>
       </div>
     </main>

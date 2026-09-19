@@ -51,12 +51,12 @@ export default async function ChannelPage({
 
       {error && (
         <p className="rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
-          글을 불러오지 못했습니다 — {error.message}
+          글을 불러오지 못했어요 — {error.message}
         </p>
       )}
 
       {!error && rows.length === 0 && (
-        <p className="py-8 text-center text-lg text-gray-500">아직 글이 없습니다. 첫 글을 써보세요</p>
+        <p className="py-8 text-center text-lg text-gray-500">아직 글이 없어요. 첫 글을 써보세요</p>
       )}
 
       <ul className="divide-y divide-gray-100 dark:divide-gray-800">

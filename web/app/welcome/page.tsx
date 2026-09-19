@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Avatar } from '@/components/avatar';
 import {
-  AVATAR_COLORS, AVATAR_EMOJIS, defaultAvatar, emojiAvatar, photoAvatar,
+  AVATAR_COLORS, AVATAR_EMOJIS, defaultAvatar, withColor, withEmoji, withPhoto,
 } from '@/lib/avatar';
 import { shrinkToWebp } from '@/lib/image';
 import { browserSupabase } from '@/lib/supabase-browser';
@@ -61,7 +61,7 @@ export default function Welcome() {
   const saveNickname = async () => {
     const name = nick.trim();
     if (name.length < 2 || name.length > 12) {
-      setNickErr('2자에서 12자까지 쓸 수 있습니다'); return;
+      setNickErr('2자에서 12자까지 쓸 수 있어요'); return;
     }
     setBusy(true); setNickErr(null);
 
@@ -77,10 +77,23 @@ export default function Welcome() {
 
     if (error) {
       setBusy(false);
+
+      /* 23503 = 남의 표를 가리키는 값. 여기서는 auth.users 에 그 사람이 없다는 뜻입니다.
+         AuthProvider 가 미리 걸러내지만, 걸러낸 뒤 토큰이 죽는 경우가 남습니다.
+         회원에게 영문 제약조건 이름을 보여주지 않고, 다음에 또 나면
+         어느 id 였는지 알 수 있게 적어 둡니다 */
+      if (error.code === '23503') {
+        console.error('[POT JOB] 없는 계정으로 프로필을 만들려 했습니다 · id =', session.user.id);
+        await browserSupabase().auth.signOut({ scope: 'local' });
+        setNickErr('로그인이 풀렸어요. 다시 로그인해 주세요');
+        setTimeout(() => router.replace('/login'), 1200);
+        return;
+      }
+
       setNickErr(
         error.code === '23505'
-          ? '이미 쓰고 있는 닉네임입니다. 다른 것으로 해주세요'
-          : `저장하지 못했습니다 — ${error.message}`,
+          ? '이미 쓰고 있는 닉네임이에요. 다른 것으로 해주세요'
+          : `저장하지 못했어요 — ${error.message}`,
       );
       return;
     }
@@ -106,7 +119,7 @@ export default function Welcome() {
       .from('profiles').update({ job_group: job, role }).eq('id', session.user.id);
     setBusy(false);
     if (error) {
-      toast(`저장하지 못했습니다 — ${error.message}`, { tone: 'danger', ms: 4000 });
+      toast(`저장하지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 });
       return;
     }
     await reload();
@@ -124,12 +137,12 @@ export default function Welcome() {
         contentType: 'image/webp', upsert: true,
       });
       if (error) throw error;
-      await sb.from('profiles').update({ avatar: photoAvatar(path) }).eq('id', session.user.id);
-      setAvatar(photoAvatar(path));
+      await sb.from('profiles').update({ avatar: withPhoto(avatar, path) }).eq('id', session.user.id);
+      setAvatar(withPhoto(avatar, path));
       await reload();
-      toast('사진을 올렸습니다');
+      toast('프로필 사진이 업로드 됐어요!');
     } catch (e) {
-      toast(`사진을 올리지 못했습니다 — ${(e as Error).message}`, { tone: 'danger', ms: 4000 });
+      toast(`사진을 올리지 못했어요 — ${(e as Error).message}`, { tone: 'danger', ms: 4000 });
     }
     setBusy(false);
   };
@@ -165,7 +178,7 @@ export default function Welcome() {
               className="mt-6 flex w-full items-center gap-5 rounded-sm border border-gray-200 px-6 py-5 text-left dark:border-gray-700"
             >
               <Box on={allChecked} />
-              <span className="text-body-lg font-bold">모두 동의합니다</span>
+              <span className="text-body-lg font-bold">모두 동의할래요</span>
             </button>
 
             <ul className="mt-5 space-y-1">
@@ -213,7 +226,7 @@ export default function Welcome() {
           <section>
             <h1 className="text-h2 font-bold">닉네임을 정해 주세요</h1>
             <p className="mt-2 text-lg text-gray-500">
-              커뮤니티에 이 이름으로 보입니다. 나중에 5번까지 바꿀 수 있습니다
+              커뮤니티에서 이 이름으로 보여요. 나중에 5번까지 바꿀 수 있어요
             </p>
 
             <input
@@ -241,7 +254,7 @@ export default function Welcome() {
           <section>
             <h1 className="text-h2 font-bold">어떤 분이신가요</h1>
             <p className="mt-2 text-lg text-gray-500">
-              커뮤니티에서 보이는 방이 이걸로 갈립니다. 나중에 바꿀 수 있습니다
+              커뮤니티에서 보이는 방이 이걸로 갈려요. 나중에 바꿀 수 있어요
             </p>
 
             <h2 className="mt-7 text-sm font-bold text-gray-500">직군</h2>
@@ -275,13 +288,13 @@ export default function Welcome() {
           <section>
             <h1 className="text-h2 font-bold">프로필 사진 (선택)</h1>
             <p className="mt-2 text-lg text-gray-500">
-              안 올리시면 아래 이모지 아바타로 시작합니다
+              안 올리시면 아래 이모지 아바타로 시작해요
             </p>
 
             <div className="mt-6 flex items-center gap-6">
               <Avatar value={avatar} size="lg" />
               <label className="cursor-pointer rounded-md border border-gray-200 px-6 py-4 text-lg font-medium hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950">
-                사진 올리기
+                프로필 사진 설정하기
                 <input
                   type="file"
                   accept="image/*"
@@ -291,14 +304,14 @@ export default function Welcome() {
               </label>
             </div>
 
-            <p className="mt-6 text-sm text-gray-400">이모지와 색을 고르셔도 됩니다</p>
+            <p className="mt-6 text-sm text-gray-400">이모지와 색을 골라도 돼요</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {AVATAR_EMOJIS.map((em) => (
                 <button
                   key={em}
                   type="button"
                   aria-label={em}
-                  onClick={() => setAvatar(emojiAvatar(em, avatar.split('|')[1] || AVATAR_COLORS[0]))}
+                  onClick={() => setAvatar(withEmoji(avatar, em))}
                   className="rounded-md border border-gray-200 px-4 py-1 text-body-lg dark:border-gray-700"
                 >
                   {em}
@@ -311,7 +324,7 @@ export default function Welcome() {
                   key={c}
                   type="button"
                   aria-label={'바탕색 ' + c}
-                  onClick={() => setAvatar(emojiAvatar(avatar.split('|')[0] || AVATAR_EMOJIS[0], c))}
+                  onClick={() => setAvatar(withColor(avatar, c))}
                   className="size-[28px] rounded-md border border-gray-200 dark:border-gray-700"
                   style={{ background: c }}
                 />
@@ -322,11 +335,10 @@ export default function Welcome() {
               type="button"
               disabled={busy}
               onClick={async () => {
-                if (!avatar.startsWith('u/')) {
-                  await browserSupabase().from('profiles').update({ avatar }).eq('id', session.user.id);
-                  await reload();
-                }
-                toast('가입이 끝났습니다');
+                /* 사진을 올린 뒤에 바탕색만 바꾸셨을 수 있어서 늘 한 번 저장합니다 */
+                await browserSupabase().from('profiles').update({ avatar }).eq('id', session.user.id);
+                await reload();
+                toast('가입이 끝났어요! 반가워요');
                 router.push('/');
               }}
               className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"

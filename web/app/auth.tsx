@@ -51,25 +51,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setMe((data as Me) ?? null);
   }, [sb]);
 
+  /* getSession() 은 브라우저에 저장된 것을 읽기만 하고 서버에 물어보지 않습니다.
+     그래서 지워진 계정의 토큰도 만료(약 1시간) 전까지는 멀쩡해 보입니다.
+     그 상태로 글이나 프로필을 쓰면 「profiles_id_fkey 위반」 같은 영문 오류를 만납니다
+     (2026-09-19 실제로 났습니다 — 01:23~01:24).
+
+     그래서 여기서 한 번 서버에 물어봅니다. 없는 사람이면 조용히 내보냅니다.
+     쓰는 화면마다 따로 막지 않고 여기 한 곳에서 막습니다. */
+  const verify = useCallback(async (s: Session | null): Promise<Session | null> => {
+    if (!s) return null;
+    const { data, error } = await sb.auth.getUser();
+    if (error || !data.user) {
+      await sb.auth.signOut({ scope: 'local' });
+      return null;
+    }
+    return s;
+  }, [sb]);
+
   useEffect(() => {
     let alive = true;
 
     sb.auth.getSession().then(async ({ data }) => {
+      const ok = await verify(data.session);
       if (!alive) return;
-      setSession(data.session);
-      await loadMe(data.session);
+      setSession(ok);
+      await loadMe(ok);
       if (alive) setLoading(false);
     });
 
-    const { data: sub } = sb.auth.onAuthStateChange(async (_e, s) => {
+    const { data: sub } = sb.auth.onAuthStateChange(async (e, s) => {
       if (!alive) return;
-      setSession(s);
-      await loadMe(s);
+      /* 로그아웃·토큰 갱신 때는 다시 물어볼 필요가 없습니다 */
+      const ok = e === 'SIGNED_OUT' ? null : await verify(s);
+      if (!alive) return;
+      setSession(ok);
+      await loadMe(ok);
       setLoading(false);
     });
 
     return () => { alive = false; sub.subscription.unsubscribe(); };
-  }, [sb, loadMe]);
+  }, [sb, loadMe, verify]);
 
   const value = useMemo<Auth>(() => ({
     loading, session, me,

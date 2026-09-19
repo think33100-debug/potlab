@@ -55,7 +55,7 @@ export function MyLists({ profileId }: { profileId: string }) {
 
       <div className="mt-6">
         {tab === 'posts' && (
-          <List empty="아직 쓴 글이 없습니다" rows={posts}>
+          <List empty="아직 쓴 글이 없어요" rows={posts}>
             {posts?.map((p) => (
               <li key={p.id} className="py-5">
                 <Link href={`/post/${p.id}`} className="block hover:underline">
@@ -69,7 +69,7 @@ export function MyLists({ profileId }: { profileId: string }) {
         )}
 
         {tab === 'comments' && (
-          <List empty="아직 단 댓글이 없습니다" rows={comments}>
+          <List empty="아직 단 댓글이 없어요" rows={comments}>
             {comments?.map((c) => (
               <li key={c.id} className="py-5">
                 <Link href={`/post/${c.post_id}`} className="block hover:underline">
@@ -84,7 +84,7 @@ export function MyLists({ profileId }: { profileId: string }) {
         )}
 
         {tab === 'stars' && (
-          <List empty="아직 찜한 공고가 없습니다" rows={stars}>
+          <List empty="아직 찜한 공고가 없어요" rows={stars}>
             {stars?.map((s) => (
               <li key={s.job_id} className="py-5">
                 <Link href={`/jobs/${s.job_id}`} className="block hover:underline">

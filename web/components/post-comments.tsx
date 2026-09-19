@@ -47,7 +47,7 @@ export function PostComments({ postId }: { postId: number }) {
       post_id: postId, parent_id: replyTo, author_id: me!.id, body: body.trim(),
     });
     setBusy(false);
-    if (error) { toast(`달지 못했습니다 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
+    if (error) { toast(`달지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
     setBody(''); setReplyTo(null);
     await load();
   };
@@ -55,7 +55,7 @@ export function PostComments({ postId }: { postId: number }) {
   const remove = async (id: number) => {
     if (!confirm('이 댓글을 지울까요?')) return;
     const { error } = await browserSupabase().from('comments').delete().eq('id', id);
-    if (error) { toast(`지우지 못했습니다 — ${error.message}`, { tone: 'danger' }); return; }
+    if (error) { toast(`지우지 못했어요 — ${error.message}`, { tone: 'danger' }); return; }
     await load();
   };
 
@@ -71,7 +71,7 @@ export function PostComments({ postId }: { postId: number }) {
       {!loading && !session && (
         <div className="mt-5 rounded-sm border border-gray-100 p-6 text-center dark:border-gray-800">
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            글은 누구나 읽을 수 있습니다. 댓글은 회원만 달 수 있어요
+            글은 누구나 읽을 수 있어요. 댓글은 회원만 달 수 있어요
           </p>
           <button
             type="button"
@@ -88,7 +88,7 @@ export function PostComments({ postId }: { postId: number }) {
 
       {session && !me && (
         <p className="mt-5 text-lg text-gray-500">
-          가입을 마치면 댓글을 달 수 있습니다 —{' '}
+          가입을 마치면 댓글을 달 수 있어요 —{' '}
           <a href="/welcome" className="text-interaction-blue hover:underline">가입 마저 하기</a>
         </p>
       )}
@@ -97,7 +97,7 @@ export function PostComments({ postId }: { postId: number }) {
         <div className="mt-5">
           {replyTo && (
             <p className="mb-1 flex items-center gap-3 text-sm text-gray-500">
-              답글을 답니다
+              답글을 달고 있어요
               <button type="button" onClick={() => setReplyTo(null)}
                 className="text-interaction-blue hover:underline">그만두기</button>
             </p>
@@ -122,7 +122,7 @@ export function PostComments({ postId }: { postId: number }) {
       {rows === null ? (
         <p className="mt-6 text-lg text-gray-400">불러오는 중…</p>
       ) : rows.length === 0 ? (
-        <p className="mt-6 text-lg text-gray-500">아직 댓글이 없습니다</p>
+        <p className="mt-6 text-lg text-gray-500">아직 댓글이 없어요</p>
       ) : (
         <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
           {roots.map((c) => (

@@ -45,7 +45,7 @@ export function BackGuard({ home = '/' }: { home?: string }) {
         window.history.back();   // 쌓아둔 칸 너머로 — 여기서 사이트를 벗어납니다
         return;
       }
-      toast('한 번 더 누르면 종료됩니다', { ms: EXIT_WINDOW_MS });
+      toast('한 번 더 누르면 나가요', { ms: EXIT_WINDOW_MS });
       ensureGuard();             // ← 자리를 다시 쌓습니다
     };
 

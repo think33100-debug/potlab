@@ -78,7 +78,7 @@ export default async function Community() {
       <section>
         <h2 className="text-h3 font-bold">새 글</h2>
         {freshRows.length === 0 ? (
-          <p className="py-8 text-center text-lg text-gray-500">아직 글이 없습니다. 첫 글을 써보세요</p>
+          <p className="py-8 text-center text-lg text-gray-500">아직 글이 없어요. 첫 글을 써보세요</p>
         ) : (
           <ul className="mt-2 divide-y divide-gray-100 dark:divide-gray-800">
             {freshRows.map((p) => <PostItem key={p.id} p={p} showChannel />)}

@@ -34,7 +34,7 @@ export async function generateMetadata({
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const p = await getPost(id);
-  if (!p) return { title: '없는 글입니다 · POT JOB' };
+  if (!p) return { title: '없는 글이에요 · POT JOB' };
 
   const imgs = await getImages(p.id);
   const title = p.title || p.body.slice(0, 40);

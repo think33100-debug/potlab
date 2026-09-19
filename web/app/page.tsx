@@ -76,7 +76,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
       <header className="mb-7">
         <h1 className="text-h1 font-bold">채용공고</h1>
         <p className="mt-1 text-lg text-gray-500">
-          작업치료사 · 물리치료사 · 공공기관과 병원에서 모읍니다
+          작업치료사 · 물리치료사 · 공공기관과 병원에서 모아요
         </p>
       </header>
 
@@ -158,13 +158,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
 
       {error && (
         <p className="rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
-          공고를 불러오지 못했습니다 — {error.message}
+          공고를 불러오지 못했어요 — {error.message}
         </p>
       )}
 
       {!error && rows.length === 0 && (
         <p className="py-8 text-center text-lg text-gray-500">
-          {searching ? `「${q}」 로 찾은 공고가 없습니다.` : '조건에 맞는 공고가 없습니다.'}
+          {searching ? `「${q}」 로 찾은 공고가 없어요` : '조건에 맞는 공고가 없어요'}
         </p>
       )}
 
@@ -211,7 +211,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
 
       <p className="mt-7 text-sm text-gray-400">
         {searching
-          ? `${rows.length}건 보임 · 네 탭 전체에서 찾았습니다`
+          ? `${rows.length}건 보임 · 네 탭 전체에서 찾았어요`
           : `${active?.label} ${counts[TABS.findIndex((t) => t.key === active?.key)]}건 중 ${rows.length}건 보임`}
         {' · 최근 올라온 순 · 한 번에 100건까지'}
       </p>

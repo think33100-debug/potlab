@@ -37,7 +37,7 @@ export function PostActions({
 
   const needLogin = () => {
     sessionStorage.setItem('potjob.after-login', location.pathname);
-    toast('로그인이 필요합니다');
+    toast('로그인하면 쓸 수 있어요');
     router.push('/login');
   };
 
@@ -50,11 +50,11 @@ export function PostActions({
       const { error } = await sb.from('post_likes').delete()
         .eq('post_id', id).eq('profile_id', me.id);
       if (!error) { setLiked(false); setLikes((v) => Math.max(0, v - 1)); }
-      else toast(`좋아요를 떼지 못했습니다 — ${error.message}`, { tone: 'danger' });
+      else toast(`좋아요를 떼지 못했어요 — ${error.message}`, { tone: 'danger' });
     } else {
       const { error } = await sb.from('post_likes').insert({ post_id: id, profile_id: me.id });
       if (!error) { setLiked(true); setLikes((v) => v + 1); }
-      else toast(`좋아요를 누르지 못했습니다 — ${error.message}`, { tone: 'danger' });
+      else toast(`좋아요를 누르지 못했어요 — ${error.message}`, { tone: 'danger' });
     }
     setBusy(false);
   };
@@ -79,10 +79,10 @@ export function PostActions({
   const copyLink = async (url = `${location.origin}/post/${id}`) => {
     try {
       await navigator.clipboard.writeText(url);
-      toast('링크를 복사했습니다');
+      toast('링크를 복사했어요!');
     } catch {
       /* 안전하지 않은 연결(http)에서는 clipboard 가 막힙니다 */
-      toast(`복사하지 못했습니다 — 주소: ${url}`, { tone: 'danger', ms: 5000 });
+      toast(`복사하지 못했어요 — 주소: ${url}`, { tone: 'danger', ms: 5000 });
     }
   };
 
@@ -96,19 +96,19 @@ export function PostActions({
     });
     if (error) {
       toast(
-        error.code === '23505' ? '이미 신고하신 글입니다' : `신고하지 못했습니다 — ${error.message}`,
+        error.code === '23505' ? '이미 신고하신 글이에요' : `신고하지 못했어요 — ${error.message}`,
         { tone: 'danger' },
       );
       return;
     }
-    toast('신고했습니다. 관리자가 확인합니다');
+    toast('신고했어요. 관리자가 확인할게요');
   };
 
   const remove = async () => {
-    if (!confirm('이 글을 지울까요? 되돌릴 수 없습니다')) return;
+    if (!confirm('이 글을 지울까요? 되돌릴 수 없어요')) return;
     const { error } = await browserSupabase().from('posts').delete().eq('id', id);
-    if (error) { toast(`지우지 못했습니다 — ${error.message}`, { tone: 'danger' }); return; }
-    toast('글을 지웠습니다');
+    if (error) { toast(`지우지 못했어요 — ${error.message}`, { tone: 'danger' }); return; }
+    toast('글을 지웠어요');
     router.push('/community');
   };
 

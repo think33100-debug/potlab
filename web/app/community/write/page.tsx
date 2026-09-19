@@ -44,9 +44,9 @@ function Write() {
 
   const addFiles = (files: FileList) => {
     const room = MAX_POST_IMAGES - picks.length;
-    if (room <= 0) { toast(`사진은 ${MAX_POST_IMAGES}장까지입니다`, { tone: 'danger' }); return; }
+    if (room <= 0) { toast(`사진은 ${MAX_POST_IMAGES}장까지 넣을 수 있어요`, { tone: 'danger' }); return; }
     const take = Array.from(files).slice(0, room);
-    if (files.length > room) toast(`${MAX_POST_IMAGES}장까지라 ${take.length}장만 담았습니다`);
+    if (files.length > room) toast(`${MAX_POST_IMAGES}장까지라 ${take.length}장만 담았어요`);
     setPicks([...picks, ...take.map((f) => ({ file: f, preview: URL.createObjectURL(f) }))]);
   };
 
@@ -80,11 +80,11 @@ function Write() {
         if (rowErr) throw rowErr;
       }
 
-      toast('글을 올렸습니다');
+      toast('글이 올라갔어요!');
       router.push(`/post/${post.id}`);
     } catch (e) {
       setBusy(false);
-      toast(`올리지 못했습니다 — ${(e as Error).message}`, { tone: 'danger', ms: 4000 });
+      toast(`올리지 못했어요 — ${(e as Error).message}`, { tone: 'danger', ms: 4000 });
     }
   };
 
@@ -101,7 +101,7 @@ function Write() {
         {rooms.map((c) => <option key={c.id} value={c.id}>{c.name} — {c.desc}</option>)}
       </select>
 
-      <label className="mt-6 block text-sm font-bold text-gray-500">제목 (없어도 됩니다)</label>
+      <label className="mt-6 block text-sm font-bold text-gray-500">제목 (없어도 돼요)</label>
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -157,7 +157,7 @@ function Write() {
       </button>
 
       <p className="mt-5 text-sm text-gray-400">
-        남 비방·저격·허위사실·광고는 지워집니다 — 커뮤니티 이용규칙
+        남 비방·저격·허위사실·광고는 지워져요 — 커뮤니티 이용규칙
       </p>
     </main>
   );
