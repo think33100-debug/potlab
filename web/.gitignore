@@ -43,4 +43,11 @@ next-env.d.ts
 # 배포용 공개 값만 예외로 둡니다.
 # NEXT_PUBLIC_ 이 붙은 값은 어차피 브라우저 번들에 들어가는 공개 값이라
 # 저장소에 둬도 됩니다. service_role 키는 여기 두면 안 됩니다.
+
+.vercel
+.env*
+
+# 배포용 공개 값만 예외로 둡니다 — 이 줄이 마지막이어야 .env* 를 이깁니다.
+# NEXT_PUBLIC_ 이 붙은 값은 어차피 브라우저 번들에 들어갑니다.
+# service_role 키는 여기 두면 안 됩니다.
 !.env.production
