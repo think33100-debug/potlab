@@ -34,12 +34,16 @@ export function TabBar() {
               href={t.href}
               aria-current={on(t.href) ? 'page' : undefined}
               className={
-                'flex flex-col items-center gap-1 py-4 text-xs ' +
+                'flex flex-col items-center gap-1 py-4 ' +
                 (on(t.href) ? 'text-teal-strong' : 'text-gray-400')
               }
             >
-              <span className="text-body-lg" aria-hidden>{t.emoji}</span>
-              {t.label}
+              <span className="text-body-lg leading-none" aria-hidden>{t.emoji}</span>
+              {/* text-xs 는 10px 오버라인 라벨용이라 탭 이름에는 너무 작습니다.
+                  글자를 키우는 설정을 쓰는 분이 있어 줄바꿈과 자간도 막아둡니다 */}
+              <span className="text-sm leading-normal font-medium tracking-normal whitespace-nowrap">
+                {t.label}
+              </span>
             </Link>
           </li>
         ))}

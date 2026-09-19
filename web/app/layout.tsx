@@ -7,6 +7,7 @@ import { siteUrl } from "@/lib/site-url";
 import { AuthProvider } from "./auth";
 import { BackGuard } from "./back-guard";
 import { SignupGuard } from "./signup-guard";
+import { SURFACE_SCRIPT, Surface } from "./surface";
 import { ToastProvider } from "./toast";
 import "./globals.css";
 
@@ -23,12 +24,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     /* 글꼴은 globals.css 의 --font-sans (Pretendard) 가 정합니다.
        next/font 의 Geist 는 뺐습니다 — teamsparta.md 의 글꼴이 아닙니다 */
-    <html lang="ko" className="h-full antialiased">
+    /* 아래 script 가 그리기 전에 html 에 표시를 답니다.
+       서버가 보낸 것과 달라지는 게 정상이라 리액트에게 미리 알려 둡니다 */
+    <html lang="ko" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        {/* 커뮤니티로 바로 들어온 사람이 흰 화면을 한 번 보지 않게,
+            리액트가 그리기 전에 바탕을 정합니다 */}
+        <script dangerouslySetInnerHTML={{ __html: SURFACE_SCRIPT }} />
+      </head>
       <body className="flex min-h-full flex-col bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
         <ToastProvider>
         <AuthProvider>
           <BackGuard />
           <SignupGuard />
+          <Surface />
 
           {/* 탑바 56px · 그림자 없이 아래 보더만 — teamsparta.md */}
           <header className="sticky top-0 z-40 h-[56px] shrink-0 border-b border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900">

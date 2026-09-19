@@ -28,6 +28,13 @@ const loadDraft = (uid: string): Form => {
   try { return JSON.parse(localStorage.getItem(DRAFT(uid)) || '{}'); } catch { return {}; }
 };
 
+/* 알림 판.
+   밝은 바탕에서는 연한 teal 을 깔고, 어두운 바탕에서는 테두리만 씁니다 —
+   어두운 화면에 연한 덩어리가 있으면 그 줄만 튀어 보입니다 */
+const PANEL =
+  'rounded-sm p-6 text-lg text-teal-strong bg-badge-teal-bg '
+  + 'dark:bg-transparent dark:border dark:border-teal-strong/40';
+
 /* 빈 칸은 0 이 아니라 '안 적음' 입니다. 0 으로 넣으면 평균이 내려갑니다 */
 const num = (v: string | undefined) => (v && v.trim() !== '' ? Number(v) : null);
 
@@ -110,7 +117,7 @@ export function SignupSurvey({
               </li>
             ))}
           </ul>
-          <p className="mt-6 rounded-sm bg-badge-teal-bg p-6 text-lg text-teal-strong">{PRIVACY_LINE}</p>
+          <p className={'mt-6 ' + PANEL}>{PRIVACY_LINE}</p>
           <p className="mt-2 text-sm text-gray-400">병원 이름은 받지 않아요</p>
         </div>
       ),
@@ -167,10 +174,13 @@ export function SignupSurvey({
         body: (
           <>
             <Num k="net_monthly" label="고정 월 실수령액" hint="세금 떼고 통장에 들어오는 금액" v={f.net_monthly} on={set} unit="만원" ph="250" req />
+            {/* 빨간 바탕을 안 씁니다 — teamsparta.md 「입력 오류에 빨강 배경을
+                사용하지 않는다. 보더·헬퍼 텍스트로 전달한다」.
+                어두운 바탕에서 분홍 덩어리가 뜨는 것도 같이 없어집니다 */}
             {flag && (
-              <p className="mt-2 rounded-sm bg-brand-red-soft p-5 text-lg text-brand-red-dark">
+              <p className="mt-2 rounded-sm border border-brand-red/40 p-5 text-lg text-brand-red">
                 <b className="block">{flag.t}</b>
-                <span className="mt-1 block text-sm">{flag.d}</span>
+                <span className="mt-1 block text-sm text-gray-500">{flag.d}</span>
               </p>
             )}
             {/* 체크박스가 아니라 둘 중 하나입니다 — 체크를 안 한 것이
@@ -334,10 +344,10 @@ export function SignupSurvey({
           적어 주신 내용을 이대로 {edit ? '저장해요' : '등록해요'}. 고칠 게 있으면 돌아가서 바꿀 수 있어요
         </p>
 
-        <p className={'mt-6 rounded-sm p-6 text-lg '
+        <p className={'mt-6 '
           + (edit && editsLeft === 1
-            ? 'bg-brand-red-soft text-brand-red-dark'
-            : 'bg-badge-teal-bg text-teal-strong')}>
+            ? 'rounded-sm border border-brand-red/40 p-6 text-lg text-brand-red'
+            : PANEL)}>
           {edit
             ? <>지금 저장하면 올해 <b>{Math.max(0, (editsLeft ?? 2) - 1)}번</b> 남아요</>
             : <>등록하고 나면 <b>내 정보에서 1년에 2번</b> 고칠 수 있어요</>}

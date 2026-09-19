@@ -41,9 +41,14 @@ export default function MyPage() {
   const left = Math.max(0, FREE_CHANGES - used);
   const locked = left === 0;
 
+  /* 이 칸에서 바뀐 게 있는지. 없으면 단추를 잠급니다 —
+     「지금 쓰는 닉네임과 같아요」를 오류로 띄우면, 사진만 바꾸러 온 분이
+     저장이 통째로 막힌 줄로 압니다. 이 화면은 칸마다 따로 저장됩니다 */
+  const nickChanged = nick.trim() !== me.nickname;
+
   const saveNick = async () => {
     const name = nick.trim();
-    if (name === me.nickname) { setErr('지금 쓰는 닉네임과 같아요'); return; }
+    if (!nickChanged) return;
     if (name.length < 2 || name.length > 12) { setErr('2자에서 12자까지 쓸 수 있어요'); return; }
 
     setBusy(true); setErr(null);
@@ -79,9 +84,11 @@ export default function MyPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h1 font-bold">내 정보</h1>
+      <p className="mt-2 text-lg text-gray-500">칸마다 따로 저장돼요. 하나만 바꿔도 돼요</p>
 
       <section className="mt-7">
         <h2 className="text-h3 font-bold">프로필 사진</h2>
+        <p className="mt-1 text-sm text-gray-400">고르면 바로 저장돼요</p>
         <div className="mt-5">
           <AvatarPicker userId={me.id} value={me.avatar} onChange={reload} />
         </div>
@@ -115,7 +122,7 @@ export default function MyPage() {
           <button
             type="button"
             onClick={saveNick}
-            disabled={busy || locked}
+            disabled={busy || locked || !nickChanged}
             className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
           >
             바꾸기
@@ -137,6 +144,7 @@ export default function MyPage() {
         <p className="mt-1 text-lg text-gray-500">
           커뮤니티에서 보이는 방이 역할로 갈려요. 졸업하시면 현직으로 바꿔 주세요
         </p>
+        <p className="mt-1 text-sm text-gray-400">누르면 바로 저장돼요</p>
 
         <h3 className="mt-6 text-sm font-bold text-gray-500">직군</h3>
         <div className="mt-2 flex flex-wrap gap-2">

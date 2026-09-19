@@ -5,6 +5,19 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 @import "tailwindcss";
 
+/* 어두운 쪽 토큰이 켜지는 조건은 둘입니다.
+
+   ① 기기 설정이 어두운 모드일 때 (Tailwind 기본값)
+   ② 커뮤니티처럼 화면 자체가 어두운 바탕일 때
+
+   ②를 위해 html 에 data-surface="dark" 를 답니다. 그래야 탭바·탑바까지
+   같이 어두워집니다 — 본문만 어둡고 위아래가 희면 더 이상해 보입니다.
+   teamsparta.md: bg-canvas-dark = gray-900, bg-surface-dark = gray-950 */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) { @slot; }
+  &:where(html[data-surface="dark"] *) { @slot; }
+}
+
 /* ────────────────────────────────────────────────────────────────
    teamsparta.md 의 토큰입니다. 값을 여기서 바꾸지 말고 그쪽을 고치세요.
    Tailwind v4 는 tailwind.config.js 가 없습니다 — 이 @theme 가 설정입니다.
@@ -178,6 +191,14 @@
        break-word 를 같이 두는 이유는 띄어쓰기 없는 긴 주소 때문입니다 */
     word-break: keep-all;
     overflow-wrap: break-word;
+  }
+
+  /* 커뮤니티 바탕. body 의 클래스만으로는 스크롤 끝을 넘어간 자리가
+     흰색으로 남아서 html 에도 같이 칠합니다 */
+  html[data-surface="dark"],
+  html[data-surface="dark"] body {
+    background-color: var(--color-gray-900);
+    color: var(--color-white);
   }
 
   /* 포커스를 보더 색만으로 알리지 않습니다 */

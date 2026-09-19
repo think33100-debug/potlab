@@ -87,9 +87,9 @@ export function SurveyEdit({ profileId, role, job }: { profileId: string; role: 
       </button>
 
       {none && (
-        <p className="mt-5 rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
+        <p className="mt-5 rounded-sm border border-brand-red/40 p-6 text-lg text-brand-red">
           다음 해가 되면 다시 2번 고칠 수 있어요.
-          <span className="mt-1 block text-sm">자료가 자꾸 바뀌면 통계를 믿을 수 없어서 횟수를 둡니다</span>
+          <span className="mt-1 block text-sm text-gray-500">자료가 자꾸 바뀌면 통계를 믿을 수 없어서 횟수를 둡니다</span>
         </p>
       )}
     </section>
