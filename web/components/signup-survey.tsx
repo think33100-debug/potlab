@@ -305,7 +305,7 @@ export function SignupSurvey({
       <div className="mt-7 flex gap-2">
         {i > 0 && (
           <button type="button" onClick={() => { setI(i - 1); setErr(null); }} disabled={busy}
-            className="rounded-md border border-gray-200 px-7 py-5 text-lg font-medium disabled:opacity-40 dark:border-gray-700">
+            className="w-[96px] shrink-0 rounded-md border border-gray-200 py-5 text-lg font-medium disabled:opacity-40 dark:border-gray-700">
             이전
           </button>
         )}
@@ -326,6 +326,8 @@ export function SignupSurvey({
 
 /* ── 칸들 ── */
 
+/* 라벨은 한 줄에 하나씩 쌓습니다. 굵은 글씨·작은 힌트를 한 줄에 섞으면
+   줄이 들쭉날쭉해져서 화면이 깨져 보입니다 */
 function Label({ label, hint, req, k }: { label: string; hint?: string; req?: boolean; k?: string }) {
   const why = k ? FIELD_HINT[k] : undefined;
   return (
@@ -333,15 +335,24 @@ function Label({ label, hint, req, k }: { label: string; hint?: string; req?: bo
       <span className="block text-lg font-bold">
         {label}
         {req && <span className="ml-1 text-brand-red">*</span>}
-        {hint && <span className="ml-2 text-sm font-medium text-gray-400">{hint}</span>}
       </span>
+      {hint && <span className="mt-1 block text-sm text-gray-400">{hint}</span>}
       {why && <span className="mt-1 block text-sm text-teal-strong">{why}</span>}
     </>
   );
 }
 
-const INPUT =
-  'w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950';
+/* 모든 칸이 같은 자리에서 끝나야 합니다.
+   단위(만원·년)를 칸 밖에 두면 그 줄만 짧아져서 네모가 제각각으로 보입니다 —
+   그래서 테두리는 바깥 상자가 갖고, 단위는 그 안에 넣습니다 */
+const SKIN = 'rounded-xs border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-950';
+/* 단위가 붙는 칸 — 테두리는 이 상자가 갖습니다 */
+const BOX = `flex w-full items-center ${SKIN} focus-within:outline-[3px] focus-within:outline-focus-ring focus-within:outline-offset-2`;
+const BARE = 'min-w-0 flex-1 bg-transparent px-5 py-4 text-lg outline-none';
+/* 단위가 없는 칸 (고르는 칸·여러 줄).
+   폭은 여기서 안 정합니다 — w-full 을 넣어두면 줄 안에서 w-[88px] 과 부딪혀
+   어느 쪽이 이길지 클래스 적는 순서로는 안 정해집니다. 쓰는 자리에서 정합니다 */
+const INPUT = `block ${SKIN} px-5 py-4 text-lg`;
 
 function Num({
   k, label, hint, v, on, unit, ph, step, req,
@@ -350,12 +361,12 @@ function Num({
   unit?: string; ph?: string; step?: string; req?: boolean;
 }) {
   return (
-    <label className="mt-5 block first:mt-0">
+    <label className="mt-6 block first:mt-0">
       <Label label={label} hint={hint} req={req} k={k} />
-      <span className="mt-2 flex items-center gap-3">
+      <span className={BOX + ' mt-2'}>
         <input type="number" inputMode="decimal" step={step} value={v ?? ''} placeholder={ph}
-          onChange={(e) => on(k, e.target.value)} className={INPUT} />
-        {unit && <span className="shrink-0 text-lg text-gray-500">{unit}</span>}
+          onChange={(e) => on(k, e.target.value)} className={BARE} />
+        {unit && <span className="shrink-0 pr-5 text-lg text-gray-400">{unit}</span>}
       </span>
     </label>
   );
@@ -368,9 +379,9 @@ function Sel({
   opts: readonly string[]; req?: boolean; blank?: string;
 }) {
   return (
-    <label className="mt-5 block first:mt-0">
+    <label className="mt-6 block first:mt-0">
       <Label label={label} hint={hint} req={req} k={k} />
-      <select value={v ?? ''} onChange={(e) => on(k, e.target.value)} className={INPUT + ' mt-2'}>
+      <select value={v ?? ''} onChange={(e) => on(k, e.target.value)} className={INPUT + ' mt-2 w-full'}>
         <option value="">{blank ?? '선택'}</option>
         {opts.map((o) => <option key={o}>{o}</option>)}
       </select>
@@ -382,9 +393,9 @@ function Sel({
    학생은 필수, 현직은 선택입니다 — 옛 submit 의 req 배열과 같습니다 */
 function Schools({ v, on, req }: { v?: string; on: (k: string, v: string) => void; req?: boolean }) {
   return (
-    <label className="mt-5 block first:mt-0">
+    <label className="mt-6 block first:mt-0">
       <Label label="최종 학력" req={req} k="school_type" />
-      <select value={v ?? ''} onChange={(e) => on('school_type', e.target.value)} className={INPUT + ' mt-2'}>
+      <select value={v ?? ''} onChange={(e) => on('school_type', e.target.value)} className={INPUT + ' mt-2 w-full'}>
         <option value="">선택</option>
         {SCHOOLS.map((g) => (
           <optgroup key={g.group} label={g.group}>
@@ -421,10 +432,10 @@ function Area({
 }: { k: string; label: string; hint?: string; v?: string; on: (k: string, v: string) => void; ph?: string }) {
   const n = (v ?? '').length;
   return (
-    <label className="mt-5 block">
+    <label className="mt-6 block">
       <Label label={label} hint={hint} k={k} />
       <textarea rows={4} maxLength={300} value={v ?? ''} placeholder={ph}
-        onChange={(e) => on(k, e.target.value)} className={INPUT + ' mt-2'} />
+        onChange={(e) => on(k, e.target.value)} className={INPUT + ' mt-2 w-full'} />
       <span className="mt-1 block text-right text-sm text-gray-400">{n} / 300</span>
     </label>
   );
@@ -478,7 +489,7 @@ function Chips({
 
       <div className="mt-2 flex gap-2">
         <input value={etc} onChange={(e) => setEtc(e.target.value)}
-          placeholder={`목록에 없는 ${label}`} className={INPUT}
+          placeholder={`목록에 없는 ${label}`} className={INPUT + ' min-w-0 flex-1'}
           onKeyDown={(e) => {
             if (e.key !== 'Enter') return;
             e.preventDefault();
@@ -517,17 +528,20 @@ function Rows({ rows, on }: { rows: WorkRow[]; on: (v: WorkRow[]) => void }) {
       {rows.length === 0 && <p className="text-lg text-gray-400">없으면 그냥 넘어가도 돼요</p>}
 
       {rows.map((r, i) => (
+        /* min-w-0 이 없으면 고르는 칸이 제 글자 길이만큼 버텨서
+           줄 전체가 오른쪽으로 삐져나갑니다 */
         <div key={i} className="mt-2 flex gap-2">
-          <select value={r.hospital} onChange={(e) => edit(i, { hospital: e.target.value })} className={INPUT}>
+          <select value={r.hospital} onChange={(e) => edit(i, { hospital: e.target.value })}
+            className={INPUT + ' min-w-0 flex-1'}>
             <option value="">병원 유형</option>
             {HOSPITALS.map((h) => <option key={h}>{h}</option>)}
           </select>
           <input type="number" inputMode="numeric" placeholder="개월" value={r.months}
             onChange={(e) => edit(i, { months: e.target.value })}
-            className={INPUT + ' max-w-[100px]'} />
+            className={INPUT + ' w-[88px] shrink-0'} />
           <button type="button" aria-label={`${i + 1}번째 줄 지우기`}
             onClick={() => on(rows.filter((_, j) => j !== i))}
-            className="shrink-0 rounded-md border border-gray-200 px-5 text-lg text-gray-400 dark:border-gray-700">
+            className="w-[44px] shrink-0 rounded-md border border-gray-200 text-lg text-gray-400 dark:border-gray-700">
             ×
           </button>
         </div>

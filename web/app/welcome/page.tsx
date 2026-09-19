@@ -135,7 +135,9 @@ export default function Welcome() {
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <div className="mx-auto w-full max-w-[26rem]">
+      {/* ⑤ 급여·스펙은 칸이 많고 설명 줄이 길어서 26rem 안에서는 자꾸 줄이 접힙니다.
+          PC 에서만 넓힙니다 — 폰은 어차피 화면 폭을 다 씁니다 */}
+      <div className={'mx-auto w-full ' + (step === 5 ? 'max-w-[34rem]' : 'max-w-[26rem]')}>
         {/* 가입 도중에 막히면 나갈 길이 있어야 합니다.
             여기서 나가면 로그인 화면에서 다른 수단으로 다시 들어올 수 있습니다 */}
         <div className="mb-5 flex justify-end">
