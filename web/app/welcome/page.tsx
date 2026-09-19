@@ -150,6 +150,22 @@ export default function Welcome() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
       <div className="mx-auto w-full max-w-[26rem]">
+        {/* 가입 도중에 막히면 나갈 길이 있어야 합니다.
+            여기서 나가면 로그인 화면에서 다른 수단으로 다시 들어올 수 있습니다 */}
+        <div className="mb-5 flex justify-end">
+          <button
+            type="button"
+            onClick={async () => {
+              await browserSupabase().auth.signOut({ scope: 'local' });
+              toast('처음부터 다시 해요');
+              router.replace('/login');
+            }}
+            className="text-sm text-gray-500 hover:underline"
+          >
+            처음부터 다시 하기
+          </button>
+        </div>
+
         <ol className="mb-7 flex flex-wrap gap-2 text-sm" aria-label="가입 순서">
           {['약관 동의', '닉네임', '직군·역할', '사진'].map((t, i) => (
             <li
