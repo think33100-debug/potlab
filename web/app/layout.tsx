@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { TopbarUser } from "@/components/topbar-user";
+import { AuthProvider } from "./auth";
 import { BackGuard } from "./back-guard";
 import { ToastProvider } from "./toast";
 import "./globals.css";
@@ -17,6 +19,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="ko" className="h-full antialiased">
       <body className="flex min-h-full flex-col bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
         <ToastProvider>
+        <AuthProvider>
           <BackGuard />
 
           {/* 탑바 56px · 그림자 없이 아래 보더만 — teamsparta.md */}
@@ -25,16 +28,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/" aria-label="POT JOB 홈">
                 <Logo />
               </Link>
-              <Link
-                href="/login"
-                className="rounded-md border border-gray-200 px-4 py-1 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950"
-              >
-                로그인
-              </Link>
+              <TopbarUser />
             </div>
           </header>
 
           {children}
+        </AuthProvider>
         </ToastProvider>
       </body>
     </html>
