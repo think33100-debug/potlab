@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Hit } from '@/components/hit';
 import { PostActions } from '@/components/post-actions';
 import { PostComments } from '@/components/post-comments';
 import { ViewBump } from '@/components/view-bump';
@@ -64,6 +65,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
+      <Hit kind="post" target={p.id} />
       <ViewBump id={p.id} />
 
       <Link href={`/community/${p.channel}`} className="text-lg text-interaction-blue hover:underline">

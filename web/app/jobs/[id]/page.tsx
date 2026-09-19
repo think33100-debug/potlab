@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AdminJobTools } from '@/components/admin-job-tools';
+import { Hit } from '@/components/hit';
+import { JobOpenLink } from '@/components/job-open-link';
 import { OrgPanel } from '@/components/org-panel';
 import { supabase, JOB_ONE_COLS, type JobPost } from '@/lib/supabase';
 
@@ -40,6 +42,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
+      <Hit kind="job" target={j.id} />
+
       {/* 링크·보조 이동은 interaction blue 입니다 */}
       <Link href="/jobs" className="text-lg text-interaction-blue hover:underline">← 목록</Link>
 
@@ -59,16 +63,15 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
           <Row label="기관종별" v={j.org_kind} />
         </dl>
 
-        <a
-          href={j.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          /* primary CTA — Sparta red · 50px 알약 · 700.
-             hover 는 그림자를 키우지 않고 빨강을 어둡게, press 는 scale(0.98) */
+        {/* 누른 것을 셉니다 — 「본 사람」보다 「지원하러 간 사람」이 값을 매기는 근거입니다.
+            primary CTA — Sparta red · 50px 알약 · 700 */}
+        <JobOpenLink
+          id={j.id}
+          url={j.url}
           className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-lg font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98]"
         >
           원문 공고 열기
-        </a>
+        </JobOpenLink>
       </header>
 
       {keys.length > 0 ? (

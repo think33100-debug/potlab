@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Hit } from '@/components/hit';
 import { PostItem } from '@/components/post-row';
 import { CHANNELS, GROUPS } from '@/lib/channels';
 import { supabase, POST_LIST_COLS, type PostRow } from '@/lib/supabase';
@@ -34,6 +35,8 @@ export default async function Community() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
+      <Hit kind="community" />
+
       <header className="mb-7">
         <h1 className="text-h1 font-bold">커뮤니티</h1>
         <p className="mt-1 text-lg text-gray-500">치료사끼리 묻고 답하는 곳</p>

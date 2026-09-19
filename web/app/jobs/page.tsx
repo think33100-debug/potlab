@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Hit } from '@/components/hit';
 import {
   supabase, LIST_COLS, TABS, tabLabel, type JobListItem,
 } from '@/lib/supabase';
@@ -81,6 +82,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
+      <Hit kind="jobs" />
+
       <header className="mb-7">
         <h1 className="text-h1 font-bold">{byDeadline ? '마감 임박 공고' : '채용공고'}</h1>
         <p className="mt-1 text-lg text-gray-500">

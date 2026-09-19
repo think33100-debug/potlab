@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Hit } from '@/components/hit';
 import { HomeBanner } from '@/components/home-banner';
 import { getHome, metricLine } from '@/lib/home';
 import { safeHref } from '@/lib/routes';
@@ -16,6 +17,8 @@ export default async function Home() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-6 pb-[88px] md:px-7 md:pb-8">
+      <Hit kind="home" />
+
       {/* ① 상단 배너 */}
       <HomeBanner items={top} seconds={seconds} />
 

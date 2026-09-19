@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Hit } from '@/components/hit';
 import { notFound } from 'next/navigation';
 import { PostItem } from '@/components/post-row';
 import { CHANNEL_BY_ID } from '@/lib/channels';
@@ -29,6 +30,7 @@ export default async function ChannelPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
+      <Hit kind="community" />
       <Link href="/community" className="text-lg text-interaction-blue hover:underline">← 방 고르기</Link>
 
       <header className="mt-6 mb-6">
