@@ -7,7 +7,7 @@ import { Avatar } from './avatar';
 /* 탑바 오른쪽. 로그인 전에는 단추, 로그인 뒤에는 아바타와 닉네임입니다.
    여기에도 이메일은 안 씁니다 — 커뮤니티에 보이는 것은 닉네임과 아바타뿐입니다 */
 export function TopbarUser() {
-  const { loading, session, me } = useAuth();
+  const { loading, session, me, isAdmin } = useAuth();
 
   if (loading) return <span className="text-sm text-gray-400">…</span>;
 
@@ -38,9 +38,20 @@ export function TopbarUser() {
   }
 
   return (
-    <Link href="/me" className="flex items-center gap-3">
-      <Avatar value={me.avatar} size="sm" />
-      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{me.nickname}</span>
-    </Link>
+    <div className="flex items-center gap-5">
+      {/* 관리자에게만 보입니다. 다만 막는 자리는 여기가 아니라 DB 입니다 */}
+      {isAdmin && (
+        <Link
+          href="/admin"
+          className="rounded-md border border-brand-red px-4 py-1 text-sm font-bold text-brand-red hover:bg-brand-red-soft"
+        >
+          관리자
+        </Link>
+      )}
+      <Link href="/me" className="flex items-center gap-3">
+        <Avatar value={me.avatar} size="sm" />
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{me.nickname}</span>
+      </Link>
+    </div>
   );
 }
