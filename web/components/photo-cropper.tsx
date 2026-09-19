@@ -174,9 +174,10 @@ export function PhotoCropper({
               }}
             />
           )}
-          {/* 원 밖을 어둡게 — 어디가 남는지 눈으로 보이게 */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 rounded-md"
-               style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.45) inset', borderRadius: '9999px' }} />
+          {/* 원 밖을 어둡게 — 어디가 남는지 눈으로 보이게.
+              inset 을 붙이면 안쪽이 어두워집니다. 바깥을 덮어야 하므로 바깥 그림자입니다 */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 rounded-full"
+               style={{ boxShadow: '0 0 0 9999px rgba(0,0,0,0.45)' }} />
         </div>
       </div>
 
