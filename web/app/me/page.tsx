@@ -100,7 +100,7 @@ export default function MyPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 md:px-7">
+    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h1 font-bold">내 정보</h1>
 
       <section className="mt-7">

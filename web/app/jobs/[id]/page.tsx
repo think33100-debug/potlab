@@ -22,7 +22,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
   if (error) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-7 md:px-7">
+      <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
         <p className="rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
           공고를 불러오지 못했어요 — {error.message}
         </p>
@@ -39,9 +39,9 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   ];
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-7 md:px-7">
+    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       {/* 링크·보조 이동은 interaction blue 입니다 */}
-      <Link href="/" className="text-lg text-interaction-blue hover:underline">← 목록</Link>
+      <Link href="/jobs" className="text-lg text-interaction-blue hover:underline">← 목록</Link>
 
       <header className="mt-6 border-b border-gray-200 pb-6 dark:border-gray-800">
         <p className="text-lg text-gray-500">{j.org_name}</p>

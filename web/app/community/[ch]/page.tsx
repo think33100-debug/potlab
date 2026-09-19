@@ -28,7 +28,7 @@ export default async function ChannelPage({
   const rows = (data ?? []) as unknown as PostRow[];
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
+    <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <Link href="/community" className="text-lg text-interaction-blue hover:underline">← 방 고르기</Link>
 
       <header className="mt-6 mb-6">

@@ -48,7 +48,7 @@ export function AdminJobTools({ id }: { id: string }) {
     setBusy(false);
     if (error) { toast(`지우지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
     toast('공고를 지웠어요');
-    router.push('/');
+    router.push('/jobs');
   };
 
   return (

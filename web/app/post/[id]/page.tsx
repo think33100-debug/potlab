@@ -63,7 +63,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const imgs = await getImages(p.id);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 md:px-7">
+    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <ViewBump id={p.id} />
 
       <Link href={`/community/${p.channel}`} className="text-lg text-interaction-blue hover:underline">

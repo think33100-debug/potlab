@@ -100,7 +100,7 @@ export default function Login() {
           </p>
           <button
             type="button"
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/jobs')}
             className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
           >
             공고 보러 가기

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
 import { AuthProvider } from "./auth";
 import { BackGuard } from "./back-guard";
@@ -33,15 +34,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <Link href="/" aria-label="POT JOB 홈">
                   <Logo />
                 </Link>
-                <Link href="/community" className="text-lg font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                  커뮤니티
-                </Link>
+                <TopNav />
               </div>
               <TopbarUser />
             </div>
           </header>
 
           {children}
+
+          {/* 휴대폰에서만 보이는 아래 탭바 */}
+          <TabBar />
         </AuthProvider>
         </ToastProvider>
       </body>

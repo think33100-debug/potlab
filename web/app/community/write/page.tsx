@@ -89,7 +89,7 @@ function Write() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 md:px-7">
+    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h2 font-bold">글쓰기</h1>
 
       <label className="mt-6 block text-sm font-bold text-gray-500">방</label>
