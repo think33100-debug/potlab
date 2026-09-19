@@ -6,6 +6,7 @@ import { TopbarUser } from "@/components/topbar-user";
 import { siteUrl } from "@/lib/site-url";
 import { AuthProvider } from "./auth";
 import { BackGuard } from "./back-guard";
+import { SignupGuard } from "./signup-guard";
 import { ToastProvider } from "./toast";
 import "./globals.css";
 
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ToastProvider>
         <AuthProvider>
           <BackGuard />
+          <SignupGuard />
 
           {/* 탑바 56px · 그림자 없이 아래 보더만 — teamsparta.md */}
           <header className="sticky top-0 z-40 h-[56px] shrink-0 border-b border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900">

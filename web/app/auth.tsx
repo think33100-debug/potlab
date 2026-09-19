@@ -14,6 +14,8 @@ export type Me = {
   job_group: string | null;
   role: string | null;
   nickname_changes: number;
+  /* 급여·스펙을 마친 시각. 비어 있으면 가입이 아직 안 끝났습니다 */
+  survey_at: string | null;
 };
 
 type Auth = {
@@ -48,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const [prof, admin] = await Promise.all([
       sb.from('profiles')
-        .select('id,nickname,avatar,job_group,role,nickname_changes')
+        .select('id,nickname,avatar,job_group,role,nickname_changes,survey_at')
         .eq('id', s.user.id).maybeSingle(),
       /* 관리자인지는 DB 에 물어봅니다. 이 값은 단추를 보일지 말지에만 씁니다 —
          진짜로 막는 자리는 RLS 와 칸 단위 권한입니다.

@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AvatarPicker } from '@/components/avatar-picker';
+import { SignupSurvey } from '@/components/signup-survey';
 import { defaultAvatar } from '@/lib/avatar';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
 import { JOB_GROUPS, ROLES, ROLE_DESC, type JobGroup, type Role } from '@/lib/who';
+
 import { useAuth } from '../auth';
 import { useToast } from '../toast';
 
@@ -16,7 +18,10 @@ export default function Welcome() {
   const toast = useToast();
   const { loading, session, me, reload } = useAuth();
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  /* 아직 안 누르셨으면 이미 채운 데까지 보고 자리를 정합니다.
+     닉네임을 넣은 뒤 창을 닫았다가 다시 들어오면 ① 부터 다시 시켜서는 안 됩니다 —
+     profiles 줄이 이미 있어서 또 만들려다 막힙니다 */
+  const [stepPick, setStepPick] = useState<1 | 2 | 3 | 4 | 5 | null>(null);
   const [job, setJob] = useState<JobGroup | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -34,10 +39,15 @@ export default function Welcome() {
   const avatar = picked ?? (session ? defaultAvatar(session.user.id) : '');
   const setAvatar = setPicked;
 
+  const resume = !me ? 1 : (me.job_group && me.role) ? 5 : 3;
+  const step = stepPick ?? resume;
+  const setStep = setStepPick;
+
   useEffect(() => {
     if (loading) return;
     if (!session) { router.replace('/login'); return; }
-    if (me && !justMade) router.replace('/');         // 이미 가입을 마친 분
+    /* 가입을 「마쳤다」의 기준은 급여·스펙까지입니다. 닉네임만으로는 아닙니다 */
+    if (me?.survey_at && !justMade) router.replace('/');
   }, [loading, session, me, router, justMade]);
 
   if (loading || !session) {
@@ -143,7 +153,7 @@ export default function Welcome() {
         </div>
 
         <ol className="mb-7 flex flex-wrap gap-2 text-sm" aria-label="가입 순서">
-          {['약관 동의', '닉네임', '직군·역할', '사진'].map((t, i) => (
+          {['약관 동의', '닉네임', '직군·역할', '사진', '급여·스펙'].map((t, i) => (
             <li
               key={t}
               aria-current={step === i + 1 ? 'step' : undefined}
@@ -298,14 +308,29 @@ export default function Welcome() {
                 /* 사진을 올린 뒤에 바탕색만 바꾸셨을 수 있어서 늘 한 번 저장합니다 */
                 await browserSupabase().from('profiles').update({ avatar }).eq('id', session.user.id);
                 await reload();
-                toast('가입이 끝났어요! 반가워요');
-                router.push('/');
+                setStep(5);
               }}
               className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
             >
-              시작하기
+              다음
             </button>
           </section>
+        )}
+
+        {step === 5 && (
+          <SignupSurvey
+            userId={session.user.id}
+            job={job ?? me?.job_group ?? '작업치료사'}
+            role={(role ?? me?.role ?? '현직') as Role}
+            onDone={async () => {
+              /* 다 채웠다는 표시. SignupGuard 가 이 값만 봅니다 */
+              await browserSupabase().from('profiles')
+                .update({ survey_at: new Date().toISOString() }).eq('id', session.user.id);
+              await reload();
+              toast('가입이 끝났어요! 반가워요');
+              router.push('/');
+            }}
+          />
         )}
       </div>
     </main>
