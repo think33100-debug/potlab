@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
+import { siteUrl } from "@/lib/site-url";
 import { AuthProvider } from "./auth";
 import { BackGuard } from "./back-guard";
 import { ToastProvider } from "./toast";
@@ -11,8 +12,8 @@ import "./globals.css";
 export const metadata: Metadata = {
   /* 공유한 링크의 미리보기 그림 주소를 절대 주소로 만들어 줍니다.
      이게 없으면 /og.png 가 상대 주소로 나가 카톡이 그림을 못 찾습니다.
-     배포할 때 NEXT_PUBLIC_SITE_URL 을 실제 주소로 넣어 주세요 */
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+     배포 주소는 Vercel 이 알아서 알려줍니다 — lib/site-url.ts 참고 */
+  metadataBase: new URL(siteUrl()),
   title: "POT JOB · 채용공고",
   description: "작업치료사·물리치료사 채용공고를 한곳에서",
 };
