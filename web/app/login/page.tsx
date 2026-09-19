@@ -92,7 +92,7 @@ export default function Login() {
   /* 가입까지 마친 분이 다시 들어온 경우 */
   if (session && me) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
+      <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
         <div className="mx-auto w-full max-w-[22rem]">
           <Logo className="!text-h1" />
           <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">
@@ -118,7 +118,7 @@ export default function Login() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
+    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
       <div className="mx-auto w-full max-w-[22rem]">
         <Logo className="!text-h1" />
         <p className="mt-2 text-lg text-gray-500">

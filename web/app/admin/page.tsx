@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { HOME_COLS, type HomeBlock } from '@/lib/home';
+import { PhotoPicker } from '@/components/photo-picker';
 import { shrinkToWebp } from '@/lib/image';
 import { ROUTES } from '@/lib/routes';
 import { browserSupabase } from '@/lib/supabase-browser';
@@ -315,11 +316,7 @@ function Picture({
           // eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다
           <img src={url} alt="" className="h-[56px] w-[100px] rounded-xs object-cover" />
         )}
-        <label className="cursor-pointer rounded-md border border-gray-200 px-6 py-4 text-lg font-medium hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950">
-          {url ? '그림 바꾸기' : '그림 넣기'}
-          <input type="file" accept="image/*" className="sr-only"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) onUpload(b, f); e.target.value = ''; }} />
-        </label>
+        <PhotoPicker label={url ? '그림 바꾸기' : '그림 넣기'} onPick={(f) => onUpload(b, f)} />
         {url && (
           <button type="button" onClick={onClear}
             className="text-sm text-gray-500 hover:underline">

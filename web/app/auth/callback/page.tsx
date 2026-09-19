@@ -45,7 +45,7 @@ export default function AuthCallback() {
   }, [router]);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
+    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
       {err ? (
         <div className="rounded-sm bg-brand-red-soft p-6">
           <p className="text-lg font-bold text-brand-red-dark">로그인을 마치지 못했어요</p>

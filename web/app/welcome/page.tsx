@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Avatar } from '@/components/avatar';
+import { PhotoPicker } from '@/components/photo-picker';
 import {
   AVATAR_COLORS, AVATAR_EMOJIS, defaultAvatar, withColor, withEmoji, withPhoto,
 } from '@/lib/avatar';
@@ -44,7 +45,7 @@ export default function Welcome() {
   }, [loading, session, me, router, justMade]);
 
   if (loading || !session) {
-    return <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7"><p className="text-lg text-gray-500">잠시만요…</p></main>;
+    return <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8"><p className="text-lg text-gray-500">잠시만요…</p></main>;
   }
 
   const required = AGREEMENTS.filter((a) => a.required);
@@ -148,7 +149,7 @@ export default function Welcome() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
+    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
       <div className="mx-auto w-full max-w-[26rem]">
         {/* 가입 도중에 막히면 나갈 길이 있어야 합니다.
             여기서 나가면 로그인 화면에서 다른 수단으로 다시 들어올 수 있습니다 */}
@@ -309,15 +310,7 @@ export default function Welcome() {
 
             <div className="mt-6 flex items-center gap-6">
               <Avatar value={avatar} size="lg" />
-              <label className="cursor-pointer rounded-md border border-gray-200 px-6 py-4 text-lg font-medium hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950">
-                프로필 사진 설정하기
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) pickPhoto(f); }}
-                />
-              </label>
+              <PhotoPicker label="이미지 직접 가져오기" onPick={pickPhoto} disabled={busy} />
             </div>
 
             <p className="mt-6 text-sm text-gray-400">이모지와 색을 골라도 돼요</p>

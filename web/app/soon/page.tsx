@@ -18,7 +18,7 @@ export default async function Soon({
   const w = WHAT[what ?? ''] ?? { emoji: '🌱', title: '준비 중', line: '' };
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-col items-center px-6 py-8 text-center md:px-7">
+    <main className="mx-auto flex w-full max-w-2xl flex-col items-center px-6 py-8 pb-[88px] text-center md:px-7 md:pb-8">
       <span className="text-[56px]" aria-hidden>{w.emoji}</span>
       <h1 className="mt-5 text-h2 font-bold">{w.title}</h1>
       <p className="mt-2 text-h3 font-bold text-brand-red">곧 찾아올게요</p>

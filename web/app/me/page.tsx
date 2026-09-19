@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Avatar } from '@/components/avatar';
+import { PhotoPicker } from '@/components/photo-picker';
 import { MyLists } from '@/components/my-lists';
 import { AVATAR_COLORS, AVATAR_EMOJIS, withColor, withEmoji, withPhoto } from '@/lib/avatar';
 import { shrinkToWebp } from '@/lib/image';
@@ -107,11 +108,7 @@ export default function MyPage() {
         <h2 className="text-h3 font-bold">프로필 사진</h2>
         <div className="mt-5 flex items-center gap-6">
           <Avatar value={me.avatar} size="lg" />
-          <label className="cursor-pointer rounded-md border border-gray-200 px-6 py-4 text-lg font-medium hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950">
-            프로필 사진 바꾸기
-            <input type="file" accept="image/*" className="sr-only"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) pickPhoto(f); }} />
-          </label>
+          <PhotoPicker label="이미지 직접 가져오기" onPick={pickPhoto} disabled={busy} />
         </div>
 
         <div className="mt-5 flex flex-wrap gap-2">

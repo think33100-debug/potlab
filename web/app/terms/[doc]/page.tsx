@@ -12,7 +12,7 @@ export default async function TermsPage({ params }: { params: Promise<{ doc: str
   if (!t) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 md:px-7">
+    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <Link href="/welcome" className="text-lg text-interaction-blue hover:underline">← 돌아가기</Link>
 
       <h1 className="mt-6 text-h2 font-bold">{t.title}</h1>
