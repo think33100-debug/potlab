@@ -325,11 +325,8 @@ export default function Welcome() {
             job={job ?? me?.job_group ?? '작업치료사'}
             role={(role ?? me?.role ?? '현직') as Role}
             onDone={async () => {
-              /* 다 채웠다는 표시. SignupGuard 가 이 값만 봅니다 */
-              await browserSupabase().from('profiles')
-                .update({ survey_at: new Date().toISOString() }).eq('id', session.user.id);
+              /* survey_at 은 save_my_survey 가 이미 찍었습니다. 여기선 다시 읽기만 합니다 */
               await reload();
-              toast('가입이 끝났어요! 반가워요');
               router.push('/');
             }}
           />

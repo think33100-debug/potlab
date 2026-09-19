@@ -4,9 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { MyLists } from '@/components/my-lists';
+import { SurveyEdit } from '@/components/survey-edit';
 
 import { browserSupabase } from '@/lib/supabase-browser';
-import { JOB_GROUPS, ROLES, ROLE_DESC } from '@/lib/who';
+import { JOB_GROUPS, ROLES, ROLE_DESC, type Role } from '@/lib/who';
 import { useAuth } from '../auth';
 import { useToast } from '../toast';
 
@@ -156,6 +157,8 @@ export default function MyPage() {
           ))}
         </div>
       </section>
+
+      <SurveyEdit profileId={me.id} role={(me.role ?? '현직') as Role} job={me.job_group ?? '작업치료사'} />
 
       <MyLists profileId={me.id} />
 

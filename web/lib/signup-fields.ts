@@ -13,12 +13,16 @@ export const REGIONS = [
   '부산·울산·경남', '광주·전라', '강원', '제주',
 ] as const;
 
-/* 고르는 칸에 보이는 긴 이름. 저장할 때는 ' —' 앞만 남깁니다 (옛 submit 과 같게) */
+/* 고르는 칸에 보이는 긴 이름. 저장할 때는 ' —' 앞만 남깁니다 (옛 submit 과 같게).
+
+   대학병원은 사립·국립을 나눕니다 — 급여 차이가 커서 한 덩어리로 두면
+   중위값이 둘 사이 어중간한 값이 되어 양쪽 다 못 씁니다. */
 export const HOSPITAL_TYPES = [
-  '대학병원', '종합병원', '의료원(지방의료원 등)', '재활병원', '요양병원', '병(의)원',
+  '대학병원(사립)', '대학병원(국립)',
+  '종합병원', '의료원(지방의료원 등)', '재활병원', '요양병원', '병(의)원',
   '장애인복지관', '복지관·센터', '아동·발달센터',
   '공공기관(병원) — 건보공단 일산병원, 보훈병원 등',
-  '공공기관(비병원) — 건보공단·심평원 등 심사·행정',
+  '공공기관(비병원) — 건보공단·심평원·도로교통공단 등 심사·행정',
   '기타',
 ] as const;
 
@@ -26,7 +30,8 @@ export const shortType = (v: string) => v.split(' —')[0];
 
 /* 희망 유형·경력/실습 줄에서 쓰는 짧은 목록 (옛 HOSPITALS) */
 export const HOSPITALS = [
-  '대학병원', '종합병원', '의료원', '재활병원', '요양병원', '병(의)원',
+  '대학병원(사립)', '대학병원(국립)',
+  '종합병원', '의료원', '재활병원', '요양병원', '병(의)원',
   '복지관·센터', '아동·발달센터', '공공기관(병원)', '공공기관(비병원)', '기타',
 ] as const;
 
@@ -41,7 +46,11 @@ export const SCHOOLS: { group: string; items: string[] }[] = [
   { group: '대학원', items: ['석사', '박사'] },
 ];
 
+/* 「고르지 않음」 은 뺐습니다 — 남녀 급여 차이를 보려면 빈 줄이 많으면 안 됩니다 */
 export const GENDERS = ['남', '여'] as const;
+
+/* 「없음」 도 답입니다. 빈칸으로 두면 안 적은 건지 없는 건지 구분이 안 됩니다 */
+export const NONE = '없음';
 
 /* 자격증·교육 — n 은 묶음 이름, s 는 그 안의 항목.
    s 가 비면 묶음 이름 자체가 하나의 값입니다.
@@ -82,9 +91,48 @@ export const COURSES_PT: ChipGroup[] = [
 
 export const coursesFor = (job: string) => (job === '물리치료사' ? COURSES_PT : COURSES_OT);
 
-/* 실습·경력 한 줄. 최대 5개 (옛 addRow) */
+/* 실습·경력 한 줄. 최대 5개 (옛 addRow).
+   지역을 같이 받습니다 — 어느 지역에서 몇 년 일하고 어디로 옮기는지 보려면 필요합니다 */
 export const MAX_ROWS = 5;
-export type WorkRow = { hospital: string; months: string };
+export type WorkRow = { hospital: string; region: string; months: string };
+
+/* ── 등록한 줄 → 화면 모양 ──
+
+   마이페이지에서 고칠 때 씁니다. 화면이 안 끼어 있어서 따로 시험할 수 있습니다
+   (node lib/signup-fields.test.mjs) */
+export type Form = Record<string, string>;
+export type Draft = { f: Form; certs: string[]; courses: string[]; rows: WorkRow[] };
+
+export function toDraft(
+  salary: Record<string, unknown> | null,
+  spec: Record<string, unknown> | null,
+): Draft {
+  const s = (v: unknown) => (v === null || v === undefined ? '' : String(v));
+  const f: Form = {};
+  for (const [k, v] of Object.entries(salary ?? {})) f[k] = s(v);
+
+  /* 담을 때는 ' —' 앞만 남겼으니 고르는 칸의 긴 이름으로 되돌립니다 */
+  f.hospital_type = HOSPITAL_TYPES.find((t) => shortType(t) === f.hospital_type) ?? f.hospital_type;
+  f.extra_pay = salary ? (salary.extra_pay ? 'Y' : 'N') : '';
+
+  for (const k of ['school_type', 'grade', 'gpa', 'gpa_scale', 'lang_score', 'want_type', 'want_region']) {
+    f[k] = s(spec?.[k]);
+  }
+  /* 등록은 했는데 비어 있으면 「없음」을 골랐던 것입니다 */
+  if (spec && !f.lang_score) f.lang_none = 'Y';
+
+  const raw = (spec?.career ?? spec?.practice ?? []) as WorkRow[];
+  const rows = Array.isArray(raw)
+    ? raw.map((r) => ({ hospital: s(r.hospital), region: s(r.region), months: s(r.months) }))
+    : [];
+  if (spec && rows.length === 0) f.rows_none = 'Y';
+
+  const list = (v: unknown) => {
+    const xs = Array.isArray(v) ? (v as string[]) : [];
+    return spec && xs.length === 0 ? [NONE] : xs;
+  };
+  return { f, certs: list(spec?.licenses), courses: list(spec?.trainings), rows };
+}
 
 /* 금액을 보고 한 번 되묻는 기준 (옛 OUTLIER).
    막지는 않습니다 — 야간전담처럼 진짜로 높은 경우가 있어서 특이사항에 적게 합니다 */
