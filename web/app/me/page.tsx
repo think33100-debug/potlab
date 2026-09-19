@@ -2,11 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Avatar } from '@/components/avatar';
-import { PhotoPicker } from '@/components/photo-picker';
+import { AvatarPicker } from '@/components/avatar-picker';
 import { MyLists } from '@/components/my-lists';
-import { AVATAR_COLORS, AVATAR_EMOJIS, withColor, withEmoji, withPhoto } from '@/lib/avatar';
-import { shrinkToWebp } from '@/lib/image';
+
 import { browserSupabase } from '@/lib/supabase-browser';
 import { JOB_GROUPS, ROLES, ROLE_DESC } from '@/lib/who';
 import { useAuth } from '../auth';
@@ -68,29 +66,6 @@ export default function MyPage() {
     toast(`닉네임이 바뀌었어요! ${left - 1}번 더 바꿀 수 있어요`);
   };
 
-  const pickPhoto = async (file: File) => {
-    setBusy(true);
-    try {
-      const webp = await shrinkToWebp(file, 400);
-      const path = `${me.id}/${Date.now()}.webp`;
-      const sb = browserSupabase();
-      const { error } = await sb.storage.from('avatars')
-        .upload(path, webp, { contentType: 'image/webp', upsert: true });
-      if (error) throw error;
-      await sb.from('profiles').update({ avatar: withPhoto(me.avatar, path) }).eq('id', me.id);
-      await reload();
-      toast('프로필 사진이 바뀌었어요!');
-    } catch (e) {
-      toast(`사진을 올리지 못했어요 — ${(e as Error).message}`, { tone: 'danger', ms: 4000 });
-    }
-    setBusy(false);
-  };
-
-  const setAvatar = async (v: string) => {
-    await browserSupabase().from('profiles').update({ avatar: v }).eq('id', me.id);
-    await reload();
-  };
-
   /* 직군·역할 바꾸기. 닉네임과 달리 횟수 제한이 없습니다 —
      졸업하면 학생에서 현직으로 옮겨야 하기 때문입니다 */
   const setWho = async (patch: { job_group?: string; role?: string }) => {
@@ -106,27 +81,8 @@ export default function MyPage() {
 
       <section className="mt-7">
         <h2 className="text-h3 font-bold">프로필 사진</h2>
-        <div className="mt-5 flex items-center gap-6">
-          <Avatar value={me.avatar} size="lg" />
-          <PhotoPicker label="이미지 직접 가져오기" onPick={pickPhoto} disabled={busy} />
-        </div>
-
-        <div className="mt-5 flex flex-wrap gap-2">
-          {AVATAR_EMOJIS.map((em) => (
-            <button key={em} type="button" aria-label={em}
-              onClick={() => setAvatar(withEmoji(me.avatar, em))}
-              className="rounded-md border border-gray-200 px-4 py-1 text-body-lg dark:border-gray-700">
-              {em}
-            </button>
-          ))}
-        </div>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {AVATAR_COLORS.map((c) => (
-            <button key={c} type="button" aria-label={'바탕색 ' + c}
-              onClick={() => setAvatar(withColor(me.avatar, c))}
-              className="size-[28px] rounded-md border border-gray-200 dark:border-gray-700"
-              style={{ background: c }} />
-          ))}
+        <div className="mt-5">
+          <AvatarPicker userId={me.id} value={me.avatar} onChange={reload} />
         </div>
       </section>
 
