@@ -10,6 +10,7 @@ import {
 import { shrinkToWebp } from '@/lib/image';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
+import { JOB_GROUPS, ROLES, ROLE_DESC, type JobGroup, type Role } from '@/lib/who';
 import { useAuth } from '../auth';
 import { useToast } from '../toast';
 
@@ -18,7 +19,9 @@ export default function Welcome() {
   const toast = useToast();
   const { loading, session, me, reload } = useAuth();
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [job, setJob] = useState<JobGroup | null>(null);
+  const [role, setRole] = useState<Role | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [nick, setNick] = useState('');
   const [picked, setPicked] = useState<string | null>(null);
@@ -94,7 +97,23 @@ export default function Welcome() {
     setStep(3);
   };
 
-  /* ③ 사진 (선택) */
+  /* ③ 직군·역할 — 둘 다 필수입니다.
+     역할이 비면 커뮤니티가 현직 방만 보여줘서(옛 chFor_ 와 같게) 학생이 길을 잃습니다 */
+  const saveWho = async () => {
+    if (!job || !role) return;
+    setBusy(true);
+    const { error } = await browserSupabase()
+      .from('profiles').update({ job_group: job, role }).eq('id', session.user.id);
+    setBusy(false);
+    if (error) {
+      toast(`저장하지 못했습니다 — ${error.message}`, { tone: 'danger', ms: 4000 });
+      return;
+    }
+    await reload();
+    setStep(4);
+  };
+
+  /* ④ 사진 (선택) */
   const pickPhoto = async (file: File) => {
     setBusy(true);
     try {
@@ -118,8 +137,8 @@ export default function Welcome() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
       <div className="mx-auto w-full max-w-[26rem]">
-        <ol className="mb-7 flex gap-2 text-sm" aria-label="가입 순서">
-          {['약관 동의', '닉네임', '사진'].map((t, i) => (
+        <ol className="mb-7 flex flex-wrap gap-2 text-sm" aria-label="가입 순서">
+          {['약관 동의', '닉네임', '직군·역할', '사진'].map((t, i) => (
             <li
               key={t}
               aria-current={step === i + 1 ? 'step' : undefined}
@@ -220,6 +239,40 @@ export default function Welcome() {
 
         {step === 3 && (
           <section>
+            <h1 className="text-h2 font-bold">어떤 분이신가요</h1>
+            <p className="mt-2 text-lg text-gray-500">
+              커뮤니티에서 보이는 방이 이걸로 갈립니다. 나중에 바꿀 수 있습니다
+            </p>
+
+            <h2 className="mt-7 text-sm font-bold text-gray-500">직군</h2>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {JOB_GROUPS.map((g) => (
+                <Choice key={g} on={job === g} go={() => setJob(g)}>{g}</Choice>
+              ))}
+            </div>
+
+            <h2 className="mt-6 text-sm font-bold text-gray-500">역할</h2>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {ROLES.map((r) => (
+                <Choice key={r} on={role === r} go={() => setRole(r)} sub={ROLE_DESC[r]}>
+                  {r}
+                </Choice>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              disabled={busy || !job || !role}
+              onClick={saveWho}
+              className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {busy ? '저장하는 중…' : (!job || !role) ? '둘 다 골라 주세요' : '다음'}
+            </button>
+          </section>
+        )}
+
+        {step === 4 && (
+          <section>
             <h1 className="text-h2 font-bold">프로필 사진 (선택)</h1>
             <p className="mt-2 text-lg text-gray-500">
               안 올리시면 아래 이모지 아바타로 시작합니다
@@ -284,6 +337,33 @@ export default function Welcome() {
         )}
       </div>
     </main>
+  );
+}
+
+/* 둘 중 하나 고르는 큰 네모. 켜진 것은 teal 입니다 —
+   빨강은 아이덴티티·CTA 자리라 「다음」 단추와 다투면 안 됩니다 */
+function Choice({
+  on, go, sub, children,
+}: {
+  on: boolean; go: () => void; sub?: string; children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={go}
+      aria-pressed={on}
+      className={
+        'rounded-sm border px-6 py-5 text-left transition-colors ' +
+        (on
+          ? 'border-teal-strong bg-badge-teal-bg'
+          : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950')
+      }
+    >
+      <span className={'block text-body-lg font-bold ' + (on ? 'text-teal-strong' : '')}>
+        {children}
+      </span>
+      {sub && <span className="mt-1 block text-sm text-gray-500">{sub}</span>}
+    </button>
   );
 }
 

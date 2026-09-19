@@ -1,5 +1,6 @@
 'use client';
 
+import type { Provider } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { useState, useSyncExternalStore } from 'react';
 import { Logo } from '@/components/logo';
@@ -13,22 +14,22 @@ import { useToast } from '../toast';
 /* 카카오·네이버 색은 teamsparta.md 토큰이 아니라 각 회사가 정한 값입니다.
    저쪽 심사 기준이라 우리 팔레트로 바꾸면 안 됩니다 — 그래서 값을 그대로 씁니다.
 
-   ready 는 「Supabase 에 그 수단이 실제로 켜져 있는가」입니다. 2026-09-19 확인:
-     kakao  authorize → 302, 실제 카카오로 넘어감
-     naver  400 "Unsupported provider" — Supabase 에 네이버 제공자가 아예 없습니다
-     apple  400 — 열쇠를 아직 안 받았습니다 */
+   oauth 는 Supabase 에 적힌 이름 그대로여야 합니다. 2026-09-19 두드려 본 값:
+     kakao         302 → kauth.kakao.com
+     custom:naver  302 → nid.naver.com   ← 네이버는 custom 제공자로 켜져 있습니다
+     naver         400 "Unsupported provider"  (이름을 이렇게 부르면 안 됩니다)
+     apple         400 — 열쇠를 아직 안 받았습니다
+
+   Provider 타입에 `custom:${string}` 가 들어 있어 그대로 넘기면 됩니다. */
 type Method = {
   key: LoginMethod; label: string; cls: string; why?: string;
   /* 값이 있으면 켜진 수단입니다. 없으면 자리만 있는 것 */
-  oauth?: 'kakao' | 'apple';
+  oauth?: Provider;
 };
 
 const METHODS: Method[] = [
   { key: 'kakao', label: '카카오로 시작하기', cls: 'bg-[#FEE500] text-[#191600]', oauth: 'kakao' },
-  {
-    key: 'naver', label: '네이버로 시작하기', cls: 'bg-[#03C75A] text-white',
-    why: '네이버는 Supabase 가 기본으로 주는 수단이 아닙니다. 따로 붙여야 합니다',
-  },
+  { key: 'naver', label: '네이버로 시작하기', cls: 'bg-[#03C75A] text-white', oauth: 'custom:naver' },
   {
     key: 'apple', label: 'Apple로 시작하기', cls: 'bg-black text-white',
     why: 'Apple 은 아직 열쇠를 못 받았습니다. 자리만 잡아둡니다',

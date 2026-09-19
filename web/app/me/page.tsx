@@ -7,6 +7,7 @@ import { MyLists } from '@/components/my-lists';
 import { AVATAR_COLORS, AVATAR_EMOJIS, emojiAvatar, photoAvatar } from '@/lib/avatar';
 import { shrinkToWebp } from '@/lib/image';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { JOB_GROUPS, ROLES, ROLE_DESC } from '@/lib/who';
 import { useAuth } from '../auth';
 import { useToast } from '../toast';
 
@@ -89,6 +90,15 @@ export default function MyPage() {
     await reload();
   };
 
+  /* 직군·역할 바꾸기. 닉네임과 달리 횟수 제한이 없습니다 —
+     졸업하면 학생에서 현직으로 옮겨야 하기 때문입니다 */
+  const setWho = async (patch: { job_group?: string; role?: string }) => {
+    const { error } = await browserSupabase().from('profiles').update(patch).eq('id', me.id);
+    if (error) { toast(`바꾸지 못했습니다 — ${error.message}`, { tone: 'danger' }); return; }
+    await reload();
+    toast(patch.role ? `${patch.role}으로 바꿨습니다` : `${patch.job_group}로 바꿨습니다`);
+  };
+
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 md:px-7">
       <h1 className="text-h1 font-bold">내 정보</h1>
@@ -168,6 +178,32 @@ export default function MyPage() {
         )}
       </section>
 
+      <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
+        <h2 className="text-h3 font-bold">직군 · 역할</h2>
+        <p className="mt-1 text-lg text-gray-500">
+          커뮤니티에서 보이는 방이 역할로 갈립니다. 졸업하시면 현직으로 바꿔 주세요
+        </p>
+
+        <h3 className="mt-6 text-sm font-bold text-gray-500">직군</h3>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {JOB_GROUPS.map((g) => (
+            <Pick key={g} on={me.job_group === g} go={() => setWho({ job_group: g })}>{g}</Pick>
+          ))}
+        </div>
+
+        <h3 className="mt-6 text-sm font-bold text-gray-500">역할</h3>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {ROLES.map((r) => (
+            <Pick key={r} on={me.role === r} go={() => setWho({ role: r })}>
+              {r}
+              <span className={'ml-2 text-sm font-medium ' + (me.role === r ? 'text-white/70' : 'text-gray-400')}>
+                {ROLE_DESC[r]}
+              </span>
+            </Pick>
+          ))}
+        </div>
+      </section>
+
       <MyLists profileId={me.id} />
 
       <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
@@ -177,5 +213,18 @@ export default function MyPage() {
         </button>
       </section>
     </main>
+  );
+}
+
+function Pick({ on, go, children }: { on: boolean; go: () => void; children: React.ReactNode }) {
+  return (
+    <button type="button" onClick={go} aria-pressed={on}
+      className={
+        'rounded-md border px-6 py-4 text-lg font-medium transition-colors ' +
+        (on ? 'border-teal-strong bg-teal-strong text-white'
+            : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950')
+      }>
+      {children}
+    </button>
   );
 }
