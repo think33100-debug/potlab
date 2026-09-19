@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Avatar } from '@/components/avatar';
+import { MyLists } from '@/components/my-lists';
 import { AVATAR_COLORS, AVATAR_EMOJIS, emojiAvatar, photoAvatar } from '@/lib/avatar';
 import { shrinkToWebp } from '@/lib/image';
 import { browserSupabase } from '@/lib/supabase-browser';
@@ -166,6 +167,8 @@ export default function MyPage() {
           </p>
         )}
       </section>
+
+      <MyLists profileId={me.id} />
 
       <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
         <button type="button" onClick={signOut}

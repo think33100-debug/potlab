@@ -80,6 +80,49 @@ export type OrgRow = {
   addr: string | null;
 };
 
+/* ── 커뮤니티 ───────────────────────────────────────── */
+
+export type PostRow = {
+  id: number;
+  channel: string;
+  author_id: string;
+  title: string | null;
+  body: string;
+  comment_count: number;
+  like_count: number;
+  view_count: number;
+  created_at: string;
+  edited_at: string | null;
+  profiles: { nickname: string; avatar: string | null } | null;
+  post_images?: { thumb_path: string }[];
+};
+
+/* 목록에서는 본문을 통째로 안 받습니다. 사진도 썸네일 경로만 받습니다.
+   profiles 는 닉네임과 아바타뿐입니다 — 이메일 칸은 애초에 없습니다.
+
+   `profiles!posts_author_id_fkey` 로 관계 이름을 박아야 합니다.
+   그냥 `profiles` 라고 쓰면 PGRST201 이 납니다 — posts 에서 profiles 로 가는 길이
+   둘이라(작성자 author_id, 좋아요 post_likes 다대다) 어느 쪽인지 못 정합니다. */
+const AUTHOR = 'profiles!posts_author_id_fkey(nickname,avatar)';
+
+export const POST_LIST_COLS =
+  'id,channel,author_id,title,body,comment_count,like_count,view_count,created_at,'
+  + AUTHOR + ',post_images(thumb_path)';
+
+export const POST_ONE_COLS =
+  'id,channel,author_id,title,body,comment_count,like_count,view_count,created_at,edited_at,'
+  + AUTHOR;
+
+export type CommentRow = {
+  id: number;
+  post_id: number;
+  parent_id: number | null;
+  author_id: string;
+  body: string;
+  created_at: string;
+  profiles: { nickname: string; avatar: string | null } | null;
+};
+
 export const ORG_SOURCE_NAME: Record<string, string> = {
   hospital: '심평원 병원정보',
   public: '공공보건의료기관',

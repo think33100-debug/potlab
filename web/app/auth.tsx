@@ -12,6 +12,7 @@ export type Me = {
   nickname: string;
   avatar: string | null;
   job_group: string | null;
+  role: string | null;
   nickname_changes: number;
 };
 
@@ -44,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!s) { setMe(null); return; }
     const { data } = await sb
       .from('profiles')
-      .select('id,nickname,avatar,job_group,nickname_changes')
+      .select('id,nickname,avatar,job_group,role,nickname_changes')
       .eq('id', s.user.id)
       .maybeSingle();
     setMe((data as Me) ?? null);

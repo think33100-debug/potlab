@@ -8,6 +8,10 @@ import { ToastProvider } from "./toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  /* 공유한 링크의 미리보기 그림 주소를 절대 주소로 만들어 줍니다.
+     이게 없으면 /og.png 가 상대 주소로 나가 카톡이 그림을 못 찾습니다.
+     배포할 때 NEXT_PUBLIC_SITE_URL 을 실제 주소로 넣어 주세요 */
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: "POT JOB · 채용공고",
   description: "작업치료사·물리치료사 채용공고를 한곳에서",
 };
@@ -25,9 +29,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {/* 탑바 56px · 그림자 없이 아래 보더만 — teamsparta.md */}
           <header className="sticky top-0 z-40 h-[56px] shrink-0 border-b border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900">
             <div className="mx-auto flex h-full max-w-3xl items-center justify-between px-6 md:px-7">
-              <Link href="/" aria-label="POT JOB 홈">
-                <Logo />
-              </Link>
+              <div className="flex items-center gap-6">
+                <Link href="/" aria-label="POT JOB 홈">
+                  <Logo />
+                </Link>
+                <Link href="/community" className="text-lg font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                  커뮤니티
+                </Link>
+              </div>
               <TopbarUser />
             </div>
           </header>

@@ -24,6 +24,10 @@ export default function Welcome() {
   const [picked, setPicked] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [nickErr, setNickErr] = useState<string | null>(null);
+  /* ② 에서 방금 줄을 만든 경우입니다.
+     이걸 안 두면 줄이 생기는 순간 「이미 가입한 분」 으로 몰려
+     ③ 사진 칸을 못 보고 홈으로 튕깁니다 */
+  const [justMade, setJustMade] = useState(false);
 
   /* 아무것도 안 고르셨으면 기본 아바타. 상태로 안 두고 계산합니다 —
      effect 안에서 setState 하면 그릴 때마다 한 번 더 그립니다 */
@@ -33,8 +37,8 @@ export default function Welcome() {
   useEffect(() => {
     if (loading) return;
     if (!session) { router.replace('/login'); return; }
-    if (me) router.replace('/');                      // 이미 가입을 마친 분
-  }, [loading, session, me, router]);
+    if (me && !justMade) router.replace('/');         // 이미 가입을 마친 분
+  }, [loading, session, me, router, justMade]);
 
   if (loading || !session) {
     return <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7"><p className="text-lg text-gray-500">잠시만요…</p></main>;
@@ -84,6 +88,7 @@ export default function Welcome() {
       });
     }
 
+    setJustMade(true);      // reload 로 me 가 생겨도 ③ 에 머무르게
     await reload();
     setBusy(false);
     setStep(3);
