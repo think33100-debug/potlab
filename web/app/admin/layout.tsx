@@ -13,6 +13,7 @@ import { useAuth } from '../auth';
 
 const MENU = [
   { href: '/admin', label: '홈 꾸미기' },
+  { href: '/admin/jobs', label: '공고' },
 ];
 
 export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
@@ -53,10 +54,10 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
             <Link
               key={m.href}
               href={m.href}
-              aria-current={pathname === m.href ? 'page' : undefined}
+              aria-current={m.href === '/admin' ? (pathname === '/admin' ? 'page' : undefined) : (pathname.startsWith(m.href) ? 'page' : undefined)}
               className={
                 'rounded-md border px-6 py-4 text-lg font-medium ' +
-                (pathname === m.href
+                ((m.href === '/admin' ? pathname === '/admin' : pathname.startsWith(m.href))
                   ? 'border-teal-strong bg-teal-strong text-white'
                   : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400')
               }
