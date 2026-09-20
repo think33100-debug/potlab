@@ -27,7 +27,7 @@ export function SurveyEdit({ profileId, role, job }: { profileId: string; role: 
       sb.from('salary_records').select('*').eq('profile_id', profileId).maybeSingle(),
       sb.from('student_specs').select('*').eq('profile_id', profileId).maybeSingle(),
       /* 어학은 표가 따로입니다 (spec_langs). 한 사람이 여러 줄입니다 */
-      sb.from('spec_langs').select('exam,score,level,note').eq('profile_id', profileId),
+      sb.from('spec_langs').select('exam,score,level').eq('profile_id', profileId),
       sb.from('profiles').select('survey_edits,survey_edits_since').eq('id', profileId).maybeSingle(),
     ]);
     const bad = sal.error ?? spec.error ?? langs.error ?? prof.error;

@@ -18,7 +18,7 @@ import { PART_LABEL, PART_MAX, cheerOf, gaps, tierOf, type PartKey } from '@/lib
 type Me = {
   job_group: string | null; role: string | null; grade: string | null;
   school_type: string | null; gpa: number | null; gpa_scale: number | null;
-  langs: { exam: string; score: number | null; level: string | null; note: string | null }[] | null;
+  langs: { exam: string; score: number | null; level: string | null }[] | null;
   lang_points: number; n_licenses: number; n_trainings: number;
   rows: { hospital?: string; region?: string; months?: string }[];
   want_type: string | null; want_region: string | null;
@@ -271,9 +271,7 @@ function rawOf(k: PartKey, me: Me): string {
       const xs = me.langs ?? [];
       if (xs.length === 0) return '안 적음';
       return xs.map((l) =>
-        l.level ? `${l.exam} ${l.level}`
-        : l.score != null ? `${l.exam} ${l.score}점`
-        : l.note ?? l.exam).join(' · ');
+        l.level ? `${l.exam} ${l.level}` : `${l.exam} ${l.score}점`).join(' · ');
     }
     case 'school':
       return me.school_type ?? '안 적음';

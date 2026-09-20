@@ -648,13 +648,13 @@ function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
             </div>
 
             {/* 시험 고르기 — 다섯 개를 두 줄로 */}
-            <div className="mt-2 grid grid-cols-3 gap-2">
+            <div className="mt-2 grid grid-cols-2 gap-2">
               {EXAMS.map((x) => {
                 const off = used.has(x.name);
                 const on_ = r.exam === x.name;
                 return (
                   <button key={x.name} type="button" disabled={off} aria-pressed={on_}
-                    onClick={() => edit(i, { exam: x.name, score: '', level: '', note: '' })}
+                    onClick={() => edit(i, { exam: x.name, score: '', level: '' })}
                     className={'rounded-sm border px-3 py-4 text-lg font-medium transition-colors '
                       + (on_ ? 'border-teal-strong bg-badge-teal-bg text-teal-strong dark:bg-transparent'
                              : 'border-gray-200 disabled:opacity-30 dark:border-gray-700')}>
@@ -671,11 +671,6 @@ function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
                 <option value="">등급을 골라 주세요</option>
                 {OPIC_LEVELS.map((v) => <option key={v}>{v}</option>)}
               </select>
-            ) : r.exam === '기타' ? (
-              <input value={r.note} maxLength={60} aria-label="어학 시험 이름과 점수"
-                onChange={(e) => edit(i, { note: e.target.value })}
-                placeholder="예) 아이엘츠 6.5"
-                className={INPUT + ' mt-2 w-full'} />
             ) : r.exam ? (
               <span className={(bad ? BOX_BAD : BOX) + ' mt-2 w-full'}>
                 <input type="number" inputMode="numeric" aria-label={`${r.exam} 점수`}

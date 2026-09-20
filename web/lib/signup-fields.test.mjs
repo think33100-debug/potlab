@@ -4,7 +4,7 @@
    여기가 틀리면 마이페이지에서 고칠 때 값이 빈 칸으로 보이고,
    그대로 저장하면 원래 적으신 게 날아갑니다. */
 import assert from 'node:assert/strict';
-import { toDraft, NONE , payAs , emptyLang, langError, langsPayload, OPIC_LEVELS } from './signup-fields.ts';
+import { toDraft, NONE , payAs , emptyLang, langError, langsPayload, OPIC_LEVELS , EXAMS } from './signup-fields.ts';
 
 /* ① 현직 — 담을 때 짧게 줄인 병원 유형이 고르는 칸의 긴 이름으로 돌아와야 합니다 */
 {
@@ -154,11 +154,14 @@ console.log('payAs 통과 — 6가지');
 
   /* 보내는 모양 — 시험마다 채워지는 칸이 다릅니다 */
   assert.deepEqual(langsPayload([row({ exam: '토익', score: '850' })]),
-    [{ exam: '토익', score: 850, level: null, note: null }]);
+    [{ exam: '토익', score: 850, level: null }]);
   assert.deepEqual(langsPayload([row({ exam: '오픽', level: 'IH' })]),
-    [{ exam: '오픽', score: null, level: 'IH', note: null }]);
-  assert.deepEqual(langsPayload([row({ exam: '기타', note: ' 아이엘츠 6.5 ' })]),
-    [{ exam: '기타', score: null, level: null, note: '아이엘츠 6.5' }]);
+    [{ exam: '오픽', score: null, level: 'IH' }]);
+
+  /* 시험은 넷입니다. 「기타」는 뺐습니다 (DB 의 spec_langs_exam_ok 가 최종) */
+  assert.deepEqual(EXAMS.map((e) => e.name), ['토익', '텝스', '토익스피킹', '오픽']);
+  assert.deepEqual(langsPayload([row({ exam: '기타', score: '100' })]), []);
+  assert.deepEqual(langsPayload([row({ exam: '아이엘츠', score: '7' })]), []);
 
   /* 오픽은 공식 9등급만. AM·AH·Superior 는 OPI 것이라 여기 없습니다 */
   assert.deepEqual(OPIC_LEVELS, ['NL','NM','NH','IL','IM1','IM2','IM3','IH','AL']);
@@ -167,15 +170,15 @@ console.log('payAs 통과 — 6가지');
   /* 같은 시험 두 줄은 앞의 것만 (DB 의 spec_langs_one_per_exam 이 최종) */
   assert.deepEqual(
     langsPayload([row({ exam: '토익', score: '850' }), row({ exam: '토익', score: '700' })]),
-    [{ exam: '토익', score: 850, level: null, note: null }]);
+    [{ exam: '토익', score: 850, level: null }]);
 
-  /* 5줄 상한 */
-  const many = ['토익','텝스','토익스피킹','오픽','기타','토익']
-    .map((e) => row({ exam: e, score: '100', level: 'IH', note: 'x' }));
-  assert.equal(langsPayload(many).length, 5);
+  /* 5줄 상한 — 시험이 넷이라 네 줄이 한계지만, 상한 자체는 살아 있어야 합니다 */
+  const many = ['토익','텝스','토익스피킹','오픽','토익','텝스']
+    .map((e) => row({ exam: e, score: '100', level: 'IH' }));
+  assert.equal(langsPayload(many).length, 4);
 }
 
-console.log('어학 통과 — 5가지');
+console.log('어학 통과 — 7가지');
 
 /* ⑦ 조사 — 「텝스은」이 나왔던 자리입니다. 받침 없는 이름은 「는」 */
 assert.match(langError({ ...emptyLang(), exam: '텝스', score: '700' }), /텝스는/);
@@ -186,20 +189,17 @@ console.log('어학 조사 통과 — 2가지');
       안 펴지면 고치기만 해도 어학이 통째로 날아갑니다 */
 {
   const { langs } = toDraft(null, { licenses: [], trainings: [], career: [] }, [
-    { exam: '토익', score: 850, level: null, note: null },
-    { exam: '오픽', score: null, level: 'IH', note: null },
-    { exam: '기타', score: null, level: null, note: '아이엘츠 6.5' },
+    { exam: '토익', score: 850, level: null },
+    { exam: '오픽', score: null, level: 'IH' },
   ]);
   assert.deepEqual(langs, [
-    { exam: '토익', score: '850', level: '', note: '' },
-    { exam: '오픽', score: '', level: 'IH', note: '' },
-    { exam: '기타', score: '', level: '', note: '아이엘츠 6.5' },
+    { exam: '토익', score: '850', level: '' },
+    { exam: '오픽', score: '', level: 'IH' },
   ]);
   /* 편 것을 그대로 다시 보내면 원래 값이어야 합니다 — 한 바퀴 돌아도 안 상해야 합니다 */
   assert.deepEqual(langsPayload(langs), [
-    { exam: '토익', score: 850, level: null, note: null },
-    { exam: '오픽', score: null, level: 'IH', note: null },
-    { exam: '기타', score: null, level: null, note: '아이엘츠 6.5' },
+    { exam: '토익', score: 850, level: null },
+    { exam: '오픽', score: null, level: 'IH' },
   ]);
   /* 어학을 안 넣었던 사람 */
   assert.deepEqual(toDraft(null, {}, []).langs, []);

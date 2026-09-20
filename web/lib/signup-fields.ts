@@ -102,15 +102,16 @@ export type WorkRow = { hospital: string; region: string; months: string };
    시험·점수·등급을 따로 둡니다 — 「토익 850」처럼 글자로 합치면 나중에
    시험별로 셀 수가 없습니다. */
 export const LANG_MAX = 5;
-export type LangRow = { exam: string; score: string; level: string; note: string };
+export type LangRow = { exam: string; score: string; level: string };
 
-/* 만점은 각 시험 공식 기준입니다. DB 의 spec_langs_score_range 와 같은 숫자여야 합니다 */
+/* 시험은 넷입니다. 「기타」는 뺐습니다 — 무슨 시험인지 모르면
+   시험별로 셀 수도, 점수를 매길 수도 없었습니다.
+   만점은 각 시험 공식 기준입니다. DB 의 spec_langs_score_range 와 같은 숫자여야 합니다 */
 export const EXAMS: { name: string; max?: number; ph?: string }[] = [
   { name: '토익', max: 990, ph: '850' },
   { name: '텝스', max: 600, ph: '400' },
   { name: '토익스피킹', max: 200, ph: '140' },
   { name: '오픽' },
-  { name: '기타' },
 ];
 
 /* opic.or.kr 공식 안내에서 확인했습니다 —
@@ -118,7 +119,7 @@ export const EXAMS: { name: string; max?: number; ph?: string }[] = [
    AM·AH·Superior 는 OPI 것이라 여기 넣으면 안 됩니다 */
 export const OPIC_LEVELS = ['NL', 'NM', 'NH', 'IL', 'IM1', 'IM2', 'IM3', 'IH', 'AL'];
 
-export const emptyLang = (): LangRow => ({ exam: '', score: '', level: '', note: '' });
+export const emptyLang = (): LangRow => ({ exam: '', score: '', level: '' });
 
 /* 이 줄이 저장할 만큼 채워졌나. 안 채워진 줄은 그냥 버립니다 —
    어학은 필수가 아니라서 덜 채웠다고 막지 않습니다 */
@@ -126,7 +127,6 @@ export function langDone(r: LangRow): boolean {
   const e = EXAMS.find((x) => x.name === r.exam);
   if (!e) return false;
   if (r.exam === '오픽') return OPIC_LEVELS.includes(r.level);
-  if (r.exam === '기타') return r.note.trim().length > 0;
   const n = Number(r.score);
   return r.score.trim() !== '' && Number.isInteger(n) && n >= 0 && n <= (e.max ?? 0);
 }
@@ -135,10 +135,7 @@ export function langDone(r: LangRow): boolean {
 export function langError(r: LangRow): string | null {
   const e = EXAMS.find((x) => x.name === r.exam);
   if (!e) return null;
-  if (r.exam === '오픽' || r.exam === '기타') {
-    if (r.exam === '기타' && r.note.trim().length > 60) return '60자까지 쓸 수 있어요';
-    return null;
-  }
+  if (r.exam === '오픽') return null;
   if (r.score.trim() === '') return null;
   const n = Number(r.score);
   if (!Number.isFinite(n) || !Number.isInteger(n)) return '숫자만 넣을 수 있어요';
@@ -156,9 +153,8 @@ export function langsPayload(rows: LangRow[]) {
     seen.add(r.exam);
     out.push({
       exam: r.exam,
-      score: r.exam === '오픽' || r.exam === '기타' ? null : Number(r.score),
+      score: r.exam === '오픽' ? null : Number(r.score),
       level: r.exam === '오픽' ? r.level : null,
-      note: r.exam === '기타' ? r.note.trim() : null,
     });
     if (out.length >= LANG_MAX) break;
   }
@@ -221,7 +217,7 @@ export function toDraft(
   };
   /* 등록해 둔 어학을 화면 모양으로 폅니다 */
   const ls = (langs ?? []).map((r) => ({
-    exam: s(r.exam), score: s(r.score), level: s(r.level), note: s(r.note),
+    exam: s(r.exam), score: s(r.score), level: s(r.level),
   }));
   return { f, certs: list(spec?.licenses), courses: list(spec?.trainings), rows, langs: ls };
 }
