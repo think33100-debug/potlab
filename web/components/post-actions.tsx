@@ -67,7 +67,7 @@ export function PostActions({
      데스크톱에는 공유창이 없어 링크 복사로 떨어집니다. */
   const share = async () => {
     const url = `${location.origin}/post/${id}`;
-    const data = { title: `${title} · POT JOB`, text: title, url };
+    const data = { title: `${title} · POTJOB`, text: title, url };
 
     if (navigator.share && navigator.canShare?.(data)) {
       try { await navigator.share(data); return; }

@@ -25,7 +25,7 @@ export function JobOpenLink({
       profile_id: me?.id ?? null,   // 로그인 안 했으면 비웁니다
       kind: 'out',
     }).then(({ error }) => {
-      if (error) console.warn('[POT JOB] 원문 열기 기록 실패:', error.message);
+      if (error) console.warn('[POTJOB] 원문 열기 기록 실패:', error.message);
     });
   };
 

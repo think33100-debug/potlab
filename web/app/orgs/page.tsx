@@ -4,7 +4,7 @@ import { OrgSearch } from '@/components/org-search';
 import { OrgDetail } from '@/components/org-detail';
 
 export const metadata: Metadata = {
-  title: '병원정보 찾기 · POT JOB',
+  title: '병원정보 찾기 · POTJOB',
   description: '전국 기관을 이름·종별·지역으로 찾아보세요',
 };
 

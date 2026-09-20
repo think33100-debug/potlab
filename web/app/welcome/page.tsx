@@ -90,7 +90,7 @@ export default function Welcome() {
          회원에게 영문 제약조건 이름을 보여주지 않고, 다음에 또 나면
          어느 id 였는지 알 수 있게 적어 둡니다 */
       if (error.code === '23503') {
-        console.error('[POT JOB] 없는 계정으로 프로필을 만들려 했습니다 · id =', session.user.id);
+        console.error('[POTJOB] 없는 계정으로 프로필을 만들려 했습니다 · id =', session.user.id);
         await browserSupabase().auth.signOut({ scope: 'local' });
         setNickErr('로그인이 풀렸어요. 다시 로그인해 주세요');
         setTimeout(() => router.replace('/login'), 1200);

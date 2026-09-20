@@ -11,12 +11,12 @@ export const TERMS: Record<TermKey, { title: string; draft: boolean; body: strin
   service: {
     title: '이용약관',
     draft: true,
-    body: `POT JOB 은 작업치료사·물리치료사 채용공고를 모아 보여주고,
+    body: `POTJOB 은 작업치료사·물리치료사 채용공고를 모아 보여주고,
 치료사끼리 이야기할 자리를 제공합니다.
 
 1. 채용공고는 각 기관이 올린 것을 모아 보여드리는 것입니다.
    내용이 기관 원문과 다를 수 있으니 지원 전에 원문을 확인해 주세요.
-   채용 결과에 대해 POT JOB 은 당사자가 아닙니다.
+   채용 결과에 대해 POTJOB 은 당사자가 아닙니다.
 
 2. 회원이 올린 글과 댓글의 책임은 올린 분에게 있습니다.
 

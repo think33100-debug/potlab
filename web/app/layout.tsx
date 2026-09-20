@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { TabBar, TopNav } from "@/components/tab-bar";
@@ -15,9 +15,22 @@ export const metadata: Metadata = {
      이게 없으면 /og.png 가 상대 주소로 나가 카톡이 그림을 못 찾습니다.
      배포 주소는 Vercel 이 알아서 알려줍니다 — lib/site-url.ts 참고 */
   metadataBase: new URL(siteUrl()),
-  title: "POT JOB · 채용공고",
+  title: "POTJOB · 채용공고",
   description: "작업치료사·물리치료사 채용공고를 한곳에서",
+  /* 브랜드 명세서 7번 — 파비콘·홈 화면 아이콘·PWA */
+  icons: {
+    icon: [
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon-180.png", sizes: "180x180" }],
+  },
+  manifest: "/site.webmanifest",
+  appleWebApp: { title: "POTJOB" },
 };
+
+/* 주소창·작업전환 화면 색. 브랜드 빨강입니다 */
+export const viewport: Viewport = { themeColor: "#FF3B30" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -41,7 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <header className="sticky top-0 z-40 h-[56px] shrink-0 border-b border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900">
             <div className="mx-auto flex h-full max-w-3xl items-center justify-between px-6 md:px-7">
               <div className="flex items-center gap-6">
-                <Link href="/" aria-label="POT JOB 홈">
+                <Link href="/" aria-label="POTJOB 홈">
                   <Logo />
                 </Link>
                 <TopNav />

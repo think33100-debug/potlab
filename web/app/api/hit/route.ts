@@ -58,7 +58,7 @@ export async function POST(req: Request) {
   });
 
   if (error) {
-    console.error('[POT JOB] 조회 기록 실패:', error.message);
+    console.error('[POTJOB] 조회 기록 실패:', error.message);
     return NextResponse.json({ ok: false }, { status: 500 });
   }
   return NextResponse.json({ ok: true, counted: true });

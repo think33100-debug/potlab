@@ -36,7 +36,7 @@ export async function generateMetadata({
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const p = await getPost(id);
-  if (!p) return { title: '없는 글이에요 · POT JOB' };
+  if (!p) return { title: '없는 글이에요 · POTJOB' };
 
   const imgs = await getImages(p.id);
   const title = p.title || p.body.slice(0, 40);
@@ -44,11 +44,11 @@ export async function generateMetadata({
   const image = imgs[0] ? publicUrl('post-images', imgs[0].path) : '/og.png';
 
   return {
-    title: `${title} · ${channelName(p.channel)} · POT JOB`,
+    title: `${title} · ${channelName(p.channel)} · POTJOB`,
     description: desc,
     openGraph: {
       type: 'article',
-      siteName: 'POT JOB',
+      siteName: 'POTJOB',
       title,
       description: desc,
       images: [{ url: image }],

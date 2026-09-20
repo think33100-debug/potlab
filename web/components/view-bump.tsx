@@ -25,7 +25,7 @@ export function ViewBump({ id }: { id: number }) {
        supabase-js 의 요청은 thenable 이라 부르기만 하면 아무 일도 안 일어납니다 —
        처음에 이걸 빠뜨려 조회수가 0 에 머물렀습니다 */
     browserSupabase().rpc('bump_post_view', { p_id: id }).then(({ error }) => {
-      if (error) console.warn('[POT JOB] 조회수 못 올림:', error.message);
+      if (error) console.warn('[POTJOB] 조회수 못 올림:', error.message);
     });
   }, [id]);
 
