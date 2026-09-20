@@ -1,14 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { Icon } from '@/components/icon';
 import { useCountUp } from '@/lib/reveal';
 import type { HomeStats } from '@/lib/home';
 
-/* 히어로 — 한 화면을 꽉 채웁니다.
+/* 히어로.
 
-   여기만 어둡습니다(potjob_ink). 나머지는 전부 밝은 종이색이라,
-   첫 화면에서 대비가 한 번 세게 걸립니다.
+   맨 위가 아니라 배너·카테고리·큰배너 다음에 옵니다. 앱을 열면 늘 쓰던 홈이
+   먼저 나오고, 내리면 여기서 이야기가 시작됩니다.
+   그래서 한 화면을 꽉 채우지 않습니다 — 높이는 내용에 맡기고 위아래만 넉넉히.
+
+   여기만 어둡습니다(potjob_ink). 밝은 화면 한가운데 어두운 덩어리가 들어가
+   시선이 한 번 끊깁니다.
 
    어두운 구역이라 따뜻한 회색(--color-mute 등)을 안 씁니다.
    바탕이 잉크색이면 푸른기가 문제가 안 되고, 기존 gray-* 가 더 밝은 쪽까지
@@ -17,9 +20,18 @@ export function Hero({ stats }: { stats: HomeStats }) {
   const ot = stats.joined.find((j) => j.job === '작업치료사');
   const joined = stats.joined.reduce((s, j) => s + j.n, 0);
 
+  /* 아직 안 쌓인 칸은 아예 뺍니다. 「아직 집계 전」이 두 번 뜨면 비어 보입니다.
+     자료가 쌓이면 칸이 저절로 늘어납니다 — 개수를 세어 격자를 만듭니다 */
+  const cells = [
+    ot?.mid != null ? { n: ot.mid, unit: '만원', label: '작업치료사 중위' } : null,
+    joined >= stats.min_n ? { n: joined, unit: '명', label: '지금까지 참여' } : null,
+    stats.hospitals > 0 ? { n: stats.hospitals, label: '등록된 병원' } : null,
+  ].filter((c) => c !== null);
+
   return (
-    <section className="bg-gray-900 text-white">
-      <div className="mx-auto flex min-h-[calc(100svh-56px)] w-full max-w-3xl flex-col justify-center px-6 py-8 md:px-7">
+    /* 밝은 바탕을 뚫고 가로로 꽉 찹니다 — 가운데 어두운 띠가 되게 */
+    <section className="-mx-6 bg-gray-900 px-6 py-8 text-white md:-mx-7 md:px-7">
+      <div className="mx-auto w-full max-w-3xl">
         {/* 눈썹 — 앞에 빨간 짧은 선 */}
         <p className="flex items-center gap-3">
           <span aria-hidden className="h-[2px] w-[20px] shrink-0 bg-brand-red" />
@@ -59,32 +71,24 @@ export function Hero({ stats }: { stats: HomeStats }) {
           </Link>
         </div>
 
-        {/* 숫자 셋. 아직 안 쌓인 값은 지어내지 않고 「아직 집계 전」으로 둡니다 */}
-        <dl className="mt-8 grid grid-cols-3 gap-5 border-t border-gray-800 pt-7">
-          <Stat n={ot?.mid ?? null} unit="만원" label="작업치료사 중위" />
-          <Stat n={joined || null} unit="명" label="지금까지 참여" />
-          <Stat n={stats.hospitals} label="등록된 병원" />
-        </dl>
-
-        <p className="mt-8 flex items-center justify-center gap-2 text-sm text-gray-400">
-          아래로 내려보세요
-          <Icon name="arrow-down" size={14} />
-        </p>
+        {/* 쌓인 만큼만 보여줍니다. 한 칸만 남으면 가로로 꽉 찹니다 */}
+        {cells.length > 0 && (
+          <dl
+            className="mt-8 grid gap-5 border-t border-gray-800 pt-7"
+            style={{ gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))` }}
+          >
+            {cells.map((c) => (
+              <div key={c.label}>
+                <dd className="text-h2 font-bold">
+                  <Count to={c.n} />{c.unit && <span className="text-h3">{c.unit}</span>}
+                </dd>
+                <dt className="mt-1 text-sm text-gray-400">{c.label}</dt>
+              </div>
+            ))}
+          </dl>
+        )}
       </div>
     </section>
-  );
-}
-
-function Stat({ n, unit, label }: { n: number | null; unit?: string; label: string }) {
-  return (
-    <div>
-      <dd className="text-h2 font-bold">
-        {n === null
-          ? <span className="text-h3 text-gray-400">아직 집계 전</span>
-          : <><Count to={n} /><span className="text-h3">{unit}</span></>}
-      </dd>
-      <dt className="mt-1 text-sm text-gray-400">{label}</dt>
-    </div>
   );
 }
 
