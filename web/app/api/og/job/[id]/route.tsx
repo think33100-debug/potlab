@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { isClosed } from '@/lib/job-state';
+import { siteUrl } from '@/lib/site-url';
 import { supabase } from '@/lib/supabase';
 
 /* 카톡·문자에 뜨는 미리보기 그림. 공고마다 다르게 그립니다.
@@ -15,6 +16,26 @@ import { supabase } from '@/lib/supabase';
 /* edge 여야 합니다. nodejs 에서는 fetch 가 file:// 를 못 열어서
    글꼴을 못 읽고 500 이 납니다 (실제로 그렇게 났습니다) */
 export const runtime = 'edge';
+
+/* 한글 글꼴을 서버가 들고 있어야 합니다. 없으면 전부 네모로 깨집니다.
+   woff2 는 satori 가 못 읽습니다. woff 로 넣었습니다.
+
+   이 파일 옆에 두고 import.meta.url 로 읽었더니 글꼴(1.1MB)이 함수 꾸러미에
+   같이 들어가, Edge 함수가 1.96MB 가 되어 **배포가 통째로 실패했습니다**
+   (한도 1MB · 2026-09-20). public/ 으로 옮기고 주소로 받아옵니다 —
+   정적 파일은 함수 크기에 안 들어갑니다.
+
+   한 번 받아 두고 계속 씁니다. 실패하면 다음 요청이 다시 받습니다. */
+let fontCache: ArrayBuffer | null = null;
+async function loadFont(): Promise<ArrayBuffer> {
+  if (fontCache) return fontCache;
+  const res = await fetch(siteUrl() + '/Pretendard-Bold.woff', {
+    cache: 'force-cache',
+  });
+  if (!res.ok) throw new Error('글꼴을 못 받았습니다: ' + res.status);
+  fontCache = await res.arrayBuffer();
+  return fontCache;
+}
 export const dynamic = 'force-dynamic';
 
 const W = 1200;
@@ -53,12 +74,7 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  /* 한글 글꼴을 서버가 들고 있어야 합니다. 없으면 전부 네모로 깨집니다.
-     import.meta.url 로 읽으면 Next 가 배포 꾸러미에 같이 담아 줍니다 —
-     process.cwd() 로 경로를 짜면 Vercel 에서 파일을 못 찾습니다.
-     woff2 는 satori 가 못 읽습니다. woff 로 넣었습니다 */
-  const font = await fetch(new URL('./Pretendard-Bold.woff', import.meta.url))
-    .then((r) => r.arrayBuffer());
+  const font = await loadFont();
 
   let org = 'POTJOB';
   let skin = FALLBACK;
