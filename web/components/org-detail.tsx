@@ -11,7 +11,7 @@ import { supabase, LIST_COLS, ORG_SOURCE_NAME, type JobListItem } from '@/lib/su
 export async function OrgDetail({ name, sido }: { name: string; sido: string | null }) {
   const [orgs, jobs] = await Promise.all([
     findOrgMerged(name, sido),
-    supabase.from('job_posts').select(LIST_COLS)
+    supabase.from('job_posts_pub').select(LIST_COLS)
       .eq('org_name', name)
       .order('posted_at', { ascending: false, nullsFirst: false })
       .limit(20),

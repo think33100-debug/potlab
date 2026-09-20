@@ -1,0 +1,46 @@
+name: 공고 가져오기 (옛 쪽 시트 → Supabase)
+
+# 옛 쪽(구글 시트)에서 새 쪽으로 공고를 옮기는 다리입니다.
+# 옛 쪽 수집기는 평일 7~19시(한국시간)에만 돕니다. 그 밖 시간에도 돌지만,
+# 줄 수가 지난번과 같으면 한 줄짜리 요청 하나로 끝냅니다 — 가볍습니다.
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # 30분마다 — 끝쪽만
+    - cron: '0 20 * * *'     # 한국시간 새벽 5시 — 전체를 한 번 훑습니다
+  workflow_dispatch:         # 손으로 눌러 돌릴 때
+    inputs:
+      full:
+        description: '전체를 훑을까요'
+        type: boolean
+        default: false
+
+# 앞 차례가 아직 돌고 있으면 겹치지 않게 기다립니다.
+# 겹쳐 돌면 같은 줄을 두 번 담게 되는데, id 로 맞춰 담으니 자료는 안 깨집니다.
+# 다만 기록이 지저분해져서 막습니다.
+concurrency:
+  group: sync-jobs
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 가져오기
+        env:
+          APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
+          EXPORT_KEY: ${{ secrets.EXPORT_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          if [ "${{ github.event.schedule }}" = "0 20 * * *" ] \
+          || [ "${{ inputs.full }}" = "true" ]; then
+            node tools/sync_jobs.js --full
+          else
+            node tools/sync_jobs.js
+          fi

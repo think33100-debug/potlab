@@ -70,7 +70,7 @@ export async function GET(
   /* 없는 번호를 넣어도 터지지 않고 기본 그림이 나가야 합니다 */
   try {
     const { data } = await supabase
-      .from('job_posts').select('org_name,job_group,apply_to').eq('id', id).maybeSingle();
+      .from('job_posts_pub').select('org_name,job_group,apply_to').eq('id', id).maybeSingle();
     const j = data as { org_name: string; job_group: string | null; apply_to: string | null } | null;
     if (j) {
       org = j.org_name || 'POTJOB';

@@ -34,7 +34,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
   /* 거르기는 탭·검색과 상관없이 늘 같게 겁니다.
      숨김·보류는 여기서 안 뺍니다 — RLS 가 이미 뺀 것만 내려줍니다 */
   const base = () => {
-    let b = supabase.from('job_posts').select(LIST_COLS);
+    let b = supabase.from('job_posts_pub').select(LIST_COLS);
     if (sp.job) b = b.eq('job_group', sp.job);
     if (sp.sido) b = b.eq('sido', sp.sido);
     if (!sp.all) b = b.or(`apply_to.gte.${today},apply_to.is.null`);
@@ -45,7 +45,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
   /* 탭별 건수 — 줄은 안 받고 세기만 합니다 (head: true) */
   const counts = await Promise.all(
     TABS.map(async (t) => {
-      let c = supabase.from('job_posts').select('id', { count: 'exact', head: true });
+      let c = supabase.from('job_posts_pub').select('id', { count: 'exact', head: true });
       if (sp.job) c = c.eq('job_group', sp.job);
       if (sp.sido) c = c.eq('sido', sp.sido);
       if (!sp.all) c = c.or(`apply_to.gte.${today},apply_to.is.null`);

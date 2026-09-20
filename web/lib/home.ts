@@ -66,9 +66,9 @@ export async function getHome(): Promise<HomeData> {
     supabase.from('site_settings').select('key,value').eq('key', 'top_banner_seconds').maybeSingle(),
 
     /* 숫자는 지어내지 않고 실제로 셉니다 */
-    supabase.from('job_posts').select('id', { count: 'exact', head: true })
+    supabase.from('job_posts_pub').select('id', { count: 'exact', head: true })
       .gte('apply_to', today).lte('apply_to', until),
-    supabase.from('job_posts').select('id', { count: 'exact', head: true }),
+    supabase.from('job_posts_pub').select('id', { count: 'exact', head: true }),
     supabase.from('org_directory').select('name', { count: 'exact', head: true }),
     supabase.from('posts').select('id,title,body')
       .gte('created_at', daysAgoIso(HOT_DAYS))

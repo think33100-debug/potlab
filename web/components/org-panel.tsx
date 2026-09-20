@@ -11,7 +11,7 @@ import { ORG_SOURCE_NAME } from '@/lib/supabase';
 export async function OrgPanel({ orgName, exceptJobId }: { orgName: string; exceptJobId: string }) {
   const [org, others] = await Promise.all([
     findOrg(orgName),
-    supabase.from('job_posts').select(LIST_COLS)
+    supabase.from('job_posts_pub').select(LIST_COLS)
       .eq('org_name', orgName).neq('id', exceptJobId)
       .order('posted_at', { ascending: false, nullsFirst: false })
       .limit(5),

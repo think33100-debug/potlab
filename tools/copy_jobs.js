@@ -180,7 +180,7 @@ function mergeFixes(byId, X) {
   return { edits, fixedPosts, orphanFix };
 }
 
-if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, num, region, sourceOf }; return; }
+if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, num, region, sourceOf, env, page, readSheet, sb, count }; return; }
 
 (async function main() {
   const cfg = env();

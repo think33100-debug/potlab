@@ -104,7 +104,7 @@ async function withExtras(row: OrgInfo): Promise<OrgInfo> {
    숫자를 지어내지 않고 실제로 셉니다 */
 export async function ourNumbers() {
   const [jobs, orgs] = await Promise.all([
-    supabase.from('job_posts').select('id', { count: 'exact', head: true }),
+    supabase.from('job_posts_pub').select('id', { count: 'exact', head: true }),
     supabase.from('org_directory').select('name', { count: 'exact', head: true }),
   ]);
   return { jobs: jobs.count ?? 0, orgs: orgs.count ?? 0 };

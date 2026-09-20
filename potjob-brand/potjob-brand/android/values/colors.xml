@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="potjob_red">#FF3B30</color>
+    <color name="potjob_red_pressed">#E0332A</color>
+    <color name="potjob_ink">#14181C</color>
+    <color name="potjob_surface_dark">#1B2025</color>
+    <color name="potjob_on_dark_muted">#A8B0B5</color>
+    <color name="potjob_paper">#F4F4F1</color>
+</resources>

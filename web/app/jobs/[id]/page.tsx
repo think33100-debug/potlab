@@ -15,7 +15,7 @@ import { Clip, JoinCta } from '@/app/gate';
 export const dynamic = 'force-dynamic';
 
 const one = async (id: string) => {
-  const { data } = await supabase.from('job_posts').select(JOB_ONE_COLS).eq('id', id).maybeSingle();
+  const { data } = await supabase.from('job_posts_pub').select(JOB_ONE_COLS).eq('id', id).maybeSingle();
   return (data as unknown as JobPost | null) ?? null;
 };
 
@@ -60,7 +60,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   /* select('*') 를 쓰면 안 됩니다 — 출처·수집일 칸은 회원에게 권한이 없어
      통째로 거절당합니다. 볼 수 있는 칸만 적습니다 (JOB_ONE_COLS) */
   const { data, error } = await supabase
-    .from('job_posts').select(JOB_ONE_COLS).eq('id', id).maybeSingle();
+    .from('job_posts_pub').select(JOB_ONE_COLS).eq('id', id).maybeSingle();
 
   if (error) {
     return (
