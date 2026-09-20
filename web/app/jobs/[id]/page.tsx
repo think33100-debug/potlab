@@ -36,7 +36,9 @@ export async function generateMetadata({
 
   const title = `${j.org_name} ${j.job_group ?? '치료사'} 채용`;
   const desc = [j.title, when, j.work_place].filter(Boolean).join(' · ');
-  const image = `${siteUrl()}/og.png`;
+  /* 공고마다 다르게 그립니다 (app/api/og/job/[id]/route.tsx).
+     절대 주소여야 합니다 — 카톡이 상대 주소로는 그림을 못 찾습니다 */
+  const image = `${siteUrl()}/api/og/job/${encodeURIComponent(j.id)}`;
 
   return {
     title: `${title} · POTJOB`,
