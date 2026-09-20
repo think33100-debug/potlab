@@ -8,7 +8,7 @@
  * 자료는 Apps Script → 이 스크립트 → Supabase 로 바로 흐릅니다.
  *
  * .env.local 에서 읽습니다:
- *   SUPABASE_URL · SUPABASE_SERVICE_KEY · APPS_SCRIPT_URL
+ *   SUPABASE_URL · SUPABASE_SERVICE_KEY · APPS_SCRIPT_URL · EXPORT_KEY
  */
 'use strict';
 const fs = require('fs');
@@ -23,7 +23,7 @@ function env() {
   fs.readFileSync(f, 'utf8').split(/\r?\n/).forEach((l) => {
     const m = l.match(/^\s*([A-Z_]+)\s*=\s*(.*?)\s*$/); if (m) out[m[1]] = m[2];
   });
-  ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'APPS_SCRIPT_URL'].forEach((k) => {
+  ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'APPS_SCRIPT_URL', 'EXPORT_KEY'].forEach((k) => {
     if (!out[k]) { console.error('.env.local 에 ' + k + ' 가 없습니다.'); process.exit(1); }
   });
   return out;
@@ -34,7 +34,7 @@ let seq = 0;
 async function page(cfg, sheet, from, count) {
   const cb = '__potlab_cb_' + (++seq) + '_' + Date.now();
   const u = cfg.APPS_SCRIPT_URL + '?callback=' + cb + '&action=exportRows'
-          + '&args=' + encodeURIComponent(JSON.stringify([sheet, from, count]))
+          + '&args=' + encodeURIComponent(JSON.stringify([cfg.EXPORT_KEY, sheet, from, count]))
           + '&t=' + Date.now();
   const res = await fetch(u);
   const txt = await res.text();
