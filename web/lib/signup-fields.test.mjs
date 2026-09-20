@@ -4,7 +4,7 @@
    여기가 틀리면 마이페이지에서 고칠 때 값이 빈 칸으로 보이고,
    그대로 저장하면 원래 적으신 게 날아갑니다. */
 import assert from 'node:assert/strict';
-import { toDraft, NONE } from './signup-fields.ts';
+import { toDraft, NONE , payAs } from './signup-fields.ts';
 
 /* ① 현직 — 담을 때 짧게 줄인 병원 유형이 고르는 칸의 긴 이름으로 돌아와야 합니다 */
 {
@@ -110,3 +110,32 @@ console.log('signup-fields 통과 — 4가지');
 }
 
 console.log('숫자 칸 검사 통과 — 6가지');
+
+/* ⑤ payAs — DB 의 salary_estimated_needs_net 에 걸리지 않게 셋이 늘 같이 움직이나
+   (2026-09-20 실제로 난 오류: pay_basis 만 estimated 로 남았습니다) */
+{
+  const est = { pay_basis: 'estimated', pay_unsure: 'Y', net_monthly: '220', dependents: '1' };
+  assert.deepEqual(payAs(est), { pay_basis: 'estimated', net_monthly: 220, dependents: 1 });
+
+  /* 토글만 끈 경우 — 예전에 저장이 막히던 자리입니다 */
+  assert.deepEqual(payAs({ ...est, pay_unsure: '', net_monthly: '', dependents: '' }),
+    { pay_basis: 'gross', net_monthly: null, dependents: null });
+
+  /* 칸만 지운 경우도 마찬가지로 gross 로 떨어져야 합니다 */
+  assert.deepEqual(payAs({ ...est, net_monthly: '' }),
+    { pay_basis: 'gross', net_monthly: null, dependents: null });
+  assert.deepEqual(payAs({ ...est, dependents: '' }),
+    { pay_basis: 'gross', net_monthly: null, dependents: null });
+
+  /* 세전을 직접 적은 보통의 경우 */
+  assert.deepEqual(payAs({ pay_basis: 'gross', base_monthly: '250' }),
+    { pay_basis: 'gross', net_monthly: null, dependents: null });
+
+  /* estimated 로 나온 줄은 언제나 DB 규칙을 만족해야 합니다 */
+  for (const f of [est, { ...est, dependents: '4' }]) {
+    const r = payAs(f);
+    assert.ok(r.pay_basis !== 'estimated' || (r.net_monthly != null && r.dependents != null));
+  }
+}
+
+console.log('payAs 통과 — 6가지');

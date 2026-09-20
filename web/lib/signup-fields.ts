@@ -103,6 +103,25 @@ export type WorkRow = { hospital: string; region: string; months: string };
 export type Form = Record<string, string>;
 export type Draft = { f: Form; certs: string[]; courses: string[]; rows: WorkRow[] };
 
+/* 빈 칸은 0 이 아니라 '안 적음' 입니다 */
+const num = (v: string | undefined) => (v && v.trim() !== '' ? Number(v) : null);
+
+/* 급여를 세전으로 직접 적었는지, 세후로 적어 계산했는지.
+
+   DB 의 salary_estimated_needs_net 이 「estimated 면 net_monthly 와 dependents 가
+   둘 다 있어야 한다」고 막습니다. 예전에는 세 칸을 따로 판단해서 어긋났습니다 —
+   세후로 계산해 넣은 뒤 「세전을 모르겠어요」를 다시 끄면 pay_basis 만
+   estimated 로 남아 저장이 통째로 막혔습니다. 한 번만 판단하고 셋을 여기서 갈라 씁니다 */
+export function payAs(f: Form) {
+  const est = f.pay_basis === 'estimated' && f.pay_unsure === 'Y'
+    && num(f.net_monthly) != null && num(f.dependents) != null;
+  return {
+    pay_basis: est ? 'estimated' : 'gross',
+    net_monthly: est ? num(f.net_monthly) : null,
+    dependents: est ? num(f.dependents) : null,
+  };
+}
+
 export function toDraft(
   salary: Record<string, unknown> | null,
   spec: Record<string, unknown> | null,

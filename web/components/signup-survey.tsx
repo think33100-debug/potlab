@@ -5,7 +5,7 @@ import { browserSupabase } from '@/lib/supabase-browser';
 import {
   CERTS, EMPLOYMENTS, GENDERS, GRADES, HOSPITALS, HOSPITAL_TYPES,
   MAX_ROWS, NONE, RANGE, REGIONS, SALARY_HIGH, SALARY_LOW, SCHOOLS, THIS_YEAR,
-  anyError, coursesFor, fieldError, shortType,
+  anyError, coursesFor, fieldError, payAs, shortType,
   type ChipGroup, type Draft, type Form, type WorkRow,
 } from '@/lib/signup-fields';
 import { annualTotal, hourlyWage, man10, monthlyHours } from '@/lib/pay';
@@ -337,10 +337,14 @@ export function SignupSurvey({
         hospital_type: shortType(f.hospital_type),
         employ_type: f.employ_type,
         base_monthly: Number(f.base_monthly),
-        /* 세전을 직접 적었는지, 세후로 적어 계산했는지 남깁니다 */
-        pay_basis: f.pay_basis === 'estimated' ? 'estimated' : 'gross',
-        net_monthly: f.pay_unsure === 'Y' ? num(f.net_monthly) : null,
-        dependents: f.pay_unsure === 'Y' ? num(f.dependents) : null,
+        /* 세전을 직접 적었는지, 세후로 적어 계산했는지 남깁니다.
+
+           셋은 반드시 같이 움직여야 합니다. DB 의 salary_estimated_needs_net 이
+           「estimated 면 net_monthly 와 dependents 가 둘 다 있어야 한다」고 막습니다.
+           따로 판단하니 어긋났습니다 — 세후로 계산해 넣은 뒤 「세전을 모르겠어요」를
+           다시 끄면 pay_basis 만 estimated 로 남아 저장이 통째로 막혔습니다.
+           그래서 한 번만 판단하고 셋 다 거기서 갈라 씁니다 */
+        ...payAs(f),
         extra_pay_monthly: num(f.extra_pay_monthly),
         duty_count: num(f.duty_count), duty_hours: num(f.duty_hours), duty_pay: num(f.duty_pay),
         weekend_count: num(f.weekend_count), weekend_hours: num(f.weekend_hours),
@@ -825,6 +829,11 @@ function Gross({ f, patch }: { f: Form; patch: (p: Form) => void }) {
   const canEstimate = unsure && Number.isFinite(net) && net > 0
     && !fieldError('net_monthly', f.net_monthly, f) && !fieldError('dependents', f.dependents, f);
   const guess = canEstimate ? 만원(grossFromNet(net * 10_000, dep)) : null;
+  /* 「이 값으로 넣을게요」를 눌러 넣은 뒤입니다.
+     예전에는 눌러도 화면이 그대로여서 안 눌린 줄 알았습니다 —
+     값은 위 「고정 월급」 칸에 들어가는데 그 칸이 화면 밖이었습니다.
+     그래서 여기서 계산 칸을 접고 넣은 값을 보여줍니다 */
+  const put = unsure && f.pay_basis === 'estimated' && !!f.base_monthly;
 
   return (
     <div>
@@ -835,7 +844,7 @@ function Gross({ f, patch }: { f: Form; patch: (p: Form) => void }) {
 
       <button type="button" aria-pressed={unsure}
         onClick={() => patch(unsure
-          ? { pay_unsure: '', net_monthly: '', dependents: '' }
+          ? { pay_unsure: '', net_monthly: '', dependents: '', pay_basis: 'gross' }
           : { pay_unsure: 'Y' })}
         className={'mt-5 flex w-full items-center gap-5 rounded-sm border px-6 py-5 text-left transition-colors '
           + (unsure ? 'border-teal-strong bg-badge-teal-bg dark:border-teal-strong/40 dark:bg-transparent'
@@ -844,7 +853,21 @@ function Gross({ f, patch }: { f: Form; patch: (p: Form) => void }) {
         <span className="text-lg font-medium">세전을 모르겠어요</span>
       </button>
 
-      {unsure && (
+      {unsure && put && (
+        <div className={'mt-5 ' + PANEL}>
+          세전 월급 <b>{f.base_monthly}만원</b>으로 넣었어요
+          <span className="mt-1 block text-sm">
+            세후 {f.net_monthly}만원 · 부양가족 {f.dependents}명에서 계산한 값이에요.
+            위 고정 월급 칸에서 고치셔도 돼요
+          </span>
+          <button type="button" onClick={() => patch({ pay_basis: 'gross' })}
+            className="mt-5 rounded-md border border-teal-strong px-6 py-4 text-lg font-medium text-teal-strong">
+            다시 계산할래요
+          </button>
+        </div>
+      )}
+
+      {unsure && !put && (
         <div className="mt-5 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
           <Num k="net_monthly" label="세후(실수령) 월급" req unit="만원" ph="220"
             hint="통장에 들어오는 금액이에요"
