@@ -22,7 +22,7 @@ import { toDraft, NONE } from './signup-fields.ts';
   );
   assert.equal(f.hospital_type, '공공기관(비병원) — 건보공단·심평원·도로교통공단 등 심사·행정');
   assert.equal(f.net_monthly, '250');
-  assert.equal(f.extra_pay, 'Y');
+  assert.equal(f.pay_unsure, '');
   assert.equal(f.note, '');            // null 은 빈 칸으로
   assert.equal(f.lang_none, undefined); // 점수가 있으면 「없음」이 아닙니다
   assert.equal(f.rows_none, undefined);
@@ -33,10 +33,10 @@ import { toDraft, NONE } from './signup-fields.ts';
       안 그러면 고치기 화면이 열리자마자 「위 칸을 채워 주세요」로 잠깁니다 */
 {
   const { f, certs, courses } = toDraft(
-    { hired_year: 2021, hospital_type: '대학병원(국립)', extra_pay: false },
+    { hired_year: 2021, hospital_type: '대학병원(국립)', pay_basis: 'estimated' },
     { licenses: [], trainings: [], career: [], lang_score: null },
   );
-  assert.equal(f.extra_pay, 'N');
+  assert.equal(f.pay_unsure, 'Y');   // 세후로 적어 계산했던 분
   assert.equal(f.lang_none, 'Y');
   assert.equal(f.rows_none, 'Y');
   assert.deepEqual(certs, [NONE]);
@@ -55,7 +55,7 @@ import { toDraft, NONE } from './signup-fields.ts';
   });
   assert.equal(f.grade, '4학년');
   assert.equal(f.want_type, '종합병원');
-  assert.equal(f.extra_pay, '');        // 급여 줄이 없으면 비어 있어야 합니다
+  assert.equal(f.pay_unsure, '');       // 급여 줄이 없으면 비어 있어야 합니다
   assert.deepEqual(rows, [{ hospital: '요양병원', region: '강원', months: '2' }]);
 }
 

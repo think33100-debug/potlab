@@ -10,20 +10,23 @@ import { man10, rankOf, tierOf, type Rank } from '@/lib/pay';
 export type Me = {
   nickname: string; job_group: string | null; role: string | null;
   band: string | null; region: string; hospital_type: string; employ_type: string;
-  net_monthly: number; bonus_yearly: number | null;
-  duty_count: number | null; weekend_count: number | null;
+  base_monthly: number | null; pay_basis: string | null;
+  net_monthly: number | null; dependents: number | null;
+  extra_pay_monthly: number | null; bonus_yearly: number | null;
+  duty_count: number | null; duty_hours: number | null; duty_pay: number | null;
+  weekend_count: number | null; weekend_hours: number | null; weekend_pay: number | null;
   hired_year: number; current_hired_year: number | null; birth_year: number | null;
   annual: number;
 };
 export type Stats = {
   n: number;
-  monthly: { min: number; q1: number; median: number; q3: number; max: number } | null;
-  annual: { q1: number; median: number; q3: number } | null;
+  annual: { min: number; q1: number; median: number; q3: number; max: number } | null;
+  base: { q1: number; median: number; q3: number } | null;
   duty_avg: number | null;
   weekend_avg: number | null;
   emp_dist: Record<string, number> | null;
   my_below_annual: number;
-  my_below_monthly: number;
+  my_below_base: number;
   in_filter: boolean;
 };
 
@@ -31,13 +34,13 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
   /* 주 순위는 연 환산입니다 — 상여까지 넣은 실제 총액이라야 비교가 됩니다.
      연 환산이 안 나오면(표본 부족) 고정 월급으로 내려갑니다 (옛 getStats 와 같게) */
   const annRank: Rank | null = rankOf(s.n, s.my_below_annual, me.annual, s.annual?.median ?? null, minN);
-  const monRank: Rank | null = rankOf(s.n, s.my_below_monthly, me.net_monthly, s.monthly?.median ?? null, minN);
+  const monRank: Rank | null = rankOf(s.n, s.my_below_base, me.base_monthly, s.base?.median ?? null, minN);
   const rank = annRank ?? monRank;
   const byAnnual = annRank !== null;
 
   const tags = [
     me.band, me.hospital_type, me.region, me.employ_type,
-    `월 ${me.net_monthly}만원`, `연 ${man10(me.annual)}`,
+    me.base_monthly ? `월 ${me.base_monthly}만원(세전)` : null, `연 ${man10(me.annual)}`,
     me.duty_count ? `당직 ${me.duty_count}회` : null,
     me.weekend_count ? `주말 ${me.weekend_count}회` : null,
   ].filter(Boolean) as string[];
@@ -64,7 +67,7 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
             {tierOf(rank.top).label}
           </span>
           <p className="mt-2 text-sm text-gray-500">
-            같은 조건 {rank.n}명 중 · {byAnnual ? '연 환산' : '고정 월급'} 기준
+            같은 조건 {rank.n}명 중 · {byAnnual ? '연 총소득' : '고정 월급'} 기준
           </p>
           <p className="mt-1 text-h1 font-bold">상위 {rank.top}%</p>
           <p className="mt-1 text-lg text-gray-500">
@@ -84,14 +87,17 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
 
           {byAnnual && (
             <p className="mt-5 rounded-sm bg-gray-50 p-5 text-sm text-gray-500 dark:bg-gray-950">
-              연 환산 = 고정 월급 {me.net_monthly}만원 × 12
-              {me.bonus_yearly ? ` + 상여 ${me.bonus_yearly}만원` : ' (상여 없음)'}
+              연 총소득 = 고정 월급 {me.base_monthly}만원 × 12
+              {me.extra_pay_monthly ? ` + 추가수당 ${me.extra_pay_monthly}만원 × 12` : ''}
+              {me.bonus_yearly ? ` + 상여 ${me.bonus_yearly}만원` : ''}
+              {(me.duty_pay && me.duty_count) ? ` + 당직 ${me.duty_pay}만원 × ${me.duty_count}회 × 12` : ''}
+              {(me.weekend_pay && me.weekend_count) ? ` + 주말 ${me.weekend_pay}만원 × ${me.weekend_count}회 × 12` : ''}
               {' = '}<b className="text-gray-900 dark:text-white">{man10(rank.mine)}</b>
             </p>
           )}
 
           <p className="mt-5 text-lg">
-            내 {byAnnual ? '연 환산' : '월 실수령'}{' '}
+            내 {byAnnual ? '연 총소득' : '월 실수령'}{' '}
             <b>{byAnnual ? man10(rank.mine) : `${rank.mine}만원`}</b>
             {' · '}중위값 <b>{byAnnual ? man10(rank.median) : `${rank.median}만원`}</b>
           </p>

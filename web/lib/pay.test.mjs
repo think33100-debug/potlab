@@ -56,3 +56,33 @@ assert.equal(grow(30).goal, 100);
 assert.equal(grow(120).goal, 200);
 
 console.log('pay 통과 — 7가지');
+
+/* ── 연 총소득 · 시급 ── */
+{
+  const { annualTotal, monthlyHours, hourlyWage, BASE_HOURS } = await import('./pay.ts');
+
+  /* ⑧ 손으로 셀 수 있는 값 — DB 의 annual_total 식과 같아야 합니다 */
+  const p = { base: 250, extra: 10, bonus: 400, dutyCount: 2, dutyHours: 3, dutyPay: 5,
+              weekendCount: 1, weekendHours: 4, weekendPay: 8 };
+  //  250*12 + 10*12 + 400 + 5*2*12 + 8*1*12 = 3000 + 120 + 400 + 120 + 96
+  assert.equal(annualTotal(p), 3736);
+
+  /* ⑨ 안 적은 칸은 0 으로 봅니다 */
+  assert.equal(annualTotal({ base: 250 }), 3000);
+  assert.equal(annualTotal({ base: 250, bonus: 600 }), 3600);
+
+  /* ⑩ 실제 노동시간 — 기본 174 + 당직 6 + 주말 4 */
+  assert.equal(monthlyHours(p), BASE_HOURS + 2 * 3 + 1 * 4);
+  assert.equal(monthlyHours({ base: 250 }), BASE_HOURS);
+
+  /* ⑪ 시급 — 월 총소득 ÷ 실제 노동시간 */
+  assert.equal(hourlyWage({ base: 174 }), 10_000);   // 174만원 ÷ 174시간 = 시급 1만원
+
+  /* ⑫ 같은 연봉이어도 당직이 많으면 시급이 낮습니다 — 이 화면의 요점 */
+  const 편한곳 = { base: 300 };
+  const 빡센곳 = { base: 250, dutyCount: 4, dutyHours: 8, dutyPay: 12.5 };
+  assert.equal(annualTotal(편한곳), annualTotal(빡센곳));      // 연봉은 3,600만원으로 같음
+  assert.ok(hourlyWage(빡센곳) < hourlyWage(편한곳));
+}
+
+console.log('연 총소득 · 시급 통과 — 5가지');

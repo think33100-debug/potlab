@@ -196,7 +196,7 @@ export default function SpecPage() {
 function Rookie({ job }: { job: string | null }) {
   const [d, setD] = useState<{
     job: string | null; min_n: number; base: number;
-    types: { type: string; n: number; median: number; median_year: number }[];
+    types: { type: string; n: number; median_year: number; median_base: number }[];
   } | null>(null);
 
   useEffect(() => {
@@ -210,7 +210,7 @@ function Rookie({ job }: { job: string | null }) {
     <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
       <h2 className="text-h3 font-bold">여기 가면 얼마 받나요</h2>
       <p className="mt-1 text-sm text-gray-500">
-        {d.job ?? '치료사'} 중 <b>연차 2년 이하</b>가 적어준 고정 월 실수령이에요
+        {d.job ?? '치료사'} 중 <b>연차 2년 이하</b>가 적어준 연 총소득이에요
       </p>
 
       {d.types.length === 0 ? (
@@ -228,9 +228,9 @@ function Rookie({ job }: { job: string | null }) {
                   <span className="ml-2 text-sm text-gray-400">{t.n}명</span>
                 </span>
                 <span className="shrink-0 text-right">
-                  <b className="text-h3">{t.median}만원</b>
+                  <b className="text-h3">{man10(t.median_year)}</b>
                   <span className="block text-sm text-gray-400">
-                    연 {man10(t.median_year)}
+                    고정 월급 {t.median_base}만원
                   </span>
                 </span>
               </div>

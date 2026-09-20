@@ -99,21 +99,24 @@ export default function PayPage() {
             </section>
           ) : (
             <>
-              <Card title="고정 월 실수령"
-                sub={`${res.job ?? '전체'} · ${s.n}명 기준 (이 직군 전체 ${res.total}명)`}>
-                <Row k="중위값" v={`${s.monthly!.median}만원`} big />
-                <Row k="상위 25%" v={`${s.monthly!.q3}만원`} />
-                <Row k="하위 25%" v={`${s.monthly!.q1}만원`} />
-                <Row k="범위" v={`${s.monthly!.min} ~ ${s.monthly!.max}만원`} />
-                <Row k="월 당직" v={`${s.duty_avg}회`} />
-                <Row k="월 주말근무" v={`${s.weekend_avg}회`} />
+              {/* 연 총소득이 기준입니다. 월급만 비교하면 상여 있는 곳과
+                  없는 곳이 같아 보여서 뜻이 없습니다 */}
+              <Card title="연 총소득"
+                sub={`${res.job ?? '전체'} · ${s.n}명 기준 (이 직군 전체 ${res.total}명)`
+                  + ' · 고정월급 + 추가수당 + 상여 + 당직·주말 수당'}>
+                <Row k="중위값" v={man10(s.annual!.median)} big />
+                <Row k="상위 25%" v={man10(s.annual!.q3)} />
+                <Row k="하위 25%" v={man10(s.annual!.q1)} />
+                <Row k="범위" v={`${man10(s.annual!.min)} ~ ${man10(s.annual!.max)}`} />
               </Card>
 
-              {s.annual && (
-                <Card title="연 환산" sub="고정급 12개월 + 연간 상여">
-                  <Row k="중위값" v={man10(s.annual.median)} big />
-                  <Row k="상위 25%" v={man10(s.annual.q3)} />
-                  <Row k="하위 25%" v={man10(s.annual.q1)} />
+              {s.base && (
+                <Card title="고정 월급" sub="세전 · 수당·상여를 뺀 기본급">
+                  <Row k="중위값" v={`${s.base.median}만원`} big />
+                  <Row k="상위 25%" v={`${s.base.q3}만원`} />
+                  <Row k="하위 25%" v={`${s.base.q1}만원`} />
+                  <Row k="월 당직" v={`${s.duty_avg}회`} />
+                  <Row k="월 주말근무" v={`${s.weekend_avg}회`} />
                 </Card>
               )}
 

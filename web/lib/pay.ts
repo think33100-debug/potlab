@@ -68,3 +68,49 @@ export function grow(n: number): { goal: number; pct: number; msg: string } {
   else { goal = Math.ceil((n + 1) / 100) * 100; msg = '이미 믿을 만한 표본이에요. 더 모이면 세부 조건까지 갈라볼 수 있어요'; }
   return { goal, pct: Math.min(Math.round((n / goal) * 100), 100), msg };
 }
+
+/* ── 연 총소득 계산 ──
+
+   DB 의 salary_records.annual_total 과 같은 식이어야 합니다.
+   화면에서 「연봉으로 치면 약 …」을 바로 보여주려고 여기에도 둡니다.
+   식이 갈라지면 화면과 통계가 다른 말을 하게 되니 시험으로 묶어둡니다. */
+export type PayInput = {
+  base: number;            // 고정 월급 (세전, 만원)
+  extra?: number;          // 추가 수당 월 평균 (만원)
+  bonus?: number;          // 연간 상여 (만원)
+  dutyCount?: number;      // 월 당직 횟수
+  dutyHours?: number;      // 당직 1회 시간
+  dutyPay?: number;        // 당직 1회 수당 (만원)
+  weekendCount?: number;   // 월 주말근무 횟수
+  weekendHours?: number;   // 주말근무 1회 시간
+  weekendPay?: number;     // 주말근무 1회 수당 (만원)
+};
+
+const n0 = (v: number | undefined) => (Number.isFinite(v) ? (v as number) : 0);
+
+/* 연 총소득 (만원) */
+export function annualTotal(p: PayInput): number {
+  return n0(p.base) * 12
+    + n0(p.extra) * 12
+    + n0(p.bonus)
+    + n0(p.dutyPay) * n0(p.dutyCount) * 12
+    + n0(p.weekendPay) * n0(p.weekendCount) * 12;
+}
+
+/* 한 달에 실제로 일하는 시간.
+   174시간은 주 40시간 · 월 평균 4.345주 기준입니다 (옛 앱과 같은 값) */
+export const BASE_HOURS = 174;
+
+export function monthlyHours(p: PayInput): number {
+  return BASE_HOURS
+    + n0(p.dutyCount) * n0(p.dutyHours)
+    + n0(p.weekendCount) * n0(p.weekendHours);
+}
+
+/* 시급 (원). 당직·주말까지 넣은 실제 노동시간으로 나눕니다 —
+   월급은 상위인데 시급은 하위인 경우가 여기서 드러납니다 */
+export function hourlyWage(p: PayInput): number {
+  const h = monthlyHours(p);
+  if (h <= 0) return 0;
+  return Math.round((annualTotal(p) / 12) * 10_000 / h);
+}

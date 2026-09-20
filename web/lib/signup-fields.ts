@@ -113,7 +113,8 @@ export function toDraft(
 
   /* 담을 때는 ' —' 앞만 남겼으니 고르는 칸의 긴 이름으로 되돌립니다 */
   f.hospital_type = HOSPITAL_TYPES.find((t) => shortType(t) === f.hospital_type) ?? f.hospital_type;
-  f.extra_pay = salary ? (salary.extra_pay ? 'Y' : 'N') : '';
+  /* 세후로 적어 계산했던 분은 그 상태 그대로 열어 줍니다 */
+  f.pay_unsure = salary?.pay_basis === 'estimated' ? 'Y' : '';
 
   for (const k of ['school_type', 'grade', 'gpa', 'gpa_scale', 'lang_score', 'want_type', 'want_region']) {
     f[k] = s(spec?.[k]);
@@ -157,6 +158,11 @@ export const RANGE: Record<string, Rule> = {
   current_hired_year: { min: 1970, max: 0, int: true, label: '지금 병원 입사연도' },
   birth_year:         { min: 1940, max: 0, int: true, label: '출생연도' },
   net_monthly:        { min: 1, max: 2000, int: true, label: '월 실수령액' },
+  base_monthly:       { min: 1, max: 2000, int: true, label: '고정 월급' },
+  extra_pay_monthly:  { min: 0, max: 2000, int: true, label: '추가 수당' },
+  duty_pay:           { min: 0, max: 200, label: '당직 수당' },
+  weekend_pay:        { min: 0, max: 200, label: '주말근무 수당' },
+  dependents:         { min: 1, max: 15, int: true, label: '부양가족 수' },
   bonus_yearly:       { min: 0, max: 9999, int: true, label: '연간 상여' },
   duty_count:         { min: 0, max: 31, int: true, label: '당직 횟수' },
   duty_hours:         { min: 0, max: 24, label: '당직 시간' },

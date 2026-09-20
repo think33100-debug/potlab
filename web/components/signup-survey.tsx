@@ -8,6 +8,8 @@ import {
   anyError, coursesFor, fieldError, shortType,
   type ChipGroup, type Draft, type Form, type WorkRow,
 } from '@/lib/signup-fields';
+import { annualTotal, hourlyWage, man10, monthlyHours } from '@/lib/pay';
+import { RATE_YEAR, grossFromNet, netFromGross, 만원 } from '@/lib/tax';
 import { FIELD_HINT, PRIVACY_LINE, UNLOCKS } from '@/lib/unlocks';
 import type { Role } from '@/lib/who';
 
@@ -97,11 +99,12 @@ export function SignupSurvey({
   /* 이 화면의 숫자 칸 중 하나라도 범위를 벗어나면 못 넘어갑니다 */
   const bad = (keys: string[]) => anyError(keys, f);
 
-  const salary = num(f.net_monthly);
+  /* 되묻는 기준은 이제 세전 고정 월급입니다 */
+  const salary = num(f.base_monthly);
   const flag =
     salary == null ? null
-      : salary < SALARY_LOW ? { t: '세후 금액이 맞나요?', d: '세전을 적으신 건 아닌지 확인해 주세요. 맞다면 특이사항에 사정을 적어 주세요' }
-      : salary > SALARY_HIGH ? { t: '높은 편이에요', d: '당직·수당이 포함된 건 아닌지 확인해 주세요. 맞다면 특이사항에 적어 주세요' }
+      : salary < SALARY_LOW ? { t: '세전 금액이 맞나요?', d: '실수령을 적으신 건 아닌지 확인해 주세요. 맞다면 특이사항에 사정을 적어 주세요' }
+      : salary > SALARY_HIGH ? { t: '높은 편이에요', d: '수당·상여가 포함된 건 아닌지 확인해 주세요. 그건 아래 칸에 따로 적어요' }
       : null;
 
   /* ── 화면 목록 ── */
@@ -179,43 +182,49 @@ export function SignupSurvey({
         ),
       },
       {
-        title: '급여', sub: '기본급 + 매달 고정 수당 · 세후. 성과금·상여·당직 수당은 빼고요',
-        ok: has('net_monthly') && has('extra_pay') && !bad(['net_monthly','bonus_yearly']),
+        title: '급여', sub: '연 총소득으로 봅니다. 월급만 비교하면 뜻이 없어요',
+        ok: has('base_monthly') && has('extra_pay_monthly') && has('bonus_yearly')
+          && !bad(['base_monthly', 'extra_pay_monthly', 'bonus_yearly', 'net_monthly', 'dependents']),
         body: (
           <>
-            <Num k="net_monthly" label="고정 월 실수령액" hint="세금 떼고 통장에 들어오는 금액" v={f.net_monthly} on={set} unit="만원" ph="250" req f={f} />
+            <Gross f={f} patch={patch} />
             {/* 빨간 바탕을 안 씁니다 — teamsparta.md 「입력 오류에 빨강 배경을
-                사용하지 않는다. 보더·헬퍼 텍스트로 전달한다」.
-                어두운 바탕에서 분홍 덩어리가 뜨는 것도 같이 없어집니다 */}
+                사용하지 않는다. 보더·헬퍼 텍스트로 전달한다」 */}
             {flag && (
               <p className="mt-2 rounded-sm border border-brand-red/40 p-5 text-lg text-brand-red">
                 <b className="block">{flag.t}</b>
                 <span className="mt-1 block text-sm text-gray-500">{flag.d}</span>
               </p>
             )}
-            {/* 체크박스가 아니라 둘 중 하나입니다 — 체크를 안 한 것이
-                「없다」인지 「아직 안 봤다」인지 구분이 안 되기 때문입니다 */}
-            <Two k="extra_pay" label="기본 치료 외에 추가 수당이 있나요" req
-              hint="건수·실적에 따라 더 받는 경우. 있으면 위 실수령에 그 금액까지 더해서 적어 주세요"
-              v={f.extra_pay} on={set} yes="있어요" no="없어요" />
-            <Num k="bonus_yearly" label="연간 상여 총액" hint="선택 · 1년치 상여·성과금 합계 · 없으면 0" v={f.bonus_yearly} on={set} unit="만원" ph="0" f={f} />
+            <Num k="extra_pay_monthly" label="추가 수당" req unit="만원 / 월" ph="0"
+              hint="치료 건수나 실적으로 더 받는 돈이에요. 없으면 0"
+              v={f.extra_pay_monthly} on={set} f={f} />
+            <Num k="bonus_yearly" label="연간 상여금" req unit="만원" ph="0"
+              hint="작년 한 해 명절·성과급으로 받은 돈을 다 합쳐서 적어 주세요. 없으면 0"
+              v={f.bonus_yearly} on={set} f={f} />
           </>
         ),
       },
       {
-        title: '당직 · 주말근무', sub: '선택이에요. 없으면 0 으로 두세요',
-        ok: !bad(['duty_count','duty_hours','weekend_count','weekend_hours']),
+        title: '당직 · 주말근무', sub: '없으면 0 으로 두세요. 시급을 내는 데 씁니다',
+        ok: !bad(['duty_count', 'duty_hours', 'duty_pay',
+                  'weekend_count', 'weekend_hours', 'weekend_pay']),
         body: (
           <>
-            <div className="grid grid-cols-2 gap-2">
-              <Num k="duty_count" label="당직" hint="퇴근 후 더 남는 근무" v={f.duty_count} on={set} unit="회 / 월" ph="0" f={f} />
-              <Num k="duty_hours" label="한 번에" v={f.duty_hours} on={set} unit="시간" ph="2" f={f} />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Num k="weekend_count" label="주말근무" v={f.weekend_count} on={set} unit="회 / 월" ph="0" f={f} />
-              <Num k="weekend_hours" label="한 번에" hint="반나절이면 4" v={f.weekend_hours} on={set} unit="시간" ph="4" f={f} />
-            </div>
-            <p className="mt-5 text-sm text-gray-400">기본 174시간 · 주 5일 기준으로 시급을 냅니다</p>
+            {/* 라벨 줄 수가 달라 칸이 좌우로 어긋났습니다. 묶음으로 싸서 줄을 맞춥니다 */}
+            <Group title="당직" hint="퇴근 후 더 남는 근무 · 당직·주말을 넣어야 진짜 시급이 나와요">
+              <Num k="duty_count" label="한 달에" v={f.duty_count} on={set} unit="회" ph="0" f={f} noWhy />
+              <Num k="duty_hours" label="한 번에" v={f.duty_hours} on={set} unit="시간" ph="2" f={f} noWhy />
+              <Num k="duty_pay" label="한 번에" v={f.duty_pay} on={set} unit="만원" ph="0" f={f} noWhy />
+            </Group>
+            <Group title="주말근무" hint="반나절이면 4시간">
+              <Num k="weekend_count" label="한 달에" v={f.weekend_count} on={set} unit="회" ph="0" f={f} noWhy />
+              <Num k="weekend_hours" label="한 번에" v={f.weekend_hours} on={set} unit="시간" ph="4" f={f} noWhy />
+              <Num k="weekend_pay" label="한 번에" v={f.weekend_pay} on={set} unit="만원" ph="0" f={f} noWhy />
+            </Group>
+
+            {/* 다 넣으면 그 자리에서 보여줍니다. 보고 고칠 수 있어야 자료가 정확해집니다 */}
+            <PaySummary f={f} />
           </>
         ),
       },
@@ -317,17 +326,24 @@ export function SignupSurvey({
       want_region: stu ? f.want_region || null : null,
     };
 
+    /* 연 총소득(annual_total)은 안 보냅니다 — DB 가 직접 셉니다.
+       화면에서 계산해 보내면 둘이 어긋나는 날이 옵니다 */
     const salaryRow = !stu ? {
         hired_year: Number(f.hired_year),
         current_hired_year: num(f.current_hired_year) ?? Number(f.hired_year),
         region: f.region,
         hospital_type: shortType(f.hospital_type),
         employ_type: f.employ_type,
-        net_monthly: Number(f.net_monthly),
-        duty_count: num(f.duty_count), duty_hours: num(f.duty_hours),
+        base_monthly: Number(f.base_monthly),
+        /* 세전을 직접 적었는지, 세후로 적어 계산했는지 남깁니다 */
+        pay_basis: f.pay_basis === 'estimated' ? 'estimated' : 'gross',
+        net_monthly: f.pay_unsure === 'Y' ? num(f.net_monthly) : null,
+        dependents: f.pay_unsure === 'Y' ? num(f.dependents) : null,
+        extra_pay_monthly: num(f.extra_pay_monthly),
+        duty_count: num(f.duty_count), duty_hours: num(f.duty_hours), duty_pay: num(f.duty_pay),
         weekend_count: num(f.weekend_count), weekend_hours: num(f.weekend_hours),
+        weekend_pay: num(f.weekend_pay),
         bonus_yearly: num(f.bonus_yearly),
-        extra_pay: f.extra_pay === 'Y',
         gender: f.gender || null,
         birth_year: num(f.birth_year),
         note: f.note || null,
@@ -484,12 +500,14 @@ const BOX_BAD = BOX.replace('border-gray-200', 'border-brand-red').replace('dark
 const INPUT = `block ${SKIN} px-5 py-4 text-lg`;
 
 function Num({
-  k, label, hint, v, on, unit, ph, step, req, f,
+  k, label, hint, v, on, unit, ph, step, req, f, noWhy,
 }: {
   k: string; label: string; hint?: string; v?: string; on: (k: string, v: string) => void;
   unit?: string; ph?: string; step?: string; req?: boolean;
   /* 칸끼리 얽힌 규칙을 보려면 다른 칸도 필요합니다 (지금 병원 ≥ 첫 입사 등) */
   f?: Form;
+  /* 묶음 안에서는 안내 줄을 끕니다 — 한 칸만 줄이 늘어 좌우가 어긋납니다 */
+  noWhy?: boolean;
 }) {
   const err = fieldError(k, v, f ?? {});
   const r = RANGE[k];
@@ -497,7 +515,7 @@ function Num({
 
   return (
     <label className="mt-6 block first:mt-0">
-      <Label label={label} hint={hint} req={req} k={k} />
+      <Label label={label} hint={hint} req={req} k={noWhy ? undefined : k} />
       <span className={(err ? BOX_BAD : BOX) + ' mt-2 w-full'}>
         {/* min·max 를 달아두면 폰 자판이 먼저 걸러줍니다. 믿지는 않습니다 */}
         <input type="number" inputMode="decimal" step={step} value={v ?? ''} placeholder={ph}
@@ -772,6 +790,124 @@ function Rows({
         <Tick on={noneOn} />
         <span className="text-lg font-medium">{none}</span>
       </button>
+    </div>
+  );
+}
+
+/* ── 급여 ──────────────────────────────────────────────── */
+
+/* 라벨 줄 수가 달라 칸이 좌우로 어긋나던 것을 묶음으로 감싸 줄을 맞춥니다 */
+function Group({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-6 rounded-sm border border-gray-100 p-5 first:mt-0 dark:border-gray-800">
+      <p className="text-lg font-bold">{title}</p>
+      {hint && <p className="mt-1 text-sm text-gray-400">{hint}</p>}
+      <div className="mt-2 grid grid-cols-3 gap-2 [&>label]:mt-0">{children}</div>
+    </div>
+  );
+}
+
+/* ① 고정 월급 (세전). 세전을 모르는 분이 많아 세후로 넣고 계산하는 길을 둡니다.
+   어느 쪽으로 넣었는지는 pay_basis 로 DB 에 남깁니다 — 나중에 자료를 믿을지 말지의 근거입니다 */
+function Gross({ f, patch }: { f: Form; patch: (p: Form) => void }) {
+  const unsure = f.pay_unsure === 'Y';
+  const net = Number(f.net_monthly);
+  const dep = Math.max(1, Number(f.dependents) || 1);
+  const canEstimate = unsure && Number.isFinite(net) && net > 0
+    && !fieldError('net_monthly', f.net_monthly, f) && !fieldError('dependents', f.dependents, f);
+  const guess = canEstimate ? 만원(grossFromNet(net * 10_000, dep)) : null;
+
+  return (
+    <div>
+      <Num k="base_monthly" label="고정 월급" req unit="만원" ph="250"
+        hint="근로계약서에 적힌 기본급이에요. 수당·상여는 빼고요"
+        v={f.base_monthly} on={(k, v) => patch({ [k]: v, pay_basis: 'gross' })} f={f} />
+      <p className="mt-1 text-sm text-gray-400">세전 — 세금·4대보험 떼기 전 금액이에요</p>
+
+      <button type="button" aria-pressed={unsure}
+        onClick={() => patch(unsure
+          ? { pay_unsure: '', net_monthly: '', dependents: '' }
+          : { pay_unsure: 'Y' })}
+        className={'mt-5 flex w-full items-center gap-5 rounded-sm border px-6 py-5 text-left transition-colors '
+          + (unsure ? 'border-teal-strong bg-badge-teal-bg dark:border-teal-strong/40 dark:bg-transparent'
+                    : 'border-gray-200 dark:border-gray-700')}>
+        <Tick on={unsure} />
+        <span className="text-lg font-medium">세전을 모르겠어요</span>
+      </button>
+
+      {unsure && (
+        <div className="mt-5 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
+          <Num k="net_monthly" label="세후(실수령) 월급" req unit="만원" ph="220"
+            hint="통장에 들어오는 금액이에요"
+            v={f.net_monthly} on={(k, v) => patch({ [k]: v })} f={f} />
+          <Num k="dependents" label="부양가족 수" req unit="명" ph="1"
+            hint="본인 포함이에요. 혼자면 1"
+            v={f.dependents} on={(k, v) => patch({ [k]: v })} f={f} />
+
+          {guess != null && (
+            <>
+              <p className={'mt-6 ' + PANEL}>
+                세전 약 <b>{guess}만원</b>으로 보여요
+                <span className="mt-1 block text-sm">
+                  {RATE_YEAR}년 4대보험 요율과 국세청 세율로 계산했어요. 소득세는 간이세액표라 대략이에요
+                </span>
+              </p>
+              <button type="button"
+                onClick={() => patch({ base_monthly: String(guess), pay_basis: 'estimated' })}
+                className="mt-5 w-full rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
+                이 값으로 넣을게요
+              </button>
+              <p className="mt-2 text-sm text-gray-400">넣고 나서 위 고정 월급 칸에서 고치셔도 돼요</p>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* 다 넣으면 그 자리에서 보여줍니다. 회원이 보고 고쳐야 자료가 정확해집니다 */
+function PaySummary({ f }: { f: Form }) {
+  const p = {
+    base: Number(f.base_monthly), extra: Number(f.extra_pay_monthly), bonus: Number(f.bonus_yearly),
+    dutyCount: Number(f.duty_count), dutyHours: Number(f.duty_hours), dutyPay: Number(f.duty_pay),
+    weekendCount: Number(f.weekend_count), weekendHours: Number(f.weekend_hours),
+    weekendPay: Number(f.weekend_pay),
+  };
+  if (!Number.isFinite(p.base) || p.base <= 0) return null;
+
+  const year = annualTotal(p);
+  const month = Math.round(year / 12);
+  /* 실수령은 1인 가구 기준으로 통일합니다 — 사람마다 부양가족이 달라
+     그대로 두면 서로 비교가 안 됩니다 */
+  const net = 만원(netFromGross((month * 10_000), 1).net);
+  const hour = hourlyWage(p);
+
+  return (
+    <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
+      <p className="text-sm font-bold text-gray-500">적어 주신 걸로 계산하면</p>
+      <p className="mt-2 text-h1 font-bold">연 {man10(year)}</p>
+      <dl className="mt-5 space-y-2 text-lg">
+        <Line k="월 평균" v={`약 ${month}만원`} />
+        <Line k="1인 가구 실수령" v={`약 ${net}만원`} />
+        <Line k="시급" v={`약 ${hour.toLocaleString('ko-KR')}원`}
+          note={`실제 일하는 ${monthlyHours(p)}시간 기준 · 당직·주말 포함`} />
+      </dl>
+      <p className="mt-5 text-sm text-gray-400">
+        다르면 위 칸을 고쳐 주세요. {RATE_YEAR}년 요율 기준이고 소득세는 대략이에요
+      </p>
+    </section>
+  );
+}
+
+function Line({ k, v, note }: { k: string; v: string; note?: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-5">
+      <dt className="shrink-0 text-gray-500">{k}</dt>
+      <dd className="text-right">
+        <b>{v}</b>
+        {note && <span className="mt-1 block text-sm text-gray-400">{note}</span>}
+      </dd>
     </div>
   );
 }
