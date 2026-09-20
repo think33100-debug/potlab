@@ -48,7 +48,7 @@ export default function ResetMe() {
     <div>
       <h2 className="text-h3 font-bold">내 계정 초기화</h2>
       <p className="mt-2 text-lg text-gray-500">
-        가입 화면을 다시 보려고 쓰는 자리예요. 지금 로그인한 계정을 통째로 지웁니다
+        가입 화면을 다시 보려고 쓰는 자리입니다. 지금 로그인한 계정을 통째로 지웁니다
       </p>
 
       <div className="mt-6 rounded-sm bg-brand-red-soft p-6">
@@ -60,7 +60,7 @@ export default function ResetMe() {
           <li>· 관리자 자격</li>
         </ul>
         <p className="mt-5 text-sm text-brand-red-dark">
-          공고 628건과 홈 배너 설정은 그대로예요. 회원 것만 지웁니다
+          공고 628건과 홈 배너 설정은 그대로 둡니다. 회원 것만 지웁니다
         </p>
       </div>
 

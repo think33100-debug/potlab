@@ -23,7 +23,7 @@ export type Tier = { key: string; label: string; note: string };
 export function tierOf(top: number): Tier {
   if (top <= 10) return { key: 't1', label: '최상위권', note: '같은 조건에서 손에 꼽히는 수준이에요' };
   if (top <= 25) return { key: 't2', label: '상위권', note: '또래보다 확실히 높은 편이에요' };
-  if (top <= 50) return { key: 't3', label: '중위권', note: '평균 언저리예요' };
+  if (top <= 50) return { key: 't3', label: '중위권', note: '딱 평균 언저리죠' };
   if (top <= 75) return { key: 't4', label: '중위권 아래', note: '조건을 한 번 따져볼 만해요' };
   return { key: 't5', label: '하위권', note: '당직·수당 조건을 다른 곳과 비교해 보시길 권해요' };
 }

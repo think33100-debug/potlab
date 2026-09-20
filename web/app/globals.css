@@ -14,7 +14,11 @@
    같이 어두워집니다 — 본문만 어둡고 위아래가 희면 더 이상해 보입니다.
    teamsparta.md: bg-canvas-dark = gray-900, bg-surface-dark = gray-950 */
 @custom-variant dark {
-  @media (prefers-color-scheme: dark) { @slot; }
+  /* 기기가 어두운 모드여도, 밝게 고정한 화면(홈)에서는 안 켜집니다.
+     이게 없으면 홈에서 탑바·탭바만 어두워지고 본문은 종이색이라 따로 놉니다 */
+  @media (prefers-color-scheme: dark) {
+    &:where(html:not([data-surface="light"]) *) { @slot; }
+  }
   &:where(html[data-surface="dark"] *) { @slot; }
 }
 
@@ -60,6 +64,31 @@
   --color-gray-950: #1B2025;                           /* potjob_surface_dark · 어두운 카드 */
   --color-black: oklch(0.000 0.000 0);
 
+  /* ── 따뜻한 회색 (홈 랜딩 전용) ───────────────────────
+     위의 gray-* 는 teamsparta.md 의 눈금이고 푸른기가 있습니다(색조 265~271).
+     홈 바탕으로 쓰는 potjob_paper(#F4F4F1)는 누런 쪽이라, 그 위에 푸른 회색
+     테두리를 두르면 테두리만 파랗게 떠 보입니다. 그래서 바탕과 색기를 맞춘
+     회색을 따로 둡니다.
+
+     쓰는 자리
+       paper   홈·밝은 구역의 바탕
+       card    밝은 구역 카드 안쪽
+       line    밝은 구역 카드 테두리 1px
+       ink     제목·큰 글자
+       body    본문
+       mute    보조 글자. 이보다 연한 회색을 글자에 쓰지 마세요
+
+     안 쓰는 자리
+       어두운 구역(히어로·어두운 카드) 안에서는 기존 gray-* 를 그대로 씁니다.
+       거기서는 바탕이 potjob_ink 라 푸른기가 문제가 안 됩니다. */
+  --color-paper: #F4F4F1;              /* potjob_paper */
+  --color-card: #FFFFFF;
+  --color-line: #E3E3DE;
+  --color-ink: #14181C;                /* potjob_ink */
+  --color-surface-dark: #1B2025;       /* potjob_surface_dark · 어두운 구역 카드 */
+  --color-body: #4A5056;               /* 본문 */
+  --color-mute: #5F666C;               /* 보조. 이보다 연하게 쓰지 말 것 */
+
   /* 상태 */
   --color-success: oklch(0.627 0.170 149);
   --color-warning: oklch(0.769 0.165 70);
@@ -78,6 +107,11 @@
   /* ── 글꼴 ─────────────────────────────────────────── */
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
                system-ui, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+
+  /* 숫자 글꼴. 지금은 본문과 같은 Pretendard 입니다.
+     Archivo 900 으로 바꾸기로 정해지면 이 한 줄만 고치면 전부 따라옵니다 —
+     화면에서는 lib/num.ts 의 NUM 클래스만 쓰고 글꼴 이름을 직접 안 씁니다 */
+  --font-num: var(--font-sans);
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* ── 글자 크기 ────────────────────────────────────────
@@ -165,6 +199,37 @@
   --animate-breathe: breathe 2.6s ease-in-out infinite;
 }
 
+/* 화면에 들어올 때 아래에서 살짝 올라옵니다.
+   한 번만 돕니다 — 되감기는 lib/reveal.ts 가 막습니다(한 번 보면 관찰을 끊습니다).
+   여기서는 「보이기 전/후」 두 상태만 정하고, 언제 바뀌는지는 자바스크립트가 정합니다 */
+@layer utilities {
+  .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  }
+  .reveal-on {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* 막대그래프가 0 에서 자기 길이까지 자랍니다 */
+  .grow {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .grow-on { transform: scaleX(1); }
+
+  /* 숫자 글꼴은 여기 한 곳에서만 꺼내 씁니다.
+     tabular-nums 라 세는 동안 자리수가 안 흔들립니다 */
+  .num {
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+}
+
 @keyframes toast-in {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -182,6 +247,13 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-toast-in,
   .animate-breathe { animation: none; }
+
+  /* 움직임 없이 최종 상태로 바로 둡니다.
+     lib/reveal.ts 도 같은 설정을 보고 세는 것을 건너뜁니다 —
+     CSS 만 막으면 숫자가 0 에서 멈춰 있게 됩니다 */
+  .reveal, .grow { transition: none; }
+  .reveal { opacity: 1; transform: none; }
+  .grow   { transform: scaleX(1); }
 }
 
 @layer base {

@@ -2,17 +2,19 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Icon } from '@/components/icon';
 
 /* 아래 탭바. 앱의 뼈대라 DB 가 아니라 코드에 둡니다 —
    여기를 바꾸면 라우팅도 같이 바뀝니다.
 
    휴대폰에서만 보입니다. 데스크톱은 위쪽 줄로 충분하고,
    넓은 화면 아래에 띠가 붙어 있으면 어색합니다. */
+/* 아이콘 이름은 Lucide 이름을 그대로 씁니다 (components/icon.tsx) */
 const TABS = [
-  { href: '/',          label: '홈',       emoji: '🏠' },
-  { href: '/jobs',      label: '공고',     emoji: '📋' },
-  { href: '/community', label: '커뮤니티', emoji: '💬' },
-  { href: '/me',        label: '내 정보',  emoji: '🙂' },
+  { href: '/',          label: '홈',       icon: 'house' },
+  { href: '/jobs',      label: '공고',     icon: 'briefcase' },
+  { href: '/community', label: '커뮤니티', icon: 'message-circle' },
+  { href: '/me',        label: '내 정보',  icon: 'user-round' },
 ];
 
 export function TabBar() {
@@ -38,7 +40,7 @@ export function TabBar() {
                 (on(t.href) ? 'text-teal-strong' : 'text-gray-400')
               }
             >
-              <span className="text-body-lg leading-none" aria-hidden>{t.emoji}</span>
+              <Icon name={t.icon} size={20} />
               {/* text-xs 는 10px 오버라인 라벨용이라 탭 이름에는 너무 작습니다.
                   글자를 키우는 설정을 쓰는 분이 있어 줄바꿈과 자간도 막아둡니다 */}
               <span className="text-sm leading-normal font-medium tracking-normal whitespace-nowrap">

@@ -44,7 +44,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             리액트가 그리기 전에 바탕을 정합니다 */}
         <script dangerouslySetInnerHTML={{ __html: SURFACE_SCRIPT }} />
       </head>
-      <body className="flex min-h-full flex-col bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
+      {/* 밝은 바탕은 potjob_paper 입니다. 흰색은 카드 안쪽에만 씁니다 —
+          종이색 위에 흰 카드가 떠야 카드가 카드로 보입니다 */}
+      <body className="flex min-h-full flex-col bg-paper text-gray-900 dark:bg-gray-900 dark:text-white">
         <ToastProvider>
         <AuthProvider>
           <BackGuard />

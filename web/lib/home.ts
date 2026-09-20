@@ -14,6 +14,7 @@ export type HomeBlock = {
   sort: number;
   enabled: boolean;
   emoji: string | null;
+  icon: string | null;          // 라인 아이콘 이름 (components/icon.tsx)
   image_path: string | null;
   title: string;
   descr: string | null;
@@ -22,16 +23,28 @@ export type HomeBlock = {
 };
 
 export const HOME_COLS =
-  'id,kind,sort,enabled,emoji,image_path,title,descr,href,metric';
+  'id,kind,sort,enabled,emoji,icon,image_path,title,descr,href,metric';
 
 export const DEADLINE_DAYS = 7;
 const HOT_DAYS = 7;
+
+/* 홈에 뜨는 숫자. 전부 DB 에서 옵니다 (home_stats()).
+   코드에 박으면 다음 분기에 틀린 화면이 됩니다 */
+export type HomeStats = {
+  hospitals: number;        // 심평원 병원 수
+  ot: number;               // 작업치료사
+  pt: number;               // 물리치료사
+  hira_ver: string | null;  // 심평원 자료판 — 화면 표기가 이걸 따라갑니다
+  joined: { job: string; n: number; mid: number | null }[];
+  min_n: number;            // 이 수보다 적으면 중위값을 안 내보냅니다
+};
 
 export type HomeData = {
   top: HomeBlock[];
   categories: HomeBlock[];
   bigs: HomeBlock[];
   seconds: number;
+  stats: HomeStats;
   metrics: {
     deadline: number;
     jobs: number;
@@ -40,11 +53,15 @@ export type HomeData = {
   };
 };
 
+/* 치료사 합계는 두 값을 읽어 더합니다. 미리 더한 숫자를 두지 않습니다 —
+   한쪽 자료만 바뀌면 합계가 조용히 어긋납니다 */
+export const therapists = (s: HomeStats) => s.ot + s.pt;
+
 export async function getHome(): Promise<HomeData> {
   const today = todayIso();
   const until = new Date(Date.now() + DEADLINE_DAYS * 86400000).toISOString().slice(0, 10);
 
-  const [blocks, settings, deadline, jobs, orgs, hot] = await Promise.all([
+  const [blocks, settings, deadline, jobs, orgs, hot, stats] = await Promise.all([
     supabase.from('home_blocks').select(HOME_COLS).eq('enabled', true).order('sort'),
     supabase.from('site_settings').select('key,value').eq('key', 'top_banner_seconds').maybeSingle(),
 
@@ -56,6 +73,7 @@ export async function getHome(): Promise<HomeData> {
     supabase.from('posts').select('id,title,body')
       .gte('created_at', daysAgoIso(HOT_DAYS))
       .order('view_count', { ascending: false }).limit(1),
+    supabase.rpc('home_stats'),
   ]);
 
   const rows = (blocks.data ?? []) as unknown as HomeBlock[];
@@ -66,6 +84,8 @@ export async function getHome(): Promise<HomeData> {
     categories: rows.filter((b) => b.kind === 'category'),
     bigs: rows.filter((b) => b.kind === 'big'),
     seconds: Number((settings.data as { value: unknown } | null)?.value ?? 5) || 5,
+    stats: (stats.data as HomeStats | null)
+      ?? { hospitals: 0, ot: 0, pt: 0, hira_ver: null, joined: [], min_n: 3 },
     metrics: {
       deadline: deadline.count ?? 0,
       jobs: jobs.count ?? 0,

@@ -187,7 +187,7 @@ export default function AdminStats() {
           많이 본 공고 <span className="text-sm font-medium text-gray-400">최근 7일</span>
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          「열기」는 원문 공고를 누른 수예요. 광고 값을 매길 때 이 숫자가 제일 단단해요
+          「열기」는 원문 공고를 누른 수입니다. 광고 값을 매길 때 이 숫자가 제일 단단해요
         </p>
         {!jobs || jobs.length === 0 ? (
           <p className="mt-5 text-lg text-gray-500">아직 기록이 없어요</p>

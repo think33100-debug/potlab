@@ -168,7 +168,7 @@ export default function AdminJobs() {
         <p className="mt-7 text-lg text-gray-400">불러오는 중…</p>
       ) : rows.length === 0 ? (
         <p className="mt-7 py-8 text-center text-lg text-gray-500">
-          {state === 'hold' ? '보류함이 비었어요. 좋은 신호예요' : '해당하는 공고가 없어요'}
+          {state === 'hold' ? '보류함이 비었어요. 좋은 신호죠' : '해당하는 공고가 없어요'}
         </p>
       ) : (
         <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">

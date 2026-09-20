@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { Icon, ICON_NAMES } from '@/components/icon';
 import { HOME_COLS, type HomeBlock } from '@/lib/home';
 import { PhotoPicker } from '@/components/photo-picker';
 import { shrinkToWebp } from '@/lib/image';
@@ -69,7 +70,7 @@ export default function AdminHome() {
 
   const save = async (b: HomeBlock) => {
     const { error } = await browserSupabase().from('home_blocks').update({
-      enabled: b.enabled, emoji: b.emoji, image_path: b.image_path,
+      enabled: b.enabled, emoji: b.emoji, icon: b.icon, image_path: b.image_path,
       title: b.title, descr: b.descr, href: b.href, metric: b.metric,
       updated_at: new Date().toISOString(),
     }).eq('id', b.id);
@@ -171,7 +172,9 @@ export default function AdminHome() {
         {of('category').map((b, i, arr) => (
           <Row key={b.id} b={b} i={i} last={arr.length - 1}
             onPatch={patch} onSave={save} onMove={move} onUpload={upload}>
-            <Field label="이모지" v={b.emoji ?? ''} set={(v) => patch(b.id, { emoji: v })} wide={false} />
+            {/* 이모지는 안 씁니다 — 라인 아이콘 이름을 고릅니다.
+                없는 이름이 들어와도 화면은 기본 아이콘으로 떨어집니다 */}
+            <IconField v={b.icon ?? ''} set={(v) => patch(b.id, { icon: v })} />
             <Field label="글씨" v={b.title} set={(v) => patch(b.id, { title: v })} />
             <Href b={b} set={(v) => patch(b.id, { href: v })} />
           </Row>
@@ -276,6 +279,29 @@ function Field({
           + (wide ? 'w-full' : 'w-[88px] text-center')
         }
       />
+    </label>
+  );
+}
+
+/* 아이콘은 코드가 아는 이름 중에서만 고릅니다.
+   글자로 직접 치게 두면 오타가 나고, 그러면 화면에 기본 아이콘만 남습니다 */
+function IconField({ v, set }: { v: string; set: (v: string) => void }) {
+  return (
+    <label className="block">
+      <span className="text-sm font-bold text-gray-500">아이콘</span>
+      <span className="mt-1 flex items-center gap-3">
+        <span className="flex size-[44px] shrink-0 items-center justify-center rounded-xs border border-gray-200 dark:border-gray-700">
+          <Icon name={v} size={20} />
+        </span>
+        <select
+          value={v}
+          onChange={(e) => set(e.target.value)}
+          className="min-w-0 flex-1 appearance-none rounded-xs border border-gray-200 bg-gray-50 py-4 pl-5 pr-[36px] text-lg dark:border-gray-700 dark:bg-gray-950"
+        >
+          <option value="">없음 (점으로 보여요)</option>
+          {ICON_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
+        </select>
+      </span>
     </label>
   );
 }

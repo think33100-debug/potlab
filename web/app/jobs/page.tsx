@@ -89,7 +89,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
         <h1 className="text-h1 font-bold">{byDeadline ? '마감 임박 공고' : '채용공고'}</h1>
         <p className="mt-1 text-lg text-gray-500">
           {byDeadline
-            ? '마감일이 가까운 순서예요'
+            ? '마감일이 가까운 순서입니다'
             : '작업치료사 · 물리치료사 · 공공기관과 병원에서 모아요'}
         </p>
         {byDeadline && (

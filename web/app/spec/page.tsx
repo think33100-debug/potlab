@@ -156,7 +156,7 @@ export default function SpecPage() {
             {res.reach?.enough ? (
               <>
                 <p className="mt-1 text-sm text-gray-500">
-                  그 기관에서 일하는 {res.reach.base}명 중 내 점수보다 낮은 사람이 몇 %인지예요.
+                  그 기관에서 일하는 {res.reach.base}명 중 내 점수보다 낮은 사람이 몇 %인지 보여드려요.
                   높을수록 내 스펙이 그 자리에 가까워요
                 </p>
                 <div className="mt-5">

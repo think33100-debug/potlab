@@ -53,7 +53,7 @@ export default function PayPage() {
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h1 font-bold">월급 확인</h1>
       <p className="mt-2 text-lg text-gray-500">
-        치료사들이 직접 올린 급여예요. 같은 조건끼리만 비교해요
+        치료사들이 직접 올린 급여입니다. 같은 조건끼리만 비교해요
       </p>
 
       {/* ── 조건 ── */}
@@ -122,7 +122,7 @@ export default function PayPage() {
 
               {s.emp_dist && (
                 <Card title="고용형태"
-                  sub="모든 고용형태가 들어간 숫자예요. 위에서 하나만 골라 볼 수도 있어요">
+                  sub="모든 고용형태가 들어간 숫자입니다. 위에서 하나만 골라 볼 수도 있어요">
                   {Object.entries(s.emp_dist)
                     .sort((a, b) => b[1] - a[1])
                     .map(([k, v]) => (
@@ -152,7 +152,7 @@ export default function PayPage() {
           </section>
 
           <p className="mt-6 text-sm text-gray-400">
-            치료사들이 직접 올린 자료예요. 병원 이름은 받지 않아요
+            치료사들이 직접 올린 자료입니다. 병원 이름은 받지 않아요
           </p>
         </>
       )}
