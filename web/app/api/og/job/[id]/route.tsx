@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { isClosed } from '@/lib/job-state';
 import { siteUrl } from '@/lib/site-url';
 import { supabase } from '@/lib/supabase';
@@ -52,11 +53,11 @@ const H = 630;
    흰 글자가 읽히도록 teal 과 green 은 눈금보다 어둡게 내렸습니다.
    (teamsparta 의 success 는 oklch 0.627 이라 흰 글자가 2.9:1 로 흐립니다) */
 const SKIN: Record<string, { bg: string; name: string }> = {
-  작업치료사: { bg: '#22505E', name: '작업치료사' },   // teal-strong 계열
-  물리치료사: { bg: '#16704A', name: '물리치료사' },   // success 를 어둡게
-  공통:       { bg: '#FF3B30', name: '작업 · 물리치료사' }, // potjob_red
+  작업치료사: { bg: JOB_COLOR.작업치료사, name: '작업치료사' },
+  물리치료사: { bg: JOB_COLOR.물리치료사, name: '물리치료사' },
+  공통:       { bg: JOB_COLOR.공통, name: '작업 · 물리치료사' },
 };
-const FALLBACK = { bg: '#4A4D54', name: '치료사' };    // gray-600 — 아직 못 가린 것
+const FALLBACK = { bg: JOB_COLOR_FALLBACK, name: '치료사' };   // 아직 못 가린 것
 
 /* 병원 이름은 제일 크게 갑니다. 이게 클릭을 만듭니다.
    길면 글자를 줄여서라도 한 화면에 다 넣습니다 */

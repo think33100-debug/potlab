@@ -55,15 +55,19 @@ export function JobVeil({ children }: { children: React.ReactNode }) {
           안 자르면 흐린 화면이 몇 천 픽셀 이어지고, 가입 권유가 그 맨 아래에
           붙어서 아무도 못 봅니다. 맛만 보이고 곧바로 권유가 나오게 합니다 */}
       <div aria-hidden
-           className="max-h-[560px] overflow-hidden"
+           className="max-h-[620px] overflow-hidden"
            style={{ filter: 'blur(7px)', opacity: 0.75 }}>
         {children}
       </div>
 
-      {/* 아래로 갈수록 진해지는 안개 */}
+      {/* 아래로 갈수록 진해지는 안개.
+
+          360px 입니다. 480px 로 뒀더니 병원 숫자 넷 중 아래 둘(작업치료사·
+          물리치료사)이 안개에 통째로 덮였습니다. 그 숫자가 미끼인데 안 보이면
+          가입할 이유가 안 생깁니다. 안개가 시작하는 자리를 아래로 내렸습니다 */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[480px]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[360px]"
         style={{
           background: 'linear-gradient(to bottom, rgba(244,244,241,0) 0%,'
                       + ' rgba(244,244,241,0.82) 32%, #F4F4F1 62%)',

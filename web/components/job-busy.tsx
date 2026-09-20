@@ -24,19 +24,22 @@ export function JobBusy({
   return (
     <section className="mt-7">
       <p className="text-[12px] font-bold tracking-[0.08em] text-[#5F666C]">
-        <span className="mr-2 inline-block h-[2px] w-4 -translate-y-[3px] bg-[#FF3B30]" />
+        <span className="mr-2 inline-block h-[2px] w-4 -translate-y-[3px]"
+              style={{ backgroundColor: w.color }} />
         얼마나 바쁜 곳인지
       </p>
 
       <div className="mt-3 rounded-[14px] border border-[#E3E3DE] bg-white p-6">
         <div className="flex items-center gap-4">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center
-                           rounded-[15px] bg-[#FF3B30]">
+                           rounded-[15px]"
+                style={{ backgroundColor: w.color }}>
             <Icon name={w.icon} size={26} filled className="text-white" />
           </span>
           <span className="min-w-0">
             <span className="block break-keep text-[28px] font-black leading-none
-                             tracking-[-0.035em] text-[#FF3B30]">
+                             tracking-[-0.035em]"
+                  style={{ color: w.color }}>
               {w.label}
             </span>
             <span className="mt-1.5 block break-keep text-[12px] font-bold text-[#5F666C]">
@@ -55,11 +58,10 @@ export function JobBusy({
                 className={
                   'flex items-center justify-center gap-1.5 overflow-hidden '
                   + 'motion-reduce:transition-none '
-                  + (on
-                    ? 'rounded-[16px] bg-[#FF3B30] text-white'
-                    : 'rounded-[12px] bg-[#F4F4F1] text-[#8A9096]')
+                  + (on ? 'rounded-[16px] text-white' : 'rounded-[12px] text-[#8A9096]')
                 }
                 style={{
+                  backgroundColor: on ? w.color : '#F4F4F1',
                   /* 움직임 줄이기면 seen 이 처음부터 true 라 곧바로 최종 모습입니다 */
                   height: on ? (seen ? 72 : 56) : 56,
                   flexGrow: on ? (seen ? 1.15 : 1) : 1,

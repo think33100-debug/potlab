@@ -13,6 +13,7 @@ import { Rise } from '@/components/job-parts';
 import { OrgPanel } from '@/components/org-panel';
 import { JobVeil } from '@/components/job-veil';
 import { ShareButtons } from '@/components/share-buttons';
+import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
 import { isClosed, todayKst } from '@/lib/job-state';
@@ -27,12 +28,6 @@ const one = async (id: string) => {
   return (data as unknown as JobPost | null) ?? null;
 };
 
-/* 직군 배지 색. 마감된 공고는 회색으로 내려앉습니다 */
-const JOB_COLOR: Record<string, string> = {
-  작업치료사: '#22505E',
-  물리치료사: '#16704A',
-  공통: '#FF3B30',
-};
 
 function dday(to: string | null): { text: string; urgent: boolean } | null {
   if (!to) return null;
@@ -89,7 +84,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   ]);
 
   const d = dday(j.apply_to);
-  const badge = closed ? '#8A9299' : (JOB_COLOR[j.job_group ?? ''] ?? '#4A4D54');
+  /* 마감된 공고는 회색으로 내려앉습니다 */
+  const badge = closed ? '#8A9299' : (JOB_COLOR[j.job_group ?? ''] ?? JOB_COLOR_FALLBACK);
 
   /* 「01 02 03」으로 끊어 보여줄 수 있는 모양인지 봅니다.
      못 끊으면 통째로 한 덩어리로 보여줍니다 — 억지로 자르면 뜻이 깨집니다 */
