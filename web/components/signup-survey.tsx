@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
 import {
   CERTS, EMPLOYMENTS, EXAMS, GENDERS, GRADES, HOSPITALS, HOSPITAL_TYPES,
@@ -28,6 +28,9 @@ import type { Role } from '@/lib/who';
    반쯤 채운 줄을 못 넣습니다. */
 
 const DRAFT = (uid: string) => `potjob.survey.${uid}`;
+
+/* 어학 기준표 한 줄. 숫자는 DB 의 lang_bands() 가 정본입니다 */
+type Band = { exam: string; points: number; min_score: number | null; levels: string[] | null; source: string };
 
 const loadDraft = (uid: string): Form => {
   try { return JSON.parse(localStorage.getItem(DRAFT(uid)) || '{}'); } catch { return {}; }
@@ -694,7 +697,73 @@ function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
         </button>
       )}
 
-      <p className="mt-2 text-sm text-gray-400">점수 기준은 POTJOB 자체 기준이에요</p>
+      <LangBands />
+    </div>
+  );
+}
+
+/* 기준표. 숫자는 DB 의 lang_bands() 한 곳에만 있습니다 —
+   화면에 베껴 두면 기준을 고칠 때 한쪽만 고치게 됩니다 */
+function LangBands() {
+  const [bands, setBands] = useState<Band[] | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open || bands) return;
+    browserSupabase().rpc('lang_bands').then(({ data }) => setBands((data ?? []) as Band[]));
+  }, [open, bands]);
+
+  /* 시험별로 묶어서 보여줍니다 */
+  const byExam = (bands ?? []).reduce<Record<string, Band[]>>((m, b) => {
+    (m[b.exam] ??= []).push(b); return m;
+  }, {});
+
+  return (
+    <div className="mt-2">
+      <p className="text-sm text-gray-500">
+        점수 기준은 POTJOB 자체 기준이에요.
+        시험끼리 환산한 게 아니라 각 시험이 발표한 등급을 그대로 따랐어요
+      </p>
+      <button type="button" onClick={() => setOpen(!open)}
+        className="mt-1 text-sm text-teal-strong underline">
+        {open ? '기준표 접기' : '기준표 보기'}
+      </button>
+
+      {open && (
+        <div className="mt-2 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
+          {bands === null ? <p className="text-sm text-gray-400">불러오는 중…</p> : (
+            <>
+              {EXAMS.map((e) => {
+                const rows = byExam[e.name] ?? [];
+                if (rows.length === 0) return null;
+                return (
+                  <div key={e.name} className="mt-5 first:mt-0">
+                    <p className="text-sm font-bold">{e.name}</p>
+                    <dl className="mt-1 space-y-1">
+                      {rows.map((b, i) => (
+                        /* flex-wrap 을 쓰면 설명이 길 때 줄 전체가 아래로 떨어져
+                           점수와 내용이 따로 놉니다. 옆에 붙인 채로 안에서 접히게 둡니다 */
+                        <div key={i} className="flex items-baseline gap-3 text-sm">
+                          <dt className="w-[52px] shrink-0 font-medium text-teal-strong">{b.points}점</dt>
+                          <dd className="min-w-0">
+                            {b.levels ? b.levels.join(' · ')
+                              : b.min_score != null ? `${b.min_score}점 이상` : '그 아래'}
+                            <span className="ml-2 text-gray-400">{b.source}</span>
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                );
+              })}
+              <p className="mt-6 text-sm text-gray-400">
+                여러 개 넣으면 그중 제일 높은 점수 하나만 써요. 더하지 않아요.
+                어학을 넣으면 어떤 점수든 최소 2점이에요
+              </p>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

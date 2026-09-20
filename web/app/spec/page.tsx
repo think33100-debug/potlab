@@ -112,7 +112,7 @@ export default function SpecPage() {
           <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
             <h2 className="text-h3 font-bold">항목별 점수</h2>
             <p className="mt-1 text-sm text-gray-500">
-              내가 넣은 값과 그 값이 몇 점인지예요
+              내가 넣은 값과 그 값이 몇 점인지 보여드려요
             </p>
             <div className="mt-5">
               {(Object.keys(PART_MAX) as PartKey[]).map((k) => (
@@ -125,6 +125,15 @@ export default function SpecPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-gray-500">{rawOf(k, me)}</p>
+                  {/* 어학은 기준이 POTJOB 자체 기준이라 밝혀 둡니다.
+                      시험끼리 환산한 게 아니라는 것도 같이 */}
+                  {k === 'lang' && (
+                    <p className="mt-1 text-sm text-gray-400">
+                      점수 기준은 POTJOB 자체 기준이에요.
+                      시험끼리 환산한 게 아니라 각 시험이 발표한 등급을 그대로 따랐어요.
+                      여러 개 넣으면 제일 높은 것 하나만 써요
+                    </p>
+                  )}
                   <div className="mt-2 h-1 rounded-md bg-gray-100 dark:bg-gray-800">
                     <div className="h-1 rounded-md bg-teal-strong"
                       style={{ width: `${Math.round(((me.parts[k] ?? 0) / PART_MAX[k]) * 100)}%` }} />
