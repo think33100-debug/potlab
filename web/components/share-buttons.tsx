@@ -1,5 +1,6 @@
 'use client';
 
+import { Icon } from '@/components/icon';
 import { useToast } from '@/app/toast';
 
 /* 공유 · 링크 복사.
@@ -14,7 +15,7 @@ import { useToast } from '@/app/toast';
    (지금 가진 것은 로그인용 REST 키라 다릅니다).
    데스크톱에는 공유창이 없어 링크 복사로 떨어집니다. */
 export function ShareButtons({
-  title, text, path,
+  title, text, path, compact = false,
 }: {
   /* 공유창에 뜨는 제목. 뒤에 · POTJOB 이 붙습니다 */
   title: string;
@@ -22,6 +23,9 @@ export function ShareButtons({
   text?: string;
   /* 이 사이트 안의 주소 (/post/12 · /jobs/abc). 앞의 주소는 브라우저에서 붙입니다 */
   path: string;
+  /* 상단바처럼 자리가 좁은 곳에서는 아이콘 하나로 줄입니다.
+     누르면 공유창이 뜨고, 공유창이 없는 컴퓨터에서는 링크 복사로 떨어집니다 */
+  compact?: boolean;
 }) {
   const toast = useToast();
 
@@ -47,6 +51,21 @@ export function ShareButtons({
       toast(`복사하지 못했어요 — 주소: ${u}`, { tone: 'danger', ms: 5000 });
     }
   };
+
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={share}
+        className="flex h-9 w-9 items-center justify-center rounded-full text-[#4A5056]
+                   transition-transform duration-[120ms] active:scale-[0.88]
+                   motion-reduce:transition-none"
+      >
+        <Icon name="share" size={20} />
+        <span className="sr-only">공유</span>
+      </button>
+    );
+  }
 
   return (
     <>

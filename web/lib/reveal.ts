@@ -43,7 +43,7 @@ export function useSeen<T extends HTMLElement>() {
    requestAnimationFrame 으로 시간을 보고 값을 냅니다 —
    setInterval 로 정해진 횟수를 더하면 느린 기기에서 끝 값이 안 맞습니다.
    마지막 프레임은 반드시 to 로 찍습니다. */
-export function useCountUp(to: number, ms = 1100) {
+export function useCountUp(to: number, ms = 1100, digits = 0) {
   const { ref, seen } = useSeen<HTMLSpanElement>();
   const [n, setN] = useState(0);
 
@@ -53,16 +53,36 @@ export function useCountUp(to: number, ms = 1100) {
 
     let raf = 0;
     const t0 = performance.now();
+    /* 소수점 있는 값(치료사 한 명당 병상 12.1)도 자연스럽게 오르게 —
+       Math.round 로만 깎으면 12.1 이 12 에서 멈춥니다 */
+    const step = Math.pow(10, digits);
     const tick = (t: number) => {
       const p = Math.min(1, (t - t0) / ms);
       /* 끝에서 부드럽게 멈춥니다 */
       const eased = 1 - Math.pow(1 - p, 3);
-      setN(p === 1 ? to : Math.round(to * eased));
+      setN(p === 1 ? to : Math.round(to * eased * step) / step);
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [seen, to, ms]);
+  }, [seen, to, ms, digits]);
 
-  return { ref, n };
+  return { ref, n: n.toFixed(digits) };
+}
+
+/* 0% 에서 실제 값까지 차오르는 막대.
+   숫자와 같은 규칙입니다 — 한 번만, 움직임 줄이기면 처음부터 최종값. */
+export function useGrow(to: number, ms = 900) {
+  const { ref, seen } = useSeen<HTMLDivElement>();
+  const [w, setW] = useState(0);
+
+  useEffect(() => {
+    if (!seen) return;
+    if (lessMotion()) { setW(to); return; }
+    /* 한 프레임 뒤에 바꿔야 CSS transition 이 0 → to 를 봅니다 */
+    const id = requestAnimationFrame(() => setW(to));
+    return () => cancelAnimationFrame(id);
+  }, [seen, to]);
+
+  return { ref, w, ms };
 }

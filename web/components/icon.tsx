@@ -42,6 +42,17 @@ const PATHS: Record<string, string> = {
   'user-plus': 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6',
   users: 'M18 21a6 6 0 0 0-12 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21a5 5 0 0 0-4-4.9M17 3.1a5 5 0 0 1 0 9.8',
 
+  /* 공고 상세 (2026-09-20) */
+  bookmark: 'm19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z',
+  'bookmark-filled': 'm19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z',
+  'chevron-left': 'm15 18-6-6 6-6',
+  'arrow-up-right': 'M7 7h10v10M7 17 17 7',
+  'bed-double': 'M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8M2 17h20M6 10V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3',
+  stethoscope: 'M11 2v2a4 4 0 0 1-8 0V2M7 8v3a6 6 0 0 0 12 0V9M19 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM13 17a3 3 0 1 0 6 0v-3',
+  paperclip: 'M13.2 6.6 7 12.8a2.8 2.8 0 0 0 4 4l7.5-7.5a5 5 0 0 0-7-7L4 9.8a7 7 0 0 0 10 10L20 14',
+  'list-checks': 'm3 5 2 2 3-3M3 13l2 2 3-3M3 21l2 2 3-3M13 6h8M13 14h8M13 22h8',
+  info: 'M12 16v-4M12 8h.01M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z',
+  'graduation-cap': 'M22 10 12 5 2 10l10 5 10-5ZM6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5',
   /* 이름이 없을 때 떨어지는 자리. 화면이 안 깨지게 점 하나를 그립니다 */
   dot: 'M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
 };
@@ -49,9 +60,10 @@ const PATHS: Record<string, string> = {
 export type IconName = keyof typeof PATHS;
 
 export function Icon({
-  name, size = 24, className = '', stroke = 1.5,
+  name, size = 24, className = '', stroke = 1.5, filled = false,
 }: {
-  name: string | null | undefined; size?: number; className?: string; stroke?: number;
+  name: string | null | undefined; size?: number; className?: string;
+  stroke?: number; filled?: boolean;
 }) {
   /* 관리자가 오타를 내도 404 가 아니라 기본 아이콘이 나옵니다 */
   const d = (name && PATHS[name]) || PATHS.dot;
@@ -61,7 +73,7 @@ export function Icon({
       viewBox="0 0 24 24"
       width={size}
       height={size}
-      fill="none"
+      fill={filled ? 'currentColor' : 'none'}
       stroke="currentColor"
       strokeWidth={stroke}
       strokeLinecap="round"

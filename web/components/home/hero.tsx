@@ -96,5 +96,5 @@ export function Hero({ stats }: { stats: HomeStats }) {
    세는 동안 글자가 좌우로 안 흔들립니다 */
 export function Count({ to }: { to: number }) {
   const { ref, n } = useCountUp(to);
-  return <span ref={ref} className="num">{n.toLocaleString('ko-KR')}</span>;
+  return <span ref={ref} className="num">{Number(n).toLocaleString('ko-KR')}</span>;
 }
