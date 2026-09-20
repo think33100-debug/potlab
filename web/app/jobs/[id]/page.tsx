@@ -5,6 +5,7 @@ import { Hit } from '@/components/hit';
 import { JobOpenLink } from '@/components/job-open-link';
 import { OrgPanel } from '@/components/org-panel';
 import { supabase, JOB_ONE_COLS, type JobPost } from '@/lib/supabase';
+import { Clip, JoinCta } from '@/app/gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,21 +76,26 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       </header>
 
       {keys.length > 0 ? (
-        <div className="mt-7 space-y-6">
-          {keys.map((k) => (
-            <section key={k}>
-              <h2 className="text-lg font-bold">{k}</h2>
-              <p className="mt-1 whitespace-pre-wrap break-words text-lg text-gray-700 dark:text-gray-300">
-                {detail[k]}
-              </p>
-            </section>
-          ))}
-        </div>
+        /* 가입 전에는 본문을 일부만 보여줍니다 — app/gate.tsx */
+        <Clip max="24rem">
+          <div className="mt-7 space-y-6">
+            {keys.map((k) => (
+              <section key={k}>
+                <h2 className="text-lg font-bold">{k}</h2>
+                <p className="mt-1 whitespace-pre-wrap break-words text-lg text-gray-700 dark:text-gray-300">
+                  {detail[k]}
+                </p>
+              </section>
+            ))}
+          </div>
+        </Clip>
       ) : (
         <p className="mt-7 text-lg text-gray-500">
           이 공고는 본문을 못 받아왔어요. 위 「원문 공고 열기」를 눌러 주세요
         </p>
       )}
+
+      <JoinCta what="이 공고" />
 
       {/* 이 기관이 어떤 곳인지 · 같은 기관의 다른 공고 */}
       <OrgPanel orgName={j.org_name} exceptJobId={j.id} />

@@ -7,6 +7,7 @@ import { PostComments } from '@/components/post-comments';
 import { ViewBump } from '@/components/view-bump';
 import { channelName } from '@/lib/channels';
 import { supabase, POST_ONE_COLS, type PostRow } from '@/lib/supabase';
+import { Clip, JoinCta, Members } from '@/app/gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,21 +84,24 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           <span className="text-gray-400">조회 {p.view_count}</span>
         </p>
 
-        <p className="mt-6 whitespace-pre-wrap break-words text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-          {p.body}
-        </p>
+        {/* 가입 전에는 본문을 일부만 보여줍니다 — app/gate.tsx */}
+        <Clip max="22rem">
+          <p className="mt-6 whitespace-pre-wrap break-words text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+            {p.body}
+          </p>
 
-        {imgs.length > 0 && (
-          <ul className="mt-6 space-y-5">
-            {imgs.map((im) => (
-              <li key={im.path}>
-                {/* eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다 */}
-                <img src={publicUrl('post-images', im.path)} alt=""
-                  className="w-full rounded-sm" loading="lazy" />
-              </li>
-            ))}
-          </ul>
-        )}
+          {imgs.length > 0 && (
+            <ul className="mt-6 space-y-5">
+              {imgs.map((im) => (
+                <li key={im.path}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다 */}
+                  <img src={publicUrl('post-images', im.path)} alt=""
+                    className="w-full rounded-sm" loading="lazy" />
+                </li>
+              ))}
+            </ul>
+          )}
+        </Clip>
       </article>
 
       <PostActions
@@ -107,7 +111,12 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         title={p.title || p.body.slice(0, 40)}
       />
 
-      <PostComments postId={p.id} />
+      <JoinCta what="이 글과 댓글" />
+
+      {/* 댓글은 가입을 마친 분에게만 */}
+      <Members>
+        <PostComments postId={p.id} />
+      </Members>
     </main>
   );
 }

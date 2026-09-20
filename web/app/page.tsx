@@ -3,6 +3,7 @@ import { Hit } from '@/components/hit';
 import { HomeBanner } from '@/components/home-banner';
 import { getHome, metricLine } from '@/lib/home';
 import { safeHref } from '@/lib/routes';
+import { JoinCta } from './gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,6 +63,9 @@ export default async function Home() {
           </ul>
         </section>
       )}
+
+      {/* 홈은 배너·카테고리를 다 보여줍니다. 들어오는 문이라 가리지 않습니다 */}
+      <JoinCta what="공고와 커뮤니티" />
 
       {/* 숫자의 출처를 밝힙니다 — 느낌이 아니라 센 값입니다 */}
       <p className="mt-7 text-sm text-gray-400">

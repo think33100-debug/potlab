@@ -4,6 +4,7 @@ import {
   supabase, LIST_COLS, TABS, tabLabel, type JobListItem,
 } from '@/lib/supabase';
 import { OrgCard } from '../org-card';
+import { Clip, JoinCta } from '../gate';
 
 export const dynamic = 'force-dynamic';   // 공고는 자주 바뀝니다
 
@@ -186,6 +187,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
         </p>
       )}
 
+      {/* 가입 전에는 맛보기로 몇 건만 보입니다 — app/gate.tsx */}
+      <Clip max="46rem">
       <ul className="divide-y divide-gray-100 dark:divide-gray-800">
         {rows.map((r) => {
           const dd = dday(r.apply_to);
@@ -225,6 +228,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
           );
         })}
       </ul>
+      </Clip>
+
+      <JoinCta what="공고" />
 
       <p className="mt-7 text-sm text-gray-400">
         {searching
