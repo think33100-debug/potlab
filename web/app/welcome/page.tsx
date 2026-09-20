@@ -39,7 +39,7 @@ export default function Welcome() {
   const avatar = picked ?? (session ? defaultAvatar(session.user.id) : '');
   const setAvatar = setPicked;
 
-  const resume = !me ? 1 : (me.job_group && me.role) ? 5 : 3;
+  const resume = !me ? 1 : (me.job_group && me.role) ? 5 : 2;
   const step = stepPick ?? resume;
   const setStep = setStepPick;
 
@@ -63,9 +63,12 @@ export default function Welcome() {
     setChecked(Object.fromEntries(AGREEMENTS.map((a) => [a.key, on])));
   };
 
-  /* ② 닉네임 — profiles 줄을 여기서 만듭니다.
-     nickname 이 NOT NULL·unique 라 이 칸을 지나야 줄이 생깁니다 */
+  /* ③ 닉네임 — profiles 줄을 여기서 만듭니다.
+     nickname 이 NOT NULL·unique 라 이 칸을 지나야 줄이 생깁니다.
+     그래서 ② 에서 고른 직군·역할도 여기서 한꺼번에 담습니다 —
+     줄이 없는데 update 를 부르면 0줄이 바뀌고 조용히 사라집니다 */
   const saveNickname = async () => {
+    if (!job || !role) { setStep(2); return; }
     const name = nick.trim();
     if (name.length < 2 || name.length > 12) {
       setNickErr('2자에서 12자까지 쓸 수 있어요'); return;
@@ -76,6 +79,8 @@ export default function Welcome() {
     const { error } = await sb.from('profiles').insert({
       id: session.user.id,
       nickname: name,
+      job_group: job,
+      role,
       avatar,
       terms_agreed_at: new Date().toISOString(),
       terms_version: TERMS_VERSION,
@@ -111,16 +116,21 @@ export default function Welcome() {
       });
     }
 
-    setJustMade(true);      // reload 로 me 가 생겨도 ③ 에 머무르게
+    setJustMade(true);      // reload 로 me 가 생겨도 ④ 에 머무르게
     await reload();
     setBusy(false);
-    setStep(3);
+    setStep(4);
   };
 
-  /* ③ 직군·역할 — 둘 다 필수입니다.
-     역할이 비면 커뮤니티가 현직 방만 보여줘서(옛 chFor_ 와 같게) 학생이 길을 잃습니다 */
+  /* ② 직군·역할 — 둘 다 필수입니다.
+     역할이 비면 커뮤니티가 현직 방만 보여줘서(옛 chFor_ 와 같게) 학생이 길을 잃습니다.
+
+     이 자리에는 아직 profiles 줄이 없습니다. 그래서 대개는 저장할 게 없고
+     들고만 갔다가 ③ 에서 닉네임과 함께 넣습니다.
+     아래 update 를 타는 건 줄은 있는데 직군이 빈 옛 계정뿐입니다 */
   const saveWho = async () => {
     if (!job || !role) return;
+    if (!me) { setStep(3); return; }
     setBusy(true);
     const { error } = await browserSupabase()
       .from('profiles').update({ job_group: job, role }).eq('id', session.user.id);
@@ -130,7 +140,7 @@ export default function Welcome() {
       return;
     }
     await reload();
-    setStep(4);
+    setStep(5);
   };
 
   return (
@@ -155,7 +165,7 @@ export default function Welcome() {
         </div>
 
         <ol className="mb-7 flex flex-wrap gap-2 text-sm" aria-label="가입 순서">
-          {['약관 동의', '닉네임', '직군·역할', '사진', '급여·스펙'].map((t, i) => (
+          {['약관 동의', '직군·역할', '닉네임', '사진', '급여·스펙'].map((t, i) => (
             <li
               key={t}
               aria-current={step === i + 1 ? 'step' : undefined}
@@ -228,34 +238,6 @@ export default function Welcome() {
 
         {step === 2 && (
           <section>
-            <h1 className="text-h2 font-bold">닉네임을 정해 주세요</h1>
-            <p className="mt-2 text-lg text-gray-500">
-              커뮤니티에서 이 이름으로 보여요. 나중에 5번까지 바꿀 수 있어요
-            </p>
-
-            <input
-              value={nick}
-              onChange={(e) => { setNick(e.target.value); setNickErr(null); }}
-              maxLength={12}
-              placeholder="2~12자"
-              aria-label="닉네임"
-              className="mt-6 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-body-lg dark:border-gray-700 dark:bg-gray-950"
-            />
-            {nickErr && <p className="mt-2 text-lg text-brand-red">{nickErr}</p>}
-
-            <button
-              type="button"
-              disabled={busy || nick.trim().length < 2}
-              onClick={saveNickname}
-              className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
-            >
-              {busy ? '저장하는 중…' : '다음'}
-            </button>
-          </section>
-        )}
-
-        {step === 3 && (
-          <section>
             <h1 className="text-h2 font-bold">어떤 분이신가요</h1>
             <p className="mt-2 text-lg text-gray-500">
               커뮤니티에서 보이는 방이 이걸로 갈려요. 나중에 바꿀 수 있어요
@@ -284,6 +266,34 @@ export default function Welcome() {
               className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {busy ? '저장하는 중…' : (!job || !role) ? '둘 다 골라 주세요' : '다음'}
+            </button>
+          </section>
+        )}
+
+        {step === 3 && (
+          <section>
+            <h1 className="text-h2 font-bold">닉네임을 정해 주세요</h1>
+            <p className="mt-2 text-lg text-gray-500">
+              커뮤니티에서 이 이름으로 보여요. 나중에 5번까지 바꿀 수 있어요
+            </p>
+
+            <input
+              value={nick}
+              onChange={(e) => { setNick(e.target.value); setNickErr(null); }}
+              maxLength={12}
+              placeholder="2~12자"
+              aria-label="닉네임"
+              className="mt-6 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-body-lg dark:border-gray-700 dark:bg-gray-950"
+            />
+            {nickErr && <p className="mt-2 text-lg text-brand-red">{nickErr}</p>}
+
+            <button
+              type="button"
+              disabled={busy || nick.trim().length < 2}
+              onClick={saveNickname}
+              className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
+            >
+              {busy ? '저장하는 중…' : '다음'}
             </button>
           </section>
         )}

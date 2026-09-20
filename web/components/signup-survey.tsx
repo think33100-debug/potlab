@@ -9,6 +9,7 @@ import {
   type ChipGroup, type Draft, type Form, type WorkRow,
 } from '@/lib/signup-fields';
 import { annualTotal, hourlyWage, man10, monthlyHours } from '@/lib/pay';
+import { progress } from '@/lib/progress';
 import { RATE_YEAR, grossFromNet, netFromGross, 만원 } from '@/lib/tax';
 import { FIELD_HINT, PRIVACY_LINE, UNLOCKS } from '@/lib/unlocks';
 import type { Role } from '@/lib/who';
@@ -111,7 +112,7 @@ export function SignupSurvey({
   const steps: { title: string; sub?: string; ok?: boolean; body: React.ReactNode }[] = [
     /* 고칠 때는 「채우면 열려요」 안내를 안 보여줍니다. 이미 채우신 분입니다 */
     ...(edit ? [] : [{
-      title: '마지막이에요',
+      title: '무엇이 열리나요',
       sub: '여기까지 채우면 아래가 열려요',
       body: (
         <div>
@@ -296,6 +297,7 @@ export function SignupSurvey({
   /* 남겨둔 자리가 지금 화면 수보다 클 수 있습니다 — 현직 9장, 학생 6장이라
      역할을 바꾸면 어긋납니다. 없는 화면을 그리면 그대로 터집니다 */
   const at = Math.min(i, steps.length - 1);
+  const step = progress(at, steps.length);
   const cur = steps[at];
   const last = at === steps.length - 1;
   const blocked = cur.ok === false;
@@ -437,7 +439,14 @@ export function SignupSurvey({
         <span className="shrink-0 text-sm text-gray-400">{at + 1} / {steps.length}</span>
       </div>
 
-      <h1 className="mt-6 text-h2 font-bold">{cur.title}</h1>
+      {/* 숫자만 있으면 밋밋합니다. 한 줄 붙이고 남은 시간도 알려줍니다 —
+          끝이 안 보이면 중간에 나갑니다 (lib/progress.ts) */}
+      <p className="mt-2 flex flex-wrap items-baseline gap-3 text-sm">
+        <span className="font-bold text-teal-strong">{step.msg}</span>
+        {step.left && <span className="text-gray-400">{step.left}</span>}
+      </p>
+
+      <h1 className="mt-5 text-h2 font-bold">{cur.title}</h1>
       {cur.sub && <p className="mt-2 text-lg text-gray-500">{cur.sub}</p>}
 
       <div className="mt-6">{cur.body}</div>
