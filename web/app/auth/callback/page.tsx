@@ -37,7 +37,11 @@ export default function AuthCallback() {
         .from('profiles').select('id').eq('id', data.session.user.id).maybeSingle();
 
       const back = sessionStorage.getItem('potjob.after-login');
-      sessionStorage.removeItem('potjob.after-login');
+      /* 이미 가입한 분은 여기서 바로 보내고 자리를 지웁니다.
+         처음 오신 분은 /welcome 을 거치므로 자리를 남겨 둡니다 —
+         지워버리면 가입을 마친 뒤 홈으로 떨어져서, 보러 왔던 공고를
+         다시 못 찾고 그냥 나갑니다 */
+      if (prof) sessionStorage.removeItem('potjob.after-login');
       router.replace(prof ? (back || '/') : '/welcome');
     })();
 

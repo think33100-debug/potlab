@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
+import { ShareButtons } from '@/components/share-buttons';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 글 아래 단추 줄 — 좋아요 · 공유 · 신고 · (내 글이면) 지우기 */
@@ -59,33 +60,6 @@ export function PostActions({
     setBusy(false);
   };
 
-  /* 공유 — 휴대폰에서는 기계가 주는 공유창을 씁니다.
-     거기에 카카오톡이 들어 있어서 SDK 없이도 카톡으로 보낼 수 있습니다.
-
-     카카오 SDK 로 「카카오톡」 단추를 따로 두려면 JavaScript 키가 필요합니다
-     (지금 가진 것은 로그인용 REST 키라 다릅니다).
-     데스크톱에는 공유창이 없어 링크 복사로 떨어집니다. */
-  const share = async () => {
-    const url = `${location.origin}/post/${id}`;
-    const data = { title: `${title} · POTJOB`, text: title, url };
-
-    if (navigator.share && navigator.canShare?.(data)) {
-      try { await navigator.share(data); return; }
-      catch { /* 취소는 잘못이 아닙니다 */ return; }
-    }
-    await copyLink(url);
-  };
-
-  const copyLink = async (url = `${location.origin}/post/${id}`) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      toast('링크를 복사했어요!');
-    } catch {
-      /* 안전하지 않은 연결(http)에서는 clipboard 가 막힙니다 */
-      toast(`복사하지 못했어요 — 주소: ${url}`, { tone: 'danger', ms: 5000 });
-    }
-  };
-
   const report = async () => {
     if (!me) return needLogin();
     const reason = prompt('어떤 점이 문제인가요? (비방·저격·허위사실·광고 등)');
@@ -129,21 +103,8 @@ export function PostActions({
         좋아요 {likes}
       </button>
 
-      <button
-        type="button"
-        onClick={share}
-        className="rounded-md bg-brand-red px-6 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
-      >
-        공유
-      </button>
-
-      <button
-        type="button"
-        onClick={() => copyLink()}
-        className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
-      >
-        링크 복사
-      </button>
+      {/* 공고·병원·급여도 같은 것을 씁니다 */}
+      <ShareButtons title={title} path={`/post/${id}`} />
 
       <span className="flex-1" />
 

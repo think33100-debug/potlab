@@ -337,7 +337,14 @@ export default function Welcome() {
             onDone={async () => {
               /* survey_at 은 save_my_survey 가 이미 찍었습니다. 여기선 다시 읽기만 합니다 */
               await reload();
-              router.push('/');
+              /* 공유 링크를 보고 들어오신 분은 그 공고로 돌려보냅니다.
+                 홈으로 떨어뜨리면 뭘 보러 왔는지 잊고 그냥 나갑니다 */
+              let back: string | null = null;
+              try {
+                back = sessionStorage.getItem('potjob.after-login');
+                sessionStorage.removeItem('potjob.after-login');
+              } catch { /* 사생활 보호 창 */ }
+              router.push(back || '/');
             }}
           />
         )}
