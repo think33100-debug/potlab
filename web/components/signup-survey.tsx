@@ -47,7 +47,9 @@ export function SignupSurvey({
   editsLeft?: number;
 }) {
   const edit = initial !== undefined;
-  const [i, setI] = useState(0);
+  /* 어느 화면까지 왔는지도 초안에 남깁니다.
+     튕기거나 창을 닫았다가 돌아와도 1/9 부터 다시 채우지 않게 */
+  const [i, setI] = useState(() => (initial ? 0 : Number(loadDraft(userId)._step) || 0));
   const [f, setF] = useState<Form>(() => initial?.f ?? loadDraft(userId));
   const [certs, setCerts] = useState<string[]>(
     () => initial?.certs ?? loadDraft(userId)._certs?.split('\n').filter(Boolean) ?? []);
@@ -73,14 +75,18 @@ export function SignupSurvey({
     save(next, certs, courses, rows);
   };
   const set = (k: string, v: string) => patch({ [k]: v });
-  const save = (nf: Form, nc: string[], nk: string[], nr: WorkRow[]) => {
+  const save = (nf: Form, nc: string[], nk: string[], nr: WorkRow[], step = i) => {
     if (edit) return;      // 고치는 중에는 초안을 안 남깁니다. 등록된 값이 기준입니다
     try {
       localStorage.setItem(DRAFT(userId), JSON.stringify({
         ...nf, _certs: nc.join('\n'), _courses: nk.join('\n'), _rows: JSON.stringify(nr),
+        _step: String(step),
       }));
     } catch { /* 사생활 보호 창에서는 못 씁니다. 초안만 못 남을 뿐입니다 */ }
   };
+
+  /* 화면을 옮길 때마다 자리를 남깁니다 */
+  const go = (step: number) => { setI(step); setErr(null); save(f, certs, courses, rows, step); };
 
   /* 「없음」도 답입니다. 빈칸이면 안 적은 건지 없는 건지 구분이 안 됩니다 —
      그래서 어학·자격증·교육·경력에는 각각 「없음」을 두고, 그걸 골라야 넘어갑니다 */
@@ -272,8 +278,11 @@ export function SignupSurvey({
     }] : []),
   ];
 
-  const cur = steps[i];
-  const last = i === steps.length - 1;
+  /* 남겨둔 자리가 지금 화면 수보다 클 수 있습니다 — 현직 9장, 학생 6장이라
+     역할을 바꾸면 어긋납니다. 없는 화면을 그리면 그대로 터집니다 */
+  const at = Math.min(i, steps.length - 1);
+  const cur = steps[at];
+  const last = at === steps.length - 1;
   const blocked = cur.ok === false;
 
   const finish = async () => {
@@ -401,9 +410,9 @@ export function SignupSurvey({
       <div className="flex items-center gap-5">
         <div className="h-1 flex-1 rounded-md bg-gray-100 dark:bg-gray-800">
           <div className="h-1 rounded-md bg-teal-strong transition-[width]"
-               style={{ width: `${(i / (steps.length - 1)) * 100}%` }} />
+               style={{ width: `${(at / (steps.length - 1)) * 100}%` }} />
         </div>
-        <span className="shrink-0 text-sm text-gray-400">{i + 1} / {steps.length}</span>
+        <span className="shrink-0 text-sm text-gray-400">{at + 1} / {steps.length}</span>
       </div>
 
       <h1 className="mt-6 text-h2 font-bold">{cur.title}</h1>
@@ -414,8 +423,8 @@ export function SignupSurvey({
       {err && <p className="mt-5 text-lg text-brand-red">{err}</p>}
 
       <div className="mt-7 flex gap-2">
-        {i > 0 && (
-          <button type="button" onClick={() => { setI(i - 1); setErr(null); }} disabled={busy}
+        {at > 0 && (
+          <button type="button" onClick={() => go(at - 1)} disabled={busy}
             className="w-[96px] shrink-0 rounded-md border border-gray-200 py-5 text-lg font-medium disabled:opacity-40 dark:border-gray-700">
             이전
           </button>
@@ -423,14 +432,14 @@ export function SignupSurvey({
         <button
           type="button"
           disabled={busy || blocked}
-          onClick={() => (last ? setPhase('confirm') : setI(i + 1))}
+          onClick={() => (last ? setPhase('confirm') : go(at + 1))}
           className="flex-1 rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {blocked ? '위 칸을 채워 주세요' : last ? '다 됐어요' : i === 0 ? '채우러 가기' : '다음'}
+          {blocked ? '위 칸을 채워 주세요' : last ? '다 됐어요' : at === 0 ? '채우러 가기' : '다음'}
         </button>
       </div>
 
-      {i > 0 && !stu && <p className="mt-5 text-sm text-gray-400">{PRIVACY_LINE}</p>}
+      {at > 0 && !stu && <p className="mt-5 text-sm text-gray-400">{PRIVACY_LINE}</p>}
     </section>
   );
 }

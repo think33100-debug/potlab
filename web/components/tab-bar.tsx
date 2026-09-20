@@ -15,11 +15,20 @@ const TABS = [
   { href: '/me',        label: '내 정보',  emoji: '🙂' },
 ];
 
+/* 가입을 마치기 전에는 다른 화면으로 못 갑니다 (SignupGuard).
+   그런데 탭은 그대로 보여서, 누르면 넘어갔다가 곧바로 가입 화면으로 튕겨
+   돌아옵니다 — 버벅거리는 것처럼 보이고, 채우던 자리도 잃습니다.
+   갈 수 없는 길은 아예 안 보여줍니다. */
+const HIDE_NAV = ['/welcome'];
+const hideNav = (path: string) => HIDE_NAV.includes(path);
+
 export function TabBar() {
   const pathname = usePathname();
 
   const on = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+  if (hideNav(pathname)) return null;
 
   return (
     <nav
@@ -57,6 +66,8 @@ export function TopNav() {
   const pathname = usePathname();
   const on = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+  if (hideNav(pathname)) return null;
 
   return (
     <nav className="hidden items-center gap-6 md:flex" aria-label="위쪽 길">
