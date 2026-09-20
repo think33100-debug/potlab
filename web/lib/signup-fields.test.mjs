@@ -69,3 +69,44 @@ import { toDraft, NONE } from './signup-fields.ts';
 }
 
 console.log('signup-fields 통과 — 4가지');
+
+/* ── 숫자 칸 검사 ── */
+{
+  const { fieldError, anyError } = await import('./signup-fields.ts');
+  const Y = 2026;                       // 해가 바뀌어도 시험이 흔들리지 않게 넣어 줍니다
+
+  /* ⑤ 세중님이 잡은 버그 — 입사연도 5555 가 통과했습니다 */
+  assert.match(fieldError('hired_year', '5555', {}, Y), /첫 입사연도는 1970 ~ 2026/);
+  assert.equal(fieldError('hired_year', '2021', {}, Y), null);
+  assert.match(fieldError('hired_year', '1969', {}, Y), /1970 ~ 2026/);
+  assert.equal(fieldError('hired_year', '2026', {}, Y), null);   // 올해는 됩니다
+
+  /* ⑥ 지금 병원이 첫 입사보다 빠를 수 없습니다 */
+  assert.match(fieldError('current_hired_year', '2019', { hired_year: '2021' }, Y),
+    /빠를 수 없어요/);
+  assert.equal(fieldError('current_hired_year', '2021', { hired_year: '2021' }, Y), null);
+  assert.equal(fieldError('current_hired_year', '2024', { hired_year: '2021' }, Y), null);
+
+  /* ⑦ 학점은 만점을 넘을 수 없습니다 */
+  assert.match(fieldError('gpa', '4.8', { gpa_scale: '4.5' }, Y), /만점\(4\.5\)보다/);
+  assert.equal(fieldError('gpa', '4.5', { gpa_scale: '4.5' }, Y), null);
+
+  /* ⑧ 나머지 숫자 칸도 범위를 봅니다 */
+  assert.match(fieldError('net_monthly', '99999', {}, Y), /1 ~ 2000/);
+  assert.match(fieldError('lang_score', '1000', {}, Y), /0 ~ 990/);
+  assert.match(fieldError('duty_count', '40', {}, Y), /0 ~ 31/);
+  assert.match(fieldError('weekend_count', '20', {}, Y), /0 ~ 10/);
+  assert.match(fieldError('bonus_yearly', '-5', {}, Y), /0 ~ 9999/);
+  assert.match(fieldError('birth_year', '2025', {}, Y), /1940 ~ 2011/);  // 최소 나이 15
+  assert.match(fieldError('hired_year', '2021.5', {}, Y), /정수로/);
+
+  /* ⑨ 빈 칸은 여기서 안 봅니다 — 「필수」가 따로 봅니다 */
+  assert.equal(fieldError('hired_year', '', {}, Y), null);
+  assert.equal(fieldError('hired_year', undefined, {}, Y), null);
+
+  /* ⑩ 화면 단위로 묶어 보기 */
+  assert.equal(anyError(['hired_year', 'region'], { hired_year: '5555' }, Y), true);
+  assert.equal(anyError(['hired_year', 'region'], { hired_year: '2021' }, Y), false);
+}
+
+console.log('숫자 칸 검사 통과 — 6가지');

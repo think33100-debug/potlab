@@ -134,6 +134,78 @@ export function toDraft(
   return { f, certs: list(spec?.licenses), courses: list(spec?.trainings), rows };
 }
 
+/* ── 숫자 칸 검사 ──
+
+   화면에서 안 막으면 DB 의 check 제약에 걸려 영문 오류가 뜹니다.
+   여기 범위는 DB 쪽(salary_year_range · salary_net_range 등)과 같아야 합니다.
+
+   올해를 밖에서 넣을 수 있게 둔 이유는 시험 때문입니다 —
+   해가 바뀌면 통과하다 말다 하는 시험은 쓸모가 없습니다. */
+export const THIS_YEAR = new Date().getFullYear();
+
+/* 「학점은」 과 「연도는」. 조사가 틀리면 대충 만든 티가 납니다 */
+export function eun(w: string) {
+  const c = w.charCodeAt(w.length - 1);
+  const 받침 = c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+  return w + (받침 ? '은' : '는');
+}
+
+type Rule = { min: number; max: number; int?: boolean; label: string };
+
+export const RANGE: Record<string, Rule> = {
+  hired_year:         { min: 1970, max: 0, int: true, label: '첫 입사연도' },   // max 0 = 올해
+  current_hired_year: { min: 1970, max: 0, int: true, label: '지금 병원 입사연도' },
+  birth_year:         { min: 1940, max: 0, int: true, label: '출생연도' },
+  net_monthly:        { min: 1, max: 2000, int: true, label: '월 실수령액' },
+  bonus_yearly:       { min: 0, max: 9999, int: true, label: '연간 상여' },
+  duty_count:         { min: 0, max: 31, int: true, label: '당직 횟수' },
+  duty_hours:         { min: 0, max: 24, label: '당직 시간' },
+  weekend_count:      { min: 0, max: 10, int: true, label: '주말근무 횟수' },
+  weekend_hours:      { min: 0, max: 24, label: '주말근무 시간' },
+  gpa:                { min: 0, max: 100, label: '학점' },
+  gpa_scale:          { min: 1, max: 100, label: '만점 기준' },
+  lang_score:         { min: 0, max: 990, int: true, label: '어학 점수' },
+  months:             { min: 1, max: 600, int: true, label: '개월' },
+};
+
+/* 칸 하나를 봅니다. 문제가 없으면 null.
+   f 를 같이 받는 이유는 칸끼리 얽힌 규칙 때문입니다 —
+   지금 병원 입사연도는 첫 입사연도보다 빠를 수 없고, 학점은 만점을 넘을 수 없습니다. */
+export function fieldError(
+  k: string, v: string | undefined, f: Form = {}, thisYear = THIS_YEAR,
+): string | null {
+  const s = (v ?? '').trim();
+  if (s === '') return null;                 // 비어 있는 것은 「필수」가 따로 봅니다
+
+  const r = RANGE[k];
+  if (!r) return null;
+  const n = Number(s);
+  if (!Number.isFinite(n)) return `${eun(r.label)} 숫자로 적어 주세요`;
+  if (r.int && !Number.isInteger(n)) return `${eun(r.label)} 정수로 적어 주세요`;
+
+  /* 출생연도는 올해까지 열면 갓난아기가 됩니다. 최소 나이를 둡니다 */
+  const max = r.max === 0 ? (k === 'birth_year' ? thisYear - 15 : thisYear) : r.max;
+  if (n < r.min || n > max) return `${eun(r.label)} ${r.min} ~ ${max} 사이로 적어 주세요`;
+
+  if (k === 'current_hired_year' && f.hired_year) {
+    const first = Number(f.hired_year);
+    if (Number.isFinite(first) && n < first) {
+      return '지금 병원 입사연도가 첫 입사연도보다 빠를 수 없어요';
+    }
+  }
+  if (k === 'gpa' && f.gpa_scale) {
+    const scale = Number(f.gpa_scale);
+    if (Number.isFinite(scale) && scale > 0 && n > scale) {
+      return `학점이 만점(${f.gpa_scale})보다 클 수 없어요`;
+    }
+  }
+  return null;
+}
+
+/* 한 화면 안의 칸들을 한꺼번에 봅니다. 하나라도 걸리면 못 넘어갑니다 */
+export const anyError = (keys: string[], f: Form, thisYear = THIS_YEAR) =>
+  keys.some((k) => fieldError(k, f[k], f, thisYear) !== null);
+
 /* 금액을 보고 한 번 되묻는 기준 (옛 OUTLIER).
    막지는 않습니다 — 야간전담처럼 진짜로 높은 경우가 있어서 특이사항에 적게 합니다 */
 export const SALARY_LOW = 180;

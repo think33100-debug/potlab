@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
 import {
   CERTS, EMPLOYMENTS, GENDERS, GRADES, HOSPITALS, HOSPITAL_TYPES,
-  MAX_ROWS, NONE, REGIONS, SALARY_HIGH, SALARY_LOW, SCHOOLS,
-  coursesFor, shortType, type ChipGroup, type Draft, type Form, type WorkRow,
+  MAX_ROWS, NONE, RANGE, REGIONS, SALARY_HIGH, SALARY_LOW, SCHOOLS, THIS_YEAR,
+  anyError, coursesFor, fieldError, shortType,
+  type ChipGroup, type Draft, type Form, type WorkRow,
 } from '@/lib/signup-fields';
 import { FIELD_HINT, PRIVACY_LINE, UNLOCKS } from '@/lib/unlocks';
 import type { Role } from '@/lib/who';
@@ -93,6 +94,8 @@ export function SignupSurvey({
   const has = (k: string) => !!f[k]?.trim();
   const langOk = f.lang_none === 'Y' || has('lang_score');
   const rowsOk = f.rows_none === 'Y' || rows.some((r) => r.hospital && r.region && r.months);
+  /* 이 화면의 숫자 칸 중 하나라도 범위를 벗어나면 못 넘어갑니다 */
+  const bad = (keys: string[]) => anyError(keys, f);
 
   const salary = num(f.net_monthly);
   const flag =
@@ -141,12 +144,12 @@ export function SignupSurvey({
       },
       {
         title: '학점 · 어학',
-        ok: has('gpa') && has('gpa_scale') && langOk,
+        ok: has('gpa') && has('gpa_scale') && langOk && !bad(['gpa','gpa_scale','lang_score']),
         body: (
           <>
             <div className="grid grid-cols-2 gap-2">
-              <Num k="gpa" label="학점" v={f.gpa} on={set} unit="점" step="0.01" ph="3.8" req />
-              <Num k="gpa_scale" label="만점 기준" v={f.gpa_scale} on={set} unit="점" step="0.1" ph="4.5" req />
+              <Num k="gpa" label="학점" v={f.gpa} on={set} unit="점" step="0.01" ph="3.8" req f={f} />
+              <Num k="gpa_scale" label="만점 기준" v={f.gpa_scale} on={set} unit="점" step="0.1" ph="4.5" req f={f} />
             </div>
             <Lang f={f} patch={patch} />
           </>
@@ -155,11 +158,12 @@ export function SignupSurvey({
     ] : [
       {
         title: '언제부터 일하셨나요',
-        ok: has('hired_year') && has('current_hired_year') && has('region'),
+        ok: has('hired_year') && has('current_hired_year') && has('region')
+          && !bad(['hired_year','current_hired_year']),
         body: (
           <>
-            <Num k="hired_year" label="첫 입사연도" hint="치료사로 처음 일 시작한 해" v={f.hired_year} on={set} unit="년" ph="2021" req />
-            <Num k="current_hired_year" label="지금 병원 입사연도" hint="첫 직장이면 위와 같게" v={f.current_hired_year} on={set} unit="년" ph="2024" req />
+            <Num k="hired_year" label="첫 입사연도" hint="치료사로 처음 일 시작한 해" v={f.hired_year} on={set} unit="년" ph="2021" req f={f} />
+            <Num k="current_hired_year" label="지금 병원 입사연도" hint="첫 직장이면 위와 같게" v={f.current_hired_year} on={set} unit="년" ph="2024" req f={f} />
             <Sel k="region" label="지역" hint="근무지 기준" v={f.region} on={set} opts={REGIONS} req />
           </>
         ),
@@ -176,10 +180,10 @@ export function SignupSurvey({
       },
       {
         title: '급여', sub: '기본급 + 매달 고정 수당 · 세후. 성과금·상여·당직 수당은 빼고요',
-        ok: has('net_monthly') && has('extra_pay'),
+        ok: has('net_monthly') && has('extra_pay') && !bad(['net_monthly','bonus_yearly']),
         body: (
           <>
-            <Num k="net_monthly" label="고정 월 실수령액" hint="세금 떼고 통장에 들어오는 금액" v={f.net_monthly} on={set} unit="만원" ph="250" req />
+            <Num k="net_monthly" label="고정 월 실수령액" hint="세금 떼고 통장에 들어오는 금액" v={f.net_monthly} on={set} unit="만원" ph="250" req f={f} />
             {/* 빨간 바탕을 안 씁니다 — teamsparta.md 「입력 오류에 빨강 배경을
                 사용하지 않는다. 보더·헬퍼 텍스트로 전달한다」.
                 어두운 바탕에서 분홍 덩어리가 뜨는 것도 같이 없어집니다 */}
@@ -194,21 +198,22 @@ export function SignupSurvey({
             <Two k="extra_pay" label="기본 치료 외에 추가 수당이 있나요" req
               hint="건수·실적에 따라 더 받는 경우. 있으면 위 실수령에 그 금액까지 더해서 적어 주세요"
               v={f.extra_pay} on={set} yes="있어요" no="없어요" />
-            <Num k="bonus_yearly" label="연간 상여 총액" hint="선택 · 1년치 상여·성과금 합계 · 없으면 0" v={f.bonus_yearly} on={set} unit="만원" ph="0" />
+            <Num k="bonus_yearly" label="연간 상여 총액" hint="선택 · 1년치 상여·성과금 합계 · 없으면 0" v={f.bonus_yearly} on={set} unit="만원" ph="0" f={f} />
           </>
         ),
       },
       {
         title: '당직 · 주말근무', sub: '선택이에요. 없으면 0 으로 두세요',
+        ok: !bad(['duty_count','duty_hours','weekend_count','weekend_hours']),
         body: (
           <>
             <div className="grid grid-cols-2 gap-2">
-              <Num k="duty_count" label="당직" hint="퇴근 후 더 남는 근무" v={f.duty_count} on={set} unit="회 / 월" ph="0" />
-              <Num k="duty_hours" label="한 번에" v={f.duty_hours} on={set} unit="시간" ph="2" />
+              <Num k="duty_count" label="당직" hint="퇴근 후 더 남는 근무" v={f.duty_count} on={set} unit="회 / 월" ph="0" f={f} />
+              <Num k="duty_hours" label="한 번에" v={f.duty_hours} on={set} unit="시간" ph="2" f={f} />
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <Num k="weekend_count" label="주말근무" v={f.weekend_count} on={set} unit="회 / 월" ph="0" />
-              <Num k="weekend_hours" label="한 번에" hint="반나절이면 4" v={f.weekend_hours} on={set} unit="시간" ph="4" />
+              <Num k="weekend_count" label="주말근무" v={f.weekend_count} on={set} unit="회 / 월" ph="0" f={f} />
+              <Num k="weekend_hours" label="한 번에" hint="반나절이면 4" v={f.weekend_hours} on={set} unit="시간" ph="4" f={f} />
             </div>
             <p className="mt-5 text-sm text-gray-400">기본 174시간 · 주 5일 기준으로 시급을 냅니다</p>
           </>
@@ -216,11 +221,11 @@ export function SignupSurvey({
       },
       {
         title: '나에 대해',
-        ok: has('gender') && has('birth_year'),
+        ok: has('gender') && has('birth_year') && !bad(['birth_year']),
         body: (
           <>
             <Sel k="gender" label="성별" hint="남녀 급여 차이를 보는 데 써요" v={f.gender} on={set} opts={GENDERS} req />
-            <Num k="birth_year" label="출생연도" hint="또래 비교에 써요" v={f.birth_year} on={set} unit="년생" ph="1997" req />
+            <Num k="birth_year" label="출생연도" hint="또래 비교에 써요" v={f.birth_year} on={set} unit="년생" ph="1997" req f={f} />
             <Area k="note" label="특이사항" hint="선택 · 남들과 다른 조건이 있다면" v={f.note} on={set}
               ph="예) 야간전담이라 수당이 큽니다 / 주 4일제라 낮게 나옵니다" />
           </>
@@ -228,13 +233,14 @@ export function SignupSurvey({
       },
       {
         title: '학력', sub: '여기까지 채우면 합격 스펙 통계도 볼 수 있어요',
-        ok: has('school_type') && has('gpa') && has('gpa_scale') && langOk,
+        ok: has('school_type') && has('gpa') && has('gpa_scale') && langOk
+          && !bad(['gpa','gpa_scale','lang_score']),
         body: (
           <>
             <Schools v={f.school_type} on={set} req />
             <div className="grid grid-cols-2 gap-2">
-              <Num k="gpa" label="학점" v={f.gpa} on={set} unit="점" step="0.01" ph="3.8" req />
-              <Num k="gpa_scale" label="만점 기준" v={f.gpa_scale} on={set} unit="점" step="0.1" ph="4.5" req />
+              <Num k="gpa" label="학점" v={f.gpa} on={set} unit="점" step="0.01" ph="3.8" req f={f} />
+              <Num k="gpa_scale" label="만점 기준" v={f.gpa_scale} on={set} unit="점" step="0.1" ph="4.5" req f={f} />
             </div>
             <Lang f={f} patch={patch} />
           </>
@@ -470,25 +476,37 @@ const SKIN = 'rounded-xs border border-gray-200 bg-gray-50 dark:border-gray-700 
    폭은 INPUT 과 같은 이유로 여기서 안 정합니다 */
 const BOX = `flex items-center ${SKIN} focus-within:outline-[3px] focus-within:outline-focus-ring focus-within:outline-offset-2`;
 const BARE = 'min-w-0 flex-1 bg-transparent px-5 py-4 text-lg outline-none';
+/* 틀린 칸은 테두리 색으로 알립니다 — teamsparta.md 는 오류에 빨강 배경을 금합니다 */
+const BOX_BAD = BOX.replace('border-gray-200', 'border-brand-red').replace('dark:border-gray-700', 'dark:border-brand-red');
 /* 단위가 없는 칸 (고르는 칸·여러 줄).
    폭은 여기서 안 정합니다 — w-full 을 넣어두면 줄 안에서 w-[88px] 과 부딪혀
    어느 쪽이 이길지 클래스 적는 순서로는 안 정해집니다. 쓰는 자리에서 정합니다 */
 const INPUT = `block ${SKIN} px-5 py-4 text-lg`;
 
 function Num({
-  k, label, hint, v, on, unit, ph, step, req,
+  k, label, hint, v, on, unit, ph, step, req, f,
 }: {
   k: string; label: string; hint?: string; v?: string; on: (k: string, v: string) => void;
   unit?: string; ph?: string; step?: string; req?: boolean;
+  /* 칸끼리 얽힌 규칙을 보려면 다른 칸도 필요합니다 (지금 병원 ≥ 첫 입사 등) */
+  f?: Form;
 }) {
+  const err = fieldError(k, v, f ?? {});
+  const r = RANGE[k];
+  const max = r ? (r.max === 0 ? (k === 'birth_year' ? THIS_YEAR - 15 : THIS_YEAR) : r.max) : undefined;
+
   return (
     <label className="mt-6 block first:mt-0">
       <Label label={label} hint={hint} req={req} k={k} />
-      <span className={BOX + ' mt-2 w-full'}>
+      <span className={(err ? BOX_BAD : BOX) + ' mt-2 w-full'}>
+        {/* min·max 를 달아두면 폰 자판이 먼저 걸러줍니다. 믿지는 않습니다 */}
         <input type="number" inputMode="decimal" step={step} value={v ?? ''} placeholder={ph}
+          min={r?.min} max={max} aria-invalid={err ? true : undefined}
           onChange={(e) => on(k, e.target.value)} className={BARE} />
         {unit && <span className="shrink-0 pr-5 text-lg text-gray-400">{unit}</span>}
       </span>
+      {/* 무엇이 틀렸는지 그 자리에서 적습니다 — 「다음」이 안 눌리는 이유가 보여야 합니다 */}
+      {err && <span className="mt-1 block text-sm text-brand-red">{err}</span>}
     </label>
   );
 }
@@ -731,6 +749,7 @@ function Rows({
               </select>
               <span className={BOX + ' w-[124px] shrink-0'}>
                 <input type="number" inputMode="numeric" placeholder="개월" value={r.months}
+                  min={RANGE.months.min} max={RANGE.months.max}
                   onChange={(e) => edit(i, { months: e.target.value })} className={BARE} />
                 <span className="shrink-0 pr-5 text-lg text-gray-400">개월</span>
               </span>
