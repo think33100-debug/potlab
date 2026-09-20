@@ -70,7 +70,7 @@ export async function generateMetadata({
   };
 }
 
-const CORE_SKIP = ['지원자격', '전형방법', '제출서류', '접수방법'];
+const CORE_SKIP = ['지원자격', '전형방법', '제출서류', '접수방법', '기관홈'];
 
 export default async function JobDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -103,7 +103,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
   return (
     <div className={closed ? 'bg-[#F4F4F1]' : 'bg-[#F4F4F1]'}>
-      <main className="mx-auto w-full max-w-2xl px-6 pb-[104px] pt-4 md:px-7">
+      <main className="mx-auto w-full max-w-2xl px-6 pb-[152px] pt-4 md:px-7 md:pb-[96px]">
         <Hit kind="job" target={j.id} />
 
         {/* ① 상단바 ─────────────────────────────── */}
@@ -281,6 +281,25 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
             </div>
           </Rise>
 
+          {detail['기관홈'] && (
+            <Rise>
+              <a
+                href={detail['기관홈']}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 flex items-center justify-between gap-3 rounded-[12px]
+                           border border-[#E3E3DE] bg-white px-6 py-5
+                           transition-transform duration-[120ms] active:scale-[0.99]
+                           motion-reduce:transition-none"
+              >
+                <span className="break-keep text-[15px] font-medium text-[#4A5056]">
+                  기관 홈페이지 열기
+                </span>
+                <Icon name="arrow-up-right" size={16} className="shrink-0 text-[#5F666C]" />
+              </a>
+            </Rise>
+          )}
+
           <OrgPanel orgName={j.org_name} exceptJobId={j.id} />
         </div>
 
@@ -314,8 +333,10 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
       {/* ⑩ 하단 고정 버튼 — 마감된 공고에는 없습니다 */}
       {!closed && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#E3E3DE] bg-white/95
-                        px-6 py-3 backdrop-blur md:px-7">
+        /* 탭바(62px·md 미만에만 있음) 위에 얹습니다.
+           둘 다 bottom-0 이면 탭바가 z-40 이라 이 줄이 통째로 가려집니다 */
+        <div className="fixed inset-x-0 bottom-[62px] z-30 border-t border-[#E3E3DE]
+                        bg-white/95 px-6 py-3 backdrop-blur md:bottom-0 md:px-7">
           <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
             <JobSave id={j.id} big />
             <JobOpenLink
