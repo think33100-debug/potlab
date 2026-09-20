@@ -11,13 +11,13 @@ import { JobOpenLink } from '@/components/job-open-link';
 import { JobSave } from '@/components/job-save';
 import { Rise } from '@/components/job-parts';
 import { OrgPanel } from '@/components/org-panel';
+import { JobVeil } from '@/components/job-veil';
 import { ShareButtons } from '@/components/share-buttons';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
 import { isClosed, todayKst } from '@/lib/job-state';
 import { siteUrl } from '@/lib/site-url';
 import { supabase, JOB_ONE_COLS, type JobPost } from '@/lib/supabase';
-import { Clip, JoinCta } from '@/app/gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -179,6 +179,9 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
             </dl>
           </Rise>
 
+          {/* 가입 안 한 사람은 여기부터 흐립니다 (components/job-veil.tsx).
+              공유 링크로 들어온 사람에게는 안 겁니다 */}
+          <JobVeil>
           {/* ④ 병원 뜯어보기 · ⑤ 얼마나 바쁜 곳인지 ─ */}
           {hosp && (
             <>
@@ -188,7 +191,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
           )}
 
           {/* ⑥ 지원 자격 ──────────────────────── */}
-          <Clip max="26rem">
+          <>
             {detail['지원자격'] && (
               <Rise>
                 <Block icon={icons['job.require']} title="지원 자격">
@@ -259,15 +262,13 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                 </Block>
               </Rise>
             ))}
-          </Clip>
+          </>
 
           {!detail['지원자격'] && !detail['전형방법'] && rest.length === 0 && (
             <p className="mt-7 break-keep text-[15px] text-[#5F666C]">
               이 공고는 본문을 못 받아왔어요. 아래 단추로 원문을 열어 주세요
             </p>
           )}
-
-          <JoinCta what="이 공고" />
 
           {/* ⑨ 출처 ───────────────────────────── */}
           <Rise>
@@ -301,6 +302,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
           )}
 
           <OrgPanel orgName={j.org_name} exceptJobId={j.id} />
+          </JobVeil>
         </div>
 
         {/* ⑤ 마감이면 하단 고정 버튼 대신 「지금 열려 있는 비슷한 공고」 */}

@@ -40,35 +40,48 @@ export async function hospitalStat(orgName: string): Promise<HospitalStat | null
   return (data as unknown as HospitalStat | null) ?? null;
 }
 
-/* 「같은 종합병원끼리 견줬을 때 …」 — 종별 이름이 반드시 들어갑니다.
-   무슨 평균인지 안 밝히면 읽는 사람이 전국 평균으로 오해합니다. */
-export function busyWord(h: HospitalStat): { label: string; line: string } {
+/* 바쁨 세 칸에 쓰는 말과 아이콘.
+
+   종별 이름이 반드시 들어갑니다 — 무슨 기준인지 안 밝히면 읽는 사람이
+   전국 평균으로 오해합니다. 종별은 공고마다 바뀝니다.
+
+   이모지는 안 씁니다. 기기마다 모양이 달라 아이폰과 안드로이드가 다르게
+   보이고, 홈 화면에서 이미 전부 뺐습니다. 대신 **채운 아이콘**을 씁니다. */
+export const BANDS = [
+  { key: 'easy', label: '여유로운 곳', icon: 'leaf' },
+  { key: 'mid',  label: '보통',       icon: 'equal' },
+  { key: 'busy', label: '바쁜 곳',    icon: 'flame' },
+] as const;
+
+export type BandKey = (typeof BANDS)[number]['key'];
+
+export function busyWord(h: HospitalStat): {
+  label: string; icon: string; where: string; head: string; body: string;
+} {
   const kind = h.kind || '같은 종별';
   if (h.band === 'easy') {
     return {
       label: '여유로운 곳',
-      line: `같은 ${kind}끼리 견줬을 때 중간보다 적어요`,
+      icon: 'leaf',
+      where: `같은 ${kind} 중 아래쪽 25%`,
+      head: '치료사 한 명이 맡는 환자가 적은 편이에요.',
+      body: `한 사람에게 쓸 시간이 그만큼 깁니다. 대신 자리가 잘 안 나기도 하죠. 같은 ${kind}끼리 견줘서 매긴 기준이에요.`,
     };
   }
   if (h.band === 'busy') {
     return {
       label: '바쁜 곳',
-      line: `같은 ${kind}끼리 견줬을 때 중간보다 많습니다`,
+      icon: 'flame',
+      where: `같은 ${kind} 중 위쪽 25%`,
+      head: '치료사 한 명이 맡는 환자가 많은 편이에요.',
+      body: `손은 바쁘지만 그만큼 사람을 자주 뽑습니다. 같은 ${kind}끼리 견줘서 매긴 기준이에요.`,
     };
   }
   return {
     label: '보통',
-    line: `같은 ${kind}끼리 견줬을 때 중간쯤이에요`,
+    icon: 'equal',
+    where: `같은 ${kind} 중 가운데 50%`,
+    head: '치료사 한 명이 맡는 환자가 딱 중간쯤입니다.',
+    body: `너무 몰리지도, 한가하지도 않은 곳이죠. 같은 ${kind}끼리 견줘서 매긴 기준이에요.`,
   };
-}
-
-/* 막대에서 채울 비율(0~100).
-   눈금이 세 칸이라 칸 안에서도 위치가 보이게 폅니다 —
-   여유 0~33 · 보통 33~67 · 바쁨 67~100 */
-export function busyPercent(h: HospitalStat): number {
-  const { per_bed: v, kind_p25: a, kind_p75: b } = h;
-  if (a == null || b == null || b <= a) return 50;
-  if (v <= a) return Math.max(6, (v / a) * 33);
-  if (v >= b) return Math.min(100, 67 + Math.min(1, (v - b) / b) * 33);
-  return 33 + ((v - a) / (b - a)) * 34;
 }

@@ -69,20 +69,3 @@ export function useCountUp(to: number, ms = 1100, digits = 0) {
 
   return { ref, n: n.toFixed(digits) };
 }
-
-/* 0% 에서 실제 값까지 차오르는 막대.
-   숫자와 같은 규칙입니다 — 한 번만, 움직임 줄이기면 처음부터 최종값. */
-export function useGrow(to: number, ms = 900) {
-  const { ref, seen } = useSeen<HTMLDivElement>();
-  const [w, setW] = useState(0);
-
-  useEffect(() => {
-    if (!seen) return;
-    if (lessMotion()) { setW(to); return; }
-    /* 한 프레임 뒤에 바꿔야 CSS transition 이 0 → to 를 봅니다 */
-    const id = requestAnimationFrame(() => setW(to));
-    return () => cancelAnimationFrame(id);
-  }, [seen, to]);
-
-  return { ref, w, ms };
-}

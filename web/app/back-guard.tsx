@@ -20,10 +20,27 @@ import { useToast } from './toast';
 
 const GUARD = 'potjobBackGuard';
 
+/* 이번 방문에서 **처음 열린 자리**를 한 번만 적어둡니다.
+
+   공고 상세가 「카톡으로 받은 링크인지 · 목록에서 눌러 들어온 것인지」를
+   가르는 데 씁니다 (components/job-veil.tsx).
+   공고 화면에서만 적으면 언제나 그 공고가 되어버려서, 모든 화면에 붙는
+   여기서 적습니다. */
+export function markEntry() {
+  try {
+    if (!sessionStorage.getItem('entry_path')) {
+      sessionStorage.setItem('entry_path', location.pathname);
+    }
+  } catch { /* 사파리 비공개 */ }
+}
+
 export function BackGuard({ home = '/' }: { home?: string }) {
   const pathname = usePathname();
   const toast = useToast();
   const exit = useRef(createBackExit());
+
+  /* 그리는 중에 부르면 서버에서도 돌려다 걸립니다. 붙은 뒤에 한 번만 */
+  useEffect(() => { markEntry(); }, []);
 
   useEffect(() => {
     if (pathname !== home) return;
