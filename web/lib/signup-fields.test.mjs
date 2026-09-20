@@ -4,7 +4,7 @@
    여기가 틀리면 마이페이지에서 고칠 때 값이 빈 칸으로 보이고,
    그대로 저장하면 원래 적으신 게 날아갑니다. */
 import assert from 'node:assert/strict';
-import { toDraft, NONE , payAs } from './signup-fields.ts';
+import { toDraft, NONE , payAs , emptyLang, langError, langsPayload, OPIC_LEVELS } from './signup-fields.ts';
 
 /* ① 현직 — 담을 때 짧게 줄인 병원 유형이 고르는 칸의 긴 이름으로 돌아와야 합니다 */
 {
@@ -24,7 +24,6 @@ import { toDraft, NONE , payAs } from './signup-fields.ts';
   assert.equal(f.net_monthly, '250');
   assert.equal(f.pay_unsure, '');
   assert.equal(f.note, '');            // null 은 빈 칸으로
-  assert.equal(f.lang_none, undefined); // 점수가 있으면 「없음」이 아닙니다
   assert.equal(f.rows_none, undefined);
   assert.deepEqual(rows, [{ hospital: '대학병원(사립)', region: '서울', months: '24' }]);
 }
@@ -34,10 +33,9 @@ import { toDraft, NONE , payAs } from './signup-fields.ts';
 {
   const { f, certs, courses } = toDraft(
     { hired_year: 2021, hospital_type: '대학병원(국립)', pay_basis: 'estimated' },
-    { licenses: [], trainings: [], career: [], lang_score: null },
+    { licenses: [], trainings: [], career: [] },
   );
   assert.equal(f.pay_unsure, 'Y');   // 세후로 적어 계산했던 분
-  assert.equal(f.lang_none, 'Y');
   assert.equal(f.rows_none, 'Y');
   assert.deepEqual(certs, [NONE]);
   assert.deepEqual(courses, [NONE]);
@@ -93,7 +91,6 @@ console.log('signup-fields 통과 — 4가지');
 
   /* ⑧ 나머지 숫자 칸도 범위를 봅니다 */
   assert.match(fieldError('net_monthly', '99999', {}, Y), /1 ~ 2000/);
-  assert.match(fieldError('lang_score', '1000', {}, Y), /0 ~ 990/);
   assert.match(fieldError('duty_count', '40', {}, Y), /0 ~ 31/);
   assert.match(fieldError('weekend_count', '20', {}, Y), /0 ~ 10/);
   assert.match(fieldError('bonus_yearly', '-5', {}, Y), /0 ~ 9999/);
@@ -139,3 +136,73 @@ console.log('숫자 칸 검사 통과 — 6가지');
 }
 
 console.log('payAs 통과 — 6가지');
+
+/* ⑥ 어학 — 한 사람이 여러 줄. DB 의 spec_langs 규칙과 어긋나면 저장이 막힙니다 */
+{
+  const row = (o) => ({ ...emptyLang(), ...o });
+
+  /* 시험마다 만점이 다릅니다 (DB 의 spec_langs_score_range 와 같은 숫자) */
+  assert.equal(langError(row({ exam: '토익', score: '990' })), null);
+  assert.ok(langError(row({ exam: '토익', score: '1200' })));
+  assert.equal(langError(row({ exam: '텝스', score: '600' })), null);
+  assert.ok(langError(row({ exam: '텝스', score: '700' })));
+  assert.ok(langError(row({ exam: '토익스피킹', score: '210' })));
+
+  /* 덜 채운 줄은 잘못이 아니라 그냥 버립니다 — 어학은 필수가 아닙니다 */
+  assert.equal(langError(row({ exam: '토익' })), null);
+  assert.deepEqual(langsPayload([row({ exam: '토익' })]), []);
+
+  /* 보내는 모양 — 시험마다 채워지는 칸이 다릅니다 */
+  assert.deepEqual(langsPayload([row({ exam: '토익', score: '850' })]),
+    [{ exam: '토익', score: 850, level: null, note: null }]);
+  assert.deepEqual(langsPayload([row({ exam: '오픽', level: 'IH' })]),
+    [{ exam: '오픽', score: null, level: 'IH', note: null }]);
+  assert.deepEqual(langsPayload([row({ exam: '기타', note: ' 아이엘츠 6.5 ' })]),
+    [{ exam: '기타', score: null, level: null, note: '아이엘츠 6.5' }]);
+
+  /* 오픽은 공식 9등급만. AM·AH·Superior 는 OPI 것이라 여기 없습니다 */
+  assert.deepEqual(OPIC_LEVELS, ['NL','NM','NH','IL','IM1','IM2','IM3','IH','AL']);
+  assert.deepEqual(langsPayload([row({ exam: '오픽', level: 'AH' })]), []);
+
+  /* 같은 시험 두 줄은 앞의 것만 (DB 의 spec_langs_one_per_exam 이 최종) */
+  assert.deepEqual(
+    langsPayload([row({ exam: '토익', score: '850' }), row({ exam: '토익', score: '700' })]),
+    [{ exam: '토익', score: 850, level: null, note: null }]);
+
+  /* 5줄 상한 */
+  const many = ['토익','텝스','토익스피킹','오픽','기타','토익']
+    .map((e) => row({ exam: e, score: '100', level: 'IH', note: 'x' }));
+  assert.equal(langsPayload(many).length, 5);
+}
+
+console.log('어학 통과 — 5가지');
+
+/* ⑦ 조사 — 「텝스은」이 나왔던 자리입니다. 받침 없는 이름은 「는」 */
+assert.match(langError({ ...emptyLang(), exam: '텝스', score: '700' }), /텝스는/);
+assert.match(langError({ ...emptyLang(), exam: '토익', score: '1200' }), /토익은/);
+console.log('어학 조사 통과 — 2가지');
+
+/* ⑧ 마이페이지에서 고칠 때 — 등록해 둔 어학이 화면 모양으로 펴져야 합니다.
+      안 펴지면 고치기만 해도 어학이 통째로 날아갑니다 */
+{
+  const { langs } = toDraft(null, { licenses: [], trainings: [], career: [] }, [
+    { exam: '토익', score: 850, level: null, note: null },
+    { exam: '오픽', score: null, level: 'IH', note: null },
+    { exam: '기타', score: null, level: null, note: '아이엘츠 6.5' },
+  ]);
+  assert.deepEqual(langs, [
+    { exam: '토익', score: '850', level: '', note: '' },
+    { exam: '오픽', score: '', level: 'IH', note: '' },
+    { exam: '기타', score: '', level: '', note: '아이엘츠 6.5' },
+  ]);
+  /* 편 것을 그대로 다시 보내면 원래 값이어야 합니다 — 한 바퀴 돌아도 안 상해야 합니다 */
+  assert.deepEqual(langsPayload(langs), [
+    { exam: '토익', score: 850, level: null, note: null },
+    { exam: '오픽', score: null, level: 'IH', note: null },
+    { exam: '기타', score: null, level: null, note: '아이엘츠 6.5' },
+  ]);
+  /* 어학을 안 넣었던 사람 */
+  assert.deepEqual(toDraft(null, {}, []).langs, []);
+}
+
+console.log('어학 불러오기 통과 — 3가지');

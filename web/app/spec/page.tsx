@@ -18,7 +18,8 @@ import { PART_LABEL, PART_MAX, cheerOf, gaps, tierOf, type PartKey } from '@/lib
 type Me = {
   job_group: string | null; role: string | null; grade: string | null;
   school_type: string | null; gpa: number | null; gpa_scale: number | null;
-  lang_score: number | null; n_licenses: number; n_trainings: number;
+  langs: { exam: string; score: number | null; level: string | null; note: string | null }[] | null;
+  lang_points: number; n_licenses: number; n_trainings: number;
   rows: { hospital?: string; region?: string; months?: string }[];
   want_type: string | null; want_region: string | null;
   score: number; parts: Record<string, number>;
@@ -255,8 +256,16 @@ function rawOf(k: PartKey, me: Me): string {
       /* 3.00 이 숫자로 오면 3 이 됩니다. 학점은 소수점이 보여야 학점처럼 읽힙니다 */
       return me.gpa && me.gpa_scale
         ? `${trim(me.gpa)} / ${trim(me.gpa_scale)}` : '안 적음';
-    case 'lang':
-      return me.lang_score ? `${me.lang_score}점` : '안 적음';
+    case 'lang': {
+      /* 넣은 것을 그대로 보여줍니다 — 「토익 850점 · 오픽 IH」.
+         점수만 보여주면 왜 그 점수인지 모릅니다 */
+      const xs = me.langs ?? [];
+      if (xs.length === 0) return '안 적음';
+      return xs.map((l) =>
+        l.level ? `${l.exam} ${l.level}`
+        : l.score != null ? `${l.exam} ${l.score}점`
+        : l.note ?? l.exam).join(' · ');
+    }
     case 'school':
       return me.school_type ?? '안 적음';
     case 'certs':

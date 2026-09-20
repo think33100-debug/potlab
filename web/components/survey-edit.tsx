@@ -23,19 +23,21 @@ export function SurveyEdit({ profileId, role, job }: { profileId: string; role: 
 
   const load = async () => {
     const sb = browserSupabase();
-    const [sal, spec, prof] = await Promise.all([
+    const [sal, spec, langs, prof] = await Promise.all([
       sb.from('salary_records').select('*').eq('profile_id', profileId).maybeSingle(),
       sb.from('student_specs').select('*').eq('profile_id', profileId).maybeSingle(),
+      /* 어학은 표가 따로입니다 (spec_langs). 한 사람이 여러 줄입니다 */
+      sb.from('spec_langs').select('exam,score,level,note').eq('profile_id', profileId),
       sb.from('profiles').select('survey_edits,survey_edits_since').eq('id', profileId).maybeSingle(),
     ]);
-    const bad = sal.error ?? spec.error ?? prof.error;
+    const bad = sal.error ?? spec.error ?? langs.error ?? prof.error;
     if (bad) { setErr(`불러오지 못했어요 — ${bad.message}`); return; }
 
     /* 1년이 지났으면 횟수가 0 으로 돌아갑니다 — DB 함수와 같은 규칙입니다 */
     const since = prof.data?.survey_edits_since ? new Date(prof.data.survey_edits_since) : null;
     const fresh = !since || Date.now() - since.getTime() >= 365 * 24 * 3600_000;
     setLeft(FREE_EDITS - (fresh ? 0 : (prof.data?.survey_edits ?? 0)));
-    setDraft(toDraft(sal.data, spec.data));
+    setDraft(toDraft(sal.data, spec.data, langs.data ?? []));
   };
 
   useEffect(() => { load().catch((e) => setErr(String(e))); },

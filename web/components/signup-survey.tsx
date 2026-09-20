@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
 import {
-  CERTS, EMPLOYMENTS, GENDERS, GRADES, HOSPITALS, HOSPITAL_TYPES,
-  MAX_ROWS, NONE, RANGE, REGIONS, SALARY_HIGH, SALARY_LOW, SCHOOLS, THIS_YEAR,
-  anyError, coursesFor, fieldError, payAs, shortType,
-  type ChipGroup, type Draft, type Form, type WorkRow,
+  CERTS, EMPLOYMENTS, EXAMS, GENDERS, GRADES, HOSPITALS, HOSPITAL_TYPES,
+  LANG_MAX, MAX_ROWS, NONE, OPIC_LEVELS, RANGE, REGIONS,
+  SALARY_HIGH, SALARY_LOW, SCHOOLS, THIS_YEAR,
+  anyError, coursesFor, emptyLang, fieldError, langError, langsPayload, payAs, shortType,
+  type ChipGroup, type Draft, type Form, type LangRow, type WorkRow,
 } from '@/lib/signup-fields';
 import { annualTotal, hourlyWage, man10, monthlyHours } from '@/lib/pay';
 import { progress } from '@/lib/progress';
@@ -63,6 +64,11 @@ export function SignupSurvey({
     if (initial) return initial.rows;
     try { return JSON.parse(loadDraft(userId)._rows || '[]'); } catch { return []; }
   });
+  /* 어학은 필수가 아닙니다. 빈 목록으로 시작해 「어학 추가」로 늘립니다 */
+  const [langs, setLangs] = useState<LangRow[]>(() => {
+    if (initial) return initial.langs;
+    try { return JSON.parse(loadDraft(userId)._langs || '[]'); } catch { return []; }
+  });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   /* form 채우는 중 → confirm 정말 등록할지 → done 고맙다는 화면 */
@@ -76,26 +82,27 @@ export function SignupSurvey({
   const patch = (p: Form) => {
     const next = { ...f, ...p };
     setF(next);
-    save(next, certs, courses, rows);
+    save(next, certs, courses, rows, i, langs);
   };
   const set = (k: string, v: string) => patch({ [k]: v });
-  const save = (nf: Form, nc: string[], nk: string[], nr: WorkRow[], step = i) => {
+  const save = (nf: Form, nc: string[], nk: string[], nr: WorkRow[], step = i, nl = langs) => {
     if (edit) return;      // 고치는 중에는 초안을 안 남깁니다. 등록된 값이 기준입니다
     try {
       localStorage.setItem(DRAFT(userId), JSON.stringify({
         ...nf, _certs: nc.join('\n'), _courses: nk.join('\n'), _rows: JSON.stringify(nr),
-        _step: String(step),
+        _langs: JSON.stringify(nl), _step: String(step),
       }));
     } catch { /* 사생활 보호 창에서는 못 씁니다. 초안만 못 남을 뿐입니다 */ }
   };
 
+  const putLangs = (v: LangRow[]) => { setLangs(v); save(f, certs, courses, rows, i, v); };
+
   /* 화면을 옮길 때마다 자리를 남깁니다 */
-  const go = (step: number) => { setI(step); setErr(null); save(f, certs, courses, rows, step); };
+  const go = (step: number) => { setI(step); setErr(null); save(f, certs, courses, rows, step, langs); };
 
   /* 「없음」도 답입니다. 빈칸이면 안 적은 건지 없는 건지 구분이 안 됩니다 —
      그래서 어학·자격증·교육·경력에는 각각 「없음」을 두고, 그걸 골라야 넘어갑니다 */
   const has = (k: string) => !!f[k]?.trim();
-  const langOk = f.lang_none === 'Y' || has('lang_score');
   const rowsOk = f.rows_none === 'Y' || rows.some((r) => r.hospital && r.region && r.months);
   /* 이 화면의 숫자 칸 중 하나라도 범위를 벗어나면 못 넘어갑니다 */
   const bad = (keys: string[]) => anyError(keys, f);
@@ -148,14 +155,14 @@ export function SignupSurvey({
       },
       {
         title: '학점 · 어학',
-        ok: has('gpa') && has('gpa_scale') && langOk && !bad(['gpa','gpa_scale','lang_score']),
+        ok: has('gpa') && has('gpa_scale') && !bad(['gpa','gpa_scale']) && langs.every((r) => !langError(r)),
         body: (
           <>
             <div className="grid grid-cols-2 gap-2">
               <Num k="gpa" label="학점" v={f.gpa} on={set} unit="점" step="0.01" ph="3.8" req f={f} />
               <Num k="gpa_scale" label="만점 기준" v={f.gpa_scale} on={set} unit="점" step="0.1" ph="4.5" req f={f} />
             </div>
-            <Lang f={f} patch={patch} />
+            <Langs rows={langs} on={putLangs} />
           </>
         ),
       },
@@ -243,8 +250,8 @@ export function SignupSurvey({
       },
       {
         title: '학력', sub: '여기까지 채우면 합격 스펙 통계도 볼 수 있어요',
-        ok: has('school_type') && has('gpa') && has('gpa_scale') && langOk
-          && !bad(['gpa','gpa_scale','lang_score']),
+        ok: has('school_type') && has('gpa') && has('gpa_scale')
+          && !bad(['gpa','gpa_scale']) && langs.every((r) => !langError(r)),
         body: (
           <>
             <Schools v={f.school_type} on={set} req />
@@ -252,7 +259,7 @@ export function SignupSurvey({
               <Num k="gpa" label="학점" v={f.gpa} on={set} unit="점" step="0.01" ph="3.8" req f={f} />
               <Num k="gpa_scale" label="만점 기준" v={f.gpa_scale} on={set} unit="점" step="0.1" ph="4.5" req f={f} />
             </div>
-            <Lang f={f} patch={patch} />
+            <Langs rows={langs} on={putLangs} />
           </>
         ),
       },
@@ -318,7 +325,6 @@ export function SignupSurvey({
       school_type: f.school_type || null,
       grade: stu ? f.grade || null : null,
       gpa: num(f.gpa), gpa_scale: num(f.gpa_scale),
-      lang_score: f.lang_none === 'Y' ? null : num(f.lang_score),
       licenses: strip(certs), trainings: strip(courses),
       practice: stu ? filled : null,
       career: stu ? null : filled,
@@ -357,7 +363,10 @@ export function SignupSurvey({
 
     /* 표에 직접 안 씁니다 — 회원에게는 쓰기 권한이 없습니다.
        이 함수가 1년 2회를 세고, survey_at 을 찍고, 두 표를 같이 담습니다 */
-    const { error } = await sb.rpc('save_my_survey', { p_salary: salaryRow, p_spec: spec });
+    /* 어학은 표가 따로라 따로 보냅니다. 덜 채운 줄은 langsPayload 가 버립니다 */
+    const { error } = await sb.rpc('save_my_survey', {
+      p_salary: salaryRow, p_spec: spec, p_langs: langsPayload(langs),
+    });
     if (error) {
       setBusy(false);
       setErr(error.message.includes('1년에 2번')
@@ -602,22 +611,90 @@ function Two({
   );
 }
 
-/* 어학 점수 — 안 본 사람이 많습니다. 안 봤으면 안 봤다고 찍어야 넘어갑니다 */
-function Lang({ f, patch }: { f: Form; patch: (p: Form) => void }) {
-  const none = f.lang_none === 'Y';
+/* 어학 — 한 사람이 여러 개를 넣을 수 있습니다 (표 spec_langs).
+
+   필수가 아닙니다. 학생은 어학 점수가 없는 경우가 더 많아서,
+   비워 두고도 다음으로 넘어갑니다. 그래서 별표(req)도 안 답니다.
+
+   이미 넣은 시험은 다음 줄에서 못 고르게 막습니다 — 같은 시험 두 줄은
+   DB 의 spec_langs_one_per_exam 이 최종으로 막지만, 눌러 놓고 나중에
+   거부당하는 것보다 아예 안 눌리는 편이 낫습니다. */
+function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
+  const taken = (i: number) => new Set(rows.filter((_, j) => j !== i).map((r) => r.exam));
+  const edit = (i: number, patch: Partial<LangRow>) =>
+    on(rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+
   return (
     <div className="mt-6">
-      {!none && (
-        <Num k="lang_score" label="어학 점수" hint="토익 기준" v={f.lang_score}
-          on={(k, v) => patch({ [k]: v })} unit="점" ph="800" req />
+      <p className="text-lg font-bold">어학</p>
+      <p className="mt-1 text-lg text-gray-500">어학 점수가 있으면 넣어주세요. 없어도 괜찮아요</p>
+
+      {rows.map((r, i) => {
+        const used = taken(i);
+        const spec = EXAMS.find((x) => x.name === r.exam);
+        const bad = langError(r);
+        return (
+          <div key={i} className="mt-5 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-bold text-gray-400">{i + 1}번째</span>
+              <button type="button" aria-label={`${i + 1}번째 어학 지우기`}
+                onClick={() => on(rows.filter((_, j) => j !== i))}
+                className="rounded-md px-4 py-1 text-sm text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-950">
+                지우기
+              </button>
+            </div>
+
+            {/* 시험 고르기 — 다섯 개를 두 줄로 */}
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {EXAMS.map((x) => {
+                const off = used.has(x.name);
+                const on_ = r.exam === x.name;
+                return (
+                  <button key={x.name} type="button" disabled={off} aria-pressed={on_}
+                    onClick={() => edit(i, { exam: x.name, score: '', level: '', note: '' })}
+                    className={'rounded-sm border px-3 py-4 text-lg font-medium transition-colors '
+                      + (on_ ? 'border-teal-strong bg-badge-teal-bg text-teal-strong dark:bg-transparent'
+                             : 'border-gray-200 disabled:opacity-30 dark:border-gray-700')}>
+                    {x.name}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* 고른 시험에 맞는 칸만 붙습니다 */}
+            {r.exam === '오픽' ? (
+              <select value={r.level} onChange={(e) => edit(i, { level: e.target.value })}
+                aria-label="오픽 등급" className={INPUT + ' mt-2 w-full'}>
+                <option value="">등급을 골라 주세요</option>
+                {OPIC_LEVELS.map((v) => <option key={v}>{v}</option>)}
+              </select>
+            ) : r.exam === '기타' ? (
+              <input value={r.note} maxLength={60} aria-label="어학 시험 이름과 점수"
+                onChange={(e) => edit(i, { note: e.target.value })}
+                placeholder="예) 아이엘츠 6.5"
+                className={INPUT + ' mt-2 w-full'} />
+            ) : r.exam ? (
+              <span className={(bad ? BOX_BAD : BOX) + ' mt-2 w-full'}>
+                <input type="number" inputMode="numeric" aria-label={`${r.exam} 점수`}
+                  value={r.score} min={0} max={spec?.max} placeholder={spec?.ph}
+                  onChange={(e) => edit(i, { score: e.target.value })} className={BARE} />
+                <span className="shrink-0 pr-5 text-lg text-gray-500">점</span>
+              </span>
+            ) : null}
+
+            {bad && <p className="mt-2 text-sm text-brand-red">{bad}</p>}
+          </div>
+        );
+      })}
+
+      {rows.length < LANG_MAX && (
+        <button type="button" onClick={() => on([...rows, emptyLang()])}
+          className="mt-5 w-full rounded-md border border-dashed border-gray-300 px-6 py-5 text-lg font-medium text-gray-500 dark:border-gray-600">
+          + 어학 추가
+        </button>
       )}
-      <button type="button" aria-pressed={none}
-        onClick={() => patch(none ? { lang_none: '' } : { lang_none: 'Y', lang_score: '' })}
-        className={'mt-5 flex w-full items-center gap-5 rounded-sm border px-6 py-5 text-left transition-colors '
-          + (none ? 'border-teal-strong bg-badge-teal-bg' : 'border-gray-200 dark:border-gray-700')}>
-        <Tick on={none} />
-        <span className="text-lg font-medium">어학 점수 없음</span>
-      </button>
+
+      <p className="mt-2 text-sm text-gray-400">점수 기준은 POTJOB 자체 기준이에요</p>
     </div>
   );
 }

@@ -96,12 +96,81 @@ export const coursesFor = (job: string) => (job === '물리치료사' ? COURSES_
 export const MAX_ROWS = 5;
 export type WorkRow = { hospital: string; region: string; months: string };
 
+/* ───────── 어학 ─────────
+
+   한 사람이 토익도 오픽도 넣을 수 있어서 줄이 여러 개입니다 (표 spec_langs).
+   시험·점수·등급을 따로 둡니다 — 「토익 850」처럼 글자로 합치면 나중에
+   시험별로 셀 수가 없습니다. */
+export const LANG_MAX = 5;
+export type LangRow = { exam: string; score: string; level: string; note: string };
+
+/* 만점은 각 시험 공식 기준입니다. DB 의 spec_langs_score_range 와 같은 숫자여야 합니다 */
+export const EXAMS: { name: string; max?: number; ph?: string }[] = [
+  { name: '토익', max: 990, ph: '850' },
+  { name: '텝스', max: 600, ph: '400' },
+  { name: '토익스피킹', max: 200, ph: '140' },
+  { name: '오픽' },
+  { name: '기타' },
+];
+
+/* opic.or.kr 공식 안내에서 확인했습니다 —
+   「OPIc은 IM등급을 세분화하여 제공합니다 (IM3 > IM2 > IM1)」, 범위는 Novice Low ~ Advanced Low.
+   AM·AH·Superior 는 OPI 것이라 여기 넣으면 안 됩니다 */
+export const OPIC_LEVELS = ['NL', 'NM', 'NH', 'IL', 'IM1', 'IM2', 'IM3', 'IH', 'AL'];
+
+export const emptyLang = (): LangRow => ({ exam: '', score: '', level: '', note: '' });
+
+/* 이 줄이 저장할 만큼 채워졌나. 안 채워진 줄은 그냥 버립니다 —
+   어학은 필수가 아니라서 덜 채웠다고 막지 않습니다 */
+export function langDone(r: LangRow): boolean {
+  const e = EXAMS.find((x) => x.name === r.exam);
+  if (!e) return false;
+  if (r.exam === '오픽') return OPIC_LEVELS.includes(r.level);
+  if (r.exam === '기타') return r.note.trim().length > 0;
+  const n = Number(r.score);
+  return r.score.trim() !== '' && Number.isInteger(n) && n >= 0 && n <= (e.max ?? 0);
+}
+
+/* 채운 줄에 잘못이 있으면 알려줍니다. 빈 줄은 잘못이 아닙니다 */
+export function langError(r: LangRow): string | null {
+  const e = EXAMS.find((x) => x.name === r.exam);
+  if (!e) return null;
+  if (r.exam === '오픽' || r.exam === '기타') {
+    if (r.exam === '기타' && r.note.trim().length > 60) return '60자까지 쓸 수 있어요';
+    return null;
+  }
+  if (r.score.trim() === '') return null;
+  const n = Number(r.score);
+  if (!Number.isFinite(n) || !Number.isInteger(n)) return '숫자만 넣을 수 있어요';
+  if (n < 0 || n > (e.max ?? 0)) return `${eun(r.exam)} 0 ~ ${e.max} 사이로 넣어 주세요`;
+  return null;
+}
+
+/* DB 로 보낼 모양. 덜 채운 줄은 버리고, 같은 시험이 겹치면 앞의 것만 남깁니다
+   (화면에서도 막지만 DB 의 spec_langs_one_per_exam 이 최종입니다) */
+export function langsPayload(rows: LangRow[]) {
+  const seen = new Set<string>();
+  const out = [];
+  for (const r of rows) {
+    if (!langDone(r) || seen.has(r.exam)) continue;
+    seen.add(r.exam);
+    out.push({
+      exam: r.exam,
+      score: r.exam === '오픽' || r.exam === '기타' ? null : Number(r.score),
+      level: r.exam === '오픽' ? r.level : null,
+      note: r.exam === '기타' ? r.note.trim() : null,
+    });
+    if (out.length >= LANG_MAX) break;
+  }
+  return out;
+}
+
 /* ── 등록한 줄 → 화면 모양 ──
 
    마이페이지에서 고칠 때 씁니다. 화면이 안 끼어 있어서 따로 시험할 수 있습니다
    (node lib/signup-fields.test.mjs) */
 export type Form = Record<string, string>;
-export type Draft = { f: Form; certs: string[]; courses: string[]; rows: WorkRow[] };
+export type Draft = { f: Form; certs: string[]; courses: string[]; rows: WorkRow[]; langs: LangRow[] };
 
 /* 빈 칸은 0 이 아니라 '안 적음' 입니다 */
 const num = (v: string | undefined) => (v && v.trim() !== '' ? Number(v) : null);
@@ -125,6 +194,7 @@ export function payAs(f: Form) {
 export function toDraft(
   salary: Record<string, unknown> | null,
   spec: Record<string, unknown> | null,
+  langs: Record<string, unknown>[] | null = null,
 ): Draft {
   const s = (v: unknown) => (v === null || v === undefined ? '' : String(v));
   const f: Form = {};
@@ -135,11 +205,9 @@ export function toDraft(
   /* 세후로 적어 계산했던 분은 그 상태 그대로 열어 줍니다 */
   f.pay_unsure = salary?.pay_basis === 'estimated' ? 'Y' : '';
 
-  for (const k of ['school_type', 'grade', 'gpa', 'gpa_scale', 'lang_score', 'want_type', 'want_region']) {
+  for (const k of ['school_type', 'grade', 'gpa', 'gpa_scale', 'want_type', 'want_region']) {
     f[k] = s(spec?.[k]);
   }
-  /* 등록은 했는데 비어 있으면 「없음」을 골랐던 것입니다 */
-  if (spec && !f.lang_score) f.lang_none = 'Y';
 
   const raw = (spec?.career ?? spec?.practice ?? []) as WorkRow[];
   const rows = Array.isArray(raw)
@@ -151,7 +219,11 @@ export function toDraft(
     const xs = Array.isArray(v) ? (v as string[]) : [];
     return spec && xs.length === 0 ? [NONE] : xs;
   };
-  return { f, certs: list(spec?.licenses), courses: list(spec?.trainings), rows };
+  /* 등록해 둔 어학을 화면 모양으로 폅니다 */
+  const ls = (langs ?? []).map((r) => ({
+    exam: s(r.exam), score: s(r.score), level: s(r.level), note: s(r.note),
+  }));
+  return { f, certs: list(spec?.licenses), courses: list(spec?.trainings), rows, langs: ls };
 }
 
 /* ── 숫자 칸 검사 ──
@@ -189,7 +261,6 @@ export const RANGE: Record<string, Rule> = {
   weekend_hours:      { min: 0, max: 24, label: '주말근무 시간' },
   gpa:                { min: 0, max: 100, label: '학점' },
   gpa_scale:          { min: 1, max: 100, label: '만점 기준' },
-  lang_score:         { min: 0, max: 990, int: true, label: '어학 점수' },
   months:             { min: 1, max: 600, int: true, label: '개월' },
 };
 
