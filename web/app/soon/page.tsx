@@ -27,7 +27,7 @@ export default async function Soon({
       <div className="mt-8 flex flex-wrap justify-center gap-2">
         <Link
           href="/jobs"
-          className="rounded-md bg-brand-red px-7 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
+          className="rounded-md bg-brand-red px-7 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
         >
           채용공고 보기
         </Link>

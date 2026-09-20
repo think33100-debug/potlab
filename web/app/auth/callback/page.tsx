@@ -50,7 +50,7 @@ export default function AuthCallback() {
         <div className="rounded-sm bg-brand-red-soft p-6">
           <p className="text-lg font-bold text-brand-red-dark">로그인을 마치지 못했어요</p>
           <p className="mt-2 text-lg text-brand-red-dark">{err}</p>
-          <a href="/login" className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-lg font-bold text-white">
+          <a href="/login" className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-body-lg font-bold text-white">
             다시 해보기
           </a>
         </div>

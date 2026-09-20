@@ -30,9 +30,16 @@
   /* ── 색 ───────────────────────────────────────────── */
   --color-*: initial;
 
-  /* 브랜드·상호작용 */
-  --color-brand-red: oklch(0.613 0.214 19);            /* 아이덴티티 · primary CTA */
-  --color-brand-red-dark: oklch(0.525 0.197 21);       /* CTA hover/pressed */
+  /* 브랜드·상호작용
+
+     빨강과 어두운 쪽은 브랜드 명세서(potjob-brand/README.md 2번)의 값입니다.
+     hex 로 적은 이유 — tokens.json 이 hex 라 옮기면서 틀릴 일을 없앱니다.
+
+     ※ #FF3B30 위의 흰 글자는 대비가 3.55:1 입니다. 명세서대로
+       큰 굵은 글자(16px 이상 bold)와 로고에만 씁니다. 본문에 쓰지 마세요.
+       빨강을 글자색으로 쓸 때는 어두운 배경 위에서만 (잉크 위 5.03:1) */
+  --color-brand-red: #FF3B30;                          /* potjob_red · 아이덴티티 · primary CTA */
+  --color-brand-red-dark: #E0332A;                     /* potjob_red_pressed · 눌림 */
   --color-brand-red-soft: oklch(0.944 0.029 7);        /* 빨강 배지 · 옅은 경고면 */
   --color-interaction-blue: oklch(0.429 0.297 264);    /* 링크·정보·포커스. sRGB 색역 밖 — 브라우저가 클리핑합니다 */
   --color-interaction-blue-soft: oklch(0.958 0.020 280);
@@ -40,7 +47,7 @@
 
   /* 중립 */
   --color-white: oklch(1.000 0.000 0);
-  --color-gray-50: oklch(0.979 0.003 265);
+  --color-gray-50: #F4F4F1;                            /* potjob_paper */
   --color-gray-100: oklch(0.954 0.005 258);
   --color-gray-200: oklch(0.910 0.007 269);
   --color-gray-300: oklch(0.829 0.009 265);
@@ -49,14 +56,14 @@
   --color-gray-600: oklch(0.420 0.012 267);
   --color-gray-700: oklch(0.298 0.011 271);
   --color-gray-800: oklch(0.210 0.008 275);
-  --color-gray-900: oklch(0.164 0.011 268);
-  --color-gray-950: oklch(0.164 0.007 271);
+  --color-gray-900: #14181C;                           /* potjob_ink · 어두운 바탕 */
+  --color-gray-950: #1B2025;                           /* potjob_surface_dark · 어두운 카드 */
   --color-black: oklch(0.000 0.000 0);
 
   /* 상태 */
   --color-success: oklch(0.627 0.170 149);
   --color-warning: oklch(0.769 0.165 70);
-  --color-danger: oklch(0.613 0.214 19);
+  --color-danger: #FF3B30;                             /* 빨강은 하나입니다 */
   --color-info: oklch(0.429 0.297 264);
 
   /* 배지면 */

@@ -393,7 +393,7 @@ export function SignupSurvey({
             돌아가기
           </button>
           <button type="button" onClick={finish} disabled={busy}
-            className="flex-1 rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40">
+            className="flex-1 rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40">
             {busy ? '저장하는 중…' : edit ? '이대로 저장할래요' : '등록할래요'}
           </button>
         </div>
@@ -419,7 +419,7 @@ export function SignupSurvey({
             : <>적어 주신 내용은 <b>내 정보에서 1년에 2번</b> 고칠 수 있어요</>}
         </p>
         <button type="button" onClick={() => onDone()}
-          className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
+          className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
           {edit ? '내 정보로 돌아가기' : '시작하기'}
         </button>
       </section>
@@ -455,7 +455,7 @@ export function SignupSurvey({
           type="button"
           disabled={busy || blocked}
           onClick={() => (last ? setPhase('confirm') : go(at + 1))}
-          className="flex-1 rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex-1 rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {blocked ? '위 칸을 채워 주세요' : last ? '다 됐어요' : at === 0 ? '채우러 가기' : '다음'}
         </button>
@@ -854,7 +854,7 @@ function Gross({ f, patch }: { f: Form; patch: (p: Form) => void }) {
               </p>
               <button type="button"
                 onClick={() => patch({ base_monthly: String(guess), pay_basis: 'estimated' })}
-                className="mt-5 w-full rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
+                className="mt-5 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
                 이 값으로 넣을게요
               </button>
               <p className="mt-2 text-sm text-gray-400">넣고 나서 위 고정 월급 칸에서 고치셔도 돼요</p>

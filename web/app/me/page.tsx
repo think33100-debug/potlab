@@ -123,7 +123,7 @@ export default function MyPage() {
             type="button"
             onClick={saveNick}
             disabled={busy || locked || !nickChanged}
-            className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+            className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
           >
             바꾸기
           </button>

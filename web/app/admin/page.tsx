@@ -149,7 +149,7 @@ export default function AdminHome() {
           <button
             type="button" onClick={saveSeconds}
             disabled={seconds === savedSeconds}
-            className="rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
+            className="rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
           >
             속도 저장
           </button>
@@ -252,7 +252,7 @@ function Row({
         <span className="flex-1" />
 
         <button type="button" onClick={() => onSave(b)}
-          className="rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
+          className="rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
           저장
         </button>
       </div>

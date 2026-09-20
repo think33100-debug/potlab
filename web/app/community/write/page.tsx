@@ -151,7 +151,7 @@ function Write() {
         type="button"
         onClick={submit}
         disabled={busy}
-        className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
+        className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
       >
         {busy ? '올리는 중…' : '올리기'}
       </button>

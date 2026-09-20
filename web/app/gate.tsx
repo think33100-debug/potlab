@@ -76,7 +76,7 @@ export function JoinCta({ what }: { what: string }) {
         가입하시면 {eul(what)} 전부 보실 수 있어요
       </p>
       <Link href={href}
-        className="mt-6 inline-block w-full rounded-md bg-brand-red px-7 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
+        className="mt-6 inline-block w-full rounded-md bg-brand-red px-7 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
         회원가입 하고 전부 보기
       </Link>
       {mid && (

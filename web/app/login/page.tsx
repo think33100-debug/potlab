@@ -101,7 +101,7 @@ export default function Login() {
           <button
             type="button"
             onClick={() => router.push('/jobs')}
-            className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
+            className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
           >
             공고 보러 가기
           </button>
@@ -132,7 +132,7 @@ export default function Login() {
             </p>
             <Link
               href="/welcome"
-              className="mt-5 block w-full rounded-md bg-brand-red px-6 py-5 text-center text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
+              className="mt-5 block w-full rounded-md bg-brand-red px-6 py-5 text-center text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
             >
               이어서 하기
             </Link>

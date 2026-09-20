@@ -198,7 +198,7 @@ export default function AdminJobEdit() {
             되돌리기
           </button>
           <button type="button" onClick={save} disabled={busy || changed.length === 0}
-            className="rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white hover:bg-brand-red-dark disabled:opacity-40">
+            className="rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark disabled:opacity-40">
             {busy ? '저장하는 중…' : '저장'}
           </button>
         </div>

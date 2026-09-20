@@ -79,7 +79,7 @@ export function PostComments({ postId }: { postId: number }) {
               sessionStorage.setItem('potjob.after-login', location.pathname);
               router.push('/login');
             }}
-            className="mt-5 rounded-md bg-brand-red px-7 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
+            className="mt-5 rounded-md bg-brand-red px-7 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
           >
             가입하고 댓글 달기
           </button>
@@ -112,7 +112,7 @@ export function PostComments({ postId }: { postId: number }) {
               className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
             />
             <button type="button" onClick={send} disabled={busy || !body.trim()}
-              className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white hover:bg-brand-red-dark disabled:opacity-40">
+              className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark disabled:opacity-40">
               달기
             </button>
           </div>

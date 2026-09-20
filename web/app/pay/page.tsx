@@ -82,7 +82,7 @@ export default function PayPage() {
                 {profile ? '급여를 등록하면' : '가입하고 급여를 등록하면'} 같은 조건에서 내가 몇 등인지 나와요
               </p>
               <Link href={profile ? '/me' : '/login'}
-                className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white hover:bg-brand-red-dark">
+                className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark">
                 {profile ? '내 정보에서 등록하기' : '시작하기'}
               </Link>
             </section>

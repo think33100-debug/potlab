@@ -89,10 +89,11 @@ function Btn({
       onClick={onClick}
       disabled={busy}
       className={
-        'rounded-md border px-6 py-4 text-lg font-medium disabled:opacity-40 ' +
+        'rounded-md border px-6 py-4 disabled:opacity-40 ' +
         (danger
-          ? 'border-brand-red bg-brand-red text-white hover:bg-brand-red-dark'
-          : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300')
+          /* 빨강 바탕 위 흰 글자는 16px 굵게여야 합니다 — 브랜드 명세서 2번 */
+          ? 'text-body-lg font-bold border-brand-red bg-brand-red text-white hover:bg-brand-red-dark'
+          : 'text-lg font-medium border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300')
       }
     >
       {children}

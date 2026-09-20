@@ -83,7 +83,7 @@ export function OrgSearch() {
           placeholder="기관 이름으로 찾기" aria-label="기관 이름"
           className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950" />
         <button type="submit"
-          className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white hover:bg-brand-red-dark">
+          className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark">
           찾기
         </button>
       </form>

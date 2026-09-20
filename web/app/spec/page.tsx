@@ -66,7 +66,7 @@ export default function SpecPage() {
               : '가입하면서 스펙을 채우면 점수가 나와요'}
           </p>
           <Link href={profile ? '/me' : '/login'}
-            className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white hover:bg-brand-red-dark">
+            className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark">
             {profile ? '내 정보로 가기' : '시작하기'}
           </Link>
           <Score100 />

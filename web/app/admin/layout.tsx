@@ -39,7 +39,7 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
         </p>
         <Link
           href={session ? '/' : '/login'}
-          className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-lg font-bold text-white hover:bg-brand-red-dark"
+          className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark"
         >
           {session ? '홈으로' : '로그인하기'}
         </Link>

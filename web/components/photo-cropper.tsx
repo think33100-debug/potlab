@@ -197,7 +197,7 @@ export function PhotoCropper({
           그만두기
         </button>
         <button type="button" onClick={crop} disabled={busy || !img}
-          className="flex-1 rounded-md bg-brand-red px-6 py-5 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40">
+          className="flex-1 rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40">
           {busy ? '자르는 중…' : '이걸로 할래요'}
         </button>
       </div>

@@ -45,7 +45,7 @@ export default async function ChannelPage({
         </div>
         <Link
           href={`/community/write?ch=${ch}`}
-          className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
+          className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
         >
           글쓰기
         </Link>

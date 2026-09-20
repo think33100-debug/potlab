@@ -69,7 +69,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
         <JobOpenLink
           id={j.id}
           url={j.url}
-          className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-lg font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98]"
+          className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-body-lg font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98]"
         >
           원문 공고 열기
         </JobOpenLink>
