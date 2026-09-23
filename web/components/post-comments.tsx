@@ -6,6 +6,7 @@ import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
 import { browserSupabase } from '@/lib/supabase-browser';
 import type { CommentRow } from '@/lib/supabase';
+import { shownName } from '@/lib/who';
 import { Avatar } from './avatar';
 import { ago } from './post-row';
 
@@ -26,7 +27,7 @@ export function PostComments({ postId }: { postId: number }) {
   const fetchRows = useCallback(async () => {
     const { data } = await browserSupabase()
       .from('comments')
-      .select('id,post_id,parent_id,author_id,body,created_at,profiles(nickname,avatar)')
+      .select('id,post_id,parent_id,author_id,body,created_at,profiles(nickname,avatar,erased_at)')
       .eq('post_id', postId)
       .order('created_at');
     return (data ?? []) as unknown as CommentRow[];
@@ -157,7 +158,7 @@ function One({
       <div className="flex items-center gap-3 text-sm text-gray-500">
         <Avatar value={c.profiles?.avatar} size="sm" />
         <span className="font-medium text-gray-700 dark:text-gray-300">
-          {c.profiles?.nickname ?? '알 수 없음'}
+          {shownName(c.profiles)}
         </span>
         <span className="text-gray-400">{ago(c.created_at)}</span>
         <span className="flex-1" />

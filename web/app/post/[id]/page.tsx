@@ -7,6 +7,7 @@ import { PostComments } from '@/components/post-comments';
 import { ViewBump } from '@/components/view-bump';
 import { channelName } from '@/lib/channels';
 import { supabase, POST_ONE_COLS, type PostRow } from '@/lib/supabase';
+import { shownName } from '@/lib/who';
 import { Clip, JoinCta, Members } from '@/app/gate';
 
 export const dynamic = 'force-dynamic';
@@ -119,7 +120,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
         <p className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-500">
           <span className="font-medium text-gray-700 dark:text-gray-300">
-            {p.profiles?.nickname ?? '알 수 없음'}
+            {shownName(p.profiles)}
           </span>
           <span>{p.created_at.slice(0, 16).replace('T', ' ')}</span>
           <span className="text-gray-400">조회 {p.view_count}</span>

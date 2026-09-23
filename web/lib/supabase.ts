@@ -98,6 +98,9 @@ export type OrgRow = {
 
 /* ── 커뮤니티 ───────────────────────────────────────── */
 
+/* 글쓴이 이름을 고르는 규칙은 lib/who.ts 에 있습니다 (shownName).
+   여기 두면 시험에서 못 불러옵니다 — 이 파일은 열쇠로 클라이언트를 만듭니다 */
+
 export type PostRow = {
   id: number;
   channel: string;
@@ -109,7 +112,7 @@ export type PostRow = {
   view_count: number;
   created_at: string;
   edited_at: string | null;
-  profiles: { nickname: string; avatar: string | null } | null;
+  profiles: { nickname: string; avatar: string | null; erased_at: string | null } | null;
   post_images?: { thumb_path: string }[];
 };
 
@@ -119,7 +122,7 @@ export type PostRow = {
    `profiles!posts_author_id_fkey` 로 관계 이름을 박아야 합니다.
    그냥 `profiles` 라고 쓰면 PGRST201 이 납니다 — posts 에서 profiles 로 가는 길이
    둘이라(작성자 author_id, 좋아요 post_likes 다대다) 어느 쪽인지 못 정합니다. */
-const AUTHOR = 'profiles!posts_author_id_fkey(nickname,avatar)';
+const AUTHOR = 'profiles!posts_author_id_fkey(nickname,avatar,erased_at)';
 
 export const POST_LIST_COLS =
   'id,channel,author_id,title,body,comment_count,like_count,view_count,created_at,'
@@ -136,7 +139,7 @@ export type CommentRow = {
   author_id: string;
   body: string;
   created_at: string;
-  profiles: { nickname: string; avatar: string | null } | null;
+  profiles: { nickname: string; avatar: string | null; erased_at: string | null } | null;
 };
 
 export const ORG_SOURCE_NAME: Record<string, string> = {

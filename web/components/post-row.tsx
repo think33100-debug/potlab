@@ -5,6 +5,7 @@ import { Avatar } from '@/components/avatar';
 import { channelName } from '@/lib/channels';
 import { browserSupabase } from '@/lib/supabase-browser';
 import type { PostRow } from '@/lib/supabase';
+import { shownName } from '@/lib/who';
 
 export function ago(iso: string) {
   const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -37,7 +38,7 @@ export function PostItem({ p, showChannel = false }: { p: PostRow; showChannel?:
               </span>
             )}
             <Avatar value={p.profiles?.avatar} size="sm" />
-            <span className="truncate">{p.profiles?.nickname ?? '알 수 없음'}</span>
+            <span className="truncate">{shownName(p.profiles)}</span>
             <span className="text-gray-400">{ago(p.created_at)}</span>
           </div>
 
