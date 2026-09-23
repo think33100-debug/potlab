@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Avatar } from '@/components/avatar';
 import { PhotoCropper } from '@/components/photo-cropper';
 import { PhotoPicker } from '@/components/photo-picker';
-import { AVATAR_COLORS, AVATAR_EMOJIS, withColor, withEmoji, withPhoto } from '@/lib/avatar';
+import { AVATAR_COLORS, AVATAR_EMOJIS, isPhoto, withColor, withEmoji, withPhoto } from '@/lib/avatar';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '@/app/toast';
 
@@ -23,6 +23,13 @@ export function AvatarPicker({
   const toast = useToast();
   const [picked, setPicked] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+
+  /* 지금 사진을 올려둔 상태인지. 이모지·새 사진은 이 사진을 덮습니다 —
+     되돌릴 길이 없어서 한 번 물어봅니다.
+     바탕색은 안 묻습니다. withColor 가 사진 경로를 그대로 두고 색만 바꿉니다 */
+  const hasPhoto = isPhoto(value);
+  const askOverwrite = () =>
+    !hasPhoto || confirm('프로필 사진을 바꿀까요? 지금 사진은 되돌릴 수 없어요');
 
   const save = async (next: string) => {
     const { error } = await browserSupabase()
@@ -52,18 +59,21 @@ export function AvatarPicker({
     return <PhotoCropper file={picked} onDone={upload} onCancel={() => setPicked(null)} />;
   }
 
+  /* 자르기 화면에 들어가기 전에 물어봅니다 — 자르고 나서 물으면 헛수고가 됩니다 */
+  const pickPhoto = (f: File) => { if (askOverwrite()) setPicked(f); };
+
   return (
     <div>
       <div className="flex items-center gap-6">
         <Avatar value={value} size="lg" />
-        <PhotoPicker label="이미지 직접 가져오기" onPick={setPicked} disabled={busy} />
+        <PhotoPicker label="이미지 직접 가져오기" onPick={pickPhoto} disabled={busy} />
       </div>
 
       <p className="mt-6 text-sm text-gray-400">이모지와 색을 골라도 돼요</p>
       <div className="mt-2 flex flex-wrap gap-2">
         {AVATAR_EMOJIS.map((em) => (
           <button key={em} type="button" aria-label={em} disabled={busy}
-            onClick={() => save(withEmoji(value, em))}
+            onClick={() => { if (askOverwrite()) save(withEmoji(value, em)); }}
             className="rounded-md border border-gray-200 px-4 py-1 text-body-lg disabled:opacity-40 dark:border-gray-700">
             {em}
           </button>

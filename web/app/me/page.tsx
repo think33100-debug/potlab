@@ -51,6 +51,12 @@ export default function MyPage() {
     if (!nickChanged) return;
     if (name.length < 2 || name.length > 12) { setErr('2자에서 12자까지 쓸 수 있어요'); return; }
 
+    /* 남은 횟수는 DB 가 셉니다 (profiles.nickname_changes).
+       한 번 쓰면 안 돌아오니 누르기 전에 몇 번 남았는지 알려드립니다 */
+    if (!confirm(
+      `앞으로 ${left}번 바꿀 수 있어요. 그다음부터는 유료로 바뀝니다. 바꿀까요?`,
+    )) return;
+
     setBusy(true); setErr(null);
     const { error } = await browserSupabase()
       .from('profiles').update({ nickname: name }).eq('id', me.id);

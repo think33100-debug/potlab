@@ -87,14 +87,19 @@ export async function GET(
   /* 없는 번호를 넣어도 터지지 않고 기본 그림이 나가야 합니다 */
   try {
     const { data } = await supabase
-      .from('job_posts_pub').select('org_name,job_group,apply_to').eq('id', id).maybeSingle();
-    const j = data as { org_name: string; job_group: string | null; apply_to: string | null } | null;
+      .from('job_posts_pub').select('org_name,job_group,apply_from,apply_to').eq('id', id).maybeSingle();
+    const j = data as {
+      org_name: string; job_group: string | null;
+      apply_from: string | null; apply_to: string | null;
+    } | null;
     if (j) {
       org = j.org_name || 'POTJOB';
       skin = (j.job_group && SKIN[j.job_group]) || FALLBACK;
       closed = isClosed(j.apply_to);
-      const when = !j.apply_to ? '마감일 미정'
+      /* 시작일이 있으면 「언제부터」까지 그립니다 */
+      const when = !j.apply_to ? (j.apply_from ? `${j.apply_from} 접수 시작` : '마감일 미정')
         : closed ? `${j.apply_to} 마감`
+        : j.apply_from ? `${j.apply_from} ~ ${j.apply_to} 접수`
         : `~${j.apply_to} 접수`;
       foot = `${skin.name} · ${when}`;
     }

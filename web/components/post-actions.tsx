@@ -64,6 +64,8 @@ export function PostActions({
     if (!me) return needLogin();
     const reason = prompt('어떤 점이 문제인가요? (비방·저격·허위사실·광고 등)');
     if (!reason?.trim()) return;
+    /* 같은 글은 한 번만 신고됩니다. 무르는 길이 없어서 한 번 물어봅니다 */
+    if (!confirm('이 글을 신고할까요? 신고는 취소할 수 없어요')) return;
 
     const { error } = await browserSupabase().from('reports').insert({
       target_type: 'post', target_id: id, reporter_id: me.id, reason: reason.trim(),
@@ -78,9 +80,18 @@ export function PostActions({
     toast('신고했어요. 관리자가 확인할게요');
   };
 
+  /* 줄을 없애지 않고 감춥니다.
+
+     보는 사람에게는 지운 것과 똑같습니다 — 목록에서도 상세에서도 안 보입니다.
+     다만 표에는 남습니다. 분쟁이 생겼을 때 원본이 있어야 하고,
+     이미 나간 공유 링크가 「지워진 글이에요」라고 말해줄 수 있어야 합니다.
+     (표에서 지우면 그 링크는 「없는 글」이 되어 버립니다)
+
+     감춘 사람·시각은 DB 함수가 박습니다. 화면이 적어 보내면 아무 이름이나
+     넣을 수 있어서 hidden 칸은 권한 자체를 걷어뒀습니다. */
   const remove = async () => {
     if (!confirm('이 글을 지울까요? 되돌릴 수 없어요')) return;
-    const { error } = await browserSupabase().from('posts').delete().eq('id', id);
+    const { error } = await browserSupabase().rpc('hide_post', { p_id: id, p_hide: true });
     if (error) { toast(`지우지 못했어요 — ${error.message}`, { tone: 'danger' }); return; }
     toast('글을 지웠어요');
     router.push('/community');

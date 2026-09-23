@@ -57,11 +57,13 @@ export function ShareButtons({
       <button
         type="button"
         onClick={share}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-[#4A5056]
+        /* 누르는 자리 48px — 손가락에 맞춥니다.
+           눈금(--spacing)이 지워져 있어 h-9 는 CSS 가 안 나옵니다 */
+        className="flex h-[48px] w-[48px] items-center justify-center rounded-full text-[#4A5056]
                    transition-transform duration-[120ms] active:scale-[0.88]
                    motion-reduce:transition-none"
       >
-        <Icon name="share" size={20} />
+        <Icon name="share" size={24} />
         <span className="sr-only">공유</span>
       </button>
     );

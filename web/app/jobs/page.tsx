@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { Hit } from '@/components/hit';
+import { Icon } from '@/components/icon';
+import { jobViews } from '@/lib/job-views';
 import {
   supabase, LIST_COLS, TABS, tabLabel, type JobListItem,
 } from '@/lib/supabase';
@@ -72,6 +74,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
 
   const { data, error } = await list;
   const rows = (data ?? []) as unknown as JobListItem[];
+
+  /* 지금 화면에 뜨는 것만 셉니다 (lib/job-views.ts) */
+  const views = await jobViews(rows.map((r) => r.id));
 
   const link = (patch: Partial<Record<keyof SP, string | undefined>>) => {
     const next = { ...sp, ...patch };
@@ -221,7 +226,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
                   {r.work_place && <span>{r.work_place}</span>}
                   {r.employ_type && <span>{r.employ_type}</span>}
                   {r.headcount ? <span>{r.headcount}명</span> : null}
-                  {r.apply_to && <span>~{d(r.apply_to)}</span>}
+                  {/* 마감일만 있으면 「벌써 열린 건가」를 못 알아봅니다 */}
+                  {(r.apply_from || r.apply_to) && (
+                    <span>{d(r.apply_from)}~{d(r.apply_to)}</span>
+                  )}
+                  <span className="flex items-center gap-1">
+                    <Icon name="eye" size={13} className="shrink-0" />
+                    <span className="num tabular-nums">{views[r.id] ?? 0}</span>
+                  </span>
                 </div>
               </Link>
             </li>

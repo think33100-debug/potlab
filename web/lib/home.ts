@@ -34,7 +34,7 @@ export type HomeStats = {
   hospitals: number;        // 심평원 병원 수
   ot: number;               // 작업치료사
   pt: number;               // 물리치료사
-  hira_ver: string | null;  // 심평원 자료판 — 화면 표기가 이걸 따라갑니다
+  hira_ver: string | null;  // 심평원 자료판. 화면에는 안 씁니다 — 분기 표기를 안 내보내기로 했습니다
   joined: { job: string; n: number; mid: number | null }[];
   min_n: number;            // 이 수보다 적으면 중위값을 안 내보냅니다
 };
@@ -69,7 +69,9 @@ export async function getHome(): Promise<HomeData> {
     supabase.from('job_posts_pub').select('id', { count: 'exact', head: true })
       .gte('apply_to', today).lte('apply_to', until),
     supabase.from('job_posts_pub').select('id', { count: 'exact', head: true }),
-    supabase.from('org_directory').select('name', { count: 'exact', head: true }),
+    /* org_directory 는 anon 이 못 읽습니다 (통째로 긁어가는 길을 닫았습니다).
+       세어 둔 값을 함수로 받습니다 */
+    supabase.rpc('org_total'),
     supabase.from('posts').select('id,title,body')
       .gte('created_at', daysAgoIso(HOT_DAYS))
       .order('view_count', { ascending: false }).limit(1),
@@ -89,7 +91,7 @@ export async function getHome(): Promise<HomeData> {
     metrics: {
       deadline: deadline.count ?? 0,
       jobs: jobs.count ?? 0,
-      orgs: orgs.count ?? 0,
+      orgs: (orgs.data as number | null) ?? 0,
       hot: hotRow ? { id: hotRow.id, title: hotRow.title || hotRow.body.slice(0, 30) } : null,
     },
   };

@@ -71,7 +71,9 @@ export function JobHospital({
           <Num slot={icons['job.pt']} to={h.pt} unit="명" label={PT} hot={mine === PT} />
         </div>
 
-        <p className="mt-6 text-[12px] text-[#6C757C]">심평원 기준이에요.</p>
+        <p className="mt-6 break-keep text-[12px] leading-relaxed text-[#6C757C]">
+          심사평가원에서 받아온 자료입니다. 실제와 다를 수 있어요.
+        </p>
       </div>
     </section>
   );

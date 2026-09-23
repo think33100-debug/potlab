@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Icon } from '@/components/icon';
+import { PayNote } from '@/components/pay-note';
 import { Count } from './hero';
 import { useSeen } from '@/lib/reveal';
 import { therapists, type HomeStats } from '@/lib/home';
@@ -85,7 +86,8 @@ export function Joined({ stats }: { stats: HomeStats }) {
             </li>
           ))}
         </ul>
-        <p className="mt-5 text-lg text-mute">
+        <PayNote className="mt-5 text-mute" />
+        <p className="mt-2 text-lg text-mute">
           {stats.min_n}명이 안 되면 안 보여드려요.
           통계가 아니라 그냥 누구 한 명 얘기가 되니까요.
         </p>
@@ -238,11 +240,11 @@ export function JobSection({ stats }: { stats: HomeStats }) {
             <Chip n={stats.hospitals} label="병원" />
           </ul>
 
-          {stats.hira_ver && (
-            <p className="mt-5 text-sm text-gray-400">
-              건강보험심사평가원 {stats.hira_ver} 기준
-            </p>
-          )}
+          {/* 자료판(분기 표기)은 화면에 안 씁니다 — 분기가 지나면
+              「낡은 자료」로 읽힙니다. 값은 lib/home.ts 가 계속 들고 있습니다 */}
+          <p className="mt-5 text-sm text-gray-400">
+            건강보험심사평가원 기준
+          </p>
         </div>
       </Reveal>
 
@@ -438,7 +440,7 @@ export function FinalCta({ stats }: { stats: HomeStats }) {
           지금 시작하기
         </Link>
         <p className="mt-7 text-sm text-gray-400">
-          건강보험심사평가원 {stats.hira_ver ?? ''} 병원 자료, 공공기관 채용공시,
+          건강보험심사평가원 병원 자료, 공공기관 채용공시,
           회원이 직접 등록한 급여입니다. {stats.min_n}명이 안 되는 조건은 안 보여드립니다.
         </p>
       </div>

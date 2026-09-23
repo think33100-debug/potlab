@@ -10,9 +10,15 @@
    로그인 수단이 주는 사진을 그대로 쓰면, 본인이 커뮤니티에 내놓을
    생각이 없던 얼굴이 올라갑니다. 그래서 값을 아예 안 읽습니다. */
 
+/* 위 두 줄은 처음부터 있던 것입니다 — 동물·식물·소품.
+   아래 두 줄은 병원과 치료 쪽입니다. 치료사가 쓰는 앱인데 고를 게
+   병아리와 여우뿐이면 남의 앱처럼 보입니다.
+   작업치료 쪽(소근육 활동)은 🧩 🖍️ 🧶, 물리치료 쪽은 🦴 🧘 🏃 가 맡습니다. */
 export const AVATAR_EMOJIS = [
   '🐣', '🐨', '🦊', '🐼', '🐧', '🐙', '🌱', '🌻',
   '⭐', '🍀', '🫖', '🧃', '🎧', '📚', '🩺', '🧩',
+  '🏥', '🚑', '💊', '💉', '🩹', '🦴', '🧠', '🫀',
+  '🧑‍⚕️', '🦽', '🩼', '🤲', '🧘', '🏃', '🖍️', '🧶',
 ];
 
 export const AVATAR_COLORS = [
@@ -49,6 +55,16 @@ export function withColor(v: string | null | undefined, color: string) {
 export function withEmoji(v: string | null | undefined, emoji: string) {
   const { color } = split(v ?? '');
   return `${emoji}|${color}`;
+}
+
+/* 지금 올려둔 사진이 있는지.
+
+   이모지를 누르거나 새 사진을 올리면 이 사진이 덮입니다 — 화면에서
+   되찾을 길이 없어서, 이 값이 참이면 먼저 물어봅니다
+   (components/avatar-picker.tsx). 바탕색은 묻지 않습니다 —
+   withColor 가 사진 경로를 그대로 두고 색만 갈아 끼웁니다. */
+export function isPhoto(v: string | null | undefined): boolean {
+  return parseAvatar(v).kind === 'photo';
 }
 
 export function withPhoto(v: string | null | undefined, path: string) {

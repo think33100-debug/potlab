@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { NothingHere } from '@/components/nothing-here';
 import { Hit } from '@/components/hit';
 import { PostActions } from '@/components/post-actions';
 import { PostComments } from '@/components/post-comments';
@@ -17,6 +17,34 @@ async function getPost(id: string) {
   const { data } = await supabase.from('posts').select(POST_ONE_COLS).eq('id', n).maybeSingle();
   return (data as unknown as PostRow) ?? null;
 }
+
+/* 못 읽었을 때 왜 못 읽었는지.
+
+   RLS 가 감춘 글을 안 내려주므로 위 질의만으로는 「없는 글」과
+   「지워진 글」이 똑같이 빈손으로 옵니다. 그런데 링크를 받은 분에게는
+   그 둘이 전혀 다른 얘기입니다 — 하나는 주소가 틀린 것이고
+   하나는 글쓴이가 지운 것입니다.
+
+   그래서 상태 한 낱말만 물어봅니다. 본문은 한 글자도 안 나갑니다
+   (DB 의 post_state 함수). */
+async function stateOf(id: string): Promise<'gone' | 'hidden'> {
+  const n = Number(id);
+  if (!Number.isFinite(n)) return 'gone';
+  const { data } = await supabase.rpc('post_state', { p_id: n });
+  return data === 'hidden' ? 'hidden' : 'gone';
+}
+
+/* 두 경우의 말. 미리보기 제목과 화면이 같은 말을 쓰게 한 곳에 둡니다 */
+const GONE = {
+  gone: {
+    title: '찾는 글이 없어요',
+    body: '주소가 잘못됐거나, 처음부터 없던 글이에요.',
+  },
+  hidden: {
+    title: '지워진 글이에요',
+    body: '글쓴이가 지웠거나 관리자가 내린 글이에요. 링크를 받으셨다면 그 사이에 지워졌어요.',
+  },
+} as const;
 
 async function getImages(id: number) {
   const { data } = await supabase
@@ -36,7 +64,8 @@ export async function generateMetadata({
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const p = await getPost(id);
-  if (!p) return { title: '없는 글이에요 · POTJOB' };
+  /* 카톡에 뜨는 제목도 갈라 적습니다 — 누르기 전에 알 수 있게 */
+  if (!p) return { title: `${GONE[await stateOf(id)].title} · POTJOB` };
 
   const imgs = await getImages(p.id);
   const title = p.title || p.body.slice(0, 40);
@@ -60,7 +89,19 @@ export async function generateMetadata({
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const p = await getPost(id);
-  if (!p) notFound();
+
+  /* 404 를 내는 대신 화면을 보여줍니다. 받은 사람이 왜 안 보이는지는
+     알게 해야 합니다 — 빈 화면은 「서비스가 고장 났다」로 읽힙니다 */
+  if (!p) {
+    const g = GONE[await stateOf(id)];
+    return (
+      <NothingHere
+        title={g.title} body={g.body}
+        goHref="/community" goLabel="커뮤니티 가기"
+        subHref="/jobs" subLabel="채용공고 보기"
+      />
+    );
+  }
 
   const imgs = await getImages(p.id);
 

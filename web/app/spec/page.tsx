@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { PayNote } from '@/components/pay-note';
 import { useAuth } from '../auth';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { man10 } from '@/lib/pay';
@@ -246,7 +247,9 @@ function Rookie({ job }: { job: string | null }) {
               </div>
             ))}
           </div>
-          <p className="mt-5 text-sm text-gray-400">
+          <PayNote className="mt-5 text-gray-500"
+                   source="연차 2년 이하 회원이 직접 올린 급여" />
+          <p className="mt-1 text-sm text-gray-400">
             가운데 값(중위값)이에요. {d.min_n}명이 안 되는 유형은 안 보여드려요
           </p>
         </>

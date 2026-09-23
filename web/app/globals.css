@@ -286,3 +286,64 @@
     outline-offset: 2px;
   }
 }
+
+/* ────────────────────────────────────────────────────────────────
+   앱 시작 화면 (2026-09-23)
+
+   흰 바탕 가운데에 「피오티잡」이 떠오르고, 조금 뒤에 아래 두 줄이 따라옵니다.
+
+   왜 자바스크립트로 안 그리는가 — 그리기 전에 한 번 칠하는 것과 같은 이유입니다.
+   리액트가 붙은 뒤에 띄우면 앱 화면이 한 번 번쩍이고 그 위에 덮입니다.
+   <head> 의 짧은 스크립트가 html 에 data-splash="on" 만 답니다 (app/layout.tsx).
+   나타났다 사라지는 것은 전부 여기 CSS 가 합니다 — 치우는 코드가 따로 없습니다.
+
+   안 띄우는 경우 둘 —
+     · 첫 자리가 홈이 아닐 때 (공유 링크로 들어온 사람은 바로 글을 봐야 합니다)
+     · 이번 방문에서 이미 한 번 띄웠을 때
+   ──────────────────────────────────────────────────────────────── */
+#splash { display: none; }
+
+html[data-splash="on"] #splash {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;                       /* 이름과 문장 사이의 틈 */
+  background-color: #FFFFFF;
+  text-align: center;
+  animation: splash-out 2.3s forwards;
+}
+
+html[data-splash="on"] #splash .splash-name { animation: splash-in 0.55s 0.1s both; }
+html[data-splash="on"] #splash .splash-line { animation: splash-in 0.55s 0.75s both; }
+
+@keyframes splash-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 마지막 0.4초에만 사라집니다. visibility 까지 꺼야 밑이 눌립니다 */
+@keyframes splash-out {
+  0%, 82%  { opacity: 1; visibility: visible; }
+  100%     { opacity: 0; visibility: hidden; }
+}
+
+/* 움직임을 줄여달라는 설정이면 움직임 없이 바로 보이고, 조용히 사라집니다 */
+@media (prefers-reduced-motion: reduce) {
+  html[data-splash="on"] #splash {
+    animation: splash-cut 1.4s forwards;
+  }
+  html[data-splash="on"] #splash .splash-name,
+  html[data-splash="on"] #splash .splash-line {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  @keyframes splash-cut {
+    0%, 99%  { opacity: 1; visibility: visible; }
+    100%     { opacity: 0; visibility: hidden; }
+  }
+}

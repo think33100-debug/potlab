@@ -1,5 +1,6 @@
 'use client';
 
+import { PayNote } from '@/components/pay-note';
 import { man10, rankOf, tierOf, type Rank } from '@/lib/pay';
 
 /* 「내 위치」 카드. 이 화면에서 제일 중요한 자리라 따로 뒀습니다 —
@@ -116,6 +117,8 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
           {!s.in_filter && (
             <p className="mt-2 text-sm text-gray-400">지금 걸어둔 조건에는 내 자료가 안 들어가요</p>
           )}
+
+          <PayNote className="mt-5 text-gray-500" />
         </div>
       )}
     </section>

@@ -50,7 +50,18 @@ export function TopbarUser() {
       )}
       <Link href="/me" className="flex items-center gap-3">
         <Avatar value={me.avatar} size="sm" />
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{me.nickname}</span>
+        {/* 닉네임은 12자까지 됩니다. 옆에 직군 배지가 붙으면서 390px 에서
+            탑바가 넘칠 수 있어 여기서 잘라 둡니다 */}
+        <span className="max-w-[6.5rem] truncate text-sm font-medium text-gray-700 dark:text-gray-300">
+          {me.nickname}
+        </span>
+        {/* 가입할 때 받은 값 그대로입니다 — 학생이면 학생, 아니면 직군.
+            역할이 갈라놓는 게 커뮤니티 방이라 여기서도 그 갈래를 따릅니다 */}
+        {(me.role === '학생' ? '학생' : me.job_group) && (
+          <span className="shrink-0 rounded-md bg-badge-teal-bg px-3 py-1 text-sm font-medium text-teal-strong">
+            {me.role === '학생' ? '학생' : me.job_group}
+          </span>
+        )}
       </Link>
     </div>
   );

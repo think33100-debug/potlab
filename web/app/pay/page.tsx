@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../auth';
+import { PayNote } from '@/components/pay-note';
 import { PayRank, type Me, type Stats } from '@/components/pay-rank';
 import { EMPLOYMENTS, HOSPITAL_TYPES, REGIONS, shortType } from '@/lib/signup-fields';
 import { BANDS, grow, man10 } from '@/lib/pay';
@@ -151,7 +152,8 @@ export default function PayPage() {
             <p className="mt-2 text-sm text-gray-500">{grow(s.n).msg}</p>
           </section>
 
-          <p className="mt-6 text-sm text-gray-400">
+          <PayNote className="mt-6 text-gray-500" />
+          <p className="mt-1 text-sm text-gray-400">
             치료사들이 직접 올린 자료입니다. 병원 이름은 받지 않아요
           </p>
         </>

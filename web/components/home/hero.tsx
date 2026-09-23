@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { PayNote } from '@/components/pay-note';
 import { useCountUp } from '@/lib/reveal';
 import type { HomeStats } from '@/lib/home';
 
@@ -87,6 +88,9 @@ export function Hero({ stats }: { stats: HomeStats }) {
             ))}
           </dl>
         )}
+
+        {/* 중위값만 크게 보이면 「내가 받을 돈」으로 읽힙니다 */}
+        {ot?.mid != null && <PayNote className="mt-5 text-gray-400" />}
       </div>
     </section>
   );

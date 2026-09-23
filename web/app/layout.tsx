@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { SPLASH_SCRIPT, Splash } from "@/components/splash";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
 import { siteUrl } from "@/lib/site-url";
@@ -43,6 +44,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* 커뮤니티로 바로 들어온 사람이 흰 화면을 한 번 보지 않게,
             리액트가 그리기 전에 바탕을 정합니다 */}
         <script dangerouslySetInnerHTML={{ __html: SURFACE_SCRIPT }} />
+        {/* 앱 시작 화면을 띄울지만 정합니다. 그리는 것은 CSS 입니다 */}
+        <script dangerouslySetInnerHTML={{ __html: SPLASH_SCRIPT }} />
       </head>
       {/* 밝은 바탕은 potjob_paper 입니다. 흰색은 카드 안쪽에만 씁니다 —
           종이색 위에 흰 카드가 떠야 카드가 카드로 보입니다 */}
@@ -51,6 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AuthProvider>
           <BackGuard />
           <Surface />
+          <Splash />
 
           {/* 탑바 56px · 그림자 없이 아래 보더만 — teamsparta.md */}
           <header className="sticky top-0 z-40 h-[56px] shrink-0 border-b border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900">
@@ -66,6 +70,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </header>
 
           {children}
+
+          {/* 직업정보제공사업 신고 사항. 모든 화면 맨 아래에 작게 둡니다 —
+              신고번호는 화면에 밝혀야 하는 것이라 한 화면만 빠지면 안 됩니다.
+              휴대폰에서는 탭바(62px)에 가리지 않게 아래를 더 띄웁니다 */}
+          <footer className="mx-auto w-full max-w-3xl px-6 pb-[78px] pt-7 md:px-7 md:pb-7">
+            <p className="break-keep text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              직업정보제공사업 신고번호 J1401020260007
+              <br />
+              주식회사 빈틈 · 대구 북구 동북로 291, 901-A156호
+            </p>
+          </footer>
 
           {/* 휴대폰에서만 보이는 아래 탭바 */}
           <TabBar />

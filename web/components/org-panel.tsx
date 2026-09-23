@@ -1,16 +1,18 @@
 import Link from 'next/link';
-import { findOrg } from '@/lib/org';
 import { supabase, LIST_COLS, type JobListItem } from '@/lib/supabase';
-import { ORG_SOURCE_NAME } from '@/lib/supabase';
+import { orgPublic, place, shortKinds, TILE_NAME } from '@/lib/org';
 
 /* 공고 하나를 볼 때 그 기관이 어떤 곳인지 같이 보여줍니다.
-   예전 앱에서 병원 정보가 같이 뜨던 자리입니다.
 
-   급여는 salary_records 가 아직 0줄이라 자리만 잡아둡니다 —
+   인원·병상은 여기서 뺐습니다 — 바로 위 「병원 뜯어보기」가 같은 숫자를
+   더 크게 보여줍니다. 두 벌로 두면 한쪽만 고치게 됩니다.
+   대신 병원정보 화면으로 가는 길을 놓습니다.
+
+   급여는 salary_records 가 아직 한 줄뿐이라 자리만 잡아둡니다 —
    없는 숫자를 지어내지 않습니다. */
 export async function OrgPanel({ orgName, exceptJobId }: { orgName: string; exceptJobId: string }) {
   const [org, others] = await Promise.all([
-    findOrg(orgName),
+    orgPublic(orgName, null),
     supabase.from('job_posts_pub').select(LIST_COLS)
       .eq('org_name', orgName).neq('id', exceptJobId)
       .order('posted_at', { ascending: false, nullsFirst: false })
@@ -20,24 +22,19 @@ export async function OrgPanel({ orgName, exceptJobId }: { orgName: string; exce
   const rows = (others.data ?? []) as unknown as JobListItem[];
   if (!org && rows.length === 0) return null;
 
-  const where = [org?.sido, org?.sgg].filter(Boolean).join(' ');
   const facts: [string, string][] = [];
-  if (org?.kind) facts.push(['종별', org.kind]);
+  if (org?.kinds?.length) facts.push(['종별', shortKinds(org.kinds)]);
   if (org?.est_type) facts.push(['설립구분', org.est_type]);
+  const where = place(org?.sido_std ?? null, org?.sgg_std ?? null);
   if (where) facts.push(['지역', where]);
-  if (org?.beds != null) facts.push(['병상', `${org.beds}개`]);
-  if (org?.capacity != null) facts.push(['정원', `${org.capacity}명`]);
-  if (org?.pt != null || org?.ot != null) {
-    facts.push(['치료사', [
-      org.pt != null ? `물리치료사 ${org.pt}명` : null,
-      org.ot != null ? `작업치료사 ${org.ot}명` : null,
-    ].filter(Boolean).join(' · ')]);
-  }
+  if (org?.tel) facts.push(['전화', org.tel]);
 
   return (
     <section className="mt-8 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
       <p className="text-xs text-gray-400">이 기관은 이런 곳이에요</p>
-      <p className="mt-2 text-h3 font-bold">{org?.name ?? orgName}</p>
+      {/* 색을 박습니다. 물려받게 두면 어두운 모드에서 흰색이 되어
+          종이색 바탕 위에서 안 보였습니다 (#14181C 로 16.2:1) */}
+      <p className="mt-2 text-h3 font-bold text-ink">{org?.name ?? orgName}</p>
 
       {facts.length > 0 ? (
         <dl className="mt-5 grid grid-cols-[5rem_1fr] gap-y-2 text-lg">
@@ -55,10 +52,14 @@ export async function OrgPanel({ orgName, exceptJobId }: { orgName: string; exce
       )}
 
       {org?.addr && <p className="mt-5 text-lg text-gray-700 dark:text-gray-300">{org.addr}</p>}
+
       {org && (
-        <p className="mt-2 text-sm text-gray-400">
-          출처 {ORG_SOURCE_NAME[org.source] ?? org.source}
-        </p>
+        <Link
+          href={`/orgs?org=${encodeURIComponent(org.name)}&sido=${encodeURIComponent(org.sido_std ?? '')}`}
+          className="mt-5 block text-lg font-medium text-interaction-blue hover:underline"
+        >
+          {TILE_NAME[org.tile] ?? '기관'} 정보 자세히 보기 →
+        </Link>
       )}
 
       {/* 급여는 자료가 없어서 숫자를 안 만듭니다 */}

@@ -17,6 +17,7 @@ import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
 import { isClosed, todayKst } from '@/lib/job-state';
+import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { supabase, JOB_ONE_COLS, type JobPost } from '@/lib/supabase';
 
@@ -46,11 +47,14 @@ export async function generateMetadata({
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const j = await one(id);
-  if (!j) return { title: '없는 공고에요 · POTJOB' };
+  if (!j) return { title: '없는 공고입니다 · POTJOB' };
 
   const closed = isClosed(j.apply_to);
-  const when = !j.apply_to ? '마감일 미정'
+  /* 받는 사람이 「언제부터 언제까지」를 미리보기에서 바로 알아야 합니다.
+     시작일이 자료에 없으면 예전처럼 마감일만 적습니다 */
+  const when = !j.apply_to ? (j.apply_from ? `${j.apply_from} 접수 시작` : '마감일 미정')
     : closed ? `${j.apply_to} 마감됨`
+    : j.apply_from ? `${j.apply_from} ~ ${j.apply_to} 접수`
     : `~${j.apply_to} 마감`;
 
   const title = `${j.org_name} ${j.job_group ?? '치료사'} 채용`;
@@ -78,9 +82,10 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
   /* 병원 자료가 없으면 null 입니다 — 그 구역을 통째로 감춥니다.
      0 으로 채우면 「치료사가 없는 병원」으로 읽혀 더 나쁩니다 */
-  const [hosp, icons] = await Promise.all([
+  const [hosp, icons, views] = await Promise.all([
     hospitalStat(j.org_name),
     iconMap('공고 상세'),
+    jobViews([j.id]),
   ]);
 
   const d = dday(j.apply_to);
@@ -106,14 +111,15 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
         <div className="flex items-center justify-between">
           <Link
             href="/jobs"
-            className="-ml-2 flex h-9 w-9 items-center justify-center rounded-full
+            className="-ml-5 flex h-[48px] w-[48px] items-center justify-center rounded-full
                        text-[#4A5056] transition-transform duration-[120ms]
                        active:scale-[0.88] motion-reduce:transition-none"
           >
-            <Icon name="chevron-left" size={22} />
+            <Icon name="chevron-left" size={24} />
             <span className="sr-only">목록으로</span>
           </Link>
-          <div className="flex items-center gap-1">
+          {/* gap-1(4px)이면 저장과 공유가 손가락 하나에 같이 눌립니다 */}
+          <div className="-mr-5 flex items-center gap-3">
             <JobSave id={j.id} />
             <ShareButtons
               title={`${j.org_name} ${j.job_group ?? '치료사'} 채용`}
@@ -160,6 +166,12 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               {j.org_name}
               {j.work_place && <span className="text-[#5F666C]"> · {j.work_place}</span>}
             </p>
+
+            {/* 조회수 — 몇 명이나 보고 있는 자리인지 */}
+            <p className="mt-2 flex items-center gap-1.5 text-[13px] text-[#5F666C]">
+              <Icon name="eye" size={15} className="shrink-0" />
+              <span className="num tabular-nums">{views[j.id] ?? 0}</span>
+            </p>
           </header>
 
           {/* ③ 핵심 네 칸 ──────────────────────── */}
@@ -168,7 +180,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               <Core icon={icons['job.headcount']} label="모집 인원"
                     v={j.headcount ? `${j.headcount}명` : '공고 참조'} />
               <Core icon={icons['job.deadline']} label="접수 마감"
-                    v={j.apply_to ?? '수시'} />
+                    v={j.apply_to ?? '수시'}
+                    sub={j.apply_from ? `${j.apply_from} 시작` : null} />
               <Core icon={icons['job.edu']} label="학력" v={j.edu ?? '제한 없음'} />
               <Core icon={icons['job.place']} label="근무지"
                     v={j.work_place ?? j.sido ?? '공고 참조'} />
@@ -357,7 +370,9 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   );
 }
 
-function Core({ icon, label, v }: { icon: string; label: string; v: string }) {
+function Core({
+  icon, label, v, sub = null,
+}: { icon: string; label: string; v: string; sub?: string | null }) {
   return (
     <div className="rounded-[12px] border border-[#E3E3DE] bg-white p-5">
       <dt className="flex items-center gap-1.5 text-[13px] text-[#5F666C]">
@@ -366,6 +381,8 @@ function Core({ icon, label, v }: { icon: string; label: string; v: string }) {
       </dt>
       <dd className="mt-1.5 break-keep text-[17px] font-bold text-[#1B2025]"
           style={{ overflowWrap: 'break-word' }}>{v}</dd>
+      {/* 마감일만 있고 시작일이 없어서 「접수가 열렸나」를 못 알아봤습니다 */}
+      {sub && <p className="mt-1 break-keep text-[12px] text-[#5F666C]">{sub}</p>}
     </div>
   );
 }

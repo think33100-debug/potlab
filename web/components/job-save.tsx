@@ -59,10 +59,11 @@ export function JobSave({ id, big = false }: { id: string; big?: boolean }) {
   return (
     <button
       type="button" onClick={toggle} aria-pressed={!!on}
-      className="flex h-9 w-9 items-center justify-center rounded-full transition-transform
+      /* 누르는 자리 48px — components/share-buttons.tsx 와 같은 크기 */
+      className="flex h-[48px] w-[48px] items-center justify-center rounded-full transition-transform
                  duration-[120ms] active:scale-[0.88] motion-reduce:transition-none"
     >
-      <Icon name="bookmark" filled={!!on} size={20}
+      <Icon name="bookmark" filled={!!on} size={24}
             className={on ? 'text-[#FF3B30]' : 'text-[#4A5056]'} />
       <span className="sr-only">{on ? '저장 취소' : '저장'}</span>
     </button>
