@@ -248,6 +248,9 @@
   .animate-toast-in,
   .animate-breathe { animation: none; }
 
+  /* 바탕색이 넘어가는 것도 움직임입니다 — 바로 바뀝니다 */
+  html, body { transition: none; }
+
   /* 움직임 없이 최종 상태로 바로 둡니다.
      lib/reveal.ts 도 같은 설정을 보고 세는 것을 건너뜁니다 —
      CSS 만 막으면 숫자가 0 에서 멈춰 있게 됩니다 */
@@ -273,11 +276,32 @@
   }
 
   /* 커뮤니티 바탕. body 의 클래스만으로는 스크롤 끝을 넘어간 자리가
-     흰색으로 남아서 html 에도 같이 칠합니다 */
+     흰색으로 남아서 html 에도 같이 칠합니다.
+
+     바탕 #14181C · 카드 #1B2025 · 글자 흰색 — 토큰 이름으로는
+     gray-900 · gray-950 · white 입니다 (teamsparta.md 의 값 그대로). */
   html[data-surface="dark"],
   html[data-surface="dark"] body {
     background-color: var(--color-gray-900);
     color: var(--color-white);
+  }
+
+  /* 어두운 구역에서는 보조 글자를 #9BA3AB 보다 연하게 쓰지 않습니다.
+
+     밝은 바탕에서 쓰던 gray-500(oklch 0.569)을 그대로 두면 잉크색 위에서
+     3:1 이 안 나옵니다. 화면마다 클래스를 바꾸는 대신 토큰 값을 이 구역에서만
+     갈아 끼웁니다 — text-gray-500 이 붙은 자리가 전부 한 번에 밝아집니다.
+
+     gray-500·600 은 이 프로젝트에서 글자색으로만 씁니다 (bg-/border- 로 쓰는
+     자리는 /admin·/welcome 뿐이고 둘 다 어두운 구역이 아닙니다). */
+  html[data-surface="dark"] {
+    --color-gray-500: #9BA3AB;   /* 보조 글자의 바닥값 */
+    --color-gray-600: #C6CCD2;   /* 본문에 가까운 보조 */
+  }
+
+  /* 탭바로 커뮤니티에 들어가고 나올 때 바탕이 툭 바뀌지 않게 */
+  html, body {
+    transition: background-color 240ms ease-out, color 240ms ease-out;
   }
 
   /* 포커스를 보더 색만으로 알리지 않습니다 */

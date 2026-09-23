@@ -13,6 +13,7 @@ import { useAuth } from '../auth';
 
 const MENU = [
   { href: '/admin', label: '홈 꾸미기' },
+  { href: '/admin/texts', label: '홈 글' },
   { href: '/admin/jobs', label: '공고' },
   { href: '/admin/posts', label: '커뮤니티 글' },
   { href: '/admin/icons', label: '아이콘' },

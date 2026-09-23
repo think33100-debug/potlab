@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Hit } from '@/components/hit';
 import { Icon } from '@/components/icon';
+import { JobTabs } from '@/components/job-tabs';
 import { jobViews } from '@/lib/job-views';
 import {
   supabase, LIST_COLS, TABS, tabLabel, type JobListItem,
@@ -78,6 +79,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
   /* 지금 화면에 뜨는 것만 셉니다 (lib/job-views.ts) */
   const views = await jobViews(rows.map((r) => r.id));
 
+  /* 분류 카드의 그림. 이름·가는 곳은 코드(TABS)에 있고 그림만 DB 입니다 */
+  const cards = await supabase.from('job_tab_cards').select('tab_key,image_path');
+  const tabImages: Record<string, string | null> = {};
+  ((cards.data ?? []) as { tab_key: string; image_path: string | null }[])
+    .forEach((c) => { tabImages[c.tab_key] = c.image_path; });
+
   const link = (patch: Partial<Record<keyof SP, string | undefined>>) => {
     const next = { ...sp, ...patch };
     const p = new URLSearchParams();
@@ -135,26 +142,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
           </Link>
         </div>
       ) : (
-        <nav className="mb-6 flex flex-wrap gap-2" aria-label="탭">
-          {TABS.map((t, i) => (
-            <Link
-              key={t.key}
-              href={link({ tab: t.key })}
-              aria-current={active?.key === t.key ? 'page' : undefined}
-              className={
-                'rounded-md border px-6 py-4 text-lg font-medium transition-colors ' +
-                (active?.key === t.key
-                  ? 'border-teal-strong bg-teal-strong text-white'
-                  : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950')
-              }
-            >
-              {t.label}
-              <span className={'ml-2 text-sm ' + (active?.key === t.key ? 'text-white/70' : 'text-gray-400')}>
-                {counts[i]}
-              </span>
-            </Link>
-          ))}
-        </nav>
+        /* 칩 넉 줄 대신 옆으로 미는 카드입니다. 그림이 들어갈 자리입니다 */
+        <JobTabs
+          images={tabImages}
+          hrefs={Object.fromEntries(TABS.map((t) => [t.key, link({ tab: t.key })]))}
+          active={active?.key ?? null}
+          counts={counts}
+        />
       )}
 
       <nav className="mb-7 space-y-2" aria-label="거르기">

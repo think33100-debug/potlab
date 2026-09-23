@@ -1,3 +1,4 @@
+import type { Texts } from './home-text';
 import { supabase } from './supabase';
 import { daysAgoIso, todayIso } from './time';
 
@@ -10,7 +11,7 @@ import { daysAgoIso, todayIso } from './time';
 
 export type HomeBlock = {
   id: number;
-  kind: 'top' | 'category' | 'big';
+  kind: 'top' | 'category' | 'big' | 'comm';
   sort: number;
   enabled: boolean;
   emoji: string | null;
@@ -45,6 +46,8 @@ export type HomeData = {
   bigs: HomeBlock[];
   seconds: number;
   stats: HomeStats;
+  /* 랜딩 글. 관리자가 /admin/texts 에서 고칩니다 (lib/home-text.ts) */
+  texts: Texts;
   metrics: {
     deadline: number;
     jobs: number;
@@ -61,7 +64,7 @@ export async function getHome(): Promise<HomeData> {
   const today = todayIso();
   const until = new Date(Date.now() + DEADLINE_DAYS * 86400000).toISOString().slice(0, 10);
 
-  const [blocks, settings, deadline, jobs, orgs, hot, stats] = await Promise.all([
+  const [blocks, settings, deadline, jobs, orgs, hot, stats, texts] = await Promise.all([
     supabase.from('home_blocks').select(HOME_COLS).eq('enabled', true).order('sort'),
     supabase.from('site_settings').select('key,value').eq('key', 'top_banner_seconds').maybeSingle(),
 
@@ -76,9 +79,16 @@ export async function getHome(): Promise<HomeData> {
       .gte('created_at', daysAgoIso(HOT_DAYS))
       .order('view_count', { ascending: false }).limit(1),
     supabase.rpc('home_stats'),
+    supabase.from('home_texts').select('key,value'),
   ]);
 
   const rows = (blocks.data ?? []) as unknown as HomeBlock[];
+
+  /* 못 읽으면 빈 표로 둡니다 — 화면은 lib/home-text.ts 의 기본값으로 그립니다.
+     DB 한 번 안 열렸다고 홈이 통째로 비면 안 됩니다 */
+  const words: Texts = {};
+  ((texts.data ?? []) as { key: string; value: string }[])
+    .forEach((r) => { words[r.key] = r.value; });
   const hotRow = (hot.data ?? [])[0] as { id: number; title: string | null; body: string } | undefined;
 
   return {
@@ -86,6 +96,7 @@ export async function getHome(): Promise<HomeData> {
     categories: rows.filter((b) => b.kind === 'category'),
     bigs: rows.filter((b) => b.kind === 'big'),
     seconds: Number((settings.data as { value: unknown } | null)?.value ?? 5) || 5,
+    texts: words,
     stats: (stats.data as HomeStats | null)
       ?? { hospitals: 0, ot: 0, pt: 0, hira_ver: null, joined: [], min_n: 3 },
     metrics: {
@@ -94,6 +105,24 @@ export async function getHome(): Promise<HomeData> {
       orgs: (orgs.data as number | null) ?? 0,
       hot: hotRow ? { id: hotRow.id, title: hotRow.title || hotRow.body.slice(0, 30) } : null,
     },
+  };
+}
+
+/* 커뮤니티 맨 위 배너. 홈과 같은 표에서 kind 만 다르게 받아옵니다.
+
+   넘기는 속도는 홈과 따로 둡니다 (comm_banner_seconds) — 같은 값을 쓰면
+   한쪽을 고칠 때 다른 쪽이 같이 바뀝니다. */
+export async function commBanners(): Promise<{ items: HomeBlock[]; seconds: number }> {
+  const [blocks, settings] = await Promise.all([
+    supabase.from('home_blocks').select(HOME_COLS)
+      .eq('kind', 'comm').eq('enabled', true).order('sort'),
+    supabase.from('site_settings').select('value').eq('key', 'comm_banner_seconds').maybeSingle(),
+  ]);
+
+  return {
+    /* 제목이 비면 안 내보냅니다 — 관리자가 아직 안 채운 자리입니다 */
+    items: ((blocks.data ?? []) as unknown as HomeBlock[]).filter((b) => b.title),
+    seconds: Number((settings.data as { value: unknown } | null)?.value ?? 5) || 5,
   };
 }
 

@@ -6,11 +6,19 @@ import { PayNote } from '@/components/pay-note';
 import { useAuth } from '../auth';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { man10 } from '@/lib/pay';
-import { PART_LABEL, PART_MAX, cheerOf, gaps, tierOf, type PartKey } from '@/lib/spec';
+import { NEXT_WHY, PART_LABEL, PART_ORDER, cheerOf, nextUp, tierOf, type PartKey } from '@/lib/spec';
 
 /* 스펙쌓기. 옛 앱의 학생 결과 화면(getStudentResult)을 옮긴 것입니다.
 
-   배점은 옛 앱 그대로 — 학점 60 · 어학 15 · 자격증 10 · 학력 5 · 이수교육 5 · 실습 5.
+   **배점은 화면에 한 자도 안 내보냅니다** (2026-09-23).
+   우리가 직접 만든 기준이라 밖으로 나가면 안 됩니다. 그래서 여기서 뺀 것들 —
+     · 항목별 「12 / 15점」 표기
+     · 항목별 막대 (길이가 곧 비율이라 배점이 역산됩니다)
+     · 「꽉 채우면 N점 올라가요」
+     · 맨 아래 배점표
+   남긴 것은 총점 하나와 학생이 넣은 값 그대로입니다.
+   다음에 챙길 것은 배점을 안 보고 고릅니다 (lib/spec.ts 의 nextUp).
+
    점수 계산은 DB 의 spec_parts() 한 곳에만 있습니다. 여기서 다시 계산하지 않습니다.
 
    「합격한 사람들과 비교」는 기관유형마다 「나보다 낮은 현직이 몇 %」입니다.
@@ -51,9 +59,10 @@ export default function SpecPage() {
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <h1 className="text-h1 font-bold">스펙쌓기</h1>
-      <p className="mt-2 text-lg text-gray-500">
-        내 스펙이 몇 점인지, 어디를 채우면 오르는지 보여드려요
+      <h1 className="break-keep text-h1 font-bold">스펙쌓기</h1>
+      <p className="mt-2 break-keep text-lg text-gray-500">
+        피오티잡에서 실제로 취업을 준비하는 학생들을 조사해
+        자체적으로 만든 스펙 점수입니다
       </p>
 
       {err && <p className="mt-6 text-lg text-brand-red">{err}</p>}
@@ -71,7 +80,6 @@ export default function SpecPage() {
             className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark">
             {profile ? '내 정보로 가기' : '시작하기'}
           </Link>
-          <Score100 />
         </section>
       )}
 
@@ -109,46 +117,28 @@ export default function SpecPage() {
             </p>
           </section>
 
-          {/* ── 항목별 ── */}
+          {/* ── 내가 넣은 것 ──
+              점수도 막대도 안 붙입니다. 길이 하나만 있어도 배점이 역산됩니다 */}
           <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-            <h2 className="text-h3 font-bold">항목별 점수</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              내가 넣은 값과 그 값이 몇 점인지 보여드려요
-            </p>
-            <div className="mt-5">
-              {(Object.keys(PART_MAX) as PartKey[]).map((k) => (
-                <div key={k} className="mt-6 first:mt-0">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-lg font-bold">{PART_LABEL[k]}</span>
-                    <span className="text-lg">
-                      <b>{me.parts[k] ?? 0}</b>
-                      <span className="text-gray-400"> / {PART_MAX[k]}점</span>
-                    </span>
-                  </div>
-                  <p className="mt-1 text-sm text-gray-500">{rawOf(k, me)}</p>
-                  {/* 어학은 기준이 POTJOB 자체 기준이라 밝혀 둡니다.
-                      시험끼리 환산한 게 아니라는 것도 같이 */}
-                  {k === 'lang' && (
-                    <p className="mt-1 text-sm text-gray-400">
-                      점수 기준은 POTJOB 자체 기준이에요.
-                      시험끼리 환산한 게 아니라 각 시험이 발표한 등급을 그대로 따랐어요.
-                      여러 개 넣으면 제일 높은 것 하나만 써요
-                    </p>
-                  )}
-                  <div className="mt-2 h-1 rounded-md bg-gray-100 dark:bg-gray-800">
-                    <div className="h-1 rounded-md bg-teal-strong"
-                      style={{ width: `${Math.round(((me.parts[k] ?? 0) / PART_MAX[k]) * 100)}%` }} />
-                  </div>
+            <h2 className="break-keep text-h3 font-bold">내가 넣은 것</h2>
+            <dl className="mt-5">
+              {PART_ORDER.map((k) => (
+                <div key={k}
+                  className="flex items-baseline justify-between gap-5 border-b border-gray-50
+                             py-5 last:border-0 dark:border-gray-800">
+                  <dt className="break-keep text-lg font-bold">{PART_LABEL[k]}</dt>
+                  <dd className="shrink-0 break-keep text-right text-lg text-gray-600 dark:text-gray-400">
+                    {rawOf(k, me)}
+                  </dd>
                 </div>
               ))}
-            </div>
+            </dl>
 
-            {gaps(me.parts).length > 0 && (
-              <p className="mt-7 rounded-sm bg-badge-teal-bg p-6 text-lg text-teal-strong dark:border dark:border-teal-strong/40 dark:bg-transparent">
-                지금 제일 많이 오를 수 있는 건 <b>{PART_LABEL[gaps(me.parts)[0].key]}</b>이에요.
-                꽉 채우면 {gaps(me.parts)[0].left}점이 올라가요
-              </p>
-            )}
+            {/* 어학은 우리 기준이라 밝혀 둡니다. 구간 값은 안 적습니다 */}
+            <p className="mt-5 break-keep text-sm text-gray-400">
+              어학은 시험끼리 환산한 게 아니라 각 시험이 발표한 등급을 그대로 따랐어요.
+              여러 개 넣으면 제일 높은 것 하나만 써요
+            </p>
           </section>
 
           {/* ── 합격한 사람들과 비교 ── */}
@@ -194,8 +184,8 @@ export default function SpecPage() {
             )}
           </section>
 
+          <NextUp parts={me.parts} />
           <Rookie job={me.job_group} />
-          <Score100 />
         </>
       )}
     </main>
@@ -267,43 +257,43 @@ function rawOf(k: PartKey, me: Me): string {
     case 'gpa':
       /* 3.00 이 숫자로 오면 3 이 됩니다. 학점은 소수점이 보여야 학점처럼 읽힙니다 */
       return me.gpa && me.gpa_scale
-        ? `${trim(me.gpa)} / ${trim(me.gpa_scale)}` : '안 적음';
+        ? `${trim(me.gpa)} / ${trim(me.gpa_scale)}` : '없음';
     case 'lang': {
       /* 넣은 것을 그대로 보여줍니다 — 「토익 850점 · 오픽 IH」.
          점수만 보여주면 왜 그 점수인지 모릅니다 */
       const xs = me.langs ?? [];
-      if (xs.length === 0) return '안 적음';
+      if (xs.length === 0) return '없음';
       return xs.map((l) =>
         l.level ? `${l.exam} ${l.level}` : `${l.exam} ${l.score}점`).join(' · ');
     }
     case 'school':
-      return me.school_type ?? '안 적음';
+      return me.school_type ?? '없음';
     case 'certs':
-      return `${me.n_licenses}개`;
+      return me.n_licenses ? `${me.n_licenses}개` : '없음';
     case 'courses':
-      return `${me.n_trainings}개`;
+      return me.n_trainings ? `${me.n_trainings}개` : '없음';
     case 'practice': {
       const big = (me.rows ?? []).filter((r) =>
         /대학병원|상급종합|종합병원|공공기관\(병원\)|의료원/.test(r.hospital ?? '')).length;
-      if (!me.rows?.length) return '안 적음';
+      if (!me.rows?.length) return '없음';
       return big ? `큰 병원 ${big}곳` : `요양·센터 ${me.rows.length}곳`;
     }
   }
 }
 
-function Score100() {
+/* 다음에 챙기면 좋을 것 한 줄.
+
+   배점을 안 봅니다 — 「지금 시작할 수 있는 것부터」라는 손으로 정한 차례를
+   씁니다 (lib/spec.ts 의 NEXT_ORDER). 그 차례는 배점 순서와 일부러 다릅니다. */
+function NextUp({ parts }: { parts: Record<string, number> }) {
+  const k = nextUp(parts);
+  if (!k) return null;
+
   return (
-    <section className="mt-7 rounded-sm bg-gray-50 p-6 dark:bg-gray-950">
-      <h2 className="text-lg font-bold">배점</h2>
-      <p className="mt-1 text-sm text-gray-500">100점 만점이에요</p>
-      <ul className="mt-5 space-y-1">
-        {(Object.keys(PART_MAX) as PartKey[]).map((k) => (
-          <li key={k} className="flex justify-between text-lg">
-            <span className="text-gray-600 dark:text-gray-400">{PART_LABEL[k]}</span>
-            <span className="font-medium">{PART_MAX[k]}점</span>
-          </li>
-        ))}
-      </ul>
+    <section className="mt-7 rounded-sm bg-badge-teal-bg p-6 dark:border dark:border-teal-strong/40 dark:bg-transparent">
+      <p className="break-keep text-lg text-teal-strong">
+        다음엔 <b>{PART_LABEL[k]}</b>을 챙겨보세요. {NEXT_WHY[k]}
+      </p>
     </section>
   );
 }

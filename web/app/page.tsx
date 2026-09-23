@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Hit } from '@/components/hit';
 import { HomeBanner } from '@/components/home-banner';
 import { Icon } from '@/components/icon';
+import { Rail } from '@/components/rail';
 import { Hero } from '@/components/home/hero';
 import {
   Anonymous, FinalCta, HowTo, JobSection, Joined, PaySection, Together,
@@ -27,7 +28,7 @@ export const dynamic = 'force-dynamic';
 
    바탕은 밝은 종이색이고 히어로와 마지막 CTA 만 어둡습니다. */
 export default async function Home() {
-  const { top, categories, bigs, seconds, metrics, stats } = await getHome();
+  const { top, categories, bigs, seconds, metrics, stats, texts } = await getHome();
 
   return (
     <>
@@ -62,52 +63,54 @@ export default async function Home() {
 
           {/* ③ 큰 배너 — DB.
 
-              가로로 밀던 것을 세로로 쌓았습니다. 카드가 화면 폭의 76% 라
-              옆 카드가 반씩 잘려 「우리가 보고 있…」 처럼 글이 끊겼습니다.
-              세로로 쌓으면 하나씩 가로로 꽉 차서 안 잘립니다. */}
+              한 번 세로로 쌓았다가(카드가 76% 라 옆 카드가 반씩 잘려
+              「우리가 보고 있…」 처럼 글이 끊겼습니다) 다시 옆으로 밉니다.
+              이번엔 카드가 줄 폭에서 40px 만 모자라서 글이 안 잘리고,
+              다음 카드가 25px 만 보여 「더 있다」만 알립니다.
+              손으로 밀면 scroll-snap 이 딱 멈춰 줍니다 (components/rail.tsx) */}
           {bigs.length > 0 && (
-            <section aria-label="살펴보기" className="pt-8">
-              <ul className="space-y-3">
+            <div className="pt-8">
+              <Rail label="살펴보기">
                 {bigs.map((b) => (
-                  <li key={b.id}>
-                    <Link
-                      href={safeHref(b.href)}
-                      className="flex min-h-[200px] flex-col justify-between rounded-sm border border-line bg-card p-7 hover:bg-paper"
-                    >
-                      <p className="text-h2 font-bold text-ink">{b.title}</p>
-                      <p className="mt-5 text-body-lg text-body">{metricLine(b, metrics)}</p>
-                    </Link>
-                  </li>
+                  <Link
+                    key={b.id}
+                    href={safeHref(b.href)}
+                    className="flex min-h-[200px] w-full flex-col justify-between rounded-sm
+                               border border-line bg-card p-7 hover:bg-paper"
+                  >
+                    <p className="break-keep text-h2 font-bold text-ink">{b.title}</p>
+                    <p className="mt-5 break-keep text-body-lg text-body">{metricLine(b, metrics)}</p>
+                  </Link>
                 ))}
-              </ul>
-            </section>
+              </Rail>
+            </div>
           )}
 
           {/* ④ 히어로 — 여기서 이야기가 시작됩니다 */}
           <div className="pt-8">
-            <Hero stats={stats} />
+            <Hero stats={stats} texts={texts} />
           </div>
 
           {/* ⑤ 참여 현황 */}
-          <Joined stats={stats} />
+          <Joined stats={stats} texts={texts} />
 
           {/* ⑥ 급여 01~05 */}
-          <PaySection />
+          <PaySection texts={texts} />
 
           {/* ⑦ 취업·이직 06~09 */}
-          <JobSection stats={stats} />
+          <JobSection stats={stats} texts={texts} />
 
           {/* ⑧ 함께 만듭니다 */}
-          <Together />
+          <Together texts={texts} />
 
           {/* ⑨ 익명 */}
-          <Anonymous />
+          <Anonymous texts={texts} />
 
           {/* ⑩ 이용 방법 */}
-          <HowTo />
+          <HowTo texts={texts} />
 
           {/* ⑪ 마지막 CTA + 출처 */}
-          <FinalCta stats={stats} />
+          <FinalCta stats={stats} texts={texts} />
         </div>
       </main>
     </>

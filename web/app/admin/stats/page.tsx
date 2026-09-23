@@ -26,12 +26,19 @@ type Now = {
 };
 type Daily = { day: string; visits: number; views: number; admin_visits: number };
 type Screen = { kind: string; views: number; visits: number };
+type Device = { device: string; visits: number; views: number };
 type TopJob = { id: string; title: string; org_name: string; views: number; outs: number };
 type TopPost = { id: number; title: string; channel: string; views: number };
 
 const SCREEN_NAME: Record<string, string> = {
   home: '홈', jobs: '공고 목록', job: '공고 상세',
-  community: '커뮤니티', post: '글 상세', other: '그 밖에',
+  community: '커뮤니티', post: '글 상세',
+  orgs: '병원정보 찾기', org: '기관 상세', other: '그 밖에',
+};
+
+/* 기기는 2026-09-23 부터 담습니다. 그 전 자료에는 가릴 근거가 없습니다 */
+const DEVICE_NAME: Record<string, string> = {
+  mobile: '휴대폰', desktop: '피시', 모름: '2026-09-23 이전',
 };
 
 const PROVIDER_NAME: Record<string, string> = {
@@ -44,18 +51,20 @@ export default function AdminStats() {
   const [screens, setScreens] = useState<Screen[] | null>(null);
   const [jobs, setJobs] = useState<TopJob[] | null>(null);
   const [posts, setPosts] = useState<TopPost[] | null>(null);
+  const [devices, setDevices] = useState<Device[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   const fetchAll = useCallback(async () => {
     const sb = browserSupabase();
-    const [n, d, s, tj, tp] = await Promise.all([
+    const [n, d, s, tj, tp, dv] = await Promise.all([
       sb.rpc('admin_stats_now'),
       sb.rpc('admin_stats_daily', { p_days: 30 }),
       sb.rpc('admin_stats_screens', { p_days: 7 }),
       sb.rpc('admin_stats_top_jobs', { p_days: 7, p_limit: 10 }),
       sb.rpc('admin_stats_top_posts', { p_days: 7, p_limit: 10 }),
+      sb.rpc('admin_stats_devices', { p_days: 7 }),
     ]);
-    const bad = [n, d, s, tj, tp].find((r) => r.error);
+    const bad = [n, d, s, tj, tp, dv].find((r) => r.error);
     return {
       err: bad?.error?.message ?? null,
       now: n.data as Now | null,
@@ -63,6 +72,7 @@ export default function AdminStats() {
       screens: (s.data ?? []) as Screen[],
       jobs: (tj.data ?? []) as TopJob[],
       posts: (tp.data ?? []) as TopPost[],
+      devices: (dv.data ?? []) as Device[],
     };
   }, []);
 
@@ -72,6 +82,7 @@ export default function AdminStats() {
       if (!alive) return;
       setErr(r.err); setNow(r.now); setDaily(r.daily);
       setScreens(r.screens); setJobs(r.jobs); setPosts(r.posts);
+      setDevices(r.devices);
     });
     return () => { alive = false; };
   }, [fetchAll]);
@@ -110,6 +121,48 @@ export default function AdminStats() {
             관리자 방문 {today.admin_visits}은 위 숫자에서 뺐어요
           </p>
         )}
+      </section>
+
+      {/* ── 피시 · 휴대폰 ── */}
+      <section>
+        <h2 className="break-keep text-h3 font-bold">
+          피시 · 휴대폰
+          <span className="ml-2 text-sm font-medium text-gray-400">최근 7일</span>
+        </h2>
+
+        {!devices || devices.length === 0 ? (
+          <p className="mt-5 break-keep text-lg text-gray-500">아직 기록이 없어요</p>
+        ) : (
+          <ul className="mt-5 space-y-5">
+            {devices.map((d) => {
+              const all = devices.reduce((a, x) => a + Number(x.visits), 0) || 1;
+              const pct = Math.round((Number(d.visits) / all) * 100);
+              return (
+                <li key={d.device}>
+                  <div className="flex items-baseline justify-between gap-5">
+                    <span className="break-keep text-lg font-medium">
+                      {DEVICE_NAME[d.device] ?? d.device}
+                    </span>
+                    <span className="shrink-0 text-lg">
+                      <b className="num tabular-nums">{pct}%</b>
+                      <span className="ml-2 text-sm text-gray-400">
+                        방문 {Number(d.visits).toLocaleString()} · 조회 {Number(d.views).toLocaleString()}
+                      </span>
+                    </span>
+                  </div>
+                  <div className="mt-2 h-1 rounded-md bg-gray-100 dark:bg-gray-800">
+                    <div className="h-1 rounded-md bg-teal-strong" style={{ width: pct + '%' }} />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        <p className="mt-5 break-keep text-sm text-gray-400">
+          기기는 2026-09-23 부터 담습니다. 그 전에 쌓인 것은 가릴 근거가 없어서
+          「2026-09-23 이전」으로 묶여요. 태블릿은 휴대폰 쪽으로 셉니다
+        </p>
       </section>
 
       {/* ── 30일 ── */}

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AdminTabCards } from '@/components/admin-tab-cards';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ADMIN_LIST_COLS, STATES, type AdminJobListItem, type StateKey,
@@ -106,6 +107,7 @@ export default function AdminJobs() {
 
   return (
     <div>
+      <AdminTabCards />
       {/* 상태 칸 */}
       <nav className="flex flex-wrap gap-2" aria-label="공고 상태">
         {STATES.map((s) => (

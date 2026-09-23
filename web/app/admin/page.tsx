@@ -27,18 +27,22 @@ export default function AdminHome() {
   const [blocks, setBlocks] = useState<HomeBlock[] | null>(null);
   const [seconds, setSeconds] = useState('5');
   const [savedSeconds, setSavedSeconds] = useState('5');
+  const [commSeconds, setCommSeconds] = useState('5');
+  const [savedCommSeconds, setSavedCommSeconds] = useState('5');
 
   /* 받아오는 일과 상태에 넣는 일을 갈라둡니다 —
      effect 안에서 바로 setState 하면 그릴 때마다 한 번 더 그립니다 */
   const fetchAll = useCallback(async () => {
     const sb = browserSupabase();
-    const [b, s] = await Promise.all([
+    const [b, s, c] = await Promise.all([
       sb.from('home_blocks').select(HOME_COLS).order('kind').order('sort'),
       sb.from('site_settings').select('value').eq('key', 'top_banner_seconds').maybeSingle(),
+      sb.from('site_settings').select('value').eq('key', 'comm_banner_seconds').maybeSingle(),
     ]);
     return {
       blocks: (b.data ?? []) as unknown as HomeBlock[],
       sec: String((s.data as { value: unknown } | null)?.value ?? 5),
+      commSec: String((c.data as { value: unknown } | null)?.value ?? 5),
     };
   }, []);
 
@@ -47,6 +51,8 @@ export default function AdminHome() {
     setBlocks(r.blocks);
     setSeconds(r.sec);
     setSavedSeconds(r.sec);
+    setCommSeconds(r.commSec);
+    setSavedCommSeconds(r.commSec);
   }, [fetchAll]);
 
   useEffect(() => {
@@ -56,6 +62,8 @@ export default function AdminHome() {
       setBlocks(r.blocks);
       setSeconds(r.sec);
       setSavedSeconds(r.sec);
+      setCommSeconds(r.commSec);
+      setSavedCommSeconds(r.commSec);
     });
     return () => { alive = false; };
   }, [fetchAll]);
@@ -114,16 +122,16 @@ export default function AdminHome() {
     }
   };
 
-  const saveSeconds = async () => {
-    const n = Number(seconds);
+  const saveSeconds = async (key: string, raw: string, done: (v: string) => void) => {
+    const n = Number(raw);
     if (!Number.isFinite(n) || n < 2 || n > 60) {
       toast('2초에서 60초 사이로 넣어 주세요', { tone: 'danger' }); return;
     }
     const { error } = await browserSupabase().from('site_settings')
       .update({ value: n, updated_at: new Date().toISOString() })
-      .eq('key', 'top_banner_seconds');
+      .eq('key', key);
     if (error) { toast(`저장하지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
-    setSavedSeconds(String(n));
+    done(String(n));
     toast(`${n}초마다 넘기게 했어요`);
   };
 
@@ -148,7 +156,7 @@ export default function AdminHome() {
             </div>
           </label>
           <button
-            type="button" onClick={saveSeconds}
+            type="button" onClick={() => saveSeconds('top_banner_seconds', seconds, setSavedSeconds)}
             disabled={seconds === savedSeconds}
             className="rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
           >
@@ -177,6 +185,45 @@ export default function AdminHome() {
             <IconField v={b.icon ?? ''} set={(v) => patch(b.id, { icon: v })} />
             <Field label="글씨" v={b.title} set={(v) => patch(b.id, { title: v })} />
             <Href b={b} set={(v) => patch(b.id, { href: v })} />
+          </Row>
+        ))}
+      </Section>
+
+      {/* ── 커뮤니티 배너 ── */}
+      <Section
+        title="커뮤니티 배너"
+        note={`커뮤니티 맨 위에 옆으로 밀리는 줄 · 제목이 비면 안 나와요 · 지금 ${of('comm').filter((b) => b.enabled && b.title).length}개`}
+      >
+        <div className="mb-6 flex flex-wrap items-end gap-3 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
+          <label className="text-sm font-bold text-gray-500">
+            넘어가는 속도
+            <div className="mt-2 flex gap-2">
+              <input
+                type="number" min={2} max={60}
+                value={commSeconds}
+                onChange={(e) => setCommSeconds(e.target.value)}
+                className="w-[88px] rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
+              />
+              <span className="self-center text-lg text-gray-500">초</span>
+            </div>
+          </label>
+          <button
+            type="button"
+            onClick={() => saveSeconds('comm_banner_seconds', commSeconds, setSavedCommSeconds)}
+            disabled={commSeconds === savedCommSeconds}
+            className="rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
+          >
+            속도 저장
+          </button>
+        </div>
+
+        {of('comm').map((b, i, arr) => (
+          <Row key={b.id} b={b} i={i} last={arr.length - 1}
+            onPatch={patch} onSave={save} onMove={move} onUpload={upload}>
+            <Field label="제목" v={b.title} set={(v) => patch(b.id, { title: v })} />
+            <Field label="설명" v={b.descr ?? ''} set={(v) => patch(b.id, { descr: v })} />
+            <Href b={b} set={(v) => patch(b.id, { href: v })} />
+            <Picture b={b} onUpload={upload} onClear={() => patch(b.id, { image_path: null })} />
           </Row>
         ))}
       </Section>
