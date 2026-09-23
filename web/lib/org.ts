@@ -1,103 +1,122 @@
 import { supabase } from './supabase';
 
-/* 기관 하나를 찾아 「이런 곳이에요」에 쓸 값을 모읍니다.
+/* 병원정보 찾기(/orgs)가 쓰는 것들.
 
-   org_directory 는 표 9개를 이어붙인 뷰라 이름·종별·지역·주소뿐입니다.
-   치료사 인원처럼 더 깊은 값은 원본 표에 있어서, 찾은 출처에 따라
-   그 표를 한 번 더 봅니다 (hospitals · ltc_facilities).
+   자료는 org_group_mv 한 곳에 모여 있습니다 — 표 아홉 개를 이어붙인
+   org_directory 를 이름+시도로 묶고, 심평원·장기요양 인력 자료를 붙여 둔 표입니다.
 
-   ponytail: 이름이 정확히 같은 줄을 먼저 찾고, 없으면 부분 일치로 내려갑니다.
-   공고의 org_name 은 기관이 직접 쓴 이름이라 대개 그대로 맞습니다.
-   헛짚는 게 보이면 그때 pg_trgm 점수(설계 문서 1-8)로 올립니다. */
+   화면은 그 표를 직접 안 읽습니다. anon 에게 select 를 안 줬습니다 —
+   한 번에 통째로 못 가져가게 하려고요. 전부 DB 함수를 거칩니다
+   (org_facets · org_search · org_public · org_detail · org_nearby · org_jobs).
+   목록 함수가 20곳에서 끊습니다. PostgREST 의 Max rows 에 기대지 않습니다. */
 
-export type OrgInfo = {
-  source: string;
-  name: string;
-  kind: string | null;
-  sido: string | null;
-  sgg: string | null;
-  addr: string | null;
-  /* 아래는 원본 표에서 더 찾아온 값입니다. 없으면 null */
-  beds: number | null;       // 병상
-  est_type: string | null;   // 설립구분 (공공보건의료기관)
-  pt: number | null;         // 물리치료사
-  ot: number | null;         // 작업치료사
-  capacity: number | null;   // 정원 (장기요양기관)
+/* 종별 타일 여덟 개. 아이콘은 DB(ui_icons)에서 오고 여기엔 자리 이름만 둡니다 */
+export const TILES = [
+  { key: 'all',     label: '전체',     slot: 'org.tile.all' },
+  { key: 'general', label: '종합병원', slot: 'org.tile.general' },
+  { key: 'rehab',   label: '재활병원', slot: 'org.tile.rehab' },
+  { key: 'nursing', label: '요양병원', slot: 'org.tile.nursing' },
+  { key: 'clinic',  label: '의원',     slot: 'org.tile.clinic' },
+  { key: 'ltc',     label: '장기요양', slot: 'org.tile.ltc' },
+  { key: 'welfare', label: '복지시설', slot: 'org.tile.welfare' },
+  { key: 'health',  label: '보건기관', slot: 'org.tile.health' },
+] as const;
+
+/* etc 는 타일이 없습니다 — 병원·한방병원·정신병원·치과병원 1,635곳입니다.
+   「전체」와 이름 찾기로만 닿습니다. 배지에는 이름을 적어 줍니다 */
+export const TILE_NAME: Record<string, string> = {
+  ...Object.fromEntries(TILES.map((t) => [t.key, t.label])),
+  etc: '병원',
 };
 
-const COLS = 'source,name,kind,sido,sgg,addr';
+export const SIDOS = [
+  '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종',
+  '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주',
+] as const;
 
-export async function findOrg(orgName: string): Promise<OrgInfo | null> {
-  const q = orgName.trim();
-  if (q.length < 2) return null;
+export type OrgListRow = {
+  name: string;
+  sido_std: string | null;
+  sgg_std: string | null;
+  kinds: string[] | null;
+  tile: string;
+  bed: number | null;
+  ot: number | null;
+  pt: number | null;
+  rehab: number | null;
+  capacity: number | null;
+  band: 'easy' | 'mid' | 'busy' | null;
+  staffed: boolean;
+  n_jobs: number;
+  total: number;
+};
 
-  /* 이름이 똑같은 줄 먼저 */
-  const exact = await supabase.from('org_directory').select(COLS).eq('name', q).limit(1);
-  let row = (exact.data ?? [])[0] as OrgInfo | undefined;
+export type OrgFacets = {
+  tiles: Record<string, number>;
+  sidos: { key: string; n: number }[];
+  sggs: Record<string, { key: string; n: number }[]>;
+  total: number;
+};
 
-  if (!row) {
-    const like = await supabase.from('org_directory').select(COLS).ilike('name', `%${q}%`).limit(1);
-    row = (like.data ?? [])[0] as OrgInfo | undefined;
-  }
-  if (!row) return null;
-  return withExtras(row);
+/* 누구나 볼 수 있는 부분. 숫자는 여기 없습니다 */
+export type OrgPublic = {
+  name: string;
+  sido_std: string | null;
+  sgg_std: string | null;
+  addr: string | null;
+  tel: string | null;
+  kinds: string[] | null;
+  sources: string[] | null;
+  tile: string;
+  staffed: boolean;
+  band: 'easy' | 'mid' | 'busy' | null;
+  est_type: string | null;
+  homepage: string | null;
+};
+
+/* 회원만 받는 부분. 로그인 안 한 요청에는 DB 가 아무 줄도 안 줍니다 */
+export type OrgStat = {
+  name: string;
+  kinds: string[] | null;
+  hosp_kind: string | null;
+  tel: string | null;
+  bed: number | null;
+  rehab: number | null;
+  ot: number | null;
+  pt: number | null;
+  capacity: number | null;
+  per_bed: number | null;
+  kind_med: number | null;
+  kind_p25: number | null;
+  kind_p75: number | null;
+  kind_n: number | null;
+  band: 'easy' | 'mid' | 'busy' | null;
+  data_version: string | null;
+};
+
+export type OrgJob = {
+  id: string;
+  title: string;
+  job_group: string | null;
+  employ_type: string | null;
+  apply_to: string | null;
+  org_name: string;
+};
+
+export async function orgPublic(name: string, sido: string | null): Promise<OrgPublic | null> {
+  const { data } = await supabase.rpc('org_public', { p_name: name, p_sido: sido });
+  return ((data ?? []) as OrgPublic[])[0] ?? null;
 }
 
-/* 병원정보 찾기에서 고른 기관.
-
-   한 기관이 자료 여러 곳에 들어 있습니다 — 경북대학교병원은 심평원·
-   공공보건의료기관·정신건강시설 셋에 있습니다. 하나만 보면 치료사 인원이
-   있는 자료를 놓칠 수 있어서, 이름이 같은 줄을 전부 보고 합칩니다.
-   지역까지 같이 보는 이유는 분원 때문입니다. */
-export async function findOrgMerged(orgName: string, sido: string | null): Promise<OrgInfo[]> {
-  const { data } = await supabase.from('org_directory').select(COLS).eq('name', orgName).limit(20);
-  let rows = (data ?? []) as OrgInfo[];
-  if (sido) {
-    const same = rows.filter((r) => sidoOf(r) === sido);
-    if (same.length) rows = same;
-  }
-  return Promise.all(rows.map(withExtras));
+export async function orgNearby(name: string, sido: string | null) {
+  const { data } = await supabase.rpc('org_nearby', { p_name: name, p_sido: sido, p_n: 3 });
+  return (data ?? []) as { name: string; sido_std: string | null; sgg_std: string | null;
+                           kinds: string[] | null; tile: string; therapists: number }[];
 }
 
-/* DB 의 org_sido() 와 같은 규칙입니다. 자료마다 「경기도」와 「경기」가 섞여 있어서요 */
-export function sidoOf(r: { sido: string | null; addr: string | null }): string | null {
-  const s = (r.sido?.trim() || r.addr || '').trim();
-  const two: [string, string][] = [
-    ['서울', '서울'], ['부산', '부산'], ['대구', '대구'], ['인천', '인천'],
-    ['광주', '광주'], ['대전', '대전'], ['울산', '울산'], ['세종', '세종'],
-    ['경기', '경기'], ['강원', '강원'], ['제주', '제주'],
-    ['충청북', '충북'], ['충북', '충북'], ['충청남', '충남'], ['충남', '충남'],
-    ['전라북', '전북'], ['전북', '전북'], ['전라남', '전남'], ['전남', '전남'],
-    ['경상북', '경북'], ['경북', '경북'], ['경상남', '경남'], ['경남', '경남'],
-  ];
-  for (const [pre, out] of two) if (s.startsWith(pre)) return out;
-  return null;
-}
-
-async function withExtras(row: OrgInfo): Promise<OrgInfo> {
-  const out: OrgInfo = {
-    ...row, beds: null, est_type: null, pt: null, ot: null, capacity: null,
-  };
-
-  /* 출처에 따라 원본 표에서 치료사 인원·병상을 더 찾아옵니다 */
-  if (row.source === 'hospital') {
-    const { data } = await supabase
-      .from('hospitals').select('bed,pt,ot').eq('name', row.name).limit(1);
-    const h = (data ?? [])[0] as { bed: number | null; pt: number | null; ot: number | null } | undefined;
-    if (h) { out.beds = h.bed; out.pt = h.pt; out.ot = h.ot; }
-  } else if (row.source === 'public') {
-    const { data } = await supabase
-      .from('public_hospitals').select('beds,est_type').eq('name', row.name).limit(1);
-    const h = (data ?? [])[0] as { beds: number | null; est_type: string | null } | undefined;
-    if (h) { out.beds = h.beds; out.est_type = h.est_type; }
-  } else if (row.source === 'ltc') {
-    const { data } = await supabase
-      .from('ltc_facilities').select('capacity,pt,ot').eq('name', row.name).limit(1);
-    const h = (data ?? [])[0] as { capacity: number | null; pt: number | null; ot: number | null } | undefined;
-    if (h) { out.capacity = h.capacity; out.pt = h.pt; out.ot = h.ot; }
-  }
-
-  return out;
+export async function orgJobs(name: string): Promise<OrgJob[]> {
+  const { data } = await supabase.rpc('org_jobs', { p_name: name, p_n: 10 });
+  return (data ?? []) as OrgJob[];
 }
 
 /* 우리가 보고 있는 규모. 홈의 큰 배너에서 씁니다.
@@ -105,9 +124,9 @@ async function withExtras(row: OrgInfo): Promise<OrgInfo> {
 export async function ourNumbers() {
   const [jobs, orgs] = await Promise.all([
     supabase.from('job_posts_pub').select('id', { count: 'exact', head: true }),
-    supabase.from('org_directory').select('name', { count: 'exact', head: true }),
+    supabase.rpc('org_total'),
   ]);
-  return { jobs: jobs.count ?? 0, orgs: orgs.count ?? 0 };
+  return { jobs: jobs.count ?? 0, orgs: (orgs.data as number | null) ?? 0 };
 }
 
 /* 장기요양 종별은 「노인요양시설·치매전담실가형1실·치매전담실가형2실…」 처럼
@@ -119,10 +138,10 @@ export function shortKinds(kinds: string[] | null): string {
   return xs.length > 2 ? `${head.join(' · ')} 외 ${xs.length - 2}개` : head.join(' · ');
 }
 
-/* 자료에 따라 시군구가 「대구중구」처럼 시도를 이미 달고 옵니다. 두 번 안 적습니다 */
+/* 자료에 따라 시군구가 「대구중구」처럼 시도를 이미 달고 옵니다. 두 번 안 적습니다.
+   DB 의 org_sgg() 가 대부분 떼어 주지만, 못 뗀 것이 남아도 여기서 한 번 더 봅니다 */
 export function place(sido: string | null, sgg: string | null): string {
   if (!sido) return sgg ?? '';
   if (!sgg) return sido;
   return sgg.startsWith(sido) ? sgg : `${sido} ${sgg}`;
 }
-

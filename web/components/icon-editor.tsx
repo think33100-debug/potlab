@@ -41,6 +41,15 @@ const KO: Record<string, string> = {
   'list-checks': '목록 체크 서류',
   info: '정보 안내',
   'graduation-cap': '학사모 학력 졸업',
+  /* 병원정보 · 종별 */
+  'layout-grid': '네모 네개 전체 모두',
+  hospital: '병원 건물 십자',
+  'id-card-lanyard': '사원증 목걸이 신분증 재활병원',
+  bed: '침대 하나 요양 장기요양',
+  heart: '하트 마음 복지',
+  landmark: '관공서 기둥 보건소 공공',
+  phone: '전화 수화기',
+  'chevron-down': '아래 화살표 펼치기',
 };
 
 const match = (name: string, q: string) => {

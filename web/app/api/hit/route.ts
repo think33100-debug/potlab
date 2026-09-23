@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
 
-const KINDS = ['home', 'jobs', 'job', 'community', 'post', 'other'] as const;
+const KINDS = ['home', 'jobs', 'job', 'community', 'post', 'orgs', 'org', 'other'] as const;
 type Kind = (typeof KINDS)[number];
 
 /* 자기를 밝히는 봇들. 대부분은 자바스크립트를 안 돌려서 여기까지 오지도 않습니다 —

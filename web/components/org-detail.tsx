@@ -1,143 +1,229 @@
 import Link from 'next/link';
-import { findOrgMerged, place, sidoOf } from '@/lib/org';
-import { supabase, LIST_COLS, ORG_SOURCE_NAME, type JobListItem } from '@/lib/supabase';
+import { Icon } from '@/components/icon';
+import { Rise } from '@/components/job-parts';
+import { OrgSave } from '@/components/org-save';
+import { OrgStat } from '@/components/org-stat';
+import { ShareButtons } from '@/components/share-buttons';
+import { BUSY_COLOR } from '@/lib/brand';
+import { iconMap } from '@/lib/icons';
+import { orgJobs, orgNearby, orgPublic, place, shortKinds, TILE_NAME } from '@/lib/org';
 
-/* 기관 하나. 치료사 인원·정원·병상·주소와, 그 기관의 공고를 같이 보여줍니다.
+/* 기관 하나.
 
-   한 기관이 자료 여러 곳에 있어서 전부 보고 합칩니다 — 치료사 인원은
-   심평원 자료에만, 정원은 장기요양 자료에만 있어서 하나만 보면 놓칩니다.
+   누구나 보는 부분(이름·종별·지역·주소·전화·공고)은 서버가 그립니다 —
+   링크로 바로 열어도 내용이 담겨 나가야 합니다.
+   인원·바쁨은 회원만이라 화면(components/org-stat.tsx)에서 따로 받아옵니다. */
 
-   숫자를 만들지 않습니다. 원본 자료에 없으면 「자료에 없어요」라고 적습니다. */
+const BAND_WORD: Record<string, string> = { busy: '바쁜 곳', mid: '보통', easy: '여유로운 곳' };
+
 export async function OrgDetail({ name, sido }: { name: string; sido: string | null }) {
-  const [orgs, jobs] = await Promise.all([
-    findOrgMerged(name, sido),
-    supabase.from('job_posts_pub').select(LIST_COLS)
-      .eq('org_name', name)
-      .order('posted_at', { ascending: false, nullsFirst: false })
-      .limit(20),
-  ]);
+  const [org, icons] = await Promise.all([orgPublic(name, sido), iconMap('공고 상세')]);
 
-  const rows = (jobs.data ?? []) as unknown as JobListItem[];
-
-  if (orgs.length === 0) {
+  if (!org) {
     return (
       <>
         <Back />
-        <h1 className="mt-6 text-h2 font-bold">{name}</h1>
-        <p className="mt-5 text-lg text-gray-500">
-          이 기관을 자료에서 못 찾았어요. 이름이 바뀌었거나 문 닫았을 수 있어요
+        <h1 className="mt-6 break-keep text-[26px] font-black text-[#14181C]">{name}</h1>
+        <p className="mt-4 break-keep text-[15px] text-[#5F666C]">
+          이 기관을 자료에서 못 찾았어요. 이름이 바뀌었거나 문을 닫았을 수 있어요
         </p>
       </>
     );
   }
 
-  /* 여러 자료 중 값이 있는 것을 씁니다 */
-  const first = <T,>(pick: (o: (typeof orgs)[number]) => T | null | undefined): T | null => {
-    for (const o of orgs) { const v = pick(o); if (v != null && v !== '') return v; }
-    return null;
-  };
+  const [jobs, near] = await Promise.all([
+    orgJobs(org.name),
+    orgNearby(org.name, org.sido_std),
+  ]);
 
-  const kinds = [...new Set(orgs.map((o) => o.kind).filter(Boolean))] as string[];
-  const ot = first((o) => o.ot);
-  const pt = first((o) => o.pt);
-  const addr = first((o) => o.addr);
+  const where = place(org.sido_std, org.sgg_std);
+  const kind = TILE_NAME[org.tile] ?? '기관';
 
   const facts: [string, string][] = [];
-  if (kinds.length) facts.push(['종별', kinds.join(' · ')]);
-  const est = first((o) => o.est_type);
-  if (est) facts.push(['설립구분', est]);
-  const where = place(sidoOf({ sido: first((o) => o.sido), addr }), first((o) => o.sgg));
-  if (where) facts.push(['지역', where]);
-  const beds = first((o) => o.beds);
-  if (beds != null) facts.push(['병상', `${beds.toLocaleString('ko-KR')}개`]);
-  const cap = first((o) => o.capacity);
-  if (cap != null) facts.push(['정원', `${cap.toLocaleString('ko-KR')}명`]);
+  if (org.addr) facts.push(['주소', org.addr]);
+  if (org.tel) facts.push(['전화', org.tel]);
+  if (org.kinds?.length) facts.push(['종별', shortKinds(org.kinds)]);
+  if (org.est_type) facts.push(['설립구분', org.est_type]);
 
   return (
     <>
-      <Back />
+      {/* ① 상단바 ─────────────────────────────── */}
+      <div className="-mr-5 flex items-center justify-between">
+        <Back />
+        <ShareButtons
+          title={org.name}
+          text={[kind, where].filter(Boolean).join(' · ')}
+          path={`/orgs?org=${encodeURIComponent(org.name)}&sido=${encodeURIComponent(org.sido_std ?? '')}`}
+          compact
+        />
+      </div>
 
-      <h1 className="mt-6 text-h2 font-bold">{orgs[0].name}</h1>
-      <p className="mt-2 text-sm text-gray-400">
-        출처 {[...new Set(orgs.map((o) => ORG_SOURCE_NAME[o.source] ?? o.source))].join(' · ')}
-      </p>
-
-      <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-        <h2 className="text-h3 font-bold">치료사</h2>
-        {ot != null || pt != null ? (
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            <Big label="작업치료사" v={ot} />
-            <Big label="물리치료사" v={pt} />
-          </div>
-        ) : (
-          <p className="mt-2 text-lg text-gray-500">
-            이 자료에는 치료사 인원이 없어요. 심평원 병원정보와 장기요양기관 자료에만 들어 있어요
-          </p>
-        )}
-      </section>
-
-      {facts.length > 0 && (
-        <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-          <h2 className="text-h3 font-bold">기관 정보</h2>
-          <dl className="mt-5 grid grid-cols-[5rem_1fr] gap-y-4 text-lg">
-            {facts.map(([k, v]) => (
-              <div key={k} className="contents">
-                <dt className="text-gray-500">{k}</dt>
-                <dd className="break-words font-medium">{v}</dd>
-              </div>
-            ))}
-          </dl>
-          {addr && (
-            <p className="mt-5 border-t border-gray-100 pt-5 text-lg text-gray-700 dark:border-gray-800 dark:text-gray-300">
-              {addr}
-            </p>
+      {/* ② 머리 ───────────────────────────────── */}
+      <header className="mt-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-[#ECECE8] px-3 py-1 text-[13px] font-bold text-[#4A5056]">
+            {kind}
+          </span>
+          {org.band && (
+            <span className="rounded-full px-3 py-1 text-[13px] font-bold text-white"
+                  style={{ backgroundColor: BUSY_COLOR[org.band] }}>
+              {BAND_WORD[org.band]}
+            </span>
           )}
+        </div>
+
+        <h1 className="mt-4 break-keep text-[28px] font-black leading-[1.32] text-[#14181C]"
+            style={{ overflowWrap: 'break-word' }}>
+          {org.name}
+        </h1>
+
+        <p className="mt-3 break-keep text-[15px] text-[#4A5056]">
+          {org.addr || where || '주소가 자료에 없어요'}
+        </p>
+      </header>
+
+      {/* ③ 병원 전체 인원 · ④ 얼마나 바쁜 곳인지 — 회원만 ── */}
+      <OrgStat name={org.name} sido={org.sido_std} staffed={org.staffed} icons={icons} />
+
+      {/* ⑤ 이 기관의 공고 ─────────────────────── */}
+      <Rise>
+        <section className="mt-7 rounded-[14px] border border-[#E3E3DE] bg-white p-6">
+          <h2 className="flex items-center gap-2 text-[17px] font-bold text-[#1B2025]">
+            <Icon name={icons['job.headcount']} size={18} className="shrink-0 text-[#5F666C]" />
+            이 기관의 공고
+          </h2>
+
+          {jobs.length === 0 ? (
+            <p className="mt-4 break-keep text-[15px] text-[#5F666C]">
+              지금 열린 공고가 없어요. 새로 뜨면 아래 단추로 알려드릴게요
+            </p>
+          ) : (
+            <ul className="mt-4 flex flex-col gap-2">
+              {jobs.map((j) => (
+                <li key={j.id}>
+                  <Link
+                    href={`/jobs/${j.id}`}
+                    className="block rounded-[12px] bg-[#F4F4F1] px-5 py-4
+                               transition-transform duration-[120ms] active:scale-[0.99]
+                               motion-reduce:transition-none"
+                  >
+                    <p className="break-keep text-[15px] font-bold leading-[1.45] text-[#14181C]">
+                      {j.title}
+                    </p>
+                    <p className="mt-1 break-keep text-[13px] text-[#5F666C]">
+                      {[j.job_group, j.employ_type,
+                        j.apply_to ? `~${j.apply_to.slice(5).replace('-', '.')}` : null]
+                        .filter(Boolean).join(' · ')}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <p className="mt-4 break-keep rounded-[10px] bg-[#ECECE8] p-4 text-[12px]
+                        leading-relaxed text-[#5F666C]">
+            지난 공고는 아직 못 보여드려요. 공공기관 쪽에서 마감된 공고를 주지 않아서,
+            우리가 모으기 시작한 뒤의 것만 남습니다.
+          </p>
         </section>
+      </Rise>
+
+      {/* ⑥ 기본 정보 ──────────────────────────── */}
+      {facts.length > 0 && (
+        <Rise>
+          <section className="mt-7 rounded-[14px] border border-[#E3E3DE] bg-white p-6">
+            <h2 className="flex items-center gap-2 text-[17px] font-bold text-[#1B2025]">
+              <Icon name={icons['job.place']} size={18} className="shrink-0 text-[#5F666C]" />
+              기본 정보
+            </h2>
+            <dl className="mt-4 grid grid-cols-[4.5rem_1fr] gap-y-3">
+              {facts.map(([k, v]) => (
+                <div key={k} className="contents">
+                  <dt className="break-keep text-[13px] text-[#5F666C]">{k}</dt>
+                  <dd className="break-keep text-[14px] text-[#4A5056]"
+                      style={{ overflowWrap: 'break-word' }}>{v}</dd>
+                </div>
+              ))}
+            </dl>
+
+            {org.homepage && (
+              <a
+                href={org.homepage}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 flex items-center justify-between gap-3 rounded-[12px]
+                           border border-[#E3E3DE] px-5 py-4
+                           transition-transform duration-[120ms] active:scale-[0.99]
+                           motion-reduce:transition-none"
+              >
+                <span className="break-keep text-[14px] font-medium text-[#4A5056]">
+                  기관 홈페이지 열기
+                </span>
+                <Icon name="arrow-up-right" size={16} className="shrink-0 text-[#5F666C]" />
+              </a>
+            )}
+          </section>
+        </Rise>
       )}
 
-      <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-        <h2 className="text-h3 font-bold">이 기관의 공고</h2>
-        {rows.length === 0 ? (
-          <p className="mt-2 text-lg text-gray-500">
-            지금 올라온 공고가 없어요. 새로 뜨면 공고 화면에 올라와요
-          </p>
-        ) : (
-          <ul className="mt-5 divide-y divide-gray-100 dark:divide-gray-800">
-            {rows.map((r) => (
-              <li key={r.id}>
-                <Link href={`/jobs/${r.id}`}
-                  className="-mx-4 block rounded-sm px-4 py-5 hover:bg-gray-50 dark:hover:bg-gray-950">
-                  <p className="text-lg font-medium">{r.title}</p>
-                  <p className="mt-1 text-sm text-gray-400">
-                    {[r.job_group, r.employ_type,
-                      r.apply_to ? `~${r.apply_to.slice(5).replace('-', '.')}` : null]
-                      .filter(Boolean).join(' · ')}
-                  </p>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {/* ⑦ 근처의 비슷한 곳 ───────────────────── */}
+      {near.length > 0 && (
+        <Rise>
+          <section className="mt-7">
+            <h2 className="break-keep text-[17px] font-bold text-[#1B2025]">
+              근처의 비슷한 곳
+            </h2>
+            <p className="mt-1 break-keep text-[13px] text-[#5F666C]">
+              {[where, kind].filter(Boolean).join(' · ')}
+            </p>
+            <ul className="mt-3 flex flex-col gap-2">
+              {near.map((o) => (
+                <li key={`${o.name}/${o.sido_std}`}>
+                  <Link
+                    href={`/orgs?org=${encodeURIComponent(o.name)}&sido=${encodeURIComponent(o.sido_std ?? '')}`}
+                    className="flex items-center justify-between gap-3 rounded-[12px]
+                               border border-[#E3E3DE] bg-white px-5 py-4
+                               transition-transform duration-[120ms] active:scale-[0.99]
+                               motion-reduce:transition-none"
+                  >
+                    <span className="min-w-0 break-keep text-[15px] font-bold text-[#14181C]">
+                      {o.name}
+                    </span>
+                    <Icon name="chevron-left" size={16}
+                          className="shrink-0 rotate-180 text-[#8A9299]" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </Rise>
+      )}
+
+      {/* ⑧ 출처 ───────────────────────────────── */}
+      <div className="mt-7 flex items-start gap-2 rounded-[10px] bg-[#ECECE8] p-5">
+        <Icon name={icons['job.source']} size={15} className="mt-0.5 shrink-0 text-[#5F666C]" />
+        <p className="break-keep text-[12px] leading-relaxed text-[#5F666C]">
+          건강보험심사평가원 병원 자료를 기관 한 곳 단위로 다시 묶었어요.
+        </p>
+      </div>
+
+      {/* ⑨ 하단 고정 — 탭바 위에 얹습니다 */}
+      <OrgSave name={org.name} sido={org.sido_std} />
     </>
   );
 }
 
 function Back() {
   return (
-    <Link href="/orgs" className="text-lg text-interaction-blue hover:underline">
-      ← 병원정보 찾기
+    <Link
+      href="/orgs"
+      className="-ml-5 flex h-[48px] w-[48px] items-center justify-center rounded-full text-[#4A5056]
+                 transition-transform duration-[120ms] active:scale-[0.88]
+                 motion-reduce:transition-none"
+    >
+      <Icon name="chevron-left" size={24} />
+      <span className="sr-only">병원정보 찾기로</span>
     </Link>
-  );
-}
-
-function Big({ label, v }: { label: string; v: number | null }) {
-  return (
-    <div className="rounded-sm bg-gray-50 p-5 dark:bg-gray-950">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="mt-1 text-h2 font-bold">
-        {v == null ? <span className="text-h3 font-medium text-gray-400">자료에 없어요</span> : `${v}명`}
-      </p>
-    </div>
   );
 }

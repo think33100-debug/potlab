@@ -13,7 +13,7 @@ import { dayKey } from '@/lib/day-key';
 export function Hit({
   kind, target,
 }: {
-  kind: 'home' | 'jobs' | 'job' | 'community' | 'post' | 'other';
+  kind: 'home' | 'jobs' | 'job' | 'community' | 'post' | 'orgs' | 'org' | 'other';
   target?: string | number | null;
 }) {
   const { loading, isAdmin } = useAuth();
