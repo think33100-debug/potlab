@@ -4,7 +4,7 @@
    다만 배점 합이 100이 아니면 화면의 막대가 전부 거짓말이 되므로 그것부터 봅니다. */
 import assert from 'node:assert/strict';
 import { PART_MAX } from './spec-weights.ts';
-import { tierOf, cheerOf, nextUp, NEXT_ORDER } from './spec.ts';
+import { tierOf, cheerOf, nextUp, CHEER_ORDER, NEXT_ORDER, PART_ORDER } from './spec.ts';
 
 /* ① 배점 합 100 — 학점60·어학15·자격증10·학력5·교육5·실습5 */
 assert.equal(Object.values(PART_MAX).reduce((a, b) => a + b, 0), 100);
@@ -48,18 +48,30 @@ assert.match(cheerOf(3, { gpa: 0, lang: 0, certs: 0, school: 0, courses: 0, prac
 assert.match(cheerOf(90, { gpa: 60, lang: 15, certs: 10, school: 5, courses: 5, practice: 5 }),
   /면접만 준비/);
 
-/* ④ 다음에 챙길 것 — 배점이 안 드러나야 합니다 (2026-09-23) */
+/* ④ 손으로 정한 차례 셋 — 전부 배점과 달라야 합니다 (lib/spec-order.ts).
+
+      다음에 누가 「보기 좋게」 배점 순서로 되돌려 놓으면 여기가 깨집니다.
+      그게 이 시험의 전부입니다 */
 {
-  /* 차례가 배점 순서와 달라야 합니다. 같으면 추천만 보고 배점을 역산합니다.
-     배점 순서는 gpa · lang · certs · school · courses · practice 입니다 */
   const byWeight = Object.keys(PART_MAX).sort((a, b) => PART_MAX[b] - PART_MAX[a]);
-  assert.notDeepEqual(NEXT_ORDER, byWeight.filter((k) => NEXT_ORDER.includes(k)));
+  const sameAsWeight = (order) =>
+    JSON.stringify(order) === JSON.stringify(byWeight.filter((k) => order.includes(k)));
+
+  assert.equal(sameAsWeight(NEXT_ORDER), false, '추천 차례가 배점 순서와 같습니다');
+  assert.equal(sameAsWeight(PART_ORDER), false, '화면 차례가 배점 순서와 같습니다');
+  assert.equal(sameAsWeight(CHEER_ORDER), false, '칭찬 차례가 배점 순서와 같습니다');
 
   /* 제일 큰 배점(학점 60)이 제일 먼저 권해지면 안 됩니다 */
   assert.notEqual(NEXT_ORDER[0], 'gpa');
 
   /* 학력은 아예 안 권합니다 — 지금 와서 바꿀 수 있는 게 아닙니다 */
   assert.equal(NEXT_ORDER.includes('school'), false);
+
+  /* 차례 셋 다 항목을 빠뜨리거나 겹치지 않아야 합니다
+     (추천만 학력을 뺀 다섯입니다) */
+  assert.equal(new Set(PART_ORDER).size, 6);
+  assert.equal(new Set(CHEER_ORDER).size, 6);
+  assert.equal(new Set(NEXT_ORDER).size, 5);
 
   /* 안 채운 것 중 차례가 빠른 하나 */
   assert.equal(nextUp({ gpa: 19, lang: 0, certs: 1, school: 5, courses: 0, practice: 3 }), 'lang');
