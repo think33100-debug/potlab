@@ -152,6 +152,21 @@ export default function PayPage() {
             <p className="mt-2 text-sm text-gray-500">{grow(s.n).msg}</p>
           </section>
 
+          <Link
+            href="/tools"
+            className="mt-7 flex items-center justify-between gap-3 rounded-sm
+                       border border-gray-200 px-6 py-5 hover:bg-gray-50
+                       dark:border-gray-700 dark:hover:bg-gray-950"
+          >
+            <span className="min-w-0">
+              <span className="block break-keep text-body-lg font-bold">계산기 보기</span>
+              <span className="mt-1 block break-keep text-sm text-gray-500">
+                세전·세후 · 퇴직금 · 연차. 로그인 없이 쓸 수 있어요
+              </span>
+            </span>
+            <span aria-hidden className="shrink-0 text-gray-400">→</span>
+          </Link>
+
           <PayNote className="mt-6 text-gray-500" />
           <p className="mt-1 text-sm text-gray-400">
             치료사들이 직접 올린 자료입니다. 병원 이름은 받지 않아요

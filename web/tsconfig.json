@@ -6,6 +6,10 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    /* import 에 .ts 를 붙일 수 있게 합니다 (noEmit 일 때만 됩니다).
+       왜 — 시험을 node 로 바로 돌리는데(lib/*.test.mjs) node 는 확장자를 요구하고
+       tsc 는 이 설정 없이 거부합니다. 둘 다 통과시키려면 이게 있어야 합니다 */
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",

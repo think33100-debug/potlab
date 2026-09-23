@@ -69,3 +69,35 @@ export function useCountUp(to: number, ms = 1100, digits = 0) {
 
   return { ref, n: n.toFixed(digits) };
 }
+
+/* 값이 바뀔 때마다 세어 올라갑니다 (계산기 결과).
+
+   useCountUp 과 다른 점 — 그건 「화면에 들어올 때 한 번」입니다.
+   계산기는 같은 자리에서 값만 바뀌므로 화면에 들어오는 일이 다시 안 생깁니다.
+   그래서 값 자체를 보고 셉니다.
+
+   움직임 줄이기를 켠 분에게는 세지 않고 바로 최종값을 보여줍니다. */
+export function useCountTo(to: number, ms = 700) {
+  const [n, setN] = useState(to);
+  const from = useRef(to);
+
+  useEffect(() => {
+    const start = from.current;
+    from.current = to;
+    if (start === to) { setN(to); return; }
+    if (lessMotion()) { setN(to); return; }
+
+    let raf = 0;
+    const t0 = performance.now();
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / ms);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setN(p === 1 ? to : Math.round(start + (to - start) * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [to, ms]);
+
+  return n;
+}
