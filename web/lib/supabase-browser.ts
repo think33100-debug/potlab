@@ -1,24 +1,33 @@
 'use client';
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 /* 브라우저 쪽 열쇠꾸러미입니다.
 
-   lib/supabase.ts 와 무엇이 다른가 —
-     lib/supabase.ts          서버에서 공개 자료만 읽습니다. 세션을 안 들고 있습니다
-     lib/supabase-browser.ts  로그인한 사람으로 읽고 씁니다. 세션을 브라우저에 둡니다
+   ── 2026-09-25 에 바뀐 것 ──────────────────────────────────────────
+   세션을 **localStorage 에서 쿠키로 옮겼습니다.**
 
-   둘을 안 합치는 이유: 글 상세는 서버에서 그려야 카톡 미리보기(OG)가 뜨는데,
-   서버에는 그 사람의 세션이 없습니다. 공개 읽기와 본인 쓰기를 갈라두면 둘 다 됩니다.
+   왜 — localStorage 는 브라우저 안에만 있어서 **서버가 못 봅니다.**
+   그래서 서버가 그리는 화면은 「누가 보고 있는지」를 모른 채 익명으로만
+   읽었고, 공고 목록이 로그인 없이 통째로 나갔습니다.
+   쿠키는 요청에 실려 가므로 서버가 그 사람으로 읽을 수 있습니다.
+
+   화면 코드는 그대로입니다 — createClient 가 createBrowserClient 로 바뀌었을 뿐,
+   browserSupabase() 를 쓰는 쪽은 한 줄도 안 고쳤습니다.
 
    detectSessionInUrl — 카카오에서 돌아올 때 주소에 붙어 오는 code 를
-   자동으로 세션으로 바꿉니다. 이게 꺼져 있으면 로그인하고도 로그인이 안 됩니다. */
+   자동으로 세션으로 바꿉니다. 이게 꺼져 있으면 로그인하고도 로그인이 안 됩니다.
+   PKCE 의 code_verifier 도 이제 쿠키에 들어갑니다 (같은 출처라 /auth/callback 에서 읽힙니다).
+
+   서버 쪽은 lib/supabase-server.ts 입니다.
+   lib/supabase.ts 는 세션이 아예 없는 「누구나 보는 자료」 전용으로 남습니다. */
 
 let client: SupabaseClient | null = null;
 
 export function browserSupabase(): SupabaseClient {
   if (!client) {
-    client = createClient(
+    client = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
