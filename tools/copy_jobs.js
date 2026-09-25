@@ -250,7 +250,26 @@ if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, n
         title: s(g(r, '공고제목')), url: s(g(r, '원문주소')),
         why: s(g(r, '걸린단어')) || '(없음)',
         restored: /^Y$/i.test(String(g(r, '되돌림') || '').trim()) }),
-      key: 'id' }
+      key: 'id' },
+    /* 사이트점검 — 꺼진 병원 홈페이지를 구글 서버에서 두드려 본 기록 (2026-09-25).
+       한 기관을 하루에 1차·2차로 두 번 두드리므로 열쇠는 기관|날|차수 입니다 */
+    { sheet: '사이트점검', table: 'site_checks', map: (g, r) => ({
+        id: [s(g(r, '기관')), date(g(r, '두드린날')), num(g(r, '차수'))].join('|'),
+        name: s(g(r, '기관')), checked_on: date(g(r, '두드린날')),
+        round: num(g(r, '차수')), code: s(g(r, '응답코드')),
+        ms: num(g(r, '묶음시간ms')), job_words: num(g(r, '채용글수')),
+        page_title: s(g(r, '쪽제목')), body_head: s(g(r, '본문앞500자')),
+        off_why_before: s(g(r, '전에꺼둔이유')) }),
+      key: 'id' },
+    /* 사이트상태 — 지금 켜져 있나 · 왜 껐나 · 언제 켰나 (2026-09-25).
+       세 번 연속 못 받아야 끄고, 꺼진 곳은 일주일에 한 번 다시 두드립니다.
+       「자동」 칸이 HOSP_SITES 의 off 위에 얹힙니다 — '' 설정대로 · Y 켬 · N 끔 */
+    { sheet: '사이트상태', table: 'site_state', map: (g, r) => ({
+        name: s(g(r, '기관')), url: s(g(r, '주소')), auto: s(g(r, '자동')),
+        fail_streak: num(g(r, '연속실패')) || 0, last_fail: s(g(r, '마지막실패')),
+        off_on: date(g(r, '끈날')), off_why: s(g(r, '끈이유')),
+        on_on: date(g(r, '켠날')), tried_on: date(g(r, '마지막두드림')) }),
+      key: 'name' }
   ];
 
   const loaded = [{ name: '채용공고 → job_posts', sheet: J.total, rows: posts.length, table: 'job_posts', data: posts }];
