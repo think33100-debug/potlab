@@ -257,7 +257,10 @@ if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, n
         id: [s(g(r, '기관')), date(g(r, '두드린날')), num(g(r, '차수'))].join('|'),
         name: s(g(r, '기관')), checked_on: date(g(r, '두드린날')),
         round: num(g(r, '차수')), code: s(g(r, '응답코드')),
-        ms: num(g(r, '묶음시간ms')), job_words: num(g(r, '채용글수')),
+        /* 시트가 「걸린시간ms」 로 만들어졌고 코드에서 이름만 「묶음시간ms」 로
+           바꾼 적이 있습니다. 시트 머리글은 그대로라 둘 다 받습니다 (2026-09-25) */
+        ms: num(g(r, '묶음시간ms')) ?? num(g(r, '걸린시간ms')),
+        job_words: num(g(r, '채용글수')),
         page_title: s(g(r, '쪽제목')), body_head: s(g(r, '본문앞500자')),
         off_why_before: s(g(r, '전에꺼둔이유')) }),
       key: 'id' },
@@ -317,7 +320,14 @@ if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, n
     /* 표마다 기본열쇠가 다릅니다. 조건 없는 DELETE 는 safeupdate 가 막습니다. */
     const DEL = { job_posts: 'id=neq.__none__', drop_rules: 'key=neq.__none__',
                   collectable_orgs: 'org_name=neq.__none__',
-                  wn_verdicts: 'wanted_auth_no=neq.__none__', job_post_edits: 'id=gt.0' };
+                  wn_verdicts: 'wanted_auth_no=neq.__none__', job_post_edits: 'id=gt.0',
+                  /* 열쇠가 글자인 표는 반드시 여기 적어야 합니다 (2026-09-25).
+                     안 적으면 기본값 id=gt.0 으로 떨어지는데, 글자 열쇠에 > 0 을
+                     대면 엉뚱하게 지워지고, site_state 처럼 id 칸이 아예 없는 표는
+                     요청 자체가 400 으로 죽습니다 */
+                  job_trash: 'id=neq.__none__',
+                  site_checks: 'id=neq.__none__',
+                  site_state: 'name=neq.__none__' };
     await sb(cfg, l.table + '?' + (DEL[l.table] || 'id=gt.0'), 'DELETE');
     await push(cfg, l.table, l.data);
     const got = await count(cfg, l.table);
