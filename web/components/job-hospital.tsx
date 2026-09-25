@@ -19,6 +19,19 @@ import { useCountUp } from '@/lib/reveal';
 const OT = '작업치료사';
 const PT = '물리치료사';
 
+/* 어느 시점 자료인지 한 줄로. data_version 은 두 가지로 옵니다 —
+     「심평원 2026-09-25」  API 로 받은 곳 (의료기관별상세정보서비스)
+     「2026Q2」             아직 못 받아 자료판을 쓰는 곳
+   기관이 55,338곳이라 전부 받는 데 며칠 걸립니다. 그동안 섞여 있습니다 */
+function srcWord(v: string | null): string {
+  if (!v) return '심사평가원에서 받아온 자료입니다.';
+  const day = v.match(/^심평원 (\d{4}-\d{2}-\d{2})$/)?.[1];
+  if (day) return `심사평가원 ${day} 기준입니다.`;
+  const q = v.match(/^(\d{4})Q([1-4])$/);
+  if (q) return `심사평가원 ${q[1]}년 ${q[2]}분기 자료입니다.`;
+  return `심사평가원 ${v} 자료입니다.`;
+}
+
 function Num({
   to, unit, label, hot, slot,
 }: {
@@ -71,8 +84,11 @@ export function JobHospital({
           <Num slot={icons['job.pt']} to={h.pt} unit="명" label={PT} hot={mine === PT} />
         </div>
 
+        {/* 언제 받은 값인지 밝힙니다 (2026-09-25).
+            줄마다 다릅니다 — API 로 받은 곳은 그날 값, 아직 못 받은 곳은
+            2026Q2 자료판 값입니다. 한 문구로 뭉뚱그리면 거짓이 됩니다 */}
         <p className="mt-6 break-keep text-[12px] leading-relaxed text-[#6C757C]">
-          심사평가원에서 받아온 자료입니다. 실제와 다를 수 있어요.
+          {srcWord(h.data_version)} 실제와 다를 수 있어요.
         </p>
       </div>
     </section>
