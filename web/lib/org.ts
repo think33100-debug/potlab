@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 
 /* 병원정보 찾기(/orgs)가 쓰는 것들.
@@ -103,30 +104,41 @@ export type OrgJob = {
   org_name: string;
 };
 
-export async function orgPublic(name: string, sido: string | null): Promise<OrgPublic | null> {
-  const { data } = await supabase.rpc('org_public', { p_name: name, p_sido: sido });
+/* 아래 셋은 **회원만** 봅니다 (2026-09-25).
+   org_public · org_nearby · org_jobs 의 실행 권한을 anon 에서 걷었습니다.
+   그래서 열쇠꾸러미를 받습니다 — 로그인 안 한 사람으로 부르면 권한 오류가 나고
+   여기서 빈 값이 됩니다. 화면은 그 구역을 감추고 가입 권유를 그립니다. */
+export async function orgPublic(
+  sb: SupabaseClient, name: string, sido: string | null,
+): Promise<OrgPublic | null> {
+  const { data } = await sb.rpc('org_public', { p_name: name, p_sido: sido });
   return ((data ?? []) as OrgPublic[])[0] ?? null;
 }
 
-export async function orgNearby(name: string, sido: string | null) {
-  const { data } = await supabase.rpc('org_nearby', { p_name: name, p_sido: sido, p_n: 3 });
+export async function orgNearby(sb: SupabaseClient, name: string, sido: string | null) {
+  const { data } = await sb.rpc('org_nearby', { p_name: name, p_sido: sido, p_n: 3 });
   return (data ?? []) as { name: string; sido_std: string | null; sgg_std: string | null;
                            kinds: string[] | null; tile: string; therapists: number }[];
 }
 
-export async function orgJobs(name: string): Promise<OrgJob[]> {
-  const { data } = await supabase.rpc('org_jobs', { p_name: name, p_n: 10 });
+export async function orgJobs(sb: SupabaseClient, name: string): Promise<OrgJob[]> {
+  const { data } = await sb.rpc('org_jobs', { p_name: name, p_n: 10 });
   return (data ?? []) as OrgJob[];
 }
 
 /* 우리가 보고 있는 규모. 홈의 큰 배너에서 씁니다.
    숫자를 지어내지 않고 실제로 셉니다 */
 export async function ourNumbers() {
-  const [jobs, orgs] = await Promise.all([
-    supabase.from('job_posts_pub').select('id', { count: 'exact', head: true }),
+  const [totals, orgs] = await Promise.all([
+    /* 공고 뷰를 직접 세지 않습니다 — 통째로 읽는 길을 닫았습니다 (2026-09-25).
+       개수만 내주는 함수라 로그인 없이도 됩니다 */
+    supabase.rpc('job_totals'),
     supabase.rpc('org_total'),
   ]);
-  return { jobs: jobs.count ?? 0, orgs: (orgs.data as number | null) ?? 0 };
+  return {
+    jobs: (totals.data as { jobs?: number } | null)?.jobs ?? 0,
+    orgs: (orgs.data as number | null) ?? 0,
+  };
 }
 
 /* 장기요양 종별은 「노인요양시설·치매전담실가형1실·치매전담실가형2실…」 처럼

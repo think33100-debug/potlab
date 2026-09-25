@@ -6,18 +6,43 @@ import { OrgStat } from '@/components/org-stat';
 import { ShareButtons } from '@/components/share-buttons';
 import { BUSY_COLOR } from '@/lib/brand';
 import { iconMap } from '@/lib/icons';
+import { MembersOnly } from '@/components/members-only';
 import { orgJobs, orgNearby, orgPublic, place, shortKinds, TILE_NAME } from '@/lib/org';
+import { serverSupabase } from '@/lib/supabase-server';
 
 /* 기관 하나.
 
-   누구나 보는 부분(이름·종별·지역·주소·전화·공고)은 서버가 그립니다 —
-   링크로 바로 열어도 내용이 담겨 나가야 합니다.
-   인원·바쁨은 회원만이라 화면(components/org-stat.tsx)에서 따로 받아옵니다. */
+   ── 2026-09-25 에 바뀐 것 ──────────────────────────────────────────
+   **기관 상세는 통째로 회원만 봅니다.**
+
+   전에는 「이름·종별·지역·주소·전화·공고는 누구나」였습니다. 그런데 그 자료를
+   내주는 함수(org_public · org_jobs · org_nearby)가 로그인을 안 보고 있어서,
+   요청을 직접 쏘면 기관 55,338곳이 그대로 나갔습니다.
+   실제로 쏴서 확인했습니다 — org_public 1줄 · org_jobs 8줄 · org_nearby 3줄.
+
+   지금은 셋 다 실행 권한을 anon 에서 걷었습니다. 로그인 안 한 분에게는
+   아무것도 안 오고, 여기서 가입 권유를 그립니다. */
 
 const BAND_WORD: Record<string, string> = { busy: '바쁜 곳', mid: '보통', easy: '여유로운 곳' };
 
 export async function OrgDetail({ name, sido }: { name: string; sido: string | null }) {
-  const [org, icons] = await Promise.all([orgPublic(name, sido), iconMap('공고 상세')]);
+  const sb = await serverSupabase();
+  const { data: who } = await sb.auth.getUser();
+
+  if (!who.user) {
+    return (
+      <>
+        <Back />
+        <h1 className="mt-6 break-keep text-[26px] font-black text-[#14181C]">{name}</h1>
+        <MembersOnly
+          title={<>병원정보는<br />회원만 볼 수 있어요</>}
+          body="치료사 인원 · 병상 · 얼마나 바쁜 곳인지와 지금 열린 공고까지. 가입은 3분이면 끝나요."
+        />
+      </>
+    );
+  }
+
+  const [org, icons] = await Promise.all([orgPublic(sb, name, sido), iconMap('공고 상세')]);
 
   if (!org) {
     return (
@@ -32,8 +57,8 @@ export async function OrgDetail({ name, sido }: { name: string; sido: string | n
   }
 
   const [jobs, near] = await Promise.all([
-    orgJobs(org.name),
-    orgNearby(org.name, org.sido_std),
+    orgJobs(sb, org.name),
+    orgNearby(sb, org.name, org.sido_std),
   ]);
 
   const where = place(org.sido_std, org.sgg_std);

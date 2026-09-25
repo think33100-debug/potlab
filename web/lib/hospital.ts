@@ -1,5 +1,5 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { BUSY_COLOR } from './brand';
-import { supabase } from './supabase';
 
 /* 「병원 뜯어보기」에 쓰는 숫자.
 
@@ -33,9 +33,15 @@ export type HospitalStat = {
 
    이름 맞추기(org_key)는 DB 함수라 여기서 못 합니다. 같은 규칙을 화면에
    또 적으면 반드시 어긋나므로, DB 함수 하나를 부릅니다. */
-export async function hospitalStat(orgName: string): Promise<HospitalStat | null> {
+/* 2026-09-25 — **회원만 봅니다.** org_hospital_by_name 의 실행 권한을
+   anon 에서 걷었습니다. 그래서 열쇠꾸러미를 받아야 합니다 —
+   로그인 안 한 사람으로 부르면 권한 오류가 나고 여기서 null 이 됩니다.
+   화면은 그 구역을 통째로 감추고 가입 권유를 그립니다. */
+export async function hospitalStat(
+  sb: SupabaseClient, orgName: string,
+): Promise<HospitalStat | null> {
   if (!orgName) return null;
-  const { data } = await supabase
+  const { data } = await sb
     .rpc('org_hospital_by_name', { p_name: orgName })
     .maybeSingle();
   return (data as unknown as HospitalStat | null) ?? null;

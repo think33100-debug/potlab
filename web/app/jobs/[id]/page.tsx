@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -19,13 +20,20 @@ import { iconMap } from '@/lib/icons';
 import { isClosed, todayKst } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
-import { supabase, JOB_ONE_COLS, type JobPost } from '@/lib/supabase';
+import { MembersOnly } from '@/components/members-only';
+import { supabase, type JobPost } from '@/lib/supabase';
+import { serverSupabase } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
-const one = async (id: string) => {
-  const { data } = await supabase
-    .from('job_posts_pub').select(JOB_ONE_COLS).eq('id', id).maybeSingle();
+/* 공고 한 건.
+
+   2026-09-25 — 공고 뷰를 통째로 읽는 길을 닫아서 이제 함수로 받습니다.
+   **공유 링크가 살아야 하므로 이 한 건은 로그인 없이도 열립니다.**
+   다만 본문(detail)은 회원에게만 실려 옵니다 — 비회원에게는 DB 가 빈 것을 줍니다.
+   그 자리는 어차피 흐려져 있었는데, 전에는 흐리기만 하고 자료는 나갔습니다. */
+const one = async (sb: SupabaseClient, id: string) => {
+  const { data } = await sb.rpc('job_one', { p_id: id }).maybeSingle();
   return (data as unknown as JobPost | null) ?? null;
 };
 
@@ -46,7 +54,9 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const j = await one(id);
+  /* 카톡·검색 로봇에는 세션이 없습니다. 공개 열쇠꾸러미로 읽습니다 —
+     제목·기관·마감일만 쓰므로 본문이 없어도 됩니다 */
+  const j = await one(supabase, id);
   if (!j) return { title: '없는 공고입니다 · POTJOB' };
 
   const closed = isClosed(j.apply_to);
@@ -73,7 +83,14 @@ const CORE_SKIP = ['지원자격', '전형방법', '제출서류', '접수방법
 
 export default async function JobDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const j = await one(id);
+
+  /* 쿠키에 실려 온 세션으로 읽습니다. 로그인 안 했으면
+     본문도 병원 숫자도 안 실려 옵니다 (막는 자리는 DB) */
+  const sb = await serverSupabase();
+  const { data: who } = await sb.auth.getUser();
+  const member = !!who.user;
+
+  const j = await one(sb, id);
   if (!j) notFound();
 
   /* 마감돼도 막지 않습니다. 이미 주소를 아는 사람이라 빈 화면을 주면 링크가 죽습니다 */
@@ -83,7 +100,9 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   /* 병원 자료가 없으면 null 입니다 — 그 구역을 통째로 감춥니다.
      0 으로 채우면 「치료사가 없는 병원」으로 읽혀 더 나쁩니다 */
   const [hosp, icons, views] = await Promise.all([
-    hospitalStat(j.org_name),
+    /* 회원만 옵니다. 비회원에게는 null 이고 그 구역을 통째로 감춥니다 —
+       0 으로 채우면 「치료사가 없는 병원」으로 읽혀서 더 나쁩니다 */
+    member ? hospitalStat(sb, j.org_name) : Promise.resolve(null),
     iconMap('공고 상세'),
     jobViews([j.id]),
   ]);
@@ -188,8 +207,18 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
             </dl>
           </Rise>
 
-          {/* 가입 안 한 사람은 여기부터 흐립니다 (components/job-veil.tsx).
-              공유 링크로 들어온 사람에게는 안 겁니다 */}
+          {/* 로그인 안 한 분에게는 여기부터 자료가 아예 안 옵니다 (막는 자리는 DB).
+              흐릴 것이 없으니 안내 카드를 놓습니다.
+
+              로그인은 했는데 가입을 안 마친 분에게는 전처럼 흐림을 겁니다 —
+              그분들에게는 자료가 실제로 실려 오기 때문입니다
+              (components/job-veil.tsx) */}
+          {!member ? (
+            <MembersOnly
+              title={<>이 병원이 어떤 곳인지<br />회원만 볼 수 있어요</>}
+              body="치료사 인원 · 병상 · 얼마나 바쁜 곳인지와 지원 자격 · 전형 방법까지. 가입은 3분이면 끝나요."
+            />
+          ) : (
           <JobVeil>
           {/* ④ 병원 뜯어보기 · ⑤ 얼마나 바쁜 곳인지 ─ */}
           {hosp && (
@@ -312,6 +341,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
           <OrgPanel orgName={j.org_name} exceptJobId={j.id} />
           </JobVeil>
+          )}
         </div>
 
         {/* ⑤ 마감이면 하단 고정 버튼 대신 「지금 열려 있는 비슷한 공고」 */}

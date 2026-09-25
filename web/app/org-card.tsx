@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { serverSupabase } from '@/lib/supabase-server';
 import { place, shortKinds, TILE_NAME, type OrgListRow } from '@/lib/org';
 
 /* 공고를 이름으로 찾을 때 「이 기관은 이런 곳이에요」를 위에 붙입니다.
@@ -13,7 +13,9 @@ export async function OrgCard({ name }: { name: string }) {
   const q = name.trim();
   if (q.length < 2) return null;
 
-  const { data, error } = await supabase.rpc('org_search', {
+  /* 2026-09-25 — org_search 는 회원만입니다. 그 사람의 열쇠꾸러미로 부릅니다 */
+  const sb = await serverSupabase();
+  const { data, error } = await sb.rpc('org_search', {
     p_q: q, p_sort: 'staff', p_limit: 1, p_offset: 0,
   });
 

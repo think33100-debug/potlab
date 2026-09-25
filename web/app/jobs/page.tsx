@@ -2,18 +2,37 @@ import Link from 'next/link';
 import { Hit } from '@/components/hit';
 import { Icon } from '@/components/icon';
 import { JobTabs } from '@/components/job-tabs';
+import { MembersOnly } from '@/components/members-only';
 import { jobViews } from '@/lib/job-views';
-import {
-  supabase, LIST_COLS, TABS, tabLabel, type JobListItem,
-} from '@/lib/supabase';
+import { supabase, TABS, tabLabel, type JobListItem } from '@/lib/supabase';
+import { serverSupabase } from '@/lib/supabase-server';
 import { OrgCard } from '../org-card';
-import { Clip, JoinCta } from '../gate';
 
 export const dynamic = 'force-dynamic';   // 공고는 자주 바뀝니다
+
+/* 공고 목록·검색.
+
+   ── 2026-09-25 에 바뀐 것 ──────────────────────────────────────────
+   **회원만 봅니다. 한 번에 20건씩.**
+
+   그 전에는 로그인 없이 요청 한 번에 100건이 나갔습니다 (총 497건).
+   실제로 쏴서 확인했습니다 — Content-Range: 0-99/497.
+   화면에서 흐리기만 했지 자료는 그대로 나가고 있었습니다.
+
+   지금은 DB 의 job_list() 만 이 목록을 내줍니다. 그 함수가
+     · auth.uid() 가 없으면 거절하고
+     · 20건에서 끊습니다 — 부르는 쪽이 더 달라고 해도
+   화면은 서버에서 **그 사람의 쿠키로** 읽습니다 (lib/supabase-server.ts).
+
+   맛보기(Clip)는 뺐습니다. 자료가 아예 안 오기 때문에 흐릴 것이 없습니다 —
+   대신 「회원만 볼 수 있어요」 카드를 놓습니다. */
 
 const JOBS = ['작업치료사', '물리치료사'];
 const SIDOS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
                '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+
+/** 한 쪽에 몇 건인지. DB 의 job_list() 와 같아야 합니다 */
+const PAGE = 20;
 
 function d(v: string | null) {
   return v ? v.slice(5).replace('-', '.') : '';
@@ -26,80 +45,78 @@ function dday(to: string | null) {
   return { text: 'D-' + left, urgent: left <= 3, over: false };
 }
 
-type SP = { job?: string; sido?: string; all?: string; tab?: string; q?: string; sort?: string };
+type SP = {
+  job?: string; sido?: string; all?: string; tab?: string;
+  q?: string; sort?: string; p?: string;
+};
 
-export default async function Home({ searchParams }: { searchParams: Promise<SP> }) {
+export default async function Jobs({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
-  const today = new Date().toISOString().slice(0, 10);
   const q = (sp.q ?? '').trim();
   const searching = q.length > 0;
-
-  /* 거르기는 탭·검색과 상관없이 늘 같게 겁니다.
-     숨김·보류는 여기서 안 뺍니다 — RLS 가 이미 뺀 것만 내려줍니다 */
-  const base = () => {
-    let b = supabase.from('job_posts_pub').select(LIST_COLS);
-    if (sp.job) b = b.eq('job_group', sp.job);
-    if (sp.sido) b = b.eq('sido', sp.sido);
-    if (!sp.all) b = b.or(`apply_to.gte.${today},apply_to.is.null`);
-    if (searching) b = b.or(`title.ilike.%${q}%,org_name.ilike.%${q}%`);
-    return b;
-  };
-
-  /* 탭별 건수 — 줄은 안 받고 세기만 합니다 (head: true) */
-  const counts = await Promise.all(
-    TABS.map(async (t) => {
-      let c = supabase.from('job_posts_pub').select('id', { count: 'exact', head: true });
-      if (sp.job) c = c.eq('job_group', sp.job);
-      if (sp.sido) c = c.eq('sido', sp.sido);
-      if (!sp.all) c = c.or(`apply_to.gte.${today},apply_to.is.null`);
-      if (searching) c = c.or(`title.ilike.%${q}%,org_name.ilike.%${q}%`);
-      const { count } = await c.like('tab', t.like);
-      return count ?? 0;
-    }),
-  );
-  const total = counts.reduce((a, b) => a + b, 0);
+  const page = Math.max(0, Number(sp.p ?? 0) || 0);
 
   /* 검색 중에는 탭을 안 씁니다 — 전체에서 찾고, 어느 탭 공고인지 줄마다 붙입니다 */
   const active = searching ? null : (TABS.find((t) => t.key === sp.tab) ?? TABS[0]);
 
-  /* 마감 임박 — 홈의 큰 배너가 여기로 보냅니다.
-     이미 닫힌 것과 마감일이 없는 것은 빼고 가까운 순으로 올립니다 */
-  const byDeadline = sp.sort === 'deadline';
+  /* 쿠키에 실려 온 세션으로 읽습니다. 로그인 안 했으면 job_list 가 거절합니다 */
+  const sb = await serverSupabase();
 
-  let list = byDeadline
-    ? base().not('apply_to', 'is', null).gte('apply_to', today)
-        .order('apply_to', { ascending: true }).limit(100)
-    : base().order('posted_at', { ascending: false, nullsFirst: false }).limit(100);
+  const [list, counts, cards] = await Promise.all([
+    sb.rpc('job_list', {
+      p_job: sp.job ?? null,
+      p_sido: sp.sido ?? null,
+      p_tab: active?.like ?? null,
+      p_q: q || null,
+      p_all: !!sp.all,
+      p_sort: sp.sort ?? null,
+      p_page: page,
+    }),
+    sb.rpc('job_counts', {
+      p_job: sp.job ?? null,
+      p_sido: sp.sido ?? null,
+      p_q: q || null,
+      p_all: !!sp.all,
+      p_tabs: TABS.map((t) => t.like),
+    }),
+    /* 분류 카드 그림은 누구나 봅니다 (관리자가 올린 그림 경로뿐입니다) */
+    supabase.from('job_tab_cards').select('tab_key,image_path'),
+  ]);
 
-  if (active) list = list.like('tab', active.like);
+  /* 42501 = 권한 없음. 로그인 안 한 분입니다 — 오류가 아니라 안내를 그립니다 */
+  const locked = list.error?.code === '42501';
+  const rows = (list.data ?? []) as unknown as JobListItem[];
 
-  const { data, error } = await list;
-  const rows = (data ?? []) as unknown as JobListItem[];
+  const tally = (counts.data ?? {}) as Record<string, number>;
+  const tabCounts = TABS.map((t) => Number(tally[t.like] ?? 0));
+  const total = tabCounts.reduce((a, b) => a + b, 0);
 
-  /* 지금 화면에 뜨는 것만 셉니다 (lib/job-views.ts) */
-  const views = await jobViews(rows.map((r) => r.id));
-
-  /* 분류 카드의 그림. 이름·가는 곳은 코드(TABS)에 있고 그림만 DB 입니다 */
-  const cards = await supabase.from('job_tab_cards').select('tab_key,image_path');
   const tabImages: Record<string, string | null> = {};
   ((cards.data ?? []) as { tab_key: string; image_path: string | null }[])
     .forEach((c) => { tabImages[c.tab_key] = c.image_path; });
 
+  /* 지금 화면에 뜨는 것만 셉니다 (lib/job-views.ts) */
+  const views = await jobViews(rows.map((r) => r.id));
+
   const link = (patch: Partial<Record<keyof SP, string | undefined>>) => {
-    const next = { ...sp, ...patch };
+    /* 조건을 바꾸면 쪽 번호는 처음으로 돌아갑니다 —
+       3쪽을 보다 지역을 바꾸면 없는 쪽으로 가서 빈 화면이 납니다 */
+    const next = { ...sp, p: undefined, ...patch };
     const p = new URLSearchParams();
     Object.entries(next).forEach(([k, v]) => { if (v) p.set(k, v); });
     const s = p.toString();
     return s ? '/jobs?' + s : '/jobs';
   };
 
+  const byDeadline = sp.sort === 'deadline';
+
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <Hit kind="jobs" />
 
       <header className="mb-7">
-        <h1 className="text-h1 font-bold">{byDeadline ? '마감 임박 공고' : '채용공고'}</h1>
-        <p className="mt-1 text-lg text-gray-500">
+        <h1 className="break-keep text-h1 font-bold">{byDeadline ? '마감 임박 공고' : '채용공고'}</h1>
+        <p className="mt-1 break-keep text-lg text-gray-500">
           {byDeadline
             ? '마감일이 가까운 순서입니다'
             : '작업치료사 · 물리치료사 · 공공기관과 병원에서 모아요'}
@@ -134,20 +151,21 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
 
       {searching ? (
         <div className="mb-6 flex flex-wrap items-baseline gap-3">
-          <p className="text-lg text-gray-700 dark:text-gray-300">
-            <span className="font-bold">{q}</span> — 네 탭 전체에서 {total}건
+          <p className="break-keep text-lg text-gray-700 dark:text-gray-300">
+            <span className="font-bold">{q}</span>
+            {locked ? ' — 회원만 볼 수 있어요' : ` — 네 탭 전체에서 ${total}건`}
           </p>
           <Link href={link({ q: undefined })} className="text-sm text-interaction-blue hover:underline">
             검색 지우기
           </Link>
         </div>
       ) : (
-        /* 칩 넉 줄 대신 옆으로 미는 카드입니다. 그림이 들어갈 자리입니다 */
+        /* 분류 카드. 로그인 전에는 건수를 안 붙입니다 — 셀 수가 없습니다 */
         <JobTabs
           images={tabImages}
           hrefs={Object.fromEntries(TABS.map((t) => [t.key, link({ tab: t.key })]))}
           active={active?.key ?? null}
-          counts={counts}
+          counts={locked ? null : tabCounts}
         />
       )}
 
@@ -171,79 +189,109 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
         </div>
       </nav>
 
-      {/* 기관 이름으로 찾으면 그 기관이 어떤 곳인지 먼저 보여줍니다 */}
-      {searching && <OrgCard name={q} />}
+      {/* 기관 이름으로 찾으면 그 기관이 어떤 곳인지 먼저 보여줍니다 (회원만) */}
+      {searching && !locked && <OrgCard name={q} />}
 
-      {error && (
-        <p className="rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
-          공고를 불러오지 못했어요 — {error.message}
+      {locked && (
+        <MembersOnly
+          title={<>공고는<br />회원만 볼 수 있어요</>}
+          body="공공기관 · 대학병원 · 종합병원 공고를 하나도 안 빼고 모읍니다. 가입은 3분이면 끝나요."
+        />
+      )}
+
+      {!locked && list.error && (
+        <p className="break-keep rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
+          공고를 불러오지 못했어요 — {list.error.message}
         </p>
       )}
 
-      {!error && rows.length === 0 && (
-        <p className="py-8 text-center text-lg text-gray-500">
-          {searching ? `「${q}」 로 찾은 공고가 없어요` : '조건에 맞는 공고가 없어요'}
+      {!locked && !list.error && rows.length === 0 && (
+        <p className="break-keep py-8 text-center text-lg text-gray-500">
+          {searching ? `「${q}」 로 찾은 공고가 없어요`
+            : page > 0 ? '이 쪽에는 공고가 없어요' : '조건에 맞는 공고가 없어요'}
         </p>
       )}
 
-      {/* 가입 전에는 맛보기로 몇 건만 보입니다 — app/gate.tsx */}
-      <Clip max="46rem">
-      <ul className="divide-y divide-gray-100 dark:divide-gray-800">
-        {rows.map((r) => {
-          const dd = dday(r.apply_to);
-          return (
-            <li key={r.id}>
-              <Link
-                href={`/jobs/${r.id}`}
-                className="-mx-4 block rounded-sm px-4 py-6 hover:bg-gray-50 dark:hover:bg-gray-950"
-              >
-                <div className="flex items-baseline justify-between gap-5">
-                  <span className="text-sm text-gray-500">{r.org_name}</span>
-                  {dd && (
-                    <span className={
-                      'shrink-0 text-sm font-bold ' +
-                      (dd.over ? 'text-gray-400' : dd.urgent ? 'text-brand-red' : 'text-gray-600')
-                    }>
-                      {dd.text}
+      {!locked && (
+        <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+          {rows.map((r) => {
+            const dd = dday(r.apply_to);
+            return (
+              <li key={r.id}>
+                <Link
+                  href={`/jobs/${r.id}`}
+                  className="-mx-4 block rounded-sm px-4 py-6 hover:bg-gray-50 dark:hover:bg-gray-950"
+                >
+                  <div className="flex items-baseline justify-between gap-5">
+                    <span className="break-keep text-sm text-gray-500">{r.org_name}</span>
+                    {dd && (
+                      <span className={
+                        'shrink-0 text-sm font-bold ' +
+                        (dd.over ? 'text-gray-400' : dd.urgent ? 'text-brand-red' : 'text-gray-600')
+                      }>
+                        {dd.text}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 break-keep text-body-lg font-medium">{r.title}</p>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
+                    {searching && r.tab && (
+                      <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
+                        {tabLabel(r.tab)}
+                      </span>
+                    )}
+                    {r.job_group && <span className="font-medium text-gray-700 dark:text-gray-300">{r.job_group}</span>}
+                    {r.work_place && <span>{r.work_place}</span>}
+                    {r.employ_type && <span>{r.employ_type}</span>}
+                    {r.headcount ? <span>{r.headcount}명</span> : null}
+                    {(r.apply_from || r.apply_to) && (
+                      <span>{d(r.apply_from)}~{d(r.apply_to)}</span>
+                    )}
+                    <span className="flex items-center gap-1">
+                      <Icon name="eye" size={13} className="shrink-0" />
+                      <span className="num tabular-nums">{views[r.id] ?? 0}</span>
                     </span>
-                  )}
-                </div>
-                <p className="mt-1 text-body-lg font-medium">{r.title}</p>
-                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
-                  {/* 검색 결과에서는 어느 탭 공고인지 밝힙니다 */}
-                  {searching && r.tab && (
-                    <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
-                      {tabLabel(r.tab)}
-                    </span>
-                  )}
-                  {r.job_group && <span className="font-medium text-gray-700 dark:text-gray-300">{r.job_group}</span>}
-                  {r.work_place && <span>{r.work_place}</span>}
-                  {r.employ_type && <span>{r.employ_type}</span>}
-                  {r.headcount ? <span>{r.headcount}명</span> : null}
-                  {/* 마감일만 있으면 「벌써 열린 건가」를 못 알아봅니다 */}
-                  {(r.apply_from || r.apply_to) && (
-                    <span>{d(r.apply_from)}~{d(r.apply_to)}</span>
-                  )}
-                  <span className="flex items-center gap-1">
-                    <Icon name="eye" size={13} className="shrink-0" />
-                    <span className="num tabular-nums">{views[r.id] ?? 0}</span>
-                  </span>
-                </div>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-      </Clip>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-      <JoinCta what="공고" />
+      {/* 쪽 넘기기. 한 번에 20건이라 여기가 있어야 끝까지 볼 수 있습니다 */}
+      {!locked && (page > 0 || rows.length === PAGE) && (
+        <nav className="mt-7 flex items-center justify-between gap-3" aria-label="쪽 넘기기">
+          {page > 0 ? (
+            <Link
+              href={link({ p: String(page - 1) || undefined })}
+              className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
+            >
+              ← 앞쪽
+            </Link>
+          ) : <span />}
 
-      <p className="mt-7 text-sm text-gray-400">
-        {searching
-          ? `${rows.length}건 보임 · 네 탭 전체에서 찾았어요`
-          : `${active?.label} ${counts[TABS.findIndex((t) => t.key === active?.key)]}건 중 ${rows.length}건 보임`}
-        {' · 최근 올라온 순 · 한 번에 100건까지'}
-      </p>
+          <span className="break-keep text-sm text-gray-500">{page + 1}쪽</span>
+
+          {rows.length === PAGE ? (
+            <Link
+              href={link({ p: String(page + 1) })}
+              className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
+            >
+              다음쪽 →
+            </Link>
+          ) : <span />}
+        </nav>
+      )}
+
+      {!locked && (
+        <p className="mt-7 break-keep text-sm text-gray-400">
+          {searching
+            ? `네 탭 전체에서 ${total}건 · 이 쪽에 ${rows.length}건`
+            : `${active?.label} ${tabCounts[TABS.findIndex((t) => t.key === active?.key)]}건 중 이 쪽에 ${rows.length}건`}
+          {' · 한 번에 '}{PAGE}{'건씩 보여드려요'}
+        </p>
+      )}
     </main>
   );
 }

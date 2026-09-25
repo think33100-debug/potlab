@@ -199,3 +199,78 @@ welfare_facilities     14710     14710     맞음
 치매센터 남는 칸 6개가 `extra` jsonb 에 317줄 다 들어감.
 
 `org_directory` 는 원본을 다시 부은 뒤 `refresh materialized view org_directory;` 를 돌려야 합니다.
+
+---
+
+## 로그인해야 보이게 (2026-09-25 완료)
+
+오픈 전 필수 셋 중 첫째입니다. **막는 자리를 화면에서 DB 로 옮겼습니다.**
+화면에서만 숨기면 요청을 직접 쏘는 쪽은 못 막습니다.
+
+### 고치기 전에 실제로 쏴본 것 (로그인 없이, anon 열쇠만)
+
+```
+공고 목록 job_posts_pub?limit=1000     200   Content-Range 0-99/497
+공고 검색 title=ilike.*치료*            200   100줄
+병원정보 검색 org_search                200   20줄
+기관 한 곳 org_public                   200   1줄
+그 기관 공고 org_jobs                   200   8줄
+근처 기관 org_nearby                    200   3줄
+거르기 목록 org_facets                  200   전부
+```
+
+기관 표는 더 심했습니다 — 로그인한 회원 한 명이
+`ltc_facilities` 30,595 · `hospitals` 15,332 · `welfare_facilities` 14,710 줄을
+그대로 받아갈 수 있었습니다. anon 도 넷은 읽혔습니다.
+「누구나 · true」라는 RLS 규칙이 붙어 있어서 사실상 아무것도 안 막고 있었습니다.
+
+### 한 일
+
+**공고** — 뷰를 통째로 읽는 길(`job_posts_pub`)을 닫고 함수 넷으로만 엽니다.
+
+```
+job_one(id)      한 건. 공유 링크가 살아야 해서 누구나. 본문(detail)은 회원만
+job_list(...)    목록·검색. 회원만 · 한 번에 20건에서 끊음 (함수 안에 박아둠)
+job_counts(...)  탭별 건수. 회원만
+job_totals()     홈에 쓰는 개수. 줄이 안 나가므로 누구나
+```
+
+**기관** — 함수 일곱의 실행 권한을 걷었습니다.
+`anon` 에서만 걷으면 안 됩니다 — 권한이 `PUBLIC` 에 붙어 있어서 anon 이 그걸
+물려받습니다. 처음에 이걸 몰라 한 번 헛돌았습니다. `revoke ... from public` 이 답입니다.
+`org_total` 만 남겨뒀습니다(홈의 「55,338곳」).
+
+**기관 원자료 표·뷰 열** — 읽기 권한을 걷고 「누구나」 규칙을 지웠습니다.
+RLS 는 켜둔 채 규칙이 없으면 전부 막힙니다.
+
+```
+hospitals · ltc_facilities · welfare_facilities · mental_centers
+dementia_centers · public_hospitals · collectable_orgs
+org_hospital_stat · org_coverage · org_targets
+```
+
+화면은 안 깨집니다 — `org_*` · `job_*` 함수 열둘이 모두 주인(postgres) 권한으로
+돌아서 RLS 와 표 권한을 그냥 지나갑니다. 화면 코드가 이 표들을 직접 읽는 곳은
+없습니다(확인함 · 0곳). 수집기는 `service_role` 이라 그대로 돕니다.
+
+### 고친 뒤 다시 쏴본 것
+
+로그인 없이 — 위의 일곱과 표·뷰 열, **전부 401 `42501`**.
+`job_one` 만 200 이고 `detail` 은 `{}` 입니다(공유 링크는 살아 있어야 하므로).
+홈은 그대로 돕니다 — `org_total` 55,338 · `job_totals` 497 · 커뮤니티 · 홈 문구.
+
+회원으로 흉내 내어(`set local role authenticated`) 확인한 것 —
+
+```
+job_list()              20줄      job_list(p_page=>1)   20줄
+org_search()            20줄      org_search(300 달라고) 20줄  ← least(…,20)
+org_public 1 · org_hospital_by_name 1 · org_nearby 3 · org_facets 1
+위의 표·뷰 열                     전부 막힘
+```
+
+### 확인 못 한 것
+
+카카오·네이버 로그인은 **시작**만 확인했습니다(각자의 로그인 화면까지 도달,
+PKCE 검증값이 쿠키에 들어간 것까지). 계정이 없어 로그인을 끝내지는 못했고,
+그래서 **로그인한 상태의 화면은 브라우저로 확인하지 못했습니다.**
+DB 쪽은 위처럼 흉내 내어 확인했습니다.

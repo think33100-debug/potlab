@@ -21,7 +21,8 @@ export function JobTabs({
      함수를 넘기면 「Functions cannot be passed directly to Client Components」 */
   hrefs: Record<string, string>;
   active: string | null;
-  counts: number[];
+  /* 건수. 로그인 전에는 셀 수가 없어서 null 로 옵니다 (job_counts 가 회원만) */
+  counts: number[] | null;
 }) {
   return (
     <Rail label="분류" className="mb-7">
@@ -50,9 +51,11 @@ export function JobTabs({
           >
             {bg && <span aria-hidden className="absolute inset-0 bg-black/45" />}
             <span className="relative break-keep text-h3 font-bold">{t.label}</span>
-            <span className="relative mt-1 text-lg text-white/75">
-              <span className="num tabular-nums">{counts[i]}</span>건
-            </span>
+            {counts && (
+              <span className="relative mt-1 text-lg text-white/75">
+                <span className="num tabular-nums">{counts[i]}</span>건
+              </span>
+            )}
           </Link>
         );
       })}

@@ -9,14 +9,20 @@ export const supabase = createClient(
   { auth: { persistSession: false } }
 );
 
-/* 공고 상세가 받는 칸입니다.
+/* 공고를 받는 길은 2026-09-25 에 함수로 바뀌었습니다.
 
-   source · collected_at · evidence 는 여기 없습니다 — 관리자만 보는 값이라
-   회원에게는 DB 가 칸 자체를 안 내줍니다 (칸 단위 권한).
-   관리자는 job_meta 뷰로 따로 받습니다. select('*') 를 쓰면 권한 오류가 납니다. */
-export const JOB_ONE_COLS =
-  'id,org_name,title,hire_type,employ_type,work_place,sido,sgg,edu,headcount,'
-  + 'apply_from,apply_to,posted_at,url,job_group,org_kind,tab,detail';
+   전에는 화면이 job_posts_pub 뷰를 직접 읽고 필요한 칸을 골랐습니다.
+   그러면 요청을 직접 쏘는 쪽도 똑같이 읽을 수 있어서, 로그인 없이
+   한 번에 100건이 나갔습니다 (실제로 쏴서 확인 — 0-99/497).
+
+   지금은 뷰를 통째로 읽는 길을 닫고 함수 셋으로만 엽니다.
+     job_one(id)      한 건. 공유 링크가 살아야 해서 누구나. 본문은 회원만
+     job_list(...)    목록·검색. 회원만 · 한 번에 20건
+     job_counts(...)  탭별 건수. 회원만
+     job_totals()     홈에 쓰는 개수. 줄이 안 나가므로 누구나
+
+   그래서 JOB_ONE_COLS · LIST_COLS 같은 칸 목록은 없어졌습니다 —
+   무엇을 내줄지는 이제 DB 함수가 정합니다. */
 
 export type JobMeta = {
   id: string;
@@ -49,11 +55,6 @@ export type JobPost = {
   tab: string | null;
   detail: Record<string, string>;
 };
-
-/* 목록에서는 본문(detail)을 안 받습니다 — 전송량이 열 배 차이납니다.
-   source 도 없습니다 — 출처는 관리자만 봅니다 */
-export const LIST_COLS =
-  'id,org_name,title,employ_type,work_place,sido,job_group,org_kind,tab,apply_from,apply_to,posted_at,headcount';
 
 export type JobListItem = Pick<
   JobPost,

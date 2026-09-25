@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { supabase, LIST_COLS, type JobListItem } from '@/lib/supabase';
-import { orgPublic, place, shortKinds, TILE_NAME } from '@/lib/org';
+import type { JobListItem } from '@/lib/supabase';
+import { orgJobs, orgPublic, place, shortKinds, TILE_NAME } from '@/lib/org';
+import { serverSupabase } from '@/lib/supabase-server';
 
 /* 공고 하나를 볼 때 그 기관이 어떤 곳인지 같이 보여줍니다.
 
@@ -11,15 +12,16 @@ import { orgPublic, place, shortKinds, TILE_NAME } from '@/lib/org';
    급여는 salary_records 가 아직 한 줄뿐이라 자리만 잡아둡니다 —
    없는 숫자를 지어내지 않습니다. */
 export async function OrgPanel({ orgName, exceptJobId }: { orgName: string; exceptJobId: string }) {
+  /* 2026-09-25 — 회원만 봅니다. 공고 뷰를 직접 읽던 것도 함수로 바꿨습니다.
+     로그인 안 한 분에게는 둘 다 빈 값이 오고 이 구역은 통째로 안 그립니다 */
+  const sb = await serverSupabase();
   const [org, others] = await Promise.all([
-    orgPublic(orgName, null),
-    supabase.from('job_posts_pub').select(LIST_COLS)
-      .eq('org_name', orgName).neq('id', exceptJobId)
-      .order('posted_at', { ascending: false, nullsFirst: false })
-      .limit(5),
+    orgPublic(sb, orgName, null),
+    orgJobs(sb, orgName),
   ]);
 
-  const rows = (others.data ?? []) as unknown as JobListItem[];
+  const rows = (others as unknown as JobListItem[])
+    .filter((r) => r.id !== exceptJobId).slice(0, 5);
   if (!org && rows.length === 0) return null;
 
   const facts: [string, string][] = [];

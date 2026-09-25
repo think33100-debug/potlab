@@ -1,6 +1,6 @@
 import type { Texts } from './home-text';
 import { supabase } from './supabase';
-import { daysAgoIso, todayIso } from './time';
+import { daysAgoIso } from './time';
 
 /* 홈 화면이 DB 에서 받아오는 것들.
 
@@ -61,17 +61,15 @@ export type HomeData = {
 export const therapists = (s: HomeStats) => s.ot + s.pt;
 
 export async function getHome(): Promise<HomeData> {
-  const today = todayIso();
-  const until = new Date(Date.now() + DEADLINE_DAYS * 86400000).toISOString().slice(0, 10);
 
-  const [blocks, settings, deadline, jobs, orgs, hot, stats, texts] = await Promise.all([
+  const [blocks, settings, totals, orgs, hot, stats, texts] = await Promise.all([
     supabase.from('home_blocks').select(HOME_COLS).eq('enabled', true).order('sort'),
     supabase.from('site_settings').select('key,value').eq('key', 'top_banner_seconds').maybeSingle(),
 
-    /* 숫자는 지어내지 않고 실제로 셉니다 */
-    supabase.from('job_posts_pub').select('id', { count: 'exact', head: true })
-      .gte('apply_to', today).lte('apply_to', until),
-    supabase.from('job_posts_pub').select('id', { count: 'exact', head: true }),
+    /* 숫자는 지어내지 않고 실제로 셉니다.
+       공고 뷰를 직접 세지 않습니다 — 2026-09-25 에 통째로 읽는 길을 닫았습니다.
+       개수만 내주는 함수를 부릅니다 (줄은 한 줄도 안 나갑니다) */
+    supabase.rpc('job_totals'),
     /* org_directory 는 anon 이 못 읽습니다 (통째로 긁어가는 길을 닫았습니다).
        세어 둔 값을 함수로 받습니다 */
     supabase.rpc('org_total'),
@@ -100,8 +98,8 @@ export async function getHome(): Promise<HomeData> {
     stats: (stats.data as HomeStats | null)
       ?? { hospitals: 0, ot: 0, pt: 0, hira_ver: null, joined: [], min_n: 3 },
     metrics: {
-      deadline: deadline.count ?? 0,
-      jobs: jobs.count ?? 0,
+      deadline: (totals.data as { deadline?: number } | null)?.deadline ?? 0,
+      jobs: (totals.data as { jobs?: number } | null)?.jobs ?? 0,
       orgs: (orgs.data as number | null) ?? 0,
       hot: hotRow ? { id: hotRow.id, title: hotRow.title || hotRow.body.slice(0, 30) } : null,
     },

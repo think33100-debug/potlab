@@ -86,8 +86,9 @@ export async function GET(
 
   /* 없는 번호를 넣어도 터지지 않고 기본 그림이 나가야 합니다 */
   try {
-    const { data } = await supabase
-      .from('job_posts_pub').select('org_name,job_group,apply_from,apply_to').eq('id', id).maybeSingle();
+    /* 2026-09-25 — 공고 뷰를 통째로 읽는 길을 닫아서 함수로 받습니다.
+       미리보기 그림에는 세션이 없습니다. job_one 은 그래서 열어뒀습니다 */
+    const { data } = await supabase.rpc('job_one', { p_id: id }).maybeSingle();
     const j = data as {
       org_name: string; job_group: string | null;
       apply_from: string | null; apply_to: string | null;

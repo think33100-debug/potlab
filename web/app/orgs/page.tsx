@@ -4,8 +4,9 @@ import { Hit } from '@/components/hit';
 import { OrgDetail } from '@/components/org-detail';
 import { OrgSearch } from '@/components/org-search';
 import { iconMap } from '@/lib/icons';
-import { orgPublic, place, TILE_NAME, type OrgFacets } from '@/lib/org';
-import { supabase } from '@/lib/supabase';
+import { MembersOnly } from '@/components/members-only';
+import { orgPublic, ourNumbers, place, TILE_NAME, type OrgFacets } from '@/lib/org';
+import { serverSupabase } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,8 +16,10 @@ export const dynamic = 'force-dynamic';
    있고(10곳), 같은 이름이 자료 두 곳에 있는 경우도 있어서
    주소 조각(/orgs/이름)으로는 가리키기가 어렵습니다. */
 
-async function facets(): Promise<OrgFacets> {
-  const { data } = await supabase.rpc('org_facets');
+/* 거르기 목록도 회원만입니다 (2026-09-25 · org_facets 의 실행 권한을 걷었습니다).
+   로그인 안 한 분에게는 빈 것이 오고, 아래에서 가입 권유를 그립니다 */
+async function facets(sb: Awaited<ReturnType<typeof serverSupabase>>): Promise<OrgFacets> {
+  const { data } = await sb.rpc('org_facets');
   return (data as OrgFacets | null)
     ?? { tiles: {}, sidos: [], sggs: {}, total: 0 };
 }
@@ -31,7 +34,9 @@ export async function generateMetadata({ searchParams }: PageProps<'/orgs'>): Pr
     };
   }
   const sido = typeof sp.sido === 'string' && sp.sido ? sp.sido : null;
-  const o = await orgPublic(org, sido);
+  /* 회원이 공유한 링크면 제목이 제대로 붙고, 아니면 이름만 붙습니다 —
+     기관 자료는 회원만 읽을 수 있습니다 */
+  const o = await orgPublic(await serverSupabase(), org, sido);
   if (!o) return { title: `${org} · POTJOB` };
 
   const desc = [TILE_NAME[o.tile] ?? '기관', place(o.sido_std, o.sgg_std)]
@@ -62,7 +67,30 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
     );
   }
 
-  const [f, icons] = await Promise.all([facets(), iconMap('병원정보 · 종별')]);
+  const sb = await serverSupabase();
+  const { data: who } = await sb.auth.getUser();
+
+  if (!who.user) {
+    return (
+      <div className="bg-[#F4F4F1]">
+        <main className="mx-auto w-full max-w-2xl px-6 pt-6 pb-[88px] md:px-7">
+          <Hit kind="orgs" />
+          <h1 className="break-keep text-h1 font-bold text-[#14181C]">병원정보 찾기</h1>
+          <p className="mt-2 break-keep text-lg text-[#5F666C]">
+            치료사가 일하는 곳을 이름 · 종별 · 지역으로 찾아봐요
+          </p>
+          {/* 곳 수는 지어내지 않고 실제로 셉니다 — org_total 은 줄이 안 나가서
+              로그인 없이도 부를 수 있게 열어뒀습니다 */}
+          <MembersOnly
+            title={<>병원정보는<br />회원만 볼 수 있어요</>}
+            body={`치료사가 일하는 곳 ${(await ourNumbers()).orgs.toLocaleString('ko-KR')} 곳. 인원 · 병상 · 얼마나 바쁜 곳인지까지 찾아볼 수 있어요.`}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  const [f, icons] = await Promise.all([facets(sb), iconMap('병원정보 · 종별')]);
 
   return (
     <div className="bg-[#F4F4F1]">
