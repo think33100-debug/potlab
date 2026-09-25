@@ -96,6 +96,29 @@ export const coursesFor = (job: string) => (job === '물리치료사' ? COURSES_
 export const MAX_ROWS = 5;
 export type WorkRow = { hospital: string; region: string; months: string };
 
+/* 경력·실습 줄의 규칙 한 곳 — **전부 쓰거나, 전부 안 쓰거나** (2026-09-25).
+
+   전에는 「한 줄이라도 다 채웠으면 통과」였습니다. 그러면 옆의 반쯤 쓴 줄이
+   그대로 넘어가고, 저장할 때 조용히 버려졌습니다. 적어놓은 게 없어지는 것보다
+   넘어가기 전에 막는 편이 낫습니다.
+
+   아무것도 안 쓴 분은 그냥 넘어갑니다 — 막 졸업해서 경력이 없는 분입니다.
+   화면과 저장이 **같은 규칙**을 써야 합니다. 두 벌이 되면 화면은 통과시키고
+   저장은 버리는 사이가 생깁니다 */
+export const rowStarted = (r: WorkRow) => !!(r.hospital || r.region || r.months);
+export const rowFull    = (r: WorkRow) => !!(r.hospital && r.region && r.months);
+
+/** 반쯤 쓴 줄. 비어 있는 줄은 안 셉니다 */
+export const rowsHalf = (rows: WorkRow[]) => rows.filter((r) => rowStarted(r) && !rowFull(r));
+
+/** 다음으로 넘어갈 수 있나. 개월수 범위까지 봅니다 */
+export const rowsReady = (rows: WorkRow[]) =>
+  rowsHalf(rows).length === 0
+  && !rows.some((r) => rowFull(r) && fieldError('months', r.months, {}) !== null);
+
+/** 저장할 줄 — 화면이 통과시킨 것만 남습니다 */
+export const rowsToSave = (rows: WorkRow[]) => rows.filter(rowFull);
+
 /* ───────── 어학 ─────────
 
    한 사람이 토익도 오픽도 넣을 수 있어서 줄이 여러 개입니다 (표 spec_langs).

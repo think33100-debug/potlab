@@ -7,6 +7,7 @@ import {
   LANG_MAX, MAX_ROWS, NONE, OPIC_LEVELS, RANGE, REGIONS,
   SALARY_HIGH, SALARY_LOW, SCHOOLS, THIS_YEAR,
   anyError, coursesFor, emptyLang, fieldError, langError, langsPayload, payAs, shortType,
+  rowFull, rowStarted, rowsReady, rowsToSave,
   type ChipGroup, type Draft, type Form, type LangRow, type WorkRow,
 } from '@/lib/signup-fields';
 import { annualTotal, hourlyWage, man10, monthlyHours } from '@/lib/pay';
@@ -106,7 +107,15 @@ export function SignupSurvey({
   /* 「없음」도 답입니다. 빈칸이면 안 적은 건지 없는 건지 구분이 안 됩니다 —
      그래서 어학·자격증·교육·경력에는 각각 「없음」을 두고, 그걸 골라야 넘어갑니다 */
   const has = (k: string) => !!f[k]?.trim();
-  const rowsOk = f.rows_none === 'Y' || rows.some((r) => r.hospital && r.region && r.months);
+  /* 경력은 **전부 쓰거나, 전부 안 쓰거나** 입니다 (2026-09-25 에 바뀜).
+
+       전에는 `rows.some(완성)` 이었습니다 — 한 줄만 다 채우면 옆에
+       반쯤 만 줄이 있어도 그대로 넘어갔고, 넘어간 반쯤 줄은 저장할 때
+       조용히 버려졌습니다. 적어놓고 없어지는 것보다 막는 편이 낫습니다.
+
+       그리고 아무것도 안 쓴 분은 **그냥 넘어갑니다.** 전에는 「경력 없음」을
+       꼭 눌러야 했는데, 이제 막 졸업한 분에게 그건 걸림돌이입니다 */
+  const rowsOk = rowsReady(rows);
   /* 이 화면의 숫자 칸 중 하나라도 범위를 벗어나면 못 넘어갑니다 */
   const bad = (keys: string[]) => anyError(keys, f);
 
@@ -170,31 +179,28 @@ export function SignupSurvey({
         ),
       },
     ] : [
+      /* 「언제부터 일하셨나요」 카드를 없앰습니다 (2026-09-25).
+         첫 입사연도·지금 병원 입사연도는 **경력 카드로** 갔습니다 — 경력에
+         관한 것을 앞뒤 두 화면에 나눠 묻고 있었습니다.
+         지역은 「근무지 기준」이라 아래 「어떤 곳에서 일하세요」 로 넣었습니다.
+         저장되는 칸은 하나도 안 바뀜니다 — 묻는 순서만 바뀜니다 */
       {
-        title: '언제부터 일하셨나요',
-        ok: has('hired_year') && has('current_hired_year') && has('region')
-          && !bad(['hired_year','current_hired_year']),
+        title: '어떤 곳에서 일하세요',
+        ok: has('hospital_type') && has('employ_type') && has('region'),
         body: (
           <>
-            <Num k="hired_year" label="첫 입사연도" hint="치료사로 처음 일 시작한 해" v={f.hired_year} on={set} unit="년" ph="2021" req f={f} />
-            <Num k="current_hired_year" label="지금 병원 입사연도" hint="첫 직장이면 위와 같게" v={f.current_hired_year} on={set} unit="년" ph="2024" req f={f} />
+            <Sel k="hospital_type" label="병원·기관 유형" hint="국립대병원은 대학병원(국립)" v={f.hospital_type} on={set} opts={HOSPITAL_TYPES} req />
+            <Sel k="employ_type" label="고용형태" hint="인턴·프리랜서도 모두 집계돼요" v={f.employ_type} on={set} opts={EMPLOYMENTS} req />
             <Sel k="region" label="지역" hint="근무지 기준" v={f.region} on={set} opts={REGIONS} req />
           </>
         ),
       },
       {
-        title: '어떤 곳에서 일하세요',
-        ok: has('hospital_type') && has('employ_type'),
-        body: (
-          <>
-            <Sel k="hospital_type" label="병원·기관 유형" hint="국립대병원은 대학병원(국립)" v={f.hospital_type} on={set} opts={HOSPITAL_TYPES} req />
-            <Sel k="employ_type" label="고용형태" hint="인턴·프리랜서도 모두 집계돼요" v={f.employ_type} on={set} opts={EMPLOYMENTS} req />
-          </>
-        ),
-      },
-      {
         title: '급여', sub: '연 총소득으로 봅니다. 월급만 비교하면 뜻이 없어요',
-        ok: has('base_monthly') && has('extra_pay_monthly') && has('bonus_yearly')
+        /* 상여는 **안 써도 넘어갑니다** (2026-09-25).
+           전에는 0 이라도 써야 했는데, 상여가 얼리는지 모르는 분이 있습니다.
+           비우면 NULL 로 들어갑니다 — 「0원」과 「안 적음」은 칸에서 갈립니다 */
+        ok: has('base_monthly') && has('extra_pay_monthly')
           && !bad(['base_monthly', 'extra_pay_monthly', 'bonus_yearly', 'net_monthly', 'dependents']),
         body: (
           <>
@@ -210,8 +216,8 @@ export function SignupSurvey({
             <Num k="extra_pay_monthly" label="추가 수당" req unit="만원 / 월" ph="0"
               hint="치료 건수나 실적으로 더 받는 돈이에요. 없으면 0"
               v={f.extra_pay_monthly} on={set} f={f} />
-            <Num k="bonus_yearly" label="연간 상여금" req unit="만원" ph="0"
-              hint="작년 한 해 명절·성과급으로 받은 돈을 다 합쳐서 적어 주세요. 없으면 0"
+            <Num k="bonus_yearly" label="연간 상여금" unit="만원" ph="0"
+              hint="작년 한 해 명절·성과급으로 받은 돈을 다 합쳐서. 없으면 0, 모르시면 비워 두세요"
               v={f.bonus_yearly} on={set} f={f} />
           </>
         ),
@@ -283,12 +289,28 @@ export function SignupSurvey({
 
     {
       title: stu ? '실습' : '경력',
-      sub: stu ? '다녀온 곳을 최대 5개까지' : '이전 근무지 포함, 최대 5개',
-      ok: rowsOk,
+      sub: stu ? '다녀온 곳을 최대 5개까지'
+               : '언제부터 일하셨는지와 이전 근무지를 한 번에 적어요',
+      ok: rowsOk
+        && (stu || (has('hired_year') && has('current_hired_year')
+                    && !bad(['hired_year', 'current_hired_year']))),
       body: (
-        <Rows rows={rows} none={stu ? '실습 없음' : '경력 없음'}
-          noneOn={f.rows_none === 'Y'} setNone={(b) => set('rows_none', b ? 'Y' : '')}
-          on={(v) => { setRows(v); save(f, certs, courses, v); }} />
+        <>
+          {/* 첫 입사연도는 **비울 수 없습니다** — salary_records.hired_year 가
+              NOT NULL 입니다. 막 졸업해서 이전 근무지가 없어도 「지금 병원에
+              언제 들어왔나」는 있습니다. 아래 이전 근무지만 선택입니다 */}
+          {!stu && (
+            <>
+              <Num k="hired_year" label="첫 입사연도" hint="치료사로 처음 일 시작한 해" v={f.hired_year} on={set} unit="년" ph="2021" req f={f} />
+              <Num k="current_hired_year" label="지금 병원 입사연도" hint="첫 직장이면 위와 같게" v={f.current_hired_year} on={set} unit="년" ph="2024" req f={f} />
+              <p className="mt-6 text-sm font-bold text-gray-500">이전 근무지 (선택 · 최대 5개)</p>
+              <p className="mt-1 text-sm text-gray-400">없으시면 비워 두고 넘어가실 수 있어요</p>
+            </>
+          )}
+          <Rows rows={rows} none={stu ? '실습 없음' : '경력 없음'}
+            noneOn={f.rows_none === 'Y'} setNone={(b) => set('rows_none', b ? 'Y' : '')}
+            on={(v) => { setRows(v); save(f, certs, courses, v); }} />
+        </>
       ),
     },
 
@@ -304,7 +326,7 @@ export function SignupSurvey({
     }] : []),
   ];
 
-  /* 남겨둔 자리가 지금 화면 수보다 클 수 있습니다 — 현직 9장, 학생 6장이라
+  /* 남겨둔 자리가 지금 화면 수보다 클 수 있습니다 — 현직 8장, 학생 6장이라
      역할을 바꾸면 어긋납니다. 없는 화면을 그리면 그대로 터집니다 */
   const at = Math.min(i, steps.length - 1);
   const step = progress(at, steps.length);
@@ -318,7 +340,11 @@ export function SignupSurvey({
 
     /* 스펙은 현직·학생 둘 다 씁니다 (옛 화면에서도 2단계 카드는 공용이었습니다).
        실습은 학생 칸, 경력은 현직 칸이라 같은 rows 를 역할에 따라 다른 칸에 담습니다 */
-    const filled = f.rows_none === 'Y' ? [] : rows.filter((r) => r.hospital && r.region);
+    /* 화면과 같은 규칙을 씁니다 (lib/signup-fields.ts).
+       전에는 여기가 hospital && region 만 봐서, 개월수가 빈 줄이 개월수 없이
+       저장됐습니다. 이제 화면이 막아서 그럴 일이 없지만, 규칙을 두 벌로
+       두면 다음에 또 어긋납니다 */
+    const filled = f.rows_none === 'Y' ? [] : rowsToSave(rows);
     const months = filled.reduce((s, r) => s + (Number(r.months) || 0), 0);
 
     /* 「없음」을 골랐으면 빈 목록으로 담습니다 — 화면에서만 쓰는 표시입니다 */
@@ -523,6 +549,8 @@ const BOX_BAD = BOX.replace('border-gray-200', 'border-brand-red').replace('dark
    폭은 여기서 안 정합니다 — w-full 을 넣어두면 줄 안에서 w-[88px] 과 부딪혀
    어느 쪽이 이길지 클래스 적는 순서로는 안 정해집니다. 쓰는 자리에서 정합니다 */
 const INPUT = `block ${SKIN} px-5 py-4 text-lg`;
+/* 고르는 칸도 틀리면 테두리 색으로 알립니다 (BOX_BAD 와 같은 규칙) */
+const INPUT_BAD = INPUT.replace('border-gray-200', 'border-brand-red').replace('dark:border-gray-700', 'dark:border-brand-red');
 
 function Num({
   k, label, hint, v, on, unit, ph, step, req, f, noWhy,
@@ -884,6 +912,12 @@ function Chip({ on, go, children }: { on: boolean; go: () => void; children: Rea
 }
 
 /* 실습·경력 — 병원 이름은 안 받습니다. 유형·지역·개월만 (옛 drawRows 에 지역을 더한 것) */
+/* 비어있는 칸 옆에 붙는 한 줄. 빨간 바탕을 안 씁니다 —
+   teamsparta.md 「입력 오류에 빨강 배경을 사용하지 않는다」 */
+function 비었어요({ children }: { children: React.ReactNode }) {
+  return <p className="mt-1 text-sm text-brand-red">{children}</p>;
+}
+
 function Rows({
   rows, on, none, noneOn, setNone,
 }: {
@@ -896,7 +930,13 @@ function Rows({
   return (
     <div>
       <div className={noneOn ? 'opacity-60' : ''}>
-        {rows.map((r, i) => (
+        {rows.map((r, i) => {
+          /* **어느 칸이 비었는지 그 칸 옆에 적습니다** (2026-09-25).
+             전에는 「다음」이 회색으로 죽어 있기만 하고 왜 막혔는지는 안 보였습니다.
+             손도 안 댈 줄은 안 다근니다 — 쓴 줄만 봅니다 */
+          const 비음 = rowStarted(r) && !rowFull(r);
+          const 칸빈 = (v: string) => 비음 && !v;
+          return (
           /* min-w-0 이 없으면 고르는 칸이 제 글자 길이만큼 버텨서
              줄 전체가 오른쪽으로 삐져나갑니다 */
           <div key={i} className="mt-5 rounded-sm border border-gray-100 p-5 first:mt-0 dark:border-gray-800">
@@ -909,25 +949,34 @@ function Rows({
               </button>
             </div>
             <select value={r.hospital} onChange={(e) => edit(i, { hospital: e.target.value })}
-              className={INPUT + ' mt-2 w-full'}>
+              className={(칸빈(r.hospital) ? INPUT_BAD : INPUT) + ' mt-2 w-full'}>
               <option value="">병원 유형</option>
               {HOSPITALS.map((h) => <option key={h}>{h}</option>)}
             </select>
+            {칸빈(r.hospital) && <비었어요>병원 유형을 골라 주세요</비었어요>}
+
             <div className="mt-2 flex gap-2">
               <select value={r.region} onChange={(e) => edit(i, { region: e.target.value })}
-                className={INPUT + ' min-w-0 flex-1'}>
+                className={(칸빈(r.region) ? INPUT_BAD : INPUT) + ' min-w-0 flex-1'}>
                 <option value="">지역</option>
                 {REGIONS.map((x) => <option key={x}>{x}</option>)}
               </select>
-              <span className={BOX + ' w-[124px] shrink-0'}>
+              <span className={(칸빈(r.months) ? BOX_BAD : BOX) + ' w-[124px] shrink-0'}>
                 <input type="number" inputMode="numeric" placeholder="개월" value={r.months}
                   min={RANGE.months.min} max={RANGE.months.max}
                   onChange={(e) => edit(i, { months: e.target.value })} className={BARE} />
                 <span className="shrink-0 pr-5 text-lg text-gray-400">개월</span>
               </span>
             </div>
+            {(칸빈(r.region) || 칸빈(r.months)) && (
+              <비었어요>
+                {칸빈(r.region) && 칸빈(r.months) ? '지역과 근무 개월수를 적어 주세요'
+                  : 칸빈(r.region) ? '지역을 골라 주세요' : '근무 개월수를 적어 주세요'}
+              </비었어요>
+            )}
           </div>
-        ))}
+          );
+        })}
 
         <button type="button" disabled={rows.length >= MAX_ROWS || noneOn}
           onClick={() => on([...rows, { hospital: '', region: '', months: '' }])}

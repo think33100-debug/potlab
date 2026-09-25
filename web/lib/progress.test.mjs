@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { progress, SECONDS_PER_STEP } from './progress.ts';
 
-/* ① 현직 9장 — 처음·절반·끝 */
+/* ① 9장짜리 — 처음·절반·끝 */
 {
   assert.equal(progress(0, 9).msg, '이제 시작이에요');
   assert.equal(progress(4, 9).msg, '절반 왔어요!');      // 4/8 = 0.5

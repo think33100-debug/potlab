@@ -1401,3 +1401,101 @@ post-actions · job-closed · job-save · org-save
 `app/gate.tsx` 의 `gateOf` 원문도 같이 대조합니다 — 규칙이 두 벌이 되면
 검사가 거짓말을 하기 때문입니다. 일부러 규칙을 망가뜨려 끝값 1 로
 떨어지는 것까지 확인했습니다.
+
+---
+
+## 첫 가입 설문 손보기 (2026-09-25 밤)
+
+### 고치기 전에 — 칸이 어디에 있었나
+
+현직 9장 중 경력에 관한 것이 **두 화면에 흩어져** 있었습니다.
+
+```
+1장  약관·개인정보
+2장  언제부터 일하셨나요   hired_year · current_hired_year · region   ← 경력
+…
+8장  경력                 이전 근무지 최대 5개 (career)              ← 경력
+```
+
+저장되는 곳은 이렇습니다.
+
+| 화면 칸 | 표 · 열 | 빈 값 |
+|---|---|---|
+| 첫 입사연도 | `salary_records.hired_year` | **NOT NULL** |
+| 지금 병원 입사연도 | `salary_records.current_hired_year` | 비어도 됨 (비면 첫 입사연도로 채움) |
+| 지역 | `salary_records.region` | NOT NULL |
+| 이전 근무지 | `student_specs.career` (jsonb) · `career_months` | 비어도 됨 |
+| 연간 상여금 | `salary_records.bonus_yearly` | 비어도 됨 |
+
+### [1] 경력을 한 화면으로
+
+2장을 없애고 —
+
+- 첫 입사연도 · 지금 병원 입사연도 → **경력 화면 맨 위로**
+- 지역 → 「어떤 곳에서 일하세요」 (근무지 기준이라 거기가 맞습니다)
+
+**저장되는 열은 하나도 안 바뀝니다.** 묻는 순서만 바뀝니다.
+이미 등록한 회원 자료도 그대로입니다 — `/me` 에서 고칠 때 같은 값이
+새 자리에 뜹니다. 현직은 9장 → 8장이 됐습니다.
+
+### [2] 경력은 전부 쓰거나, 전부 안 쓰거나
+
+**화면과 저장이 다른 규칙을 쓰고 있었습니다.**
+
+```
+화면   rows.some(완성)              한 줄만 다 채우면 통과
+저장   filter(hospital && region)   개월수는 안 봄
+```
+
+반쯤 쓴 줄이 화면은 통과하고 **저장에서 조용히 버려졌습니다.**
+적어놓은 것이 없어지는 것이라, 넘어가기 전에 막는 쪽으로 바꿨습니다.
+
+규칙을 `lib/signup-fields.ts` 한 곳에 두고 화면과 저장이 같이 씁니다.
+
+```
+rowStarted   한 칸이라도 채웠나
+rowFull      세 칸 다 채웠나
+rowsReady    다음으로 넘어갈 수 있나   ← 화면
+rowsToSave   저장할 줄                ← 저장
+```
+
+아무것도 안 쓰면 그냥 넘어갑니다. 막 졸업한 분에게 「경력 없음」을 누르게
+하던 것은 걸림돌이었습니다. 반쯤 쓴 줄은 **그 칸 옆에** 빨간 테두리와
+「지역을 골라 주세요」 같은 한 줄이 붙습니다.
+
+### [3] 상여는 안 써도 넘어갑니다 — 다만 통계에 함정이 있습니다
+
+칸은 0 과 빈 값을 **구분합니다.**
+
+```
+bonus_yearly integer NULL
+CHECK (bonus_yearly IS NULL OR (bonus_yearly >= 0 AND bonus_yearly <= 9999))
+```
+
+그런데 **연 총소득은 구분하지 않습니다.**
+
+```sql
+annual_total  GENERATED ALWAYS AS (
+  base_monthly*12 + COALESCE(extra_pay_monthly,0)*12
+  + COALESCE(bonus_yearly, 0)            -- ← 「안 적음」을 0원으로 셉니다
+  + ... )
+```
+
+`pay_stats` · `home_stats` · `rookie_salary` 가 전부 `annual_total` 로 중앙값을
+냅니다. 그래서 상여를 안 적은 분은 **연봉이 상여만큼 낮게** 집계됩니다.
+열을 나눌 필요는 없습니다 — 구분은 이미 됩니다. 고칠 자리는 `annual_total`
+쪽이고, 어떻게 할지는 정해야 합니다.
+
+지금 자료는 급여 3줄 · 상여 0원 2줄 · 상여 안 적음 0줄입니다.
+
+### 검사
+
+`web/tools/check-career.mjs` — 아홉 칸. 제일 중요한 줄은 이것입니다.
+
+```
+화면이 통과시킨 줄은 저장에서 하나도 안 없어져야 합니다
+```
+
+`lib/signup-fields.ts` 원문과 `components/signup-survey.tsx` 가 그 규칙을
+쓰는지도 같이 봅니다. 옛 규칙을 일부러 되살려 끝값 1 로 떨어지는 것까지
+확인했습니다.
