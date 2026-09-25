@@ -5,6 +5,15 @@ import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 조용한 실패를 잡는 빨간 줄 (2026-09-25).
 
+   ── 기준을 경로마다 다르게 (2026-09-25 밤) ───────────────────
+   전에는 「사흘 연속 0건」 하나로 모든 경로를 봤습니다. 그래서 나라일터·
+   클린아이에 빨간 줄이 떴는데, 현직자 확인 결과 **고장이 아니라 원래
+   공고가 드문 것**이었습니다. 시끄러우면 아무도 안 봅니다.
+
+   지금은 경로마다 「지금까지 가장 오래 쉰 것의 두 배」를 기준으로 삼고,
+   그 경로를 5번 넘게 못 봤으면 판단을 미룹니다. 자세한 것은 DB 의
+   route_health() 주석에 적었습니다 — **판정은 거기서 합니다.**
+
    ── 왜 ────────────────────────────────────────────────────────
    2026-09-25 하루에 네 가지를 우연히 발견했습니다 —
    clasp 로그인 만료(9/20부터 올리기가 조용히 실패) · 병원 홈페이지 47곳이
@@ -12,11 +21,9 @@ import { browserSupabase } from '@/lib/supabase-browser';
    결과발표 공고가 회원 화면에 노출.
    전부 누가 우연히 볼 때까지 몰랐습니다. 매일 스스로 재게 합니다.
 
-   ── 언제 뜨나 ────────────────────────────────────────────────
-   지난 14일 하루 평균이 0보다 큰 경로가 **사흘 연속 0건**이면 뜹니다.
-   원래 조용한 경로(평균 0)는 안 울립니다 — 시끄러우면 아무도 안 봅니다.
-
-   판정은 DB 함수 route_health() 가 합니다. 여기서 다시 세지 않습니다.
+   ── 근거를 같이 보여줍니다 ───────────────────────────────────
+   「평소 ○일에 한 번 · 가장 오래 쉰 것 ○일 · 지금 ○일째」
+   숫자만 보여주고 왜인지 안 알려주면 다음 사람이 또 기준을 고칩니다.
 
    ── 불러오는 동안은 아무것도 안 그립니다 ─────────────────────
    0.2초 사이에 「이상 없음」이나 「이상 있음」을 잘못 보여주면 안 됩니다.
@@ -24,10 +31,12 @@ import { browserSupabase } from '@/lib/supabase-browser';
 
 type Row = {
   경로: string;
-  어제: number;
-  십사일평균: number | null;
-  연속0일: number;
   마지막: string | null;
+  며칠째: number | null;
+  평소간격: number | null;   // 공고가 온 날 사이 틈의 중앙값
+  가장긴틈: number | null;
+  본틈: number | null;       // 틈을 몇 번 봤나. 5 미만이면 판단을 미룹니다
+  기준일: number | null;
   빨간줄: boolean;
   왜: string;
 };
@@ -66,19 +75,34 @@ export function RouteHealth() {
           <li key={r.경로} className="break-keep text-[14px] text-[#1B2025]">
             <span className="font-bold">{r.경로}</span>
             {' — '}
-            <span className="num tabular-nums">{r.연속0일}</span>
-            일째 0건
+            <span className="num tabular-nums">{r.며칠째}</span>
+            일째 안 옵니다
             {r.마지막 && (
               <>
                 {' · 마지막 '}
                 <span className="num tabular-nums">{r.마지막}</span>
               </>
             )}
-            {r.십사일평균 != null && r.십사일평균 > 0 && (
-              <span className="text-[#5F666C]">
-                {' (평소 하루 '}
-                <span className="num tabular-nums">{r.십사일평균}</span>
-                {'건)'}
+            {/* 왜 빨간지 — 근거를 같이 보여줘야 다음 사람이 기준을 안 고칩니다 */}
+            {r.평소간격 != null && r.평소간격 > 0 && (
+              <span className="block text-[13px] text-[#5F666C]">
+                {'평소 '}
+                <span className="num tabular-nums">{r.평소간격}</span>
+                {'일에 한 번'}
+                {r.가장긴틈 != null && (
+                  <>
+                    {' · 가장 오래 쉰 것 '}
+                    <span className="num tabular-nums">{r.가장긴틈}</span>
+                    {'일'}
+                  </>
+                )}
+                {r.기준일 != null && (
+                  <>
+                    {' · 기준 '}
+                    <span className="num tabular-nums">{r.기준일}</span>
+                    {'일'}
+                  </>
+                )}
               </span>
             )}
           </li>
