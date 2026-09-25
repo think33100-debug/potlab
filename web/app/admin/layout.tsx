@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../auth';
+import { RouteHealth } from '@/components/route-health';
 
 /* 관리자 화면의 껍데기입니다.
 
@@ -52,6 +53,10 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
+      {/* 공고가 안 들어오는 경로가 있으면 여기 빨간 줄이 뜹니다 (2026-09-25).
+          조용한 실패를 우연히 발견하는 일이 없게 하려고 맨 위에 둡니다 */}
+      <RouteHealth />
+
       <header className="mb-7">
         <h1 className="text-h1 font-bold">관리자</h1>
         <nav className="mt-5 flex flex-wrap gap-2" aria-label="관리자 메뉴">
