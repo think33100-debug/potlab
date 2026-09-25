@@ -12,8 +12,8 @@ import { serverSupabase } from '@/lib/supabase-server';
    급여는 salary_records 가 아직 한 줄뿐이라 자리만 잡아둡니다 —
    없는 숫자를 지어내지 않습니다. */
 export async function OrgPanel(
-  { orgName, exceptJobId, jobTitle }:
-  { orgName: string; exceptJobId: string; jobTitle?: string },
+  { orgName, exceptJobId, jobTitle, jobUrl }:
+  { orgName: string; exceptJobId: string; jobTitle?: string; jobUrl?: string | null },
 ) {
   /* 2026-09-25 — 회원만 봅니다. 공고 뷰를 직접 읽던 것도 함수로 바꿨습니다.
      로그인 안 한 분에게는 둘 다 빈 값이 오고 이 구역은 통째로 안 그립니다 */
@@ -21,7 +21,7 @@ export async function OrgPanel(
   const [org, others] = await Promise.all([
     /* 제목을 같이 넘깁니다 — 알리오처럼 본사 이름으로 올라온 공고는
        제목 대괄호 안에 진짜 병원이 적혀 있습니다 */
-    orgPublic(sb, orgName, null, jobTitle),
+    orgPublic(sb, orgName, null, jobTitle, jobUrl),
     orgJobs(sb, orgName),
   ]);
 

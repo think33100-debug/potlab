@@ -119,10 +119,18 @@ export type OrgJob = {
 
    기관 화면은 기관 이름에서 출발하므로 제목이 없습니다 — 안 넘기면
    그 단계를 그냥 건너뜁니다. */
+/* 원문 주소(src)도 넘깁니다 (2026-09-25).
+
+   같은 시도에 모기관과 분원이 같이 있으면 이름·시도·제목으로는 못 가립니다.
+   알리오가 「경북대학교병원」 이름으로 보낸 공고 5건이 실은 칠곡경북대(대구
+   북구) 공고였고, 가릴 수 있는 것은 원문 주소뿐이었습니다 — www.knuch.kr.
+   어느 주소가 어느 분원인지는 org_alias(kind='호스트')에 손으로 적습니다. */
 export async function orgPublic(
-  sb: SupabaseClient, name: string, sido: string | null, title?: string | null,
+  sb: SupabaseClient, name: string, sido: string | null,
+  title?: string | null, src?: string | null,
 ): Promise<OrgPublic | null> {
-  const { data } = await sb.rpc('org_public', { p_name: name, p_sido: sido, p_title: title ?? null });
+  const { data } = await sb.rpc('org_public',
+    { p_name: name, p_sido: sido, p_title: title ?? null, p_src: src ?? null });
   return ((data ?? []) as OrgPublic[])[0] ?? null;
 }
 
