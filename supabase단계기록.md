@@ -465,3 +465,70 @@ node tools/hira.js quota           오늘 몇 번 썼는지
 ```
 
 비율을 내는 집계는 **차례 7(의원)까지 받은 뒤에** 해야 합니다.
+
+### 종별코드표 — 한 곳에 모았습니다
+
+표는 **`hira_cl_cd`** 하나입니다. 쓰는 자리도 **`hira_todo` 뷰 하나뿐**입니다
+(DB 전체를 훑어 확인 · `tools/hira.js` 는 코드를 해석하지 않고 그대로 옮기기만 합니다).
+받을 차례를 바꾸려면 그 표의 「차례」 칸만 고치면 됩니다.
+
+값은 **활용가이드가 아니라 실제 응답의 `clCdNm` 으로 확인한 것**입니다
+(`hira_org` 79,874줄에서 셈).
+
+```
+차례 2   01 상급종합 47 · 11 종합병원 336
+차례 3   21 병원 1,431 · 28 요양병원 1,276 · 29 정신병원 261
+차례 4   92 한방병원 624
+차례 5   71 보건소 249 · 72 보건지소 1,286 · 75 보건의료원 16
+차례 6   73 보건진료소 1,899
+차례 7   31 의원 37,866
+차례 9   41 치과병원 248 · 51 치과의원 19,426 · 61 조산원 16 · 93 한의원 14,893
+```
+
+**문서에서 잘려 있던 73·74 는 순서로 짐작하면 틀립니다.**
+73 은 보건진료소가 맞지만 보건의료원은 **74 가 아니라 75** 이고,
+**74 는 전국 79,874곳 어디에도 안 나옵니다.**
+
+### 별칭 · 손 표시
+
+이름이 다른 곳은 `org_alias` 에 손으로 넣습니다. 두 곳뿐이라 규칙을
+만들지 않았습니다 — 규칙을 만들면 엉뚱한 곳이 붙습니다.
+
+```
+양산부산대학교치과병원  →  부산대학교치과병원   (치과병원 · 아직 상세 안 받음)
+학교법인 춘해병원       →  춘해보건대학교병원   (종합병원 · 허가병상 201 · 물리치료사 5)
+```
+
+심평원 목록에 없는 5곳은 `org_note` 에 「확인 필요」로 적어 뒀습니다.
+`org_targets` 의 맨 뒤 `note` 칸으로 보입니다. **문 닫았는지는 확인 안 했습니다.**
+
+```
+강릉원주대학교치과병원      치과병원이라 대상이 아닐 수 있음
+경상북도포항노인전문요양병원
+성남시노인보건센터의원
+완주군아름다운노인전문병원
+서울지구병원                군 병원이라 대상이 아닐 수 있음
+```
+
+### 병원급이 다 채워지면 셀 것 (그대로 붙여 쓰면 됩니다)
+
+```sql
+-- 종별로 치료사가 있는 기관 수 · 목표 안팎 · 인원
+with 목표열쇠 as (
+  select public.hira_name_key(name) as k from public.org_targets
+  union select public.hira_name_key(hira_name) from public.org_alias
+)
+select o.cl_cd_nm as 종별,
+       count(*) filter (where d.ykiho is not null)            as 받은곳,
+       count(*) filter (where d.ot > 0)                       as 작업치료사있음,
+       count(*) filter (where d.pt > 0)                       as 물리치료사있음,
+       count(*) filter (where d.ot > 0 and o.name_key not in (select k from 목표열쇠)) as 그중_목표밖,
+       sum(d.ot) filter (where o.name_key not in (select k from 목표열쇠)) as 목표밖_작업치료사,
+       sum(d.pt) filter (where o.name_key not in (select k from 목표열쇠)) as 목표밖_물리치료사
+from hira_org o left join hira_detail d on d.ykiho = o.ykiho
+group by 1 order by 3 desc nulls last;
+```
+
+**주의** — 의원(37,866곳)을 받기 전에는 비율을 내면 안 됩니다.
+정형외과 의원에 물리치료사가 많아서 병원급만으로는 그림이 안 나옵니다.
+작업치료사는 병원급이 채워지면 대충 그림이 나옵니다.
