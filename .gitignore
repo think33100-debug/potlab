@@ -26,3 +26,6 @@ web/out/
 web/.env*.local
 web/next-env.d.ts
 .playwright-mcp/
+
+# Apps Script 백업 폴더 — wage.js 에 API 열쇠가 박혀 있습니다 (gas/ 와 같은 이유)
+gas_백업_*/
