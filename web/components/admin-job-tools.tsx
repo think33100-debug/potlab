@@ -60,6 +60,11 @@ export function AdminJobTools({ id }: { id: string }) {
           출처 {SOURCE_NAME[meta.source] ?? meta.source}
           {' · '}수집 {meta.collected_at?.slice(0, 10)}
           {meta.hidden ? ' · 숨김' : ''}{meta.hold ? ' · 보류' : ''}
+          {/* 왜 보류인지 — 이게 없으면 관리자가 한 건씩 열어 원문을 읽어야 합니다.
+              시트의 「보류사유」 칸이 evidence 에 실려 옵니다 (tools/copy_jobs.js) */}
+          {meta.hold && meta.evidence?.['보류사유'] && (
+            <><br /><b className="text-brand-red-dark">보류 이유 — {meta.evidence['보류사유']}</b></>
+          )}
           {meta.evidence?.['탭근거'] && <><br />분류 근거 — {meta.evidence['탭근거']}</>}
         </p>
       )}

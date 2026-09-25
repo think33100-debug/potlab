@@ -32,14 +32,18 @@ export type AdminJob = {
   updated_at: string;
 };
 
+/* evidence 를 함께 받습니다 — 보류함에서 **왜 보류인지**를 목록에서
+   바로 보여주려고입니다 (2026-09-25). 없으면 관리자가 한 건씩 열어
+   원문을 읽어야 합니다. jsonb 한 칸이라 목록이 많이 무거워지지 않습니다 */
 export const ADMIN_LIST_COLS =
   'id,source,org_name,title,job_group,employ_type,work_place,sido,tab,'
-  + 'headcount,apply_to,posted_at,hidden,hold,collected_at';
+  + 'headcount,apply_to,posted_at,hidden,hold,collected_at,evidence';
 
 export type AdminJobListItem = Pick<
   AdminJob,
   'id' | 'source' | 'org_name' | 'title' | 'job_group' | 'employ_type' | 'work_place'
   | 'sido' | 'tab' | 'headcount' | 'apply_to' | 'posted_at' | 'hidden' | 'hold' | 'collected_at'
+  | 'evidence'
 >;
 
 /* 관리자가 매일 보는 칸들. 「보류」가 첫째입니다 —

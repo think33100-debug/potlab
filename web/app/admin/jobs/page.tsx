@@ -196,6 +196,15 @@ export default function AdminJobs() {
                   r.id].filter(Boolean).join(' · ')}
               </p>
 
+              {/* 왜 보류인지 — 목록에서 바로 보이게 (2026-09-25).
+                  없으면 관리자가 한 건씩 열어 원문을 읽어야 합니다.
+                  시트의 「보류사유」 칸이 evidence 에 실려 옵니다 */}
+              {r.hold && r.evidence?.['보류사유'] && (
+                <p className="mt-1 break-keep text-sm font-medium text-brand-red-dark">
+                  보류 이유 — {r.evidence['보류사유']}
+                </p>
+              )}
+
               <div className="mt-5 flex flex-wrap gap-2">
                 <Act onClick={() => patch(r.id, { hold: !r.hold }, r.hold ? '보류를 풀었어요' : '보류함으로 보냈어요')} busy={busy === r.id}>
                   {r.hold ? '보류 풀기' : '보류로'}
