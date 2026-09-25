@@ -9,6 +9,10 @@
  *   sync_jobs.js   30분마다 도는 다리. 지우지 않고 id 로 맞춰 담습니다
  *
  * 원본과 고친 값을 나눠 둡니다 —
+ * 공고 말고도 세 장을 같이 나릅니다 (2026-09-26) —
+ *   쓰레기통 → job_trash · 사이트점검 → site_checks · 사이트상태 → site_state
+ *   어느 시트를 나르는지는 copy_jobs.js 의 EXTRA_SHEETS 한 곳에만 적습니다.
+ *
  *   job_posts        옛 쪽 시트가 말한 것. 이 도구가 마음대로 덮어씁니다
  *   job_post_edits   관리자가 고친 것. 여기는 건드리지 않습니다
  *   job_hides        사람이 내린 것. 여기도 안 건드립니다
@@ -18,7 +22,7 @@
  *   SUPABASE_URL · SUPABASE_SERVICE_KEY · APPS_SCRIPT_URL · EXPORT_KEY
  */
 'use strict';
-const { toJobPost, sb, count } = require('./copy_jobs.js');
+const { toJobPost, sb, count, EXTRA_SHEETS } = require('./copy_jobs.js');
 const fs = require('fs');
 const path = require('path');
 const ROOT = path.join(__dirname, '..');
@@ -48,13 +52,13 @@ function env() {
 
 /* ── 옛 쪽 시트 한 조각 ── */
 let seq = 0;
-async function page(cfg, from, cnt) {
+async function page(cfg, from, cnt, sheet) {
   const cb = '__potlab_cb_' + (++seq) + '_' + Date.now();
   const url = cfg.APPS_SCRIPT_URL
     + (cfg.APPS_SCRIPT_URL.includes('?') ? '&' : '?')
     + 'callback=' + cb
     + '&action=exportRows'
-    + '&args=' + encodeURIComponent(JSON.stringify([cfg.EXPORT_KEY, SHEET, from, cnt]))
+    + '&args=' + encodeURIComponent(JSON.stringify([cfg.EXPORT_KEY, sheet || SHEET, from, cnt]))
     + '&t=' + Date.now();
   const res = await fetch(url, { redirect: 'follow' });
   const txt = await res.text();
@@ -153,6 +157,78 @@ async function keepOldEdits(cfg, bySheet) {
   return add.length;
 }
 
+/* 시트 한 장을 통째로 읽습니다 (공고 말고 작은 시트들) */
+async function readWhole(cfg, sheet) {
+  const first = await page(cfg, 0, PAGE, sheet);
+  let rows = first.rows;
+  while (rows.length < first.total) {
+    const nx = await page(cfg, rows.length, PAGE, sheet);
+    if (!nx.rows.length) break;
+    rows = rows.concat(nx.rows);
+  }
+  const idx = {}; first.head.forEach((h, i) => { idx[String(h).trim()] = i; });
+  return { total: first.total, rows,
+           get: (r, name) => (idx[name] === undefined ? '' : r[idx[name]]) };
+}
+
+/* 공고 말고 같이 나르는 세 장 — 어느 시트인지는 copy_jobs.js 가 압니다.
+
+   **비우지 않고 열쇠로 맞춰 담습니다.** 이 다리는 30분마다 도는데
+   비웠다가 중간에 죽으면 표가 빈 채로 남습니다. */
+async function syncExtras(cfg, dry) {
+  const 결과 = [];
+  for (const o of EXTRA_SHEETS) {
+    let S;
+    try { S = await readWhole(cfg, o.sheet); }
+    catch (e) {
+      /* 시트가 아직 없을 수 있습니다 (사이트상태는 수집기가 처음 돌 때 생깁니다) */
+      결과.push({ sheet: o.sheet, table: o.table, n: 0, note: '못 읽음 · ' + e.message.slice(0, 60) });
+      continue;
+    }
+    const seen = new Set();
+    const rows = S.rows.map((r) => o.map(S.get, r)).filter((x) => {
+      const k = x[o.key];
+      if (!k || seen.has(k)) return false;
+      seen.add(k); return true;
+    });
+    if (!dry && rows.length) await upsert(cfg, o.table, rows, o.key);
+    결과.push({ sheet: o.sheet, table: o.table, n: rows.length, 시트줄: S.total });
+  }
+  return 결과;
+}
+
+/* 쓰레기통에 든 공고를 job_posts 에서 치웁니다 (2026-09-26).
+
+   ── 왜 필요한가 ──────────────────────────────────────────
+   이 다리는 **담기만 하고 지우지 않습니다.** 그래서 수집기가 쓰레기통으로
+   내린 공고가 표에 그대로 남습니다. 2026-09-26 에 시트는 642건인데 표는
+   719건이었고, 차이 77건이 정확히 쓰레기통 건수였습니다.
+
+   ── 왜 이 방식이 안전한가 ────────────────────────────────
+   「시트에 없는 줄을 전부 지우기」 가 아닙니다. 시트를 반만 읽은 판에
+   그렇게 하면 멀쩡한 공고가 날아갑니다.
+   **쓰레기통 시트에 이름이 적힌 것만** 지웁니다. 관리자가 「잘못 버림」
+   (되돌림 Y) 을 누른 줄은 건드리지 않습니다. */
+async function dropTrashed(cfg, dry) {
+  let S;
+  try { S = await readWhole(cfg, '쓰레기통'); } catch (e) { return 0; }
+  const uniq = [...new Set(
+    S.rows
+      .filter((r) => !/^Y$/i.test(String(S.get(r, '되돌림') || '').trim()))
+      .map((r) => String(S.get(r, '공고ID') || '').trim())
+      .filter(Boolean),
+  )];
+  if (!uniq.length) return 0;
+  if (dry) return uniq.length;
+
+  const before = await count(cfg, 'job_posts');
+  for (let i = 0; i < uniq.length; i += 100) {
+    const 조각 = uniq.slice(i, i + 100).map(encodeURIComponent).join(',');
+    await sb(cfg, 'job_posts?id=in.(' + 조각 + ')', 'DELETE');
+  }
+  return before - await count(cfg, 'job_posts');
+}
+
 (async function main() {
   const t0 = Date.now();
   const cfg = env();
@@ -193,6 +269,10 @@ async function keepOldEdits(cfg, bySheet) {
 
     if (dry) {
       console.log('--dry 라 담지 않았습니다.');
+      const ex = await syncExtras(cfg, true);
+      ex.forEach((x) => console.log('  ' + x.sheet.padEnd(8) + ' → ' + x.table.padEnd(12)
+        + (x.note ? x.note : x.n + '건 (시트 ' + x.시트줄 + '줄)')));
+      console.log('  쓰레기통에 들어 치울 공고 ' + (await dropTrashed(cfg, true)) + '건');
       console.log('맨 끝 3건:');
       posts.slice(-3).forEach((p) => console.log('  ' + p.id + ' | ' + p.org_name
         + ' | ' + String(p.title).slice(0, 40) + ' | ' + (p.job_group || '(빈칸)')));
@@ -220,7 +300,16 @@ async function keepOldEdits(cfg, bySheet) {
                      took_ms: Date.now() - t0, ok: true,
                      note: '새로 늘어난 줄 ' + (after - before) + '건' });
 
-    console.log('담았습니다 · 표 ' + before + ' → ' + after + '건 (새로 ' + (after - before) + ')');
+    /* ⑤ 공고 말고 세 장도 같이. 그리고 쓰레기통에 든 것은 표에서 치웁니다 */
+    const extras = await syncExtras(cfg, false);
+    extras.forEach((x) => console.log('  ' + x.sheet.padEnd(8) + ' → ' + x.table.padEnd(12)
+      + (x.note ? x.note : x.n + '건 (시트 ' + x.시트줄 + '줄)')));
+    const 치움 = await dropTrashed(cfg, false);
+    const 끝 = await count(cfg, 'job_posts');
+    if (치움) console.log('  쓰레기통에 든 공고 ' + 치움 + '건을 표에서 치웠습니다');
+
+    console.log('담았습니다 · 표 ' + before + ' → ' + 끝 + '건 (새로 ' + (after - before)
+      + ' · 치움 ' + 치움 + ')');
     console.log((Date.now() - t0) + 'ms');
   } catch (e) {
     console.error('실패: ' + e.message);

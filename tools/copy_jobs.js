@@ -180,7 +180,54 @@ function mergeFixes(byId, X) {
   return { edits, fixedPosts, orphanFix };
 }
 
-if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, num, region, sourceOf, env, page, readSheet, sb, count }; return; }
+/* ═══ 공고 말고 같이 나르는 시트들 ═══ (2026-09-26)
+ *
+ *  **두 다리가 같은 표를 씁니다.** 여기 한 곳에만 적습니다 —
+ *    tools/copy_jobs.js   손으로 돌리는 이사용 (비우고 다시 붓기)
+ *    tools/sync_jobs.js   GitHub 이 30분마다 돌리는 다리 (id 로 맞춰 담기)
+ *
+ *  새 시트를 여기 넣으면 **gas/wage.js 의 EXPORT_OK 에도** 넣어야 합니다.
+ *  안 넣으면 「내보낼 수 없는 시트입니다」 로 막힙니다 (쓰레기통이 그랬습니다).
+ */
+const EXTRA_SHEETS = [
+  /* 쓰레기통 — 버림 단어만 있어 안 담은 공고 (2026-09-25).
+     그냥 안 담으면 무엇을 버렸는지 아무도 모릅니다. 단어 하나가 진짜
+     공고를 죽였을 때 알아챌 길이 없어서 버린 것도 나릅니다.
+     「되돌림」 칸이 Y 면 관리자가 「잘못 버림」을 누른 것입니다 */
+  { sheet: '쓰레기통', table: 'job_trash', map: (g, r) => ({
+      id: s(g(r, '공고ID')),
+      trashed_at: (s(g(r, '버린시각')) || '').replace(' ', 'T') + ':00+09:00',
+      source: s(g(r, '출처')), org_name: s(g(r, '기관명')),
+      title: s(g(r, '공고제목')), url: s(g(r, '원문주소')),
+      why: s(g(r, '걸린단어')) || '(없음)',
+      restored: /^Y$/i.test(String(g(r, '되돌림') || '').trim()) }),
+    key: 'id' },
+  /* 사이트점검 — 꺼진 병원 홈페이지를 구글 서버에서 두드려 본 기록 (2026-09-25).
+     한 기관을 하루에 1차·2차로 두 번 두드리므로 열쇠는 기관|날|차수 입니다 */
+  { sheet: '사이트점검', table: 'site_checks', map: (g, r) => ({
+      id: [s(g(r, '기관')), date(g(r, '두드린날')), num(g(r, '차수'))].join('|'),
+      name: s(g(r, '기관')), checked_on: date(g(r, '두드린날')),
+      round: num(g(r, '차수')), code: s(g(r, '응답코드')),
+      /* 시트가 「걸린시간ms」 로 만들어졌고 코드에서 이름만 「묶음시간ms」 로
+         바꾼 적이 있습니다. 시트 머리글은 그대로라 둘 다 받습니다 (2026-09-25) */
+      ms: num(g(r, '묶음시간ms')) ?? num(g(r, '걸린시간ms')),
+      job_words: num(g(r, '채용글수')),
+      page_title: s(g(r, '쪽제목')), body_head: s(g(r, '본문앞500자')),
+      off_why_before: s(g(r, '전에꺼둔이유')) }),
+    key: 'id' },
+  /* 사이트상태 — 지금 켜져 있나 · 왜 껐나 · 언제 켰나 (2026-09-25).
+     세 번 연속 못 받아야 끄고, 꺼진 곳은 일주일에 한 번 다시 두드립니다.
+     「자동」 칸이 HOSP_SITES 의 off 위에 얹힙니다 — '' 설정대로 · Y 켬 · N 끔 */
+  { sheet: '사이트상태', table: 'site_state', map: (g, r) => ({
+      name: s(g(r, '기관')), url: s(g(r, '주소')), auto: s(g(r, '자동')),
+      fail_streak: num(g(r, '연속실패')) || 0, last_fail: s(g(r, '마지막실패')),
+      off_on: date(g(r, '끈날')), off_why: s(g(r, '끈이유')),
+      on_on: date(g(r, '켠날')), tried_on: date(g(r, '마지막두드림')) }),
+    key: 'name' }
+];
+
+if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, num, region, sourceOf, env, page, readSheet, sb, count,
+                                                   EXTRA_SHEETS, s }; return; }
 
 (async function main() {
   const cfg = env();
@@ -238,42 +285,8 @@ if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, n
         wanted_auth_no: s(g(r, 'wantedAuthNo')), verdict: s(g(r, '판정')) || '(없음)',
         reason: s(g(r, '근거')), org_name: s(g(r, '기관')), title: s(g(r, '제목')),
         decided_at: date(g(r, '판정일')) ? date(g(r, '판정일')) + 'T00:00:00+09:00' : null }),
-      key: 'wanted_auth_no' },
-    /* 쓰레기통 — 버림 단어만 있어 안 담은 공고 (2026-09-25).
-       그냥 안 담으면 무엇을 버렸는지 아무도 모릅니다. 단어 하나가 진짜
-       공고를 죽였을 때 알아챌 길이 없어서 버린 것도 나릅니다.
-       「되돌림」 칸이 Y 면 관리자가 「잘못 버림」을 누른 것입니다 */
-    { sheet: '쓰레기통', table: 'job_trash', map: (g, r) => ({
-        id: s(g(r, '공고ID')),
-        trashed_at: (s(g(r, '버린시각')) || '').replace(' ', 'T') + ':00+09:00',
-        source: s(g(r, '출처')), org_name: s(g(r, '기관명')),
-        title: s(g(r, '공고제목')), url: s(g(r, '원문주소')),
-        why: s(g(r, '걸린단어')) || '(없음)',
-        restored: /^Y$/i.test(String(g(r, '되돌림') || '').trim()) }),
-      key: 'id' },
-    /* 사이트점검 — 꺼진 병원 홈페이지를 구글 서버에서 두드려 본 기록 (2026-09-25).
-       한 기관을 하루에 1차·2차로 두 번 두드리므로 열쇠는 기관|날|차수 입니다 */
-    { sheet: '사이트점검', table: 'site_checks', map: (g, r) => ({
-        id: [s(g(r, '기관')), date(g(r, '두드린날')), num(g(r, '차수'))].join('|'),
-        name: s(g(r, '기관')), checked_on: date(g(r, '두드린날')),
-        round: num(g(r, '차수')), code: s(g(r, '응답코드')),
-        /* 시트가 「걸린시간ms」 로 만들어졌고 코드에서 이름만 「묶음시간ms」 로
-           바꾼 적이 있습니다. 시트 머리글은 그대로라 둘 다 받습니다 (2026-09-25) */
-        ms: num(g(r, '묶음시간ms')) ?? num(g(r, '걸린시간ms')),
-        job_words: num(g(r, '채용글수')),
-        page_title: s(g(r, '쪽제목')), body_head: s(g(r, '본문앞500자')),
-        off_why_before: s(g(r, '전에꺼둔이유')) }),
-      key: 'id' },
-    /* 사이트상태 — 지금 켜져 있나 · 왜 껐나 · 언제 켰나 (2026-09-25).
-       세 번 연속 못 받아야 끄고, 꺼진 곳은 일주일에 한 번 다시 두드립니다.
-       「자동」 칸이 HOSP_SITES 의 off 위에 얹힙니다 — '' 설정대로 · Y 켬 · N 끔 */
-    { sheet: '사이트상태', table: 'site_state', map: (g, r) => ({
-        name: s(g(r, '기관')), url: s(g(r, '주소')), auto: s(g(r, '자동')),
-        fail_streak: num(g(r, '연속실패')) || 0, last_fail: s(g(r, '마지막실패')),
-        off_on: date(g(r, '끈날')), off_why: s(g(r, '끈이유')),
-        on_on: date(g(r, '켠날')), tried_on: date(g(r, '마지막두드림')) }),
-      key: 'name' }
-  ];
+      key: 'wanted_auth_no' }
+  ].concat(EXTRA_SHEETS);
 
   const loaded = [{ name: '채용공고 → job_posts', sheet: J.total, rows: posts.length, table: 'job_posts', data: posts }];
   for (const o of others) {
