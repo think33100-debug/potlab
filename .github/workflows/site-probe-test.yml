@@ -44,38 +44,69 @@ jobs:
             { name: "근로복지공단 태백병원", 구글: "400", url: "https://www.comwel.or.kr/taebaek/info/rcrt.jsp" },
           ];
           const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+
+          /* 1차 — User-Agent 만. 2차 — 평범한 브라우저처럼 머리글을 다 얹습니다.
+             IP 가 아니라 User-Agent 로 막는 것이었다면 2차에서 풀립니다.
+             구글 2차에서는 0곳이었지만 싸니까 여기서도 확인합니다 */
+          const 머리글 = (차수, url) => {
+            if (차수 === 1) return { "User-Agent": UA };
+            let ref = "";
+            try { ref = url.split("/").slice(0, 3).join("/") + "/"; } catch (e) {}
+            return {
+              "User-Agent": UA,
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+              "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+              "Upgrade-Insecure-Requests": "1",
+              "Sec-Fetch-Dest": "document", "Sec-Fetch-Mode": "navigate",
+              "Sec-Fetch-Site": "none", "Sec-Fetch-User": "?1",
+              "Referer": ref
+            };
+          };
+
+          const 두드리기 = async (s, 차수) => {
+            const t0 = Date.now();
+            let code = "", body = "", err = "";
+            try {
+              const c = new AbortController();
+              const tm = setTimeout(() => c.abort(), 25000);
+              const r = await fetch(s.url, { headers: 머리글(차수, s.url), redirect: "follow", signal: c.signal });
+              clearTimeout(tm);
+              code = r.status;
+              body = await r.text();
+            } catch (e) {
+              err = (e.cause && e.cause.code) || e.name || String(e).slice(0, 60);
+            }
+            return { code, body, err, ms: Date.now() - t0 };
+          };
+
           (async () => {
-            let 열림 = 0;
+            let 일차열림 = 0, 이차열림 = 0, 이차에풀림 = 0;
             for (const s of 볼곳) {
-              const t0 = Date.now();
-              let code = "", body = "", err = "";
-              try {
-                const c = new AbortController();
-                const tm = setTimeout(() => c.abort(), 25000);
-                const r = await fetch(s.url, { headers: { "User-Agent": UA }, redirect: "follow", signal: c.signal });
-                clearTimeout(tm);
-                code = r.status;
-                body = await r.text();
-              } catch (e) {
-                err = (e.cause && e.cause.code) || e.name || String(e).slice(0, 60);
-              }
-              const ms = Date.now() - t0;
-              if (code === 200) 열림++;
+              const a = await 두드리기(s, 1);
+              const b = a.code === 200 ? null : await 두드리기(s, 2);
+              if (a.code === 200) 일차열림++;
+              if (b && b.code === 200) { 이차열림++; 이차에풀림++; }
+              const 최종 = (b && b.code === 200) ? b : a;
               console.log("");
               console.log("━".repeat(70));
               console.log(s.name + "   구글에서는 " + s.구글);
               console.log("  " + s.url);
-              console.log("  GitHub 에서 → " + (err ? ("못 엶 · " + err) : ("HTTP " + code)) + " · " + ms + "ms · " + body.length + "자");
-              const 채용 = (body.match(/채용|모집|공고/g) || []).length;
+              console.log("  1차 (UA 만)        → " + (a.err ? ("못 엶 · " + a.err) : ("HTTP " + a.code)) + " · " + a.ms + "ms · " + a.body.length + "자");
+              if (b) console.log("  2차 (브라우저 흉내) → " + (b.err ? ("못 엶 · " + b.err) : ("HTTP " + b.code)) + " · " + b.ms + "ms · " + b.body.length + "자"
+                                 + (b.code === 200 ? "   ★ 머리글 바꾸니 열렸습니다" : ""));
+              const 채용 = (최종.body.match(/채용|모집|공고/g) || []).length;
               console.log("  채용·모집·공고 라는 말이 " + 채용 + "번");
               console.log("  ── 본문 앞 500자 ──");
-              console.log("  " + body.slice(0, 500).replace(/\s+/g, " "));
+              console.log("  " + (최종.body || "(빈 본문)").slice(0, 500).replace(/\s+/g, " "));
             }
+            const 열림 = 일차열림 + 이차열림;
             console.log("");
             console.log("━".repeat(70));
             console.log("정리 — 구글에서 X 인데 GitHub 에서 O 인 곳: " + 열림 + " / " + 볼곳.length + "곳");
+            console.log("        1차(UA 만)에서 열린 곳 " + 일차열림 + "곳 · 2차(브라우저 흉내)에서 풀린 곳 " + 이차에풀림 + "곳");
             if (열림 === 볼곳.length) console.log("→ 다섯 곳 다 열립니다. 길이 열린 것입니다.");
-            else if (열림 === 0)      console.log("→ 한 곳도 안 열립니다. GitHub IP 도 막혔습니다 — Firecrawl 을 알아볼 차례입니다.");
+            else if (열림 === 0)      console.log("→ 한 곳도 안 열립니다. 머리글이 아니라 IP 대역 차단으로 확정됩니다.");
             else                      console.log("→ 일부만 열립니다. 위 목록에서 어디가 되고 어디가 안 되는지 보시면 됩니다.");
+            if (이차에풀림 > 0)        console.log("→ ★ 머리글로 풀린 곳이 있습니다. IP 가 아니라 User-Agent 문제였습니다.");
           })();
           '
