@@ -104,14 +104,11 @@ async function hira(url) {
   return { rows: it == null || it === '' ? [] : (Array.isArray(it) ? it : [it]), total: j.response.body.totalCount };
 }
 
-/* 이름 다듬기 — gas/wage.js 의 hospLoose_ 와 같은 규칙이어야
-   옛 짝맞추기 결과와 견줄 수 있습니다 */
-const LEGAL = /\(주\)|㈜|\(의\)|\(재\)|\(사\)|\(학\)|\(의료법인\)|\(재단법인\)|의료법인|재단법인|사회복지법인|학교법인|사단법인|특수법인|주식회사|유한회사/g;
-const nameKey = (v) => String(v || '')
-  .replace(/（/g, '(').replace(/）/g, ')')
-  .replace(LEGAL, '')
-  .replace(/[\s·・\-–—,()\[\]]/g, '')
-  .toLowerCase();
+/* 이름 다듬기 — 규칙은 한 벌입니다 (tools/org-name-key.js).
+   DB 의 public.org_name_key · gas/wage.js 의 orgNameKey_ 와 같은 값을 냅니다
+   (심평원 이름 3,000개로 견줘 하나도 안 다른 것을 확인했습니다).
+   여기서 따로 만들면 반드시 어긋납니다 */
+const { orgNameKey: nameKey } = require('./org-name-key');
 
 const num = (v) => (v === null || v === undefined || v === '' ? null : Number(v));
 const ymd = (v) => {
