@@ -4,6 +4,7 @@ import { Icon } from '@/components/icon';
 import { JobTabs } from '@/components/job-tabs';
 import { MembersOnly } from '@/components/members-only';
 import { jobViews } from '@/lib/job-views';
+import { SIDOS } from '@/lib/org';
 import { supabase, TABS, tabLabel, type JobListItem } from '@/lib/supabase';
 import { serverSupabase } from '@/lib/supabase-server';
 import { OrgCard } from '../org-card';
@@ -28,8 +29,9 @@ export const dynamic = 'force-dynamic';   // 공고는 자주 바뀝니다
    대신 「회원만 볼 수 있어요」 카드를 놓습니다. */
 
 const JOBS = ['작업치료사', '물리치료사'];
-const SIDOS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
-               '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+/* 시도 목록은 lib/org.ts 한 벌뿐입니다 (2026-09-25).
+   여기에 또 두었더니 두 곳의 순서가 달랐습니다 — 같은 화면에서 같은 목록이
+   달리 보이면 어느 쪽이 맞는지 아무도 모릅니다. DB 쪽도 sido_has 하나입니다 */
 
 /** 한 쪽에 몇 건인지. DB 의 job_list() 와 같아야 합니다 */
 const PAGE = 20;
