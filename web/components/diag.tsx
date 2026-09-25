@@ -41,19 +41,47 @@ export function useDiag(): boolean {
   );
 }
 
-/* 벽을 그린 부품의 이름표. 진단을 켰을 때만 보입니다 */
-export function DiagTag({ 이름 }: { 이름: string }) {
+/* 브라우저가 지금 가지고 있는 쿠키. 값은 안 찍고 이름으로 갈라 세기만 합니다.
+   서버 것(lib/diag-server.ts)과 **같은 규칙**이어야 나란히 놓고 볼 수 있습니다 */
+function 내쿠키(): string {
+  try {
+    const raw = document.cookie;
+    const 이름들 = raw ? raw.split(';').map((c) => c.trim().split('=')[0]) : [];
+    const 세션 = 이름들.filter((n) => /^sb-.*-auth-token(.d+)?$/.test(n)).length;
+    const 쪽지 = 이름들.filter((n) => n.startsWith('sb-') && n.includes('code-verifier')).length;
+    return `${세션 ? '있음' : '없음'} · 세션조각 ${세션} · 쪽지 ${쪽지}`
+         + ` · 전부 ${이름들.length}개 ${raw.length}바이트`;
+  } catch {
+    /* 인앱이 document.cookie 를 막으면 여기로 떨어집니다 — 그 자체가 답입니다 */
+    return '못 읽음(브라우저가 막음)';
+  }
+}
+
+/* 벽을 그린 부품의 이름표. 진단을 켰을 때만 보입니다.
+
+   문서요청 — 이 벽을 그린 **그 문서 요청**이 들고 온 것입니다.
+   아래 진단판의 「서버 판정」은 브라우저가 따로 쓴 요청이라, 둘이 다르면
+   「문서 요청에만 쿠키가 안 실린다」는 뜻입니다 */
+export function DiagTag({ 이름, 문서요청 }: { 이름: string; 문서요청?: string }) {
   const on = useDiag();
   if (!on) return null;
   return (
-    <span className="mt-2 block text-[11px] text-[#9AA0A6]">
+    <span className="mt-2 block text-left text-[11px] leading-[1.7] text-[#9AA0A6]">
       [진단] 이 벽을 그린 곳 · {이름}
+      {문서요청 && (
+        <>
+          <br />
+          [진단] 문서 요청이 들고 온 것 · {문서요청}
+          <br />
+          [진단] 브라우저가 가진 것 · {내쿠키()}
+        </>
+      )}
     </span>
   );
 }
 
 type Srv = {
-  서버판정: string; 오류이름: string | null;
+  서버판정: string; 오류이름: string | null; 브라우저: string;
   로그인쿠키: string; 로그인쿠키조각: number; 로그인도중쪽지: number; 쿠키전체개수: number;
   배포: string; 배포판: string; 지금: string;
 };
@@ -84,12 +112,15 @@ export function DiagStrip() {
   화면 판정   ${화면판정}${me ? ' · 설문 ' + (me.survey_at ? '마침' : '안 마침') : session ? ' · profiles 줄 없음' : ''}
   로그인 쿠키 ${srv ? `${srv.로그인쿠키} · 조각 ${srv.로그인쿠키조각}개` : '—'}
   로그인 중 쪽지 ${srv ? `${srv.로그인도중쪽지}개 · 쿠키 전부 ${srv.쿠키전체개수}개` : '—'}
+  브라우저 쿠키 ${내쿠키()}
+  브라우저     ${srv ? srv.브라우저 : '—'}
   서버 오류   ${srv ? (srv.오류이름 ?? '없음') : '—'}
   배포        ${srv ? `${srv.배포} · ${srv.배포판}` : '—'}
   찍은 시각   ${srv ? srv.지금 : '—'}
   주소        ${typeof location === 'undefined' ? '' : location.pathname}
 
-  서버와 화면이 다르면 → 쿠키가 서버까지 안 간 것입니다
+  브라우저에는 있는데 서버가 안 받았으면 → 요청에 안 붙는 것입니다
+  브라우저에도 없으면 → 애초에 심기지가 않은 것입니다
   둘 다 회원인데 벽이 서 있으면 → 벽에 붙은 [진단] 이름표를 보세요`}
       </pre>
     </div>

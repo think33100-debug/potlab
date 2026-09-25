@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { DiagTag } from '@/components/diag';
 import { Icon } from '@/components/icon';
+import { 한줄로, 이요청이들고온것 } from '@/lib/diag-server';
 
 /* 「회원만 볼 수 있어요」 카드 한 벌.
 
@@ -10,9 +11,15 @@ import { Icon } from '@/components/icon';
    ※ 이건 **안내**입니다. 막는 자리는 DB 입니다 —
      공고 목록은 job_list() 가, 병원정보는 실행 권한이 막습니다.
      화면만 가리면 요청을 직접 만들어 뚫립니다 (그게 2026-09-25 전 상태였습니다). */
-export function MembersOnly({
+export async function MembersOnly({
   title, body, note, 진단,
 }: { title: React.ReactNode; body: string; note?: string; 진단?: string }) {
+  /* 진단용 — **이 벽을 그리는 바로 그 문서 요청**이 무엇을 들고 왔는지.
+     /api/diag-who 는 브라우저가 따로 쓏는 요청이라 이것과 다를 수 있습니다.
+     카카오톡 안에서 문서 요청에만 쿠키가 안 실리는 경우를 보려면 둘을 갈라야 합니다.
+     이 벽을 쓰는 네 화면은 전부 원래부터 매번 새로 그리므로 성질이 안 바뀝니다 */
+  const 들고온것 = await 이요청이들고온것();
+
   return (
     <section className="mt-7 flex flex-col items-center rounded-[14px] border border-[#E3E3DE]
                         bg-white px-6 py-8 text-center">
@@ -45,7 +52,10 @@ export function MembersOnly({
       </p>
 
       {/* 진단을 켰을 때만 — 이 벽을 그린 곳이 서버인지 화면인지 가릅니다 */}
-      <DiagTag 이름={진단 ?? 'components/members-only.tsx (부른 곳 안 적음)'} />
+      <DiagTag
+        이름={진단 ?? 'components/members-only.tsx (부른 곳 안 적음)'}
+        문서요청={`${들고온것.브라우저} · 쿠키 ${한줄로(들고온것.쿠키)} · Cookie 머리글 ${들고온것.쿠키머리글}바이트`}
+      />
     </section>
   );
 }

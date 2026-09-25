@@ -1253,3 +1253,63 @@ if (!who.user) → 가입 권유 카드
   app/admin/reset · app/login · components/admin-job-tools ·
   job-hospital · job-open-link · job-save · org-save · post-actions
 ```
+
+---
+
+## 카카오톡 인앱에서 회원이 비회원으로 보이는 것 (2026-09-25)
+
+**서버 판정 코드는 맞았습니다.** 크롬에서는 정상이고 카톡 인앱에서만 납니다.
+
+### 쿠키 설정 — 짐작이 아니라 코드에서 읽은 값
+
+`@supabase/ssr` 0.12.7 의 기본값입니다
+(`node_modules/@supabase/ssr/dist/main/utils/constants.js`).
+
+```
+path      /
+sameSite  lax
+secure    지정 없음          ← 붙지 않습니다
+domain    지정 없음          ← 호스트 전용 쿠키가 됩니다
+httpOnly  false              ← 브라우저 JS 가 읽고 씁니다
+maxAge    400일
+조각      3180바이트마다 .0 .1 로 쪼갬 (utils/chunker.js)
+```
+
+브라우저 쪽은 `document.cookie = serialize(...)` 한 줄로 심습니다
+(`dist/main/cookies.js:94`). 서버 쪽은 미들웨어가 같은 값으로 다시 씁니다.
+
+### 재는 자리를 세 군데로 나눴습니다
+
+같은 「쿠키」라도 어디서 보느냐가 다릅니다. 셋을 갈라야 원인이 갈립니다.
+
+```
+브라우저가 가진 것   document.cookie          ← 심기긴 했나
+문서 요청이 들고 온 것 화면을 그린 그 요청       ← 화면에 실려 갔나
+서버가 따로 받은 것   /api/diag-who            ← 다른 요청에는 실리나
+```
+
+`/api/diag-who` 는 브라우저가 **따로** 쏘는 요청이라 화면을 그린 문서 요청과
+다릅니다. 인앱이 문서 요청에만 쿠키를 안 붙이는 경우를 보려면 갈라야 합니다.
+그래서 가입 권유 카드 자체가 `lib/diag-server.ts` 로 제 요청을 잽니다.
+
+### 브라우저 판정 함수에 있던 같은 함정 (고쳤습니다)
+
+`app/auth.tsx` 의 `verify()` 가 **오류가 나기만 하면 로그아웃**시켰습니다.
+
+```js
+if (error || !data.user) { await sb.auth.signOut({ scope: 'local' }); }
+```
+
+오류에는 두 가지가 섞여 있습니다 —
+
+```
+답을 받았다   서버가 「그런 사람 없다」고 답함     → 내보내는 게 맞습니다
+답을 못 받았다 연결이 끊김                        → 모름입니다. 내보내면 안 됩니다
+```
+
+안 갈랐기 때문에 잠깐 끊긴 것만으로 로그인이 풀렸고, 쿠키가 지워져
+**서버는 다음 새로고침에서 정직하게 「비회원」이라고 답하게** 됩니다.
+서버 쪽을 아무리 고쳐도 소용이 없는 상태입니다.
+
+지금은 `isAuthApiError(error)` 일 때만 — 서버가 실제로 답했을 때만 —
+내보냅니다. 못 받았으면 가진 세션을 그대로 씁니다.

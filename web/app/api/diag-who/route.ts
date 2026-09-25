@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { 어느브라우저 } from '@/lib/diag-server';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 /* 서버가 지금 이 사람을 무엇으로 보는지 그대로 돌려줍니다 (2026-09-25).
@@ -55,6 +56,7 @@ export async function GET() {
     로그인도중쪽지: 쪽지.length,          // 쌓이기만 하고 안 지워집니다 (많으면 그것도 단서)
     쿠키전체개수: all.length,
     배포: (process.env.VERCEL_GIT_COMMIT_SHA ?? '로컬').slice(0, 7),
+    브라우저: 어느브라우저((await (await import('next/headers')).headers()).get('user-agent') ?? ''),
     배포판: process.env.VERCEL_ENV ?? '로컬',
     지금: new Date().toISOString(),
   });

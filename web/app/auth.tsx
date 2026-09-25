@@ -1,6 +1,6 @@
 'use client';
 
-import type { Session } from '@supabase/supabase-js';
+import { isAuthApiError, type Session } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import {
   createContext, useCallback, useContext, useEffect, useMemo, useState,
@@ -72,11 +72,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const verify = useCallback(async (s: Session | null): Promise<Session | null> => {
     if (!s) return null;
     const { data, error } = await sb.auth.getUser();
-    if (error || !data.user) {
-      await sb.auth.signOut({ scope: 'local' });
-      return null;
-    }
-    return s;
+    if (data.user) return s;
+
+    /* 여기서부터가 2026-09-25 에 고친 자리입니다.
+
+       전에는 **오류가 나기만 하면 로그아웃**시켰습니다.
+         if (error || !data.user) { await sb.auth.signOut({ scope: 'local' }); }
+
+       그런데 오류에는 두 가지가 섞여 있습니다.
+         답을 받았다  서버가 「그런 사람 없다」고 답했습니다 → 내보내는 게 맞습니다
+         답을 못 받았다 연결이 끊겼습니다 → **모름입니다. 내보내면 안 됩니다**
+
+       둘을 안 가르는 바람에, 지하철에서 잠깐 끊긴 것만으로 로그인이 풀렸습니다.
+       그러면 쿠키가 지워지고, 서버는 다음 새로고침에서 정직하게 「비회원」이라고
+       답합니다 — 서버 쪽을 아무리 고쳐도 소용이 없는 상태가 됩니다.
+
+       지금은 **답을 받았을 때만** 내보냅니다. 못 받았으면 가진 것을 그대로 씁니다. */
+    if (error && !isAuthApiError(error)) return s;   // 답을 못 받음 → 모름 → 그대로 둠
+
+    await sb.auth.signOut({ scope: 'local' });
+    return null;
   }, [sb]);
 
   useEffect(() => {
