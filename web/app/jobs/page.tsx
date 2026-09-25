@@ -87,6 +87,13 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
   const locked = list.error?.code === '42501';
   const rows = (list.data ?? []) as unknown as JobListItem[];
 
+  /* 조건에 맞는 전체 건수입니다. job_list 가 줄마다 같은 값을 붙여 보냅니다
+     (org_search 와 같은 방식). 「다음 쪽이 있나」를 이걸로 가릅니다 —
+     「받은 줄이 20이면 다음 쪽이 있다」로 보면, 전체가 딱 20의 배수일 때
+     빈 쪽으로 가는 「다음쪽」이 생깁니다. 오늘이 정확히 그랬습니다 (320건) */
+  const matched = Number((rows[0] as unknown as { total?: number })?.total ?? 0);
+  const hasNext = (page + 1) * PAGE < matched;
+
   const tally = (counts.data ?? {}) as Record<string, number>;
   const tabCounts = TABS.map((t) => Number(tally[t.like] ?? 0));
   const total = tabCounts.reduce((a, b) => a + b, 0);
@@ -260,7 +267,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       )}
 
       {/* 쪽 넘기기. 한 번에 20건이라 여기가 있어야 끝까지 볼 수 있습니다 */}
-      {!locked && (page > 0 || rows.length === PAGE) && (
+      {!locked && (page > 0 || hasNext) && (
         <nav className="mt-7 flex items-center justify-between gap-3" aria-label="쪽 넘기기">
           {page > 0 ? (
             <Link
@@ -273,7 +280,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
 
           <span className="break-keep text-sm text-gray-500">{page + 1}쪽</span>
 
-          {rows.length === PAGE ? (
+          {hasNext ? (
             <Link
               href={link({ p: String(page + 1) })}
               className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
