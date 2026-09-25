@@ -6,7 +6,7 @@ import { OrgSearch } from '@/components/org-search';
 import { iconMap } from '@/lib/icons';
 import { MembersOnly } from '@/components/members-only';
 import { orgPublic, ourNumbers, place, TILE_NAME, type OrgFacets } from '@/lib/org';
-import { serverSupabase } from '@/lib/supabase-server';
+import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,9 +68,12 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
   }
 
   const sb = await serverSupabase();
-  const { data: who } = await sb.auth.getUser();
+  /* 세 값입니다 — 회원 · 비회원 · 모름.
+     「모름」(물어봤는데 답을 못 받음)일 때 가입 권유를 그리면,
+     회원에게 「가입하고 전부 보기」 가 뜹니다 (2026-09-25에 실제로 났습니다) */
+  const who = await serverWho(sb);
 
-  if (!who.user) {
+  if (who === '비회원') {
     return (
       <div className="bg-[#F4F4F1]">
         <main className="mx-auto w-full max-w-2xl px-6 pt-6 pb-[88px] md:px-7">

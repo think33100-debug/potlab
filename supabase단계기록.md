@@ -1205,3 +1205,51 @@ sealIsEnforced: false, heartbeatRate: 0.5, … }
 가끔 실패하는 것이라 지금은 재현이 안 됩니다.
 로그의 `note` 가 300자에서 잘려 더 볼 수가 없습니다 — 그래서 심장박동에
 응답 앞 300자를 같이 남기기로 했습니다.
+
+---
+
+## 회원인데 「가입하고 전부 보기」 가 뜨던 것 (2026-09-25)
+
+### 원인 — 오류를 「비회원」으로 그렸습니다
+
+서버에서 그리는 관문 넷 중 **셋이 `getUser()` 의 오류를 버리고** 있었습니다.
+
+```js
+const { data: who } = await sb.auth.getUser();   // ← error 를 안 받습니다
+if (!who.user) → 가입 권유 카드
+```
+
+`getUser()` 는 **실패해도 `user` 가 `null`** 입니다. 잠깐 연결이 끊기거나 토큰
+갱신이 실패하면 로그인한 회원에게 「가입하고 전부 보기」 가 떴습니다.
+눌러 보면 「이미 로그인되어 있어요」 — 회원인데 비회원 화면을 본 것입니다.
+
+**목록 화면(`app/jobs/page.tsx`)은 이 함정을 안 밟았습니다.**
+거기서는 **DB 가 보낸 `42501`** 로 가립니다. 「권한 없음」은 물어봐서 받은
+답이지, 못 물어본 것이 아닙니다.
+
+### 고친 것 — `serverWho()` 하나로
+
+`lib/supabase-server.ts` 에 넣었습니다 (`serverUserId` 옆). 이름은 grep 으로
+먼저 확인했습니다 — `serverWho`·`whoServer`·`memberState` 전부 0이었습니다.
+
+```
+회원    로그인한 사람
+비회원  물어봤고 아니라는 답을 받음 (AuthSessionMissingError)
+모름    물어봤는데 답을 못 받음 → **가입 권유도 회원 자료도 안 그립니다**
+```
+
+화면 쪽 규칙과 같습니다 (`org-stat.tsx` · `job-veil.tsx` 가 `loading` 을 그렇게 씁니다).
+
+### 아직 두 값인 곳 — 목록만 (안 고쳤습니다)
+
+`useAuth()` 를 쓰면서 `loading` 을 안 받는 곳이 9개입니다. 그중 **가입 권유를
+그리는 곳은 하나**입니다.
+
+```
+★ app/pay/page.tsx      「가입하고 급여를 등록하면」 · 단추가 /login 으로
+                        확인 중에는 회원에게도 그렇게 보입니다
+
+나머지 8곳은 단추를 막거나 표시만 바꿉니다 (가입 권유를 안 그립니다)
+  app/admin/reset · app/login · components/admin-job-tools ·
+  job-hospital · job-open-link · job-save · org-save · post-actions
+```

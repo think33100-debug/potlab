@@ -8,7 +8,7 @@ import { BUSY_COLOR } from '@/lib/brand';
 import { iconMap } from '@/lib/icons';
 import { MembersOnly } from '@/components/members-only';
 import { orgJobs, orgNearby, orgPublic, place, shortKinds, TILE_NAME } from '@/lib/org';
-import { serverSupabase } from '@/lib/supabase-server';
+import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 /* 기관 하나.
 
@@ -27,9 +27,10 @@ const BAND_WORD: Record<string, string> = { busy: '바쁜 곳', mid: '보통', e
 
 export async function OrgDetail({ name, sido }: { name: string; sido: string | null }) {
   const sb = await serverSupabase();
-  const { data: who } = await sb.auth.getUser();
+  /* 회원 · 비회원 · 모름. 「모름」이면 가입 권유를 안 그립니다 */
+  const who = await serverWho(sb);
 
-  if (!who.user) {
+  if (who === '비회원') {
     return (
       <>
         <Back />

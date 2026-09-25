@@ -22,7 +22,7 @@ import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { MembersOnly } from '@/components/members-only';
 import { supabase, type JobPost } from '@/lib/supabase';
-import { serverSupabase } from '@/lib/supabase-server';
+import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,8 +87,10 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   /* 쿠키에 실려 온 세션으로 읽습니다. 로그인 안 했으면
      본문도 병원 숫자도 안 실려 옵니다 (막는 자리는 DB) */
   const sb = await serverSupabase();
-  const { data: who } = await sb.auth.getUser();
-  const member = !!who.user;
+  /* 회원 · 비회원 · 모름 세 값입니다.
+     「모름」은 회원도 비회원도 아닙니다 — 병원 자료도, 가입 권유도 안 그립니다 */
+  const who = await serverWho(sb);
+  const member = who === '회원';
 
   const j = await one(sb, id);
   if (!j) notFound();
@@ -207,13 +209,12 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
             </dl>
           </Rise>
 
-          {/* 로그인 안 한 분에게는 여기부터 자료가 아예 안 옵니다 (막는 자리는 DB).
-              흐릴 것이 없으니 안내 카드를 놓습니다.
-
-              로그인은 했는데 가입을 안 마친 분에게는 전처럼 흐림을 겁니다 —
-              그분들에게는 자료가 실제로 실려 오기 때문입니다
-              (components/job-veil.tsx) */}
-          {!member ? (
+          {/* 세 갈래입니다 (2026-09-25).
+                비회원  자료가 아예 안 옵니다 (막는 자리는 DB). 안내 카드를 놓습니다
+                회원    진짜 자료. 가입을 아직 안 마쳤으면 JobVeil 이 흐립니다
+                모름    **아무것도 안 그립니다.** 물어봤는데 답을 못 받은 것이라
+                        가입 권유를 그리면 회원에게 「가입하고 전부 보기」 가 뜹니다 */}
+          {who === '모름' ? null : who === '비회원' ? (
             <MembersOnly
               title={<>이 병원이 어떤 곳인지<br />회원만 볼 수 있어요</>}
               body="치료사 인원 · 병상 · 얼마나 바쁜 곳인지와 지원 자격 · 전형 방법까지. 가입은 3분이면 끝나요."
