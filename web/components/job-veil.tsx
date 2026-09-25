@@ -32,7 +32,7 @@ import { Icon } from '@/components/icon';
    새로고침해도 처음 자리는 그대로라, 공유 링크를 다시 읽어도 안 흐려집니다.
    서버는 이걸 모릅니다(세션이 브라우저에만 있음). 그래서 브라우저에서 봅니다. */
 export function JobVeil({ children }: { children: React.ReactNode }) {
-  const { loading, me } = useAuth();
+  const { loading, session, me } = useAuth();
   /* null = 아직 모름. 처음 그릴 때 깜빡이지 않게 흐림을 미룹니다 */
   const [fromShare, setFromShare] = useState<boolean | null>(null);
 
@@ -107,7 +107,15 @@ export function JobVeil({ children }: { children: React.ReactNode }) {
         <p className="mt-3 break-keep text-[12px] text-[#5F666C]">
           카카오 · 네이버로 3초 만에 시작해요
         </p>
-        <DiagTag 이름="components/job-veil.tsx · 화면(설문 안 마침으로 봄)" />
+        {/* 어느 조건에서 걸렸는지까지 — 캐프처 한 장으로 갈리게 */}
+        <DiagTag
+          이름="components/job-veil.tsx · 화면이 판정합니다 (serverWho 를 안 씁니다)"
+          문서요청={`확인중 ${loading ? '예' : '아니오'}`
+            + ` · 세션 ${session ? '있음' : '없음'}`
+            + ` · profiles 줄 ${me ? '있음' : '없음'}`
+            + ` · 설문 ${me?.survey_at ? '마침' : '안 마침'}`
+            + ` · 공유로 들어옴 ${fromShare === null ? '모름' : fromShare ? '예' : '아니오'}`}
+        />
       </div>
     </div>
   );
