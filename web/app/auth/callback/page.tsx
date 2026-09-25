@@ -12,6 +12,34 @@ import { browserSupabase } from '@/lib/supabase-browser';
 
      profiles 줄이 있으면   → 원래 보던 곳
      없으면                 → /welcome (약관 → 닉네임 → 사진) */
+/* 로그인 도중에 쓰는 임시 쪽지를 치웁니다 (2026-09-25).
+
+   ── 왜 쌓였나 ────────────────────────────────────────────────
+   쪽지 이름은 `sb-<ref>-auth-token-flow-<흐름번호>-code-verifier` 로,
+   **로그인을 누를 때마다 다른 이름**이 하나씩 생깁니다.
+   @supabase/ssr 는 **끝까지 마친 흐름의 쪽지만** 지웁니다
+   (node_modules/@supabase/auth-js … removePKCEVerifier). 카카오 화면에서
+   뒤로 가거나 그만둔 흐름의 쪽지는 그대로 남습니다.
+   2026-09-25 에 로그인한 적 없는 브라우저에 일곱 개가 쌓여 있었습니다.
+
+   ── 여기서 지워도 되는 까닭 ──────────────────────────────────
+   이 자리는 **세션을 이미 받은 뒤**입니다. 진행 중인 로그인이 없으므로
+   남은 쪽지는 전부 버린 것입니다. 흐름 목록(`-flows-code-verifier`)도
+   같이 지웁니다 — 가리킬 쪽지가 없으니까요.
+
+   ?진단=1 의 「로그인도중쪽지」 가 0 이 되는지로 확인합니다. */
+function 쪽지치우기() {
+  try {
+    const 안전 = location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie.split(';')
+      .map((c) => c.split('=')[0].trim())
+      .filter((n) => n.startsWith('sb-') && n.includes('code-verifier'))
+      .forEach((n) => {
+        document.cookie = `${n}=; Max-Age=0; path=/; SameSite=Lax${안전}`;
+      });
+  } catch { /* 쿠키를 막아둔 브라우저 — 로그인은 이미 끝났으니 그냥 넘어갑니다 */ }
+}
+
 export default function AuthCallback() {
   const router = useRouter();
   const [err, setErr] = useState<string | null>(null);
@@ -32,6 +60,8 @@ export default function AuthCallback() {
       if (!alive) return;
       if (error) { setErr(error.message); return; }
       if (!data.session) { setErr('로그인을 못 마쳤어요. 다시 눌러 주세요'); return; }
+
+      쪽지치우기();
 
       const { data: prof } = await sb
         .from('profiles').select('id').eq('id', data.session.user.id).maybeSingle();

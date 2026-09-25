@@ -31,6 +31,18 @@ export async function GET() {
   /* 오류 이름만 따로 봅니다 — 「비회원」과 「모름」을 가른 근거 */
   const { error } = await sb.auth.getUser();
 
+  /* 관리자에게만 돌려줍니다 (2026-09-25).
+
+     「모름」일 때는 내줍니다 — 관리자인지 **알 수 없는 상태 자체가** 진단해야
+     할 고장이고, 그때 막으면 진단판이 있으나 마나입니다. 그 상태에서 나가는
+     것은 쿠키 개수·브라우저·배포번호뿐입니다. 값도 토큰도 사람 id 도 없습니다. */
+  if (who !== '모름') {
+    const { data: 관리자 } = await sb.rpc('is_admin');
+    if (관리자 !== true) {
+      return NextResponse.json({ 진단: '관리자만 볼 수 있습니다' }, { status: 403 });
+    }
+  }
+
   const { cookies } = await import('next/headers');
   const jar = await cookies();
   const all = jar.getAll();
