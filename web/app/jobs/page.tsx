@@ -203,6 +203,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
         <MembersOnly
           title={<>공고는<br />회원만 볼 수 있어요</>}
           body="공공기관 · 대학병원 · 종합병원 공고를 하나도 안 빼고 모읍니다. 가입은 3분이면 끝나요."
+          진단="app/jobs/page.tsx · 서버(DB 가 42501 을 돌려줌)"
         />
       )}
 

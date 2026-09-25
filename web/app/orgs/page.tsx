@@ -87,6 +87,7 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
           <MembersOnly
             title={<>병원정보는<br />회원만 볼 수 있어요</>}
             body={`치료사가 일하는 곳 ${(await ourNumbers()).orgs.toLocaleString('ko-KR')} 곳. 인원 · 병상 · 얼마나 바쁜 곳인지까지 찾아볼 수 있어요.`}
+            진단="app/orgs/page.tsx · 서버(serverWho)"
           />
         </main>
       </div>

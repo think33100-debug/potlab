@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
+import { DiagTag } from '@/components/diag';
 import { Icon } from '@/components/icon';
 
 /* 가입 안 한 사람에게는 병원 구역부터 아래를 흐리게 덮습니다.
@@ -106,6 +107,7 @@ export function JobVeil({ children }: { children: React.ReactNode }) {
         <p className="mt-3 break-keep text-[12px] text-[#5F666C]">
           카카오 · 네이버로 3초 만에 시작해요
         </p>
+        <DiagTag 이름="components/job-veil.tsx · 화면(설문 안 마침으로 봄)" />
       </div>
     </div>
   );

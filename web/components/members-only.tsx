@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { DiagTag } from '@/components/diag';
 import { Icon } from '@/components/icon';
 
 /* 「회원만 볼 수 있어요」 카드 한 벌.
@@ -10,8 +11,8 @@ import { Icon } from '@/components/icon';
      공고 목록은 job_list() 가, 병원정보는 실행 권한이 막습니다.
      화면만 가리면 요청을 직접 만들어 뚫립니다 (그게 2026-09-25 전 상태였습니다). */
 export function MembersOnly({
-  title, body, note,
-}: { title: React.ReactNode; body: string; note?: string }) {
+  title, body, note, 진단,
+}: { title: React.ReactNode; body: string; note?: string; 진단?: string }) {
   return (
     <section className="mt-7 flex flex-col items-center rounded-[14px] border border-[#E3E3DE]
                         bg-white px-6 py-8 text-center">
@@ -42,6 +43,9 @@ export function MembersOnly({
       <p className="mt-3 break-keep text-[12px] text-[#5F666C]">
         {note ?? '카카오 · 네이버로 3초 만에 시작해요'}
       </p>
+
+      {/* 진단을 켰을 때만 — 이 벽을 그린 곳이 서버인지 화면인지 가릅니다 */}
+      <DiagTag 이름={진단 ?? 'components/members-only.tsx (부른 곳 안 적음)'} />
     </section>
   );
 }

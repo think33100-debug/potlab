@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import { DiagStrip } from "@/components/diag";
 import { Logo } from "@/components/logo";
 import { SPLASH_SCRIPT, Splash } from "@/components/splash";
 import { TabBar, TopNav } from "@/components/tab-bar";
@@ -81,6 +82,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               주식회사 빈틈 · 대구 북구 동북로 291, 901-A156호
             </p>
           </footer>
+
+          {/* 주소 끝에 ?진단=1 을 붙였을 때만 보입니다.
+              관리자에게만 보이게 할 수가 없습니다 — 관리자인지 아는 방법이
+              바로 지금 고장난 그 판정입니다 (components/diag.tsx) */}
+          <DiagStrip />
 
           {/* 휴대폰에서만 보이는 아래 탭바 */}
           <TabBar />

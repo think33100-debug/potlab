@@ -218,6 +218,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
             <MembersOnly
               title={<>이 병원이 어떤 곳인지<br />회원만 볼 수 있어요</>}
               body="치료사 인원 · 병상 · 얼마나 바쁜 곳인지와 지원 자격 · 전형 방법까지. 가입은 3분이면 끝나요."
+              진단="app/jobs/[id]/page.tsx · 서버(serverWho)"
             />
           ) : (
           <JobVeil>

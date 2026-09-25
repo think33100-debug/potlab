@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
+import { DiagTag } from '@/components/diag';
 import { Icon } from '@/components/icon';
 import { JobBusy } from '@/components/job-busy';
 import { JobHospital } from '@/components/job-hospital';
@@ -98,6 +99,7 @@ function Locked() {
       <p className="mt-3 break-keep text-[12px] text-[#5F666C]">
         카카오 · 네이버로 3초 만에 시작해요
       </p>
+      <DiagTag 이름="components/org-stat.tsx · 화면(session 없음으로 봄)" />
     </section>
   );
 }

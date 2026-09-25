@@ -38,6 +38,7 @@ export async function OrgDetail({ name, sido }: { name: string; sido: string | n
         <MembersOnly
           title={<>병원정보는<br />회원만 볼 수 있어요</>}
           body="치료사 인원 · 병상 · 얼마나 바쁜 곳인지와 지금 열린 공고까지. 가입은 3분이면 끝나요."
+          진단="components/org-detail.tsx · 서버(serverWho)"
         />
       </>
     );
