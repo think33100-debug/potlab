@@ -40,15 +40,6 @@ export async function serverSupabase(): Promise<SupabaseClient> {
   );
 }
 
-/** 지금 보고 있는 사람의 id. 로그인 안 했으면 null */
-export async function serverUserId(): Promise<string | null> {
-  const sb = await serverSupabase();
-  /* getUser() 는 서버에 물어봅니다. getSession() 은 쿠키에 적힌 것을 믿기만 해서
-     남이 만들어 넣은 값도 그대로 통과합니다 — 막는 자리에서는 쓰면 안 됩니다 */
-  const { data } = await sb.auth.getUser();
-  return data.user?.id ?? null;
-}
-
 /* 서버에서 본 로그인 상태. **세 값입니다.**
 
    회원    로그인한 사람입니다

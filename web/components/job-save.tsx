@@ -11,7 +11,7 @@ import { browserSupabase } from '@/lib/supabase-browser';
    로그인 전에 누르면 막지 않고 로그인으로 보냅니다 —
    돌아올 자리를 적어 두니 로그인하면 이 공고로 돌아옵니다. */
 export function JobSave({ id, big = false }: { id: string; big?: boolean }) {
-  const { session } = useAuth();
+  const { loading, session } = useAuth();
   const router = useRouter();
   const [on, setOn] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
@@ -24,6 +24,11 @@ export function JobSave({ id, big = false }: { id: string; big?: boolean }) {
   }, [session, id]);
 
   async function toggle() {
+    /* 확인 중이면 **아무것도 안 합니다.** /login 으로 보내면 안 됩니다 —
+       회원인데 들어오자마자 누르면 로그인 화면으로 튀깁니다.
+       잠시 뒤 다시 누르면 됩니다 (2026-09-25) */
+    if (loading) return;
+
     if (!session) {
       try { sessionStorage.setItem('after_login', `/jobs/${id}`); } catch { /* 사파리 비공개 */ }
       router.push('/login');

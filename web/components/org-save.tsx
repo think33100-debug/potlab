@@ -14,7 +14,7 @@ import { browserSupabase } from '@/lib/supabase-browser';
    탭바(md 미만 62px) 위에 얹습니다. 둘 다 bottom-0 이면 탭바가 z-40 이라
    이 줄이 통째로 가려집니다 — 공고 상세에서 한 번 가려졌던 자리입니다. */
 export function OrgSave({ name, sido }: { name: string; sido: string | null }) {
-  const { session } = useAuth();
+  const { loading, session } = useAuth();
   const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [notify, setNotify] = useState(false);
@@ -38,6 +38,11 @@ export function OrgSave({ name, sido }: { name: string; sido: string | null }) {
   };
 
   async function star() {
+    /* 확인 중이면 **아무것도 안 합니다.** /login 으로 보내면 안 됩니다 —
+       회원인데 들어오자마자 누르면 로그인 화면으로 튀깁니다.
+       잠시 뒤 다시 누르면 됩니다 (2026-09-25) */
+    if (loading) return;
+
     if (!session) return toLogin();
     if (busy) return;
     setBusy(true);
@@ -52,6 +57,11 @@ export function OrgSave({ name, sido }: { name: string; sido: string | null }) {
   }
 
   async function ring() {
+    /* 확인 중이면 **아무것도 안 합니다.** /login 으로 보내면 안 됩니다 —
+       회원인데 들어오자마자 누르면 로그인 화면으로 튀깁니다.
+       잠시 뒤 다시 누르면 됩니다 (2026-09-25) */
+    if (loading) return;
+
     if (!session) return toLogin();
     if (busy) return;
     setBusy(true);

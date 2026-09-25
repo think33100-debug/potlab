@@ -13,7 +13,7 @@ export function PostActions({
 }: {
   id: number; authorId: string; likeCount: number; title: string;
 }) {
-  const { session, me } = useAuth();
+  const { loading, session, me } = useAuth();
   const toast = useToast();
   const router = useRouter();
 
@@ -36,6 +36,8 @@ export function PostActions({
     return () => { alive = false; };
   }, [id, me]);
 
+  /* 확인 중에 누르면 **잠긐 기다립니다.** /login 으로 보내면 안 됩니다 —
+     회원인데 들어오자마자 누르면 로그인 화면으로 튀깁니다 (2026-09-25) */
   const needLogin = () => {
     sessionStorage.setItem('potjob.after-login', location.pathname);
     toast('로그인하면 쓸 수 있어요');
@@ -43,6 +45,7 @@ export function PostActions({
   };
 
   const toggleLike = async () => {
+    if (loading) return toast('잠시만요 — 로그인을 확인하고 있어요');
     if (!me) return needLogin();
     setBusy(true);
     const sb = browserSupabase();
@@ -61,6 +64,7 @@ export function PostActions({
   };
 
   const report = async () => {
+    if (loading) return toast('잠시만요 — 로그인을 확인하고 있어요');
     if (!me) return needLogin();
     const reason = prompt('어떤 점이 문제인가요? (비방·저격·허위사실·광고 등)');
     if (!reason?.trim()) return;

@@ -38,6 +38,10 @@ export function JobClosed({ jobId }: { jobId: string }) {
   const ask = async () => {
     /* 아직 회원이 아니면 가입으로. 어디서 왔는지 들고 갑니다 —
        가입을 마치고 홈으로 떨어지면 이 공고를 다시 못 찾아 그냥 나갑니다 */
+  /* 확인 중에 누르면 **잠긐 기다립니다.** /login 으로 보내면 안 됩니다 —
+     회원인데 들어오자마자 누르면 로그인 화면으로 튀깁니다 (2026-09-25) */
+    if (loading) { toast('잠시만요 — 로그인을 확인하고 있어요'); return; }
+
     if (!session || !me) {
       try { sessionStorage.setItem('potjob.after-login', `/jobs/${jobId}`); } catch { /* 사생활 보호 창 */ }
       router.push(session ? '/welcome' : '/login');

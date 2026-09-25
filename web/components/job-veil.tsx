@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/app/auth';
+import { useGate } from '@/app/gate';
 import { DiagTag } from '@/components/diag';
 import { Icon } from '@/components/icon';
 
@@ -32,7 +32,9 @@ import { Icon } from '@/components/icon';
    새로고침해도 처음 자리는 그대로라, 공유 링크를 다시 읽어도 안 흐려집니다.
    서버는 이걸 모릅니다(세션이 브라우저에만 있음). 그래서 브라우저에서 봅니다. */
 export function JobVeil({ children }: { children: React.ReactNode }) {
-  const { loading, session, me } = useAuth();
+  /* 벍히는 규칙은 app/gate.tsx 한 곳에서 가져옵니다. 여기서 따로 판정하면
+     문구를 고칠 때 한쪽만 고치게 됩니다 — 실제로 그랬습니다 (2026-09-25) */
+  const { 모름, full, 회원, href } = useGate();
   /* null = 아직 모름. 처음 그릴 때 깜빡이지 않게 흐림을 미룹니다 */
   const [fromShare, setFromShare] = useState<boolean | null>(null);
 
@@ -50,8 +52,9 @@ export function JobVeil({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const full = !!me?.survey_at;
-  const veil = !loading && !full && fromShare === false;
+  /* 모름이면 흐리지 않습니다. 못 읽은 것을 「가입 안 함」으로 그리면
+     회원에게 가입 권유가 뜽니다 — 이것이 2026-09-25 의 그 버그입니다 */
+  const veil = !모름 && !full && fromShare === false;
 
   if (!veil) return <>{children}</>;
 
@@ -87,33 +90,31 @@ export function JobVeil({ children }: { children: React.ReactNode }) {
         </span>
 
         <h2 className="mt-4 break-keep text-[24px] font-black leading-[1.35] text-[#14181C]">
-          이 병원이 어떤 곳인지<br />회원만 볼 수 있어요
+          이 병원이 어떤 곳인지<br />{회원 ? '설문 뒤에 보여드려요' : '회원만 볼 수 있어요'}
         </h2>
         <p className="mt-3 max-w-[20rem] break-keep text-[14px] leading-[1.7] text-[#4A5056]">
           치료사 인원 · 병상 · 얼마나 바쁜 곳인지까지.
-          가입은 3분이면 끝나요.
+          {회원 ? ' 직군·경력만 알려주시면 돼요.' : ' 가입은 3분이면 끝나요.'}
         </p>
 
         <Link
-          href="/login"
+          href={href}
           className="mt-6 flex h-[54px] w-full max-w-[22rem] items-center justify-center
                      rounded-[12px] bg-[#FF3B30] text-[16px] font-bold text-white
                      transition-transform duration-[120ms] active:translate-y-[2px]
                      active:scale-[0.99] active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.25)]
                      motion-reduce:transition-none"
         >
-          가입하고 전부 보기
+          {회원 ? '3분 설문 마치고 전부 보기' : '가입하고 전부 보기'}
         </Link>
         <p className="mt-3 break-keep text-[12px] text-[#5F666C]">
-          카카오 · 네이버로 3초 만에 시작해요
+          {회원 ? '채우던 곳에서 이어서 하실 수 있어요' : '카카오 · 네이버로 3초 만에 시작해요'}
         </p>
         {/* 어느 조건에서 걸렸는지까지 — 캐프처 한 장으로 갈리게 */}
         <DiagTag
           이름="components/job-veil.tsx · 화면이 판정합니다 (serverWho 를 안 씁니다)"
-          문서요청={`확인중 ${loading ? '예' : '아니오'}`
-            + ` · 세션 ${session ? '있음' : '없음'}`
-            + ` · profiles 줄 ${me ? '있음' : '없음'}`
-            + ` · 설문 ${me?.survey_at ? '마침' : '안 마침'}`
+          문서요청={`로그인 ${회원 ? '회원' : 모름 ? '모름' : '비회원'}`
+            + ` · 설문 ${모름 ? '모름' : full ? '마침' : '안 마침'}`
             + ` · 공유로 들어옴 ${fromShare === null ? '모름' : fromShare ? '예' : '아니오'}`}
         />
       </div>

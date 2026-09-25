@@ -44,7 +44,7 @@ type Res = {
 };
 
 export default function SpecPage() {
-  const { loading, me: profile } = useAuth();
+  const { loading, session, me: profile } = useAuth();
   const [res, setRes] = useState<Res | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -71,15 +71,21 @@ export default function SpecPage() {
       {res && !me && (
         <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
           <h2 className="text-h3 font-bold">스펙을 아직 안 적으셨어요</h2>
+          {/* 글귀와 단추가 **같은 규칙**을 씁니다 (2026-09-25).
+              전에는 글귀만 loading 을 보고 바로 아래 단추는 안 봤습니다 —
+              글귀는 비어 있는데 단추만 「시작하기 → /login」 으로 뗴습니다 */}
           <p className="mt-2 text-lg text-gray-500">
-            {loading ? '' : profile
-              ? '내 정보에서 스펙을 채우면 점수가 나와요'
+            {loading ? ''
+              : profile ? '내 정보에서 스펙을 채우면 점수가 나와요'
+              : session ? '가입을 마저 하고 스펙을 채우면 점수가 나와요'
               : '가입하면서 스펙을 채우면 점수가 나와요'}
           </p>
-          <Link href={profile ? '/me' : '/login'}
-            className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark">
-            {profile ? '내 정보로 가기' : '시작하기'}
-          </Link>
+          {!loading && (
+            <Link href={profile ? '/me' : session ? '/welcome' : '/login'}
+              className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark">
+              {profile ? '내 정보로 가기' : session ? '가입 마저 하기' : '시작하기'}
+            </Link>
+          )}
         </section>
       )}
 

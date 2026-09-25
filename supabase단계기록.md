@@ -1313,3 +1313,91 @@ if (error || !data.user) { await sb.auth.signOut({ scope: 'local' }); }
 
 지금은 `isAuthApiError(error)` 일 때만 — 서버가 실제로 답했을 때만 —
 내보냅니다. 못 받았으면 가진 세션을 그대로 씁니다.
+
+---
+
+## 회원 여부 판정을 세 값으로 통일 (2026-09-25 저녁)
+
+하루에 같은 버그를 네 번 고쳤습니다. 네 번 다 **두 값으로 판정한 자리**였습니다.
+자세한 규칙은 `web/회원여부_읽는_법.md` 에 따로 적었습니다.
+
+### [1] 뿌리 — `app/auth.tsx` 의 `loadMe`
+
+```js
+setMe((prof.data as Me) ?? null);      // ← 오류를 버립니다
+setIsAdmin(admin.data === true);
+```
+
+`prof.error` 가 있는 것과 `maybeSingle()` 이 「그런 줄 없다」고 답한 것이
+똑같이 `me = null` 이 됐습니다. profiles 를 한 번 못 읽으면 회원이
+「가입 안 한 사람」이 되고, 흐림·댓글·상단바가 전부 그 말을 따라갔습니다.
+
+이제 `meOk` 를 따로 두고, `useAuth()` 가 두 값을 더 내놓습니다.
+
+```
+who   '회원' | '비회원' | '모름'      serverWho 와 같은 이름·같은 뜻
+설문  '마침' | '안마침' | '모름'      profiles 를 못 읽으면 모름
+```
+
+`Who` 타입은 `lib/supabase-server.ts` 한 곳에만 있고, 화면은 `import type` 으로
+모양만 가져옵니다. 이름표를 두 벌 만들지 않습니다.
+
+### [2] 「모름」은 빈 화면으로 통일
+
+```
+app/jobs/[id]/page.tsx     이미 null 이었습니다
+app/orgs/page.tsx          회원 쪽으로 넘어가던 것 → null
+components/org-detail.tsx  회원 쪽으로 넘어가던 것 → null
+```
+
+빈 자료를 채운 회원 화면은 「찾는 결과가 없습니다」처럼 보입니다.
+없는 사실을 지어내는 꼴이라 빈 자리가 낫습니다.
+
+### [3] 설문 벽과 세션 벽을 말로 구분
+
+```
+회원인데 설문 전  「3분 설문 마치고 전부 보기」 → /welcome
+비회원            「가입하고 전부 보기」        → /login
+모름              아무것도 안 그림
+```
+
+`app/gate.tsx` 에 `gateOf(who, 설문)` 순수 함수를 두고 `job-veil.tsx` 가
+그것을 불러 씁니다. 전에는 `job-veil.tsx` 가 따로 판정해서, 문구를 고치면
+한쪽만 고치게 돼 있었습니다.
+
+### [4] 회원에게 틀리게 보이던 세 곳 + 튕기던 네 곳
+
+```
+app/login/page.tsx   loading 을 아예 안 받아, 로그인한 분이 열면 첫 그림에
+                     카카오·네이버 단추가 통째로 떴습니다 → 「잠시만요…」
+app/pay/page.tsx     「가입하고 급여를 등록하면」 + /login → loading 이면 단추도 안 그림
+app/spec/page.tsx    글귀는 loading 을 보는데 바로 아래 단추는 안 봤습니다 → 같은 규칙으로
+
+post-actions · job-closed · job-save · org-save
+   확인 중에 누르면 /login 으로 튕겼습니다 → 잠깐 기다립니다
+```
+
+`job-save` · `org-save` 는 토스트를 안 쓰던 파일이라 새로 끌어오지 않고
+누른 것을 삼키게 했습니다. 잠시 뒤 다시 누르면 됩니다.
+
+### [5] `serverUserId` 삭제
+
+부르는 곳이 한 곳도 없는데 `error` 를 버리는 옛 방식이었습니다.
+같은 파일 주석이 그러지 말라고 적고 있는데 정작 자기가 그랬습니다.
+
+### 검사
+
+`web/tools/check-gate.mjs` — 여섯 칸을 한 번에 봅니다.
+
+```
+회원 · 마침    → 전부 보임
+회원 · 안마침  → 설문 권유 → /welcome
+회원 · 모름    → 자리 비움      ← 오늘의 그 버그
+비회원 · 안마침 → 가입 권유 → /login
+비회원 · 모름   → 자리 비움
+모름 · 모름    → 자리 비움
+```
+
+`app/gate.tsx` 의 `gateOf` 원문도 같이 대조합니다 — 규칙이 두 벌이 되면
+검사가 거짓말을 하기 때문입니다. 일부러 규칙을 망가뜨려 끝값 1 로
+떨어지는 것까지 확인했습니다.

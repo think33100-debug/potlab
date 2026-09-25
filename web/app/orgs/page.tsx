@@ -73,6 +73,12 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
      회원에게 「가입하고 전부 보기」 가 뜹니다 (2026-09-25에 실제로 났습니다) */
   const who = await serverWho(sb);
 
+  /* 「모름」은 **빈 화면**입니다 — 공고 상세와 같은 방향 (2026-09-25).
+     전에는 회원 쪽으로 넘겨 자료가 빈 채로 그려졌습니다. 그러면
+     「찾는 결과가 없습니다」처럼 보여, 없는 사실을 지어내는 꼴이 됩니다.
+     같은 함수를 쓰는 세 곳이 막힐 때 가는 방향이 달랐습니다. 한쪽으로 맞췥니다 */
+  if (who === '모름') return null;
+
   if (who === '비회원') {
     return (
       <div className="bg-[#F4F4F1]">

@@ -21,7 +21,9 @@ import { JOB_GROUPS } from '@/lib/who';
 type Res = { job: string | null; total: number; min_n: number; stats: Stats; me: Me | null };
 
 export default function PayPage() {
-  const { me: profile } = useAuth();
+  /* loading 을 꼭 받습니다. 안 받으면 확인 중에 회원에게도
+     「가입하고 급여를 등록하면」 이 뗴다가 바뀌었습니다 (2026-09-25) */
+  const { loading: 확인중, session, me: profile } = useAuth();
 
   const [job, setJob] = useState('');
   const [region, setRegion] = useState('');
@@ -80,12 +82,19 @@ export default function PayPage() {
             <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
               <h2 className="text-h3 font-bold">내 위치도 보고 싶으세요?</h2>
               <p className="mt-2 text-lg text-gray-500">
-                {profile ? '급여를 등록하면' : '가입하고 급여를 등록하면'} 같은 조건에서 내가 몇 등인지 나와요
+                {확인중 ? ''
+                  : profile ? '급여를 등록하면 같은 조건에서 내가 몇 등인지 나와요'
+                  : session ? '가입을 마저 하고 급여를 등록하면 같은 조건에서 내가 몇 등인지 나와요'
+                  : '가입하고 급여를 등록하면 같은 조건에서 내가 몇 등인지 나와요'}
               </p>
-              <Link href={profile ? '/me' : '/login'}
-                className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark">
-                {profile ? '내 정보에서 등록하기' : '시작하기'}
-              </Link>
+              {/* 확인 중에는 단추도 안 그립니다 — 글귀만 비우고 단추를 남기면
+                  「시작하기 → /login」 이 회원에게 그대로 보입니다 */}
+              {!확인중 && (
+                <Link href={profile ? '/me' : session ? '/welcome' : '/login'}
+                  className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark">
+                  {profile ? '내 정보에서 등록하기' : session ? '가입 마저 하기' : '시작하기'}
+                </Link>
+              )}
             </section>
           )}
 

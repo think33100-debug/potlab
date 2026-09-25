@@ -27,8 +27,12 @@ const BAND_WORD: Record<string, string> = { busy: '바쁜 곳', mid: '보통', e
 
 export async function OrgDetail({ name, sido }: { name: string; sido: string | null }) {
   const sb = await serverSupabase();
-  /* 회원 · 비회원 · 모름. 「모름」이면 가입 권유를 안 그립니다 */
+  /* 회원 · 비회원 · 모름.
+     「모름」은 **빈 화면**입니다 — 공고 상세와 같은 방향 (2026-09-25).
+     가입 권유도, 빈 자료를 채운 회원 화면도 그리지 않습니다 */
   const who = await serverWho(sb);
+
+  if (who === '모름') return null;
 
   if (who === '비회원') {
     return (

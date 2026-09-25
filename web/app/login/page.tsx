@@ -38,7 +38,7 @@ const METHODS: Method[] = [
 export default function Login() {
   const toast = useToast();
   const router = useRouter();
-  const { session, me } = useAuth();
+  const { loading, session, me } = useAuth();
   const [busy, setBusy] = useState<LoginMethod | null>(null);
 
   /* 서버에는 localStorage 가 없습니다. 서버 그림은 null 로 두고
@@ -88,6 +88,20 @@ export default function Login() {
     await browserSupabase().auth.signOut({ scope: 'local' });
     toast('처음부터 다시 해요');
   };
+
+  /* 확인 중에는 아무것도 안 그립니다 (2026-09-25).
+     전에는 loading 을 안 받아서, 로그인한 분이 이 화면을 열면 첫 그림에
+     카카오·네이버 단추가 통째로 뗴다가 바뀌었습니다. 자기가 로그아웃된 줄 알게 됩니다 */
+  if (loading) {
+    return (
+      <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
+        <div className="mx-auto w-full max-w-[22rem]">
+          <Logo className="!text-h1" />
+          <p className="mt-2 text-lg text-gray-500">잠시만요…</p>
+        </div>
+      </main>
+    );
+  }
 
   /* 가입까지 마친 분이 다시 들어온 경우 */
   if (session && me) {

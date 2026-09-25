@@ -29,7 +29,7 @@ export function OrgStat({
 }: {
   name: string; sido: string | null; staffed: boolean; icons: Record<string, string>;
 }) {
-  const { loading, session } = useAuth();
+  const { loading, session, who } = useAuth();
   /* undefined = 아직 안 물어봄 */
   const [row, setRow] = useState<Row | null | undefined>(undefined);
 
@@ -45,7 +45,11 @@ export function OrgStat({
   if (!staffed) return null;
   if (loading || row === undefined) return null;
 
-  if (!session) return <Locked />;
+  /* 서버와 같은 이름을 씁니다 (2026-09-25) — 회원 / 비회원 / 모름.
+     「모름」은 자물쇠도 안 걸고 자리를 비웁니다 — 못 물어본 것을
+     「로그인 안 함」으로 그리면 회원에게 가입 권유가 뜽니다 */
+  if (who === '모름') return null;
+  if (who === '비회원') return <Locked />;
   if (!row) return null;
 
   /* 공고 상세의 부품이 쓰는 모양으로 맞춥니다 */
@@ -99,7 +103,7 @@ function Locked() {
       <p className="mt-3 break-keep text-[12px] text-[#5F666C]">
         카카오 · 네이버로 3초 만에 시작해요
       </p>
-      <DiagTag 이름="components/org-stat.tsx · 화면(session 없음으로 봄)" />
+      <DiagTag 이름="components/org-stat.tsx · 화면(로그인 안 함 — 세션 벙)" />
     </section>
   );
 }
