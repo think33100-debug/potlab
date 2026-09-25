@@ -238,7 +238,19 @@ if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, n
         wanted_auth_no: s(g(r, 'wantedAuthNo')), verdict: s(g(r, '판정')) || '(없음)',
         reason: s(g(r, '근거')), org_name: s(g(r, '기관')), title: s(g(r, '제목')),
         decided_at: date(g(r, '판정일')) ? date(g(r, '판정일')) + 'T00:00:00+09:00' : null }),
-      key: 'wanted_auth_no' }
+      key: 'wanted_auth_no' },
+    /* 쓰레기통 — 버림 단어만 있어 안 담은 공고 (2026-09-25).
+       그냥 안 담으면 무엇을 버렸는지 아무도 모릅니다. 단어 하나가 진짜
+       공고를 죽였을 때 알아챌 길이 없어서 버린 것도 나릅니다.
+       「되돌림」 칸이 Y 면 관리자가 「잘못 버림」을 누른 것입니다 */
+    { sheet: '쓰레기통', table: 'job_trash', map: (g, r) => ({
+        id: s(g(r, '공고ID')),
+        trashed_at: (s(g(r, '버린시각')) || '').replace(' ', 'T') + ':00+09:00',
+        source: s(g(r, '출처')), org_name: s(g(r, '기관명')),
+        title: s(g(r, '공고제목')), url: s(g(r, '원문주소')),
+        why: s(g(r, '걸린단어')) || '(없음)',
+        restored: /^Y$/i.test(String(g(r, '되돌림') || '').trim()) }),
+      key: 'id' }
   ];
 
   const loaded = [{ name: '채용공고 → job_posts', sheet: J.total, rows: posts.length, table: 'job_posts', data: posts }];
