@@ -108,10 +108,21 @@ export type OrgJob = {
    org_public · org_nearby · org_jobs 의 실행 권한을 anon 에서 걷었습니다.
    그래서 열쇠꾸러미를 받습니다 — 로그인 안 한 사람으로 부르면 권한 오류가 나고
    여기서 빈 값이 됩니다. 화면은 그 구역을 감추고 가입 권유를 그립니다. */
+/* 제목(title)은 **공고 상세에서만** 넘깁니다 (2026-09-25).
+
+   알리오는 본사 이름으로 공고를 올리고 실제 병원은 제목 대괄호 안에 적습니다
+   — 「근로복지공단」 + 「[대구병원] 기간제(물리치료사)」.
+   그걸로 기관을 찾는 마지막 단계가 DB 함수에 있습니다.
+
+   대괄호만 쓰면 안 됩니다. 「[대구병원]」 하나로 찾으면 대구 북구의 **다른
+   사립 병원**에 붙습니다. 그래서 기관명을 앞에 붙여 찾습니다.
+
+   기관 화면은 기관 이름에서 출발하므로 제목이 없습니다 — 안 넘기면
+   그 단계를 그냥 건너뜁니다. */
 export async function orgPublic(
-  sb: SupabaseClient, name: string, sido: string | null,
+  sb: SupabaseClient, name: string, sido: string | null, title?: string | null,
 ): Promise<OrgPublic | null> {
-  const { data } = await sb.rpc('org_public', { p_name: name, p_sido: sido });
+  const { data } = await sb.rpc('org_public', { p_name: name, p_sido: sido, p_title: title ?? null });
   return ((data ?? []) as OrgPublic[])[0] ?? null;
 }
 

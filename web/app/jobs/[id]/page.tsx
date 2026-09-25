@@ -339,7 +339,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
             </Rise>
           )}
 
-          <OrgPanel orgName={j.org_name} exceptJobId={j.id} />
+          <OrgPanel orgName={j.org_name} exceptJobId={j.id} jobTitle={j.title} />
           </JobVeil>
           )}
         </div>
