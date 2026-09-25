@@ -199,7 +199,14 @@ export function SignupSurvey({
         title: '급여', sub: '연 총소득으로 봅니다. 월급만 비교하면 뜻이 없어요',
         /* 상여는 **안 써도 넘어갑니다** (2026-09-25).
            전에는 0 이라도 써야 했는데, 상여가 얼리는지 모르는 분이 있습니다.
-           비우면 NULL 로 들어갑니다 — 「0원」과 「안 적음」은 칸에서 갈립니다 */
+
+           저장과 셀은 일부러 다릅니다 — 세중님이 정하셨습니다 (2026-09-25).
+             저장  비우면 NULL. 「0원」과 「안 적음」은 칸에서 그대로 갈라 남습니다
+             셀   연 총소득(annual_total)은 COALESCE(bonus_yearly, 0) 으로 **0 으로** 셉니다
+
+           그래서 상여를 안 적은 분도 연봉 통계에 들어갑니다. 빼지 않습니다.
+           **annual_total 을 고치지 마세요.** 자료가 적을 때는 한 명이라도 더
+           세는 쪽이 낫다는 판단입니다. 화면에 「제외」 같은 말도 안 적습니다 */
         ok: has('base_monthly') && has('extra_pay_monthly')
           && !bad(['base_monthly', 'extra_pay_monthly', 'bonus_yearly', 'net_monthly', 'dependents']),
         body: (
@@ -217,7 +224,7 @@ export function SignupSurvey({
               hint="치료 건수나 실적으로 더 받는 돈이에요. 없으면 0"
               v={f.extra_pay_monthly} on={set} f={f} />
             <Num k="bonus_yearly" label="연간 상여금" unit="만원" ph="0"
-              hint="작년 한 해 명절·성과급으로 받은 돈을 다 합쳐서. 없으면 0, 모르시면 비워 두세요"
+              hint="작년 한 해 명절·성과급으로 받은 돈을 다 합쳐서. 없으면 비워두세요"
               v={f.bonus_yearly} on={set} f={f} />
           </>
         ),

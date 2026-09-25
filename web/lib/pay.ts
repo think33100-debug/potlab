@@ -88,7 +88,16 @@ export type PayInput = {
 
 const n0 = (v: number | undefined) => (Number.isFinite(v) ? (v as number) : 0);
 
-/* 연 총소득 (만원) */
+/* 연 총소득 (만원).
+
+   **안 적은 칸은 0 으로 셉니다.** DB 의 salary_records.annual_total 생성식과
+   같은 규칙이어야 합니다 — 거기도 COALESCE(…, 0) 입니다. 둘이 어긋나면
+   화면에 보이는 연봉과 통계에 잡히는 연봉이 달라집니다.
+
+   상여를 안 적은 분도 이 계산에 들어갑니다. 그만큼 연봉이 낮게 잡히지만,
+   자료가 적을 때는 한 명이라도 더 세는 쪽이 낫다고 정했습니다
+   (2026-09-25 · 세중님 판단). 통계에서 빼지 않고, 화면에 「제외」 같은 말도
+   안 적습니다. 고치려거든 이 주석부터 지우세요. */
 export function annualTotal(p: PayInput): number {
   return n0(p.base) * 12
     + n0(p.extra) * 12
