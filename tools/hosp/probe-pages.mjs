@@ -46,6 +46,17 @@ async function 두드리기(u) {
   }
 }
 
+/* ⚠ **EUC-KR 쪽이 아직 많습니다.** UTF-8 로 읽으면 한글이 전부 깨져서
+   「채용/모집」 이 0번으로 세집니다. 2026-09-26 에 강동경희대·동국대일산을
+   그렇게 「글 적음」 으로 잘못 셌습니다. 머리글 → <meta> 차례로 봅니다. */
+function 글로(buf, ct) {
+  let cs = (String(ct).match(/charset=["']?([\w-]+)/i) || [])[1];
+  if (!cs) cs = (buf.subarray(0, 2048).toString('latin1').match(/charset=["']?([\w-]+)/i) || [])[1];
+  cs = (cs || 'utf-8').toLowerCase();
+  try { return { 글: new TextDecoder(cs).decode(buf), cs }; }
+  catch { return { 글: buf.toString('utf8'), cs: cs + '(못 읽어 utf-8 로)' }; }
+}
+
 /* 채용글처럼 보이는 줄 세기 — 어림입니다 */
 function 글수(html) {
   const 날짜 = (html.match(/20\d{2}[.\-/]\s?\d{1,2}[.\-/]\s?\d{1,2}/g) || []).length;
@@ -73,7 +84,7 @@ for (const r of 볼것) {
     console.log('✗ ' + r.기관.slice(0, 24).padEnd(26) + '못 붙음 · ' + g.왜);
     continue;
   }
-  const html = g.몸.toString('utf8');
+  const { 글: html, cs } = 글로(g.몸, g.ct);
   const n = 글수(html);
   const js = JS쪽인가(html, r.url);
   let 판정 = '열림';
@@ -81,13 +92,13 @@ for (const r of 볼것) {
   else if (js) 판정 = 'JS';
   else if (n.채용말 < 3) 판정 = '글 적음';
 
-  결과.push({ ...r, 판정, code: g.code, 크기: g.몸.length, n, 끝주소: g.끝주소 });
+  결과.push({ ...r, 판정, code: g.code, 크기: g.몸.length, cs, n, 끝주소: g.끝주소 });
   const 표 = 판정 === '열림' ? '○' : 판정 === 'JS' ? '◐' : '✗';
   console.log(표 + ' ' + r.기관.slice(0, 24).padEnd(26)
     + String(g.code).padStart(3) + ' · ' + String(g.몸.length).padStart(7) + '바이트'
     + ' · 날짜 ' + String(n.날짜).padStart(3) + ' · tr ' + String(n.tr).padStart(3)
     + ' · 「채용/모집」 ' + String(n.채용말).padStart(3)
-    + ' · ' + 판정
+    + ' · ' + cs.padEnd(7) + ' · ' + 판정
     + (g.끝주소 && g.끝주소 !== r.url ? '  → ' + g.끝주소.slice(0, 60) : ''));
   await new Promise((x) => setTimeout(x, 700));
 }

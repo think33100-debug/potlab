@@ -1,0 +1,51 @@
+name: 브라우저로 열어보기 (미다스 4곳 · 한 번 시험)
+
+# ── 왜 있나 ────────────────────────────────────────────────
+# 아래 네 곳은 Next.js 로 만든 채용 사이트라 HTML 만 받아서는 공고 목록이
+# 안 옵니다 (집에서 확인 · 본문 20자 남짓). 번들 6개를 읽어도 자료 주소가
+# 안 나왔습니다.
+#
+#   세종충남대학교병원    cnuhinsa.recruiter.co.kr   (충남대병원 본원과 공용)
+#   빛고을전남대학교병원  cnuh.recruiter.co.kr       (전남대병원 본원과 공용)
+#   중앙대학교광명병원    caumc.recruiter.co.kr
+#   한양대학교구리병원    hyumcguri.recruiter.co.kr
+#
+# 알고 싶은 것은 **하나**입니다 —
+#   「GitHub 자리에서 브라우저를 띄우면 목록이 오나, 아니면 IP 가 막히나」
+#
+# 판정
+#   목록 HTML 이 오면            → 「열림(브라우저)」
+#   접속 자체가 막히면            → 「GitHub IP 차단 → 집에서 긁음」
+#     (타임아웃 · 403 · 빈 응답)
+#
+# **「됐다/안 됐다」 만 적지 않습니다.** 응답 원문 앞 500자를 찍습니다.
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # `npx playwright install` 만 하면 크로미움만 깔립니다.
+      # 스크립트가 `import('playwright')` 를 하니 **묶음도 깔아야** 합니다
+      - name: 크로미움 깔기
+        run: |
+          npm install --no-save playwright@1.47.0
+          npx playwright install --with-deps chromium
+
+      - name: 열어보고 원문 찍기
+        run: node tools/hosp/probe-browser.mjs
+
+      - name: 받은 쪽 올려두기
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe-browser
+          path: tools/hosp/reports/browser/
+          if-no-files-found: warn

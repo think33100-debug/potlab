@@ -9,7 +9,7 @@
  */
 import fs from 'node:fs';
 import { hwp글자, 한글파일인가 } from './index.mjs';
-import { 첨부받기, 기본간격, 묶음, 묶음쉼, 쉼 } from '../cleaneye-file.mjs';
+import { 첨부받기, 기본간격, 통쉼, 쉼 } from '../cleaneye-file.mjs';
 
 const 인자 = process.argv.slice(2);
 const 몇 = Number((인자[인자.indexOf('--n') + 1]) || 0) || 0;
@@ -44,13 +44,12 @@ console.log('클린아이 의료 공고 중 한글 첨부 ' + 의료.length + '�
 let 됨 = 0, 못받음 = 0, 못읽음 = 0, 넘침 = 0, 다시받음 = 0, 받은수 = 0;
 const 실패 = [], 글자수 = [], 직군찾음 = [];
 for (const o of 볼것) {
-  /* 클린아이는 15건마다 막습니다 — 통이 다시 찰 때까지 쉽니다 */
-  if (받은수 && 받은수 % 묶음 === 0) {
-    console.log('   … ' + 받은수 + '건 받았습니다. 클린아이 통이 다시 찰 때까지 ' + (묶음쉼 / 1000) + '초 쉽니다');
-    await 쉼(묶음쉼);
-  }
   받은수++;
-  const g = await 첨부받기(o.URL);
+  /* 통이 15건입니다. **몇 번째인지로 세면 안 맞습니다** — 첨부가 없어 건너뛴
+     것도 같이 세어져서, 2026-09-26 에 4건 받고 쉬는 일이 있었습니다.
+     그냥 **429 를 만났을 때** 한 번 쉬었다 다시 받습니다 (통쉼 = 2분 반) */
+  const g = await 첨부받기(o.URL, { 다시: 1, 기다림: 통쉼 });
+  if (g.다시받음) console.log('   … 통이 차서 ' + (통쉼 / 1000) + '초 쉬었다 다시 받았습니다');
   if (!g.buf) {
     못받음++; if (g.넘침) 넘침++;
     실패.push({ o, 왜: g.왜, buf: null });

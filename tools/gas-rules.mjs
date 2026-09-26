@@ -98,7 +98,7 @@ const 통 = 읽기();
    MEDTECH 로 「보류함으로 보낼지 그냥 버릴지」 를 가릅니다.
    그걸 안 옮겼다가 보류함이 362건이 됐습니다 (2026-09-26) */
 const 밖으로 = new Function(통.글 + '\nreturn { '
-  + 함수이름.concat(['MEDTECH', 'MED_ONLY_OTHER']).join(', ') + ' };')();
+  + 함수이름.concat(['MEDTECH', 'MED_ONLY_OTHER', 'OTHER_PROF_RE', 'OUR_PROF_RE', 'OTHER_JOBS']).join(', ') + ' };')();
 
 export const matchJob = 밖으로.matchJob_;
 export const notOurs = 밖으로.notOurs_;
@@ -109,6 +109,10 @@ export const fmtDate = 밖으로.fmtDate_;
    그냥 버릴지」 를 가릅니다. 안 옮겼다가 보류함이 362건이 됐습니다 (2026-09-26) */
 export const MEDTECH = 밖으로.MEDTECH;
 export const MED_ONLY_OTHER = 밖으로.MED_ONLY_OTHER;
+/* 첨부를 읽고 「그럼 무슨 직군이 적혀 있었나」 를 적어 주려고 씁니다 (sort-rule 5단계) */
+export const OTHER_PROF_RE = 밖으로.OTHER_PROF_RE;
+export const OUR_PROF_RE = 밖으로.OUR_PROF_RE;
+export const OTHER_JOBS = 밖으로.OTHER_JOBS;
 export const 구운날 = 통.구운날;
 
 /* node tools/gas-rules.mjs --굽기 */

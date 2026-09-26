@@ -40,7 +40,7 @@ import { matchJob, notOurs, mixedTitle, titleOtherOnly, 구운날 } from './gas-
 import { sortJob } from './sort-rule.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
-import { 첨부받기, 기본간격, 묶음, 묶음쉼, 쉼 } from './cleaneye-file.mjs';
+import { 첨부받기, 기본간격, 통크기, 통쉼, 쉼 } from './cleaneye-file.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'CE2';
@@ -132,11 +132,26 @@ async function 시도한곳(cfg, cd, 이름, 떠들기) {
 
 /* ── 첨부 읽기 ────────────────────────────────────────────── */
 /** 공고 하나의 첨부 → { 글, 왜, 꼴 }. 던지지 않습니다 */
-async function 첨부글자(o, 셈) {
+async function 첨부글자(o, 셈, 옵션) {
   const 이름 = String(o.FILE_NAME1 || '');
   if (!이름) { 셈.첨부없음++; return { 글: '', 왜: '첨부가 없는 공고입니다' }; }
 
-  const g = await 첨부받기(o.URL);
+  let g = await 첨부받기(o.URL, { 다시: 0 });
+  /* ⚠ **429 로 튕긴 요청도 통을 먹습니다.** 그래서 곧바로 다시 두드리면
+     통이 영영 안 찹니다 (2026-09-26 에 그렇게 헛돌았습니다).
+     재어 보니 **통 15건 · 2분이면 다 찹니다.** 한 번 기다렸다 이어갑니다 */
+  if (!g.buf && g.넘침 && 옵션 && !옵션.통막힘.막힘) {
+    const 남은 = 옵션.끝날때 - Date.now();
+    if (남은 > 통쉼 + 30000) {
+      셈.통쉼++;
+      console.log('   … 통이 찼습니다 (' + 셈.첨부받음 + '건 받음). ' + (통쉼 / 1000) + '초 쉬고 이어갑니다');
+      await 쉼(통쉼);
+      g = await 첨부받기(o.URL, { 다시: 0 });
+    } else {
+      /* 이번 실행에 남은 시간이 모자랍니다 — 다음 실행이 이어서 읽습니다 */
+      옵션.통막힘.막힘 = true;
+    }
+  }
   if (!g.buf) {
     if (g.넘침) { 셈.막힘++; return { 글: '', 왜: g.왜, 막힘: true }; }
     셈.첨부못받음++; return { 글: '', 왜: g.왜 };
@@ -187,29 +202,23 @@ async function 한건(o, 셈, 옵션) {
     if (j) { job = j; 근거 = '직무'; }
   }
 
-  let hold = '', 다시 = false, 못읽은까닭 = '', 읽었나 = false;
-
   /* ④ 첨부 — **이 경로의 본체입니다.**
-     다만 버릴 것은 첨부를 열기 전에 버립니다 (알리오에서 배운 것).
-     클린아이는 하루 15건밖에 못 받아서 더 아껴야 합니다 */
+     버릴 것은 첨부를 열기 전에 버립니다 (알리오에서 배운 것).
+     클린아이는 통이 15건이라 더 아껴야 합니다.
+
+     **판정은 여기서 안 합니다.** 읽은 글을 그대로 `sortJob` 5단계에 넘깁니다 —
+     규칙을 클린아이 전용 코드에 두면 두 벌이 됩니다 (2026-09-26 세중님 지시) */
+  let 첨부 = undefined;
   if (!job && !옵션.첨부안열기) {
     if (titleOtherOnly(title)) { 셈.남의자리++; return null; }
-    if (셈.첨부받음 >= 옵션.첨부한도) {
-      /* ⑤ 한도에 걸린 것은 **보류함이 아니라 「다음 번에」** 입니다.
-         보류함에 넣으면 관리자가 읽을 수 없는 것을 계속 보게 됩니다 */
-      셈.다음번++; 다시 = true;
-      못읽은까닭 = '이번엔 첨부를 못 열었습니다 (클린아이 다운로드 한도 ' + 옵션.첨부한도 + '건) — 다음 번에 다시 봅니다';
+    if (옵션.통막힘 && 옵션.통막힘.막힘) {
+      /* 이번 실행에서는 더 못 읽습니다 — 다음 실행이 이어서 읽습니다 */
+      셈.다음번++;
+      첨부 = { 읽음: false, 왜: '이번 실행의 다운로드 몫을 다 썼습니다 — 다음 실행이 이어서 읽습니다' };
     } else {
-      const a = await 첨부글자(o, 셈);
-      if (a.글) {
-        읽었나 = true;
-        const j = matchJob(a.글);
-        if (j && !notOurs(a.글.slice(0, 200))) { job = j; 근거 = '첨부 ' + (a.꼴 || ''); 셈.첨부로가림++; }
-        else 못읽은까닭 = '첨부를 읽었지만 우리 직군이 없음';
-      } else {
-        못읽은까닭 = a.왜;
-        if (a.막힘) { 다시 = true; 셈.다음번++; }
-      }
+      const a = await 첨부글자(o, 셈, 옵션);
+      첨부 = a.글 ? { 읽음: true, 글: a.글 } : { 읽음: false, 왜: a.왜 };
+      if (!a.글 && a.막힘) 셈.다음번++;
       await 쉼(기본간격);
     }
   }
@@ -219,28 +228,15 @@ async function 한건(o, 셈, 옵션) {
   const 끝 = 날(o.PUB_END_DATE);
   if (끝 && 끝 < 오늘) { 셈.마감++; return null; }
 
-  /* ⑥ 네 갈래 — 규칙은 tools/sort-rule.mjs 한 벌 */
-  const 갈래 = sortJob(title, job || '');
-
-  /* ⑦ 못 가렸을 때 — **보류함이냐 쓰레기통이냐를 「읽었나」 로 가릅니다** (2026-09-26)
-       보류함 = 「모르겠다, 사람이 봐 달라」
-       쓰레기통 = 「우리 것이 아닌 걸 안다」
-
-     첨부를 **읽었는데** 우리 직군이 없으면 그건 모르는 게 아니라 **아는** 것입니다.
-     그때는 네 갈래 판정을 따릅니다 — 「의사직(안과 전문의) 초빙」 은 쓰레기통입니다.
-     첨부를 **못 읽었으면**(없음·막힘·깨짐) 그건 모르는 것이라 보류함입니다.
-
-     이 구분이 없으면 하루 70건이 보류함에 쌓입니다. 그중 23건이 의사직·병원보조라
-     관리자가 그걸 다 넘겨야 진짜 봐야 할 것에 닿습니다.
-     (옛 수집기 gas 는 못 가린 것을 **그냥 버렸습니다** — 그래서 한 달에 7건뿐이었습니다) */
-  if (!job) {
-    if (읽었나 && 갈래.갈래 === '쓰레기통') {
-      /* 읽어보니 우리 것이 아니었습니다 — 버립니다 */
-    } else {
-      hold = 못읽은까닭 || '직군을 못 가렸습니다';
-    }
+  /* ⑤ 갈래 — 규칙은 tools/sort-rule.mjs 한 벌 (네 갈래 + 5단계) */
+  const 갈래 = sortJob(title, job || '', 첨부);
+  if (!job && 갈래.갈래 === '회원목록' && 갈래.단계 === 5) {
+    job = matchJob(첨부.글) || '공통';
+    근거 = '첨부';
+    셈.첨부로가림++;
   }
-  return { id, org, title, job, 근거, hold, 다시, 갈래, o };
+  const hold = 갈래.갈래 === '보류함' ? 갈래.왜 : '';
+  return { id, org, title, job, 근거, hold, 다시: !!갈래.다시, 갈래, o };
 }
 
 function 날(v) {
@@ -283,8 +279,9 @@ const 한줄 = argv.includes('--한줄');
 const dry = argv.includes('--dry') || 한줄;
 const 몇건 = argv.includes('--n') ? Number(argv[argv.indexOf('--n') + 1]) || 0 : 0;
 const 첨부안열기 = argv.includes('--첨부안열기');
-/* 한 번 돌 때 열 첨부 수. 클린아이가 15건에서 막습니다 */
-const 첨부한도 = argv.includes('--첨부한도') ? Number(argv[argv.indexOf('--첨부한도') + 1]) || 묶음 : 묶음;
+/* 이번 실행에 쓸 시간. 통이 차면 2분 쉬고 이어가다가, 이 시간을 넘기면
+   나머지는 「다음에」 로 넘깁니다 (Actions timeout 25분보다 넉넉히 짧게) */
+const 시간예산 = (argv.includes('--분') ? Number(argv[argv.indexOf('--분') + 1]) || 18 : 18) * 60000;
 
 const 원래log = console.log;
 if (한줄) console.log = () => {};
@@ -299,7 +296,7 @@ console.log('  열쇠          클린아이 ' + (cfg.CLEANEYE_KEY ? cfg.CLEANEYE
   + ' · Supabase ' + (cfg.SUPABASE_ANON_KEY ? '있음' : '**없음**')
   + ' · collect_put ' + (cfg.COLLECT_KEY_CE2 ? '있음' : '**없음**'));
 console.log('  첨부 읽기     한글 tools/hwp · PDF ' + (OCR쓸수있나() ? OCR이름표 : '**맡길 곳 없음**')
-  + ' · 한 번에 ' + 첨부한도 + '건까지');
+  + ' · 통 ' + 통크기 + '건/' + (통쉼 / 1000) + '초 · 이번 실행 ' + Math.round(시간예산 / 60000) + '분까지');
 if (!cfg.CLEANEYE_KEY) { console.error('CLEANEYE_KEY 가 없습니다'); process.exit(1); }
 
 /* ① 목록 — 시도 17곳 */
@@ -323,25 +320,27 @@ console.log('  전체 ' + 전부.length + '건 · 그중 의료 ' + 의료.lengt
 /* ② 판정 — **의료만** 봅니다. 나머지는 우리 일이 아닙니다 */
 const 셈 = { 남의자리: 0, 마감: 0, 첨부없음: 0, 첨부받음: 0, 첨부못받음: 0, 막힘: 0,
   hwp읽음: 0, hwp못읽음: 0, OCR: 0, pdf읽음: 0, pdf못읽음: 0, OCR못씀: 0,
-  모르는꼴: 0, 첨부로가림: 0, 다음번: 0 };
+  모르는꼴: 0, 첨부로가림: 0, 다음번: 0, 통쉼: 0 };
 const 볼것 = 몇건 ? 의료.slice(0, 몇건) : 의료;
 console.log('\n② 판정 — ' + 볼것.length + '건');
 const 결과 = [];
-let 첨부센것 = 0;
+const 통막힘 = { 막힘: false };
+const 옵션 = { 첨부안열기, 통막힘, 끝날때: t0 + 시간예산 };
 for (const o of 볼것) {
-  /* 클린아이는 15건마다 막습니다. 한도까지 받았으면 더 안 두드립니다 */
-  const x = await 한건(o, 셈, { 첨부안열기, 첨부한도 });
+  if (Date.now() > 옵션.끝날때) 통막힘.막힘 = true;   // 시간이 다 됐습니다
+  const x = await 한건(o, 셈, 옵션);
   if (x) 결과.push(x);
-  if (셈.첨부받음 > 첨부센것) 첨부센것 = 셈.첨부받음;
 }
 
-const 회원 = 결과.filter((x) => !x.hold && x.갈래.갈래 === '회원목록');
-const 보류 = 결과.filter((x) => x.hold || x.갈래.갈래 === '보류함');
-const 쓰레기 = 결과.filter((x) => !x.hold && x.갈래.갈래 === '쓰레기통');
+/* 갈래는 sortJob 하나가 정합니다 — 여기서 다시 안 가릅니다 */
+const 회원 = 결과.filter((x) => x.갈래.갈래 === '회원목록');
+const 보류 = 결과.filter((x) => x.갈래.갈래 === '보류함');
+const 쓰레기 = 결과.filter((x) => x.갈래.갈래 === '쓰레기통');
 
 console.log('  남의 자리라 버림  ' + 셈.남의자리 + ' · 마감 지남 ' + 셈.마감);
 console.log('  첨부 — 없음 ' + 셈.첨부없음 + ' · 받음 ' + 셈.첨부받음
-  + ' · 못 받음 ' + 셈.첨부못받음 + ' · 막힘(429) ' + 셈.막힘 + ' · 다음 번에 ' + 셈.다음번);
+  + ' · 못 받음 ' + 셈.첨부못받음 + ' · 막힘(429) ' + 셈.막힘 + ' · 다음 번에 ' + 셈.다음번
+  + (셈.통쉼 ? ' · 통이 차서 쉰 횟수 ' + 셈.통쉼 : ''));
 console.log('         한글 읽음 ' + 셈.hwp읽음 + '/' + (셈.hwp읽음 + 셈.hwp못읽음)
   + ' · PDF 읽음 ' + 셈.pdf읽음 + '/' + (셈.pdf읽음 + 셈.pdf못읽음)
   + (셈.OCR못씀 ? ' · OCR 못 씀 ' + 셈.OCR못씀 : '') + (셈.모르는꼴 ? ' · 모르는 꼴 ' + 셈.모르는꼴 : ''));
@@ -389,12 +388,25 @@ const 담을것 = 회원.concat(보류).map((x) => {
       걸린단어: (x.갈래.걸린단어 || []).join(','),
       보류사유: x.hold || (x.갈래.갈래 === '보류함' ? x.갈래.왜 : ''),
       갈래: x.갈래.갈래,
+      /* **몇 단계에서 갈렸는지.** 쓰레기통 화면에서 관리자가
+         「의료기사인데 왜 버렸지」 를 사유만 보고 알 수 있어야 합니다 */
+      단계: String(x.갈래.단계 || ''),
+      사유: x.갈래.왜 || '',
       다시볼것: x.다시 ? 'Y' : '',
       첨부: String(o.FILE_NAME1 || ''),
     },
     collected_at: 이제,
   };
 });
+
+/* 버린 것도 남깁니다 — 관리자 화면(admin/trash)이 「버린 이유」 를 보여줍니다.
+   사유에 **몇 단계에서 버렸는지**와 첨부에서 찾은 직군이 들어 있어야
+   「의료기사인데 왜 버렸지」 를 사유만 보고 알 수 있습니다 */
+const 버릴것 = 쓰레기.map((x) => ({
+  id: 'CE' + x.id, org_name: x.org, title: x.title, url: String(x.o.URL || ''),
+  why: x.갈래.왜 + ((x.갈래.걸린단어 || []).length ? ' — ' + x.갈래.걸린단어.join(',') : ''),
+  trashed_at: 이제,
+}));
 
 /* ④ 담거나, 옛것과 대조하거나 */
 if (dry) {
@@ -446,5 +458,15 @@ if (dry) {
     (r['건너뛴것'] || []).slice(0, 5).forEach((x) => console.error('  건너뜀 ' + x.id + ' · ' + x.why));
   }
   console.log('\n씀          ' + 담음 + '건' + (건너뜀 ? ' · 건너뜀 ' + 건너뜀 + '건' : ''));
+
+  let 버림 = 0;
+  for (let i = 0; i < 버릴것.length; i += 200) {
+    const r = await rpc(cfg, 'collect_trash', {
+      p_secret: cfg.COLLECT_KEY_CE2, p_source: SOURCE, p_rows: 버릴것.slice(i, i + 200),
+    });
+    버림 += r['담음'] || 0;
+    (r['건너뛴것'] || []).slice(0, 5).forEach((x) => console.error('  쓰레기통 건너뜀 ' + x.id + ' · ' + x.why));
+  }
+  console.log('쓰레기통     ' + 버림 + '건 (사유를 함께 남겼습니다)');
   console.log(Math.round((Date.now() - t0) / 1000) + '초');
 }
