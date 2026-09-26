@@ -71,6 +71,30 @@ function date(v) {
   if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
   return y + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0');
 }
+/* 날짜+시각 → ISO(+09:00) · 못 읽으면 null
+ *
+ * ── 2026-09-26 에 여기서 다리가 멈췄습니다 ────────────────────
+ * gas 는 「2026-09-25 22:57」 로 **초 없이** 적습니다.
+ * 그런데 **구글 시트가 그 글자를 날짜 값으로 바꿔 저장하고**,
+ * exportRows 가 Date 를 'yyyy-MM-dd HH:mm:ss' 로 돌려줍니다.
+ * 받는 쪽에서 `.replace(' ','T') + ':00+09:00'` 를 하고 있었으니
+ *   「2026-09-25T22:57:00」 + 「:00+09:00」 = 「…22:57:00:00+09:00」
+ * 초가 두 번 붙어 PostgREST 가 400(22007)으로 거절했고, 그 한 표 때문에
+ * 다리가 통째로 멈췄습니다. 85줄 전부 같은 꼴이었습니다.
+ *
+ * 같은 함정이 gas 에도 적혀 있습니다 (offLogDay_ 의 주석).
+ * **시트에서 온 날짜는 초가 있을 수도 없을 수도 있습니다.** 둘 다 견딥니다.
+ */
+function ts(v) {
+  const t = String(v == null ? '' : v).trim();
+  if (!t) return null;
+  const m = t.match(/^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})[T ](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) { const d = date(t); return d ? d + 'T00:00:00+09:00' : null; }
+  const [, y, mo, d, h, mi, se] = m;
+  if (+mo < 1 || +mo > 12 || +d < 1 || +d > 31 || +h > 23 || +mi > 59) return null;
+  const p2 = (x) => String(x).padStart(2, '0');
+  return `${y}-${p2(mo)}-${p2(d)}T${p2(h)}:${mi}:${se || '00'}+09:00`;
+}
 /* 「서울특별시 종로구 …」 → 시도·시군구 */
 function region(v) {
   const t = String(v == null ? '' : v).trim();
@@ -196,7 +220,7 @@ const EXTRA_SHEETS = [
      「되돌림」 칸이 Y 면 관리자가 「잘못 버림」을 누른 것입니다 */
   { sheet: '쓰레기통', table: 'job_trash', map: (g, r) => ({
       id: s(g(r, '공고ID')),
-      trashed_at: (s(g(r, '버린시각')) || '').replace(' ', 'T') + ':00+09:00',
+      trashed_at: ts(g(r, '버린시각')),
       source: s(g(r, '출처')), org_name: s(g(r, '기관명')),
       title: s(g(r, '공고제목')), url: s(g(r, '원문주소')),
       why: s(g(r, '걸린단어')) || '(없음)',
@@ -226,7 +250,7 @@ const EXTRA_SHEETS = [
     key: 'name' }
 ];
 
-if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, num, region, sourceOf, env, page, readSheet, sb, count,
+if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, ts, num, region, sourceOf, env, page, readSheet, sb, count,
                                                    EXTRA_SHEETS, s }; return; }
 
 (async function main() {

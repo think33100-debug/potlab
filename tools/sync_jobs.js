@@ -108,6 +108,40 @@ async function upsert(cfg, table, rows, onConflict) {
   }
 }
 
+/* 담되, 틀린 줄이 있으면 **그 줄만 건너뜁니다** (2026-09-26).
+ *
+ * ── 왜 필요한가 ───────────────────────────────────────────────
+ * PostgREST 는 묶음 중 한 줄이 틀리면 **묶음 전체**를 거절합니다.
+ * 2026-09-26 에 쓰레기통 85줄의 시각 글자가 한 가지 꼴로 틀렸는데,
+ * 그것 때문에 다리가 통째로 멈췄습니다. 한 줄 때문에 전부 멈추면 안 됩니다.
+ *
+ * 평소에는 묶음 한 번으로 끝납니다. **거절당했을 때만** 한 줄씩 다시 넣어
+ * 나쁜 줄을 가려냅니다 — 느리지만 그때뿐이고, 무엇이 왜 빠졌는지 남습니다.
+ */
+async function upsertSkipping(cfg, table, rows, key) {
+  if (!rows.length) return { ok: 0, skipped: [] };
+  try { await upsert(cfg, table, rows, key); return { ok: rows.length, skipped: [] }; }
+  catch (e) {
+    const skipped = [];
+    let ok = 0;
+    for (const r of rows) {
+      try { await upsert(cfg, table, [r], key); ok++; }
+      catch (e2) {
+        skipped.push({ key: String(r[key]), why: String(e2.message).replace(/\s+/g, ' ').slice(0, 140) });
+      }
+    }
+    return { ok, skipped };
+  }
+}
+/* 건너뛴 줄을 눈에 띄게 찍고, 기록에 남길 한 줄을 돌려줍니다 */
+function 건너뜀알리기(table, skipped) {
+  if (!skipped.length) return '';
+  console.error('  ⚠ ' + table + ' — 건너뜀 ' + skipped.length + '건');
+  skipped.slice(0, 5).forEach((x) => console.error('      ' + x.key + ' · ' + x.why));
+  if (skipped.length > 5) console.error('      … 그 밖에 ' + (skipped.length - 5) + '건');
+  return table + ' 건너뜀 ' + skipped.length + '건 (' + skipped[0].why.slice(0, 60) + ')';
+}
+
 /* ── 어디까지 봤는지 ── */
 async function loadState(cfg) {
   const r = await get(cfg, 'collector_state?key=eq.job_sync&select=value');
@@ -191,8 +225,13 @@ async function syncExtras(cfg, dry) {
       if (!k || seen.has(k)) return false;
       seen.add(k); return true;
     });
-    if (!dry && rows.length) await upsert(cfg, o.table, rows, o.key);
-    결과.push({ sheet: o.sheet, table: o.table, n: rows.length, 시트줄: S.total });
+    let 담김 = rows.length, 건너뜀 = [];
+    if (!dry && rows.length) {
+      const r2 = await upsertSkipping(cfg, o.table, rows, o.key);
+      담김 = r2.ok; 건너뜀 = r2.skipped;
+    }
+    결과.push({ sheet: o.sheet, table: o.table, n: 담김, 시트줄: S.total,
+                건너뜀: 건너뜀 });
   }
   return 결과;
 }
@@ -288,25 +327,33 @@ async function dropTrashed(cfg, dry) {
        job_posts 는 이제 「옛 쪽이 말한 것」만 담는 자리라 통째로 덮어써도 됩니다.
        관리자가 고친 값은 job_post_edits 에, 사람이 내린 것은 job_hides 에 있습니다. */
     const before = await count(cfg, 'job_posts');
-    await upsert(cfg, 'job_posts', posts.map((p) => {
+    const 공고결과 = await upsertSkipping(cfg, 'job_posts', posts.map((p) => {
       const q = Object.assign({}, p); delete q.edited_fields; return q;
     }), 'id');
     const after = await count(cfg, 'job_posts');
-
-    await saveState(cfg, { sheet_total: total, last_run: new Date().toISOString(),
-                           last_mode: mode });
-    await log(cfg, { mode, sheet_total: total, read_rows: S.rows.length,
-                     upserted: posts.length, edits_kept: kept,
-                     took_ms: Date.now() - t0, ok: true,
-                     note: '새로 늘어난 줄 ' + (after - before) + '건' });
+    const 말 = [건너뜀알리기('job_posts', 공고결과.skipped)];
 
     /* ⑤ 공고 말고 세 장도 같이. 그리고 쓰레기통에 든 것은 표에서 치웁니다 */
     const extras = await syncExtras(cfg, false);
-    extras.forEach((x) => console.log('  ' + x.sheet.padEnd(8) + ' → ' + x.table.padEnd(12)
-      + (x.note ? x.note : x.n + '건 (시트 ' + x.시트줄 + '줄)')));
+    extras.forEach((x) => {
+      console.log('  ' + x.sheet.padEnd(8) + ' → ' + x.table.padEnd(12)
+        + (x.note ? x.note : x.n + '건 (시트 ' + x.시트줄 + '줄)'));
+      말.push(건너뜀알리기(x.table, x.건너뜀 || []));
+    });
     const 치움 = await dropTrashed(cfg, false);
     const 끝 = await count(cfg, 'job_posts');
     if (치움) console.log('  쓰레기통에 든 공고 ' + 치움 + '건을 표에서 치웠습니다');
+
+    /* 기록은 **다 끝난 뒤 한 번만** 남깁니다 (2026-09-26).
+       전에는 공고를 담자마자 ok:true 로 적고 그 뒤 세 장에서 죽어서,
+       한 번 돈 것이 ok:true 와 ok:false 두 줄로 남았습니다 */
+    await saveState(cfg, { sheet_total: total, last_run: new Date().toISOString(),
+                           last_mode: mode });
+    await log(cfg, { mode, sheet_total: total, read_rows: S.rows.length,
+                     upserted: 공고결과.ok, edits_kept: kept,
+                     took_ms: Date.now() - t0, ok: true,
+                     note: ['새로 늘어난 줄 ' + (after - before) + '건 · 치움 ' + 치움 + '건']
+                       .concat(말.filter(Boolean)).join(' | ').slice(0, 500) });
 
     console.log('담았습니다 · 표 ' + before + ' → ' + 끝 + '건 (새로 ' + (after - before)
       + ' · 치움 ' + 치움 + ')');
