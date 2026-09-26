@@ -26,7 +26,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, MEDTECH, 구운날 } from './gas-rules.mjs';
 import { sortJob } from './sort-rule.mjs';
-import { pdf글자, OCR쓸수있나 } from './drive-ocr.mjs';
+import { pdf글자, OCR쓸수있나, OCR어느길, OCR멈췄나 } from './drive-ocr.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'AL2';
@@ -219,7 +219,26 @@ async function 한건(cfg, r, 셈, 옵션) {
       if (!job && !우대에만) {
         우대에만 = !!matchJob(String(box.prefCn || '') + ' ' + String(box.prefCondCn || ''));
       }
-      /* ⑤ 첨부 공고문 (OCR) */
+      /* ── 버릴 것은 **OCR 하기 전에** 버립니다 (2026-09-26) ──────
+         처음에는 첨부를 먼저 읽고 나서 버렸습니다. 그래서 속리산국립공원·
+         발전공기업처럼 어차피 버릴 공고까지 OCR 을 돌렸고, 한 번 돌 때
+         OCR 실패 줄이 90줄 가까이 나왔습니다. PDF 를 열 값어치가 있는
+         공고는 10건 남짓입니다.
+         OCR 은 느리고(한 건에 수 초) 드라이브 할당량을 먹습니다.
+         **버릴 것을 먼저 버리고, 남은 것만 읽습니다.** */
+
+      /* 제목이 남의 자리인데 단계에도 우리 직군이 없으면 버립니다 (gas 와 같게).
+         **다만 우대 칸에 우리 직군이 적혀 있으면 안 버립니다** — 305299
+         대한적십자사 조리원 공고가 그렇습니다. 버리면 아무도 못 보고,
+         회원 목록에 올리면 조리원 자리가 작업치료사로 뜹니다. 보류함이 맞습니다 */
+      if (!job && !우대에만 && titleOtherOnly(title) && 근거 !== '상세 전형단계') {
+        셈.남의자리++; return null;
+      }
+      /* 「의료기술·의료기사·보건직」 같은 말이 있어야 우리 직군이 숨어 있을 수
+         있습니다. 그런 말이 없으면 우리와 무관한 공고입니다 */
+      if (!job && !우대에만 && !MEDTECH.test(hay)) { 셈.우리와무관++; return null; }
+
+      /* ⑤ 여기까지 살아남은 것만 첨부 공고문을 읽습니다 (OCR) */
       if (!job) {
         const a = await 공고문글자(box, 셈);
         if (a.글) {
@@ -228,24 +247,10 @@ async function 한건(cfg, r, 셈, 옵션) {
           else 못읽은까닭 = '공고문을 읽었지만 우리 직군이 없음';
         } else 못읽은까닭 = a.왜;
       }
-      /* 제목이 남의 자리인데 단계에도 우리 직군이 없으면 버립니다 (gas 와 같게).
-         **다만 우대 칸에 우리 직군이 적혀 있으면 안 버립니다** — 305299
-         대한적십자사 조리원 공고가 그렇습니다. 버리면 아무도 못 보고,
-         회원 목록에 올리면 조리원 자리가 작업치료사로 뜹니다. 보류함이 맞습니다 */
-      if (!job && !우대에만 && titleOtherOnly(title) && 근거 !== '상세 전형단계') {
-        셈.남의자리++; return null;
-      }
 
-      /* ⑥ **보류함으로 보낼지, 그냥 버릴지** — gas 의 collectJobs 와 같은 관문입니다.
-         「의료기술·의료기사·보건직」 같은 말이 있어야 우리 직군이 숨어 있을 수
-         있습니다. 그런 말이 없으면 속리산국립공원·발전공기업 공고입니다 —
-         보류함에 넣으면 관리자가 못 봅니다.
-         이걸 안 옮겼더니 보류함이 364건이 됐습니다 (2026-09-26). */
+      /* ⑥ 그래도 못 가렸으면 보류함으로 — **버리지 않습니다** */
       if (!job) {
-        /* 우대 칸에만 있던 것은 **버리지 않고 보류함으로.** 사람이 공고문을
-           열어 「정말 그 자리를 뽑는가」 를 봅니다 (2026-09-26) */
         if (우대에만) { hold = '직군이 우대 자격증에만 있음 — 확인 필요'; 근거 = '상세 우대'; }
-        else if (!MEDTECH.test(hay)) { 셈.우리와무관++; return null; }
         else hold = 못읽은까닭 || '직군을 뭉뚱그린 공고입니다';
       }
       if (box.files) r.__files = box.files.length;
@@ -302,7 +307,10 @@ for (const k of ['ALIO_LIST_KEY', 'ALIO_DETAIL_KEY', 'SUPABASE_URL', 'SUPABASE_A
 if (!dry && !cfg.COLLECT_KEY_AL2) { console.error('COLLECT_KEY_AL2 가 없습니다 (담으려면 필요합니다)'); process.exit(1); }
 
 console.log('알리오 새 수집기 · ' + (dry ? '**--dry · 담지 않습니다**' : '담습니다 (source=' + SOURCE + ')'));
-console.log('규칙 구운 날 ' + 구운날 + ' · OCR ' + (OCR쓸수있나() ? '쓸 수 있음' : '열쇠 없음 → PDF 는 보류함으로') + '\n');
+console.log('규칙 구운 날 ' + 구운날 + ' · OCR '
+  + (OCR쓸수있나()
+      ? (OCR어느길() === 'oauth' ? '세중님 계정 (OAuth · drive.file)' : '서비스 계정')
+      : '열쇠 없음 → PDF 는 보류함으로') + '\n');
 
 /* ① 목록 전부 */
 let rows = [];
@@ -339,6 +347,8 @@ const 쓰레기 = 결과.filter((x) => !x.hold && x.갈래.갈래 === '쓰레기
 
 console.log('상세 열림   ' + 셈.상세 + '건 (못 받음 ' + 셈.상세못받음 + ')');
 console.log('OCR        ' + 셈.OCR + '건');
+/* 열쇠가 죽었으면 **조용히 넘어가지 않습니다.** 빨간 줄로 잡히게 exit 1 입니다 */
+if (OCR멈췄나()) { console.error('\n' + OCR멈췄나()); process.exitCode = 1; }
 console.log('남의 자리   ' + 셈.남의자리 + '건 · 우리와 무관 ' + 셈.우리와무관 + '건 · 마감 ' + 셈.마감 + '건');
 console.log('회원 목록   ' + 회원.length + '건');
 console.log('보류함      ' + 보류.length + '건');

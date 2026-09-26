@@ -27,59 +27,87 @@
  */
 import crypto from 'node:crypto';
 
-const 범위 = 'https://www.googleapis.com/auth/drive';
-let 계정 = null, 토큰 = null, 토큰끝 = 0;
+/* ── 두 가지 길 ───────────────────────────────────────────────
+ *  ① **세중님 계정 (OAuth · 지금 쓰는 길)**
+ *     GDRIVE_CLIENT_ID · GDRIVE_CLIENT_SECRET · GDRIVE_REFRESH_TOKEN
+ *     범위는 drive.file — **이 앱이 만든 파일만** 봅니다.
+ *  ② 서비스 계정 (2026-09-26 에 막혔습니다. 남겨만 둡니다)
+ *     GDRIVE_SA_JSON. **서비스 계정은 제 드라이브 용량이 0** 이라
+ *     폴더를 공유받아도 올린 파일 주인이 서비스 계정이라 403 이 납니다.
+ *     공유 드라이브가 있으면 풀리는데 개인 gmail 에는 없습니다.
+ */
+const 범위 = 'https://www.googleapis.com/auth/drive.file';
+let 토큰 = null, 토큰끝 = 0;
 
-function 열쇠읽기() {
-  if (계정 !== null) return 계정;
-  const raw = process.env.GDRIVE_SA_JSON;
-  if (!raw) { 계정 = false; return 계정; }
-  try {
-    const j = JSON.parse(raw);
-    계정 = (j.client_email && j.private_key) ? j : false;
-  } catch { 계정 = false; }
-  return 계정;
+function 어느길() {
+  if (process.env.GDRIVE_REFRESH_TOKEN && process.env.GDRIVE_CLIENT_ID
+      && process.env.GDRIVE_CLIENT_SECRET) return 'oauth';
+  if (process.env.GDRIVE_SA_JSON) return 'sa';
+  return '';
 }
-
-export function OCR쓸수있나() { return !!열쇠읽기(); }
+export function OCR쓸수있나() { return !!어느길(); }
+export function OCR어느길() { return 어느길(); }
 
 const b64url = (b) => Buffer.from(b).toString('base64')
   .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
 async function 토큰받기() {
-  const sa = 열쇠읽기();
-  if (!sa) throw new Error('GDRIVE_SA_JSON 이 없습니다');
   if (토큰 && Date.now() < 토큰끝 - 60000) return 토큰;
+  const 길 = 어느길();
+  if (!길) throw new Error('드라이브 열쇠가 없습니다');
 
-  const 이제 = Math.floor(Date.now() / 1000);
-  const 머리 = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
-  const 몸 = b64url(JSON.stringify({
-    iss: sa.client_email, scope: 범위,
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: 이제, exp: 이제 + 3600,
-  }));
-  const 서명 = b64url(crypto.createSign('RSA-SHA256')
-    .update(머리 + '.' + 몸).sign(sa.private_key));
-
-  const r = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
+  let body;
+  if (길 === 'oauth') {
+    body = new URLSearchParams({
+      client_id: process.env.GDRIVE_CLIENT_ID,
+      client_secret: process.env.GDRIVE_CLIENT_SECRET,
+      refresh_token: process.env.GDRIVE_REFRESH_TOKEN,
+      grant_type: 'refresh_token',
+    });
+  } else {
+    const sa = JSON.parse(process.env.GDRIVE_SA_JSON);
+    const 이제 = Math.floor(Date.now() / 1000);
+    const 머리 = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+    const 몸 = b64url(JSON.stringify({
+      iss: sa.client_email, scope: 범위,
+      aud: 'https://oauth2.googleapis.com/token', iat: 이제, exp: 이제 + 3600,
+    }));
+    const 서명 = b64url(crypto.createSign('RSA-SHA256').update(머리 + '.' + 몸).sign(sa.private_key));
+    body = new URLSearchParams({
       grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
       assertion: 머리 + '.' + 몸 + '.' + 서명,
-    }),
+    });
+  }
+
+  const r = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body,
   });
   const t = await r.text();
-  if (!r.ok) throw new Error('토큰을 못 받았습니다 ' + r.status + ' ' + t.slice(0, 200));
+  if (!r.ok) {
+    /* **토큰이 죽으면 여기서 납니다.** 동의 화면이 「테스트」 상태면
+       refresh token 이 7일 뒤 죽습니다 (구글 문서). 무슨 일인지 또렷이 적습니다 */
+    const 죽음 = /invalid_grant/.test(t);
+    throw new Error((죽음 ? '★ 드라이브 열쇠가 죽었습니다 (invalid_grant) — '
+      + '동의 화면이 「테스트」 상태면 7일 뒤 죽습니다. 「프로덕션」 으로 게시하고 '
+      + 'node tools/drive-auth.mjs 로 다시 받으세요. · ' : '토큰을 못 받았습니다 ')
+      + r.status + ' ' + t.slice(0, 200));
+  }
   const j = JSON.parse(t);
   토큰 = j.access_token;
   토큰끝 = Date.now() + (Number(j.expires_in) || 3600) * 1000;
   return 토큰;
 }
 
+/* 연속으로 실패하면 더 안 두드립니다. 열쇠가 죽은 것과 한 건이 이상한 것은
+   다른 일입니다. 앞엣것은 로그를 90줄로 만들고 아무것도 안 알려줍니다 */
+let 연속실패 = 0, 꺼짐 = '';
+const 실패한도 = 5;
+/** 지금 OCR 이 멈춰 있나 — 멈춰 있으면 까닭을 돌려줍니다 */
+export function OCR멈췄나() { return 꺼짐; }
+
 /** PDF 알맹이 → 글자. 못 읽으면 '' (던지지 않습니다 — 부르는 쪽이 보류함으로) */
 export async function pdf글자(buf, 이름 = '공고문.pdf') {
-  if (!OCR쓸수있나()) return '';
+  if (!OCR쓸수있나() || 꺼짐) return '';
   let id = null;
   try {
     const tok = await 토큰받기();
@@ -130,10 +158,21 @@ export async function pdf글자(buf, 이름 = '공고문.pdf') {
     await 지우기(tok, 문서);
     await 지우기(tok, id);
     id = null;
+    연속실패 = 0;   // 한 번 되면 셈을 되돌립니다
     return 글;
   } catch (e) {
     if (id) { try { await 지우기(await 토큰받기(), id); } catch { /* 넘어갑니다 */ } }
-    console.error('  OCR 실패 · ' + String(e.message).slice(0, 140));
+    연속실패++;
+    console.error('  OCR 실패 (' + 연속실패 + '번째) · ' + String(e.message).slice(0, 160));
+    /* **연속으로 실패하면 멈춥니다.** 열쇠가 죽었는데 500건을 다 두드리면
+       로그가 90줄씩 쌓이고 무엇이 문제인지 안 보입니다.
+       한 건씩 다른 까닭으로 실패하는 것과, 열쇠가 죽어 전부 실패하는 것은
+       다른 일입니다 — 뒤엣것은 사람이 손봐야 합니다 (2026-09-26) */
+    if (연속실패 >= 실패한도) {
+      꺼짐 = '★ OCR 열쇠 확인 — 연속 ' + 연속실패 + '번 실패해서 멈췄습니다. '
+        + '마지막 까닭: ' + String(e.message).slice(0, 120);
+      console.error('\n' + 꺼짐 + '\n');
+    }
     return '';
   }
 }
