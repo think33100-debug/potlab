@@ -69,21 +69,89 @@ const de = (s) => String(s ?? '')
   .replace(/&#xD;/gi, '\n').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
   .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
 
-async function 목록한쪽(cfg, page) {
+/* 못 받았을 때 **왜 못 받았는지를 반드시 찍습니다** (2026-09-26).
+   전에는 응답을 통째로 삼켜서, GitHub 에서 0건이 나왔을 때 시간 초과인지
+   403 인지 칸 이름이 다른 건지 알 길이 없었습니다.
+   진단 함수가 원문을 안 찍으면 진단을 못 합니다. */
+async function 목록한쪽(cfg, page, 떠들기) {
   const q = new URLSearchParams({ pageNo: String(page), numOfRows: '100', ongoingYn: 'Y' });
   for (let t = 0; t < 3; t++) {
     if (t) await 쉬기(1500 * t);
+    const t0 = Date.now();
+    let 어땠나 = '';
     try {
       /* 인증키는 이미 인코딩돼 있어 **다시 감싸면 안 됩니다** */
       const r = await fetch(목록URL + '?serviceKey=' + cfg.ALIO_LIST_KEY + '&' + q,
         { method: 'POST', headers: { accept: 'application/json', 'User-Agent': UA } });
-      if (r.status !== 200) continue;
-      const j = JSON.parse(await r.text());
-      if (j && j.resultCode === '5') continue;
-      if (j && j.result) return j;
-    } catch { /* 다시 */ }
+      const txt = await r.text();
+      const ms = Date.now() - t0;
+      if (떠들기) {
+        console.log('    [' + page + '쪽 ' + (t + 1) + '번째] HTTP ' + r.status
+          + ' · ' + ms + 'ms · ' + txt.length + '자 · '
+          + (r.headers.get('content-type') || '형식 없음'));
+      }
+      if (r.status !== 200) {
+        어땠나 = 'HTTP ' + r.status;
+      } else {
+        let j = null;
+        try { j = JSON.parse(txt); }
+        catch (e) { 어땠나 = 'JSON 이 아닙니다 (' + e.message.slice(0, 60) + ')'; }
+        if (j) {
+          /* ⚠ 알리오는 **열쇠가 틀려도 HTTP 200 + resultCode 5** 를 줍니다.
+             2026-09-26 에 열쇠 없이 두드려 확인했습니다 —
+               {"resultCode":"5","resultMsgEng":"SERVICETIMEOUT_ERROR", …}
+             그래서 resultCode 5 를 「잠깐 끊긴 것」으로만 보면 안 됩니다.
+             열쇠가 안 맞아도 똑같이 보입니다. resultMsg 를 같이 찍습니다 */
+          if (j.resultCode === '5') {
+            어땠나 = 'resultCode 5 · ' + (j.resultMsgEng || '') + ' / ' + (j.resultMsg || '')
+              + '   ← 열쇠가 틀려도 이 값이 옵니다';
+          }
+          else if (!j.result) {
+            어땠나 = 'result 칸이 없습니다 · 맨 위 칸 이름 — ' + Object.keys(j).join(',');
+          } else {
+            if (떠들기) console.log('    → 받았습니다. 맨 위 칸 — ' + Object.keys(j).join(','));
+            return j;
+          }
+        }
+      }
+      if (떠들기) {
+        console.log('    ✗ ' + 어땠나);
+        console.log('    응답 앞 500자 — ' + txt.slice(0, 500).replace(/\s+/g, ' '));
+      }
+    } catch (e) {
+      if (떠들기) {
+        console.log('    [' + page + '쪽 ' + (t + 1) + '번째] 못 붙음 · '
+          + (Date.now() - t0) + 'ms · ' + String(e.message).slice(0, 200)
+          + (e.cause ? ' · ' + String(e.cause.message || e.cause).slice(0, 120) : ''));
+      }
+    }
   }
   return null;
+}
+
+/* 알리오가 **이 자리(GitHub)의 IP 를 막는지** 봅니다.
+   열쇠 없이 두드려서 응답 코드만 봅니다 — 막혔으면 열쇠와 상관없이 막힙니다 */
+async function 막혔나() {
+  const 볼것 = [
+    ['목록 (열쇠 없이 POST)', 목록URL, 'POST'],
+    ['목록 (열쇠 없이 GET)', 목록URL, 'GET'],
+    ['포털 첫 화면', 'https://opendata.alio.go.kr/new/', 'GET'],
+    ['상세 (열쇠 없이 GET)', 상세URL, 'GET'],
+  ];
+  for (const [이름, u, m] of 볼것) {
+    const t0 = Date.now();
+    try {
+      const r = await fetch(u, { method: m, headers: { 'User-Agent': UA }, redirect: 'follow' });
+      const txt = await r.text();
+      console.log('  ' + 이름.padEnd(24) + 'HTTP ' + String(r.status).padEnd(5)
+        + (Date.now() - t0) + 'ms · ' + txt.length + '자 · '
+        + txt.slice(0, 90).replace(/\s+/g, ' '));
+    } catch (e) {
+      console.log('  ' + 이름.padEnd(24) + '못 붙음 · ' + (Date.now() - t0) + 'ms · '
+        + String(e.message).slice(0, 90)
+        + (e.cause ? ' · ' + String(e.cause.message || e.cause).slice(0, 80) : ''));
+    }
+  }
 }
 async function 상세받기(cfg, sn) {
   const n = String(sn || '').replace(/\D/g, '');
@@ -285,13 +353,27 @@ async function 옛것(cfg) {
      그래서 대조는 열쇠를 가진 집 컴퓨터에서만 됩니다 — Actions 에서는
      대조를 안 하고 담기만 합니다. */
   const 열쇠 = cfg.SUPABASE_SERVICE_KEY;
-  if (!열쇠) return null;
-  const r = await fetch(cfg.SUPABASE_URL
-    + '/rest/v1/job_posts?source=eq.AL&select=id,title,org_name,job_group,hold,apply_to&limit=2000', {
-    headers: { apikey: 열쇠, Authorization: 'Bearer ' + 열쇠 },
-  });
-  if (!r.ok) { console.error('  옛것 읽기 실패 ' + r.status); return null; }
-  return r.json();
+  if (!열쇠) {
+    console.log('  (대조 안 함 — SUPABASE_SERVICE_KEY 가 없습니다.');
+    console.log('   job_posts 를 통째로 읽는 것은 anon 에게 **일부러** 안 열어 뒀습니다.');
+    console.log('   GitHub 에서는 대조가 안 되고 집 컴퓨터에서만 됩니다)');
+    return null;
+  }
+  const u = cfg.SUPABASE_URL
+    + '/rest/v1/job_posts?source=eq.AL&select=id,title,org_name,job_group,hold,apply_to&limit=2000';
+  try {
+    const r = await fetch(u, { headers: { apikey: 열쇠, Authorization: 'Bearer ' + 열쇠 } });
+    const txt = await r.text();
+    if (!r.ok) {
+      console.error('  옛것 읽기 실패 · HTTP ' + r.status
+        + ' · 응답 앞 300자 — ' + txt.slice(0, 300).replace(/\s+/g, ' '));
+      return null;
+    }
+    return JSON.parse(txt);
+  } catch (e) {
+    console.error('  옛것 읽기 실패 · ' + String(e.message).slice(0, 200));
+    return null;
+  }
 }
 
 /* ── 본체 ─────────────────────────────────────────────────── */
@@ -309,14 +391,38 @@ console.log('알리오 새 수집기 · ' + (dry ? '**--dry · 담지 않습니�
 console.log('규칙 구운 날 ' + 구운날 + ' · OCR '
   + (OCR쓸수있나()
       ? OCR이름표
-      : '열쇠 없음 → PDF 는 보류함으로') + '\n');
+      : '열쇠 없음 → PDF 는 보류함으로'));
+console.log('도는 곳 ' + (process.env.GITHUB_ACTIONS ? 'GitHub Actions' : '집 컴퓨터')
+  + ' · node ' + process.version);
+
+/* ── 열쇠가 들어왔나 (값은 안 찍습니다. 있는지와 길이만) ──────
+   이름이 어긋나면 「없다」가 아니라 **엉뚱한 값**이 들어옵니다.
+   workflow 의 env 이름과 Secrets 이름이 같은지 여기서 드러납니다 */
+console.log('\n── 열쇠 ──');
+for (const k of ['ALIO_LIST_KEY', 'ALIO_DETAIL_KEY', 'SUPABASE_URL', 'SUPABASE_ANON_KEY',
+                 'COLLECT_KEY_AL2', 'OCR_GAS_URL', 'OCR_KEY', 'SUPABASE_SERVICE_KEY']) {
+  const v = cfg[k];
+  console.log('  ' + k.padEnd(22) + (v ? '있음 · ' + String(v).length + '자' : '없음'));
+}
+
+/* ── 알리오가 이 자리를 막는지 (열쇠와 상관없이) ── */
+if (dry) {
+  console.log('\n── 알리오가 이 자리를 막나 (열쇠 없이 두드려 응답 코드만) ──');
+  await 막혔나();
+}
 
 /* ① 목록 전부 */
+console.log('\n── 목록 받기 ──');
 let rows = [];
 let total = null;
 for (let p = 1; p <= 120; p++) {
-  const j = await 목록한쪽(cfg, p);
+  /* 첫 쪽은 무슨 일이 있었는지 다 찍습니다. 뒷쪽까지 찍으면 로그가 넘칩니다 */
+  const j = await 목록한쪽(cfg, p, p === 1 || dry);
   if (!j) { console.error('  ' + p + '쪽에서 멈췄습니다'); break; }
+  if (p === 1) {
+    console.log('  totalCount 원문 — ' + JSON.stringify(j.totalCount)
+      + ' · result 줄 수 ' + (j.result || []).length);
+  }
   if (total === null) total = Number(j.totalCount || 0);
   const 쪽 = j.result || [];
   if (!쪽.length) break;
