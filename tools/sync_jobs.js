@@ -142,6 +142,24 @@ function 건너뜀알리기(table, skipped) {
   return table + ' 건너뜀 ' + skipped.length + '건 (' + skipped[0].why.slice(0, 60) + ')';
 }
 
+/* 새 수집기(시트를 안 거치는 것)가 임자인 공고 번호.
+   지금은 AL2(알리오) 하나뿐이고, 경로를 옮길 때마다 여기 늘어납니다.
+   collect_source 표의 code 중 「옛 수집기 것이 아닌 것」 을 봅니다. */
+const 새수집기 = ['AL2'];
+async function 새수집기가가진것(cfg) {
+  const 집 = new Set();
+  for (const s of 새수집기) {
+    try {
+      const r = await get(cfg, 'job_posts?source=eq.' + s + '&select=id&limit=5000');
+      r.forEach((x) => 집.add(String(x.id)));
+    } catch (e) {
+      /* 못 읽으면 **아무것도 안 비킵니다** — 모르는 채 비키면 공고가 사라집니다 */
+      console.error('  새 수집기 줄을 못 읽었습니다(' + s + ') · ' + e.message.slice(0, 80));
+    }
+  }
+  return 집;
+}
+
 /* ── 어디까지 봤는지 ── */
 async function loadState(cfg) {
   const r = await get(cfg, 'collector_state?key=eq.job_sync&select=value');
@@ -301,10 +319,21 @@ async function dropTrashed(cfg, dry) {
     const all = S.rows.map((r) => toJobPost(S.get, r)).filter((p) => p.id);
     /* 시트는 같은 공고ID 가 두 번 있어도 받아줍니다. 뒤엣것을 남깁니다. */
     const byId = {}; all.forEach((p) => { byId[p.id] = p; });
-    const posts = Object.keys(byId).map((k) => byId[k]);
+    let posts = Object.keys(byId).map((k) => byId[k]);
+
+    /* 새 수집기가 가진 줄은 **건드리지 않습니다** (2026-09-26).
+       알리오 새 수집기(AL2)는 옛것과 **같은 공고 번호**를 씁니다. 한 공고가
+       두 줄로 보이지 않는 건 좋은데, 다리는 숫자 번호를 무조건 「AL」 로 보고
+       덮어씁니다. 그대로 두면 AL2 가 담은 줄이 조용히 AL 로 바뀌어
+       사흘 대조가 뜻을 잃습니다.
+       **새 수집기가 임자인 줄은 그쪽에 맡깁니다.** */
+    const 남의것 = await 새수집기가가진것(cfg);
+    const 비킨것 = posts.filter((p) => 남의것.has(String(p.id)));
+    if (비킨것.length) posts = posts.filter((p) => !남의것.has(String(p.id)));
 
     console.log('시트 ' + total + '줄 · ' + from + '번째부터 ' + S.rows.length + '줄 읽음 · '
-                + posts.length + '건 (' + mode + ')');
+                + posts.length + '건 (' + mode + ')'
+                + (비킨것.length ? ' · 새 수집기 것이라 비킨 줄 ' + 비킨것.length + '건' : ''));
 
     if (dry) {
       console.log('--dry 라 담지 않았습니다.');

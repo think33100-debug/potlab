@@ -43,6 +43,8 @@ jobs:
           COLLECT_KEY_AL2: ${{ secrets.COLLECT_KEY_AL2 }}
           # 첨부 공고문 OCR. 없으면 PDF 공고는 보류함으로 갑니다 (버리지 않습니다)
           GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
+          # 서비스 계정은 제 드라이브 용량이 0 이라 **공유 폴더가 꼭 있어야** 합니다
+          GDRIVE_OCR_FOLDER: ${{ secrets.GDRIVE_OCR_FOLDER }}
         run: |
           if [ "${{ inputs.dry }}" = "true" ]; then
             node tools/collect-alio.mjs --dry

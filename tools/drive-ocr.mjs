@@ -87,7 +87,15 @@ export async function pdf글자(buf, 이름 = '공고문.pdf') {
     /* ① 올리면서 문서로 바꾸게 합니다.
        **대상 mimeType 을 정하지 않습니다** (정하면 OCR 이 거절됩니다) */
     const 경계 = '----potjob' + crypto.randomBytes(8).toString('hex');
-    const 메타 = JSON.stringify({ name: 이름, mimeType: 'application/pdf' });
+    /* **폴더를 정해 그 안에 올립니다.**
+       서비스 계정은 제 드라이브 용량이 0 입니다. 아무 데나 올리면
+       「storageQuotaExceeded」 가 납니다. 사람 계정이 만든 폴더를 서비스
+       계정에게 편집자로 공유하고, 그 폴더 번호를 GDRIVE_OCR_FOLDER 에 둡니다 */
+    const 폴더 = process.env.GDRIVE_OCR_FOLDER;
+    const 메타 = JSON.stringify({
+      name: 이름, mimeType: 'application/pdf',
+      ...(폴더 ? { parents: [폴더] } : {}),
+    });
     const 앞 = Buffer.from('--' + 경계 + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'
       + 메타 + '\r\n--' + 경계 + '\r\nContent-Type: application/pdf\r\n\r\n');
     const 뒤 = Buffer.from('\r\n--' + 경계 + '--');
@@ -104,7 +112,10 @@ export async function pdf글자(buf, 이름 = '공고문.pdf') {
     const cp = await fetch('https://www.googleapis.com/drive/v3/files/' + id + '/copy?fields=id', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mimeType: 'application/vnd.google-apps.document' }),
+      body: JSON.stringify({
+        mimeType: 'application/vnd.google-apps.document',
+        ...(폴더 ? { parents: [폴더] } : {}),
+      }),
     });
     if (!cp.ok) throw new Error('바꾸기 실패 ' + cp.status + ' ' + (await cp.text()).slice(0, 200));
     const 문서 = JSON.parse(await cp.text()).id;
