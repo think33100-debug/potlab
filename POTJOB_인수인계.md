@@ -1254,7 +1254,43 @@ node tools/copy_jobs.js   공고를 시트에서 Supabase 로
 - API 경로는 IP 차단이 없습니다. **홈페이지 경로는 맨 마지막**이고,
   구글 IP 가 막는 25곳은 집 컴퓨터로 돌립니다.
 - 첫 경로의 지도는 **`알리오_이전_지도.md`** 에 있습니다.
-  거기에 「PDF 공고문을 어떻게 할지」 가 유일한 미정 사항으로 적혀 있습니다.
+
+### 알리오 새 수집기 (AL2) — 2026-09-26 부터
+
+```
+tools/collect-alio.mjs     본체 (--dry 로 옛것과 대조)
+tools/gas-rules.mjs        gas 의 직군 판정을 **떼어 와서** 씁니다 (안 베낍니다)
+tools/gas-rules.json       그 떼어 온 결과를 구운 것 — Actions 에는 gas/ 가 없어서
+tools/drive-ocr.mjs        PDF → 글자 (구글 Drive convert · OCR)
+.github/workflows/collect-alio.yml   30분마다
+DB  collect_put()          **유일한 쓰기 통로.** service_role 을 안 씁니다
+DB  collect_source         경로 대응표 (AL=알리오 · AL2=알리오(새) · CE · GJ · WN · ND · HS)
+DB  collect_secret         경로별 열쇠. 아무에게도 안 열려 있습니다
+```
+
+- **gas 규칙을 베끼지 않았습니다.** `gas/wage.js` 에서 함수 본문을 떼어 와
+  그대로 돌립니다. 규칙이 두 벌이 되면 한쪽만 고치고 빼먹습니다.
+  gas 를 고쳤으면 `node tools/gas-rules.mjs --굽기` 를 돌려 다시 구우세요.
+- **`steps` 에 직군이 적혀 있다는 gas 주석은 지금은 안 맞습니다.**
+  2026-09-26 에 의료 공고 40건의 상세를 열어보니 `steps` 로 풀린 것이 **0건**
+  이었습니다. **직군은 상세 본문(자격·우대)과 첨부 공고문으로 가립니다.**
+  (gas 는 동결이라 그 주석을 안 고쳤습니다. 여기 적어 둡니다)
+- **첨부 공고문은 거의 전부 스캔 그림입니다.** 12건을 재보니 12건 다
+  글자가 0자였습니다. `pdftotext` 로는 못 읽고 **OCR 이 있어야** 합니다.
+  `GDRIVE_SA_JSON` 이 없으면 PDF 공고는 **보류함으로** 갑니다 — 버리지 않습니다.
+- 첨부를 받으려면 **포털 세션 쿠키**가 필요합니다. 없으면 파일 대신
+  포털 첫 화면(8,333자 HTML)이 옵니다.
+
+**GitHub Secrets 에 넣어야 하는 것**
+
+| 이름 | 무엇 | 어디서 |
+|---|---|---|
+| `ALIO_LIST_KEY` | 알리오 목록 | `gas/wage.js` 의 `JOB_API.KEY` |
+| `ALIO_DETAIL_KEY` | 알리오 상세 | `gas/wage.js` 의 `ALIO_D.KEY` |
+| `SUPABASE_URL` | | 이미 있습니다 |
+| `SUPABASE_ANON_KEY` | **anon 입니다** (service_role 아님) | `web/.env.local` |
+| `COLLECT_KEY_AL2` | `collect_put` 열쇠 | DB `collect_secret` 표 |
+| `GDRIVE_SA_JSON` | 구글 서비스 계정 JSON 통째로 | 새로 만드셔야 합니다 |
 
 ## 1층과 2층 — 「사람이 많은 곳」이 아니라 「정보가 귀한 곳」
 
