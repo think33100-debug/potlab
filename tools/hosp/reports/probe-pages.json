@@ -1,0 +1,689 @@
+[
+ {
+  "갈래": "재활",
+  "기관": "강원특별자치도재활병원",
+  "지역": "",
+  "url": "https://www.grh.or.kr/notice/notice_04.asp?board_id=BBCC04",
+  "비고": "",
+  "상태쓴것": "",
+  "판정": "열림",
+  "code": 200,
+  "크기": 28267,
+  "n": {
+   "날짜": 12,
+   "tr": 13,
+   "li": 106,
+   "채용말": 10
+  },
+  "끝주소": "https://www.grh.or.kr/notice/notice_04.asp?board_id=BBCC04"
+ },
+ {
+  "갈래": "재활",
+  "기관": "경북권역재활병원",
+  "지역": "",
+  "url": "http://www.grrh.or.kr/main/bbs/index.do?menu_idx=32&master_idx=3",
+  "비고": "",
+  "상태쓴것": "",
+  "판정": "열림",
+  "code": 200,
+  "크기": 28709,
+  "n": {
+   "날짜": 10,
+   "tr": 11,
+   "li": 112,
+   "채용말": 17
+  },
+  "끝주소": "http://www.grrh.or.kr/main/bbs/index.do?menu_idx=32&master_idx=3"
+ },
+ {
+  "갈래": "재활",
+  "기관": "경인권역재활병원",
+  "지역": "",
+  "url": "https://www.rch.or.kr/web/rchkyungin/bbs/employment",
+  "비고": "",
+  "상태쓴것": "",
+  "판정": "열림",
+  "code": 200,
+  "크기": 231200,
+  "n": {
+   "날짜": 3,
+   "tr": 11,
+   "li": 157,
+   "채용말": 20
+  },
+  "끝주소": "https://www.rch.or.kr/web/rchkyungin/bbs/employment"
+ },
+ {
+  "갈래": "재활",
+  "기관": "국립재활원",
+  "지역": "",
+  "url": "https://www.nrc.go.kr/nrc/board/boardList.do?bn=newsList&menu_cd=01_03&fno=3",
+  "비고": "",
+  "상태쓴것": "",
+  "판정": "열림",
+  "code": 200,
+  "크기": 79237,
+  "n": {
+   "날짜": 10,
+   "tr": 11,
+   "li": 202,
+   "채용말": 18
+  },
+  "끝주소": "https://www.nrc.go.kr/nrc/board/boardList.do?bn=newsList&menu_cd=01_03&fno=3"
+ },
+ {
+  "갈래": "재활",
+  "기관": "대전세종충남·넥슨후원 공공어린이재활병원",
+  "지역": "",
+  "url": "https://dpcrh.or.kr/bbs/BBSMSTR_000000000364/list.do",
+  "비고": "",
+  "상태쓴것": "",
+  "판정": "열림",
+  "code": 200,
+  "크기": 156210,
+  "n": {
+   "날짜": 12,
+   "tr": 13,
+   "li": 165,
+   "채용말": 29
+  },
+  "끝주소": "https://dpcrh.or.kr/bbs/BBSMSTR_000000000364/list.do"
+ },
+ {
+  "갈래": "재활",
+  "기관": "성동재활의원",
+  "지역": "",
+  "url": "",
+  "비고": "제외 — 의원급",
+  "건너뜀": "제외 — 제외 — 의원급",
+  "판정": "건너뜀",
+  "메모": "제외 — 제외 — 의원급"
+ },
+ {
+  "갈래": "재활",
+  "기관": "푸르메재단 넥슨어린이재활병원",
+  "지역": "",
+  "url": "http://www.purmehospital.org/bbs/board.php?bo_table=recruit&theme=eb4_hosp_001",
+  "비고": "",
+  "상태쓴것": "",
+  "판정": "열림",
+  "code": 200,
+  "크기": 145598,
+  "n": {
+   "날짜": 30,
+   "tr": 31,
+   "li": 164,
+   "채용말": 24
+  },
+  "끝주소": "http://www.purmehospital.org/bbs/board.php?bo_table=recruit&theme=eb4_hosp_001"
+ },
+ {
+  "갈래": "재활",
+  "기관": "호남권역재활병원",
+  "지역": "",
+  "url": "https://www.honamhosp.or.kr/bbs/board.php?bo_table=6040",
+  "비고": "",
+  "상태쓴것": "",
+  "판정": "열림",
+  "code": 200,
+  "크기": 45000,
+  "n": {
+   "날짜": 19,
+   "tr": 15,
+   "li": 112,
+   "채용말": 15
+  },
+  "끝주소": "https://www.honamhosp.or.kr/bbs/board.php?bo_table=6040"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "가톨릭관동대학교 국제성모병원",
+  "지역": "인천 인천서구",
+  "url": "https://www.ish.or.kr/main/contents.do?a_num=91443696",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "열림",
+  "code": 200,
+  "크기": 129223,
+  "n": {
+   "날짜": 24,
+   "tr": 11,
+   "li": 321,
+   "채용말": 39
+  },
+  "끝주소": "https://www.ish.or.kr/main/contents.do?a_num=91443696"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "가톨릭대학교 여의도성모병원",
+  "지역": "서울 영등포구",
+  "url": "https://www.cmcsungmo.or.kr/page/board/recruit?p=1&s=12&q=%7B%7D",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 144799,
+  "n": {
+   "날짜": 3,
+   "tr": 0,
+   "li": 391,
+   "채용말": 7
+  },
+  "끝주소": "https://www.cmcsungmo.or.kr/page/board/recruit?p=1&s=12&q=%7B%7D"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "가톨릭대학교부천성모병원",
+  "지역": "경기 부천원미구",
+  "url": "https://www.cmcbucheon.or.kr/page/board/recruit?p=1&s=12&q=%7B%7D",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 151725,
+  "n": {
+   "날짜": 3,
+   "tr": 0,
+   "li": 407,
+   "채용말": 8
+  },
+  "끝주소": "https://www.cmcbucheon.or.kr/page/board/recruit?p=1&s=12&q=%7B%7D"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "강남을지대학교병원",
+  "지역": "서울 강남구",
+  "url": "https://gangnam.eulji.or.kr/info/info_pg06_04.jsp",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "열림",
+  "code": 200,
+  "크기": 27188,
+  "n": {
+   "날짜": 13,
+   "tr": 11,
+   "li": 130,
+   "채용말": 12
+  },
+  "끝주소": "https://gangnam.eulji.or.kr/info/info_pg06_04.jsp"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "강동경희대학교병원",
+  "지역": "서울 강동구",
+  "url": "https://recruit.incruit.com/khnmc/",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "글 적음",
+  "code": 200,
+  "크기": 8663,
+  "n": {
+   "날짜": 0,
+   "tr": 0,
+   "li": 0,
+   "채용말": 0
+  },
+  "끝주소": "https://recruit.incruit.com/khnmc/"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "건국대학교 충주병원",
+  "지역": "충북 충주시",
+  "url": "https://www.kuh.co.kr/bbs/data/list.do?per_menu_idx=51&tabCnt=3&menu_idx=134",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 64678,
+  "n": {
+   "날짜": 11,
+   "tr": 12,
+   "li": 139,
+   "채용말": 19
+  },
+  "끝주소": "https://www.kuh.co.kr/bbs/data/list.do?per_menu_idx=51&tabCnt=3&menu_idx=134"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "계명대학교 경주동산병원",
+  "지역": "경북 경주시",
+  "url": "https://gyeongju.dsmc.or.kr:49890/content/03use/07_03.php",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "열림",
+  "code": 200,
+  "크기": 45947,
+  "n": {
+   "날짜": 13,
+   "tr": 0,
+   "li": 210,
+   "채용말": 26
+  },
+  "끝주소": "https://gyeongju.dsmc.or.kr:49890/content/03use/07_03.php"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "노원을지대학교병원",
+  "지역": "서울 노원구",
+  "url": "https://www.eulji.or.kr/info/info_pg06_04.jsp",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 27168,
+  "n": {
+   "날짜": 11,
+   "tr": 11,
+   "li": 110,
+   "채용말": 17
+  },
+  "끝주소": "https://www.eulji.or.kr/info/info_pg06_04.jsp"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "대구가톨릭대학교 칠곡가톨릭병원",
+  "지역": "대구 대구북구",
+  "url": "http://www.tcmcch.co.kr/content/04client/02_01.php",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 65029,
+  "n": {
+   "날짜": 10,
+   "tr": 11,
+   "li": 160,
+   "채용말": 32
+  },
+  "끝주소": "http://www.tcmcch.co.kr/content/04client/02_01.php"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "대구보건대학교병원",
+  "지역": "대구 대구북구",
+  "url": "http://www.dhch.ac.kr/bbs/board.php?bc=employment",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "열림",
+  "code": 200,
+  "크기": 45015,
+  "n": {
+   "날짜": 7,
+   "tr": 45,
+   "li": 75,
+   "채용말": 21
+  },
+  "끝주소": "http://www.dhch.ac.kr/bbs/board.php?bc=employment"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "동국대학교의과대학경주병원",
+  "지역": "경북 경주시",
+  "url": "https://gj.dumc.or.kr/main/contents.do?a_num=44801314",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "못 붙음",
+  "code": 0,
+  "메모": "UNABLE_TO_VERIFY_LEAF_SIGNATURE"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "동국대학교일산불교병원",
+  "지역": "경기 고양일산동구",
+  "url": "http://www.dumc.or.kr/hospital/recruit/hospitalRecruitList.jsp?nowPageInfo=ILSH&nowMenuId=00000130",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "글 적음",
+  "code": 200,
+  "크기": 34070,
+  "n": {
+   "날짜": 20,
+   "tr": 11,
+   "li": 157,
+   "채용말": 0
+  },
+  "끝주소": "http://www.dumc.or.kr/hospital/recruit/hospitalRecruitList.jsp?nowPageInfo=ILSH&nowMenuId=00000130"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "동아대학교대신병원",
+  "지역": "부산 부산서구",
+  "url": "http://www.daudh.or.kr/bbs/board.php?bo_table=recruitment",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "열림",
+  "code": 200,
+  "크기": 130498,
+  "n": {
+   "날짜": 0,
+   "tr": 11,
+   "li": 208,
+   "채용말": 30
+  },
+  "끝주소": "http://www.daudh.or.kr/bbs/board.php?bo_table=recruitment"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "빛고을전남대학교병원",
+  "지역": "전남 광주남구",
+  "url": "https://cnuh.recruiter.co.kr/appsite/company/index",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 5267,
+  "n": {
+   "날짜": 0,
+   "tr": 0,
+   "li": 0,
+   "채용말": 3
+  },
+  "끝주소": "https://cnuh.recruiter.co.kr/appsite/company/index"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "세종충남대학교병원",
+  "지역": "세종",
+  "url": "https://cnuhinsa.recruiter.co.kr/career/apply",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "JS",
+  "code": 200,
+  "크기": 21232,
+  "n": {
+   "날짜": 4,
+   "tr": 0,
+   "li": 0,
+   "채용말": 30
+  },
+  "끝주소": "https://cnuhinsa.recruiter.co.kr/career/apply"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "순천향대학교 부속 구미병원",
+  "지역": "경북 구미시",
+  "url": "https://jobapplication.schmc.ac.kr/?departmentidx=190005",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "JS",
+  "code": 200,
+  "크기": 111647,
+  "n": {
+   "날짜": 0,
+   "tr": 0,
+   "li": 16,
+   "채용말": 5
+  },
+  "끝주소": "https://jobapplication.schmc.ac.kr/?departmentidx=190005"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "순천향대학교 부속 서울병원",
+  "지역": "서울 용산구",
+  "url": "https://jobapplication.schmc.ac.kr/?departmentidx=190002",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "JS",
+  "code": 200,
+  "크기": 111647,
+  "n": {
+   "날짜": 0,
+   "tr": 0,
+   "li": 16,
+   "채용말": 5
+  },
+  "끝주소": "https://jobapplication.schmc.ac.kr/?departmentidx=190002"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "순천향대학교부속 천안병원",
+  "지역": "충남 천안동남구",
+  "url": "https://jobapplication.schmc.ac.kr/?departmentidx=190004",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "JS",
+  "code": 200,
+  "크기": 111647,
+  "n": {
+   "날짜": 0,
+   "tr": 0,
+   "li": 16,
+   "채용말": 5
+  },
+  "끝주소": "https://jobapplication.schmc.ac.kr/?departmentidx=190004"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "영남대학교의과대학부속영천병원",
+  "지역": "경북 영천시",
+  "url": "https://yumc.ac.kr/bbs/List.do?bbsId=news5",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 54239,
+  "n": {
+   "날짜": 17,
+   "tr": 16,
+   "li": 245,
+   "채용말": 21
+  },
+  "끝주소": "https://yumc.ac.kr/bbs/List.do?bbsId=news5"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "인제대학교 해운대백병원",
+  "지역": "부산 부산해운대구",
+  "url": "https://www.paik.ac.kr/haeundae/user/job/list.do?menuNo=500063",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 74830,
+  "n": {
+   "날짜": 16,
+   "tr": 11,
+   "li": 388,
+   "채용말": 26
+  },
+  "끝주소": "https://www.paik.ac.kr/haeundae/user/job/list.do?menuNo=500063"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "인제대학교일산백병원",
+  "지역": "경기 고양일산서구",
+  "url": "https://www.paik.ac.kr/ilsan/user/job/list.do?menuNo=900101",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 78445,
+  "n": {
+   "날짜": 15,
+   "tr": 11,
+   "li": 393,
+   "채용말": 19
+  },
+  "끝주소": "https://www.paik.ac.kr/ilsan/user/job/list.do?menuNo=900101"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "중앙대학교광명병원",
+  "지역": "경기 광명시",
+  "url": "https://caumc.recruiter.co.kr/career/home",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "JS",
+  "code": 200,
+  "크기": 21814,
+  "n": {
+   "날짜": 0,
+   "tr": 0,
+   "li": 0,
+   "채용말": 38
+  },
+  "끝주소": "https://caumc.recruiter.co.kr/career/home"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "차의과학대학교부속구미차병원",
+  "지역": "경북 구미시",
+  "url": "https://recruit.chamc.co.kr/page.ckd#/family/announcement/GMCBW",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "JS",
+  "code": 200,
+  "크기": 16960,
+  "n": {
+   "날짜": 0,
+   "tr": 0,
+   "li": 66,
+   "채용말": 7
+  },
+  "끝주소": "https://recruit.chamc.co.kr/page.ckd"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "차의과학대학교분당차병원",
+  "지역": "경기 성남분당구",
+  "url": "https://recruit.chamc.co.kr/page.ckd#/recruit/announcement",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "JS",
+  "code": 200,
+  "크기": 16960,
+  "n": {
+   "날짜": 0,
+   "tr": 0,
+   "li": 66,
+   "채용말": 7
+  },
+  "끝주소": "https://recruit.chamc.co.kr/page.ckd"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "학교법인 건양교육재단 건양대학교부여병원",
+  "지역": "충남 부여군",
+  "url": "https://www.kyuh.ac.kr/bbs/BBSMSTR_000000000150/list.do",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "열림",
+  "code": 200,
+  "크기": 68312,
+  "n": {
+   "날짜": 10,
+   "tr": 11,
+   "li": 86,
+   "채용말": 23
+  },
+  "끝주소": "https://www.kyuh.ac.kr/bbs/BBSMSTR_000000000150/list.do"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "학교법인 을지학원 대전을지대학교병원",
+  "지역": "대전 대전서구",
+  "url": "https://www.emc.ac.kr/info/info_pg06_04.jsp",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 28900,
+  "n": {
+   "날짜": 22,
+   "tr": 11,
+   "li": 110,
+   "채용말": 15
+  },
+  "끝주소": "https://www.emc.ac.kr/info/info_pg06_04.jsp"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "한림대학교 강남성심병원",
+  "지역": "서울 영등포구",
+  "url": "https://recruit.hallym.or.kr/index.jsp",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 36053,
+  "n": {
+   "날짜": 17,
+   "tr": 0,
+   "li": 70,
+   "채용말": 39
+  },
+  "끝주소": "https://recruit.hallym.or.kr/index.jsp"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "한림대학교 한강성심병원",
+  "지역": "서울 영등포구",
+  "url": "https://recruit.hallym.or.kr/index.jsp",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 36053,
+  "n": {
+   "날짜": 17,
+   "tr": 0,
+   "li": 70,
+   "채용말": 39
+  },
+  "끝주소": "https://recruit.hallym.or.kr/index.jsp"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "한림대학교동탄성심병원",
+  "지역": "경기 화성동탄구",
+  "url": "https://recruit.hallym.or.kr/index.jsp",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 36053,
+  "n": {
+   "날짜": 17,
+   "tr": 0,
+   "li": 70,
+   "채용말": 39
+  },
+  "끝주소": "https://recruit.hallym.or.kr/index.jsp"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "한림대학교춘천성심병원",
+  "지역": "강원 춘천시",
+  "url": "https://recruit.hallym.or.kr/index.jsp",
+  "비고": "길은 있는데 안 옴",
+  "상태쓴것": "길은 있는데 안 옴",
+  "판정": "열림",
+  "code": 200,
+  "크기": 36053,
+  "n": {
+   "날짜": 17,
+   "tr": 0,
+   "li": 70,
+   "채용말": 39
+  },
+  "끝주소": "https://recruit.hallym.or.kr/index.jsp"
+ },
+ {
+  "갈래": "대학병원",
+  "기관": "한양대학교구리병원",
+  "지역": "경기 구리시",
+  "url": "https://hyumcguri.recruiter.co.kr/career/apply",
+  "비고": "길도 모름",
+  "상태쓴것": "길도 모름",
+  "판정": "JS",
+  "code": 200,
+  "크기": 21489,
+  "n": {
+   "날짜": 8,
+   "tr": 0,
+   "li": 0,
+   "채용말": 28
+  },
+  "끝주소": "https://hyumcguri.recruiter.co.kr/career/apply"
+ }
+]
