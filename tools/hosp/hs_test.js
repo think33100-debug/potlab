@@ -19,7 +19,11 @@
 // }
 const fs = require('fs');
 const path = require('path');
-const cfg = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+/* 다른 도구(hs_run.mjs)가 이 파일의 hospParseHtml 을 **그대로 빌려 씁니다.**
+   규칙을 두 벌로 만들면 한쪽만 고치고 빼먹습니다. 그래서 require 로 불러도
+   죽지 않게 cfg 읽기를 직접 실행할 때로 미룹니다 */
+const 직접실행 = require.main === module;
+const cfg = 직접실행 ? JSON.parse(fs.readFileSync(process.argv[2], 'utf8')) : null;
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0';
 
 function stripTags(s) {
@@ -83,4 +87,5 @@ async function main() {
   const bad = rows.filter(function (r) { return !r.url; }).length;
   if (bad) console.log('※ 링크 없는 줄 ' + bad);
 }
-main().catch(function (e) { console.error('오류 ' + e.message); process.exit(1); });
+if (직접실행) main().catch(function (e) { console.error('오류 ' + e.message); process.exit(1); });
+module.exports = { hospParseHtml: hospParseHtml, stripTags: stripTags, abs: abs, ymd: ymd, UA: UA };
