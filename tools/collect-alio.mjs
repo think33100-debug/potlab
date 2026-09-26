@@ -97,14 +97,13 @@ async function 목록한쪽(cfg, page, 떠들기) {
         try { j = JSON.parse(txt); }
         catch (e) { 어땠나 = 'JSON 이 아닙니다 (' + e.message.slice(0, 60) + ')'; }
         if (j) {
-          /* ⚠ 알리오는 **열쇠가 틀려도 HTTP 200 + resultCode 5** 를 줍니다.
-             2026-09-26 에 열쇠 없이 두드려 확인했습니다 —
-               {"resultCode":"5","resultMsgEng":"SERVICETIMEOUT_ERROR", …}
-             그래서 resultCode 5 를 「잠깐 끊긴 것」으로만 보면 안 됩니다.
-             열쇠가 안 맞아도 똑같이 보입니다. resultMsg 를 같이 찍습니다 */
+          /* resultCode 5 는 **알리오 쪽이 잠깐 안 되는 것**입니다.
+             열쇠가 틀려도 같은 값이 오지만(2026-09-26 확인), 실제로 겪어 보니
+             **같은 열쇠로 조금 뒤에 다시 하면 됩니다.**
+             GitHub 에서 한 번 0건이 나와 열쇠를 의심했는데, 그대로 다시
+             돌리니 500건이 왔습니다. **열쇠를 다시 볼 일이 아닙니다.** */
           if (j.resultCode === '5') {
-            어땠나 = 'resultCode 5 · ' + (j.resultMsgEng || '') + ' / ' + (j.resultMsg || '')
-              + '   ← 열쇠가 틀려도 이 값이 옵니다';
+            어땠나 = 'resultCode 5 · ' + (j.resultMsgEng || '') + ' / ' + (j.resultMsg || '');
           }
           else if (!j.result) {
             어땠나 = 'result 칸이 없습니다 · 맨 위 칸 이름 — ' + Object.keys(j).join(',');
@@ -378,8 +377,23 @@ async function 옛것(cfg) {
 
 /* ── 본체 ─────────────────────────────────────────────────── */
 const argv = process.argv.slice(2);
-const dry = argv.includes('--dry');
+/* --한줄 — 사흘 대조용. 담지 않고 「AL2 vs gas: 같음 N · 다름 N」 만 찍습니다.
+ *
+ * ── 왜 DB 를 읽어 견주지 않나 ────────────────────────────────
+ * 처음에 job_posts 의 source 로 견주는 도구를 따로 만들었다가 지웠습니다.
+ * **거짓말을 합니다** — 겹치는 공고는 gas 가 임자라 AL2 로 안 써집니다
+ * (collect_put 이 남의 줄을 안 덮습니다). 그래서 source 로 세면 「같음」이
+ * 영원히 0 입니다. 2026-09-26 에 실제로 0 이 나와 알았습니다.
+ *
+ * 견줄 것은 「표에 뭐가 있나」가 아니라 **「새 수집기가 뭐라고 판정하나」**
+ * 입니다. 그건 dry 가 내는 것이고, 규칙이 한 벌이니 여기서 같이 냅니다.
+ */
+const 한줄 = argv.includes('--한줄');
+const dry = argv.includes('--dry') || 한줄;
 const 몇건 = argv.includes('--n') ? Number(argv[argv.indexOf('--n') + 1]) || 0 : 0;
+/* --한줄 일 때는 중간 로그를 죽입니다. 한 줄만 남기려고요 */
+const 원래log = console.log;
+if (한줄) console.log = () => {};
 const t0 = Date.now();
 const cfg = env();
 for (const k of ['ALIO_LIST_KEY', 'ALIO_DETAIL_KEY', 'SUPABASE_URL', 'SUPABASE_ANON_KEY']) {
@@ -418,7 +432,15 @@ let total = null;
 for (let p = 1; p <= 120; p++) {
   /* 첫 쪽은 무슨 일이 있었는지 다 찍습니다. 뒷쪽까지 찍으면 로그가 넘칩니다 */
   const j = await 목록한쪽(cfg, p, p === 1 || dry);
-  if (!j) { console.error('  ' + p + '쪽에서 멈췄습니다'); break; }
+  if (!j) {
+    console.error('  ' + p + '쪽에서 멈췄습니다');
+    /* 세 번 다시 두드려도 안 되면 **알리오 쪽 일입니다.**
+       2026-09-26 에 한 번 0건이 나와 열쇠를 의심했는데, 그대로 다시 돌리니
+       500건이 왔습니다. 다음 사람이 같은 데를 파지 않게 적어 둡니다 */
+    console.error('  ※ 세 번 다 실패했습니다 — **알리오 쪽 오류입니다. 열쇠 확인 불필요.**');
+    console.error('     같은 열쇠로 조금 뒤에 다시 돌리면 됩니다 (30분 뒤 저절로 다시 돕니다).');
+    break;
+  }
   if (p === 1) {
     console.log('  totalCount 원문 — ' + JSON.stringify(j.totalCount)
       + ' · result 줄 수 ' + (j.result || []).length);
@@ -523,6 +545,14 @@ if (dry) {
       const v = 옛집.get(k);
       return !v.apply_to || String(v.apply_to) >= 오늘;
     });
+    /* 사흘 대조용 한 줄 — 「다름」 은 **아직 접수중인 것만** 셉니다.
+       마감된 옛 공고는 알리오가 안 주므로 차이가 아닙니다 */
+    const 다름 = 새것만.length + 살아있는옛것만.length;
+    원래log('AL2 vs gas: 같음 ' + 같음.length + ' · 다름 ' + 다름
+      + '  (새 것에만 ' + 새것만.length + ' · gas 에만 ' + 살아있는옛것만.length + ')'
+      + '   [' + 오늘 + ' · 접수중만]');
+    if (한줄) process.exit(0);
+
     console.log('\n━━ 옛 수집기(AL)와 대조 — 공고 번호로');
     console.log('  같음        ' + 같음.length + '건');
     console.log('  새 것에만    ' + 새것만.length + '건');
