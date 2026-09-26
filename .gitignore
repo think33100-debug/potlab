@@ -8,6 +8,10 @@ gas/*
 !gas/ocr/
 gas/ocr/.clasp.json
 gas/ocr/.clasprc.json
+# clasp 제외 목록도 저장소에 둡니다 — 열쇠가 없고, 없으면 push 가 깨집니다.
+# gas/ocr/ 가 gas/ 안에 있어서 clasp 가 appsscript.json 을 두 번 올리려 합니다
+# (「A file with this name already exists: appsscript」). 2026-09-26
+!gas/.claspignore
 wage.gs.txt
 *.gs.txt
 

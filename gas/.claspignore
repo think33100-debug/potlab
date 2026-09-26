@@ -1,0 +1,27 @@
+# 이 폴더에서 clasp 가 **올리지 않을** 것 (2026-09-26)
+#
+# ── 왜 생겼나 ────────────────────────────────────────────────
+# gas/ocr/ 는 **다른 Apps Script 프로젝트**입니다 (OCR 전용 · 별도 scriptId).
+# 그런데 .clasp.json 이 skipSubdirectories: false 라 clasp 가 gas/ 아래를
+# 전부 훑어 gas/ocr/appsscript.json 까지 같이 올리려 했습니다.
+# Apps Script 는 파일 이름에 폴더가 없어서 둘 다 「appsscript」 가 되고,
+# 그래서 이 오류가 났습니다 —
+#   A file with this name already exists in the current project: appsscript
+#
+# clasp status 로 확인한 것 (고치기 전) —
+#   Tracked files: appsscript.json · WageAdmin.html · WageForm.html
+#                  ocr\appsscript.json · ocr\Code.gs · wage.js
+#
+# ⚠ .claspignore 가 생기면 clasp 의 **기본 제외 목록이 사라집니다.**
+#   그래서 .clasp.json · creds.json · push.ps1 도 여기 적어야 합니다.
+#   특히 creds.json 은 열쇠라 올라가면 안 됩니다.
+
+# OCR 은 딴 프로젝트입니다 (gas/ocr/push.ps1 로 따로 올립니다)
+ocr/**
+
+# clasp 자신의 것 · 열쇠 · 올리는 스크립트
+.clasp.json
+.claspignore
+creds.json
+push.ps1
+*.ps1
