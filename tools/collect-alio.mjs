@@ -26,7 +26,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, MEDTECH, 구운날 } from './gas-rules.mjs';
 import { sortJob } from './sort-rule.mjs';
-import { pdf글자, OCR쓸수있나, OCR어느길, OCR멈췄나 } from './drive-ocr.mjs';
+import { pdf글자, 쓸수있나 as OCR쓸수있나, 멈췄나 as OCR멈췄나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'AL2';
@@ -130,7 +130,7 @@ async function 공고문글자(box, 셈) {
     const hwp = files.some((f) => String(f.atchFileType) === 'A' && /\.hwpx?$/i.test(String(f.atchFileNm || '')));
     return { 글: '', 왜: hwp ? '공고문이 한글(hwp)이라 못 읽음' : '공고문 첨부가 없음' };
   }
-  if (!OCR쓸수있나()) return { 글: '', 왜: 'PDF 공고문 · OCR 열쇠가 없어 못 읽음' };
+  if (!OCR쓸수있나()) return { 글: '', 왜: 'PDF 공고문 · OCR 을 맡길 곳이 없어 못 읽음' };
   try {
     const ck = await 포털쿠키();
     const r = await fetch(pdf.url, { headers: { 'User-Agent': UA, Cookie: ck, Referer: 'https://opendata.alio.go.kr/new/' } });
@@ -140,11 +140,10 @@ async function 공고문글자(box, 셈) {
       return { 글: '', 왜: 'PDF 가 아닌 것이 옴 (' + buf.length + '바이트)' };
     }
     셈.OCR++;
-    const t = await pdf글자(buf, pdf.atchFileNm);
-    if (!t || !t.trim()) return { 글: '', 왜: 'OCR 했지만 글자가 0자' };
-    return { 글: t, 왜: '' };
+    /* 어디에 맡기는지는 tools/ocr/index.mjs 가 정합니다. 여기는 모릅니다 */
+    return await pdf글자(buf, pdf.atchFileNm);
   } catch (e) {
-    return { 글: '', 왜: 'PDF 를 못 읽음 · ' + String(e.message).slice(0, 80) };
+    return { 글: '', 왜: 'PDF 를 못 받음 · ' + String(e.message).slice(0, 80) };
   }
 }
 
@@ -309,7 +308,7 @@ if (!dry && !cfg.COLLECT_KEY_AL2) { console.error('COLLECT_KEY_AL2 가 없습니
 console.log('알리오 새 수집기 · ' + (dry ? '**--dry · 담지 않습니다**' : '담습니다 (source=' + SOURCE + ')'));
 console.log('규칙 구운 날 ' + 구운날 + ' · OCR '
   + (OCR쓸수있나()
-      ? (OCR어느길() === 'oauth' ? '세중님 계정 (OAuth · drive.file)' : '서비스 계정')
+      ? OCR이름표
       : '열쇠 없음 → PDF 는 보류함으로') + '\n');
 
 /* ① 목록 전부 */

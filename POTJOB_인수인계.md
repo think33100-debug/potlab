@@ -1261,7 +1261,9 @@ node tools/copy_jobs.js   공고를 시트에서 Supabase 로
 tools/collect-alio.mjs     본체 (--dry 로 옛것과 대조)
 tools/gas-rules.mjs        gas 의 직군 판정을 **떼어 와서** 씁니다 (안 베낍니다)
 tools/gas-rules.json       그 떼어 온 결과를 구운 것 — Actions 에는 gas/ 가 없어서
-tools/drive-ocr.mjs        PDF → 글자 (구글 Drive convert · OCR)
+tools/ocr/index.mjs        OCR 을 어디에 맡길지 고르는 자리
+tools/ocr/gas.mjs          그 한 가지 — gas/ocr 웹앱
+gas/ocr/                   OCR 전용 Apps Script (열쇠 없음 · 저장소에 올라갑니다)
 .github/workflows/collect-alio.yml   30분마다
 DB  collect_put()          **유일한 쓰기 통로.** service_role 을 안 씁니다
 DB  collect_source         경로 대응표 (AL=알리오 · AL2=알리오(새) · CE · GJ · WN · ND · HS)
@@ -1277,7 +1279,17 @@ DB  collect_secret         경로별 열쇠. 아무에게도 안 열려 있습�
   (gas 는 동결이라 그 주석을 안 고쳤습니다. 여기 적어 둡니다)
 - **첨부 공고문은 거의 전부 스캔 그림입니다.** 12건을 재보니 12건 다
   글자가 0자였습니다. `pdftotext` 로는 못 읽고 **OCR 이 있어야** 합니다.
-  `GDRIVE_SA_JSON` 이 없으면 PDF 공고는 **보류함으로** 갑니다 — 버리지 않습니다.
+  OCR 은 **gas/ocr 웹앱**(세중님 계정)에 맡깁니다. 열쇠가 없으면 PDF 공고는
+  **보류함으로** 갑니다 — 버리지 않습니다.
+
+  node 에서 드라이브를 직접 쓰는 길 둘은 **막혔습니다** —
+  **서비스 계정**은 제 드라이브 용량이 0 이라 폴더를 공유받아도 올린 파일
+  주인이 서비스 계정이어서 403 storageQuotaExceeded 입니다 (개인 gmail 에는
+  공유 드라이브가 없습니다). **OAuth** 는 되지만 동의 화면이 「테스트」면
+  refresh token 이 7일마다 죽습니다. Apps Script 는 열쇠 관리가 없습니다.
+
+  **나중에 Vision 같은 것으로 바꾸려면 `tools/ocr/` 아래 파일 하나만**
+  같은 모양으로 만들면 됩니다 — 수집기는 한 줄도 안 고칩니다.
 - 첨부를 받으려면 **포털 세션 쿠키**가 필요합니다. 없으면 파일 대신
   포털 첫 화면(8,333자 HTML)이 옵니다.
 
@@ -1290,7 +1302,8 @@ DB  collect_secret         경로별 열쇠. 아무에게도 안 열려 있습�
 | `SUPABASE_URL` | | 이미 있습니다 |
 | `SUPABASE_ANON_KEY` | **anon 입니다** (service_role 아님) | `web/.env.local` |
 | `COLLECT_KEY_AL2` | `collect_put` 열쇠 | DB `collect_secret` 표 |
-| `GDRIVE_SA_JSON` | 구글 서비스 계정 JSON 통째로 | 새로 만드셔야 합니다 |
+| `OCR_GAS_URL` | gas/ocr 웹앱 주소 | `gas/ocr/README.md` 3번 |
+| `OCR_KEY` | 그 웹앱의 비밀값 | 편집기에서 `makeOcrKey()` 실행 |
 
 ## 1층과 2층 — 「사람이 많은 곳」이 아니라 「정보가 귀한 곳」
 

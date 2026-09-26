@@ -45,14 +45,11 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           COLLECT_KEY_AL2: ${{ secrets.COLLECT_KEY_AL2 }}
-          # 첨부 공고문 OCR — **세중님 계정으로** 올립니다 (drive.file 범위).
-          # 서비스 계정은 제 드라이브 용량이 0 이라 403 이 났습니다 (2026-09-26).
+          # 첨부 공고문 OCR — gas/ocr 웹앱(세중님 계정)에 맡깁니다.
+          # 서비스 계정은 드라이브 용량 0 으로, OAuth 는 7일 만료로 접었습니다.
           # 없으면 PDF 공고는 보류함으로 갑니다 — 버리지 않습니다
-          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
-          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
-          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
-          # 있으면 그 폴더에, 없으면 드라이브 맨 위에 올렸다가 **바로 지웁니다**
-          GDRIVE_OCR_FOLDER: ${{ secrets.GDRIVE_OCR_FOLDER }}
+          OCR_GAS_URL: ${{ secrets.OCR_GAS_URL }}
+          OCR_KEY: ${{ secrets.OCR_KEY }}
         run: |
           if [ "${{ inputs.dry }}" = "true" ]; then
             node tools/collect-alio.mjs --dry
