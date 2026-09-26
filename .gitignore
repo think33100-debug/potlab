@@ -12,6 +12,9 @@ gas/ocr/.clasprc.json
 # gas/ocr/ 가 gas/ 안에 있어서 clasp 가 appsscript.json 을 두 번 올리려 합니다
 # (「A file with this name already exists: appsscript」). 2026-09-26
 !gas/.claspignore
+# 「돌다가 죽는 것」 검사 규칙도 저장소에 둡니다 — 열쇠가 없습니다.
+# 없으면 push.ps1 이 검사를 건너뛰고, 2026-09-26 같은 일이 또 납니다
+!gas/eslint.gas.mjs
 wage.gs.txt
 *.gs.txt
 
