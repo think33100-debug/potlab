@@ -42,10 +42,25 @@ for (const c of 곳들) {
   const page = await ctx.newPage();
   /* 서버가 무엇을 돌려줬는지도 봅니다 — 화면이 비어도 200 일 수 있습니다 */
   const 응답들 = [];
-  page.on('response', (r) => {
+  /* ⚠ **자료를 주는 주소를 여기서 받아 적습니다** (2026-09-27).
+     번들에서 경로를 찾아 일곱 번 두드려 전부 404 였습니다
+     (`/api/position/v1/jobflex` 등 · NoHandlerFoundException).
+     짐작으로 주소를 만들지 않고, **브라우저가 실제로 부르는 것**을 적습니다.
+     이 목록에 공고 제목이 든 JSON 이 있으면 다음부터는 fetch 한 번으로 끝납니다 */
+  const 자료주소 = [];
+  page.on('response', async (r) => {
     const u = r.url();
-    if (/\.(css|png|jpe?g|gif|svg|woff2?|ico)(\?|$)/i.test(u)) return;
+    if (/\.(css|png|jpe?g|gif|svg|woff2?|ico|js|map)(\?|$)/i.test(u)) return;
     응답들.push(r.status() + ' ' + u.slice(0, 120));
+    const ct = (r.headers()['content-type'] || '');
+    if (!/json|x-component/i.test(ct)) return;
+    try {
+      const t = await r.text();
+      const 한글 = (t.match(/[가-힣]{2,}/g) || []).length;
+      /* 공고 제목이 들어 있을 만큼 한글이 많은 것만 */
+      if (한글 >= 10) 자료주소.push({ 주소: u, 방법: r.request().method(), 크기: t.length, 한글,
+        앞: t.slice(0, 400).replace(/\s+/g, ' ') });
+    } catch { /* 이미 닫힌 응답 */ }
   });
 
   try {
@@ -93,6 +108,18 @@ for (const c of 곳들) {
   if (줄.응답.length) {
     console.log('   ── 서버가 준 것 (앞 8개) ──');
     줄.응답.slice(0, 8).forEach((x) => console.log('     ' + x));
+  }
+  /* ★ 다음부터 브라우저를 안 띄우려면 이 주소를 씁니다 */
+  줄.자료주소 = 자료주소;
+  if (자료주소.length) {
+    console.log('   ★★ 자료를 주는 주소 ' + 자료주소.length + '개 — 다음부터는 fetch 한 번이면 됩니다');
+    자료주소.forEach((x) => {
+      console.log('     ' + x.방법 + ' ' + x.주소);
+      console.log('        ' + x.크기 + '바이트 · 한글 ' + x.한글 + '개');
+      console.log('        앞 400자 — ' + x.앞);
+    });
+  } else {
+    console.log('   ※ 자료를 주는 주소를 못 찾았습니다 — 화면째로 긁어야 합니다');
   }
   결과.push({ ...줄, html: undefined, 본문: (줄.본문 || '').slice(0, 2000) });
 }
