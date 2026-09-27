@@ -146,15 +146,23 @@ function toJobPost(g, r) {
 }
 
 /* ── Supabase ── */
-async function sb(cfg, pathq, method, body) {
+/* 돌려받기 = true 면 바뀐 줄을 돌려줍니다 (몇 줄이 바뀌었나 세려고).
+   주소에 on_conflict 가 있으면 **겹친 줄을 고치도록** 알려줘야 합니다 —
+   안 그러면 PostgREST 가 409 로 거절합니다 */
+async function sb(cfg, pathq, method, body, 돌려받기) {
+  const 병합 = pathq.includes('on_conflict=') ? 'resolution=merge-duplicates,' : '';
   const res = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + pathq, {
     method,
     headers: { apikey: cfg.SUPABASE_SERVICE_KEY,
                Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY,
-               'Content-Type': 'application/json', Prefer: 'return=minimal' },
+               'Content-Type': 'application/json',
+               Prefer: 병합 + (돌려받기 ? 'return=representation' : 'return=minimal') },
     body: body ? JSON.stringify(body) : undefined
   });
   if (!res.ok) throw new Error(res.status + ' ' + (await res.text()).slice(0, 400));
+  if (!돌려받기) return;
+  const t = await res.text();
+  return t ? JSON.parse(t) : [];
 }
 async function count(cfg, table) {
   const res = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + table + '?select=*&limit=1', {
@@ -352,6 +360,21 @@ if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, t
 
   console.log('표'.padEnd(26) + '시트'.padEnd(9) + 'DB'.padEnd(9) + '결과');
   console.log('─'.repeat(58));
+  /* ⚠ **job_posts 는 비우지 않습니다** (2026-09-26 · 세중님이 정하신 것).
+     이 파일은 처음 한 번 부을 때 쓰던 것이고 지금 워크플로에는 걸려 있지
+     않습니다 (sync.yml 은 sync_jobs.js 만 부릅니다). 그래도 손으로 돌리면
+     공고가 통째로 지워지기 때문에 막아 둡니다.
+     공고는 지우지 않고 감춥니다 — 되살릴 수 없고, 「지난 공고」 를 나중에
+     보여주려면 자료가 남아 있어야 합니다. */
+  if (!process.argv.includes('--공고도-비우기')) {
+    const n = loaded.findIndex((l) => l.table === 'job_posts');
+    if (n >= 0) {
+      console.log('※ job_posts 는 비우지 않고 열쇠로 맞춰 담습니다 (공고는 지우지 않습니다).');
+      console.log('  정말 비우려면 --공고도-비우기 를 붙이세요. 되살릴 수 없습니다.');
+      loaded[n].비우지않기 = true;
+    }
+  }
+
   let bad = 0;
   for (const l of loaded) {
     /* 표마다 기본열쇠가 다릅니다. 조건 없는 DELETE 는 safeupdate 가 막습니다. */
@@ -365,12 +388,22 @@ if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, t
                   job_trash: 'id=neq.__none__',
                   site_checks: 'id=neq.__none__',
                   site_state: 'name=neq.__none__' };
-    await sb(cfg, l.table + '?' + (DEL[l.table] || 'id=gt.0'), 'DELETE');
-    await push(cfg, l.table, l.data);
+    if (!l.비우지않기) await sb(cfg, l.table + '?' + (DEL[l.table] || 'id=gt.0'), 'DELETE');
+    if (l.비우지않기) {
+      /* 비우지 않을 표는 열쇠로 맞춰 담습니다 (겹치면 고치고 없으면 넣음) */
+      for (let i = 0; i < l.data.length; i += BATCH) {
+        await sb(cfg, l.table + '?on_conflict=' + (l.key || 'id'), 'POST',
+          l.data.slice(i, i + BATCH));
+      }
+    } else {
+      await push(cfg, l.table, l.data);
+    }
     const got = await count(cfg, l.table);
-    const ok = got === l.rows;
+    /* 비우지 않은 표는 옛 줄이 남아 있으니 시트 줄 수와 달라도 맞습니다 */
+    const ok = l.비우지않기 ? got >= l.rows : got === l.rows;
     if (!ok) bad++;
-    console.log(l.name.padEnd(26) + String(l.sheet).padEnd(9) + String(got).padEnd(9) + (ok ? '맞음' : '✗ ' + (got - l.rows)));
+    console.log(l.name.padEnd(26) + String(l.sheet).padEnd(9) + String(got).padEnd(9)
+      + (ok ? (l.비우지않기 ? '맞음 (안 비웠습니다)' : '맞음') : '✗ ' + (got - l.rows)));
   }
   console.log('─'.repeat(58));
   console.log('손으로 고친 공고 ' + fixedPosts + '건 · 원본이 없는 수정 줄 ' + orphanFix + '개');

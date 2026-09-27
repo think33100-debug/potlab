@@ -254,10 +254,17 @@ async function syncExtras(cfg, dry) {
   return 결과;
 }
 
-/* 쓰레기통에 든 공고를 job_posts 에서 치웁니다 (2026-09-26).
+/* 쓰레기통에 든 공고를 job_posts 에서 **감춥니다** (2026-09-26).
+
+   ── 2026-09-26 에 「지우기」 에서 「감추기」 로 바꿨습니다 ─────
+   **공고는 지우지 않습니다** (세중님이 정하신 것). 법적 삭제 요청만
+   예외이고 그때는 관리자가 손으로 지웁니다.
+   지운 공고는 되살릴 수 없고, 「지난 공고」 를 나중에 보여주려면
+   자료가 남아 있어야 합니다. 그 전까지 **121건이 이미 지워졌습니다** —
+   job_trash 에 제목·기관·링크·사유는 남아 있지만 마감일·직군·상세는 없습니다.
 
    ── 왜 필요한가 ──────────────────────────────────────────
-   이 다리는 **담기만 하고 지우지 않습니다.** 그래서 수집기가 쓰레기통으로
+   이 다리는 **담기만 합니다.** 그래서 수집기가 쓰레기통으로
    내린 공고가 표에 그대로 남습니다. 2026-09-26 에 시트는 642건인데 표는
    719건이었고, 차이 77건이 정확히 쓰레기통 건수였습니다.
 
@@ -266,7 +273,7 @@ async function syncExtras(cfg, dry) {
    그렇게 하면 멀쩡한 공고가 날아갑니다.
    **쓰레기통 시트에 이름이 적힌 것만** 지웁니다. 관리자가 「잘못 버림」
    (되돌림 Y) 을 누른 줄은 건드리지 않습니다. */
-async function dropTrashed(cfg, dry) {
+async function hideTrashed(cfg, dry) {
   let S;
   try { S = await readWhole(cfg, '쓰레기통'); } catch (e) { return 0; }
   const uniq = [...new Set(
@@ -278,12 +285,17 @@ async function dropTrashed(cfg, dry) {
   if (!uniq.length) return 0;
   if (dry) return uniq.length;
 
-  const before = await count(cfg, 'job_posts');
+  /* **지우지 않고 감춥니다** (2026-09-26 · 세중님이 정하신 것).
+     이미 감춰 둔 줄은 건드리지 않습니다 — 감춘 날이 밀리면 안 됩니다 */
+  const 오늘 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+  let 감춤 = 0;
   for (let i = 0; i < uniq.length; i += 100) {
     const 조각 = uniq.slice(i, i + 100).map(encodeURIComponent).join(',');
-    await sb(cfg, 'job_posts?id=in.(' + 조각 + ')', 'DELETE');
+    const r = await sb(cfg, 'job_posts?id=in.(' + 조각 + ')&hidden_why=is.null',
+      'PATCH', { hidden: true, hidden_why: '쓰레기통', hidden_on: 오늘 }, true);
+    감춤 += Array.isArray(r) ? r.length : 0;
   }
-  return before - await count(cfg, 'job_posts');
+  return 감춤;
 }
 
 (async function main() {
@@ -340,7 +352,7 @@ async function dropTrashed(cfg, dry) {
       const ex = await syncExtras(cfg, true);
       ex.forEach((x) => console.log('  ' + x.sheet.padEnd(8) + ' → ' + x.table.padEnd(12)
         + (x.note ? x.note : x.n + '건 (시트 ' + x.시트줄 + '줄)')));
-      console.log('  쓰레기통에 들어 치울 공고 ' + (await dropTrashed(cfg, true)) + '건');
+      console.log('  쓰레기통에 들어 감출 공고 ' + (await hideTrashed(cfg, true)) + '건');
       console.log('맨 끝 3건:');
       posts.slice(-3).forEach((p) => console.log('  ' + p.id + ' | ' + p.org_name
         + ' | ' + String(p.title).slice(0, 40) + ' | ' + (p.job_group || '(빈칸)')));
@@ -369,9 +381,9 @@ async function dropTrashed(cfg, dry) {
         + (x.note ? x.note : x.n + '건 (시트 ' + x.시트줄 + '줄)'));
       말.push(건너뜀알리기(x.table, x.건너뜀 || []));
     });
-    const 치움 = await dropTrashed(cfg, false);
+    const 감춤 = await hideTrashed(cfg, false);
     const 끝 = await count(cfg, 'job_posts');
-    if (치움) console.log('  쓰레기통에 든 공고 ' + 치움 + '건을 표에서 치웠습니다');
+    if (감춤) console.log('  쓰레기통에 든 공고 ' + 감춤 + '건을 감췄습니다 (지우지 않습니다)');
 
     /* 기록은 **다 끝난 뒤 한 번만** 남깁니다 (2026-09-26).
        전에는 공고를 담자마자 ok:true 로 적고 그 뒤 세 장에서 죽어서,
