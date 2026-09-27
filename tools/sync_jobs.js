@@ -254,6 +254,20 @@ async function syncExtras(cfg, dry) {
   return 결과;
 }
 
+/* DB 함수를 부릅니다 (쓰기는 함수 한 곳으로만 — 그 원칙 그대로) */
+async function rpc(cfg, fn, body) {
+  const res = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+    method: 'POST',
+    headers: { apikey: cfg.SUPABASE_SERVICE_KEY,
+               Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY,
+               'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {}),
+  });
+  const t = await res.text();
+  if (!res.ok) throw new Error(res.status + ' ' + t.slice(0, 300));
+  return t ? JSON.parse(t) : null;
+}
+
 /* 쓰레기통에 든 공고를 job_posts 에서 **감춥니다** (2026-09-26).
 
    ── 2026-09-26 에 「지우기」 에서 「감추기」 로 바꿨습니다 ─────
@@ -385,6 +399,33 @@ async function hideTrashed(cfg, dry) {
     const 끝 = await count(cfg, 'job_posts');
     if (감춤) console.log('  쓰레기통에 든 공고 ' + 감춤 + '건을 감췄습니다 (지우지 않습니다)');
 
+    /* ── 지난 공고를 회원 목록에서 감춥니다 (2026-09-28) ─────────────
+       규칙은 DB 의 hide_stale_posts() 한 벌입니다 —
+         마감일 있음 → 마감 지나면 「마감 지남」
+         마감일 없음 → 처음 본 날부터 45일 지나면 「45일 지남」
+         재공고로 마감일이 늘어나면 감춤을 풉니다
+       ⚠ 2026-09-27 에 이 함수를 만들어 놓고 **부르는 곳을 안 붙였습니다.**
+         그래서 마감 지난 공고가 회원 목록에 그대로 남아 있었습니다.
+         다리가 공고를 담은 바로 뒤가 제자리입니다 */
+    /* ⚠ 순서가 중요합니다 (2026-09-28).
+       ① 제목에서 마감일을 다시 채웁니다 — 다리가 방금 시트 값(빈 칸)으로 덮어썼습니다
+       ② 제목에 「마감·종료」 가 적힌 것을 감춥니다 — 45일 규칙보다 먼저
+       ③ 그다음 마감일·45일 규칙
+       ①을 빼먹으면 「마감 지남」 이어야 할 공고가 「45일 지남」 으로 감춰집니다 */
+    try {
+      const f = await rpc(cfg, 'fill_deadline_from_title', {});
+      const c = await rpc(cfg, 'hide_closed_by_title', {});
+      const 앞말 = [...Object.entries(f || {}), ...Object.entries(c || {})]
+        .filter(([, v]) => Number(v) > 0).map(([k, v]) => k + ' ' + v + '건');
+      if (앞말.length) console.log('  마감일 정리 — ' + 앞말.join(' · '));
+    } catch (e) { console.error('  마감일 정리 실패 · ' + String(e.message).slice(0, 200)); }
+    try {
+      const h = await rpc(cfg, 'hide_stale_posts', { p_days: 45 });
+      const 말 = Object.entries(h || {}).filter(([k]) => !/기준일|며칠/.test(k))
+        .filter(([, v]) => Number(v) > 0).map(([k, v]) => k + ' ' + v + '건');
+      console.log('  감춤 정리 — ' + (말.length ? 말.join(' · ') : '바뀐 것 없음'));
+    } catch (e) { console.error('  감춤 정리 실패 · ' + String(e.message).slice(0, 200)); }
+
     /* 기록은 **다 끝난 뒤 한 번만** 남깁니다 (2026-09-26).
        전에는 공고를 담자마자 ok:true 로 적고 그 뒤 세 장에서 죽어서,
        한 번 돈 것이 ok:true 와 ok:false 두 줄로 남았습니다 */
@@ -393,11 +434,11 @@ async function hideTrashed(cfg, dry) {
     await log(cfg, { mode, sheet_total: total, read_rows: S.rows.length,
                      upserted: 공고결과.ok, edits_kept: kept,
                      took_ms: Date.now() - t0, ok: true,
-                     note: ['새로 늘어난 줄 ' + (after - before) + '건 · 치움 ' + 치움 + '건']
+                     note: ['새로 늘어난 줄 ' + (after - before) + '건 · 감춤 ' + 감춤 + '건']
                        .concat(말.filter(Boolean)).join(' | ').slice(0, 500) });
 
     console.log('담았습니다 · 표 ' + before + ' → ' + 끝 + '건 (새로 ' + (after - before)
-      + ' · 치움 ' + 치움 + ')');
+      + ' · 감춤 ' + 감춤 + ')');
     console.log((Date.now() - t0) + 'ms');
   } catch (e) {
     console.error('실패: ' + e.message);

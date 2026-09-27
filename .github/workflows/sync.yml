@@ -31,6 +31,15 @@ jobs:
         with:
           node-version: '20'
 
+      # 돌다가 죽는 것 검사 (node --check 로는 안 잡히는 종류).
+      # 2026-09-28 에 다리가 「치움 is not defined」 로 하루 네 번 죽었습니다 —
+      # 이름을 바꾸며 두 곳을 빼먹은 것인데 문법 오류가 아니라 실행 오류였습니다.
+      # eslint 한 꾸러미만 깔면 됩니다 (몇 초). web 전체를 깔면 30분 크론에 너무 무겁습니다.
+      - name: 돌다가 죽는 것 검사
+        run: |
+          npm install --no-save --silent eslint@9.39.5
+          node tools/lint.mjs --tools
+
       - name: 가져오기
         env:
           APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
