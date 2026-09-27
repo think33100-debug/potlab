@@ -58,7 +58,22 @@ for (const c of 곳들) {
       const t = await r.text();
       const 한글 = (t.match(/[가-힣]{2,}/g) || []).length;
       /* 공고 제목이 들어 있을 만큼 한글이 많은 것만 */
-      if (한글 >= 10) 자료주소.push({ 주소: u, 방법: r.request().method(), 크기: t.length, 한글,
+      if (한글 < 10) return;
+      /* ⚠ **머리글도 함께 적습니다** (2026-09-27).
+         신형 마이다스 API 는 `api-recruiter.recruiter.co.kr/position/v1/jobflex` 인데
+         그냥 부르면 `401 인증에 실패하였습니다` 입니다. 무슨 머리글을 보내는지
+         알아야 다음부터 fetch 로 받을 수 있습니다. 토큰이면 어디서 오는지도 봐야 합니다.
+         (열쇠 값이 로그에 찍히니 저장소에 올리지 말고 눈으로만 보세요) */
+      const req = r.request();
+      const 머리 = {};
+      for (const [k, v] of Object.entries(req.headers())) {
+        if (/^(accept|authorization|x-|content-type|origin|referer|cookie)/i.test(k)) {
+          머리[k] = k.toLowerCase() === 'cookie' || /auth|token/i.test(k)
+            ? String(v).slice(0, 24) + '…(' + String(v).length + '자)' : v;
+        }
+      }
+      자료주소.push({ 주소: u, 방법: req.method(), 크기: t.length, 한글, 머리,
+        보낸것: (req.postData() || '').slice(0, 200),
         앞: t.slice(0, 400).replace(/\s+/g, ' ') });
     } catch { /* 이미 닫힌 응답 */ }
   });
@@ -116,6 +131,8 @@ for (const c of 곳들) {
     자료주소.forEach((x) => {
       console.log('     ' + x.방법 + ' ' + x.주소);
       console.log('        ' + x.크기 + '바이트 · 한글 ' + x.한글 + '개');
+      console.log('        머리글 — ' + JSON.stringify(x.머리));
+      if (x.보낸것) console.log('        보낸 것 — ' + x.보낸것);
       console.log('        앞 400자 — ' + x.앞);
     });
   } else {
