@@ -29,6 +29,7 @@ export default [
         URL: 'readonly', URLSearchParams: 'readonly', TextDecoder: 'readonly',
         TextEncoder: 'readonly', setTimeout: 'readonly', clearTimeout: 'readonly',
         require: 'readonly', module: 'writable', exports: 'writable',
+        AbortSignal: 'readonly', AbortController: 'readonly', structuredClone: 'readonly',
         __dirname: 'readonly', __filename: 'readonly',
       },
     },
