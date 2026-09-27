@@ -1,0 +1,146 @@
+[
+ {
+  "이름": "동래봉생병원",
+  "url": "https://www.drbs.or.kr/page/board/board.php?tno=1415",
+  "그냥": "UNABLE_TO_V",
+  "등급낮춤": "UNABLE_TO_V",
+  "사슬": "UNABLE_TO_V",
+  "열림": false
+ },
+ {
+  "이름": "의료법인 녹산의료재단동수원병원",
+  "url": "https://www.dswhosp.co.kr/support/recruit.php",
+  "그냥": "UNABLE_TO_V",
+  "등급낮춤": "UNABLE_TO_V",
+  "사슬": "UNABLE_TO_V",
+  "열림": false
+ },
+ {
+  "이름": "창원경상국립대학교병원",
+  "url": "https://recruit.gnuch.co.kr/recruit/02_general/01_notice/ge_notice.jsp",
+  "그냥": "HTTP 200",
+  "등급낮춤": "-",
+  "사슬": "-",
+  "열림": true
+ },
+ {
+  "이름": "창원경상국립대학교병원",
+  "url": "https://recruit.gnuch.co.kr/recruit/01_specialist/01_notice/sp_notice.jsp",
+  "그냥": "HTTP 200",
+  "등급낮춤": "-",
+  "사슬": "-",
+  "열림": true
+ },
+ {
+  "이름": "경상국립대학교병원",
+  "url": "https://recruit.gnuh.co.kr:8443/recruit/02_general/01_notice/ge_notice.jsp",
+  "그냥": "UNABLE_TO_V",
+  "등급낮춤": "UNABLE_TO_V",
+  "사슬": "UNABLE_TO_V",
+  "열림": false
+ },
+ {
+  "이름": "경상국립대학교병원",
+  "url": "https://recruit.gnuh.co.kr:8443/recruit/01_specialist/01_notice/sp_notice.jsp",
+  "그냥": "UNABLE_TO_V",
+  "등급낮춤": "UNABLE_TO_V",
+  "사슬": "UNABLE_TO_V",
+  "열림": false
+ },
+ {
+  "이름": "효산의료재단 지샘병원",
+  "url": "https://www.gsamhospital.com/bbs/board.php?bo_table=recruit",
+  "그냥": "EPROTO",
+  "등급낮춤": "HTTP 200",
+  "사슬": "-",
+  "열림": true
+ },
+ {
+  "이름": "의료법인 광혜의료재단 광혜병원",
+  "url": "https://www.gwanghyehospital.com/bbs/board.php?bo_table=K050500",
+  "그냥": "EPROTO",
+  "등급낮춤": "HTTP 200",
+  "사슬": "-",
+  "열림": true
+ },
+ {
+  "이름": "의료법인우리의료재단김포우리병원",
+  "url": "https://www.gwhospital.co.kr/intro/recruit_list.php",
+  "그냥": "EPROTO",
+  "등급낮춤": "HTTP 200",
+  "사슬": "-",
+  "열림": true
+ },
+ {
+  "이름": "제주한라병원",
+  "url": "https://www.hallahosp.co.kr/bbs/board.php?bo_table=5_3_2_1",
+  "그냥": "UNABLE_TO_V",
+  "등급낮춤": "UNABLE_TO_V",
+  "사슬": "UNABLE_TO_V",
+  "열림": false
+ },
+ {
+  "이름": "의료법인 행도의료재단 해동병원",
+  "url": "https://www.hdh.co.kr/gnuboard/bbs/board.php?bo_table=jobboard",
+  "그냥": "EPROTO",
+  "등급낮춤": "HTTP 200",
+  "사슬": "-",
+  "열림": true
+ },
+ {
+  "이름": "의료법인 건명의료재단 중앙제일병원",
+  "url": "https://joongangjeil.co.kr/introduction/recruit.php",
+  "그냥": "UNABLE_TO_V",
+  "등급낮춤": "UNABLE_TO_V",
+  "사슬": "UNABLE_TO_V",
+  "열림": false
+ },
+ {
+  "이름": "전북특별자치도 군산의료원",
+  "url": "https://www.kunmed.or.kr/board/bbs/board.php?bo_table=recruit",
+  "그냥": "HPE_CR_EXPE",
+  "등급낮춤": "HPE_CR_EXPE",
+  "사슬": "HPE_CR_EXPE",
+  "열림": false
+ },
+ {
+  "이름": "효산의료재단 안양샘병원",
+  "url": "https://anyang.samhospital.com/bbs/board.php?bo_table=recruit",
+  "그냥": "EPROTO",
+  "등급낮춤": "HTTP 200",
+  "사슬": "-",
+  "열림": true
+ },
+ {
+  "이름": "의료법인 서명의료재단 세명종합병원",
+  "url": "https://www.smhospital.kr/front/info/recruit1.php",
+  "그냥": "UNABLE_TO_V",
+  "등급낮춤": "UNABLE_TO_V",
+  "사슬": "UNABLE_TO_V",
+  "열림": false
+ },
+ {
+  "이름": "안동성소병원",
+  "url": "https://sungso.com/bj_board/bjbrd_list.htm?board_id=0505",
+  "그냥": "UNABLE_TO_V",
+  "등급낮춤": "UNABLE_TO_V",
+  "사슬": "UNABLE_TO_V",
+  "열림": false
+ },
+ {
+  "이름": "의료법인 영훈의료재단 대전선병원",
+  "url": "https://www.sunhospital.com/sub5_4.html",
+  "그냥": "UNABLE_TO_V",
+  "등급낮춤": "UNABLE_TO_V",
+  "사슬": "UNABLE_TO_V",
+  "열림": false
+ },
+ {
+  "이름": "의료법인영훈의료재단 유성선병원",
+  "url": "https://www.yuseongsunhospital.com/sub5_4.html",
+  "그냥": "UNABLE_TO_V",
+  "등급낮춤": "UNABLE_TO_V",
+  "사슬": "UNABLE_TO_V",
+  "열림": false
+ }
+]
