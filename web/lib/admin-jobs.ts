@@ -30,6 +30,9 @@ export type AdminJob = {
   evidence: Record<string, string> | null;
   collected_at: string;
   updated_at: string;
+  /* 왜 감췄나 — 「재판정으로 버림 (9/28)」 · 「마감 지남」 · 「45일 지남」 … */
+  hidden_why: string | null;
+  hidden_on: string | null;
 };
 
 /* evidence 를 함께 받습니다 — 보류함에서 **왜 보류인지**를 목록에서
@@ -37,13 +40,13 @@ export type AdminJob = {
    원문을 읽어야 합니다. jsonb 한 칸이라 목록이 많이 무거워지지 않습니다 */
 export const ADMIN_LIST_COLS =
   'id,source,org_name,title,job_group,employ_type,work_place,sido,tab,'
-  + 'headcount,apply_to,posted_at,hidden,hold,collected_at,evidence';
+  + 'headcount,apply_to,posted_at,hidden,hold,collected_at,evidence,hidden_why';
 
 export type AdminJobListItem = Pick<
   AdminJob,
   'id' | 'source' | 'org_name' | 'title' | 'job_group' | 'employ_type' | 'work_place'
   | 'sido' | 'tab' | 'headcount' | 'apply_to' | 'posted_at' | 'hidden' | 'hold' | 'collected_at'
-  | 'evidence'
+  | 'evidence' | 'hidden_why'
 >;
 
 /* 관리자가 매일 보는 칸들. 「보류」가 첫째입니다 —
@@ -52,6 +55,10 @@ export const STATES = [
   { key: 'hold',   label: '보류함',   hint: '못 가린 공고 · 확인해서 올릴 것' },
   { key: 'live',   label: '올라간 것', hint: '회원에게 보이는 공고' },
   { key: 'hidden', label: '숨긴 것',   hint: '안 보이게 치운 공고' },
+  /* 규칙을 바꾼 뒤 다시 판정해 감춘 것만 따로 봅니다 (2026-09-28).
+     「숨긴 것」 에는 마감 지남·쓰레기통 등 450건이 섞여 있어 못 찾습니다.
+     **지운 것이 아니라 감춘 것**이라 여기서 되살릴 수 있습니다 */
+  { key: 'rejudged', label: '재판정으로 버림', hint: '규칙을 바꿔 다시 판정한 것 · 되살릴 수 있습니다' },
   { key: 'all',    label: '전체',     hint: '' },
 ] as const;
 

@@ -422,6 +422,16 @@ async function hideTrashed(cfg, dry) {
       if (n) console.log('  「재활치료」만으로 잡힌 공고 ' + n + '건을 보류함으로 (지우지 않습니다)');
     } catch (e) { console.error('  재활치료 보류 실패 · ' + String(e.message).slice(0, 200)); }
 
+    /* 재판정으로 감추기로 한 것을 다시 적용합니다 (2026-09-28).
+       46건 중 14건(HS 11 · WN 2 · GJ 1)은 **시트를 거쳐** 들어옵니다.
+       다리가 방금 시트의 「보류 = Y」 로 덮어썼으니 여기서 되돌립니다.
+       마감 지난 공고 192건이 회원 화면에 떠 있던 것과 같은 꼴입니다. */
+    try {
+      const r = await rpc(cfg, 'apply_rejudged', {});
+      const n = Number((r || {})['재판정 다시 적용'] || 0);
+      if (n) console.log('  재판정 결정 ' + n + '건을 다시 적용했습니다 (시트가 되돌려 놓은 것)');
+    } catch (e) { console.error('  재판정 다시 적용 실패 · ' + String(e.message).slice(0, 200)); }
+
     try {
       const f = await rpc(cfg, 'fill_deadline_from_title', {});
       const c = await rpc(cfg, 'hide_closed_by_title', {});

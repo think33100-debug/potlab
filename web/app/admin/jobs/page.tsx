@@ -39,6 +39,8 @@ export default function AdminJobs() {
     if (state === 'hold') b = b.eq('hold', true);
     if (state === 'live') b = b.eq('hold', false).eq('hidden', false);
     if (state === 'hidden') b = b.eq('hidden', true);
+    /* 규칙을 바꿔 다시 판정한 것만 — 되살릴 수 있게 따로 모읍니다 (2026-09-28) */
+    if (state === 'rejudged') b = b.eq('hidden', true).like('hidden_why', '재판정으로 버림%');
     if (tab) b = b.like('tab', TABS.find((t) => t.key === tab)?.like ?? '%');
     if (q) b = b.or(`title.ilike.%${q}%,org_name.ilike.%${q}%,id.ilike.%${q}%`);
     return b;
@@ -199,6 +201,12 @@ export default function AdminJobs() {
               {/* 왜 보류인지 — 목록에서 바로 보이게 (2026-09-25).
                   없으면 관리자가 한 건씩 열어 원문을 읽어야 합니다.
                   시트의 「보류사유」 칸이 evidence 에 실려 옵니다 */}
+              {/* 왜 감췄는지 — 되살릴지 정하려면 까닭이 보여야 합니다 (2026-09-28) */}
+              {r.hidden && r.hidden_why && (
+                <p className="mt-1 break-keep text-[13px] text-[#8b979d]">
+                  감춘 까닭 — {r.hidden_why}
+                </p>
+              )}
               {r.hold && r.evidence?.['보류사유'] && (
                 <p className="mt-1 break-keep text-sm font-medium text-brand-red-dark">
                   보류 이유 — {r.evidence['보류사유']}
