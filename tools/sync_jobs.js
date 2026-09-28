@@ -412,6 +412,16 @@ async function hideTrashed(cfg, dry) {
        ② 제목에 「마감·종료」 가 적힌 것을 감춥니다 — 45일 규칙보다 먼저
        ③ 그다음 마감일·45일 규칙
        ①을 빼먹으면 「마감 지남」 이어야 할 공고가 「45일 지남」 으로 감춰집니다 */
+    /* 「재활치료」 만으로 직군이 잡힌 공고를 보류함으로 (2026-09-28).
+       gas v329 에서 확정 낱말을 고쳤지만 **시트에 이미 적힌 「공통」 은 그대로**이고
+       다리가 방금 그 값을 밀어 올렸습니다. 그래서 여기서 한 번 더 봅니다.
+       청주의료원 제26-9회(재활치료업무보조)가 회원 목록에 올라갔던 일입니다 */
+    try {
+      const r = await rpc(cfg, 'hold_rehab_only', {});
+      const n = Number((r || {}).재활치료만_보류 || 0);
+      if (n) console.log('  「재활치료」만으로 잡힌 공고 ' + n + '건을 보류함으로 (지우지 않습니다)');
+    } catch (e) { console.error('  재활치료 보류 실패 · ' + String(e.message).slice(0, 200)); }
+
     try {
       const f = await rpc(cfg, 'fill_deadline_from_title', {});
       const c = await rpc(cfg, 'hide_closed_by_title', {});
@@ -420,7 +430,12 @@ async function hideTrashed(cfg, dry) {
       if (앞말.length) console.log('  마감일 정리 — ' + 앞말.join(' · '));
     } catch (e) { console.error('  마감일 정리 실패 · ' + String(e.message).slice(0, 200)); }
     try {
-      const h = await rpc(cfg, 'hide_stale_posts', { p_days: 45 });
+      /* 수시·상시 공고는 180일까지 둡니다 (세중님 결정 ㉮ · 2026-09-28 켬).
+         제목에 「수시」 「상시」 「채용 시까지」 가 있으면 45일이 아니라 180일입니다 —
+         끝이 없는 공고를 45일로 끊으면 아직 뽑고 있는 자리가 사라집니다.
+         켠 날 잰 것: 수시·상시 공고 3건 · 보임 1(영천 물리치료사 88일)
+                     · 180일 넘어 감춤 1(536일) · 사람이 숨긴 것 1(그대로 둠) */
+      const h = await rpc(cfg, 'hide_stale_posts', { p_days: 45, p_rolling_days: 180 });
       const 말 = Object.entries(h || {}).filter(([k]) => !/기준일|며칠/.test(k))
         .filter(([, v]) => Number(v) > 0).map(([k, v]) => k + ' ' + v + '건');
       console.log('  감춤 정리 — ' + (말.length ? 말.join(' · ') : '바뀐 것 없음'));

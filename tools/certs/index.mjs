@@ -34,6 +34,21 @@ try {
 
 export const 호스트들 = [...가진것.keys()];
 
+/* ── 줄 끝이 망가진 머리글을 보내는 곳 (2026-09-28) ──────────
+ * 군산의료원은 `Content-Security-Policy` 를 **여러 줄에 걸쳐 LF 만으로** 내보냅니다.
+ * HTTP/1.1 머리글은 줄 끝이 CRLF 여야 해서 node 파서가 `HPE_CR_EXPECTED` 를 냅니다.
+ * 앞 500바이트를 16진수로 찍어 확인한 것입니다 —
+ *     ... 'unsafe-eval'␊       ← CR 이 없습니다
+ *         code.jquery.com␊
+ *         fonts.gstatic.com␊
+ *         https://t1.kakaocdn.net;...␍␊
+ * 서버 설정에 CSP 를 줄바꿈해 적은 것이 그대로 나가는 것입니다. 우리가 고칠 수 없습니다.
+ *
+ * ⚠ `insecureHTTPParser` 는 **줄 끝만 관용**합니다.
+ *    인증서 검증(`rejectUnauthorized`)은 그대로 켠 채입니다 — 끄지 않습니다.
+ *    그래도 이름이 그런 것이라 **적은 호스트에만** 켭니다. 전체에 켜지 않습니다. */
+const 느슨한파서 = new Set(['www.kunmed.or.kr']);
+
 /** 이 호스트에 붙일 인증서가 있나 */
 export function 있나(호스트) { return 가진것.has(String(호스트 || '')); }
 
@@ -45,7 +60,10 @@ export async function 붙여받기(url, opt) {
   let u;
   try { u = new URL(url); } catch { return { 왜: '주소가 아닙니다' }; }
   const pem = 가진것.get(u.hostname);
-  if (!pem && u.protocol === 'https:') {
+  const 느슨 = 느슨한파서.has(u.hostname);
+  /* 느슨한 파서는 undici(fetch)에 없는 옵션입니다. 그래서 붙일 인증서가 없어도
+     아래 https.request 길로 보냅니다 */
+  if (!pem && !느슨 && u.protocol === 'https:') {
     /* 붙일 것이 없으면 평범하게 */
     try {
       const r = await fetch(url, opt);
@@ -59,7 +77,8 @@ export async function 붙여받기(url, opt) {
       host: u.hostname, port: u.port || 443, path: u.pathname + u.search, method: 'GET',
       headers: { ...머리, Host: u.hostname }, servername: u.hostname,
       rejectUnauthorized: true,                              // ← 끄지 않습니다
-      ca: [...tls.rootCertificates, pem],                    // ← 사슬만 이어줍니다
+      ...(pem ? { ca: [...tls.rootCertificates, pem] } : {}),  // ← 사슬만 이어줍니다
+      ...(느슨 ? { insecureHTTPParser: true } : {}),           // ← 줄 끝만 관용 (군산의료원)
       ciphers: 'DEFAULT@SECLEVEL=1', minVersion: 'TLSv1',
     }, (res) => {
       /* 자리 옮김을 한 번 따라갑니다 */
@@ -77,4 +96,28 @@ export async function 붙여받기(url, opt) {
     req.setTimeout((opt && opt.timeout) || 20000, () => { req.destroy(); done({ 왜: 'TIMEOUT' }); });
     req.end();
   });
+}
+
+/**
+ * 받아서 **글자로** 돌려줍니다 — 중간 인증서 붙이기 + 인코딩 읽기까지.
+ *
+ * 이 다섯 줄짜리 인코딩 코드가 `hs_run` `hs_census` `hs_pages` `probe-pages`
+ * 네 군데에 베껴져 있었습니다. 강동경희대 글 수가 0으로 나온 것도
+ * 그중 한 군데가 EUC-KR 을 안 본 탓이었습니다. 한 벌로 모읍니다 (2026-09-28).
+ *
+ * `enc` 를 주면 그걸 씁니다 (사이트 설정의 `s.enc`).
+ * 돌려주는 것 { code, html, cs, 바이트, buf, 왜 } — 던지지 않습니다.
+ */
+export async function 글받기(url, opt) {
+  const o = opt || {};
+  const g = await 붙여받기(url, { headers: o.headers || {}, timeout: o.timeout });
+  if (g.왜) return { 왜: g.왜 };
+  const ct = (g.headers && g.headers.get('content-type')) || '';
+  /* 머리글 → <meta> 차례로 봅니다. EUC-KR 쪽이 아직 많습니다 */
+  let cs = o.enc || (ct.match(/charset=["']?([\w-]+)/i) || [])[1]
+    || (g.buf.subarray(0, 2048).toString('latin1').match(/charset=["']?([\w-]+)/i) || [])[1] || 'utf-8';
+  let html;
+  try { html = new TextDecoder(cs.toLowerCase()).decode(g.buf); }
+  catch { html = g.buf.toString('utf8'); cs += '(못 읽어 utf-8)'; }
+  return { code: g.code, html, cs, 바이트: g.buf.length, buf: g.buf };
 }

@@ -25,8 +25,13 @@ const 구운것 = path.join(여기, 'gas-rules.json');
 
 /* 떼어 올 것 — 상수와 함수. 늘리면 아래 만들기() 도 같이 봅니다 */
 /* multiRole_ 은 정규식을 함수 안에 품고 있어 떼어 올 상수가 없습니다 */
-const 상수이름 = ['JOB_WORDS', 'NOT_OURS', 'MEDTECH', 'MED_ONLY_OTHER', 'OTHER_JOBS', 'OTHER_PROF_RE', 'OUR_PROF_RE'];
-const 함수이름 = ['matchJob_', 'notOurs_', 'multiRole_', 'mixedTitle_', 'titleOtherOnly_', 'fmtDate_'];
+const 상수이름 = ['JOB_WORDS', 'NOT_OURS', 'MEDTECH', 'MED_ONLY_OTHER', 'OTHER_JOBS', 'OTHER_PROF_RE', 'OUR_PROF_RE',
+  /* 병원 게시판 판정에 쓰는 것 — hospVerdict_ 가 이 셋을 봅니다 (2026-09-28) */
+  'HS_SKIP_RE', 'HS_BROAD_RE', 'HS_OTHER_RE'];
+const 함수이름 = ['matchJob_', 'notOurs_', 'multiRole_', 'mixedTitle_', 'titleOtherOnly_', 'fmtDate_',
+  /* 「담음 · 보류 · 버림」 을 가르는 곳. 확정 낱말을 고칠 때 여기까지 돌려 봐야
+     보류함으로 가는지 쓰레기통으로 가는지 알 수 있습니다 (2026-09-28) */
+  'hospVerdict_'];
 
 function 함수떼기(src, name) {
   const i = src.indexOf('function ' + name + '(');
@@ -58,7 +63,11 @@ function 상수떼기(src, name) {
     if (따옴표) { if (c === 따옴표) 따옴표 = ''; continue; }
     if (c === "'" || c === '"' || c === '`') { 따옴표 = c; continue; }
     if (c === '[' || c === '{' || c === '(') 깊이++;
-    else if (c === ']' || c === '}' || c === ')') 깊이--;
+    /* 0 아래로 내리지 않습니다. 정규식 낱말칸 안의 닫는 괄호를 짝으로 세면
+       깊이가 음수가 되고, 그러면 그 줄의 `;` 를 끝으로 못 알아봅니다.
+       `HS_BROAD_RE` 의 `보건\s*[,)/·]` 가 그랬습니다 — 630자를 삼켜
+       다음 함수까지 끌고 왔습니다 (2026-09-28). */
+    else if (c === ']' || c === '}' || c === ')') 깊이 = Math.max(0, 깊이 - 1);
     else if (c === ';' && 깊이 === 0) return src.slice(i, k + 1);
   }
   return null;
@@ -69,9 +78,19 @@ export function 굽기() {
   const src = fs.readFileSync(GAS_경로, 'utf8');
   const 조각 = [];
   const 없는것 = [];
-  for (const n of 상수이름) { const t = 상수떼기(src, n); t ? 조각.push(t) : 없는것.push('const ' + n); }
-  for (const n of 함수이름) { const t = 함수떼기(src, n); t ? 조각.push(t) : 없는것.push('function ' + n); }
+  /* 조각마다 「말이 되나」 를 바로 봅니다. 안 보면 아래 new Function 에서
+     `<anonymous_script>:113 Unexpected token ')'` 만 뜨고 **어느 상수인지 안 나옵니다**
+     — 그 줄 번호로 원인을 찾느라 헤맸습니다 (2026-09-28). */
+  const 깨진것 = [];
+  const 담기 = (이름, t) => {
+    if (!t) { 없는것.push(이름); return; }
+    try { new Function(t); } catch (e) { 깨진것.push(이름 + ' (' + e.message + ' · ' + t.length + '자)'); return; }
+    조각.push(t);
+  };
+  for (const n of 상수이름) 담기('const ' + n, 상수떼기(src, n));
+  for (const n of 함수이름) 담기('function ' + n, 함수떼기(src, n));
   if (없는것.length) throw new Error('gas 에서 못 찾은 것: ' + 없는것.join(' · '));
+  if (깨진것.length) throw new Error('잘못 잘린 것: ' + 깨진것.join(' · '));
   return { 구운날: new Date().toISOString().slice(0, 10), 글: 조각.join('\n') };
 }
 
@@ -98,7 +117,8 @@ const 통 = 읽기();
    MEDTECH 로 「보류함으로 보낼지 그냥 버릴지」 를 가릅니다.
    그걸 안 옮겼다가 보류함이 362건이 됐습니다 (2026-09-26) */
 const 밖으로 = new Function(통.글 + '\nreturn { '
-  + 함수이름.concat(['MEDTECH', 'MED_ONLY_OTHER', 'OTHER_PROF_RE', 'OUR_PROF_RE', 'OTHER_JOBS']).join(', ') + ' };')();
+  + 함수이름.concat(['MEDTECH', 'MED_ONLY_OTHER', 'OTHER_PROF_RE', 'OUR_PROF_RE', 'OTHER_JOBS',
+    'HS_SKIP_RE', 'HS_BROAD_RE', 'HS_OTHER_RE']).join(', ') + ' };')();
 
 export const matchJob = 밖으로.matchJob_;
 export const notOurs = 밖으로.notOurs_;
@@ -113,6 +133,11 @@ export const MED_ONLY_OTHER = 밖으로.MED_ONLY_OTHER;
 export const OTHER_PROF_RE = 밖으로.OTHER_PROF_RE;
 export const OUR_PROF_RE = 밖으로.OUR_PROF_RE;
 export const OTHER_JOBS = 밖으로.OTHER_JOBS;
+/* 병원 게시판 판정 — 「담음(직군) · 보류(…) · 버림(…)」 를 글자로 돌려줍니다 */
+export const hospVerdict = 밖으로.hospVerdict_;
+export const HS_SKIP_RE = 밖으로.HS_SKIP_RE;
+export const HS_BROAD_RE = 밖으로.HS_BROAD_RE;
+export const HS_OTHER_RE = 밖으로.HS_OTHER_RE;
 export const 구운날 = 통.구운날;
 
 /* node tools/gas-rules.mjs --굽기 */

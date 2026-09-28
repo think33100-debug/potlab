@@ -14,6 +14,7 @@
  * 이 숫자를 먼저 보고 백필을 돌립니다 — 사이트를 두드리는 일이라 함부로 못 합니다.
  */
 import fs from 'node:fs';
+import { 글받기 } from '../certs/index.mjs';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { hospParseHtml, UA } = require('./hs_test.js');
@@ -33,14 +34,11 @@ const 볼것 = (찾을말.length ? SITES.filter((s) => 찾을말.some((w) => s.n
   .filter((s) => s.type === 'html' && s.url);
 
 async function 받기(s) {
-  const r = await fetch(s.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, redirect: 'follow' });
-  const buf = Buffer.from(await r.arrayBuffer());
-  const ct = r.headers.get('content-type') || '';
-  let cs = s.enc || (ct.match(/charset=["']?([\w-]+)/i) || [])[1]
-    || (buf.subarray(0, 2048).toString('latin1').match(/charset=["']?([\w-]+)/i) || [])[1] || 'utf-8';
-  let html;
-  try { html = new TextDecoder(cs.toLowerCase()).decode(buf); } catch { html = buf.toString('utf8'); }
-  return { code: r.status, html };
+  /* 중간 인증서 붙이기 + 인코딩 읽기를 한 벌로 모았습니다 (tools/certs/index.mjs · 2026-09-28).
+     전에는 이 다섯 줄이 네 파일에 베껴져 있었습니다 */
+  const g = await 글받기(s.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, enc: s.enc });
+  if (g.왜) throw new Error(g.왜);
+  return { code: g.code, html: g.html };
 }
 
 const 결과 = [];

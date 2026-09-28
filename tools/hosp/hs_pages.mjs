@@ -12,6 +12,7 @@
  * **페이지 넘김 표시**를 찾아 우리가 뽑은 줄 수와 견줍니다.
  */
 import fs from 'node:fs';
+import { 글받기 } from '../certs/index.mjs';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { hospParseHtml, UA } = require('./hs_test.js');
@@ -34,13 +35,10 @@ console.log('기관'.padEnd(28) + '뽑은줄  쪽에 적힌 전체  페이지넘
 for (const s of 볼것) {
   let html = '', code = 0;
   try {
-    const r = await fetch(s.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, redirect: 'follow' });
-    code = r.status;
-    const buf = Buffer.from(await r.arrayBuffer());
-    const ct = r.headers.get('content-type') || '';
-    let cs = s.enc || (ct.match(/charset=["']?([\w-]+)/i) || [])[1]
-      || (buf.subarray(0, 2048).toString('latin1').match(/charset=["']?([\w-]+)/i) || [])[1] || 'utf-8';
-    try { html = new TextDecoder(cs.toLowerCase()).decode(buf); } catch { html = buf.toString('utf8'); }
+    /* 중간 인증서 붙이기 + 인코딩 읽기를 한 벌로 (tools/certs/index.mjs · 2026-09-28) */
+    const g = await 글받기(s.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, enc: s.enc });
+    if (g.왜) throw new Error(g.왜);
+    code = g.code; html = g.html;
   } catch (e) {
     console.log(s.name.slice(0, 26).padEnd(28) + '못 붙음 · ' + String(e && (e.cause?.code || e.message)).slice(0, 40));
     continue;

@@ -18,6 +18,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { hospParseHtml, UA } = require('./hs_test.js');
 import { matchJob, notOurs } from '../gas-rules.mjs';
+import { 글받기 } from '../certs/index.mjs';
 
 const argv = process.argv.slice(2);
 const 제목수 = argv.includes('--제목') ? Number(argv[argv.indexOf('--제목') + 1]) || 5 : 0;
@@ -42,20 +43,11 @@ for (const s of 볼것) {
   }
   if (!s.url) { console.log('－ ' + s.name.slice(0, 26).padEnd(28) + '주소가 없습니다'); continue; }
 
-  let html = '', code = 0, 바이트 = 0, 왜 = '';
-  try {
-    const r = await fetch(s.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, redirect: 'follow' });
-    code = r.status;
-    const buf = Buffer.from(await r.arrayBuffer());
-    바이트 = buf.length;
-    /* EUC-KR 쪽이 아직 많습니다. 머리글 → <meta> 차례로 봅니다 */
-    const ct = r.headers.get('content-type') || '';
-    let cs = s.enc || (ct.match(/charset=["']?([\w-]+)/i) || [])[1]
-      || (buf.subarray(0, 2048).toString('latin1').match(/charset=["']?([\w-]+)/i) || [])[1] || 'utf-8';
-    try { html = new TextDecoder(cs.toLowerCase()).decode(buf); }
-    catch { html = buf.toString('utf8'); cs += '(못 읽어 utf-8)'; }
-    s.__cs = cs;
-  } catch (e) { 왜 = String(e && (e.cause?.code || e.message) || e).slice(0, 60); }
+  /* 중간 인증서가 빠진 병원 10곳은 받아둔 것을 붙여 받습니다 (검증은 켠 채로 · 2026-09-28).
+     안 그러면 경상국립대병원처럼 늘 `UNABLE_TO_VERIFY_LEAF_SIGNATURE` 로 「못 긁음」 입니다 */
+  const g = await 글받기(s.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, enc: s.enc });
+  const html = g.html || '', code = g.code || 0, 바이트 = g.바이트 || 0, 왜 = g.왜 || '';
+  if (g.cs) s.__cs = g.cs;
 
   if (왜 || code >= 400) {
     합계.못긁음++;
