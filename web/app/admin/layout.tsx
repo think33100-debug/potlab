@@ -20,6 +20,7 @@ const MENU = [
   { href: '/admin/posts', label: '커뮤니티 글' },
   { href: '/admin/icons', label: '아이콘' },
   { href: '/admin/stats', label: '통계' },
+  { href: '/admin/compete', label: '경쟁률' },
   { href: '/admin/reset', label: '내 계정 초기화' },
 ];
 
