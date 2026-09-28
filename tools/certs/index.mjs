@@ -61,14 +61,33 @@ export async function 붙여받기(url, opt) {
   try { u = new URL(url); } catch { return { 왜: '주소가 아닙니다' }; }
   const pem = 가진것.get(u.hostname);
   const 느슨 = 느슨한파서.has(u.hostname);
-  /* 느슨한 파서는 undici(fetch)에 없는 옵션입니다. 그래서 붙일 인증서가 없어도
-     아래 https.request 길로 보냅니다 */
-  if (!pem && !느슨 && u.protocol === 'https:') {
-    /* 붙일 것이 없으면 평범하게 */
+
+  /* ⚠ **`http://` 주소를 https.request 로 보내고 있었습니다** (2026-09-28 에 찾음).
+     조건이 `u.protocol === 'https:'` 여서, http 주소는 평범한 fetch 를 건너뛰고
+     아래 https.request(443포트)로 갔습니다. 그래서 병원 5곳이
+     `ERR_TLS_CERT_ALTNAME_INVALID` · `DEPTH_ZERO_SELF_SIGNED_CERT` 로 나왔는데
+     **평범하게 받으면 HTTP 200 이었습니다** —
+       김해복음병원 · 무안병원 · 포천우리병원 · 전주고려병원 · 뉴성민병원
+     (인증서가 딴 도메인 것이거나 자체 서명인데, 우리는 http 로 부르고 있었습니다) */
+  if (u.protocol !== 'https:') {
     try {
       const r = await fetch(url, opt);
       return { code: r.status, buf: Buffer.from(await r.arrayBuffer()), headers: r.headers, url: r.url };
     } catch (e) { return { 왜: String(e && (e.cause?.code || e.name || e.message)).slice(0, 60) }; }
+  }
+
+  /* https 인데 붙일 것도 없으면 먼저 평범하게 받아 봅니다 */
+  if (!pem && !느슨) {
+    try {
+      const r = await fetch(url, opt);
+      return { code: r.status, buf: Buffer.from(await r.arrayBuffer()), headers: r.headers, url: r.url };
+    } catch (e) {
+      const 왜 = String(e && (e.cause?.code || e.name || e.message));
+      /* SSL 쪽 까닭이면 **옛 암호를 허용해** 한 번 더 해 봅니다.
+         검증은 그대로 켠 채입니다 — 암호 목록만 넓힙니다.
+         광혜병원(ERR_SSL_DH_KEY_TOO_SMALL) · 평택성모병원이 이걸로 열립니다 */
+      if (!/SSL|TLS|CERT|DH_KEY|EPROTO/i.test(왜)) return { 왜: 왜.slice(0, 60) };
+    }
   }
 
   return new Promise((done) => {
