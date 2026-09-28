@@ -1,7 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["icn1"],
-  "functions": {
-    "app/api/blocked-test/route.ts": { "maxDuration": 60 }
-  }
+  "regions": ["icn1"]
 }
