@@ -61,6 +61,8 @@ async function readSheet(cfg, sheet) {
 const s = (v) => { const t = String(v == null ? '' : v).trim(); return t === '' ? null : t; };
 const num = (v) => { const t = String(v == null ? '' : v).replace(/[^\d-]/g, ''); return t === '' ? null : Number(t); };
 const yes = (v) => /^(y|yes|예|o|true|1)$/i.test(String(v == null ? '' : v).trim());
+/* 비어 있지 않으면 참 — 숨김·보류 칸은 'Y' 일 때도 있고 사유 글일 때도 있습니다 */
+const 찼나 = (v) => String(v == null ? '' : v).trim() !== '';
 /* 「2026.09.27」 「2026-09-27」 「20260927」 → 2026-09-27 · 아니면 null */
 function date(v) {
   const t = String(v == null ? '' : v).trim();
@@ -139,7 +141,16 @@ function toJobPost(g, r) {
     posted_at: date(g(r, '공고일')), url: s(g(r, '링크')) || '',
     job_group: s(g(r, '직군')), form: s(g(r, '형태')),
     org_kind: s(g(r, '기관종별')), tab: s(g(r, '탭분류')),
-    hidden: yes(g(r, '숨김')), hold: yes(g(r, '보류')), notify: yes(g(r, '알림')),
+    /* ⚠ 숨김·보류는 **비어 있지 않으면 참**입니다 (2026-09-28).
+       gas 는 보통 'Y' 를 쓰지만 `applyDropRules` 는 사유를 적습니다 —
+         숨김 = 「규칙 낱말:임상병리」
+       `yes()` 는 y·yes·예·o·true·1 만 참으로 봐서 이걸 **거짓**으로 읽었고,
+       버림 규칙이 막은 공고가 회원 목록에 그대로 떴습니다
+       (충주의료원 임상병리사 · 대전보훈 방사선사 등).
+       gas 자신도 `if (String(r[14] || '').trim())` 로 「비어 있지 않으면 숨김」 을
+       씁니다 (hospRejudge 등). 다리도 같은 잣대로 읽습니다.
+       알림(notify)은 'Y' 만 쓰므로 yes() 그대로 둡니다. */
+    hidden: 찼나(g(r, '숨김')), hold: 찼나(g(r, '보류')), notify: yes(g(r, '알림')),
     detail, evidence, edited_fields: [],
     collected_at: date(g(r, '수집일')) ? date(g(r, '수집일')) + 'T00:00:00+09:00' : null
   };

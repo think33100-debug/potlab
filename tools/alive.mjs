@@ -20,6 +20,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { 붙여받기 } from './certs/index.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -61,15 +62,12 @@ async function rpc(cfg, fn, body) {
 const 없어짐말 = /존재하지\s*않는\s*(글|게시물|페이지)|삭제된\s*(글|게시물)|없는\s*게시물|잘못된\s*접근|접근할\s*수\s*없|페이지를\s*찾을\s*수\s*없|Not\s*Found|해당\s*게시물이\s*없|게시물이\s*존재하지/i;
 
 async function 하나(x) {
-  let r, buf;
-  try {
-    r = await fetch(x.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' },
-      redirect: 'follow', signal: AbortSignal.timeout(20000) });
-    buf = Buffer.from(await r.arrayBuffer());
-  } catch (e) {
-    /* 못 붙음·타임아웃 → 판단 못 함 */
-    return { 결과: 'unknown', 왜: String(e && (e.cause?.code || e.name || e.message)).slice(0, 40) };
-  }
+  /* 중간 인증서가 빠진 병원 10곳은 받아둔 것을 붙여 받습니다 (검증은 켠 채로).
+     안 그러면 동래봉생병원처럼 늘 「판단 못 함」 으로 남습니다 */
+  const g = await 붙여받기(x.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, timeout: 20000 });
+  if (g.왜) return { 결과: 'unknown', 왜: g.왜.slice(0, 40) };
+  const r = { status: g.code, headers: g.headers };
+  const buf = g.buf;
   if (r.status === 404 || r.status === 410) return { 결과: 'gone', 왜: 'HTTP ' + r.status };
   if (r.status >= 500) return { 결과: 'unknown', 왜: 'HTTP ' + r.status + ' (사이트 장애)' };
   if (r.status === 403 || r.status === 401) return { 결과: 'unknown', 왜: 'HTTP ' + r.status + ' (막힘)' };
