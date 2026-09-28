@@ -74,6 +74,22 @@ const ver = (appSrc.match(/var APP_JS_VER = '([^']+)'/) || [])[1] || '?';
   else console.log('· ' + f + ' → app.js?v=' + tag + ' (다리 ' + ver + ')');
 });
 
+/* ── 갈래 규칙이 두 벌로 갈라지지 않았나 (2026-09-28) ──────────
+   gas 의 갈래 규칙은 tools/sort-rule.mjs 에서 **구워 넣은** 것입니다.
+   누가 gas 쪽을 손으로 고치면 두 벌이 됩니다 — 2026-09-28 에 제목 940건 중
+   550건(58%)이 갈라져 있던 것을 찾았습니다. 여기서 매번 봅니다. */
+try {
+  const out = require('child_process').execFileSync(
+    process.execPath, [path.join(__dirname, 'sort-rule-to-gas.mjs'), '--검사'],
+    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  console.log('· ' + String(out).trim().split('\n')[0]);
+} catch (e) {
+  const 말 = String((e.stdout || '') + (e.stderr || '')).trim().split('\n');
+  problems.push('gas 의 갈래 규칙이 tools/sort-rule.mjs 와 다릅니다 — '
+    + 'node tools/sort-rule-to-gas.mjs 를 돌려 다시 구우세요'
+    + (말[0] ? ' (' + 말[0].replace(/^✗\s*/, '') + ')' : ''));
+}
+
 /* ── 결과 ── */
 console.log('· METHODS ' + methods.length + '개' + (api ? ' · API 표 ' + api.length + '개' : ''));
 if (!problems.length) {

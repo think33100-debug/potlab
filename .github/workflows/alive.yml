@@ -40,6 +40,15 @@ jobs:
           npm install --no-save --silent eslint@9.39.5
           node tools/lint.mjs --tools
 
+      # 갈래 규칙이 두 벌로 갈라지지 않았는지.
+      # 2026-09-28 에 gas 와 sort-rule 이 제목 940건 중 550건(58%)에서 달랐습니다.
+      # 손으로 고른 30칸만 보던 시험은 그걸 못 잡았습니다 —
+      # 이제 진짜 공고 제목 전부(tools/제목모음.json)를 두 벌에 넣고 견줍니다.
+      - name: 갈래 규칙 검사
+        run: |
+          node tools/check-sort.mjs
+          node tools/check-jobwords.mjs
+
       - name: 원문 확인
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

@@ -27,11 +27,15 @@ const 구운것 = path.join(여기, 'gas-rules.json');
 /* multiRole_ 은 정규식을 함수 안에 품고 있어 떼어 올 상수가 없습니다 */
 const 상수이름 = ['JOB_WORDS', 'NOT_OURS', 'MEDTECH', 'MED_ONLY_OTHER', 'OTHER_JOBS', 'OTHER_PROF_RE', 'OUR_PROF_RE',
   /* 병원 게시판 판정에 쓰는 것 — hospVerdict_ 가 이 셋을 봅니다 (2026-09-28) */
-  'HS_SKIP_RE', 'HS_BROAD_RE', 'HS_OTHER_RE'];
+  'HS_SKIP_RE', 'HS_BROAD_RE', 'HS_OTHER_RE',
+  /* sort-rule 에서 구워 넣은 갈래 규칙 (2026-09-28). hospVerdict_ 가 이걸 부릅니다 */
+  'SR_확정단어', 'SR_보류보장단어', 'SR_받기예외', 'SR_버림단어'];
 const 함수이름 = ['matchJob_', 'notOurs_', 'multiRole_', 'mixedTitle_', 'titleOtherOnly_', 'fmtDate_',
   /* 「담음 · 보류 · 버림」 을 가르는 곳. 확정 낱말을 고칠 때 여기까지 돌려 봐야
      보류함으로 가는지 쓰레기통으로 가는지 알 수 있습니다 (2026-09-28) */
-  'hospVerdict_'];
+  'hospVerdict_',
+  /* 구워 넣은 것 — 판정은 이제 여기서 합니다 */
+  'SR_갈래', 'SR_여럿나열', 'SR_붙이기'];
 
 function 함수떼기(src, name) {
   const i = src.indexOf('function ' + name + '(');

@@ -154,5 +154,53 @@ if (sortJob.length < 3) {
   틀림 += 1;
 }
 
-console.log(틀림 ? `\n  ${틀림}칸이 틀립니다` : `\n  ${표.length + 직군칸.length + 다섯칸.length}칸 다 맞습니다`);
+/* ══ 두 벌 대조 — 제목 전부 (2026-09-28) ═════════════════════
+ *
+ * ── 왜 생겼나 ────────────────────────────────────────────
+ * 위 손으로 고른 칸들은 **제가 sort-rule 을 보면서 쓴 것**입니다.
+ * 그래서 sort-rule 의 빈틈이 시험 칸에도 똑같이 빠져 있었습니다 —
+ * 자기 답안지로 자기를 채점한 것입니다.
+ * 그 바람에 gas 와 940건 중 550건(58%)이 갈라진 것을 **못 잡았습니다.**
+ *
+ * 이제 **진짜 공고 제목 전부**(tools/제목모음.json)를 두 벌에 넣고
+ * 답이 다르면 실패합니다. 손으로 고른 칸으로는 이걸 못 잡습니다.
+ *
+ * 제목 모음 다시 굽기 — node tools/제목모음-굽기.mjs
+ */
+{
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
+  const 여기 = path.dirname(fileURLToPath(import.meta.url));
+  const 모음길 = path.join(여기, '제목모음.json');
+
+  if (!fs.existsSync(모음길)) {
+    console.log('\n  ✗ tools/제목모음.json 이 없습니다 — node tools/제목모음-굽기.mjs 를 돌리세요');
+    틀림 += 1;
+  } else {
+    const { hospVerdict } = await import('./gas-rules.mjs');
+    const { 제목: 제목들, 구운날 } = JSON.parse(fs.readFileSync(모음길, 'utf8'));
+    const 갈래로 = (v) => (v.startsWith('담음') ? '회원목록' : v.startsWith('보류') ? '보류함' : '쓰레기통');
+    const 다른것 = [];
+    for (const t of 제목들) {
+      const a = sortJob(t, '', null).갈래;
+      const b = 갈래로(hospVerdict(t, ''));
+      if (a !== b) 다른것.push({ t, a, b });
+    }
+    console.log('\n── 두 벌 대조 — 제목 ' + 제목들.length + '개 (구운 날 ' + 구운날 + ') ──');
+    if (다른것.length) {
+      console.log('  ✗ 답이 다른 제목 ' + 다른것.length + '개 — 두 벌이 갈라졌습니다');
+      다른것.slice(0, 12).forEach((x) => console.log('     sort-rule ' + x.a.padEnd(5)
+        + ' ↔ gas ' + x.b.padEnd(5) + '  ' + x.t.slice(0, 54)));
+      if (다른것.length > 12) console.log('     … 그리고 ' + (다른것.length - 12) + '개 더');
+      console.log('     고치는 법 — tools/sort-rule.mjs 를 고치고');
+      console.log('                node tools/sort-rule-to-gas.mjs 로 gas 에 다시 구우세요');
+      틀림 += 다른것.length;
+    } else {
+      console.log('  ○ 두 벌이 같은 답을 냅니다');
+    }
+  }
+}
+
+console.log(틀림 ? `\n  ${틀림}칸이 틀립니다` : `\n  ${표.length + 직군칸.length + 다섯칸.length}칸 + 두 벌 대조 다 맞습니다`);
 process.exit(틀림 ? 1 : 0);
