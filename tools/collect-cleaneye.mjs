@@ -243,7 +243,12 @@ async function 한건(o, 셈, 옵션) {
     셈.첨부로가림++;
   }
   const hold = 갈래.갈래 === '보류함' ? 갈래.왜 : '';
-  return { id, org, title, job, 근거, hold, 다시: !!갈래.다시, 갈래, o };
+  /* 읽은 첨부 글은 **버리지 않고 보관합니다** (2026-09-28 · 세중님이 9/26 정한 원칙).
+     지금까지는 직군만 뽑고 버려서, 규칙을 고쳐도 이미 지나간 공고에 다시 못 댔습니다.
+     회원 화면에는 안 나갑니다 — job_body 는 anon 에게 권한이 없습니다.
+     개인정보는 DB 의 collect_body() 가 담기 전에 지웁니다 */
+  const 원문 = (첨부 && 첨부.읽음 && 첨부.글) ? 첨부.글 : '';
+  return { id, org, title, job, 근거, hold, 다시: !!갈래.다시, 갈래, o, 원문 };
 }
 
 function 날(v) {
@@ -465,6 +470,27 @@ if (dry) {
     (r['건너뛴것'] || []).slice(0, 5).forEach((x) => console.error('  건너뜀 ' + x.id + ' · ' + x.why));
   }
   console.log('\n씀          ' + 담음 + '건' + (건너뜀 ? ' · 건너뜀 ' + 건너뜀 + '건' : ''));
+
+  /* 읽은 첨부 글을 보관합니다 — 회원 화면에는 안 나갑니다.
+     쓰레기통에 간 것도 담습니다. 「왜 버렸나」 를 나중에 다시 대볼 수 있어야 합니다 */
+  const 원문들 = 결과.filter((x) => x && x.원문).map((x) => ({
+    job_id: 'CE' + x.id, kind: '첨부', ord: 0,
+    url: String(x.o.URL || ''), file_name: String(x.o.FILE_NAME1 || ''),
+    body: x.원문,
+  }));
+  if (원문들.length) {
+    let 보관 = 0, 바이트 = 0, 끝말 = '';
+    for (let i = 0; i < 원문들.length; i += 50) {
+      try {
+        const r = await rpc(cfg, 'collect_body', {
+          p_secret: cfg.COLLECT_KEY_CE2, p_source: SOURCE, p_rows: 원문들.slice(i, i + 50),
+        });
+        보관 += r['담음'] || 0; 바이트 += r['바이트'] || 0;
+        끝말 = '보관함 ' + r['표 크기'] + ' · DB ' + r['DB 크기'];
+      } catch (e) { console.error('  원문 보관 실패 · ' + String(e.message).slice(0, 200)); break; }
+    }
+    if (보관) console.log('원문 보관    ' + 보관 + '건 · ' + Math.round(바이트 / 1024) + 'KB · ' + 끝말);
+  }
 
   let 버림 = 0;
   for (let i = 0; i < 버릴것.length; i += 200) {

@@ -1,0 +1,70 @@
+name: 신형 채용사이트 수집 (JF · JobFlex)
+
+# 마이다스 신형 채용사이트(*.recruiter.co.kr/career) 12곳.
+# 시트를 거치지 않고 DB 에 바로 담습니다 (AL2 · CE2 와 같은 길).
+#
+# ── 전에 「막혔다」 고 적었던 것 ─────────────────────────────
+# 401·404 를 일곱 번 받고 「로그인이 필요한 듯」 이라고 적어 뒀는데
+# **틀렸습니다.** 빠진 것은 요청 머리글 한 줄이었습니다 —
+#     prefix: <호스트>.recruiter.co.kr
+# 브라우저로 열어 보니 비밀번호 칸도 「로그인」 이라는 말도 없었습니다.
+# 우리가 지어낸 주소를 두드리지 말고, 브라우저가 실제로 보내는 머리글을
+# 봤어야 했습니다.
+#
+# ── 왜 하루 세 번인가 ───────────────────────────────────────
+# 공고 목록만 받습니다 (첨부·상세를 안 엽니다). 12곳 · 940건에 12초입니다.
+# 막는 것이 없어 자주 돌아도 되지만, 하루 몇 건 안 올라오는 곳이라
+# 아침·낮·저녁 세 번이면 충분합니다.
+on:
+  schedule:
+    - cron: '23 22,3,9 * * *'     # 한국시각 07:23 · 12:23 · 18:23
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: '담지 말고 세기만 할까요'
+        type: boolean
+        default: false
+      backfill:
+        description: '마감된 옛 공고까지 전부 담을까요 (백필 · 940건)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: collect-jobflex
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 돌다가 죽는 것 검사 — node --check 로는 안 잡히는 종류
+      - name: 돌다가 죽는 것 검사
+        run: |
+          npm install --no-save --silent eslint@9.39.5
+          node tools/lint.mjs --tools
+
+      # 갈래 규칙이 gas 와 어긋나지 않았는지.
+      # 2026-09-28 에 두 규칙이 제목 940건 중 550건(58%)에서 달랐습니다
+      - name: 갈래 규칙 검사
+        run: |
+          node tools/check-sort.mjs
+          node tools/check-jobwords.mjs
+
+      - name: 신형 채용사이트 받아 담기
+        env:
+          # Supabase — service_role 이 아니라 anon 입니다.
+          # 쓰기는 collect_put() · 뒷정리는 collect_after() 로만 갑니다
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          COLLECT_KEY_JF: ${{ secrets.COLLECT_KEY_JF }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.dry }}" = "true" ]; then ARGS="$ARGS --dry"; fi
+          if [ "${{ inputs.backfill }}" = "true" ]; then ARGS="$ARGS --백필"; fi
+          node tools/collect-jobflex.mjs $ARGS

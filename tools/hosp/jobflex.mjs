@@ -42,15 +42,33 @@ const API = 'https://api-recruiter.recruiter.co.kr/position/v1/jobflex';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
 
 /* 신형으로 확인된 곳 — tools/hosp/reports/batch*.md 와 HOSP_SITES 에서 모았습니다.
-   「지어낸 주소」 가 아니라 보고서에 적힌 것만 넣었습니다 */
+   「지어낸 주소」 가 아니라 보고서에 적힌 것만 넣었습니다.
+ *
+ * ── `가르기` — 공용 채용사이트를 병원별로 나눕니다 ────────────
+ * 한 채용사이트에 여러 병원 공고가 같이 옵니다. 그런데 `classificationCode` 가
+ * **곳마다 다른 것을 담고 있습니다.** 12곳을 다 찍어 본 값입니다 (2026-09-28) —
+ *   gnuh       「경상국립대학교병원」          ← 병원 이름
+ *   caumc      「광명병원」「서울병원」「의료원」  ← 병원 이름 (공용)
+ *   cnuhinsa   「대전」「세종」「대전세종」        ← 지역 (공용)
+ *   nhimc      「비정규직」「정규직」「수련생」     ← 고용형태
+ *   hyumcguri  「간호직」「보건직」「약무직」      ← 직군
+ *   ish        「수시」 · gcmc 「채용」 · scmc 「상시」「공채」
+ *
+ * 그래서 이 값을 그냥 기관명으로 쓰면 「수시」 「비정규직」 이 기관명이 됩니다 —
+ * 실제로 그렇게 담겼다가 고쳤습니다.
+ * **가르기가 적힌 곳만** 나누고, 나머지는 사이트 주인 이름을 씁니다. */
 export const 곳들 = [
   { 호스트: 'gnuh', 이름: '경상국립대학교병원' },
   { 호스트: 'gcmc', 이름: '경상북도김천의료원' },
   { 호스트: 'scmc', 이름: '성남시의료원' },
   { 호스트: 'smc', 이름: '서울특별시서울의료원' },
   { 호스트: 'nhimc', 이름: '국민건강보험공단일산병원' },
-  { 호스트: 'cnuhinsa', 이름: '세종충남대학교병원', 메모: '충남대병원 본원과 공용' },
-  { 호스트: 'caumc', 이름: '중앙대학교광명병원', 메모: '중앙대의료원 공용' },
+  { 호스트: 'cnuhinsa', 이름: '세종충남대학교병원',
+    메모: '충남대병원 본원과 공용 — 꼬리표가 지역입니다',
+    가르기: { 대전: '충남대학교병원', 세종: '세종충남대학교병원' } },
+  { 호스트: 'caumc', 이름: '중앙대학교광명병원',
+    메모: '중앙대의료원 공용',
+    가르기: { 광명병원: '중앙대학교광명병원', 서울병원: '중앙대학교병원' } },
   { 호스트: 'hyumcguri', 이름: '한양대학교구리병원' },
   { 호스트: 'seoulsnh', 이름: '서울특별시서남병원' },
   { 호스트: 'diramsjob', 이름: '동남권원자력의학원원자력병원' },
@@ -105,14 +123,23 @@ export async function 목록(호스트, 최대쪽 = 20) {
 /** 한 건을 우리 칸에 맞춰 풉니다 */
 export function 풀기(호스트, x) {
   const 제목 = String(x.title || '').trim();
-  const 기관 = String(x.classificationCode || ''
-    || (x.tagList || []).map((t) => t.tagName).join(' ')).trim();
+  const 꼬리표들 = [String(x.classificationCode || '').trim(),
+    ...(x.tagList || []).map((t) => String(t.tagName || '').trim())].filter(Boolean);
+  const 곳 = 곳들.find((c) => c.호스트 === 호스트);
+  /* 기관명은 **가르기에 적힌 꼬리표일 때만** 바꿉니다.
+     안 그러면 「수시」 「비정규직」 이 기관명이 됩니다 (2026-09-28 에 실제로 그랬습니다) */
+  let 기관 = (곳 && 곳.이름) || 호스트;
+  if (곳 && 곳.가르기) {
+    for (const t of 꼬리표들) {
+      if (곳.가르기[t]) { 기관 = 곳.가르기[t]; break; }
+    }
+  }
   const 날 = (v) => (v ? String(v).slice(0, 10) : '');
   return {
     id: 'JF' + x.positionSn,
     제목,
     기관,
-    꼬리표: (x.tagList || []).map((t) => t.tagName).join(' · '),
+    꼬리표: [...new Set(꼬리표들)].join(' · '),
     접수중: x.submissionStatus === 'IN_SUBMISSION',
     상태: String(x.submissionStatus || ''),
     시작: 날(x.startDateTime),
