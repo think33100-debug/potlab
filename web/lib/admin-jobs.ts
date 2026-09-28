@@ -33,6 +33,10 @@ export type AdminJob = {
   /* 왜 감췄나 — 「재판정으로 버림 (9/28)」 · 「마감 지남」 · 「45일 지남」 … */
   hidden_why: string | null;
   hidden_on: string | null;
+  /* 관리자가 손으로 정한 공고 — 규칙이 못 덮어씁니다 (2026-09-29) */
+  admin_locked: boolean;
+  admin_at: string | null;
+  admin_note: string | null;
 };
 
 /* evidence 를 함께 받습니다 — 보류함에서 **왜 보류인지**를 목록에서
@@ -40,13 +44,13 @@ export type AdminJob = {
    원문을 읽어야 합니다. jsonb 한 칸이라 목록이 많이 무거워지지 않습니다 */
 export const ADMIN_LIST_COLS =
   'id,source,org_name,title,job_group,employ_type,work_place,sido,tab,'
-  + 'headcount,apply_to,posted_at,hidden,hold,collected_at,evidence,hidden_why';
+  + 'headcount,apply_to,posted_at,hidden,hold,collected_at,evidence,hidden_why,admin_locked,admin_note';
 
 export type AdminJobListItem = Pick<
   AdminJob,
   'id' | 'source' | 'org_name' | 'title' | 'job_group' | 'employ_type' | 'work_place'
   | 'sido' | 'tab' | 'headcount' | 'apply_to' | 'posted_at' | 'hidden' | 'hold' | 'collected_at'
-  | 'evidence' | 'hidden_why'
+  | 'evidence' | 'hidden_why' | 'admin_locked' | 'admin_note'
 >;
 
 /* 관리자가 매일 보는 칸들. 「보류」가 첫째입니다 —

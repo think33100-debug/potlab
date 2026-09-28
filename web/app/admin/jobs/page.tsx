@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { AdminTabCards } from '@/components/admin-tab-cards';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import {
   ADMIN_LIST_COLS, STATES, type AdminJobListItem, type StateKey,
 } from '@/lib/admin-jobs';
@@ -22,12 +23,31 @@ const PAGE = 50;
 
 export default function AdminJobs() {
   const toast = useToast();
+  /* ── 뒤로 가기가 **보던 화면**으로 돌아가게 (2026-09-29) ──
+     전에는 탭·검색어·쪽이 화면 안 상태(useState)에만 있어서, 공고를 열었다
+     뒤로 오면 기본 탭(보류함)으로 튀었습니다.
+     주소(?state=…&q=…&page=…)에 담으면 브라우저가 알아서 되돌려 줍니다.
+     스크롤 위치는 Next.js 가 주소마다 기억합니다. */
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
 
-  const [state, setState] = useState<StateKey>('hold');
-  const [tab, setTab] = useState('');
-  const [q, setQ] = useState('');
-  const [typed, setTyped] = useState('');
-  const [page, setPage] = useState(0);
+  const state = (params.get('state') as StateKey) || 'hold';
+  const tab = params.get('tab') || '';
+  const q = params.get('q') || '';
+  const page = Number(params.get('page') || 0);
+  const [typed, setTyped] = useState(q);
+  /* 주소를 바꿉니다. push 라야 **뒤로 가기가 그 화면으로** 돌아갑니다 */
+  const 주소로 = useCallback((바꿀것: Record<string, string | number | null>) => {
+    const u = new URLSearchParams(params.toString());
+    for (const [k, v] of Object.entries(바꿀것)) {
+      if (v === null || v === '' || v === 0) u.delete(k); else u.set(k, String(v));
+    }
+    router.push(pathname + (u.toString() ? '?' + u.toString() : ''), { scroll: false });
+  }, [params, pathname, router]);
+  /* 검색칸은 주소가 바뀌면 따라갑니다 (뒤로 가기로 왔을 때) */
+  const 앞주소 = useRef(q);
+  useEffect(() => { if (앞주소.current !== q) { 앞주소.current = q; setTyped(q); } }, [q]);
 
   const [rows, setRows] = useState<AdminJobListItem[] | null>(null);
   const [total, setTotal] = useState(0);
@@ -84,14 +104,45 @@ export default function AdminJobs() {
     return () => { alive = false; };
   }, [fetchRows, fetchCounts]);
 
-  const patch = async (id: string, v: Record<string, boolean>, said: string) => {
+  /* ── 관리자 결정 (2026-09-29) ──
+     전에는 hold 와 hidden 을 **따로 뒤집었습니다.** 그래서
+     「보류 풀기」 를 눌러도 hidden 이 남아 안 보이고,
+     「다시 보이기」 를 눌러도 hold 가 남아 보류함으로 돌아갔습니다.
+     서귀포의료원 공고(CE77568)가 그래서 안 살아났습니다.
+
+     이제 살리기·숨기기·보류함으로 셋 중 하나입니다.
+     **결정하면 잠깁니다** — 규칙·재판정·동기화가 다시 못 덮어씁니다. */
+  const decide = async (id: string, what: '살리기' | '숨기기' | '보류함으로' | '잠금풀기',
+                        jobGroup?: string, note?: string) => {
     setBusy(id);
-    const { error } = await browserSupabase().from('job_posts')
-      .update({ ...v, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await browserSupabase().rpc('admin_decide', {
+      p_id: id, p_what: what, p_job_group: jobGroup ?? null, p_note: note ?? null,
+    });
     setBusy(null);
-    if (error) { toast(`바꾸지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
-    toast(said);
+    if (error) { toast(`바꾸지 못했어요 — ${error.message}`, { tone: 'danger', ms: 5000 }); return; }
+    toast(what === '살리기' ? `회원 화면에 올렸어요 (${jobGroup})`
+      : what === '숨기기' ? '숨겼어요'
+      : what === '보류함으로' ? '보류함으로 보냈어요' : '잠금을 풀었어요 — 규칙에 맡깁니다');
     await reload();
+  };
+
+  /* 살릴 때는 직군을 골라야 합니다 — 물리/작업/공통 */
+  const 살리기 = (id: string, title: string) => {
+    const 물음 = [
+      `「${title.slice(0, 40)}」 를 회원 화면에 올립니다.`,
+      '',
+      '직군을 고르세요 —',
+      '  1  물리치료사',
+      '  2  작업치료사',
+      '  3  공통(둘 다)',
+      '',
+      '번호를 넣어 주세요',
+    ].join('\n');
+    const 답 = prompt(물음, '3');
+    if (답 === null) return;
+    const 직군 = { 1: '물리치료사', 2: '작업치료사', 3: '공통' }[Number(답.trim()) as 1 | 2 | 3];
+    if (!직군) { toast('1 · 2 · 3 중에 골라 주세요', { tone: 'danger' }); return; }
+    void decide(id, '살리기', 직군);
   };
 
   const remove = async (id: string, title: string) => {
@@ -104,8 +155,8 @@ export default function AdminJobs() {
     await reload();
   };
 
-  const go = (s: StateKey) => { setState(s); setPage(0); };
-  const search = () => { setQ(typed.trim()); setPage(0); };
+  const go = (s: StateKey) => 주소로({ state: s === 'hold' ? null : s, page: null });
+  const search = () => 주소로({ q: typed.trim() || null, page: null });
 
   return (
     <div>
@@ -150,7 +201,7 @@ export default function AdminJobs() {
         </button>
         <select
           value={tab}
-          onChange={(e) => { setTab(e.target.value); setPage(0); }}
+          onChange={(e) => 주소로({ tab: e.target.value || null, page: null })}
           aria-label="탭으로 거르기"
           className="appearance-none rounded-xs border border-gray-200 bg-gray-50 py-4 pl-5 pr-[36px] text-lg dark:border-gray-700 dark:bg-gray-950"
         >
@@ -162,7 +213,7 @@ export default function AdminJobs() {
       {q && (
         <p className="mt-2 text-sm text-gray-500">
           「{q}」로 찾은 {total}건{' '}
-          <button type="button" onClick={() => { setQ(''); setTyped(''); setPage(0); }}
+          <button type="button" onClick={() => { setTyped(''); 주소로({ q: null, page: null }); }}
             className="text-interaction-blue hover:underline">검색 지우기</button>
         </p>
       )}
@@ -207,6 +258,13 @@ export default function AdminJobs() {
                   감춘 까닭 — {r.hidden_why}
                 </p>
               )}
+              {/* 관리자가 정한 것 — 규칙이 못 덮어씁니다 */}
+              {r.admin_locked && (
+                <p className="mt-1 break-keep text-[13px] font-bold text-[#0d5c4f]">
+                  관리자가 정한 공고 — 규칙·재판정·동기화가 못 바꿉니다
+                  {r.admin_note ? ' · ' + r.admin_note : ''}
+                </p>
+              )}
               {r.hold && r.evidence?.['보류사유'] && (
                 <p className="mt-1 break-keep text-sm font-medium text-brand-red-dark">
                   보류 이유 — {r.evidence['보류사유']}
@@ -214,12 +272,19 @@ export default function AdminJobs() {
               )}
 
               <div className="mt-5 flex flex-wrap gap-2">
-                <Act onClick={() => patch(r.id, { hold: !r.hold }, r.hold ? '보류를 풀었어요' : '보류함으로 보냈어요')} busy={busy === r.id}>
-                  {r.hold ? '보류 풀기' : '보류로'}
-                </Act>
-                <Act onClick={() => patch(r.id, { hidden: !r.hidden }, r.hidden ? '다시 보이게 했어요' : '숨겼어요')} busy={busy === r.id}>
-                  {r.hidden ? '다시 보이기' : '숨기기'}
-                </Act>
+                {/* 살리기 · 숨기기 · 보류함으로 — 셋 중 하나. 지금 상태인 것은 안 보입니다 */}
+                {(r.hold || r.hidden) && (
+                  <Act onClick={() => 살리기(r.id, r.title)} busy={busy === r.id}>회원 화면에 올리기</Act>
+                )}
+                {!r.hidden && (
+                  <Act onClick={() => decide(r.id, '숨기기')} busy={busy === r.id}>숨기기</Act>
+                )}
+                {!r.hold && (
+                  <Act onClick={() => decide(r.id, '보류함으로')} busy={busy === r.id}>보류함으로</Act>
+                )}
+                {r.admin_locked && (
+                  <Act onClick={() => decide(r.id, '잠금풀기')} busy={busy === r.id}>잠금 풀기</Act>
+                )}
                 <Link href={`/admin/jobs/${r.id}`}
                   className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">
                   수정
@@ -239,14 +304,14 @@ export default function AdminJobs() {
       {/* 쪽 넘기기 */}
       {total > PAGE && (
         <div className="mt-7 flex items-center justify-between gap-5">
-          <button type="button" disabled={page === 0} onClick={() => setPage((p) => p - 1)}
+          <button type="button" disabled={page === 0} onClick={() => 주소로({ page: page - 1 })}
             className="rounded-md border border-gray-200 px-6 py-4 text-lg disabled:opacity-30 dark:border-gray-700">
             ← 이전
           </button>
           <span className="text-sm text-gray-500">
             {page * PAGE + 1}–{Math.min((page + 1) * PAGE, total)} / {total}건
           </span>
-          <button type="button" disabled={(page + 1) * PAGE >= total} onClick={() => setPage((p) => p + 1)}
+          <button type="button" disabled={(page + 1) * PAGE >= total} onClick={() => 주소로({ page: page + 1 })}
             className="rounded-md border border-gray-200 px-6 py-4 text-lg disabled:opacity-30 dark:border-gray-700">
             다음 →
           </button>
