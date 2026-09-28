@@ -1,0 +1,90 @@
+[
+ {
+  "이름": "창원경상국립대학교병원",
+  "host": "recruit.gnuch.co.kr",
+  "url": "https://recruit.gnuch.co.kr/recruit/02_general/01_notice/ge_notice.jsp",
+  "상태": "그냥 열림",
+  "code": 200
+ },
+ {
+  "이름": "경상국립대학교병원",
+  "host": "recruit.gnuh.co.kr",
+  "url": "https://recruit.gnuh.co.kr:8443/recruit/02_general/01_notice/ge_notice.jsp",
+  "상태": "중간 붙여 열림",
+  "code": 200,
+  "받은곳": "http://public.wisekey.com/crt/tsrsasecureca2.cer",
+  "발급": "TuringSign RSA Secure CA 2"
+ },
+ {
+  "이름": "제주한라병원",
+  "host": "www.hallahosp.co.kr",
+  "url": "https://www.hallahosp.co.kr/bbs/board.php?bo_table=5_3_2_1",
+  "상태": "중간 붙여 열림",
+  "code": 200,
+  "받은곳": "http://crt.sectigo.com/SectigoPublicServerAuthenticationCAOVR36.crt",
+  "발급": "Sectigo Public Server Authentication CA OV R36"
+ },
+ {
+  "이름": "동래봉생병원",
+  "host": "www.drbs.or.kr",
+  "url": "https://www.drbs.or.kr/page/board/board.php?tno=1415",
+  "상태": "중간 붙여 열림",
+  "code": 200,
+  "받은곳": "http://secure.globalsign.com/cacert/gsgccr6alphasslca2025.crt",
+  "발급": "GlobalSign GCC R6 AlphaSSL CA 2025"
+ },
+ {
+  "이름": "의료법인 녹산의료재단동수원병원",
+  "host": "www.dswhosp.co.kr",
+  "url": "https://www.dswhosp.co.kr/support/recruit.php",
+  "상태": "중간 붙여 열림",
+  "code": 200,
+  "받은곳": "http://crt.sectigo.com/SectigoPublicServerAuthenticationCADVR36.crt",
+  "발급": "Sectigo Public Server Authentication CA DV R36"
+ },
+ {
+  "이름": "의료법인 건명의료재단 중앙제일병원",
+  "host": "joongangjeil.co.kr",
+  "url": "https://joongangjeil.co.kr/introduction/recruit.php",
+  "상태": "중간 붙여 열림",
+  "code": 200,
+  "받은곳": "http://crt.sectigo.com/SectigoPublicServerAuthenticationCADVR36.crt",
+  "발급": "Sectigo Public Server Authentication CA DV R36"
+ },
+ {
+  "이름": "의료법인 서명의료재단 세명종합병원",
+  "host": "www.smhospital.kr",
+  "url": "https://www.smhospital.kr/front/info/recruit1.php",
+  "상태": "중간 붙여 열림",
+  "code": 200,
+  "받은곳": "http://crt.sectigo.com/SectigoPublicServerAuthenticationCADVR36.crt",
+  "발급": "Sectigo Public Server Authentication CA DV R36"
+ },
+ {
+  "이름": "안동성소병원",
+  "host": "sungso.com",
+  "url": "https://sungso.com/bj_board/bjbrd_list.htm?board_id=0505",
+  "상태": "중간 붙여 열림",
+  "code": 200,
+  "받은곳": "http://crt.sectigo.com/SectigoPublicServerAuthenticationCADVR36.crt",
+  "발급": "Sectigo Public Server Authentication CA DV R36"
+ },
+ {
+  "이름": "의료법인 영훈의료재단 대전선병원",
+  "host": "www.sunhospital.com",
+  "url": "https://www.sunhospital.com/sub5_4.html",
+  "상태": "중간 붙여 열림",
+  "code": 200,
+  "받은곳": "http://secure.globalsign.com/cacert/gsgccr6alphasslca2025.crt",
+  "발급": "GlobalSign GCC R6 AlphaSSL CA 2025"
+ },
+ {
+  "이름": "의료법인영훈의료재단 유성선병원",
+  "host": "www.yuseongsunhospital.com",
+  "url": "https://www.yuseongsunhospital.com/sub5_4.html",
+  "상태": "중간 붙여 열림",
+  "code": 200,
+  "받은곳": "http://secure.globalsign.com/cacert/gsgccr6alphasslca2025.crt",
+  "발급": "GlobalSign GCC R6 AlphaSSL CA 2025"
+ }
+]
