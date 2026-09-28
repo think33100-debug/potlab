@@ -41,8 +41,60 @@ type Row = {
   왜: string;
 };
 
+/* 회원 화면에 있으면 안 될 공고가 새는지 — pub_leak() 이 셉니다.
+   2026-09-28 에 마감 지난 공고 192건이 회원 화면에 떠 있었습니다.
+   가장 오래된 것은 173일째였고 **아무도 몰랐습니다.**
+   감추는 규칙을 고치는 것만으로는 부족해서 셈을 따로 보여줍니다. */
+type Leak = {
+  '마감 지남': number;
+  '45일 넘음': number;
+  '수시 180일 넘음': number;
+  '마감 지남 · 물리치료사': number;
+  '마감 지남 · 작업치료사': number;
+  '가장 오래전 마감': string | null;
+  '며칠째': number;
+  '회원 화면 전체': number;
+  샘: boolean;
+};
+
+function 샘경보({ leak }: { leak: Leak }) {
+  const 칸 = [
+    { 이름: '마감이 지났는데 보임', 수: leak['마감 지남'],
+      덧: `물리치료사 ${leak['마감 지남 · 물리치료사']} · 작업치료사 ${leak['마감 지남 · 작업치료사']}`
+        + (leak['가장 오래전 마감'] ? ` · 가장 오래된 것 ${leak['가장 오래전 마감']} 마감 (${leak['며칠째']}일째)` : '') },
+    { 이름: '마감일 없이 45일 넘었는데 보임', 수: leak['45일 넘음'], 덧: '' },
+    { 이름: '수시·상시인데 180일 넘었는데 보임', 수: leak['수시 180일 넘음'], 덧: '' },
+  ].filter((x) => x.수 > 0);
+
+  return (
+    <div role="alert" className="mb-6 rounded-[14px] border-2 border-[#FF3B30] bg-[#FFF1F0] p-5">
+      <p className="break-keep text-[15px] font-bold text-[#FF3B30]">
+        회원 화면에 있으면 안 될 공고가 {칸.reduce((a, x) => a + x.수, 0)}건 있어요
+      </p>
+      <ul className="mt-3 space-y-2">
+        {칸.map((x) => (
+          <li key={x.이름} className="break-keep text-[14px] text-[#1B2025]">
+            <span className="font-bold">{x.이름}</span>
+            {' — '}
+            <span className="num tabular-nums">{x.수}</span>
+            건
+            {x.덧 && <span className="block text-[13px] text-[#5F666C]">{x.덧}</span>}
+          </li>
+        ))}
+      </ul>
+      {/* 무엇을 해야 하는지 한 줄 — 빨간 줄만 보고 무엇을 할지 모르면 소용없습니다 */}
+      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#5F666C]">
+        감추는 규칙(hide_stale_posts)이 안 돌았거나 다리가 숨김을 되돌린 것이에요.
+        다리를 한 번 더 돌려 보고, 그래도 남으면 규칙을 봐야 해요.
+        회원 화면 전체 <span className="num tabular-nums">{leak['회원 화면 전체']}</span>건 중입니다.
+      </p>
+    </div>
+  );
+}
+
 export function RouteHealth() {
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [leak, setLeak] = useState<Leak | null>(null);
 
   useEffect(() => {
     let 살아있나 = true;
@@ -52,16 +104,25 @@ export function RouteHealth() {
         if (!살아있나) return;
         setRows(error ? [] : ((data ?? []) as Row[]));
       });
+    browserSupabase()
+      .rpc('pub_leak')
+      .then(({ data, error }) => {
+        if (!살아있나) return;
+        setLeak(error ? null : (data as Leak));
+      });
     return () => { 살아있나 = false; };
   }, []);
 
   /* 확인 중에는 아무것도 안 그립니다 */
   if (rows === null) return null;
 
+  const 샘 = leak && leak.샘 ? <샘경보 leak={leak} /> : null;
   const 빨간것 = rows.filter((r) => r.빨간줄);
-  if (!빨간것.length) return null;
+  if (!빨간것.length) return 샘;
 
   return (
+    <>
+    {샘}
     <div
       role="alert"
       className="mb-6 rounded-[14px] border-2 border-[#FF3B30] bg-[#FFF1F0] p-5"
@@ -115,5 +176,6 @@ export function RouteHealth() {
         Apps Script 실행 기록과 GitHub Actions 를 먼저 확인해 주세요.
       </p>
     </div>
+    </>
   );
 }
