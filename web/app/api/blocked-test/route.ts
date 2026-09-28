@@ -130,7 +130,7 @@ async function 두드리기(s: 곳, 차수: number): Promise<한번> {
  *
  * ⚠ 인증서 검증(rejectUnauthorized)은 **끄지 않습니다.**
  *   받아둔 중간 인증서를 뿌리 묶음에 **더할** 뿐입니다. */
-function 붙여받기(url: string): Promise<한번> {
+function 붙여받기(url: string, 기다림 = 8000): Promise<한번> {
   const t0 = Date.now();
   return new Promise((done) => {
     let u: URL;
@@ -159,7 +159,7 @@ function 붙여받기(url: string): Promise<한번> {
     req.on('error', (e: NodeJS.ErrnoException) => done({
       code: null, 자수: 0, 본문: '', 왜: String(e.code || e.message).slice(0, 120), ms: Date.now() - t0,
     }));
-    req.setTimeout(8000, () => { req.destroy(); done({ code: null, 자수: 0, 본문: '', 왜: 'TIMEOUT', ms: Date.now() - t0 }); });
+    req.setTimeout(기다림, () => { req.destroy(); done({ code: null, 자수: 0, 본문: '', 왜: 'TIMEOUT', ms: Date.now() - t0 }); });
     req.end();
   });
 }
@@ -167,9 +167,13 @@ function 붙여받기(url: string): Promise<한번> {
 async function 한곳(s: 곳) {
   const a = await 두드리기(s, 1);
   const b = a.code === 200 ? null : await 두드리기(s, 2);
-  /* 1·2차가 SSL 쪽 까닭으로 죽었으면 수집기와 같은 방식으로 한 번 더 */
-  const ssl한가 = /SSL|TLS|CERT|DH_KEY|EPROTO/i.test((b || a).왜 || '');
-  const c = (!(b && b.code === 200) && a.code !== 200 && ssl한가) ? await 붙여받기(s.url) : null;
+  /* 1·2차가 다 안 되면 수집기와 같은 방식으로 한 번 더.
+     ⚠ 처음엔 /SSL|TLS|CERT|DH_KEY|EPROTO/ 일 때만 했는데,
+       **UNABLE_TO_VERIFY_LEAF_SIGNATURE 에는 그 글자가 하나도 없습니다.**
+       그래서 동수원·중앙제일이 3차를 건너뛰었습니다 (2026-09-28).
+       갈래를 따지지 말고 **안 되면 무조건** 한 번 더 하는 것이 맞습니다.
+       느린 곳과 막힌 곳을 가르려고 3차는 15초까지 기다립니다 */
+  const c = (!(b && b.code === 200) && a.code !== 200) ? await 붙여받기(s.url, 15000) : null;
   const 최종 = (c && c.code === 200) ? c : (b && b.code === 200) ? b : a;
   const 글 = 최종.본문.replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -193,9 +197,10 @@ async function 한곳(s: 곳) {
     인증서로_풀렸나: !!(c && c.code === 200),
     /* 왜 막혔는지 갈래를 지어 둡니다 — 「AWS 대역 차단」 과 「우리 쪽 SSL」 은 다른 일입니다 */
     막힌갈래: 최종.code === 200 ? ''
+      : (c && c.code === 403) || 최종.code === 403 ? 'HTTP 403 — 서버가 IP 를 보고 거절'
       : /limited to users in Korea|Firewall|Forbidden|차단/i.test((최종.본문 || '').slice(0, 400)) ? 'IP 보고 거절'
-        : /SSL|TLS|CERT|DH_KEY/i.test(최종.왜 || '') ? 'SSL (서버는 답했습니다 — IP 차단 아님)'
-          : /TIMEOUT|ECONNREFUSED|ENOTFOUND/i.test(최종.왜 || '') ? '아예 못 붙음'
+        : /SSL|TLS|CERT|DH_KEY|VERIFY_LEAF|SELF_SIGNED|ALTNAME|HANDSHAKE/i.test(최종.왜 || '') ? 'SSL (서버는 답했습니다 — IP 차단 아님)'
+          : /TIMEOUT|Abort|ECONNREFUSED|ENOTFOUND|ECONNRESET/i.test(최종.왜 || '') ? '아예 못 붙음'
             : 'HTTP ' + 최종.code,
     오류_원문: 최종.왜 || '',
     응답_원문_앞1200자: (글 || '(빈 본문)').slice(0, 1200),
