@@ -198,8 +198,13 @@ for (const 말 of 찾을말) {
       break;
     }
 
+    /* ⚠ 쪽을 **끝까지 다 봤을 때만** 다음 쪽으로 넘깁니다.
+       시간이 다 돼서 쪽 한가운데서 멈췄는데 「다음쪽 = 쪽+1」 로 적으면
+       그 쪽의 남은 공고가 **영영 안 들어옵니다.** 이 프로젝트는 빠지면 안 됩니다.
+       다시 받으면 앞부분이 겹치지만, 담는 함수가 덮어쓰기라 겹쳐도 탈이 없습니다. */
+    let 쪽끝까지 = true;
     for (const c of 것) {
-      if (Date.now() - t0 > 시간예산) break;
+      if (Date.now() - t0 > 시간예산) { 쪽끝까지 = false; break; }
       const D = await 받기(상세URL + '?serviceKey=' + cfg.ALIO_DETAIL_KEY
         + '&resultType=json&sn=' + c.recrutPblntSn);
       셈.상세++;
@@ -248,9 +253,11 @@ for (const 말 of 찾을말) {
         await rpc('alio_compete_put', { p_secret: cfg.COLLECT_KEY_AL2, p_source: SOURCE, p_rows: 묶음 });
       }
       await rpc('alio_compete_state_put', { p_secret: cfg.COLLECT_KEY_AL2, p_source: SOURCE,
-        p_말: 말, p_다음쪽: 쪽 + 1, p_전체쪽: 전체, p_다한날: null, p_메모: null });
+        p_말: 말, p_다음쪽: 쪽끝까지 ? 쪽 + 1 : 쪽, p_전체쪽: 전체, p_다한날: null, p_메모: null });
     }
-    console.log('   ' + 쪽 + '/' + (전체 ?? '?') + '쪽 · 공고 ' + 셈.공고 + ' · 단계 ' + 셈.줄);
+    console.log('   ' + 쪽 + '/' + (전체 ?? '?') + '쪽 · 공고 ' + 셈.공고 + ' · 단계 ' + 셈.줄
+      + (쪽끝까지 ? '' : '  (쪽 한가운데서 멈춤 — 이 쪽을 다시 받습니다)'));
+    if (!쪽끝까지) break;
     if (전체 && 쪽 >= 전체) {
       if (!dry) await rpc('alio_compete_state_put', { p_secret: cfg.COLLECT_KEY_AL2, p_source: SOURCE,
         p_말: 말, p_다음쪽: 쪽 + 1, p_전체쪽: 전체, p_다한날: 오늘(), p_메모: null });
