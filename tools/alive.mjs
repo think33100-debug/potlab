@@ -39,8 +39,14 @@ function env() {
   return out;
 }
 
-async function rpc(cfg, fn, body, 열쇠) {
-  const k = 열쇠 || cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;
+/* ⚠ **anon 열쇠만 씁니다** (2026-09-28).
+   전에는 SUPABASE_SERVICE_KEY 를 먼저 집었습니다. 그래서 집 컴퓨터에서는 통하고
+   GitHub 에서는 401 permission denied for function alive_targets 로 죽었습니다 —
+   **GitHub 과 다른 열쇠로 시험한 것**이 잘못이었습니다.
+   service_role 열쇠는 GitHub 에 넣지 않습니다. 권한은 함수 안의 ALIVE_KEY 검사로 봅니다. */
+async function rpc(cfg, fn, body) {
+  const k = cfg.SUPABASE_ANON_KEY;
+  if (!k) throw new Error('SUPABASE_ANON_KEY 가 없습니다');
   const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',
     headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
@@ -94,7 +100,8 @@ const 몇 = argv.includes('--n') ? Number(argv[argv.indexOf('--n') + 1]) || 0 : 
 const cfg = env();
 if (!cfg.SUPABASE_URL) { console.error('SUPABASE_URL 이 없습니다'); process.exit(1); }
 
-const 볼것0 = await rpc(cfg, 'alive_targets', { p_n: 300 });
+if (!cfg.ALIVE_KEY) { console.error('ALIVE_KEY 가 없습니다 — 함수 권한을 이 열쇠로 봅니다'); process.exit(1); }
+const 볼것0 = await rpc(cfg, 'alive_targets', { p_secret: cfg.ALIVE_KEY, p_n: 300 });
 const 볼것 = 몇 ? (볼것0 || []).slice(0, 몇) : (볼것0 || []);
 console.log('원문 확인 — 마감일 없는 공고 ' + 볼것.length + '건'
   + (dry ? ' (--dry · 기록하지 않습니다)' : ''));
@@ -117,6 +124,5 @@ console.log('\n── 살아 있음 ' + (셈.alive || 0) + ' · 사라짐 ' + (�
   + ' · 판단 못 함 ' + (셈.unknown || 0));
 
 if (dry) { console.log('--dry 라 기록하지 않았습니다.'); process.exit(0); }
-if (!cfg.ALIVE_KEY) { console.error('ALIVE_KEY 가 없어 기록하지 못했습니다'); process.exit(1); }
-const 답 = await rpc(cfg, 'alive_mark', { p_secret: cfg.ALIVE_KEY, p_rows: 결과 }, cfg.SUPABASE_ANON_KEY);
+const 답 = await rpc(cfg, 'alive_mark', { p_secret: cfg.ALIVE_KEY, p_rows: 결과 });
 console.log('기록 — ' + Object.entries(답 || {}).map(([k, v]) => k + ' ' + v).join(' · '));
