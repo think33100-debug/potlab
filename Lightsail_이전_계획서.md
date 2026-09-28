@@ -245,7 +245,69 @@ free -h            # Swap 줄에 4.0Gi 가 보이면 됐습니다
 
 ---
 
-## 정할 것 (홈페이지_이전_지도.md 맨 아래 그대로)
+---
+
+## ★ 정할 것 — 답이 나왔습니다 (2026-09-28 · 세중님)
+
+| # | 정한 것 |
+|---|---|
+| 1 | **「집에서 긁음」 은 안 만듭니다.** 컴퓨터를 계속 켜둘 수 없습니다. 새 서버를 만들면 **막힌 3곳을 바로 다시 두드려 보고**, 그래도 막히면 그때 다른 방법을 정합니다 |
+| 2 | 상세는 **사이트당 하루 50건** — 그대로 |
+| 3 | **특수 채용사이트 15곳도 같이 옮깁니다** (`cmc` 6 · `schmc` 4 · `greeting` 4 · `appsite`/`listjson` 13) |
+| 4 | **확인 알림 메일은 새 서버에서 하루 한 번 요약**으로 보냅니다 |
+
+### 이 답에 따라 이미 만든 것 (2026-09-28)
+
+| 무엇 | 어디 | 확인한 것 |
+|---|---|---|
+| 전용 처리기 5가지 | `tools/hosp/sites.mjs` | **27줄 전부 돕니다 · 탈난 곳 0** · 162줄 · 우리 직군 3건 |
+| 새 수집기 | `tools/collect-hosp.mjs` | 288줄 · 1,966줄 · **못 받은 곳 0** · 한 바퀴 **48~60초** |
+| 첫날 대조 | `--dry --한줄` | **`gas 에만 0`** · 같음 67 · HS3 에만 145 · 상세로 가린 것 17건 |
+| 박동·경보 | `collector_beat` · `beat_health()` | 20시간 늦추니 빨간 줄 뜸 (평소 6시간 · 기준 12시간) |
+| 하루 한 번 요약 | `tools/hold-digest.mjs` | 51건짜리 요약이 나옵니다. 보낼 것 없으면 **안 보냅니다** |
+
+---
+
+## 6. 서버에 걸 cron
+
+```bash
+crontab -e
+```
+
+```cron
+# 병원 홈페이지 수집 — 하루 네 번 (한 바퀴 1분쯤)
+7 6,11,16,21 * * *  cd /home/ubuntu/potlab && /usr/bin/node tools/collect-hosp.mjs >> /home/ubuntu/log/hosp.log 2>&1
+
+# 하루 한 번 요약 메일 — 아침 8시
+0 8 * * *           cd /home/ubuntu/potlab && /usr/bin/node tools/hold-digest.mjs >> /home/ubuntu/log/digest.log 2>&1
+
+# 로그가 커지지 않게 (한 달)
+0 4 1 * *           find /home/ubuntu/log -name '*.log' -mtime +31 -delete
+```
+
+```bash
+mkdir -p /home/ubuntu/log
+```
+
+> 시계는 한국시각으로 맞춰 둡니다 — `sudo timedatectl set-timezone Asia/Seoul`
+
+**cron 이 안 돌아도 알 수 있습니다.** 수집기가 한 바퀴마다 박동을 남기고,
+관리자 화면이 **평소 간격의 2배**를 넘으면 빨간 줄을 띄웁니다.
+
+## 7. 메일 보내는 길 — 하나 정하셔야 합니다
+
+`tools/hold-digest.mjs` 는 **열쇠가 없으면 화면에만 찍습니다.** 보내려면 둘 중 하나가 필요합니다.
+
+| 길 | 무엇이 필요한가 | 값 |
+|---|---|---|
+| **Resend** (권합니다) | https://resend.com 가입 → API 열쇠 | 무료 한도 있음 · `.env` 에 `RESEND_KEY` · `NOTIFY_EMAIL` |
+| 서버의 메일 프로그램 | `sudo apt install msmtp-mta` + 지메일 앱 비밀번호 | cron 이 stdout 을 메일로 넘깁니다 |
+
+지금은 화면에 찍기만 해도 로그(`/home/ubuntu/log/digest.log`)에 남습니다.
+
+---
+
+## 정할 것 (홈페이지_이전_지도.md 맨 아래 그대로 · 이제 답이 있습니다)
 
 > 1. **「집에서 긁음」 을 만들 것인가.**
 >    GitHub 에서도 막히는 곳이 남으면, 세중님 컴퓨터에서 하루 한 번 돌리는 방식이

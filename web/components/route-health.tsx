@@ -92,9 +92,64 @@ function 샘경보({ leak }: { leak: Leak }) {
   );
 }
 
+/* 수집기가 제때 돌았나 — beat_health() 가 셉니다 (2026-09-28).
+   GitHub Actions 예약 실행이 3~6시간씩 밀려도 아무도 몰랐습니다.
+   그래서 수집기를 서울 서버 cron 으로 옮기면서, 한 바퀴 돌 때마다 박동을 남기고
+   **화면이 밖에서** 그걸 봅니다. 서버 안에서 보는 감시는 서버가 죽으면 같이 죽습니다. */
+type Beat = {
+  경로: string; 이름: string; 마지막: string | null;
+  몇시간째: number | null; 평소간격시간: number | null; 기대간격시간: number | null;
+  마지막탈: string; 빨간줄: boolean; 왜: string;
+};
+
+function 박동경보({ beats }: { beats: Beat[] }) {
+  return (
+    <div role="alert" className="mb-6 rounded-[14px] border-2 border-[#FF3B30] bg-[#FFF1F0] p-5">
+      <p className="break-keep text-[15px] font-bold text-[#FF3B30]">
+        수집기가 제때 안 돈 곳이 {beats.length}곳 있어요
+      </p>
+      <ul className="mt-3 space-y-2">
+        {beats.map((b) => (
+          <li key={b.경로} className="break-keep text-[14px] text-[#1B2025]">
+            <span className="font-bold">{b.이름}</span>
+            {' — '}
+            {b.왜}
+            {b.몇시간째 != null && (
+              <>
+                {' · '}
+                <span className="num tabular-nums">{b.몇시간째}</span>
+                시간째
+              </>
+            )}
+            {/* 왜 빨간지 — 근거를 같이 보여줘야 다음 사람이 기준을 안 고칩니다 */}
+            <span className="block text-[13px] text-[#5F666C]">
+              {b.평소간격시간 != null && b.평소간격시간 > 0 && (
+                <>
+                  {'평소 '}
+                  <span className="num tabular-nums">{b.평소간격시간}</span>
+                  {'시간에 한 번 · 기준 '}
+                  <span className="num tabular-nums">{b.기대간격시간}</span>
+                  {'시간'}
+                </>
+              )}
+              {b.마지막탈 && <span className="block">{'마지막 탈 — ' + b.마지막탈}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#5F666C]">
+        서버가 멈췄거나 cron 이 안 돈 것이에요. 서울 서버에 들어가
+        <span className="font-bold">{' journalctl -u potjob-hosp -n 50 '}</span>
+        을 봐 주세요.
+      </p>
+    </div>
+  );
+}
+
 export function RouteHealth() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [leak, setLeak] = useState<Leak | null>(null);
+  const [beats, setBeats] = useState<Beat[] | null>(null);
 
   useEffect(() => {
     let 살아있나 = true;
@@ -110,6 +165,12 @@ export function RouteHealth() {
         if (!살아있나) return;
         setLeak(error ? null : (data as Leak));
       });
+    browserSupabase()
+      .rpc('beat_health')
+      .then(({ data, error }) => {
+        if (!살아있나) return;
+        setBeats(error ? [] : ((data ?? []) as Beat[]));
+      });
     return () => { 살아있나 = false; };
   }, []);
 
@@ -117,11 +178,14 @@ export function RouteHealth() {
   if (rows === null) return null;
 
   const 샘 = leak && leak.샘 ? <샘경보 leak={leak} /> : null;
+  const 늦은것 = (beats || []).filter((b) => b.빨간줄);
+  const 박동 = 늦은것.length ? <박동경보 beats={늦은것} /> : null;
   const 빨간것 = rows.filter((r) => r.빨간줄);
-  if (!빨간것.length) return 샘;
+  if (!빨간것.length) return (박동 || 샘) ? <>{박동}{샘}</> : null;
 
   return (
     <>
+    {박동}
     {샘}
     <div
       role="alert"
