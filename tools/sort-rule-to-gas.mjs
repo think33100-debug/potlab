@@ -27,6 +27,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 확정단어, 보류보장단어, 받기예외, 버림단어 } from './sort-rule.mjs';
+import { 확정, 가능성, 기존에만, 뭉뚱그림, 쌓아둘직종, 잘린제목 } from './뽑을단어.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const GAS = path.join(여기, '..', 'gas', 'wage.js');
@@ -72,16 +73,32 @@ export function 만들기() {
     'const SR_보류보장단어 = ' + J(보류보장단어) + ';',
     'const SR_받기예외 = ' + J(받기예외) + ';',
     'const SR_버림단어 = ' + J(버림단어) + ';',
+    '/* 「뽑을 단어」 — 세중님이 현장 기준으로 정한 목록 (tools/뽑을단어.mjs) */',
+    'const SR_확정 = ' + J(확정) + ';',
+    'const SR_가능성 = ' + J(가능성) + ';',
+    'const SR_기존에만 = ' + J(기존에만) + ';',
+    'const SR_쌓아둘직종 = ' + J(쌓아둘직종) + ';',
+    'const SR_뭉뚱그림 = ' + String(뭉뚱그림) + ';',
+    'const SR_잘린제목 = ' + String(잘린제목) + ';',
+    'function SR_확정찾기(글) { const t = SR_붙이기(글); return SR_확정.filter(function (w) { return t.indexOf(SR_붙이기(w)) > -1; }); }',
+    'function SR_가능성찾기(글) { const t = SR_붙이기(글); return SR_가능성.concat(SR_기존에만).filter(function (w) { return t.indexOf(SR_붙이기(w)) > -1; }); }',
+    'function SR_쌓아둘것인가(글) { const t = SR_붙이기(글); return SR_쌓아둘직종.filter(function (w) { return t.indexOf(SR_붙이기(w)) > -1; }); }',
     '',
     이름바꾸기(떼기('여럿나열'), [['function 여럿나열(', 'function SR_여럿나열(']]),
     '',
-    이름바꾸기(본문, [
+    이름바꾸기(본문.split('SR_가능성찾기(지운것, 기존것도())').join('SR_가능성찾기(지운것)').split('가능성찾기(지운것, 기존것도())').join('가능성찾기(지운것)'), [
       ['function sortJob(', 'function SR_갈래('],
       ['확정단어', 'SR_확정단어'],
       ['보류보장단어', 'SR_보류보장단어'],
       ['받기예외', 'SR_받기예외'],
       ['버림단어', 'SR_버림단어'],
       ['여럿나열(', 'SR_여럿나열('],
+      ['확정찾기(', 'SR_확정찾기('],
+      ['가능성찾기(', 'SR_가능성찾기('],
+      ['쌓아둘것인가(', 'SR_쌓아둘것인가('],
+      ['뭉뚱그림', 'SR_뭉뚱그림'],
+      ['잘린제목', 'SR_잘린제목'],
+      ['OTHER_PROF_RE', 'OTHER_PROF_RE'],
       ['붙이기(', 'SR_붙이기('],
     ]),
     '',

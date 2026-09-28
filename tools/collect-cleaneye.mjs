@@ -348,6 +348,8 @@ for (const o of 볼것) {
 const 회원 = 결과.filter((x) => x.갈래.갈래 === '회원목록');
 const 보류 = 결과.filter((x) => x.갈래.갈래 === '보류함');
 const 쓰레기 = 결과.filter((x) => x.갈래.갈래 === '쓰레기통');
+/* 임상병리사·방사선사 — 버리지 않고 화면에 안 보이게 쌓아둡니다 (2026-09-20 결정) */
+const 쌓을것 = 결과.filter((x) => x.갈래.갈래 === '숨김보관');
 
 console.log('  남의 자리라 버림  ' + 셈.남의자리 + ' · 마감 지남 ' + 셈.마감);
 console.log('  첨부 — 없음 ' + 셈.첨부없음 + ' · 받음 ' + 셈.첨부받음
@@ -367,7 +369,7 @@ if (회원.length) {
 
 /* ③ 담을 줄 만들기 — 쓰레기통은 안 담습니다 */
 const 이제 = new Date().toISOString();
-const 담을것 = 회원.concat(보류).map((x) => {
+const 담을것 = 회원.concat(보류).concat(쌓을것).map((x) => {
   const o = x.o;
   return {
     id: 'CE' + x.id,
@@ -381,7 +383,7 @@ const 담을것 = 회원.concat(보류).map((x) => {
     url: String(o.URL || ''),
     job_group: x.job || null,
     form: (x.근거 === '제목' && !mixedTitle(x.title)) ? null : '포함',
-    hidden: false,
+    hidden: x.갈래.갈래 === '숨김보관',   // 쌓아두되 회원 화면에는 안 보입니다
     hold: !!(x.hold || x.갈래.갈래 === '보류함'),
     detail: {
       지원자격: 자르기(['ENT_LICENSE1', 'ENT_LICENSE2', 'ENT_LICENSE3', 'ENT_LICENSE4']

@@ -223,7 +223,8 @@ for (const r of 살아있는것) {
 const 회원 = 결과.filter((x) => x.갈래.갈래 === '회원목록');
 const 보류 = 결과.filter((x) => x.갈래.갈래 === '보류함');
 const 쓰레기 = 결과.filter((x) => x.갈래.갈래 === '쓰레기통');
-console.log('  회원 목록 ' + 회원.length + ' · 보류함 ' + 보류.length + ' · 쓰레기통 ' + 쓰레기.length);
+console.log('  회원 목록 ' + 회원.length + ' · 보류함 ' + 보류.length + ' · 쓰레기통 ' + 쓰레기.length
+  + ' · 쌓아둠 ' + 결과.filter((x) => x.갈래.갈래 === '숨김보관').length);
 
 /* ── ③ 상세 열기 — 제목만으로 못 가린 것만, 사이트당 하루 상세몫 건 ── */
 let 상세연것 = 0, 상세로가림 = 0;
@@ -261,6 +262,9 @@ if (상세몫 > 0) {
 const 회원2 = 결과.filter((x) => x.갈래.갈래 === '회원목록');
 const 보류2 = 결과.filter((x) => x.갈래.갈래 === '보류함');
 const 쓰레기2 = 결과.filter((x) => x.갈래.갈래 === '쓰레기통');
+/* 임상병리사·방사선사 — 버리지 않고 **화면에 안 보이게 쌓아둡니다** (2026-09-20 결정).
+   나중에 값을 매길 자료이고, 버리면 되살릴 수 없습니다 */
+const 쌓을것 = 결과.filter((x) => x.갈래.갈래 === '숨김보관');
 if (회원2.length) {
   console.log('\n  ★ 회원 목록에 올라갈 것 —');
   회원2.forEach((x) => console.log('     ' + (x.직군 || '?').padEnd(7)
@@ -271,7 +275,7 @@ if (회원2.length) {
 /* ── ④ 담을 줄 ───────────────────────────────────────────── */
 const 이제 = new Date().toISOString();
 const 날 = (v) => (v ? String(v).replace(/\./g, '-') : null);
-const 담을것 = 회원2.concat(보류2).map((x) => ({
+const 담을것 = 회원2.concat(보류2).concat(쌓을것).map((x) => ({
   id: x.id,
   external_id: String(x.id).slice(2),
   org_name: x.곳.name, title: x.title,
@@ -283,7 +287,7 @@ const 담을것 = 회원2.concat(보류2).map((x) => ({
   url: x.url,
   job_group: x.갈래.갈래 === '회원목록' ? (x.직군 || null) : null,
   form: (x.직군 && !mixedTitle(x.title)) ? null : '포함',
-  hidden: false,
+  hidden: x.갈래.갈래 === '숨김보관',      // 쌓아두되 회원 화면에는 안 보입니다
   hold: x.갈래.갈래 === '보류함',
   detail: { 기관홈: x.곳.base || x.곳.host || '' },
   evidence: {

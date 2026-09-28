@@ -29,13 +29,16 @@ const 상수이름 = ['JOB_WORDS', 'NOT_OURS', 'MEDTECH', 'MED_ONLY_OTHER', 'OTH
   /* 병원 게시판 판정에 쓰는 것 — hospVerdict_ 가 이 셋을 봅니다 (2026-09-28) */
   'HS_SKIP_RE', 'HS_BROAD_RE', 'HS_OTHER_RE',
   /* sort-rule 에서 구워 넣은 갈래 규칙 (2026-09-28). hospVerdict_ 가 이걸 부릅니다 */
-  'SR_확정단어', 'SR_보류보장단어', 'SR_받기예외', 'SR_버림단어'];
+  'SR_확정단어', 'SR_보류보장단어', 'SR_받기예외', 'SR_버림단어',
+  /* 「뽑을 단어」 (2026-09-28) */
+  'SR_확정', 'SR_가능성', 'SR_기존에만', 'SR_쌓아둘직종', 'SR_뭉뚱그림', 'SR_잘린제목'];
 const 함수이름 = ['matchJob_', 'notOurs_', 'multiRole_', 'mixedTitle_', 'titleOtherOnly_', 'fmtDate_',
   /* 「담음 · 보류 · 버림」 을 가르는 곳. 확정 낱말을 고칠 때 여기까지 돌려 봐야
      보류함으로 가는지 쓰레기통으로 가는지 알 수 있습니다 (2026-09-28) */
   'hospVerdict_',
   /* 구워 넣은 것 — 판정은 이제 여기서 합니다 */
-  'SR_갈래', 'SR_여럿나열', 'SR_붙이기'];
+  'SR_갈래', 'SR_여럿나열', 'SR_붙이기',
+  'SR_확정찾기', 'SR_가능성찾기', 'SR_쌓아둘것인가'];
 
 function 함수떼기(src, name) {
   const i = src.indexOf('function ' + name + '(');
@@ -51,8 +54,17 @@ function 함수떼기(src, name) {
    정규식으로 끝을 찾으면 틀립니다 — 괄호 짝을 세어 끝을 찾습니다.
    (정규식으로 하다가 한 번 전부 「못 찾음」 이 났습니다) */
 function 상수떼기(src, name) {
+  /* ⚠ **이름이 정확히 맞아야 합니다** (2026-09-28).
+     전에는 앞부분만 맞아도 잡혔습니다 — `SR_확정` 을 찾으면 `SR_확정단어` 가
+     먼저 걸려서 같은 상수를 두 번 떼어 왔고,
+     「Identifier 'SR_확정단어' has already been declared」 로 죽었습니다.
+     이름 바로 뒤에 공백이나 `=` 이 와야 그 이름입니다. */
   const 머리 = '\nconst ' + name;
-  let i = src.indexOf(머리);
+  let i = -1;
+  for (let k = src.indexOf(머리); k > -1; k = src.indexOf(머리, k + 1)) {
+    const 뒤 = src[k + 머리.length];
+    if (뒤 === ' ' || 뒤 === '=') { i = k; break; }
+  }
   if (i < 0 && src.startsWith('const ' + name)) i = -1; else if (i < 0) return null;
   i = i < 0 ? 0 : i + 1;
   const eq = src.indexOf('=', i);

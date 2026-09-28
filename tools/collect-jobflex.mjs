@@ -134,12 +134,14 @@ const 결과 = 모은것.map((r) => {
 const 회원 = 결과.filter((x) => x.갈래.갈래 === '회원목록');
 const 보류 = 결과.filter((x) => x.갈래.갈래 === '보류함');
 const 쓰레기 = 결과.filter((x) => x.갈래.갈래 === '쓰레기통');
+/* 임상병리사·방사선사 — 버리지 않고 화면에 안 보이게 쌓아둡니다 (2026-09-20 결정) */
+const 쌓을것 = 결과.filter((x) => x.갈래.갈래 === '숨김보관');
 
 console.log('\n② 판정 — 회원 목록 ' + 회원.length + ' · 보류함 ' + 보류.length
   + ' · 쓰레기통 ' + 쓰레기.length);
 
 /* 담을 것 — 백필이 아니면 접수중인 것만. 쓰레기통은 담지 않습니다 */
-const 후보 = 회원.concat(보류).filter((x) => 백필 || x.접수중);
+const 후보 = 회원.concat(보류).concat(쌓을것).filter((x) => 백필 || x.접수중);
 console.log('  이번에 담을 것 ' + 후보.length + '건'
   + (백필 ? '' : ' (접수중만 · --백필 이면 ' + (회원.length + 보류.length) + '건)'));
 
@@ -172,7 +174,7 @@ const 담을것 = 후보.map((x) => ({
   url: x.주소,
   job_group: x.갈래.갈래 === '회원목록' ? (x.직군 || null) : null,
   form: (x.직군 && !mixedTitle(x.제목)) ? null : '포함',
-  hidden: false,
+  hidden: x.갈래.갈래 === '숨김보관',   // 쌓아두되 회원 화면에는 안 보입니다
   hold: x.갈래.갈래 === '보류함',
   detail: { 기관홈: 'https://' + x.곳.호스트 + '.recruiter.co.kr/career/home' },
   evidence: {
