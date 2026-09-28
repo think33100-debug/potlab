@@ -97,7 +97,7 @@ async function 두드리기(s: 곳, 차수: number): Promise<한번> {
   const t0 = Date.now();
   try {
     const c = new AbortController();
-    const tm = setTimeout(() => c.abort(), 11000);
+    const tm = setTimeout(() => c.abort(), 8000);
     const r = await fetch(s.url, { headers: 머리글(차수, s.url), redirect: 'follow', signal: c.signal, cache: 'no-store' });
     clearTimeout(tm);
     const buf = Buffer.from(await r.arrayBuffer());
@@ -159,7 +159,7 @@ function 붙여받기(url: string): Promise<한번> {
     req.on('error', (e: NodeJS.ErrnoException) => done({
       code: null, 자수: 0, 본문: '', 왜: String(e.code || e.message).slice(0, 120), ms: Date.now() - t0,
     }));
-    req.setTimeout(11000, () => { req.destroy(); done({ code: null, 자수: 0, 본문: '', 왜: 'TIMEOUT', ms: Date.now() - t0 }); });
+    req.setTimeout(8000, () => { req.destroy(); done({ code: null, 자수: 0, 본문: '', 왜: 'TIMEOUT', ms: Date.now() - t0 }); });
     req.end();
   });
 }
@@ -205,11 +205,11 @@ async function 한곳(s: 곳) {
 export async function GET() {
   const 리전 = process.env.VERCEL_REGION || '(모름)';
   const t0 = Date.now();
-  /* 한꺼번에 다 던지면 상대 서버에도 우리 함수에도 무리입니다. 12곳씩 나눕니다 */
-  const 결과: Awaited<ReturnType<typeof 한곳>>[] = [];
-  for (let i = 0; i < 볼곳.length; i += 12) {
-    결과.push(...await Promise.all(볼곳.slice(i, i + 12).map(한곳)));
-  }
+  /* ⚠ 12곳씩 나눠 돌렸더니 **60초를 넘겨 504** 가 났습니다 (2026-09-28).
+     묶음마다 그 안에서 가장 느린 곳을 끝까지 기다리는데, 3차까지 붙이니 넘쳤습니다.
+     한꺼번에 던지면 전체가 「가장 느린 한 곳」 만큼만 걸립니다.
+     37곳이라 상대 서버에도 무리가 아닙니다 — 한 곳당 한두 번입니다 */
+  const 결과 = await Promise.all(볼곳.map(한곳));
   const 열림 = 결과.filter((r) => r.성공);
   const 막힘 = 결과.filter((r) => !r.성공);
   return NextResponse.json({
