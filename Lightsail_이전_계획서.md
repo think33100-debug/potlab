@@ -222,6 +222,15 @@ free -h            # Swap 줄에 4.0Gi 가 보이면 됐습니다
 ## 5. 옮기는 순서
 
 ```
+0. ★ 서버 만든 직후 — 막힌 3곳을 다시 두드려 보기
+      curl -s -o /dev/null -w "%{http_code}
+" https://dongahospital.co.kr/bbs/board.php?bo_table=0403
+      curl -s -o /dev/null -w "%{http_code}
+" https://www.gwanghyehospital.com/bbs/board.php?bo_table=K050500
+      curl -s -o /dev/null -w "%{http_code}
+" http://www.hanmaeum.jeju.kr/board/list.do?tblNm=Hire
+      · 동아병원은 200 이 와도 본문이 「한국에서만 접속 가능합니다」 인지 봐야 합니다
+      · 열리면 「집에서 긁음」 이 아예 필요 없습니다
 1. 서버 만들기 (세중님) · 스왑 · Node 20 · git · 크로미움
 2. 저장소 받기 · .env 넣기 (anon + COLLECT_KEY_HS3)
 3. DB 에 HS3 경로 · 내부 열쇠 · collector_beat 표 · 함수 만들기 (제가)
@@ -252,8 +261,23 @@ free -h            # Swap 줄에 4.0Gi 가 보이면 됐습니다
 > 4. **보류함 메일**을 node 에서도 보낼지. 지금은 gas 가 `MailApp` 으로 보냅니다.
 >    node 에서는 보낼 길이 따로 필요합니다 (관리자 화면만으로 갈음할 수도 있습니다).
 
-### 1번에 보태는 것 (오늘 알게 된 것)
+### 1번은 답이 나왔습니다 — **3곳**
 
-GitHub 시험을 기다릴 필요가 없어졌습니다. **Vercel 서울에서 37곳을 직접 시험했습니다.**
-결과는 이 문서와 같이 드린 보고에 있습니다 — 서울에서도 안 열리는 곳이 몇 곳인지가
-1번의 답을 정합니다.
+Vercel 서울 운영 배포에서 37곳을 직접 시험했습니다 (2026-09-28).
+
+```
+본 곳 37 · 열린 곳 34 · 아직 막힌 곳 3
+```
+
+| 곳 | 집에서 | AWS 서울에서 |
+|---|---|---|
+| 동아병원 | HTTP 200 · 59KB · 241ms | HTTP 200 인데 본문이 「한국에서만 접속 가능합니다」 |
+| 광혜병원 | 열림 (옛 암호 허용하면) | HTTP **403** |
+| 한마음병원(제주) | HTTP 200 · 97ms | 8초 안에 못 붙음 (두 번 다) |
+
+**나라가 아니라 데이터센터 대역을 봅니다.** Lightsail 도 AWS 라 같을 가능성이 큽니다.
+
+→ 「집에서 긁음」 은 **3곳만** 있으면 됩니다.
+  ⚠ **Lightsail 을 만든 뒤 이 3곳을 한 번 더 두드려 봐야 확정입니다.**
+    Vercel 과 Lightsail 은 같은 AWS 라도 IP 대역이 다를 수 있습니다.
+    (만든 직후 할 일 목록에 넣어 두었습니다)
