@@ -21,11 +21,23 @@ import type { Who } from '@/lib/supabase-server';
                → **자르지도 권하지도 않습니다.** 자리를 비웁니다
      다봤다  설문까지 마친 분 → 원본 그대로
      맛보기  그 밖 → 잘라서 보여주고 권합니다 */
-export function gateOf(who: Who, 설문: 설문상태) {
+/* ⚠ **관리자는 언제나 다 봅니다** (2026-09-29).
+ *
+ * 그 전에는 여기서 관리자를 안 봤습니다. 그래서 관리자 계정으로 로그인해
+ * 공고를 보면 「3분 설문 마치고 전부 보기」가 떴습니다 —
+ * `profiles.survey_at` 이 비어 있었기 때문입니다 (직군·역할은 채워져 있는데
+ * 설문 도장만 안 찍힌 상태. 계정을 초기화하고 설문을 다시 안 마치면 그렇게 됩니다).
+ *
+ * 관리자 판정(admins 표)과 회원 판정(survey_at)이 **따로 놀고 있었습니다.**
+ * 관리자에게 가입을 권하는 화면은 말이 안 됩니다. 여기서 잇습니다.
+ *
+ * ※ 이건 화면 안내일 뿐이고 막는 자리는 DB 입니다. 관리자를 통과시켜도
+ *   급여 개별 금액·남의 스펙은 여전히 DB 가 막습니다. */
+export function gateOf(who: Who, 설문: 설문상태, isAdmin = false) {
   return {
     /* 확인 중이거나 profiles 를 못 읽었습니다 → 자르지도 권하지도 않습니다 */
-    모름: who === '모름' || 설문 === '모름',
-    full: 설문 === '마침',
+    모름: (who === '모름' || 설문 === '모름') && !isAdmin,
+    full: 설문 === '마침' || isAdmin,
     회원: who === '회원',
     /* 가입하다 만 사람은 하던 단계로 돌아갑니다 — /welcome 이 어디까지
        했는지 보고 그 자리를 엽니다 (직군·역할까지 했으면 급여·스펙부터) */
@@ -34,8 +46,8 @@ export function gateOf(who: Who, 설문: 설문상태) {
 }
 
 export function useGate() {
-  const { who, 설문 } = useAuth();
-  return gateOf(who, 설문);
+  const { who, 설문, isAdmin } = useAuth();
+  return gateOf(who, 설문, isAdmin);
 }
 
 /* 맛보기에서 잘라 보여주는 칸.

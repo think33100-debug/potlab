@@ -24,8 +24,16 @@ import { browserSupabase } from '@/lib/supabase-browser';
 
 type 칸 = Record<string, unknown>;
 type 묶음 = 칸;
-type 알림 = { 읽은공고: number; 못읽음: number; 아직: number; 마지막읽은때: string | null; 웹값: number; API값: number };
-type 목록답 = { 묶음: 묶음[]; 고를것: { 기관: string[]; 직군: string[]; 지역: string[]; 연도: number[] }; 알림: 알림 };
+type 알림 = {
+  읽은공고: number; 못읽음: number; 아직: number; 마지막읽은때: string | null;
+  웹값: number; API값: number; 요약갱신: string | null;
+  짝확인필요: number; 고용형태확인필요: number; 한회뿐: number;
+};
+type 목록답 = {
+  묶음: 묶음[]; 전체묶음수: number;
+  고를것: { 기관: string[]; 직군: string[]; 지역: string[]; 고용형태: string[]; 연도: number[] };
+  알림: 알림;
+};
 type 하나답 = { 머리: 칸; 회차: 칸[] };
 
 const n = (v: unknown) => (v === null || v === undefined ? '—' : String(v));
@@ -44,6 +52,8 @@ function 밝힘({ 기본값단계 }: { 기본값단계?: boolean }) {
   return (
     <p className="mt-4 border-t border-gray-100 pt-3 text-xs leading-relaxed text-gray-500">
       <b>알리오 기준</b>입니다 (공공기관 채용정보시스템에 기관이 올린 값).
+      묶음은 <b>같은 기관 · 직군 · 지역 · 고용형태</b>끼리 이은 것입니다 —
+      공무직·정규직·기간제·특정업무직은 섞지 않습니다.
       경쟁률은 <b>첫 단계 응시자 ÷ 최종 선발 인원</b>으로, 알리오가 「최종 경쟁률」로
       적어 둔 값을 그대로 씁니다.
       뽑은 사람이 0명이면 나눌 수가 없어 <b>「계산 불가」</b>로 둡니다 — 0 으로 적지 않습니다.
@@ -60,6 +70,7 @@ function 본문() {
   const 기관 = params.get('기관') || '';
   const 직군 = params.get('직군') || '';
   const 지역 = params.get('지역') || '';
+  const 고용형태 = params.get('고용형태') || '';
   const 연도 = params.get('연도') || '';
   const 찾기 = params.get('q') || '';
   const 고른묶음 = params.get('묶음') || '';
@@ -86,12 +97,13 @@ function 본문() {
     browserSupabase().rpc('admin_alio_groups', {
       p_기관: 기관 || null, p_직군: 직군 || null, p_지역: 지역 || null,
       p_연도: 연도 ? Number(연도) : null, p_찾기: 찾기 || null,
+      p_고용형태: 고용형태 || null,
     }).then(({ data, error }) => {
       if (!살아있음) return;
       if (error) setErr(error.message); else setD(data as 목록답);
     });
     return () => { 살아있음 = false; };
-  }, [기관, 직군, 지역, 연도, 찾기]);
+  }, [기관, 직군, 지역, 고용형태, 연도, 찾기]);
 
   useEffect(() => {
     let 살아있음 = true;
@@ -143,7 +155,8 @@ function 본문() {
       <section className="rounded-xl border border-gray-200 bg-white p-4">
         <div className="flex flex-wrap items-end gap-3">
           {([['기관', 기관, d.고를것.기관], ['직군', 직군, d.고를것.직군],
-             ['지역', 지역, d.고를것.지역]] as const).map(([이름, 값, 것들]) => (
+             ['지역', 지역, d.고를것.지역],
+             ['고용형태', 고용형태, d.고를것.고용형태]] as const).map(([이름, 값, 것들]) => (
             <label key={이름} className="text-sm">
               <div className="mb-1 text-gray-500">{이름}</div>
               <select value={값} onChange={(e) => 주소로({ [이름]: e.target.value || null, 묶음: null })}
@@ -167,8 +180,8 @@ function 본문() {
               placeholder="물리치료사"
               className="w-56 rounded-lg border border-gray-300 px-2 py-1.5" />
           </form>
-          {(기관 || 직군 || 지역 || 연도 || 찾기) && (
-            <button onClick={() => 주소로({ 기관: null, 직군: null, 지역: null, 연도: null, q: null, 묶음: null })}
+          {(기관 || 직군 || 지역 || 고용형태 || 연도 || 찾기) && (
+            <button onClick={() => 주소로({ 기관: null, 직군: null, 지역: null, 고용형태: null, 연도: null, q: null, 묶음: null })}
               className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200">
               거르기 풀기
             </button>
@@ -189,6 +202,10 @@ function 본문() {
                   <h2 className="text-xl font-bold">{n(h['기관'])}</h2>
                   <span className="rounded bg-blue-50 px-2 py-0.5 text-sm text-blue-800">{n(h['직군'])}</span>
                   <span className="rounded bg-gray-100 px-2 py-0.5 text-sm text-gray-700">{n(h['지역'])}</span>
+                  <span className={'rounded px-2 py-0.5 text-sm ' + (h['고용형태확인필요']
+                    ? 'bg-amber-100 text-amber-900' : 'bg-emerald-50 text-emerald-800')}>
+                    {n(h['고용형태'])}
+                  </span>
                   {h['짝확인필요'] ? (
                     <span className="rounded bg-amber-100 px-2 py-0.5 text-sm text-amber-900">짝 확인 필요</span>
                   ) : null}
@@ -212,6 +229,17 @@ function 본문() {
                     공고 {쉼표(h['회차'])}회
                     {Number(h['계산불가']) > 0 && <> · 계산 불가 {쉼표(h['계산불가'])}회 (뽑은 사람 0명)</>}
                   </div>
+                  {h['한회뿐'] ? (
+                    <div className="mt-2 rounded bg-gray-100 px-3 py-2 text-xs text-gray-700">
+                      <b>1회 자료</b>입니다. 한 번뿐이라 평균이라 부르기 어렵습니다 — 그해 그 공고의 값입니다.
+                    </div>
+                  ) : null}
+                  {h['고용형태확인필요'] ? (
+                    <div className="mt-2 rounded bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                      공고에 <b>고용형태가 적혀 있지 않습니다.</b> 짐작해 붙이지 않았습니다 —
+                      정규직·공무직·기간제가 섞여 있을 수 있습니다.
+                    </div>
+                  ) : null}
                   {h['짝확인필요'] ? (
                     <div className="mt-2 rounded bg-amber-50 px-3 py-2 text-xs text-amber-900">
                       이 묶음은 공고마다 이름이 달라 <b>같은 자리인지 확인이 필요합니다.</b>
@@ -286,11 +314,20 @@ function 본문() {
       {/* ── 묶음 목록 ── */}
       <section>
         <h2 className="mb-2 font-semibold">
-          묶음 {쉼표(d.묶음.length)}개
+          묶음 {쉼표(d.전체묶음수)}개
+          {d.전체묶음수 > d.묶음.length && (
+            <span className="ml-1 text-sm font-normal text-gray-500">
+              (앞의 {쉼표(d.묶음.length)}개만 보여 줍니다 — 위에서 걸러 주세요)
+            </span>
+          )}
           <span className="ml-2 text-sm font-normal text-gray-500">
-            기관 + 직군 + 지역으로 이은 것. 누르면 회차별로 펼쳐집니다
+            기관 + 직군 + 지역 + 고용형태로 이은 것. 누르면 회차별로 펼쳐집니다
           </span>
         </h2>
+        <p className="mb-2 text-xs text-gray-500">
+          짝 확인 필요 {쉼표(a.짝확인필요)}개 · 고용형태 확인 필요 <b>{쉼표(a.고용형태확인필요)}</b>개 ·
+          1회 자료 {쉼표(a.한회뿐)}개
+        </p>
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-gray-600">
@@ -313,6 +350,13 @@ function 본문() {
                     <div className="mt-0.5 flex flex-wrap gap-1">
                       <span className="rounded bg-blue-50 px-1.5 text-xs text-blue-700">{n(x['직군'])}</span>
                       <span className="rounded bg-gray-100 px-1.5 text-xs text-gray-600">{n(x['지역'])}</span>
+                      <span className={'rounded px-1.5 text-xs ' + (x['고용형태확인필요']
+                        ? 'bg-amber-100 text-amber-900' : 'bg-emerald-50 text-emerald-800')}>
+                        {n(x['고용형태'])}
+                      </span>
+                      {x['한회뿐'] ? (
+                        <span className="rounded bg-gray-100 px-1.5 text-xs text-gray-600">1회 자료</span>
+                      ) : null}
                       {x['짝확인필요'] ? (
                         <span className="rounded bg-amber-100 px-1.5 text-xs text-amber-900">짝 확인 필요</span>
                       ) : null}
