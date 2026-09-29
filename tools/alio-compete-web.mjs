@@ -116,6 +116,10 @@ const 뽑 = (이름, 기본) => (argv.includes(이름) ? Number(argv[argv.indexO
 const 시간예산 = 뽑('--분', 40) * 60000;
 const 몇개 = 뽑('--몇', 0);
 const 간격 = 뽑('--간격', 600);
+/* 한 화면 받는 데 1.6초씩 걸립니다 (2026-09-29 에 재 봤습니다).
+   하나씩 받으면 1,914건에 여덟 시간이 넘습니다. 네 줄로 나눠 받으면 25분쯤입니다.
+   늘리지 마세요 — 남의 서버입니다. 네 줄이면 1초에 두 번 남짓입니다. */
+const 줄수 = 뽑('--줄', 4);
 const t0 = Date.now();
 
 if (!cfg.COLLECT_KEY_AL2) { console.error('COLLECT_KEY_AL2 가 없습니다'); process.exit(1); }
@@ -128,7 +132,8 @@ let 할것 = await rpc(다시 ? 'alio_compete_web_all' : 'alio_compete_web_todo'
 if (몇개) 할것 = 할것.slice(0, 몇개);
 
 console.log('알리오 웹 전형단계 읽기 — 할 것 ' + 할것.length + '건 · '
-  + Math.round(시간예산 / 60000) + '분까지 · ' + 간격 + 'ms 간격' + (dry ? ' · --dry' : ''));
+  + Math.round(시간예산 / 60000) + '분까지 · ' + 줄수 + '줄 · ' + 간격 + 'ms 간격'
+  + (dry ? ' · --dry' : ''));
 
 const 셈 = { 읽음: 0, 줄: 0, 묶음: 0, 값있음: 0, 빈표: 0, 못읽음: 0 };
 let 담을것 = [];
@@ -139,34 +144,51 @@ const 담기 = async () => {
   }
 };
 
-for (const c of 할것) {
-  if (Date.now() - t0 > 시간예산) { console.log('시간이 다 됐습니다 — 다음 실행이 이어갑니다'); break; }
-  const w = await 웹읽기(c.sn);
+function 한건담기(sn, w) {
   셈.읽음++;
-  if (w.왜) {
-    셈.못읽음++;
-    담을것.push({ sn: c.sn, 왜: w.왜, 묶음수: 0 });
-  } else if (!w.묶음.length || !w.묶음.some((g) => g.단계.length)) {
-    셈.빈표++;
-    담을것.push({ sn: c.sn, 왜: '전형단계 표가 비어 있습니다', 묶음수: w.묶음.length });
-  } else {
-    w.묶음.forEach((g, gi) => {
-      const 줄 = 줄만들기(c.sn, gi, g);
-      if (!줄.length) return;
-      셈.묶음++;
-      if (줄[줄.length - 1].cmptt_rt_state === '있음') 셈.값있음++;
-      담을것.push(...줄); 셈.줄 += 줄.length;
-    });
-    담을것.push({ sn: c.sn, 묶음수: w.묶음.length, 왜: null });
+  if (w.왜) { 셈.못읽음++; 담을것.push({ sn, 왜: w.왜, 묶음수: 0 }); return; }
+  if (!w.묶음.length || !w.묶음.some((g) => g.단계.length)) {
+    셈.빈표++; 담을것.push({ sn, 왜: '전형단계 표가 비어 있습니다', 묶음수: w.묶음.length }); return;
   }
-  if (!dry) await 담기();
-  if (셈.읽음 % 100 === 0) {
-    console.log('  ' + 셈.읽음 + '/' + 할것.length + '건 · 묶음 ' + 셈.묶음
-      + ' · 값 있음 ' + 셈.값있음 + ' · 빈 표 ' + 셈.빈표 + ' · 못 읽음 ' + 셈.못읽음
-      + ' · ' + Math.round((Date.now() - t0) / 1000) + '초');
-  }
-  await 쉼(간격);
+  w.묶음.forEach((g, gi) => {
+    const 줄 = 줄만들기(sn, gi, g);
+    if (!줄.length) return;
+    셈.묶음++;
+    if (줄[줄.length - 1].cmptt_rt_state === '있음') 셈.값있음++;
+    담을것.push(...줄); 셈.줄 += 줄.length;
+  });
+  담을것.push({ sn, 묶음수: w.묶음.length, 왜: null });
 }
+
+/* 여러 줄로 나눠 받습니다. 한 줄이 한 건씩 맡아 끝나면 다음 것을 집습니다 */
+let 다음 = 0;
+let 멈춤 = false;
+async function 한줄() {
+  for (;;) {
+    if (멈춤 || 다음 >= 할것.length) return;
+    if (Date.now() - t0 > 시간예산) { 멈춤 = true; return; }
+    const c = 할것[다음++];
+    한건담기(c.sn, await 웹읽기(c.sn));
+    if (셈.읽음 % 100 === 0) {
+      console.log('  ' + 셈.읽음 + '/' + 할것.length + '건 · 묶음 ' + 셈.묶음
+        + ' · 값 있음 ' + 셈.값있음 + ' · 빈 표 ' + 셈.빈표 + ' · 못 읽음 ' + 셈.못읽음
+        + ' · ' + Math.round((Date.now() - t0) / 1000) + '초');
+    }
+    await 쉼(간격);
+  }
+}
+/* 담는 것은 한 군데서만 — 여러 줄이 한꺼번에 담으면 순서가 엉킵니다 */
+const 담는줄 = (async () => {
+  while (!멈춤 && (다음 < 할것.length || 담을것.length)) {
+    if (!dry) await 담기();
+    await 쉼(500);
+  }
+})();
+
+await Promise.all(Array.from({ length: 줄수 }, 한줄));
+멈춤 = true;
+await 담는줄;
+if (Date.now() - t0 > 시간예산) console.log('시간이 다 됐습니다 — 다음 실행이 이어갑니다');
 
 if (!dry && 담을것.length) {
   for (let i = 0; i < 담을것.length; i += 300) {
