@@ -23,8 +23,26 @@ export async function 웹읽기(sn) {
     h = await r.text();
   } catch (e) { return { 왜: String((e && (e.cause?.code || e.message)) || e).slice(0, 80) }; }
 
+  /* ── 공고 머리 정보 ──
+     <th>근무지</th> <td>인천,대구</td>  ·  <th>고용형태</th> <td>정규직</td>
+     <h4>전형절차/방법</h4> <p>○ 전형방법: 서류전형(1차) → 면접전형 및 …</p>
+     전형절차는 API 의 scrnprcdrMthdExpln 과 같은 글입니다. 여기서 같이 읽으면
+     API 를 따로 두드릴 까닭이 없습니다. */
+  const 글자 = (s) => String(s || '').replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/\s+/g, ' ').trim();
+  const 칸읽기 = (이름) => {
+    const m = h.match(new RegExp('<th>\\s*' + 이름 + '\\s*</th>\\s*<td[^>]*>([\\s\\S]*?)</td>'));
+    return m ? 글자(m[1]) : null;
+  };
+  const 절차 = (h.match(/<h4>\s*전형절차\s*\/\s*방법\s*<\/h4>\s*<p[^>]*>([\s\S]*?)<\/p>/) || [])[1];
+  const 머리 = {
+    근무지: 칸읽기('근무지'), 고용형태: 칸읽기('고용형태'),
+    근무분야: 칸읽기('근무분야'), 전형절차: 절차 ? 글자(절차).slice(0, 1500) : null,
+  };
+
   const i = h.indexOf('id="tab-2"');
-  if (i < 0) return { 왜: '화면에 tab-2 가 없습니다' };
+  if (i < 0) return { 머리, 왜: '화면에 tab-2 가 없습니다' };
   const j = h.indexOf('id="tab-3"');
   const seg = h.slice(i, j > i ? j : undefined);
 
@@ -47,7 +65,7 @@ export async function 웹읽기(sn) {
     const 률 = (c.match(/최종\s*경쟁률\s*([\d.]+)\s*대\s*1/) || [])[1];
     묶음.push({ 이름: (이름 || '').trim(), 단계: 줄, 경쟁률: 률 != null ? Number(률) : null });
   }
-  return { 묶음 };
+  return { 묶음, 머리 };
 }
 
 /** API 의 steps (견주기용) */
