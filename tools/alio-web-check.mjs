@@ -28,9 +28,14 @@ export async function 웹읽기(sn) {
      <h4>전형절차/방법</h4> <p>○ 전형방법: 서류전형(1차) → 면접전형 및 …</p>
      전형절차는 API 의 scrnprcdrMthdExpln 과 같은 글입니다. 여기서 같이 읽으면
      API 를 따로 두드릴 까닭이 없습니다. */
-  const 글자 = (s) => String(s || '').replace(/<br\s*\/?>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
-    .replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/\s+/g, ' ').trim();
+  /* HTML 기호를 풀어 둡니다 — 안 풀면 묶음 이름에 `&#039;` 가 그대로 남습니다 */
+  const 기호풀기 = (s) => String(s || '')
+    .replace(/&nbsp;/g, ' ').replace(/&#0?39;|&apos;/g, "'").replace(/&quot;|&#0?34;/g, '"')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
+    .replace(/&amp;/g, '&');        // & 는 맨 나중에 — 안 그러면 &amp;lt; 가 꼬입니다
+  const 글자 = (s) => 기호풀기(String(s || '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, ' '))
+    .replace(/\s+/g, ' ').trim();
   const 칸읽기 = (이름) => {
     const m = h.match(new RegExp('<th>\\s*' + 이름 + '\\s*</th>\\s*<td[^>]*>([\\s\\S]*?)</td>'));
     return m ? 글자(m[1]) : null;
@@ -63,7 +68,7 @@ export async function 웹읽기(sn) {
       }
     }
     const 률 = (c.match(/최종\s*경쟁률\s*([\d.]+)\s*대\s*1/) || [])[1];
-    묶음.push({ 이름: (이름 || '').trim(), 단계: 줄, 경쟁률: 률 != null ? Number(률) : null });
+    묶음.push({ 이름: 기호풀기(이름 || '').trim(), 단계: 줄, 경쟁률: 률 != null ? Number(률) : null });
   }
   return { 묶음, 머리 };
 }
