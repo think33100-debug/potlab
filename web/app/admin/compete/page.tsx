@@ -37,6 +37,10 @@ type 목록답 = {
 type 하나답 = { 머리: 칸; 회차: 칸[] };
 type 후보답 = { 후보: 칸[]; 셈: { 후보짝: number; 묶음: number } };
 
+/* 관리자가 고를 수 있는 고용형태 — tools/alio-group.mjs 의 고용형태말과 같은 말들 */
+const 고용형태고르기 = ['정규직', '공무직', '무기계약직', '비정규직', '기간제', '계약직',
+  '임시직', '시간제', '청년인턴', '특정업무직', '전문지원직', '전문직', '별정직', '일반직'];
+
 const n = (v: unknown) => (v === null || v === undefined ? '—' : String(v));
 const 쉼표 = (v: unknown) => (typeof v === 'number' ? v.toLocaleString('ko-KR') : n(v));
 
@@ -144,6 +148,16 @@ function 본문() {
       });
     return () => { 살아있음 = false; };
   }, [고른묶음]);
+
+  /* 관리자가 고용형태를 손으로 고릅니다. 수집기가 다시 돌아도 안 덮어씁니다 */
+  const 고용형태넣기 = async (sn: number, group_no: number, 값: string) => {
+    const { error } = await browserSupabase().rpc('admin_alio_set_hiretype',
+      { p_sn: sn, p_group_no: group_no, p_고용형태: 값 || null });
+    if (error) { setErr(error.message); return; }
+    /* 바로 다시 읽습니다 — 묶음키는 다음 수집 때 새로 짜입니다 */
+    const { data } = await browserSupabase().rpc('admin_alio_group_one', { p_묶음키: 고른묶음 });
+    if (data) setOne(data as 하나답);
+  };
 
   if (err) return <p className="text-lg text-red-600">{err}</p>;
   if (!d) return <p className="text-lg text-gray-500">잠시만요…</p>;
@@ -262,8 +276,9 @@ function 본문() {
                   </div>
                   {h['고용형태확인필요'] ? (
                     <div className="mt-2 rounded bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                      공고에 <b>고용형태가 적혀 있지 않습니다.</b> 짐작해 붙이지 않았습니다 —
-                      정규직·공무직·기간제가 섞여 있을 수 있습니다.
+                      공고에 <b>고용형태가 또렷이 적혀 있지 않습니다.</b> 짐작해 붙이지 않았습니다.
+                      아래 회차마다 직접 고르실 수 있습니다 — 고른 값은 <b>수집기가 다시 돌아도 안 덮어씁니다.</b>
+                      회원 화면에는 고용형태가 확실한 것만 올립니다.
                     </div>
                   ) : null}
                   {h['짝확인필요'] ? (
@@ -322,6 +337,21 @@ function 본문() {
                       {r['기본값단계'] ? (
                         <div className="mt-1 text-xs text-gray-400">단계 이름은 일반적인 전형 순서 기준입니다</div>
                       ) : null}
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="text-gray-500">고용형태</span>
+                        <select
+                          value={String(r['고용형태'] ?? '')}
+                          onChange={(e) => 고용형태넣기(Number(r['sn']), Number(r['묶음차례']), e.target.value)}
+                          className={'rounded border px-1.5 py-0.5 '
+                            + (r['고용형태'] ? 'border-gray-300' : 'border-amber-400 bg-amber-50')}>
+                          <option value="">— 모름 —</option>
+                          {고용형태고르기.map((x) => <option key={x} value={x}>{x}</option>)}
+                        </select>
+                        <span className="text-gray-400">
+                          {r['고용형태출처'] === '관리자 지정'
+                            ? '관리자 지정' : r['고용형태출처'] ? '자동 · ' + String(r['고용형태출처']) : '못 가림'}
+                        </span>
+                      </div>
                       {r['경쟁률상태'] === '있음' && (
                         <div className="mt-1 text-xs text-gray-500">
                           {String(r['첫응시'])}명이 지원해 {String(r['끝선발'])}명을 뽑았습니다
