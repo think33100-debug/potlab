@@ -35,9 +35,26 @@ type 목록답 = {
   알림: 알림;
 };
 type 하나답 = { 머리: 칸; 회차: 칸[] };
+type 후보답 = { 후보: 칸[]; 셈: { 후보짝: number; 묶음: number } };
 
 const n = (v: unknown) => (v === null || v === undefined ? '—' : String(v));
 const 쉼표 = (v: unknown) => (typeof v === 'number' ? v.toLocaleString('ko-KR') : n(v));
+
+/** 묶음 요약 한 문장 (2026-09-29 · 세중님이 정한 꼴).
+ *
+ *   최근 9년 이내 42번 채용 · 평균 경쟁률 17.5 대 1
+ *   최근 2년 이내 1번 채용 · 경쟁률 35.5 대 1        ← 한 번뿐이면 「평균」이라 안 합니다
+ *
+ * 「1회분」 「2회분」 「○회 자료」 같은 말은 쓰지 않습니다. */
+export function 요약문장(첫해: unknown, 값있음: unknown, 평균: unknown) {
+  const 해 = Number(첫해);
+  const 번 = Number(값있음 || 0);
+  if (!해 || !번 || 평균 === null || 평균 === undefined) return null;
+  const 년 = new Date().getFullYear() - 해 + 1;
+  return 번 === 1
+    ? `최근 ${년}년 이내 1번 채용 · 경쟁률 ${평균} 대 1`
+    : `최근 ${년}년 이내 ${번}번 채용 · 평균 경쟁률 ${평균} 대 1`;
+}
 
 /** 경쟁률 한 칸. **계산이 안 되는 것은 숫자로 안 적습니다** */
 function 률(상태: unknown, 값: unknown) {
@@ -77,6 +94,8 @@ function 본문() {
 
   const [d, setD] = useState<목록답 | null>(null);
   const [one, setOne] = useState<하나답 | null>(null);
+  const [후보, set후보] = useState<후보답 | null>(null);
+  const [후보열기, set후보열기] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [글, set글] = useState(찾기);
 
@@ -104,6 +123,15 @@ function 본문() {
     });
     return () => { 살아있음 = false; };
   }, [기관, 직군, 지역, 고용형태, 연도, 찾기]);
+
+  /* 합칠 후보 — 같은 자리인데 지역 표기가 갈린 묶음. **합치지 않습니다. 보여만 줍니다** */
+  useEffect(() => {
+    let 살아있음 = true;
+    if (!후보열기) return;
+    browserSupabase().rpc('admin_alio_merge_candidates', { p_직군: 직군 || null })
+      .then(({ data, error }) => { if (살아있음 && !error) set후보(data as 후보답); });
+    return () => { 살아있음 = false; };
+  }, [후보열기, 직군]);
 
   useEffect(() => {
     let 살아있음 = true;
@@ -198,42 +226,40 @@ function 본문() {
             const h = one.머리;
             return (
               <>
-                <div className="flex flex-wrap items-baseline gap-x-3">
-                  <h2 className="text-xl font-bold">{n(h['기관'])}</h2>
-                  <span className="rounded bg-blue-50 px-2 py-0.5 text-sm text-blue-800">{n(h['직군'])}</span>
-                  <span className="rounded bg-gray-100 px-2 py-0.5 text-sm text-gray-700">{n(h['지역'])}</span>
-                  <span className={'rounded px-2 py-0.5 text-sm ' + (h['고용형태확인필요']
-                    ? 'bg-amber-100 text-amber-900' : 'bg-emerald-50 text-emerald-800')}>
+                <h2 className="text-xl font-bold leading-snug">
+                  {n(h['기관'])} · {n(h['직군'])} · {n(h['지역'])}
+                  {' · '}
+                  <span className={h['고용형태확인필요'] ? 'text-amber-700' : 'text-emerald-700'}>
                     {n(h['고용형태'])}
                   </span>
-                  {h['짝확인필요'] ? (
-                    <span className="rounded bg-amber-100 px-2 py-0.5 text-sm text-amber-900">짝 확인 필요</span>
-                  ) : null}
-                </div>
+                </h2>
+                {h['짝확인필요'] ? (
+                  <div className="mt-1 inline-block rounded bg-amber-100 px-2 py-0.5 text-sm text-amber-900">
+                    짝 확인 필요
+                  </div>
+                ) : null}
                 {h['자리'] ? <div className="mt-1 text-sm text-gray-500">자리 이름: {String(h['자리'])}</div> : null}
 
                 {/* 평균 — 몇 회 평균인지 반드시 같이 */}
                 <div className="mt-4 rounded-xl bg-gray-50 p-4">
-                  {h['평균'] != null && Number(h['값있음']) > 0 ? (
+                  {요약문장(h['첫해'], h['값있음'], h['평균']) ? (
                     <>
-                      <div className="text-3xl font-bold">{String(h['평균'])} : 1</div>
-                      <div className="mt-1 text-sm text-gray-600">
-                        최근 <b>{쉼표(h['값있음'])}회</b> 평균 ({n(h['첫해'])}~{n(h['끝해'])}년)
-                        {h['가장낮음'] != null && <> · 가장 낮았을 때 {String(h['가장낮음'])} : 1 · 가장 높았을 때 {String(h['가장높음'])} : 1</>}
+                      <div className="text-xl font-bold leading-snug">
+                        {요약문장(h['첫해'], h['값있음'], h['평균'])}
                       </div>
+                      {h['가장낮음'] != null && Number(h['값있음']) > 1 && (
+                        <div className="mt-1 text-sm text-gray-600">
+                          가장 낮았을 때 {String(h['가장낮음'])} 대 1 · 가장 높았을 때 {String(h['가장높음'])} 대 1
+                        </div>
+                      )}
                     </>
                   ) : (
-                    <div className="text-lg text-gray-500">평균을 낼 값이 없습니다</div>
+                    <div className="text-lg text-gray-500">경쟁률을 낼 값이 없습니다</div>
                   )}
                   <div className="mt-1 text-sm text-gray-500">
-                    공고 {쉼표(h['회차'])}회
-                    {Number(h['계산불가']) > 0 && <> · 계산 불가 {쉼표(h['계산불가'])}회 (뽑은 사람 0명)</>}
+                    공고는 모두 {쉼표(h['회차'])}번
+                    {Number(h['계산불가']) > 0 && <> · 그중 {쉼표(h['계산불가'])}번은 계산 불가 (뽑은 사람 0명)</>}
                   </div>
-                  {h['한회뿐'] ? (
-                    <div className="mt-2 rounded bg-gray-100 px-3 py-2 text-xs text-gray-700">
-                      <b>1회 자료</b>입니다. 한 번뿐이라 평균이라 부르기 어렵습니다 — 그해 그 공고의 값입니다.
-                    </div>
-                  ) : null}
                   {h['고용형태확인필요'] ? (
                     <div className="mt-2 rounded bg-amber-50 px-3 py-2 text-xs text-amber-900">
                       공고에 <b>고용형태가 적혀 있지 않습니다.</b> 짐작해 붙이지 않았습니다 —
@@ -311,6 +337,62 @@ function 본문() {
         </section>
       )}
 
+      {/* ── 합칠 후보 ── */}
+      <section className="rounded-xl border border-gray-200 bg-white p-4">
+        <button onClick={() => set후보열기((v) => !v)}
+          className="text-sm font-medium text-blue-700 hover:underline">
+          {후보열기 ? '▾' : '▸'} 같은 자리인데 갈라진 묶음 찾기
+        </button>
+        <p className="mt-1 text-xs text-gray-500">
+          「태백」과 「강원」, 「안산」과 「경기」처럼 지역 표기만 달라 갈라진 것을 찾습니다.
+          <b> 합치지 않고 보여만 줍니다</b> — 합치는 것은 세중님이 확인한 뒤에 합니다.
+        </p>
+        {후보열기 && (!후보 ? <p className="mt-3 text-gray-500">잠시만요…</p> : (
+          <>
+            <p className="mt-3 text-sm">
+              후보 <b>{쉼표(후보.셈.후보짝)}</b>짝 · 묶음 {쉼표(후보.셈.묶음)}개
+            </p>
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-gray-500">
+                  <tr>
+                    <th className="py-1 pr-3 font-normal">기관 · 직군 · 고용형태</th>
+                    <th className="py-1 pr-3 font-normal">이쪽</th>
+                    <th className="py-1 pr-3 font-normal">저쪽</th>
+                    <th className="py-1 font-normal">왜 같은 자리로 보나</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {후보.후보.map((x, i) => (
+                    <tr key={i} className="border-t border-gray-100">
+                      <td className="py-1 pr-3">{n(x['식구열쇠'])}</td>
+                      <td className="py-1 pr-3">
+                        <button className="text-blue-700 hover:underline"
+                          onClick={() => 주소로({ 묶음: String(x['a키']) })}>
+                          {n(x['a지역'])}
+                        </button>
+                        <span className="ml-1 text-xs text-gray-500">{n(x['a회차'])}번</span>
+                      </td>
+                      <td className="py-1 pr-3">
+                        <button className="text-blue-700 hover:underline"
+                          onClick={() => 주소로({ 묶음: String(x['b키']) })}>
+                          {n(x['b지역'])}
+                        </button>
+                        <span className="ml-1 text-xs text-gray-500">{n(x['b회차'])}번</span>
+                      </td>
+                      <td className="py-1 text-gray-600">{n(x['까닭'])}</td>
+                    </tr>
+                  ))}
+                  {후보.후보.length === 0 && (
+                    <tr><td colSpan={4} className="py-4 text-center text-gray-500">갈라진 것으로 보이는 묶음이 없습니다</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ))}
+      </section>
+
       {/* ── 묶음 목록 ── */}
       <section>
         <h2 className="mb-2 font-semibold">
@@ -326,15 +408,15 @@ function 본문() {
         </h2>
         <p className="mb-2 text-xs text-gray-500">
           짝 확인 필요 {쉼표(a.짝확인필요)}개 · 고용형태 확인 필요 <b>{쉼표(a.고용형태확인필요)}</b>개 ·
-          1회 자료 {쉼표(a.한회뿐)}개
+          한 번만 채용한 묶음 {쉼표(a.한회뿐)}개
         </p>
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-gray-600">
               <tr>
                 <th className="px-3 py-2">기관 · 직군 · 지역</th>
-                <th className="px-3 py-2 text-right">회차</th>
-                <th className="px-3 py-2">평균 경쟁률</th>
+                <th className="px-3 py-2 text-right">채용 횟수</th>
+                <th className="px-3 py-2">경쟁률</th>
                 <th className="px-3 py-2">가장 낮음 ~ 높음</th>
                 <th className="px-3 py-2">해</th>
               </tr>
@@ -354,9 +436,6 @@ function 본문() {
                         ? 'bg-amber-100 text-amber-900' : 'bg-emerald-50 text-emerald-800')}>
                         {n(x['고용형태'])}
                       </span>
-                      {x['한회뿐'] ? (
-                        <span className="rounded bg-gray-100 px-1.5 text-xs text-gray-600">1회 자료</span>
-                      ) : null}
                       {x['짝확인필요'] ? (
                         <span className="rounded bg-amber-100 px-1.5 text-xs text-amber-900">짝 확인 필요</span>
                       ) : null}
@@ -370,12 +449,8 @@ function 본문() {
                     <div className="text-xs text-gray-400">값 {쉼표(x['값있음'])}</div>
                   </td>
                   <td className="px-3 py-2">
-                    {x['평균'] != null && Number(x['값있음']) > 0 ? (
-                      <>
-                        <b>{String(x['평균'])} : 1</b>
-                        <span className="ml-1 text-xs text-gray-500">{String(x['값있음'])}회 평균</span>
-                      </>
-                    ) : <span className="text-gray-400">평균 낼 값 없음</span>}
+                    {요약문장(x['첫해'], x['값있음'], x['평균'])
+                      ?? <span className="text-gray-400">경쟁률 낼 값 없음</span>}
                   </td>
                   <td className="px-3 py-2 text-gray-600">
                     {x['가장낮음'] != null ? <>{String(x['가장낮음'])} ~ {String(x['가장높음'])}</> : '—'}
