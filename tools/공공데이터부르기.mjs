@@ -35,6 +35,47 @@ const 쉼 = (ms) => new Promise((y) => setTimeout(y, ms));
 const 한도끝난곳 = new Set();
 export function 한도끝났나() { return [...한도끝난곳]; }
 
+/* ── 남은 한도 기록 (2026-09-30 · 세중님 지시) ─────────────
+ * 쓴 양은 **신청 건마다 하나**이고 우리 열쇠 둘이 같이 씁니다 (오늘 확인).
+ * 남이 같은 신청 건을 쓰면 우리 몫도 같이 줄어듭니다. 그러니 지켜봐야 합니다.
+ * 한 호출마다 DB 에 쓰지 않고, **가장 적게 남았던 값**만 들고 있다가
+ * 수집기가 한 바퀴 끝낼 때 서비스마다 한 줄씩 올립니다. */
+const 한도본것 = new Map();          // 서비스 → { 한도, 남음 }
+export function 한도들() { return [...한도본것.entries()].map(([서비스, v]) => ({ 서비스, ...v })); }
+
+function 한도적기(서비스, 한도, 남음) {
+  const a = Number(한도), b = Number(남음);
+  if (!Number.isFinite(a) || !Number.isFinite(b) || a <= 0) return;
+  const 앞 = 한도본것.get(서비스);
+  if (!앞 || b < 앞.남음) 한도본것.set(서비스, { 한도: a, 남음: b });
+}
+
+/** 한 바퀴 끝에 부릅니다. 실패해도 수집을 멈추지 않습니다 */
+export async function 한도알리기(경로) {
+  const 줄 = 한도들();
+  if (!줄.length) return { 올림: 0 };
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const 열쇠 = process.env['COLLECT_KEY_' + String(경로 || '').toUpperCase()]
+    || process.env.COLLECT_KEY_HS3 || process.env.COLLECT_KEY_AL2
+    || process.env.COLLECT_KEY_CE2 || process.env.COLLECT_KEY_JF;
+  if (!url || !anon || !열쇠) return { 올림: 0, 왜: '열쇠가 없어 못 올립니다' };
+  try {
+    const r = await fetch(url + '/rest/v1/rpc/api_quota_put', {
+      method: 'POST',
+      headers: { apikey: anon, Authorization: 'Bearer ' + anon, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_secret: 열쇠, p_source: 경로 || 'HS3', p_rows: 줄 }),
+    });
+    if (!r.ok) return { 올림: 0, 왜: 'HTTP ' + r.status + ' · ' + (await r.text()).slice(0, 120) };
+    /* 70% 를 넘은 것은 화면에도 바로 알립니다 */
+    줄.filter((x) => (x.한도 - x.남음) / x.한도 >= 0.7).forEach((x) => {
+      console.error('  ★ 하루 한도의 ' + Math.round(100 * (x.한도 - x.남음) / x.한도)
+        + '% 를 썼습니다 — ' + x.서비스 + ' (' + (x.한도 - x.남음) + '/' + x.한도 + ')');
+    });
+    return { 올림: 줄.length };
+  } catch (e) { return { 올림: 0, 왜: String(e.message).slice(0, 80) }; }
+}
+
 const 기본간격 = 350;
 const 기다림들 = [2000, 4000, 8000, 16000];
 
@@ -76,6 +117,7 @@ export async function 공공부르기(url, 옵션 = {}) {
 
     const 한도 = r.headers.get('x-ratelimit-limit') || '—';
     const 남음 = r.headers.get('x-ratelimit-remaining') || '—';
+    한도적기(열쇠칸, 한도, 남음);
 
     if (r.status !== 429 && r.status < 500) {
       return { code: r.status, 글, 한도, 남음, 다시, 한도끝: false, 왜: '' };

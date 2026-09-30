@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, MEDTECH, 구운날 } from './gas-rules.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 멈췄나 as OCR멈췄나, 이름표 as OCR이름표 } from './ocr/index.mjs';
-import { 공공부르기 } from './공공데이터부르기.mjs';
+import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'AL2';
@@ -593,4 +593,13 @@ if (dry) {
   }
   console.log('\n씀          ' + 담음 + '건' + (건너뜀2 ? ' · 건너뜀 ' + 건너뜀2 + '건' : ''));
   console.log(Math.round((Date.now() - t0) / 1000) + '초');
+}
+
+/* 남은 하루 한도를 남깁니다 — 쓴 양은 신청 건마다 하나이고
+   우리 열쇠 둘이 같이 씁니다. 남이 쓰면 우리 몫도 줄어듭니다 (2026-09-30) */
+const 한도 = await 한도알리기('AL2');
+if (한도.왜) console.error('한도 기록 못 함 · ' + 한도.왜);
+else if (한도.올림) {
+  console.log('한도 기록    ' + 한도들().map((x) =>
+    x.서비스.replace(/^apis?\.data\.go\.kr/, '') + ' ' + (x.한도 - x.남음) + '/' + x.한도).join(' · '));
 }
