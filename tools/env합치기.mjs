@@ -45,7 +45,28 @@ const 지킨것 = [...옛것.o.keys()].filter((k) => !새것.o.has(k));
 const 바뀐것 = [...새것.o.keys()].filter((k) => 옛것.o.has(k) && 옛것.o.get(k) !== 새것.o.get(k));
 const 새이름 = [...새것.o.keys()].filter((k) => !옛것.o.has(k));
 
-/* 먼저 임시 파일에 쓰고 옮깁니다 — 쓰다 죽어도 .env 가 반토막 나지 않게 */
+/* ① 고치기 전에 사본을 남깁니다.
+      2026-09-30 에 덮어써서 세 줄을 잃었을 때 되돌릴 사본이 없었습니다.
+      이름은 .env.bak-YYYYMMDD-HHMM — .gitignore 의 *.bak-* 에 걸려 저장소에 안 올라갑니다 */
+if (fs.existsSync(파일)) {
+  const 때 = new Date(Date.now() + 9 * 3600000).toISOString()   // 서울 시각
+    .slice(0, 16).replace(/[-:T]/g, '').replace(/^(\d{8})/, '$1-');
+  const 사본 = 파일 + '.bak-' + 때;
+  fs.copyFileSync(파일, 사본);
+  fs.chmodSync(사본, 0o600);
+  console.log('사본을 남겼습니다 — ' + 사본.split(/[\\/]/).pop());
+
+  /* 사본은 다섯 개만 둡니다 */
+  const 폴더 = 파일.replace(/[\\/][^\\/]*$/, '') || '.';
+  const 이름 = 파일.split(/[\\/]/).pop();
+  const 오래된것 = fs.readdirSync(폴더)
+    .filter((f) => f.startsWith(이름 + '.bak-'))
+    .sort().reverse().slice(5);
+  for (const f of 오래된것) { try { fs.unlinkSync(폴더 + '/' + f); } catch { /* 못 지워도 계속 */ } }
+  if (오래된것.length) console.log('  오래된 사본 ' + 오래된것.length + '개를 치웠습니다');
+}
+
+/* ② 먼저 임시 파일에 쓰고 옮깁니다 — 쓰다 죽어도 .env 가 반토막 나지 않게 */
 const 글 = [...새것.머리, ...[...합친것].map(([k, v]) => k + '=' + v)].join('\n') + '\n';
 fs.writeFileSync(파일 + '.새것', 글, { mode: 0o600 });
 fs.renameSync(파일 + '.새것', 파일);
