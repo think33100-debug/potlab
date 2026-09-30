@@ -26,13 +26,20 @@ const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 자세히 = process.argv.includes('--자세히');
 
 /* hosp-sites.json 에 적힌 그대로의 이름입니다. 바꾸지 마세요 */
-export const 막힌곳 = ['동아병원', '의료법인 광혜의료재단 광혜병원', '한마음병원'];
+export const 막힌곳 = [
+  '동아병원',
+  '의료법인 광혜의료재단 광혜병원',
+  '한마음병원',
+  /* 2026-09-30 에 새로 찾았습니다 — 서버에서 「접근 불가합니다」 43바이트 */
+  '의료법인 대우의료재단대우병원',
+];
 
 /* 2026-09-28 에 구글(미국) 자리에서 잰 것 — 견줄 자리입니다 */
 const 전에 = {
-  '동아병원': 'HTTP 200 인데 본문이 「한국에서만 접속 가능합니다」',
-  '의료법인 광혜의료재단 광혜병원': 'HTTP 403',
+  '동아병원': 'HTTP 200 · 「한국에서만 접속 가능합니다」',
+  '의료법인 광혜의료재단 광혜병원': 'HTTP 403 Forbidden',
   '한마음병원': '8초 안에 못 붙음',
+  '의료법인 대우의료재단대우병원': 'HTTP 200 · 「접근 불가합니다」 (2026-09-30 에 찾음)',
 };
 
 /* hosp-sites.json 은 { 구운날, 사이트: [...] } 꼴입니다 */
@@ -45,7 +52,7 @@ if (것.length !== 막힌곳.length) {
   console.error('  찾은 것: ' + 것.map((x) => x.name).join(' · '));
 }
 
-console.log('한국 밖에서 막히던 병원 ' + 것.length + '곳 — 여기서는 어떤지 봅니다');
+console.log('아마존 대역에서 막히던 병원 ' + 것.length + '곳 — 여기서는 어떤지 봅니다');
 console.log('돌리는 자리: ' + (process.env.POTJOB_WHERE || '(POTJOB_WHERE 를 안 정했습니다)'));
 console.log('');
 
@@ -65,7 +72,7 @@ for (const s of 것) {
   표.push({
     병원: s.name.slice(0, 20), 결과, 공고줄: 줄.length, 초,
     까닭: String(g.err || g.raw || '').slice(0, 44),
-    '2026-09-28 구글 자리': 전에[s.name] || '',
+    '막힐 때 증상': 전에[s.name] || '',
   });
   if (자세히) {
     console.log('── ' + s.name + ' · ' + 결과 + (g.raw ? ' · ' + g.raw : ''));
@@ -75,6 +82,21 @@ for (const s of 것) {
   }
 }
 console.table(표);
+
+/* 관리자 화면이 「마지막 확인 날짜」 를 보여줄 수 있게 DB 에 남깁니다 */
+if (process.env.SUPABASE_URL && process.env.COLLECT_KEY_HS3) {
+  try {
+    await fetch(process.env.SUPABASE_URL + '/rest/v1/rpc/hand_check_put', {
+      method: 'POST',
+      headers: { apikey: process.env.SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + process.env.SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_secret: process.env.COLLECT_KEY_HS3, p_source: 'HS3',
+        p_rows: 표.map((x) => ({ 이름: x.병원, 결과: x.결과, 공고줄: x.공고줄,
+          까닭: x.까닭, 어디서: process.env.POTJOB_WHERE || '(모름)' })) }),
+    });
+  } catch (e) { console.log('  (DB 에 못 남겼습니다 · ' + String(e.message).slice(0, 60) + ')'); }
+}
 
 const 열림 = 표.filter((x) => x.결과 === '열림').length;
 console.log('\n열린 곳 ' + 열림 + ' / ' + 표.length);
