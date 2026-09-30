@@ -35,7 +35,7 @@ type 목록답 = {
   알림: 알림;
 };
 type 하나답 = { 머리: 칸; 회차: 칸[] };
-type 후보답 = { 후보: 칸[]; 셈: { 후보짝: number; 묶음: number } };
+type 후보답 = { 후보: 칸[]; 셈: { 후보짝: number; 묶음: number; '모름이라 뺀 묶음': number } };
 
 /* 관리자가 고를 수 있는 고용형태 — tools/alio-group.mjs 의 고용형태말과 같은 말들 */
 const 고용형태고르기 = ['정규직', '공무직', '무기계약직', '비정규직', '기간제', '계약직',
@@ -399,13 +399,18 @@ function 본문() {
           {후보열기 ? '▾' : '▸'} 같은 자리인데 갈라진 묶음 찾기
         </button>
         <p className="mt-1 text-xs text-gray-500">
-          「태백」과 「강원」, 「안산」과 「경기」처럼 지역 표기만 달라 갈라진 것을 찾습니다.
+          「태백」과 「강원」처럼 <b>표기만 다른 같은 지역</b>만 찾습니다.
           <b> 합치지 않고 보여만 줍니다</b> — 합치는 것은 세중님이 확인한 뒤에 합니다.
+          한쪽이 「지역 모름」·「근무처 확인 필요」인 것은 <b>후보에 안 넣습니다</b> —
+          모르는 것을 특정 지역으로 짐작해 붙이지 않습니다.
         </p>
         {후보열기 && (!후보 ? <p className="mt-3 text-gray-500">잠시만요…</p> : (
           <>
             <p className="mt-3 text-sm">
               후보 <b>{쉼표(후보.셈.후보짝)}</b>짝 · 묶음 {쉼표(후보.셈.묶음)}개
+              <span className="ml-2 text-xs text-gray-500">
+                (어디인지 몰라 후보에서 뺀 묶음 {쉼표(후보.셈['모름이라 뺀 묶음'])}개)
+              </span>
             </p>
             <div className="mt-2 overflow-x-auto">
               <table className="w-full text-sm">
@@ -435,11 +440,13 @@ function 본문() {
                         </button>
                         <span className="ml-1 text-xs text-gray-500">{n(x['b회차'])}번</span>
                       </td>
-                      <td className="py-1 text-gray-600">{n(x['까닭'])}</td>
+                      <td className="py-1 text-gray-600">{n(x['근거'])}</td>
                     </tr>
                   ))}
                   {후보.후보.length === 0 && (
-                    <tr><td colSpan={4} className="py-4 text-center text-gray-500">갈라진 것으로 보이는 묶음이 없습니다</td></tr>
+                    <tr><td colSpan={4} className="py-4 text-center text-gray-500">
+                      표기만 다른 같은 지역 짝이 없습니다 — 병원 이름으로 묶으면서 다 풀렸습니다
+                    </td></tr>
                   )}
                 </tbody>
               </table>
