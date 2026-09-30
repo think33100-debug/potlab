@@ -16,6 +16,7 @@
  * · 짐작한 것은 [확인 안 됨] 으로 표시합니다
  */
 import fs from 'node:fs';
+import { robots읽기, 가도되나 } from './robots.mjs';
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
   + '(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -42,13 +43,13 @@ async function 받기(url) {
   } catch (e) { return { code: 0, 글: '', 왜: String(e.message).slice(0, 70) }; }
 }
 
-async function robots확인(집) {
+/* robots 해석은 tools/robots.mjs 한 곳에 있습니다.
+   2026-09-30 에 여기서 직접 읽다가 다섯 곳 중 넷을 틀렸습니다 —
+   주석(#)을 안 걸렀고 Allow 를 안 봤습니다 */
+async function robots확인(집, 길) {
   const r = await 받기(집 + '/robots.txt');
   if (r.code !== 200 || !r.글) return { 됨: true, 왜: 'robots.txt 없음 (HTTP ' + r.code + ')' };
-  const 덩 = r.글.split(/user-agent\s*:/i).find((x) => /^\s*\*/.test(x)) || '';
-  const 막힌길 = [...덩.matchAll(/disallow\s*:\s*(\S*)/gi)].map((m) => m[1]).filter(Boolean);
-  if (막힌길.includes('/')) return { 됨: false, 왜: 'robots.txt 가 전체를 막았습니다', 막힌길 };
-  return { 됨: true, 왜: '막힌 길 ' + 막힌길.length + '개', 막힌길 };
+  return 가도되나(robots읽기(r.글), 길 || '/');
 }
 
 /** 첫 화면에서 고시공고·채용 게시판으로 보이는 링크를 찾습니다 */
