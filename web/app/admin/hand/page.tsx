@@ -29,11 +29,18 @@ type 영자줄 = {
 };
 type 영자 = { 오늘: number; 줄: 영자줄[] };
 
+type 한도줄 = {
+  서비스: string; 한도: number; 남음: number; 쓴양: number;
+  몇퍼센트: number; 빨간줄: boolean; 본때: string;
+};
+type 한도 = { 넘은것: number; 줄: 한도줄[] };
+
 const 날 = (s: string | null) => (s ? String(s).slice(0, 10) : '—');
 
 export default function AdminHand() {
   const [d, setD] = useState<줄[] | null>(null);
   const [영, set영] = useState<영자 | null>(null);
+  const [한, set한] = useState<한도 | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   const 읽기 = useCallback(() => {
@@ -43,6 +50,10 @@ export default function AdminHand() {
     /* PDF 를 글자로 못 바꾼 건 — 9월 30일에 한 번 나왔고 원인을 못 잡아 덫을 놨습니다 */
     browserSupabase().rpc('admin_ocr_zero').then(({ data }) => {
       if (data) set영(data as 영자);
+    });
+    /* 공공데이터 하루 한도 — 쓴 양은 신청 건마다 하나라 남이 써도 우리 몫이 줄어듭니다 */
+    browserSupabase().rpc('admin_api_quota').then(({ data }) => {
+      if (data) set한(data as 한도);
     });
   }, []);
   useEffect(읽기, [읽기]);
@@ -153,6 +164,62 @@ export default function AdminHand() {
           </tbody>
         </table>
       </div>
+
+      {한 && 한.줄.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-bold">
+            공공데이터 하루 한도
+            <span className={'ml-2 rounded px-2 py-0.5 text-sm ' + (한.넘은것
+              ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800')}>
+              {한.넘은것 ? 한.넘은것 + '곳이 70%를 넘었습니다' : '넉넉합니다'}
+            </span>
+          </h2>
+          <p className="text-sm text-gray-500">
+            쓴 양은 <b>신청 건마다 하나</b>입니다 — 우리 열쇠가 둘이어도 같이 세고,
+            남이 같은 신청 건을 쓰면 우리 몫도 줄어듭니다. 바닥나면 그날 공고를 못 받습니다.
+            자정에 돌아옵니다.
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-gray-600">
+                <tr>
+                  <th className="px-3 py-2">서비스</th>
+                  <th className="px-3 py-2">오늘 쓴 양</th>
+                  <th className="px-3 py-2 w-40">얼마나</th>
+                  <th className="px-3 py-2">본 때</th>
+                </tr>
+              </thead>
+              <tbody>
+                {한.줄.map((x) => (
+                  <tr key={x.서비스} className="border-t border-gray-100">
+                    <td className="px-3 py-2 font-mono text-xs">
+                      {x.서비스.replace(/^apis?\.data\.go\.kr/, '')}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2">
+                      {x.쓴양.toLocaleString()} / {x.한도.toLocaleString()}
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 flex-1 rounded bg-gray-100">
+                          <div
+                            className={'h-2 rounded ' + (x.빨간줄 ? 'bg-red-500' : 'bg-emerald-500')}
+                            style={{ width: Math.min(100, Math.max(2, x.몇퍼센트)) + '%' }}
+                          />
+                        </div>
+                        <span className={'w-10 text-right text-xs '
+                          + (x.빨간줄 ? 'font-bold text-red-700' : 'text-gray-500')}>
+                          {x.몇퍼센트}%
+                        </span>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-gray-500">{x.본때}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       {영 && 영.줄.length > 0 && (
         <section className="space-y-2">
