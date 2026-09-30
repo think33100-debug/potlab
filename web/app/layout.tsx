@@ -5,6 +5,7 @@ import { Logo } from "@/components/logo";
 import { SPLASH_SCRIPT, Splash } from "@/components/splash";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
+import { CONTACT_EMAIL } from "@/lib/contact";
 import { siteUrl } from "@/lib/site-url";
 import { AuthProvider } from "./auth";
 import { BackGuard } from "./back-guard";
@@ -80,7 +81,21 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               직업정보제공사업 신고번호 J1401020260007
               <br />
               주식회사 빈틈 · 대구 북구 동북로 291, 901-A156호
+              <br />
+              {/* 개인정보 보호책임자는 방침에 밝혀야 하고, 어느 화면에서든
+                  찾을 수 있어야 합니다 (2026-10-01) */}
+              개인정보 보호책임자 이세중 (대표) ·{' '}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
+                {CONTACT_EMAIL}
+              </a>
             </p>
+            <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400"
+              aria-label="약관과 문의">
+              <Link href="/terms/service" className="hover:underline">이용약관</Link>
+              <Link href="/terms/privacy" className="font-bold hover:underline">개인정보처리방침</Link>
+              <Link href="/terms/community" className="hover:underline">커뮤니티 이용규칙</Link>
+              <Link href="/contact" className="hover:underline">문의하기</Link>
+            </nav>
           </footer>
 
           {/* 주소 끝에 ?진단=1 을 붙였을 때만 보입니다.

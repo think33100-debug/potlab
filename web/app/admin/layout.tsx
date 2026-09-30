@@ -22,6 +22,9 @@ const MENU = [
   { href: '/admin/stats', label: '통계' },
   { href: '/admin/compete', label: '경쟁률' },
   { href: '/admin/hand', label: '손으로 확인할 곳' },
+  /* 만들어 놓고 메뉴에 안 걸려 있던 것들 (2026-10-01 에 걸었습니다) */
+  { href: '/admin/rival', label: '경쟁사 비교' },
+  { href: '/admin/access', label: '개인정보 접속기록' },
   { href: '/admin/reset', label: '내 계정 초기화' },
 ];
 
