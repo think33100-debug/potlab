@@ -460,10 +460,13 @@ if (dry) {
       + ' · gas 에만 ' + 옛것만.length + ' (그중 아직 모집중 ' + 살아있는옛것만.length + ' ← 진짜 차이)');
     const 보기 = (이름, 열쇠들, 집) => {
       if (!열쇠들.length) return;
-      console.log('\n  ' + 이름 + ' 8건 —');
+      /* 8 은 **보여주는 수**지 건수가 아닙니다. 건수를 8 로 찍던 것을 고쳤습니다 (2026-10-01) */
+      console.log('\n  ' + 이름 + ' ' + 열쇠들.length + '건'
+        + (열쇠들.length > 8 ? ' (앞 8건만)' : '') + ' —');
       열쇠들.slice(0, 8).forEach((k) => {
         const v = 집.get(k);
-        console.log('    ' + k + '  ' + String(v.org_name).slice(0, 20).padEnd(22) + String(v.title).slice(0, 46));
+        console.log('    ' + String(v.id).padEnd(14) + String(v.org_name).slice(0, 20).padEnd(22)
+          + String(v.title).slice(0, 46));
       });
     };
     보기('HS3 에만', 새것만, 새집);
