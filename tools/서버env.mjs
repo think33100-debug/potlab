@@ -42,10 +42,14 @@ const 넣을것 = [
 ];
 
 if (process.argv.includes('--내보내기')) {
+  /* ⚠ 값에 따옴표를 씌웁니다. `.env` 를 셸에서 `. ./.env` 로 읽는데,
+     괄호·빈칸이 든 값을 안 씌우면 「syntax error near unexpected token `('」 가 납니다
+     (2026-09-30 에 POTJOB_WHERE 로 겪었습니다). 작은따옴표 안은 셸이 안 건드립니다. */
+  const 씌우기 = (v) => "'" + String(v).replace(/'/g, "'\\''") + "'";
   const 줄 = ['# potjob 수집기 · Lightsail 서울 (2026-09-30 에 만듦)',
     '# SUPABASE_SERVICE_KEY 는 일부러 안 넣었습니다 — 공개 키 + DB 함수로 갑니다',
-    'POTJOB_WHERE=Lightsail 서울 (ap-northeast-2)', 'TZ=Asia/Seoul'];
-  for (const k of 넣을것) if (있는것[k]) 줄.push(k + '=' + 있는것[k]);
+    'POTJOB_WHERE=' + 씌우기('Lightsail 서울 (ap-northeast-2)'), 'TZ=Asia/Seoul'];
+  for (const k of 넣을것) if (있는것[k]) 줄.push(k + '=' + 씌우기(있는것[k]));
   process.stdout.write(줄.join('\n') + '\n');
 } else {
   console.log('서버 .env 에 들어갈 것 — 값은 안 찍습니다\n');
