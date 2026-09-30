@@ -85,6 +85,7 @@ export default function LeavePage() {
           <li>· 급여 · 스펙 · 어학 점수</li>
           <li>· 알림 설정 · 알림 받던 기기</li>
           <li>· 관심 공고 · 관심 기관</li>
+          <li>· 내가 누른 좋아요 (글에 붙은 합계 숫자는 그대로예요)</li>
         </ul>
       </div>
 
@@ -92,8 +93,18 @@ export default function LeavePage() {
         <p className="text-lg font-bold">남는 것</p>
         <ul className="mt-2 space-y-1 break-keep text-lg text-gray-600 dark:text-gray-400">
           <li>· 내가 쓴 글과 댓글 — 글쓴이가 「탈퇴한 회원」으로 바뀌어요</li>
-          <li>· 언제 가입해서 언제 탈퇴했는지 (이름은 안 남아요)</li>
+          <li>· 채팅에 남긴 말 — 보낸 사람 표시가 가려지고, 쓴 지 1년이 되면 지워져요</li>
+          <li>· 언제 가입해서 언제 탈퇴했는지</li>
+          <li>
+            · 원래 닉네임 — <span className="font-bold">30일 동안만</span> 암호로 잠가서 보관해요.
+            분쟁이 생겼을 때 누구 글인지 가리기 위해서예요. 30일이 지나면 자동으로 지워져요
+          </li>
         </ul>
+        <p className="mt-4 break-keep text-sm text-gray-500">
+          내 글에 신고가 걸려 있으면 그 신고 처리가 끝날 때까지 원래 닉네임을 더 보관해요.
+          처리가 끝나면 바로 지워져요. 잠가 둔 닉네임은 관리자만 열어볼 수 있고,
+          열어본 기록이 따로 남아요
+        </p>
         <p className="mt-5 break-keep text-sm text-gray-500">
           글까지 지우면 남이 받아 둔 공유 링크가 죽고, 그 글에 달린 남의 댓글이
           누구한테 한 말인지 알 수 없게 돼요. 그래서 글은 남기고 이름만 가려요
