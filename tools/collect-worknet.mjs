@@ -48,6 +48,7 @@ import { fileURLToPath } from 'node:url';
 import { sortJob } from './sort-rule.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
 import { 날짜풀기, 채용시까지인가 } from './날짜.mjs';
+import { 기관종별, 시설구분 } from './wn-kind.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'WN2';
@@ -131,16 +132,10 @@ function 지역손질(v) {
     .trim()).filter(Boolean).join(', ');
 }
 
-/* 시설 어림 — 응답에 기관 종류가 없어 이름으로 짐작합니다.
-   **짐작이라는 것을 화면에 밝혀야 합니다** */
-const 요양꼴 = /요양원|요양병원|주간보호|데이케어|노인복지|실버|재가장기요양|방문요양|양로/;
-const 병원꼴 = /병원|의원|의료원|클리닉|센터|재활|한방/;
-const 시설어림 = (이름, 업종) => {
-  const t = String(이름 || '') + ' ' + String(업종 || '');
-  if (요양꼴.test(t)) return '요양';
-  if (병원꼴.test(t)) return '병원';
-  return '기타';
-};
+/* 기관종별은 **gas/wage.js 의 wnKind_ 규칙을 떼어** 씁니다 (tools/wn-kind.mjs).
+   옛 수집기가 이미 그 말로 1,000건 가까이 담아 놨습니다 —
+   요양원·주야간보호 107 · 요양병원 47 · 공공·복지기관 43 …
+   여기서 새로 만들면 두 벌이 되어 한쪽만 고치게 됩니다. */
 
 function 아이템들(t) {
   return [...String(t).matchAll(/<wanted>([\s\S]*?)<\/wanted>/g)].map((x) => {
@@ -277,7 +272,9 @@ if (보기.지역.length) 보기.지역.forEach((x) => console.log('  지역 —
 const 회원 = [], 보류 = [], 쓰레기 = [];
 for (const v of 볼것) {
   const r = v.r;
-  const 시설 = 시설어림(r.company, r.indTpNm);
+  const 종별 = 기관종별(r.indTpNm, r.company);
+  /* 나중에 만들 「전체 / 병원 / 요양」 화면용. **아직 화면에 안 씁니다** */
+  const 구분 = 시설구분(종별.종별, r.company);
   const 줄 = {
     id: 'WN' + String(r.wantedAuthNo || ''),      /* 옛 수집기와 같은 규칙 — 겹치면 안 덮습니다 */
     external_id: String(r.wantedAuthNo || ''),
@@ -292,7 +289,7 @@ for (const v of 볼것) {
     posted_at: 날짜풀기(r.regDt),
     url: String(r.wantedInfoUrl || ''),           /* 약속 — 원문·지원은 고용24 원본으로 */
     job_group: v.직군,
-    org_kind: 시설,
+    org_kind: 종별.종별,
     detail: {
       출처: '고용24',                              /* 약속 — 출처를 밝힙니다 */
       근거: v.근거,
@@ -303,7 +300,8 @@ for (const v of 볼것) {
       급여: [r.salTpNm, r.sal].filter(Boolean).join(' '),
       경력: String(r.career || ''),
       휴일: String(r.holidayTpNm || ''),
-      시설어림: 시설 + ' (기관 이름으로 어림 — 응답에 기관 종류가 없습니다)',
+      시설구분: 구분,                              /* 병원 · 요양·주간보호 · 모름 */
+      기관종별근거: 종별.왜,                        /* 업종 신고 · 이름 추정 */
       ...(v.섞임 ? { 마감메모: '채용시까지 (마감 전이라도 사람이 정해지면 닫힙니다)' } : {}),
       모바일: String(r.wantedMobileInfoUrl || ''),
     },
@@ -321,9 +319,14 @@ for (const v of 볼것) {
 }
 셈.회원 = 회원.length; 셈.보류 = 보류.length; 셈.쓰레기 = 쓰레기.length;
 console.log('\n③ 갈래 — 회원 목록 ' + 셈.회원 + ' · 보류함 ' + 셈.보류 + ' · 쓰레기통 ' + 셈.쓰레기);
-console.log('   시설 어림 — 병원 ' + 회원.filter((x) => x.org_kind === '병원').length
-  + ' · 요양 ' + 회원.filter((x) => x.org_kind === '요양').length
-  + ' · 기타 ' + 회원.filter((x) => x.org_kind === '기타').length);
+const 구분셈 = {};
+회원.forEach((x) => { const g = x.detail.시설구분; 구분셈[g] = (구분셈[g] || 0) + 1; });
+console.log('   시설 구분 (아직 화면에 안 씁니다) — '
+  + Object.entries(구분셈).map(([k, v]) => k + ' ' + v).join(' · '));
+const 종별셈 = {};
+회원.forEach((x) => { 종별셈[x.org_kind] = (종별셈[x.org_kind] || 0) + 1; });
+console.log('   기관종별 — ' + Object.entries(종별셈).sort((a, b) => b[1] - a[1])
+  .map(([k, v]) => k + ' ' + v).join(' · '));
 if (회원.length) {
   console.log('\n  ★ 회원 목록에 올라갈 것 (앞 8건) —');
   회원.slice(0, 8).forEach((r) => console.log('     ' + String(r.job_group).padEnd(8)
