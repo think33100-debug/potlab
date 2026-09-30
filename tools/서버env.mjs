@@ -3,6 +3,12 @@
  *   node tools/서버env.mjs            무엇이 들어가는지 이름만 보여 줍니다
  *   node tools/서버env.mjs --내보내기  알맹이를 표준출력으로 (ssh 로 파이프)
  *
+ * ⚠ 서버에 넣을 때는 **덮어쓰지 말고 합치세요.** 2026-09-30 에 덮어써서
+ *   서버에만 있던 COLLECT_KEY_AL2 · COLLECT_KEY_CE2 · ALIVE_KEY 를 잃었습니다.
+ *
+ *   node tools/서버env.mjs --내보내기 \
+ *     | ssh ubuntu@… 'node ~/potlab/tools/env합치기.mjs ~/potlab/.env'
+ *
  * ── 지킬 것 ───────────────────────────────────────────────
  * · `--내보내기` 없이는 **값을 한 글자도 안 찍습니다**
  * · 서버에 안 올리는 것 — SUPABASE_SERVICE_KEY (세중님 지침) · VAPID/PUSH
