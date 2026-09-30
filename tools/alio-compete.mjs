@@ -28,6 +28,7 @@
  * 모르면 모른다고 남깁니다. 숫자를 지어내지 않습니다.
  */
 import fs from 'node:fs';
+import { 공공부르기 } from './공공데이터부르기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 확정, 가능성 } from './뽑을단어.mjs';
@@ -82,16 +83,13 @@ async function rpc(fn, body) {
 }
 const 쉼 = (ms) => new Promise((y) => setTimeout(y, ms));
 
+/* 간격 · 429 재시도 · 하루 한도 가리기는 공공데이터부르기.mjs 한 곳에 있습니다.
+   전에는 여기서 세 번 다시 했는데, 429 를 「너무 빨리」 와 「하루 한도」 로
+   가르지 못해 한도가 끝난 뒤에도 2초씩 헛되이 기다렸습니다 (2026-09-30) */
 async function 받기(u) {
-  for (let t = 0; t < 3; t++) {
-    try {
-      const r = await fetch(u, { headers: { accept: 'application/json' } });
-      const x = await r.text();
-      if (!r.ok) { if (t === 2) return { 왜: 'HTTP ' + r.status + ' · ' + x.slice(0, 160) }; await 쉼(2000); continue; }
-      try { return { j: JSON.parse(x) }; } catch { return { 왜: 'JSON 이 아닙니다 · ' + x.slice(0, 160) }; }
-    } catch (e) { if (t === 2) return { 왜: String(e && (e.cause?.code || e.message)).slice(0, 80) }; await 쉼(2000); }
-  }
-  return { 왜: '못 받았습니다' };
+  const r = await 공공부르기(u);
+  if (r.code !== 200) return { 왜: (r.왜 || ('HTTP ' + r.code)) + ' · ' + r.글.slice(0, 160), 한도끝: r.한도끝 };
+  try { return { j: JSON.parse(r.글) }; } catch { return { 왜: 'JSON 이 아닙니다 · ' + r.글.slice(0, 160) }; }
 }
 
 /* ── 값이 있는지, 미등록인지, 진짜 0 인지 ── */

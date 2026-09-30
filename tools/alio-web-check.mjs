@@ -12,6 +12,8 @@
  *
  * robots.txt — job.alio.go.kr 은 비어 있고 www.alio.go.kr 은 Allow: / 입니다.
  */
+import { 공공부르기 } from './공공데이터부르기.mjs';
+
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128';
 
 /** 웹 화면의 tab-2 → { 묶음: [{ 이름, 단계:[{구분,선발,응시,확정일}], 경쟁률 }] } · 던지지 않습니다 */
@@ -82,10 +84,10 @@ export async function api읽기(sn) {
   const KEY = (fs.readFileSync(path.join(여기, '..', 'gas', 'wage.js'), 'utf8')
     .match(/const JOB3_API = \{[\s\S]*?KEY:\s*'([^']+)'/) || [])[1];
   try {
-    const r = await fetch('https://apis.data.go.kr/1051000/recruitment/detail?serviceKey=' + KEY
-      + '&resultType=json&sn=' + sn, { headers: { accept: 'application/json' } });
-    if (!r.ok) return { 왜: 'HTTP ' + r.status, steps: [] };
-    const j = JSON.parse(await r.text());
+    const r = await 공공부르기('https://apis.data.go.kr/1051000/recruitment/detail?serviceKey=' + KEY
+      + '&resultType=json&sn=' + sn);
+    if (r.code !== 200) return { 왜: r.왜 || ('HTTP ' + r.code), steps: [] };
+    const j = JSON.parse(r.글);
     const m = Array.isArray(j.result) ? j.result[0] : j.result;
     return { steps: m?.steps || [], 제목: m?.recrutPbancTtl, 기관: m?.instNm, 마감: m?.pbancEndYmd };
   } catch (e) { return { 왜: String(e && e.message).slice(0, 80), steps: [] }; }

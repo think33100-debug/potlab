@@ -47,6 +47,7 @@ import { matchJob, notOurs, mixedTitle, titleOtherOnly, 구운날 } from './gas-
 import { sortJob } from './sort-rule.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
+import { 공공부르기 } from './공공데이터부르기.mjs';
 import { 첨부받기, 기본간격, 통크기, 통쉼, 쉼 } from './cleaneye-file.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -106,10 +107,12 @@ async function 시도한곳(cfg, cd, 이름, 떠들기) {
   const u = 목록URL + '?serviceKey=' + cfg.CLEANEYE_KEY + '&type=xml&sidoCd=' + cd + '&numOfRows=100';
   let txt = '';
   try {
-    const r = await fetch(u, { headers: { accept: 'application/xml' } });
-    txt = await r.text();
-    if (!r.ok) {
-      console.error('  ' + 이름 + ' HTTP ' + r.status + ' · 응답 앞 500자 — ' + txt.slice(0, 500).replace(/\s+/g, ' '));
+    const r = await 공공부르기(u, { headers: { accept: 'application/xml' } });
+    txt = r.글;
+    if (r.code !== 200) {
+      console.error('  ' + 이름 + ' HTTP ' + r.code + ' · ' + (r.왜 || '')
+        + ' · 오늘 남은 몫 ' + r.남음 + '/' + r.한도
+        + ' · 응답 앞 500자 — ' + txt.slice(0, 500).replace(/\s+/g, ' '));
       return null;
     }
   } catch (e) {

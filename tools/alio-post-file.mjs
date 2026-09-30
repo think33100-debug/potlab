@@ -15,6 +15,7 @@
  * 이름으로 못 가리는 것이 남으면 그때 PDF(atchFileType A)를 열면 됩니다.
  */
 import fs from 'node:fs';
+import { 공공부르기 } from './공공데이터부르기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -82,10 +83,10 @@ for (const c of 할것) {
   const sn = c.sn ?? c;
   let m;
   try {
-    const r = await fetch('https://apis.data.go.kr/1051000/recruitment/detail?serviceKey='
-      + cfg.ALIO_DETAIL_KEY + '&resultType=json&sn=' + sn, { headers: { accept: 'application/json' } });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const j = JSON.parse(await r.text());
+    const r = await 공공부르기('https://apis.data.go.kr/1051000/recruitment/detail?serviceKey='
+      + cfg.ALIO_DETAIL_KEY + '&resultType=json&sn=' + sn);
+    if (r.code !== 200) throw new Error(r.왜 || ('HTTP ' + r.code));
+    const j = JSON.parse(r.글);
     m = Array.isArray(j.result) ? j.result[0] : j.result;
   } catch (e) { 셈.못받음++; console.log('  sn ' + sn + ' 못 받음 · ' + e.message); await 쉼(300); continue; }
   셈.읽음++;

@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchJob, notOurs, titleOtherOnly, MEDTECH } from './gas-rules.mjs';
+import { 공공부르기 } from './공공데이터부르기.mjs';
 import { sortJob } from './sort-rule.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -78,9 +79,9 @@ for (const [k, v] of Object.entries(r0)) {
 }
 
 if (!job) {
-  const res = await fetch('https://apis.data.go.kr/1051000/recruitment/detail?serviceKey='
+  const res = await 공공부르기('https://apis.data.go.kr/1051000/recruitment/detail?serviceKey='
     + cfg.ALIO_DETAIL_KEY + '&sn=' + String(sn).replace(/\D/g, ''));
-  const j = JSON.parse(await res.text());
+  const j = JSON.parse(res.글);
   const box = Array.isArray(j.result) ? j.result[0] : j.result;
   if (!box) { 줄('④ 상세', '못 받음'); process.exit(0); }
   const names = (box.steps || []).map((s) => de(s.recrutPbancTtl).trim()).filter(Boolean);

@@ -19,12 +19,14 @@ import { 웹읽기 } from './alio-web-check.mjs';
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const KEY = (fs.readFileSync(path.join(여기, '..', 'gas', 'wage.js'), 'utf8')
   .match(/const JOB3_API = \{[\s\S]*?KEY:\s*'([^']+)'/) || [])[1];
+import { 공공부르기 } from './공공데이터부르기.mjs';
+
 const 쉼 = (ms) => new Promise((y) => setTimeout(y, ms));
 
 for (const sn of process.argv.slice(2).filter((x) => /^\d+$/.test(x))) {
-  const r = await fetch('https://apis.data.go.kr/1051000/recruitment/detail?serviceKey=' + KEY
+  const r = await 공공부르기('https://apis.data.go.kr/1051000/recruitment/detail?serviceKey=' + KEY
     + '&resultType=json&sn=' + sn, { headers: { accept: 'application/json' } });
-  const 글 = await r.text();
+  const 글 = r.글;
   const j = JSON.parse(글);
   const m = Array.isArray(j.result) ? j.result[0] : j.result;
   const w = await 웹읽기(sn);

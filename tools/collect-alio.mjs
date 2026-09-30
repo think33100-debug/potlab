@@ -27,6 +27,7 @@ import { fileURLToPath } from 'node:url';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, MEDTECH, 구운날 } from './gas-rules.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 멈췄나 as OCR멈췄나, 이름표 as OCR이름표 } from './ocr/index.mjs';
+import { 공공부르기 } from './공공데이터부르기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'AL2';
@@ -81,17 +82,17 @@ async function 목록한쪽(cfg, page, 떠들기) {
     let 어땠나 = '';
     try {
       /* 인증키는 이미 인코딩돼 있어 **다시 감싸면 안 됩니다** */
-      const r = await fetch(목록URL + '?serviceKey=' + cfg.ALIO_LIST_KEY + '&' + q,
-        { method: 'POST', headers: { accept: 'application/json', 'User-Agent': UA } });
-      const txt = await r.text();
+      const r = await 공공부르기(목록URL + '?serviceKey=' + cfg.ALIO_LIST_KEY + '&' + q,
+        { headers: { accept: 'application/json', 'User-Agent': UA } });
+      const txt = r.글;
       const ms = Date.now() - t0;
       if (떠들기) {
-        console.log('    [' + page + '쪽 ' + (t + 1) + '번째] HTTP ' + r.status
-          + ' · ' + ms + 'ms · ' + txt.length + '자 · '
-          + (r.headers.get('content-type') || '형식 없음'));
+        console.log('    [' + page + '쪽 ' + (t + 1) + '번째] HTTP ' + r.code
+          + ' · ' + ms + 'ms · ' + txt.length + '자 · 오늘 남은 몫 ' + r.남음 + '/' + r.한도
+          + (r.다시 ? ' · 다시 ' + r.다시 + '번' : ''));
       }
-      if (r.status !== 200) {
-        어땠나 = 'HTTP ' + r.status;
+      if (r.code !== 200) {
+        어땠나 = r.왜 || ('HTTP ' + r.code);
       } else {
         let j = null;
         try { j = JSON.parse(txt); }
@@ -156,10 +157,10 @@ async function 상세받기(cfg, sn) {
   const n = String(sn || '').replace(/\D/g, '');
   if (!n) return null;
   try {
-    const r = await fetch(상세URL + '?serviceKey=' + cfg.ALIO_DETAIL_KEY + '&sn=' + n,
-      { headers: { 'User-Agent': UA } });
-    if (r.status !== 200) return null;
-    const j = JSON.parse(await r.text());
+    const r = await 공공부르기(상세URL + '?serviceKey=' + cfg.ALIO_DETAIL_KEY + '&sn=' + n,
+      { headers: { 'User-Agent': UA, accept: 'application/json' } });
+    if (r.code !== 200) return null;
+    const j = JSON.parse(r.글);
     const box = j && j.result;
     return Array.isArray(box) ? box[0] : box || null;
   } catch { return null; }

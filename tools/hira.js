@@ -36,6 +36,7 @@
  * ═══════════════════════════════════════════════════════════════ */
 
 const fs = require('fs');
+const { 공공부르기 } = require('./공공데이터부르기.mjs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
@@ -93,8 +94,9 @@ const left = () => LIMIT - usedBefore - used;
 /* ── 심평원 부르기 ── */
 async function hira(url) {
   used++;
-  const r = await fetch(url);
-  const t = await r.text();
+  /* 간격 · 429 재시도 · 하루 한도 가리기는 공공데이터부르기.mjs 한 곳에 있습니다 */
+  const res = await 공공부르기(url);
+  const t = res.글;
   let j = null;
   try { j = JSON.parse(t); } catch { /* XML 로 왔거나 오류 */ }
   if (!j) return { rows: [], err: t.slice(0, 200) };
