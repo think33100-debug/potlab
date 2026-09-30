@@ -438,6 +438,17 @@ if (dry) {
     }
     if (보관) console.log('원문 보관    ' + 보관 + '건 (회원 화면에 안 나갑니다)');
 
+    /* 주소가 www 로만 갈린 같은 공고 — 옛 줄을 숨깁니다 (지우지 않습니다).
+       강진의료원이 그랬습니다 (2026-09-30). 짝이 없으면 0건입니다 */
+    try {
+      const t = await rpc(cfg, 'hide_www_twins', {
+        p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE,
+      });
+      if ((t || {})['숨긴 줄']) console.log('쌍둥이 숨김  ' + t['숨긴 줄'] + '건 (주소가 www 로만 다른 옛 줄)');
+    } catch (e) {
+      console.error('쌍둥이 숨김 못 함 · ' + String(e.message).slice(0, 120));
+    }
+
     const a = await rpc(cfg, 'collect_after', {
       p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE, p_days: 45, p_rolling_days: 180,
     });
