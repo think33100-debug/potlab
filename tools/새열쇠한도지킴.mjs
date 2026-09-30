@@ -74,6 +74,14 @@ console.log(다붙었나 ? '\n★ 네 가지 모두 운영 한도가 붙었습�
 let 지난번 = '';
 try { 지난번 = JSON.parse(fs.readFileSync(기억파일, 'utf8')).지금 || ''; } catch { /* 처음 */ }
 if (지금 === 지난번) { console.log('(지난번과 같습니다 — 알리지 않습니다)'); process.exit(0); }
+
+/* 첫 실행은 견줄 것이 없습니다. 아직 안 붙었으면 적어만 두고 조용히 지나갑니다 —
+   크론을 걸자마자 「바뀌었습니다」 메일이 오면 안 봅니다 */
+if (!지난번 && !다붙었나 && !보기만) {
+  try { fs.writeFileSync(기억파일, JSON.stringify({ 지금, 때: new Date().toISOString() }), { mode: 0o600 }); } catch { /* 못 써도 계속 */ }
+  console.log('(처음 재는 것입니다 — 적어만 두고 알리지 않습니다)');
+  process.exit(0);
+}
 try { fs.writeFileSync(기억파일, JSON.stringify({ 지금, 때: new Date().toISOString() }), { mode: 0o600 }); } catch { /* 못 써도 계속 */ }
 
 const 제목 = 다붙었나
