@@ -28,15 +28,20 @@ export function SurveyEdit({ profileId, role, job }: { profileId: string; role: 
       sb.from('student_specs').select('*').eq('profile_id', profileId).maybeSingle(),
       /* 어학은 표가 따로입니다 (spec_langs). 한 사람이 여러 줄입니다 */
       sb.from('spec_langs').select('exam,score,level').eq('profile_id', profileId),
-      sb.from('profiles').select('survey_edits,survey_edits_since').eq('id', profileId).maybeSingle(),
+      /* profiles 를 바로 읽지 않습니다 (2026-10-01) — 남에게 안 나가게 칸을 막았습니다.
+         본인 것은 내프로필() 창구로 나옵니다 (그 함수가 auth.uid() 로 스스로 거릅니다) */
+      sb.rpc('내프로필').maybeSingle(),
     ]);
     const bad = sal.error ?? spec.error ?? langs.error ?? prof.error;
     if (bad) { setErr(`불러오지 못했어요 — ${bad.message}`); return; }
 
+    /* 내프로필() 은 만들어 둔 타입에 없어서 여기서 이름을 붙여 줍니다 */
+    const 내것 = prof.data as { survey_edits: number | null; survey_edits_since: string | null } | null;
+
     /* 1년이 지났으면 횟수가 0 으로 돌아갑니다 — DB 함수와 같은 규칙입니다 */
-    const since = prof.data?.survey_edits_since ? new Date(prof.data.survey_edits_since) : null;
+    const since = 내것?.survey_edits_since ? new Date(내것.survey_edits_since) : null;
     const fresh = !since || Date.now() - since.getTime() >= 365 * 24 * 3600_000;
-    setLeft(FREE_EDITS - (fresh ? 0 : (prof.data?.survey_edits ?? 0)));
+    setLeft(FREE_EDITS - (fresh ? 0 : (내것?.survey_edits ?? 0)));
     setDraft(toDraft(sal.data, spec.data, langs.data ?? []));
   };
 

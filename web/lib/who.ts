@@ -22,17 +22,22 @@ export type Role = (typeof ROLES)[number];
    칸이라(UNIQUE · NOT NULL) 비울 수가 없어서요.
    그 값을 화면에 그대로 내보내면 안 됩니다 — 반드시 이 함수를 거치세요.
 
-   관리자 화면은 이걸 안 씁니다. 거기서는 원래 누구였는지 보여야 해서
-   erased_accounts 표를 따로 읽습니다 (app/admin/posts/page.tsx). */
+   2026-10-01 에 「알 수 없음」 → 「탈퇴한 회원」 으로 바꿨습니다.
+   「알 수 없음」은 글쓴이 줄이 사라진 것과 구별이 안 됐습니다.
+
+   관리자 화면도 이제 원래 이름을 못 봅니다 — 닉네임·직군·역할은
+   탈퇴 즉시 파기하기로 정해서 erased_accounts 에서 뺐습니다 (2026-10-01). */
 export type Author = {
   nickname: string;
   avatar?: string | null;
   erased_at?: string | null;
 } | null | undefined;
 
-/** 화면에 내보낼 이름. 지운 계정과 사라진 줄은 똑같이 「알 수 없음」입니다 */
+/** 화면에 내보낼 이름.
+ *  탈퇴한 분은 「탈퇴한 회원」, 줄 자체가 없으면 「알 수 없음」입니다 */
 export function shownName(p: Author): string {
-  if (!p || p.erased_at) return '알 수 없음';
+  if (!p) return '알 수 없음';
+  if (p.erased_at) return '탈퇴한 회원';
   return p.nickname;
 }
 

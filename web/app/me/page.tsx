@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AvatarPicker } from '@/components/avatar-picker';
@@ -181,6 +182,13 @@ export default function MyPage() {
           className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950">
           로그아웃
         </button>
+
+        {/* 애플 심사 기준 5.1.1(v) — 앱에서 가입할 수 있으면 앱 안에서 탈퇴도
+            할 수 있어야 합니다. 찾기 쉬운 자리에 둡니다 (2026-10-01) */}
+        <Link href="/me/leave"
+          className="mt-4 block text-lg text-gray-400 underline underline-offset-4 hover:text-brand-red">
+          회원 탈퇴
+        </Link>
       </section>
     </main>
   );

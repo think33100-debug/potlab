@@ -32,8 +32,9 @@ type Row = {
   hider: Person;
 };
 
-/* 지운 계정의 원래 이름. 회원 화면에는 안 나갑니다 — 이 표는 관리자만 읽습니다 */
-type Erased = Record<string, string>;
+/* 탈퇴한 분의 원래 이름은 2026-10-01 부터 **어디에도 안 남깁니다.**
+   닉네임·직군·역할은 탈퇴 즉시 파기하기로 정해 erased_accounts 에서 뺐습니다.
+   그래서 관리자 화면도 「탈퇴한 회원」 까지만 보여줍니다 */
 
 /* profiles 로 가는 길이 둘이라(글쓴이·감춘 사람) 관계 이름을 박아야 합니다.
    그냥 profiles 라고 쓰면 PGRST201 이 납니다 — lib/supabase.ts 의 AUTHOR 와 같은 사정입니다 */
@@ -57,7 +58,6 @@ export default function AdminPosts() {
   const [counts, setCounts] = useState({ live: 0, hidden: 0, all: 0 });
   const [busy, setBusy] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [erased, setErased] = useState<Erased>({});
 
   /* 받아오는 일과 상태에 넣는 일을 갈라둡니다 —
      effect 안에서 바로 setState 하면 그릴 때마다 한 번 더 그립니다
@@ -68,25 +68,17 @@ export default function AdminPosts() {
     if (s === 'live') q = q.eq('hidden', false);
     if (s === 'hidden') q = q.eq('hidden', true);
 
-    const [list, live, hidden, all, gone] = await Promise.all([
+    const [list, live, hidden, all] = await Promise.all([
       q,
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('hidden', false),
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('hidden', true),
       sb.from('posts').select('id', { count: 'exact', head: true }),
-      /* 계정을 지운 분의 원래 이름. 회원 화면에서는 「알 수 없음」이지만
-         여기서는 누구 글이었는지 알아야 합니다 */
-      sb.from('erased_accounts').select('profile_id,nickname'),
     ]);
-
-    const names: Erased = {};
-    ((gone.data ?? []) as { profile_id: string; nickname: string }[])
-      .forEach((g) => { names[g.profile_id] = g.nickname; });
 
     return {
       rows: (list.data ?? []) as unknown as Row[],
       error: list.error?.message ?? null,
       counts: { live: live.count ?? 0, hidden: hidden.count ?? 0, all: all.count ?? 0 },
-      erased: names,
     };
   }, []);
 
@@ -95,7 +87,6 @@ export default function AdminPosts() {
     setRows(r.rows);
     setCounts(r.counts);
     setErr(r.error);
-    setErased(r.erased);
   }, [fetchAll]);
 
   useEffect(() => {
@@ -105,7 +96,6 @@ export default function AdminPosts() {
       setRows(r.rows);
       setCounts(r.counts);
       setErr(r.error);
-      setErased(r.erased);
     });
     return () => { alive = false; };
   }, [fetchAll, state]);
@@ -128,21 +118,18 @@ export default function AdminPosts() {
     toast(next ? '감췄어요' : '다시 보이게 했어요');
   };
 
-  /* 이름. 계정을 지운 분이면 원래 이름을 괄호로 붙입니다 —
-     회원 화면에서는 「알 수 없음」이지만 여기서는 가려져야 합니다 */
-  const nameOf = (p: Person, id?: string) => {
+  /* 이름. 탈퇴한 분의 원래 이름은 이제 어디에도 없습니다 (2026-10-01) */
+  const nameOf = (p: Person) => {
     if (!p) return '알 수 없음';
-    if (!p.erased_at) return p.nickname;
-    const was = id ? erased[id] : undefined;
-    return was ? '지운 계정 (원래 ' + was + ')' : '지운 계정';
+    return p.erased_at ? '탈퇴한 회원' : p.nickname;
   };
 
   /* 누가 감췄는지 한 줄로. 글쓴이 본인이면 「지웠어요」, 아니면 관리자가 내린 것입니다 */
   const who = (r: Row) => {
     if (!r.hidden_by) return '누가 감췄는지 기록이 없어요 (이 기능을 붙이기 전에 감춘 글)';
     return r.hidden_by === r.author_id
-      ? '글쓴이(' + nameOf(r.author, r.author_id) + ')가 지웠어요'
-      : '관리자 ' + nameOf(r.hider, r.hidden_by) + ' 가 내렸어요';
+      ? '글쓴이(' + nameOf(r.author) + ')가 지웠어요'
+      : '관리자 ' + nameOf(r.hider) + ' 가 내렸어요';
   };
 
   return (
@@ -194,7 +181,7 @@ export default function AdminPosts() {
               <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
                 {channelName(r.channel)}
               </span>
-              <span>{nameOf(r.author, r.author_id)}</span>
+              <span>{nameOf(r.author)}</span>
               <span className="text-gray-400">{ago(r.created_at)}</span>
               {r.hidden && (
                 <span className="rounded-md bg-gray-100 px-3 font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">

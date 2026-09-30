@@ -71,9 +71,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!s) { setMe(null); setMeOk(true); setIsAdmin(false); return; }
 
     const [prof, admin] = await Promise.all([
-      sb.from('profiles')
-        .select('id,nickname,avatar,job_group,role,nickname_changes,survey_at')
-        .eq('id', s.user.id).maybeSingle(),
+      /* profiles 를 바로 읽지 않습니다 (2026-10-01).
+         비로그인·다른 회원이 프로필을 통째로 읽던 것을 막으면서
+         job_group·role 같은 칸은 남에게 아예 안 나가게 했습니다.
+         **본인 전체 프로필은 내프로필() 창구로만** 나옵니다 */
+      sb.rpc('내프로필').maybeSingle(),
       /* 관리자인지는 DB 에 물어봅니다. 이 값은 단추를 보일지 말지에만 씁니다 —
          진짜로 막는 자리는 RLS 와 칸 단위 권한입니다.
          여기서 true 로 만들어도 서버가 안 해줍니다 */
