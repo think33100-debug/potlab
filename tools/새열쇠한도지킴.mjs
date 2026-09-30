@@ -78,11 +78,10 @@ const 처음본때 = 기억.처음본때 || new Date().toISOString();
 const 몇시간째 = Math.round((Date.now() - new Date(처음본때).getTime()) / 3600000);
 
 const 적기 = (더) => {
-  try {
-    fs.writeFileSync(기억파일,
-      JSON.stringify({ 지금, 처음본때, 때: new Date().toISOString(), ...기억, ...더, 지금, 처음본때 }),
-      { mode: 0o600 });
-  } catch { /* 못 써도 계속 */ }
+  /* 기억에 있던 것(마흔여덟알림 같은 것)은 지키고, 이번에 잰 값으로 덮습니다 */
+  const 낼것 = { ...기억, ...더, 지금, 처음본때, 때: new Date().toISOString() };
+  try { fs.writeFileSync(기억파일, JSON.stringify(낼것), { mode: 0o600 }); }
+  catch { /* 못 써도 계속 */ }
 };
 
 /* 48시간이 지나도 안 붙으면 한 번만 알립니다 — 그때는 포털에 문의할 때입니다 */
