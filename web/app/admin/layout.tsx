@@ -21,6 +21,7 @@ const MENU = [
   { href: '/admin/icons', label: '아이콘' },
   { href: '/admin/stats', label: '통계' },
   { href: '/admin/compete', label: '경쟁률' },
+  { href: '/admin/hand', label: '손으로 확인할 곳' },
   { href: '/admin/reset', label: '내 계정 초기화' },
 ];
 
