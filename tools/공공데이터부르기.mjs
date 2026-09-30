@@ -85,7 +85,9 @@ const 기다림들 = [2000, 4000, 8000, 16000];
 
 /**
  * @param {string} url  serviceKey 까지 붙은 온전한 주소
- * @param {object} 옵션 { 간격, 최대다시, headers, 떠들기 }
+ * @param {object} 옵션 { 간격, 최대다시, headers, 떠들기, 기록안함 }
+ *   기록안함  남은 한도를 기록에 안 넣습니다. **한도가 다른 열쇠로 재볼 때** 씁니다 —
+ *             섞으면 「알리오 상세 100%」 처럼 엉뚱한 숫자가 화면에 뜹니다
  * @returns {Promise<{code:number, 글:string, 한도:string, 남음:string, 다시:number, 한도끝:boolean, 왜:string}>}
  */
 export async function 공공부르기(url, 옵션 = {}) {
@@ -121,7 +123,7 @@ export async function 공공부르기(url, 옵션 = {}) {
 
     const 한도 = r.headers.get('x-ratelimit-limit') || '—';
     const 남음 = r.headers.get('x-ratelimit-remaining') || '—';
-    한도적기(열쇠칸, 한도, 남음);
+    if (!옵션.기록안함) 한도적기(열쇠칸, 한도, 남음);
 
     if (r.status !== 429 && r.status < 500) {
       return { code: r.status, 글, 한도, 남음, 다시, 한도끝: false, 왜: '' };
