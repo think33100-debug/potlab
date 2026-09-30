@@ -38,10 +38,13 @@ for (const f of ['.env.server', '.env.local', '.env', 'web/.env.local']) {
 const gas = fs.existsSync('gas/wage.js') ? fs.readFileSync('gas/wage.js', 'utf8') : '';
 const 꺼내 = (re) => (gas.match(re) || [])[1] || '';
 
+/* WATCH_KEY 는 **아무 수집기도 안 읽는 이름**입니다. 새 열쇠의 한도가
+   올라갔는지만 재려고 서버에 따로 보내 둔 값입니다 (2026-09-30) */
+const 본것 = new Set();
 const 열쇠들 = [
-  ['옛 열쇠', 꺼내(/const JOB2_API = \{[\s\S]*?KEY:\s*'([^']+)'/)],
-  ['새 열쇠', env.CLEANEYE_KEY || ''],
-].filter(([, v]) => v);
+  ['지금 쓰는 열쇠', 꺼내(/const JOB2_API = \{[\s\S]*?KEY:\s*'([^']+)'/) || env.CLEANEYE_KEY || ''],
+  ['새 열쇠', env.WATCH_KEY || env.CLEANEYE_KEY || ''],
+].filter(([, v]) => v && (본것.has(v) ? false : (본것.add(v), true)));
 
 const 날 = (d) => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
 const 올해 = new Date().getFullYear();
