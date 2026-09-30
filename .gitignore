@@ -60,3 +60,6 @@ tools/hosp/reports/jobflex.json
 
 # ★ 서버의 .env — 열쇠가 전부 들어 있습니다. 9/30 유출과 같은 모양이라 반드시 뺍니다
 .env
+
+# 브라우저 시험 찌꺼기
+.playwright-mcp/
