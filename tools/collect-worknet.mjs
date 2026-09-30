@@ -144,8 +144,11 @@ const 시설어림 = (이름, 업종) => {
 
 function 아이템들(t) {
   return [...String(t).matchAll(/<wanted>([\s\S]*?)<\/wanted>/g)].map((x) => {
-    const o = {};
-    for (const f of x[1].matchAll(/<([A-Za-z0-9_]+)>([\s\S]*?)<\/\1>/g)) o[f[1]] = 겹친것풀기(f[2]);
+    const o = { 원문: {} };
+    for (const f of x[1].matchAll(/<([A-Za-z0-9_]+)>([\s\S]*?)<\/\1>/g)) {
+      o.원문[f[1]] = f[2];              /* 푼 뒤만 들고 있으면 「고치기 전」 을 못 셉니다 */
+      o[f[1]] = 겹친것풀기(f[2]);
+    }
     return o;
   });
 }
@@ -227,7 +230,12 @@ for (const r of 모은것) {
   }
   const 제목 = String(r.title || '').trim();
   if (!제목) continue;
-  if (/&amp;|&lt;|&gt;|&#/.test(String(r.title))) 셈.기호겹침++;
+  /* ④ 원문(푸는 앞)을 봐야 합니다 */
+  const 제목원문 = String((r.원문 || {}).title || '');
+  if (/&amp;|&lt;|&gt;|&#/.test(제목원문)) {
+    셈.기호겹침++;
+    if (보기.기호.length < 3) 보기.기호.push('「' + 제목원문.slice(0, 48) + '」  →  「' + 제목.slice(0, 48) + '」');
+  }
 
   /* ① 마감일 — 「채용시까지  26-11-07」 이 66% */
   const 섞임 = 채용시까지인가(r.closeDt);
@@ -261,6 +269,7 @@ console.log('\n② 거르기 — 우리 직종이 아닌 것 ' + 셈.남의직�
 console.log('  고친 것 — 마감일 섞임 ' + 셈.날짜섞임 + '건 · 제목 기호 겹침 ' + 셈.기호겹침
   + '건 · 지역 ' + 셈.지역고침 + '건 · 사업자번호 ' + 셈.사업자번호 + '건 저장');
 if (보기.남의직종.length) console.log('  남의 직종 보기 — ' + 보기.남의직종.join(' / '));
+if (보기.기호.length) 보기.기호.forEach((x) => console.log('  제목 기호 — ' + x));
 if (보기.날짜.length) 보기.날짜.forEach((x) => console.log('  마감일 — ' + x));
 if (보기.지역.length) 보기.지역.forEach((x) => console.log('  지역 — ' + x));
 
