@@ -85,8 +85,10 @@ async function 목록한쪽(cfg, page, 떠들기) {
     let 어땠나 = '';
     try {
       /* 인증키는 이미 인코딩돼 있어 **다시 감싸면 안 됩니다** */
+      /* ⚠ **이 창구는 POST 만 받습니다.** GET 으로 보내면
+         「Request method 'GET' not supported」 가 옵니다 (2026-09-30 에 제가 그렇게 깨뜨렸습니다) */
       const r = await 공공부르기(목록URL + '?serviceKey=' + cfg.ALIO_LIST_KEY + '&' + q,
-        { headers: { accept: 'application/json', 'User-Agent': UA } });
+        { 방법: 'POST', headers: { accept: 'application/json', 'User-Agent': UA } });
       const txt = r.글;
       const ms = Date.now() - t0;
       if (떠들기) {

@@ -85,7 +85,9 @@ const 기다림들 = [2000, 4000, 8000, 16000];
 
 /**
  * @param {string} url  serviceKey 까지 붙은 온전한 주소
- * @param {object} 옵션 { 간격, 최대다시, headers, 떠들기, 기록안함 }
+ * @param {object} 옵션 { 간격, 최대다시, headers, 떠들기, 기록안함, 방법 }
+ *   방법  GET 이 기본입니다. **알리오 목록(opendata.alio.go.kr)은 POST 만 받습니다** —
+ *         2026-09-30 재시도 정리 때 이걸 빠뜨려 그날부터 목록이 죽어 있었습니다
  *   기록안함  남은 한도를 기록에 안 넣습니다. **한도가 다른 열쇠로 재볼 때** 씁니다 —
  *             섞으면 「알리오 상세 100%」 처럼 엉뚱한 숫자가 화면에 뜹니다
  * @returns {Promise<{code:number, 글:string, 한도:string, 남음:string, 다시:number, 한도끝:boolean, 왜:string}>}
@@ -112,7 +114,7 @@ export async function 공공부르기(url, 옵션 = {}) {
 
     let r, 글 = '';
     try {
-      r = await fetch(url, { headers });
+      r = await fetch(url, { method: 옵션.방법 || 'GET', headers });
       글 = await r.text();
     } catch (e) {
       /* 그물이 끊긴 것 — 이건 다시 해 볼 값이 있습니다 */
