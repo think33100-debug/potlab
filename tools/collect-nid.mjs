@@ -186,12 +186,20 @@ for (const v of 볼것) {
   const j = matchJob(v.본문);
   if (j) { v.직군 = j; v.근거 = '상세'; 셈.상세로++; continue; }
 
-  /* 첨부 — 상세 화면의 내려받기 링크 */
-  const 첨부 = [...r.글.matchAll(/href=['"]([^'"]*(?:download|file)[^'"]*)['"][^>]*>([\s\S]{0,120}?)</gi)]
+  /* 첨부 — ⚠ **href 가 아니라 onclick 안에 있습니다.**
+       <a href='javascript:return false;'
+          onclick='location.href = "/download/download.aspx?path=…pdf&filename=…"'>
+     href 만 보고 「첨부가 없다」 고 넘기고 있었습니다.
+     CLAUDE.md 5번에 적힌 그 함정입니다 — 알리오에서 똑같이 겪었습니다 (2026-09-30) */
+  const 첨부 = [...r.글.matchAll(/onclick\s*=\s*'[^']*location\.href\s*=\s*"([^"]+)"[^']*'[^>]*>([\s\S]{0,140}?)</gi)]
     .map((m) => ({ url: m[1], 이름: 풀기(m[2]) }))
-    .filter((f) => /\.(pdf|hwpx?)(\?|$)|download/i.test(f.url));
-  if (!첨부.length) continue;
-  const 고른것 = 첨부.find((f) => /공고|모집|채용/.test(f.이름)) || 첨부[0];
+    .filter((f) => /download|\.(pdf|hwpx?)(\?|&|$)/i.test(f.url));
+  if (!첨부.length) { v.보류 = '첨부를 못 찾았습니다 (상세에 직군이 없습니다)'; continue; }
+  /* 공고문으로 보이는 것을 먼저. 이름이 비면 주소의 filename 을 씁니다 */
+  const 이름내기 = (f) => f.이름
+    || decodeURIComponent((f.url.match(/filename=([^&]*)/) || [])[1] || '').replace(/\+/g, ' ');
+  const 고른것 = 첨부.find((f) => /공고|모집|채용/.test(이름내기(f))) || 첨부[0];
+  고른것.이름 = 이름내기(고른것);
   let u = 고른것.url.replace(/&amp;/g, '&');
   if (!u.startsWith('http')) u = 바탕 + (u.startsWith('/') ? u : '/notification/' + u);
 
