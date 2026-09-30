@@ -78,14 +78,17 @@ if (dry) {
 
 try {
   const r = await rpc('밤정리', { p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE });
-  console.log('  이용 기록 지움(3개월 지난 것)  ' + r['이용 기록 지움(3개월)'] + '건');
+  console.log('  이용 기록 지움(3개월)          ' + r['이용 기록 지움(3개월)'] + '건');
+  console.log('  탈퇴 이름 파기(30일)           ' + r['탈퇴 이름 파기(30일)'] + '건');
+  console.log('  신고 처리 중이라 남긴 이름      ' + r['신고 처리 중이라 남긴 이름'] + '건');
+  console.log('  채팅 글 지움(1년)              ' + r['채팅 글 지움(1년)'] + '건');
+  console.log('  신고 기록 지움(처리 뒤 1년)     ' + r['신고 기록 지움(처리 1년)'] + '건');
+  console.log('  관리자 접속기록 지움(1년)       ' + r['관리자 접속기록 지움(1년)'] + '건');
   const 공고 = r['공고 옮김'] || {};
   console.log('  마감 지나 옮긴 공고            ' + (공고['마감 지남'] ?? '?') + '건');
   console.log('  마감일 없이 45일 지나 옮김      ' + (공고['45일 지남'] ?? 0) + '건');
   console.log('  수시인데 180일 지나 옮김        ' + (공고['180일 지남(수시)'] ?? 0) + '건');
   console.log('  다시 보이게 한 것              ' + (공고['다시 보이게'] ?? 0) + '건');
-  console.log('  이용 제한 기록                 ' + r['이용 제한 기록']);
-  console.log('  결제 기록                      ' + r['결제 기록']);
   console.log('\n' + Math.round((Date.now() - t0) / 1000) + '초');
 } catch (e) {
   console.error('★ 막혔습니다 · ' + e.message);
