@@ -27,10 +27,10 @@ type 묶음 = 칸;
 type 알림 = {
   읽은공고: number; 못읽음: number; 아직: number; 마지막읽은때: string | null;
   웹값: number; API값: number; 요약갱신: string | null;
-  짝확인필요: number; 고용형태확인필요: number; 한회뿐: number;
+  우리직군묶음: number; 짝확인필요: number; 고용형태확인필요: number; 한회뿐: number;
 };
 type 목록답 = {
-  묶음: 묶음[]; 전체묶음수: number;
+  묶음: 묶음[]; 전체묶음수: number; 다른직군: boolean; 숨긴묶음: number;
   고를것: { 기관: string[]; 직군: string[]; 지역: string[]; 고용형태: string[]; 연도: number[] };
   알림: 알림;
 };
@@ -94,6 +94,7 @@ function 본문() {
   const 고용형태 = params.get('고용형태') || '';
   const 연도 = params.get('연도') || '';
   const 찾기 = params.get('q') || '';
+  const 다른직군 = params.get('다른직군') === '1';
   const 고른묶음 = params.get('묶음') || '';
 
   const [d, setD] = useState<목록답 | null>(null);
@@ -120,13 +121,13 @@ function 본문() {
     browserSupabase().rpc('admin_alio_groups', {
       p_기관: 기관 || null, p_직군: 직군 || null, p_지역: 지역 || null,
       p_연도: 연도 ? Number(연도) : null, p_찾기: 찾기 || null,
-      p_고용형태: 고용형태 || null,
+      p_고용형태: 고용형태 || null, p_다른직군: 다른직군,
     }).then(({ data, error }) => {
       if (!살아있음) return;
       if (error) setErr(error.message); else setD(data as 목록답);
     });
     return () => { 살아있음 = false; };
-  }, [기관, 직군, 지역, 고용형태, 연도, 찾기]);
+  }, [기관, 직군, 지역, 고용형태, 연도, 찾기, 다른직군]);
 
   /* 합칠 후보 — 같은 자리인데 지역 표기가 갈린 묶음. **합치지 않습니다. 보여만 줍니다** */
   useEffect(() => {
@@ -222,6 +223,12 @@ function 본문() {
               placeholder="물리치료사"
               className="w-56 rounded-lg border border-gray-300 px-2 py-1.5" />
           </form>
+          <label className="flex items-center gap-1.5 text-sm text-gray-600">
+            <input type="checkbox" checked={다른직군}
+              onChange={(e) => 주소로({ 다른직군: e.target.checked ? '1' : null, 묶음: null })} />
+            다른 직군 보기
+            <span className="text-xs text-gray-400">({쉼표(d.숨긴묶음)}개 숨김)</span>
+          </label>
           {(기관 || 직군 || 지역 || 고용형태 || 연도 || 찾기) && (
             <button onClick={() => 주소로({ 기관: null, 직군: null, 지역: null, 고용형태: null, 연도: null, q: null, 묶음: null })}
               className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200">
@@ -433,12 +440,16 @@ function 본문() {
             </span>
           )}
           <span className="ml-2 text-sm font-normal text-gray-500">
-            기관 + 직군 + 지역 + 고용형태로 이은 것. 누르면 회차별로 펼쳐집니다
+            기관 + 근무처 + 직군 + 고용형태로 이은 것. 누르면 회차별로 펼쳐집니다
           </span>
         </h2>
         <p className="mb-2 text-xs text-gray-500">
-          짝 확인 필요 {쉼표(a.짝확인필요)}개 · 고용형태 확인 필요 <b>{쉼표(a.고용형태확인필요)}</b>개 ·
-          한 번만 채용한 묶음 {쉼표(a.한회뿐)}개
+          <b>우리 직군(물리·작업치료사) {쉼표(a.우리직군묶음)}묶음</b> 기준 —
+          짝 확인 필요 {쉼표(a.짝확인필요)} · 고용형태 확인 필요 <b>{쉼표(a.고용형태확인필요)}</b> ·
+          한 번만 채용 {쉼표(a.한회뿐)}
+          {d.다른직군 && <span className="ml-1 text-gray-400">
+            (다른 직군 묶음은 정리하지 않습니다 — 자료만 담아 둡니다)
+          </span>}
         </p>
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
           <table className="w-full text-sm">
@@ -466,6 +477,9 @@ function 본문() {
                         ? 'bg-amber-100 text-amber-900' : 'bg-emerald-50 text-emerald-800')}>
                         {n(x['고용형태'])}
                       </span>
+                      {!x['우리직군'] ? (
+                        <span className="rounded bg-gray-200 px-1.5 text-xs text-gray-600">다른 직군 · 정리 안 함</span>
+                      ) : null}
                       {x['짝확인필요'] ? (
                         <span className="rounded bg-amber-100 px-1.5 text-xs text-amber-900">짝 확인 필요</span>
                       ) : null}
