@@ -74,11 +74,12 @@ export async function 첨부받기(공고주소, opt) {
   const 이름 = m[2] || m[1];
 
   for (let t = 0; t <= 다시; t++) {
-    let code = 0, buf;
+    let code = 0, buf, ctype = '';
     try {
       const r = await fetch(받는곳, { method: 'POST', body,
         headers: { 'User-Agent': UA, Referer: 공고주소, 'Content-Type': 'application/x-www-form-urlencoded' } });
       code = r.status;
+      ctype = r.headers.get('content-type') || '';   /* 0자 덫이 씁니다 */
       buf = Buffer.from(await r.arrayBuffer());
     } catch (e) { return { 이름, 왜: '첨부를 못 받았습니다 · ' + String(e && e.message || e) }; }
 
@@ -89,6 +90,6 @@ export async function 첨부받기(공고주소, opt) {
       continue;
     }
     if (!buf.length) return { 이름, code, 왜: '첨부가 0바이트로 왔습니다 (HTTP ' + code + ')' };
-    return { buf, 이름, code, 다시받음: t };
+    return { buf, 이름, code, ctype, 다시받음: t };
   }
 }

@@ -22,15 +22,27 @@ type 줄 = {
   확인한지며칠: number | null; 사람이본지며칠: number | null;
 };
 
+type 영자줄 = {
+  때: string; 경로: string; 공고: string | null; 파일: string | null;
+  바이트: number | null; 앞5: string | null; ctype: string | null;
+  두번째도0: boolean; 원문: string | null;
+};
+type 영자 = { 오늘: number; 줄: 영자줄[] };
+
 const 날 = (s: string | null) => (s ? String(s).slice(0, 10) : '—');
 
 export default function AdminHand() {
   const [d, setD] = useState<줄[] | null>(null);
+  const [영, set영] = useState<영자 | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   const 읽기 = useCallback(() => {
     browserSupabase().rpc('admin_hand_check').then(({ data, error }) => {
       if (error) setErr(error.message); else setD((data as 줄[]) ?? []);
+    });
+    /* PDF 를 글자로 못 바꾼 건 — 9월 30일에 한 번 나왔고 원인을 못 잡아 덫을 놨습니다 */
+    browserSupabase().rpc('admin_ocr_zero').then(({ data }) => {
+      if (data) set영(data as 영자);
     });
   }, []);
   useEffect(읽기, [읽기]);
@@ -141,6 +153,64 @@ export default function AdminHand() {
           </tbody>
         </table>
       </div>
+
+      {영 && 영.줄.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-bold">
+            PDF 0자
+            <span className={'ml-2 rounded px-2 py-0.5 text-sm ' + (영.오늘
+              ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600')}>
+              오늘 {영.오늘}건
+            </span>
+          </h2>
+          <p className="text-sm text-gray-500">
+            PDF 는 받았는데 글자가 한 자도 안 나온 건입니다. <b>한 번 더 해 보고</b>,
+            두 번째도 0자면 보류함으로 보냅니다. 원인을 잡으려고 받은 크기·앞 5글자·
+            content-type·응답 원문을 같이 남깁니다.
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-gray-600">
+                <tr>
+                  <th className="px-3 py-2">때</th>
+                  <th className="px-3 py-2">경로 · 공고</th>
+                  <th className="px-3 py-2">파일</th>
+                  <th className="px-3 py-2">두 번째도</th>
+                  <th className="px-3 py-2">응답 원문</th>
+                </tr>
+              </thead>
+              <tbody>
+                {영.줄.map((x, i) => (
+                  <tr key={i} className="border-t border-gray-100 align-top">
+                    <td className="whitespace-nowrap px-3 py-2 text-gray-600">{x.때}</td>
+                    <td className="px-3 py-2">
+                      {x.경로}
+                      {x.공고 ? <div className="text-xs text-gray-500">{x.공고}</div> : null}
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="max-w-xs truncate">{x.파일 ?? '—'}</div>
+                      <div className="text-xs text-gray-500">
+                        {x.바이트 ?? '?'}바이트 · 앞5 「{x.앞5 ?? ''}」
+                      </div>
+                      <div className="text-xs text-gray-400">{x.ctype ?? ''}</div>
+                    </td>
+                    <td className="px-3 py-2">
+                      {x.두번째도0
+                        ? <span className="rounded bg-red-100 px-1.5 text-xs text-red-800">0자 — 보류함</span>
+                        : <span className="rounded bg-emerald-100 px-1.5 text-xs text-emerald-800">두 번째엔 읽음</span>}
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="max-h-24 max-w-md overflow-y-auto whitespace-pre-wrap break-all text-xs text-gray-600">
+                        {x.원문 ?? ''}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       <p className="text-xs leading-relaxed text-gray-500">
         확인하는 법 — 병원 채용 페이지를 열어 물리치료사·작업치료사 공고가 있는지 보고,

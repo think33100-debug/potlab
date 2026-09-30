@@ -6,7 +6,8 @@
  *        export const 이름표
  *        export function 쓸수있나()
  *        export function 멈췄나()
- *        export async function pdf글자(buf, 이름) → { 글, 왜 }
+ *        export async function pdf글자(buf, 이름, 곁들이) → { 글, 왜 }
+ *        export function 영자몇번()   0자가 몇 번 나왔나 (없으면 0 을 돌려주세요)
  *   ② 아래 목록에 넣습니다
  * 수집기는 한 줄도 안 고칩니다.
  */
@@ -22,7 +23,10 @@ export function 쓸수있나() { return !!골라진것; }
 export function 멈췄나() { return 골라진것 ? 골라진것.멈췄나() : ''; }
 
 /** PDF 알맹이 → { 글, 왜 }. **던지지 않습니다** — 못 읽으면 부르는 쪽이 보류함으로 */
-export async function pdf글자(buf, 이름) {
+export async function pdf글자(buf, 이름, 곁들이) {
   if (!골라진것) return { 글: '', 왜: 'OCR 을 맡길 곳이 없음 (OCR_GAS_URL · OCR_KEY 를 넣어주세요)' };
-  return 골라진것.pdf글자(buf, 이름);
+  return 골라진것.pdf글자(buf, 이름, 곁들이);
 }
+
+/** 이번 실행에서 OCR 이 0자를 낸 횟수 — 수집기가 마지막 줄에 찍습니다 */
+export function 영자몇번() { return 골라진것 && 골라진것.영자몇번 ? 골라진것.영자몇번() : 0; }

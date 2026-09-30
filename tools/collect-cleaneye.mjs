@@ -174,7 +174,7 @@ async function 첨부글자(o, 셈, 옵션) {
   if (g.buf.subarray(0, 5).toString('latin1') === '%PDF-') {
     if (!OCR쓸수있나()) { 셈.OCR못씀++; return { 글: '', 왜: 'PDF 인데 OCR 을 맡길 곳이 없습니다', 꼴: 'pdf' }; }
     셈.OCR++;
-    const r = await pdf글자(g.buf, g.이름);
+    const r = await pdf글자(g.buf, g.이름, { ctype: g.ctype || '', 공고: String(o.NO || '') });
     if (r.글) 셈.pdf읽음++; else 셈.pdf못읽음++;
     return { 글: r.글, 왜: r.왜, 꼴: 'pdf' };
   }

@@ -76,10 +76,11 @@ console.log('첨부 글자 뽑기 — 할 것 ' + 할것.length + '개'
 const 셈 = { hwp: 0, hwp못: 0, pdf: 0, pdf못: 0, 건너뜀: 0, 못받음: 0 };
 const 담을것 = [];
 for (const f of 할것) {
-  let buf;
+  let buf, ctype = '';
   try {
     const r = await fetch(내려받기주소(f.file_no), { headers: { 'User-Agent': UA } });
     if (!r.ok) throw new Error('HTTP ' + r.status);
+    ctype = r.headers.get('content-type') || '';   /* 0자 덫이 씁니다 */
     buf = Buffer.from(await r.arrayBuffer());
   } catch (e) {
     셈.못받음++; 담을것.push({ sn: f.sn, file_no: f.file_no, 왜: '못 받음 · ' + e.message });
@@ -98,7 +99,7 @@ for (const f of 할것) {
       담을것.push({ sn: f.sn, file_no: f.file_no,
         왜: 'PDF 인데 OCR 을 맡길 곳이 없습니다 (OCR_GAS_URL · OCR_KEY 필요)' });
     } else {
-      const r = await pdf글자(buf, 이름);
+      const r = await pdf글자(buf, 이름, { ctype: ctype || '', 공고: String(f.sn || '') });
       if (r.글) { 셈.pdf++; 담을것.push({ sn: f.sn, file_no: f.file_no, 글: r.글 }); }
       else { 셈.pdf못++; 담을것.push({ sn: f.sn, file_no: f.file_no, 왜: r.왜 || 'PDF 를 못 읽었습니다' }); }
     }

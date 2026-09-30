@@ -207,8 +207,11 @@ async function 공고문글자(box, 셈) {
       return { 글: '', 왜: 'PDF 가 아닌 것이 옴 (' + buf.length + '바이트)' };
     }
     셈.OCR++;
-    /* 어디에 맡기는지는 tools/ocr/index.mjs 가 정합니다. 여기는 모릅니다 */
-    return await pdf글자(buf, pdf.atchFileNm);
+    /* 어디에 맡기는지는 tools/ocr/index.mjs 가 정합니다. 여기는 모릅니다.
+       곁들이는 0자가 나왔을 때 남길 자료입니다 (2026-09-30 덫) */
+    return await pdf글자(buf, pdf.atchFileNm,
+      { ctype: r.headers.get('content-type') || '',
+        공고: String(box.sn || box.recrutPblntSn || '') });
   } catch (e) {
     return { 글: '', 왜: 'PDF 를 못 받음 · ' + String(e.message).slice(0, 80) };
   }
