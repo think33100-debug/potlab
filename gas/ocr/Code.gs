@@ -117,25 +117,41 @@ function 지우기_(id) {
 
 /* ═══ 세중님이 편집기에서 한 번 실행하실 것 ═══
  *
- *  ① makeOcrKey()   — 비밀값을 만들어 스크립트 속성에 넣고 로그에 찍습니다.
- *                     그 값을 GitHub Secret `OCR_KEY` 에 넣으세요.
+ *  ① makeOcrKey()   — 비밀값이 **없을 때만** 만듭니다. 이미 있으면 있던 값을
+ *                     보여주고 끝냅니다. 로그 첫머리에 【새로 만듦】 인지
+ *                     【있던 값】 인지 찍히니 그걸 보세요.
+ *  ①′ rotateOcrKey() — 있어도 **새로 만듭니다.** 열쇠가 샜을 때 쓰는 자리입니다.
+ *                     실행하는 순간 옛 값은 죽습니다. 새 값을 GitHub Secret
+ *                     `OCR_KEY` 와 컴퓨터의 `.env.server` 두 군데 다 넣으세요.
  *  ② testOcr()      — 작은 PDF 를 만들어 OCR 이 도는지 봅니다.
  *                     처음 실행할 때 권한 허용 창이 뜹니다. 그때 허용해 주세요.
  *
- *  ※ 밑줄로 끝나는 함수는 실행 목록에 안 뜹니다. 그래서 이 둘은 밑줄이 없습니다.
+ *  ※ 밑줄로 끝나는 함수는 실행 목록에 안 뜹니다. 그래서 이 셋은 밑줄이 없습니다.
  */
-function makeOcrKey() {
+function makeOcrKey() { return 열쇠내기_(false); }
+
+/** 있어도 **새로 만듭니다.** 열쇠가 샜을 때 쓰는 자리입니다 */
+function rotateOcrKey() { return 열쇠내기_(true); }
+
+function 열쇠내기_(갈아끼우나) {
   var p = PropertiesService.getScriptProperties();
   var 있던것 = p.getProperty('OCR_KEY');
-  if (있던것) {
-    Logger.log('이미 있습니다. 같은 값을 GitHub Secret OCR_KEY 에 넣으세요:\n' + 있던것);
+
+  if (있던것 && !갈아끼우나) {
+    Logger.log('【있던 값】 새로 만들지 않았습니다.\n'
+      + '  같은 값을 GitHub Secret OCR_KEY 와 .env.server 에 넣으세요:\n\n' + 있던것
+      + '\n\n  ※ 진짜 새로 만들려면 rotateOcrKey 를 실행하세요.');
     return 있던것;
   }
+
   var 글자 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   var 새것 = '';
   for (var i = 0; i < 40; i++) 새것 += 글자.charAt(Math.floor(Math.random() * 글자.length));
   p.setProperty('OCR_KEY', 새것);
-  Logger.log('만들었습니다. 이 값을 GitHub Secret OCR_KEY 에 넣으세요:\n' + 새것);
+
+  Logger.log('【새로 만듦】' + (있던것 ? ' 옛 값은 이 순간 죽었습니다.' : ' (처음 만듭니다)') + '\n'
+    + '  이 값을 GitHub Secret OCR_KEY 와 .env.server 두 군데 다 넣으세요:\n\n' + 새것
+    + '\n\n  넣기 전까지 OCR 은 401 로 거절됩니다.');
   return 새것;
 }
 
