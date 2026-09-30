@@ -47,3 +47,6 @@ gas_백업_*/
 # 서버로 넘길 값 — 절대 올리지 않습니다 (2026-09-30)
 .env.server
 *.pem
+.env.server*
+.env.*.bak
+*.bak-*
