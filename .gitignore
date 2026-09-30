@@ -53,3 +53,7 @@ gas_백업_*/
 
 # 열쇠 갈아끼울 때 남기는 되돌림 사본 — 절대 올리지 않습니다
 *.바꾸기전
+
+# 수집기가 돌 때마다 새로 쓰는 보고서 — 서버에서 git pull 을 막습니다
+tools/hosp/reports/collect-hosp.json
+tools/hosp/reports/jobflex.json
