@@ -116,9 +116,10 @@ const 줄 = 볼것.map((x) => ({
   기관명: 기관어림(x.제목), 지역: x.지역, 고용형태: x.고용형태, 링크: x.링크,
 }));
 const 담음 = await rpc('rival_put', {
-  p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE, p_rows: 줄, p_첫판: 첫판,
+  p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE, p_rows: 줄,
 });
-console.log('\n③ 담음 — 새것 ' + 담음['새것'] + ' · 이미 있던 것 ' + 담음['이미 있던 것']);
+if (담음['첫판']) console.log('\n③ 처음 켭니다 — 지금 목록에 있는 것은 모두 「기존」 으로 둡니다');
+console.log('③ 담음 — 새것 ' + 담음['새것'] + ' · 이미 있던 것 ' + 담음['이미 있던 것']);
 
 /* ── ④ 견주기 ─────────────────────────────────────────────── */
 const 견줌 = await rpc('rival_match_go', { p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE });
