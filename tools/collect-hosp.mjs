@@ -114,6 +114,63 @@ const 공고ID = (기관, url, 제목) => 'HS' + Math.abs(해시(기관 + '|' + 
 const 붙이기 = (s) => String(s || '').replace(/\s+/g, '').replace(/[^가-힣A-Za-z0-9]/g, '');
 const 같은공고 = (기관, 제목) => 붙이기(기관) + '|' + 붙이기(제목);
 
+/* ── 주소를 같은 꼴로 ──────────────────────────────────────
+   공고ID 는 `기관|주소|제목` 해시라, 같은 공고라도 주소가
+   `www.` 있고 없고로 갈리면 번호가 둘 생깁니다. 강진의료원이 그랬고
+   대조가 매일 「gas 에만 3」 을 냈습니다 (2026-10-01).
+
+   **공고ID 규칙은 안 건드립니다.** 건드리면 모든 번호가 바뀌어
+   새 공고가 쏟아집니다. 대조할 때만 주소를 맞춰 봅니다.
+
+   맞추는 것 — www 유무 · http/https · 끝의 / · 대소문자 · 기본 포트 */
+function 주소맞추기(u) {
+  const t = String(u || '').trim();
+  if (!t) return '';
+  try {
+    const x = new URL(t);
+    const 집 = x.hostname.replace(/^www\./i, '').toLowerCase();
+    const 포트 = (x.port && x.port !== '80' && x.port !== '443') ? ':' + x.port : '';
+    const 길 = x.pathname.replace(/\/+$/, '');
+    return 집 + 포트 + 길 + x.search;          // 물음표 뒤는 순서까지 그대로 봅니다
+  } catch {
+    return t.replace(/^https?:\/\//i, '').replace(/^www\./i, '')
+      .replace(/\/+$/, '').toLowerCase();
+  }
+}
+/* 대조용 열쇠 — 주소가 있으면 주소로, 없으면 옛날처럼 번호로 */
+const 대조키 = (기관, url, id) => (url ? 붙이기(기관) + '|' + 주소맞추기(url) : 'ID:' + String(id));
+
+/* ── 스스로 하는 검사 — node tools/collect-hosp.mjs --주소검사 ── */
+if (process.argv.includes('--주소검사')) {
+  const 짝 = [
+    /* 강진의료원 — 실제로 번호가 갈렸던 그 짝 (2026-10-01) */
+    ['https://www.gjmc.or.kr/board/view.do?no=18', 'http://gjmc.or.kr/board/view.do?no=18', true],
+    ['https://gjmc.or.kr/board/', 'https://gjmc.or.kr/board', true],
+    /* 물음표 뒤의 / 는 값의 일부라 **지우면 안 됩니다** */
+    ['https://gjmc.or.kr/view.do?no=18/', 'https://gjmc.or.kr/view.do?no=18', false],
+    ['https://WWW.GJMC.or.kr/Board/view.do?no=18', 'https://gjmc.or.kr/Board/view.do?no=18', true],
+    ['https://gjmc.or.kr:443/a', 'http://gjmc.or.kr/a', true],
+    /* 갈려야 하는 것 — 글 번호가 다르면 다른 공고입니다 */
+    ['https://gjmc.or.kr/board/view.do?no=18', 'https://gjmc.or.kr/board/view.do?no=19', false],
+    ['https://gjmc.or.kr/a', 'https://gjmc.or.kr/b', false],
+    /* 주소가 아닌 글자도 죽지 않아야 합니다 */
+    ['javascript:go(3)', 'javascript:go(3)', true],
+  ];
+  let 틀림 = 0;
+  for (const [a, b, 같아야] of 짝) {
+    const 같나 = 주소맞추기(a) === 주소맞추기(b);
+    if (같나 !== 같아야) 틀림++;
+    console.log((같나 === 같아야 ? '○ ' : '★ ') + (같아야 ? '같아야' : '달라야') + ' — '
+      + 주소맞추기(a) + (같나 ? '  ==  ' : '  !=  ') + 주소맞추기(b));
+  }
+  /* 주소가 없으면 번호로 떨어지는지 */
+  const 번호로 = 대조키('강진의료원', '', 'HS123');
+  if (번호로 !== 'ID:HS123') { 틀림++; console.log('★ 주소 없을 때 번호로 안 떨어짐 — ' + 번호로); }
+  else console.log('○ 주소가 없으면 번호로 — ' + 번호로);
+  console.log(틀림 ? '\n★ ' + 틀림 + '개 틀렸습니다' : '\n○ 다 맞습니다');
+  process.exit(틀림 ? 1 : 0);
+}
+
 /* ── 본체 ── */
 const argv = process.argv.slice(2);
 const dry = argv.includes('--dry');
@@ -341,8 +398,10 @@ if (dry) {
   const 옛 = await 옛것();
   if (!옛) console.log('\n옛 수집기 것을 못 읽었습니다 (대조 못 함)');
   else {
-    const 옛집 = new Map(옛.map((x) => [String(x.id), x]));
-    const 새집 = new Map(담을것.map((x) => [String(x.id), x]));
+    /* 번호가 아니라 **주소**로 맞춥니다 (2026-10-01).
+       번호는 주소를 해시한 것이라 `www.` 하나에 갈립니다 */
+    const 옛집 = new Map(옛.map((x) => [대조키(x.org_name, x.url, x.id), x]));
+    const 새집 = new Map(담을것.map((x) => [대조키(x.org_name, x.url, x.id), x]));
     const 같음 = [...새집.keys()].filter((k) => 옛집.has(k));
     const 새것만 = [...새집.keys()].filter((k) => !옛집.has(k));
     const 옛것만 = [...옛집.keys()].filter((k) => !새집.has(k));
