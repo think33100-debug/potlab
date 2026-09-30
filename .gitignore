@@ -57,3 +57,6 @@ gas_백업_*/
 # 수집기가 돌 때마다 새로 쓰는 보고서 — 서버에서 git pull 을 막습니다
 tools/hosp/reports/collect-hosp.json
 tools/hosp/reports/jobflex.json
+
+# ★ 서버의 .env — 열쇠가 전부 들어 있습니다. 9/30 유출과 같은 모양이라 반드시 뺍니다
+.env
