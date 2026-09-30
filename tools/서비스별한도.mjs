@@ -121,11 +121,10 @@ for (const s of 서비스) {
 
 console.table(표);
 
-const 새한도 = [...new Set(표.map((x) => x['새 열쇠 한도']).filter((x) => x && x !== '—'))];
-const 옛한도 = [...new Set(표.map((x) => x['옛 열쇠 한도']).filter((x) => x && x !== '—'))];
+const 갈래 = (이름) => [...new Set(표.map((x) => x[이름 + ' 한도']).filter((v) => v && v !== '—'))];
 console.log('\n갈라 읽기 —');
-console.log('  옛 열쇠가 받은 한도 갈래 : ' + 옛한도.join(' · '));
-console.log('  새 열쇠가 받은 한도 갈래 : ' + 새한도.join(' · '));
+for (const [이름] of 열쇠들) console.log('  ' + 이름.padEnd(16) + '한도 갈래 : ' + 갈래(이름).join(' · '));
+const 새한도 = 갈래('새 열쇠'), 옛한도 = 갈래('지금 쓰는 열쇠');
 if (새한도.length === 1 && 옛한도.length > 1) {
   console.log('  → 새 열쇠는 **어느 서비스에서나 같은 한도**입니다. 서비스 탓이 아니라 **열쇠 탓**입니다');
 } else if (새한도.length > 1) {

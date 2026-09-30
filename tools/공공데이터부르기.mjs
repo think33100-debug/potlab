@@ -56,15 +56,19 @@ export async function 한도알리기(경로) {
   if (!줄.length) return { 올림: 0 };
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const 열쇠 = process.env['COLLECT_KEY_' + String(경로 || '').toUpperCase()]
-    || process.env.COLLECT_KEY_HS3 || process.env.COLLECT_KEY_AL2
-    || process.env.COLLECT_KEY_CE2 || process.env.COLLECT_KEY_JF;
-  if (!url || !anon || !열쇠) return { 올림: 0, 왜: '열쇠가 없어 못 올립니다' };
+  /* ⚠ 경로와 열쇠는 **짝이 맞아야** 합니다. 전에는 경로만 CE2 라 하고
+     열쇠는 HS3 것을 집어 401 「열쇠가 맞지 않습니다」 가 났습니다 (2026-09-30) */
+  const 고르기 = [String(경로 || '').toUpperCase(), 'HS3', 'AL2', 'CE2', 'JF']
+    .filter(Boolean)
+    .map((c) => [c, process.env['COLLECT_KEY_' + c]])
+    .find(([, v]) => v);
+  if (!url || !anon || !고르기) return { 올림: 0, 왜: '열쇠가 없어 못 올립니다' };
+  const [쓸경로, 열쇠] = 고르기;
   try {
     const r = await fetch(url + '/rest/v1/rpc/api_quota_put', {
       method: 'POST',
       headers: { apikey: anon, Authorization: 'Bearer ' + anon, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_secret: 열쇠, p_source: 경로 || 'HS3', p_rows: 줄 }),
+      body: JSON.stringify({ p_secret: 열쇠, p_source: 쓸경로, p_rows: 줄 }),
     });
     if (!r.ok) return { 올림: 0, 왜: 'HTTP ' + r.status + ' · ' + (await r.text()).slice(0, 120) };
     /* 70% 를 넘은 것은 화면에도 바로 알립니다 */
