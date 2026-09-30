@@ -107,13 +107,9 @@ if (dry) {
 }
 
 /* ── ③ 담기 ───────────────────────────────────────────────── */
-/* 처음 켜는 것인지 — rival_post 에 이 경쟁사 줄이 하나도 없으면 첫 판입니다 */
-const 있나 = await fetch(cfg.SUPABASE_URL + '/rest/v1/rival_post?select=글번호&경쟁사=eq.'
-  + encodeURIComponent(경쟁사) + '&limit=1',
-{ headers: { apikey: cfg.SUPABASE_ANON_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_ANON_KEY } });
-let 첫판 = false;
-try { 첫판 = ((await 있나.json()) || []).length === 0; } catch { 첫판 = false; }
-if (첫판) console.log('\n③ 처음 켭니다 — 지금 목록에 있는 것은 모두 「기존」 으로 둡니다');
+/* 「처음 켜는 것인가」 는 **DB 가 정합니다.**
+   여기서 세려다 anon 권한이 없어 조용히 false 가 됐습니다 (2026-09-30).
+   그 바람에 켤 때 이미 있던 6건이 「새로 올라온 것」 으로 잡혔습니다. */
 
 const 줄 = 볼것.map((x) => ({
   경쟁사, 글번호: String(x.번호), 제목: x.제목, 기관분류: x.분류,
