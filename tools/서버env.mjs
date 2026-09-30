@@ -29,6 +29,8 @@ const gas = fs.readFileSync('gas/wage.js', 'utf8');
 const 꺼내기 = (re) => (gas.match(re) || [])[1] || '';
 있는것.ALIO_DETAIL_KEY ||= 꺼내기(/const JOB3_API = \{[\s\S]*?KEY:\s*'([^']+)'/);
 있는것.ALIO_LIST_KEY   ||= 꺼내기(/const JOB_API = \{[\s\S]*?KEY:\s*'([^']+)'/);
+/* 고용24(워크넷) 전용 열쇠 — **공공데이터포털 열쇠가 아닙니다.** UUID 36자 */
+있는것.WORK_KEY        ||= 꺼내기(/const WORK_API = \{[\s\S]*?KEY:\s*'([^']+)'/);
 있는것.OCR_GAS_URL     ||= fs.existsSync('gas/ocr/README.md')
   ? (fs.readFileSync('gas/ocr/README.md', 'utf8')
       .match(/https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec/) || [''])[0] : '';
@@ -58,6 +60,7 @@ const 넣을것 = [
   'OCR_GAS_URL', 'OCR_KEY',
   'RESEND_KEY', 'MAIL_FROM', 'NOTIFY_EMAIL',
   'ALIVE_KEY', 'EXPORT_KEY', 'APPS_SCRIPT_URL', 'ADMIN_URL', 'VERCEL_BASE',
+  'WORK_KEY',
 ];
 
 if (process.argv.includes('--내보내기')) {
