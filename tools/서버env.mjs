@@ -33,29 +33,18 @@ const 꺼내기 = (re) => (gas.match(re) || [])[1] || '';
   ? (fs.readFileSync('gas/ocr/README.md', 'utf8')
       .match(/https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec/) || [''])[0] : '';
 
-/* ⚠⚠ 공공데이터 열쇠 잠금 (2026-09-30) ⚠⚠
+/* ⚠ 공공데이터 인증키는 **gas/wage.js 의 JOB2_API 가 쓰는 것**을 그대로 씁니다.
  *
- * .env.server 의 CLEANEYE_KEY 는 **재발급받은 새 열쇠**인데, 그 열쇠에는
- * 운영계정 상향 한도가 아직 안 붙었습니다 —
- *     알리오 /detail   옛 열쇠 100,000  /  새 열쇠 1,000
- * 우리만 하루 1,230건을 씁니다. 새 열쇠로 바꾸면 **첫날부터 넘칩니다.**
+ * 2026-09-30 에 재발급을 받았지만 그 열쇠에는 운영계정 상향 한도가 안 붙어
+ * 알리오 상세가 하루 1,000건이었습니다 (우리만 1,230건을 씁니다).
+ * 세중님 결정 — **옛 열쇠를 그대로 씁니다.** 이 열쇠는 공개 채용공고를 읽는
+ * 열쇠라 남이 써도 우리 한도를 축내는 것 말고는 할 수 있는 게 없고,
+ * 노출 뒤 사용량도 한도의 1.2% 로 정상입니다.
+ * 대신 **서비스별 하루 사용량이 70% 를 넘으면 알립니다** (api_quota).
  *
- * 그래서 새 열쇠가 서버로 나가지 않게 여기서 막습니다.
- * 대신 WATCH_KEY 라는 **아무 수집기도 안 읽는 이름**으로 보내
- * 한 시간마다 한도가 올라갔는지만 재게 합니다.
- *
- * 한도가 100,000 으로 확인되면 —
- *     node tools/서버env.mjs --내보내기 --열쇠바꿔도됨
- * 로 풀고, gas/wage.js 쪽도 tools/공공데이터열쇠바꾸기.mjs 로 함께 바꿉니다. */
-const 풀기 = process.argv.includes('--열쇠바꿔도됨');
+ * 그래서 .env.server 에 다른 값이 들어 있어도 여기서는 gas 쪽을 씁니다. */
 const 살아있는열쇠 = 꺼내기(/const JOB2_API = \{[\s\S]*?KEY:\s*'([^']+)'/);
-있는것.WATCH_KEY = 있는것.CLEANEYE_KEY;
-if (!풀기 && 살아있는열쇠 && 있는것.CLEANEYE_KEY !== 살아있는열쇠) {
-  있는것.CLEANEYE_KEY = 살아있는열쇠;
-  있는것.ALIO_DETAIL_KEY = 살아있는열쇠;
-  process.stderr.write('※ 공공데이터 열쇠는 **바꾸지 않고** 내보냅니다 (한도가 아직 1,000 입니다).\n'
-    + '  새 열쇠는 WATCH_KEY 로만 보냅니다. 풀려면 --열쇠바꿔도됨 을 붙이세요.\n');
-}
+if (살아있는열쇠) { 있는것.CLEANEYE_KEY = 살아있는열쇠; 있는것.ALIO_DETAIL_KEY = 살아있는열쇠; }
 
 /* 별명 */
 있는것.SUPABASE_URL ||= 있는것.NEXT_PUBLIC_SUPABASE_URL;
@@ -69,7 +58,6 @@ const 넣을것 = [
   'OCR_GAS_URL', 'OCR_KEY',
   'RESEND_KEY', 'MAIL_FROM', 'NOTIFY_EMAIL',
   'ALIVE_KEY', 'EXPORT_KEY', 'APPS_SCRIPT_URL', 'ADMIN_URL', 'VERCEL_BASE',
-  'WATCH_KEY',
 ];
 
 if (process.argv.includes('--내보내기')) {

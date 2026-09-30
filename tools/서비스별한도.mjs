@@ -38,13 +38,9 @@ for (const f of ['.env.server', '.env.local', '.env', 'web/.env.local']) {
 const gas = fs.existsSync('gas/wage.js') ? fs.readFileSync('gas/wage.js', 'utf8') : '';
 const 꺼내 = (re) => (gas.match(re) || [])[1] || '';
 
-/* WATCH_KEY 는 **아무 수집기도 안 읽는 이름**입니다. 새 열쇠의 한도가
-   올라갔는지만 재려고 서버에 따로 보내 둔 값입니다 (2026-09-30) */
-const 본것 = new Set();
 const 열쇠들 = [
   ['지금 쓰는 열쇠', 꺼내(/const JOB2_API = \{[\s\S]*?KEY:\s*'([^']+)'/) || env.CLEANEYE_KEY || ''],
-  ['새 열쇠', env.WATCH_KEY || env.CLEANEYE_KEY || ''],
-].filter(([, v]) => v && (본것.has(v) ? false : (본것.add(v), true)));
+].filter(([, v]) => v);
 
 const 날 = (d) => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
 const 올해 = new Date().getFullYear();
@@ -105,9 +101,7 @@ for (const s of 서비스) {
   for (const [기능, u] of s.곳) {
     const 줄 = { 서비스: s.계정, 기능 };
     for (const [이름, 값] of 열쇠들) {
-      /* 실제로 쓰는 열쇠만 기록합니다. 감시용 열쇠는 한도가 달라 섞으면 안 됩니다 */
-      const r = await 공공부르기(u + '&serviceKey=' + 값,
-        { 간격: 1500, 최대다시: 1, 떠들기: false, 기록안함: 이름 !== '지금 쓰는 열쇠' });
+      const r = await 공공부르기(u + '&serviceKey=' + 값, { 간격: 1500, 최대다시: 1, 떠들기: false });
       const 오류 = 포털오류(r.글);
       줄[이름 + ' 한도'] = r.한도;
       줄[이름 + ' 남음'] = r.남음;

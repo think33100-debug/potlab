@@ -1,0 +1,4 @@
+#!/bin/sh
+# 커밋 직전 열쇠 검사 — 2026-09-30 유출 뒤에 넣었습니다.
+# 켜는 법:  git config core.hooksPath .githooks
+exec node tools/열쇠검사.mjs
