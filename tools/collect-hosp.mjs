@@ -141,7 +141,8 @@ if (!dry && !cfg.COLLECT_KEY_HS3) { console.error('COLLECT_KEY_HS3 가 없습니
 
 /* ── ① 목록 받기 ─────────────────────────────────────────── */
 console.log('\n① 목록 —');
-const 셈 = { 못받음: 0, 규칙0: 0, 줄: 0, 꺼짐: 0 };
+const 셈 = { 못받음: 0, 규칙0: 0, 줄: 0, 꺼짐: 0, 주소없음: 0 };
+const 주소없는곳 = new Map();
 const 모은것 = [];
 const 곳별 = [];
 const 못받은곳 = [];
@@ -168,11 +169,23 @@ for (let i = 0; i < 볼것.length; i += 동시) {
     if (!rows.length) 셈.규칙0++;
     셈.줄 += rows.length;
     곳별.push({ 이름: s.name, 줄: rows.length, raw: g.raw });
-    rows.forEach((r) => { if (r.title && r.url) 모은것.push({ ...r, 곳: s }); });
+    /* ⚠ 주소가 없는 줄은 담을 수 없습니다. **그런데 말없이 버리면 안 됩니다** —
+       강진의료원이 link 규칙 하나 때문에 7줄을 통째로 잃고 있었는데
+       「줄 7」 이라고만 찍혀서 두 주 동안 아무도 몰랐습니다 (2026-09-30). */
+    rows.forEach((r) => {
+      if (r.title && r.url) { 모은것.push({ ...r, 곳: s }); return; }
+      셈.주소없음++;
+      주소없는곳.set(s.name, (주소없는곳.get(s.name) || 0) + 1);
+    });
   }));
 }
 console.log('  줄 ' + 셈.줄 + ' · 못 받음 ' + 셈.못받음 + '곳 · 한 줄도 못 뽑음 ' + 셈.규칙0
   + '곳 · 건너뜀 ' + 셈.꺼짐 + '곳');
+if (셈.주소없음) {
+  console.log('  ★ 주소를 못 뽑아 버린 줄 ' + 셈.주소없음 + '건 — link 규칙을 봐야 합니다');
+  [...주소없는곳.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8)
+    .forEach(([이름, n]) => console.log('      ' + 이름.slice(0, 26).padEnd(28) + n + '건'));
+}
 if (못받은곳.length) {
   console.log('  못 받은 곳 —');
   못받은곳.slice(0, 12).forEach((x) => console.log('    ✗ ' + x.이름.slice(0, 24).padEnd(26) + x.왜.slice(0, 56)));

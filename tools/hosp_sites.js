@@ -1,4 +1,4 @@
-/* 설정표 — name 은 심평원 병원목록 이름 그대로. html 은 hs_test.js 로 검증한 것만. (2026-09-17 · 288곳) */
+/* 설정표 — name 은 심평원 병원목록 이름 그대로. html 은 hs_test.js 로 검증한 것만. (2026-09-30 · 288곳) */
 const HOSP_SITES = [
   { name: '전남대학교병원', type: 'appsite', host: 'https://cnuh.recruiter.co.kr', sn: 4978, settingType: 'E', not: '화순' },
   { name: '화순전남대학교병원', type: 'appsite', host: 'https://cnuh.recruiter.co.kr', sn: 4978, settingType: 'E', only: '화순' },
