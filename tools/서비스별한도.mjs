@@ -23,7 +23,7 @@
  */
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import { 공공부르기, 포털오류 } from './공공데이터부르기.mjs';
+import { 공공부르기, 포털오류, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
 
 const 지문 = (v) => (v ? crypto.createHash('sha256').update(v).digest('hex').slice(0, 10) : '—');
 
@@ -130,3 +130,9 @@ if (새한도.length === 1 && 옛한도.length > 1) {
 } else {
   console.log('  → 갈래가 하나씩뿐이라 아직 못 가릅니다');
 }
+
+/* 잰 값을 그대로 남깁니다 — 관리자 화면과 요약 메일이 이걸 봅니다.
+   COLLECT_KEY 가 있는 곳(서버)에서 돌릴 때만 올라갑니다 */
+const 남김 = await 한도알리기(process.env.POTJOB_경로 || "CE2");
+console.log('');
+console.log(남김.왜 ? '남기지 못했습니다 · ' + 남김.왜 : 'DB 에 ' + 남김.올림 + '줄 남겼습니다');
