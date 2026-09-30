@@ -43,3 +43,7 @@ web/next-env.d.ts
 
 # Apps Script 백업 폴더 — wage.js 에 API 열쇠가 박혀 있습니다 (gas/ 와 같은 이유)
 gas_백업_*/
+
+# 서버로 넘길 값 — 절대 올리지 않습니다 (2026-09-30)
+.env.server
+*.pem

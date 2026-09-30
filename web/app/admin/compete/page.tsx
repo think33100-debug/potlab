@@ -344,7 +344,25 @@ function 본문() {
                       {r['기본값단계'] ? (
                         <div className="mt-1 text-xs text-gray-400">단계 이름은 일반적인 전형 순서 기준입니다</div>
                       ) : null}
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                      {/* 공고문 원문을 바로 열 수 있게 (2026-09-30 · 세중님).
+                          개방 API 의 첨부 주소는 죽어 있어 www.alio.go.kr 쪽을 씁니다 */}
+                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                        <a href={String(r['알리오화면'])} target="_blank" rel="noopener noreferrer"
+                          className="text-blue-700 hover:underline">알리오 공고 화면 ↗</a>
+                        {((r['첨부'] as 칸[]) || []).map((f, k) => (
+                          <a key={k} href={String(f['주소'])} target="_blank" rel="noopener noreferrer"
+                            className={'hover:underline ' + (f['갈래'] === 'A' ? 'font-medium text-blue-700' : 'text-gray-500')}>
+                            {f['갈래'] === 'A' ? '공고문' : f['갈래'] === 'B' ? '지원서'
+                              : f['갈래'] === 'C' ? '직무기술서' : '첨부'}
+                            {' '}{String(f['이름'] ?? '').slice(-18)} ↗
+                            {f['읽었나'] ? <span className="ml-0.5 text-emerald-600">읽음</span> : null}
+                          </a>
+                        ))}
+                        {!((r['첨부'] as 칸[]) || []).length && (
+                          <span className="text-gray-400">첨부 없음</span>
+                        )}
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
                         <span className="text-gray-500">고용형태</span>
                         <select
                           value={String(r['고용형태'] ?? '')}
