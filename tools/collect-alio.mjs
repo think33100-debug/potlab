@@ -50,6 +50,9 @@ function env() {
   /* 화면 쪽 이름으로 들어 있으면 그것도 받습니다 */
   out.SUPABASE_ANON_KEY = out.SUPABASE_ANON_KEY || out.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   out.SUPABASE_URL = out.SUPABASE_URL || out.NEXT_PUBLIC_SUPABASE_URL;
+  /* 서버에서는 HS3 서버 전용 값을 씁니다 — collect_secret 에 같은 값을 등록해 뒀습니다.
+     값을 어디로도 옮기지 않으려고 이렇게 합니다 (GitHub Actions 는 제 열쇠를 그대로 씁니다) */
+  out.COLLECT_KEY_AL2 = out.COLLECT_KEY_AL2 || out.COLLECT_KEY_HS3;
 
   /* 집 컴퓨터에서는 gas/wage.js 안의 열쇠를 빌려 씁니다.
      Actions 에는 gas/ 가 없으니 Secrets 로 와야 합니다 */
