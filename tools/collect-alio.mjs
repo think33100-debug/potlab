@@ -704,6 +704,23 @@ if (dry) {
   console.log(Math.round((Date.now() - t0) / 1000) + '초');
 }
 
+/* 박동 — 관리자 → 기관 현황 화면이 이것으로 「돌고 있나」를 봅니다 (2026-10-02).
+   알리오·클린아이만 빠져 있어서 collector_beat 에 안 남았습니다. 그래서
+   24시간 실행 여부를 로그로만 확인할 수 있었습니다.
+   **순찰도 남깁니다** — 순찰이 멈춘 것도 화면에서 보여야 합니다 */
+if (!dry) {
+  try {
+    await rpc(cfg, 'collect_beat', {
+      p_secret: cfg.COLLECT_KEY_AL2, p_source: SOURCE,
+      p_beat: { took_ms: Date.now() - t0, ok: !process.exitCode,
+        본곳: 1, 담음: 회원.length + 보류.length, 보류: 보류.length,
+        버림: 쓰레기.length, 못받음: 셈.상세못받음,
+        메모: { 모드: 순찰 ? '순찰' : '전체', 받음: rows.length, 상세: 셈.상세,
+          OCR: 셈.OCR, 남의자리: 셈.남의자리, 우리와무관: 셈.우리와무관, 건너뜀: 셈.건너뜀 } },
+    });
+  } catch (e) { console.error('박동 못 남김 · ' + String(e.message).slice(0, 120)); }
+}
+
 /* 남은 하루 한도를 남깁니다 — 쓴 양은 신청 건마다 하나이고
    우리 열쇠 둘이 같이 씁니다. 남이 쓰면 우리 몫도 줄어듭니다 (2026-09-30) */
 const 한도 = await 한도알리기('AL2');
