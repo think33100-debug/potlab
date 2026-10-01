@@ -35,18 +35,35 @@ const 꺼내기 = (re) => (gas.match(re) || [])[1] || '';
   ? (fs.readFileSync('gas/ocr/README.md', 'utf8')
       .match(/https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec/) || [''])[0] : '';
 
-/* ⚠ 공공데이터 인증키는 **gas/wage.js 의 JOB2_API 가 쓰는 것**을 그대로 씁니다.
+/* 공공데이터 인증키는 **.env.server 를 먼저** 씁니다 (2026-10-01 에 뒤집었습니다).
  *
- * 2026-09-30 에 재발급을 받았지만 그 열쇠에는 운영계정 상향 한도가 안 붙어
- * 알리오 상세가 하루 1,000건이었습니다 (우리만 1,230건을 씁니다).
- * 세중님 결정 — **옛 열쇠를 그대로 씁니다.** 이 열쇠는 공개 채용공고를 읽는
- * 열쇠라 남이 써도 우리 한도를 축내는 것 말고는 할 수 있는 게 없고,
- * 노출 뒤 사용량도 한도의 1.2% 로 정상입니다.
- * 대신 **서비스별 하루 사용량이 70% 를 넘으면 알립니다** (api_quota).
+ * ── 전에는 반대였습니다 ─────────────────────────────────────
+ * 9/30 에 「옛 열쇠를 그대로 쓴다」 고 정해서, .env.server 에 새 열쇠가
+ * 들어 있어도 여기서 gas/wage.js 의 옛 열쇠로 덮었습니다.
  *
- * 그래서 .env.server 에 다른 값이 들어 있어도 여기서는 gas 쪽을 씁니다. */
-const 살아있는열쇠 = 꺼내기(/const JOB2_API = \{[\s\S]*?KEY:\s*'([^']+)'/);
-if (살아있는열쇠) { 있는것.CLEANEYE_KEY = 살아있는열쇠; 있는것.ALIO_DETAIL_KEY = 살아있는열쇠; }
+ * ── 그 전제가 틀렸습니다 ────────────────────────────────────
+ * 10/1 에 두 열쇠로 세 서비스를 한 번씩 불러 보니 —
+ *     클린아이 B551982   옛 403 미등록  |  새 200
+ *     나라일터 1760000   옛 403 미등록  |  새 200
+ *     알리오   1051000   옛 403 미등록  |  새 200
+ * **옛 열쇠는 세 곳 다 죽었습니다.** 세중님이 포털에서 확인하신 것도
+ * 같았습니다 — 운영계정 승인(2026-09-08~2028-09-08)에 붙은 인증키가
+ * 새 열쇠이고, /detail·/list 각 100,000/일입니다.
+ *
+ * ── gas/wage.js 는 안 건드립니다 ───────────────────────────
+ * 그 파일은 동결이고, 새 열쇠를 파일에 박지 않습니다.
+ * (확인 — 저장소에 추적되지 않고 원격에도 없습니다. 옛 열쇠는 그 안
+ *  10군데에 있지만 공개된 적은 없습니다)
+ * 옛 앱(Apps Script)의 JOB2·JOB3 수집기는 10/3 정리 대상입니다. */
+if (!있는것.CLEANEYE_KEY || !있는것.ALIO_DETAIL_KEY) {
+  const gas열쇠 = 꺼내기(/const JOB2_API = \{[\s\S]*?KEY:\s*'([^']+)'/);
+  if (gas열쇠) {
+    있는것.CLEANEYE_KEY ||= gas열쇠;
+    있는것.ALIO_DETAIL_KEY ||= gas열쇠;
+    console.error('⚠ .env.server 에 공공데이터 열쇠가 없어 gas/wage.js 것을 씁니다 — '
+      + '그 열쇠는 2026-10-01 기준 죽어 있습니다');
+  }
+}
 
 /* 별명 */
 있는것.SUPABASE_URL ||= 있는것.NEXT_PUBLIC_SUPABASE_URL;
@@ -61,6 +78,11 @@ const 넣을것 = [
   'RESEND_KEY', 'MAIL_FROM', 'NOTIFY_EMAIL',
   'ALIVE_KEY', 'EXPORT_KEY', 'APPS_SCRIPT_URL', 'ADMIN_URL', 'VERCEL_BASE',
   'WORK_KEY',
+  /* 백업 (2026-10-01). Supabase 무료 요금제에 Daily backups 가 없어
+     서버에 임시로 떠 둡니다. tools/백업.mjs 가 이 둘을 씁니다.
+     ⚠ SUPABASE_DB_URL 에는 DB 비밀번호가 들어 있습니다 —
+       .env.server 는 .gitignore 50번 줄이 막고 있고 한 번도 올라간 적 없습니다 */
+  'SUPABASE_DB_URL', 'BACKUP_KEY',
 ];
 
 if (process.argv.includes('--내보내기')) {

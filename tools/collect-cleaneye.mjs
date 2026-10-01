@@ -79,13 +79,10 @@ function env() {
   /* 서버에서는 HS3 서버 전용 값을 씁니다 — collect_secret 에 같은 값을 등록해 뒀습니다.
      값을 어디로도 옮기지 않으려고 이렇게 합니다 (GitHub Actions 는 제 열쇠를 그대로 씁니다) */
   out.COLLECT_KEY_CE2 = out.COLLECT_KEY_CE2 || out.COLLECT_KEY_HS3;
-  /* 집 컴퓨터에서는 gas 안의 열쇠를 빌립니다. Actions 에는 gas/ 가 없습니다 */
-  const gas = path.join(여기, '..', 'gas', 'wage.js');
-  if (fs.existsSync(gas)) {
-    const src = fs.readFileSync(gas, 'utf8');
-    out.CLEANEYE_KEY = out.CLEANEYE_KEY
-      || (src.match(/const JOB2_API = \{[\s\S]*?KEY:\s*'([^']+)'/) || [])[1] || '';
-  }
+  /* gas/wage.js 는 **열쇠 출처로 안 씁니다** (2026-10-01 에 뗐습니다).
+     거기 박힌 공공데이터 열쇠는 죽었습니다 — 클린아이·나라일터·알리오
+     세 서비스 모두 403 「등록되지 않은 서비스키」 였습니다.
+     새 열쇠는 .env 에만 둡니다 (파일에 박지 않습니다). */
   /* 알리오 상세와 같은 열쇠입니다 — 하나만 넣어 두셨어도 돌게 */
   out.CLEANEYE_KEY = out.CLEANEYE_KEY || out.ALIO_DETAIL_KEY || '';
   return out;

@@ -38,8 +38,12 @@ for (const f of ['.env.server', '.env.local', '.env', 'web/.env.local']) {
 const gas = fs.existsSync('gas/wage.js') ? fs.readFileSync('gas/wage.js', 'utf8') : '';
 const 꺼내 = (re) => (gas.match(re) || [])[1] || '';
 
+/* .env 를 **먼저** 봅니다 (2026-10-01 에 뒤집었습니다).
+   전에는 gas/wage.js 를 먼저 봐서, .env 에 새 열쇠가 있어도
+   죽은 옛 열쇠의 한도를 재고 있었습니다. */
 const 열쇠들 = [
-  ['지금 쓰는 열쇠', 꺼내(/const JOB2_API = \{[\s\S]*?KEY:\s*'([^']+)'/) || env.CLEANEYE_KEY || ''],
+  ['지금 쓰는 열쇠', env.CLEANEYE_KEY || env.ALIO_DETAIL_KEY
+    || 꺼내(/const JOB2_API = \{[\s\S]*?KEY:\s*'([^']+)'/) || ''],
 ].filter(([, v]) => v);
 
 const 날 = (d) => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
