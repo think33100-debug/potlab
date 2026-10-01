@@ -224,7 +224,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                     <p className="text-sm text-gray-500">{r.org_name}</p>
                     <p className="mt-1 break-keep text-body-lg font-medium">
                       {r.is_intern && (
-                        <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-warning ring-1 ring-warning/40">
+                        <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-gray-900 ring-1 ring-warning dark:text-gray-100">
                           체험형 인턴
                         </span>
                       )}
@@ -294,7 +294,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                         소지자」가 적혀 있어 올립니다. 다만 인턴이라 헷갈리지
                         않게 표시합니다. 판단은 DB(job_posts_pub.is_intern)가 합니다 */}
                     {r.is_intern && (
-                      <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-warning ring-1 ring-warning/40">
+                      <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-gray-900 ring-1 ring-warning dark:text-gray-100">
                         체험형 인턴
                       </span>
                     )}

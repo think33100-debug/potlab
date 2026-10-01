@@ -34,7 +34,7 @@ type 짐 = {
 const 판정색 = (p: string | null) =>
   p === '우리가 빠름' ? 'bg-badge-green-bg text-gray-900'
     : p === '우리가 늦음' ? 'bg-brand-red-soft text-brand-red-dark'
-      : p && p.includes('없음') ? 'text-warning ring-1 ring-warning/40'
+      : p && p.includes('없음') ? 'text-gray-900 ring-1 ring-warning dark:text-gray-100'
         : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
 
 const 상태들 = ['미처리', '원인 확인', '수정 완료'];
@@ -105,7 +105,7 @@ export default function AdminRival() {
           ['이번 주 비교', s['이번 주 비교'], 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100'],
           ['우리가 빠름', s['우리가 빠름'], 'bg-badge-green-bg text-gray-900'],
           ['우리가 늦음', s['우리가 늦음'], 'bg-brand-red-soft text-brand-red-dark'],
-          ['우리에게 없음', s['우리에게 없음'], 'bg-gray-50 text-warning ring-1 ring-warning/40 dark:bg-gray-950'],
+          ['우리에게 없음', s['우리에게 없음'], 'bg-gray-50 text-gray-900 ring-1 ring-warning dark:bg-gray-950 dark:text-gray-100'],
           ['평균 늦은 시간', s['평균 늦은 시간'], 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100'],
           ['미처리', s['미처리'], 'bg-badge-blue-bg text-gray-900'],
         ].map(([라벨, 값, 색]) => (
@@ -192,7 +192,7 @@ export default function AdminRival() {
                       <div className="max-w-xs text-xs">{x.우리제목}</div>
                       <div className="text-xs text-gray-500">{x.우리경로} · {x.우리것}</div>
                     </>
-                    : <span className="font-bold text-warning">없습니다</span>}
+                    : <span className="font-bold text-brand-red-dark">없습니다</span>}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2">
                   <span className={'rounded px-1.5 py-0.5 text-xs ' + 판정색(x.판정)}>{x.판정 ?? '-'}</span>
