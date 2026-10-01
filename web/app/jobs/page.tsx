@@ -5,7 +5,7 @@ import { JobTabs } from '@/components/job-tabs';
 import { MembersOnly } from '@/components/members-only';
 import { jobViews } from '@/lib/job-views';
 import { SIDOS } from '@/lib/org';
-import { supabase, TABS, tabLabel, type JobListItem } from '@/lib/supabase';
+import { supabase, TABS, tabLabel, type JobListItem, type 맛보기공고 } from '@/lib/supabase';
 import { serverSupabase } from '@/lib/supabase-server';
 import { OrgCard } from '../org-card';
 
@@ -88,6 +88,18 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
   /* 42501 = 권한 없음. 로그인 안 한 분입니다 — 오류가 아니라 안내를 그립니다 */
   const locked = list.error?.code === '42501';
   const rows = (list.data ?? []) as unknown as JobListItem[];
+
+  /* 로그인 안 한 분에게도 **최신 몇 건은** 보여줍니다 (2026-10-01).
+     세중님 결정 — 「최신 공고 일부만 공개, 나머지는 로그인」.
+     몇 건인지는 DB 의 site_settings 「비로그인_공고수」 한 줄로 정합니다
+     (-1 이면 접수 중인 것 전부. 애플 심사에서 걸리면 숫자만 바꾸면 됩니다).
+
+     job_list 를 비로그인에 열지 않고 **칸을 좁힌 다른 창구**를 씁니다 —
+     근거·상세·점수·인원·고용형태·경쟁률·급여는 한 칸도 안 나갑니다.
+     검색·필터·쪽 넘기기·찜·알림은 그대로 로그인이 필요합니다. */
+  const 맛보기 = locked ? await supabase.rpc('공개공고') : null;
+  const 맛보기줄 = (맛보기?.data ?? []) as 맛보기공고[];
+  const 전체건수 = Number(맛보기줄[0]?.전체건수 ?? 0);
 
   /* 조건에 맞는 전체 건수입니다. job_list 가 줄마다 같은 값을 붙여 보냅니다
      (org_search 와 같은 방식). 「다음 쪽이 있나」를 이걸로 가릅니다 —
@@ -202,11 +214,43 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       {searching && !locked && <OrgCard name={q} />}
 
       {locked && (
-        <MembersOnly
-          title={<>공고는<br />회원만 볼 수 있어요</>}
-          body="공공기관 · 대학병원 · 종합병원 공고를 하나도 안 빼고 모읍니다. 가입은 3분이면 끝나요."
-          진단="app/jobs/page.tsx · 서버(DB 가 42501 을 돌려줌)"
-        />
+        <>
+          {맛보기줄.length > 0 && (
+            <ul className="space-y-3">
+              {맛보기줄.map((r) => (
+                <li key={r.id}>
+                  <Link href={`/jobs/${r.id}`}
+                    className="block rounded-sm border border-gray-200 p-5 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950">
+                    <p className="text-sm text-gray-500">{r.org_name}</p>
+                    <p className="mt-1 break-keep text-body-lg font-medium">
+                      {r.is_intern && (
+                        <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-warning ring-1 ring-warning/40">
+                          체험형 인턴
+                        </span>
+                      )}
+                      {r.title}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
+                      {r.job_group && (
+                        <span className="font-medium text-gray-700 dark:text-gray-300">{r.job_group}</span>
+                      )}
+                      {r.sido && <span>{r.sido}</span>}
+                      {r.apply_to && <span>~{d(r.apply_to)}</span>}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="mt-6">
+            <MembersOnly
+              title={<>로그인하면<br />공고 {전체건수}건을 다 볼 수 있어요</>}
+              body={`지금 보시는 건 최신 ${맛보기줄.length}건이에요. 로그인하면 공고 ${전체건수}건 전체와 경쟁률 · 급여 비교 · 마감 알림을 볼 수 있어요. 가입은 3분이면 끝나요.`}
+              진단="app/jobs/page.tsx · 비로그인 맛보기(공개공고)"
+            />
+          </div>
+        </>
       )}
 
       {!locked && list.error && (

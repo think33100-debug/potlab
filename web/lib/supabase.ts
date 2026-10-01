@@ -69,6 +69,16 @@ export type JobListItem = Pick<
   | 'apply_from' | 'apply_to' | 'posted_at' | 'headcount' | 'is_intern'
 >;
 
+/* 로그인 안 한 분에게 보여주는 맛보기 (2026-10-01).
+   DB 의 공개공고() 가 내주는 것 그대로입니다.
+   **여기 없는 칸은 비로그인에게 안 나갑니다** — 근거·상세·점수·인원·
+   고용형태·경쟁률·급여는 창구에서 아예 빼 두었습니다.
+   몇 건을 보여줄지는 site_settings 「비로그인_공고수」 한 줄로 정합니다. */
+export type 맛보기공고 = Pick<
+  JobPost,
+  'id' | 'title' | 'org_name' | 'sido' | 'job_group' | 'apply_to' | 'is_intern' | 'url'
+> & { 전체건수: number; 보여주는수: number };
+
 export const SOURCE_NAME: Record<string, string> = {
   WN: '워크넷', HS: '병원 게시판', AL: '알리오', GJ: '나라일터',
   ND: '치매센터', CE: '클린아이', BZ: '기업 직접등록',
