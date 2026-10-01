@@ -32,10 +32,10 @@ type 짐 = {
 };
 
 const 판정색 = (p: string | null) =>
-  p === '우리가 빠름' ? 'bg-emerald-100 text-emerald-800'
-    : p === '우리가 늦음' ? 'bg-red-100 text-red-800'
-      : p && p.includes('없음') ? 'bg-amber-100 text-amber-900'
-        : 'bg-gray-100 text-gray-600';
+  p === '우리가 빠름' ? 'bg-badge-green-bg text-gray-900'
+    : p === '우리가 늦음' ? 'bg-brand-red-soft text-brand-red-dark'
+      : p && p.includes('없음') ? 'text-warning ring-1 ring-warning/40'
+        : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
 
 const 상태들 = ['미처리', '원인 확인', '수정 완료'];
 const 원인들 = ['수집 목록에 없는 기관', '수집 주기 탓', '직군 못 가림', '보류함 대기', '막힌 병원', '모름'];
@@ -83,7 +83,7 @@ export default function AdminRival() {
     읽기();
   };
 
-  if (err) return <p className="text-lg text-red-600">{err}</p>;
+  if (err) return <p className="text-lg text-brand-red">{err}</p>;
   if (!d) return <p className="text-lg text-gray-500">잠시만요…</p>;
 
   const s = d.요약 || {};
@@ -102,15 +102,15 @@ export default function AdminRival() {
       {/* ── 요약 ── */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
         {[
-          ['이번 주 비교', s['이번 주 비교'], 'bg-gray-50 text-gray-900'],
-          ['우리가 빠름', s['우리가 빠름'], 'bg-emerald-50 text-emerald-800'],
-          ['우리가 늦음', s['우리가 늦음'], 'bg-red-50 text-red-800'],
-          ['우리에게 없음', s['우리에게 없음'], 'bg-amber-50 text-amber-900'],
-          ['평균 늦은 시간', s['평균 늦은 시간'], 'bg-gray-50 text-gray-900'],
-          ['미처리', s['미처리'], 'bg-blue-50 text-blue-900'],
+          ['이번 주 비교', s['이번 주 비교'], 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100'],
+          ['우리가 빠름', s['우리가 빠름'], 'bg-badge-green-bg text-gray-900'],
+          ['우리가 늦음', s['우리가 늦음'], 'bg-brand-red-soft text-brand-red-dark'],
+          ['우리에게 없음', s['우리에게 없음'], 'bg-gray-50 text-warning ring-1 ring-warning/40 dark:bg-gray-950'],
+          ['평균 늦은 시간', s['평균 늦은 시간'], 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100'],
+          ['미처리', s['미처리'], 'bg-badge-blue-bg text-gray-900'],
         ].map(([라벨, 값, 색]) => (
           <div key={String(라벨)} className={'rounded-xl p-3 ' + 색}>
-            <div className="text-xs opacity-70">{라벨}</div>
+            <div className="text-xs font-bold">{라벨}</div>
             <div className="text-2xl font-bold">
               {값 ?? 0}{라벨 === '평균 늦은 시간' ? <span className="text-sm font-normal"> 시간</span> : null}
             </div>
@@ -118,12 +118,12 @@ export default function AdminRival() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-3 text-sm">
+      <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950 p-3 text-sm">
         <b>원인별</b>{' '}
         {Object.entries(d.원인별 || {}).length === 0
           ? <span className="text-gray-500">아직 없습니다</span>
           : Object.entries(d.원인별).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
-            <span key={k} className="mr-2 inline-block rounded bg-gray-100 px-2 py-0.5">{k} {v}</span>
+            <span key={k} className="mr-2 inline-block rounded bg-gray-100 px-2 py-0.5 dark:bg-gray-800">{k} {v}</span>
           ))}
         <span className="ml-2 text-xs text-gray-500">
           · 「기존」 {s['기존 (셈에서 뺌)'] ?? 0}건은 켤 때 이미 목록에 있어 빠름·늦음 셈에서 뺐습니다
@@ -131,7 +131,7 @@ export default function AdminRival() {
       </div>
 
       {/* ── 손으로 넣기 (굿잡피티) ── */}
-      <section className="rounded-xl border border-gray-200 bg-white p-4">
+      <section className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950 p-4">
         <h2 className="font-bold">굿잡피티 — 손으로 넣기</h2>
         <p className="mt-1 text-xs text-gray-500">
           굿잡피티는 이용약관에 「회사의 사전 승락없이 복제 또는 유통시키거나 상업적으로
@@ -155,9 +155,9 @@ export default function AdminRival() {
       </section>
 
       {/* ── 줄 ── */}
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-gray-600">
+          <thead className="bg-gray-50 text-left text-gray-700 dark:bg-gray-900 dark:text-gray-300">
             <tr>
               <th className="px-3 py-2">경쟁사 공고</th>
               <th className="px-3 py-2">우리 것</th>
@@ -171,15 +171,15 @@ export default function AdminRival() {
               <tr key={x.경쟁사 + x.글번호} className="border-t border-gray-100 align-top">
                 <td className="px-3 py-2">
                   <div className="flex items-center gap-1">
-                    <span className="rounded bg-gray-100 px-1.5 text-xs">{x.경쟁사}</span>
-                    {x.기관분류 && <span className="rounded bg-indigo-50 px-1.5 text-xs text-indigo-800">{x.기관분류}</span>}
-                    {x.기존 && <span className="rounded bg-gray-100 px-1.5 text-xs text-gray-500">기존</span>}
-                    {x.넣은이 === '손' && <span className="rounded bg-purple-50 px-1.5 text-xs text-purple-800">손 입력</span>}
+                    <span className="rounded bg-gray-100 px-1.5 text-xs dark:bg-gray-800">{x.경쟁사}</span>
+                    {x.기관분류 && <span className="rounded bg-badge-teal-bg px-1.5 text-xs text-gray-900">{x.기관분류}</span>}
+                    {x.기존 && <span className="rounded bg-gray-100 px-1.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">기존</span>}
+                    {x.넣은이 === '손' && <span className="rounded bg-badge-blue-bg px-1.5 text-xs text-gray-900">손 입력</span>}
                   </div>
                   <div className="mt-1 max-w-md">
                     {x.링크
                       ? <a href={x.링크} target="_blank" rel="noreferrer"
-                        className="text-blue-700 underline decoration-dotted">{x.제목}</a>
+                        className="text-interaction-blue underline decoration-dotted">{x.제목}</a>
                       : x.제목}
                   </div>
                   <div className="text-xs text-gray-500">
@@ -192,7 +192,7 @@ export default function AdminRival() {
                       <div className="max-w-xs text-xs">{x.우리제목}</div>
                       <div className="text-xs text-gray-500">{x.우리경로} · {x.우리것}</div>
                     </>
-                    : <span className="text-amber-700">없습니다</span>}
+                    : <span className="font-bold text-warning">없습니다</span>}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2">
                   <span className={'rounded px-1.5 py-0.5 text-xs ' + 판정색(x.판정)}>{x.판정 ?? '-'}</span>
@@ -210,7 +210,7 @@ export default function AdminRival() {
                   </select>
                   {x.원인 === '수집 목록에 없는 기관' && (
                     <button onClick={() => 후보로(x)}
-                      className="mt-1 block rounded-lg bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-500">
+                      className="mt-1 block rounded-lg bg-interaction-blue px-2 py-1 text-xs text-white hover:opacity-80">
                       수집 후보로 올리기
                     </button>
                   )}
@@ -235,14 +235,14 @@ export default function AdminRival() {
 
       {/* ── 수집 후보 ── */}
       {d.수집후보.length > 0 && (
-        <section className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <h2 className="font-bold text-blue-900">수집 대상 후보 {d.수집후보.length}곳</h2>
-          <ul className="mt-2 space-y-1 text-sm text-blue-900">
+        <section className="rounded-xl border border-gray-200 bg-badge-blue-bg p-4 dark:border-gray-700">
+          <h2 className="font-bold text-gray-900">수집 대상 후보 {d.수집후보.length}곳</h2>
+          <ul className="mt-2 space-y-1 text-sm text-gray-900">
             {d.수집후보.map((c) => (
               <li key={c.기관명}>
                 <b>{c.기관명}</b>
                 <span className="ml-2 rounded bg-white px-1.5 text-xs">{c.상태}</span>
-                <span className="ml-2 text-xs opacity-70">{c.어디서}</span>
+                <span className="ml-2 text-xs text-gray-700">{c.어디서}</span>
               </li>
             ))}
           </ul>
