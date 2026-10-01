@@ -138,15 +138,42 @@ const 앞머리에서출처 = (id) => {
   return '(모름)';
 };
 
+/* ★ 기본은 **접수중만** 봅니다 (2026-10-02).
+   gas 시트는 **쌓인 역사**라 9월에 마감된 공고까지 들고 있습니다. 새 수집기는
+   지금 접수중인 것만 봅니다. 그래서 날짜를 안 가리고 견주면 「옛 것만 읽음」이
+   58·7·30·108·8건으로 나오는데 그건 구멍이 아니라 그냥 마감된 공고입니다.
+   접수마감이 오늘보다 앞이면 뺍니다. 마감일이 빈 줄은 **남깁니다** —
+   「채용시까지」가 많아서, 빼면 진짜 구멍을 놓칠 수 있습니다.
+   --다보기 를 주면 마감된 것까지 전부 봅니다. */
+const 다보기 = argv.includes('--다보기');
+const 오늘 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+const 마감칸 = ['접수마감', '마감', 'apply_to'].find((n) => 자리[n] !== undefined);
+console.log('  마감 칸 「' + (마감칸 || '(없음)') + '」 · ' + (다보기 ? '마감된 것까지 전부' : '접수중만 (--다보기 로 전부)'));
+
 const 옛읽은것 = new Map();   // 옛 출처 → Set(공고ID)
+let 마감빼기 = 0;
 for (const r of 줄들) {
   const id = 칸(r, ID칸).trim();
   if (!id) continue;
   const s = 출처칸 ? 칸(r, 출처칸).trim() : 앞머리에서출처(id);
   if (!s) continue;
   if (날 && 날칸 && !칸(r, 날칸).startsWith(날)) continue;
+  if (!다보기 && 마감칸) {
+    /* 시트는 **점**으로 적습니다 — "2026.09.03" (2026-10-02 에 원문을 찍어 확인).
+       점·빗금을 빼기표 꼴로 바꿔서 견줍니다. 빈 줄·이상한 꼴은 남깁니다 */
+    const 끝 = 칸(r, 마감칸).trim().slice(0, 10).replace(/[./]/g, '-');
+    if (/^\d{4}-\d{2}-\d{2}$/.test(끝) && 끝 < 오늘) { 마감빼기++; continue; }
+  }
   if (!옛읽은것.has(s)) 옛읽은것.set(s, new Set());
   옛읽은것.get(s).add(id);
+}
+if (마감빼기) console.log('  마감 지나 뺀 줄 ' + 마감빼기 + '건 (기준 ' + 오늘 + ')');
+/* 마감일 꼴이 짐작과 다를 수 있습니다 — 원문 본보기를 찍습니다 (2026-10-02) */
+if (마감칸) {
+  const 본보기 = 줄들.slice(0, 2000).map((r) => 칸(r, 마감칸).trim()).filter(Boolean).slice(0, 6);
+  console.log('  마감일 원문 본보기 — ' + 본보기.map((x) => JSON.stringify(x)).join(' · '));
+  const 빈것 = 줄들.filter((r) => !칸(r, 마감칸).trim()).length;
+  console.log('  마감일이 빈 줄 ' + 빈것 + ' / ' + 줄들.length);
 }
 console.log('\n  시트 출처별 줄 수 —');
 for (const [s, v] of [...옛읽은것].sort()) console.log('    ' + s.padEnd(6) + v.size + '건');
