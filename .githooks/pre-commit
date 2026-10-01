@@ -1,4 +1,11 @@
 #!/bin/sh
-# 커밋 직전 열쇠 검사 — 2026-09-30 유출 뒤에 넣었습니다.
-# 켜는 법:  git config core.hooksPath .githooks
-exec node tools/열쇠검사.mjs
+# 커밋 직전 검사. 켜는 법:  git config core.hooksPath .githooks
+
+# ① 열쇠가 섞였나 — 2026-09-30 유출 뒤에 넣었습니다
+node tools/열쇠검사.mjs || exit 1
+
+# ② 관리자 화면을 만들어 놓고 메뉴에 안 걸었나 — 2026-10-01 에 두 번 났습니다.
+#    layout.tsx 나 admin 아래 화면이 바뀐 커밋에서만 봅니다
+if git diff --cached --name-only -z | tr '\0' '\n' | grep -q '^web/app/admin/'; then
+  node tools/관리자메뉴검사.mjs || exit 1
+fi
