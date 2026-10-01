@@ -250,7 +250,26 @@ async function 한건(cfg, r, 셈, 옵션) {
   const 우대글 = 우대칸.map((k) => String(r[k] ?? '')).join(' ');
   let 우대에만 = !!matchJob(우대글);
 
-  if (!job) { job = matchJob(hay); if (job) 근거 = '목록'; }
+  if (!job) {
+    job = matchJob(hay);
+    if (job) {
+      /* 전에는 그냥 '목록' 이라고만 적었습니다. 그러면 나중에 「이게 왜 우리
+         공고지?」 를 물었을 때 **어느 칸의 어느 낱말이 걸렸는지 알 수가 없어**
+         매번 API 를 다시 두드려야 했습니다 (2026-10-01).
+         어느 칸인지와 그 앞뒤 글자를 같이 남깁니다. */
+      const 걸린칸 = Object.entries(r)
+        .filter(([k]) => !우대칸.includes(k))
+        .find(([, v]) => matchJob(String(v ?? '')));
+      if (걸린칸) {
+        const 글 = String(걸린칸[1] ?? '').replace(/\s+/g, ' ');
+        const 어디 = 글.search(/물리치료|작업치료/);
+        근거 = '목록 · ' + 걸린칸[0] + ' 칸 — 「'
+          + 글.slice(Math.max(0, 어디 - 30), 어디 + 50).trim() + '」';
+      } else {
+        근거 = '목록 (어느 칸인지 못 가림)';
+      }
+    }
+  }
   if (job) 우대에만 = false;   // 제대로 된 칸에서 나왔으면 우대는 상관없습니다
 
   let hold = '', 인원 = Number(r.recrutNope) || null, 못읽은까닭 = '';
