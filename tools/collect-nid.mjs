@@ -40,6 +40,7 @@ import { fileURLToPath } from 'node:url';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 import { sortJob } from './sort-rule.mjs';
+import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
 import { 첨부직군 } from './첨부직군.mjs';
 
@@ -255,14 +256,24 @@ for (const v of 볼것) {
     detail: { 근거: v.근거 || '제목', ...(v.걸린줄 ? { 걸린줄: String(v.걸린줄).slice(0, 300) } : {}) },
     evidence: v.보류 ? { 보류사유: v.보류 } : {},
   };
-  if (v.가산점뿐) { 쓰레기.push({ id: 줄.id, org_name: 기관, title: v.제목, url: 줄.url, why: v.가산점뿐 }); continue; }
-  if (v.보류) { 줄.hold = true; 보류.push(줄); continue; }
+  /* 다시 받아야 할 까닭이면 판정을 기억하지 않습니다 (알리오·클린아이와 같은 규칙) */
+  const 적기 = (판정) => { v.__판정 = (v.보류 && /못 읽|못 받|OCR 실패/.test(v.보류)) ? '' : 판정; };
+  if (v.가산점뿐) { 적기('쓰레기통'); 쓰레기.push({ id: 줄.id, org_name: 기관, title: v.제목, url: 줄.url, why: v.가산점뿐 }); continue; }
+  if (v.보류) { 적기('보류함'); 줄.hold = true; 보류.push(줄); continue; }
   const 갈래 = sortJob(v.제목, v.직군 || '', null);
-  if (갈래.갈래 === '회원목록') { 회원.push(줄); continue; }
-  if (갈래.갈래 === '보류함') { 줄.hold = true; 보류.push(줄); continue; }
+  if (갈래.갈래 === '회원목록') { 적기('회원목록'); 회원.push(줄); continue; }
+  if (갈래.갈래 === '보류함') { 적기('보류함'); 줄.hold = true; 보류.push(줄); continue; }
+  적기('쓰레기통');
   쓰레기.push({ id: 줄.id, org_name: 기관, title: v.제목, url: 줄.url, why: 갈래.왜 || '우리 직군 아님' });
 }
 셈.회원 = 회원.length; 셈.보류 = 보류.length; 셈.쓰레기 = 쓰레기.length;
+/* 내린 판정을 기억에 남깁니다 — 10/3 짝 대조용 (2026-10-02) */
+if (!dry) {
+  await 판정남기기(cfg, { 열쇠: cfg.COLLECT_KEY_ND2 || cfg.COLLECT_KEY_HS3 || '', source: SOURCE,
+    줄들: 볼것.filter((v) => v.__판정 && v.x && v.x.no)
+      .map((v) => ({ 번호: String(v.x.no), 판정: v.__판정,
+        지문: 지문({ t: v.제목, d: v.x.날 || '' }) })) });
+}
 console.log('\n④ 갈래 — 회원 목록 ' + 셈.회원 + ' · 보류함 ' + 셈.보류 + ' · 쓰레기통 ' + 셈.쓰레기);
 if (회원.length) {
   console.log('\n  ★ 회원 목록에 올라갈 것 —');

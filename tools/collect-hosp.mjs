@@ -38,6 +38,7 @@ import { fileURLToPath } from 'node:url';
 import { 사이트줄 } from './hosp/sites.mjs';
 import { 글받기 } from './certs/index.mjs';
 import { sortJob } from './sort-rule.mjs';
+import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, mixedTitle, 구운날 } from './gas-rules.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -335,6 +336,17 @@ const 쓰레기2 = 결과.filter((x) => x.갈래.갈래 === '쓰레기통');
 /* 임상병리사·방사선사 — 버리지 않고 **화면에 안 보이게 쌓아둡니다** (2026-09-20 결정).
    나중에 값을 매길 자료이고, 버리면 되살릴 수 없습니다 */
 const 쌓을것 = 결과.filter((x) => x.갈래.갈래 === '숨김보관');
+/* 내린 판정을 기억에 남깁니다 — 10/3 짝 대조용 (2026-10-02 세중님 지시).
+   병원 홈페이지는 바깥 번호가 없어서 **공고ID 그대로** 적습니다.
+   지문은 안 바뀌는 칸(제목·주소·마감일)으로만 잽니다 — 긁은 쪽 전체로 재면
+   사이트가 꾸밈을 조금 바꿔도 지문이 달라집니다 */
+if (!dry) {
+  const 열쇠2 = cfg.COLLECT_KEY_HS3 || '';
+  await 판정남기기(cfg, { 열쇠: 열쇠2, source: SOURCE, 줄들: 결과
+    .filter((x) => x.id && x.갈래 && x.갈래.갈래)
+    .map((x) => ({ 번호: String(x.id), 판정: x.갈래.갈래,
+      지문: 지문({ t: x.title, u: x.url, d: x.to || x.from || '' }) })) });
+}
 if (회원2.length) {
   console.log('\n  ★ 회원 목록에 올라갈 것 —');
   회원2.forEach((x) => console.log('     ' + (x.직군 || '?').padEnd(7)

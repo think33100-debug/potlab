@@ -46,6 +46,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sortJob } from './sort-rule.mjs';
+import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
 import { 날짜풀기, 채용시까지인가 } from './날짜.mjs';
 import { 기관종별, 시설구분 } from './wn-kind.mjs';
@@ -365,16 +366,28 @@ for (const v of 볼것) {
     evidence: {},
   };
   const 갈래 = sortJob(v.제목, v.직군, null);
-  if (갈래.갈래 === '회원목록') { 회원.push(줄); continue; }
+  if (갈래.갈래 === '회원목록') { v.__판정 = '회원목록'; 회원.push(줄); continue; }
   if (갈래.갈래 === '쓰레기통') {
     /* 직종코드가 우리 것인데 갈래가 쓰레기통이면 사람이 봐야 합니다. 버리지 않습니다 */
     줄.hold = true;
     줄.evidence = { 보류사유: '고용24 직종코드는 우리 것인데 제목 규칙이 걸렀습니다 — ' + (갈래.왜 || '') };
+    v.__판정 = '보류함';
     보류.push(줄); continue;
   }
+  v.__판정 = '보류함';
   줄.hold = true; 보류.push(줄);
 }
 셈.회원 = 회원.length; 셈.보류 = 보류.length; 셈.쓰레기 = 쓰레기.length;
+/* 내린 판정을 기억에 남깁니다 — 10/3 짝 대조용 (2026-10-02).
+   워크넷 응답에는 **smodifyDtm(수정일시)** 가 있습니다 (예 202610011621).
+   원 출처가 「언제 고쳤나」를 알려주면 그게 지문보다 정확합니다 —
+   알리오·나라일터에는 그 칸이 없어서 목록 줄 지문을 쓰고 있습니다 */
+if (!dry) {
+  await 판정남기기(cfg, { 열쇠: cfg.COLLECT_KEY_WN2 || cfg.COLLECT_KEY_HS3 || '', source: SOURCE,
+    줄들: 볼것.filter((v) => v.__판정 && v.r && v.r.wantedAuthNo)
+      .map((v) => ({ 번호: String(v.r.wantedAuthNo), 판정: v.__판정,
+        지문: 지문({ m: String(v.r.smodifyDtm || ''), t: v.제목 }) })) });
+}
 console.log('\n③ 갈래 — 회원 목록 ' + 셈.회원 + ' · 보류함 ' + 셈.보류 + ' · 쓰레기통 ' + 셈.쓰레기);
 const 구분셈 = {};
 회원.forEach((x) => { const g = x.detail.시설구분; 구분셈[g] = (구분셈[g] || 0) + 1; });
