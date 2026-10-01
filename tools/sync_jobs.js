@@ -50,23 +50,76 @@ function env() {
   return out;
 }
 
+/* ── 앱스 스크립트가 JSONP 대신 구글 화면을 돌려줄 때 ───────────
+   2026-09-27 ~ 10-01 사이 26번 중 9번 이렇게 실패했습니다.
+   받은 것이 `<!DOCTYPE html>` 로 시작하는 구글 화면이었는데,
+   앞 300자만 찍어서 **무슨 화면인지 알 수가 없었습니다** —
+   오류 화면인지 로그인 화면인지 할당량 초과인지.
+
+   그래서 제목과 눈에 보이는 글자를 따로 뽑아 찍습니다. */
+function 화면읽기(txt) {
+  const 제목 = (txt.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '(제목 없음)';
+  const 본문 = txt
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ').trim();
+  /* 무엇인지 어림잡아 봅니다. 확실하지 않으면 「모름」 입니다 */
+  const 다 = (제목 + ' ' + 본문).toLowerCase();
+  const 짐작 =
+    /sign in|signin|로그인|accounts\.google/.test(다) ? '로그인 화면 (승인이 풀렸을 수 있습니다)'
+    : /quota|exceeded|한도|초과|too many/.test(다) ? '할당량 초과'
+    : /temporarily unavailable|try again|일시적|잠시 후/.test(다) ? '일시 오류 (잠시 후 다시)'
+    : /error|오류|문제가 발생/.test(다) ? '구글 오류 화면'
+    : '모름';
+  return { 제목, 본문, 짐작 };
+}
+
 /* ── 옛 쪽 시트 한 조각 ── */
 let seq = 0;
 async function page(cfg, from, cnt, sheet) {
-  const cb = '__potlab_cb_' + (++seq) + '_' + Date.now();
-  const url = cfg.APPS_SCRIPT_URL
-    + (cfg.APPS_SCRIPT_URL.includes('?') ? '&' : '?')
-    + 'callback=' + cb
-    + '&action=exportRows'
-    + '&args=' + encodeURIComponent(JSON.stringify([cfg.EXPORT_KEY, sheet || SHEET, from, cnt]))
-    + '&t=' + Date.now();
-  const res = await fetch(url, { redirect: 'follow' });
-  const txt = await res.text();
-  const m = txt.match(/^__potlab_cb_\d+_\d+\((.*)\);\s*$/s);
-  if (!m) throw new Error('JSONP 가 아닙니다: ' + txt.slice(0, 300));
-  const j = JSON.parse(m[1]);
-  if (!j.ok) throw new Error('내보내기 거절: ' + j.error);
-  return j.data;
+  /* 구글 화면이 오면 잠시 뒤 다시 걸어 봅니다.
+     ⚠ 30초·60초·120초는 **일시 오류일 때만** 뜻이 있습니다.
+       로그인·할당량이면 몇 번을 걸어도 같습니다 — 그래서 짐작을 함께 찍습니다. */
+  const 기다림 = [30, 60, 120];
+  let 마지막 = null;
+
+  for (let 번 = 0; 번 <= 기다림.length; 번++) {
+    const cb = '__potlab_cb_' + (++seq) + '_' + Date.now();
+    const url = cfg.APPS_SCRIPT_URL
+      + (cfg.APPS_SCRIPT_URL.includes('?') ? '&' : '?')
+      + 'callback=' + cb
+      + '&action=exportRows'
+      + '&args=' + encodeURIComponent(JSON.stringify([cfg.EXPORT_KEY, sheet || SHEET, from, cnt]))
+      + '&t=' + Date.now();
+    const res = await fetch(url, { redirect: 'follow' });
+    const txt = await res.text();
+    const m = txt.match(/^__potlab_cb_\d+_\d+\((.*)\);\s*$/s);
+
+    if (m) {
+      if (번 > 0) console.error('  ○ ' + 번 + '번째 다시 걸어 받았습니다');
+      const j = JSON.parse(m[1]);
+      if (!j.ok) throw new Error('내보내기 거절: ' + j.error);
+      return j.data;
+    }
+
+    const v = 화면읽기(txt);
+    마지막 = v;
+    console.error('  ★ JSONP 가 아니라 화면이 왔습니다 (' + (번 + 1) + '번째)'
+      + ' · HTTP ' + res.status + ' · ' + txt.length + '자'
+      + ' · 끝주소 ' + res.url
+      + '\n     제목   ' + v.제목
+      + '\n     짐작   ' + v.짐작
+      + '\n     본문 1200자 — ' + v.본문.slice(0, 1200));
+
+    if (번 === 기다림.length) break;
+    console.error('  ' + 기다림[번] + '초 쉬고 다시 걸어 봅니다');
+    await new Promise((y) => setTimeout(y, 기다림[번] * 1000));
+  }
+
+  throw new Error('JSONP 가 아닙니다 — ' + (기다림.length + 1) + '번 다 실패'
+    + ' · 제목 「' + 마지막.제목 + '」 · 짐작 ' + 마지막.짐작);
 }
 
 /* from 번째부터 cnt 줄을 (여러 쪽에 걸쳐) 읽습니다 */
