@@ -23,6 +23,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, MEDTECH, 구운날 } from './gas-rules.mjs';
 import { sortJob } from './sort-rule.mjs';
@@ -231,7 +232,7 @@ async function 한건(cfg, r, 셈, 옵션) {
   if (!id) return null;
 
   /* ① 제목이 남의 자리뿐이면 볼 것 없습니다 */
-  if (notOurs(title)) { 셈.남의자리++; return null; }
+  if (notOurs(title)) { 셈.남의자리++; r.__판정 = '남의 자리'; return null; }
 
   /* ② 제목 → ③ 목록 전체 */
   let job = matchJob(title);
@@ -326,11 +327,11 @@ async function 한건(cfg, r, 셈, 옵션) {
          대한적십자사 조리원 공고가 그렇습니다. 버리면 아무도 못 보고,
          회원 목록에 올리면 조리원 자리가 작업치료사로 뜹니다. 보류함이 맞습니다 */
       if (!job && !우대에만 && titleOtherOnly(title) && 근거 !== '상세 전형단계') {
-        셈.남의자리++; return null;
+        셈.남의자리++; r.__판정 = '남의 자리'; return null;
       }
       /* 「의료기술·의료기사·보건직」 같은 말이 있어야 우리 직군이 숨어 있을 수
          있습니다. 그런 말이 없으면 우리와 무관한 공고입니다 */
-      if (!job && !우대에만 && !MEDTECH.test(hay)) { 셈.우리와무관++; return null; }
+      if (!job && !우대에만 && !MEDTECH.test(hay)) { 셈.우리와무관++; r.__판정 = '우리와 무관'; return null; }
 
       /* ⑤ 여기까지 살아남은 것만 첨부 공고문을 읽습니다 (OCR) */
       if (!job) {
@@ -355,10 +356,11 @@ async function 한건(cfg, r, 셈, 옵션) {
   /* 마감된 것은 빼기 */
   const 오늘8 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }).replace(/-/g, '');
   const 끝8 = String(r.pbancEndYmd || '').replace(/\D/g, '');
-  if (끝8.length === 8 && 끝8 < 오늘8) { 셈.마감++; return null; }
+  if (끝8.length === 8 && 끝8 < 오늘8) { 셈.마감++; r.__판정 = '마감'; return null; }
 
   /* ⑥ 네 갈래 — 규칙은 tools/sort-rule.mjs 한 벌 */
   const 갈래 = sortJob(title, job || '');
+  r.__판정 = hold ? '보류함' : 갈래.갈래;
   return { id, org, title, job, 근거, hold, 인원, 갈래, r };
 }
 
@@ -489,12 +491,13 @@ for (let p = 1; p <= (순찰 ? 1 : 120); p++) {
 }
 console.log('받음        ' + rows.length + '건 (접수중 ' + total + '건) · ' + Math.round((Date.now() - t0) / 1000) + '초');
 
+const 열쇠 = cfg.COLLECT_KEY_AL2 || cfg.COLLECT_KEY_HS3 || '';
+
 /* ①-2 순찰이면 **DB 에 없는 번호만** 남깁니다 ─────────────────
    이걸 안 하면 순찰이 돌 때마다 상세 100번을 다시 엽니다.
    창구가 막히면(열쇠·통신) **거르지 않고 그대로 갑니다** —
    거르다 실패했다고 공고를 놓치면 안 됩니다. */
 if (순찰 && rows.length) {
-  const 열쇠 = cfg.COLLECT_KEY_AL2 || cfg.COLLECT_KEY_HS3 || '';
   const 번호들 = rows.map((r) => String(r.recrutPblntSn)).filter(Boolean);
   try {
     if (!열쇠) throw new Error('COLLECT_KEY 가 없습니다');
@@ -520,6 +523,47 @@ if (순찰 && rows.length) {
   }
 }
 
+/* ①-3 순찰은 **이미 판정한 번호도** 건너뜁니다 (2026-10-01) ─────
+   있는번호만으로는 모자랍니다. 「우리 직군이 아니라 안 담은」 공고는
+   job_posts 에 없으니 순찰마다 되살아나 상세를 다시 열고, 첨부가 있으면
+   OCR 까지 다시 돕니다. 실측 — 받은 100건 중 13건이 그랬고(남의 자리 6 ·
+   우리와 무관 7), 그중 9건이 상세를 다시 열었습니다.
+
+   그래서 버린 것까지 판정을 기억해 두고(수집판정 표), 목록 줄이 그대로면
+   건너뜁니다. 알리오 목록에는 **수정일 칸이 없습니다** — 날짜 칸은
+   pbancBgngYmd·pbancEndYmd 둘뿐이고 decimalDay 는 D-day 라 날마다 바뀝니다.
+   그래서 수정일 대신 목록 줄의 지문을 견줍니다. 지문이 달라지면 다시 봅니다.
+
+   **전체 한 바퀴(--순찰 없이)는 건너뛰지 않습니다** — 하루 한 번은 다 봅니다. */
+const 지문 = (r) => createHash('sha1').update(JSON.stringify(
+  Object.fromEntries(Object.entries(r)
+    .filter(([k]) => !k.startsWith('__') && k !== 'decimalDay' && k !== 'ongoingYn'))
+)).digest('hex').slice(0, 32);
+
+if (순찰 && rows.length) {
+  try {
+    if (!열쇠) throw new Error('COLLECT_KEY 가 없습니다');
+    const 안것 = new Map();
+    for (let i = 0; i < rows.length; i += 500) {
+      const 묶음 = rows.slice(i, i + 500).map((r) => String(r.recrutPblntSn)).filter(Boolean);
+      const j = await rpc(cfg, encodeURIComponent('판정물어보기'),
+        { p_secret: 열쇠, p_source: SOURCE, p_ids: 묶음 });
+      for (const x of (j || [])) 안것.set(String(x.번호), String(x.지문));
+    }
+    const 전 = rows.length;
+    rows = rows.filter((r) => {
+      const 기억 = 안것.get(String(r.recrutPblntSn));
+      if (기억 && 기억 === 지문(r)) return false;
+      return true;
+    });
+    console.log('순찰        전에 판정한 것 ' + (전 - rows.length) + '건을 더 빼고 '
+      + rows.length + '건만 봅니다');
+  } catch (e) {
+    console.error('순찰        ★ 전에 내린 판정을 못 물어봤습니다 — 거르지 않고 그대로 갑니다');
+    console.error('            ' + String(e.message).slice(0, 400));
+  }
+}
+
 /* ② 판정 */
 const 셈 = { 상세: 0, 상세못받음: 0, OCR: 0, 남의자리: 0, 우리와무관: 0, 마감: 0, 건너뜀: 0 };
 const 건너뛴것 = [];
@@ -534,6 +578,26 @@ for (const r of 볼것) {
     if (건너뛴것.length < 20) 건너뛴것.push({ id: r.recrutPblntSn, why: String(e.message).slice(0, 120) });
   }
 }
+/* ②-2 내린 판정을 기억에 남깁니다 — **버린 것까지** (2026-10-01).
+   담지 않은 공고도 남겨야 순찰이 같은 상세를 다시 안 엽니다.
+   남기는 것은 번호·출처·판정·판정때·지문뿐입니다. 공고 본문은 안 담습니다.
+   던진 줄(셈.건너뜀)은 **안 남깁니다** — 다음에 다시 봐야 하니까요. */
+if (!dry && 열쇠) {
+  const 남길것 = 볼것
+    .filter((r) => r.__판정 && r.recrutPblntSn)
+    .map((r) => ({ 번호: String(r.recrutPblntSn), 판정: r.__판정, 지문: 지문(r) }));
+  let 남긴수 = 0;
+  try {
+    for (let i = 0; i < 남길것.length; i += 500) {
+      남긴수 += Number(await rpc(cfg, encodeURIComponent('판정남기기'),
+        { p_secret: 열쇠, p_source: SOURCE, p_rows: 남길것.slice(i, i + 500) })) || 0;
+    }
+    console.log('판정 기억   ' + 남긴수 + '건');
+  } catch (e) {
+    console.error('판정 기억   ★ 못 남겼습니다 — ' + String(e.message).slice(0, 300));
+  }
+}
+
 const 회원 = 결과.filter((x) => !x.hold && x.갈래.갈래 === '회원목록');
 const 보류 = 결과.filter((x) => x.hold || x.갈래.갈래 === '보류함');
 const 쓰레기 = 결과.filter((x) => !x.hold && x.갈래.갈래 === '쓰레기통');
