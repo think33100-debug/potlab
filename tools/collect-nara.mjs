@@ -285,13 +285,22 @@ console.log('  볼 것 ' + 볼것.length + '건 (제목에 직군 ' + 볼것.fil
    그걸 쓰는 게 맞지만 나라일터 목록에는 없어서 목록 줄 지문을 견줍니다.
    **전체 한 바퀴(--순찰 없이)는 건너뛰지 않습니다** — 하루 한 번은 다 봅니다. */
 const 열쇠 = cfg.COLLECT_KEY_GJ2 || cfg.COLLECT_KEY_HS3 || '';
+/* 지문을 잴 칸 — 수정일·마감일·제목만. 조회수(readnum)는 빼야 합니다 */
+const 재볼것 = (v) => ({ m: String(v.x.moddate || ''), e: String(v.x.enddate || ''), t: String(v.x.title || '') });
 let 볼것2 = 볼것;
 if (순찰 && 볼것.length) {
   볼것2 = await 판정한것빼기(cfg, { 열쇠, source: SOURCE, 줄들: 볼것,
     번호뽑기: (v) => v.x && v.x.idx,
-    /* ★ 지문은 **원 목록 줄(v.x)** 로 잽니다. v 에는 수집기가 상세·보류·직군을
-       덧붙여서, v 로 재면 지문이 매번 달라져 기억이 뜻을 잃습니다 */
-    지문뽑기: (v) => v.x });
+    /* ★ 목록 줄 전체로 재면 안 됩니다. 나라일터 목록에는 **readnum(조회수)** 가
+       있어서 누가 보기만 해도 지문이 달라집니다 — 376건을 기억했는데 91건만
+       건너뛰었습니다 (2026-10-02 실측).
+       대신 **moddate(수정일)** 를 씁니다. 목록 칸은 열입니다 —
+         areacode · enddate · idx · insttname · moddate · readnum · regdate ·
+         title · type01 · type02
+       원 출처가 「언제 고쳤나」를 알려주니 그게 지문보다 정확합니다.
+       (어제 「나라일터에 수정일 칸이 없다」고 적은 것은 틀렸습니다 —
+        상세 응답만 보고 목록을 안 봤습니다) */
+    지문뽑기: 재볼것 });
   볼것.length = 0;
   볼것.push(...볼것2);
 }
@@ -531,7 +540,7 @@ for (const v of 볼것) {
 if (!dry) {
   await 판정남기기(cfg, { 열쇠, source: SOURCE, 줄들: 볼것
     .filter((v) => v.__판정 && v.x && v.x.idx)
-    .map((v) => ({ 번호: String(v.x.idx), 판정: v.__판정, 지문: 지문(v.x) })) });
+    .map((v) => ({ 번호: String(v.x.idx), 판정: v.__판정, 지문: 지문(재볼것(v)) })) });
 }
 
 console.log('\n④ 갈래 — 회원 목록 ' + 셈.회원 + ' · 보류함 ' + 셈.보류 + ' · 쓰레기통 ' + 셈.쓰레기);
