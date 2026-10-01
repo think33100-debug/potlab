@@ -58,6 +58,8 @@ export default function AdminPosts() {
   const [counts, setCounts] = useState({ live: 0, hidden: 0, all: 0 });
   const [busy, setBusy] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  /* 회원번호는 회원 화면에 안 나가는 칸이라 창구(admin_회원표)로만 받습니다 */
+  const [이름표, set이름표] = useState<Record<string, string>>({});
 
   /* 받아오는 일과 상태에 넣는 일을 갈라둡니다 —
      effect 안에서 바로 setState 하면 그릴 때마다 한 번 더 그립니다
@@ -68,17 +70,23 @@ export default function AdminPosts() {
     if (s === 'live') q = q.eq('hidden', false);
     if (s === 'hidden') q = q.eq('hidden', true);
 
-    const [list, live, hidden, all] = await Promise.all([
+    const [list, live, hidden, all, people] = await Promise.all([
       q,
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('hidden', false),
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('hidden', true),
       sb.from('posts').select('id', { count: 'exact', head: true }),
+      sb.rpc('admin_회원표'),
     ]);
+
+    const 표: Record<string, string> = {};
+    ((people.data ?? []) as { id: string; 이름표: string }[])
+      .forEach((p) => { 표[p.id] = p.이름표; });
 
     return {
       rows: (list.data ?? []) as unknown as Row[],
       error: list.error?.message ?? null,
       counts: { live: live.count ?? 0, hidden: hidden.count ?? 0, all: all.count ?? 0 },
+      이름표: 표,
     };
   }, []);
 
@@ -87,6 +95,7 @@ export default function AdminPosts() {
     setRows(r.rows);
     setCounts(r.counts);
     setErr(r.error);
+    set이름표(r.이름표);
   }, [fetchAll]);
 
   useEffect(() => {
@@ -118,8 +127,11 @@ export default function AdminPosts() {
     toast(next ? '감췄어요' : '다시 보이게 했어요');
   };
 
-  /* 이름. 탈퇴한 분의 원래 이름은 이제 어디에도 없습니다 (2026-10-01) */
-  const nameOf = (p: Person) => {
+  /* 이름 — 관리자 화면에서는 「#번호 닉네임」 으로 보여줍니다 (2026-10-01).
+     탈퇴한 분의 원래 이름은 30일 동안 암호로 잠겨 있고, 여기서는 안 풉니다.
+     꼭 봐야 하면 admin_탈퇴이름() 으로만 열 수 있고 그때 기록이 남습니다 */
+  const nameOf = (p: Person, id?: string) => {
+    if (id && 이름표[id]) return 이름표[id];
     if (!p) return '알 수 없음';
     return p.erased_at ? '탈퇴한 회원' : p.nickname;
   };
@@ -128,8 +140,8 @@ export default function AdminPosts() {
   const who = (r: Row) => {
     if (!r.hidden_by) return '누가 감췄는지 기록이 없어요 (이 기능을 붙이기 전에 감춘 글)';
     return r.hidden_by === r.author_id
-      ? '글쓴이(' + nameOf(r.author) + ')가 지웠어요'
-      : '관리자 ' + nameOf(r.hider) + ' 가 내렸어요';
+      ? '글쓴이(' + nameOf(r.author, r.author_id) + ')가 지웠어요'
+      : '관리자 ' + nameOf(r.hider, r.hidden_by ?? undefined) + ' 가 내렸어요';
   };
 
   return (
@@ -181,7 +193,7 @@ export default function AdminPosts() {
               <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
                 {channelName(r.channel)}
               </span>
-              <span>{nameOf(r.author)}</span>
+              <span>{nameOf(r.author, r.author_id)}</span>
               <span className="text-gray-400">{ago(r.created_at)}</span>
               {r.hidden && (
                 <span className="rounded-md bg-gray-100 px-3 font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">

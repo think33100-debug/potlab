@@ -35,6 +35,7 @@ type 줄 = {
   무엇: string;
   어느표: string;
   누구것: string | null;
+  누구: string | null;
   몇명: number | null;
 };
 
@@ -62,7 +63,8 @@ export default function AdminAccessLog() {
     const k = q.trim();
     if (!k || !rows) return rows ?? [];
     return rows.filter((r) =>
-      [r.누가, r.무엇, r.어느표, r.누구것 ?? '', r.어디서 ?? ''].join(' ').includes(k));
+      [r.누가, r.무엇, r.어느표, r.누구 ?? '', r.누구것 ?? '', r.어디서 ?? '']
+        .join(' ').includes(k));
   }, [rows, q]);
 
   /* 이번 달에 몇 건이나 봤나 — 점검할 때 먼저 보는 숫자입니다 */
@@ -94,11 +96,11 @@ export default function AdminAccessLog() {
       </div>
 
       <label className="mt-6 block">
-        <span className="text-sm font-bold text-gray-500">찾기 (누가·무엇·어느 표)</span>
+        <span className="text-sm font-bold text-gray-500">찾기 (회원번호·닉네임·무엇·어느 표)</span>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="예: 급여 · 탈퇴이름"
+          placeholder="예: 급여 · 탈퇴이름 · #00003"
           aria-label="찾기"
           className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
         />
@@ -139,7 +141,7 @@ export default function AdminAccessLog() {
                 {r.어느표}
                 {r.누구것 && (
                   <span className="block text-sm">
-                    누구 것 — <span className="num tabular-nums">{r.누구것}</span>
+                    누구 것 — <span className="font-bold">{r.누구 ?? r.누구것}</span>
                   </span>
                 )}
                 {r.몇명 != null && r.몇명 > 1 && (

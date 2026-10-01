@@ -110,6 +110,17 @@ export default function Welcome() {
       return;
     }
 
+    /* 동의는 증빙이라 **문서별로** 남깁니다 (2026-10-01).
+       profiles.terms_version 한 칸으로는 어느 문서에 동의한 건지 알 수 없습니다.
+       선택 항목(알림)은 안 눌렀어도 「false 로 동의 안 함」 을 남깁니다 —
+       나중에 「물어봤는데 거절했다」 를 보이려면 그 기록이 있어야 합니다.
+       실패해도 가입은 굴러가게 둡니다. 여기서 막으면 가입이 통째로 죽습니다 */
+    const 동의 = await sb.rpc('동의남기기', {
+      p_판: TERMS_VERSION,
+      p_문서들: Object.fromEntries(AGREEMENTS.map((a) => [a.key, !!checked[a.key]])),
+    });
+    if (동의.error) console.error('[POTJOB] 동의 기록을 못 남겼습니다 ·', 동의.error.message);
+
     if (checked.notify) {
       await sb.from('notification_settings').upsert({
         profile_id: session.user.id, agreed: true, agreed_at: new Date().toISOString(),
