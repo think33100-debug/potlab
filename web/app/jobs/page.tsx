@@ -243,7 +243,19 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 break-keep text-body-lg font-medium">{r.title}</p>
+                  <p className="mt-1 break-keep text-body-lg font-medium">
+                    {/* 체험형 인턴은 정규 채용과 구분해 보여줍니다 (2026-10-01).
+                        이런 공고에도 우리 직군 직렬이 실제로 있습니다 —
+                        근로복지공단 청년인턴 응시자격에 「(물리치료사) 면허증
+                        소지자」가 적혀 있어 올립니다. 다만 인턴이라 헷갈리지
+                        않게 표시합니다. 판단은 DB(job_posts_pub.is_intern)가 합니다 */}
+                    {r.is_intern && (
+                      <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-warning ring-1 ring-warning/40">
+                        체험형 인턴
+                      </span>
+                    )}
+                    {r.title}
+                  </p>
                   <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
                     {searching && r.tab && (
                       <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">

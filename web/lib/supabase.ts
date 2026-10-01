@@ -54,13 +54,19 @@ export type JobPost = {
   org_kind: string | null;
   tab: string | null;
   detail: Record<string, string>;
+  /* 체험형 인턴인가 — 정규 채용과 구분해 보여주려고 (2026-10-01).
+     DB 가 제목으로 스스로 정합니다: 수련생|체험형|청년인턴|인턴
+     이런 공고도 우리 직군 직렬이 실제로 있어서 올립니다 —
+     근로복지공단 청년인턴은 응시자격에 「(물리치료사) 면허증 소지자」가
+     적혀 있습니다. 다만 인턴이라 회원이 헷갈리지 않게 표시를 답니다 */
+  is_intern: boolean | null;
 };
 
 export type JobListItem = Pick<
   JobPost,
   'id' | 'org_name' | 'title' | 'employ_type' | 'work_place'
   | 'sido' | 'job_group' | 'org_kind' | 'tab'
-  | 'apply_from' | 'apply_to' | 'posted_at' | 'headcount'
+  | 'apply_from' | 'apply_to' | 'posted_at' | 'headcount' | 'is_intern'
 >;
 
 export const SOURCE_NAME: Record<string, string> = {
