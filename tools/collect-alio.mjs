@@ -418,6 +418,8 @@ const argv = process.argv.slice(2);
  */
 const 한줄 = argv.includes('--한줄');
 const dry = argv.includes('--dry') || 한줄;
+/* --순찰 — 자주 도는 가벼운 모드. 첫 쪽만 받고 DB 에 없는 번호만 상세를 엽니다 */
+const 순찰 = argv.includes('--순찰');
 const 몇건 = argv.includes('--n') ? Number(argv[argv.indexOf('--n') + 1]) || 0 : 0;
 /* --한줄 일 때는 중간 로그를 죽입니다. 한 줄만 남기려고요 */
 const 원래log = console.log;
@@ -453,11 +455,16 @@ if (dry) {
   await 막혔나();
 }
 
-/* ① 목록 전부 */
-console.log('\n── 목록 받기 ──');
+/* ① 목록 — 순찰이면 첫 쪽만, 아니면 전부 ─────────────────────
+   순찰(--순찰)은 **자주, 가볍게** 도는 모드입니다 (2026-10-01).
+     목록 첫 쪽만 받고 → DB 에 없는 번호만 골라 → 그것만 상세를 엽니다
+     새 공고가 없으면 상세를 한 번도 안 열고 몇 초에 끝납니다.
+   전체 한 바퀴(--순찰 없이)는 지금처럼 다 훑습니다 —
+   마감일이 바뀌거나 고쳐진 것을 따라잡는 몫입니다. */
+console.log('\n── 목록 받기 ──' + (순찰 ? ' (순찰 — 첫 쪽만)' : ''));
 let rows = [];
 let total = null;
-for (let p = 1; p <= 120; p++) {
+for (let p = 1; p <= (순찰 ? 1 : 120); p++) {
   /* 첫 쪽은 무슨 일이 있었는지 다 찍습니다. 뒷쪽까지 찍으면 로그가 넘칩니다 */
   const j = await 목록한쪽(cfg, p, p === 1 || dry);
   if (!j) {
@@ -481,6 +488,37 @@ for (let p = 1; p <= 120; p++) {
   await 쉬기(200);
 }
 console.log('받음        ' + rows.length + '건 (접수중 ' + total + '건) · ' + Math.round((Date.now() - t0) / 1000) + '초');
+
+/* ①-2 순찰이면 **DB 에 없는 번호만** 남깁니다 ─────────────────
+   이걸 안 하면 순찰이 돌 때마다 상세 100번을 다시 엽니다.
+   창구가 막히면(열쇠·통신) **거르지 않고 그대로 갑니다** —
+   거르다 실패했다고 공고를 놓치면 안 됩니다. */
+if (순찰 && rows.length) {
+  const 열쇠 = cfg.COLLECT_KEY_AL2 || cfg.COLLECT_KEY_HS3 || '';
+  const 번호들 = rows.map((r) => String(r.recrutPblntSn)).filter(Boolean);
+  try {
+    if (!열쇠) throw new Error('COLLECT_KEY 가 없습니다');
+    const res = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('있는번호'), {
+      method: 'POST',
+      headers: {
+        apikey: cfg.SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + cfg.SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ p_secret: 열쇠, p_source: SOURCE, p_ids: 번호들 }),
+    });
+    const 글 = await res.text();
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' · 응답 원문 — ' + 글.slice(0, 400));
+    const 있는것 = new Set(JSON.parse(글).map((x) => String(x.id)));
+    const 전 = rows.length;
+    rows = rows.filter((r) => !있는것.has(String(r.recrutPblntSn)));
+    console.log('순찰        이미 있는 것 ' + 있는것.size + '건을 빼고 '
+      + rows.length + '건만 봅니다 (받은 ' + 전 + '건 중)');
+  } catch (e) {
+    console.error('순찰        ★ 있는 번호를 못 물어봤습니다 — 거르지 않고 그대로 갑니다');
+    console.error('            ' + String(e.message).slice(0, 400));
+  }
+}
 
 /* ② 판정 */
 const 셈 = { 상세: 0, 상세못받음: 0, OCR: 0, 남의자리: 0, 우리와무관: 0, 마감: 0, 건너뜀: 0 };
