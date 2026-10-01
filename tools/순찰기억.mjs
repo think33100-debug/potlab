@@ -49,8 +49,13 @@ async function rpc(cfg, 이름, body) {
 /**
  * 전에 판정한 줄을 빼고 돌려줍니다. 실패하면 받은 것을 그대로 돌려줍니다.
  * @param 번호뽑기 (줄) => '305658' 같은 원 출처 번호
+ * @param 지문뽑기 (줄) => 지문을 잴 **원 목록 줄**. 안 주면 줄 자체를 씁니다.
+ *        나라일터처럼 수집기가 줄에 제 값(상세·보류·직군)을 덧붙이는 경우에는
+ *        꼭 주어야 합니다 — 안 그러면 지문이 매번 달라져 기억이 뜻을 잃습니다
+ *        (2026-10-02 에 그럴 뻔했습니다).
  */
-export async function 판정한것빼기(cfg, { 열쇠, source, 줄들, 번호뽑기, 뺄칸 = [] }) {
+export async function 판정한것빼기(cfg, { 열쇠, source, 줄들, 번호뽑기, 지문뽑기, 뺄칸 = [] }) {
+  const 잴것 = 지문뽑기 || ((o) => o);
   if (!줄들.length) return 줄들;
   try {
     if (!열쇠) throw new Error('COLLECT_KEY 가 없습니다');
@@ -63,7 +68,7 @@ export async function 판정한것빼기(cfg, { 열쇠, source, 줄들, 번호�
     }
     const 남을것 = 줄들.filter((o) => {
       const 기억 = 안것.get(String(번호뽑기(o) || ''));
-      return !(기억 && 기억 === 지문(o, 뺄칸));
+      return !(기억 && 기억 === 지문(잴것(o), 뺄칸));
     });
     console.log('순찰        전에 판정한 것 ' + (줄들.length - 남을것.length)
       + '건을 빼고 ' + 남을것.length + '건만 봅니다');
