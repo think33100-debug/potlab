@@ -188,15 +188,63 @@ const 셈 = {
 };
 const 보기 = { 날짜: [], 기호: [], 지역: [], 남의직종: [] };
 
+/* ── 이상한 응답을 스스로 잡습니다 (2026-10-02) ──────────────────
+   고용24 는 **하루 호출 한도를 어디에도 밝히지 않습니다.** 문서 두 곳,
+   data.go.kr, 응답 헤더 13개, 응답 본문을 다 봤는데 없었습니다.
+   그래서 주기를 하루 3회 → 16회로 올리면서 「이상하면 바로 멈추는」 장치를 둡니다.
+
+   정상 응답은 반드시 <wantedRoot> 로 시작합니다. 200 인데 그게 아니면
+   (한도 초과·열쇠 거절·점검 화면 등) **원문을 남기고 exit 1 로 멈춥니다.**
+   그러면 ~/워크넷크론.sh 가 주기를 하루 3회로 되돌립니다. */
+const 로그터 = (process.env.HOME || process.env.USERPROFILE || '.') + '/log';
+function 이상한응답남기기(쪽, r) {
+  try {
+    fs.mkdirSync(로그터, { recursive: true });
+    const 글 = '[' + new Date().toISOString() + '] ' + 쪽 + '쪽 · HTTP ' + r.code
+      + ' · ' + (r.왜 || '') + '\n' + 가리기(r.글).slice(0, 1200) + '\n\n';
+    fs.appendFileSync(로그터 + '/워크넷_이상.log', 글);
+  } catch (e) { console.error('이상 기록 실패 · ' + String(e.message).slice(0, 120)); }
+}
+/* 하루 호출 수 — 나중에 한도를 문의할 때 근거로 씁니다 */
+let 호출수 = 0;
+function 호출수남기기() {
+  try {
+    fs.mkdirSync(로그터, { recursive: true });
+    const 파일 = 로그터 + '/워크넷_호출수.json';
+    let 표 = {};
+    try { 표 = JSON.parse(fs.readFileSync(파일, 'utf8')); } catch { /* 처음이면 빈 표 */ }
+    const 날 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+    표[날] = (표[날] || 0) + 호출수;
+    /* 60일치만 들고 있습니다 */
+    const 날들 = Object.keys(표).sort();
+    while (날들.length > 60) delete 표[날들.shift()];
+    fs.writeFileSync(파일, JSON.stringify(표, null, 1));
+    console.log('  호출 ' + 호출수 + '번 · 오늘 누적 ' + 표[날] + '번 (한도는 공개 안 됨)');
+  } catch (e) { console.error('호출 수 기록 실패 · ' + String(e.message).slice(0, 120)); }
+}
+
 console.log('\n① 목록 —');
 const 모은것 = [];
 let 전체 = null;
+let 이상 = false;
 for (let 쪽 = 1; 쪽 <= 최대쪽; 쪽++) {
   const r = await 받기(주소만들기({ callTp: 'L', startPage: 쪽, display: 100, occupation: 직종.join('|') }));
+  호출수++;
   if (r.code !== 200 || !r.글) {
     셈.못받은쪽++;
-    console.error('  ' + 쪽 + '쪽 HTTP ' + r.code + ' · ' + (r.왜 || '')
+    이상 = true;
+    이상한응답남기기(쪽, r);
+    console.error('  ★ ' + 쪽 + '쪽 HTTP ' + r.code + ' · ' + (r.왜 || '')
       + ' · 응답 앞 500자 — ' + 가리기(r.글).replace(/\s+/g, ' ').slice(0, 500));
+    break;
+  }
+  /* 200 인데 wantedRoot 가 아니면 한도 초과·열쇠 거절·점검 화면입니다 */
+  if (!/<wantedRoot[\s>]/.test(r.글)) {
+    셈.못받은쪽++;
+    이상 = true;
+    이상한응답남기기(쪽, r);
+    console.error('  ★ ' + 쪽 + '쪽 HTTP 200 인데 wantedRoot 가 아닙니다'
+      + ' · ' + r.글.length + '자 · 앞 500자 — ' + 가리기(r.글).replace(/\s+/g, ' ').slice(0, 500));
     break;
   }
   if (전체 === null) {
@@ -212,6 +260,15 @@ for (let 쪽 = 1; 쪽 <= 최대쪽; 쪽++) {
   await 쉼(400);
 }
 console.log('  읽은 줄 ' + 셈.읽은줄 + (셈.못받은쪽 ? ' · 못 받은 쪽 ' + 셈.못받은쪽 : ''));
+호출수남기기();
+/* 이상한 응답을 한 번이라도 받으면 **담지 않고 멈춥니다.**
+   반쪽만 읽은 목록으로 담으면 멀쩡한 공고가 사라진 것처럼 보입니다.
+   exit 1 을 보고 ~/워크넷크론.sh 가 주기를 하루 3회로 되돌립니다 */
+if (이상) {
+  console.error('\n★ 이상한 응답을 받아 멈춥니다 — 담지 않았습니다');
+  console.error('   원문은 ' + 로그터 + '/워크넷_이상.log 에 남겼습니다');
+  process.exit(1);
+}
 
 /* ── ② 거르고 다듬기 ──────────────────────────────────────── */
 const 오늘 = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
