@@ -528,7 +528,16 @@ const 담을것 = 회원.concat(보류).map((x) => {
     headcount: x.인원 || null,
     apply_from: 날(r.pbancBgngYmd), apply_to: 날(r.pbancEndYmd),
     posted_at: 날(r.pbancBgngYmd),
-    url: de(r.srcUrl),
+    /* 알리오는 srcUrl 에 **공고별 주소가 아니라 기관 대문**을 주는 때가 많습니다
+       (2026-10-01). 근로복지공단 12건이 전부 comwel.or.kr/recruit/hp/main.do
+       하나였습니다 — 눌러도 그 공고로 안 갑니다.
+       알리오 자체 공고 쪽으로 보냅니다. 확인한 것 — idx 는 recrutPblntSn 과
+       같은 번호입니다 (305616·305572·305539 세 건을 열어 API 제목이
+       그 쪽 안에 있는 것을 봤습니다).
+       기관 대문은 detail.기관홈 에 그대로 남깁니다 — 버리지 않습니다. */
+    url: r.recrutPblntSn
+      ? 'https://job.alio.go.kr/recruitview.do?idx=' + r.recrutPblntSn
+      : de(r.srcUrl),
     job_group: x.job || null,
     form: (x.근거 === '제목' && !mixedTitle(x.title)) ? null : '포함',
     hidden: false,
