@@ -45,6 +45,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, 구운날 } from './gas-rules.mjs';
 import { sortJob } from './sort-rule.mjs';
+import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
@@ -194,7 +195,7 @@ async function 한건(o, 셈, 옵션) {
   const org = String(o.ENT_NAME || '');
 
   /* ① 제목이 남의 자리뿐이면 볼 것 없습니다 */
-  if (notOurs(title)) { 셈.남의자리++; return null; }
+  if (notOurs(title)) { 셈.남의자리++; o.__판정 = '남의 자리'; return null; }
 
   /* ② 제목 → ③ 자격증·직무 칸 */
   let job = matchJob(title);
@@ -220,7 +221,7 @@ async function 한건(o, 셈, 옵션) {
      규칙을 클린아이 전용 코드에 두면 두 벌이 됩니다 (2026-09-26 세중님 지시) */
   let 첨부 = undefined;
   if (!job && !옵션.첨부안열기) {
-    if (titleOtherOnly(title)) { 셈.남의자리++; return null; }
+    if (titleOtherOnly(title)) { 셈.남의자리++; o.__판정 = '남의 자리'; return null; }
     if (옵션.통막힘 && 옵션.통막힘.막힘) {
       /* 이번 실행에서는 더 못 읽습니다 — 다음 실행이 이어서 읽습니다 */
       셈.다음번++;
@@ -236,7 +237,7 @@ async function 한건(o, 셈, 옵션) {
   /* 마감 지난 것은 빼기 */
   const 오늘 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
   const 끝 = 날(o.PUB_END_DATE);
-  if (끝 && 끝 < 오늘) { 셈.마감++; return null; }
+  if (끝 && 끝 < 오늘) { 셈.마감++; o.__판정 = '마감'; return null; }
 
   /* ⑤ 갈래 — 규칙은 tools/sort-rule.mjs 한 벌 (네 갈래 + 5단계) */
   const 갈래 = sortJob(title, job || '', 첨부);
@@ -250,6 +251,9 @@ async function 한건(o, 셈, 옵션) {
      지금까지는 직군만 뽑고 버려서, 규칙을 고쳐도 이미 지나간 공고에 다시 못 댔습니다.
      회원 화면에는 안 나갑니다 — job_body 는 anon 에게 권한이 없습니다.
      개인정보는 DB 의 collect_body() 가 담기 전에 지웁니다 */
+  /* 첨부를 **열려다 못 연** 줄은 판정을 안 남깁니다 (통 막힘·다음 번에·못 받음).
+     남기면 순찰이 영영 건너뛰어, 다음 실행이 이어서 읽을 기회를 뺏습니다 */
+  if (!첨부 || 첨부.읽음) o.__판정 = hold ? '보류함' : 갈래.갈래;
   const 원문 = (첨부 && 첨부.읽음 && 첨부.글) ? 첨부.글 : '';
   return { id, org, title, job, 근거, hold, 다시: !!갈래.다시, 갈래, o, 원문 };
 }
@@ -294,9 +298,14 @@ const 한줄 = argv.includes('--한줄');
 const dry = argv.includes('--dry') || 한줄;
 const 몇건 = argv.includes('--n') ? Number(argv[argv.indexOf('--n') + 1]) || 0 : 0;
 const 첨부안열기 = argv.includes('--첨부안열기');
+/* --순찰 — 자주 도는 가벼운 모드 (2026-10-01).
+   클린아이 목록은 시도 17곳 한 번씩이라 더 줄일 게 없습니다 (쪽 넘김이 없습니다).
+   무거운 것은 **상세 판정과 첨부 읽기**입니다 — 한 바퀴 971초 · OCR 30건.
+   그래서 순찰은 목록은 그대로 받고, **전에 판정한 줄만 빼고** 봅니다. */
+const 순찰 = argv.includes('--순찰');
 /* 이번 실행에 쓸 시간. 통이 차면 2분 쉬고 이어가다가, 이 시간을 넘기면
    나머지는 「다음에」 로 넘깁니다 (Actions timeout 25분보다 넉넉히 짧게) */
-const 시간예산 = (argv.includes('--분') ? Number(argv[argv.indexOf('--분') + 1]) || 18 : 18) * 60000;
+const 시간예산 = (argv.includes('--분') ? Number(argv[argv.indexOf('--분') + 1]) || 18 : (순찰 ? 4 : 18)) * 60000;
 
 const 원래log = console.log;
 if (한줄) console.log = () => {};
@@ -336,7 +345,13 @@ console.log('  전체 ' + 전부.length + '건 · 그중 의료 ' + 의료.lengt
 const 셈 = { 남의자리: 0, 마감: 0, 첨부없음: 0, 첨부받음: 0, 첨부못받음: 0, 막힘: 0,
   hwp읽음: 0, hwp못읽음: 0, OCR: 0, pdf읽음: 0, pdf못읽음: 0, OCR못씀: 0,
   모르는꼴: 0, 첨부로가림: 0, 다음번: 0, 통쉼: 0 };
-const 볼것 = 몇건 ? 의료.slice(0, 몇건) : 의료;
+const 열쇠 = cfg.COLLECT_KEY_CE2 || cfg.COLLECT_KEY_HS3 || '';
+let 거른것 = 의료;
+if (순찰 && 거른것.length) {
+  거른것 = await 판정한것빼기(cfg, { 열쇠, source: SOURCE, 줄들: 거른것,
+    번호뽑기: (o) => o.NO });
+}
+const 볼것 = 몇건 ? 거른것.slice(0, 몇건) : 거른것;
 console.log('\n② 판정 — ' + 볼것.length + '건');
 const 결과 = [];
 const 통막힘 = { 막힘: false };
@@ -355,6 +370,11 @@ const 쓰레기 = 결과.filter((x) => x.갈래.갈래 === '쓰레기통');
 const 쌓을것 = 결과.filter((x) => x.갈래.갈래 === '숨김보관');
 
 console.log('  남의 자리라 버림  ' + 셈.남의자리 + ' · 마감 지남 ' + 셈.마감);
+if (!dry) {
+  await 판정남기기(cfg, { 열쇠, source: SOURCE, 줄들: 볼것
+    .filter((o) => o.__판정 && o.NO)
+    .map((o) => ({ 번호: String(o.NO), 판정: o.__판정, 지문: 지문(o) })) });
+}
 console.log('  첨부 — 없음 ' + 셈.첨부없음 + ' · 받음 ' + 셈.첨부받음
   + ' · 못 받음 ' + 셈.첨부못받음 + ' · 막힘(429) ' + 셈.막힘 + ' · 다음 번에 ' + 셈.다음번
   + (셈.통쉼 ? ' · 통이 차서 쉰 횟수 ' + 셈.통쉼 : ''));

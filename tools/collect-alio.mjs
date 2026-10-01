@@ -23,12 +23,12 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, MEDTECH, 구운날 } from './gas-rules.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 멈췄나 as OCR멈췄나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
+import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'AL2';
@@ -535,33 +535,9 @@ if (순찰 && rows.length) {
    그래서 수정일 대신 목록 줄의 지문을 견줍니다. 지문이 달라지면 다시 봅니다.
 
    **전체 한 바퀴(--순찰 없이)는 건너뛰지 않습니다** — 하루 한 번은 다 봅니다. */
-const 지문 = (r) => createHash('sha1').update(JSON.stringify(
-  Object.fromEntries(Object.entries(r)
-    .filter(([k]) => !k.startsWith('__') && k !== 'decimalDay' && k !== 'ongoingYn'))
-)).digest('hex').slice(0, 32);
-
 if (순찰 && rows.length) {
-  try {
-    if (!열쇠) throw new Error('COLLECT_KEY 가 없습니다');
-    const 안것 = new Map();
-    for (let i = 0; i < rows.length; i += 500) {
-      const 묶음 = rows.slice(i, i + 500).map((r) => String(r.recrutPblntSn)).filter(Boolean);
-      const j = await rpc(cfg, encodeURIComponent('판정물어보기'),
-        { p_secret: 열쇠, p_source: SOURCE, p_ids: 묶음 });
-      for (const x of (j || [])) 안것.set(String(x.번호), String(x.지문));
-    }
-    const 전 = rows.length;
-    rows = rows.filter((r) => {
-      const 기억 = 안것.get(String(r.recrutPblntSn));
-      if (기억 && 기억 === 지문(r)) return false;
-      return true;
-    });
-    console.log('순찰        전에 판정한 것 ' + (전 - rows.length) + '건을 더 빼고 '
-      + rows.length + '건만 봅니다');
-  } catch (e) {
-    console.error('순찰        ★ 전에 내린 판정을 못 물어봤습니다 — 거르지 않고 그대로 갑니다');
-    console.error('            ' + String(e.message).slice(0, 400));
-  }
+  rows = await 판정한것빼기(cfg, { 열쇠, source: SOURCE, 줄들: rows,
+    번호뽑기: (r) => r.recrutPblntSn });
 }
 
 /* ② 판정 */
@@ -582,20 +558,10 @@ for (const r of 볼것) {
    담지 않은 공고도 남겨야 순찰이 같은 상세를 다시 안 엽니다.
    남기는 것은 번호·출처·판정·판정때·지문뿐입니다. 공고 본문은 안 담습니다.
    던진 줄(셈.건너뜀)은 **안 남깁니다** — 다음에 다시 봐야 하니까요. */
-if (!dry && 열쇠) {
-  const 남길것 = 볼것
+if (!dry) {
+  await 판정남기기(cfg, { 열쇠, source: SOURCE, 줄들: 볼것
     .filter((r) => r.__판정 && r.recrutPblntSn)
-    .map((r) => ({ 번호: String(r.recrutPblntSn), 판정: r.__판정, 지문: 지문(r) }));
-  let 남긴수 = 0;
-  try {
-    for (let i = 0; i < 남길것.length; i += 500) {
-      남긴수 += Number(await rpc(cfg, encodeURIComponent('판정남기기'),
-        { p_secret: 열쇠, p_source: SOURCE, p_rows: 남길것.slice(i, i + 500) })) || 0;
-    }
-    console.log('판정 기억   ' + 남긴수 + '건');
-  } catch (e) {
-    console.error('판정 기억   ★ 못 남겼습니다 — ' + String(e.message).slice(0, 300));
-  }
+    .map((r) => ({ 번호: String(r.recrutPblntSn), 판정: r.__판정, 지문: 지문(r) })) });
 }
 
 const 회원 = 결과.filter((x) => !x.hold && x.갈래.갈래 === '회원목록');
