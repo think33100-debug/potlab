@@ -89,7 +89,11 @@ const cfg = env();
 
 /* ── 잔심부름 ─────────────────────────────────────────────── */
 const 쉼 = (ms) => new Promise((y) => setTimeout(y, ms));
-const 풀기 = (s) => String(s == null ? '' : s)
+/* 엔티티가 **두 번** 감싸여 오는 줄이 있습니다 — `&amp;amp;` (2026-10-01).
+   한 번만 풀면 `&amp;` 가 남아 회원 화면에 「식음팀(F&amp;B)」 처럼 보입니다.
+   클린아이 수집기는 이미 반복해서 풉니다. 같은 방식으로 맞춥니다 —
+   **변화가 없을 때까지** 풉니다 (돌고 도는 것을 막으려 최대 5번). */
+const 한번풀기 = (s) => String(s == null ? '' : s)
   .replace(/&amp;/g, '&').replace(/&#38;/g, '&')
   .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
   .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
@@ -97,8 +101,17 @@ const 풀기 = (s) => String(s == null ? '' : s)
     const n = m[2] === 'x' || m[2] === 'X'
       ? parseInt(m.slice(3, -1), 16) : parseInt(m.slice(2, -1), 10);
     return Number.isFinite(n) ? String.fromCharCode(n) : ' ';
-  })
-  .trim();
+  });
+
+const 풀기 = (s) => {
+  let v = String(s == null ? '' : s);
+  for (let i = 0; i < 5; i++) {
+    const 다음 = 한번풀기(v);
+    if (다음 === v) break;
+    v = 다음;
+  }
+  return v.trim();
+};
 
 /** XML <item> 들을 { 태그: 값 } 으로. 가벼운 파서입니다 */
 function 아이템들(글) {
