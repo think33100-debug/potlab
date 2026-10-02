@@ -65,15 +65,11 @@ comment on table 알림기기 is
 
 create index if not exists 알림기기_회원 on 알림기기 (profile_id) where 켜짐;
 
+-- ★ 표에는 **아무도 직접 못 닿습니다.** RLS 를 켜고 정책을 하나도 안 둡니다.
+--   드나드는 길은 아래 SECURITY DEFINER 함수 넷뿐입니다.
+--   정책을 두면 「직접 읽어도 되는구나」로 읽힙니다 — 그 틈을 아예 없앱니다.
 alter table 알림기기 enable row level security;
-
--- 내 기기만 보고 고칠 수 있습니다
-create policy "내 기기만 봅니다" on 알림기기
-  for select to authenticated using (profile_id = auth.uid());
-create policy "내 기기만 넣습니다" on 알림기기
-  for insert to authenticated with check (profile_id = auth.uid());
-create policy "내 기기만 고칩니다" on 알림기기
-  for update to authenticated using (profile_id = auth.uid());
+revoke all on table 알림기기 from anon, authenticated;
 
 -- ── 표 ② 알림보낸것 ─────────────────────────────────────────
 -- **같은 기기에 같은 공고를 두 번 보내지 않게** 하는 자물쇠입니다.
@@ -94,8 +90,9 @@ comment on table 알림보낸것 is
 
 create index if not exists 알림보낸것_기기_때 on 알림보낸것 (기기id, 보낸때 desc);
 
-alter table 알림보낸것 enable row level security;
 -- 회원 화면은 이 표를 안 읽습니다. 보내는 쪽만 함수로 드나듭니다.
+alter table 알림보낸것 enable row level security;
+revoke all on table 알림보낸것 from anon, authenticated;
 
 -- ── 함수 ① 기기 등록 ────────────────────────────────────────
 -- 회원이 「알림 받기」를 누를 때 브라우저가 부릅니다.
@@ -117,9 +114,17 @@ begin
   insert into 알림기기 (profile_id, 어떻게, 주소, 열쇠1, 열쇠2, 켜짐, 구독한때, 연속실패, 꺼진때, 꺼진까닭)
   values (auth.uid(), coalesce(p_어떻게, 'webpush'), p_주소, p_열쇠1, p_열쇠2, true, now(), 0, null, null)
   on conflict (어떻게, 주소) do update
-     set profile_id = auth.uid(), 열쇠1 = excluded.열쇠1, 열쇠2 = excluded.열쇠2,
+     set 열쇠1 = excluded.열쇠1, 열쇠2 = excluded.열쇠2,
          켜짐 = true, 구독한때 = now(), 연속실패 = 0, 꺼진때 = null, 꺼진까닭 = null
+   /* ★ **남의 기기를 가로채지 못하게** 합니다 (2026-10-02).
+      처음엔 do update 에서 profile_id = auth.uid() 로 덮었습니다. 그러면 남의
+      endpoint 를 아는 사람이 같은 주소로 등록해 **그 기기의 주인이 될 수** 있었습니다.
+      이제 주인이 나일 때만 고칩니다. 남의 줄이면 아무 일도 안 일어나고 null 을 돌려줍니다 */
+   where 알림기기.profile_id = auth.uid()
   returning id into v_id;
+  if v_id is null then
+    raise exception '이미 다른 분의 기기로 등록된 주소입니다' using errcode = '42501';
+  end if;
   return v_id;
 end $$;
 
@@ -280,17 +285,28 @@ begin
 end $$;
 
 -- ── 권한 ────────────────────────────────────────────────────
-revoke all on function 알림기기등록(text, text, text, text) from public;
-revoke all on function 알림기기끄기(text, text) from public;
-revoke all on function 보낼알림(text, int, int) from public;
-revoke all on function 알림보낸것남기기(text, jsonb) from public;
+revoke all on function 알림기기등록(text, text, text, text) from public, anon;
+revoke all on function 알림기기끄기(text, text) from public, anon;
+revoke all on function 보낼알림(text, int, int) from public, anon, authenticated;
+revoke all on function 알림보낸것남기기(text, jsonb) from public, anon, authenticated;
 
--- 회원이 켜고 끕니다
+-- 회원이 켜고 끕니다 — 본인 기기만 (함수 안에서 auth.uid() 로 막습니다)
 grant execute on function 알림기기등록(text, text, text, text) to authenticated;
 grant execute on function 알림기기끄기(text, text) to authenticated;
--- 보내는 쪽(Lightsail)만. 열쇠로 한 번 더 막습니다
-grant execute on function 보낼알림(text, int, int) to anon;
-grant execute on function 알림보낸것남기기(text, jsonb) to anon;
+
+/* ★ 고르는 쪽·기록하는 쪽은 **서버 열쇠(service_role)만** 부릅니다 (2026-10-02 세중님 지시).
+   anon·authenticated 는 회수했습니다.
+
+   ⚠ 이것은 **자세를 바꾸는 결정**입니다. 지금까지 수집기는 전부
+     「anon + collect_secret 열쇠」로 돌았고, service_role 열쇠는 **집 컴퓨터에만**
+     두었습니다 (job_posts 를 통째로 읽는 길을 서버에 안 열려고 일부러 그랬습니다).
+     이 둘을 service_role 로 바꾸면 Lightsail 에 service_role 열쇠가 놓입니다.
+     그 열쇠는 **RLS 를 전부 지나칩니다** — 이 두 함수만이 아니라 모든 표를요.
+
+   그래서 **열쇠 검사(p_secret)를 그대로 두었습니다.** 둘 다 통과해야 돕니다 —
+   service_role 로 들어와도 collect_secret 의 열쇠가 없으면 42501 입니다. */
+grant execute on function 보낼알림(text, int, int) to service_role;
+grant execute on function 알림보낸것남기기(text, jsonb) to service_role;
 
 commit;
 
@@ -315,3 +331,19 @@ commit;
 --      탈퇴 회원 제외        p.erased_at is null
 --      꺼진 기기 제외        d.켜짐 · d.연속실패 < 3
 --      기관·직군 설정 재사용  org_stars.notify · job_stars (새 설정 표를 안 만듭니다)
+--
+-- 5) 권한이 뜻대로인지 — 올린 뒤 이 쿼리로 눈으로 봅니다
+--      select p.proname,
+--             has_function_privilege('anon', p.oid, 'execute')          anon,
+--             has_function_privilege('authenticated', p.oid, 'execute') 회원,
+--             has_function_privilege('service_role', p.oid, 'execute')  서버
+--        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+--       where n.nspname = 'public'
+--         and p.proname in ('알림기기등록','알림기기끄기','보낼알림','알림보낸것남기기');
+--      → 등록·끄기  anon f · 회원 t · 서버 t
+--         보낼알림·남기기  anon f · 회원 f · 서버 t
+--
+-- 6) 표에 직접 못 닿는지
+--      select relname, relrowsecurity, relacl from pg_class
+--       where relname in ('알림기기','알림보낸것');
+--      → relrowsecurity = t · relacl 에 anon·authenticated 가 없어야 합니다
