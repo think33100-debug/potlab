@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
+import NotifyToggle from '@/components/notify-toggle';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 마감된 공고 맨 위에 붙는 띠.
@@ -79,10 +80,16 @@ export function JobClosed({ jobId }: { jobId: string }) {
           {busy ? '켜는 중…' : '알림 받기'}
         </button>
       )}
+      {/* 동의를 적은 **뒤에** 진짜 구독을 받습니다 (2026-10-02).
+          전에는 notification_settings 에 동의만 적고 끝나서, 눌러도 아무 데도
+          안 갔습니다 — 약속만 하고 보내는 장치가 없었습니다 */}
       {on === true && (
-        <p className="mt-6 text-lg text-gray-600 dark:text-gray-400">
-          알림은 이미 켜져 있어요
-        </p>
+        <div className="mt-6">
+          <p className="text-lg text-gray-600 dark:text-gray-400">
+            알림을 받으려면 이 기기에서 한 번 더 켜주세요
+          </p>
+          <div className="mt-3"><NotifyToggle /></div>
+        </div>
       )}
     </section>
   );

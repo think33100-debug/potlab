@@ -1,0 +1,166 @@
+/* ═══════════════════════════════════════════════════════════════
+ *  알림 ② 보내는 부분 — 웹 푸시로 쏩니다
+ *  2026-10-02. **크론은 아직 안 걸었습니다** (세중님 승인 뒤에 겁니다).
+ * ═══════════════════════════════════════════════════════════════
+ *
+ *  고르는 쪽과 떼어져 있습니다
+ *    누구에게 무엇을 보낼지는 **DB 의 보낼알림() 이 정합니다.** 이 파일은
+ *    그 목록을 받아 쏘기만 합니다. 나중에 앱스토어 앱이 나오면
+ *    `어떻게` 칸을 보고 다른 길(FCM·APNs)로 보내게 **여기만** 고치면 됩니다.
+ *
+ *  쓰는 법
+ *    node tools/알림보내기.mjs --dry            고를 것만 보고 안 보냅니다
+ *    node tools/알림보내기.mjs --나만 <기기id>   그 기기 하나에만 (시험용)
+ *    node tools/알림보내기.mjs                  진짜로 보냅니다
+ *
+ *  열쇠 (.env.server)
+ *    SUPABASE_URL · SUPABASE_SERVICE_KEY   보낼알림·알림보낸것남기기 는
+ *                                          service_role 만 부를 수 있습니다
+ *    COLLECT_KEY_HS3                       함수 안 열쇠 검사 (두 겹입니다)
+ *    VAPID_PUBLIC · VAPID_PRIVATE · VAPID_MAIL
+ *
+ *  안전장치는 **DB 가 겁니다** — 이 파일이 아닙니다
+ *    구독 시각 이후만 · 중복 방지 · 하루 상한 · 조용한 시간 22~7 ·
+ *    탈퇴 회원 제외 · 꺼진 기기 제외
+ *    여기서 하는 일은 「받은 목록을 쏘고 결과를 되돌려 주는 것」뿐입니다.
+ *
+ *  **먼저 남기고 보냅니다**
+ *    고유 제약 (기기id, 갈래, 공고id) 이 중복을 막습니다. 보내고 나서 남기면
+ *    중간에 죽었을 때 두 번 갑니다. 그래서 남기기를 먼저 하고, 결과는 뒤에 고칩니다.
+ * ═══════════════════════════════════════════════════════════════ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import webpush from 'web-push';
+
+const 여기 = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.join(여기, '..');
+const 읽기 = (f) => {
+  const o = {};
+  if (!fs.existsSync(f)) return o;
+  for (const l of fs.readFileSync(f, 'utf8').split(/\r?\n/)) {
+    const m = l.match(/^([A-Z_][A-Z0-9_]*)=(.*)$/);
+    if (m) o[m[1]] = m[2].trim().replace(/^(['"])([\s\S]*)\1$/, '$2').trim();
+  }
+  return o;
+};
+const cfg = {
+  ...읽기(path.join(ROOT, '.env.local')),
+  ...읽기(path.join(ROOT, 'web', '.env.local')),
+  ...읽기(path.join(ROOT, '.env.server')),
+  ...읽기(path.join(ROOT, '.env')),
+  ...process.env,
+};
+cfg.SUPABASE_URL = cfg.SUPABASE_URL || cfg.NEXT_PUBLIC_SUPABASE_URL;
+
+const argv = process.argv.slice(2);
+const dry = argv.includes('--dry');
+const 나만 = argv.includes('--나만') ? String(argv[argv.indexOf('--나만') + 1] || '') : '';
+const 하루상한 = argv.includes('--상한') ? Number(argv[argv.indexOf('--상한') + 1]) || 3 : 3;
+
+const t0 = Date.now();
+console.log('알림 보내기 · ' + new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+  + (dry ? ' · **--dry · 보내지 않습니다**' : '')
+  + (나만 ? ' · **--나만 ' + 나만 + ' (그 기기에만)**' : ''));
+
+const 없는것 = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'COLLECT_KEY_HS3',
+  'VAPID_PUBLIC', 'VAPID_PRIVATE', 'VAPID_MAIL'].filter((k) => !cfg[k]);
+for (const k of ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'COLLECT_KEY_HS3', 'VAPID_PUBLIC', 'VAPID_PRIVATE', 'VAPID_MAIL']) {
+  console.log('  ' + k.padEnd(22) + (cfg[k] ? '있음' : '**없음**'));
+}
+if (없는것.length) { console.error('\n열쇠가 모자랍니다 — ' + 없는것.join(' · ')); process.exit(1); }
+
+webpush.setVapidDetails(cfg.VAPID_MAIL, cfg.VAPID_PUBLIC, cfg.VAPID_PRIVATE);
+
+/* 보낼알림·알림보낸것남기기 는 service_role 만 부를 수 있습니다 */
+async function rpc(이름, body) {
+  const k = cfg.SUPABASE_SERVICE_KEY;
+  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent(이름), {
+    method: 'POST',
+    headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const 글 = await r.text();
+  if (!r.ok) throw new Error('HTTP ' + r.status + ' · 응답 원문 — ' + 글.slice(0, 500));
+  return 글 ? JSON.parse(글) : null;
+}
+
+/* ① 보낼 것 받기 — 고르는 일은 DB 가 다 했습니다 */
+let 할것 = await rpc('보낼알림', { p_secret: cfg.COLLECT_KEY_HS3, p_하루상한: 하루상한, p_몇개: 200 });
+할것 = 할것 || [];
+console.log('\n── 고른 것 ' + 할것.length + '건 ──');
+if (나만) {
+  const 전 = 할것.length;
+  할것 = 할것.filter((x) => String(x.기기id) === 나만);
+  console.log('  --나만 이라 ' + 할것.length + '건만 (' + 전 + '건 중)');
+}
+if (!할것.length) {
+  console.log('  보낼 것이 없습니다 (조용한 시간이거나, 새 공고가 없거나, 기기가 없습니다)');
+  console.log('\n' + Math.round((Date.now() - t0) / 1000) + '초');
+  process.exit(0);
+}
+
+const 셈 = { 보냄: 0, 사라짐: 0, 실패: 0 };
+const 보기 = [];
+for (const x of 할것.slice(0, 12)) {
+  보기.push('  ' + x.갈래.padEnd(6) + String(x.기관 || '').slice(0, 18).padEnd(20)
+    + String(x.제목 || '').slice(0, 40));
+}
+console.log(보기.join('\n'));
+if (할것.length > 12) console.log('  … 그 밖에 ' + (할것.length - 12) + '건');
+
+if (dry) {
+  console.log('\n--dry 라 보내지 않았습니다. ' + Math.round((Date.now() - t0) / 1000) + '초');
+  process.exit(0);
+}
+
+/* ② **먼저 남깁니다.** 고유 제약이 중복을 막습니다 —
+   보내고 나서 남기면 중간에 죽었을 때 두 번 갑니다 */
+const 미리 = 할것.map((x) => ({ 기기id: x.기기id, 갈래: x.갈래, 공고id: x.공고id, 결과: '보내는 중' }));
+const 새로남긴수 = Number(await rpc('알림보낸것남기기', { p_secret: cfg.COLLECT_KEY_HS3, p_rows: 미리 })) || 0;
+console.log('\n먼저 남김   ' + 새로남긴수 + '건 (이미 있던 것은 안 보냅니다)');
+
+/* ③ 쏘기 */
+const 결과들 = [];
+for (const x of 할것) {
+  const 몸 = JSON.stringify({
+    제목: x.갈래 === '마감임박' ? '마감이 다가와요' : (x.기관 || '새 공고'),
+    몸: x.갈래 === '마감임박'
+      ? String(x.제목 || '').slice(0, 60) + (x.마감 ? ' · ' + x.마감 + ' 마감' : '')
+      : String(x.제목 || '').slice(0, 60),
+    주소: '/jobs/' + x.공고id,
+    태그: x.갈래 + ':' + x.공고id,
+  });
+  try {
+    await webpush.sendNotification(
+      { endpoint: x.주소, keys: { p256dh: x.열쇠1, auth: x.열쇠2 } }, 몸);
+    셈.보냄++;
+    결과들.push({ 기기id: x.기기id, 갈래: x.갈래, 공고id: x.공고id, 결과: 'ok' });
+  } catch (e) {
+    const code = e && e.statusCode;
+    /* 404·410 = 기기가 사라졌습니다. DB 가 그 기기를 끕니다 */
+    if (code === 404 || code === 410) {
+      셈.사라짐++;
+      결과들.push({ 기기id: x.기기id, 갈래: x.갈래, 공고id: x.공고id, 결과: 'gone' });
+    } else {
+      셈.실패++;
+      결과들.push({ 기기id: x.기기id, 갈래: x.갈래, 공고id: x.공고id,
+        결과: 'HTTP ' + (code || '?') + ' ' + String(e && e.message || e).slice(0, 80) });
+    }
+  }
+  await new Promise((f) => setTimeout(f, 80));
+}
+
+/* ④ 결과 되돌려 주기 — 사라진 기기 끄기·연속 실패 세기는 DB 가 합니다 */
+for (let i = 0; i < 결과들.length; i += 500) {
+  await rpc('알림보낸것남기기', { p_secret: cfg.COLLECT_KEY_HS3, p_rows: 결과들.slice(i, i + 500) });
+}
+
+console.log('\n보냄 ' + 셈.보냄 + ' · 사라진 기기 ' + 셈.사라짐 + ' · 실패 ' + 셈.실패);
+const 나쁜것 = 결과들.filter((x) => x.결과 !== 'ok' && x.결과 !== 'gone').slice(0, 3);
+if (나쁜것.length) {
+  console.error('\n★ 실패한 것 (앞 세 건) —');
+  for (const x of 나쁜것) console.error('   기기 ' + x.기기id + ' · ' + x.결과);
+}
+console.log('\n' + Math.round((Date.now() - t0) / 1000) + '초');
+if (셈.실패) process.exitCode = 1;
