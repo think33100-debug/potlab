@@ -10,7 +10,9 @@
  *
  *  쓰는 법
  *    node tools/알림보내기.mjs --dry            고를 것만 보고 안 보냅니다
- *    node tools/알림보내기.mjs --나만 <기기id>   그 기기 하나에만 (시험용)
+ *    node tools/알림보내기.mjs --나만 <기기id>   고른 것 중 그 기기 몫만
+ *    node tools/알림보내기.mjs --시험 <기기id>   그 기기에 **시험 한 건**을 쏩니다
+ *                                              (보낼알림 을 안 거칩니다. 아래 설명)
  *    node tools/알림보내기.mjs                  진짜로 보냅니다
  *
  *  열쇠 (.env.server)
@@ -56,6 +58,8 @@ cfg.SUPABASE_URL = cfg.SUPABASE_URL || cfg.NEXT_PUBLIC_SUPABASE_URL;
 const argv = process.argv.slice(2);
 const dry = argv.includes('--dry');
 const 나만 = argv.includes('--나만') ? String(argv[argv.indexOf('--나만') + 1] || '') : '';
+const 시험 = argv.includes('--시험') ? String(argv[argv.indexOf('--시험') + 1] || '') : '';
+const 시험공고 = argv.includes('--시험') ? String(argv[argv.indexOf('--시험') + 2] || '') : '';
 const 하루상한 = argv.includes('--상한') ? Number(argv[argv.indexOf('--상한') + 1]) || 3 : 3;
 
 const t0 = Date.now();
@@ -83,6 +87,53 @@ async function rpc(이름, body) {
   const 글 = await r.text();
   if (!r.ok) throw new Error('HTTP ' + r.status + ' · 응답 원문 — ' + 글.slice(0, 500));
   return 글 ? JSON.parse(글) : null;
+}
+
+/* ── 시험 발송 (--시험 <기기id> [공고id]) ──────────────────────────
+ *
+ * 왜 따로 있나 — `보낼알림()` 은 **구독 시각 이후 새 공고만** 고릅니다.
+ * 갓 구독한 기기에는 보낼 것이 없어서(맞는 동작입니다) 화면을 못 봅니다.
+ * 그래서 **진짜와 똑같은 모양으로** 한 건만 쏩니다.
+ *
+ * 안전하게 두는 것
+ *   · 기기id 를 손으로 적어야만 돕니다. 회원 전체로는 갈 수 없습니다
+ *   · `알림보낸것` 에 **안 남깁니다** — 시험은 짝이 되는 공고 판정이 없습니다.
+ *     남기면 나중에 그 공고의 진짜 알림이 「이미 보냄」으로 막힙니다
+ *   · 꺼진 기기에는 안 보냅니다
+ */
+if (시험) {
+  const 길 = cfg.SUPABASE_URL + '/rest/v1/' + encodeURIComponent('알림기기')
+    + '?id=eq.' + encodeURIComponent(시험) + '&select=id,주소,열쇠1,열쇠2,켜짐';
+  const k = cfg.SUPABASE_SERVICE_KEY;
+  const r = await fetch(길, { headers: { apikey: k, Authorization: 'Bearer ' + k } });
+  const 글 = await r.text();
+  if (!r.ok) { console.error('기기를 못 읽었습니다 — HTTP ' + r.status + ' · ' + 글.slice(0, 400)); process.exit(1); }
+  const [기기] = JSON.parse(글);
+  if (!기기) { console.error('기기 ' + 시험 + ' 가 없습니다'); process.exit(1); }
+  if (!기기.켜짐) { console.error('기기 ' + 시험 + ' 는 꺼져 있습니다'); process.exit(1); }
+  console.log('\n기기 ' + 기기.id + ' · ' + new URL(기기.주소).host + ' (주소 값은 안 찍습니다)');
+
+  /* 눌렀을 때 진짜 열리는 공고로 보냅니다 — 빈 화면이 뜨면 시험이 안 됩니다 */
+  const 공고 = 시험공고 && !시험공고.startsWith('--') ? 시험공고 : 'WNK152412610020006';
+  const 몸 = JSON.stringify({
+    제목: '연세메디하임병원',
+    몸: '원주 연세메디하임병원 작업치료사 구인합니다 · 알림 시험',
+    주소: '/jobs/' + 공고,
+    태그: '시험:' + 공고,
+  });
+  console.log('보낼 것 —\n' + 몸.replace(/","/g, '"\n  "') + '\n');
+  if (dry) { console.log('--dry 라 안 보냈습니다'); process.exit(0); }
+  try {
+    await webpush.sendNotification(
+      { endpoint: 기기.주소, keys: { p256dh: 기기.열쇠1, auth: 기기.열쇠2 } }, 몸);
+    console.log('보냈습니다. 화면에 뜨는지 봐 주십시오');
+    console.log('※ 알림보낸것 에는 안 남겼습니다 (시험이라서)');
+  } catch (e) {
+    console.error('못 보냈습니다 — HTTP ' + (e && e.statusCode) + ' · '
+      + String((e && e.body) || (e && e.message) || e).slice(0, 500));
+    process.exit(1);
+  }
+  process.exit(0);
 }
 
 /* ① 보낼 것 받기 — 고르는 일은 DB 가 다 했습니다 */
