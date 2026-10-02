@@ -209,6 +209,30 @@ export default function SpecPage() {
           </Link>
         </>
       )}
+
+      {/* 봉사활동 — **{res && me} 바깥**입니다 (세중님 확정 2026-10-02).
+
+          안에 두면 스펙을 적은 회원에게만 보입니다. 그런데 봉사활동을 제일
+          찾을 사람은 **아직 스펙을 안 적은 학생**입니다. 실적이 필요해서
+          찾는 것이니까요. /volunteer 자체도 로그인 없이 열리게 만들었으니
+          입구만 로그인 뒤에 두면 앞뒤가 안 맞습니다.
+
+          건수는 일부러 안 적습니다 — 날마다 바뀌어서 박아두면 낡습니다.
+          모양은 위 「계산기 보기」를 그대로 베꼈습니다. 새로 지은 색이 없습니다. */}
+      <Link
+        href="/volunteer"
+        className="mt-7 flex items-center justify-between gap-3 rounded-sm
+                   border border-gray-200 px-6 py-5 hover:bg-gray-50
+                   dark:border-gray-700 dark:hover:bg-gray-950"
+      >
+        <span className="min-w-0">
+          <span className="block break-keep text-body-lg font-bold">봉사활동 찾기</span>
+          <span className="mt-1 block break-keep text-sm text-gray-500">
+            지역으로 좁혀 볼 수 있어요. 신청은 VMS 에서 해요
+          </span>
+        </span>
+        <span aria-hidden className="shrink-0 text-gray-400">→</span>
+      </Link>
     </main>
   );
 }
