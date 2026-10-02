@@ -193,20 +193,13 @@ export default function SpecPage() {
           <NextUp parts={me.parts} />
           <Rookie job={me.job_group} />
 
-          <Link
-            href="/tools"
-            className="mt-7 flex items-center justify-between gap-3 rounded-sm
-                       border border-gray-200 px-6 py-5 hover:bg-gray-50
-                       dark:border-gray-700 dark:hover:bg-gray-950"
-          >
-            <span className="min-w-0">
-              <span className="block break-keep text-body-lg font-bold">계산기 보기</span>
-              <span className="mt-1 block break-keep text-sm text-gray-500">
-                세전·세후 · 퇴직금 · 연차. 로그인 없이 쓸 수 있어요
-              </span>
-            </span>
-            <span aria-hidden className="shrink-0 text-gray-400">→</span>
-          </Link>
+          {/* 「계산기 보기」 카드를 **여기서 뺐습니다** (2026-10-02 세중님 결정).
+              계산기는 월급확인(/pay)에서 나와야 합니다. 그리고 거기에
+              app/pay/page.tsx:165 로 **똑같은 카드가 이미 있습니다** —
+              이건 같은 것을 한 번 더 둔 것이었습니다.
+              게다가 이 자리는 {res && me} 안이라 스펙을 적은 회원만 보는데,
+              카드 설명은 「로그인 없이 쓸 수 있어요」였습니다. /pay 쪽은
+              누구나 보므로 그쪽만 남깁니다. */}
         </>
       )}
 
