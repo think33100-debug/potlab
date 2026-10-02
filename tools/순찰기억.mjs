@@ -59,9 +59,14 @@ export async function 판정한것빼기(cfg, { 열쇠, source, 줄들, 번호�
   if (!줄들.length) return 줄들;
   try {
     if (!열쇠) throw new Error('COLLECT_KEY 가 없습니다');
+    /* ★ 한 번에 **100개씩만** 묻습니다. Supabase 는 응답을 100줄로 자릅니다 —
+       500개를 물으면 100줄만 돌아와 나머지는 「기억에 없는 것」이 됩니다.
+       2026-10-02 에 나라일터에서 겪었습니다: 376건을 기억했는데 100건만
+       건너뛰었습니다. 알리오(100건)·클린아이(88건)는 한도 안이라 안 걸렸습니다.
+       심평원받을곳() 에서도 같은 한도를 만났습니다 (Range 헤더도 안 듣습니다) */
     const 안것 = new Map();
-    for (let i = 0; i < 줄들.length; i += 500) {
-      const 묶음 = 줄들.slice(i, i + 500).map((o) => String(번호뽑기(o) || '')).filter(Boolean);
+    for (let i = 0; i < 줄들.length; i += 100) {
+      const 묶음 = 줄들.slice(i, i + 100).map((o) => String(번호뽑기(o) || '')).filter(Boolean);
       if (!묶음.length) continue;
       const j = await rpc(cfg, '판정물어보기', { p_secret: 열쇠, p_source: source, p_ids: 묶음 });
       for (const x of (j || [])) 안것.set(String(x.번호), String(x.지문));
