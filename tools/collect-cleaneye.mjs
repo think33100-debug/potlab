@@ -534,7 +534,8 @@ if (dry) {
    **순찰도 남깁니다** — 순찰이 멈춘 것도 화면에서 보여야 합니다 */
 if (!dry) {
   try {
-    await rpc('collect_beat', {
+    /* 이 파일의 rpc 도 첫 인자가 cfg 입니다 (알리오·JobFlex 와 같습니다) */
+    await rpc(cfg, 'collect_beat', {
       p_secret: cfg.COLLECT_KEY_CE2, p_source: SOURCE,
       p_beat: { took_ms: Date.now() - t0, ok: !process.exitCode,
         본곳: SIDO.length - 못받은시도, 담음: 회원.length + 보류.length,
