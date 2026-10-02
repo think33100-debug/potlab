@@ -279,5 +279,20 @@ console.log('── 전체 ' + 합.전체 + ' · 접수중 ' + 합.접수중
   + ' · 접수중인 우리 직군 ' + 합.접수중우리 + '건 · '
   + Math.round((Date.now() - t0) / 1000) + '초');
 
+/* 박동 — 이것도 안 부르고 있었습니다 (2026-10-02). beat_health() 가
+   「44시간째 안 왔습니다」로 빨간줄을 세웠는데 실제로는 하루 세 번 잘 돌고
+   있었습니다. 안 부르면 「돌고 있나」를 화면에서 못 봅니다 */
+if (!dry) {
+  try {
+    await rpc('collect_beat', {
+      p_secret: cfg.COLLECT_KEY_JF, p_source: SOURCE,
+      p_beat: { took_ms: Date.now() - t0, ok: !process.exitCode,
+        본곳: 곳별줄.length, 담음: 합.접수중우리,
+        보류: 0, 버림: 0, 못받음: 0,
+        메모: { 전체: 합.전체, 접수중: 합.접수중, 물리: 합.물리, 작업: 합.작업 } },
+    });
+  } catch (e) { console.error('박동 못 남김 · ' + String(e.message).slice(0, 120)); }
+}
+
 fs.writeFileSync(path.join(여기, 'hosp', 'reports', 'jobflex.json'),
   JSON.stringify({ 잰날: 오늘, 백필: 백필, 곳별: 곳별줄 }, null, 1), 'utf8');

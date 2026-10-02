@@ -22,6 +22,9 @@ const MENU = [
   { href: '/admin/stats', label: '통계' },
   { href: '/admin/compete', label: '경쟁률' },
   { href: '/admin/hand', label: '손으로 확인할 곳' },
+  /* 수집기가 돌았나 / 공고가 들어왔나 — collect_beat 을 읽는 화면이 없어서
+     「돌았는데 안 들어온다」를 못 가렸습니다 (2026-10-02 에 만들었습니다) */
+  { href: '/admin/beat', label: '수집기 상태' },
   /* 만들어 놓고 메뉴에 안 걸려 있던 것들 (2026-10-01 에 걸었습니다) */
   { href: '/admin/rival', label: '경쟁사 비교' },
   { href: '/admin/members', label: '회원' },
