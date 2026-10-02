@@ -99,7 +99,18 @@ const cfg = env();
 if (!cfg.SUPABASE_URL) { console.error('SUPABASE_URL 이 없습니다'); process.exit(1); }
 
 if (!cfg.ALIVE_KEY) { console.error('ALIVE_KEY 가 없습니다 — 함수 권한을 이 열쇠로 봅니다'); process.exit(1); }
-const 볼것0 = await rpc(cfg, 'alive_targets', { p_secret: cfg.ALIVE_KEY, p_n: 300 });
+/* ★ Supabase 는 줄을 돌려주는 함수의 응답을 **100줄로 자릅니다** (2026-10-02 확인).
+   `p_n: 300` 으로 물어도 100줄만 옵니다. 지금 대상이 84건이라 안 걸리지만,
+   100을 넘으면 조용히 잘려 뒷부분을 **그 주에 못 봅니다.**
+   되묻는 것으로는 못 풉니다 — 표시(alive_mark)를 하기 전에는 같은 100건이 또 옵니다.
+   그래서 100이 꽉 차면 **소리를 냅니다.** 그때 이 도구를 나눠 도는 꼴로 고쳐야 합니다.
+   (나라일터 순찰이 376건을 기억했는데 100건만 건너뛴 것이 같은 한도였습니다) */
+const 볼것0 = await rpc(cfg, 'alive_targets', { p_secret: cfg.ALIVE_KEY, p_n: 100 });
+if ((볼것0 || []).length >= 100) {
+  console.error('★ 대상이 100건으로 꽉 찼습니다 — Supabase 가 거기서 자릅니다.');
+  console.error('  더 있을 수 있습니다. 이번 주에 못 본 것은 다음 주로 밀립니다.');
+  console.error('  100을 계속 넘으면 alive.mjs 를 「100건씩 보고 표시하고 또 받기」 꼴로 고쳐야 합니다.');
+}
 const 볼것 = 몇 ? (볼것0 || []).slice(0, 몇) : (볼것0 || []);
 console.log('원문 확인 — 마감일 없는 공고 ' + 볼것.length + '건'
   + (dry ? ' (--dry · 기록하지 않습니다)' : ''));

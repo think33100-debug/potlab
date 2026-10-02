@@ -509,18 +509,25 @@ if (순찰 && rows.length) {
   const 번호들 = rows.map((r) => String(r.recrutPblntSn)).filter(Boolean);
   try {
     if (!열쇠) throw new Error('COLLECT_KEY 가 없습니다');
-    const res = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('있는번호'), {
-      method: 'POST',
-      headers: {
-        apikey: cfg.SUPABASE_ANON_KEY,
-        Authorization: 'Bearer ' + cfg.SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ p_secret: 열쇠, p_source: SOURCE, p_ids: 번호들 }),
-    });
-    const 글 = await res.text();
-    if (!res.ok) throw new Error('HTTP ' + res.status + ' · 응답 원문 — ' + 글.slice(0, 400));
-    const 있는것 = new Set(JSON.parse(글).map((x) => String(x.id)));
+    /* ★ **100개씩** 묻습니다. Supabase 는 줄을 돌려주는 함수의 응답을 100줄로
+       자릅니다 (2026-10-02 확인). 순찰은 한 쪽이 100건이라 지금은 딱 한도에
+       걸터앉아 있습니다 — 쪽이 101건이 되면 조용히 덜 거릅니다.
+       덜 거르면 상세를 더 열 뿐이라 공고가 빠지지는 않지만, 순찰의 뜻이 없어집니다 */
+    const 있는것 = new Set();
+    for (let i = 0; i < 번호들.length; i += 100) {
+      const res = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('있는번호'), {
+        method: 'POST',
+        headers: {
+          apikey: cfg.SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + cfg.SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ p_secret: 열쇠, p_source: SOURCE, p_ids: 번호들.slice(i, i + 100) }),
+      });
+      const 글 = await res.text();
+      if (!res.ok) throw new Error('HTTP ' + res.status + ' · 응답 원문 — ' + 글.slice(0, 400));
+      for (const x of JSON.parse(글)) 있는것.add(String(x.id));
+    }
     const 전 = rows.length;
     rows = rows.filter((r) => !있는것.has(String(r.recrutPblntSn)));
     console.log('순찰        이미 있는 것 ' + 있는것.size + '건을 빼고 '
