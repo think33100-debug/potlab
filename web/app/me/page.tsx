@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { MyLists } from '@/components/my-lists';
+import NotifyToggle from '@/components/notify-toggle';
 import { SurveyEdit } from '@/components/survey-edit';
 
 import { browserSupabase } from '@/lib/supabase-browser';
@@ -176,6 +177,17 @@ export default function MyPage() {
       <SurveyEdit profileId={me.id} role={(me.role ?? '현직') as Role} job={me.job_group ?? '작업치료사'} />
 
       <MyLists profileId={me.id} />
+
+      {/* 알림 — 찜한 기관·공고를 켜 두면 여기서 알림을 받습니다 (2026-10-02).
+          켜고 끄는 자리가 따로 없어서 공고 화면에서만 켤 수 있었습니다 */}
+      <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
+        <h2 className="text-h3 font-bold">알림</h2>
+        <p className="mt-2 break-keep text-lg text-gray-500">
+          찜한 기관에 새 공고가 뜨거나, 찜한 공고가 마감 3일 전이면 알려드려요.
+          밤 10시부터 아침 7시까지는 보내지 않고 아침에 모아서 보냅니다
+        </p>
+        <div className="mt-4"><NotifyToggle /></div>
+      </section>
 
       <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
         <button type="button" onClick={signOut}
