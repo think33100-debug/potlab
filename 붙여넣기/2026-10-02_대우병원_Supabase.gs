@@ -1,5 +1,8 @@
 /* ───────────────────────────────────────────────────────────────
- * 붙여 넣는 법 (2026-10-02)
+ * 붙여 넣는 법 (2026-10-02 · 출처를 HS3 로 고친 판)
+ *
+ * ★ 10/02 아침에 낸 판은 출처가 HS 라 **한 줄도 안 들어갑니다** (42501).
+ *   그 판을 이미 붙이셨다면 이 파일로 **통째로 바꿔** 주십시오.
  *
  * 1. 앱스 스크립트 편집기를 엽니다
  * 2. Wage.gs 의 **맨 끝**에 아래를 그대로 붙입니다 (기존 코드는 안 건드립니다)
@@ -9,11 +12,11 @@
  *      COLLECT_KEY_HS3  43자 공용 열쇠
  * 4. 실행 목록에서 collectDaewooToSupabase 를 한 번 눌러 봅니다
  *    → 「대우병원 — 읽은 줄 N · 담음 N/N · 쓰레기통 N/N」 이 나오면 됩니다
+ *    → 「열쇠가 맞지 않습니다」 가 나오면 COLLECT_KEY_HS3 값을 다시 보십시오
  * 5. 잘 되면 트리거를 겁니다 — 시간 기반 · 1~2시간마다
  * 6. 그다음에 hospTick 을 끕니다
  *
  * ※ 새 버전 배포는 필요 없습니다 — 트리거로 도는 함수입니다.
- *   (웹앱 doGet 을 고친 게 아니라서 배포와 무관합니다)
  * ─────────────────────────────────────────────────────────────── */
 
 /* ═══════════════════════════════════════════════════════════════
@@ -41,6 +44,9 @@
  *
  *  **기존 코드는 한 줄도 안 건드렸습니다.** 쓰는 것은 읽기만 하는 조각뿐입니다 —
  *    HOSP_SITES · hospSiteRows_ · hospVerdict_ · hashStr_ · mixedTitle_ · hospIndex_ · norm_
+ *
+ *  출처는 **HS3** 입니다. collect_secret 에 source='HS' 줄이 없어서
+ *  HS 로는 한 줄도 안 들어갑니다 (42501). HS3 에는 43자 공용 열쇠가 있습니다.
  *
  *  공고ID 규칙은 collectHosp 과 **똑같습니다** —
  *    'HS' + Math.abs(hashStr_(기관 + '|' + 주소 + '|' + 제목))
@@ -121,7 +127,8 @@ function hospOneToSupabase_(이름) {
       /* 제목만으로 못 가린 것은 보류함으로. 여기서는 상세를 열지 않습니다 —
          한 곳만 보는 작은 트리거라 짧게 끝나야 합니다. 관리자가 봅니다 */
       hold: (!담음 && !쌓기) ? 'true' : 'false',
-      detail: { 근거: '병원 게시판 제목 · ' + v, 기관홈: s.base || s.host || '' },
+      detail: { 근거: '병원 게시판 제목 · ' + v
+        + ' · 앱스 스크립트(구글 IP) · 서버에서 막힌 곳', 기관홈: s.base || s.host || '' },
       evidence: (!담음 && !쌓기)
         ? { 보류사유: '제목만으로 직군을 못 가렸습니다 · ' + v + ' (대우병원 전용 트리거 — 상세를 안 엽니다)' }
         : (쌓기 ? { 감춘까닭: v } : {}),
@@ -133,7 +140,7 @@ function hospOneToSupabase_(이름) {
     const res = UrlFetchApp.fetch(SB + '/rest/v1/rpc/' + fn, {
       method: 'post', contentType: 'application/json', muteHttpExceptions: true,
       headers: { apikey: ANON, Authorization: 'Bearer ' + ANON },
-      payload: JSON.stringify({ p_secret: KEY, p_source: 'HS', p_rows: 줄들 }),
+      payload: JSON.stringify({ p_secret: KEY, p_source: 'HS3', p_rows: 줄들 }),
     });
     const code = res.getResponseCode(), 글 = res.getContentText();
     if (code !== 200) return { ok: 0, why: 'HTTP ' + code + ' · ' + 글.slice(0, 300) };
@@ -141,8 +148,14 @@ function hospOneToSupabase_(이름) {
     return { ok: (j && j['담음']) || 0, why: '' };
   };
 
-  /* 출처는 **HS** 입니다 — 옛 수집기와 같은 자리입니다. 그래야 collect_put 이
-     이미 있는 옛 줄을 고칠 수 있고, 토요일 주인 넘기기와도 어긋나지 않습니다 */
+  /* 출처는 **HS3** 입니다 (2026-10-02 세중님 결정).
+     처음엔 HS 로 썼는데 collect_secret 에 source='HS' 줄이 **없어서**
+     한 줄도 안 들어갔습니다 — 「열쇠가 맞지 않습니다」(42501).
+     collect_put 은 열쇠를 출처별로 맞춰 봅니다 (s.source = p_source).
+     HS3 에는 43자 공용 열쇠가 이미 등록돼 있습니다.
+     토요일 주인 넘기기 뒤에도 대우병원 줄이 HS3 라 양쪽이 맞고,
+     옛 HS 줄도 짝 규칙(수집기짝 HS3→HS)으로 가져갑니다.
+     출처만 보면 Lightsail 인지 여기인지 못 가리므로 detail.근거 에 적어 둡니다 */
   const a = 보내기('collect_put', 넣을것);
   const b = 보내기('collect_trash', 버릴것);
   쪽지.push(s.name + ' — 읽은 줄 ' + rows.length
