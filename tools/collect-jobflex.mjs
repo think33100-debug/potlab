@@ -284,7 +284,8 @@ console.log('── 전체 ' + 합.전체 + ' · 접수중 ' + 합.접수중
    있었습니다. 안 부르면 「돌고 있나」를 화면에서 못 봅니다 */
 if (!dry) {
   try {
-    await rpc('collect_beat', {
+    /* 이 파일의 rpc 는 첫 인자가 cfg 입니다 — 다른 수집기와 꼴이 다릅니다 */
+    await rpc(cfg, 'collect_beat', {
       p_secret: cfg.COLLECT_KEY_JF, p_source: SOURCE,
       p_beat: { took_ms: Date.now() - t0, ok: !process.exitCode,
         본곳: 곳별줄.length, 담음: 합.접수중우리,
