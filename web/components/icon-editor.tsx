@@ -175,7 +175,7 @@ export function IconEditor({ slots }: { slots: IconSlot[] }) {
                 type="button"
                 onClick={save}
                 disabled={!dirty || busy}
-                className="rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white disabled:opacity-40"
+                className="rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white disabled:opacity-40"
               >
                 {busy ? '저장 중…' : '저장하기'}
               </button>

@@ -240,7 +240,7 @@ export default function Welcome() {
               type="button"
               disabled={!allRequired}
               onClick={() => setStep(2)}
-              className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {allRequired ? '다음' : '필수 항목에 모두 동의해 주세요'}
             </button>
@@ -274,7 +274,7 @@ export default function Welcome() {
               type="button"
               disabled={busy || !job || !role}
               onClick={saveWho}
-              className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {busy ? '저장하는 중…' : (!job || !role) ? '둘 다 골라 주세요' : '다음'}
             </button>
@@ -302,7 +302,7 @@ export default function Welcome() {
               type="button"
               disabled={busy || nick.trim().length < 2}
               onClick={saveNickname}
-              className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
+              className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
             >
               {busy ? '저장하는 중…' : '다음'}
             </button>
@@ -333,7 +333,7 @@ export default function Welcome() {
                 await reload();
                 setStep(5);
               }}
-              className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
+              className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
             >
               다음
             </button>

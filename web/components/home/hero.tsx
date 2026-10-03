@@ -64,7 +64,7 @@ export function Hero({ stats, texts }: { stats: HomeStats; texts: Texts }) {
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           <Link
             href="/pay"
-            className="rounded-md bg-brand-red px-7 py-5 text-center text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
+            className="rounded-md bg-brand-red px-7 py-5 text-center text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
           >
             {t('hero.cta1')}
           </Link>

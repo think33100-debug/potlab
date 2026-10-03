@@ -40,17 +40,40 @@ export const metadata: Metadata = {
   description: '학회 교육과정과 학술대회를 한자리에서 봅니다. 신청은 각 학회에서 합니다',
 };
 
-/* 학회 이름은 COURSES_OT 와 **글자 그대로 같아야** 합니다.
-   주소에는 짧은 이름표를 씁니다 — 한글은 주소에서 아홉 배로 부풉니다 */
+/* 학회 이름은 COURSES_OT · COURSES_PT 와 **글자 그대로 같아야** 합니다.
+   주소에는 짧은 이름표를 씁니다 — 한글은 주소에서 아홉 배로 부풉니다.
+
+   ★ 보바스는 고르는 목록에서 작업치료 쪽이 「보바스」, 물리치료 쪽이
+     「한국보바스협회」인데 **같은 단체**입니다. 그래서 직군을 「공통」으로
+     담아 양쪽 탭에 다 나옵니다. */
 const TABS = [
-  { key: 'all', label: '전체', 출처: null as string | null },
-  { key: 'dys', label: '연하재활', 출처: '대한연하재활학회' },
-  { key: 'kdys', label: '연하장애', 출처: '대한연하장애학회' },
-  { key: 'cog', label: '인지재활', 출처: '대한인지재활학회' },
-  { key: 'drv', label: '운전재활', 출처: '한국운전재활학회' },
+  { key: 'all', label: '전체', 출처: null as string | null, 직군: null as string | null },
+  { key: 'dys', label: '연하재활', 출처: '대한연하재활학회', 직군: '작업치료사' },
+  { key: 'kdys', label: '연하장애', 출처: '대한연하장애학회', 직군: '작업치료사' },
+  { key: 'cog', label: '인지재활', 출처: '대한인지재활학회', 직군: '작업치료사' },
+  { key: 'drv', label: '운전재활', 출처: '한국운전재활학회', 직군: '작업치료사' },
+  { key: 'bob', label: '보바스', 출처: '한국보바스협회', 직군: '공통' },
+  { key: 'omt', label: '정형도수', 출처: '대한정형도수물리치료학회', 직군: '물리치료사' },
+  { key: 'pnf', label: 'PNF', 출처: '대한고유수용성신경근촉진법학회', 직군: '물리치료사' },
+  { key: 'ke', label: '칼텐본', 출처: '칼텐본-에비언스학회', 직군: '물리치료사' },
+  { key: 'aqua', label: '수중치료', 출처: '국제수중치료협회', 직군: '물리치료사' },
 ];
 
-type SP = { tab?: string; p?: string; past?: string };
+/* 직군 줄 — 세중님 지시 (2026-10-03). 「공통」은 양쪽에 다 보입니다 */
+const JOBS = [
+  { key: 'all', label: '전체', 직군: null as string | null },
+  { key: 'ot', label: '작업치료', 직군: '작업치료사' },
+  { key: 'pt', label: '물리치료', 직군: '물리치료사' },
+];
+
+/* robots.txt 가 긁기를 막은 곳 — **모으지 않고 링크만 겁니다** (세중님 결정).
+   둘 다 교육 안내가 살아 있는 곳이라, 길은 열어 두고 자료는 안 가져옵니다 */
+const 링크만 = [
+  { 이름: '한국작업치료사협회', 주소: 'http://www.kaot.org/board/index.jsp?code=course_notice', 직군: '작업치료사' },
+  { 이름: '국제의과학아카데미 (INDT)', 주소: 'https://www.imsacademy.net/Edu_Notice', 직군: '물리치료사' },
+];
+
+type SP = { tab?: string; job?: string; p?: string; past?: string };
 
 type 줄 = {
   번호: string; 출처: string; 직군: string; 갈래: string; 제목: string;
@@ -86,26 +109,39 @@ const 갈래색: Record<string, string> = {
 
 export default async function Edu({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
-  const tab = TABS.find((t) => t.key === sp.tab) ?? TABS[0];
+  const job = JOBS.find((j) => j.key === sp.job) ?? JOBS[0];
   const page = Math.max(0, Number(sp.p ?? 0) || 0);
   const 지난것 = sp.past === '1';
+
+  /* 직군을 고르면 그 직군 학회만 탭에 둡니다. 「공통」(보바스)은 양쪽에 */
+  const 보일탭 = TABS.filter((t) => !job.직군 || t.직군 === null
+    || t.직군 === job.직군 || t.직군 === '공통');
+  /* 직군을 바꾸면 안 보이는 학회가 골라져 있을 수 있습니다 — 그러면 전체로 */
+  const tab = 보일탭.find((t) => t.key === sp.tab) ?? 보일탭[0];
 
   const sb = await serverSupabase();
 
   /* 탭마다 건수를 보여줍니다. 교육셈() 이 int 하나만 주므로 탭 수만큼 부릅니다 —
-     표가 작아서(수십 건) 이게 뷰를 새로 만드는 것보다 쌉니다 */
+     표가 작아서(백여 건) 이게 뷰를 새로 만드는 것보다 쌉니다 */
   const [목록, ...셈들] = await Promise.all([
-    sb.rpc('교육목록', { p_직군: null, p_출처: tab.출처, p_지난것: 지난것, p_page: page }),
-    ...TABS.map((t) => sb.rpc('교육셈', { p_직군: null, p_출처: t.출처, p_지난것: 지난것 })),
+    sb.rpc('교육목록', { p_직군: job.직군, p_출처: tab.출처, p_지난것: 지난것, p_page: page }),
+    ...보일탭.map((t) => sb.rpc('교육셈', { p_직군: job.직군, p_출처: t.출처, p_지난것: 지난것 })),
+    ...JOBS.map((j) => sb.rpc('교육셈', { p_직군: j.직군, p_출처: null, p_지난것: 지난것 })),
   ]);
 
   const rows = (목록.data ?? []) as unknown as 줄[];
-  const 셈 = Object.fromEntries(TABS.map((t, i) => [t.key, (셈들[i]?.data as number | null) ?? 0]));
+  const 셈 = Object.fromEntries(보일탭.map((t, i) => [t.key, (셈들[i]?.data as number | null) ?? 0]));
+  const 직군셈 = Object.fromEntries(
+    JOBS.map((j, i) => [j.key, (셈들[보일탭.length + i]?.data as number | null) ?? 0]));
+
+  const 링크칸 = 링크만.filter((x) => !job.직군 || x.직군 === job.직군);
 
   const 길 = (next: Partial<SP>) => {
     const q = new URLSearchParams();
     const t = next.tab ?? sp.tab;
+    const j = next.job ?? sp.job;
     const pa = next.past ?? sp.past;
+    if (j && j !== 'all') q.set('job', j);
     if (t && t !== 'all') q.set('tab', t);
     if (pa === '1') q.set('past', '1');
     if (next.p && next.p !== '0') q.set('p', next.p);
@@ -120,9 +156,32 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
         학회 교육과정과 학술대회입니다. <b>신청은 각 학회에서</b> 합니다
       </p>
 
+      {/* 직군 줄 */}
+      <nav aria-label="직군" className="mt-6 flex flex-wrap gap-2">
+        {JOBS.map((j) => {
+          const on = j.key === job.key;
+          return (
+            <Link
+              key={j.key}
+              href={길({ job: j.key, tab: 'all', p: '0' })}
+              aria-current={on ? 'page' : undefined}
+              className={
+                'rounded-md border px-5 py-3 text-lg font-medium transition-colors '
+                + (on
+                  ? 'border-teal-strong bg-teal-strong text-white'
+                  : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950')
+              }
+            >
+              {j.label}
+              <span className={'ml-2 text-sm ' + (on ? 'text-white/70' : 'text-mute')}>{직군셈[j.key]}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
       {/* 학회 탭 — 스펙쌓기 「이수 교육」 의 학회 이름과 같습니다 */}
-      <nav aria-label="학회" className="mt-6 flex flex-wrap gap-2">
-        {TABS.map((t) => {
+      <nav aria-label="학회" className="mt-3 flex flex-wrap gap-2">
+        {보일탭.map((t) => {
           const on = t.key === tab.key;
           return (
             <Link
@@ -156,13 +215,32 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
       <p className="mt-4 break-keep rounded-sm border border-line bg-card p-5 text-sm leading-relaxed text-mute">
         학회 홈페이지에 공개된 안내를 모은 것입니다. <b>신청·문의는 학회에서</b> 하세요.
         <br />
-        지금은 <b>작업치료 쪽 학회 넷</b>입니다. 물리치료 쪽 학회는 아직 안 모았습니다.
+        날짜가 없는 줄은 <b>올린 날</b>을 적었습니다 — 교육 날짜가 아닙니다.
+        <br />
+        <b>대한정형도수물리치료학회</b>와 <b>칼텐본-에비언스학회</b>는 게시판이
+        날짜를 「09-28」처럼 <b>해 없이</b> 적습니다. 해를 지어내지 않으려고 비워 뒀습니다.
         <br />
         <b>대한인지재활학회</b>는 홈페이지가 긁기를 막아 두어, 첫 화면에 실린
         제목과 날짜만 가져옵니다. 자세한 것은 학회 화면에서 보세요.
-        <br />
-        날짜가 없는 줄은 <b>올린 날</b>을 적었습니다 — 교육 날짜가 아닙니다.
       </p>
+
+      {/* robots.txt 가 막은 곳 — 자료는 안 가져오고 길만 열어 둡니다 */}
+      {링크칸.length > 0 && (
+        <div className="mt-3 break-keep rounded-sm border border-line bg-card p-5 text-sm leading-relaxed text-mute">
+          아래 두 곳은 홈페이지가 <b>자동 수집을 막아 두어</b> 공고를 모으지 않습니다.
+          직접 들어가서 보세요.
+          <ul className="mt-2 flex flex-col gap-1">
+            {링크칸.map((x) => (
+              <li key={x.주소}>
+                <a href={x.주소} target="_blank" rel="noopener noreferrer"
+                  className="font-bold text-brand-red underline underline-offset-4">
+                  {x.이름} ›
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {목록.error && (
         <p className="mt-6 rounded-sm border border-brand-red/40 bg-brand-red-soft p-6 text-lg text-brand-red-dark">
@@ -219,7 +297,14 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
                 )}
                 {!d && v.장소 && <p className="mt-2 text-lg text-mute">{v.장소}</p>}
 
-                {v.모집인원 && <p className="mt-1 text-sm text-mute">모집 {v.모집인원}</p>}
+                {/* 「100명 (선착순)」 은 「모집 …」 으로, 「접수 8월 24일 ~ …」 은
+                    그대로 찍습니다. 보바스는 교육 날짜 없이 **접수 기간**만
+                    내놓는데 「모집 접수 …」 로 찍으면 말이 안 됩니다 */}
+                {v.모집인원 && (
+                  <p className="mt-1 text-sm text-mute">
+                    {/^\d/.test(v.모집인원) ? '모집 ' + v.모집인원 : v.모집인원}
+                  </p>
+                )}
 
                 <p className="mt-3 text-lg font-bold text-brand-red">학회 화면에서 보기 ›</p>
               </a>

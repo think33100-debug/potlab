@@ -47,7 +47,7 @@ export default function LeavePage() {
     return <main className="mx-auto w-full max-w-3xl px-6 py-8 md:px-7">
       <h1 className="text-h2 font-bold">로그인한 분만 쓸 수 있어요</h1>
       <Link href="/login"
-        className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark">
+        className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-btn font-bold text-white hover:bg-brand-red-dark">
         로그인하기
       </Link>
     </main>;
@@ -132,7 +132,7 @@ export default function LeavePage() {
         type="button"
         onClick={run}
         disabled={busy || typed.trim() !== SURE}
-        className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
       >
         {busy ? '탈퇴하는 중…' : typed.trim() === SURE ? '탈퇴하기' : `「${SURE}」 라고 쳐주세요`}
       </button>

@@ -74,7 +74,7 @@ export function ShareButtons({
       <button
         type="button"
         onClick={share}
-        className="rounded-md bg-brand-red px-6 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
+        className="rounded-md bg-brand-red px-6 py-4 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
       >
         공유
       </button>

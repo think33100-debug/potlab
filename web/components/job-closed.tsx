@@ -75,7 +75,7 @@ export function JobClosed({ jobId }: { jobId: string }) {
           type="button"
           onClick={ask}
           disabled={busy}
-          className="mt-6 rounded-md bg-brand-red px-7 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
+          className="mt-6 rounded-md bg-brand-red px-7 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
         >
           {busy ? '켜는 중…' : '알림 받기'}
         </button>

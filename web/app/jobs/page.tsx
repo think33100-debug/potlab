@@ -164,7 +164,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
         />
         <button
           type="submit"
-          className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98]"
+          className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98]"
         >
           찾기
         </button>

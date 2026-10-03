@@ -123,7 +123,7 @@ export default function AdminTexts() {
                     type="button"
                     onClick={() => save(r)}
                     disabled={busy === r.key || !dirty}
-                    className="mt-3 rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
+                    className="mt-3 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
                   >
                     {busy === r.key ? '저장하는 중…' : '저장'}
                   </button>

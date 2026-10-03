@@ -82,7 +82,7 @@ export default function SpecPage() {
           </p>
           {!loading && (
             <Link href={profile ? '/me' : session ? '/welcome' : '/login'}
-              className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-body-lg font-bold text-white hover:bg-brand-red-dark">
+              className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark">
               {profile ? '내 정보로 가기' : session ? '가입 마저 하기' : '시작하기'}
             </Link>
           )}

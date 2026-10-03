@@ -104,7 +104,7 @@ export default function ResetMe() {
         type="button"
         onClick={run}
         disabled={busy || typed.trim() !== SURE}
-        className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
       >
         {busy ? '지우는 중…' : typed.trim() === SURE ? '내 개인정보 지우기' : `「${SURE}」 라고 쳐주세요`}
       </button>

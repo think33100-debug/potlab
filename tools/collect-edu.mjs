@@ -63,6 +63,15 @@ const 풀기 = (s) => String(s || '')
   .replace(/&sdot;/g, '·').replace(/&times;/g, '×');
 const 글만 = (h) => 풀기(String(h || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
 
+/* 게시판 제목에 붙어 오는 덤을 뗍니다.
+   그누보드는 댓글 수를 **제목 링크 안에** 넣습니다 —
+   `<span class="sound_only">댓글</span><span class="cnt_cmt">1</span><span class="sound_only">개</span>`
+   그대로 두면 제목이 「… 자격시험 공고 댓글 1 개」 가 됩니다 (2026-10-03 에 봤습니다) */
+const 제목정리 = (h) => 글만(String(h || '')
+  .replace(/<span class="sound_only">[\s\S]*?<\/span>/gi, '')
+  .replace(/<span class="cnt_cmt">[\s\S]*?<\/span>/gi, '')
+  .replace(/<i[\s\S]*$/, ''));
+
 /* 날짜 — 되돌려 맞춰 봅니다 (봉사 수집기와 같은 방식).
    「2014-04-__」 「0000-00-00」 「2014-02-30」 을 전부 걸러냅니다 */
 export function 날짜만(v) {
@@ -150,7 +159,7 @@ export function 그누보드(html, 출처, 꼬리, 기본주소) {
     const c = m[1];
     const a = c.match(/<a href="([^"]*wr_id=(\d+)[^"]*)"[^>]*class="bo_tit"[^>]*>([\s\S]*?)<\/a>/);
     if (!a) continue;
-    const 제목 = 글만(a[3].replace(/<i[\s\S]*$/, ''));
+    const 제목 = 제목정리(a[3]);
     if (!제목) continue;
     out.push({
       번호: 꼬리 + ':' + a[2], 출처, 직군: '작업치료사', 갈래: 갈래보기(제목), 제목,
@@ -170,7 +179,7 @@ export function 운전재활(html) {
     const c = m[1];
     const a = c.match(/<a href="(view\.php\?idx=(\d+)[^"]*)"[^>]*>([\s\S]*?)<\/a>/);
     if (!a) continue;
-    const 제목 = 글만(a[3]);
+    const 제목 = 제목정리(a[3]);
     if (!제목) continue;
     const 날 = [...c.matchAll(/\d{4}-\d{2}-\d{2}/g)].map((x) => 날짜만(x[0])).filter(Boolean);
     out.push({
@@ -223,6 +232,131 @@ export function 인지재활(html) {
       갈래: 갈래보기(제목), 제목,
       시작: '', 끝: '', 장소: '', 모집인원: '', 상태: '모름',
       올린날: 날, 링크: 'https://cogsociety.org' + m[1], 원문: 제목,
+    });
+  }
+  return out;
+}
+
+/* ═══ 물리치료 쪽 다섯 (2026-10-03 저녁에 더함) ═══
+   전부 robots.txt 를 먼저 받아 보고 넣었습니다 — 자세한 것은 위 머리말. */
+
+/* 번호가 없는 곳(보바스)을 위한 짧은 지문.
+   제목·장소·기간이 같으면 같은 줄로 봅니다 — 다시 받아도 안 쌓입니다 */
+function 지문(s) {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+
+/* 「2026. 09. 26 ~ 10. 24」 → 「접수 9월 26일 ~ 10월 24일」
+   ★ 이것은 **교육 날짜가 아니라 접수 기간**입니다. 보바스는 「일 시」 를
+   「-」 로 비워두고 등록 기간만 적습니다. 교육 날짜인 척 넣으면 회원이
+   날짜를 잘못 적게 되므로 시작·끝 칸에는 **안 넣습니다.** */
+export function 접수기간(v) {
+  const s = String(v || '').replace(/\s+/g, '');
+  const m = s.match(/(\d{4})\.(\d{1,2})\.(\d{1,2})~(?:(\d{4})\.)?(\d{1,2})\.(\d{1,2})/);
+  if (!m) return '';
+  return '접수 ' + Number(m[2]) + '월 ' + Number(m[3]) + '일 ~ ' + Number(m[5]) + '월 ' + Number(m[6]) + '일';
+}
+
+/* ⑥ 한국보바스협회 — 첫 화면의 「접수진행중인 교육프로그램」.
+      글마다 주소가 없습니다(javascript:void(0)) — 교육일정 쪽으로 보냅니다.
+      ★ 출처를 「한국보바스협회」로 적습니다. 고르는 목록에서 작업치료 쪽은
+      「보바스」, 물리치료 쪽은 「한국보바스협회」인데 같은 단체입니다.
+      그래서 직군을 **공통**으로 둬 양쪽 탭에 다 나오게 합니다. */
+export function 보바스(html) {
+  const out = [];
+  const i = html.indexOf('id="main-schedule-list"');
+  if (i < 0) return out;
+  const 칸 = html.slice(i, i + 12000);
+  for (const m of 칸.matchAll(/<li>([\s\S]*?)<\/li>/g)) {
+    const c = m[1];
+    const 값 = (이름표) => {
+      const r = new RegExp('<dt>' + 이름표 + '<\\/dt>\\s*<dd>([\\s\\S]*?)<\\/dd>');
+      return 글만((c.match(r) || [])[1]);
+    };
+    const 제목 = 값('교육명');
+    if (!제목) continue;
+    const 장소 = 값('장 소');
+    const 등록 = 값('등 록');
+    const 일시 = 값('일 시');
+    const 두날 = [...일시.matchAll(/\d{4}[-.\/]\s*\d{1,2}[-.\/]\s*\d{1,2}/g)]
+      .map((x) => 날짜꼴(x[0].replace(/\s/g, ''))).filter(Boolean);
+    out.push({
+      번호: '보바스:' + 지문(제목 + '|' + 장소 + '|' + 등록),
+      출처: '한국보바스협회', 직군: '공통', 갈래: '교육', 제목,
+      시작: 두날[0] || '', 끝: 두날[1] || 두날[0] || '',
+      장소, 모집인원: 접수기간(등록), 상태: '접수중', 올린날: '',
+      링크: 'https://www.kbobath.com/program/schedule',
+      원문: 글만(c).slice(0, 300),
+    });
+  }
+  return out;
+}
+
+/* ⑦ 그누보드 표 꼴 (정형도수 · 칼텐본 지회) — td_subject 안에 글 링크.
+      ★ 칼텐본 지회는 날짜를 「01-15」 처럼 **해 없이** 적습니다.
+        날짜꼴() 이 그런 것을 빈 값으로 돌려주므로 올린날이 비어 남습니다.
+        아무 해나 붙이지 않습니다 (해를 지어내면 지난 글이 올해 것이 됩니다) */
+export function 그누보드표(html, 출처, 꼬리, 직군) {
+  const out = [];
+  for (const m of html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)) {
+    const c = m[1];
+    const a = c.match(/<td class="td_subject"[^>]*>\s*<a href="([^"]*wr_id=(\d+)[^"]*)"[^>]*>([\s\S]*?)<\/a>/);
+    if (!a) continue;
+    const 제목 = 제목정리(a[3]);
+    if (!제목) continue;
+    /* 글쓴이 칸에 메일 주소·쪽지 링크가 섞여 있어 날짜는 날짜 칸에서만 봅니다 */
+    const 날칸 = c.match(/<td class="td_date(?:time)?"[^>]*>([\s\S]*?)<\/td>/);
+    out.push({
+      번호: 꼬리 + ':' + a[2], 출처, 직군, 갈래: 갈래보기(제목), 제목,
+      시작: '', 끝: '', 장소: '', 모집인원: '', 상태: '모름',
+      올린날: 날짜꼴(날칸 ? 글만(날칸[1]) : ''),
+      링크: 풀기(a[1]), 원문: 제목,
+    });
+  }
+  return out;
+}
+
+/* ⑧ 대한PNF학회 — 글 주소가 /notice/105 꼴입니다 */
+export function pnf(html) {
+  const out = [];
+  for (const m of html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)) {
+    const c = m[1];
+    const a = c.match(/<a href="(https?:\/\/kspnf\.org\/notice\/(\d+))"[^>]*>([\s\S]*?)<\/a>/);
+    if (!a) continue;
+    const 제목 = 제목정리(a[3]);
+    if (!제목) continue;
+    const 날 = [...c.matchAll(/\d{4}-\d{2}-\d{2}/g)].map((x) => 날짜만(x[0])).filter(Boolean);
+    out.push({
+      번호: 'PNF:' + a[2], 출처: '대한고유수용성신경근촉진법학회', 직군: '물리치료사',
+      갈래: 갈래보기(제목), 제목,
+      시작: '', 끝: '', 장소: '', 모집인원: '', 상태: '모름',
+      올린날: 날[0] || '', 링크: a[1], 원문: 제목,
+    });
+  }
+  return out;
+}
+
+/* ⑨ 국제수중치료협회 — 글 주소가 없습니다. `page_view(1215)` 를 눌러야 열립니다.
+      번호만 받아 목록 쪽으로 보냅니다. **https 는 인증서가 자기서명이라
+      안 됩니다 — http 로 읽습니다. 검증은 끄지 않았습니다** */
+export function 수중치료(html) {
+  const out = [];
+  for (const m of html.matchAll(/<tr[^>]*id="mylist(\d+)"[^>]*>([\s\S]*?)<\/tr>/g)) {
+    const c = m[2];
+    const a = c.match(/<a href='javascript:page_view\(\d+\);'[^>]*class='bold'>([\s\S]*?)<\/a>/);
+    if (!a) continue;
+    const 제목 = 글만(a[1]);
+    if (!제목) continue;
+    const 날 = [...c.matchAll(/20\d{2}\.\d{1,2}\.\d{1,2}/g)].map((x) => 날짜꼴(x[0])).filter(Boolean);
+    out.push({
+      번호: '수중치료:' + m[1], 출처: '국제수중치료협회', 직군: '물리치료사',
+      갈래: 갈래보기(제목), 제목,
+      시작: '', 끝: '', 장소: '', 모집인원: '', 상태: '모름',
+      올린날: 날[0] || '',
+      링크: 'http://www.iatakorea.org/bbs/list.php?b_id=8&ffid=03-02',
+      원문: 제목,
     });
   }
   return out;
@@ -317,6 +451,79 @@ if (시험) {
   봐('갈래', g.갈래, '교육');
   봐('링크', g.링크, 'https://cogsociety.org/notice/view.asp?Key=53');
 
+  console.log('\n보바스 (첫 화면 토막 · 받은 원문 그대로)');
+  const bo = `<ul class="m-schedule-list" id="main-schedule-list">
+    <li><a href="javascript:void(0);">
+    <dl class="title"><dt>교육명</dt><dd>특강(인체동작의 이해) (Pelvis &amp; Core Stability)</dd></dl>
+    <dl class="option day"><dt>일 시</dt><dd>-</dd></dl>
+    <dl class="option day"><dt>등 록</dt><dd>2026. 08. 24 ~ 10. 18</dd></dl>
+    <dl class="option jangso"><dt>장 소</dt><dd>분당 보바스기념병원</dd></dl>
+    </a></li></ul>`;
+  const b1 = 보바스(bo)[0] || {};
+  봐('제목의 &amp; 풀기', b1.제목, '특강(인체동작의 이해) (Pelvis & Core Stability)');
+  봐('장소', b1.장소, '분당 보바스기념병원');
+  /* ★ 등록 기간을 **시작·끝에 안 넣는지**가 핵심입니다 */
+  봐('교육 날짜 칸은 비어야 함', b1.시작 + '|' + b1.끝, '|');
+  봐('접수 기간은 따로', b1.모집인원, '접수 8월 24일 ~ 10월 18일');
+  봐('직군 공통 (작업·물리 양쪽)', b1.직군, '공통');
+  봐('두 번 받아도 같은 번호', 보바스(bo)[0].번호, b1.번호);
+
+  console.log('\n그누보드 표 (정형도수)');
+  const kao = `<tr class="bo_notice"><td class="td_num"><strong>공지</strong></td>
+    <td class="td_subject"><a href="http://www.kaomt.or.kr/bbs/board.php?bo_table=0201&amp;wr_id=2743">
+    2026대한정형도수물리치료학회 강사(복구)신청</a><img src="x.gif" alt="첨부파일"></td>
+    <td class="td_name sv_use"><a href="http://www.kaomt.or.kr/bbs/formmail.php?mb_id=admin&amp;email=YWRtaW4=">메일보내기</a></td>
+    <td class="td_date">2026-09-30</td><td class="td_num">123</td></tr>`;
+  const k1 = 그누보드표(kao, '대한정형도수물리치료학회', '정형도수', '물리치료사')[0] || {};
+  봐('번호', k1.번호, '정형도수:2743');
+  봐('제목', k1.제목, '2026대한정형도수물리치료학회 강사(복구)신청');
+  봐('올린날', k1.올린날, '2026-09-30');
+  봐('링크의 &amp; 풀기', k1.링크, 'http://www.kaomt.or.kr/bbs/board.php?bo_table=0201&wr_id=2743');
+
+  /* 그누보드는 댓글 수를 **제목 링크 안에** 넣습니다. 안 떼면 제목이
+     「… 자격시험 공고 댓글 1 개」 가 됩니다 (2026-10-03 에 실제로 그랬습니다) */
+  const kao2 = `<tr class=""><td class="td_subject">
+    <a href="http://www.kaomt.or.kr/bbs/board.php?bo_table=0201&amp;wr_id=2727">
+    26년 제26차 정형도수전문물리치료사 자격시험 공고
+    <span class="sound_only">댓글</span><span class="cnt_cmt">1</span><span class="sound_only">개</span></a></td>
+    <td class="td_date">09-28</td></tr>`;
+  봐('제목에서 댓글 수 떼기',
+    (그누보드표(kao2, '대한정형도수물리치료학회', '정형도수', '물리치료사')[0] || {}).제목,
+    '26년 제26차 정형도수전문물리치료사 자격시험 공고');
+
+  console.log('\n칼텐본 지회 — 해 없는 날짜(01-15)를 지어내지 않는지');
+  const kal = `<tr class="bo_notice"><td class="td_num"><strong>공지</strong></td>
+    <td class="td_subject"><a href="http://kaltenbornevjenthomt.co.kr/2016/bbs/board.php?bo_table=education02&amp;wr_id=179">
+    2024년 전국 및 지역별 전체 교육일정</a></td>
+    <td class="td_name sv_use"><span class="sv_member">관리자</span></td>
+    <td class="td_date">01-15</td><td class="td_num">4577</td></tr>`;
+  const k2 = 그누보드표(kal, '칼텐본-에비언스학회', '칼텐본', '물리치료사')[0] || {};
+  봐('번호', k2.번호, '칼텐본:179');
+  봐('해를 모르면 비워 둠', k2.올린날, '');
+  봐('갈래', k2.갈래, '교육');
+
+  console.log('\n대한PNF학회');
+  const pn = `<tr class=""><td class="pc_vw">18</td>
+    <td class="td_subject tal" style="padding-left:0px">
+    <a href="https://kspnf.org/notice/105">2026년도 대한PNF학회 학술대회<i class="fa fa-download"></i></a></td>
+    <td class="pc_vw"><span class="sv_member">사무국</span></td><td>2026-09-03</td></tr>`;
+  const p1 = pnf(pn)[0] || {};
+  봐('번호', p1.번호, 'PNF:105');
+  봐('제목에서 아이콘 떼기', p1.제목, '2026년도 대한PNF학회 학술대회');
+  봐('올린날', p1.올린날, '2026-09-03');
+  봐('출처는 고르는 목록 이름으로', p1.출처, '대한고유수용성신경근촉진법학회');
+
+  console.log('\n국제수중치료협회');
+  const ia = `<tr onmouseover="this.style.backgroundColor='#fafafa'" id="mylist1215">
+    <td class="sml_text_en">160</td>
+    <td class="bold txt_l"><span class='somb_'><a href='javascript:page_view(1215,8,"");'><img src='./imgFd/sm_1.png'/></a>&nbsp;&nbsp;</span><a href='javascript:page_view(1215);' class='bold'>2026년 전반기 수중치료 강좌일정</a>&nbsp;<img src='/bbs/images/common/file.gif'/></td>
+    <td class="sml_text">임현주</td><td class="sml_text_en">2026.01.06</td><td class="sml_text_en">3276</td></tr>`;
+  const i1 = 수중치료(ia)[0] || {};
+  봐('번호', i1.번호, '수중치료:1215');
+  봐('제목 (그림 링크에 안 속음)', i1.제목, '2026년 전반기 수중치료 강좌일정');
+  봐('올린날 (2026.01.06 꼴)', i1.올린날, '2026-01-06');
+  봐('갈래', i1.갈래, '교육');
+
   console.log('\n' + (거짓 ? '★ ' + 거짓 + '개 틀렸습니다 (' + 참 + '개 맞음)' : '○ ' + 참 + '개 다 맞았습니다'));
   process.exit(거짓 ? 1 : 0);
 }
@@ -329,6 +536,19 @@ const 곳 = [
   { 이름: '운전재활 공지', u: 'http://www.ksdr.or.kr/sub_notice/list.php', f: 운전재활 },
   { 이름: '연하장애 공지', u: 'http://www.kdys.or.kr/board/list.html?code=notice', f: 연하장애 },
   { 이름: '인지재활 첫 화면', u: 'https://cogsociety.org/', f: 인지재활 },
+
+  /* ── 물리치료 쪽 (2026-10-03 저녁) ── */
+  { 이름: '보바스 접수중', u: 'https://www.kbobath.com/', f: 보바스 },
+  { 이름: '정형도수 학회공지', u: 'http://www.kaomt.or.kr/bbs/board.php?bo_table=0201',
+    f: (h) => 그누보드표(h, '대한정형도수물리치료학회', '정형도수', '물리치료사') },
+  { 이름: 'PNF 공지사항', u: 'https://kspnf.org/notice', f: pnf },
+  { 이름: '칼텐본 교육일정', u: 'http://kaltenbornevjenthomt.co.kr/2016/bbs/board.php?bo_table=education02&me_code=2020',
+    f: (h) => 그누보드표(h, '칼텐본-에비언스학회', '칼텐본', '물리치료사') },
+  { 이름: '칼텐본 교육안내', u: 'http://kaltenbornevjenthomt.co.kr/2016/bbs/board.php?bo_table=education01&me_code=20',
+    f: (h) => 그누보드표(h, '칼텐본-에비언스학회', '칼텐본', '물리치료사') },
+  /* ★ https 는 인증서가 자기서명이라 연결이 끊깁니다. 검증은 **끄지 않고**
+     http 로 읽습니다 (2026-10-03 확인). robots.txt 는 없습니다 */
+  { 이름: '수중치료 교육일정', u: 'http://www.iatakorea.org/bbs/list.php?b_id=8&ffid=03-02', f: 수중치료 },
 ];
 
 const 모두 = [];

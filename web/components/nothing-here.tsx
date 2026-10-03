@@ -43,7 +43,7 @@ export function NothingHere({
       <div className="mt-8 flex w-full max-w-[22rem] flex-col gap-2">
         <Link
           href={goHref}
-          className="rounded-md bg-brand-red px-7 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
+          className="rounded-md bg-brand-red px-7 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
         >
           {goLabel}
         </Link>
