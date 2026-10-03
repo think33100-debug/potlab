@@ -8,50 +8,40 @@ import { useEffect } from 'react';
    /post 도 커뮤니티 글이라 같이 넣습니다. */
 export const DARK_PATHS = ['/community', '/post'];
 
-/* 반대로, 기기가 어두운 모드여도 밝게 고정하는 화면.
-
-   홈은 랜딩이라 「히어로만 어둡고 나머지는 종이색」이 전부입니다.
-   기기 설정을 따라가게 두면 탑바·탭바만 어두워지고 본문은 종이색이라
-   위아래가 따로 놉니다 (실제로 그렇게 나왔습니다). */
-export const LIGHT_PATHS = ['/', '/orgs'];
-
-/* 아래로 딸린 화면까지 통째로 밝게 고정하는 자리.
-
-   공고 상세(/jobs/<id>)는 색을 전부 직접 박아 그립니다 — 바탕 #F4F4F1,
-   글자 #14181C. 그런데 고정을 안 해두면, 기기가 어두운 모드일 때
-   색을 안 박은 조각만 dark: 쪽으로 넘어갑니다.
-   「이 기관은 이런 곳이에요」의 기관 이름이 그랬습니다 —
-   body 의 dark:text-white 를 물려받아 종이색 위에서 대비 1.10:1 이 됐습니다.
-   탑바·탭바만 검게 뜨던 것도 같이 풀립니다.
-
-   목록(/jobs)은 여기 안 넣습니다. 그 화면은 dark: 짝을 제대로 갖추고 있어
-   어두운 모드에서 멀쩡합니다 — 고정하면 오히려 뺏는 것이 됩니다. */
-export const LIGHT_TREES = ['/jobs/'];
-
+/* ★ 2026-10-03 — 규칙을 뒤집었습니다 (세중님 결정)
+ *
+ *   전   밝게 고정한 곳만 밝고, 나머지는 **기기 설정을 따라갔습니다.**
+ *        목록 ['/', '/orgs'] + ['/jobs/'] 셋뿐이었습니다.
+ *        그래서 기기가 어두운 모드면 채용공고·월급확인·스펙쌓기가 다 어두웠습니다.
+ *
+ *   후   **커뮤니티만 어둡게, 그 밖에는 전부 밝게.**
+ *        기기가 어두운 모드여도 커뮤니티 밖은 밝게 나옵니다.
+ *
+ *   이렇게 두면 새로 만드는 화면(/volunteer · /tools · /edu · /youth …)이
+ *   **저절로 밝게** 나옵니다. 화면마다 고정 목록에 더할 일이 없습니다.
+ *   화면마다 색을 박는 대신 이 한 자리로 정합니다.
+ *
+ *   밝은 모드 색·글꼴·여백은 teamsparta.md 의 토큰을 씁니다 —
+ *   globals.css 가 그 문서에서 옮겨온 값입니다. 값을 화면에 박지 마십시오. */
 export const isDark = (path: string) =>
   DARK_PATHS.some((p) => path === p || path.startsWith(p + '/'));
 
-export const isLight = (path: string) =>
-  LIGHT_PATHS.includes(path) || LIGHT_TREES.some((p) => path.startsWith(p));
+/** 커뮤니티가 아니면 전부 밝습니다 */
+export const isLight = (path: string) => !isDark(path);
 
 /* 그리기 전에 한 번 칠합니다.
    effect 로만 두면 링크를 눌러 바로 들어온 사람이 흰 화면을 한 번 봅니다 */
 export const SURFACE_SCRIPT =
   `(function(){try{var p=location.pathname;var d=${JSON.stringify(DARK_PATHS)}` +
   `.some(function(x){return p===x||p.indexOf(x+"/")===0});` +
-  `if(d){document.documentElement.dataset.surface="dark";}` +
-  `else if(${JSON.stringify(LIGHT_PATHS)}.indexOf(p)>=0||` +
-  `${JSON.stringify(LIGHT_TREES)}.some(function(x){return p.indexOf(x)===0}))` +
-  `{document.documentElement.dataset.surface="light";}}catch(e){}})()`;
+  `document.documentElement.dataset.surface=d?"dark":"light";}catch(e){}})()`;
 
 /* 화면을 옮겨 다닐 때 따라 바꿉니다 */
 export function Surface() {
   const path = usePathname();
   useEffect(() => {
-    const el = document.documentElement;
-    if (isDark(path)) el.dataset.surface = 'dark';
-    else if (isLight(path)) el.dataset.surface = 'light';
-    else delete el.dataset.surface;
+    /* 늘 둘 중 하나로 못 박습니다. 지우면 기기 설정을 따라가 버립니다 */
+    document.documentElement.dataset.surface = isDark(path) ? 'dark' : 'light';
   }, [path]);
   return null;
 }

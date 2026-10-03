@@ -18,11 +18,18 @@
    같이 어두워집니다 — 본문만 어둡고 위아래가 희면 더 이상해 보입니다.
    teamsparta.md: bg-canvas-dark = gray-900, bg-surface-dark = gray-950 */
 @custom-variant dark {
-  /* 기기가 어두운 모드여도, 밝게 고정한 화면(홈)에서는 안 켜집니다.
-     이게 없으면 홈에서 탑바·탭바만 어두워지고 본문은 종이색이라 따로 놉니다 */
-  @media (prefers-color-scheme: dark) {
-    &:where(html:not([data-surface="light"]) *) { @slot; }
-  }
+  /* ★ 2026-10-03 — 기기 설정을 **안 따라갑니다** (세중님 결정)
+   *
+   *   전   @media (prefers-color-scheme: dark) 가 살아 있어서,
+   *        기기가 어두운 모드면 밝게 고정한 셋(/ · /orgs · /jobs/<id>)만
+   *        빼고 다 어두워졌습니다. 채용공고·월급확인·스펙쌓기가 그랬습니다.
+   *
+   *   후   **커뮤니티만 어둡게.** 화면이 둘 중 하나를 늘 못 박습니다
+   *        (app/surface.tsx 의 SURFACE_SCRIPT 가 data-surface 를 늘 답니다).
+   *        기기가 어두운 모드여도 커뮤니티 밖은 밝게 나옵니다.
+   *
+   *   @media 줄을 지운 까닭 — 남겨 두면 data-surface 가 붙기 전 한 순간
+   *   (스크립트가 돌기 전)에 어두운 색이 비칩니다. 규칙을 하나만 둡니다. */
   &:where(html[data-surface="dark"] *) { @slot; }
 }
 
