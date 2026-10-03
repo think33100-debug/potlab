@@ -14,6 +14,12 @@
  *    node tools/알림보내기.mjs --시험 <기기id>   그 기기에 **시험 한 건**을 쏩니다
  *                                              (보낼알림 을 안 거칩니다. 아래 설명)
  *    node tools/알림보내기.mjs                  진짜로 보냅니다
+ *    node tools/알림보내기.mjs --자가시험        주소 만드는 규칙만 시험 (열쇠 없이)
+ *
+ *  갈래 셋
+ *    새공고     찜한 병원에 새 공고        → /jobs/<공고id>
+ *    마감임박   찜한 공고 마감 3일 전       → /jobs/<공고id>
+ *    새교육     알림 켠 교육기관의 새 교육   → /edu/org/<기관>  (2026-10-04 보탬)
  *
  *  열쇠 (.env.server)
  *    SUPABASE_URL · SUPABASE_SERVICE_KEY   보낼알림·알림보낸것남기기 는
@@ -61,6 +67,31 @@ const 나만 = argv.includes('--나만') ? String(argv[argv.indexOf('--나만') 
 const 시험 = argv.includes('--시험') ? String(argv[argv.indexOf('--시험') + 1] || '') : '';
 const 시험공고 = argv.includes('--시험') ? String(argv[argv.indexOf('--시험') + 2] || '') : '';
 const 하루상한 = argv.includes('--상한') ? Number(argv[argv.indexOf('--상한') + 1]) || 3 : 3;
+
+/* 눌렀을 때 갈 곳. 갈래마다 다릅니다 (2026-10-04) —
+   공고는 /jobs/<공고id> 로 가지만, **교육 하나만 보는 화면이 없습니다.**
+   그래서 교육은 그 기관 화면으로 보냅니다. 거기 열린 교육이 위에 있습니다.
+
+   왜 보낼알림() 이 주소를 안 돌려주나 — 돌려주는 칸을 늘리면 함수를 drop
+   하고 다시 만들어야 합니다. 갈래를 보고 여기서 만드는 쪽이 쌉니다 */
+const 갈곳 = (x) => (x.갈래 === '새교육'
+  ? '/edu/org/' + encodeURIComponent(x.기관 || '')
+  : '/jobs/' + x.공고id);
+
+/* 자가시험 — 열쇠 없이 돕니다. node tools/알림보내기.mjs --자가시험 */
+if (argv.includes('--자가시험')) {
+  const 같나 = (a, b, 말) => {
+    if (a !== b) { console.error('✗ ' + 말 + '\n   받음 ' + a + '\n   바람 ' + b); process.exit(1); }
+    console.log('○ ' + 말);
+  };
+  같나(갈곳({ 갈래: '새공고', 공고id: 'WNK1', 기관: '어느병원' }), '/jobs/WNK1', '새공고는 /jobs 로');
+  같나(갈곳({ 갈래: '마감임박', 공고id: 'WNK2', 기관: '어느병원' }), '/jobs/WNK2', '마감임박도 /jobs 로');
+  같나(갈곳({ 갈래: '새교육', 공고id: 'EDU-1', 기관: '대한연하재활학회' }),
+    '/edu/org/' + encodeURIComponent('대한연하재활학회'), '새교육은 기관 화면으로 (한글 주소는 감쌉니다)');
+  같나(갈곳({ 갈래: '새교육', 공고id: 'EDU-2', 기관: '' }), '/edu/org/', '기관이 비어도 안 터집니다');
+  console.log('\n자가시험 4개 다 통과');
+  process.exit(0);
+}
 
 const t0 = Date.now();
 console.log('알림 보내기 · ' + new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
@@ -175,11 +206,13 @@ console.log('\n먼저 남김   ' + 새로남긴수 + '건 (이미 있던 것은 
 const 결과들 = [];
 for (const x of 할것) {
   const 몸 = JSON.stringify({
-    제목: x.갈래 === '마감임박' ? '마감이 다가와요' : (x.기관 || '새 공고'),
+    제목: x.갈래 === '마감임박' ? '마감이 다가와요'
+      : x.갈래 === '새교육' ? (x.기관 || '새 교육')
+      : (x.기관 || '새 공고'),
     몸: x.갈래 === '마감임박'
       ? String(x.제목 || '').slice(0, 60) + (x.마감 ? ' · ' + x.마감 + ' 마감' : '')
       : String(x.제목 || '').slice(0, 60),
-    주소: '/jobs/' + x.공고id,
+    주소: 갈곳(x),
     태그: x.갈래 + ':' + x.공고id,
   });
   try {
