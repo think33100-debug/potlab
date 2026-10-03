@@ -325,3 +325,26 @@ if (한줄) {
   console.log('\n담았습니다 — 봉사처 ' + 담은처 + '곳 · 모집 ' + 담은모집 + '건');
   console.log(Math.round((Date.now() - t0) / 1000) + '초');
 }
+
+/* ── 박동 — 안 남기면 /admin/beat 이 「안 돌았다」를 못 알아챕니다 ──
+   다른 수집기(collect-hosp 등)와 같은 꼴입니다.
+
+   ⚠ `collect_source` 에 VMS 줄이 있어야 들어갑니다.
+      아직 없습니다 — sql/2026-10-04_수집경로_봉사교육.sql 를 올려야 합니다.
+      그때까지는 조용히 실패하고 수집 자체는 그대로 끝납니다. */
+try {
+  await rpc('collect_beat', {
+    p_secret: cfg.COLLECT_KEY_VMS,
+    p_source: 'VMS',
+    p_beat: {
+      took_ms: Date.now() - t0,
+      ok: true,
+      본곳: 처목록.length,
+      담음: 담은모집,
+      메모: { 봉사처: 담은처, 복지보건: 셈['복지·보건'], 기타: 셈['기타'], 모름: 셈['모름'] },
+    },
+  });
+} catch (e) {
+  console.log('박동을 못 남겼습니다 — ' + String(e.message).slice(0, 160));
+  console.log('(수집은 끝났습니다. collect_source 에 VMS 줄이 없으면 이렇게 됩니다)');
+}

@@ -1,0 +1,22 @@
+{
+  "web/app/admin/beat/page.tsx:67": "beat_health 는 경로 수만큼 — 지금 7줄, 수집 경로가 100이 될 일 없음",
+  "web/app/admin/beat/page.tsx:68": "수집기박동 은 수집기 수만큼 — 지금 13줄",
+  "web/components/route-health.tsx:157": "route_health 는 경로 수만큼 — 지금 15줄",
+  "web/components/route-health.tsx:169": "beat_health 는 경로 수만큼 — 지금 7줄",
+  "web/components/signup-survey.tsx:743": "lang_bands 는 시험·등급 표 — 지금 18줄, 손으로 넣는 고정 목록",
+  "web/lib/job-views.ts:13": "화면에 보이는 공고 id 만 넘깁니다 (한 쪽 20건). 부르는 곳 둘 다 20건 이하",
+  "web/lib/org.ts:132": "org_public 은 기관 하나를 찾는 것 — 첫 줄만 씁니다",
+  "web/lib/org.ts:138": "org_nearby 는 p_n: 3",
+  "web/lib/org.ts:144": "org_jobs 는 p_n: 10",
+  "web/components/org-stat.tsx:40": "org_detail 은 기관 하나 — 함수 안에 limit 1",
+  "web/app/admin/stats/page.tsx:62": "admin_stats_screens 는 화면 갈래 수만큼 — 지금 8줄",
+  "web/app/admin/stats/page.tsx:65": "admin_stats_devices 는 기기 갈래 — 지금 2줄",
+  "web/app/admin/stats/page.tsx:61": "admin_stats_daily 는 p_days 만큼 줄이 나옵니다 — 화면이 30 을 넘깁니다",
+  "web/app/admin/stats/page.tsx:63": "admin_stats_top_jobs 는 함수 안에서 limit p_limit — 화면이 10 을 넘깁니다",
+  "web/app/admin/stats/page.tsx:64": "admin_stats_top_posts 도 limit p_limit — 화면이 10 을 넘깁니다",
+  "web/app/admin/access/page.tsx:54": "아직 안 고침 — 지금 기록 3줄, 101줄째부터 잘립니다. SQL 준비됨 sql/2026-10-04_백줄한도_준비.sql (제일 급함 · 개인정보 기록)",
+  "web/app/admin/members/page.tsx:41": "아직 안 고침 — 지금 회원 4명, 101명째부터 잘립니다. SQL 준비됨",
+  "web/app/admin/posts/page.tsx:78": "아직 안 고침 — 지금 회원 4명. 화면이 p_ids 를 안 넘깁니다. SQL·안내 준비됨",
+  "web/app/admin/reports/page.tsx:42": "아직 안 고침 — 지금 신고 0줄, 101줄째부터 잘립니다. SQL 준비됨",
+  "web/app/jobs/page.tsx:100": "아직 안 고침 — 지금 10줄(비로그인_공고수=10). 그 값이 100을 넘거나 -1 이면 잘립니다. SQL 준비됨"
+}

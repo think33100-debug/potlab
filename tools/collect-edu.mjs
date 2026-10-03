@@ -54,6 +54,7 @@ const cfg = {
 
 const dry = process.argv.includes('--dry');
 const 시험 = process.argv.includes('--시험');
+const 시작한때 = Date.now();      // 박동에 「얼마나 걸렸나」를 남기려고
 const UA = 'Mozilla/5.0 (compatible; POTJOB/1.0; +https://potjob.co.kr)';
 
 /* ── 글자 다루기 ───────────────────────────────────────────── */
@@ -720,3 +721,28 @@ const 센것 = await 부르기('교육셈', { p_직군: null, p_출처: null, p_
 const 전부 = await 부르기('교육셈', { p_직군: null, p_출처: null, p_지난것: true });
 console.log('\n담았습니다 — 보낸 것 ' + 담음 + '건 · 표 전체 ' + 전부 + '건 · 아직 안 끝난 것 ' + 센것 + '건');
 if (막힌곳.length) console.log('\n막힌 곳 ' + 막힌곳.length + ':\n  ' + 막힌곳.join('\n  '));
+
+/* ── 박동 — 안 남기면 /admin/beat 이 「안 돌았다」를 못 알아챕니다 ──
+   다른 수집기(collect-hosp 등)와 같은 꼴입니다.
+
+   ⚠ `collect_source` 에 EDU 줄이 있어야 들어갑니다.
+      아직 없습니다 — sql/2026-10-04_수집경로_봉사교육.sql 를 올려야 합니다.
+      그때까지는 아래가 조용히 실패하고 수집 자체는 그대로 끝납니다.
+      (박동 하나 때문에 수집을 망치지 않습니다) */
+try {
+  await 부르기('collect_beat', {
+    p_secret: 열쇠,
+    p_source: 'EDU',
+    p_beat: {
+      took_ms: Date.now() - 시작한때,
+      ok: 막힌곳.length === 0,
+      왜: 막힌곳.join(' · '),
+      본곳: 곳.length,
+      담음,
+      메모: { 출처수: new Set(하나씩.map((x) => x.출처)).size, 안끝난것: 센것, 표전체: 전부 },
+    },
+  });
+} catch (e) {
+  console.log('\n박동을 못 남겼습니다 — ' + String(e.message).slice(0, 160));
+  console.log('(수집은 끝났습니다. collect_source 에 EDU 줄이 없으면 이렇게 됩니다)');
+}

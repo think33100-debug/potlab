@@ -38,14 +38,31 @@ export default function AdminTrash() {
   /* 가져오기만 합니다 — 화면 값은 바꾸지 않습니다.
      effect 안에서 바로 setState 하면 경고가 나고, 실제로도 한 번 더 그려집니다.
      이 저장소의 다른 관리자 화면과 같은 꼴입니다 (app/admin/jobs/page.tsx) */
+  /* ★ 전에는 `.limit(500)` 한 줄이었습니다. **거짓이었습니다** —
+     Supabase 는 한 번에 **100줄만** 돌려줍니다. limit 을 키워도 안 되고
+     오류도 안 납니다. 쓰레기통이 2,966줄인데 **100줄만 보고 있었습니다.**
+     「최근 100건 밖에서 잘못 버린 것」은 화면에 뜰 길이 아예 없었습니다.
+     (2026-10-04 에 재서 찾음 — Content-Range 0-99/2966)
+
+     그래서 100줄씩 다섯 쪽을 이어 받습니다. 500은 전에 적어 둔 수를
+     그대로 지킨 것입니다 — 전부 받으면 관리자 화면이 너무 무거워집니다. */
   const fetchRows = useCallback(async (): Promise<줄[]> => {
-    let b = browserSupabase().from('job_trash')
-      .select('*').order('trashed_at', { ascending: false }).limit(500);
-    if (되돌린것만) b = b.eq('restored', true);
-    if (q) b = b.or(`title.ilike.%${q}%,org_name.ilike.%${q}%,why.ilike.%${q}%`);
-    const { data, error } = await b;
-    if (error) { toast(`불러오지 못했어요 — ${error.message}`, { tone: 'danger' }); return []; }
-    return (data ?? []) as 줄[];
+    const 쪽크기 = 100;            // 서버가 못 넘게 막는 수
+    const 최대 = 500;
+    const 모두: 줄[] = [];
+    for (let off = 0; off < 최대; off += 쪽크기) {
+      let b = browserSupabase().from('job_trash')
+        .select('*').order('trashed_at', { ascending: false })
+        .range(off, off + 쪽크기 - 1);
+      if (되돌린것만) b = b.eq('restored', true);
+      if (q) b = b.or(`title.ilike.%${q}%,org_name.ilike.%${q}%,why.ilike.%${q}%`);
+      const { data, error } = await b;
+      if (error) { toast(`불러오지 못했어요 — ${error.message}`, { tone: 'danger' }); return 모두; }
+      const 쪽 = (data ?? []) as 줄[];
+      모두.push(...쪽);
+      if (쪽.length < 쪽크기) break;     // 마지막 쪽
+    }
+    return 모두;
   }, [q, 되돌린것만, toast]);
 
   useEffect(() => {

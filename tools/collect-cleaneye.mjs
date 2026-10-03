@@ -43,6 +43,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { 모두받기 } from './쪽나눠받기.mjs';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, 구운날 } from './gas-rules.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
@@ -282,14 +283,14 @@ async function 옛것(cfg) {
     console.log('  (대조 안 함 — SUPABASE_SERVICE_KEY 가 없습니다. 집 컴퓨터에서만 됩니다)');
     return null;
   }
+  /* ★ 전에는 `&limit=2000` 이었습니다. PostgREST 가 **100줄에서 자릅니다** —
+     limit 을 키워도 안 됩니다. CE 는 지금 7줄이라 안 걸렸지만,
+     100을 넘으면 대조가 조용히 틀려집니다. 쪽을 나눕니다 */
   const u = cfg.SUPABASE_URL
-    + '/rest/v1/job_posts?source=eq.CE&select=id,title,org_name,job_group,hold,apply_to&limit=2000';
+    + '/rest/v1/job_posts?source=eq.CE&select=id,title,org_name,job_group,hold,apply_to';
   try {
-    const r = await fetch(u, { headers: { apikey: 열쇠, Authorization: 'Bearer ' + 열쇠 } });
-    const txt = await r.text();
-    if (!r.ok) { console.error('  옛것 읽기 실패 · HTTP ' + r.status + ' · ' + txt.slice(0, 300)); return null; }
-    return JSON.parse(txt);
-  } catch (e) { console.error('  옛것 읽기 실패 · ' + String(e.message).slice(0, 200)); return null; }
+    return await 모두받기(u, { apikey: 열쇠, Authorization: 'Bearer ' + 열쇠 });
+  } catch (e) { console.error('  옛것 읽기 실패 · ' + String(e.message).slice(0, 300)); return null; }
 }
 
 /* ── 본체 ─────────────────────────────────────────────────── */

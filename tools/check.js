@@ -104,6 +104,19 @@ try {
   problems.push("화면 색 — 밝은 바탕에서 묻히는 글자색이 있습니다 (위 ★ 를 보십시오)");
 }
 
+/* ── 100줄 한도 (2026-10-04) ───────────────────────────────────
+   Supabase 는 한 번에 100줄만 돌려줍니다. limit 을 키워도 안 되고
+   **오류도 안 납니다** — 101번째 줄부터 조용히 없는 것이 됩니다.
+   두 번 밟았습니다 (봉사목록 379→100 · 교육 102→100).
+   자세한 것은 tools/백줄검사.mjs. */
+try {
+  const { execFileSync } = require("child_process");
+  execFileSync(process.execPath, [require("path").join(__dirname, "백줄검사.mjs")],
+    { stdio: "inherit" });
+} catch (e) {
+  problems.push("100줄 한도 — 조용히 잘릴 수 있는 조회가 있습니다 (위 ★ 를 보십시오)");
+}
+
 if (!problems.length) {
   console.log('\n어긋난 곳 없습니다.');
 } else {
