@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 
    어두운 구역에서는 보조 글자를 #9BA3AB 보다 연하게 쓰지 않습니다.
    화면마다 클래스를 바꾸지 않고 globals.css 가 그 구역의 토큰 값을
-   갈아 끼웁니다 — text-gray-500 이 붙은 자리가 전부 한 번에 밝아집니다.
+   갈아 끼웁니다 — text-mute 이 붙은 자리가 전부 한 번에 밝아집니다.
 
    맨 위 배너는 홈과 같은 표(home_blocks kind='comm')에서 옵니다.
    관리자가 /admin 에서 고칩니다 — 배포가 필요 없습니다. */
@@ -59,7 +59,7 @@ export default async function Community() {
 
       <header className={banner.items.length > 0 ? 'mb-7 mt-8' : 'mb-7'}>
         <h1 className="break-keep text-h1 font-bold">커뮤니티</h1>
-        <p className="mt-1 break-keep text-lg text-gray-500">치료사끼리 묻고 답하는 곳</p>
+        <p className="mt-1 break-keep text-lg text-mute">치료사끼리 묻고 답하는 곳</p>
       </header>
 
       {/* ② 주제 — 옆으로 밉니다. 묶음(둘 다 · 치료사 · 학생)마다 한 줄 */}
@@ -80,7 +80,7 @@ export default async function Community() {
                     {c.name}
                     <span className="ml-2 text-sm font-medium text-mute">{n[c.id] ?? 0}</span>
                   </p>
-                  <p className="mt-3 break-keep text-lg text-gray-500">{c.desc}</p>
+                  <p className="mt-3 break-keep text-lg text-mute">{c.desc}</p>
                 </Link>
               ))}
             </Rail>
@@ -103,7 +103,7 @@ export default async function Community() {
       <section>
         <h2 className="break-keep text-h3 font-bold">새 글</h2>
         {freshRows.length === 0 ? (
-          <p className="break-keep py-8 text-center text-lg text-gray-500">
+          <p className="break-keep py-8 text-center text-lg text-mute">
             아직 글이 없어요. 첫 글을 써보세요
           </p>
         ) : (

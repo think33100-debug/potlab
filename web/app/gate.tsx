@@ -105,7 +105,7 @@ export function JoinCta({ what }: { what: string }) {
   return (
     <section className="mt-7 rounded-sm border border-gray-200 p-6 text-center dark:border-gray-700">
       <p className="text-body-lg font-bold">여기까지만 보여요</p>
-      <p className="mt-2 text-lg text-gray-500">
+      <p className="mt-2 text-lg text-mute">
         {회원
           ? <>설문만 마치면 {eul(what)} 전부 보실 수 있어요</>
           : <>가입하시면 {eul(what)} 전부 보실 수 있어요</>}

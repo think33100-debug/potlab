@@ -147,7 +147,7 @@ export default function AdminPosts() {
   return (
     <div>
       <h2 className="text-h3 font-bold">커뮤니티 글</h2>
-      <p className="mt-1 break-keep text-sm text-gray-500">
+      <p className="mt-1 break-keep text-sm text-mute">
         글은 지우지 않고 감춥니다. 감춘 글도 표에 남아서, 이미 나간 공유 링크가
         「지워진 글이에요」라고 말해줄 수 있어요
       </p>
@@ -180,16 +180,16 @@ export default function AdminPosts() {
         </p>
       )}
 
-      {rows === null && <p className="mt-6 text-lg text-gray-500">불러오는 중…</p>}
+      {rows === null && <p className="mt-6 text-lg text-mute">불러오는 중…</p>}
 
       {rows && rows.length === 0 && !err && (
-        <p className="mt-8 text-center text-lg text-gray-500">여기 해당하는 글이 없어요</p>
+        <p className="mt-8 text-center text-lg text-mute">여기 해당하는 글이 없어요</p>
       )}
 
       <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
         {(rows ?? []).map((r) => (
           <li key={r.id} className="py-6">
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-mute">
               <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
                 {channelName(r.channel)}
               </span>
@@ -210,7 +210,7 @@ export default function AdminPosts() {
 
             {/* 누가 언제 감췄는지 — 분쟁이 생기면 이 한 줄이 근거입니다 */}
             {r.hidden && (
-              <p className="mt-2 break-keep text-sm text-gray-500">
+              <p className="mt-2 break-keep text-sm text-mute">
                 {r.hidden_at ? r.hidden_at.slice(0, 16).replace('T', ' ') : '시각 모름'}
                 {' · '}
                 {who(r)}

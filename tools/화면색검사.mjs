@@ -44,7 +44,7 @@ const 걸린것 = [];
 for (const f of 파일들) {
   const 줄들 = fs.readFileSync(f, 'utf8').split(/\r?\n/);
   줄들.forEach((l, i) => {
-    for (const m of l.matchAll(/(?<!dark:)text-gray-400\b/g)) {
+    for (const m of l.matchAll(/(?<!dark:)text-gray-(400|500)\b/g)) {
       걸린것.push(짧게(f) + ':' + (i + 1) + '  ' + l.trim().slice(0, 70));
     }
   });
@@ -57,7 +57,7 @@ if (걸린것.length) {
   for (const x of 걸린것.slice(0, 15)) console.log('   · ' + x);
   if (걸린것.length > 15) console.log('   … 그 밖에 ' + (걸린것.length - 15) + '곳');
 } else {
-  console.log('○ 맨 text-gray-400 없습니다 (밝은 바탕에서 묻히는 글자색)');
+  console.log('○ 맨 text-gray-400·500 없습니다 (밝은 바탕에서 묻히는 글자색)');
 }
 
 /* ── ② 더 연한 글자색 ──

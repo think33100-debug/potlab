@@ -75,7 +75,7 @@ export function UnemploymentForm({ 설정 }: { 설정: 실업급여설정 }) {
       </Card>
 
       {!셀수있나 && (
-        <p className="mt-6 break-keep text-lg text-gray-500">월급을 넣으면 바로 나옵니다</p>
+        <p className="mt-6 break-keep text-lg text-mute">월급을 넣으면 바로 나옵니다</p>
       )}
 
       {r && (

@@ -31,7 +31,7 @@ export function PostItem({ p, showChannel = false }: { p: PostRow; showChannel?:
         className="-mx-4 flex gap-5 rounded-sm px-4 py-6 hover:bg-gray-50 dark:hover:bg-gray-950"
       >
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-3 text-sm text-gray-500">
+          <div className="flex items-center gap-3 text-sm text-mute">
             {showChannel && (
               <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
                 {channelName(p.channel)}

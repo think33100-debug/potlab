@@ -84,7 +84,7 @@ export default function AdminRival() {
   };
 
   if (err) return <p className="text-lg text-brand-red">{err}</p>;
-  if (!d) return <p className="text-lg text-gray-500">잠시만요…</p>;
+  if (!d) return <p className="text-lg text-mute">잠시만요…</p>;
 
   const s = d.요약 || {};
 
@@ -92,7 +92,7 @@ export default function AdminRival() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-bold">경쟁사 비교</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-mute">
           <b>관리자만 봅니다. 회원 화면에는 쓰지 않습니다.</b> 경쟁사 공고를 우리 공고로
           옮겨 싣지 않습니다 — 쓰는 것은 「이 기관을 우리도 봐야겠다」는 신호뿐입니다.
           공고는 그 기관에서 직접 긁습니다.
@@ -121,11 +121,11 @@ export default function AdminRival() {
       <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950 p-3 text-sm">
         <b>원인별</b>{' '}
         {Object.entries(d.원인별 || {}).length === 0
-          ? <span className="text-gray-500">아직 없습니다</span>
+          ? <span className="text-mute">아직 없습니다</span>
           : Object.entries(d.원인별).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
             <span key={k} className="mr-2 inline-block rounded bg-gray-100 px-2 py-0.5 dark:bg-gray-800">{k} {v}</span>
           ))}
-        <span className="ml-2 text-xs text-gray-500">
+        <span className="ml-2 text-xs text-mute">
           · 「기존」 {s['기존 (셈에서 뺌)'] ?? 0}건은 켤 때 이미 목록에 있어 빠름·늦음 셈에서 뺐습니다
         </span>
       </div>
@@ -133,7 +133,7 @@ export default function AdminRival() {
       {/* ── 손으로 넣기 (굿잡피티) ── */}
       <section className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950 p-4">
         <h2 className="font-bold">굿잡피티 — 손으로 넣기</h2>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-mute">
           굿잡피티는 이용약관에 「회사의 사전 승락없이 복제 또는 유통시키거나 상업적으로
           이용하는 경우」가 이용제한 사유로 적혀 있어 <b>자동으로 보지 않습니다.</b>
           세중님이 눈으로 보신 것만 여기 적습니다.
@@ -182,7 +182,7 @@ export default function AdminRival() {
                         className="text-interaction-blue underline decoration-dotted">{x.제목}</a>
                       : x.제목}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-mute">
                     {x.기관명 ? x.기관명 + ' (어림)' : ''} {x.지역 ?? ''} {x.고용형태 ?? ''} · 처음 본 때 {x.처음본때}
                   </div>
                 </td>
@@ -190,14 +190,14 @@ export default function AdminRival() {
                   {x.우리것
                     ? <>
                       <div className="max-w-xs text-xs">{x.우리제목}</div>
-                      <div className="text-xs text-gray-500">{x.우리경로} · {x.우리것}</div>
+                      <div className="text-xs text-mute">{x.우리경로} · {x.우리것}</div>
                     </>
                     : <span className="font-bold text-brand-red-dark">없습니다</span>}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2">
                   <span className={'rounded px-1.5 py-0.5 text-xs ' + 판정색(x.판정)}>{x.판정 ?? '-'}</span>
                   {x.차이시간 != null && (
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-mute">
                       {x.차이시간 >= 0 ? '+' : ''}{x.차이시간} 시간
                     </div>
                   )}
@@ -227,7 +227,7 @@ export default function AdminRival() {
               </tr>
             ))}
             {d.줄.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-gray-500">아직 없습니다</td></tr>
+              <tr><td colSpan={5} className="px-3 py-6 text-center text-mute">아직 없습니다</td></tr>
             )}
           </tbody>
         </table>

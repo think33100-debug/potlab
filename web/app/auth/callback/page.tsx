@@ -89,7 +89,7 @@ export default function AuthCallback() {
           </a>
         </div>
       ) : (
-        <p className="text-lg text-gray-500">로그인을 마치는 중이에요…</p>
+        <p className="text-lg text-mute">로그인을 마치는 중이에요…</p>
       )}
     </main>
   );

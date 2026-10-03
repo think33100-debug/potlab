@@ -79,7 +79,7 @@ export default function AdminBeat() {
   return (
     <div>
       <h2 className="text-h3 font-bold">수집기 상태</h2>
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         수집기가 <span className="font-bold">돌았나</span>와 공고가{' '}
         <span className="font-bold">들어왔나</span>는 다릅니다. 둘을 나란히 놓습니다.
       </p>
@@ -87,7 +87,7 @@ export default function AdminBeat() {
       {err && <p className="mt-4 text-lg text-brand-red">{err}</p>}
 
       {박동 === null || 흐름 === null
-        ? <p className="mt-6 text-lg text-gray-500">잠시만요…</p>
+        ? <p className="mt-6 text-lg text-mute">잠시만요…</p>
         : (
           <>
             <div className={'mt-5 rounded-sm p-5 '
@@ -102,7 +102,7 @@ export default function AdminBeat() {
             </div>
 
             <h3 className="mt-8 font-bold">① 돌았나 — 수집기가 남긴 박동</h3>
-            <p className="mt-1 break-keep text-sm text-gray-500">
+            <p className="mt-1 break-keep text-sm text-mute">
               한 바퀴 돌 때마다 <span className="font-bold">collect_beat()</span> 로 남깁니다.
               박동을 안 부르는 수집기는 실제로 돌아도 빨간줄이 섭니다
             </p>
@@ -123,7 +123,7 @@ export default function AdminBeat() {
                     <tr key={r.경로} className="border-t border-gray-200 dark:border-gray-700">
                       <td className="px-3 py-2">
                         <span className="font-bold">{r.이름}</span>
-                        <span className="ml-1 text-xs text-gray-500">{r.경로}</span>
+                        <span className="ml-1 text-xs text-mute">{r.경로}</span>
                       </td>
                       <td className="px-3 py-2 whitespace-nowrap">{때(r.마지막)}</td>
                       <td className="num px-3 py-2 text-right tabular-nums">{수(r.몇시간째)}</td>
@@ -142,7 +142,7 @@ export default function AdminBeat() {
             </div>
 
             <h3 className="mt-8 font-bold">② 들어왔나 — 공고 흐름</h3>
-            <p className="mt-1 break-keep text-sm text-gray-500">
+            <p className="mt-1 break-keep text-sm text-mute">
               <span className="font-bold">지난 24시간</span> 새 공고가 7일 하루평균의 절반보다
               적으면 빨간줄입니다. 잰 날수가 모자라면 판단을 미룹니다
             </p>

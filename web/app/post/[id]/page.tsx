@@ -118,7 +118,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
       <article className="mt-6">
         {p.title && <h1 className="text-h2 font-bold">{p.title}</h1>}
 
-        <p className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+        <p className="mt-2 flex flex-wrap items-center gap-3 text-sm text-mute">
           <span className="font-medium text-gray-700 dark:text-gray-300">
             {shownName(p.profiles)}
           </span>

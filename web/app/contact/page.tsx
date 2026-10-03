@@ -27,7 +27,7 @@ export default function ContactPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h2 font-bold">문의하기</h1>
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         아래 메일로 보내주세요. 평일에 확인하고 답을 드립니다
       </p>
 
@@ -59,7 +59,7 @@ export default function ContactPage() {
             {CONTACT_EMAIL}
           </a>
         </p>
-        <p className="mt-3 break-keep text-sm text-gray-500">
+        <p className="mt-3 break-keep text-sm text-mute">
           개인정보와 관련한 문의·불만·피해구제는 이쪽으로 주세요.{' '}
           <Link href="/terms/privacy" className="underline underline-offset-2">
             개인정보처리방침

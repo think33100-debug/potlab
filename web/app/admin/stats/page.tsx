@@ -106,7 +106,7 @@ export default function AdminStats() {
       {/* ── 오늘 ── */}
       <section>
         <h2 className="text-h3 font-bold">오늘</h2>
-        <p className="mt-1 text-sm text-gray-500">{now.today} · 한국 시각 기준</p>
+        <p className="mt-1 text-sm text-mute">{now.today} · 한국 시각 기준</p>
 
         <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
           <Big label="방문 수" v={today?.visits ?? 0} prev={yday?.visits}
@@ -131,7 +131,7 @@ export default function AdminStats() {
         </h2>
 
         {!devices || devices.length === 0 ? (
-          <p className="mt-5 break-keep text-lg text-gray-500">아직 기록이 없어요</p>
+          <p className="mt-5 break-keep text-lg text-mute">아직 기록이 없어요</p>
         ) : (
           <ul className="mt-5 space-y-5">
             {devices.map((d) => {
@@ -168,7 +168,7 @@ export default function AdminStats() {
       {/* ── 30일 ── */}
       <section>
         <h2 className="text-h3 font-bold">최근 30일</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-mute">
           방문 {sum('visits').toLocaleString()} · 화면 조회 {sum('views').toLocaleString()}
           {sum('visits') === 0 && ' · 오늘부터 쌓기 시작했어요'}
         </p>
@@ -198,7 +198,7 @@ export default function AdminStats() {
       <section>
         <h2 className="text-h3 font-bold">화면별 <span className="text-sm font-medium text-mute">최근 7일</span></h2>
         {!screens || screens.length === 0 ? (
-          <p className="mt-5 text-lg text-gray-500">아직 기록이 없어요</p>
+          <p className="mt-5 text-lg text-mute">아직 기록이 없어요</p>
         ) : (
           <ul className="mt-5 divide-y divide-gray-100 dark:divide-gray-800">
             {screens.map((s) => (
@@ -239,11 +239,11 @@ export default function AdminStats() {
         <h2 className="text-h3 font-bold">
           많이 본 공고 <span className="text-sm font-medium text-mute">최근 7일</span>
         </h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-mute">
           「열기」는 원문 공고를 누른 수입니다. 광고 값을 매길 때 이 숫자가 제일 단단해요
         </p>
         {!jobs || jobs.length === 0 ? (
-          <p className="mt-5 text-lg text-gray-500">아직 기록이 없어요</p>
+          <p className="mt-5 text-lg text-mute">아직 기록이 없어요</p>
         ) : (
           <ul className="mt-5 divide-y divide-gray-100 dark:divide-gray-800">
             {jobs.map((j) => (
@@ -266,7 +266,7 @@ export default function AdminStats() {
           많이 본 글 <span className="text-sm font-medium text-mute">최근 7일</span>
         </h2>
         {!posts || posts.length === 0 ? (
-          <p className="mt-5 text-lg text-gray-500">아직 기록이 없어요</p>
+          <p className="mt-5 text-lg text-mute">아직 기록이 없어요</p>
         ) : (
           <ul className="mt-5 divide-y divide-gray-100 dark:divide-gray-800">
             {posts.map((p) => (
@@ -300,7 +300,7 @@ function Big({
 
   return (
     <div className="rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-      <p className="text-sm text-gray-500">{label}</p>
+      <p className="text-sm text-mute">{label}</p>
       <p className="mt-1 text-h1 font-bold tabular-nums">{v.toLocaleString()}</p>
 
       {diff != null && (
@@ -323,7 +323,7 @@ function Split({
   const rows = Object.entries(data ?? {}).sort((a, b) => b[1] - a[1]);
   return (
     <div className="rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-      <p className="text-sm font-bold text-gray-500">{title}</p>
+      <p className="text-sm font-bold text-mute">{title}</p>
       {rows.length === 0 ? (
         <p className="mt-2 text-lg text-mute">없음</p>
       ) : (

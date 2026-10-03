@@ -97,7 +97,7 @@ export default function Login() {
       <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
         <div className="mx-auto w-full max-w-[22rem]">
           <Logo className="!text-h1" />
-          <p className="mt-2 text-lg text-gray-500">잠시만요…</p>
+          <p className="mt-2 text-lg text-mute">잠시만요…</p>
         </div>
       </main>
     );
@@ -135,7 +135,7 @@ export default function Login() {
     <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
       <div className="mx-auto w-full max-w-[22rem]">
         <Logo className="!text-h1" />
-        <p className="mt-2 text-lg text-gray-500">
+        <p className="mt-2 text-lg text-mute">
           작업치료사 · 물리치료사 채용공고를 한곳에서
         </p>
 
@@ -153,7 +153,7 @@ export default function Login() {
             <button
               type="button"
               onClick={restart}
-              className="mt-2 w-full rounded-md px-6 py-4 text-sm text-gray-500 hover:underline"
+              className="mt-2 w-full rounded-md px-6 py-4 text-sm text-mute hover:underline"
             >
               처음부터 다시 하기
             </button>
@@ -162,7 +162,7 @@ export default function Login() {
 
         <div className="mt-8 space-y-5">
           {halfway && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-mute">
               다른 수단으로 로그인하면 새 계정이 돼요
             </p>
           )}

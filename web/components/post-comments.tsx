@@ -88,7 +88,7 @@ export function PostComments({ postId }: { postId: number }) {
       )}
 
       {session && !me && (
-        <p className="mt-5 text-lg text-gray-500">
+        <p className="mt-5 text-lg text-mute">
           가입을 마치면 댓글을 달 수 있어요 —{' '}
           <a href="/welcome" className="text-interaction-blue hover:underline">가입 마저 하기</a>
         </p>
@@ -97,7 +97,7 @@ export function PostComments({ postId }: { postId: number }) {
       {me && (
         <div className="mt-5">
           {replyTo && (
-            <p className="mb-1 flex items-center gap-3 text-sm text-gray-500">
+            <p className="mb-1 flex items-center gap-3 text-sm text-mute">
               답글을 달고 있어요
               <button type="button" onClick={() => setReplyTo(null)}
                 className="text-interaction-blue hover:underline">그만두기</button>
@@ -123,7 +123,7 @@ export function PostComments({ postId }: { postId: number }) {
       {rows === null ? (
         <p className="mt-6 text-lg text-mute">불러오는 중…</p>
       ) : rows.length === 0 ? (
-        <p className="mt-6 text-lg text-gray-500">아직 댓글이 없어요</p>
+        <p className="mt-6 text-lg text-mute">아직 댓글이 없어요</p>
       ) : (
         <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
           {roots.map((c) => (
@@ -155,7 +155,7 @@ function One({
 }) {
   return (
     <div>
-      <div className="flex items-center gap-3 text-sm text-gray-500">
+      <div className="flex items-center gap-3 text-sm text-mute">
         <Avatar value={c.profiles?.avatar} size="sm" />
         <span className="font-medium text-gray-700 dark:text-gray-300">
           {shownName(c.profiles)}

@@ -111,7 +111,7 @@ export function IconEditor({ slots }: { slots: IconSlot[] }) {
                     <Icon name={r.icon} size={22} className="shrink-0 text-gray-600 dark:text-gray-300" />
                     <span className="min-w-0 flex-1">
                       <span className="block break-keep text-lg">{r.label}</span>
-                      <span className="block truncate text-sm text-gray-500">{r.icon}</span>
+                      <span className="block truncate text-sm text-mute">{r.icon}</span>
                     </span>
                   </button>
                 </li>
@@ -124,10 +124,10 @@ export function IconEditor({ slots }: { slots: IconSlot[] }) {
       {/* 오른쪽 — 고른 자리 바꾸기 */}
       <div>
         {!cur ? (
-          <p className="text-lg text-gray-500">왼쪽에서 자리를 골라 주세요</p>
+          <p className="text-lg text-mute">왼쪽에서 자리를 골라 주세요</p>
         ) : (
           <div className="rounded-md border border-gray-200 p-6 dark:border-gray-700">
-            <p className="text-sm text-gray-500">{cur.area}</p>
+            <p className="text-sm text-mute">{cur.area}</p>
             <p className="break-keep text-h3 font-bold">{cur.label}</p>
 
             <div className="mt-5 flex items-center gap-5">
@@ -166,7 +166,7 @@ export function IconEditor({ slots }: { slots: IconSlot[] }) {
                 </button>
               ))}
               {found.length === 0 && (
-                <p className="col-span-full text-lg text-gray-500">그런 아이콘은 없어요</p>
+                <p className="col-span-full text-lg text-mute">그런 아이콘은 없어요</p>
               )}
             </div>
 
@@ -191,7 +191,7 @@ export function IconEditor({ slots }: { slots: IconSlot[] }) {
           </div>
         )}
 
-        <p className="mt-5 break-keep text-sm leading-relaxed text-gray-500">
+        <p className="mt-5 break-keep text-sm leading-relaxed text-mute">
           이름이 잘못 들어가면 기본 아이콘으로 보여요. 화면이 깨지지는 않습니다
         </p>
       </div>

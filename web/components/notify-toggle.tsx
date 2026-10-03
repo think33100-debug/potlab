@@ -112,7 +112,7 @@ export default function NotifyToggle({ 작게 = false }: { 작게?: boolean }) {
 
   if (상태 === '못씀') {
     return (
-      <p className={'break-keep text-gray-500 ' + (작게 ? 'text-sm' : 'text-lg')}>
+      <p className={'break-keep text-mute ' + (작게 ? 'text-sm' : 'text-lg')}>
         이 브라우저는 알림을 못 받아요.
         아이폰은 <span className="font-bold">홈 화면에 추가</span>한 뒤에 다시 보세요
       </p>
@@ -121,7 +121,7 @@ export default function NotifyToggle({ 작게 = false }: { 작게?: boolean }) {
 
   if (상태 === '막힘') {
     return (
-      <p className={'break-keep text-gray-500 ' + (작게 ? 'text-sm' : 'text-lg')}>
+      <p className={'break-keep text-mute ' + (작게 ? 'text-sm' : 'text-lg')}>
         브라우저에서 알림이 막혀 있어요. 주소창 왼쪽 자물쇠를 눌러 허용으로 바꿔주세요
       </p>
     );

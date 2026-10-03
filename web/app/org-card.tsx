@@ -22,7 +22,7 @@ export async function OrgCard({ name }: { name: string }) {
   /* 못 읽으면 조용히 숨기지 않습니다. 진짜 이유를 적습니다 */
   if (error) {
     return (
-      <p className="mb-6 rounded-sm border border-gray-200 p-6 text-sm text-gray-500 dark:border-gray-800">
+      <p className="mb-6 rounded-sm border border-gray-200 p-6 text-sm text-mute dark:border-gray-800">
         기관 정보를 못 읽었어요 — {error.message}
         {error.code ? ` (${error.code})` : ''}
       </p>

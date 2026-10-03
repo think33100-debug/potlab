@@ -77,7 +77,7 @@ export default function AdminAccessLog() {
   return (
     <div>
       <h2 className="text-h3 font-bold">개인정보 접속기록</h2>
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         관리자가 회원의 급여·스펙·어학이나 탈퇴 회원의 원래 이름을 열어본 기록입니다.
         법이 <span className="font-bold">월 1회 이상 점검</span>하라고 합니다
         (개인정보의 안전성 확보조치 기준 제8조)
@@ -89,14 +89,14 @@ export default function AdminAccessLog() {
           최근 <span className="num tabular-nums font-bold">{rows?.length ?? 0}</span>건을 보여줍니다
           (최대 500)
         </p>
-        <p className="mt-2 break-keep text-sm text-gray-500">
+        <p className="mt-2 break-keep text-sm text-mute">
           보관 기간 <span className="font-bold">1년</span> — 매일 밤 11시에 1년 지난 것을 지웁니다.
           회원이 5만 명을 넘으면 2년으로 바꿔야 합니다
         </p>
       </div>
 
       <label className="mt-6 block">
-        <span className="text-sm font-bold text-gray-500">찾기 (회원번호·닉네임·무엇·어느 표)</span>
+        <span className="text-sm font-bold text-mute">찾기 (회원번호·닉네임·무엇·어느 표)</span>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -112,12 +112,12 @@ export default function AdminAccessLog() {
         </p>
       )}
 
-      {rows === null && <p className="mt-6 text-lg text-gray-500">잠시만요…</p>}
+      {rows === null && <p className="mt-6 text-lg text-mute">잠시만요…</p>}
 
       {rows !== null && 보일것.length === 0 && (
         <div className="mt-6 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
           <p className="break-keep text-lg font-bold">기록이 없어요</p>
-          <p className="mt-2 break-keep text-lg text-gray-500">
+          <p className="mt-2 break-keep text-lg text-mute">
             {q
               ? '찾는 말과 맞는 줄이 없어요'
               : '아직 아무도 회원 개인정보를 열어보지 않았어요. 비어 있는 것이 정상입니다'}
@@ -131,7 +131,7 @@ export default function AdminAccessLog() {
             <li key={r.언제 + i}
               className="rounded-sm border border-gray-200 p-5 dark:border-gray-700">
               <p className="flex flex-wrap items-baseline gap-x-3 text-lg">
-                <span className="num tabular-nums text-gray-500">{때(r.언제)}</span>
+                <span className="num tabular-nums text-mute">{때(r.언제)}</span>
                 <span className="font-bold">{r.누가}</span>
                 <span className="rounded-xs bg-gray-100 px-2 py-1 text-sm dark:bg-gray-800">
                   {r.무엇}

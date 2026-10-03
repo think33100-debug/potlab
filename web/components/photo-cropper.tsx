@@ -144,7 +144,7 @@ export function PhotoCropper({
   return (
     <div className="rounded-sm border border-gray-100 p-6 dark:border-gray-800">
       <p className="text-lg font-bold">사진 맞추기</p>
-      <p className="mt-1 text-sm text-gray-500">
+      <p className="mt-1 text-sm text-mute">
         끌어서 옮기고, 두 손가락으로 벌려서 키워요
       </p>
 
@@ -182,7 +182,7 @@ export function PhotoCropper({
       </div>
 
       <label className="mt-5 block">
-        <span className="text-sm font-bold text-gray-500">크기</span>
+        <span className="text-sm font-bold text-mute">크기</span>
         <input
           type="range" min={1} max={MAX_SCALE} step={0.01} value={scale}
           onChange={(e) => setBoth(off, Number(e.target.value))}

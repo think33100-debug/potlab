@@ -36,7 +36,7 @@ export default function MyPage() {
   }, [loading, session, me, router]);
 
   if (loading || !me) {
-    return <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7"><p className="text-lg text-gray-500">잠시만요…</p></main>;
+    return <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7"><p className="text-lg text-mute">잠시만요…</p></main>;
   }
 
   const used = me.nickname_changes;
@@ -92,7 +92,7 @@ export default function MyPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h1 font-bold">내 정보</h1>
-      <p className="mt-2 text-lg text-gray-500">칸마다 따로 저장돼요. 하나만 바꿔도 돼요</p>
+      <p className="mt-2 text-lg text-mute">칸마다 따로 저장돼요. 하나만 바꿔도 돼요</p>
 
       <section className="mt-7">
         <h2 className="text-h3 font-bold">프로필 사진</h2>
@@ -104,7 +104,7 @@ export default function MyPage() {
 
       <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
         <h2 className="text-h3 font-bold">닉네임</h2>
-        <p className="mt-1 text-lg text-gray-500">
+        <p className="mt-1 text-lg text-mute">
           {locked
             ? '무료로 바꿀 수 있는 5번을 다 쓰셨어요'
             : `${FREE_CHANGES}번 중 ${left}번 남았어요`}
@@ -149,19 +149,19 @@ export default function MyPage() {
 
       <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
         <h2 className="text-h3 font-bold">직군 · 역할</h2>
-        <p className="mt-1 text-lg text-gray-500">
+        <p className="mt-1 text-lg text-mute">
           커뮤니티에서 보이는 방이 역할로 갈려요. 졸업하시면 현직으로 바꿔 주세요
         </p>
         <p className="mt-1 text-sm text-mute">누르면 바로 저장돼요</p>
 
-        <h3 className="mt-6 text-sm font-bold text-gray-500">직군</h3>
+        <h3 className="mt-6 text-sm font-bold text-mute">직군</h3>
         <div className="mt-2 flex flex-wrap gap-2">
           {JOB_GROUPS.map((g) => (
             <Pick key={g} on={me.job_group === g} go={() => setWho({ job_group: g })}>{g}</Pick>
           ))}
         </div>
 
-        <h3 className="mt-6 text-sm font-bold text-gray-500">역할</h3>
+        <h3 className="mt-6 text-sm font-bold text-mute">역할</h3>
         <div className="mt-2 flex flex-wrap gap-2">
           {ROLES.map((r) => (
             <Pick key={r} on={me.role === r} go={() => setWho({ role: r })}>
@@ -182,7 +182,7 @@ export default function MyPage() {
           켜고 끄는 자리가 따로 없어서 공고 화면에서만 켤 수 있었습니다 */}
       <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
         <h2 className="text-h3 font-bold">알림</h2>
-        <p className="mt-2 break-keep text-lg text-gray-500">
+        <p className="mt-2 break-keep text-lg text-mute">
           찜한 기관에 새 공고가 뜨거나, 찜한 공고가 마감 3일 전이면 알려드려요.
           밤 10시부터 아침 7시까지는 보내지 않고 아침에 모아서 보냅니다
         </p>

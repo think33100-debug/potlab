@@ -118,6 +118,6 @@ function T({ on, go, children }: { on: boolean; go: () => void; children: React.
 
 function List({ rows, empty, children }: { rows: unknown[] | null; empty: string; children: React.ReactNode }) {
   if (rows === null) return <p className="text-lg text-mute">불러오는 중…</p>;
-  if (rows.length === 0) return <p className="py-8 text-center text-lg text-gray-500">{empty}</p>;
+  if (rows.length === 0) return <p className="py-8 text-center text-lg text-mute">{empty}</p>;
   return <ul className="divide-y divide-gray-100 dark:divide-gray-800">{children}</ul>;
 }

@@ -144,7 +144,7 @@ export function SignupSurvey({
                     {u.title}
                     {u.soon && <span className="ml-2 rounded-xs bg-gray-50 px-2 py-1 text-sm font-medium text-mute dark:bg-gray-950">준비 중</span>}
                   </b>
-                  <span className="mt-1 block text-sm text-gray-500">{u.desc}</span>
+                  <span className="mt-1 block text-sm text-mute">{u.desc}</span>
                 </span>
               </li>
             ))}
@@ -217,7 +217,7 @@ export function SignupSurvey({
             {flag && (
               <p className="mt-2 rounded-sm border border-brand-red/40 p-5 text-lg text-brand-red">
                 <b className="block">{flag.t}</b>
-                <span className="mt-1 block text-sm text-gray-500">{flag.d}</span>
+                <span className="mt-1 block text-sm text-mute">{flag.d}</span>
               </p>
             )}
             <Num k="extra_pay_monthly" label="추가 수당" req unit="만원 / 월" ph="0"
@@ -310,7 +310,7 @@ export function SignupSurvey({
             <>
               <Num k="hired_year" label="첫 입사연도" hint="치료사로 처음 일 시작한 해" v={f.hired_year} on={set} unit="년" ph="2021" req f={f} />
               <Num k="current_hired_year" label="지금 병원 입사연도" hint="첫 직장이면 위와 같게" v={f.current_hired_year} on={set} unit="년" ph="2024" req f={f} />
-              <p className="mt-6 text-sm font-bold text-gray-500">이전 근무지 (선택 · 최대 5개)</p>
+              <p className="mt-6 text-sm font-bold text-mute">이전 근무지 (선택 · 최대 5개)</p>
               <p className="mt-1 text-sm text-mute">없으시면 비워 두고 넘어가실 수 있어요</p>
             </>
           )}
@@ -422,7 +422,7 @@ export function SignupSurvey({
     return (
       <section>
         <h1 className="text-h2 font-bold">{edit ? '이대로 고칠까요?' : '등록하시겠어요?'}</h1>
-        <p className="mt-2 text-lg text-gray-500">
+        <p className="mt-2 text-lg text-mute">
           적어 주신 내용을 이대로 {edit ? '저장해요' : '등록해요'}. 고칠 게 있으면 돌아가서 바꿀 수 있어요
         </p>
 
@@ -459,12 +459,12 @@ export function SignupSurvey({
         <h1 className="mt-6 text-h2 font-bold">
           {edit ? '고쳤어요' : '등록해주셔서 고마워요'}
         </h1>
-        <p className="mt-5 text-body-lg leading-relaxed text-gray-500">
+        <p className="mt-5 text-body-lg leading-relaxed text-mute">
           {edit
             ? '바꾸신 내용으로 저장했어요'
             : <>치료사들의 더 나은 미래를 위해<br />힘을 보태주셨어요</>}
         </p>
-        <p className="mt-7 rounded-sm bg-gray-50 p-6 text-lg text-gray-500 dark:bg-gray-950">
+        <p className="mt-7 rounded-sm bg-gray-50 p-6 text-lg text-mute dark:bg-gray-950">
           {edit
             ? <>올해 <b>{Math.max(0, (editsLeft ?? 2) - 1)}번</b> 더 고칠 수 있어요</>
             : <>적어 주신 내용은 <b>내 정보에서 1년에 2번</b> 고칠 수 있어요</>}
@@ -496,7 +496,7 @@ export function SignupSurvey({
       </p>
 
       <h1 className="mt-5 text-h2 font-bold">{cur.title}</h1>
-      {cur.sub && <p className="mt-2 text-lg text-gray-500">{cur.sub}</p>}
+      {cur.sub && <p className="mt-2 text-lg text-mute">{cur.sub}</p>}
 
       <div className="mt-6">{cur.body}</div>
 
@@ -665,7 +665,7 @@ function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
   return (
     <div className="mt-6">
       <p className="text-lg font-bold">어학</p>
-      <p className="mt-1 text-lg text-gray-500">어학 점수가 있으면 넣어주세요. 없어도 괜찮아요</p>
+      <p className="mt-1 text-lg text-mute">어학 점수가 있으면 넣어주세요. 없어도 괜찮아요</p>
 
       {rows.map((r, i) => {
         const used = taken(i);
@@ -711,7 +711,7 @@ function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
                 <input type="number" inputMode="numeric" aria-label={`${r.exam} 점수`}
                   value={r.score} min={0} max={spec?.max} placeholder={spec?.ph}
                   onChange={(e) => edit(i, { score: e.target.value })} className={BARE} />
-                <span className="shrink-0 pr-5 text-lg text-gray-500">점</span>
+                <span className="shrink-0 pr-5 text-lg text-mute">점</span>
               </span>
             ) : null}
 
@@ -722,7 +722,7 @@ function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
 
       {rows.length < LANG_MAX && (
         <button type="button" onClick={() => on([...rows, emptyLang()])}
-          className="mt-5 w-full rounded-md border border-dashed border-gray-300 px-6 py-5 text-lg font-medium text-gray-500 dark:border-gray-600">
+          className="mt-5 w-full rounded-md border border-dashed border-gray-300 px-6 py-5 text-lg font-medium text-mute dark:border-gray-600">
           + 어학 추가
         </button>
       )}
@@ -750,7 +750,7 @@ function LangBands() {
 
   return (
     <div className="mt-2">
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-mute">
         점수 기준은 POTJOB 자체 기준이에요.
         시험끼리 환산한 게 아니라 각 시험이 발표한 등급을 그대로 따랐어요
       </p>
@@ -987,7 +987,7 @@ function Rows({
 
         <button type="button" disabled={rows.length >= MAX_ROWS || noneOn}
           onClick={() => on([...rows, { hospital: '', region: '', months: '' }])}
-          className="mt-5 w-full rounded-md border border-dashed border-gray-300 px-6 py-5 text-lg font-medium text-gray-500 disabled:opacity-40 dark:border-gray-600">
+          className="mt-5 w-full rounded-md border border-dashed border-gray-300 px-6 py-5 text-lg font-medium text-mute disabled:opacity-40 dark:border-gray-600">
           {rows.length >= MAX_ROWS ? '최대 5개까지 넣을 수 있어요' : '+ 한 줄 추가'}
         </button>
       </div>
@@ -1114,7 +1114,7 @@ function PaySummary({ f }: { f: Form }) {
 
   return (
     <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-      <p className="text-sm font-bold text-gray-500">적어 주신 걸로 계산하면</p>
+      <p className="text-sm font-bold text-mute">적어 주신 걸로 계산하면</p>
       <p className="mt-2 text-h1 font-bold">연 {man10(year)}</p>
       <dl className="mt-5 space-y-2 text-lg">
         <Line k="월 평균" v={`약 ${month}만원`} />
@@ -1132,7 +1132,7 @@ function PaySummary({ f }: { f: Form }) {
 function Line({ k, v, note }: { k: string; v: string; note?: string }) {
   return (
     <div className="flex items-baseline justify-between gap-5">
-      <dt className="shrink-0 text-gray-500">{k}</dt>
+      <dt className="shrink-0 text-mute">{k}</dt>
       <dd className="text-right">
         <b>{v}</b>
         {note && <span className="mt-1 block text-sm text-mute">{note}</span>}

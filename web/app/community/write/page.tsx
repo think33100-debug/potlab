@@ -36,7 +36,7 @@ function Write() {
   useEffect(() => () => picks.forEach((p) => URL.revokeObjectURL(p.preview)), [picks]);
 
   if (loading || !me) {
-    return <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7"><p className="text-lg text-gray-500">잠시만요…</p></main>;
+    return <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7"><p className="text-lg text-mute">잠시만요…</p></main>;
   }
 
   /* 학생에게는 학생 방을, 현직에게는 현직 방을 보여줍니다 (옛 chFor_ 와 같게) */
@@ -92,7 +92,7 @@ function Write() {
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h2 font-bold">글쓰기</h1>
 
-      <label className="mt-6 block text-sm font-bold text-gray-500">방</label>
+      <label className="mt-6 block text-sm font-bold text-mute">방</label>
       <select
         value={ch}
         onChange={(e) => setCh(e.target.value)}
@@ -101,7 +101,7 @@ function Write() {
         {rooms.map((c) => <option key={c.id} value={c.id}>{c.name} — {c.desc}</option>)}
       </select>
 
-      <label className="mt-6 block text-sm font-bold text-gray-500">제목 (없어도 돼요)</label>
+      <label className="mt-6 block text-sm font-bold text-mute">제목 (없어도 돼요)</label>
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -109,7 +109,7 @@ function Write() {
         className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
       />
 
-      <label className="mt-6 block text-sm font-bold text-gray-500">내용</label>
+      <label className="mt-6 block text-sm font-bold text-mute">내용</label>
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}

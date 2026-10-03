@@ -35,7 +35,7 @@ export default async function ChannelPage({
 
       <header className="mt-6 mb-6">
         <h1 className="text-h1 font-bold">{room.name}</h1>
-        <p className="mt-1 text-lg text-gray-500">{room.desc}</p>
+        <p className="mt-1 text-lg text-mute">{room.desc}</p>
       </header>
 
       <div className="mb-6 flex items-center justify-between gap-5">
@@ -58,7 +58,7 @@ export default async function ChannelPage({
       )}
 
       {!error && rows.length === 0 && (
-        <p className="py-8 text-center text-lg text-gray-500">아직 글이 없어요. 첫 글을 써보세요</p>
+        <p className="py-8 text-center text-lg text-mute">아직 글이 없어요. 첫 글을 써보세요</p>
       )}
 
       <ul className="divide-y divide-gray-100 dark:divide-gray-800">

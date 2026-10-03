@@ -66,7 +66,7 @@ export default function AdminMembers() {
   return (
     <div>
       <h2 className="text-h3 font-bold">회원 목록</h2>
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         회원번호는 가입 순서대로 붙고 바뀌지 않아요. 회원 화면에는 안 보여요
       </p>
 
@@ -75,13 +75,13 @@ export default function AdminMembers() {
           쓰는 중 <span className="num tabular-nums font-bold">{살아있음}</span>명 ·
           탈퇴 <span className="num tabular-nums font-bold">{나감}</span>명
         </p>
-        <p className="mt-2 break-keep text-sm text-gray-500">
+        <p className="mt-2 break-keep text-sm text-mute">
           이 화면을 연 것도 「개인정보 접속기록」 에 남습니다
         </p>
       </div>
 
       <label className="mt-6 block">
-        <span className="text-sm font-bold text-gray-500">찾기 (회원번호·닉네임·직군)</span>
+        <span className="text-sm font-bold text-mute">찾기 (회원번호·닉네임·직군)</span>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -96,7 +96,7 @@ export default function AdminMembers() {
           못 불러왔어요 — {err}
         </p>
       )}
-      {rows === null && <p className="mt-6 text-lg text-gray-500">잠시만요…</p>}
+      {rows === null && <p className="mt-6 text-lg text-mute">잠시만요…</p>}
 
       {보일것.length > 0 && (
         <ul className="mt-6 space-y-3">
@@ -151,7 +151,7 @@ export default function AdminMembers() {
       )}
 
       {rows !== null && 보일것.length === 0 && (
-        <p className="mt-6 text-lg text-gray-500">찾는 회원이 없어요</p>
+        <p className="mt-6 text-lg text-mute">찾는 회원이 없어요</p>
       )}
     </div>
   );

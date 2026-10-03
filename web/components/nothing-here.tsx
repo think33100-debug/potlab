@@ -31,12 +31,12 @@ export function NothingHere({
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-col items-center px-6 py-8 text-center md:px-7">
       <span className="flex h-[56px] w-[56px] items-center justify-center rounded-sm bg-gray-100 dark:bg-gray-800">
-        <Icon name="search" size={26} className="text-gray-500" />
+        <Icon name="search" size={26} className="text-mute" />
       </span>
 
       <h1 className="mt-6 break-keep text-h2 font-bold">{title}</h1>
 
-      <p className="mt-3 max-w-[22rem] break-keep text-lg leading-relaxed text-gray-500">
+      <p className="mt-3 max-w-[22rem] break-keep text-lg leading-relaxed text-mute">
         {body}
       </p>
 

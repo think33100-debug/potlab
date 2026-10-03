@@ -59,7 +59,7 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
       </div>
 
       {!rank ? (
-        <p className="mt-5 text-lg text-gray-500">
+        <p className="mt-5 text-lg text-mute">
           같은 조건에 {minN}명이 모이면 내 위치가 나와요. 지금은 {s.n}명이에요
         </p>
       ) : (
@@ -67,11 +67,11 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
           <span className="inline-block rounded-md bg-badge-teal-bg px-4 py-1 text-sm font-bold text-teal-strong dark:border dark:border-teal-strong/40 dark:bg-transparent">
             {tierOf(rank.top).label}
           </span>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-mute">
             같은 조건 {rank.n}명 중 · {byAnnual ? '연 총소득' : '고정 월급'} 기준
           </p>
           <p className="mt-1 text-h1 font-bold">상위 {rank.top}%</p>
-          <p className="mt-1 text-lg text-gray-500">
+          <p className="mt-1 text-lg text-mute">
             {rank.n}명 중 <b className="text-gray-900 dark:text-white">{rank.rank}등</b>
           </p>
           <p className="mt-1 text-sm text-mute">숫자가 작을수록 많이 받는다는 뜻이에요</p>
@@ -87,7 +87,7 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
           </div>
 
           {byAnnual && (
-            <p className="mt-5 rounded-sm bg-gray-50 p-5 text-sm text-gray-500 dark:bg-gray-950">
+            <p className="mt-5 rounded-sm bg-gray-50 p-5 text-sm text-mute dark:bg-gray-950">
               연 총소득 = 고정 월급 {me.base_monthly}만원 × 12
               {me.extra_pay_monthly ? ` + 추가수당 ${me.extra_pay_monthly}만원 × 12` : ''}
               {me.bonus_yearly ? ` + 상여 ${me.bonus_yearly}만원` : ''}
@@ -102,7 +102,7 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
             <b>{byAnnual ? man10(rank.mine) : `${rank.mine}만원`}</b>
             {' · '}중위값 <b>{byAnnual ? man10(rank.median) : `${rank.median}만원`}</b>
           </p>
-          <p className="mt-1 text-lg text-gray-500">
+          <p className="mt-1 text-lg text-mute">
             {Math.abs(rank.diff) < (byAnnual ? 5 : 0.5)
               ? `중위값과 거의 같아요. ${tierOf(rank.top).note}`
               : `중위값보다 ${byAnnual ? man10(Math.abs(rank.diff)) : `${Math.abs(rank.diff)}만원`}`
@@ -118,7 +118,7 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
             <p className="mt-2 text-sm text-mute">지금 걸어둔 조건에는 내 자료가 안 들어가요</p>
           )}
 
-          <PayNote className="mt-5 text-gray-500" />
+          <PayNote className="mt-5 text-mute" />
         </div>
       )}
     </section>

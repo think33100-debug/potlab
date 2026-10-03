@@ -39,11 +39,11 @@ export default async function Unemployment() {
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <Hit kind="other" target="tools-unemployment" />
 
-      <Link href="/tools" className="text-lg text-gray-500 hover:underline">← 계산기</Link>
+      <Link href="/tools" className="text-lg text-mute hover:underline">← 계산기</Link>
       <h1 className="mt-3 break-keep text-h1 font-bold">실업급여 계산기</h1>
 
       {/* ★ 꼭 밝히는 줄 */}
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         하루 얼마씩 며칠 받는지 봅니다.
         {' '}<b className="text-ink">{s.기준해}년 기준 · 출처 {s.출처}</b>
       </p>
@@ -89,11 +89,11 @@ export default async function Unemployment() {
           대부분 둘 중 하나에 걸립니다.
         </p>
 
-        <h3 className="mt-6 text-sm font-bold text-gray-500">소정급여일수</h3>
+        <h3 className="mt-6 text-sm font-bold text-mute">소정급여일수</h3>
         <div className="mt-2 overflow-x-auto">
           <table className="w-full text-lg">
             <thead>
-              <tr className="border-b border-gray-100 text-sm text-gray-500 dark:border-gray-800">
+              <tr className="border-b border-gray-100 text-sm text-mute dark:border-gray-800">
                 <th className="py-2 text-left font-medium">고용보험 가입기간</th>
                 <th className="py-2 text-right font-medium">50세 미만</th>
                 <th className="py-2 text-right font-medium">50세 이상·장애인</th>
@@ -125,7 +125,7 @@ export default async function Unemployment() {
         )}
       </section>
 
-      <p className="mt-6 break-keep rounded-sm bg-gray-50 p-5 text-sm leading-relaxed text-gray-500 dark:bg-gray-950">
+      <p className="mt-6 break-keep rounded-sm bg-gray-50 p-5 text-sm leading-relaxed text-mute dark:bg-gray-950">
         <b>참고용입니다.</b> 실제 금액은 이직 사유·가입 이력·나이에 따라 달라집니다.
         스스로 그만둔 경우에는 받지 못할 수 있습니다.
         <br />

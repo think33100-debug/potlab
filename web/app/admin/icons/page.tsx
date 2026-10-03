@@ -14,7 +14,7 @@ export default async function AdminIcons() {
   const slots = await iconSlots();
   return (
     <>
-      <p className="mb-6 break-keep text-lg text-gray-500">
+      <p className="mb-6 break-keep text-lg text-mute">
         화면에 쓰이는 아이콘을 바꿉니다. 바꾸면 바로 반영돼요
       </p>
       <IconEditor slots={slots} />

@@ -23,7 +23,7 @@ export default async function Soon({
       <Icon name={w.icon} size={48} className="text-ink" />
       <h1 className="mt-5 text-h2 font-bold">{w.title}</h1>
       <p className="mt-2 text-h3 font-bold text-brand-red">곧 찾아올게요</p>
-      {w.line && <p className="mt-5 text-lg text-gray-500">{w.line}</p>}
+      {w.line && <p className="mt-5 text-lg text-mute">{w.line}</p>}
 
       <div className="mt-8 flex flex-wrap justify-center gap-2">
         <Link

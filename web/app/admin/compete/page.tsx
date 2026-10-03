@@ -63,7 +63,7 @@ export function 요약문장(첫해: unknown, 값있음: unknown, 평균: unknow
 /** 경쟁률 한 칸. **계산이 안 되는 것은 숫자로 안 적습니다** */
 function 률(상태: unknown, 값: unknown) {
   if (상태 === '있음') return <b className="text-gray-900">{String(값)} : 1</b>;
-  if (상태 === '못냄') return <span className="text-gray-500">계산 불가<span className="ml-1 text-xs">(뽑은 사람 0명)</span></span>;
+  if (상태 === '못냄') return <span className="text-mute">계산 불가<span className="ml-1 text-xs">(뽑은 사람 0명)</span></span>;
   if (상태 === '진짜0') return <span className="text-gray-600">0 : 1 <span className="text-xs">(아무도 안 옴)</span></span>;
   return <span className="text-mute">미등록</span>;
 }
@@ -71,7 +71,7 @@ function 률(상태: unknown, 값: unknown) {
 /* ── 무엇으로 밝혀 두는가 (화면 아래 늘 붙습니다) ── */
 function 밝힘({ 기본값단계 }: { 기본값단계?: boolean }) {
   return (
-    <p className="mt-4 border-t border-gray-100 pt-3 text-xs leading-relaxed text-gray-500">
+    <p className="mt-4 border-t border-gray-100 pt-3 text-xs leading-relaxed text-mute">
       <b>알리오 기준</b>입니다 (공공기관 채용정보시스템에 기관이 올린 값).
       묶음은 <b>같은 기관 · 직군 · 지역 · 고용형태</b>끼리 이은 것입니다 —
       공무직·정규직·기간제·특정업무직은 섞지 않습니다.
@@ -161,7 +161,7 @@ function 본문() {
   };
 
   if (err) return <p className="text-lg text-red-600">{err}</p>;
-  if (!d) return <p className="text-lg text-gray-500">잠시만요…</p>;
+  if (!d) return <p className="text-lg text-mute">잠시만요…</p>;
 
   const a = d.알림;
   const 경보 = a.못읽음 > 0;
@@ -170,7 +170,7 @@ function 본문() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-bold">알리오 경쟁률</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-mute">
           같은 기관·직군·지역의 지난 공고를 한 묶음으로 이어, 회차순으로 봅니다.
           회원 화면에는 아직 안 붙였습니다.
         </p>
@@ -201,7 +201,7 @@ function 본문() {
              ['지역', 지역, d.고를것.지역],
              ['고용형태', 고용형태, d.고를것.고용형태]] as const).map(([이름, 값, 것들]) => (
             <label key={이름} className="text-sm">
-              <div className="mb-1 text-gray-500">{이름}</div>
+              <div className="mb-1 text-mute">{이름}</div>
               <select value={값} onChange={(e) => 주소로({ [이름]: e.target.value || null, 묶음: null })}
                 className="w-44 rounded-lg border border-gray-300 px-2 py-1.5">
                 <option value="">전체</option>
@@ -210,7 +210,7 @@ function 본문() {
             </label>
           ))}
           <label className="text-sm">
-            <div className="mb-1 text-gray-500">연도</div>
+            <div className="mb-1 text-mute">연도</div>
             <select value={연도} onChange={(e) => 주소로({ 연도: e.target.value || null, 묶음: null })}
               className="w-28 rounded-lg border border-gray-300 px-2 py-1.5">
               <option value="">전체</option>
@@ -218,7 +218,7 @@ function 본문() {
             </select>
           </label>
           <form className="text-sm" onSubmit={(e) => { e.preventDefault(); 주소로({ q: 글 || null, 묶음: null }); }}>
-            <div className="mb-1 text-gray-500">공고명·묶음이름</div>
+            <div className="mb-1 text-mute">공고명·묶음이름</div>
             <input value={글} onChange={(e) => set글(e.target.value)}
               placeholder="물리치료사"
               className="w-56 rounded-lg border border-gray-300 px-2 py-1.5" />
@@ -243,7 +243,7 @@ function 본문() {
         <section className="rounded-xl border-2 border-gray-900 bg-white p-5">
           <button onClick={() => 주소로({ 묶음: null })}
             className="mb-3 text-sm text-blue-700 hover:underline">← 묶음 목록으로</button>
-          {!one ? <p className="text-gray-500">잠시만요…</p> : (() => {
+          {!one ? <p className="text-mute">잠시만요…</p> : (() => {
             const h = one.머리;
             return (
               <>
@@ -259,7 +259,7 @@ function 본문() {
                     짝 확인 필요
                   </div>
                 ) : null}
-                {h['자리'] ? <div className="mt-1 text-sm text-gray-500">자리 이름: {String(h['자리'])}</div> : null}
+                {h['자리'] ? <div className="mt-1 text-sm text-mute">자리 이름: {String(h['자리'])}</div> : null}
 
                 {/* 평균 — 몇 회 평균인지 반드시 같이 */}
                 <div className="mt-4 rounded-xl bg-gray-50 p-4">
@@ -275,9 +275,9 @@ function 본문() {
                       )}
                     </>
                   ) : (
-                    <div className="text-lg text-gray-500">경쟁률을 낼 값이 없습니다</div>
+                    <div className="text-lg text-mute">경쟁률을 낼 값이 없습니다</div>
                   )}
-                  <div className="mt-1 text-sm text-gray-500">
+                  <div className="mt-1 text-sm text-mute">
                     공고는 모두 {쉼표(h['회차'])}번
                     {Number(h['계산불가']) > 0 && <> · 그중 {쉼표(h['계산불가'])}번은 계산 불가 (뽑은 사람 0명)</>}
                   </div>
@@ -308,16 +308,16 @@ function 본문() {
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
                         <div>
                           <span className="font-semibold">{n(r['연도'])}년</span>
-                          <span className="ml-2 text-sm text-gray-500">마감 {n(r['마감'])}</span>
+                          <span className="ml-2 text-sm text-mute">마감 {n(r['마감'])}</span>
                         </div>
                         <div className="text-lg">{률(r['경쟁률상태'], r['경쟁률'])}</div>
                       </div>
                       <div className="mt-1 text-sm text-gray-700">{n(r['공고명'])}</div>
-                      <div className="text-xs text-gray-500">{n(r['묶음이름'])}</div>
+                      <div className="text-xs text-mute">{n(r['묶음이름'])}</div>
 
                       <div className="mt-3 overflow-x-auto">
                         <table className="w-full text-sm">
-                          <thead className="text-left text-gray-500">
+                          <thead className="text-left text-mute">
                             <tr>
                               <th className="py-1 pr-3 font-normal">단계</th>
                               <th className="py-1 pr-3 text-right font-normal">선발</th>
@@ -335,7 +335,7 @@ function 본문() {
                                 </td>
                                 <td className="py-1 pr-3 text-right">{s['선발'] == null ? '—' : String(s['선발'])}명</td>
                                 <td className="py-1 pr-3 text-right">{s['응시'] == null ? '—' : String(s['응시'])}명</td>
-                                <td className="py-1 text-gray-500">{n(s['확정일'])}</td>
+                                <td className="py-1 text-mute">{n(s['확정일'])}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -351,7 +351,7 @@ function 본문() {
                           className="text-blue-700 hover:underline">알리오 공고 화면 ↗</a>
                         {((r['첨부'] as 칸[]) || []).map((f, k) => (
                           <a key={k} href={String(f['주소'])} target="_blank" rel="noopener noreferrer"
-                            className={'hover:underline ' + (f['갈래'] === 'A' ? 'font-medium text-blue-700' : 'text-gray-500')}>
+                            className={'hover:underline ' + (f['갈래'] === 'A' ? 'font-medium text-blue-700' : 'text-mute')}>
                             {f['갈래'] === 'A' ? '공고문' : f['갈래'] === 'B' ? '지원서'
                               : f['갈래'] === 'C' ? '직무기술서' : '첨부'}
                             {' '}{String(f['이름'] ?? '').slice(-18)} ↗
@@ -363,7 +363,7 @@ function 본문() {
                         )}
                       </div>
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
-                        <span className="text-gray-500">고용형태</span>
+                        <span className="text-mute">고용형태</span>
                         <select
                           value={String(r['고용형태'] ?? '')}
                           onChange={(e) => 고용형태넣기(Number(r['sn']), Number(r['묶음차례']), e.target.value)}
@@ -378,7 +378,7 @@ function 본문() {
                         </span>
                       </div>
                       {r['경쟁률상태'] === '있음' && (
-                        <div className="mt-1 text-xs text-gray-500">
+                        <div className="mt-1 text-xs text-mute">
                           {String(r['첫응시'])}명이 지원해 {String(r['끝선발'])}명을 뽑았습니다
                         </div>
                       )}
@@ -398,23 +398,23 @@ function 본문() {
           className="text-sm font-medium text-blue-700 hover:underline">
           {후보열기 ? '▾' : '▸'} 같은 자리인데 갈라진 묶음 찾기
         </button>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-mute">
           「태백」과 「강원」처럼 <b>표기만 다른 같은 지역</b>만 찾습니다.
           <b> 합치지 않고 보여만 줍니다</b> — 합치는 것은 세중님이 확인한 뒤에 합니다.
           한쪽이 「지역 모름」·「근무처 확인 필요」인 것은 <b>후보에 안 넣습니다</b> —
           모르는 것을 특정 지역으로 짐작해 붙이지 않습니다.
         </p>
-        {후보열기 && (!후보 ? <p className="mt-3 text-gray-500">잠시만요…</p> : (
+        {후보열기 && (!후보 ? <p className="mt-3 text-mute">잠시만요…</p> : (
           <>
             <p className="mt-3 text-sm">
               후보 <b>{쉼표(후보.셈.후보짝)}</b>짝 · 묶음 {쉼표(후보.셈.묶음)}개
-              <span className="ml-2 text-xs text-gray-500">
+              <span className="ml-2 text-xs text-mute">
                 (어디인지 몰라 후보에서 뺀 묶음 {쉼표(후보.셈['모름이라 뺀 묶음'])}개)
               </span>
             </p>
             <div className="mt-2 overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-left text-gray-500">
+                <thead className="text-left text-mute">
                   <tr>
                     <th className="py-1 pr-3 font-normal">기관 · 직군 · 고용형태</th>
                     <th className="py-1 pr-3 font-normal">이쪽</th>
@@ -431,20 +431,20 @@ function 본문() {
                           onClick={() => 주소로({ 묶음: String(x['a키']) })}>
                           {n(x['a지역'])}
                         </button>
-                        <span className="ml-1 text-xs text-gray-500">{n(x['a회차'])}번</span>
+                        <span className="ml-1 text-xs text-mute">{n(x['a회차'])}번</span>
                       </td>
                       <td className="py-1 pr-3">
                         <button className="text-blue-700 hover:underline"
                           onClick={() => 주소로({ 묶음: String(x['b키']) })}>
                           {n(x['b지역'])}
                         </button>
-                        <span className="ml-1 text-xs text-gray-500">{n(x['b회차'])}번</span>
+                        <span className="ml-1 text-xs text-mute">{n(x['b회차'])}번</span>
                       </td>
                       <td className="py-1 text-gray-600">{n(x['근거'])}</td>
                     </tr>
                   ))}
                   {후보.후보.length === 0 && (
-                    <tr><td colSpan={4} className="py-4 text-center text-gray-500">
+                    <tr><td colSpan={4} className="py-4 text-center text-mute">
                       표기만 다른 같은 지역 짝이 없습니다 — 병원 이름으로 묶으면서 다 풀렸습니다
                     </td></tr>
                   )}
@@ -460,15 +460,15 @@ function 본문() {
         <h2 className="mb-2 font-semibold">
           묶음 {쉼표(d.전체묶음수)}개
           {d.전체묶음수 > d.묶음.length && (
-            <span className="ml-1 text-sm font-normal text-gray-500">
+            <span className="ml-1 text-sm font-normal text-mute">
               (앞의 {쉼표(d.묶음.length)}개만 보여 줍니다 — 위에서 걸러 주세요)
             </span>
           )}
-          <span className="ml-2 text-sm font-normal text-gray-500">
+          <span className="ml-2 text-sm font-normal text-mute">
             기관 + 근무처 + 직군 + 고용형태로 이은 것. 누르면 회차별로 펼쳐집니다
           </span>
         </h2>
-        <p className="mb-2 text-xs text-gray-500">
+        <p className="mb-2 text-xs text-mute">
           <b>우리 직군(물리·작업치료사) {쉼표(a.우리직군묶음)}묶음</b> 기준 —
           짝 확인 필요 {쉼표(a.짝확인필요)} · 고용형태 확인 필요 <b>{쉼표(a.고용형태확인필요)}</b> ·
           한 번만 채용 {쉼표(a.한회뿐)}
@@ -527,11 +527,11 @@ function 본문() {
                       <div className="text-xs text-mute">계산 불가 {String(x['계산불가'])}회</div>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-gray-500">{n(x['첫해'])}~{n(x['끝해'])}</td>
+                  <td className="px-3 py-2 text-mute">{n(x['첫해'])}~{n(x['끝해'])}</td>
                 </tr>
               ))}
               {d.묶음.length === 0 && (
-                <tr><td colSpan={5} className="px-3 py-6 text-center text-gray-500">고른 조건에 맞는 묶음이 없습니다</td></tr>
+                <tr><td colSpan={5} className="px-3 py-6 text-center text-mute">고른 조건에 맞는 묶음이 없습니다</td></tr>
               )}
             </tbody>
           </table>
@@ -548,5 +548,5 @@ function 본문() {
 }
 
 export default function AdminCompete() {
-  return <Suspense fallback={<p className="text-lg text-gray-500">잠시만요…</p>}><본문 /></Suspense>;
+  return <Suspense fallback={<p className="text-lg text-mute">잠시만요…</p>}><본문 /></Suspense>;
 }

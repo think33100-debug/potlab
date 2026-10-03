@@ -51,7 +51,7 @@ export default function Welcome() {
   }, [loading, session, me, router, justMade]);
 
   if (loading || !session) {
-    return <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8"><p className="text-lg text-gray-500">잠시만요…</p></main>;
+    return <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8"><p className="text-lg text-mute">잠시만요…</p></main>;
   }
 
   const required = AGREEMENTS.filter((a) => a.required);
@@ -169,7 +169,7 @@ export default function Welcome() {
               toast('처음부터 다시 해요');
               router.replace('/login');
             }}
-            className="text-sm text-gray-500 hover:underline"
+            className="text-sm text-mute hover:underline"
           >
             처음부터 다시 하기
           </button>
@@ -195,7 +195,7 @@ export default function Welcome() {
         {step === 1 && (
           <section>
             <h1 className="text-h2 font-bold">시작하기 전에</h1>
-            <p className="mt-2 text-lg text-gray-500">아래 항목에 동의해 주세요</p>
+            <p className="mt-2 text-lg text-mute">아래 항목에 동의해 주세요</p>
 
             <button
               type="button"
@@ -250,18 +250,18 @@ export default function Welcome() {
         {step === 2 && (
           <section>
             <h1 className="text-h2 font-bold">어떤 분이신가요</h1>
-            <p className="mt-2 text-lg text-gray-500">
+            <p className="mt-2 text-lg text-mute">
               커뮤니티에서 보이는 방이 이걸로 갈려요. 나중에 바꿀 수 있어요
             </p>
 
-            <h2 className="mt-7 text-sm font-bold text-gray-500">직군</h2>
+            <h2 className="mt-7 text-sm font-bold text-mute">직군</h2>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {JOB_GROUPS.map((g) => (
                 <Choice key={g} on={job === g} go={() => setJob(g)}>{g}</Choice>
               ))}
             </div>
 
-            <h2 className="mt-6 text-sm font-bold text-gray-500">역할</h2>
+            <h2 className="mt-6 text-sm font-bold text-mute">역할</h2>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {ROLES.map((r) => (
                 <Choice key={r} on={role === r} go={() => setRole(r)} sub={ROLE_DESC[r]}>
@@ -284,7 +284,7 @@ export default function Welcome() {
         {step === 3 && (
           <section>
             <h1 className="text-h2 font-bold">닉네임을 정해 주세요</h1>
-            <p className="mt-2 text-lg text-gray-500">
+            <p className="mt-2 text-lg text-mute">
               커뮤니티에서 이 이름으로 보여요. 나중에 5번까지 바꿀 수 있어요
             </p>
 
@@ -312,7 +312,7 @@ export default function Welcome() {
         {step === 4 && (
           <section>
             <h1 className="text-h2 font-bold">프로필 사진 (선택)</h1>
-            <p className="mt-2 text-lg text-gray-500">
+            <p className="mt-2 text-lg text-mute">
               안 올리시면 아래 이모지 아바타로 시작해요
             </p>
 
@@ -386,7 +386,7 @@ function Choice({
       <span className={'block text-body-lg font-bold ' + (on ? 'text-teal-strong' : '')}>
         {children}
       </span>
-      {sub && <span className="mt-1 block text-sm text-gray-500">{sub}</span>}
+      {sub && <span className="mt-1 block text-sm text-mute">{sub}</span>}
     </button>
   );
 }

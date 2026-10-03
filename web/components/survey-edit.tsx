@@ -58,7 +58,7 @@ export function SurveyEdit({ profileId, role, job }: { profileId: string; role: 
           onDone={async () => { setOpen(false); await load(); }}
         />
         <button type="button" onClick={() => setOpen(false)}
-          className="mt-5 text-sm text-gray-500 hover:underline">
+          className="mt-5 text-sm text-mute hover:underline">
           그만두고 돌아가기
         </button>
       </section>
@@ -70,7 +70,7 @@ export function SurveyEdit({ profileId, role, job }: { profileId: string; role: 
   return (
     <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
       <h2 className="text-h3 font-bold">급여 · 스펙</h2>
-      <p className="mt-1 text-lg text-gray-500">
+      <p className="mt-1 text-lg text-mute">
         {left === null ? '불러오는 중이에요…'
           : none ? '올해 고칠 수 있는 2번을 다 쓰셨어요'
           : `1년에 2번 고칠 수 있어요. ${left}번 남았어요`}
@@ -96,7 +96,7 @@ export function SurveyEdit({ profileId, role, job }: { profileId: string; role: 
       {none && (
         <p className="mt-5 rounded-sm border border-brand-red/40 p-6 text-lg text-brand-red">
           다음 해가 되면 다시 2번 고칠 수 있어요.
-          <span className="mt-1 block text-sm text-gray-500">자료가 자꾸 바뀌면 통계를 믿을 수 없어서 횟수를 둡니다</span>
+          <span className="mt-1 block text-sm text-mute">자료가 자꾸 바뀌면 통계를 믿을 수 없어서 횟수를 둡니다</span>
         </p>
       )}
     </section>

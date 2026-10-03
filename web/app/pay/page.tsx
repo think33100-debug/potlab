@@ -55,7 +55,7 @@ export default function PayPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h1 font-bold">월급 확인</h1>
-      <p className="mt-2 text-lg text-gray-500">
+      <p className="mt-2 text-lg text-mute">
         치료사들이 직접 올린 급여입니다. 같은 조건끼리만 비교해요
       </p>
 
@@ -71,7 +71,7 @@ export default function PayPage() {
       </section>
 
       {err && <p className="mt-6 text-lg text-brand-red">{err}</p>}
-      {busy && !res && <p className="mt-7 text-lg text-gray-500">세는 중이에요…</p>}
+      {busy && !res && <p className="mt-7 text-lg text-mute">세는 중이에요…</p>}
 
       {res && s && (
         <>
@@ -81,7 +81,7 @@ export default function PayPage() {
           ) : (
             <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
               <h2 className="text-h3 font-bold">내 위치도 보고 싶으세요?</h2>
-              <p className="mt-2 text-lg text-gray-500">
+              <p className="mt-2 text-lg text-mute">
                 {확인중 ? ''
                   : profile ? '급여를 등록하면 같은 조건에서 내가 몇 등인지 나와요'
                   : session ? '가입을 마저 하고 급여를 등록하면 같은 조건에서 내가 몇 등인지 나와요'
@@ -102,7 +102,7 @@ export default function PayPage() {
           {s.n < res.min_n ? (
             <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
               <h2 className="text-h3 font-bold">아직 숫자를 못 보여드려요</h2>
-              <p className="mt-2 text-lg text-gray-500">
+              <p className="mt-2 text-lg text-mute">
                 이 조건에 {s.n}명뿐이에요. {res.min_n}명이 안 되면 누가 적었는지 짐작될 수 있어서
                 숫자를 안 내보내요. 조건을 넓혀 보세요
               </p>
@@ -139,7 +139,7 @@ export default function PayPage() {
                       <div key={k} className="mt-2 first:mt-0">
                         <div className="flex justify-between text-lg">
                           <span>{k}</span>
-                          <span className="text-gray-500">{v}명</span>
+                          <span className="text-mute">{v}명</span>
                         </div>
                         <div className="mt-1 h-1 rounded-md bg-gray-100 dark:bg-gray-800">
                           <div className="h-1 rounded-md bg-teal-strong"
@@ -158,7 +158,7 @@ export default function PayPage() {
             <div className="mt-2 h-1 rounded-md bg-gray-200 dark:bg-gray-800">
               <div className="h-1 rounded-md bg-teal-strong" style={{ width: `${grow(s.n).pct}%` }} />
             </div>
-            <p className="mt-2 text-sm text-gray-500">{grow(s.n).msg}</p>
+            <p className="mt-2 text-sm text-mute">{grow(s.n).msg}</p>
           </section>
 
           <Link
@@ -169,14 +169,14 @@ export default function PayPage() {
           >
             <span className="min-w-0">
               <span className="block break-keep text-body-lg font-bold">계산기 보기</span>
-              <span className="mt-1 block break-keep text-sm text-gray-500">
+              <span className="mt-1 block break-keep text-sm text-mute">
                 세전·세후 · 퇴직금 · 연차. 로그인 없이 쓸 수 있어요
               </span>
             </span>
             <span aria-hidden className="shrink-0 text-mute">→</span>
           </Link>
 
-          <PayNote className="mt-6 text-gray-500" />
+          <PayNote className="mt-6 text-mute" />
           <p className="mt-1 text-sm text-mute">
             치료사들이 직접 올린 자료입니다. 병원 이름은 받지 않아요
           </p>
@@ -191,7 +191,7 @@ function Sel({
 }: { label: string; v: string; on: (v: string) => void; opts: readonly string[]; all: string }) {
   return (
     <label className="block">
-      <span className="block text-sm font-bold text-gray-500">{label}</span>
+      <span className="block text-sm font-bold text-mute">{label}</span>
       <select value={v} onChange={(e) => on(e.target.value)}
         className="mt-1 block w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950">
         <option value="">{all}</option>
@@ -205,7 +205,7 @@ function Card({ title, sub, children }: { title: string; sub?: string; children:
   return (
     <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
       <h2 className="text-h3 font-bold">{title}</h2>
-      {sub && <p className="mt-1 text-sm text-gray-500">{sub}</p>}
+      {sub && <p className="mt-1 text-sm text-mute">{sub}</p>}
       <div className="mt-5">{children}</div>
     </section>
   );
@@ -214,7 +214,7 @@ function Card({ title, sub, children }: { title: string; sub?: string; children:
 function Row({ k, v, big }: { k: string; v: string; big?: boolean }) {
   return (
     <div className="flex items-baseline justify-between border-b border-gray-50 py-4 last:border-0 dark:border-gray-800">
-      <span className="text-lg text-gray-500">{k}</span>
+      <span className="text-lg text-mute">{k}</span>
       <span className={big ? 'text-h3 font-bold' : 'text-lg font-medium'}>{v}</span>
     </div>
   );

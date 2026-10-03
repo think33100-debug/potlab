@@ -56,7 +56,7 @@ export default function ResetMe() {
   return (
     <div>
       <h2 className="text-h3 font-bold">내 계정 초기화</h2>
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         가입 화면을 다시 보려고 쓰는 자리입니다. 지금 로그인한 계정의 개인정보를 지웁니다
       </p>
 
@@ -76,7 +76,7 @@ export default function ResetMe() {
           <li>· 내가 쓴 글과 댓글 — 글쓴이만 「알 수 없음」이 돼요</li>
           <li>· 원래 누구였는지 (관리자만 볼 수 있어요)</li>
         </ul>
-        <p className="mt-5 break-keep text-sm text-gray-500">
+        <p className="mt-5 break-keep text-sm text-mute">
           글까지 지우면 남이 받아 둔 공유 링크가 죽고, 그 글에 달린 남의 댓글이
           누구한테 한 말인지 알 수 없게 됩니다. 그래서 글은 남깁니다
         </p>
@@ -88,7 +88,7 @@ export default function ResetMe() {
       </p>
 
       <label className="mt-6 block">
-        <span className="text-sm font-bold text-gray-500">
+        <span className="text-sm font-bold text-mute">
           맞으면 「{SURE}」 라고 쳐주세요
         </span>
         <input

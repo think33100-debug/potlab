@@ -137,7 +137,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
 
       <header className="mb-7">
         <h1 className="break-keep text-h1 font-bold">{byDeadline ? '마감 임박 공고' : '채용공고'}</h1>
-        <p className="mt-1 break-keep text-lg text-gray-500">
+        <p className="mt-1 break-keep text-lg text-mute">
           {byDeadline
             ? '마감일이 가까운 순서입니다'
             : '작업치료사 · 물리치료사 · 공공기관과 병원에서 모아요'}
@@ -221,7 +221,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                 <li key={r.id}>
                   <Link href={`/jobs/${r.id}`}
                     className="block rounded-sm border border-gray-200 p-5 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950">
-                    <p className="text-sm text-gray-500">{r.org_name}</p>
+                    <p className="text-sm text-mute">{r.org_name}</p>
                     <p className="mt-1 break-keep text-body-lg font-medium">
                       {r.is_intern && (
                         <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-gray-900 ring-1 ring-warning dark:text-gray-100">
@@ -230,7 +230,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                       )}
                       {r.title}
                     </p>
-                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mute">
                       {r.job_group && (
                         <span className="font-medium text-gray-700 dark:text-gray-300">{r.job_group}</span>
                       )}
@@ -260,7 +260,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       )}
 
       {!locked && !list.error && rows.length === 0 && (
-        <p className="break-keep py-8 text-center text-lg text-gray-500">
+        <p className="break-keep py-8 text-center text-lg text-mute">
           {searching ? `「${q}」 로 찾은 공고가 없어요`
             : page > 0 ? '이 쪽에는 공고가 없어요' : '조건에 맞는 공고가 없어요'}
         </p>
@@ -277,7 +277,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                   className="-mx-4 block rounded-sm px-4 py-6 hover:bg-gray-50 dark:hover:bg-gray-950"
                 >
                   <div className="flex items-baseline justify-between gap-5">
-                    <span className="break-keep text-sm text-gray-500">{r.org_name}</span>
+                    <span className="break-keep text-sm text-mute">{r.org_name}</span>
                     {dd && (
                       <span className={
                         'shrink-0 text-sm font-bold ' +
@@ -300,7 +300,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                     )}
                     {r.title}
                   </p>
-                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mute">
                     {searching && r.tab && (
                       <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
                         {tabLabel(r.tab)}
@@ -337,7 +337,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
             </Link>
           ) : <span />}
 
-          <span className="break-keep text-sm text-gray-500">{page + 1}쪽</span>
+          <span className="break-keep text-sm text-mute">{page + 1}쪽</span>
 
           {hasNext ? (
             <Link

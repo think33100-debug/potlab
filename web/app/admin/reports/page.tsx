@@ -63,7 +63,7 @@ export default function AdminReports() {
   return (
     <div>
       <h2 className="text-h3 font-bold">신고</h2>
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         읽고 「처리 완료」를 눌러주세요. 눌러야 1년 뒤 자동으로 지워지고,
         신고당한 글쓴이가 탈퇴했을 때 그 사람 닉네임 보관도 끝납니다
       </p>
@@ -90,12 +90,12 @@ export default function AdminReports() {
           못 불러왔어요 — {err}
         </p>
       )}
-      {rows === null && <p className="mt-6 text-lg text-gray-500">잠시만요…</p>}
+      {rows === null && <p className="mt-6 text-lg text-mute">잠시만요…</p>}
 
       {rows !== null && rows.length === 0 && (
         <div className="mt-6 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
           <p className="break-keep text-lg font-bold">신고가 없어요</p>
-          <p className="mt-2 break-keep text-lg text-gray-500">
+          <p className="mt-2 break-keep text-lg text-mute">
             {처리전만 ? '처리 안 한 신고가 없습니다' : '아직 신고가 한 건도 없습니다'}
           </p>
         </div>
@@ -118,9 +118,9 @@ export default function AdminReports() {
                   <span className="rounded-xs bg-gray-100 px-2 py-1 text-sm dark:bg-gray-800">
                     {r.무엇 === 'post' ? '글' : r.무엇 === 'comment' ? '댓글' : r.무엇}
                   </span>
-                  <span className="num tabular-nums text-gray-500">{때(r.신고시각)}</span>
+                  <span className="num tabular-nums text-mute">{때(r.신고시각)}</span>
                   {r.처리시각
-                    ? <span className="text-sm text-gray-500">처리 완료 {때(r.처리시각)}</span>
+                    ? <span className="text-sm text-mute">처리 완료 {때(r.처리시각)}</span>
                     : <span className="text-sm font-bold text-brand-red">처리 안 함</span>}
                 </p>
 

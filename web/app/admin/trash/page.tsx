@@ -83,7 +83,7 @@ export default function AdminTrash() {
   return (
     <section>
       <h1 className="text-h2 font-bold">쓰레기통</h1>
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         제목에 버림 단어만 있어 아예 안 담은 공고예요. <b>자동으로 안 비워요.</b>
         <br />
         진짜 공고가 잘못 버려졌으면 「잘못 버림」 을 눌러 주세요.
@@ -124,16 +124,16 @@ export default function AdminTrash() {
         </label>
       </div>
 
-      {rows === null && <p className="mt-8 text-lg text-gray-500">잠시만요…</p>}
+      {rows === null && <p className="mt-8 text-lg text-mute">잠시만요…</p>}
       {rows !== null && rows.length === 0 && (
-        <p className="mt-8 text-lg text-gray-500">
+        <p className="mt-8 text-lg text-mute">
           {되돌린것만 ? '되돌린 공고가 없어요' : '쓰레기통이 비었어요'}
         </p>
       )}
 
       {rows !== null && rows.length > 0 && (
         <>
-          <p className="mt-6 text-sm text-gray-500">
+          <p className="mt-6 text-sm text-mute">
             <span className="num tabular-nums">{rows.length}</span>건
             {rows.length >= 500 && ' (500건까지만 보여요)'}
           </p>
@@ -146,7 +146,7 @@ export default function AdminTrash() {
                   {r.restored && <span className="mr-2 text-brand-red">되돌림</span>}
                   {r.title}
                 </p>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-mute">
                   {[r.source, r.org_name, r.id, r.trashed_at?.slice(0, 16).replace('T', ' ')]
                     .filter(Boolean).join(' · ')}
                 </p>

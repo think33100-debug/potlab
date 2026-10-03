@@ -47,13 +47,13 @@ export async function OrgPanel(
         <dl className="mt-5 grid grid-cols-[5rem_1fr] gap-y-2 text-lg">
           {facts.map(([k, v]) => (
             <div key={k} className="contents">
-              <dt className="text-gray-500">{k}</dt>
+              <dt className="text-mute">{k}</dt>
               <dd className="break-words">{v}</dd>
             </div>
           ))}
         </dl>
       ) : (
-        <p className="mt-5 text-lg text-gray-500">
+        <p className="mt-5 text-lg text-mute">
           기관 자료에서 못 찾았어요. 공고에 적힌 이름과 자료의 이름이 다를 수 있어요
         </p>
       )}
@@ -71,15 +71,15 @@ export async function OrgPanel(
 
       {/* 급여는 자료가 없어서 숫자를 안 만듭니다 */}
       <div className="mt-6 border-t border-gray-100 pt-5 dark:border-gray-800">
-        <p className="text-sm font-bold text-gray-500">이 기관 급여</p>
-        <p className="mt-1 text-lg text-gray-500">
+        <p className="text-sm font-bold text-mute">이 기관 급여</p>
+        <p className="mt-1 text-lg text-mute">
           아직 올라온 급여 정보가 없어요. 회원이 올려주면 여기에 보여드릴게요
         </p>
       </div>
 
       {rows.length > 0 && (
         <div className="mt-6 border-t border-gray-100 pt-5 dark:border-gray-800">
-          <p className="text-sm font-bold text-gray-500">같은 기관의 다른 공고 {rows.length}건</p>
+          <p className="text-sm font-bold text-mute">같은 기관의 다른 공고 {rows.length}건</p>
           <ul className="mt-2 divide-y divide-gray-100 dark:divide-gray-800">
             {rows.map((r) => (
               <li key={r.id}>

@@ -77,7 +77,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               신고번호는 화면에 밝혀야 하는 것이라 한 화면만 빠지면 안 됩니다.
               휴대폰에서는 탭바(62px)에 가리지 않게 아래를 더 띄웁니다 */}
           <footer className="mx-auto w-full max-w-3xl px-6 pb-[78px] pt-7 md:px-7 md:pb-7">
-            <p className="break-keep text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+            <p className="break-keep text-sm leading-relaxed text-mute dark:text-gray-400">
               직업정보제공사업 신고번호 J1401020260007
               <br />
               주식회사 빈틈 · 대구 북구 동북로 291, 901-A156호
@@ -89,7 +89,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 {CONTACT_EMAIL}
               </a>
             </p>
-            <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400"
+            <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-mute dark:text-gray-400"
               aria-label="약관과 문의">
               <Link href="/terms/service" className="hover:underline">이용약관</Link>
               <Link href="/terms/privacy" className="font-bold hover:underline">개인정보처리방침</Link>

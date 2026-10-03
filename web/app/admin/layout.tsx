@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
   if (loading) {
     return (
       <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
-        <p className="text-lg text-gray-500">잠시만요…</p>
+        <p className="text-lg text-mute">잠시만요…</p>
       </main>
     );
   }
@@ -49,7 +49,7 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
     return (
       <main className="mx-auto w-full max-w-3xl px-6 py-8 md:px-7">
         <h1 className="text-h2 font-bold">관리자만 볼 수 있어요</h1>
-        <p className="mt-2 text-lg text-gray-500">
+        <p className="mt-2 text-lg text-mute">
           {session ? '이 계정은 관리자가 아니에요' : '먼저 로그인해 주세요'}
         </p>
         <Link

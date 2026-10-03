@@ -182,7 +182,7 @@ export default function AdminJobs() {
         ))}
       </nav>
       {STATES.find((s) => s.key === state)?.hint && (
-        <p className="mt-2 text-sm text-gray-500">{STATES.find((s) => s.key === state)!.hint}</p>
+        <p className="mt-2 text-sm text-mute">{STATES.find((s) => s.key === state)!.hint}</p>
       )}
 
       {/* 찾기 · 탭 거르기 */}
@@ -211,7 +211,7 @@ export default function AdminJobs() {
       </div>
 
       {q && (
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-mute">
           「{q}」로 찾은 {total}건{' '}
           <button type="button" onClick={() => { setTyped(''); 주소로({ q: null, page: null }); }}
             className="text-interaction-blue hover:underline">검색 지우기</button>
@@ -222,7 +222,7 @@ export default function AdminJobs() {
       {rows === null ? (
         <p className="mt-7 text-lg text-mute">불러오는 중…</p>
       ) : rows.length === 0 ? (
-        <p className="mt-7 py-8 text-center text-lg text-gray-500">
+        <p className="mt-7 py-8 text-center text-lg text-mute">
           {state === 'hold' ? '보류함이 비었어요. 좋은 신호죠' : '해당하는 공고가 없어요'}
         </p>
       ) : (
@@ -242,7 +242,7 @@ export default function AdminJobs() {
                 {r.title}
               </Link>
 
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-mute">
                 {[r.job_group, r.employ_type, r.work_place,
                   r.headcount ? `${r.headcount}명` : null,
                   r.apply_to ? `~${r.apply_to}` : null,
@@ -308,7 +308,7 @@ export default function AdminJobs() {
             className="rounded-md border border-gray-200 px-6 py-4 text-lg disabled:opacity-30 dark:border-gray-700">
             ← 이전
           </button>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-mute">
             {page * PAGE + 1}–{Math.min((page + 1) * PAGE, total)} / {total}건
           </span>
           <button type="button" disabled={(page + 1) * PAGE >= total} onClick={() => 주소로({ page: page + 1 })}

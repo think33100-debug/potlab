@@ -60,13 +60,13 @@ export default function SpecPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="break-keep text-h1 font-bold">스펙쌓기</h1>
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         피오티잡에서 실제로 취업을 준비하는 학생들을 조사해
         자체적으로 만든 스펙 점수입니다
       </p>
 
       {err && <p className="mt-6 text-lg text-brand-red">{err}</p>}
-      {!res && !err && <p className="mt-7 text-lg text-gray-500">세는 중이에요…</p>}
+      {!res && !err && <p className="mt-7 text-lg text-mute">세는 중이에요…</p>}
 
       {res && !me && (
         <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
@@ -74,7 +74,7 @@ export default function SpecPage() {
           {/* 글귀와 단추가 **같은 규칙**을 씁니다 (2026-09-25).
               전에는 글귀만 loading 을 보고 바로 아래 단추는 안 봤습니다 —
               글귀는 비어 있는데 단추만 「시작하기 → /login」 으로 뗴습니다 */}
-          <p className="mt-2 text-lg text-gray-500">
+          <p className="mt-2 text-lg text-mute">
             {loading ? ''
               : profile ? '내 정보에서 스펙을 채우면 점수가 나와요'
               : session ? '가입을 마저 하고 스펙을 채우면 점수가 나와요'
@@ -95,8 +95,8 @@ export default function SpecPage() {
           <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
             <p aria-hidden className="text-h1">{tierOf(me.score).emoji}</p>
             <p className="mt-2 text-h2 font-bold">{tierOf(me.score).headline}</p>
-            <p className="mt-1 text-lg text-gray-500">{tierOf(me.score).comment}</p>
-            <p className="mt-1 text-lg text-gray-500">{tierOf(me.score).place}</p>
+            <p className="mt-1 text-lg text-mute">{tierOf(me.score).comment}</p>
+            <p className="mt-1 text-lg text-mute">{tierOf(me.score).place}</p>
 
             <p className="mt-6 text-h1 font-bold">
               {me.score}
@@ -112,7 +112,7 @@ export default function SpecPage() {
                 {res.peer.n}명 중 <b>상위 {res.peer.top}%</b>
               </p>
             ) : (
-              <p className="mt-5 text-lg text-gray-500">
+              <p className="mt-5 text-lg text-mute">
                 같은 조건에 {res.min_peer}명이 모이면 또래 중 내 위치가 나와요.
                 지금은 {res.peer?.n ?? 0}명이에요
               </p>
@@ -152,7 +152,7 @@ export default function SpecPage() {
             <h2 className="text-h3 font-bold">합격한 사람들과 비교</h2>
             {res.reach?.enough ? (
               <>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-mute">
                   그 기관에서 일하는 {res.reach.base}명 중 내 점수보다 낮은 사람이 몇 %인지 보여드려요.
                   높을수록 내 스펙이 그 자리에 가까워요
                 </p>
@@ -181,7 +181,7 @@ export default function SpecPage() {
                 </p>
               </>
             ) : (
-              <p className="mt-2 text-lg text-gray-500">
+              <p className="mt-2 text-lg text-mute">
                 현직 선배들 스펙이 {res.reach && !res.reach.enough ? res.reach.need : res.min_pro}명은
                 모여야 보여드릴 수 있어요. 지금은
                 {' '}{res.reach && !res.reach.enough ? res.reach.have : 0}명이에요.
@@ -220,7 +220,7 @@ export default function SpecPage() {
       >
         <span className="min-w-0">
           <span className="block break-keep text-body-lg font-bold">봉사활동 찾기</span>
-          <span className="mt-1 block break-keep text-sm text-gray-500">
+          <span className="mt-1 block break-keep text-sm text-mute">
             지역으로 좁혀 볼 수 있어요. 신청은 VMS 에서 해요
           </span>
         </span>
@@ -248,12 +248,12 @@ function Rookie({ job }: { job: string | null }) {
   return (
     <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
       <h2 className="text-h3 font-bold">여기 가면 얼마 받나요</h2>
-      <p className="mt-1 text-sm text-gray-500">
+      <p className="mt-1 text-sm text-mute">
         {d.job ?? '치료사'} 중 <b>연차 2년 이하</b>가 적어준 연 총소득이에요
       </p>
 
       {d.types.length === 0 ? (
-        <p className="mt-5 text-lg text-gray-500">
+        <p className="mt-5 text-lg text-mute">
           신입 급여가 아직 {d.min_n}명은 모이지 않았어요. 지금은 {d.base}명이에요
         </p>
       ) : (
@@ -275,7 +275,7 @@ function Rookie({ job }: { job: string | null }) {
               </div>
             ))}
           </div>
-          <PayNote className="mt-5 text-gray-500"
+          <PayNote className="mt-5 text-mute"
                    source="연차 2년 이하 회원이 직접 올린 급여" />
           <p className="mt-1 text-sm text-mute">
             가운데 값(중위값)이에요. {d.min_n}명이 안 되는 유형은 안 보여드려요

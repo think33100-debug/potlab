@@ -75,7 +75,7 @@ export default function AdminTexts() {
       </p>
     );
   }
-  if (!rows) return <p className="text-lg text-gray-500">불러오는 중…</p>;
+  if (!rows) return <p className="text-lg text-mute">불러오는 중…</p>;
 
   /* 구역 순서는 sort 가 정합니다 — 화면에 나오는 차례와 같습니다 */
   const areas: string[] = [];
@@ -83,7 +83,7 @@ export default function AdminTexts() {
 
   return (
     <div className="space-y-8">
-      <p className="break-keep text-sm text-gray-500">
+      <p className="break-keep text-sm text-mute">
         고치면 바로 홈에 나가요. 가는 곳(링크)과 아이콘 이름은 여기서 안 고칩니다 —
         엉뚱한 값이 들어가면 화면이 깨져요. 「{'{min}'}」 같은 자리는 화면이 숫자로 채웁니다
       </p>
@@ -98,7 +98,7 @@ export default function AdminTexts() {
                 <div key={r.key}
                   className="rounded-sm border border-gray-100 p-6 dark:border-gray-800">
                   <div className="flex flex-wrap items-baseline justify-between gap-3">
-                    <span className="break-keep text-sm font-bold text-gray-500">{r.label}</span>
+                    <span className="break-keep text-sm font-bold text-mute">{r.label}</span>
                     <span className="text-sm text-mute">{r.key}</span>
                   </div>
 

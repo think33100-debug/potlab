@@ -45,7 +45,7 @@ export default function AdminJobEdit() {
   if (missing) {
     return (
       <div>
-        <p className="text-lg text-gray-500">그런 공고가 없어요. 이미 지워졌을 수 있어요</p>
+        <p className="text-lg text-mute">그런 공고가 없어요. 이미 지워졌을 수 있어요</p>
         <Link href="/admin/jobs" className="mt-5 inline-block text-lg text-interaction-blue hover:underline">
           ← 공고 목록
         </Link>
@@ -113,7 +113,7 @@ export default function AdminJobEdit() {
       </div>
 
       {job.evidence?.['탭근거'] && (
-        <p className="mt-2 text-sm text-gray-500">분류 근거 — {job.evidence['탭근거']}</p>
+        <p className="mt-2 text-sm text-mute">분류 근거 — {job.evidence['탭근거']}</p>
       )}
 
       {/* 상태 단추 */}
@@ -149,7 +149,7 @@ export default function AdminJobEdit() {
           const dirty = draft[f.key] !== String(job[f.key] ?? '');
           return (
             <label key={String(f.key)} className="block">
-              <span className="text-sm font-bold text-gray-500">
+              <span className="text-sm font-bold text-mute">
                 {f.label}
                 {dirty && <span className="ml-2 font-medium text-brand-red">고침</span>}
               </span>
@@ -170,13 +170,13 @@ export default function AdminJobEdit() {
       {Object.keys(job.detail ?? {}).length > 0 && (
         <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
           <h2 className="text-h3 font-bold">본문</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-mute">
             수집기가 채운 칸이에요. 여기서는 보기만 해요
           </p>
           <dl className="mt-5 space-y-5">
             {Object.entries(job.detail).map(([k, v]) => (
               <div key={k}>
-                <dt className="text-sm font-bold text-gray-500">{k}</dt>
+                <dt className="text-sm font-bold text-mute">{k}</dt>
                 <dd className="mt-1 whitespace-pre-wrap break-words text-lg text-gray-700 dark:text-gray-300">{v}</dd>
               </div>
             ))}
@@ -187,7 +187,7 @@ export default function AdminJobEdit() {
       {/* 저장 — 아래에 붙어 따라옵니다 */}
       <div className="sticky bottom-0 mt-8 -mx-6 border-t border-gray-100 bg-white px-6 py-5 md:-mx-7 md:px-7 dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center gap-5">
-          <span className="text-lg text-gray-500">
+          <span className="text-lg text-mute">
             {changed.length === 0 ? '고친 칸이 없어요' : `${changed.length}개 칸을 고쳤어요`}
           </span>
           <span className="flex-1" />

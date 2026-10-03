@@ -125,7 +125,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h1 font-bold">봉사활동 찾기</h1>
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         지역과 분야로 봉사할 곳을 찾습니다. 신청은 <b>VMS</b>에서 합니다
       </p>
 
@@ -162,7 +162,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
           aria-current={sido === null ? 'page' : undefined}
           className={'text-lg ' + (sido === null
             ? 'font-bold text-ink underline underline-offset-4'
-            : 'text-gray-500 hover:underline')}
+            : 'text-mute hover:underline')}
         >
           전국
         </Link>
@@ -173,7 +173,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
             aria-current={sido === s.시도 ? 'page' : undefined}
             className={'text-lg ' + (sido === s.시도
               ? 'font-bold text-ink underline underline-offset-4'
-              : 'text-gray-500 hover:underline')}
+              : 'text-mute hover:underline')}
           >
             {s.시도}
             <span className="ml-1 text-sm text-mute">{s.수}</span>
@@ -181,7 +181,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
         ))}
       </nav>
 
-      <p className="mt-5 text-lg text-gray-500">
+      <p className="mt-5 text-lg text-mute">
         {sido ?? '전국'} · <b className="text-ink">{이탭수}건</b> 모집 중
         {tab.갈래 === null && c && c.모름 > 0 && (
           <span className="text-sm text-mute">
@@ -191,7 +191,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
       </p>
 
       {/* 어디서 온 자료인지 밝힙니다. 출처와 한계를 화면에 적는다는 규칙 */}
-      <p className="mt-4 break-keep rounded-sm border border-line bg-card p-5 text-sm leading-relaxed text-gray-500">
+      <p className="mt-4 break-keep rounded-sm border border-line bg-card p-5 text-sm leading-relaxed text-mute">
         한국사회복지협의회 <b>VMS</b> 자료입니다. 오늘부터 180일 안에 하는 봉사만 모았습니다.
         <br />
         <b>신청은 VMS 에서</b> 합니다 — 회원가입이 필요할 수 있습니다.
@@ -216,7 +216,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
       )}
 
       {!목록.error && rows.length === 0 && (
-        <p className="mt-6 break-keep rounded-sm border border-line bg-card p-7 text-lg text-gray-500">
+        <p className="mt-6 break-keep rounded-sm border border-line bg-card p-7 text-lg text-mute">
           {sido ?? '전국'}에 지금 올라온 것이 없어요.
           {sido && <> <Link href={길({ sido: 'all', p: '0' })} className="underline underline-offset-4">전국으로 보기</Link></>}
         </p>
@@ -235,7 +235,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
                 className="block rounded-sm border border-line bg-card p-6 hover:bg-paper"
               >
                 <p className="break-keep text-body-lg font-bold text-ink">{v.제목}</p>
-                <p className="mt-2 break-keep text-lg text-gray-500">
+                <p className="mt-2 break-keep text-lg text-mute">
                   {v.기관}
                   {v.장소 && <><br />{v.장소}</>}
                 </p>
@@ -253,7 +253,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
                   {v.청소년 && <span className="rounded-xs bg-gray-100 px-3 py-1 text-gray-600 dark:bg-gray-800 dark:text-gray-400">청소년 가능</span>}
                   {v.분야 && <span className="rounded-xs bg-gray-100 px-3 py-1 text-gray-600 dark:bg-gray-800 dark:text-gray-400">{v.분야}</span>}
                   {!!v.모집인원 && (
-                    <span className="text-gray-500">
+                    <span className="text-mute">
                       {v.신청인원 ?? 0}/{v.모집인원}명
                       {남은자리 > 0 && <> · {남은자리}자리</>}
                     </span>

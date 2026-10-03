@@ -40,7 +40,7 @@ export default function LeavePage() {
 
   if (loading) {
     return <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
-      <p className="text-lg text-gray-500">잠시만요…</p>
+      <p className="text-lg text-mute">잠시만요…</p>
     </main>;
   }
   if (!session) {
@@ -73,7 +73,7 @@ export default function LeavePage() {
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h2 font-bold">회원 탈퇴</h1>
-      <p className="mt-2 break-keep text-lg text-gray-500">
+      <p className="mt-2 break-keep text-lg text-mute">
         탈퇴하면 되돌릴 수 없어요. 무엇이 지워지고 무엇이 남는지 먼저 봐주세요
       </p>
 
@@ -100,12 +100,12 @@ export default function LeavePage() {
             분쟁이 생겼을 때 누구 글인지 가리기 위해서예요. 30일이 지나면 자동으로 지워져요
           </li>
         </ul>
-        <p className="mt-4 break-keep text-sm text-gray-500">
+        <p className="mt-4 break-keep text-sm text-mute">
           내 글에 신고가 걸려 있으면 그 신고 처리가 끝날 때까지 원래 닉네임을 더 보관해요.
           처리가 끝나면 바로 지워져요. 잠가 둔 닉네임은 관리자만 열어볼 수 있고,
           열어본 기록이 따로 남아요
         </p>
-        <p className="mt-5 break-keep text-sm text-gray-500">
+        <p className="mt-5 break-keep text-sm text-mute">
           글까지 지우면 남이 받아 둔 공유 링크가 죽고, 그 글에 달린 남의 댓글이
           누구한테 한 말인지 알 수 없게 돼요. 그래서 글은 남기고 이름만 가려요
         </p>
@@ -116,7 +116,7 @@ export default function LeavePage() {
       </p>
 
       <label className="mt-6 block">
-        <span className="text-sm font-bold text-gray-500">
+        <span className="text-sm font-bold text-mute">
           정말 탈퇴하시려면 「{SURE}」 라고 쳐주세요
         </span>
         <input

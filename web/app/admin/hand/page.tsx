@@ -71,7 +71,7 @@ export default function AdminHand() {
   };
 
   if (err) return <p className="text-lg text-red-600">{err}</p>;
-  if (!d) return <p className="text-lg text-gray-500">잠시만요…</p>;
+  if (!d) return <p className="text-lg text-mute">잠시만요…</p>;
 
   const 막힌것 = d.filter((x) => x.결과 !== '열림');
   const 오래된것 = d.filter((x) => (x.사람이본지며칠 ?? 999) > 30);
@@ -80,7 +80,7 @@ export default function AdminHand() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-bold">손으로 확인할 곳</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-mute">
           기계가 못 가는 병원입니다. <b>빠지지 않는 것이 자동화보다 중요합니다</b> —
           버리지 않고 여기 두고 사람이 봅니다.
         </p>
@@ -124,8 +124,8 @@ export default function AdminHand() {
                     ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900')}>
                     {x.결과 ?? '—'}
                   </span>
-                  {x.공고줄 ? <span className="ml-1 text-xs text-gray-500">공고 {x.공고줄}줄</span> : null}
-                  <div className="text-xs text-gray-500">{x.까닭 ?? ''}</div>
+                  {x.공고줄 ? <span className="ml-1 text-xs text-mute">공고 {x.공고줄}줄</span> : null}
+                  <div className="text-xs text-mute">{x.까닭 ?? ''}</div>
                   <div className="text-xs text-mute">{x.어디서 ?? ''}</div>
                 </td>
                 <td className="px-3 py-2 text-gray-600">
@@ -141,7 +141,7 @@ export default function AdminHand() {
                   {x.사람이본날 ? (
                     <>
                       {x.사람이본날}
-                      <div className={'text-xs ' + ((x.사람이본지며칠 ?? 0) > 30 ? 'text-red-600' : 'text-gray-500')}>
+                      <div className={'text-xs ' + ((x.사람이본지며칠 ?? 0) > 30 ? 'text-red-600' : 'text-mute')}>
                         {x.사람이본지며칠}일 전
                       </div>
                     </>
@@ -157,7 +157,7 @@ export default function AdminHand() {
               </tr>
             ))}
             {d.length === 0 && (
-              <tr><td colSpan={6} className="px-3 py-6 text-center text-gray-500">
+              <tr><td colSpan={6} className="px-3 py-6 text-center text-mute">
                 손으로 확인할 곳이 없습니다
               </td></tr>
             )}
@@ -174,7 +174,7 @@ export default function AdminHand() {
               {한.넘은것 ? 한.넘은것 + '곳이 70%를 넘었습니다' : '넉넉합니다'}
             </span>
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-mute">
             쓴 양은 <b>신청 건마다 하나</b>입니다 — 우리 열쇠가 둘이어도 같이 세고,
             남이 같은 신청 건을 쓰면 우리 몫도 줄어듭니다. 바닥나면 그날 공고를 못 받습니다.
             자정에 돌아옵니다.
@@ -207,12 +207,12 @@ export default function AdminHand() {
                           />
                         </div>
                         <span className={'w-10 text-right text-xs '
-                          + (x.빨간줄 ? 'font-bold text-red-700' : 'text-gray-500')}>
+                          + (x.빨간줄 ? 'font-bold text-red-700' : 'text-mute')}>
                           {x.몇퍼센트}%
                         </span>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2 text-gray-500">{x.본때}</td>
+                    <td className="whitespace-nowrap px-3 py-2 text-mute">{x.본때}</td>
                   </tr>
                 ))}
               </tbody>
@@ -230,7 +230,7 @@ export default function AdminHand() {
               오늘 {영.오늘}건
             </span>
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-mute">
             PDF 는 받았는데 글자가 한 자도 안 나온 건입니다. <b>한 번 더 해 보고</b>,
             두 번째도 0자면 보류함으로 보냅니다. 원인을 잡으려고 받은 크기·앞 5글자·
             content-type·응답 원문을 같이 남깁니다.
@@ -252,11 +252,11 @@ export default function AdminHand() {
                     <td className="whitespace-nowrap px-3 py-2 text-gray-600">{x.때}</td>
                     <td className="px-3 py-2">
                       {x.경로}
-                      {x.공고 ? <div className="text-xs text-gray-500">{x.공고}</div> : null}
+                      {x.공고 ? <div className="text-xs text-mute">{x.공고}</div> : null}
                     </td>
                     <td className="px-3 py-2">
                       <div className="max-w-xs truncate">{x.파일 ?? '—'}</div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-mute">
                         {x.바이트 ?? '?'}바이트 · 앞5 「{x.앞5 ?? ''}」
                       </div>
                       <div className="text-xs text-mute">{x.ctype ?? ''}</div>
@@ -279,7 +279,7 @@ export default function AdminHand() {
         </section>
       )}
 
-      <p className="text-xs leading-relaxed text-gray-500">
+      <p className="text-xs leading-relaxed text-mute">
         확인하는 법 — 병원 채용 페이지를 열어 물리치료사·작업치료사 공고가 있는지 보고,
         있으면 관리자 → 공고에서 손으로 넣은 뒤 「오늘 봤음」을 누르십시오.
         주소와 자세한 내력은 저장소의 <code>손으로_확인할곳.md</code> 에 있습니다.

@@ -68,7 +68,7 @@ export default function AdminHome() {
     return () => { alive = false; };
   }, [fetchAll]);
 
-  if (!blocks) return <p className="text-lg text-gray-500">불러오는 중…</p>;
+  if (!blocks) return <p className="text-lg text-mute">불러오는 중…</p>;
 
   const of = (kind: HomeBlock['kind']) =>
     blocks.filter((b) => b.kind === kind).sort((a, c) => a.sort - c.sort);
@@ -143,7 +143,7 @@ export default function AdminHome() {
         note={`켜진 것만 홈에 나와요 · 제목이 비면 안 나와요 · 지금 ${of('top').filter((b) => b.enabled && b.title).length}개`}
       >
         <div className="mb-6 flex flex-wrap items-end gap-3 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-          <label className="text-sm font-bold text-gray-500">
+          <label className="text-sm font-bold text-mute">
             넘어가는 속도
             <div className="mt-2 flex gap-2">
               <input
@@ -152,7 +152,7 @@ export default function AdminHome() {
                 onChange={(e) => setSeconds(e.target.value)}
                 className="w-[88px] rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
               />
-              <span className="self-center text-lg text-gray-500">초</span>
+              <span className="self-center text-lg text-mute">초</span>
             </div>
           </label>
           <button
@@ -195,7 +195,7 @@ export default function AdminHome() {
         note={`커뮤니티 맨 위에 옆으로 밀리는 줄 · 제목이 비면 안 나와요 · 지금 ${of('comm').filter((b) => b.enabled && b.title).length}개`}
       >
         <div className="mb-6 flex flex-wrap items-end gap-3 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-          <label className="text-sm font-bold text-gray-500">
+          <label className="text-sm font-bold text-mute">
             넘어가는 속도
             <div className="mt-2 flex gap-2">
               <input
@@ -204,7 +204,7 @@ export default function AdminHome() {
                 onChange={(e) => setCommSeconds(e.target.value)}
                 className="w-[88px] rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
               />
-              <span className="self-center text-lg text-gray-500">초</span>
+              <span className="self-center text-lg text-mute">초</span>
             </div>
           </label>
           <button
@@ -235,7 +235,7 @@ export default function AdminHome() {
             onPatch={patch} onSave={save} onMove={move} onUpload={upload}>
             <Field label="제목" v={b.title} set={(v) => patch(b.id, { title: v })} />
             <label className="block">
-              <span className="text-sm font-bold text-gray-500">안에 넣을 숫자</span>
+              <span className="text-sm font-bold text-mute">안에 넣을 숫자</span>
               <select
                 value={b.metric ?? ''}
                 onChange={(e) => patch(b.id, { metric: (e.target.value || null) as HomeBlock['metric'] })}
@@ -260,7 +260,7 @@ function Section({ title, note, children }: { title: string; note: string; child
   return (
     <section>
       <h2 className="text-h3 font-bold">{title}</h2>
-      <p className="mt-1 text-sm text-gray-500">{note}</p>
+      <p className="mt-1 text-sm text-mute">{note}</p>
       <div className="mt-5 space-y-5">{children}</div>
     </section>
   );
@@ -317,7 +317,7 @@ function Field({
 }: { label: string; v: string; set: (v: string) => void; wide?: boolean }) {
   return (
     <label className="block">
-      <span className="text-sm font-bold text-gray-500">{label}</span>
+      <span className="text-sm font-bold text-mute">{label}</span>
       <input
         value={v}
         onChange={(e) => set(e.target.value)}
@@ -335,7 +335,7 @@ function Field({
 function IconField({ v, set }: { v: string; set: (v: string) => void }) {
   return (
     <label className="block">
-      <span className="text-sm font-bold text-gray-500">아이콘</span>
+      <span className="text-sm font-bold text-mute">아이콘</span>
       <span className="mt-1 flex items-center gap-3">
         <span className="flex size-[44px] shrink-0 items-center justify-center rounded-xs border border-gray-200 dark:border-gray-700">
           <Icon name={v} size={20} />
@@ -357,7 +357,7 @@ function IconField({ v, set }: { v: string; set: (v: string) => void }) {
 function Href({ b, set }: { b: HomeBlock; set: (v: string) => void }) {
   return (
     <label className="block">
-      <span className="text-sm font-bold text-gray-500">누르면 갈 곳</span>
+      <span className="text-sm font-bold text-mute">누르면 갈 곳</span>
       <select
         value={b.href ?? ''}
         onChange={(e) => set(e.target.value)}
@@ -383,7 +383,7 @@ function Picture({
 
   return (
     <div>
-      <span className="text-sm font-bold text-gray-500">그림 (없으면 teal 바탕에 글씨만)</span>
+      <span className="text-sm font-bold text-mute">그림 (없으면 teal 바탕에 글씨만)</span>
       <div className="mt-2 flex flex-wrap items-center gap-3">
         {url && (
           // eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다
@@ -392,7 +392,7 @@ function Picture({
         <PhotoPicker label={url ? '그림 바꾸기' : '그림 넣기'} onPick={(f) => onUpload(b, f)} />
         {url && (
           <button type="button" onClick={onClear}
-            className="text-sm text-gray-500 hover:underline">
+            className="text-sm text-mute hover:underline">
             그림 빼기 (저장을 눌러야 적용돼요)
           </button>
         )}

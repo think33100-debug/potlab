@@ -67,7 +67,7 @@ export function AdminTabCards() {
   return (
     <section className="mb-8">
       <h2 className="break-keep text-h3 font-bold">분류 카드 그림</h2>
-      <p className="mt-1 break-keep text-sm text-gray-500">
+      <p className="mt-1 break-keep text-sm text-mute">
         공고 목록 맨 위에 옆으로 밀리는 카드입니다. 이름과 가는 곳은 코드에 있어서
         여기서는 그림만 바꿉니다
       </p>
@@ -95,7 +95,7 @@ export function AdminTabCards() {
                 />
                 {url && (
                   <button type="button" onClick={() => put(t.key, null)}
-                    className="text-sm text-gray-500 hover:underline">
+                    className="text-sm text-mute hover:underline">
                     그림 빼기
                   </button>
                 )}
