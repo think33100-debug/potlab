@@ -161,81 +161,52 @@ history -c && history -w
 
 ---
 
-## 7. 서버에 못 들어가고 있습니다 — 브라우저로 하는 법 (2026-10-04)
+## 7. 서버 접속 — 풀렸습니다 (2026-10-04 정정)
 
-제가 서버에 `ssh` 로 못 들어갑니다. 재 본 것 —
-
-```
-키 파일   ~/.ssh/LightsailDefaultKey-ap-northeast-2.pem
-          (OneDrive\바탕 화면\potjob-keys\ 에도 같은 파일이 있습니다 — 지문 같음)
-키 상태   멀쩡합니다. ssh-keygen 이 공개키를 뽑아냅니다 (RSA 2048)
-          지문 SHA256:gDEVFVtHj04yHxNF/SFmR3uZqXDEV7goMO2/cYlNeaM
-
-ssh -v 인증 단계
-  debug1: Will attempt key: …LightsailDefaultKey-ap-northeast-2.pem  explicit
-  debug1: Trying private key: …LightsailDefaultKey-ap-northeast-2.pem
-  debug1: Authentications that can continue: publickey
-  debug1: No more authentication methods to try.
-  ubuntu@…: Permission denied (publickey).
-```
-
-**키를 읽어서 서버에 내밀었는데 서버가 안 받습니다.** 키 파일 문제가
-아닙니다. 사용자 이름 넷(`ubuntu` `admin` `ec2-user` `bitnami`)을 다 해 봤고
-전부 같은 거절입니다. 호스트 키는 `known_hosts` 와 맞습니다(= 서버는 맞습니다).
-
-> 왜 그런지는 **짐작하지 않겠습니다.** 서버 쪽 `~/.ssh/authorized_keys` 를
-> 봐야 알 수 있는데 그걸 보려면 들어가야 해서 닭과 달걀입니다.
-
-### 그래서 브라우저로 하십시오
-
-Lightsail 은 브라우저 안에서 터미널을 띄워 줍니다. 키가 필요 없습니다.
+앞서 「서버가 키를 거절한다」고 적은 것은 **틀렸습니다.**
+제가 **엉뚱한 서버**에 접속하고 있었습니다.
 
 ```
-1. lightsail.aws.amazon.com 로그인
-2. 인스턴스 목록에서 우리 서버를 고릅니다
-3. 오른쪽 위 「Connect using SSH」(브라우저로 연결) 단추
-4. 검은 화면이 뜨면 아래를 그대로 칩니다
+known_hosts 줄 차례
+  1) 54.117.2.213   ← 우리 서버가 아닙니다
+  2) 15.164.3.222   ← potjob-collector (진짜)
+  3) 15.164.3.222
+  4) 15.164.3.222
+
+제가 쓴 명령   cut -d' ' -f1 ~/.ssh/known_hosts | head -1   →   54.117.2.213
 ```
 
-**① 크론 시각 보기** (제가 크론 안을 확정하려면 이게 필요합니다)
+IP 를 화면에 안 찍으려고 `head -1` 로 집었는데 그 첫 줄이 남의 주소였습니다.
+앞서 「호스트 키가 known_hosts 와 맞으니 서버는 맞다」고 한 것도 틀린 셈입니다 —
+**아는 호스트라는 것과 올바른 호스트라는 것은 다릅니다.**
+
+`ubuntu@15.164.3.222` 로는 **한 번에 들어갔습니다** (`ip-172-26-15-202`).
+그래서 이 문서의 2~4번(세중님이 손으로 넣는 법)은 **이제 안 하셔도 됩니다.**
+제가 넣었습니다 —
+
+```
+서버 ~/potlab/.env    줄 27 → 29 · 이름표 24 → 26
+  YOUTH_KEY           길이 36   sha256 394352ba…   (내 쪽과 같음)
+  COLLECT_KEY_EDU     길이 44   sha256 c9eb0f46…   (내 쪽과 같음)
+서버에서 두드린 결과    HTTP 200 · resultCode 200 · totCount 3,150
+~/.bash_history 에 열쇠  0줄 (값을 표준입력으로만 보냈습니다)
+백업                   .env.bak_… 를 먼저 떴습니다
+```
+
+> 길이를 `awk -F=` 로 셌더니 44 가 아니라 43 으로 나와 놀랐습니다.
+> base64 열쇠 끝의 `=` 에서 잘린 것이었습니다 — 열쇠가 잘린 게 아닙니다.
+> sha256 지문으로 다시 재서 양쪽이 같은 것을 확인했습니다.
+
+---
+
+## 8. 치울 것 — 남의 주소
+
+`known_hosts` 의 `54.117.2.213` 은 우리 서버가 아닙니다.
+두면 또 같은 실수를 합니다. 지울 때는 —
 
 ```bash
-crontab -l
+ssh-keygen -R 54.117.2.213
 ```
 
-나온 줄을 **통째로** 복사해 주십시오. 잘라서 주시면 또 헛짚습니다.
-
-**② YOUTH_KEY 넣기**
-
-```bash
-cp ~/potlab/.env ~/potlab/.env.백업_$(date +%Y%m%d_%H%M%S)
-nano ~/potlab/.env
-```
-
-맨 아래로 내려가(`Ctrl+End`) 한 줄 붙여넣고 —
-
-```
-YOUTH_KEY=여기에열쇠36글자
-```
-
-저장 `Ctrl+O` → `Enter` → 나가기 `Ctrl+X`
-
-**③ 들어갔는지 확인** (값은 안 보입니다)
-
-```bash
-grep -c '^YOUTH_KEY=' ~/potlab/.env
-awk -F= '/^YOUTH_KEY=/{print "길이", length($2)}' ~/potlab/.env
-```
-
-`1` 과 `길이 36` 이 나오면 됩니다.
-
-**④ 제 접속이 왜 막혔는지 보려면** (하시는 김에)
-
-```bash
-wc -l ~/.ssh/authorized_keys
-ssh-keygen -lf ~/.ssh/authorized_keys
-```
-
-나온 지문이 위에 적은 `SHA256:gDEV…` 와 **같은지만** 알려 주십시오.
-다르면 서버에 다른 키가 걸려 있는 것이고, 같으면 다른 까닭을 더 찾겠습니다.
-(열쇠 값 자체는 보내지 마십시오. 지문만으로 충분합니다)
+**제가 지우지 않았습니다** — 세중님의 다른 작업에서 쓰는 주소일 수도 있어
+먼저 여쭙습니다.
