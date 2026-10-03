@@ -46,6 +46,7 @@ export function ListFilters({
   시도들 = [],
   직군숨김 = false,
   지역숨김 = false,
+  마감숨김 = false,
   마감말 = '마감된 것도',
   기본직군 = null,
   역할 = null,
@@ -60,6 +61,8 @@ export function ListFilters({
   시도들?: readonly string[];
   직군숨김?: boolean;
   지역숨김?: boolean;
+  /* 교육기관 화면처럼 마감 개념이 없는 곳에서 체크박스를 숨깁니다 */
+  마감숨김?: boolean;
   마감말?: string;
   /* 회원이 가입 때 고른 직군. 주소에 job 이 없을 때 **이것이 골라진 것처럼**
      보입니다. 비로그인이면 null 이라 「전체」가 됩니다 */
@@ -148,6 +151,7 @@ export function ListFilters({
         </label>
       )}
 
+      {!마감숨김 && (
       <label className="flex cursor-pointer items-center gap-2 text-lg text-body">
         <input
           type="checkbox"
@@ -157,6 +161,7 @@ export function ListFilters({
         />
         {마감말}
       </label>
+      )}
 
       {/* 비로그인에게 「기본이 내 직군」이라고 말해 두지 않으면,
           왜 작업치료사만 보이는지 모른 채 헤맵니다 */}

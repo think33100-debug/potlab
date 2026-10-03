@@ -166,6 +166,12 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
       <p className="mt-2 break-keep text-lg text-mute">
         학회 교육과정과 학술대회입니다. <b>신청은 각 학회에서</b> 합니다
       </p>
+      <p className="mt-2">
+        <Link href="/edu/org"
+          className="text-lg font-bold text-brand-red underline underline-offset-4">
+          교육기관으로 보기 ›
+        </Link>
+      </p>
 
       {/* 직군 줄 */}
       {/* 거르기 줄 — 채용공고와 같은 부품입니다 (2026-10-04 세중님 결정).
