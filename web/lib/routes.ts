@@ -15,6 +15,7 @@ export const ROUTES: { href: string; label: string; soon?: string }[] = [
   { href: '/spec',               label: '스펙쌓기' },
   { href: '/orgs',               label: '병원정보 찾기' },
   { href: '/volunteer',          label: '봉사활동 찾기' },
+  { href: '/edu',                label: '교육·학술' },
   { href: '/tools',              label: '계산기' },
 ];
 

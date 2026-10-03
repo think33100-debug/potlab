@@ -61,6 +61,42 @@ export default async function Home() {
             </div>
           )}
 
+          {/* ②-2 아래 줄 — **코드**에 둡니다 (2026-10-03 세중님 지시).
+
+              위 다섯 칸은 DB(home_blocks)에서 오고 관리자가 고칩니다.
+              여기는 거기에 **섞지 않습니다** — 다섯 칸을 건드리지 말라는
+              지시가 있었고, 섞으면 관리자가 실수로 지울 수 있습니다.
+
+              청년정책은 아직 없습니다. 온통청년 열쇠가 무효가 되어
+              (2026-10-03 · HTTP 403 invalid api key) 자료가 한 건도
+              없습니다. 열쇠를 다시 받으면 **아래 배열에 한 줄** 더하면 됩니다.
+              없는 화면으로 보내지 않으려고 일부러 비워 둡니다. */}
+          <div className="pt-8">
+            <nav aria-label="더 찾아보기">
+              <h2 className="text-sm font-bold text-mute">더 찾아보기</h2>
+              <ul className="mt-3 grid grid-cols-2 gap-2">
+                {[
+                  { href: '/edu', icon: 'graduation-cap', title: '교육·학술',
+                    sub: '학회 교육과정·학술대회' },
+                ].map((x) => (
+                  <li key={x.href}>
+                    <Link
+                      href={safeHref(x.href)}
+                      className="flex h-full items-center gap-3 rounded-sm border border-line
+                                 bg-card px-5 py-5 hover:bg-paper"
+                    >
+                      <Icon name={x.icon} size={22} className="shrink-0 text-ink" />
+                      <span className="min-w-0">
+                        <span className="block text-body-lg font-bold text-ink">{x.title}</span>
+                        <span className="block break-keep text-sm text-mute">{x.sub}</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+
           {/* ③ 큰 배너 — DB.
 
               한 번 세로로 쌓았다가(카드가 76% 라 옆 카드가 반씩 잘려
