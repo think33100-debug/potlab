@@ -604,6 +604,25 @@ if (dry) {
           날짜섞임: 셈.날짜섞임, 기호겹침: 셈.기호겹침, 지역고침: 셈.지역고침 } },
     });
   } catch (e) { console.error('박동 못 남김 · ' + String(e.message).slice(0, 120)); }
+
+  /* ── 덧갈래 박동 (2026-10-04 세중님 지시) ──────────────────────
+     덧갈래 크론(`워크넷덧크론.sh`)은 탈나면 **제 crontab 줄만 스스로 끕니다.**
+     그러면 조용히 멈추고 아무도 모릅니다.
+
+     그래서 `--덧` 으로 돌 때마다 **따로 박동을 남깁니다**(경로 WNX).
+     크론이 스스로 꺼지면 박동이 끊기고, `beat_health()` 가 평소 간격의
+     2배를 넘긴 것을 보고 관리자 화면(/admin/beat)에 **빨간 줄**을 띄웁니다.
+     새 화면을 만들 필요가 없습니다 — 이미 있는 장치를 쓰는 것입니다. */
+  if (덧켬) {
+    try {
+      await rpc('collect_beat', {
+        p_secret: cfg.COLLECT_KEY_WN2, p_source: 'WNX',
+        p_beat: { took_ms: Date.now() - t0, ok: true, 본곳: 덧갈래.length,
+          담음: 셈.회원 + 셈.보류, 보류: 셈.보류,
+          메모: { 덧갈래수: 덧갈래.length, 읽은줄: 셈.읽은줄 } },
+      });
+    } catch (e) { console.error('덧갈래 박동 못 남김 · ' + String(e.message).slice(0, 120)); }
+  }
 }
 
 if (한줄) {
