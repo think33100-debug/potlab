@@ -79,6 +79,10 @@ export default async function Home() {
                 {[
                   { href: '/edu', icon: 'graduation-cap', title: '교육·학술',
                     sub: '학회 교육과정·학술대회' },
+                  /* 아이콘은 components/icon.tsx 에 있는 것만 씁니다 —
+                     없는 이름을 적으면 기본 아이콘으로 떨어집니다 */
+                  { href: '/youth', icon: 'list-checks', title: '청년정책',
+                    sub: '취업·교육비·주거 지원' },
                 ].map((x) => (
                   <li key={x.href}>
                     <Link
