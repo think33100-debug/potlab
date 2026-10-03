@@ -1,0 +1,78 @@
+-- ════════════════════════════════════════════════════════════════
+--  100줄 한도 고침 — **되돌리기** (2026-10-04)
+--  짝: sql/2026-10-04_백줄한도_준비.sql
+-- ════════════════════════════════════════════════════════════════
+--
+--  준비 SQL 을 올렸다가 뭔가 잘못되면 이 파일로 되돌립니다.
+--  옛 정의는 **이미 떠 두었습니다** —
+--
+--    2026-10-03 13:48 (UTC) 에 `함수사본` 에 다섯 줄을 넣었습니다
+--      admin_신고목록("p_처리전만" boolean)   2,506자
+--      admin_접속기록()                      975자
+--      admin_회원목록()                    1,370자
+--      admin_회원표(p_ids uuid[])            773자
+--      공개공고()                          1,062자
+--
+--  ── 되돌리는 법 ──────────────────────────────────────────────
+--  ① 먼저 무엇이 들어 있는지 봅니다
+--
+--     select 이름, 때, length(정의)
+--       from 함수사본
+--      where 이름 like 'admin_접속기록%' or 이름 like 'admin_회원%'
+--         or 이름 like 'admin_신고목록%' or 이름 like '공개공고%'
+--      order by 때 desc;
+--
+--  ② 되돌릴 함수의 **옛 정의 글**을 꺼내 그대로 실행합니다
+--
+--     select 정의 from 함수사본
+--      where 이름 like 'admin_접속기록%'
+--      order by 때 desc limit 1;
+--
+--     ↑ 나온 `CREATE OR REPLACE FUNCTION …` 을 복사해 그대로 돌리면
+--       옛 모습으로 돌아갑니다.
+--
+--  ③ ★ 인자가 바뀐 함수는 **새 인자 꼴을 지워야** 합니다.
+--     안 그러면 같은 이름이 둘이 되어 PostgREST 가 헷갈립니다.
+--
+--     drop function if exists admin_접속기록(int);
+--     drop function if exists admin_회원목록(int);
+--     drop function if exists admin_회원표(uuid[], int);
+--     -- admin_신고목록 · 공개공고 는 인자를 바꾸지 않았다면 지울 것이 없습니다
+--
+--     ⚠ 이 drop 은 **새로 만든 꼴만** 지웁니다. 옛 꼴(인자 없는 것)은
+--       그대로 둡니다. 지우기 전에 아래로 두 꼴이 다 있는지 꼭 보십시오 —
+--
+--       select p.proname, pg_get_function_identity_arguments(p.oid)
+--         from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+--        where n.nspname = 'public'
+--          and p.proname in ('admin_접속기록','admin_회원목록','admin_회원표');
+--
+--  ④ 권한을 다시 줍니다 (함수를 다시 만들면 권한이 따라오지 않습니다)
+--
+--     revoke all on function admin_접속기록() from anon, authenticated, public;
+--     revoke all on function admin_회원목록() from anon, authenticated, public;
+--     revoke all on function admin_회원표(uuid[]) from anon, authenticated, public;
+--     grant execute on function admin_접속기록() to authenticated;
+--     grant execute on function admin_회원목록() to authenticated;
+--     grant execute on function admin_회원표(uuid[]) to authenticated;
+--     grant execute on function 공개공고() to anon, authenticated;
+--
+--  ⑤ 화면도 같이 되돌려야 합니다
+--     쪽을 넘기게 고친 화면이 옛 함수를 부르면 「인자가 없다」로 깨집니다.
+--       web/app/admin/access/page.tsx · members · posts · reports
+--     git 으로 그 커밋만 되돌리면 됩니다.
+--
+--  ── 올리는 차례 (세중님 지시) ────────────────────────────────
+--  ① admin_접속기록 **하나만** 올리고 /admin/access 를 눌러 확인
+--  ② 괜찮으면 나머지 넷
+--  ③ 공개공고 는 올린 뒤 **「비로그인_공고수」(지금 10)가 그대로 지켜지는지**
+--     꼭 봅니다 —
+--
+--     select (select value from site_settings where key='비로그인_공고수') as 설정값,
+--            (select count(*) from 공개공고()) as 실제줄수,
+--            (select 보여주는수 from 공개공고() limit 1) as 화면에말하는수;
+--
+--     셋이 10 · 10 · 10 으로 같아야 합니다.
+--     (설정값이 -1 이나 100 보다 크면 100 으로 묶이게 고쳤습니다.
+--      지금 10 이므로 바뀌는 것이 없어야 합니다)
+-- ════════════════════════════════════════════════════════════════

@@ -158,3 +158,84 @@ history -c && history -w
 > 쪽에 눈으로 보이는 「요청 예시」는 **옛 주소(`/opi/youthPlcyList.do` ·
 > `openApiVlak`)가 그대로 남아 있는 묵은 글**입니다. 그걸 따라가면 400 입니다.
 > 그래서 쪽을 읽는 대신 창구에 직접 물어 맞췄습니다.
+
+---
+
+## 7. 서버에 못 들어가고 있습니다 — 브라우저로 하는 법 (2026-10-04)
+
+제가 서버에 `ssh` 로 못 들어갑니다. 재 본 것 —
+
+```
+키 파일   ~/.ssh/LightsailDefaultKey-ap-northeast-2.pem
+          (OneDrive\바탕 화면\potjob-keys\ 에도 같은 파일이 있습니다 — 지문 같음)
+키 상태   멀쩡합니다. ssh-keygen 이 공개키를 뽑아냅니다 (RSA 2048)
+          지문 SHA256:gDEVFVtHj04yHxNF/SFmR3uZqXDEV7goMO2/cYlNeaM
+
+ssh -v 인증 단계
+  debug1: Will attempt key: …LightsailDefaultKey-ap-northeast-2.pem  explicit
+  debug1: Trying private key: …LightsailDefaultKey-ap-northeast-2.pem
+  debug1: Authentications that can continue: publickey
+  debug1: No more authentication methods to try.
+  ubuntu@…: Permission denied (publickey).
+```
+
+**키를 읽어서 서버에 내밀었는데 서버가 안 받습니다.** 키 파일 문제가
+아닙니다. 사용자 이름 넷(`ubuntu` `admin` `ec2-user` `bitnami`)을 다 해 봤고
+전부 같은 거절입니다. 호스트 키는 `known_hosts` 와 맞습니다(= 서버는 맞습니다).
+
+> 왜 그런지는 **짐작하지 않겠습니다.** 서버 쪽 `~/.ssh/authorized_keys` 를
+> 봐야 알 수 있는데 그걸 보려면 들어가야 해서 닭과 달걀입니다.
+
+### 그래서 브라우저로 하십시오
+
+Lightsail 은 브라우저 안에서 터미널을 띄워 줍니다. 키가 필요 없습니다.
+
+```
+1. lightsail.aws.amazon.com 로그인
+2. 인스턴스 목록에서 우리 서버를 고릅니다
+3. 오른쪽 위 「Connect using SSH」(브라우저로 연결) 단추
+4. 검은 화면이 뜨면 아래를 그대로 칩니다
+```
+
+**① 크론 시각 보기** (제가 크론 안을 확정하려면 이게 필요합니다)
+
+```bash
+crontab -l
+```
+
+나온 줄을 **통째로** 복사해 주십시오. 잘라서 주시면 또 헛짚습니다.
+
+**② YOUTH_KEY 넣기**
+
+```bash
+cp ~/potlab/.env ~/potlab/.env.백업_$(date +%Y%m%d_%H%M%S)
+nano ~/potlab/.env
+```
+
+맨 아래로 내려가(`Ctrl+End`) 한 줄 붙여넣고 —
+
+```
+YOUTH_KEY=여기에열쇠36글자
+```
+
+저장 `Ctrl+O` → `Enter` → 나가기 `Ctrl+X`
+
+**③ 들어갔는지 확인** (값은 안 보입니다)
+
+```bash
+grep -c '^YOUTH_KEY=' ~/potlab/.env
+awk -F= '/^YOUTH_KEY=/{print "길이", length($2)}' ~/potlab/.env
+```
+
+`1` 과 `길이 36` 이 나오면 됩니다.
+
+**④ 제 접속이 왜 막혔는지 보려면** (하시는 김에)
+
+```bash
+wc -l ~/.ssh/authorized_keys
+ssh-keygen -lf ~/.ssh/authorized_keys
+```
+
+나온 지문이 위에 적은 `SHA256:gDEV…` 와 **같은지만** 알려 주십시오.
+다르면 서버에 다른 키가 걸려 있는 것이고, 같으면 다른 까닭을 더 찾겠습니다.
+(열쇠 값 자체는 보내지 마십시오. 지문만으로 충분합니다)
