@@ -37,11 +37,24 @@ export default function AdminMembers() {
   const [연사람, set연사람] = useState<string | null>(null);
   const [속내용, set속내용] = useState<Record<string, unknown> | null>(null);
 
+  /* ★ 한 번에 100줄만 옵니다 — Supabase 가 거기서 자릅니다 (오류도 안 납니다).
+     회원이 101명이 되는 날 조용히 안 보이기 시작합니다.
+     그래서 100줄씩 쪽을 넘겨 받습니다.
+
+     ⚠ `p_page` 를 **반드시 넘겨야** 합니다. 안 넘기면 PostgREST 가
+       인자 없는 옛 판을 부릅니다 (2026-10-04 · 옛 판은 지웠습니다). */
   const load = useCallback(async () => {
-    const { data, error } = await browserSupabase().rpc('admin_회원목록');
-    if (error) { setErr(error.message); setRows([]); return; }
+    const 쪽크기 = 100;
+    const 모두: 줄[] = [];
+    for (let 쪽 = 0; 쪽 < 50; 쪽++) {
+      const { data, error } = await browserSupabase().rpc('admin_회원목록', { p_page: 쪽 });
+      if (error) { setErr(error.message); setRows(모두); return; }
+      const 받은것 = (data ?? []) as 줄[];
+      모두.push(...받은것);
+      if (받은것.length < 쪽크기) break;
+    }
     setErr(null);
-    setRows((data ?? []) as 줄[]);
+    setRows(모두);
   }, []);
 
   useEffect(() => { load(); }, [load]);

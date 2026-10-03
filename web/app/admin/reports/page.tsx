@@ -37,12 +37,24 @@ export default function AdminReports() {
   const [처리전만, set처리전만] = useState(true);
   const [busy, setBusy] = useState<number | null>(null);
 
+  /* ★ 한 번에 100줄만 옵니다 — Supabase 가 거기서 자릅니다 (오류도 안 납니다).
+     신고가 101건이 되는 날 조용히 안 보이기 시작합니다.
+
+     ⚠ `p_page` 를 **반드시 넘겨야** 합니다. 안 넘기면 PostgREST 가
+       `p_처리전만` 만 받는 옛 판을 부릅니다 (2026-10-04 · 옛 판은 지웠습니다). */
   const load = useCallback(async (만: boolean) => {
-    const { data, error } = await browserSupabase()
-      .rpc('admin_신고목록', { p_처리전만: 만 });
-    if (error) { setErr(error.message); setRows([]); return; }
+    const 쪽크기 = 100;
+    const 모두: 줄[] = [];
+    for (let 쪽 = 0; 쪽 < 50; 쪽++) {
+      const { data, error } = await browserSupabase()
+        .rpc('admin_신고목록', { p_처리전만: 만, p_page: 쪽 });
+      if (error) { setErr(error.message); setRows(모두); return; }
+      const 받은것 = (data ?? []) as 줄[];
+      모두.push(...받은것);
+      if (받은것.length < 쪽크기) break;
+    }
     setErr(null);
-    setRows((data ?? []) as 줄[]);
+    setRows(모두);
   }, []);
 
   useEffect(() => { load(처리전만); }, [load, 처리전만]);

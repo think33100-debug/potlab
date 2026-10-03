@@ -50,11 +50,27 @@ export default function AdminAccessLog() {
   const [err, setErr] = useState<string | null>(null);
   const [q, setQ] = useState('');
 
+  /* ★ 한 번에 100줄만 옵니다 — Supabase 가 거기서 자릅니다.
+     limit 을 키워도 안 되고 오류도 안 납니다 (2026-10-04 에 재서 찾았습니다).
+     **개인정보 접속 기록**이라 잘려 보이면 안 되는 자리입니다.
+     그래서 100줄씩 쪽을 넘겨 받습니다. 함수에 p_page 를 더해 뒀습니다.
+
+     ⚠ `p_page` 를 **반드시 넘겨야** 합니다. 안 넘기면 PostgREST 가
+       인자 없는 옛 함수(한 번에 500을 달라다가 100에서 잘리던 것)를
+       부릅니다. 옛 함수는 아직 지우지 않았습니다 — 세중님 결정 대기. */
   const load = useCallback(async () => {
-    const { data, error } = await browserSupabase().rpc('admin_접속기록');
-    if (error) { setErr(error.message); setRows([]); return; }
+    const 쪽크기 = 100;
+    const 최대 = 500;              // 전에 적어 둔 수를 그대로 지킵니다
+    const 모두: 줄[] = [];
+    for (let 쪽 = 0; 쪽 * 쪽크기 < 최대; 쪽++) {
+      const { data, error } = await browserSupabase().rpc('admin_접속기록', { p_page: 쪽 });
+      if (error) { setErr(error.message); setRows(모두); return; }
+      const 받은것 = (data ?? []) as 줄[];
+      모두.push(...받은것);
+      if (받은것.length < 쪽크기) break;
+    }
     setErr(null);
-    setRows((data ?? []) as 줄[]);
+    setRows(모두);
   }, []);
 
   useEffect(() => { load(); }, [load]);

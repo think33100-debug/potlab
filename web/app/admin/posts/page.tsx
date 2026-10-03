@@ -66,16 +66,51 @@ export default function AdminPosts() {
      (app/admin/page.tsx 와 같은 방식) */
   const fetchAll = useCallback(async (s: State) => {
     const sb = browserSupabase();
-    let q = sb.from('posts').select(COLS).order('id', { ascending: false }).limit(200);
-    if (s === 'live') q = q.eq('hidden', false);
-    if (s === 'hidden') q = q.eq('hidden', true);
+
+    /* ★ 한 번에 100줄만 옵니다 — Supabase 가 거기서 자릅니다.
+       `.limit(200)` 이라고 적혀 있어도 200이 오지 않고, 오류도 안 납니다.
+       글이 101개가 되는 날 조용히 안 보이기 시작합니다 (2026-10-04 에 찾음).
+       그래서 100줄씩 이어 받습니다. 200은 전에 적어 둔 수를 그대로 지킨 것입니다 */
+    const 글받기 = async () => {
+      const 쪽크기 = 100, 최대 = 200;
+      const 모두: Row[] = [];
+      for (let off = 0; off < 최대; off += 쪽크기) {
+        let q = sb.from('posts').select(COLS).order('id', { ascending: false })
+          .range(off, off + 쪽크기 - 1);
+        if (s === 'live') q = q.eq('hidden', false);
+        if (s === 'hidden') q = q.eq('hidden', true);
+        const { data, error } = await q;
+        if (error) return { data: 모두, error };
+        const 받은것 = (data ?? []) as unknown as Row[];
+        모두.push(...받은것);
+        if (받은것.length < 쪽크기) break;
+      }
+      return { data: 모두, error: null };
+    };
+
+    /* 회원 이름표도 100에서 잘립니다.
+       ⚠ `p_page` 를 **반드시 넘겨야** 새 판이 불립니다 (옛 판은 2026-10-04 에 지웠습니다).
+       ponytail: 지금은 회원이 적어 쪽을 다 돌지만, 회원이 많아지면
+       글 목록의 author_id 만 `p_ids` 로 넘기는 쪽이 낫습니다 (함수가 이미 받습니다) */
+    const 이름표받기 = async () => {
+      const 쪽크기 = 100;
+      const 모두: { id: string; 이름표: string }[] = [];
+      for (let 쪽 = 0; 쪽 < 50; 쪽++) {
+        const { data, error } = await sb.rpc('admin_회원표', { p_ids: null, p_page: 쪽 });
+        if (error) return { data: 모두, error };
+        const 받은것 = (data ?? []) as { id: string; 이름표: string }[];
+        모두.push(...받은것);
+        if (받은것.length < 쪽크기) break;
+      }
+      return { data: 모두, error: null };
+    };
 
     const [list, live, hidden, all, people] = await Promise.all([
-      q,
+      글받기(),
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('hidden', false),
       sb.from('posts').select('id', { count: 'exact', head: true }).eq('hidden', true),
       sb.from('posts').select('id', { count: 'exact', head: true }),
-      sb.rpc('admin_회원표'),
+      이름표받기(),
     ]);
 
     const 표: Record<string, string> = {};
