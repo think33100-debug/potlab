@@ -318,6 +318,25 @@ export function 그누보드표(html, 출처, 꼬리, 직군) {
   return out;
 }
 
+/* 상세 글에서 **올린 날**을 꺼냅니다 (2026-10-03 밤).
+
+   정형도수·칼텐본은 목록에 날짜를 「09-28」처럼 해 없이 적습니다.
+   그런데 **상세 글에는 해가 있습니다** — 「26-09-28 12:48」.
+
+   ★ 아무 데서나 긁으면 안 됩니다. 같은 쪽에 **댓글 날짜**도 같은 꼴로
+     있습니다 (정형도수 2727번은 글 26-08-23, 댓글 26-09-21).
+     댓글 날짜는 `bo_vc_hdinfo` 안에 있고, 글 날짜는 `bo_v_info` 칸의
+     「작성일」 바로 뒤 <strong> 입니다. 그 칸 안에서만 찾습니다. */
+export function 상세날짜(html) {
+  const i = html.search(/id="bo_v_info"/);
+  if (i < 0) return '';
+  /* 그 칸이 끝나는 곳까지만 봅니다 — 댓글 쪽으로 넘어가지 않게 */
+  const 칸 = html.slice(i, i + 4000).split(/<\/section>/)[0];
+  const m = 칸.match(/작성일<\/span>\s*<strong>([^<]*)<\/strong>/)
+    || 칸.match(/작성일\s*<strong>([^<]*)<\/strong>/);
+  return m ? 날짜꼴(글만(m[1])) : '';
+}
+
 /* ⑧ 대한PNF학회 — 글 주소가 /notice/105 꼴입니다 */
 export function pnf(html) {
   const out = [];
@@ -491,6 +510,21 @@ if (시험) {
     (그누보드표(kao2, '대한정형도수물리치료학회', '정형도수', '물리치료사')[0] || {}).제목,
     '26년 제26차 정형도수전문물리치료사 자격시험 공고');
 
+  console.log('\n상세 글에서 해 찾기 — 댓글 날짜에 안 속는지');
+  /* 정형도수 2727번 원문 꼴: 글은 26-08-23, 댓글은 26-09-21 입니다 */
+  const 상세 = `<section id="bo_v_info"><h2>페이지 정보</h2>
+    작성자 <strong><span class="sv_member">관리자</span></strong>
+    <span class="sound_only">작성일</span><strong>26-08-23 11:24</strong>
+    조회<strong>506회</strong>댓글<strong>1건</strong>
+    </section><!-- 댓글 -->
+    <span class="bo_vc_hdinfo"><time datetime="2026-09-21T16:18:00+09:00">26-09-21 16:18</time></span>`;
+  봐('글 날짜를 집는지 (댓글 아님)', 상세날짜(상세), '2026-08-23');
+  봐('칼텐본 2024년 글', 상세날짜('<section id="bo_v_info">작성자 <strong>관리자</strong>'
+    + '<span class="sound_only">작성일</span><strong>24-01-15 09:45</strong></section>'), '2024-01-15');
+  봐('칼텐본 2020년 글', 상세날짜('<section id="bo_v_info">'
+    + '<span class="sound_only">작성일</span><strong>20-02-06 15:21</strong></section>'), '2020-02-06');
+  봐('그 칸이 없으면 빈 값', 상세날짜('<div>아무것도 없음</div>'), '');
+
   console.log('\n칼텐본 지회 — 해 없는 날짜(01-15)를 지어내지 않는지');
   const kal = `<tr class="bo_notice"><td class="td_num"><strong>공지</strong></td>
     <td class="td_subject"><a href="http://kaltenbornevjenthomt.co.kr/2016/bbs/board.php?bo_table=education02&amp;wr_id=179">
@@ -575,6 +609,62 @@ for (const x of 곳) {
 
 /* 번호가 같은 것은 뒤에 온 것으로 (같은 글이 두 게시판에 걸릴 때) */
 const 하나씩 = [...new Map(모두.map((x) => [x.번호, x])).values()];
+
+/* ── 해 없는 날짜 메우기 (2026-10-03 밤) ──────────────────────────
+   정형도수·칼텐본은 목록에 「09-28」처럼 해를 안 적습니다.
+   상세 글에는 「26-09-28 12:48」로 해가 있어서, **날짜가 빈 줄만**
+   상세를 한 번 열어 채웁니다.
+
+   ★ 이미 날짜를 알아낸 줄은 다시 안 엽니다 — 표에서 먼저 물어봅니다.
+     안 그러면 크론이 돌 때마다 쉰 번씩 남의 서버를 두드립니다. */
+const 날짜없는것 = 하나씩.filter((x) => !x.올린날 && !x.시작 && /wr_id=\d+/.test(x.링크));
+if (날짜없는것.length && !process.argv.includes('--상세없이')) {
+  const URL0 = cfg.SUPABASE_URL || cfg.NEXT_PUBLIC_SUPABASE_URL;
+  const SK0 = cfg.SUPABASE_SERVICE_KEY;
+  /* ★ 전에 알아낸 날짜를 **그대로 들고 옵니다.**
+     처음에는 「아는 것은 건너뛰기」만 했는데, 그러면 그 줄의 올린날이 빈
+     채로 다시 담겨 **표에 있던 날짜를 null 로 덮어썼습니다**
+     (교육담기 가 `올린날 = excluded.올린날` 이라 빈 값도 그대로 들어갑니다).
+     2026-10-03 밤에 두 번 돌려 보고 잡았습니다. 건너뛰려면 값을 가져와야 합니다 */
+  /* ★ 쪽을 넘겨 가며 받습니다. PostgREST 가 **100줄에서 자릅니다** —
+     `limit=5000` 을 붙여도 서버 쪽 max-rows 가 이깁니다.
+     이걸 몰랐을 때 102줄 중 100줄만 받아, 남은 2줄을 날마다 다시
+     열고 있었습니다 (2026-10-03 밤에 세어 보고 잡았습니다).
+     이 프로젝트에서 같은 한도에 걸린 게 두 번째입니다 — 봉사목록 도 그랬습니다 */
+  let 아는날짜 = new Map();
+  if (URL0 && SK0) {
+    try {
+      for (let off = 0; ; off += 100) {
+        const r = await fetch(URL0 + '/rest/v1/' + encodeURIComponent('교육')
+          + '?select=' + encodeURIComponent('번호,올린날')
+          + '&' + encodeURIComponent('올린날') + '=not.is.null'
+          + '&order=' + encodeURIComponent('번호') + '&limit=100&offset=' + off,
+          { headers: { apikey: SK0, Authorization: 'Bearer ' + SK0 } });
+        if (!r.ok) break;
+        const 쪽 = await r.json();
+        for (const x of 쪽) 아는날짜.set(x.번호, x.올린날);
+        if (쪽.length < 100) break;
+      }
+    } catch { /* 못 물어보면 그냥 다 엽니다 */ }
+  }
+  const 열것 = [];
+  for (const x of 날짜없는것) {
+    const 전에 = 아는날짜.get(x.번호);
+    if (전에) x.올린날 = 전에;        // 들고 옵니다 — 덮어쓰기 사고 막기
+    else 열것.push(x);
+  }
+  console.log('\n해 없는 날짜 ' + 날짜없는것.length + '건 중 ' + 열것.length
+    + '건을 상세로 확인합니다 (전에 알아낸 ' + (날짜없는것.length - 열것.length) + '건은 그 값을 씁니다)');
+  let 찾음 = 0;
+  for (const x of 열것) {
+    const r = await 받기(x.링크, x.번호);
+    if (r.오류) { console.log('   · ' + x.번호 + ' 못 받음: ' + r.오류); continue; }
+    const d = 상세날짜(r.html);
+    if (d) { x.올린날 = d; 찾음++; }
+    await new Promise((s) => setTimeout(s, 700));   // 남의 서버에 부담 안 주려고
+  }
+  console.log('   해를 찾은 것 ' + 찾음 + '건 · 못 찾은 것 ' + (열것.length - 찾음) + '건(비워 둡니다)');
+}
 console.log('\n모두 ' + 하나씩.length + '건 · 출처 ' + new Set(하나씩.map((x) => x.출처)).size + '곳');
 for (const [s, n] of Object.entries(하나씩.reduce((a, x) => ((a[x.출처] = (a[x.출처] || 0) + 1), a), {})))
   console.log('   ' + String(n).padStart(3) + '  ' + s);
