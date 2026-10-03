@@ -45,6 +45,39 @@ const 부르기 = async (action, args) => {
 console.log('옛 앱 건강 확인 · ' + new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }));
 console.log('');
 
+/* ★ 옛 앱 앞문이 **둘**입니다 (2026-10-03 에 호되게 배웠습니다)
+ *
+ *    앱스 스크립트  script.google.com/macros/s/…/exec   ← 아래 ①②③
+ *    GitHub Pages   potjob.co.kr                        ← 아래 ④
+ *                   저장소 뿌리 index.html 을 그대로 내줍니다
+ *
+ *  10/1 에 index.html 에 박아 둔 「이사 안내 띠」가 심사 기간에 떠 있었는데,
+ *  제가 앱스 스크립트 쪽만 두드려서 「공지 없음」이라고 보고했습니다.
+ *  **두 앞문을 다 봐야 합니다.** */
+const 페이지확인 = async () => {
+  const r = await fetch('https://potjob.co.kr/?cb=' + Date.now(), { redirect: 'follow' });
+  const h = await r.text();
+  /* 심사 기간에 떠 있으면 안 되는 것들 */
+  const 띠 = [
+    ['이사 안내 띠 (movedNotice)', /movedNotice/],
+    ['「새 주소로 옮겼습니다」', /새 주소로 옮겼/],
+    ['「다시 가입해 주세요」', /다시 가입해 주세요/],
+  ].filter(([, re]) => re.test(h));
+  console.log('  ④ GitHub Pages (potjob.co.kr)    HTTP ' + r.status
+    + ' · ' + h.length + '글자');
+  if (띠.length) {
+    console.log('      ★★ 심사 중에 떠 있으면 안 되는 것이 보입니다 —');
+    for (const [이름] of 띠) console.log('         · ' + 이름);
+  } else {
+    console.log('      올라와 있으면 안 되는 띠·공지 없습니다');
+  }
+  /* 화면이 제대로 그려지는지 — 맨 위 글 */
+  const i = h.indexOf('<body>');
+  const t = h.slice(i, i + 700).replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  console.log('      맨 위 글 — ' + t.slice(0, 60));
+};
+
 for (const [이름, action, args] of [
   ['① 시트 읽기 (exportRows)', 'exportRows', [c.EXPORT_KEY, '채용공고', 0, 1]],
   ['② 시트 상태 (healthCheck)', 'healthCheck', [c.EXPORT_KEY]],
@@ -62,3 +95,5 @@ for (const [이름, action, args] of [
     console.log('  ' + 이름.padEnd(32) + '★ 못 불렀습니다 — ' + String(e.message).slice(0, 80));
   }
 }
+
+await 페이지확인();
