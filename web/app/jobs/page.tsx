@@ -2,11 +2,12 @@ import Link from 'next/link';
 import { Hit } from '@/components/hit';
 import { Icon } from '@/components/icon';
 import { JobTabs } from '@/components/job-tabs';
+import { ListFilters } from '@/components/list-filters';
 import { MembersOnly } from '@/components/members-only';
 import { jobViews } from '@/lib/job-views';
 import { SIDOS } from '@/lib/org';
 import { supabase, TABS, tabLabel, type JobListItem, type 맛보기공고 } from '@/lib/supabase';
-import { serverSupabase } from '@/lib/supabase-server';
+import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { OrgCard } from '../org-card';
 
 export const dynamic = 'force-dynamic';   // 공고는 자주 바뀝니다
@@ -48,7 +49,9 @@ function dday(to: string | null) {
 }
 
 type SP = {
-  job?: string; sido?: string; all?: string; tab?: string;
+  /* `all` 은 옛 이름입니다. 2026-10-04 에 네 화면을 `past` 로 맞췄는데,
+     밖에 나간 링크가 깨지지 않게 **둘 다 읽습니다** */
+  job?: string; sido?: string; all?: string; past?: string; tab?: string;
   q?: string; sort?: string; p?: string;
 };
 
@@ -64,13 +67,28 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
   /* 쿠키에 실려 온 세션으로 읽습니다. 로그인 안 했으면 job_list 가 거절합니다 */
   const sb = await serverSupabase();
 
+  /* 마감된 것도 보기 — `past` 가 새 이름, `all` 은 옛 이름입니다 (둘 다 읽습니다) */
+  const 지난것 = sp.past === '1' || !!sp.all;
+
+  /* 직군 기본값 = 회원이 가입 때 고른 직군 (세중님 결정 2026-10-04).
+     비로그인은 null 이라 「전체」가 됩니다.
+     ★ 주소에 job 이 있으면 **그것이 먼저**입니다 — 회원이 「전체」를 골랐는데
+       가입 직군으로 되돌리면 고른 것이 무시됩니다. 그래서 `'전체'` 라는
+       또렷한 값을 따로 둡니다 */
+  let 내직군: string | null = null;
+  if (await serverWho(sb) === '회원') {
+    const { data } = await sb.from('profiles').select('job_group').limit(1).maybeSingle();
+    내직군 = (data as { job_group?: string | null } | null)?.job_group ?? null;
+  }
+  const 고른직군 = sp.job === '전체' ? null : (sp.job ?? 내직군);
+
   const [list, counts, cards] = await Promise.all([
     sb.rpc('job_list', {
-      p_job: sp.job ?? null,
+      p_job: 고른직군,
       p_sido: sp.sido ?? null,
       p_tab: active?.like ?? null,
       p_q: q || null,
-      p_all: !!sp.all,
+      p_all: 지난것,
       p_sort: sp.sort ?? null,
       p_page: page,
     }),
@@ -78,7 +96,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       p_job: sp.job ?? null,
       p_sido: sp.sido ?? null,
       p_q: q || null,
-      p_all: !!sp.all,
+      p_all: 지난것,
       p_tabs: TABS.map((t) => t.like),
     }),
     /* 분류 카드 그림은 누구나 봅니다 (관리자가 올린 그림 경로뿐입니다) */
@@ -190,25 +208,19 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
         />
       )}
 
-      <nav className="mb-7 space-y-2" aria-label="거르기">
-        <div className="flex flex-wrap gap-2">
-          <Chip href={link({ job: undefined })} on={!sp.job}>전체 직군</Chip>
-          {JOBS.map((j) => (
-            <Chip key={j} href={link({ job: j })} on={sp.job === j}>{j}</Chip>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Chip href={link({ sido: undefined })} on={!sp.sido}>전국</Chip>
-          {SIDOS.map((s) => (
-            <Chip key={s} href={link({ sido: s })} on={sp.sido === s}>{s}</Chip>
-          ))}
-        </div>
-        <div>
-          <Chip href={link({ all: sp.all ? undefined : '1' })} on={!!sp.all}>
-            마감된 것도 보기
-          </Chip>
-        </div>
-      </nav>
+      {/* 거르기 줄 — 네 화면이 같이 쓰는 부품입니다 (2026-10-04 세중님 결정).
+          전에는 칩이 세 줄이라 휴대폰에서 자리를 많이 먹었습니다 */}
+      <ListFilters
+        기준={{ job: sp.job ?? 내직군 ?? undefined, sido: sp.sido, past: 지난것 }}
+        시도들={SIDOS}
+        기본직군={내직군}
+        뿌리="/jobs"
+        남길값={{
+          ...(sp.tab ? { tab: sp.tab } : {}),
+          ...(q ? { q } : {}),
+          ...(sp.sort ? { sort: sp.sort } : {}),
+        }}
+      />
 
       {/* 기관 이름으로 찾으면 그 기관이 어떤 곳인지 먼저 보여줍니다 (회원만) */}
       {searching && !locked && <OrgCard name={q} />}

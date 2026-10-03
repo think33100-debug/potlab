@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ListFilters } from '@/components/list-filters';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 /* 봉사활동 찾기 (2026-10-02).
@@ -58,7 +59,7 @@ const 지역기본: Record<string, string> = {
   서울: '서울', 강원: '강원', 제주: '제주',
 };
 
-type SP = { tab?: string; sido?: string; p?: string };
+type SP = { tab?: string; sido?: string; p?: string; past?: string };
 
 type 줄 = {
   번호: number; 제목: string; 기관: string | null;
@@ -82,6 +83,9 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
 
   const sb = await serverSupabase();
 
+  /* 「모집 끝난 것도 보기」 — 켜면 상태를 안 거릅니다 (2026-10-04) */
+  const 지난것 = sp.past === '1';
+
   /* 주소에 시·도가 있으면 그것, 없으면 회원 지역에서. 회원이 아니면 전국.
      「전국」을 또렷이 고른 것과 「아직 안 골랐다」를 가려야 하므로
      주소에 sido=all 이 있으면 전국으로 못 박습니다 */
@@ -103,8 +107,8 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
   }
 
   const [목록, 셈값] = await Promise.all([
-    sb.rpc('봉사목록', { p_갈래: tab.갈래, p_시도: sido, p_상태: '모집중', p_page: page }),
-    sb.rpc('봉사셈', { p_시도: sido, p_상태: '모집중' }),
+    sb.rpc('봉사목록', { p_갈래: tab.갈래, p_시도: sido, p_상태: 지난것 ? null : '모집중', p_page: page }),
+    sb.rpc('봉사셈', { p_시도: sido, p_상태: 지난것 ? null : '모집중' }),
   ]);
 
   const rows = (목록.data ?? []) as unknown as 줄[];
@@ -156,30 +160,20 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
       </nav>
 
       {/* 시·도 — 거르는 칸은 이것 하나입니다 */}
-      <nav aria-label="지역" className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-        <Link
-          href={길({ sido: 'all', p: '0' })}
-          aria-current={sido === null ? 'page' : undefined}
-          className={'text-lg ' + (sido === null
-            ? 'font-bold text-ink underline underline-offset-4'
-            : 'text-mute hover:underline')}
-        >
-          전국
-        </Link>
-        {(c?.시도들 ?? []).map((s) => (
-          <Link
-            key={s.시도}
-            href={길({ sido: s.시도, p: '0' })}
-            aria-current={sido === s.시도 ? 'page' : undefined}
-            className={'text-lg ' + (sido === s.시도
-              ? 'font-bold text-ink underline underline-offset-4'
-              : 'text-mute hover:underline')}
-          >
-            {s.시도}
-            <span className="ml-1 text-sm text-mute">{s.수}</span>
-          </Link>
-        ))}
-      </nav>
+      {/* 거르기 줄 — 네 화면이 같이 쓰는 부품입니다 (2026-10-04 세중님 결정).
+          봉사는 **직군 칸을 숨깁니다** — 직군 구분이 없는 자료입니다.
+          「마감된 것도」는 모집 상태를 푸는 것으로 잇습니다 */}
+      <div className="mt-3">
+        <ListFilters
+          기준={{ sido: sido ?? undefined, past: 지난것 }}
+          시도들={(c?.시도들 ?? []).map((s) => s.시도)}
+          직군숨김
+          마감말="모집 끝난 것도"
+          뿌리="/volunteer"
+          남길값={sp.tab && sp.tab !== 'all' ? { tab: sp.tab } : {}}
+        />
+      </div>
+
 
       <p className="mt-5 text-lg text-mute">
         {sido ?? '전국'} · <b className="text-ink">{이탭수}건</b> 모집 중

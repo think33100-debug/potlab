@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { ListFilters } from '@/components/list-filters';
 import { serverSupabase } from '@/lib/supabase-server';
 
 /* 청년정책 찾기 (2026-10-04).
@@ -153,30 +154,19 @@ export default async function Youth({ searchParams }: { searchParams: Promise<SP
       </nav>
 
       {/* 시·도 — 고르면 그 지역 + 전국이 함께 나옵니다 */}
-      <nav aria-label="지역" className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-        <Link
-          href={길({ sido: 'all', p: '0' })}
-          aria-current={sido === null ? 'page' : undefined}
-          className={'text-lg ' + (sido === null
-            ? 'font-bold text-ink underline underline-offset-4'
-            : 'text-mute hover:underline')}
-        >
-          전국
-        </Link>
-        {(c?.시도들 ?? []).map((s) => (
-          <Link
-            key={s.시도}
-            href={길({ sido: s.시도, p: '0' })}
-            aria-current={sido === s.시도 ? 'page' : undefined}
-            className={'text-lg ' + (sido === s.시도
-              ? 'font-bold text-ink underline underline-offset-4'
-              : 'text-mute hover:underline')}
-          >
-            {s.시도}
-            <span className="ml-1 text-sm text-mute">{s.수}</span>
-          </Link>
-        ))}
-      </nav>
+      {/* 거르기 줄 — 채용공고·교육과 같은 부품입니다 (2026-10-04 세중님 결정).
+          청년정책은 **직군 칸을 숨깁니다** — 치료사용으로 고르지 않는 화면이라
+          직군 구분이 아예 없습니다 */}
+      <div className="mt-3">
+        <ListFilters
+          기준={{ sido: sido ?? undefined, past: 지난것 }}
+          시도들={(c?.시도들 ?? []).map((s) => s.시도)}
+          직군숨김
+          마감말="신청 끝난 것도"
+          뿌리="/youth"
+          남길값={sp.tab && sp.tab !== 'all' ? { tab: sp.tab } : {}}
+        />
+      </div>
 
       <p className="mt-5 text-lg text-mute">
         {sido ? sido + ' + 전국' : '전국'} · <b className="text-ink">{이탭수}건</b>

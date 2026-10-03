@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { serverSupabase } from '@/lib/supabase-server';
+import { ListFilters } from '@/components/list-filters';
+import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 /* 교육·학술 (2026-10-03).
 
@@ -109,32 +110,37 @@ const 갈래색: Record<string, string> = {
 
 export default async function Edu({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
-  const job = JOBS.find((j) => j.key === sp.job) ?? JOBS[0];
   const page = Math.max(0, Number(sp.p ?? 0) || 0);
   const 지난것 = sp.past === '1';
 
+  const sb = await serverSupabase();
+
+  /* 직군 기본값 = 회원이 가입 때 고른 직군 (세중님 결정 2026-10-04).
+     주소의 job 이 먼저이고, '전체' 는 또렷하게 「전부 보기」입니다 */
+  let 내직군: string | null = null;
+  if (await serverWho(sb) === '회원') {
+    const { data } = await sb.from('profiles').select('job_group').limit(1).maybeSingle();
+    내직군 = (data as { job_group?: string | null } | null)?.job_group ?? null;
+  }
+  const 고른직군 = sp.job === '전체' ? null : (sp.job ?? 내직군);
+
   /* 직군을 고르면 그 직군 학회만 탭에 둡니다. 「공통」(보바스)은 양쪽에 */
-  const 보일탭 = TABS.filter((t) => !job.직군 || t.직군 === null
-    || t.직군 === job.직군 || t.직군 === '공통');
+  const 보일탭 = TABS.filter((t) => !고른직군 || t.직군 === null
+    || t.직군 === 고른직군 || t.직군 === '공통');
   /* 직군을 바꾸면 안 보이는 학회가 골라져 있을 수 있습니다 — 그러면 전체로 */
   const tab = 보일탭.find((t) => t.key === sp.tab) ?? 보일탭[0];
-
-  const sb = await serverSupabase();
 
   /* 탭마다 건수를 보여줍니다. 교육셈() 이 int 하나만 주므로 탭 수만큼 부릅니다 —
      표가 작아서(백여 건) 이게 뷰를 새로 만드는 것보다 쌉니다 */
   const [목록, ...셈들] = await Promise.all([
-    sb.rpc('교육목록', { p_직군: job.직군, p_출처: tab.출처, p_지난것: 지난것, p_page: page }),
-    ...보일탭.map((t) => sb.rpc('교육셈', { p_직군: job.직군, p_출처: t.출처, p_지난것: 지난것 })),
-    ...JOBS.map((j) => sb.rpc('교육셈', { p_직군: j.직군, p_출처: null, p_지난것: 지난것 })),
+    sb.rpc('교육목록', { p_직군: 고른직군, p_출처: tab.출처, p_지난것: 지난것, p_page: page }),
+    ...보일탭.map((t) => sb.rpc('교육셈', { p_직군: 고른직군, p_출처: t.출처, p_지난것: 지난것 })),
   ]);
 
   const rows = (목록.data ?? []) as unknown as 줄[];
   const 셈 = Object.fromEntries(보일탭.map((t, i) => [t.key, (셈들[i]?.data as number | null) ?? 0]));
-  const 직군셈 = Object.fromEntries(
-    JOBS.map((j, i) => [j.key, (셈들[보일탭.length + i]?.data as number | null) ?? 0]));
 
-  const 링크칸 = 링크만.filter((x) => !job.직군 || x.직군 === job.직군);
+  const 링크칸 = 링크만.filter((x) => !고른직군 || x.직군 === 고른직군);
 
   const 길 = (next: Partial<SP>) => {
     const q = new URLSearchParams();
@@ -157,27 +163,19 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
       </p>
 
       {/* 직군 줄 */}
-      <nav aria-label="직군" className="mt-6 flex flex-wrap gap-2">
-        {JOBS.map((j) => {
-          const on = j.key === job.key;
-          return (
-            <Link
-              key={j.key}
-              href={길({ job: j.key, tab: 'all', p: '0' })}
-              aria-current={on ? 'page' : undefined}
-              className={
-                'rounded-md border px-5 py-3 text-lg font-medium transition-colors '
-                + (on
-                  ? 'border-teal-strong bg-teal-strong text-white'
-                  : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950')
-              }
-            >
-              {j.label}
-              <span className={'ml-2 text-sm ' + (on ? 'text-white/70' : 'text-mute')}>{직군셈[j.key]}</span>
-            </Link>
-          );
-        })}
-      </nav>
+      {/* 거르기 줄 — 채용공고와 같은 부품입니다 (2026-10-04 세중님 결정).
+          교육은 **지역 칸을 숨깁니다** — 자료에 시·도 칸이 없고 장소가
+          자유 글이라 거르는 칸으로 못 씁니다 */}
+      <div className="mt-6">
+        <ListFilters
+          기준={{ job: sp.job ?? 내직군 ?? undefined, past: 지난것 }}
+          지역숨김
+          기본직군={내직군}
+          마감말="끝난 것도"
+          뿌리="/edu"
+          남길값={sp.tab && sp.tab !== 'all' ? { tab: sp.tab } : {}}
+        />
+      </div>
 
       {/* 학회 탭 — 스펙쌓기 「이수 교육」 의 학회 이름과 같습니다 */}
       <nav aria-label="학회" className="mt-3 flex flex-wrap gap-2">
