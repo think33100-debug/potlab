@@ -128,30 +128,6 @@ export default async function Youth({ searchParams }: { searchParams: Promise<SP
       </p>
 
       {/* 갈래 탭 */}
-      <nav aria-label="갈래" className="mt-6 flex flex-wrap gap-2">
-        {TABS.map((t) => {
-          const on = t.key === tab.key;
-          const n = c ? (t.갈래 === null ? c.전체 : (c.갈래?.[t.갈래] ?? 0)) : null;
-          return (
-            <Link
-              key={t.key}
-              href={길({ tab: t.key, p: '0' })}
-              aria-current={on ? 'page' : undefined}
-              className={
-                'rounded-md border px-5 py-3 text-lg font-medium transition-colors '
-                + (on
-                  ? 'border-teal-strong bg-teal-strong text-white'
-                  : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950')
-              }
-            >
-              {t.label}
-              {n !== null && (
-                <span className={'ml-2 text-sm ' + (on ? 'text-white/70' : 'text-mute')}>{n}</span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
 
       {/* 시·도 — 고르면 그 지역 + 전국이 함께 나옵니다 */}
       {/* 거르기 줄 — 채용공고·교육과 같은 부품입니다 (2026-10-04 세중님 결정).
@@ -164,7 +140,16 @@ export default async function Youth({ searchParams }: { searchParams: Promise<SP
           직군숨김
           마감말="신청 끝난 것도"
           뿌리="/youth"
-          남길값={sp.tab && sp.tab !== 'all' ? { tab: sp.tab } : {}}
+          고름={{
+            이름: 'tab',
+            전체말: '갈래 전체',
+            고른값: tab.key === 'all' ? undefined : tab.key,
+            선택지: TABS.filter((t) => t.key !== 'all').map((t) => ({
+              값: t.key,
+              글: t.label,
+              수: c && t.갈래 ? (c.갈래?.[t.갈래] ?? 0) : undefined,
+            })),
+          }}
         />
       </div>
 

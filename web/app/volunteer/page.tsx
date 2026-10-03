@@ -134,30 +134,6 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
       </p>
 
       {/* 분야 탭 */}
-      <nav aria-label="분야" className="mt-6 flex flex-wrap gap-2">
-        {TABS.map((t) => {
-          const on = t.key === tab.key;
-          const n = c ? (t.갈래 === null ? c.전체 : t.갈래 === '기타' ? c.기타 : c['복지·보건']) : null;
-          return (
-            <Link
-              key={t.key}
-              href={길({ tab: t.key, p: '0' })}
-              aria-current={on ? 'page' : undefined}
-              className={
-                'rounded-md border px-6 py-3 text-lg font-medium transition-colors '
-                + (on
-                  ? 'border-teal-strong bg-teal-strong text-white'
-                  : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950')
-              }
-            >
-              {t.label}
-              {n !== null && (
-                <span className={'ml-2 text-sm ' + (on ? 'text-white/70' : 'text-mute')}>{n}</span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
 
       {/* 시·도 — 거르는 칸은 이것 하나입니다 */}
       {/* 거르기 줄 — 네 화면이 같이 쓰는 부품입니다 (2026-10-04 세중님 결정).
@@ -170,7 +146,16 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
           직군숨김
           마감말="모집 끝난 것도"
           뿌리="/volunteer"
-          남길값={sp.tab && sp.tab !== 'all' ? { tab: sp.tab } : {}}
+          고름={{
+            이름: 'tab',
+            전체말: '분야 전체',
+            고른값: tab.key === 'all' ? undefined : tab.key,
+            선택지: TABS.filter((t) => t.key !== 'all').map((t) => ({
+              값: t.key,
+              글: t.label,
+              수: c ? (t.갈래 === '기타' ? c.기타 : c['복지·보건']) : undefined,
+            })),
+          }}
         />
       </div>
 

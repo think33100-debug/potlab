@@ -179,40 +179,22 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
           역할={내역할}
           마감말="끝난 것도"
           뿌리="/edu"
-          남길값={sp.tab && sp.tab !== 'all' ? { tab: sp.tab } : {}}
+          /* 학회 고르기 — 전에는 탭 10개가 늘어서서 휴대폰에서 두 줄을
+             먹었습니다. 건수는 선택지 안에 「(14)」로 넣어 안 잃습니다 */
+          고름={{
+            이름: 'tab',
+            전체말: '학회 전체',
+            고른값: tab.key === 'all' ? undefined : tab.key,
+            선택지: 보일탭.filter((t) => t.key !== 'all')
+              .map((t) => ({ 값: t.key, 글: t.label, 수: 셈[t.key] })),
+          }}
         />
       </div>
 
       {/* 학회 탭 — 스펙쌓기 「이수 교육」 의 학회 이름과 같습니다 */}
-      <nav aria-label="학회" className="mt-3 flex flex-wrap gap-2">
-        {보일탭.map((t) => {
-          const on = t.key === tab.key;
-          return (
-            <Link
-              key={t.key}
-              href={길({ tab: t.key, p: '0' })}
-              aria-current={on ? 'page' : undefined}
-              className={
-                'rounded-md border px-5 py-3 text-lg font-medium transition-colors '
-                + (on
-                  ? 'border-teal-strong bg-teal-strong text-white'
-                  : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950')
-              }
-            >
-              {t.label}
-              <span className={'ml-2 text-sm ' + (on ? 'text-white/70' : 'text-mute')}>{셈[t.key]}</span>
-            </Link>
-          );
-        })}
-      </nav>
-
       <p className="mt-5 text-lg text-mute">
         <b className="text-ink">{셈[tab.key]}건</b>
         {지난것 ? ' (끝난 것까지)' : ' · 아직 안 끝난 것'}
-        {' · '}
-        <Link href={길({ past: 지난것 ? '0' : '1', p: '0' })} className="underline underline-offset-4">
-          {지난것 ? '안 끝난 것만 보기' : '끝난 것까지 보기'}
-        </Link>
       </p>
 
       {/* 출처와 한계를 화면에 밝힙니다 */}

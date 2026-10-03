@@ -30,8 +30,19 @@ export type 거르기값 = {
   past?: boolean;      // 마감된 것도 보기
 };
 
+/* 화면마다 다른 「고르는 칸 하나 더」.
+   /edu 는 학회, /volunteer 는 분야, /youth 는 갈래가 들어갑니다.
+   전에는 탭이 10개씩 늘어서서 휴대폰에서 두세 줄을 먹었습니다 */
+export type 고름칸 = {
+  이름: string;                 // 주소에 쓸 이름 — 'tab'
+  전체말: string;               // '학회 전체' · '분야 전체'
+  선택지: { 값: string; 글: string; 수?: number }[];
+  고른값?: string;
+};
+
 export function ListFilters({
   기준,
+  고름,
   시도들 = [],
   직군숨김 = false,
   지역숨김 = false,
@@ -42,6 +53,7 @@ export function ListFilters({
   남길값 = {},
 }: {
   기준: 거르기값;
+  고름?: 고름칸;
   /* 교육·학술처럼 **시·도 칸이 아예 없는** 자료는 지역을 숨깁니다.
      장소가 자유 글이라 거르는 칸으로 못 씁니다 — 없는 거르기를 보여주면
      「왜 걸러도 안 줄지?」 하고 헤맵니다 */
@@ -60,18 +72,23 @@ export function ListFilters({
 }) {
   const router = useRouter();
 
-  const 가기 = useCallback((바꿀: 거르기값) => {
+  const 가기 = useCallback((바꿀: 거르기값 & { 고름값?: string | null }) => {
     const 다음 = { ...기준, ...바꿀 };
     const q = new URLSearchParams();
-    /* 화면마다 지켜야 할 값(탭·검색어)을 먼저 넣습니다 */
+    /* 화면마다 지켜야 할 값(검색어·차례)을 먼저 넣습니다 */
     for (const [k, v] of Object.entries(남길값)) if (v) q.set(k, v);
     if (다음.job) q.set('job', 다음.job);
     if (다음.sido) q.set('sido', 다음.sido);
     if (다음.past) q.set('past', '1');
+    /* 고르는 칸 하나 더 — 바꾸지 않았으면 쓰던 값을 그대로 지킵니다 */
+    if (고름) {
+      const v = '고름값' in 바꿀 ? 바꿀.고름값 : 고름.고른값;
+      if (v) q.set(고름.이름, v);
+    }
     /* 조건을 바꾸면 쪽은 처음으로 — 3쪽 보다 지역을 바꾸면 빈 화면이 납니다 */
     const s = q.toString();
     router.push(s ? 뿌리 + '?' + s : 뿌리);
-  }, [기준, 남길값, 뿌리, router]);
+  }, [기준, 고름, 남길값, 뿌리, router]);
 
   const 칸 = 'rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink'
     + ' focus:border-teal-strong focus:outline-none';
@@ -111,6 +128,24 @@ export function ListFilters({
           {시도들.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
       </label>
+      )}
+
+      {고름 && (
+        <label className="flex items-center gap-2">
+          <span className="sr-only">{고름.전체말}</span>
+          <select
+            className={칸}
+            value={고름.고른값 ?? ''}
+            onChange={(e) => 가기({ 고름값: e.target.value || null })}
+          >
+            <option value="">{고름.전체말}</option>
+            {고름.선택지.map((o) => (
+              <option key={o.값} value={o.값}>
+                {o.글}{typeof o.수 === 'number' ? ` (${o.수})` : ''}
+              </option>
+            ))}
+          </select>
+        </label>
       )}
 
       <label className="flex cursor-pointer items-center gap-2 text-lg text-body">
