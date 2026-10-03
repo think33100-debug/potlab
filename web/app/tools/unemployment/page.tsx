@@ -79,6 +79,16 @@ export default async function Unemployment() {
           ))}
         </dl>
 
+        {/* ★ 금액대나 「사이 구간」 예시는 **적지 않습니다** (2026-10-03 세중님).
+            경계가 3개월 일수(89~92일)에 따라 달라져서, 숫자를 적으면 틀립니다.
+            같은 월 336만원이 92일이면 하한에 걸리고 90일이면 안 걸립니다.
+            그래서 틈이 좁다는 사실만 한 줄로 알립니다. */}
+        <p className="mt-4 break-keep rounded-sm bg-gray-50 p-4 text-sm leading-relaxed text-gray-600 dark:bg-gray-950 dark:text-gray-400">
+          올해는 상한과 하한 차이가{' '}
+          <b>{(s.구직급여상한 - s.구직급여하한).toLocaleString('ko-KR')}원</b>뿐이라,
+          대부분 둘 중 하나에 걸립니다.
+        </p>
+
         <h3 className="mt-6 text-sm font-bold text-gray-500">소정급여일수</h3>
         <div className="mt-2 overflow-x-auto">
           <table className="w-full text-lg">
