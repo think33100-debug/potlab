@@ -198,7 +198,13 @@ function 건너뜀알리기(table, skipped) {
 /* 새 수집기(시트를 안 거치는 것)가 임자인 공고 번호.
    지금은 AL2(알리오) 하나뿐이고, 경로를 옮길 때마다 여기 늘어납니다.
    collect_source 표의 code 중 「옛 수집기 것이 아닌 것」 을 봅니다. */
-const 새수집기 = ['AL2'];
+/* 2026-10-03 — 다섯 짝을 넘기면서 넷을 더했습니다 (세중님 승인).
+   안 더하면 다리가 넘긴 줄을 **옛 이름표로 되돌립니다.** 까닭 —
+     · 다리는 collect_put 을 안 거치고 service_role 로 job_posts 에 직접 upsert 합니다
+     · source 를 공고ID 앞 글자로 정합니다 (copy_jobs.js sourceOf: 'HS…'→'HS')
+     · on conflict (id) 로 source 까지 덮어씁니다
+   WN2 는 **아직 넣지 않았습니다** — 워크넷은 짝 대조를 못 지나서 안 넘깁니다. */
+const 새수집기 = ['AL2', 'CE2', 'GJ2', 'HS3', 'ND2'];
 async function 새수집기가가진것(cfg) {
   const 집 = new Set();
   for (const s of 새수집기) {
@@ -340,15 +346,28 @@ async function rpc(cfg, fn, body) {
    그렇게 하면 멀쩡한 공고가 날아갑니다.
    **쓰레기통 시트에 이름이 적힌 것만** 지웁니다. 관리자가 「잘못 버림」
    (되돌림 Y) 을 누른 줄은 건드리지 않습니다. */
-async function hideTrashed(cfg, dry) {
+async function hideTrashed(cfg, dry, 남의것) {
   let S;
   try { S = await readWhole(cfg, '쓰레기통'); } catch (e) { return 0; }
-  const uniq = [...new Set(
+  let uniq = [...new Set(
     S.rows
       .filter((r) => !/^Y$/i.test(String(S.get(r, '되돌림') || '').trim()))
       .map((r) => String(S.get(r, '공고ID') || '').trim())
       .filter(Boolean),
   )];
+  /* ★ 2026-10-03 — 새 수집기가 임자인 줄은 **감추지도 않습니다.**
+     전에는 이 함수가 비켜갈 목록을 안 봤습니다. 그래서 옛 수집기가 버린 공고를
+     새 수집기가 살려 둔 경우, 다리가 조용히 감춰 버렸습니다.
+     판정은 임자가 합니다 — 담기(upsert)에서 비킨 줄을 감추기에서 안 비키면
+     앞뒤가 안 맞습니다. */
+  if (남의것 && 남의것.size) {
+    const 전 = uniq.length;
+    uniq = uniq.filter((id) => !남의것.has(String(id)));
+    if (전 !== uniq.length) {
+      console.log('  쓰레기통 ' + 전 + '건 중 ' + (전 - uniq.length)
+        + '건은 새 수집기 것이라 비켰습니다 (감추지 않습니다)');
+    }
+  }
   if (!uniq.length) return 0;
   if (dry) return uniq.length;
 
@@ -419,7 +438,7 @@ async function hideTrashed(cfg, dry) {
       const ex = await syncExtras(cfg, true);
       ex.forEach((x) => console.log('  ' + x.sheet.padEnd(8) + ' → ' + x.table.padEnd(12)
         + (x.note ? x.note : x.n + '건 (시트 ' + x.시트줄 + '줄)')));
-      console.log('  쓰레기통에 들어 감출 공고 ' + (await hideTrashed(cfg, true)) + '건');
+      console.log('  쓰레기통에 들어 감출 공고 ' + (await hideTrashed(cfg, true, 남의것)) + '건');
       console.log('맨 끝 3건:');
       posts.slice(-3).forEach((p) => console.log('  ' + p.id + ' | ' + p.org_name
         + ' | ' + String(p.title).slice(0, 40) + ' | ' + (p.job_group || '(빈칸)')));
@@ -448,7 +467,7 @@ async function hideTrashed(cfg, dry) {
         + (x.note ? x.note : x.n + '건 (시트 ' + x.시트줄 + '줄)'));
       말.push(건너뜀알리기(x.table, x.건너뜀 || []));
     });
-    const 감춤 = await hideTrashed(cfg, false);
+    const 감춤 = await hideTrashed(cfg, false, 남의것);
     const 끝 = await count(cfg, 'job_posts');
     if (감춤) console.log('  쓰레기통에 든 공고 ' + 감춤 + '건을 감췄습니다 (지우지 않습니다)');
 
