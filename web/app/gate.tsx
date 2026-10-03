@@ -115,7 +115,7 @@ export function JoinCta({ what }: { what: string }) {
         {회원 ? '3분 설문 마치고 전부 보기' : '가입하고 전부 보기'}
       </Link>
       {회원 && (
-        <p className="mt-2 text-sm text-gray-400">채우던 곳에서 이어서 하실 수 있어요</p>
+        <p className="mt-2 text-sm text-mute">채우던 곳에서 이어서 하실 수 있어요</p>
       )}
     </section>
   );

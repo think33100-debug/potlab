@@ -184,7 +184,7 @@ export default function Welcome() {
                 'rounded-md px-4 py-1 font-medium ' +
                 (step === i + 1
                   ? 'bg-teal-strong text-white'
-                  : step > i + 1 ? 'bg-badge-teal-bg text-teal-strong' : 'bg-gray-50 text-gray-400 dark:bg-gray-950')
+                  : step > i + 1 ? 'bg-badge-teal-bg text-teal-strong' : 'bg-gray-50 text-mute dark:bg-gray-950')
               }
             >
               {i + 1}. {t}
@@ -220,7 +220,7 @@ export default function Welcome() {
                     <span className="text-lg">
                       {a.required
                         ? <span className="text-brand-red">[필수] </span>
-                        : <span className="text-gray-400">[선택] </span>}
+                        : <span className="text-mute">[선택] </span>}
                       {a.label}
                     </span>
                   </label>

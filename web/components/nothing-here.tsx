@@ -53,7 +53,7 @@ export function NothingHere({
         >
           {subLabel}
         </Link>
-        <Link href="/" className="mt-2 text-sm text-gray-400 hover:underline">
+        <Link href="/" className="mt-2 text-sm text-mute hover:underline">
           홈으로
         </Link>
       </div>

@@ -125,12 +125,12 @@ export function PostActions({
 
       {session && me?.id === authorId ? (
         <button type="button" onClick={remove}
-          className="rounded-md px-4 py-4 text-sm text-gray-400 hover:text-brand-red">
+          className="rounded-md px-4 py-4 text-sm text-mute hover:text-brand-red">
           지우기
         </button>
       ) : (
         <button type="button" onClick={report}
-          className="rounded-md px-4 py-4 text-sm text-gray-400 hover:text-brand-red">
+          className="rounded-md px-4 py-4 text-sm text-mute hover:text-brand-red">
           신고
         </button>
       )}

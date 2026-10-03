@@ -94,7 +94,7 @@ export default function AdminStats() {
       </p>
     );
   }
-  if (!now || !daily) return <p className="text-lg text-gray-400">세는 중…</p>;
+  if (!now || !daily) return <p className="text-lg text-mute">세는 중…</p>;
 
   const today = daily[daily.length - 1];
   const yday = daily[daily.length - 2];
@@ -117,7 +117,7 @@ export default function AdminStats() {
         </div>
 
         {(today?.admin_visits ?? 0) > 0 && (
-          <p className="mt-3 text-sm text-gray-400">
+          <p className="mt-3 text-sm text-mute">
             관리자 방문 {today.admin_visits}은 위 숫자에서 뺐어요
           </p>
         )}
@@ -127,7 +127,7 @@ export default function AdminStats() {
       <section>
         <h2 className="break-keep text-h3 font-bold">
           피시 · 휴대폰
-          <span className="ml-2 text-sm font-medium text-gray-400">최근 7일</span>
+          <span className="ml-2 text-sm font-medium text-mute">최근 7일</span>
         </h2>
 
         {!devices || devices.length === 0 ? (
@@ -145,7 +145,7 @@ export default function AdminStats() {
                     </span>
                     <span className="shrink-0 text-lg">
                       <b className="num tabular-nums">{pct}%</b>
-                      <span className="ml-2 text-sm text-gray-400">
+                      <span className="ml-2 text-sm text-mute">
                         방문 {Number(d.visits).toLocaleString()} · 조회 {Number(d.views).toLocaleString()}
                       </span>
                     </span>
@@ -159,7 +159,7 @@ export default function AdminStats() {
           </ul>
         )}
 
-        <p className="mt-5 break-keep text-sm text-gray-400">
+        <p className="mt-5 break-keep text-sm text-mute">
           기기는 2026-09-23 부터 담습니다. 그 전에 쌓인 것은 가릴 근거가 없어서
           「2026-09-23 이전」으로 묶여요. 태블릿은 휴대폰 쪽으로 셉니다
         </p>
@@ -188,7 +188,7 @@ export default function AdminStats() {
             </div>
           ))}
         </div>
-        <div className="mt-2 flex justify-between text-sm text-gray-400">
+        <div className="mt-2 flex justify-between text-sm text-mute">
           <span>{daily[0]?.day.slice(5)}</span>
           <span>{daily[daily.length - 1]?.day.slice(5)}</span>
         </div>
@@ -196,7 +196,7 @@ export default function AdminStats() {
 
       {/* ── 화면별 ── */}
       <section>
-        <h2 className="text-h3 font-bold">화면별 <span className="text-sm font-medium text-gray-400">최근 7일</span></h2>
+        <h2 className="text-h3 font-bold">화면별 <span className="text-sm font-medium text-mute">최근 7일</span></h2>
         {!screens || screens.length === 0 ? (
           <p className="mt-5 text-lg text-gray-500">아직 기록이 없어요</p>
         ) : (
@@ -206,7 +206,7 @@ export default function AdminStats() {
                 <span className="text-lg font-medium">{SCREEN_NAME[s.kind] ?? s.kind}</span>
                 <span className="flex-1" />
                 <span className="text-body-lg font-bold">{s.views.toLocaleString()}</span>
-                <span className="text-sm text-gray-400">방문 {s.visits}</span>
+                <span className="text-sm text-mute">방문 {s.visits}</span>
               </li>
             ))}
           </ul>
@@ -229,7 +229,7 @@ export default function AdminStats() {
           <Split title="로그인 수단" data={now.providers} rename={PROVIDER_NAME} />
         </div>
 
-        <p className="mt-5 text-sm text-gray-400">
+        <p className="mt-5 text-sm text-mute">
           커뮤니티 글 {now.posts} · 댓글 {now.comments} · 오늘 새 공고 {now.jobs_today} · 보류함 {now.jobs_hold}
         </p>
       </section>
@@ -237,7 +237,7 @@ export default function AdminStats() {
       {/* ── 많이 본 공고 ── */}
       <section>
         <h2 className="text-h3 font-bold">
-          많이 본 공고 <span className="text-sm font-medium text-gray-400">최근 7일</span>
+          많이 본 공고 <span className="text-sm font-medium text-mute">최근 7일</span>
         </h2>
         <p className="mt-1 text-sm text-gray-500">
           「열기」는 원문 공고를 누른 수입니다. 광고 값을 매길 때 이 숫자가 제일 단단해요
@@ -249,7 +249,7 @@ export default function AdminStats() {
             {jobs.map((j) => (
               <li key={j.id} className="flex items-baseline gap-5 py-4">
                 <Link href={`/jobs/${j.id}`} className="min-w-0 flex-1 truncate hover:underline">
-                  <span className="text-sm text-gray-400">{j.org_name}</span>
+                  <span className="text-sm text-mute">{j.org_name}</span>
                   <span className="ml-3 text-lg">{j.title}</span>
                 </Link>
                 <span className="shrink-0 text-body-lg font-bold">{j.views}</span>
@@ -263,7 +263,7 @@ export default function AdminStats() {
       {/* ── 많이 본 글 ── */}
       <section>
         <h2 className="text-h3 font-bold">
-          많이 본 글 <span className="text-sm font-medium text-gray-400">최근 7일</span>
+          많이 본 글 <span className="text-sm font-medium text-mute">최근 7일</span>
         </h2>
         {!posts || posts.length === 0 ? (
           <p className="mt-5 text-lg text-gray-500">아직 기록이 없어요</p>
@@ -272,7 +272,7 @@ export default function AdminStats() {
             {posts.map((p) => (
               <li key={p.id} className="flex items-baseline gap-5 py-4">
                 <Link href={`/post/${p.id}`} className="min-w-0 flex-1 truncate hover:underline">
-                  <span className="text-sm text-gray-400">{channelName(p.channel)}</span>
+                  <span className="text-sm text-mute">{channelName(p.channel)}</span>
                   <span className="ml-3 text-lg">{p.title}</span>
                 </Link>
                 <span className="shrink-0 text-body-lg font-bold">{p.views}</span>
@@ -282,7 +282,7 @@ export default function AdminStats() {
         )}
       </section>
 
-      <p className="text-sm text-gray-400">
+      <p className="text-sm text-mute">
         방문·조회는 오늘부터 쌓습니다. 과거는 셀 수 없어요.
         업체에 보여줄 「하루 평균」은 최소 2주는 모아야 말할 수 있어요
       </p>
@@ -305,14 +305,14 @@ function Big({
 
       {diff != null && (
         <p className={'mt-1 text-sm font-medium ' +
-          (diff > 0 ? 'text-teal-strong' : diff < 0 ? 'text-brand-red' : 'text-gray-400')}>
+          (diff > 0 ? 'text-teal-strong' : diff < 0 ? 'text-brand-red' : 'text-mute')}>
           {diff > 0 ? '▲' : diff < 0 ? '▼' : '='} {Math.abs(diff)}
           {pct != null && ` (${pct > 0 ? '+' : ''}${pct}%)`}
-          <span className="ml-2 font-normal text-gray-400">어제 {prev}</span>
+          <span className="ml-2 font-normal text-mute">어제 {prev}</span>
         </p>
       )}
-      {sub && <p className="mt-1 text-sm text-gray-400">{sub}</p>}
-      {note && <p className="mt-2 text-xs leading-normal text-gray-400">{note}</p>}
+      {sub && <p className="mt-1 text-sm text-mute">{sub}</p>}
+      {note && <p className="mt-2 text-xs leading-normal text-mute">{note}</p>}
     </div>
   );
 }
@@ -325,7 +325,7 @@ function Split({
     <div className="rounded-sm border border-gray-100 p-6 dark:border-gray-800">
       <p className="text-sm font-bold text-gray-500">{title}</p>
       {rows.length === 0 ? (
-        <p className="mt-2 text-lg text-gray-400">없음</p>
+        <p className="mt-2 text-lg text-mute">없음</p>
       ) : (
         <ul className="mt-2 space-y-1">
           {rows.map(([k, n]) => (

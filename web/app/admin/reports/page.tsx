@@ -133,7 +133,7 @@ export default function AdminReports() {
                     신고당한 글 —{' '}
                     {r.대상글있나
                       ? <>「{r.대상글제목}」 · 쓴이 {r.대상글쓴이}</>
-                      : <span className="text-gray-400">이미 지워진 글입니다</span>}
+                      : <span className="text-mute">이미 지워진 글입니다</span>}
                   </span>
                   {r.처리한사람 && (
                     <span className="block text-sm">

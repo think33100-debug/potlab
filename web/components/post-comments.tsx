@@ -121,7 +121,7 @@ export function PostComments({ postId }: { postId: number }) {
       )}
 
       {rows === null ? (
-        <p className="mt-6 text-lg text-gray-400">불러오는 중…</p>
+        <p className="mt-6 text-lg text-mute">불러오는 중…</p>
       ) : rows.length === 0 ? (
         <p className="mt-6 text-lg text-gray-500">아직 댓글이 없어요</p>
       ) : (
@@ -160,7 +160,7 @@ function One({
         <span className="font-medium text-gray-700 dark:text-gray-300">
           {shownName(c.profiles)}
         </span>
-        <span className="text-gray-400">{ago(c.created_at)}</span>
+        <span className="text-mute">{ago(c.created_at)}</span>
         <span className="flex-1" />
         {onReply && (
           <button type="button" onClick={onReply} className="text-interaction-blue hover:underline">
@@ -168,7 +168,7 @@ function One({
           </button>
         )}
         {mine && (
-          <button type="button" onClick={() => onRemove(c.id)} className="text-gray-400 hover:text-brand-red">
+          <button type="button" onClick={() => onRemove(c.id)} className="text-mute hover:text-brand-red">
             지우기
           </button>
         )}

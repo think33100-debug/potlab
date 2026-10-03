@@ -142,7 +142,7 @@ export function SignupSurvey({
                 <span className="min-w-0">
                   <b className="block text-lg">
                     {u.title}
-                    {u.soon && <span className="ml-2 rounded-xs bg-gray-50 px-2 py-1 text-sm font-medium text-gray-400 dark:bg-gray-950">준비 중</span>}
+                    {u.soon && <span className="ml-2 rounded-xs bg-gray-50 px-2 py-1 text-sm font-medium text-mute dark:bg-gray-950">준비 중</span>}
                   </b>
                   <span className="mt-1 block text-sm text-gray-500">{u.desc}</span>
                 </span>
@@ -150,7 +150,7 @@ export function SignupSurvey({
             ))}
           </ul>
           <p className={'mt-6 ' + PANEL}>{PRIVACY_LINE}</p>
-          <p className="mt-2 text-sm text-gray-400">병원 이름은 받지 않아요</p>
+          <p className="mt-2 text-sm text-mute">병원 이름은 받지 않아요</p>
         </div>
       ),
     }]),
@@ -311,7 +311,7 @@ export function SignupSurvey({
               <Num k="hired_year" label="첫 입사연도" hint="치료사로 처음 일 시작한 해" v={f.hired_year} on={set} unit="년" ph="2021" req f={f} />
               <Num k="current_hired_year" label="지금 병원 입사연도" hint="첫 직장이면 위와 같게" v={f.current_hired_year} on={set} unit="년" ph="2024" req f={f} />
               <p className="mt-6 text-sm font-bold text-gray-500">이전 근무지 (선택 · 최대 5개)</p>
-              <p className="mt-1 text-sm text-gray-400">없으시면 비워 두고 넘어가실 수 있어요</p>
+              <p className="mt-1 text-sm text-mute">없으시면 비워 두고 넘어가실 수 있어요</p>
             </>
           )}
           <Rows rows={rows} none={stu ? '실습 없음' : '경력 없음'}
@@ -434,7 +434,7 @@ export function SignupSurvey({
             ? <>지금 저장하면 올해 <b>{Math.max(0, (editsLeft ?? 2) - 1)}번</b> 남아요</>
             : <>등록하고 나면 <b>내 정보에서 1년에 2번</b> 고칠 수 있어요</>}
         </p>
-        {!stu && <p className="mt-5 text-sm text-gray-400">{PRIVACY_LINE}</p>}
+        {!stu && <p className="mt-5 text-sm text-mute">{PRIVACY_LINE}</p>}
 
         {err && <p className="mt-5 text-lg text-brand-red">{err}</p>}
 
@@ -485,14 +485,14 @@ export function SignupSurvey({
           <div className="h-1 rounded-md bg-teal-strong transition-[width]"
                style={{ width: `${(at / (steps.length - 1)) * 100}%` }} />
         </div>
-        <span className="shrink-0 text-sm text-gray-400">{at + 1} / {steps.length}</span>
+        <span className="shrink-0 text-sm text-mute">{at + 1} / {steps.length}</span>
       </div>
 
       {/* 숫자만 있으면 밋밋합니다. 한 줄 붙이고 남은 시간도 알려줍니다 —
           끝이 안 보이면 중간에 나갑니다 (lib/progress.ts) */}
       <p className="mt-2 flex flex-wrap items-baseline gap-3 text-sm">
         <span className="font-bold text-teal-strong">{step.msg}</span>
-        {step.left && <span className="text-gray-400">{step.left}</span>}
+        {step.left && <span className="text-mute">{step.left}</span>}
       </p>
 
       <h1 className="mt-5 text-h2 font-bold">{cur.title}</h1>
@@ -519,7 +519,7 @@ export function SignupSurvey({
         </button>
       </div>
 
-      {at > 0 && !stu && <p className="mt-5 text-sm text-gray-400">{PRIVACY_LINE}</p>}
+      {at > 0 && !stu && <p className="mt-5 text-sm text-mute">{PRIVACY_LINE}</p>}
     </section>
   );
 }
@@ -536,7 +536,7 @@ function Label({ label, hint, req, k }: { label: string; hint?: string; req?: bo
         {label}
         {req && <span className="ml-1 text-brand-red">*</span>}
       </span>
-      {hint && <span className="mt-1 block text-sm text-gray-400">{hint}</span>}
+      {hint && <span className="mt-1 block text-sm text-mute">{hint}</span>}
       {why && <span className="mt-1 block text-sm text-teal-strong">{why}</span>}
     </>
   );
@@ -581,7 +581,7 @@ function Num({
         <input type="number" inputMode="decimal" step={step} value={v ?? ''} placeholder={ph}
           min={r?.min} max={max} aria-invalid={err ? true : undefined}
           onChange={(e) => on(k, e.target.value)} className={BARE} />
-        {unit && <span className="shrink-0 pr-5 text-lg text-gray-400">{unit}</span>}
+        {unit && <span className="shrink-0 pr-5 text-lg text-mute">{unit}</span>}
       </span>
       {/* 무엇이 틀렸는지 그 자리에서 적습니다 — 「다음」이 안 눌리는 이유가 보여야 합니다 */}
       {err && <span className="mt-1 block text-sm text-brand-red">{err}</span>}
@@ -674,10 +674,10 @@ function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
         return (
           <div key={i} className="mt-5 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-gray-400">{i + 1}번째</span>
+              <span className="text-sm font-bold text-mute">{i + 1}번째</span>
               <button type="button" aria-label={`${i + 1}번째 어학 지우기`}
                 onClick={() => on(rows.filter((_, j) => j !== i))}
-                className="rounded-md px-4 py-1 text-sm text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-950">
+                className="rounded-md px-4 py-1 text-sm text-mute hover:bg-gray-50 dark:hover:bg-gray-950">
                 지우기
               </button>
             </div>
@@ -761,7 +761,7 @@ function LangBands() {
 
       {open && (
         <div className="mt-2 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
-          {bands === null ? <p className="text-sm text-gray-400">불러오는 중…</p> : (
+          {bands === null ? <p className="text-sm text-mute">불러오는 중…</p> : (
             <>
               {EXAMS.map((e) => {
                 const rows = byExam[e.name] ?? [];
@@ -778,7 +778,7 @@ function LangBands() {
                           <dd className="min-w-0">
                             {b.levels ? b.levels.join(' · ')
                               : b.min_score != null ? `${b.min_score}점 이상` : '그 아래'}
-                            <span className="ml-2 text-gray-400">{b.source}</span>
+                            <span className="ml-2 text-mute">{b.source}</span>
                           </dd>
                         </div>
                       ))}
@@ -786,7 +786,7 @@ function LangBands() {
                   </div>
                 );
               })}
-              <p className="mt-6 text-sm text-gray-400">
+              <p className="mt-6 text-sm text-mute">
                 여러 개 넣으면 그중 제일 높은 점수 하나만 써요. 더하지 않아요.
                 어학을 넣으면 어떤 점수든 최소 2점이에요
               </p>
@@ -816,7 +816,7 @@ function Area({
       <Label label={label} hint={hint} k={k} />
       <textarea rows={4} maxLength={300} value={v ?? ''} placeholder={ph}
         onChange={(e) => on(k, e.target.value)} className={INPUT + ' mt-2 w-full'} />
-      <span className="mt-1 block text-right text-sm text-gray-400">{n} / 300</span>
+      <span className="mt-1 block text-right text-sm text-mute">{n} / 300</span>
     </label>
   );
 }
@@ -858,7 +858,7 @@ function Chips({
                 </span>
               )}
               {g.n}
-              <span aria-hidden className="ml-auto shrink-0 text-lg text-gray-400 transition-transform group-open:rotate-90">
+              <span aria-hidden className="ml-auto shrink-0 text-lg text-mute transition-transform group-open:rotate-90">
                 ›
               </span>
             </summary>
@@ -948,10 +948,10 @@ function Rows({
              줄 전체가 오른쪽으로 삐져나갑니다 */
           <div key={i} className="mt-5 rounded-sm border border-gray-100 p-5 first:mt-0 dark:border-gray-800">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-gray-400">{i + 1}번째</span>
+              <span className="text-sm font-bold text-mute">{i + 1}번째</span>
               <button type="button" aria-label={`${i + 1}번째 줄 지우기`}
                 onClick={() => on(rows.filter((_, j) => j !== i))}
-                className="rounded-md px-4 py-1 text-sm text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-950">
+                className="rounded-md px-4 py-1 text-sm text-mute hover:bg-gray-50 dark:hover:bg-gray-950">
                 지우기
               </button>
             </div>
@@ -972,7 +972,7 @@ function Rows({
                 <input type="number" inputMode="numeric" placeholder="개월" value={r.months}
                   min={RANGE.months.min} max={RANGE.months.max}
                   onChange={(e) => edit(i, { months: e.target.value })} className={BARE} />
-                <span className="shrink-0 pr-5 text-lg text-gray-400">개월</span>
+                <span className="shrink-0 pr-5 text-lg text-mute">개월</span>
               </span>
             </div>
             {(칸빈(r.region) || 칸빈(r.months)) && (
@@ -1011,7 +1011,7 @@ function Group({ title, hint, children }: { title: string; hint?: string; childr
   return (
     <div className="mt-6 rounded-sm border border-gray-100 p-5 first:mt-0 dark:border-gray-800">
       <p className="text-lg font-bold">{title}</p>
-      {hint && <p className="mt-1 text-sm text-gray-400">{hint}</p>}
+      {hint && <p className="mt-1 text-sm text-mute">{hint}</p>}
       <div className="mt-2 grid grid-cols-3 gap-2 [&>label]:mt-0">{children}</div>
     </div>
   );
@@ -1037,7 +1037,7 @@ function Gross({ f, patch }: { f: Form; patch: (p: Form) => void }) {
       <Num k="base_monthly" label="고정 월급" req unit="만원" ph="250"
         hint="근로계약서에 적힌 기본급이에요. 수당·상여는 빼고요"
         v={f.base_monthly} on={(k, v) => patch({ [k]: v, pay_basis: 'gross' })} f={f} />
-      <p className="mt-1 text-sm text-gray-400">세전 — 세금·4대보험 떼기 전 금액이에요</p>
+      <p className="mt-1 text-sm text-mute">세전 — 세금·4대보험 떼기 전 금액이에요</p>
 
       <button type="button" aria-pressed={unsure}
         onClick={() => patch(unsure
@@ -1086,7 +1086,7 @@ function Gross({ f, patch }: { f: Form; patch: (p: Form) => void }) {
                 className="mt-5 w-full rounded-md bg-brand-red px-6 py-5 text-body-lg font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
                 이 값으로 넣을게요
               </button>
-              <p className="mt-2 text-sm text-gray-400">넣고 나서 위 고정 월급 칸에서 고치셔도 돼요</p>
+              <p className="mt-2 text-sm text-mute">넣고 나서 위 고정 월급 칸에서 고치셔도 돼요</p>
             </>
           )}
         </div>
@@ -1122,7 +1122,7 @@ function PaySummary({ f }: { f: Form }) {
         <Line k="시급" v={`약 ${hour.toLocaleString('ko-KR')}원`}
           note={`실제 일하는 ${monthlyHours(p)}시간 기준 · 당직·주말 포함`} />
       </dl>
-      <p className="mt-5 text-sm text-gray-400">
+      <p className="mt-5 text-sm text-mute">
         다르면 위 칸을 고쳐 주세요. {RATE_YEAR}년 요율 기준이고 소득세는 대략이에요
       </p>
     </section>
@@ -1135,7 +1135,7 @@ function Line({ k, v, note }: { k: string; v: string; note?: string }) {
       <dt className="shrink-0 text-gray-500">{k}</dt>
       <dd className="text-right">
         <b>{v}</b>
-        {note && <span className="mt-1 block text-sm text-gray-400">{note}</span>}
+        {note && <span className="mt-1 block text-sm text-mute">{note}</span>}
       </dd>
     </div>
   );

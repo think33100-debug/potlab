@@ -148,7 +148,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
             >
               {t.label}
               {n !== null && (
-                <span className={'ml-2 text-sm ' + (on ? 'text-white/70' : 'text-gray-400')}>{n}</span>
+                <span className={'ml-2 text-sm ' + (on ? 'text-white/70' : 'text-mute')}>{n}</span>
               )}
             </Link>
           );
@@ -176,7 +176,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
               : 'text-gray-500 hover:underline')}
           >
             {s.시도}
-            <span className="ml-1 text-sm text-gray-400">{s.수}</span>
+            <span className="ml-1 text-sm text-mute">{s.수}</span>
           </Link>
         ))}
       </nav>
@@ -184,7 +184,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
       <p className="mt-5 text-lg text-gray-500">
         {sido ?? '전국'} · <b className="text-ink">{이탭수}건</b> 모집 중
         {tab.갈래 === null && c && c.모름 > 0 && (
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-mute">
             {' '}(분야를 알 수 없는 {c.모름}건 포함 — 「전체」에만 나옵니다)
           </span>
         )}
@@ -239,7 +239,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
                   {v.기관}
                   {v.장소 && <><br />{v.장소}</>}
                 </p>
-                <p className="mt-2 text-sm text-gray-400">
+                <p className="mt-2 text-sm text-mute">
                   {[v.시도, v.시군구].filter(Boolean).join(' ')}
                   {!v.시군구 && v.시도 && ' · 구·군 모름'}
                 </p>
@@ -275,7 +275,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
               ‹ 앞으로
             </Link>
           ) : <span />}
-          <span className="text-sm text-gray-400">{page + 1}쪽</span>
+          <span className="text-sm text-mute">{page + 1}쪽</span>
           {rows.length === 20 ? (
             <Link href={길({ p: String(page + 1) })}
               className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">

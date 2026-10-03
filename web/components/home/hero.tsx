@@ -87,14 +87,14 @@ export function Hero({ stats, texts }: { stats: HomeStats; texts: Texts }) {
                 <dd className="text-h2 font-bold">
                   <Count to={c.n} />{c.unit && <span className="text-h3">{c.unit}</span>}
                 </dd>
-                <dt className="mt-1 text-sm text-gray-400">{c.label}</dt>
+                <dt className="mt-1 text-sm text-mute">{c.label}</dt>
               </div>
             ))}
           </dl>
         )}
 
         {/* 중위값만 크게 보이면 「내가 받을 돈」으로 읽힙니다 */}
-        {ot?.mid != null && <PayNote className="mt-5 text-gray-400" />}
+        {ot?.mid != null && <PayNote className="mt-5 text-mute" />}
       </div>
     </section>
   );

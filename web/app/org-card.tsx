@@ -39,7 +39,7 @@ export async function OrgCard({ name }: { name: string }) {
       href={`/orgs?org=${encodeURIComponent(org.name)}&sido=${encodeURIComponent(org.sido_std ?? '')}`}
       className="mb-6 block rounded-sm border border-gray-100 p-6 dark:border-gray-800"
     >
-      <p className="text-xs text-gray-400">이 기관은 이런 곳이에요</p>
+      <p className="text-xs text-mute">이 기관은 이런 곳이에요</p>
       <p className="mt-2 text-h3 font-bold">{org.name}</p>
 
       <div className="mt-2 flex flex-wrap gap-2">
@@ -56,7 +56,7 @@ export async function OrgCard({ name }: { name: string }) {
       {org.kinds?.length ? (
         <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">{shortKinds(org.kinds)}</p>
       ) : null}
-      <p className="mt-2 text-sm text-gray-400">눌러서 병원정보 보기</p>
+      <p className="mt-2 text-sm text-mute">눌러서 병원정보 보기</p>
     </Link>
   );
 }

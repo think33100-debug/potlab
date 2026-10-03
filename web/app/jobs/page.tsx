@@ -160,7 +160,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
           defaultValue={q}
           placeholder="기관 이름이나 공고 제목으로 찾기"
           aria-label="공고 검색"
-          className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-950"
+          className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg placeholder:text-mute dark:border-gray-700 dark:bg-gray-950"
         />
         <button
           type="submit"
@@ -281,7 +281,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                     {dd && (
                       <span className={
                         'shrink-0 text-sm font-bold ' +
-                        (dd.over ? 'text-gray-400' : dd.urgent ? 'text-brand-red' : 'text-gray-600')
+                        (dd.over ? 'text-mute' : dd.urgent ? 'text-brand-red' : 'text-gray-600')
                       }>
                         {dd.text}
                       </span>
@@ -351,7 +351,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       )}
 
       {!locked && (
-        <p className="mt-7 break-keep text-sm text-gray-400">
+        <p className="mt-7 break-keep text-sm text-mute">
           {searching
             ? `네 탭 전체에서 ${total}건 · 이 쪽에 ${rows.length}건`
             : `${active?.label} ${tabCounts[TABS.findIndex((t) => t.key === active?.key)]}건 중 이 쪽에 ${rows.length}건`}

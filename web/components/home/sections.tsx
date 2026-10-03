@@ -225,7 +225,7 @@ export function JobSection({ stats, texts }: { stats: HomeStats; texts: Texts })
 
           {/* 자료판(분기 표기)은 화면에 안 씁니다 — 분기가 지나면
               「낡은 자료」로 읽힙니다. 값은 lib/home.ts 가 계속 들고 있습니다 */}
-          <p className="mt-5 break-keep text-sm text-gray-400">{t('job.dark.source')}</p>
+          <p className="mt-5 break-keep text-sm text-mute">{t('job.dark.source')}</p>
         </div>
       </Reveal>
 
@@ -273,7 +273,7 @@ function Chip({ n, label }: { n: number; label: string }) {
   return (
     <li className="rounded-md border border-gray-700 px-5 py-2 text-lg">
       <b><Count to={n} /></b>
-      <span className="ml-2 text-gray-400">{label}</span>
+      <span className="ml-2 text-mute">{label}</span>
     </li>
   );
 }
@@ -394,7 +394,7 @@ export function FinalCta({ stats, texts }: { stats: HomeStats; texts: Texts }) {
   return (
     <section className="-mx-6 mt-8 bg-gray-900 px-6 py-8 text-white md:-mx-7 md:px-7">
       <div className="mx-auto max-w-3xl">
-        <p className="break-keep text-sm font-bold tracking-wide text-gray-400">{t('cta.eyebrow')}</p>
+        <p className="break-keep text-sm font-bold tracking-wide text-mute">{t('cta.eyebrow')}</p>
         <h2 className="mt-5 whitespace-pre-line break-keep text-h1 font-bold leading-[1.25]">
           {t('cta.title')}
         </h2>
@@ -404,7 +404,7 @@ export function FinalCta({ stats, texts }: { stats: HomeStats; texts: Texts }) {
         >
           {t('cta.button')}
         </Link>
-        <p className="mt-7 whitespace-pre-line break-keep text-sm text-gray-400">
+        <p className="mt-7 whitespace-pre-line break-keep text-sm text-mute">
           {t('cta.source', { min: stats.min_n })}
         </p>
       </div>

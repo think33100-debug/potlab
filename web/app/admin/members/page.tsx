@@ -124,7 +124,7 @@ export default function AdminMembers() {
                   스펙 {r.스펙넣음 ? '넣음' : '안 넣음'} ·
                   알림 {r.알림받음 ? '받음' : '안 받음'}
                 </span>
-                <span className="block text-sm text-gray-400">
+                <span className="block text-sm text-mute">
                   동의 {r.동의판 ?? '(기록 없음)'}
                   {r.동의시각 && ' · ' + 날(r.동의시각)}
                 </span>

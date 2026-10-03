@@ -142,7 +142,7 @@ export default function LeavePage() {
         그만두기
       </Link>
 
-      <p className="mt-5 break-keep text-sm text-gray-400">
+      <p className="mt-5 break-keep text-sm text-mute">
         탈퇴한 뒤 같은 카카오·네이버로 다시 로그인하면 <span className="font-bold">새 계정</span>으로
         가입 첫 화면부터 시작해요. 예전 글은 「탈퇴한 회원」이 쓴 글로 남습니다
       </p>

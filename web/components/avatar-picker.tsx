@@ -69,7 +69,7 @@ export function AvatarPicker({
         <PhotoPicker label="이미지 직접 가져오기" onPick={pickPhoto} disabled={busy} />
       </div>
 
-      <p className="mt-6 text-sm text-gray-400">이모지와 색을 골라도 돼요</p>
+      <p className="mt-6 text-sm text-mute">이모지와 색을 골라도 돼요</p>
       <div className="mt-2 flex flex-wrap gap-2">
         {AVATAR_EMOJIS.map((em) => (
           <button key={em} type="button" aria-label={em} disabled={busy}

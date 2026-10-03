@@ -72,7 +72,7 @@ export default async function Unemployment() {
             <div key={a} className="flex items-baseline justify-between gap-4 border-b border-gray-50 py-4 last:border-0 dark:border-gray-800">
               <dt className="min-w-0 break-keep text-lg">
                 {a}
-                <span className="mt-0.5 block text-sm text-gray-400">{c}</span>
+                <span className="mt-0.5 block text-sm text-mute">{c}</span>
               </dt>
               <dd className="shrink-0 break-keep text-lg font-bold">{b}</dd>
             </div>
@@ -112,7 +112,7 @@ export default async function Unemployment() {
         </div>
 
         {Object.keys(s.출처주소 ?? {}).length > 0 && (
-          <p className="mt-5 break-keep text-sm text-gray-400">
+          <p className="mt-5 break-keep text-sm text-mute">
             출처 —{' '}
             {Object.entries(s.출처주소).map(([이름, 주소], i) => (
               <span key={이름}>

@@ -99,7 +99,7 @@ export default function AdminTexts() {
                   className="rounded-sm border border-gray-100 p-6 dark:border-gray-800">
                   <div className="flex flex-wrap items-baseline justify-between gap-3">
                     <span className="break-keep text-sm font-bold text-gray-500">{r.label}</span>
-                    <span className="text-sm text-gray-400">{r.key}</span>
+                    <span className="text-sm text-mute">{r.key}</span>
                   </div>
 
                   {r.multiline ? (

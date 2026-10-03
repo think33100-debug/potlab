@@ -195,13 +195,13 @@ export default function Login() {
                 >
                   {busy === m.key ? '넘어가는 중…' : m.label}
                 </button>
-                {m.why && <p className="mt-1 text-sm text-gray-400">{m.why}</p>}
+                {m.why && <p className="mt-1 text-sm text-mute">{m.why}</p>}
               </div>
             );
           })}
         </div>
 
-        <p className="mt-7 text-sm text-gray-400">
+        <p className="mt-7 text-sm text-mute">
           마지막에 쓴 수단은 이 기기에만 기억해요. 서버로 보내지 않아요
         </p>
       </div>

@@ -35,9 +35,18 @@ export function TabBar() {
             <Link
               href={t.href}
               aria-current={on(t.href) ? 'page' : undefined}
+              /* ★ 2026-10-03 — 어두운 구역에 dark: 짝을 달았습니다.
+                 커뮤니티(어두운 바탕)에서 눌린 탭이 teal-strong(oklch 0.378 ·
+                 어두운 청록)이라 잉크색 바탕에서 **1.8:1** 로 안 보였습니다.
+                 위쪽 길(TopNav)은 처음부터 dark:text-white 짝이 있었는데
+                 아래 탭바만 빠져 있었습니다. 같은 방식으로 맞춥니다.
+                 안 눌린 탭도 mute(#5F666C)가 어두운 바탕에서 안 보여
+                 gray-400 으로 올립니다 — 어두운 구역 전용 값입니다. */
               className={
                 'flex flex-col items-center gap-1 py-4 ' +
-                (on(t.href) ? 'text-teal-strong' : 'text-gray-400')
+                (on(t.href)
+                  ? 'text-teal-strong dark:text-white'
+                  : 'text-mute dark:text-gray-400')
               }
             >
               <Icon name={t.icon} size={20} />

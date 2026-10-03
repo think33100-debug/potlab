@@ -9,7 +9,7 @@ import { Avatar } from './avatar';
 export function TopbarUser() {
   const { loading, session, me, isAdmin } = useAuth();
 
-  if (loading) return <span className="text-sm text-gray-400">…</span>;
+  if (loading) return <span className="text-sm text-mute">…</span>;
 
   if (!session) {
     return (

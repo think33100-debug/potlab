@@ -92,6 +92,18 @@ try {
 
 /* ── 결과 ── */
 console.log('· METHODS ' + methods.length + '개' + (api ? ' · API 표 ' + api.length + '개' : ''));
+/* ── 화면 색 (2026-10-03) ──────────────────────────────────────
+   밝은 바탕에서 묻히는 글자색을 잡습니다. 자세한 것은 tools/화면색검사.mjs.
+   「커뮤니티만 어둡게」로 바꾸면서 text-gray-400 이 2.18:1 로 묻혔습니다.
+   dark: 가 붙은 것은 어두운 바탕에서 맞는 색이라 안 잡습니다. */
+try {
+  const { execFileSync } = require("child_process");
+  execFileSync(process.execPath, [require("path").join(__dirname, "화면색검사.mjs")],
+    { stdio: "inherit" });
+} catch (e) {
+  problems.push("화면 색 — 밝은 바탕에서 묻히는 글자색이 있습니다 (위 ★ 를 보십시오)");
+}
+
 if (!problems.length) {
   console.log('\n어긋난 곳 없습니다.');
 } else {

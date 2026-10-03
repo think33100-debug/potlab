@@ -167,7 +167,7 @@ export default function AdminPosts() {
             }
           >
             {s.label}
-            <span className={'ml-2 text-sm ' + (state === s.key ? 'text-white/70' : 'text-gray-400')}>
+            <span className={'ml-2 text-sm ' + (state === s.key ? 'text-white/70' : 'text-mute')}>
               {counts[s.key]}
             </span>
           </button>
@@ -194,7 +194,7 @@ export default function AdminPosts() {
                 {channelName(r.channel)}
               </span>
               <span>{nameOf(r.author, r.author_id)}</span>
-              <span className="text-gray-400">{ago(r.created_at)}</span>
+              <span className="text-mute">{ago(r.created_at)}</span>
               {r.hidden && (
                 <span className="rounded-md bg-gray-100 px-3 font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
                   감춤

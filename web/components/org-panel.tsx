@@ -38,7 +38,7 @@ export async function OrgPanel(
 
   return (
     <section className="mt-8 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-      <p className="text-xs text-gray-400">이 기관은 이런 곳이에요</p>
+      <p className="text-xs text-mute">이 기관은 이런 곳이에요</p>
       {/* 색을 박습니다. 물려받게 두면 어두운 모드에서 흰색이 되어
           종이색 바탕 위에서 안 보였습니다 (#14181C 로 16.2:1) */}
       <p className="mt-2 text-h3 font-bold text-ink">{org?.name ?? orgName}</p>
@@ -85,7 +85,7 @@ export async function OrgPanel(
               <li key={r.id}>
                 <Link href={`/jobs/${r.id}`} className="-mx-4 block rounded-sm px-4 py-5 hover:bg-gray-50 dark:hover:bg-gray-950">
                   <p className="truncate text-lg font-medium">{r.title}</p>
-                  <p className="mt-1 text-sm text-gray-400">
+                  <p className="mt-1 text-sm text-mute">
                     {[r.job_group, r.employ_type, r.apply_to ? `~${r.apply_to.slice(5).replace('-', '.')}` : null]
                       .filter(Boolean).join(' · ')}
                   </p>

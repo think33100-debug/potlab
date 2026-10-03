@@ -173,11 +173,11 @@ export default function PayPage() {
                 세전·세후 · 퇴직금 · 연차. 로그인 없이 쓸 수 있어요
               </span>
             </span>
-            <span aria-hidden className="shrink-0 text-gray-400">→</span>
+            <span aria-hidden className="shrink-0 text-mute">→</span>
           </Link>
 
           <PayNote className="mt-6 text-gray-500" />
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-mute">
             치료사들이 직접 올린 자료입니다. 병원 이름은 받지 않아요
           </p>
         </>

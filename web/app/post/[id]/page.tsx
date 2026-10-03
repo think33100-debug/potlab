@@ -123,7 +123,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             {shownName(p.profiles)}
           </span>
           <span>{p.created_at.slice(0, 16).replace('T', ' ')}</span>
-          <span className="text-gray-400">조회 {p.view_count}</span>
+          <span className="text-mute">조회 {p.view_count}</span>
         </p>
 
         {/* 가입 전에는 본문을 일부만 보여줍니다 — app/gate.tsx */}

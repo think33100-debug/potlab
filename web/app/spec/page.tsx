@@ -100,7 +100,7 @@ export default function SpecPage() {
 
             <p className="mt-6 text-h1 font-bold">
               {me.score}
-              <span className="ml-1 text-h3 font-medium text-gray-400">/ 100점</span>
+              <span className="ml-1 text-h3 font-medium text-mute">/ 100점</span>
             </p>
             <div className="mt-2 h-1 rounded-md bg-gray-100 dark:bg-gray-800">
               <div className="h-1 rounded-md bg-teal-strong" style={{ width: `${me.score}%` }} />
@@ -141,7 +141,7 @@ export default function SpecPage() {
             </dl>
 
             {/* 어학은 우리 기준이라 밝혀 둡니다. 구간 값은 안 적습니다 */}
-            <p className="mt-5 break-keep text-sm text-gray-400">
+            <p className="mt-5 break-keep text-sm text-mute">
               어학은 시험끼리 환산한 게 아니라 각 시험이 발표한 등급을 그대로 따랐어요.
               여러 개 넣으면 제일 높은 것 하나만 써요
             </p>
@@ -168,7 +168,7 @@ export default function SpecPage() {
                           )}
                         </span>
                         <span className="text-lg"><b>{t.rate}%</b>
-                          <span className="ml-2 text-sm text-gray-400">{t.n}명 기준</span></span>
+                          <span className="ml-2 text-sm text-mute">{t.n}명 기준</span></span>
                       </div>
                       <div className="mt-2 h-1 rounded-md bg-gray-100 dark:bg-gray-800">
                         <div className="h-1 rounded-md bg-teal-strong" style={{ width: `${t.rate}%` }} />
@@ -176,7 +176,7 @@ export default function SpecPage() {
                     </div>
                   ))}
                 </div>
-                <p className="mt-6 text-sm text-gray-400">
+                <p className="mt-6 text-sm text-mute">
                   위 등급 문구는 점수만 보고 적은 것이고, 실제 근거는 이 비율이에요
                 </p>
               </>
@@ -224,7 +224,7 @@ export default function SpecPage() {
             지역으로 좁혀 볼 수 있어요. 신청은 VMS 에서 해요
           </span>
         </span>
-        <span aria-hidden className="shrink-0 text-gray-400">→</span>
+        <span aria-hidden className="shrink-0 text-mute">→</span>
       </Link>
     </main>
   );
@@ -264,11 +264,11 @@ function Rookie({ job }: { job: string | null }) {
                 className="flex items-baseline justify-between border-b border-gray-50 py-5 last:border-0 dark:border-gray-800">
                 <span className="min-w-0 text-lg font-medium">
                   {t.type}
-                  <span className="ml-2 text-sm text-gray-400">{t.n}명</span>
+                  <span className="ml-2 text-sm text-mute">{t.n}명</span>
                 </span>
                 <span className="shrink-0 text-right">
                   <b className="text-h3">{man10(t.median_year)}</b>
-                  <span className="block text-sm text-gray-400">
+                  <span className="block text-sm text-mute">
                     고정 월급 {t.median_base}만원
                   </span>
                 </span>
@@ -277,7 +277,7 @@ function Rookie({ job }: { job: string | null }) {
           </div>
           <PayNote className="mt-5 text-gray-500"
                    source="연차 2년 이하 회원이 직접 올린 급여" />
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-mute">
             가운데 값(중위값)이에요. {d.min_n}명이 안 되는 유형은 안 보여드려요
           </p>
         </>

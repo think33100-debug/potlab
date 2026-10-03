@@ -39,13 +39,13 @@ export function PostItem({ p, showChannel = false }: { p: PostRow; showChannel?:
             )}
             <Avatar value={p.profiles?.avatar} size="sm" />
             <span className="truncate">{shownName(p.profiles)}</span>
-            <span className="text-gray-400">{ago(p.created_at)}</span>
+            <span className="text-mute">{ago(p.created_at)}</span>
           </div>
 
           {p.title && <p className="mt-1 truncate text-body-lg font-medium">{p.title}</p>}
           <p className="mt-1 line-clamp-2 text-lg text-gray-600 dark:text-gray-400">{p.body}</p>
 
-          <div className="mt-2 flex gap-3 text-sm text-gray-400">
+          <div className="mt-2 flex gap-3 text-sm text-mute">
             <span>조회 {p.view_count}</span>
             <span>댓글 {p.comment_count}</span>
             <span>좋아요 {p.like_count}</span>

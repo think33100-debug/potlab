@@ -37,7 +37,7 @@ function Slide({ b }: { b: HomeBlock }) {
     >
       {bg && <span aria-hidden className="absolute inset-0 bg-black/45" />}
       <span className="relative break-keep text-h3 font-bold">{b.title}</span>
-      {b.descr && <span className="relative mt-1 break-keep text-lg text-gray-400">{b.descr}</span>}
+      {b.descr && <span className="relative mt-1 break-keep text-lg text-mute">{b.descr}</span>}
     </Link>
   );
 }

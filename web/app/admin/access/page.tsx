@@ -149,7 +149,7 @@ export default function AdminAccessLog() {
                     한 번에 <span className="num tabular-nums">{r.몇명}</span>명
                   </span>
                 )}
-                <span className="block text-sm text-gray-400">
+                <span className="block text-sm text-mute">
                   접속지 {r.어디서 ?? '(모름 — 데이터베이스에서 직접 부른 것)'}
                 </span>
               </p>

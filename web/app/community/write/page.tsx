@@ -123,7 +123,7 @@ function Write() {
           <input type="file" accept="image/*" multiple className="sr-only"
             onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ''; }} />
         </label>
-        <span className="text-sm text-gray-400">
+        <span className="text-sm text-mute">
           {picks.length}/{MAX_POST_IMAGES}장 · 올릴 때 1600px WebP 로 줄입니다
         </span>
       </div>
@@ -156,7 +156,7 @@ function Write() {
         {busy ? '올리는 중…' : '올리기'}
       </button>
 
-      <p className="mt-5 text-sm text-gray-400">
+      <p className="mt-5 text-sm text-mute">
         남 비방·저격·허위사실·광고는 지워져요 — 커뮤니티 이용규칙
       </p>
     </main>

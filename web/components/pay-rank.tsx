@@ -74,7 +74,7 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
           <p className="mt-1 text-lg text-gray-500">
             {rank.n}명 중 <b className="text-gray-900 dark:text-white">{rank.rank}등</b>
           </p>
-          <p className="mt-1 text-sm text-gray-400">숫자가 작을수록 많이 받는다는 뜻이에요</p>
+          <p className="mt-1 text-sm text-mute">숫자가 작을수록 많이 받는다는 뜻이에요</p>
 
           {/* 막대 — 오른쪽이 많이 받는 쪽입니다 */}
           <div className="relative mt-6 h-1 rounded-md bg-gray-100 dark:bg-gray-800">
@@ -82,7 +82,7 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
               className="absolute -top-1 size-[12px] -translate-x-1/2 rounded-md bg-teal-strong"
               style={{ left: `${Math.max(2, Math.min(98, 100 - rank.top))}%` }} />
           </div>
-          <div className="mt-2 flex justify-between text-sm text-gray-400">
+          <div className="mt-2 flex justify-between text-sm text-mute">
             <span>하위</span><span>중위</span><span>상위</span>
           </div>
 
@@ -110,12 +110,12 @@ export function PayRank({ me, s, minN }: { me: Me; s: Stats; minN: number }) {
           </p>
 
           {byAnnual && monRank && (
-            <p className="mt-2 text-sm text-gray-400">
+            <p className="mt-2 text-sm text-mute">
               고정 월급만 놓고 보면 상위 {monRank.top}% (중위 {monRank.median}만원)
             </p>
           )}
           {!s.in_filter && (
-            <p className="mt-2 text-sm text-gray-400">지금 걸어둔 조건에는 내 자료가 안 들어가요</p>
+            <p className="mt-2 text-sm text-mute">지금 걸어둔 조건에는 내 자료가 안 들어가요</p>
           )}
 
           <PayNote className="mt-5 text-gray-500" />

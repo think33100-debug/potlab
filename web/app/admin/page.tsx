@@ -292,7 +292,7 @@ function Row({
           <span className="text-lg font-medium">{b.enabled ? '켜짐' : '꺼짐'}</span>
         </label>
 
-        <span className="text-sm text-gray-400">{i + 1}번째</span>
+        <span className="text-sm text-mute">{i + 1}번째</span>
 
         <button type="button" onClick={() => onMove(b, -1)} disabled={i === 0}
           aria-label="위로" className="rounded-md border border-gray-200 px-4 py-1 text-lg disabled:opacity-30 dark:border-gray-700">↑</button>

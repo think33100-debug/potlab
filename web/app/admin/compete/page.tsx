@@ -65,7 +65,7 @@ function 률(상태: unknown, 값: unknown) {
   if (상태 === '있음') return <b className="text-gray-900">{String(값)} : 1</b>;
   if (상태 === '못냄') return <span className="text-gray-500">계산 불가<span className="ml-1 text-xs">(뽑은 사람 0명)</span></span>;
   if (상태 === '진짜0') return <span className="text-gray-600">0 : 1 <span className="text-xs">(아무도 안 옴)</span></span>;
-  return <span className="text-gray-400">미등록</span>;
+  return <span className="text-mute">미등록</span>;
 }
 
 /* ── 무엇으로 밝혀 두는가 (화면 아래 늘 붙습니다) ── */
@@ -227,7 +227,7 @@ function 본문() {
             <input type="checkbox" checked={다른직군}
               onChange={(e) => 주소로({ 다른직군: e.target.checked ? '1' : null, 묶음: null })} />
             다른 직군 보기
-            <span className="text-xs text-gray-400">({쉼표(d.숨긴묶음)}개 숨김)</span>
+            <span className="text-xs text-mute">({쉼표(d.숨긴묶음)}개 숨김)</span>
           </label>
           {(기관 || 직군 || 지역 || 고용형태 || 연도 || 찾기) && (
             <button onClick={() => 주소로({ 기관: null, 직군: null, 지역: null, 고용형태: null, 연도: null, q: null, 묶음: null })}
@@ -342,7 +342,7 @@ function 본문() {
                         </table>
                       </div>
                       {r['기본값단계'] ? (
-                        <div className="mt-1 text-xs text-gray-400">단계 이름은 일반적인 전형 순서 기준입니다</div>
+                        <div className="mt-1 text-xs text-mute">단계 이름은 일반적인 전형 순서 기준입니다</div>
                       ) : null}
                       {/* 공고문 원문을 바로 열 수 있게 (2026-09-30 · 세중님).
                           개방 API 의 첨부 주소는 죽어 있어 www.alio.go.kr 쪽을 씁니다 */}
@@ -359,7 +359,7 @@ function 본문() {
                           </a>
                         ))}
                         {!((r['첨부'] as 칸[]) || []).length && (
-                          <span className="text-gray-400">첨부 없음</span>
+                          <span className="text-mute">첨부 없음</span>
                         )}
                       </div>
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
@@ -372,7 +372,7 @@ function 본문() {
                           <option value="">— 모름 —</option>
                           {고용형태고르기.map((x) => <option key={x} value={x}>{x}</option>)}
                         </select>
-                        <span className="text-gray-400">
+                        <span className="text-mute">
                           {r['고용형태출처'] === '관리자 지정'
                             ? '관리자 지정' : r['고용형태출처'] ? '자동 · ' + String(r['고용형태출처']) : '못 가림'}
                         </span>
@@ -472,7 +472,7 @@ function 본문() {
           <b>우리 직군(물리·작업치료사) {쉼표(a.우리직군묶음)}묶음</b> 기준 —
           짝 확인 필요 {쉼표(a.짝확인필요)} · 고용형태 확인 필요 <b>{쉼표(a.고용형태확인필요)}</b> ·
           한 번만 채용 {쉼표(a.한회뿐)}
-          {d.다른직군 && <span className="ml-1 text-gray-400">
+          {d.다른직군 && <span className="ml-1 text-mute">
             (다른 직군 묶음은 정리하지 않습니다 — 자료만 담아 둡니다)
           </span>}
         </p>
@@ -515,16 +515,16 @@ function 본문() {
                   </td>
                   <td className="px-3 py-2 text-right">
                     {쉼표(x['회차'])}
-                    <div className="text-xs text-gray-400">값 {쉼표(x['값있음'])}</div>
+                    <div className="text-xs text-mute">값 {쉼표(x['값있음'])}</div>
                   </td>
                   <td className="px-3 py-2">
                     {요약문장(x['첫해'], x['값있음'], x['평균'])
-                      ?? <span className="text-gray-400">경쟁률 낼 값 없음</span>}
+                      ?? <span className="text-mute">경쟁률 낼 값 없음</span>}
                   </td>
                   <td className="px-3 py-2 text-gray-600">
                     {x['가장낮음'] != null ? <>{String(x['가장낮음'])} ~ {String(x['가장높음'])}</> : '—'}
                     {Number(x['계산불가']) > 0 && (
-                      <div className="text-xs text-gray-400">계산 불가 {String(x['계산불가'])}회</div>
+                      <div className="text-xs text-mute">계산 불가 {String(x['계산불가'])}회</div>
                     )}
                   </td>
                   <td className="px-3 py-2 text-gray-500">{n(x['첫해'])}~{n(x['끝해'])}</td>
@@ -537,7 +537,7 @@ function 본문() {
           </table>
         </div>
         <밝힘 />
-        <p className="mt-2 text-xs text-gray-400">
+        <p className="mt-2 text-xs text-mute">
           숫자는 알리오 웹 화면에서 읽습니다 — 공공데이터 API 는 뒤쪽 전형단계를 비워 보냅니다
           (지금 웹 {쉼표(a.웹값)}건 · API {쉼표(a.API값)}건).
           API 가 고쳐지면 API 로 되돌릴 수 있게 표와 도구를 그대로 두었습니다.

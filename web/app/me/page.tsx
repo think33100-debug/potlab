@@ -96,7 +96,7 @@ export default function MyPage() {
 
       <section className="mt-7">
         <h2 className="text-h3 font-bold">프로필 사진</h2>
-        <p className="mt-1 text-sm text-gray-400">고르면 바로 저장돼요</p>
+        <p className="mt-1 text-sm text-mute">고르면 바로 저장돼요</p>
         <div className="mt-5">
           <AvatarPicker userId={me.id} value={me.avatar} onChange={reload} />
         </div>
@@ -152,7 +152,7 @@ export default function MyPage() {
         <p className="mt-1 text-lg text-gray-500">
           커뮤니티에서 보이는 방이 역할로 갈려요. 졸업하시면 현직으로 바꿔 주세요
         </p>
-        <p className="mt-1 text-sm text-gray-400">누르면 바로 저장돼요</p>
+        <p className="mt-1 text-sm text-mute">누르면 바로 저장돼요</p>
 
         <h3 className="mt-6 text-sm font-bold text-gray-500">직군</h3>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -166,7 +166,7 @@ export default function MyPage() {
           {ROLES.map((r) => (
             <Pick key={r} on={me.role === r} go={() => setWho({ role: r })}>
               {r}
-              <span className={'ml-2 text-sm font-medium ' + (me.role === r ? 'text-white/70' : 'text-gray-400')}>
+              <span className={'ml-2 text-sm font-medium ' + (me.role === r ? 'text-white/70' : 'text-mute')}>
                 {ROLE_DESC[r]}
               </span>
             </Pick>
@@ -198,7 +198,7 @@ export default function MyPage() {
         {/* 애플 심사 기준 5.1.1(v) — 앱에서 가입할 수 있으면 앱 안에서 탈퇴도
             할 수 있어야 합니다. 찾기 쉬운 자리에 둡니다 (2026-10-01) */}
         <Link href="/me/leave"
-          className="mt-4 block text-lg text-gray-400 underline underline-offset-4 hover:text-brand-red">
+          className="mt-4 block text-lg text-mute underline underline-offset-4 hover:text-brand-red">
           회원 탈퇴
         </Link>
       </section>

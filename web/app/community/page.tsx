@@ -66,7 +66,7 @@ export default async function Community() {
       <nav className="mb-8" aria-label="방">
         {GROUPS.map((g) => (
           <section key={g.for} className="mb-7">
-            <h2 className="mb-3 text-sm font-bold text-gray-400">{g.title}</h2>
+            <h2 className="mb-3 text-sm font-bold text-mute">{g.title}</h2>
             <Rail label={`${g.title} 주제`} dark>
               {CHANNELS.filter((c) => c.for === g.for).map((c) => (
                 <Link
@@ -78,7 +78,7 @@ export default async function Community() {
                 >
                   <p className="break-keep text-h3 font-bold">
                     {c.name}
-                    <span className="ml-2 text-sm font-medium text-gray-400">{n[c.id] ?? 0}</span>
+                    <span className="ml-2 text-sm font-medium text-mute">{n[c.id] ?? 0}</span>
                   </p>
                   <p className="mt-3 break-keep text-lg text-gray-500">{c.desc}</p>
                 </Link>
@@ -92,7 +92,7 @@ export default async function Community() {
         <section className="mb-8 rounded-sm bg-gray-950 p-6">
           <h2 className="break-keep text-h3 font-bold">
             지금 많이 본 글
-            <span className="ml-2 text-sm font-medium text-gray-400">최근 {HOT_DAYS}일</span>
+            <span className="ml-2 text-sm font-medium text-mute">최근 {HOT_DAYS}일</span>
           </h2>
           <ul className="mt-2 divide-y divide-white/10">
             {hotRows.map((p) => <PostItem key={p.id} p={p} showChannel />)}

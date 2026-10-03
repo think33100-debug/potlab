@@ -175,7 +175,7 @@ export default function AdminJobs() {
             }
           >
             {s.label}
-            <span className={'ml-2 text-sm ' + (state === s.key ? 'text-white/70' : 'text-gray-400')}>
+            <span className={'ml-2 text-sm ' + (state === s.key ? 'text-white/70' : 'text-mute')}>
               {counts[s.key] ?? '…'}
             </span>
           </button>
@@ -220,7 +220,7 @@ export default function AdminJobs() {
 
       {/* 목록 */}
       {rows === null ? (
-        <p className="mt-7 text-lg text-gray-400">불러오는 중…</p>
+        <p className="mt-7 text-lg text-mute">불러오는 중…</p>
       ) : rows.length === 0 ? (
         <p className="mt-7 py-8 text-center text-lg text-gray-500">
           {state === 'hold' ? '보류함이 비었어요. 좋은 신호죠' : '해당하는 공고가 없어요'}
@@ -229,7 +229,7 @@ export default function AdminJobs() {
         <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
           {rows.map((r) => (
             <li key={r.id} className="py-6">
-              <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-mute">
                 {r.hold && <Badge tone="red">보류</Badge>}
                 {r.hidden && <Badge tone="gray">숨김</Badge>}
                 {r.tab && <Badge tone="blue">{tabLabel(r.tab)}</Badge>}
@@ -336,7 +336,7 @@ function Act({
       className={
         'rounded-md border px-6 py-4 text-lg font-medium disabled:opacity-40 ' +
         (danger
-          ? 'border-gray-200 text-gray-400 hover:border-brand-red hover:text-brand-red dark:border-gray-700'
+          ? 'border-gray-200 text-mute hover:border-brand-red hover:text-brand-red dark:border-gray-700'
           : 'border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300')
       }>
       {children}

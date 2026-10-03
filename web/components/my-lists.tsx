@@ -59,9 +59,9 @@ export function MyLists({ profileId }: { profileId: string }) {
             {posts?.map((p) => (
               <li key={p.id} className="py-5">
                 <Link href={`/post/${p.id}`} className="block hover:underline">
-                  <span className="text-sm text-gray-400">{channelName(p.channel)} · {ago(p.created_at)}</span>
+                  <span className="text-sm text-mute">{channelName(p.channel)} · {ago(p.created_at)}</span>
                   <p className="mt-1 truncate text-body-lg font-medium">{p.title || p.body.slice(0, 40)}</p>
-                  <p className="mt-1 text-sm text-gray-400">조회 {p.view_count} · 댓글 {p.comment_count}</p>
+                  <p className="mt-1 text-sm text-mute">조회 {p.view_count} · 댓글 {p.comment_count}</p>
                 </Link>
               </li>
             ))}
@@ -74,7 +74,7 @@ export function MyLists({ profileId }: { profileId: string }) {
               <li key={c.id} className="py-5">
                 <Link href={`/post/${c.post_id}`} className="block hover:underline">
                   <p className="text-lg text-gray-700 dark:text-gray-300">{c.body}</p>
-                  <p className="mt-1 truncate text-sm text-gray-400">
+                  <p className="mt-1 truncate text-sm text-mute">
                     {ago(c.created_at)} · {c.posts?.title || c.posts?.body.slice(0, 30) || '지워진 글'}
                   </p>
                 </Link>
@@ -88,10 +88,10 @@ export function MyLists({ profileId }: { profileId: string }) {
             {stars?.map((s) => (
               <li key={s.job_id} className="py-5">
                 <Link href={`/jobs/${s.job_id}`} className="block hover:underline">
-                  <span className="text-sm text-gray-400">{s.job_posts?.org_name}</span>
+                  <span className="text-sm text-mute">{s.job_posts?.org_name}</span>
                   <p className="mt-1 truncate text-body-lg font-medium">{s.job_posts?.title ?? '지워진 공고'}</p>
                   {s.job_posts?.apply_to && (
-                    <p className="mt-1 text-sm text-gray-400">~{s.job_posts.apply_to}</p>
+                    <p className="mt-1 text-sm text-mute">~{s.job_posts.apply_to}</p>
                   )}
                 </Link>
               </li>
@@ -117,7 +117,7 @@ function T({ on, go, children }: { on: boolean; go: () => void; children: React.
 }
 
 function List({ rows, empty, children }: { rows: unknown[] | null; empty: string; children: React.ReactNode }) {
-  if (rows === null) return <p className="text-lg text-gray-400">불러오는 중…</p>;
+  if (rows === null) return <p className="text-lg text-mute">불러오는 중…</p>;
   if (rows.length === 0) return <p className="py-8 text-center text-lg text-gray-500">{empty}</p>;
   return <ul className="divide-y divide-gray-100 dark:divide-gray-800">{children}</ul>;
 }

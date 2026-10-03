@@ -16,7 +16,7 @@ export default async function TermsPage({ params }: { params: Promise<{ doc: str
       <Link href="/welcome" className="text-lg text-interaction-blue hover:underline">← 돌아가기</Link>
 
       <h1 className="mt-6 text-h2 font-bold">{t.title}</h1>
-      <p className="mt-1 text-sm text-gray-400">{TERMS_VERSION} 판</p>
+      <p className="mt-1 text-sm text-mute">{TERMS_VERSION} 판</p>
 
       {t.draft && (
         <p className="mt-6 rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">

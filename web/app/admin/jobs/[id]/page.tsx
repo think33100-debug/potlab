@@ -52,7 +52,7 @@ export default function AdminJobEdit() {
       </div>
     );
   }
-  if (!job) return <p className="text-lg text-gray-400">불러오는 중…</p>;
+  if (!job) return <p className="text-lg text-mute">불러오는 중…</p>;
 
   const changed = EDITABLE.filter((f) => draft[f.key] !== String(job[f.key] ?? ''));
 
@@ -103,7 +103,7 @@ export default function AdminJobEdit() {
     <div>
       <Link href="/admin/jobs" className="text-lg text-interaction-blue hover:underline">← 공고 목록</Link>
 
-      <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-gray-400">
+      <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-mute">
         {job.hold && <span className="rounded-md bg-brand-red-soft px-3 font-medium text-brand-red-dark">보류</span>}
         {job.hidden && <span className="rounded-md bg-gray-100 px-3 font-medium text-gray-600 dark:bg-gray-800">숨김</span>}
         <span>{job.id}</span>
@@ -138,7 +138,7 @@ export default function AdminJobEdit() {
         </a>
         <span className="flex-1" />
         <button type="button" disabled={busy} onClick={remove}
-          className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-400 hover:border-brand-red hover:text-brand-red disabled:opacity-40 dark:border-gray-700">
+          className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-mute hover:border-brand-red hover:text-brand-red disabled:opacity-40 dark:border-gray-700">
           삭제
         </button>
       </div>

@@ -84,7 +84,7 @@ export default function ResetMe() {
 
       <p className="mt-6 text-lg text-gray-700 dark:text-gray-300">
         지금 계정: <span className="font-bold">{me?.nickname ?? '(가입 전)'}</span>
-        <span className="ml-2 text-sm text-gray-400">{session?.user.id.slice(0, 8)}…</span>
+        <span className="ml-2 text-sm text-mute">{session?.user.id.slice(0, 8)}…</span>
       </p>
 
       <label className="mt-6 block">
@@ -109,7 +109,7 @@ export default function ResetMe() {
         {busy ? '지우는 중…' : typed.trim() === SURE ? '내 개인정보 지우기' : `「${SURE}」 라고 쳐주세요`}
       </button>
 
-      <p className="mt-5 text-sm text-gray-400">
+      <p className="mt-5 text-sm text-mute">
         지운 뒤 같은 수단(카카오·네이버)으로 다시 로그인하면 새 계정으로 가입 ①번부터 시작해요.
         올렸던 프로필 사진 파일은 저장소에 남습니다 — tools/clean_orphan_files.js 로 치웁니다
       </p>
