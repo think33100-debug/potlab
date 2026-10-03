@@ -117,10 +117,15 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
 
   /* 직군 기본값 = 회원이 가입 때 고른 직군 (세중님 결정 2026-10-04).
      주소의 job 이 먼저이고, '전체' 는 또렷하게 「전부 보기」입니다 */
+  /* ★ profiles 를 직접 읽으면 안 됩니다 — authenticated 에게 SELECT 권한이
+     없어서 늘 빈 값이 옵니다. 정식 통로는 내프로필() 입니다 (2026-10-04) */
   let 내직군: string | null = null;
+  let 내역할: string | null = null;
   if (await serverWho(sb) === '회원') {
-    const { data } = await sb.from('profiles').select('job_group').limit(1).maybeSingle();
-    내직군 = (data as { job_group?: string | null } | null)?.job_group ?? null;
+    const { data } = await sb.rpc('내프로필');
+    const 나 = ((data ?? []) as { job_group?: string | null; role?: string | null }[])[0];
+    내직군 = 나?.job_group ?? null;
+    내역할 = 나?.role ?? null;
   }
   const 고른직군 = sp.job === '전체' ? null : (sp.job ?? 내직군);
 
@@ -171,6 +176,7 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
           기준={{ job: sp.job ?? 내직군 ?? undefined, past: 지난것 }}
           지역숨김
           기본직군={내직군}
+          역할={내역할}
           마감말="끝난 것도"
           뿌리="/edu"
           남길값={sp.tab && sp.tab !== 'all' ? { tab: sp.tab } : {}}

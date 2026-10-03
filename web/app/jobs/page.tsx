@@ -75,10 +75,20 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
      ★ 주소에 job 이 있으면 **그것이 먼저**입니다 — 회원이 「전체」를 골랐는데
        가입 직군으로 되돌리면 고른 것이 무시됩니다. 그래서 `'전체'` 라는
        또렷한 값을 따로 둡니다 */
+  /* ★ `profiles` 를 **직접 읽으면 안 됩니다.**
+     그 표는 authenticated 에게 SELECT 권한이 아예 없습니다
+     (DELETE·REFERENCES·TRIGGER·TRUNCATE 뿐). RLS 에 「내 프로필은 내가
+     읽습니다」 정책이 있어도, 표 권한이 먼저라 거절됩니다.
+     2026-10-04 에 직접 읽게 짰다가 **늘 빈 값이 와서 직군 기본값이
+     하나도 안 걸렸습니다.** 세중님이 「고정이 안 된다」고 하신 그것입니다.
+     정식 통로는 `내프로필()` 입니다 — 학생·현직(role)까지 같이 줍니다. */
   let 내직군: string | null = null;
+  let 내역할: string | null = null;
   if (await serverWho(sb) === '회원') {
-    const { data } = await sb.from('profiles').select('job_group').limit(1).maybeSingle();
-    내직군 = (data as { job_group?: string | null } | null)?.job_group ?? null;
+    const { data } = await sb.rpc('내프로필');
+    const 나 = ((data ?? []) as { job_group?: string | null; role?: string | null }[])[0];
+    내직군 = 나?.job_group ?? null;
+    내역할 = 나?.role ?? null;
   }
   const 고른직군 = sp.job === '전체' ? null : (sp.job ?? 내직군);
 
@@ -214,6 +224,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
         기준={{ job: sp.job ?? 내직군 ?? undefined, sido: sp.sido, past: 지난것 }}
         시도들={SIDOS}
         기본직군={내직군}
+        역할={내역할}
         뿌리="/jobs"
         남길값={{
           ...(sp.tab ? { tab: sp.tab } : {}),
