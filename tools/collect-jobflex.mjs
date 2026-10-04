@@ -43,7 +43,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 곳들, 목록, 풀기 } from './hosp/jobflex.mjs';
+import { 곳들, 목록, 풀기, 꼬리표가르기, 경력조건 } from './hosp/jobflex.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { mixedTitle, 구운날 } from './gas-rules.mjs';
 
@@ -155,16 +155,36 @@ if (우리.length) {
 
 /* ③ 담을 줄 만들기 */
 const 이제 = new Date().toISOString();
-const 담을것 = 후보.map((x) => ({
+const 담을것 = 후보.map((x) => {
+const 간것 = 꼬리표가르기(x.꼬리표);
+return ({
   id: x.id,
   external_id: String(x.id).slice(2),
   /* 공용 채용사이트는 한 곳에 여러 병원이 옵니다. classificationCode/tagName 에
      병원 이름이 들어 있어 그걸 기관명으로 씁니다. 없으면 사이트 주인 이름 */
   org_name: x.기관 || x.곳.이름,
-  /* 꼬리표는 기관명이 아닙니다 — 고용형태·직군·지역이 섞여 옵니다. 근무지 칸에 둡니다 */
-  work_place: x.꼬리표 || '',
+  /* ★ 2026-10-05 — 꼬리표를 **값을 보고 갈라 담습니다.**
+     전에는 꼬리표를 통째로 근무지 칸(work_place)에 넣었습니다. 그래서
+     「비정규직」·「수시」·「업무지원직」이 근무지로 들어가 지역 처리가 망가졌습니다.
+     응답 원문으로 확인한 것 (tools/고용24_꼬리표_확인.mjs · 2026-10-05) —
+       칸 이름  positionSn · title · submissionStatus · openStatus ·
+                announcementType · startDateTime · tagList · fixStatus ·
+                careerType · endDateTime · classificationCode ·
+                recruitmentType · dday
+       ★ **지역을 담은 칸이 하나도 없습니다.** classificationCode 와
+         tagList[].tagName 은 늘 같은 값이고, 기관마다 뜻이 다릅니다 —
+           성가롤로    정규직 · 계약직            (고용형태)
+           일산병원    비정규직 · 수련생 · 업무지원직 (고용형태 + 직렬)
+           국제성모    수시                      (채용 방식)
+           충남대병원  대전 · 세종                (지역)
+     그래서 **낱말을 알아볼 때만** 그 칸에 넣고, 모르면 버리지 않고
+     detail 에 남깁니다. */
+  work_place: 간것.근무지,
+  employ_type: 간것.고용형태,
   title: x.제목 || '(없음)',
-  hire_type: '', employ_type: x.경력 || '',
+  /* careerType 은 **경력 조건**입니다 (NEW·CAREER·ANY·NEW_CAREER).
+     고용형태가 아닙니다 — 알리오와 같이 hire_type 에 둡니다 */
+  hire_type: 경력조건(x.경력),
   sido: null, sgg: null, edu: '',
   headcount: null,
   apply_from: x.시작 || null,
@@ -176,7 +196,12 @@ const 담을것 = 후보.map((x) => ({
   form: (x.직군 && !mixedTitle(x.제목)) ? null : '포함',
   hidden: x.갈래.갈래 === '숨김보관',   // 쌓아두되 회원 화면에는 안 보입니다
   hold: x.갈래.갈래 === '보류함',
-  detail: { 기관홈: 'https://' + x.곳.호스트 + '.recruiter.co.kr/career/home' },
+  /* 못 알아본 꼬리표는 **버리지 않고** 여기 남깁니다 —
+     나중에 무엇인지 알게 되면 여기서 되살립니다 */
+  detail: {
+    기관홈: 'https://' + x.곳.호스트 + '.recruiter.co.kr/career/home',
+    ...(간것.남은꼬리표 ? { 꼬리표: 간것.남은꼬리표 } : {}),
+  },
   evidence: {
     직군근거: x.직군 ? '신형 채용사이트 목록 제목 · ' + x.갈래.왜 : '',
     갈래: x.갈래.갈래,
@@ -189,7 +214,8 @@ const 담을것 = 후보.map((x) => ({
     채용사이트: x.곳.호스트 + '.recruiter.co.kr',
   },
   collected_at: 이제,
-}));
+});
+});
 
 /* 버린 것도 남깁니다 — 관리자 쓰레기통 화면이 「왜 버렸는지」 를 보여줍니다 */
 const 버릴것 = (백필 ? 쓰레기 : 쓰레기.filter((x) => x.접수중)).map((x) => ({

@@ -206,3 +206,43 @@ if (process.argv[1] && process.argv[1].endsWith('jobflex.mjs')) {
     JSON.stringify({ 잰날: new Date().toISOString().slice(0, 10), 결과 }, null, 1), 'utf8');
   console.log('   자세한 것은 tools/hosp/reports/jobflex.json');
 }
+/* ═══ 꼬리표 가르기 (2026-10-05) ═══════════════════════════════
+ *
+ * 고용24 응답의 classificationCode · tagList[].tagName 은 **기관마다 뜻이
+ * 다릅니다.** 지역을 담은 칸은 응답에 아예 없습니다 (원문으로 확인).
+ * 그래서 낱말을 알아볼 때만 그 칸에 넣고, 모르면 detail 로 보냅니다.
+ *
+ * ⚠ 짐작하지 않습니다 — 아래 두 목록에 **있는 낱말만** 갈라 담습니다.
+ */
+export const 시도이름 = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종',
+  '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주',
+  /* 2026-07-01 출범 (법률 제21738호) */ '전남광주'];
+
+/* 고용형태로 **확인된** 낱말만. 「수련생」·「업무지원직」·「수시」·「공채」는
+   고용형태가 아니라 직렬·채용방식이라 넣지 않습니다 */
+export const 고용형태낱말 = ['정규직', '계약직', '비정규직', '무기계약직'];
+
+export function 꼬리표가르기(꼬리표) {
+  const 조각 = String(꼬리표 || '').split('·').map((s) => s.trim()).filter(Boolean);
+  const 지역 = [], 고용 = [], 나머지 = [];
+  for (const t of 조각) {
+    if (시도이름.includes(t)) 지역.push(t);
+    else if (고용형태낱말.includes(t)) 고용.push(t);
+    else 나머지.push(t);
+  }
+  return {
+    근무지: 지역.join(', '),
+    고용형태: 고용.join(', '),
+    남은꼬리표: 나머지.join(' · '),
+  };
+}
+
+/* careerType — 알리오의 recrutSeNm(채용구분)과 같은 자리입니다.
+   원문으로 본 값: NEW · CAREER · ANY · NEW_CAREER
+   (NEW_CAREER 는 hosp/jobflex.mjs 가 이미 「신입/경력」으로 바꿔 보냅니다) */
+export function 경력조건(v) {
+  const s = String(v || '').trim();
+  return ({ NEW: '신입', CAREER: '경력', ANY: '관계없음',
+    NEW_CAREER: '신입/경력', '신입/경력': '신입/경력' })[s] || s;
+}
+
