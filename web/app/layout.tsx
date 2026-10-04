@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DiagStrip } from "@/components/diag";
 import { Logo } from "@/components/logo";
 import { SPLASH_SCRIPT, Splash } from "@/components/splash";
+import { SplashAd } from "@/components/splash-ad";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
 import { CONTACT_EMAIL } from "@/lib/contact";
@@ -57,6 +58,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <BackGuard />
           <Surface />
           <Splash />
+          {/* 광고 배너가 걸려 있을 때만 오픈 화면 위에 덮습니다.
+              없거나 꺼져 있으면 아무것도 안 그립니다 (2026-10-04) */}
+          <SplashAd />
 
           {/* 탑바 56px · 그림자 없이 아래 보더만 — teamsparta.md */}
           <header className="sticky top-0 z-40 h-[56px] shrink-0 border-b border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900">

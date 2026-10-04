@@ -377,6 +377,15 @@ html[data-splash="on"] #splash {
   animation: splash-out 2.3s forwards;
 }
 
+/* 커뮤니티로 들어왔을 때는 어둡게 (2026-10-04).
+   흰 화면이 떴다가 어두운 커뮤니티가 나오면 눈이 한 번 찔립니다 —
+   오픈 화면이 **들어가는 곳 색**이어야 이어져 보입니다 */
+html[data-surface="dark"][data-splash="on"] #splash {
+  background-color: var(--color-gray-900);
+}
+html[data-surface="dark"][data-splash="on"] #splash .splash-name { color: #FFFFFF; }
+html[data-surface="dark"][data-splash="on"] #splash .splash-line { color: #C6CCD2; }
+
 html[data-splash="on"] #splash .splash-name { animation: splash-in 0.55s 0.1s both; }
 html[data-splash="on"] #splash .splash-line { animation: splash-in 0.55s 0.75s both; }
 

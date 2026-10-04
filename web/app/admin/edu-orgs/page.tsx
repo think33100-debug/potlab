@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { PhotoPicker } from '@/components/photo-picker';
+import { shrinkToWebp } from '@/lib/image';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
 
@@ -58,6 +60,28 @@ export default function AdminEduOrgs() {
     if (error) { toast(`저장하지 못했어요 — ${error.message}`, { tone: 'danger' }); return; }
     toast('저장했어요');
     load();
+  };
+
+  /* 그림은 홈 배너와 같은 저장소(home-images)를 씁니다 —
+     관리자만 올릴 수 있는 통이 이미 있어서 새로 만들 이유가 없습니다 */
+  const 그림올리기 = async (o: 줄, file: File) => {
+    setBusy(true);
+    try {
+      const webp = await shrinkToWebp(file, 600);
+      // eslint-disable-next-line react-hooks/purity -- 파일 이름이 겹치지 않게 시각을 붙입니다
+      const path = `eduorg/${Date.now()}.webp`;
+      const sb = browserSupabase();
+      const { error } = await sb.storage.from('home-images')
+        .upload(path, webp, { contentType: 'image/webp', upsert: true });
+      if (error) throw error;
+      const url = sb.storage.from('home-images').getPublicUrl(path).data.publicUrl;
+      setBusy(false);
+      await 저장(o, { 그림: url });
+      return;
+    } catch (e) {
+      toast('그림을 올리지 못했어요 — ' + (e as Error).message, { tone: 'danger', ms: 5000 });
+    }
+    setBusy(false);
   };
 
   if (err) {
@@ -121,7 +145,6 @@ export default function AdminEduOrgs() {
                     const f = new FormData(e.currentTarget);
                     저장(o, {
                       소개: String(f.get('소개') ?? ''),
-                      그림: String(f.get('그림') ?? ''),
                       누리집: String(f.get('누리집') ?? ''),
                       차례: Number(f.get('차례')) || o.차례,
                     });
@@ -134,12 +157,32 @@ export default function AdminEduOrgs() {
                       placeholder="비워 두면 회원 화면에서 소개 칸이 안 보입니다"
                       className="mt-1 w-full rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink" />
                   </label>
-                  <label className="block">
-                    <span className="block text-sm font-bold text-mute">대표 그림 주소</span>
-                    <input name="그림" defaultValue={o.그림 ?? ''}
-                      placeholder="직접 올린 그림 주소만 (남의 로고 금지)"
-                      className="mt-1 w-full rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink" />
-                  </label>
+                  {/* ★ 주소를 적게 두지 않습니다 (2026-10-04).
+                      칸을 두면 남의 누리집 로고 주소를 붙여 넣을 수 있습니다.
+                      **올린 그림만** 쓰이게 올리는 단추만 둡니다 */}
+                  <div>
+                    <span className="block text-sm font-bold text-mute">대표 그림</span>
+                    <div className="mt-1 flex flex-wrap items-center gap-3">
+                      {o.그림 && (
+                        // eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다
+                        <img src={o.그림} alt="" className="size-16 rounded-xs border border-line object-cover" />
+                      )}
+                      <PhotoPicker
+                        label={o.그림 ? '그림 바꾸기' : '그림 넣기'}
+                        disabled={busy}
+                        onPick={(f) => 그림올리기(o, f)}
+                      />
+                      {o.그림 && (
+                        <button type="button" onClick={() => 저장(o, { 그림: '' })}
+                          className="text-sm text-mute hover:underline">
+                          그림 빼기 (이름 글자 카드로 보입니다)
+                        </button>
+                      )}
+                    </div>
+                    <p className="mt-1 text-sm text-mute">
+                      남의 누리집 로고를 쓰면 안 됩니다. 비워 두면 이름 글자 카드가 나갑니다
+                    </p>
+                  </div>
                   <label className="block">
                     <span className="block text-sm font-bold text-mute">누리집 주소</span>
                     <input name="누리집" defaultValue={o.누리집 ?? ''}

@@ -23,6 +23,7 @@ const MENU = [
   { href: '/admin/compete', label: '경쟁률' },
   { href: '/admin/hand', label: '손으로 확인할 곳' },
   { href: '/admin/edu-orgs', label: '교육기관' },
+  { href: '/admin/ads', label: '오픈 화면 광고' },
   /* 수집기가 돌았나 / 공고가 들어왔나 — collect_beat 을 읽는 화면이 없어서
      「돌았는데 안 들어온다」를 못 가렸습니다 (2026-10-02 에 만들었습니다) */
   { href: '/admin/beat', label: '수집기 상태' },
