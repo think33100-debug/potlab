@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AdminMerge } from '@/components/admin-merge';
 import { AdminTabCards } from '@/components/admin-tab-cards';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
@@ -161,6 +162,8 @@ export default function AdminJobs() {
   return (
     <div>
       <AdminTabCards />
+      {/* 같은 공고가 둘로 올라온 짝. 접어 두고, 펼쳐서 하나씩 가립니다 */}
+      <AdminMerge />
       {/* 상태 칸 */}
       <nav className="flex flex-wrap gap-2" aria-label="공고 상태">
         {STATES.map((s) => (
