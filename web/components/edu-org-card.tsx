@@ -40,8 +40,10 @@ function 글자카드({ 이름 }: { 이름: string }) {
   );
 }
 
-export function EduOrgCard({ o, 켜짐, 로그인했나 }: {
+export function EduOrgCard({ o, 켜짐, 로그인했나, 오늘 }: {
   o: 기관; 켜짐: boolean; 로그인했나: boolean;
+  /* 서버에서 잰 한국 날짜 (YYYY-MM-DD). 여기서 재면 서버와 어긋납니다 */
+  오늘: string;
 }) {
   const [on, setOn] = useState(켜짐);
   const [busy, setBusy] = useState(false);
@@ -79,9 +81,13 @@ export function EduOrgCard({ o, 켜짐, 로그인했나 }: {
               ? <span className="text-mute">열린 교육 <b className="text-ink">{o.열린교육}</b></span>
               : <span className="text-mute">링크만 겁니다</span>}
           </p>
+          {/* 최근 = 그 기관 교육의 가장 늦은 「시작일(없으면 올린날)」입니다.
+              앞으로 열릴 교육이면 그 날이 **오늘보다 뒤**라서,
+              「최근 10월 19일」이라고 쓰면 거짓말이 됩니다 (2026-10-04 고침) */}
           {o.최근 && (
             <p className="mt-1 text-sm text-mute">
-              최근 {Number(o.최근.slice(5, 7))}월 {Number(o.최근.slice(8, 10))}일
+              {o.최근 > 오늘 ? '다음 일정' : '최근'}{' '}
+              {Number(o.최근.slice(5, 7))}월 {Number(o.최근.slice(8, 10))}일
             </p>
           )}
         </div>

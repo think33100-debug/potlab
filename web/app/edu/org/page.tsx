@@ -29,17 +29,16 @@ export default async function EduOrgs({ searchParams }: { searchParams: Promise<
   const sp = await searchParams;
   const sb = await serverSupabase();
 
-  /* 직군 기본값 = 가입 때 고른 직군. profiles 를 직접 읽지 않습니다 */
-  let 내직군: string | null = null;
-  let 내역할: string | null = null;
+  /* ★ 이 화면만 직군 기본값을 **안 겁니다** (2026-10-04 고침).
+
+     공고·교육 목록은 수백~수천 건이라 가입 직군으로 먼저 좁히는 게 맞습니다.
+     그런데 여기는 **기관이 11곳뿐인 주소록**입니다. 직군을 걸면 6곳만 남아
+     절반이 사라집니다 — 세중님이 로그인해서 열었을 때 그게 났습니다.
+     「어디서 배우나」를 보는 화면에서 절반을 감출 이유가 없습니다.
+
+     드롭다운은 그대로 둡니다. 좁혀 보고 싶으면 직접 고르면 됩니다. */
   const 회원인가 = await serverWho(sb) === '회원';
-  if (회원인가) {
-    const { data } = await sb.rpc('내프로필');
-    const 나 = ((data ?? []) as { job_group?: string | null; role?: string | null }[])[0];
-    내직군 = 나?.job_group ?? null;
-    내역할 = 나?.role ?? null;
-  }
-  const 고른직군 = sp.job === '전체' ? null : (sp.job ?? 내직군);
+  const 고른직군 = sp.job === '전체' ? null : (sp.job ?? null);
 
   const [목록, 내알림] = await Promise.all([
     sb.rpc('교육기관목록', { p_직군: 고른직군 }),
@@ -48,6 +47,10 @@ export default async function EduOrgs({ searchParams }: { searchParams: Promise<
 
   const rows = (목록.data ?? []) as unknown as 기관[];
   const 켠것 = new Set(((내알림.data ?? []) as { 기관: string }[]).map((x) => x.기관));
+  /* 카드가 「최근」인지 「다음 일정」인지 가리는 데 씁니다.
+     서버에서 재서 내려보냅니다 — 카드 안에서 재면 서버와 화면의 날짜가
+     어긋나 리액트가 한 번 다시 그립니다 */
+  const 오늘 = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
@@ -58,11 +61,9 @@ export default async function EduOrgs({ searchParams }: { searchParams: Promise<
 
       <div className="mt-6">
         <ListFilters
-          기준={{ job: sp.job ?? 내직군 ?? undefined }}
+          기준={{ job: sp.job ?? undefined }}
           지역숨김
           마감숨김
-          기본직군={내직군}
-          역할={내역할}
           뿌리="/edu/org"
         />
       </div>
@@ -83,7 +84,7 @@ export default async function EduOrgs({ searchParams }: { searchParams: Promise<
       <ul className="mt-5 flex flex-col gap-3">
         {rows.map((o) => (
           <li key={o.이름}>
-            <EduOrgCard o={o} 켜짐={켠것.has(o.이름)} 로그인했나={회원인가} />
+            <EduOrgCard o={o} 켜짐={켠것.has(o.이름)} 로그인했나={회원인가} 오늘={오늘} />
           </li>
         ))}
       </ul>
