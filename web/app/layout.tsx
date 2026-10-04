@@ -6,7 +6,7 @@ import { SPLASH_SCRIPT, Splash } from "@/components/splash";
 import { SplashAd } from "@/components/splash-ad";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
-import { CONTACT_EMAIL } from "@/lib/contact";
+import { COMPANY, CONTACT_EMAIL, PRIVACY_OFFICER } from "@/lib/contact";
 import { siteUrl } from "@/lib/site-url";
 import { AuthProvider } from "./auth";
 import { BackGuard } from "./back-guard";
@@ -82,13 +82,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               휴대폰에서는 탭바(62px)에 가리지 않게 아래를 더 띄웁니다 */}
           <footer className="mx-auto w-full max-w-3xl px-6 pb-[78px] pt-7 md:px-7 md:pb-7">
             <p className="break-keep text-sm leading-relaxed text-mute dark:text-gray-400">
-              직업정보제공사업 신고번호 J1401020260007
+              {/* 사업자 정보도 lib/contact.ts 한 곳에서 가져옵니다 (2026-10-05).
+                  여기 박아 두면 주소를 옮길 때 이 줄만 안 바뀝니다 */}
+              직업정보제공사업 신고번호 {COMPANY.신고번호}
               <br />
-              주식회사 빈틈 · 대구 북구 동북로 291, 901-A156호
+              {COMPANY.이름} · {COMPANY.주소}
               <br />
               {/* 개인정보 보호책임자는 방침에 밝혀야 하고, 어느 화면에서든
-                  찾을 수 있어야 합니다 (2026-10-01) */}
-              개인정보 보호책임자 이세중 (대표) ·{' '}
+                  찾을 수 있어야 합니다 (2026-10-01).
+                  사람 이름 대신 팀 이름을 적습니다 (2026-10-05 세중님 지시) */}
+              개인정보 보호책임자 {PRIVACY_OFFICER.이름} ·{' '}
               <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
                 {CONTACT_EMAIL}
               </a>

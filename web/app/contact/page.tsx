@@ -53,7 +53,8 @@ export default function ContactPage() {
       <section className="mt-8 rounded-sm bg-badge-teal-bg p-6 dark:border dark:border-teal-strong/40 dark:bg-transparent">
         <h2 className="text-lg font-bold">개인정보 보호책임자</h2>
         <p className="mt-2 break-keep text-lg text-gray-700 dark:text-gray-300">
-          {PRIVACY_OFFICER.이름} ({PRIVACY_OFFICER.직책})
+          {PRIVACY_OFFICER.이름}
+          {PRIVACY_OFFICER.직책 ? ` (${PRIVACY_OFFICER.직책})` : ''}
           <br />
           <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
             {CONTACT_EMAIL}

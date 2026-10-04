@@ -111,7 +111,7 @@ export const TERMS: Record<TermKey, { title: string; draft: boolean; body: strin
   · 열람 · 정정 · 삭제 · 처리정지를 요청하실 수 있습니다 (아래 문의처)
 
 개인정보 보호책임자
-  · 이세중 (대표) · think0331@naver.com
+  · 주식회사 빈틈 운영팀 · think0331@naver.com
 
 동의하지 않으셔도 채용공고는 보실 수 있습니다.
 다만 로그인이 필요한 기능(글쓰기·댓글·찜)은 쓰실 수 없습니다.`,

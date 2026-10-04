@@ -21,9 +21,8 @@ import { useToast } from '@/app/toast';
    묶지 않음    묶지않기() — 그 짝을 기억해 다시 안 올립니다
    풀기        공고연결풀기() — 감췄던 줄이 다시 보입니다
 
-   ⚠ 「묶지 않음」을 **잘못 눌렀을 때 되돌리는 길이 아직 없습니다.**
-     되돌리는 함수는 승인을 기다리는 중입니다 —
-     sql/2026-10-04_묶지않음_되돌리기.sql */
+   되돌리기    묶지않음되돌리기() — 잘못 누른 짝을 다시 후보로 올립니다
+               (2026-10-05 에 함수가 올라가 단추를 달았습니다) */
 
 type 후보 = {
   왼쪽: string; 오른쪽: string; 기관: string;
@@ -40,6 +39,12 @@ type 묶은 = {
   기관: string | null; 왜: string | null; 묶은날: string | null;
 };
 
+type 안묶음 = {
+  왼쪽: string; 오른쪽: string; 정한때: string;
+  왼쪽출처: string | null; 왼쪽제목: string | null;
+  오른쪽출처: string | null; 오른쪽제목: string | null; 기관: string | null;
+};
+
 const 출처말 = (s: string | null) => (s ? (SOURCE_NAME[s] ?? s) : '모름');
 
 export function AdminMerge() {
@@ -47,7 +52,7 @@ export function AdminMerge() {
   const [열림, set열림] = useState(false);
   const [후보들, set후보들] = useState<후보[] | null>(null);
   const [묶은것들, set묶은것들] = useState<묶은[] | null>(null);
-  const [안묶음수, set안묶음수] = useState<number | null>(null);
+  const [안묶음들, set안묶음들] = useState<안묶음[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -62,14 +67,14 @@ export function AdminMerge() {
       모두.push(...받은것);
       if (받은것.length < 100) break;
     }
-    const [묶음, 셈] = await Promise.all([
+    const [묶음, 안묶음] = await Promise.all([
       sb.rpc('묶은것', { p_page: 0 }),
-      sb.rpc('묶지않음수'),
+      sb.rpc('묶지않음목록', { p_page: 0 }),
     ]);
     setErr(null);
     set후보들(모두);
     set묶은것들((묶음.data ?? []) as 묶은[]);
-    set안묶음수(Number(셈.data ?? 0));
+    set안묶음들((안묶음.data ?? []) as 안묶음[]);
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -98,6 +103,21 @@ export function AdminMerge() {
     setBusy(null);
     if (error) { toast('저장하지 못했어요 — ' + error.message, { tone: 'danger', ms: 4000 }); return; }
     toast('다른 공고로 기억했어요');
+    load();
+  };
+
+  /* 「묶지 않음」을 잘못 눌렀을 때. 지우는 것은 그 기억 한 줄뿐이고,
+     공고는 손대지 않습니다 — 그 짝이 다시 후보로 올라옵니다 */
+  const 되돌리기 = async (x: 안묶음) => {
+    if (busy) return;
+    setBusy(x.왼쪽);
+    const { data, error } = await browserSupabase().rpc('묶지않음되돌리기', {
+      p_왼쪽: x.왼쪽, p_오른쪽: x.오른쪽,
+    });
+    setBusy(null);
+    if (error) { toast('되돌리지 못했어요 — ' + error.message, { tone: 'danger', ms: 4000 }); return; }
+    const n = Number((data as Record<string, unknown> | null)?.['되돌린줄'] ?? 0);
+    toast(n > 0 ? '다시 후보로 올렸어요' : '이미 없는 짝이에요');
     load();
   };
 
@@ -136,7 +156,7 @@ export function AdminMerge() {
           <span className="ml-3 text-lg font-medium text-mute">
             {후보수 === null ? '세는 중…' : 후보수 + '짝'}
             {묶은것들 && 묶은것들.length > 0 && ' · 묶은 것 ' + 묶은것들.length}
-            {안묶음수 ? ' · 다른 공고로 정한 것 ' + 안묶음수 : ''}
+            {안묶음들 && 안묶음들.length > 0 ? ' · 다른 공고로 정한 것 ' + 안묶음들.length : ''}
           </span>
         </span>
         <span className="shrink-0 text-lg text-mute">{열림 ? '접기' : '펼치기'}</span>
@@ -228,6 +248,37 @@ export function AdminMerge() {
                     <button type="button" disabled={busy === m.연결한줄} onClick={() => 풀기(m)}
                       className="mt-3 rounded-md border border-gray-200 px-6 py-3 text-lg font-medium hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-950">
                       풀기
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {안묶음들 && 안묶음들.length > 0 && (
+            <>
+              <h3 className="mt-8 text-h3 font-bold text-mute">
+                다른 공고로 정한 것 {안묶음들.length}
+              </h3>
+              <p className="mt-1 break-keep text-sm text-mute">
+                후보 목록에 다시 안 올라옵니다. 잘못 눌렀으면 되돌리세요 —
+                <b> 공고는 손대지 않습니다.</b>
+              </p>
+              <ul className="mt-3 flex flex-col gap-3">
+                {안묶음들.map((x) => (
+                  <li key={x.왼쪽 + '|' + x.오른쪽}
+                    className="rounded-sm border border-gray-100 p-5 dark:border-gray-800">
+                    <p className="text-sm text-mute">
+                      {x.기관 ?? '기관 모름'} · {String(x.정한때).slice(0, 10)}
+                    </p>
+                    <p className="mt-1 break-keep text-lg">
+                      {출처말(x.왼쪽출처)} {x.왼쪽제목 ?? x.왼쪽}
+                      <span className="text-mute"> ↔ </span>
+                      {출처말(x.오른쪽출처)} {x.오른쪽제목 ?? x.오른쪽}
+                    </p>
+                    <button type="button" disabled={busy === x.왼쪽} onClick={() => 되돌리기(x)}
+                      className="mt-3 rounded-md border border-gray-200 px-6 py-3 text-lg font-medium hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-950">
+                      되돌리기
                     </button>
                   </li>
                 ))}
