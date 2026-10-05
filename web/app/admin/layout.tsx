@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../auth';
 import { RouteHealth } from '@/components/route-health';
+import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 관리자 화면의 껍데기입니다.
 
@@ -39,6 +41,31 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
   const { loading, session, isAdmin } = useAuth();
   const pathname = usePathname();
 
+  /* ★ 2026-10-05 — 거절하기 **전에 한 번 더** 물어봅니다.
+     is_admin() 은 비로그인도 부를 수 있고 그때 **거짓**을 돌려줍니다.
+     로그인 토큰이 잠깐 끊긴 사이에 그 판정이 돌면, 관리자인데도
+     「관리자가 아니에요」가 뜹니다 (2026-10-05 에 실제로 겪었고
+     새로고침 한 번으로 돌아왔습니다).
+     그래서 토큰을 새로 받아 다시 묻고, 그래도 아니면 그때 거절합니다. */
+  const [다시물음, set다시물음] = useState<'아직' | '하는중' | '끝'>('아직');
+  const [다시본결과, set다시본결과] = useState(false);
+
+  useEffect(() => {
+    if (loading || !session || isAdmin || 다시물음 !== '아직') return;
+    set다시물음('하는중');
+    const sb = browserSupabase();
+    (async () => {
+      try {
+        await sb.auth.refreshSession();
+        const { data, error } = await sb.rpc('is_admin');
+        set다시본결과(!error && data === true);
+      } catch { set다시본결과(false); }
+      set다시물음('끝');
+    })();
+  }, [loading, session, isAdmin, 다시물음]);
+
+  const 관리자인가 = isAdmin || 다시본결과;
+
   if (loading) {
     return (
       <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
@@ -47,7 +74,16 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
     );
   }
 
-  if (!session || !isAdmin) {
+  /* 다시 묻는 동안에는 거절하지 않습니다 — 깜빡였다 사라지면 더 헷갈립니다 */
+  if (session && !관리자인가 && 다시물음 !== '끝') {
+    return (
+      <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
+        <p className="text-lg text-mute">로그인을 확인하고 있어요…</p>
+      </main>
+    );
+  }
+
+  if (!session || !관리자인가) {
     return (
       <main className="mx-auto w-full max-w-3xl px-6 py-8 md:px-7">
         <h1 className="text-h2 font-bold">관리자만 볼 수 있어요</h1>
