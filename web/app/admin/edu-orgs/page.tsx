@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { PhotoPicker } from '@/components/photo-picker';
 import { shrinkToWebp } from '@/lib/image';
+import { 올리기탈 } from '@/lib/upload-error';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
 
@@ -79,7 +80,10 @@ export default function AdminEduOrgs() {
       await 저장(o, { 그림: url });
       return;
     } catch (e) {
-      toast('그림을 올리지 못했어요 — ' + (e as Error).message, { tone: 'danger', ms: 5000 });
+      /* ★ 2026-10-05 — 브라우저가 돌려주는 말이 영어입니다
+         (「The source image could not be decoded.」). 그대로 띄우면
+         무엇이 잘못인지 모릅니다. 가장 흔한 두 가지는 우리 말로 바꿉니다 */
+      toast('그림을 올리지 못했어요 — ' + 올리기탈(e), { tone: 'danger', ms: 5000 });
     }
     setBusy(false);
   };

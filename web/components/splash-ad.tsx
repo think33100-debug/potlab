@@ -50,11 +50,23 @@ export function SplashAd() {
     return () => { 살아있나 = false; };
   }, []);
 
+  /* ★ 2026-10-05 — supabase-js 의 rpc() 는 **.then() 을 불러야 보냅니다.**
+     전에는 부르기만 하고 기다리지 않아서 **요청이 아예 안 나갔습니다** —
+     배너는 떴는데 광고셈이 0줄이었습니다. 같은 자리인 job-open-link.tsx 는
+     .then() 을 달고 있어 멀쩡했습니다.
+     세는 일로 화면을 막지 않으려고 기다리지는 않고, 탈만 적어 둡니다 */
+  const 세기 = (자리: string, 눌렀나: boolean) => {
+    browserSupabase().rpc('광고셈올리기', { p_자리: 자리, p_누름: 눌렀나 })
+      .then(({ error }) => {
+        if (error) console.warn('[POTJOB] 광고 세기 실패:', error.message);
+      }, (e: unknown) => console.warn('[POTJOB] 광고 세기 실패:', e));
+  };
+
   /* 보여준 것을 한 번만 셉니다. 자동으로 치우는 시계도 여기서 겁니다 */
   useEffect(() => {
     if (!ad || 센적있나.current) return;
     센적있나.current = true;
-    browserSupabase().rpc('광고셈올리기', { p_자리: ad.자리, p_누름: false });
+    세기(ad.자리, false);
     const t = setTimeout(치우기, Math.min(Math.max(ad.표시초, 1), 5) * 1000);
     return () => clearTimeout(t);
   }, [ad, 치우기]);
@@ -62,7 +74,7 @@ export function SplashAd() {
   if (!ad || 감춤) return null;
 
   const 누름 = () => {
-    browserSupabase().rpc('광고셈올리기', { p_자리: ad.자리, p_누름: true });
+    세기(ad.자리, true);
     if (ad.링크) window.open(ad.링크, '_blank', 'noopener,noreferrer');
     치우기();
   };

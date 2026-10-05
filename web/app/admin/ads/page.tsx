@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { PhotoPicker } from '@/components/photo-picker';
 import { shrinkToWebp } from '@/lib/image';
+import { 올리기탈 } from '@/lib/upload-error';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
 
@@ -89,7 +90,7 @@ export default function AdminAds() {
       await 저장(o, { 그림: url });
       return;
     } catch (e) {
-      toast('그림을 올리지 못했어요 — ' + (e as Error).message, { tone: 'danger', ms: 5000 });
+      toast('그림을 올리지 못했어요 — ' + 올리기탈(e), { tone: 'danger', ms: 5000 });
     }
     setBusy(null);
   };
