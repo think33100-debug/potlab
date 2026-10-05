@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/auth';
 import { Icon } from '@/components/icon';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { useToast } from '@/app/toast';
 
 /* 기관 저장 + 「공고 뜨면 알려주기」. 둘 다 org_stars 한 줄입니다 —
    저장은 줄이 있는 것, 알림은 notify 칸입니다.
@@ -19,6 +20,7 @@ export function OrgSave({ name, sido }: { name: string; sido: string | null }) {
   const [saved, setSaved] = useState(false);
   const [notify, setNotify] = useState(false);
   const [busy, setBusy] = useState(false);
+  const toast = useToast();
 
   const back = `/orgs?org=${encodeURIComponent(name)}&sido=${encodeURIComponent(sido ?? '')}`;
 
@@ -52,7 +54,12 @@ export function OrgSave({ name, sido }: { name: string; sido: string | null }) {
     const { error } = next
       ? await sb.from('org_stars').upsert({ org_name: name })
       : await sb.from('org_stars').delete().eq('org_name', name);
-    if (error) setSaved(!next);
+    /* ★ 2026-10-05 — 말없이 되돌리지 않습니다. 까닭을 띄웁니다 */
+    if (error) {
+      setSaved(!next);
+      toast(`${next ? '저장' : '저장 취소'}하지 못했어요 — ${error.message}`,
+        { tone: 'danger', ms: 4000 });
+    }
     setBusy(false);
   }
 
@@ -70,7 +77,12 @@ export function OrgSave({ name, sido }: { name: string; sido: string | null }) {
     setSaved(true);
     const { error } = await browserSupabase()
       .from('org_stars').upsert({ org_name: name, notify: next });
-    if (error) { setNotify(!next); }
+    /* ★ 2026-10-05 — 말없이 되돌리지 않습니다 */
+    if (error) {
+      setNotify(!next);
+      toast(`알림을 ${next ? '켜' : '꺼'}지 못했어요 — ${error.message}`,
+        { tone: 'danger', ms: 4000 });
+    }
     setBusy(false);
   }
 

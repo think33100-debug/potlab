@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/auth';
 import { Icon } from '@/components/icon';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { useToast } from '@/app/toast';
 
 /* 공고 저장(찜). 저장한 것은 /me 의 「찜한 공고」에 모입니다.
 
@@ -15,6 +16,7 @@ export function JobSave({ id, big = false }: { id: string; big?: boolean }) {
   const router = useRouter();
   const [on, setOn] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (!session) { setOn(false); return; }
@@ -42,7 +44,15 @@ export function JobSave({ id, big = false }: { id: string; big?: boolean }) {
     const { error } = next
       ? await sb.from('job_stars').insert({ job_id: id })
       : await sb.from('job_stars').delete().eq('job_id', id);
-    if (error) setOn(!next);                       // 실패하면 되돌립니다
+    /* ★ 2026-10-05 — 전에는 **말없이 되돌렸습니다.**
+       그래서 세중님이 「켜졌다가 바로 풀린다」고만 보셨고, 무엇이 잘못인지
+       알 길이 없었습니다. 실패하면 까닭을 띄웁니다 (작업지침 11번 —
+       「화면에 진짜 이유가 뜨게 만들 것」) */
+    if (error) {
+      setOn(!next);
+      toast(`${next ? '저장' : '저장 취소'}하지 못했어요 — ${error.message}`,
+        { tone: 'danger', ms: 4000 });
+    }
     setBusy(false);
   }
 

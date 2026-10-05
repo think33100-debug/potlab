@@ -150,18 +150,53 @@ if (시험) {
     제목: '연세메디하임병원',
     몸: '원주 연세메디하임병원 작업치료사 구인합니다 · 알림 시험',
     주소: '/jobs/' + 공고,
-    태그: '시험:' + 공고,
+    /* ★ 2026-10-05 — 시험 태그에 **시각을 붙입니다.**
+       전에는 늘 같은 태그라, 앞 시험 알림이 알림 센터에 남아 있으면
+       크롬이 조용히 바꿔치기만 하고 새 띠를 안 띄웠습니다 */
+    // eslint-disable-next-line no-restricted-syntax
+    태그: '시험:' + 공고 + ':' + Date.now(),
   });
   console.log('보낼 것 —\n' + 몸.replace(/","/g, '"\n  "') + '\n');
+
+  /* ★ 2026-10-05 — **FCM 이 돌려준 것을 그대로 찍습니다.**
+     전에는 「보냈습니다」만 찍어서, 세중님이 못 받았을 때 FCM 이 받기나 했는지
+     알 길이 없었습니다 (작업지침 2번 — 진단은 응답 원문을 찍을 것).
+       201  받았습니다 (그 뒤는 브라우저·기기 쪽 문제)
+       403  VAPID 열쇠가 구독 때와 다릅니다  ← 가장 흔한 원인
+       404·410  구독이 사라졌습니다 — 다시 켜야 합니다
+       413  몸이 너무 깁니다 */
+  console.log('보내는 쪽 VAPID 공개키 — 앞 8글자 ' + cfg.VAPID_PUBLIC.slice(0, 8)
+    + ' · 뒤 6글자 ' + cfg.VAPID_PUBLIC.slice(-6) + ' · ' + cfg.VAPID_PUBLIC.length + '글자');
+  console.log('  (화면이 쓰는 NEXT_PUBLIC_VAPID_PUBLIC 과 **같아야** 합니다.\n'
+    + '   다르면 FCM 이 403 을 줍니다)\n');
+
   if (dry) { console.log('--dry 라 안 보냈습니다'); process.exit(0); }
   try {
-    await webpush.sendNotification(
+    const res = await webpush.sendNotification(
       { endpoint: 기기.주소, keys: { p256dh: 기기.열쇠1, auth: 기기.열쇠2 } }, 몸);
-    console.log('보냈습니다. 화면에 뜨는지 봐 주십시오');
+    console.log('── FCM 응답 원문 ──');
+    console.log('  HTTP ' + res.statusCode);
+    console.log('  본문 ' + (String(res.body || '').trim() || '(비어 있음 — 201 은 보통 빕니다)'));
+    console.log('  머리글 ' + JSON.stringify(res.headers || {}).slice(0, 400));
+    console.log('\n' + (res.statusCode === 201
+      ? '★ FCM 이 받았습니다. 여기서 안 뜨면 **브라우저·윈도우 쪽**입니다 —\n'
+        + '   크롬이 켜져 있는지 · 윈도우 알림 허용 · 집중 모드 꺼짐 ·\n'
+        + '   주소창 자물쇠 → 알림 「허용」'
+      : '★ HTTP ' + res.statusCode + ' 입니다. 위 본문을 보십시오'));
     console.log('※ 알림보낸것 에는 안 남겼습니다 (시험이라서)');
   } catch (e) {
-    console.error('못 보냈습니다 — HTTP ' + (e && e.statusCode) + ' · '
-      + String((e && e.body) || (e && e.message) || e).slice(0, 500));
+    console.error('── FCM 이 거절했습니다 ──');
+    console.error('  HTTP ' + (e && e.statusCode));
+    console.error('  본문 ' + String((e && e.body) || (e && e.message) || e).slice(0, 800));
+    console.error('  머리글 ' + JSON.stringify((e && e.headers) || {}).slice(0, 400));
+    if (e && (e.statusCode === 403 || e.statusCode === 400)) {
+      console.error('\n★ 403·400 은 거의 **VAPID 열쇠가 안 맞는 것**입니다 —\n'
+        + '   화면(Vercel 의 NEXT_PUBLIC_VAPID_PUBLIC)과 서버(.env 의 VAPID_PUBLIC)가\n'
+        + '   다르면 구독은 되는데 보낼 때 막힙니다. 그러면 **다시 켜야** 합니다');
+    }
+    if (e && (e.statusCode === 404 || e.statusCode === 410)) {
+      console.error('\n★ 404·410 은 **구독이 사라진 것**입니다. /me 에서 다시 켜야 합니다');
+    }
     process.exit(1);
   }
   process.exit(0);
