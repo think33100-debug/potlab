@@ -33,7 +33,10 @@ export function AdminTitleCheck() {
   const [d, setD] = useState<묶음 | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
-  const [열린갈래, set열린갈래] = useState<string | null>(null);
+  /* ★ 2026-10-05 — **펼친 것이 기본**입니다 (세중님 지시).
+     접어 두었더니 세중님 화면에서 19줄이 안 보였습니다. 할 일이 있는
+     목록은 눌러야 보이면 안 봅니다. 접고 싶은 것만 접습니다 */
+  const [닫힌갈래, set닫힌갈래] = useState<string[]>([]);
   const toast = useToast();
 
   const 읽기 = useCallback(() => {
@@ -102,10 +105,12 @@ export function AdminTitleCheck() {
 
       <ul className="mt-4 flex flex-col gap-3">
         {칸.map((c) => {
-          const 열림 = 열린갈래 === c.열쇠;
+          const 열림 = !닫힌갈래.includes(c.열쇠);
           return (
             <li key={c.열쇠} className="rounded-xs border border-gray-100 p-5 dark:border-gray-800">
-              <button type="button" onClick={() => set열린갈래(열림 ? null : c.열쇠)}
+              <button type="button"
+                onClick={() => set닫힌갈래((v) =>
+                  열림 ? [...v, c.열쇠] : v.filter((k) => k !== c.열쇠))}
                 className="flex w-full items-center justify-between gap-3 text-left">
                 <span>
                   <b className="text-body-lg text-ink">{c.이름}</b>
