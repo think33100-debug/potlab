@@ -206,8 +206,34 @@ if (시험) {
   process.exit(0);
 }
 
+/* 박동 — 관리자 → 수집기 상태 화면이 이것으로 「돌고 있나」를 봅니다 (2026-10-05).
+   알림 경로만 빠져 있어서, **멈춰도 화면에 빨간 줄이 안 떴습니다.**
+   고를 것이 0건이어도 남깁니다 — 「돌았다」와 「보낼 게 없었다」는 다릅니다.
+   ⚷ 개인정보는 한 칸도 안 남깁니다 — 숫자와 갈래뿐입니다 */
+async function 박동남기기(결과) {
+  if (dry || 나만 || 시험) return;        // 시험·연습은 박동을 흐립니다
+  try {
+    await rpc('collect_beat', {
+      p_secret: cfg.COLLECT_KEY_HS3, p_source: 'PUSH',
+      p_beat: { took_ms: Date.now() - t0, ok: !!결과.ok,
+        본곳: 1, 담음: 결과.보냄 || 0, 보류: 0, 버림: 0, 못받음: 결과.실패 || 0,
+        메모: { 고른것: 결과.고른것 || 0, 보냄: 결과.보냄 || 0,
+          사라진기기: 결과.사라짐 || 0, 실패: 결과.실패 || 0,
+          하루상한: 하루상한, 왜: 결과.왜 || '' } },
+    });
+  } catch (e) { console.error('박동 못 남김 · ' + String(e.message).slice(0, 120)); }
+}
+
 /* ① 보낼 것 받기 — 고르는 일은 DB 가 다 했습니다 */
-let 할것 = await rpc('보낼알림', { p_secret: cfg.COLLECT_KEY_HS3, p_하루상한: 하루상한, p_몇개: 200 });
+let 할것;
+try {
+  할것 = await rpc('보낼알림', { p_secret: cfg.COLLECT_KEY_HS3, p_하루상한: 하루상한, p_몇개: 200 });
+} catch (e) {
+  /* 고르는 쪽이 터지면 **그것도 박동에 남겨야** 화면에 빨간 줄이 뜹니다 */
+  await 박동남기기({ ok: false, 왜: '보낼알림() 실패 · ' + String(e.message).slice(0, 150) });
+  console.error('보낼알림() 을 못 불렀습니다 — ' + String(e.message).slice(0, 300));
+  process.exit(1);
+}
 할것 = 할것 || [];
 console.log('\n── 고른 것 ' + 할것.length + '건 ──');
 if (나만) {
@@ -217,6 +243,9 @@ if (나만) {
 }
 if (!할것.length) {
   console.log('  보낼 것이 없습니다 (조용한 시간이거나, 새 공고가 없거나, 기기가 없습니다)');
+  /* ★ 0건도 박동을 남깁니다 — 「돌았다」와 「보낼 게 없었다」는 다릅니다.
+     안 남기면 조용한 밤이 지난 뒤 멈춘 것처럼 보입니다 */
+  await 박동남기기({ ok: true, 고른것: 0, 왜: '보낼 것 없음' });
   console.log('\n' + Math.round((Date.now() - t0) / 1000) + '초');
   process.exit(0);
 }
@@ -285,5 +314,14 @@ if (나쁜것.length) {
   console.error('\n★ 실패한 것 (앞 세 건) —');
   for (const x of 나쁜것) console.error('   기기 ' + x.기기id + ' · ' + x.결과);
 }
+/* ⑤ 박동 — 끝까지 왔다는 표시. 실패가 하나라도 있으면 ok=false 라
+   관리자 화면에 빨간 줄이 뜹니다 */
+await 박동남기기({ ok: !셈.실패, 고른것: 할것.length,
+  보냄: 셈.보냄, 사라짐: 셈.사라짐, 실패: 셈.실패,
+  왜: 셈.실패 ? (나쁜것[0] ? 앞머리만(나쁜것[0].결과) : '보내기 실패') : '' });
+
 console.log('\n' + Math.round((Date.now() - t0) / 1000) + '초');
 if (셈.실패) process.exitCode = 1;
+
+/* 실패 글에서 기기 주소 같은 것이 섞여 들어가지 않게 앞머리만 씁니다 */
+function 앞머리만(s) { return String(s || '').slice(0, 120); }
