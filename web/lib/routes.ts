@@ -18,6 +18,8 @@ export const ROUTES: { href: string; label: string; soon?: string }[] = [
   { href: '/edu',                label: '교육·학술' },
   { href: '/edu/org',            label: '교육기관' },
   { href: '/youth',              label: '청년정책 찾기' },
+  /* 경쟁률 찾아보기 (2026-10-05). 목록은 누구나, 숫자는 회원만입니다 */
+  { href: '/compete',            label: '경쟁률 찾아보기' },
   { href: '/tools',              label: '계산기' },
 ];
 

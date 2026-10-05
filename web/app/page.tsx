@@ -83,6 +83,10 @@ export default async function Home() {
                      없는 이름을 적으면 기본 아이콘으로 떨어집니다 */
                   { href: '/youth', icon: 'list-checks', title: '청년정책',
                     sub: '취업·교육비·주거 지원' },
+                  /* 경쟁률 (2026-10-05). 목록은 누구나, 숫자는 회원만 —
+                     그래서 비로그인에게도 걸어 둡니다 */
+                  { href: '/compete', icon: 'bar-chart', title: '경쟁률',
+                    sub: '공공기관 지난 채용 경쟁률' },
                 ].map((x) => (
                   <li key={x.href}>
                     <Link
