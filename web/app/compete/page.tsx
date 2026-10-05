@@ -96,7 +96,10 @@ const 칩 = 'rounded-xs bg-badge-teal-bg px-3 py-1 text-sm text-gray-700 dark:te
 export default async function Compete({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const 쪽 = Math.max(1, Number(sp.p ?? 1) || 1);
-  const 고른묶음 = sp.g ? decodeURIComponent(sp.g) : null;
+  /* ★ sp.g 는 Next 가 이미 한 번 풀어 줍니다. 여기서 또 풀거나
+     href 에서 미리 encodeURIComponent 하면 **두 번 인코딩**되어
+     주소가 쓸데없이 길어집니다 (한글은 주소에서 아홉 배로 부풉니다) */
+  const 고른묶음 = sp.g || null;
 
   const sb = await serverSupabase();
   const 누구 = await serverWho(sb);
@@ -274,7 +277,7 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
             <ul className="flex flex-col gap-3">
               {d.묶음.map((g) => (
                 <li key={g.묶음키}>
-                  <Link href={주소({ g: encodeURIComponent(g.묶음키), p: undefined })}
+                  <Link href={주소({ g: g.묶음키, p: undefined })}
                     className="block rounded-sm border border-line bg-card p-5 hover:border-teal-strong">
                     <p className="break-keep text-body-lg font-bold text-ink">
                       {g.기관} · {g.지역} · {g.직군}
