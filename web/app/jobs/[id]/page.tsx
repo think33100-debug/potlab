@@ -37,6 +37,19 @@ const one = async (sb: SupabaseClient, id: string) => {
   return (data as unknown as JobPost | null) ?? null;
 };
 
+/* 기관이 쓴 원문 제목 (2026-10-05).
+
+   화면 제목은 우리가 이어 붙인 「보여 줄 제목」입니다. 회원이 기관 공고와
+   맞춰 볼 수 있어야 해서 원문을 아래에 작게 둡니다.
+
+   왜 job_one 에 안 싣고 따로 부르나 — job_one 의 돌려주는 칸을 바꾸려면
+   함수를 drop 했다가 다시 만들어야 합니다(승인 창). 작은 함수를 더하는
+   쪽이 쌉니다. 보여 줄 제목과 **같으면 null** 이라 그 줄이 안 그려집니다. */
+const 원문제목 = async (sb: SupabaseClient, id: string) => {
+  const { data } = await sb.rpc('공고원문제목', { p_id: id });
+  return (data as string | null) ?? null;
+};
+
 
 function dday(to: string | null): { text: string; urgent: boolean } | null {
   if (!to) return null;
@@ -94,6 +107,9 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
   const j = await one(sb, id);
   if (!j) notFound();
+
+  /* 기관이 쓴 원문 제목. 보여 줄 제목과 같으면 null 이라 안 그려집니다 */
+  const 기관원문 = await 원문제목(sb, id);
 
   /* 마감돼도 막지 않습니다. 이미 주소를 아는 사람이라 빈 화면을 주면 링크가 죽습니다 */
   const closed = isClosed(j.apply_to);
@@ -182,6 +198,15 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                 style={{ overflowWrap: 'break-word' }}>
               {j.title}
             </h1>
+
+            {/* ★ 기관이 쓴 원문 제목 (2026-10-05).
+                위 제목은 우리가 이어 붙인 것입니다. 회원이 기관 공고와
+                맞춰 볼 수 있어야 해서 원문을 그대로 둡니다 */}
+            {기관원문 && (
+              <p className="mt-2 break-keep text-[13px] leading-[1.6] text-[#8A9199]">
+                기관 원문 제목 — {기관원문}
+              </p>
+            )}
 
             <p className="mt-3 break-keep text-[16px] text-[#4A5056]">
               {j.org_name}

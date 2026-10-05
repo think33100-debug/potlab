@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { AdminTitleCheck } from '@/components/admin-title-check';
 
 /* 손으로 확인할 곳 — 기계가 못 가는 병원 (2026-09-30).
  *
@@ -85,6 +86,11 @@ export default function AdminHand() {
           버리지 않고 여기 두고 사람이 봅니다.
         </p>
       </header>
+
+      {/* 제목 때문에 사람이 봐야 하는 네 갈래 (2026-10-05).
+          위 목록은 **출처**(못 가는 병원)이고, 이것은 **공고 제목**입니다 —
+          성격이 달라 섞지 않고 따로 둡니다 */}
+      <AdminTitleCheck />
 
       {막힌것.length > 0 && (
         <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
