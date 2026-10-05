@@ -303,7 +303,9 @@ if (!dry && 담을것.length) {
 if (!dry) {
   const f = await rpc('alio_compete_fix', { p_secret: cfg.COLLECT_KEY_AL2, p_source: SOURCE });
   console.log('\n묶음 고침 ' + f['고침'] + '줄 · 직군 묶음 ' + f['묶음']
-    + ' · 경쟁률 값 있음 ' + f['경쟁률값있음']
+    /* ★ 열쇠 이름은 「있음」입니다 — 「경쟁률값있음」을 읽어 undefined 가 찍혔습니다.
+       alio_compete_fix 가 돌려주는 것은 고침·묶음·있음·미등록·진짜0·못냄·안맞음 입니다 */
+    + ' · 경쟁률 값 있음 ' + f['있음']
     + ' · 우리 계산과 안 맞음 ' + f['안맞음'] + (f['안맞음'] ? '  ⚠' : ''));
 }
 
