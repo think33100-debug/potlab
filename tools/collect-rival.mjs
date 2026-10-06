@@ -105,13 +105,19 @@ async function 박동(ok, 왜, 셈) {
   }
 }
 
-/* 어디서 터져도 박동을 남기고 나갑니다. 맨 위 await 가 깨지면 여기로 옵니다 */
-process.on('unhandledRejection', async (e) => {
-  const 왜 = String(e && (e.message || e)).slice(0, 500);
-  console.error('\n★ 탈났습니다 — ' + 왜);
-  await 박동(false, 왜);
-  process.exit(1);
-});
+/* 어디서 터져도 박동을 남기고 나갑니다.
+ * ★ **둘 다 걸어야 합니다** (2026-10-07 에 실제로 겪었습니다).
+ *   맨 위 await 가 깨지면 Node 는 `unhandledRejection` 이 아니라
+ *   **`uncaughtException`** 으로 올립니다. 처음에 unhandledRejection 만
+ *   걸어 두고 돌렸는데 박동이 안 남고 그냥 죽었습니다. */
+for (const 언제 of ['uncaughtException', 'unhandledRejection']) {
+  process.on(언제, async (e) => {
+    const 왜 = String(e && (e.message || e)).slice(0, 500);
+    console.error('\n★ 탈났습니다 (' + 언제 + ') — ' + 왜);
+    await 박동(false, 왜);
+    process.exit(1);
+  });
+}
 
 /* 제목에서 기관 이름을 어림합니다. 틀릴 수 있어 화면에 「어림」 이라고 밝힙니다 */
 function 기관어림(제목) {
