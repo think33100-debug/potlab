@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ListFilters } from '@/components/list-filters';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
-/* 경쟁률 찾아보기 (2026-10-05).
+/* 경쟁률 찾아보기 (2026-10-05 · 꼴은 2026-10-07 에 다시 짰습니다).
 
    ── 왜 있나 ──────────────────────────────────────────────────
    공공기관이 알리오에 **지난 채용의 선발·응시 인원을 공개**합니다.
@@ -29,6 +29,13 @@ import { serverSupabase, serverWho } from '@/lib/supabase-server';
      가장높음·가장낮음을 **아예 안 내보냅니다.** 화면에서 가리면
      개발자 도구 네트워크 응답에 값이 그대로 보입니다.
    숫자는 `경쟁률한묶음()` 이 첫 줄에서 `auth.uid()` 를 보고 줍니다.
+
+   ── 꼴은 공고 목록과 같은 결입니다 (2026-10-07 세중님 지시) ────
+   teamsparta.md 토큰만 씁니다. 화면마다 색을 새로 박지 않습니다.
+     · 목록    테두리 없는 줄 + divide-y · 기관 작게 → 제목 크게 → 꼬리표
+     · 꼬리표  badge-blue-bg + interaction-blue  (공고 목록 분류 꼬리표와 같은 것)
+     · CTA     brand-red · rounded-md · active:scale-[0.98]
+     · 숫자    tabular-nums (스파르타 Typography 절)
 
    ── 로그인 없이 봅니다 (목록만) ───────────────────────────────
    /edu · /volunteer · /orgs 와 같은 결입니다. */
@@ -78,20 +85,55 @@ function 요약문(h: 한묶음['머리']) {
     : `최근 ${년}년 이내 ${h.회차}번 채용 · 평균 경쟁률 ${h.평균} 대 1`;
 }
 
+/* 한 회차의 경쟁률 칸 (2026-10-07 세중님 결정).
+
+   전에는 셋을 뭉뚱그려 「경쟁률 낼 값 없음」이라고만 적었습니다.
+   뜻이 다 다릅니다 —
+
+     ① 지원자 0명              32회차 → 「0 : 1」
+     ② 지원자는 있는데 선발 0명  32회차 → 「지원 ○명 · 선발 0명」
+          ★ 「0 대 1」로 적지 않습니다. 뜻이 **반대**가 됩니다 —
+            아무도 안 왔다가 아니라 왔는데 안 뽑은 것입니다
+     ③ 기관이 숫자를 안 적음     7회차 → 「기관이 숫자를 안 적었어요」
+          ★ 0 이 아니라 **모르는 것**입니다. 숫자를 지어내지 않습니다
+
+   셋 다 평균·가장 낮음·가장 높음 계산에는 안 들어갑니다 —
+   alio_group_sum.평균 은 값있음 줄로만 냅니다 (자료로 확인했습니다). */
+function 률칸(r: 회차) {
+  if (r.경쟁률상태 === '있음' && r.경쟁률) {
+    return { 큰글: `${r.경쟁률} : 1`, 작은글: null as string | null, 흐림: false };
+  }
+  if (r.첫응시 == null || r.끝선발 == null) {
+    return { 큰글: null, 작은글: '기관이 숫자를 안 적었어요', 흐림: true };
+  }
+  if (r.끝선발 === 0 && r.첫응시 > 0) {
+    return { 큰글: null, 작은글: `지원 ${r.첫응시}명 · 선발 0명`, 흐림: false };
+  }
+  if (r.첫응시 === 0) {
+    return { 큰글: '0 : 1', 작은글: '지원한 사람이 없었어요', 흐림: false };
+  }
+  return { 큰글: null, 작은글: '경쟁률을 낼 값이 없어요', 흐림: true };
+}
+
 /* 출처와 한계 — 화면 아래 **늘** 붙습니다 (경쟁률_화면_설계.md 4절) */
 function 밝힘({ 기본값단계 }: { 기본값단계?: boolean }) {
+  const 굵게 = 'font-medium text-gray-700 dark:text-gray-300';
   return (
-    <p className="mt-6 break-keep text-sm leading-relaxed text-mute">
+    <p className="mt-8 break-keep border-t border-gray-100 pt-5 text-sm leading-relaxed text-mute dark:border-gray-800">
       알리오(공공기관 경영정보 공개시스템)에 기관이 올린 자료 기준이에요.
-      <b> 공공기관만 해당돼요</b> — 민간 병원은 이 자료에 없어요.
-      경쟁률은 <b>첫 단계 응시자 ÷ 최종 선발 인원</b>이에요.
-      뽑은 사람이 0명이면 「경쟁률 낼 값 없음」으로 적고 0으로 적지 않아요.
-      {기본값단계 && <> 단계가 서류인지 면접인지 공고 설명에 없으면 <b>일반적인 전형 순서 기준</b>으로 적어요.</>}
+      <b className={굵게}> 공공기관만 해당돼요</b> — 민간 병원은 이 자료에 없어요.
+      경쟁률은 <b className={굵게}>첫 단계 응시자 ÷ 최종 선발 인원</b>이에요.
+      뽑은 사람이 0명이면 비율 대신 <b className={굵게}>지원·선발 인원</b>을 그대로 적고,
+      기관이 인원을 안 적은 회차는 <b className={굵게}>「안 적었어요」</b>로 둬요 — 0으로 적지 않아요.
+      {기본값단계 && (
+        <> 단계가 서류인지 면접인지 공고 설명에 없으면 <b className={굵게}>일반적인 전형 순서 기준</b>으로 적어요.</>
+      )}
     </p>
   );
 }
 
-const 칩 = 'rounded-xs bg-badge-teal-bg px-3 py-1 text-sm text-gray-700 dark:text-gray-200';
+/* 공고 목록의 분류 꼬리표와 **같은 것**을 씁니다 (web/app/jobs/page.tsx:328) */
+const 꼬리표 = 'rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue';
 
 export default async function Compete({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
@@ -135,6 +177,7 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
     if (r.error) 숫자탈 = r.error.message;
     else 한것 = r.data as 한묶음;
   }
+  const 로그인하라 = !!숫자탈 && 숫자탈.includes('로그인');
 
   const 주소 = (바꿀: Partial<SP>) => {
     const q = new URLSearchParams();
@@ -150,87 +193,111 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <header>
-        <h1 className="text-h1 font-bold">경쟁률 찾아보기</h1>
+        <h1 className="break-keep text-h1 font-bold">경쟁률 찾아보기</h1>
         <p className="mt-2 break-keep text-lg text-mute">
-          공공기관이 공개한 지난 채용의 경쟁률이에요. 자리 <b>{d.전체}곳</b>
-          {!회원인가 && <> · 숫자는 <b>로그인하면</b> 보여요</>}
+          공공기관이 공개한 지난 채용의 경쟁률이에요. 자리{' '}
+          <b className="num font-bold tabular-nums text-ink">{d.전체}곳</b>
+          {!회원인가 && (
+            <> · 숫자는 <b className="font-bold text-ink">로그인하면</b> 보여요</>
+          )}
         </p>
       </header>
 
       {/* ── 고른 묶음 ───────────────────────────────────────── */}
       {고른묶음 && (
-        <section className="mt-6 rounded-sm border border-line bg-card p-6">
-          <Link href={주소({ g: undefined })} className="text-sm text-mute underline underline-offset-2">
+        <section className="mt-7">
+          <Link href={주소({ g: undefined })}
+            className="text-sm font-medium text-interaction-blue hover:underline">
             ← 목록으로
           </Link>
 
           {숫자탈 ? (
-            <div className="mt-4">
-              <p className="break-keep text-body-lg font-bold text-ink">
-                {숫자탈.includes('로그인') ? '로그인하면 경쟁률을 볼 수 있어요' : '못 읽었어요'}
+            /* 로그인 유도 — 카드 하나로 또렷하게 */
+            <div className="mt-4 rounded-sm border border-gray-200 bg-gray-50 p-7 dark:border-gray-700 dark:bg-gray-950">
+              <p className="break-keep text-h3 font-bold text-ink">
+                {로그인하라 ? '로그인하면 경쟁률을 볼 수 있어요' : '못 읽었어요'}
               </p>
-              <p className="mt-2 break-keep text-lg text-mute">
-                {숫자탈.includes('로그인')
+              <p className="mt-2 break-keep text-lg leading-relaxed text-mute">
+                {로그인하라
                   ? '어느 자리에 몇 번 채용했는지는 로그인 없이 보여요. 경쟁률 숫자만 회원에게 보여드려요.'
                   : 숫자탈}
               </p>
-              {숫자탈.includes('로그인') && (
+              {로그인하라 && (
                 <Link href={'/login?next=' + encodeURIComponent(주소({}))}
-                  className="mt-5 inline-block rounded-md bg-brand-red px-7 py-5 text-btn font-bold text-white hover:bg-brand-red-dark">
+                  className="mt-6 inline-block rounded-md bg-brand-red px-7 py-4 text-btn font-bold
+                             text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98]">
                   로그인하기
                 </Link>
               )}
             </div>
           ) : 한것 ? (
             <div className="mt-4">
-              <h2 className="break-keep text-h3 font-bold">
-                {한것.머리.기관} · {한것.머리.지역} · {한것.머리.직군}
+              {/* 머리 — 기관은 작게, 요약 문장이 가장 큽니다 */}
+              <p className="break-keep text-sm text-mute">
+                {한것.머리.기관} · {한것.머리.지역}
                 {한것.머리.고용형태 ? ' · ' + 한것.머리.고용형태 : ''}
-              </h2>
-              <p className="mt-2 text-body-lg font-bold text-ink">{요약문(한것.머리)}</p>
+              </p>
+              <h2 className="mt-1 break-keep text-h2 font-bold">{한것.머리.직군}</h2>
+              <p className="mt-3 break-keep text-body-lg font-bold text-ink">{요약문(한것.머리)}</p>
               {한것.머리.평균 && 한것.머리.가장낮음 && (
                 <p className="mt-1 text-lg text-mute">
-                  가장 낮았을 때 {한것.머리.가장낮음} 대 1 · 가장 높았을 때 {한것.머리.가장높음} 대 1
+                  가장 낮았을 때 <span className="num tabular-nums">{한것.머리.가장낮음}</span> 대 1 ·
+                  가장 높았을 때 <span className="num tabular-nums">{한것.머리.가장높음}</span> 대 1
                 </p>
               )}
+              {한것.머리.자리 && (
+                <p className="mt-2 break-keep text-sm text-mute">{한것.머리.자리}</p>
+              )}
 
-              <ul className="mt-5 flex flex-col gap-3">
-                {한것.회차들.map((r) => (
-                  <li key={r.sn} className="rounded-xs bg-paper p-5 dark:bg-gray-950">
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="text-lg text-mute">
-                        {r.해}년{r.마감 ? ` · 마감 ${r.마감}` : ''}
-                      </span>
-                      <span className="text-body-lg font-bold text-ink">
-                        {r.경쟁률상태 === '있음' && r.경쟁률
-                          ? `${r.경쟁률} : 1`
-                          : <span className="text-mute">경쟁률 낼 값 없음</span>}
-                      </span>
-                    </div>
-                    {r.공고제목 && (
-                      <p className="mt-1 break-keep text-lg text-ink">{r.공고제목}</p>
-                    )}
-                    {r.자리이름 && <p className="text-sm text-mute">{r.자리이름}</p>}
+              {/* 회차 — 공고 목록과 같은 divide-y 리듬 */}
+              <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
+                {한것.회차들.map((r) => {
+                  const v = 률칸(r);
+                  return (
+                    <li key={r.sn} className="py-6">
+                      <div className="flex items-baseline justify-between gap-5">
+                        <span className="text-sm text-mute">
+                          {r.해}년{r.마감 ? ` · 마감 ${r.마감}` : ''}
+                        </span>
+                        <span className={'shrink-0 text-right ' + (v.흐림 ? 'text-mute' : '')}>
+                          {v.큰글 && (
+                            <b className="num block text-h3 font-bold tabular-nums text-ink">{v.큰글}</b>
+                          )}
+                          {v.작은글 && (
+                            <span className={'block text-sm '
+                              + (v.큰글 ? 'text-mute' : 'font-medium text-gray-700 dark:text-gray-300')}>
+                              {v.작은글}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      {r.공고제목 && (
+                        <p className="mt-1 break-keep text-body-lg font-medium">{r.공고제목}</p>
+                      )}
+                      {r.자리이름 && <p className="mt-0.5 break-keep text-sm text-mute">{r.자리이름}</p>}
 
-                    {r.단계들 && r.단계들.length > 0 && (
-                      <ul className="mt-3 flex flex-col gap-1">
-                        {r.단계들.map((s, i) => (
-                          <li key={i} className="text-sm text-mute">
-                            <b className="text-ink">{s.이름 ?? (i + 1) + '차'}</b>
-                            {s.선발 != null && <> · {s.선발}명 뽑음</>}
-                            {s.응시 != null && <> · {s.응시}명 지원</>}
-                            {s.확정일 && <> · 결과 {s.확정일}</>}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {r.첫응시 != null && r.끝선발 ? (
-                      <p className="mt-2 text-sm text-ink">
-                        {r.첫응시}명이 지원해 {r.끝선발}명을 뽑았어요
-                      </p>
-                    ) : null}
-                  </li>
-                ))}
+                      {r.단계들 && r.단계들.length > 0 && (
+                        <ul className="mt-3 flex flex-col gap-1">
+                          {r.단계들.map((t, i) => (
+                            <li key={i} className="flex flex-wrap gap-x-3 text-sm text-mute">
+                              <b className="min-w-[3.5rem] font-medium text-gray-700 dark:text-gray-300">
+                                {t.이름 ?? (i + 1) + '차'}
+                              </b>
+                              {t.선발 != null && <span className="num tabular-nums">{t.선발}명 뽑음</span>}
+                              {t.응시 != null && <span className="num tabular-nums">{t.응시}명 지원</span>}
+                              {t.확정일 && <span>결과 {t.확정일}</span>}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {r.첫응시 != null && r.끝선발 ? (
+                        <p className="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {r.첫응시}명이 지원해 {r.끝선발}명을 뽑았어요
+                        </p>
+                      ) : null}
+                    </li>
+                  );
+                })}
               </ul>
               <밝힘 기본값단계={한것.머리.기본값단계} />
             </div>
@@ -256,44 +323,52 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
               남길값={sp.q ? { q: sp.q } : {}}
             />
 
-            {/* 자리 이름으로 찾기 — 설계 5절 */}
-            <form action="/compete" method="get" className="mb-6 flex gap-2">
+            {/* 자리 이름으로 찾기 — 공고 목록의 찾기 줄과 같은 꼴입니다 */}
+            <form action="/compete" method="get" className="mb-2 flex gap-2">
               {sp.job && <input type="hidden" name="job" value={sp.job} />}
               {sp.sido && <input type="hidden" name="sido" value={sp.sido} />}
               {sp.org && <input type="hidden" name="org" value={sp.org} />}
               <input name="q" defaultValue={sp.q ?? ''} placeholder="기관·자리 이름으로 찾기"
                 aria-label="기관이나 자리 이름으로 찾기"
-                className="min-w-0 flex-1 rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink focus:border-teal-strong focus:outline-none" />
+                className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg
+                           placeholder:text-mute dark:border-gray-700 dark:bg-gray-950" />
               <button type="submit"
-                className="shrink-0 rounded-xs border border-line px-5 py-3 text-lg text-ink hover:bg-gray-50">
+                className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white
+                           transition-colors hover:bg-brand-red-dark active:scale-[0.98]">
                 찾기
               </button>
             </form>
           </div>
 
           {d.묶음.length === 0 ? (
-            <p className="text-lg text-mute">고른 조건에 맞는 자리가 없어요.</p>
+            <p className="mt-7 text-lg text-mute">고른 조건에 맞는 자리가 없어요.</p>
           ) : (
-            <ul className="flex flex-col gap-3">
+            <ul className="divide-y divide-gray-100 dark:divide-gray-800">
               {d.묶음.map((g) => (
                 <li key={g.묶음키}>
                   <Link href={주소({ g: g.묶음키, p: undefined })}
-                    className="block rounded-sm border border-line bg-card p-5 hover:border-teal-strong">
-                    <p className="break-keep text-body-lg font-bold text-ink">
-                      {g.기관} · {g.지역} · {g.직군}
+                    className="-mx-4 block rounded-sm px-4 py-6 hover:bg-gray-50 dark:hover:bg-gray-950">
+                    {/* 공고 목록과 같은 차례 — 기관 작게, 제목 크게, 꼬리표 아래 */}
+                    <div className="flex items-baseline justify-between gap-5">
+                      <span className="break-keep text-sm text-mute">
+                        {g.기관} · {g.지역}
+                      </span>
+                      <span className="num shrink-0 text-sm font-bold tabular-nums text-gray-600 dark:text-gray-400">
+                        {g.회차}번 채용
+                      </span>
+                    </div>
+                    <p className="mt-1 break-keep text-body-lg font-medium">
+                      {g.직군}
                       {g.고용형태 ? ' · ' + g.고용형태 : ''}
                     </p>
-                    {g.자리 && (
-                      <p className="mt-1 break-keep text-sm text-mute">{g.자리}</p>
-                    )}
-                    <p className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className={칩}>{g.첫해}~{g.끝해}년</span>
-                      <span className={칩}>{g.회차}번 채용</span>
-                      {g.기본값단계 && <span className={칩}>단계 이름 기본값</span>}
-                      <span className="text-sm text-mute">
-                        {회원인가 ? '경쟁률 보기 →' : '로그인하면 경쟁률을 볼 수 있어요'}
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-mute">
+                      <span className={꼬리표}>{g.첫해}~{g.끝해}년</span>
+                      {g.기본값단계 && <span>단계 이름 기본값</span>}
+                      {g.자리 && <span className="break-keep">{g.자리}</span>}
+                      <span className="font-medium text-interaction-blue">
+                        {회원인가 ? '경쟁률 보기' : '로그인하면 경쟁률을 볼 수 있어요'}
                       </span>
-                    </p>
+                    </div>
                   </Link>
                 </li>
               ))}
@@ -304,14 +379,16 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
             <nav aria-label="쪽" className="mt-7 flex items-center justify-between">
               {쪽 > 1
                 ? <Link href={주소({ p: String(쪽 - 1) })}
-                    className="rounded-xs border border-line px-5 py-3 text-lg text-ink hover:bg-gray-50">
+                    className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium
+                               text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">
                     이전
                   </Link>
                 : <span />}
-              <span className="text-lg text-mute">{쪽} / {끝쪽}</span>
+              <span className="num text-lg tabular-nums text-mute">{쪽} / {끝쪽}</span>
               {쪽 < 끝쪽
                 ? <Link href={주소({ p: String(쪽 + 1) })}
-                    className="rounded-xs border border-line px-5 py-3 text-lg text-ink hover:bg-gray-50">
+                    className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium
+                               text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">
                     다음
                   </Link>
                 : <span />}
