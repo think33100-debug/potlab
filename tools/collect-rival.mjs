@@ -50,9 +50,25 @@ function env() {
   return out;
 }
 const cfg = env();
+/* 박동의 took_ms 가 이걸 씁니다 — 맨 위 await 가 깨져도 값이 있어야 합니다 */
+const t0 = Date.now();
 
+/* ⚠ **service 열쇠를 먼저 집습니다** (2026-10-07).
+ *
+ * 까닭 — `rival_match_go` 가 `57014 statement timeout` 으로 **매회** 죽고
+ * 있었습니다. 2026-10-01 부터 93회, 하루 16번 도는 모든 회차입니다.
+ * anon 역할 한도가 3초인데(pg_roles), 이 함수는 공고 전체에 `견줄이름()` 을
+ * 걸고 유사도로 정렬합니다. 던지고 죽으니 박동도 안 남아 아무 표시가
+ * 없었습니다 (알리오묶기_시간초과_조사_2026-10-07.md 2절).
+ * service_role 에는 statement_timeout 이 없습니다.
+ *
+ * ★ 이 도구는 **서버 크론에서만** 돕니다 (`15 7-22 * * *`).
+ *   GitHub Actions 에 없습니다 — service 열쇠를 GitHub Secrets 에 넣지 않습니다.
+ *   브라우저 코드(web/)에도 넣지 않습니다.
+ * ★ 열쇠가 없으면 anon 으로 내려갑니다 — 돌기는 하되 3초 한도를 받습니다.
+ */
 async function rpc(fn, body) {
-  const k = cfg.SUPABASE_ANON_KEY;
+  const k = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;
   const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',
     headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
@@ -63,6 +79,40 @@ async function rpc(fn, body) {
   try { return JSON.parse(t); } catch { return t; }
 }
 
+/* ── 박동 ───────────────────────────────────────────────────────
+ * 경로는 **RIVAL** 입니다. 병원 홈페이지 HS3 와 **따로** 둡니다 —
+ * 열쇠만 HS3 것을 함께 씁니다. 한 경로로 묶으면 beat_health 의
+ * 간격 가운데값이 뒤섞입니다 (~/경쟁률크론.sh 의 AL2C 와 같은 까닭).
+ *
+ * ★ **탈이 나도 반드시 남깁니다.** 안 남기면 멈춘 것과 구별이 안 됩니다.
+ *   2026-10-01 부터 93회 죽는 동안 이게 없어 박동이 조용했습니다.
+ * ★ 박동 자체가 실패해도 **던지지 않습니다.** 진짜 까닭을 덮으면 안 됩니다.
+ * ★ --dry 에서는 남기지 않습니다.
+ */
+const BEAT_SOURCE = 'RIVAL';
+let 박동남겼나 = false;
+async function 박동(ok, 왜, 셈) {
+  if (dry || 박동남겼나) return;
+  박동남겼나 = true;
+  try {
+    await rpc('collect_beat', {
+      p_secret: cfg.COLLECT_KEY_HS3, p_source: BEAT_SOURCE,
+      p_beat: { took_ms: Date.now() - t0, ok, 왜: 왜 || '', ...(셈 || {}) },
+    });
+    console.log('박동 — ' + BEAT_SOURCE + ' · ' + (ok ? '정상' : '탈남'));
+  } catch (e) {
+    console.error('박동을 못 남겼습니다 — ' + String(e && e.message || e).slice(0, 120));
+  }
+}
+
+/* 어디서 터져도 박동을 남기고 나갑니다. 맨 위 await 가 깨지면 여기로 옵니다 */
+process.on('unhandledRejection', async (e) => {
+  const 왜 = String(e && (e.message || e)).slice(0, 500);
+  console.error('\n★ 탈났습니다 — ' + 왜);
+  await 박동(false, 왜);
+  process.exit(1);
+});
+
 /* 제목에서 기관 이름을 어림합니다. 틀릴 수 있어 화면에 「어림」 이라고 밝힙니다 */
 function 기관어림(제목) {
   const t = String(제목 || '');
@@ -70,7 +120,6 @@ function 기관어림(제목) {
   return m ? m[1].trim() : '';
 }
 
-const t0 = Date.now();
 console.log('경쟁사 관찰 (' + 경쟁사 + ') · '
   + new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) + (dry ? ' · --dry' : ''));
 console.log('  목록 첫 쪽만 봅니다. 상세는 열지 않습니다');
@@ -81,13 +130,18 @@ const 집 = new URL(목록주소).origin;
 const rb = await fetch(집 + '/robots.txt', { headers: { 'User-Agent': UA } });
 const 판 = 가도되나(robots읽기(rb.ok ? await rb.text() : ''), new URL(목록주소).pathname);
 console.log('\n① robots.txt — ' + (판.됨 ? '가도 됩니다' : '★ 막혔습니다') + ' · ' + 판.왜);
-if (!판.됨) { console.error('robots.txt 가 막았습니다. 아무것도 안 했습니다'); process.exit(0); }
+if (!판.됨) {
+  console.error('robots.txt 가 막았습니다. 아무것도 안 했습니다');
+  await 박동(false, 'robots.txt 가 막았습니다 — ' + 판.왜);
+  process.exit(0);
+}
 
 /* ── ② 목록 한 번 ─────────────────────────────────────────── */
 const r = await fetch(목록주소, { headers: { 'User-Agent': UA } });
 if (!r.ok) {
   console.error('② 목록 HTTP ' + r.status + ' · 응답 앞 500자 — '
     + (await r.text()).replace(/\s+/g, ' ').slice(0, 500));
+  await 박동(false, '목록 HTTP ' + r.status);
   process.exit(1);
 }
 const 전부 = 목록읽기(await r.text());
@@ -124,4 +178,12 @@ console.log('③ 담음 — 새것 ' + 담음['새것'] + ' · 이미 있던 것
 /* ── ④ 견주기 ─────────────────────────────────────────────── */
 const 견줌 = await rpc('rival_match_go', { p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE });
 console.log('④ 견줌 — ' + Object.entries(견줌).map(([k, v]) => k + ' ' + v).join(' · '));
+
+/* ── ⑤ 박동 ───────────────────────────────────────────────── */
+await 박동(true, '', {
+  본곳: 전부.length,
+  담음: Number(담음['새것']) || 0,
+  버림: 전부.length - 볼것.length,
+  메모: { 견줄것: 볼것.length, 이미있던것: Number(담음['이미 있던 것']) || 0, 견줌 },
+});
 console.log('\n' + Math.round((Date.now() - t0) / 1000) + '초');

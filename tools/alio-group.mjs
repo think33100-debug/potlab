@@ -41,8 +41,24 @@ function env() {
   return out;
 }
 const cfg = env();
+/* ⚠ **service 열쇠를 먼저 집습니다** (2026-10-07).
+ *
+ * 까닭 — anon 역할에는 `statement_timeout = 3s` 가 걸려 있습니다 (pg_roles).
+ * `alio_group_src` 는 묶음 6,082개를 5.7MB jsonb 로 내놓는데, PostgREST 를 거친
+ * 27회가 평균 1.12초 · **최대 2.64초**였습니다. 한도의 88% 를 늘 쓰고 있어
+ * 자료가 조금 늘거나 PostgREST 가 다시 뜬 직후면 넘습니다.
+ * 10월 6·7일 이틀 연속으로 `57014 statement timeout` 이 난 자리입니다
+ * (알리오묶기_시간초과_조사_2026-10-07.md).
+ * service_role 에는 statement_timeout 이 없습니다.
+ *
+ * ★ 이 도구는 **서버 크론에서만** 돕니다. GitHub Actions 에 없습니다
+ *   (.github/workflows 에 alio-group 이 안 나옵니다 — 2026-10-07 확인).
+ *   그래서 service 열쇠를 GitHub Secrets 에 넣을 일이 없습니다.
+ *   브라우저 코드(web/)에도 넣지 않습니다.
+ * ★ 열쇠가 없으면 anon 으로 내려갑니다 — 돌기는 하되 3초 한도를 받습니다.
+ */
 async function rpc(fn, body) {
-  const k = cfg.SUPABASE_ANON_KEY;
+  const k = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;
   const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',
     headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
