@@ -144,7 +144,10 @@ export function 풀기(호스트, x) {
     상태: String(x.submissionStatus || ''),
     시작: 날(x.startDateTime),
     마감: 날(x.endDateTime),
-    경력: x.careerType === 'NEW_CAREER' ? '신입/경력' : String(x.careerType || ''),
+    /* ★ 여기서 NEW_CAREER 만 따로 풀던 것을 없앴습니다 (2026-10-07).
+       아래 경력조건() 과 **두 벌**이었습니다. 원문 값을 그대로 들고 가고
+       말로 바꾸는 것은 경력조건() 한 곳에서만 합니다 (작업지침 6절) */
+    경력: String(x.careerType || ''),
     주소: 'https://' + 호스트 + '.recruiter.co.kr/career/jobs/' + x.positionSn,
     직군: (matchJob(제목) && !notOurs(제목)) ? matchJob(제목) : '',
   };

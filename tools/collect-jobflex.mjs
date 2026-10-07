@@ -182,7 +182,8 @@ return ({
   work_place: 간것.근무지,
   employ_type: 간것.고용형태,
   title: x.제목 || '(없음)',
-  /* careerType 은 **경력 조건**입니다 (NEW·CAREER·ANY·NEW_CAREER).
+  /* careerType 은 **경력 조건**입니다. 원문으로 본 값 여섯은
+     tools/hosp/jobflex.mjs 의 경력조건() 주석에 적어 두었습니다 (2026-10-07).
      고용형태가 아닙니다 — 알리오와 같이 hire_type 에 둡니다 */
   hire_type: 경력조건(x.경력),
   sido: null, sgg: null, edu: '',

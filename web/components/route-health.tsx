@@ -146,10 +146,49 @@ function 박동경보({ beats }: { beats: Beat[] }) {
   );
 }
 
+/* 처음 보는 코드 값 (2026-10-07 세중님).
+   회원 화면에는 「공고문 참고」 로 나가고 **여기서만** 영문을 보여 줍니다.
+   워크넷 10·20 이 90건 샜던 자리라, 다음에는 새기 전에 보이게 둡니다 */
+type 모르는코드 = {
+  있나: boolean; 가짓수: number; 공고수: number; 회원화면에보이는것: number;
+  줄: { 칸: string; 출처: string; 값: string; 공고수: number; 살아있음: number }[];
+};
+
+function 코드경보({ 코드 }: { 코드: 모르는코드 }) {
+  return (
+    <div role="alert" className="mb-6 rounded-[14px] border-2 border-[#FF9500] bg-[#FFF8EF] p-5">
+      <p className="break-keep text-[15px] font-bold text-[#B36200]">
+        처음 보는 코드 값이 {코드.가짓수}가지 있어요 (공고 {코드.공고수}건)
+      </p>
+      <ul className="mt-3 space-y-2">
+        {코드.줄.map((x) => (
+          <li key={x.칸 + x.출처 + x.값} className="break-keep text-[14px] text-[#1B2025]">
+            <span className="font-bold">{x.값}</span>
+            {' — '}{x.출처}{' · '}{x.칸}{' · 공고 '}
+            <span className="num tabular-nums">{x.공고수}</span>{'건'}
+            {x.살아있음 > 0 && (
+              <span className="block text-[13px] text-[#B36200]">
+                {'그중 '}<span className="num tabular-nums">{x.살아있음}</span>
+                {'건이 회원 화면에 있어요 (「공고문 참고」 로 보입니다)'}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#5F666C]">
+        회원 화면에는 영문이 안 나갑니다 — 한글이 없는 값은 비워서 「공고문 참고」 로
+        보입니다. 뜻을 알아내면 수집기의 코드표(예: tools/hosp/jobflex.mjs 의
+        경력조건)와 DB 의 고용형태보임() 에 한 줄씩 더해 주세요.
+      </p>
+    </div>
+  );
+}
+
 export function RouteHealth() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [leak, setLeak] = useState<Leak | null>(null);
   const [beats, setBeats] = useState<Beat[] | null>(null);
+  const [코드, set코드] = useState<모르는코드 | null>(null);
 
   useEffect(() => {
     let 살아있나 = true;
@@ -171,6 +210,12 @@ export function RouteHealth() {
         if (!살아있나) return;
         setBeats(error ? [] : ((data ?? []) as Beat[]));
       });
+    browserSupabase()
+      .rpc('모르는코드')
+      .then(({ data, error }) => {
+        if (!살아있나) return;
+        set코드(error ? null : (data as 모르는코드));
+      });
     return () => { 살아있나 = false; };
   }, []);
 
@@ -180,13 +225,17 @@ export function RouteHealth() {
   const 샘 = leak && leak.샘 ? <샘경보 leak={leak} /> : null;
   const 늦은것 = (beats || []).filter((b) => b.빨간줄);
   const 박동 = 늦은것.length ? <박동경보 beats={늦은것} /> : null;
+  const 코드띠 = 코드 && 코드.있나 ? <코드경보 코드={코드} /> : null;
   const 빨간것 = rows.filter((r) => r.빨간줄);
-  if (!빨간것.length) return (박동 || 샘) ? <>{박동}{샘}</> : null;
+  if (!빨간것.length) {
+    return (박동 || 샘 || 코드띠) ? <>{박동}{샘}{코드띠}</> : null;
+  }
 
   return (
     <>
     {박동}
     {샘}
+    {코드띠}
     <div
       role="alert"
       className="mb-6 rounded-[14px] border-2 border-[#FF3B30] bg-[#FFF1F0] p-5"

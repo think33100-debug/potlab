@@ -61,9 +61,14 @@ console.log('\n경력 조건 (careerType — 응답 원문에서 본 값만)');
 봐('ANY', 경력조건('ANY'), '관계없음');
 봐('NEW_CAREER', 경력조건('NEW_CAREER'), '신입/경력');
 봐('이미 바뀐 신입/경력', 경력조건('신입/경력'), '신입/경력');
-/* ⚠ FIELD_DIFFERENCE 는 응답에서 못 봤습니다. 지어내지 않고 그대로 둡니다 */
-봐('모르는 값은 그대로 (지어내지 않습니다)',
-  경력조건('FIELD_DIFFERENCE'), 'FIELD_DIFFERENCE');
+/* 2026-10-07 — 목록 API 를 직접 두드려 **본 값 여섯**을 다 셌습니다.
+   FIELD_DIFFERENCE 와 INTERNSHIP 이 실제로 옵니다 (전에는 「못 봤다」 고 적혀 있었습니다).
+   한글 뜻은 확인 못 해(상세 API 가 401) [미확인] 을 답니다 —
+   회원 화면에는 DB 의 고용형태보임() 이 한글 없는 값을 비워 「공고문 참고」 로 보입니다 */
+봐('FIELD_DIFFERENCE', 경력조건('FIELD_DIFFERENCE'), '분야별 상이 [미확인]');
+봐('INTERNSHIP', 경력조건('INTERNSHIP'), '인턴 [미확인]');
+봐('그래도 모르는 값은 그대로 (지어내지 않습니다)',
+  경력조건('SOMETHING_NEW'), 'SOMETHING_NEW');
 봐('빈 값', 경력조건(''), '');
 
 console.log('\n목록이 겹치지 않는지');
