@@ -261,6 +261,28 @@ API 한 번이면 끝날 일을 화면 긁기·PDF 읽기로 헤맸습니다.
 `pyhwp` 로 읽힙니다. `hwp5txt` 는 표를 `<표>` 로만 내놓으니 **`hwp5html`** 을 쓸 것.
 `six` 를 따로 깔아야 돕니다)
 
+**2026-10-07 — `~/hwp읽기` 를 다시 깔았습니다.** 서버에 없어졌던 것입니다.
+
+```
+python3 -m venv ~/hwp읽기
+~/hwp읽기/bin/pip install pyhwp six
+```
+
+깔린 것 — `pyhwp 0.1b15` · `six 1.17.0` · `olefile 0.47` · `lxml 6.1.3` ·
+`cryptography 50.0.2` · `cffi 2.1.1` · `pycparser 3.0` (python 3.12.3)
+실행 파일 — `hwp5html` `hwp5txt` `hwp5odt` `hwp5proc` `hwp5spec` `hwp5view`
+
+쓰는 법 (충주의료원 공고문으로 확인했습니다)
+
+```
+~/hwp읽기/bin/hwp5html --output <폴더> <파일.hwp>
+  → <폴더>/index.xhtml 에서 태그를 걷어내고 읽습니다
+```
+
+**`hwp5txt` 는 그 파일에서 아무것도 못 냈고 `hwp5html` 은 표를 읽어 냈습니다** —
+「원서접수 2026. 9. 4.(금) ~ 9. 14.(월)」. 지침의 말 그대로입니다.
+저장소 안 `tools/hwp/` (맨손 UTF-16LE)도 표를 못 가져옵니다 — 본문만 됩니다.
+
 ---
 
 ## 8-2. `pgrep -f` · `pkill -f` 는 내 명령줄까지 잡습니다
