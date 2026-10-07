@@ -52,7 +52,9 @@ const 원문제목 = async (sb: SupabaseClient, id: string) => {
 
 
 function dday(to: string | null): { text: string; urgent: boolean } | null {
-  if (!to) return null;
+  /* ★ 마감일이 없으면 「수시채용」 딱지 (2026-10-07 확정 방침).
+     목록(app/jobs/page.tsx)의 dday 도 같은 말을 돌려줍니다 */
+  if (!to) return { text: '수시채용', urgent: false };
   const left = Math.ceil(
     (new Date(to + 'T23:59:59+09:00').getTime()
      - new Date(todayKst() + 'T00:00:00+09:00').getTime()) / 86400000,
@@ -81,7 +83,7 @@ export async function generateMetadata({
     : `~${j.apply_to} 마감`;
 
   const title = `${j.org_name} ${j.job_group ?? '치료사'} 채용`;
-  const desc = [j.title, when, j.work_place].filter(Boolean).join(' · ');
+  const desc = [j.title, when, j.지역보임].filter(Boolean).join(' · ');
   const img = `${siteUrl()}/api/og/job/${j.id}`;
 
   return {
@@ -208,9 +210,12 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               </p>
             )}
 
+            {/* ★ 지역은 j.지역보임 을 읽습니다 — 카드·제목과 **같은 계산**입니다
+                (2026-10-07 확정 방침). 전에는 work_place 를 그대로 써서
+                순천병원이 「전남광주」로 나왔습니다 */}
             <p className="mt-3 break-keep text-[16px] text-[#4A5056]">
               {j.org_name}
-              {j.work_place && <span className="text-[#5F666C]"> · {j.work_place}</span>}
+              {j.지역보임 && <span className="text-[#5F666C]"> · {j.지역보임}</span>}
             </p>
 
             {/* 조회수 — 몇 명이나 보고 있는 자리인지 */}
@@ -226,13 +231,33 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               <Core icon={icons['job.headcount']} label="모집 인원"
                     v={j.headcount ? `${j.headcount}명` : '공고 참조'} />
               <Core icon={icons['job.deadline']} label="접수 마감"
-                    v={j.apply_to ?? '수시'}
+                    v={j.apply_to ?? '수시채용'}
                     sub={j.apply_from ? `${j.apply_from} 시작` : null} />
               <Core icon={icons['job.edu']} label="학력" v={j.edu ?? '제한 없음'} />
+              {/* 근무지도 지역보임 을 먼저 읽습니다. 자세한 주소(work_place)는
+                  다르면 아래 줄에 덧붙입니다 — 상세는 더 보여 줄 수 있습니다 */}
               <Core icon={icons['job.place']} label="근무지"
-                    v={j.work_place ?? j.sido ?? '공고 참조'} />
+                    v={j.지역보임 ?? '공고 참조'}
+                    sub={j.work_place && j.work_place.includes(' ')
+                         && j.work_place !== j.지역보임 ? j.work_place : null} />
             </dl>
           </Rise>
+
+          {/* ③-2 수시채용 안내 (2026-10-07 확정 방침).
+              문구는 세중님이 정한 그대로입니다 — 글자를 바꾸지 마십시오.
+              ⚠ 「30일」 은 방침의 숫자입니다. 지금 DB 의 실제 기준은
+                hide_stale_posts(p_days) 가 정합니다 — 밤정리가 넘기는 날수와
+                이 문구가 다르면 둘 중 하나를 맞춰야 합니다 */}
+          {!j.apply_to && (
+            <Rise>
+              <p className="mt-3 break-keep rounded-[12px] border border-[#E3E3DE]
+                            bg-[#F7F7F4] p-5 text-[14px] leading-[1.7] text-[#4A5056]">
+                수시채용 공고입니다. 마감일이 정해져 있지 않습니다.
+                병원에서 공고를 내리면 POTJOB에서도 내려갑니다.
+                올라온 지 30일이 지나면 지난 공고로 옮겨집니다.
+              </p>
+            </Rise>
+          )}
 
           {/* 세 갈래입니다 (2026-09-25).
                 비회원  자료가 아예 안 옵니다 (막는 자리는 DB). 안내 카드를 놓습니다

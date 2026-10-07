@@ -41,7 +41,10 @@ function d(v: string | null) {
   return v ? v.slice(5).replace('-', '.') : '';
 }
 function dday(to: string | null) {
-  if (!to) return null;
+  /* ★ 마감일이 없으면 「수시채용」 딱지 (2026-10-07 확정 방침).
+     상세(app/jobs/[id]/page.tsx)의 dday 도 같은 말을 돌려줍니다 —
+     두 벌이라 한쪽만 고치면 글자가 갈립니다 */
+  if (!to) return { text: '수시채용', urgent: false, over: false };
   const left = Math.ceil((new Date(to + 'T23:59:59+09:00').getTime() - Date.now()) / 86400000);
   if (left < 0) return { text: '마감', urgent: false, over: true };
   if (left === 0) return { text: '오늘 마감', urgent: true, over: false };
@@ -138,7 +141,10 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
 
   const tally = (counts.data ?? {}) as Record<string, number>;
   const tabCounts = TABS.map((t) => Number(tally[t.like] ?? 0));
-  const total = tabCounts.reduce((a, b) => a + b, 0);
+  /* ★ 탭 건수를 더하면 안 됩니다 (2026-10-07). 탭이 빈 공고 86건이 네 탭에
+     **다 들어가** 있어 합이 전체보다 큽니다. job_counts 가 겹치지 않게 센
+     「(전체)」 를 따로 보냅니다. 없으면(배포가 어긋난 때) 옛 방식으로 내려갑니다 */
+  const total = Number(tally['(전체)'] ?? tabCounts.reduce((a, b) => a + b, 0));
 
   const tabImages: Record<string, string | null> = {};
   ((cards.data ?? []) as { tab_key: string; image_path: string | null }[])
@@ -202,7 +208,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
         <div className="mb-6 flex flex-wrap items-baseline gap-3">
           <p className="break-keep text-lg text-gray-700 dark:text-gray-300">
             <span className="font-bold">{q}</span>
-            {locked ? ' — 회원만 볼 수 있어요' : ` — 네 탭 전체에서 ${total}건`}
+            {locked ? ' — 회원만 볼 수 있어요' : ` — 공고 ${total}건에서 찾았어요`}
           </p>
           <Link href={link({ q: undefined })} className="text-sm text-interaction-blue hover:underline">
             검색 지우기
@@ -323,6 +329,12 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                     )}
                     {r.title}
                   </p>
+                  {/* 아래 줄은 **직군 · 지역 · 고용형태 · 공고 기간 · 조회수** 로 고정입니다
+                      (2026-10-07 확정 방침). 공고마다 칸을 빼거나 더하지 않습니다.
+                      ★ 지역은 r.지역보임 을 읽습니다 — 제목과 **같은 계산**입니다.
+                        전에는 work_place 를 그대로 써서 제목과 어긋났습니다 —
+                        인하대는 빈칸, 순천병원은 「전남광주」가 그대로 나왔습니다.
+                      ★ 모집 인원은 아래 줄에서 뺐습니다. 상세의 「모집 인원」 칸에 있습니다 */}
                   <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mute">
                     {searching && r.tab && (
                       <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
@@ -330,9 +342,8 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                       </span>
                     )}
                     {r.job_group && <span className="font-medium text-gray-700 dark:text-gray-300">{r.job_group}</span>}
-                    {r.work_place && <span>{r.work_place}</span>}
+                    {r.지역보임 && <span>{r.지역보임}</span>}
                     {r.employ_type && <span>{r.employ_type}</span>}
-                    {r.headcount ? <span>{r.headcount}명</span> : null}
                     {(r.apply_from || r.apply_to) && (
                       <span>{d(r.apply_from)}~{d(r.apply_to)}</span>
                     )}
@@ -376,7 +387,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       {!locked && (
         <p className="mt-7 break-keep text-sm text-mute">
           {searching
-            ? `네 탭 전체에서 ${total}건 · 이 쪽에 ${rows.length}건`
+            ? `공고 ${total}건에서 찾음 · 이 쪽에 ${rows.length}건`
             : `${active?.label} ${tabCounts[TABS.findIndex((t) => t.key === active?.key)]}건 중 이 쪽에 ${rows.length}건`}
           {' · 한 번에 '}{PAGE}{'건씩 보여드려요'}
         </p>

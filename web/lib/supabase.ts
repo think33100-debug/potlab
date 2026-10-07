@@ -60,6 +60,13 @@ export type JobPost = {
      근로복지공단 청년인턴은 응시자격에 「(물리치료사) 면허증 소지자」가
      적혀 있습니다. 다만 인턴이라 회원이 헷갈리지 않게 표시를 답니다 */
   is_intern: boolean | null;
+  /* 카드와 상세가 **같은 계산 결과**를 읽는 칸입니다 (2026-10-07 확정 방침).
+     DB 의 지역보임(job_posts) 이 정합니다 — 제목도 같은 함수를 씁니다.
+       공공기관 본체가 직접 뽑으면      비웁니다
+       「전남광주」                   전남·광주로 가릅니다. 못 가르면 비웁니다
+       아는 데까지                    「전남 순천시」 (짧은 시도 + 시군구)
+     ★ work_place·sido 를 화면에 직접 쓰지 마십시오. 그래서 어긋났습니다 */
+  지역보임: string | null;
 };
 
 export type JobListItem = Pick<
@@ -67,6 +74,7 @@ export type JobListItem = Pick<
   'id' | 'org_name' | 'title' | 'employ_type' | 'work_place'
   | 'sido' | 'job_group' | 'org_kind' | 'tab'
   | 'apply_from' | 'apply_to' | 'posted_at' | 'headcount' | 'is_intern'
+  | '지역보임'
 >;
 
 /* 로그인 안 한 분에게 보여주는 맛보기 (2026-10-01).
