@@ -9,6 +9,7 @@ import { ViewBump } from '@/components/view-bump';
 import { channelName } from '@/lib/channels';
 import { supabase, POST_ONE_COLS, type PostRow } from '@/lib/supabase';
 import { serverSupabase } from '@/lib/supabase-server';
+import { siteUrl } from '@/lib/site-url';
 import { shownName } from '@/lib/who';
 import { Clip, JoinCta, Members } from '@/app/gate';
 
@@ -56,15 +57,18 @@ const GONE = {
   },
 } as const;
 
-async function getImages(id: number) {
-  const { data } = await supabase
-    .from('post_images').select('path,thumb_path,sort').eq('post_id', id).order('sort');
-  return (data ?? []) as { path: string; thumb_path: string; sort: number }[];
+/* ★ 2026-10-07 — 사진 **경로**를 화면으로 안 보냅니다 (세중님 결정 ㉯).
+   저장소 경로가 `<글쓴이 회원번호>/<글번호>/0.webp` 라 회원번호가 나갑니다.
+   몇 장인지만 세고, 그림은 우리 주소로 받습니다 —
+   app/api/post-image/[post]/[idx]/route.ts */
+async function countImages(id: number) {
+  const { count } = await supabase
+    .from('post_images').select('post_id', { count: 'exact', head: true }).eq('post_id', id);
+  return count ?? 0;
 }
 
-function publicUrl(bucket: string, path: string) {
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
-}
+/* 카톡 미리보기는 절대 주소여야 합니다 */
+const 사진주소 = (postId: number, i: number) => `${siteUrl()}/api/post-image/${postId}/${i}`;
 
 /* 카톡·트위터에 뜨는 미리보기입니다.
    공유가 이 제품의 들어오는 문이라 여기가 비면 링크만 덩그러니 갑니다.
@@ -77,10 +81,10 @@ export async function generateMetadata({
   /* 카톡에 뜨는 제목도 갈라 적습니다 — 누르기 전에 알 수 있게 */
   if (!p) return { title: `${GONE[await stateOf(id)].title} · POTJOB` };
 
-  const imgs = await getImages(p.id);
+  const 장수 = await countImages(p.id);
   const title = p.title || p.body.slice(0, 40);
   const desc = p.body.slice(0, 120).replace(/\s+/g, ' ');
-  const image = imgs[0] ? publicUrl('post-images', imgs[0].path) : '/og.png';
+  const image = 장수 > 0 ? 사진주소(p.id, 0) : '/og.png';
 
   return {
     title: `${title} · ${channelName(p.channel)} · POTJOB`,
@@ -114,7 +118,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
     );
   }
 
-  const imgs = await getImages(p.id);
+  const 장수 = await countImages(p.id);
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
@@ -142,12 +146,12 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             {p.body}
           </p>
 
-          {imgs.length > 0 && (
+          {장수 > 0 && (
             <ul className="mt-6 space-y-5">
-              {imgs.map((im) => (
-                <li key={im.path}>
-                  {/* eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다 */}
-                  <img src={publicUrl('post-images', im.path)} alt=""
+              {Array.from({ length: 장수 }, (_, i) => (
+                <li key={i}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- 우리 라우트가 바이트를 그대로 보냅니다 */}
+                  <img src={`/api/post-image/${p.id}/${i}`} alt=""
                     className="w-full rounded-sm" loading="lazy" />
                 </li>
               ))}

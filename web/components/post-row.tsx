@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { Avatar } from '@/components/avatar';
 import { channelName } from '@/lib/channels';
-import { browserSupabase } from '@/lib/supabase-browser';
 import type { PostRow } from '@/lib/supabase';
 import { shownName } from '@/lib/who';
 
@@ -19,10 +18,10 @@ export function ago(iso: string) {
 /* 글 한 줄. 목록 어디서나 같은 모양으로 씁니다.
    보이는 사람 정보는 닉네임과 아바타뿐입니다 */
 export function PostItem({ p, showChannel = false }: { p: PostRow; showChannel?: boolean }) {
-  const thumb = p.post_images?.[0]?.thumb_path;
-  const thumbUrl = thumb
-    ? browserSupabase().storage.from('post-images').getPublicUrl(thumb).data.publicUrl
-    : null;
+  /* ★ 2026-10-07 — 저장소 공개 주소를 쓰지 않습니다 (세중님 결정 ㉯).
+     그 경로가 「회원번호/글번호/0-t.webp」 라 회원번호가 화면에 나갔습니다.
+     우리 주소로 받습니다 — app/api/post-image/[post]/[idx]/route.ts */
+  const thumbUrl = (p.사진수 ?? 0) > 0 ? `/api/post-image/${p.id}/0?t=1` : null;
 
   return (
     <li>
