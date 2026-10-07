@@ -45,7 +45,7 @@ import { matchJob, notOurs, mixedTitle, 구운날 } from './gas-rules.mjs';
 /* 접수기간 규칙 — tools/hosp/hs_dates.js 한 벌. CommonJS 라 require 로 끌어옵니다.
    2026-10-07 에 붙였습니다. 전에는 저 파일이 저장소에 있는데 아무도 안 불렀습니다 */
 const require = createRequire(import.meta.url);
-const { hsDetailDates } = require('./hosp/hs_dates.js');
+const { hsDetailDates, hs접수문장 } = require('./hosp/hs_dates.js');
 
 /* 읽은 날짜가 쓸만한가 — 짐작으로 담지 않습니다.
  *
@@ -368,6 +368,10 @@ if (상세몫 > 0) {
 
       /* ★ 접수기간 채우기 (2026-10-07). 규칙은 tools/hosp/hs_dates.js 한 벌입니다.
          목록에서 날짜가 나온 공고는 건드리지 않습니다 — 목록 쪽이 더 믿을만합니다 */
+      /* 접수 안내 문장을 떼어 둡니다 — 판정은 DB 의 마감표시() 가 합니다.
+         「채용시까지」 처럼 날짜가 아닌 말이 적혀 있으면 그게 진짜 수시 공고입니다 */
+      x.접수문장 = hs접수문장(글);
+
       if (!x.to) {
         const d = hsDetailDates(글);
         const to = 날짜쓸만한가(d, x.posted || x.from);
@@ -447,6 +451,9 @@ const 담을것 = 회원2.concat(보류2).concat(쌓을것).map((x) => ({
        collect_put 창구가 그 칸을 안 받습니다 — 창구를 고치는 대신 근거에 적습니다.
        관리자 화면이 근거를 이미 펼쳐 보여 줍니다 */
     ...(x.날짜출처 ? { 날짜출처: x.날짜출처 } : {}),
+    /* 접수 안내 문장 그대로. DB 의 마감표시() 가 여기에 「채용시까지·상시·수시…」 가
+       있는지 보고 「수시채용」 인지 「마감일 공고문 확인」 인지 가릅니다 */
+    ...(x.접수문장 ? { 접수문장: x.접수문장 } : {}),
     갈래: x.갈래.갈래, 단계: String(x.갈래.단계 || ''), 사유: x.갈래.왜 || '',
     걸린단어: (x.갈래.걸린단어 || []).join(','),
     보류사유: x.갈래.갈래 === '보류함' ? (x.상세왜 ? x.갈래.왜 + ' · 상세 ' + x.상세왜 : x.갈래.왜) : '',

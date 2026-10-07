@@ -54,6 +54,24 @@ function hsDetailDates(text) {
   }
   return best || { from: '', to: '' };
 }
+
+/* 접수 안내 문장만 떼어 옵니다 — **판정하지 않습니다** (2026-10-07).
+ *
+ * 「수시채용인가」 판정은 DB 의 마감표시() 한 곳에만 둡니다 (세중님 지시).
+ * 그래서 여기서는 낱말을 보지 않고, 접수 안내가 적힌 문장을 그대로 떼어
+ * `evidence.접수문장` 에 담습니다. 판정은 DB 가 그 문장에 합니다.
+ * 이렇게 하면 「채용시까지」 같은 낱말 목록이 코드와 DB 에 두 벌 생기지 않습니다.
+ *
+ * 돌려주는 것 — 앵커 둘레 글 (최대 240자). 없으면 빈 문자열.
+ */
+function hs접수문장(text) {
+  const t = String(text || '');
+  const anchors = /(원서\s*)?접수\s*(기간|기한|일정|마감|일시|일자|기일)|모집\s*기간|채용\s*기간|지원\s*기간|응시원서\s*접수|마감\s*일시|마감일|전형\s*일정/g;
+  let a, 모음 = [];
+  while ((a = anchors.exec(t)) && 모음.length < 2) 모음.push(t.slice(a.index, a.index + 160).trim());
+  return 모음.join(' / ').slice(0, 240);
+}
+
 if (require.main === module) {
   (async function () {
     for (const u of process.argv.slice(2)) {
@@ -63,4 +81,4 @@ if (require.main === module) {
     }
   })();
 }
-module.exports = { hsDetailDates, hsText };
+module.exports = { hsDetailDates, hsText, hs접수문장 };

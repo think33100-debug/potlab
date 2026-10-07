@@ -53,7 +53,7 @@ import { createRequire } from 'node:module';
  * (제가 앞서 「본문이 비었다」 고 보고한 것은 「접수기간·원서접수·마감」 으로만
  *  찾아봤기 때문입니다. 이 사이트는 「접수 **기한**」 입니다) */
 const require = createRequire(import.meta.url);
-const { hsDetailDates } = require('./hosp/hs_dates.js');
+const { hsDetailDates, hs접수문장 } = require('./hosp/hs_dates.js');
 
 /* 「2026.10.07」 ± 날수 */
 function 날더하기(점날, 날수) {
@@ -223,6 +223,9 @@ for (const v of 볼것) {
   }
   v.본문 = 풀기(r.글);
 
+  /* 접수 안내 문장 — 판정은 DB 의 마감표시() 가 합니다 */
+  v.접수문장 = hs접수문장(v.본문);
+
   /* 접수기간 — HS 와 같은 규칙입니다 (tools/hosp/hs_dates.js) */
   const dd = hsDetailDates(v.본문);
   const to = 날짜쓸만한가(dd, v.x.날, 오늘점ND);
@@ -319,6 +322,7 @@ for (const v of 볼것) {
     evidence: {
       ...(v.보류 ? { 보류사유: v.보류 } : {}),
       ...(v.날짜출처 ? { 날짜출처: v.날짜출처 } : {}),
+      ...(v.접수문장 ? { 접수문장: v.접수문장 } : {}),
     },
   };
   /* 다시 받아야 할 까닭이면 판정을 기억하지 않습니다 (알리오·클린아이와 같은 규칙) */
