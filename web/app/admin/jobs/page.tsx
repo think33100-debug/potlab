@@ -197,6 +197,8 @@ export default function AdminJobs() {
         <p className="mt-2 text-sm text-mute">{STATES.find((s) => s.key === state)!.hint}</p>
       )}
 
+      {state === 'hold' && <HoldCleanup onDone={reload} />}
+
       {/* 찾기 · 탭 거르기 */}
       <div className="mt-6 flex flex-wrap gap-2">
         <input
@@ -338,6 +340,63 @@ function Badge({ tone, children }: { tone: 'red' | 'gray' | 'blue'; children: Re
     : tone === 'blue' ? 'bg-badge-blue-bg text-interaction-blue'
     : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
   return <span className={'rounded-md px-3 font-medium ' + cls}>{children}</span>;
+}
+
+/* 보류함에서 **마감 지난 것만** 한 번에 치웁니다 (2026-10-07 세중님).
+ *
+ *   마감일이 없는 공고는 넣지 않습니다 — 아직 뽑는 중일 수 있습니다
+ *   브라우저 confirm 을 안 씁니다. 화면 안에서 건수를 먼저 보여주고
+ *   한 번 더 눌러야 돕니다
+ *   지우지 않습니다. 보류함에서 빼고 감춤으로 두며 사유는
+ *   「보류함 정리(마감 지남)」 — job_state_log 에 남아 되돌릴 수 있습니다
+ *   관리자인지는 **DB 의 보류함마감정리() 안에서** is_admin() 으로 봅니다.
+ *   화면에서 숨기는 것은 자물쇠가 아닙니다 */
+function HoldCleanup({ onDone }: { onDone: () => void }) {
+  const [셀것, set셀것] = useState<number | null>(null);
+  const [도는중, set도는중] = useState(false);
+  const [끝난말, set끝난말] = useState<string | null>(null);
+
+  const 세기 = async () => {
+    set도는중(true); set끝난말(null);
+    const { data, error } = await browserSupabase().rpc('보류함마감정리', { p_정말: false });
+    set도는중(false);
+    if (error) { set끝난말('세지 못했습니다 — ' + error.message); return; }
+    set셀것(Number((data as Record<string, number>)?.['셀것'] ?? 0));
+  };
+
+  const 치우기 = async () => {
+    set도는중(true);
+    const { data, error } = await browserSupabase().rpc('보류함마감정리', { p_정말: true });
+    set도는중(false); set셀것(null);
+    if (error) { set끝난말('치우지 못했습니다 — ' + error.message); return; }
+    set끝난말(((data as Record<string, number>)?.['치운것'] ?? 0) + '건을 치웠습니다. '
+      + '「숨긴 것」 칸에서 사유 「보류함 정리(마감 지남)」 으로 찾을 수 있습니다');
+    onDone();
+  };
+
+  return (
+    <div className="mt-3 rounded-md border border-gray-200 p-4 dark:border-gray-700">
+      {셀것 === null ? (
+        <Act onClick={세기} busy={도는중}>마감 지난 것 한 번에 치우기</Act>
+      ) : 셀것 === 0 ? (
+        <p className="text-lg text-mute">
+          마감 지난 보류함 공고가 없습니다.
+          <button type="button" onClick={() => set셀것(null)}
+            className="ml-3 text-sm text-interaction-blue hover:underline">닫기</button>
+        </p>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-lg">
+            마감 지난 공고 <b>{셀것}건</b>을 보류함에서 치웁니다. 지우지 않고 감춥니다
+          </p>
+          <Act onClick={치우기} busy={도는중} danger>정말 치우기</Act>
+          <button type="button" onClick={() => set셀것(null)}
+            className="text-sm text-interaction-blue hover:underline">그만두기</button>
+        </div>
+      )}
+      {끝난말 && <p className="mt-2 text-sm text-mute">{끝난말}</p>}
+    </div>
+  );
 }
 
 function Act({
