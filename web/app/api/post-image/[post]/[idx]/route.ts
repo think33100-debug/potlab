@@ -41,18 +41,14 @@ export async function GET(
   /* 작은 그림(목록 썸네일)인지 */
   const 작은것 = new URL(req.url).searchParams.get('t') === '1';
 
-  /* 감춰진 글은 공개글 보기에 없습니다 */
-  const { data: 글 } = await supabase
-    .from('공개글').select('id').eq('id', 글번호).maybeSingle();
-  if (!글) return new NextResponse('없는 글', { status: 404 });
-
-  const { data: 사진들 } = await supabase
-    .from('post_images').select('path,thumb_path,sort')
-    .eq('post_id', 글번호).order('sort');
-  const 한장 = (사진들 ?? [])[번] as { path: string; thumb_path: string } | undefined;
+  /* 감춰진 글의 사진은 함수가 아예 안 내줍니다 (DB 의 글사진).
+     post_images 를 직접 안 읽는 것은, 그 표의 규칙이 posts 를 보는데
+     비로그인은 posts 를 못 읽어 규칙이 터지기 때문입니다 (2026-10-07) */
+  const { data: 사진들 } = await supabase.rpc('글사진', { p_post: 글번호 });
+  const 한장 = ((사진들 ?? []) as { 큰것: string; 작은것: string }[])[번];
   if (!한장) return new NextResponse('없는 사진', { status: 404 });
 
-  const 길 = 작은것 ? (한장.thumb_path || 한장.path) : 한장.path;
+  const 길 = 작은것 ? 한장.작은것 : 한장.큰것;
   const r = await fetch(저장소(길));
   if (!r.ok || !r.body) return new NextResponse('사진을 못 읽었어요', { status: 502 });
 

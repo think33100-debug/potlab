@@ -62,9 +62,10 @@ const GONE = {
    몇 장인지만 세고, 그림은 우리 주소로 받습니다 —
    app/api/post-image/[post]/[idx]/route.ts */
 async function countImages(id: number) {
-  const { count } = await supabase
-    .from('post_images').select('post_id', { count: 'exact', head: true }).eq('post_id', id);
-  return count ?? 0;
+  /* post_images 를 직접 안 셉니다 — 그 표의 규칙이 posts 를 보는데 비로그인은
+     posts 를 못 읽어 규칙이 터집니다. DB 의 글사진() 이 감춰진 글도 걸러 줍니다 */
+  const { data } = await supabase.rpc('글사진', { p_post: id });
+  return (data ?? []).length as number;
 }
 
 /* 카톡 미리보기는 절대 주소여야 합니다 */
