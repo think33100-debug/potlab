@@ -40,11 +40,21 @@ const PAGE = 20;
 function d(v: string | null) {
   return v ? v.slice(5).replace('-', '.') : '';
 }
-function dday(to: string | null) {
-  /* ★ 마감일이 없으면 「수시채용」 딱지 (2026-10-07 확정 방침).
-     상세(app/jobs/[id]/page.tsx)의 dday 도 같은 말을 돌려줍니다 —
-     두 벌이라 한쪽만 고치면 글자가 갈립니다 */
-  if (!to) return { text: '수시채용', urgent: false, over: false };
+/* ★ 2026-10-07 — 마감일이 없을 때 쓸 말을 **화면이 정하지 않습니다.**
+   DB 의 마감표시() 가 정해서 job_list 가 「마감표시」 칸으로 내려 줍니다
+   (세중님 지시: 「판정은 DB 함수 하나에만 두고, 화면 두 곳과 관리자 화면은
+   그 함수를 부르게」).
+
+   전에는 여기서 `if (!to) return '수시채용'` 으로 정했습니다. 그래서
+   공공기관 공고 42건이 「수시채용」 으로 떴습니다 — 사실은 우리가 접수기간을
+   못 읽은 것이었습니다.
+
+   표시 가 비어 있으면 마감일이 있다는 뜻이고 날수를 셉니다. */
+function dday(to: string | null, 표시?: string | null) {
+  if (!to) {
+    const t = 표시 || '마감일 공고문 확인';
+    return { text: t, urgent: false, over: false };
+  }
   const left = Math.ceil((new Date(to + 'T23:59:59+09:00').getTime() - Date.now()) / 86400000);
   if (left < 0) return { text: '마감', urgent: false, over: true };
   if (left === 0) return { text: '오늘 마감', urgent: true, over: false };
@@ -323,7 +333,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       {!locked && (
         <ul className="divide-y divide-gray-100 dark:divide-gray-800">
           {rows.map((r) => {
-            const dd = dday(r.apply_to);
+            const dd = dday(r.apply_to, r.마감표시);
             return (
               <li key={r.id}>
                 <Link

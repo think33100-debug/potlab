@@ -52,10 +52,11 @@ const 원문제목 = async (sb: SupabaseClient, id: string) => {
 };
 
 
-function dday(to: string | null): { text: string; urgent: boolean } | null {
-  /* ★ 마감일이 없으면 「수시채용」 딱지 (2026-10-07 확정 방침).
-     목록(app/jobs/page.tsx)의 dday 도 같은 말을 돌려줍니다 */
-  if (!to) return { text: '수시채용', urgent: false };
+/* ★ 2026-10-07 — 마감일이 없을 때 쓸 말을 **화면이 정하지 않습니다.**
+   DB 의 마감표시() 가 정해서 job_one 이 「마감표시」 칸으로 내려 줍니다
+   (세중님 지시). 목록(app/jobs/page.tsx)의 dday 도 같은 칸을 읽습니다 */
+function dday(to: string | null, 표시?: string | null): { text: string; urgent: boolean } | null {
+  if (!to) return { text: 표시 || '마감일 공고문 확인', urgent: false };
   const left = Math.ceil(
     (new Date(to + 'T23:59:59+09:00').getTime()
      - new Date(todayKst() + 'T00:00:00+09:00').getTime()) / 86400000,
@@ -128,7 +129,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     jobViews([j.id]),
   ]);
 
-  const d = dday(j.apply_to);
+  const d = dday(j.apply_to, j.마감표시);
   /* 마감된 공고는 회색으로 내려앉습니다 */
   const badge = closed ? '#8A9299' : (JOB_COLOR[j.job_group ?? ''] ?? JOB_COLOR_FALLBACK);
 
@@ -238,7 +239,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               <Core icon={icons['job.headcount']} label="모집 인원"
                     v={j.headcount ? `${j.headcount}명` : '공고 참조'} />
               <Core icon={icons['job.deadline']} label="접수 마감"
-                    v={j.apply_to ?? '수시채용'}
+                    v={j.apply_to ?? (j.마감표시 || '마감일 공고문 확인')}
                     sub={j.apply_from ? `${j.apply_from} 시작` : null} />
               <Core icon={icons['job.edu']} label="학력" v={j.edu ?? '제한 없음'} />
               {/* 근무지도 지역보임 을 먼저 읽습니다. 자세한 주소(work_place)는
@@ -256,12 +257,26 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                  정찰이 원 공고가 살아 있다고 보면 **날수를 안 셉니다.**
                  30일은 「아무 신호가 없을 때」만 쓰는 뒷줄이라, 회원에게
                  「30일이면 내려간다」 고 적으면 사실과 다릅니다 */}
-          {!j.apply_to && (
+          {/* ★ 2026-10-07 — 안내를 **두 갈래**로 갈랐습니다 (세중님 지시).
+              전에는 마감일이 없으면 무조건 「수시채용 공고입니다」 라고 했습니다.
+              그런데 그중 대부분은 수시가 아니라 **우리가 접수기간을 못 읽은 것**
+              이었습니다. 못 읽은 것을 「수시」 라고 하면 회원이 마감일을
+              안 찾아보고 놓칩니다. 어느 쪽인지는 DB 의 마감표시() 가 정합니다 */}
+          {!j.apply_to && j.마감표시 === '수시채용' && (
             <Rise>
               <p className="mt-3 break-keep rounded-[12px] border border-[#E3E3DE]
                             bg-[#F7F7F4] p-5 text-[14px] leading-[1.7] text-[#4A5056]">
                 수시채용 공고입니다. 마감일이 정해져 있지 않으며,
                 병원에서 공고를 내리면 POTJOB에서도 내려갑니다.
+              </p>
+            </Rise>
+          )}
+          {!j.apply_to && j.마감표시 !== '수시채용' && (
+            <Rise>
+              <p className="mt-3 break-keep rounded-[12px] border border-[#E3E3DE]
+                            bg-[#F7F7F4] p-5 text-[14px] leading-[1.7] text-[#4A5056]">
+                접수 마감일을 아직 확인하지 못했습니다. 아래 ⑨ 출처의 원 공고문에서
+                접수기간을 꼭 확인해 주세요. 저희도 다시 읽어 채워 넣겠습니다.
               </p>
             </Rise>
           )}

@@ -37,6 +37,8 @@ export type AdminJob = {
   admin_locked: boolean;
   admin_at: string | null;
   admin_note: string | null;
+  /* 마감일 자리에 쓸 말 (2026-10-07 · DB 의 마감표시()). 회원 화면과 글자가 같습니다 */
+  마감표시: string | null;
 };
 
 /* evidence 를 함께 받습니다 — 보류함에서 **왜 보류인지**를 목록에서
@@ -44,13 +46,14 @@ export type AdminJob = {
    원문을 읽어야 합니다. jsonb 한 칸이라 목록이 많이 무거워지지 않습니다 */
 export const ADMIN_LIST_COLS =
   'id,source,org_name,title,job_group,employ_type,work_place,sido,tab,'
-  + 'headcount,apply_to,posted_at,hidden,hold,collected_at,evidence,hidden_why,admin_locked,admin_note';
+  + 'headcount,apply_to,posted_at,hidden,hold,collected_at,evidence,hidden_why,admin_locked,'
+  + 'admin_note,마감표시';
 
 export type AdminJobListItem = Pick<
   AdminJob,
   'id' | 'source' | 'org_name' | 'title' | 'job_group' | 'employ_type' | 'work_place'
   | 'sido' | 'tab' | 'headcount' | 'apply_to' | 'posted_at' | 'hidden' | 'hold' | 'collected_at'
-  | 'evidence' | 'hidden_why' | 'admin_locked' | 'admin_note'
+  | 'evidence' | 'hidden_why' | 'admin_locked' | 'admin_note' | '마감표시'
 >;
 
 /* 관리자가 매일 보는 칸들. 「보류」가 첫째입니다 —
@@ -68,6 +71,12 @@ export const STATES = [
      **사람이 한 번 봐야 합니다.** 되살릴 수 있습니다.
      사유는 hide_stale_posts 가 「30일 지남」 으로 적습니다 (전에는 45일). */
   { key: 'needcheck', label: '확인 필요', hint: '마감일 없이 날수가 지나 내린 공고 · 아직 뽑는 중일 수 있습니다' },
+  /* ★ 2026-10-07 — 올라가 있는데 **마감일을 못 읽은** 공고 (세중님 지시).
+     DB 의 마감표시() 가 「마감일 공고문 확인」 이라고 한 것만 모입니다.
+     원문에 「채용시까지·상시·수시」 가 적힌 진짜 수시 공고는 여기 안 옵니다 —
+     그건 「수시채용」 으로 갈라집니다. 여기 있는 것은 **우리가 못 읽은 것**이라
+     사람이 원 공고문을 열어 접수기간을 넣어 주면 됩니다 */
+  { key: 'nodeadline', label: '마감일 못 읽음', hint: '회원에게 보이는데 접수기간을 못 읽은 공고 · 원 공고문을 열어 채워 주십시오' },
   { key: 'all',    label: '전체',     hint: '' },
 ] as const;
 
