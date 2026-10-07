@@ -85,10 +85,55 @@ async function 하나(x) {
   const 글 = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   if (글.length < 200) return { 결과: 'unknown', 왜: '본문이 ' + 글.length + '자뿐 (판단 못 함)' };
 
-  /* 제목의 앞 토막이 쪽에 있으면 확실히 살아 있습니다 */
+  /* ── ② 제목에 마감 표시 (2026-10-07) ────────────────────────
+     글을 지우지 않고 **제목만** 「[모집]」 → 「[마감]」 으로 고치는 곳이 있습니다.
+     인화재단 한국병원·백제병원이 그렇습니다. 원문이 살아 있나만 보면 영영 안 걸립니다.
+     ★ 우리가 담은 제목 앞 토막이 그 줄에 같이 있어야 **이 공고의** 마감입니다.
+       옆 글 목록의 「(마감)○○ 채용공고」 를 보고 엉뚱한 판정을 하면 안 됩니다
+       (포항세명기독병원에서 실제로 그럴 뻔했습니다) */
   const 열쇠말 = String(x.title || '').replace(/\s+/g, ' ').slice(0, 12).trim();
-  const 있나 = 열쇠말.length >= 6 && 글.replace(/\s/g, '').includes(열쇠말.replace(/\s/g, ''));
-  return { 결과: 'alive', 왜: 있나 ? '제목이 쪽에 있습니다' : '쪽은 열립니다(제목은 못 찾음)' };
+  const 붙 = (s) => String(s || '').replace(/\s/g, '');
+  const 글붙 = 붙(글);
+  const 제목있나 = 열쇠말.length >= 6 && 글붙.includes(붙(열쇠말));
+  if (제목있나) {
+    const i = 글붙.indexOf(붙(열쇠말));
+    const 둘레 = 글붙.slice(Math.max(0, i - 20), i + 붙(열쇠말).length + 20);
+    const m = 둘레.match(/\[?\(?\s*(마감|채용완료|모집종료|접수마감|채용종료)\s*\)?\]?/);
+    if (m) return { 결과: 'closed', 왜: '제목에 「' + m[1] + '」 가 붙었습니다' };
+  }
+
+  /* ── ③ 본문에 「접수기간 : <마감>」 (2026-10-07) ─────────────
+     굿모닝병원이 이 꼴입니다 — 기간 자리에 날짜 대신 「<마감>」 을 적습니다 */
+  if (/(접수|모집|원서)\s*기간[^가-힣0-9]{0,8}(＜|<|&lt;|\[|\()?\s*마감/.test(글)) {
+    return { 결과: 'closed', 왜: '본문 접수기간 자리에 「마감」' };
+  }
+
+  /* ── ④ 본문 「접수기간」 앞뒤만 잘라 마감일 읽기 (2026-10-07) ─
+     ★ **글 전체를 넣으면 안 됩니다.** 임용일·면접일·발표일이 섞여
+       엉뚱한 날짜가 마감일이 됩니다. 「접수기간」 뒤 60자만 봅니다.
+     날짜 읽기는 DB 의 deadline_from_title() 한 벌을 씁니다 —
+     여기서 또 쓰면 규칙이 두 벌로 갈립니다 (작업지침 6절).
+     그래서 **자른 글만** 돌려주고 날짜는 DB 가 읽습니다 */
+  const 기 = 글.match(/(?:접수|모집|원서)\s*기간[^가-힣0-9]{0,8}([\s\S]{0,60})/);
+  if (기) return { 결과: 'alive', 왜: '쪽이 열립니다', 접수기간: 기[1].trim().slice(0, 60) };
+
+  /* ── ⑤ 목록으로 튕김 (2026-10-07) ───────────────────────────
+     서산중앙병원이 이 꼴입니다 — 글을 지우면 307 로 **목록 쪽**으로 보냅니다.
+     목록 쪽은 200 이고 81KB 라 「살아 있음」 으로 세어졌습니다.
+     alive.yml 머리글에는 처음부터 「목록으로 튕김 → gone」 이라 적혀 있었는데
+     코드에 그 판정이 없었습니다.
+     ★ **제목을 못 찾았을 때만** 봅니다. 주소가 바뀌어도 그 글이 거기 있으면
+       살아 있는 것입니다 (게시판이 주소를 다듬는 곳이 있습니다) */
+  const 끝주소 = String(g.url || x.url);
+  if (!제목있나 && 끝주소 !== x.url) {
+    const 전길 = new URL(x.url).pathname;
+    const 끝길 = new URL(끝주소).pathname;
+    if (전길 !== 끝길) {
+      return { 결과: 'gone', 왜: '목록으로 튕김 — ' + 끝길.slice(0, 50) };
+    }
+  }
+
+  return { 결과: 'alive', 왜: 제목있나 ? '제목이 쪽에 있습니다' : '쪽은 열립니다(제목은 못 찾음)' };
 }
 
 /* ── 본체 ── */
@@ -105,7 +150,13 @@ if (!cfg.ALIVE_KEY) { console.error('ALIVE_KEY 가 없습니다 — 함수 권�
    되묻는 것으로는 못 풉니다 — 표시(alive_mark)를 하기 전에는 같은 100건이 또 옵니다.
    그래서 100이 꽉 차면 **소리를 냅니다.** 그때 이 도구를 나눠 도는 꼴로 고쳐야 합니다.
    (나라일터 순찰이 376건을 기억했는데 100건만 건너뛴 것이 같은 한도였습니다) */
-const 볼것0 = await rpc(cfg, 'alive_targets', { p_secret: cfg.ALIVE_KEY, p_n: 100 });
+/* --내린것 — 날수로 **이미 내려간** 공고까지 돌아봅니다 (2026-10-07).
+   「확인 필요」 칸에 쌓인 것을 사람이 하나씩 보지 않게 하려는 길입니다.
+   접수기간을 찾아 아직 안 지났으면 되살립니다 (DB 의 alive_mark 가 합니다).
+   평소 정찰은 이 깃발 없이 돌립니다 — 보이는 공고만 봅니다 */
+const 내린것 = argv.includes('--내린것');
+const 볼것0 = await rpc(cfg, 'alive_targets',
+  { p_secret: cfg.ALIVE_KEY, p_n: 100, p_내린것: 내린것 });
 if ((볼것0 || []).length >= 100) {
   console.error('★ 대상이 100건으로 꽉 찼습니다 — Supabase 가 거기서 자릅니다.');
   console.error('  더 있을 수 있습니다. 이번 주에 못 본 것은 다음 주로 밀립니다.');
@@ -119,18 +170,21 @@ if (!볼것.length) { console.log('확인할 것이 없습니다 (최근 6일 �
 const 결과 = [];
 for (const x of 볼것) {
   const r = await 하나(x);
-  결과.push({ id: x.id, 결과: r.결과 });
-  const 표 = r.결과 === 'alive' ? '○' : r.결과 === 'gone' ? '✗' : '?';
+  /* 접수기간은 **자른 글 그대로** 보냅니다. 날짜 읽기는 DB 의
+     deadline_from_title() 한 벌이 합니다 (작업지침 6절) */
+  결과.push({ id: x.id, 결과: r.결과, ...(r.접수기간 ? { 접수기간: r.접수기간 } : {}) });
+  const 표 = r.결과 === 'alive' ? '○' : r.결과 === 'gone' ? '✗' : r.결과 === 'closed' ? '■' : '?';
   console.log(표 + ' ' + String(x.org_name).slice(0, 16).padEnd(18)
     + String(x.title).slice(0, 40).padEnd(42)
     + (x.gone_streak ? '연속 ' + x.gone_streak + ' ' : '      ')
-    + r.왜);
+    + r.왜 + (r.접수기간 ? '  【접수기간 ' + r.접수기간.slice(0, 40) + '】' : ''));
   await new Promise((y) => setTimeout(y, 1200));
 }
 
 const 셈 = 결과.reduce((a, x) => (a[x.결과] = (a[x.결과] || 0) + 1, a), {});
 console.log('\n── 살아 있음 ' + (셈.alive || 0) + ' · 사라짐 ' + (셈.gone || 0)
-  + ' · 판단 못 함 ' + (셈.unknown || 0));
+  + ' · 마감됨 ' + (셈.closed || 0) + ' · 판단 못 함 ' + (셈.unknown || 0)
+  + ' · 접수기간 찾음 ' + 결과.filter((x) => x.접수기간).length);
 
 if (dry) { console.log('--dry 라 기록하지 않았습니다.'); process.exit(0); }
 const 답 = await rpc(cfg, 'alive_mark', { p_secret: cfg.ALIVE_KEY, p_rows: 결과 });

@@ -312,6 +312,25 @@ if (dry) {
     }
     console.log('쓰레기통     ' + 버림 + '건 (지우지 않고 까닭과 함께 남깁니다)');
   }
+  /* ── 정찰 (목록에서 빠진 것) ─────────────────────────────
+     치매센터 목록은 **마감된 공고에 링크를 안 겁니다**
+     (<a href='javascript:end_alert();'>). 그래서 모은것 에는 접수중만 들어옵니다.
+     「어제 있던 번호가 오늘 접수중 목록에 없다 = 마감됐거나 내려갔다」 입니다.
+     요청을 한 번도 더 하지 않는 공짜 정찰입니다.
+     ⚠ 쪽을 하나라도 못 받았으면 건너뜁니다 — 그 쪽 공고가 전부 「빠졌다」 가 됩니다 */
+  if (셈.못받은쪽) {
+    console.log('정찰        건너뜀 — 쪽을 ' + 셈.못받은쪽 + '개 못 받았습니다');
+  } else {
+    try {
+      const r = await rpc('목록빠짐표시', {
+        p_secret: cfg.COLLECT_KEY_ND2, p_source: SOURCE,
+        p_본것: 모은것.map((x) => 'ND' + x.no),
+      });
+      console.log('정찰        ' + Object.entries(r || {})
+        .filter(([k]) => !/기준일/.test(k)).map(([k, v]) => k + ' ' + v).join(' · '));
+    } catch (e) { console.error('정찰 못 함 · ' + String(e.message).slice(0, 150)); }
+  }
+
   console.log(Math.round((Date.now() - t0) / 1000) + '초');
   try {
     await rpc('collect_beat', {

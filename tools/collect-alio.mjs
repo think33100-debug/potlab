@@ -497,6 +497,14 @@ for (let p = 1; p <= (순찰 ? 1 : 120); p++) {
 }
 console.log('받음        ' + rows.length + '건 (접수중 ' + total + '건) · ' + Math.round((Date.now() - t0) / 1000) + '초');
 
+/* ★ 정찰용 — **거르기 전** 전체 번호를 들고 있습니다 (2026-10-07).
+   알리오는 ongoingYn=Y 로 **진행 중인 것만** 줍니다 (목록 주소를 보십시오).
+   그러니 「어제 있던 번호가 오늘 목록에 없다 = 내려갔다」 입니다.
+   요청을 한 번도 더 하지 않는 공짜 정찰입니다.
+   ⚠ 순찰은 첫 쪽만 받으므로 쓰면 안 됩니다 — 뒷쪽이 전부 「빠졌다」 가 됩니다.
+      그래서 아래에서 `!순찰` 일 때만 보냅니다 */
+const 받은번호전부 = rows.map((r) => String(r.recrutPblntSn));
+
 const 열쇠 = cfg.COLLECT_KEY_AL2 || cfg.COLLECT_KEY_HS3 || '';
 
 /* ①-2 순찰이면 **DB 에 없는 번호만** 남깁니다 ─────────────────
@@ -707,6 +715,18 @@ if (dry) {
   }
   console.log('\n씀          ' + 담음 + '건' + (건너뜀2 ? ' · 건너뜀 ' + 건너뜀2 + '건' : ''));
   console.log(Math.round((Date.now() - t0) / 1000) + '초');
+}
+
+/* ── 정찰 (목록에서 빠진 것) ───────────────────────────────
+   전체 한 바퀴에서만 봅니다. 두 번 연속 빠지면 「병원이 내림」 입니다.
+   목록을 제대로 못 받은 날은 DB 함수가 스스로 건드리지 않습니다 */
+if (!dry && !순찰) {
+  try {
+    const r = await rpc(cfg, '목록빠짐표시',
+      { p_secret: cfg.COLLECT_KEY_AL2, p_source: SOURCE, p_본것: 받은번호전부 });
+    console.log('정찰        ' + Object.entries(r || {})
+      .filter(([k]) => !/기준일/.test(k)).map(([k, v]) => k + ' ' + v).join(' · '));
+  } catch (e) { console.error('정찰 못 함 · ' + String(e.message).slice(0, 150)); }
 }
 
 /* 박동 — 관리자 → 기관 현황 화면이 이것으로 「돌고 있나」를 봅니다 (2026-10-02).
