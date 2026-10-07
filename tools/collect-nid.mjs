@@ -332,12 +332,21 @@ for (const v of 볼것) {
   쓰레기.push({ id: 줄.id, org_name: 기관, title: v.제목, url: 줄.url, why: 갈래.왜 || '우리 직군 아님' });
 }
 셈.회원 = 회원.length; 셈.보류 = 보류.length; 셈.쓰레기 = 쓰레기.length;
-/* 내린 판정을 기억에 남깁니다 — 10/3 짝 대조용 (2026-10-02) */
+/* 내린 판정을 기억에 남깁니다 — 10/3 짝 대조용 (2026-10-02)
+ *
+ * ★ 2026-10-07 — **같은 번호를 한 번만** 보냅니다. 전에는 그대로 보내서
+ *   HTTP 500 이 났습니다 —
+ *     "ON CONFLICT DO UPDATE command cannot affect row a second time"
+ *   목록 화면이 쪽을 넘겨도 같은 글을 다시 내주는 때가 있어서 같은 번호가
+ *   두 번 들어갑니다. 한 insert 안에 같은 열쇠가 두 줄이면 Postgres 가 거절합니다.
+ *   그동안 ND 쪽 정찰 기억이 하나도 안 쌓이고 있었습니다. */
 if (!dry) {
-  await 판정남기기(cfg, { 열쇠: cfg.COLLECT_KEY_ND2 || cfg.COLLECT_KEY_HS3 || '', source: SOURCE,
-    줄들: 볼것.filter((v) => v.__판정 && v.x && v.x.no)
-      .map((v) => ({ 번호: String(v.x.no), 판정: v.__판정,
-        지문: 지문({ t: v.제목, d: v.x.날 || '' }) })) });
+  const 본번호 = new Set();
+  const 줄들 = 볼것.filter((v) => v.__판정 && v.x && v.x.no)
+    .filter((v) => { const k = String(v.x.no); if (본번호.has(k)) return false; 본번호.add(k); return true; })
+    .map((v) => ({ 번호: String(v.x.no), 판정: v.__판정,
+      지문: 지문({ t: v.제목, d: v.x.날 || '' }) }));
+  await 판정남기기(cfg, { 열쇠: cfg.COLLECT_KEY_ND2 || cfg.COLLECT_KEY_HS3 || '', source: SOURCE, 줄들 });
 }
 console.log('\n④ 갈래 — 회원 목록 ' + 셈.회원 + ' · 보류함 ' + 셈.보류 + ' · 쓰레기통 ' + 셈.쓰레기);
 if (회원.length) {
