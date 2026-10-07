@@ -39,14 +39,19 @@ const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
 
 /* .env — 값은 찍지 않습니다 */
 const cfg = {};
-for (const f of ['.env', '.env.local']) {
+for (const f of ['.env.local', '.env']) {
   const p = path.join(여기, '..', '..', f);
   if (!fs.existsSync(p)) continue;
-  for (const 줄 of fs.readFileSync(p, 'utf8').split('\n')) {
-    const m = 줄.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)$/);
-    if (m) cfg[m[1]] = m[2].trim().replace(/^["']|["']$/g, '');
+  for (const 줄 of fs.readFileSync(p, 'utf8').split(/\r?\n/)) {
+    const m = 줄.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
+    if (m && !cfg[m[1]]) cfg[m[1]] = m[2].replace(/^["']|["']$/g, '');
   }
 }
+for (const k of Object.keys(process.env)) if (process.env[k]) cfg[k] = process.env[k];
+cfg.SUPABASE_ANON_KEY = cfg.SUPABASE_ANON_KEY || cfg.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+cfg.SUPABASE_URL = cfg.SUPABASE_URL || cfg.NEXT_PUBLIC_SUPABASE_URL;
+/* ND2 열쇠는 HS3 과 같은 값입니다 — collect-nid.mjs 의 env() 와 같은 규칙입니다 */
+cfg.COLLECT_KEY_ND2 = cfg.COLLECT_KEY_ND2 || cfg.COLLECT_KEY_HS3;
 const 오늘점 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }).replace(/-/g, '.');
 
 /* 읽은 날짜가 쓸만한가 — 수집기 둘과 같은 기준입니다.
@@ -67,9 +72,9 @@ function 쓸만한가(d) {
   return to;
 }
 
-async function rpc(fn, body) {
+async function rpc(fn, body, 꼬리 = '') {
   const k = cfg.SUPABASE_ANON_KEY;
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn + 꼬리, {
     method: 'POST',
     headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -77,6 +82,22 @@ async function rpc(fn, body) {
   const t = await r.text();
   if (!r.ok) throw new Error(fn + ' HTTP ' + r.status + ' · ' + t.slice(0, 250));
   try { return JSON.parse(t); } catch { return t; }
+}
+
+/* ★ collect_peek 은 한 번에 **100줄**만 옵니다 (PostgREST 의 기본 상한).
+   함수 안에는 limit 5000 이 적혀 있는데 창구가 100 에서 끊습니다 —
+   2026-10-07 에 「담긴 줄 100」 이 두 번 똑같이 찍혀서 알았습니다.
+   그래서 offset 으로 넘기며 끝까지 받습니다 */
+async function 다받기(열쇠값, source, of) {
+  const 모음 = [];
+  for (let off = 0; off < 6000; off += 100) {
+    const 줄 = await rpc('collect_peek', { p_secret: 열쇠값, p_source: source, p_of: of },
+      '?limit=100&offset=' + off);
+    const n = 줄 || [];
+    모음.push(...n);
+    if (n.length < 100) break;
+  }
+  return 모음;
 }
 
 /* 어느 출처를 되읽나 — 열쇠 이름과 짝지어 둡니다.
@@ -102,7 +123,7 @@ for (const m of 묶음) {
   /* ① 마감일이 빈 줄을 모읍니다 */
   let 빈것 = [];
   for (const of of m.볼것) {
-    const 줄 = await rpc('collect_peek', { p_secret: 열쇠값, p_source: m.source, p_of: of });
+    const 줄 = await 다받기(열쇠값, m.source, of);
     const n = (줄 || []).filter((r) => !r.apply_to && r.url);
     console.log('\n' + m.source + ' ← ' + of + ' : 담긴 줄 ' + (줄 || []).length
       + ' · 마감일 빈 것 ' + n.length);
