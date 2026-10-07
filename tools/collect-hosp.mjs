@@ -34,12 +34,48 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { 사이트줄 } from './hosp/sites.mjs';
 import { 글받기 } from './certs/index.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, mixedTitle, 구운날 } from './gas-rules.mjs';
+
+/* 접수기간 규칙 — tools/hosp/hs_dates.js 한 벌. CommonJS 라 require 로 끌어옵니다.
+   2026-10-07 에 붙였습니다. 전에는 저 파일이 저장소에 있는데 아무도 안 불렀습니다 */
+const require = createRequire(import.meta.url);
+const { hsDetailDates } = require('./hosp/hs_dates.js');
+
+/* 읽은 날짜가 쓸만한가 — 짐작으로 담지 않습니다.
+ *
+ * 2026-10-07 에 스물을 돌려 본 것 중 서산중앙병원이 `from 2021.08.12` 를 냈습니다.
+ * 몇 해 전 공고 글이 게시판에 그대로 붙어 있어서입니다. 마감일은 안 나왔으니
+ * 이번엔 안 담겼지만, 거르는 자리를 둡니다.
+ *
+ * 지난 마감일은 **받습니다** — 그건 「마감된 공고」 라는 올바른 정보이고,
+ * DB 의 hide_stale_posts 가 보고 치웁니다 (세중님 2026-10-07 지시:
+ * 「날짜가 생긴 공고 중 이미 지난 것은 지난 공고로 갑니다」).
+ */
+function 날짜쓸만한가(d, 올린날) {
+  if (!d || !d.to) return '';
+  const 점 = (s) => String(s || '').replace(/-/g, '.');
+  const to = 점(d.to), from = 점(d.from);
+  if (!/^20\d{2}\.\d{2}\.\d{2}$/.test(to)) return '';
+  if (from && from > to) return '';                       // 시작이 마감보다 뒤
+  const 바닥 = 올린날 ? 점(올린날) : null;
+  /* 올린 날보다 사흘 넘게 이른 마감일은 옛 글의 날짜입니다 */
+  if (바닥 && to < 더하기(바닥, -3)) return '';
+  if (!바닥 && to < 더하기(오늘점, -400)) return '';        // 올린 날을 모를 때의 바닥
+  if (to > 더하기(오늘점, 400)) return '';                  // 연도를 잘못 읽은 것
+  return to;
+}
+/* 「2026.10.07」 ± 날수 */
+function 더하기(점날, 날수) {
+  const [y, m, d] = String(점날).split('.').map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d + 날수));
+  return t.toISOString().slice(0, 10).replace(/-/g, '.');
+}
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'HS3';
@@ -297,17 +333,29 @@ const 쓰레기 = 결과.filter((x) => x.갈래.갈래 === '쓰레기통');
 console.log('  회원 목록 ' + 회원.length + ' · 보류함 ' + 보류.length + ' · 쓰레기통 ' + 쓰레기.length
   + ' · 쌓아둠 ' + 결과.filter((x) => x.갈래.갈래 === '숨김보관').length);
 
-/* ── ③ 상세 열기 — 제목만으로 못 가린 것만, 사이트당 하루 상세몫 건 ── */
-let 상세연것 = 0, 상세로가림 = 0;
+/* ── ③ 상세 열기 — 사이트당 하루 상세몫 건 ──────────────────
+ *
+ * ★ 2026-10-07 — 상세를 **두 가지** 까닭으로 엽니다 (세중님 지시).
+ *     ① 제목만으로 직군을 못 가린 것      ← 전부터 하던 것
+ *     ② 담을 것인데 **마감일이 없는 것**   ← 새로 더한 것
+ *   ②가 없어서 HS 출처 공고 313건의 마감일이 비어 「수시채용」 으로 떴습니다.
+ *   옛 앱의 hospFillDates 가 하던 일인데 옮기지 않았습니다
+ *   (홈페이지_이전_지도.md:35 의 `✗`).
+ */
+let 상세연것 = 0, 상세로가림 = 0, 날짜채움 = 0, 날짜버림 = 0;
 if (상세몫 > 0) {
   const 곳마다 = new Map();
-  const 열것 = 보류.filter((x) => {
+  /* 쓰레기통 빼고 담길 것 중 마감일이 없는 것 + 직군을 못 가린 것 */
+  const 날짜없는것 = 결과.filter((x) => x.갈래.갈래 !== '쓰레기통' && !x.to);
+  const 뽑을것 = [...new Set([...보류, ...날짜없는것])];
+  const 열것 = 뽑을것.filter((x) => {
     const n = 곳마다.get(x.곳.name) || 0;
     if (n >= 상세몫) return false;
     곳마다.set(x.곳.name, n + 1);
     return true;
   });
-  console.log('\n③ 상세 — 제목만으로 못 가린 ' + 보류.length + '건 중 ' + 열것.length + '건을 엽니다'
+  console.log('\n③ 상세 — 직군을 못 가린 ' + 보류.length + '건 + 마감일이 없는 '
+    + 날짜없는것.length + '건 → 겹침 빼고 ' + 열것.length + '건을 엽니다'
     + ' (사이트당 ' + 상세몫 + '건까지)');
   for (let i = 0; i < 열것.length; i += 동시) {
     await Promise.all(열것.slice(i, i + 동시).map(async (x) => {
@@ -317,6 +365,25 @@ if (상세몫 > 0) {
       const 글 = g.html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
         .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
       x.본문 = 글;
+
+      /* ★ 접수기간 채우기 (2026-10-07). 규칙은 tools/hosp/hs_dates.js 한 벌입니다.
+         목록에서 날짜가 나온 공고는 건드리지 않습니다 — 목록 쪽이 더 믿을만합니다 */
+      if (!x.to) {
+        const d = hsDetailDates(글);
+        const to = 날짜쓸만한가(d, x.posted || x.from);
+        if (to) {
+          x.to = to;
+          if (!x.from && d.from) x.from = d.from;
+          x.날짜출처 = d.rank === 1 ? '본문 · 공고기간' : '본문 · 접수기간';
+          날짜채움++;
+        } else if (d.to) {
+          /* 읽었는데 거른 것 — 조용히 버리지 않고 셉니다 (지침 2절) */
+          날짜버림++;
+          console.log('    날짜 거름 ' + x.곳.name.slice(0, 14).padEnd(16)
+            + '읽은값 ' + JSON.stringify(d) + ' · 올린날 ' + (x.posted || '모름'));
+        }
+      }
+
       const j = matchJob(글);
       if (j) {
         x.직군 = j;
@@ -327,6 +394,8 @@ if (상세몫 > 0) {
     }));
   }
   console.log('  연 것 ' + 상세연것 + '건 · ★ 상세를 읽고 나서 직군이 가려진 공고 ' + 상세로가림 + '건');
+  console.log('  ★ 상세에서 마감일을 채운 공고 ' + 날짜채움 + '건'
+    + (날짜버림 ? ' · 읽었지만 거른 것 ' + 날짜버림 + '건' : ''));
 }
 
 /* 상세로 바뀐 것을 다시 셉니다 */
@@ -374,6 +443,10 @@ const 담을것 = 회원2.concat(보류2).concat(쌓을것).map((x) => ({
   detail: { 기관홈: x.곳.base || x.곳.host || '' },
   evidence: {
     직군근거: x.근거 || (x.직군 ? '병원 게시판 제목 · 담음(' + x.직군 + ')' : ''),
+    /* 마감일을 어디서 얻었나 (2026-10-07). job_posts.deadline_src 칸이 있지만
+       collect_put 창구가 그 칸을 안 받습니다 — 창구를 고치는 대신 근거에 적습니다.
+       관리자 화면이 근거를 이미 펼쳐 보여 줍니다 */
+    ...(x.날짜출처 ? { 날짜출처: x.날짜출처 } : {}),
     갈래: x.갈래.갈래, 단계: String(x.갈래.단계 || ''), 사유: x.갈래.왜 || '',
     걸린단어: (x.갈래.걸린단어 || []).join(','),
     보류사유: x.갈래.갈래 === '보류함' ? (x.상세왜 ? x.갈래.왜 + ' · 상세 ' + x.상세왜 : x.갈래.왜) : '',

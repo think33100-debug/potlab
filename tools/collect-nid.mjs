@@ -43,6 +43,37 @@ import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
 import { 첨부직군 } from './첨부직군.mjs';
+import { createRequire } from 'node:module';
+
+/* 접수기간 규칙 — HS 수집기와 **같은 한 벌**입니다 (2026-10-07).
+ *
+ * 세중님 지시는 「첨부 PDF 에서 접수기간을 읽어라」 였는데, 돌려 보니 **상세 화면에
+ * 적혀 있었습니다** — 「- 접수 기한: 2026.10.2.(금)~2026.10.19.(월)」.
+ * 치매센터 공고 11건 중 10건이 그렇습니다. 첨부 PDF 를 열 필요가 없습니다.
+ * (제가 앞서 「본문이 비었다」 고 보고한 것은 「접수기간·원서접수·마감」 으로만
+ *  찾아봤기 때문입니다. 이 사이트는 「접수 **기한**」 입니다) */
+const require = createRequire(import.meta.url);
+const { hsDetailDates } = require('./hosp/hs_dates.js');
+
+/* 「2026.10.07」 ± 날수 */
+function 날더하기(점날, 날수) {
+  const [y, m, d] = String(점날).split('.').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + 날수)).toISOString().slice(0, 10).replace(/-/g, '.');
+}
+/* 읽은 날짜가 쓸만한가 — HS 쪽 날짜쓸만한가() 와 같은 기준입니다.
+   지난 마감일은 받습니다 (마감된 공고라는 올바른 정보입니다) */
+function 날짜쓸만한가(d, 올린날, 오늘점) {
+  if (!d || !d.to) return '';
+  const 점 = (s) => String(s || '').replace(/-/g, '.');
+  const to = 점(d.to), from = 점(d.from);
+  if (!/^20\d{2}\.\d{2}\.\d{2}$/.test(to)) return '';
+  if (from && from > to) return '';
+  const 바닥 = 올린날 ? 점(올린날) : null;
+  if (바닥 && to < 날더하기(바닥, -3)) return '';
+  if (!바닥 && to < 날더하기(오늘점, -400)) return '';
+  if (to > 날더하기(오늘점, 400)) return '';
+  return to;
+}
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'ND2';
@@ -174,15 +205,40 @@ console.log('\n② 제목 판정 — 볼 것 ' + 볼것.length + '건 (제목에
   + ') · 남의 자리 ' + 셈.남의자리 + ' 건너뜀');
 
 /* ── ③ 상세·첨부 ──────────────────────────────────────────── */
-console.log('\n③ 상세 — 제목만으로 못 가린 ' + 볼것.filter((v) => v.열까).length + '건을 엽니다');
+/* ★ 2026-10-07 — 상세를 **전부** 엽니다. 전에는 제목으로 직군을 못 가린 것만
+   열었습니다. 접수기간이 상세 화면에 있어서 안 열면 마감일이 영영 빕니다
+   (치매센터 공고 9건이 전부 「수시채용」 으로 떠 있었습니다).
+   치매센터는 한 쪽에 10건이라 전부 열어도 요청이 몇십 건입니다 */
+const 오늘점ND = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }).replace(/-/g, '.');
+console.log('\n③ 상세 — ' + 볼것.length + '건을 전부 엽니다 (직군을 못 가린 것 '
+  + 볼것.filter((v) => v.열까).length + '건 + 마감일 읽기)');
 for (const v of 볼것) {
-  if (!v.열까) continue;
   if (Date.now() - t0 > 15 * 60000) { console.log('  15분이 넘어 여기서 멈춥니다'); break; }
   셈.상세연것++;
   const r = await 받기(상세URL + '?no=' + v.x.no);
   await 쉼(600);
-  if (r.code !== 200 || !r.글) { v.보류 = '상세를 못 받았습니다 (HTTP ' + r.code + ')'; continue; }
+  if (r.code !== 200 || !r.글) {
+    if (v.열까) v.보류 = '상세를 못 받았습니다 (HTTP ' + r.code + ')';
+    continue;
+  }
   v.본문 = 풀기(r.글);
+
+  /* 접수기간 — HS 와 같은 규칙입니다 (tools/hosp/hs_dates.js) */
+  const dd = hsDetailDates(v.본문);
+  const to = 날짜쓸만한가(dd, v.x.날, 오늘점ND);
+  if (to) {
+    v.to = to;
+    v.from = dd.from || '';
+    v.날짜출처 = dd.rank === 1 ? '본문 · 공고기간' : '본문 · 접수기간';
+    셈.날짜채움 = (셈.날짜채움 || 0) + 1;
+  } else if (dd.to) {
+    셈.날짜버림 = (셈.날짜버림 || 0) + 1;
+    console.log('    날짜 거름 no=' + v.x.no + ' 읽은값 ' + JSON.stringify(dd)
+      + ' · 올린날 ' + (v.x.날 || '모름'));
+  }
+
+  /* 직군을 이미 제목으로 가렸으면 여기서 끝 — 첨부까지 열지 않습니다 */
+  if (!v.열까) continue;
 
   const j = matchJob(v.본문);
   if (j) { v.직군 = j; v.근거 = '상세'; 셈.상세로++; continue; }
@@ -237,6 +293,8 @@ for (const v of 볼것) {
   } catch (e) { v.보류 = '첨부를 못 받았습니다 · ' + String(e.message).slice(0, 80); }
 }
 console.log('  연 것 ' + 셈.상세연것 + '건 · 첨부까지 ' + 셈.첨부연것 + '건');
+console.log('  ★ 상세에서 마감일을 채운 공고 ' + (셈.날짜채움 || 0) + '건'
+  + (셈.날짜버림 ? ' · 읽었지만 거른 것 ' + 셈.날짜버림 + '건' : ''));
 console.log('  ★ 상세로 가린 ' + 셈.상세로 + '건 · 첨부로 가린 ' + 셈.첨부로
   + '건 · 가산점이라 거른 ' + 셈.가산점거름 + '건 · 못 가려 보류 ' + 셈.못가림 + '건');
 
@@ -250,11 +308,18 @@ for (const v of 볼것) {
     org_name: 기관,
     title: v.제목,
     posted_at: v.x.날,
+    /* ★ 2026-10-07 — 접수기간을 담습니다. 전에는 이 칸이 아예 없어서
+       치매센터 공고가 전부 「수시채용」 으로 떴습니다 */
+    apply_from: v.from ? String(v.from).replace(/\./g, '-') : null,
+    apply_to: v.to ? String(v.to).replace(/\./g, '-') : null,
     url: 상세URL + '?no=' + v.x.no,
     job_group: v.직군 || '',
     org_kind: '공공',
     detail: { 근거: v.근거 || '제목', ...(v.걸린줄 ? { 걸린줄: String(v.걸린줄).slice(0, 300) } : {}) },
-    evidence: v.보류 ? { 보류사유: v.보류 } : {},
+    evidence: {
+      ...(v.보류 ? { 보류사유: v.보류 } : {}),
+      ...(v.날짜출처 ? { 날짜출처: v.날짜출처 } : {}),
+    },
   };
   /* 다시 받아야 할 까닭이면 판정을 기억하지 않습니다 (알리오·클린아이와 같은 규칙) */
   const 적기 = (판정) => { v.__판정 = (v.보류 && /못 읽|못 받|OCR 실패/.test(v.보류)) ? '' : 판정; };
