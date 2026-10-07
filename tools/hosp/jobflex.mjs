@@ -238,11 +238,25 @@ export function 꼬리표가르기(꼬리표) {
 }
 
 /* careerType — 알리오의 recrutSeNm(채용구분)과 같은 자리입니다.
-   원문으로 본 값: NEW · CAREER · ANY · NEW_CAREER
-   (NEW_CAREER 는 hosp/jobflex.mjs 가 이미 「신입/경력」으로 바꿔 보냅니다) */
+ *
+ * ★ 원문으로 본 값은 **여섯**입니다 (2026-10-07 에 목록 API 를 직접 두드려 셈).
+ *     동남권원자력의학원 19건   NEW_CAREER 18 · FIELD_DIFFERENCE 1
+ *     충남대학교병원   300건   ANY 128 · NEW 77 · NEW_CAREER 73 ·
+ *                              FIELD_DIFFERENCE 16 · CAREER 5 · INTERNSHIP 1
+ *   전에는 넷만 적혀 있었습니다. 안 적힌 값이 들어오면 그대로 흘러가
+ *   영문 코드가 화면까지 갑니다 — 실제로 FIELD_DIFFERENCE 15건이 그랬습니다.
+ *
+ * ⚠ FIELD_DIFFERENCE · INTERNSHIP 의 **한글 뜻은 확인 못 했습니다.**
+ *   JobFlex 는 마이다스 사설 API 라 공개 명세가 없고, 상세 엔드포인트
+ *   두 꼴(…/{sn} · …/{sn}/detail)을 두 병원에 두드렸더니 넷 다 HTTP 401
+ *   「인증에 실패하였습니다」 였습니다. 작업지침 3절대로 **멈추고 명세를 요청**합니다.
+ *   그때까지 [미확인] 을 답니다 — 짐작한 말을 확인한 말처럼 두지 않습니다.
+ *   정황만 적어 둡니다: FIELD_DIFFERENCE 가 붙은 공고는 둘 다
+ *   「채용분야 : 간호사, 사회복지사, 행정코디네이터…」 꼴의 **통합 공고**입니다. */
 export function 경력조건(v) {
   const s = String(v || '').trim();
   return ({ NEW: '신입', CAREER: '경력', ANY: '관계없음',
-    NEW_CAREER: '신입/경력', '신입/경력': '신입/경력' })[s] || s;
+    NEW_CAREER: '신입/경력', '신입/경력': '신입/경력',
+    FIELD_DIFFERENCE: '분야별 상이 [미확인]', INTERNSHIP: '인턴 [미확인]' })[s] || s;
 }
 

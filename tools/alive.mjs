@@ -137,7 +137,36 @@ async function 하나(x) {
 }
 
 /* ── 본체 ── */
+const t0 = Date.now();          /* 박동의 took_ms 가 씁니다 (2026-10-07) */
 const argv = process.argv.slice(2);
+
+/* 어디서 터져도 박동을 남기고 나갑니다.
+   ★ **둘 다 걸어야 합니다** — 맨 위 await 가 깨지면 Node 는
+     `unhandledRejection` 이 아니라 **`uncaughtException`** 으로 올립니다.
+     2026-10-07 에 경쟁사 수집기에서 실제로 겪었습니다 (한쪽만 걸어 박동이 안 남음).
+   ★ 박동 자체가 실패해도 던지지 않습니다 — 진짜 까닭을 덮으면 안 됩니다 */
+let 박동남겼나 = false;
+async function 박동(ok, 왜, 셈) {
+  if (박동남겼나) return;
+  박동남겼나 = true;
+  try {
+    await rpc(env(), 'collect_beat', {
+      p_secret: env().ALIVE_KEY, p_source: 'ALIVE',
+      p_beat: { took_ms: Date.now() - t0, ok, 왜: 왜 || '', ...(셈 || {}) },
+    });
+    console.log('박동 — ALIVE · ' + (ok ? '정상' : '탈남'));
+  } catch (e) {
+    console.error('박동을 못 남겼습니다 — ' + String(e && e.message || e).slice(0, 120));
+  }
+}
+for (const 언제 of ['uncaughtException', 'unhandledRejection']) {
+  process.on(언제, async (e) => {
+    const 왜 = String(e && (e.message || e)).slice(0, 500);
+    console.error('\n★ 탈났습니다 (' + 언제 + ') — ' + 왜);
+    if (!argv.includes('--dry')) await 박동(false, 왜);
+    process.exit(1);
+  });
+}
 const dry = argv.includes('--dry');
 const 몇 = argv.includes('--n') ? Number(argv[argv.indexOf('--n') + 1]) || 0 : 0;
 const cfg = env();
@@ -165,7 +194,12 @@ if ((볼것0 || []).length >= 100) {
 const 볼것 = 몇 ? (볼것0 || []).slice(0, 몇) : (볼것0 || []);
 console.log('원문 확인 — 마감일 없는 공고 ' + 볼것.length + '건'
   + (dry ? ' (--dry · 기록하지 않습니다)' : ''));
-if (!볼것.length) { console.log('확인할 것이 없습니다 (최근 6일 안에 다 봤습니다)'); process.exit(0); }
+if (!볼것.length) {
+  console.log('확인할 것이 없습니다 (최근 6일 안에 다 봤습니다)');
+  /* ★ 볼 것이 없어도 박동은 남깁니다 — 안 남기면 「멈춘 것」 과 구별이 안 됩니다 */
+  if (!dry) await 박동(true, '', { 본곳: 0, 메모: { 왜: '볼 것이 없었습니다' } });
+  process.exit(0);
+}
 
 const 결과 = [];
 for (const x of 볼것) {
@@ -189,3 +223,11 @@ console.log('\n── 살아 있음 ' + (셈.alive || 0) + ' · 사라짐 ' + (�
 if (dry) { console.log('--dry 라 기록하지 않았습니다.'); process.exit(0); }
 const 답 = await rpc(cfg, 'alive_mark', { p_secret: cfg.ALIVE_KEY, p_rows: 결과 });
 console.log('기록 — ' + Object.entries(답 || {}).map(([k, v]) => k + ' ' + v).join(' · '));
+
+/* 박동 — 경로 ALIVE. 늦음 기준 36시간 (매일 02:15 에 도니 24시간이 평소 간격) (2026-10-07).
+   탈이 났을 때는 위의 손잡이가 ok=false 로 남깁니다 */
+await 박동(true, '', {
+  본곳: 볼것.length,
+  메모: { ...셈, 접수기간찾음: 결과.filter((x) => x.접수기간).length,
+    내린것까지: 내린것, 기록: 답 },
+});
