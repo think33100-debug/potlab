@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { AdminJobReports } from '@/components/admin-job-reports';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
 
@@ -170,6 +171,10 @@ export default function AdminReports() {
           </ul>
         </>
       )}
+
+      {/* 공고 오류 신고 (2026-10-07). 같은 「신고」 메뉴 아래에 둡니다 —
+          관리자가 신고를 찾으러 두 곳을 돌지 않게 */}
+      <AdminJobReports />
     </div>
   );
 }

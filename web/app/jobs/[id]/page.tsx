@@ -9,6 +9,7 @@ import { JobBusy } from '@/components/job-busy';
 import { JobClosed } from '@/components/job-closed';
 import { JobHospital } from '@/components/job-hospital';
 import { JobOpenLink } from '@/components/job-open-link';
+import { JobReport } from '@/components/job-report';
 import { JobSave } from '@/components/job-save';
 import { Rise } from '@/components/job-parts';
 import { OrgPanel } from '@/components/org-panel';
@@ -140,6 +141,12 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const stepped = steps.length >= 2 && steps.length <= 8;
 
   const rest = Object.keys(detail).filter((k) => !CORE_SKIP.includes(k) && detail[k]);
+
+  /* 워크넷(고용24) 공고인가. id 는 수집기가 'WN' + 고용24 공고번호로 만듭니다
+     (tools/collect-worknet.mjs 485줄 · 옛 WN 과 새 WN2 가 같은 규칙입니다).
+     job_one 의 돌려주는 칸에 source 를 더하려면 함수를 drop 했다 다시 만들어야
+     해서(승인 창), 위 「원문제목」과 같은 이유로 id 로 가립니다 */
+  const 워크넷 = j.id.startsWith('WN');
 
   return (
     <div className={closed ? 'bg-[#F4F4F1]' : 'bg-[#F4F4F1]'}>
@@ -349,6 +356,15 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                                 text-[#4A5056]" style={{ overflowWrap: 'break-word' }}>
                     {detail[k]}
                   </p>
+                  {/* ★ 워크넷 급여란 고정 안내 (2026-10-07 세중님 지시).
+                      워크넷이 주는 숫자는 1호봉 기준이라 그대로 읽으면 오해합니다.
+                      워크넷 공고만 붙입니다 — 「연봉」 칸은 청소년수련원(CE)·
+                      알리오(AL)에도 있는데 그쪽은 1호봉 기준이 아닙니다 */}
+                  {k === '연봉' && 워크넷 && (
+                    <p className="mt-3 break-keep text-[12px] leading-relaxed text-[#5F666C]">
+                      1호봉 예정 급여이며, 호봉 인정 및 경력에 따라 상이할 수 있음
+                    </p>
+                  )}
                 </Block>
               </Rise>
             ))}
@@ -371,6 +387,10 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               </p>
             </div>
           </Rise>
+
+          {/* 오류 신고 (2026-10-07). 출처 안내 바로 아래입니다 —
+              「우리가 옮긴 것」을 읽은 자리에서 「틀렸다」를 말할 수 있어야 합니다 */}
+          <JobReport id={j.id} />
 
           {detail['기관홈'] && (
             <Rise>
