@@ -9,9 +9,11 @@ import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 글 아래 단추 줄 — 좋아요 · 공유 · 신고 · (내 글이면) 지우기 */
 export function PostActions({
-  id, authorId, likeCount, title,
+  id, mine, likeCount, title,
 }: {
-  id: number; authorId: string; likeCount: number; title: string;
+  /* ★ 2026-10-07 — 회원번호(authorId) 대신 「내 글인가」만 받습니다.
+     판정은 DB 의 공개글 보기가 합니다 (세중님 결정 ㉯) */
+  id: number; mine: boolean; likeCount: number; title: string;
 }) {
   const { loading, session, me } = useAuth();
   const toast = useToast();
@@ -123,7 +125,7 @@ export function PostActions({
 
       <span className="flex-1" />
 
-      {session && me?.id === authorId ? (
+      {session && mine ? (
         <button type="button" onClick={remove}
           className="rounded-md px-4 py-4 text-sm text-mute hover:text-brand-red">
           지우기

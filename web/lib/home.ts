@@ -73,7 +73,8 @@ export async function getHome(): Promise<HomeData> {
     /* org_directory 는 anon 이 못 읽습니다 (통째로 긁어가는 길을 닫았습니다).
        세어 둔 값을 함수로 받습니다 */
     supabase.rpc('org_total'),
-    supabase.from('posts').select('id,title,body')
+    /* 회원번호를 안 받는 공개 보기입니다 (2026-10-07) */
+    supabase.from('공개글').select('id,title,body')
       .gte('created_at', daysAgoIso(HOT_DAYS))
       .order('view_count', { ascending: false }).limit(1),
     supabase.rpc('home_stats'),

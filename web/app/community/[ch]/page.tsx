@@ -20,7 +20,7 @@ export default async function ChannelPage({
 
   const hot = sort === 'hot';
   const { data, error } = await supabase
-    .from('posts')
+    .from('공개글')
     .select(POST_LIST_COLS)
     .eq('channel', ch)
     .order(hot ? 'view_count' : 'created_at', { ascending: false })

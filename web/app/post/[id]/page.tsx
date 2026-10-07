@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { NothingHere } from '@/components/nothing-here';
@@ -7,15 +8,23 @@ import { PostComments } from '@/components/post-comments';
 import { ViewBump } from '@/components/view-bump';
 import { channelName } from '@/lib/channels';
 import { supabase, POST_ONE_COLS, type PostRow } from '@/lib/supabase';
+import { serverSupabase } from '@/lib/supabase-server';
 import { shownName } from '@/lib/who';
 import { Clip, JoinCta, Members } from '@/app/gate';
 
 export const dynamic = 'force-dynamic';
 
-async function getPost(id: string) {
+/* ★ 2026-10-07 — `posts` 가 아니라 **공개글 보기**를 읽습니다 (세중님 결정 ㉯).
+   글쓴이 회원번호가 화면으로 안 나갑니다. 「내 글인가」는 보기의 `내글` 칸입니다.
+
+   그래서 **세션으로 읽어야** 합니다 — `내글` 이 `author_id = auth.uid()` 라,
+   세션 없는 열쇠로 읽으면 늘 거짓이고 글쓴이에게 지우기 단추가 안 보입니다.
+   미리보기(generateMetadata)는 크롤러라 세션이 없으니 공개 열쇠로 읽습니다 —
+   거기서는 `내글` 을 안 씁니다. */
+async function getPost(sb: SupabaseClient, id: string) {
   const n = Number(id);
   if (!Number.isFinite(n)) return null;
-  const { data } = await supabase.from('posts').select(POST_ONE_COLS).eq('id', n).maybeSingle();
+  const { data } = await sb.from('공개글').select(POST_ONE_COLS).eq('id', n).maybeSingle();
   return (data as unknown as PostRow) ?? null;
 }
 
@@ -64,7 +73,7 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const p = await getPost(id);
+  const p = await getPost(supabase, id);
   /* 카톡에 뜨는 제목도 갈라 적습니다 — 누르기 전에 알 수 있게 */
   if (!p) return { title: `${GONE[await stateOf(id)].title} · POTJOB` };
 
@@ -89,7 +98,8 @@ export async function generateMetadata({
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const p = await getPost(id);
+  /* 쿠키에 실려 온 세션으로 읽습니다 — 그래야 「내글」 이 참이 됩니다 */
+  const p = await getPost(await serverSupabase(), id);
 
   /* 404 를 내는 대신 화면을 보여줍니다. 받은 사람이 왜 안 보이는지는
      알게 해야 합니다 — 빈 화면은 「서비스가 고장 났다」로 읽힙니다 */
@@ -148,7 +158,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
       <PostActions
         id={p.id}
-        authorId={p.author_id}
+        mine={!!p.내글}
         likeCount={p.like_count}
         title={p.title || p.body.slice(0, 40)}
       />

@@ -31,14 +31,14 @@ export default async function Community() {
   const since = daysAgoIso(HOT_DAYS);
 
   const [hot, fresh, counts, banner] = await Promise.all([
-    supabase.from('posts').select(POST_LIST_COLS)
+    supabase.from('공개글').select(POST_LIST_COLS)
       .gte('created_at', since)
       .order('view_count', { ascending: false })
       .limit(5),
-    supabase.from('posts').select(POST_LIST_COLS)
+    supabase.from('공개글').select(POST_LIST_COLS)
       .order('created_at', { ascending: false })
       .limit(20),
-    supabase.from('posts').select('channel'),
+    supabase.from('공개글').select('channel'),
     commBanners(),
   ]);
 

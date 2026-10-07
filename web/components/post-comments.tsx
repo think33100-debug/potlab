@@ -26,8 +26,12 @@ export function PostComments({ postId }: { postId: number }) {
      effect 안에서 바로 setState 하면 그릴 때마다 한 번 더 그립니다 */
   const fetchRows = useCallback(async () => {
     const { data } = await browserSupabase()
-      .from('comments')
-      .select('id,post_id,parent_id,author_id,body,created_at,profiles(nickname,avatar,erased_at)')
+      /* ★ 2026-10-07 — 「공개댓글」 보기를 읽습니다 (세중님 결정 ㉯).
+         회원번호가 화면으로 안 나가고, 「내 댓글인가」는 보기의 내글 칸이 답합니다.
+         전에 쓰던 profiles(...) 묻어 읽기는 **회원에게도 실패**하고 있었습니다 —
+         profiles 는 authenticated 에게 SELECT 권한이 아예 없습니다 */
+      .from('공개댓글')
+      .select('id,post_id,parent_id,내글,body,created_at,profiles')
       .eq('post_id', postId)
       .order('created_at');
     return (data ?? []) as unknown as CommentRow[];
@@ -128,13 +132,13 @@ export function PostComments({ postId }: { postId: number }) {
         <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
           {roots.map((c) => (
             <li key={c.id} className="py-5">
-              <One c={c} mine={me?.id === c.author_id} onRemove={remove}
+              <One c={c} mine={!!c.내글} onRemove={remove}
                 onReply={me ? () => setReplyTo(c.id) : undefined} />
               {kids(c.id).length > 0 && (
                 <ul className="mt-5 space-y-5 border-l border-gray-100 pl-6 dark:border-gray-800">
                   {kids(c.id).map((k) => (
                     <li key={k.id}>
-                      <One c={k} mine={me?.id === k.author_id} onRemove={remove} />
+                      <One c={k} mine={!!k.내글} onRemove={remove} />
                     </li>
                   ))}
                 </ul>

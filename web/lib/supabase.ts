@@ -133,7 +133,8 @@ export type OrgRow = {
 export type PostRow = {
   id: number;
   channel: string;
-  author_id: string;
+  /* 회원번호는 더 안 받습니다 (2026-10-07). 「내 글인가」만 받습니다 */
+  내글?: boolean | null;
   title: string | null;
   body: string;
   comment_count: number;
@@ -146,26 +147,33 @@ export type PostRow = {
 };
 
 /* 목록에서는 본문을 통째로 안 받습니다. 사진도 썸네일 경로만 받습니다.
-   profiles 는 닉네임과 아바타뿐입니다 — 이메일 칸은 애초에 없습니다.
 
-   `profiles!posts_author_id_fkey` 로 관계 이름을 박아야 합니다.
-   그냥 `profiles` 라고 쓰면 PGRST201 이 납니다 — posts 에서 profiles 로 가는 길이
-   둘이라(작성자 author_id, 좋아요 post_likes 다대다) 어느 쪽인지 못 정합니다. */
-const AUTHOR = 'profiles!posts_author_id_fkey(nickname,avatar,erased_at)';
+   ★ 2026-10-07 — `posts` 를 직접 읽지 않고 **공개글 보기**를 읽습니다
+     (세중님 결정 ㉯). 두 가지가 한꺼번에 바뀝니다.
 
+     ① 글쓴이 회원번호(author_id)가 비로그인에게 안 나갑니다.
+        원래 표는 회원에게만 열려 있습니다 (anon 의 SELECT 를 뗐습니다)
+     ② 전에 쓰던 `profiles!posts_author_id_fkey(...)` 묻어 읽기는
+        **회원에게도 실패하고 있었습니다** — `profiles` 는 anon 도
+        authenticated 도 SELECT 권한이 아예 없습니다. 그래서 커뮤니티 목록이
+        「아직 글이 없어요」 로 떠 있었습니다. 보기가 닉네임을 직접 담아 줍니다
+
+   「내 글인가」는 보기의 `내글` 칸이 답합니다 — 회원번호를 화면으로 안 보내고도
+   지우기 단추를 가릴 수 있습니다. 세션으로 읽어야 참이 됩니다(serverSupabase) */
 export const POST_LIST_COLS =
-  'id,channel,author_id,title,body,comment_count,like_count,view_count,created_at,'
-  + AUTHOR + ',post_images(thumb_path)';
+  'id,channel,title,body,comment_count,like_count,view_count,created_at,내글,'
+  + 'profiles,post_images';
 
 export const POST_ONE_COLS =
-  'id,channel,author_id,title,body,comment_count,like_count,view_count,created_at,edited_at,'
-  + AUTHOR;
+  'id,channel,title,body,comment_count,like_count,view_count,created_at,edited_at,'
+  + '내글,profiles';
 
 export type CommentRow = {
   id: number;
   post_id: number;
   parent_id: number | null;
-  author_id: string;
+  /* 회원번호는 더 안 받습니다 (2026-10-07) — 공개댓글 보기의 「내글」 칸을 봅니다 */
+  내글?: boolean | null;
   body: string;
   created_at: string;
   profiles: { nickname: string; avatar: string | null; erased_at: string | null } | null;
