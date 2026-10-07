@@ -182,12 +182,12 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               >
                 {j.job_group ?? '치료사'}
               </span>
-              {j.employ_type && (
-                <span className="rounded-full border border-[#E3E3DE] bg-white px-3 py-1
-                                 text-[13px] text-[#4A5056]">
-                  {j.employ_type}
-                </span>
-              )}
+              {/* 못 가린 공고는 칸을 비우지 않고 「공고문 참고」 (2026-10-07 세중님).
+                  DB 값은 비워 둔 채로 화면 표시만 바꿉니다. 목록 카드도 같은 말입니다 */}
+              <span className="rounded-full border border-[#E3E3DE] bg-white px-3 py-1
+                               text-[13px] text-[#4A5056]">
+                {j.employ_type || '공고문 참고'}
+              </span>
               {d && (
                 <span className={`rounded-full px-3 py-1 text-[13px] font-bold ${
                   d.urgent ? 'bg-[#FF3B30] text-white' : 'bg-[#ECECE8] text-[#4A5056]'}`}>

@@ -343,7 +343,10 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                     )}
                     {r.job_group && <span className="font-medium text-gray-700 dark:text-gray-300">{r.job_group}</span>}
                     {r.지역보임 && <span>{r.지역보임}</span>}
-                    {r.employ_type && <span>{r.employ_type}</span>}
+                    {/* 고용형태를 못 가린 공고는 칸을 비우지 않고 「공고문 참고」 라고
+                        적습니다 (2026-10-07 세중님). DB 값은 비워 둔 채입니다 —
+                        화면 표시만 바꿉니다. 상세도 같은 말을 씁니다 */}
+                    <span>{r.employ_type || '공고문 참고'}</span>
                     {(r.apply_from || r.apply_to) && (
                       <span>{d(r.apply_from)}~{d(r.apply_to)}</span>
                     )}

@@ -62,6 +62,12 @@ export default function AdminJobs() {
     if (state === 'hidden') b = b.eq('hidden', true);
     /* 규칙을 바꿔 다시 판정한 것만 — 되살릴 수 있게 따로 모읍니다 (2026-09-28) */
     if (state === 'rejudged') b = b.eq('hidden', true).like('hidden_why', '재판정으로 버림%');
+    /* 마감일 없이 날수가 지나 내린 것 (2026-10-07).
+       「30일 지남」 과 옛 「45일 지남」 을 같이 모읍니다.
+       「180일 지남(수시)」 는 뺍니다 — 그건 진짜 수시 공고라 사람이 볼 것이 없습니다 */
+    if (state === 'needcheck') {
+      b = b.eq('hidden', true).like('hidden_why', '%일 지남').not('hidden_why', 'like', '%(수시)%');
+    }
     if (tab) b = b.like('tab', TABS.find((t) => t.key === tab)?.like ?? '%');
     if (q) b = b.or(`title.ilike.%${q}%,org_name.ilike.%${q}%,id.ilike.%${q}%`);
     return b;
@@ -79,15 +85,18 @@ export default function AdminJobs() {
     const sb = browserSupabase();
     const one = (f: (b: ReturnType<typeof sb.from>) => unknown) => f;
     void one;
-    const [hold, live, hidden, all] = await Promise.all([
+    const [hold, live, hidden, needcheck, all] = await Promise.all([
       sb.from('admin_jobs').select('id', { count: 'exact', head: true }).eq('hold', true),
       sb.from('admin_jobs').select('id', { count: 'exact', head: true }).eq('hold', false).eq('hidden', false),
       sb.from('admin_jobs').select('id', { count: 'exact', head: true }).eq('hidden', true),
+      /* 마감일 없이 날수가 지나 내린 것 — 사람이 봐야 합니다 (2026-10-07) */
+      sb.from('admin_jobs').select('id', { count: 'exact', head: true })
+        .eq('hidden', true).like('hidden_why', '%일 지남').not('hidden_why', 'like', '%(수시)%'),
       sb.from('admin_jobs').select('id', { count: 'exact', head: true }),
     ]);
     return {
       hold: hold.count ?? 0, live: live.count ?? 0,
-      hidden: hidden.count ?? 0, all: all.count ?? 0,
+      hidden: hidden.count ?? 0, needcheck: needcheck.count ?? 0, all: all.count ?? 0,
     };
   }, []);
 
