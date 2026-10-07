@@ -75,7 +75,11 @@ export type JobListItem = Pick<
   | 'sido' | 'job_group' | 'org_kind' | 'tab'
   | 'apply_from' | 'apply_to' | 'posted_at' | 'headcount' | 'is_intern'
   | '지역보임'
->;
+> & {
+  /* 관리자가 추천순 맨 위로 올린 공고인가 (2026-10-07 · DB 의 job_list 가 붙입니다).
+     job_posts 에는 없는 칸이라 Pick 이 아니라 여기서 더합니다 */
+  올림?: boolean | null;
+};
 
 /* 로그인 안 한 분에게 보여주는 맛보기 (2026-10-01).
    DB 의 공개공고() 가 내주는 것 그대로입니다.

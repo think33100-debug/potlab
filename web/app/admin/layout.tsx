@@ -19,6 +19,8 @@ const MENU = [
   { href: '/admin/texts', label: '홈 글' },
   { href: '/admin/jobs', label: '공고' },
   { href: '/admin/trash', label: '쓰레기통' },
+  /* 추천순 맨 위로 올린 공고 (2026-10-07). 나중에 유료 광고와 이어질 자리입니다 */
+  { href: '/admin/boost', label: '추천 올린 공고' },
   { href: '/admin/posts', label: '커뮤니티 글' },
   { href: '/admin/icons', label: '아이콘' },
   { href: '/admin/stats', label: '통계' },

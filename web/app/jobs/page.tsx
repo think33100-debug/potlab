@@ -165,6 +165,18 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
 
   const byDeadline = sp.sort === 'deadline';
 
+  /* 정렬 네 가지 (2026-10-07 세중님 지시).
+     주소에 sort 가 없으면 추천순입니다 — 홈의 「마감 임박 공고」 (`?sort=deadline`)
+     같은 밖에 나간 링크는 그대로 돕니다.
+     순서와 뜻은 DB 의 job_list(p_sort) 한 곳에서 정합니다 — 여기는 이름표뿐입니다 */
+  const SORTS = [
+    { key: undefined, label: '추천순' },
+    { key: 'new',      label: '최신순' },
+    { key: 'deadline', label: '마감순' },
+    { key: 'views',    label: '조회순' },
+  ] as const;
+  const 지금정렬 = SORTS.some((s) => s.key === sp.sort) ? sp.sort : undefined;
+
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <Hit kind="jobs" />
@@ -176,12 +188,25 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
             ? '마감일이 가까운 순서입니다'
             : '작업치료사 · 물리치료사 · 공공기관과 병원에서 모아요'}
         </p>
-        {byDeadline && (
-          <Link href={link({ sort: undefined })} className="mt-2 inline-block text-sm text-interaction-blue hover:underline">
-            최근 올라온 순으로 보기
-          </Link>
-        )}
       </header>
+
+      {/* 정렬 — 자바스크립트 없이도 되게 그냥 링크입니다 */}
+      <nav aria-label="정렬" className="mb-5 flex flex-wrap gap-x-5 gap-y-2">
+        {SORTS.map((s) => (
+          <Link
+            key={s.label}
+            href={link({ sort: s.key })}
+            aria-current={지금정렬 === s.key ? 'true' : undefined}
+            className={
+              'text-lg ' + (지금정렬 === s.key
+                ? 'font-bold text-ink underline underline-offset-4'
+                : 'text-mute hover:underline')
+            }
+          >
+            {s.label}
+          </Link>
+        ))}
+      </nav>
 
       {/* 검색 — 서버가 받게 GET 폼입니다. 자바스크립트 없이도 됩니다 */}
       <form action="/jobs" method="get" role="search" className="mb-6 flex gap-2">
@@ -322,6 +347,14 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                         근로복지공단 청년인턴 응시자격에 「(물리치료사) 면허증
                         소지자」가 적혀 있어 올립니다. 다만 인턴이라 헷갈리지
                         않게 표시합니다. 판단은 DB(job_posts_pub.is_intern)가 합니다 */}
+                    {/* 관리자가 위로 올린 공고에는 「추천」 을 붙입니다 (2026-10-07).
+                        나중에 유료 광고와 이어질 자리라, 왜 위에 있는지 회원이
+                        알 수 있어야 합니다. 판단은 DB(job_list.올림)가 합니다 */}
+                    {r.올림 && (
+                      <span className="mr-2 whitespace-nowrap rounded-md bg-badge-blue-bg px-2 py-0.5 align-middle text-sm font-bold text-interaction-blue">
+                        추천
+                      </span>
+                    )}
                     {r.is_intern && (
                       <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-gray-900 ring-1 ring-warning dark:text-gray-100">
                         체험형 인턴
