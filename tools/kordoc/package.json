@@ -1,0 +1,12 @@
+{
+  "name": "potlab-kordoc",
+  "private": true,
+  "version": "1.0.0",
+  "description": "공고 첨부(hwp·hwpx·pdf) 읽기 도구. 판을 못 박아 둡니다 — kordoc 은 반년에 161판이 나왔습니다",
+  "license": "UNLICENSED",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "kordoc": "4.19.1",
+    "pdfjs-dist": "4.10.38"
+  }
+}
