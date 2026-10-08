@@ -1,9 +1,12 @@
 /* ══════════════════════════════════════════════════════════════════
    기관표 1단계 — 표를 만들고 채우기까지만
-   (2026-10-08 올렸습니다 — 마이그레이션 셋)
-     2026_10_08_기관표_1단계             표 둘 · 함수 셋
-     2026_10_08_기관표_권한_고침          함수 안 역할 검사를 걷고 권한을 service_role 로
-     2026_10_08_기관표_공식이름좁히기_미정 ①.5 좁히기 · 대기는 기관번호 비움 · 공공인가 미정
+
+   (2026-10-08 올렸습니다 · 마이그레이션 다섯)
+     2026_10_08_기관표_1단계                표 둘 · 함수 셋
+     2026_10_08_기관표_권한_고침             함수 안 역할 검사를 걷고 권한을 service_role 로
+     2026_10_08_기관표_공식이름좁히기_미정   ①.5 좁히기 · 대기는 기관번호 비움 · 공공인가 미정
+     2026_10_08_기관표_산하병원_모기관       ⓪ 산하 병원 잇기 · 기관.모기관번호
+     2026_10_08_모기관번호_빈값_고침         hira_name_key(null) 이 '' 이라 'NAME:' 이 샌 것
 
    판정 함수(공공기관인가·마감표시)와 화면은 **2단계**입니다.
    이 파일은 표 둘과 함수 셋만 만듭니다. job_list·job_one·admin_jobs·
@@ -18,19 +21,31 @@
    클린아이·중앙치매센터는 공공기관만 모으는 곳입니다.
 
    ── 왜 이름이 아니라 공고마다 잇는가 ──────────────────────────────
-   org_name 「한일병원」 아래 공고 4건이 있는데 심평원에 「한일병원」이 셋입니다 —
+   org_name 「한일병원」 아래 공고가 여럿인데 심평원에 「한일병원」이 셋입니다 —
      의료법인한전의료재단 한일병원 / 종합병원 / 서울 도봉구
      한일병원 / 종합병원 / 경남 진주시
      한일병원 / 병원   / 광주 남구
-   이름을 열쇠로 두면 네 건을 한 기관으로 읽습니다. 그래서 **기관번호**를
+   이름을 열쇠로 두면 넷을 한 기관으로 읽습니다. 그래서 **기관번호**를
    열쇠로 두고, 공고마다 잇습니다.
 
+   ── 좁히는 차례 ─────────────────────────────────────────────────
+     ⓪  제목에서 뽑은 **산하 병원** 이름이 심평원 기관으로 딱 하나 풀림
+         ㉠ 본부이름 + 산하이름   ㉡ 산하이름만        (㉠ 먼저)
+     ①  이름키가 심평원 한 곳뿐
+     ①.5 공고의 기관이름이 심평원 **공식 이름과 글자까지** 같은 곳이 딱 하나
+     ②  공고 주소의 도메인 = 심평원 홈페이지 도메인
+     ③  공고 주소의 도메인 → 병원사이트표 · org_alias kind='호스트'
+     ④  공고의 시군구   (공고 자체의 값. 기관 단위 max(sido) 를 안 씁니다)
+     ⑤  공고의 시도
+   앞에서 하나로 좁혀지면 뒤는 보지 않습니다.
+   연결상태 = '사람' 인 공고는 건드리지 않습니다.
+   updated_at 은 건드리지 않습니다 (작업지침 9절).
+
    ── 알려 둔 한계 (ponytail) ──────────────────────────────────────
-   심평원에 없는 기관(요양원·복지관·공단 본체 등 707 이름 · 공고 1,161건)은
-   기관번호를 'NAME:<이름키>' 로 둡니다. 같은 이름 다른 지역의 복지관
-   (「북구노인종합복지관」 부산·대구·광주)을 한 기관으로 봅니다. 지금 그 묶음은
-   전부 2층이고 공고 29건뿐입니다. 복지시설표(welfare_facilities)에 지역이
-   있으니 필요해지면 'WELFARE:<id>' 로 올립니다.
+   심평원에 없는 기관(요양원·복지관·공단 본체 등)은 기관번호를 'NAME:<이름키>'
+   로 둡니다. 같은 이름 다른 지역의 복지관(「북구노인종합복지관」 부산·대구·광주)을
+   한 기관으로 봅니다. 지금 그 묶음은 전부 2층이고 공고가 적습니다.
+   복지시설표(welfare_facilities)에 지역이 있으니 필요해지면 'WELFARE:<id>' 로 올립니다.
    ══════════════════════════════════════════════════════════════════ */
 
 /* ── 0. 홈페이지 주소에서 도메인만 ── */
@@ -57,12 +72,13 @@ create table if not exists 기관 (
   종별이름        text,
   설립구분        text,               -- hira_detail.org_ty_cd  01 국립 · 03 공립 · 04 학교법인 …
   설립구분이름    text,
-  공공인가        boolean,            -- null = 미정
+  공공인가        boolean,            -- true · false · null(미정)
   공공근거        text,               -- '출처:AL2' · '공공병원표' · '설립구분:01'
   대학병원인가    boolean,
   상급종합인가    boolean,
   수시금지        boolean,            -- 공공 or 대학병원 or 상급종합 (기관 성격만)
   탭              text,               -- '공공기관·대학·종합 · 공공' 꼴 · null = 근거 없음(지금 탭 유지)
+  모기관번호      text,               -- 본부(모기관)의 기관번호
   확인한때        timestamptz,        -- 관리자가 손으로 고친 줄은 여기에 때가 찍힙니다
   확인한사람      text,
   메모            text,
@@ -75,9 +91,22 @@ comment on table 기관 is
    열쇠는 기관번호입니다. 같은 이름의 다른 병원을 가르기 위해서입니다.
    수시금지 는 기관 성격만 담습니다. 최종 판정은 「수시금지 AND 우리 직군」 (작업지침 10-4).
    탭이 null 이면 근거가 없다는 뜻이고, 화면은 공고의 지금 탭을 그대로 씁니다.';
+comment on column 기관.공공인가 is
+  'true  출처(공공만 모으는 곳) · 공공병원표 · 설립구분 01 국립/03 공립/05 특수법인/13 군병원
+   false **설립구분이 있고** 그 넷이 아님 — 공식 값이 「민간」이라 말해 준 것
+   null  설립구분이 없음 — 미정. 관리자 확인. 짐작으로 false 를 적지 않습니다 (10-3)';
+comment on column 기관.수시금지 is
+  '공공 or 대학병원 or 상급종합 (기관 성격만). 최종 판정은 「수시금지 AND 우리 직군」.
+   null(미정)은 「수시 허용 — 원문에 수시말이 있을 때만」 입니다 (2026-10-08 세중님 확정).
+   미정 기관은 거의 민간 2층이고 공공은 출처(AL·GJ·CE·ND)로 이미 잡히기 때문입니다.
+   거를 때 null 이 공고를 조용히 빼지 않게 해야 합니다.';
 comment on column 기관.공공근거 is
   '출처:AL2(알리오) · 출처:GJ2(나라일터) · 출처:CE2(클린아이) · 출처:ND2(중앙치매센터)
    · 공공병원표(public_hospitals) · 설립구분:01 국립/03 공립/05 특수법인/13 군병원';
+comment on column 기관.모기관번호 is
+  '본부(모기관)의 기관번호. 근무처 병원이 기관번호, 본부가 모기관번호입니다.
+   ㉠ 공고가 본부 이름으로 들어와 산하로 옮긴 것 (연결근거 산하이름·본부+산하)
+   ㉡ org_alias kind=''모기관'' 13줄 (근로복지공단 정선병원 → 근로복지공단 등)';
 comment on column 기관.확인한때 is
   '관리자가 손으로 고친 표시. 이 값이 있으면 기관표채우기() 가 그 줄을 덮지 않습니다.';
 
@@ -93,24 +122,16 @@ create policy "기관 관리자읽기" on 기관 for select to authenticated usi
 alter table job_posts
   add column if not exists "기관번호" text,
   add column if not exists "연결상태" text,   -- 자동 · 사람 · 대기 · 없음
-  add column if not exists "연결근거" text;   -- 이름 · 심평원주소 · 사이트표 · 시군구 · 시도 · 관리자
+  add column if not exists "연결근거" text;   -- 산하이름 · 본부+산하 · 이름 · 공식이름 · 심평원주소 · 사이트표 · 시군구 · 시도 · 관리자
 
 create index if not exists "job_posts_기관번호_idx" on job_posts ("기관번호");
 
 comment on column job_posts."연결상태" is
   '자동(규칙이 한 곳으로 좁혔음) · 사람(관리자가 이었음 — 아무도 덮지 않습니다)
-   · 대기(이름이 여럿인데 못 좁혔음) · 없음(심평원에 없는 기관)';
+   · 대기(이름이 여럿인데 못 좁혔음 — 기관번호는 비어 있습니다) · 없음(심평원에 없는 기관)';
 
 
-/* ── 3. 공고마다 기관을 잇기 ──────────────────────────────────────
-   좁히는 차례 — 앞에서 하나로 좁혀지면 뒤는 보지 않습니다
-     ① 이름키가 심평원 한 곳뿐
-     ② 공고 주소의 도메인 = 심평원 홈페이지 도메인
-     ③ 공고 주소의 도메인 → 병원사이트표(hosp_sites)의 이름
-     ④ 공고의 시군구 (공고 자체의 값입니다 — 기관 단위 max(sido) 를 쓰지 않습니다)
-     ⑤ 공고의 시도
-   연결상태 = '사람' 인 공고는 건드리지 않습니다.
-   updated_at 은 건드리지 않습니다 (작업지침 9절). */
+/* ── 3. 공고마다 기관을 잇기 ── */
 create or replace function "기관잇기"()
 returns table("자동" integer, "대기" integer, "없음" integer, "사람" integer)
 language plpgsql security definer set search_path = public as $$
@@ -120,17 +141,18 @@ begin
      security definer 안에서 current_user 는 **함수 주인**(postgres)이라
      'service_role' 과 절대 같아지지 않습니다 — 서버가 못 부르는 자물쇠였습니다.
      collect_put·hide_stale_posts 와 같은 방식입니다 (2026-10-08 올리면서 고쳤습니다) */
-
   with 공고 as (
     /* org_alias 로 이름을 바꿔 봅니다. 단 **바꾼 이름이 심평원에 있을 때만** 바꿉니다.
        (2026-10-08 확인 — kind='경쟁사' 두 줄은 경쟁사 사이트 표기라 심평원에 없습니다.
         그냥 바꾸면 「의료법인 백제병원」·「순천향대학교 부속 서울병원」 공고 5건이
         붙던 기관을 잃습니다. 조건 없이 썼다가 재 보고 찾았습니다)
-       kind='모기관'(13줄) 은 **쓰지 않습니다.** 산하 병원을 모기관으로 접는 짝이라
-       (근로복지공단 정선병원 → 근로복지공단) 기관 연결에 쓰면 근무처를 잃습니다 */
+       kind='모기관'(13줄) 은 **여기서 안 씁니다.** 산하 병원을 모기관으로 접는 짝이라
+       (근로복지공단 정선병원 → 근로복지공단) 이름 바꾸기에 쓰면 근무처를 잃습니다.
+       그 짝은 기관표채우기() 가 모기관번호를 채울 때 씁니다 */
     select j.id, j.org_name as 원래이름, j.source, btrim(coalesce(j.sgg, '')) as sgg,
            제목지역(j.sido, j.work_place) as 시도,
            주소도메인(j.url) as 도메인,
+           nullif(btrim("제목산하"(j.title, j.org_name)), '') as 산하,
            hira_name_key(coalesce(a.hira_name, j.org_name)) as 이름키
       from job_posts j
       left join org_alias a
@@ -140,6 +162,27 @@ begin
                          where o.name_key = hira_name_key(a.hira_name))
      where j.org_name is not null and btrim(j.org_name) <> ''
        and coalesce(j.연결상태, '') <> '사람'
+  ), 산하후보 as (
+    /* ⓪ 산하 병원 잇기 (2026-10-08 세중님 승인).
+       알리오처럼 org_name 이 본부(근로복지공단·한국보훈복지의료공단)이고 병원 이름이
+       제목에만 있는 공고입니다. 제목산하() 는 화면용이라 「재무팀」·「공고 제2026-18호」·
+       「대전」 같은 것도 뽑습니다. 그래서 **심평원 기관으로 딱 하나 풀릴 때만** 받습니다
+       (뽑힌 482건 중 105건만 남습니다). 차례 1(본부+산하) 이 2(산하이름만)보다 앞입니다 —
+       「대구병원」처럼 흔한 이름이 엉뚱한 곳에 붙지 않게 하기 위해서입니다 */
+    select c.id, o.ykiho, 1 as 차례, '본부+산하' as 근거
+      from 공고 c join hira_org o on o.name_key = hira_name_key(c.원래이름 || ' ' || c.산하)
+     where c.산하 is not null
+    union all
+    select c.id, o.ykiho, 2, '산하이름'
+      from 공고 c join hira_org o on o.name_key = hira_name_key(c.산하)
+     where c.산하 is not null
+  ), 산하정함 as (
+    select distinct on (id) id, ykiho, 근거
+      from (select id, ykiho, 근거, 차례,
+                   count(*) over (partition by id, 차례) as n
+              from 산하후보) t
+     where n = 1
+     order by id, 차례
   ), 사이트 as (
     select distinct 주소도메인(url) as 도메인, hira_name_key(name) as 이름키
       from hosp_sites where 주소도메인(url) is not null
@@ -182,17 +225,21 @@ begin
                 and s.시군구 <> 1 and s.시도 = 1 and z.시도맞나 then '시도' end as 근거
     from 짝 z join 셈 s using (id)
   ), 정할것 as (
-    select c.id, g.ykiho, g.근거,
+    select c.id,
       /* 대기(이름이 여럿인데 못 좁힘)는 기관번호를 **비웁니다.**
          전에는 'NAME:<이름키>' 를 붙여 기관표에 「못 좁힌 이름」 줄이 넷 생겼고
          그 줄의 공공인가가 false 로 적혔습니다 (2026-10-08 세중님이 짚으셨습니다) */
-      case when g.근거 is not null then 'HIRA:' || g.ykiho
+      case when h.ykiho is not null then 'HIRA:' || h.ykiho
+           when g.근거  is not null then 'HIRA:' || g.ykiho
            when exists (select 1 from hira_org o where o.name_key = c.이름키) then null
            else 'NAME:' || c.이름키 end as 기관번호,
-      case when g.근거 is not null then '자동'
+      coalesce(h.근거, g.근거) as 근거,
+      case when h.ykiho is not null or g.근거 is not null then '자동'
            when exists (select 1 from hira_org o where o.name_key = c.이름키) then '대기'
            else '없음' end as 상태
-      from 공고 c left join 고름 g on g.id = c.id and g.근거 is not null
+      from 공고 c
+      left join 산하정함 h on h.id = c.id
+      left join 고름 g on g.id = c.id and g.근거 is not null
   )
   update job_posts j
      set 기관번호 = t.기관번호, 연결상태 = t.상태, 연결근거 = t.근거
@@ -246,22 +293,40 @@ returns table("새로넣음" integer, "고침" integer, "관리자가고친것" 
 language plpgsql security definer set search_path = public as $$
 declare v_새 int := 0; v_고침 int := 0; v_사람 int;
 begin
-  /* 자물쇠는 권한(grant execute to service_role)으로만 겁니다.
-     security definer 안에서 current_user 는 **함수 주인**(postgres)이라
-     'service_role' 과 절대 같아지지 않습니다 — 서버가 못 부르는 자물쇠였습니다.
-     collect_put·hide_stale_posts 와 같은 방식입니다 (2026-10-08 올리면서 고쳤습니다) */
-
   with 모음 as (
     select j.기관번호,
            array_agg(distinct j.source) as 출처들,
            min(j.org_name) as 공고이름,
            min(hira_name_key(j.org_name)) as 이름키,
-           min(nullif(split_part(j.기관번호, 'HIRA:', 2), '')) as ykiho
+           min(nullif(split_part(j.기관번호, 'HIRA:', 2), '')) as ykiho,
+           /* 산하로 옮긴 공고가 있으면 그 공고의 기관칸이 **본부 이름**입니다 */
+           min(j.org_name) filter (where j.연결근거 in ('산하이름', '본부+산하')) as 본부이름
       from job_posts j
      where j.기관번호 is not null
      group by j.기관번호
+  ), 모기관 as (
+    select m.기관번호,
+      nullif(coalesce(
+        /* ㉠ 공고가 본부 이름으로 들어온 것.
+           본부이름이 없으면 **아예 안 찾습니다** — hira_name_key(null) 이 null 이 아니라
+           빈 글자라, 전에는 'NAME:' || '' = 'NAME:' 이 989곳에 들어갔습니다 (2026-10-08 고침) */
+        (case when m.본부이름 is null then null
+              else (select case when count(*) = 1 then 'HIRA:' || min(o.ykiho)
+                                else 'NAME:' || hira_name_key(m.본부이름) end
+                      from hira_org o where o.name_key = hira_name_key(m.본부이름)) end),
+        /* ㉡ org_alias 의 모기관 짝 13줄 */
+        (select case when (select count(*) from hira_org o
+                            where o.name_key = hira_name_key(a.hira_name)) = 1
+                     then 'HIRA:' || (select o.ykiho from hira_org o
+                                       where o.name_key = hira_name_key(a.hira_name))
+                     else 'NAME:' || hira_name_key(a.hira_name) end
+           from org_alias a
+          where a.kind = '모기관' and hira_name_key(a.our_name) = m.이름키
+          limit 1)
+      ), m.기관번호) as 모기관번호          -- 자기 자신은 모기관이 아닙니다
+      from 모음 m
   ), 붙임 as (
-    select m.기관번호, m.출처들, m.이름키,
+    select m.기관번호, m.출처들, m.이름키, mo.모기관번호,
            coalesce(o.yadm_nm, m.공고이름) as 이름,
            o.ykiho, o.sido_nm as 시도, o.sggu_nm as 시군구,
            o.cl_cd as 종별, o.cl_cd_nm as 종별이름,
@@ -271,6 +336,7 @@ begin
            exists (select 1 from public_hospitals p
                     where hira_name_key(p.name) in (hira_name_key(o.yadm_nm), m.이름키)) as 공공병원표
       from 모음 m
+      join 모기관 mo on mo.기관번호 = m.기관번호
       left join hira_org o on o.ykiho = m.ykiho
       left join hira_detail d on d.ykiho = m.ykiho
   ), 판정 as (
@@ -298,8 +364,10 @@ begin
       from 붙임 b
   ), 넣을것 as (
     select p.*,
-      /* 공공인가가 null 이면 수시금지도 null(미정)로 번집니다 — 그게 맞습니다.
-         2단계에서 화면에 쓸 때 coalesce(…, false) 로 안전한 쪽에 붙입니다 */
+      /* 공공인가가 null 이면 수시금지도 null(미정)로 번집니다.
+         미정은 「수시 허용 — 원문에 수시말이 있을 때만」 입니다 (2026-10-08 세중님 확정).
+         미정 기관은 거의 민간 2층이고, 공공은 출처(AL·GJ·CE·ND)로 이미 잡힙니다.
+         2단계에서 거를 때 null 이 공고를 조용히 빼지 않게 해야 합니다 */
       (p.공공인가 or p.대학병원인가 or p.상급종합인가) as 수시금지,
       /* 근거가 없으면 탭을 null 로 둡니다 — 화면은 공고의 지금 탭을 그대로 씁니다.
          1층 커버리지에 구멍을 내지 않기 위해서입니다 (2026-10-08 세중님 지시) */
@@ -312,10 +380,12 @@ begin
   ), 올림 as (
     insert into 기관 as t (기관번호, 이름, 이름키, ykiho, 시도, 시군구,
                            종별, 종별이름, 설립구분, 설립구분이름,
-                           공공인가, 공공근거, 대학병원인가, 상급종합인가, 수시금지, 탭)
+                           공공인가, 공공근거, 대학병원인가, 상급종합인가, 수시금지, 탭,
+                           모기관번호)
     select 기관번호, 이름, 이름키, ykiho, 시도, 시군구,
            종별, 종별이름, 설립구분, 설립구분이름,
-           공공인가, 공공근거, 대학병원인가, 상급종합인가, 수시금지, 탭
+           공공인가, 공공근거, 대학병원인가, 상급종합인가, 수시금지, 탭,
+           모기관번호
       from 넣을것
     on conflict (기관번호) do update set
         이름 = excluded.이름, 이름키 = excluded.이름키, ykiho = excluded.ykiho,
@@ -325,14 +395,15 @@ begin
         공공인가 = excluded.공공인가, 공공근거 = excluded.공공근거,
         대학병원인가 = excluded.대학병원인가, 상급종합인가 = excluded.상급종합인가,
         수시금지 = excluded.수시금지, 탭 = excluded.탭,
+        모기관번호 = excluded.모기관번호,
         고친때 = now()
       where t.확인한때 is null                      -- 관리자가 고친 줄은 그대로
         and (t.이름, t.ykiho, t.종별, t.설립구분, t.공공인가, t.공공근거,
-             t.대학병원인가, t.상급종합인가, t.수시금지, t.탭)
+             t.대학병원인가, t.상급종합인가, t.수시금지, t.탭, t.모기관번호)
             is distinct from
             (excluded.이름, excluded.ykiho, excluded.종별, excluded.설립구분,
              excluded.공공인가, excluded.공공근거, excluded.대학병원인가,
-             excluded.상급종합인가, excluded.수시금지, excluded.탭)
+             excluded.상급종합인가, excluded.수시금지, excluded.탭, excluded.모기관번호)
     returning (t.올린때 = t.고친때) as 새줄
   )
   select count(*) filter (where 새줄), count(*) filter (where not 새줄)
@@ -345,3 +416,12 @@ end $$;
 revoke all on function "기관표채우기"() from public;
 revoke execute on function "기관표채우기"() from authenticated;
 grant execute on function "기관표채우기"() to service_role;
+
+
+/* ── 6. 못 좁힌 이름이 남긴 찌꺼기 줄 치우기 (2026-10-08 세중님 승인) ──
+   대기 공고가 기관번호를 안 갖게 되면서 'NAME:부민병원' 처럼 공고가 0건인
+   줄이 남습니다. 관리자가 손으로 고친 줄(확인한때)은 안 지웁니다. */
+delete from 기관
+ where 기관번호 like 'NAME:%'
+   and 확인한때 is null
+   and not exists (select 1 from job_posts j where j.기관번호 = 기관.기관번호);
