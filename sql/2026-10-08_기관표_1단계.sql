@@ -113,9 +113,10 @@ returns table("자동" integer, "대기" integer, "없음" integer, "사람" int
 language plpgsql security definer set search_path = public as $$
 declare v_자동 int; v_대기 int; v_없음 int; v_사람 int;
 begin
-  if not (is_admin() or current_user = 'service_role') then
-    raise exception '관리자나 서버만 부를 수 있습니다';
-  end if;
+  /* 자물쇠는 권한(grant execute to service_role)으로만 겁니다.
+     security definer 안에서 current_user 는 **함수 주인**(postgres)이라
+     'service_role' 과 절대 같아지지 않습니다 — 서버가 못 부르는 자물쇠였습니다.
+     collect_put·hide_stale_posts 와 같은 방식입니다 (2026-10-08 올리면서 고쳤습니다) */
 
   with 공고 as (
     /* org_alias 로 이름을 바꿔 봅니다. 단 **바꾼 이름이 심평원에 있을 때만** 바꿉니다.
@@ -197,7 +198,8 @@ begin
 end $$;
 
 revoke all on function "기관잇기"() from public;
-grant execute on function "기관잇기"() to service_role, authenticated;
+revoke execute on function "기관잇기"() from authenticated;
+grant execute on function "기관잇기"() to service_role;
 
 
 /* ── 4. 관리자가 손으로 잇기 ── */
@@ -230,9 +232,10 @@ returns table("새로넣음" integer, "고침" integer, "관리자가고친것" 
 language plpgsql security definer set search_path = public as $$
 declare v_새 int := 0; v_고침 int := 0; v_사람 int;
 begin
-  if not (is_admin() or current_user = 'service_role') then
-    raise exception '관리자나 서버만 부를 수 있습니다';
-  end if;
+  /* 자물쇠는 권한(grant execute to service_role)으로만 겁니다.
+     security definer 안에서 current_user 는 **함수 주인**(postgres)이라
+     'service_role' 과 절대 같아지지 않습니다 — 서버가 못 부르는 자물쇠였습니다.
+     collect_put·hide_stale_posts 와 같은 방식입니다 (2026-10-08 올리면서 고쳤습니다) */
 
   with 모음 as (
     select j.기관번호,
@@ -317,4 +320,5 @@ begin
 end $$;
 
 revoke all on function "기관표채우기"() from public;
-grant execute on function "기관표채우기"() to service_role, authenticated;
+revoke execute on function "기관표채우기"() from authenticated;
+grant execute on function "기관표채우기"() to service_role;
