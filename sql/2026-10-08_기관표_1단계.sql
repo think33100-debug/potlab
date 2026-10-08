@@ -263,7 +263,13 @@ begin
       case when b.공공출처 is not null then '출처:' || b.공공출처
            when b.공공병원표 then '공공병원표'
            when b.설립구분 in ('01','03','05','13') then '설립구분:' || b.설립구분 end as 공공근거,
-      (coalesce(b.설립구분 = '04', false) and coalesce(b.종별 in ('01','11'), false)) as 대학병원인가,
+      /* 대학병원인가 (2026-10-08 세중님 확정)
+           (설립구분 04 학교법인 AND 종별 01 상급종합·11 종합병원)
+           OR 이름에 「대학병원」 또는 「대학교병원」이 **그대로** 들어감
+         넓은 패턴은 금지입니다 — 「대학」 하나로 잡으면 「대학로정형외과」 가 걸립니다.
+         이름은 심평원 공식 이름(yadm_nm)이 있으면 그것입니다 (작업지침 10-3) */
+      (     (coalesce(b.설립구분 = '04', false) and coalesce(b.종별 in ('01','11'), false))
+         or coalesce(b.이름 ~ '대학교?병원', false) ) as 대학병원인가,
       coalesce(b.종별 = '01', false) as 상급종합인가
       from 붙임 b
   ), 넣을것 as (
