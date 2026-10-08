@@ -1,6 +1,9 @@
 /* ══════════════════════════════════════════════════════════════════
    기관표 1단계 — 표를 만들고 채우기까지만
-   (2026-10-08 · 세중님 승인 전 · 아직 올리지 않았습니다)
+   (2026-10-08 올렸습니다 — 마이그레이션 셋)
+     2026_10_08_기관표_1단계             표 둘 · 함수 셋
+     2026_10_08_기관표_권한_고침          함수 안 역할 검사를 걷고 권한을 service_role 로
+     2026_10_08_기관표_공식이름좁히기_미정 ①.5 좁히기 · 대기는 기관번호 비움 · 공공인가 미정
 
    판정 함수(공공기관인가·마감표시)와 화면은 **2단계**입니다.
    이 파일은 표 둘과 함수 셋만 만듭니다. job_list·job_one·admin_jobs·
@@ -125,7 +128,7 @@ begin
         붙던 기관을 잃습니다. 조건 없이 썼다가 재 보고 찾았습니다)
        kind='모기관'(13줄) 은 **쓰지 않습니다.** 산하 병원을 모기관으로 접는 짝이라
        (근로복지공단 정선병원 → 근로복지공단) 기관 연결에 쓰면 근무처를 잃습니다 */
-    select j.id, j.org_name, j.source, btrim(coalesce(j.sgg, '')) as sgg,
+    select j.id, j.org_name as 원래이름, j.source, btrim(coalesce(j.sgg, '')) as sgg,
            제목지역(j.sido, j.work_place) as 시도,
            주소도메인(j.url) as 도메인,
            hira_name_key(coalesce(a.hira_name, j.org_name)) as 이름키
@@ -146,6 +149,10 @@ begin
       from org_alias where kind = '호스트' and 주소도메인(our_name) is not null
   ), 짝 as (
     select c.id, c.이름키, o.ykiho,
+      /* ①.5 — 심평원 공식 이름과 글자까지 같은가 (2026-10-08 세중님 승인).
+         hira_name_key 는 「의료법인·재단」 말을 떼고 비교하므로 부민·효성·중앙처럼
+         서로 다른 병원이 한 열쇠로 겹칩니다. 글자까지 같은 것은 한 곳뿐일 때가 있습니다 */
+      (o.yadm_nm = c.원래이름)                                            as 글자맞나,
       (주소도메인(o.hosp_url) is not null and c.도메인 is not null
         and (주소도메인(o.hosp_url) = c.도메인
              or c.도메인 like '%.' || 주소도메인(o.hosp_url)))            as 주소맞나,
@@ -156,6 +163,7 @@ begin
     from 공고 c join hira_org o on o.name_key = c.이름키
   ), 셈 as (
     select id, count(*) as 이름,
+           count(*) filter (where 글자맞나)   as 글자,
            count(*) filter (where 주소맞나)   as 주소,
            count(*) filter (where 사이트맞나) as 사이트,
            count(*) filter (where 시군구맞나) as 시군구,
@@ -163,17 +171,23 @@ begin
       from 짝 group by id
   ), 고름 as (
     select z.id, z.ykiho,
-      case when s.이름 = 1                                          then '이름'
-           when s.주소 = 1 and z.주소맞나                            then '심평원주소'
-           when s.주소 <> 1 and s.사이트 = 1 and z.사이트맞나         then '사이트표'
-           when s.주소 <> 1 and s.사이트 <> 1
-                and s.시군구 = 1 and z.시군구맞나                    then '시군구'
-           when s.주소 <> 1 and s.사이트 <> 1 and s.시군구 <> 1
-                and s.시도 = 1 and z.시도맞나                        then '시도' end as 근거
+      case when s.이름 = 1                                  then '이름'
+           when s.글자 = 1 and z.글자맞나                    then '공식이름'
+           when s.글자 <> 1 and s.주소 = 1 and z.주소맞나     then '심평원주소'
+           when s.글자 <> 1 and s.주소 <> 1
+                and s.사이트 = 1 and z.사이트맞나             then '사이트표'
+           when s.글자 <> 1 and s.주소 <> 1 and s.사이트 <> 1
+                and s.시군구 = 1 and z.시군구맞나             then '시군구'
+           when s.글자 <> 1 and s.주소 <> 1 and s.사이트 <> 1
+                and s.시군구 <> 1 and s.시도 = 1 and z.시도맞나 then '시도' end as 근거
     from 짝 z join 셈 s using (id)
   ), 정할것 as (
     select c.id, g.ykiho, g.근거,
+      /* 대기(이름이 여럿인데 못 좁힘)는 기관번호를 **비웁니다.**
+         전에는 'NAME:<이름키>' 를 붙여 기관표에 「못 좁힌 이름」 줄이 넷 생겼고
+         그 줄의 공공인가가 false 로 적혔습니다 (2026-10-08 세중님이 짚으셨습니다) */
       case when g.근거 is not null then 'HIRA:' || g.ykiho
+           when exists (select 1 from hira_org o where o.name_key = c.이름키) then null
            else 'NAME:' || c.이름키 end as 기관번호,
       case when g.근거 is not null then '자동'
            when exists (select 1 from hira_org o where o.name_key = c.이름키) then '대기'
@@ -261,8 +275,15 @@ begin
       left join hira_detail d on d.ykiho = m.ykiho
   ), 판정 as (
     select b.*,
-      (b.공공출처 is not null or b.공공병원표
-        or coalesce(b.설립구분 in ('01','03','05','13'), false)) as 공공인가,
+      /* 공공인가는 셋입니다 (2026-10-08 · 작업지침 10-3).
+           true   출처(공공만 모으는 곳) · 공공병원표 · 설립구분 01 국립/03 공립/05 특수법인/13 군병원
+           false  **설립구분이 있고** 그 넷이 아님 — 공식 값이 「민간」이라 말해 준 것
+           null   설립구분이 없음 — 미정. 관리자 확인
+         전에는 근거가 없으면 false 로 적었습니다. 기관 425곳이 짐작으로 「민간」이었습니다 */
+      case when b.공공출처 is not null or b.공공병원표
+                or coalesce(b.설립구분 in ('01','03','05','13'), false) then true
+           when b.설립구분 is not null                                  then false
+           else null end as 공공인가,
       case when b.공공출처 is not null then '출처:' || b.공공출처
            when b.공공병원표 then '공공병원표'
            when b.설립구분 in ('01','03','05','13') then '설립구분:' || b.설립구분 end as 공공근거,
@@ -277,6 +298,8 @@ begin
       from 붙임 b
   ), 넣을것 as (
     select p.*,
+      /* 공공인가가 null 이면 수시금지도 null(미정)로 번집니다 — 그게 맞습니다.
+         2단계에서 화면에 쓸 때 coalesce(…, false) 로 안전한 쪽에 붙입니다 */
       (p.공공인가 or p.대학병원인가 or p.상급종합인가) as 수시금지,
       /* 근거가 없으면 탭을 null 로 둡니다 — 화면은 공고의 지금 탭을 그대로 씁니다.
          1층 커버리지에 구멍을 내지 않기 위해서입니다 (2026-10-08 세중님 지시) */
