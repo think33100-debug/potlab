@@ -18,7 +18,7 @@ import { ShareButtons } from '@/components/share-buttons';
 import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
-import { isClosed, todayKst } from '@/lib/job-state';
+import { isClosed, todayKst, 시각말 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { MembersOnly } from '@/components/members-only';
@@ -55,6 +55,13 @@ const 원문제목 = async (sb: SupabaseClient, id: string) => {
 /* ★ 2026-10-07 — 마감일이 없을 때 쓸 말을 **화면이 정하지 않습니다.**
    DB 의 마감표시() 가 정해서 job_one 이 「마감표시」 칸으로 내려 줍니다
    (세중님 지시). 목록(app/jobs/page.tsx)의 dday 도 같은 칸을 읽습니다 */
+/* 「2026-10-16」 → 「금」. 한국 날짜 글자를 그대로 읽습니다 (시간대를 안 탑니다) */
+function 요일(ymd: string | null | undefined): string | null {
+  if (!ymd || !/^\d{4}-\d{2}-\d{2}/.test(ymd)) return null;
+  const [y, m, d] = ymd.slice(0, 10).split('-').map(Number);
+  return ['일', '월', '화', '수', '목', '금', '토'][new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+}
+
 function dday(to: string | null, 표시?: string | null): { text: string; urgent: boolean } | null {
   if (!to) return { text: 표시 || '마감일 공고문 확인', urgent: false };
   const left = Math.ceil(
@@ -76,7 +83,7 @@ export async function generateMetadata({
   const j = await one(supabase, id);
   if (!j) return { title: '없는 공고입니다 · POTJOB' };
 
-  const closed = isClosed(j.apply_to);
+  const closed = isClosed(j.apply_to, todayKst(), j.apply_to_time);
   /* 받는 사람이 「언제부터 언제까지」를 미리보기에서 바로 알아야 합니다.
      시작일이 자료에 없으면 예전처럼 마감일만 적습니다 */
   const when = !j.apply_to ? (j.apply_from ? `${j.apply_from} 접수 시작` : '마감일 미정')
@@ -116,7 +123,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const 기관원문 = await 원문제목(sb, id);
 
   /* 마감돼도 막지 않습니다. 이미 주소를 아는 사람이라 빈 화면을 주면 링크가 죽습니다 */
-  const closed = isClosed(j.apply_to);
+  const closed = isClosed(j.apply_to, todayKst(), j.apply_to_time);
   const detail = j.detail ?? {};
 
   /* 병원 자료가 없으면 null 입니다 — 그 구역을 통째로 감춥니다.
@@ -238,8 +245,14 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
             <dl className="mt-6 grid grid-cols-2 gap-3">
               <Core icon={icons['job.headcount']} label="모집 인원"
                     v={j.headcount ? `${j.headcount}명` : '공고 참조'} />
+              {/* ★ 2026-10-08 — 마감 **시각**이 있으면 함께 보여줍니다.
+                  「2026-10-16 (금) 오전 9시 마감」. 전에는 날짜만 보여줘서
+                  09:00 마감 공고가 그날 저녁까지 열린 것처럼 보였습니다 */}
               <Core icon={icons['job.deadline']} label="접수 마감"
-                    v={j.apply_to ?? (j.마감표시 || '마감일 공고문 확인')}
+                    v={j.apply_to
+                        ? j.apply_to + (요일(j.apply_to) ? ` (${요일(j.apply_to)})` : '')
+                          + (시각말(j.apply_to_time) ? ` ${시각말(j.apply_to_time)} 마감` : '')
+                        : (j.마감표시 || '마감일 공고문 확인')}
                     sub={j.apply_from ? `${j.apply_from} 시작` : null} />
               <Core icon={icons['job.edu']} label="학력" v={j.edu ?? '제한 없음'} />
               {/* 근무지도 지역보임 을 먼저 읽습니다. 자세한 주소(work_place)는
@@ -250,6 +263,22 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                          && j.work_place !== j.지역보임 ? j.work_place : null} />
             </dl>
           </Rise>
+
+          {/* ★ 2026-10-08 — 오늘이 마감일이고 **시각**이 정해져 있으면 한 줄 더.
+              「오늘 오전 9시에 마감됩니다」. 아침에 보고 저녁에 넣으려다 놓치는 일을
+              막습니다. 이미 지난 뒤에는 말이 바뀝니다 */}
+          {j.apply_to === todayKst() && 시각말(j.apply_to_time) && (
+            <Rise>
+              <p className={'mt-3 break-keep rounded-[12px] border p-5 text-[14px] leading-[1.7] '
+                + (closed
+                    ? 'border-[#E3E3DE] bg-[#F7F7F4] text-[#5F666C]'
+                    : 'border-brand-red/30 bg-brand-red/5 font-bold text-brand-red')}>
+                {closed
+                  ? `오늘 ${시각말(j.apply_to_time)}에 마감됐습니다.`
+                  : `오늘 ${시각말(j.apply_to_time)}에 마감됩니다.`}
+              </p>
+            </Rise>
+          )}
 
           {/* ③-2 수시채용 안내 (2026-10-07 확정 방침).
               문구는 세중님이 정한 그대로입니다 — 글자를 바꾸지 마십시오.

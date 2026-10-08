@@ -4,6 +4,7 @@ import { Icon } from '@/components/icon';
 import { JobTabs } from '@/components/job-tabs';
 import { ListFilters } from '@/components/list-filters';
 import { MembersOnly } from '@/components/members-only';
+import { isClosed, todayKst, 시각말 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { SIDOS } from '@/lib/org';
 import { supabase, TABS, tabLabel, type JobListItem, type 맛보기공고 } from '@/lib/supabase';
@@ -50,14 +51,21 @@ function d(v: string | null) {
    못 읽은 것이었습니다.
 
    표시 가 비어 있으면 마감일이 있다는 뜻이고 날수를 셉니다. */
-function dday(to: string | null, 표시?: string | null) {
+/* ★ 2026-10-08 — 마감 **시각**까지 봅니다.
+   카드 아래 줄 모양은 그대로이고(「~10.16」), 시각이 지나면 **그날이라도 회색**입니다.
+   판정은 isClosed() 한 곳에서만 합니다 — DB 의 마감지났나() 와 같은 기준입니다 */
+function dday(to: string | null, 표시?: string | null, 시각?: string | null) {
   if (!to) {
     const t = 표시 || '마감일 공고문 확인';
     return { text: t, urgent: false, over: false };
   }
+  if (isClosed(to, todayKst(), 시각)) return { text: '마감', urgent: false, over: true };
   const left = Math.ceil((new Date(to + 'T23:59:59+09:00').getTime() - Date.now()) / 86400000);
-  if (left < 0) return { text: '마감', urgent: false, over: true };
-  if (left === 0) return { text: '오늘 마감', urgent: true, over: false };
+  if (left === 0) {
+    /* 오늘 마감 — 시각이 있으면 함께 적습니다 (「오늘 17:30 마감」) */
+    const t = 시각말(시각);
+    return { text: t ? `오늘 ${t} 마감` : '오늘 마감', urgent: true, over: false };
+  }
   return { text: 'D-' + left, urgent: left <= 3, over: false };
 }
 
@@ -333,7 +341,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       {!locked && (
         <ul className="divide-y divide-gray-100 dark:divide-gray-800">
           {rows.map((r) => {
-            const dd = dday(r.apply_to, r.마감표시);
+            const dd = dday(r.apply_to, r.마감표시, r.apply_to_time);
             return (
               <li key={r.id}>
                 <Link

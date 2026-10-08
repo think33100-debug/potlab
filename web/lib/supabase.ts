@@ -73,6 +73,9 @@ export type JobPost = {
      '마감일 공고문 확인' 이면 **우리가 아직 못 읽은 것**입니다.
      ★ 화면에서 `if (!apply_to) '수시채용'` 처럼 스스로 정하지 마십시오 */
   마감표시?: string | null;
+  /* 접수 마감 시각 (2026-10-08). null 이면 그날 종일입니다.
+     마감 판정은 isClosed(apply_to, today, apply_to_time) 한 곳에서만 합니다 */
+  apply_to_time?: string | null;
 };
 
 export type JobListItem = Pick<
@@ -87,6 +90,7 @@ export type JobListItem = Pick<
   올림?: boolean | null;
   /* DB 의 마감표시() 값. JobPost 의 같은 칸과 뜻이 같습니다 */
   마감표시?: string | null;
+  apply_to_time?: string | null;
 };
 
 /* 로그인 안 한 분에게 보여주는 맛보기 (2026-10-01).

@@ -91,12 +91,12 @@ export async function GET(
     const { data } = await supabase.rpc('job_one', { p_id: id }).maybeSingle();
     const j = data as {
       org_name: string; job_group: string | null;
-      apply_from: string | null; apply_to: string | null;
+      apply_from: string | null; apply_to: string | null; apply_to_time?: string | null;
     } | null;
     if (j) {
       org = j.org_name || 'POTJOB';
       skin = (j.job_group && SKIN[j.job_group]) || FALLBACK;
-      closed = isClosed(j.apply_to);
+      closed = isClosed(j.apply_to, undefined, j.apply_to_time);
       /* 시작일이 있으면 「언제부터」까지 그립니다 */
       const when = !j.apply_to ? (j.apply_from ? `${j.apply_from} 접수 시작` : '마감일 미정')
         : closed ? `${j.apply_to} 마감`
