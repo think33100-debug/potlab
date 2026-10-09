@@ -52,7 +52,7 @@ for (const src of 것) {
   /* 값은 **여기서** 만듭니다. 화면에 안 찍습니다 */
   const 새것 = crypto.randomBytes(32).toString('base64url');
 
-  const r = await fetch(U + '/rest/v1/collect_secret', {
+  const r = await fetch(U + '/rest/v1/collect_secret_all', {
     method: 'POST', headers: { ...머리, Prefer: 'return=minimal' },
     body: JSON.stringify({ source: src, secret: 새것, note: 메모,
       made_on: new Date().toISOString().slice(0, 10) }),
@@ -68,7 +68,7 @@ for (const src of 것) {
     ? 글.replace(new RegExp('^' + 이름 + '=.*$', 'm'), 줄)
     : (글 + (글 && !글.endsWith('\n') ? '\n' : '') + 줄 + '\n');
 
-  const 몇 = await (await fetch(U + '/rest/v1/collect_secret?select=source&source=eq.' + src,
+  const 몇 = await (await fetch(U + '/rest/v1/collect_secret_all?select=source,끈때&source=eq.' + src,
     { headers: 머리 })).json();
   console.log(src + ' — 만들었습니다 · ' + 새것.length + '자 · 이 수집기의 열쇠 '
     + (Array.isArray(몇) ? 몇.length : '?') + '개 (옛것 + 새것)');
