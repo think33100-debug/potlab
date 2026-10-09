@@ -38,6 +38,8 @@ const MENU = [
   { href: '/admin/staff', label: '직원과 권한' },
   /* 마스터가 페르소나로 쓴 글 모아보기 (2026-10-09) */
   { href: '/admin/ops', label: '운영진 글' },
+  /* 채용·교육 담당자 승인 (2026-10-09 · 권한 「기관승인」) */
+  { href: '/admin/partners', label: '담당자 승인' },
   { href: '/admin/reports', label: '신고' },
   { href: '/admin/access', label: '개인정보 접속기록' },
   { href: '/admin/reset', label: '내 계정 초기화' },
