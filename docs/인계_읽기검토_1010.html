@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인계_읽기검토_1010 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="인계/00_읽는법.html">읽는 법</a><a href="screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="인계-문서-읽기-검토-2026-10-10">인계 문서 읽기 검토 — 2026-10-10</h1>
+<p>처음 받은 UX/UI 개발자의 눈으로 읽었습니다. 읽은 순서: 00 → 01 → 03 → 갤러리 → 04 → 02 → 05.</p>
+<h2 id="요약">요약</h2>
+<p>걸린 것 <b>48개</b> — 헷갈린 곳 9 · 설명 없는 낱말 12 · 안 맞는 숫자 12 · 갤러리 15 · 모호한 결정 14.</p>
+<p>그중 급한 것은 <b>다섯</b>입니다 — C1(캡처 222 vs 230) · C2(기관 58,610 vs 62,749) ·</p>
+<p>A2(카톡 썸네일이 「문제」와 「고쳐짐」으로 같은 문서에 둘 다) · A3(<code>/pay</code> 가 네 이름) · D12(갤러리에서 04 로 건너갈 수 없음).</p>
+<p>숫자 다섯 쌍이 어긋나 있어서, <b>문서를 믿고 일을 시작할 수 있는지부터 흔들립니다.</b></p>
+<h2 id="a-헷갈린-곳">A. 헷갈린 곳</h2>
+<table><thead><tr><th>#</th><th>어디 (파일:줄)</th><th>무엇이 헷갈렸나</th><th>제안 한 줄</th></tr></thead><tbody>
+<tr><td>A1</td><td><code>03_IA.md:16</code> · <code>04_화면스펙.md:73</code></td><td>「경쟁률 (회원만 · 2026-10-09 부터 <b>목록도</b>)」 — 「목록도 회원만」인지 「목록도 공개」인지 정반대로 읽힙니다. 05:160 을 봐야 전자인 것이 잡힙니다</td><td>두 곳 다 「2026-10-09 부터 <b>목록까지</b> 회원만」으로 고칩니다</td></tr>
+<tr><td>A2</td><td><code>04_화면스펙.md:63</code> ↔ <code>04_화면스펙.md:404-407</code></td><td>63줄은 「알려진 문제 — 카톡 썸네일이 온통 빨강입니다」(현재형), 404줄은 「2026-10-09 커밋 <code>8017682</code> 에서 고쳐졌고 회색인 것을 확인」. 같은 문서가 둘 다 말합니다</td><td>63줄을 지우고 「직군 둘(공통)일 때 빨강 — 색 결정 대기」 한 줄로 바꿉니다</td></tr>
+<tr><td>A3</td><td><code>01_기획.md:81</code> · <code>03_IA.md:37</code> · <code>04_화면스펙.md:325</code> · <code>04:333</code></td><td><code>/pay</code> 가 「급여·스펙」 → 「초임(기관 전체 평균)」 → 「유료 안내」 → 「월급 확인(옛 앱의 조회)」 네 이름입니다. 갤러리 캡처는 <code>비로그인_유료안내</code>. <code>/tools/pay</code>(세전↔세후)와도 헷갈립니다</td><td>네 곳과 캡처 이름을 한 이름으로 통일하고, 04:325 제목 옆에 「<code>/tools/pay</code> 와 다른 화면」을 적습니다</td></tr>
+<tr><td>A4</td><td><code>05_부록.md:9</code> ↔ <code>05_부록.md:10-12</code></td><td>9줄은 「62 + 14 = <b>76줄</b>」인데 아래 칸은 ○51 + △6 + ✗14 = <b>71</b>. 10-09 칸도 47+10+14=71. 5줄이 어느 표시인지 없습니다</td><td>10-12 줄에 네 번째 표시 줄(「표시 없음 5」)을 넣거나 합계를 71 로 고칩니다</td></tr>
+<tr><td>A5</td><td><code>05_부록.md:98</code> ↔ <code>05_부록.md:114</code></td><td>98줄은 「⑧ <code>notices</code> 저장소 규칙 — 2026-10-10 에 올렸습니다 ✅ 끝」, 114줄은 「오픈 전 할 일 · <code>notices</code> 규칙 올리기 · 승인대기 ⑧」</td><td>114줄을 지웁니다</td></tr>
+<tr><td>A6</td><td><code>02_기술스펙.md:68</code> ↔ <code>04_화면스펙.md:64</code></td><td><code>job_posts</code> 2,302줄인데 「보이는 공고 <b>377건</b>」. 1,925건이 어디로 갔는지(마감·감춤·보류·시험자료) 어디에도 없습니다</td><td>02:68 옆 칸에 「2,302(전체) / 377(회원에게 보이는 것)」과 그 차이의 까닭 한 줄을 적습니다</td></tr>
+<tr><td>A7</td><td><code>05_부록.md:18-19</code> ↔ <code>05_부록.md:131,133,348</code></td><td>「개발자 몫 9」에 「화면 제목」·「카드 두 모양」이 들어 있는데, 131·133·348 줄은 둘 다 「세중님이 정해 주셔야 할 수 있습니다」</td><td>18줄에서 둘을 빼 「세중님 결정」 쪽으로 옮기고 수를 7/7 로 고칩니다</td></tr>
+<tr><td>A8</td><td><code>05_부록.md:21-22</code> ↔ <code>05_부록.md:45-48</code></td><td>「△ 10 → 6 으로 줄은 까닭 — 넷이 ○」인데 그 넷 중 「커뮤니티 사진」은 48줄에서 △가 아니라 <b>[미확인] → ○</b> 입니다. 넷을 더하면 셈이 안 맞습니다</td><td>21줄을 「△ 셋 + [미확인] 하나가 ○ 가 됐습니다」로 고칩니다</td></tr>
+<tr><td>A9</td><td><code>03_IA.md:36-37</code></td><td>「도구」 가지 안에 <code>/tools/… · /pay</code> 줄 바로 아래 <code>/pay 초임</code> 이 또 있어, <code>/pay</code> 가 <code>/tools/pay</code> 의 줄임처럼 보입니다</td><td>37줄의 <code>/pay</code> 를 「도구」 밖 「그 밖」 가지로 옮깁니다</td></tr>
+</tbody></table>
+<h2 id="b-설명-없이-나온-용어">B. 설명 없이 나온 용어</h2>
+<table><thead><tr><th>#</th><th>낱말</th><th>처음 나온 곳 (파일:줄)</th><th>제안 한 줄</th></tr></thead><tbody>
+<tr><td>B1</td><td><b>창구</b></td><td><code>00_읽는법.md:26</code> (뜻풀이는 00:82 「창구(DB 함수)」 — 세 번째 쓰임)</td><td>00:26 첫 쓰임에 「창구(= DB 함수. 화면이 표를 직접 안 읽습니다)」로 괄호를 붙입니다</td></tr>
+<tr><td>B2</td><td><b>페르소나</b></td><td><code>00_읽는법.md:23</code> (정의는 01:55-59 「마스터 페르소나」)</td><td>00:23 에 「페르소나(= 마스터 한 계정으로 바꿔 입는 역할)」를 붙입니다</td></tr>
+<tr><td>B3</td><td><b>묶음</b></td><td><code>00_읽는법.md:166</code> — 네 가지 뜻으로 쓰입니다: 캡처 묶음(00:166) · 경쟁률 묶음(01:76) · 관리자 메뉴 묶음(04:229) · 디자인 묶음(05:142)</td><td>캡처 쪽은 「캡처 묶음」, 경쟁률 쪽은 「경쟁률 묶음」으로 낱말을 갈라 씁니다</td></tr>
+<tr><td>B4</td><td><b>다리</b></td><td><code>00_읽는법.md:47</code> (설명은 02:15,23)</td><td>00:47 에 「다리(= 옛 앱 → Supabase 로 30분마다 옮기는 GitHub Actions)」를 붙입니다</td></tr>
+<tr><td>B5</td><td><b>일곱 칸</b></td><td><code>00_읽는법.md:114</code> (정의는 03_IA:122). 게다가 「회원용 길 <b>일곱</b>」(02:69) · 「갈래 <b>일곱</b>」(01:84) · 캡처 <code>알림_<b>일곱줄</b></code> 이 모두 다른 일곱입니다</td><td>00:114 에 「(= 공고 상세에 그리는 칸 일곱)」을 붙이고, 02:69·01:84 쪽은 「길 일곱」·「알림 갈래」처럼 낱말을 붙여 구별합니다</td></tr>
+<tr><td>B6</td><td><b>보류함</b></td><td><code>01_기획.md:145</code> — 02:218·04:238 에 또 나오는데 <b>어느 화면인지 끝까지 안 나옵니다</b>. <code>/admin/jobs</code> 인지 <code>/admin/hand</code> 인지 모릅니다</td><td>01:145 에 「보류함(= <code>/admin/○○○</code> 화면)」으로 주소를 적습니다</td></tr>
+<tr><td>B7</td><td><b>A 규칙</b></td><td><code>03_IA.md:87</code> — 「(A 규칙 — 「그 밖은 둘 다 없음」)」 단 한 번. A 규칙이 무엇인지 어느 문서에도 없습니다</td><td>03_IA:87 의 「A 규칙」을 지우고 규칙 본문 한 줄로 바꿉니다</td></tr>
+<tr><td>B8</td><td><b>진단띠</b></td><td>갤러리 캡처 <code>진단띠__pc.png</code> (<code>/?진단=1</code>) — <b>인계 문서 다섯 벌에 한 줄도 없습니다</b></td><td>04:1절 캡처 칸에 <code>진단띠</code> 를 넣고 「<code>?진단=1</code> 로 켜는 개발용 띠」 한 줄을 적습니다</td></tr>
+<tr><td>B9</td><td><b>감춤 / 보류</b></td><td><code>03_IA.md:148</code> — 「가리는 규칙이 여기 한 곳 (감춤 · 보류 · 시험자료)」. 「감춤」과 「보류」가 어떻게 다른지 없습니다</td><td>03_IA:148 아래에 세 낱말의 차이를 한 줄씩 적습니다</td></tr>
+<tr><td>B10</td><td><b>(공식 확인) 도장</b></td><td><code>04_화면스펙.md:132</code> (05:34 에도)</td><td>04:132 에 「도장(= 담당자가 모아 온 공고를 「우리 공고 맞다」고 표시하는 것)」을 붙입니다</td></tr>
+<tr><td>B11</td><td><b><code>JobVeil</code> · <code>Clip</code></b></td><td><code>01_기획.md:42</code> — 컴포넌트 이름만 나오고 무엇을 어떻게 가리는지 없습니다</td><td>01:42 를 「가입중에게는 본문을 흐리게 덮어 보여 줍니다(<code>JobVeil</code>·<code>Clip</code>)」로 풀어 씁니다</td></tr>
+<tr><td>B12</td><td><b>꼬리표</b> · <b>되메우기</b> · <b>조회 한도</b></td><td><code>04:47</code> · <code>02:193</code> · <code>02:232</code></td><td>세 낱말 다 처음 나온 자리에 괄호 뜻풀이를 붙입니다</td></tr>
+</tbody></table>
+<h2 id="c-앞뒤가-안-맞는-숫자">C. 앞뒤가 안 맞는 숫자</h2>
+<table><thead><tr><th>#</th><th>무엇</th><th>한쪽 (파일:줄 — 값)</th><th>다른 쪽 (파일:줄 — 값)</th><th>제안 한 줄</th></tr></thead><tbody>
+<tr><td>C1</td><td><b>캡처 장수</b></td><td><code>00_읽는법.md:4</code> · <code>00:111</code> · <code>05_부록.md:51</code> — <b>222장</b></td><td><code>docs/screens/index.html:62</code> 헤더 — <b>230장</b> (실제 <code>&lt;figure&gt;</code> 230개)</td><td>세 곳을 230 으로 고치고, 00:4 기준 줄에 「캡처 수 = 갤러리 <code>&lt;figure&gt;</code> 수」를 괄호로 덧붙입니다</td></tr>
+<tr><td>C2</td><td><b>기관 수</b></td><td><code>01_기획.md:77</code> · <code>02_기술스펙.md:70</code> · <code>02:121</code> · <code>03_IA.md:19</code> — <b>58,610곳</b></td><td><code>04_화면스펙.md:270</code> — <b>62,749곳</b></td><td>어느 쪽이 지금 값인지 정해 네 곳 + 한 곳을 같게 고치고, 다른 수이면 「기관표 58,610 / 심평원 원자료 62,749」처럼 무엇을 센 수인지 적습니다</td></tr>
+<tr><td>C3</td><td><b>알림 갈래 수</b></td><td><code>01_기획.md:84</code> — 「갈래 <b>일곱</b>」 · 캡처 이름 <code>알림_<b>일곱줄</b></code></td><td><code>04_화면스펙.md:205</code> — <b>열 개</b> 나열 (마감임박·새공고·대화신청·대화수락·교육신청·교육확정·교육미선정·입금기한·자격결과·재직결과)</td><td>01:84 를 「갈래 열」로 고치고 캡처 이름을 <code>알림_목록</code> 으로 바꿉니다</td></tr>
+<tr><td>C4</td><td><b>점검표 합계</b></td><td><code>05_부록.md:9</code> — 「62 + 14 = <b>76줄</b>」</td><td><code>05_부록.md:10-12</code> — ○51 + △6 + ✗14 = <b>71</b></td><td>A4 와 같은 줄입니다 — 표시 없는 5줄을 밝히거나 합계를 71 로 고칩니다</td></tr>
+<tr><td>C5</td><td><b>관리자 화면 수</b></td><td><code>01_기획.md:49</code> · <code>03_IA.md:56</code> · <code>03:105</code> · <code>04:224</code> · <code>04:227</code> · <code>05:68</code> — <b>23곳</b></td><td><code>web/app/admin/<b>/page.tsx</code> 와 갤러리 섹션 — </b>24** (<code>/admin</code> 자신 포함)</td><td>「23곳(+ <code>/admin</code> 대시보드 = 24)」로 한 번만 밝히고 나머지는 그대로 둡니다</td></tr>
+<tr><td>C6</td><td><b>「화면 62」의 구성</b></td><td><code>00_읽는법.md:126</code> — 「화면 62곳 = <code>web/app/**/page.tsx</code> 를 센 수」 (여기엔 <code>/master</code>·<code>/auth/callback</code> 이 들어 있습니다)</td><td>갤러리 — 섹션 <b>62개</b>인데 <code>/master</code>·<code>/auth/callback</code> 을 빼고 <code>/api/og/job/[id]</code>·<code>/nope-zzz</code> 를 넣은 <b>다른 62</b>. 03_IA 의 지도에는 뒤의 둘이 없습니다</td><td>갤러리 헤더에 「화면 60 + 그려서 내려주는 길 1 + 404 1」로 적고, 03_IA 지도 끝에 그 둘을 한 줄로 붙입니다</td></tr>
+<tr><td>C7</td><td><b>캡처 있는 화면 수</b></td><td><code>05_부록.md:51</code> — 「62곳 중 <b>60곳</b>에 캡처가 있습니다」</td><td>갤러리 — 62 섹션 <b>전부</b> 2장 이상 (0장 섹션 없음)</td><td>05:51 을 「<code>page.tsx</code> 62 중 60 · 갤러리 섹션 62 전부」로 풀어 적습니다</td></tr>
+<tr><td>C8</td><td><b>숨긴 화면 수</b></td><td><code>05_부록.md:110</code> — 「숨긴 화면 <b>여덟</b>을 하나씩 열기」 · 05:59-68 표 8줄</td><td><code>03_IA.md</code> ★ — <code>/edu/manage</code>·<code>/alarm</code>·<code>/talk</code>·<code>/talk/[room]</code>·<code>/verify</code>·<code>/partner</code>·<code>/biz</code> <b>일곱</b> (<code>/master</code> 는 ★ 가 아니라 「길이 없는 곳」)</td><td>05:59 표와 03_IA ★ 목록을 같게 맞추고, <code>/master</code>·<code>/admin/*</code> 을 셈에 넣는지 밝힙니다</td></tr>
+<tr><td>C9</td><td><b>공고 수</b></td><td><code>02_기술스펙.md:68</code> — <code>job_posts</code> <b>2,302</b></td><td><code>04:64</code> · <code>05:118</code> · <code>05:226</code> · <code>05:233</code> — 「보이는 공고 <b>377건</b>」</td><td>A6 과 같은 줄 — 02:68 에 둘을 나란히 적습니다</td></tr>
+<tr><td>C10</td><td><b>세중님 결정 수</b></td><td><code>00_읽는법.md:28</code> · <code>05:19</code> · <code>05:155</code> — <b>다섯</b></td><td><code>05:348-349</code> — 「둘(제목 문구 · 카드 디자인)은 <b>정해 주셔야</b> 할 수 있습니다」 (그 둘은 05:18 「개발자 몫 9」 안에 있습니다)</td><td>다섯을 일곱으로 고치고 05:18 의 9 를 7 로 내립니다</td></tr>
+<tr><td>C11</td><td><b><code>.png</code> 파일 수</b></td><td>갤러리 헤더 — <b>230장</b></td><td><code>docs/screens/</code> 폴더 — <code>.png</code> <b>259장</b> + 하위 폴더 셋(<code>_토막</code> 8 · <code>_확인</code> 10 · <code>_가릴자리미리보기</code> 21) <b>39장</b></td><td>00:204 「캡처 갤러리」 줄에 「갤러리에 안 쓰는 옛 캡처 29장과 하위 폴더 셋은 참고용」 한 줄을 붙입니다</td></tr>
+<tr><td>C12</td><td><b><code>[미확인]</code> 수</b></td><td><code>00_읽는법.md:4</code> — <b>3곳</b> · <code>05:198</code> — 「셋」</td><td><code>05:48</code> 표 안에 취소선 없는 「[미확인]」 글자가 한 번 더 있어 눈으로 세면 4 입니다</td><td>05:48 의 「[미확인]」을 「(그때 [미확인])」처럼 지난 일로 바꿉니다</td></tr>
+</tbody></table>
+<h2 id="d-갤러리에서-찾기-어려운-화면">D. 갤러리에서 찾기 어려운 화면</h2>
+<table><thead><tr><th>#</th><th>어느 화면</th><th>왜 못 찾았나</th><th>제안 한 줄</th></tr></thead><tbody>
+<tr><td>D1</td><td>관리자 23곳 전부</td><td>이름이 영어 주소 그대로입니다 — <code>관리자_hand</code>·<code>관리자_beat</code>·<code>관리자_rival</code>·<code>관리자_boost</code>·<code>관리자_icons</code>·<code>관리자_ops</code>·<code>관리자_reset</code>·<code>관리자_texts</code>·<code>관리자_access</code>·<code>관리자_blanks</code>. 「hand = 손으로 확인할 곳」·「beat = 수집기 상태」는 <code>04:233-234</code> 를 역추적해야 알았습니다</td><td>갤러리 <code>&lt;h2&gt;</code> 에 주소 옆에 한글 이름을 같이 찍습니다 (<code>/admin/hand</code> — 손으로 확인할 곳)</td></tr>
+<tr><td>D2</td><td>홈</td><td><code>관리자_홈</code> 은 <code>/admin</code> 이고 <code>비로그인_홈</code>·<code>학생_홈</code>·<code>가입중_홈</code>·<code>비회원보기_홈</code> 은 <code>/</code> 입니다. 「홈」이 두 곳입니다</td><td><code>관리자_홈</code> 을 <code>관리자_관리자홈</code> 으로 바꿉니다</td></tr>
+<tr><td>D3</td><td>물리치료사가 보는 화면</td><td>페르소나 칩 아홉에 <b>물리치료사가 없습니다</b>(캡처 0장). <code>01:45</code>·<code>04:249</code>·<code>00:69</code> 는 역할 아홉에 물리치료사를 넣고, 갤러리는 그 자리에 「(로그인 안 함)」을 넣었습니다</td><td>갤러리 헤더에 「물리치료사는 작업치료사와 화면이 같아 안 찍었습니다」 한 줄을 넣습니다</td></tr>
+<tr><td>D4</td><td>교육 회차 다섯 상태</td><td><code>교육_모집중</code>·<code>교육_입금대기</code>·<code>교육_미선정</code>·<code>교육_후기쓰기</code>·<code>교육_후기아직</code> — 역할 접두가 없어 <b>어느 페르소나 눈으로 본 것인지</b> 모릅니다</td><td>다른 캡처와 같게 <code>학생_교육_모집중</code> 꼴로 접두를 붙입니다</td></tr>
+<tr><td>D5</td><td>숨김 상태의 채용·교육 관리</td><td><code>채용관리</code>·<code>교육관리</code> (접두 없음 · 상태 「숨김(준비 중)」) 가 <code>담당자_채용관리</code>·<code>교육담당자_교육관리</code> 와 섞여 있어, 접두 없는 쪽이 누구 눈인지 모릅니다</td><td>접두 없는 둘을 <code>비로그인_채용관리_숨김</code> 꼴로 바꿉니다</td></tr>
+<tr><td>D6</td><td>채용담당자 화면</td><td>접두가 <code>담당자_</code> 입니다. 옆에 <code>교육담당자_</code>·<code>둘다담당자_</code> 가 있어 「담당자」가 셋을 아우르는 말인지 채용담당자만인지 읽다 멈췄습니다</td><td><code>담당자_</code> 를 <code>채용담당자_</code> 로 바꿉니다</td></tr>
+<tr><td>D7</td><td><code>/pay</code> · <code>/spec</code></td><td>캡처 이름이 <code>비로그인_유료안내</code>·<code>비로그인_기능표</code> 인데 문서는 「초임」·「스펙쌓기」입니다. 「기능표」로는 <code>/spec</code> 을 떠올릴 수 없습니다</td><td>캡처 이름을 문서 이름과 같게 바꿉니다 (A3 과 같은 줄)</td></tr>
+<tr><td>D8</td><td>404</td><td><code>비로그인_없는주소</code>(<code>/nope-zzz</code>) 의 상태가 「<b>권한 없음</b>」입니다. 실제로는 404 입니다 — 상태 칩으로 걸러도 404 를 못 찾습니다</td><td>상태 칩에 「없는 주소」를 하나 더하고 이 한 장을 그쪽으로 옮깁니다</td></tr>
+<tr><td>D9</td><td>카톡 미리보기</td><td><code>/api/og/job/[id]</code> 가 「화면」 섹션으로 들어 있습니다. <code>04:391</code> 은 「화면이 아니라 그려서 내려주는 길」이라 합니다</td><td>섹션 제목 옆에 「(화면 아님 · 1200×630 그림)」을 찍습니다</td></tr>
+<tr><td>D10</td><td>진단띠</td><td>캡처는 있는데 문서에 설명이 없습니다 (B8)</td><td>B8 과 같은 줄</td></tr>
+<tr><td>D11</td><td>대화 신청 받기</td><td><code>04:196</code> 이 캡처 <code>대화_신청받기</code> 를 가리키는데 <b>그 이름의 파일이 없습니다</b>(목록.json 에 <code>대화_목록</code>·<code>대화_사진하나사라짐</code> 둘뿐). <code>04:193</code> 의 상태 넷 중 「신청」 모습은 아무 데도 없습니다</td><td>04:196 에서 그 이름을 지우고 「신청·수락 모습은 아직 캡처 없음」을 적습니다</td></tr>
+<tr><td>D12</td><td>갤러리 → 04 화면스펙</td><td>섹션마다 있는 「04 화면스펙 →」 링크가 <code>../인계/04_화면스펙.md#...</code> 입니다. <code>00:22</code>·<code>03_IA:5</code> 가 안내한 대로 <b>파일을 두 번 눌러 열면</b> 브라우저가 <code>.md</code> 를 내려받기만 하고 한글 앵커도 안 걸립니다</td><td>링크를 GitHub 주소로 바꾸거나, 04 를 <code>04_화면스펙.html</code> 로도 함께 내보냅니다</td></tr>
+<tr><td>D13</td><td>마스터 <code>/master</code></td><td>04 의 21절 중 <b>15절(마스터)만</b> 갤러리에서 안 걸립니다 (앵커 20개)</td><td>갤러리 맨 아래에 캡처 없는 화면 셋(<code>/master</code>·<code>/auth/callback</code>·15절)을 한 줄로 적습니다</td></tr>
+<tr><td>D14</td><td><code>/jobs</code> · <code>/community</code> 같은 회원 화면</td><td>섹션이 주소 알파벳 순이라 <code>/admin/*</code> 24개가 맨 앞을 차지합니다. <code>/jobs</code> 는 <b>39번째</b>입니다 — UX 가 가장 먼저 볼 화면이 가장 아래입니다</td><td>섹션을 「회원 → 담당자 → 관리자」 순으로 묶고 묶음 제목을 넣습니다</td></tr>
+<tr><td>D15</td><td>폴더에 섞인 옛 캡처</td><td><code>docs/screens/</code> 에 갤러리가 안 쓰는 <code>.png</code> <b>29장</b>(<code>home.png</code>·<code>jobs-비회원.png</code>·<code>og-job-마감.png</code>…)이 새 이름 캡처와 같은 폴더에 섞여 있고, 하위 폴더 셋(<code>_토막</code>·<code>_확인</code>·<code>_가릴자리미리보기</code>)은 문서에 한 줄도 없습니다</td><td>옛 29장을 <code>_옛캡처/</code> 로 옮기고, 하위 폴더 셋의 쓰임을 00:204 아래에 한 줄씩 적습니다</td></tr>
+</tbody></table>
+<h2 id="e-이거-정해져-있나">E. 「이거 정해져 있나?」</h2>
+<table><thead><tr><th>#</th><th>어디 (파일:줄)</th><th>무엇이 모호한가</th><th>제안 한 줄</th></tr></thead><tbody>
+<tr><td>E1</td><td><code>05_부록.md:94</code></td><td>승인대기 ③ 「꺼 둔 열쇠 여섯 줄 치우기 — <b>2026-10-10 15:00 이후</b>」. 오늘이 10-10 입니다. 지금 해도 되는 건지, 누가 하는 건지 모릅니다</td><td>「누가 · 지났으면 바로」를 적거나 끝났으면 취소선을 긋습니다</td></tr>
+<tr><td>E2</td><td><code>02_기술스펙.md:142</code></td><td><code>avatars</code>·<code>home-images</code>·<code>ad-images</code> 의 한도와 규칙이 「—」 입니다. <b>미정인지, 정해졌는데 안 적은 건지</b> 구분이 안 됩니다</td><td>「—」 를 「기본값(미정)」 또는 실제 값으로 바꿉니다</td></tr>
+<tr><td>E3</td><td><code>04_화면스펙.md:396</code></td><td>OG 「접수 중 · 직군 하나 → <b>그 직군 색</b>」 — 색값이 없습니다. 「공통 <code>#FF3B30</code>」만 적혀 있어 작업치료사·물리치료사 색을 모릅니다</td><td><code>JOB_COLOR</code> 세 값을 04:396 표에 적습니다</td></tr>
+<tr><td>E4</td><td><code>05_부록.md:140-142</code></td><td>「직군 둘인 공고가 접수 중에도 온통 빨강 — 바꿀지는 <b>디자인 결정</b>」. 그런데 6절 「세중님 결정 다섯」에는 없습니다</td><td>6절에 ⑥ 으로 올리거나 「디자인 담당이 정합니다」를 밝힙니다</td></tr>
+<tr><td>E5</td><td><code>05_부록.md:131</code></td><td>화면 제목 문구 — 「세중님이 정하셔야 합니다」인데 05:18 「개발자 몫 9」에 들어 있습니다</td><td>A7·C10 과 같은 줄</td></tr>
+<tr><td>E6</td><td><code>05_부록.md:133</code></td><td>카드 두 모양 — 「디자인을 한 벌로 정해야 합니다」인데 역시 「개발자 몫 9」입니다. <b>제가 정해도 되는 건지</b> 모릅니다</td><td>「디자인 안을 개발자가 내고 세중님이 고릅니다」처럼 누가 무엇을 하는지 적습니다</td></tr>
+<tr><td>E7</td><td><code>03_IA.md:74</code></td><td><code>/compete</code> 가 <b>가입중에게 「○ 목록」</b> 인데 <code>04:73</code>·<code>05:160-162</code> 는 「회원만 · 비회원은 목록도 못 봅니다」입니다. <code>01:42</code> 는 가입중을 아직 회원이 아니라고 합니다</td><td>03_IA:74 의 가입중 칸을 ✗ 또는 「흐림」으로 맞춥니다</td></tr>
+<tr><td>E8</td><td><code>04_화면스펙.md:75</code></td><td>상태에 「회원(목록)」과 「회원(숫자까지)」이 둘 다 있는데 <b>무엇으로 갈리는지</b> 없습니다 (03_IA:74 는 가입중/학생으로 갈라 놓았습니다)</td><td>04:75 에 갈리는 조건 한 줄을 적습니다</td></tr>
+<tr><td>E9</td><td><code>04_화면스펙.md:51</code></td><td>「<b>숨김</b> \</td><td>아님」 줄이 3절에만 있습니다. 다른 20절은 그 줄이 없고 제목의 ★ 로만 알 수 있습니다</td><td>3절의 그 줄을 지우고 ★ 하나로 통일합니다</td></tr>
+<tr><td>E10</td><td><code>05_부록.md:91-100</code></td><td>승인대기 번호에 <b>①과 ⑤가 없습니다</b>. 끝난 것인지 지운 것인지 알 수 없습니다 (⑧ 은 취소선으로 남겨 두었습니다)</td><td>①⑤ 도 취소선으로 남기거나 「①⑤ 는 끝나 뺐습니다」를 적습니다</td></tr>
+<tr><td>E11</td><td><code>02_기술스펙.md:206</code></td><td>「새 표·새 칸·새 함수·<b>새 화면</b>은 전문을 글로 남기고 바로 진행합니다」 — UX 가 새 화면을 만들 때 승인이 필요 없다는 뜻인지, 디자인 승인은 별개인지 모릅니다</td><td>「화면 <b>코드</b>는 바로, <b>디자인</b>은 세중님 확인 뒤」처럼 갈라 적습니다</td></tr>
+<tr><td>E12</td><td><code>04_화면스펙.md:78-79</code></td><td><code>/compete</code> 결정이 확정(05:160)인데 「<b>코드 주석에 둘 다 적혀 있습니다</b>」. 옛 주석을 지울지 남길지 없습니다</td><td>「옛 주석은 그대로 둡니다(뒤집은 기록)」 또는 「지웁니다」를 적습니다</td></tr>
+<tr><td>E13</td><td><code>00_읽는법.md:46</code></td><td>서버 ssh 「<b>급하지 않으면 미룹니다</b>」 — 무엇이 급한 건지, 누가 판단하는지 없습니다</td><td>「수집기를 고칠 차례가 오면 세중님께 요청」으로 조건을 적습니다 (00:148 과 같은 말로)</td></tr>
+<tr><td>E14</td><td><code>05_부록.md:170-174</code></td><td>6절 ② 광고 배너 — 추천안은 있는데 <b>결정은 없습니다</b>. 그런데 <code>02:142</code> 에서 <code>ad-images</code> 는 이미 공개 버킷이고 <code>05:47</code> 에서 그림도 올라가게 고쳤습니다. 제가 시험 배너를 켜 봐도 되는지 모릅니다</td><td>② 에 「개발자가 켜 보는 것은 허용 / 회원에게 내보내는 것만 결정 대기」를 한 줄 적습니다</td></tr>
+</tbody></table>
+<h2 id="맨-처음-30분에-막힌-것-셋">맨 처음 30분에 막힌 것 셋</h2>
+<p>1. <b>C1 + D12</b> — 00:22 가 말한 대로 갤러리를 두 번 눌러 열었습니다. 헤더가 「그림 <b>230</b>장」인데 방금 읽은 00:4 는 「캡처 <b>222</b>장」이었습니다. 어느 쪽이 지금 상태인지 확인하려고 04 로 건너가려 했는데, 섹션마다 있는 「04 화면스펙 →」 링크가 <code>.md</code> 라서 브라우저가 내려받기만 했습니다. <b>갤러리에서 스펙으로 가는 길이 없어서 거기서 멈췄습니다.</b></p>
+<p>2. <b>D1 + D14</b> — 갤러리를 위에서 훑으니 <code>관리자_access</code> 부터 <code>관리자_verify</code> 까지 영어 이름 24개가 먼저 나옵니다. <code>관리자_hand</code>·<code>관리자_beat</code>·<code>관리자_rival</code> 이 무슨 화면인지 몰라 04:233-234 의 한글 메뉴 이름과 하나씩 맞춰 봤습니다. 제가 고칠 <code>/jobs</code> 는 <b>39번째</b>였습니다.</p>
+<p>3. <b>A2 + C2</b> — 04:63 이 「카톡 썸네일이 온통 빨강입니다」라 적어 둬서 UI 문제로 집었는데, 같은 문서 404줄이 「고쳐졌고 회색인 것을 확인했습니다」였습니다. 믿을 수 있는 줄이 어느 쪽인지 가리려고 기관 수를 맞춰 봤더니 이쪽도 58,610(세 문서)과 62,749(04:270)로 갈려 있었습니다. <b>「문서를 믿고 손을 대도 되나」에서 멈췄습니다.</b></p>
+<hr>
+<h2 id="이-검토를-받은-뒤-2026-10-10-새벽">이 검토를 받은 뒤 (2026-10-10 새벽)</h2>
+<p><b>둘만 고쳤습니다</b> — 그날 밤 제가 만든 <b>자기 모순</b>이라 그대로 두면 안 됐습니다.</p>
+<table><thead><tr><th>번호</th><th>어디</th><th>어떻게</th></tr></thead><tbody>
+<tr><td>A2</td><td><code>04_화면스펙.md:63</code></td><td>「온통 빨강입니다」 → 「마감은 회색으로 고쳤고(21절), 빨강은 직군이 둘일 때」</td></tr>
+<tr><td>A5</td><td><code>05_부록.md:114</code></td><td>「<code>notices</code> 규칙 올리기 — 승인대기 ⑧」 → 「2026-10-10 에 올렸습니다」</td></tr>
+</tbody></table>
+<p><b>나머지 46개는 손대지 않았습니다.</b> 검토는 「무엇을 고칠지 정하는 자료」이지</p>
+<p>고칠 권한이 아닙니다. 세중님이 보시고 정하실 것입니다.</p>
+<p><b>숫자 쌍(C 묶음)이 가장 급합니다</b> — 「222 vs 230」·「58,610 vs 62,749」 같은</p>
+<p>것은 읽는 사람이 <b>문서를 믿을지</b>를 흔듭니다. 고칠 때는 둘 중 어느 쪽이</p>
+<p>맞는지 <b>세어 보고</b> 고쳐야 합니다 (작업지침 6절 — 기준을 고치면 쓰는 자리를</p>
+<p>전부 <code>grep</code> 으로 찾습니다).</p>
+<p class="만든말">이 쪽은 <code>인계_읽기검토_1010.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>

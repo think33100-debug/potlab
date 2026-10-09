@@ -73,3 +73,6 @@ tools/hosp/reports/jobflex.json
 #   npm install -D playwright && npx playwright install chromium
 package.json
 package-lock.json
+
+# 검사·임시 자리 (커밋하지 않습니다 — 압축을 풀어 보는 데 씁니다)
+tmp/

@@ -18,7 +18,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
-const 뿌리 = path.join(여기, '..');
+/* 뿌리를 밖에서 줄 수 있습니다 — tools/인계압축.mjs 가 **복사본**에 대고
+   돌리려고 씁니다 (저장소 글은 안 건드립니다) */
+const 뿌리 = process.env.인계_뿌리 || path.join(여기, '..');
 const 방 = path.join(뿌리, 'docs', '인계');
 
 /* GitHub·VS Code 와 같은 닻 규칙 — 갤러리가 만드는 것과 **같아야** 합니다
@@ -99,7 +101,7 @@ function 바꾸기(md) {
   return out.join('\n');
 }
 
-const 껍데기 = (제목, 몸, 차례) => `<!doctype html>
+const 껍데기 = (제목, 몸, 차례, 갤러리길 = '../screens/index.html') => `<!doctype html>
 <html lang="ko">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -135,7 +137,7 @@ const 껍데기 = (제목, 몸, 차례) => `<!doctype html>
   a { color: var(--파랑); }
   .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
 </style>
-<nav class="위"><b>POTJOB 인계</b>${차례}<a href="../screens/index.html">갤러리</a></nav>
+<nav class="위"><b>POTJOB 인계</b>${차례}<a href="${갤러리길}">갤러리</a></nav>
 <div class="판">
 ${몸}
 <p class="만든말">이 쪽은 <code>${안전(제목)}.md</code> 에서 만든 것입니다.
@@ -143,6 +145,22 @@ ${몸}
 </div>
 </html>
 `;
+
+/* 인계 문서가 **링크로** 가리키는 곁 문서도 .html 로 냅니다.
+   안 내면 00_읽는법.html 의 「../화면전수점검_1009.html」 이 깨집니다 */
+const 곁문서 = ['화면상태목록', '화면전수점검_1009', '공고상세_일곱칸_진단_1009',
+  '칸채우기_미리보기_1010', '인계_읽기검토_1010'];
+const 문서방 = path.join(뿌리, 'docs');
+for (const 이름 of 곁문서) {
+  const md길 = path.join(문서방, 이름 + '.md');
+  if (!fs.existsSync(md길)) { console.log('  · 없음 ' + 이름 + '.md'); continue; }
+  const md = fs.readFileSync(md길, 'utf8');
+  fs.writeFileSync(path.join(문서방, 이름 + '.html'),
+    /* 곁 문서는 docs/ 바로 아래라 갤러리가 `screens/index.html` 입니다 —
+       인계 문서(docs/인계/)와 깊이가 달라서 길을 따로 줍니다 */
+    껍데기(이름, 바꾸기(md), `<a href="인계/00_읽는법.html">읽는 법</a>`, 'screens/index.html'));
+  console.log('  ○ ' + 이름 + '.html');
+}
 
 const 파일들 = fs.readdirSync(방).filter((f) => f.endsWith('.md')).sort();
 const 차례 = 파일들.map((f) => {

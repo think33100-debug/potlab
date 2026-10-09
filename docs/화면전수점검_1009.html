@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>화면전수점검_1009 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="인계/00_읽는법.html">읽는 법</a><a href="screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="화면-전수-점검표-2026-10-09">화면 전수 점검표 — 2026-10-09</h1>
+<blockquote><b>숫자 기준 시각</b> — 2026-10-10 03시(KST) · 커밋 <code>3394655</code> 이후.</blockquote>
+<blockquote>숫자는 그때 <b>세어 본 값</b>입니다 (DB <code>select</code> · 파일 수).</blockquote>
+<p><b>목적</b> — 개발자가 세중님이 운영할 <b>모든 화면을 빠짐없이, 모든 상태로</b> 볼 수 있게.</p>
+<p><b>「코드에 있다」는 ○ 가 아닙니다.</b> 메뉴에서 닿고, 열리고, 끝까지 되어야 ○ 입니다.</p>
+<p>들어가는 길은 <code>web/</code> 전체(파일 174개 · 글자 944,379자)를 뒤져</p>
+<p><code>href=</code> · <code>href:</code> · <code>push(</code> · <code>replace(</code> 를 <b>세었습니다.</b></p>
+<hr>
+<h2 id="요약-2026-10-10-새벽-갱신">요약 (2026-10-10 새벽 갱신)</h2>
+<table><thead><tr><th></th><th>수</th><th>10-09 밤</th></tr></thead><tbody>
+<tr><td><b>전체</b></td><td>화면 <b>62</b> + 아직 없는 기능 14 = <b>76줄</b></td><td>76</td></tr>
+<tr><td>○ 끝까지 됨</td><td><b>51</b></td><td>47</td></tr>
+<tr><td>△ 열리지만 덜 됨</td><td><b>6</b></td><td>10</td></tr>
+<tr><td>✗ 아직 없음 (기능)</td><td>14 (개발자 9 · 세중님 결정 5)</td><td>14</td></tr>
+<tr><td>표시를 안 단 화면</td><td><b>5</b></td><td>5</td></tr>
+</tbody></table>
+<p>화면 62곳은 <code>web/app/<b>/page.tsx</code> 를 센 것이고 </b>이 표의 줄 수와 같습니다.**</p>
+<p>61 → 62 는 <code>/admin/blanks</code>(빈칸 공고)가 늘어서입니다.</p>
+<p><code>node tools/인계점검.mjs</code> 가 <b>세 수(코드·스펙·캡처)를 맞춰 봅니다.</b></p>
+<h3 id="2026-10-10-새벽에-바뀐-줄-저장소-경로의-한글">2026-10-10 새벽에 바뀐 줄 — 저장소 경로의 한글</h3>
+<p>넷이 △ → ○ 입니다. 같은 뿌리였습니다 — **Supabase Storage 가 경로에 한글이</p>
+<p>있으면 <code>InvalidKey</code> 로 거절합니다** (인계 05 부록 8-4 절).</p>
+<table><thead><tr><th>주소</th><th>무엇이 한글이었나</th><th>후</th></tr></thead><tbody>
+<tr><td><code>/biz</code> · <code>/edu/manage</code> 첨부</td><td>파일 이름 (공고문 이름은 거의 다 한글)</td><td>○ 22가지 확인</td></tr>
+<tr><td><code>/verify</code> 증빙 올리기</td><td>경로 앞머리 <code>재직-</code></td><td>○</td></tr>
+<tr><td><code>/admin/ads</code> 배너 그림</td><td>자리 이름 <code>앱</code> · <code>커뮤니티</code></td><td>○</td></tr>
+<tr><td><code>/community/write</code> 사진</td><td>(경로는 멀쩡했고 눌러 본 적이 없었습니다)</td><td>○</td></tr>
+</tbody></table>
+<h3 id="밤에-바뀐-줄">밤에 바뀐 줄</h3>
+<table><thead><tr><th>주소</th><th>전</th><th>후</th></tr></thead><tbody>
+<tr><td><code>/partner</code> · <code>/verify</code></td><td>✗ 길이 0곳</td><td>○ <code>/me</code> 에 붙였습니다</td></tr>
+<tr><td><code>/biz</code></td><td>△ 보기와 도장만</td><td>○ 공고 쓰기·고치기·마감·내리기 + 첨부</td></tr>
+<tr><td><code>/edu/manage</code></td><td>없음</td><td>○ 새로 만듦</td></tr>
+<tr><td><code>/admin/blanks</code></td><td>없음</td><td>○ 새로 만듦</td></tr>
+<tr><td><code>/compete</code></td><td>○ 누구나 목록</td><td>○ <b>회원만</b></td></tr>
+<tr><td><code>/jobs/[id]</code></td><td>△ detail 칸을 다 그림</td><td>○ <b>일곱 칸</b></td></tr>
+<tr><td><code>/edu/회차/[id]</code></td><td><b>✗ 배포에서 404</b></td><td>○ <code>/edu/session/[id]</code> 로 이름 바꿈</td></tr>
+<tr><td>첨부(두 화면)</td><td>없음</td><td>△ 화면은 됐고 <b>저장소 규칙이 승인대기 ⑧</b></td></tr>
+</tbody></table>
+<hr>
+<h2 id="1-화면-61곳">1. 화면 61곳</h2>
+<p>칸 뜻 —</p>
+<p><b>누가</b> 보나 · <b>길</b>(들어가는 자리 · 괄호 안은 코드에서 센 링크 수) ·</p>
+<p><b>열림</b>(주소를 치면 그려지나) · <b>끝까지</b>(그 화면이 하는 일이 끝까지 되나) ·</p>
+<p><b>예시</b>(예시 자료가 깔려 있나) · <b>캡처</b>(<code>docs/screens/</code> 에 있나) ·</p>
+<p><b>회원</b>(지금 회원에게 보이나)</p>
+<h3 id="1-1-누구나-보는-화면">1-1. 누구나 보는 화면</h3>
+<table><thead><tr><th>주소</th><th>누가</th><th>길</th><th>열림</th><th>끝까지</th><th>예시</th><th>캡처</th><th>회원</th><th>비고</th></tr></thead><tbody>
+<tr><td><code>/</code></td><td>누구나</td><td>로고·탭바 (13)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>비로그인은 맛보기</td></tr>
+<tr><td><code>/jobs</code></td><td>회원</td><td>탭바·홈 (7)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>비로그인은 <code>공개공고()</code> 10건</td></tr>
+<tr><td><code>/jobs/[id]</code></td><td>누구나</td><td>목록·알림 (14)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>본문은 회원만</td></tr>
+<tr><td><code>/orgs</code></td><td>회원</td><td>홈 (2)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td></td></tr>
+<tr><td><code>/community</code></td><td>누구나</td><td>탭바 (6)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>역할별 방 가림</td></tr>
+<tr><td><code>/community/[ch]</code></td><td>역할별</td><td>커뮤니티 (5)</td><td>○</td><td>○</td><td>○</td><td>—</td><td>○</td><td></td></tr>
+<tr><td><code>/community/write</code></td><td>회원</td><td>방 안 (1)</td><td>○</td><td>△</td><td>✗</td><td>✗</td><td>○</td><td>사진 올리기 미확인</td></tr>
+<tr><td><code>/post/[id]</code></td><td>누구나</td><td>목록 (6)</td><td>○</td><td>○</td><td>○</td><td>—</td><td>○</td><td></td></tr>
+<tr><td><code>/edu</code></td><td>누구나</td><td>홈 (4)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td></td></tr>
+<tr><td><code>/edu/org</code></td><td>누구나</td><td>교육 (3)</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>○</td><td></td></tr>
+<tr><td><code>/edu/org/[name]</code></td><td>누구나</td><td>교육기관 (1)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>IA ㉒ 에 있음</td></tr>
+<tr><td><code>/edu/session/[id]</code></td><td>누구나</td><td>교육 목록 (1)</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>○</td><td>상태 5가지 예시 있음</td></tr>
+<tr><td><code>/compete</code></td><td>회원</td><td>공고 상세 (2)</td><td>○</td><td>○</td><td>△</td><td>✗</td><td>○</td><td>예시 기관 경쟁률 없음</td></tr>
+<tr><td><code>/login</code></td><td>비회원</td><td>곳곳 (20)</td><td>○</td><td>○</td><td>—</td><td>○</td><td>○</td><td>카카오·네이버</td></tr>
+<tr><td><code>/welcome</code></td><td>가입중</td><td>가입 뒤 (6)</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>○</td><td>5단계</td></tr>
+<tr><td><code>/auth/callback</code></td><td>—</td><td>OAuth 가 부름 (0)</td><td>○</td><td>○</td><td>—</td><td>—</td><td>○</td><td>길이 없는 것이 맞습니다</td></tr>
+<tr><td><code>/me</code></td><td>회원</td><td>탭바 (3)</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>○</td><td></td></tr>
+<tr><td><code>/me/leave</code></td><td>회원</td><td>내 정보 (1)</td><td>○</td><td>△</td><td>✗</td><td>✗</td><td>○</td><td>증빙 파일 삭제는 ✗ (아래 2절)</td></tr>
+<tr><td><code>/contact</code></td><td>누구나</td><td>꼬리말 (1)</td><td>○</td><td>○</td><td>—</td><td>✗</td><td>○</td><td></td></tr>
+<tr><td><code>/terms/[doc]</code></td><td>누구나</td><td>꼬리말 (5)</td><td>○</td><td>○</td><td>—</td><td>✗</td><td>○</td><td>약관 3종</td></tr>
+<tr><td><code>/tools</code></td><td>누구나</td><td>홈 (6)</td><td>○</td><td>○</td><td>—</td><td>○</td><td>○</td><td></td></tr>
+<tr><td><code>/tools/severance</code></td><td>누구나</td><td>계산기 (1)</td><td>○</td><td>○</td><td>—</td><td>○</td><td>○</td><td></td></tr>
+<tr><td><code>/tools/leave</code></td><td>누구나</td><td>계산기 (1)</td><td>○</td><td>○</td><td>—</td><td>○</td><td>○</td><td></td></tr>
+<tr><td><code>/tools/unemployment</code></td><td>누구나</td><td>계산기 (1)</td><td>○</td><td>○</td><td>—</td><td>○</td><td>○</td><td>넷 중 유일하게 제목 있음</td></tr>
+<tr><td><code>/tools/pay</code></td><td>누구나</td><td>계산기 (1)</td><td>○</td><td>○</td><td>—</td><td>○</td><td>○</td><td></td></tr>
+<tr><td><code>/pay</code></td><td>회원</td><td>홈·내 정보 (3)</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>○</td><td>초임 — 기관 전체 평균</td></tr>
+<tr><td><code>/spec</code></td><td>회원</td><td>홈 (1)</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>○</td><td></td></tr>
+<tr><td><code>/volunteer</code></td><td>누구나</td><td>홈 (2)</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>○</td><td></td></tr>
+<tr><td><code>/youth</code></td><td>누구나</td><td>홈 (2)</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>○</td><td></td></tr>
+<tr><td><code>/soon</code></td><td>—</td><td>없음 (0)</td><td>○</td><td>○</td><td>—</td><td>✗</td><td>○</td><td>자리만 둔 화면</td></tr>
+</tbody></table>
+<h3 id="1-2-숨겨-둔-화면-운영진에게만">1-2. 숨겨 둔 화면 — 운영진에게만</h3>
+<table><thead><tr><th>주소</th><th>누가</th><th>길</th><th>열림</th><th>끝까지</th><th>예시</th><th>캡처</th><th>회원</th><th>비고</th></tr></thead><tbody>
+<tr><td><code>/master</code></td><td>마스터</td><td>없음 (0)</td><td>○</td><td>○</td><td>—</td><td>○</td><td>✗</td><td>길이 없는 것이 맞습니다</td></tr>
+<tr><td><code>/biz</code></td><td><b>채용담당자</b>·마스터</td><td>탑바·탭바·내 정보 (2)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>공고 쓰기·고치기·마감·내리기 · 첨부</td></tr>
+<tr><td><code>/edu/manage</code></td><td><b>교육담당자</b>·마스터</td><td>탑바·탭바·내 정보 (2)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>과정·회차·신청자·답글 · 첨부</td></tr>
+<tr><td><code>/partner</code></td><td>운영진</td><td><b>내 정보 (10-09 보탬)</b></td><td>○</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>전에는 길이 0곳이었습니다</td></tr>
+<tr><td><code>/verify</code></td><td>운영진</td><td><b>내 정보 (10-09 보탬)</b></td><td>○</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>전에는 길이 0곳이었습니다</td></tr>
+<tr><td><code>/talk</code></td><td>운영진</td><td>알림 (1)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>✗</td><td></td></tr>
+<tr><td><code>/talk/[room]</code></td><td>운영진</td><td>대화 목록 (1)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>사진 사라짐 예시 있음</td></tr>
+<tr><td><code>/alarm</code></td><td>관리자</td><td>탑바 종 (1)</td><td>○</td><td>○</td><td>○</td><td>○</td><td>✗</td><td>10-09 에 종까지 숨김</td></tr>
+</tbody></table>
+<h3 id="1-3-관리자-화면-22곳">1-3. 관리자 화면 22곳</h3>
+<p>전부 <code>/admin</code> 왼쪽 메뉴에서 닿습니다 (링크 각 1곳 · 메뉴가 유일한 길입니다).</p>
+<p><b>예시 자료</b>는 담당자·재직·교육 쪽에만 깔려 있습니다.</p>
+<table><thead><tr><th>주소</th><th>열림</th><th>끝까지</th><th>예시</th><th>캡처</th><th>비고</th></tr></thead><tbody>
+<tr><td><code>/admin</code></td><td>○</td><td>○</td><td>—</td><td>○</td><td>메뉴 겉면</td></tr>
+<tr><td><code>/admin/texts</code></td><td>○</td><td>○</td><td>—</td><td>○</td><td>문구 관리</td></tr>
+<tr><td><code>/admin/jobs</code> · <code>/admin/jobs/[id]</code></td><td>○</td><td>○</td><td>○</td><td>○</td><td>보류함·공고</td></tr>
+<tr><td><b><code>/admin/blanks</code></b></td><td>○</td><td>○</td><td>○</td><td>○</td><td><b>빈칸 공고 (10-09 새로)</b> — 374건</td></tr>
+<tr><td><code>/admin/trash</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td></td></tr>
+<tr><td><code>/admin/boost</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td>추천 올림</td></tr>
+<tr><td><code>/admin/posts</code></td><td>○</td><td>○</td><td>○</td><td>✗</td><td>예시 글 3건</td></tr>
+<tr><td><code>/admin/icons</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td></td></tr>
+<tr><td><code>/admin/stats</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td>시험 계정은 <code>excluded</code> 로 빠짐</td></tr>
+<tr><td><code>/admin/compete</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td></td></tr>
+<tr><td><code>/admin/hand</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td>손으로 확인할 곳</td></tr>
+<tr><td><code>/admin/edu-orgs</code></td><td>○</td><td>○</td><td>○</td><td>✗</td><td></td></tr>
+<tr><td><code>/admin/ads</code></td><td>○</td><td>○</td><td>△</td><td>✗</td><td>배너 둘 다 꺼짐</td></tr>
+<tr><td><code>/admin/beat</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td>수집기 상태</td></tr>
+<tr><td><code>/admin/rival</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td></td></tr>
+<tr><td><code>/admin/members</code></td><td>○</td><td>○</td><td>○</td><td>✗</td><td>시험 계정 셋</td></tr>
+<tr><td><code>/admin/staff</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td>직원과 권한</td></tr>
+<tr><td><code>/admin/access</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td></td></tr>
+<tr><td><code>/admin/ops</code></td><td>○</td><td>○</td><td>○</td><td>✗</td><td>운영진 글</td></tr>
+<tr><td><code>/admin/partners</code></td><td>○</td><td>○</td><td>○</td><td>✗</td><td>담당자 승인 6줄</td></tr>
+<tr><td><code>/admin/verify</code></td><td>○</td><td>○</td><td>○</td><td>✗</td><td>재직 심사중 1건</td></tr>
+<tr><td><code>/admin/reports</code></td><td>○</td><td>△</td><td>✗</td><td>✗</td><td>신고 처리 — 2절 참고</td></tr>
+<tr><td><code>/admin/reset</code></td><td>○</td><td>○</td><td>—</td><td>✗</td><td></td></tr>
+</tbody></table>
+<hr>
+<h2 id="2-계획했지만-아직-없는-기능-14">2. 계획했지만 <b>아직 없는 기능</b> 14</h2>
+<p>여기 줄은 <b>화면이 아니라 기능</b>입니다. ✗ 는 「아직 안 한 것」이지</p>
+<p>「확인한 것」이 아닙니다 (작업지침 6절).</p>
+<table><thead><tr><th>기능</th><th>지금</th><th>어디까지 있나</th><th>누가</th></tr></thead><tbody>
+<tr><td>① 글 신고 처리</td><td>✗</td><td><code>/admin/reports</code> 가 목록만. 「숨기기·반려」 단추 없음</td><td>개발자 몫</td></tr>
+<tr><td>② 댓글 신고 처리</td><td>✗</td><td>신고를 받는 창구는 있고 처리 화면이 없음</td><td>개발자 몫</td></tr>
+<tr><td>③ 대화 신고 처리</td><td>✗</td><td>「신고된 대화 열람」 권한 코드만 만들어 둠</td><td>개발자 몫</td></tr>
+<tr><td>④ 리뷰 신고 처리</td><td>✗</td><td><code>교육리뷰.숨김</code> 칸은 있는데 누르는 자리가 없음</td><td>개발자 몫</td></tr>
+<tr><td>⑤ 회원 차단</td><td>△</td><td><code>대화차단</code> 표와 <code>대화차단하기()</code> 는 있음. <b>화면이 없음</b></td><td>개발자 몫</td></tr>
+<tr><td>⑥ 리뷰 삭제(권한자)</td><td>✗</td><td>담당자는 답글만. 관리자 삭제 자리 없음</td><td>개발자 몫</td></tr>
+<tr><td>⑦ 탈퇴 — 증빙 파일 삭제</td><td>✗</td><td><code>/me/leave</code> 가 <code>profiles</code> 만 정리. <code>인증자료</code>·<code>재직인증</code>의 storage 파일이 남음</td><td>개발자 몫</td></tr>
+<tr><td>⑧ 탈퇴 — 신고 중이면 보존</td><td>✗</td><td>위와 같은 자리. 규칙만 정해져 있음</td><td>개발자 몫</td></tr>
+<tr><td>⑨ 담당자 승인/반려</td><td>○</td><td><code>/admin/partners</code> 에서 됩니다</td><td>—</td></tr>
+<tr><td>⑩ 재직 확인 승인/반려</td><td>○</td><td><code>/admin/verify</code> 에서 됩니다</td><td>—</td></tr>
+<tr><td>⑪ 운영진 글</td><td>○</td><td><code>/admin/ops</code> · <code>운영진글</code> 표</td><td>—</td></tr>
+<tr><td>⑫ 문구 관리</td><td>○</td><td><code>/admin/texts</code></td><td>—</td></tr>
+<tr><td>⑬ 직원 권한</td><td>○</td><td><code>/admin/staff</code> · 권한 12가지</td><td>—</td></tr>
+<tr><td>⑭ 알림</td><td>△</td><td>알림함·종은 됩니다. <b>푸시로 내보내는 크론</b>은 서버에만 있고 화면에서 못 봅니다</td><td>세중님 결정</td></tr>
+<tr><td>⑮ 1:1 대화</td><td>○</td><td><code>/talk</code></td><td>—</td></tr>
+<tr><td>⑯ 중고거래</td><td>△</td><td>글은 올라갑니다. <b>값·거래 상태 칸이 없습니다</b></td><td>세중님 결정</td></tr>
+<tr><td>⑰ 채용 관리</td><td>○</td><td><code>/biz</code> (10-09)</td><td>—</td></tr>
+<tr><td>⑱ 교육 관리</td><td>○</td><td><code>/edu/manage</code> (10-09)</td><td>—</td></tr>
+</tbody></table>
+<p>(⑨~⑱ 중 ○ 인 것은 「없는 기능」에서 빠졌지만, 세중님이 적어 달라고 하신</p>
+<p>목록이라 자리를 남겨 둡니다.)</p>
+<hr>
+<h2 id="3-아홉-열리지만-덜-된-것">3. △ 아홉 — 열리지만 덜 된 것</h2>
+<table><thead><tr><th>어디</th><th>무엇이 덜 됐나</th><th>누가</th></tr></thead><tbody>
+<tr><td><code>/community/write</code></td><td>사진 올리기를 실제로 안 눌러 봤습니다</td><td>개발자 몫</td></tr>
+<tr><td><code>/me/leave</code></td><td>증빙 파일이 안 지워집니다 (2절 ⑦⑧)</td><td>개발자 몫</td></tr>
+<tr><td><code>/compete</code></td><td>예시 기관에 경쟁률 자료가 없어 빈 화면입니다</td><td>세중님 결정</td></tr>
+<tr><td><code>/admin/reports</code></td><td>목록만 있고 처리 단추가 없습니다</td><td>개발자 몫</td></tr>
+<tr><td><code>/admin/ads</code></td><td>배너 둘 다 꺼져 있어 모양을 못 봅니다</td><td>세중님 결정</td></tr>
+<tr><td>알림 푸시</td><td>서버 크론이라 화면에서 확인 불가</td><td>세중님 결정</td></tr>
+<tr><td>중고거래</td><td>값·거래 상태 칸 없음</td><td>세중님 결정</td></tr>
+<tr><td><code>/edu/session/[id]</code> 계좌</td><td>마스터가 담당자라 「계좌는 신청하시면」 칸을 못 봅니다</td><td>개발자 몫</td></tr>
+<tr><td>사업자 <code>없는 번호</code></td><td><code>NTS_BIZ_KEY</code> 가 없어 진위확인을 못 돌립니다</td><td>세중님 결정</td></tr>
+</tbody></table>
+<hr>
+<h2 id="4-이번에-고친-둘">4. 이번에 고친 ✗ 둘</h2>
+<p><b><code>/partner</code> · <code>/verify</code> 는 코드에 있는데 들어갈 길이 0곳이었습니다.</b></p>
+<p><code>web/</code> 전체를 세어서 찾았습니다. <code>/me</code> 의 「담당자 화면」 칸에 붙였습니다</p>
+<p>(운영진에게만). <b>길이 없으면 없는 기능입니다</b> — 작업지침 6절 그대로입니다.</p>
+<hr>
+<h2 id="5-캡처">5. 캡처</h2>
+<p><code>docs/screens/</code> 에 <b>손님 16장</b>이 들어갔습니다 (<code>node tools/캡처.mjs --손님만</code>).</p>
+<p>나머지 124장은 <code>MASTER_EMAIL</code>·<code>MASTER_PW</code> 가 있어야 합니다 —</p>
+<pre><code>
+node tools/캡처.mjs            묶음 여덟 · 140장 (PC 1280 · 휴대폰 390)
+node tools/캡처.mjs --목록      무엇을 찍는지만
+node tools/캡처.mjs --묶음 관리자
+</code></pre>
+<p>비번은 <code>.env</code> 에서 읽고 화면에 한 번도 안 찍습니다. 로그인 칸은 안 찍습니다.</p>
+<p>끝나면 페르소나를 <b>「관리자」로 되돌려 놓습니다</b>.</p>
+<p class="만든말">이 쪽은 <code>화면전수점검_1009.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>

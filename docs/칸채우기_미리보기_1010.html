@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>칸채우기_미리보기_1010 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="인계/00_읽는법.html">읽는 법</a><a href="screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="공고-칸-채우기-미리-돌려-본-것-2026-10-10">공고 칸 채우기 — 미리 돌려 본 것 (2026-10-10)</h1>
+<p><b>DB 를 한 줄도 안 바꿨습니다.</b> <code>select</code> 만 했습니다.</p>
+<p><code>node tools/칸채우기미리보기.mjs --몇개 20</code> 로 다시 낼 수 있습니다.</p>
+<h2 id="어디서-재료가-오나">어디서 재료가 오나</h2>
+<table><thead><tr><th>단계</th><th>재료</th><th>지금 상태</th></tr></thead><tbody>
+<tr><td>① 제목</td><td><code>job_posts.title</code></td><td>있음</td></tr>
+<tr><td>② 상세 API</td><td><code>job_posts.detail</code> · <code>headcount</code> · <code>apply_to</code> · <code>work_place</code></td><td>있음</td></tr>
+<tr><td>③ 첨부 공고문</td><td><b><code>job_body.body</code></b> — 수집기가 읽어 둔 공고문 글자</td><td><b>329줄</b></td></tr>
+<tr><td>—</td><td><code>job_attachments</code> (첨부 주소)</td><td><b>0줄</b></td></tr>
+</tbody></table>
+<p>③ 은 원래 <code>job_attachments</code> 의 주소로 파일을 다시 받아 읽는 자리였는데,</p>
+<p>그 표가 비어 있습니다. 대신 <b>이미 읽어 둔 글자</b>(<code>job_body</code>)를 씁니다 —</p>
+<p>다시 받을 필요가 없어 더 쌉니다. 다만 보이는 공고 377건 중</p>
+<p>글자가 있는 것은 <b>28건</b>뿐입니다.</p>
+<h2 id="칸별-채움-비율-이-20건-기준">칸별 채움 비율 (이 20건 기준)</h2>
+<table><thead><tr><th>칸</th><th>참</th><th>빔</th><th>참 비율</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>10</td><td>10</td><td>50%</td></tr>
+<tr><td>접수마감</td><td>15</td><td>5</td><td>75%</td></tr>
+<tr><td>근무지</td><td>14</td><td>6</td><td>70%</td></tr>
+<tr><td>지원자격</td><td>9</td><td>11</td><td>45%</td></tr>
+<tr><td>예상연봉</td><td>4</td><td>16</td><td>20%</td></tr>
+<tr><td>얼마나바쁜곳</td><td>20</td><td>0</td><td>100%</td></tr>
+<tr><td>병원뜯어보기</td><td>20</td><td>0</td><td>100%</td></tr>
+</tbody></table>
+<p><b>얼마나 바쁜 곳 · 병원 뜯어보기 둘은 공고가 아니라 기관 자료에서 옵니다</b> —</p>
+<p>공고를 아무리 읽어도 안 채워지고, 기관표·심평원 자료가 있으면 늘 찹니다.</p>
+<p>그래서 「공고에서 채워야 하는 칸」은 <b>앞 다섯</b>입니다.</p>
+<h2 id="값이-어디서-왔나">값이 어디서 왔나</h2>
+<table><thead><tr><th>출처</th><th>칸 수</th></tr></thead><tbody>
+<tr><td>상세API</td><td>48</td></tr>
+<tr><td>기관표</td><td>20</td></tr>
+<tr><td>심평원</td><td>20</td></tr>
+<tr><td>첨부(job_body)</td><td>4</td></tr>
+<tr><td>제목</td><td>0</td></tr>
+</tbody></table>
+<hr>
+<h2 id="공고마다">공고마다</h2>
+<h3 id="ce80111-강원특별자치도강릉의료원">CE80111 · 강원특별자치도강릉의료원</h3>
+<blockquote>공고2026-69호 보건직 8급 작업치료사</blockquote>
+<p>출처 <code>CE2</code> · 직군 작업치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td><b>1명</b></td><td>상세API</td><td><code>headcount = 1</code></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-12</b></td><td>상세API</td><td><code>apply_to = 2026-10-12</code></td></tr>
+<tr><td>근무지</td><td><b>강원도 강릉시 경강로 2007</b></td><td>상세API</td><td><code>work_place = 강원도 강릉시 경강로 2007</code></td></tr>
+<tr><td>지원자격</td><td><b>작업치료사 면허증</b></td><td>상세API</td><td><code>detail.지원자격</code></td></tr>
+<tr><td>예상연봉</td><td><b>3000만원 이상</b></td><td>상세API</td><td><code>detail.연봉</code></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — 없음</p>
+<h3 id="hs1926704705-삼성서울병원">HS1926704705 · 삼성서울병원</h3>
+<blockquote>재활치료실 계약직 물리치료사 채용</blockquote>
+<p>출처 <code>HS3</code> · 직군 물리치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-14</b></td><td>상세API</td><td><code>apply_to = 2026-10-14</code></td></tr>
+<tr><td>근무지</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>모집인원 · 근무지 · 지원자격 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="305539-건강보험심사평가원">305539 · 건강보험심사평가원</h3>
+<blockquote>2026년 하반기 건강보험심사평가원 체험형 청년인턴 채용 공고</blockquote>
+<p>출처 <code>AL2</code> · 직군 공통 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td><b>233명</b></td><td>상세API</td><td><code>headcount = 233</code></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-15</b></td><td>상세API</td><td><code>apply_to = 2026-10-15</code></td></tr>
+<tr><td>근무지</td><td><b>서울,부산,대구,인천,대전,경기,강원,전북,전남광주,경남,제주</b></td><td>상세API</td><td><code>work_place = 서울,부산,대구,인천,대전,경기,강원,전북,전남광주,경남,제주</code></td></tr>
+<tr><td>지원자격</td><td>**□ 일반전형  ○ 행정인턴: 학력 및 전공 제한 없음  ○ 심사인턴: 아래 면허 중 하나 이상 소지한 자    - 간호사, 의료기사*, 보건의료정보관리사 **</td><td>상세API</td><td><code>detail.지원자격</code></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="305572-대한적십자사">305572 · 대한적십자사</h3>
+<blockquote>경인권역재활병원 비정규직(대체인력) 물리치료사 채용 공고(2026.11.2.임용)(1)</blockquote>
+<p>출처 <code>AL</code> · 직군 물리치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td><b>1명</b></td><td>상세API</td><td><code>headcount = 1</code></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-18</b></td><td>상세API</td><td><code>apply_to = 2026-10-18</code></td></tr>
+<tr><td>근무지</td><td><b>인천</b></td><td>상세API</td><td><code>work_place = 인천</code></td></tr>
+<tr><td>지원자격</td><td><b>○ (필수) 물리치료사 면허증 소지자 ○ (필수) NDT, 보바스, PNF, TONA 중 1개 이상 자격 소지자(120시간 이상 이수)  ※ 중추신경계발달재활</b></td><td>상세API</td><td><code>detail.지원자격</code></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="biz000005-시험병원-마스터-전용">BIZ000005 · 시험병원 (마스터 전용)</h3>
+<blockquote>[예시] 작업치료사 채용 (모집중)</blockquote>
+<p>출처 <code>BIZ</code> · 직군 작업치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td><b>2명</b></td><td>상세API</td><td><code>headcount = 2</code></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-23</b></td><td>상세API</td><td><code>apply_to = 2026-10-23</code></td></tr>
+<tr><td>근무지</td><td><b>재활의학과</b></td><td>상세API</td><td><code>work_place = 재활의학과</code></td></tr>
+<tr><td>지원자격</td><td><b>예시 자료입니다. 작업치료사 면허 소지자.</b></td><td>상세API</td><td><code>detail.지원자격</code></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="ce80043-경기도의료원">CE80043 · 경기도의료원</h3>
+<blockquote>경기도의료원안성병원 작업치료사(의료기술직/정규직)채용 공고</blockquote>
+<p>출처 <code>CE2</code> · 직군 작업치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td><b>1명</b></td><td>상세API</td><td><code>headcount = 1</code></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-10</b></td><td>상세API</td><td><code>apply_to = 2026-10-10</code></td></tr>
+<tr><td>근무지</td><td><b>경기도 수원시 장안구 수성로245번길 69 경기도의료원</b></td><td>상세API</td><td><code>work_place = 경기도 수원시 장안구 수성로245번길 69 경기도의료원</code></td></tr>
+<tr><td>지원자격</td><td><b>작업치료사 면허증 소지자</b></td><td>상세API</td><td><code>detail.지원자격</code></td></tr>
+<tr><td>예상연봉</td><td><b>4000만원 이상</b></td><td>상세API</td><td><code>detail.연봉</code></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — 없음</p>
+<h3 id="gj304477-한국장애인개발원">GJ304477 · 한국장애인개발원</h3>
+<blockquote>한국장애인개발원 2026년도 제3차 직원 정기채용 공고(정규직, 무기직, 개방형 등)</blockquote>
+<p>출처 <code>GJ2</code> · 직군 공통 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-12</b></td><td>상세API</td><td><code>apply_to = 2026-10-12</code></td></tr>
+<tr><td>근무지</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>모집인원 · 근무지 · 지원자격 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="hs1004062063-대자인병원">HS1004062063 · 대자인병원</h3>
+<blockquote>[통합재활팀] 물리치료사/작업치료사 채용</blockquote>
+<p>출처 <code>HS3</code> · 직군 공통 · 공고문 글자 <b>24956자</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>접수마감</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>근무지</td><td><b>[통합재활팀] 물리치료사/작업치료사 채용 .bymqIm{position:absolute;top:0;left:0;width:100%;min-height:100%;}</b></td><td>첨부(job_body)</td><td><code>[통합재활팀] 물리치료사/작업치료사 채용 .bymqIm{position:absolute;top:0;left:0;width:100%;min-height:100%;}</code></td></tr>
+<tr><td>지원자격</td><td><b>[통합재활팀] 물리치료사/작업치료사 채용 .bymqIm{position:absolute;top:0;left:0;width:100%;min-height:100%;}</b></td><td>첨부(job_body)</td><td><code>[통합재활팀] 물리치료사/작업치료사 채용 .bymqIm{position:absolute;top:0;left:0;width:100%;min-height:100%;}</code></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>모집인원 · 접수마감 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="hs1062954099-울산엘리야병원">HS1062954099 · 울산엘리야병원</h3>
+<blockquote>물리치료팀 물리치료사</blockquote>
+<p>출처 <code>HS</code> · 직군 물리치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>접수마감</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>근무지</td><td><b>울산 울산북구</b></td><td>상세API</td><td><code>work_place = 울산 울산북구</code></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>모집인원 · 접수마감 · 지원자격 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="jf130010-성가롤로병원">JF130010 · 성가롤로병원</h3>
+<blockquote>물리치료사(재활의학팀/정규직) 직원모집공고</blockquote>
+<p>출처 <code>JF</code> · 직군 물리치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-11</b></td><td>상세API</td><td><code>apply_to = 2026-10-11</code></td></tr>
+<tr><td>근무지</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>모집인원 · 근무지 · 지원자격 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="nd1706-세종광역치매센터">ND1706 · 세종광역치매센터</h3>
+<blockquote>기간제근로자 채용 공고</blockquote>
+<p>출처 <code>ND</code> · 직군 작업치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td><b>1명</b></td><td>상세API</td><td><code>headcount = 1</code></td></tr>
+<tr><td>접수마감</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>근무지</td><td><b>세종</b></td><td>상세API</td><td><code>work_place = 세종</code></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>접수마감 · 지원자격 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="nd1720-중랑구치매안심센터">ND1720 · 중랑구치매안심센터</h3>
+<blockquote>[중랑구치매안심센터] 직원 채용 공고</blockquote>
+<p>출처 <code>ND2</code> · 직군 작업치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-13</b></td><td>상세API</td><td><code>apply_to = 2026-10-13</code></td></tr>
+<tr><td>근무지</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>모집인원 · 근무지 · 지원자격 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="wnk120032609220013-주식회사도타이">WNK120032609220013 · 주식회사도타이</h3>
+<blockquote>[더시그넘 하우스 너싱홈] 작업치료사 모집</blockquote>
+<p>출처 <code>WN</code> · 직군 작업치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-21</b></td><td>상세API</td><td><code>apply_to = 2026-10-21</code></td></tr>
+<tr><td>근무지</td><td><b>서울 강남구</b></td><td>상세API</td><td><code>work_place = 서울 강남구</code></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td><b>연봉 2900만원~3400만원</b></td><td>상세API</td><td><code>detail.연봉</code></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>모집인원 · 지원자격</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="wnk120232609280018-둔촌데이케어센터">WNK120232609280018 · 둔촌데이케어센터</h3>
+<blockquote>치매전담 둔촌데이케어센터 작업치료사 모집 공고</blockquote>
+<p>출처 <code>WN2</code> · 직군 작업치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-20</b></td><td>상세API</td><td><code>apply_to = 2026-10-20</code></td></tr>
+<tr><td>근무지</td><td><b>서울 강동구 천호대로 1210</b></td><td>상세API</td><td><code>work_place = 서울 강동구 천호대로 1210</code></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>모집인원 · 지원자격 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="305571-대한적십자사">305571 · 대한적십자사</h3>
+<blockquote>경인권역재활병원 비정규직(대체인력) 작업치료사 채용 공고(2026.11.2.임용)</blockquote>
+<p>출처 <code>AL2</code> · 직군 작업치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td><b>1명</b></td><td>상세API</td><td><code>headcount = 1</code></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-18</b></td><td>상세API</td><td><code>apply_to = 2026-10-18</code></td></tr>
+<tr><td>근무지</td><td><b>인천</b></td><td>상세API</td><td><code>work_place = 인천</code></td></tr>
+<tr><td>지원자격</td><td><b>○ (필수) 작업치료사 면허증 소지자 ○ 소아작업치료 경력 보유자 우대</b></td><td>상세API</td><td><code>detail.지원자격</code></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="biz000006-시험병원-마스터-전용">BIZ000006 · 시험병원 (마스터 전용)</h3>
+<blockquote>[예시] 물리치료사 채용 (오늘 18시 마감)</blockquote>
+<p>출처 <code>BIZ</code> · 직군 물리치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td><b>1명</b></td><td>상세API</td><td><code>headcount = 1</code></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-09</b></td><td>상세API</td><td><code>apply_to = 2026-10-09</code></td></tr>
+<tr><td>근무지</td><td><b>물리치료실</b></td><td>상세API</td><td><code>work_place = 물리치료실</code></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>지원자격 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="ce80150-강원특별자치도원주의료원">CE80150 · 강원특별자치도원주의료원</h3>
+<blockquote>원주의료원 신규직원(보건직8급_물리치료사, 작업치료사) 채용공고</blockquote>
+<p>출처 <code>CE2</code> · 직군 공통 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td><b>2명</b></td><td>상세API</td><td><code>headcount = 2</code></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-12</b></td><td>상세API</td><td><code>apply_to = 2026-10-12</code></td></tr>
+<tr><td>근무지</td><td><b>강원특별자치도 원주시 서원대로 387</b></td><td>상세API</td><td><code>work_place = 강원특별자치도 원주시 서원대로 387</code></td></tr>
+<tr><td>지원자격</td><td><b>각 직무별 필수자격 요건 면허증 소지자 · 병원급 의료기관 경력 1년 이상인 자</b></td><td>상세API</td><td><code>detail.지원자격</code></td></tr>
+<tr><td>예상연봉</td><td><b>3600만원 이상</b></td><td>상세API</td><td><code>detail.연봉</code></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — 없음</p>
+<h3 id="gj304792-보건복지부-국립재활원">GJ304792 · 보건복지부 국립재활원</h3>
+<blockquote>국립재활원 한시임기제 공무원(보건의료정보관리사) 경력경쟁채용시험 공고</blockquote>
+<p>출처 <code>GJ2</code> · 직군 작업치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>접수마감</td><td><b>2026-10-14</b></td><td>상세API</td><td><code>apply_to = 2026-10-14</code></td></tr>
+<tr><td>근무지</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>모집인원 · 근무지 · 지원자격 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="hs1162733471-의료법인-동강의료재단-동천동강병원">HS1162733471 · 의료법인 동강의료재단 동천동강병원</h3>
+<blockquote>동천동강병원 물리치료팀 물리치료사 (계약직 / 육아휴직 대체채용)</blockquote>
+<p>출처 <code>HS3</code> · 직군 물리치료사 · 공고문 글자 <b>3149자</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td><b>1명</b></td><td>첨부(job_body)</td><td><code>채용공고 : 동천동강병원 물리치료팀 물리치료사 (계약직 / 육아휴직 대체채용) 동강/의료법인 동강의료재단 동천동강병원 진료안내 진료시간 진료예약 외래진료 입원 및</code></td></tr>
+<tr><td>접수마감</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>근무지</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>지원자격</td><td><b>채용공고 : 동천동강병원 물리치료팀 물리치료사 (계약직 / 육아휴직 대체채용) 동강/의료법인 동강의료재단 동천동강병원 진료안내 진료시간 진료예약 외래진료 입원 및</b></td><td>첨부(job_body)</td><td><code>채용공고 : 동천동강병원 물리치료팀 물리치료사 (계약직 / 육아휴직 대체채용) 동강/의료법인 동강의료재단 동천동강병원 진료안내 진료시간 진료예약 외래진료 입원 및</code></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>접수마감 · 근무지 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<h3 id="hs111861539-학교법인동의병원">HS111861539 · 학교법인)동의병원</h3>
+<blockquote>작업치료사 채용 공고 [마감]</blockquote>
+<p>출처 <code>HS</code> · 직군 작업치료사 · <b>공고문 글자 없음</b></p>
+<table><thead><tr><th>칸</th><th>값</th><th>출처</th><th>근거 (원문 한 줄)</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>접수마감</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>근무지</td><td><b>부산 부산진구</b></td><td>상세API</td><td><code>work_place = 부산 부산진구</code></td></tr>
+<tr><td>지원자격</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>예상연봉</td><td>— _안 그림_</td><td></td><td></td></tr>
+<tr><td>얼마나바쁜곳</td><td><b>(심평원 치료사 수에서 계산)</b></td><td>심평원</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+<tr><td>병원뜯어보기</td><td><b>(기관표)</b></td><td>기관표</td><td><code>공고와 무관 · 기관 자료</code></td></tr>
+</tbody></table>
+<p>못 찾은 칸 — <b>모집인원 · 접수마감 · 지원자격 · 예상연봉</b> (「공고에 없음」이라 안 적고 빈 칸으로 둡니다 → <code>/admin/blanks</code>)</p>
+<hr>
+<h2 id="377건-전체로-보면">377건 전체로 보면</h2>
+<table><thead><tr><th></th><th>수</th></tr></thead><tbody>
+<tr><td>보이는 공고</td><td>377건</td></tr>
+<tr><td>공고문 글자가 있는 것</td><td><b>28건</b></td></tr>
+<tr><td>글자가 없어 ③ 을 못 쓰는 것</td><td>349건</td></tr>
+</tbody></table>
+<p><b>Haiku 를 부를 일이 지금은 없습니다.</b> Haiku 는 공고문이 <b>그림</b>일 때 쓰는데,</p>
+<p><code>job_attachments</code> 가 0줄이라 그림 첨부가 <b>0장</b>입니다. <code>job_body</code> 는 이미</p>
+<p>글자라 읽는 데 모델이 필요 없습니다.</p>
+<table><thead><tr><th></th><th>값</th></tr></thead><tbody>
+<tr><td>이 미리보기에서 부른 Haiku</td><td><b>0번</b> · 토큰 0 · <b>$0.00</b></td></tr>
+<tr><td>377건 전체로 늘려도</td><td><b>0번</b> · <b>$0.00</b> (그림 첨부가 0장이라)</td></tr>
+</tbody></table>
+<p>수집기가 첨부를 담기 시작하면 그때 그림 첨부가 생기고, 그제야 Haiku 값이</p>
+<p>생깁니다. <code>tools/공고칸채우기.mjs --dry</code> 가 그 수를 셉니다.</p>
+<p><b>숫자를 지어내지 않았습니다</b> — 위 표의 모든 값에 원문 한 줄을 붙였고,</p>
+<p>근거를 못 찾은 칸은 비워 두었습니다.</p>
+<p class="만든말">이 쪽은 <code>칸채우기_미리보기_1010.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>
