@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/app/auth';
+import { AlarmBell } from './alarm-bell';
 import { Avatar } from './avatar';
 
 /* 탑바 오른쪽. 로그인 전에는 단추, 로그인 뒤에는 아바타와 닉네임입니다.
@@ -39,6 +40,8 @@ export function TopbarUser() {
 
   return (
     <div className="flex items-center gap-5">
+      {/* 알림 종 — 안 읽은 것이 있을 때만 숫자가 붙습니다 (2026-10-09) */}
+      <AlarmBell />
       {/* 관리자에게만 보입니다. 다만 막는 자리는 여기가 아니라 DB 입니다 */}
       {isAdmin && (
         <Link
