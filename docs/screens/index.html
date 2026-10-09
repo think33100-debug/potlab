@@ -1,0 +1,3635 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POTJOB 화면 갤러리</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.6 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+         color: #111; background: #fafafa; }
+  header { position: sticky; top: 0; z-index: 5; background: #fff;
+           border-bottom: 1px solid var(--줄); padding: 14px 20px; }
+  header h1 { margin: 0 0 4px; font-size: 19px; }
+  header .한줄 { color: var(--흐림); font-size: 13px; }
+  .고르기 { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
+  .고르기 b { font-size: 12px; color: var(--흐림); margin-right: 2px; }
+  button.칩 { font: inherit; font-size: 12px; padding: 3px 10px; border: 1px solid var(--줄);
+              background: #fff; border-radius: 999px; cursor: pointer; }
+  button.칩[aria-pressed="true"] { background: var(--파랑); border-color: var(--파랑); color: #fff; }
+  main { padding: 20px; max-width: 1500px; margin: 0 auto; }
+  nav.차례 { background: #fff; border: 1px solid var(--줄); border-radius: 10px;
+             padding: 12px 16px; margin-bottom: 20px;
+             /* 62곳이라 한 줄로 두면 옆으로 넘칩니다 — 접어 보입니다 */
+             display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  nav.차례 a { font-size: 12px; color: var(--파랑); text-decoration: none;
+               white-space: nowrap; }
+  section.screen { background: #fff; border: 1px solid var(--줄); border-radius: 10px;
+                   padding: 16px; margin-bottom: 22px; }
+  section.screen h2 { margin: 0 0 4px; font-size: 16px; }
+  section.screen h2 code { background: #f3f4f6; padding: 2px 8px; border-radius: 6px; }
+  p.meta { margin: 0 0 12px; font-size: 12px; color: var(--흐림);
+           display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .count { background: #111; color: #fff; border-radius: 999px; padding: 1px 8px; }
+  a.spec { color: var(--파랑); }
+  .nospec { color: #b45309; }
+  .shots { display: grid; gap: 14px;
+           grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  figure { margin: 0; border: 1px solid var(--줄); border-radius: 8px; overflow: hidden;
+           background: #fff; }
+  /* PC 그림은 1280px 넓이라 좁은 칸에 넣으면 글자가 안 보입니다. 두 칸을 씁니다 */
+  figure[data-w="pc"] { grid-column: span 2; }
+  figure img { display: block; width: 100%; height: 320px; object-fit: cover;
+               object-position: top; background: #f9fafb; }
+  @media (max-width: 560px) { figure[data-w="pc"] { grid-column: span 1; } }
+  figcaption { padding: 8px 10px; font-size: 11px; line-height: 1.5; }
+  figcaption b { display: inline-block; margin-right: 6px; }
+  figcaption code { display: block; color: var(--흐림); word-break: break-all; margin-top: 2px; }
+  figcaption .fn { display: block; color: #9ca3af; font-size: 10px; word-break: break-all; }
+  .w { color: var(--흐림); }
+  .st { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 10px;
+        background: #f3f4f6; color: #374151; }
+  .st-자료있음 { background: #dcfce7; color: #166534; }
+  .st-빈상태 { background: #fef3c7; color: #92400e; }
+  .st-로그인안내 { background: #dbeafe; color: #1e40af; }
+  .st-권한없음 { background: #fee2e2; color: #991b1b; }
+  .st-숨김준비중 { background: #ede9fe; color: #5b21b6; }
+  section.screen[hidden], figure[hidden] { display: none; }
+</style>
+
+<header>
+  <h1>POTJOB 화면 갤러리</h1>
+  <div class="한줄">
+    화면 <b>62</b>곳 · 그림 <b>230</b>장 · 찍은 때 2026. 10. 10. 오전 12:53:33
+    · 찍은 곳 <code>https://potjob-web.vercel.app</code>
+  </div>
+  <div class="한줄" style="margin-top:4px">
+    그림을 누르면 원래 크기로 열립니다. 긴 화면은 위에서 320px 만 보입니다.
+  </div>
+  <div class="고르기" id="페르소나고르기"><b>페르소나</b></div>
+  <div class="고르기" id="상태고르기"><b>상태</b></div>
+  <div class="고르기" id="폭고르기"><b>폭</b></div>
+</header>
+
+<main>
+  <nav class="차례" id="차례"></nav>
+  
+<section class="screen" id="screen-_"
+         data-personas="(로그인 안 함)|비회원|가입중|학생|관리자"
+         data-states="자료 있음">
+  <h2><code>/</code></h2>
+  <p class="meta">
+    <span class="count">12장</span>
+    <span>(로그인 안 함) · 비회원 · 가입중 · 학생 · 관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#1-홈">04 화면스펙 → 1. 홈 `/`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_홈__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_홈__pc.png" alt="비로그인_홈" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/</code>
+        <span class="fn">비로그인_홈__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_홈__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_홈__phone.png" alt="비로그인_홈" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/</code>
+        <span class="fn">비로그인_홈__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="자료 있음" data-w="pc">
+      <a href="비회원보기_홈__pc.png" target="_blank" rel="noopener">
+        <img src="비회원보기_홈__pc.png" alt="비회원보기_홈" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/</code>
+        <span class="fn">비회원보기_홈__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="자료 있음" data-w="phone">
+      <a href="비회원보기_홈__phone.png" target="_blank" rel="noopener">
+        <img src="비회원보기_홈__phone.png" alt="비회원보기_홈" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/</code>
+        <span class="fn">비회원보기_홈__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="가입중" data-state="자료 있음" data-w="pc">
+      <a href="가입중_홈__pc.png" target="_blank" rel="noopener">
+        <img src="가입중_홈__pc.png" alt="가입중_홈" loading="lazy">
+      </a>
+      <figcaption>
+        <b>가입중</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/</code>
+        <span class="fn">가입중_홈__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="가입중" data-state="자료 있음" data-w="phone">
+      <a href="가입중_홈__phone.png" target="_blank" rel="noopener">
+        <img src="가입중_홈__phone.png" alt="가입중_홈" loading="lazy">
+      </a>
+      <figcaption>
+        <b>가입중</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/</code>
+        <span class="fn">가입중_홈__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_홈__pc.png" target="_blank" rel="noopener">
+        <img src="학생_홈__pc.png" alt="학생_홈" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/</code>
+        <span class="fn">학생_홈__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_홈__phone.png" target="_blank" rel="noopener">
+        <img src="학생_홈__phone.png" alt="학생_홈" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/</code>
+        <span class="fn">학생_홈__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="진단띠__pc.png" target="_blank" rel="noopener">
+        <img src="진단띠__pc.png" alt="진단띠" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/?진단=1</code>
+        <span class="fn">진단띠__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="페르소나띠__pc.png" target="_blank" rel="noopener">
+        <img src="페르소나띠__pc.png" alt="페르소나띠" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/</code>
+        <span class="fn">페르소나띠__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="진단띠__phone.png" target="_blank" rel="noopener">
+        <img src="진단띠__phone.png" alt="진단띠" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/?진단=1</code>
+        <span class="fn">진단띠__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="페르소나띠__phone.png" target="_blank" rel="noopener">
+        <img src="페르소나띠__phone.png" alt="페르소나띠" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/</code>
+        <span class="fn">페르소나띠__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin"
+         data-personas="학생|관리자"
+         data-states="권한 없음|자료 있음">
+  <h2><code>/admin</code></h2>
+  <p class="meta">
+    <span class="count">4장</span>
+    <span>학생 · 관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="학생" data-state="권한 없음" data-w="pc">
+      <a href="학생_관리자_권한없음__pc.png" target="_blank" rel="noopener">
+        <img src="학생_관리자_권한없음__pc.png" alt="학생_관리자_권한없음" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-권한없음">권한 없음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin</code>
+        <span class="fn">학생_관리자_권한없음__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="권한 없음" data-w="phone">
+      <a href="학생_관리자_권한없음__phone.png" target="_blank" rel="noopener">
+        <img src="학생_관리자_권한없음__phone.png" alt="학생_관리자_권한없음" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-권한없음">권한 없음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin</code>
+        <span class="fn">학생_관리자_권한없음__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_홈__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_홈__pc.png" alt="관리자_홈" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin</code>
+        <span class="fn">관리자_홈__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_홈__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_홈__phone.png" alt="관리자_홈" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin</code>
+        <span class="fn">관리자_홈__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_access"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/access</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_access__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_access__pc.png" alt="관리자_access" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/access</code>
+        <span class="fn">관리자_access__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_access__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_access__phone.png" alt="관리자_access" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/access</code>
+        <span class="fn">관리자_access__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_ads"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/ads</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_ads__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_ads__pc.png" alt="관리자_ads" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/ads</code>
+        <span class="fn">관리자_ads__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_ads__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_ads__phone.png" alt="관리자_ads" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/ads</code>
+        <span class="fn">관리자_ads__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_beat"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/beat</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_beat__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_beat__pc.png" alt="관리자_beat" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/beat</code>
+        <span class="fn">관리자_beat__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_beat__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_beat__phone.png" alt="관리자_beat" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/beat</code>
+        <span class="fn">관리자_beat__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_blanks"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/blanks</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_blanks__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_blanks__pc.png" alt="관리자_blanks" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/blanks</code>
+        <span class="fn">관리자_blanks__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_blanks__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_blanks__phone.png" alt="관리자_blanks" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/blanks</code>
+        <span class="fn">관리자_blanks__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_boost"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/boost</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_boost__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_boost__pc.png" alt="관리자_boost" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/boost</code>
+        <span class="fn">관리자_boost__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_boost__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_boost__phone.png" alt="관리자_boost" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/boost</code>
+        <span class="fn">관리자_boost__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_compete"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/compete</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_compete__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_compete__pc.png" alt="관리자_compete" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/compete</code>
+        <span class="fn">관리자_compete__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_compete__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_compete__phone.png" alt="관리자_compete" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/compete</code>
+        <span class="fn">관리자_compete__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_edu_orgs"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/edu-orgs</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_edu-orgs__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_edu-orgs__pc.png" alt="관리자_edu-orgs" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/edu-orgs</code>
+        <span class="fn">관리자_edu-orgs__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_edu-orgs__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_edu-orgs__phone.png" alt="관리자_edu-orgs" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/edu-orgs</code>
+        <span class="fn">관리자_edu-orgs__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_hand"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/hand</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_hand__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_hand__pc.png" alt="관리자_hand" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/hand</code>
+        <span class="fn">관리자_hand__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_hand__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_hand__phone.png" alt="관리자_hand" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/hand</code>
+        <span class="fn">관리자_hand__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_icons"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/icons</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_icons__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_icons__pc.png" alt="관리자_icons" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/icons</code>
+        <span class="fn">관리자_icons__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_icons__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_icons__phone.png" alt="관리자_icons" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/icons</code>
+        <span class="fn">관리자_icons__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_jobs"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/jobs</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_jobs__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_jobs__pc.png" alt="관리자_jobs" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/jobs</code>
+        <span class="fn">관리자_jobs__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_jobs__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_jobs__phone.png" alt="관리자_jobs" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/jobs</code>
+        <span class="fn">관리자_jobs__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_jobs__id_"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/jobs/[id]</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_공고하나__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_공고하나__pc.png" alt="관리자_공고하나" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/jobs/WNK150012610080045</code>
+        <span class="fn">관리자_공고하나__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_공고하나__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_공고하나__phone.png" alt="관리자_공고하나" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/jobs/WNK150012610080045</code>
+        <span class="fn">관리자_공고하나__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_members"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/members</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_members__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_members__pc.png" alt="관리자_members" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/members</code>
+        <span class="fn">관리자_members__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_members__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_members__phone.png" alt="관리자_members" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/members</code>
+        <span class="fn">관리자_members__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_ops"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/ops</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_ops__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_ops__pc.png" alt="관리자_ops" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/ops</code>
+        <span class="fn">관리자_ops__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_ops__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_ops__phone.png" alt="관리자_ops" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/ops</code>
+        <span class="fn">관리자_ops__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_partners"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/partners</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#9-담당자-신청-partner-숨김-승인-adminpartners">04 화면스펙 → 9. 담당자 신청 `/partner` ★숨김 · 승인 `/admin/partners`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_partners__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_partners__pc.png" alt="관리자_partners" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/partners</code>
+        <span class="fn">관리자_partners__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_partners__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_partners__phone.png" alt="관리자_partners" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/partners</code>
+        <span class="fn">관리자_partners__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_posts"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/posts</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_posts__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_posts__pc.png" alt="관리자_posts" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/posts</code>
+        <span class="fn">관리자_posts__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_posts__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_posts__phone.png" alt="관리자_posts" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/posts</code>
+        <span class="fn">관리자_posts__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_reports"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/reports</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_reports__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_reports__pc.png" alt="관리자_reports" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/reports</code>
+        <span class="fn">관리자_reports__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_reports__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_reports__phone.png" alt="관리자_reports" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/reports</code>
+        <span class="fn">관리자_reports__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_reset"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/reset</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_reset__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_reset__pc.png" alt="관리자_reset" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/reset</code>
+        <span class="fn">관리자_reset__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_reset__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_reset__phone.png" alt="관리자_reset" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/reset</code>
+        <span class="fn">관리자_reset__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_rival"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/rival</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_rival__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_rival__pc.png" alt="관리자_rival" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/rival</code>
+        <span class="fn">관리자_rival__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_rival__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_rival__phone.png" alt="관리자_rival" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/rival</code>
+        <span class="fn">관리자_rival__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_staff"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/staff</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_staff__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_staff__pc.png" alt="관리자_staff" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/staff</code>
+        <span class="fn">관리자_staff__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_staff__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_staff__phone.png" alt="관리자_staff" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/staff</code>
+        <span class="fn">관리자_staff__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_stats"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/stats</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_stats__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_stats__pc.png" alt="관리자_stats" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/stats</code>
+        <span class="fn">관리자_stats__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_stats__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_stats__phone.png" alt="관리자_stats" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/stats</code>
+        <span class="fn">관리자_stats__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_texts"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/texts</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_texts__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_texts__pc.png" alt="관리자_texts" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/texts</code>
+        <span class="fn">관리자_texts__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_texts__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_texts__phone.png" alt="관리자_texts" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/texts</code>
+        <span class="fn">관리자_texts__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_trash"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/trash</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#14-관리자-admin-23곳-공고-하나-adminjobsid">04 화면스펙 → 14. 관리자 `/admin` … 23곳 · 공고 하나 `/admin/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_trash__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_trash__pc.png" alt="관리자_trash" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/trash</code>
+        <span class="fn">관리자_trash__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_trash__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_trash__phone.png" alt="관리자_trash" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/trash</code>
+        <span class="fn">관리자_trash__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_admin_verify"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/admin/verify</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#10-재직-인증-verify-숨김-adminverify">04 화면스펙 → 10. 재직 인증 `/verify` ★숨김 · `/admin/verify`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_verify__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_verify__pc.png" alt="관리자_verify" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/admin/verify</code>
+        <span class="fn">관리자_verify__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_verify__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_verify__phone.png" alt="관리자_verify" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/admin/verify</code>
+        <span class="fn">관리자_verify__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_alarm"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/alarm</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#12-알림함-alarm-탑바-종-숨김">04 화면스펙 → 12. 알림함 `/alarm` · 탑바 종 ★숨김</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="알림_일곱줄__pc.png" target="_blank" rel="noopener">
+        <img src="알림_일곱줄__pc.png" alt="알림_일곱줄" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/alarm</code>
+        <span class="fn">알림_일곱줄__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="알림_일곱줄__phone.png" target="_blank" rel="noopener">
+        <img src="알림_일곱줄__phone.png" alt="알림_일곱줄" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/alarm</code>
+        <span class="fn">알림_일곱줄__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_api_og_job__id_"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음|빈 상태">
+  <h2><code>/api/og/job/[id]</code></h2>
+  <p class="meta">
+    <span class="count">6장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#21-404-not-found-카톡-미리보기-apiogjobid">04 화면스펙 → 21. 404 `not-found` · 카톡 미리보기 `/api/og/job/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="카톡미리보기_마감__pc.png" target="_blank" rel="noopener">
+        <img src="카톡미리보기_마감__pc.png" alt="카톡미리보기_마감" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/api/og/job/WNKJAX002609170009</code>
+        <span class="fn">카톡미리보기_마감__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="빈 상태" data-w="pc">
+      <a href="카톡미리보기_숨겨진공고__pc.png" target="_blank" rel="noopener">
+        <img src="카톡미리보기_숨겨진공고__pc.png" alt="카톡미리보기_숨겨진공고" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-빈상태">빈 상태</span>
+        <span class="w">PC 1280</span>
+        <code>/api/og/job/WNK180512610060043</code>
+        <span class="fn">카톡미리보기_숨겨진공고__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="카톡미리보기_진행중__pc.png" target="_blank" rel="noopener">
+        <img src="카톡미리보기_진행중__pc.png" alt="카톡미리보기_진행중" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/api/og/job/WNK150012610080045</code>
+        <span class="fn">카톡미리보기_진행중__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="카톡미리보기_마감__phone.png" target="_blank" rel="noopener">
+        <img src="카톡미리보기_마감__phone.png" alt="카톡미리보기_마감" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/api/og/job/WNKJAX002609170009</code>
+        <span class="fn">카톡미리보기_마감__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="빈 상태" data-w="phone">
+      <a href="카톡미리보기_숨겨진공고__phone.png" target="_blank" rel="noopener">
+        <img src="카톡미리보기_숨겨진공고__phone.png" alt="카톡미리보기_숨겨진공고" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-빈상태">빈 상태</span>
+        <span class="w">휴대폰 390</span>
+        <code>/api/og/job/WNK180512610060043</code>
+        <span class="fn">카톡미리보기_숨겨진공고__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="카톡미리보기_진행중__phone.png" target="_blank" rel="noopener">
+        <img src="카톡미리보기_진행중__phone.png" alt="카톡미리보기_진행중" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/api/og/job/WNK150012610080045</code>
+        <span class="fn">카톡미리보기_진행중__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_biz"
+         data-personas="학생|채용담당자|교육담당자|채용+교육담당자|관리자"
+         data-states="숨김(준비 중)|자료 있음|권한 없음">
+  <h2><code>/biz</code></h2>
+  <p class="meta">
+    <span class="count">10장</span>
+    <span>학생 · 채용담당자 · 교육담당자 · 채용+교육담당자 · 관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#7-채용-관리-biz-숨김">04 화면스펙 → 7. 채용 관리 `/biz` ★숨김</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="학생" data-state="숨김(준비 중)" data-w="pc">
+      <a href="학생_채용관리_숨김__pc.png" target="_blank" rel="noopener">
+        <img src="학생_채용관리_숨김__pc.png" alt="학생_채용관리_숨김" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-숨김준비중">숨김(준비 중)</span>
+        <span class="w">PC 1280</span>
+        <code>/biz</code>
+        <span class="fn">학생_채용관리_숨김__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="숨김(준비 중)" data-w="phone">
+      <a href="학생_채용관리_숨김__phone.png" target="_blank" rel="noopener">
+        <img src="학생_채용관리_숨김__phone.png" alt="학생_채용관리_숨김" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-숨김준비중">숨김(준비 중)</span>
+        <span class="w">휴대폰 390</span>
+        <code>/biz</code>
+        <span class="fn">학생_채용관리_숨김__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용담당자" data-state="자료 있음" data-w="pc">
+      <a href="담당자_채용관리__pc.png" target="_blank" rel="noopener">
+        <img src="담당자_채용관리__pc.png" alt="담당자_채용관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/biz</code>
+        <span class="fn">담당자_채용관리__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용담당자" data-state="자료 있음" data-w="phone">
+      <a href="담당자_채용관리__phone.png" target="_blank" rel="noopener">
+        <img src="담당자_채용관리__phone.png" alt="담당자_채용관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/biz</code>
+        <span class="fn">담당자_채용관리__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="교육담당자" data-state="권한 없음" data-w="pc">
+      <a href="교육담당자_채용관리_막힘__pc.png" target="_blank" rel="noopener">
+        <img src="교육담당자_채용관리_막힘__pc.png" alt="교육담당자_채용관리_막힘" loading="lazy">
+      </a>
+      <figcaption>
+        <b>교육담당자</b>
+        <span class="st st-권한없음">권한 없음</span>
+        <span class="w">PC 1280</span>
+        <code>/biz</code>
+        <span class="fn">교육담당자_채용관리_막힘__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="교육담당자" data-state="권한 없음" data-w="phone">
+      <a href="교육담당자_채용관리_막힘__phone.png" target="_blank" rel="noopener">
+        <img src="교육담당자_채용관리_막힘__phone.png" alt="교육담당자_채용관리_막힘" loading="lazy">
+      </a>
+      <figcaption>
+        <b>교육담당자</b>
+        <span class="st st-권한없음">권한 없음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/biz</code>
+        <span class="fn">교육담당자_채용관리_막힘__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용+교육담당자" data-state="자료 있음" data-w="pc">
+      <a href="둘다담당자_채용관리__pc.png" target="_blank" rel="noopener">
+        <img src="둘다담당자_채용관리__pc.png" alt="둘다담당자_채용관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용+교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/biz</code>
+        <span class="fn">둘다담당자_채용관리__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용+교육담당자" data-state="자료 있음" data-w="phone">
+      <a href="둘다담당자_채용관리__phone.png" target="_blank" rel="noopener">
+        <img src="둘다담당자_채용관리__phone.png" alt="둘다담당자_채용관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용+교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/biz</code>
+        <span class="fn">둘다담당자_채용관리__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="숨김(준비 중)" data-w="pc">
+      <a href="채용관리__pc.png" target="_blank" rel="noopener">
+        <img src="채용관리__pc.png" alt="채용관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-숨김준비중">숨김(준비 중)</span>
+        <span class="w">PC 1280</span>
+        <code>/biz</code>
+        <span class="fn">채용관리__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="숨김(준비 중)" data-w="phone">
+      <a href="채용관리__phone.png" target="_blank" rel="noopener">
+        <img src="채용관리__phone.png" alt="채용관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-숨김준비중">숨김(준비 중)</span>
+        <span class="w">휴대폰 390</span>
+        <code>/biz</code>
+        <span class="fn">채용관리__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_community"
+         data-personas="(로그인 안 함)|비회원|학생|작업치료사|채용담당자"
+         data-states="자료 있음">
+  <h2><code>/community</code></h2>
+  <p class="meta">
+    <span class="count">10장</span>
+    <span>(로그인 안 함) · 비회원 · 학생 · 작업치료사 · 채용담당자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#5-커뮤니티-community-communitych-postid-글쓰기-communitywrite">04 화면스펙 → 5. 커뮤니티 `/community` · `/community/[ch]` · `/post/[id]` · 글쓰기 `/community/write`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_커뮤니티__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_커뮤니티__pc.png" alt="비로그인_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/community</code>
+        <span class="fn">비로그인_커뮤니티__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_커뮤니티__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_커뮤니티__phone.png" alt="비로그인_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/community</code>
+        <span class="fn">비로그인_커뮤니티__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="자료 있음" data-w="pc">
+      <a href="비회원보기_커뮤니티__pc.png" target="_blank" rel="noopener">
+        <img src="비회원보기_커뮤니티__pc.png" alt="비회원보기_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/community</code>
+        <span class="fn">비회원보기_커뮤니티__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="자료 있음" data-w="phone">
+      <a href="비회원보기_커뮤니티__phone.png" target="_blank" rel="noopener">
+        <img src="비회원보기_커뮤니티__phone.png" alt="비회원보기_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/community</code>
+        <span class="fn">비회원보기_커뮤니티__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_커뮤니티__pc.png" target="_blank" rel="noopener">
+        <img src="학생_커뮤니티__pc.png" alt="학생_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/community</code>
+        <span class="fn">학생_커뮤니티__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_커뮤니티__phone.png" target="_blank" rel="noopener">
+        <img src="학생_커뮤니티__phone.png" alt="학생_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/community</code>
+        <span class="fn">학생_커뮤니티__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="pc">
+      <a href="작업치료사_커뮤니티__pc.png" target="_blank" rel="noopener">
+        <img src="작업치료사_커뮤니티__pc.png" alt="작업치료사_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/community</code>
+        <span class="fn">작업치료사_커뮤니티__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="phone">
+      <a href="작업치료사_커뮤니티__phone.png" target="_blank" rel="noopener">
+        <img src="작업치료사_커뮤니티__phone.png" alt="작업치료사_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/community</code>
+        <span class="fn">작업치료사_커뮤니티__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용담당자" data-state="자료 있음" data-w="pc">
+      <a href="담당자_커뮤니티__pc.png" target="_blank" rel="noopener">
+        <img src="담당자_커뮤니티__pc.png" alt="담당자_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/community</code>
+        <span class="fn">담당자_커뮤니티__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용담당자" data-state="자료 있음" data-w="phone">
+      <a href="담당자_커뮤니티__phone.png" target="_blank" rel="noopener">
+        <img src="담당자_커뮤니티__phone.png" alt="담당자_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/community</code>
+        <span class="fn">담당자_커뮤니티__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_community__ch_"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/community/[ch]</code></h2>
+  <p class="meta">
+    <span class="count">4장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#5-커뮤니티-community-communitych-postid-글쓰기-communitywrite">04 화면스펙 → 5. 커뮤니티 `/community` · `/community/[ch]` · `/post/[id]` · 글쓰기 `/community/write`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_커뮤니티_자유__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_커뮤니티_자유__pc.png" alt="비로그인_커뮤니티_자유" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/community/free</code>
+        <span class="fn">비로그인_커뮤니티_자유__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_커뮤니티_장터__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_커뮤니티_장터__pc.png" alt="비로그인_커뮤니티_장터" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/community/market</code>
+        <span class="fn">비로그인_커뮤니티_장터__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_커뮤니티_자유__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_커뮤니티_자유__phone.png" alt="비로그인_커뮤니티_자유" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/community/free</code>
+        <span class="fn">비로그인_커뮤니티_자유__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_커뮤니티_장터__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_커뮤니티_장터__phone.png" alt="비로그인_커뮤니티_장터" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/community/market</code>
+        <span class="fn">비로그인_커뮤니티_장터__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_community_write"
+         data-personas="(로그인 안 함)|학생|관리자"
+         data-states="로그인 안내|자료 있음">
+  <h2><code>/community/write</code></h2>
+  <p class="meta">
+    <span class="count">6장</span>
+    <span>(로그인 안 함) · 학생 · 관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#5-커뮤니티-community-communitych-postid-글쓰기-communitywrite">04 화면스펙 → 5. 커뮤니티 `/community` · `/community/[ch]` · `/post/[id]` · 글쓰기 `/community/write`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="로그인 안내" data-w="pc">
+      <a href="비로그인_글쓰기_로그인안내__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_글쓰기_로그인안내__pc.png" alt="비로그인_글쓰기_로그인안내" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-로그인안내">로그인 안내</span>
+        <span class="w">PC 1280</span>
+        <code>/community/write</code>
+        <span class="fn">비로그인_글쓰기_로그인안내__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="로그인 안내" data-w="phone">
+      <a href="비로그인_글쓰기_로그인안내__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_글쓰기_로그인안내__phone.png" alt="비로그인_글쓰기_로그인안내" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-로그인안내">로그인 안내</span>
+        <span class="w">휴대폰 390</span>
+        <code>/community/write</code>
+        <span class="fn">비로그인_글쓰기_로그인안내__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_글쓰기__pc.png" target="_blank" rel="noopener">
+        <img src="학생_글쓰기__pc.png" alt="학생_글쓰기" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/community/write</code>
+        <span class="fn">학생_글쓰기__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_글쓰기__phone.png" target="_blank" rel="noopener">
+        <img src="학생_글쓰기__phone.png" alt="학생_글쓰기" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/community/write</code>
+        <span class="fn">학생_글쓰기__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="관리자_글쓰기__pc.png" target="_blank" rel="noopener">
+        <img src="관리자_글쓰기__pc.png" alt="관리자_글쓰기" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/community/write</code>
+        <span class="fn">관리자_글쓰기__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="관리자_글쓰기__phone.png" target="_blank" rel="noopener">
+        <img src="관리자_글쓰기__phone.png" alt="관리자_글쓰기" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/community/write</code>
+        <span class="fn">관리자_글쓰기__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_compete"
+         data-personas="(로그인 안 함)|비회원|학생|작업치료사"
+         data-states="로그인 안내|자료 있음">
+  <h2><code>/compete</code></h2>
+  <p class="meta">
+    <span class="count">8장</span>
+    <span>(로그인 안 함) · 비회원 · 학생 · 작업치료사</span>
+    <a class="spec" href="../인계/04_화면스펙.md#4-경쟁률-compete">04 화면스펙 → 4. 경쟁률 `/compete`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="로그인 안내" data-w="pc">
+      <a href="비로그인_경쟁률_로그인안내__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_경쟁률_로그인안내__pc.png" alt="비로그인_경쟁률_로그인안내" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-로그인안내">로그인 안내</span>
+        <span class="w">PC 1280</span>
+        <code>/compete</code>
+        <span class="fn">비로그인_경쟁률_로그인안내__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="로그인 안내" data-w="phone">
+      <a href="비로그인_경쟁률_로그인안내__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_경쟁률_로그인안내__phone.png" alt="비로그인_경쟁률_로그인안내" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-로그인안내">로그인 안내</span>
+        <span class="w">휴대폰 390</span>
+        <code>/compete</code>
+        <span class="fn">비로그인_경쟁률_로그인안내__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="로그인 안내" data-w="pc">
+      <a href="비회원보기_경쟁률__pc.png" target="_blank" rel="noopener">
+        <img src="비회원보기_경쟁률__pc.png" alt="비회원보기_경쟁률" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-로그인안내">로그인 안내</span>
+        <span class="w">PC 1280</span>
+        <code>/compete</code>
+        <span class="fn">비회원보기_경쟁률__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="로그인 안내" data-w="phone">
+      <a href="비회원보기_경쟁률__phone.png" target="_blank" rel="noopener">
+        <img src="비회원보기_경쟁률__phone.png" alt="비회원보기_경쟁률" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-로그인안내">로그인 안내</span>
+        <span class="w">휴대폰 390</span>
+        <code>/compete</code>
+        <span class="fn">비회원보기_경쟁률__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_경쟁률__pc.png" target="_blank" rel="noopener">
+        <img src="학생_경쟁률__pc.png" alt="학생_경쟁률" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/compete?g=작업치료사</code>
+        <span class="fn">학생_경쟁률__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_경쟁률__phone.png" target="_blank" rel="noopener">
+        <img src="학생_경쟁률__phone.png" alt="학생_경쟁률" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/compete?g=작업치료사</code>
+        <span class="fn">학생_경쟁률__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="pc">
+      <a href="작업치료사_경쟁률__pc.png" target="_blank" rel="noopener">
+        <img src="작업치료사_경쟁률__pc.png" alt="작업치료사_경쟁률" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/compete?g=작업치료사</code>
+        <span class="fn">작업치료사_경쟁률__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="phone">
+      <a href="작업치료사_경쟁률__phone.png" target="_blank" rel="noopener">
+        <img src="작업치료사_경쟁률__phone.png" alt="작업치료사_경쟁률" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/compete?g=작업치료사</code>
+        <span class="fn">작업치료사_경쟁률__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_contact"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/contact</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#19-약관-termsdoc-문의-contact-유료-안내-pay">04 화면스펙 → 19. 약관 `/terms/[doc]` · 문의 `/contact` · 유료 안내 `/pay`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_문의__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_문의__pc.png" alt="비로그인_문의" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/contact</code>
+        <span class="fn">비로그인_문의__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_문의__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_문의__phone.png" alt="비로그인_문의" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/contact</code>
+        <span class="fn">비로그인_문의__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_edu"
+         data-personas="(로그인 안 함)|비회원|학생|작업치료사|교육담당자"
+         data-states="자료 있음">
+  <h2><code>/edu</code></h2>
+  <p class="meta">
+    <span class="count">10장</span>
+    <span>(로그인 안 함) · 비회원 · 학생 · 작업치료사 · 교육담당자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#6-교육학술-edu-edusessionid-eduorg-eduorgname">04 화면스펙 → 6. 교육·학술 `/edu` · `/edu/session/[id]` · `/edu/org` · `/edu/org/[name]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_교육__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_교육__pc.png" alt="비로그인_교육" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu</code>
+        <span class="fn">비로그인_교육__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_교육__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_교육__phone.png" alt="비로그인_교육" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu</code>
+        <span class="fn">비로그인_교육__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="자료 있음" data-w="pc">
+      <a href="비회원보기_교육__pc.png" target="_blank" rel="noopener">
+        <img src="비회원보기_교육__pc.png" alt="비회원보기_교육" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu</code>
+        <span class="fn">비회원보기_교육__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="자료 있음" data-w="phone">
+      <a href="비회원보기_교육__phone.png" target="_blank" rel="noopener">
+        <img src="비회원보기_교육__phone.png" alt="비회원보기_교육" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu</code>
+        <span class="fn">비회원보기_교육__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_교육__pc.png" target="_blank" rel="noopener">
+        <img src="학생_교육__pc.png" alt="학생_교육" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu</code>
+        <span class="fn">학생_교육__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_교육__phone.png" target="_blank" rel="noopener">
+        <img src="학생_교육__phone.png" alt="학생_교육" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu</code>
+        <span class="fn">학생_교육__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="pc">
+      <a href="작업치료사_교육__pc.png" target="_blank" rel="noopener">
+        <img src="작업치료사_교육__pc.png" alt="작업치료사_교육" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu</code>
+        <span class="fn">작업치료사_교육__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="phone">
+      <a href="작업치료사_교육__phone.png" target="_blank" rel="noopener">
+        <img src="작업치료사_교육__phone.png" alt="작업치료사_교육" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu</code>
+        <span class="fn">작업치료사_교육__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="교육담당자" data-state="자료 있음" data-w="pc">
+      <a href="교육담당자_교육목록__pc.png" target="_blank" rel="noopener">
+        <img src="교육담당자_교육목록__pc.png" alt="교육담당자_교육목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu</code>
+        <span class="fn">교육담당자_교육목록__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="교육담당자" data-state="자료 있음" data-w="phone">
+      <a href="교육담당자_교육목록__phone.png" target="_blank" rel="noopener">
+        <img src="교육담당자_교육목록__phone.png" alt="교육담당자_교육목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu</code>
+        <span class="fn">교육담당자_교육목록__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_edu_manage"
+         data-personas="학생|채용담당자|교육담당자|채용+교육담당자|관리자"
+         data-states="숨김(준비 중)|권한 없음|자료 있음">
+  <h2><code>/edu/manage</code></h2>
+  <p class="meta">
+    <span class="count">10장</span>
+    <span>학생 · 채용담당자 · 교육담당자 · 채용+교육담당자 · 관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#8-교육-관리-edumanage-숨김">04 화면스펙 → 8. 교육 관리 `/edu/manage` ★숨김</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="학생" data-state="숨김(준비 중)" data-w="pc">
+      <a href="학생_교육관리_숨김__pc.png" target="_blank" rel="noopener">
+        <img src="학생_교육관리_숨김__pc.png" alt="학생_교육관리_숨김" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-숨김준비중">숨김(준비 중)</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/manage</code>
+        <span class="fn">학생_교육관리_숨김__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="숨김(준비 중)" data-w="phone">
+      <a href="학생_교육관리_숨김__phone.png" target="_blank" rel="noopener">
+        <img src="학생_교육관리_숨김__phone.png" alt="학생_교육관리_숨김" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-숨김준비중">숨김(준비 중)</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/manage</code>
+        <span class="fn">학생_교육관리_숨김__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용담당자" data-state="권한 없음" data-w="pc">
+      <a href="담당자_교육관리_막힘__pc.png" target="_blank" rel="noopener">
+        <img src="담당자_교육관리_막힘__pc.png" alt="담당자_교육관리_막힘" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용담당자</b>
+        <span class="st st-권한없음">권한 없음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/manage</code>
+        <span class="fn">담당자_교육관리_막힘__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용담당자" data-state="권한 없음" data-w="phone">
+      <a href="담당자_교육관리_막힘__phone.png" target="_blank" rel="noopener">
+        <img src="담당자_교육관리_막힘__phone.png" alt="담당자_교육관리_막힘" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용담당자</b>
+        <span class="st st-권한없음">권한 없음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/manage</code>
+        <span class="fn">담당자_교육관리_막힘__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="교육담당자" data-state="자료 있음" data-w="pc">
+      <a href="교육담당자_교육관리__pc.png" target="_blank" rel="noopener">
+        <img src="교육담당자_교육관리__pc.png" alt="교육담당자_교육관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/manage</code>
+        <span class="fn">교육담당자_교육관리__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="교육담당자" data-state="자료 있음" data-w="phone">
+      <a href="교육담당자_교육관리__phone.png" target="_blank" rel="noopener">
+        <img src="교육담당자_교육관리__phone.png" alt="교육담당자_교육관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/manage</code>
+        <span class="fn">교육담당자_교육관리__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용+교육담당자" data-state="자료 있음" data-w="pc">
+      <a href="둘다담당자_교육관리__pc.png" target="_blank" rel="noopener">
+        <img src="둘다담당자_교육관리__pc.png" alt="둘다담당자_교육관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용+교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/manage</code>
+        <span class="fn">둘다담당자_교육관리__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용+교육담당자" data-state="자료 있음" data-w="phone">
+      <a href="둘다담당자_교육관리__phone.png" target="_blank" rel="noopener">
+        <img src="둘다담당자_교육관리__phone.png" alt="둘다담당자_교육관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용+교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/manage</code>
+        <span class="fn">둘다담당자_교육관리__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="숨김(준비 중)" data-w="pc">
+      <a href="교육관리__pc.png" target="_blank" rel="noopener">
+        <img src="교육관리__pc.png" alt="교육관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-숨김준비중">숨김(준비 중)</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/manage</code>
+        <span class="fn">교육관리__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="숨김(준비 중)" data-w="phone">
+      <a href="교육관리__phone.png" target="_blank" rel="noopener">
+        <img src="교육관리__phone.png" alt="교육관리" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-숨김준비중">숨김(준비 중)</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/manage</code>
+        <span class="fn">교육관리__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_edu_org"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/edu/org</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#6-교육학술-edu-edusessionid-eduorg-eduorgname">04 화면스펙 → 6. 교육·학술 `/edu` · `/edu/session/[id]` · `/edu/org` · `/edu/org/[name]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_교육기관목록__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_교육기관목록__pc.png" alt="비로그인_교육기관목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/org</code>
+        <span class="fn">비로그인_교육기관목록__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_교육기관목록__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_교육기관목록__phone.png" alt="비로그인_교육기관목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/org</code>
+        <span class="fn">비로그인_교육기관목록__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_edu_org__name_"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/edu/org/[name]</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#6-교육학술-edu-edusessionid-eduorg-eduorgname">04 화면스펙 → 6. 교육·학술 `/edu` · `/edu/session/[id]` · `/edu/org` · `/edu/org/[name]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_교육기관하나__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_교육기관하나__pc.png" alt="비로그인_교육기관하나" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/org/대한연하재활학회</code>
+        <span class="fn">비로그인_교육기관하나__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_교육기관하나__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_교육기관하나__phone.png" alt="비로그인_교육기관하나" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/org/대한연하재활학회</code>
+        <span class="fn">비로그인_교육기관하나__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_edu_session__id_"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/edu/session/[id]</code></h2>
+  <p class="meta">
+    <span class="count">10장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#6-교육학술-edu-edusessionid-eduorg-eduorgname">04 화면스펙 → 6. 교육·학술 `/edu` · `/edu/session/[id]` · `/edu/org` · `/edu/org/[name]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="교육_모집중__pc.png" target="_blank" rel="noopener">
+        <img src="교육_모집중__pc.png" alt="교육_모집중" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/session/2</code>
+        <span class="fn">교육_모집중__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="교육_미선정__pc.png" target="_blank" rel="noopener">
+        <img src="교육_미선정__pc.png" alt="교육_미선정" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/session/4</code>
+        <span class="fn">교육_미선정__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="교육_입금대기__pc.png" target="_blank" rel="noopener">
+        <img src="교육_입금대기__pc.png" alt="교육_입금대기" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/session/3</code>
+        <span class="fn">교육_입금대기__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="교육_후기쓰기__pc.png" target="_blank" rel="noopener">
+        <img src="교육_후기쓰기__pc.png" alt="교육_후기쓰기" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/session/5</code>
+        <span class="fn">교육_후기쓰기__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="교육_후기아직__pc.png" target="_blank" rel="noopener">
+        <img src="교육_후기아직__pc.png" alt="교육_후기아직" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/edu/session/6</code>
+        <span class="fn">교육_후기아직__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="교육_모집중__phone.png" target="_blank" rel="noopener">
+        <img src="교육_모집중__phone.png" alt="교육_모집중" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/session/2</code>
+        <span class="fn">교육_모집중__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="교육_미선정__phone.png" target="_blank" rel="noopener">
+        <img src="교육_미선정__phone.png" alt="교육_미선정" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/session/4</code>
+        <span class="fn">교육_미선정__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="교육_입금대기__phone.png" target="_blank" rel="noopener">
+        <img src="교육_입금대기__phone.png" alt="교육_입금대기" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/session/3</code>
+        <span class="fn">교육_입금대기__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="교육_후기쓰기__phone.png" target="_blank" rel="noopener">
+        <img src="교육_후기쓰기__phone.png" alt="교육_후기쓰기" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/session/5</code>
+        <span class="fn">교육_후기쓰기__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="교육_후기아직__phone.png" target="_blank" rel="noopener">
+        <img src="교육_후기아직__phone.png" alt="교육_후기아직" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/edu/session/6</code>
+        <span class="fn">교육_후기아직__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_jobs"
+         data-personas="(로그인 안 함)|비회원|가입중|학생|작업치료사"
+         data-states="자료 있음|빈 상태">
+  <h2><code>/jobs</code></h2>
+  <p class="meta">
+    <span class="count">14장</span>
+    <span>(로그인 안 함) · 비회원 · 가입중 · 학생 · 작업치료사</span>
+    <a class="spec" href="../인계/04_화면스펙.md#2-공고-목록-jobs">04 화면스펙 → 2. 공고 목록 `/jobs`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_공고목록__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_공고목록__pc.png" alt="비로그인_공고목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs</code>
+        <span class="fn">비로그인_공고목록__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="빈 상태" data-w="pc">
+      <a href="비로그인_공고목록_빈결과__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_공고목록_빈결과__pc.png" alt="비로그인_공고목록_빈결과" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-빈상태">빈 상태</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs?q=zzz없는낱말zzz</code>
+        <span class="fn">비로그인_공고목록_빈결과__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_공고목록__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_공고목록__phone.png" alt="비로그인_공고목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs</code>
+        <span class="fn">비로그인_공고목록__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="빈 상태" data-w="phone">
+      <a href="비로그인_공고목록_빈결과__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_공고목록_빈결과__phone.png" alt="비로그인_공고목록_빈결과" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-빈상태">빈 상태</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs?q=zzz없는낱말zzz</code>
+        <span class="fn">비로그인_공고목록_빈결과__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="자료 있음" data-w="pc">
+      <a href="비회원보기_공고목록__pc.png" target="_blank" rel="noopener">
+        <img src="비회원보기_공고목록__pc.png" alt="비회원보기_공고목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs</code>
+        <span class="fn">비회원보기_공고목록__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="자료 있음" data-w="phone">
+      <a href="비회원보기_공고목록__phone.png" target="_blank" rel="noopener">
+        <img src="비회원보기_공고목록__phone.png" alt="비회원보기_공고목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs</code>
+        <span class="fn">비회원보기_공고목록__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="가입중" data-state="자료 있음" data-w="pc">
+      <a href="가입중_공고목록__pc.png" target="_blank" rel="noopener">
+        <img src="가입중_공고목록__pc.png" alt="가입중_공고목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>가입중</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs</code>
+        <span class="fn">가입중_공고목록__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="가입중" data-state="자료 있음" data-w="phone">
+      <a href="가입중_공고목록__phone.png" target="_blank" rel="noopener">
+        <img src="가입중_공고목록__phone.png" alt="가입중_공고목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>가입중</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs</code>
+        <span class="fn">가입중_공고목록__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_공고목록__pc.png" target="_blank" rel="noopener">
+        <img src="학생_공고목록__pc.png" alt="학생_공고목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs</code>
+        <span class="fn">학생_공고목록__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_공고목록__phone.png" target="_blank" rel="noopener">
+        <img src="학생_공고목록__phone.png" alt="학생_공고목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs</code>
+        <span class="fn">학생_공고목록__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="pc">
+      <a href="작업치료사_공고목록__pc.png" target="_blank" rel="noopener">
+        <img src="작업치료사_공고목록__pc.png" alt="작업치료사_공고목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs</code>
+        <span class="fn">작업치료사_공고목록__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="빈 상태" data-w="pc">
+      <a href="작업치료사_공고목록_빈결과__pc.png" target="_blank" rel="noopener">
+        <img src="작업치료사_공고목록_빈결과__pc.png" alt="작업치료사_공고목록_빈결과" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-빈상태">빈 상태</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs?q=zzz없는낱말zzz</code>
+        <span class="fn">작업치료사_공고목록_빈결과__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="phone">
+      <a href="작업치료사_공고목록__phone.png" target="_blank" rel="noopener">
+        <img src="작업치료사_공고목록__phone.png" alt="작업치료사_공고목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs</code>
+        <span class="fn">작업치료사_공고목록__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="빈 상태" data-w="phone">
+      <a href="작업치료사_공고목록_빈결과__phone.png" target="_blank" rel="noopener">
+        <img src="작업치료사_공고목록_빈결과__phone.png" alt="작업치료사_공고목록_빈결과" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-빈상태">빈 상태</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs?q=zzz없는낱말zzz</code>
+        <span class="fn">작업치료사_공고목록_빈결과__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_jobs__id_"
+         data-personas="(로그인 안 함)|비회원|학생|작업치료사|채용담당자"
+         data-states="로그인 안내|자료 있음">
+  <h2><code>/jobs/[id]</code></h2>
+  <p class="meta">
+    <span class="count">10장</span>
+    <span>(로그인 안 함) · 비회원 · 학생 · 작업치료사 · 채용담당자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#3-공고-상세-jobsid">04 화면스펙 → 3. 공고 상세 `/jobs/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="로그인 안내" data-w="pc">
+      <a href="비로그인_공고상세_로그인안내__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_공고상세_로그인안내__pc.png" alt="비로그인_공고상세_로그인안내" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-로그인안내">로그인 안내</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs/WNK150012610080045</code>
+        <span class="fn">비로그인_공고상세_로그인안내__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="로그인 안내" data-w="phone">
+      <a href="비로그인_공고상세_로그인안내__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_공고상세_로그인안내__phone.png" alt="비로그인_공고상세_로그인안내" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-로그인안내">로그인 안내</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs/WNK150012610080045</code>
+        <span class="fn">비로그인_공고상세_로그인안내__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="로그인 안내" data-w="pc">
+      <a href="비회원보기_공고상세__pc.png" target="_blank" rel="noopener">
+        <img src="비회원보기_공고상세__pc.png" alt="비회원보기_공고상세" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-로그인안내">로그인 안내</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs/WNK150012610080045</code>
+        <span class="fn">비회원보기_공고상세__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="비회원" data-state="로그인 안내" data-w="phone">
+      <a href="비회원보기_공고상세__phone.png" target="_blank" rel="noopener">
+        <img src="비회원보기_공고상세__phone.png" alt="비회원보기_공고상세" loading="lazy">
+      </a>
+      <figcaption>
+        <b>비회원</b>
+        <span class="st st-로그인안내">로그인 안내</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs/WNK150012610080045</code>
+        <span class="fn">비회원보기_공고상세__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_공고상세__pc.png" target="_blank" rel="noopener">
+        <img src="학생_공고상세__pc.png" alt="학생_공고상세" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs/WNK150012610080045</code>
+        <span class="fn">학생_공고상세__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_공고상세__phone.png" target="_blank" rel="noopener">
+        <img src="학생_공고상세__phone.png" alt="학생_공고상세" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs/WNK150012610080045</code>
+        <span class="fn">학생_공고상세__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="pc">
+      <a href="작업치료사_공고상세__pc.png" target="_blank" rel="noopener">
+        <img src="작업치료사_공고상세__pc.png" alt="작업치료사_공고상세" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs/WNK150012610080045</code>
+        <span class="fn">작업치료사_공고상세__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="phone">
+      <a href="작업치료사_공고상세__phone.png" target="_blank" rel="noopener">
+        <img src="작업치료사_공고상세__phone.png" alt="작업치료사_공고상세" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs/WNK150012610080045</code>
+        <span class="fn">작업치료사_공고상세__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용담당자" data-state="자료 있음" data-w="pc">
+      <a href="담당자_시험공고_첨부__pc.png" target="_blank" rel="noopener">
+        <img src="담당자_시험공고_첨부__pc.png" alt="담당자_시험공고_첨부" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/jobs/BIZ000005</code>
+        <span class="fn">담당자_시험공고_첨부__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용담당자" data-state="자료 있음" data-w="phone">
+      <a href="담당자_시험공고_첨부__phone.png" target="_blank" rel="noopener">
+        <img src="담당자_시험공고_첨부__phone.png" alt="담당자_시험공고_첨부" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/jobs/BIZ000005</code>
+        <span class="fn">담당자_시험공고_첨부__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_login"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/login</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#18-로그인-login-환영-welcome-돌아오는-자리-authcallback">04 화면스펙 → 18. 로그인 `/login` · 환영 `/welcome` · 돌아오는 자리 `/auth/callback`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_로그인화면__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_로그인화면__pc.png" alt="비로그인_로그인화면" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/login</code>
+        <span class="fn">비로그인_로그인화면__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_로그인화면__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_로그인화면__phone.png" alt="비로그인_로그인화면" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/login</code>
+        <span class="fn">비로그인_로그인화면__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_me"
+         data-personas="학생|작업치료사|채용담당자|교육담당자|채용+교육담당자"
+         data-states="자료 있음">
+  <h2><code>/me</code></h2>
+  <p class="meta">
+    <span class="count">10장</span>
+    <span>학생 · 작업치료사 · 채용담당자 · 교육담당자 · 채용+교육담당자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#13-내-정보-me-탈퇴-meleave">04 화면스펙 → 13. 내 정보 `/me` · 탈퇴 `/me/leave`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_내정보__pc.png" target="_blank" rel="noopener">
+        <img src="학생_내정보__pc.png" alt="학생_내정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/me</code>
+        <span class="fn">학생_내정보__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_내정보__phone.png" target="_blank" rel="noopener">
+        <img src="학생_내정보__phone.png" alt="학생_내정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/me</code>
+        <span class="fn">학생_내정보__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="pc">
+      <a href="작업치료사_내정보__pc.png" target="_blank" rel="noopener">
+        <img src="작업치료사_내정보__pc.png" alt="작업치료사_내정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/me</code>
+        <span class="fn">작업치료사_내정보__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="작업치료사" data-state="자료 있음" data-w="phone">
+      <a href="작업치료사_내정보__phone.png" target="_blank" rel="noopener">
+        <img src="작업치료사_내정보__phone.png" alt="작업치료사_내정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>작업치료사</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/me</code>
+        <span class="fn">작업치료사_내정보__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용담당자" data-state="자료 있음" data-w="pc">
+      <a href="담당자_내정보__pc.png" target="_blank" rel="noopener">
+        <img src="담당자_내정보__pc.png" alt="담당자_내정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/me</code>
+        <span class="fn">담당자_내정보__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용담당자" data-state="자료 있음" data-w="phone">
+      <a href="담당자_내정보__phone.png" target="_blank" rel="noopener">
+        <img src="담당자_내정보__phone.png" alt="담당자_내정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/me</code>
+        <span class="fn">담당자_내정보__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="교육담당자" data-state="자료 있음" data-w="pc">
+      <a href="교육담당자_내정보__pc.png" target="_blank" rel="noopener">
+        <img src="교육담당자_내정보__pc.png" alt="교육담당자_내정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/me</code>
+        <span class="fn">교육담당자_내정보__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="교육담당자" data-state="자료 있음" data-w="phone">
+      <a href="교육담당자_내정보__phone.png" target="_blank" rel="noopener">
+        <img src="교육담당자_내정보__phone.png" alt="교육담당자_내정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/me</code>
+        <span class="fn">교육담당자_내정보__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용+교육담당자" data-state="자료 있음" data-w="pc">
+      <a href="둘다담당자_내정보__pc.png" target="_blank" rel="noopener">
+        <img src="둘다담당자_내정보__pc.png" alt="둘다담당자_내정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용+교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/me</code>
+        <span class="fn">둘다담당자_내정보__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="채용+교육담당자" data-state="자료 있음" data-w="phone">
+      <a href="둘다담당자_내정보__phone.png" target="_blank" rel="noopener">
+        <img src="둘다담당자_내정보__phone.png" alt="둘다담당자_내정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>채용+교육담당자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/me</code>
+        <span class="fn">둘다담당자_내정보__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_me_leave"
+         data-personas="학생"
+         data-states="자료 있음">
+  <h2><code>/me/leave</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>학생</span>
+    <a class="spec" href="../인계/04_화면스펙.md#13-내-정보-me-탈퇴-meleave">04 화면스펙 → 13. 내 정보 `/me` · 탈퇴 `/me/leave`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_탈퇴__pc.png" target="_blank" rel="noopener">
+        <img src="학생_탈퇴__pc.png" alt="학생_탈퇴" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/me/leave</code>
+        <span class="fn">학생_탈퇴__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_탈퇴__phone.png" target="_blank" rel="noopener">
+        <img src="학생_탈퇴__phone.png" alt="학생_탈퇴" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/me/leave</code>
+        <span class="fn">학생_탈퇴__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_nope_zzz"
+         data-personas="(로그인 안 함)"
+         data-states="권한 없음">
+  <h2><code>/nope-zzz</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#21-404-not-found-카톡-미리보기-apiogjobid">04 화면스펙 → 21. 404 `not-found` · 카톡 미리보기 `/api/og/job/[id]`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="권한 없음" data-w="pc">
+      <a href="비로그인_없는주소__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_없는주소__pc.png" alt="비로그인_없는주소" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-권한없음">권한 없음</span>
+        <span class="w">PC 1280</span>
+        <code>/nope-zzz</code>
+        <span class="fn">비로그인_없는주소__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="권한 없음" data-w="phone">
+      <a href="비로그인_없는주소__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_없는주소__phone.png" alt="비로그인_없는주소" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-권한없음">권한 없음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/nope-zzz</code>
+        <span class="fn">비로그인_없는주소__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_orgs"
+         data-personas="(로그인 안 함)|학생"
+         data-states="자료 있음|빈 상태">
+  <h2><code>/orgs</code></h2>
+  <p class="meta">
+    <span class="count">6장</span>
+    <span>(로그인 안 함) · 학생</span>
+    <a class="spec" href="../인계/04_화면스펙.md#16-기관-orgs">04 화면스펙 → 16. 기관 `/orgs`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_기관__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_기관__pc.png" alt="비로그인_기관" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/orgs</code>
+        <span class="fn">비로그인_기관__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="빈 상태" data-w="pc">
+      <a href="비로그인_기관_빈결과__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_기관_빈결과__pc.png" alt="비로그인_기관_빈결과" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-빈상태">빈 상태</span>
+        <span class="w">PC 1280</span>
+        <code>/orgs?q=zzz없는낱말zzz</code>
+        <span class="fn">비로그인_기관_빈결과__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_기관__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_기관__phone.png" alt="비로그인_기관" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/orgs</code>
+        <span class="fn">비로그인_기관__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="빈 상태" data-w="phone">
+      <a href="비로그인_기관_빈결과__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_기관_빈결과__phone.png" alt="비로그인_기관_빈결과" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-빈상태">빈 상태</span>
+        <span class="w">휴대폰 390</span>
+        <code>/orgs?q=zzz없는낱말zzz</code>
+        <span class="fn">비로그인_기관_빈결과__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_기관목록__pc.png" target="_blank" rel="noopener">
+        <img src="학생_기관목록__pc.png" alt="학생_기관목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/orgs</code>
+        <span class="fn">학생_기관목록__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_기관목록__phone.png" target="_blank" rel="noopener">
+        <img src="학생_기관목록__phone.png" alt="학생_기관목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/orgs</code>
+        <span class="fn">학생_기관목록__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_partner"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/partner</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#9-담당자-신청-partner-숨김-승인-adminpartners">04 화면스펙 → 9. 담당자 신청 `/partner` ★숨김 · 승인 `/admin/partners`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="담당자_내신청__pc.png" target="_blank" rel="noopener">
+        <img src="담당자_내신청__pc.png" alt="담당자_내신청" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/partner</code>
+        <span class="fn">담당자_내신청__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="담당자_내신청__phone.png" target="_blank" rel="noopener">
+        <img src="담당자_내신청__phone.png" alt="담당자_내신청" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/partner</code>
+        <span class="fn">담당자_내신청__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_pay"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/pay</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#19-약관-termsdoc-문의-contact-유료-안내-pay">04 화면스펙 → 19. 약관 `/terms/[doc]` · 문의 `/contact` · 유료 안내 `/pay`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_유료안내__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_유료안내__pc.png" alt="비로그인_유료안내" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/pay</code>
+        <span class="fn">비로그인_유료안내__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_유료안내__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_유료안내__phone.png" alt="비로그인_유료안내" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/pay</code>
+        <span class="fn">비로그인_유료안내__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_post__id_"
+         data-personas="(로그인 안 함)|학생"
+         data-states="자료 있음">
+  <h2><code>/post/[id]</code></h2>
+  <p class="meta">
+    <span class="count">4장</span>
+    <span>(로그인 안 함) · 학생</span>
+    <a class="spec" href="../인계/04_화면스펙.md#5-커뮤니티-community-communitych-postid-글쓰기-communitywrite">04 화면스펙 → 5. 커뮤니티 `/community` · `/community/[ch]` · `/post/[id]` · 글쓰기 `/community/write`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_글하나__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_글하나__pc.png" alt="비로그인_글하나" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/post/80</code>
+        <span class="fn">비로그인_글하나__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_글하나__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_글하나__phone.png" alt="비로그인_글하나" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/post/80</code>
+        <span class="fn">비로그인_글하나__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="pc">
+      <a href="학생_글하나__pc.png" target="_blank" rel="noopener">
+        <img src="학생_글하나__pc.png" alt="학생_글하나" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/post/80</code>
+        <span class="fn">학생_글하나__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="학생" data-state="자료 있음" data-w="phone">
+      <a href="학생_글하나__phone.png" target="_blank" rel="noopener">
+        <img src="학생_글하나__phone.png" alt="학생_글하나" loading="lazy">
+      </a>
+      <figcaption>
+        <b>학생</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/post/80</code>
+        <span class="fn">학생_글하나__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_soon"
+         data-personas="(로그인 안 함)"
+         data-states="숨김(준비 중)">
+  <h2><code>/soon</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#20-그-밖-volunteer-youth-soon-spec">04 화면스펙 → 20. 그 밖 `/volunteer` · `/youth` · `/soon` · `/spec`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="숨김(준비 중)" data-w="pc">
+      <a href="비로그인_준비중__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_준비중__pc.png" alt="비로그인_준비중" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-숨김준비중">숨김(준비 중)</span>
+        <span class="w">PC 1280</span>
+        <code>/soon</code>
+        <span class="fn">비로그인_준비중__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="숨김(준비 중)" data-w="phone">
+      <a href="비로그인_준비중__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_준비중__phone.png" alt="비로그인_준비중" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-숨김준비중">숨김(준비 중)</span>
+        <span class="w">휴대폰 390</span>
+        <code>/soon</code>
+        <span class="fn">비로그인_준비중__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_spec"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/spec</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#20-그-밖-volunteer-youth-soon-spec">04 화면스펙 → 20. 그 밖 `/volunteer` · `/youth` · `/soon` · `/spec`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_기능표__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_기능표__pc.png" alt="비로그인_기능표" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/spec</code>
+        <span class="fn">비로그인_기능표__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_기능표__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_기능표__phone.png" alt="비로그인_기능표" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/spec</code>
+        <span class="fn">비로그인_기능표__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_talk"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/talk</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#11-11-대화-talk-talkroom-숨김">04 화면스펙 → 11. 1:1 대화 `/talk` · `/talk/[room]` ★숨김</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="대화_목록__pc.png" target="_blank" rel="noopener">
+        <img src="대화_목록__pc.png" alt="대화_목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/talk</code>
+        <span class="fn">대화_목록__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="대화_목록__phone.png" target="_blank" rel="noopener">
+        <img src="대화_목록__phone.png" alt="대화_목록" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/talk</code>
+        <span class="fn">대화_목록__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_talk__room_"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/talk/[room]</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#11-11-대화-talk-talkroom-숨김">04 화면스펙 → 11. 1:1 대화 `/talk` · `/talk/[room]` ★숨김</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="대화_사진하나사라짐__pc.png" target="_blank" rel="noopener">
+        <img src="대화_사진하나사라짐__pc.png" alt="대화_사진하나사라짐" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/talk/6</code>
+        <span class="fn">대화_사진하나사라짐__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="대화_사진하나사라짐__phone.png" target="_blank" rel="noopener">
+        <img src="대화_사진하나사라짐__phone.png" alt="대화_사진하나사라짐" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/talk/6</code>
+        <span class="fn">대화_사진하나사라짐__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_terms__doc_"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/terms/[doc]</code></h2>
+  <p class="meta">
+    <span class="count">6장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#19-약관-termsdoc-문의-contact-유료-안내-pay">04 화면스펙 → 19. 약관 `/terms/[doc]` · 문의 `/contact` · 유료 안내 `/pay`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_약관_개인정보__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_약관_개인정보__pc.png" alt="비로그인_약관_개인정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/terms/privacy</code>
+        <span class="fn">비로그인_약관_개인정보__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_약관_서비스__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_약관_서비스__pc.png" alt="비로그인_약관_서비스" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/terms/service</code>
+        <span class="fn">비로그인_약관_서비스__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_약관_커뮤니티__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_약관_커뮤니티__pc.png" alt="비로그인_약관_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/terms/community</code>
+        <span class="fn">비로그인_약관_커뮤니티__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_약관_개인정보__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_약관_개인정보__phone.png" alt="비로그인_약관_개인정보" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/terms/privacy</code>
+        <span class="fn">비로그인_약관_개인정보__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_약관_서비스__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_약관_서비스__phone.png" alt="비로그인_약관_서비스" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/terms/service</code>
+        <span class="fn">비로그인_약관_서비스__phone.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_약관_커뮤니티__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_약관_커뮤니티__phone.png" alt="비로그인_약관_커뮤니티" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/terms/community</code>
+        <span class="fn">비로그인_약관_커뮤니티__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_tools"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/tools</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#17-계산기-tools-toolsunemployment-toolsseverance-toolsleave-toolspay">04 화면스펙 → 17. 계산기 `/tools` · `/tools/unemployment` · `/tools/severance` · `/tools/leave` · `/tools/pay`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_계산기__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_계산기__pc.png" alt="비로그인_계산기" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/tools</code>
+        <span class="fn">비로그인_계산기__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_계산기__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_계산기__phone.png" alt="비로그인_계산기" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/tools</code>
+        <span class="fn">비로그인_계산기__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_tools_leave"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/tools/leave</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#17-계산기-tools-toolsunemployment-toolsseverance-toolsleave-toolspay">04 화면스펙 → 17. 계산기 `/tools` · `/tools/unemployment` · `/tools/severance` · `/tools/leave` · `/tools/pay`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_계산기_연차__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_계산기_연차__pc.png" alt="비로그인_계산기_연차" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/tools/leave</code>
+        <span class="fn">비로그인_계산기_연차__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_계산기_연차__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_계산기_연차__phone.png" alt="비로그인_계산기_연차" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/tools/leave</code>
+        <span class="fn">비로그인_계산기_연차__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_tools_pay"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/tools/pay</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#17-계산기-tools-toolsunemployment-toolsseverance-toolsleave-toolspay">04 화면스펙 → 17. 계산기 `/tools` · `/tools/unemployment` · `/tools/severance` · `/tools/leave` · `/tools/pay`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_계산기_월급__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_계산기_월급__pc.png" alt="비로그인_계산기_월급" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/tools/pay</code>
+        <span class="fn">비로그인_계산기_월급__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_계산기_월급__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_계산기_월급__phone.png" alt="비로그인_계산기_월급" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/tools/pay</code>
+        <span class="fn">비로그인_계산기_월급__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_tools_severance"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/tools/severance</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#17-계산기-tools-toolsunemployment-toolsseverance-toolsleave-toolspay">04 화면스펙 → 17. 계산기 `/tools` · `/tools/unemployment` · `/tools/severance` · `/tools/leave` · `/tools/pay`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_계산기_퇴직금__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_계산기_퇴직금__pc.png" alt="비로그인_계산기_퇴직금" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/tools/severance</code>
+        <span class="fn">비로그인_계산기_퇴직금__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_계산기_퇴직금__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_계산기_퇴직금__phone.png" alt="비로그인_계산기_퇴직금" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/tools/severance</code>
+        <span class="fn">비로그인_계산기_퇴직금__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_tools_unemployment"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/tools/unemployment</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#17-계산기-tools-toolsunemployment-toolsseverance-toolsleave-toolspay">04 화면스펙 → 17. 계산기 `/tools` · `/tools/unemployment` · `/tools/severance` · `/tools/leave` · `/tools/pay`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_계산기_실업급여__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_계산기_실업급여__pc.png" alt="비로그인_계산기_실업급여" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/tools/unemployment</code>
+        <span class="fn">비로그인_계산기_실업급여__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_계산기_실업급여__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_계산기_실업급여__phone.png" alt="비로그인_계산기_실업급여" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/tools/unemployment</code>
+        <span class="fn">비로그인_계산기_실업급여__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_verify"
+         data-personas="관리자"
+         data-states="자료 있음">
+  <h2><code>/verify</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>관리자</span>
+    <a class="spec" href="../인계/04_화면스펙.md#10-재직-인증-verify-숨김-adminverify">04 화면스펙 → 10. 재직 인증 `/verify` ★숨김 · `/admin/verify`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="관리자" data-state="자료 있음" data-w="pc">
+      <a href="재직_배지__pc.png" target="_blank" rel="noopener">
+        <img src="재직_배지__pc.png" alt="재직_배지" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/verify</code>
+        <span class="fn">재직_배지__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="관리자" data-state="자료 있음" data-w="phone">
+      <a href="재직_배지__phone.png" target="_blank" rel="noopener">
+        <img src="재직_배지__phone.png" alt="재직_배지" loading="lazy">
+      </a>
+      <figcaption>
+        <b>관리자</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/verify</code>
+        <span class="fn">재직_배지__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_volunteer"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/volunteer</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#20-그-밖-volunteer-youth-soon-spec">04 화면스펙 → 20. 그 밖 `/volunteer` · `/youth` · `/soon` · `/spec`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_봉사__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_봉사__pc.png" alt="비로그인_봉사" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/volunteer</code>
+        <span class="fn">비로그인_봉사__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_봉사__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_봉사__phone.png" alt="비로그인_봉사" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/volunteer</code>
+        <span class="fn">비로그인_봉사__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_welcome"
+         data-personas="가입중"
+         data-states="자료 있음">
+  <h2><code>/welcome</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>가입중</span>
+    <a class="spec" href="../인계/04_화면스펙.md#18-로그인-login-환영-welcome-돌아오는-자리-authcallback">04 화면스펙 → 18. 로그인 `/login` · 환영 `/welcome` · 돌아오는 자리 `/auth/callback`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="가입중" data-state="자료 있음" data-w="pc">
+      <a href="가입중_환영__pc.png" target="_blank" rel="noopener">
+        <img src="가입중_환영__pc.png" alt="가입중_환영" loading="lazy">
+      </a>
+      <figcaption>
+        <b>가입중</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/welcome</code>
+        <span class="fn">가입중_환영__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="가입중" data-state="자료 있음" data-w="phone">
+      <a href="가입중_환영__phone.png" target="_blank" rel="noopener">
+        <img src="가입중_환영__phone.png" alt="가입중_환영" loading="lazy">
+      </a>
+      <figcaption>
+        <b>가입중</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/welcome</code>
+        <span class="fn">가입중_환영__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+<section class="screen" id="screen-_youth"
+         data-personas="(로그인 안 함)"
+         data-states="자료 있음">
+  <h2><code>/youth</code></h2>
+  <p class="meta">
+    <span class="count">2장</span>
+    <span>(로그인 안 함)</span>
+    <a class="spec" href="../인계/04_화면스펙.md#20-그-밖-volunteer-youth-soon-spec">04 화면스펙 → 20. 그 밖 `/volunteer` · `/youth` · `/soon` · `/spec`</a>
+  </p>
+  <div class="shots">
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="pc">
+      <a href="비로그인_청년__pc.png" target="_blank" rel="noopener">
+        <img src="비로그인_청년__pc.png" alt="비로그인_청년" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">PC 1280</span>
+        <code>/youth</code>
+        <span class="fn">비로그인_청년__pc.png</span>
+      </figcaption>
+    </figure>
+    <figure data-persona="(로그인 안 함)" data-state="자료 있음" data-w="phone">
+      <a href="비로그인_청년__phone.png" target="_blank" rel="noopener">
+        <img src="비로그인_청년__phone.png" alt="비로그인_청년" loading="lazy">
+      </a>
+      <figcaption>
+        <b>(로그인 안 함)</b>
+        <span class="st st-자료있음">자료 있음</span>
+        <span class="w">휴대폰 390</span>
+        <code>/youth</code>
+        <span class="fn">비로그인_청년__phone.png</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+</main>
+
+<script>
+const 페르소나 = [["관리자",78],["(로그인 안 함)",68],["학생",28],["작업치료사",14],["비회원",12],["채용담당자",10],["교육담당자",8],["가입중",6],["채용+교육담당자",6]];
+const 상태 = [["자료 있음",194],["숨김(준비 중)",10],["로그인 안내",10],["권한 없음",8],["빈 상태",8]];
+const 폭목록 = [['pc', 'PC 1280'], ['phone', '휴대폰 390']];
+const 켠것 = { persona: null, state: null, w: null };
+
+function 칩들(통, 줄들, 키, 이름내기) {
+  for (const [값, 수] of 줄들) {
+    const b = document.createElement('button');
+    b.className = '칩'; b.type = 'button'; b.setAttribute('aria-pressed', 'false');
+    b.textContent = (이름내기 ? 이름내기(값) : 값) + ' ' + 수;
+    b.onclick = () => {
+      켠것[키] = 켠것[키] === 값 ? null : 값;
+      for (const x of 통.querySelectorAll('button')) x.setAttribute('aria-pressed', 'false');
+      if (켠것[키] === 값) b.setAttribute('aria-pressed', 'true');
+      거르기();
+    };
+    통.append(b);
+  }
+}
+칩들(document.getElementById('페르소나고르기'), 페르소나, 'persona');
+칩들(document.getElementById('상태고르기'), 상태, 'state');
+칩들(document.getElementById('폭고르기'),
+     폭목록.map(([v]) => [v, document.querySelectorAll('figure[data-w="' + v + '"]').length]),
+     'w', (v) => (v === 'pc' ? 'PC' : '휴대폰'));
+
+function 거르기() {
+  for (const s of document.querySelectorAll('section.screen')) {
+    let 보인다 = 0;
+    for (const f of s.querySelectorAll('figure')) {
+      const ok = (!켠것.persona || f.dataset.persona === 켠것.persona)
+              && (!켠것.state || f.dataset.state === 켠것.state)
+              && (!켠것.w || f.dataset.w === 켠것.w);
+      f.hidden = !ok; if (ok) 보인다++;
+    }
+    s.hidden = 보인다 === 0;
+    const c = s.querySelector('.count'); if (c) c.textContent = 보인다 + '장';
+  }
+  차례그리기();
+}
+
+function 차례그리기() {
+  const n = document.getElementById('차례');
+  n.innerHTML = '<b style="font-size:12px;color:#6b7280">차례 </b>';
+  for (const s of document.querySelectorAll('section.screen:not([hidden])')) {
+    const a = document.createElement('a');
+    a.href = '#' + s.id; a.textContent = s.querySelector('h2 code').textContent;
+    n.append(a);
+  }
+}
+차례그리기();
+</script>
+</html>

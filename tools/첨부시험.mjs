@@ -199,6 +199,36 @@ for (const [이름, 바이트, 형식] of [
   }
 }
 
+/* 7b. 커뮤니티 사진 — 같은 「저장소에 올라가나」 질문이라 여기서 같이 봅니다.
+   경로 꼴은 web/app/community/write/page.tsx 와 같게 (<내번호>/<글번호>/0.webp).
+   규칙은 **내 폴더만**이라 남의 폴더에 못 올리는 것도 함께 봅니다.
+   넣은 파일은 바로 치웁니다 (post-images 에는 지우기 규칙이 있습니다). */
+{
+  const 나 = await (await fetch(`${URL_}/auth/v1/user`, { headers: 머리() })).json();
+  const 내번호 = 나?.id;
+  적기(!!내번호, '커뮤니티 사진 — 내 회원번호 받기');
+  if (내번호) {
+    const 자리 = `${내번호}/0/시험.webp`.replace('시험', 'test');
+    const r = await fetch(`${URL_}/storage/v1/object/post-images/${자리}`, {
+      method: 'POST', headers: { ...머리(), 'Content-Type': 'image/webp' },
+      body: Buffer.from('UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==', 'base64'),
+    });
+    적기(r.ok, '  내 폴더에 사진 올리기' + (r.ok ? '' : ' — ' + r.status + ' ' + (await r.text()).slice(0, 120)));
+
+    const 남 = await fetch(`${URL_}/storage/v1/object/post-images/00000000-0000-0000-0000-000000000000/0/test.webp`, {
+      method: 'POST', headers: { ...머리(), 'Content-Type': 'image/webp' },
+      body: Buffer.from('UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==', 'base64'),
+    });
+    적기(!남.ok, '  남의 폴더에는 못 올림' + (남.ok ? ' — **올라갔습니다**' : ` (${남.status})`));
+
+    if (r.ok) {
+      const d = await fetch(`${URL_}/storage/v1/object/post-images/${자리}`,
+        { method: 'DELETE', headers: 머리() });
+      적기(d.ok, '  치우기' + (d.ok ? '' : ` (${d.status})`));
+    }
+  }
+}
+
 /* 8. 치우기 — 넣은 줄은 같은 작업 안에서 (지침 8-9).
    --남겨두기 를 주면 둡니다. 인계 캡처에 첨부 칸이 **차 있는 모습**이
    있어야 해서입니다. 남긴 줄은 `시험자료 = true` 라 회원에게 안 보이고
