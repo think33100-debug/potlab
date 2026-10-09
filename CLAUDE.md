@@ -274,6 +274,12 @@ revoke execute on function f() from public, anon;          ← 닫힙니다
 grant  execute on function f() to authenticated;           ← 필요한 역할에만 다시
 ```
 
+**새 함수를 만들 때는 같은 SQL 끝에 `revoke … from public, anon` 을 함께 넣습니다 —
+트리거 함수도 예외가 아닙니다.** 트리거 함수는 직접 못 부르니 괜찮아 보이지만,
+PUBLIC 이 붙은 채로 남아 점검에 빨간 줄로 걸립니다. 실제로 2026-10-09 에
+`운영진글남기기()` 가 그렇게 걸렸습니다 — 만든 그날 점검이 잡았습니다.
+**걷어도 트리거는 그대로 돕니다** (그 자리에서 글을 넣어 확인했습니다).
+
 **같은 실수를 두 번 했습니다.**
 
 ```

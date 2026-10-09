@@ -122,13 +122,16 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
   /* 병원 자료가 없으면 null 입니다 — 그 구역을 통째로 감춥니다.
      0 으로 채우면 「치료사가 없는 병원」으로 읽혀 더 나쁩니다 */
-  const [hosp, icons, views] = await Promise.all([
+  const [hosp, icons, views, 경쟁률있나] = await Promise.all([
     /* 회원만 옵니다. 비회원에게는 null 이고 그 구역을 통째로 감춥니다 —
        0 으로 채우면 「치료사가 없는 병원」으로 읽혀서 더 나쁩니다 */
     member ? hospitalStat(sb, j.org_name) : Promise.resolve(null),
     iconMap('공고 상세'),
     jobViews([j.id]),
+    /* 이 기관 경쟁률 자료가 있나 (2026-10-09). 단추를 보일지만 정합니다 */
+    sb.rpc('경쟁률있나', { p_기관: j.org_name, p_직군: j.job_group }),
   ]);
+  const 경쟁률 = 경쟁률있나.data === true;
 
   const d = 마감배지(j.apply_to, j.마감표시, j.apply_to_time);
   /* 마감된 공고는 회색으로 내려앉습니다 */
@@ -473,6 +476,33 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                          motion-reduce:transition-none"
             >
               비슷한 공고 보기
+            </Link>
+          </section>
+        )}
+
+        {/* 경쟁률 보러 가기 (2026-10-09).
+            **그 기관 자료가 있을 때만** 보입니다. 경쟁률은 알리오 공공기관
+            19곳뿐이라, 없는 기관에 단추를 달면 눌러서 빈 화면을 봅니다.
+            판정은 DB 의 경쟁률있나() 가 합니다 — 화면이 짐작하지 않습니다 */}
+        {경쟁률 && (
+          <section className="mt-7 rounded-[14px] border border-[#E3E3DE] bg-white p-6">
+            <p className="break-keep text-[17px] font-bold text-[#1B2025]">
+              이 기관, 몇 대 일이었을까요
+            </p>
+            <p className="mt-2 break-keep text-[15px] text-[#5F666C]">
+              {j.org_name}의 지난 채용 경쟁률을 모아 뒀어요
+            </p>
+            <Link
+              href={`/compete?${new URLSearchParams({
+                org: j.org_name,
+                ...(j.job_group && j.job_group !== '공통' ? { job: j.job_group } : {}),
+              }).toString()}`}
+              className="mt-5 block w-full rounded-[12px] border border-[#E3E3DE] px-7 py-4
+                         text-center text-[16px] font-bold text-[#1B2025]
+                         transition-transform duration-[120ms]
+                         active:translate-y-[2px] active:scale-[0.99] motion-reduce:transition-none"
+            >
+              경쟁률 보러 가기
             </Link>
           </section>
         )}
