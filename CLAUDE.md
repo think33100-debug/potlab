@@ -255,6 +255,44 @@ API 한 번이면 끝날 일을 화면 긁기·PDF 읽기로 헤맸습니다.
 공고 313건의 마감일이 비어 「수시채용」으로 떴습니다. `grep` 으로 **부르는 곳이
 있는지**까지 봐야 합니다)
 
+### 6-2. 함수 인수를 바꾸면 **그것은 새 함수입니다**
+
+`create or replace` 는 **인수가 같을 때만** 「같은 함수」입니다. 인수를 하나라도
+더하거나 빼면 **새로 만들어지고, 권한이 기본값으로 돌아갑니다** — PostgreSQL 은
+새 함수를 **PUBLIC 에게 EXECUTE** 로 엽니다.
+
+그래서 함수를 고치는 마이그레이션 **끝에는 언제나**
+`revoke execute … from public, anon` + 필요한 역할에만 `grant` 를 다시 겁니다.
+
+### 6-3. `revoke … from anon` 만으로는 **아무것도 안 닫힙니다**
+
+`anon` 은 `PUBLIC` 에 딸려 있습니다. `from public` 까지 걷어야 닫힙니다.
+
+```
+revoke execute on function f() from anon;                  ← 안 닫힙니다
+revoke execute on function f() from public, anon;          ← 닫힙니다
+grant  execute on function f() to authenticated;           ← 필요한 역할에만 다시
+```
+
+**같은 실수를 두 번 했습니다.**
+
+```
+2026-09-24  org_search·org_public·org_jobs·org_nearby 를 anon 에서만 걷었는데
+            안 막혔습니다. 쏴보고 알았고, PUBLIC 까지 걷어 고쳤습니다
+2026-09-25  org_public_host_branch 가 인수에 p_src 를 더했습니다 → 새 함수 →
+            PUBLIC 이 다시 붙었고 그 마이그레이션에 revoke 가 없었습니다.
+            **보름 동안 기관 58,610곳이 비로그인에게 열려 있었습니다**
+2026-10-09  다시 찾아 닫았습니다. 여섯 중 다섯은 멀쩡했고 org_public 하나뿐이었습니다
+```
+
+**「기본 권한을 닫아 두면 되지 않나」 — 2026-10-09 에 해 봤는데 안 됩니다.**
+`alter default privileges for role postgres in schema public revoke execute on
+functions from public` 을 걸고 시험 함수를 만들어 봤더니 **그대로 PUBLIC 이
+붙었습니다.** `pg_default_acl` 도 걸기 전과 글자까지 같았습니다(= 아무 일도 안
+일어났습니다). **마이그레이션마다 손으로 거는 수밖에 없습니다.**
+대신 `tools/보안_비로그인점검.mjs` 가 날마다 **「허용 목록 밖에 열린 것이 있나」**
+를 묻습니다 — 거르는 그물은 그쪽입니다.
+
 ---
 
 ## 7. 코드 블록을 통째로 갈아끼우지 않기
