@@ -16,6 +16,12 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const PAGE = 300, BATCH = 500;
 
+/* job_state_log 에 남길 이름 (2026-10-09).
+   다리는 RPC 를 안 거치고 REST 로 바로 써서 app.누가 를 못 심습니다.
+   그래서 헤더로 보냅니다 — 받는 쪽은 job_state_log_trg 입니다.
+   값은 한글이 됩니다 (서버에서 확인). 헤더 **이름**만 아스키여야 합니다 */
+const WHO = '다리(옛 시트) · tools/sync_jobs.js';
+
 function env() {
   const f = path.join(ROOT, '.env.local');
   if (!fs.existsSync(f)) { console.error('.env.local 이 없습니다.'); process.exit(1); }
@@ -167,6 +173,11 @@ async function sb(cfg, pathq, method, body, 돌려받기) {
     headers: { apikey: cfg.SUPABASE_SERVICE_KEY,
                Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY,
                'Content-Type': 'application/json',
+               /* 누가 바꿨는지 job_state_log 에 남깁니다 (2026-10-09).
+                  DB 쪽 job_state_log_trg 가 **service_role 일 때만** 이 값을 씁니다 —
+                  헤더는 누구나 꾸밀 수 있어서입니다 (세중님 지적).
+                  이름은 아스키여야 합니다. x-누가 로 보냈더니 아예 안 왔습니다 */
+               'x-who': WHO,
                Prefer: 병합 + (돌려받기 ? 'return=representation' : 'return=minimal') },
     body: body ? JSON.stringify(body) : undefined
   });
@@ -270,7 +281,7 @@ const EXTRA_SHEETS = [
 ];
 
 if (require.main !== module) { module.exports = { mergeFixes, toJobPost, date, ts, num, region, sourceOf, env, page, readSheet, sb, count,
-                                                   EXTRA_SHEETS, s }; return; }
+                                                   EXTRA_SHEETS, s, WHO }; return; }
 
 (async function main() {
   const cfg = env();

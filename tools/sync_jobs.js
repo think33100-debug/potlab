@@ -22,7 +22,7 @@
  *   SUPABASE_URL · SUPABASE_SERVICE_KEY · APPS_SCRIPT_URL · EXPORT_KEY
  */
 'use strict';
-const { toJobPost, sb, count, EXTRA_SHEETS } = require('./copy_jobs.js');
+const { toJobPost, sb, count, EXTRA_SHEETS, WHO } = require('./copy_jobs.js');
 const fs = require('fs');
 const path = require('path');
 const ROOT = path.join(__dirname, '..');
@@ -154,6 +154,7 @@ async function upsert(cfg, table, rows, onConflict) {
       headers: { apikey: cfg.SUPABASE_SERVICE_KEY,
                  Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY,
                  'Content-Type': 'application/json',
+                 'x-who': WHO,            // job_state_log 에 이름을 남깁니다 (copy_jobs.js)
                  Prefer: 'resolution=merge-duplicates,return=minimal' },
       body: JSON.stringify(rows.slice(i, i + BATCH))
     });
@@ -349,7 +350,8 @@ async function rpc(cfg, fn, body) {
     method: 'POST',
     headers: { apikey: cfg.SUPABASE_SERVICE_KEY,
                Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY,
-               'Content-Type': 'application/json' },
+               'Content-Type': 'application/json',
+               'x-who': WHO },
     body: JSON.stringify(body || {}),
   });
   const t = await res.text();

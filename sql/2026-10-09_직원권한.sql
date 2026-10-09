@@ -298,15 +298,15 @@ $$;
 -- ─────────────────────────────────────────────────────────────
 -- ⑥ 누가 부를 수 있나
 -- ─────────────────────────────────────────────────────────────
-revoke all on function public.대표인가()            from anon;
-revoke all on function public.권한있나(text)         from anon;
-revoke all on function public.내권한()               from anon;
-revoke all on function public.admin_직원목록()        from anon;
-revoke all on function public.admin_직원넣기(bigint, text)        from anon, authenticated;
-revoke all on function public.admin_직원빼기(bigint, text)        from anon, authenticated;
-revoke all on function public.admin_권한주기(bigint, text, text)   from anon, authenticated;
-revoke all on function public.admin_권한거두기(bigint, text, text) from anon, authenticated;
-revoke all on function public.admin_권한기록(int)     from anon;
+revoke all on function public.대표인가()            from public, anon;
+revoke all on function public.권한있나(text)         from public, anon;
+revoke all on function public.내권한()               from public, anon;
+revoke all on function public.admin_직원목록()        from public, anon;
+revoke all on function public.admin_직원넣기(bigint, text)        from public, anon, authenticated;
+revoke all on function public.admin_직원빼기(bigint, text)        from public, anon, authenticated;
+revoke all on function public.admin_권한주기(bigint, text, text)   from public, anon, authenticated;
+revoke all on function public.admin_권한거두기(bigint, text, text) from public, anon, authenticated;
+revoke all on function public.admin_권한기록(int)     from public, anon;
 
 grant execute on function public.권한있나(text)       to authenticated;
 grant execute on function public.대표인가()           to authenticated;
