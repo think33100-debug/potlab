@@ -48,6 +48,18 @@ export default async function ChannelPage({
         <p className="mt-1 text-lg text-mute">{room.desc}</p>
       </header>
 
+      {/* 중고거래는 돈이 오가는 자리라 책임을 먼저 적습니다 (2026-10-09).
+          POTJOB 은 가운데 서지 않습니다 — 서면 책임도 우리에게 옵니다 */}
+      {ch === 'used' && (
+        <section className="mb-7 rounded-sm border border-warning p-5">
+          <p className="break-keep text-lg font-bold">거래는 두 분 사이의 일이에요</p>
+          <p className="mt-2 break-keep text-lg text-mute">
+            POTJOB 은 돈이나 물건을 맡아 두지 않고, 거래에 끼지 않아요.
+            먼저 보내 달라고 하거나 이상하면 <b>글 아래 신고</b>를 눌러 주세요.
+          </p>
+        </section>
+      )}
+
       <div className="mb-6 flex items-center justify-between gap-5">
         <div className="flex gap-2">
           <Sort href={`/community/${ch}`} on={!hot}>최신</Sort>
