@@ -19,8 +19,14 @@ const PAGE = 300, BATCH = 500;
 /* job_state_log 에 남길 이름 (2026-10-09).
    다리는 RPC 를 안 거치고 REST 로 바로 써서 app.누가 를 못 심습니다.
    그래서 헤더로 보냅니다 — 받는 쪽은 job_state_log_trg 입니다.
-   값은 한글이 됩니다 (서버에서 확인). 헤더 **이름**만 아스키여야 합니다 */
-const WHO = '다리(옛 시트) · tools/sync_jobs.js';
+
+   ★ 값까지 **아스키**여야 합니다. 이름만 아스키면 되는 줄 알고 한글을 넣었다가
+     다리를 두 시간 멈췄습니다 (2026-10-09 11:13~13:10).
+       TypeError: Cannot convert argument to a ByteString because the character
+       at index 0 has a value of 48372 which is greater than 255
+     HTTP 헤더 값은 latin-1 이고 Node 의 fetch(undici)가 그걸 지킵니다.
+     curl 로 시험할 때는 통과해서 못 봤습니다 — curl 은 안 따집니다. */
+const WHO = 'bridge (old sheet) tools/sync_jobs.js';
 
 function env() {
   const f = path.join(ROOT, '.env.local');

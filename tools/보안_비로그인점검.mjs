@@ -61,7 +61,7 @@ async function 열린것() {
     headers: { apikey: cfg.SUPABASE_SERVICE_KEY,
                Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY,
                'Content-Type': 'application/json',
-               'x-who': '보안 점검 · tools/보안_비로그인점검.mjs' },
+               'x-who': 'security-check tools/anon-check' },
     body: '{}',
   });
   if (!res.ok) throw new Error(res.status + ' ' + (await res.text()).slice(0, 200));
