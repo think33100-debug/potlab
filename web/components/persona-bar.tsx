@@ -66,7 +66,7 @@ export function PersonaBar() {
   const 것들 = [...(p.고를수있는것 ?? []), '비회원'];
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[60] border-t-2 border-brand-red bg-[#14181C] px-4 py-2">
+    <div className="fixed inset-x-0 bottom-[62px] z-[60] border-y-2 border-brand-red bg-[#14181C] px-4 py-2 md:bottom-0">
       <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-2">
         <button
           type="button" onClick={() => set접음((v) => !v)}

@@ -113,6 +113,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
           {/* 휴대폰에서만 보이는 아래 탭바 */}
           <TabBar />
+
+          {/* 마스터 계정에게만 보이는 역할 바꾸기 띠 (2026-10-09).
+              탭바(z-40) 위에 얹습니다 — z-[60] */}
+          <PersonaBar />
         </AuthProvider>
         </ToastProvider>
       </body>

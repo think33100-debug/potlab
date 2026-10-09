@@ -21,7 +21,7 @@ type 회차 = {
   시작: string; 끝: string | null; 장소: string | null;
   정원: number; 확정수: number; 접수시작: string; 접수끝: string;
   수강료: number | null; 상태: string; 환불규정: string; 결제링크: string | null;
-  내상태: string | null;
+  내상태: string | null; 리뷰가능: boolean;
   계좌: { 은행: string | null; 계좌번호: string | null; 예금주: string | null;
           입금기한: string | null; 입금자명규칙: string | null } | null;
 };
@@ -71,8 +71,9 @@ export default function EduSession() {
     set다시((n) => n + 1);
   };
 
-  const 오늘 = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
-  const 리뷰가능 = s.내상태 === '참여확정' && 오늘 >= s.시작;
+  /* 「지금 후기를 쓸 수 있나」는 **DB 가 정합니다** (교육회차보기 의 리뷰가능).
+     화면이 날짜를 만들면 그릴 때마다 값이 달라지고 규칙이 두 벌이 됩니다 */
+  const 리뷰가능 = s.리뷰가능 === true;
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
