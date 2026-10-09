@@ -226,7 +226,11 @@ async function 찍기(page, 이름, 길, 폭이름) {
   await page.evaluate(async () => {
     const 잠깐 = (ms) => new Promise((r) => setTimeout(r, ms));
     const 높이 = () => document.documentElement.scrollHeight;
-    for (let y = 0; y < 높이(); y += Math.floor(window.innerHeight * 0.8)) {
+    const 한걸음 = Math.max(200, Math.floor(window.innerHeight * 0.8));
+    /* ★ 돌 횟수에 상한을 둡니다. 스크롤할수록 길어지는 화면(더 받아오는 목록)
+       이면 높이()가 계속 늘어나 **고리가 안 끝납니다.** 40걸음이면
+       휴대폰 폭에서도 2만 픽셀쯤이라 어느 화면이든 바닥에 닿습니다 */
+    for (let i = 0, y = 0; i < 40 && y < 높이(); i++, y += 한걸음) {
       window.scrollTo(0, y);
       await 잠깐(120);
     }
