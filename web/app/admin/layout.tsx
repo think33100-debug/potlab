@@ -34,6 +34,8 @@ const MENU = [
   /* 만들어 놓고 메뉴에 안 걸려 있던 것들 (2026-10-01 에 걸었습니다) */
   { href: '/admin/rival', label: '경쟁사 비교' },
   { href: '/admin/members', label: '회원' },
+  /* 직원과 권한 (2026-10-09). 보는 것은 운영진 누구나, 고치는 것은 대표만 */
+  { href: '/admin/staff', label: '직원과 권한' },
   { href: '/admin/reports', label: '신고' },
   { href: '/admin/access', label: '개인정보 접속기록' },
   { href: '/admin/reset', label: '내 계정 초기화' },
