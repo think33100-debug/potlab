@@ -36,6 +36,8 @@ const MENU = [
   { href: '/admin/members', label: '회원' },
   /* 직원과 권한 (2026-10-09). 보는 것은 운영진 누구나, 고치는 것은 대표만 */
   { href: '/admin/staff', label: '직원과 권한' },
+  /* 마스터가 페르소나로 쓴 글 모아보기 (2026-10-09) */
+  { href: '/admin/ops', label: '운영진 글' },
   { href: '/admin/reports', label: '신고' },
   { href: '/admin/access', label: '개인정보 접속기록' },
   { href: '/admin/reset', label: '내 계정 초기화' },
