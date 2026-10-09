@@ -63,3 +63,13 @@ tools/hosp/reports/jobflex.json
 
 # 브라우저 시험 찌꺼기
 .playwright-mcp/
+
+# 저장소 맨 위의 package.json — **일부러 안 올립니다** (2026-10-09).
+# tools/ 스크립트가 쓰는 것들(web-push · playwright)을 담아 두는 자리입니다.
+# 올리면 서버에서 git pull 뒤에 npm install 이 돌 때 playwright 와
+# 크로미움(수백 MB)까지 받으려 합니다. 서버 크론이 쓰는 web-push 는
+# .github/workflows/push.yml 처럼 `--no-save` 로 따로 깔려 있습니다.
+# 깔는 법은 tools/캡처.mjs 머리말에 적어 두었습니다 —
+#   npm install -D playwright && npx playwright install chromium
+package.json
+package-lock.json
