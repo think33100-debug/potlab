@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DiagStrip } from "@/components/diag";
 import { Logo } from "@/components/logo";
 import { SPLASH_SCRIPT, Splash } from "@/components/splash";
+import { PersonaBar } from "@/components/persona-bar";
 import { SplashAd } from "@/components/splash-ad";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
