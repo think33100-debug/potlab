@@ -77,19 +77,48 @@ const 예시공고 = cfg.CAPTURE_JOB || 'BIZ000005';
 const 진짜공고 = cfg.CAPTURE_REAL_JOB || 'WNK150012610080045';
 const 예시방 = cfg.CAPTURE_ROOM || '6';
 
+/* 글·채널·교육기관·공고 — 갤러리에서 쓸 **진짜 자료** 하나씩.
+   번호가 바뀌면 여기만 고치면 됩니다 */
+const 예시글 = cfg.CAPTURE_POST || '80';
+const 예시교육기관 = cfg.CAPTURE_EDU_ORG || '대한연하재활학회';
+const 없는낱말 = 'zzz없는낱말zzz';
+
+/* 상태는 셋째 칸입니다 — 없으면 「자료 있음」입니다.
+   쓰는 말: 자료 있음 · 빈 상태 · 로그인 안내 · 권한 없음 · 숨김(준비 중) */
 const 계획 = [
   { 묶음: '비로그인', 역할: null, 손님: true, 줄: [
     ['비로그인_홈', '/'],
     ['비로그인_공고목록', '/jobs'],
+    ['비로그인_공고목록_빈결과', `/jobs?q=${없는낱말}`, '빈 상태'],
     /* 「지원하러 가기」가 로그인 안내로 바뀌고 첨부 칸이 아예 안 보입니다 (C·B) */
-    ['비로그인_공고상세_로그인안내', `/jobs/${진짜공고}`],
+    ['비로그인_공고상세_로그인안내', `/jobs/${진짜공고}`, '로그인 안내'],
     /* 목록까지 막힙니다 (2026-10-09 세중님 지시 · 10-05 결정을 뒤집은 자리) */
-    ['비로그인_경쟁률_로그인안내', '/compete'],
+    ['비로그인_경쟁률_로그인안내', '/compete', '로그인 안내'],
     ['비로그인_커뮤니티', '/community'],
+    ['비로그인_커뮤니티_자유', '/community/free'],
+    ['비로그인_커뮤니티_장터', '/community/market'],
+    ['비로그인_글하나', `/post/${예시글}`],
+    ['비로그인_글쓰기_로그인안내', '/community/write', '로그인 안내'],
     ['비로그인_교육', '/edu'],
+    ['비로그인_교육기관목록', '/edu/org'],
+    ['비로그인_교육기관하나', `/edu/org/${예시교육기관}`],
     ['비로그인_기관', '/orgs'],
+    ['비로그인_기관_빈결과', `/orgs?q=${없는낱말}`, '빈 상태'],
     ['비로그인_로그인화면', '/login'],
     ['비로그인_계산기', '/tools'],
+    ['비로그인_계산기_실업급여', '/tools/unemployment'],
+    ['비로그인_계산기_퇴직금', '/tools/severance'],
+    ['비로그인_계산기_연차', '/tools/leave'],
+    ['비로그인_계산기_월급', '/tools/pay'],
+    ['비로그인_약관_서비스', '/terms/service'],
+    ['비로그인_약관_개인정보', '/terms/privacy'],
+    ['비로그인_약관_커뮤니티', '/terms/community'],
+    ['비로그인_문의', '/contact'],
+    ['비로그인_유료안내', '/pay'],
+    ['비로그인_봉사', '/volunteer'],
+    ['비로그인_청년', '/youth'],
+    ['비로그인_준비중', '/soon', '숨김(준비 중)'],
+    ['비로그인_기능표', '/spec'],
   ] },
 
   { 묶음: '관리자', 역할: '관리자', 줄: [
@@ -99,14 +128,17 @@ const 계획 = [
         'icons', 'jobs', 'members', 'ops', 'partners', 'posts', 'reports', 'reset',
         'rival', 'staff', 'stats', 'texts', 'trash', 'verify']
       .map((k) => [`관리자_${k}`, `/admin/${k}`]),
+    ['관리자_공고하나', `/admin/jobs/${진짜공고}`],
     ['진단띠', '/?진단=1'],
     ['알림_일곱줄', '/alarm'],
     ['대화_목록', '/talk'],
     ['대화_사진하나사라짐', `/talk/${예시방}`],
     ['재직_배지', '/verify'],
     ['담당자_내신청', '/partner'],
-    ['채용관리', '/biz'],
-    ['교육관리', '/edu/manage'],
+    ['관리자_글쓰기', '/community/write'],
+    /* 관리자·마스터 페르소나에는 담당자 메뉴가 **없습니다** (A 규칙) */
+    ['채용관리', '/biz', '숨김(준비 중)'],
+    ['교육관리', '/edu/manage', '숨김(준비 중)'],
     ['교육_모집중', '/edu/session/2'],
     ['교육_입금대기', '/edu/session/3'],
     ['교육_미선정', '/edu/session/4'],
@@ -124,25 +156,35 @@ const 계획 = [
     ['학생_내정보', '/me'],
     ['학생_탈퇴', '/me/leave'],
     ['학생_교육', '/edu'],
+    ['학생_글쓰기', '/community/write'],
+    ['학생_글하나', `/post/${예시글}`],
+    /* 그 밖의 페르소나에는 담당자 메뉴가 둘 다 없습니다 (A 규칙) */
+    ['학생_채용관리_숨김', '/biz', '숨김(준비 중)'],
+    ['학생_교육관리_숨김', '/edu/manage', '숨김(준비 중)'],
+    ['학생_관리자_권한없음', '/admin', '권한 없음'],
   ] },
 
   { 묶음: '작업치료사', 역할: '작업치료사', 줄: [
     ['작업치료사_공고목록', '/jobs'],
+    ['작업치료사_공고목록_빈결과', `/jobs?q=${없는낱말}`, '빈 상태'],
     ['작업치료사_공고상세', `/jobs/${진짜공고}`],
+    ['작업치료사_경쟁률', '/compete?g=작업치료사'],
     ['작업치료사_커뮤니티', '/community'],
+    ['작업치료사_교육', '/edu'],
     ['작업치료사_내정보', '/me'],
   ] },
 
   { 묶음: '채용담당자', 역할: '채용담당자', 줄: [
     ['담당자_채용관리', '/biz'],
-    ['담당자_교육관리_막힘', '/edu/manage'],
+    ['담당자_시험공고_첨부', `/jobs/${예시공고}`],
+    ['담당자_교육관리_막힘', '/edu/manage', '권한 없음'],
     ['담당자_커뮤니티', '/community'],
     ['담당자_내정보', '/me'],
   ] },
 
   { 묶음: '교육담당자', 역할: '교육담당자', 줄: [
     ['교육담당자_교육관리', '/edu/manage'],
-    ['교육담당자_채용관리_막힘', '/biz'],
+    ['교육담당자_채용관리_막힘', '/biz', '권한 없음'],
     ['교육담당자_교육목록', '/edu'],
     ['교육담당자_내정보', '/me'],
   ] },
@@ -165,8 +207,8 @@ const 계획 = [
   { 묶음: '비회원보기', 역할: '비회원', 줄: [
     ['비회원보기_홈', '/'],
     ['비회원보기_공고목록', '/jobs'],
-    ['비회원보기_공고상세', `/jobs/${진짜공고}`],
-    ['비회원보기_경쟁률', '/compete'],
+    ['비회원보기_공고상세', `/jobs/${진짜공고}`, '로그인 안내'],
+    ['비회원보기_경쟁률', '/compete', '로그인 안내'],
     ['비회원보기_커뮤니티', '/community'],
     ['비회원보기_교육', '/edu'],
   ] },
@@ -185,7 +227,10 @@ if (목록만) {
   let n = 0;
   for (const g of 계획) {
     console.log('\n[' + g.묶음 + ']' + (g.역할 ? ' 역할 ' + g.역할 : ' 로그인 안 함'));
-    for (const [이름, 길] of g.줄) { console.log('  ' + 이름 + '  ' + 길); n += 폭.length; }
+    for (const [이름, 길, 상태] of g.줄) {
+      console.log('  ' + 이름.padEnd(30) + 길.padEnd(34) + (상태 ?? '자료 있음'));
+      n += 폭.length;
+    }
   }
   console.log('\n모두 ' + n + '장 (폭 ' + 폭.length + '가지)');
   process.exit(0);
@@ -212,7 +257,8 @@ const 탈 = [];
  * 안 하므로, 훑지 않으면 화면 아래쪽이 **통째로 빈칸으로** 찍힙니다.
  * 처음 찍은 공고 상세에서 가운데가 비어 있어서 알았습니다.
  */
-async function 찍기(page, 이름, 길, 폭이름) {
+async function 찍기(page, 줄, 폭이름, g) {
+  const [이름, 길, 상태] = 줄;
   const 파일 = path.join(나갈곳, `${이름}__${폭이름}.png`);
   try {
     await page.goto(주소 + 길, { waitUntil: 'networkidle', timeout: 45_000 });
@@ -243,7 +289,12 @@ async function 찍기(page, 이름, 길, 폭이름) {
   await page.waitForTimeout(800);
 
   await page.screenshot({ path: 파일, fullPage: true });
-  찍은것.push(path.relative(뿌리, 파일).replace(/\\/g, '/'));
+  찍은것.push({
+    파일: path.basename(파일),
+    이름, 주소: 길, 폭: 폭이름,
+    묶음: g.묶음, 역할: g.역할 ?? '(로그인 안 함)',
+    상태: 상태 ?? '자료 있음',
+  });
 }
 
 /* 띠에서 역할 바꾸기 — 세중님이 누르는 그 단추를 누릅니다 */
@@ -268,7 +319,7 @@ try {
     const ctx = await browser.newContext({ locale: 'ko-KR', timezoneId: 'Asia/Seoul', ...w });
     const page = await ctx.newPage();
     const g = 계획.find((x) => x.손님);
-    for (const [이름, 길] of g.줄) await 찍기(page, 이름, 길, w.이름);
+    for (const 줄 of g.줄) await 찍기(page, 줄, w.이름, g);
     /* 대보기용 글자를 받아 둡니다 */
     if (w.이름 === 'pc') {
       g.글자 = {};
@@ -313,7 +364,7 @@ try {
 
     for (const w of 폭) {
       await page.setViewportSize(w.viewport);
-      for (const [이름, 길] of g.줄) await 찍기(page, 이름, 길, w.이름);
+      for (const 줄 of g.줄) await 찍기(page, 줄, w.이름, g);
     }
 
     if (g.역할 === '비회원') {
@@ -358,6 +409,24 @@ try {
     }
   }
   await browser.close();
+}
+
+/* ── 목록 남기기 ──────────────────────────────────────────
+   갤러리(tools/갤러리.mjs)와 점검(tools/인계점검.mjs)이 이 파일을 읽습니다.
+   한 묶음만 다시 찍었을 때 나머지 줄이 사라지지 않게 **합쳐서** 씁니다 */
+{
+  const 목록길 = path.join(나갈곳, '목록.json');
+  let 전 = [];
+  if (fs.existsSync(목록길)) {
+    try { 전 = JSON.parse(fs.readFileSync(목록길, 'utf8')).줄 ?? []; } catch { 전 = []; }
+  }
+  const 새것 = new Set(찍은것.map((x) => x.파일));
+  const 합친것 = [...찍은것, ...전.filter((x) => !새것.has(x.파일))]
+    .filter((x) => fs.existsSync(path.join(나갈곳, x.파일)))
+    .sort((a, b) => a.파일.localeCompare(b.파일, 'ko'));
+  fs.writeFileSync(목록길,
+    JSON.stringify({ 찍은때: new Date().toISOString(), 주소, 줄: 합친것 }, null, 1) + '\n');
+  console.log('○ 목록 ' + 합친것.length + '줄 → ' + path.relative(뿌리, 목록길));
 }
 
 console.log('\n찍은 것 ' + 찍은것.length + '장 → ' + path.relative(뿌리, 나갈곳));

@@ -80,7 +80,9 @@ export default function AdminAds() {
         throw new Error('줄여도 ' + Math.round(webp.size / 1024) + 'KB 입니다 (1MB 까지)');
       }
       // eslint-disable-next-line react-hooks/purity -- 파일 이름이 겹치지 않게 시각을 붙입니다
-      const path = `${o.자리}-${Date.now()}.webp`;
+      /* ★ 자리 이름이 「앱」·「커뮤니티」라 경로에 그대로 쓰면 InvalidKey 입니다
+         (작업지침 6-2b). ad-images 가 0장인 까닭입니다 — 한 번도 안 올라갔습니다 */
+      const path = `${o.자리 === '앱' ? 'app' : 'community'}-${Date.now()}.webp`;
       const sb = browserSupabase();
       const { error } = await sb.storage.from('ad-images')
         .upload(path, webp, { contentType: 'image/webp', upsert: true });

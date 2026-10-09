@@ -48,7 +48,10 @@ export default function Verify() {
     set도는중(true); set탈(null);
     const sb = browserSupabase();
     const { data: u } = await sb.auth.getUser();
-    const 경로 = `${u.user?.id}/재직-${Date.now()}-${파일.name.replace(/[^\w.]/g, '_')}`;
+    /* ★ 저장소 경로에 한글을 쓰면 InvalidKey 입니다 (작업지침 6-2b).
+       「재직-」 때문에 재직 증빙이 한 번도 안 올라갔습니다 — proofs 에
+       제가 넣은 견본 말고는 한 장도 없습니다. 영문 앞머리로 바꿉니다. */
+    const 경로 = `${u.user?.id}/proof-${Date.now()}-${파일.name.replace(/[^\w.]/g, '_')}`;
     const { error: 올림 } = await sb.storage.from('proofs').upload(경로, 파일);
     if (올림) { set도는중(false); set탈(올림.message); return; }
     const { error } = await sb.rpc('재직인증신청', { p_경로: 경로, p_병원: 병원.trim() || null });

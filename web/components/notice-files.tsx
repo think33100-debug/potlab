@@ -101,8 +101,13 @@ export function NoticeFiles({
 
     set도는중(true);
     const sb = browserSupabase();
-    const 깨끗한이름 = f.name.replace(/[^\w.가-힣-]/g, '_').slice(-80);
-    const 자리 = `${갈래 === '채용' ? 공고 : '교육' + 회차}/${crypto.randomUUID()}-${깨끗한이름}`;
+    /* ★ 저장소 열쇠(경로)에는 **한글을 못 씁니다** — Supabase Storage 가
+       InvalidKey 로 거절합니다. 공고문 이름은 거의 다 한글이라 여기서 다
+       막혔습니다 (2026-10-10 에 tools/첨부시험.mjs 가 잡았습니다).
+       그래서 경로는 uuid + 확장자만 쓰고, **보여줄 이름은 표(공고첨부.이름)에**
+       그대로 둡니다. 작업지침 6-2b — 밖에서 이름으로 가리키는 자리는 영문. */
+    const 확장자 = (f.name.match(/\.[A-Za-z0-9]{1,8}$/)?.[0] ?? '').toLowerCase();
+    const 자리 = `${갈래 === '채용' ? 공고 : '교육' + 회차}/${crypto.randomUUID()}${확장자}`;
 
     const { error: 올림 } = await sb.storage.from('notices')
       .upload(자리, f, { contentType: 형식, upsert: false });
