@@ -8,8 +8,8 @@ import assert from 'node:assert/strict';
 import { shownName } from './who.ts';
 
 /* ① 보통 회원 — 닉네임 그대로 */
-assert.equal(shownName({ nickname: '나나로', erased_at: null }), '나나로');
-assert.equal(shownName({ nickname: '나나로' }), '나나로');
+assert.equal(shownName({ nickname: '시험닉', erased_at: null }), '시험닉');
+assert.equal(shownName({ nickname: '시험닉' }), '시험닉');
 
 /* ② 계정을 지운 분 — 닉네임 칸에 값이 남아 있어도 안 내보냅니다.
       nickname 은 UNIQUE · NOT NULL 이라 비울 수가 없어서
@@ -19,7 +19,7 @@ assert.equal(
   '탈퇴한 회원',
 );
 /* 원래 닉네임이 그대로 남아 있는 경우에도 지운 표시가 이깁니다 */
-assert.equal(shownName({ nickname: '나나로', erased_at: '2026-09-23T00:00:00Z' }), '탈퇴한 회원');
+assert.equal(shownName({ nickname: '시험닉', erased_at: '2026-09-23T00:00:00Z' }), '탈퇴한 회원');
 
 /* ③ 줄 자체가 없을 때 — 이건 탈퇴와 다릅니다. 「알 수 없음」 그대로 */
 assert.equal(shownName(null), '알 수 없음');

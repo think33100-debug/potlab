@@ -299,6 +299,8 @@ async function 찍기(page, 줄, 폭이름, g) {
   /* Rise 의 등장 효과가 520ms 입니다. 다 끝나고 찍습니다 */
   await page.waitForTimeout(800);
 
+  await 개인정보가리기(page);
+
   await page.screenshot({ path: 파일, fullPage: true });
   찍은것.push({
     파일: path.basename(파일),
@@ -306,6 +308,65 @@ async function 찍기(page, 줄, 폭이름, g) {
     묶음: g.묶음, 역할: g.역할 ?? '(로그인 안 함)',
     상태: 상태 ?? '자료 있음',
   });
+}
+
+/* ── 개인정보 가리기 ──────────────────────────────────────
+ * 2026-10-10 전수 검사에서 **실제 회원의 닉네임·글·사진**이 커뮤니티와
+ * 관리자 화면에 찍힌 것을 찾았습니다. 그림을 손으로 덮는 것은 한 번뿐이고,
+ * 다음에 찍으면 또 나옵니다. 그래서 **찍기 전에** 그 글자가 든 칸을 덮습니다.
+ *
+ * 가릴 글자는 tools/가릴자리.json 에 있습니다. 시험 계정·운영진은 안 가립니다.
+ * DB 를 건드리지 않습니다 — 화면에서만 덮습니다.
+ */
+const 가릴글자 = (() => {
+  try {
+    const j = JSON.parse(fs.readFileSync(path.join(여기, '가릴자리.json'), 'utf8'));
+    return { 목록: j.글자?.목록 ?? [], 놔둘것: j.글자?.놔둘것 ?? [] };
+  } catch { return { 목록: [], 놔둘것: [] }; }
+})();
+
+async function 개인정보가리기(page) {
+  if (!가릴글자.목록.length) return;
+  await page.evaluate(({ 목록, 놔둘것 }) => {
+    /* 그 글자가 **직접** 들어 있는 가장 작은 칸을 찾고, 거기서 위로 올라가며
+       「줄 하나」로 보이는 칸(li·a·article·카드)을 덮습니다 */
+    const 덮기 = (el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4) return;
+      const d = document.createElement('div');
+      d.setAttribute('data-가림', '1');
+      d.style.cssText = `position:absolute;left:${r.left + scrollX}px;top:${r.top + scrollY}px;`
+        + `width:${r.width}px;height:${r.height}px;background:#111;z-index:2147483646;`
+        + 'border-radius:6px';
+      document.body.appendChild(d);
+    };
+    const 줄찾기 = (el) => {
+      let p = el;
+      for (let i = 0; i < 6 && p && p !== document.body; i++) {
+        const 태그 = p.tagName;
+        if (태그 === 'LI' || 태그 === 'ARTICLE' || 태그 === 'TR'
+            || (태그 === 'A' && p.getBoundingClientRect().height > 40)) return p;
+        p = p.parentElement;
+      }
+      return el;
+    };
+    /* ★ **글자가 그 칸 전부일 때만** 잡습니다.
+       처음에는 includes() 로 찾았는데 「이야」가 **「이야기」**에 걸려
+       방 카드와 목록이 통째로 까맣게 됐습니다 (2026-10-10 에 찍어 보고 알았습니다).
+       닉네임은 제 칸에 따로 그려지므로 「칸 전체가 그 닉네임」이면 맞습니다.
+       글 제목은 닉네임이 든 줄 안에 같이 있어서 줄을 덮으면 함께 가려집니다 */
+    const 걸림 = new Set();
+    const 걷기 = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = 걷기.nextNode(); n; n = 걷기.nextNode()) {
+      const 글 = (n.nodeValue ?? '').trim();
+      if (!목록.includes(글)) continue;
+      if (놔둘것.includes(글)) continue;
+      const el = n.parentElement;
+      if (el) 걸림.add(줄찾기(el));
+    }
+    for (const el of 걸림) 덮기(el);
+    return 걸림.size;
+  }, 가릴글자);
 }
 
 /* 띠에서 역할 바꾸기 — 세중님이 누르는 그 단추를 누릅니다 */

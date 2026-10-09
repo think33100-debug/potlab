@@ -98,7 +98,9 @@ export default function AdminMembers() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="예: #00004 · 나나로 · 물리치료사"
+          {/* ★ 예시에 **실제 회원의 번호·닉네임**을 적어 두었었습니다 (2026-10-10 캡처
+              검사에서 찾았습니다). 안내문은 지어낸 값으로 씁니다 */}
+          placeholder="예: #00001 · 닉네임 · 물리치료사"
           aria-label="찾기"
           className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
         />
