@@ -1,0 +1,592 @@
+{
+  "만든날": "2026-10-09",
+  "왜 이 파일이 있나": "비로그인(anon)에게 열어 두기로 **정한** 창구만 적습니다. 여기 없는 것이 열려 있으면 점검이 실패합니다. 이름에 인수까지 적는 까닭 — 인수가 바뀌면 새 함수가 되고 권한이 기본값(PUBLIC)으로 돌아갑니다 (2026-09-25 org_public 이 그렇게 다시 열렸습니다).",
+  "함수": [
+    {
+      "이름": "admin_api_quota()",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "admin_ocr_zero()",
+      "왜": "★ 닫아야 할 후보. 2026-10-09 점검에서 표시했습니다 — 관리자·회원 자리인데 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+    },
+    {
+      "이름": "admin_rival()",
+      "왜": "★ 닫아야 할 후보. 2026-10-09 점검에서 표시했습니다 — 관리자·회원 자리인데 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+    },
+    {
+      "이름": "admin_rival_add(\"p_경쟁사\" text, \"p_기관명\" text, \"p_제목\" text, \"p_본날짜\" timestamp with time zone, \"p_링크\" text, \"p_기관분류\" text)",
+      "왜": "★ 닫아야 할 후보. 2026-10-09 점검에서 표시했습니다 — 관리자·회원 자리인데 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+    },
+    {
+      "이름": "admin_rival_org_todo(\"p_기관명\" text, \"p_어디서\" text)",
+      "왜": "★ 닫아야 할 후보. 2026-10-09 점검에서 표시했습니다 — 관리자·회원 자리인데 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+    },
+    {
+      "이름": "admin_rival_set(\"p_경쟁사\" text, \"p_글번호\" text, \"p_상태\" text, \"p_메모\" text, \"p_원인\" text)",
+      "왜": "★ 닫아야 할 후보. 2026-10-09 점검에서 표시했습니다 — 관리자·회원 자리인데 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+    },
+    {
+      "이름": "alio_compete_fix(p_secret text, p_source text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_compete_put(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_compete_state_get(p_secret text, p_source text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_compete_state_put(p_secret text, p_source text, \"p_말\" text, \"p_다음쪽\" integer, \"p_전체쪽\" integer, \"p_다한날\" date, \"p_메모\" text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_compete_web_all(p_secret text, p_source text, p_limit integer)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_compete_web_put(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_compete_web_todo(p_secret text, p_source text, p_limit integer)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_group_put(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_group_refresh(p_secret text, p_source text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_group_src(p_secret text, p_source text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_post_file_put(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_post_file_text_put(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_post_file_text_todo(p_secret text, p_source text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_post_file_todo(p_secret text, p_source text, \"p_모름만\" boolean)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_post_meta_put(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_post_meta_todo(p_secret text, p_source text, p_limit integer)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alio_web_peek(p_secret text, p_source text, p_keys jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alive_mark(p_secret text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alive_targets(p_secret text, p_n integer)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "alive_targets(p_secret text, p_n integer, \"p_내린것\" boolean)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "api_quota_put(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "bump_nickname_change()",
+      "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+    },
+    {
+      "이름": "bump_post_view(p_id bigint)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "bump_report_count()",
+      "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+    },
+    {
+      "이름": "collect_after(p_secret text, p_source text, p_days integer, p_rolling_days integer)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "collect_beat(p_secret text, p_source text, p_beat jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "collect_body(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "collect_gap_get(p_secret text, p_source text, p_new text, p_old text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "collect_peek(p_secret text, p_source text, p_of text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "collect_put(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "collect_trash(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "deadline_from_title(p_title text, p_base date)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "hand_check_put(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "hide_www_twins(p_secret text, p_source text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "hira_name_key(s text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "hold_digest(p_secret text, p_source text, p_hours integer)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "home_stats()",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "in_room(p_room bigint)",
+      "왜": "★ 닫아야 할 후보. 2026-10-09 점검에서 표시했습니다 — 관리자·회원 자리인데 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+    },
+    {
+      "이름": "is_admin()",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "job_counts(p_job text, p_sido text, p_q text, p_all boolean, p_tabs text[])",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "job_one(p_id text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "job_posts_first_seen_keep()",
+      "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+    },
+    {
+      "이름": "job_posts_one_state_trg()",
+      "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+    },
+    {
+      "이름": "job_state_log_trg()",
+      "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+    },
+    {
+      "이름": "job_totals()",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "job_views(p_ids text[])",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "keep_one_admin()",
+      "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+    },
+    {
+      "이름": "lang_bands()",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "lang_points(p_exam text, p_score integer, p_level text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "lang_points_check()",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "ocr_zero_put(p_secret text, p_source text, p_x jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "org_key(s text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "org_name_key(s text, p_drop_sido boolean)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "org_sgg(p_sido text, p_sgg text, p_addr text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "org_sido(p_sido text, p_addr text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "org_tile(p_kinds text[], p_sources text[], p_name text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "org_total()",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "pay_band(p_hired_year integer)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "pay_stats(p_job text, p_region text, p_type text, p_band text, p_employ text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "post_state(p_id bigint)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "pub_baseline_get(p_secret text, p_source text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "rejudge_forget(p_secret text, p_ids text[])",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "rejudge_hold_apply(p_secret text, p_show text[], p_hide text[], p_why text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "rejudge_hold_list(p_secret text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "rival_match_go(p_secret text, p_source text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "rival_put(p_secret text, p_source text, p_rows jsonb, \"p_첫판\" boolean)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "rookie_salary(p_job text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "save_my_survey(p_salary jsonb, p_spec jsonb, p_langs jsonb)",
+      "왜": "★ 닫아야 할 후보. 2026-10-09 점검에서 표시했습니다 — 관리자·회원 자리인데 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+    },
+    {
+      "이름": "sido_has(p_stored text, p_want text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "spec_langs_cap()",
+      "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+    },
+    {
+      "이름": "spec_parts(p_gpa numeric, p_gpa_scale numeric, p_lang_pt integer, p_school text, p_licenses text[], p_trainings text[], p_rows jsonb)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "spec_parts_check()",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "spec_score(s student_specs)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "spec_stats()",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "개인정보지움(p text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "경쟁률찾기목록(\"p_직군\" text, \"p_지역\" text, \"p_기관\" text, \"p_찾기\" text, \"p_쪽\" integer)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "경쟁률한묶음(\"p_묶음키\" text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "고용형태보임(v text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "고용형태보임행(j job_posts)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "공개공고()",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "공개공고하나(p_id text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "공고원문제목(p_id text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "공고조회수(p_id text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "공공기관인가(p_id text, p_tab text, p_org_name text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "광고셈올리기(\"p_자리\" text, \"p_누름\" boolean)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "교육기관목록(\"p_직군\" text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "교육기관하나(\"p_이름\" text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "교육목록(\"p_직군\" text, \"p_출처\" text, \"p_지난것\" boolean, p_page integer)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "교육셈(\"p_직군\" text, \"p_출처\" text, \"p_지난것\" boolean)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "근무지이름있나(p_org text, p_title text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "글사진(p_post bigint)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "닉네임다듬기(p text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "닉네임쓸수있나(p_nickname text)",
+      "왜": "★ 닫아야 할 후보. 2026-10-09 점검에서 표시했습니다 — 관리자·회원 자리인데 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+    },
+    {
+      "이름": "닉네임잡혔나(p_nickname text)",
+      "왜": "★ 닫아야 할 후보. 2026-10-09 점검에서 표시했습니다 — 관리자·회원 자리인데 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+    },
+    {
+      "이름": "마감일되읽기(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "마감지났나(p_apply_to date, p_apply_to_time time without time zone)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "마감표시(p_apply_to date, p_id text, p_tab text, p_org_name text, p_title text, \"p_접수문장\" text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "목록빠짐표시(p_secret text, p_source text, \"p_본것\" text[])",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "밤정리(p_secret text, p_source text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "법인앞말떼기(v text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "본체만뽑나(p_org text, p_title text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "봉사목록(\"p_갈래\" text, \"p_시도\" text, \"p_상태\" text, p_page integer)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "봉사셈(\"p_시도\" text, \"p_상태\" text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "수시인가(p_title text, p_detail jsonb, \"p_제목말\" text, \"p_칸말\" text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "심평원받을곳(p_secret text, p_source text, \"p_연월\" text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "심평원인원담기(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "아직산공고인가(p_apply_to date, p_apply_to_time time without time zone)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "알리오자리같음목록(p_secret text, p_source text)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "있는번호(p_secret text, p_source text, p_ids text[])",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "잡힌닉네임막기()",
+      "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+    },
+    {
+      "이름": "제목기관(j job_posts)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "제목대체사유(p_title text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "제목부서(p_title text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "제목부서(p_title text, \"p_부서\" text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "제목지역(p_sido text, p_work text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "제목직군(p_job text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "제목채우기()",
+      "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+    },
+    {
+      "이름": "주소도메인(u text)",
+      "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+    },
+    {
+      "이름": "지금광고(\"p_자리\" text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "지역겹치나_새(\"p_지역\" text, p_org text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "지역보임(j job_posts)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "지역앞말떼기(\"p_지역\" text, \"p_기관\" text)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "청년목록(\"p_갈래\" text, \"p_시도\" text, \"p_지난것\" boolean, p_page integer)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "청년셈(\"p_시도\" text, \"p_지난것\" boolean)",
+      "왜": "비회원 화면이 씁니다 — 홈 · 공고 맛보기 · 교육 · 봉사 · 청년 · 커뮤니티 공개 보기"
+    },
+    {
+      "이름": "판정남기기(p_secret text, p_source text, p_rows jsonb)",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    },
+    {
+      "이름": "판정물어보기(p_secret text, p_source text, p_ids text[])",
+      "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+    }
+  ],
+  "표": [
+    {
+      "이름": "collect_source",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "dementia_safe_centers",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "dev_rehab_orgs",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "home_blocks",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "home_texts",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "job_attachments",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "job_events",
+      "왜": "★ 비로그인이 **쓸 수 있습니다**. 2026-10-09 점검에서 표시했습니다 — 확인이 필요합니다"
+    },
+    {
+      "이름": "job_tab_cards",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "page_hits",
+      "왜": "★ 비로그인이 **쓸 수 있습니다**. 2026-10-09 점검에서 표시했습니다 — 확인이 필요합니다"
+    },
+    {
+      "이름": "site_settings",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "ui_icons",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "welfare_centers",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "공개글",
+      "왜": "비회원 화면이 읽습니다"
+    },
+    {
+      "이름": "공개댓글",
+      "왜": "비회원 화면이 읽습니다"
+    }
+  ]
+}

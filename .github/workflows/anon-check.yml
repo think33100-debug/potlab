@@ -1,0 +1,35 @@
+name: 비로그인에게 열린 창구 점검
+
+# 「허용 목록 밖에 열린 것이 있나」를 날마다 묻습니다 (2026-10-09).
+#
+# 왜 — 2026-09-25 에 org_public 의 인수가 늘면서 새 함수가 되었고,
+# 권한이 기본값(PUBLIC)으로 돌아가 **기관 58,610곳이 비로그인에게 보름 동안**
+# 열려 있었습니다. 손으로 적은 점검 목록에 그 함수가 없어서 못 잡았습니다.
+#
+# 실패하면 GitHub 이 저장소 주인에게 메일을 보냅니다
+# (Settings → Notifications → Actions · 기본으로 켜져 있습니다).
+
+on:
+  schedule:
+    - cron: '20 21 * * *'    # 한국시간 아침 6시 20분
+  workflow_dispatch:
+
+concurrency:
+  group: anon-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 점검
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node tools/보안_비로그인점검.mjs
