@@ -316,7 +316,7 @@ export default function EduManage() {
                               className="rounded-md border border-gray-200 bg-white px-5 py-2 text-lg text-gray-600 hover:bg-gray-50 dark:bg-gray-800">
                               {신청본다 === s.회차id ? '신청자 접기' : '신청자 보기'}
                             </button>
-                            <Link href={`/edu/회차/${s.회차id}`}
+                            <Link href={`/edu/session/${s.회차id}`}
                               className="rounded-md border border-gray-200 bg-white px-5 py-2 text-lg text-gray-600 hover:bg-gray-50 dark:bg-gray-800">
                               회원 화면으로
                             </Link>
