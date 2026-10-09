@@ -264,6 +264,21 @@ API 한 번이면 끝날 일을 화면 긁기·PDF 읽기로 헤맸습니다.
 그래서 함수를 고치는 마이그레이션 **끝에는 언제나**
 `revoke execute … from public, anon` + 필요한 역할에만 `grant` 를 다시 겁니다.
 
+### 6-2b. 밖에서 **이름으로** 부르는 함수는 영어 이름으로
+
+Supabase 훅처럼 함수를 **주소로 가리키는** 자리가 있습니다. 거기에는 한글
+이름을 못 씁니다.
+
+```
+2026-10-09  hook_이메일가입막기 를 before-user-created 훅에 걸려다 거절당했습니다
+  Invalid Auth Hook URI: pg-functions://postgres/public/hook_이메일가입막기
+  Should follow pg-functions://postgres/schema/function_name
+→ hook_block_email_signup 으로 다시 만들었습니다
+```
+
+**안에서만 부르는 함수는 한글이 낫습니다** — 읽기 쉽고 뜻이 바로 보입니다.
+다만 **훅 · 외부 도구 · 설정 파일에 이름을 적는 함수**는 영어로 짓습니다.
+
 ### 6-3. `revoke … from anon` 만으로는 **아무것도 안 닫힙니다**
 
 `anon` 은 `PUBLIC` 에 딸려 있습니다. `from public` 까지 걷어야 닫힙니다.
