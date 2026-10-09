@@ -33,11 +33,20 @@ export type Me = {
    serverWho 가 서버에서 막은 그 함정이 브라우저에 그대로 남아 있었습니다. */
 export type 설문상태 = '마침' | '안마침' | '모름';
 
+/* 들어가는 길을 그릴 때 쓰는 값 (2026-10-09).
+   「채용 관리」·「교육 관리」 링크를 누구에게 보일지 정합니다.
+   내프로필() 에 붙이지 않은 까닭 — 그쪽은 returns table 이라 칸을 더하면
+   drop 이 필요합니다. 여기는 Promise.all 로 함께 불러 왕복이 안 늡니다. */
+export type 관리메뉴 = {
+  채용관리: boolean; 교육관리: boolean; 페르소나역할: string | null;
+};
+
 type Auth = {
   loading: boolean;
   session: Session | null;
   me: Me | null;          // profiles 줄. 가입을 마치기 전에는 null 입니다
   isAdmin: boolean;       // 단추를 보일지 말지에만 씁니다 — 막는 자리는 DB 입니다
+  관리: 관리메뉴;          // 「채용 관리」·「교육 관리」 링크를 보일지
   /* 로그인했나. **lib/supabase-server.ts 의 serverWho 와 같은 세 값·같은 뜻입니다.**
      서버와 화면이 다른 말을 쓰면 맞춰볼 수가 없습니다 */
   who: Who;
@@ -46,8 +55,10 @@ type Auth = {
   signOut: () => Promise<void>;
 };
 
+const 관리없음: 관리메뉴 = { 채용관리: false, 교육관리: false, 페르소나역할: null };
+
 const Ctx = createContext<Auth>({
-  loading: true, session: null, me: null, isAdmin: false,
+  loading: true, session: null, me: null, isAdmin: false, 관리: 관리없음,
   who: '모름', 설문: '모름',
   reload: async () => {}, signOut: async () => {},
 });
@@ -64,13 +75,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [me, setMe] = useState<Me | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [관리, set관리] = useState<관리메뉴>(관리없음);
   /* profiles 를 읽어냈나. false 면 「모름」입니다 — 「가입 안 함」이 아닙니다 */
   const [meOk, setMeOk] = useState(true);
 
   const loadMe = useCallback(async (s: Session | null) => {
-    if (!s) { setMe(null); setMeOk(true); setIsAdmin(false); return; }
+    if (!s) { setMe(null); setMeOk(true); setIsAdmin(false); set관리(관리없음); return; }
 
-    const [prof, admin] = await Promise.all([
+    const [prof, admin, 메뉴] = await Promise.all([
       /* profiles 를 바로 읽지 않습니다 (2026-10-01).
          비로그인·다른 회원이 프로필을 통째로 읽던 것을 막으면서
          job_group·role 같은 칸은 남에게 아예 안 나가게 했습니다.
@@ -80,6 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
          진짜로 막는 자리는 RLS 와 칸 단위 권한입니다.
          여기서 true 로 만들어도 서버가 안 해줍니다 */
       sb.rpc('is_admin'),
+      /* 「채용 관리」·「교육 관리」 링크를 보일지. 못 읽으면 안 보이는 쪽으로 둡니다 —
+         링크를 숨겨도 막는 자리는 DB 입니다 */
+      sb.rpc('내관리메뉴'),
     ]);
 
     /* **오류와 「줄이 없음」은 다릅니다** (2026-09-25).
@@ -97,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     /* 관리자는 못 읽으면 아닌 쪽으로 둡니다 — 단추를 보일지 말지에만 쓰고,
        진짜로 막는 자리는 RLS 라 여기서 틀려도 뚫리지 않습니다 */
     setIsAdmin(!admin.error && admin.data === true);
+    set관리(메뉴.error ? 관리없음 : { ...관리없음, ...(메뉴.data as 관리메뉴) });
   }, [sb]);
 
   /* getSession() 은 브라우저에 저장된 것을 읽기만 하고 서버에 물어보지 않습니다.
@@ -161,7 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         : me?.survey_at ? '마침' : '안마침';
 
   const value = useMemo<Auth>(() => ({
-    loading, session, me, isAdmin, who, 설문,
+    loading, session, me, isAdmin, 관리, who, 설문,
     reload: async () => {
       const { data } = await sb.auth.getSession();
       await loadMe(data.session);
@@ -171,7 +187,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setMe(null);
       router.push('/');
     },
-  }), [loading, session, me, isAdmin, who, 설문, sb, loadMe, router]);
+  }), [loading, session, me, isAdmin, 관리, who, 설문, sb, loadMe, router]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

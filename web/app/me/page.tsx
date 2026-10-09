@@ -18,7 +18,7 @@ const FREE_CHANGES = 5;
 export default function MyPage() {
   const router = useRouter();
   const toast = useToast();
-  const { loading, session, me, reload, signOut } = useAuth();
+  const { loading, session, me, 관리, reload, signOut } = useAuth();
 
   /* 안 건드렸으면 지금 닉네임을 보여줍니다. 상태로 미리 채우지 않습니다 —
      effect 안 setState 는 그릴 때마다 한 번 더 그립니다 */
@@ -173,6 +173,29 @@ export default function MyPage() {
           ))}
         </div>
       </section>
+
+      {/* 담당자로 승인된 분과 마스터에게만 붙습니다 (2026-10-09).
+          탑바·아래 탭바와 **같은 값**(내관리메뉴 창구)을 봅니다 — 한쪽만 보이면
+          「분명 승인받았는데 들어갈 길이 없다」가 됩니다 */}
+      {(관리.채용관리 || 관리.교육관리) && (
+        <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
+          <h2 className="text-h3 font-bold">담당자 화면</h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {관리.채용관리 && (
+              <Link href="/biz"
+                className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950">
+                채용 관리
+              </Link>
+            )}
+            {관리.교육관리 && (
+              <Link href="/edu/manage"
+                className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950">
+                교육 관리
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       <SurveyEdit profileId={me.id} role={(me.role ?? '현직') as Role} job={me.job_group ?? '작업치료사'} />
 

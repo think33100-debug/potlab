@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/app/auth';
 import { Icon } from '@/components/icon';
 
 /* 아래 탭바. 앱의 뼈대라 DB 가 아니라 코드에 둡니다 —
@@ -17,11 +18,25 @@ const TABS = [
   { href: '/me',        label: '내 정보',  icon: 'user-round' },
 ];
 
+/* 「채용 관리」·「교육 관리」 는 **승인된 담당자와 마스터에게만** 붙습니다
+   (2026-10-09). 값은 내관리메뉴() 창구가 줍니다 — 화면이 짐작하지 않습니다.
+   링크를 숨기는 것은 길 안내일 뿐이고, 막는 자리는 DB 입니다. */
+function 관리길(관리: { 채용관리: boolean; 교육관리: boolean }) {
+  const xs: { href: string; label: string; icon: string }[] = [];
+  if (관리.채용관리) xs.push({ href: '/biz', label: '채용 관리', icon: 'building-2' });
+  if (관리.교육관리) xs.push({ href: '/edu/manage', label: '교육 관리', icon: 'graduation-cap' });
+  return xs;
+}
+
 export function TabBar() {
   const pathname = usePathname();
+  const { 관리 } = useAuth();
 
   const on = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+  /* 담당자 길은 **「내 정보」 앞**에 끼웁니다 — 내 정보는 늘 맨 오른쪽입니다 */
+  const tabs = [...TABS.slice(0, 3), ...관리길(관리), ...TABS.slice(3)];
 
   return (
     <nav
@@ -30,7 +45,7 @@ export function TabBar() {
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <ul className="mx-auto flex max-w-3xl">
-        {TABS.map((t) => (
+        {tabs.map((t) => (
           <li key={t.href} className="flex-1">
             <Link
               href={t.href}
@@ -66,12 +81,13 @@ export function TabBar() {
 /* 데스크톱 위쪽 줄에 놓는 같은 길들 */
 export function TopNav() {
   const pathname = usePathname();
+  const { 관리 } = useAuth();
   const on = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href);
 
   return (
     <nav className="hidden items-center gap-6 md:flex" aria-label="위쪽 길">
-      {TABS.slice(1, 3).map((t) => (
+      {[...TABS.slice(1, 3), ...관리길(관리)].map((t) => (
         <Link
           key={t.href}
           href={t.href}
