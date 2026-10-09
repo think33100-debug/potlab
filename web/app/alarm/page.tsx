@@ -22,11 +22,11 @@ const 날 = (s: string) => new Date(s).toLocaleString('ko-KR',
   { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 export default function Alarm() {
-  const { loading, session } = useAuth();
+  const { loading, session, isAdmin } = useAuth();
   const [줄들, set줄들] = useState<알림[] | null>(null);
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || !isAdmin) return;
     let 살아있나 = true;
     const sb = browserSupabase();
     sb.rpc('내알림', { p_몇줄: 50 }).then(({ data }) => {
@@ -36,7 +36,7 @@ export default function Alarm() {
       sb.rpc('알림읽음', { p_id: null });
     });
     return () => { 살아있나 = false; };
-  }, [session]);
+  }, [session, isAdmin]);
 
   if (loading) {
     return <main className="mx-auto w-full max-w-2xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
@@ -55,9 +55,24 @@ export default function Alarm() {
     );
   }
 
+  /* 알림함은 2026-10-09 에 만든 기능입니다. 새 기능은 관리자·마스터에게만
+     보이게 숨겨서 배포합니다 — 탑바의 종도 같은 기준으로 가려 뒀습니다 */
+  if (!isAdmin) {
+    return (
+      <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
+        <p className="break-keep text-h3 font-bold">아직 준비 중이에요</p>
+        <Link href="/" className="mt-7 inline-block rounded-md border border-gray-200 px-6 py-4
+                                  text-lg font-medium text-gray-600 hover:bg-gray-50">홈으로</Link>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <h1 className="break-keep text-h1 font-bold">알림</h1>
+      <p className="rounded-sm bg-badge-teal-bg px-4 py-2 text-sm text-teal-strong">
+        숨겨 둔 화면이에요 — 관리자와 마스터(관리자 페르소나)에게만 보입니다
+      </p>
+      <h1 className="mt-5 break-keep text-h1 font-bold">알림</h1>
 
       {줄들 === null ? <p className="mt-6 text-lg text-mute">잠시만요…</p>
         : 줄들.length === 0
