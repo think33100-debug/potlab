@@ -49,6 +49,49 @@ export function isClosed(
   return nowTime > applyToTime.slice(0, 8);
 }
 
+/* 마감 배지에 쓸 말과 색 (2026-10-09).
+
+   ★ 전에는 같은 이름의 dday() 가 **목록과 상세에 따로** 있었습니다.
+     2026-10-08 에 마감 시각을 넣으면서 목록만 고쳐서, 시각이 지난 그날
+     상세에는 빨간 「오늘 마감」 이 그대로 남았습니다 (근로복지공단안산병원
+     17:30 마감 공고로 확인). 그래서 한 벌로 모읍니다 —
+     **마감 배지를 그리는 곳은 이 함수만 부릅니다.**
+
+     마감일 없음        마감표시() 가 정한 말 (「마감일 공고문 확인」 등) · 회색
+     마감 (시각 포함)    「마감」 · 회색 · over
+     오늘 마감          「오늘 마감」 또는 「오늘 오후 5시 30분 마감」 · 빨강
+     그 밖              「D-n」 · 사흘 이하면 빨강
+
+   urgent 는 빨강으로 칠할지, over 는 흐리게 둘지입니다. 둘은 같이 못 켜집니다. */
+export type 마감배지모양 = { text: string; urgent: boolean; over: boolean };
+
+export function 마감배지(
+  to: string | null | undefined,
+  표시?: string | null,
+  시각?: string | null,
+  now: Date = new Date(),
+): 마감배지모양 {
+  if (!to) {
+    return { text: 표시 || '마감일 공고문 확인', urgent: false, over: false };
+  }
+  if (isClosed(to, todayKst(now), 시각, nowTimeKst(now))) {
+    return { text: '마감', urgent: false, over: true };
+  }
+  /* 날수는 **날짜끼리** 셉니다 (오늘 0시 ↔ 마감일 0시).
+     지금 시각에서 재면 같은 날 낮에도 하루가 남은 것으로 올라갑니다 —
+     목록의 옛 dday() 가 그렇게 세서, 마감 당일에 「D-1」, 내일 마감에
+     「D-2」 를 찍고 있었습니다. 상세 쪽 셈이 맞았으므로 그것을 가져옵니다 */
+  const left = Math.ceil(
+    (new Date(to + 'T23:59:59+09:00').getTime()
+     - new Date(todayKst(now) + 'T00:00:00+09:00').getTime()) / 86400000,
+  ) - 1;
+  if (left <= 0) {
+    const t = 시각말(시각);
+    return { text: t ? `오늘 ${t} 마감` : '오늘 마감', urgent: true, over: false };
+  }
+  return { text: 'D-' + left, urgent: left <= 3, over: false };
+}
+
 /* 「09:00:00」 → 「오전 9시」 · 「17:30:00」 → 「오후 5시 30분」 · 「23:59:59」 → 「밤 12시」 */
 export function 시각말(t: string | null | undefined): string | null {
   if (!t) return null;

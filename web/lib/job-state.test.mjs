@@ -3,7 +3,7 @@
    마감 판단이 틀리면 둘 중 하나가 납니다 —
    멀쩡한 공고에 「마감」 띠가 붙거나, 끝난 공고를 계속 지원하러 보냅니다. */
 import assert from 'node:assert/strict';
-import { isClosed, todayKst, nowTimeKst, 시각말 } from './job-state.ts';
+import { isClosed, todayKst, nowTimeKst, 마감배지, 시각말 } from './job-state.ts';
 
 /* ① 마감일이 빈 공고는 마감이 아닙니다.
       인수인계 원칙 — 「마감일이 비어 있으면 잘못 읽은 것」입니다.
@@ -71,4 +71,43 @@ assert.match(todayKst(), /^\d{4}-\d{2}-\d{2}$/);
   assert.match(nowTimeKst(), /^\d{2}:\d{2}:\d{2}$/);
 }
 
-console.log('마감 판단 통과 — 7가지');
+/* ⑧ 마감 배지 — 목록과 상세가 **같은 함수**를 씁니다 (2026-10-09).
+
+   2026-10-08 에 같은 이름의 dday() 가 두 벌이라 상세만 틀렸습니다.
+   그 사고를 그대로 재현해 둡니다 — 근로복지공단안산병원 17:30 마감 공고 */
+{
+  const 그날저녁 = new Date('2026-10-08T08:39:00Z');   // 한국 10/8 17:39
+  const 그날낮   = new Date('2026-10-08T05:00:00Z');   // 한국 10/8 14:00
+
+  /* 시각이 지나면 그날이라도 회색 「마감」 — 빨강이면 안 됩니다 */
+  const 지남 = 마감배지('2026-10-08', null, '17:30:00', 그날저녁);
+  assert.equal(지남.text, '마감');
+  assert.equal(지남.urgent, false);
+  assert.equal(지남.over, true);
+
+  /* 아직이면 시각을 붙여 빨강 */
+  const 아직 = 마감배지('2026-10-08', null, '17:30:00', 그날낮);
+  assert.equal(아직.text, '오늘 오후 5시 30분 마감');
+  assert.equal(아직.urgent, true);
+  assert.equal(아직.over, false);
+
+  /* 시각이 없으면 그날 종일 열려 있습니다 */
+  assert.equal(마감배지('2026-10-08', null, null, 그날저녁).text, '오늘 마감');
+
+  /* 마감일이 없으면 마감표시() 가 정한 말을 그대로 씁니다 — 마감이 아닙니다 */
+  const 없음 = 마감배지(null, '마감일 공고문 확인', null, 그날저녁);
+  assert.equal(없음.text, '마감일 공고문 확인');
+  assert.equal(없음.over, false);
+  assert.equal(마감배지(null, null, null, 그날저녁).text, '마감일 공고문 확인');
+
+  /* 남은 날수 — 사흘 이하만 빨강 */
+  assert.equal(마감배지('2026-10-11', null, null, 그날낮).text, 'D-3');
+  assert.equal(마감배지('2026-10-11', null, null, 그날낮).urgent, true);
+  assert.equal(마감배지('2026-10-12', null, null, 그날낮).text, 'D-4');
+  assert.equal(마감배지('2026-10-12', null, null, 그날낮).urgent, false);
+
+  /* 지난 날짜는 시각과 무관하게 회색 */
+  assert.equal(마감배지('2026-10-07', null, null, 그날낮).over, true);
+}
+
+console.log('마감 판단 통과 — 8가지');

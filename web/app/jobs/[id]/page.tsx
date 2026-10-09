@@ -18,7 +18,7 @@ import { ShareButtons } from '@/components/share-buttons';
 import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
-import { isClosed, todayKst, 시각말 } from '@/lib/job-state';
+import { isClosed, todayKst, 마감배지, 시각말 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { MembersOnly } from '@/components/members-only';
@@ -62,16 +62,10 @@ function 요일(ymd: string | null | undefined): string | null {
   return ['일', '월', '화', '수', '목', '금', '토'][new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
 }
 
-function dday(to: string | null, 표시?: string | null): { text: string; urgent: boolean } | null {
-  if (!to) return { text: 표시 || '마감일 공고문 확인', urgent: false };
-  const left = Math.ceil(
-    (new Date(to + 'T23:59:59+09:00').getTime()
-     - new Date(todayKst() + 'T00:00:00+09:00').getTime()) / 86400000,
-  ) - 1;
-  if (left < 0) return { text: '마감', urgent: false };
-  if (left === 0) return { text: '오늘 마감', urgent: true };
-  return { text: `D-${left}`, urgent: left <= 3 };
-}
+/* ★ 2026-10-09 — 여기 있던 dday() 를 지웠습니다.
+   목록에도 같은 이름이 한 벌 있었고, 2026-10-08 에 마감 시각을 넣을 때 목록만
+   고쳐서 **시각이 지난 그날 이 화면만 빨간 「오늘 마감」** 이 남았습니다.
+   이제 lib/job-state.ts 의 마감배지() 한 벌만 씁니다 */
 
 /* 카톡·문자에 뜨는 미리보기 */
 export async function generateMetadata({
@@ -136,7 +130,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     jobViews([j.id]),
   ]);
 
-  const d = dday(j.apply_to, j.마감표시);
+  const d = 마감배지(j.apply_to, j.마감표시, j.apply_to_time);
   /* 마감된 공고는 회색으로 내려앉습니다 */
   const badge = closed ? '#8A9299' : (JOB_COLOR[j.job_group ?? ''] ?? JOB_COLOR_FALLBACK);
 
@@ -203,12 +197,10 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                                text-[13px] text-[#4A5056]">
                 {j.employ_type || '공고문 참고'}
               </span>
-              {d && (
-                <span className={`rounded-full px-3 py-1 text-[13px] font-bold ${
-                  d.urgent ? 'bg-[#FF3B30] text-white' : 'bg-[#ECECE8] text-[#4A5056]'}`}>
-                  {d.text}
-                </span>
-              )}
+              <span className={`rounded-full px-3 py-1 text-[13px] font-bold ${
+                d.urgent ? 'bg-[#FF3B30] text-white' : 'bg-[#ECECE8] text-[#4A5056]'}`}>
+                {d.text}
+              </span>
             </div>
 
             <h1 className="mt-4 break-keep text-[26px] font-bold leading-[1.35] text-[#1B2025]"

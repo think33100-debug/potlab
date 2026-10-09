@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
+import { CLOSED_COLOR, JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { isClosed } from '@/lib/job-state';
 import { siteUrl } from '@/lib/site-url';
 import { supabase } from '@/lib/supabase';
@@ -111,7 +111,10 @@ export async function GET(
       <div
         style={{
           width: W, height: H, display: 'flex', flexDirection: 'column',
-          justifyContent: 'space-between', backgroundColor: skin.bg,
+          /* ★ 2026-10-09 — 마감된 공고는 직군 색 대신 회색입니다.
+             직군이 「공통」이면 #FF3B30 이라, 끝난 공고가 카톡에서 가장 급해
+             보였습니다. 앱 안에서는 같은 공고를 흐리게 눌러 둡니다 */
+          justifyContent: 'space-between', backgroundColor: closed ? CLOSED_COLOR : skin.bg,
           padding: 72, fontFamily: 'Pretendard', color: '#FFFFFF',
         }}
       >
