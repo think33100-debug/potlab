@@ -1,7 +1,8 @@
 'use client';
 
 import { createBrowserClient } from '@supabase/ssr';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { 비회원보기중 } from './guest-view';
 
 /* 브라우저 쪽 열쇠꾸러미입니다.
 
@@ -24,8 +25,32 @@ import type { SupabaseClient } from '@supabase/supabase-js';
    lib/supabase.ts 는 세션이 아예 없는 「누구나 보는 자료」 전용으로 남습니다. */
 
 let client: SupabaseClient | null = null;
+let 손님용: SupabaseClient | null = null;
 
-export function browserSupabase(): SupabaseClient {
+/* 「비회원 보기」 전용 열쇠꾸러미 (2026-10-09 · lib/guest-view.ts 참고).
+   persistSession 을 끄고 storageKey 를 따로 줘서 **세션을 아예 안 집습니다.**
+   그래서 요청에 Authorization: Bearer <회원 토큰> 이 안 실리고,
+   anon 열쇠로만 나갑니다 — 로그아웃한 사람과 똑같은 요청이 됩니다.
+   storageKey 를 안 바꾸면 같은 열쇠를 읽어 세션을 주워 옵니다. */
+function 손님클라이언트(): SupabaseClient {
+  if (!손님용) {
+    손님용 = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+          storageKey: 'potjob-guest-view-none',
+        },
+      },
+    );
+  }
+  return 손님용;
+}
+
+function 진짜클라이언트(): SupabaseClient {
   if (!client) {
     client = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,4 +66,16 @@ export function browserSupabase(): SupabaseClient {
     );
   }
   return client;
+}
+
+/* 평소에는 로그인한 사람으로 읽습니다.
+   「비회원 보기」를 켜 두면 **세션 없는 열쇠꾸러미**를 돌려줍니다 —
+   화면 코드는 한 줄도 안 고치고 자료까지 비회원이 됩니다.
+
+   진짜: true 는 그 보기를 **무시하고** 늘 로그인한 사람으로 읽습니다.
+   페르소나 띠와 로그인 상태를 읽는 자리만 씁니다 — 그 둘은 비회원 보기
+   중에도 「내가 마스터인가」를 알아야 하기 때문입니다. */
+export function browserSupabase(opts?: { 진짜?: boolean }): SupabaseClient {
+  if (!opts?.진짜 && 비회원보기중()) return 손님클라이언트();
+  return 진짜클라이언트();
 }

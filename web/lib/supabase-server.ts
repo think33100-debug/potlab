@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { GUEST_COOKIE } from './guest-view';
 
 /* 서버에서 **그 사람으로** 읽는 열쇠꾸러미입니다 (2026-09-25).
 
@@ -18,6 +19,21 @@ import type { SupabaseClient } from '@supabase/supabase-js';
      앞 사람의 쿠키로 뒷사람 화면을 그리게 됩니다. */
 export async function serverSupabase(): Promise<SupabaseClient> {
   const jar = await cookies();
+
+  /* ★ 2026-10-09 — 「비회원 보기」 (lib/guest-view.ts).
+     마스터가 로그인을 유지한 채 비회원 화면을 겪어 볼 때, **서버도** 세션을
+     안 읽어야 합니다. 화면만 비회원처럼 그리면 서버 렌더가 회원 자료를
+     그대로 담아 보냅니다.
+     세션 쿠키를 아예 안 건네주는 것이 가장 확실합니다 — 토큰이 없으면
+     getUser() 가 AuthSessionMissingError 를 내고 serverWho 가 「비회원」이
+     됩니다. 「모름」이 아니라 「비회원」이라는 점이 중요합니다 */
+  if (jar.get(GUEST_COOKIE)?.value === '1') {
+    return createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { cookies: { getAll: () => [], setAll: () => {} } },
+    );
+  }
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
