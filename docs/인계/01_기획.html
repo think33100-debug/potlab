@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01_기획 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="00_%EC%9D%BD%EB%8A%94%EB%B2%95.html">읽는법</a><a href="01_%EA%B8%B0%ED%9A%8D.html">기획</a><a href="02_%EA%B8%B0%EC%88%A0%EC%8A%A4%ED%8E%99.html">기술스펙</a><a href="03_IA.html">IA</a><a href="04_%ED%99%94%EB%A9%B4%EC%8A%A4%ED%8E%99.html">화면스펙</a><a href="05_%EB%B6%80%EB%A1%9D.html">부록</a><a href="../screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="01-기획">01. 기획</h1>
+<blockquote><b>숫자 기준 시각</b> — 2026-10-10 03시(KST) · 커밋 <code>3394655</code> 이후.</blockquote>
+<blockquote>숫자는 그때 <b>세어 본 값</b>입니다 (DB <code>select</code> · 파일 수).</blockquote>
+<h2 id="서비스-목적">서비스 목적</h2>
+<p><b>작업치료사·물리치료사 채용공고를 하나도 안 빼고 모읍니다.</b></p>
+<p>많이 안 뽑는 기관이라도 하나 빠지면 「여기 오면 다 있다」가 무너집니다.</p>
+<h3 id="1층-공공기관-종합병원-대학병원">1층 — 공공기관 · 종합병원 · 대학병원</h3>
+<p>대상은 셋 중 하나라도 걸리면 포함합니다.</p>
+<p>1. 나라·지자체가 운영하는 모든 기관 (국립대병원·국립병원·지방의료원·보훈·산재·</p>
+<p>   보건소·치매안심센터·국립센터류·지자체 직영 복지관/재활원, 시립·도립·군립 요양시설)</p>
+<p>2. 심평원 종별이 <b>상급종합</b> 또는 <b>종합병원</b></p>
+<p>3. 이름에 <b>대학병원</b>이 들어가면 종별 무관</p>
+<h3 id="왜-재활병원이-1층이-아닌가">왜 재활병원이 1층이 아닌가</h3>
+<p>숫자만 보면 반대입니다 — 재활병원에 작업치료사가 제일 많습니다.</p>
+<p>「병원」 종별 <b>4,961명</b>으로 상급종합 전부(347명)의 <b>14배</b>입니다.</p>
+<p>서송병원 한 곳이 171명인데 상급종합 한 곳 최대가 24명입니다 (2026-09-26 · 심평원 API).</p>
+<p><b>그래도 1층에 안 넣습니다.</b> 사람이 많은 곳이 아니라 <b>정보가 귀한 곳</b>이</p>
+<p>1층이기 때문입니다. 재활병원은 취업이 쉬워서 공고를 굳이 찾아다니지 않아도</p>
+<p>됩니다 — 우리가 모아줄 값이 낮습니다. 공공·종합·대학은 반대입니다.</p>
+<p><b>재활·요양은 2층</b>이고 나중에 업체 유료 등록 자리입니다. 그래서 재활·요양</p>
+<p>공고에는 조회수를 남깁니다 — 나중에 값을 매길 근거가 됩니다.</p>
+<h3 id="커버리지는-숫자로-말합니다">커버리지는 숫자로 말합니다</h3>
+<p>「대상 N곳 중 최근 30일 공고가 들어온 곳 M곳」. 느낌으로 말하지 않습니다.</p>
+<p>대상 몇 곳을 보고 있는지 화면에 밝힙니다.</p>
+<hr>
+<h2 id="사용자-역할-아홉">사용자 역할 아홉</h2>
+<table><thead><tr><th>역할</th><th>누구</th><th>무엇을 봅니다</th><th>어떻게 됩니다</th></tr></thead><tbody>
+<tr><td><b>비회원</b></td><td>로그인 안 함</td><td>홈 · 공고 <b>맛보기 10건</b> · 커뮤니티 맛보기 · 교육 · 기관 · 계산기</td><td>원문 주소·경쟁률·병원 자료는 <b>안 줍니다</b></td></tr>
+<tr><td><b>가입중</b></td><td>닉네임까지만 정함</td><td>위와 비슷하되 <code>JobVeil</code>·<code>Clip</code> 이 잘라 보여 줍니다</td><td><code>/welcome</code> 5단계를 마치면 회원</td></tr>
+<tr><td><b>학생</b></td><td>재학생</td><td>회원 전체 + 학생 방</td><td><code>profiles.role = '학생'</code></td></tr>
+<tr><td><b>작업치료사</b></td><td>현직</td><td>회원 전체 + 치료사 방</td><td><code>role = '현직'</code> · <code>job_group = '작업치료사'</code></td></tr>
+<tr><td><b>물리치료사</b></td><td>현직</td><td>같음</td><td><code>job_group = '물리치료사'</code></td></tr>
+<tr><td><b>채용담당자</b></td><td>병원 인사팀</td><td><b>채용 관리</b>(<code>/biz</code>) — 공고 쓰기·고치기·마감·내리기</td><td><code>회원자격</code> 갈래 <code>채용담당자</code> 승인</td></tr>
+<tr><td><b>교육담당자</b></td><td>학회·학원 간사</td><td><b>교육 관리</b>(<code>/edu/manage</code>) — 과정·회차·신청자·답글</td><td>갈래 <code>교육담당자기관</code>·<code>교육담당자개인</code> 승인</td></tr>
+<tr><td><b>둘 다</b></td><td>두 자격 모두 승인</td><td>채용 관리 + 교육 관리</td><td>메뉴에 둘이 다 뜹니다</td></tr>
+<tr><td><b>관리자 · 대표</b></td><td>운영진</td><td>관리자 화면 23곳 · 권한 12가지</td><td><code>admins</code> · <code>권한</code> 표</td></tr>
+</tbody></table>
+<p><b>치료사가 아닌 담당자입니다.</b> 채용·교육 담당자 페르소나는 <code>role</code> 을 비웁니다 —</p>
+<p>병원 인사팀이 커뮤니티 치료사 방에 글을 쓰면 안 되기 때문입니다.</p>
+<p>치료사가 담당자를 겸하는 경우는 <b>치료사 역할 + 담당자 자격</b> 둘 다로 봅니다.</p>
+<h3 id="마스터-페르소나">마스터 페르소나</h3>
+<p>운영 전용 계정 하나(<code>/master</code>)로 <b>위 역할을 진짜로 겪어 봅니다.</b></p>
+<p>화면만 흉내 내는 것이 아니라 <code>profiles.role</code>·<code>job_group</code>·<code>회원자격</code> 이</p>
+<p><b>실제로 바뀝니다</b> — RLS 와 창구 권한까지 그 역할로 막힙니다.</p>
+<p>페르소나 중에는 <b>관리자 힘이 꺼집니다</b> (<code>is_admin()</code> 이 false). 그래야</p>
+<p>「회원에게는 막히나」를 볼 수 있습니다.</p>
+<p>「비회원」 페르소나는 <b>로그아웃이 아닙니다.</b> 로그인을 유지한 채 쿠키</p>
+<p>하나(<code>potjob_guest_view</code>)로 브라우저와 서버가 둘 다 JWT 를 안 보냅니다 —</p>
+<p>화면뿐 아니라 <b>자료까지</b> 비회원이 됩니다.</p>
+<hr>
+<h2 id="핵심-기능">핵심 기능</h2>
+<table><thead><tr><th>기능</th><th>지금</th><th>어디</th></tr></thead><tbody>
+<tr><td><b>공고 모으기</b></td><td>API 10곳 · 못 붙인 곳 3곳</td><td>수집기 서버 크론</td></tr>
+<tr><td><b>공고 보기</b></td><td>목록 · 상세 <b>일곱 칸</b> · 찜 · 마감 알림</td><td><code>/jobs</code></td></tr>
+<tr><td><b>경쟁률</b></td><td>알리오 공개 자료 222묶음 · <b>회원만</b></td><td><code>/compete</code></td></tr>
+<tr><td><b>기관 찾기</b></td><td><b>58,610</b>곳 (<code>org_group_mv</code> — 같은 곳을 묶어 센 수)</td><td><code>/orgs</code></td></tr>
+<tr><td><b>커뮤니티</b></td><td>역할별 방 · 중고거래 · 운영진 글</td><td><code>/community</code></td></tr>
+<tr><td><b>교육·학술</b></td><td>과정 · 회차 · 신청 · 후기</td><td><code>/edu</code></td></tr>
+<tr><td><b>계산기 넷</b></td><td>퇴직금 · 연차 · 실업급여 · 실수령액</td><td><code>/tools</code></td></tr>
+<tr><td><b>월급 확인 · 스펙쌓기</b></td><td>기관 전체 평균(공시 자료)</td><td><code>/pay</code>(월급 확인) · <code>/spec</code></td></tr>
+<tr><td><b>담당자</b></td><td>채용 관리 · 교육 관리 · 첨부</td><td><code>/biz</code> · <code>/edu/manage</code></td></tr>
+<tr><td><b>1:1 대화</b></td><td>신청 → 수락 · 사진은 한 번만</td><td><code>/talk</code></td></tr>
+<tr><td><b>알림함</b></td><td>갈래 일곱</td><td><code>/alarm</code></td></tr>
+<tr><td><b>재직 인증</b></td><td>확인하면 파일을 <b>바로 지웁니다</b></td><td><code>/verify</code></td></tr>
+</tbody></table>
+<hr>
+<h2 id="운영-원칙-화면을-고칠-때-지켜야-하는-것">운영 원칙 — 화면을 고칠 때 지켜야 하는 것</h2>
+<h3 id="수시-금지-기관-성격-and-우리-직군">① 수시 금지 = 기관 성격 <b>AND</b> 우리 직군</h3>
+<pre><code>
+수시 금지 = 기관이 (공공 · 대학병원 · 상급종합) 중 하나 이고
+            직군이 작업치료사·물리치료사일 때만
+</code></pre>
+<p>의료기사가 아닌 직군(의료보조원·청소·조리·운전)은 이 기관들에서도 수시가</p>
+<p>있습니다. 반례 — 서귀포의료원(지방출연기관) 공고문이</p>
+<p>「접수기간 : 2026. 7. 10.(금)부터 ~ <b>채용완료시 까지</b>」였고,</p>
+<p>첨부를 읽으니 <b>기간제 의료보조원</b> 1명이었습니다.</p>
+<h3 id="마감-처리-수시채용이라고-쓰지-않습니다">② 마감 처리 — 「수시채용」이라고 쓰지 않습니다</h3>
+<p>공공 기관의 마감일이 비면 <b>「마감일 공고문 확인」</b>입니다.</p>
+<p>「수시」라고 적으면 회원이 마감일을 안 찾아봅니다.</p>
+<p><b>칸이 비어 있는 것을 「그런 공고」로 읽지 않습니다.</b> 먼저 출처별 채움 비율을</p>
+<p>셉니다 — 2026-10-07 에 마감일 없는 323건을 「수시채용」으로 보여주고 있었는데,</p>
+<p>322건이 긁기 출처(HS·ND)였습니다. 날짜를 주는 출처는 한 건도 안 빠졌습니다.</p>
+<p>기관 성격이 아니라 <b>수집기가 못 읽은 것</b>이었습니다.</p>
+<p><b>API 가 준 날짜를 공고문 날짜로 믿지 마십시오.</b> 위 서귀포의료원 공고의</p>
+<p>클린아이 값은 <code>PUB_END_DATE 2026-12-31</code> 이었는데 공고문과 달랐습니다.</p>
+<h3 id="출처와-한계를-화면에-밝힙니다">③ 출처와 한계를 화면에 밝힙니다</h3>
+<p>「직군 구분 없는 기관 전체 평균」처럼 <b>무엇을 모르는지</b>를 적습니다.</p>
+<p>확실하지 않은 숫자(경쟁률 등)는 만들지 않습니다.</p>
+<h3 id="기관-성격을-이름으로-짐작하지-않습니다">④ 기관 성격을 <b>이름으로 짐작하지 않습니다</b></h3>
+<p>공공·대학·종별·수시금지는 <b>심평원 공식 값만</b> 씁니다.</p>
+<p>비어 있으면 짐작하지 말고 <b>미정(null)</b> 으로 두고 관리자에게 보냅니다.</p>
+<p>미정인 동안 화면은 안전한 쪽으로.</p>
+<p>실제로 밟은 것 — 선한병원(이름에 「병원」이 없어 종합 탭에 있었으나 종별은</p>
+<p>「병원」) · 원광대·중앙대병원(탭이 「공공」이었으나 설립구분은 「학교법인」) ·</p>
+<p>경희의료원(「의료원」이라 공공처럼 보이나 학교법인) ·</p>
+<p>한일병원(「한전의료재단」이라 공공 계열로 보고했으나 심평원 설립구분은 「개인」).</p>
+<h3 id="시험자료">⑤ 시험자료</h3>
+<p>예시 자료는 전부 <code>시험자료 = true</code> 이고 <b>시험병원·시험 교육기관에만</b> 붙습니다.</p>
+<p>회원용 창구가 그 칸을 보고 걸러냅니다. 치우는 것은 <code>시험자료치우기()</code> 한 번.</p>
+<p>시험 자료를 <b>실제 회원 계정에 넣지 않습니다.</b></p>
+<h3 id="운영진-글">⑥ 운영진 글</h3>
+<p>마스터가 페르소나로 쓴 글은 <code>posts</code> 가 아니라 <b>따로 둔 <code>운영진글</code> 표</b>에</p>
+<p>표시합니다. <code>posts</code> 에 <code>쓴역할</code> 칸을 두면 REST <code>select</code> 로 페르소나가 드러납니다.</p>
+<h3 id="못-가린-공고는-버리지-않습니다">⑦ 못 가린 공고는 버리지 않습니다</h3>
+<p>보류함으로 보내고 관리자가 확인 후 올립니다.</p>
+<p>여러 직군 통합 공고는 <b>인원이 우리 직군 인원이 아닙니다.</b></p>
+<h3 id="결제는-potjob-이-받지-않습니다">⑧ 결제는 POTJOB 이 받지 않습니다</h3>
+<p>교육은 <b>계좌 안내만 전달</b>합니다. 환불 규정은 기관이 적고, 비면 창구가 거절합니다.</p>
+<p class="만든말">이 쪽은 <code>01_기획.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>

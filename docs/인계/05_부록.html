@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05_부록 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="00_%EC%9D%BD%EB%8A%94%EB%B2%95.html">읽는법</a><a href="01_%EA%B8%B0%ED%9A%8D.html">기획</a><a href="02_%EA%B8%B0%EC%88%A0%EC%8A%A4%ED%8E%99.html">기술스펙</a><a href="03_IA.html">IA</a><a href="04_%ED%99%94%EB%A9%B4%EC%8A%A4%ED%8E%99.html">화면스펙</a><a href="05_%EB%B6%80%EB%A1%9D.html">부록</a><a href="../screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="05-부록">05. 부록</h1>
+<blockquote><b>숫자 기준 시각</b> — 2026-10-10 03시(KST) · 커밋 <code>3394655</code> 이후.</blockquote>
+<blockquote>숫자는 그때 <b>세어 본 값</b>입니다 (DB <code>select</code> · 파일 수).</blockquote>
+<h2 id="1-화면-전수-점검표-2026-10-10-새벽-최신">1. 화면 전수 점검표 (2026-10-10 새벽 · 최신)</h2>
+<p><b>「코드에 있다」는 ○ 가 아닙니다.</b> 메뉴에서 닿고, 열리고, 끝까지 되어야 ○ 입니다.</p>
+<table><thead><tr><th></th><th>수</th><th>2026-10-09 밤</th></tr></thead><tbody>
+<tr><td><b>전체</b></td><td>화면 <b>62</b> + 아직 없는 기능 <b>14</b> = <b>76줄</b></td><td>76</td></tr>
+<tr><td>○ 끝까지 됨</td><td><b>51</b></td><td>47</td></tr>
+<tr><td>△ 열리지만 덜 됨</td><td><b>6</b></td><td>10</td></tr>
+<tr><td>✗ 아직 없음 (기능)</td><td>14</td><td>14</td></tr>
+<tr><td>표시를 안 단 화면</td><td><b>5</b></td><td>5</td></tr>
+</tbody></table>
+<p>51 + 6 + 5 = 화면 <b>62</b> · 거기에 아직 없는 기능 14 를 더해 <b>76줄</b>입니다.</p>
+<p>「표시를 안 단 화면」 다섯은 <code>/master</code>·<code>/auth/callback</code>·<code>/soon</code>·<code>/nope-zzz</code>(404)·<code>/api/og/job/[id]</code> 처럼</p>
+<p><b>회원이 쓰는 화면이 아닌 것</b>입니다.</p>
+<p><b>✗ 14 를 누가 할지 나눕니다</b> (6절·8절에 까닭).</p>
+<table><thead><tr><th>누가</th><th>수</th><th>무엇</th></tr></thead><tbody>
+<tr><td><b>개발자 몫</b></td><td><b>9</b></td><td>신고 처리 넷 · 탈퇴 때 증빙 파일 지우기 · <code>loading.tsx</code> · 화면 제목 · 홈 CTA 깜빡임 · 카드 두 모양</td></tr>
+<tr><td><b>세중님 결정</b></td><td><b>5</b></td><td>경쟁률 예시 자료 · 광고 배너 · 알림 푸시 확인 · 중고거래 값 칸 · 국세청 열쇠</td></tr>
+</tbody></table>
+<p>△ 가 10 → 6 으로 줄은 까닭 — 첨부·재직 증빙·광고 배너 그림·커뮤니티 사진</p>
+<p><b>넷이 ○</b> 가 됐습니다 (저장소 경로의 한글을 고쳤습니다 · 8-4 절).</p>
+<p>화면이 61 → <b>62</b> 가 된 것은 <code>/admin/blanks</code>(빈칸 공고)를 더했기 때문입니다.</p>
+<p><code>/edu/회차/[id]</code> 는 <code>/edu/session/[id]</code> 로 <b>이름만</b> 바뀌었습니다 (수는 그대로).</p>
+<p>자세한 표는 <b><code>docs/화면전수점검_1009.md</code></b> 에 있습니다. 여기에는 <b>바뀐 줄만</b> 적습니다.</p>
+<h3 id="2026-10-09-밤에-바뀐-줄">2026-10-09 밤에 바뀐 줄</h3>
+<table><thead><tr><th>주소</th><th>전</th><th>후</th></tr></thead><tbody>
+<tr><td><code>/partner</code> · <code>/verify</code></td><td>✗ 길이 0곳</td><td>○ <code>/me</code> 에 붙였습니다</td></tr>
+<tr><td><code>/biz</code></td><td>△ 보기와 도장만</td><td>○ 공고 쓰기·고치기·마감·내리기</td></tr>
+<tr><td><code>/edu/manage</code></td><td>없음</td><td>○ 새로 만듦</td></tr>
+<tr><td><code>/admin/blanks</code></td><td>없음</td><td>○ 새로 만듦</td></tr>
+<tr><td><code>/compete</code></td><td>○ 누구나 목록</td><td>○ <b>회원만</b></td></tr>
+<tr><td><code>/jobs/[id]</code></td><td>△ detail 칸을 다 그림</td><td>○ <b>일곱 칸</b></td></tr>
+<tr><td><code>/edu/회차/[id]</code></td><td><b>✗ 배포에서 404</b></td><td>○ <code>/edu/session/[id]</code></td></tr>
+</tbody></table>
+<h3 id="2026-10-10-새벽에-바뀐-줄">2026-10-10 새벽에 바뀐 줄</h3>
+<table><thead><tr><th>주소</th><th>전</th><th>후</th></tr></thead><tbody>
+<tr><td>공고·교육 <b>첨부</b></td><td>△ 화면만 (저장소 규칙 승인대기)</td><td>○ <b>끝까지</b> — 규칙 올리고 22가지 확인</td></tr>
+<tr><td><code>/verify</code> 증빙 올리기</td><td>△ 눌러 본 적 없음</td><td>○ 경로 한글을 고쳐 <b>올라갑니다</b></td></tr>
+<tr><td><code>/admin/ads</code> 배너 그림</td><td>✗ 0장 (까닭 몰랐음)</td><td>○ 경로 한글을 고쳤습니다</td></tr>
+<tr><td>커뮤니티 <b>사진 올리기</b></td><td>[미확인]</td><td>○ 올리기·남의 폴더 막기·치우기</td><td>&lt;!-- 점검:설명 — 2026-10-10 에 채웠습니다 --&gt;</td></tr>
+<tr><td><code>/tools/*</code> 넷 · <code>/terms/*</code> 셋 · <code>/orgs</code> · <code>/contact</code> · <code>/pay</code> · <code>/volunteer</code> · <code>/youth</code> · <code>/soon</code> · <code>/spec</code> · <code>/community/write</code> · <code>/community/[ch]</code> · <code>/post/[id]</code> · <code>/edu/org/[name]</code> · <code>/admin/jobs/[id]</code></td><td>캡처·스펙 <b>없음</b></td><td>○ 04 화면스펙 16~20절 + 캡처</td></tr>
+</tbody></table>
+<p><b>캡처가 158 → 230장</b>이 됐습니다. 화면 <b>62곳 중 60곳</b>에 캡처가 있습니다 —</p>
+<p>빠진 둘은 일부러입니다 (<code>/master</code> 는 로그인 칸이라 비번이 찍힐 수 있고,</p>
+<p><code>/auth/callback</code> 은 그려지는 화면이 없습니다).</p>
+<hr>
+<h2 id="2-숨긴-기능과-여는-법">2. 숨긴 기능과 여는 법</h2>
+<table><thead><tr><th>주소</th><th>무엇</th><th>지금 누구에게</th></tr></thead><tbody>
+<tr><td><code>/biz</code></td><td>채용 관리</td><td>승인된 채용담당자 · 마스터(채용 페르소나)</td></tr>
+<tr><td><code>/edu/manage</code></td><td>교육 관리</td><td>승인된 교육담당자 · 마스터(교육 페르소나)</td></tr>
+<tr><td><code>/partner</code></td><td>담당자 신청</td><td>운영진</td></tr>
+<tr><td><code>/verify</code></td><td>재직 인증</td><td>운영진</td></tr>
+<tr><td><code>/talk</code> · <code>/talk/[room]</code></td><td>1:1 대화</td><td>관리자 · 마스터</td></tr>
+<tr><td><code>/alarm</code> · 탑바 종</td><td>알림함</td><td>관리자</td></tr>
+<tr><td><code>/master</code></td><td>마스터</td><td>마스터</td></tr>
+<tr><td><code>/admin/*</code> 23곳</td><td>관리자</td><td>권한별</td></tr>
+</tbody></table>
+<h3 id="여는-법-하나씩">여는 법 — <b>하나씩</b></h3>
+<p>한꺼번에 열면 어디가 터졌는지 모릅니다. 화면마다 <b>한 줄</b>입니다.</p>
+<table><thead><tr><th>어디</th><th>무엇을</th></tr></thead><tbody>
+<tr><td>그 화면 맨 위 <code>if (!isAdmin &amp;&amp; !마스터)</code> 갈래</td><td>지웁니다</td></tr>
+<tr><td><code>components/alarm-bell.tsx</code> 의 <code>!isAdmin</code></td><td>지웁니다</td></tr>
+<tr><td><code>components/tab-bar.tsx</code> 의 <code>관리길()</code></td><td><b>그대로 둡니다</b> — 승인된 담당자에게만 뜨는 것이 맞습니다</td></tr>
+</tbody></table>
+<p><b><code>/biz</code>·<code>/edu/manage</code> 는 열고 말고가 아닙니다</b> — <b>담당자를 승인하면</b></p>
+<p>그분에게 보입니다. 지금 안 보이는 것은 승인된 담당자가 없어서입니다.</p>
+<p><b>막는 자리는 화면이 아니라 DB 입니다.</b> 화면에서 <code>isAdmin</code> 을 지워도</p>
+<p><code>교육담당자인가()</code>·<code>담당자공고쓰기()</code> 같은 창구가 그대로 거절합니다.</p>
+<p>그래서 화면만 열어 보는 것은 안전합니다.</p>
+<hr>
+<h2 id="3-승인-대기-docs승인대기_1009md">3. 승인 대기 — <code>docs/승인대기_1009.md</code></h2>
+<table><thead><tr><th>번호</th><th>무엇</th><th>언제</th></tr></thead><tbody>
+<tr><td>②</td><td><code>밤정리()</code> 대화 보관 (사진 30일·글 1년·신고 중이면 보존)</td><td>아무 때나</td></tr>
+<tr><td>③</td><td>꺼 둔 열쇠 여섯 줄 치우기</td><td><b>2026-10-10 15:00 이후</b></td></tr>
+<tr><td>④</td><td>옛 훅 함수 <code>hook_이메일가입막기(jsonb)</code> 치우기</td><td>아무 때나</td></tr>
+<tr><td>⑥</td><td><code>시험자료치우기()</code> <b>실행</b></td><td>개발자가 화면을 다 본 뒤</td></tr>
+<tr><td>⑦</td><td>storage 견본 6장 · <b>notices 시험 파일 6장</b> · 시험 계정 3 (함수 밖)</td><td>⑥ 뒤</td></tr>
+<tr><td><del>⑧</del></td><td><del><code>notices</code> 저장소 규칙 셋</del> — <b>2026-10-10 에 올렸습니다 ✅</b></td><td>끝</td></tr>
+<tr><td>⑨</td><td><code>tools/공고칸채우기.mjs</code> 실행</td><td><b>수집기 첨부 담기 뒤</b> (8-1 절)</td></tr>
+<tr><td>⑩</td><td><code>시험자료치우기()</code> 에 <code>공고첨부</code> 더하기</td><td>⑥ 전에 <b>꼭</b></td></tr>
+</tbody></table>
+<p><b>⑩ 을 안 하면 ⑥ 이 외래키 때문에 멈춥니다.</b></p>
+<hr>
+<h2 id="4-오픈-전-할-일">4. 오픈 전 할 일</h2>
+<table><thead><tr><th>무엇</th><th>왜</th></tr></thead><tbody>
+<tr><td>숨긴 화면 여덟을 <b>하나씩</b> 열기</td><td>2절</td></tr>
+<tr><td>「아직 없는 기능」 14 중 <b>신고 처리 넷</b>부터</td><td>커뮤니티를 열면 바로 필요합니다</td></tr>
+<tr><td>탈퇴 때 증빙 파일 지우기</td><td>지금은 <code>profiles</code> 만 정리합니다</td></tr>
+<tr><td>예시 자료 치우기</td><td>승인대기 ⑥⑦⑩</td></tr>
+<tr><td><del><code>notices</code> 규칙 올리기</del></td><td><b>2026-10-10 에 올렸습니다</b> (승인대기 ⑧ 끝)</td></tr>
+<tr><td>국세청 <code>NTS_BIZ_KEY</code> 넣기</td><td>사업자 진위확인이 「수동 확인」입니다</td></tr>
+<tr><td><b>수집기가 첨부를 담게 하기</b></td><td><code>job_attachments</code> 가 <b>0줄</b>이라 「공고문에서 읽기」 재료가 없습니다</td></tr>
+<tr><td>기관표 완성</td><td>공공·대학·종별·수시금지 판정의 유일한 근거</td></tr>
+<tr><td>빈칸 공고 374건 줄이기</td><td>보이는 공고 377건 중 374건에 빈 칸이 있습니다</td></tr>
+<tr><td>결제 안내 문구 확인</td><td><b>POTJOB 은 결제를 받지 않습니다</b></td></tr>
+<tr><td>신고번호가 모든 화면 아래에</td><td>직업정보제공사업 신고 사항입니다</td></tr>
+</tbody></table>
+<hr>
+<h2 id="5-미뤄-둔-ux-문제">5. 미뤄 둔 UX 문제</h2>
+<p>고치지 <b>않기로 한 것이 아니라, 아직 안 한 것</b>입니다.</p>
+<table><thead><tr><th>무엇</th><th>지금 모습</th><th>왜 미뤘나</th></tr></thead><tbody>
+<tr><td><b><code>loading.tsx</code> 가 없습니다</b></td><td>화면을 옮길 때 잠깐 빈 칸. 각 화면이 「잠시만요…」를 따로 그립니다</td><td>라우트마다 넣어야 해서 한 번에 할 일입니다</td></tr>
+<tr><td><b>화면 제목이 14곳에만</b></td><td><code>&lt;title&gt;</code> 이 레이아웃 하나뿐이라 탭 이름이 전부 「POTJOB · 채용공고」. 계산기 넷 중 실업급여만 제목이 있습니다</td><td>제목 문구를 세중님이 정하셔야 합니다</td></tr>
+<tr><td><b>홈 CTA 깜빡임</b></td><td>비회원→회원 판정이 늦어 「가입하고 전부 보기」가 잠깐 떴다 사라집니다</td><td>세 값으로 고쳤는데 홈만 남았습니다</td></tr>
+<tr><td><b>카드가 두 모양</b></td><td>공고 카드와 기관 카드의 테두리·여백이 다릅니다</td><td>디자인을 한 벌로 정해야 합니다</td></tr>
+<tr><td><del>마감 공고 카톡 썸네일이 온통 빨강</del></td><td><b>고쳐졌습니다 (2026-10-09 커밋 <code>8017682</code>).</b> 10-08 에 적었을 때는 맞는 말이었고(옛 캡처 <code>og-job-마감.png</code> 가 온통 빨강입니다), 그 뒤 마감 카드에 <b>따로 둔 회색</b> <code>CLOSED_COLOR</code> 가 붙었습니다 (<code>app/api/og/job/[id]/route.tsx:117</code> — <code>closed ? CLOSED_COLOR : skin.bg</code>). 2026-10-10 에 다시 찍어 회색인 것을 확인했습니다 → <code>카톡미리보기_마감__pc.png</code></td><td>할 일 없음</td></tr>
+<tr><td><b>화면에 직접 박은 색 338곳 / 41파일</b></td><td><code>tools/check.js</code> 가 셉니다 (늘어나면 보입니다)</td><td>토큰으로 옮기는 일이 큽니다</td></tr>
+<tr><td><b>스크롤 등장 효과(<code>Rise</code>)</b></td><td>화면에 들어오기 전까지 <code>opacity: 0</code> 입니다. 캡처가 스크롤을 안 하면 아래쪽이 <b>통째로 빈칸</b>으로 찍힙니다</td><td>캡처 쪽에서 훑고 찍도록 고쳤습니다. 화면 자체는 그대로입니다</td></tr>
+</tbody></table>
+<p><b>2026-10-10 에 찍어 보고 알게 된 것 둘</b> (<code>카톡미리보기_*</code> 세 장).</p>
+<ul>
+<li><b>직군이 둘인 공고는 접수 중에도 온통 빨강</b>입니다 — <code>JOB_COLOR.공통 = #FF3B30</code>.</li>
+</ul>
+<p>  마감이 아니라 <b>직군 색</b>입니다. 색만 보면 가장 급해 보입니다.</p>
+<p>  바꿀지는 디자인 결정입니다 (카드 두 모양 문제와 같은 묶음).</p>
+<ul>
+<li><b>숨겨진 공고를 공유하면 기본 카드(회색 POTJOB)로 떨어집니다.</b> 제목도</li>
+</ul>
+<p>  날짜도 안 나옵니다. 숨긴 공고 주소를 받은 사람은 무엇이었는지 알 수 없습니다.</p>
+<p>  (공고 둘로 찍어 보고 알았습니다 — <code>카톡미리보기_숨겨진공고__pc.png</code>)</p>
+<p><b>2026-10-09 에 고친 것</b> — 휴대폰 공고 상세의 아래 띠. 재 보니 띠 75px +</p>
+<p>탭바 62px = 137px 인데 여백이 152px 이라 평평한 화면은 괜찮지만, 탭바가</p>
+<p><code>env(safe-area-inset-bottom)</code> 을 더 먹어 아이폰에서 171px 이 됐습니다.</p>
+<p>(캡처에서 본 「본문 잘림」은 <code>fullPage</code> 가 고정 띠를 한 번만 그리는 <b>촬영 자국</b></p>
+<p>이었습니다 — 고치기 전에 원인을 확인했습니다.)</p>
+<hr>
+<h2 id="6-세중님-결정-대기-다섯-추천안과-까닭">6. 세중님 결정 대기 — 다섯 · <b>추천안과 까닭</b></h2>
+<p><b>개발자가 알아야 할 것</b> — 아래 다섯은 <b>아직 정해지지 않았습니다.</b> 그래서</p>
+<p>그 자리의 화면이 비어 있거나 「수동 확인」입니다. 고장이 아닙니다.</p>
+<p><b><code>/compete</code> 를 「회원만」으로 바꾼 것은 확정입니다</b> (2026-10-09 세중님 지시).</p>
+<p>2026-10-05 의 「목록은 누구나」 결정을 뒤집은 자리라 적어 둡니다 — 비회원은</p>
+<p>목록도 못 봅니다. 「경쟁률 보러 가기」가 로그인 안내로 바뀝니다.</p>
+<h3 id="경쟁률-예시-자료-compete-가-시험-기관에서는-빈-화면입니다">① 경쟁률 예시 자료 — <code>/compete</code> 가 시험 기관에서는 빈 화면입니다</h3>
+<blockquote><b>추천 — 그대로 둡니다.</b> 경쟁률은 알리오가 공개한 <b>진짜 자료</b>라 지어낼 수</blockquote>
+<blockquote>없습니다. 시험병원에 가짜 경쟁률을 넣으면 「우리가 만든 숫자」가 생깁니다.</blockquote>
+<blockquote>대신 캡처는 <b>진짜 기관</b>(알리오 공공기관 19곳 중 하나)으로 찍습니다.</blockquote>
+<h3 id="오픈-화면-광고-배너-둘-다-꺼져-있어-모양을-못-봅니다">② 오픈 화면 광고 — 배너 둘 다 꺼져 있어 모양을 못 봅니다</h3>
+<blockquote><b>추천 — 시험용 배너를 <code>시험자료</code>로 하나 켭니다.</b> <code>광고배너</code> 표에</blockquote>
+<blockquote><code>시험자료</code> 칸을 더하고 관리자·마스터에게만 보이게 하면, 모양을 보면서도</blockquote>
+<blockquote>회원에게는 안 나갑니다. 지금 구조(<code>광고배너</code>)로 바로 됩니다.</blockquote>
+<h3 id="알림-푸시-서버-크론이라-화면에서-확인이-안-됩니다">③ 알림 푸시 — 서버 크론이라 화면에서 확인이 안 됩니다</h3>
+<blockquote><b>추천 — 관리자 화면에 「마지막으로 보낸 알림」 한 줄을 붙입니다.</b></blockquote>
+<blockquote><code>보낼알림()</code> 이 이미 건수를 돌려줍니다. <code>/admin/beat</code>(수집기 상태)에</blockquote>
+<blockquote>같은 모양으로 한 줄이면 됩니다. 푸시를 실제로 받아 보는 것은 그다음입니다.</blockquote>
+<h3 id="중고거래-값거래-상태-칸이-없습니다">④ 중고거래 — 값·거래 상태 칸이 없습니다</h3>
+<blockquote><b>추천 — 값과 상태(판매중·예약중·거래완료) 두 칸만 먼저 넣습니다.</b></blockquote>
+<blockquote>지금은 글 본문에 「가격 0원」처럼 적고 있어서 찾기도 거르기도 안 됩니다.</blockquote>
+<blockquote>결제는 <b>안 붙입니다</b> — POTJOB 은 결제를 받지 않는다는 원칙과 같습니다.</blockquote>
+<h3 id="국세청-nts_biz_key-사업자-진위확인이-수동-확인입니다">⑤ 국세청 <code>NTS_BIZ_KEY</code> — 사업자 진위확인이 「수동 확인」입니다</h3>
+<blockquote><b>추천 — 열쇠를 서버 <code>.env</code> 에 넣습니다.</b> 2026-10-09 에 활용신청 승인을</blockquote>
+<blockquote>받으셨습니다. 넣으면 <code>tools/사업자진위확인.mjs</code> 가 저절로 돕니다.</blockquote>
+<blockquote><b>다만 명세를 아직 원문으로 확인하지 않았습니다</b> — 열쇠가 생기면 먼저</blockquote>
+<blockquote>한 건을 쏘아 응답 원문과 항목 이름을 찍고, 그걸 보고 읽는 코드를 맞춥니다</blockquote>
+<blockquote>(지침 3절·4절).</blockquote>
+<hr>
+<h2 id="7-확인하지-못한-것-셋----점검설명-아래-표의-미확인-이-실제-줄입니다---">7. 확인하지 못한 것 — <b>셋</b> &lt;!-- 점검:설명 — 아래 표의 [미확인] 이 실제 줄입니다 --&gt;</h2>
+<p><b>0 이 아닙니다.</b> 남은 것과 까닭을 적습니다.</p>
+<p><code>node tools/인계점검.mjs</code> 가 이 표의 줄을 셉니다.</p>
+<table><thead><tr><th>무엇</th><th>왜 못 채웠나</th><th>누가</th></tr></thead><tbody>
+<tr><td><b>[미확인]</b> ⑳ 카카오·네이버 로그인 <b>동의 화면</b></td><td>외부 서비스 화면이라 코드가 못 찍습니다</td><td>세중님이 휴대폰으로</td></tr>
+<tr><td><b>[미확인]</b> ㉔ 옛 앱 로그인 안쪽</td><td>옛 앱은 <b>구글 계정</b>으로 들어갑니다</td><td>세중님이 휴대폰으로</td></tr>
+<tr><td><b>[미확인]</b> 회원 경로 <b>실측 3초</b></td><td>실제 회원 계정이 있어야 재는 값입니다</td><td>오픈 뒤</td></tr>
+</tbody></table>
+<p><b>셋 다 「우리 코드로는 닿을 수 없는 자리」입니다.</b> 앞 둘은 외부 서비스 화면이고,</p>
+<p>마지막은 실제 회원이 생긴 뒤에만 재는 값입니다. 이 셋 말고는 전부 채웠습니다.</p>
+<p><b>2026-10-10 에 하나 줄었습니다</b> — 「커뮤니티 사진 올리기」. 저장소 규칙을</p>
+<p>올리고 <code>tools/첨부시험.mjs</code> 가 <b>보내는 쪽과 같은 길로</b> 올려 봤습니다:</p>
+<p>내 폴더에 올라가고(○), 남의 폴더에는 400 으로 막히고(○), 치우기도 됩니다(○).</p>
+<p><b>나머지 15곳은 마스터 페르소나로</b> 전부 겪어 보고 캡처했습니다 — 시험용</p>
+<p>카카오 계정을 안 만들어도 됐습니다.</p>
+<hr>
+<h2 id="7-2-캡처-개인정보-검사-2026-10-10">7-2. 캡처 개인정보 검사 (2026-10-10)</h2>
+<p>캡처를 <b>한 장씩 열어</b> 실제 회원의 자취가 찍혔는지 봤습니다.</p>
+<p>시험 계정·운영진(마스터)·시험병원·시험 교육기관·견본은 가리지 않습니다.</p>
+<table><thead><tr><th></th><th>수</th></tr></thead><tbody>
+<tr><td>그림 파일</td><td><b>259</b>장 (코드가 찍은 <b>230</b> + 옛 손캡처 <b>29</b>)</td></tr>
+<tr><td>서로 다른 그림</td><td><b>231</b>장 (관리자 휴대폰 21장이 <b>바이트까지 같은</b> 권한 벽이라 하나로 셉니다)</td></tr>
+<tr><td>개인정보가 나온 그림</td><td><b>19</b>장</td></tr>
+<tr><td>가린 그림</td><td><b>19</b>장 (원본은 저장소 밖 <code>바탕화면/캡처원본_1010/</code>)</td></tr>
+</tbody></table>
+<h3 id="무엇이-찍혀-있었나">무엇이 찍혀 있었나</h3>
+<table><thead><tr><th>무엇</th><th>어디</th></tr></thead><tbody>
+<tr><td>실제 회원 <b>닉네임 셋</b> (<code>#00002</code> · <code>#00004</code> · <code>#00005</code>)</td><td><code>관리자_members</code> · <code>관리자_posts</code> · 커뮤니티 목록 전부</td></tr>
+<tr><td>실제 회원이 쓴 <b>글 제목·본문·사진</b></td><td><code>/community</code> · <code>/community/free</code> · <code>/post/[id]</code> — 비로그인·학생·작업치료사·담당자·비회원보기 <b>다섯 페르소나</b></td></tr>
+<tr><td>회원 <b>uuid 앞 8자</b> (<code>보낸이 …</code>)</td><td><code>관리자_reports</code></td></tr>
+<tr><td>실제 회원 글 제목</td><td><code>관리자_stats</code> 「많이 본 글」</td></tr>
+</tbody></table>
+<p><b>가리지 않은 것</b> — 화면 아래에 늘 있는 메일 주소는 <b>개인정보 보호책임자</b></p>
+<p>연락처로, 법에 따라 모든 화면에 띄우는 <b>공개 정보</b>입니다. 회원 것이 아닙니다</p>
+<p>(<code>lib/contact.ts</code> 한 곳에 있습니다).</p>
+<p><code>관리자_reset</code> 의 <code>3a204fae…</code> 는 <b>마스터 자신의</b> 번호입니다.</p>
+<h3 id="코드에서도-둘-찾았습니다">코드에서도 둘 찾았습니다</h3>
+<p>캡처만 가려서는 다음에 또 찍힙니다. 뿌리를 고쳤습니다.</p>
+<table><thead><tr><th>어디</th><th>무엇이 있었나</th><th>고친 것</th></tr></thead><tbody>
+<tr><td><code>app/admin/members/page.tsx:101</code></td><td>찾기 칸 안내문에 <b>실제 회원의 번호와 닉네임</b></td><td>지어낸 값으로</td></tr>
+<tr><td><code>lib/who.test.mjs</code></td><td>시험 값이 실제 회원 닉네임</td><td><code>시험닉</code> 으로</td></tr>
+</tbody></table>
+<h3 id="다음에-또-안-찍히게">다음에 또 안 찍히게</h3>
+<ul>
+<li><code>tools/가릴자리.json</code> — 가릴 <b>글자</b>(닉네임 셋)와, 이미 찍은 그림의 <b>자리</b></li>
+<li><code>tools/캡처.mjs</code> 가 <b>찍기 전에</b> 그 닉네임이 든 줄을 검게 덮습니다.</li>
+</ul>
+<p>  DB 는 안 건드립니다 — 화면에서만 덮습니다</p>
+<ul>
+<li><code>tools/캡처가리기.mjs</code> — 다시 못 찍는 그림(페르소나를 바꿔야 하는 것)은 자리로 덮습니다</li>
+</ul>
+<p><b>처음엔 <code>includes()</code> 로 찾았다가 「이야」가 「이야</b>기<b>」에 걸려</b> 방 카드까지</p>
+<p>통째로 까맣게 됐습니다. <b>칸 전체가 그 닉네임일 때만</b> 잡도록 좁혔습니다.</p>
+<h3 id="아직-저장소에-남은-것">아직 저장소에 남은 것</h3>
+<p><b>옛 커밋에는 가리기 전 그림이 그대로 있습니다.</b> <code>git log</code> 로 꺼낼 수 있습니다</p>
+<p>(<code>community.png</code> · <code>관리자_members__pc.png</code> 등 19장). 기록을 고쳐 쓰는 것은</p>
+<p>되돌릴 수 없는 일이라 <b>세중님 결정으로 남깁니다</b> (아침 목록 참고).</p>
+<p>지금 올라간 판에는 남아 있지 않습니다.</p>
+<hr>
+<h2 id="8-알려진-문제-개발자가-먼저-알아야-할-것">8. 알려진 문제 — 개발자가 먼저 알아야 할 것</h2>
+<h3 id="8-1-수집기가-첨부-공고문을-저장하지-않습니다">8-1. 수집기가 <b>첨부 공고문을 저장하지 않습니다</b></h3>
+<pre><code>
+job_attachments  0줄        (공고 377건 중 첨부가 담긴 것 0건)
+</code></pre>
+<p>공고 상세 일곱 칸은 <b>제목 → 상세 API → 첨부 공고문</b> 순으로 채웁니다.</p>
+<p>셋째 단계의 재료가 지금 <b>없습니다.</b> 그래서 —</p>
+<ul>
+<li>상세 API 에 없는 칸은 <b>그려지지 않습니다</b> (「공고에 없음」이라고 안 적습니다)</li>
+<li>보이는 공고 <b>377건 중 374건</b>에 빈 칸이 있습니다 (<code>/admin/blanks</code> 에서 봅니다)</li>
+<li><code>tools/공고칸채우기.mjs</code>(되메우기)는 <b>지금 돌려도 얻을 것이 적습니다</b> —</li>
+</ul>
+<p>  첨부를 담는 일이 먼저입니다 (승인대기 ⑨ 가 ⑧ 뒤인 까닭)</p>
+<p><b>이 일은 인계 뒤로 미뤘습니다</b> (2026-10-10 세중님 지시 — 인계가 1순위).</p>
+<p><b>어디를 고쳐야 하나</b> — 저장소를 뒤져 확인했습니다. 담을 자리도, 창구도,</p>
+<p>주소를 받아 오는 코드도 <b>이미 있습니다.</b> <code>insert</code> 한 줄만 없습니다.</p>
+<pre><code>
+표      job_attachments (job_id · kind · name · url · parsed_at)
+        지금 0줄. 쓰는 코드는 tools/공고칸채우기.mjs 하나뿐이고 **읽기만** 합니다
+        (`grep -rn job_attachments` → 코드 2곳 · 문서 8곳. 넣는 곳 0)
+
+주소를 이미 받는 곳
+  tools/collect-nara.mjs:320   첨부받기(idx) → { pdf, hwp }
+                               부르는 곳 395 · 405 줄
+  tools/collect-alio.mjs:199   첨부 공고문(atchFileType = 'A')을 골라 글자로
+  tools/collect-cleaneye.mjs   cleaneye-file.mjs 의 첨부받기(URL)
+</code></pre>
+<p>세 수집기 다 <b>공고문을 열어 글자를 읽습니다</b> — 직군을 가리는 데 쓰려고요.</p>
+<p>읽고 나서 <b>주소를 버립니다.</b> 그 자리에서 <code>job_attachments</code> 에 한 줄 넣으면</p>
+<p>일곱 칸의 셋째 재료가 생깁니다.</p>
+<p><b>주의 둘.</b></p>
+<p>1. 나라일터 주소는 <code>&amp;amp;</code> 를 안 풀면 <b>HTML 오류 화면</b>이 옵니다. 이미</p>
+<p>   <code>온전히()</code> 가 풀어 두었으니 그 값을 넣으십시오 (작업지침 5절).</p>
+<p>2. 넣은 뒤에 <code>tools/공고칸채우기.mjs</code> 를 돌립니다 (승인대기 ⑨). 되메우기는</p>
+<p>   <b><code>updated_at</code> 을 바꾸지 않습니다</b> — 그걸 보고 도는 것이 있습니다</p>
+<p>   (작업지침 9절).</p>
+<h3 id="8-2-일곱-칸-두-공고를-뜯어-본-결과">8-2. 일곱 칸 — 두 공고를 뜯어 본 결과</h3>
+<p>자세한 진단은 <b><code>docs/공고상세_일곱칸_진단_1009.md</code></b> 에 있습니다. 요약 —</p>
+<table><thead><tr><th>칸</th><th>강릉의료원 작업치료사</th><th>삼성서울병원 물리치료사</th></tr></thead><tbody>
+<tr><td>모집인원</td><td>○ 상세 API</td><td>✗ <b>안 그려짐</b></td></tr>
+<tr><td>접수마감</td><td>○ 상세 API</td><td>○ 제목에서 뽑음</td></tr>
+<tr><td>근무지</td><td>○ 기관표</td><td>○ 기관표</td></tr>
+<tr><td>지원자격</td><td>○ 상세 API</td><td>✗ <b>안 그려짐</b></td></tr>
+<tr><td>예상 연봉</td><td>✗ <b>안 그려짐</b></td><td>✗ <b>안 그려짐</b></td></tr>
+<tr><td>얼마나 바쁜 곳</td><td>○ 심평원 치료사 수</td><td>○ 심평원 치료사 수</td></tr>
+<tr><td>병원 뜯어보기</td><td>○ 기관표</td><td>○ 기관표</td></tr>
+</tbody></table>
+<p><b>강릉의료원은 출처가 셋</b>입니다(클린아이·워크넷·홈페이지 긁기). <code>detail</code> 항목</p>
+<p>수가 각각 8 · 2 · 1 로 달라서, 어느 줄을 보느냐에 따라 칸이 찼다 비었다 합니다.</p>
+<p><b>출처가 칸을 잘못 채운 자리도 있습니다</b> — 클린아이 줄의 <code>결격사유</code> 에</p>
+<p>「방문,우편(등기)」가 들어 있습니다. 그건 <b>제출 방법</b>입니다. 그래서 일곱 칸에서</p>
+<p><code>결격사유</code> 를 뺀 것이 결과적으로 맞았습니다.</p>
+<p><b>빈 칸은 그리지 않고 <code>/admin/blanks</code> 에 모읍니다.</b> 관리자가 채운 칸은</p>
+<p><code>edited_fields</code> 에 잠겨 수집기가 덮지 않습니다.</p>
+<h3 id="8-3-화면-주소에-한글을-쓰면-배포에서만-404">8-3. 화면 주소에 한글을 쓰면 <b>배포에서만</b> 404</h3>
+<pre><code>
+/edu/회차/[id]    로컬 npm run build 는 통과 · tsc 통과 · 배포에서 404
+                  퍼센트 인코딩으로 쳐도 404
+→ /edu/session/[id] 로 바꿨습니다 (폴더 1 · 화면 1 · 문서 15 · DB 함수 4)
+</code></pre>
+<p><b>고약한 까닭</b> — 로컬 빌드 목록에 <code>ƒ /edu/회차/[id]</code> 로 멀쩡히 찍힙니다.</p>
+<p><b>올려서 열어 봐야만</b> 드러납니다. 캡처 다섯 장이 전부 「이 자리에 아무것도</p>
+<p>없어요」로 찍혀서 알았습니다.</p>
+<h3 id="8-4-저장소-경로에-한글을-쓰면-파일이-아예-안-올라갑니다">8-4. <b>저장소 경로</b>에 한글을 쓰면 파일이 아예 안 올라갑니다</h3>
+<p>8-3 과 같은 뿌리입니다. Supabase Storage 가 열쇠(경로)에 한글이 있으면</p>
+<p><code>InvalidKey</code> 로 거절합니다. 2026-10-10 에 <b>셋</b>을 찾아 고쳤습니다.</p>
+<table><thead><tr><th>어디</th><th>무엇이 한글이었나</th><th>증거</th></tr></thead><tbody>
+<tr><td><code>notices</code> (공고·교육 첨부)</td><td><b>파일 이름</b> — 공고문 이름은 거의 다 한글</td><td>올리자마자 400</td></tr>
+<tr><td><code>proofs</code> (재직 증빙)</td><td>경로 앞머리 <code>재직-</code></td><td>버킷에 <b>견본 6장뿐</b></td></tr>
+<tr><td><code>ad-images</code> (광고 배너)</td><td>자리 이름 <code>앱</code> · <code>커뮤니티</code></td><td>버킷 <b>0장</b></td></tr>
+</tbody></table>
+<p>경로는 ASCII(uuid + 확장자)만 쓰고 <b>보여줄 이름은 표에</b> 둡니다</p>
+<p>(<code>공고첨부.이름</code>). 고친 뒤 <code>tools/첨부시험.mjs</code> 가 22가지 전부 ○ 입니다.</p>
+<p><b>광고 배너가 「꺼져 있어 모양을 못 본다」(6절 ②)의 까닭 절반이 이것입니다</b> —</p>
+<p>켜고 안 켜고가 아니라 그림이 올라갈 수 없었습니다.</p>
+<p><b>같은 꼴을 또 만들지 않으려면</b> — 밖에서 이름으로 가리키는 자리(화면 주소 ·</p>
+<p>저장소 경로 · 훅 주소 · 쿠키 이름 · HTTP 헤더 값 · 셸 변수)는 <b>영문</b>으로.</p>
+<p>안에서 부르는 변수·함수는 한글이 낫습니다 (작업지침 6-2b).</p>
+<h3 id="8-5-휴대폰-아래-띠가-본문을-가림-고쳤습니다">8-5. 휴대폰 아래 띠가 본문을 가림 — <b>고쳤습니다</b></h3>
+<pre><code>
+재 보니   띠 75px + 탭바 62px = 137px  &lt; 여백 152px   → 평평한 화면은 괜찮음
+아이폰    탭바가 env(safe-area-inset-bottom) 을 더 먹어 171px &gt; 152px  ← 진짜 문제
+</code></pre>
+<p>여백과 띠 위치를 둘 다 <code>env(safe-area-inset-bottom)</code> 을 더하도록 고쳤습니다</p>
+<p>(<code>pb-[calc(152px+env(safe-area-inset-bottom))]</code> ·</p>
+<p><code>bottom-[calc(62px+env(safe-area-inset-bottom))] md:bottom-0</code>).</p>
+<p><b>처음에 캡처를 보고 「본문이 잘린다」고 보고했는데 그건 틀렸습니다</b> —</p>
+<p><code>fullPage</code> 가 고정 띠를 한 번만 그리는 <b>촬영 자국</b>이었습니다. 원인을 재 보고</p>
+<p>나서야 진짜 문제(안전 영역)를 찾았습니다.</p>
+<h3 id="8-6-미뤄-둔-ux-넷">8-6. 미뤄 둔 UX 넷</h3>
+<p>5절의 표에 자세히 있습니다. 한 줄씩 —</p>
+<table><thead><tr><th>무엇</th><th>왜 미뤘나</th></tr></thead><tbody>
+<tr><td><b><code>loading.tsx</code> 가 없습니다</b></td><td>라우트마다 넣어야 해서 한 번에 할 일입니다</td></tr>
+<tr><td><b>화면 제목이 14곳에만</b></td><td>탭 이름이 전부 「POTJOB · 채용공고」. <b>제목 문구를 정해야</b> 합니다</td></tr>
+<tr><td><b>홈 CTA 깜빡임</b></td><td>세 값(회원·비회원·모름)으로 고쳤는데 홈만 남았습니다</td></tr>
+<tr><td><b>카드가 두 모양</b></td><td>공고 카드와 기관 카드의 테두리·여백이 다릅니다. <b>디자인을 한 벌로</b></td></tr>
+</tbody></table>
+<p><b>넷 다 「고치지 않기로 한 것」이 아니라 「아직 안 한 것」입니다.</b></p>
+<p>둘(제목 문구 · 카드 디자인)은 <b>정해 주셔야</b> 할 수 있습니다.</p>
+<h3 id="8-7-관리자-휴대폰-캡처-21장이-권한-벽으로-찍혔습니다-한-번뿐-재현-안-됨">8-7. 관리자 <b>휴대폰</b> 캡처 21장이 권한 벽으로 찍혔습니다 — <b>한 번뿐, 재현 안 됨</b></h3>
+<p><b>무엇</b> — 2026-10-09 밤 캡처에서 <code>관리자</code> 묶음의 <b>휴대폰</b> 21장이 전부</p>
+<p>「관리자만 볼 수 있어요」 벽으로 찍혔습니다. <b>PC 21장은 멀쩡합니다.</b></p>
+<p><b>그날 그림</b> — 커밋 <code>157c7fc</code> 에 그대로 있습니다</p>
+<p>(<code>git show 157c7fc:docs/screens/관리자_members__phone.png</code>). 띠가</p>
+<p>「운영진 · <b>작업치료사</b>」로, 그 순간 <code>마스터페르소나.지금역할</code> 이 정말</p>
+<p>작업치료사였다는 뜻입니다 (<code>내페르소나()</code> 는 그 칸을 <b>그대로</b> 돌려줍니다 —</p>
+<p>딴 값으로 대신하는 길이 없습니다).</p>
+<pre><code>
+00:23:10  관리자_access__phone   멀쩡 (띠 = 관리자)
+00:23:?   관리자_ads__phone      멀쩡 (띠 = 관리자)
+00:23:50  관리자_jobs__phone     ← 여기부터 벽 (띠 = 작업치료사)
+00:24:11  관리자_reports__phone  벽
+</code></pre>
+<p><b>2026-10-10 에 같은 묶음을 다시 찍었습니다 — 재현되지 않았습니다.</b></p>
+<p>매 장마다 띠·쿠키·주소를 적고 <code>페르소나바꾸기</code> 요청을 가로채며 돌렸는데,</p>
+<p>21장 전부 「운영진 · 관리자」였고 <b>그 요청은 한 번도 안 나갔습니다</b></p>
+<p>(<code>tools/캡처.mjs --진단</code> · 기록은 <code>docs/screens/_진단_*.json</code>).</p>
+<p><b>원인을 못 찾았습니다.</b> 10분 재 보고 끊었습니다.</p>
+<p><b>의심 셋</b> (어느 것도 확인 못 했습니다)</p>
+<p>1. <b>두 프로세스가 같은 마스터 계정을 같이 썼습니다.</b> 그날 캡처가 도는</p>
+<p>   동안 <code>tools/첨부시험.mjs</code> 를 두 번 돌렸고, 그것도 <code>페르소나바꾸기</code> 를</p>
+<p>   부릅니다 (채용담당자 → 관리자). 시각이 딱 맞진 않지만(00:19 끝) **그날</p>
+<p>   페르소나를 건드린 것은 그것뿐**입니다</p>
+<p>2. 창 하나로 끝까지 가는데 중간에 <b>세션이 새로 고쳐지면서</b> 서버가 그려 둔</p>
+<p>   화면과 어긋났을 수 있습니다 (<code>/admin/*</code> 는 서버에서 <code>is_admin()</code> 을 봅니다)</p>
+<p>3. 휴대폰 폭에서 띠 단추가 본문과 겹쳐, 스크롤 훑기 중에 <b>눌린</b> 것일</p>
+<p>   가능성. 다만 가로챈 기록에 요청이 없어 <b>아닐 쪽에 가깝습니다</b></p>
+<p><b>막는 법 — 지금 넣어 둔 것</b></p>
+<ul>
+<li><code>tools/캡처.mjs --진단</code> 이 매 장마다 띠를 적습니다. 다시 나면 **어느 장에서</li>
+</ul>
+<p>  바뀌었는지** 바로 보입니다</p>
+<ul>
+<li><b>캡처가 도는 동안 같은 계정을 쓰는 다른 스크립트를 돌리지 마십시오.</b></li>
+</ul>
+<p>  이것이 1번을 막는 가장 싼 길입니다</p>
+<hr>
+<h2 id="9-알려진-문서-문제-고치지-않고-남겨-둔-것">9. 알려진 문서 문제 — <b>고치지 않고 남겨 둔 것</b></h2>
+<p>2026-10-10 에 이 작업을 모르는 사람에게 인계 문서를 <b>처음 받은 셈 치고</b></p>
+<p>읽혔습니다. 걸린 것 <b>48개</b> — <code>docs/인계_읽기검토_1010.md</code> 에 항목마다</p>
+<p>「고칠 곳(파일:줄)」과 「제안 한 줄」이 있습니다.</p>
+<p><b>고친 것은 급한 것뿐입니다.</b></p>
+<table><thead><tr><th>고침</th><th>무엇</th></tr></thead><tbody>
+<tr><td>숫자</td><td>기관 수(58,610 ↔ 62,749)는 <b>서로 다른 것</b>이었습니다 — 이름을 붙였습니다. 캡처 수·공고 수·점검표 합계는 <b>세어서</b> 맞췄고, 숫자가 나오는 문서마다 <b>기준 시각</b>을 달았습니다</td></tr>
+<tr><td>낱말</td><td>00 읽는법 맨 앞에 <b>「낱말 풀이」</b> 절 — 창구 · 페르소나 · A 규칙 · 보류함 · 다리 · 시험자료 · 일곱 칸 · 빈칸 공고 · 진단띠 · 묶음 등</td></tr>
+<tr><td>모순</td><td>카톡 썸네일 「문제 / 고쳐짐」 · <code>notices</code> 규칙 「올릴 것 / 올렸음」</td></tr>
+<tr><td>이름</td><td><code>/pay</code> 가 네 이름이던 것을 <b>「월급 확인」</b> 하나로 (<code>/tools/pay</code> 와 다른 화면이라고 밝혔습니다)</td></tr>
+<tr><td>링크</td><td>갤러리의 「04 화면스펙 →」 가 clone 해서 파일로 열어도 걸리게 <code>.html</code> 을 함께 냅니다 (<code>tools/문서html.mjs</code>)</td></tr>
+</tbody></table>
+<p><b>나머지 ~40개는 손대지 않았습니다.</b> 고쳐야 할지, 어떻게 고칠지는</p>
+<p><b>보시는 분이 판단하실 일</b>입니다. 특히 아래 셋은 판단이 필요합니다.</p>
+<ul>
+<li><b>갤러리의 관리자 23곳 이름이 영어 주소 그대로</b>(<code>관리자_hand</code>·<code>관리자_beat</code>)라</li>
+</ul>
+<p>  04 절의 한글 메뉴와 하나씩 맞춰 봐야 합니다</p>
+<ul>
+<li><b>갤러리 차례가 주소 알파벳 순</b>이라 <code>/jobs</code> 가 39번째입니다</li>
+<li><b>물리치료사 페르소나 캡처가 0장</b>입니다 (역할 아홉에는 들어 있습니다)</li>
+</ul>
+<p class="만든말">이 쪽은 <code>05_부록.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>

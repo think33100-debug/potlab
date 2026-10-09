@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04_화면스펙 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="00_%EC%9D%BD%EB%8A%94%EB%B2%95.html">읽는법</a><a href="01_%EA%B8%B0%ED%9A%8D.html">기획</a><a href="02_%EA%B8%B0%EC%88%A0%EC%8A%A4%ED%8E%99.html">기술스펙</a><a href="03_IA.html">IA</a><a href="04_%ED%99%94%EB%A9%B4%EC%8A%A4%ED%8E%99.html">화면스펙</a><a href="05_%EB%B6%80%EB%A1%9D.html">부록</a><a href="../screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="04-화면-스펙">04. 화면 스펙</h1>
+<blockquote><b>숫자 기준 시각</b> — 2026-10-10 03시(KST) · 커밋 <code>3394655</code> 이후.</blockquote>
+<blockquote>숫자는 그때 <b>세어 본 값</b>입니다 (DB <code>select</code> · 파일 수).</blockquote>
+<p>화면마다 — <b>목적 · 누가 · 구성 요소 · 상태별 모습 · 캡처 · 숨김 · 알려진 문제</b>.</p>
+<p>캡처 파일은 <code>docs/screens/&lt;이름&gt;__pc.png</code> 와 <code>__phone.png</code> 두 벌입니다.</p>
+<hr>
+<h2 id="1-홈">1. 홈 <code>/</code></h2>
+<table><thead><tr><th><b>목적</b></th><th>공고로 가는 가장 짧은 길. 비회원에게는 「여기 오면 다 있다」를 보이는 자리</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td>누구나</td></tr>
+<tr><td><b>구성</b></td><td>오픈 화면(스플래시) → 로고 → 맛보기 공고 → 계산기 넷 → 기관 → 교육 → 봉사 → 청년 → 초임·스펙</td></tr>
+<tr><td><b>상태</b></td><td>비회원(맛보기 + 가입 권유) · 가입중(흐림) · 회원(전체) · <b>모름(아무것도 안 그림)</b></td></tr>
+<tr><td><b>캡처</b></td><td><code>비로그인_홈</code> · <code>학생_홈</code> · <code>가입중_홈</code> · <code>비회원보기_홈</code></td></tr>
+<tr><td><b>문제</b></td><td><b>홈 CTA 깜빡임</b> — 비회원→회원 판정이 늦어 「가입하고 전부 보기」가 잠깐 떴다 사라집니다</td></tr>
+</tbody></table>
+<p><b>오픈 화면 광고(<code>SplashAd</code>)</b> — <code>광고배너</code> 자리 둘이 **모두 꺼져 있고 그림이</p>
+<p>비어** 있어 배너 겹이 아예 안 그려집니다. 지금 모습이 「광고 없음」 모습입니다.</p>
+<hr>
+<h2 id="2-공고-목록-jobs">2. 공고 목록 <code>/jobs</code></h2>
+<table><thead><tr><th><b>목적</b></th><th>탭·직군·지역·검색으로 공고를 좁혀 보기</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td>회원. 비회원은 <b>맛보기 10건</b> (<code>site_settings.비로그인_공고수</code>)</td></tr>
+<tr><td><b>구성</b></td><td>탭 넷 → 직군·지역 고르개 → 검색 → 목록 20건 → 쪽 넘기기</td></tr>
+<tr><td><b>탭 넷</b></td><td>공공기관·대학·종합 / 재활·요양병원·의원 / 아동·정신센터 / 요양원·노인센터</td></tr>
+<tr><td><b>상태</b></td><td>비회원 맛보기 · 회원 목록 · 결과 없음 · 마감 포함 보기</td></tr>
+<tr><td><b>캡처</b></td><td><code>비로그인_공고목록</code> · <code>학생_공고목록</code> · <code>작업치료사_공고목록</code> · <code>가입중_공고목록</code></td></tr>
+</tbody></table>
+<p><b>카드가 읽는 값은 DB 가 정합니다</b> — <code>지역보임</code>(순천병원이 「전남광주」로</p>
+<p>나오던 자리) · <code>마감표시</code>(「수시채용」을 화면이 정하지 않습니다).</p>
+<p><b>화면에서 <code>work_place</code>·<code>apply_to</code> 로 직접 판단하지 마십시오.</b></p>
+<hr>
+<h2 id="3-공고-상세-jobsid">3. 공고 상세 <code>/jobs/[id]</code></h2>
+<table><thead><tr><th><b>목적</b></th><th>지원할지 정하는 데 필요한 것만. 그 밖은 원문으로</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td>누구나 열립니다 (공유 링크가 살아야 해서). <b>본문은 회원만</b></td></tr>
+<tr><td><b>구성</b></td><td>제목·꼬리표 → <b>일곱 칸</b> → 지원 자격 → 첨부 → 경쟁률 → 비슷한 공고 → 아래 고정 띠</td></tr>
+<tr><td><b>일곱 칸</b></td><td>모집인원 · 접수마감 · 근무지 · 지원자격 · 예상 연봉 · 얼마나 바쁜 곳 · 병원 뜯어보기</td></tr>
+<tr><td><b>상태</b></td><td>비회원(가입 권유 + 「로그인하고 지원하러 가기」) · 가입중(흐림) · 회원 · <b>마감(회색 · 아래 띠 없음)</b></td></tr>
+<tr><td><b>캡처</b></td><td><code>비로그인_공고상세_로그인안내</code> · <code>학생_공고상세</code> · <code>작업치료사_공고상세</code> · <code>비회원보기_공고상세</code></td></tr>
+<tr><td><b>숨김</b></td><td>아님</td></tr>
+</tbody></table>
+<p><b>비회원에게는 원문 주소를 창구가 아예 안 줍니다</b> (<code>job_one</code> 이 <code>url</code> 을 null 로).</p>
+<p>화면에서 단추만 가리면 HTML·JSON 에 값이 그대로 남습니다.</p>
+<p><b>안 그리는 칸</b> — 전형방법·우대사항·결격사유·문의처·제출서류·<b>학력</b>.</p>
+<p><b>못 찾은 칸은 안 그립니다.</b> 「공고에 없음」을 쓰지 않습니다.</p>
+<table><thead><tr><th>알려진 문제</th><th></th></tr></thead><tbody>
+<tr><td>아래 띠</td><td>2026-10-09 에 <b>안전 영역</b>을 더했습니다 (아이폰 홈 막대에서 마지막 줄이 가렸습니다)</td></tr>
+<tr><td>미리보기 색</td><td>마감은 2026-10-09 에 회색으로 고쳤습니다(21절). <b>직군이 둘(공통)이면 접수 중에도 온통 빨강</b> — 색을 정해야 합니다</td></tr>
+<tr><td>빈 칸</td><td>보이는 공고 377건 중 <b>374건</b>에 빈 칸이 있습니다 (지원자격 365·모집인원 363)</td></tr>
+</tbody></table>
+<hr>
+<h2 id="4-경쟁률-compete">4. 경쟁률 <code>/compete</code></h2>
+<table><thead><tr><th><b>목적</b></th><th>「○○병원 작업치료사 경쟁률」로 찾아오는 사람을 받는 자리</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td><b>회원만</b> (2026-10-09 부터 목록도)</td></tr>
+<tr><td><b>구성</b></td><td>직군·지역·기관 고르개 → 묶음 목록 222개 → 한 묶음 펼치면 숫자</td></tr>
+<tr><td><b>상태</b></td><td><b>비회원(로그인 안내)</b> · 회원(목록) · 회원(숫자까지) · 결과 없음</td></tr>
+<tr><td><b>캡처</b></td><td><code>비로그인_경쟁률_로그인안내</code> · <code>학생_경쟁률</code></td></tr>
+</tbody></table>
+<p><b>앞 결정과 다릅니다</b> — 2026-10-05 에는 「목록은 누구나, 숫자는 회원만」이었고</p>
+<p>2026-10-09 에 「목록도 회원만」으로 바뀌었습니다. 코드 주석에 둘 다 적혀 있습니다.</p>
+<p><b>숫자는 화면에서 가리지 않습니다</b> — 목록 창구가 평균·최고·최저를 **아예 안</p>
+<p>내보냅니다.** 화면에서 가리면 개발자 도구에 값이 그대로 보입니다.</p>
+<hr>
+<h2 id="5-커뮤니티-community-communitych-postid-글쓰기-communitywrite">5. 커뮤니티 <code>/community</code> · <code>/community/[ch]</code> · <code>/post/[id]</code> · 글쓰기 <code>/community/write</code></h2>
+<table><thead><tr><th><b>목적</b></th><th>역할이 같은 사람끼리 이야기하는 자리</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td>방마다 다릅니다. <b>학생 방에 치료사는 못 들어갑니다. 학생은 치료사 방을 봅니다</b></td></tr>
+<tr><td><b>구성</b></td><td>방 고르기 → 글 목록 → 글 + 댓글 → 글쓰기(사진)</td></tr>
+<tr><td><b>상태</b></td><td>비회원(맛보기) · 역할별 방 · 중고거래 · 운영진 글 표시</td></tr>
+<tr><td><b>캡처</b></td><td><code>비로그인_커뮤니티</code> · <code>학생_커뮤니티</code> · <code>작업치료사_커뮤니티</code> · <code>담당자_커뮤니티</code></td></tr>
+</tbody></table>
+<p><b>담당자는 읽기만 합니다</b> (치료사·학생 역할을 겸할 때만 씁니다).</p>
+<p><b>글쓴이 회원번호가 화면에 안 나갑니다</b> — <code>공개글</code> 보기가 닉네임만 담아 줍니다.</p>
+<p>사진도 <code>/api/post-image/...</code> 로 중계합니다 (저장소 경로에 회원번호가 들어 있습니다).</p>
+<table><thead><tr><th>알려진 문제</th><th></th></tr></thead><tbody>
+<tr><td>사진 올리기</td><td>실제로 눌러 보지 못했습니다</td></tr>
+<tr><td>신고 처리</td><td>글·댓글·대화·리뷰 <b>넷 다 처리 화면이 없습니다</b></td></tr>
+</tbody></table>
+<hr>
+<h2 id="6-교육학술-edu-edusessionid-eduorg-eduorgname">6. 교육·학술 <code>/edu</code> · <code>/edu/session/[id]</code> · <code>/edu/org</code> · <code>/edu/org/[name]</code></h2>
+<table><thead><tr><th><b>목적</b></th><th>학회·학원 교육을 한자리에. 결제는 받지 않고 <b>계좌 안내만</b> 전합니다</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td>누구나. 계좌는 <b>신청한 사람</b>과 담당자에게만</td></tr>
+<tr><td><b>구성</b></td><td>과정 목록 → 회차 → 정원·접수·수강료 → 입금 안내 → 환불 규정 → 첨부 → 후기</td></tr>
+<tr><td><b>상태</b></td><td>모집중 · 마감(정원 참) · 끝남 · 내 신청(신청함·입금대기·참여확정·미선정) · 후기 쓸 수 있음 · <b>첫날 08시 전</b></td></tr>
+<tr><td><b>캡처</b></td><td><code>교육_모집중</code> · <code>교육_입금대기</code> · <code>교육_미선정</code> · <code>교육_후기쓰기</code> · <code>교육_후기아직</code></td></tr>
+</tbody></table>
+<p><b>후기를 지금 쓸 수 있나는 DB 가 정합니다</b> (<code>교육회차보기</code> 의 <code>리뷰가능</code>).</p>
+<p>화면이 날짜를 만들면 그릴 때마다 값이 달라지고 규칙이 두 벌이 됩니다.</p>
+<p><b>주소에 한글을 쓰지 마십시오</b> — <code>/edu/회차/[id]</code> 가 로컬에서는 되는데</p>
+<p>배포에서 404 였습니다 (2026-10-09 · <code>/edu/session/[id]</code> 로 바꿨습니다).</p>
+<hr>
+<h2 id="7-채용-관리-biz-숨김">7. 채용 관리 <code>/biz</code> ★숨김</h2>
+<table><thead><tr><th><b>목적</b></th><th>병원 담당자가 <b>자기 공고를 직접</b> 올리고 고치는 자리</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td>승인된 <b>채용담당자</b>. 교육담당자 페르소나로는 안 열립니다</td></tr>
+<tr><td><b>구성</b></td><td>병원 고르기 → 「공고 쓰기」 → <b>일곱 칸</b> → 첨부 → 내 공고 목록</td></tr>
+<tr><td><b>단추</b></td><td>고치기 · 지금 마감 · 내리기 · (모아 온 공고에는) 공식 확인 도장</td></tr>
+<tr><td><b>상태</b></td><td>승인 전(준비 중) · 병원 없음 · 공고 없음 · 시험병원(회원에게 안 보임 안내)</td></tr>
+<tr><td><b>캡처</b></td><td><code>담당자_채용관리</code> · <code>둘다담당자_채용관리</code> · <code>교육담당자_채용관리_막힘</code></td></tr>
+</tbody></table>
+<p><b>모아 온 공고는 담당자가 못 고칩니다.</b> 창구가 <code>source &lt;&gt; 'BIZ'</code> 를 거절합니다 —</p>
+<p>긁어 온 값과 담당자가 고친 값이 어긋났을 때 어느 쪽이 맞는지 정하는 규칙을</p>
+<p>먼저 만들어야 하기 때문입니다.</p>
+<hr>
+<h2 id="8-교육-관리-edumanage-숨김">8. 교육 관리 <code>/edu/manage</code> ★숨김</h2>
+<table><thead><tr><th><b>목적</b></th><th>학회 간사가 과정·회차를 만들고 신청자를 보는 자리</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td>승인된 <b>교육담당자</b>(기관·개인). 채용담당자 페르소나로는 안 열립니다</td></tr>
+<tr><td><b>구성</b></td><td>「과정 만들기」 → 과정 목록 → 「회차 열기」(최대 30일·정원·계좌·환불) → 신청자 → 후기 답글</td></tr>
+<tr><td><b>단추</b></td><td>숨기기 · 참여 확정 · 모집 끝내기 · 재공고 · 답글 달기</td></tr>
+<tr><td><b>상태</b></td><td>승인 전 · 과정 없음 · 회차별(모집중·마감·끝남) · 입금했다는 분 N명</td></tr>
+<tr><td><b>캡처</b></td><td><code>교육담당자_교육관리</code> · <code>둘다담당자_교육관리</code> · <code>담당자_교육관리_막힘</code></td></tr>
+</tbody></table>
+<p><b>정원이 차면 자동으로 마감됩니다</b> (<code>교육참여확정</code> 안에서).</p>
+<p><b>후기는 못 지웁니다. 답글만</b> 답니다.</p>
+<hr>
+<h2 id="9-담당자-신청-partner-숨김-승인-adminpartners">9. 담당자 신청 <code>/partner</code> ★숨김 · 승인 <code>/admin/partners</code></h2>
+<table><thead><tr><th><b>목적</b></th><th>병원·학회가 담당자 자격을 신청하고 증빙을 올리는 자리</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td>지금은 운영진만 (2026-10-09 에 <code>/me</code> 에 길을 붙였습니다)</td></tr>
+<tr><td><b>구성</b></td><td>갈래 고르기(채용·교육기관·교육개인) → 사업자번호 → 증빙 올리기 → 심사</td></tr>
+<tr><td><b>상태</b></td><td>심사중 · 승인 · 반려(까닭) · <b>정지</b></td></tr>
+<tr><td><b>사업자 상태</b></td><td>계속사업자 · 휴업자 · 폐업자 · 없는 번호 · <b>(수동 확인)</b></td></tr>
+<tr><td><b>캡처</b></td><td><code>담당자_내신청</code> · <code>관리자_partners</code></td></tr>
+</tbody></table>
+<p><code>NTS_BIZ_KEY</code> 가 없으면 「수동 확인」으로 둡니다 — <b>기능이 멈추지 않습니다.</b></p>
+<hr>
+<h2 id="10-재직-인증-verify-숨김-adminverify">10. 재직 인증 <code>/verify</code> ★숨김 · <code>/admin/verify</code></h2>
+<table><thead><tr><th><b>목적</b></th><th>「재직 확인」 배지</th></tr></thead><tbody>
+<tr><td><b>구성</b></td><td>일하는 곳 → 재직증명서·사원증 올리기 → 심사</td></tr>
+<tr><td><b>상태</b></td><td>심사중 · 확인(배지) · 반려(까닭)</td></tr>
+<tr><td><b>캡처</b></td><td><code>재직_배지</code> · <code>관리자_verify</code></td></tr>
+</tbody></table>
+<p><b>확인이 끝나면 파일을 바로 지웁니다.</b> 담당자 증빙과 다릅니다 — 그쪽은 소속을</p>
+<p>되짚어야 해서 탈퇴할 때까지 보관합니다. 그 말을 화면에 적어 둡니다.</p>
+<hr>
+<h2 id="11-11-대화-talk-talkroom-숨김">11. 1:1 대화 <code>/talk</code> · <code>/talk/[room]</code> ★숨김</h2>
+<table><thead><tr><th><b>목적</b></th><th>공고·교육을 두고 둘이 이야기하는 자리</th></tr></thead><tbody>
+<tr><td><b>구성</b></td><td>방 목록 → 신청 받기/거절 → 글·사진</td></tr>
+<tr><td><b>상태</b></td><td>신청 · 수락 · <b>거절(목록에 안 뜸)</b> · 차단</td></tr>
+<tr><td><b>사진</b></td><td><b>한 번 보면 안 보입니다</b> — 경로는 DB 에 남고 창구가 안 줍니다</td></tr>
+<tr><td><b>보관</b></td><td>사진 30일 · 글 1년 · <b>신고 처리 전이면 둘 다 보존</b> (승인대기 ②)</td></tr>
+<tr><td><b>캡처</b></td><td><code>대화_목록</code> · <code>대화_신청받기</code> · <code>대화_사진하나사라짐</code></td></tr>
+</tbody></table>
+<hr>
+<h2 id="12-알림함-alarm-탑바-종-숨김">12. 알림함 <code>/alarm</code> · 탑바 종 ★숨김</h2>
+<table><thead><tr><th><b>목적</b></th><th>푸시를 못 받는 분도 앱 안에서 다 보는 자리</th></tr></thead><tbody>
+<tr><td><b>갈래</b></td><td>마감임박 · 새공고 · 대화신청 · 대화수락 · 교육신청 · 교육확정 · 교육미선정 · 입금기한 · 자격결과 · 재직결과</td></tr>
+<tr><td><b>상태</b></td><td>안 읽음(빨간 점 · 종에 숫자) · 읽음 · 없음</td></tr>
+<tr><td><b>캡처</b></td><td><code>알림_일곱줄</code></td></tr>
+</tbody></table>
+<p><b>넣는 것은 창구(<code>알림넣기</code>)뿐입니다</b> — 회원은 남에게 못 보냅니다.</p>
+<p>종은 지금 <b>관리자에게만</b> 보입니다 (알림을 보내는 기능이 다 숨겨져 있어서).</p>
+<hr>
+<h2 id="13-내-정보-me-탈퇴-meleave">13. 내 정보 <code>/me</code> · 탈퇴 <code>/me/leave</code></h2>
+<table><thead><tr><th><b>구성</b></th><th>프로필 → 직군·역할 → 설문 고치기 → 찜 목록 → 알림 켜기 → <b>담당자 화면</b> → 로그아웃 → 탈퇴</th></tr></thead><tbody>
+<tr><td><b>캡처</b></td><td><code>학생_내정보</code> · <code>담당자_내정보</code> · <code>둘다담당자_내정보</code> · <code>학생_탈퇴</code></td></tr>
+<tr><td><b>문제</b></td><td>탈퇴가 <code>profiles</code> 만 정리합니다 — <b>증빙 파일이 storage 에 남습니다</b></td></tr>
+</tbody></table>
+<hr>
+<h2 id="14-관리자-admin-23곳-공고-하나-adminjobsid">14. 관리자 <code>/admin</code> … 23곳 · 공고 하나 <code>/admin/jobs/[id]</code></h2>
+<p>왼쪽 메뉴가 <b>유일한 길</b>입니다. <code>node tools/check.js</code> 가 화면 수와 메뉴 줄 수를</p>
+<p>맞춰 봅니다 (2026-10-09 기준 <b>23 ↔ 23</b>).</p>
+<table><thead><tr><th>묶음</th><th>화면</th></tr></thead><tbody>
+<tr><td>공고</td><td>홈 꾸미기 · 홈 글 · 공고 · <b>빈칸 공고</b> · 쓰레기통 · 추천 올린 공고</td></tr>
+<tr><td>커뮤니티</td><td>커뮤니티 글 · 신고</td></tr>
+<tr><td>자료</td><td>아이콘 · 통계 · 경쟁률 · 손으로 확인할 곳 · 교육기관 · 오픈 화면 광고</td></tr>
+<tr><td>운영</td><td>수집기 상태 · 경쟁사 비교 · 회원 · 직원과 권한 · 운영진 글</td></tr>
+<tr><td>승인</td><td>담당자 승인 · 재직 확인</td></tr>
+<tr><td>그 밖</td><td>개인정보 접속기록 · 내 계정 초기화</td></tr>
+</tbody></table>
+<p><b>권한 12가지</b> — 공고관리 · 보류함 · 통계 · 회원관리 · 신고처리 · 리뷰삭제 ·</p>
+<p>기관승인 · 광고 · 문구 · 운영진글 · 페르소나 · 대화열람.</p>
+<hr>
+<h2 id="15-마스터-master-페르소나-띠">15. 마스터 <code>/master</code> · 페르소나 띠</h2>
+<table><thead><tr><th><b>목적</b></th><th>회원 화면을 <b>진짜 그 역할로</b> 보는 자리. 앱스토어 심사용 계정도 겸합니다</th></tr></thead><tbody>
+<tr><td><b>구성</b></td><td>메일·비번 → 들어가면 화면 아래 빨간 띠</td></tr>
+<tr><td><b>역할 아홉</b></td><td>관리자 · 학생 · 작업치료사 · 물리치료사 · 채용담당자 · 교육담당자 · <b>채용+교육담당자</b> · 가입중 · 비회원</td></tr>
+<tr><td><b>캡처</b></td><td><code>페르소나띠</code></td></tr>
+</tbody></table>
+<p><b>여기로는 가입이 안 됩니다</b> (훅이 이메일 가입을 거절합니다).</p>
+<p>다섯 번 틀리면 이 브라우저에서 15분 잠급니다.</p>
+<p><b>「비회원」은 로그아웃이 아닙니다</b> — 로그인을 유지한 채 쿠키 하나로</p>
+<p>브라우저와 서버가 둘 다 JWT 를 안 보냅니다.</p>
+<p>2026-10-09 캡처에서 <b>다섯 화면이 로그아웃 창과 글자까지 같은 것</b>을 확인했습니다.</p>
+<hr>
+<h2 id="16-기관-orgs">16. 기관 <code>/orgs</code></h2>
+<table><thead><tr><th><b>목적</b></th><th>병원·기관을 찾아 그 기관의 공고·종별·병상·치료사 수를 봅니다</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td>누구나 (비회원도)</td></tr>
+<tr><td><b>상태</b></td><td>자료 있음 / <b>빈 결과</b> (<code>/orgs?q=없는이름</code>)</td></tr>
+<tr><td><b>캡처</b></td><td><code>비로그인_기관</code> · <code>비로그인_기관_빈결과</code> · <code>학생_기관목록</code></td></tr>
+</tbody></table>
+<p>대조용 표(<code>org_directory</code>)에 <b>62,749</b>줄이 있고, 화면이 보여주는 것은 같은 곳을 묶은 <b>58,610</b>곳입니다 (<code>org_group_mv</code>). 종별·설립구분은 <b>심평원 공식 값</b>만 씁니다 —</p>
+<p>이름으로 짐작하지 않습니다 (작업지침 10-3). 공식 값이 비면 미정으로 둡니다.</p>
+<hr>
+<h2 id="17-계산기-tools-toolsunemployment-toolsseverance-toolsleave-toolspay">17. 계산기 <code>/tools</code> · <code>/tools/unemployment</code> · <code>/tools/severance</code> · <code>/tools/leave</code> · <code>/tools/pay</code></h2>
+<table><thead><tr><th>주소</th><th>무엇</th><th>계산이 어디 있나</th></tr></thead><tbody>
+<tr><td><code>/tools</code></td><td>모음 화면</td><td>—</td></tr>
+<tr><td><code>/tools/unemployment</code></td><td>실업급여(구직급여)</td><td><code>lib/rates.ts</code> + <b>관리자 설정 한 줄</b></td></tr>
+<tr><td><code>/tools/severance</code></td><td>퇴직금</td><td><code>lib/labor.ts</code></td></tr>
+<tr><td><code>/tools/leave</code></td><td>연차</td><td><code>lib/labor.ts</code></td></tr>
+<tr><td><code>/tools/pay</code></td><td>세전 ↔ 세후</td><td><code>lib/tax.ts</code></td></tr>
+</tbody></table>
+<table><thead><tr><th><b>누가</b></th><th>누구나 (비회원도)</th></tr></thead><tbody>
+<tr><td><b>상태</b></td><td>자료 있음만 — 입력 전/후 한 화면입니다</td></tr>
+<tr><td><b>캡처</b></td><td><code>비로그인_계산기</code> · <code>비로그인_계산기_실업급여</code> · <code>_퇴직금</code> · <code>_연차</code> · <code>_월급</code></td></tr>
+</tbody></table>
+<p><b>계산을 화면에서 다시 짜지 않습니다.</b> 넷 다 <code>lib/</code> 의 함수를 부릅니다</p>
+<p>(<code>node web/lib/labor.test.mjs</code> 로 시험합니다).</p>
+<p>실업급여는 2026-09-23 에 <b>일부러 빼 뒀다가</b> 10-03 에 넣었습니다 — 상·하한이</p>
+<p>해마다 바뀌는데 코드에 박으면 틀린 금액을 보여주게 됩니다. 지금은 값이</p>
+<p><b>관리자 설정</b>에 있어 해가 바뀌면 그 줄만 고칩니다.</p>
+<p><b>알려진 문제</b> — 넷 중 <b>실업급여만 화면 제목(<code>&lt;title&gt;</code>)이 있습니다</b> (05 부록 5절).</p>
+<hr>
+<h2 id="18-로그인-login-환영-welcome-돌아오는-자리-authcallback">18. 로그인 <code>/login</code> · 환영 <code>/welcome</code> · 돌아오는 자리 <code>/auth/callback</code></h2>
+<table><thead><tr><th><b>목적</b></th><th>카카오·네이버로 들어오고, 처음이면 설문을 거쳐 환영 화면으로</th></tr></thead><tbody>
+<tr><td><b>누가</b></td><td>비회원 → <code>/login</code> · 가입 중 → <code>/welcome</code></td></tr>
+<tr><td><b>길</b></td><td><code>/login</code> → 카카오/네이버 → <code>/auth/callback</code> → (처음이면) 설문 → <code>/welcome</code></td></tr>
+<tr><td><b>캡처</b></td><td><code>비로그인_로그인화면</code> · <code>가입중_환영</code></td></tr>
+</tbody></table>
+<p><code>/auth/callback</code> 은 <b>그려지는 화면이 아닙니다</b> — 받아서 바로 보내는 자리라</p>
+<p>캡처가 없습니다.</p>
+<p><b>이메일 가입은 막혀 있습니다</b> (<code>hook_block_email_signup</code>). 마스터 계정만</p>
+<p><code>/master</code> 로 들어옵니다.</p>
+<p><b>로그인을 하려 했던 자리로 돌려보냅니다</b> — <code>sessionStorage['potjob.after-login']</code></p>
+<p>한 곳에 모아 뒀습니다 (<code>components/login-first.tsx</code>).</p>
+<p><b>[미확인]</b> 카카오·네이버 <b>동의 화면</b>은 외부 서비스라 코드가 못 찍습니다. &lt;!-- 점검:설명 — 실제 줄은 05 부록 7절에 있습니다 --&gt;</p>
+<p>세중님이 휴대폰으로 찍어 주셔야 합니다 (05 부록 7절).</p>
+<hr>
+<h2 id="19-약관-termsdoc-문의-contact-월급-확인-pay">19. 약관 <code>/terms/[doc]</code> · 문의 <code>/contact</code> · 월급 확인 <code>/pay</code></h2>
+<table><thead><tr><th>주소</th><th>무엇</th></tr></thead><tbody>
+<tr><td><code>/terms/service</code></td><td>이용약관</td></tr>
+<tr><td><code>/terms/privacy</code></td><td>개인정보 처리방침</td></tr>
+<tr><td><code>/terms/community</code></td><td>커뮤니티 운영규칙</td></tr>
+<tr><td><code>/contact</code></td><td>문의 — <b>메일 주소 하나</b>입니다</td></tr>
+<tr><td><code>/pay</code></td><td><b>월급 확인</b> (옛 앱의 「조회」를 옮긴 것). <code>/tools/pay</code>(세전↔세후)와 <b>다른 화면</b></td></tr>
+</tbody></table>
+<table><thead><tr><th><b>누가</b></th><th>누구나</th></tr></thead><tbody>
+<tr><td><b>캡처</b></td><td><code>비로그인_약관_서비스</code> · <code>_개인정보</code> · <code>_커뮤니티</code> · <code>비로그인_문의</code> · <code>비로그인_유료안내</code>(← <code>/pay</code> 입니다. 이름이 옛것이라 헷갈립니다)</td></tr>
+</tbody></table>
+<p><b>문의에 폼을 두지 않았습니다</b> — 폼을 두면 문의 내용과 보낸 사람을 우리가</p>
+<p>보관하게 되고, 그러면 보관기간·파기까지 붙여야 합니다. 메일로 받으면 그 짐이</p>
+<p>없습니다. 주소는 <code>lib/contact.ts</code> <b>한 곳</b>에만 적혀 있습니다.</p>
+<p>약관 글자는 <code>lib/terms.ts</code> 한 곳이고 <code>TERMS_VERSION</code> 으로 판을 셉니다.</p>
+<hr>
+<h2 id="20-그-밖-volunteer-youth-soon-spec">20. 그 밖 <code>/volunteer</code> · <code>/youth</code> · <code>/soon</code> · <code>/spec</code></h2>
+<table><thead><tr><th>주소</th><th>무엇</th><th>자료가 어디서</th></tr></thead><tbody>
+<tr><td><code>/volunteer</code></td><td>봉사활동 찾기</td><td>VMS → 서버 수집기 → Supabase</td></tr>
+<tr><td><code>/youth</code></td><td>청년정책 찾기</td><td>온통청년 → 수집기 (<b>3,150건</b>)</td></tr>
+<tr><td><code>/spec</code></td><td>스펙쌓기</td><td>회원 설문</td></tr>
+<tr><td><code>/soon</code></td><td><b>아직 안 만든 화면 셋</b>이 같이 쓰는 자리</td><td>—</td></tr>
+</tbody></table>
+<table><thead><tr><th><b>누가</b></th><th>누구나</th></tr></thead><tbody>
+<tr><td><b>상태</b></td><td><code>/soon</code> 은 <b>숨김(준비 중)</b> 하나뿐입니다</td></tr>
+<tr><td><b>캡처</b></td><td><code>비로그인_봉사</code> · <code>비로그인_청년</code> · <code>비로그인_기능표</code> · <code>비로그인_준비중</code></td></tr>
+</tbody></table>
+<p><b>화면이 VMS·온통청년을 직접 부르지 않습니다</b> — 인증키가 브라우저로 나가면</p>
+<p>안 되기 때문입니다. 수집기가 담은 것만 읽습니다.</p>
+<p><b><code>/spec</code> 은 배점을 한 자도 안 내보냅니다</b> (2026-09-23). 우리가 만든 기준이라</p>
+<p>밖으로 나가면 안 됩니다.</p>
+<p><b><code>/soon</code> 은 404 를 안 내려고 있는 자리입니다.</b> 홈 카테고리가 아직 없는 화면</p>
+<p>(월급 확인 · 스펙쌓기 · 병원정보 찾기)을 여기로 보냅니다. 화면이 생기면</p>
+<p><code>lib/routes.ts</code> 의 표에서 그 줄만 지웁니다.</p>
+<hr>
+<h2 id="21-404-not-found-카톡-미리보기-apiogjobid">21. 404 <code>not-found</code> · 카톡 미리보기 <code>/api/og/job/[id]</code></h2>
+<h3 id="404-없는-주소">404 — 없는 주소</h3>
+<table><thead><tr><th><b>목적</b></th><th>오타 · 내린 공고 · 없는 기관으로 들어왔을 때</th></tr></thead><tbody>
+<tr><td><b>구성</b></td><td>돋보기 · 「이 자리에 아무것도 없어요」 · 단추 셋 (<code>/jobs</code> · <code>/community</code> · <code>/</code>)</td></tr>
+<tr><td><b>어디</b></td><td><code>app/not-found.tsx</code> — <b><code>page.tsx</code> 가 아니라 길이 없습니다</b></td></tr>
+<tr><td><b>캡처</b></td><td><code>비로그인_없는주소</code> (<code>/nope-zzz</code> 로 들어가 찍습니다)</td></tr>
+</tbody></table>
+<p>이 파일이 없으면 Next 가 영어 한 줄 「404 | This page could not be found」 를</p>
+<p>내보냅니다.</p>
+<h3 id="카톡메신저-미리보기-apiogjobid">카톡·메신저 미리보기 <code>/api/og/job/[id]</code></h3>
+<p>공고 주소를 카톡·슬랙에 붙이면 뜨는 <b>1200×630 그림</b>입니다. 화면이 아니라</p>
+<p><b>그려서 내려주는 길</b>입니다 (<code>route.tsx</code>).</p>
+<table><thead><tr><th>상태</th><th>바탕</th><th>캡처</th></tr></thead><tbody>
+<tr><td>접수 중 · 직군 하나</td><td>그 직군 색</td><td>—</td></tr>
+<tr><td>접수 중 · <b>직군 둘(공통)</b></td><td><b>빨강 <code>#FF3B30</code></b></td><td><code>카톡미리보기_진행중</code></td></tr>
+<tr><td><b>마감</b></td><td><b>따로 둔 회색</b> <code>CLOSED_COLOR</code> + 오른쪽 위 「마감」</td><td><code>카톡미리보기_마감</code></td></tr>
+<tr><td><b>숨겨진 공고</b></td><td>기본 카드 (회색 POTJOB · 제목도 날짜도 없음)</td><td><code>카톡미리보기_숨겨진공고</code></td></tr>
+</tbody></table>
+<p>규칙은 한 줄입니다 — <code>backgroundColor: closed ? CLOSED_COLOR : skin.bg</code></p>
+<p>(<code>route.tsx:117</code>).</p>
+<p><b>옛 문서의 「마감 썸네일이 온통 빨강」은 그때는 맞는 말이었습니다</b> —</p>
+<p><code>og-job-마감.png</code>(2026-10-08 손캡처)가 온통 빨강입니다. **2026-10-09 커밋</p>
+<p><code>8017682</code> 에서 고쳐졌고**, 10-10 에 다시 찍어 회색인 것을 확인했습니다.</p>
+<p>지금 빨강인 것은 <b>마감이 아니라 직군이 둘(공통)일 때</b>입니다.</p>
+<p class="만든말">이 쪽은 <code>04_화면스펙.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02_기술스펙 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="00_%EC%9D%BD%EB%8A%94%EB%B2%95.html">읽는법</a><a href="01_%EA%B8%B0%ED%9A%8D.html">기획</a><a href="02_%EA%B8%B0%EC%88%A0%EC%8A%A4%ED%8E%99.html">기술스펙</a><a href="03_IA.html">IA</a><a href="04_%ED%99%94%EB%A9%B4%EC%8A%A4%ED%8E%99.html">화면스펙</a><a href="05_%EB%B6%80%EB%A1%9D.html">부록</a><a href="../screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="02-기술-스펙">02. 기술 스펙</h1>
+<blockquote><b>숫자 기준 시각</b> — 2026-10-10 03시(KST) · 커밋 <code>3394655</code> 이후.</blockquote>
+<blockquote>숫자는 그때 <b>세어 본 값</b>입니다 (DB <code>select</code> · 파일 수).</blockquote>
+<h2 id="구조">구조</h2>
+<pre><code>
+브라우저 ── Vercel (Next.js 16 · React 19 · Tailwind v4)
+               │
+               ├── Supabase  PostgreSQL + PostgREST + RLS + Storage + Auth
+               │                 창구(RPC)로만 드나듭니다. 표를 직접 안 읽습니다
+               │
+               ├── 수집기 서버 (Lightsail · 크론)  tools/*.mjs
+               │        API 10곳에서 공고를 긁어 담습니다
+               │
+               └── 옛 앱 (Google Apps Script)  gas/
+                        아직 일부가 돕니다. GitHub Actions 「다리」가 30분마다 옮깁니다
+</code></pre>
+<table><thead><tr><th>층</th><th>무엇</th><th>어디</th></tr></thead><tbody>
+<tr><td>화면</td><td>Next.js 16.3.5 · React 19.2.8 · Tailwind v4 (<code>@theme static</code>)</td><td><code>web/</code></td></tr>
+<tr><td>창구·자료</td><td>Supabase</td><td><code>sql/</code> 에 날짜별 전문</td></tr>
+<tr><td>수집기</td><td>Node 스크립트 · 서버 크론</td><td><code>tools/</code></td></tr>
+<tr><td>다리</td><td>GitHub Actions <code>sync.yml</code> (30분) · <code>anon-check.yml</code> (매일 06:20)</td><td><code>.github/workflows/</code></td></tr>
+<tr><td>옛 앱</td><td>Apps Script</td><td><code>gas/</code></td></tr>
+</tbody></table>
+<p><b>이름은 한글입니다</b> — 함수·변수·DB 칸·창구 이름까지.</p>
+<p><b>예외는 밖에서 이름으로 부르는 것</b>입니다 (6-2b):</p>
+<table><thead><tr><th>자리</th><th>왜 영어여야 하나</th></tr></thead><tbody>
+<tr><td>Supabase auth 훅</td><td><code>pg-functions://postgres/public/&lt;이름&gt;</code> 에 한글이 들어가면 <b>거부</b>됩니다</td></tr>
+<tr><td><b>URL 경로</b></td><td>로컬 빌드는 되는데 <b>배포에서 404</b> 입니다 (2026-10-09 에 <code>/edu/회차/[id]</code> 로 밟았습니다 → <code>/edu/session/[id]</code>)</td></tr>
+<tr><td><b>저장소 경로(열쇠)</b></td><td>Supabase Storage 가 <code>InvalidKey</code> 로 거절합니다. 2026-10-10 에 <b>셋</b>이 막혀 있었습니다 (<code>notices</code> 파일 이름 · <code>proofs</code> 의 <code>재직-</code> · <code>ad-images</code> 의 <code>앱</code>/<code>커뮤니티</code>). 경로는 <b>uuid + 확장자</b>, 보여줄 이름은 <b>표의 칸</b>에</td></tr>
+<tr><td>HTTP 헤더 값</td><td>latin-1 만 됩니다. <code>fetch</code> 는 막고 <code>curl</code> 은 안 막습니다</td></tr>
+<tr><td>셸 변수 이름</td><td>bash 가 명령어로 읽습니다</td></tr>
+<tr><td>쿠키 이름</td><td><code>potjob_guest_view</code> — 서버·브라우저가 같은 이름으로 읽습니다</td></tr>
+</tbody></table>
+<p><b>RLS 정책 본문은 <code>security definer</code> 가 아닙니다</b> — <b>부르는 사람 권한으로</b></p>
+<p>돕니다. 그래서 정책 안에서 우리 표를 <code>select</code> 하면 <code>permission denied</code> 입니다</p>
+<p>(표는 <code>authenticated</code> 에게 안 열려 있습니다). 창구 함수로 감싸야 합니다 —</p>
+<p><code>첨부올릴수있나(text)</code> 가 그 예입니다. 기준을 두 정책이 함께 쓰므로</p>
+<p><b>함수 한 곳</b>에만 둡니다.</p>
+<hr>
+<h2 id="열쇠꾸러미-셋">열쇠꾸러미 셋</h2>
+<table><thead><tr><th>파일</th><th>세션</th><th>쓰는 데</th></tr></thead><tbody>
+<tr><td><code>lib/supabase.ts</code></td><td><b>없음</b></td><td>누구나 보는 자료 (홈 배너·문구·카톡 미리보기)</td></tr>
+<tr><td><code>lib/supabase-server.ts</code></td><td>쿠키</td><td>서버가 <b>그 사람으로</b> 읽습니다</td></tr>
+<tr><td><code>lib/supabase-browser.ts</code></td><td>쿠키</td><td>브라우저</td></tr>
+</tbody></table>
+<p><code>lib/guest-view.ts</code> 가 「비회원 보기」를 맡습니다 — 쿠키 하나로</p>
+<p><b>브라우저와 서버가 둘 다</b> JWT 를 안 보냅니다.</p>
+<p><code>browserSupabase({ 진짜: true })</code> 는 그 보기를 무시합니다 (페르소나 띠 전용).</p>
+<p>로그인 상태는 <b>세 값</b>입니다 — <code>회원</code> · <code>비회원</code> · <code>모름</code>.</p>
+<p>「모름」은 물어봤는데 답을 못 받은 것입니다. <b>가입 권유도 회원 자료도 안 그립니다.</b></p>
+<p>두 값으로 쓰면 잠깐 끊긴 회원에게 「가입하고 전부 보기」가 뜹니다.</p>
+<hr>
+<h2 id="주요-표">주요 표</h2>
+<table><thead><tr><th>표</th><th>무엇</th><th>줄 수(2026-10-09)</th></tr></thead><tbody>
+<tr><td><code>job_posts</code></td><td>공고 — <b>전체</b> 2,306 / <b>회원에게 보이는 것 378</b> (숨김 1,660 · 보류 268)</td><td><b>2,306</b></td></tr>
+<tr><td><code>job_posts_pub</code> (보기)</td><td><b>회원용 길 일곱이 전부 지나는 한 자리</b></td><td>—</td></tr>
+<tr><td><code>org_group_mv</code></td><td>기관 찾기가 보여주는 묶은 기관</td><td><b>58,610</b></td></tr>
+<tr><td><code>org_directory</code></td><td>대조용 — 표 아홉을 이어붙인 것 (묶기 전)</td><td><b>62,749</b></td></tr>
+<tr><td><code>기관</code></td><td>기관표 (종별·설립구분·공공인가·탭) — <b>아직 채우는 중</b></td><td><b>1,022</b></td></tr>
+<tr><td><code>profiles</code></td><td>회원</td><td>—</td></tr>
+<tr><td><code>admins</code> · <code>권한</code> · <code>권한기록</code></td><td>운영진과 권한 12가지</td><td>—</td></tr>
+<tr><td><code>회원자격</code></td><td>채용·교육 담당자 자격</td><td>—</td></tr>
+<tr><td><code>인증자료</code> · <code>재직인증</code></td><td>증빙</td><td>—</td></tr>
+<tr><td><code>교육과정</code> · <code>교육회차</code> · <code>교육신청</code> · <code>교육리뷰</code> · <code>교육리뷰답글</code></td><td>교육</td><td>—</td></tr>
+<tr><td><code>공고첨부</code></td><td>담당자가 올린 공고문 (2026-10-09)</td><td>—</td></tr>
+<tr><td><code>posts</code> · <code>comments</code> · <code>운영진글</code></td><td>커뮤니티</td><td>—</td></tr>
+<tr><td><code>chat_rooms</code> · <code>chat_members</code> · <code>chat_messages</code> · <code>대화차단</code></td><td>1:1 대화</td><td>—</td></tr>
+<tr><td><code>알림함</code></td><td>알림</td><td>—</td></tr>
+<tr><td><code>마스터페르소나</code></td><td>마스터가 지금 어느 역할인지</td><td>1</td></tr>
+</tbody></table>
+<h3 id="가리는-자리는-한-곳입니다">가리는 자리는 <b>한 곳</b>입니다</h3>
+<pre><code>
+회원용 공고 길 일곱              job_posts_pub 보기 하나를 지납니다
+  job_list · job_one · job_counts · job_totals · org_jobs · 공개공고 · 공개공고하나
+
+시험자료 가리기                  job_posts_pub 의 `not 시험자료 or 시험자료볼까()`
+담당자 권한                      채용담당자인가() · 교육담당자인가() 두 함수
+교육 창구 열한 개                교육담당자인가() 한 함수를 지납니다
+마감 판정                        아직산공고인가() 한 함수
+마감일이 없을 때 쓸 말             마감표시() 한 함수
+</code></pre>
+<p><b>기준을 고칠 때는 <code>grep</code> 으로 같은 기준을 쓰는 곳을 전부 찾습니다.</b></p>
+<p>DB 함수는 저장소에 없으므로 <code>pg_proc.prosrc</code> 도 함께 봅니다.</p>
+<hr>
+<h2 id="권한과-rls">권한과 RLS</h2>
+<h3 id="원칙">원칙</h3>
+<ul>
+<li><b>표를 직접 안 읽습니다.</b> 창구(<code>security definer</code> 함수)로만 드나듭니다</li>
+<li>화면의 <code>isAdmin</code> 은 <b>단추를 보일지 말지</b>에만 씁니다. 막는 자리는 DB 입니다</li>
+<li>숨긴 화면도 같습니다 — 화면에서 <code>isAdmin</code> 을 지워도 창구가 거절합니다</li>
+</ul>
+<h3 id="세-가지-함정-실제로-밟았습니다">세 가지 함정 (실제로 밟았습니다)</h3>
+<p><b>① <code>revoke … from anon</code> 만으로는 아무것도 안 닫힙니다.</b></p>
+<p><code>anon</code> 은 <code>PUBLIC</code> 에 딸려 있습니다.</p>
+<pre><code>
+revoke execute on function f() from anon;           -- 안 닫힙니다
+revoke execute on function f() from public, anon;   -- 닫힙니다
+grant  execute on function f() to authenticated;
+</code></pre>
+<p><b>② 함수 인수를 바꾸면 그것은 새 함수입니다.</b> PostgreSQL 이 새 함수를</p>
+<p><b>PUBLIC 에게 EXECUTE</b> 로 엽니다. 2026-09-25 에 <code>org_public_host_branch</code> 가</p>
+<p>인수를 하나 더하면서 <b>기관 58,610곳이 보름 동안 비로그인에게 열려</b> 있었습니다.</p>
+<p><b>③ 기본 권한을 닫아 두는 것은 여기서 안 됩니다.</b></p>
+<p><code>alter default privileges … revoke execute on functions from public</code> 을 걸고</p>
+<p>시험해 봤더니 <b>그대로 PUBLIC 이 붙었습니다.</b> 마이그레이션마다 손으로 겁니다.</p>
+<p>그래서 **새 함수를 만들 때는 같은 SQL 끝에 <code>revoke … from public, anon</code> 을</p>
+<p>함께 넣습니다 — 트리거 함수도 예외가 아닙니다.**</p>
+<h3 id="거르는-그물-날마다-도는-점검">거르는 그물 — 날마다 도는 점검</h3>
+<p><code>tools/보안_비로그인점검.mjs</code> 가 「허용 목록 밖에 비로그인에게 열린 것이 있나」를</p>
+<p>묻습니다. 허용 목록은 <code>tools/공개허용목록.json</code> (함수 130 · 표 14) 이고</p>
+<p><b>줄마다 「왜」가 적혀 있습니다.</b> GitHub Actions 가 매일 06:20 KST 에 돕니다.</p>
+<h3 id="저장소storage-버킷">저장소(Storage) 버킷</h3>
+<table><thead><tr><th>버킷</th><th>공개</th><th>한도</th><th>규칙</th></tr></thead><tbody>
+<tr><td><code>post-images</code></td><td>공개</td><td>2MB</td><td>내 폴더에만 올림 · 누구나 봄</td></tr>
+<tr><td><code>chat-images</code></td><td>비공개</td><td>2MB</td><td>내 폴더만</td></tr>
+<tr><td><code>avatars</code> · <code>home-images</code> · <code>ad-images</code></td><td>공개</td><td>—</td><td>—</td></tr>
+<tr><td><code>proofs</code></td><td>비공개</td><td>5MB</td><td>본인과 「기관승인」 권한자만</td></tr>
+<tr><td><b><code>notices</code></b></td><td>비공개</td><td>10MB</td><td><b>규칙이 아직 없습니다</b> — 승인대기 ⑧</td></tr>
+</tbody></table>
+<hr>
+<h2 id="훅">훅</h2>
+<table><thead><tr><th>훅</th><th>함수</th><th>무엇</th></tr></thead><tbody>
+<tr><td>before-user-created</td><td><code>hook_block_email_signup(jsonb)</code></td><td><b>이메일 가입을 막습니다.</b> 마스터 계정은 관리 API 로 만들었습니다</td></tr>
+</tbody></table>
+<p>옛 이름 <code>hook_이메일가입막기</code> 는 <b>한글이라 훅 주소로 못 씁니다</b> (승인대기 ④).</p>
+<hr>
+<h2 id="시험자료">시험자료</h2>
+<p>예시 자료는 전부 <code>시험자료 = true</code> 이고 <b>시험병원·시험 교육기관에만</b> 붙습니다.</p>
+<p>회원용 창구가 그 칸을 보고 걸러냅니다. 실제로 겪어 본 결과 —</p>
+<pre><code>
+보통 회원으로     교육 0건 · 공개글 0건 · 내알림 0건 · 시험 공고 0건
+마스터로          교육 3건 · 시험 공고 보임
+</code></pre>
+<p>치우는 것은 <code>시험자료치우기()</code> 한 번 (실행은 승인대기 ⑥).</p>
+<p>함수 밖에 남는 것 — storage 견본 6장 · 시험 계정 3 · <code>notices</code> 첨부.</p>
+<p><b>시험 자료를 실제 회원 계정에 넣지 않습니다.</b></p>
+<hr>
+<h2 id="claudemd-규칙-요약"><code>CLAUDE.md</code> 규칙 요약</h2>
+<p>실제로 밟은 실수를 적어 둔 파일입니다. 일을 시작하기 전에 이 절들을 읽어 주십시오.</p>
+<table><thead><tr><th>절</th><th>무엇</th></tr></thead><tbody>
+<tr><td>1</td><td><b>원인을 확인하지 않고 고치지 않기.</b> 같은 증상을 두 번 못 고쳤으면 세 번째는 진단부터</td></tr>
+<tr><td>2</td><td>진단 함수는 <b>응답 원문 500~1,200자</b>와 항목 이름 목록을 찍습니다</td></tr>
+<tr><td>3</td><td><b>주소·명세를 짐작으로 만들지 않기.</b> 하나 확인했다고 나머지를 규칙으로 만들지 않습니다</td></tr>
+<tr><td>4</td><td><b>API 는 신청한 기능을 전부 확인하고 시작.</b> 「자동은 어렵다」 전에 안 쓰는 기능을 두드립니다</td></tr>
+<tr><td>5</td><td>응답을 보고 코드를 씁니다. 받은 파일이 정말 그 형식인지 확인 (PDF 는 앞 5글자 <code>%PDF-</code>)</td></tr>
+<tr><td>6</td><td><b>기준을 바꿀 때는 <code>grep</code> 으로 전부 찾아 함께 바꿉니다.</b> 찾은 곳 수를 보고에 적습니다</td></tr>
+<tr><td>6-2 · 6-3</td><td>인수를 바꾸면 새 함수 · <code>revoke from anon</code> 만으로는 안 닫힘</td></tr>
+<tr><td>6-2b</td><td><b>밖에서 이름으로 부르는 것은 영어로</b> (훅 주소 · URL 경로)</td></tr>
+<tr><td>8-5</td><td>서버는 <b>이름으로만</b> 부릅니다 (<code>ssh potjob</code>)</td></tr>
+<tr><td>8-7 · 8-8</td><td><code>delete</code>·<code>drop</code> 글자가 승인 창을 띄웁니다. <b>거절된 SQL 은 창만 안 뜨게 고쳐서 다시 올리지 않습니다</b></td></tr>
+<tr><td>8-9</td><td>시험 자료를 실제 회원 계정에 넣지 않습니다</td></tr>
+<tr><td>8-10</td><td><b>서버 반영은 커밋 → <code>git pull</code> 로만</b></td></tr>
+<tr><td>9</td><td>수집 규칙을 고치면 <b>이미 담긴 것을 어떻게 할지</b>도 함께 말합니다. 되메우기는 <code>updated_at</code> 을 안 바꿉니다</td></tr>
+<tr><td>10-3</td><td><b>기관 성격을 이름으로 짐작하지 않습니다</b></td></tr>
+<tr><td>10-4</td><td>수시 금지 = 기관 성격 <b>AND</b> 우리 직군</td></tr>
+<tr><td>12</td><td><b>시험은 보내는 쪽과 같은 도구로.</b> <code>curl</code> 로 통과한 것이 <code>fetch</code> 에서 죽어 다리가 1시간 53분 멈췄습니다</td></tr>
+</tbody></table>
+<h3 id="승인이-필요한-것은-셋뿐입니다">승인이 필요한 것은 셋뿐입니다</h3>
+<pre><code>
+지우기          delete · drop · truncate
+권한 바꾸기      grant · revoke · RLS 정책
+회원 자료 고치기
+</code></pre>
+<p>새 표·새 칸·새 함수·새 화면은 <b>전문을 글로 남기고 바로 진행</b>합니다.</p>
+<hr>
+<h2 id="개발자와-코드의-일-나누기">개발자와 코드의 일 나누기</h2>
+<p>이 프로젝트는 <b>전부 자동일 필요가 없습니다.</b> 안 되는 곳은</p>
+<p>「손으로 확인할 곳」 목록에 넣고 마지막 확인일을 남깁니다.</p>
+<p><b>빠지지 않는 것이 자동화보다 중요합니다.</b></p>
+<table><thead><tr><th>코드가 하는 일</th><th>사람이 하는 일</th></tr></thead><tbody>
+<tr><td>API 10곳에서 공고 긁기</td><td>못 가린 공고를 <b>보류함</b>에서 확인 후 올리기</td></tr>
+<tr><td>제목·상세·첨부에서 직군 찾기</td><td><code>.hwp</code> 중 못 읽은 것</td></tr>
+<tr><td>마감일 읽기</td><td>비면 「마감일 공고문 확인」으로 두고 눈으로</td></tr>
+<tr><td>상세 일곱 칸 채우기</td><td>끝내 못 찾은 칸을 <b>「빈칸 공고」</b>(<code>/admin/blanks</code>)에서</td></tr>
+<tr><td>사업자번호 진위확인 (국세청 API)</td><td>열쇠가 없으면 「수동 확인」</td></tr>
+<tr><td>기관 성격 심평원 값 채우기</td><td>공식 값이 비면 <b>미정으로 두고 관리자 확인</b></td></tr>
+</tbody></table>
+<p><b>짐작해서 채우지 않습니다.</b> 비면 비어 있는 대로 두고 화면은 안전한 쪽으로 적습니다.</p>
+<h3 id="고친-뒤-할-것">고친 뒤 할 것</h3>
+<pre><code>
+1. npx tsc --noEmit                 (web/ 에서)
+2. npm run lint                     새로 고친 파일에 지적이 없는지
+3. node tools/check.js              API 표 ↔ METHODS · 중복 이름 · 색 · 조회 한도
+                                    · 관리자 화면 수 ↔ 메뉴 줄 수
+4. 새 이름을 grep 으로 먼저 검색
+5. 화면 ↔ 창구 항목 이름 일치
+</code></pre>
+<p><code>npm run build</code> 는 <b>마지막에 한 번</b> 돌립니다 — <code>.next</code> 의 옛 타입 파일 때문에</p>
+<p><code>tsc</code> 가 헛 오류를 내는 일이 있습니다 (폴더 이름을 바꾼 직후).</p>
+<p class="만든말">이 쪽은 <code>02_기술스펙.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>

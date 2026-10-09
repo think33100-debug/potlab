@@ -63,6 +63,12 @@ const cfg = env();
 const 주소 = (인수('주소', cfg.CAPTURE_URL || 'https://potjob-web.vercel.app')).replace(/\/+$/, '');
 const 나갈곳 = path.join(뿌리, 인수('폴더', 'docs/screens'));
 const 고른묶음 = 인수('묶음', null);
+/* --폭 pc | phone — 한쪽만 다시 찍을 때 (2026-10-10) */
+const 고른폭 = 인수('폭', null);
+/* --진단 — 매 장마다 띠 글자·쿠키·주소를 적고, 페르소나바꾸기 요청을 가로챕니다.
+   「관리자 휴대폰 21장이 권한 벽으로 찍혔다」를 짚으려고 만들었습니다 */
+const 진단 = process.argv.includes('--진단');
+const 진단줄 = [];
 
 /* ── 찍을 것 ────────────────────────────────────────────────
    묶음: 어느 역할로 볼지 · 줄: [파일이름, 주소, 기다릴 글자(없으면 생략)]
@@ -232,7 +238,9 @@ const 폭 = [
   { 이름: 'pc', viewport: { width: 1280, height: 900 } },
   { 이름: 'phone', viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
     deviceScaleFactor: 2 },
-];
+].filter((w) => !고른폭 || w.이름 === 고른폭);
+
+if (!폭.length) { console.error('--폭 은 pc 또는 phone 입니다'); process.exit(2); }
 
 if (목록만) {
   let n = 0;
@@ -300,6 +308,29 @@ async function 찍기(page, 줄, 폭이름, g) {
   await page.waitForTimeout(800);
 
   await 개인정보가리기(page);
+
+  /* ── 증거 남기기 (--진단) ───────────────────────────────
+     고치기 전에 **무엇이 달라지는지**부터 봅니다 (작업지침 1절).
+     띠 글자는 내페르소나().지금역할 을 그대로 그린 것입니다 */
+  if (진단) {
+    const 본것 = await page.evaluate(() => {
+      const 띠 = [...document.querySelectorAll('button')]
+        .map((b) => b.textContent ?? '').find((t) => t.startsWith('운영진 ·')) ?? '(띠 없음)';
+      const 쿠키 = document.cookie.split('; ').filter(Boolean)
+        .map((c) => c.split('=')[0]).sort();
+      return {
+        띠: 띠.trim(),
+        손님쿠키: document.cookie.includes('potjob_guest_view=1'),
+        쿠키이름: 쿠키.join(','),
+        주소: location.pathname + location.search,
+        벽: document.body.innerText.includes('관리자만 볼 수 있어요'),
+      };
+    }).catch((e) => ({ 띠: '(못 읽음)', 탈: String(e.message).slice(0, 60) }));
+    진단줄.push({ 파일: path.basename(파일), ...본것 });
+    console.log(`    [진단] ${path.basename(파일).padEnd(32)} ${본것.띠}`
+      + (본것.벽 ? '  ← **권한 벽**' : '')
+      + (본것.손님쿠키 ? '  (손님쿠키 켜짐)' : ''));
+  }
 
   await page.screenshot({ path: 파일, fullPage: true });
   찍은것.push({
@@ -416,6 +447,20 @@ try {
     locale: 'ko-KR', timezoneId: 'Asia/Seoul', ...폭[0],
   });
   마스터창 = ctx;
+  /* ★ 페르소나바꾸기 요청이 **실제로 나가는지** 가로챕니다.
+     나간다면 화면이 누른 것이고, 안 나가는데 역할이 바뀌면 딴 데서 바꾼 것입니다.
+     어느 쪽인지 알아야 고칠 자리를 압니다 (작업지침 1절) */
+  if (진단) {
+    ctx.on('request', (req) => {
+      const u = req.url();
+      if (!u.includes('/rpc/')) return;
+      const 이름 = decodeURIComponent(u.split('/rpc/')[1] || '').split('?')[0];
+      if (이름 === '페르소나바꾸기' || 이름 === '내페르소나') {
+        console.log(`    [진단·요청] ${이름}  ${req.method()}  ${(req.postData() ?? '').slice(0, 80)}`);
+        진단줄.push({ 요청: 이름, 몸: (req.postData() ?? '').slice(0, 80) });
+      }
+    });
+  }
   const page = await ctx.newPage();
 
   await page.goto(주소 + '/master', { waitUntil: 'networkidle' });
@@ -499,6 +544,12 @@ try {
   fs.writeFileSync(목록길,
     JSON.stringify({ 찍은때: new Date().toISOString(), 주소, 줄: 합친것 }, null, 1) + '\n');
   console.log('○ 목록 ' + 합친것.length + '줄 → ' + path.relative(뿌리, 목록길));
+}
+
+if (진단 && 진단줄.length) {
+  const 길 = path.join(나갈곳, '_진단_' + new Date().toISOString().slice(0, 10) + '.json');
+  fs.writeFileSync(길, JSON.stringify(진단줄, null, 1) + '\n');
+  console.log('\n[진단] ' + 진단줄.length + '줄 → ' + path.relative(뿌리, 길));
 }
 
 console.log('\n찍은 것 ' + 찍은것.length + '장 → ' + path.relative(뿌리, 나갈곳));

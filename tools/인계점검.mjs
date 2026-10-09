@@ -189,7 +189,10 @@ const 거를것 = [
 ];
 const 볼파일 = [
   ...문서들,
+  /* .md 에서 만든 .html 도 함께 봅니다 — 넘기는 것은 둘 다입니다 */
+  ...fs.readdirSync(인계방).filter((f) => f.endsWith('.html')).map((f) => path.join(인계방, f)),
   ...fs.readdirSync(그림방).filter((f) => /\.(html|json)$/.test(f)).map((f) => path.join(그림방, f)),
+  path.join(뿌리, 'README.md'),
 ];
 const 걸린것 = [];
 for (const f of 볼파일) {

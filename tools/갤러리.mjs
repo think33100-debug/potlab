@@ -132,7 +132,7 @@ for (const 주소 of 주소들) {
   <p class="meta">
     <span class="count">${줄들.length}장</span>
     <span>${안전(묶음말)}</span>
-    ${s ? `<a class="spec" href="../인계/04_화면스펙.md#${안전(s.닻)}">04 화면스펙 → ${안전(s.제목)}</a>`
+    ${s ? `<a class="spec" href="../인계/04_화면스펙.html#${안전(s.닻)}">04 화면스펙 → ${안전(s.제목)}</a>`
         : '<span class="nospec">04 화면스펙에 절이 없습니다</span>'}
   </p>
   <div class="shots">`;

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>00_읽는법 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="00_%EC%9D%BD%EB%8A%94%EB%B2%95.html">읽는법</a><a href="01_%EA%B8%B0%ED%9A%8D.html">기획</a><a href="02_%EA%B8%B0%EC%88%A0%EC%8A%A4%ED%8E%99.html">기술스펙</a><a href="03_IA.html">IA</a><a href="04_%ED%99%94%EB%A9%B4%EC%8A%A4%ED%8E%99.html">화면스펙</a><a href="05_%EB%B6%80%EB%A1%9D.html">부록</a><a href="../screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="00-읽는-법-potjob-인계-문서">00. 읽는 법 — POTJOB 인계 문서</h1>
+<blockquote><b>기준</b> — 2026-10-10 02시(KST) · 커밋 <code>500d24c</code> · 화면 <b>62</b>곳 ·</blockquote>
+<blockquote>캡처 <b>230</b>장(코드가 찍은 것) + 옛 손캡처 29장 · <code>[미확인]</code> <b>3</b>곳 (05 부록 7절에 위치와 까닭) &lt;!-- 점검:설명 --&gt;</blockquote>
+<blockquote><b>목적</b> — 전체 서비스의 구조와 화면 상세를 파악하여 <b>UX·UI 개선에 참고</b>하기 위한 것입니다.</blockquote>
+<blockquote>(세중님 원래 요청: 「전체 프로젝트의 기획, 기술 스펙, Information Architecture와,</blockquote>
+<blockquote>화면 스펙을 정리해줘」)</blockquote>
+<p>사람 이름·열쇠 값·비밀번호는 한 글자도 없습니다.</p>
+<p><code>node tools/인계점검.mjs</code> 가 날마다 그것을 묻습니다 (5가지 · 아래 「맞는지 보는 법」).</p>
+<hr>
+<h2 id="낱말-풀이-먼저-읽으십시오">낱말 풀이 — 먼저 읽으십시오</h2>
+<p>문서 곳곳에 설명 없이 나오는 말들입니다. <b>이 표만 알면 나머지는 읽힙니다.</b></p>
+<table><thead><tr><th>낱말</th><th>뜻</th></tr></thead><tbody>
+<tr><td><b>창구</b></td><td>DB 함수(<code>security definer</code> RPC). <b>화면은 표를 직접 안 읽습니다</b> — 늘 창구를 거칩니다. 권한 규칙이 창구 한 곳에만 있어서, 주소를 손으로 쳐도 막힙니다</td></tr>
+<tr><td><b>페르소나</b></td><td>마스터 계정이 <b>진짜 그 역할로</b> 바꿔서 보는 것. 화면만 흉내 내는 게 아니라 DB 의 <code>profiles.role</code> 까지 바뀝니다 → 「마스터 계정으로 직접 보는 법」 절</td></tr>
+<tr><td><b>A 규칙</b></td><td>2026-10-09 에 정한 <b>담당자 역할 나누기</b>. 채용담당자는 「채용 관리」만, 교육담당자는 「교육 관리」만, 둘 다 승인되면 둘 다, 그 밖(회원·학생·관리자 페르소나)은 <b>둘 다 없음</b></td></tr>
+<tr><td><b>보류함</b></td><td>수집기가 <b>우리 직군인지 못 가린 공고</b>를 모아 두는 곳. 버리지 않고 관리자가 확인한 뒤 올립니다. 화면은 <code>/admin/jobs</code> 안의 거르개입니다 (따로 된 주소가 없습니다)</td></tr>
+<tr><td><b>쓰레기통</b></td><td>우리 직군이 <b>아니라고 판정한</b> 공고. 「왜 버렸나」를 나중에 대보려고 남깁니다 (<code>/admin/trash</code>)</td></tr>
+<tr><td><b>다리</b></td><td>옛 앱(Apps Script)이 모은 공고를 Supabase 로 옮기는 것 (<code>tools/sync_jobs.js</code>). 한 방향입니다</td></tr>
+<tr><td><b>시험자료</b></td><td><code>시험자료 = true</code> 가 붙은 줄. <b>회원에게 안 보입니다.</b> 시험병원·시험 교육기관에만 붙어 있고, 실제 회원 계정에는 한 줄도 없습니다</td></tr>
+<tr><td><b>일곱 칸</b></td><td>공고 상세에 그리는 칸 일곱 — 모집인원 · 접수마감 · 근무지 · 지원자격 · 예상 연봉 · 얼마나 바쁜 곳 · 병원 뜯어보기. <b>못 찾은 칸은 안 그립니다</b> (「공고에 없음」이라고 안 적습니다)</td></tr>
+<tr><td><b>빈칸 공고</b></td><td>일곱 칸 중 빈 것이 있는 공고를 모은 관리자 화면 (<code>/admin/blanks</code>)</td></tr>
+<tr><td><b>진단띠</b></td><td>주소 끝에 <code>?진단=1</code> 을 붙이면 화면 맨 아래에 뜨는 상자. 「이 화면을 누구로 보고 있나」를 <b>값 없이 세기만</b> 해서 보여줍니다 (쿠키 수·배포 해시 등)</td></tr>
+<tr><td><b>묶음</b></td><td>쓰는 자리마다 뜻이 다릅니다 — 캡처에서는 <b>페르소나 한 벌</b>, 경쟁률에서는 <b>채용 공고 한 건</b>, 관리자 메뉴에서는 <b>메뉴 묶음</b></td></tr>
+<tr><td><b>마스터</b></td><td>앱스토어 심사·화면 확인용 계정 하나. <code>/master</code> 로만 들어옵니다 (길이 없습니다)</td></tr>
+<tr><td><b>비회원 보기</b></td><td>로그아웃이 <b>아닙니다.</b> 로그인을 유지한 채 쿠키 하나로 브라우저·서버가 둘 다 JWT 를 안 보냅니다 → 자료까지 비회원이 됩니다</td></tr>
+</tbody></table>
+<hr>
+<h2 id="읽는-순서">읽는 순서</h2>
+<pre><code>
+01 기획      왜 이 서비스인가 · 역할 아홉 · 운영 원칙 여덟
+   ↓
+03 IA        화면 62곳 지도 · 역할별로 보이는 범위 · 들어가는 길
+   ↓
+갤러리       docs/screens/index.html  ← **파일을 두 번 누르면 열립니다**
+   ↓         화면마다 페르소나 × 상태 × PC/휴대폰이 나란히 있습니다
+04 화면스펙   그 화면의 목적·구성·상태·알려진 문제
+   ↓
+02 기술스펙   고칠 때 무엇을 건드리면 안 되나 (창구·권한·규칙)
+   ↓
+05 부록      전수 점검표 · 승인대기 · 미뤄 둔 UX · **세중님 결정 다섯**
+</code></pre>
+<p><b>갤러리를 03 다음에 보는 까닭</b> — 글로 읽은 지도를 그림으로 한 번 훑으면</p>
+<p>04 의 「상태별 모습」이 바로 붙습니다. 서버가 필요 없습니다.</p>
+<hr>
+<h2 id="개발자에게-줄-접근">개발자에게 줄 접근</h2>
+<p><b>이름과 필요한 권한만</b> 적습니다. 열쇠·비번 값은 이 문서에 없고, 앞으로도</p>
+<p>문서에 적지 않습니다 — 세중님이 <b>따로</b> 전달합니다.</p>
+<table><thead><tr><th>어디</th><th>무엇을 하려고</th><th>필요한 권한</th></tr></thead><tbody>
+<tr><td><b>GitHub</b> <code>think33100-debug/potlab</code></td><td>코드 읽기·고치기·PR</td><td>Write (Collaborator)</td></tr>
+<tr><td><b>Vercel</b> 프로젝트 <code>potjob-web</code></td><td>배포 상태·빌드 로그·런타임 오류</td><td>Member (프로젝트 보기)</td></tr>
+<tr><td><b>Supabase</b> 프로젝트</td><td>표·창구 함수·권한·저장소 보기</td><td>Developer (쓰기는 마이그레이션으로만)</td></tr>
+<tr><td><b>서버</b>(수집기)</td><td>크론·수집기 로그</td><td>ssh — <b>급하지 않으면 미룹니다</b></td></tr>
+<tr><td><b>Google Apps Script</b>(옛 앱·다리)</td><td>옛 출처 수집</td><td>주인 계정이라 <b>세중님만</b></td></tr>
+</tbody></table>
+<p><b>지금 당장 필요한 것은 위 셋</b>(GitHub · Vercel · Supabase)뿐입니다.</p>
+<p>UX·UI 개선이 목적이면 <b>GitHub 하나로도</b> 시작할 수 있습니다.</p>
+<p>서버 반영은 <b>저장소 커밋 → 서버 <code>git pull</code></b> 로만 합니다. 파일을 서버에</p>
+<p>직접 복사하지 않습니다 (작업지침 8-10 — 그렇게 해서 서버가 31커밋 뒤처진 적이</p>
+<p>있습니다).</p>
+<hr>
+<h2 id="마스터-계정으로-직접-보는-법">마스터 계정으로 직접 보는 법</h2>
+<p>화면 아홉 역할을 <b>진짜 그 역할로</b> 봅니다. 시험 계정을 아홉 개 만들 필요가</p>
+<p>없습니다.</p>
+<pre><code>
+1. https://potjob-web.vercel.app/master 로 들어갑니다
+   (메일·비번은 세중님이 따로 전달합니다. 이 문서에 없습니다)
+2. 들어가면 화면 아래에 **빨간 띠**가 생깁니다
+3. 띠에서 역할을 누릅니다 —
+   관리자 · 학생 · 작업치료사 · 물리치료사 ·
+   채용담당자 · 교육담당자 · 채용+교육담당자 · 가입중 · 비회원
+4. 보고 나면 **「관리자」로 되돌려 두십시오**
+</code></pre>
+<p>알아 둘 것 둘.</p>
+<ul>
+<li><b>「비회원」은 로그아웃이 아닙니다.</b> 로그인은 그대로 둔 채 쿠키 하나로</li>
+</ul>
+<p>  브라우저와 서버가 둘 다 JWT 를 안 보냅니다. 띠는 남아 있지만 <b>자료까지</b></p>
+<p>  비회원이 보는 것과 같습니다 (캡처로 다섯 화면이 글자까지 같은 것을 확인).</p>
+<ul>
+<li><b>시험 자료는 <code>시험자료 = true</code> 로 표시돼 있고 회원에게 안 보입니다.</b></li>
+</ul>
+<p>  시험 병원·시험 교육기관에만 붙어 있습니다. 실제 회원 계정에는 한 줄도</p>
+<p>  넣지 않았습니다 (작업지침 8-9).</p>
+<p>주소로 직접 쳐서 들어가도 <b>창구(DB 함수)가 거절합니다</b> — 화면만 막은 것이</p>
+<p>아닙니다. 그래서 눌러 보는 것은 안전합니다.</p>
+<hr>
+<h2 id="맞는지-보는-법">맞는지 보는 법</h2>
+<pre><code>
+node tools/인계점검.mjs     화면 수 세 가지 · 링크 · 비번·개인정보 · [미확인] · 캡처 &lt;!-- 점검:설명 --&gt;
+node tools/갤러리.mjs        docs/screens/index.html 다시 만들기
+node tools/캡처.mjs --목록    무엇을 찍는지 (안 찍고 목록만)
+node tools/check.js          관리자 화면 수 ↔ 메뉴 줄 수 · 박아 넣은 색 수
+</code></pre>
+<p>캡처를 다시 찍으려면 <code>node tools/캡처.mjs</code> 입니다. 마스터 메일·비번을</p>
+<p><b>환경변수로만</b> 넘깁니다 (파일·로그·커밋에 안 남습니다).</p>
+<hr>
+<h2 id="문서-지도">문서 지도</h2>
+<table><thead><tr><th>파일</th><th>무엇이 있나</th><th>누가 먼저 보면 좋나</th></tr></thead><tbody>
+<tr><td><a href="00_읽는법.html"><b>00_읽는법.md</b></a></td><td>이 문서. 지도 · 접근 범위 · 캡처 쓰는 법</td><td>모두</td></tr>
+<tr><td><a href="01_기획.html"><b>01_기획.md</b></a></td><td>서비스 목적 · 사용자 역할 아홉 · 핵심 기능 · 운영 원칙</td><td>기획 · 디자인</td></tr>
+<tr><td><a href="02_기술스펙.html"><b>02_기술스펙.md</b></a></td><td>구조 · 표와 함수 · 권한과 RLS · 보안 점검 · 훅 · 규칙 요약</td><td>개발</td></tr>
+<tr><td><a href="03_IA.html"><b>03_IA.md</b></a></td><td>전체 화면 지도 · 역할별 보이는 범위 · 들어가는 길</td><td>UX</td></tr>
+<tr><td><a href="04_화면스펙.html"><b>04_화면스펙.md</b></a></td><td>화면마다 목적·누가·구성 요소·상태별 모습·캡처·알려진 문제</td><td>UX · UI</td></tr>
+<tr><td><a href="05_부록.html"><b>05_부록.md</b></a></td><td>전수 점검표 · 숨긴 기능과 여는 법 · 승인대기 · 오픈 전 할 일 · <b>알려진 문제</b> · 세중님 결정 5</td><td>모두</td></tr>
+<tr><td><a href="../screens/index.html"><b>갤러리</b></a></td><td>캡처 <b>230</b>장 — 화면 × 페르소나 × 상태 × PC/휴대폰</td><td>UX · UI</td></tr>
+</tbody></table>
+<p>곁에 두고 볼 것 — <a href="../화면전수점검_1009.html">화면 전수 점검표</a> ·</p>
+<p><a href="../공고상세_일곱칸_진단_1009.html">일곱 칸 진단</a> ·</p>
+<p><a href="../승인대기_1009.html">승인대기</a> · <a href="../../CLAUDE.html">작업지침</a></p>
+<p><b>UX·UI 개선이 목적이라면 03 → 04 → 05 순서</b>가 빠릅니다.</p>
+<p>01 은 왜 그렇게 만들었는지, 02 는 고칠 때 무엇을 건드리면 안 되는지입니다.</p>
+<hr>
+<h2 id="이-문서들의-출처">이 문서들의 출처</h2>
+<p>전부 <b>코드와 DB 를 직접 열어 확인한 것</b>입니다. 짐작으로 쓴 줄이 없습니다.</p>
+<ul>
+<li>화면 62곳 = <code>web/app/**/page.tsx</code> 를 센 수</li>
+<li>들어가는 길 = <code>web/</code> 파일 174개(944,379자)에서 <code>href=</code> · <code>href:</code> · <code>push(</code> · <code>replace(</code> 를 센 수</li>
+<li>창구·표 = <code>pg_proc</code> · <code>information_schema</code> 에서 읽은 것</li>
+<li>상태별 모습 = <code>docs/화면상태목록.md</code> 의 예시 자료로 <b>실제로 띄워 본 것</b></li>
+</ul>
+<p>확인하지 못한 것은 <b>[미확인]</b> 으로 적습니다 &lt;!-- 점검:설명 --&gt;. 2026-10-10 기준 남은 수는</p>
+<p>05 부록 맨 끝에 있습니다.</p>
+<hr>
+<h2 id="접근-범위-무엇을-받아야-시작하나">접근 범위 — 무엇을 받아야 시작하나</h2>
+<table><thead><tr><th>받는 것</th><th>왜</th><th>주는 쪽</th></tr></thead><tbody>
+<tr><td>GitHub 저장소 쓰기</td><td>코드</td><td>세중님</td></tr>
+<tr><td>Vercel 프로젝트 보기</td><td>배포 로그 · 런타임 오류</td><td>세중님</td></tr>
+<tr><td>Supabase (anon 열쇠)</td><td>화면 개발</td><td>세중님</td></tr>
+<tr><td><code>.env.local</code> 견본 (값은 빈 칸)</td><td>설정 모양</td><td>세중님</td></tr>
+</tbody></table>
+<p><b>받지 않는 것</b></p>
+<ul>
+<li><b><code>service_role</code> 열쇠</b> — 서버 안에서만 씁니다. 브라우저 코드·GitHub 에 안 넣습니다</li>
+<li><b>서버 ssh</b> — 수집기를 고칠 차례가 오면 그때</li>
+<li><b>마스터 비번</b> — 세중님 것입니다. 캡처는 아래처럼 <b>값을 보지 않고</b> 돌립니다</li>
+</ul>
+<p>열쇠 값은 화면·로그·커밋 어디에도 안 남깁니다. <code>git commit</code> 훅이 열쇠 모양을</p>
+<p>찾아 막습니다 (커밋할 때 「○ 열쇠가 섞인 곳 없습니다」가 뜹니다).</p>
+<hr>
+<h2 id="캡처-스크립트-쓰는-법-tools캡처mjs">캡처 스크립트 쓰는 법 — <code>tools/캡처.mjs</code></h2>
+<p><b>코드가 직접 찍습니다.</b> 사람이 비번을 치지 않습니다.</p>
+<pre><code>
+npm install -D playwright          (저장소 맨 위에서 · 한 번만)
+npx playwright install chromium
+
+node tools/캡처.mjs --목록          무엇을 찍는지만 봅니다
+node tools/캡처.mjs --손님만        로그인이 필요 없는 것만
+node tools/캡처.mjs                 묶음 아홉 전부 (PC 1280 · 휴대폰 390)
+node tools/캡처.mjs --묶음 관리자
+node tools/캡처.mjs --주소 http://localhost:3000
+</code></pre>
+<p>비번을 저장소에 두지 않고 돌리는 법 (서버 <code>.env</code> 에서 <b>프로세스 안으로만</b>) —</p>
+<pre><code>
+$env:MASTER_EMAIL = (ssh potjob "sed -n 's/^MASTER_EMAIL=//p' ~/potlab/.env").Trim()
+$env:MASTER_PW    = (ssh potjob "sed -n 's/^MASTER_PW=//p'    ~/potlab/.env").Trim()
+node tools/캡처.mjs
+Remove-Item Env:MASTER_EMAIL, Env:MASTER_PW
+</code></pre>
+<table><thead><tr><th>어떻게</th><th>왜</th></tr></thead><tbody>
+<tr><td>로그인 칸은 <b>안 찍습니다</b></td><td>찍으면 메일 주소가 그림에 남습니다</td></tr>
+<tr><td>틀리면 한 번만 시도하고 멈춥니다</td><td><code>/master</code> 가 다섯 번에 15분 잠급니다</td></tr>
+<tr><td>페르소나는 <b>띠의 단추를 눌러</b> 바꿉니다</td><td>창구를 몰래 부르면 띠가 안 지나갑니다</td></tr>
+<tr><td>끝나면 <code>finally</code> 에서 「관리자」로 되돌립니다</td><td>안 되돌리면 다음에 학생으로 들어가 있습니다</td></tr>
+<tr><td>「비회원 보기」는 로그아웃 창과 <b>글자를 맞춥니다</b></td><td>그림을 맞추면 빨간 띠 때문에 늘 다릅니다</td></tr>
+</tbody></table>
+<p><b>배포 주소는 <code>potjob-web.vercel.app</code></b> 입니다. <code>potjob.co.kr</code> 은 아직</p>
+<p><b>옛 앱(GitHub Pages)</b> 이라 거기로 찍으면 404 만 나옵니다.</p>
+<p><b>저장소 맨 위의 <code>package.json</code> 은 git 에 없습니다</b> — 서버에서 <code>git pull</code> 뒤</p>
+<p><code>npm install</code> 이 돌면 크로미움(수백 MB)까지 받으려 하기 때문입니다.</p>
+<hr>
+<h2 id="함께-보는-파일">함께 보는 파일</h2>
+<table><thead><tr><th>파일</th><th>무엇</th></tr></thead><tbody>
+<tr><td><code>CLAUDE.md</code></td><td>이 저장소의 헌법. 실제로 밟은 실수를 적어 둔 것입니다</td></tr>
+<tr><td><code>docs/화면상태목록.md</code></td><td>화면 × 상태 표. 칸마다 「어느 계정으로 · 어느 주소로」</td></tr>
+<tr><td><code>docs/화면전수점검_1009.md</code></td><td>화면 62 + 아직 없는 기능 14 (05 부록 1절에 최신판)</td></tr>
+<tr><td><code>docs/승인대기_1009.md</code></td><td>세중님 승인이 있어야 올리는 것</td></tr>
+<tr><td><code>docs/screens/index.html</code></td><td><b>캡처 갤러리</b> — 파일만 두 번 누르면 열립니다</td></tr>
+<tr><td><code>docs/공고상세_일곱칸_진단_1009.md</code></td><td>일곱 칸을 왜 그렇게 골랐나 (두 공고를 뜯어본 것)</td></tr>
+<tr><td><code>docs/인계_읽기검토_1010.md</code></td><td><b>이 문서들을 처음 받은 사람이 걸린 것 48개.</b> 무엇을 고칠지 정하는 자료입니다</td></tr>
+<tr><td><code>docs/칸채우기_미리보기_1010.md</code></td><td>일곱 칸을 지금 자료로 채우면 어디까지 차나 (공고 20건 · DB 안 바꿈)</td></tr>
+<tr><td><code>docs/첨부_미리보기_1010.json</code></td><td>공고문 첨부 주소 30건과 형식 확인 결과</td></tr>
+<tr><td><code>sql/</code></td><td><b>손으로 올린 SQL.</b> 마이그레이션으로 올린 것은 Supabase 쪽에 있습니다</td></tr>
+<tr><td><code>gas/</code></td><td>옛 앱 (Apps Script). 아직 공고 일부를 모으고 <b>다리</b>로 넘깁니다</td></tr>
+</tbody></table>
+<h3 id="tools-에서-꼭-아실-것"><code>tools/</code> 에서 꼭 아실 것</h3>
+<table><thead><tr><th>파일</th><th>무엇</th></tr></thead><tbody>
+<tr><td><code>tools/인계점검.mjs</code></td><td>인계 문서·캡처가 서로 맞나 (다섯 가지). <b>넘기기 전에 돌립니다</b></td></tr>
+<tr><td><code>tools/캡처.mjs</code></td><td>캡처를 <b>코드가</b> 찍습니다. 비번은 환경변수로만 받습니다</td></tr>
+<tr><td><code>tools/갤러리.mjs</code></td><td><code>docs/screens/index.html</code> 을 다시 만듭니다</td></tr>
+<tr><td><code>tools/문서html.mjs</code></td><td><code>docs/인계/*.md</code> → 같은 이름 <code>.html</code>. <b><code>.md</code> 를 고치면 이것을 다시 돌립니다</b></td></tr>
+<tr><td><code>tools/가릴자리.json</code> · <code>tools/캡처가리기.mjs</code></td><td>캡처에서 실제 회원을 가립니다 (05 부록 7-2절)</td></tr>
+<tr><td><code>tools/그림자르기.mjs</code></td><td>7만 픽셀짜리 캡처를 토막 내어 눈으로 봅니다</td></tr>
+<tr><td><code>tools/check.js</code></td><td>관리자 화면 수 ↔ 메뉴 줄 수 · 박아 넣은 색 수 · 100줄에서 잘릴 조회</td></tr>
+<tr><td><code>tools/보안_비로그인점검.mjs</code></td><td><b>허용 목록 밖에 비로그인에게 열린 것이 있나</b> (날마다)</td></tr>
+<tr><td><code>tools/collect-*.mjs</code></td><td>수집기. <b>서버 크론에서</b> 돕니다 (여기서 돌리면 열쇠가 IP 때문에 막힙니다)</td></tr>
+<tr><td><code>tools/sync_jobs.js</code></td><td><b>다리</b> — 옛 앱 → Supabase (한 방향)</td></tr>
+</tbody></table>
+<hr>
+<h2 id="지금-진행-중인-일-어디까지-됐나">지금 진행 중인 일 — 어디까지 됐나</h2>
+<table><thead><tr><th>무엇</th><th>어디까지</th><th>다음</th></tr></thead><tbody>
+<tr><td><b>갈래 <code>attach-prep</code></b></td><td>수집기 셋이 공고문 주소를 <code>job_attachments</code> 에 담게 고쳐 <b>푸시만</b> 했습니다. <code>main</code> 에 <b>안 합쳤습니다</b></td><td>서버에서 <code>--마른</code> 으로 한 바퀴 → 멀쩡하면 합치기 (승인대기 ⑪)</td></tr>
+<tr><td><b>일곱 칸 채우기</b></td><td>20건으로 미리 돌려 봤습니다 (<code>docs/칸채우기_미리보기_1010.md</code>). 예상 연봉이 20% 로 가장 빕니다</td><td><code>attach-prep</code> 이 돈 뒤에 되메우기 (승인대기 ⑨)</td></tr>
+<tr><td><b>승인대기</b></td><td>⑧(저장소 규칙)은 끝. ②③④⑥⑦⑨⑩⑪ 남음 · ⑫는 <b>A 로 닫혔습니다</b></td><td><code>docs/승인대기_1009.md</code></td></tr>
+<tr><td><b>세중님 결정 다섯</b></td><td>추천안을 적어 뒀습니다 (05 부록 6절)</td><td>경쟁률 예시 · 광고 배너 · 알림 푸시 확인 · 중고거래 값 칸 · 국세청 열쇠</td></tr>
+<tr><td><b>문서 읽기검토 48개</b></td><td>급한 것(숫자·낱말·<code>/pay</code>·카톡)만 고쳤습니다</td><td>나머지는 05 부록 9절 「알려진 문서 문제」</td></tr>
+</tbody></table>
+<p><b>왜 <code>attach-prep</code> 을 안 합쳤나</b> — 수집기는 <b>30분마다</b> 돕니다. 밤에 합쳐서</p>
+<p>탈이 나면 아침에야 보입니다. 서버에서 한 바퀴 <b>지켜본 뒤</b>에 합칩니다.</p>
+<p class="만든말">이 쪽은 <code>00_읽는법.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>

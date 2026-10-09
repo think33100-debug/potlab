@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03_IA · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="00_%EC%9D%BD%EB%8A%94%EB%B2%95.html">읽는법</a><a href="01_%EA%B8%B0%ED%9A%8D.html">기획</a><a href="02_%EA%B8%B0%EC%88%A0%EC%8A%A4%ED%8E%99.html">기술스펙</a><a href="03_IA.html">IA</a><a href="04_%ED%99%94%EB%A9%B4%EC%8A%A4%ED%8E%99.html">화면스펙</a><a href="05_%EB%B6%80%EB%A1%9D.html">부록</a><a href="../screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="03-information-architecture">03. Information Architecture</h1>
+<blockquote><b>숫자 기준 시각</b> — 2026-10-10 03시(KST) · 커밋 <code>3394655</code> 이후.</blockquote>
+<blockquote>숫자는 그때 <b>세어 본 값</b>입니다 (DB <code>select</code> · 파일 수).</blockquote>
+<h2 id="전체-화면-지도-62곳">전체 화면 지도 — 62곳</h2>
+<blockquote>그림으로 먼저 훑으려면 <b><code>../screens/index.html</code></b> 을 두 번 누르십시오 —</blockquote>
+<blockquote>화면마다 페르소나 × 상태 × PC/휴대폰이 나란히 있습니다 (서버 필요 없음).</blockquote>
+<pre><code>
+POTJOB
+│
+├─ /                         홈 — 맛보기 공고 · 계산기 · 기관 · 교육 · 봉사 · 청년
+│
+├─ 공고
+│   ├─ /jobs                 목록 (회원) · 비로그인은 맛보기 10건
+│   ├─ /jobs/[id]            상세 — **일곱 칸** (아래 4절)
+│   └─ /compete              경쟁률 (회원만 · 2026-10-09 부터 목록도)
+│
+├─ 기관
+│   └─ /orgs                 기관 찾기 58,610곳 (묶은 수 · 대조용 org_directory 는 62,749)
+│
+├─ 커뮤니티
+│   ├─ /community            방 고르기
+│   ├─ /community/[ch]       방 — 역할로 출입이 갈립니다
+│   ├─ /community/write      글쓰기
+│   └─ /post/[id]            글 한 건
+│
+├─ 교육·학술
+│   ├─ /edu                  과정 목록
+│   ├─ /edu/org              교육기관 목록
+│   ├─ /edu/org/[name]       교육기관 한 곳
+│   ├─ /edu/session/[id]     회차 한 건 — 신청·입금·후기
+│   └─ /edu/manage           ★ 교육 관리 (교육담당자)
+│
+├─ 도구
+│   ├─ /tools                계산기 넷
+│   ├─ /tools/severance · /leave · /unemployment · /pay
+│   ├─ /pay                  **월급 확인** (기관 전체 평균 · 공시 자료)
+│                            ※ /tools/pay(세전↔세후)와 **다른 화면**입니다
+│   └─ /spec                 스펙
+│
+├─ 그 밖
+│   ├─ /volunteer · /youth   봉사 · 청년 정책
+│   ├─ /contact · /terms/[doc]
+│   └─ /soon                 자리만 둔 화면
+│
+├─ 나
+│   ├─ /login · /auth/callback · /welcome
+│   ├─ /me · /me/leave
+│   ├─ /alarm                ★ 알림함
+│   ├─ /talk · /talk/[room]  ★ 1:1 대화
+│   ├─ /verify               ★ 재직 인증
+│   ├─ /partner              ★ 담당자 신청
+│   └─ /biz                  ★ 채용 관리 (채용담당자)
+│
+└─ 운영
+    ├─ /master               마스터 로그인 (길이 없습니다 — 일부러)
+    ├─ /admin … 23곳         관리자 (왼쪽 메뉴가 유일한 길 · page.tsx 는 24개 — 아래 한 줄 포함)
+    └─ /admin/jobs/[id]      공고 한 건 뜯어보기
+</code></pre>
+<p>★ = <b>아직 숨겨 둔 화면</b> (05 부록에 여는 법)</p>
+<hr>
+<h2 id="역할별-보이는-범위">역할별 보이는 범위</h2>
+<table><thead><tr><th>화면</th><th>비회원</th><th>가입중</th><th>학생·치료사</th><th>채용담당자</th><th>교육담당자</th><th>둘 다</th><th>관리자</th></tr></thead><tbody>
+<tr><td><code>/</code></td><td>맛보기</td><td>맛보기</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td><code>/jobs</code></td><td><b>10건만</b></td><td>흐림</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td><code>/jobs/[id]</code></td><td>제목·기관만</td><td>흐림</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td>├ 원문 주소</td><td><b>안 줍니다</b></td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td>├ 병원 뜯어보기</td><td>✗</td><td>흐림</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td>└ 첨부</td><td><b>✗</b></td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td><code>/compete</code></td><td><b>✗ 로그인 안내</b></td><td>○ 목록</td><td>○ 숫자까지</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td><code>/orgs</code></td><td>일부</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td><code>/community</code></td><td>맛보기</td><td>맛보기</td><td>역할 방</td><td>읽기만</td><td>읽기만</td><td>읽기만</td><td>○</td></tr>
+<tr><td><code>/edu</code> · <code>/edu/session</code></td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td>└ 계좌</td><td>✗</td><td>✗</td><td>신청해야</td><td>✗</td><td>담당자면 ○</td><td>○</td><td>✗</td></tr>
+<tr><td><code>/me</code></td><td>✗</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+<tr><td><b><code>/biz</code></b></td><td>✗</td><td>✗</td><td>✗</td><td><b>○</b></td><td>✗</td><td><b>○</b></td><td>✗*</td></tr>
+<tr><td><b><code>/edu/manage</code></b></td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td><b>○</b></td><td><b>○</b></td><td>✗*</td></tr>
+<tr><td><code>/alarm</code> · 종</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>○</td></tr>
+<tr><td><code>/talk</code> · <code>/verify</code> · <code>/partner</code></td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>○</td></tr>
+<tr><td><code>/admin/*</code></td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td><td>권한별</td></tr>
+</tbody></table>
+<p>\* 관리자 <b>페르소나</b>에서는 담당자 화면이 안 보입니다. 담당자 자격이 있어야</p>
+<p>보입니다 (A 규칙 — 「그 밖은 둘 다 없음」). 마스터는 페르소나를 바꿔서 봅니다.</p>
+<p><b>담당자는 치료사가 아닙니다.</b> 채용·교육 담당자 페르소나는 <code>role</code> 이 비어</p>
+<p>있어서 커뮤니티 치료사 방에 <b>글을 못 씁니다.</b> 치료사가 담당자를 겸하면</p>
+<p>치료사 역할 + 담당자 자격 둘 다를 갖습니다.</p>
+<hr>
+<h2 id="들어가는-길">들어가는 길</h2>
+<table><thead><tr><th>어디서</th><th>무엇이 걸려 있나</th></tr></thead><tbody>
+<tr><td><b>로고</b></td><td><code>/</code></td></tr>
+<tr><td><b>탑바 (PC)</b></td><td>공고 · 커뮤니티 (+ 담당자면 채용 관리 · 교육 관리) · 알림 종(관리자) · 내 정보</td></tr>
+<tr><td><b>아래 탭바 (휴대폰)</b></td><td>홈 · 공고 · 커뮤니티 (+ 담당자 길) · 내 정보</td></tr>
+<tr><td><b>홈</b></td><td>공고 · 기관 · 교육 · 계산기 · 봉사 · 청년 · 초임 · 스펙</td></tr>
+<tr><td><b><code>/me</code></b></td><td>찜 · 알림 · 담당자 화면 · 탈퇴</td></tr>
+<tr><td><b>꼬리말</b></td><td>약관 3종 · 문의하기 · 신고번호</td></tr>
+<tr><td><b><code>/admin</code> 왼쪽 메뉴</b></td><td>관리자 23곳 (<b>메뉴가 유일한 길</b>입니다)</td></tr>
+<tr><td><b>페르소나 띠</b></td><td>마스터에게만. 역할 아홉</td></tr>
+</tbody></table>
+<h3 id="길이-없는-곳-일부러">길이 <b>없는</b> 곳 (일부러)</h3>
+<table><thead><tr><th>주소</th><th>왜</th></tr></thead><tbody>
+<tr><td><code>/auth/callback</code></td><td>OAuth 가 부르는 자리</td></tr>
+<tr><td><code>/master</code></td><td>운영 전용. 주소를 아는 사람만</td></tr>
+<tr><td><code>/soon</code></td><td>자리만 둔 화면</td></tr>
+</tbody></table>
+<p>2026-10-09 에 <b>길이 없던 <code>/partner</code>·<code>/verify</code> 두 곳</b>을 찾아 <code>/me</code> 에 붙였습니다.</p>
+<p>저장소 전체(파일 174개)에서 <code>href=</code>·<code>href:</code>·<code>push(</code>·<code>replace(</code> 를 세어 찾았습니다.</p>
+<p><b>길이 없으면 없는 기능입니다.</b></p>
+<hr>
+<h2 id="공고-상세-일곱-칸-2026-10-09-확정">공고 상세 — 일곱 칸 (2026-10-09 확정)</h2>
+<pre><code>
+① 모집 인원        우리 직군 인원만. 통합 공고의 전체 인원 금지
+② 접수 마감        날짜 + 시각. 없으면 「마감일 공고문 확인」
+③ 근무지          공고문 우선, 없으면 기관표 주소
+④ 지원 자격        공고 말 그대로
+⑤ 예상 연봉        「내규에 따름」·「협의」도 그대로. 숫자를 만들지 않음
+⑥ 얼마나 바쁜 곳    심평원 자료 (회원만)
+⑦ 병원 뜯어보기     심평원 자료 (회원만)
+</code></pre>
+<p><b>안 그립니다</b> — 전형방법 · 우대사항 · 결격사유 · 문의처 · 제출서류 · <b>학력</b>.</p>
+<p>그 내용은 <b>첨부 공고문</b>과 <b>「원문 보기」</b>(회원만)로 갑니다.</p>
+<p><b>못 찾은 칸은 안 그립니다.</b> 「공고에 없음」이라고 적으면 회원이 공고문을</p>
+<p>안 찾아봅니다. 빈 칸은 <code>/admin/blanks</code> 「빈칸 공고」로 모읍니다.</p>
+<hr>
+<h2 id="자료가-흐르는-길">자료가 흐르는 길</h2>
+<pre><code>
+수집기(서버 크론) ─→ collect_put ─→ job_posts ─→ job_posts_pub ─→ 회원 화면
+                                       ↑                ↑
+옛 앱 ─ 다리(30분) ────────────────────┘        가리는 규칙이 여기 한 곳
+                                                 (감춤 · 보류 · 시험자료)
+담당자(/biz) ─→ 담당자공고쓰기 ─→ job_posts (source='BIZ')
+</code></pre>
+<p><b>저절로 도는 규칙에서 BIZ 는 뺍니다</b> — 수집기가 확인해 주지 않는 공고라</p>
+<p>「아무 신호가 없다」가 당연하기 때문입니다 (<code>hide_stale_posts</code> ② ·</p>
+<p><code>hold_rehab_only</code> · <code>fill_deadline_from_title</code>).</p>
+<p>마감일이 지나서 내리는 규칙은 BIZ 에도 그대로 적용됩니다.</p>
+<p class="만든말">이 쪽은 <code>03_IA.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>
