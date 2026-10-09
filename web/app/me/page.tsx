@@ -18,7 +18,9 @@ const FREE_CHANGES = 5;
 export default function MyPage() {
   const router = useRouter();
   const toast = useToast();
-  const { loading, session, me, 관리, reload, signOut } = useAuth();
+  const { loading, session, me, isAdmin, 관리, reload, signOut } = useAuth();
+  /* 숨겨 둔 화면에 들어갈 길을 보일지. 관리자이거나 마스터(어느 페르소나든) */
+  const 운영진 = isAdmin || 관리.페르소나역할 != null;
 
   /* 안 건드렸으면 지금 닉네임을 보여줍니다. 상태로 미리 채우지 않습니다 —
      effect 안 setState 는 그릴 때마다 한 번 더 그립니다 */
@@ -177,22 +179,22 @@ export default function MyPage() {
       {/* 담당자로 승인된 분과 마스터에게만 붙습니다 (2026-10-09).
           탑바·아래 탭바와 **같은 값**(내관리메뉴 창구)을 봅니다 — 한쪽만 보이면
           「분명 승인받았는데 들어갈 길이 없다」가 됩니다 */}
-      {(관리.채용관리 || 관리.교육관리) && (
+      {(관리.채용관리 || 관리.교육관리 || 운영진) && (
         <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
           <h2 className="text-h3 font-bold">담당자 화면</h2>
+          {운영진 && (
+            <p className="mt-1 text-sm text-mute">
+              아래 둘은 아직 숨겨 둔 화면이라 운영진에게만 보여요
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2">
-            {관리.채용관리 && (
-              <Link href="/biz"
-                className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950">
-                채용 관리
-              </Link>
-            )}
-            {관리.교육관리 && (
-              <Link href="/edu/manage"
-                className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950">
-                교육 관리
-              </Link>
-            )}
+            {관리.채용관리 && <길 href="/biz">채용 관리</길>}
+            {관리.교육관리 && <길 href="/edu/manage">교육 관리</길>}
+            {/* ★ 2026-10-09 — 이 둘은 **코드에만 있고 들어갈 길이 없었습니다.**
+                web/ 전체를 grep 해서 링크 0곳으로 나왔습니다. 길이 없으면
+                없는 기능입니다 (작업지침 6절) */}
+            {운영진 && <길 href="/partner">담당자 신청</길>}
+            {운영진 && <길 href="/verify">재직 인증</길>}
           </div>
         </section>
       )}
@@ -226,6 +228,16 @@ export default function MyPage() {
         </Link>
       </section>
     </main>
+  );
+}
+
+/* 담당자 화면으로 가는 단추 하나. 생김새가 네 곳에서 같아야 해서 뺐습니다 */
+function 길({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link href={href}
+      className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950">
+      {children}
+    </Link>
   );
 }
 
