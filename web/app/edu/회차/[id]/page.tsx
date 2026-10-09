@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
+import { NoticeFiles } from '@/components/notice-files';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 교육 회차 한 건 (2026-10-09 · 뼈대 5절).
@@ -122,6 +123,9 @@ export default function EduSession() {
       ) : session && (
         <p className="mt-5 break-keep text-lg text-mute">계좌는 신청하시면 보여드려요.</p>
       )}
+
+      {/* 첨부 — 안내문·시간표 (회원만 받습니다) */}
+      <NoticeFiles 갈래="교육" 회차={s.회차id} 고칠수있나={false} />
 
       <section className="mt-5 rounded-sm border border-gray-200 p-5">
         <p className="text-lg font-bold">환불 규정</p>

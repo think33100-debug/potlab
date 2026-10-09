@@ -11,6 +11,8 @@ import { JobHospital } from '@/components/job-hospital';
 import { JobOpenLink } from '@/components/job-open-link';
 import { JobReport } from '@/components/job-report';
 import { JobSave } from '@/components/job-save';
+import { LoginFirst } from '@/components/login-first';
+import { NoticeFiles } from '@/components/notice-files';
 import { Rise } from '@/components/job-parts';
 import { OrgPanel } from '@/components/org-panel';
 import { JobVeil } from '@/components/job-veil';
@@ -49,6 +51,15 @@ const one = async (sb: SupabaseClient, id: string) => {
 const 원문제목 = async (sb: SupabaseClient, id: string) => {
   const { data } = await sb.rpc('공고원문제목', { p_id: id });
   return (data as string | null) ?? null;
+};
+
+/* ★ 2026-10-09 — 공고문에서 **읽어낸** 값 (job_posts.뽑은값).
+   detail 은 출처가 준 원문이라 덮지 않습니다. 화면은 뽑은값을 먼저 보고,
+   없으면 detail 을 봅니다. 비회원에게는 DB 가 빈 것을 줍니다.
+   job_one 에 안 싣는 까닭은 위 원문제목과 같습니다 (칸을 더하려면 drop) */
+const 뽑은값받기 = async (sb: SupabaseClient, id: string) => {
+  const { data } = await sb.rpc('공고뽑은값', { p_id: id });
+  return (data as Record<string, string> | null) ?? {};
 };
 
 
@@ -97,7 +108,9 @@ export async function generateMetadata({
   };
 }
 
-const CORE_SKIP = ['지원자격', '전형방법', '제출서류', '접수방법', '기관홈'];
+/* CORE_SKIP 은 2026-10-09 에 없앴습니다 — detail 의 **남은 칸을 전부 그리던**
+   규칙이었는데, 이제 상세는 정해진 일곱 칸만 그립니다 (세중님 확정).
+   전형방법·우대사항·결격사유·문의처·제출서류는 원문 공고에서 봅니다 */
 
 export default async function JobDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -122,7 +135,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
   /* 병원 자료가 없으면 null 입니다 — 그 구역을 통째로 감춥니다.
      0 으로 채우면 「치료사가 없는 병원」으로 읽혀 더 나쁩니다 */
-  const [hosp, icons, views, 경쟁률있나] = await Promise.all([
+  const [hosp, icons, views, 경쟁률있나, 뽑은값] = await Promise.all([
     /* 회원만 옵니다. 비회원에게는 null 이고 그 구역을 통째로 감춥니다 —
        0 으로 채우면 「치료사가 없는 병원」으로 읽혀서 더 나쁩니다 */
     member ? hospitalStat(sb, j.org_name) : Promise.resolve(null),
@@ -132,6 +145,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
        공고 번호만 넘깁니다 — 기관번호 찾기와 본부 잇기는 DB 가 합니다
        (알리오 경쟁률은 본부 이름으로 쌓이고 공고는 분원 이름으로 옵니다) */
     sb.rpc('공고경쟁률있나', { p_공고: j.id }),
+    뽑은값받기(sb, id),
   ]);
   const 경쟁률 = 경쟁률있나.data === true;
 
@@ -139,15 +153,15 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   /* 마감된 공고는 회색으로 내려앉습니다 */
   const badge = closed ? '#8A9299' : (JOB_COLOR[j.job_group ?? ''] ?? JOB_COLOR_FALLBACK);
 
-  /* 「01 02 03」으로 끊어 보여줄 수 있는 모양인지 봅니다.
-     못 끊으면 통째로 한 덩어리로 보여줍니다 — 억지로 자르면 뜻이 깨집니다 */
-  const steps = (detail['전형방법'] ?? '')
-    .split(/\s*(?:→|->|\n|\r|·\s(?=\d))\s*/)
-    .map((x) => x.replace(/^\s*[0-9]+\s*[.)]\s*/, '').trim())
-    .filter((x) => x.length > 1);
-  const stepped = steps.length >= 2 && steps.length <= 8;
-
-  const rest = Object.keys(detail).filter((k) => !CORE_SKIP.includes(k) && detail[k]);
+  /* ★ 2026-10-09 세중님 확정 — 「예상 연봉」은 공고에 적힌 **말 그대로** 씁니다.
+     「3000만원 이상」 「월급 230만원~300만원」 「내규에 따름」 「협의」 모두
+     그대로 보여줍니다. 숫자를 만들지 않습니다.
+     뽑은값(공고문에서 읽어낸 것)이 있으면 먼저 봅니다 — 원문 detail 은
+     그대로 두고 따로 담습니다 */
+  const 연봉: string | null =
+    (뽑은값?.['예상연봉'] ?? detail['연봉'] ?? detail['예상연봉'] ?? null) || null;
+  const 지원자격: string | null =
+    (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
 
   /* 워크넷(고용24) 공고인가. id 는 수집기가 'WN' + 고용24 공고번호로 만듭니다
      (tools/collect-worknet.mjs 485줄 · 옛 WN 과 새 WN2 가 같은 규칙입니다).
@@ -157,7 +171,22 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
   return (
     <div className={closed ? 'bg-[#F4F4F1]' : 'bg-[#F4F4F1]'}>
-      <main className="mx-auto w-full max-w-2xl px-6 pb-[152px] pt-4 md:px-7 md:pb-[96px]">
+      {/* ★ 2026-10-09 — 아래 여백에 **안전 영역**을 더합니다.
+          재 보니 휴대폰에서 아래에 겹쳐 있는 것이 둘입니다 —
+            지원 띠   border 1 + py-3(12+12) + 단추 50 = 75px
+            탭바                                      = 62px
+          둘이 137px 인데 여백이 152px 이라 평평한 화면에서는 15px 남습니다.
+          그런데 탭바는 `padding-bottom: env(safe-area-inset-bottom)` 을 더
+          먹습니다(components/tab-bar.tsx). 아이폰 홈 막대가 있는 기기에서는
+          34px 쯤이 더 붙어 **171px > 152px** 이 되어 마지막 줄이 가려집니다.
+          그래서 여백도 같은 값을 더합니다. md 부터는 탭바가 없어 96px 그대로.
+
+          ※ 캡처에서 본 「본문이 잘림」은 **촬영 자국**이었습니다 —
+            fullPage 는 고정 띠를 한 번만 그려서 글 한가운데 얹힙니다.
+            실제 기기에서는 스크롤하면 비켜납니다 (지침 1절 — 고치기 전에
+            원인부터 확인했습니다) */}
+      <main className="mx-auto w-full max-w-2xl px-6 pt-4
+                       pb-[calc(152px+env(safe-area-inset-bottom))] md:px-7 md:pb-[96px]">
         <Hit kind="job" target={j.id} />
 
         {/* ① 상단바 ─────────────────────────────── */}
@@ -237,11 +266,22 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
             </p>
           </header>
 
-          {/* ③ 핵심 네 칸 ──────────────────────── */}
+          {/* ③ 핵심 칸 ──────────────────────────────────────────
+              ★ 2026-10-09 세중님 확정 — 공고 상세는 **이 일곱 칸만** 그립니다.
+                모집인원 · 접수마감 · 근무지 · 지원자격 · 예상 연봉 ·
+                얼마나 바쁜 곳 · 병원 뜯어보기
+              전형방법 · 우대사항 · 결격사유 · 문의처 · 제출서류 · **학력**은
+              그리지 않습니다. 「원문 보기」 링크는 남깁니다 (회원만).
+
+              ★ 못 찾은 칸은 **그리지 않습니다.** 「공고에 없음」이라고 적으면
+                회원이 공고문을 안 찾아봅니다 (15절과 같은 까닭).
+                빈 칸은 관리자 「빈칸 공고」 목록으로 갑니다 */}
           <Rise>
             <dl className="mt-6 grid grid-cols-2 gap-3">
-              <Core icon={icons['job.headcount']} label="모집 인원"
-                    v={j.headcount ? `${j.headcount}명` : '공고 참조'} />
+              {j.headcount != null && (
+                <Core icon={icons['job.headcount']} label="모집 인원"
+                      v={`${j.headcount}명`} />
+              )}
               {/* ★ 2026-10-08 — 마감 **시각**이 있으면 함께 보여줍니다.
                   「2026-10-16 (금) 오전 9시 마감」. 전에는 날짜만 보여줘서
                   09:00 마감 공고가 그날 저녁까지 열린 것처럼 보였습니다 */}
@@ -251,13 +291,19 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                           + (시각말(j.apply_to_time) ? ` ${시각말(j.apply_to_time)} 마감` : '')
                         : (j.마감표시 || '마감일 공고문 확인')}
                     sub={j.apply_from ? `${j.apply_from} 시작` : null} />
-              <Core icon={icons['job.edu']} label="학력" v={j.edu ?? '제한 없음'} />
               {/* 근무지도 지역보임 을 먼저 읽습니다. 자세한 주소(work_place)는
-                  다르면 아래 줄에 덧붙입니다 — 상세는 더 보여 줄 수 있습니다 */}
-              <Core icon={icons['job.place']} label="근무지"
-                    v={j.지역보임 ?? '공고 참조'}
-                    sub={j.work_place && j.work_place.includes(' ')
-                         && j.work_place !== j.지역보임 ? j.work_place : null} />
+                  다르면 아래 줄에 덧붙입니다 — 상세는 더 보여 줄 수 있습니다.
+                  공고문에 없으면 기관표 주소가 들어와 있습니다 */}
+              {(j.지역보임 || j.work_place) && (
+                <Core icon={icons['job.place']} label="근무지"
+                      v={j.지역보임 ?? j.work_place ?? ''}
+                      sub={j.work_place && j.work_place.includes(' ')
+                           && j.work_place !== j.지역보임 ? j.work_place : null} />
+              )}
+              {연봉 && (
+                <Core icon={icons['job.pay'] ?? icons['job.headcount']} label="예상 연봉"
+                      v={연봉} />
+              )}
             </dl>
           </Rise>
 
@@ -328,90 +374,34 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
             </>
           )}
 
-          {/* ⑥ 지원 자격 ──────────────────────── */}
-          <>
-            {detail['지원자격'] && (
-              <Rise>
-                <Block icon={icons['job.require']} title="지원 자격">
-                  <p className="whitespace-pre-wrap break-keep text-[15px] leading-[1.75]
-                                text-[#4A5056]" style={{ overflowWrap: 'break-word' }}>
-                    {detail['지원자격']}
-                  </p>
-                </Block>
-              </Rise>
-            )}
+          {/* ⑥ 지원 자격 ────────────────────────
+              ★ 2026-10-09 세중님 확정 — 상세에 그리는 글 칸은 **지원 자격 하나**입니다.
+              전형방법 · 우대사항 · 결격사유 · 문의처 · 제출서류는 그리지 않습니다.
+              그 내용은 원문 공고에 있고, 아래 「원문 보기」로 갑니다 */}
+          {지원자격 && (
+            <Rise>
+              <Block icon={icons['job.require']} title="지원 자격">
+                <p className="whitespace-pre-wrap break-keep text-[15px] leading-[1.75]
+                              text-[#4A5056]" style={{ overflowWrap: 'break-word' }}>
+                  {지원자격}
+                </p>
+              </Block>
+            </Rise>
+          )}
 
-            {/* ⑦ 전형 방법 ────────────────────── */}
-            {detail['전형방법'] && (
-              <Rise>
-                <Block icon={icons['job.steps']} title="전형 방법">
-                  {stepped ? (
-                    <ol className="space-y-4">
-                      {steps.map((s, i) => (
-                        <li key={s} className="flex gap-4">
-                          <span className="num shrink-0 text-[18px] leading-[1.5] text-[#FF3B30]">
-                            {String(i + 1).padStart(2, '0')}
-                          </span>
-                          <span className="break-keep text-[15px] leading-[1.6] text-[#4A5056]"
-                                style={{ overflowWrap: 'break-word' }}>{s}</span>
-                        </li>
-                      ))}
-                    </ol>
-                  ) : (
-                    <p className="whitespace-pre-wrap break-keep text-[15px] leading-[1.75]
-                                  text-[#4A5056]" style={{ overflowWrap: 'break-word' }}>
-                      {detail['전형방법']}
-                    </p>
-                  )}
-                </Block>
-              </Rise>
-            )}
+          {/* ★ 워크넷 급여란 고정 안내 (2026-10-07 세중님 지시).
+              워크넷이 주는 숫자는 1호봉 기준이라 그대로 읽으면 오해합니다.
+              연봉 칸을 위로 옮겼으므로 안내도 따라옵니다 */}
+          {연봉 && 워크넷 && (
+            <p className="mt-3 break-keep text-[12px] leading-relaxed text-[#5F666C]">
+              예상 연봉은 1호봉 예정 급여이며, 호봉 인정 및 경력에 따라 상이할 수 있음
+            </p>
+          )}
 
-            {/* ⑧ 첨부·서류 ────────────────────── */}
-            {(detail['제출서류'] || detail['접수방법']) && (
-              <Rise>
-                <Block icon={icons['job.files']} title="내야 하는 것">
-                  {detail['제출서류'] && (
-                    <p className="whitespace-pre-wrap break-keep text-[15px] leading-[1.75]
-                                  text-[#4A5056]" style={{ overflowWrap: 'break-word' }}>
-                      {detail['제출서류']}
-                    </p>
-                  )}
-                  {detail['접수방법'] && (
-                    <p className="mt-4 whitespace-pre-wrap break-keep text-[15px] leading-[1.75]
-                                  text-[#4A5056]" style={{ overflowWrap: 'break-word' }}>
-                      {detail['접수방법']}
-                    </p>
-                  )}
-                  <p className="mt-4 break-keep text-[12px] text-[#5F666C]">
-                    첨부 파일은 원문 공고에 있어요. 아래 단추로 열어 주세요
-                  </p>
-                </Block>
-              </Rise>
-            )}
+          {/* 첨부 — 담당자가 올린 공고문·그림 (회원만 받습니다) */}
+          <NoticeFiles 갈래="채용" 공고={j.id} 고칠수있나={false} />
 
-            {rest.map((k) => (
-              <Rise key={k}>
-                <Block icon={icons['job.require']} title={k}>
-                  <p className="whitespace-pre-wrap break-keep text-[15px] leading-[1.75]
-                                text-[#4A5056]" style={{ overflowWrap: 'break-word' }}>
-                    {detail[k]}
-                  </p>
-                  {/* ★ 워크넷 급여란 고정 안내 (2026-10-07 세중님 지시).
-                      워크넷이 주는 숫자는 1호봉 기준이라 그대로 읽으면 오해합니다.
-                      워크넷 공고만 붙입니다 — 「연봉」 칸은 청소년수련원(CE)·
-                      알리오(AL)에도 있는데 그쪽은 1호봉 기준이 아닙니다 */}
-                  {k === '연봉' && 워크넷 && (
-                    <p className="mt-3 break-keep text-[12px] leading-relaxed text-[#5F666C]">
-                      1호봉 예정 급여이며, 호봉 인정 및 경력에 따라 상이할 수 있음
-                    </p>
-                  )}
-                </Block>
-              </Rise>
-            ))}
-          </>
-
-          {!detail['지원자격'] && !detail['전형방법'] && rest.length === 0 && (
+          {!지원자격 && !연봉 && (
             <p className="mt-7 break-keep text-[15px] text-[#5F666C]">
               이 공고는 본문을 못 받아왔어요. 아래 단추로 원문을 열어 주세요
             </p>
@@ -494,18 +484,31 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
             <p className="mt-2 break-keep text-[15px] text-[#5F666C]">
               {j.org_name}의 지난 채용 경쟁률을 모아 뒀어요
             </p>
-            <Link
-              href={`/compete?${new URLSearchParams({
-                org: j.org_name,
-                ...(j.job_group && j.job_group !== '공통' ? { job: j.job_group } : {}),
-              }).toString()}`}
-              className="mt-5 block w-full rounded-[12px] border border-[#E3E3DE] px-7 py-4
-                         text-center text-[16px] font-bold text-[#1B2025]
-                         transition-transform duration-[120ms]
-                         active:translate-y-[2px] active:scale-[0.99] motion-reduce:transition-none"
-            >
-              경쟁률 보러 가기
-            </Link>
+            {/* ★ 2026-10-09 — 경쟁률은 **회원 자료**입니다 (방침 2026-10-01).
+                비회원에게는 /compete 로 보내지 않고 로그인 안내로 바꿉니다.
+                /compete 쪽도 서버에서 같은 기준으로 막습니다 — 한쪽만 막으면
+                주소를 쳐서 들어옵니다 */}
+            {member ? (
+              <Link
+                href={`/compete?${new URLSearchParams({
+                  org: j.org_name,
+                  ...(j.job_group && j.job_group !== '공통' ? { job: j.job_group } : {}),
+                }).toString()}`}
+                className="mt-5 block w-full rounded-[12px] border border-[#E3E3DE] px-7 py-4
+                           text-center text-[16px] font-bold text-[#1B2025]
+                           transition-transform duration-[120ms]
+                           active:translate-y-[2px] active:scale-[0.99] motion-reduce:transition-none"
+              >
+                경쟁률 보러 가기
+              </Link>
+            ) : (
+              <LoginFirst
+                className="mt-5 block w-full rounded-[12px] border border-[#E3E3DE] px-7 py-4
+                           text-center text-[16px] font-bold text-[#1B2025]"
+              >
+                로그인하고 경쟁률 보기
+              </LoginFirst>
+            )}
           </section>
         )}
 
@@ -516,7 +519,11 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       {!closed && (
         /* 탭바(62px·md 미만에만 있음) 위에 얹습니다.
            둘 다 bottom-0 이면 탭바가 z-40 이라 이 줄이 통째로 가려집니다 */
-        <div className="fixed inset-x-0 bottom-[62px] z-30 border-t border-[#E3E3DE]
+        /* ★ 2026-10-09 — 지원 띠도 탭바가 안전 영역만큼 커지는 것을 따라갑니다.
+           안 따라가면 홈 막대가 있는 기기에서 탭바가 이 띠를 밀고 올라옵니다.
+           인라인 style 로 쓰면 md:bottom-0 을 이겨서 데스크톱이 어긋납니다 */
+        <div className="fixed inset-x-0 bottom-[calc(62px+env(safe-area-inset-bottom))]
+                        z-30 border-t border-[#E3E3DE]
                         bg-white/95 px-6 py-3 backdrop-blur md:bottom-0 md:px-7">
           <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
             <JobSave id={j.id} big />

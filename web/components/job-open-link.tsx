@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/app/auth';
+import { LoginFirst } from '@/components/login-first';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 「원문 공고 열기」. 누른 것을 셉니다.
@@ -15,9 +16,21 @@ import { browserSupabase } from '@/lib/supabase-browser';
 export function JobOpenLink({
   id, url, children, className,
 }: {
-  id: string; url: string; children: React.ReactNode; className?: string;
+  id: string; url: string | null; children: React.ReactNode; className?: string;
 }) {
   const { me } = useAuth();
+
+  /* ★ 2026-10-09 — 비회원에게는 **창구가 url 을 아예 안 줍니다**
+     (job_one · 공개공고). 그래서 여기서 「로그인 안 함」을 따로 묻지 않고
+     **주소가 없으면** 로그인 안내로 바꿉니다. 화면이 스스로 판정하면
+     서버와 어긋나고, 그 틈으로 주소가 새는 모양이 됩니다 */
+  if (!url) {
+    return (
+      <LoginFirst className={className}>
+        로그인하고 지원하러 가기
+      </LoginFirst>
+    );
+  }
 
   const mark = () => {
     browserSupabase().from('job_events').insert({

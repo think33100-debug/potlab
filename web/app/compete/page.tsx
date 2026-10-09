@@ -147,6 +147,35 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
   const 누구 = await serverWho(sb);
   const 회원인가 = 누구 === '회원';
 
+  /* ★ 2026-10-09 밤 — **비회원에게는 목록도 안 보입니다.**
+     세중님 지시로 바뀐 자리입니다. 앞 결정과 나란히 적어 둡니다 —
+
+       2026-10-05  「목록은 누구나 봅니다. 숫자는 회원만」 (가운데 길)
+       2026-10-09  「/compete 직접 접속도 서버에서 로그인 안내로」
+
+     공고 상세의 「경쟁률 보러 가기」도 같은 기준으로 바뀌었습니다. 한쪽만
+     막으면 주소를 쳐서 들어옵니다. 「모름」일 때는 막지 않습니다 —
+     물어보지 못한 것을 「비회원」으로 읽으면, 잠깐 끊긴 회원이 쫓겨납니다
+     (lib/supabase-server.ts 의 세 값 규칙). */
+  if (누구 === '비회원') {
+    return (
+      <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
+        <h1 className="break-keep text-h1 font-bold">경쟁률 찾아보기</h1>
+        <p className="mt-3 break-keep text-lg text-mute">
+          공공기관이 공개한 지난 채용의 경쟁률이에요. <b>로그인하시면 보여드릴게요.</b>
+        </p>
+        <Link href="/login"
+          className="mt-7 inline-block rounded-md bg-brand-red px-7 py-5 text-btn font-bold text-white
+                     hover:bg-brand-red-dark">
+          로그인하고 보기
+        </Link>
+        <p className="mt-4 break-keep text-sm text-mute">
+          카카오·네이버로 10초면 됩니다. 보시던 자리로 돌아와요.
+        </p>
+      </main>
+    );
+  }
+
   const { data, error } = await sb.rpc('경쟁률찾기목록', {
     p_직군: sp.job && sp.job !== '전체' ? sp.job : null,
     p_지역: sp.sido || null,

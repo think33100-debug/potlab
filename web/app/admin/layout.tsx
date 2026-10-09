@@ -18,6 +18,9 @@ const MENU = [
   { href: '/admin', label: '홈 꾸미기' },
   { href: '/admin/texts', label: '홈 글' },
   { href: '/admin/jobs', label: '공고' },
+  /* 상세 일곱 칸 중 비어 있는 칸이 있는 공고 (2026-10-09).
+     못 찾은 칸은 회원 화면에 안 그리고 여기로 모읍니다 */
+  { href: '/admin/blanks', label: '빈칸 공고' },
   { href: '/admin/trash', label: '쓰레기통' },
   /* 추천순 맨 위로 올린 공고 (2026-10-07). 나중에 유료 광고와 이어질 자리입니다 */
   { href: '/admin/boost', label: '추천 올린 공고' },

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../auth';
+import { NoticeFiles } from '@/components/notice-files';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 채용 담당자 화면 (2026-10-09 · 뼈대 ⑧ · 공고 쓰기는 10-09 밤에 보탰습니다).
@@ -30,19 +31,26 @@ type 공고 = {
   공식확인: boolean; source: string | null;
 };
 
+/* ★ 2026-10-09 세중님 확정 — 공고 상세가 그리는 **일곱 칸**과 같은 칸만 받습니다.
+     모집인원 · 접수마감 · 근무지 · 지원자격 · 예상 연봉 ·
+     얼마나 바쁜 곳(심평원) · 병원 뜯어보기(심평원)
+   뒤의 둘은 우리가 심평원 자료로 그리므로 담당자가 적을 것이 없습니다.
+   전형방법 · 우대사항 · 결격사유 · 문의처 · 제출서류는 **받지 않습니다** —
+   상세에 안 그리니 받아 두면 아무 데도 안 쓰이는 칸이 됩니다.
+   그 내용은 공고문 첨부와 「지원 안내 주소」로 갑니다. */
 type 쓸것 = {
   제목: string; 직군: string; 고용형태: string; 근무지: string;
   인원: string; 접수부터: string; 접수까지: string; 마감시각: string;
-  주소: string; 지원자격: string; 전형방법: string;
+  주소: string; 지원자격: string; 예상연봉: string;
 };
 
 const 빈것: 쓸것 = {
   제목: '', 직군: '작업치료사', 고용형태: '', 근무지: '', 인원: '',
-  접수부터: '', 접수까지: '', 마감시각: '', 주소: '', 지원자격: '', 전형방법: '',
+  접수부터: '', 접수까지: '', 마감시각: '', 주소: '', 지원자격: '', 예상연봉: '',
 };
 
 export default function Biz() {
-  const { loading, session, isAdmin } = useAuth();
+  const { loading, session, isAdmin, 관리 } = useAuth();
   const [병원들, set병원들] = useState<병원[]>([]);
   const [고른곳, set고른곳] = useState<string | null>(null);
   const [공고들, set공고들] = useState<공고[]>([]);
@@ -55,7 +63,7 @@ export default function Biz() {
   const [도는중, set도는중] = useState(false);
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || !관리.채용관리) return;
     let 살아있나 = true;
     browserSupabase().rpc('내병원').then(({ data, error }) => {
       if (!살아있나) return;
@@ -65,7 +73,7 @@ export default function Biz() {
       set고른곳((p) => p ?? xs[0]?.기관번호 ?? null);
     });
     return () => { 살아있나 = false; };
-  }, [session]);
+  }, [session, 관리.채용관리]);
 
   useEffect(() => {
     if (!고른곳) return;
@@ -89,9 +97,12 @@ export default function Biz() {
     if (!고른곳) return;
     set도는중(true); set탈(null); set알림(null);
     const sb = browserSupabase();
+    /* 화면 칸 이름 ↔ DB detail 칸 이름을 여기서 맞춥니다.
+       상세 화면은 뽑은값 → detail 순으로 읽습니다 (jobs/[id]/page.tsx).
+       「연봉」은 수집 출처가 쓰는 이름이라 그대로 씁니다 */
     const 상세 = {
       ...(값.지원자격.trim() ? { 지원자격: 값.지원자격.trim() } : {}),
-      ...(값.전형방법.trim() ? { 전형방법: 값.전형방법.trim() } : {}),
+      ...(값.예상연봉.trim() ? { 연봉: 값.예상연봉.trim() } : {}),
     };
     const 공통 = {
       p_제목: 값.제목, p_직군: 값.직군,
@@ -134,14 +145,27 @@ export default function Biz() {
 
   if (loading) return <main className="mx-auto w-full max-w-3xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
 
+  /* ★ 2026-10-09 밤 — **채용담당자로 승인된 분에게만** 열립니다.
+     교육담당자 페르소나로 주소를 쳐도 여기서 막힙니다.
+     값은 /edu/manage 와 **같은 창구**(내관리메뉴)를 봅니다 — 두 화면이
+     서로 다른 기준을 쓰면 한쪽만 보이는 일이 생깁니다 */
+  if (!관리.채용관리) {
+    return (
+      <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
+        <p className="break-keep text-h3 font-bold">아직 준비 중이에요</p>
+        <Link href="/" className="mt-7 inline-block rounded-md border border-gray-200 px-6 py-4
+                                  text-lg font-medium text-gray-600 hover:bg-gray-50">홈으로</Link>
+      </main>
+    );
+  }
+
   if (병원들.length === 0) {
     return (
       <main className="mx-auto w-full max-w-3xl px-6 py-8 md:px-7">
-        <h1 className="break-keep text-h1 font-bold">채용 담당자</h1>
+        <h1 className="break-keep text-h1 font-bold">채용 관리</h1>
         <p className="mt-3 break-keep text-lg text-mute">
-          {isAdmin
-            ? '승인된 병원이 아직 없어요. 담당자 신청을 승인하면 여기 나옵니다.'
-            : '아직 준비 중이에요.'}
+          승인된 병원이 아직 없어요.
+          {isAdmin && ' 담당자 신청을 승인하면 여기 나옵니다.'}
         </p>
         <Link href={isAdmin ? '/admin/partners' : '/'}
           className="mt-7 inline-block rounded-md border border-gray-200 px-6 py-4
@@ -266,12 +290,26 @@ export default function Biz() {
           <label className="mt-4 block text-sm font-bold text-mute" htmlFor="지원자격">지원 자격</label>
           <textarea id="지원자격" rows={3} value={값.지원자격}
             onChange={(e) => set값({ ...값, 지원자격: e.target.value })}
+            placeholder="작업치료사 면허 소지자"
             className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-3 text-lg" />
 
-          <label className="mt-4 block text-sm font-bold text-mute" htmlFor="전형방법">전형 방법</label>
-          <textarea id="전형방법" rows={2} value={값.전형방법}
-            onChange={(e) => set값({ ...값, 전형방법: e.target.value })}
-            className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-3 text-lg" />
+          <label className="mt-4 block text-sm font-bold text-mute" htmlFor="예상연봉">예상 연봉</label>
+          <input id="예상연봉" value={값.예상연봉}
+            onChange={(e) => set값({ ...값, 예상연봉: e.target.value })}
+            placeholder="3,000만원 이상 · 내규에 따름 · 협의"
+            className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
+          <p className="mt-1 break-keep text-sm text-mute">
+            적으신 말 그대로 보여드려요. 「내규에 따름」·「협의」도 그대로 나갑니다 —
+            우리가 숫자를 만들지 않아요.
+          </p>
+
+          <p className="mt-5 break-keep rounded-sm bg-gray-50 p-4 text-sm text-mute dark:bg-gray-900">
+            공고 상세에는 <b>일곱 칸만</b> 보입니다 — 모집인원 · 접수마감 · 근무지 ·
+            지원자격 · 예상 연봉과, 우리가 심평원 자료로 그리는
+            「얼마나 바쁜 곳인지」 · 「병원 뜯어보기」예요.
+            전형 방법 · 제출 서류 · 문의처는 <b>공고문 첨부</b>와
+            「지원 안내 주소」로 보여드립니다.
+          </p>
 
           <div className="mt-5 flex flex-wrap gap-2">
             <button type="button" onClick={보내기} disabled={도는중}
@@ -322,6 +360,13 @@ export default function Biz() {
                   {' · 지원하러 가기 '}
                   <b className="num">{j.지원누름.toLocaleString('ko-KR')}</b>
                 </p>
+                {/* 첨부 — 담당자가 올린 공고에만 답니다 (모아 온 공고는 못 답니다) */}
+                {j.source === 'BIZ' && (
+                  <NoticeFiles 갈래="채용" 공고={j.id} 고칠수있나
+                    읽어서채우기={() => set알림(
+                      '공고문 읽어서 칸 채우기는 내일 아침에 켭니다 (tools/공고칸채우기.mjs).')} />
+                )}
+
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Link href={`/jobs/${j.id}`}
                     className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">

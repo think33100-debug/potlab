@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
+import { NoticeFiles } from '@/components/notice-files';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 교육 관리 — 담당자가 과정·회차를 만들고 신청자를 보는 곳 (2026-10-09 · 뼈대 ⑥).
@@ -341,6 +342,9 @@ export default function EduManage() {
                               재공고
                             </button>
                           </div>
+
+                          {/* 첨부 — 안내문·시간표를 답니다. 회원만 받습니다 */}
+                          <NoticeFiles 갈래="교육" 회차={s.회차id} 고칠수있나 />
 
                           {신청본다 === s.회차id && (
                             신청들?.회차 !== s.회차id
