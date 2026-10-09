@@ -28,6 +28,8 @@ import { 모두받기 } from './쪽나눠받기.mjs';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, MEDTECH, 구운날 } from './gas-rules.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 멈췄나 as OCR멈췄나, 이름표 as OCR이름표 } from './ocr/index.mjs';
+/* 공고문 주소를 job_attachments 에 담습니다 (2026-10-10 · tools/첨부담기.mjs) */
+import { 첨부모으기 } from './첨부담기.mjs';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 
@@ -196,11 +198,23 @@ async function 포털쿠키() {
 }
 const 담기 = (jar) => Object.entries(jar).map(([k, v]) => k + '=' + v).join('; ');
 
+/* 첨부 주소를 모읍니다 — SOURCE 는 AL2 입니다 (2026-10-10) */
+/* argv 는 아래쪽에서 선언됩니다 — 여기서는 process.argv 를 바로 봅니다
+   (const 는 위로 안 끌려 올라갑니다. argv 를 쓰면 TDZ 로 죽습니다) */
+const 첨부모음 = 첨부모으기(SOURCE, { 마른: process.argv.includes('--마른') });
+
 /** 첨부 공고문(A)을 받아 글자로. 못 읽으면 '' */
 async function 공고문글자(box, 셈) {
   const files = box.files || [];
   const pdf = files.find((f) => String(f.atchFileType) === 'A'
     && /\.pdf$/i.test(String(f.atchFileNm || '')));
+  /* ★ 글자를 못 읽어도 **주소는 담습니다.** 한글(hwp) 공고문도 담아 두면
+     나중에 서버 ~/hwp읽기 로 읽을 수 있습니다 (지침 8절).
+     atchFileType 'A' 가 공고문입니다 — 코드 정의서에 있습니다 (지침 4절) */
+  for (const f of files.filter((x) => String(x.atchFileType) === 'A')) {
+    첨부모음.더하기({ job_id: String(box.sn || box.recrutPblntSn || ''),
+                    kind: '공고문', name: String(f.atchFileNm || ''), url: String(f.url || '') });
+  }
   if (!pdf) {
     const hwp = files.some((f) => String(f.atchFileType) === 'A' && /\.hwpx?$/i.test(String(f.atchFileNm || '')));
     return { 글: '', 왜: hwp ? '공고문이 한글(hwp)이라 못 읽음' : '공고문 첨부가 없음' };
@@ -428,6 +442,8 @@ const 한줄 = argv.includes('--한줄');
 const dry = argv.includes('--dry') || 한줄;
 /* --순찰 — 자주 도는 가벼운 모드. 첫 쪽만 받고 DB 에 없는 번호만 상세를 엽니다 */
 const 순찰 = argv.includes('--순찰');
+/* --마른 : 첨부를 DB 에 안 담고 docs/첨부_미리보기_1010.json 에만 적습니다 */
+const 마른첨부 = argv.includes('--마른');
 const 몇건 = argv.includes('--n') ? Number(argv[argv.indexOf('--n') + 1]) || 0 : 0;
 /* --한줄 일 때는 중간 로그를 죽입니다. 한 줄만 남기려고요 */
 const 원래log = console.log;
@@ -744,6 +760,12 @@ if (!dry) {
           OCR: 셈.OCR, 남의자리: 셈.남의자리, 우리와무관: 셈.우리와무관, 건너뜀: 셈.건너뜀 } },
     });
   } catch (e) { console.error('박동 못 남김 · ' + String(e.message).slice(0, 120)); }
+}
+
+/* 첨부 주소 담기 (2026-10-10) */
+if (첨부모음.줄들.length) {
+  if (첨부모음.마른) await 첨부모음.형식확인(40);
+  await 첨부모음.끝내기(cfg);
 }
 
 /* 남은 하루 한도를 남깁니다 — 쓴 양은 신청 건마다 하나이고

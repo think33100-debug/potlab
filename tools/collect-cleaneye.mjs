@@ -51,6 +51,8 @@ import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
 import { 첨부받기, 기본간격, 통크기, 통쉼, 쉼 } from './cleaneye-file.mjs';
+/* 공고문 주소를 job_attachments 에 담습니다 (2026-10-10 · tools/첨부담기.mjs) */
+import { 첨부모으기 } from './첨부담기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'CE2';
@@ -299,6 +301,8 @@ const 한줄 = argv.includes('--한줄');
 const dry = argv.includes('--dry') || 한줄;
 const 몇건 = argv.includes('--n') ? Number(argv[argv.indexOf('--n') + 1]) || 0 : 0;
 const 첨부안열기 = argv.includes('--첨부안열기');
+/* --마른 : 첨부를 DB 에 안 담고 docs/첨부_미리보기_1010.json 에만 적습니다 */
+const 마른첨부 = argv.includes('--마른');
 /* --순찰 — 자주 도는 가벼운 모드 (2026-10-01).
    클린아이 목록은 시도 17곳 한 번씩이라 더 줄일 게 없습니다 (쪽 넘김이 없습니다).
    무거운 것은 **상세 판정과 첨부 읽기**입니다 — 한 바퀴 971초 · OCR 30건.
@@ -512,6 +516,22 @@ if (dry) {
     url: String(x.o.URL || ''), file_name: String(x.o.FILE_NAME1 || ''),
     body: x.원문,
   }));
+
+  /* ★ 주소도 함께 담습니다 (2026-10-10) — job_attachments 가 0줄이라
+     공고 상세 일곱 칸의 셋째 재료가 없었습니다.
+     **클린아이는 첨부 직링크가 없습니다** — 첨부를 받으려면 공고 화면에서
+     UPLOAD_FILENAME·ORIGINAL_FILENAME·FILE_PATH 를 뽑아 POST 해야 합니다
+     (tools/cleaneye-file.mjs 3줄). 그래서 담는 것은 **공고 화면 주소**이고,
+     나중에 되메울 때는 같은 두 걸음을 다시 밟아야 합니다 */
+  const 첨부모음 = 첨부모으기(SOURCE, { 마른: 마른첨부 });
+  for (const x of 결과.filter((v) => v && v.원문)) {
+    첨부모음.더하기({ job_id: 'CE' + x.id, kind: '공고화면',
+                    name: String(x.o.FILE_NAME1 || ''), url: String(x.o.URL || '') });
+  }
+  if (첨부모음.줄들.length) {
+    if (마른첨부) await 첨부모음.형식확인(40);
+    await 첨부모음.끝내기(cfg);
+  }
   if (원문들.length) {
     let 보관 = 0, 바이트 = 0, 끝말 = '';
     for (let i = 0; i < 원문들.length; i += 50) {
