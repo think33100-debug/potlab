@@ -219,6 +219,36 @@ async function 새수집기가가진것(cfg) {
   return 집;
 }
 
+/* 사람이 숨김·보류를 정해 둔 줄의 **지금 값** (2026-10-09).
+
+   셋 중 하나면 「사람이 정한 것」으로 봅니다.
+     admin_locked = true                     관리자가 잠근 줄
+     edited_fields 에 hidden 또는 hold        그 칸을 손으로 고친 줄
+     같은공고 가 채워짐                        두 벌 묶기로 감춘 줄 —
+                                             열 건 중 **다섯 건**이 이미 되살아나
+                                             회원에게 같은 공고가 두 번 보였습니다
+
+   못 읽으면 **빈 것을 돌려줍니다.** 그러면 시트 값이 그대로 들어가는데,
+   그건 지금까지의 동작이라 더 나빠지지는 않습니다. 대신 눈에 띄게 적습니다. */
+async function 사람이정한것(cfg) {
+  const 집 = new Map();
+  try {
+    const r = await get(cfg,
+      'job_posts?select=id,hidden,hold,admin_locked,edited_fields'
+      /* or=() 안에서는 배열 값에 **따옴표**가 있어야 합니다.
+         {hidden} 으로 보내면 400 「malformed array literal」 이 납니다
+         (2026-10-09 서버에서 두 번 두드려 확인했습니다 — 400 → 200 · 13줄) */
+      + '&or=(admin_locked.eq.true,edited_fields.cs.{"hidden"},edited_fields.cs.{"hold"},'
+      + '같은공고.not.is.null)'
+      + '&limit=5000');
+    r.forEach((x) => 집.set(String(x.id), { hidden: !!x.hidden, hold: !!x.hold }));
+  } catch (e) {
+    console.error('  ⚠ 사람이 정한 줄을 못 읽었습니다 — 시트 값이 그대로 들어갑니다 · '
+                  + e.message.slice(0, 80));
+  }
+  return 집;
+}
+
 /* ── 어디까지 봤는지 ── */
 async function loadState(cfg) {
   const r = await get(cfg, 'collector_state?key=eq.job_sync&select=value');
@@ -428,6 +458,35 @@ async function hideTrashed(cfg, dry, 남의것) {
     const 남의것 = await 새수집기가가진것(cfg);
     const 비킨것 = posts.filter((p) => 남의것.has(String(p.id)));
     if (비킨것.length) posts = posts.filter((p) => !남의것.has(String(p.id)));
+
+    /* ★ 2026-10-09 — **사람이 정한 숨김·보류는 시트로 되돌리지 않습니다.**
+
+       실제로 다섯 건이 되돌아갔습니다. 세중님이 10-07 에 쓰레기통으로 보낸
+       HS485195755 가 10-08 다리 실행 중에 보류함으로 돌아왔고, 「두 벌 묶기」로
+       감춘 네 건도 다시 보이게 됐습니다 (job_state_log 의 누가 = 「(안 적힘)」 —
+       다리는 RPC 를 안 거쳐서 누가 를 안 남깁니다).
+
+       위의 「새 수집기 것 비키기」만으로는 못 막습니다 —
+       새수집기가가진것() 이 한 번이라도 못 읽으면 **아무것도 안 비키고**
+       시트 값으로 통째로 덮어씁니다. 그 자리에 그렇게 적혀 있습니다.
+
+       그래서 임자가 누구든, **잠긴 줄의 hidden·hold 는 지금 DB 값으로 되돌려
+       보냅니다.** 나머지 칸은 그대로 담습니다 — 시트에서 고친 제목·마감일은
+       들어와야 합니다.
+
+       칸을 **빼지 않고 지금 값으로 덮어쓰는** 까닭 — PostgREST 의 upsert 는
+       보내는 줄들의 열쇠를 합쳐 칸 목록을 만듭니다. 한 줄에서만 칸을 빼면 그
+       줄은 기본값(false)이 됩니다. 빼는 쪽이 더 위험합니다. */
+    const 잠긴것 = await 사람이정한것(cfg);
+    let 지킨수 = 0;
+    posts.forEach((p) => {
+      const 지금 = 잠긴것.get(String(p.id));
+      if (!지금) return;
+      if (p.hidden !== 지금.hidden || p.hold !== 지금.hold) 지킨수++;
+      p.hidden = 지금.hidden;
+      p.hold = 지금.hold;
+    });
+    if (지킨수) console.log('  사람이 정한 숨김·보류를 지킨 줄 ' + 지킨수 + '건');
 
     console.log('시트 ' + total + '줄 · ' + from + '번째부터 ' + S.rows.length + '줄 읽음 · '
                 + posts.length + '건 (' + mode + ')'
