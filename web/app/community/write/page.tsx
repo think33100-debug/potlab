@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { channelsFor } from '@/lib/channels';
 import { MAX_POST_IMAGES, postImagePair } from '@/lib/image';
 import { browserSupabase } from '@/lib/supabase-browser';
@@ -37,6 +38,26 @@ function Write() {
 
   if (loading || !me) {
     return <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7"><p className="text-lg text-mute">잠시만요…</p></main>;
+  }
+
+  /* 치료사·학생이 아니면 글을 못 씁니다 (2026-10-09 · 뼈대 3-4).
+     채용·교육 담당자는 읽기만 합니다 — 병원 사람이 치료사 방에 글을 쓰기
+     시작하면 솔직한 말이 사라집니다. 막는 자리는 표의 정책이고(42501),
+     여기서는 쓰러 들어왔다가 저장할 때 튕기지 않게 미리 알려 줍니다 */
+  if (me.role !== '현직' && me.role !== '학생') {
+    return (
+      <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
+        <p className="break-keep text-h3 font-bold">글은 치료사·학생만 쓸 수 있어요</p>
+        <p className="mt-3 break-keep text-lg text-mute">
+          읽는 것은 그대로 하실 수 있어요.
+        </p>
+        <Link href="/community"
+          className="mt-7 inline-block rounded-md border border-gray-200 px-6 py-4 text-lg
+                     font-medium text-gray-600 hover:bg-gray-50">
+          커뮤니티로
+        </Link>
+      </main>
+    );
   }
 
   /* 학생에게는 학생 방을, 현직에게는 현직 방을 보여줍니다 (옛 chFor_ 와 같게) */

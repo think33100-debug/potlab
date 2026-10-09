@@ -3,7 +3,11 @@ import { Hit } from '@/components/hit';
 import { notFound } from 'next/navigation';
 import { PostItem } from '@/components/post-row';
 import { CHANNEL_BY_ID } from '@/lib/channels';
-import { supabase, POST_LIST_COLS, type PostRow } from '@/lib/supabase';
+import { POST_LIST_COLS, type PostRow } from '@/lib/supabase';
+/* ★ 2026-10-09 — 세션 없는 열쇠꾸러미로 읽으면 **학생이 학생 방을 못 봅니다.**
+   공개글 보기가 방볼수있나() 로 가리는데, 그 함수가 auth.uid() 를 봅니다.
+   쿠키를 읽는 꾸러미로 바꿉니다 (lib/supabase-server.ts) */
+import { serverSupabase } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +23,13 @@ export default async function ChannelPage({
   if (!room) notFound();
 
   const hot = sort === 'hot';
-  const { data, error } = await supabase
+  const sb = await serverSupabase();
+
+  /* 이 방에 글을 쓸 수 있나 (2026-10-09). 막는 자리는 표의 정책이고,
+     여기서는 못 쓸 단추를 안 보일 뿐입니다 —
+     학생에게 치료사 방은 보이되 글쓰기가 없습니다 */
+  const { data: 쓸수있나 } = await sb.rpc('방에쓸수있나', { p_방: ch });
+  const { data, error } = await sb
     .from('공개글')
     .select(POST_LIST_COLS)
     .eq('channel', ch)
@@ -43,12 +53,14 @@ export default async function ChannelPage({
           <Sort href={`/community/${ch}`} on={!hot}>최신</Sort>
           <Sort href={`/community/${ch}?sort=hot`} on={hot}>많이 본</Sort>
         </div>
-        <Link
-          href={`/community/write?ch=${ch}`}
-          className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
-        >
-          글쓰기
-        </Link>
+        {쓸수있나 === true && (
+          <Link
+            href={`/community/write?ch=${ch}`}
+            className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
+          >
+            글쓰기
+          </Link>
+        )}
       </div>
 
       {error && (
