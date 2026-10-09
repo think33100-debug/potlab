@@ -204,7 +204,14 @@ fs.mkdirSync(나갈곳, { recursive: true });
 const 찍은것 = [];
 const 탈 = [];
 
-/* 한 장 찍기. 주소를 열고 글자가 자리 잡을 틈을 준 뒤 전체 높이로 */
+/* 한 장 찍기. 주소를 열고 글자가 자리 잡을 틈을 준 뒤 전체 높이로.
+ *
+ * ★ 2026-10-09 — 찍기 전에 **아래까지 한 번 훑습니다.**
+ * 화면 부품 Rise 는 스크롤로 들어올 때까지 `opacity: 0` 입니다
+ * (components/job-parts.tsx · IntersectionObserver). fullPage 는 스크롤을
+ * 안 하므로, 훑지 않으면 화면 아래쪽이 **통째로 빈칸으로** 찍힙니다.
+ * 처음 찍은 공고 상세에서 가운데가 비어 있어서 알았습니다.
+ */
 async function 찍기(page, 이름, 길, 폭이름) {
   const 파일 = path.join(나갈곳, `${이름}__${폭이름}.png`);
   try {
@@ -213,7 +220,24 @@ async function 찍기(page, 이름, 길, 폭이름) {
     /* networkidle 이 안 와도(폴링하는 화면) 그려진 것은 찍습니다 */
     await page.waitForTimeout(1500);
   }
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(700);
+
+  /* 아래까지 훑어 Rise 를 깨운 뒤 맨 위로 돌아옵니다 */
+  await page.evaluate(async () => {
+    const 잠깐 = (ms) => new Promise((r) => setTimeout(r, ms));
+    const 높이 = () => document.documentElement.scrollHeight;
+    for (let y = 0; y < 높이(); y += Math.floor(window.innerHeight * 0.8)) {
+      window.scrollTo(0, y);
+      await 잠깐(120);
+    }
+    window.scrollTo(0, 높이());
+    await 잠깐(250);
+    window.scrollTo(0, 0);
+    await 잠깐(150);
+  });
+  /* Rise 의 등장 효과가 520ms 입니다. 다 끝나고 찍습니다 */
+  await page.waitForTimeout(800);
+
   await page.screenshot({ path: 파일, fullPage: true });
   찍은것.push(path.relative(뿌리, 파일).replace(/\\/g, '/'));
 }
