@@ -128,8 +128,10 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     member ? hospitalStat(sb, j.org_name) : Promise.resolve(null),
     iconMap('공고 상세'),
     jobViews([j.id]),
-    /* 이 기관 경쟁률 자료가 있나 (2026-10-09). 단추를 보일지만 정합니다 */
-    sb.rpc('경쟁률있나', { p_기관: j.org_name, p_직군: j.job_group }),
+    /* 이 공고의 기관에 경쟁률 자료가 있나 (2026-10-09). 단추를 보일지만 정합니다.
+       공고 번호만 넘깁니다 — 기관번호 찾기와 본부 잇기는 DB 가 합니다
+       (알리오 경쟁률은 본부 이름으로 쌓이고 공고는 분원 이름으로 옵니다) */
+    sb.rpc('공고경쟁률있나', { p_공고: j.id }),
   ]);
   const 경쟁률 = 경쟁률있나.data === true;
 
