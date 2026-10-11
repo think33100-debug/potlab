@@ -86,9 +86,13 @@ export function 칸재기(j) {
   const 잠김 = new Set(j.edited_fields ?? []);
   const 값 = {};
 
+  /* ★ 2026-10-11 — 화면이 headcount 다음에 뽑은값을 봅니다
+     (web/app/jobs/[id]/page.tsx 의 모집인원). 여기도 같이 바꿉니다 */
   값.모집인원 = j.headcount != null
     ? { 값: j.headcount + '명', 출처: '상세API(headcount)', 근거: `headcount = ${j.headcount}` }
-    : null;
+    : (p['모집인원']
+        ? { 값: String(p['모집인원']), 출처: '뽑은값', 근거: `뽑은값.모집인원 = ${p['모집인원']}` }
+        : null);
 
   값.접수마감 = j.apply_to
     ? { 값: j.apply_to, 출처: '상세API(apply_to)', 근거: `apply_to = ${j.apply_to}` }
