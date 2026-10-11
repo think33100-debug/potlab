@@ -63,23 +63,14 @@ export default function Verify() {
 
   if (loading) return <main className="mx-auto w-full max-w-2xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
 
-  if (!isAdmin && !마스터) {
-    return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
-        <p className="break-keep text-h3 font-bold">아직 준비 중이에요</p>
-        <Link href="/" className="mt-7 inline-block rounded-md border border-gray-200 px-6 py-4
-                                  text-lg font-medium text-gray-600 hover:bg-gray-50">홈으로</Link>
-      </main>
-    );
-  }
+  /* ★ 2026-10-11 — 회원에게 열었습니다 (세중님 결정).
+     재직 인증 — 회원이 증빙을 올리고 관리자가 확인합니다.
+     막는 자리는 화면이 아니라 창구입니다 (docs/인계/05_부록.md 2절) */
 
   const 지금 = 줄들.find((r) => r.상태 === '심사중' || r.상태 === '확인');
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <p className="rounded-sm bg-badge-teal-bg px-4 py-2 text-sm text-teal-strong">
-        숨겨 둔 화면이에요 — 관리자와 마스터에게만 보입니다
-      </p>
       <h1 className="mt-5 break-keep text-h1 font-bold">재직 인증</h1>
       <p className="mt-2 break-keep text-lg text-mute">
         재직증명서나 사원증을 올려 주시면 확인하고 <b>「재직 확인」 배지</b>를 달아드려요.
