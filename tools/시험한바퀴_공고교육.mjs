@@ -121,7 +121,8 @@ if (Number.isFinite(과정id)) {
   const 회차 = await 창구(빈계정, '교육회차열기', {
     p_과정: 과정id, p_시작: 뒤, p_끝: 뒤, p_장소: '대구 (시험)', p_정원: 10,
     p_접수시작: 오늘, p_접수끝: 뒤, p_수강료: 0, p_은행: null, p_계좌번호: null,
-    p_예금주: null, p_입금기한: null, p_입금자명규칙: null, p_환불규정: null, p_결제링크: null,
+    p_예금주: null, p_입금기한: null, p_입금자명규칙: null,
+    p_환불규정: '시험용입니다. 실제 환불 규정이 아닙니다.', p_결제링크: null,
   });
   const 회차id = Number(회차.답?.회차id ?? 회차.답?.회차 ?? 회차.답?.id ?? 회차.답);
   적자('⑤ 교육 회차 열기', 회차.ok && Number.isFinite(회차id), 회차.ok ? '회차 ' + 회차id : JSON.stringify(회차.답).slice(0, 120));
