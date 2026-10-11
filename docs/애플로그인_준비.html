@@ -103,28 +103,38 @@ Certificates, IDs &amp; Profiles → 왼쪽 **Keys** → + 단추
 → **Download** 를 누르면 `AuthKey_XXXXXXXXXX.p8` 파일이 내려옵니다
 </code></pre>
 <blockquote>파일 이름의 <code>XXXXXXXXXX</code> 열 글자가 <b>Key ID</b> 입니다 (⑤ 에서 씁니다).</blockquote>
-<h2 id="supabase-에-넣기">⑤ Supabase 에 넣기</h2>
+<h2 id="supabase-에-넣기-jwt-를-만들어서-넣습니다">⑤ Supabase 에 넣기 — <b>JWT 를 만들어서</b> 넣습니다</h2>
 <pre><code>
 supabase.com/dashboard → 우리 프로젝트
 → 왼쪽 Authentication → Providers → 목록에서 **Apple**
 → 맨 위 Enable Sign in with Apple 켜기
+→ **Allow users without an email** 도 켜기   (Hide My Email 때 필요합니다)
 </code></pre>
-<p>칸이 넷입니다. <b>값은 세중님이 바로 넣으십시오.</b></p>
-<table><thead><tr><th>칸</th><th>무엇을 넣나</th></tr></thead><tbody>
+<p>칸이 <b>둘</b>입니다.</p>
+<table><thead><tr><th>칸</th><th>넣을 것</th></tr></thead><tbody>
 <tr><td><b>Client IDs</b></td><td>② 의 Services ID — <code>kr.co.potjob.web</code></td></tr>
-<tr><td><b>Secret Key (for OAuth)</b></td><td>④ 의 <code>.p8</code> <b>파일을 메모장으로 열어</b> 안의 글 전체 (<code>-----BEGIN PRIVATE KEY-----</code> 부터 끝까지)</td></tr>
-<tr><td><b>Team ID</b></td><td>③ 에서 본 값</td></tr>
-<tr><td><b>Key ID</b></td><td>④ 파일 이름의 열 글자</td></tr>
+<tr><td><b>Secret Key (for OAuth)</b></td><td><b>JWT</b> 입니다. <code>.p8</code> 을 그대로 붙이면 안 됩니다</td></tr>
 </tbody></table>
-<blockquote>Supabase 가 <b>「client secret」 을 대신 만들어 줍니다.</b> <code>.p8</code> 을 넣으면</blockquote>
-<blockquote>됩니다 — 따로 도구를 돌려 JWT 를 만드실 필요가 <b>없습니다.</b></blockquote>
-<blockquote>(예전 안내 중에는 직접 만들라는 것이 있는데, 지금 대시보드는 넷만 받습니다.</blockquote>
-<blockquote>칸이 넷이 아니라 <b>Secret Key 한 칸</b>만 보이면 그때 알려 주십시오 —</blockquote>
-<blockquote>그때는 세중님 PC 에서 돌릴 명령을 적어 드리겠습니다)</blockquote>
+<blockquote>화면에 「Secret key should be a JWT」 라고 적혀 있고 **Team ID·Key ID 칸이</blockquote>
+<blockquote>없습니다.<b> 그 둘은 JWT </b>안에** 들어갑니다. 그래서 우리가 만들어 넣습니다.</blockquote>
+<h3 id="jwt-만들기-세중님-pc-에서-한-줄">JWT 만들기 — 세중님 PC 에서 한 줄</h3>
 <pre><code>
-→ 맨 아래 **Save**
+cd "C:\Users\think\OneDrive\바탕 화면\potjob\potlab"
+node tools/애플비밀만들기.mjs
 </code></pre>
-<hr>
+<p>넷을 물어봅니다. <b>값은 화면에 안 찍힙니다.</b></p>
+<pre><code>
+① .p8 파일 경로   ← 파일을 창에 **끌어다 놓으셔도** 됩니다
+② Team ID         Account → Membership details 의 열 글자
+③ Key ID          비우고 엔터 → 파일 이름(AuthKey_XXXXXXXXXX.p8)에서 집습니다
+④ Client ID       kr.co.potjob.web
+</code></pre>
+<p>바탕화면에 <b><code>apple_secret.txt</code></b> 가 생깁니다. 화면에는 글자 수와</p>
+<p><b>만료일</b>만 찍습니다.</p>
+<pre><code>
+그 파일을 열어 **전체를 복사** → Secret Key (for OAuth) 에 붙이고 **Save**
+→ **apple_secret.txt 를 지웁니다**
+</code></pre>
 <h2 id="다-되면-한-바퀴-시험-제가-아니라-세중님-계정으로">⑥ 다 되면 — 한 바퀴 시험 (제가 아니라 세중님 계정으로)</h2>
 <p>웹에서 합니다. 앱은 아직 없습니다.</p>
 <pre><code>
@@ -140,12 +150,40 @@ supabase.com/dashboard → 우리 프로젝트
 <p><b>막히면 화면에 뜨는 글을 그대로</b> 알려 주십시오. <code>/login</code> 은 실패 까닭을</p>
 <p>감추지 않고 그대로 보여 줍니다.</p>
 <hr>
+<h2 id="6개월마다-다시-만들어-넣기">⑦ <b>6개월마다 다시 만들어 넣기</b></h2>
+<p>애플은 client secret 을 <b>6개월까지만</b> 받습니다 (15,777,000초).</p>
+<p>만료되면 <b>Apple 로그인만 조용히 안 됩니다</b> — 다른 로그인은 멀쩡해서</p>
+<p>눈치채기 어렵습니다.</p>
+<pre><code>
+만료일   tools/애플비밀만들기.mjs 가 만들 때 화면에 찍습니다.
+         그 날짜를 docs/인계/05_부록.md 「정기 할 일」에 적어 두십시오
+다시 만들기   같은 명령을 다시 돌리면 됩니다. **.p8 은 그대로 씁니다** —
+         새로 받을 필요가 없습니다 (Key 는 그대로, JWT 만 새로)
+</code></pre>
+<p><b>미리 알아채는 법</b> — 만료 2주 전쯤 <code>/login</code> 에서 Apple 단추를 한 번</p>
+<p>눌러 보십시오. 안 되면 화면이 까닭을 그대로 보여 줍니다.</p>
+<hr>
 <h2 id="아직-안-한-것-탈퇴할-때-애플-연결-끊기">아직 안 한 것 — <b>탈퇴할 때 애플 연결 끊기</b></h2>
 <p>애플은 <b>5.1.1(v)</b> 에서 「탈퇴하면 애플 쪽 연결도 끊으라」고 합니다</p>
 <p>(<code>POST https://appleid.apple.com/auth/revoke</code>). 이건 <code>.p8</code> 로 만든</p>
 <p>client secret 이 <b>서버에</b> 있어야 할 수 있습니다.</p>
 <p>지금은 안 돼 있습니다. <b>⑤ 가 끝난 뒤</b>에 붙이겠습니다 — 승인대기 ⑲.</p>
 <p>웹만 쓰는 동안에는 심사 대상이 아니고, <b>앱을 올리기 전에는 꼭 필요합니다.</b></p>
+<h3 id="그때-열쇠를-어디에-두나-세중님이-직접-넣으십니다">그때 열쇠를 어디에 두나 — <b>세중님이 직접 넣으십니다</b></h3>
+<p><code>revoke</code> 를 부르려면 ⑤ 에서 만든 것과 <b>같은 JWT</b> 가 서버에 있어야 합니다.</p>
+<pre><code>
+어디   서버 ~/potlab/.env 에 한 줄
+       APPLE_CLIENT_SECRET='&lt;apple_secret.txt 의 글 전체&gt;'
+       (옆에 APPLE_CLIENT_ID='kr.co.potjob.web' 도)
+누가   **세중님이 직접** 적으십니다. 제가 값을 보지 않습니다
+왜 .p8 이 아니라 JWT 인가
+       .p8 을 서버에 두면 **아무 때나 새 비밀을 만들 수 있는 열쇠**가 서버에
+       있게 됩니다. 6개월짜리 JWT 만 두는 쪽이 샜을 때 피해가 작습니다
+같이 바꿀 것
+       ⑦ 에서 6개월마다 JWT 를 새로 만들 때 **서버 .env 도 함께** 바꿉니다.
+       안 바꾸면 탈퇴할 때 연결 끊기만 조용히 실패합니다
+</code></pre>
+<p><b>지금은 넣지 마십시오</b> — 탈퇴 쪽 코드를 붙인 뒤에 알려 드리겠습니다.</p>
 <hr>
 <h2 id="코드-쪽에서-이미-해-둔-것">코드 쪽에서 이미 해 둔 것</h2>
 <table><thead><tr><th>무엇</th><th>어디</th><th>상태</th></tr></thead><tbody>
