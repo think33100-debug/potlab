@@ -163,27 +163,34 @@ node tools/애플비밀만들기.mjs
 <p><b>미리 알아채는 법</b> — 만료 2주 전쯤 <code>/login</code> 에서 Apple 단추를 한 번</p>
 <p>눌러 보십시오. 안 되면 화면이 까닭을 그대로 보여 줍니다.</p>
 <hr>
-<h2 id="아직-안-한-것-탈퇴할-때-애플-연결-끊기">아직 안 한 것 — <b>탈퇴할 때 애플 연결 끊기</b></h2>
-<p>애플은 <b>5.1.1(v)</b> 에서 「탈퇴하면 애플 쪽 연결도 끊으라」고 합니다</p>
-<p>(<code>POST https://appleid.apple.com/auth/revoke</code>). 이건 <code>.p8</code> 로 만든</p>
-<p>client secret 이 <b>서버에</b> 있어야 할 수 있습니다.</p>
-<p>지금은 안 돼 있습니다. <b>⑤ 가 끝난 뒤</b>에 붙이겠습니다 — 승인대기 ⑲.</p>
-<p>웹만 쓰는 동안에는 심사 대상이 아니고, <b>앱을 올리기 전에는 꼭 필요합니다.</b></p>
-<h3 id="그때-열쇠를-어디에-두나-세중님이-직접-넣으십니다">그때 열쇠를 어디에 두나 — <b>세중님이 직접 넣으십니다</b></h3>
-<p><code>revoke</code> 를 부르려면 ⑤ 에서 만든 것과 <b>같은 JWT</b> 가 서버에 있어야 합니다.</p>
+<h2 id="탈퇴할-때-애플-연결-끊기-2026-10-11-에-붙였습니다">⑧ 탈퇴할 때 애플 연결 끊기 — ✅ <b>2026-10-11 에 붙였습니다</b></h2>
+<p>애플 <b>5.1.1(v)</b> — 탈퇴하면 애플 쪽 연결도 끊어야 합니다</p>
+<p>(<code>POST https://appleid.apple.com/auth/revoke</code>).</p>
+<h3 id="어떻게-돌아가나">어떻게 돌아가나</h3>
 <pre><code>
-어디   서버 ~/potlab/.env 에 한 줄
-       APPLE_CLIENT_SECRET='&lt;apple_secret.txt 의 글 전체&gt;'
-       (옆에 APPLE_CLIENT_ID='kr.co.potjob.web' 도)
-누가   **세중님이 직접** 적으십니다. 제가 값을 보지 않습니다
-왜 .p8 이 아니라 JWT 인가
-       .p8 을 서버에 두면 **아무 때나 새 비밀을 만들 수 있는 열쇠**가 서버에
-       있게 됩니다. 6개월짜리 JWT 만 두는 쪽이 샜을 때 피해가 작습니다
-같이 바꿀 것
-       ⑦ 에서 6개월마다 JWT 를 새로 만들 때 **서버 .env 도 함께** 바꿉니다.
-       안 바꾸면 탈퇴할 때 연결 끊기만 조용히 실패합니다
+① 애플로 로그인하고 돌아온 **그 순간**에만 세션에 provider_refresh_token 이
+   실려 옵니다. /auth/callback 이 창구 애플연결저장() 으로 넣어 둡니다
+② 탈퇴할 때 /api/apple-revoke 가 내애플연결() 로 **그 사람 것만** 꺼내
+   애플에 revoke 를 부릅니다
+③ 끝나면 애플연결끊음() 이 값을 비웁니다 (지우지 않습니다)
 </code></pre>
-<p><b>지금은 넣지 마십시오</b> — 탈퇴 쪽 코드를 붙인 뒤에 알려 드리겠습니다.</p>
+<p>표 <code>애플연결</code> 은 <b>창구로만</b> 봅니다 (정책 0개 · anon·authenticated 권한 없음).</p>
+<h3 id="세중님이-넣으실-것-서버가-아니라-vercel-입니다">세중님이 넣으실 것 — <b>서버가 아니라 Vercel 입니다</b></h3>
+<p><code>revoke</code> 는 <b>화면 쪽 자리(/api/apple-revoke)</b>가 부릅니다. 그래서 열쇠는</p>
+<p><b>Vercel</b> 에 둡니다 (서버 <code>.env</code> 가 아닙니다 — 제가 앞에 잘못 적었습니다).</p>
+<pre><code>
+Vercel → potjob-web → Settings → Environment Variables → Production
+  APPLE_CLIENT_ID       kr.co.potjob.web
+  APPLE_CLIENT_SECRET   ⑤ 에서 만든 **JWT 전체** (apple_secret.txt 의 글)
+→ 넣은 뒤 **다시 배포**해야 값이 붙습니다
+</code></pre>
+<blockquote><b>.p8 이 아니라 JWT 를 둡니다.</b> .p8 을 두면 「아무 때나 새 비밀을 만들 수</blockquote>
+<blockquote>있는 열쇠」가 거기 있게 됩니다. 6개월짜리 JWT 만 두는 쪽이 샜을 때 피해가</blockquote>
+<blockquote>작습니다. <b>⑦ 에서 6개월마다 JWT 를 새로 만들 때 이 값도 함께</b> 바꿉니다 —</blockquote>
+<blockquote>안 바꾸면 <b>탈퇴할 때 연결 끊기만 조용히 실패합니다.</b></blockquote>
+<p><b>지금 안 넣어도 탈퇴는 됩니다</b> — 열쇠가 없으면 그 자리가</p>
+<p>「애플 열쇠가 아직 없습니다」만 돌려주고 탈퇴는 그대로 갑니다.</p>
+<p>애플 로그인을 쓴 적 없는 분에게는 애초에 할 일이 없습니다.</p>
 <hr>
 <h2 id="코드-쪽에서-이미-해-둔-것">코드 쪽에서 이미 해 둔 것</h2>
 <table><thead><tr><th>무엇</th><th>어디</th><th>상태</th></tr></thead><tbody>
@@ -192,7 +199,7 @@ node tools/애플비밀만들기.mjs
 <tr><td>이메일 가림(Hide My Email)</td><td>—</td><td>○ 우리는 이메일로 아무것도 안 보냅니다. 가려진 주소여도 그대로 돕니다</td></tr>
 <tr><td>이름을 안 줘도 되나</td><td>가입 화면</td><td>○ 닉네임을 <b>우리 화면에서</b> 받습니다. 애플이 주는 이름은 안 씁니다</td></tr>
 <tr><td>앱 안에서 탈퇴</td><td><code>/me</code> → <code>/me/leave</code></td><td>○ (5.1.1(v))</td></tr>
-<tr><td>탈퇴 때 애플 연결 끊기</td><td>—</td><td>✗ 승인대기 ⑲</td></tr>
+<tr><td>탈퇴 때 애플 연결 끊기</td><td><code>/api/apple-revoke</code> · <code>애플연결</code> 표 · 창구 셋</td><td>✅ 2026-10-11. <b>Vercel 에 열쇠 둘만</b> 넣으시면 됩니다</td></tr>
 </tbody></table>
 <p class="만든말">이 쪽은 <code>애플로그인_준비.md</code> 에서 만든 것입니다.
 글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>

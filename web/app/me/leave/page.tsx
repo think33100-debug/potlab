@@ -23,10 +23,13 @@ import { useToast } from '../../toast';
    글까지 지우면 이미 나간 공유 링크가 죽고, 그 글에 달린 남의 댓글이
    누구한테 한 말인지 알 수 없게 됩니다. 글은 남기고 글쓴이만 가립니다.
 
-   ── 애플 로그인을 켜게 되면 ──────────────────────────────────
+   ── 애플 연결 끊기 (2026-10-11 에 붙였습니다) ────────────────
    애플은 탈퇴할 때 Sign in with Apple REST API 의 /auth/revoke 를 불러
-   토큰을 거두라고 요구합니다. 지금은 카카오·네이버만 켜져 있어 해당 없습니다.
-   켜는 날 reset_my_account() 옆에 그 호출을 붙여야 합니다. */
+   토큰을 거두라고 요구합니다 (5.1.1(v)).
+   **reset_my_account() 를 부르기 전에** /api/apple-revoke 를 부릅니다 —
+   계정을 지운 뒤에는 그 사람 토큰으로 창구를 못 부릅니다.
+   애플 열쇠가 아직 없으면 그 자리가 「없습니다」만 돌려주고 **탈퇴는
+   그대로 됩니다.** 애플로 로그인한 적이 없는 분에게도 할 일이 없습니다. */
 
 const SURE = '탈퇴';
 
@@ -56,6 +59,17 @@ export default function LeavePage() {
   const run = async () => {
     setBusy(true);
     const sb = browserSupabase();
+    /* ★ 애플 연결을 **먼저** 끊습니다 — 계정을 지운 뒤에는 못 부릅니다.
+       실패해도 탈퇴는 그대로 갑니다 (애플 쪽은 관리자가 따로 볼 수 있습니다) */
+    try {
+      const tok = session?.access_token;
+      if (tok) {
+        await fetch('/api/apple-revoke', {
+          method: 'POST', headers: { Authorization: 'Bearer ' + tok },
+        });
+      }
+    } catch { /* 탈퇴를 막지 않습니다 */ }
+
     const { error } = await sb.rpc('reset_my_account');
 
     if (error) {

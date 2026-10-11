@@ -63,6 +63,20 @@ export default function AuthCallback() {
 
       쪽지치우기();
 
+      /* ★ 2026-10-11 — 애플로 들어왔으면 **이 순간에만** 실려 오는
+         provider_refresh_token 을 넣어 둡니다. 탈퇴할 때 애플에
+         revoke 를 부르려면 그 값이 있어야 합니다 (애플 5.1.1(v)).
+         표는 창구로만 봅니다 — 애플연결저장() 이 자기 것만 넣습니다.
+         실패해도 로그인을 막지 않습니다 */
+      try {
+        const 제공자 = data.session.user.app_metadata?.provider;
+        const 리프레시 = (data.session as { provider_refresh_token?: string | null })
+          .provider_refresh_token;
+        if (제공자 === 'apple' && 리프레시) {
+          await sb.rpc('애플연결저장', { p_토큰: 리프레시 });
+        }
+      } catch { /* 넣기 실패가 로그인을 막지 않습니다 */ }
+
       const { data: prof } = await sb
         .from('profiles').select('id').eq('id', data.session.user.id).maybeSingle();
 
