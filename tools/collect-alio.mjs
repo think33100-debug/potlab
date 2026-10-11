@@ -347,6 +347,18 @@ async function 한건(cfg, r, 셈, 옵션) {
     const box = await 상세받기(cfg, id);
     if (!box) { 셈.상세못받음++; hold = '상세를 못 받았습니다'; }
     else {
+      /* ★ 2026-10-11 — 첨부 주소는 **상세를 연 바로 이 자리에서** 담습니다.
+         전에는 공고문글자() 안에만 있어서 두 겹으로 막혀 있었습니다 —
+           ① 제목·steps 로 직군이 가려진 공고는 공고문글자() 를 안 부릅니다
+           ② 아래쪽 「우리와 무관」 등의 early return 을 먼저 만납니다
+         그래서 30건을 돌려도 첨부가 0줄이었습니다. 응답 원문을 찍어
+         files 2개(atchFileType A·B·C)가 실려 오는 것을 눈으로 확인했습니다.
+         box.files 는 같은 /detail 응답에 실려 와 API 호출이 안 늡니다.
+         atchFileType  A=공고문 B=지원서 C=직무기술서 (코드 정의서 · 지침 4절) */
+      for (const f of (box.files || []).filter((x) => String(x.atchFileType) === 'A')) {
+        첨부모음.더하기({ job_id: String(box.recrutPblntSn || box.sn || id),
+                        kind: '공고문', name: String(f.atchFileNm || ''), url: String(f.url || '') });
+      }
       const names = (box.steps || []).map((s) => String(s.recrutPbancTtl || '').trim()).filter(Boolean);
       /* ★ 2026-10-11 — 직군을 **이미 가린** 공고에서도 인원은 셉니다.
          전에는 j1 갈래 안에서만 세서, 목록으로 가려진 공고는 못 셌습니다 */
@@ -438,16 +450,6 @@ async function 한건(cfg, r, 셈, 옵션) {
       }
       if (box.files) r.__files = box.files.length;
       r.__box = box;
-
-      /* ★ 2026-10-11 — 첨부 주소를 **직군을 가린 공고에도** 담습니다.
-         전에는 공고문글자() 안에만 있어서, 제목·상세(steps)로 직군이
-         가려진 공고는 첨부 주소가 안 담겼습니다. 그런데 일곱 칸(모집인원·
-         접수마감·근무지·지원자격·예상연봉)은 **가려진 공고에도** 필요합니다.
-         box.files 는 **같은 /detail 응답**에 실려 와서 API 호출이 안 늡니다 */
-      for (const f of (box.files || []).filter((x) => String(x.atchFileType) === 'A')) {
-        첨부모음.더하기({ job_id: String(box.sn || box.recrutPblntSn || id),
-                        kind: '공고문', name: String(f.atchFileNm || ''), url: String(f.url || '') });
-      }
     }
   }
 
@@ -859,10 +861,8 @@ if (!dry) {
 }
 
 /* 첨부 주소 담기 (2026-10-10) */
-if (첨부모음.줄들.length) {
-  if (첨부모음.마른) await 첨부모음.형식확인(40);
-  await 첨부모음.끝내기(cfg);
-}
+if (첨부모음.줄들.length && 첨부모음.마른) await 첨부모음.형식확인(40);
+await 첨부모음.끝내기(cfg);   /* 0줄이어도 셈을 찍습니다 (지침 2절) */
 
 /* 남은 하루 한도를 남깁니다 — 쓴 양은 신청 건마다 하나이고
    우리 열쇠 둘이 같이 씁니다. 남이 쓰면 우리 몫도 줄어듭니다 (2026-09-30) */
