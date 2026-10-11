@@ -51,6 +51,8 @@ import { sortJob } from './sort-rule.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
 import { 첨부직군 } from './첨부직군.mjs';
+/* 공고문 주소를 job_attachments 에 담습니다 (2026-10-10 · tools/첨부담기.mjs) */
+import { 첨부모으기 } from './첨부담기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'GJ2';
@@ -73,6 +75,9 @@ const 첨부셈만 = argv.includes('--첨부셈만');
    목록은 그대로 받고, **전에 판정한 줄만 빼고** 상세·첨부를 엽니다.
    한 바퀴에 상세 374번 + 첨부 105건(PDF 는 구글 OCR)이라 그게 시간의 전부입니다 */
 const 순찰 = argv.includes('--순찰');
+/* --마른 : 첨부를 DB 에 안 담고 docs/첨부_미리보기_1010.json 에만 적습니다 */
+const 마른첨부 = argv.includes('--마른');
+const 첨부모음 = 첨부모으기(SOURCE, { 마른: 마른첨부 });
 const 최대쪽 = 값('--쪽', 30);
 const 상세몫 = 값('--상세', 600);
 const 며칠 = 값('--날', 30);
@@ -406,6 +411,12 @@ for (const v of 볼것) {
   if (!f.pdf && !f.hwp) continue;
   셈.첨부연것++;
   const 고른것 = f.pdf || f.hwp;
+  /* ★ 여기서 주소를 **버리지 않고 담습니다** (2026-10-10).
+     글자만 읽고 주소를 흘려보내서 job_attachments 가 0줄이었고, 그래서
+     공고 상세 일곱 칸의 셋째 재료(첨부 공고문)가 통째로 없었습니다.
+     온전히() 가 &amp; 를 이미 풀어 둔 값입니다 (지침 5절) */
+  첨부모음.더하기({ job_id: 'GJ' + String(v.x.idx || ''), kind: '공고문',
+                  name: 고른것.includes('.hwp') ? '공고문.hwp' : '공고문.pdf', url: 고른것 });
   const 이름 = 고른것.includes('.hwp') ? '공고문.hwp' : '공고문.pdf';
   const a = await 파일글자(고른것, 이름);
   if (a.글) {
@@ -606,6 +617,12 @@ if (!dry) {
       },
     });
   } catch (e) { console.error('박동 못 남김 · ' + String(e.message).slice(0, 120)); }
+}
+
+/* ── ⑥-2 첨부 주소 담기 ──────────────────────────────────── */
+if (첨부모음.줄들.length) {
+  if (마른첨부) await 첨부모음.형식확인(40);
+  await 첨부모음.끝내기(cfg);
 }
 
 /* ── ⑦ 한도 남기기 ───────────────────────────────────────── */
