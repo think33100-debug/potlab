@@ -176,7 +176,12 @@ if (cfg.RESEND_KEY && cfg.NOTIFY_EMAIL) {
   });
   const t = await r.text();
   if (!r.ok) { console.error('메일 못 보냄 · HTTP ' + r.status + ' · ' + t.slice(0, 300)); process.exit(1); }
+  /* ★ 2026-10-11 — **id 를 남깁니다.** 「Resend 가 받아들였다」와 「도착했다」는
+     다릅니다. id 가 있으면 나중에 상태를 조회할 수 있습니다 (지침 12절) */
+  let id = '';
+  try { id = (JSON.parse(t) || {}).id || ''; } catch { /* 모양이 바뀌어도 넘어갑니다 */ }
   console.log('보냈습니다 — ' + 제목);
+  console.log('   Resend id ' + (id || '(응답에 id 가 없습니다: ' + t.slice(0, 120) + ')'));
 } else {
   console.log('※ RESEND_KEY · NOTIFY_EMAIL 이 없어 화면에만 찍습니다\n');
   console.log('제목: ' + 제목 + '\n');
