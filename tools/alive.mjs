@@ -21,6 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 붙여받기 } from './certs/index.mjs';
+import { 목록상태, 목록상태셈 } from './hosp/hs_목록상태.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -106,6 +107,31 @@ async function 하나(x) {
      굿모닝병원이 이 꼴입니다 — 기간 자리에 날짜 대신 「<마감>」 을 적습니다 */
   if (/(접수|모집|원서)\s*기간[^가-힣0-9]{0,8}(＜|<|&lt;|\[|\()?\s*마감/.test(글)) {
     return { 결과: 'closed', 왜: '본문 접수기간 자리에 「마감」' };
+  }
+
+  /* ── ⑥ **목록 줄**의 상태 칸 (2026-10-12) ──────────────────
+     ②는 상세 쪽의 제목을 봅니다. 그런데 병원 게시판은 상태를 **목록 쪽의
+     칸**에 적는 곳이 많아, 상세를 열면 그 표시가 없습니다.
+
+       울산엘리야병원   목록 줄 「[채용완료] 물리치료팀 물리치료사」
+       청주성모병원     목록 줄 「… 물리치료사 채용  모집완료  09-18」
+       부산광역시의료원  목록 줄 「1181  완료  직원 모집 공고(물리치료사 - 기간제)」
+
+     2026-10-12 에 세어 보니 회원에게 보이는 병원 공고 46건 중 **11건이 그
+     줄에서 이미 마감**이었습니다. 상세만 봐서는 영영 안 걸립니다.
+
+     규칙은 `hosp/hs_목록상태.mjs` 한 곳에 둡니다 — 조사 도구
+     (`마감표시_줄마다.mjs`)와 같은 자리를 씁니다 (지침 6절).
+     목록은 **기관마다 한 번만** 받아 돌려 씁니다.
+
+     ★ ④보다 **먼저** 봅니다. 목록이 「마감」이라고 적었으면 접수기간을
+       채우는 것보다 그 말이 셉니다. */
+  try {
+    const L = await 목록상태(x.org_name, x.title);
+    if (L.결과 === 'closed') return { 결과: 'closed', 왜: L.왜 + ' — ' + String(L.줄글 || '').slice(0, 60) };
+  } catch (e) {
+    /* 목록을 못 받아도 상세 판정은 그대로 씁니다 — 판단을 미루지 않습니다 */
+    console.error('    (목록 줄을 못 봤습니다 · ' + String(e && e.message || e).slice(0, 60) + ')');
   }
 
   /* ── ④ 본문 「접수기간」 앞뒤만 잘라 마감일 읽기 (2026-10-07) ─
@@ -219,6 +245,10 @@ const 셈 = 결과.reduce((a, x) => (a[x.결과] = (a[x.결과] || 0) + 1, a), {
 console.log('\n── 살아 있음 ' + (셈.alive || 0) + ' · 사라짐 ' + (셈.gone || 0)
   + ' · 마감됨 ' + (셈.closed || 0) + ' · 판단 못 함 ' + (셈.unknown || 0)
   + ' · 접수기간 찾음 ' + 결과.filter((x) => x.접수기간).length);
+/* ⑥ 이 무슨 일을 했는지 **숫자로** 적습니다 — 안 적으면 돌았는지 모릅니다 */
+const 목셈 = 목록상태셈();
+console.log('   목록 줄 — 받은 기관 ' + 목셈.받은곳 + ' · 못 받은 기관 ' + 목셈.못받은곳
+  + ' · 판정 ' + (Object.entries(목셈.판정).map(([k, v]) => k + ' ' + v).join(' · ') || '없음'));
 
 if (dry) { console.log('--dry 라 기록하지 않았습니다.'); process.exit(0); }
 const 답 = await rpc(cfg, 'alive_mark', { p_secret: cfg.ALIVE_KEY, p_rows: 결과 });

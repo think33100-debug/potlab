@@ -1,0 +1,181 @@
+/* 병원 게시판 **목록 줄**의 상태 칸을 읽습니다 — 「마감 · 채용완료 · 모집완료 …」
+ * (2026-10-12).
+ *
+ *   import { 목록상태, 목록상태셈 } from './hosp/hs_목록상태.mjs';
+ *   const r = await 목록상태('청주성모병원', '물리치료사 채용');
+ *   // → { 결과: 'closed'|'open'|'없음'|'모름', 왜, 줄글 }
+ *
+ * ── 왜 따로 봐야 하나 ────────────────────────────────────────
+ * `alive.mjs` 는 공고의 **상세 쪽**을 봅니다. 그런데 병원 게시판은 상태를
+ * **목록 쪽의 칸**에 적는 곳이 많습니다. 상세를 열면 그 표시가 없습니다.
+ *
+ *   울산엘리야병원  목록 줄 「[채용완료] 물리치료팀 물리치료사」
+ *   청주성모병원    목록 줄 「… 물리치료사 채용  모집완료  09-18」
+ *   부산광역시의료원 목록 줄 「1181  완료  직원 모집 공고(물리치료사 - 기간제)」
+ *
+ * 2026-10-12 에 세어 보니 회원에게 보이는 병원 공고 46건 중 **11건이 그 줄에서
+ * 이미 마감**이었습니다. 상세만 봐서는 영영 안 걸립니다.
+ *
+ * ── 왜 여기 한 곳에 두나 ─────────────────────────────────────
+ * 같은 규칙을 `alive.mjs`(정기 판정)와 `마감표시_줄마다.mjs`(조사)가 같이 씁니다.
+ * 두 벌로 두면 어긋납니다 (지침 6절 — 기준은 한 자리).
+ *
+ * ── 조심한 것 ────────────────────────────────────────────────
+ *   · 줄을 **고를** 때는 괄호 안을 살립니다. 버리면
+ *     「직원 모집 공고(물리치료사 - 기간제)」 가 「직원 모집 공고(기록물관리
+ *     전문요원 - 행정직)」 줄에 붙습니다 (2026-10-12 에 실제로 그랬습니다)
+ *   · 걸린 줄이 **하나일 때만** 판정합니다. 둘 이상이면 「모름」 —
+ *     같은 제목을 네 번 올린 게시판이 있습니다 (동의병원)
+ *   · 한 줄에 닫힘말과 열림말이 같이 있으면 「모름」
+ *   · 목록 받기는 `글받기()` 한 벌로, **기관마다 한 번만** 받고 돌려 씁니다
+ *   · `type` 이 `html` 이 아닌 갈래(appsite·cmc·schmc·greeting)는 **이미**
+ *     수집기가 상태를 읽어 마감을 버립니다 (sites.mjs). 그래서 「없음」을 돌려줍니다
+ *   · 설정은 **읽기만** 합니다 — `collect-hosp.mjs` 의 `사이트들()` 은
+ *     `hosp-sites.json` 을 **쓰므로** 부르지 않습니다
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { 글받기 } from '../certs/index.mjs';
+
+const require = createRequire(import.meta.url);
+const { UA } = require('./hs_test.js');
+const 기본머리 = { 'User-Agent': UA, 'Accept-Language': 'ko' };
+const 여기 = path.dirname(fileURLToPath(import.meta.url));
+
+/* ── 설정 288줄 — 읽기만 ───────────────────────────────────── */
+let 사이트들 = null;
+function 설정() {
+  if (사이트들) return 사이트들;
+  const gas = path.join(여기, '..', '..', 'gas', 'wage.js');
+  if (fs.existsSync(gas)) {
+    const G = fs.readFileSync(gas, 'utf8');
+    const i0 = G.indexOf('const HOSP_SITES = [');
+    if (i0 >= 0) {
+      let d = 0; let end = -1;
+      for (let k = G.indexOf('[', i0); k < G.length; k++) {
+        if (G[k] === '[') d++; else if (G[k] === ']' && --d === 0) { end = k + 1; break; }
+      }
+      // eslint-disable-next-line no-new-func
+      사이트들 = new Function('return ' + G.slice(G.indexOf('[', i0), end))();
+      return 사이트들;
+    }
+  }
+  const 구운것 = path.join(여기, 'hosp-sites.json');
+  사이트들 = fs.existsSync(구운것) ? (JSON.parse(fs.readFileSync(구운것, 'utf8')).사이트 || []) : [];
+  return 사이트들;
+}
+
+const 기관키 = (s) => String(s || '')
+  .replace(/의료법인|학교법인|재단법인|사회복지법인|특수법인|사단법인|지방의료원|의료재단|복지재단|유지재단|부속/g, '')
+  .replace(/[\s()·,)]/g, '').toLowerCase();
+
+/** 줄을 **고를** 때 쓰는 꼴 — 괄호 안을 살리고, 말머리 상태 표시만 걷습니다 */
+const 견줄 = (s) => String(s || '')
+  .replace(/^\s*[[(<【]\s*(마감|종료|완료|모집마감|접수마감|채용마감|채용완료|모집완료)\s*[\])>】]/g, ' ')
+  .replace(/[★☆■□●○◆◇▶▷…·,.'"“”‘’\-–—_/\\|:;!?~[\]()<>【】]/g, '')
+  .replace(/\s+/g, '').toLowerCase();
+
+const 태그걷기 = (h) => String(h || '')
+  .replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')
+  .replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]+>/g, ' ')
+  .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+
+export const 닫힘말 = /마감|종료|완료|접수\s*끝/;
+export const 열림말 = /접수\s*중|진행\s*중|채용\s*중|모집\s*중/;
+
+/* 기관마다 목록을 한 번만 받습니다 (한 번 돈 동안만 들고 있습니다) */
+const 받아둔것 = new Map();        /* 기관키 → {줄들, 왜} */
+const 셈 = { 받은곳: 0, 못받은곳: 0, 판정: {} };
+export function 목록상태셈() { return { ...셈, 판정: { ...셈.판정 } }; }
+
+async function 목록줄들(s) {
+  const k = 기관키(s.name);
+  if (받아둔것.has(k)) return 받아둔것.get(k);
+  let 값;
+  try {
+    const g = await 글받기(s.url, { headers: 기본머리, enc: s.enc, timeout: 20000 });
+    if (g.왜) 값 = { 왜: '못 받음 · ' + String(g.왜).slice(0, 40) };
+    else if (g.code !== 200 || (g.html || '').length < 300) 값 = { 왜: 'HTTP ' + g.code };
+    else if (!s.row) 값 = { 왜: '설정에 row 규칙이 없습니다' };
+    else 값 = { 줄들: g.html.match(new RegExp(s.row, 'g')) || [] };
+  } catch (e) {
+    값 = { 왜: '탈 ' + String(e && e.message || e).slice(0, 40) };
+  }
+  if (값.왜) 셈.못받은곳++; else 셈.받은곳++;
+  받아둔것.set(k, 값);
+  return 값;
+}
+
+/**
+ * 그 공고가 **그 기관 목록 줄에서** 마감인가.
+ * @param {string} 기관 job_posts.org_name
+ * @param {string} 제목 job_posts.title (원문 제목)
+ * @returns {{결과:'closed'|'open'|'없음'|'모름', 왜:string, 줄글?:string}}
+ */
+export async function 목록상태(기관, 제목) {
+  const 센다 = (r) => { 셈.판정[r.결과] = (셈.판정[r.결과] ?? 0) + 1; return r; };
+  const s = 설정().find((x) => 기관키(x.name) === 기관키(기관));
+  if (!s) return 센다({ 결과: '없음', 왜: '병원 목록에 없는 기관입니다' });
+  if (s.type !== 'html') {
+    return 센다({ 결과: '없음', 왜: '갈래 ' + s.type + ' — 수집기가 이미 상태를 읽습니다' });
+  }
+  if (!s.url) return 센다({ 결과: '없음', 왜: '목록 주소가 없습니다' });
+
+  const L = await 목록줄들(s);
+  if (L.왜) return 센다({ 결과: '모름', 왜: L.왜 });
+  if (!L.줄들.length) return 센다({ 결과: '모름', 왜: 'row 규칙에 걸린 줄이 0' });
+
+  const kk = 견줄(제목);
+  if (kk.length < 6) return 센다({ 결과: '모름', 왜: '제목이 너무 짧아 줄을 못 고릅니다' });
+  const 걸린 = L.줄들.filter((c) => 견줄(태그걷기(c)).includes(kk));
+  if (!걸린.length) return 센다({ 결과: '없음', 왜: '목록에 그 제목이 없습니다' });
+  if (걸린.length > 1) return 센다({ 결과: '모름', 왜: '같은 제목의 줄이 ' + 걸린.length + '개' });
+
+  const 글 = 태그걷기(걸린[0]);
+  const 닫 = 닫힘말.test(글); const 열 = 열림말.test(글);
+  if (닫 && !열) {
+    return 센다({ 결과: 'closed', 왜: '목록 줄이 「' + (글.match(닫힘말) || [''])[0] + '」', 줄글: 글.slice(0, 120) });
+  }
+  if (열 && !닫) return 센다({ 결과: 'open', 왜: '목록 줄이 「접수중」', 줄글: 글.slice(0, 120) });
+  if (닫 && 열) return 센다({ 결과: '모름', 왜: '한 줄에 닫힘말과 열림말이 같이 있습니다', 줄글: 글.slice(0, 120) });
+  return 센다({ 결과: '없음', 왜: '그 줄에 상태말이 없습니다', 줄글: 글.slice(0, 120) });
+}
+
+/* ── 자기 점검 ───────────────────────────────────────────────
+   node tools/hosp/hs_목록상태.mjs        규칙만 (사이트를 안 두드립니다)
+   node tools/hosp/hs_목록상태.mjs 기관 제목   실제로 한 건 */
+if (process.argv[1] && process.argv[1].endsWith('hs_목록상태.mjs')) {
+  const [기관, 제목] = process.argv.slice(2);
+  if (기관 && 제목) {
+    console.log(JSON.stringify(await 목록상태(기관, 제목), null, 1));
+  } else {
+    const 어겼나 = [];
+    const 봐 = (이름, 참) => { if (!참) 어겼나.push(이름); };
+
+    /* 괄호를 살려야 엉뚱한 줄에 안 붙습니다 */
+    봐('괄호를 살림', 견줄('직원 모집 공고(물리치료사 - 기간제)') !== 견줄('직원 모집 공고(기록물관리 전문요원 - 행정직)'));
+    /* 말머리 상태 표시는 걷습니다 — 우리가 담은 제목에 그것이 붙어 있을 수 있습니다 */
+    봐('말머리 [마감] 을 걷음', 견줄('[마감] 작업치료사 채용') === 견줄('작업치료사 채용'));
+    봐('말머리 (마감) 을 걷음', 견줄('(마감)물리치료사 모집공고') === 견줄('물리치료사 모집공고'));
+    /* 가운데 들어간 <마감> 은 **안** 걷습니다 — 제목의 일부입니다 */
+    봐('가운데 <마감> 은 남김', 견줄('작업치료사 채용공고(계약직) <마감>').includes('마감'));
+
+    봐('닫힘말 채용완료', 닫힘말.test('[채용완료] 물리치료팀 물리치료사'));
+    봐('닫힘말 모집완료', 닫힘말.test('물리치료사 채용 모집완료 09-18'));
+    봐('닫힘말 완료', 닫힘말.test('1181 완료 직원 모집 공고(물리치료사 - 기간제)'));
+    봐('닫힘말 채용마감', 닫힘말.test('물리치료사 모집 (* 채용마감 *)'));
+    봐('열림말 접수중', 열림말.test('물리치료사 채용 접수중'));
+    봐('열림말 진행중', 열림말.test('작업치료사 진행중'));
+    봐('열림말만 있으면 닫힘 아님', !닫힘말.test('물리치료사 채용 접수중 10-20'));
+
+    /* 태그걷기 가 꺾쇠 글자를 안 삼키나 — 지침 5절(rgPlain_ 덫) */
+    봐('태그걷기가 제목을 안 지움', 태그걷기('<td>작업치료사 채용공고(계약직) &lt;마감&gt;</td>').includes('작업치료사'));
+
+    if (어겼나.length) { console.error('✗ ' + 어겼나.join(' · ')); process.exit(1); }
+    console.log('○ 자기 점검 ' + 12 + '개 통과 (사이트를 두드리지 않았습니다)');
+    console.log('   설정 ' + 설정().length + '곳 읽음 · html 갈래 '
+      + 설정().filter((x) => x.type === 'html').length + '곳');
+  }
+}
