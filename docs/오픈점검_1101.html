@@ -131,7 +131,15 @@
 </tbody></table>
 <hr>
 <h2 id="4-오픈-전-보안-네-가지">4. 오픈 전 보안 — <b>네 가지</b></h2>
-<h3 id="4-1-수집기-창구가-비로그인에게-열려-있습니다">4-1. 수집기 창구가 <b>비로그인에게 열려 있습니다</b></h3>
+<h3 id="4-1-수집기-창구가-비로그인에게-열려-있었습니다-2026-10-11-에-닫았습니다">4-1. 수집기 창구가 비로그인에게 열려 있었습니다 — ✅ <b>2026-10-11 에 닫았습니다</b></h3>
+<blockquote><b>끝났습니다.</b> 수집기 열넷이 <code>service_role</code> 로 창구를 부르고(커밋 <code>9106739</code>),</blockquote>
+<blockquote><code>collect_put</code>·<code>collect_beat</code>·<code>판정남기기</code>·<code>api_quota_put</code> 넷에서</blockquote>
+<blockquote><code>public</code>·<code>anon</code>·<code>authenticated</code> 를 걷었습니다. 지금 권한은</blockquote>
+<blockquote><code>{postgres, service_role}</code> 뿐입니다.</blockquote>
+<blockquote><code>api_quota_put</code> 에는 <b>PUBLIC 까지</b> 붙어 있었습니다 — 함께 걷었습니다.</blockquote>
+<blockquote>걷은 뒤 서버 수집기를 돌려 241건을 담았습니다.</blockquote>
+<h3 id="아래는-찾았을-때-적은-글입니다">(아래는 찾았을 때 적은 글입니다)</h3>
+<h3 id="4-1-옛-수집기-창구가-비로그인에게-열려-있습니다">4-1-옛. 수집기 창구가 <b>비로그인에게 열려 있습니다</b></h3>
 <pre><code>
 collect_put    anon=O · authenticated=O · service_role=O
 collect_beat   anon=O · authenticated=O · service_role=O
@@ -153,7 +161,15 @@ grant  execute on function public.판정남기기(text, text, jsonb)     to serv
 <p>부르게** 함께 고쳐야 합니다 — 안 고치면 수집이 통째로 멈춥니다.</p>
 <p>한 수집기에서 먼저 해 보고 나머지를 옮깁니다. <code>p_secret</code> 은 <b>그대로 둡니다</b></p>
 <p>(두 겹이 낫습니다).</p>
-<h3 id="4-2-가짜-조회수를-못-막습니다">4-2. 가짜 조회수를 못 막습니다</h3>
+<h3 id="4-2-가짜-조회수를-못-막았습니다-2026-10-11-에-그물을-걸었습니다">4-2. 가짜 조회수를 못 막았습니다 — ✅ <b>2026-10-11 에 그물을 걸었습니다</b></h3>
+<blockquote><b>끝났습니다.</b> 하루번호를 <b>서버가</b> 만듭니다 — 아이피 + 브라우저 한 낱말</blockquote>
+<blockquote>+ 날짜 + 본 자리를 해시합니다. 브라우저가 보낸 <code>key</code> 는 버립니다.</blockquote>
+<blockquote>같은 날 같은 자리는 <b>한 번만</b> 셉니다.</blockquote>
+<blockquote>아이피도 UA 도 저장하지 않습니다 — 해시만 남고 되짚을 수 없습니다.</blockquote>
+<blockquote>유일 제약 대신 넣기 전에 한 번 묻습니다 (제약을 걸려면 쌓인 줄을 지워야</blockquote>
+<blockquote>하는데 그건 승인 창입니다 · 8-7).</blockquote>
+<h3 id="아래는-찾았을-때-적은-글입니다">(아래는 찾았을 때 적은 글입니다)</h3>
+<h3 id="4-2-옛-가짜-조회수를-못-막습니다">4-2-옛. 가짜 조회수를 못 막습니다</h3>
 <p><code>web/app/api/hit/route.ts</code> 는 봇 이름과 <code>prefetch</code> 만 거릅니다.</p>
 <p><b>같은 사람인지 가리는 <code>day_key</code> 를 브라우저가 줍니다.</b> 번호를 매번 새로</p>
 <p>지어 보내면 조회수가 끝없이 올라갑니다. 아이피 제한도 없습니다.</p>
@@ -185,10 +201,10 @@ grant  execute on function public.판정남기기(text, text, jsonb)     to serv
 <hr>
 <h2 id="5-앱-심사-준비-현황">5. 앱 심사 준비 현황</h2>
 <table><thead><tr><th>심사 기준</th><th>무엇이 필요한가</th><th>지금</th><th>할 일</th></tr></thead><tbody>
-<tr><td><b>4.8 로그인 서비스</b></td><td>카카오·네이버가 있으면 <b>Apple 로그인도</b> 있어야 합니다</td><td>✗ <code>/login</code> 에 단추는 있는데 「아직 준비 중이에요」 — 안 이어져 있습니다</td><td>Apple Developer 등록 → Supabase 에 Apple 제공자 켜기 → <code>METHODS</code> 의 <code>apple</code> 에 <code>oauth</code> 넣기</td></tr>
+<tr><td><b>4.8 로그인 서비스</b></td><td>카카오·네이버가 있으면 <b>Apple 로그인도</b> 있어야 합니다</td><td>△ <b>코드는 2026-10-11 에 이었습니다.</b> 세중님이 애플 개발자 등록 → Supabase Providers → Apple 네 칸만 채우시면 됩니다</td><td><code>docs/애플로그인_준비.md</code> 차례대로</td></tr>
 <tr><td><b>5.1.1(v) 앱 안에서 탈퇴</b></td><td>가입이 되면 탈퇴도 앱 안에서</td><td>○ <code>/me</code> 에 「회원 탈퇴」 (주석에 기준 번호까지 적혀 있습니다)</td><td>탈퇴 때 <b>증빙 파일</b>도 지우기 (지금은 <code>profiles</code> 만)</td></tr>
 <tr><td><b>1.2 회원이 쓴 글</b> — 신고</td><td>신고 창구</td><td>○ <code>공고오류신고</code> · <code>admin_신고목록</code> · <code>admin_신고처리</code> · <code>신고걸렸나</code></td><td>커뮤니티 글·댓글 신고가 <b>끝까지 도는지</b> 한 바퀴</td></tr>
-<tr><td><b>1.2 회원이 쓴 글</b> — <b>차단</b></td><td><b>거슬리는 회원을 차단</b>할 수 있어야 합니다</td><td>△ <code>대화차단하기()</code> 는 <b>1:1 대화만</b></td><td><b>커뮤니티에 차단이 없습니다.</b> 차단한 사람의 글·댓글이 안 보이게 만들어야 합니다 — <b>심사에서 막히는 자리</b></td></tr>
+<tr><td><b>1.2 회원이 쓴 글</b> — <b>차단</b></td><td><b>거슬리는 회원을 차단</b>할 수 있어야 합니다</td><td>✅ <b>2026-10-11 에 만들었습니다</b> — 글 아래 「차단」 · <code>/me</code> 에 「차단한 분」과 「풀기」. 눌러서 한 바퀴 확인했습니다</td><td>—</td></tr>
 <tr><td><b>1.2</b> — 24시간 안 처리</td><td>신고를 하루 안에 본다는 약속</td><td>?</td><td>약관·안내에 한 줄 (세중님이 오픈 직전에)</td></tr>
 <tr><td><b>심사용 계정</b></td><td>애플 심사원이 쓸 계정</td><td>✗</td><td>아이디·비번을 만들어 <b>심사 메모에</b> 적습니다. 그 계정에 <b>승인된 담당자 권한</b>까지 넣어야 <code>/biz</code> 를 봅니다</td></tr>
 <tr><td><b>4.2 최소 기능</b> (「앱다운 기능」)</td><td>웹을 감싸기만 하면 떨어집니다</td><td>△</td><td>후보 — <b>① 마감 알림 푸시</b>(이미 있습니다 · VAPID) <b>② 찜한 공고 오프라인 보기</b> <b>③ 공고 사진으로 바로 신고</b> <b>④ 위젯 — 오늘 마감</b></td></tr>
