@@ -30,6 +30,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 공공부르기, 한도들 } from './공공데이터부르기.mjs';
+import { 직군인원 } from './알리오직군셈.mjs';   /* 셈은 한 자리에만 */
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 뿌리 = path.join(여기, '..');
@@ -99,30 +100,6 @@ console.log(`알리오 공고 ${공고.length}건 · 셀 것 ${할것.length}건
   + (몇개 ? ` (--몇개 ${몇개})` : '') + (정말 ? '' : ' · **마른 실행**'));
 
 /* ── ② 직군 세기 ────────────────────────────────────────────── */
-/* 「의료기술직(물리치료사)」 「일반(작업치료사)-(1)」 「물리치료사 2명」 */
-export function 직군인원(이름들) {
-  const 셈 = { 물리치료사: 0, 작업치료사: 0 };
-  const 근거 = [];
-  for (const t0 of 이름들) {
-    const t = String(t0 || '').replace(/\s+/g, ' ').trim();
-    if (!t) continue;
-    const 물 = /물리치료/.test(t);
-    const 작 = /작업치료/.test(t);
-    if (!물 && !작) continue;
-    /* 인원 꼴 — 「-(1)」 「(1명)」 「1명」 「: 2」 */
-    const m = t.match(/[-–]\s*\((\d{1,3})\)\s*$/) || t.match(/\((\d{1,3})\s*명\)/)
-      || t.match(/(\d{1,3})\s*명/) || t.match(/[:：]\s*(\d{1,3})\s*$/);
-    const n = m ? Number(m[1]) : 1;          /* 수가 안 적히면 한 자리로 봅니다 */
-    if (물 && 작) {
-      /* 한 줄에 둘 다 — 가를 수 없으니 공통으로 나눠 적지 않고 둘 다에 올립니다 */
-      셈.물리치료사 += n; 셈.작업치료사 += n;
-      근거.push(`${t} → 물리·작업 둘 다 ${n}`);
-    } else if (물) { 셈.물리치료사 += n; 근거.push(`${t} → 물리치료사 ${n}`); }
-    else { 셈.작업치료사 += n; 근거.push(`${t} → 작업치료사 ${n}`); }
-  }
-  return { 셈, 근거, 합: 셈.물리치료사 + 셈.작업치료사, 둘다: 근거.some((x) => x.includes('둘 다')) };
-}
-
 async function 상세받기(sn) {
   const n = String(sn || '').replace(/\D/g, '');
   if (!n) return null;
