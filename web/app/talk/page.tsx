@@ -48,15 +48,9 @@ export default function Talk() {
 
   if (loading) return <main className="mx-auto w-full max-w-2xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
 
-  if (!isAdmin && !마스터) {
-    return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
-        <p className="break-keep text-h3 font-bold">아직 준비 중이에요</p>
-        <Link href="/" className="mt-7 inline-block rounded-md border border-gray-200 px-6 py-4
-                                  text-lg font-medium text-gray-600 hover:bg-gray-50">홈으로</Link>
-      </main>
-    );
-  }
+  /* ★ 2026-10-11 — 회원에게 열었습니다 (세중님 결정).
+     1:1 대화 — 회원끼리 말합니다.
+     막는 자리는 화면이 아니라 창구입니다 (docs/인계/05_부록.md 2절) */
 
   const 정하기 = async (r: 방, 받나: boolean) => {
     const { error } = await browserSupabase()

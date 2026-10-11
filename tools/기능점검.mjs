@@ -34,13 +34,24 @@ const 주소 = (process.argv.includes('--주소')
 const 준비중 = '아직 준비 중이에요';
 
 const 기능 = {
-  알림함: { 길: '/alarm', 역할: '작업치료사', 손님막힘: true, 눌러볼것: '종' },
-  재직인증: { 길: '/verify', 역할: '작업치료사', 손님막힘: true },
-  담당자신청: { 길: '/partner', 역할: '작업치료사', 손님막힘: true },
-  채용관리: { 길: '/biz', 역할: '채용담당자', 손님막힘: true },
-  교육관리: { 길: '/edu/manage', 역할: '교육담당자', 손님막힘: true },
-  대화: { 길: '/talk', 역할: '작업치료사', 손님막힘: true },
+  알림함: { 길: '/alarm', 역할: '작업치료사', 쪽: 'web/app/alarm/page.tsx', 눌러볼것: '종' },
+  재직인증: { 길: '/verify', 역할: '작업치료사', 쪽: 'web/app/verify/page.tsx' },
+  담당자신청: { 길: '/partner', 역할: '작업치료사', 쪽: 'web/app/partner/page.tsx' },
+  채용관리: { 길: '/biz', 역할: '채용담당자', 쪽: 'web/app/biz/page.tsx' },
+  교육관리: { 길: '/edu/manage', 역할: '교육담당자', 쪽: 'web/app/edu/manage/page.tsx' },
+  대화: { 길: '/talk', 역할: '작업치료사', 쪽: 'web/app/talk/page.tsx' },
 };
+
+/* ★ 마스터는 **어느 갈래든 지나갑니다.** 그래서 「마스터로 보였다」가
+   「회원에게 열렸다」의 근거가 못 됩니다 (2026-10-11 에 실제로 헛통과했습니다 —
+   /talk 가 아직 막혀 있는데 「열렸습니다」로 나왔습니다).
+   그래서 **코드에 막는 갈래가 남아 있나**를 함께 봅니다. 이쪽이 진짜 근거입니다 */
+function 막는갈래있나(쪽) {
+  try {
+    const t = fs.readFileSync(쪽, 'utf8');
+    return /아직 준비 중이에요/.test(t) && /!isAdmin|!마스터/.test(t);
+  } catch { return null; }
+}
 
 const 고른것 = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const 볼것 = (고른것.includes('전부') || !고른것.length) ? Object.keys(기능)
@@ -97,8 +108,13 @@ try {
     await page.waitForTimeout(600);
     const 글 = await page.evaluate(() => document.body.innerText);
     const 열림 = !글.includes(준비중);
-    적기.push({ 이름, 무엇: f.역할 + '(회원)', 됨: 열림,
-      말: 열림 ? '열렸습니다' : '**아직 「' + 준비중 + '」**' });
+    적기.push({ 이름, 무엇: f.역할 + '(마스터로)', 됨: 열림,
+      말: 열림 ? '보입니다' : '**아직 「' + 준비중 + '」**' });
+    const 막힘 = 막는갈래있나(f.쪽);
+    적기.push({ 이름, 무엇: '코드의 막는 갈래', 됨: 막힘 === false,
+      말: 막힘 === false ? '없습니다 — **회원에게 열렸습니다**'
+        : 막힘 === true ? '**남아 있습니다 — 회원에게는 아직 안 보입니다**'
+        : '(쪽을 못 읽었습니다)' });
 
     if (f.눌러볼것 === '종') {
       /* 탑바의 종이 회원에게 보이나 — 눌러서 /alarm 으로 가나 */
