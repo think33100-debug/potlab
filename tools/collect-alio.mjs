@@ -438,6 +438,16 @@ async function 한건(cfg, r, 셈, 옵션) {
       }
       if (box.files) r.__files = box.files.length;
       r.__box = box;
+
+      /* ★ 2026-10-11 — 첨부 주소를 **직군을 가린 공고에도** 담습니다.
+         전에는 공고문글자() 안에만 있어서, 제목·상세(steps)로 직군이
+         가려진 공고는 첨부 주소가 안 담겼습니다. 그런데 일곱 칸(모집인원·
+         접수마감·근무지·지원자격·예상연봉)은 **가려진 공고에도** 필요합니다.
+         box.files 는 **같은 /detail 응답**에 실려 와서 API 호출이 안 늡니다 */
+      for (const f of (box.files || []).filter((x) => String(x.atchFileType) === 'A')) {
+        첨부모음.더하기({ job_id: String(box.sn || box.recrutPblntSn || id),
+                        kind: '공고문', name: String(f.atchFileNm || ''), url: String(f.url || '') });
+      }
     }
   }
 
