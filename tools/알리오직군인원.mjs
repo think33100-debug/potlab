@@ -171,6 +171,16 @@ const 글 = [
   '',
 ].join('\n');
 fs.writeFileSync(path.join(뿌리, 'docs', '알리오인원_1011.md'), 글);
+/* 「다른 직군만 나뉘어 있고 우리 것은 없음」 — 보류함 후보를 통째로 냅니다.
+   보고서 표에는 **보이는 것만** 적지만, 옮길 때는 전부 있어야 합니다 */
+fs.mkdirSync(path.join(뿌리, 'tmp'), { recursive: true });
+fs.writeFileSync(path.join(뿌리, 'tmp', '알리오_보류후보_1011.json'), JSON.stringify({
+  만든때: new Date().toISOString(),
+  줄: 영명.map((x) => ({ id: x.j.id, 기관: x.j.org_name, 제목: x.j.title,
+    보임: !x.j.hidden && !x.j.hold, hold: x.j.hold, hidden: x.j.hidden,
+    전형단계: x.이름들.slice(0, 6) })),
+}, null, 1) + '\n');
+console.log('○ → tmp/알리오_보류후보_1011.json (' + 영명.length + '건)');
 console.log('○ → docs/알리오인원_1011.md');
 
 if (!정말) {
