@@ -65,7 +65,9 @@ begin
         coalesce(r->'detail', '{}'::jsonb), coalesce(r->'evidence', '{}'::jsonb),
         coalesce(nullif(r->>'collected_at','')::timestamptz, now()), now(),
         nullif(r->>'apply_to_time','')::time,                        -- ★
-        r->'뽑은값',                                                  -- ★ 없으면 null
+        /* ★ 뽑은값 은 not null default '{}' 입니다 — null 을 넣으면 막힙니다
+           (2026-10-11 에 클린아이 3건이 그렇게 막혔습니다) */
+        coalesce(r->'뽑은값', '{}'::jsonb),                                                  -- ★ 없으면 null
         nullif(r->>'뽑은법',''),                                      -- ★
         case when r ? '뽑은값' then now() else null end)              -- ★
       on conflict (id) do update set
@@ -118,10 +120,10 @@ begin
                              when (j.source = p_source or j.source = v_짝) then excluded.apply_to_time
                              else j.apply_to_time end,
         뽑은값 = case when j.admin_locked then j.뽑은값
-                     when excluded.뽑은값 is null then j.뽑은값
+                     when excluded.뽑은값 = '{}'::jsonb then j.뽑은값
                      else coalesce(j.뽑은값, '{}'::jsonb) || excluded.뽑은값 end,
         뽑은법 = coalesce(excluded.뽑은법, j.뽑은법),
-        뽑은때 = case when excluded.뽑은값 is null then j.뽑은때 else now() end,
+        뽑은때 = case when excluded.뽑은값 = '{}'::jsonb then j.뽑은때 else now() end,
         updated_at = now()
       where j.source = p_source
          or j.source is null
