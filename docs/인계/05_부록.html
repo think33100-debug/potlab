@@ -83,29 +83,39 @@
 <p>빠진 둘은 일부러입니다 (<code>/master</code> 는 로그인 칸이라 비번이 찍힐 수 있고,</p>
 <p><code>/auth/callback</code> 은 그려지는 화면이 없습니다).</p>
 <hr>
-<h2 id="2-숨긴-기능과-여는-법">2. 숨긴 기능과 여는 법</h2>
-<table><thead><tr><th>주소</th><th>무엇</th><th>지금 누구에게</th></tr></thead><tbody>
-<tr><td><code>/biz</code></td><td>채용 관리</td><td>승인된 채용담당자 · 마스터(채용 페르소나)</td></tr>
-<tr><td><code>/edu/manage</code></td><td>교육 관리</td><td>승인된 교육담당자 · 마스터(교육 페르소나)</td></tr>
-<tr><td><code>/partner</code></td><td>담당자 신청</td><td>운영진</td></tr>
-<tr><td><code>/verify</code></td><td>재직 인증</td><td>운영진</td></tr>
-<tr><td><code>/talk</code> · <code>/talk/[room]</code></td><td>1:1 대화</td><td>관리자 · 마스터</td></tr>
-<tr><td><code>/alarm</code> · 탑바 종</td><td>알림함</td><td>관리자</td></tr>
-<tr><td><code>/master</code></td><td>마스터</td><td>마스터</td></tr>
-<tr><td><code>/admin/*</code> 23곳</td><td>관리자</td><td>권한별</td></tr>
+<h2 id="2-지금-무엇이-열려-있나-2026-10-11-에-다섯을-열었습니다">2. 지금 무엇이 열려 있나 — <b>2026-10-11 에 다섯을 열었습니다</b></h2>
+<p>세중님 결정으로 10/13~10/22 예정이던 다섯을 <b>오늘 한꺼번에</b> 열었습니다.</p>
+<p>열 때마다 페르소나로 눌러 보고 배포 READY 를 확인했습니다</p>
+<p>(<code>node tools/기능점검.mjs 전부</code>).</p>
+<table><thead><tr><th>주소</th><th>무엇</th><th>지금 누구에게</th><th>비회원</th></tr></thead><tbody>
+<tr><td><code>/alarm</code> · 탑바 종</td><td>알림함</td><td><b>회원 모두</b> ✅</td><td>로그인 안내</td></tr>
+<tr><td><code>/verify</code></td><td>재직 인증</td><td><b>회원 모두</b> ✅</td><td>로그인 안내</td></tr>
+<tr><td><code>/partner</code></td><td>담당자 신청</td><td><b>회원 모두</b> ✅</td><td>로그인 안내</td></tr>
+<tr><td><code>/talk</code> · <code>/talk/[room]</code></td><td>1:1 대화</td><td><b>회원 모두</b> ✅</td><td>로그인 안내</td></tr>
+<tr><td><code>/biz</code></td><td>채용 관리</td><td><b>승인된 채용담당자</b></td><td>로그인 안내</td></tr>
+<tr><td><code>/edu/manage</code></td><td>교육 관리</td><td><b>승인된 교육담당자</b></td><td>로그인 안내</td></tr>
+<tr><td><code>/master</code></td><td>마스터</td><td>마스터</td><td>로그인 칸</td></tr>
+<tr><td><code>/admin/*</code> 23곳</td><td>관리자</td><td>권한별</td><td>막힘</td></tr>
 </tbody></table>
-<h3 id="여는-법-하나씩">여는 법 — <b>하나씩</b></h3>
-<p>한꺼번에 열면 어디가 터졌는지 모릅니다. 화면마다 <b>한 줄</b>입니다.</p>
-<table><thead><tr><th>어디</th><th>무엇을</th></tr></thead><tbody>
-<tr><td>그 화면 맨 위 <code>if (!isAdmin &amp;&amp; !마스터)</code> 갈래</td><td>지웁니다</td></tr>
-<tr><td><code>components/alarm-bell.tsx</code> 의 <code>!isAdmin</code></td><td>지웁니다</td></tr>
-<tr><td><code>components/tab-bar.tsx</code> 의 <code>관리길()</code></td><td><b>그대로 둡니다</b> — 승인된 담당자에게만 뜨는 것이 맞습니다</td></tr>
-</tbody></table>
-<p><b><code>/biz</code>·<code>/edu/manage</code> 는 열고 말고가 아닙니다</b> — <b>담당자를 승인하면</b></p>
-<p>그분에게 보입니다. 지금 안 보이는 것은 승인된 담당자가 없어서입니다.</p>
-<p><b>막는 자리는 화면이 아니라 DB 입니다.</b> 화면에서 <code>isAdmin</code> 을 지워도</p>
-<p><code>교육담당자인가()</code>·<code>담당자공고쓰기()</code> 같은 창구가 그대로 거절합니다.</p>
-<p>그래서 화면만 열어 보는 것은 안전합니다.</p>
+<p><b><code>/biz</code>·<code>/edu/manage</code> 는 「열고 말고」가 아닙니다</b> — <b>담당자를 승인하면</b></p>
+<p>그분에게 보입니다. 그 화면의 「아직 준비 중이에요」는 숨긴 스위치가 아니라</p>
+<p><b>승인 안내</b>입니다.</p>
+<h3 id="다시-숨기려면-화면마다-한-줄">다시 숨기려면 — 화면마다 <b>한 줄</b></h3>
+<pre><code>
+/* 그 화면 맨 위에 다시 넣습니다 */
+if (!isAdmin &amp;&amp; !마스터) {
+  return &lt;main …&gt;&lt;p&gt;아직 준비 중이에요&lt;/p&gt;…&lt;/main&gt;;
+}
+</code></pre>
+<p>탑바의 종은 <code>components/alarm-bell.tsx</code> 의 <code>if (!session || !me) return null;</code></p>
+<p>을 <code>if (!session || !me || !isAdmin) return null;</code> 로 되돌립니다.</p>
+<p><b>막는 진짜 자리는 DB 입니다.</b> 화면을 되돌려도 창구가 따로 거절합니다 —</p>
+<p><code>교육담당자인가()</code>·<code>담당자공고쓰기()</code>·<code>내알림()</code> 모두 <code>auth.uid()</code> 를 봅니다.</p>
+<h3 id="마스터로-볼-때-조심할-것">마스터로 볼 때 조심할 것</h3>
+<p><b>마스터는 어느 갈래든 지나갑니다.</b> 「마스터로 보였다」는 **「회원에게</p>
+<p>열렸다」의 근거가 못 됩니다.** 2026-10-11 에 실제로 헛통과했습니다 —</p>
+<p><code>/talk</code> 가 아직 막혀 있는데 점검이 「열렸습니다」로 적었습니다.</p>
+<p>그래서 <code>tools/기능점검.mjs</code> 는 <b>코드에 막는 갈래가 남아 있나</b>를 함께 봅니다.</p>
 <hr>
 <h2 id="3-승인-대기-docs승인대기_1009md">3. 승인 대기 — <code>docs/승인대기_1009.md</code></h2>
 <table><thead><tr><th>번호</th><th>무엇</th><th>언제</th></tr></thead><tbody>
@@ -173,7 +183,7 @@
 <p>(캡처에서 본 「본문 잘림」은 <code>fullPage</code> 가 고정 띠를 한 번만 그리는 <b>촬영 자국</b></p>
 <p>이었습니다 — 고치기 전에 원인을 확인했습니다.)</p>
 <hr>
-<h2 id="6-세중님-결정-대기-다섯-추천안과-까닭">6. 세중님 결정 대기 — 다섯 · <b>추천안과 까닭</b></h2>
+<h2 id="6-세중님-결정-대기-넷-는-끝났습니다-추천안과-까닭">6. 세중님 결정 대기 — <b>넷</b> (⑤ 는 끝났습니다) · 추천안과 까닭</h2>
 <p><b>개발자가 알아야 할 것</b> — 아래 다섯은 <b>아직 정해지지 않았습니다.</b> 그래서</p>
 <p>그 자리의 화면이 비어 있거나 「수동 확인」입니다. 고장이 아닙니다.</p>
 <p><b><code>/compete</code> 를 「회원만」으로 바꾼 것은 확정입니다</b> (2026-10-09 세중님 지시).</p>
@@ -195,7 +205,13 @@
 <blockquote><b>추천 — 값과 상태(판매중·예약중·거래완료) 두 칸만 먼저 넣습니다.</b></blockquote>
 <blockquote>지금은 글 본문에 「가격 0원」처럼 적고 있어서 찾기도 거르기도 안 됩니다.</blockquote>
 <blockquote>결제는 <b>안 붙입니다</b> — POTJOB 은 결제를 받지 않는다는 원칙과 같습니다.</blockquote>
-<h3 id="국세청-nts_biz_key-사업자-진위확인이-수동-확인입니다">⑤ 국세청 <code>NTS_BIZ_KEY</code> — 사업자 진위확인이 「수동 확인」입니다</h3>
+<h3 id="국세청-nts_biz_key-끝났습니다-2026-10-11">⑤ 국세청 <code>NTS_BIZ_KEY</code> — ✅ <b>끝났습니다 (2026-10-11)</b></h3>
+<blockquote>세중님이 Vercel 에 넣으셨고, 열쇠 두 벌(Encoding·Decoding) 중 어느 쪽이어도</blockquote>
+<blockquote>돌게 코드를 고쳤습니다. 들어 있는 것은 <b>Decoding 쪽 64자</b>였습니다.</blockquote>
+<blockquote><code>/partner</code> 에서 <b>단추를 눌러</b> 「계속사업자」·「없는 번호」를 받았습니다.</blockquote>
+<blockquote>남은 것 — DB 에 적히는 값은 서버가 적어야 믿을 수 있어, 열쇠가 **서버</blockquote>
+<blockquote><code>.env</code> 에도** 있어야 합니다.</blockquote>
+<h3 id="-옛-국세청-nts_biz_key-사업자-진위확인이-수동-확인이었습니다">⑤-옛 국세청 <code>NTS_BIZ_KEY</code> — 사업자 진위확인이 「수동 확인」이었습니다</h3>
 <blockquote><b>추천 — 열쇠를 서버 <code>.env</code> 에 넣습니다.</b> 2026-10-09 에 활용신청 승인을</blockquote>
 <blockquote>받으셨습니다. 넣으면 <code>tools/사업자진위확인.mjs</code> 가 저절로 돕니다.</blockquote>
 <blockquote><b>다만 명세를 아직 원문으로 확인하지 않았습니다</b> — 열쇠가 생기면 먼저</blockquote>
