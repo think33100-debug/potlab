@@ -43,6 +43,50 @@ const BUCKETS = ['avatars', 'post-images'];
    **갓 올린 파일은 안 건드립니다** — 올리고 줄을 쓰는 사이에 지우면 안 됩니다 */
 const 봐줄분 = 15;          /* 올린 지 15분 안 된 파일은 그대로 둡니다 */
 
+/* ★ 2026-10-11 — **허용 목록.** 「무엇을 지울까」가 아니라 **「무엇만 지울까」**입니다.
+   (세중님 결정 · docs/치우개_휴지통안_1011.md ①)
+
+   전에는 「쓰는 줄이 안 가리키면 지운다」였습니다. 그러면 표를 하나
+   빠뜨릴 때마다 **새 파일이 희생**되고, 빠뜨렸다는 것은 **파일이 없어진
+   뒤에** 압니다. 뒤집습니다 — **꼴에 안 맞으면 아예 안 건드립니다.**
+
+   그래서 갈래 attach-prep 을 합치며 표 더하기를 잊어도 **파일이 안
+   사라집니다.** 잊은 것은 「안 치워진 파일이 쌓인다」로 드러나지
+   「없어졌다」로 드러나지 않습니다 — **틀렸을 때 덜 아픈 쪽**입니다. */
+const 지워도되는꼴 = {
+  'avatars':     /^[0-9a-f-]{36}\/[^/]+$/,            // <회원>/파일
+  'post-images': /^[0-9a-f-]{36}\/\d+\/[^/]+$/,       // <회원>/<글>/파일
+  'proofs':      /^[0-9a-f-]{36}\/[^/]+$/,            // <회원>/파일
+  'chat-images': /^[0-9a-f-]{36}\/[^/]+$/,            // <회원>/파일
+  'notices':     /^(BIZ\d{6}|edu\d+)\/[^/]+$/,        // 담당자 공고·교육 회차만
+};
+
+/* ★ 뚜껑 — 한 번에 이보다 많이 잡히면 **멈춥니다.**
+   10분에 수백 개가 잡히면 그건 치우개가 맞은 게 아니라 **표를 못 읽은
+   것**입니다 (오늘 그 자리가 조용한 실패였습니다) */
+const 한번뚜껑 = 50;
+
+/* 꼴에 안 맞아 건너뛴 것 — 로그에 **꼴별로** 남깁니다 */
+const 건너뛴꼴 = new Map();
+function 꼴맞나(통, 길) {
+  const 꼴 = 지워도되는꼴[통];
+  if (!꼴) { 세기(통, '(그 통은 허용 목록에 없습니다)'); return false; }
+  if (꼴.test(길)) return true;
+  /* 어떤 꼴이었는지만 남깁니다 — 파일 이름은 안 적습니다 */
+  const 앞 = 길.split('/')[0];
+  세기(통, 앞.replace(/[0-9a-f-]{36}/, '<회원uuid>').replace(/\d{6,}/, '<숫자>') + '/…');
+  return false;
+}
+function 세기(통, 꼴) {
+  const 열쇠 = 통 + ' ← ' + 꼴;
+  건너뛴꼴.set(열쇠, (건너뛴꼴.get(열쇠) ?? 0) + 1);
+}
+function 건너뛴것찍기() {
+  if (!건너뛴꼴.size) { console.log('건너뛴 경로 꼴: 없음'); return; }
+  console.log('건너뛴 경로 꼴 (허용 목록에 안 맞아 **안 건드린** 것)');
+  for (const [꼴, n] of [...건너뛴꼴].sort()) console.log('   ' + 꼴 + '  ' + n + '개');
+}
+
 /* 「주인(회원)이 있나」가 아니라 **「쓰는 줄이 가리키나」**로 보는 통들.
    2026-10-11 에 셋으로 늘렸습니다 — 그날 세어 보니 notices 에 파일 19개인데
    공고첨부는 6줄이었습니다. **아무도 안 치우고 있었습니다.**
@@ -81,12 +125,16 @@ async function main() {
 
     for (const f of folders) {
       if (alive.has(f.name)) continue;          // 주인이 있는 폴더는 건너뜁니다
-      orphans = orphans.concat(await walk(bucket, f.name));
+      orphans = orphans.concat((await walk(bucket, f.name)).filter((길) => 꼴맞나(bucket, 길)));
     }
 
     if (orphans.length === 0) { console.log(`${bucket}: 치울 것 없음`); continue; }
 
     console.log(`${bucket}: 주인 없는 파일 ${orphans.length}개`);
+    if (orphans.length > 한번뚜껑) {
+      console.error(`   ★ ${한번뚜껑}개가 넘습니다 — **멈춥니다** (표를 못 읽었을 수 있습니다)`);
+      continue;
+    }
     orphans.forEach((p) => console.log('   ' + p));
 
     if (!DO_IT) { console.log('   (--yes 를 붙이면 실제로 지웁니다)'); continue; }
@@ -97,6 +145,7 @@ async function main() {
     console.log(r.ok ? `   지웠습니다` : `   실패 HTTP ${r.status} ${await r.text()}`);
   }
   for (const t of 가리키는통) await 가리키지않는것치우기(t);
+  건너뛴것찍기();
 }
 
 async function 가리키지않는것치우기({ 통, 표, 칸 }) {
@@ -117,6 +166,7 @@ async function 가리키지않는것치우기({ 통, 표, 칸 }) {
     for (const it of 안쪽) {
       if (it.id === null) continue;
       if (쓰는것.has(it.길)) continue;
+      if (!꼴맞나(통, it.길)) continue;                  /* 허용 목록 밖은 안 건드립니다 */
       const 만든때 = Date.parse(it.created_at ?? it.updated_at ?? 0);
       if (Number.isFinite(만든때) && Date.now() - 만든때 < 봐줄분 * 60_000) continue;
       지울것.push(it.길);
@@ -124,6 +174,11 @@ async function 가리키지않는것치우기({ 통, 표, 칸 }) {
   }
   if (!지울것.length) { console.log(`${통}: 치울 것 없음`); return; }
   console.log(`${통}: 아무 줄도 안 가리키는 파일 ${지울것.length}개`);
+  if (지울것.length > 한번뚜껑) {
+    console.error(`   ★ ${한번뚜껑}개가 넘습니다 — **멈춥니다.** 치우개가 맞은 것이 아니라`);
+    console.error('     표를 못 읽었을 수 있습니다. 사람이 보고 나서 돌리십시오');
+    return;
+  }
   /* ★ 2026-10-11 — **하나도 안 줄이고 다 찍습니다.** 앞 10개만 찍었더니
      그날 지운 14개 중 3개의 이름을 못 댔습니다. 지운 것은 되돌릴 수 없으니
      무엇을 지웠는지는 **남아 있어야** 합니다 (docs/지운파일_1011.md) */
