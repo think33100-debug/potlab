@@ -107,7 +107,12 @@ export function NoticeFiles({
        그래서 경로는 uuid + 확장자만 쓰고, **보여줄 이름은 표(공고첨부.이름)에**
        그대로 둡니다. 작업지침 6-2b — 밖에서 이름으로 가리키는 자리는 영문. */
     const 확장자 = (f.name.match(/\.[A-Za-z0-9]{1,8}$/)?.[0] ?? '').toLowerCase();
-    const 자리 = `${갈래 === '채용' ? 공고 : '교육' + 회차}/${crypto.randomUUID()}${확장자}`;
+    /* ★ 2026-10-11 — 교육 앞머리를 **영문 edu** 로 바꿨습니다.
+       「교육9/…」 로 올리면 InvalidKey 입니다 (작업지침 6-2b) —
+       **교육 첨부가 한 번도 안 올라갔습니다.** 2026-10-10 에 공고 쪽만
+       고치고 교육 쪽은 한글을 그대로 뒀습니다.
+       DB 의 첨부올릴수있나() 도 같은 날 함께 바꿨습니다 — 한 쌍입니다 */
+    const 자리 = `${갈래 === '채용' ? 공고 : 'edu' + 회차}/${crypto.randomUUID()}${확장자}`;
 
     const { error: 올림 } = await sb.storage.from('notices')
       .upload(자리, f, { contentType: 형식, upsert: false });

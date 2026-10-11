@@ -130,7 +130,7 @@ if (Number.isFinite(과정id)) {
     await 섬김('교육회차?회차id=eq.' + 회차id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ 시험자료: true }) });
     /* 교육 첨부 — notices 통의 「교육<회차>」 폴더 (components/notice-files.tsx) */
     const pdf2 = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n');
-    const 길2 = '교육' + 회차id + '/' + Date.now() + '-edu.pdf';
+    const 길2 = 'edu' + 회차id + '/' + Date.now() + '-edu.pdf';
     const r2 = await fetch(URL_ + '/storage/v1/object/notices/' + 길2, {
       method: 'POST', headers: { apikey: ANON, Authorization: 'Bearer ' + 빈계정, 'Content-Type': 'application/pdf' }, body: pdf2,
     });
