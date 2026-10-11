@@ -121,17 +121,39 @@ export function 첨부모으기(source, 옵션 = {}) {
         console.log(`  [마른] 첨부 ${줄들.length}줄 → docs/첨부_미리보기_1010.json (${source})`);
         return;
       }
-      /* 진짜로 담기 — 창구를 거칩니다. 표를 직접 안 씁니다 */
-      const { rpc } = await import('./collect-lib.mjs');
+      /* 진짜로 담기 — 창구를 거칩니다. 표를 직접 안 씁니다.
+         ★ 2026-10-11 — 전에는 `await import('./collect-lib.mjs')` 였는데
+         **그 파일은 쓴 적이 없습니다.** 마른 실행만 거쳐서 안 드러났고,
+         진짜로 담으려니 ERR_MODULE_NOT_FOUND 로 멈췄습니다.
+         수집기마다 제 rpc 를 들고 있어 내보내는 자리가 없습니다 —
+         여기서 직접 부릅니다 (collect_attach 는 service_role 전용입니다) */
       const 열쇠 = cfg['COLLECT_KEY_' + source] || cfg.COLLECT_KEY_HS3;
-      let 담음 = 0;
+      const rpc = async (_cfg, fn, body) => {
+        const k = _cfg.SUPABASE_SERVICE_KEY;
+        if (!k) throw new Error('SUPABASE_SERVICE_KEY 가 없습니다 (collect_attach 는 service_role 전용)');
+        const r = await fetch(_cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+          method: 'POST',
+          headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const t = await r.text();
+        if (!r.ok) throw new Error(fn + ' HTTP ' + r.status + ' · ' + t.slice(0, 300));
+        try { return JSON.parse(t); } catch { return t; }
+      };
+      const 합 = { 담음: 0, 겹침: 0, 건너뜀: 0, 공고없음: 0 };
+      let 첫탈 = null; let 묶음 = null; let 표줄수 = null;
       for (let i = 0; i < 줄들.length; i += 200) {
         const r = await rpc(cfg, 'collect_attach', {
           p_secret: 열쇠, p_source: source, p_rows: 줄들.slice(i, i + 200),
         });
-        담음 += r['담음'] || 0;
+        for (const k of Object.keys(합)) 합[k] += r[k] || 0;
+        첫탈 ||= r['첫탈']; 묶음 = r['묶음']; 표줄수 = r['표 줄수'];
       }
-      console.log(`  첨부 ${담음}줄 담았습니다 (${source})`);
+      /* 「몇 건 왔다」만 찍는 진단은 쓸모없습니다 (지침 2절) — 갈래별로 찍습니다 */
+      console.log(`  첨부 ${합.담음}줄 담았습니다 (${source})`
+        + ` · 겹침 ${합.겹침} · 건너뜀 ${합.건너뜀} · 그 공고가 표에 없음 ${합.공고없음}`
+        + ` · 묶음 ${묶음 ?? '(없음)'} · 표 전체 ${표줄수}줄`);
+      if (첫탈) console.log(`  ⚠ 첫 탈 — ${첫탈}`);
     },
   };
 }
