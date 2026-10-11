@@ -117,7 +117,23 @@ export async function pdf글자(buf, 이름 = '공고문.pdf', 곁들이 = {}) {
       console.error('  ★ OCR 0자 (1번째) — 한 번만 다시 해 봅니다');
       console.error(자국(원문));
 
-      const 다시 = await 한번(buf, 이름);
+      /* ★ 2026-10-11 — **기다렸다 다시 받습니다** (세중님 지시 — 경보만 고치지 말고
+         뿌리도 고치기).
+         세어 보니 전체 112건 중 **93건(83%)이 두 번째에 읽혔습니다.** 첫 응답이
+         `{"ok":true,"what":"potjob OCR","열쇠있음":true,"status":200}` — `text` 칸이
+         없는 상태 객체입니다. 저쪽이 Drive 변환을 **아직 못 끝낸 것**으로 보입니다
+         (바로 다시 묻던 것을 기다리게 합니다).
+         83% 가 되살아나니 기다리는 값이 있습니다 — 2초 → 5초로 두 번 더 봅니다 */
+      let 다시 = null;
+      for (const 쉴초 of [2, 5]) {
+        await new Promise((r) => setTimeout(r, 쉴초 * 1000));
+        다시 = await 한번(buf, 이름);
+        if (다시.j && 다시.j.ok && 다시.j.text && 다시.j.text.trim()) {
+          console.error('  ○ ' + 쉴초 + '초 기다렸다 다시 묻자 읽혔습니다');
+          break;
+        }
+        console.error('  … ' + 쉴초 + '초 기다렸는데 아직 0자입니다');
+      }
       const 됐나 = 다시.j && 다시.j.ok && 다시.j.text && 다시.j.text.trim();
       if (됐나) {
         console.error('  ○ 두 번째에 읽었습니다 — 글자 ' + 다시.j.text.length + '자.'
