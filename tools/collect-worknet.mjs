@@ -24,6 +24,18 @@
  *   상세      callTp=D + wantedAuthNo + **infoSvc** (없으면 「정보제공처가 바르지 않습니다」)
  *             empTpNm · receiptCloseDt · jobCont · collectPsncnt …
  *
+ * ── 상세(callTp=D)도 부릅니다 (2026-10-11) ───────────────────
+ *   2026-10-10 에 보이는 공고 373건 중 303건이 워크넷인데 **모집인원 0%**
+ *   였습니다. 까닭은 공고문이 아니라 **이 수집기가 목록만 쓴 것**입니다.
+ *   위 머리말에 상세 항목을 적어 두고도 한 번도 안 불렀습니다.
+ *     collectPsncnt → headcount      certificate → detail.지원자격
+ *     salTpNm       → detail.연봉 (목록의 salTpNm 은 「월급」 뿐입니다)
+ *   247건을 되메워 모집인원 3% → 75% 가 됐습니다 (docs/공고통일점검_1010.md).
+ *   **한 번 받은 번호는 다시 안 받습니다** — 로그 폴더의 워크넷_상세받음.json 에
+ *   번호 → smodifyDtm 을 적어 두고, 새 번호이거나 원 출처가 고친 것만 받습니다.
+ *   한 번에 받는 수는 --상세최대=N (기본 40) 으로 묶습니다. 하루 호출이
+ *   96번(목록+덧갈래)인데 상세를 다 부르면 네 배가 넘습니다.
+ *
  * ── 고쳐 넣은 것 (예전에 찾아둔 버그) ────────────────────────
  *   ① closeDt 가 「채용시까지  26-11-07」 로 섞여 옴 (235건 중 156건 · 66%)
  *      → tools/날짜.mjs 의 공용 함수로 풉니다. 치매센터·나라일터와 같은 함수
@@ -55,6 +67,11 @@ import { 기관종별, 시설구분 } from './wn-kind.mjs';
 import { 덧갈래가리기, 괄호풀기 } from './덧갈래판정.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
+/* 한 번에 받을 상세 수 — 하루 호출 수를 묶는 고삐입니다 */
+const 상세최대 = Number((process.argv.find((a) => a.startsWith('--상세최대=')) || '').split('=')[1] || 40);
+/* --dry 는 상세를 안 받습니다 (09:55 대조용 마른 실행이 호출을 안 쓰게).
+   따로 폴더에서 시험할 때만 --상세시험 으로 켭니다 */
+const 상세시험 = process.argv.includes('--상세시험');
 const SOURCE = 'WN2';
 const URL_ = 'https://www.work24.go.kr/cm/openApi/call/wk/callOpenApiSvcInfo210L01.do';
 /* 물리및작업치료사 · 물리치료사 · 작업치료사 */
@@ -183,6 +200,42 @@ const 주소만들기 = (o) => URL_ + '?' + Object.entries({ authKey: cfg.WORK_K
   .map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
 /* 로그에 열쇠가 찍히지 않게 */
 const 가리기 = (t) => (cfg.WORK_KEY ? String(t).split(cfg.WORK_KEY).join('‹열쇠›') : String(t));
+
+/* ── 상세 한 건 ─────────────────────────────────────────────
+   infoSvc 가 없으면 「정보제공처가 바르지 않습니다」가 옵니다. 목록 줄에
+   이미 들어 있으니 목록을 다시 부르지 않습니다 */
+const 한칸 = (t, 이름) => {
+  const 글 = String(t);
+  const 여 = 글.indexOf('<' + 이름 + '>');
+  if (여 < 0) return '';
+  const 까 = 글.indexOf('</' + 이름 + '>', 여);
+  if (까 < 0) return '';
+  return 겹친것풀기(글.slice(여 + 이름.length + 2, 까)).trim();
+};
+async function 상세한건(번호, svc) {
+  const r = await 받기(주소만들기({ callTp: 'D', wantedAuthNo: 번호, infoSvc: svc }));
+  호출수++;
+  if (r.code !== 200 || !/<wantedDtl[\s>]/.test(r.글)) {
+    return { 탈: 'HTTP ' + r.code + ' ' + 가리기(r.글).replace(/\s+/g, ' ').slice(0, 120) };
+  }
+  return {
+    인원: 한칸(r.글, 'collectPsncnt'),
+    자격: 한칸(r.글, 'certificate'),
+    급여: 한칸(r.글, 'salTpNm').replace(/,\s*$/, '').slice(0, 120),
+  };
+}
+
+/* 한 번 받은 번호를 기억합니다 — 번호 → smodifyDtm */
+const 상세기억터 = 로그터 + '/워크넷_상세받음.json';
+function 상세기억읽기() {
+  try { return JSON.parse(fs.readFileSync(상세기억터, 'utf8')); } catch { return {}; }
+}
+function 상세기억쓰기(표) {
+  try {
+    fs.mkdirSync(로그터, { recursive: true });
+    fs.writeFileSync(상세기억터, JSON.stringify(표, null, 1));
+  } catch (e) { console.error('상세 기억 못 남김 · ' + String(e.message).slice(0, 120)); }
+}
 
 /* ── 본체 ─────────────────────────────────────────────────── */
 const t0 = Date.now();
@@ -474,6 +527,44 @@ if (보기.기호.length) 보기.기호.forEach((x) => console.log('  제목 기
 if (보기.날짜.length) 보기.날짜.forEach((x) => console.log('  마감일 — ' + x));
 if (보기.지역.length) 보기.지역.forEach((x) => console.log('  지역 — ' + x));
 
+/* ── ②-2 상세 (callTp=D) ──────────────────────────────────── */
+const 상세값 = new Map();        /* 번호 → { 인원, 자격, 급여 } */
+const 상세탈 = [];
+if (!dry || 상세시험) {
+  const 기억 = 상세기억읽기();
+  /* 새 번호이거나 원 출처가 고친 것(smodifyDtm 이 달라진 것)만 받습니다 */
+  const 할것 = 볼것.filter((v) => {
+    const 번호 = String(v.r.wantedAuthNo || '');
+    if (!번호 || !v.r.infoSvc) return false;
+    return 기억[번호] !== String(v.r.smodifyDtm || '-');
+  });
+  const 받을것 = 할것.slice(0, 상세최대);
+  console.log('\n②-2 상세 — 받을 것 ' + 할것.length + '건 중 ' + 받을것.length + '건'
+    + (할것.length > 받을것.length ? ' (--상세최대=' + 상세최대 + ' · 남은 것은 다음 번에)' : ''));
+  for (const v of 받을것) {
+    const 번호 = String(v.r.wantedAuthNo);
+    const r = await 상세한건(번호, String(v.r.infoSvc));
+    if (r.탈) {
+      상세탈.push(번호 + ' · ' + r.탈);
+      /* 연달아 실패하면 한도일 수 있습니다 — 그 자리에서 멈추고 목록은 그대로 담습니다 */
+      if (상세탈.length >= 5) { console.error('   ★ 연달아 다섯 번 실패 — 상세만 접습니다'); break; }
+    } else {
+      상세값.set(번호, r);
+      기억[번호] = String(v.r.smodifyDtm || '-');
+    }
+    await 쉼(300);
+  }
+  /* 지금 목록에 없는 번호는 기억에서 지웁니다 — 워크넷은 마감되면 목록에서 뺍니다 */
+  const 살아있는 = new Set(볼것.map((v) => String(v.r.wantedAuthNo || '')));
+  for (const k of Object.keys(기억)) if (!살아있는.has(k)) delete 기억[k];
+  if (!dry) 상세기억쓰기(기억);
+  const 셈3 = { 인원: 0, 자격: 0, 급여: 0 };
+  for (const v of 상세값.values()) for (const k of Object.keys(셈3)) if (v[k]) 셈3[k]++;
+  console.log('   받음 ' + 상세값.size + '건 · 못 받음 ' + 상세탈.length + '건'
+    + ' — 모집인원 ' + 셈3.인원 + ' · 지원자격 ' + 셈3.자격 + ' · 급여 ' + 셈3.급여);
+  for (const t of 상세탈.slice(0, 3)) console.error('   ✗ ' + t);
+}
+
 /* ── ③ 갈래 ───────────────────────────────────────────────── */
 const 회원 = [], 보류 = [], 쓰레기 = [];
 for (const v of 볼것) {
@@ -481,6 +572,8 @@ for (const v of 볼것) {
   const 종별 = 기관종별(r.indTpNm, r.company);
   /* 나중에 만들 「전체 / 병원 / 요양」 화면용. **아직 화면에 안 씁니다** */
   const 구분 = 시설구분(종별.종별, r.company);
+  /* 상세에서 받은 것 — 없으면 전과 똑같이 돕니다 */
+  const 상 = 상세값.get(String(r.wantedAuthNo || '')) || {};
   const 줄 = {
     id: 'WN' + String(r.wantedAuthNo || ''),      /* 옛 수집기와 같은 규칙 — 겹치면 안 덮습니다 */
     external_id: String(r.wantedAuthNo || ''),
@@ -491,6 +584,9 @@ for (const v of 볼것) {
     sido: (v.지역.split(' ')[0] || ''),
     sgg: (v.지역.split(' ').slice(1).join(' ') || ''),
     edu: [r.minEdubg, r.maxEdubg].filter(Boolean).join('~'),
+    /* 모집 인원 — 상세의 collectPsncnt. 공고 하나에 직종 하나(jobsNm)라
+       **우리 직군 몫**입니다 (통합 공고가 아닙니다 · 작업지침 15절) */
+    ...(/^[0-9]+$/.test(String(상.인원 || '')) ? { headcount: Number(상.인원) } : {}),
     apply_to: v.마감,
     posted_at: 날짜풀기(r.regDt),
     url: String(r.wantedInfoUrl || ''),           /* 약속 — 원문·지원은 고용24 원본으로 */
@@ -504,6 +600,11 @@ for (const v of 볼것) {
       사업자번호: String(r.busino || ''),          /* ⑥ 심평원 자료와 이을 용도 */
       업종: String(r.indTpNm || ''),
       급여: [r.salTpNm, r.sal].filter(Boolean).join(' '),
+      /* 화면이 읽는 이름은 「지원자격」·「연봉」 입니다 (web/app/jobs/[id]/page.tsx).
+         목록의 salTpNm 은 「월급」 한 낱말뿐이고, 상세의 salTpNm 은
+         「월급2,413,950원 이상 ~ 2,413,950원 이하」 로 옵니다 */
+      ...(상.자격 ? { 지원자격: String(상.자격).slice(0, 300) } : {}),
+      ...(상.급여 && /[0-9]/.test(상.급여) ? { 연봉: 상.급여 } : {}),
       경력: String(r.career || ''),
       휴일: String(r.holidayTpNm || ''),
       시설구분: 구분,                              /* 병원 · 요양·주간보호 · 모름 */
