@@ -1,0 +1,9 @@
+[    2005ms] [WARNING] [Meta Pixel] - Invalid PixelID: a non-numeric string. @ https://designhosp.career.greetinghr.com/_next/static/chunks/2hv2tf7-77opd.js?dpl=09febce9344d96b0d2b83c5544a44784880b1b1d:3
+[    2546ms] [WARNING] Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube.com') does not match the recipient window's origin ('https://designhosp.career.greetinghr.com'). @ https://www.youtube.com/s/player/5203c085/www-widgetapi.vflset/www-widgetapi.js:162
+[    3278ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://designhosp.career.greetinghr.com/ko/null:0
+[    3435ms] [WARNING] The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127 @ :0
+[   13529ms] [WARNING] [Meta Pixel] - Invalid PixelID: a non-numeric string. @ https://designhosp.career.greetinghr.com/_next/static/chunks/2hv2tf7-77opd.js?dpl=09febce9344d96b0d2b83c5544a44784880b1b1d:3
+[   14058ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://designhosp.career.greetinghr.com/ko/o/null:0
+[   19056ms] [WARNING] [Meta Pixel] - Invalid PixelID: a non-numeric string. @ https://designhosp.career.greetinghr.com/_next/static/chunks/2hv2tf7-77opd.js?dpl=09febce9344d96b0d2b83c5544a44784880b1b1d:3
+[   21674ms] [WARNING] [Meta Pixel] - Invalid PixelID: a non-numeric string. @ https://designhosp.career.greetinghr.com/_next/static/chunks/2hv2tf7-77opd.js?dpl=09febce9344d96b0d2b83c5544a44784880b1b1d:3
+[   22789ms] [WARNING] The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127 @ :0

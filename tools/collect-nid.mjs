@@ -297,6 +297,15 @@ for (const v of 볼것) {
       continue;
     }
     if (!글) { v.보류 = '첨부를 못 읽었습니다'; continue; }
+
+    /* ★ 2026-10-12 — 읽은 글을 **보관합니다** (세중님 지시).
+       전에는 직군만 뽑고 버렸습니다. 그래서 2026-10-11 에 hs_dates 버그
+       피해를 셀 때 ND2 4건을 **다시 확인할 수 없었습니다** (job_body 에
+       HS3 상세 264줄·CE2 첨부 65줄만 있고 ND2 는 0줄).
+       창구 `collect_body` 가 이미 있어 **부르기만** 하면 됩니다 —
+       표를 새로 만들지 않습니다. 개인정보는 그 창구가 담기 전에 지웁니다.
+       회원 화면에는 안 나갑니다 (job_body 는 anon 에게 권한이 없습니다) */
+    v.원문 = 글;
     /* ★ 2026-10-11 — 공고문에서 **일곱 칸**도 뽑습니다 (세중님 1순위).
        규칙은 tools/공고문읽기.mjs 한 벌입니다 (지침 6절) */
     if (md) {
@@ -436,6 +445,32 @@ if (dry) {
     담음 += r['담음'] || 0;
   }
   console.log('\n씀          ' + 담음 + '건');
+
+  /* ★ 2026-10-12 — 읽은 첨부 글을 `job_body` 에 보관합니다 (창구 collect_body).
+     표를 새로 만들지 않습니다 — 이미 HS3·CE2 가 쓰는 표입니다.
+     회원 화면에는 안 나갑니다. 개인정보는 창구가 담기 전에 지웁니다.
+     담긴 공고만 보관합니다 (쓰레기통 줄은 FK 가 없습니다) */
+  const 담은번호 = new Set(넣을것.map((x) => x.id));
+  const 원문들 = 볼것
+    .filter((v) => v.원문 && v.x && v.x.no && 담은번호.has('ND' + v.x.no))
+    .map((v) => ({ job_id: 'ND' + v.x.no, kind: '첨부', ord: 0,
+      url: v.첨부주소 || null, file_name: v.첨부이름 || null,
+      body: String(v.원문).slice(0, 400000) }));
+  if (원문들.length) {
+    let 보관 = 0; let 바이트 = 0;
+    for (let i = 0; i < 원문들.length; i += 50) {
+      try {
+        const r = await rpc('collect_body', {
+          p_secret: cfg.COLLECT_KEY_ND2, p_source: SOURCE, p_rows: 원문들.slice(i, i + 50),
+        });
+        보관 += r['담음'] || 0; 바이트 += r['바이트'] || 0;
+      } catch (e) { console.log('   원문 보관 못 함 — ' + String(e.message).slice(0, 110)); break; }
+    }
+    console.log('원문 보관    ' + 보관 + '건 · ' + Math.round(바이트 / 1024) + 'KB');
+  } else {
+    console.log('원문 보관    0건 (읽은 글이 없거나 담긴 공고가 아닙니다)');
+  }
+
   if (쓰레기.length) {
     let 버림 = 0;
     for (let i = 0; i < 쓰레기.length; i += 200) {
