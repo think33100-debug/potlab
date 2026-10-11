@@ -86,6 +86,19 @@ export function PostActions({
     toast('신고했어요. 관리자가 확인할게요');
   };
 
+  /* 차단 — 그 사람 글·댓글이 안 보입니다 (2026-10-11 · 애플 심사 1.2).
+     **글 번호로** 겁니다. 글쓴이 회원번호는 화면으로 안 나갑니다 —
+     창구(차단하기)가 서버에서 글쓴이를 찾습니다 */
+  const block = async () => {
+    if (loading) return toast('잠시만요 — 로그인을 확인하고 있어요');
+    if (!me) return needLogin();
+    if (!confirm('이 분을 차단할까요? 이 분의 글과 댓글이 안 보이게 돼요.\n내 정보 화면에서 다시 풀 수 있어요')) return;
+    const { error } = await browserSupabase().rpc('차단하기', { p_글: id });
+    if (error) { toast(`차단하지 못했어요 — ${error.message}`, { tone: 'danger' }); return; }
+    toast('차단했어요. 이 분의 글은 이제 안 보여요');
+    router.push('/community');
+  };
+
   /* 줄을 없애지 않고 감춥니다.
 
      보는 사람에게는 지운 것과 똑같습니다 — 목록에서도 상세에서도 안 보입니다.
@@ -131,10 +144,16 @@ export function PostActions({
           지우기
         </button>
       ) : (
-        <button type="button" onClick={report}
-          className="rounded-md px-4 py-4 text-sm text-mute hover:text-brand-red">
-          신고
-        </button>
+        <>
+          <button type="button" onClick={block}
+            className="rounded-md px-4 py-4 text-sm text-mute hover:text-brand-red">
+            차단
+          </button>
+          <button type="button" onClick={report}
+            className="rounded-md px-4 py-4 text-sm text-mute hover:text-brand-red">
+            신고
+          </button>
+        </>
       )}
     </div>
   );

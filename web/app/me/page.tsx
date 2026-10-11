@@ -12,6 +12,7 @@ import { browserSupabase } from '@/lib/supabase-browser';
 import { JOB_GROUPS, ROLES, ROLE_DESC, type Role } from '@/lib/who';
 import { useAuth } from '../auth';
 import { useToast } from '../toast';
+import { BlockList } from '@/components/block-list';
 
 const FREE_CHANGES = 5;
 
@@ -213,6 +214,9 @@ export default function MyPage() {
         </p>
         <div className="mt-4"><NotifyToggle /></div>
       </section>
+
+      {/* 차단한 분 — 풀 수 있어야 합니다 (애플 심사 1.2). 없으면 안 그립니다 */}
+      <BlockList />
 
       <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
         <button type="button" onClick={signOut}

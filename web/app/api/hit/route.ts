@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createHash } from 'node:crypto';
 import { supabase } from '@/lib/supabase';
 
 /* 화면을 한 번 봤다고 알리는 자리입니다.
@@ -29,6 +30,22 @@ const BOT = /bot|crawl|spider|slurp|facebookexternalhit|embedly|preview|scrape|c
    그때 제대로 된 판별기를 답니다 — 지금은 두 갈래면 충분합니다. */
 const MOBILE = /android|iphone|ipad|ipod|iemobile|opera mini|mobile|silk|kindle|blackberry|webos/i;
 
+/* ★ 2026-10-11 — **하루번호를 서버가 만듭니다.**
+
+   전에는 브라우저가 `key` 를 보냈습니다. 번호를 매번 새로 지어 보내면
+   조회수가 끝없이 올라갑니다 — 그 숫자로 광고 값을 매길 참이라 거짓
+   숫자는 되돌릴 수 없습니다.
+
+   이제 **아이피 + 브라우저 한 낱말 + 날짜 + 본 자리**를 해시해 우리가
+   정합니다. 아이피도 UA 도 **저장하지 않습니다** — 해시만 남고 되짚을 수
+   없습니다. 브라우저가 보낸 `key` 는 **안 믿고 버립니다.** */
+function 하루번호(ip: string, ua: string, day: string, target: string): string {
+  const 소금 = process.env.HIT_SALT ?? 'potjob-hit';
+  return createHash('sha256')
+    .update([소금, day, ip, ua.slice(0, 80), target].join('|'))
+    .digest('hex').slice(0, 32);
+}
+
 function seoulDay(): string {
   /* 한국 날짜로 셉니다. 서버는 UTC 라 그냥 두면 아침 9시에 날이 바뀝니다 */
   return new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 10);
@@ -53,14 +70,28 @@ export async function POST(req: Request) {
 
   const kind = (KINDS as readonly string[]).includes(body.kind ?? '')
     ? (body.kind as Kind) : 'other';
-  const key = String(body.key ?? '').slice(0, 64);
-  if (!key) return NextResponse.json({ ok: false, why: '하루번호가 없습니다' }, { status: 400 });
+  /* 브라우저가 보낸 `key` 는 **안 씁니다** (위 하루번호 머리말).
+     옛 화면이 아직 보내고 있어도 조용히 버립니다 */
+  const who = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const day = seoulDay();
+  const target = body.target ? String(body.target).slice(0, 64) : null;
+  const key = 하루번호(who, ua, day, target ?? '');
+
+  /* 같은 날 · 같은 자리 · 같은 사람은 **한 번만** 셉니다 (세중님 2026-10-11).
+     유일 제약을 걸려면 이미 쌓인 줄을 먼저 지워야 하는데, 지우는 것은
+     승인 창이 뜹니다 (작업지침 8-7). 그래서 넣기 전에 한 번 묻습니다.
+     ponytail: 두 번 두드립니다. 줄이 많아지면 그때 제약으로 옮깁니다 */
+  let 물음 = supabase.from('page_hits').select('id')
+    .eq('day', day).eq('kind', kind).eq('day_key', key).limit(1);
+  물음 = target === null ? 물음.is('target', null) : 물음.eq('target', target);
+  const { data: 이미 } = await 물음;
+  if (이미 && 이미.length) return NextResponse.json({ ok: true, counted: false });
 
   const { error } = await supabase.from('page_hits').insert({
-    day: seoulDay(),
+    day,
     kind,
     device: MOBILE.test(ua) ? 'mobile' : 'desktop',
-    target: body.target ? String(body.target).slice(0, 64) : null,
+    target,
     day_key: key,
     /* 관리자가 본 것은 숫자에서 뺍니다.
        이 값은 브라우저가 말해주는 것이라 완벽하지 않습니다 —
