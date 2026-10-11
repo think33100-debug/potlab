@@ -76,15 +76,20 @@ export default function Welcome() {
     setBusy(true); setNickErr(null);
 
     const sb = browserSupabase();
-    const { error } = await sb.from('profiles').insert({
-      id: session.user.id,
-      nickname: name,
-      job_group: job,
-      role,
-      avatar,
-      terms_agreed_at: new Date().toISOString(),
-      terms_version: TERMS_VERSION,
-      /* 카카오가 준 사진·이메일은 일부러 안 담습니다 — lib/avatar.ts 참고 */
+    /* ★ 2026-10-11 — **창구로 옮겼습니다.** 전에는 여기서 profiles 에 바로
+       넣었는데, profiles.회원번호 의 기본값이 nextval('회원번호_seq') 라
+       회원에게 **시퀀스 권한**이 있어야 했습니다. 2026-09-30 에 회원번호를
+       더하면서 그 권한을 안 줘서, 그날부터 **새 가입이 한 건도 안 됐습니다**
+       (「permission denied for sequence 회원번호_seq」).
+       11일 동안 아무도 가입을 안 해서 아무도 몰랐습니다.
+       창구(security definer) 안에서 넣으면 회원 쪽 권한이 필요 없습니다.
+       카카오가 준 사진·이메일은 일부러 안 담습니다 — lib/avatar.ts 참고 */
+    const { error } = await sb.rpc('가입하기', {
+      p_닉네임: name,
+      p_직군: job,
+      p_역할: role,
+      p_사진: avatar,
+      p_약관판: TERMS_VERSION,
     });
 
     if (error) {
