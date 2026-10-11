@@ -60,13 +60,21 @@ export default function AdminBeat() {
   const [박동, set박동] = useState<박동줄[] | null>(null);
   const [흐름, set흐름] = useState<흐름줄[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  /* ★ 2026-10-11 — 「마지막으로 보낸 알림」 한 줄 (세중님 결정).
+     푸시는 GitHub Actions 가 하루 세 번 돌아서 화면에서 볼 길이 없었습니다 */
+  const [알림, set알림] = useState<{
+    마지막때?: string | null; 오늘보냄?: number; 모두보냄?: number;
+    켜진기기?: number; 꺼진기기?: number; 왜?: string;
+  } | null>(null);
 
   const load = useCallback(async () => {
     const sb = browserSupabase();
-    const [a, b] = await Promise.all([
+    const [a, b, c] = await Promise.all([
       sb.rpc('beat_health'),
       sb.rpc('수집기박동'),
+      sb.rpc('admin_마지막알림'),
     ]);
+    if (!c.error) set알림(c.data as typeof 알림);
     if (a.error) { setErr(a.error.message); set박동([]); } else { set박동((a.data ?? []) as 박동줄[]); }
     if (b.error) { setErr((p) => p ?? b.error!.message); set흐름([]); } else { set흐름((b.data ?? []) as 흐름줄[]); }
   }, []);
@@ -83,6 +91,21 @@ export default function AdminBeat() {
         수집기가 <span className="font-bold">돌았나</span>와 공고가{' '}
         <span className="font-bold">들어왔나</span>는 다릅니다. 둘을 나란히 놓습니다.
       </p>
+
+      {/* 마지막으로 보낸 알림 — 한 줄 */}
+      {알림 && !알림.왜 && (
+        <p className="mt-4 break-keep rounded-sm border border-gray-200 px-5 py-4 text-lg
+                      dark:border-gray-700">
+          <b>마지막으로 보낸 알림</b>{' · '}
+          {알림.마지막때
+            ? new Date(알림.마지막때).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+            : '아직 한 번도 안 보냈어요'}
+          {' · 오늘 '}<span className="num tabular-nums">{알림.오늘보냄 ?? 0}</span>건
+          {' · 모두 '}<span className="num tabular-nums">{알림.모두보냄 ?? 0}</span>건
+          {' · 켜 둔 기기 '}<span className="num tabular-nums">{알림.켜진기기 ?? 0}</span>대
+          {(알림.꺼진기기 ?? 0) > 0 && <span className="text-mute">{' (꺼진 것 ' + 알림.꺼진기기 + '대)'}</span>}
+        </p>
+      )}
 
       {err && <p className="mt-4 text-lg text-brand-red">{err}</p>}
 

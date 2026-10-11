@@ -42,6 +42,25 @@ export function PostItem({ p, showChannel = false }: { p: PostRow; showChannel?:
           </div>
 
           {p.title && <p className="mt-1 truncate text-body-lg font-medium">{p.title}</p>}
+          {/* ★ 2026-10-11 — 중고거래 값·상태 (세중님 결정).
+              전에는 본문에 「가격 0원」처럼 적어 찾기도 거르기도 안 됐습니다.
+              **결제는 없습니다** — 값은 적어 두는 글자일 뿐입니다 */}
+          {(p.값 != null || p.거래상태) && (
+            <p className="mt-1 flex items-center gap-2 text-lg">
+              {p.값 != null && (
+                <b className="num tabular-nums">{p.값.toLocaleString('ko-KR')}원</b>
+              )}
+              {p.값 == null && <span className="text-mute">값 안 적음</span>}
+              {p.거래상태 && (
+                <span className={'rounded-full px-2 py-0.5 text-sm '
+                  + (p.거래상태 === '판매중' ? 'bg-badge-teal-bg text-teal-strong'
+                     : p.거래상태 === '예약중' ? 'bg-brand-red-soft text-brand-red-dark'
+                     : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400')}>
+                  {p.거래상태}
+                </span>
+              )}
+            </p>
+          )}
           <p className="mt-1 line-clamp-2 text-lg text-gray-600 dark:text-gray-400">{p.body}</p>
 
           <div className="mt-2 flex gap-3 text-sm text-mute">

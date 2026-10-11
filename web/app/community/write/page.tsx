@@ -25,6 +25,11 @@ function Write() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [picks, setPicks] = useState<Pick[]>([]);
+  /* ★ 2026-10-11 — 중고거래 값·상태 (세중님 결정 「추천대로」).
+     전에는 본문에 「가격 0원」처럼 적어서 찾기도 거르기도 안 됐습니다.
+     **결제는 안 붙입니다** — POTJOB 은 결제를 받지 않습니다 */
+  const [값, set값] = useState('');
+  const [거래상태, set거래상태] = useState('판매중');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -77,9 +82,13 @@ function Write() {
     const sb = browserSupabase();
 
     try {
+      const 장터 = ch === 'market';
+      const 값숫자 = 값.replace(/[^0-9]/g, '');
       const { data: post, error } = await sb.from('posts').insert({
         channel: ch, author_id: me.id,
         title: title.trim() || null, body: body.trim(),
+        /* 장터가 아니면 두 칸을 아예 안 보냅니다 */
+        ...(장터 ? { 값: 값숫자 ? Number(값숫자) : null, 거래상태 } : {}),
       }).select('id').single();
       if (error) throw error;
 
@@ -129,6 +138,24 @@ function Write() {
         maxLength={60}
         className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
       />
+
+      {/* ★ 중고거래에만 — 값과 상태 (2026-10-11) */}
+      {ch === 'market' && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <input
+            value={값}
+            onChange={(e) => set값(e.target.value.replace(/[^0-9]/g, ''))}
+            inputMode="numeric" placeholder="값 (원) — 비워 두면 「값 안 적음」"
+            className="min-w-[200px] flex-1 rounded-sm border border-gray-200 px-5 py-4 text-lg" />
+          <select
+            value={거래상태} onChange={(e) => set거래상태(e.target.value)}
+            className="rounded-sm border border-gray-200 px-4 py-4 text-lg">
+            <option value="판매중">판매중</option>
+            <option value="예약중">예약중</option>
+            <option value="거래완료">거래완료</option>
+          </select>
+        </div>
+      )}
 
       <label className="mt-6 block text-sm font-bold text-mute">내용</label>
       <textarea

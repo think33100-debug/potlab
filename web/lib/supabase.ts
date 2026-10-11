@@ -158,6 +158,9 @@ export type PostRow = {
   /* ★ 2026-10-07 — 사진 **경로**는 더 안 받습니다. 그 경로에 글쓴이 회원번호가
      들어 있습니다. 몇 장인지만 받고, 그림은 /api/post-image 로 받습니다 */
   사진수?: number | null;
+  /* 중고거래에만 — 다른 방은 null (2026-10-11) */
+  값?: number | null;
+  거래상태?: string | null;
 };
 
 /* 목록에서는 본문을 통째로 안 받습니다. 사진도 썸네일 경로만 받습니다.
@@ -176,7 +179,8 @@ export type PostRow = {
    지우기 단추를 가릴 수 있습니다. 세션으로 읽어야 참이 됩니다(serverSupabase) */
 export const POST_LIST_COLS =
   'id,channel,title,body,comment_count,like_count,view_count,created_at,내글,'
-  + 'profiles,사진수';
+  /* ★ 2026-10-11 — 중고거래 값·상태 (세중님 결정). 다른 방에서는 늘 null 입니다 */
+  + 'profiles,사진수,값,거래상태';
 
 export const POST_ONE_COLS =
   'id,channel,title,body,comment_count,like_count,view_count,created_at,edited_at,'
