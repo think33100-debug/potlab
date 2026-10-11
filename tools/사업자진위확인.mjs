@@ -56,7 +56,21 @@ if (!cfg.NTS_BIZ_KEY) {
   process.exit(0);
 }
 
-const res = await fetch(주소 + '?serviceKey=' + encodeURIComponent(cfg.NTS_BIZ_KEY), {
+/* 포털은 인증키를 **두 벌**로 줍니다 — Encoding(이미 퍼센트로 싼 것) ·
+   Decoding(날것). 어느 쪽인지 모르는 채 encodeURIComponent() 를 걸면
+   Encoding 쪽은 % 가 %25 로 **두 번 싸여** 열쇠가 안 맞습니다.
+   그래서 한 번 풀고 한 번만 싸맵니다. **값은 안 찍습니다** (지침 8-11) */
+function 열쇠날것(k) {
+  if (!/%[0-9A-Fa-f]{2}/.test(k)) return k;
+  try { return decodeURIComponent(k); } catch { return k; }
+}
+if (process.argv.includes('--열쇠모양')) {
+  const k = cfg.NTS_BIZ_KEY;
+  console.log('열쇠 — 길이 ' + k.length + ' · 앞 4글자 ' + k.slice(0, 4)
+    + ' · 퍼센트 ' + (/%[0-9A-Fa-f]{2}/.test(k) ? '있음 → Encoding(싼 것)' : '없음 → Decoding(날것)'));
+}
+
+const res = await fetch(주소 + '?serviceKey=' + encodeURIComponent(열쇠날것(cfg.NTS_BIZ_KEY)), {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ b_no: 번호들.map((x) => x.replace(/-/g, '')) }),

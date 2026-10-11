@@ -56,6 +56,10 @@ export default function Partner() {
   const [교육기관, set교육기관] = useState('');
   const [탈, set탈] = useState<string | null>(null);
   const [도는중, set도는중] = useState(false);
+  /* 국세청 확인 — **보여 주기용**입니다. DB 에 적는 값은 서버가 따로 봅니다
+     (web/app/api/biz/route.ts 머리말) */
+  const [국세청, set국세청] = useState<string | null>(null);
+  const [확인중, set확인중] = useState(false);
 
   const 읽기 = useCallback(async () => {
     const sb = browserSupabase();
@@ -80,6 +84,23 @@ export default function Partner() {
     );
   }
 
+  const 국세청확인 = async () => {
+    const b = 사업자번호.replace(/\D/g, '');
+    if (b.length !== 10) { set국세청('숫자 10자리를 넣어 주세요'); return; }
+    set확인중(true); set국세청(null);
+    try {
+      const r = await fetch('/api/biz', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ b_no: b }),
+      });
+      const j = await r.json();
+      set국세청(r.ok ? String(j.상태 ?? '모름') : '지금은 확인이 안 돼요 (관리자가 봅니다)');
+    } catch {
+      set국세청('지금은 확인이 안 돼요 (관리자가 봅니다)');
+    }
+    set확인중(false);
+  };
+
   const 내기 = async () => {
     set도는중(true); set탈(null);
     const { data, error } = await browserSupabase().rpc('담당자신청', {
@@ -91,7 +112,7 @@ export default function Partner() {
     set도는중(false);
     if (error) { set탈(error.message); return; }
     void data;
-    set사업자번호(''); set교육기관('');
+    set사업자번호(''); set교육기관(''); set국세청(null);
     await 읽기();
   };
 
@@ -122,10 +143,33 @@ export default function Partner() {
         <p className="mt-4 break-keep text-lg text-mute">{필요한것[갈래].설명}</p>
 
         {갈래 !== '교육담당자개인' && (
-          <input
-            value={사업자번호} onChange={(e) => set사업자번호(e.target.value)}
-            inputMode="numeric" placeholder="사업자등록번호 (숫자 10자리)"
-            className="mt-4 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
+          <>
+            <input
+              value={사업자번호}
+              onChange={(e) => { set사업자번호(e.target.value); set국세청(null); }}
+              inputMode="numeric" placeholder="사업자등록번호 (숫자 10자리)"
+              className="mt-4 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <button
+                type="button" onClick={국세청확인}
+                disabled={확인중 || 사업자번호.replace(/\D/g, '').length !== 10}
+                className="rounded-sm border border-gray-200 px-4 py-2 text-lg text-gray-600
+                           disabled:opacity-40 hover:bg-gray-50">
+                {확인중 ? '보는 중…' : '국세청 확인'}
+              </button>
+              {국세청 && (
+                <span className={'break-keep text-lg '
+                  + (국세청 === '계속사업자' ? 'font-bold text-teal-strong'
+                     : 국세청 === '휴업자' || 국세청 === '폐업자' || 국세청 === '없는 번호'
+                       ? 'font-bold text-brand-red' : 'text-mute')}>
+                  {국세청}
+                </span>
+              )}
+            </div>
+            <p className="mt-1 break-keep text-sm text-mute">
+              국세청에 등록된 상태를 미리 보여 드려요. 승인은 관리자가 서류를 보고 정합니다.
+            </p>
+          </>
         )}
         {갈래 === '교육담당자기관' && (
           <input
