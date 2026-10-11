@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>열쇠교체_계획 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="인계/00_읽는법.html">읽는 법</a><a href="screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="열쇠-교체-계획-조사만-했습니다-하나도-안-돌렸습니다">열쇠 교체 계획 — <b>조사만 했습니다. 하나도 안 돌렸습니다</b></h1>
+<p>기준 시각 <b>2026-10-11 17:00 (한국시간)</b> · 결정일 <b>10/25(토)</b></p>
+<h2 id="왜-이-글이-있나">왜 이 글이 있나</h2>
+<p>2026-10-11 에 제가 <code>.env.local</code> 을 셸로 <code>source</code> 했는데, 그 파일에</p>
+<p><b>이름 없이 값만 있는 줄</b>이 하나 있었습니다. 셸이 그 줄을 명령어로 읽어</p>
+<p><code>command not found</code> 와 함께 <b>값을 화면에 찍었습니다.</b></p>
+<ul>
+<li>찍힌 것 — <b>옛 <code>service_role</code> 열쇠</b> (지금 쓰는 것과 <b>다른 값</b>)</li>
+<li>살아 있나 — <b>살아 있습니다.</b> 그 열쇠로 PostgREST 를 두드리니 <b>HTTP 200</b></li>
+<li>저장소에 샜나 — <b>아닙니다.</b> <code>git log --all -S</code> 0건 · <code>git grep</code> 0건 ·</li>
+</ul>
+<p>  <code>.env.local</code> 은 <code>.gitignore:34</code> 에 있습니다. 샌 자리는 <b>그 대화 하나</b>입니다</p>
+<ul>
+<li>한 것 — 그 떠돌이 줄을 <code>.env.local</code> 에서 뗐습니다</li>
+</ul>
+<p>**세중님 결정 (2026-10-11) — 지금은 안 바꿉니다. 오픈 전이라 10/25 판정일에</p>
+<p>처리합니다.** 이 글은 그날 쓸 지도입니다.</p>
+<hr>
+<h2 id="1-좋은-길이-있습니다-새-api-키로-옮기고-옛-키만-끕니다">1. 좋은 길이 있습니다 — <b>새 API 키로 옮기고 옛 키만 끕니다</b></h2>
+<p>공식 문서(<code>supabase.com/docs/guides/api/api-keys</code>)를 읽었습니다. **짐작이</p>
+<p>아닙니다.** 문서가 말하는 것은 이렇습니다.</p>
+<table><thead><tr><th></th><th>옛 (legacy)</th><th>새</th></tr></thead><tbody>
+<tr><td>꼴</td><td>긴 JWT (<code>eyJhbGciOi…</code>)</td><td>짧은 글 (<code>sb_publishable_…</code> · <code>sb_secret_…</code>)</td></tr>
+<tr><td>브라우저에 두는 것</td><td><code>anon</code></td><td><code>sb_publishable_…</code></td></tr>
+<tr><td>서버에만 두는 것</td><td><code>service_role</code></td><td><code>sb_secret_…</code></td></tr>
+<tr><td>역할</td><td><code>anon</code> · <code>service_role</code></td><td><b>같습니다</b> — publishable → <code>anon</code>/<code>authenticated</code>, secret → <code>service_role</code></td></tr>
+<tr><td>RLS</td><td>service_role 이 건너뜀</td><td><b>secret 도 똑같이 건너뜁니다</b> (같은 <code>BYPASSRLS</code> 역할)</td></tr>
+</tbody></table>
+<p>문서에서 그대로 가져온 두 줄 —</p>
+<blockquote>「새 키를 만들어도 기존 <code>anon</code>·<code>service_role</code> 키는 <b>그대로 돕니다.</b></blockquote>
+<blockquote>대시보드 <b>Settings → API Keys</b> 에서 <b>끄는 것은 따로 하는 일</b>입니다.」</blockquote>
+<blockquote>「<b>끄는 것은 되돌릴 수 있습니다</b> — 빠뜨린 데가 있으면 다시 켜면 됩니다.」</blockquote>
+<p>문서는 또 「<code>anon</code>·<code>service_role</code> 키를 <b>2026년 말까지 없앱니다</b>」라고</p>
+<p>적고 있습니다. 어차피 한 번은 옮겨야 합니다.</p>
+<h3 id="그래서-권하는-길">그래서 권하는 길</h3>
+<pre><code>
+① 새 키 둘을 만듭니다            옛 키는 그대로 돕니다 — 아무것도 안 멈춥니다
+② 쓰는 데를 하나씩 새 키로 바꿉니다  한 군데씩. 멈춤 없음
+③ 다 바꾼 뒤 옛 키를 **끕니다**     두 열쇠(지금 것 · 떠돌이 것)가 함께 죽습니다
+④ 하루 지켜보고 괜찮으면 끝         빠진 데가 있으면 ③ 을 **되돌립니다**
+</code></pre>
+<p><b>JWT 비밀을 통째로 바꾸는 것보다 훨씬 안전합니다</b> — 멈추는 시간이 없고,</p>
+<p>되돌릴 수 있고, 한 군데씩 할 수 있습니다.</p>
+<blockquote><b>확인 못 한 것 하나</b> — 문서가 <b>저장소(Storage)</b> 와 <b>직접 서명한 JWT</b></blockquote>
+<blockquote>에 대해서는 말이 없습니다. 우리는 Storage 를 씁니다(<code>notices</code>·<code>proofs</code>·</blockquote>
+<blockquote><code>ad-images</code>). ③ 전에 <b>Storage 올리기·내리기를 새 키로 한 번 해 봐야</b></blockquote>
+<blockquote>합니다. 「문서에 없으니 되겠지」로 넘기지 않습니다.</blockquote>
+<hr>
+<h2 id="2-안-되면-jwt-비밀-교체-바꿀-자리-목록">2. 안 되면 — JWT 비밀 교체. 바꿀 자리 목록</h2>
+<p>JWT 비밀을 바꾸면 <b><code>anon</code> 까지 전부</b> 새로 받습니다. 아래를 <b>한꺼번에</b></p>
+<p>갈아야 하고, 그 사이 사이트와 수집기가 멈춥니다.</p>
+<h3 id="바꿀-자리">바꿀 자리</h3>
+<table><thead><tr><th>어디</th><th>무엇</th><th>몇 개</th><th>누가</th></tr></thead><tbody>
+<tr><td>Supabase 대시보드</td><td>JWT Secret 교체</td><td>1</td><td>세중님</td></tr>
+<tr><td>Vercel <code>potjob-web</code></td><td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> (production·preview·development <b>셋</b>)</td><td>3</td><td>세중님</td></tr>
+<tr><td>GitHub Secrets</td><td><code>SUPABASE_ANON_KEY</code> · <code>SUPABASE_SERVICE_KEY</code></td><td>2</td><td>세중님</td></tr>
+<tr><td>서버 <code>~/potlab/.env</code></td><td><code>SUPABASE_ANON_KEY</code> · <code>SUPABASE_SERVICE_KEY</code></td><td>2</td><td>세중님 (값을 넣는 일이라)</td></tr>
+<tr><td>내 PC <code>.env.local</code></td><td><code>SUPABASE_SERVICE_KEY</code></td><td>1</td><td>세중님</td></tr>
+<tr><td>앱(있다면)</td><td>아직 없습니다</td><td>0</td><td>—</td></tr>
+</tbody></table>
+<p>저장소 <b>코드는 안 고칩니다</b> — 전부 환경 변수에서 읽습니다. 센 것 (값이</p>
+<p>아니라 <b>이름을 쓰는 파일 수</b>) —</p>
+<pre><code>
+SUPABASE_SERVICE_KEY 를 읽는 파일   26  (tools 23 · .github/workflows 2 · 그 밖 1)
+SUPABASE_ANON_KEY   를 읽는 파일   35  (tools 31 · .github/workflows 4)
+web 쪽                              web/lib/supabase.ts · supabase-server.ts ·
+                                    supabase-browser.ts 세 벌 (Vercel 변수에서 읽습니다)
+gas 쪽                              0 — 옛 시트는 다리를 거칩니다
+</code></pre>
+<p>GitHub Secrets 에 들어 있는 이름 전부 (열쇠 교체 때 함께 볼 것) —</p>
+<p><code>ALIO_DETAIL_KEY</code> <code>ALIO_LIST_KEY</code> <code>ALIVE_KEY</code> <code>APPS_SCRIPT_URL</code> <code>CLEANEYE_KEY</code></p>
+<p><code>COLLECT_KEY_AL2</code> <code>COLLECT_KEY_CE2</code> <code>COLLECT_KEY_JF</code> <code>EXPORT_KEY</code> <code>OCR_GAS_URL</code></p>
+<p><code>OCR_KEY</code> <code>PUSH_KEY</code> <code>SUPABASE_ANON_KEY</code> <code>SUPABASE_SERVICE_KEY</code> <code>SUPABASE_URL</code></p>
+<p><code>VAPID_MAIL</code> <code>VAPID_PRIVATE</code> <code>VAPID_PUBLIC</code></p>
+<h3 id="순서와-걸리는-시간-jwt-비밀을-바꿀-때">순서와 걸리는 시간 (JWT 비밀을 바꿀 때)</h3>
+<pre><code>
+0. 크론을 멈춥니다 (서버 crontab 주석 · GitHub Actions 끄기)       5분
+1. Supabase 에서 JWT Secret 교체                                  1분  ← 여기서부터 멈춥니다
+2. 새 anon·service_role 을 받아 적어 둡니다                        2분
+3. Vercel 변수 셋 → 다시 배포 (배포가 READY 될 때까지)             5분
+4. GitHub Secrets 둘                                              3분
+5. 서버 ~/potlab/.env 둘 → 수집기 하나를 손으로 돌려 확인          5분
+6. 크론 다시 켜기 · 다리 한 바퀴 · 화면 한 번                      10분
+                                                      멈추는 시간  약 15분
+                                                      전체        30~40분
+</code></pre>
+<p><b>로그인한 회원은 다시 로그인해야 합니다</b> — 가지고 있던 토큰이 그 비밀로</p>
+<p>서명돼 있습니다. 오픈 뒤에 하면 회원이 전부 튕깁니다. **오픈 전에 끝내야</p>
+<p>하는 까닭**입니다.</p>
+<hr>
+<h2 id="3-1025-에-할-일-차례대로">3. 10/25 에 할 일 (차례대로)</h2>
+<p>1. Supabase 대시보드 <b>Settings → API Keys</b> 에 새 키 방식이 보이는지 봅니다</p>
+<p>2. 보이면 <b>1절 길</b>로 갑니다 (①②③④). 이게 첫째입니다</p>
+<p>3. ③ 전에 <b>Storage 올리기·내리기를 새 키로 한 번</b> 해 봅니다 — 문서에 없습니다</p>
+<p>4. 새 키 방식이 없으면 <b>2절 길</b>(JWT 비밀 교체)로 갑니다. 오픈 전에</p>
+<p>5. 끝나면 옛 열쇠로 두드려 <b>HTTP 401 인지</b> 확인합니다. 200 이면 안 죽은 것입니다</p>
+<hr>
+<h2 id="함께-볼-것">함께 볼 것</h2>
+<ul>
+<li><code>docs/승인대기_1009.md</code> ⑬ — 기록에 남은 죽은 열쇠 다섯</li>
+<li><code>docs/인계/05_부록.md</code> 4절 「오픈 전 할 일」</li>
+<li><code>CLAUDE.md</code> 8-11 (열쇠 값을 화면에 찍지 않습니다) · 8-12 (<code>.env</code> 를 셸로</li>
+</ul>
+<p>  <code>source</code> 하지 않습니다)</p>
+<p class="만든말">이 쪽은 <code>열쇠교체_계획.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>

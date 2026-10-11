@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오픈점검_1101 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="인계/00_읽는법.html">읽는 법</a><a href="screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="111-기능-오픈-준비-점검표">11/1 기능 오픈 준비 — 점검표</h1>
+<p>기준 시각 <b>2026-10-11 19:00 (한국시간)</b> · 커밋 <code>7899701</code> 뒤</p>
+<blockquote><b>아직 스위치는 하나도 안 켰습니다.</b> 이 글은 <b>여는 차례와 볼 것</b>만</blockquote>
+<blockquote>적은 지도입니다.</blockquote>
+<pre><code>
+10/11 (오늘)  이 글을 씁니다
+10/12~10/24   하나씩 열고 하나씩 봅니다 (아래 2절 차례대로)
+10/25 (토)    판정 — 불안한 기능만 다시 숨깁니다
+11/1          모든 기능 오픈 (채용 담당자·교육 담당자 공고 올리기 포함)
+</code></pre>
+<p>약관·개인정보 처리방침은 <b>세중님이 오픈 직전에</b> 정리하십니다. 여기서는</p>
+<p>안 다룹니다.</p>
+<hr>
+<h2 id="1-지금-숨어-있는-것">1. 지금 숨어 있는 것</h2>
+<table><thead><tr><th>주소</th><th>무엇</th><th>지금 누구에게</th><th>막는 자리</th></tr></thead><tbody>
+<tr><td><code>/partner</code></td><td>담당자 신청</td><td>운영진·마스터</td><td>화면 <code>if (!isAdmin &amp;&amp; !마스터)</code></td></tr>
+<tr><td><code>/verify</code></td><td>재직 인증</td><td>운영진·마스터</td><td>화면 같은 갈래</td></tr>
+<tr><td><code>/talk</code> · <code>/talk/[room]</code></td><td>1:1 대화</td><td>관리자·마스터</td><td>화면 같은 갈래</td></tr>
+<tr><td><code>/alarm</code> · 탑바 종</td><td>알림함</td><td>관리자</td><td><code>components/alarm-bell.tsx</code> 의 <code>!isAdmin</code></td></tr>
+<tr><td><code>/biz</code></td><td>채용 관리</td><td>승인된 채용담당자</td><td><b>화면이 아니라 승인</b></td></tr>
+<tr><td><code>/edu/manage</code></td><td>교육 관리</td><td>승인된 교육담당자</td><td><b>화면이 아니라 승인</b></td></tr>
+<tr><td><code>/master</code> · <code>/admin/*</code> 23곳</td><td>운영</td><td>권한별</td><td>그대로 둡니다</td></tr>
+</tbody></table>
+<p><b><code>/biz</code>·<code>/edu/manage</code> 는 「열고 말고」가 아닙니다.</b> 담당자를 승인하면</p>
+<p>그분에게 보입니다. 지금 안 보이는 까닭은 <b>승인된 담당자가 없어서</b>입니다.</p>
+<p><b>막는 진짜 자리는 DB 입니다.</b> 화면에서 <code>isAdmin</code> 을 지워도</p>
+<p><code>교육담당자인가()</code>·<code>담당자공고쓰기()</code> 같은 창구가 거절합니다. 그래서</p>
+<p>화면만 먼저 열어 보는 것은 안전합니다 — 다만 **화면을 열면 회원 눈에</p>
+<p>보이므로<b>, 창구가 거절하는 꼴이 </b>미안하지 않은 말**인지 함께 봐야 합니다.</p>
+<hr>
+<h2 id="2-여는-차례-하나씩-하루에-하나">2. 여는 차례 — <b>하나씩</b>, 하루에 하나</h2>
+<p>한꺼번에 열면 어디가 터졌는지 모릅니다. 차례는 <b>뒤탈이 작은 것부터</b>입니다.</p>
+<table><thead><tr><th>#</th><th>언제</th><th>무엇을 엽니다</th><th>고치는 자리</th><th>열면 누가 무엇을 할 수 있나</th></tr></thead><tbody>
+<tr><td>1</td><td>10/13(월)</td><td><b>알림함</b> <code>/alarm</code> · 탑바 종</td><td><code>components/alarm-bell.tsx</code> 의 <code>!isAdmin</code> 지우기</td><td>회원이 찜한 공고 마감을 알림으로 받습니다. <b>밖으로 나가는 것이 없습니다</b> — 제일 안전합니다</td></tr>
+<tr><td>2</td><td>10/14(화)</td><td><b>재직 인증</b> <code>/verify</code></td><td>그 화면 맨 위 갈래 지우기</td><td>회원이 증빙을 올립니다. <b>파일이 들어오기 시작합니다</b> — 저장소 규칙과 탈퇴 때 지우기를 먼저 봐야 합니다 (4절)</td></tr>
+<tr><td>3</td><td>10/16(목)</td><td><b>담당자 신청</b> <code>/partner</code></td><td>같은 갈래 지우기</td><td>기관이 신청합니다. 승인은 관리자가 합니다. <b>여기부터 사업자번호·증빙이 들어옵니다</b></td></tr>
+<tr><td>4</td><td>10/20(월)</td><td><b>채용·교육 관리</b> <code>/biz</code> · <code>/edu/manage</code></td><td>화면이 아니라 <b>담당자 한 곳을 승인</b>합니다</td><td>그 기관이 <b>공고를 올립니다.</b> 가장 무겁습니다 — 3번을 나흘 지켜본 뒤</td></tr>
+<tr><td>5</td><td>10/22(수)</td><td><b>1:1 대화</b> <code>/talk</code></td><td>같은 갈래 지우기</td><td>회원끼리 말합니다. <b>차단이 없으면 열지 않습니다</b> (5절)</td></tr>
+</tbody></table>
+<p><b>열 때마다 그날 안에 할 것</b></p>
+<pre><code>
+① 페르소나 아홉으로 그 화면을 한 바퀴 (3절 점검표)
+② 비로그인 창으로 같은 주소 — 「로그인 안내」가 뜨는지
+③ 창구가 거절하는 꼴 보기 — 빨간 오류 글이 아니라 **사람 말**인지
+④ 다음 날 아침 collector_beat 와 Vercel 배포가 멀쩡한지
+</code></pre>
+<hr>
+<h2 id="3-기능마다-끝까지-페르소나-점검표">3. 기능마다 끝까지 — 페르소나 점검표</h2>
+<p>페르소나 아홉 — **비로그인 · 학생 · 작업치료사 · 물리치료사 · 채용담당자 ·</p>
+<p>교육담당자 · 채용+교육담당자 · 가입중 · 비회원보기**.</p>
+<p>「본다」가 아니라 <b>「끝까지 해 본다」</b>입니다. 올리는 기능은 <b>올려 봐야</b></p>
+<p>된 것입니다 (작업지침 6-2b).</p>
+<h3 id="알림함">① 알림함</h3>
+<table><thead><tr><th>할 것</th><th>어느 페르소나</th><th>되면 무엇이 보여야</th></tr></thead><tbody>
+<tr><td>공고를 찜한다 → 마감 3일 전 알림이 오나</td><td>작업치료사</td><td>알림함에 한 줄 · 종에 빨간 점</td></tr>
+<tr><td>알림을 읽는다</td><td>작업치료사</td><td>빨간 점이 사라짐</td></tr>
+<tr><td>알림함을 연다</td><td>비로그인</td><td>로그인 안내 (빈 화면 아님)</td></tr>
+<tr><td>푸시 허용을 거절한다</td><td>학생</td><td>화면이 안 깨지고 알림함은 그대로 돎</td></tr>
+</tbody></table>
+<h3 id="재직-인증">② 재직 인증</h3>
+<table><thead><tr><th>할 것</th><th>페르소나</th><th>되면</th></tr></thead><tbody>
+<tr><td>증빙을 <b>올린다</b> (pdf·jpg)</td><td>작업치료사</td><td>저장소에 파일이 들어감 — <b>버킷 줄 수를 세어 확인</b></td></tr>
+<tr><td>한글 이름 파일을 올린다</td><td>작업치료사</td><td><b>올라가야 합니다</b> (경로는 uuid+확장자. 6-2b)</td></tr>
+<tr><td>20MB 넘는 파일</td><td>물리치료사</td><td>미안한 말로 거절</td></tr>
+<tr><td>남의 증빙을 주소로 열어 본다</td><td>학생</td><td><b>401/403</b> — 못 봐야 합니다</td></tr>
+<tr><td>관리자가 승인·반려한다</td><td>운영진</td><td>회원 화면에 상태가 바뀜</td></tr>
+<tr><td><b>탈퇴한다</b></td><td>시험 계정</td><td>증빙 <b>파일까지</b> 지워지는가 ← 지금 안 지웁니다 (4절)</td></tr>
+</tbody></table>
+<h3 id="담당자-신청">③ 담당자 신청</h3>
+<table><thead><tr><th>할 것</th><th>페르소나</th><th>되면</th></tr></thead><tbody>
+<tr><td>사업자번호를 넣고 <b>「국세청 확인」</b></td><td>채용담당자</td><td>계속사업자/휴업자/폐업자/없는 번호 — <b>2026-10-11 확인함</b></td></tr>
+<tr><td>사업자등록증을 올린다</td><td>채용담당자</td><td>올라감</td></tr>
+<tr><td>주민번호 뒷자리가 보이는 서류</td><td>채용담당자</td><td>반려되고 <b>까닭이 적힘</b></td></tr>
+<tr><td>남의 신청을 본다</td><td>작업치료사</td><td>안 보임</td></tr>
+<tr><td>관리자가 승인한다</td><td>운영진</td><td>그 계정에 <code>/biz</code> 가 생김</td></tr>
+</tbody></table>
+<h3 id="채용교육-관리-가장-무거움">④ 채용·교육 관리 (<b>가장 무거움</b>)</h3>
+<table><thead><tr><th>할 것</th><th>페르소나</th><th>되면</th></tr></thead><tbody>
+<tr><td>공고를 <b>쓴다</b></td><td>채용담당자</td><td>회원 목록에 뜸 · 일곱 칸이 찬다</td></tr>
+<tr><td>남의 기관 공고를 고친다</td><td>채용담당자</td><td><b>거절</b> (<code>채용담당자인가()</code>)</td></tr>
+<tr><td>공고를 마감한다</td><td>채용담당자</td><td>목록에서 내려감</td></tr>
+<tr><td>첨부 공고문을 올린다</td><td>채용담당자</td><td>올라감 · <b>비회원은 못 받음</b></td></tr>
+<tr><td>교육 회차를 연다</td><td>교육담당자</td><td><code>/edu</code> 에 뜸</td></tr>
+<tr><td>수집기가 같은 공고를 덮나</td><td>—</td><td><b>덮으면 안 됩니다</b> — <code>edited_fields</code> 가 지키는지 확인</td></tr>
+<tr><td>담당자가 올린 공고를 수집기가 지우나</td><td>—</td><td><code>source</code> 가 달라 안 건드려야 합니다</td></tr>
+</tbody></table>
+<h3 id="11-대화">⑤ 1:1 대화</h3>
+<table><thead><tr><th>할 것</th><th>페르소나</th><th>되면</th></tr></thead><tbody>
+<tr><td>말을 건다</td><td>작업치료사 → 채용담당자</td><td>방이 생김</td></tr>
+<tr><td><b>차단한다</b></td><td>작업치료사</td><td><code>대화차단하기()</code> — 상대가 더 못 보냄</td></tr>
+<tr><td>차단한 사람의 글을 본다</td><td>작업치료사</td><td><b>지금은 그대로 보입니다</b> (5절)</td></tr>
+<tr><td>신고한다</td><td>물리치료사</td><td><code>/admin/reports</code> 에 뜸</td></tr>
+</tbody></table>
+<hr>
+<h2 id="4-오픈-전-보안-네-가지">4. 오픈 전 보안 — <b>네 가지</b></h2>
+<h3 id="4-1-수집기-창구가-비로그인에게-열려-있습니다">4-1. 수집기 창구가 <b>비로그인에게 열려 있습니다</b></h3>
+<pre><code>
+collect_put    anon=O · authenticated=O · service_role=O
+collect_beat   anon=O · authenticated=O · service_role=O
+판정남기기      anon=O · authenticated=X · service_role=O
+</code></pre>
+<p><code>anon</code> 열쇠는 <b>브라우저에 내려가는 공개 값</b>입니다. 지금은 <code>p_secret</code></p>
+<p>하나로만 막고 있습니다. 비밀이 한 번 새면 <b>아무나 공고를 넣을 수 있습니다.</b></p>
+<p><b>고치는 법</b> — 수집기는 서버에서만 돕니다. <code>service_role</code> 로 옮깁니다.</p>
+<pre><code>
+revoke execute on function public.collect_put(text, text, jsonb)  from public, anon, authenticated;
+revoke execute on function public.collect_beat(text, text, jsonb) from public, anon, authenticated;
+revoke execute on function public.판정남기기(text, text, jsonb)     from public, anon;
+grant  execute on function public.collect_put(text, text, jsonb)  to service_role;
+grant  execute on function public.collect_beat(text, text, jsonb) to service_role;
+grant  execute on function public.판정남기기(text, text, jsonb)     to service_role;
+</code></pre>
+<p><b>인수 꼴을 먼저 확인하고 돌립니다</b> (위 SQL 의 인수는 아직 안 맞춰 봤습니다).</p>
+<p>그리고 **수집기 열넷이 <code>SUPABASE_ANON_KEY</code> 대신 <code>SUPABASE_SERVICE_KEY</code> 로</p>
+<p>부르게** 함께 고쳐야 합니다 — 안 고치면 수집이 통째로 멈춥니다.</p>
+<p>한 수집기에서 먼저 해 보고 나머지를 옮깁니다. <code>p_secret</code> 은 <b>그대로 둡니다</b></p>
+<p>(두 겹이 낫습니다).</p>
+<h3 id="4-2-가짜-조회수를-못-막습니다">4-2. 가짜 조회수를 못 막습니다</h3>
+<p><code>web/app/api/hit/route.ts</code> 는 봇 이름과 <code>prefetch</code> 만 거릅니다.</p>
+<p><b>같은 사람인지 가리는 <code>day_key</code> 를 브라우저가 줍니다.</b> 번호를 매번 새로</p>
+<p>지어 보내면 조회수가 끝없이 올라갑니다. 아이피 제한도 없습니다.</p>
+<p><b>고치는 법 (셋 중 둘만 해도 됩니다)</b></p>
+<ul>
+<li>아이피+공고별 <b>1분에 몇 번</b>으로 묶기 (<code>/api/biz</code> 에 넣은 것과 같은 꼴)</li>
+<li><code>day_key</code> 를 서버가 정하기 — 아이피+날짜를 해시해서 <b>브라우저 말을 안 믿기</b></li>
+<li><code>page_hits</code> 에 <code>(day, kind, target, day_key)</code> <b>유일 제약</b>을 걸어 같은 날</li>
+</ul>
+<p>  같은 사람은 한 번만 세기</p>
+<p><b>왜 오픈 전인가</b> — 조회수는 <b>광고 값을 매기는 근거</b>입니다 (CLAUDE.md</p>
+<p>「재활·요양 공고에는 조회수를 남긴다. 나중에 값을 매길 근거가 된다」).</p>
+<p>거짓 숫자로 값을 매기면 되돌릴 수 없습니다.</p>
+<h3 id="4-3-승인대기에-남은-것">4-3. 승인대기에 남은 것</h3>
+<table><thead><tr><th>번호</th><th>무엇</th><th>오픈 전에 꼭?</th></tr></thead><tbody>
+<tr><td>②</td><td><code>밤정리()</code> 대화 보관 고치기</td><td>1:1 대화를 열면 <b>필요합니다</b></td></tr>
+<tr><td>③</td><td>꺼 둔 열쇠 여섯 줄 치우기</td><td>하면 좋습니다</td></tr>
+<tr><td>④</td><td>옛 훅 함수 <code>hook_이메일가입막기</code> 치우기</td><td>하면 좋습니다 (<code>drop</code> 이라 승인 창)</td></tr>
+<tr><td>⑥⑦⑩</td><td>시험 자료 치우기</td><td><b>꼭</b> (5절)</td></tr>
+<tr><td>⑨</td><td><code>공고칸채우기</code> 실행</td><td>아니요 — ⑭ 로 거의 대신했습니다</td></tr>
+<tr><td>⑪</td><td>수집기 첨부 담기 (<code>attach-prep</code> 합치기)</td><td>「공고문에서 읽기」를 쓰려면 필요합니다</td></tr>
+<tr><td>⑬</td><td>기록에 남은 죽은 열쇠 다섯</td><td>죽은 것이라 급하지 않습니다</td></tr>
+<tr><td>⑰</td><td>알리오 상세 <code>steps</code> 로 인원 채우기</td><td>아니요</td></tr>
+<tr><td>⑱</td><td><b>Apps Script 승인 풀림</b></td><td><b>지금 당장</b> — 다리와 옛 수집기가 멈춰 있습니다</td></tr>
+</tbody></table>
+<h3 id="4-4-옛-service_role-열쇠">4-4. 옛 <code>service_role</code> 열쇠</h3>
+<p><code>docs/열쇠교체_계획.md</code> — <b>10/25 판정일에 처리</b>합니다 (세중님 결정).</p>
+<p><b>회원이 전부 다시 로그인해야 하므로 오픈 전에 끝내야 합니다.</b></p>
+<hr>
+<h2 id="5-앱-심사-준비-현황">5. 앱 심사 준비 현황</h2>
+<table><thead><tr><th>심사 기준</th><th>무엇이 필요한가</th><th>지금</th><th>할 일</th></tr></thead><tbody>
+<tr><td><b>4.8 로그인 서비스</b></td><td>카카오·네이버가 있으면 <b>Apple 로그인도</b> 있어야 합니다</td><td>✗ <code>/login</code> 에 단추는 있는데 「아직 준비 중이에요」 — 안 이어져 있습니다</td><td>Apple Developer 등록 → Supabase 에 Apple 제공자 켜기 → <code>METHODS</code> 의 <code>apple</code> 에 <code>oauth</code> 넣기</td></tr>
+<tr><td><b>5.1.1(v) 앱 안에서 탈퇴</b></td><td>가입이 되면 탈퇴도 앱 안에서</td><td>○ <code>/me</code> 에 「회원 탈퇴」 (주석에 기준 번호까지 적혀 있습니다)</td><td>탈퇴 때 <b>증빙 파일</b>도 지우기 (지금은 <code>profiles</code> 만)</td></tr>
+<tr><td><b>1.2 회원이 쓴 글</b> — 신고</td><td>신고 창구</td><td>○ <code>공고오류신고</code> · <code>admin_신고목록</code> · <code>admin_신고처리</code> · <code>신고걸렸나</code></td><td>커뮤니티 글·댓글 신고가 <b>끝까지 도는지</b> 한 바퀴</td></tr>
+<tr><td><b>1.2 회원이 쓴 글</b> — <b>차단</b></td><td><b>거슬리는 회원을 차단</b>할 수 있어야 합니다</td><td>△ <code>대화차단하기()</code> 는 <b>1:1 대화만</b></td><td><b>커뮤니티에 차단이 없습니다.</b> 차단한 사람의 글·댓글이 안 보이게 만들어야 합니다 — <b>심사에서 막히는 자리</b></td></tr>
+<tr><td><b>1.2</b> — 24시간 안 처리</td><td>신고를 하루 안에 본다는 약속</td><td>?</td><td>약관·안내에 한 줄 (세중님이 오픈 직전에)</td></tr>
+<tr><td><b>심사용 계정</b></td><td>애플 심사원이 쓸 계정</td><td>✗</td><td>아이디·비번을 만들어 <b>심사 메모에</b> 적습니다. 그 계정에 <b>승인된 담당자 권한</b>까지 넣어야 <code>/biz</code> 를 봅니다</td></tr>
+<tr><td><b>4.2 최소 기능</b> (「앱다운 기능」)</td><td>웹을 감싸기만 하면 떨어집니다</td><td>△</td><td>후보 — <b>① 마감 알림 푸시</b>(이미 있습니다 · VAPID) <b>② 찜한 공고 오프라인 보기</b> <b>③ 공고 사진으로 바로 신고</b> <b>④ 위젯 — 오늘 마감</b></td></tr>
+</tbody></table>
+<p><b>가장 급한 것은 「차단」입니다.</b> 나머지는 이미 있거나 등록 절차입니다.</p>
+<hr>
+<h2 id="6-시험-자료-언제-어떻게-치우나">6. 시험 자료 — <b>언제, 어떻게 치우나</b></h2>
+<h3 id="지금-남아-있는-것">지금 남아 있는 것</h3>
+<table><thead><tr><th>무엇</th><th>어디</th><th>승인대기</th></tr></thead><tbody>
+<tr><td>시험 회원 넷 (<code>시험학생</code>·<code>시험물리</code>·<code>시험빈계정</code>·<code>바꾼이름</code>)</td><td><code>profiles</code></td><td>⑥</td></tr>
+<tr><td>시험 공고 (<code>source='TEST'</code>)</td><td><code>job_posts</code></td><td>⑥</td></tr>
+<tr><td>함수 <b>밖</b>에 있는 시험 자료 둘</td><td>—</td><td>⑦</td></tr>
+<tr><td>시험 공고 첨부</td><td><code>job_attachments</code> · 저장소</td><td>⑩ (안 하면 ⑥ 이 FK 에서 멈춥니다)</td></tr>
+<tr><td>견본 증빙 6장</td><td>저장소 <code>proofs</code></td><td>⑥</td></tr>
+</tbody></table>
+<h3 id="언제">언제</h3>
+<p><b>오픈 직전이 아니라 10/25 판정일에 치웁니다.</b> 까닭 —</p>
+<ul>
+<li>10/12~10/24 에 <b>페르소나로 시험할 때 그 계정들이 필요합니다</b></li>
+<li>치우고 나서 터지면 다시 만들어야 하는데, 오픈 직전에 할 일이 아닙니다</li>
+<li><b>치우는 데 승인 창이 뜹니다</b> (<code>delete</code>) — 세중님이 깨어 계실 때만 (8-7)</li>
+</ul>
+<h3 id="어떻게-차례대로">어떻게 (차례대로)</h3>
+<pre><code>
+1. ⑩ 을 먼저 — 시험자료치우기() 에 공고첨부를 더합니다
+   안 하면 ⑥ 이 FK 때문에 멈춥니다
+2. 저장소 파일을 먼저 지웁니다 (표를 지우면 파일 주소를 잃습니다)
+     proofs 의 견본 6장 · 시험 공고 첨부
+3. ⑥ 시험자료치우기() 실행 — 승인 창이 뜹니다
+4. 센 뒤 확인 —
+     select count(*) from job_posts where source = 'TEST';          → 0
+     select count(*) from profiles where nickname like '시험%';      → 0
+     저장소 proofs · notices 버킷 줄 수                              → 0
+5. 화면 한 바퀴 — 관리자 회원 목록 · 공고 목록 · 커뮤니티
+6. **캡처를 다시 찍습니다** — 지금 캡처 230장에 시험 계정이 들어 있습니다
+</code></pre>
+<p><b>치운 뒤에는 시험 계정이 없습니다.</b> 11/1 뒤에 다시 시험해야 하면</p>
+<p><b>그때 새로 만들고 그 자리에서 치웁니다</b> (작업지침 8-9).</p>
+<hr>
+<h2 id="7-1025-판정일에-볼-것-한-장">7. 10/25 판정일에 볼 것 — 한 장</h2>
+<pre><code>
+□ 1절의 다섯 기능이 다 열려 있고 하루 넘게 멀쩡한가
+□ 4-1 수집기 창구를 service_role 로 옮겼나 · 수집기 열넷이 다 도나
+□ 4-2 조회수에 그물을 걸었나
+□ 4-4 옛 service_role 열쇠를 처리했나 (docs/열쇠교체_계획.md)
+□ 5절 「차단」을 만들었나
+□ 6절 시험 자료를 치웠나 · 캡처를 다시 찍었나
+□ ⑱ Apps Script 가 살아 있나 (다리 job_sync_log 에 ok=true)
+□ 불안한 기능이 있으면 **그것만 다시 숨깁니다** — 한 줄이면 됩니다
+</code></pre>
+<hr>
+<h2 id="함께-볼-것">함께 볼 것</h2>
+<ul>
+<li><code>docs/승인대기_1009.md</code> — 번호별 전문과 되돌리는 법</li>
+<li><code>docs/열쇠교체_계획.md</code> — 10/25 열쇠 처리</li>
+<li><code>docs/인계/05_부록.md</code> 2절 「숨긴 기능과 여는 법」 · 4절 「오픈 전 할 일」</li>
+<li><code>docs/화면상태목록.md</code> — 화면마다 어떤 상태가 있나</li>
+</ul>
+<p class="만든말">이 쪽은 <code>오픈점검_1101.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>
