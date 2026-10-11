@@ -43,18 +43,31 @@ export async function POST(req: Request) {
   const 토큰 = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
   if (!토큰) return NextResponse.json({ 됨: false, 왜: '로그인이 필요합니다' }, { status: 401 });
 
+  /* ★ 2026-10-11 — **결과를 남깁니다** (승인대기 ㉔).
+     남기지 않으면 끊겼는지 알 길이 없습니다 — 애플 계정 화면은 연결이
+     없었어도 똑같이 비어 보이고, Vercel 실행 기록은 따로 봐야 합니다.
+     erased_accounts.애플끊기 에 한 줄로 적습니다 (그 사람 줄에만) */
+  const 적기 = async (결과: string) => {
+    try { await 창구(토큰, '애플끊기적기', { p_결과: 결과 }); } catch { /* 탈퇴를 막지 않습니다 */ }
+  };
+
   const 아이디 = process.env.APPLE_CLIENT_ID;
   const 비밀 = process.env.APPLE_CLIENT_SECRET;
   if (!아이디 || !비밀) {
     /* 탈퇴를 막지 않습니다 — 아직 안 붙인 것뿐입니다 */
+    await 적기('열쇠 없음');
     return NextResponse.json({ 됨: false, 왜: '애플 열쇠가 아직 없습니다 (승인대기 ⑲)' });
   }
 
   const 꺼냄 = await 창구(토큰, '내애플연결');
   const 리프레시 = typeof 꺼냄.답 === 'string' ? 꺼냄.답 : null;
-  if (!꺼냄.ok) return NextResponse.json({ 됨: false, 왜: '연결을 못 읽었습니다' }, { status: 502 });
+  if (!꺼냄.ok) {
+    await 적기('연결을 못 읽었습니다');
+    return NextResponse.json({ 됨: false, 왜: '연결을 못 읽었습니다' }, { status: 502 });
+  }
   if (!리프레시) {
     /* 애플로 로그인한 적이 없거나 이미 끊었습니다 — 할 일이 없습니다 */
+    await 적기('끊을 것 없음');
     return NextResponse.json({ 됨: true, 왜: '끊을 애플 연결이 없습니다' });
   }
 
@@ -73,9 +86,11 @@ export async function POST(req: Request) {
   /* 애플은 성공하면 **빈 몸에 200** 을 줍니다 */
   if (!r.ok) {
     const 글 = (await r.text()).slice(0, 300);
+    await 적기('HTTP ' + r.status + ' · ' + 글.replace(/\s+/g, ' ').slice(0, 120));
     return NextResponse.json({ 됨: false, HTTP: r.status, 왜: 글 }, { status: 502 });
   }
 
   await 창구(토큰, '애플연결끊음');
+  await 적기('200');          /* ← 이것이 찍혀야 **끊긴 것**입니다 */
   return NextResponse.json({ 됨: true });
 }
