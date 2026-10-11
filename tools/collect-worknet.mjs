@@ -532,11 +532,22 @@ const 상세값 = new Map();        /* 번호 → { 인원, 자격, 급여 } */
 const 상세탈 = [];
 if (!dry || 상세시험) {
   const 기억 = 상세기억읽기();
-  /* 새 번호이거나 원 출처가 고친 것(smodifyDtm 이 달라진 것)만 받습니다 */
+  /* ① 먼저 기억에 있는 값을 그대로 싣습니다.
+     collect_put 이 headcount·detail 을 excluded 로 덮기 때문에, 이번에 상세를
+     안 받은 공고도 값을 실어 보내야 **어제 받은 인원이 null 로 지워지지
+     않습니다.** 40건씩 묶어 받는 것과 한 쌍입니다 */
+  for (const v of 볼것) {
+    const 번호 = String(v.r.wantedAuthNo || '');
+    const 옛 = 기억[번호];
+    if (옛 && 옛.m === String(v.r.smodifyDtm || '-')) {
+      상세값.set(번호, { 인원: 옛.n || '', 자격: 옛.c || '', 급여: 옛.s || '' });
+    }
+  }
+  /* ② 새 번호이거나 원 출처가 고친 것(smodifyDtm 이 달라진 것)만 받습니다 */
   const 할것 = 볼것.filter((v) => {
     const 번호 = String(v.r.wantedAuthNo || '');
     if (!번호 || !v.r.infoSvc) return false;
-    return 기억[번호] !== String(v.r.smodifyDtm || '-');
+    return !상세값.has(번호);
   });
   const 받을것 = 할것.slice(0, 상세최대);
   console.log('\n②-2 상세 — 받을 것 ' + 할것.length + '건 중 ' + 받을것.length + '건'
@@ -550,7 +561,7 @@ if (!dry || 상세시험) {
       if (상세탈.length >= 5) { console.error('   ★ 연달아 다섯 번 실패 — 상세만 접습니다'); break; }
     } else {
       상세값.set(번호, r);
-      기억[번호] = String(v.r.smodifyDtm || '-');
+      기억[번호] = { m: String(v.r.smodifyDtm || '-'), n: r.인원, c: r.자격, s: r.급여 };
     }
     await 쉼(300);
   }
@@ -560,7 +571,7 @@ if (!dry || 상세시험) {
   if (!dry) 상세기억쓰기(기억);
   const 셈3 = { 인원: 0, 자격: 0, 급여: 0 };
   for (const v of 상세값.values()) for (const k of Object.keys(셈3)) if (v[k]) 셈3[k]++;
-  console.log('   받음 ' + 상세값.size + '건 · 못 받음 ' + 상세탈.length + '건'
+  console.log('   실어 보낼 것 ' + 상세값.size + '건 (기억분 포함) · 못 받음 ' + 상세탈.length + '건'
     + ' — 모집인원 ' + 셈3.인원 + ' · 지원자격 ' + 셈3.자격 + ' · 급여 ' + 셈3.급여);
   for (const t of 상세탈.slice(0, 3)) console.error('   ✗ ' + t);
 }
