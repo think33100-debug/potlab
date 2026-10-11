@@ -41,8 +41,21 @@ const BUCKETS = ['avatars', 'post-images'];
    개인정보라 두 겹으로 둡니다.
 
    **갓 올린 파일은 안 건드립니다** — 올리고 줄을 쓰는 사이에 지우면 안 됩니다 */
-const 증빙통 = 'proofs';
 const 봐줄분 = 15;          /* 올린 지 15분 안 된 파일은 그대로 둡니다 */
+
+/* 「주인(회원)이 있나」가 아니라 **「쓰는 줄이 가리키나」**로 보는 통들.
+   2026-10-11 에 셋으로 늘렸습니다 — 그날 세어 보니 notices 에 파일 19개인데
+   공고첨부는 6줄이었습니다. **아무도 안 치우고 있었습니다.**
+
+     proofs       재직 증빙   — 검토가 끝나면 재직인증.경로 가 비워집니다
+     notices      공고·교육 첨부 — 공고첨부.경로
+     chat-images  대화 사진   — chat_messages.image_path·image_thumb_path
+                  (밤정리가 30일 뒤 칸을 비웁니다 → 그 뒤 여기서 지웁니다) */
+const 가리키는통 = [
+  { 통: 'proofs', 표: '재직인증', 칸: ['경로'] },
+  { 통: 'notices', 표: '공고첨부', 칸: ['경로'] },
+  { 통: 'chat-images', 표: 'chat_messages', 칸: ['image_path', 'image_thumb_path'] },
+];
 
 async function rest(path) {
   const r = await fetch(`${URL}/rest/v1/${path}`, { headers: H });
@@ -78,33 +91,38 @@ async function main() {
     });
     console.log(r.ok ? `   지웠습니다` : `   실패 HTTP ${r.status} ${await r.text()}`);
   }
-  await 증빙치우기();
+  for (const t of 가리키는통) await 가리키지않는것치우기(t);
 }
 
-async function 증빙치우기() {
-  /* 아직 쓰이는 경로 */
-  const r = await fetch(`${URL}/rest/v1/${encodeURIComponent('재직인증')}?select=${encodeURIComponent('경로')}&${encodeURIComponent('경로')}=not.is.null`, { headers: H });
-  if (!r.ok) { console.error('재직인증을 못 읽었습니다 — HTTP ' + r.status); return; }
-  const 쓰는것 = new Set((await r.json()).map((x) => x['경로']).filter(Boolean));
+async function 가리키지않는것치우기({ 통, 표, 칸 }) {
+  /* 아직 쓰이는 경로 모으기 */
+  const 쓰는것 = new Set();
+  for (const c of 칸) {
+    const q = `${encodeURIComponent(표)}?select=${encodeURIComponent(c)}&${encodeURIComponent(c)}=not.is.null`;
+    const r = await fetch(`${URL}/rest/v1/${q}`, { headers: H });
+    if (!r.ok) { console.error(`${표}.${c} 를 못 읽었습니다 — HTTP ${r.status}`); return; }
+    for (const x of await r.json()) if (x[c]) 쓰는것.add(x[c]);
+  }
 
   const 지울것 = [];
-  const 폴더들 = await list(증빙통, '');
-  for (const f of 폴더들) {
-    if (f.id !== null) continue;                     /* 파일이 아니라 폴더만 */
-    for (const it of await list(증빙통, f.name)) {
+  for (const f of await list(통, '')) {
+    /* 파일이 바로 있을 수도, 폴더 안에 있을 수도 있습니다 */
+    const 안쪽 = f.id === null ? (await list(통, f.name)).map((it) => ({ ...it, 길: `${f.name}/${it.name}` }))
+      : [{ ...f, 길: f.name }];
+    for (const it of 안쪽) {
       if (it.id === null) continue;
-      const 길 = `${f.name}/${it.name}`;
-      if (쓰는것.has(길)) continue;
+      if (쓰는것.has(it.길)) continue;
       const 만든때 = Date.parse(it.created_at ?? it.updated_at ?? 0);
       if (Number.isFinite(만든때) && Date.now() - 만든때 < 봐줄분 * 60_000) continue;
-      지울것.push(길);
+      지울것.push(it.길);
     }
   }
-  if (!지울것.length) { console.log(`${증빙통}: 치울 것 없음`); return; }
-  console.log(`${증빙통}: 아무 줄도 안 가리키는 파일 ${지울것.length}개`);
+  if (!지울것.length) { console.log(`${통}: 치울 것 없음`); return; }
+  console.log(`${통}: 아무 줄도 안 가리키는 파일 ${지울것.length}개`);
   지울것.slice(0, 10).forEach((x) => console.log('   ' + x));
+  if (지울것.length > 10) console.log(`   … 그리고 ${지울것.length - 10}개`);
   if (!DO_IT) { console.log('   (--yes 를 주면 지웁니다)'); return; }
-  const d = await fetch(`${URL}/storage/v1/object/${증빙통}`, {
+  const d = await fetch(`${URL}/storage/v1/object/${통}`, {
     method: 'DELETE', headers: H, body: JSON.stringify({ prefixes: 지울것 }),
   });
   console.log(d.ok ? `   지웠습니다 ${지울것.length}개` : `   못 지웠습니다 — HTTP ${d.status}`);
