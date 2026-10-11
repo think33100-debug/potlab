@@ -291,6 +291,7 @@ function 호출수남기기() {
     while (날들.length > 60) delete 표[날들.shift()];
     fs.writeFileSync(파일, JSON.stringify(표, null, 1));
     console.log('  호출 ' + 호출수 + '번 · 오늘 누적 ' + 표[날] + '번 (한도는 공개 안 됨)');
+    호출수 = 0;   /* 적은 만큼 비웁니다 — 상세까지 세려고 두 번 부릅니다 */
   } catch (e) { console.error('호출 수 기록 실패 · ' + String(e.message).slice(0, 120)); }
 }
 
@@ -574,6 +575,7 @@ if (!dry || 상세시험) {
   console.log('   실어 보낼 것 ' + 상세값.size + '건 (기억분 포함) · 못 받음 ' + 상세탈.length + '건'
     + ' — 모집인원 ' + 셈3.인원 + ' · 지원자격 ' + 셈3.자격 + ' · 급여 ' + 셈3.급여);
   for (const t of 상세탈.slice(0, 3)) console.error('   ✗ ' + t);
+  호출수남기기();        /* 상세로 쓴 호출도 오늘 누적에 넣습니다 */
 }
 
 /* ── ③ 갈래 ───────────────────────────────────────────────── */
