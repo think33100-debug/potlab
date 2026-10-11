@@ -274,7 +274,19 @@ async function 한건(cfg, r, 셈, 옵션) {
   }
   if (job) 우대에만 = false;   // 제대로 된 칸에서 나왔으면 우대는 상관없습니다
 
-  let hold = '', 인원 = Number(r.recrutNope) || null, 못읽은까닭 = '';
+  /* ★ 2026-10-11 — `recrutNope` 은 **공고 전체 인원**입니다. 우리 직군 몫이
+     아닙니다 (작업지침 15절). 그대로 담고 있어서 심평원 공고가 화면에
+     「모집 인원 233명」으로 떴습니다.
+
+     1명이면 통합일 수 없으니 그때만 그대로 씁니다 — 공고 전체가 1명인데
+     우리 직군이 거기 들어 있으면 그 1명이 우리 몫입니다.
+     2명 이상은 **아래 steps 에서 우리 직군 단계만 세어 나온 값**일 때만 씁니다.
+     steps 를 못 본 공고는 **비웁니다** — 틀린 숫자가 빈 칸보다 나쁩니다.
+
+     ☞ 남은 일 (승인대기 ⑰) — 지금은 직군을 목록에서 가린 공고는 상세를
+       안 엽니다. 그 공고들도 상세를 열어 우리 직군 몫을 세면 인원이 찹니다. */
+  const 공고전체인원 = Number(r.recrutNope) || null;
+  let hold = '', 인원 = 공고전체인원 === 1 ? 1 : null, 못읽은까닭 = '';
 
   /* ④ 상세 — 접수중 500건 중 467건이 여기까지 옵니다 */
   if (!job && !옵션.상세안열기) {
@@ -370,7 +382,7 @@ async function 한건(cfg, r, 셈, 옵션) {
      다시 받아도 결과가 같고, 관리자가 처리할 몫입니다 */
   const 다시볼까닭 = /OCR 실패|OCR 을 맡길 곳이 없어|PDF 를 못 받음|PDF 가 아닌 것이 옴|상세를 못 받았습니다/;
   r.__판정 = (hold && 다시볼까닭.test(hold)) ? '' : (hold ? '보류함' : 갈래.갈래);
-  return { id, org, title, job, 근거, hold, 인원, 갈래, r };
+  return { id, org, title, job, 근거, hold, 인원, 공고전체인원, 갈래, r };
 }
 
 /* ── DB ───────────────────────────────────────────────────── */
@@ -614,7 +626,7 @@ const 담을것 = 회원.concat(보류).map((x) => {
     hire_type: de(r.recrutSeNm), employ_type: de(r.hireTypeNmLst),
     work_place: 지역, sido: null, sgg: null,
     edu: de(r.acbgCondNmLst),
-    headcount: x.인원 || null,
+    headcount: x.인원 || null,     /* 우리 직군 몫만. 전체 인원은 detail.공고전체인원 */
     apply_from: 날(r.pbancBgngYmd), apply_to: 날(r.pbancEndYmd),
     posted_at: 날(r.pbancBgngYmd),
     /* 알리오는 srcUrl 에 **공고별 주소가 아니라 기관 대문**을 주는 때가 많습니다
