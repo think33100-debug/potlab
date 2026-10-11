@@ -1,0 +1,45 @@
+name: 만료일 점검 (2주 전부터 알립니다)
+
+# 때가 되면 꼭 해야 하는데 **안 하면 조용히 망가지는 것**들이 있습니다.
+# 애플 client secret 이 그렇습니다 — 만료되면 Apple 로그인만 안 되고
+# 카카오·네이버는 멀쩡해서 아무도 눈치채지 못합니다.
+#
+# docs/만료일.json 을 날마다 읽어 **2주 전부터 실패로 표시**합니다.
+# 실패하면 GitHub 이 저장소 주인에게 메일을 보냅니다.
+#
+# 날짜를 늘리면(새로 만들면) 그 파일의 만료일만 고치면 됩니다.
+
+on:
+  schedule:
+    - cron: '0 22 * * *'    # 한국시간 아침 7시
+  workflow_dispatch:
+  push:
+    paths: ['docs/만료일.json', '.github/workflows/만료일점검.yml']
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 날짜 견주기
+        run: |
+          node -e '
+            const fs = require("fs");
+            const j = JSON.parse(fs.readFileSync("docs/만료일.json", "utf8"));
+            const 오늘 = new Date();
+            let 걸림 = 0;
+            for (const r of j["줄"]) {
+              const 끝 = new Date(r["만료일"] + "T00:00:00+09:00");
+              const 남은날 = Math.floor((끝 - 오늘) / 86400000);
+              const 말 = r["무엇"] + " — " + r["만료일"] + " (" + 남은날 + "일 남음)";
+              if (남은날 <= 14) { 걸림++; console.error("★ " + 말 + "\n   " + r["어떻게"]); }
+              else console.log("○ " + 말);
+            }
+            if (걸림) {
+              console.error("\n2주 안에 만료되는 것이 " + 걸림 + "개 있습니다.");
+              process.exit(1);
+            }
+          '

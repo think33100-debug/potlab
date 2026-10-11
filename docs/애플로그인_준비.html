@@ -155,11 +155,21 @@ node tools/애플비밀만들기.mjs
 <p>만료되면 <b>Apple 로그인만 조용히 안 됩니다</b> — 다른 로그인은 멀쩡해서</p>
 <p>눈치채기 어렵습니다.</p>
 <pre><code>
-만료일   tools/애플비밀만들기.mjs 가 만들 때 화면에 찍습니다.
-         그 날짜를 docs/인계/05_부록.md 「정기 할 일」에 적어 두십시오
+만료일   **2027-04-12**  (2026-10-11 에 만든 것)
 다시 만들기   같은 명령을 다시 돌리면 됩니다. **.p8 은 그대로 씁니다** —
          새로 받을 필요가 없습니다 (Key 는 그대로, JWT 만 새로)
+바꿀 자리 **둘**   ① Supabase → Authentication → Providers → Apple → Secret Key
+                 ② Vercel → potjob-web → APPLE_CLIENT_SECRET → **다시 배포**
 </code></pre>
+<blockquote><b>두 자리의 값이 다르면 이런 증상이 납니다</b> —</blockquote>
+<blockquote>① <b>Supabase 쪽만 옛것</b>: 로그인 자체가 안 됩니다. 애플이 <code>invalid_client</code></blockquote>
+<blockquote>   로 거절하고 <code>/login</code> 에 그 글이 그대로 뜹니다.</blockquote>
+<blockquote>② <b>Vercel 쪽만 옛것</b>: **로그인은 되는데 탈퇴할 때 연결 끊기만 조용히</blockquote>
+<blockquote>   실패합니다.** 회원은 아무것도 못 느끼고 애플 심사에서 걸립니다.</blockquote>
+<blockquote>   그래서 <b>둘을 같은 값으로</b> 두고 <b>같이</b> 바꿉니다.</blockquote>
+<p><b>그물</b> — <code>docs/만료일.json</code> 에 적어 두었고</p>
+<p><code>.github/workflows/만료일점검.yml</code> 이 날마다 읽어 <b>2주 전(2027-03-29)부터</b></p>
+<p>실패로 표시합니다. 실패하면 메일이 갑니다.</p>
 <p><b>미리 알아채는 법</b> — 만료 2주 전쯤 <code>/login</code> 에서 Apple 단추를 한 번</p>
 <p>눌러 보십시오. 안 되면 화면이 까닭을 그대로 보여 줍니다.</p>
 <hr>
