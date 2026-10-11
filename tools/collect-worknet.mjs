@@ -226,14 +226,14 @@ async function 상세한건(번호, svc) {
 }
 
 /* 한 번 받은 번호를 기억합니다 — 번호 → smodifyDtm */
-const 상세기억터 = 로그터 + '/워크넷_상세받음.json';
+const 상세기억터 = () => 로그터 + '/워크넷_상세받음.json';
 function 상세기억읽기() {
-  try { return JSON.parse(fs.readFileSync(상세기억터, 'utf8')); } catch { return {}; }
+  try { return JSON.parse(fs.readFileSync(상세기억터(), 'utf8')); } catch { return {}; }
 }
 function 상세기억쓰기(표) {
   try {
     fs.mkdirSync(로그터, { recursive: true });
-    fs.writeFileSync(상세기억터, JSON.stringify(표, null, 1));
+    fs.writeFileSync(상세기억터(), JSON.stringify(표, null, 1));
   } catch (e) { console.error('상세 기억 못 남김 · ' + String(e.message).slice(0, 120)); }
 }
 
