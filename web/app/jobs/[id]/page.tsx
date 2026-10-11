@@ -162,6 +162,13 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     (뽑은값?.['예상연봉'] ?? detail['연봉'] ?? detail['예상연봉'] ?? null) || null;
   const 지원자격: string | null =
     (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
+  /* ★ 2026-10-11 — 모집 인원도 뽑은값을 봅니다.
+     `headcount` 칸을 채워 주는 출처가 거의 없어서(373건 중 13건) 이 칸이
+     거의 안 그려졌습니다. 워크넷 상세 API 의 `collectPsncnt` 를 읽어
+     뽑은값에 넣었으니(247건) 그걸 뒤로 받칩니다.
+     `headcount` 가 먼저입니다 — 관리자가 고치는 칸이 그쪽입니다 */
+  const 모집인원: string | null =
+    (j.headcount != null ? `${j.headcount}명` : (뽑은값?.['모집인원'] ?? null)) || null;
 
   /* 워크넷(고용24) 공고인가. id 는 수집기가 'WN' + 고용24 공고번호로 만듭니다
      (tools/collect-worknet.mjs 485줄 · 옛 WN 과 새 WN2 가 같은 규칙입니다).
@@ -278,9 +285,9 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                 빈 칸은 관리자 「빈칸 공고」 목록으로 갑니다 */}
           <Rise>
             <dl className="mt-6 grid grid-cols-2 gap-3">
-              {j.headcount != null && (
+              {모집인원 && (
                 <Core icon={icons['job.headcount']} label="모집 인원"
-                      v={`${j.headcount}명`} />
+                      v={모집인원} />
               )}
               {/* ★ 2026-10-08 — 마감 **시각**이 있으면 함께 보여줍니다.
                   「2026-10-16 (금) 오전 9시 마감」. 전에는 날짜만 보여줘서
