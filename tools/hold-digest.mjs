@@ -3,6 +3,7 @@
  *   node tools/hold-digest.mjs            만들어서 보냅니다
  *   node tools/hold-digest.mjs --보기      보내지 않고 화면에만 (내용 확인용)
  *   node tools/hold-digest.mjs --시간 48   48시간치로
+ *   node tools/hold-digest.mjs --잠금분 1  잠금 경보 기준을 1분으로 (시험용)
  *
  * ── 왜 하루 한 번인가 ────────────────────────────────────────
  * 전에는 gas 가 보류함에 들어갈 때마다 메일을 보냈습니다.
@@ -23,6 +24,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -57,13 +59,69 @@ async function rpc(cfg, fn, body) {
   return t ? JSON.parse(t) : null;
 }
 
+/** 잠금을 너무 오래 쥔 수집기 (2026-10-12) ───────────────────
+ *
+ * 10-12 01:50 클린아이가 일을 **다 끝내고도** kordoc 워커 때문에 5시간 19분
+ * 살아 있었습니다. 잠금(`~/lock/cleaneye.lock`)을 쥔 채라 그 뒤 실행
+ * **13번이 전부 건너뛰었습니다.** 그런데 **아무 경보도 안 울렸습니다** —
+ *   · 「늦은 수집기」 는 DB 의 박동을 봅니다. 그 실행은 박동을 **남겼습니다**
+ *     (일을 끝냈으니까요). 그래서 늦은 것으로 안 잡힙니다
+ *   · 「새 공고 마름」 은 평일 업무시간 기준이라 새벽에는 안 울립니다
+ * 멈춘 것을 세중님이 아침에 `ps` 를 보고 아셨습니다. 그 눈을 여기에 옮깁니다.
+ *
+ * 이것은 **서버 쪽 신호**라 DB 함수가 아니라 여기서 셉니다.
+ * 리눅스가 아니면 조용히 빈 배열을 돌려줍니다. */
+function 오래쥔잠금(분기준 = 30) {
+  try {
+    if (!fs.existsSync('/proc')) return [];
+    const 잠금들 = new Map();                      /* pid → 잠금 이름 */
+    for (const p of fs.readdirSync('/proc')) {
+      if (!/^\d+$/.test(p)) continue;
+      let fds;
+      try { fds = fs.readdirSync('/proc/' + p + '/fd'); } catch { continue; }  /* 남의 것은 못 봅니다 */
+      for (const fd of fds) {
+        let 가리킴;
+        try { 가리킴 = fs.readlinkSync('/proc/' + p + '/fd/' + fd); } catch { continue; }
+        const m = /\/lock\/([^/]+)\.lock$/.exec(가리킴);
+        if (m) { 잠금들.set(p, m[1]); break; }
+      }
+    }
+    if (!잠금들.size) return [];
+    /* 걸린 시간은 `ps` 한 번으로 — pid 로만 봅니다 (지침 8-2: 이름으로 찾으면
+       제 명령줄까지 걸립니다) */
+    const out = execFileSync('ps', ['-eo', 'pid=,etimes=,args='], { encoding: 'utf8' });
+    const 센것 = [];
+    for (const 줄 of out.split('\n')) {
+      const m = /^\s*(\d+)\s+(\d+)\s+(.*)$/.exec(줄);
+      if (!m) continue;
+      const [, pid, 초, 명령] = m;
+      if (!잠금들.has(pid)) continue;
+      if (Number(초) < 분기준 * 60) continue;
+      센것.push({ 수집기: 잠금들.get(pid), pid, 분: Math.round(Number(초) / 60), 명령: 명령.slice(0, 70) });
+    }
+    /* 한 수집기에 셸·node 둘이 같이 걸립니다 — 오래된 쪽 하나만 */
+    const 하나씩 = new Map();
+    for (const x of 센것.sort((a, b) => b.분 - a.분)) if (!하나씩.has(x.수집기)) 하나씩.set(x.수집기, x);
+    return [...하나씩.values()];
+  } catch {
+    return [];                                     /* 못 세면 조용히 넘어갑니다 */
+  }
+}
+
 /** 사람이 읽을 글로 */
-function 글로(d, 관리자주소) {
+function 글로(d, 관리자주소, 잠금) {
   const 줄 = [];
   const 보류 = d['새 보류'] || [];
   const 샘 = d['회원 화면'] || {};
   const 늦음 = d['늦은 수집기'] || [];
 
+  if ((잠금 || []).length) {
+    줄.push('██ 수집기가 잠금을 오래 쥐고 있습니다 ██');
+    잠금.forEach((x) => 줄.push('   ' + x.수집기 + ' — ' + x.분 + '분째 (pid ' + x.pid + ') ' + x.명령));
+    줄.push('   ※ 그 수집기의 다음 실행이 **전부 건너뜁니다.** 로그 끝줄이 이미');
+    줄.push('     끝난 꼴이면 멈춰 선 것입니다 — ps 로 보고 pid 로 죽이십시오');
+    줄.push('');
+  }
   if (늦음.length) {
     줄.push('██ 수집기가 제때 안 돌았습니다 ██');
     늦음.forEach((x) => 줄.push('   ' + x.경로 + ' — ' + x.왜 + ' (' + x.몇시간째 + '시간째)'));
@@ -150,14 +208,21 @@ const d = await rpc(cfg, 'hold_digest', {
   p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE, p_hours: 시간,
 });
 
-if (!d['보낼것있나']) {
-  console.log('보낼 것이 없습니다 — 새 보류 0건 · 회원 화면 멀쩡 · 수집기 다 제때 · PDF 0자 0건');
+/* ★ 잠금 경보는 **DB 가 모르는 신호**라 여기서 셉니다. 그래서 「보낼것있나」
+   보다 **먼저** 세고, 이것만 있어도 보냅니다. 전에는 아래 early return 때문에
+   10-12 처럼 수집기가 5시간 19분 멈춰도 메일이 안 갔습니다 */
+const 잠금분 = Number(argv.includes('--잠금분') ? argv[argv.indexOf('--잠금분') + 1] : 30) || 30;
+const 잠금 = 오래쥔잠금(잠금분);
+
+if (!d['보낼것있나'] && !잠금.length) {
+  console.log('보낼 것이 없습니다 — 새 보류 0건 · 회원 화면 멀쩡 · 수집기 다 제때 · PDF 0자 0건 · 오래 쥔 잠금 0');
   process.exit(0);
 }
 
 const 관리자 = cfg.ADMIN_URL || 'https://potjob-web.vercel.app/admin/jobs';
-const 본문 = 글로(d, 관리자);
+const 본문 = 글로(d, 관리자, 잠금);
 const 제목 = '[피오티잡] 확인할 공고 ' + d['새 보류 건수'] + '건'
+  + (잠금.length ? ' · ⚠ 수집기 잠금 ' + 잠금.map((x) => x.수집기 + ' ' + x.분 + '분').join('·') : '')
   + (d['PDF 0자'] ? ' · ⚠ PDF 0자 ' + d['PDF 0자'] + '건' : '')
   + (((d['하루 한도'] || {})['넘은것'] || 0) ? ' · ⚠ 한도 임박' : '')
   + (((d['기준값'] || {})['넘었나']) ? ' · ⚠ 공고 수 ' + (d['기준값'] || {})['몇퍼센트'] + '%' : '')
