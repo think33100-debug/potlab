@@ -18,11 +18,12 @@
    두지 마세요. 이 스크립트를 돌릴 때만 환경변수로 주고 끝내세요. */
 
 const URL = process.env.SUPABASE_URL;
-const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+/* 서버 .env 는 SUPABASE_SERVICE_KEY 라는 이름을 씁니다 — 둘 다 받습니다 (2026-10-11) */
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 const DO_IT = process.argv.includes('--yes');
 
 if (!URL || !KEY) {
-  console.error('SUPABASE_URL 과 SUPABASE_SERVICE_ROLE_KEY 를 넣어 주세요');
+  console.error('SUPABASE_URL 과 SUPABASE_SERVICE_KEY(또는 SUPABASE_SERVICE_ROLE_KEY) 를 넣어 주세요');
   process.exit(1);
 }
 

@@ -75,6 +75,12 @@ try {
   const t3 = await r3.text();
   적자('③ 닉네임 저장', r3.ok, r3.ok ? '저장됐습니다' : 'HTTP ' + r3.status + ' · ' + t3.replace(/\s+/g, ' ').slice(0, 140));
 
+  /* 통계에 안 섞이게 — 몇 초뿐이지만 「쓰는 중 N명」에 끼지 않게 합니다 */
+  await fetch(`${URL_}/rest/v1/profiles?id=eq.${누구}`, {
+    method: 'PATCH', headers: { ...관리, Prefer: 'return=minimal' },
+    body: JSON.stringify({ excluded: true }),
+  });
+
   /* ④ 정말 줄이 생겼나 (회원번호까지) */
   const r4 = await fetch(`${URL_}/rest/v1/profiles?select=${encodeURIComponent('회원번호')},nickname&id=eq.${누구}`, { headers: 관리 });
   const j4 = await r4.json();
