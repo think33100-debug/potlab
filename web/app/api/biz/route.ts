@@ -5,7 +5,7 @@ import { 사업자상태보기, 열쇠모양 } from '@/lib/nts';
  *
  *   POST /api/biz   { "b_no": "1234567890" }
  *     → { 상태: "계속사업자" | "휴업자" | "폐업자" | "없는 번호" | "수동 확인" }
- *   GET  /api/biz?진단=1
+ *   GET  /api/biz?diag=1
  *     → 열쇠 **모양만** (길이 · 앞 4글자 · 퍼센트 포함 여부). 값은 안 줍니다
  *
  * ── 왜 서버를 거치나 ────────────────────────────────────────
@@ -37,10 +37,12 @@ function 너무잦나(who: string) {
 
 export async function GET(req: Request) {
   const u = new URL(req.url);
-  if (u.searchParams.get('진단') !== '1') {
+  if (u.searchParams.get('diag') !== '1') {
     return NextResponse.json({ 왜: 'POST 로 b_no 를 주세요' }, { status: 405 });
   }
-  /* 열쇠 **값은 없습니다** — 모양만 돌려줍니다 */
+  /* 열쇠 **값은 없습니다** — 모양만 돌려줍니다.
+     물음표 뒤 이름은 **영문**입니다 — 주소에 한글을 쓰면 밖에서 못 부릅니다
+     (작업지침 6-2b. 한글 `?진단=1` 로 뒀다가 실제로 안 걸렸습니다) */
   return NextResponse.json({ 열쇠: 열쇠모양(process.env.NTS_BIZ_KEY) });
 }
 
