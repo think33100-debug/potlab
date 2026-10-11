@@ -48,6 +48,8 @@ import { matchJob, notOurs, mixedTitle, titleOtherOnly, 구운날 } from './gas-
 import { sortJob } from './sort-rule.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
+/* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
+import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
 import { 첨부받기, 기본간격, 통크기, 통쉼, 쉼 } from './cleaneye-file.mjs';
@@ -179,6 +181,22 @@ async function 첨부글자(o, 셈, 옵션) {
   }
   셈.첨부받음++;
 
+  /* ★ 2026-10-11 — **kordoc 을 먼저 씁니다** (세중님 1순위).
+     맨손 tools/hwp 는 표를 뭉개고 줄 구분이 없어 어느 인원이 어느 직군
+     것인지 못 가립니다. kordoc 은 표를 살립니다. PDF 도 바로 읽어
+     Apps Script OCR 을 안 거칩니다 (실측 hwp 0.3~0.5초 · pdf 1.3~3.7초).
+     md 를 함께 돌려줘 부르는 쪽이 칸뽑기() 로 일곱 칸을 뽑습니다 */
+  if (kordoc있나()) {
+    const k = await 첨부읽기(g.buf, g.이름);
+    if (k.글 && k.글.length > 80) {
+      셈.kordoc읽음 = (셈.kordoc읽음 ?? 0) + 1;
+      셈.kordoc초 = Math.round(((셈.kordoc초 ?? 0) + k.초) * 100) / 100;
+      return { 글: k.글, md: k.md, 왜: '', 꼴: k.꼴 };
+    }
+    셈.kordoc빈손 = (셈.kordoc빈손 ?? 0) + 1;
+    /* 빈손이면 **그림만 든 파일**일 수 있습니다 — 옛 길로 넘깁니다 */
+  }
+
   if (한글파일인가(g.이름)) {
     const r = hwp글자(g.buf, g.이름);
     if (r.글) 셈.hwp읽음++; else 셈.hwp못읽음++;
@@ -238,7 +256,7 @@ async function 한건(o, 셈, 옵션) {
       첨부 = { 읽음: false, 왜: '이번 실행의 다운로드 몫을 다 썼습니다 — 다음 실행이 이어서 읽습니다' };
     } else {
       const a = await 첨부글자(o, 셈, 옵션);
-      첨부 = a.글 ? { 읽음: true, 글: a.글 } : { 읽음: false, 왜: a.왜, 끝: !!a.끝 };
+      첨부 = a.글 ? { 읽음: true, 글: a.글, md: a.md } : { 읽음: false, 왜: a.왜, 끝: !!a.끝 };
       if (!a.글 && a.막힘) 셈.다음번++;
       await 쉼(기본간격);
     }
@@ -265,7 +283,11 @@ async function 한건(o, 셈, 옵션) {
      남기면 순찰이 영영 건너뛰어, 다음 실행이 이어서 읽을 기회를 뺏습니다 */
   if (!첨부 || 첨부.읽음 || 첨부.끝) o.__판정 = hold ? '보류함' : 갈래.갈래;
   const 원문 = (첨부 && 첨부.읽음 && 첨부.글) ? 첨부.글 : '';
-  return { id, org, title, job, 근거, hold, 다시: !!갈래.다시, 갈래, o, 원문 };
+  /* ★ 2026-10-11 — kordoc 의 md 를 함께 넘깁니다. 담는 자리에서 칸뽑기() 로
+     일곱 칸을 뽑습니다 — 특히 **모집인원은 우리 직군 줄의 것만**.
+     클린아이 API 의 EMPLOY_NUM 은 **공고 전체 인원**이라 통합공고면 틀립니다 */
+  return { id, org, title, job, 근거, hold, 다시: !!갈래.다시, 갈래, o, 원문,
+    md: (첨부 && 첨부.읽음) ? (첨부.md || '') : '' };
 }
 
 function 날(v) {
@@ -401,6 +423,9 @@ console.log('  첨부 — 없음 ' + 셈.첨부없음 + ' · 받음 ' + 셈.첨�
 console.log('         한글 읽음 ' + 셈.hwp읽음 + '/' + (셈.hwp읽음 + 셈.hwp못읽음)
   + ' · PDF 읽음 ' + 셈.pdf읽음 + '/' + (셈.pdf읽음 + 셈.pdf못읽음)
   + (셈.OCR못씀 ? ' · OCR 못 씀 ' + 셈.OCR못씀 : '') + (셈.모르는꼴 ? ' · 모르는 꼴 ' + 셈.모르는꼴 : ''));
+/* ★ 2026-10-11 — kordoc 이 얼마나 읽었나. 안 찍으면 돌았는지 알 수 없습니다 (지침 2절) */
+console.log('         kordoc 읽음 ' + (셈.kordoc읽음 ?? 0) + ' · 빈손 ' + (셈.kordoc빈손 ?? 0)
+  + ' · 걸린 시간 합 ' + (셈.kordoc초 ?? 0) + '초');
 console.log('\n  ★ 첨부를 읽고 나서 직군이 가려진 공고  ' + 셈.첨부로가림 + '건   ← 이 일의 값어치');
 console.log('  회원 목록 ' + 회원.length + ' · 보류함 ' + 보류.length + ' · 쓰레기통 ' + 쓰레기.length);
 
@@ -414,6 +439,22 @@ if (회원.length) {
 const 이제 = new Date().toISOString();
 const 담을것 = 회원.concat(보류).concat(쌓을것).map((x) => {
   const o = x.o;
+  /* ★ 2026-10-11 — 공고문(kordoc)에서 뽑은 칸 (세중님 1순위).
+     클린아이 API 는 지원자격·연봉을 주지만 **모집인원은 공고 전체(EMPLOY_NUM)**
+     입니다. 통합공고면 우리 직군 인원이 아닙니다 (지침 15절). 공고문 표에
+     우리 직군 줄이 있으면 **그 인원으로 바꿉니다.** 없으면 API 값을 그대로 둡니다 */
+  let 칸 = null;
+  try { if (x.md) 칸 = 칸뽑기(x.md, x.원문 || ''); } catch { /* 넘어갑니다 */ }
+  const 내직군인원 = (칸 && x.job && x.job !== '공통') ? 칸.모집인원?.[x.job] : null;
+  const 뽑은값 = 칸 ? {
+    ...(칸.접수마감 ? { 공고문_접수마감: 칸.접수마감 } : {}),
+    ...(칸.접수시각 ? { 공고문_접수시각: 칸.접수시각 } : {}),
+    ...(Object.keys(칸.모집인원 || {}).length ? { 직군별인원: 칸.모집인원 } : {}),
+    ...(칸.지원자격 ? { 지원자격: 칸.지원자격 } : {}),
+    ...(칸.근무지 ? { 근무지: 칸.근무지 } : {}),
+    ...(칸.예상연봉 ? { 예상연봉: 칸.예상연봉 } : {}),
+    근거: 칸.근거 || {}, 읽은법: 'kordoc',
+  } : null;
   return {
     id: 'CE' + x.id,
     external_id: x.id,
@@ -421,7 +462,10 @@ const 담을것 = 회원.concat(보류).concat(쌓을것).map((x) => {
     hire_type: String(o.EMPLOY_GB || ''), employ_type: String(o.JOB_TYPE || ''),
     work_place: String(o.WORK_PLACE || o.ADDRESS || ''), sido: null, sgg: null,
     edu: '',
-    headcount: Number(String(o.EMPLOY_NUM || '').replace(/\D/g, '')) || null,
+    /* 우리 직군 줄의 인원이 있으면 그것, 없으면 API 의 공고 전체 인원 */
+    headcount: 내직군인원 ?? (Number(String(o.EMPLOY_NUM || '').replace(/\D/g, '')) || null),
+    ...(칸?.접수시각 ? { apply_to_time: 칸.접수시각 } : {}),
+    ...(뽑은값 ? { 뽑은값, 뽑은법: 'kordoc' } : {}),
     apply_from: 날(o.PUB_DATE), apply_to: 날(o.PUB_END_DATE), posted_at: 날(o.PUB_DATE),
     url: String(o.URL || ''),
     job_group: x.job || null,

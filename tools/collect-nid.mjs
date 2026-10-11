@@ -39,6 +39,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
+/* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
+import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
@@ -269,7 +271,19 @@ for (const v of 볼것) {
     const buf = Buffer.from(await f.arrayBuffer());
     const 이름 = 고른것.이름 || '공고문';
     let 글 = '';
-    if (한글파일인가(이름) || buf.subarray(0, 2).toString('latin1') === 'PK'
+    let md = '';
+    /* ★ 2026-10-11 — **kordoc 을 먼저** (세중님 1순위). 맨손 tools/hwp 는
+       표를 뭉개서 어느 인원이 어느 직군 것인지 못 가립니다 */
+    if (kordoc있나()) {
+      const k = await 첨부읽기(buf, 이름);
+      if (k.글 && k.글.length > 80) {
+        글 = k.글; md = k.md;
+        셈.kordoc읽음 = (셈.kordoc읽음 ?? 0) + 1;
+        셈.kordoc초 = Math.round(((셈.kordoc초 ?? 0) + k.초) * 100) / 100;
+      } else { 셈.kordoc빈손 = (셈.kordoc빈손 ?? 0) + 1; }
+    }
+    if (글) { /* kordoc 이 읽었습니다 — 옛 길을 건너뜁니다 */ }
+    else if (한글파일인가(이름) || buf.subarray(0, 2).toString('latin1') === 'PK'
       || buf.subarray(0, 4).toString('hex') === 'd0cf11e0') {
       글 = hwp글자(buf, 이름.replace(/\.[^.]*$/, '') + '.hwp').글 || '';
     } else if (buf.subarray(0, 5).toString('latin1') === '%PDF-') {
@@ -282,6 +296,16 @@ for (const v of 볼것) {
       continue;
     }
     if (!글) { v.보류 = '첨부를 못 읽었습니다'; continue; }
+    /* ★ 2026-10-11 — 공고문에서 **일곱 칸**도 뽑습니다 (세중님 1순위).
+       규칙은 tools/공고문읽기.mjs 한 벌입니다 (지침 6절) */
+    if (md) {
+      try {
+        const 칸 = 칸뽑기(md, 글);
+        const 뭐든 = 칸.접수마감 || 칸.지원자격 || 칸.근무지 || 칸.예상연봉
+          || Object.keys(칸.모집인원 || {}).length;
+        if (뭐든) { v.칸 = 칸; 셈.칸뽑음 = (셈.칸뽑음 ?? 0) + 1; }
+      } catch (e) { 셈.칸탈 = (셈.칸탈 ?? 0) + 1; }
+    }
     const g = 첨부직군(글);
     if (g.직군) { v.직군 = g.직군; v.근거 = '첨부 공고문 · 모집 부분'; v.걸린줄 = g.줄; 셈.첨부로++; }
     else if (g.어디 === '가산점') {
@@ -300,6 +324,11 @@ console.log('  ★ 상세에서 마감일을 채운 공고 ' + (셈.날짜채움
   + (셈.날짜버림 ? ' · 읽었지만 거른 것 ' + 셈.날짜버림 + '건' : ''));
 console.log('  ★ 상세로 가린 ' + 셈.상세로 + '건 · 첨부로 가린 ' + 셈.첨부로
   + '건 · 가산점이라 거른 ' + 셈.가산점거름 + '건 · 못 가려 보류 ' + 셈.못가림 + '건');
+/* ★ 2026-10-11 — kordoc 이 얼마나 읽었나. 안 찍으면 돌았는지 알 수 없습니다 (지침 2절) */
+console.log('  kordoc 읽음 ' + (셈.kordoc읽음 ?? 0) + ' · 빈손 ' + (셈.kordoc빈손 ?? 0)
+  + ' · 걸린 시간 합 ' + (셈.kordoc초 ?? 0) + '초'
+  + ' · 일곱 칸 뽑은 공고 ' + (셈.칸뽑음 ?? 0) + '건'
+  + (셈.칸탈 ? ' · 칸 뽑다 탈 ' + 셈.칸탈 + '건' : ''));
 
 /* ── ④ 갈래 ───────────────────────────────────────────────── */
 const 회원 = [], 보류 = [], 쓰레기 = [];
@@ -325,6 +354,30 @@ for (const v of 볼것) {
       ...(v.접수문장 ? { 접수문장: v.접수문장 } : {}),
     },
   };
+
+  /* ★ 2026-10-11 — 공고문(kordoc)에서 뽑은 칸을 싣습니다 (세중님 1순위).
+     모집인원은 **우리 직군 줄의 것만**. 그 공고 직군에 맞는 것이 없으면
+     비워 둡니다 (통합공고 전체 인원 안 씀 · 지침 15절).
+     이 수집기는 상세에서 마감일을 채우니(v.날짜출처) **apply_to 는 안 덮습니다** */
+  if (v.칸) {
+    const 내직군인원 = v.직군 ? v.칸.모집인원?.[v.직군] : null;
+    if (내직군인원 != null) 줄.headcount = 내직군인원;
+    if (v.칸.접수시각) 줄.apply_to_time = v.칸.접수시각;
+    if (v.칸.근무지 && !줄.work_place) 줄.work_place = v.칸.근무지;
+    줄.detail = { ...(줄.detail || {}),
+      ...(v.칸.지원자격 ? { 지원자격: v.칸.지원자격 } : {}),
+      ...(v.칸.예상연봉 ? { 연봉: v.칸.예상연봉 } : {}) };
+    줄.뽑은값 = {
+      ...(v.칸.접수마감 ? { 공고문_접수마감: v.칸.접수마감 } : {}),
+      ...(v.칸.접수시각 ? { 공고문_접수시각: v.칸.접수시각 } : {}),
+      ...(Object.keys(v.칸.모집인원 || {}).length ? { 직군별인원: v.칸.모집인원 } : {}),
+      ...(v.칸.지원자격 ? { 지원자격: v.칸.지원자격 } : {}),
+      ...(v.칸.근무지 ? { 근무지: v.칸.근무지 } : {}),
+      ...(v.칸.예상연봉 ? { 예상연봉: v.칸.예상연봉 } : {}),
+      근거: v.칸.근거 || {}, 읽은법: 'kordoc',
+    };
+    줄.뽑은법 = 'kordoc';
+  }
   /* 다시 받아야 할 까닭이면 판정을 기억하지 않습니다 (알리오·클린아이와 같은 규칙) */
   const 적기 = (판정) => { v.__판정 = (v.보류 && /못 읽|못 받|OCR 실패/.test(v.보류)) ? '' : 판정; };
   if (v.가산점뿐) { 적기('쓰레기통'); 쓰레기.push({ id: 줄.id, org_name: 기관, title: v.제목, url: 줄.url, why: v.가산점뿐 }); continue; }
