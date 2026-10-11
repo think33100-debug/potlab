@@ -191,7 +191,7 @@ async function 첨부글자(o, 셈, 옵션) {
     if (k.글 && k.글.length > 80) {
       셈.kordoc읽음 = (셈.kordoc읽음 ?? 0) + 1;
       셈.kordoc초 = Math.round(((셈.kordoc초 ?? 0) + k.초) * 100) / 100;
-      return { 글: k.글, md: k.md, 왜: '', 꼴: k.꼴 };
+      return { 글: k.글, md: k.md, blocks: k.blocks, 왜: '', 꼴: k.꼴, 코드: k.코드 };
     }
     셈.kordoc빈손 = (셈.kordoc빈손 ?? 0) + 1;
     /* 빈손이면 **그림만 든 파일**일 수 있습니다 — 옛 길로 넘깁니다 */
@@ -256,7 +256,7 @@ async function 한건(o, 셈, 옵션) {
       첨부 = { 읽음: false, 왜: '이번 실행의 다운로드 몫을 다 썼습니다 — 다음 실행이 이어서 읽습니다' };
     } else {
       const a = await 첨부글자(o, 셈, 옵션);
-      첨부 = a.글 ? { 읽음: true, 글: a.글, md: a.md } : { 읽음: false, 왜: a.왜, 끝: !!a.끝 };
+      첨부 = a.글 ? { 읽음: true, 글: a.글, md: a.md, blocks: a.blocks } : { 읽음: false, 왜: a.왜, 끝: !!a.끝, 코드: a.코드 };
       if (!a.글 && a.막힘) 셈.다음번++;
       await 쉼(기본간격);
     }
@@ -287,7 +287,8 @@ async function 한건(o, 셈, 옵션) {
      일곱 칸을 뽑습니다 — 특히 **모집인원은 우리 직군 줄의 것만**.
      클린아이 API 의 EMPLOY_NUM 은 **공고 전체 인원**이라 통합공고면 틀립니다 */
   return { id, org, title, job, 근거, hold, 다시: !!갈래.다시, 갈래, o, 원문,
-    md: (첨부 && 첨부.읽음) ? (첨부.md || '') : '' };
+    md: (첨부 && 첨부.읽음) ? (첨부.md || '') : '',
+    blocks: (첨부 && 첨부.읽음) ? (첨부.blocks || null) : null };
 }
 
 function 날(v) {
@@ -444,7 +445,7 @@ const 담을것 = 회원.concat(보류).concat(쌓을것).map((x) => {
      입니다. 통합공고면 우리 직군 인원이 아닙니다 (지침 15절). 공고문 표에
      우리 직군 줄이 있으면 **그 인원으로 바꿉니다.** 없으면 API 값을 그대로 둡니다 */
   let 칸 = null;
-  try { if (x.md) 칸 = 칸뽑기(x.md, x.원문 || ''); } catch { /* 넘어갑니다 */ }
+  try { if (x.blocks?.length || x.md) 칸 = 칸뽑기(x.blocks?.length ? x.blocks : x.md, x.원문 || ''); } catch { /* 넘어갑니다 */ }
   const 내직군인원 = (칸 && x.job && x.job !== '공통') ? 칸.모집인원?.[x.job] : null;
   const 뽑은값 = 칸 ? {
     ...(칸.접수마감 ? { 공고문_접수마감: 칸.접수마감 } : {}),

@@ -34,51 +34,71 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFile } from 'node:child_process';
+import { 읽기, kordoc있나, 워커끝내기, 워커셈 } from './kordoc워커.mjs';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
-const KORDOC = path.join(여기, 'kordoc', 'node_modules', 'kordoc', 'dist', 'cli.js');
 const require_ = createRequire(import.meta.url);
 const { hsDetailDates } = require_('./hosp/hs_dates.js');
 
-export function kordoc있나() { return fs.existsSync(KORDOC); }
+/* kordoc있나 · 읽기 는 tools/kordoc워커.mjs 한 곳에 있습니다 (지침 6절) */
+export { kordoc있나, 워커끝내기, 워커셈 };
 
 /* 맨손 hwp — 있으면 씁니다 (없어도 kordoc 만으로 돕니다) */
 let 맨손 = null;
 try { 맨손 = await import('./hwp/index.mjs'); } catch { /* 넘어갑니다 */ }
 
-/* ── 첨부 한 건 읽기 ────────────────────────────────────────── */
+/* ── 첨부 한 건 읽기 ──────────────────────────────────────────
+ *
+ * ★ 2026-10-11 — **상주 워커**를 씁니다 (tools/kordoc워커.mjs).
+ * 전에는 파일마다 node 를 새로 띄웠습니다. 바꾸고 재 보니 hwp 가
+ * 0.31초 → 0.009~0.057초 이고, 15건 합이 14.6초 → 5.8초,
+ * 최대 메모리가 393MB → 239MB 입니다.
+ *
+ * ★ 스캔 PDF 는 `pageQuality.needsOcr` 를 보고 **필요할 때만** 내장 OCR 을
+ * 한 번 더 켭니다 (`ocr: "auto"`). 모델은 ~18MB 이고 서버에 미리 받아 둡니다
+ * (`kordoc check-ocr-models`). `formulaOcr` 는 **안 씁니다** (AGPL).
+ */
 export async function 첨부읽기(buf, 이름 = '공고문.hwp', 옵션 = {}) {
-  const 제한초 = 옵션.제한초 ?? 120;
   if (!kordoc있나()) return { md: '', 글: '', 왜: 'kordoc 이 안 깔렸습니다 (tools/kordoc 에서 npm ci)', 초: 0 };
 
-  /* 받은 것이 정말 그 형식인지 **먼저** 봅니다 (지침 5절) */
+  /* 받은 것이 정말 그 형식인지 **먼저** 봅니다 (지침 5절).
+     kordoc 의 detectFormat 과 같은 생각이고, 우리는 바이트만 들고 있어서
+     여기서 앞 글자로 봅니다 — 주소가 틀리면 HTML 이 옵니다 */
   const 꼴 = 진짜형식(buf);
   if (!['pdf', 'hwp', 'zip계열'].includes(꼴)) {
-    return { md: '', 글: '', 왜: '읽을 수 있는 형식이 아닙니다 (' + 꼴 + ' · ' + buf.length + '바이트)', 초: 0 };
+    return { md: '', 글: '', 왜: '읽을 수 있는 형식이 아닙니다 (' + 꼴 + ' · ' + buf.length + '바이트)', 초: 0, 꼴 };
   }
 
   /* 저장 이름은 **ASCII 만** — 한글 경로는 탈이 납니다 (지침 6-2b) */
   const 확장자 = 꼴 === 'pdf' ? '.pdf' : (/\.hwpx$/i.test(이름) || 꼴 === 'zip계열' ? '.hwpx' : '.hwp');
   const 바닥 = fs.mkdtempSync(path.join(os.tmpdir(), 'kd-'));
   const 넣을곳 = path.join(바닥, 'in' + 확장자);
-  const 낼곳 = path.join(바닥, 'out.md');
   fs.writeFileSync(넣을곳, buf);
 
-  const t0 = Date.now();
-  const 탈 = await new Promise((맺) => {
-    execFile(process.execPath, [KORDOC, 넣을곳, '-o', 낼곳],
-      { maxBuffer: 64e6, timeout: 제한초 * 1000, cwd: path.join(여기, 'kordoc') },
-      (e) => 맺(e ? String(e.message).slice(0, 140) : null));
-  });
-  const 초 = (Date.now() - t0) / 1000;
+  let 초 = 0; let 결과 = null; let 왜 = ''; let OCR썼나 = false; let rssMB = null;
+  try {
+    const r = await 읽기(넣을곳, {});
+    초 += r.초; rssMB = r.rssMB; 결과 = r.result;
 
-  let md = '';
-  try { md = fs.readFileSync(낼곳, 'utf8'); } catch { /* 안 나왔습니다 */ }
+    /* ★ 스캔 쪽이 있으면 **그때만** OCR 을 켜 한 번 더 */
+    const 필요쪽 = (결과?.pageQuality || []).filter((q) => q.needsOcr);
+    const 그림뿐 = 결과?.code === 'IMAGE_BASED_PDF' || 결과?.isImageBased;
+    if (옵션.OCR안함 !== true && (필요쪽.length || 그림뿐)) {
+      const r2 = await 읽기(넣을곳, { ocr: 'auto' });
+      초 += r2.초; rssMB = Math.max(rssMB ?? 0, r2.rssMB);
+      if (r2.result?.success && (r2.result.markdown || '').length > (결과?.markdown || '').length) {
+        결과 = r2.result; OCR썼나 = true;
+      }
+    }
+  } catch (e) { 왜 = 'kordoc 탈 · ' + String(e.message).slice(0, 140); }
 
-  /* 맨손도 함께 (hwp 만) — 글자가 더 많은 파일이 있습니다 */
+  const md = 결과?.success ? String(결과.markdown || '') : '';
+  const blocks = 결과?.success ? (결과.blocks || []) : [];
+
+  /* 맨손도 함께 (hwp 만) — 잰 결과 글자가 더 많은 파일이 있습니다 (8,873 vs 3,874).
+     표는 blocks, **직군 판별용 글은 둘을 합쳐** 씁니다 */
   let 맨손글 = '';
   if (맨손 && 꼴 === 'hwp') {
     try { 맨손글 = String(맨손.hwp글자(buf, 이름).글 || ''); } catch { /* 넘어갑니다 */ }
@@ -87,9 +107,19 @@ export async function 첨부읽기(buf, 이름 = '공고문.hwp', 옵션 = {}) {
   try { fs.rmSync(바닥, { recursive: true, force: true }); } catch { /* 넘어갑니다 */ }
 
   if (!md && !맨손글) {
-    return { md: '', 글: '', 왜: 탈 ? 'kordoc 탈 · ' + 탈 : 'kordoc 이 0자를 냈습니다', 초, 꼴 };
+    return {
+      md: '', blocks: [], 글: '', 초, 꼴, rssMB,
+      /* ★ 실패 코드를 그대로 돌려줍니다 — 요약 메일이 사유별로 셉니다 */
+      코드: 결과?.code || (왜 ? 'PARSE_ERROR' : 'EMPTY'),
+      왜: 왜 || (결과?.error ? String(결과.error).slice(0, 160) : 'kordoc 이 0자를 냈습니다'),
+    };
   }
-  return { md, 글: (글만(md) + '\n' + 맨손글).trim(), 왜: '', 초, 꼴, 맨손글자: 맨손글.length };
+  return {
+    md, blocks, 글: (글만(md) + '\n' + 맨손글).trim(), 왜: '', 초, 꼴, rssMB,
+    맨손글자: 맨손글.length, OCR썼나,
+    쪽수: 결과?.pageCount ?? null,
+    OCR필요쪽: (결과?.pageQuality || []).filter((q) => q.needsOcr).length,
+  };
 }
 
 /* 앞 글자로 본 진짜 형식 — 확장자를 믿지 않습니다 (지침 5절) */
@@ -122,7 +152,64 @@ function 글만(md) {
 /* ── 표 떼어내기 — <table> 하나를 줄·칸으로 ──────────────────
    kordoc 은 rowspan·colspan 을 살려 줍니다. 우리는 **그 줄에 우리 직군이
    적혀 있나**만 보면 되므로 칸을 펼치지 않고 그대로 읽습니다 */
+/* ── IRTable 에서 줄·칸 떼어내기 (2026-10-11 세중님 1순위) ──────
+ *
+ * **마크다운을 정규식으로 긁지 않습니다.** kordoc 의 `blocks` 에
+ * `IRTable { rows, cols, cells: IRCell[][], hasHeader }` 가 있고
+ * `IRCell { text, colSpan, rowSpan, blocks?, isHeader? }` 입니다
+ * (깔린 index.d.ts 에서 읽어 확인했습니다).
+ *
+ * 이렇게 하면 버그 ②가 **형식과 무관하게** 풀립니다 — 전에는 hwp 는
+ * `<table>`, pdf 는 파이프 표로 나와서 한쪽만 읽고 있었습니다.
+ * `blocks` 는 두 형식이 같은 꼴입니다.
+ *
+ * 셀 안에 중첩 표가 있으면(`IRCell.blocks`) 그 안까지 들어갑니다. */
+export function 블록표들(blocks) {
+  const 모두 = [];
+  const 걷기 = (bs) => {
+    for (const b of (bs || [])) {
+      if (b && b.type === 'table' && b.table && Array.isArray(b.table.cells)) {
+        모두.push({
+          줄: b.table.cells.map((행) => (행 || []).map((c) => String(c?.text ?? '').replace(/\s+/g, ' ').trim())),
+          머리있나: !!b.table.hasHeader,
+          분류: b.table.classification?.kind ?? null,
+          캡션: b.table.caption ?? null,
+        });
+        /* 셀 안 중첩 표 */
+        for (const 행 of b.table.cells) for (const c of (행 || [])) if (c?.blocks) 걷기(c.blocks);
+      }
+      if (b?.children) 걷기(b.children);
+    }
+  };
+  걷기(blocks);
+  return 모두;
+}
+
+/* blocks 전체에서 **글만** — 문단·헤딩·표 칸을 원문 순서대로.
+   전에는 표만 모아서 문단에 있는 접수기간을 놓쳤습니다 (자기 점검에서 잡았습니다) */
+export function 블록글(blocks) {
+  const 조각 = [];
+  const 걷기 = (bs) => {
+    for (const b of (bs || [])) {
+      if (!b) continue;
+      if (b.text) 조각.push(String(b.text));
+      if (b.table && Array.isArray(b.table.cells)) {
+        if (b.table.caption) 조각.push(String(b.table.caption));
+        for (const 행 of b.table.cells) {
+          조각.push((행 || []).map((c) => String(c?.text ?? '')).join(' | '));
+          for (const c of (행 || [])) if (c?.blocks) 걷기(c.blocks);
+        }
+      }
+      if (b.children) 걷기(b.children);
+    }
+  };
+  걷기(blocks);
+  return 조각.join(' ').replace(/\s+/g, ' ').trim();
+}
+
 export function 표들(md) {
+  /* blocks 배열을 받으면 그쪽으로 — 형식과 무관한 길입니다 */
+  if (Array.isArray(md)) return 블록표들(md).map((t) => t.줄);
   const s = String(md || '');
   const 모두 = [];
 
@@ -169,7 +256,10 @@ function 명뽑기(글) {
 /* ── 칸 뽑기 ─────────────────────────────────────────────────
    돌려주는 것마다 **근거**를 함께 냅니다. 근거 없는 값은 쓰지 않습니다 */
 export function 칸뽑기(md, 합친글 = '') {
-  const 글 = (합친글 || 글만(md));
+  /* `md` 는 **마크다운 글** 또는 **blocks 배열** 입니다.
+     blocks 를 주면 표를 IRTable 에서 집어 **형식과 무관**합니다 (버그 ②).
+     글을 주면 옛 길(정규식)로 — 자기 점검과 md 만 든 부르는 쪽을 위해 남깁니다 */
+  const 글 = (합친글 || (Array.isArray(md) ? 블록글(md) : 글만(md)));
   const 낸것 = { 접수마감: null, 접수시각: null, 모집인원: {}, 지원자격: null,
     근무지: null, 예상연봉: null, 근거: {} };
 
@@ -371,6 +461,51 @@ if (import.meta.url === 'file://' + process.argv[1] || process.argv[1]?.endsWith
     /* ★ 제대로 된 것은 그대로 냅니다 */
     봐('내규는 낸다', /내규/.test(칸뽑기('물리치료사 모집\n보수 : 병원 내규에 따름').예상연봉 || ''));
     봐('숫자 있는 것도 낸다', /2,800/.test(칸뽑기('작업치료사 모집\n연봉 : 2,800만원').예상연봉 || ''));
+
+    /* ★ 2026-10-11 — **blocks(IRTable) 로도 같은 값이 나오나.**
+       같은 표를 hwp 꼴(<table>) · pdf 꼴(파이프) · blocks 셋으로 주고
+       **셋이 같은 답**인지 봅니다. 버그 ②가 형식과 무관하게 풀렸다는 증거입니다 */
+    const 블록 = [
+      { type: 'heading', text: '채용 공고' },
+      { type: 'table',
+        table: { rows: 4, cols: 4, hasHeader: true,
+          cells: [
+            [{ text: '구 분', colSpan: 2, rowSpan: 1, isHeader: true },
+             { text: '채용예정 인 원', colSpan: 1, rowSpan: 1, isHeader: true },
+             { text: '자격요건등', colSpan: 1, rowSpan: 1, isHeader: true }],
+            [{ text: '조리원', colSpan: 1, rowSpan: 1 }, { text: '정규직 8급', colSpan: 1, rowSpan: 1 },
+             { text: '1명', colSpan: 1, rowSpan: 1 }, { text: '병원 구내식당 근무', colSpan: 1, rowSpan: 1 }],
+            [{ text: '작업치료사', colSpan: 1, rowSpan: 1 }, { text: '단기고용직', colSpan: 1, rowSpan: 1 },
+             { text: '1명', colSpan: 1, rowSpan: 1 },
+             { text: '작업치료사 면허증 소지자 (소아 재활 유경험자 우대)', colSpan: 1, rowSpan: 1 }],
+            [{ text: '물리치료사', colSpan: 1, rowSpan: 1 }, { text: '단기고용직', colSpan: 1, rowSpan: 1 },
+             { text: '2명', colSpan: 1, rowSpan: 1 }, { text: '물리치료사 면허증 소지자', colSpan: 1, rowSpan: 1 }],
+            [{ text: '영양사', colSpan: 1, rowSpan: 1 }, { text: '정규직', colSpan: 1, rowSpan: 1 },
+             { text: '85명', colSpan: 1, rowSpan: 1 }, { text: '영양사 면허', colSpan: 1, rowSpan: 1 }],
+          ] } },
+      { type: 'paragraph', text: '접수기간 : 2026. 9. 30. ~ 2026. 10. 18. 23:00까지' },
+      { type: 'paragraph', text: '보수 : 회사 내규에 따름' },
+      { type: 'paragraph', text: '근무지 : 재활치료실' },
+    ];
+    const rB = 칸뽑기(블록);
+    봐('blocks 로 표 하나', 표들(블록).length === 1);
+    봐('blocks — 작업치료사 1명', rB.모집인원.작업치료사 === 1);
+    봐('blocks — 물리치료사 2명', rB.모집인원.물리치료사 === 2);
+    봐('blocks — 영양사 85명은 안 가져온다', !Object.values(rB.모집인원).includes(85));
+    봐('blocks — 접수마감', rB.접수마감 === '2026-10-18');
+    봐('blocks — 접수시각', rB.접수시각 === '23:00');
+    봐('blocks — 지원자격에 면허', /면허/.test(rB.지원자격 || ''));
+    /* 셋이 같은 답인가 — <table> · 파이프 · blocks */
+    봐('세 형식이 같은 모집인원',
+      JSON.stringify(rB.모집인원) === JSON.stringify(r.모집인원));
+
+    /* ★ 중첩 표(IRCell.blocks)도 들어가나 */
+    const 중첩 = [{ type: 'table', table: { rows: 1, cols: 1, hasHeader: false,
+      cells: [[{ text: '', colSpan: 1, rowSpan: 1, blocks: [
+        { type: 'table', table: { rows: 2, cols: 2, hasHeader: true,
+          cells: [[{ text: '직종' }, { text: '인원' }],
+            [{ text: '물리치료사' }, { text: '3명' }]] } }] }]] } }];
+    봐('셀 안 중첩 표도 읽는다', 칸뽑기(중첩).모집인원.물리치료사 === 3);
     봐('근무지', /재활치료실/.test(r.근무지 || ''));
     if (어겼나.length) {
       console.error('✗ 자기 점검 실패 — ' + 어겼나.join(' · '));

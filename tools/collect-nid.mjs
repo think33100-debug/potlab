@@ -272,12 +272,13 @@ for (const v of 볼것) {
     const 이름 = 고른것.이름 || '공고문';
     let 글 = '';
     let md = '';
+    let 블록 = null;
     /* ★ 2026-10-11 — **kordoc 을 먼저** (세중님 1순위). 맨손 tools/hwp 는
        표를 뭉개서 어느 인원이 어느 직군 것인지 못 가립니다 */
     if (kordoc있나()) {
       const k = await 첨부읽기(buf, 이름);
       if (k.글 && k.글.length > 80) {
-        글 = k.글; md = k.md;
+        글 = k.글; md = k.md; 블록 = k.blocks;
         셈.kordoc읽음 = (셈.kordoc읽음 ?? 0) + 1;
         셈.kordoc초 = Math.round(((셈.kordoc초 ?? 0) + k.초) * 100) / 100;
       } else { 셈.kordoc빈손 = (셈.kordoc빈손 ?? 0) + 1; }
@@ -300,7 +301,7 @@ for (const v of 볼것) {
        규칙은 tools/공고문읽기.mjs 한 벌입니다 (지침 6절) */
     if (md) {
       try {
-        const 칸 = 칸뽑기(md, 글);
+        const 칸 = 칸뽑기(블록?.length ? 블록 : md, 글);
         const 뭐든 = 칸.접수마감 || 칸.지원자격 || 칸.근무지 || 칸.예상연봉
           || Object.keys(칸.모집인원 || {}).length;
         if (뭐든) { v.칸 = 칸; 셈.칸뽑음 = (셈.칸뽑음 ?? 0) + 1; }

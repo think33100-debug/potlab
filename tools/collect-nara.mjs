@@ -372,7 +372,7 @@ async function 파일글자(주소, 이름) {
       if (k.글 && k.글.length > 80) {
         셈.kordoc읽음 = (셈.kordoc읽음 ?? 0) + 1;
         셈.kordoc초 = Math.round(((셈.kordoc초 ?? 0) + k.초) * 100) / 100;
-        return { 글: k.글, md: k.md, 왜: '', 꼴: k.꼴 };
+        return { 글: k.글, md: k.md, blocks: k.blocks, 왜: '', 꼴: k.꼴, 코드: k.코드 };
       }
       셈.kordoc빈손 = (셈.kordoc빈손 ?? 0) + 1;
       /* kordoc 이 빈손이면 **그림만 든 파일**일 수 있습니다 — 옛 길로 넘깁니다 */
@@ -447,7 +447,7 @@ for (const v of 볼것) {
      뽑은 값은 v.칸 에 두고 아래 ⑤ 에서 공고 줄에 싣습니다 */
   if (a.md) {
     try {
-      const 칸 = 칸뽑기(a.md, a.글);
+      const 칸 = 칸뽑기(a.blocks?.length ? a.blocks : a.md, a.글);
       const 뭐든 = 칸.접수마감 || 칸.지원자격 || 칸.근무지 || 칸.예상연봉
         || Object.keys(칸.모집인원 || {}).length;
       if (뭐든) { v.칸 = 칸; 셈.칸뽑음 = (셈.칸뽑음 ?? 0) + 1; }
