@@ -91,7 +91,10 @@ if (되돌리기) {
 const 공고 = await 다읽기('job_posts?select=id,source,org_name,title,job_group,headcount,detail,edited_fields,admin_locked,hidden,hold'
   + '&source=in.(AL,AL2)&order=id.asc');
 const 할것0 = 공고.filter((j) => !j.admin_locked && !(j.edited_fields ?? []).includes('headcount'));
-const 할것 = 몇개 ? 할것0.slice(0, 몇개) : 할것0;
+/* 회원 화면에 **보이는 공고를 먼저** 셉니다 — 마감된 옛 공고부터 세면
+   시험이 헛돕니다 (첫 20건이 전부 옛 공고라 0명으로 나왔습니다) */
+const 할것1 = [...할것0].sort((a, b) => Number(!a.hidden && !a.hold ? 0 : 1) - Number(!b.hidden && !b.hold ? 0 : 1));
+const 할것 = 몇개 ? 할것1.slice(0, 몇개) : 할것1;
 console.log(`알리오 공고 ${공고.length}건 · 셀 것 ${할것.length}건`
   + (몇개 ? ` (--몇개 ${몇개})` : '') + (정말 ? '' : ' · **마른 실행**'));
 
@@ -149,7 +152,7 @@ const 찼다 = 결과.filter((x) => x.합 > 0);
 const 영명 = 결과.filter((x) => x.이름들?.length && x.합 === 0);
 const 못셈 = 결과.filter((x) => !x.이름들?.length || x.왜);
 console.log(`\n② 상세 ${호출}회 — 인원을 센 것 ${찼다.length}건 · 우리 직군 0명 ${영명.length}건 · 못 센 것 ${못셈.length}건`);
-if (한도말) console.log('   한도 — ' + 한도글());
+const 한도 = 한도글(); if (한도) console.log('   한도 — ' + 한도);
 
 /* ── ③ 보고서 ───────────────────────────────────────────────── */
 const 줄 = (x) => `| \`${x.j.id}\` | ${x.j.org_name} | ${String(x.j.title).slice(0, 26)} | ${x.j.headcount ?? '—'} | `
