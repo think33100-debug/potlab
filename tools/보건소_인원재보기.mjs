@@ -50,7 +50,7 @@ const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUP
 
 /* 보건소·보건의료원 — 시도가 고르게 섞이도록 이름 순으로 띄워 가며 고릅니다 */
 const r0 = await fetch(cfg.SUPABASE_URL
-  + '/rest/v1/hira_org?select=ykiho,yadm_nm,cl_cd,sido_cd_nm&cl_cd=in.(71,75)&order=yadm_nm.asc&limit=1000',
+  + '/rest/v1/hira_org?select=ykiho,yadm_nm,cl_cd,sido_nm&cl_cd=in.(71,75)&order=yadm_nm.asc&limit=1000',
   { headers: H });
 const 전부 = await r0.json();
 if (!Array.isArray(전부)) { console.error('기관을 못 받음 — ' + JSON.stringify(전부).slice(0, 200)); process.exit(1); }
@@ -102,7 +102,7 @@ for (const o of 볼것) {
   if (물) { 셈.물리있음++; 물리합 += 물; }
   if (작) { 셈.작업있음++; 작업합 += 작; }
   if (!물 && !작) 셈.둘다0++;
-  else 있는곳.push({ 이름: o.yadm_nm, 시도: o.sido_cd_nm, 물, 작 });
+  else 있는곳.push({ 이름: o.yadm_nm, 시도: o.sido_nm, 물, 작 });
 }
 
 console.log('── 결과 ──────────────────────────────────────────');
