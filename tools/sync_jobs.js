@@ -145,6 +145,28 @@ async function get(cfg, pathq) {
   if (!res.ok) throw new Error(res.status + ' ' + (await res.text()).slice(0, 300));
   return res.json();
 }
+/* ★ 2026-10-11 — **PostgREST 는 한 번에 100줄까지만 줍니다.**
+   `limit=5000` 을 적어도 100줄에서 끊깁니다. 쪽을 넘겨 가며 다 읽습니다.
+
+   이것 때문에 다리가 **새 수집기 것을 100건까지만 비키고 있었습니다.**
+   AL2·GJ2·HS3 는 보이는 공고가 100건 아래라 탈이 안 났는데, 오늘 워크넷
+   241건이 WN2 로 넘어오면서 **141건을 다리가 덮을 뻔했습니다.** */
+async function get전부(cfg, pathq, 한쪽 = 100) {   /* 서버가 100줄에서 끊으니 100씩 */
+  const 다 = [];
+  for (let 처음 = 0; ; 처음 += 한쪽) {
+    const res = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + pathq, {
+      headers: { apikey: cfg.SUPABASE_SERVICE_KEY,
+                 Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY,
+                 Range: 처음 + '-' + (처음 + 한쪽 - 1),
+                 'Range-Unit': 'items' },
+    });
+    if (!res.ok) throw new Error(res.status + ' ' + (await res.text()).slice(0, 300));
+    const 조각 = await res.json();
+    다.push(...조각);
+    if (조각.length < 한쪽) return 다;
+    if (다.length > 100000) return 다;      /* 끝없이 도는 것 막기 */
+  }
+}
 /* 있으면 고치고 없으면 넣습니다 (id 가 기본열쇠) */
 async function upsert(cfg, table, rows, onConflict) {
   for (let i = 0; i < rows.length; i += BATCH) {
@@ -213,7 +235,7 @@ async function 새수집기가가진것(cfg) {
   const 집 = new Set();
   for (const s of 새수집기) {
     try {
-      const r = await get(cfg, 'job_posts?source=eq.' + s + '&select=id&limit=5000');
+      const r = await get전부(cfg, 'job_posts?source=eq.' + s + '&select=id');
       r.forEach((x) => 집.add(String(x.id)));
     } catch (e) {
       /* 못 읽으면 **아무것도 안 비킵니다** — 모르는 채 비키면 공고가 사라집니다 */
@@ -237,14 +259,13 @@ async function 새수집기가가진것(cfg) {
 async function 사람이정한것(cfg) {
   const 집 = new Map();
   try {
-    const r = await get(cfg,
+    const r = await get전부(cfg,
       'job_posts?select=id,hidden,hold,admin_locked,edited_fields'
       /* or=() 안에서는 배열 값에 **따옴표**가 있어야 합니다.
          {hidden} 으로 보내면 400 「malformed array literal」 이 납니다
          (2026-10-09 서버에서 두 번 두드려 확인했습니다 — 400 → 200 · 13줄) */
       + '&or=(admin_locked.eq.true,edited_fields.cs.{"hidden"},edited_fields.cs.{"hold"},'
-      + '같은공고.not.is.null)'
-      + '&limit=5000');
+      + '같은공고.not.is.null)');
     r.forEach((x) => 집.set(String(x.id), { hidden: !!x.hidden, hold: !!x.hold }));
   } catch (e) {
     console.error('  ⚠ 사람이 정한 줄을 못 읽었습니다 — 시트 값이 그대로 들어갑니다 · '
