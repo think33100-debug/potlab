@@ -73,16 +73,9 @@ export default function Partner() {
   if (loading) return <main className="mx-auto w-full max-w-2xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
 
   /* 아직 숨겨 둔 화면입니다 */
-  if (!isAdmin && !마스터) {
-    return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
-        <p className="break-keep text-h3 font-bold">아직 준비 중이에요</p>
-        <p className="mt-3 break-keep text-lg text-mute">곧 열어 드릴게요.</p>
-        <Link href="/" className="mt-7 inline-block rounded-md border border-gray-200 px-6 py-4
-                                  text-lg font-medium text-gray-600 hover:bg-gray-50">홈으로</Link>
-      </main>
-    );
-  }
+  /* ★ 2026-10-11 — 회원에게 열었습니다 (세중님 결정).
+     담당자 신청 — 기관이 신청하고 관리자가 승인합니다.
+     막는 자리는 화면이 아니라 창구입니다 (docs/인계/05_부록.md 2절) */
 
   const 국세청확인 = async () => {
     const b = 사업자번호.replace(/\D/g, '');
@@ -118,9 +111,6 @@ export default function Partner() {
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <p className="rounded-sm bg-badge-teal-bg px-4 py-2 text-sm text-teal-strong">
-        숨겨 둔 화면이에요 — 관리자와 마스터에게만 보입니다
-      </p>
 
       <h1 className="mt-5 break-keep text-h1 font-bold">채용 · 교육 담당자 신청</h1>
       <p className="mt-2 break-keep text-lg text-mute">
