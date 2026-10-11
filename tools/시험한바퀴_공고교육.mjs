@@ -113,20 +113,20 @@ const 과정 = await 창구(빈계정, '교육과정만들기', {
   p_제목: '시험 교육 — 연하재활 (2026-10-11 한바퀴)', p_직군: '물리치료사',
   p_소개: '한 바퀴 시험용입니다', p_교육기관: '시험교육기관',
 });
-const 과정id = Number(과정.답?.과정 ?? 과정.답?.id ?? 과정.답);
-적자('④ 교육 과정 만들기', 과정.ok && Number.isFinite(과정id), 과정.ok ? '과정 ' + 과정id : JSON.stringify(과정.답).slice(0, 120));
+const 과정id = Number(과정.답?.과정id ?? 과정.답?.과정 ?? 과정.답?.id ?? 과정.답);
+적자('④ 교육 과정 만들기', 과정.ok && Number.isFinite(과정id), Number.isFinite(과정id) ? '과정 ' + 과정id : '답 ' + JSON.stringify(과정.답).slice(0, 120));
 
 if (Number.isFinite(과정id)) {
-  await 섬김('교육과정?id=eq.' + 과정id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ 시험자료: true }) });
+  await 섬김('교육과정?과정id=eq.' + 과정id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ 시험자료: true }) });
   const 회차 = await 창구(빈계정, '교육회차열기', {
     p_과정: 과정id, p_시작: 뒤, p_끝: 뒤, p_장소: '대구 (시험)', p_정원: 10,
     p_접수시작: 오늘, p_접수끝: 뒤, p_수강료: 0, p_은행: null, p_계좌번호: null,
     p_예금주: null, p_입금기한: null, p_입금자명규칙: null, p_환불규정: null, p_결제링크: null,
   });
-  const 회차id = Number(회차.답?.회차 ?? 회차.답?.id ?? 회차.답);
+  const 회차id = Number(회차.답?.회차id ?? 회차.답?.회차 ?? 회차.답?.id ?? 회차.답);
   적자('⑤ 교육 회차 열기', 회차.ok && Number.isFinite(회차id), 회차.ok ? '회차 ' + 회차id : JSON.stringify(회차.답).slice(0, 120));
   if (Number.isFinite(회차id)) {
-    await 섬김('교육회차?id=eq.' + 회차id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ 시험자료: true }) });
+    await 섬김('교육회차?회차id=eq.' + 회차id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ 시험자료: true }) });
     /* 교육 첨부 — notices 통의 「교육<회차>」 폴더 (components/notice-files.tsx) */
     const pdf2 = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n');
     const 길2 = '교육' + 회차id + '/' + Date.now() + '-edu.pdf';
