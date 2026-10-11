@@ -55,7 +55,9 @@ export async function 한도알리기(경로) {
   const 줄 = 한도들();
   if (!줄.length) return { 올림: 0 };
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  /* 창구는 service_role 로 (2026-10-11). 없으면 anon 으로 떨어집니다 */
+  const anon = process.env.SUPABASE_SERVICE_KEY
+    || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   /* ⚠ 경로와 열쇠는 **짝이 맞아야** 합니다. 전에는 경로만 CE2 라 하고
      열쇠는 HS3 것을 집어 401 「열쇠가 맞지 않습니다」 가 났습니다 (2026-09-30) */
   const 고르기 = [String(경로 || '').toUpperCase(), 'HS3', 'AL2', 'CE2', 'JF']

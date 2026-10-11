@@ -102,7 +102,7 @@ function env() {
 /* ⚠ **anon 열쇠만 씁니다.** service_role 은 서버에 두지 않습니다.
    권한은 DB 함수 안의 COLLECT_KEY_HS3 검사로 봅니다 (AL2·CE2·JF·ALIVE 와 같은 방식) */
 async function rpc(cfg, fn, body) {
-  const k = cfg.SUPABASE_ANON_KEY;
+  const k = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;   /* 창구는 service_role 로 (2026-10-11) */
   if (!k) throw new Error('SUPABASE_ANON_KEY 가 없습니다');
   const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',

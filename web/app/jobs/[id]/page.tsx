@@ -167,8 +167,18 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
      거의 안 그려졌습니다. 워크넷 상세 API 의 `collectPsncnt` 를 읽어
      뽑은값에 넣었으니(247건) 그걸 뒤로 받칩니다.
      `headcount` 가 먼저입니다 — 관리자가 고치는 칸이 그쪽입니다 */
-  const 모집인원: string | null =
-    (j.headcount != null ? `${j.headcount}명` : (뽑은값?.['모집인원'] ?? null)) || null;
+  /* ★ 2026-10-11 — 알리오 통합 공고는 **직군별로** 적습니다.
+     「물리치료사 3명 · 작업치료사 1명」. 공고 전체 인원(233명 같은 것)을
+     우리 인원처럼 보이면 안 됩니다 (작업지침 15절) */
+  const 직군인원 = (detail['직군인원'] ?? null) as
+    { 물리치료사?: number; 작업치료사?: number } | null;
+  const 직군인원말 = 직군인원
+    ? [직군인원.물리치료사 ? `물리치료사 ${직군인원.물리치료사}명` : null,
+       직군인원.작업치료사 ? `작업치료사 ${직군인원.작업치료사}명` : null]
+      .filter(Boolean).join(' · ')
+    : '';
+  const 모집인원: string | null = 직군인원말
+    || (j.headcount != null ? `${j.headcount}명` : (뽑은값?.['모집인원'] ?? null)) || null;
 
   /* 워크넷(고용24) 공고인가. id 는 수집기가 'WN' + 고용24 공고번호로 만듭니다
      (tools/collect-worknet.mjs 485줄 · 옛 WN 과 새 WN2 가 같은 규칙입니다).
