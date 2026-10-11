@@ -113,14 +113,48 @@ console.log('볼 것 ' + 볼것.length + '건' + (출처 ? ' (출처 ' + 출처 
 console.log(진짜 ? '\n★ **진짜로 담습니다**' : '\n[마른] 아무것도 안 담습니다 — 담으려면 --진짜');
 
 const 칸이름 = ['모집인원', '마감시각', '근무지', '지원자격', '예상연봉'];
-const 전 = {}; const 후 = {}; for (const k of 칸이름) { 전[k] = 0; 후[k] = 0; }
 const 견본 = []; const 보낼줄 = [];
 let 읽음 = 0; let 빈손 = 0; let 초합 = 0; let 못받음 = 0;
+const 빈손까닭 = new Map();
+
+/* ★ 알리오 첨부는 **쿠키가 있어야** 받습니다. 없으면 파일 대신 포털 첫
+   화면(8,333자 HTML)이 옵니다 — 2026-10-11 에 이 되메우기를 마른으로
+   돌려 2건이 다 「빈손」으로 나와서 알았습니다 (collect-alio.mjs 의
+   포털쿠키() 주석에 이미 적혀 있던 것입니다) */
+let 알리오쿠키 = null;
+async function 머리(주소) {
+  const 기본 = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0' };
+  if (!/opendata\.alio\.go\.kr/.test(주소)) return 기본;
+  if (알리오쿠키 === null) {
+    const jar = {};
+    let u = 'https://opendata.alio.go.kr/new/';
+    const 담기 = () => Object.entries(jar).map(([k, v]) => k + '=' + v).join('; ');
+    for (let hop = 0; hop < 4 && u; hop++) {
+      const r = await fetch(u, { redirect: 'manual', headers: { ...기본, Cookie: 담기() } });
+      (r.headers.getSetCookie?.() || []).forEach((x) => {
+        const kv = String(x).split(';')[0]; const i = kv.indexOf('=');
+        if (i > 0) jar[kv.slice(0, i).trim()] = kv.slice(i + 1).trim();
+      });
+      const loc = r.headers.get('location');
+      u = (r.status >= 300 && r.status < 400 && loc)
+        ? (/^https?:/.test(loc) ? loc : 'https://opendata.alio.go.kr' + loc) : '';
+    }
+    알리오쿠키 = 담기();
+    console.log('   (알리오 포털 쿠키 ' + (알리오쿠키 ? 알리오쿠키.split(';').length + '개' : '없음') + ')');
+  }
+  return { ...기본, Cookie: 알리오쿠키, Referer: 'https://opendata.alio.go.kr/new/' };
+}
+
+/* ★ 전·후를 **공고마다 한 줄씩 남겨 끝에 셉니다.**
+   전에는 고리 안에서 세다가 `continue` 로 빠져 「전 100% → 후 0%」 같은
+   헛숫자가 나왔습니다 (2026-10-11 마른 실행에서 잡았습니다) */
+const 잰것 = [];
 
 for (const j of 볼것) {
   const 잠김 = new Set(j.edited_fields || []);
   const 지금빈 = new Set(빈칸들(j));
-  for (const k of 칸이름) if (!지금빈.has(k)) 전[k]++;
+  const 한줄 = { id: j.id, 지금빈, 채울것: {} };
+  잰것.push(한줄);
 
   /* 공고문 쪽 첨부를 고릅니다 — 지원서·서식은 뒤로 */
   const 점수 = (nm) => (/지원서|응시원서|서식|양식|이력서|직무기술/.test(nm) ? 0 : /공고|모집|채용/.test(nm) ? 2 : 1);
@@ -129,28 +163,30 @@ for (const j of 볼것) {
 
   let buf = null;
   try {
-    const g = await fetch(고른것.url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    if (!g.ok) { 못받음++; continue; }
+    const g = await fetch(고른것.url, { headers: await 머리(고른것.url) });
+    if (!g.ok) { 못받음++; 한줄.왜 = 'HTTP ' + g.status; continue; }
     buf = Buffer.from(await g.arrayBuffer());
-  } catch { 못받음++; continue; }
+  } catch (e) { 못받음++; 한줄.왜 = String(e.message).slice(0, 80); continue; }
 
   const k = await 첨부읽기(buf, 고른것.name || '공고문');
   초합 += k.초 || 0;
-  if (!k.글) { 빈손++; continue; }
+  if (!k.글) {
+    빈손++; 한줄.왜 = k.왜 || '빈손';
+    빈손까닭.set(한줄.왜, (빈손까닭.get(한줄.왜) ?? 0) + 1);
+    continue;
+  }
   읽음++;
 
   const 칸 = 칸뽑기(k.md, k.글);
   const 내직군인원 = j.job_group ? 칸.모집인원?.[j.job_group] : null;
 
   /* 무엇이 새로 채워지나 */
-  const 채울것 = {};
+  const 채울것 = 한줄.채울것;
   if (지금빈.has('모집인원') && !잠김.has('headcount') && 내직군인원 != null) 채울것.모집인원 = 내직군인원;
   if (지금빈.has('마감시각') && !잠김.has('apply_to_time') && 칸.접수시각) 채울것.마감시각 = 칸.접수시각;
   if (지금빈.has('근무지') && !잠김.has('work_place') && 칸.근무지) 채울것.근무지 = 칸.근무지;
   if (지금빈.has('지원자격') && 칸.지원자격) 채울것.지원자격 = 칸.지원자격;
   if (지금빈.has('예상연봉') && 칸.예상연봉) 채울것.예상연봉 = 칸.예상연봉;
-
-  for (const kk of 칸이름) if (!지금빈.has(kk) || 채울것[kk] != null) 후[kk]++;
 
   if (Object.keys(채울것).length) {
     보낼줄.push({ j, 칸, 채울것, 내직군인원, 파일: 고른것.name || '' });
@@ -162,9 +198,19 @@ for (const j of 볼것) {
   }
 }
 
+const 전 = {}; const 후 = {};
+for (const k of 칸이름) {
+  전[k] = 잰것.filter((x) => !x.지금빈.has(k)).length;
+  후[k] = 잰것.filter((x) => !x.지금빈.has(k) || x.채울것[k] != null).length;
+}
+
 console.log('\n── 읽기 ─────────────────────────────────────────');
 console.log('  kordoc 읽음 ' + 읽음 + ' · 빈손 ' + 빈손 + ' · 못 받음 ' + 못받음
   + ' · 걸린 시간 합 ' + Math.round(초합 * 10) / 10 + '초');
+/* 「몇 건 왔다」만 찍는 진단은 쓸모없습니다 (지침 2절) — 까닭을 적습니다 */
+for (const [왜, n] of [...빈손까닭].sort((a, b) => b[1] - a[1])) {
+  console.log('     빈손 ' + String(n).padStart(3) + '건  ' + 왜);
+}
 
 console.log('\n── 칸별 채움률 (대상 ' + 볼것.length + '건) ──');
 console.log('  칸          전        →  후');
