@@ -204,8 +204,11 @@ function 건너뜀알리기(table, skipped) {
      · 다리는 collect_put 을 안 거치고 service_role 로 job_posts 에 직접 upsert 합니다
      · source 를 공고ID 앞 글자로 정합니다 (copy_jobs.js sourceOf: 'HS…'→'HS')
      · on conflict (id) 로 source 까지 덮어씁니다
-   WN2 는 **아직 넣지 않았습니다** — 워크넷은 짝 대조를 못 지나서 안 넘깁니다. */
-const 새수집기 = ['AL2', 'CE2', 'GJ2', 'HS3', 'ND2'];
+   2026-10-11 — **WN2 를 넣었습니다 (세중님 승인).** 상세 API 를 붙이고 보니,
+   짝이 없어서 새 수집기가 옛 출처(WN) 244건을 **한 칸도 못 고치고** 있었습니다.
+   같은 기준이 여기와 DB 의 수집기짝 표 **두 곳**에 있습니다. 한 쪽만 고치면
+   다리와 수집기가 서로 덮습니다 — **반드시 함께** 고칩니다 (승인대기 ⑮). */
+const 새수집기 = ['AL2', 'CE2', 'GJ2', 'HS3', 'ND2', 'WN2'];
 async function 새수집기가가진것(cfg) {
   const 집 = new Set();
   for (const s of 새수집기) {
