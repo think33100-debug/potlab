@@ -1,7 +1,0 @@
-[  198089ms] [LOG] 0 @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3:845
-[  203948ms] [LOG] 0 @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3&wr_id=516:710
-[  203956ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3&wr_id=516:0
-[  209338ms] [LOG] 0 @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3&wr_id=515:710
-[  209344ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3&wr_id=515:0
-[  244652ms] [LOG] 0 @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3:845
-[  249026ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://www.bjhosp.co.kr/favicon.ico:0

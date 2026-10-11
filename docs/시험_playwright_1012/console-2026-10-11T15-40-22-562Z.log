@@ -1,5 +1,0 @@
-[    1825ms] [LOG] 0 @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3:845
-[    7699ms] [LOG] 0 @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3&wr_id=516:710
-[    7702ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3&wr_id=516:0
-[   13025ms] [LOG] 0 @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3&wr_id=515:710
-[   13029ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://gjmed.or.kr/bbs/board.php?bo_table=notice3&wr_id=515:0

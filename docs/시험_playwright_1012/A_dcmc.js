@@ -14,6 +14,15 @@ async (page) => {
   const 첨부꼴 = /\.(hwpx?|pdf|docx?)(\?|$)/i;
   const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36' };
   const 쉼 = (ms) => new Promise((r) => setTimeout(r, ms));
+  /* ★ 대화창(alert·confirm)을 **그 자리에서 닫습니다.**
+     안 닫으면 modal state 로 그 뒤 모든 명령이 막힙니다 —
+     강진의료원이 「열람 가능 기간이 만료된 게시물입니다」 alert 를 띄워
+     10곳 중 6곳이 그렇게 막혔습니다 (2026-10-12). 띄운 글은 적어 둡니다 */
+  const 대화창 = [];
+  page.on('dialog', async (d) => {
+    대화창.push(String(d.type()) + ': ' + String(d.message()).slice(0, 120));
+    try { await d.dismiss(); } catch { /* 이미 닫혔습니다 */ }
+  });
   const t0 = Date.now();
   const r = { 코드: "dcmc", 이름: "대구가톨릭대학교병원",
     갈래: "대학병원", 왜고름: "★ CSS 덩어리 8,599자",
@@ -104,6 +113,11 @@ async (page) => {
     } catch { r.스크린샷 = null; }
   } catch (e) { r.막힘 = String(e.message).slice(0, 140); }
 
+  /* ★ 끝에 **빈 쪽으로 옮깁니다.** 대화창이 떠 있으면 CLI 가 결과 대신
+     「Modal state」 를 찍어 돌려준 값이 묻힙니다 — 강진의료원이 상세에서
+     「열람 가능 기간이 만료된 게시물입니다」 alert 를 띄워 그렇게 됐습니다 */
+  try { await page.goto('about:blank', { timeout: 10000 }); } catch { /* 넘어갑니다 */ }
+  if (대화창.length) r.대화창 = 대화창.slice(0, 6);
   r.걸린초 = Math.round((Date.now() - t0) / 100) / 10;
   return JSON.stringify(r);
 }
