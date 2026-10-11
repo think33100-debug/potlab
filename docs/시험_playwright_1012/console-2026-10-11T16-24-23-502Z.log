@@ -1,0 +1,5 @@
+[    2151ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://seal.thawte.com/getthawteseal?host_name=www.knuh.or.kr&size=M&lang=ko:0
+[    2740ms] TypeError: Cannot read properties of null (reading 'style')
+    at showglobal (https://www.knuh.or.kr/js/active.js:12:12)
+    at window.onload (https://www.knuh.or.kr/hospitalinfo/hospitalinfo_03_05_list.asp:415:5)
+[    2814ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://www.knuh.or.kr/favicon.ico:0
