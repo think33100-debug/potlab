@@ -88,6 +88,8 @@ const 줄수 = Array.isArray(읽기.답) ? 읽기.답.length : 0;
 const 신고 = await fetch(`${URL_}/rest/v1/reports`, {
   method: 'POST',
   headers: { apikey: ANON, Authorization: 'Bearer ' + 물리, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+    /* ★ 2026-10-11 — reports_target_type_check 가 **post·comment 만** 받습니다.
+     그래서 **대화는 신고할 길이 아예 없습니다** (아래 ⑥ 결과). 승인대기 ㉒ */
   body: JSON.stringify({ target_type: 'chat_room', target_id: 방, reporter_id: 물리id, reason: '시험 신고입니다 (2026-10-11)' }),
 });
 const 신고글 = await 신고.text();
@@ -105,7 +107,7 @@ const 막힌뒤 = await 창구(마스터, '대화보내기', { p_방: 방, p_글
 적자('⑧-2 차단 뒤 보내기', !막힌뒤.ok, 막힌뒤.ok ? '**그대로 갑니다**' : '막혔습니다 (' + 막힌뒤.code + ')');
 
 /* ⑨ 관리자가 신고를 처리 */
-const 목록 = await 창구(마스터, 'admin_신고목록', { p_상태: '대기' }).catch(() => ({ ok: false }));
+const 목록 = await 창구(마스터, 'admin_신고목록', { p_처리전만: true, p_page: 0 }).catch(() => ({ ok: false }));
 적자('⑨ 관리자 신고 목록', 목록.ok, 목록.ok ? (Array.isArray(목록.답) ? 목록.답.length + '건' : '열립니다') : JSON.stringify(목록.답).slice(0, 110));
 
 /* ⑩ 만든 것을 **시험자료로** 표시 — 10/25 에 함께 치웁니다 */
