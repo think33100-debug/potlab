@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지운파일_1011 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="인계/00_읽는법.html">읽는 법</a><a href="screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="2026-10-11-에-지운-저장-파일-근거">2026-10-11 에 지운 저장 파일 — 근거</h1>
+<p>기준 시각 <b>2026-10-11 20:30 (한국시간)</b></p>
+<p><code>tools/clean_orphan_files.js</code> 를 크론(10분마다)에 올리면서 <b>두 번</b> 돌았습니다.</p>
+<p>지운 것은 모두 <b>스물</b>입니다.</p>
+<pre><code>
+첫 번째 (손으로 · 통 넷)      avatars 5 · post-images 6 · proofs 6   = 17개
+두 번째 (통을 셋 더 넓힌 뒤)  notices 13 · chat-images 1             = 14개
+                             ※ 둘째 번에 avatars·post-images·proofs 는 「치울 것 없음」
+</code></pre>
+<blockquote><b>먼저 밝힐 것 — 둘째 번 14개 가운데 3개는 이름을 못 댑니다.</b></blockquote>
+<blockquote>치우개가 이름을 <b>앞 10개만</b> 찍고 나머지는 「… 그리고 3개」로 줄였습니다.</blockquote>
+<blockquote>게다가 그 실행은 로그 파일로 안 남기고 화면으로만 봤습니다.</blockquote>
+<blockquote><b>이것은 제 잘못입니다.</b> 아래 「다시 안 그러려고」에 고친 것을 적었습니다.</blockquote>
+<hr>
+<h2 id="1-지운-것이-회원-자료일-수-있었나-아닙니다">1. 지운 것이 <b>회원 자료일 수 있었나</b> — 아닙니다</h2>
+<h3 id="notices-공고교육-첨부-13개">notices (공고·교육 첨부) 13개</h3>
+<p><code>notices</code> 통에 파일을 넣을 수 있는 사람은 <b>승인된 담당자</b>뿐입니다</p>
+<p>(storage 규칙 <code>첨부올릴수있나</code>). 그런데 —</p>
+<table><thead><tr><th>근거</th><th>값</th></tr></thead><tbody>
+<tr><td>담당자가 올린 공고(<code>source='BIZ'</code>)</td><td><b>아홉 건, 전부 <code>시험자료 = true</code></b></td></tr>
+<tr><td>그중 2026-10-11 것</td><td><code>BIZ000010</code> ~ <code>BIZ000015</code> <b>여섯 건</b> — 오늘 제가 한 바퀴 돌며 만든 것</td></tr>
+<tr><td>그 여섯 건의 <code>공고첨부</code> 줄</td><td><b>0줄</b> ← 지워진 파일들이 이것입니다</td></tr>
+<tr><td>살아남은 <code>notices</code> 6개</td><td>전부 <code>BIZ000005</code>(2026-10-09 예시 자료)의 것 · <code>공고첨부</code> 6줄이 가리킴</td></tr>
+<tr><td>수집기 첨부(<code>job_attachments</code>)</td><td><b>0줄</b> (지금은 바깥 주소만 씁니다 — 우리 통에 파일이 없습니다)</td></tr>
+</tbody></table>
+<p><b>즉 <code>notices</code> 통에 들어온 파일은 예시 자료와 오늘 제 시험뿐입니다.</b></p>
+<p>실제 회원·실제 기관이 올린 파일은 <b>한 번도 없었습니다</b> — 담당자 승인이</p>
+<p>오늘 처음 났기 때문입니다.</p>
+<p>지워진 13개 중 <b>이름을 댈 수 있는 10개</b> (화면 기록에 남은 것):</p>
+<pre><code>
+BIZ000010/1791714399525-notice.pdf   BIZ000010/1791714399787-notice.png
+BIZ000011/1791714434500-notice.pdf   BIZ000011/1791714434629-notice.png
+BIZ000012/1791714467834-notice.pdf   BIZ000012/1791714467943-notice.png
+BIZ000013/1791714505597-notice.pdf   BIZ000013/1791714505718-notice.png
+BIZ000014/1791714522072-notice.pdf   BIZ000014/1791714522193-notice.png
+</code></pre>
+<p><b>못 댄 3개</b>는 같은 꼴(<code>BIZ000014</code>·<code>BIZ000015</code> 와 교육 첨부 <code>edu10/…</code>)로</p>
+<p>보이지만 <b>이름을 적어 두지 않았으므로 「그랬을 것」이라고만 적습니다.</b></p>
+<p>내용은 전부 제가 그 자리에서 만든 가짜입니다 —</p>
+<p><code>%PDF-1.4 … %%EOF</code> 한 줄짜리 PDF 와 1×1 픽셀 PNG.</p>
+<h3 id="chat-images-1개">chat-images 1개</h3>
+<p>오늘 1:1 대화 한 바퀴를 <b>세 번</b> 돌리면서 1×1 픽셀 PNG 를 올렸고,</p>
+<p>그중 한 장이 쪽지에 안 붙은 채 남아 있었습니다. 회원 사진이 아닙니다.</p>
+<h3 id="proofs-6개-첫-번째-실행">proofs 6개 (첫 번째 실행)</h3>
+<pre><code>
+3a204fae…/sample-1·2·3·4·6.pdf   2026-10-09 예시 재직 증빙 (가짜)
+ff6b44ed…/proof-…-test.pdf       오늘 한 바퀴에서 올린 가짜
+</code></pre>
+<p>전부 <code>tools/견본서류만들기.mjs</code> 가 만든 것으로 「SAMPLE / TEST DATA —</p>
+<p>NOT A REAL DOCUMENT」와 가린 주민번호만 적혀 있습니다.</p>
+<p><code>sample-5.pdf</code> 는 <b>안 지웠습니다</b> — 재직인증 id 5(심사중)가 가리킵니다.</p>
+<h3 id="avatars-5-post-images-6-첫-번째-실행">avatars 5 · post-images 6 (첫 번째 실행)</h3>
+<p><b>주인(회원)이 사라진</b> 파일입니다 — <code>profiles</code> 에 없는 uuid 폴더.</p>
+<p>이 둘은 2026-09-19 부터 있던 원래 규칙(「주인 없는 파일」)이고</p>
+<p>오늘 넓힌 쪽이 아닙니다.</p>
+<hr>
+<h2 id="2-지금-버킷과-표가-맞습니다">2. 지금 버킷과 표가 맞습니다</h2>
+<pre><code>
+notices      6  =  공고첨부 6줄            ○
+proofs       1  =  재직인증 경로 1줄        ○
+chat-images  3  ·  사진 쪽지 5             △ 쪽지 둘이 **없는 파일**을 가리킵니다
+avatars      2  ·  post-images 4          ○
+home-images 12  ·  ad-images 1            치우개 대상이 아닙니다 (관리자가 올린 것)
+</code></pre>
+<p><code>chat-images</code> 의 어긋남은 <b>새는 쪽이 아니라 안 보이는 쪽</b>입니다 —</p>
+<p>오늘 시험 찌꺼기이고, 그 쪽지도 10/25 에 시험자료로 함께 사라집니다.</p>
+<hr>
+<h2 id="3-다시-안-그러려고-이름을-다-적습니다">3. 다시 안 그러려고 — <b>이름을 다 적습니다</b></h2>
+<p>고친 것 (2026-10-11)</p>
+<ul>
+<li>치우개가 <b>지운 경로를 하나도 빠짐없이</b> 찍습니다 (「… 그리고 N개」를 뺐습니다)</li>
+<li>크론 줄이 <b>로그 파일로 남깁니다</b> — <code>~/log/고아파일.log</code></li>
+</ul>
+<p>  (첫 번째 실행만 남기고 둘째 번은 화면으로만 본 것이 오늘의 구멍이었습니다)</p>
+<p><b>아직 안 한 것 — 「휴지통 7일」과 「허용 목록」.</b> 제안만 적었습니다:</p>
+<p><code>docs/치우개_휴지통안_1011.md</code></p>
+<p class="만든말">이 쪽은 <code>지운파일_1011.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>

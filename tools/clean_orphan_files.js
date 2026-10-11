@@ -124,8 +124,10 @@ async function 가리키지않는것치우기({ 통, 표, 칸 }) {
   }
   if (!지울것.length) { console.log(`${통}: 치울 것 없음`); return; }
   console.log(`${통}: 아무 줄도 안 가리키는 파일 ${지울것.length}개`);
-  지울것.slice(0, 10).forEach((x) => console.log('   ' + x));
-  if (지울것.length > 10) console.log(`   … 그리고 ${지울것.length - 10}개`);
+  /* ★ 2026-10-11 — **하나도 안 줄이고 다 찍습니다.** 앞 10개만 찍었더니
+     그날 지운 14개 중 3개의 이름을 못 댔습니다. 지운 것은 되돌릴 수 없으니
+     무엇을 지웠는지는 **남아 있어야** 합니다 (docs/지운파일_1011.md) */
+  지울것.forEach((x) => console.log('   ' + x));
   if (!DO_IT) { console.log('   (--yes 를 주면 지웁니다)'); return; }
   const d = await fetch(`${URL}/storage/v1/object/${통}`, {
     method: 'DELETE', headers: H, body: JSON.stringify({ prefixes: 지울것 }),
