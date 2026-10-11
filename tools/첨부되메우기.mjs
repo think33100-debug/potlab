@@ -1,0 +1,232 @@
+/* 이미 담긴 공고의 첨부를 **다시 읽어 일곱 칸을 채웁니다** (2026-10-11).
+ *
+ *   node tools/첨부되메우기.mjs --마른                 세어만 봅니다 (기본)
+ *   node tools/첨부되메우기.mjs --마른 --견본 5         견본도
+ *   node tools/첨부되메우기.mjs --출처 GJ2 --몇개 30
+ *   node tools/첨부되메우기.mjs --진짜                 **담습니다** (세중님 확인 뒤에만)
+ *
+ * ★ **기본이 마른 실행입니다.** `--진짜` 를 적어야 담습니다.
+ *   세중님 지시 — 「마른 실행 → 칸별 전후 채움률 + 견본 5건 원문↔값 →
+ *   제 확인 → 실행」.
+ *
+ * ── 지키는 것 ───────────────────────────────────────────────
+ *   · `updated_at` 을 **안 바꿉니다** (지침 9절 — 알림·다리가 그 값을 봅니다)
+ *   · `edited_fields` 에 걸린 칸과 `admin_locked` 공고는 **건너뜁니다**
+ *   · `apply_to` 를 **안 덮습니다.** 공고문 값은 뽑은값에만 둡니다
+ *     (지침 15절 — API 날짜와 공고문 날짜가 다릅니다)
+ *   · 모집인원은 **그 공고 직군 줄의 것만.** 없으면 비워 둡니다
+ *   · `job_attachments` 에 주소가 있는 공고만 봅니다. 없으면 먼저 수집기가
+ *     주소를 담아야 합니다 (`POTJOB_ATTACH_WRITE=1`)
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
+
+const 여기 = path.dirname(fileURLToPath(import.meta.url));
+const argv = process.argv.slice(2);
+const 값 = (이름, 기본) => {
+  const i = argv.indexOf(이름);
+  return i > -1 && argv[i + 1] != null ? argv[i + 1] : 기본;
+};
+const 진짜 = argv.includes('--진짜');
+const 몇개 = Number(값('--몇개', 40));
+const 출처 = 값('--출처', '');
+const 견본수 = Number(값('--견본', 5));
+
+function env() {
+  const out = {};
+  for (const f of [path.join(여기, '..', '.env'), path.join(여기, '..', '.env.local')]) {
+    if (!fs.existsSync(f)) continue;
+    for (const l of fs.readFileSync(f, 'utf8').split(/\r?\n/)) {
+      const m = l.match(/^\s*([A-Z_0-9]+)\s*=\s*(.*?)\s*$/);
+      if (m && !out[m[1]]) out[m[1]] = m[2].replace(/^['"]|['"]$/g, '');
+    }
+  }
+  for (const k of Object.keys(process.env)) if (process.env[k]) out[k] = process.env[k];
+  out.SUPABASE_URL = out.SUPABASE_URL || out.NEXT_PUBLIC_SUPABASE_URL;
+  return out;
+}
+const cfg = env();
+for (const k of ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY']) {
+  if (!cfg[k]) { console.error(k + ' 가 없습니다'); process.exit(1); }
+}
+if (!kordoc있나()) { console.error('kordoc 이 안 깔렸습니다 — cd tools/kordoc && npm ci'); process.exit(1); }
+const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY };
+
+/* PostgREST 는 limit 을 줘도 100줄에서 끊습니다 — Range 로 쪽을 넘깁니다 */
+async function 전부(길, 뚜껑 = Infinity) {
+  const 모두 = [];
+  for (let 처음 = 0; 처음 < 뚜껑; 처음 += 100) {
+    const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길,
+      { headers: { ...H, Range: `${처음}-${처음 + 99}`, 'Range-Unit': 'items' } });
+    if (!r.ok) throw new Error(길.slice(0, 60) + ' HTTP ' + r.status + ' · ' + (await r.text()).slice(0, 200));
+    const 한쪽 = await r.json();
+    모두.push(...한쪽);
+    if (한쪽.length < 100) break;
+  }
+  return 모두.slice(0, 뚜껑 === Infinity ? undefined : 뚜껑);
+}
+
+/* ── 볼 것 고르기 ────────────────────────────────────────────
+   첨부 주소가 있고, 일곱 칸 중 하나라도 빈 공고 */
+const 첨부들 = await 전부('job_attachments?select=job_id,url,kind,name&order=id.asc');
+if (!첨부들.length) {
+  console.log('job_attachments 가 0줄입니다 — 먼저 수집기가 주소를 담아야 합니다');
+  console.log('   POTJOB_ATTACH_WRITE=1 node tools/collect-nara.mjs --상세 30');
+  process.exit(0);
+}
+const 공고별첨부 = new Map();
+for (const a of 첨부들) {
+  if (!공고별첨부.has(a.job_id)) 공고별첨부.set(a.job_id, []);
+  공고별첨부.get(a.job_id).push(a);
+}
+console.log('첨부 주소가 있는 공고 ' + 공고별첨부.size + '곳 (첨부 ' + 첨부들.length + '줄)');
+
+const 번호들 = [...공고별첨부.keys()];
+const 공고들 = [];
+for (let i = 0; i < 번호들.length; i += 60) {
+  const 조각 = 번호들.slice(i, i + 60).map(encodeURIComponent).join(',');
+  공고들.push(...await 전부('job_posts?select=id,source,org_name,title,job_group,headcount,'
+    + 'apply_to,apply_to_time,work_place,detail,' + encodeURIComponent('뽑은값')
+    + ',edited_fields,admin_locked,hidden,hold&id=in.(' + 조각 + ')'));
+}
+
+const 빈칸들 = (j) => {
+  const p = j['뽑은값'] || {}; const d = j.detail || {};
+  const 빈 = [];
+  if (j.headcount == null) 빈.push('모집인원');
+  if (!j.apply_to_time) 빈.push('마감시각');
+  if (!j.work_place && !p['근무지']) 빈.push('근무지');
+  if (!d['지원자격'] && !p['지원자격']) 빈.push('지원자격');
+  if (!d['연봉'] && !p['예상연봉']) 빈.push('예상연봉');
+  return 빈;
+};
+
+const 볼것 = 공고들
+  .filter((j) => !출처 || j.source === 출처)
+  .filter((j) => !j.admin_locked)
+  .filter((j) => 빈칸들(j).length)
+  .slice(0, 몇개);
+console.log('볼 것 ' + 볼것.length + '건' + (출처 ? ' (출처 ' + 출처 + ')' : '')
+  + ' · 관리자 잠금 건너뜀 ' + 공고들.filter((j) => j.admin_locked).length + '건');
+console.log(진짜 ? '\n★ **진짜로 담습니다**' : '\n[마른] 아무것도 안 담습니다 — 담으려면 --진짜');
+
+const 칸이름 = ['모집인원', '마감시각', '근무지', '지원자격', '예상연봉'];
+const 전 = {}; const 후 = {}; for (const k of 칸이름) { 전[k] = 0; 후[k] = 0; }
+const 견본 = []; const 보낼줄 = [];
+let 읽음 = 0; let 빈손 = 0; let 초합 = 0; let 못받음 = 0;
+
+for (const j of 볼것) {
+  const 잠김 = new Set(j.edited_fields || []);
+  const 지금빈 = new Set(빈칸들(j));
+  for (const k of 칸이름) if (!지금빈.has(k)) 전[k]++;
+
+  /* 공고문 쪽 첨부를 고릅니다 — 지원서·서식은 뒤로 */
+  const 점수 = (nm) => (/지원서|응시원서|서식|양식|이력서|직무기술/.test(nm) ? 0 : /공고|모집|채용/.test(nm) ? 2 : 1);
+  const 고른것 = [...공고별첨부.get(j.id)].sort((a, b) => 점수(b.name || '') - 점수(a.name || ''))[0];
+  if (!고른것) continue;
+
+  let buf = null;
+  try {
+    const g = await fetch(고른것.url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    if (!g.ok) { 못받음++; continue; }
+    buf = Buffer.from(await g.arrayBuffer());
+  } catch { 못받음++; continue; }
+
+  const k = await 첨부읽기(buf, 고른것.name || '공고문');
+  초합 += k.초 || 0;
+  if (!k.글) { 빈손++; continue; }
+  읽음++;
+
+  const 칸 = 칸뽑기(k.md, k.글);
+  const 내직군인원 = j.job_group ? 칸.모집인원?.[j.job_group] : null;
+
+  /* 무엇이 새로 채워지나 */
+  const 채울것 = {};
+  if (지금빈.has('모집인원') && !잠김.has('headcount') && 내직군인원 != null) 채울것.모집인원 = 내직군인원;
+  if (지금빈.has('마감시각') && !잠김.has('apply_to_time') && 칸.접수시각) 채울것.마감시각 = 칸.접수시각;
+  if (지금빈.has('근무지') && !잠김.has('work_place') && 칸.근무지) 채울것.근무지 = 칸.근무지;
+  if (지금빈.has('지원자격') && 칸.지원자격) 채울것.지원자격 = 칸.지원자격;
+  if (지금빈.has('예상연봉') && 칸.예상연봉) 채울것.예상연봉 = 칸.예상연봉;
+
+  for (const kk of 칸이름) if (!지금빈.has(kk) || 채울것[kk] != null) 후[kk]++;
+
+  if (Object.keys(채울것).length) {
+    보낼줄.push({ j, 칸, 채울것, 내직군인원, 파일: 고른것.name || '' });
+    if (견본.length < 견본수) {
+      견본.push({ id: j.id, 기관: j.org_name, 제목: String(j.title).slice(0, 48),
+        직군: j.job_group || '(없음)', 파일: (고른것.name || '').slice(0, 56),
+        채울것, 근거: 칸.근거 });
+    }
+  }
+}
+
+console.log('\n── 읽기 ─────────────────────────────────────────');
+console.log('  kordoc 읽음 ' + 읽음 + ' · 빈손 ' + 빈손 + ' · 못 받음 ' + 못받음
+  + ' · 걸린 시간 합 ' + Math.round(초합 * 10) / 10 + '초');
+
+console.log('\n── 칸별 채움률 (대상 ' + 볼것.length + '건) ──');
+console.log('  칸          전        →  후');
+for (const k of 칸이름) {
+  const p = (n) => String(Math.round(100 * n / Math.max(1, 볼것.length))).padStart(3) + '%';
+  console.log('  ' + k.padEnd(10) + p(전[k]) + ' (' + String(전[k]).padStart(3) + ')  →'
+    + p(후[k]) + ' (' + String(후[k]).padStart(3) + ')');
+}
+
+console.log('\n── 견본 — 원문 근거 ↔ 채울 값 ────────────────────');
+for (const s of 견본) {
+  console.log('\n  ' + s.id + '  ' + s.기관 + '  [' + s.직군 + ']');
+  console.log('    제목  ' + s.제목);
+  console.log('    파일  ' + s.파일);
+  for (const [k, v] of Object.entries(s.채울것)) {
+    console.log('    ' + k.padEnd(8) + ' → ' + JSON.stringify(v).slice(0, 150));
+    const 근거열쇠 = k === '모집인원' ? ('모집인원.' + s.직군) : (k === '마감시각' ? '접수시각' : k);
+    if (s.근거[근거열쇠]) console.log('             근거  ' + String(s.근거[근거열쇠]).slice(0, 150));
+  }
+}
+
+if (!진짜) {
+  console.log('\n[마른] 담을 수 있는 공고 ' + 보낼줄.length + '건. 담으려면 --진짜');
+  process.exit(0);
+}
+
+/* ── 진짜로 담기 ────────────────────────────────────────────
+   `updated_at` 을 안 바꾸려고 **창구 하나**로 보냅니다.
+   그 창구(`칸되메우기`)가 없으면 여기서 멈춥니다 — 표를 직접 안 씁니다 */
+console.log('\n담습니다 — ' + 보낼줄.length + '건');
+const 줄들 = 보낼줄.map(({ j, 칸, 채울것, 내직군인원 }) => ({
+  id: j.id,
+  ...(채울것.모집인원 != null ? { headcount: 내직군인원 } : {}),
+  ...(채울것.마감시각 ? { apply_to_time: 칸.접수시각 } : {}),
+  ...(채울것.근무지 ? { work_place: 칸.근무지 } : {}),
+  detail: { ...(j.detail || {}),
+    ...(채울것.지원자격 ? { 지원자격: 칸.지원자격 } : {}),
+    ...(채울것.예상연봉 ? { 연봉: 칸.예상연봉 } : {}) },
+  뽑은값: {
+    ...(칸.접수마감 ? { 공고문_접수마감: 칸.접수마감 } : {}),
+    ...(칸.접수시각 ? { 공고문_접수시각: 칸.접수시각 } : {}),
+    ...(Object.keys(칸.모집인원 || {}).length ? { 직군별인원: 칸.모집인원 } : {}),
+    ...(칸.지원자격 ? { 지원자격: 칸.지원자격 } : {}),
+    ...(칸.근무지 ? { 근무지: 칸.근무지 } : {}),
+    ...(칸.예상연봉 ? { 예상연봉: 칸.예상연봉 } : {}),
+    근거: 칸.근거 || {}, 읽은법: 'kordoc',
+  },
+}));
+let 담음 = 0;
+for (let i = 0; i < 줄들.length; i += 50) {
+  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'), {
+    method: 'POST',
+    headers: { ...H, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_rows: 줄들.slice(i, i + 50) }),
+  });
+  const t = await r.text();
+  if (!r.ok) {
+    console.error('✗ 창구가 막혔습니다 — HTTP ' + r.status + ' · ' + t.slice(0, 300));
+    console.error('  창구 `칸되메우기(p_rows jsonb)` 가 아직 없으면 먼저 만들어야 합니다.');
+    console.error('  **표를 직접 쓰지 않습니다** (지침 — 창구로만).');
+    process.exit(1);
+  }
+  try { 담음 += (JSON.parse(t) || {})['담음'] || 0; } catch { /* 모양이 다르면 그대로 */ }
+}
+console.log('담았습니다 — ' + 담음 + '건 (updated_at 은 안 바꿨습니다)');
