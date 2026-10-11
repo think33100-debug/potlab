@@ -107,14 +107,22 @@ export function 첨부모으기(source, 옵션 = {}) {
     },
 
     /* 주소마다 앞 8글자를 받아 **정말 그 형식인지** 봅니다.
-       파일을 통째로 안 받습니다 — Range 로 앞부분만 */
-    async 형식확인(최대 = 40) {
+       파일을 통째로 안 받습니다 — Range 로 앞부분만.
+
+       ★ 2026-10-11 — **머리(쿠키)를 받습니다.** 안 쓰면 알리오가 파일 대신
+       포털 첫 화면(8,333자 HTML)을 줍니다. 10-11 에 28건을 쿠키 없이 두드려
+       전부 HTML 이 와서 「첨부 주소가 틀렸다」고 읽었는데, 쿠키를 붙이니
+       891,887바이트 `%PDF-` 와 86,528바이트 hwp(OLE)가 왔습니다.
+       **주소는 멀쩡했고 제 확인이 틀렸습니다.**
+       `collect-alio.mjs` 의 포털쿠키() 주석에 이미 적혀 있던 것입니다 (지침 5절). */
+    async 형식확인(최대 = 40, 머리얻기 = null) {
       let 본것 = 0;
+      const 머리 = 머리얻기 ? await 머리얻기() : {};
       for (const r of 줄들) {
         if (본것 >= 최대) { r.형식 = '안 봄'; continue; }
         본것++;
         try {
-          const res = await fetch(r.url, { headers: { Range: 'bytes=0-15' } });
+          const res = await fetch(r.url, { headers: { ...머리, Range: 'bytes=0-15' } });
           const b = new Uint8Array(await res.arrayBuffer());
           r.형식 = 진짜형식(b);
           r.HTTP = res.status;
