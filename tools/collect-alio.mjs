@@ -32,6 +32,13 @@ import { pdf글자, 쓸수있나 as OCR쓸수있나, 멈췄나 as OCR멈췄나, 
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 
+/* 창구(collect_put · collect_beat · 판정남기기)를 부를 열쇠.
+   **service_role 이 있으면 그것**을 씁니다 (2026-10-11). anon 은 브라우저에
+   내려가는 공개 값이라, 창구가 anon 에게 열려 있으면 p_secret 하나만 새도
+   아무나 공고를 넣을 수 있습니다. 수집기는 서버에서만 돕니다.
+   없으면 anon 으로 떨어집니다 — 권한을 걷기 전까지 안 멈춥니다 */
+const 창구열쇠 = (c) => c.SUPABASE_SERVICE_KEY || c.SUPABASE_ANON_KEY;
+
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'AL2';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -393,7 +400,7 @@ async function 한건(cfg, r, 셈, 옵션) {
 async function rpc(cfg, fn, body) {
   const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',
-    headers: { apikey: cfg.SUPABASE_ANON_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_ANON_KEY,
+    headers: { apikey: 창구열쇠(cfg), Authorization: 'Bearer ' + 창구열쇠(cfg),
                'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
@@ -540,8 +547,8 @@ if (순찰 && rows.length) {
       const res = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('있는번호'), {
         method: 'POST',
         headers: {
-          apikey: cfg.SUPABASE_ANON_KEY,
-          Authorization: 'Bearer ' + cfg.SUPABASE_ANON_KEY,
+          apikey: 창구열쇠(cfg),
+          Authorization: 'Bearer ' + 창구열쇠(cfg),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ p_secret: 열쇠, p_source: SOURCE, p_ids: 번호들.slice(i, i + 100) }),

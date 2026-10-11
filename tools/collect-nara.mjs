@@ -173,7 +173,7 @@ const 먼저 = /지역사회중심재활|치매안심센터|치매|보건소|보
 
 /* ── DB ───────────────────────────────────────────────────── */
 async function rpc(fn, body) {
-  const k = cfg.SUPABASE_ANON_KEY;
+  const k = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;   /* 창구는 service_role 로 (2026-10-11) */
   if (!k) throw new Error('SUPABASE_ANON_KEY 가 없습니다');
   const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',

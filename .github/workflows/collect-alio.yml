@@ -59,6 +59,8 @@ jobs:
           # 쓰기는 collect_put() 함수 하나로만 갑니다
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          # 창구(collect_put)는 service_role 로 부릅니다 (2026-10-11)
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           COLLECT_KEY_AL2: ${{ secrets.COLLECT_KEY_AL2 }}
           # 첨부 공고문 OCR — gas/ocr 웹앱(세중님 계정)에 맡깁니다.
           # 서비스 계정은 드라이브 용량 0 으로, OAuth 는 7일 만료로 접었습니다.

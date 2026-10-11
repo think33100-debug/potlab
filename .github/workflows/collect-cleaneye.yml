@@ -63,6 +63,8 @@ jobs:
           # 쓰기는 collect_put() 함수 하나로만 갑니다
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          # 창구(collect_put)는 service_role 로 부릅니다 (2026-10-11)
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           COLLECT_KEY_CE2: ${{ secrets.COLLECT_KEY_CE2 }}
           # 첨부 PDF OCR — gas/ocr 웹앱(세중님 계정).
           # 한글(.hwp)은 tools/hwp 가 읽으므로 열쇠가 필요 없습니다.

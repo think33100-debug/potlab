@@ -46,7 +46,7 @@ function env() {
    **GitHub 과 다른 열쇠로 시험한 것**이 잘못이었습니다.
    service_role 열쇠는 GitHub 에 넣지 않습니다. 권한은 함수 안의 ALIVE_KEY 검사로 봅니다. */
 async function rpc(cfg, fn, body) {
-  const k = cfg.SUPABASE_ANON_KEY;
+  const k = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;   /* 창구는 service_role 로 (2026-10-11) */
   if (!k) throw new Error('SUPABASE_ANON_KEY 가 없습니다');
   const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',

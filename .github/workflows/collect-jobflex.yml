@@ -78,6 +78,8 @@ jobs:
           # 쓰기는 collect_put() · 뒷정리는 collect_after() 로만 갑니다
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          # 창구(collect_put)는 service_role 로 부릅니다 (2026-10-11)
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           COLLECT_KEY_JF: ${{ secrets.COLLECT_KEY_JF }}
         run: |
           ARGS=""
