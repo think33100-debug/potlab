@@ -61,9 +61,6 @@ export default function Talk() {
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <p className="rounded-sm bg-badge-teal-bg px-4 py-2 text-sm text-teal-strong">
-        숨겨 둔 화면이에요 — 관리자와 마스터에게만 보입니다
-      </p>
       <h1 className="mt-5 break-keep text-h1 font-bold">대화</h1>
       <p className="mt-2 break-keep text-lg text-mute">
         말을 걸면 상대가 받을지 고릅니다. 사진은 상대가 한 번 보면 사라져요.
