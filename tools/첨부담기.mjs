@@ -57,8 +57,28 @@ export function 저장이름(job_id, 차례, 원래이름) {
   return `${안전한번호}-${차례}${확장자}`;
 }
 
+/* ★ 2026-10-11 — **켜야 담습니다.**
+ *
+ * attach-prep 을 main 에 합치자마자 **크론이 곧바로 진짜로 담았습니다.**
+ * 알리오 크론은 `--마른` 없이 5분마다 도니까요 (22:00·22:27 에 2줄 들어갔습니다).
+ * 세중님이 정한 「첫 실행은 최대 30건」·「밤에 백필 금지」를 넘는 길입니다.
+ *
+ * 그래서 **기본을 마른으로** 둡니다. 담으려면 환경변수를 켭니다 —
+ *
+ *   POTJOB_ATTACH_WRITE=1  node tools/collect-nara.mjs
+ *
+ * 변수 이름이 영문인 까닭은 셸이 한글 변수를 못 쓰기 때문입니다 (지침 8-3).
+ * 크론에는 **일부러 안 넣습니다.** 사람이 손으로 켜서 한 바퀴 보고 나서
+ * 넣는 것이 맞습니다 (지침 11-2 와 같은 결 — 「돌았다」와 「맞게 돌았다」는 다릅니다). */
+const 켜졌나 = () => process.env.POTJOB_ATTACH_WRITE === '1';
+
+/* 한 번에 이보다 많으면 멈춥니다 — 치우개의 50개 뚜껑과 같은 생각입니다.
+   POTJOB_ATTACH_MAX 로 올릴 수 있습니다 */
+const 뚜껑 = () => Number(process.env.POTJOB_ATTACH_MAX) || 30;
+
 export function 첨부모으기(source, 옵션 = {}) {
-  const 마른 = !!옵션.마른;
+  /* 옵션.마른 이 아니어도, 환경변수를 안 켰으면 마른입니다 */
+  const 마른 = !!옵션.마른 || !켜졌나();
   const 줄들 = [];
   const 셈 = { 더한것: 0, 주소없음: 0, 겹침: 0 };
   const 본주소 = new Set();
@@ -126,7 +146,15 @@ export function 첨부모으기(source, 옵션 = {}) {
         전.때 = new Date().toISOString();
         fs.mkdirSync(path.dirname(낼곳), { recursive: true });
         fs.writeFileSync(낼곳, JSON.stringify(전, null, 1) + '\n');
-        console.log(`  [마른] 첨부 ${줄들.length}줄 → docs/첨부_미리보기_1010.json (${source})`);
+        console.log(`  [마른] 첨부 ${줄들.length}줄 → docs/첨부_미리보기_1010.json (${source})`
+          + (켜졌나() ? '' : ' · 담으려면 POTJOB_ATTACH_WRITE=1'));
+        return;
+      }
+
+      /* 뚜껑 — 한 번에 너무 많으면 멈춥니다 */
+      if (줄들.length > 뚜껑()) {
+        console.error(`  ★ 첨부 ${줄들.length}줄은 한 번 뚜껑(${뚜껑()})을 넘습니다 — **담지 않습니다.**`);
+        console.error(`     POTJOB_ATTACH_MAX 로 올리거나, 좁혀서 다시 돌리십시오`);
         return;
       }
       /* 진짜로 담기 — 창구를 거칩니다. 표를 직접 안 씁니다.
