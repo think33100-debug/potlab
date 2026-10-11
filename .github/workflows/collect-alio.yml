@@ -55,8 +55,10 @@ jobs:
           # 공공데이터포털 — 둘 다 이미 인코딩된 키입니다. 다시 감싸면 안 됩니다
           ALIO_LIST_KEY: ${{ secrets.ALIO_LIST_KEY }}
           ALIO_DETAIL_KEY: ${{ secrets.ALIO_DETAIL_KEY }}
-          # Supabase — service_role 이 아니라 anon 입니다.
-          # 쓰기는 collect_put() 함수 하나로만 갑니다
+          # Supabase — 2026-10-11 부터 **창구는 service_role 로** 부릅니다.
+          # anon 은 브라우저에 내려가는 공개 값이라, 창구가 anon 에게 열려 있으면
+          # p_secret 하나만 새도 아무나 공고를 넣을 수 있습니다.
+          # 쓰기는 여전히 collect_put() 함수 하나로만 갑니다
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           # 창구(collect_put)는 service_role 로 부릅니다 (2026-10-11)
