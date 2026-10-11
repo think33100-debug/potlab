@@ -98,6 +98,11 @@ console.log('알림 보내기 · ' + new Date().toLocaleString('ko-KR', { timeZo
   + (dry ? ' · **--dry · 보내지 않습니다**' : '')
   + (나만 ? ' · **--나만 ' + 나만 + ' (그 기기에만)**' : ''));
 
+/* 보낼알림() 안의 열쇠 검사는 collect_secret 에 있는 **아무 열쇠**면 됩니다.
+   서버 .env 에는 COLLECT_KEY_HS3 가 있지만 GitHub Actions 에는 AL2·CE2·JF 만
+   있습니다. 있는 것 중 하나를 집습니다 (2026-10-11) */
+cfg.COLLECT_KEY_HS3 = cfg.COLLECT_KEY_HS3 || cfg.COLLECT_KEY_AL2
+  || cfg.COLLECT_KEY_CE2 || cfg.COLLECT_KEY_JF || cfg.COLLECT_KEY_WN2 || cfg.COLLECT_KEY_VMS;
 const 없는것 = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'COLLECT_KEY_HS3',
   'VAPID_PUBLIC', 'VAPID_PRIVATE', 'VAPID_MAIL'].filter((k) => !cfg[k]);
 for (const k of ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'COLLECT_KEY_HS3', 'VAPID_PUBLIC', 'VAPID_PRIVATE', 'VAPID_MAIL']) {

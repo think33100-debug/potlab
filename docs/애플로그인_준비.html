@@ -47,11 +47,8 @@
 <p>있고, 가입 막는 훅도 Apple 을 안 막습니다. 아래 ①~⑤ 를 마치면 **배포 없이</p>
 <p>바로** 됩니다.</p>
 <hr>
-<h2 id="먼저-애플-개발자-계정">먼저 — 애플 개발자 계정</h2>
-<ul>
-<li>https://developer.apple.com → 가입 (<b>연 99 달러</b>)</li>
-<li>승인에 하루~이틀 걸립니다. <b>이것부터</b> 하십시오</li>
-</ul>
+<blockquote><b>애플 개발자 등록은 2026-10-08 에 이미 마치셨습니다.</b> 아래 ①~⑤ 만</blockquote>
+<blockquote>하시면 됩니다.</blockquote>
 <hr>
 <h2 id="app-id-만들고-sign-in-with-apple-켜기">① App ID 만들고 「Sign in with Apple」 켜기</h2>
 <pre><code>
@@ -91,7 +88,11 @@ https://qbnxycavokzcdonlfdat.supabase.co/auth/v1/callback
 developer.apple.com → Account → 오른쪽 위 Membership details
 → **Team ID** (열 글자쯤 되는 영문·숫자)
 </code></pre>
-<h2 id="key-p8-만들기-한-번만-받을-수-있습니다">④ Key (.p8) 만들기 — <b>한 번만 받을 수 있습니다</b></h2>
+<h2 id="key-p8-만들기">④ Key (.p8) 만들기</h2>
+<blockquote>### ⚠ <b>이 파일은 한 번만 받을 수 있습니다.</b></blockquote>
+<blockquote>내려받는 순간이 <b>처음이자 마지막</b>입니다. 애플은 다시 안 줍니다.</blockquote>
+<blockquote>잃어버리면 Key 를 <b>새로 만들어</b> ⑤ 를 다시 해야 합니다.</blockquote>
+<blockquote><b>내려받자마자 안전한 곳에 두십시오.</b></blockquote>
 <pre><code>
 Certificates, IDs &amp; Profiles → 왼쪽 **Keys** → + 단추
    Key Name   POTJOB Sign in with Apple
@@ -101,8 +102,7 @@ Certificates, IDs &amp; Profiles → 왼쪽 **Keys** → + 단추
 → Continue → Register
 → **Download** 를 누르면 `AuthKey_XXXXXXXXXX.p8` 파일이 내려옵니다
 </code></pre>
-<blockquote><b>이 파일은 다시 못 받습니다.</b> 안전한 곳에 두십시오.</blockquote>
-<blockquote>파일 이름의 <code>XXXXXXXXXX</code> 열 글자가 <b>Key ID</b> 입니다.</blockquote>
+<blockquote>파일 이름의 <code>XXXXXXXXXX</code> 열 글자가 <b>Key ID</b> 입니다 (⑤ 에서 씁니다).</blockquote>
 <h2 id="supabase-에-넣기">⑤ Supabase 에 넣기</h2>
 <pre><code>
 supabase.com/dashboard → 우리 프로젝트

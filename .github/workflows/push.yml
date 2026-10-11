@@ -1,5 +1,20 @@
 name: 새 공고 알림 보내기
 
+# ★ 2026-10-11 — **Apps Script 대신 Supabase 창구를 봅니다** (세중님 승인).
+#
+# 전에는 scripts/send-push.js 가 「보낼 것 있냐」를 Apps Script(`pushPending`)에
+# 물었습니다. 2026-10-09 에 Apps Script 승인이 풀리면서 그 자리가 403 이 되어
+# **푸시가 하루 세 번 다 헛돌고 있었습니다.**
+#
+# Supabase 에 같은 일을 하는 창구가 **이미** 있습니다 —
+#   보낼알림(열쇠, 하루상한, 몇개)   누구에게 무엇을 보낼지 **DB 가 정합니다**
+#   알림보낸것남기기(열쇠, 줄들)      보낸 결과·죽은 기기 정리
+# tools/알림보내기.mjs 가 2026-10-02 에 이미 그 길로 쓰여 있었고, 크론만
+# 안 걸려 있었습니다. 그것을 겁니다.
+#
+# 안전장치는 **DB 가 겁니다** — 구독 시각 이후만 · 중복 방지 · 하루 상한 ·
+# 조용한 시간(22~7시) · 탈퇴 회원 제외 · 꺼진 기기 제외.
+
 on:
   schedule:
     # 한국시간 08:20 · 13:20 · 19:20 (UTC 기준으로 적습니다)
@@ -7,6 +22,10 @@ on:
     - cron: '20 4 * * *'
     - cron: '20 10 * * *'
   workflow_dispatch:        # 손으로 눌러 시험 발송할 때 씁니다
+
+concurrency:
+  group: push
+  cancel-in-progress: false
 
 jobs:
   push:
@@ -23,9 +42,12 @@ jobs:
 
       - name: 보내기
         env:
-          APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
-          PUSH_KEY: ${{ secrets.PUSH_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          # 보낼알림·알림보낸것남기기 는 service_role 만 부를 수 있습니다
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # 함수 안 열쇠 검사 (두 겹입니다). collect_secret 에 있는 아무 열쇠면 됩니다
+          COLLECT_KEY_AL2: ${{ secrets.COLLECT_KEY_AL2 }}
           VAPID_PUBLIC: ${{ secrets.VAPID_PUBLIC }}
           VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
           VAPID_MAIL: ${{ secrets.VAPID_MAIL }}
-        run: node scripts/send-push.js
+        run: node tools/알림보내기.mjs
