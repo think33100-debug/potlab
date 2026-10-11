@@ -1,0 +1,68 @@
+name: 배포가 정말 떴나 점검
+
+# 2026-10-10~11 에 **운영 배포 다섯 번이 줄줄이 ERROR** 였는데 아무도
+# 몰랐습니다 (89bdad9 · 3394655 · 89d2353 · ae5abef · 887ece4).
+# 사이트는 닷새 전 커밋(157c7fc)으로 계속 돌고 있었습니다.
+# 까닭은 JSX 주석을 태그 **속성 자리**에 넣은 것이고, `npx tsc --noEmit`
+# 한 번이면 잡혔습니다.
+#
+# 그래서 그물 둘을 함께 겁니다.
+#   ① 밀기 전  — tsc 와 next build (사람이 지키는 규칙 · CLAUDE.md 13절)
+#   ② 민 뒤    — **이 일감**. 운영 화면이 정말 이 커밋인지 밖에서 묻습니다
+#
+# Vercel 토큰이 없어도 돕니다 — 화면 스스로 /api/build 에서
+# VERCEL_GIT_COMMIT_SHA 를 말합니다 (web/app/api/build/route.ts).
+#
+# 실패하면 GitHub 이 저장소 주인에게 메일을 보냅니다.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '40 21 * * *'    # 한국시간 아침 6시 40분 (비로그인 점검 20분 뒤)
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 운영 화면이 어느 커밋인지 묻습니다
+        env:
+          주소: https://potjob-web.vercel.app/api/build
+          바라는것: ${{ github.sha }}
+          까닭: ${{ github.event_name }}
+        run: |
+          set -u
+          # 밀고 나면 Vercel 이 짓는 데 시간이 걸립니다. 15초마다 20분까지 기다립니다.
+          # 날마다 도는 쪽은 기다릴 까닭이 없으니 한 번만 봅니다.
+          if [ "$까닭" = "push" ]; then 끝=80; else 끝=1; fi
+          i=0
+          while [ "$i" -lt "$끝" ]; do
+            i=$((i+1))
+            글=$(curl -fsS --max-time 20 "$주소" || echo '{}')
+            지금=$(printf '%s' "$글" | sed -n 's/.*"sha":"\([0-9a-f]*\)".*/\1/p')
+            if [ -n "$지금" ]; then
+              echo "[$i] 운영 화면 = ${지금:0:7}"
+            else
+              echo "[$i] /api/build 가 아직 답하지 않습니다 — $글"
+            fi
+            if [ "$까닭" != "push" ]; then
+              # 날마다 도는 쪽 — 지금 main 끝과 같은지만 봅니다
+              바라는것=$(git rev-parse HEAD)
+            fi
+            if [ "$지금" = "$바라는것" ]; then
+              echo "○ 운영 화면이 ${바라는것:0:7} 입니다"
+              exit 0
+            fi
+            [ "$i" -lt "$끝" ] && sleep 15
+          done
+          echo "✗ 운영 화면이 ${바라는것:0:7} 가 아닙니다 (지금 ${지금:-모름})."
+          echo "   Vercel 배포가 ERROR 이거나 아직 안 끝났습니다."
+          echo "   https://vercel.com/think33100-7375s-projects/potjob-web 에서 보십시오."
+          exit 1
