@@ -245,18 +245,37 @@ async function 새수집기가가진것(cfg) {
   return 집;
 }
 
-/* 사람이 숨김·보류를 정해 둔 줄의 **지금 값** (2026-10-09).
+/* **이쪽(DB)이 정한 숨김·보류**는 시트로 되돌리지 않습니다 (2026-10-09 · 넓힘 10-12).
 
-   셋 중 하나면 「사람이 정한 것」으로 봅니다.
+   처음에는 「사람이 정한 것」만 지켰습니다 —
      admin_locked = true                     관리자가 잠근 줄
      edited_fields 에 hidden 또는 hold        그 칸을 손으로 고친 줄
      같은공고 가 채워짐                        두 벌 묶기로 감춘 줄 —
                                              열 건 중 **다섯 건**이 이미 되살아나
                                              회원에게 같은 공고가 두 번 보였습니다
 
+   ★ 2026-10-12 — **자동으로 감춘 줄도 지켜야 합니다.** 그물에 구멍이 있었습니다.
+   정찰(`alive.mjs`)과 「지난 공고 감추기」(`hide_stale_posts`)가 감춘 줄은
+   `admin_locked` 도 `edited_fields` 도 비어 있습니다. 그래서 다리가 그대로
+   되살렸습니다 — **여섯 건이 지금도 회원에게 보입니다.**
+
+     2026-10-08 08:55:05  다섯 건이 **한 순간에** hidden=false 로 (누가 = 「(안 적힘)」)
+       굿모닝병원  「[재활치료실] 작업치료사 채용공고(계약직) <마감>」  까닭 「제목에 마감」
+       목포중앙    「전남권 공공어린이재활의료센터 물리치료사 모집」      까닭 「제목·본문에 마감」
+       백제병원    「충남교육청 긴급지원팀 … 직원 모집공고」             까닭 「제목·본문에 마감」
+       공주의료원  「작업치료사 … 면접 대상자 공지」                   까닭 「**결과 공고**」
+       서울시정신건강복지센터 「2026년 9차 … 인력 모집」                까닭 「**마감 지남**」
+     10-04·10-05·10-06·10-07 에도 같은 일이 있었는데, 그때는 몇 초 뒤
+     「지난 공고 감추기」가 다시 감춰서 묻혔습니다. 10-08 에는 그 뒤따르기가
+     없어 **그대로 남았습니다.**
+
+   그래서 기준을 바꿉니다 — **지금 감춰져 있거나 보류 중인 줄은 임자가 누구든
+   그 값을 지킵니다.** 시트가 공고를 다시 보이게 하는 일은 없어야 합니다.
+   되살리는 것은 이쪽 몫입니다 (`hide_stale_posts` ③④ · 정찰 · 관리자).
+
    못 읽으면 **빈 것을 돌려줍니다.** 그러면 시트 값이 그대로 들어가는데,
    그건 지금까지의 동작이라 더 나빠지지는 않습니다. 대신 눈에 띄게 적습니다. */
-async function 사람이정한것(cfg) {
+async function 숨김보류지킬것(cfg) {
   const 집 = new Map();
   try {
     const r = await get전부(cfg,
@@ -265,10 +284,10 @@ async function 사람이정한것(cfg) {
          {hidden} 으로 보내면 400 「malformed array literal」 이 납니다
          (2026-10-09 서버에서 두 번 두드려 확인했습니다 — 400 → 200 · 13줄) */
       + '&or=(admin_locked.eq.true,edited_fields.cs.{"hidden"},edited_fields.cs.{"hold"},'
-      + '같은공고.not.is.null)');
+      + '같은공고.not.is.null,hidden.eq.true,hold.eq.true)');
     r.forEach((x) => 집.set(String(x.id), { hidden: !!x.hidden, hold: !!x.hold }));
   } catch (e) {
-    console.error('  ⚠ 사람이 정한 줄을 못 읽었습니다 — 시트 값이 그대로 들어갑니다 · '
+    console.error('  ⚠ 지킬 줄을 못 읽었습니다 — 시트 값이 그대로 들어갑니다 · '
                   + e.message.slice(0, 80));
   }
   return 집;
@@ -503,7 +522,7 @@ async function hideTrashed(cfg, dry, 남의것) {
        칸을 **빼지 않고 지금 값으로 덮어쓰는** 까닭 — PostgREST 의 upsert 는
        보내는 줄들의 열쇠를 합쳐 칸 목록을 만듭니다. 한 줄에서만 칸을 빼면 그
        줄은 기본값(false)이 됩니다. 빼는 쪽이 더 위험합니다. */
-    const 잠긴것 = await 사람이정한것(cfg);
+    const 잠긴것 = await 숨김보류지킬것(cfg);
     let 지킨수 = 0;
     posts.forEach((p) => {
       const 지금 = 잠긴것.get(String(p.id));
@@ -512,7 +531,7 @@ async function hideTrashed(cfg, dry, 남의것) {
       p.hidden = 지금.hidden;
       p.hold = 지금.hold;
     });
-    if (지킨수) console.log('  사람이 정한 숨김·보류를 지킨 줄 ' + 지킨수 + '건');
+    if (지킨수) console.log('  이쪽이 정한 숨김·보류를 지킨 줄 ' + 지킨수 + '건');
 
     console.log('시트 ' + total + '줄 · ' + from + '번째부터 ' + S.rows.length + '줄 읽음 · '
                 + posts.length + '건 (' + mode + ')'
