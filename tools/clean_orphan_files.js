@@ -31,6 +31,18 @@ const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'applic
 /* 폴더 이름이 회원 id 인 통들. post-images 는 <회원id>/<글id>/<번호>.webp 입니다 */
 const BUCKETS = ['avatars', 'post-images'];
 
+/* ★ 2026-10-11 — proofs(재직 증빙) 는 **주인이 아니라 「쓰는 줄이 있나」**로
+   봅니다. 검토가 끝나면 재직인증.경로 가 비워지므로, 아무 줄도 안 가리키는
+   파일은 지울 것입니다.
+
+   왜 그물이 필요한가 — 이제는 /admin/verify 가 **정하는 그 순간** 지웁니다.
+   그래도 그때 실패하거나(창을 닫는 등) 검토 전에 탈퇴하면 파일이 남습니다.
+   개인정보라 두 겹으로 둡니다.
+
+   **갓 올린 파일은 안 건드립니다** — 올리고 줄을 쓰는 사이에 지우면 안 됩니다 */
+const 증빙통 = 'proofs';
+const 봐줄분 = 15;          /* 올린 지 15분 안 된 파일은 그대로 둡니다 */
+
 async function rest(path) {
   const r = await fetch(`${URL}/rest/v1/${path}`, { headers: H });
   if (!r.ok) throw new Error(`${path} → HTTP ${r.status} ${await r.text()}`);
@@ -65,6 +77,36 @@ async function main() {
     });
     console.log(r.ok ? `   지웠습니다` : `   실패 HTTP ${r.status} ${await r.text()}`);
   }
+  await 증빙치우기();
+}
+
+async function 증빙치우기() {
+  /* 아직 쓰이는 경로 */
+  const r = await fetch(`${URL}/rest/v1/${encodeURIComponent('재직인증')}?select=${encodeURIComponent('경로')}&${encodeURIComponent('경로')}=not.is.null`, { headers: H });
+  if (!r.ok) { console.error('재직인증을 못 읽었습니다 — HTTP ' + r.status); return; }
+  const 쓰는것 = new Set((await r.json()).map((x) => x['경로']).filter(Boolean));
+
+  const 지울것 = [];
+  const 폴더들 = await list(증빙통, '');
+  for (const f of 폴더들) {
+    if (f.id !== null) continue;                     /* 파일이 아니라 폴더만 */
+    for (const it of await list(증빙통, f.name)) {
+      if (it.id === null) continue;
+      const 길 = `${f.name}/${it.name}`;
+      if (쓰는것.has(길)) continue;
+      const 만든때 = Date.parse(it.created_at ?? it.updated_at ?? 0);
+      if (Number.isFinite(만든때) && Date.now() - 만든때 < 봐줄분 * 60_000) continue;
+      지울것.push(길);
+    }
+  }
+  if (!지울것.length) { console.log(`${증빙통}: 치울 것 없음`); return; }
+  console.log(`${증빙통}: 아무 줄도 안 가리키는 파일 ${지울것.length}개`);
+  지울것.slice(0, 10).forEach((x) => console.log('   ' + x));
+  if (!DO_IT) { console.log('   (--yes 를 주면 지웁니다)'); return; }
+  const d = await fetch(`${URL}/storage/v1/object/${증빙통}`, {
+    method: 'DELETE', headers: H, body: JSON.stringify({ prefixes: 지울것 }),
+  });
+  console.log(d.ok ? `   지웠습니다 ${지울것.length}개` : `   못 지웠습니다 — HTTP ${d.status}`);
 }
 
 async function list(bucket, prefix) {

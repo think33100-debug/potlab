@@ -56,9 +56,33 @@ export default function AdminVerify() {
       ? prompt('반려 까닭', '서류를 알아볼 수 없어요. 다시 올려 주세요.') : null;
     if (새상태 === '반려' && 까닭 === null) return;
     if (!confirm(`${r.닉네임} 님을 「${새상태}」 로 합니다. 파일은 바로 지워집니다.`)) return;
+
+    /* ★ 2026-10-11 — **정말로 바로 지웁니다.**
+       전에는 창구가 칸만 비우고 파일은 저장소에 남았습니다.
+       clean_orphan_files.js 가 치운다고 적혀 있었지만 그 스크립트는
+       크론에 없었고 proofs 통을 보지도 않았습니다 — **아무도 안 지웠습니다.**
+       SQL 로는 못 지웁니다 (storage.protect_delete). 그래서 검토하는
+       사람이 Storage API 로 지웁니다 (정책 「인증자료는 검토한 사람이
+       바로 지웁니다」).
+       **칸을 비우기 전에** 지웁니다 — 비운 뒤에는 경로를 못 읽습니다. */
+    let 지움 = '파일 없음';
+    try {
+      const { data: 자료 } = await browserSupabase()
+        .rpc('admin_재직인증열기', { p_id: r.id });
+      const 경로 = (자료 as { 경로?: string } | null)?.경로;
+      if (경로) {
+        const { error: 탈1 } = await browserSupabase().storage.from('proofs').remove([경로]);
+        지움 = 탈1 ? '못 지웠습니다 — ' + 탈1.message : '지웠습니다';
+      }
+    } catch (e) {
+      지움 = '못 지웠습니다 — ' + (e as Error).message;
+    }
+
     const { error } = await browserSupabase()
       .rpc('admin_재직인증정하기', { p_id: r.id, p_상태: 새상태, p_까닭: 까닭 });
     if (error) { set탈(error.message); return; }
+    /* 못 지웠으면 **조용히 넘어가지 않습니다** — 개인정보라 사람이 알아야 합니다 */
+    if (지움.startsWith('못')) set탈('증빙 ' + 지움 + ' (관리자에게 알려 주세요)');
     set다시((n) => n + 1);
   };
 
