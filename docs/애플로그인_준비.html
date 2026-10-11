@@ -202,6 +202,12 @@ Vercel → potjob-web → Settings → Environment Variables → Production
 <p>「애플 열쇠가 아직 없습니다」만 돌려주고 탈퇴는 그대로 갑니다.</p>
 <p>애플 로그인을 쓴 적 없는 분에게는 애초에 할 일이 없습니다.</p>
 <hr>
+<h2 id="막혔을-때-실제로-겪은-것">막혔을 때 — 실제로 겪은 것</h2>
+<table><thead><tr><th>화면에 뜬 글</th><th>까닭</th><th>고친 법</th></tr></thead><tbody>
+<tr><td><code>invalid_client</code></td><td><b>② Services ID 를 저장하지 않았습니다.</b> Sign in with Apple 에 체크하고 Configure 로 도메인·Return URL 을 넣은 뒤, <b>맨 아래 Save 를 눌러야</b> 저장됩니다. 안 누르면 Client ID 가 애플 쪽에 없는 상태라 애플이 거절합니다</td><td>② 를 다시 열어 Save (2026-10-11 확인)</td></tr>
+<tr><td><code>저장하지 못했어요 — permission denied for sequence 회원번호_seq</code></td><td>애플과 무관합니다. 가입 화면이 <code>profiles</code> 에 직접 넣는데 회원에게 시퀀스 권한이 없었습니다 (2026-09-30 부터)</td><td>창구 <code>가입하기()</code> 로 옮겼습니다 (2026-10-11)</td></tr>
+</tbody></table>
+<hr>
 <h2 id="코드-쪽에서-이미-해-둔-것">코드 쪽에서 이미 해 둔 것</h2>
 <table><thead><tr><th>무엇</th><th>어디</th><th>상태</th></tr></thead><tbody>
 <tr><td>Apple 단추를 실제로 잇기</td><td><code>web/app/login/page.tsx</code></td><td>○ <code>oauth: 'apple'</code></td></tr>

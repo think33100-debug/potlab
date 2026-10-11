@@ -1,0 +1,38 @@
+name: 새 회원이 가입되나 점검
+
+# 2026-09-30 에 회원번호 시퀀스를 더하면서 회원 쪽 권한을 안 줬습니다.
+# 그날부터 **새 가입이 한 건도 안 됐는데 11일 동안 아무도 몰랐습니다** —
+# 그 사이 아무도 가입을 안 했기 때문입니다.
+# 「permission denied for sequence 회원번호_seq」
+#
+# 그래서 **가상의 새 회원**을 하나 만들어 닉네임까지 저장해 보고 되감습니다.
+# 아무도 안 가입해도 그물이 날마다 대신 가입해 봅니다.
+#
+# 실패하면 GitHub 이 저장소 주인에게 메일을 보냅니다.
+
+on:
+  schedule:
+    - cron: '0 20 * * *'    # 한국시간 새벽 5시
+    - cron: '0 8 * * *'     # 한국시간 저녁 5시 (하루 두 번 — 가입은 첫 화면입니다)
+  workflow_dispatch:
+  push:
+    paths: ['tools/가입그물.mjs', '.github/workflows/signup-check.yml']
+
+concurrency:
+  group: signup-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 가상의 새 회원으로 가입해 보기
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node tools/가입그물.mjs
