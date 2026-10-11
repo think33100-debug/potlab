@@ -493,6 +493,18 @@ ssh 로 보내는 명령줄 안에 `collect-nara.mjs` 같은 글자가 들어 �
   `gas/appsscript.json` 의 `webapp.access` 가 `ANYONE_ANONYMOUS` 인지
 - 웹앱만 죽은 게 아닙니다. **시간 기반 트리거도 같이 죽습니다** —
   「다리가 멈췄다」로 끝내지 말고 수집기까지 보십시오
+- **승인이 풀리면 다리(옛 시트 → Supabase)가 멈춥니다.** 그리고 **조용히**
+  멈춥니다 — `job_sync_log` 에 줄이 **안 쌓이는 것**이 유일한 신호입니다.
+  실패 줄이 쌓이는 게 아니라 **아무것도 안 쌓입니다**
+  (2026-10-11 에 찾았습니다 — 마지막 성공이 **10-09 17:22**, 그 뒤 이틀치가
+  통째로 비어 있었습니다. 「실패가 없으니 괜찮겠지」가 틀렸습니다)
+- **푸시 알림도 같이 멈춥니다** — `scripts/send-push.js` 가 `pushPending` 을
+  Apps Script 에 묻습니다. OCR(`OCR_GAS_URL`)은 **다른 Apps Script** 라
+  멀쩡합니다. 셋을 따로 봐야 합니다
+- **다리가 남아 있는 동안은 날마다 점검에 `clasp logs` 를 넣습니다** —
+  `cd gas && npx clasp logs` 에 「Authorization is required」 가 보이면 그날로
+  끝난 것입니다. 「며칠째인가」를 뒤늦게 세지 않게
+  (다리 은퇴 계획은 `docs/다리_은퇴_1011.md`)
 
 ---
 

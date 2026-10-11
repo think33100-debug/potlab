@@ -30,8 +30,11 @@ const METHODS: Method[] = [
   { key: 'kakao', label: '카카오로 시작하기', cls: 'bg-[#FEE500] text-[#191600]', oauth: 'kakao' },
   { key: 'naver', label: '네이버로 시작하기', cls: 'bg-[#03C75A] text-white', oauth: 'custom:naver' },
   {
-    key: 'apple', label: 'Apple로 시작하기', cls: 'bg-black text-white',
-    why: 'Apple은 아직 준비 중이에요',
+    /* ★ 2026-10-11 — 이었습니다. Supabase 대시보드 → Authentication →
+       Providers → Apple 을 켜면 바로 돕니다 (docs/애플로그인_준비.md).
+       아직 안 켜져 있으면 「Unsupported provider」 가 그대로 뜹니다 —
+       무엇을 고쳐야 할지 보이는 쪽이 낫습니다 */
+    key: 'apple', label: 'Apple로 시작하기', cls: 'bg-black text-white', oauth: 'apple',
   },
 ];
 

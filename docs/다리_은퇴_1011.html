@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>다리_은퇴_1011 · POTJOB 인계</title>
+<style>
+  :root { --줄: #e5e7eb; --흐림: #6b7280; --파랑: #2563eb; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fafafa; color: #111;
+         font: 16px/1.75 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  .판 { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+  nav.위 { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--줄);
+           padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+  nav.위 a { font-size: 13px; color: var(--파랑); text-decoration: none; }
+  nav.위 b { font-size: 13px; color: var(--흐림); }
+  h1 { font-size: 26px; margin: 24px 0 8px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--줄); }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 3px 0; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 0.92em; }
+  pre { background: #11161b; color: #e6edf3; border-radius: 8px; padding: 14px 16px;
+        overflow-x: auto; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote { margin: 10px 0; padding: 8px 14px; border-left: 4px solid var(--파랑);
+               background: #eff6ff; border-radius: 0 8px 8px 0; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 14px;
+          background: #fff; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--줄); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f9fafb; white-space: nowrap; }
+  hr { border: 0; border-top: 1px solid var(--줄); margin: 28px 0; }
+  a { color: var(--파랑); }
+  .만든말 { color: var(--흐림); font-size: 12px; margin-top: 40px; }
+</style>
+<nav class="위"><b>POTJOB 인계</b><a href="인계/00_읽는법.html">읽는 법</a><a href="screens/index.html">갤러리</a></nav>
+<div class="판">
+<h1 id="옛-앱구글-시트-다리-은퇴해도-되나">옛 앱(구글 시트) 다리 — 은퇴해도 되나</h1>
+<p>기준 시각 <b>2026-10-11 17:40 (한국시간)</b></p>
+<p>세중님 결정 (2026-10-11) — **옛 앱으로 들어오는 새 공고는 없어도 됩니다.</p>
+<p><code>healthCheck</code> 는 지금 누르지 않습니다.**</p>
+<p>그래서 물어야 할 것은 하나입니다 — <b>다리로만 받는 출처가 있나?</b></p>
+<hr>
+<h2 id="1-출처별-새-수집기가-직접-받음-다리로만-받음">1. 출처별 — 「새 수집기가 직접 받음 / 다리로만 받음」</h2>
+<table><thead><tr><th>출처</th><th>무엇</th><th>전체</th><th>보이는 것</th><th>어떻게 들어오나</th><th>다리가 필요한가</th></tr></thead><tbody>
+<tr><td><code>WN2</code></td><td>워크넷</td><td>269</td><td>241</td><td><b>서버 크론</b> <code>collect-worknet.mjs</code> (하루 16회)</td><td><b>아니오</b></td></tr>
+<tr><td><code>AL2</code></td><td>알리오</td><td>479</td><td>5</td><td><b>GitHub Actions</b> <code>collect-alio.yml</code> (30분마다)</td><td><b>아니오</b></td></tr>
+<tr><td><code>HS3</code></td><td>병원 누리집</td><td>298</td><td>34</td><td><b>서버 크론</b> <code>collect-hosp.mjs</code> (하루 16회)</td><td><b>아니오</b></td></tr>
+<tr><td><code>GJ2</code></td><td>나라일터</td><td>275</td><td>6</td><td><b>서버 크론</b> <code>collect-nara.mjs</code> (하루 3회)</td><td><b>아니오</b></td></tr>
+<tr><td><code>CE2</code></td><td>클린아이</td><td>56</td><td>2</td><td><b>GitHub Actions</b> <code>collect-cleaneye.yml</code></td><td><b>아니오</b></td></tr>
+<tr><td><code>ND2</code></td><td>치매센터</td><td>7</td><td>3</td><td><b>서버 크론</b> <code>collect-nid.mjs</code> (하루 3회)</td><td><b>아니오</b></td></tr>
+<tr><td><code>JF</code></td><td>잡플렉스</td><td>223</td><td>1</td><td><b>GitHub Actions</b> <code>collect-jobflex.yml</code></td><td><b>아니오</b></td></tr>
+<tr><td><code>BIZ</code></td><td>담당자가 올린 공고</td><td>3</td><td>1</td><td>화면에서 바로</td><td><b>아니오</b></td></tr>
+<tr><td><code>WN</code>·<code>HS</code>·<code>AL</code>·<code>GJ</code>·<code>ND</code>·<code>CE</code></td><td>위 여섯의 <b>옛 이름</b></td><td>697</td><td>74</td><td>옛 시트 → 다리</td><td>새 것이 이미 받고 있습니다</td></tr>
+</tbody></table>
+<p><b>다리로만 받는 출처는 없습니다.</b> 옛 이름 여섯은 전부 짝이 있고</p>
+<p>(<code>수집기짝</code> 표 · 2026-10-11 에 <code>WN2 → WN</code> 을 마지막으로 채웠습니다),</p>
+<p>새 수집기가 같은 공고를 직접 받습니다.</p>
+<blockquote>옛 이름으로 남은 697건은 <b>이미 받아 둔 공고</b>입니다. 다리가 멈춰도</blockquote>
+<blockquote>사라지지 않습니다. 새로 안 들어올 뿐이고, 그건 새 수집기가 합니다.</blockquote>
+<hr>
+<h2 id="2-그런데-다리-말고도-옛-앱에-매달린-것이-둘-있습니다">2. 그런데 — <b>다리 말고도 옛 앱에 매달린 것이 둘 있습니다</b></h2>
+<p>출처는 괜찮은데, 같은 Apps Script 에 <b>다른 것</b>이 걸려 있습니다.</p>
+<table><thead><tr><th>무엇</th><th>어디</th><th>지금</th><th>옛 앱이 필요한가</th></tr></thead><tbody>
+<tr><td>다리 (시트 → <code>job_posts</code>)</td><td><code>tools/sync_jobs.js</code></td><td><b>멈춤</b> (10-09 17:22 뒤로 기록 없음)</td><td>은퇴 가능</td></tr>
+<tr><td><b>푸시 알림</b></td><td><code>scripts/send-push.js</code> → <code>pushPending</code></td><td><b>멈춤</b></td><td><b>지금은 필요합니다</b> ←</td></tr>
+<tr><td>OCR (그림 공고문 읽기)</td><td><code>OCR_GAS_URL</code></td><td><b>멀쩡합니다 (HTTP 200)</b></td><td><b>다른 Apps Script 입니다</b></td></tr>
+</tbody></table>
+<p><b>OCR 은 별개 프로젝트라 멀쩡합니다.</b> 두드려 확인했습니다 —</p>
+<p><code>{"ok":true,"what":"potjob OCR","열쇠있음":true}</code>. 승인이 풀린 것은</p>
+<p><code>APPS_SCRIPT_URL</code> 쪽 하나뿐입니다.</p>
+<h3 id="푸시-알림이-문제입니다">푸시 알림이 문제입니다</h3>
+<p><code>scripts/send-push.js</code> 가 <b>「보낼 것 있냐」를 Apps Script 에 묻습니다</b></p>
+<p>(<code>pushPending</code>). 지금 그 자리가 403 이라 <b>푸시가 하루 세 번 다 헛돕니다.</b></p>
+<p>그런데 <b>Supabase 에 이미 같은 창구가 있습니다</b> —</p>
+<p><code>보낼알림(p_secret, p_하루상한, p_몇개)</code> · <code>알림보낸것남기기()</code> ·</p>
+<p><code>알림기기등록()</code>. 즉 <b>옮기기만 하면 됩니다.</b></p>
+<p><b>10/13 에 알림함을 여는 것이 첫 순서</b>인데(<code>docs/오픈점검_1101.md</code> 2절),</p>
+<p>그 전에 이것을 옮겨야 알림이 실제로 갑니다.</p>
+<hr>
+<h2 id="3-다리-은퇴-계획-승인대기">3. 다리 은퇴 계획 (승인대기 ⑳)</h2>
+<h3 id="멈추는-법">멈추는 법</h3>
+<pre><code>
+1. 푸시를 먼저 옮깁니다 — scripts/send-push.js 가 Apps Script 대신
+   Supabase 창구(보낼알림)를 보게. **이게 끝나기 전에는 멈추지 않습니다**
+2. .github/workflows/sync.yml 의 schedule 두 줄을 주석으로 막습니다
+   (파일은 지우지 않습니다 — 되돌릴 때 주석만 풀면 됩니다)
+3. 하루 지켜봅니다 — 보이는 공고 수가 줄지 않나
+     select count(*) from job_posts where not hidden and not hold;
+     (2026-10-11 17:40 기준 **363건**)
+4. 일주일 지켜본 뒤 push.yml 도 같이 봅니다
+</code></pre>
+<h3 id="남길-기록">남길 기록</h3>
+<ul>
+<li><code>job_sync_log</code> — <b>지우지 않습니다.</b> 다리가 무엇을 했는지 남은 유일한 기록</li>
+<li><code>collector_state</code> — 다리가 쓰던 표. 그대로 둡니다</li>
+<li>옛 이름 출처(<code>WN</code>·<code>HS</code>…)로 담긴 공고 697건 — 그대로 둡니다.</li>
+</ul>
+<p>  <b>옛 시트가 우리가 가진 유일한 이력입니다</b></p>
+<ul>
+<li>구글 시트 자체 — 손대지 않습니다</li>
+</ul>
+<h3 id="되돌리는-법">되돌리는 법</h3>
+<pre><code>
+1. Apps Script 편집기에서 healthCheck 한 번 실행 (승인 다시 받기)
+2. sync.yml 의 schedule 주석을 풉니다
+3. 손으로 한 바퀴 → job_sync_log 에 ok=true 가 남는지
+</code></pre>
+<p><b>옛 앱을 영영 끄는 것이 아닙니다.</b> 시트와 Apps Script 는 그대로 두고</p>
+<p><b>다리만 멈춥니다.</b> 언제든 되살릴 수 있습니다.</p>
+<hr>
+<h2 id="4-그래서-healthcheck-가-필요한가">4. 그래서 — <code>healthCheck</code> 가 필요한가</h2>
+<table><thead><tr><th>무엇</th><th>필요한가</th></tr></thead><tbody>
+<tr><td>공고 출처</td><td><b>아니오.</b> 다리로만 받는 출처가 없습니다</td></tr>
+<tr><td>푸시 알림</td><td><b>지금은 그렇습니다.</b> Supabase 창구로 옮기면 아니오</td></tr>
+<tr><td>OCR</td><td>아니오 (다른 Apps Script · 멀쩡합니다)</td></tr>
+</tbody></table>
+<p><b>권하는 길</b> — <code>healthCheck</code> 를 누르지 않고, **푸시를 Supabase 로 옮긴 뒤</p>
+<p>다리를 은퇴**시킵니다. 10/13 알림함 열기 전에 끝내면 차례가 맞습니다.</p>
+<p class="만든말">이 쪽은 <code>다리_은퇴_1011.md</code> 에서 만든 것입니다.
+글을 고치면 <code>node tools/문서html.mjs</code> 를 다시 돌리십시오.</p>
+</div>
+</html>
