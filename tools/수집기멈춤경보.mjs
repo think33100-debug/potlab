@@ -72,7 +72,17 @@ async function rpc(fn, body) {
 }
 
 const d = await rpc('hold_digest', { p_secret: cfg.COLLECT_KEY_HS3, p_source: 'HS3', p_hours: 24 });
-const 늦음 = (d['늦은 수집기'] || []).filter((x) => Number(x['몇시간째']) >= 기준시간);
+let 늦음 = (d['늦은 수집기'] || []).filter((x) => Number(x['몇시간째']) >= 기준시간);
+
+/* `--시험` — **보내는 길이 정말 되는지** 보려고 가짜 한 줄을 넣습니다.
+   기준을 낮추는 것만으로는 시험이 안 됩니다 — 수집기가 다 멀쩡하면
+   「늦은 수집기 0곳」 이라 메일이 안 나가기 때문입니다 (2026-10-12 에 그랬습니다).
+   제목에 「시험」 을 박아 두어 받는 쪽이 헷갈리지 않게 합니다.
+   쓰고 나면 `--잊기` 로 쉬는 기록을 비우십시오. */
+if (argv.includes('--시험')) {
+  늦음 = [{ 경로: '시험(가짜)', 왜: '보내는 길이 되는지 보는 시험입니다 — 멈춘 수집기가 아닙니다',
+    몇시간째: 99 }];
+}
 
 const 기록 = (() => {
   try { return JSON.parse(fs.readFileSync(기록파일, 'utf8')); } catch { return {}; }
@@ -90,7 +100,8 @@ console.log('늦은 수집기 ' + (d['늦은 수집기'] || []).length + '곳 ·
 
 if (!보낼것.length) { console.log('보낼 것이 없습니다.'); process.exit(0); }
 
-const 제목 = '[피오티잡] ⚠ 수집기가 멈췄습니다 — '
+const 제목 = (argv.includes('--시험') ? '[피오티잡 · 시험] ' : '[피오티잡] ')
+  + '⚠ 수집기가 멈췄습니다 — '
   + 보낼것.map((x) => x.경로 + ' ' + x.몇시간째 + '시간째').join(' · ');
 const 본문 = [
   '██ 수집기가 ' + 기준시간 + '시간 넘게 안 돌았습니다 ██',
