@@ -78,10 +78,21 @@ export default function AdminJobEdit() {
     if (fresh) { setJob(fresh); }
   };
 
-  const flag = async (v: Record<string, boolean>, said: string) => {
+  /* ★ 2026-10-12 — **창구(admin_decide)로 돌렸습니다.**
+     전에는 job_posts 를 직접 update 했습니다. 그래서 둘이 어긋났습니다 —
+       ① hidden_why 를 안 지웁니다 → 「hidden=false 인데 까닭이 남은 줄」이 생깁니다
+       ② admin_locked 를 안 켭니다 → 관리자가 「다시 보이기」를 눌러도
+          그날 23:00 밤정리·정찰이 **조용히 다시 감춥니다**
+     admin_decide 가 hold·hidden·hidden_why·hidden_on·admin_locked 를 한 번에
+     맞춥니다. 「살리기」에는 지금 직군을 그대로 넘깁니다 — 안 넘기면
+     job_group 이 null 이 됩니다. */
+  const decide = async (what: '살리기' | '숨기기' | '보류함으로', said: string) => {
     setBusy(true);
-    const { error } = await browserSupabase().from('job_posts')
-      .update({ ...v, updated_at: new Date().toISOString() }).eq('id', job.id);
+    const { error } = await browserSupabase().rpc('admin_decide', {
+      p_id: job.id, p_what: what,
+      p_job_group: what === '살리기' ? (job.job_group ?? null) : null,
+      p_note: null,
+    });
     setBusy(false);
     if (error) { toast(`바꾸지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
     toast(said);
@@ -119,12 +130,12 @@ export default function AdminJobEdit() {
       {/* 상태 단추 */}
       <div className="mt-6 flex flex-wrap gap-2">
         <button type="button" disabled={busy}
-          onClick={() => flag({ hold: !job.hold }, job.hold ? '보류를 풀었어요' : '보류함으로 보냈어요')}
+          onClick={() => (job.hold ? decide('살리기', '보류를 풀었어요 — 결정이 잠겼습니다') : decide('보류함으로', '보류함으로 보냈어요'))}
           className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium disabled:opacity-40 dark:border-gray-700">
           {job.hold ? '보류 풀기' : '보류로 보내기'}
         </button>
         <button type="button" disabled={busy}
-          onClick={() => flag({ hidden: !job.hidden }, job.hidden ? '다시 보이게 했어요' : '숨겼어요')}
+          onClick={() => (job.hidden ? decide('살리기', '다시 보이게 했어요 — 결정이 잠겼습니다') : decide('숨기기', '숨겼어요'))}
           className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium disabled:opacity-40 dark:border-gray-700">
           {job.hidden ? '다시 보이기' : '숨기기'}
         </button>

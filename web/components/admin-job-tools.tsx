@@ -18,6 +18,9 @@ export function AdminJobTools({ id }: { id: string }) {
   const router = useRouter();
 
   const [meta, setMeta] = useState<JobMeta | null>(null);
+  /* 「살리기」 는 직군을 같이 넘겨야 합니다 — 안 넘기면 admin_decide 가
+     job_group 을 null 로 만듭니다. job_meta 뷰에는 그 칸이 없어 따로 읽습니다 */
+  const [직군, set직군] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [올림폼, set올림폼] = useState(false);
   const [왜, set왜] = useState('');
@@ -31,16 +34,45 @@ export function AdminJobTools({ id }: { id: string }) {
     let alive = true;
     browserSupabase().from('job_meta').select('*').eq('id', id).maybeSingle()
       .then(({ data }) => { if (alive) setMeta(data as JobMeta | null); });
+    browserSupabase().from('job_posts').select('job_group').eq('id', id).maybeSingle()
+      .then(({ data }) => {
+        if (alive) set직군((data as { job_group: string | null } | null)?.job_group ?? null);
+      });
     return () => { alive = false; };
   }, [id, isAdmin]);
 
   if (!isAdmin) return null;
 
-  const patch = async (v: Record<string, boolean>, said: string) => {
+  /* ★ 2026-10-12 — **창구(admin_decide)로 돌렸습니다.**
+     전에는 job_posts 를 직접 update 했습니다. 그래서 둘이 어긋났습니다 —
+       ① hidden_why 를 안 지웁니다 → 「hidden=false 인데 까닭이 남은 줄」이 생깁니다.
+          10-12 에 그런 줄 여섯 개를 손으로 되돌렸습니다
+       ② admin_locked 를 안 켭니다 → 관리자가 「다시 보이기」를 눌러도
+          그날 23:00 밤정리·정찰이 **조용히 다시 감춥니다**
+     admin_decide 는 hold·hidden·hidden_why·hidden_on·admin_locked 를 한 번에
+     맞추고 rejudge_hidden 에서도 빼 줍니다. /admin/jobs 목록 화면은 전부터
+     이것을 쓰고 있었습니다 — 이 화면만 직접 고치고 있었습니다.
+
+     ⚠ 「살리기」 는 직군을 같이 넘겨야 합니다. 안 넘기면 job_group 이 null 이
+       됩니다 (admin_decide 안의 `case when '살리기' then p_job_group ...`). */
+  const decide = async (what: '살리기' | '숨기기' | '보류함으로', said: string) => {
+    let 보낼직군: string | null = 직군;
+    if (what === '살리기' && !보낼직군) {
+      const 답 = prompt([
+        '회원 화면에 올립니다. 직군을 고르세요 —',
+        '  1  물리치료사', '  2  작업치료사', '  3  공통(둘 다)', '',
+        '번호를 넣어 주세요',
+      ].join('\n'), '3');
+      if (!답) return;
+      보낼직군 = 답.trim() === '1' ? '물리치료사' : 답.trim() === '2' ? '작업치료사' : '공통';
+    }
     setBusy(true);
-    const { error } = await browserSupabase().from('job_posts').update(v).eq('id', id);
+    const { error } = await browserSupabase().rpc('admin_decide', {
+      p_id: id, p_what: what, p_job_group: 보낼직군, p_note: null,
+    });
     setBusy(false);
     if (error) { toast(`바꾸지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
+    if (what === '살리기' && 보낼직군) set직군(보낼직군);
     toast(said);
     router.refresh();
   };
@@ -107,10 +139,20 @@ export function AdminJobTools({ id }: { id: string }) {
       )}
 
       <div className="mt-5 flex flex-wrap gap-2">
-        <Btn onClick={() => patch({ hidden: !meta?.hidden }, meta?.hidden ? '다시 보이게 했어요' : '숨겼어요')} busy={busy}>
+        <Btn
+          onClick={() => (meta?.hidden
+            ? decide('살리기', '다시 보이게 했어요 — 결정이 잠겼습니다')
+            : decide('숨기기', '숨겼어요'))}
+          busy={busy}
+        >
           {meta?.hidden ? '다시 보이기' : '숨기기'}
         </Btn>
-        <Btn onClick={() => patch({ hold: !meta?.hold }, meta?.hold ? '보류를 풀었어요' : '보류함으로 보냈어요')} busy={busy}>
+        <Btn
+          onClick={() => (meta?.hold
+            ? decide('살리기', '보류를 풀었어요 — 결정이 잠겼습니다')
+            : decide('보류함으로', '보류함으로 보냈어요'))}
+          busy={busy}
+        >
           {meta?.hold ? '보류 풀기' : '보류로 보내기'}
         </Btn>
         <Btn onClick={() => router.push(`/admin/jobs/${id}`)} busy={busy}>수정</Btn>
