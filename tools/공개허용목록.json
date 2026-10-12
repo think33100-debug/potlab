@@ -76,10 +76,6 @@
         "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
       },
       {
-        "이름": "alive_targets(p_secret text, p_n integer)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
         "이름": "bump_nickname_change()",
         "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
       },
@@ -843,10 +839,6 @@
       },
       {
         "이름": "alio_web_peek(p_secret text, p_source text, p_keys jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alive_targets(p_secret text, p_n integer)",
         "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
       },
       {
