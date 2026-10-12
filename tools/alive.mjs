@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 붙여받기 } from './certs/index.mjs';
-import { 목록상태, 목록상태셈 } from './hosp/hs_목록상태.mjs';
+import { 목록상태, 목록상태셈, 본문상태 } from './hosp/hs_목록상태.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -138,6 +138,18 @@ async function 하나(x) {
   } catch (e) {
     /* 목록을 못 받아도 상세 판정은 그대로 씁니다 — 판단을 미루지 않습니다 */
     console.error('    (목록 줄을 못 봤습니다 · ' + String(e && e.message || e).slice(0, 60) + ')');
+  }
+
+  /* ── ③-2 본문의 **상태 칸** (2026-10-12) ──────────────────
+     ③은 「접수기간 자리의 마감」만 봅니다. 그런데 상태를 **딴 자리**에 적는
+     곳이 있습니다 — 동래봉생병원이 그렇습니다.
+       「접수기간 ~ 채용시 … 채용형태 정규직 **진행상황 마감** 1.모집인원 : 1명」
+     목록 줄 쪽(⑥)은 같은 제목이 두 줄이라 「모름」으로 비켰고, 그래서
+     **마감인데 회원에게 보이는 공고 1건**이 남아 있었습니다.
+     규칙은 `hosp/hs_목록상태.mjs` 의 `본문상태()` 한 곳입니다 (지침 6절). */
+  const B = 본문상태(글);
+  if (B.결과 === 'closed') {
+    return { 결과: 'closed', 까닭: '본문 상태가 마감', 왜: B.왜 + ' — ' + String(B.줄글 || '').slice(0, 60) };
   }
 
   /* ── ④ 본문 「접수기간」 앞뒤만 잘라 마감일 읽기 (2026-10-07) ─

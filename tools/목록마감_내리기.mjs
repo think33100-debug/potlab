@@ -28,7 +28,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 목록상태, 목록상태셈 } from './hosp/hs_목록상태.mjs';
+import { 목록상태, 목록상태셈, 본문상태 } from './hosp/hs_목록상태.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 인수 = process.argv.slice(2);
@@ -87,7 +87,7 @@ async function rpc(fn, body) {
 }
 
 /* ── 전 숫자 ── */
-const 전체 = await 전부('job_posts_pub?select=id,org_name,title,원문제목,apply_to&order=id.asc');
+const 전체 = await 전부('job_posts_pub?select=id,org_name,title,원문제목,apply_to,접수문장&order=id.asc');
 const 볼것 = 전체.filter((v) => String(v.id).startsWith(앞글자) && v.apply_to === null);
 console.log('회원 화면 ' + 전체.length + '건 · 그중 ' + 앞글자 + ' 이고 마감일 없는 것 ' + 볼것.length + '건');
 console.log(진짜 ? '**정말로 내립니다**' : '마른 실행입니다 — 내리지 않습니다');
@@ -95,8 +95,17 @@ console.log('');
 
 const 내릴것 = [];
 for (const v of 볼것) {
+  /* ① 본문의 상태 칸 — **사이트를 두드리지 않습니다.** 이미 담아 둔 접수문장만 봅니다.
+     목록 줄보다 먼저 봅니다 — 같은 제목이 두 줄이면 목록 쪽은 「모름」으로
+     비키는데, 본문에는 답이 적혀 있는 때가 있습니다 (동래봉생병원) */
+  const B = 본문상태(v.접수문장);
+  if (B.결과 === 'closed') {
+    내릴것.push({ ...v, ...B, 까닭: '본문 상태가 마감' });
+    continue;
+  }
+  /* ② 목록 줄의 상태 칸 — 기관마다 한 번만 받습니다 */
   const r = await 목록상태(v.org_name, v.원문제목 || v.title);
-  if (r.결과 === 'closed') 내릴것.push({ ...v, ...r });
+  if (r.결과 === 'closed') 내릴것.push({ ...v, ...r, 까닭: '목록 줄에 마감' });
   await new Promise((y) => setTimeout(y, 250));
 }
 
@@ -124,7 +133,7 @@ if (!내릴것.length) { console.log('내릴 것이 없습니다'); process.exit
 /* 창구는 정찰이 쓰는 그것입니다 — 표에 직접 쓰지 않습니다 */
 const 답 = await rpc('alive_mark', {
   p_secret: cfg.ALIVE_KEY,
-  p_rows: 내릴것.map((x) => ({ id: x.id, 결과: 'closed', 까닭: '목록 줄에 마감' })),
+  p_rows: 내릴것.map((x) => ({ id: x.id, 결과: 'closed', 까닭: x.까닭 || '목록 줄에 마감' })),
 });
 console.log('기록 — ' + Object.entries(답 || {}).map(([k, v]) => k + ' ' + v).join(' · '));
 
