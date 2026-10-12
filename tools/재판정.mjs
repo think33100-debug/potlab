@@ -42,7 +42,10 @@ const cfg = env();
 if (!cfg.COLLECT_KEY_HS3) { console.error('COLLECT_KEY_HS3 가 없습니다'); process.exit(1); }
 
 async function rpc(fn, body) {
-  const k = cfg.SUPABASE_ANON_KEY;
+  /* ★ 2026-10-12 — **서버 열쇠로** 바꿨습니다. 이 도구는 GitHub 도 크론도 아니고
+     서버에서 손으로 돌립니다 (COLLECT_KEY_HS3 가 서버에만 있습니다).
+     그래서 창구의 anon 을 걷었습니다 — 권한은 p_secret 이 봅니다 */
+  const k = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;
   const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',
     headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },

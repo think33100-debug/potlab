@@ -11,8 +11,13 @@ name: 원문 살아있나 확인 (주 1회)
 # 두 번 연속으로 하는 까닭 — 사이트 점검 중에 한 번 404 가 나는 일이 흔합니다.
 # 한 번으로 감추면 멀쩡한 공고가 사라집니다.
 on:
-  schedule:
-    - cron: '40 20 * * 0'    # 한국시간 월요일 05:40
+  # ★ 2026-10-12 — 껐습니다. 서버 크론이 **날마다** 02:15 에 돕니다
+  #   (crontab: 15 2 * * * node tools/alive.mjs). 주 1회 GitHub 쪽은 겹치기였고,
+  #   이 워크플로만 anon 열쇠로 돌아서 alive_targets·alive_mark 의 anon 을 못 걷고
+  #   있었습니다. 되살리려면 이 세 줄을 풀고 그 둘에 anon 을 다시 주십시오.
+  #   손으로 돌리는 것(workflow_dispatch)은 그대로 됩니다.
+  # schedule:
+  #   - cron: '40 20 * * 0'    # 한국시간 월요일 05:40
   workflow_dispatch:
     inputs:
       dry:
