@@ -26,6 +26,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { 열린것견주기 } from './보안_열린것.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'HS3';
@@ -109,8 +110,30 @@ function 오래쥔잠금(분기준 = 30) {
 }
 
 /** 사람이 읽을 글로 */
-function 글로(d, 관리자주소, 잠금) {
+function 글로(d, 관리자주소, 잠금, 보안) {
   const 줄 = [];
+
+  /* ★ 2026-10-12 — 허용 목록 밖에 열린 창구 (세중님 지시).
+     점검 자체는 GitHub 워크플로 anon-check.yml 이 날마다 돌며 **빌드를 떨굽니다.**
+     여기는 그 위에 얹는 눈입니다 — 워크플로가 멈춰도 메일로는 보입니다.
+     셈은 tools/보안_열린것.mjs 한 곳에서 합니다 (지침 6절). */
+  if (보안 && 보안.밖합) {
+    줄.push('██ 허용 목록 밖에 열린 창구가 있습니다 ██');
+    for (const 칸 of ['비로그인', '로그인']) {
+      const s = 보안[칸];
+      if (!s || !s.밖.length) continue;
+      줄.push('   ' + 칸 + ' — ' + s.밖.length + '건');
+      s.밖.slice(0, 8).forEach((n) => 줄.push('      ' + n));
+      if (s.밖.length > 8) 줄.push('      … 그밖 ' + (s.밖.length - 8) + '건');
+    }
+    줄.push('   ※ 일부러 연 것이면 tools/공개허용목록.json 에 **왜** 와 함께 적으십시오.');
+    줄.push('     인수가 바뀌면 새 함수가 되어 권한이 PUBLIC 으로 돌아갑니다 (지침 6-2)');
+    줄.push('');
+  }
+  if (보안 && (보안.못봄 || []).length) {
+    줄.push('· 보안 점검을 못 한 칸 — ' + 보안.못봄.join(' / '));
+    줄.push('');
+  }
   const 보류 = d['새 보류'] || [];
   const 샘 = d['회원 화면'] || {};
   const 늦음 = d['늦은 수집기'] || [];
@@ -214,14 +237,20 @@ const d = await rpc(cfg, 'hold_digest', {
 const 잠금분 = Number(argv.includes('--잠금분') ? argv[argv.indexOf('--잠금분') + 1] : 30) || 30;
 const 잠금 = 오래쥔잠금(잠금분);
 
-if (!d['보낼것있나'] && !잠금.length) {
+/* 허용 목록 밖에 열린 창구 — 못 봐도 요약은 보냅니다 (빈 값으로 둡니다) */
+let 보안 = null;
+try { 보안 = await 열린것견주기(cfg); }
+catch (e) { console.error('보안 점검을 못 했습니다 — ' + String(e.message || e).slice(0, 120)); }
+
+if (!d['보낼것있나'] && !잠금.length && !(보안 && 보안.밖합)) {
   console.log('보낼 것이 없습니다 — 새 보류 0건 · 회원 화면 멀쩡 · 수집기 다 제때 · PDF 0자 0건 · 오래 쥔 잠금 0');
   process.exit(0);
 }
 
 const 관리자 = cfg.ADMIN_URL || 'https://potjob-web.vercel.app/admin/jobs';
-const 본문 = 글로(d, 관리자, 잠금);
+const 본문 = 글로(d, 관리자, 잠금, 보안);
 const 제목 = '[피오티잡] 확인할 공고 ' + d['새 보류 건수'] + '건'
+  + ((보안 && 보안.밖합) ? ' · ⚠ 허용 목록 밖 ' + 보안.밖합 + '건' : '')
   + (잠금.length ? ' · ⚠ 수집기 잠금 ' + 잠금.map((x) => x.수집기 + ' ' + x.분 + '분').join('·') : '')
   + (d['PDF 0자'] ? ' · ⚠ PDF 0자 ' + d['PDF 0자'] + '건' : '')
   + (((d['하루 한도'] || {})['넘은것'] || 0) ? ' · ⚠ 한도 임박' : '')
