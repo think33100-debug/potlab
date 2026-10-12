@@ -128,7 +128,13 @@ async function 하나(x) {
        채우는 것보다 그 말이 셉니다. */
   try {
     const L = await 목록상태(x.org_name, x.title);
-    if (L.결과 === 'closed') return { 결과: 'closed', 왜: L.왜 + ' — ' + String(L.줄글 || '').slice(0, 60) };
+    if (L.결과 === 'closed') {
+      /* 까닭 글귀를 **같이 보냅니다** — alive_mark 가 그대로 적습니다 (2026-10-12).
+         안 보내면 「제목·본문에 마감」 으로 적혀, 관리자가 상세를 열어
+         「마감이라는 말이 어디 있지」 하고 찾게 됩니다 */
+      return { 결과: 'closed', 까닭: '목록 줄에 마감',
+        왜: L.왜 + ' — ' + String(L.줄글 || '').slice(0, 60) };
+    }
   } catch (e) {
     /* 목록을 못 받아도 상세 판정은 그대로 씁니다 — 판단을 미루지 않습니다 */
     console.error('    (목록 줄을 못 봤습니다 · ' + String(e && e.message || e).slice(0, 60) + ')');
@@ -232,7 +238,9 @@ for (const x of 볼것) {
   const r = await 하나(x);
   /* 접수기간은 **자른 글 그대로** 보냅니다. 날짜 읽기는 DB 의
      deadline_from_title() 한 벌이 합니다 (작업지침 6절) */
-  결과.push({ id: x.id, 결과: r.결과, ...(r.접수기간 ? { 접수기간: r.접수기간 } : {}) });
+  결과.push({ id: x.id, 결과: r.결과,
+    ...(r.접수기간 ? { 접수기간: r.접수기간 } : {}),
+    ...(r.까닭 ? { 까닭: r.까닭 } : {}) });
   const 표 = r.결과 === 'alive' ? '○' : r.결과 === 'gone' ? '✗' : r.결과 === 'closed' ? '■' : '?';
   console.log(표 + ' ' + String(x.org_name).slice(0, 16).padEnd(18)
     + String(x.title).slice(0, 40).padEnd(42)

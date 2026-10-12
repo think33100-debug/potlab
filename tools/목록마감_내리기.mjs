@@ -22,10 +22,8 @@
  *   쓰기   DB 의 `alive_mark()` 창구              ← 정찰이 쓰는 그 창구
  * 표에 직접 쓰지 않고, 새 SQL 도 만들지 않습니다 (지침 6절).
  *
- * ⚠ 한 가지 어긋남 — `alive_mark` 는 `closed` 를 받으면 까닭을
- *   **「제목·본문에 마감」** 으로 적습니다. 이번 것은 「목록 줄」 이라 말이
- *   정확하지 않습니다. 까닭 글귀를 고치는 것은 DB 함수 손질이라 세중님
- *   승인을 받고 따로 합니다. 감추는 동작 자체는 맞습니다.
+ * 까닭 글귀는 **같이 보냅니다** — 「목록 줄에 마감」. `alive_mark` 가 그대로
+ * 적습니다 (2026-10-12 마이그레이션 `alive_mark_까닭과뚜껑보호`).
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -126,7 +124,7 @@ if (!내릴것.length) { console.log('내릴 것이 없습니다'); process.exit
 /* 창구는 정찰이 쓰는 그것입니다 — 표에 직접 쓰지 않습니다 */
 const 답 = await rpc('alive_mark', {
   p_secret: cfg.ALIVE_KEY,
-  p_rows: 내릴것.map((x) => ({ id: x.id, 결과: 'closed' })),
+  p_rows: 내릴것.map((x) => ({ id: x.id, 결과: 'closed', 까닭: '목록 줄에 마감' })),
 });
 console.log('기록 — ' + Object.entries(답 || {}).map(([k, v]) => k + ' ' + v).join(' · '));
 
