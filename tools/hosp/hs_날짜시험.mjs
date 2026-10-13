@@ -30,6 +30,7 @@ const argv = process.argv.slice(2);
 const 문제만 = argv.includes('--문제만');
 const 틀린것 = argv.includes("--틀린것");
 const 앵커 = argv.includes("--앵커");
+const 규칙만 = argv.includes("--규칙");
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
   + '(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
 
@@ -95,6 +96,39 @@ async function 본문받기(url) {
   if (g.왜 || g.code !== 200) return { 왜: g.왜 || ('HTTP ' + g.code) };
   return { 글: hsText(g.html), html: g.html };
 }
+
+/* ── ⓞ 규칙 자기점검 — 사이트를 안 두드립니다 ────────────────
+ *
+ * 2026-10-13 세중님 지시로 둘을 더했습니다. 「오늘 + 2년보다 뒤」 날짜를
+ * 안 믿는 뚜껑(hs_dates.js 의 두해뒤·너무먼날)이 살아 있는지 봅니다 —
+ * 길병원이 「채용시까지」를 2099.12.31 로 적습니다. 사이트가 바뀌어도
+ * 이 둘은 늘 같은 답이어야 하므로 글을 손으로 적어 넣습니다.
+ *
+ *   node tools/hosp/hs_날짜시험.mjs --규칙     이것만 돌리고 끝냅니다
+ */
+const 규칙문제 = [
+  { 이름: '2099.12.31 → 채용시까지 (마감일로 안 믿습니다)',
+    글: '접수기간 2026.02.06(금) 08:00 ~ 2099.12.31(목) 00:00 D-26742',
+    답: { from: '2026.02.06', to: '', to원문: '2099.12.31' } },
+  { 이름: '2026-12-31 17:00 → 그대로 (두 해 안이라 믿습니다)',
+    글: '접수기간 : 2026. 12. 1.(화) ~ 2026. 12. 31.(목) 17:00 까지',
+    답: { from: '2026.12.01', to: '2026.12.31', to원문: undefined } },
+];
+console.log('━━ ⓞ 규칙 자기점검 (사이트 안 두드림)');
+let 규칙틀림 = 0;
+for (const q of 규칙문제) {
+  const d = hsDetailDates(q.글) || {};
+  const 틀린칸 = ['from', 'to', 'to원문'].filter((k) => (d[k] || '') !== (q.답[k] || ''));
+  console.log('  ' + (틀린칸.length ? '★ 틀림' : '○ 맞음') + ' — ' + q.이름);
+  console.log('     읽은값 ' + JSON.stringify({ from: d.from, to: d.to, to원문: d.to원문 }));
+  if (틀린칸.length) {
+    규칙틀림++;
+    console.log('     정답   ' + JSON.stringify(q.답) + '  (다른 칸: ' + 틀린칸.join(', ') + ')');
+  }
+}
+console.log('');
+if (규칙문제.length && 규칙틀림) { console.error('✗ 규칙 자기점검 ' + 규칙틀림 + '건 틀렸습니다'); process.exitCode = 1; }
+if (규칙만) process.exit(규칙틀림 ? 1 : 0);
 
 console.log('HS 접수기간 읽기 시험 — 붙이기 전 (2026-10-07)');
 console.log('받는 길: 수집기와 같은 글받기() · 규칙: hs_dates.js 의 hsDetailDates()\n');

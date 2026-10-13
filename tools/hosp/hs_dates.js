@@ -22,6 +22,25 @@ function hsDetailDates(text) {
   text = String(text || '');
   const pad = function (n) { return ('0' + n).slice(-2); };
   const full = /(20\d{2})\s*[.년\-/]\s*(\d{1,2})\s*[.월\-/]\s*(\d{1,2})\s*일?/g;
+  /* ★ 2026-10-13 — **오늘 + 2년보다 뒤면 그 날짜를 안 믿습니다** (세중님 승인).
+     병원이 「채용시까지」 를 먼 날짜로 적습니다 —
+       길병원 「접수기간 2026.02.06(금) 08:00 ~ 2099.12.31(목) 00:00 D-26742」
+     우리 코드가 지어낸 값이 아니라 **사이트에 그렇게 적혀 있습니다.** 그래서
+     막는 자리가 「넣기」 가 아니라 **「읽을 때 안 믿기」** 입니다.
+     2년으로 잡은 까닭 — 「2026-12-31」 처럼 그해 말을 적는 공고가 146건 있습니다.
+     그것까지 버리면 멀쩡한 마감일을 잃습니다. 2년을 넘는 것은 사람이 적은
+     날짜가 아닙니다 (2026-10-13 에 본 7건이 전부 2050·2099·2400 이었습니다).
+     버린 날짜는 `to원문` 에 남깁니다 — 수집기가 deadline_src 에 적습니다. */
+  const 두해뒤 = (function () {
+    const d = new Date(Date.now() + 730 * 86400e3);
+    return d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate());
+  }());
+  /* 'YYYY.MM.DD' 는 자리를 채운 글자라 그대로 견주면 됩니다 */
+  const 너무먼날 = function (v) { return !!v && String(v) > 두해뒤; };
+  const 뚜껑 = function (res) {
+    if (res && 너무먼날(res.to)) { res.to원문 = res.to; res.to = ''; }
+    return res;
+  };
   const anchors = /(원서\s*)?접수\s*(기간|기한|일정|마감|일시|일자|기일)|모집\s*기간|채용\s*기간|지원\s*기간|응시원서\s*접수|마감\s*일시|마감일|공고\s*기간/g;
   let a, best = null;
   while ((a = anchors.exec(text))) {
@@ -71,10 +90,11 @@ function hsDetailDates(text) {
     }
     /* 「공고기간」 은 게시 기간이라 접수 마감과 다를 때가 많습니다 (경북대 공고기간 ~9.25 · 접수 ~9.16). 접수·모집 쪽을 우선합니다 */
     res.rank = /공고\s*기간/.test(a[0]) ? 1 : 0;
+    뚜껑(res);
     if (res.to && res.rank === 0) return res;
     if (!best || (res.to && !best.to) || (res.rank < best.rank && res.to)) best = res;
   }
-  return best || { from: '', to: '' };
+  return 뚜껑(best) || { from: '', to: '' };
 }
 
 /* 접수 안내 문장만 떼어 옵니다 — **판정하지 않습니다** (2026-10-07).
