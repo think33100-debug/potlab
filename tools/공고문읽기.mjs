@@ -71,8 +71,24 @@ export async function 첨부읽기(buf, 이름 = '공고문.hwp', 옵션 = {}) {
     return { md: '', 글: '', 왜: '읽을 수 있는 형식이 아닙니다 (' + 꼴 + ' · ' + buf.length + '바이트)', 초: 0, 꼴 };
   }
 
-  /* 저장 이름은 **ASCII 만** — 한글 경로는 탈이 납니다 (지침 6-2b) */
-  const 확장자 = 꼴 === 'pdf' ? '.pdf' : (/\.hwpx$/i.test(이름) || 꼴 === 'zip계열' ? '.hwpx' : '.hwp');
+  /* 저장 이름은 **ASCII 만** — 한글 경로는 탈이 납니다 (지침 6-2b).
+   *
+   * ★ 2026-10-12 — ZIP 속을 **kordoc 의 detectZipFormat 으로 가립니다.**
+   * 문서(usage.md 417·421줄) —
+   *   「detectFormat(buffer) … ZIP 은 hwpx, OLE2 는 hwp 반환」
+   *   「ZIP 종류를 가르려면 detectFormat() 이 hwpx 일 때 await detectZipFormat(buffer)」
+   * 전에는 ZIP 이면 무조건 `.hwpx` 로 저장했습니다. 공고 첨부에 xlsx·docx 가
+   * 섞여 오면 이름과 속이 어긋나, kordoc 이 자동 감지로 살려 주긴 해도
+   * 엉뚱한 자리에서 탈이 날 수 있습니다. */
+  let 확장자 = 꼴 === 'pdf' ? '.pdf' : (/\.hwpx$/i.test(이름) || 꼴 === 'zip계열' ? '.hwpx' : '.hwp');
+  let zip속 = null;
+  if (꼴 === 'zip계열') {
+    try {
+      const { detectZipFormat } = await import('kordoc');
+      zip속 = await detectZipFormat(buf.buffer ? buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length) : buf);
+      if (zip속 && zip속 !== 'unknown') 확장자 = '.' + zip속;
+    } catch { /* 못 불러도 .hwpx 로 갑니다 — kordoc 이 자동 감지합니다 */ }
+  }
   const 바닥 = fs.mkdtempSync(path.join(os.tmpdir(), 'kd-'));
   const 넣을곳 = path.join(바닥, 'in' + 확장자);
   fs.writeFileSync(넣을곳, buf);
@@ -82,10 +98,15 @@ export async function 첨부읽기(buf, 이름 = '공고문.hwp', 옵션 = {}) {
     const r = await 읽기(넣을곳, {});
     초 += r.초; rssMB = r.rssMB; 결과 = r.result;
 
-    /* ★ 스캔 쪽이 있으면 **그때만** OCR 을 켜 한 번 더 */
+    /* ★ 스캔 쪽이 있으면 **그때만** OCR 을 켜 한 번 더.
+       ★ 2026-10-12 — 세중님이 주신 문서(usage.md 239줄)가 **`qualitySummary.needsOcr`
+         를 먼저 보라**고 합니다 —
+           if (r.success && r.qualitySummary?.needsOcr) await parse(buffer, { ocr: true })
+         전에는 쪽별 `pageQuality[]` 만 봤습니다. 둘 다 봅니다 */
     const 필요쪽 = (결과?.pageQuality || []).filter((q) => q.needsOcr);
+    const 묶음신호 = 결과?.qualitySummary?.needsOcr === true;
     const 그림뿐 = 결과?.code === 'IMAGE_BASED_PDF' || 결과?.isImageBased;
-    if (옵션.OCR안함 !== true && (필요쪽.length || 그림뿐)) {
+    if (옵션.OCR안함 !== true && (필요쪽.length || 묶음신호 || 그림뿐)) {
       const r2 = await 읽기(넣을곳, { ocr: 'auto' });
       초 += r2.초; rssMB = Math.max(rssMB ?? 0, r2.rssMB);
       if (r2.result?.success && (r2.result.markdown || '').length > (결과?.markdown || '').length) {
@@ -119,6 +140,7 @@ export async function 첨부읽기(buf, 이름 = '공고문.hwp', 옵션 = {}) {
     맨손글자: 맨손글.length, OCR썼나,
     쪽수: 결과?.pageCount ?? null,
     OCR필요쪽: (결과?.pageQuality || []).filter((q) => q.needsOcr).length,
+    OCR묶음신호: 결과?.qualitySummary?.needsOcr ?? null,
   };
 }
 

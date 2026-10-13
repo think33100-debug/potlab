@@ -362,8 +362,21 @@ if (상세몫 > 0) {
       const g = await 글받기(x.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, enc: x.곳.enc });
       상세연것++;
       if (g.왜 || g.code !== 200) { x.상세왜 = g.왜 || ('HTTP ' + g.code); return; }
+      /* ★ 2026-10-12 — **`<style>` 과 주석도 걷습니다.**
+         전에는 `<script>` 만 걷어서 CSS 가 본문으로 들어왔습니다 —
+         본문 28건·기관 11곳이 평균 **56,128자**(중괄호 505개)로 부풀었고,
+         대청병원 한 건은 **464,949자**였습니다. 저장·읽기 부담만 늘고
+         뽑기에도 방해가 됩니다.
+         같은 일을 하는 `hosp/hs_dates.js` 의 `hsText()` 는 이미 걷습니다 —
+         **기준이 두 자리였습니다** (지침 6절). 여기를 그쪽에 맞춥니다.
+         (다만 이것이 마감일 빈칸의 원인은 아닙니다 — 걷어도 접수말이
+          드러나는 공고는 0건이었습니다. 부피만 줄이는 고침입니다) */
       const 글 = g.html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
-        .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+        .replace(/<!--[\s\S]*?-->/g, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+        .replace(/\s+/g, ' ').trim();
       x.본문 = 글;
 
       /* ★ 접수기간 채우기 (2026-10-07). 규칙은 tools/hosp/hs_dates.js 한 벌입니다.

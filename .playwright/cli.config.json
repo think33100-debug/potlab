@@ -1,0 +1,15 @@
+{
+  "browser": {
+    "browserName": "chromium",
+    "isolated": true,
+    "launchOptions": {
+      "channel": "chrome",
+      "headless": true
+    }
+  },
+  "timeouts": {
+    "navigation": 30000,
+    "action": 10000
+  },
+  "outputDir": "docs/시험_playwright_1012"
+}
