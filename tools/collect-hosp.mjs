@@ -138,6 +138,38 @@ function 사이트들() {
   return JSON.parse(fs.readFileSync(구운것, 'utf8')).사이트;
 }
 
+/* ── cfgs 에만 있는 새 곳을 더합니다 (2026-10-13) ─────────────
+ *
+ * 설정의 뿌리는 `tools/hosp/cfgs/*.json` 입니다 —
+ *   cfgs → build_sites.js → hosp_sites.js → replace_sites.js → gas/wage.js
+ * 그런데 `gas/wage.js` 는 **옛 앱(심사 중)** 파일이라 못 건드립니다
+ * (세중님 지시). 그래서 새 병원 cfg 를 넣어도 wage.js 까지 못 가고,
+ * 위 `사이트들()` 은 wage.js 만 보니 **새 곳이 영영 안 들어옵니다.**
+ *
+ * 그 틈을 여기서 메웁니다 — cfgs 를 훑어 **이름이 아직 없는 곳만** 더합니다.
+ * 이미 있는 곳은 건드리지 않습니다 (wage.js 쪽 규칙이 더 새것일 수 있습니다).
+ * wage.js 가 다시 구워지면 이 더하기는 저절로 0곳이 됩니다.
+ *
+ * 2026-10-13 에 이 길로 들어온 곳 — 강동경희대학교병원 (cfgs/khnmc.json).
+ * 대학병원인데 어느 출처에도 공고가 **한 건도** 없었습니다. 홈페이지
+ * www.khnmc.or.kr 의 「온라인채용」이 인크루트 채용관 khnmc 로 갑니다 —
+ * 경희대학교병원(khmc)과 같은 판이라 설정을 그대로 썼습니다. */
+function cfgs더하기(S) {
+  const 터 = path.join(여기, 'hosp', 'cfgs');
+  if (!fs.existsSync(터)) return S;
+  const 이름 = new Set(S.map((x) => x.name));
+  const 더한것 = [];
+  for (const f of fs.readdirSync(터).filter((x) => x.endsWith('.json')).sort()) {
+    let c;
+    try { c = JSON.parse(fs.readFileSync(path.join(터, f), 'utf8')); } catch { continue; }
+    if (!c || !c.name || 이름.has(c.name)) continue;
+    if (!c.type) c.type = 'html';
+    이름.add(c.name); S.push(c); 더한것.push(c.name);
+  }
+  if (더한것.length) console.log('  cfgs 에서 더함  ' + 더한것.length + '곳 — ' + 더한것.join(' · '));
+  return S;
+}
+
 /* ── 공고ID — gas 와 **같은 규칙**이라야 겹치지 않습니다 ────── */
 function 해시(s) {
   let h = 0;
@@ -223,7 +255,7 @@ const 오늘 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }
 const 원래log = console.log;
 if (한줄) console.log = () => {};
 
-const 전부 = 사이트들();
+const 전부 = cfgs더하기(사이트들());
 const 볼것 = 찾을말.length ? 전부.filter((s) => 찾을말.some((w) => s.name.includes(w))) : 전부;
 
 console.log('병원 홈페이지 수집 (HS3) — ' + 볼것.length + '줄 · ' + 오늘

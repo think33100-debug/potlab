@@ -1,0 +1,13 @@
+{
+  "name": "강동경희대학교병원",
+  "type": "html",
+  "url": "https://recruit.incruit.com/khnmc/job/",
+  "base": "https://recruit.incruit.com",
+  "enc": "EUC-KR",
+  "row": "<li><div class=\"inner-box\">[\\s\\S]*?</li>",
+  "title": "<span class=\"title\">([\\s\\S]*?)</span>",
+  "link": "<a href=\"([^\"]*/khnmc/job/\\d+)\"",
+  "date": "(20\\d{2}\\.\\d{2}\\.\\d{2})",
+  "skip": "공지|합격자|발표|결과",
+  "note": "인크루트 채용관(khnmc). 경희대학교병원(khmc)과 같은 판 — 홈페이지 www.khnmc.or.kr 의 「온라인채용·채용정보」 링크 다섯 개가 모두 recruit.incruit.com/khnmc/ 로 갑니다 (2026-10-13 브라우저로 확인)."
+}
