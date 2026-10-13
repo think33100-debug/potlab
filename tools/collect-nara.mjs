@@ -572,6 +572,7 @@ const 줄만들기 = (v) => {
     sido: String((v.상세 || {}).areaname || '').split(/[ ,]/)[0] || '',
     apply_from: 날짜(x.begindate),
     apply_to: 날짜(x.enddate),
+    deadline_src: x.enddate ? 'API:나라일터' : null,
     posted_at: 날짜(x.regdate),
     url: 원문주소(x.idx),
     job_group: v.직군 || '',

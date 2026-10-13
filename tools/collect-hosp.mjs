@@ -437,6 +437,9 @@ const 담을것 = 회원2.concat(보류2).concat(쌓을것).map((x) => ({
   hire_type: '', employ_type: '', work_place: '', sido: null, sgg: null, edu: '',
   headcount: null,
   apply_from: 날(x.from), apply_to: 날(x.to),
+  /* 마감일을 어디서 얻었나 (2026-10-13). 전에는 창구가 이 칸을 안 받아
+     evidence.날짜출처 에만 적었습니다. 이제 둘 다 보냅니다 — 짧은 정해진 말로 */
+  deadline_src: x.날짜출처 || (x.to ? '목록' : null),
   /* 원래 올린 날 — job_posts 의 트리거가 이걸로 first_seen 을 잡습니다 */
   posted_at: 날(x.from || x.posted),
   url: x.url,

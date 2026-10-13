@@ -345,6 +345,9 @@ for (const v of 볼것) {
        치매센터 공고가 전부 「수시채용」 으로 떴습니다 */
     apply_from: v.from ? String(v.from).replace(/\./g, '-') : null,
     apply_to: v.to ? String(v.to).replace(/\./g, '-') : null,
+    /* 마감일을 어디서 얻었나 (2026-10-13). 전에는 창구가 이 칸을 안 받아
+       evidence.날짜출처 에만 적었습니다. 이제 둘 다 보냅니다 */
+    deadline_src: v.날짜출처 || (v.to ? '본문' : null),
     url: 상세URL + '?no=' + v.x.no,
     job_group: v.직군 || '',
     org_kind: '공공',

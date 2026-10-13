@@ -601,6 +601,7 @@ for (const v of 볼것) {
        **우리 직군 몫**입니다 (통합 공고가 아닙니다 · 작업지침 15절) */
     ...(/^[0-9]+$/.test(String(상.인원 || '')) ? { headcount: Number(상.인원) } : {}),
     apply_to: v.마감,
+    deadline_src: v.마감 ? 'API:워크넷' : null,
     posted_at: 날짜풀기(r.regDt),
     url: String(r.wantedInfoUrl || ''),           /* 약속 — 원문·지원은 고용24 원본으로 */
     job_group: v.직군,

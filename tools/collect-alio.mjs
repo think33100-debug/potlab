@@ -727,6 +727,7 @@ const 담을것 = 회원.concat(보류).map((x) => {
     edu: de(r.acbgCondNmLst),
     headcount: x.인원 || null,     /* 우리 직군 몫만. 전체 인원은 detail.공고전체인원 */
     apply_from: 날(r.pbancBgngYmd), apply_to: 날(r.pbancEndYmd),
+    deadline_src: r.pbancEndYmd ? 'API:알리오' : null,
     posted_at: 날(r.pbancBgngYmd),
     /* 알리오는 srcUrl 에 **공고별 주소가 아니라 기관 대문**을 주는 때가 많습니다
        (2026-10-01). 근로복지공단 12건이 전부 comwel.or.kr/recruit/hp/main.do

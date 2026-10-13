@@ -468,6 +468,7 @@ const 담을것 = 회원.concat(보류).concat(쌓을것).map((x) => {
     ...(칸?.접수시각 ? { apply_to_time: 칸.접수시각 } : {}),
     ...(뽑은값 ? { 뽑은값, 뽑은법: 'kordoc' } : {}),
     apply_from: 날(o.PUB_DATE), apply_to: 날(o.PUB_END_DATE), posted_at: 날(o.PUB_DATE),
+    deadline_src: o.PUB_END_DATE ? 'API:클린아이' : null,
     url: String(o.URL || ''),
     job_group: x.job || null,
     form: (x.근거 === '제목' && !mixedTitle(x.title)) ? null : '포함',

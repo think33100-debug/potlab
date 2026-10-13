@@ -190,6 +190,7 @@ return ({
   headcount: null,
   apply_from: x.시작 || null,
   apply_to: x.마감 || null,
+  deadline_src: x.마감 ? 'API:고용24' : null,
   /* ★ 원래 올린 날. job_posts 의 트리거가 이것으로 first_seen 을 잡습니다 */
   posted_at: x.시작 || null,
   url: x.주소,
