@@ -95,9 +95,10 @@ console.log('  원래 apply_to ' + 원래마감 + ' · deadline_src ' + (원래�
 console.log('');
 if (!진짜) {
   console.log('마른 실행입니다. --진짜 를 붙이면 아래 셋을 쏘고 **되돌립니다** —');
-  console.log('  ① apply_to ' + 하루뒤 + ' + deadline_src 「시험」  → 차야 합니다');
-  console.log('  ② apply_to ' + 원래마감 + ' + deadline_src null     → 비워져야 합니다');
-  console.log('  ③ apply_to ' + 원래마감 + ' (그대로) + deadline_src 「시험2」 → 안 차야 합니다');
+  console.log('  ① 비어 있음 + 마감일 ' + 하루뒤 + ' + 출처 「시험」    → 차야 합니다');
+  console.log('  ③ 차 있음  + 마감일 ' + 하루뒤 + ' (그대로) + 「시험2」 → 안 바뀌어야 합니다');
+  console.log('  ② 마감일 ' + 원래마감 + ' 로 되돌리고 출처 없음        → 비워져야 합니다');
+  console.log('  ④ 비어 있음 + 마감일 ' + 원래마감 + ' (같음) + 「시험4」  → 차야 합니다 (새 규칙)');
   process.exit(0);
 }
 
@@ -114,9 +115,16 @@ const 지금 = async () => (await 읽기('job_posts?select=apply_to,deadline_src
   + encodeURIComponent(j.id)))[0];
 
 const 결과 = [];
-결과.push(['① 마감일이 바뀌면 출처가 찬다', await 쏘기(틀(하루뒤, '시험')), await 지금()]);
+결과.push(['① 비어 있을 때 마감일이 바뀌며 출처를 보내면 찬다', await 쏘기(틀(하루뒤, '시험')), await 지금()]);
+/* ★ ③ 을 먼저 봅니다 — 지금 출처가 **차 있는** 상태입니다.
+   차 있을 때 마감일이 그대로면 안 바뀌어야 합니다 */
+결과.push(['③ 차 있고 마감일이 그대로면 출처를 보내도 안 바뀐다', await 쏘기(틀(하루뒤, '시험2')), await 지금()]);
 결과.push(['② 마감일을 되돌리고 출처를 안 보내면 비워진다', await 쏘기(틀(원래마감, null)), await 지금()]);
-결과.push(['③ 마감일이 그대로면 출처를 보내도 안 찬다', await 쏘기(틀(원래마감, '시험2')), await 지금()]);
+/* ★ 2026-10-13 세중님이 규칙을 고치셔서 더한 갈래 —
+   비어 있으면 **같은 날짜라도** 출처를 받아 채웁니다 */
+결과.push(['④ 비어 있고 마감일이 같아도 출처를 보내면 찬다', await 쏘기(틀(원래마감, '시험4')), await 지금()]);
+/* 되돌리기 — 출처를 원래대로. 지금 차 있고 마감일이 그대로라 창구로는 못 지웁니다.
+   (그게 ③ 규칙입니다) 그래서 원래 값이 null 이면 **손으로** 비웁니다 */
 
 console.log('── 쏘고 읽은 것 ──');
 for (const [이름, 답, 뒤] of 결과) {
@@ -125,15 +133,28 @@ for (const [이름, 답, 뒤] of 결과) {
   console.log('     지금 — apply_to ' + 뒤.apply_to + ' · deadline_src ' + (뒤.deadline_src ?? 'null'));
 }
 
+/* 원래 출처로 되돌립니다. 지금은 '시험4' 가 차 있고 마감일이 그대로라
+   창구로는 못 지웁니다(③ 규칙) — 그래서 표를 직접 고칩니다.
+   **시험이 남긴 것을 같은 작업 안에서 치웁니다** (지침 8-9) */
+await fetch(cfg.SUPABASE_URL + '/rest/v1/job_posts?id=eq.' + encodeURIComponent(j.id), {
+  method: 'PATCH',
+  headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+  body: JSON.stringify({ deadline_src: 원래출처 }),
+});
+
 const 끝 = await 지금();
 const 봐 = [];
 if (결과[0][2].deadline_src !== '시험') 봐.push('① 출처가 안 찼습니다');
-if (결과[1][2].deadline_src !== null) 봐.push('② 출처가 안 비워졌습니다');
-if (결과[2][2].deadline_src !== null) 봐.push('③ 마감일이 그대로인데 출처가 찼습니다');
+if (결과[1][2].deadline_src !== '시험') 봐.push('③ 차 있는데 출처가 바뀌었습니다 (' + 결과[1][2].deadline_src + ')');
+if (결과[2][2].deadline_src !== null) 봐.push('② 출처가 안 비워졌습니다');
+if (결과[3][2].deadline_src !== '시험4') 봐.push('④ 비어 있고 같은 날짜인데 출처가 안 찼습니다');
 if (끝.apply_to !== 원래마감) 봐.push('★ 마감일이 원래대로 안 돌아왔습니다 (' + 끝.apply_to + ')');
+if ((끝.deadline_src ?? null) !== (원래출처 ?? null)) {
+  봐.push('★ 출처가 원래대로 안 돌아왔습니다 (' + (끝.deadline_src ?? 'null') + ')');
+}
 
 console.log('');
 if (봐.length) { console.error('✗ ' + 봐.join(' · ')); process.exit(1); }
-console.log('○ 셋 다 맞습니다. 마감일은 원래대로(' + 끝.apply_to + ') · 출처는 '
+console.log('○ 넷 다 맞습니다. 마감일은 원래대로(' + 끝.apply_to + ') · 출처는 '
   + (끝.deadline_src ?? 'null') + ' 입니다');
 console.log('   (원래 출처가 ' + (원래출처 ?? 'null') + ' 였으니 그대로입니다)');
