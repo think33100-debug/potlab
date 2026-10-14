@@ -45,7 +45,7 @@ import { matchJob, notOurs, mixedTitle, 구운날 } from './gas-rules.mjs';
 /* 접수기간 규칙 — tools/hosp/hs_dates.js 한 벌. CommonJS 라 require 로 끌어옵니다.
    2026-10-07 에 붙였습니다. 전에는 저 파일이 저장소에 있는데 아무도 안 불렀습니다 */
 const require = createRequire(import.meta.url);
-const { hsDetailDates, hs접수문장, 너무먼날 } = require('./hosp/hs_dates.js');
+const { hsDetailDates, hs접수문장, 너무먼날, 마감시각 } = require('./hosp/hs_dates.js');
 
 /* 읽은 날짜가 쓸만한가 — 짐작으로 담지 않습니다.
  *
@@ -487,12 +487,26 @@ const 날 = (v) => (v ? String(v).replace(/\./g, '-') : null);
  * (2026-10-13 에 이미 담긴 7건을 그렇게 고쳤습니다). */
 const 오늘글 = new Date().toISOString().slice(0, 10);
 const 먼마감 = [];
+/* ★ 2026-10-14 — **마감 시각도 함께 정합니다.**
+ *
+ * 일곱 칸 가운데 마감시각이 1.1% 로 가장 낮았는데, 세어 보니 HS3 공고
+ * **53건의 접수문장에 시각이 적혀** 있으면서 apply_to_time 이 비어
+ * 있었습니다(49건). `collect-hosp` 가 그 칸을 **아예 안 보내고** 있었습니다.
+ * 첨부를 읽기 전에 이미 가진 글에서 얻을 수 있는 값이었습니다.
+ * 규칙은 `hs_dates` 의 `마감시각()` 한 자리입니다 (자기 점검 8개). */
+const 시각찾음 = [];
 const 마감과출처 = (x) => {
   if (너무먼날(x.to)) {
     먼마감.push({ 곳: x.곳.name, 제목: x.title, 원문: x.to });
     return { apply_to: null, deadline_src: '원문 날짜 ' + 날(x.to) + ' → 채용시까지로 봄 (' + 오늘글 + ')' };
   }
-  return { apply_to: 날(x.to), deadline_src: x.날짜출처 || (x.to ? '목록' : null) };
+  const 시 = x.접수문장 ? 마감시각(x.접수문장, x.to) : '';
+  if (시) 시각찾음.push({ 곳: x.곳.name, 제목: x.title, 시: 시, 문장: String(x.접수문장).slice(0, 56) });
+  return {
+    apply_to: 날(x.to),
+    deadline_src: x.날짜출처 || (x.to ? '목록' : null),
+    ...(시 ? { apply_to_time: 시 } : {}),
+  };
 };
 const 담을것 = 회원2.concat(보류2).concat(쌓을것).map((x) => ({
   id: x.id,
@@ -644,6 +658,11 @@ if (dry) {
     }
     console.log('\n씀          ' + 담음 + '건');
     /* 두 해 넘는 마감일을 안 믿고 비운 것 — 몇 건이고 무엇이었나 (2026-10-14) */
+    if (시각찾음.length) {
+      console.log('마감 시각 찾음 ' + 시각찾음.length + '건 (접수문장에서 · 첨부를 안 열고)');
+      시각찾음.slice(0, 5).forEach((x) => console.log('     ' + x.시 + '  '
+        + x.곳.slice(0, 16).padEnd(18) + x.문장));
+    }
     if (먼마감.length) {
       console.log('먼 마감 비움  ' + 먼마감.length + '건 (두 해 넘는 날짜 · deadline_src 에 원문을 남깁니다)');
       먼마감.slice(0, 6).forEach((x) => console.log('     ' + x.원문 + '  '
