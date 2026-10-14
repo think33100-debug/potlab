@@ -1,0 +1,5 @@
+- generic [ref=f10e3]:
+  - generic [ref=f10e4]: 이용에 불편을 드려 죄송합니다. 현재 서비스 접속이 원활하지 않습니다.
+  - generic [ref=f10e6]:
+    - button "이전 페이지로" [ref=f10e7] [cursor=pointer]
+    - button "홈으로" [ref=f10e9] [cursor=pointer]

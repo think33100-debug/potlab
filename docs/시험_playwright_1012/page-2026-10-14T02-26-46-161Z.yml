@@ -1,0 +1,694 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - generic [ref=f1e6]:
+      - heading [level=1] [ref=f1e8]:
+        - link "로고" [ref=f1e9] [cursor=pointer]:
+          - /url: /
+      - list [ref=f1e11]:
+        - listitem [ref=f1e12]:
+          - link "채용정보" [ref=f1e13] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e14]:
+          - link "차병원·차바이오그룹" [ref=f1e15] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e16]:
+          - link "기관/기업·직무소개" [ref=f1e17] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e18]:
+          - link "인사제도" [ref=f1e19] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e20]:
+          - link "CHA人사이드" [ref=f1e21] [cursor=pointer]:
+            - /url: javascript:;
+      - generic [ref=f1e22]:
+        - link "마이페이지" [ref=f1e24] [cursor=pointer]:
+          - /url: javascript:void(0);
+        - link "지원결과확인" [ref=f1e26] [cursor=pointer]:
+          - /url: javascript:void(0);
+        - link "로그인" [ref=f1e28] [cursor=pointer]:
+          - /url: javascript:void(0);
+    - generic [ref=f1e29]:
+      - generic [ref=f1e30]:
+        - generic [ref=f1e31]:
+          - button "Previous" [ref=f1e32] [cursor=pointer]
+          - listbox [ref=f1e34]:
+            - option [ref=f1e35]:
+              - paragraph [ref=f1e37]: Global CHA! BIO CHA!
+            - option [aria-hidden] [ref=f1e38]:
+              - paragraph [ref=f1e40]: 한국를 넘어 세계로 당신의 소중한 꿈을 펼쳐보세요
+            - option [aria-hidden] [ref=f1e41]:
+              - paragraph [ref=f1e43]: 초일류 글로벌 생명공학그룹 실현을 함께 합니다
+          - button "Next" [ref=f1e44] [cursor=pointer]
+        - generic [ref=f1e45]:
+          - generic [ref=f1e46]:
+            - emphasis [ref=f1e47]: "1"
+            - text: /3
+          - list [ref=f1e51]:
+            - listitem [ref=f1e52]:
+              - generic [ref=f1e53]: "1"
+              - paragraph [ref=f1e54]: COUNTRIES
+            - listitem [ref=f1e55]:
+              - generic [ref=f1e56]: "15"
+              - paragraph [ref=f1e57]: MEDICAL CENTERS
+            - listitem [ref=f1e58]:
+              - generic [ref=f1e59]: "306"
+              - paragraph [ref=f1e60]: DOCTORS
+            - listitem [ref=f1e61]:
+              - generic [ref=f1e62]: 2,381
+              - paragraph [ref=f1e63]: MEMBERS
+      - generic [ref=f1e65]:
+        - group "검색" [ref=f1e67]:
+          - combobox [ref=f1e69] [cursor=pointer]:
+            - option "전체" [selected]
+            - option "기업부문"
+            - option "의료부문"
+            - option "연구부문"
+          - combobox [ref=f1e71] [cursor=pointer]:
+            - option "전체" [selected]
+            - option "그룹 경력공채"
+            - option "성광의료재단"
+            - option "대구차병원"
+            - option "분당차병원"
+            - option "차병원 여성의학연구소"
+            - option "재단본부"
+            - option "서울역센터"
+            - option "기업본부"
+            - option "강남차병원"
+            - option "차움"
+            - option "차 여성의학연구소 서울역"
+            - option "차움 건진센터 삼성분원"
+            - option "차바이오텍"
+            - option "차케어스"
+            - option "CMG제약"
+            - option "차메디텍"
+            - option "차헬스케어"
+            - option "서울CRO"
+            - option "차바이오에프앤씨"
+            - option "구미차병원"
+            - option "대구차여성의원"
+            - option "공채(교원)"
+            - option "그룹 공채"
+            - option "차그룹 종합연구원"
+            - option "차바이오랩"
+            - option "공채(간호사)"
+            - option "그룹 임원/경력공채"
+            - option "재단"
+            - option "의료재단"
+            - option "HR본부"
+            - option "종합연구원"
+            - option "기업부문"
+            - option "성광의료재단 차병원"
+            - option "공채(전공의)"
+            - option "일산차병원"
+            - option "미래의학연구원"
+            - option "스포렉스 건진센터"
+            - option "연구원의료원"
+            - option "차여성의학연구소 잠실센터"
+            - option "마티카바이오랩스"
+            - option "차여성의학연구소 마곡센터"
+            - option "마티카 바이오테크놀로지(미국)"
+          - combobox [ref=f1e73] [cursor=pointer]:
+            - option "구분" [selected]
+            - option "신입"
+            - option "경력"
+            - option "진료직"
+            - option "경력무관"
+          - combobox [ref=f1e75] [cursor=pointer]:
+            - option "전체" [selected]
+            - option "제목"
+            - option "내용"
+          - generic [ref=f1e76]:
+            - textbox "검색어를 입력하세요." [ref=f1e77]
+            - link "Search" [ref=f1e78] [cursor=pointer]:
+              - /url: javascript:;
+        - heading [level=2] [ref=f1e79]:
+          - text: 글로벌 바이오·헬스케어 산업을 이끌어 나갈
+          - strong [ref=f1e80]: 차병원·차바이오그룹 인재
+          - text: 를 찾습니다.
+        - generic [ref=f1e81]:
+          - link "더보기" [ref=f1e83] [cursor=pointer]:
+            - /url: javascript:;
+          - list [ref=f1e84]:
+            - listitem [ref=f1e85]:
+              - link "# 전체" [ref=f1e86] [cursor=pointer]:
+                - /url: javascript:;
+            - listitem [ref=f1e87]:
+              - link "# 의료부문" [ref=f1e88] [cursor=pointer]:
+                - /url: javascript:;
+            - listitem [ref=f1e89]:
+              - link "# 기업부문" [ref=f1e90] [cursor=pointer]:
+                - /url: javascript:;
+            - listitem [ref=f1e91]:
+              - link "# 연구부문" [ref=f1e92] [cursor=pointer]:
+                - /url: javascript:;
+          - generic [ref=f1e93]:
+            - 'link "그룹 공채 경력 10월 21일 마감 차병원·차바이오그룹 임원·교수·연구원 초빙 #경력 #차병원·차바이오그룹 임원·교수·연구원 초빙" [ref=f1e95] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e96]:
+                - strong [ref=f1e97]: 그룹 공채
+                - generic [ref=f1e98]: 경력
+              - generic [ref=f1e99]:
+                - emphasis [ref=f1e100]: 10월 21일 마감
+                - paragraph [ref=f1e101]: 차병원·차바이오그룹 임원·교수·연구원 초빙
+                - generic [ref=f1e102]: "#경력 #차병원·차바이오그룹 임원·교수·연구원 초빙"
+            - 'link "그룹 공채 신입 10월 15일 마감 2026 차병원·차바이오그룹 신입/Junior 공채 #신입 #2026 차병원·차바이오그룹 신입/Junior 공채" [ref=f1e104] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e105]:
+                - strong [ref=f1e106]: 그룹 공채
+                - generic [ref=f1e107]: 신입
+              - generic [ref=f1e108]:
+                - emphasis [ref=f1e109]: 10월 15일 마감
+                - paragraph [ref=f1e110]: 2026 차병원·차바이오그룹 신입/Junior 공채
+                - generic [ref=f1e111]: "#신입 #2026 차병원·차바이오그룹 신입/Junior 공채"
+            - 'link "공채(교원) 경력 무관 10월 31일 마감 [차움] 피부과 전문의 초빙 #공통 #[차움] 피부과 전문의 초빙" [ref=f1e113] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e114]:
+                - strong [ref=f1e115]: 공채(교원)
+                - generic [ref=f1e116]: 경력 무관
+              - generic [ref=f1e117]:
+                - emphasis [ref=f1e118]: 10월 31일 마감
+                - paragraph [ref=f1e119]: "[차움] 피부과 전문의 초빙"
+                - generic [ref=f1e120]: "#공통 #[차움] 피부과 전문의 초빙"
+            - 'link "분당차병원 경력 무관 10월 18일 마감 약제부 매주 토요일 아르바이트 약사 모집 #공통 #약제부 매주 토요일 아르바이트 약사 모집" [ref=f1e122] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e123]:
+                - strong [ref=f1e124]: 분당차병원
+                - generic [ref=f1e125]: 경력 무관
+              - generic [ref=f1e126]:
+                - emphasis [ref=f1e127]: 10월 18일 마감
+                - paragraph [ref=f1e128]: 약제부 매주 토요일 아르바이트 약사 모집
+                - generic [ref=f1e129]: "#공통 #약제부 매주 토요일 아르바이트 약사 모집"
+            - 'link "분당차병원 경력 10월 18일 마감 임상전담간호팀(비뇨의학과) 간호사 모집(외래&수술실) #경력 #임상전담간호팀(비뇨의학과) 간호사 모집(외래&수술실)" [ref=f1e131] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e132]:
+                - strong [ref=f1e133]: 분당차병원
+                - generic [ref=f1e134]: 경력
+              - generic [ref=f1e135]:
+                - emphasis [ref=f1e136]: 10월 18일 마감
+                - paragraph [ref=f1e137]: 임상전담간호팀(비뇨의학과) 간호사 모집(외래&수술실)
+                - generic [ref=f1e138]: "#경력 #임상전담간호팀(비뇨의학과) 간호사 모집(외래&수술실)"
+            - 'link "분당차병원 경력 무관 10월 16일 마감 신경과 임상심리사 모집 #공통 #신경과 임상심리사 모집" [ref=f1e140] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e141]:
+                - strong [ref=f1e142]: 분당차병원
+                - generic [ref=f1e143]: 경력 무관
+              - generic [ref=f1e144]:
+                - emphasis [ref=f1e145]: 10월 16일 마감
+                - paragraph [ref=f1e146]: 신경과 임상심리사 모집
+                - generic [ref=f1e147]: "#공통 #신경과 임상심리사 모집"
+            - 'link "일산차병원 경력 10월 18일 마감 일산차병원 건진센터 간호사(오전직) 채용 #경력 #일산차병원 건진센터 간호사(오전직) 채용" [ref=f1e149] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e150]:
+                - strong [ref=f1e151]: 일산차병원
+                - generic [ref=f1e152]: 경력
+              - generic [ref=f1e153]:
+                - emphasis [ref=f1e154]: 10월 18일 마감
+                - paragraph [ref=f1e155]: 일산차병원 건진센터 간호사(오전직) 채용
+                - generic [ref=f1e156]: "#경력 #일산차병원 건진센터 간호사(오전직) 채용"
+            - 'link "차여성의학연구소 대구 경력 무관 10월 19일 마감 대구차여성의원 원무 직원 모집 (충원) #공통 #대구차여성의원 원무 직원 모집 (충원)" [ref=f1e158] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e159]:
+                - strong [ref=f1e160]: 차여성의학연구소 대구
+                - generic [ref=f1e161]: 경력 무관
+              - generic [ref=f1e162]:
+                - emphasis [ref=f1e163]: 10월 19일 마감
+                - paragraph [ref=f1e164]: 대구차여성의원 원무 직원 모집 (충원)
+                - generic [ref=f1e165]: "#공통 #대구차여성의원 원무 직원 모집 (충원)"
+            - 'link "차바이오텍 경력 11월 13일 마감 [기업] 인사팀 급여 담당자 채용 #경력 #[기업] 인사팀 급여 담당자 채용" [ref=f1e167] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e168]:
+                - strong [ref=f1e169]: 차바이오텍
+                - generic [ref=f1e170]: 경력
+              - generic [ref=f1e171]:
+                - emphasis [ref=f1e172]: 11월 13일 마감
+                - paragraph [ref=f1e173]: "[기업] 인사팀 급여 담당자 채용"
+                - generic [ref=f1e174]: "#경력 #[기업] 인사팀 급여 담당자 채용"
+            - 'link "차여성의학연구소 대구 경력 무관 10월 18일 마감 대구차여성의원 수술실 간호사 모집 (충원) #공통 #대구차여성의원 수술실 간호사 모집 (충원)" [ref=f1e176] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e177]:
+                - strong [ref=f1e178]: 차여성의학연구소 대구
+                - generic [ref=f1e179]: 경력 무관
+              - generic [ref=f1e180]:
+                - emphasis [ref=f1e181]: 10월 18일 마감
+                - paragraph [ref=f1e182]: 대구차여성의원 수술실 간호사 모집 (충원)
+                - generic [ref=f1e183]: "#공통 #대구차여성의원 수술실 간호사 모집 (충원)"
+            - 'link "차여성의학연구소 대구 경력 무관 10월 25일 마감 대구차여성의원 방사선사 모집 (충원) #공통 #대구차여성의원 방사선사 모집 (충원)" [ref=f1e185] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e186]:
+                - strong [ref=f1e187]: 차여성의학연구소 대구
+                - generic [ref=f1e188]: 경력 무관
+              - generic [ref=f1e189]:
+                - emphasis [ref=f1e190]: 10월 25일 마감
+                - paragraph [ref=f1e191]: 대구차여성의원 방사선사 모집 (충원)
+                - generic [ref=f1e192]: "#공통 #대구차여성의원 방사선사 모집 (충원)"
+            - 'link "분당차병원 경력 무관 10월 18일 마감 응급의학과 응급구조사 모집 #공통 #응급의학과 응급구조사 모집" [ref=f1e194] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e195]:
+                - strong [ref=f1e196]: 분당차병원
+                - generic [ref=f1e197]: 경력 무관
+              - generic [ref=f1e198]:
+                - emphasis [ref=f1e199]: 10월 18일 마감
+                - paragraph [ref=f1e200]: 응급의학과 응급구조사 모집
+                - generic [ref=f1e201]: "#공통 #응급의학과 응급구조사 모집"
+            - 'link "분당차병원 경력 10월 15일 마감 임상전담간호팀(혈액종양내과) 간호사 모집(병동) #경력 #임상전담간호팀(혈액종양내과) 간호사 모집(병동)" [ref=f1e203] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e204]:
+                - strong [ref=f1e205]: 분당차병원
+                - generic [ref=f1e206]: 경력
+              - generic [ref=f1e207]:
+                - emphasis [ref=f1e208]: 10월 15일 마감
+                - paragraph [ref=f1e209]: 임상전담간호팀(혈액종양내과) 간호사 모집(병동)
+                - generic [ref=f1e210]: "#경력 #임상전담간호팀(혈액종양내과) 간호사 모집(병동)"
+            - 'link "일산차병원 경력 무관 10월 18일 마감 일산차병원 건진센터 사무직(영업 및 마케팅) 채용 #공통 #일산차병원 건진센터 사무직(영업 및 마케팅) 채용" [ref=f1e212] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e213]:
+                - strong [ref=f1e214]: 일산차병원
+                - generic [ref=f1e215]: 경력 무관
+              - generic [ref=f1e216]:
+                - emphasis [ref=f1e217]: 10월 18일 마감
+                - paragraph [ref=f1e218]: 일산차병원 건진센터 사무직(영업 및 마케팅) 채용
+                - generic [ref=f1e219]: "#공통 #일산차병원 건진센터 사무직(영업 및 마케팅) 채용"
+            - 'link "분당차병원 경력 10월 18일 마감 신규(기졸업자) 및 경력간호사 모집 #경력 #신규(기졸업자) 및 경력간호사 모집" [ref=f1e221] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e222]:
+                - strong [ref=f1e223]: 분당차병원
+                - generic [ref=f1e224]: 경력
+              - generic [ref=f1e225]:
+                - emphasis [ref=f1e226]: 10월 18일 마감
+                - paragraph [ref=f1e227]: 신규(기졸업자) 및 경력간호사 모집
+                - generic [ref=f1e228]: "#경력 #신규(기졸업자) 및 경력간호사 모집"
+            - 'link "일산차병원 경력 무관 10월 18일 마감 일산차병원 간호국 간호사(신생아집중치료실, 수술실) 채용(경력무관) #공통 #일산차병원 간호국 간호사(신생아집중치료실, 수술실) 채용(경력무관)" [ref=f1e230] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e231]:
+                - strong [ref=f1e232]: 일산차병원
+                - generic [ref=f1e233]: 경력 무관
+              - generic [ref=f1e234]:
+                - emphasis [ref=f1e235]: 10월 18일 마감
+                - paragraph [ref=f1e236]: 일산차병원 간호국 간호사(신생아집중치료실, 수술실) 채용(경력무관)
+                - generic [ref=f1e237]: "#공통 #일산차병원 간호국 간호사(신생아집중치료실, 수술실) 채용(경력무관)"
+            - 'link "분당차병원 경력 10월 15일 마감 마취회복실 전담간호사 모집 #경력 #마취회복실 전담간호사 모집" [ref=f1e239] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e240]:
+                - strong [ref=f1e241]: 분당차병원
+                - generic [ref=f1e242]: 경력
+              - generic [ref=f1e243]:
+                - emphasis [ref=f1e244]: 10월 15일 마감
+                - paragraph [ref=f1e245]: 마취회복실 전담간호사 모집
+                - generic [ref=f1e246]: "#경력 #마취회복실 전담간호사 모집"
+            - 'link "분당차병원 경력 10월 15일 마감 정신건강의학과 보호병동 간호사 모집 #경력 #정신건강의학과 보호병동 간호사 모집" [ref=f1e248] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e249]:
+                - strong [ref=f1e250]: 분당차병원
+                - generic [ref=f1e251]: 경력
+              - generic [ref=f1e252]:
+                - emphasis [ref=f1e253]: 10월 15일 마감
+                - paragraph [ref=f1e254]: 정신건강의학과 보호병동 간호사 모집
+                - generic [ref=f1e255]: "#경력 #정신건강의학과 보호병동 간호사 모집"
+            - 'link "분당차병원 경력 10월 15일 마감 임상전담간호팀(비뇨의학과) 간호사 모집(병동&외래) #경력 #임상전담간호팀(비뇨의학과) 간호사 모집(병동&외래)" [ref=f1e257] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e258]:
+                - strong [ref=f1e259]: 분당차병원
+                - generic [ref=f1e260]: 경력
+              - generic [ref=f1e261]:
+                - emphasis [ref=f1e262]: 10월 15일 마감
+                - paragraph [ref=f1e263]: 임상전담간호팀(비뇨의학과) 간호사 모집(병동&외래)
+                - generic [ref=f1e264]: "#경력 #임상전담간호팀(비뇨의학과) 간호사 모집(병동&외래)"
+            - 'link "분당차병원 경력 10월 15일 마감 임상전담간호팀(정형외과) 간호사 모집(수술실) #경력 #임상전담간호팀(정형외과) 간호사 모집(수술실)" [ref=f1e266] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e267]:
+                - strong [ref=f1e268]: 분당차병원
+                - generic [ref=f1e269]: 경력
+              - generic [ref=f1e270]:
+                - emphasis [ref=f1e271]: 10월 15일 마감
+                - paragraph [ref=f1e272]: 임상전담간호팀(정형외과) 간호사 모집(수술실)
+                - generic [ref=f1e273]: "#경력 #임상전담간호팀(정형외과) 간호사 모집(수술실)"
+            - 'link "분당차병원 경력 무관 오늘 마감 간호간병병동 간호조무사 모집 #공통 #간호간병병동 간호조무사 모집" [ref=f1e275] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e276]:
+                - strong [ref=f1e277]: 분당차병원
+                - generic [ref=f1e278]: 경력 무관
+              - generic [ref=f1e279]:
+                - emphasis [ref=f1e280]: 오늘 마감
+                - paragraph [ref=f1e281]: 간호간병병동 간호조무사 모집
+                - generic [ref=f1e282]: "#공통 #간호간병병동 간호조무사 모집"
+            - 'link "강남차병원 경력 10월 15일 마감 간호국 임상전담간호(산과) 간호사 모집 #경력 #간호국 임상전담간호(산과) 간호사 모집" [ref=f1e284] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e285]:
+                - strong [ref=f1e286]: 강남차병원
+                - generic [ref=f1e287]: 경력
+              - generic [ref=f1e288]:
+                - emphasis [ref=f1e289]: 10월 15일 마감
+                - paragraph [ref=f1e290]: 간호국 임상전담간호(산과) 간호사 모집
+                - generic [ref=f1e291]: "#경력 #간호국 임상전담간호(산과) 간호사 모집"
+            - 'link "차여성의학연구소 대구 경력 10월 18일 마감 대구차여성의원 외래 간호사 모집 (충원) #경력 #대구차여성의원 외래 간호사 모집 (충원)" [ref=f1e293] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e294]:
+                - strong [ref=f1e295]: 차여성의학연구소 대구
+                - generic [ref=f1e296]: 경력
+              - generic [ref=f1e297]:
+                - emphasis [ref=f1e298]: 10월 18일 마감
+                - paragraph [ref=f1e299]: 대구차여성의원 외래 간호사 모집 (충원)
+                - generic [ref=f1e300]: "#경력 #대구차여성의원 외래 간호사 모집 (충원)"
+            - 'link "분당차병원 경력 10월 15일 마감 임상전담간호팀(소아전문응급의료센터) 간호사 모집 #경력 #임상전담간호팀(소아전문응급의료센터) 간호사 모집" [ref=f1e302] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e303]:
+                - strong [ref=f1e304]: 분당차병원
+                - generic [ref=f1e305]: 경력
+              - generic [ref=f1e306]:
+                - emphasis [ref=f1e307]: 10월 15일 마감
+                - paragraph [ref=f1e308]: 임상전담간호팀(소아전문응급의료센터) 간호사 모집
+                - generic [ref=f1e309]: "#경력 #임상전담간호팀(소아전문응급의료센터) 간호사 모집"
+            - 'link "구미차병원 경력 무관 10월 18일 마감 전산팀 행정직원 모집(계약직) #공통 #전산팀 행정직원 모집(계약직)" [ref=f1e311] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e312]:
+                - strong [ref=f1e313]: 구미차병원
+                - generic [ref=f1e314]: 경력 무관
+              - generic [ref=f1e315]:
+                - emphasis [ref=f1e316]: 10월 18일 마감
+                - paragraph [ref=f1e317]: 전산팀 행정직원 모집(계약직)
+                - generic [ref=f1e318]: "#공통 #전산팀 행정직원 모집(계약직)"
+            - 'link "분당차병원 경력 10월 15일 마감 임상전담간호팀(산부인과) 간호사 모집(분만실) #경력 #임상전담간호팀(산부인과) 간호사 모집(분만실)" [ref=f1e320] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e321]:
+                - strong [ref=f1e322]: 분당차병원
+                - generic [ref=f1e323]: 경력
+              - generic [ref=f1e324]:
+                - emphasis [ref=f1e325]: 10월 15일 마감
+                - paragraph [ref=f1e326]: 임상전담간호팀(산부인과) 간호사 모집(분만실)
+                - generic [ref=f1e327]: "#경력 #임상전담간호팀(산부인과) 간호사 모집(분만실)"
+            - 'link "일산차병원 신입 오늘 마감 영상의학팀 방사선사보조 채용 #신입 #영상의학팀 방사선사보조 채용" [ref=f1e329] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e330]:
+                - strong [ref=f1e331]: 일산차병원
+                - generic [ref=f1e332]: 신입
+              - generic [ref=f1e333]:
+                - emphasis [ref=f1e334]: 오늘 마감
+                - paragraph [ref=f1e335]: 영상의학팀 방사선사보조 채용
+                - generic [ref=f1e336]: "#신입 #영상의학팀 방사선사보조 채용"
+            - 'link "분당차병원 경력 10월 15일 마감 임상전담간호팀(안과) 간호사 모집(외래&수술실) #경력 #임상전담간호팀(안과) 간호사 모집(외래&수술실)" [ref=f1e338] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e339]:
+                - strong [ref=f1e340]: 분당차병원
+                - generic [ref=f1e341]: 경력
+              - generic [ref=f1e342]:
+                - emphasis [ref=f1e343]: 10월 15일 마감
+                - paragraph [ref=f1e344]: 임상전담간호팀(안과) 간호사 모집(외래&수술실)
+                - generic [ref=f1e345]: "#경력 #임상전담간호팀(안과) 간호사 모집(외래&수술실)"
+            - 'link "분당차병원 경력 10월 15일 마감 임상전담간호팀(산부인과) 간호사 모집(분만실&병동) #경력 #임상전담간호팀(산부인과) 간호사 모집(분만실&병동)" [ref=f1e347] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e348]:
+                - strong [ref=f1e349]: 분당차병원
+                - generic [ref=f1e350]: 경력
+              - generic [ref=f1e351]:
+                - emphasis [ref=f1e352]: 10월 15일 마감
+                - paragraph [ref=f1e353]: 임상전담간호팀(산부인과) 간호사 모집(분만실&병동)
+                - generic [ref=f1e354]: "#경력 #임상전담간호팀(산부인과) 간호사 모집(분만실&병동)"
+            - 'link "분당차병원 경력 10월 15일 마감 임상전담간호팀(외과) 간호사 모집(병동) #경력 #임상전담간호팀(외과) 간호사 모집(병동)" [ref=f1e356] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e357]:
+                - strong [ref=f1e358]: 분당차병원
+                - generic [ref=f1e359]: 경력
+              - generic [ref=f1e360]:
+                - emphasis [ref=f1e361]: 10월 15일 마감
+                - paragraph [ref=f1e362]: 임상전담간호팀(외과) 간호사 모집(병동)
+                - generic [ref=f1e363]: "#경력 #임상전담간호팀(외과) 간호사 모집(병동)"
+            - 'link "분당차병원 경력 10월 15일 마감 임상전담간호팀(산부인과) 간호사 모집(수술실) #경력 #임상전담간호팀(산부인과) 간호사 모집(수술실)" [ref=f1e365] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e366]:
+                - strong [ref=f1e367]: 분당차병원
+                - generic [ref=f1e368]: 경력
+              - generic [ref=f1e369]:
+                - emphasis [ref=f1e370]: 10월 15일 마감
+                - paragraph [ref=f1e371]: 임상전담간호팀(산부인과) 간호사 모집(수술실)
+                - generic [ref=f1e372]: "#경력 #임상전담간호팀(산부인과) 간호사 모집(수술실)"
+            - 'link "CHARI 경력 무관 10월 31일 마감 [차의학연구원] TR센터 연구원(계약직) 모집 #공통 #[차의학연구원] TR센터 연구원(계약직) 모집" [ref=f1e374] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e375]:
+                - strong [ref=f1e376]: CHARI
+                - generic [ref=f1e377]: 경력 무관
+              - generic [ref=f1e378]:
+                - emphasis [ref=f1e379]: 10월 31일 마감
+                - paragraph [ref=f1e380]: "[차의학연구원] TR센터 연구원(계약직) 모집"
+                - generic [ref=f1e381]: "#공통 #[차의학연구원] TR센터 연구원(계약직) 모집"
+            - 'link "차여성의학연구소 마곡 경력 10월 16일 마감 차병원 마곡센터, 간호팀 난임 외래간호사(경력) 정규직 채용 #경력 #차병원 마곡센터, 간호팀 난임 외래간호사(경력) 정규직 채용" [ref=f1e383] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e384]:
+                - strong [ref=f1e385]: 차여성의학연구소 마곡
+                - generic [ref=f1e386]: 경력
+              - generic [ref=f1e387]:
+                - emphasis [ref=f1e388]: 10월 16일 마감
+                - paragraph [ref=f1e389]: 차병원 마곡센터, 간호팀 난임 외래간호사(경력) 정규직 채용
+                - generic [ref=f1e390]: "#경력 #차병원 마곡센터, 간호팀 난임 외래간호사(경력) 정규직 채용"
+            - 'link "CHARI 경력 무관 10월 27일 마감 [차의학연구원] 면역세포센터 연구원 모집 #공통 #[차의학연구원] 면역세포센터 연구원 모집" [ref=f1e392] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e393]:
+                - strong [ref=f1e394]: CHARI
+                - generic [ref=f1e395]: 경력 무관
+              - generic [ref=f1e396]:
+                - emphasis [ref=f1e397]: 10월 27일 마감
+                - paragraph [ref=f1e398]: "[차의학연구원] 면역세포센터 연구원 모집"
+                - generic [ref=f1e399]: "#공통 #[차의학연구원] 면역세포센터 연구원 모집"
+            - 'link "분당차병원 경력 무관 10월 18일 마감 약제부 야간약사 모집 #공통 #약제부 야간약사 모집" [ref=f1e401] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e402]:
+                - strong [ref=f1e403]: 분당차병원
+                - generic [ref=f1e404]: 경력 무관
+              - generic [ref=f1e405]:
+                - emphasis [ref=f1e406]: 10월 18일 마감
+                - paragraph [ref=f1e407]: 약제부 야간약사 모집
+                - generic [ref=f1e408]: "#공통 #약제부 야간약사 모집"
+            - 'link "차여성의학연구소 마곡 경력 10월 16일 마감 차병원 마곡센터, 간호팀 난임 수술간호사(경력) 정규직 채용 #경력 #차병원 마곡센터, 간호팀 난임 수술간호사(경력) 정규직 채용" [ref=f1e410] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e411]:
+                - strong [ref=f1e412]: 차여성의학연구소 마곡
+                - generic [ref=f1e413]: 경력
+              - generic [ref=f1e414]:
+                - emphasis [ref=f1e415]: 10월 16일 마감
+                - paragraph [ref=f1e416]: 차병원 마곡센터, 간호팀 난임 수술간호사(경력) 정규직 채용
+                - generic [ref=f1e417]: "#경력 #차병원 마곡센터, 간호팀 난임 수술간호사(경력) 정규직 채용"
+            - 'link "분당차연구부 경력 10월 15일 마감 [연구부] 모체테아의학연구팀 연구원 모집 #경력 #[연구부] 모체테아의학연구팀 연구원 모집" [ref=f1e419] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e420]:
+                - strong [ref=f1e421]: 분당차연구부
+                - generic [ref=f1e422]: 경력
+              - generic [ref=f1e423]:
+                - emphasis [ref=f1e424]: 10월 15일 마감
+                - paragraph [ref=f1e425]: "[연구부] 모체테아의학연구팀 연구원 모집"
+                - generic [ref=f1e426]: "#경력 #[연구부] 모체테아의학연구팀 연구원 모집"
+            - 'link "차여성의학연구소 서울역센터 경력 무관 10월 16일 마감 차병원 서울역센터 산부인과 전담간호사 채용 안내 #공통 #차병원 서울역센터 산부인과 전담간호사 채용 안내" [ref=f1e428] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e429]:
+                - strong [ref=f1e430]: 차여성의학연구소 서울역센터
+                - generic [ref=f1e431]: 경력 무관
+              - generic [ref=f1e432]:
+                - emphasis [ref=f1e433]: 10월 16일 마감
+                - paragraph [ref=f1e434]: 차병원 서울역센터 산부인과 전담간호사 채용 안내
+                - generic [ref=f1e435]: "#공통 #차병원 서울역센터 산부인과 전담간호사 채용 안내"
+            - 'link "분당차병원 경력 무관 10월 15일 마감 진단검사의학팀 임상병리사 모집 #공통 #진단검사의학팀 임상병리사 모집" [ref=f1e437] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e438]:
+                - strong [ref=f1e439]: 분당차병원
+                - generic [ref=f1e440]: 경력 무관
+              - generic [ref=f1e441]:
+                - emphasis [ref=f1e442]: 10월 15일 마감
+                - paragraph [ref=f1e443]: 진단검사의학팀 임상병리사 모집
+                - generic [ref=f1e444]: "#공통 #진단검사의학팀 임상병리사 모집"
+            - 'link "차움 경력 10월 25일 마감 차병원 차움 국제협력팀 채용 #경력 #차병원 차움 국제협력팀 채용" [ref=f1e446] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e447]:
+                - strong [ref=f1e448]: 차움
+                - generic [ref=f1e449]: 경력
+              - generic [ref=f1e450]:
+                - emphasis [ref=f1e451]: 10월 25일 마감
+                - paragraph [ref=f1e452]: 차병원 차움 국제협력팀 채용
+                - generic [ref=f1e453]: "#경력 #차병원 차움 국제협력팀 채용"
+            - 'link "CHARI 경력 10월 16일 마감 [차의학연구원] RA/QA센터 RA 연구원 모집 #경력 #[차의학연구원] RA/QA센터 RA 연구원 모집" [ref=f1e455] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e456]:
+                - strong [ref=f1e457]: CHARI
+                - generic [ref=f1e458]: 경력
+              - generic [ref=f1e459]:
+                - emphasis [ref=f1e460]: 10월 16일 마감
+                - paragraph [ref=f1e461]: "[차의학연구원] RA/QA센터 RA 연구원 모집"
+                - generic [ref=f1e462]: "#경력 #[차의학연구원] RA/QA센터 RA 연구원 모집"
+            - 'link "차움 경력 10월 18일 마감 차병원 차움 에버셀스킨케어클리닉 피부관리사 채용 #경력 #차병원 차움 에버셀스킨케어클리닉 피부관리사 채용" [ref=f1e464] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e465]:
+                - strong [ref=f1e466]: 차움
+                - generic [ref=f1e467]: 경력
+              - generic [ref=f1e468]:
+                - emphasis [ref=f1e469]: 10월 18일 마감
+                - paragraph [ref=f1e470]: 차병원 차움 에버셀스킨케어클리닉 피부관리사 채용
+                - generic [ref=f1e471]: "#경력 #차병원 차움 에버셀스킨케어클리닉 피부관리사 채용"
+            - 'link "차바이오텍 경력 10월 31일 마감 [차바이오텍]글로벌사업본부 채용 #경력 #[차바이오텍]글로벌사업본부 채용" [ref=f1e473] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e474]:
+                - strong [ref=f1e475]: 차바이오텍
+                - generic [ref=f1e476]: 경력
+              - generic [ref=f1e477]:
+                - emphasis [ref=f1e478]: 10월 31일 마감
+                - paragraph [ref=f1e479]: "[차바이오텍]글로벌사업본부 채용"
+                - generic [ref=f1e480]: "#경력 #[차바이오텍]글로벌사업본부 채용"
+            - 'link "차바이오텍 신입 10월 31일 마감 [기업] 차움 회원관리팀 모집 #신입 #[기업] 차움 회원관리팀 모집" [ref=f1e482] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e483]:
+                - strong [ref=f1e484]: 차바이오텍
+                - generic [ref=f1e485]: 신입
+              - generic [ref=f1e486]:
+                - emphasis [ref=f1e487]: 10월 31일 마감
+                - paragraph [ref=f1e488]: "[기업] 차움 회원관리팀 모집"
+                - generic [ref=f1e489]: "#신입 #[기업] 차움 회원관리팀 모집"
+            - 'link "마티카바이오랩스 경력 무관 10월 31일 마감 [기업] 경영지원팀 구매총무 담당자 채용 #공통 #[기업] 경영지원팀 구매총무 담당자 채용" [ref=f1e491] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e492]:
+                - strong [ref=f1e493]: 마티카바이오랩스
+                - generic [ref=f1e494]: 경력 무관
+              - generic [ref=f1e495]:
+                - emphasis [ref=f1e496]: 10월 31일 마감
+                - paragraph [ref=f1e497]: "[기업] 경영지원팀 구매총무 담당자 채용"
+                - generic [ref=f1e498]: "#공통 #[기업] 경영지원팀 구매총무 담당자 채용"
+            - 'link "차바이오텍 경력 10월 31일 마감 [기업] 사업기획팀 팀장 채용 #경력 #[기업] 사업기획팀 팀장 채용" [ref=f1e500] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e501]:
+                - strong [ref=f1e502]: 차바이오텍
+                - generic [ref=f1e503]: 경력
+              - generic [ref=f1e504]:
+                - emphasis [ref=f1e505]: 10월 31일 마감
+                - paragraph [ref=f1e506]: "[기업] 사업기획팀 팀장 채용"
+                - generic [ref=f1e507]: "#경력 #[기업] 사업기획팀 팀장 채용"
+            - 'link "차바이오텍 경력 10월 31일 마감 [차바이오텍] IT사업본부 개발팀 웹개발자, AI서비스 개발자 모집 #경력 #[차바이오텍] IT사업본부 개발팀 웹개발자, AI서비스 개발자 모집" [ref=f1e509] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e510]:
+                - strong [ref=f1e511]: 차바이오텍
+                - generic [ref=f1e512]: 경력
+              - generic [ref=f1e513]:
+                - emphasis [ref=f1e514]: 10월 31일 마감
+                - paragraph [ref=f1e515]: "[차바이오텍] IT사업본부 개발팀 웹개발자, AI서비스 개발자 모집"
+                - generic [ref=f1e516]: "#경력 #[차바이오텍] IT사업본부 개발팀 웹개발자, AI서비스 개발자 모집"
+            - 'link "차바이오텍 경력 10월 31일 마감 [기업]IT사업본부 병원전산 개발/운영 채용 #경력 #[기업]IT사업본부 병원전산 개발/운영 채용" [ref=f1e518] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e519]:
+                - strong [ref=f1e520]: 차바이오텍
+                - generic [ref=f1e521]: 경력
+              - generic [ref=f1e522]:
+                - emphasis [ref=f1e523]: 10월 31일 마감
+                - paragraph [ref=f1e524]: "[기업]IT사업본부 병원전산 개발/운영 채용"
+                - generic [ref=f1e525]: "#경력 #[기업]IT사업본부 병원전산 개발/운영 채용"
+            - 'link "차바이오텍 경력 10월 31일 마감 [기업] 글로벌사업화지원팀 채용 #경력 #[기업] 글로벌사업화지원팀 채용" [ref=f1e527] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e528]:
+                - strong [ref=f1e529]: 차바이오텍
+                - generic [ref=f1e530]: 경력
+              - generic [ref=f1e531]:
+                - emphasis [ref=f1e532]: 10월 31일 마감
+                - paragraph [ref=f1e533]: "[기업] 글로벌사업화지원팀 채용"
+                - generic [ref=f1e534]: "#경력 #[기업] 글로벌사업화지원팀 채용"
+            - 'link "차바이오텍 경력 10월 31일 마감 [차바이오텍]분자유전체연구팀 채용 #경력 #[차바이오텍]분자유전체연구팀 채용" [ref=f1e536] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e537]:
+                - strong [ref=f1e538]: 차바이오텍
+                - generic [ref=f1e539]: 경력
+              - generic [ref=f1e540]:
+                - emphasis [ref=f1e541]: 10월 31일 마감
+                - paragraph [ref=f1e542]: "[차바이오텍]분자유전체연구팀 채용"
+                - generic [ref=f1e543]: "#경력 #[차바이오텍]분자유전체연구팀 채용"
+            - 'link "마티카바이오랩스 경력 10월 31일 마감 [기업] 제조2팀 (Bio Insurance 상품공정) 모집 #경력 #[기업] 제조2팀 (Bio Insurance 상품공정) 모집" [ref=f1e545] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e546]:
+                - strong [ref=f1e547]: 마티카바이오랩스
+                - generic [ref=f1e548]: 경력
+              - generic [ref=f1e549]:
+                - emphasis [ref=f1e550]: 10월 31일 마감
+                - paragraph [ref=f1e551]: "[기업] 제조2팀 (Bio Insurance 상품공정) 모집"
+                - generic [ref=f1e552]: "#경력 #[기업] 제조2팀 (Bio Insurance 상품공정) 모집"
+            - 'link "차바이오텍 경력 10월 31일 마감 [기업] 글로벌 투자유치지원팀 채용 #경력 #[기업] 글로벌 투자유치지원팀 채용" [ref=f1e554] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e555]:
+                - strong [ref=f1e556]: 차바이오텍
+                - generic [ref=f1e557]: 경력
+              - generic [ref=f1e558]:
+                - emphasis [ref=f1e559]: 10월 31일 마감
+                - paragraph [ref=f1e560]: "[기업] 글로벌 투자유치지원팀 채용"
+                - generic [ref=f1e561]: "#경력 #[기업] 글로벌 투자유치지원팀 채용"
+            - 'link "차바이오텍 경력 10월 31일 마감 [기업] 대외협력팀 채용(책임자) #경력 #[기업] 대외협력팀 채용(책임자)" [ref=f1e563] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e564]:
+                - strong [ref=f1e565]: 차바이오텍
+                - generic [ref=f1e566]: 경력
+              - generic [ref=f1e567]:
+                - emphasis [ref=f1e568]: 10월 31일 마감
+                - paragraph [ref=f1e569]: "[기업] 대외협력팀 채용(책임자)"
+                - generic [ref=f1e570]: "#경력 #[기업] 대외협력팀 채용(책임자)"
+            - 'link "차바이오텍 경력 10월 31일 마감 [기업] 오피스운영팀 채용 #경력 #[기업] 오피스운영팀 채용" [ref=f1e572] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e573]:
+                - strong [ref=f1e574]: 차바이오텍
+                - generic [ref=f1e575]: 경력
+              - generic [ref=f1e576]:
+                - emphasis [ref=f1e577]: 10월 31일 마감
+                - paragraph [ref=f1e578]: "[기업] 오피스운영팀 채용"
+                - generic [ref=f1e579]: "#경력 #[기업] 오피스운영팀 채용"
+            - 'link "차바이오텍 경력 10월 31일 마감 [기업] 대외협력팀 채용(대리급) #경력 #[기업] 대외협력팀 채용(대리급)" [ref=f1e581] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e582]:
+                - strong [ref=f1e583]: 차바이오텍
+                - generic [ref=f1e584]: 경력
+              - generic [ref=f1e585]:
+                - emphasis [ref=f1e586]: 10월 31일 마감
+                - paragraph [ref=f1e587]: "[기업] 대외협력팀 채용(대리급)"
+                - generic [ref=f1e588]: "#경력 #[기업] 대외협력팀 채용(대리급)"
+            - 'link "차바이오텍 경력 10월 31일 마감 [기업] 랩 운영팀 채용 #경력 #[기업] 랩 운영팀 채용" [ref=f1e590] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e591]:
+                - strong [ref=f1e592]: 차바이오텍
+                - generic [ref=f1e593]: 경력
+              - generic [ref=f1e594]:
+                - emphasis [ref=f1e595]: 10월 31일 마감
+                - paragraph [ref=f1e596]: "[기업] 랩 운영팀 채용"
+                - generic [ref=f1e597]: "#경력 #[기업] 랩 운영팀 채용"
+            - 'link "마티카바이오랩스 경력 10월 20일 마감 [기업]GMP운영지원팀 (증원) #경력 #[기업]GMP운영지원팀 (증원)" [ref=f1e599] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e600]:
+                - strong [ref=f1e601]: 마티카바이오랩스
+                - generic [ref=f1e602]: 경력
+              - generic [ref=f1e603]:
+                - emphasis [ref=f1e604]: 10월 20일 마감
+                - paragraph [ref=f1e605]: "[기업]GMP운영지원팀 (증원)"
+                - generic [ref=f1e606]: "#경력 #[기업]GMP운영지원팀 (증원)"
+            - 'link "마티카바이오랩스 경력 10월 20일 마감 [기업]품질보증팀(QA) 모집 #경력 #[기업]품질보증팀(QA) 모집" [ref=f1e608] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e609]:
+                - strong [ref=f1e610]: 마티카바이오랩스
+                - generic [ref=f1e611]: 경력
+              - generic [ref=f1e612]:
+                - emphasis [ref=f1e613]: 10월 20일 마감
+                - paragraph [ref=f1e614]: "[기업]품질보증팀(QA) 모집"
+                - generic [ref=f1e615]: "#경력 #[기업]품질보증팀(QA) 모집"
+            - 'link "차바이오텍 신입 상시 [기업] 테라스파 테라피스트 모집 #신입 #[기업] 테라스파 테라피스트 모집" [ref=f1e617] [cursor=pointer]':
+              - /url: "javascript:"
+              - generic [ref=f1e618]:
+                - strong [ref=f1e619]: 차바이오텍
+                - generic [ref=f1e620]: 신입
+              - generic [ref=f1e621]:
+                - emphasis [ref=f1e622]: 상시
+                - paragraph [ref=f1e623]: "[기업] 테라스파 테라피스트 모집"
+                - generic [ref=f1e624]: "#신입 #[기업] 테라스파 테라피스트 모집"
+  - generic [ref=f1e627]:
+    - generic [ref=f1e628]:
+      - list [ref=f1e629]:
+        - listitem [ref=f1e630]:
+          - link "개인정보취급방침" [ref=f1e631] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e632]:
+          - link "이메일무단수집거부" [ref=f1e633] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e634]:
+          - link "이용약관" [ref=f1e635] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e636]:
+          - link "사이트맵" [ref=f1e637] [cursor=pointer]:
+            - /url: javascript:;
+      - paragraph [ref=f1e638]: 우)13488 경기도 성남시 분당구 판교로 335 차바이오컴플렉스
+      - paragraph [ref=f1e639]: COPYRIGHT © 2022 CHAMC RECRUIT. All Rights Reserved.
+    - link "Family Site" [ref=f1e640] [cursor=pointer]:
+      - /url: javascript:chaFamilysite();

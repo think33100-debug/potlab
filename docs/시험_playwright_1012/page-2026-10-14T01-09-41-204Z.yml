@@ -1,0 +1,358 @@
+- generic [active] [ref=f13e1]:
+  - generic:
+    - link "본문 바로가기" [ref=f13e2] [cursor=pointer]:
+      - /url: "#promotion"
+    - link "진료예약 바로가기" [ref=f13e3] [cursor=pointer]:
+      - /url: /home/reservation/main.do
+    - link "건강정보 바로가기" [ref=f13e4] [cursor=pointer]:
+      - /url: /home/healthInfo/main.do
+    - link "진료차트 바로가기" [ref=f13e5] [cursor=pointer]:
+      - /url: /home/healthChart/main.do
+    - link "나눔소통 바로가기" [ref=f13e6] [cursor=pointer]:
+      - /url: /home/share/main.do
+    - link "병원안내 바로가기" [ref=f13e7] [cursor=pointer]:
+      - /url: /home/info/main.do
+    - link "나의 서비스 바로가기" [ref=f13e8] [cursor=pointer]:
+      - /url: /home/mypage/myStory.do
+    - link [ref=f13e9] [cursor=pointer]:
+      - /url: javascript:void(0);
+  - generic [ref=f13e12]:
+    - link [ref=f13e13] [cursor=pointer]:
+      - /url: javascript:void(0);
+    - img "365일 24시간 진료예약 1599-3114" [ref=f13e14]
+    - generic [ref=f13e16] [cursor=pointer]:
+      - checkbox "오늘하루 열지 않음"
+      - text: 오늘하루 열지 않음
+    - button "닫기" [ref=f13e18] [cursor=pointer]
+    - link [ref=f13e21] [cursor=pointer]:
+      - /url: javascript:void(0);
+  - generic [ref=f13e22]:
+    - banner [ref=f13e25]:
+      - generic:
+        - link [ref=f13e26] [cursor=pointer]:
+          - /url: javascript:void(0);
+        - heading [level=1] [ref=f13e27]:
+          - link [ref=f13e29] [cursor=pointer]:
+            - /url: /home/main/index.do
+            - img "삼성서울병원" [ref=f13e30]
+      - navigation [ref=f13e31]:
+        - menubar [ref=f13e32]:
+          - menuitem [ref=f13e33] [cursor=pointer]:
+            - generic [ref=f13e34]:
+              - emphasis: 진료예약
+          - menuitem [ref=f13e35] [cursor=pointer]:
+            - generic [ref=f13e36]:
+              - emphasis: 건강정보
+          - menuitem [ref=f13e37] [cursor=pointer]:
+            - generic [ref=f13e38]:
+              - emphasis: 진료차트
+          - menuitem [ref=f13e39] [cursor=pointer]:
+            - generic [ref=f13e40]:
+              - emphasis: 나눔소통
+          - menuitem [ref=f13e41] [cursor=pointer]:
+            - generic [ref=f13e42]:
+              - emphasis: 병원안내
+        - link [ref=f13e43] [cursor=pointer]:
+          - /url: javascript:void(0);
+        - generic [ref=f13e44]:
+          - generic [ref=f13e45]:
+            - generic [ref=f13e46]:
+              - link [ref=f13e47] [cursor=pointer]:
+                - /url: javascript:void(0);
+              - link "병원소개" [ref=f13e48] [cursor=pointer]:
+                - /url: javascript:void(0);
+            - list [ref=f13e49]:
+              - listitem [ref=f13e50]:
+                - link "ENG" [ref=f13e51] [cursor=pointer]:
+                  - /url: http://www.samsunghospital.com/gb/language/english/main/index.do
+              - listitem [ref=f13e52]:
+                - link "中國語" [ref=f13e53] [cursor=pointer]:
+                  - /url: http://www.samsunghospital.com/gb/language/china/main/index.do
+              - listitem [ref=f13e54]:
+                - link "RUSSIAN" [ref=f13e55] [cursor=pointer]:
+                  - /url: http://www.samsunghospital.com/gb/main/russia.do
+          - generic [ref=f13e56]:
+            - generic: 통합검색
+            - button "통합검색" [ref=f13e58] [cursor=pointer]
+          - list [ref=f13e61]:
+            - listitem [ref=f13e62]:
+              - link "로그인" [ref=f13e63] [cursor=pointer]:
+                - /url: javascript:void(0);
+            - listitem [ref=f13e64]:
+              - link "회원가입" [ref=f13e65] [cursor=pointer]:
+                - /url: /home/create/createAccount.do
+          - link [ref=f13e66] [cursor=pointer]:
+            - /url: javascript:void(0);
+    - generic [ref=f13e70]:
+      - link [ref=f13e71] [cursor=pointer]:
+        - /url: javascript:void(0);
+      - button "QUICK MENU" [expanded] [ref=f13e73] [cursor=pointer]
+      - generic [ref=f13e76]:
+        - list [ref=f13e77]:
+          - listitem [ref=f13e78]:
+            - link "건강의학센터" [ref=f13e79] [cursor=pointer]:
+              - /url: /home/healthMedical/main.do
+          - listitem [ref=f13e82]:
+            - link "심장뇌혈관병원" [ref=f13e83] [cursor=pointer]:
+              - /url: /home/hbv/main.do
+          - listitem [ref=f13e86]:
+            - link "암병원" [ref=f13e87] [cursor=pointer]:
+              - /url: /home/cancer/main/index.do
+          - listitem [ref=f13e90]:
+            - link "양성자치료센터" [ref=f13e91] [cursor=pointer]:
+              - /url: /home/proton/main/index.do
+          - listitem [ref=f13e94]:
+            - link "진료협력/의뢰" [ref=f13e95] [cursor=pointer]:
+              - /url: http://www.refer.co.kr
+          - listitem [ref=f13e98]:
+            - link "인재채용" [ref=f13e99] [cursor=pointer]:
+              - /url: /home/recruit/main.do
+        - link [ref=f13e102] [cursor=pointer]:
+          - /url: javascript:void(0);
+    - main [ref=f13e103]:
+      - link [ref=f13e104] [cursor=pointer]:
+        - /url: javascript:void(0);
+      - generic [ref=f13e106]:
+        - generic [ref=f13e108]:
+          - heading "홍보 베너 리스트" [level=3] [ref=f13e109]
+          - generic [ref=f13e111]:
+            - generic [ref=f13e112]:
+              - list [ref=f13e114]:
+                - listitem [ref=f13e115]:
+                  - link [ref=f13e116] [cursor=pointer]:
+                    - /url: http://www.samsunghospital.com/home/info/noticeView.do?seq=2404
+                    - generic [ref=f13e117]:
+                      - paragraph [ref=f13e118]: 오픈카드 서비스 안내
+                      - paragraph [ref=f13e119]: 오픈카드 서비스 안내
+              - generic [ref=f13e120]:
+                - link "홍보베너1" [ref=f13e122] [cursor=pointer]:
+                  - /url: ""
+                - link "홍보베너2" [ref=f13e125] [cursor=pointer]:
+                  - /url: ""
+                - link "홍보베너3" [ref=f13e128] [cursor=pointer]:
+                  - /url: ""
+            - button [ref=f13e130] [cursor=pointer]:
+              - link "이전베너" [ref=f13e131]:
+                - /url: ""
+            - button [ref=f13e132] [cursor=pointer]:
+              - link "다음베너" [ref=f13e133]:
+                - /url: ""
+        - generic [ref=f13e134]:
+          - generic [ref=f13e137]:
+            - heading "의료진/진료과 검색 삼성서울병원의 전문의료진을 검색해 보세요." [level=3] [ref=f13e138]:
+              - text: 의료진/진료과 검색
+              - generic [ref=f13e139]: 삼성서울병원의 전문의료진을 검색해 보세요.
+            - generic [ref=f13e140]:
+              - textbox "의료진/진료과 검색 삼성서울병원의 전문의료진을 검색해 보세요." [ref=f13e141]:
+                - /placeholder: 의료진/진료과
+              - button "검색" [ref=f13e142] [cursor=pointer]
+          - generic [ref=f13e144]:
+            - heading "의료진 검색 및 진료 예약신청, 조회" [level=3] [ref=f13e145]
+            - list:
+              - listitem [ref=f13e146]:
+                - generic [ref=f13e147]:
+                  - heading "온라인 예약신청" [level=4] [ref=f13e148]
+                  - paragraph [ref=f13e150]: 로그인 없이도 진료 예약을편리하게 하실 수 있습니다.
+                  - link "예약신청" [ref=f13e151] [cursor=pointer]:
+                    - /url: /home/reservation/onlineReservation.do
+              - listitem [ref=f13e152]:
+                - generic [ref=f13e154]:
+                  - generic [ref=f13e155]:
+                    - heading "우리병원 처음예약" [level=4] [ref=f13e156]
+                    - paragraph [ref=f13e158]: 연락처를 남겨주시면 해피콜을 통해처음 예약을 도와드립니다.
+                  - textbox "우리병원 처음예약 연락처를 남겨주시면 해피콜을 통해 처음 예약을 도와드립니다." [ref=f13e159]:
+                    - /placeholder: 010-000-0000
+                  - button "예약신청" [ref=f13e160] [cursor=pointer]
+              - listitem [ref=f13e161]:
+                - generic [ref=f13e163]:
+                  - generic [ref=f13e164]:
+                    - heading "건강검진 빠른예약" [level=4] [ref=f13e165]
+                    - paragraph [ref=f13e167]: 연락처를 남겨주시면 검진 상담 전문 간호사가 빠른 예약을 도와드립니다.
+                  - link "검진 프로그램 보기" [ref=f13e168] [cursor=pointer]:
+                    - /url: /home/healthMedical/private/program/comprehensive/basicCheckup.do
+                  - textbox "건강검진 빠른예약 연락처를 남겨주시면 검진 상담 전문 간호사가 빠른 예약을 도와드립니다." [ref=f13e169]:
+                    - /placeholder: 010-000-0000
+                  - button "예약신청" [ref=f13e170] [cursor=pointer]
+              - listitem [ref=f13e171]:
+                - link "의무기록사본발급신청 로그인 하신 후 사본발급 신청 가능합니다. 온라인신청" [ref=f13e172] [cursor=pointer]:
+                  - /url: /home/reservation/certificate.do
+                  - heading "의무기록사본발급신청" [level=4] [ref=f13e173]
+                  - paragraph [ref=f13e175]: 로그인 하신 후사본발급 신청 가능합니다.
+                  - generic [ref=f13e176]: 온라인신청
+              - listitem [ref=f13e177]:
+                - link "제증명발급서비스 로그인 하신 후 각종 제증명서류를 발급받으실 수 있습니다. 온라인신청" [ref=f13e178] [cursor=pointer]:
+                  - /url: /home/healthChart/issueService/InfoIssueCertiList.do
+                  - heading "제증명발급서비스" [level=4] [ref=f13e179]
+                  - paragraph [ref=f13e181]: 로그인 하신 후 각종 제증명서류를발급받으실 수 있습니다.
+                  - generic [ref=f13e182]: 온라인신청
+              - listitem [ref=f13e183]:
+                - link "본인인증 후 타병원 의료영상을 전송 할 수 있습니다. 온라인업로드" [ref=f13e184] [cursor=pointer]:
+                  - /url: https://cdcopy.samsunghospital.com
+                  - paragraph [ref=f13e185]: 본인인증 후 타병원 의료영상을전송 할 수 있습니다.
+                  - generic [ref=f13e186]: 온라인업로드
+        - generic [ref=f13e188]:
+          - heading "편의가이드" [level=4] [ref=f13e189]
+          - list [ref=f13e190]:
+            - listitem [ref=f13e191]:
+              - link "진료조회" [ref=f13e192] [cursor=pointer]:
+                - /url: /home/healthChart/inquireMed/inquireReservation.do
+            - listitem [ref=f13e194]:
+              - link "검사이력 및 결과조회" [ref=f13e195] [cursor=pointer]:
+                - /url: /home/healthChart/inquireMed/examHistory.do
+            - listitem [ref=f13e197]:
+              - link "오시는 길" [ref=f13e198] [cursor=pointer]:
+                - /url: /home/info/map.do
+            - listitem [ref=f13e200]:
+              - link "주차안내" [ref=f13e201] [cursor=pointer]:
+                - /url: /home/info/parking.do
+            - listitem [ref=f13e203]:
+              - link "원내위치안내" [ref=f13e204] [cursor=pointer]:
+                - /url: /home/info/guide/hmain.do?new
+            - listitem [ref=f13e206]:
+              - link "병원생활안내" [ref=f13e207] [cursor=pointer]:
+                - /url: /home/info/hospitalizationInfoPre.do
+      - generic [ref=f13e210]:
+        - generic [ref=f13e211]:
+          - heading "공지사항" [level=4] [ref=f13e212]
+          - link "더보기" [ref=f13e213] [cursor=pointer]:
+            - /url: /home/info/notice.do
+          - list [ref=f13e214]:
+            - listitem [ref=f13e215]:
+              - link [ref=f13e216] [cursor=pointer]:
+                - /url: /home/info/noticeView.do?seq=2388
+                - paragraph [ref=f13e217]: 비대면 제증명 및 의무기록사본 발급 수수료 인하('25. 3.6 적용)
+                - paragraph [ref=f13e218]: 2025.03.05
+            - listitem [ref=f13e219]:
+              - link [ref=f13e220] [cursor=pointer]:
+                - /url: /home/info/noticeView.do?seq=2386
+                - paragraph [ref=f13e221]: 제증명 발급 수수료 인상 안내('25.2.1 적용)
+                - paragraph [ref=f13e222]: 2025.01.23
+            - listitem [ref=f13e223]:
+              - link [ref=f13e224] [cursor=pointer]:
+                - /url: /home/info/noticeView.do?seq=2371
+                - paragraph [ref=f13e225]: 모바일 건강보험증 QR 출입 안내 (‘24.8.1 시행)
+                - paragraph [ref=f13e226]: 2024.08.07
+            - listitem [ref=f13e227]:
+              - link [ref=f13e228] [cursor=pointer]:
+                - /url: /home/info/noticeView.do?seq=2364
+                - paragraph [ref=f13e229]: 삼성서울병원 리모델링으로 인한 변경 안내
+                - paragraph [ref=f13e230]: 2024.05.13
+            - listitem [ref=f13e231]:
+              - link [ref=f13e232] [cursor=pointer]:
+                - /url: /home/info/noticeView.do?seq=2406
+                - paragraph [ref=f13e233]: 삼성서울병원 개인정보처리방침 개정 공지_2026/05/07
+                - paragraph [ref=f13e234]: 2026.08.10
+        - generic [ref=f13e235]:
+          - heading "학술행사" [level=4] [ref=f13e236]
+          - link "더보기" [ref=f13e237] [cursor=pointer]:
+            - /url: /home/info/scienceList.do
+          - list [ref=f13e238]:
+            - listitem [ref=f13e239]:
+              - link [ref=f13e240] [cursor=pointer]:
+                - /url: /home/info/scienceView.do?seq=23239
+                - paragraph [ref=f13e241]: 2nd Samsung Medical Center Thoracic Oncology Symposium · Lung Cancer
+                - paragraph [ref=f13e242]: 2026.10.06
+            - listitem [ref=f13e243]:
+              - link [ref=f13e244] [cursor=pointer]:
+                - /url: /home/info/scienceView.do?seq=23238
+                - paragraph [ref=f13e245]: 제 24회 SMC 유전연수강좌
+                - paragraph [ref=f13e246]: 2026.09.30
+            - listitem [ref=f13e247]:
+              - link [ref=f13e248] [cursor=pointer]:
+                - /url: /home/info/scienceView.do?seq=23237
+                - paragraph [ref=f13e249]: 원내 환자/보호자 대상 국가통합바이오빅데이터 홍보 행사
+                - paragraph [ref=f13e250]: 2026.09.21
+            - listitem [ref=f13e251]:
+              - link [ref=f13e252] [cursor=pointer]:
+                - /url: /home/info/scienceView.do?seq=23236
+                - paragraph [ref=f13e253]: 삼성서울병원 로봇수술 30,000례 기념 심포지엄
+                - paragraph [ref=f13e254]: 2026.09.17
+            - listitem [ref=f13e255]:
+              - link [ref=f13e256] [cursor=pointer]:
+                - /url: /home/info/scienceView.do?seq=23235
+                - paragraph [ref=f13e257]: "[2026 SPC Webinar 10] 늦추지 말고 전원이 필요한 심부전 증상"
+                - paragraph [ref=f13e258]: 2026.09.10
+          - link [ref=f13e259] [cursor=pointer]:
+            - /url: javascript:void(0);
+    - contentinfo [ref=f13e260]:
+      - generic [ref=f13e263]:
+        - link "삼성서울병원" [ref=f13e264] [cursor=pointer]:
+          - /url: /home/main/index.do
+        - link "건강의학센터" [ref=f13e265] [cursor=pointer]:
+          - /url: /home/healthMedical/main.do
+        - link "심장뇌혈관병원" [ref=f13e266] [cursor=pointer]:
+          - /url: /home/hbv/main.do
+        - link "암병원" [ref=f13e267] [cursor=pointer]:
+          - /url: /home/cancer/main/index.do
+        - link "미래의학연구원" [ref=f13e268] [cursor=pointer]:
+          - /url: /home/future/main/index.do
+        - link "양성자치료센터" [ref=f13e269] [cursor=pointer]:
+          - /url: /home/proton/main/index.do
+        - link "인재채용" [ref=f13e270] [cursor=pointer]:
+          - /url: /home/recruit/main.do
+        - link "장례식장" [ref=f13e271] [cursor=pointer]:
+          - /url: /home/funerals/main/index.do
+        - link "ScholarWorks" [ref=f13e272] [cursor=pointer]:
+          - /url: https://scholarworks.samsunghospital.com:447
+        - generic [ref=f13e273]:
+          - button "센터홈페이지" [ref=f13e274] [cursor=pointer]
+          - button "패밀리사이트" [ref=f13e275] [cursor=pointer]
+      - generic [ref=f13e276]:
+        - generic [ref=f13e277]:
+          - link "병원소개" [ref=f13e278] [cursor=pointer]:
+            - /url: /home/info/hosptDirectGreeting.do
+          - link "회원약관" [ref=f13e279] [cursor=pointer]:
+            - /url: /home/member/agreement.do
+          - link [ref=f13e280] [cursor=pointer]:
+            - /url: /home/member/protect.do
+            - strong [ref=f13e281]: 개인정보처리방침
+          - link "보안신고" [ref=f13e282] [cursor=pointer]:
+            - /url: /home/popup/pop_security.do
+          - link "환자의 권리와 의무" [ref=f13e283] [cursor=pointer]:
+            - /url: /home/popup/pop_right.do
+          - link "제보하기" [ref=f13e284] [cursor=pointer]:
+            - /url: /home/ethicsMain.do
+          - link "비급여진료비안내" [ref=f13e285] [cursor=pointer]:
+            - /url: /home/info/unInsuraList.do
+          - link "원격지원" [ref=f13e286] [cursor=pointer]:
+            - /url: http://www.988.co.kr/samsunghospital
+          - link "고객의 소리" [ref=f13e287] [cursor=pointer]:
+            - /url: /home/share/customerWrite.do
+          - link "홈페이지 가이드" [ref=f13e288] [cursor=pointer]:
+            - /url: /home/info/faq.do
+          - link "사이트맵" [ref=f13e289] [cursor=pointer]:
+            - /url: /home/main/siteMap.do
+        - generic [ref=f13e290]:
+          - link "정보보호관리체계인증 상세팝업" [ref=f13e292] [cursor=pointer]:
+            - /url: /home/popup/isms.do
+          - generic [ref=f13e294]:
+            - link "트위터" [ref=f13e295] [cursor=pointer]:
+              - /url: https://twitter.com/mySMC
+            - link "페이스북" [ref=f13e297] [cursor=pointer]:
+              - /url: http://www.facebook.com/SamsungMedicalCenter
+            - link "블로그" [ref=f13e299] [cursor=pointer]:
+              - /url: http://blog.naver.com/ohhappysmc
+            - link "유튜브" [ref=f13e301] [cursor=pointer]:
+              - /url: http://www.youtube.com/SamsungMedicalCenter
+        - generic [ref=f13e303]: "서울특별시 강남구 일원로 81 (06351) 삼성서울병원 / 대표전화 : 1599-3114 / 사업자등록번호 : 213-82-05096 박승우"
+        - paragraph [ref=f13e304]: copyright©1996-2015 by Samsung Medical Center. All rights reserved.
+    - generic [ref=f13e305]:
+      - generic [ref=f13e306]:
+        - link [ref=f13e307] [cursor=pointer]:
+          - /url: javascript:void(0);
+        - link [ref=f13e308] [cursor=pointer]:
+          - /url: /home/healthChart/proxyinfo.do
+        - link [ref=f13e309] [cursor=pointer]:
+          - /url: /home/info/proxyPrescription.do
+        - link [ref=f13e310] [cursor=pointer]:
+          - /url: /home/recruit/recruitInfo/recruitNotice.do
+        - generic [ref=f13e311]:
+          - paragraph [ref=f13e312]:
+            - strong [ref=f13e313]: "365"
+            - text: 일
+            - strong [ref=f13e314]: "24"
+            - text: 시간진료예약
+          - paragraph [ref=f13e315]: 1599-3114
+        - button "맨위로 이동" [ref=f13e316] [cursor=pointer]
+      - link [ref=f13e318] [cursor=pointer]:
+        - /url: javascript:void(0);

@@ -1,0 +1,603 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - generic:
+      - link "본문 바로가기" [ref=f1e3] [cursor=pointer]:
+        - /url: "#contioner"
+      - link "글로벌 네비게이션 바로가기" [ref=f1e4] [cursor=pointer]:
+        - /url: "#header"
+    - generic [ref=f1e5]:
+      - generic [ref=f1e8]:
+        - link [ref=f1e10] [cursor=pointer]:
+          - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=40157
+        - link [ref=f1e14] [cursor=pointer]:
+          - /url: https://secure.donus.org/khnmc/pay/step1
+          - 'img "강동경희 20년의 발걸음, 이제 당신과 함께 내일로 발전기금 후원하기 발전기금 문의 : 02-440-6811" [ref=f1e16]'
+        - link [ref=f1e18] [cursor=pointer]:
+          - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=40157
+        - link [ref=f1e22] [cursor=pointer]:
+          - /url: https://secure.donus.org/khnmc/pay/step1
+        - link [ref=f1e26] [cursor=pointer]:
+          - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=40157
+      - generic:
+        - generic [ref=f1e29]:
+          - link "이전" [ref=f1e30] [cursor=pointer]:
+            - /url: javascript:;
+            - emphasis: 이전
+          - link "재생" [ref=f1e31] [cursor=pointer]:
+            - /url: javascript:;
+            - emphasis: 재생
+          - link "정지" [ref=f1e32] [cursor=pointer]:
+            - /url: javascript:;
+            - emphasis: 정지
+          - link "다음" [ref=f1e33] [cursor=pointer]:
+            - /url: javascript:;
+            - emphasis: 다음
+        - button "닫기" [ref=f1e34] [cursor=pointer]
+    - generic [ref=f1e35]:
+      - heading [level=1] [ref=f1e36]:
+        - link [ref=f1e37] [cursor=pointer]:
+          - /url: /kr/main.do
+          - img "강동경희대학교병원 로고" [ref=f1e38]
+      - generic [ref=f1e39]:
+        - generic [ref=f1e40]:
+          - link "외래진료 예약" [ref=f1e41] [cursor=pointer]:
+            - /url: /kr/reservation/appointment.do
+          - link "건강검진 안내" [ref=f1e42] [cursor=pointer]:
+            - /url: javascript:void(0);
+          - link "온라인채용" [ref=f1e43] [cursor=pointer]:
+            - /url: https://recruit.incruit.com/khnmc/
+        - generic [ref=f1e44]:
+          - list [ref=f1e45]:
+            - listitem [ref=f1e46]:
+              - link "로그인" [ref=f1e47] [cursor=pointer]:
+                - /url: javascript:void(0);
+            - listitem [ref=f1e48]:
+              - link "회원가입" [ref=f1e49] [cursor=pointer]:
+                - /url: /kr/registration/select.do
+            - listitem [ref=f1e50]:
+              - link [ref=f1e51] [cursor=pointer]:
+                - /url: javascript:;
+                - img "언어선택" [ref=f1e52]
+          - generic [ref=f1e53]:
+            - textbox "검색어 입력" [ref=f1e54]:
+              - /placeholder: 통합검색
+            - link [ref=f1e55] [cursor=pointer]:
+              - /url: javascript:gnbSearch();
+              - img "검색" [ref=f1e56]
+      - list [ref=f1e58]:
+        - listitem [ref=f1e59]:
+          - link "진료" [ref=f1e60] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e61]:
+          - link "환자/보호자" [ref=f1e62] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e63]:
+          - link "건강정보" [ref=f1e64] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e65]
+        - listitem [ref=f1e66]:
+          - link "교육/연구" [ref=f1e67] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e68]:
+          - link "병원소개" [ref=f1e69] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e70]:
+          - link "글로벌·공공협력" [ref=f1e71] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f1e72]:
+          - link "전체메뉴 보기" [ref=f1e73] [cursor=pointer]:
+            - /url: javascript:;
+            - emphasis: 전체메뉴 보기
+    - text: "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+    - generic [ref=f1e74]:
+      - generic [ref=f1e75]:
+        - list [ref=f1e76]:
+          - button "Previous" [ref=f1e77] [cursor=pointer]
+          - generic [ref=f1e79]:
+            - listitem [aria-hidden] [ref=f1e80]:
+              - link [ref=f1e82] [cursor=pointer]:
+                - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=36302
+                - heading [level=3] [ref=f1e83]: 차세대 방사선 치료 시스템
+                - paragraph [ref=f1e84]: 헬시온4.0 & SGRT 본격 가동 ‘더 빠르게, 더 정밀하게, 더 안전하게’ 암 치료를 제공합니다
+            - tabpanel [ref=f1e85]:
+              - link [ref=f1e87] [cursor=pointer]:
+                - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=39953
+                - heading "환자경험평가 서울 종합병원 1위" [level=3] [ref=f1e88]
+                - paragraph [ref=f1e89]: 입원부터 퇴원까지세심한 소통과 배려로 진정한 환자 중심 의료를 실현합니다
+            - tabpanel [aria-hidden] [ref=f1e90]:
+              - link [ref=f1e92] [cursor=pointer]:
+                - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=36330
+                - heading [level=3] [ref=f1e93]: 보건복지부 2025 의료질평가 1등급 병원
+                - paragraph [ref=f1e94]: 종합병원 의료질평가 최상위 획득 더 안전하고, 더 신뢰받는 병원으로 나아갑니다
+                - text: "*종합병원 최상위 등급 1-나 획득"
+            - tabpanel [aria-hidden] [ref=f1e95]:
+              - link [ref=f1e97] [cursor=pointer]:
+                - /url: javascript:;
+                - heading [level=3] [ref=f1e98]: 의료 세계의 미래를 선도하는 강동경희대학교병원
+                - paragraph [ref=f1e99]: ‘질병없는 인류 사회 구현’을 위해 첨단 의학으로 내일의 건강을 준비합니다
+            - tabpanel [aria-hidden] [ref=f1e100]:
+              - link [ref=f1e102] [cursor=pointer]:
+                - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?pageNo=1&boardNo=1&articleNo=35856&searchKeyword=%EB%8B%A4%EB%B9%88%EC%B9%98
+                - heading [level=3] [ref=f1e103]: 최첨단 로봇수술센터
+                - paragraph [ref=f1e104]: 다빈치 Xi · SP 시스템으로 환자 중심의 최적화된 정밀 의료를 실현합니다
+            - tabpanel [aria-hidden] [ref=f1e105]:
+              - link [ref=f1e107] [cursor=pointer]:
+                - /url: javascript:;
+                - heading [level=3] [ref=f1e108]: 암 치료 잘하는 병원
+                - paragraph [ref=f1e109]: 보건복지부 암 적정성 평가 전체 1등급, 정확한 진단·맞춤형 치료로 암 치료의 기준을 세웁니다
+            - tabpanel [aria-hidden] [ref=f1e110]:
+              - link [ref=f1e112] [cursor=pointer]:
+                - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=36302
+                - heading [level=3] [ref=f1e113]: 차세대 방사선 치료 시스템
+                - paragraph [ref=f1e114]: 헬시온4.0 & SGRT 본격 가동 ‘더 빠르게, 더 정밀하게, 더 안전하게’ 암 치료를 제공합니다
+            - listitem [aria-hidden] [ref=f1e115]:
+              - link [ref=f1e117] [cursor=pointer]:
+                - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=39953
+                - heading [level=3] [ref=f1e118]: 환자경험평가 서울 종합병원 1위
+                - paragraph [ref=f1e119]: 입원부터 퇴원까지 세심한 소통과 배려로 진정한 환자 중심 의료를 실현합니다
+            - listitem [aria-hidden] [ref=f1e120]:
+              - link [ref=f1e122] [cursor=pointer]:
+                - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=36330
+                - heading [level=3] [ref=f1e123]: 보건복지부 2025 의료질평가 1등급 병원
+                - paragraph [ref=f1e124]: 종합병원 의료질평가 최상위 획득 더 안전하고, 더 신뢰받는 병원으로 나아갑니다
+                - text: "*종합병원 최상위 등급 1-나 획득"
+            - listitem [aria-hidden] [ref=f1e125]:
+              - link [ref=f1e127] [cursor=pointer]:
+                - /url: javascript:;
+                - heading [level=3] [ref=f1e128]: 의료 세계의 미래를 선도하는 강동경희대학교병원
+                - paragraph [ref=f1e129]: ‘질병없는 인류 사회 구현’을 위해 첨단 의학으로 내일의 건강을 준비합니다
+            - listitem [aria-hidden] [ref=f1e130]:
+              - link [ref=f1e132] [cursor=pointer]:
+                - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?pageNo=1&boardNo=1&articleNo=35856&searchKeyword=%EB%8B%A4%EB%B9%88%EC%B9%98
+                - heading [level=3] [ref=f1e133]: 최첨단 로봇수술센터
+                - paragraph [ref=f1e134]: 다빈치 Xi · SP 시스템으로 환자 중심의 최적화된 정밀 의료를 실현합니다
+            - listitem [aria-hidden] [ref=f1e135]:
+              - link [ref=f1e137] [cursor=pointer]:
+                - /url: javascript:;
+                - heading [level=3] [ref=f1e138]: 암 치료 잘하는 병원
+                - paragraph [ref=f1e139]: 보건복지부 암 적정성 평가 전체 1등급, 정확한 진단·맞춤형 치료로 암 치료의 기준을 세웁니다
+            - listitem [aria-hidden] [ref=f1e140]:
+              - link [ref=f1e142] [cursor=pointer]:
+                - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=36302
+                - heading [level=3] [ref=f1e143]: 차세대 방사선 치료 시스템
+                - paragraph [ref=f1e144]: 헬시온4.0 & SGRT 본격 가동 ‘더 빠르게, 더 정밀하게, 더 안전하게’ 암 치료를 제공합니다
+          - button "Next" [ref=f1e145] [cursor=pointer]
+        - generic [ref=f1e146]:
+          - generic [ref=f1e147]:
+            - tablist [ref=f1e149]:
+              - tab "1 of 6" [selected] [ref=f1e150] [cursor=pointer]: "1"
+              - tab "2 of 6" [ref=f1e151] [cursor=pointer]: "2"
+              - tab "3 of 6" [ref=f1e152] [cursor=pointer]: "3"
+              - tab "4 of 6" [ref=f1e153] [cursor=pointer]: "4"
+              - tab "5 of 6" [ref=f1e154] [cursor=pointer]: "5"
+              - tab "6 of 6" [ref=f1e155] [cursor=pointer]: "6"
+            - link "정지" [ref=f1e157] [cursor=pointer]:
+              - /url: javascript:;
+              - emphasis: 정지
+          - generic [ref=f1e158]:
+            - list [ref=f1e159]:
+              - listitem [ref=f1e160]:
+                - link [ref=f1e161] [cursor=pointer]:
+                  - /url: "#"
+                  - img "진료시간표 아이콘" [ref=f1e162]
+                  - text: 진료시간표
+              - listitem [ref=f1e163]:
+                - link [ref=f1e164] [cursor=pointer]:
+                  - /url: "#"
+                  - img "간편예약 아이콘" [ref=f1e165]
+                  - generic [ref=f1e166]: 첫 방문전화 상담 예약
+              - listitem [ref=f1e167]:
+                - link [ref=f1e168] [cursor=pointer]:
+                  - /url: /kr/reservation/appointment.do
+                  - img "진료예약 아이콘" [ref=f1e169]
+                  - text: 진료예약
+              - listitem [ref=f1e170]:
+                - link [ref=f1e171] [cursor=pointer]:
+                  - /url: /kr/mypage/reservation/ambulatory-care.do
+                  - img "에약조회 아이콘" [ref=f1e172]
+                  - generic [ref=f1e173]: 예약조회/변경/취소
+              - listitem [ref=f1e174]:
+                - link [ref=f1e175] [cursor=pointer]:
+                  - /url: https://onetouchsend.com/webcert_gangdong
+                  - img "온라인 제증명 아이콘" [ref=f1e176]
+                  - text: 온라인 제증명
+            - generic [ref=f1e177]:
+              - textbox "의료진/진료과/질환명 입력" [ref=f1e178]:
+                - /placeholder: 의료진/진료과/질환명 검색하기
+              - link [ref=f1e179] [cursor=pointer]:
+                - /url: javascript:search();
+                - img "검색 아이콘" [ref=f1e180]
+                - text: 검색
+            - heading "대표전화 1577-5800 | 전화예약 02-440-7000" [level=3] [ref=f1e181]:
+              - text: 대표전화
+              - link "1577-5800" [ref=f1e182] [cursor=pointer]:
+                - /url: tel:1577-5800
+              - generic [ref=f1e183]: "|"
+              - text: 전화예약
+              - link "02-440-7000" [ref=f1e184] [cursor=pointer]:
+                - /url: tel:02-440-7000
+      - list [ref=f1e186]:
+        - listitem [ref=f1e187]:
+          - heading "환자/보호자" [level=3] [ref=f1e188]
+          - generic [ref=f1e189]:
+            - link "증명서발급" [ref=f1e190] [cursor=pointer]:
+              - /url: /kr/treatment/service/med-certify.do
+            - link "의무기록사본발급" [ref=f1e191] [cursor=pointer]:
+              - /url: /kr/treatment/service/med-chart.do
+            - link "외래안내" [ref=f1e192] [cursor=pointer]:
+              - /url: /kr/treatment/guide/ambulatory-care.do
+            - link "응급진료안내" [ref=f1e193] [cursor=pointer]:
+              - /url: /kr/treatment/guide/emergency.do
+            - link "비급여 진료비용" [ref=f1e194] [cursor=pointer]:
+              - /url: /kr/treatment/guide/non-payments.do
+            - link "원내배치도" [ref=f1e195] [cursor=pointer]:
+              - /url: /kr/hospitalguide/lookAround.do
+            - link "주차안내" [ref=f1e196] [cursor=pointer]:
+              - /url: /kr/patient-parent/location/parking.do
+            - link "오시는 길" [ref=f1e197] [cursor=pointer]:
+              - /url: /kr/patient-parent/location/directions.do
+        - listitem [ref=f1e198]:
+          - heading "의료진" [level=3] [ref=f1e199]
+          - generic [ref=f1e200]:
+            - link "진료협력센터" [ref=f1e201] [cursor=pointer]:
+              - /url: https://gdkhrc.khmc.or.kr/
+            - link "연구기관" [ref=f1e202] [cursor=pointer]:
+              - /url: /kr/research-education/research-institution/khmsri.do
+            - link "교육기관" [ref=f1e203] [cursor=pointer]:
+              - /url: /kr/research-education/educational-institution/medical.do
+      - generic [ref=f1e204]:
+        - heading "Hospital Updates" [level=3] [ref=f1e205]
+        - list [ref=f1e206]:
+          - listitem [ref=f1e207]:
+            - link [ref=f1e208] [cursor=pointer]:
+              - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=36330
+              - paragraph [ref=f1e211]: 보건복지부 2025 의료질 평가 종합병원 상위 1% 달성
+          - listitem [ref=f1e212]:
+            - link [ref=f1e213] [cursor=pointer]:
+              - /url: https://www.khnmc.or.kr/kr/introduction-notice/view.do?articleNo=39783
+              - paragraph [ref=f1e216]: 암 진단부터 치료까지특화된 진료 프로세스
+          - listitem [ref=f1e217]:
+            - link [ref=f1e218] [cursor=pointer]:
+              - /url: https://www.youtube.com/watch?v=imMAFe-6Pmc
+              - paragraph [ref=f1e221]: 강동경희대학교병원 개원 20주년 '질병 없는 인류 사회'의 길
+      - generic [ref=f1e222]:
+        - heading "Health Information" [level=3] [ref=f1e223]
+        - list [ref=f1e225]:
+          - listitem [ref=f1e226]:
+            - link "EBS 명의 질환별 이 시대의 명의" [ref=f1e227] [cursor=pointer]:
+              - /url: https://www.khnmc.or.kr/kr/introduction/pr/ebs-bestdoctors.do
+              - generic [ref=f1e229]:
+                - paragraph [ref=f1e230]:
+                  - generic [ref=f1e231]: EBS 명의
+                - generic [ref=f1e232]: 질환별 이 시대의 명의
+          - listitem [ref=f1e233]:
+            - link "Prime Care 뇌졸중, 증상 발생 즉시 병원 찾아야 후유증 줄인다" [ref=f1e234] [cursor=pointer]:
+              - /url: https://webzineforyou.com/contents/vol164/sub03.html
+              - generic [ref=f1e236]:
+                - paragraph [ref=f1e237]:
+                  - generic [ref=f1e238]: Prime Care
+                - generic [ref=f1e239]: 뇌졸중, 증상 발생 즉시 병원 찾아야 후유증 줄인다
+          - listitem [ref=f1e240]:
+            - link "내일을 여는 의사 딸깍 소리부터 통증까지, 턱관절이 보내는 신호" [ref=f1e241] [cursor=pointer]:
+              - /url: https://webzineforyou.com/contents/vol164/sub19.html
+              - generic [ref=f1e243]:
+                - paragraph [ref=f1e244]:
+                  - generic [ref=f1e245]: 내일을 여는 의사
+                - generic [ref=f1e246]: 딸깍 소리부터 통증까지, 턱관절이 보내는 신호
+          - listitem [ref=f1e247]:
+            - link "닥터's Pick 무릎 관절염 수술, 로봇으로 정밀함을 높이다" [ref=f1e248] [cursor=pointer]:
+              - /url: https://webzineforyou.com/contents/vol164/sub17.html
+              - generic [ref=f1e250]:
+                - paragraph [ref=f1e251]:
+                  - generic [ref=f1e252]: 닥터's Pick
+                - generic [ref=f1e253]: 무릎 관절염 수술, 로봇으로 정밀함을 높이다
+      - generic [ref=f1e254]:
+        - heading "Announcements" [level=3] [ref=f1e255]
+        - generic [ref=f1e256]:
+          - list [ref=f1e257]:
+            - listitem [ref=f1e258]:
+              - link "공지사항" [ref=f1e259] [cursor=pointer]:
+                - /url: javascript:;
+            - listitem [ref=f1e260]:
+              - link "언론보도" [ref=f1e261] [cursor=pointer]:
+                - /url: javascript:;
+            - listitem [ref=f1e262]:
+              - link "입찰정보" [ref=f1e263] [cursor=pointer]:
+                - /url: javascript:;
+            - listitem [ref=f1e264]:
+              - link "채용정보" [ref=f1e265] [cursor=pointer]:
+                - /url: https://recruit.incruit.com/khnmc/
+          - generic [ref=f1e267]:
+            - paragraph [ref=f1e268]:
+              - link "더보기 +" [ref=f1e269] [cursor=pointer]:
+                - /url: /kr/introduction-notice/list.do
+            - list [ref=f1e270]:
+              - listitem [ref=f1e271]:
+                - link "NEW 강동경희대학교병원 개원 20주년 기념 폐의 날 건강강좌 2026-10-12" [ref=f1e272] [cursor=pointer]:
+                  - /url: /kr/introduction-notice/view.do?articleNo=40189
+                  - generic [ref=f1e273]:
+                    - generic [ref=f1e274]: NEW
+                    - paragraph [ref=f1e275]: 강동경희대학교병원 개원 20주년 기념 폐의 날 건강강좌
+                    - generic [ref=f1e276]: 2026-10-12
+              - listitem [ref=f1e277]:
+                - link "강동경희대학교병원 개원 20주년 기념 류마티스내과 연수강좌 2026-10-01" [ref=f1e278] [cursor=pointer]:
+                  - /url: /kr/introduction-notice/view.do?articleNo=40157
+                  - generic [ref=f1e279]:
+                    - paragraph [ref=f1e280]: 강동경희대학교병원 개원 20주년 기념 류마티스내과 연수강좌
+                    - generic [ref=f1e281]: 2026-10-01
+              - listitem [ref=f1e282]:
+                - link "정형외과 김강일 교수, 아시아 인공관절학회(ASIA) 차기 회장 선출 2026-09-30" [ref=f1e283] [cursor=pointer]:
+                  - /url: /kr/introduction-notice/view.do?articleNo=40152
+                  - generic [ref=f1e284]:
+                    - paragraph [ref=f1e285]: 정형외과 김강일 교수, 아시아 인공관절학회(ASIA) 차기 회장 선출
+                    - generic [ref=f1e286]: 2026-09-30
+              - listitem [ref=f1e287]:
+                - link "정형외과 김강일·이효범 교수팀, 아시아 인공관절학회 '최우수 구연상' 수상 2026-09-29" [ref=f1e288] [cursor=pointer]:
+                  - /url: /kr/introduction-notice/view.do?articleNo=40147
+                  - generic [ref=f1e289]:
+                    - paragraph [ref=f1e290]: 정형외과 김강일·이효범 교수팀, 아시아 인공관절학회 '최우수 구연상' 수상
+                    - generic [ref=f1e291]: 2026-09-29
+      - generic [ref=f1e293]:
+        - heading "Medical Media" [level=3] [ref=f1e294]
+        - list [ref=f1e295]:
+          - listitem [ref=f1e296]:
+            - paragraph [ref=f1e298]:
+              - img "One Air 아이콘" [ref=f1e299]
+              - text: On Air
+            - generic [ref=f1e300]:
+              - link "EBS 명의 - 오십견, 절대 주사로 낫지 않는다 페이지 새창열림":
+                - /url: https://home.ebs.co.kr/bestdoctors/vodReplayView?pageNm=replay&siteCd=ME&courseId=BP0PAPG0000000014&stepId=01BP0PAPG0000000014&lectId=60683961
+              - paragraph [ref=f1e301]: EBS 명의 - 오십견, 절대 주사로 낫지 않는다
+          - listitem [ref=f1e302]:
+            - paragraph [ref=f1e304]:
+              - img "네이버 블로그 아이콘" [ref=f1e305]
+              - text: BLOG
+            - generic [ref=f1e306]:
+              - link "통풍일까, 류마티스일까? 페이지 새창열림":
+                - /url: https://blog.naver.com/khnmc06/224415021167
+              - paragraph [ref=f1e307]: 통풍일까, 류마티스일까?
+          - listitem [ref=f1e308]:
+            - paragraph [ref=f1e310]:
+              - img "유튜브 아이콘" [ref=f1e311]
+              - text: YOUTUBE
+            - generic [ref=f1e312]:
+              - link "65세 이상은 독감 백신 접종만 맞으면 끝이 아니다? 페이지 새창열림":
+                - /url: https://www.youtube.com/watch?v=9F4T-xXQUww
+              - paragraph [ref=f1e313]: 65세 이상은 독감 백신 접종만 맞으면 끝이 아니다?
+          - listitem [ref=f1e314]:
+            - paragraph [ref=f1e316]:
+              - img "인스타 아이콘" [ref=f1e317]
+              - text: INSTAGRAM
+            - generic [ref=f1e318]:
+              - link "장염과 비슷한 '염증성 장질환' 페이지 새창열림":
+                - /url: https://www.instagram.com/p/DZEE57THW1y/?img_index=1
+              - paragraph [ref=f1e319]: 장염과 비슷한 '염증성 장질환'
+      - generic [ref=f1e322]:
+        - paragraph [ref=f1e323]:
+          - generic [ref=f1e324]:
+            - emphasis [ref=f1e325]: “
+            - text: 경희의료원은 개인의 소유물이 아니고 국민의 것, 국가의 것입니다.
+          - generic [ref=f1e326]:
+            - text: 이를 위해 우리의 노력과 정력이 깃든 경희의료원을 국민에게 헌납합니다.
+            - emphasis [ref=f1e327]: ”
+        - generic [ref=f1e328]: 설립자 미원(美源) 조영식 박사, 1971년 경희의료원 개원식
+    - generic [ref=f1e329]:
+      - link "강동경희대학교 의대병원" [ref=f1e330] [cursor=pointer]:
+        - /url: https://med.khnmc.or.kr
+      - link "강동경희대학교 한방병원" [ref=f1e332] [cursor=pointer]:
+        - /url: https://km.khnmc.or.kr
+      - link "강동경희대학교 치과병원" [ref=f1e334] [cursor=pointer]:
+        - /url: https://dent.khnmc.or.kr
+      - link "협진 진료처" [ref=f1e336] [cursor=pointer]:
+        - /url: https://integ.khnmc.or.kr
+  - generic [ref=f1e338]:
+    - generic [ref=f1e339]:
+      - list [ref=f1e342]:
+        - listitem [aria-hidden] [ref=f1e343]:
+          - generic [ref=f1e345]:
+            - paragraph [ref=f1e346]: 건강보험심사평가원
+            - text: 고난도 수술 많이 하는 병원
+        - listitem [aria-hidden] [ref=f1e347]:
+          - generic [ref=f1e349]:
+            - paragraph [ref=f1e350]: KGMSA
+            - text: 대한민국 글로벌 의료마케팅대상
+        - listitem [aria-hidden] [ref=f1e351]:
+          - generic [ref=f1e353]:
+            - paragraph [ref=f1e354]: 디지털조선일보
+            - text: 소비자가 뽑은 가장 신뢰하는 병원
+        - listitem [aria-hidden] [ref=f1e355]:
+          - generic [ref=f1e357]:
+            - paragraph [ref=f1e358]: 메디컬코리아
+            - text: 외국인 환자유치 대상
+        - listitem [aria-hidden] [ref=f1e359]:
+          - generic [ref=f1e361]:
+            - paragraph [ref=f1e362]: 보건복지가족부
+            - text: 외국인 환자 유치 장관상 수상
+        - listitem [aria-hidden] [ref=f1e363]:
+          - generic [ref=f1e365]:
+            - paragraph [ref=f1e366]: 서울특별시
+            - text: 협력의료기관 인증
+        - listitem [aria-hidden] [ref=f1e367]:
+          - generic [ref=f1e369]:
+            - paragraph [ref=f1e370]: 웹어워드코리아
+            - text: 고객지원·서비스 우수상
+        - listitem [aria-hidden] [ref=f1e371]:
+          - generic [ref=f1e373]:
+            - paragraph [ref=f1e374]: 유니세프
+            - text: 아기에게 친근한 병원
+        - listitem [aria-hidden] [ref=f1e375]:
+          - generic [ref=f1e377]:
+            - paragraph [ref=f1e378]: 한국관광공사
+            - text: 의료관광 추진 우수기관
+        - listitem [aria-hidden] [ref=f1e379]:
+          - generic [ref=f1e381]:
+            - paragraph [ref=f1e382]: 한국정보보호산업협회
+            - text: 보안서버(SSL) 인증
+        - listitem [aria-hidden] [ref=f1e383]:
+          - generic [ref=f1e385]:
+            - paragraph [ref=f1e386]: 정보통신접근성 품질인증기관
+            - text: 웹접근성 인증
+        - listitem [ref=f1e387]:
+          - img "건강보험심사평가원 고난도 수술 많이 하는 병원" [ref=f1e388]
+          - generic [ref=f1e389]:
+            - paragraph [ref=f1e390]: 건강보험심사평가원
+            - text: 고난도 수술 많이 하는 병원
+        - listitem [ref=f1e391]:
+          - img "KGMSA 대한민국 글로벌 의료마케팅대상" [ref=f1e392]
+          - generic [ref=f1e393]:
+            - paragraph [ref=f1e394]: KGMSA
+            - text: 대한민국 글로벌 의료마케팅대상
+        - listitem [ref=f1e395]:
+          - img "디지털조선일보 소비자가 뽑은 가장 신뢰하는 병원" [ref=f1e396]
+          - generic [ref=f1e397]:
+            - paragraph [ref=f1e398]: 디지털조선일보
+            - text: 소비자가 뽑은 가장 신뢰하는 병원
+        - listitem [ref=f1e399]:
+          - img "메디컬코리아 외국인 환자유치 대상" [ref=f1e400]
+          - generic [ref=f1e401]:
+            - paragraph [ref=f1e402]: 메디컬코리아
+            - text: 외국인 환자유치 대상
+        - listitem [aria-hidden] [ref=f1e403]:
+          - generic [ref=f1e405]:
+            - paragraph [ref=f1e406]: 보건복지가족부
+            - text: 외국인 환자 유치 장관상 수상
+        - listitem [aria-hidden] [ref=f1e407]:
+          - generic [ref=f1e409]:
+            - paragraph [ref=f1e410]: 서울특별시
+            - text: 협력의료기관 인증
+        - listitem [aria-hidden] [ref=f1e411]:
+          - generic [ref=f1e413]:
+            - paragraph [ref=f1e414]: 웹어워드코리아
+            - text: 고객지원·서비스 우수상
+        - listitem [aria-hidden] [ref=f1e415]:
+          - generic [ref=f1e417]:
+            - paragraph [ref=f1e418]: 유니세프
+            - text: 아기에게 친근한 병원
+        - listitem [aria-hidden] [ref=f1e419]:
+          - generic [ref=f1e421]:
+            - paragraph [ref=f1e422]: 한국관광공사
+            - text: 의료관광 추진 우수기관
+        - listitem [aria-hidden] [ref=f1e423]:
+          - generic [ref=f1e425]:
+            - paragraph [ref=f1e426]: 한국정보보호산업협회
+            - text: 보안서버(SSL) 인증
+        - listitem [aria-hidden] [ref=f1e427]:
+          - generic [ref=f1e429]:
+            - paragraph [ref=f1e430]: 정보통신접근성 품질인증기관
+            - text: 웹접근성 인증
+        - listitem [aria-hidden] [ref=f1e431]:
+          - generic [ref=f1e433]:
+            - paragraph [ref=f1e434]: 건강보험심사평가원
+            - text: 고난도 수술 많이 하는 병원
+        - listitem [aria-hidden] [ref=f1e435]:
+          - generic [ref=f1e437]:
+            - paragraph [ref=f1e438]: KGMSA
+            - text: 대한민국 글로벌 의료마케팅대상
+        - listitem [aria-hidden] [ref=f1e439]:
+          - generic [ref=f1e441]:
+            - paragraph [ref=f1e442]: 디지털조선일보
+            - text: 소비자가 뽑은 가장 신뢰하는 병원
+        - listitem [aria-hidden] [ref=f1e443]:
+          - generic [ref=f1e445]:
+            - paragraph [ref=f1e446]: 메디컬코리아
+            - text: 외국인 환자유치 대상
+        - listitem [aria-hidden] [ref=f1e447]:
+          - generic [ref=f1e449]:
+            - paragraph [ref=f1e450]: 보건복지가족부
+            - text: 외국인 환자 유치 장관상 수상
+        - listitem [aria-hidden] [ref=f1e451]:
+          - generic [ref=f1e453]:
+            - paragraph [ref=f1e454]: 서울특별시
+            - text: 협력의료기관 인증
+        - listitem [aria-hidden] [ref=f1e455]:
+          - generic [ref=f1e457]:
+            - paragraph [ref=f1e458]: 웹어워드코리아
+            - text: 고객지원·서비스 우수상
+        - listitem [aria-hidden] [ref=f1e459]:
+          - generic [ref=f1e461]:
+            - paragraph [ref=f1e462]: 유니세프
+            - text: 아기에게 친근한 병원
+        - listitem [aria-hidden] [ref=f1e463]:
+          - generic [ref=f1e465]:
+            - paragraph [ref=f1e466]: 한국관광공사
+            - text: 의료관광 추진 우수기관
+        - listitem [aria-hidden] [ref=f1e467]:
+          - generic [ref=f1e469]:
+            - paragraph [ref=f1e470]: 한국정보보호산업협회
+            - text: 보안서버(SSL) 인증
+        - listitem [aria-hidden] [ref=f1e471]:
+          - generic [ref=f1e473]:
+            - paragraph [ref=f1e474]: 정보통신접근성 품질인증기관
+            - text: 웹접근성 인증
+      - generic:
+        - button "Previous slide" [ref=f1e475] [cursor=pointer]:
+          - text: Prev
+          - emphasis
+        - button "Next slide" [ref=f1e476] [cursor=pointer]:
+          - text: Next
+          - emphasis
+    - generic [ref=f1e478]:
+      - img "강동경희대학교병원" [ref=f1e480]
+      - generic [ref=f1e481]:
+        - heading "강동경희대학교병원" [level=3] [ref=f1e482]
+        - paragraph [ref=f1e483]: 주소 (05278) 서울특별시 강동구 동남로 892
+        - paragraph [ref=f1e484]:
+          - text: 대표번호
+          - link "1577-5800" [ref=f1e485] [cursor=pointer]:
+            - /url: tel:1577-5800
+          - text: 전화예약
+          - link "02-440-7000" [ref=f1e487] [cursor=pointer]:
+            - /url: tel:02-440-7000
+          - text: 응급의료센터
+          - link "1577-5800" [ref=f1e489] [cursor=pointer]:
+            - /url: tel:1577-5800
+      - generic [ref=f1e490]:
+        - link "강동경희대학교병원 관련 사이트 + 셀렉트 열기" [ref=f1e492] [cursor=pointer]:
+          - /url: javascript:;
+          - text: 강동경희대학교병원 관련 사이트
+          - generic [ref=f1e493]: +
+          - text: 셀렉트 열기
+        - link "강동경희대학교병원 관련 기관 주요 사이트 + 셀렉트 열기" [ref=f1e495] [cursor=pointer]:
+          - /url: javascript:;
+          - text: 강동경희대학교병원 관련 기관 주요 사이트
+          - generic [ref=f1e496]: +
+          - text: 셀렉트 열기
+    - generic [ref=f1e498]:
+      - generic [ref=f1e499]:
+        - paragraph [ref=f1e500]:
+          - link "비급여진료비용" [ref=f1e501] [cursor=pointer]:
+            - /url: /kr/treatment/guide/non-payments.do
+          - text: Ⅰ
+          - link "이용약관" [ref=f1e502] [cursor=pointer]:
+            - /url: /kr/policies/user-agreement.do
+          - text: Ⅰ
+          - link "개인정보처리방침" [ref=f1e503] [cursor=pointer]:
+            - /url: /kr/policies/privacy-policy.do
+          - text: Ⅰ
+          - link "환자의 권리와 의무" [ref=f1e504] [cursor=pointer]:
+            - /url: /kr/policies/patient-right-responsibilities.do
+          - text: Ⅰ
+          - link "이메일주소무단수집거부" [ref=f1e505] [cursor=pointer]:
+            - /url: /kr/policies/rejection-of-unauthorized-email-collection.do
+          - text: Ⅰ
+          - link "발전기금" [ref=f1e506] [cursor=pointer]:
+            - /url: /kr/public-cooperation/development-fund.do
+        - paragraph [ref=f1e507]: Copyrightⓒ KYUNG HEE UNIVERSITY HOSPITAL AT GANGDONG, ALL RIGHTS RESERVED.
+      - list [ref=f1e509]:
+        - listitem [ref=f1e510]:
+          - link [ref=f1e511] [cursor=pointer]:
+            - /url: https://www.youtube.com/user/KHNMC2006
+            - img "유튜브" [ref=f1e512]
+        - listitem [ref=f1e513]:
+          - link [ref=f1e514] [cursor=pointer]:
+            - /url: https://www.instagram.com/gangdong_kyunghee/
+            - img "인스타" [ref=f1e515]
+        - listitem [ref=f1e516]:
+          - link [ref=f1e517] [cursor=pointer]:
+            - /url: https://blog.naver.com/khnmc06
+            - img "네이버블로그" [ref=f1e518]
+        - listitem [ref=f1e519]:
+          - link [ref=f1e520] [cursor=pointer]:
+            - /url: https://clip.naver.com/@khnmc2006
+            - img "네이버 클립" [ref=f1e521]
+  - text: + 셀렉트 열기 + 셀렉트 열기

@@ -1,0 +1,600 @@
+- generic [ref=f5e3]:
+  - generic:
+    - link "본문 바로가기" [ref=f5e4] [cursor=pointer]:
+      - /url: "#contioner"
+    - link "글로벌 네비게이션 바로가기" [ref=f5e5] [cursor=pointer]:
+      - /url: "#header"
+  - banner [ref=f5e6]:
+    - generic [ref=f5e8]:
+      - heading [level=1] [ref=f5e9]:
+        - link [ref=f5e10] [cursor=pointer]:
+          - /url: /kr/index.do
+          - img "고려대학교의료원 로고" [ref=f5e11]
+      - list [ref=f5e12]:
+        - listitem [ref=f5e13] [cursor=pointer]:
+          - link "의료원 소개" [ref=f5e14]:
+            - /url: /kr/introduction/introduction.do
+        - listitem [ref=f5e15] [cursor=pointer]:
+          - link "공지ㆍ소식" [ref=f5e16]:
+            - /url: /kr/B021/list.do
+        - listitem [ref=f5e17] [cursor=pointer]:
+          - link "대학ㆍ대학원" [ref=f5e18]:
+            - /url: http://medicine.korea.ac.kr/web/www
+        - listitem [ref=f5e19] [cursor=pointer]:
+          - link "병원" [ref=f5e20]:
+            - /url: http://anam.kumc.or.kr/main/index.do
+        - listitem [ref=f5e21] [cursor=pointer]:
+          - link "연구기관" [ref=f5e22]:
+            - /url: http://research.kumc.or.kr/
+        - listitem [ref=f5e23] [cursor=pointer]:
+          - link "나눔과 봉사" [ref=f5e24]:
+            - /url: http://donation.kumc.or.kr/
+      - generic [ref=f5e25]:
+        - button [ref=f5e27] [cursor=pointer]:
+          - emphasis [ref=f5e28]: 언어 선택
+        - button [ref=f5e29] [cursor=pointer]:
+          - emphasis [ref=f5e30]: 검색
+        - button [ref=f5e31] [cursor=pointer]
+    - generic [ref=f5e35]:
+      - button [ref=f5e38] [cursor=pointer]
+      - list [ref=f5e39]:
+        - listitem [ref=f5e40]:
+          - heading "의료원 소개" [level=3] [ref=f5e42]
+          - list [ref=f5e43]:
+            - listitem [ref=f5e44]:
+              - link "소개" [ref=f5e45] [cursor=pointer]:
+                - /url: /kr/introduction/introduction.do
+            - listitem [ref=f5e46]:
+              - link "현황" [ref=f5e47] [cursor=pointer]:
+                - /url: /kr/introduction/status.do
+            - listitem [ref=f5e48]:
+              - link "조직도" [ref=f5e49] [cursor=pointer]:
+                - /url: /kr/introduction/organization-chart.do
+            - listitem [ref=f5e50]:
+              - link "연혁" [ref=f5e51] [cursor=pointer]:
+                - /url: /kr/introduction/history.do
+            - listitem [ref=f5e52]:
+              - link "역대 의료원장" [ref=f5e53] [cursor=pointer]:
+                - /url: /kr/introduction/director-history.do
+            - listitem [ref=f5e54]:
+              - link "HI" [ref=f5e55] [cursor=pointer]:
+                - /url: /kr/introduction/HI.do
+            - listitem [ref=f5e56]:
+              - link "고영캠퍼스" [ref=f5e57] [cursor=pointer]:
+                - /url: /kr/introduction/koyoung/floor.do
+            - listitem [ref=f5e58]:
+              - link "메디사이언스 파크" [ref=f5e59] [cursor=pointer]:
+                - /url: /kr/introduction/mediSciencePark_1.do
+            - listitem [ref=f5e60]:
+              - link "동탄 제4고대병원" [ref=f5e61] [cursor=pointer]:
+                - /url: /kr/dongtan/mainPage.do
+            - listitem [ref=f5e62]:
+              - link "호랑이 가게" [ref=f5e63] [cursor=pointer]:
+                - /url: https://www.horangigagae.co.kr/index/
+        - listitem [ref=f5e64]:
+          - heading "공지ㆍ소식" [level=3] [ref=f5e66]
+          - list [ref=f5e67]:
+            - listitem [ref=f5e68]:
+              - link "공지사항" [ref=f5e69] [cursor=pointer]:
+                - /url: /kr/B021/list.do
+            - listitem [ref=f5e70]:
+              - link "뉴스" [ref=f5e71] [cursor=pointer]:
+                - /url: /kr/B022/list.do
+            - listitem [ref=f5e72]:
+              - link "언론보도" [ref=f5e73] [cursor=pointer]:
+                - /url: /kr/notice-news/press-report.do
+            - listitem [ref=f5e74]:
+              - link "채용정보" [ref=f5e75] [cursor=pointer]:
+                - /url: /kr/notice-news/recruit.do
+            - listitem [ref=f5e76]:
+              - link "입찰공고" [ref=f5e77] [cursor=pointer]:
+                - /url: /kr/NEWS_TENDER/list.do
+            - listitem [ref=f5e78]:
+              - link "웹진 꿈" [ref=f5e79] [cursor=pointer]:
+                - /url: /kr/B047/list.do
+            - listitem [ref=f5e80]:
+              - link "KU Medicine TV" [ref=f5e81] [cursor=pointer]:
+                - /url: /kr/B038/list.do
+            - listitem [ref=f5e82]:
+              - link "뉴스레터" [ref=f5e83] [cursor=pointer]:
+                - /url: /kr/B043/list.do
+        - listitem [ref=f5e84]:
+          - heading "대학ㆍ대학원" [level=3] [ref=f5e86]
+          - list [ref=f5e87]:
+            - listitem [ref=f5e88]:
+              - link "의과대학" [ref=f5e89] [cursor=pointer]:
+                - /url: http://medicine.korea.ac.kr
+            - listitem [ref=f5e90]:
+              - link "보건대학원" [ref=f5e91] [cursor=pointer]:
+                - /url: https://pbhealth.korea.ac.kr/pbhealth/index.do
+            - listitem [ref=f5e92]:
+              - link "임상치의학 대학원" [ref=f5e93] [cursor=pointer]:
+                - /url: https://dental.korea.ac.kr/dent/index.do
+        - listitem [ref=f5e94]:
+          - heading "병원" [level=3] [ref=f5e96]
+          - list [ref=f5e97]:
+            - listitem [ref=f5e98]:
+              - link "고려대 안암병원" [ref=f5e99] [cursor=pointer]:
+                - /url: http://anam.kumc.or.kr/kr/index.do
+            - listitem [ref=f5e100]:
+              - link "고려대 구로병원" [ref=f5e101] [cursor=pointer]:
+                - /url: http://guro.kumc.or.kr/kr/index.do
+            - listitem [ref=f5e102]:
+              - link "고려대 안산병원" [ref=f5e103] [cursor=pointer]:
+                - /url: http://ansan.kumc.or.kr/kr/index.do
+        - listitem [ref=f5e104]:
+          - heading "연구기관" [level=3] [ref=f5e106]
+          - list [ref=f5e107]:
+            - listitem [ref=f5e108]:
+              - link "의학연구처" [ref=f5e109] [cursor=pointer]:
+                - /url: /kr/institution/medical-research/intro.do
+            - listitem [ref=f5e110]:
+              - link "안암 연구중심병원" [ref=f5e111] [cursor=pointer]:
+                - /url: https://anamrnd.kumc.or.kr
+            - listitem [ref=f5e112]:
+              - link "구로 연구중심병원" [ref=f5e113] [cursor=pointer]:
+                - /url: https://gurornd.kumc.or.kr
+            - listitem [ref=f5e114]:
+              - link "안산 연구중심병원" [ref=f5e115] [cursor=pointer]:
+                - /url: https://ansanrnd.kumc.or.kr
+            - listitem [ref=f5e116]:
+              - link "연구자 검색" [ref=f5e117] [cursor=pointer]:
+                - /url: https://scholarworks.korea.ac.kr/kumedicine/
+            - listitem [ref=f5e118]:
+              - link "백신혁신센터" [ref=f5e119] [cursor=pointer]:
+                - /url: http://vick.korea.ac.kr/main/main.html
+            - listitem [ref=f5e120]:
+              - link "명예의 전당" [ref=f5e121] [cursor=pointer]:
+                - /url: /kr/institution/medical-research/honor.do
+        - listitem [ref=f5e122]:
+          - heading "나눔과 봉사" [level=3] [ref=f5e124]
+          - list [ref=f5e125]:
+            - listitem [ref=f5e126]:
+              - link "발전기금" [ref=f5e127] [cursor=pointer]:
+                - /url: http://donation.kumc.or.kr/
+            - listitem [ref=f5e128]:
+              - link "사회공헌" [ref=f5e129] [cursor=pointer]:
+                - /url: https://centerforesg.kumc.or.kr/main.do
+    - generic [ref=f5e131]:
+      - button [ref=f5e133] [cursor=pointer]
+      - generic [ref=f5e134]:
+        - list [ref=f5e135]:
+          - listitem [ref=f5e136]:
+            - link "의료원 소개" [ref=f5e137] [cursor=pointer]:
+              - /url: javascript:;
+          - listitem [ref=f5e138]:
+            - link "공지ㆍ소식" [ref=f5e139] [cursor=pointer]:
+              - /url: javascript:;
+          - listitem [ref=f5e140]:
+            - link "대학ㆍ대학원" [ref=f5e141] [cursor=pointer]:
+              - /url: javascript:;
+          - listitem [ref=f5e142]:
+            - link "병원" [ref=f5e143] [cursor=pointer]:
+              - /url: javascript:;
+          - listitem [ref=f5e144]:
+            - link "연구기관" [ref=f5e145] [cursor=pointer]:
+              - /url: javascript:;
+          - listitem [ref=f5e146]:
+            - link "나눔과 봉사" [ref=f5e147] [cursor=pointer]:
+              - /url: javascript:;
+        - list [ref=f5e148]:
+          - listitem [ref=f5e149]:
+            - list [ref=f5e150]:
+              - listitem [ref=f5e151]:
+                - link "소개" [ref=f5e152] [cursor=pointer]:
+                  - /url: /kr/introduction/introduction.do
+              - listitem [ref=f5e153]:
+                - link "현황" [ref=f5e154] [cursor=pointer]:
+                  - /url: /kr/introduction/status.do
+              - listitem [ref=f5e155]:
+                - link "조직도" [ref=f5e156] [cursor=pointer]:
+                  - /url: /kr/introduction/organization-chart.do
+              - listitem [ref=f5e157]:
+                - link "연혁" [ref=f5e158] [cursor=pointer]:
+                  - /url: /kr/introduction/history.do
+              - listitem [ref=f5e159]:
+                - link "역대 의료원장" [ref=f5e160] [cursor=pointer]:
+                  - /url: /kr/introduction/director-history.do
+              - listitem [ref=f5e161]:
+                - link "HI" [ref=f5e162] [cursor=pointer]:
+                  - /url: /kr/introduction/HI.do
+              - listitem [ref=f5e163]:
+                - link "고영캠퍼스" [ref=f5e164] [cursor=pointer]:
+                  - /url: /kr/introduction/koyoung/floor.do
+              - listitem [ref=f5e165]:
+                - link "메디사이언스 파크" [ref=f5e166] [cursor=pointer]:
+                  - /url: /kr/introduction/mediSciencePark_1.do
+              - listitem [ref=f5e167]:
+                - link "동탄 제4고대병원" [ref=f5e168] [cursor=pointer]:
+                  - /url: /kr/dongtan/mainPage.do
+              - listitem [ref=f5e169]:
+                - link "호랑이 가게" [ref=f5e170] [cursor=pointer]:
+                  - /url: https://www.horangigagae.co.kr/index/
+    - generic [ref=f5e171]:
+      - list [ref=f5e172]:
+        - listitem [ref=f5e173]:
+          - link [ref=f5e174] [cursor=pointer]:
+            - /url: https://medicine.korea.ac.kr/kr/index.do
+            - img "의과대학 링크" [ref=f5e175]
+            - text: 의과대학
+        - listitem [ref=f5e176]:
+          - link [ref=f5e177] [cursor=pointer]:
+            - /url: https://anam.kumc.or.kr/kr/index.do
+            - img "안암병원 링크" [ref=f5e178]
+            - text: 안암병원
+        - listitem [ref=f5e179]:
+          - link [ref=f5e180] [cursor=pointer]:
+            - /url: https://guro.kumc.or.kr/kr/index.do
+            - img "구로병원 링크" [ref=f5e181]
+            - text: 구로병원
+        - listitem [ref=f5e182]:
+          - link [ref=f5e183] [cursor=pointer]:
+            - /url: https://ansan.kumc.or.kr/kr/index.do
+            - img "안산병원 링크" [ref=f5e184]
+            - text: 안산병원
+        - listitem [ref=f5e185]:
+          - link [ref=f5e186] [cursor=pointer]:
+            - /url: http://donation.kumc.or.kr/
+            - img "발전기금 링크" [ref=f5e187]
+            - text: 발전기금
+        - listitem [ref=f5e188]:
+          - button "닫기" [ref=f5e189] [cursor=pointer]
+      - link [ref=f5e190] [cursor=pointer]:
+        - /url: "#"
+        - img "맨위로 버튼" [ref=f5e191]
+        - text: TOP
+  - main [ref=f5e192]:
+    - generic [ref=f5e193]:
+      - generic [ref=f5e194]:
+        - button [ref=f5e197] [cursor=pointer]
+        - button [ref=f5e198] [cursor=pointer]
+      - generic [ref=f5e199]:
+        - heading "KOREA UNIVERSITY MEDICINE" [level=3] [ref=f5e200]
+        - list [ref=f5e201]:
+          - listitem [ref=f5e202]:
+            - link "의과대학" [ref=f5e203] [cursor=pointer]:
+              - /url: https://medicine.korea.ac.kr/kr/index.do
+          - listitem [ref=f5e204]:
+            - link "안암병원" [ref=f5e205] [cursor=pointer]:
+              - /url: https://anam.kumc.or.kr/kr/index.do
+          - listitem [ref=f5e206]:
+            - link "구로병원" [ref=f5e207] [cursor=pointer]:
+              - /url: https://guro.kumc.or.kr/kr/index.do
+          - listitem [ref=f5e208]:
+            - link "안산병원" [ref=f5e209] [cursor=pointer]:
+              - /url: https://ansan.kumc.or.kr/kr/index.do
+          - listitem [ref=f5e210]:
+            - link "발전기금" [ref=f5e211] [cursor=pointer]:
+              - /url: http://donation.kumc.or.kr/
+    - generic [ref=f5e213]:
+      - generic [ref=f5e214]:
+        - text: KU Medicine WEBZINE
+        - heading "당신의 멋진 꿈을 응원합니다." [level=3] [ref=f5e215]: 당신의 멋진꿈을 응원합니다.
+        - paragraph [ref=f5e216]:
+          - text: 꿈(KUMM)은
+          - strong [ref=f5e217]: K
+          - text: orea
+          - strong [ref=f5e218]: U
+          - text: niversity
+          - strong [ref=f5e219]: M
+          - text: edicine
+          - strong [ref=f5e220]: M
+          - text: agazine 의 약자로 고려대학교의료원이 바라는 미래의학을 실현하고 질병에서 자유로운 세상을 만들고자 하는 바람을 뜻합니다.
+      - generic [ref=f5e222]:
+        - generic [ref=f5e223]:
+          - link:
+            - /url: /seasonPress/KUMM_vol33/index.jsp
+        - generic [ref=f5e224]:
+          - link:
+            - /url: /seasonPress/KUMM_vol32/index.jsp
+        - generic [ref=f5e225]:
+          - link:
+            - /url: /seasonPress/KUMM_vol31/index.jsp
+        - generic [ref=f5e226]:
+          - link:
+            - /url: /seasonPress/KUMM_vol30/index.jsp
+        - generic [ref=f5e227]:
+          - link:
+            - /url: /seasonPress/KUMM_vol29/index.jsp
+        - generic [ref=f5e228]:
+          - 'link "꿈 Vol.33 발행일 : 2026-07-30"':
+            - /url: /seasonPress/KUMM_vol33/index.jsp
+            - generic [ref=f5e229] [cursor=pointer]
+            - generic [ref=f5e230] [cursor=pointer]:
+              - heading "꿈 Vol.33" [level=4] [ref=f5e231]
+              - time [ref=f5e232]: "발행일 : 2026-07-30"
+        - generic [ref=f5e233]:
+          - link:
+            - /url: /seasonPress/KUMM_vol32/index.jsp
+        - generic [ref=f5e234]:
+          - link:
+            - /url: /seasonPress/KUMM_vol31/index.jsp
+        - generic [ref=f5e235]:
+          - link:
+            - /url: /seasonPress/KUMM_vol30/index.jsp
+        - generic [ref=f5e236]:
+          - link:
+            - /url: /seasonPress/KUMM_vol29/index.jsp
+        - generic [ref=f5e237]:
+          - link:
+            - /url: /seasonPress/KUMM_vol33/index.jsp
+        - generic [ref=f5e238]:
+          - link:
+            - /url: /seasonPress/KUMM_vol32/index.jsp
+        - generic [ref=f5e239]:
+          - link:
+            - /url: /seasonPress/KUMM_vol31/index.jsp
+        - generic [ref=f5e240]:
+          - link:
+            - /url: /seasonPress/KUMM_vol30/index.jsp
+        - generic [ref=f5e241]:
+          - link:
+            - /url: /seasonPress/KUMM_vol29/index.jsp
+    - generic [ref=f5e242]:
+      - generic [ref=f5e243]:
+        - generic [ref=f5e244]:
+          - heading "미래의학을 선도하는 ‘KU MEDICINE’" [level=3] [ref=f5e245]
+          - heading "세계 초일류 의료기관을 향해 도약" [level=3] [ref=f5e247]
+        - generic [ref=f5e249]:
+          - generic [ref=f5e250] [cursor=pointer]:
+            - link "메디사이언스 파크 메디사이언스 파크 K-바이오 메디컬 플랫폼 ㅣ 신약 및 백신 개발의 요람":
+              - /url: /kr/introduction/mediSciencePark_1.do
+              - generic [ref=f5e251]: 메디사이언스 파크
+              - generic [ref=f5e252]:
+                - heading "메디사이언스 파크" [level=3] [ref=f5e253]
+                - paragraph [ref=f5e254]: K-바이오 메디컬 플랫폼 ㅣ 신약 및 백신 개발의 요람
+          - generic [ref=f5e255] [cursor=pointer]:
+            - link "의과대학 의과대학 차세대 창의·융합 인재 양성의 산실":
+              - /url: https://medicine.korea.ac.kr/kr/index.do
+              - generic [ref=f5e256]: 의과대학
+              - generic [ref=f5e257]:
+                - heading "의과대학" [level=3] [ref=f5e258]
+                - paragraph [ref=f5e259]: 차세대 창의·융합 인재 양성의 산실
+          - generic [ref=f5e260] [cursor=pointer]:
+            - link "안암병원 안암병원 미래 융복합 의료인재 양성 ㅣ 서울 바이오 허브의 중심":
+              - /url: https://anam.kumc.or.kr/kr/index.do
+              - generic [ref=f5e261]: 안암병원
+              - generic [ref=f5e262]:
+                - heading "안암병원" [level=3] [ref=f5e263]
+                - paragraph [ref=f5e264]: 미래 융복합 의료인재 양성 ㅣ 서울 바이오 허브의 중심
+          - generic [ref=f5e265] [cursor=pointer]:
+            - link "구로병원 구로병원 한국형 의료 실리콘밸리 구축 ㅣ 중증환자 집중케어 시스템":
+              - /url: https://guro.kumc.or.kr/kr/index.do
+              - generic [ref=f5e266]: 구로병원
+              - generic [ref=f5e267]:
+                - heading "구로병원" [level=3] [ref=f5e268]
+                - paragraph [ref=f5e269]: 한국형 의료 실리콘밸리 구축 ㅣ 중증환자 집중케어 시스템
+          - generic [ref=f5e270] [cursor=pointer]:
+            - link "안산병원 안산병원 안산 헬스시티 거점 ㅣ 정밀의료·특성화 맞춤형 의료 서비스":
+              - /url: https://ansan.kumc.or.kr/kr/index.do
+              - generic [ref=f5e271]: 안산병원
+              - generic [ref=f5e272]:
+                - heading "안산병원" [level=3] [ref=f5e273]
+                - paragraph [ref=f5e274]: 안산 헬스시티 거점 ㅣ 정밀의료·특성화 맞춤형 의료 서비스
+          - generic [ref=f5e275] [cursor=pointer]:
+            - link "고영캠퍼스 고영캠퍼스 미래의학과 사회적 가치실현을 위한 런치패드":
+              - /url: /kr/introduction/koyoung/floor.do
+              - generic [ref=f5e276]: 고영캠퍼스
+              - generic [ref=f5e277]:
+                - heading "고영캠퍼스" [level=3] [ref=f5e278]
+                - paragraph [ref=f5e279]: 미래의학과 사회적 가치실현을 위한 런치패드
+      - generic [ref=f5e280]: MEDICINE
+    - generic [ref=f5e282]:
+      - generic [ref=f5e283]:
+        - generic [ref=f5e284]:
+          - text: 고려대학교의료원 소식
+          - heading "KU Medicine NEWS" [level=3] [ref=f5e285]
+        - list [ref=f5e286]:
+          - listitem [ref=f5e287]:
+            - link "뉴스" [ref=f5e288] [cursor=pointer]:
+              - /url: javascript:void(0);
+          - listitem [ref=f5e289]:
+            - link "공지사항" [ref=f5e290] [cursor=pointer]:
+              - /url: javascript:void(0);
+          - listitem [ref=f5e291]:
+            - link "언론보도" [ref=f5e292] [cursor=pointer]:
+              - /url: javascript:void(0);
+          - listitem [ref=f5e293]:
+            - link "+" [ref=f5e294] [cursor=pointer]:
+              - /url: /kr/B022/list.do
+      - generic [ref=f5e295]:
+        - link [ref=f5e296] [cursor=pointer]:
+          - /url: /kr/B022/view.do?article=272473
+          - generic [ref=f5e299]:
+            - generic [ref=f5e300]:
+              - generic [ref=f5e301]: 의료원
+              - heading "고려대의료원, ‘SMTOWN RUN CLUB 26’ 의료지원 나서" [level=3] [ref=f5e302]
+            - generic [ref=f5e303]: 고려대의료원, ‘SMTOWN RUN CLUB 26’ 의료지원 나서의료부스·구급차 운영부터 건강체험까지 현장 밀착형 의료지원SM엔터테인먼트와 ESG 협력…의료·문화 연계 사회공헌 실천고려대학교의료원(의무부총장 겸 의료원장 윤을식)이 대규모 러닝 행사 현장에서 참가자들의 건강과 안전을 지원하며 의료기관의 사회적 책임을 실천했다.고려대의료원은 지난 10월 3일 인천 영종도 왕산마리나항에서 열린 ‘SMTOWN RUN CLUB 26’에 참여해 현장 의료지원과 건강체험 프로그램을 운영했다.SM엔터테인먼트가 주최한 ‘SMTOWN RUN CLUB 26’은 러닝과 콘서트를 결합한 대규모 행사로, 아티스트와참가자가 함께 달리며 공연과 다양한 프로그램을 즐겼다.고려대의료원은 이날 고려대 안암·구로·안산병원의 의사, 간호사, 응급구조사와 사회공헌사업팀 등 총 21명으로 의료지원단을 구성했다. 고려대 안암병원 신경외과 오영규 교수 등이 참여했으며, 행사장과 러닝 코스 주요 지점에서 참가자들의 건강과 안전을 살폈다.행사장 내 의료부스에서는 러닝 중 발생할 수 있는 찰과상과 외상 등에 대한 드레싱을 비롯해 기본적인 응급처치를 제공했다. 코스 주요 구간에는 고려대학교의료원 스마트 의료기기-이동형 병원과 3대의 구급차를 배치해 응급상황 발생 시 신속하게 대응할 수 있도록 현장 의료지원 체계를 갖췄다.참가자들이 자신의 건강 상태를 직접 확인할 수 있는 체험 프로그램도 마련했다. 폐활량검사와 체성분검사(IBody) 등을 통해 신체 상태를 점검하고 일상 속 건강관리의 중요성을 체감할 수 있도록 했다.특히 이번 행사에는 유방암 환우회 회원 16명이 참가해 의미를 더했다. 환우들은 서로를 격려하며 코스를 달리고, 건강한 일상으로의 회복과 새로운 도전, 연대의 의미를 함께 나눴다. 고려대의료원 의료지원단도 환우를 비롯한 참가자들이 안전하게 행사를 즐길 수 있도록 현장에서 의료지원을 이어갔다.고려대학교 의과대학과 고려대학교의료원의 공식 마스코트 ‘호의랑’도 의료지원단과 함께 현장을 찾아 참가자들을 응원했다. 이날 행사에는 SM엔터테인먼트 소속 아티스트 샤이니 민호를 비롯해, 동방신기 최강창민, 소녀시대 유리, 엑소 수호, WayV 쿤, 샤오쥔, 헨드리, 양양, 하츠투하츠, 배우 조준영이 참여해 러너들과 함께 호흡한 것은 물론, 레이스 후에는 하츠투하츠, WayV, 민호가 무대를 선사해 현장 분위기를 더했다. ‘생명을 수호하는 의사 호랑이’라는 의미를 담은 ‘호의랑’은 의료진과 함께 참가자들과 기념사진을 촬영하고 러너들을 응원하며 활기를 더했다. 의료진과 호의랑, 아티스트들이 함께 참가자들과 소통하며 건강과 생명존중의 가치를 친근하게 전달했다.이번 의료지원은 고려대의료원과 SM엔터테인먼트가 이어오고 있는 ESG 사회공헌 협력의 일환으로 마련됐다. 양 기관은 지난해 12월 29일 사회적 가치 실현과 지속가능한 ESG 경영을 위한 업무협약을 체결하고, 각 기관의 전문성과 인프라를 활용해 다양한 사회공헌 활동을 추진하고 있다.이번 행사를 통해 고려대의료원의 의료 전문성과 SM엔터테인먼트의 문화 콘텐츠 역량을 연계해 건강과 안전, 나눔의 가치를 현장에서 함께 실천했다.윤을식 고려대학교 의무부총장 겸 의료원장은 “이번 행사를 통해 SM엔터테인먼트와 함께 참가자들의 건강과 안전을 살피고, 의료와 문화가 연계된 사회공헌의 가치를 실천할 수 있어 뜻깊다”며 “앞으로도 양 기관의 강점을 바탕으로 다양한 협력 활동을 이어가며 국민 건강 증진과 사회적 가치 실현에 기여해 나가겠다”고 말했다.
+            - generic [ref=f5e304]:
+              - img "글작성 날짜" [ref=f5e306]
+              - time [ref=f5e307]: 2026.10.08
+              - generic [ref=f5e308]: NEW
+        - list [ref=f5e309]:
+          - listitem [ref=f5e310]:
+            - link [ref=f5e311] [cursor=pointer]:
+              - /url: /kr/B022/view.do?article=272433
+              - generic [ref=f5e312]:
+                - generic [ref=f5e313]: 의료원
+                - heading "고려대의료원-식품의약품안전평가원, 바이오·의료 분야 발전 위해 맞손" [level=3] [ref=f5e314]
+              - generic [ref=f5e315]: 고려대의료원-식품의약품안전평가원, 바이오·의료 분야 발전 위해 맞손의료진 임상 자문과 식품의약품안전평가원 규제 전문상담 연계백신·의료기기·임상 자문 분야 중심으로 협력 추진 고려대학교의료원(의무부총장 겸 의료원장 윤을식)이 식품의약품안전평가원(원장 강석연)과 바이오헬스 의료제품의 제품화 지원을 위한 업무협약을 체결했다. 지난 1일 고려대 메디사이언스파크 의료원본부에서 열린 협약식에는 고려대 윤을식 의무부총장, 김학준 의학연구처장, 정희진 백신혁신센터장, 박일호 임상연구지원실장, 조금준 구로병원 연구부원장을 비롯한 주요 보직자와 강석연 식품의약품안전평가원장, 김희성 사전상담과장 등 식품의약품안전평가원 관계자들이 참석했다. 이번 협약은 식품의약품안전평가원의 규제 전문성과 고려대의료원의 임상 전문성을 연결한다는 점에서 의미가 크다. 고려대의료원은 분야별 의료진을 통한 임상 기술자문을 연계하고, 식품의약품안전평가원은 허가·심사 기준과 제출 자료 등에 관한 규제 전문상담을 제공한다. 양 기관은 백신과 의료기기, 임상 자문을 중심으로 협력하기 위해 실무협의회를 구성·운영하기로 했다. 고려대의료원 산하 안암·구로·안산 연구중심병원을 비롯해 고려대학교 의과대학 백신혁신센터, 개방형실험실, G밸리의료기기개발지원센터, 의료기기 사용적합성 시험센터 등의 임상·연구 인프라를 연계할 예정이다. 혁신제품을 개발하는 연구자와 기업을 대상으로 임상 의료 기술자문과 규제 전문상담을 결합한 통합 제품화 컨설팅도 매년 정기적으로 실시할 계획이다. 윤을식 의무부총장 겸 의료원장은 “이번 협약은 고려대의료원의 임상·연구 역량과 식품의약품안전평가원의 규제 전문성을 하나로 잇는 출발점”이라며 “우수한 연구와 기술이 실제 의료 현장에서 활용돼 더 많은 환자가 건강한 일상으로 돌아가는 길을 열고, 미래 의료 혁신을 선도해 나가겠다”고 말했다. 강석연 식품의약품안전평가원장은 “의료제품 개발 초기부터 규제 요건을 충분히 살펴보는 것이 원활한 제품화를 위해 중요하다”며 “고려대의료원과의 파트너십을 통해 의료 현장에서 환자에게 필요한 제품이 개발되고 실제 제품화까지 이어질 수 있도록 적극 지원하겠다”고 밝혔다.
+              - generic [ref=f5e316]:
+                - img "글작성 날짜" [ref=f5e318]
+                - time [ref=f5e319]: 2026.10.06
+                - generic [ref=f5e320]: NEW
+          - listitem [ref=f5e321]:
+            - link [ref=f5e322] [cursor=pointer]:
+              - /url: /kr/B022/view.do?article=272320
+              - generic [ref=f5e323]:
+                - generic [ref=f5e324]: 의료원
+                - heading "고려대의료원, 존스홉킨스·텍사스 메디컬 센터와 잇단 협력, 국내 바이오·의료기술 미국 진출 지원 확대" [level=3] [ref=f5e325]
+              - generic [ref=f5e326]: 고려대의료원, 존스홉킨스·텍사스 메디컬 센터와 잇단 협력국내 바이오·의료기술 미국 진출 지원 확대 미국 대표 의료혁신기관 잇달아 초청해 파트너링 행사 개최연구·임상 검증부터 FDA 인허가·투자유치까지 협력 모색 고려대학교의료원(의무부총장 겸 의료원장 윤을식)이 국내 바이오·의료기술의 해외 진출을 돕기 위해 미국 주요 의료혁신기관과의 협력을 넓히고 있다. 고려대의료원은 지난 9월 미국 존스홉킨스 테크놀로지 벤처스(Joh Hoki Techology Veture·JHTV)와 텍사스 메디컬 센터(Texa Medical Ceter·TMC) 관계자들을 잇달아 초청했다. 국내 유망 바이오·의료기업을 미국의 연구·임상·투자 네트워크와 연결하기 위해서다. 지난 9월 4일 고려대학교 메디사이언스파크에서 열린 2026 Korea-JHTV Bio Parterig Day에서는 존스홉킨스대와 한국 기업의 협력 사례가 집중적으로 다뤄졌다. JHTV의 폴 은칸사(Paul Nkaah) 수석이사와 대니얼 캐러비엘로(Daiel Caraviello) 이사는 존스홉킨스의 기술사업화 체계를 소개하고, 오가노이드 기반 약물반응 분석과 의료영상·인공지능(AI), 액체생검 등 한국 기업들과 진행 중인 협력 사례를 공유했다. 연구 성과를 미국 의료현장에서 검증하고 공동개발로 이어가기 위해 존스홉킨스의 임상 전문성과 연구 인프라를 어떻게 활용할 수 있는지도 논의했다. 지난 9월 17일 같은 장소에서 열린 Korea-TMC Bio Parterig Day에서는 미국 시장 진입 전략이 주요 의제로 다뤄졌다. 데이비드 맥도너(David McDoough) TMC 이노베이션 팩토리 EIR은 미국 투자유치와 시장 진출 과정에서 시장 수요와 보험급여 가능성, 지식재산권, 현지 법인구조, 미국 식품의약국(FDA) 인허가 전략 등을 사전에 갖춰야 한다고 강조했다. 기술 자체의 우수성만으로는 충분하지 않으며, 실제 의료현장의 수요와 사업성을 입증하는 과정이 뒷받침돼야 한다고 설명했다. 엘리아나 터틀(Elliaa Tuttle) TMC 디렉터는 휴스턴의 대규모 의료·생명과학 클러스터와 창업 지원체계를 소개했다. TMC 이노베이션 팩토리(Iovatio Factory)를 중심으로 운영되는 치료제·의료기기 창업 지원 프로그램과 벤처펀드, 해외 기업의 미국 시장 진출 지원 사업 등을 설명하며 의료기관과 연구자, 투자자, 기업이 한데 모여 있는 TMC의 강점을 짚었다. 국내 기업의 우수한 기술들도 공유했다. JHTV 행사에는 에이뮨링크, 제놉시, 일릭사파마텍, 아라레연구소 등 4개 기업이 참여해 면역 프로파일링, 액체생검, 약물전달, 수술용 감마카메라 기술 등을 소개했다. TMC 행사에는 에이뮨링크, 온코크로스, 사이알바이오, 체크메이트 테라퓨틱스, 제놉시 등 5개 기업이 참여해 연구개발 성과와 미국 시장 진출 전략을 선보였다. 해외 기관 관계자와 국내 연구자·기업 간 개별 파트너링도 진행됐다. 참여 기업들은 보유 기술의 개발 단계와 향후 계획을 바탕으로 미국에서 필요한 연구 및 임상 협력, 기술검증, 사업화 방안을 논의했으며, 공동연구 등 후속 협력 가능성도 함께 모색했다. 고려대의료원은 이번 행사로 국내 의료기술의 해외 진출을 위한 상시 협력 네트워크로 발전시켜 나갈 계획이다. 고려대의료원은 한국특허전략개발원 IP-TLO 얼라이언스의 글로벌 마케팅 분과장이자 한국보건산업진흥원 H+TLO 네트워크의 주도기관으로서 국내 대학·병원·연구기관 간 기술사업화 협력을 이끌고 있다. 앞으로는 해외 연구기관과 의료기관, 투자기관까지 연결 범위를 넓혀 국내 유망 의료기술의 연구·임상 검증과 사업화를 지원한다는 방침이다. 김학준 고려대 의학연구처장은 "우수한 연구성과가 실제 의료현장에서 활용되고 사업화로 이어지려면 기술개발 초기부터 연구·임상·투자·사업화 분야의 다양한 전문기관이 함께 움직여야 한다"며 "고려대의료원이 국내 연구기관과 기업, 해외 혁신기관을 연결하는 허브 역할을 강화해 실질적인 공동연구와 글로벌 사업화 성과로 이어지도록 지원하겠다"고 말했다.
+              - generic [ref=f5e327]:
+                - img "글작성 날짜" [ref=f5e329]
+                - time [ref=f5e330]: 2026.09.22
+          - listitem [ref=f5e331]:
+            - link [ref=f5e332] [cursor=pointer]:
+              - /url: /kr/B022/view.do?article=272186
+              - generic [ref=f5e333]:
+                - generic [ref=f5e334]: 의료원
+                - heading "고려대의료원·고려대의대교우회, 스리랑카 이주노동자 위한 의료봉사 펼쳐" [level=3] [ref=f5e335]
+              - generic [ref=f5e336]: 고려대의료원·고려대의대교우회, 스리랑카 이주노동자 위한 의료봉사 펼쳐 충남 아산시에서 스리랑카 이주노동자 300여 명 대상 무료 진료 진료·검사·정신건강상담부터 심폐소생술 교육까지 종합 의료지원고려대학교의료원(의무부총장 겸 의료원장 윤을식)과 고려대학교 의과대학 교우회(교우회장 윤형선)가 국내 거주 스리랑카 이주노동자들의 건강 증진을 위해 뜻을 모았다.양 기관은 지난 9월 13일 충남 아산시 음봉면에 위치한 스리랑카 사원인 마하위하라사에서 스리랑카 이주노동자 300여 명을 대상으로 의료봉사를 펼쳤다. 2023년 시작해 올해로 8회째를 맞은 이번 봉사는 언어 장벽과 근무 환경 등으로 의료기관을 찾기 어려운 이주노동자들의 질환을 조기에 발견하고 체계적인 건강관리를 돕기 위해 마련됐다.이날 봉사에는 고려대 구로병원 가정의학과 김선미, 이도희 교수를 비롯한 고려대병원 및 의대교우회 의료봉사회 소속 의사와 간호사, 임상병리사, 심리상담사, 통역 자원봉사자 등 총 70여 명이 참여했다. 의료진은 내과·가정의학과 진료와 함께 복부초음파, 흉부 X-ray 촬영, 안저검사, 채혈 등을 실시했다. 특히 씨젠의료재단과 협업해 52개 항목의 혈액검사를 시행하고 만성질환 위험 요인을 종합적으로 점검했으며, 검사 결과를 바탕으로 개인별 건강관리 방법도 안내했다. 신체 건강뿐 아니라 마음 건강도 함께 살폈다. 전문 상담 인력이 우울·불안 척도 검사를 통해 고위험군을 선별하고, 타국 생활과 근로 과정에서 겪는 정서적 어려움을 돌보는 정신건강상담을 진행했다. 아울러 일상생활과 산업현장에서 발생할 수 있는 응급상황에 대처할 수 있도록 실습 중심의 심폐소생술(CPR) 교육도 마련했다. 진료와 검사, 교육 등 전 과정에 통역 자원봉사자를 배치해 의료진과 이주노동자 간 원활한 의사소통을 돕고, 보다 정확한 진료와 건강상담이 이뤄질 수 있도록 했다. 윤을식 고려대학교 의무부총장 겸 의료원장은 "언어와 환경의 제약으로 적절한 의료서비스를 이용하기 어려운 이주노동자들에게 이번 의료봉사가 작은 보탬이 되었기를 바란다"며 "앞으로도 의술을 통해 인류애를 실천하고, 의료취약계층을 위한 사회공헌활동을 지속적으로 확대해 나가겠다"고 말했다.봉사단장인 고려대의대교우회 정인주 봉사부회장은 "휴일에도 이역만리에서 땀 흘리는 노동자들의 건강을 살피기 위해 한마음으로 함께해 준 봉사단원들에게 감사드린다"며 "앞으로도 의료 사각지대에 실질적인 도움을 줄 수 있는 의료봉사 활동을 꾸준히 이어가겠다"고 밝혔다.한편, 고려대의료원은 의대교우회를 비롯한 다양한 기관·단체와 협력해 의료서비스 접근에 어려움을 겪는 국내외 의료취약계층을 위한 의료지원과 사회공헌활동을 꾸준히 펼쳐 나갈 계획이다.
+              - generic [ref=f5e337]:
+                - img "글작성 날짜" [ref=f5e339]
+                - time [ref=f5e340]: 2026.09.18
+          - listitem [ref=f5e341]:
+            - link [ref=f5e342] [cursor=pointer]:
+              - /url: /kr/B022/view.do?article=272146
+              - generic [ref=f5e343]:
+                - generic [ref=f5e344]: 의료원
+                - heading "신일우·홍남희 부부, 고대의료원에 발전기금 2억 원 기부" [level=3] [ref=f5e345]
+              - generic [ref=f5e346]: 신일우·홍남희 부부, 고대의료원에 발전기금 2억 원 기부의료진 노고에 감사 전하며 부부가 함께 나눔 실천해고려대학교의료원(의무부총장 겸 의료원장 윤을식)이 신일우(고려대 경영대학원 연구과정 35회, 前 오가약국 대표)·홍남희 부부로부터 발전기금 2억 원을 기부받았다.기부식은 지난 14일(월) 오후 2시 고려대학교 본관 프레지던트챔버홀에서 열렸으며, 김동원 총장, 윤을식 의무부총장, 신호정 대외협력처장, 한승범 안암병원장 등 고려대 주요 보직자와 신일우·홍남희 부부와 가족들이 참석한 가운데 진행됐다.어린 시절 어려운 가정 환경 속에서도 배움을 이어온 신일우 교우는 서울 종로 5가에서 약국을 30여 년간 운영하며 성실하게 한 길을 걸어왔다. 평소 자신이 오늘날의 삶을 이룰 수 있었던 것은 주변의 도움 덕분이라는 신념으로, 감사의 마음을 사회에 다시 나누는 것을 삶의 중요한 가치로 여기며 꾸준히 후원과 기부를 이어왔다.특히, 이번 기부는 신일우 교우와 부인 홍남희 여사가 고대안암병원 의료진에 대한 깊은 감사의 뜻을 담아 각 1억 원씩 총 2억 원을 함께 전달해 그 의미를 더했다. 신일우 교우는 정형외과 이형래 교수에게, 홍남희 여사는 순환기내과 김영훈 교수에게 진료를 받은 후 노고에 보답하고자 각 임상과 발전기금을 전달했다.신일우 교우는 “살아오면서 제가 받은 도움과 은혜가 많았다는 것을 늘 생각하고 있으며, 받은 것들을 조금이나마 다시 나누고 고려대와 의료 발전에 보탬이 될 수 있다면 그것만으로도 감사한 일”이라며, “앞으로도 제가 할 수 있는 범위 내에서 사회와 병원에 보탬이 되는 나눔을 계속 이어가고 싶다”라고 기부 소감을 전했다.홍남희 여사는 “날로 새로워지는 고대안암병원의 모습을 보며 우리 부부에게 참으로 특별하고 친근한 병원이라고 생각했다”라며, “정성으로 진료해 주신 김영훈 교수님을 비롯한 의료진분들에게 감사드리며, 이번 기부가 안암병원이 환자들에게 더욱 따뜻한 안식처가 되는 데 도움이 되길 바란다”라고 밝혔다.김동원 총장은 “평생에 걸쳐 모은 귀한 재산을 병원과 사회를 위해 아낌없이 나눌 줄 아시는 교우님 부부의 숭고한 정신에 깊은 존경을 표한다”라며, “전해주신 소중한 마음이 고려대와 의료원의 미래를 밝히는 큰 빛이 되도록 최선을 다하겠다”라고 감사를 전했다.윤을식 의무부총장은 “의료진을 향한 신뢰와 감사의 마음으로 발전기금을 전달해 주신 신일우 교우님과 홍남희 여사님께 진심으로 감사드린다”라며, “두 분의 따뜻한 뜻을 받들어 환자 중심의 의료 혁신을 이루고 최고의 의료 인재를 양성하는 데 소중히 사용하겠다”라고 화답했다.
+              - generic [ref=f5e347]:
+                - img "글작성 날짜" [ref=f5e349]
+                - time [ref=f5e350]: 2026.09.16
+    - generic [ref=f5e352]:
+      - generic [ref=f5e354]:
+        - text: 고려대학교의료원 이야기
+        - heading "KU Medicine SNS" [level=3] [ref=f5e355]
+      - list [ref=f5e356]:
+        - listitem [ref=f5e357]:
+          - link "YOUTUBE" [ref=f5e358] [cursor=pointer]:
+            - /url: https://www.youtube.com/channel/UCloHi95j0b64KB7B0foV5qA?view_as=subscriber
+        - listitem [ref=f5e359]:
+          - link "INSTAGRAM" [ref=f5e360] [cursor=pointer]:
+            - /url: https://www.instagram.com/kumedicine_official/
+        - listitem [ref=f5e361]:
+          - link "X" [ref=f5e362] [cursor=pointer]:
+            - /url: https://x.com/KUMCnews?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor
+        - listitem [ref=f5e363]:
+          - link "FACEBOOK" [ref=f5e364] [cursor=pointer]:
+            - /url: https://www.facebook.com/KUMCfriend
+        - listitem [ref=f5e365]:
+          - link "NAVER TV" [ref=f5e366] [cursor=pointer]:
+            - /url: https://tv.naver.com/kumctv
+        - listitem [ref=f5e367]:
+          - link "BLOG" [ref=f5e368] [cursor=pointer]:
+            - /url: "#none"
+      - generic [ref=f5e369]:
+        - button [ref=f5e370] [cursor=pointer]
+        - button [ref=f5e371] [cursor=pointer]
+  - contentinfo [ref=f5e372]:
+    - generic [ref=f5e374]:
+      - list [ref=f5e376]:
+        - group "1 / 9" [ref=f5e377]
+        - group "2 / 9" [ref=f5e378]
+        - group "3 / 9" [ref=f5e379]
+        - group "4 / 9" [ref=f5e380]
+        - group "5 / 9" [ref=f5e381]
+        - group "6 / 9" [ref=f5e382]
+        - group "7 / 9" [ref=f5e383]
+        - group "8 / 9" [ref=f5e384]
+        - group "9 / 9" [ref=f5e385]
+      - generic:
+        - button "Previous slide" [disabled]: prev
+        - button "Next slide" [ref=f5e386] [cursor=pointer]: next
+    - generic [ref=f5e388]:
+      - generic:
+        - link "고려대학교의료원":
+          - /url: /kr/index.do
+          - img "고려대학교의료원"
+      - generic [ref=f5e389]:
+        - list [ref=f5e390]:
+          - listitem [ref=f5e391]: 주소
+          - listitem [ref=f5e392]: 서울시 성북구 정릉로 161 고려대학교의료원 (우)02708
+        - list [ref=f5e393]:
+          - listitem [ref=f5e394]: 문의전화
+          - listitem [ref=f5e395]:
+            - link "02 - 920 - 5114" [ref=f5e396] [cursor=pointer]:
+              - /url: tel:02-920-5114
+          - listitem [ref=f5e397]:
+            - link "02 - 920 - 6114" [ref=f5e398] [cursor=pointer]:
+              - /url: tel:02-920-6114
+        - list [ref=f5e399]:
+          - listitem [ref=f5e400]: SNS
+          - listitem [ref=f5e401]:
+            - link "Youtube" [ref=f5e402] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UCloHi95j0b64KB7B0foV5qA?view_as=subscriber
+          - listitem [ref=f5e403]:
+            - link "Facebook" [ref=f5e404] [cursor=pointer]:
+              - /url: https://www.facebook.com/KUMCfriend
+          - listitem [ref=f5e405]:
+            - link "Naver" [ref=f5e406] [cursor=pointer]:
+              - /url: https://tv.naver.com/kumctv
+          - listitem [ref=f5e407]:
+            - link "X" [ref=f5e408] [cursor=pointer]:
+              - /url: https://x.com/KUMCnews
+    - generic [ref=f5e410]:
+      - list [ref=f5e411]:
+        - listitem [ref=f5e412]:
+          - link "인터넷이용약관" [ref=f5e413] [cursor=pointer]:
+            - /url: /kr/service/rull-internet.do
+        - listitem [ref=f5e414]:
+          - link "개인정보처리방침" [ref=f5e415] [cursor=pointer]:
+            - /url: /kr/service/privacy.do
+        - listitem [ref=f5e416]:
+          - link "환자권리장전" [ref=f5e417] [cursor=pointer]:
+            - /url: /kr/service/patient-right.do
+        - listitem [ref=f5e418]:
+          - link "이메일주소수집거부" [ref=f5e419] [cursor=pointer]:
+            - /url: /kr/service/refusal-collection.do
+      - generic [ref=f5e420]:
+        - generic [ref=f5e421]:
+          - link "패밀리사이트 리스트 열기" [ref=f5e422] [cursor=pointer]:
+            - /url: javascript:void(0);
+            - generic [ref=f5e423]: 패밀리사이트
+            - emphasis [ref=f5e424]: 리스트 열기
+          - list:
+            - listitem [ref=f5e425]:
+              - link "고려대학 안암병원" [ref=f5e426] [cursor=pointer]:
+                - /url: http://anam.kumc.or.kr/kr/index.do
+            - listitem [ref=f5e427]:
+              - link "고려대학 구로병원" [ref=f5e428] [cursor=pointer]:
+                - /url: http://guro.kumc.or.kr/kr/index.do
+            - listitem [ref=f5e429]:
+              - link "고려대학 안산병원" [ref=f5e430] [cursor=pointer]:
+                - /url: http://ansan.kumc.or.kr/kr/index.do
+            - listitem [ref=f5e431]:
+              - link "의과대학" [ref=f5e432] [cursor=pointer]:
+                - /url: https://medicine.korea.ac.kr/kr/index.do
+            - listitem [ref=f5e433]:
+              - link "보건과학대학" [ref=f5e434] [cursor=pointer]:
+                - /url: https://chs.korea.ac.kr/chs/index.do
+            - listitem [ref=f5e435]:
+              - link "보건대학원" [ref=f5e436] [cursor=pointer]:
+                - /url: https://pbhealth.korea.ac.kr/pbhealth/index.do
+            - listitem [ref=f5e437]:
+              - link "의학도서관" [ref=f5e438] [cursor=pointer]:
+                - /url: https://medlib.korea.ac.kr/
+            - listitem [ref=f5e439]:
+              - link "고려대학교" [ref=f5e440] [cursor=pointer]:
+                - /url: https://www.korea.ac.kr/mbshome/mbs/university/index.do
+            - listitem [ref=f5e441]:
+              - link "기금사업본부" [ref=f5e442] [cursor=pointer]:
+                - /url: http://donation.kumc.or.kr/
+            - listitem [ref=f5e443]:
+              - link "의과대학교우회" [ref=f5e444] [cursor=pointer]:
+                - /url: http://www.kuma.or.kr/
+            - listitem [ref=f5e445]:
+              - link "안암 연구중심병원" [ref=f5e446] [cursor=pointer]:
+                - /url: https://anamrnd.kumc.or.kr/kr/index.do
+            - listitem [ref=f5e447]:
+              - link "구로 연구중심병원" [ref=f5e448] [cursor=pointer]:
+                - /url: https://gurornd.kumc.or.kr/kr/index.do
+            - listitem [ref=f5e449]:
+              - link "안산 연구중심병원" [ref=f5e450] [cursor=pointer]:
+                - /url: https://ansanrnd.kumc.or.kr/kr/index.do
+            - listitem [ref=f5e451]:
+              - link "K-Master 사업단" [ref=f5e452] [cursor=pointer]:
+                - /url: http://k-master.org/
+            - listitem [ref=f5e453]:
+              - link "구로병원 연구중심 육성 R&D사업단" [ref=f5e454] [cursor=pointer]:
+                - /url: https://k-map.or.kr/
+        - generic [ref=f5e455]:
+          - link "진료지원부서 리스트 열기" [ref=f5e456] [cursor=pointer]:
+            - /url: javascript:void(0);
+            - generic [ref=f5e457]: 진료지원부서
+            - emphasis [ref=f5e458]: 리스트 열기
+          - list:
+            - listitem [ref=f5e459]:
+              - link "교육수련팀" [ref=f5e460] [cursor=pointer]:
+                - /url: /kr/etetd/intro/greeting.do

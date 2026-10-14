@@ -1,0 +1,4 @@
+[     579ms] [WARNING] The key "target-densitydpi" is not supported. @ https://www.uuh.ulsan.kr/intro/:5
+[    1971ms] [LOG] 1.ready @ https://www.uuh.ulsan.kr/_Template/Layout/layout-intro/_Js/layout_main.js:27
+[    2101ms] [ERROR] Connecting to 'https://nam.veta.naver.com/nac/2' violates the following Content Security Policy directive: "connect-src 'self' dev.uuh.ulsan.kr *.uuh.ulsan.kr *.uuh.ulsan.kr:9990 *.uuh.ulsan.kr:7577 *.uuh.ulsan.kr:7614 www.google-analytics.com dapi.kakao.com wcs.naver.net wcs.naver.com *.google.com". The action has been blocked. @ https://ssl.pstatic.net/melona/libs/gfp-nac-module/synchronizer.js:0
+[    5532ms] [LOG] 3.docLoad @ https://www.uuh.ulsan.kr/_Template/Layout/layout-intro/_Js/layout_main.js:39

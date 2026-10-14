@@ -1,0 +1,372 @@
+- generic [active] [ref=f3e1]:
+  - generic:
+    - link "본문으로 바로가기" [ref=f3e2] [cursor=pointer]:
+      - /url: "#contents"
+    - link "대메뉴로 바로가기" [ref=f3e3] [cursor=pointer]:
+      - /url: "#menu_navi"
+  - generic [ref=f3e4]:
+    - generic [ref=f3e5]:
+      - generic [ref=f3e6]:
+        - list [ref=f3e7]:
+          - listitem [ref=f3e8]:
+            - link "계명대학교 동산의료원" [ref=f3e9] [cursor=pointer]:
+              - /url: http://www.dsmc.or.kr/
+          - listitem [ref=f3e10]:
+            - link "계명대학교 동산병원" [ref=f3e11] [cursor=pointer]:
+              - /url: http://dongsan.dsmc.or.kr/
+          - listitem [ref=f3e12]:
+            - link "대구동산병원" [ref=f3e13] [cursor=pointer]:
+              - /url: http://daegu.dsmc.or.kr/
+          - listitem [ref=f3e14]:
+            - link "경주동산병원" [ref=f3e15] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=f3e16]:
+            - link "English" [ref=f3e17] [cursor=pointer]:
+              - /url: http://eng.dsmc.or.kr/
+        - generic [ref=f3e18]:
+          - list:
+            - listitem [ref=f3e19]:
+              - link "사이트맵" [ref=f3e20] [cursor=pointer]:
+                - /url: /content/05logincenter/07_01.php
+      - heading [level=1] [ref=f3e21]:
+        - link "계명대학교 경주동산병원":
+          - /url: /
+          - img "계명대학교 경주동산병원" [ref=f3e22] [cursor=pointer]
+      - generic [ref=f3e23]:
+        - generic:
+          - list [ref=f3e24]:
+            - listitem [ref=f3e25]:
+              - link "진료예약" [ref=f3e26] [cursor=pointer]:
+                - /url: /content/01treatment/02_01.php
+            - listitem [ref=f3e27]:
+              - link "진료안내" [ref=f3e28] [cursor=pointer]:
+                - /url: /content/02health/01_01.php
+            - listitem [ref=f3e29]:
+              - link "병원안내" [ref=f3e30] [cursor=pointer]:
+                - /url: /content/03use/01_01.php
+            - listitem [ref=f3e31]:
+              - link "건강정보" [ref=f3e32] [cursor=pointer]:
+                - /url: /content/04share/01_01.php
+          - paragraph [ref=f3e33]:
+            - link "전체메뉴 열기":
+              - /url: javascript:;
+              - img "전체메뉴 열기" [ref=f3e34] [cursor=pointer]
+          - paragraph [ref=f3e35]:
+            - link "전체메뉴 열기":
+              - /url: javascript:;
+              - img "전체메뉴 열기" [ref=f3e36] [cursor=pointer]
+    - generic [ref=f3e37]:
+      - generic [ref=f3e39]:
+        - generic [ref=f3e40]:
+          - generic:
+            - generic:
+              - paragraph: 뛰어난 접근성, 빠른 진료로
+              - paragraph: 시민과 함께하는 병원
+          - generic [ref=f3e41]:
+            - generic:
+              - paragraph [ref=f3e42]: 뛰어난 접근성, 빠른 진료로
+              - paragraph [ref=f3e43]: 시민과 함께하는 병원
+          - generic:
+            - generic:
+              - paragraph: 뛰어난 접근성, 빠른 진료로
+              - paragraph: 시민과 함께하는 병원
+          - generic:
+            - generic:
+              - paragraph: 뛰어난 접근성, 빠른 진료로
+              - paragraph: 시민과 함께하는 병원
+          - generic:
+            - generic:
+              - paragraph: 뛰어난 접근성, 빠른 진료로
+              - paragraph: 시민과 함께하는 병원
+        - generic [ref=f3e44]:
+          - button "Previous slide" [ref=f3e45] [cursor=pointer]
+          - button "Next slide" [ref=f3e46] [cursor=pointer]
+      - generic [ref=f3e47]:
+        - generic [ref=f3e48]:
+          - paragraph [ref=f3e49]: 진료예약
+          - paragraph [ref=f3e50]:
+            - text: 빠르고 쉽게 진료예약을
+            - generic [ref=f3e51]: 하실 수 있습니다.
+          - list [ref=f3e52]:
+            - listitem [ref=f3e53]:
+              - link "진료과별 전화예약" [ref=f3e54] [cursor=pointer]:
+                - /url: /content/03use/02_05.php
+        - generic [ref=f3e56]:
+          - paragraph [ref=f3e57]: 진료과
+          - generic [ref=f3e59]:
+            - generic [ref=f3e60]: 진료과 입력
+            - textbox "진료과 입력" [ref=f3e61]
+            - button "검색" [ref=f3e62] [cursor=pointer]
+          - list [ref=f3e63]:
+            - listitem [ref=f3e64]:
+              - link "진료과 소개" [ref=f3e65] [cursor=pointer]:
+                - /url: /content/02health/01_01.php
+            - listitem [ref=f3e67]:
+              - link "진료시간표" [ref=f3e68] [cursor=pointer]:
+                - /url: /content/03use/02_02.php
+        - generic [ref=f3e70]:
+          - paragraph [ref=f3e71]: 의료진
+          - generic [ref=f3e73]:
+            - generic [ref=f3e74]: 의료진 입력
+            - textbox "의료진 입력" [ref=f3e75]
+            - button "검색" [ref=f3e76] [cursor=pointer]
+          - list [ref=f3e77]:
+            - listitem [ref=f3e78]:
+              - link "의료진 소개" [ref=f3e79] [cursor=pointer]:
+                - /url: /content/02health/01_01.php
+            - listitem [ref=f3e81]:
+              - link "전문클리닉" [ref=f3e82] [cursor=pointer]:
+                - /url: /content/02health/03_01.php
+        - generic [ref=f3e84]:
+          - list [ref=f3e85]:
+            - listitem [ref=f3e86]:
+              - link "1번째 팝업":
+                - /url: "#li_pz1_1"
+                - img "1번째 팝업" [ref=f3e87] [cursor=pointer]
+              - link [ref=f3e89] [cursor=pointer]:
+                - /url: https://m.imaeil.com/page/view/2026061609270101647
+                - img "이경섭 경주동산병원장 매일신문 인터뷰 자세히보기" [ref=f3e90]
+            - listitem [ref=f3e91]:
+              - link "2번째 팝업":
+                - /url: "#li_pz1_2"
+                - img "2번째 팝업" [ref=f3e92] [cursor=pointer]
+              - generic:
+                - link:
+                  - /url: https://gyeongju.dsmc.or.kr:49890/content/02health/01_0102pop.php?md_idx=450
+            - listitem [ref=f3e93]:
+              - link "3번째 팝업":
+                - /url: "#li_pz1_3"
+                - img "3번째 팝업" [ref=f3e94] [cursor=pointer]
+              - generic:
+                - link:
+                  - /url: http://www.srbsm.co.kr/default/index_view_page.php?part_idx=280&idx=53137
+            - listitem [ref=f3e95]:
+              - link "4번째 팝업":
+                - /url: "#li_pz1_4"
+                - img "4번째 팝업" [ref=f3e96] [cursor=pointer]
+              - generic:
+                - link:
+                  - /url: /data/banner2/좌담회_전립선비대증의_수술치료_최선의_선택은.pdf
+            - listitem [ref=f3e97]:
+              - link "5번째 팝업":
+                - /url: "#li_pz1_5"
+                - img "5번째 팝업" [ref=f3e98] [cursor=pointer]
+              - generic:
+                - link:
+                  - /url: ""
+            - listitem [ref=f3e99]:
+              - link "6번째 팝업":
+                - /url: "#li_pz1_6"
+                - img "6번째 팝업" [ref=f3e100] [cursor=pointer]
+              - generic:
+                - link:
+                  - /url: ""
+          - paragraph [ref=f3e101]:
+            - link:
+              - /url: "#img_pzplay"
+            - link "팝업존 멈춤":
+              - /url: "#img_pzstop"
+              - img "팝업존 멈춤" [ref=f3e102] [cursor=pointer]
+        - generic [ref=f3e103]:
+          - paragraph [ref=f3e104]: 진료안내
+          - paragraph [ref=f3e105]:
+            - text: 경주 동산병원 진료안내에 관하여
+            - generic [ref=f3e106]: 자세히 알려드립니다.
+          - list [ref=f3e107]:
+            - listitem [ref=f3e108]:
+              - link "진료안내" [ref=f3e109] [cursor=pointer]:
+                - /url: /content/03use/02_01.php
+            - listitem [ref=f3e111]:
+              - link "입퇴원절차 안내" [ref=f3e112] [cursor=pointer]:
+                - /url: /content/03use/03_02.php
+        - generic [ref=f3e114]:
+          - paragraph [ref=f3e115]: 증명서발급
+          - paragraph [ref=f3e116]:
+            - text: 증명서발급을 위한 안내와
+            - generic [ref=f3e117]: 절차에 관해 안내합니다.
+          - list [ref=f3e118]:
+            - listitem [ref=f3e119]:
+              - link "증명서발급 안내" [ref=f3e120] [cursor=pointer]:
+                - /url: /content/01treatment/03_01.php
+            - listitem [ref=f3e122]:
+              - link "위임장 및 동의서" [ref=f3e123] [cursor=pointer]:
+                - /url: /content/01treatment/03_03.php
+        - generic [ref=f3e125]:
+          - paragraph [ref=f3e126]: 건강검진센터
+          - paragraph [ref=f3e127]:
+            - text: 건강검진센터에 관하여
+            - generic [ref=f3e128]: 자세히 알려드립니다.
+          - list [ref=f3e129]:
+            - listitem [ref=f3e130]:
+              - link "건강검진절차" [ref=f3e131] [cursor=pointer]:
+                - /url: /content/02health/05_01.php
+            - listitem [ref=f3e133]:
+              - link "종합건강검진" [ref=f3e134] [cursor=pointer]:
+                - /url: /content/02health/05_02.php
+        - generic [ref=f3e136]:
+          - paragraph [ref=f3e137]: 병원안내
+          - paragraph [ref=f3e138]:
+            - text: 병원 오시는 길 및 전화번호안내 등
+            - generic [ref=f3e139]: 병원관련에 대해 안내해드립니다.
+          - list:
+            - listitem [ref=f3e140]:
+              - link "오시는 길" [ref=f3e141] [cursor=pointer]:
+                - /url: /content/03use/06_01.php
+            - listitem [ref=f3e142]:
+              - link "전화번호 안내" [ref=f3e143] [cursor=pointer]:
+                - /url: /content/03use/06_04.php
+            - listitem [ref=f3e144]:
+              - link "층별안내" [ref=f3e145] [cursor=pointer]:
+                - /url: /content/03use/06_03.php
+            - listitem [ref=f3e146]:
+              - link "인사말" [ref=f3e147] [cursor=pointer]:
+                - /url: /content/03use/01_01.php
+      - list [ref=f3e149]:
+        - listitem [ref=f3e150]:
+          - link "진료시간표" [ref=f3e151] [cursor=pointer]:
+            - /url: /content/03use/02_02.php
+        - listitem [ref=f3e152]:
+          - link "고객의소리" [ref=f3e153] [cursor=pointer]:
+            - /url: /content/03use/08_01.php
+        - listitem [ref=f3e154]:
+          - link "비급여진료비" [ref=f3e155] [cursor=pointer]:
+            - /url: /content/03use/02_03.php
+        - listitem [ref=f3e156]:
+          - link "발전기금사무국" [ref=f3e157] [cursor=pointer]:
+            - /url: http://fund.dsmc.or.kr/content/02guide/01_01.php
+        - listitem [ref=f3e158]:
+          - link "호스피스병동" [ref=f3e159] [cursor=pointer]:
+            - /url: /content/03use/03_05.php
+        - listitem [ref=f3e160]:
+          - link "장례식장" [ref=f3e161] [cursor=pointer]:
+            - /url: /content/03use/10_01.php
+        - listitem [ref=f3e162]:
+          - link "건강검진센터" [ref=f3e163] [cursor=pointer]:
+            - /url: /content/02health/05_01.php
+      - list [ref=f3e165]:
+        - listitem [ref=f3e166]:
+          - link "공지사항" [ref=f3e167] [cursor=pointer]:
+            - /url: javascript:;
+          - generic [ref=f3e168]:
+            - generic [ref=f3e169]:
+              - list:
+                - listitem [ref=f3e170]:
+                  - link "26 2025.09 25-26절기 65세 이상 독감 및 코로나19 무료 예방접종 안내" [ref=f3e171] [cursor=pointer]:
+                    - /url: /content/03use/07_01.php?proc_type=view&b_num=357
+                    - paragraph [ref=f3e172]:
+                      - generic [ref=f3e173]: "26"
+                      - text: "2025.09"
+                    - generic [ref=f3e174]:
+                      - term [ref=f3e175]: 25-26절기 65세 이상 독감 및 코로나19 무료 예방접종 안내
+                      - definition [ref=f3e176]
+                - listitem [ref=f3e177]:
+                  - link "02 2024.10 24-25절기 65세 이상 독감 및 코로나19 무료 예방접종 안내" [ref=f3e178] [cursor=pointer]:
+                    - /url: /content/03use/07_01.php?proc_type=view&b_num=354
+                    - paragraph [ref=f3e179]:
+                      - generic [ref=f3e180]: "02"
+                      - text: "2024.10"
+                    - generic [ref=f3e181]:
+                      - term [ref=f3e182]: 24-25절기 65세 이상 독감 및 코로나19 무료 예방접종 안내
+                      - definition [ref=f3e183]
+                - listitem [ref=f3e184]:
+                  - link "19 2022.09 23-24절기 65세 이상 독감 무료 예방접종 안내 만65세이상어르신독감(인플루엔자)무료접종" [ref=f3e185] [cursor=pointer]:
+                    - /url: /content/03use/07_01.php?proc_type=view&b_num=353
+                    - paragraph [ref=f3e186]:
+                      - generic [ref=f3e187]: "19"
+                      - text: "2022.09"
+                    - generic [ref=f3e188]:
+                      - term [ref=f3e189]: 23-24절기 65세 이상 독감 무료 예방접종 안내
+                      - definition [ref=f3e190]: 만65세이상어르신독감(인플루엔자)무료접종
+                - listitem [ref=f3e191]:
+                  - link "15 2021.09 22-23절기 65세 이상 독감 무료 예방접종 안내 22-23절기65세이상독감무료예방접종안내" [ref=f3e192] [cursor=pointer]:
+                    - /url: /content/03use/07_01.php?proc_type=view&b_num=351
+                    - paragraph [ref=f3e193]:
+                      - generic [ref=f3e194]: "15"
+                      - text: "2021.09"
+                    - generic [ref=f3e195]:
+                      - term [ref=f3e196]: 22-23절기 65세 이상 독감 무료 예방접종 안내
+                      - definition [ref=f3e197]: 22-23절기65세이상독감무료예방접종안내
+            - paragraph [ref=f3e198]:
+              - link "더보기" [ref=f3e199] [cursor=pointer]:
+                - /url: /content/03use/07_01.php
+        - listitem [ref=f3e200]:
+          - link "채용공고" [ref=f3e201] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f3e202]:
+          - link "입찰공고" [ref=f3e203] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f3e204]:
+          - link "언론보도" [ref=f3e205] [cursor=pointer]:
+            - /url: javascript:;
+      - generic [ref=f3e207]:
+        - paragraph [ref=f3e210]: 하나님의 사랑을 실천하는 환자중심의 병원국민의 건강과 국가 발전에 이바지하는 병원
+        - generic [ref=f3e211]:
+          - generic [ref=f3e212]:
+            - term [ref=f3e213]: 진료상담
+            - definition [ref=f3e214]: Tel. 054-770-9441
+          - generic [ref=f3e215]:
+            - term [ref=f3e216]: 응급실
+            - definition [ref=f3e217]: Tel. 054-748-9119
+    - generic [ref=f3e219]:
+      - generic [ref=f3e220]:
+        - generic [ref=f3e221]:
+          - list:
+            - listitem [ref=f3e222]:
+              - link "개인정보처리방침" [ref=f3e223] [cursor=pointer]:
+                - /url: /content/05logincenter/01_01.php
+            - listitem [ref=f3e224]:
+              - link "병원윤리강령" [ref=f3e225] [cursor=pointer]:
+                - /url: /content/05logincenter/04_01.php
+            - listitem [ref=f3e226]:
+              - link "이메일무단수집거부" [ref=f3e227] [cursor=pointer]:
+                - /url: /content/05logincenter/05_01.php
+            - listitem [ref=f3e228]:
+              - link "환자권리장전" [ref=f3e229] [cursor=pointer]:
+                - /url: /content/05logincenter/03_01.php
+            - listitem [ref=f3e230]:
+              - link "응시원서 다운로드" [ref=f3e231] [cursor=pointer]:
+                - /url: /img/common/응시지원서_경주동산병원.hwp
+        - generic [ref=f3e232]:
+          - paragraph [ref=f3e233]:
+            - text: 계명대학교 경주동산병원
+            - generic [ref=f3e234]: 38144 경상북도 경주시 봉황로 65
+            - text: "대표전화 : 054-770-9500"
+          - paragraph [ref=f3e235]: COPYRIGHT (C) KEIMYUNG UNIVERSITY KYUNGJU DONGSAN HOSPITAL. ALL RIGHTS RESERVED.
+      - paragraph [ref=f3e237]:
+        - link "관련기관 바로가기" [ref=f3e238] [cursor=pointer]:
+          - /url: javascript:;
+  - generic [ref=f3e239]:
+    - paragraph [ref=f3e242]:
+      - link [ref=f3e243] [cursor=pointer]:
+        - /url: http://www.srbsm.co.kr/default/index_view_page.php?part_idx=280&idx=53137
+        - img "20250828115632439.jpg" [ref=f3e244]
+    - generic [ref=f3e245]:
+      - generic:
+        - list:
+          - listitem [ref=f3e246]:
+            - checkbox "다음에 창 열지 않기" [ref=f3e247]
+          - listitem [ref=f3e248]: 다음에 창 열지 않기
+          - listitem [ref=f3e249]:
+            - button "닫기" [ref=f3e250]
+  - generic [ref=f3e251]:
+    - paragraph [ref=f3e254]:
+      - img "20260327134944360.jpg" [ref=f3e255]
+    - generic [ref=f3e256]:
+      - generic:
+        - list:
+          - listitem [ref=f3e257]:
+            - checkbox "다음에 창 열지 않기" [ref=f3e258]
+          - listitem [ref=f3e259]: 다음에 창 열지 않기
+          - listitem [ref=f3e260]:
+            - button "닫기" [ref=f3e261]
+  - generic [ref=f3e262]:
+    - paragraph [ref=f3e265]:
+      - img "20260626154258203.jpg" [ref=f3e266]
+    - generic [ref=f3e267]:
+      - generic:
+        - list:
+          - listitem [ref=f3e268]:
+            - checkbox "다음에 창 열지 않기" [ref=f3e269]
+          - listitem [ref=f3e270]: 다음에 창 열지 않기
+          - listitem [ref=f3e271]:
+            - button "닫기" [ref=f3e272]

@@ -1,0 +1,258 @@
+[     992ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.ApplicationConnection
+INFO: Starting application uuhrecruit-589680522 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[     992ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.ApplicationConnection
+INFO: Using theme: dashboard @ com.vaadin.DefaultWidgetSet-0.js:6285
+[     992ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.ApplicationConnection
+INFO: Vaadin application servlet version:  @ com.vaadin.DefaultWidgetSet-0.js:6285
+[     992ms] [ERROR] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.ApplicationConnection
+SEVERE: Warning: your widget set seems to be built with a different version than the one used on server. Unexpected behavior may occur. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[     997ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.Heartbeat
+INFO: Setting hearbeat interval to 300sec. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[     999ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: JSON parsing took 0.4ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1000ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Handling message from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1000ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling resources from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1000ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling type inheritance map from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1001ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Handling type mappings from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1001ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Handling resource dependencies @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1001ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling meta information @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1002ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Creating connectors (if needed) @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1012ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Updating connector states @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1016ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling locales @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1016ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Updating connector hierarchy @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1017ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Sending hierarchy change events @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1037ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Running @DelegateToWidget @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1038ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Sending state change events @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1080ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Passing UIDL to Vaadin 6 style connectors @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1110ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Performing server to client RPC calls @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1110ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: * Unregistered 0 connectors @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1110ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: handleUIDLMessage: 108 ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1110ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Starting layout phase @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1113ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Measured 6 non connector elements @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1122ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 1 measured 46 elements, fired 0 listeners and did 0 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1128ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 2 measured 83 elements, fired 0 listeners and did 2 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1129ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 3 measured 9 elements, fired 0 listeners and did 2 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1130ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 4 measured 22 elements, fired 0 listeners and did 1 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1130ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: No more changes in pass 5 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1134ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Total layout phase time: 23ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1134ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: First response processed 1026 ms after fetchStart @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1134ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  Processing time was 135ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1134ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Referenced paintables: 79 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1136ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Starting layout phase @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1137ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Measured 6 non connector elements @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1137ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 1 measured 2 elements, fired 0 listeners and did 1 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1137ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 2 measured 1 elements, fired 0 listeners and did 1 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1137ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: No more changes in pass 3 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1137ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Total layout phase time: 1ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1138ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Starting layout phase @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1138ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Measured 6 non connector elements @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1138ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 1 measured 2 elements, fired 0 listeners and did 1 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1138ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: No more changes in pass 2 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1138ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Total layout phase time: 1ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1154ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.XhrConnection
+INFO: Sending xhr message to server: {"csrfToken":"28ea5244-0477-4bb1-96fc-35b640f5c34f","rpc":[["27","v","v",["pagelength",["i",5]]],["0","com.vaadin.shared.ui.ui.UIServerRpc","resize",[720,1280,1280,720]]],"syncId":0,"clientId":0,"wsver":"7.7.10"} @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1282ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.XhrConnection
+INFO: Server visit took 128.5ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1282ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: JSON parsing took 0ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1282ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.XhrConnection
+INFO: Received xhr message: for(;;);[{"syncId": 1, "clientId": 1, "changes" : [], "state":{}, "types":{}, "hierarchy":{}, "rpc" : [], "meta" : {}, "resources" : {}, "timings":[56, 38]}] @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1283ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Handling message from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1283ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling resources from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1283ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling type inheritance map from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1283ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Handling type mappings from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1283ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Handling resource dependencies @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1283ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling meta information @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1283ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Creating connectors (if needed) @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1283ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Updating connector states @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1284ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling locales @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1284ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Updating connector hierarchy @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1284ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Running @DelegateToWidget @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1284ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Sending state change events @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1284ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Passing UIDL to Vaadin 6 style connectors @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1284ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Performing server to client RPC calls @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1284ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: * Unregistered 0 connectors @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1284ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: handleUIDLMessage: 1 ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1285ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Starting layout phase @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1297ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Measured 6 non connector elements @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1298ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 1 measured 9 elements, fired 0 listeners and did 0 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1300ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 2 measured 7 elements, fired 0 listeners and did 1 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1301ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 3 measured 6 elements, fired 0 listeners and did 2 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1302ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 4 measured 23 elements, fired 0 listeners and did 0 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1302ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: No more changes in pass 5 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1303ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Total layout phase time: 18ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1303ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  Processing time was 20ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1303ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Referenced paintables: 79 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1304ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.ui.ui.UIConnector
+INFO: Loading of dashboard from https://recruit.uuh.ulsan.kr:8443/uuhrecruit/VAADIN/themes/dashboard/styles.css?v=7.7.10 completed @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1304ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageSender
+INFO: Resynchronizing from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1305ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.XhrConnection
+INFO: Sending xhr message to server: {"csrfToken":"28ea5244-0477-4bb1-96fc-35b640f5c34f","rpc":[],"syncId":1,"clientId":1,"resynchronize":true} @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1326ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Starting layout phase @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1330ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Measured 6 non connector elements @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1332ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 1 measured 41 elements, fired 0 listeners and did 2 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1332ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 2 measured 7 elements, fired 0 listeners and did 2 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1333ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 3 measured 11 elements, fired 0 listeners and did 1 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1334ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: No more changes in pass 4 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1334ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Total layout phase time: 7ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1345ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.XhrConnection
+INFO: Server visit took 40.4ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1346ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: JSON parsing took 0ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1346ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.XhrConnection
+INFO: Received xhr message: for(;;);[{"syncId": 2, "resynchronize": true, "clientId": 2, "changes" : [["change",{"pid":"0"},["0",{"id":"0","location":"https:\/\/recruit.uuh.ulsan.kr:8443\/uuhrecruit\/#!입사지원","v":{"action":""}},["css-injections",{},["css-string",{"id":0},".maxwidthCenter {max-width: 1280px;\nleft: 50%;\n top: 50%;\ntransform: translate(-50%, -50%) !important;}"],["css-string",{"id":1},".menuShield {color:#00ff00; font-weight:bold;}"]],["actions",{},["action",{"key":"1","caption":"Clear","kc":27,"mk":[]}],["action",{"key":"2","caption":"Enter","kc":13,"mk":[]}],["action",{"key":"3","caption":"Clear","kc":27,"mk":[]}],["action",{"key":"4","caption":"Enter","kc":13,"mk":[]}],["action",{"key":"5","caption":"Clear","kc":27,"mk":[]}],["action",{"key":"6","caption":"Enter","kc":13,"mk":[]}],["action",{"key":"7","caption":"Clear","kc":27,"mk":[]}],["action",{"key":"8","caption":"Enter","kc":13,"mk":[]}],["action",{"key":"9","caption":"Clear","kc":27,"mk":[]}],["action",{"key":"10","caption":"Enter","kc":13,"mk":[]}]]]],["change",{"pid":"23"},["1",{"id":"23"}]],["change",{"pid":"27"},["2",{"id":"27","selectmode":"none","measurehint":0,"cols":2,"rows":10,"firstrow":0,"totalrows":10,"pagelength":5,"colheaders":true,"colfooters":false,"vcolorder":["1","2"],"pb-ft":0,"pb-l":9,"v":{"firstvisible":0,"firstvisibleonlastpage":-1,"sortcolumn":"null","sortascending":true,"reqrows":-1,"reqfirstrow":-1,"collapsedcolumns":[],"noncollapsiblecolumns":[]}},["rows",{},["tr",{"key":1},["3",{"id":"29","cached":true}],["4",{"id":"31","cached":true}]],["tr",{"key":2},["3",{"id":"33","cached":true}],["4",{"id":"35","cached":true}]],["tr",{"key":3},["3",{"id":"37","cached":true}],["4",{"id":"39","cached":true}]],["tr",{"key":4},["3",{"id":"41","cached":true}],["4",{"id":"43","cached":true}]],["tr",{"key":5},["3",{"id":"45","cached":true}],["4",{"id":"47","cached":true}]],["tr",{"key":6},["3",{"id":"49","cached":true}],["4",{"id":"51","cached":true}]],["tr",{"key":7},["3",{"id":"53","cached":true}],["4",{"id":"55","cached":true}]],["tr",{"key":8},["3",{"id":"57","cached":true}],["4",{"id":"59","cached":true}]],["tr",{"key":9},["3",{"id":"61","cached":true}],["4",{"id":"63","cached":true}]],["tr",{"key":10},["3",{"id":"65","cached":true}],["4",{"id":"67","cached":true}]]],["visiblecolumns",{},["column",{"cid":"1","caption":"제목","fcaption":"","align":"c"}],["column",{"cid":"2","caption":"마감일","fcaption":"","sortable":true}]]]],["change",{"pid":"26"},["5",{"id":"26","iem":"LAZY","iet":400}]],["change",{"pid":"77"},["5",{"id":"77"}]]], "state":{"0":{"pageState":{"hasResizeListeners":true},"localeServiceState":{"localeData":[{"name":"ko_KR","monthNames":["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"],"shortMonthNames":["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"],"shortDayNames":["일","월","화","수","목","금","토"],"dayNames":["일요일","월요일","화요일","수요일","목요일","금요일","토요일"],"firstDayOfWeek":0,"dateFormat":"yy. M. d","twelveHourClock":true,"hourMinuteDelimiter":":","am":"오전","pm":"오후"}]},"theme":"dashboard","height":"100.0%","width":"100.0%","styles":["valo-menu-responsive"]},"10":{"contentMode":"HTML","text":"채용공고","styles":["h4"],"primaryStyleName":"valo-menu-subtitle"},"11":{"caption":"입사지원","styles":["selected"],"primaryStyleName":"valo-menu-item","resources":{"icon":{"uRL":"fonticon://FontAwesome/f03a"}}},"12":{"caption":"지원서조회/수정","primaryStyleName":"valo-menu-item","resources":{"icon":{"uRL":"fonticon://FontAwesome/f044"}}},"13":{"contentMode":"HTML","text":"합격조회","styles":["h4"],"primaryStyleName":"valo-menu-subtitle"},"14":{"caption":"합격조회","primaryStyleName":"valo-menu-item","resources":{"icon":{"uRL":"fonticon://FontAwesome/f058"}}},"15":{"caption":"비밀번호 재발급","primaryStyleName":"valo-menu-item","resources":{"icon":{"uRL":"fonticon://FontAwesome/f084"}}},"16":{"contentMode":"HTML","text":"개인정보","styles":["h4"],"primaryStyleName":"valo-menu-subtitle"},"17":{"caption":"개인정보처리방침","styles":["menuShield"],"primaryStyleName":"valo-menu-item","resources":{"icon":{"uRL":"fonticon://FontAwesome/f132"}}},"18":{"height":"100.0%","width":"100.0%","styles":["view-content","v-scrollable"]},"19":{"childData":{"20":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":1,"height":"100.0%","width":"100.0%"},"2":{"childData":{"18":{"alignmentBitmask":5,"expandRatio":1},"3":{"alignmentBitmask":5,"expandRatio":0}},"height":"100.0%","width":"100.0%","styles":["mainview","maxwidthCenter"]},"20":{"tabs":[{"caption":"전체","enabled":true,"visible":true,"closable":false,"description":null,"styleName":null,"key":"1","componentError":null,"id":null,"iconAltText":""},{"caption":"정규직","enabled":true,"visible":true,"closable":false,"description":null,"styleName":null,"key":"2","componentError":null,"id":null,"iconAltText":""},{"caption":"계약직","enabled":true,"visible":true,"closable":false,"description":null,"styleName":null,"key":"3","componentError":null,"id":null,"iconAltText":""},{"caption":"전문의","enabled":true,"visible":true,"closable":false,"description":null,"styleName":null,"key":"4","componentError":null,"id":null,"iconAltText":""},{"caption":"전공의","enabled":true,"visible":true,"closable":false,"description":null,"styleName":null,"key":"5","componentError":null,"id":null,"iconAltText":""}],"selected":"1","height":"100.0%","width":"100.0%","immediate":true,"styles":["framed","padded-tabbar"]},"21":{"childData":{"22":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":1,"height":"100.0%","width":"100.0%"},"22":{"spacing":true,"childData":{"23":{"alignmentBitmask":5,"expandRatio":0},"27":{"alignmentBitmask":5,"expandRatio":1},"68":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":14,"height":"100.0%","width":"100.0%"},"23":{"tabIndex":-1,"width":"100.0%","caption":"<strong>입사지원</strong>","styles":["color1"]},"24":{"spacing":true,"childData":{"25":{"alignmentBitmask":5,"expandRatio":0},"26":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15},"25":{"caption":"새로고침","styles":["primary"]},"26":{"inputPrompt":"Filter","text":"","width":"160.0px","styles":["inline-icon"],"resources":{"icon":{"uRL":"fonticon://FontAwesome/f002"}},"registeredEventListeners":["ie"]},"27":{"height":"100.0%","width":"100.0%","styles":["borderless","no-header","no-horizontal-lines","no-vertical-lines"]},"28":{"contentMode":"HTML","text":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;지원기간 : 2026년10월2 일 ~ 2026년10월11일","width":"100.0%"},"29":{"spacing":true,"childData":{"28":{"alignmentBitmask":5,"expandRatio":0},"30":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15,"width":"100.0%"},"3":{"id":"dashboard-menu","primaryStyleName":"valo-menu"},"30":{"caption":"기사지원 계약직 채용","styles":["borderless-colored","large"]},"31":{"contentMode":"HTML","text":"<center><h3><strong><font color=\"#ffffff\">마감</font></strong></h3></center>","width":"80.0px","styles":["label-deadline-end"]},"32":{"contentMode":"HTML","text":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;지원기간 : 2026년10월2 일 ~ 2026년10월11일","width":"100.0%"},"33":{"spacing":true,"childData":{"32":{"alignmentBitmask":5,"expandRatio":0},"34":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15,"width":"100.0%"},"34":{"caption":"건강증진팀 단시간 계약직 임상병리사 채용","styles":["borderless-colored","large"]},"35":{"contentMode":"HTML","text":"<center><h3><strong><font color=\"#ffffff\">마감</font></strong></h3></center>","width":"80.0px","styles":["label-deadline-end"]},"36":{"contentMode":"HTML","text":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;지원기간 : 2026년10월2 일 ~ 2026년10월11일","width":"100.0%"},"37":{"spacing":true,"childData":{"36":{"alignmentBitmask":5,"expandRatio":0},"38":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15,"width":"100.0%"},"38":{"caption":"건강증진팀 계약직 간호사 채용","styles":["borderless-colored","large"]},"39":{"contentMode":"HTML","text":"<center><h3><strong><font color=\"#ffffff\">마감</font></strong></h3></center>","width":"80.0px","styles":["label-deadline-end"]},"4":{"styles":["sidebar","valo-menu-part","no-vertical-drag-hints","no-horizontal-drag-hints"]},"40":{"contentMode":"HTML","text":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;지원기간 : 2026년10월2 일 ~ 2026년10월11일","width":"100.0%"},"41":{"spacing":true,"childData":{"40":{"alignmentBitmask":5,"expandRatio":0},"42":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15,"width":"100.0%"},"42":{"caption":"직업환경보건팀 계약직 방사선사 채용","styles":["borderless-colored","large"]},"43":{"contentMode":"HTML","text":"<center><h3><strong><font color=\"#ffffff\">마감</font></strong></h3></center>","width":"80.0px","styles":["label-deadline-end"]},"44":{"contentMode":"HTML","text":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;지원기간 : 2026년7 월28일 ~ 2026년10월31일","width":"100.0%"},"45":{"spacing":true,"childData":{"44":{"alignmentBitmask":5,"expandRatio":0},"46":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15,"width":"100.0%"},"46":{"caption":"소아청소년과 [전담교수] 초빙 안내","styles":["borderless-colored","large"]},"47":{"contentMode":"HTML","text":"<center><h3><strong><font color=\"#ffffff\">D-17</font></strong></h3></center>","width":"80.0px","styles":["label-deadline-live"]},"48":{"contentMode":"HTML","text":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;지원기간 : 2026년7 월28일 ~ 2026년10월31일","width":"100.0%"},"49":{"spacing":true,"childData":{"48":{"alignmentBitmask":5,"expandRatio":0},"50":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15,"width":"100.0%"},"5":{"childData":{"6":{"alignmentBitmask":5,"expandRatio":0},"7":{"alignmentBitmask":34,"expandRatio":0}},"width":"100.0%","styles":["valo-menu-title"]},"50":{"caption":"산부인과 [전담교수] 초빙 안내","styles":["borderless-colored","large"]},"51":{"contentMode":"HTML","text":"<center><h3><strong><font color=\"#ffffff\">D-17</font></strong></h3></center>","width":"80.0px","styles":["label-deadline-live"]},"52":{"contentMode":"HTML","text":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;지원기간 : 2026년5 월29일 ~ 2026년10월31일","width":"100.0%"},"53":{"spacing":true,"childData":{"52":{"alignmentBitmask":5,"expandRatio":0},"54":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15,"width":"100.0%"},"54":{"caption":"내과(알레르기) 전문의 초빙안내","styles":["borderless-colored","large"]},"55":{"contentMode":"HTML","text":"<center><h3><strong><font color=\"#ffffff\">D-17</font></strong></h3></center>","width":"80.0px","styles":["label-deadline-live"]},"56":{"contentMode":"HTML","text":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;지원기간 : 2026년4 월30일 ~ 2026년10월31일","width":"100.0%"},"57":{"spacing":true,"childData":{"56":{"alignmentBitmask":5,"expandRatio":0},"58":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15,"width":"100.0%"},"58":{"caption":"2026년 전문의 초빙 안내","styles":["borderless-colored","large"]},"59":{"contentMode":"HTML","text":"<center><h3><strong><font color=\"#ffffff\">D-17</font></strong></h3></center>","width":"80.0px","styles":["label-deadline-live"]},"6":{"caption":"","resources":{"source":{"uRL":"theme://img/uuh_white_orange.png"}}},"60":{"contentMode":"HTML","text":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;지원기간 : 2026년4 월29일 ~ 2026년10월31일","width":"100.0%"},"61":{"spacing":true,"childData":{"60":{"alignmentBitmask":5,"expandRatio":0},"62":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15,"width":"100.0%"},"62":{"caption":"호흡기내과 전문의 초빙안내","styles":["borderless-colored","large"]},"63":{"contentMode":"HTML","text":"<center><h3><strong><font color=\"#ffffff\">D-17</font></strong></h3></center>","width":"80.0px","styles":["label-deadline-live"]},"64":{"contentMode":"HTML","text":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;지원기간 : 2026년1 월23일 ~ 2026년10월31일","width":"100.0%"},"65":{"spacing":true,"childData":{"64":{"alignmentBitmask":5,"expandRatio":0},"66":{"alignmentBitmask":5,"expandRatio":0}},"marginsBitmask":15,"width":"100.0%"},"66":{"caption":"건강의학과(소화기내시경) 전담교수 초빙안내","styles":["borderless-colored","large"]},"67":{"contentMode":"HTML","text":"<center><h3><strong><font color=\"#ffffff\">D-17</font></strong></h3></center>","width":"80.0px","styles":["label-deadline-live"]},"68":{"spacing":true,"childData":{"72":{"alignmentBitmask":48,"expandRatio":1}},"width":"100.0%"},"7":{"contentMode":"HTML","text":"<div align=\"right\"><h2><strong>채용</strong></h2></div>","width":"100.0%"},"72":{"spacing":true,"childData":{"73":{"alignmentBitmask":5,"expandRatio":0},"74":{"alignmentBitmask":5,"expandRatio":0},"75":{"alignmentBitmask":5,"expandRatio":0},"80":{"alignmentBitmask":5,"expandRatio":0},"81":{"alignmentBitmask":5,"expandRatio":0}}},"73":{"styles":["link"],"resources":{"icon":{"uRL":"fonticon://FontAwesome/f0a8"}},"enabled":false},"74":{"styles":["link"],"resources":{"icon":{"uRL":"fonticon://FontAwesome/f190"}},"enabled":false},"75":{"spacing":true,"childData":{"76":{"alignmentBitmask":33,"expandRatio":0},"77":{"alignmentBitmask":33,"expandRatio":0},"78":{"alignmentBitmask":33,"expandRatio":0},"79":{"alignmentBitmask":33,"expandRatio":0}}},"76":{"contentMode":"HTML","text":"Page&nbsp;"},"77":{"text":"1","width":"50.0px","immediate":true,"styles":["small"]},"78":{"contentMode":"HTML","text":"&nbsp;/&nbsp;"},"79":{"text":"3"},"8":{"caption":"Menu","styles":["valo-menu-toggle","borderless","small"],"resources":{"icon":{"uRL":"fonticon://FontAwesome/f03a"}}},"80":{"styles":["link"],"resources":{"icon":{"uRL":"fonticon://FontAwesome/f18e"}}},"81":{"styles":["link"],"resources":{"icon":{"uRL":"fonticon://FontAwesome/f0a9"}}},"9":{"styles":["valo-menuitems"]}}, "types":{"0":"0","1":"17","10":"4","11":"8","12":"8","13":"4","14":"8","15":"8","16":"4","17":"8","18":"11","19":"12","2":"13","20":"7","21":"16","22":"3","23":"1","24":"9","25":"6","26":"5","27":"2","28":"4","29":"3","3":"10","30":"6","31":"4","32":"4","33":"3","34":"6","35":"4","36":"4","37":"3","38":"6","39":"4","4":"11","40":"4","41":"3","42":"6","43":"4","44":"4","45":"3","46":"6","47":"4","48":"4","49":"3","5":"3","50":"6","51":"4","52":"4","53":"3","54":"6","55":"4","56":"4","57":"3","58":"6","59":"4","6":"15","60":"4","61":"3","62":"6","63":"4","64":"4","65":"3","66":"6","67":"4","68":"14","7":"4","72":"9","73":"6","74":"6","75":"9","76":"4","77":"5","78":"4","79":"4","8":"6","80":"6","81":"6","9":"11"}, "hierarchy":{"0":["2","1"],"1":[],"18":["19"],"19":["20"],"2":["3","18"],"20":["21"],"21":["22"],"22":["23","27","68"],"23":["24"],"24":["25","26"],"27":["33","57","37","63","65","31","59","49","29","41","39","67","45","47","55","35","53","43","61","51"],"29":["30","28"],"3":["4"],"33":["34","32"],"37":["38","36"],"4":["5","8","9"],"41":["42","40"],"45":["46","44"],"49":["50","48"],"5":["6","7"],"53":["54","52"],"57":["58","56"],"61":["62","60"],"65":["66","64"],"68":["72"],"72":["73","74","75","80","81"],"75":["76","77","78","79"],"9":["10","11","12","13","14","15","16","17"]}, "rpc" : [], "meta" : {"repaintAll":true}, "resources" : {}, "typeMappings" : { "com.vaadin.ui.VerticalLayout" : 3 , "com.vaadin.ui.HorizontalLayout" : 9 , "com.vaadin.ui.AbstractField" : 18 , "com.vaadin.ui.AbstractSingleComponentContainer" : 19 , "com.vaadin.ui.AbstractComponentContainer" : 20 , "com.vaadin.ui.Button" : 6 , "com.vaadin.server.AbstractClientConnector" : 21 , "kr.ulsan.uuh.dashboard.DashboardUI" : 0 , "com.vaadin.ui.AbstractComponent" : 22 , "com.vaadin.ui.CssLayout" : 11 , "com.vaadin.ui.AbstractOrderedLayout" : 23 , "com.vaadin.ui.Panel" : 1 , "kr.ulsan.uuh.dashboard.view.DashboardMenu.ValoMenuItemButton" : 8 , "com.vaadin.ui.AbstractLayout" : 24 , "kr.ulsan.uuh.dashboard.recruit.RecruitListPageAll" : 16 , "com.vaadin.ui.Label" : 4 , "com.vaadin.addon.pagination.Pagination" : 14 , "com.vaadin.ui.Image" : 15 , "com.vaadin.ui.Table" : 2 , "kr.ulsan.uuh.dashboard.view.DashboardMenu" : 10 , "kr.ulsan.uuh.dashboard.view.MainView" : 13 , "com.vaadin.ui.UI" : 25 , "com.vaadin.ui.AbstractTextField" : 26 , "com.vaadin.ui.TabSheet" : 7 , "com.vaadin.ui.TextField" : 5 , "com.vaadin.server.AbstractExtension" : 27 , "com.vaadin.server.Responsive" : 17 , "com.vaadin.ui.CustomComponent" : 28 , "com.vaadin.ui.AbstractSelect" : 29 , "com.vaadin.ui.AbstractEmbedded" : 30 , "com.vaadin.ui.AbstractFocusable" : 31 , "kr.ulsan.uuh.dashboard.recruit.RecruitListPageTab" : 12 }, "typeInheritanceMap" : { "3" : 23 , "9" : 23 , "18" : 22 , "19" : 22 , "20" : 22 , "6" : 31 , "0" : 25 , "22" : 21 , "11" : 24 , "23" : 24 , "1" : 19 , "8" : 6 , "24" : 20 , "16" : 3 , "4" : 22 , "14" : 9 , "15" : 30 , "2" : 29 , "10" : 28 , "13" : 9 , "25" : 19 , "26" : 18 , "7" : 20 , "5" : 26 , "27" : 21 , "17" : 27 , "28" : 22 , "29" : 18 , "30" : 22 , "31" : 22 , "12" : 3 }, "timings":[56, 0]}] @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1346ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Handling message from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1346ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling resources from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1346ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling type inheritance map from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1346ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Handling type mappings from server @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1346ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Handling resource dependencies @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1346ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling meta information @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1347ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Updating connector hierarchy @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1348ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Sending hierarchy change events @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1353ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: * Unregistered 78 connectors @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1353ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Creating connectors (if needed) @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1355ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Updating connector states @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1356ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Handling locales @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1356ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Updating connector hierarchy @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1356ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Sending hierarchy change events @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1363ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Running @DelegateToWidget @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1363ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Sending state change events @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1380ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Passing UIDL to Vaadin 6 style connectors @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1387ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  * Performing server to client RPC calls @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1387ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: * Unregistered 0 connectors @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1387ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: handleUIDLMessage: 35 ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1387ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Starting layout phase @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1388ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Measured 6 non connector elements @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1394ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 1 measured 56 elements, fired 0 listeners and did 0 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1400ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 2 measured 82 elements, fired 0 listeners and did 2 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1402ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 3 measured 9 elements, fired 0 listeners and did 2 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1403ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 4 measured 22 elements, fired 0 listeners and did 1 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1403ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: No more changes in pass 5 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1404ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Total layout phase time: 17ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1404ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO:  Processing time was 58ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1404ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.communication.MessageHandler
+INFO: Referenced paintables: 79 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1405ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Starting layout phase @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1405ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Measured 6 non connector elements @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1405ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 1 measured 2 elements, fired 0 listeners and did 1 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1405ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 2 measured 1 elements, fired 0 listeners and did 1 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1405ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: No more changes in pass 3 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1406ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Total layout phase time: 1ms @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1511ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Starting layout phase @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1511ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Measured 6 non connector elements @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1511ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Pass 1 measured 1 elements, fired 0 listeners and did 0 layouts. @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1512ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: No more changes in pass 2 @ com.vaadin.DefaultWidgetSet-0.js:6285
+[    1512ms] [INFO] Wed Oct 14 10:12:52 GMT+900 2026 com.vaadin.client.LayoutManager
+INFO: Total layout phase time: 1ms @ com.vaadin.DefaultWidgetSet-0.js:6285

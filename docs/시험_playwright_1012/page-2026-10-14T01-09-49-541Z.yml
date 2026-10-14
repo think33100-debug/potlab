@@ -1,0 +1,61 @@
+- generic [active] [ref=f14e1]:
+  - list:
+    - listitem:
+      - link "본문 바로가기" [ref=f14e2] [cursor=pointer]:
+        - /url: "#cms-content"
+  - generic [ref=f14e4]:
+    - heading [level=1] [ref=f14e5]:
+      - link [ref=f14e6] [cursor=pointer]:
+        - /url: "#!"
+        - img "양산부산대학교병원" [ref=f14e7]
+    - generic [ref=f14e8]:
+      - link "인재채용" [ref=f14e9] [cursor=pointer]:
+        - /url: https://pnuyh.recruiter.co.kr/appsite/company/index
+      - link "KOR" [ref=f14e10] [cursor=pointer]:
+        - /url: "#!"
+  - generic [ref=f14e11]:
+    - generic [ref=f14e12]:
+      - link [ref=f14e14] [cursor=pointer]:
+        - /url: /pnuyh/index.do
+        - paragraph [ref=f14e15]: 양산부산대학교병원
+        - paragraph [ref=f14e16]: Pusan National UniversityYangsan Hospital
+      - generic [ref=f14e17]:
+        - link [ref=f14e18] [cursor=pointer]:
+          - /url: /kids/index.do
+          - paragraph [ref=f14e19]: 어린이병원
+          - paragraph [ref=f14e20]: Children’s Hospital
+        - link [ref=f14e21] [cursor=pointer]:
+          - /url: https://rehab.pnuyh.or.kr/rehab/
+          - paragraph [ref=f14e22]: 영남권역재활병원
+          - paragraph [ref=f14e23]: Rehabilitation Hospital
+        - link [ref=f14e24] [cursor=pointer]:
+          - /url: https://www.pnuh.or.kr/pnuh/
+          - paragraph [ref=f14e25]: 부산대학교병원
+          - paragraph [ref=f14e26]: Pusan National University Hospital
+        - link [ref=f14e27] [cursor=pointer]:
+          - /url: https://www.pnukh.or.kr/pnukh/index.do
+          - paragraph [ref=f14e28]: 한방병원
+          - paragraph [ref=f14e29]: Korean Medicine Hospital
+    - generic [ref=f14e30]:
+      - paragraph [ref=f14e31]:
+        - text: 건강을 위한
+        - strong [ref=f14e32]: 동행,
+        - text: 믿음을 주는
+        - strong [ref=f14e33]: 병원
+      - generic [ref=f14e34]:
+        - link "블로그" [ref=f14e35] [cursor=pointer]:
+          - /url: https://blog.naver.com/pnuyhpr
+        - link "인스타그램" [ref=f14e36] [cursor=pointer]:
+          - /url: https://www.instagram.com/pnuyh/
+        - link "유튜브" [ref=f14e37] [cursor=pointer]:
+          - /url: https://www.youtube.com/channel/UCo6xAaulkLgHzmrbd_IUUrg
+      - generic [ref=f14e38]:
+        - link "건강증진센터" [ref=f14e39] [cursor=pointer]:
+          - /url: https://health.pnuyh.or.kr
+        - link "진료협력센터" [ref=f14e40] [cursor=pointer]:
+          - /url: https://refer.pnuyh.or.kr/
+        - link "의생명융합연구원" [ref=f14e41] [cursor=pointer]:
+          - /url: https://rcb.pnuyh.or.kr/
+        - link "부산대학교치과병원" [ref=f14e42] [cursor=pointer]:
+          - /url: https://www.pnudh.co.kr/pnudh/main/main.do?cmnx=1
+  - paragraph [ref=f14e44]: ⓒ 2023 Pusan National University Yangsan Hospital. All Rights Reserved.

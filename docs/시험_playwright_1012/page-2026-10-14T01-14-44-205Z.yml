@@ -1,0 +1,37 @@
+- generic [active] [ref=f30e1]:
+  - generic [ref=f30e3]:
+    - generic [ref=f30e6]:
+      - img "homepage logo image" [ref=f30e10]
+      - generic [ref=f30e11]:
+        - generic [ref=f30e13]:
+          - link "회사 소개" [ref=f30e14] [cursor=pointer]:
+            - /url: /
+          - link "채용 공고" [ref=f30e16] [cursor=pointer]:
+            - /url: /4qxkvknx
+        - button "로그인" [ref=f30e19] [cursor=pointer]
+    - generic [ref=f30e23]:
+      - generic [ref=f30e88]:
+        - generic [ref=f30e94]:
+          - heading "지금," [level=3] [ref=f30e95]
+          - heading "우리의 여정에 함께하세요" [level=3] [ref=f30e96]
+        - link "진행 중인 공고 보러 가기" [ref=f30e102] [cursor=pointer]:
+          - /url: /4qxkvknx
+      - generic [ref=f30e108]:
+        - generic [ref=f30e110]:
+          - img "homepage footer logo" [ref=f30e112]
+          - generic [ref=f30e113]:
+            - generic [ref=f30e114]: © 강북삼성병원
+            - generic [ref=f30e115]:
+              - text: "전화: 02-2001-2825, FAX: 02-2001-2117"
+              - paragraph [ref=f30e116]: "이메일: dayhope.choi@samsung.com"
+        - generic [ref=f30e119]:
+          - link "개인정보처리방침" [ref=f30e121] [cursor=pointer]:
+            - /url: https://main.kbsmc.co.kr/main/contents.do?idx=4759
+          - generic [ref=f30e126]:
+            - link [ref=f30e127] [cursor=pointer]:
+              - /url: https://www.youtube.com/c/KangbukSamsungMedicalCenter
+            - link [ref=f30e132] [cursor=pointer]:
+              - /url: https://www.instagram.com/kangbuk_smc/
+            - link [ref=f30e138] [cursor=pointer]:
+              - /url: https://blog.naver.com/mykbsmc2780
+  - alert [ref=f30e145]

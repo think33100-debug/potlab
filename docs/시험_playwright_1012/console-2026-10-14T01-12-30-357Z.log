@@ -1,0 +1,4 @@
+[     230ms] [WARNING] The key "target-densitydpi" is not supported. @ https://www.uuh.ulsan.kr:8443/uuhrecruit/:37
+[    1025ms] [LOG] 1.ready @ https://www.uuh.ulsan.kr:8443/_Template/Layout/rspnsv-uuhrecruit/_Js/layout_main.js:69
+[    1117ms] [LOG] 2.Load @ https://www.uuh.ulsan.kr:8443/_Template/Layout/rspnsv-uuhrecruit/_Js/layout_main.js:96
+[    1532ms] [LOG] 3.docLoad @ https://www.uuh.ulsan.kr:8443/_Template/Layout/rspnsv-uuhrecruit/_Js/layout_main.js:88

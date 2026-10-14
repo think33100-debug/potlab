@@ -1,0 +1,392 @@
+- generic [active] [ref=f6e1]:
+  - generic:
+    - link "본문으로 가기":
+      - /url: "#contents"
+    - link "주메뉴로 가기":
+      - /url: "#gnb"
+    - link "카피라이트로 가기":
+      - /url: "#footer"
+  - generic [ref=f6e2]:
+    - banner [ref=f6e3]:
+      - generic [ref=f6e5]:
+        - heading [level=1] [ref=f6e6]:
+          - link [ref=f6e7] [cursor=pointer]:
+            - /url: /
+            - img "한양대학교병원" [ref=f6e8]
+        - navigation [ref=f6e9]:
+          - list [ref=f6e10]:
+            - listitem [ref=f6e11]:
+              - link "진료·예약" [ref=f6e12] [cursor=pointer]:
+                - /url: "javascript: fastReserve();"
+            - listitem [ref=f6e14]:
+              - link "의료진·진료과" [ref=f6e15] [cursor=pointer]:
+                - /url: /hospital/profList002002001.do
+            - listitem [ref=f6e17]:
+              - link "이용안내" [ref=f6e18] [cursor=pointer]:
+                - /url: /conts/102008001000000.do
+            - listitem [ref=f6e20]:
+              - link "소개·소식" [ref=f6e21] [cursor=pointer]:
+                - /url: /conts/106001001000000.do
+            - listitem [ref=f6e23]:
+              - link "마이차트" [ref=f6e24] [cursor=pointer]:
+                - /url: /mypage/mychart.do
+        - list [ref=f6e26]:
+          - listitem [ref=f6e27]:
+            - link "Family Site" [ref=f6e28] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=f6e31]:
+            - list [ref=f6e32]:
+              - listitem [ref=f6e33]:
+                - link "회원가입" [ref=f6e34] [cursor=pointer]:
+                  - /url: /member/joinStep00.do
+              - listitem [ref=f6e35]:
+                - link "로그인" [ref=f6e36] [cursor=pointer]:
+                  - /url: /member/login.do
+          - listitem [ref=f6e37]:
+            - link "KOR" [ref=f6e39] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=f6e42]:
+            - link "통합검색 열기" [ref=f6e43] [cursor=pointer]:
+              - /url: javascript:void(0);
+          - listitem [ref=f6e44]:
+            - link "사이트맵 열기" [ref=f6e45] [cursor=pointer]:
+              - /url: javascript:void(0);
+              - generic:
+                - emphasis: 사이트맵 열기
+    - article [ref=f6e47]:
+      - generic [ref=f6e49]:
+        - generic [ref=f6e52]:
+          - generic [ref=f6e53]:
+            - heading "진료예약" [level=3] [ref=f6e54]
+            - generic [ref=f6e55]:
+              - link "처음 오신 분" [ref=f6e56] [cursor=pointer]:
+                - /url: "javascript: openFastLayer('O')"
+              - link [ref=f6e59] [cursor=pointer]:
+                - /url: "javascript: openFastLayer('F')"
+                - generic [ref=f6e60]: 암환자빠른 예약
+              - link "온라인 예약" [ref=f6e62] [cursor=pointer]:
+                - /url: "javascript: fastReserve();"
+              - link "예약 조회" [ref=f6e64] [cursor=pointer]:
+                - /url: /mypage/reserveList.do
+          - generic [ref=f6e66]:
+            - link "쉽고 빠른 챗봇 예약" [ref=f6e67] [cursor=pointer]:
+              - /url: "javascript: void(0)"
+            - link [ref=f6e70] [cursor=pointer]:
+              - /url: https://pf.kakao.com/_WxgaRu
+              - emphasis [ref=f6e72]: 카카오케어챗 예약
+        - generic [ref=f6e76]:
+          - generic [ref=f6e77]:
+            - heading "의료진·질환 예약" [level=3] [ref=f6e78]
+            - generic [ref=f6e80]:
+              - paragraph [ref=f6e81]:
+                - textbox "질환, 증상, 의료진을 입력" [ref=f6e82] [cursor=pointer]:
+                  - /placeholder: 질환, 증상, 의료진을 입력하세요.
+                - button "검색" [ref=f6e83] [cursor=pointer]
+              - button "검색" [ref=f6e84] [cursor=pointer]
+          - generic [ref=f6e85]:
+            - heading "전화 예약" [level=4] [ref=f6e86]
+            - link "02-2290-8114" [ref=f6e89] [cursor=pointer]:
+              - /url: tel:02-2290-8114
+            - generic [ref=f6e90]:
+              - paragraph [ref=f6e91]:
+                - text: "평일 :"
+                - generic [ref=f6e92]: 08:30~17:30
+              - paragraph [ref=f6e93]:
+                - text: "토요일 :"
+                - generic [ref=f6e94]: 08:30~12:30
+        - generic [ref=f6e96]:
+          - generic [ref=f6e97]:
+            - heading "이용 안내" [level=3] [ref=f6e98]
+            - generic [ref=f6e99]:
+              - link "오시는길" [ref=f6e100] [cursor=pointer]:
+                - /url: /conts/102009001000000.do
+              - link "진료절차" [ref=f6e102] [cursor=pointer]:
+                - /url: /conts/102002008001000.do
+              - link "전화번호" [ref=f6e104] [cursor=pointer]:
+                - /url: /conts/102010003000000.do
+              - link "비급여 진료비" [ref=f6e106] [cursor=pointer]:
+                - /url: /hospital/treatmentList.do
+              - link "제증명 발급" [ref=f6e108] [cursor=pointer]:
+                - /url: /conts/102008001000000.do
+              - link "의무기록 발급" [ref=f6e110] [cursor=pointer]:
+                - /url: /conts/102008002000000.do
+          - generic [ref=f6e112]:
+            - heading "검진 예약" [level=3] [ref=f6e113]
+            - link "종합검진 예약하기" [ref=f6e114] [cursor=pointer]:
+              - /url: /premiumhealth/conts/101003000000000.do
+            - link "국가건강검진" [ref=f6e116] [cursor=pointer]:
+              - /url: /tp/basichealth/
+      - list [ref=f6e121]:
+        - listitem [ref=f6e122]:
+          - link [ref=f6e123] [cursor=pointer]:
+            - /url: /hospital/locationList.do
+            - emphasis [ref=f6e126]: 층별안내
+        - listitem [ref=f6e127]:
+          - link [ref=f6e128] [cursor=pointer]:
+            - /url: /conts/102002006001000.do
+            - emphasis [ref=f6e131]: 입∙퇴원
+        - listitem [ref=f6e132]:
+          - link [ref=f6e133] [cursor=pointer]:
+            - /url: /board/commBoardFaqList.do
+            - emphasis [ref=f6e136]: 자주하는 질문
+        - listitem [ref=f6e137]:
+          - link [ref=f6e138] [cursor=pointer]:
+            - /url: /hydic/
+            - emphasis [ref=f6e141]: 건강백과
+        - listitem [ref=f6e142]:
+          - link [ref=f6e143] [cursor=pointer]:
+            - /url: /srefer/
+            - emphasis [ref=f6e146]: 진료협력센터
+        - listitem [ref=f6e147]:
+          - link [ref=f6e148] [cursor=pointer]:
+            - /url: https://fund.hyumc.com/home/kor/main.do
+            - emphasis [ref=f6e151]: 발전기금
+      - generic [ref=f6e154]:
+        - generic [ref=f6e155]:
+          - generic [ref=f6e156]:
+            - button "Go to slide 1" [ref=f6e157] [cursor=pointer]
+            - button "Go to slide 2" [ref=f6e158] [cursor=pointer]
+            - button "Go to slide 3" [ref=f6e159] [cursor=pointer]
+            - button "Go to slide 4" [ref=f6e160] [cursor=pointer]
+            - button "Go to slide 5" [ref=f6e161] [cursor=pointer]
+            - button "Go to slide 6" [ref=f6e162] [cursor=pointer]
+          - link "정지" [ref=f6e163] [cursor=pointer]:
+            - /url: javascript:void(0);
+            - emphasis: 정지
+        - generic [ref=f6e165]:
+          - group "1 / 6" [ref=f6e166]
+          - group "2 / 6" [ref=f6e168]
+          - group "3 / 6" [ref=f6e170]
+          - group "4 / 6" [ref=f6e172]
+          - group "5 / 6" [ref=f6e174]
+          - group "6 / 6" [ref=f6e176]
+      - list [ref=f6e180]:
+        - listitem [ref=f6e181]:
+          - generic [ref=f6e182]:
+            - generic [ref=f6e183]:
+              - paragraph [ref=f6e184]: 공지사항
+              - paragraph [ref=f6e185]: 2026-07-27
+            - link [ref=f6e186] [cursor=pointer]:
+              - /url: /board/commBoardNoticeView.do?no=6732
+              - paragraph [ref=f6e187]:
+                - strong [ref=f6e188]: 외래 조기진료 시범 운영 안내 (류마티스내과·비뇨의학과·신경과·외과·산부인과 우선 운영)
+            - link "자세히 보기" [ref=f6e190] [cursor=pointer]:
+              - /url: /board/commBoardNoticeView.do?no=6732
+        - listitem [ref=f6e193]:
+          - generic [ref=f6e194]:
+            - generic [ref=f6e195]:
+              - paragraph [ref=f6e196]: 병원소식
+              - paragraph [ref=f6e197]: 2026-10-08
+            - link [ref=f6e198] [cursor=pointer]:
+              - /url: /board/commBoardNewsView.do?no=6888
+              - paragraph [ref=f6e199]:
+                - strong [ref=f6e200]: 안명주 의학석좌교수, ‘병원발전기금’으로 1억 원 기부
+            - link "자세히 보기" [ref=f6e202] [cursor=pointer]:
+              - /url: /board/commBoardNewsView.do?no=6888
+        - listitem [ref=f6e205]:
+          - generic [ref=f6e206]:
+            - generic [ref=f6e207]:
+              - paragraph [ref=f6e208]: 언론보도
+              - paragraph [ref=f6e209]: 2026-10-12
+            - link [ref=f6e210] [cursor=pointer]:
+              - /url: https://jhealthmedia.joins.com/news/articleView.html?idxno=33685
+              - paragraph [ref=f6e211]:
+                - strong [ref=f6e212]: 17개 전문센터 중심 통합 진료 … 암 치료 전문성 높인다
+            - link "자세히 보기" [ref=f6e214] [cursor=pointer]:
+              - /url: /press/list.do
+        - listitem [ref=f6e217]:
+          - generic [ref=f6e218]:
+            - generic [ref=f6e219]:
+              - paragraph [ref=f6e220]: 학술행사
+              - paragraph [ref=f6e221]: 2026년 11월 04일 13:20~14:20
+            - link [ref=f6e222] [cursor=pointer]:
+              - /url: /hyumc/board/seminarBoardView.do?no=439
+              - paragraph [ref=f6e223]:
+                - strong [ref=f6e224]: 2026년 장기이식 환우 건강강좌 개최
+            - link "자세히 보기" [ref=f6e226] [cursor=pointer]:
+              - /url: /hyumc/board/seminarBoardView.do?no=439
+      - generic [ref=f6e230]:
+        - heading [level=3] [ref=f6e231]:
+          - link "Hihy 건강저장소" [ref=f6e232] [cursor=pointer]:
+            - /url: /board/commBoardHealthRepoList.do
+        - generic [ref=f6e233]:
+          - list [ref=f6e234]:
+            - listitem [ref=f6e235]:
+              - generic [ref=f6e236]:
+                - paragraph [ref=f6e238]: 2026-10-01
+                - link [ref=f6e239] [cursor=pointer]:
+                  - /url: /board/commBoardHealthRepoView.do?no=6877
+                  - paragraph [ref=f6e240]:
+                    - strong [ref=f6e241]: 루게릭병 진단 후 막막하다면? 알아두면 힘이 되는 사회복지제도 A to Z
+                  - paragraph [ref=f6e242]: "한양대학교병원 루게릭병 클리닉에서는 루게릭병의 치료 전략과 관리법에 대한 강의를 정기적으로 진행하고 있습니다. 이번 강좌에서는 한양대학교병원 사회복지팀 장영주 의료사회복지사님과 함께 루게릭병 환우와 가족분들이 꼭 알아야 할 '사회복지제도'에 대해 상세히 알아봅니다. 루게릭병 진단 후 발생할 수 있는 경제적, 신체적 어려움을 덜어드리기 위해 국가와 지자체에서 제공하는 다양한 지원 제도를 4가지 핵심 분야(치료비, 생계, 장애인, 돌봄 지원)로 나누어 알기 쉽게 정리해 드립니다. 진료비 부담을 줄여주는 산정특례 및 본인부담상한제부터, 가장 적절한 장애인 등록 시기, 그리고 환우의 일상을 돕는 노인장기요양보험과 활동지원 서비스까지 실질적으로 꼭 필요한 정보들을 영상에서 확인해 보세요. (강의 일자 : 26년 7월 11일) ⏱️ 목차 [1부: 치료비 지원] 00:27 1. 본인일부부담금 산정특례제도 02:37 2. 본인부담상한제 05:12 3. 희귀질환자 의료비 지원사업 07:14 4. 재난적 의료비 지원사업 09:16 5. 긴급복지 의료지원 11:29 6. 차상위 본인부담경감대상자 지원사업 [2부: 생계 지원] 12:27 1. 다양한 연금제도 비교 14:30 2. 국민기초생활보장제도 16:02 3. 차상위계층 확인사업 17:28 4. 긴급복지 지원사업 [3부: 장애인 지원] 18:35 1. 루게릭병 환우의 장애인 등록 21:42 2. 국민연금 내 장애연금 23:35 3. 장애인 연금 및 장애수당 23:59 4. 장애인 활동지원사업 25:14 5. 장애인 보조기기 지원사업 25:31 6. 장애인 택시지원 [4부: 돌봄 지원] 26:33 1. 통합돌봄 서비스 27:39 2. 노인장기요양보험제도 32:21 3. 일상돌봄 서비스 32:56 4. 가사·간병 방문 지원사업 33:34 5. 긴급돌봄 지원사업 33:58 6. 119 안심콜 [5부: 기타 지원 및 마무리] 35:06 1. 희소·긴급도입 필요 의료기기 공급 사업 안내 35:37 2. 도움이 되는 주요 민간/공공 사이트 및 필요 서류 발급 기관 안내 35:59 3. 한양대학교병원 사회복지팀 상담 이용 안내 및 강좌 마무리 ※ 도움이 되는 사이트 [질병관리청 희귀질환헬프라인] [질병관리청] [보건복지부] [보건복지부 복지포털(복지로)] [국민건강보험공단] [국민건강보험공단 노인장기요양보험] [국민연금공단] [한국루게릭병(ALS)협회] [(사)한국희귀·난치성질환 연합회 환우 모임] [승일희망재단] ※서류 발급 기관 사이트 [정부24] [부동산공시가격 알리미] [전자가족관계등록시스템] [국세청 홈텍스] [인터넷등기소] [내보험 찾아줌] [내보험 다보여] [한양대학교병원 루게릭병 클리닉 유튜브 채널]"
+                - generic [ref=f6e243]:
+                  - link "#루게릭병" [ref=f6e244] [cursor=pointer]:
+                    - /url: /search/search.do?keyword=루게릭병
+                  - link "# 사회복지" [ref=f6e246] [cursor=pointer]:
+                    - /url: /search/search.do?keyword= 사회복지
+            - listitem [ref=f6e248]:
+              - generic [ref=f6e249]:
+                - paragraph [ref=f6e251]: 2026-10-01
+                - link [ref=f6e252] [cursor=pointer]:
+                  - /url: /board/commBoardHealthRepoView.do?no=6875
+                  - paragraph [ref=f6e253]:
+                    - strong [ref=f6e254]: 루게릭병 환자와 가족을 위한 핵심 호흡재활 전략
+                  - paragraph [ref=f6e255]: "한양대학교병원 루게릭병 클리닉에서는 루게릭병의 치료 전략과 관리법에 대한 강의를 정기적으로 진행하고 있습니다. 이번 강좌에서는 한양대학교병원 재활의학과 최수진 교수님과 함께 루게릭병 환자와 가족분들을 위한 핵심 호흡재활 전략에 대해 알아봅니다. 루게릭병은 팔다리 근육뿐만 아니라 숨쉬는 근육, 기침하는 근육, 삼키는 근육에도 영향을 미칩니다. 호흡재활은 숨이 심하게 찰 때 시작하는 마지막 치료가 아니라, 호흡근 약화와 분비물 문제를 미리 살펴보고 적절한 시점에 준비하는 조기 치료 과정입니다. 가정에서 할 수 있는 호흡 관리법부터 비침습환기(NIV)와 기침유발기(MI-E)의 올바른 이해까지, 환자분들이 더 편안하고 안전하게 지내실 수 있도록 돕는 유익한 정보들을 확인해 보세요. (강의 일자 : 26년 7월 11일) ⏱️ 목차 00:00 강좌 소개 및 오늘 나눌 이야기 00:48 1. 왜 호흡 관리가 중요한가? (숨쉬기와 기침·분비물) 01:59 2. 미리 살펴야 할 호흡 기능 저하 의심 증상들 02:38 정기적으로 확인해야 하는 호흡 검사 종류 (폐활량, 호흡 근력 등) 05:37 3. 비침습환기(NIV)란 무엇이고, 왜 필요한가요? 07:11 권장하는 비침습환기(NIV) 사용 시점과 효과 08:15 4. 기침보조와 가래·침 관리 방법 12:17 5. 집에서 가족과 함께 할 수 있는 호흡 관리법 13:51 오늘 꼭 기억해야 할 6가지 핵심 메시지 [의료진 바로가기 -재활의학과 최수진 교수] [한양대학교병원 루게릭병 클리닉 유튜브 채널] [주의사항 및 안내] ※ 본 영상에서 제공하는 의학 정보는 일반적인 지식을 전달하기 위한 목적으로 제작되었습니다. ※ 본 영상의 내용은 의료진의 직접적인 진찰을 대신할 수 없습니다. 질환의 진단, 치료, 처방 등 의학적 결정은 반드시 병원에 내원하여 전문의와 상담하시기 바랍니다. ※ 의학적 치료법이나 권고 사항은 환자 개인의 건강 상태(기저질환, 연령, 기왕력, 증상의 정도 등)와 적응증에 따라 다를 수 있습니다. 따라서 본 영상의 내용을 모든 환자에게 일률적으로 적용해서는 안 됩니다. ※ 의학 정보는 연구 결과와 치료 가이드라인의 변화에 따라 업데이트될 수 있습니다. 영상 제작 시점의 정보를 기준으로 하므로, 최신 치료법에 대해서는 담당 주치의와 상의하십시오."
+                - generic [ref=f6e256]:
+                  - link "#루게릭병" [ref=f6e257] [cursor=pointer]:
+                    - /url: /search/search.do?keyword=루게릭병
+                  - link "# 호흡재활" [ref=f6e259] [cursor=pointer]:
+                    - /url: /search/search.do?keyword= 호흡재활
+            - listitem [ref=f6e261]:
+              - generic [ref=f6e262]:
+                - paragraph [ref=f6e264]: 2026-10-01
+                - link [ref=f6e265] [cursor=pointer]:
+                  - /url: /board/commBoardHealthRepoView.do?no=6874
+                  - paragraph [ref=f6e266]:
+                    - strong [ref=f6e267]: 가래 배출이 어려울 때? 기침유발기 효과와 실전 운동법 4가지
+                  - paragraph [ref=f6e268]: "한양대학교병원 루게릭병 클리닉에서는 루게릭병의 치료 전략과 관리법에 대한 강의를 정기적으로 진행하고 있습니다. 이번에는 재활의학과 이영석 물리치료사님이 '집에서 쓰는 기침유발기'를 주제로 강의했습니다. 기침유발기는 들숨압력(양압)으로 폐를 팽창시킨 후 날숨압력(음압)으로 빠르게 전환하여, 생리적 기침과 유사한 공기 흐름을 생성해 객담(가래) 등 이물질 배출을 돕는 유용한 기기입니다. 기침 효율이 저하되거나, 객담 배출 곤란, 반복적인 폐렴 등을 겪는 분들이 언제, 어떻게 사용하면 좋은지 상세히 설명해 드립니다. 특히 슬라이드 중반부에서는 실제 기기를 활용한 4가지 핵심 호흡 운동법 시연 영상도 포함되어 있으니, 가정에서 안전하고 효과적으로 환기를 돕는 데 참고해 보시기 바랍니다. (강의 일자 : 26년 7월 11일) ⏱️ 목차 00:22 기침유발기(MIE)란? 01:04 기침유발기 사용을 주의해야 하는 경우 03:27 [운동법 ①] 호흡 조절 운동 (Breathing control, BC) 시연 및 설정법 04:45 [운동법 ②] 가슴 확장 운동 (TEE) 시연 및 설정법 05:58 [운동법 ③] 강제 호기 기법 (FET, cough) 시연 및 설정법 07:04 [운동법 ④] 폐 과팽창 운동 (ASE, hyperinflation) 시연 및 설정법 08:52 Take Home Message 및 마무리 [한양대학교병원 재활의학과] [한양대학교병원 루게릭병 클리닉 유튜브 채널] [주의사항 및 안내] ※ 본 영상에서 제공하는 의학 정보는 일반적인 지식을 전달하기 위한 목적으로 제작되었습니다. ※ 본 영상의 내용은 의료진의 직접적인 진찰을 대신할 수 없습니다. 질환의 진단, 치료, 처방 등 의학적 결정은 반드시 병원에 내원하여 전문의와 상담하시기 바랍니다. ※ 의학적 치료법이나 권고 사항은 환자 개인의 건강 상태(기저질환, 연령, 기왕력, 증상의 정도 등)와 적응증에 따라 다를 수 있습니다. 따라서 본 영상의 내용을 모든 환자에게 일률적으로 적용해서는 안 됩니다. ※ 의학 정보는 연구 결과와 치료 가이드라인의 변화에 따라 업데이트될 수 있습니다. 영상 제작 시점의 정보를 기준으로 하므로, 최신 치료법에 대해서는 담당 주치의와 상의하십시오."
+                - generic [ref=f6e269]:
+                  - link "#루게릭병" [ref=f6e270] [cursor=pointer]:
+                    - /url: /search/search.do?keyword=루게릭병
+                  - link "# 호흡재활" [ref=f6e272] [cursor=pointer]:
+                    - /url: /search/search.do?keyword= 호흡재활
+            - listitem [ref=f6e274]:
+              - generic [ref=f6e275]:
+                - paragraph [ref=f6e277]: 2026-10-01
+                - link [ref=f6e278] [cursor=pointer]:
+                  - /url: /board/commBoardHealthRepoView.do?no=6878
+                  - paragraph [ref=f6e279]:
+                    - strong [ref=f6e280]: 꼭 지켜야 할 골든타임, 심근경색
+                  - paragraph [ref=f6e281]: 우리 몸의 엔진, 심장을 말하다 '세계 심장의 날'- ① 심근경색 9. 29. 글. 한양대학교병원 응급의학과 이상환 교수 심장은 하루도 쉬지 않고 뛰며 온몸으로 혈액을 보낸다. 하지만 심장에 문제가 생겼을 때 우리 몸은 예상보다 다양한 방식으로 신호를 보낸다. 갑작스러운 가슴 통증으로 찾아오는 심근경색, 불규칙한 박동을 일으키는 부정맥, 심장 판막이 좁아지면서 숨 가쁨과 어지럼증을 유발하는 대동맥판막협착증까지. 세계 심장의 날을 맞아 심장이 보내는 위험 신호와 주요 심혈관질환의 증상, 치료, 예방법을 살펴본다. 심장이 보내는 구조신호 놓치지 않는 법 심장은 하루도 쉬지 않고 온몸에 피를 보내는 우리 몸의 엔진이다. 심장에 산소와 영양을 공급하는 혈관이 관상동맥이다. 관상동맥 벽에 쌓여 있던 콜레스테롤 찌꺼기, 즉 죽상경화반이 파열되면 그 자리에 피떡인 혈전이 생겨 혈관을 막는다. 이때 산소 공급이 끊긴 심장근육이 빠르게 손상되는 질환이 급성 심근경색이다. 심근경색은 치명적인 부정맥과 심정지로 이어질 수 있어 신속한 대응이 필요하다. 치료 원칙은 막힌 혈관을 최대한 빨리 다시 여는 것이다. 시간이 지날수록 살릴 수 있는 심장근육은 줄어들고, 치료가 늦어질수록 심부전·부정맥·쇼크 같은 합병증 위험도 커진다. 응급실에서 아무리 빨리 준비해도 환자가 집에서 수시간을 기다린 뒤 도착한다면 이미 중요한 시간을 놓친 셈이다. 심근경색은 꼭 심한 가슴 통증으로만 오지 않는다 가장 전형적인 증상은 가슴 한가운데를 짓누르거나 조이고, 무거운 물체를 올려놓은 듯한 불편감이다. 몇 분 이상 지속되거나 좋아졌다가 다시 나타날 수 있으며, 통증이 왼팔이나 양팔, 어깨, 등, 목, 턱, 명치 쪽으로 퍼지기도 한다. 숨이 차거나 식은땀이 나고 메스꺼움·구토·어지럼증이 함께 나타나는 경우도 흔하다. 하지만 모든 환자가 교과서처럼 아픈 것은 아니다. 일부 환자는 뚜렷한 흉통 없이 갑작스러운 호흡곤란, 심한 피로감, 체한 듯한 불편감, 식은땀이나 실신으로 나타날 수 있다. 특히 고령자와 당뇨병 환자에서는 통증이 뚜렷하지 않을 수 있다. 통증이 약하거나 잠시 좋아졌다고 안전한 것도 아니다. 평소와 다른 가슴 불편감이 새로 생겼거나 걷거나 계단을 오를 때 악화되고 쉬어도 완전히 사라지지 않는다면 즉시 진료를 받아야 한다. 병원에 갈까 고민하지 말고 119를 부른다 심근경색이 의심되면 하던 일을 즉시 멈추고 119에 신고해야 한다. 가족이 올 때까지 기다리거나 직접 운전하거나 소화제를 먹고 증상이 가라앉는지 지켜보는 것은 위험하다. 이동 중 심실세동과 같은 치명적인 부정맥이나 심정지가 발생할 수 있기 때문이다. 평소 니트로글리세린을 처방 받았다면 의료진이 알려준 방법대로 복용하되 약을 먹고 기다리느라 신고를 늦춰서는 안 된다. 구급대는 현장에서 심전도와 활력징후를 확인하고 필요한 응급처치를 시작할 수 있다. 또한 환자 상태를 병원에 미리 전달해 응급실과 심혈관조영실이 준비할 수 있도록 한다. 신고할 때는 증상이 시작된 시각, 통증 부위와 양상, 복용 중인 약과 과거 심장질환 여부를 알려주는 것이 좋다. 구급차를 이용하면 이동 중 응급처치를 받을 수 있고 병원에서도 더욱 신속하게 치료로 연결될 수 있다. 환자가 갑자기 의식을 잃고 정상적으로 숨 쉬지 않는다면 심정지로 진행했을 가능성이 있다. 즉시 119에 신고하고 가슴 중앙을 강하고 빠르게 반복해서 압박해야 한다. 주변에 자동심장충격기가 있다면 음성 안내에 따라 사용한다. 보호자가 시행하는 심폐소생술과 조기 제세동은 구급대가 도착할 때까지 뇌와 심장으로 가는 혈류를 유지하는 생명선이다. 신속한 진단과 혈관 개통 응급실에서는 가능한 한 빨리 12유도 심전도를 시행하고, 혈액검사로 심장근육 손상을 나타내는 트로포닌 수치를 확인한다. 심전도에서 전형적인 변화가 보이는 ‘ST분절 상승 심근경색’은 막힌 관상동맥을 즉시 열어야 하는 초응급질환이다. 첫 심전도가 정상이라고 심근경색이 완전히 배제되는 것은 아니다. 증상과 위험도를 종합했을 때 심근경색이 의심되면 심전도와 트로포닌 검사를 반복하고 심장초음파 등을 추가한다. 또한 대동맥박리·폐색전증·기흉처럼 흉통을 일으키는 다른 응급질환도 함께 확인한다. ST분절 상승 심근경색의 치료는 손목이나 사타구니 혈관으로 가느다란 관을 넣어 막힌 혈관을 다시 여는 관상동맥 중재술이다. 치료는 빠를수록 좋으며 혈류를 회복시키는 것이 중요하다. 심근경색 예방, 생활습관과 건강 수치를 함께 관리한다 심근경색은 어느 날 갑자기 발생하는 것처럼 보이지만 대부분은 오랜 기간 관상동맥에 동맥경화가 쌓인 결과다. 예방의 핵심은 혈관을 손상시키는 위험 요인을 미리 찾아 꾸준히 관리하는 것이다. 가장 중요한 것은 금연이다. 일반 담배뿐 아니라 전자담배와 간접흡연도 피해야 한다. 식사는 채소, 과일, 통곡물, 콩류, 생선과 견과류를 중심으로 하고, 짠 음식과 가공육, 포화지방이 많은 음식, 당이 든 음료는 줄이는 것이 좋다. 운동은 빠르게 걷기처럼 숨이 조금 차지만 대화는 가능한 정도로 하루 30분씩 주 5일 정도 실천하는 것이 좋다. 한 번에 30분이 어렵다면 짧게 나누어 시작해도 되며, 주 2일 정도 근력운동을 더하면 도움이 된다. 생활습관만큼 중요한 것은 자신의 혈압·혈당·콜레스테롤 수치를 아는 것이다. 고혈압, 당뇨병, 고지혈증은 특별한 증상이 없어도 관상동맥을 계속 손상시킬 수 있다. 건강검진에서 이상이 발견되면 치료를 미루지 말고 처방받은 약을 꾸준히 복용해야 한다. 특히 흡연자, 당뇨병·만성콩팥병 환자, 젊은 나이에 심근경색을 앓은 가족이 있는 사람은 의료진과 심혈관질환 발생 위험을 평가하고 필요한 치료를 상담하는 것이 좋다. 아스피린이 심근경색을 예방한다는 말을 듣고 임의로 복용해서는 안 된다. 심혈관질환이 없던 사람이 예방 목적으로 복용하면 출혈 위험이 예방 효과보다 클 수 있으므로, 개인의 심혈관 위험도와 출혈 가능성을 평가한 뒤 의료진이 복용 여부를 결정해야 한다. 평소에는 위험 요인을 꾸준히 관리하고, 의심되는 증상이 나타나면 지체 없이 119에 신고하는 것이 심근경색으로부터 심장을 지키는 가장 확실한 방법이다.
+            - listitem [ref=f6e283]:
+              - generic [ref=f6e284]:
+                - paragraph [ref=f6e286]: 2026-09-29
+                - link [ref=f6e287] [cursor=pointer]:
+                  - /url: /board/commBoardHealthRepoView.do?no=6863
+                  - paragraph [ref=f6e288]:
+                    - strong [ref=f6e289]: 겨드랑이 밑 최소 절개! 유방암 로봇수술의 장단점은?
+                  - paragraph [ref=f6e290]: 가슴 전체를 절제해야 하는 '유방 전절제술'을 앞두고 계신다면 상실감과 흉터에 대한 고민이 크실 텐데요. 최근 피부와 유두 보존에 유리하고 흉터를 줄이는 데 도움이 될 수 있는 '로봇수술'에 대한 관심이 높아지고 있습니다. 이번 영상에서는 유방내분비외과 정민성 교수님을 모시고 유방암 로봇수술의 원리와 장단점에 대해 알아봅니다. 기존 수술법과 비교했을 때, 로봇수술은 겨드랑이 아래 등 작은 절개창을 통해 고배율 카메라와 정교한 로봇팔을 이용하므로 보다 정밀한 수술 시야를 확보할 수 있다는 특징이 있습니다. 또한 최근 연구에 따르면 유두와 유륜 주변의 혈류 유지에 유리하다는 장점도 보고되고 있습니다. 다만, 건강보험이 적용되지 않는 비급여 항목이라 수술 비용 부담이 크다는 점도 반드시 함께 고려해야 합니다. 유방 전절제술의 수술 방법 사이에서 고민 중이시라면, 영상의 내용을 참고하시어 담당 주치의와 충분히 상의하시기 바랍니다. [바로가기 - 외과 정민성 교수] Are you facing a 'total mastectomy' and feeling concerned about the sense of loss and surgical scars? Recently, there has been growing interest in 'robotic surgery,' which can help preserve the skin and nipple while reducing visible scarring. In this video, Professor Jung Min-sung of the Department of Breast and Endocrine Surgery objectively discusses the principles, pros, and cons of robotic breast cancer surgery. Compared to conventional methods, robotic surgery allows the surgeon to secure a more precise surgical field using a high-magnification camera and delicate robotic arms through a small incision under the armpit. Furthermore, recent studies report that it is advantageous for maintaining blood flow around the nipple and areola. However, it is important to carefully consider the financial burden, as it is a non-covered item not supported by national health insurance. If you are exploring surgical options for a total mastectomy, please refer to this video and be sure to consult thoroughly with your attending physician. [주의사항 및 안내] ※ 본 영상에서 제공하는 의학 정보는 일반적인 지식을 전달하기 위한 목적으로 제작되었습니다. ※ 본 영상의 내용은 의료진의 직접적인 진찰을 대신할 수 없습니다. 질환의 진단, 치료, 처방 등 의학적 결정은 반드시 병원에 내원하여 전문의와 상담하시기 바랍니다. ※ 의학적 치료법이나 권고 사항은 환자 개인의 건강 상태(기저질환, 연령, 기왕력, 증상의 정도 등)와 적응증에 따라 다를 수 있습니다. 따라서 본 영상의 내용을 모든 환자에게 일률적으로 적용해서는 안 됩니다. ※ 의학 정보는 연구 결과와 치료 가이드라인의 변화에 따라 업데이트될 수 있습니다. 영상 제작 시점의 정보를 기준으로 하므로, 최신 치료법에 대해서는 담당 주치의와 상의하십시오. [Notice Disclaimer] ※ The medical information provided in this video is intended for general informational purposes only. ※ The content of this video cannot replace a direct medical examination by a healthcare professional. Please visit a hospital to consult with a specialist regarding medical decisions, including diagnosis, treatment, and prescriptions. ※ Medical treatments or recommendations may vary depending on an individual patient’s health status (such as underlying conditions, age, medical history, and symptom severity) and clinical indications. Therefore, the information in this video should not be applied uniformly to all patients. ※ Medical information is subject to change based on research findings and updates to clinical guidelines. This content is based on the information available at the time of production; please consult your attending physician regarding the latest treatment options.
+                - generic [ref=f6e291]:
+                  - link "#유방암" [ref=f6e292] [cursor=pointer]:
+                    - /url: /search/search.do?keyword=유방암
+                  - link "# 여성암" [ref=f6e294] [cursor=pointer]:
+                    - /url: /search/search.do?keyword= 여성암
+            - listitem [ref=f6e296]:
+              - generic [ref=f6e297]:
+                - paragraph [ref=f6e299]: 2026-09-29
+                - link [ref=f6e300] [cursor=pointer]:
+                  - /url: /board/commBoardHealthRepoView.do?no=6862
+                  - paragraph [ref=f6e301]:
+                    - strong [ref=f6e302]: 전체 유방암의 10%는 '유전'... 건강보험 적용되는 유전자 검사 대상자는?
+                  - paragraph [ref=f6e303]: 어머니, 이모, 혹은 할머니가 유방암을 앓으셨다면 나도 유방암에 걸릴 확률이 높을까요? 전체 유방암 환자의 약 5~10%는 유전자 변이로 인해 발생하는 '유전성 유방암'입니다. 이번 영상에서는 유전성 유방암의 가장 대표적인 원인인 'BRCA 유전자 변이'와 가족력의 기준, 건강보험 적용을 받아 BRCA 유전자 검사를 진행할 수 있는 구체적인 대상자 기준을 정리해 드립니다. [바로가기 - 외과 정민성 교수] If your mother, aunt, or grandmother had breast cancer, does that mean you also have a high risk of developing it? About 5 to 10% of all breast cancer cases are 'hereditary breast cancers' caused by genetic mutations. In this video, we will cover the 'BRCA gene mutation'—the most common cause of hereditary breast cancer—along with the criteria for determining family history, and the specific eligibility guidelines for receiving BRCA genetic testing covered by national health insurance. [주의사항 및 안내] ※ 본 영상에서 제공하는 의학 정보는 일반적인 지식을 전달하기 위한 목적으로 제작되었습니다. ※ 본 영상의 내용은 의료진의 직접적인 진찰을 대신할 수 없습니다. 질환의 진단, 치료, 처방 등 의학적 결정은 반드시 병원에 내원하여 전문의와 상담하시기 바랍니다. ※ 의학적 치료법이나 권고 사항은 환자 개인의 건강 상태(기저질환, 연령, 기왕력, 증상의 정도 등)와 적응증에 따라 다를 수 있습니다. 따라서 본 영상의 내용을 모든 환자에게 일률적으로 적용해서는 안 됩니다. ※ 의학 정보는 연구 결과와 치료 가이드라인의 변화에 따라 업데이트될 수 있습니다. 영상 제작 시점의 정보를 기준으로 하므로, 최신 치료법에 대해서는 담당 주치의와 상의하십시오. [Notice Disclaimer] ※ The medical information provided in this video is intended for general informational purposes only. ※ The content of this video cannot replace a direct medical examination by a healthcare professional. Please visit a hospital to consult with a specialist regarding medical decisions, including diagnosis, treatment, and prescriptions. ※ Medical treatments or recommendations may vary depending on an individual patient’s health status (such as underlying conditions, age, medical history, and symptom severity) and clinical indications. Therefore, the information in this video should not be applied uniformly to all patients. ※ Medical information is subject to change based on research findings and updates to clinical guidelines. This content is based on the information available at the time of production; please consult your attending physician regarding the latest treatment options.
+                - generic [ref=f6e304]:
+                  - link "#유방암" [ref=f6e305] [cursor=pointer]:
+                    - /url: /search/search.do?keyword=유방암
+                  - link "# 여성암" [ref=f6e307] [cursor=pointer]:
+                    - /url: /search/search.do?keyword= 여성암
+          - generic [ref=f6e310]:
+            - generic [ref=f6e311]:
+              - link "2025 한양대학교병원 홍보영상" [ref=f6e313] [cursor=pointer]:
+                - /url: https://www.youtube.com/watch?v=F_7NX5bXcpQ&t=3s
+              - generic:
+                - link "2025 한양대학교병원 홍보영상":
+                  - /url: https://www.youtube.com/@HYUnivMedical
+            - generic [ref=f6e314]:
+              - link "#한양대학교병원" [ref=f6e315] [cursor=pointer]:
+                - /url: /search/search.do?keyword=한양대학교병원
+              - link "#중증질환" [ref=f6e316] [cursor=pointer]:
+                - /url: /search/search.do?keyword=중증질환
+              - link "#난치질환" [ref=f6e317] [cursor=pointer]:
+                - /url: /search/search.do?keyword=난치질환
+              - link "#첨단진료" [ref=f6e318] [cursor=pointer]:
+                - /url: /search/search.do?keyword=첨단진료
+              - link "#연구중심병원" [ref=f6e319] [cursor=pointer]:
+                - /url: /search/search.do?keyword=연구중심병원
+              - link "#미래의학" [ref=f6e320] [cursor=pointer]:
+                - /url: /search/search.do?keyword=미래의학
+              - link "#환자중심병원" [ref=f6e321] [cursor=pointer]:
+                - /url: /search/search.do?keyword=환자중심병원
+    - contentinfo [ref=f6e322]:
+      - generic [ref=f6e324]:
+        - link "위로 가기" [ref=f6e325] [cursor=pointer]:
+          - /url: "#"
+        - generic [ref=f6e326]:
+          - link "한양대학교의료원" [ref=f6e327] [cursor=pointer]:
+            - /url: /hyumc/
+          - link "한양대학교구리병원" [ref=f6e328] [cursor=pointer]:
+            - /url: https://guri.hyumc.com/
+          - link "한양대학교류마티스병원" [ref=f6e329] [cursor=pointer]:
+            - /url: /rheumatism/
+          - link "한양대학교국제병원" [ref=f6e330] [cursor=pointer]:
+            - /url: /international/
+          - link "한양대학교암병원" [ref=f6e331] [cursor=pointer]:
+            - /url: /tp/cancer/
+          - link "의학연구원" [ref=f6e332] [cursor=pointer]:
+            - /url: https://bri.hyumc.com/
+          - link "인재채용" [ref=f6e333] [cursor=pointer]:
+            - /url: https://hyumc.recruiter.co.kr/career/home
+          - link "장례식장" [ref=f6e334] [cursor=pointer]:
+            - /url: http://hyfuneral.co.kr/
+          - link "발전기금" [ref=f6e335] [cursor=pointer]:
+            - /url: https://fund.hyumc.com/home/kor/main.do
+          - link "입찰공고" [ref=f6e336] [cursor=pointer]:
+            - /url: /board/commBoardBidList.do
+        - generic [ref=f6e337]:
+          - link "02-2290-8114" [ref=f6e338] [cursor=pointer]:
+            - /url: tel:02-2290-8114
+          - generic [ref=f6e341]:
+            - link "카카오톡" [ref=f6e342] [cursor=pointer]:
+              - /url: https://pf.kakao.com/_WxgaRu
+              - img "카카오톡"
+            - link "페이스북" [ref=f6e343] [cursor=pointer]:
+              - /url: https://www.facebook.com/hyumc
+              - img "페이스북"
+            - link "유튜브" [ref=f6e344] [cursor=pointer]:
+              - /url: https://www.youtube.com/HYUnivMedical
+              - img "유튜브"
+            - link "블로그" [ref=f6e345] [cursor=pointer]:
+              - /url: https://blog.naver.com/hyumc-pr
+              - img "블로그"
+      - generic [ref=f6e347]:
+        - generic [ref=f6e348]:
+          - generic [ref=f6e349]:
+            - link "개인정보처리방침" [ref=f6e350] [cursor=pointer]:
+              - /url: /conts/110006000000000.do
+            - link "환자의 권리와 의무" [ref=f6e351] [cursor=pointer]:
+              - /url: /conts/110007000000000.do
+            - link "회원약관" [ref=f6e352] [cursor=pointer]:
+              - /url: /conts/110008000000000.do
+            - link "윤리강령" [ref=f6e353] [cursor=pointer]:
+              - /url: /conts/110009000000000.do
+            - link "제증명 의무기록사본 발급" [ref=f6e354] [cursor=pointer]:
+              - /url: /conts/102008002000000.do
+            - link "비급여진료비" [ref=f6e355] [cursor=pointer]:
+              - /url: /hospital/treatmentList.do
+            - link "홈페이지 이용문의" [ref=f6e356] [cursor=pointer]:
+              - /url: /board/commBoardFaqList.do
+          - generic [ref=f6e357]:
+            - generic [ref=f6e358]:
+              - paragraph [ref=f6e360]:
+                - generic [ref=f6e361]: (04763) 서울특별시 성동구 왕십리로 222-1
+                - generic [ref=f6e362]:
+                  - text: TEL.
+                  - link [ref=f6e363] [cursor=pointer]:
+                    - /url: tel:02-2290-8114
+                    - strong [ref=f6e364]: 02-2290-8114
+              - paragraph [ref=f6e365]: Copyright © 2026 Hanyang University Medical Center All right Reserved.
+            - generic [ref=f6e366]:
+              - generic:
+                - generic:
+                  - img "보건복지부 의료기관 인증"
+                - generic [ref=f6e367]: 보건복지부 의료기관 인증(2023.6.3 ~ 2027.6.2)
+              - generic:
+                - generic:
+                  - img "의료정보시스템(EMR, OCS)"
+                - generic [ref=f6e368]: "[인증범위] 의료정보시스템(EMR, OCS), 홈페이지 및 모바일 애플리케이션 운영[유효기간] 2024. 2. 17 ~ 2027. 2. 16"
+        - generic [ref=f6e369]:
+          - heading [level=5] [ref=f6e371]:
+            - link "진료과·센터" [ref=f6e372] [cursor=pointer]:
+              - /url: "javascript: $('#relSiteLayer').show()"
+          - heading [level=5] [ref=f6e375]:
+            - link "관련사이트" [ref=f6e376] [cursor=pointer]:
+              - /url: javascript:void(0);

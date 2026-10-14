@@ -1,0 +1,179 @@
+- generic [active] [ref=f29e1]:
+  - paragraph:
+    - link "콘텐츠 바로가기" [ref=f29e2] [cursor=pointer]:
+      - /url: "#contents"
+  - generic [ref=f29e4]:
+    - link [ref=f29e10] [cursor=pointer]:
+      - /url: "#"
+    - button "닫기" [ref=f29e12] [cursor=pointer]
+  - generic [ref=f29e14]:
+    - banner:
+      - generic [ref=f29e15]:
+        - list [ref=f29e17]:
+          - listitem [ref=f29e18]:
+            - link "회원가입" [ref=f29e19] [cursor=pointer]:
+              - /url: /smc/member/join.do?mId=2
+          - listitem [ref=f29e20]:
+            - link "로그인" [ref=f29e21] [cursor=pointer]:
+              - /url: /recruit/login/login.do?mId=3
+        - generic [ref=f29e22]:
+          - heading [level=1] [ref=f29e23]:
+            - link [ref=f29e24] [cursor=pointer]:
+              - /url: /recruit/main/main.do?mId=1
+              - img "성균관대학교" [ref=f29e25]
+              - img "SAMSUNG - 삼성창원병원" [ref=f29e26]
+          - list [ref=f29e28]:
+            - listitem [ref=f29e29]:
+              - link "병원소개 병원소개" [ref=f29e30] [cursor=pointer]:
+                - /url: /recruit/contents/view.do?mId=33
+            - listitem [ref=f29e33]:
+              - link "채용공고 채용공고" [ref=f29e34] [cursor=pointer]:
+                - /url: /recruit/recruit/recruitInfo/list.do?mId=32
+            - listitem [ref=f29e37]:
+              - link "MY PAGE MY PAGE" [ref=f29e38] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=f29e41]:
+              - link "인재DB 인재DB" [ref=f29e42] [cursor=pointer]:
+                - /url: /recruit/recruit/recruitInjea/injeaInput.do?mId=35
+    - generic [ref=f29e45]:
+      - generic [ref=f29e47]:
+        - generic [ref=f29e48]:
+          - tabpanel [ref=f29e51]:
+            - img "삼성창원병원" [ref=f29e52]
+            - generic [ref=f29e53]:
+              - paragraph [ref=f29e54]: 삼성창원병원의 채용에 관심을 가져주셔서 대단히 감사합니다.
+              - paragraph [ref=f29e55]: 꿈과 기회는 열려있습니다
+              - paragraph [ref=f29e56]: GO WITH PEOPLE
+          - tablist [ref=f29e57]:
+            - tab "1 of 1" [selected] [ref=f29e58] [cursor=pointer]: "1"
+        - list [ref=f29e59]:
+          - listitem [ref=f29e60]:
+            - link "의사직 전문의/전공의 채용공고 보기 더보기 2건" [ref=f29e61] [cursor=pointer]:
+              - /url: /recruit/recruit/recruitInfo/list.do?mId=42&schPosition=C1D
+              - heading "의사직" [level=3] [ref=f29e62]
+              - generic [ref=f29e63]: 전문의/전공의 채용공고 보기
+              - img "더보기" [ref=f29e64]
+              - paragraph [ref=f29e65]: 2건
+          - listitem [ref=f29e66]:
+            - link "간호직 간호직 채용공고 보기 더보기 0건" [ref=f29e67] [cursor=pointer]:
+              - /url: /recruit/recruit/recruitInfo/list.do?mId=42&schPosition=C1N
+              - heading "간호직" [level=3] [ref=f29e68]
+              - generic [ref=f29e69]: 간호직 채용공고 보기
+              - img "더보기" [ref=f29e70]
+              - paragraph [ref=f29e71]: 0건
+          - listitem [ref=f29e72]:
+            - link "의료 기사직 의료 기사직 채용공고 보기 더보기 2건" [ref=f29e73] [cursor=pointer]:
+              - /url: /recruit/recruit/recruitInfo/list.do?mId=42&schPosition=C1E
+              - heading "의료 기사직" [level=3] [ref=f29e74]
+              - generic [ref=f29e75]: 의료 기사직 채용공고 보기
+              - img "더보기" [ref=f29e76]
+              - paragraph [ref=f29e77]: 2건
+          - listitem [ref=f29e78]:
+            - link "의료 지원직 연구, 행정(사무), 의료보조 등 더보기 2건" [ref=f29e79] [cursor=pointer]:
+              - /url: /recruit/recruit/recruitInfo/list.do?mId=42&schPosition=C1A
+              - heading "의료 지원직" [level=3] [ref=f29e80]
+              - generic [ref=f29e81]: 연구, 행정(사무), 의료보조 등
+              - img "더보기" [ref=f29e82]
+              - paragraph [ref=f29e83]: 2건
+          - listitem [ref=f29e84]:
+            - link "전체 진행중인 채용공고 바로가기 더보기 6건" [ref=f29e85] [cursor=pointer]:
+              - /url: /recruit/recruit/recruitInfo/list.do?mId=42&schPosition=
+              - heading "전체" [level=3] [ref=f29e86]
+              - generic [ref=f29e87]: 진행중인 채용공고 바로가기
+              - img "더보기" [ref=f29e88]
+              - paragraph [ref=f29e89]: 6건
+      - generic [ref=f29e91]:
+        - generic [ref=f29e92]:
+          - heading "선배와의 만남" [level=2] [ref=f29e93]
+          - link [ref=f29e94] [cursor=pointer]:
+            - /url: /recruit/board/view.do?mId=37&brdIdx=5
+            - img "안녕하세요. 삼성창원병원 영상의학과검사팀 응급촬영파트에서 근무하고 있는 오지환입니다." [ref=f29e95]
+            - paragraph [ref=f29e96]: 안녕하세요. 삼성창원병원 영상의학과검사팀 응급촬영파트에서 근무하고 있는 오지환입니다.
+            - img "더보기" [ref=f29e98]
+        - generic [ref=f29e99]:
+          - heading "QUICK MENU" [level=2] [ref=f29e100]
+          - list [ref=f29e101]:
+            - listitem [ref=f29e102]:
+              - link [ref=f29e103] [cursor=pointer]:
+                - /url: /recruit/recruitPass/noticeList.do?mId=41
+                - img "합격조회" [ref=f29e104]
+                - paragraph [ref=f29e105]: 합격조회
+            - listitem [ref=f29e106]:
+              - link [ref=f29e107] [cursor=pointer]:
+                - /url: /recruit/recruit/recruitInjea/injeaInput.do?mId=46
+                - img "인재DB" [ref=f29e108]
+                - paragraph [ref=f29e109]: 인재DB
+            - listitem [ref=f29e110]:
+              - link [ref=f29e111] [cursor=pointer]:
+                - /url: /recruit/board/list.do?mId=45
+                - img "채용절차" [ref=f29e112]
+                - paragraph [ref=f29e113]: 채용FAQ
+            - listitem [ref=f29e114]:
+              - link [ref=f29e115] [cursor=pointer]:
+                - /url: /recruit/contents/view.do?mId=44
+                - img "지원서다운로드" [ref=f29e116]
+                - paragraph [ref=f29e117]: 지원서 작성안내
+      - list [ref=f29e120]:
+        - listitem [ref=f29e121]:
+          - paragraph [ref=f29e122]: 전문의채용문의
+          - heading "055)233-8132" [level=2] [ref=f29e123]
+          - list [ref=f29e124]:
+            - listitem [ref=f29e125]:
+              - link "문의하기" [ref=f29e126] [cursor=pointer]:
+                - /url: mailto:chounggun.kim@samsung.com
+            - listitem [ref=f29e127]:
+              - link "지원서 다운로드" [ref=f29e128] [cursor=pointer]:
+                - /url: javascript:void(0);
+        - listitem [ref=f29e129]:
+          - paragraph [ref=f29e130]: 전공의(레지던트,인턴)채용문의
+          - heading "055)233-8041" [level=2] [ref=f29e131]
+          - list [ref=f29e132]:
+            - listitem [ref=f29e133]:
+              - link "문의하기" [ref=f29e134] [cursor=pointer]:
+                - /url: mailto:smc6294@hanmail.net
+            - listitem [ref=f29e135]:
+              - link "지원서 다운로드" [ref=f29e136] [cursor=pointer]:
+                - /url: javascript:void(0);
+        - listitem [ref=f29e137]:
+          - paragraph [ref=f29e138]: 일반의ㆍ간호사ㆍ약사의료기사ㆍ행정직 및 기타
+          - heading "055)233-8136~8138" [level=2] [ref=f29e139]
+          - list [ref=f29e140]:
+            - listitem [ref=f29e141]:
+              - link "문의하기" [ref=f29e142] [cursor=pointer]:
+                - /url: mailto:juhyeong94.lee@samsung.com
+            - listitem [ref=f29e143]:
+              - link "지원서 다운로드" [ref=f29e144] [cursor=pointer]:
+                - /url: javascript:void(0);
+    - contentinfo [ref=f29e145]:
+      - generic [ref=f29e146]:
+        - generic [ref=f29e148]:
+          - list [ref=f29e149]:
+            - listitem [ref=f29e150]:
+              - link "개인정보처리방침" [ref=f29e151] [cursor=pointer]:
+                - /url: /smc/board/list.do?mId=172
+          - generic [ref=f29e152]: (51353) 경상남도 창원시 마산회원구 팔용로 158
+          - paragraph [ref=f29e153]: COPYRIGHT 2021 SAMSUNG MEDICAL CENTER. ALL RIGHTS RESERVED.
+          - generic [ref=f29e154]:
+            - img "성균관대학교" [ref=f29e155]
+            - img "SAMSUNG - 삼성창원병원" [ref=f29e156]
+            - button [ref=f29e158] [cursor=pointer]:
+              - 'img "정보보호 관리체계 ISMS(Information Security Management System), 인증범위 : OCS/EMR 및 홈페이지 서비스 운영, 유효기간 : 2022.07.20 ~ 2025.07.17" [ref=f29e159]'
+        - generic [ref=f29e161]:
+          - button "패밀리사이트" [ref=f29e162] [cursor=pointer]
+          - list [ref=f29e163]:
+            - listitem [ref=f29e164]:
+              - link [ref=f29e165] [cursor=pointer]:
+                - /url: /smc
+                - strong [ref=f29e166]: 삼성창원병원
+            - listitem [ref=f29e167]:
+              - link [ref=f29e168] [cursor=pointer]:
+                - /url: /health
+                - strong [ref=f29e169]: 건강검진센터
+            - listitem [ref=f29e170]:
+              - link [ref=f29e171] [cursor=pointer]:
+                - /url: /refer
+                - strong [ref=f29e172]: 진료협력센터
+            - listitem [ref=f29e173]:
+              - link [ref=f29e174] [cursor=pointer]:
+                - /url: /nursing
+                - strong [ref=f29e175]: 간호본부

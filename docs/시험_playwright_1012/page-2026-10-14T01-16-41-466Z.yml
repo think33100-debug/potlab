@@ -1,0 +1,44 @@
+- generic [active] [ref=f31e1]:
+  - generic [ref=f31e3]:
+    - generic [ref=f31e6]:
+      - img "homepage logo image" [ref=f31e10]
+      - generic [ref=f31e11]:
+        - generic [ref=f31e13]:
+          - link "회사 소개" [ref=f31e14] [cursor=pointer]:
+            - /url: /
+          - link "채용 공고" [ref=f31e16] [cursor=pointer]:
+            - /url: /4qxkvknx
+        - button "로그인" [ref=f31e19] [cursor=pointer]
+    - generic [ref=f31e23]:
+      - generic [ref=f31e41]:
+        - generic [ref=f31e50]: RECRUIT
+        - generic [ref=f31e78]:
+          - generic [ref=f31e79]:
+            - generic [ref=f31e80] [cursor=pointer]: 전체 직군
+            - generic [ref=f31e87] [cursor=pointer]: 전체 소속
+            - generic [ref=f31e94] [cursor=pointer]: 전체 고용 형태
+            - generic [ref=f31e101] [cursor=pointer]: 전체 경력 사항
+            - generic [ref=f31e109]:
+              - textbox "키워드 검색" [ref=f31e110]
+              - button [ref=f31e111] [cursor=pointer]
+          - button [ref=f31e115] [cursor=pointer]
+      - generic [ref=f31e155]:
+        - generic [ref=f31e157]:
+          - img "homepage footer logo" [ref=f31e159]
+          - generic [ref=f31e160]:
+            - generic [ref=f31e161]: © 강북삼성병원
+            - generic [ref=f31e162]:
+              - text: "전화: 02-2001-2825, FAX: 02-2001-2117"
+              - paragraph [ref=f31e163]: "이메일: dayhope.choi@samsung.com"
+        - generic [ref=f31e166]:
+          - link "개인정보처리방침" [ref=f31e168] [cursor=pointer]:
+            - /url: https://main.kbsmc.co.kr/main/contents.do?idx=4759
+          - generic [ref=f31e173]:
+            - link [ref=f31e174] [cursor=pointer]:
+              - /url: https://www.youtube.com/c/KangbukSamsungMedicalCenter
+            - link [ref=f31e179] [cursor=pointer]:
+              - /url: https://www.instagram.com/kangbuk_smc/
+            - link [ref=f31e185] [cursor=pointer]:
+              - /url: https://blog.naver.com/mykbsmc2780
+      - generic [ref=f31e191] [cursor=pointer]: Created by
+  - alert [ref=f31e207]
