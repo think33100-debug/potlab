@@ -334,6 +334,30 @@ const 올해 = Number(오늘.slice(0, 4));
  *
  * 작년치는 남깁니다 — 1월에 「2025년 하반기…」 가 아직 살아 있을 수 있습니다.
  * 날짜가 적혀 있는 글은 **건드리지 않습니다.** 날짜가 하나도 없을 때만 봅니다. */
+/* ★ 2026-10-14 — **본문을 받아오는 주소가 목록 주소와 다른 곳**이 있습니다.
+ *
+ * 인크루트 채용관(강동경희대 `khnmc` · 경희대 `khmc`)의 상세 페이지는
+ * **자바스크립트로 그립니다.** 태그를 걷으면 244자뿐이고 모집부문·자격조건·
+ * 급여가 없습니다. 본문은 **iframe 으로 끼우는 다른 HTML** 에 있고,
+ * 주소는 `/job/` 을 **`/jobcont/`** 로 바꾼 것입니다.
+ *
+ * ⚠ **짐작으로 만든 주소가 아닙니다** (지침 3절). playwright-cli 의 네트워크
+ *   기록 29번째 줄에서 찾았습니다 — `docs/인크루트_상세_1014.md` 에 그대로
+ *   적어 두었습니다. 로그인·쿠키·헤드리스 없이 `fetch` 로 받아집니다 —
+ *     /khnmc/jobcont/2610120006  →  637자
+ *       「다. 모집인원 : O명  라. 자격조건 - 물리치료사 면허 소지자 …
+ *         마. 근무조건 - 급여 : 연 4,110만원 ~ 4,210만원」
+ *     /khmc/jobcont/2610080006   →  689자
+ *
+ * 다른 곳이 생기면 **여기 한 자리**에 보탭니다 (지침 6절). */
+function 상세주소(u) {
+  const s = String(u || '');
+  if (/^https?:\/\/recruit\.incruit\.com\/[^/]+\/job\/\d+/.test(s)) {
+    return s.replace('/job/', '/jobcont/');
+  }
+  return s;
+}
+
 function 옛글인가(r) {
   if (r.to || r.from || r.posted) return false;          // 날짜가 있으면 그쪽을 믿습니다
   const 해들 = [...String(r.title || '').matchAll(/(20\d{2})\s*년/g)].map((m) => Number(m[1]));
@@ -387,12 +411,12 @@ if (상세몫 > 0) {
     곳마다.set(x.곳.name, n + 1);
     return true;
   });
-  console.log('\n③ 상세 — 직군을 못 가린 ' + 보류.length + '건 + 마감일이 없는 '
-    + 날짜없는것.length + '건 → 겹침 빼고 ' + 열것.length + '건을 엽니다'
+  console.log('\n③ 상세 — 담을 것 ' + 열어야할것.length + '건(직군 못 가린 것 ' + 보류.length
+    + ' 포함 · 그중 마감일 없는 것 ' + 날짜없는것.length + ') → 겹침 빼고 ' + 열것.length + '건을 엽니다'
     + ' (사이트당 ' + 상세몫 + '건까지)');
   for (let i = 0; i < 열것.length; i += 동시) {
     await Promise.all(열것.slice(i, i + 동시).map(async (x) => {
-      const g = await 글받기(x.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, enc: x.곳.enc });
+      const g = await 글받기(상세주소(x.url), { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, enc: x.곳.enc });
       상세연것++;
       if (g.왜 || g.code !== 200) { x.상세왜 = g.왜 || ('HTTP ' + g.code); return; }
       /* ★ 2026-10-12 — **`<style>` 과 주석도 걷습니다.**
