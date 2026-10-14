@@ -54,7 +54,7 @@ const 번호준것 = process.argv.slice(2).find((x) => !x.startsWith('--'));
 let 번호 = 번호준것; let svc = null;
 
 if (!번호) {
-  const u = 주소({ callTp: 'L', startPage: 1, display: 5, occupation: '0243' });
+  const u = 주소({ callTp: 'L', startPage: 1, display: 5, occupation: '306500|306501|306502' });
   console.log('목록 — ' + 가린주소(u));
   const g = await 받기(u);
   console.log('HTTP ' + g.code + ' · ' + g.text.length + '자');
