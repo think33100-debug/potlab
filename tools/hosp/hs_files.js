@@ -41,6 +41,46 @@ function 점수(이름) {
   return 1;
 }
 
+/* ── 자바스크립트가 주소를 만드는 곳 — **찾아서** 적습니다 (2026-10-14) ──
+ *
+ * ⚠ 짐작으로 만든 규칙이 아닙니다 (지침 3절). playwright 로 페이지를 열어
+ *   **그 함수 본문을 읽고**, 받아 봐서 **앞 글자까지** 확인했습니다.
+ *   근거는 `docs/첨부주소_자바스크립트_1014.md` 에 그대로 있습니다.
+ *
+ * ① 중앙보훈병원 (보훈공단 계열 · 눌린 요소 `<a href="#none" onclick=…>`)
+ *      onclick   fn_fileDownload('189c72f1…6704', 'seoul')
+ *      함수 본문  location.href = "/common/nttFileDownload.do?fileKey=" + fileKey
+ *                                + "&bbsSysId=" + sysId
+ *      받아 보니  HTTP 200 · 658,469바이트 · 앞 8글자 `%PDF-1.4`
+ *      ★ **상세 페이지의 쿠키가 있어야 합니다.** 맨손 fetch 는 HTTP 200 에
+ *        **0바이트**였습니다. 페이지 안에서 받으니 제대로 왔습니다
+ *
+ * ② 성주군 (고용24 고시공고 · `<a href="javascript:gfn_fileDown(…)">`)
+ *      href      gfn_fileDown('<이름>.hwpx', '5635219160355651', 'employ/kny940827')
+ *      함수 본문  document.fileFrm.{filenm,uuid,saveGbn} 에 넣고
+ *                action = "/downFile.do" 로 **POST**
+ *      받아 보니  HTTP 200 · 116,695바이트 · 앞 글자 `PK\x03\x04` (hwpx 는 zip)
+ */
+const JS주소꼴 = [
+  {
+    이름: '보훈공단 fn_fileDownload',
+    꼴: /fn_fileDownload\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]\s*\)/i,
+    만들기: (m) => ({
+      url: '/common/nttFileDownload.do?fileKey=' + encodeURIComponent(m[1])
+        + '&bbsSysId=' + encodeURIComponent(m[2]),
+      받는법: { 꼴: 'GET', 쿠키: '상세' },   /* 상세 페이지 쿠키가 있어야 합니다 */
+    }),
+  },
+  {
+    이름: '고용24 gfn_fileDown',
+    꼴: /gfn_fileDown\s*\(\s*['"]([^'"]*)['"]\s*,\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]\s*\)/i,
+    만들기: (m) => ({
+      url: '/downFile.do',
+      받는법: { 꼴: 'POST', 폼: { filenm: m[1], uuid: m[2], saveGbn: m[3] }, 쿠키: '상세' },
+    }),
+  },
+];
+
 /** 상대 주소를 온전하게 */
 function 온전히(주소, 바탕) {
   const p = String(주소 || '').trim();
@@ -60,7 +100,7 @@ function hs첨부주소(html, 바탕주소) {
   /* ⚠ 이름을 **가진** 쪽이 셉니다. 뒤 규칙(②③)은 주소만 알고 이름을 모르는데,
      그때 주소 끝글자로 이름을 지어내면 「입사지원서」(점수 0)가
      「cccc.hwp」(점수 1)로 덮입니다 — 자기 점검에서 걸렸습니다 (2026-10-11) */
-  const 더하기 = (주소, 이름, 이름믿음) => {
+  const 더하기 = (주소, 이름, 이름믿음, 받는법) => {
     /* ★ 2026-10-14 — **`&amp;` 를 여기서 풉니다.** 그누보드 주소가
        `…?bo_table=t&amp;wr_id=648&amp;no=0` 꼴로 옵니다. 안 풀면
        `첨부담기.더하기` 가 「&amp; 가 남아 있습니다」로 던집니다 —
@@ -86,13 +126,28 @@ function hs첨부주소(html, 바탕주소) {
     const nm = 준이름 || (u.split('/').pop() || '').slice(0, 120);
     const 전 = 모은것.get(u);
     if (전 && (전.이름믿음 || !이름믿음)) return;      /* 이미 믿을 이름이 있으면 그대로 */
-    모은것.set(u, { name: nm, 점수: 점수(nm), 이름믿음: !!이름믿음 && !!준이름 });
+    모은것.set(u, { name: nm, 점수: 점수(nm), 이름믿음: !!이름믿음 && !!준이름, 받는법 });
   };
 
   /* ① <a href="…"> 글 </a> — 가장 흔한 꼴 (충주의료원이 이것입니다) */
   for (const m of s.matchAll(/<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]{0,300}?)<\/a>/gi)) {
     const 속글 = m[2].replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
     더하기(m[1], 속글);
+  }
+
+  /* ①-2 ★ 2026-10-14 — **자바스크립트가 주소를 만드는 곳.**
+     `<a>` 통째로 보고 `href` 든 `onclick` 이든 그 안에서 함수 호출을 찾습니다.
+     규칙은 위 `JS주소꼴` 한 자리입니다 — 짐작이 아니라 함수 본문을 읽은 것입니다 */
+  for (const m of s.matchAll(/<a\b([^>]*)>([\s\S]{0,300}?)<\/a>/gi)) {
+    const 속성 = m[1] || '';
+    const 속글 = m[2].replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+    for (const r of JS주소꼴) {
+      const g = 속성.replace(/&amp;/g, '&').match(r.꼴);
+      if (!g) continue;
+      const { url, 받는법 } = r.만들기(g);
+      더하기(url, 속글, true, 받는법);
+      break;
+    }
   }
 
   /* ② onclick 안에 작은따옴표로 든 주소 — 지침 5절에서 밟은 그 꼴입니다 */
@@ -105,7 +160,8 @@ function hs첨부주소(html, 바탕주소) {
     더하기(m[1], '');
   }
 
-  return [...모은것].map(([url, v]) => ({ url, name: v.name, 점수: v.점수 }))
+  return [...모은것].map(([url, v]) => ({ url, name: v.name, 점수: v.점수,
+    ...(v.받는법 ? { 받는법: v.받는법 } : {}) }))
     .sort((a, b) => b.점수 - a.점수);
 }
 
@@ -150,9 +206,36 @@ if (require.main === module) {
     '<a href="#no">채용공고문및직무설명서(기간제_10월).pdf</a>',
     '<a href="/real/notice.pdf">진짜 공고문.pdf</a>',
   ].join('\n'), 'https://www.bohun.or.kr/seoul/na/ntt/selectNttInfo.do?mi=1&nttSn=2');
-  봐('javascript: 주소는 안 담는다', !가짜.some((x) => /^javascript:/i.test(x.url)));
+  봐('javascript: 주소는 그대로 안 담는다', !가짜.some((x) => /^javascript:/i.test(x.url)));
   봐('제 페이지 가리키는 #주소는 안 담는다', !가짜.some((x) => /selectNttInfo\.do/.test(x.url)));
-  봐('진짜 주소는 담는다', 가짜.length === 1 && /\/real\/notice\.pdf$/.test(가짜[0].url));
+  봐('진짜 주소는 담는다', 가짜.some((x) => /\/real\/notice\.pdf$/.test(x.url)));
+  /* ★ 2026-10-14 — 성주군 꼴은 **버리지 않고 만들어 냅니다**(아래 점검 참고).
+     그래서 이 묶음에서도 /downFile.do 가 하나 나옵니다 */
+  봐('gfn_fileDown 은 /downFile.do 로 바뀐다',
+    가짜.some((x) => /\/downFile\.do$/.test(x.url) && x.받는법?.꼴 === 'POST'));
+
+  /* ★ 2026-10-14 — 자바스크립트가 주소를 만드는 두 곳. 화면에서 그대로 떼어 왔고
+     함수 본문을 읽어 주소 꼴을 알아낸 것입니다 (docs/첨부주소_자바스크립트_1014.md) */
+  const 보훈 = hs첨부주소(
+    '<a href="#none" onclick="fn_fileDownload(\'189c72f1443ba8ac00691423b9676704\', \'seoul\')">'
+      + '채용공고문및직무설명서(기간제_10월).pdf</a>',
+    'https://www.bohun.or.kr/seoul/na/ntt/selectNttInfo.do?mi=32253&nttSn=189986');
+  봐('보훈 첨부를 하나 찾는다', 보훈.length === 1);
+  봐('보훈 주소 꼴', 보훈[0]?.url
+    === 'https://www.bohun.or.kr/common/nttFileDownload.do'
+      + '?fileKey=189c72f1443ba8ac00691423b9676704&bbsSysId=seoul');
+  봐('보훈은 쿠키가 있어야 한다', 보훈[0]?.받는법?.쿠키 === '상세' && 보훈[0]?.받는법?.꼴 === 'GET');
+  봐('보훈 이름이 공고문 점수', 보훈[0]?.점수 === 2);
+
+  const 성주 = hs첨부주소(
+    '<a style="word-break:break-all;" href="javascript:gfn_fileDown(\'3. 재공고.hwpx\','
+      + '\'5635219160355651\',\'employ/kny940827\')"> 3. 재공고.hwpx</a>',
+    'https://www.gojobs.go.kr/apmView.do?empmnsn=304827');
+  봐('성주 첨부를 하나 찾는다', 성주.length === 1);
+  봐('성주는 POST 로 받는다', 성주[0]?.받는법?.꼴 === 'POST');
+  봐('성주 폼 셋', 성주[0]?.받는법?.폼?.uuid === '5635219160355651'
+    && 성주[0]?.받는법?.폼?.saveGbn === 'employ/kny940827');
+  봐('성주 주소는 /downFile.do', /\/downFile\.do$/.test(성주[0]?.url || ''));
   봐('첫째가 공고문', /채용공고/.test(r[0].name));
   봐('첫째 주소가 온전하다', r[0].url === 'https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/4ee6cf0d/879bc60d/4ee6cf0d.hwp');
   봐('입사지원서는 점수 0', r.find((x) => /입사지원서/.test(x.name))?.점수 === 0);
