@@ -65,30 +65,33 @@ async function rpc(cfg, fn, body) {
  * 강동경희대학교병원을 **우연히** 찾았습니다 — 대학병원인데 어느 출처에도
  * 공고가 0건이었습니다. 같은 구멍을 사람이 알아채기를 기다리지 않고 셉니다.
  *
- * 셈은 DB 함수 `일층병원_구멍()` 한 곳에서 합니다 (지침 6절).
+ * 셈은 DB 함수 `일층병원_구멍셈()` 한 곳에서 합니다 (지침 6절).
  * 그 함수는 `service_role` 전용이라 위 `rpc()`(anon)로는 못 부릅니다.
+ *
+ * ★ 2026-10-14 — 처음에는 목록 함수 `일층병원_구멍()` 을 그대로 불러
+ *   JS 에서 셌습니다. 그런데 **PostgREST 가 100줄에서 잘라서**
+ *   「대상 100곳 · 사각지대 100곳」 으로 찍혔습니다 (실제 549 · 236).
+ *   쪽을 넘기는 대신 **셈을 DB 에서 끝내는** 창구를 따로 만들었습니다.
+ *   목록이 필요하면 `일층병원_구멍()` 을 씁니다.
  *
  * 못 부르면 **조용히 null** 을 돌려줍니다 — 이 한 줄 때문에 요약 전체가
  * 안 가면 안 됩니다. */
 async function 일층구멍(cfg) {
   const k = cfg.SUPABASE_SERVICE_KEY;
   if (!k) return null;
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍'), {
+  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍셈'), {
     method: 'POST',
     headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
     body: '{}',
   });
   if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
-  const 다 = await r.json();
-  if (!Array.isArray(다)) return null;
-  const 사각 = 다.filter((x) => x['상태'] === '사각지대');
-  const 갈래별 = {};
-  for (const x of 사각) 갈래별[x['갈래']] = (갈래별[x['갈래']] ?? 0) + 1;
+  const j = await r.json();
+  if (!j || typeof j !== 'object') return null;
   return {
-    대상: 다.length,
-    사각: 사각.length,
-    상급종합: 사각.filter((x) => x['갈래'] === '상급종합'),
-    갈래별,
+    대상: j['대상'],
+    사각: j['사각지대'],
+    상급종합: j['사각_상급종합'] || [],
+    갈래별: j['사각_갈래별'] || {},
   };
 }
 
@@ -150,9 +153,7 @@ function 글로(d, 관리자주소, 잠금, 보안, 구멍) {
   if (구멍) {
     줄.push('· 대상인데 안 긁는 1층 병원 ' + 구멍.사각 + '곳'
       + ' (상급종합 ' + 구멍.상급종합.length + ') / 대상 ' + 구멍.대상 + '곳');
-    if (구멍.상급종합.length) {
-      줄.push('   상급종합 — ' + 구멍.상급종합.map((x) => x['기관']).join(' · '));
-    }
+    if (구멍.상급종합.length) 줄.push('   상급종합 — ' + 구멍.상급종합.join(' · '));
     줄.push('   갈래별 — ' + Object.entries(구멍.갈래별)
       .sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + v).join(' · '));
     줄.push('');
