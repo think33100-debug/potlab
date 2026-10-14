@@ -164,9 +164,12 @@ alter function public.job_list(text, text, text, text, boolean, text, integer)
 /* ★ 찍어 둔 ACL 과 **글자까지 같게** 되돌립니다 (지침 6-2a).
    create 직후에는 PUBLIC(`=X/`)이 붙어 있으니 그것만 걷고,
    전에 있던 service_role · authenticated 를 그대로 줍니다.
-   **anon 은 주지 않습니다 — 원래 없었습니다.** */
+   **anon 은 주지 않습니다 — 원래 없었습니다.**
+   ★ 2026-10-14 세중님 — `from public` 만으로는 모자랍니다. Supabase 는 새 함수에
+     **기본 권한(default privileges)으로 `anon` 을 붙일 수 있습니다.** 전 ACL 에
+     anon 이 없으니 `from public, anon` 으로 **명시해서** 뺍니다. */
 revoke execute on function
-  public.job_list(text, text, text, text, boolean, text, integer) from public;
+  public.job_list(text, text, text, text, boolean, text, integer) from public, anon;
 grant  execute on function
   public.job_list(text, text, text, text, boolean, text, integer)
   to service_role, authenticated;
