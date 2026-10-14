@@ -54,6 +54,12 @@ export function 줄까닭(줄, 옵션 = {}) {
  * `보내기(조각)` 는 창구를 부르고 창구가 돌려준 것을 그대로 주면 됩니다.
  * 돌려준 것에 `담음` 이 있으면 더합니다 (없으면 조각 길이로 셉니다).
  */
+/** 줄을 가리키는 이름 — 창구마다 칸 이름이 다릅니다
+    (`collect_put` 은 `id`, `collect_body` 는 `job_id`) */
+export function 줄이름(줄) {
+  return 줄?.id ?? 줄?.job_id ?? 줄?.공고번호 ?? '(id 없음)';
+}
+
 export async function 반씩보내기({ 줄들, 보내기, 묶음 = 200, 이름 = '', 로그 = console.log }) {
   const 뺀줄 = [];      /* 우리가 **보내기 전에** 뺀 것 */
   const 못담은줄 = [];  /* 보냈는데 창구가 **거절한** 것 (반씩 나눠 가린 것) */
@@ -64,7 +70,7 @@ export async function 반씩보내기({ 줄들, 보내기, 묶음 = 200, 이름 
   const 보낼것 = [];
   for (const 줄 of (줄들 || [])) {
     const 까닭 = 줄까닭(줄);
-    if (까닭) { 뺀줄.push({ id: 줄?.id ?? '(id 없음)', 까닭 }); continue; }
+    if (까닭) { 뺀줄.push({ id: 줄이름(줄), 까닭 }); continue; }
     보낼것.push(줄);
   }
 
@@ -78,7 +84,7 @@ export async function 반씩보내기({ 줄들, 보내기, 묶음 = 200, 이름 
     } catch (e) {
       const 왜 = String(e?.message || e).slice(0, 200);
       if (조각.length === 1) {
-        못담은줄.push({ id: 조각[0]?.id ?? '(id 없음)', 까닭: 왜 });
+        못담은줄.push({ id: 줄이름(조각[0]), 까닭: 왜 });
         return;
       }
       const 반 = Math.floor(조각.length / 2);
@@ -149,10 +155,14 @@ if (import.meta.url === 'file://' + process.argv[1]
   봐('까닭을 남긴다', /22P05/.test(r2.못담은줄[0].까닭));
   봐('반씩 나눈다(한 줄씩 다 보내지 않는다)', 부른횟수 < 16);
 
+  봐('job_id 도 집는다', 줄이름({ job_id: 'HS1' }) === 'HS1');
+  봐('id 가 먼저', 줄이름({ id: 'A', job_id: 'B' }) === 'A');
+  봐('둘 다 없으면 (id 없음)', 줄이름({}) === '(id 없음)');
+
   if (어겼나.length) {
     console.error('✗ 자기 점검 실패 — ' + 어겼나.join(' · '));
     process.exit(1);
   }
-  console.log('○ 자기 점검 통과 — 12가지 (NUL 줄 하나를 섞어도 나머지는 담깁니다)');
+  console.log('○ 자기 점검 통과 — 15가지 (NUL 줄 하나를 섞어도 나머지는 담깁니다)');
   console.log('   반씩 나누느라 창구를 부른 횟수 ' + 부른횟수 + '번 (16줄 · 한 줄씩이면 16번)');
 }
