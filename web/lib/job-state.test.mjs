@@ -135,6 +135,11 @@ assert.match(todayKst(), /^\d{4}-\d{2}-\d{2}$/);
 /* ⑩ 조교·연구 배지에 찍을 말 (2026-10-14) */
 assert.equal(조교연구말('조교'), '조교');
 assert.equal(조교연구말('연구'), '연구');
+/* ★ 2026-10-14 세중님 — **한 낱말만**. 「치료사 채용이 아닙니다」를 안 붙입니다 */
+for (const v of ['조교', '연구']) {
+  assert.equal(조교연구말(v).length, 2);
+  assert.ok(!/치료|아닙|채용/.test(조교연구말(v)));
+}
 for (const v of [null, undefined, '', '  ', '조교연구', '연구원', '교수']) {
   assert.equal(조교연구말(v), null);      /* 모르는 값은 안 찍습니다 */
 }

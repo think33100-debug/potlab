@@ -256,7 +256,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               {조교연구말(detail['조교연구']) && (
                 <span className="rounded-full border border-[#C9A227] bg-[#FFF9E6] px-3 py-1
                                  text-[13px] font-bold text-[#8A6D1A]">
-                  {조교연구말(detail['조교연구'])} · 치료사 채용이 아닙니다
+                  {조교연구말(detail['조교연구'])}
                 </span>
               )}
               {/* 못 가린 공고는 칸을 비우지 않고 「공고문 참고」 (2026-10-07 세중님).
