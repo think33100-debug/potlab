@@ -194,11 +194,37 @@ if (sortJob.length < 3) {
     const { 제목: 제목들, 구운날 } = JSON.parse(fs.readFileSync(모음길, 'utf8'));
     const 갈래로 = (v) => (v.startsWith('담음') ? '회원목록' : v.startsWith('보류') ? '보류함'
       : v.startsWith('쌓음') ? '숨김보관' : '쓰레기통');
-    const 다른것 = [];
+    /* ★ 2026-10-14 — **일부러 갈라놓은 것** 한 벌.
+     *
+     * `gas/wage.js` 는 옛 앱(심사 중)이라 **건드리지 않습니다.** 그래서
+     * `sort-rule-to-gas.mjs` 로 다시 구울 수 없는 고침이 생기면 여기 적습니다.
+     * 안 적으면 이 대조가 날마다 빨간 줄로 떠서 **아무도 안 믿게 됩니다** (지침 15절).
+     *
+     * 적을 때 함께 적는 것 — 어느 쪽이 맞는지 · 왜 gas 를 못 고치는지 · 언제 합치나. */
+    const 일부러갈라놓음 = [
+      { 꼴: /필기\s*시험\s*장소/, 맞는쪽: 'sort-rule',
+        왜: '시험 장소 공고는 채용공고가 아닙니다. HS_SKIP_RE 에 「시험 장소」가 빠져'
+          + ' 있어 강진의료원 2건이 「물리치료사 채용공고」로 15일 떠 있었습니다.'
+          + ' 낱말은 gas 에서 오는데 그 파일을 못 고쳐 sort-rule 에 보탰습니다'
+          + ' (gas 은퇴 때 한 벌로 합칩니다 · docs/다리_은퇴_1011.md)' },
+    ];
+
+    const 다른것 = [], 봐준것 = [];
     for (const t of 제목들) {
       const a = sortJob(t, '', null).갈래;
       const b = 갈래로(hospVerdict(t, ''));
-      if (a !== b) 다른것.push({ t, a, b });
+      if (a === b) continue;
+      const 봐줌 = 일부러갈라놓음.find((x) => x.꼴.test(t));
+      if (봐줌) { 봐준것.push({ t, a, b, 봐줌 }); continue; }
+      다른것.push({ t, a, b });
+    }
+    if (봐준것.length) {
+      console.log('\n  ※ 일부러 갈라놓은 것 ' + 봐준것.length + '개 —');
+      for (const x of 봐준것) {
+        console.log('     sort-rule ' + x.a.padEnd(5) + ' ↔ gas ' + x.b.padEnd(5)
+          + '  ' + x.t.slice(0, 44));
+      }
+      console.log('     맞는 쪽 ' + 봐준것[0].봐줌.맞는쪽 + ' · ' + 봐준것[0].봐줌.왜);
     }
     console.log('\n── 두 벌 대조 — 제목 ' + 제목들.length + '개 (구운 날 ' + 구운날 + ') ──');
     if (다른것.length) {
