@@ -45,7 +45,7 @@ import { matchJob, notOurs, mixedTitle, 구운날 } from './gas-rules.mjs';
 /* 접수기간 규칙 — tools/hosp/hs_dates.js 한 벌. CommonJS 라 require 로 끌어옵니다.
    2026-10-07 에 붙였습니다. 전에는 저 파일이 저장소에 있는데 아무도 안 불렀습니다 */
 const require = createRequire(import.meta.url);
-const { hsDetailDates, hs접수문장 } = require('./hosp/hs_dates.js');
+const { hsDetailDates, hs접수문장, 너무먼날 } = require('./hosp/hs_dates.js');
 
 /* 읽은 날짜가 쓸만한가 — 짐작으로 담지 않습니다.
  *
@@ -475,16 +475,36 @@ if (회원2.length) {
 /* ── ④ 담을 줄 ───────────────────────────────────────────── */
 const 이제 = new Date().toISOString();
 const 날 = (v) => (v ? String(v).replace(/\./g, '-') : null);
+/* ★ 2026-10-14 — **목록 줄에서 온 마감일에도 두 해 뚜껑을 씌웁니다** (세중님 지시).
+ *
+ * 전에는 뚜껑이 `hs_dates.hsDetailDates()` 안에만 있어서 **상세 본문**을 읽어
+ * 얻은 날짜에만 걸렸습니다. 목록(appsite·html)에서 바로 온 날짜는 그냥
+ * 들어갔습니다 — 2026-10-14 에 조선대병원이 그랬습니다
+ *   「결핵관리 국책사업 전담 간호사(계약직) 채용 재공고 | 2026.06.29 ~ 2099.12.31」
+ * 이제 규칙은 `hs_dates` 의 `너무먼날()` **한 자리**이고 여기서 그것을 부릅니다.
+ *
+ * 버린 날짜는 지우지 않고 `deadline_src` 에 남깁니다 — 왜 비었는지 보이게
+ * (2026-10-13 에 이미 담긴 7건을 그렇게 고쳤습니다). */
+const 오늘글 = new Date().toISOString().slice(0, 10);
+const 먼마감 = [];
+const 마감과출처 = (x) => {
+  if (너무먼날(x.to)) {
+    먼마감.push({ 곳: x.곳.name, 제목: x.title, 원문: x.to });
+    return { apply_to: null, deadline_src: '원문 날짜 ' + 날(x.to) + ' → 채용시까지로 봄 (' + 오늘글 + ')' };
+  }
+  return { apply_to: 날(x.to), deadline_src: x.날짜출처 || (x.to ? '목록' : null) };
+};
 const 담을것 = 회원2.concat(보류2).concat(쌓을것).map((x) => ({
   id: x.id,
   external_id: String(x.id).slice(2),
   org_name: x.곳.name, title: x.title,
   hire_type: '', employ_type: '', work_place: '', sido: null, sgg: null, edu: '',
   headcount: null,
-  apply_from: 날(x.from), apply_to: 날(x.to),
-  /* 마감일을 어디서 얻었나 (2026-10-13). 전에는 창구가 이 칸을 안 받아
-     evidence.날짜출처 에만 적었습니다. 이제 둘 다 보냅니다 — 짧은 정해진 말로 */
-  deadline_src: x.날짜출처 || (x.to ? '목록' : null),
+  apply_from: 날(x.from),
+  /* 마감일과 그 출처는 **함께** 정합니다 (2026-10-13 · 2026-10-14).
+     전에는 창구가 deadline_src 를 안 받아 evidence.날짜출처 에만 적었습니다.
+     마감과출처() 가 두 해 뚜껑까지 함께 봅니다 — 규칙은 hs_dates 한 자리 */
+  ...마감과출처(x),
   /* 원래 올린 날 — job_posts 의 트리거가 이걸로 first_seen 을 잡습니다 */
   posted_at: 날(x.from || x.posted),
   url: x.url,
@@ -623,6 +643,12 @@ if (dry) {
       (r['건너뛴것'] || []).slice(0, 5).forEach((x) => console.error('  건너뜀 ' + x.id + ' · ' + x.why));
     }
     console.log('\n씀          ' + 담음 + '건');
+    /* 두 해 넘는 마감일을 안 믿고 비운 것 — 몇 건이고 무엇이었나 (2026-10-14) */
+    if (먼마감.length) {
+      console.log('먼 마감 비움  ' + 먼마감.length + '건 (두 해 넘는 날짜 · deadline_src 에 원문을 남깁니다)');
+      먼마감.slice(0, 6).forEach((x) => console.log('     ' + x.원문 + '  '
+        + x.곳.slice(0, 18).padEnd(20) + String(x.제목).slice(0, 44)));
+    }
 
     for (let i = 0; i < 버릴것.length; i += 200) {
       const r = await rpc(cfg, 'collect_trash', {

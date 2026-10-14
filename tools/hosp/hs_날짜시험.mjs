@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { 글받기 } from '../certs/index.mjs';
 
 const require = createRequire(import.meta.url);
-const { hsDetailDates, hsText } = require('./hs_dates.js');
+const { hsDetailDates, hsText, 너무먼날 } = require('./hs_dates.js');
 
 const argv = process.argv.slice(2);
 const 문제만 = argv.includes('--문제만');
@@ -114,6 +114,29 @@ const 규칙문제 = [
     글: '접수기간 : 2026. 12. 1.(화) ~ 2026. 12. 31.(목) 17:00 까지',
     답: { from: '2026.12.01', to: '2026.12.31', to원문: undefined } },
 ];
+/* ★ 2026-10-14 — 뚜껑이 **목록 쪽에도** 걸리는지 봅니다 (세중님 지시 —
+   「목록·상세가 같은 함수 한 자리를 쓰게」). 목록 날짜는 상세 본문을 안 거치고
+   바로 apply_to 가 되므로, hs_dates 가 내보내는 `너무먼날()` 을 직접 부릅니다.
+   collect-hosp.mjs 의 `마감과출처()` 가 그 함수를 씁니다 */
+const 목록문제 = [
+  ['2099.12.31', true,  '목록에서 온 2099.12.31 → 안 믿습니다 (조선대 결핵관리 공고)'],
+  ['2099-12-31', true,  '붙임표 꼴도 같습니다'],
+  ['2026.12.31', false, '그해 말은 믿습니다 (146건이 이런 꼴입니다)'],
+  ['2026.10.18', false, '보통 마감일'],
+  ['',           false, '빈칸은 먼 날이 아닙니다'],
+];
+console.log('━━ ⓞ-2 목록 쪽 두 해 뚜껑 (너무먼날)');
+let 목록틀림 = 0;
+for (const [v, 답, 이름] of 목록문제) {
+  const 낸값 = 너무먼날(v);
+  const 맞 = 낸값 === 답;
+  if (!맞) 목록틀림++;
+  console.log('  ' + (맞 ? '○ 맞음' : '★ 틀림') + ' — ' + 이름
+    + '   (너무먼날 ' + 낸값 + ' · 정답 ' + 답 + ')');
+}
+if (목록틀림) { console.error('✗ 목록 뚜껑 ' + 목록틀림 + '건 틀렸습니다'); process.exitCode = 1; }
+console.log('');
+
 console.log('━━ ⓞ 규칙 자기점검 (사이트 안 두드림)');
 let 규칙틀림 = 0;
 for (const q of 규칙문제) {

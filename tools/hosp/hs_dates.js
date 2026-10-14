@@ -13,6 +13,32 @@
 //   ⚠ 이 CLI 는 utf-8 로 못 박혀 있어 euc-kr 쪽을 빈손으로 냅니다.
 //     수집기는 글받기()(tools/certs/index.mjs)로 받아 인코딩을 풀어 줍니다.
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0';
+
+/* ★ 2026-10-14 — **두 해 뚜껑을 한 자리로 올렸습니다** (세중님 지시).
+ *
+ * 전에는 이 규칙이 `hsDetailDates()` 안에만 있었습니다. 그래서 **상세 본문을
+ * 읽어 얻은 날짜**에는 걸리는데 **목록 줄에서 바로 얻은 날짜**에는 안 걸렸습니다.
+ * 2026-10-14 에 조선대병원 접수중 3건 중 한 건이 그렇게 들어왔습니다 —
+ *   「결핵관리 국책사업 전담 간호사(계약직) 채용 재공고 | 2026.06.29 ~ 2099.12.31」
+ * 목록(appsite)에서 온 날짜라 뚜껑을 안 거쳤습니다.
+ *
+ * 이제 `너무먼날()` 을 내보내고 **목록 쪽도 같은 함수**를 씁니다
+ * (`tools/collect-hosp.mjs` 의 담을 줄 만드는 자리 한 곳 · 지침 6절).
+ *
+ * 두 해로 잡은 까닭 — 「2026-12-31」 처럼 그해 말을 적는 공고가 146건 있습니다.
+ * 그것까지 버리면 멀쩡한 마감일을 잃습니다. 두 해를 넘는 것은 사람이 적은
+ * 날짜가 아닙니다 (2026-10-13 에 본 7건이 전부 2050·2099·2400 이었습니다). */
+function 두해뒤() {
+  const d = new Date(Date.now() + 730 * 86400e3);
+  const pad = function (n) { return ('0' + n).slice(-2); };
+  return d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate());
+}
+/* 'YYYY.MM.DD' 든 'YYYY-MM-DD' 든 자리를 채운 글자라 그대로 견주면 됩니다 */
+function 너무먼날(v) {
+  if (!v) return false;
+  const s = String(v).replace(/-/g, '.');
+  return s > 두해뒤();
+}
 function hsText(html) {
   return String(html || '').replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ');
@@ -31,12 +57,8 @@ function hsDetailDates(text) {
      그것까지 버리면 멀쩡한 마감일을 잃습니다. 2년을 넘는 것은 사람이 적은
      날짜가 아닙니다 (2026-10-13 에 본 7건이 전부 2050·2099·2400 이었습니다).
      버린 날짜는 `to원문` 에 남깁니다 — 수집기가 deadline_src 에 적습니다. */
-  const 두해뒤 = (function () {
-    const d = new Date(Date.now() + 730 * 86400e3);
-    return d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate());
-  }());
-  /* 'YYYY.MM.DD' 는 자리를 채운 글자라 그대로 견주면 됩니다 */
-  const 너무먼날 = function (v) { return !!v && String(v) > 두해뒤; };
+  /* 뚜껑 규칙은 **파일 위쪽 한 자리**에 있습니다 (너무먼날) — 목록 쪽도 같은
+     함수를 씁니다 (2026-10-14 · 지침 6절) */
   const 뚜껑 = function (res) {
     if (res && 너무먼날(res.to)) { res.to원문 = res.to; res.to = ''; }
     return res;
@@ -123,4 +145,4 @@ if (require.main === module) {
     }
   })();
 }
-module.exports = { hsDetailDates, hsText, hs접수문장 };
+module.exports = { hsDetailDates, hsText, hs접수문장, 너무먼날 };
