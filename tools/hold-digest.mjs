@@ -60,6 +60,38 @@ async function rpc(cfg, fn, body) {
   return t ? JSON.parse(t) : null;
 }
 
+/** 「대상인데 안 긁는 1층 병원」 (2026-10-14 세중님 지시) ──────
+ *
+ * 강동경희대학교병원을 **우연히** 찾았습니다 — 대학병원인데 어느 출처에도
+ * 공고가 0건이었습니다. 같은 구멍을 사람이 알아채기를 기다리지 않고 셉니다.
+ *
+ * 셈은 DB 함수 `일층병원_구멍()` 한 곳에서 합니다 (지침 6절).
+ * 그 함수는 `service_role` 전용이라 위 `rpc()`(anon)로는 못 부릅니다.
+ *
+ * 못 부르면 **조용히 null** 을 돌려줍니다 — 이 한 줄 때문에 요약 전체가
+ * 안 가면 안 됩니다. */
+async function 일층구멍(cfg) {
+  const k = cfg.SUPABASE_SERVICE_KEY;
+  if (!k) return null;
+  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍'), {
+    method: 'POST',
+    headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
+    body: '{}',
+  });
+  if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
+  const 다 = await r.json();
+  if (!Array.isArray(다)) return null;
+  const 사각 = 다.filter((x) => x['상태'] === '사각지대');
+  const 갈래별 = {};
+  for (const x of 사각) 갈래별[x['갈래']] = (갈래별[x['갈래']] ?? 0) + 1;
+  return {
+    대상: 다.length,
+    사각: 사각.length,
+    상급종합: 사각.filter((x) => x['갈래'] === '상급종합'),
+    갈래별,
+  };
+}
+
 /** 잠금을 너무 오래 쥔 수집기 (2026-10-12) ───────────────────
  *
  * 10-12 01:50 클린아이가 일을 **다 끝내고도** kordoc 워커 때문에 5시간 19분
@@ -110,8 +142,21 @@ function 오래쥔잠금(분기준 = 30) {
 }
 
 /** 사람이 읽을 글로 */
-function 글로(d, 관리자주소, 잠금, 보안) {
+function 글로(d, 관리자주소, 잠금, 보안, 구멍) {
   const 줄 = [];
+
+  /* ★ 2026-10-14 — 「대상인데 안 긁는 1층 병원」 (세중님 지시).
+     경보가 아니라 **늘 보이는 한 줄**입니다 — 숫자가 늘면 눈에 띕니다 */
+  if (구멍) {
+    줄.push('· 대상인데 안 긁는 1층 병원 ' + 구멍.사각 + '곳'
+      + ' (상급종합 ' + 구멍.상급종합.length + ') / 대상 ' + 구멍.대상 + '곳');
+    if (구멍.상급종합.length) {
+      줄.push('   상급종합 — ' + 구멍.상급종합.map((x) => x['기관']).join(' · '));
+    }
+    줄.push('   갈래별 — ' + Object.entries(구멍.갈래별)
+      .sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + v).join(' · '));
+    줄.push('');
+  }
 
   /* ★ 2026-10-12 — 허용 목록 밖에 열린 창구 (세중님 지시).
      점검 자체는 GitHub 워크플로 anon-check.yml 이 날마다 돌며 **빌드를 떨굽니다.**
@@ -242,13 +287,18 @@ let 보안 = null;
 try { 보안 = await 열린것견주기(cfg); }
 catch (e) { console.error('보안 점검을 못 했습니다 — ' + String(e.message || e).slice(0, 120)); }
 
+/* 「대상인데 안 긁는 1층 병원」 — 못 세도 요약은 보냅니다 */
+let 구멍 = null;
+try { 구멍 = await 일층구멍(cfg); }
+catch (e) { console.error('1층 병원 구멍을 못 셌습니다 — ' + String(e.message || e).slice(0, 120)); }
+
 if (!d['보낼것있나'] && !잠금.length && !(보안 && 보안.밖합)) {
   console.log('보낼 것이 없습니다 — 새 보류 0건 · 회원 화면 멀쩡 · 수집기 다 제때 · PDF 0자 0건 · 오래 쥔 잠금 0');
   process.exit(0);
 }
 
 const 관리자 = cfg.ADMIN_URL || 'https://potjob-web.vercel.app/admin/jobs';
-const 본문 = 글로(d, 관리자, 잠금, 보안);
+const 본문 = 글로(d, 관리자, 잠금, 보안, 구멍);
 const 제목 = '[피오티잡] 확인할 공고 ' + d['새 보류 건수'] + '건'
   + ((보안 && 보안.밖합) ? ' · ⚠ 허용 목록 밖 ' + 보안.밖합 + '건' : '')
   + (잠금.length ? ' · ⚠ 수집기 잠금 ' + 잠금.map((x) => x.수집기 + ' ' + x.분 + '분').join('·') : '')
