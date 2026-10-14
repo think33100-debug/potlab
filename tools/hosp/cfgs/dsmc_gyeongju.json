@@ -1,0 +1,13 @@
+{
+  "name": "계명대학교 경주동산병원",
+  "type": "html",
+  "url": "https://gyeongju.dsmc.or.kr:49890/content/03use/07_03.php",
+  "base": "https://gyeongju.dsmc.or.kr:49890",
+  "row": "<li[^>]*>\\s*<a href='\\?proc_type=view[\\s\\S]*?<\\/li>",
+  "title": "<strong>([\\s\\S]*?)<\\/strong>",
+  "link": "href='(\\?proc_type=view[^']+)'",
+  "linkFmt": "https://gyeongju.dsmc.or.kr:49890/content/03use/07_03.php{1}",
+  "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+  "skip": "합격자|발표|결과",
+  "note": "계명대 동산의료원 계열. 홈페이지 gyeongju.dsmc.or.kr:49890 을 열어 제목이 「경주동산병원」임을 보고, 그 쪽의 「채용공고」 링크가 /content/03use/07_03.php 인 것을 확인했습니다 (2026-10-14 브라우저). 계명대학교대구동산병원(daegu.dsmc.or.kr:49880)과 **같은 CMS·같은 경로**라 그 설정을 그대로 베끼고 호스트만 바꿨습니다 — nninc_simple 게시판(li 목록) · 제목은 <strong> 안 · href 가 작은따옴표 · 날짜는 등록일 1개(posted)."
+}

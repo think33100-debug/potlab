@@ -41,6 +41,51 @@ export function 밀리초날짜(v) {
   return 날짜(new Date(n).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }));
 }
 
+/** 공용 채용관 가르기 — 한 host 에 여러 병원이 같이 옵니다 ─────────
+ *
+ * ★ 2026-10-14 — **한 함수로 모았습니다.** 전에는 appsite 갈래 안에만
+ *   있었고, 차병원 갈래를 더하면서 같은 코드가 두 벌이 될 뻔했습니다
+ *   (지침 6절 — 기준은 한 자리).
+ *
+ * 받는 것은 **이미 정규화된 줄**입니다 — `{ title, cls, ... }`.
+ *   clsTitle  제목 **또는** cls 로 가릅니다
+ *             ⚠ 사이트 오타가 있습니다 — 빛고을이 recruitClassName 에서는
+ *               「빚고을」 입니다. 그래서 규칙에 둘 다 적혀 있고 제목도 봅니다
+ *   cls       cls 로만 가릅니다
+ *   only/not  제목에 그 말이 있나 / 없나
+ *
+ * 걸린 것이 0건이 되면 **빈 줄과 함께 까닭을 돌려줍니다** — 조용히 0건을
+ * 내면 「공고가 없다」 로 읽혀서 설정이 썩은 것을 못 알아챕니다.
+ */
+function 거르기(s, 줄, raw, 본cls값 = []) {
+  let 것 = 줄;
+  for (const [칸, 집기] of [
+    ['clsTitle', (x, re) => re.test(String(x.cls || '') + ' ' + String(x.title || ''))],
+    ['cls', (x, re) => re.test(String(x.cls || ''))],
+    ['only', (x, re) => re.test(String(x.title || ''))],
+    ['not', (x, re) => !re.test(String(x.title || ''))],
+  ]) {
+    if (!s[칸]) continue;
+    const re = new RegExp(s[칸]);
+    const 앞 = 것.length;
+    것 = 것.filter((x) => 집기(x, re));
+    if (!것.length && 앞) {
+      const 값 = (본cls값.length ? 본cls값 : [...new Set(줄.map((x) => x.cls).filter(Boolean))])
+        .slice(0, 8).join(' · ');
+      return {
+        rows: [],
+        raw: '접수중 ' + 앞 + '건인데 ' + 칸 + '(' + s[칸] + ') 에 걸린 것이 0건'
+          + (값 ? ' — 나온 값: ' + 값 : ''),
+      };
+    }
+  }
+  const 쓴칸 = ['clsTitle', 'cls', 'only', 'not'].filter((k) => s[k]);
+  return {
+    rows: 것,
+    raw: raw + (쓴칸.length ? ' (' + 쓴칸.map((k) => k + ' ' + s[k]).join(' · ') + ')' : ''),
+  };
+}
+
 /** POST 로 받습니다. 못 받으면 { code:0, 왜 } */
 async function 보내기(url, { body, contentType, headers } = {}) {
   try {
@@ -98,34 +143,10 @@ export async function 사이트줄(s) {
     if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + (r.왜 || String(r.text).slice(0, 80)) };
     const 다 = j.list || [];
     if (!다.length) return { err: 'list.json 이 0건 · pageUtil ' + JSON.stringify(j.pageUtil || {}).slice(0, 90) };
-    let 접수중 = 다.filter((x) => /접수중/.test(String(x.receiptState || '')));
-
-    /* 공용 사이트 가르기 — 한 host 에 여러 병원이 같이 옵니다.
-       clsTitle 은 제목 **또는** recruitClassName 으로 가릅니다.
-       ⚠ 사이트에 오타가 있습니다 — 빛고을이 recruitClassName 에서는 「빚고을」 입니다.
-         그래서 규칙에 둘 다 적혀 있고 제목도 같이 봅니다. */
-    if (s.clsTitle) {
-      const re = new RegExp(s.clsTitle);
-      const 앞 = 접수중.length;
-      접수중 = 접수중.filter((x) => re.test(String(x.recruitClassName || '') + ' ' + String(x.jobnoticeName || '')));
-      if (!접수중.length && 앞) {
-        return { rows: [], raw: '접수중 ' + 앞 + '건인데 clsTitle(' + s.clsTitle + ') 에 걸린 것이 0건' };
-      }
-    }
-    if (s.cls) {
-      const re = new RegExp(s.cls);
-      const 앞 = 접수중.length;
-      접수중 = 접수중.filter((x) => re.test(String(x.recruitClassName || '')));
-      if (!접수중.length && 앞) {
-        const 본값 = [...new Set(다.map((x) => x.recruitClassName).filter(Boolean))].slice(0, 8).join(' · ');
-        return { rows: [], raw: '접수중 ' + 앞 + '건인데 cls(' + s.cls + ') 에 걸린 것이 0건 — 나온 값: ' + 본값 };
-      }
-    }
-    return {
-      rows: 마이다스줄(접수중, s.host),
-      raw: '전체 ' + ((j.pageUtil || {}).recordCount || 다.length) + '건 중 접수중 ' + 접수중.length + '건'
-        + (s.cls ? ' (cls ' + s.cls + ')' : ''),
-    };
+    const 접수중 = 다.filter((x) => /접수중/.test(String(x.receiptState || '')));
+    return 거르기(s, 마이다스줄(접수중, s.host),
+      '전체 ' + ((j.pageUtil || {}).recordCount || 다.length) + '건 중 접수중 ' + 접수중.length + '건',
+      [...new Set(다.map((x) => x.recruitClassName).filter(Boolean))]);
   }
 
   /* ── 가톨릭중앙의료원 — 6줄 ── */
@@ -171,6 +192,48 @@ export async function 사이트줄(s) {
   /* ── 그리팅 — 4줄 ──
      안내 쪽 HTML 의 __NEXT_DATA__ 안에 queryKey ["openings"] 로 목록이 들어 있습니다.
      상세는 /ko/o/{openingId} · dueDate 는 UTC 라 한국 시각으로 바꿉니다 */
+  /* ── 차병원 그룹 공동 채용관 (2026-10-14) ───────────────────
+   *
+   * `recruit.chamc.co.kr` 한 곳에 분당차·일산차·강남차·구미차·차움·
+   * 차바이오텍 … 이 **다 섞여** 있고, `psitnNm` 이 **곧 병원 이름**입니다
+   * (2026-10-14 에 두드려 보니 59건 중 분당차 19 · 일산차 4 · 강남차 1 ·
+   *  구미차 1). 그래서 마이다스의 `recruitClassName` 과 **같은 자리**라
+   * `cls` 로 가릅니다 — 거르기 코드는 아래 한 벌을 그대로 씁니다.
+   *
+   * 창구는 평범한 POST JSON 입니다. 브라우저 없이 `fetch` 로 됩니다
+   * (HTTP 200 · 17,929자 · application/json · 지침 12절로 확인).
+   *   POST /recruit/announcement/recruitAnnouncementListMain.ckd
+   *   {"recrTpCd":"","userViewYn":"Yes","psitnCdIn":"","searchCondition":"all"}
+   *
+   * 날짜에 **시각이 붙어** 옵니다 — 「2026-10-18 23:50」. 마감 시각 칸의
+   * 귀한 재료입니다 (지금 채움률 1.1%). 날짜만 떼어 from/to 에 담고,
+   * 시각까지 든 원문은 `접수문장` 에 남깁니다.
+   *
+   * 상세 주소는 SPA 해시입니다 — 목록에서 글을 눌러 확인했습니다
+   *   https://recruit.chamc.co.kr/page.ckd#/recruit/announcement/<recrId>
+   */
+  if (s.type === 'cha') {
+    const r = await 보내기(s.host + '/recruit/announcement/recruitAnnouncementListMain.ckd', {
+      body: JSON.stringify({ recrTpCd: '', userViewYn: 'Yes', psitnCdIn: '', searchCondition: 'all' }),
+      contentType: 'application/json; charset=UTF-8',
+      headers: { Accept: 'application/json, text/plain, */*', Referer: s.host + '/page.ckd' },
+    });
+    const j = 제이슨(r);
+    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + (r.왜 || String(r.text).slice(0, 80)) };
+    const 다 = j.recruitAnnouncementListMain || [];
+    if (!다.length) return { err: '목록이 0건 · result ' + j.result };
+    const 접수중 = 다.filter((x) => String(x.closYn || '') !== 'Y');
+    const 줄 = 접수중.map((x) => ({
+      title: String(x.recrNm || '').trim(),
+      from: 날짜(String(x.rcritStaDt || '')),
+      to: 날짜(String(x.rcritEndDt || '')),
+      cls: String(x.psitnNm || ''),
+      접수문장: '접수기간 ' + (x.rcritStaDt || '') + ' ~ ' + (x.rcritEndDt || ''),
+      url: s.host + '/page.ckd#/recruit/announcement/' + x.recrId,
+    }));
+    return 거르기(s, 줄, '전체 ' + 다.length + '건 중 접수중 ' + 접수중.length + '건');
+  }
+
   if (s.type === 'greeting') {
     const g = await 글받기(s.url, { headers: 기본머리 });
     if (g.왜) return { err: '못 받음 · ' + g.왜 };

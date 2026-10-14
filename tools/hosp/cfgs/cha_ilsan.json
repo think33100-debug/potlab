@@ -1,0 +1,7 @@
+{
+  "name": "의료법인성광의료재단일산차병원",
+  "type": "cha",
+  "host": "https://recruit.chamc.co.kr",
+  "cls": "^일산차병원$",
+  "note": "차병원·차바이오그룹 공동 채용관(recruit.chamc.co.kr). 홈페이지는 SPA 라 브라우저로 열어 제목 「차병원·차바이오그룹 채용정보」 를 확인하고, 네트워크에서 목록 창구를 찾았습니다 — POST /recruit/announcement/recruitAnnouncementListMain.ckd · {\"recrTpCd\":\"\",\"userViewYn\":\"Yes\",\"psitnCdIn\":\"\",\"searchCondition\":\"all\"} (2026-10-14). **브라우저 없이 fetch 로 됩니다** — HTTP 200 · 17,929자 · application/json 으로 확인했습니다(지침 12절). psitnNm 이 **곧 병원 이름**이라 마이다스의 recruitClassName 과 같은 자리이고, cls 로 가릅니다 — 59건 중 분당차 19 · 차바이오텍 14 · 일산차 4 · 강남차 1 · 구미차 1 … 였습니다. 날짜에 시각이 붙어 옵니다(「2026-10-18 23:50」) — 날짜만 from/to 에 담고 시각까지 든 원문은 접수문장 에 남깁니다(마감 시각 칸 재료). 상세 주소는 SPA 해시이고 목록에서 글을 눌러 확인했습니다 — page.ckd#/recruit/announcement/<recrId>. 접수 끝난 것은 closYn=Y 로 걸러집니다."
+}
