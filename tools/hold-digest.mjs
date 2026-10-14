@@ -76,6 +76,62 @@ async function rpc(cfg, fn, body) {
  *
  * 못 부르면 **조용히 null** 을 돌려줍니다 — 이 한 줄 때문에 요약 전체가
  * 안 가면 안 됩니다. */
+async function 네숫자받기(cfg) {
+  const k = cfg.SUPABASE_SERVICE_KEY;
+  if (!k) return null;
+  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('네숫자'), {
+    method: 'POST',
+    headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
+    body: '{}',
+  });
+  if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
+  const j = await r.json();
+  return (j && typeof j === 'object') ? j : null;
+}
+
+/** 아침 짧은 글 — 조용한 날에도 보냅니다 (2026-10-14 세중님 결정) ──
+ *
+ * 「08:00 은 조용한 날에도 짧게 보냄(네 숫자 · 멈춘 수집기 ·
+ *   안 긁는 1층 병원 N곳). 15:00 은 지금처럼 문제 있을 때만.」
+ *
+ * 숫자는 DB 함수 `네숫자()` 한 자리에서 옵니다 (지침 6절).
+ * ④ 와 ①의 경쟁사 기준은 아직 못 재므로 **「아직 못 잼」 이라고 적습니다** —
+ * 0 이나 100% 로 적으면 거짓이 됩니다 (지침 15절). */
+function 아침글(네, 늦음, 구멍, 잠금) {
+  const 줄 = [];
+  const 칸 = 네 ? 네['③일곱칸'] : null;
+  const 놓침 = 네 ? 네['①놓친공고'] : null;
+  줄.push('피오티잡 아침 숫자 — ' + new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' }).slice(0, 16));
+  줄.push('');
+  if (놓침) {
+    줄.push('① 놓친 공고   안 긁는 1층 병원 ' + 놓침['안긁는_1층병원'] + '곳'
+      + ' (상급종합 ' + 놓침['안긁는_상급종합'] + ') / 대상 ' + 놓침['대상_1층병원'] + '곳');
+    줄.push('              경쟁사 기준 — 아직 못 잼 (짝 맞추기 뒤)');
+  }
+  if (네) 줄.push('② 마감인데 보임   ' + 네['②마감인데보임'] + '건 (회원 화면 ' + 네['회원화면'] + '건)');
+  if (칸) {
+    줄.push('③ 일곱 칸     모집인원 ' + 칸['모집인원'] + ' · 접수마감 ' + 칸['접수마감']
+      + ' · 마감시각 ' + 칸['마감시각'] + ' · 근무지 ' + 칸['근무지'] + ' · 지원자격 ' + 칸['지원자격']);
+    줄.push('              예상연봉·바쁜정도·병원뜯어보기 — 아직 칸이 없습니다');
+  }
+  줄.push('④ 먼저 올린 비율   아직 못 잼');
+  줄.push('');
+  줄.push('멈춘 수집기   ' + (늦음.length ? '⚠ ' + 늦음.length + '곳 — '
+    + 늦음.map((x) => (x['출처'] || x['수집기'] || '?')).join(' · ') : '0곳'));
+  줄.push('오래 쥔 잠금   ' + (잠금.length ? '⚠ ' + 잠금.map((x) => x.수집기 + ' ' + x.분 + '분').join(' · ') : '0'));
+  if (구멍 && 구멍.상급종합.length) {
+    줄.push('');
+    줄.push('안 긁는 상급종합 — ' + 구멍.상급종합.join(' · '));
+  }
+  if (!네) {
+    줄.push('');
+    줄.push('※ 네 숫자를 못 받았습니다 (네숫자() 창구) — 위 숫자가 비어 있습니다');
+  }
+  줄.push('');
+  줄.push('따로 알릴 것은 없습니다. 문제가 있으면 긴 요약이 따로 옵니다.');
+  return 줄.join('\n');
+}
+
 async function 일층구멍(cfg) {
   const k = cfg.SUPABASE_SERVICE_KEY;
   if (!k) return null;
@@ -293,8 +349,52 @@ let 구멍 = null;
 try { 구멍 = await 일층구멍(cfg); }
 catch (e) { console.error('1층 병원 구멍을 못 셌습니다 — ' + String(e.message || e).slice(0, 120)); }
 
+/* ★ 2026-10-14 — **아침에는 조용한 날에도 짧게 보냅니다** (세중님 결정).
+ *
+ * 「08:00 은 조용한 날에도 짧게 보냄(네 숫자 · 멈춘 수집기 · 안 긁는 1층
+ *   병원 N곳). 15:00 은 지금처럼 문제 있을 때만.」
+ *
+ * 시각은 **한국 시간**으로 봅니다 (서버는 UTC 입니다). 크론이 08:00·15:00
+ * 둘 다 같은 명령을 부르므로, 깃발 대신 시각으로 가릅니다 — 크론 줄을
+ * 안 고쳐도 되고, 손으로 돌릴 때는 `--아침` 으로 흉내낼 수 있습니다. */
+const 한국시 = Number(new Date().toLocaleString('en-GB', { timeZone: 'Asia/Seoul', hour: '2-digit', hour12: false }).slice(0, 2));
+const 아침인가 = argv.includes('--아침') || (한국시 >= 5 && 한국시 < 12);
+
 if (!d['보낼것있나'] && !잠금.length && !(보안 && 보안.밖합)) {
-  console.log('보낼 것이 없습니다 — 새 보류 0건 · 회원 화면 멀쩡 · 수집기 다 제때 · PDF 0자 0건 · 오래 쥔 잠금 0');
+  if (!아침인가) {
+    console.log('보낼 것이 없습니다 — 새 보류 0건 · 회원 화면 멀쩡 · 수집기 다 제때 · PDF 0자 0건 · 오래 쥔 잠금 0');
+    process.exit(0);
+  }
+  /* 조용한 아침 — 짧은 글만 보냅니다 */
+  let 네 = null;
+  try { 네 = await 네숫자받기(cfg); }
+  catch (e) { console.error('네 숫자를 못 받았습니다 — ' + String(e.message || e).slice(0, 120)); }
+  const 짧은본문 = 아침글(네, d['늦은 수집기'] || [], 구멍, 잠금);
+  const 짧은제목 = '[피오티잡] 아침 숫자 — 안 긁는 1층 병원 '
+    + (구멍 ? 구멍.사각 + '곳' : '?') + ' · 마감인데 보임 '
+    + (네 ? 네['②마감인데보임'] + '건' : '?') + ' · 멈춘 수집기 '
+    + ((d['늦은 수집기'] || []).length) + '곳';
+  if (보기만) { console.log('제목: ' + 짧은제목 + '\n'); console.log(짧은본문); process.exit(0); }
+  if (cfg.RESEND_KEY && cfg.NOTIFY_EMAIL) {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + cfg.RESEND_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: cfg.MAIL_FROM || 'potjob <onboarding@resend.dev>',
+        to: [cfg.NOTIFY_EMAIL], subject: 짧은제목, text: 짧은본문,
+      }),
+    });
+    const t = await r.text();
+    if (!r.ok) { console.error('메일 못 보냄 · HTTP ' + r.status + ' · ' + t.slice(0, 300)); process.exit(1); }
+    let id = '';
+    try { id = (JSON.parse(t) || {}).id || ''; } catch { /* 모양이 바뀌어도 넘어갑니다 */ }
+    console.log('아침 숫자를 보냈습니다 — ' + 짧은제목);
+    console.log('   Resend id ' + (id || '(응답에 id 가 없습니다)'));
+  } else {
+    console.log('※ RESEND_KEY · NOTIFY_EMAIL 이 없어 화면에만 찍습니다\n');
+    console.log('제목: ' + 짧은제목 + '\n');
+    console.log(짧은본문);
+  }
   process.exit(0);
 }
 
