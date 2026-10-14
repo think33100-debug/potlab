@@ -1,0 +1,13 @@
+{
+  "name": "재단법인아산사회복지재단 서울아산병원",
+  "type": "html",
+  "url": "https://recruit.amc.seoul.kr/recruit/career/list.do",
+  "base": "https://recruit.amc.seoul.kr",
+  "row": "<li class=\"dayListBoxLeft\">[\\s\\S]*?<\\/li>",
+  "title": "<div class=\"dayListTitle\">[\\s\\S]*?<span>([\\s\\S]*?)<\\/span>",
+  "link": "fnDetail\\('(\\d+)',\\s*'(\\d+)'\\)",
+  "linkFmt": "https://recruit.amc.seoul.kr/recruit/career/view.do?seq={1}&scheduleno={2}",
+  "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+  "skip": "합격자|발표|결과",
+  "note": "서울아산병원 채용관(recruit.amc.seoul.kr). 홈페이지 www.amc.seoul.kr 의 「채용안내·의사직/일반직 채용」이 여기로 갑니다 (2026-10-14 브라우저로 제목 「서울아산병원 채용」 확인). 목록 쪽은 /recruit/career/list.do 이고 **fetch 로도 서버가 그려 줍니다** — HTTP 200 · 22,774자 · dayListBoxLeft 10줄 (2026-10-14 글받기()로 확인). 줄 안에 「지원기간 : 2026.10.14(수) 09:00 ~ 2026.10.18(일) 23:00」 꼴로 **마감 시각까지** 있습니다. 링크는 href 가 없고 onclick fnDetail(seq, scheduleno) 이며, 그 함수는 /recruit/career/view.do 로 폼을 submit 합니다 — GET 으로도 열립니다(HTTP 200 · 14,623자 확인). 그래서 linkFmt 로 ?seq={1}&scheduleno={2} 를 조립합니다. 날짜가 줄마다 둘(시작·마감)이라 from/to 가 그대로 잡힙니다."
+}

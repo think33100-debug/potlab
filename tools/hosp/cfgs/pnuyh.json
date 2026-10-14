@@ -1,0 +1,6 @@
+{
+  "name": "양산부산대학교병원",
+  "type": "appsite",
+  "host": "https://pnuyh.recruiter.co.kr",
+  "note": "양산부산대병원 자체 채용관(마이다스 구형 appsite). 홈페이지 www.pnuyh.or.kr 의 「인재채용」이 https://pnuyh.recruiter.co.kr/appsite/company/index 로 갑니다 (2026-10-14 브라우저로 제목 확인). 2026-10-14 에 두드려 보니 전체 182건 중 접수중 4건이고 recruitClassName 은 전문의·상시·상시(시간제계약직)·연구교수 — 병원 이름이 아니라 **직종**이라 cls 로 가르지 않습니다. 부산대병원(pnuh)과는 다른 사이트입니다 — pnuh 목록에 양산 줄이 없는 것을 확인했습니다."
+}

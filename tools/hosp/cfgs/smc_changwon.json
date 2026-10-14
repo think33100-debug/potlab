@@ -1,0 +1,13 @@
+{
+  "name": "학교법인성균관대학삼성창원병원",
+  "type": "html",
+  "url": "https://smc.skku.edu/recruit/recruit/recruitInfo/list.do?mId=32",
+  "base": "https://smc.skku.edu",
+  "row": "<tr[^>]*>(?:(?!<\\/tr>)[\\s\\S])*?fn_goDtl[\\s\\S]*?<\\/tr>",
+  "title": "class=\"title-wrapper\">\\s*(?:<span[^>]*>[^<]*<\\/span>)?\\s*([^<]+)",
+  "link": "fn_goDtl\\('(\\d+)'",
+  "linkFmt": "https://smc.skku.edu/recruit/recruit/recruitInfo/view.do?mId=32&seq={1}",
+  "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+  "skip": "합격자|발표|결과",
+  "note": "삼성창원병원 채용관(smc.skku.edu/recruit). 홈페이지 smc.skku.edu 의 「인재채용」 → 「채용공고」가 /recruit/recruit/recruitInfo/list.do?mId=32 입니다 (2026-10-14 브라우저로 제목 「삼성창원병원 인재채용」 확인). www.samsunghospital.com/changwon 은 오류 쪽이고, 삼성서울병원 쪽의 「삼성창원병원」 링크가 smc.skku.edu 로 갑니다. fetch 로도 서버가 그려 줍니다 — HTTP 200 · 51,633자 · 줄 18개 (글받기()로 확인). 줄의 td.job 에 「의료기사직」 같은 직군이 적혀 있고 날짜는 2026-09-10 ~ 2026-09-20 꼴로 줄마다 둘(모바일용 사본까지 넷)입니다 — 처음·마지막을 쓰니 그대로 맞습니다. 링크는 href 가 javascript:void(0) 이고 onclick fn_goDtl(seq, idx) 이며, 그 함수가 폼 action 을 view.do?mId=32 로 바꿔 submit 합니다 → linkFmt 로 ?mId=32&seq={1} 를 조립합니다. 제목은 title-wrapper 안에 「공지」 뱃지 span 이 먼저 올 수 있어 그 span 을 건너뛰고 글자만 집습니다."
+}

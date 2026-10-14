@@ -1,0 +1,7 @@
+{
+  "name": "한양대학교병원",
+  "type": "appsite",
+  "host": "https://hyumc.recruiter.co.kr",
+  "not": "구리",
+  "note": "한양대병원(서울) 채용관(마이다스 구형 appsite). 홈페이지 seoul.hyumc.com 의 「인재채용」이 https://hyumc.recruiter.co.kr/career/home 으로 갑니다 (2026-10-14 브라우저로 제목 확인). 2026-10-14 에 전체 615건 중 접수중 16건이고 recruitClassName 은 임시직·정규직 — **직종**입니다. 한양대구리병원은 잡플렉스(JF)로 따로 들어오므로, 이 목록에 구리 공고가 섞여 겹치는 것을 막으려고 not: 구리 를 걸어 둡니다 (접수중 16건에는 구리가 없었지만, 옛 공고까지 다 보지는 않았습니다 — 안전한 쪽으로)."
+}

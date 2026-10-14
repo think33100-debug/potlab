@@ -1,0 +1,6 @@
+{
+  "name": "조선대학교병원",
+  "type": "appsite",
+  "host": "https://csuh.recruiter.co.kr",
+  "note": "조선대병원 채용관(마이다스 구형 appsite). 홈페이지 hosp.chosun.ac.kr 은 자바스크립트로 그리는 껍데기(링크 5개뿐)라 거기서는 채용 링크를 못 찾았습니다 — 공고 주소(csuh.recruiter.co.kr/app/jobnotice/view?systemKindCode=MRS2&jobnoticeSn=235213)를 찾아 그 호스트를 두드려 확인했습니다 (2026-10-14 · 전체 277건 중 접수중 3건). recruitClassName 은 「신규채용」 한 가지라 cls 로 가르지 않습니다. ★ 2026-10-14 에 접수중 3건 가운데 「결핵관리 국책사업 전담 간호사(계약직) 채용 재공고」 의 마감이 2099.12.31 이었습니다 — 목록 쪽 날짜에는 tools/hosp/hs_dates.js 의 두 해 뚜껑이 걸리지 않습니다(그 뚜껑은 상세 본문을 읽는 자리에만 있습니다). 칸되메우기 차례에 함께 봅니다."
+}
