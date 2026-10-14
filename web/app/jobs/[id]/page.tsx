@@ -20,7 +20,7 @@ import { ShareButtons } from '@/components/share-buttons';
 import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
-import { isClosed, todayKst, 마감배지, 시각말 } from '@/lib/job-state';
+import { isClosed, todayKst, 금액있나, 마감배지, 시각말, 연봉말 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { MembersOnly } from '@/components/members-only';
@@ -158,8 +158,12 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
      그대로 보여줍니다. 숫자를 만들지 않습니다.
      뽑은값(공고문에서 읽어낸 것)이 있으면 먼저 봅니다 — 원문 detail 은
      그대로 두고 따로 담습니다 */
-  const 연봉: string | null =
+  /* ★ 2026-10-14 세중님 확정 — 금액이 없으면 「내규에 따름」이고 **칸은 숨기지
+     않습니다.** 가리는 규칙은 lib/job-state.ts 한 자리입니다 */
+  const 연봉원문: string | null =
     (뽑은값?.['예상연봉'] ?? detail['연봉'] ?? detail['예상연봉'] ?? null) || null;
+  const 금액 = 금액있나(연봉원문);
+  const 연봉 = 연봉말(연봉원문);
   const 지원자격: string | null =
     (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
   /* ★ 2026-10-11 — 모집 인원도 뽑은값을 봅니다.
@@ -292,7 +296,12 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
               ★ 못 찾은 칸은 **그리지 않습니다.** 「공고에 없음」이라고 적으면
                 회원이 공고문을 안 찾아봅니다 (15절과 같은 까닭).
-                빈 칸은 관리자 「빈칸 공고」 목록으로 갑니다 */}
+                빈 칸은 관리자 「빈칸 공고」 목록으로 갑니다
+
+              ★ 2026-10-14 — **예상 연봉만 예외입니다.** 금액이 없으면
+                「내규에 따름」으로 그립니다. 공고에 금액이 안 적힌 것이 흔하고
+                (1층 39건 중 31건), 칸을 숨기면 회원이 「우리가 못 받아온 것」인지
+                「공고에 없는 것」인지 알 수 없었습니다 */}
           <Rise>
             <dl className="mt-6 grid grid-cols-2 gap-3">
               {모집인원 && (
@@ -317,7 +326,10 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                       sub={j.work_place && j.work_place.includes(' ')
                            && j.work_place !== j.지역보임 ? j.work_place : null} />
               )}
-              {연봉 && (
+              {/* ★ 2026-10-14 — 회원에게는 **언제나** 그립니다. 비면 「내규에 따름」.
+                  비회원에게는 detail 이 아예 안 실려 오므로(DB 가 빈 것을 줍니다)
+                  「내규에 따름」이 사실이 아닙니다 — 그 자리는 전처럼 안 그립니다 */}
+              {(member || 금액) && (
                 <Core icon={icons['job.pay'] ?? icons['job.headcount']} label="예상 연봉"
                       v={연봉} />
               )}
@@ -409,7 +421,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
           {/* ★ 워크넷 급여란 고정 안내 (2026-10-07 세중님 지시).
               워크넷이 주는 숫자는 1호봉 기준이라 그대로 읽으면 오해합니다.
               연봉 칸을 위로 옮겼으므로 안내도 따라옵니다 */}
-          {연봉 && 워크넷 && (
+          {금액 && 워크넷 && (
             <p className="mt-3 break-keep text-[12px] leading-relaxed text-[#5F666C]">
               예상 연봉은 1호봉 예정 급여이며, 호봉 인정 및 경력에 따라 상이할 수 있음
             </p>
@@ -418,7 +430,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
           {/* 첨부 — 담당자가 올린 공고문·그림 (회원만 받습니다) */}
           <NoticeFiles 갈래="채용" 공고={j.id} 고칠수있나={false} />
 
-          {!지원자격 && !연봉 && (
+          {!지원자격 && !연봉원문 && (
             <p className="mt-7 break-keep text-[15px] text-[#5F666C]">
               이 공고는 본문을 못 받아왔어요. 아래 단추로 원문을 열어 주세요
             </p>
