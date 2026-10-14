@@ -20,7 +20,7 @@ import { ShareButtons } from '@/components/share-buttons';
 import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
-import { isClosed, todayKst, 금액있나, 마감배지, 시각말, 연봉말 } from '@/lib/job-state';
+import { isClosed, todayKst, 금액있나, 마감배지, 시각말, 연봉말, 조교연구말 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { MembersOnly } from '@/components/members-only';
@@ -246,6 +246,19 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               >
                 {j.job_group ?? '치료사'}
               </span>
+              {/* ★ 2026-10-14 세중님 결정 — 「조교·연구」 배지.
+                  물리치료·작업치료 **전공자를 받는 자리이지만 치료사 자리가
+                  아닌** 공고입니다(학과 조교·연구원·연구위원). 안 보여주면
+                  회원이 기회를 놓치고, 제목을 「○○치료사 채용공고」로 바꾸면
+                  거짓입니다. 그래서 **제목은 원문 그대로 + 이 배지**입니다.
+                  가르는 일은 DB 의 조교연구갈래() 한 자리가 합니다 —
+                  화면은 detail.조교연구 를 읽어 글자만 바꿉니다(조교연구말) */}
+              {조교연구말(detail['조교연구']) && (
+                <span className="rounded-full border border-[#C9A227] bg-[#FFF9E6] px-3 py-1
+                                 text-[13px] font-bold text-[#8A6D1A]">
+                  {조교연구말(detail['조교연구'])} · 치료사 채용이 아닙니다
+                </span>
+              )}
               {/* 못 가린 공고는 칸을 비우지 않고 「공고문 참고」 (2026-10-07 세중님).
                   DB 값은 비워 둔 채로 화면 표시만 바꿉니다. 목록 카드도 같은 말입니다 */}
               <span className="rounded-full border border-[#E3E3DE] bg-white px-3 py-1

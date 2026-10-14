@@ -3,7 +3,7 @@
    마감 판단이 틀리면 둘 중 하나가 납니다 —
    멀쩡한 공고에 「마감」 띠가 붙거나, 끝난 공고를 계속 지원하러 보냅니다. */
 import assert from 'node:assert/strict';
-import { isClosed, todayKst, nowTimeKst, 마감배지, 시각말, 금액있나, 연봉말, 내규말 } from './job-state.ts';
+import { isClosed, todayKst, nowTimeKst, 마감배지, 시각말, 금액있나, 연봉말, 내규말, 조교연구말 } from './job-state.ts';
 
 /* ① 마감일이 빈 공고는 마감이 아닙니다.
       인수인계 원칙 — 「마감일이 비어 있으면 잘못 읽은 것」입니다.
@@ -132,4 +132,11 @@ assert.match(todayKst(), /^\d{4}-\d{2}-\d{2}$/);
   assert.equal(금액있나('보수는 연봉제로서 「지방공무원 보수규정」에 따라 책정함 (단위: 천원) 9급'), false);
 }
 
-console.log('마감 판단 통과 — 9가지 (예상 연봉 표시 포함)');
+/* ⑩ 조교·연구 배지에 찍을 말 (2026-10-14) */
+assert.equal(조교연구말('조교'), '조교');
+assert.equal(조교연구말('연구'), '연구');
+for (const v of [null, undefined, '', '  ', '조교연구', '연구원', '교수']) {
+  assert.equal(조교연구말(v), null);      /* 모르는 값은 안 찍습니다 */
+}
+
+console.log('마감 판단 통과 — 10가지 (조교·연구 배지 포함)');

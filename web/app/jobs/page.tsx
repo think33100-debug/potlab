@@ -4,7 +4,7 @@ import { Icon } from '@/components/icon';
 import { JobTabs } from '@/components/job-tabs';
 import { ListFilters } from '@/components/list-filters';
 import { MembersOnly } from '@/components/members-only';
-import { 마감배지 } from '@/lib/job-state';
+import { 마감배지, 조교연구말 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { SIDOS } from '@/lib/org';
 import { supabase, TABS, tabLabel, type JobListItem, type 맛보기공고 } from '@/lib/supabase';
@@ -362,6 +362,15 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                     {r.is_intern && (
                       <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-gray-900 ring-1 ring-warning dark:text-gray-100">
                         체험형 인턴
+                      </span>
+                    )}
+                    {/* ★ 2026-10-14 세중님 결정 — 「조교·연구」 배지.
+                        전공자를 받는 자리이지만 **치료사 자리가 아닌** 공고입니다
+                        (학과 조교·연구원·연구위원). 제목은 원문 그대로 두고
+                        배지로 가립니다. 판단은 DB 의 조교연구갈래() 한 자리 */}
+                    {조교연구말(r.조교연구) && (
+                      <span className="mr-2 whitespace-nowrap rounded-md bg-[#FFF9E6] px-2 py-0.5 align-middle text-sm font-bold text-[#8A6D1A] ring-1 ring-[#C9A227]">
+                        {조교연구말(r.조교연구)}
                       </span>
                     )}
                     {r.title}
