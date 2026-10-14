@@ -360,7 +360,12 @@ catch (e) { console.error('1층 병원 구멍을 못 셌습니다 — ' + String
 const 한국시 = Number(new Date().toLocaleString('en-GB', { timeZone: 'Asia/Seoul', hour: '2-digit', hour12: false }).slice(0, 2));
 const 아침인가 = argv.includes('--아침') || (한국시 >= 5 && 한국시 < 12);
 
-if (!d['보낼것있나'] && !잠금.length && !(보안 && 보안.밖합)) {
+/* `--조용한척` — 보낼 것이 있어도 **조용한 날인 것처럼** 아침 갈래를 돌립니다.
+   조용한 날이 올 때까지 기다려서는 이 길을 시험할 수 없습니다 (지침 8-16 ·
+   「기준을 잠깐 낮춰 실제로 메일이 나가는지 보고 원래대로」). */
+const 조용한척 = argv.includes('--조용한척');
+
+if (조용한척 || (!d['보낼것있나'] && !잠금.length && !(보안 && 보안.밖합))) {
   if (!아침인가) {
     console.log('보낼 것이 없습니다 — 새 보류 0건 · 회원 화면 멀쩡 · 수집기 다 제때 · PDF 0자 0건 · 오래 쥔 잠금 0');
     process.exit(0);
