@@ -438,6 +438,15 @@ if (상세몫 > 0) {
         .replace(/<!--[\s\S]*?-->/g, ' ')
         .replace(/<[^>]+>/g, ' ')
         .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+        /* ★ 2026-10-14 — **제어 글자를 걷습니다.** 22:00 정시 실행이
+           `22P05 unsupported Unicode escape sequence · \u0000 cannot be
+           converted to text` 로 통째로 탈났습니다 (담음 0). PostgreSQL 의
+           `text` 는 NUL 을 못 받습니다. `\s` 에 NUL 이 안 들어가서
+           `replace(/\s+/g,' ')` 로는 안 걷힙니다.
+           상세를 더 열기 시작하면서(이날 ③) NUL 이 든 쪽을 처음 만났습니다 —
+           한 건이 **그 바퀴 전체**를 죽입니다. 줄 단위가 아니라 한 번에
+           보내기 때문입니다. */
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ' ')
         .replace(/\s+/g, ' ').trim();
       x.본문 = 글;
 
