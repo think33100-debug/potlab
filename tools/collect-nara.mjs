@@ -48,7 +48,7 @@ import { 공공부르기, 한도알리기, 한도들 } from './공공데이터�
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
-import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
+import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
@@ -398,7 +398,13 @@ for (const v of 볼것) {
   if (!d) { v.보류 = '상세를 못 받았습니다'; continue; }
   v.상세 = d;
   const 글 = Object.values(d).join(' ');
-  const j = matchJob(글);
+  /* ★ 2026-10-14 — `matchJob` → `본문직군`. `글` 은 상세 항목을 통째로 이어
+     붙인 것이라 「○○치료학과 졸업」 같은 말까지 들어옵니다. `matchJob` 은 맨
+     「물리치료」로도 걸립니다. 같은 뿌리로 HS3 에서 18건이 틀렸습니다
+     (방사선사·임상병리사·총무팀 공고가 물리치료사로 떠 있었습니다).
+     나라일터에서는 아직 틀린 것을 못 찾았지만 **같은 꼴**이라 함께 고칩니다
+     (기준은 공고문읽기.mjs 한 자리 · 지침 6절) */
+  const j = 본문직군(글);
   if (j) { v.직군 = j; v.근거 = '상세'; 셈.상세로가림++; continue; }
 
   /* 상세에도 없으면 첨부를 읽습니다. 다만 의료 냄새가 없으면 열지 않습니다 —

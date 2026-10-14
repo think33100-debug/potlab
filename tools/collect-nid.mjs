@@ -40,7 +40,7 @@ import { fileURLToPath } from 'node:url';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
-import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
+import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
@@ -245,7 +245,13 @@ for (const v of 볼것) {
   /* 직군을 이미 제목으로 가렸으면 여기서 끝 — 첨부까지 열지 않습니다 */
   if (!v.열까) continue;
 
-  const j = matchJob(v.본문);
+  /* ★ 2026-10-14 — `matchJob` → `본문직군`. 본문은 **페이지 전체 글**이라
+     사이트 메뉴·응시자격의 「○○치료학」까지 들어옵니다. `matchJob` 은 맨
+     「작업치료」로도 걸려서, 서울광역치매센터 「연구위원(계약직)」 공고가
+     응시자격의 「… 사회복지학, **작업치료학** 등의 분야 전공자」에 걸려
+     「작업치료사 계약직 채용공고」로 회원 화면에 떠 있었습니다.
+     `본문직군` 은 「치료사」를 요구합니다 (기준은 공고문읽기.mjs 한 자리 · 지침 6절) */
+  const j = 본문직군(v.본문);
   if (j) { v.직군 = j; v.근거 = '상세'; 셈.상세로++; continue; }
 
   /* 첨부 — ⚠ **href 가 아니라 onclick 안에 있습니다.**
