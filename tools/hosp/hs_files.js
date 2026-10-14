@@ -17,8 +17,21 @@
 //
 // 자기 점검:  node tools/hosp/hs_files.js
 
-/** 첨부로 쓸 확장자 */
+/** 첨부로 쓸 확장자 — **주소**에서 (끝이거나 `?` 앞) */
 const 쓸꼴 = /\.(hwpx?|pdf|docx?)(\?|$)/i;
+
+/** ★ 2026-10-14 — **이름에서는 끝에 고정하지 않습니다.**
+ *
+ * 그누보드5 게시판은 링크 글에 크기를 붙입니다 —
+ *     「직원채용 공고 … 및 방사선사.hwp (135.5K)」
+ * 그래서 `쓸꼴`(끝 고정)로 이름을 보면 **안 걸립니다.** 주소 쪽도
+ *     /bbs/download.php?bo_table=recurit_new&wr_id=648&no=0
+ * 처럼 확장자가 아예 없어서, 둘 다 빠져 **첨부 0개**가 됐습니다 —
+ * 청주의료원(본문이 「첨부 파일 확인바랍니다.」뿐)이 그랬습니다.
+ *
+ * 이름 쪽만 느슨하게 봅니다. 주소 쪽을 느슨하게 하면 `…/pdf_viewer/x`
+ * 같은 길이 걸립니다. */
+const 이름꼴 = /\.(hwpx?|pdf|docx?)(\b|$)/i;
 
 /** 이름으로 본 쓸모 — 높을수록 공고문에 가깝습니다 */
 function 점수(이름) {
@@ -48,10 +61,27 @@ function hs첨부주소(html, 바탕주소) {
      그때 주소 끝글자로 이름을 지어내면 「입사지원서」(점수 0)가
      「cccc.hwp」(점수 1)로 덮입니다 — 자기 점검에서 걸렸습니다 (2026-10-11) */
   const 더하기 = (주소, 이름, 이름믿음) => {
-    const u = 온전히(주소, 바탕주소);
+    /* ★ 2026-10-14 — **`&amp;` 를 여기서 풉니다.** 그누보드 주소가
+       `…?bo_table=t&amp;wr_id=648&amp;no=0` 꼴로 옵니다. 안 풀면
+       `첨부담기.더하기` 가 「&amp; 가 남아 있습니다」로 던집니다 —
+       담고 나서 고치면 이미 들어간 줄이 남습니다 (지침 9절). */
+    const 날것 = String(주소 || '').replace(/&amp;/g, '&').replace(/&#38;/g, '&');
+    /* ★ 2026-10-14 — **자바스크립트가 만드는 주소는 버립니다.**
+       성주군(고용24 고시공고)이 이 꼴입니다 —
+         href="javascript:gfn_fileDown('…hwpx','5635219160355651','employ/kny940827')"
+       진짜 내려받기 주소는 그 함수 안에 있고 **우리는 아직 모릅니다.**
+       짐작으로 만들지 않습니다 (지침 3절). 찾으면 상세주소.mjs 처럼 적고 붙입니다. */
+    if (/^\s*(javascript:|#)/i.test(날것)) return;
+    const u = 온전히(날것, 바탕주소);
     if (!u) return;
+    /* ★ 2026-10-14 — **제 페이지를 가리키는 주소는 버립니다.**
+       중앙보훈병원이 `<a href="#no">채용공고문….pdf</a>` 꼴이라, 조각(#no)을
+       떼면 **상세 페이지 주소 그대로**가 됩니다. 이름에 `.pdf` 가 있어서
+       이름 검사만으로는 통과합니다 — 담으면 HTML 을 공고문이라고 담는 셈입니다.
+       진짜 주소는 자바스크립트(synap 뷰어)가 만듭니다. 아직 모릅니다. */
+    if (u.split('#')[0] === String(바탕주소 || '').split('#')[0]) return;
     /* 확장자가 주소에도 이름에도 없으면 안 씁니다 */
-    if (!쓸꼴.test(u) && !쓸꼴.test(이름 || '')) return;
+    if (!쓸꼴.test(u) && !이름꼴.test(이름 || '')) return;
     const 준이름 = String(이름 || '').trim();
     const nm = 준이름 || (u.split('/').pop() || '').slice(0, 120);
     const 전 = 모은것.get(u);
@@ -93,13 +123,36 @@ if (require.main === module) {
     '<a href="/board/view/syfsx/7140">이전 글</a>',
     '</div>',
     '<a href="#" onclick="down(\'/upload/2026/notice.pdf\')">공고문 내려받기</a>',
+    /* ★ 2026-10-14 — 그누보드5 꼴. 청주의료원 화면에서 그대로 떼어 왔습니다.
+       주소에 확장자가 없고 `&amp;` 가 들어 있으며, 이름 뒤에 크기가 붙습니다 */
+    '<a href="https://www.cjmc.or.kr/bbs/download.php?bo_table=recurit_new&amp;wr_id=648&amp;no=0"'
+      + ' class="view_file_download"> <img src="/img/icon_file.gif" alt="첨부">'
+      + ' <strong>직원채용 공고 1부조리원,시설미화원,작업치료사,물리치료사 및 방사선사.hwp</strong> (135.5K) </a>',
   ].join('\n');
 
   const r = hs첨부주소(html, 바탕);
   const 어겼나 = [];
   const 봐 = (말, 참) => { if (!참) 어겼나.push(말); };
 
-  봐('셋을 찾는다', r.length === 3);
+  봐('넷을 찾는다', r.length === 4);
+  /* ★ 2026-10-14 — 그누보드5 꼴 (주소에 확장자 없음 · 이름 뒤에 크기 · &amp;) */
+  const 그누 = r.find((x) => /download\.php/.test(x.url));
+  봐('그누보드 첨부를 찾는다', !!그누);
+  봐('그누보드 주소의 &amp; 를 풀었다',
+    !!그누 && !/&amp;/.test(그누.url) && /wr_id=648&no=0$/.test(그누.url));
+  봐('그누보드 이름이 공고문 점수', 그누?.점수 === 2);
+
+  /* ★ 2026-10-14 — 자바스크립트가 만드는 주소 · 제 페이지 가리키는 주소는 버립니다.
+     성주군(고용24)과 중앙보훈병원 화면에서 그대로 떼어 왔습니다 */
+  const 가짜 = hs첨부주소([
+    '<a href="javascript:gfn_fileDown(\'성주군 공고.hwpx\',\'5635219160355651\',\'employ/x\')">'
+      + '3. 2026년도 제2회 성주군 … 재공고.hwpx</a>',
+    '<a href="#no">채용공고문및직무설명서(기간제_10월).pdf</a>',
+    '<a href="/real/notice.pdf">진짜 공고문.pdf</a>',
+  ].join('\n'), 'https://www.bohun.or.kr/seoul/na/ntt/selectNttInfo.do?mi=1&nttSn=2');
+  봐('javascript: 주소는 안 담는다', !가짜.some((x) => /^javascript:/i.test(x.url)));
+  봐('제 페이지 가리키는 #주소는 안 담는다', !가짜.some((x) => /selectNttInfo\.do/.test(x.url)));
+  봐('진짜 주소는 담는다', 가짜.length === 1 && /\/real\/notice\.pdf$/.test(가짜[0].url));
   봐('첫째가 공고문', /채용공고/.test(r[0].name));
   봐('첫째 주소가 온전하다', r[0].url === 'https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/4ee6cf0d/879bc60d/4ee6cf0d.hwp');
   봐('입사지원서는 점수 0', r.find((x) => /입사지원서/.test(x.name))?.점수 === 0);
