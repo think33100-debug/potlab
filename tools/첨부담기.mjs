@@ -27,6 +27,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import os from 'node:os';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 뿌리 = path.join(여기, '..');
@@ -73,8 +74,42 @@ export function 저장이름(job_id, 차례, 원래이름) {
 const 켜졌나 = () => process.env.POTJOB_ATTACH_WRITE === '1';
 
 /* 한 번에 이보다 많으면 멈춥니다 — 치우개의 50개 뚜껑과 같은 생각입니다.
+   「한 바퀴에 수백 개가 잡히면 그건 맞은 게 아니라 **못 읽은 것**」 이라는
+   뜻이라 **줄이지 않고 아예 안 담습니다.**
    POTJOB_ATTACH_MAX 로 올릴 수 있습니다 */
 const 뚜껑 = () => Number(process.env.POTJOB_ATTACH_MAX) || 30;
+
+/* ★ 2026-10-14 — **하루 상한** (세중님 지시 · 기본 300건).
+ *
+ * 위 뚜껑은 「한 바퀴」 뚜껑입니다. 수집기가 셋(알리오·클린아이·나라일터)이고
+ * 알리오는 5분마다 도니까, 한 바퀴 뚜껑만으로는 하루에 얼마나 담길지 모릅니다.
+ * 그래서 **날마다** 셉니다.
+ *
+ * `job_attachments` 에 **만든 때 칸이 없습니다**(id·job_id·kind·name·url·
+ * parsed_at·수집묶음). 그래서 DB 로는 「오늘 몇 건 담았나」를 못 셉니다 —
+ * 칸을 더하는 것은 표 바꾸기라 승인이 필요하니, 지금은 **서버에 셈 파일**을
+ * 둡니다 (`~/첨부담은수.json` · `수집기멈춤경보.mjs` 의 `~/경보기록.json` 과 같은 꼴).
+ * 수집기 셋이 같은 서버에서 도니 한 파일로 셉니다.
+ *
+ * 하루 상한을 넘으면 **남은 몫만큼만** 담고 나머지는 다음 바퀴로 넘깁니다 —
+ * 첨부는 공고가 살아 있는 동안 계속 보이니 하루 늦어도 잃지 않습니다.
+ */
+const 하루상한 = () => Number(process.env.POTJOB_ATTACH_DAY) || 300;
+const 셈파일 = () => path.join(os.homedir(), '첨부담은수.json');
+function 오늘담은수() {
+  try {
+    const j = JSON.parse(fs.readFileSync(셈파일(), 'utf8'));
+    return j['날'] === 오늘() ? Number(j['담은수']) || 0 : 0;
+  } catch { return 0; }
+}
+function 오늘담은수더하기(n) {
+  try {
+    fs.writeFileSync(셈파일(), JSON.stringify({ 날: 오늘(), 담은수: 오늘담은수() + n }) + '\n');
+  } catch (e) { console.error('  ⚠ 하루 상한 셈을 못 적었습니다 — ' + String(e.message || e).slice(0, 90)); }
+}
+function 오늘() {
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+}
 
 export function 첨부모으기(source, 옵션 = {}) {
   /* 옵션.마른 이 아니어도, 환경변수를 안 켰으면 마른입니다 */
@@ -159,8 +194,23 @@ export function 첨부모으기(source, 옵션 = {}) {
         return;
       }
 
+      /* ★ 하루 상한 — 남은 몫만큼만 담습니다 (2026-10-14) */
+      const 이미 = 오늘담은수();
+      const 남은몫 = 하루상한() - 이미;
+      if (남은몫 <= 0) {
+        console.log(`  첨부 ${줄들.length}줄 — 오늘 상한(${하루상한()})을 다 썼습니다`
+          + ` (오늘 ${이미}건). **담지 않습니다.** 다음 바퀴로 넘깁니다`);
+        return;
+      }
+      let 담을줄 = 줄들;
+      if (줄들.length > 남은몫) {
+        console.log(`  첨부 ${줄들.length}줄 중 ${남은몫}줄만 담습니다`
+          + ` — 오늘 상한 ${하루상한()} · 이미 ${이미}건. 나머지는 다음 바퀴로`);
+        담을줄 = 줄들.slice(0, 남은몫);
+      }
+
       /* 뚜껑 — 한 번에 너무 많으면 멈춥니다 */
-      if (줄들.length > 뚜껑()) {
+      if (담을줄.length > 뚜껑()) {
         console.error(`  ★ 첨부 ${줄들.length}줄은 한 번 뚜껑(${뚜껑()})을 넘습니다 — **담지 않습니다.**`);
         console.error(`     POTJOB_ATTACH_MAX 로 올리거나, 좁혀서 다시 돌리십시오`);
         return;
@@ -186,15 +236,19 @@ export function 첨부모으기(source, 옵션 = {}) {
       };
       const 합 = { 담음: 0, 겹침: 0, 건너뜀: 0, 공고없음: 0 };
       let 첫탈 = null; let 묶음 = null; let 표줄수 = null;
-      for (let i = 0; i < 줄들.length; i += 200) {
+      for (let i = 0; i < 담을줄.length; i += 200) {
         const r = await rpc(cfg, 'collect_attach', {
-          p_secret: 열쇠, p_source: source, p_rows: 줄들.slice(i, i + 200),
+          p_secret: 열쇠, p_source: source, p_rows: 담을줄.slice(i, i + 200),
         });
         for (const k of Object.keys(합)) 합[k] += r[k] || 0;
         첫탈 ||= r['첫탈']; 묶음 = r['묶음']; 표줄수 = r['표 줄수'];
       }
+      /* 하루 상한 셈에 **진짜 담은 것만** 더합니다 — 겹침은 새 줄이 아닙니다 */
+      if (합.담음) 오늘담은수더하기(합.담음);
+
       /* 「몇 건 왔다」만 찍는 진단은 쓸모없습니다 (지침 2절) — 갈래별로 찍습니다 */
       console.log(`  첨부 ${합.담음}줄 담았습니다 (${source})`
+        + ` · 오늘 ${오늘담은수()}/${하루상한()}`
         + ` · 겹침 ${합.겹침} · 건너뜀 ${합.건너뜀} · 그 공고가 표에 없음 ${합.공고없음}`
         + ` · 묶음 ${묶음 ?? '(없음)'} · 표 전체 ${표줄수}줄`);
       if (첫탈) console.log(`  ⚠ 첫 탈 — ${첫탈}`);
