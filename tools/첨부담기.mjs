@@ -27,7 +27,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import os from 'node:os';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 뿌리 = path.join(여기, '..');
@@ -85,30 +84,34 @@ const 뚜껑 = () => Number(process.env.POTJOB_ATTACH_MAX) || 30;
  * 알리오는 5분마다 도니까, 한 바퀴 뚜껑만으로는 하루에 얼마나 담길지 모릅니다.
  * 그래서 **날마다** 셉니다.
  *
- * `job_attachments` 에 **만든 때 칸이 없습니다**(id·job_id·kind·name·url·
- * parsed_at·수집묶음). 그래서 DB 로는 「오늘 몇 건 담았나」를 못 셉니다 —
- * 칸을 더하는 것은 표 바꾸기라 승인이 필요하니, 지금은 **서버에 셈 파일**을
- * 둡니다 (`~/첨부담은수.json` · `수집기멈춤경보.mjs` 의 `~/경보기록.json` 과 같은 꼴).
- * 수집기 셋이 같은 서버에서 도니 한 파일로 셉니다.
+ * ★ 2026-10-14 (그날 저녁) — **DB 로 셉니다.** 처음에는 서버 셈 파일
+ * (`~/첨부담은수.json`)로 셌습니다 — 이 표에 만든 때 칸이 없었기 때문입니다.
+ * 세중님 승인으로 `job_attachments.만든때`(timestamptz default now())를 더해서,
+ * 이제 **표를 세어** 상한을 봅니다. 파일 셈은 치웠습니다 —
+ * 파일이 지워지면 상한이 조용히 풀리고, 서버 한 대에서만 맞는 셈이었습니다.
  *
  * 하루 상한을 넘으면 **남은 몫만큼만** 담고 나머지는 다음 바퀴로 넘깁니다 —
  * 첨부는 공고가 살아 있는 동안 계속 보이니 하루 늦어도 잃지 않습니다.
+ *
+ * 못 세면(네트워크 탈 등) **담지 않습니다.** 상한을 모르는 채 담는 것보다
+ * 한 바퀴 쉬는 쪽이 낫습니다.
  */
 const 하루상한 = () => Number(process.env.POTJOB_ATTACH_DAY) || 300;
-const 셈파일 = () => path.join(os.homedir(), '첨부담은수.json');
-function 오늘담은수() {
-  try {
-    const j = JSON.parse(fs.readFileSync(셈파일(), 'utf8'));
-    return j['날'] === 오늘() ? Number(j['담은수']) || 0 : 0;
-  } catch { return 0; }
+function 한국오늘0시() {
+  /* 한국 날짜의 00:00 을 UTC 로 — 서버는 UTC 입니다 */
+  const 날 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+  return 날 + 'T00:00:00+09:00';
 }
-function 오늘담은수더하기(n) {
-  try {
-    fs.writeFileSync(셈파일(), JSON.stringify({ 날: 오늘(), 담은수: 오늘담은수() + n }) + '\n');
-  } catch (e) { console.error('  ⚠ 하루 상한 셈을 못 적었습니다 — ' + String(e.message || e).slice(0, 90)); }
-}
-function 오늘() {
-  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+async function 오늘담은수(cfg) {
+  const k = cfg.SUPABASE_SERVICE_KEY;
+  if (!k) throw new Error('SUPABASE_SERVICE_KEY 가 없습니다');
+  const q = 'job_attachments?select=id&' + encodeURIComponent('만든때')
+    + '=gte.' + encodeURIComponent(한국오늘0시());
+  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + q, {
+    headers: { apikey: k, Authorization: 'Bearer ' + k, Prefer: 'count=exact', Range: '0-0' },
+  });
+  if (!r.ok) throw new Error('job_attachments 셈 HTTP ' + r.status + ' · ' + (await r.text()).slice(0, 160));
+  return Number((r.headers.get('content-range') || '/0').split('/')[1] || 0);
 }
 
 export function 첨부모으기(source, 옵션 = {}) {
@@ -195,7 +198,13 @@ export function 첨부모으기(source, 옵션 = {}) {
       }
 
       /* ★ 하루 상한 — 남은 몫만큼만 담습니다 (2026-10-14) */
-      const 이미 = 오늘담은수();
+      let 이미;
+      try { 이미 = await 오늘담은수(cfg); }
+      catch (e) {
+        console.error('  ★ 오늘 담은 수를 못 셌습니다 — ' + String(e.message || e).slice(0, 140));
+        console.error('     상한을 모르는 채 담지 않습니다. 다음 바퀴로 넘깁니다');
+        return;
+      }
       const 남은몫 = 하루상한() - 이미;
       if (남은몫 <= 0) {
         console.log(`  첨부 ${줄들.length}줄 — 오늘 상한(${하루상한()})을 다 썼습니다`
@@ -243,12 +252,9 @@ export function 첨부모으기(source, 옵션 = {}) {
         for (const k of Object.keys(합)) 합[k] += r[k] || 0;
         첫탈 ||= r['첫탈']; 묶음 = r['묶음']; 표줄수 = r['표 줄수'];
       }
-      /* 하루 상한 셈에 **진짜 담은 것만** 더합니다 — 겹침은 새 줄이 아닙니다 */
-      if (합.담음) 오늘담은수더하기(합.담음);
-
       /* 「몇 건 왔다」만 찍는 진단은 쓸모없습니다 (지침 2절) — 갈래별로 찍습니다 */
       console.log(`  첨부 ${합.담음}줄 담았습니다 (${source})`
-        + ` · 오늘 ${오늘담은수()}/${하루상한()}`
+        + ` · 오늘 ${이미 + 합.담음}/${하루상한()}`
         + ` · 겹침 ${합.겹침} · 건너뜀 ${합.건너뜀} · 그 공고가 표에 없음 ${합.공고없음}`
         + ` · 묶음 ${묶음 ?? '(없음)'} · 표 전체 ${표줄수}줄`);
       if (첫탈) console.log(`  ⚠ 첫 탈 — ${첫탈}`);
