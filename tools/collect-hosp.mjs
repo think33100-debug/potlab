@@ -48,6 +48,8 @@ import { 상세주소 } from './hosp/상세주소.mjs';
    자기점검까지 통과했는데 **부르는 곳이 한 군데도 없었습니다** — 지침 6절의
    「코드가 저장소에 있어도 아무도 import 하지 않으면 없는 기능입니다」 그대로입니다 */
 import { 첨부모으기 } from './첨부담기.mjs';
+/* 보내기 전 줄마다 보고, 실패하면 반씩 나눠 문제 줄만 뺍니다 (세중님 0번) */
+import { 반씩보내기 } from './보낼줄.mjs';
 
 /* 접수기간 규칙 — tools/hosp/hs_dates.js 한 벌. CommonJS 라 require 로 끌어옵니다.
    2026-10-07 에 붙였습니다. 전에는 저 파일이 저장소에 있는데 아무도 안 불렀습니다 */
@@ -258,6 +260,13 @@ const 상세몫 = argv.includes('--상세') ? Number(argv[argv.indexOf('--상세
 /* 첨부는 `--마른` 이거나 `POTJOB_ATTACH_WRITE` 가 안 켜져 있으면 안 담습니다.
    `--dry` 와 따로 둡니다 — 나라일터도 그렇게 합니다 (collect-nara.mjs:81) */
 const 마른첨부 = argv.includes('--마른') || dry;
+
+/* ★ 2026-10-14 세중님 0번 시험용 — **NUL 이 든 가짜 줄 하나를 섞습니다.**
+   `--나쁜줄시험` 을 줄 때만 섞이고, 그 줄은 `TEST` 로 시작해 실제 공고와
+   섞이지 않습니다. 담길 일도 없습니다 — 보내기 전에 걸러집니다.
+   「시험 자료는 실제 회원 계정에 넣지 않습니다」(지침 8-9)와 같은 결로,
+   되돌릴 필요가 없는 쪽으로 짭니다 */
+const 나쁜줄시험 = argv.includes('--나쁜줄시험');
 const 찾을말 = argv.filter((x, i) => !x.startsWith('--')
   && !['--동시', '--상세'].includes(argv[i - 1]));
 
@@ -632,6 +641,15 @@ const 버릴것 = 쓰레기2.map((x) => ({
 const 원문들 = 결과.filter((x) => x.본문 && x.본문.length > 200).map((x) => ({
   job_id: x.id, kind: '상세', ord: 0, url: x.url, body: x.본문,
 }));
+/* ★ 2026-10-14 세중님 0번 시험 — NUL 이 든 가짜 줄 하나를 **한가운데** 섞습니다.
+   `--나쁜줄시험` 일 때만. 나머지가 담기는지 보는 것이 목적입니다 */
+if (나쁜줄시험 && 원문들.length) {
+  원문들.splice(Math.floor(원문들.length / 2), 0, {
+    job_id: 'TEST나쁜줄', kind: '상세', ord: 0,
+    url: 'https://example.com/시험', body: '앞\u0000뒤 '.repeat(80),
+  });
+  console.log('  ★ --나쁜줄시험 — NUL 이 든 가짜 줄 하나를 섞었습니다 (TEST나쁜줄)');
+}
 
 /* ── ⑤ 담거나, 옛것과 대조하거나 ─────────────────────────── */
 /* 옛 수집기(HS)가 담은 것을 읽습니다.
@@ -647,6 +665,8 @@ async function 옛것() {
 }
 
 let 담음 = 0, 버림 = 0, 보관 = 0, 탈 = '';
+/* ★ 2026-10-14 — 담지 못한 줄 (한 줄 때문에 바퀴가 죽지 않게 · 세중님 0번) */
+let 못담음 = 0; const 못담은것 = [];
 if (dry) {
   const 옛 = await 옛것();
   if (!옛) console.log('\n옛 수집기 것을 못 읽었습니다 (대조 못 함)');
@@ -728,14 +748,24 @@ if (dry) {
   console.log('\n--dry 라 담지 않았습니다. ' + Math.round((Date.now() - t0) / 1000) + '초');
 } else {
   try {
-    for (let i = 0; i < 담을것.length; i += 200) {
-      const r = await rpc(cfg, 'collect_put', {
-        p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE, p_rows: 담을것.slice(i, i + 200),
-      });
-      담음 += r['담음'] || 0;
-      (r['건너뛴것'] || []).slice(0, 5).forEach((x) => console.error('  건너뜀 ' + x.id + ' · ' + x.why));
-    }
+    /* ★ 2026-10-14 세중님 0번 — **한 줄 때문에 바퀴가 통째로 죽지 않게.**
+       보내기 전에 줄마다 보고, 그래도 묶음이 실패하면 반씩 나눠 문제 줄만
+       뺍니다. 뺀 줄은 셈과 까닭이 남습니다 (tools/보낼줄.mjs 한 자리) */
+    const p = await 반씩보내기({
+      줄들: 담을것, 묶음: 200, 이름: 'collect_put',
+      보내기: (조각) => rpc(cfg, 'collect_put', {
+        p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE, p_rows: 조각,
+      }),
+    });
+    담음 += p.담음;
+    못담음 += p.못담음;
+    못담은것.push(...p.뺀줄.map((x) => ({ ...x, 어디: 'collect_put' })),
+                  ...p.못담은줄.map((x) => ({ ...x, 어디: 'collect_put' })));
+    p.건너뜀.slice(0, 5).forEach((x) => console.error('  건너뜀 ' + x.id + ' · ' + x.why));
     console.log('\n씀          ' + 담음 + '건');
+    if (못담음) {
+      console.log('담지 못한 줄  ⚠ ' + 못담음 + '건 — 나머지는 담았습니다 (까닭은 위에)');
+    }
     /* 두 해 넘는 마감일을 안 믿고 비운 것 — 몇 건이고 무엇이었나 (2026-10-14) */
     if (시각찾음.length) {
       console.log('마감 시각 찾음 ' + 시각찾음.length + '건 (접수문장에서 · 첨부를 안 열고)');
@@ -748,20 +778,30 @@ if (dry) {
         + x.곳.slice(0, 18).padEnd(20) + String(x.제목).slice(0, 44)));
     }
 
-    for (let i = 0; i < 버릴것.length; i += 200) {
-      const r = await rpc(cfg, 'collect_trash', {
-        p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE, p_rows: 버릴것.slice(i, i + 200),
-      });
-      버림 += r['담음'] || 0;
-    }
+    const tr = await 반씩보내기({
+      줄들: 버릴것, 묶음: 200, 이름: 'collect_trash',
+      보내기: (조각) => rpc(cfg, 'collect_trash', {
+        p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE, p_rows: 조각,
+      }),
+    });
+    버림 += tr.담음;
+    못담음 += tr.못담음;
+    못담은것.push(...tr.뺀줄.map((x) => ({ ...x, 어디: 'collect_trash' })),
+                  ...tr.못담은줄.map((x) => ({ ...x, 어디: 'collect_trash' })));
     if (버림) console.log('쓰레기통    ' + 버림 + '건 (지우지 않고 까닭과 함께 남깁니다)');
 
-    for (let i = 0; i < 원문들.length; i += 50) {
-      const r = await rpc(cfg, 'collect_body', {
-        p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE, p_rows: 원문들.slice(i, i + 50),
-      });
-      보관 += r['담음'] || 0;
-    }
+    /* ★ 원문 보관이 **22:00 에 바퀴를 죽인 그 자리**입니다 — NUL 이 든 본문 하나로
+       `22P05` 가 나면서 담음 0 이 됐습니다. 여기가 가장 먼저 필요했습니다 */
+    const bd = await 반씩보내기({
+      줄들: 원문들, 묶음: 50, 이름: 'collect_body',
+      보내기: (조각) => rpc(cfg, 'collect_body', {
+        p_secret: cfg.COLLECT_KEY_HS3, p_source: SOURCE, p_rows: 조각,
+      }),
+    });
+    보관 += bd.담음;
+    못담음 += bd.못담음;
+    못담은것.push(...bd.뺀줄.map((x) => ({ ...x, 어디: 'collect_body' })),
+                  ...bd.못담은줄.map((x) => ({ ...x, 어디: 'collect_body' })));
     if (보관) console.log('원문 보관    ' + 보관 + '건 (회원 화면에 안 나갑니다)');
 
     /* 주소가 www 로만 갈린 같은 공고 — 옛 줄을 숨깁니다 (지우지 않습니다).
@@ -801,7 +841,10 @@ if (dry) {
       p_beat: {
         took_ms: Date.now() - t0, ok: !탈, 왜: 탈,
         본곳: 볼것.length, 담음, 보류: 보류2.length, 버림, 못받음: 셈.못받음,
-        메모: { 줄: 셈.줄, 규칙0: 셈.규칙0, 상세연것, 상세로가림, 원문보관: 보관 },
+        /* ★ 2026-10-14 세중님 0번 — 「담지 못한 줄」을 박동에 남깁니다.
+           하루 요약 메일이 이 칸을 읽습니다 (tools/hold-digest.mjs) */
+        메모: { 줄: 셈.줄, 규칙0: 셈.규칙0, 상세연것, 상세로가림, 원문보관: 보관,
+          못담음, 못담은것: 못담은것.slice(0, 20) },
       },
     });
   } catch (e) { console.error('박동 남기기 실패 · ' + String(e.message).slice(0, 160)); }
