@@ -1,2 +1,0 @@
-[     223ms] TypeError: Cannot read properties of null (reading 'style')
-    at https://smc.skku.edu/recruit/main/main.do?mId=1:126:46

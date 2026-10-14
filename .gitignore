@@ -78,3 +78,6 @@ package-lock.json
 tmp/
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
+
+# playwright 디버그 찌꺼기 (2026-10-14 에 실수로 들어갔습니다)
+docs/시험_playwright_1012/

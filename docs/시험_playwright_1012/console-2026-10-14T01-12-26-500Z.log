@@ -1,7 +1,0 @@
-[     607ms] [LOG] b @ http://recruit.amc.seoul.kr/recruit/main.do:79
-[     609ms] TypeError: Cannot read properties of undefined (reading 'style')
-    at HTMLDocument.<anonymous> (http://recruit.amc.seoul.kr/recruit/main.do:81:29)
-    at c (http://recruit.amc.seoul.kr/recruit/js/libs/jquery-1.10.2.min.js:4:26036)
-    at Object.fireWith [as resolveWith] (http://recruit.amc.seoul.kr/recruit/js/libs/jquery-1.10.2.min.js:4:26840)
-    at x.ready (http://recruit.amc.seoul.kr/recruit/js/libs/jquery-1.10.2.min.js:4:3305)
-    at HTMLDocument.q (http://recruit.amc.seoul.kr/recruit/js/libs/jquery-1.10.2.min.js:4:717)
