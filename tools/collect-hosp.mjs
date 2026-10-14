@@ -44,10 +44,15 @@ import { matchJob, notOurs, mixedTitle, 구운날 } from './gas-rules.mjs';
 import { 본문직군 } from './공고문읽기.mjs';
 /* 본문을 받아오는 주소가 목록 주소와 다른 곳 (인크루트 /jobcont/) — 한 자리 */
 import { 상세주소 } from './hosp/상세주소.mjs';
+/* ★ 2026-10-14 — 첨부 담기 (세중님 ㉯). `hs_files.js` 는 2026-10-11 에 만들어
+   자기점검까지 통과했는데 **부르는 곳이 한 군데도 없었습니다** — 지침 6절의
+   「코드가 저장소에 있어도 아무도 import 하지 않으면 없는 기능입니다」 그대로입니다 */
+import { 첨부모으기 } from './첨부담기.mjs';
 
 /* 접수기간 규칙 — tools/hosp/hs_dates.js 한 벌. CommonJS 라 require 로 끌어옵니다.
    2026-10-07 에 붙였습니다. 전에는 저 파일이 저장소에 있는데 아무도 안 불렀습니다 */
 const require = createRequire(import.meta.url);
+const { hs첨부주소 } = require('./hosp/hs_files.js');   /* 상세 HTML 에서 공고문 첨부 주소 */
 const { hsDetailDates, hs접수문장, 너무먼날, 마감시각 } = require('./hosp/hs_dates.js');
 
 /* 읽은 날짜가 쓸만한가 — 짐작으로 담지 않습니다.
@@ -249,10 +254,15 @@ const dry = argv.includes('--dry');
 const 한줄 = argv.includes('--한줄');
 const 동시 = Number(argv.includes('--동시') ? argv[argv.indexOf('--동시') + 1] : 6) || 6;
 const 상세몫 = argv.includes('--상세') ? Number(argv[argv.indexOf('--상세') + 1]) : 50;
+
+/* 첨부는 `--마른` 이거나 `POTJOB_ATTACH_WRITE` 가 안 켜져 있으면 안 담습니다.
+   `--dry` 와 따로 둡니다 — 나라일터도 그렇게 합니다 (collect-nara.mjs:81) */
+const 마른첨부 = argv.includes('--마른') || dry;
 const 찾을말 = argv.filter((x, i) => !x.startsWith('--')
   && !['--동시', '--상세'].includes(argv[i - 1]));
 
 const cfg = env();
+const 첨부모음 = 첨부모으기(SOURCE, { 마른: 마른첨부 });
 const t0 = Date.now();
 const 오늘 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
 const 원래log = console.log;
@@ -430,6 +440,24 @@ if (상세몫 > 0) {
         .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
         .replace(/\s+/g, ' ').trim();
       x.본문 = 글;
+
+      /* ★ 2026-10-14 세중님 ㉯ — **공고문 첨부 주소를 모읍니다.**
+         규칙은 `hosp/hs_files.js` 한 벌입니다 (공고문 > 그밖 > 지원서·서식).
+         주소를 규칙으로 못 만듭니다 — 상세 HTML 에서 긁는 수밖에 없습니다
+         (충주의료원은 해시가 셋 들어갑니다 · 지침 3절).
+         담는 것은 `첨부담기.mjs` 가 하고, 하루 상한·마른 실행도 그쪽 규칙입니다.
+         ⚠ `글`(태그 걷은 것) 이 아니라 **`g.html`(원본)** 을 줍니다 — 주소는
+            태그 안에 있어서 걷은 글에는 없습니다 */
+      try {
+        for (const a of hs첨부주소(g.html, 상세주소(x.url))) {
+          첨부모음.더하기({ job_id: x.id, kind: a.kind || '공고문', name: a.이름 || a.name || '', url: a.url || a.주소 || a });
+          x.첨부수 = (x.첨부수 || 0) + 1;
+        }
+      } catch (e) {
+        /* 조용히 버리지 않습니다 (지침 2절) */
+        console.log('    첨부 못 모음 ' + String(x.곳.name).slice(0, 14).padEnd(16)
+          + String(e.message || e).slice(0, 80));
+      }
 
       /* ★ 접수기간 채우기 (2026-10-07). 규칙은 tools/hosp/hs_dates.js 한 벌입니다.
          목록에서 날짜가 나온 공고는 건드리지 않습니다 — 목록 쪽이 더 믿을만합니다 */
@@ -773,6 +801,10 @@ if (dry) {
 console.log('\n── ' + 볼것.length + '줄 · 줄 ' + 셈.줄 + ' · 회원 ' + 회원2.length
   + ' · 보류 ' + 보류2.length + ' · 쓰레기통 ' + 쓰레기2.length
   + ' · ' + Math.round((Date.now() - t0) / 1000) + '초');
+
+/* 첨부 — 0줄이어도 셈을 찍습니다 (지침 2절) */
+if (첨부모음.줄들.length && 첨부모음.마른) await 첨부모음.형식확인(40);
+await 첨부모음.끝내기(cfg);
 
 fs.writeFileSync(path.join(여기, 'hosp', 'reports', 'collect-hosp.json'),
   JSON.stringify({ 잰날: 오늘, 셈, 곳별, 못받은곳 }, null, 1), 'utf8');
