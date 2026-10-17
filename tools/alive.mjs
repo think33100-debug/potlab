@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 붙여받기 } from './certs/index.mjs';
-import { 목록상태, 목록상태셈, 본문상태 } from './hosp/hs_목록상태.mjs';
+import { 목록상태, 목록상태셈, 본문상태, 알림상태 } from './hosp/hs_목록상태.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -82,6 +82,14 @@ async function 하나(x) {
   try { html = new TextDecoder(cs.toLowerCase()).decode(buf); } catch { html = buf.toString('utf8'); }
 
   if (없어짐말.test(html)) return { 결과: 'gone', 왜: '「' + (html.match(없어짐말) || [''])[0] + '」' };
+  /* ── ⑦ 알림창으로만 마감을 알리는 곳 (2026-10-17) ───────────
+     태그를 **걷기 전에** 봅니다 — alert 은 <script> 안이라 걷으면 사라지고,
+     쪽이 메뉴뿐이어도 200자를 넘어 아래 「판단 못 함」 에도 안 걸립니다.
+     고신대 마감 공고 2건이 그래서 회원 화면에 남아 있었습니다.
+     규칙은 hosp/hs_목록상태.mjs 의 알림상태() 한 곳입니다 (지침 6절) */
+  const A = 알림상태(html);
+  if (A.결과 === 'closed') return { 결과: 'closed', 까닭: '알림창이 마감', 왜: A.왜 };
+
   /* 알맹이가 거의 없으면 판단을 미룹니다 — 「없다」 고 단정하지 않습니다 */
   const 글 = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   if (글.length < 200) return { 결과: 'unknown', 왜: '본문이 ' + 글.length + '자뿐 (판단 못 함)' };
