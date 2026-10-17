@@ -9,5 +9,6 @@
  "linkFmt": "https://www.nph.go.kr/nph/bbs/B0000018/view.do?nttId={1}&menuNo=200110",
  "date": "<td>(20\\d{2}-\\d{2}-\\d{2})<\\/td>",
  "skip": "합격자|발표|결과",
- "note": "경찰병원 채용정보 게시판(B0000018) 표. 날짜는 등록일 하나(posted). robots.txt 는 User-Agent: Googlebot 에만 /nph/bbs/ 금지 · User-agent: * 규칙 없음. 상세 view.do?nttId=N&menuNo=200110 GET 200."
+ "본문선택자": "#content",
+ "note": "경찰병원 채용정보 게시판(B0000018) 표. 날짜는 등록일 하나(posted). robots.txt 는 User-Agent: Googlebot 에만 /nph/bbs/ 금지 · User-agent: * 규칙 없음. 상세 view.do?nttId=N&menuNo=200110 GET 200. 본문선택자 #content — 2026-10-17 확인: 쪽 전체 1,306자 중 메뉴가 대부분이고 #content 349자에 진짜 본문이 있습니다(그 바깥 #contents 380자는 breadcrumb 가 섞입니다)."
 }
