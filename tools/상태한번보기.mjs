@@ -30,7 +30,7 @@ console.log('=== 네숫자 ===');
 console.log(JSON.stringify(await rpc('네숫자'), null, 1));
 
 console.log('\n=== 출처별 마지막 수집 (collect_source) ===');
-const src = await 표('collect_source?select=*&order=코드');
+const src = await 표('collect_source?select=*&order=code');
 console.log(src.몸);
 
 console.log('\n=== 보류함 건수 ===');
