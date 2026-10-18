@@ -116,6 +116,7 @@ const 칸이름 = ['모집인원', '마감시각', '근무지', '지원자격', 
 const 견본 = []; const 보낼줄 = [];
 let 읽음 = 0; let 빈손 = 0; let 초합 = 0; let 못받음 = 0;
 const 빈손까닭 = new Map();
+const 못받음까닭 = new Map();      /* 못 받은 까닭도 셉니다 (지침 2절) */
 
 /* ★ 알리오 첨부는 **쿠키가 있어야** 받습니다. 없으면 파일 대신 포털 첫
    화면(8,333자 HTML)이 옵니다 — 2026-10-11 에 이 되메우기를 마른으로
@@ -145,6 +146,49 @@ async function 머리(주소) {
   return { ...기본, Cookie: 알리오쿠키, Referer: 'https://opendata.alio.go.kr/new/' };
 }
 
+/* ── 같은 사이트는 3.5초 이상 띄웁니다 (지침 — 병원 사이트 3초 이상) ─────
+   2026-10-18 — 전에는 틈이 없어 한 기관에 첨부가 여럿이면 1.2초 간격으로
+   줄줄이 때렸습니다. 알리오·클린아이 포털만 돌 때는 안 드러났는데,
+   병원 홈페이지로 넓히면 바로 문제가 됩니다.
+   403·429·빈 응답이 **이어서 3번**이면 그 사이트를 멈추고 기록합니다. */
+const 틈ms = Number(process.env.POTJOB_ATTACH_GAP_MS) || 3500;
+const 받기제한초 = Number(process.env.POTJOB_ATTACH_FETCH_SEC) || 20;
+const 끝때 = new Map();          /* host → 마지막 요청 시각 */
+const 막힘 = new Map();          /* host → 이어진 막힘 수 */
+const 멈춘사이트 = new Map();    /* host → 까닭 */
+const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function 어디(주소) { try { return new URL(주소).host; } catch { return ''; } }
+
+async function 틈두고받기(주소) {
+  const host = 어디(주소);
+  if (!host) return { 왜: '주소 꼴이 아님' };
+  if ((막힘.get(host) || 0) >= 3) return { 왜: '그 사이트 막힘 3번 — 멈췄습니다' };
+  const 지난 = Date.now() - (끝때.get(host) || 0);
+  if (지난 < 틈ms) await 자고(틈ms - 지난);
+  끝때.set(host, Date.now());
+  let g;
+  try {
+    g = await fetch(주소, { headers: await 머리(주소), signal: AbortSignal.timeout(받기제한초 * 1000) });
+  } catch (e) {
+    return { 왜: String(e && e.message || e).slice(0, 60) };
+  }
+  if (g.status === 403 || g.status === 429) {
+    const n = (막힘.get(host) || 0) + 1; 막힘.set(host, n);
+    if (n >= 3) 멈춘사이트.set(host, 'HTTP ' + g.status + ' 3번');
+    return { 왜: 'HTTP ' + g.status };
+  }
+  if (!g.ok) return { 왜: 'HTTP ' + g.status };
+  const buf = Buffer.from(await g.arrayBuffer());
+  if (!buf.length) {
+    const n = (막힘.get(host) || 0) + 1; 막힘.set(host, n);
+    if (n >= 3) 멈춘사이트.set(host, '빈 응답 3번');
+    return { 왜: '빈 응답' };
+  }
+  막힘.set(host, 0);
+  return { buf };
+}
+
 /* ★ 전·후를 **공고마다 한 줄씩 남겨 끝에 셉니다.**
    전에는 고리 안에서 세다가 `continue` 로 빠져 「전 100% → 후 0%」 같은
    헛숫자가 나왔습니다 (2026-10-11 마른 실행에서 잡았습니다) */
@@ -161,12 +205,9 @@ for (const j of 볼것) {
   const 고른것 = [...공고별첨부.get(j.id)].sort((a, b) => 점수(b.name || '') - 점수(a.name || ''))[0];
   if (!고른것) continue;
 
-  let buf = null;
-  try {
-    const g = await fetch(고른것.url, { headers: await 머리(고른것.url) });
-    if (!g.ok) { 못받음++; 한줄.왜 = 'HTTP ' + g.status; continue; }
-    buf = Buffer.from(await g.arrayBuffer());
-  } catch (e) { 못받음++; 한줄.왜 = String(e.message).slice(0, 80); continue; }
+  const 받음 = await 틈두고받기(고른것.url);
+  if (받음.왜) { 못받음++; 한줄.왜 = 받음.왜; 못받음까닭.set(받음.왜, (못받음까닭.get(받음.왜) ?? 0) + 1); continue; }
+  const buf = 받음.buf;
 
   const k = await 첨부읽기(buf, 고른것.name || '공고문');
   초합 += k.초 || 0;
@@ -210,6 +251,13 @@ console.log('  kordoc 읽음 ' + 읽음 + ' · 빈손 ' + 빈손 + ' · 못 받�
 /* 「몇 건 왔다」만 찍는 진단은 쓸모없습니다 (지침 2절) — 까닭을 적습니다 */
 for (const [왜, n] of [...빈손까닭].sort((a, b) => b[1] - a[1])) {
   console.log('     빈손 ' + String(n).padStart(3) + '건  ' + 왜);
+}
+for (const [왜, n] of [...못받음까닭].sort((a, b) => b[1] - a[1])) {
+  console.log('   못받음 ' + String(n).padStart(3) + '건  ' + 왜);
+}
+if (멈춘사이트.size) {
+  console.log('  ★ 멈춘 사이트 ' + 멈춘사이트.size + '곳 — ' +
+    [...멈춘사이트].map(([h, 왜]) => h + '(' + 왜 + ')').join(' · '));
 }
 
 console.log('\n── 칸별 채움률 (대상 ' + 볼것.length + '건) ──');
