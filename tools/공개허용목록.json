@@ -490,6 +490,10 @@
       {
         "이름": "판정물어보기(p_secret text, p_source text, p_ids text[])",
         "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "조교연구갈래(\"p_제목\" text, \"p_기관\" text, \"p_글\" text)",
+        "왜": "job_posts_pub 뷰가 본문에서 이 함수를 부릅니다. 뷰는 **부르는 사람 권한으로** 돌기 때문에(지침 6-2c) 여기서 걷으면 회원 화면 목록이 깨집니다. 표를 읽지 않는 순수 함수이고(입력 글자만 봄) SECURITY INVOKER · IMMUTABLE 이며 다른 함수를 부르지 않습니다 — 2026-10-18 에 prosrc·prosecdef·provolatile 을 찍어 확인했습니다."
       }
     ],
     "표": [
@@ -1688,6 +1692,10 @@
       {
         "이름": "페르소나바꾸기(\"p_역할\" text)",
         "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "조교연구갈래(\"p_제목\" text, \"p_기관\" text, \"p_글\" text)",
+        "왜": "job_posts_pub 뷰가 본문에서 이 함수를 부릅니다. 뷰는 **부르는 사람 권한으로** 돌기 때문에(지침 6-2c) 여기서 걷으면 회원 화면 목록이 깨집니다. 표를 읽지 않는 순수 함수이고(입력 글자만 봄) SECURITY INVOKER · IMMUTABLE 이며 다른 함수를 부르지 않습니다 — 2026-10-18 에 prosrc·prosecdef·provolatile 을 찍어 확인했습니다."
       }
     ],
     "표": [
