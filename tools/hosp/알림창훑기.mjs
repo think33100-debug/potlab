@@ -88,7 +88,17 @@ async function 다(q) {
   }
 }
 
-const 공 = (await 다(`job_posts_pub?select=id,source,org_name,title,url&source=in.(${출처들.join(',')})&url=not.is.null&order=id.asc`)).slice(0, 뚜껑);
+/* ★ job_posts_pub 에는 **source 칸이 없습니다** (2026-10-18 에 400 을 받고 알았습니다 —
+   「Perhaps you meant job_posts_pub.score」). 그래서 회원 화면 번호를 먼저 받고
+   출처·주소는 job_posts 에서 붙입니다. 「회원에게 보이나」는 반드시 job_posts_pub
+   으로 가립니다 — hidden=false 만 보면 보류함까지 셉니다 (지침 8-14) */
+const 보이는번호 = (await 다('job_posts_pub?select=id&order=id.asc')).map((x) => x.id);
+const 공 = [];
+for (let i = 0; i < 보이는번호.length; i += 60) {
+  const 조각 = 보이는번호.slice(i, i + 60).map(encodeURIComponent).join(',');
+  공.push(...await 다(`job_posts?select=id,source,org_name,title,url&id=in.(${조각})&source=in.(${출처들.join(',')})&url=not.is.null&order=id.asc`));
+}
+공.length = Math.min(공.length, 뚜껑);
 console.log(`회원 화면 공고 ${공.length}건 · 출처 ${출처들.join('·')} · ${new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 19).replace('T', ' ')} KST`);
 
 const 끝때 = new Map();            /* host → 마지막 요청 시각 */

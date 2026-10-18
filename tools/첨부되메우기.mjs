@@ -70,7 +70,18 @@ async function 전부(길, 뚜껑 = Infinity) {
 
 /* ── 볼 것 고르기 ────────────────────────────────────────────
    첨부 주소가 있고, 일곱 칸 중 하나라도 빈 공고 */
-const 첨부들 = await 전부('job_attachments?select=job_id,url,kind,name&order=id.asc');
+/* 읽기탈 칸은 창구 SQL 을 올린 뒤에 생깁니다 — 없으면 400 이 오니 물러섭니다 */
+let 읽기탈있나 = true;
+let 첨부들;
+try {
+  첨부들 = await 전부('job_attachments?select=job_id,url,kind,name,parsed_at,'
+    + encodeURIComponent('읽기탈') + '&order=id.asc');
+} catch (e) {
+  if (!/42703|읽기탈/.test(String(e.message))) throw e;
+  읽기탈있나 = false;
+  첨부들 = await 전부('job_attachments?select=job_id,url,kind,name,parsed_at&order=id.asc');
+  console.log('   (읽기탈 칸이 아직 없습니다 — 창구 SQL 을 올리면 생깁니다)');
+}
 if (!첨부들.length) {
   console.log('job_attachments 가 0줄입니다 — 먼저 수집기가 주소를 담아야 합니다');
   console.log('   POTJOB_ATTACH_WRITE=1 node tools/collect-nara.mjs --상세 30');
@@ -82,6 +93,12 @@ for (const a of 첨부들) {
   공고별첨부.get(a.job_id).push(a);
 }
 console.log('첨부 주소가 있는 공고 ' + 공고별첨부.size + '곳 (첨부 ' + 첨부들.length + '줄)');
+{
+  const 읽음 = 첨부들.filter((a) => a.parsed_at && !a['읽기탈']).length;
+  const 안됨 = 첨부들.filter((a) => a.parsed_at && a['읽기탈']).length;
+  const 안본것 = 첨부들.filter((a) => !a.parsed_at).length;
+  console.log('   읽은 것 ' + 읽음 + ' · 읽어 봤는데 안 된 것 ' + 안됨 + ' · 아직 안 본 것 ' + 안본것);
+}
 
 const 번호들 = [...공고별첨부.keys()];
 const 공고들 = [];
@@ -146,6 +163,23 @@ async function 머리(주소) {
   return { ...기본, Cookie: 알리오쿠키, Referer: 'https://opendata.alio.go.kr/new/' };
 }
 
+/* ── 하루 상한과 「읽어 봤나」 (2026-10-18 세중님 수집기 순서 1) ──────────
+   `parsed_at` 은 **마지막으로 읽어 본 때**, `읽기탈` 은 안 된 까닭입니다
+   (창구 supabase/migrations/2026_10_18_첨부읽음표시_창구.sql).
+   그 칸이 있어야 ① 같은 파일을 날마다 다시 받지 않고 ② 하루 상한을 걸 수 있습니다.
+   ★ 상한 300 은 **첨부담기(주소 담기)와 같은 값**으로 맞췄습니다 (지침 6절 —
+     기준을 두 벌로 만들지 않습니다). POTJOB_PARSE_MAX 로 바꿉니다. */
+const 하루뚜껑 = Number(process.env.POTJOB_PARSE_MAX) || 300;
+/* 다시 받아도 영영 안 되는 까닭 — 이런 줄은 건너뜁니다 */
+const 영영안됨 = /형식이 아닙니다|섹션 파일을 찾을 수 없/;
+const 오늘KST = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+const 날짜KST = (t) => (t ? new Date(new Date(t).getTime() + 9 * 3600e3).toISOString().slice(0, 10) : '');
+const 표시할것 = [];                /* --진짜 일 때 창구로 보낼 {job_id,url,왜} */
+/* ★ 이 둘은 날짜KST·오늘KST 가 선 **뒤에** 두어야 합니다 — 위에 두면
+   const 의 TDZ 에 걸려 ReferenceError 가 납니다. node --check 는 못 잡습니다 */
+const 오늘읽어본수 = 첨부들.filter((a) => 날짜KST(a.parsed_at) === 오늘KST).length;
+let 상한에걸림 = false;
+
 /* ── 같은 사이트는 3.5초 이상 띄웁니다 (지침 — 병원 사이트 3초 이상) ─────
    2026-10-18 — 전에는 틈이 없어 한 기관에 첨부가 여럿이면 1.2초 간격으로
    줄줄이 때렸습니다. 알리오·클린아이 포털만 돌 때는 안 드러났는데,
@@ -202,11 +236,26 @@ for (const j of 볼것) {
 
   /* 공고문 쪽 첨부를 고릅니다 — 지원서·서식은 뒤로 */
   const 점수 = (nm) => (/지원서|응시원서|서식|양식|이력서|직무기술/.test(nm) ? 0 : /공고|모집|채용/.test(nm) ? 2 : 1);
-  const 고른것 = [...공고별첨부.get(j.id)].sort((a, b) => 점수(b.name || '') - 점수(a.name || ''))[0];
-  if (!고른것) continue;
+  /* 영영 안 되는 까닭이 적힌 줄은 건너뜁니다 (png·섹션 없는 hwpx 등) */
+  const 쓸만한 = 공고별첨부.get(j.id).filter((a) => !(a['읽기탈'] && 영영안됨.test(a['읽기탈'])));
+  const 고른것 = [...쓸만한].sort((a, b) => 점수(b.name || '') - 점수(a.name || ''))[0];
+  if (!고른것) { 한줄.왜 = '쓸 수 있는 첨부가 없습니다 (영영 안 되는 것만)'; continue; }
+
+  /* 하루 상한 — 넘으면 **거기서 멈춥니다.** 줄이지 않고 멈추는 쪽이
+     「많이 잡혔다 = 못 읽은 것」을 숨기지 않습니다 (첨부담기와 같은 생각) */
+  if (오늘읽어본수 + 표시할것.length >= 하루뚜껑) {
+    상한에걸림 = true;
+    한줄.왜 = '하루 상한 ' + 하루뚜껑 + '건에 걸렸습니다';
+    continue;
+  }
 
   const 받음 = await 틈두고받기(고른것.url);
-  if (받음.왜) { 못받음++; 한줄.왜 = 받음.왜; 못받음까닭.set(받음.왜, (못받음까닭.get(받음.왜) ?? 0) + 1); continue; }
+  if (받음.왜) {
+    못받음++; 한줄.왜 = 받음.왜;
+    못받음까닭.set(받음.왜, (못받음까닭.get(받음.왜) ?? 0) + 1);
+    표시할것.push({ job_id: j.id, url: 고른것.url, 왜: 받음.왜 });
+    continue;
+  }
   const buf = 받음.buf;
 
   const k = await 첨부읽기(buf, 고른것.name || '공고문');
@@ -214,9 +263,11 @@ for (const j of 볼것) {
   if (!k.글) {
     빈손++; 한줄.왜 = k.왜 || '빈손';
     빈손까닭.set(한줄.왜, (빈손까닭.get(한줄.왜) ?? 0) + 1);
+    표시할것.push({ job_id: j.id, url: 고른것.url, 왜: 한줄.왜 });
     continue;
   }
   읽음++;
+  표시할것.push({ job_id: j.id, url: 고른것.url, 왜: '' });
 
   const 칸 = 칸뽑기(k.md, k.글);
   const 내직군인원 = j.job_group ? 칸.모집인원?.[j.job_group] : null;
@@ -248,6 +299,8 @@ for (const k of 칸이름) {
 console.log('\n── 읽기 ─────────────────────────────────────────');
 console.log('  kordoc 읽음 ' + 읽음 + ' · 빈손 ' + 빈손 + ' · 못 받음 ' + 못받음
   + ' · 걸린 시간 합 ' + Math.round(초합 * 10) / 10 + '초');
+console.log('  하루 상한 ' + (오늘읽어본수 + 표시할것.length) + '/' + 하루뚜껑
+  + ' (오늘 이미 ' + 오늘읽어본수 + '건)' + (상한에걸림 ? '  ★ 상한에 걸려 멈췄습니다' : ''));
 /* 「몇 건 왔다」만 찍는 진단은 쓸모없습니다 (지침 2절) — 까닭을 적습니다 */
 for (const [왜, n] of [...빈손까닭].sort((a, b) => b[1] - a[1])) {
   console.log('     빈손 ' + String(n).padStart(3) + '건  ' + 왜);
@@ -324,3 +377,24 @@ for (let i = 0; i < 줄들.length; i += 50) {
   try { 담음 += (JSON.parse(t) || {})['담음'] || 0; } catch { /* 모양이 다르면 그대로 */ }
 }
 console.log('담았습니다 — ' + 담음 + '건 (updated_at 은 안 바꿨습니다)');
+
+/* ── 첨부 쪽에 「읽어 봤다」 를 남깁니다 — 표를 직접 안 씁니다 ──────────
+   이 표시가 없으면 같은 파일을 날마다 다시 받고, 하루 상한도 못 겁니다 */
+if (표시할것.length) {
+  let 표시 = null;
+  for (let i = 0; i < 표시할것.length; i += 100) {
+    const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('첨부읽음표시'), {
+      method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_rows: 표시할것.slice(i, i + 100) }),
+    });
+    const t = await r.text();
+    if (!r.ok) {
+      console.error('✗ 읽음 표시 창구가 막혔습니다 — HTTP ' + r.status + ' · ' + t.slice(0, 200));
+      console.error('  창구 `첨부읽음표시(p_rows jsonb)` 가 아직 없으면 먼저 올려야 합니다');
+      console.error('  (supabase/migrations/2026_10_18_첨부읽음표시_창구.sql)');
+      break;
+    }
+    try { 표시 = JSON.parse(t); } catch { /* 모양이 다르면 그대로 */ }
+  }
+  if (표시) console.log('읽음 표시 — ' + JSON.stringify(표시));
+}
