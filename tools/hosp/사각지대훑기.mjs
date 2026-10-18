@@ -43,9 +43,33 @@ export function 꼴가리기({ 끝주소, 바이트, 글, 링크수 }) {
   return '열리는데 채용 링크를 못 찾음';
 }
 
+/* 스킴 후보 — 아래 잘받기() 가 씁니다. 자기점검이 먼저 쓰니 여기 둡니다 */
+const 짝스킴 = (t) => (/^http:/i.test(t) ? t.replace(/^http:/i, 'https:') : t.replace(/^https:/i, 'http:'));
+export const 후보주소 = (u) => {
+  const t = String(u || '').trim();
+  if (!t) return [];
+  if (!/^https?:\/\//i.test(t)) return ['https://' + t, 'http://' + t];
+  return [t, 짝스킴(t)];
+};
+
 if (argv.includes('--자기점검')) {
   const 어겼나 = [];
   const 봐 = (n, c) => { if (!c) 어겼나.push(n); };
+  /* 스킴 후보 — 2026-10-18 에 실제로 열어 본 다섯 곳이 견본입니다
+     (docs/주소_열어본근거_1018.md) */
+  봐('스킴 없음 → https 먼저',
+    JSON.stringify(후보주소('www.kbhospital.com/'))
+    === JSON.stringify(['https://www.kbhospital.com/', 'http://www.kbhospital.com/']));
+  봐('http 이면 https 로 한 번 더 (울산대)',
+    JSON.stringify(후보주소('http://www.uuh.ulsan.kr/main/main.asp'))
+    === JSON.stringify(['http://www.uuh.ulsan.kr/main/main.asp', 'https://www.uuh.ulsan.kr/main/main.asp']));
+  봐('https 이면 http 로 한 번 더 (세종여주·화성유일)',
+    JSON.stringify(후보주소('https://www.hsyuil.kr/'))
+    === JSON.stringify(['https://www.hsyuil.kr/', 'http://www.hsyuil.kr/']));
+  봐('후보는 늘 두 개 — 세 번 두드리지 않습니다', 후보주소('https://a.kr').length === 2);
+  봐('빈 값은 후보가 없습니다', 후보주소('').length === 0 && 후보주소(null).length === 0);
+  봐('경로 안의 http 는 안 건드립니다',
+    후보주소('https://a.kr/go?u=http://b.kr')[1] === 'http://a.kr/go?u=http://b.kr');
   봐('JobFlex', 꼴가리기({ 끝주소: 'https://a.jobflex.com/x', 바이트: 50000, 글: '', 링크수: 2 }) === 'JobFlex (대행)');
   봐('recruiter', 꼴가리기({ 끝주소: 'https://x.recruiter.co.kr/', 바이트: 50000, 글: '', 링크수: 1 }) === 'recruiter.co.kr (대행)');
   봐('JS 로 옮겨 가는 껍데기',
@@ -55,7 +79,7 @@ if (argv.includes('--자기점검')) {
   봐('자체 게시판', 꼴가리기({ 끝주소: 'https://a.kr/', 바이트: 90000, 글: '', 링크수: 3 }) === '자체 게시판 (링크 찾음)');
   봐('링크 못 찾음', 꼴가리기({ 끝주소: 'https://a.kr/', 바이트: 90000, 글: '', 링크수: 0 }) === '열리는데 채용 링크를 못 찾음');
   if (어겼나.length) { console.error('✗ 자기 점검 실패 — ' + 어겼나.join(' · ')); process.exit(1); }
-  console.log('○ 자기 점검 통과 — 꼴 가리기 6가지 (사이트를 두드리지 않았습니다)');
+  console.log('○ 자기 점검 통과 — 꼴 가리기 6가지 · 스킴 후보 6가지 (사이트를 두드리지 않았습니다)');
   process.exit(0);
 }
 
@@ -155,6 +179,26 @@ const 받기 = async (u) => {
     return { code: r.status, 글: t, 끝: r.url, 바이트: buf.length };
   } catch (e) { return { 왜: String(e && e.message || e).slice(0, 44) }; }
 };
+/* ── 스킴을 가립니다 (2026-10-18 세중님 9번) ──────────────────────
+ * `hira_org.hosp_url` 8,824줄 중 **822줄에 `http://` 가 없습니다**(9.3%).
+ * 그리고 스킴이 적혀 있어도 틀린 곳이 있습니다 — 울산대학교병원은 값이
+ * `http://` 인데 **사이트는 https 만 받습니다**(http 는 소켓을 끊습니다).
+ * 반대도 있습니다 — 세종여주병원·화성유일병원은 값이 `https://` 인데
+ * 인증서가 만료·이름 불일치라 **http 로만** 열립니다.
+ *
+ * 그래서 **표를 822번 고치지 않고 읽는 자리에서 가립니다.** 두 번 해 보고
+ * 안 되면 멈춥니다 (세중님 규칙 · 근거는 docs/주소_열어본근거_1018.md).
+ * 822줄을 고치는 길로 갔다면 다음 심평원 동기화가 우리 수정을 덮습니다. */
+const 잘받기 = async (u) => {
+  let 마지막 = { 왜: '주소가 비었습니다' };
+  for (const c of 후보주소(u)) {
+    const r = await 받기(c);
+    if (!r.왜) return { ...r, 쓴주소: c, 고침: c === String(u).trim() ? '' : '원값 「' + u + '」 → ' + c };
+    마지막 = { ...r, 왜: r.왜 + ' (' + c.replace(/^(https?):\/\/.*/, '$1') + ')' };
+  }
+  return { ...마지막, 쓴주소: null };
+};
+
 const 링크찾기 = (글) => {
   const 본것 = new Set(); const out = [];
   for (const m of String(글).matchAll(/<a[^>]+href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]{0,70}?)<\/a>/gi)) {
@@ -169,13 +213,16 @@ const 링크찾기 = (글) => {
 
 for (const [i, x] of 볼것.entries()) {
   const u = 주소[x['기관']];
-  let origin;
-  try { origin = new URL(u).origin; } catch { 결과.push({ x, u, 꼴: '주소 꼴이 아님' }); continue; }
-  const rb = await 받기(origin + '/robots.txt');
-  const rbs = rb.왜 ? '못 받음' : (rb.code === 200 ? robots판정(rb.글) : '없음(열림)');
-  const h = await 받기(u);
-  if (h.왜) { 결과.push({ x, u, robots: rbs, 꼴: '못 받음 · ' + h.왜 }); }
+  /* 본 주소를 먼저 받아 **쓸 주소**를 정하고, 그 origin 으로 robots 를 봅니다.
+     못 받는 곳에 robots 요청을 또 보내지 않습니다 */
+  const h = await 잘받기(u);
+  if (h.왜) { 결과.push({ x, u, robots: '(안 봄)', 꼴: '못 받음 · ' + h.왜 }); }
   else {
+    let origin;
+    try { origin = new URL(h.쓴주소).origin; } catch { 결과.push({ x, u, 꼴: '주소 꼴이 아님' }); continue; }
+    const rb = await 받기(origin + '/robots.txt');
+    const rbs = rb.왜 ? '못 받음' : (rb.code === 200 ? robots판정(rb.글) : '없음(열림)');
+    if (h.고침) console.log('    [스킴] ' + x['기관'] + ' — ' + h.고침);
     const L = 링크찾기(h.글);
     결과.push({ x, u, robots: rbs, 바이트: h.바이트, 끝: h.끝, 링크: L, 꼴: 꼴가리기({ 끝주소: h.끝, 바이트: h.바이트, 글: h.글, 링크수: L.length }) });
   }
