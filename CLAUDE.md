@@ -310,6 +310,15 @@ select p.oid::regprocedure::text, p.proacl::text   -- ← 올리기 전에 찍�
 비회원에게 열려 있는 줄 알았는데 실제 ACL 에 `anon` 이 없었습니다 —
 비회원 목록은 `공개공고()` 가 냅니다. **찍어서 봅니다.**
 
+**코드 주석을 근거로 `grant` 를 더하지 않습니다. 전 ACL 을 찍어 거기 없는 역할은
+안 넣습니다.** (2026-10-18 — `alive_mark` 에 주석만 보고 **없던 `anon` 을
+더했습니다.** 전 ACL 은 `{postgres=X/postgres,service_role=X/postgres}` 였고
+바로 `revoke … from public, anon, authenticated` 로 되돌려 글자까지 같게
+맞췄습니다. `pg_stat_statements` 에 `anon` 호출 8번이 있었지만 **시각이 안
+남아** 그 10분 사이인지 가릴 수 없었습니다 — 열쇠 검사(`collect_secret`
+24자 이상)가 있어 해는 없었습니다. 수집기는 `SUPABASE_SERVICE_KEY` 를 쓰므로
+`anon` 이 없어도 돕니다)
+
 ### 6-2b. 밖에서 **이름으로** 부르는 것은 영어 이름으로
 
 함수든 화면 주소든, **밖에서 그 이름을 적어 가리키는** 자리에는 한글을 못 씁니다.
