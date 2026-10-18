@@ -1,0 +1,12 @@
+{
+ "name": "대구보건대학교병원",
+ "type": "html",
+ "url": "http://dhch.ac.kr/bbs/board.php?bc=employment",
+ "base": "http://dhch.ac.kr/bbs",
+ "row": "<tr>[\\s\\S]*?<\\/tr>",
+ "title": "<a[^>]+href=\"\\.\\/board\\.php\\?bc=employment[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"\\.(\\/board\\.php\\?bc=employment&idx=\\d+)",
+ "date": "<td>(20\\d{2}-\\d{2}-\\d{2})<\\/td>",
+ "skip": "합격자|발표|결과",
+ "note": "2026-10-18 새로 넣음 (1층 사각지대 메우기 · 세중님 4번). 그누보드 계열이지만 **wr_id 가 아니라 idx** 입니다. ★ **https 가 자체서명 인증서(DEPTH_ZERO_SELF_SIGNED_CERT)라 http 로만 열립니다** — 실제로 받아 보고 정했습니다(docs/주소_열어본근거_1018.md 와 같은 결). 목록 원문 — `<tr><td>2</td><td class=\"sj\"><span …>[채용중]</span><a href=\"./board.php?bc=employment&idx=1047&amp;npage=\">작업치료사 채용(신규, 경력)</a></td>…<td>2026-09-23</td></tr>`. link 는 `&amp;npage=` 를 뺀 idx 까지만 집습니다 — npage 가 쪽마다 달라지면 같은 공고가 새 id 로 들어옵니다. 제목 앞의 `[채용중]`·`[마감]` 은 span 안이라 제목에 안 들어옵니다. 우리 직군 공고가 실제로 있습니다 — 「작업치료사 채용(신규, 경력)」(idx=1047 · 2026-09-23)."
+}

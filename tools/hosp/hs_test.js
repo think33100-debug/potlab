@@ -26,8 +26,25 @@ const 직접실행 = require.main === module;
 const cfg = 직접실행 ? JSON.parse(fs.readFileSync(process.argv[2], 'utf8')) : null;
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0';
 
+/* 태그를 걷습니다 — **진짜 태그만** 걷습니다 (2026-10-18)
+ *
+ * 전에는 `<[^>]+>` 였습니다. 그래서 **꺾쇠로 싸인 제목이 통째로 사라졌습니다.**
+ *   광주씨티병원 목록 원문   <a href="…num=3182"><물리치료사 충원공고></a>
+ *   걷은 결과               (빈 글)  → 4자 미만이라 **그 줄이 버려집니다**
+ * 지침 5절에 적힌 그 함정입니다 — 「`rgPlain_` 을 쓰려다 `<2026년 한가위
+ * 정담장터>` 가 통째로 사라질 뻔했습니다. 꺾쇠를 태그로 오해하는 함수였습니다」.
+ * 그때는 안 쓰고 넘겼는데, 이 자리에 같은 것이 있었습니다.
+ *
+ * 진짜 태그는 이름이 **영문자로 시작**합니다 (`<a …>` `</td>` `<br/>` `<img …>`).
+ * 주석 `<!-- -->` 과 `<!DOCTYPE>` 은 따로 걷습니다. 한글·숫자로 시작하는 꺾쇠는
+ * 글의 일부라 **그대로 둡니다** — 「하나도 안 빼고 올린다」가 목표이기 때문입니다. */
 function stripTags(s) {
-  return String(s || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim();
+  return String(s || '')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<![^>]*>/g, ' ')
+    .replace(/<\/?[a-zA-Z][a-zA-Z0-9:-]*(\s[^>]*?)?\/?>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim();
 }
 function abs(href, base) {
   href = String(href || '').trim().replace(/&amp;/g, '&');
