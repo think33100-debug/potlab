@@ -3,6 +3,9 @@
  *   node tools/없어진공고찾기.mjs --바퀴 1        1바퀴 (결과를 파일로 남깁니다)
  *   node tools/없어진공고찾기.mjs --바퀴 2        2바퀴 (1바퀴와 견줍니다)
  *   node tools/없어진공고찾기.mjs --견주기        두 바퀴 결과를 견주어 **내릴 목록**을 냅니다
+ *   node tools/없어진공고찾기.mjs --바퀴 1 --정찰보고   결과를 alive_mark 에 보고합니다
+ *                                                (창구가 seen_on·gone_streak 을 적고
+ *                                                 gone_streak>=2 에서 스스로 내립니다)
  *   node tools/없어진공고찾기.mjs --자기점검
  *
  * ── 세중님 조건 ──────────────────────────────────────
@@ -206,6 +209,38 @@ for (const [i, x] of 그밖.entries()) {
   process.stderr.write('\r  그밖 ' + (i + 1) + '/' + 그밖.length + '   ');
 }
 process.stderr.write('\n');
+
+/* ── 정찰 창구에 보고 (2026-10-18 세중님 7번) ──────────────────
+ * `--정찰보고` 를 적으면 `alive_mark` 에 `{id, 결과}` 를 보냅니다.
+ * **그 창구가 `seen_on`·`gone_streak` 를 적고, `gone_streak >= 2` 에서 스스로
+ * 내립니다** — 세중님의 「두 번 판정된 것만」 규칙과 **같은 문턱**입니다.
+ * 그래서 손으로 내리지 않아도 되고, 「정찰이 한 번도 안 본 회원 화면 공고」
+ * 323 → 0 도 이쪽으로 풀립니다.
+ *
+ * ★ 오류였던 것은 **안 보냅니다** — `unknown` 으로도 안 보냅니다.
+ *   사이트 장애를 「없어짐 셈」에 넣지 않는 것이 세중님 조건입니다.
+ * ★ 까닭은 안 보냅니다 — gone 갈래가 `원문없어짐까닭말()` 을 씁니다 (한 자리). */
+if (argv.includes('--정찰보고')) {
+  if (!cfg.ALIVE_KEY) { console.error('✗ ALIVE_KEY 가 없습니다 — 창구가 이 열쇠로 권한을 봅니다'); process.exit(1); }
+  const 줄 = [
+    ...없어짐.map((x) => ({ id: x.id, 결과: 'gone' })),
+    ...살아있음.map((id) => ({ id, 결과: 'alive' })),
+  ];
+  console.log('\n정찰 창구(alive_mark)에 보냅니다 — gone ' + 없어짐.length
+    + ' · alive ' + 살아있음.length + ' · 오류 ' + 오류.length + '건은 **안 보냅니다**');
+  let 받음 = null;
+  for (let i = 0; i < 줄.length; i += 200) {
+    const r = await fetch(U + '/rest/v1/rpc/alive_mark', {
+      method: 'POST',
+      headers: { ...H, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_secret: cfg.ALIVE_KEY, p_rows: 줄.slice(i, i + 200) }),
+    });
+    const t = await r.text();
+    if (!r.ok) { console.error('✗ alive_mark ' + r.status + ' · ' + t.slice(0, 200)); process.exit(1); }
+    try { 받음 = JSON.parse(t); } catch { /* 모양이 다르면 그대로 */ }
+  }
+  if (받음) console.log('창구가 답한 것 — ' + JSON.stringify(받음));
+}
 
 const 낼것 = { 바퀴: Number(바퀴), 잰때: new Date().toISOString(), 본것: 공.length, 없어짐, 오류, 살아있음수: 살아있음.length };
 fs.mkdirSync(결과폴더, { recursive: true });
