@@ -76,21 +76,32 @@ if (!U || !K) { console.error('✗ SUPABASE_URL / SUPABASE_SERVICE_KEY 가 없�
 const H = { apikey: K, Authorization: 'Bearer ' + K, 'Content-Type': 'application/json' };
 
 /* 사각지대 기관 + hira_org 주소 — 창구로 받습니다.
-   ★ 2026-10-18 — **RPC 결과도 쪽이 나뉩니다.** 처음에 한 번만 불러
-   「사각지대 21곳」 으로 나왔는데 SQL 로 세면 **77곳**이었습니다.
-   Range 로 끝까지 받습니다 (같은 실수를 네 번 했습니다 — 쪽 넘기기를 빠뜨리는 것) */
+ *
+ * ★ 2026-10-18 — **RPC 결과도 100줄에서 끊깁니다.** 처음에 한 번만 불러
+ *   「사각지대 21곳」 으로 나왔는데 SQL 로 세면 **77곳**이었습니다.
+ *   `Range: 0-999` 를 줘도 `content-range: 0-99/*` 로 **100줄만** 옵니다 —
+ *   Supabase 가 max-rows 를 100 으로 묶어 두었고 Range 로는 못 넘깁니다.
+ *   그래서 **`offset` 으로** 넘깁니다. 갈래별로 보니 종합병원이 아예 안 와서
+ *   21곳이었습니다 (상급종합 2 · 대학병원 19 · 공공보건의료 79 = 100줄).
+ *
+ * ★ 같은 실수를 **다섯 번** 했습니다 — 916→100 · 343→100 · 시험자료 섞임 ·
+ *   77→21 · 그리고 Range 로 고쳤다고 믿은 것. **받은 줄 수를 분모와 맞춰 보는
+ *   것**이 유일한 그물입니다. 그래서 아래에 받은 줄 수를 찍습니다. */
 const 구멍전부 = [];
-for (let 처음 = 0; ; 처음 += 1000) {
-  const r0 = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍'), {
-    method: 'POST',
-    headers: { ...H, Range: 처음 + '-' + (처음 + 999), 'Range-Unit': 'items' },
-    body: '{}',
-  });
+for (let off = 0; ; off += 100) {
+  const r0 = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍')
+    + '?limit=100&offset=' + off, { method: 'POST', headers: H, body: '{}' });
   if (!r0.ok) { console.error('✗ 일층병원_구멍 ' + r0.status + ' ' + (await r0.text()).slice(0, 160)); process.exit(1); }
   const 한쪽 = await r0.json();
   구멍전부.push(...한쪽);
-  if (한쪽.length < 1000) break;
-  if (처음 > 50000) break;
+  if (!한쪽.length) break;
+  if (off > 20000) { console.error('✗ 너무 많습니다 — 멈춥니다'); break; }
+}
+{
+  const 갈 = {};
+  for (const x of 구멍전부) 갈[x['갈래']] = (갈[x['갈래']] || 0) + 1;
+  console.log('일층병원_구멍() 받은 줄 ' + 구멍전부.length + ' — '
+    + Object.entries(갈).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + v).join(' · '));
 }
 const 구멍 = 구멍전부.filter((x) => x['상태'] === '사각지대'
   && ['상급종합', '대학병원', '종합병원'].includes(x['갈래'])
