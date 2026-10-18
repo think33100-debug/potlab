@@ -98,11 +98,16 @@ language sql security definer set search_path = public as $fn$
       left join 종별 z on z.k = d.k
      where g.k is not null          -- 공공이면 종별 무관으로 남깁니다
         or not (
-             /* 대학병원 갈래는 kind, 종합·상급은 심평원 종별을 봅니다.
-                안 B(대학병원의 종별「병원」을 남기기)로 뒤집으려면 아래
-                `d."갈래" = '대학병원'` 줄에서 '병원' 만 빼면 됩니다 —
-                CLAUDE.md 1층 기준 3 「이름에 대학병원이 들어가면 종별 무관」 */
-             (d."갈래" = '대학병원' and "민간2층종별"(d.kind))
+             /* ★ **대학병원 갈래에서는 종별「병원」을 빼지 않습니다** (2026-10-19 세중님 결정).
+                CLAUDE.md 1층 기준 3 — 「이름에 대학병원이 들어가면 종별 무관」.
+                해당하는 다섯 곳 — 대구보건대학교병원 · 동아대학교대신병원 ·
+                계명대학교 경주동산병원 · 강남을지대학교병원 · 건양대학교부여병원.
+                대구보건대는 2026-10-18 에 설정을 넣고 공고가 1건 들어왔습니다 —
+                분모에서 빼면 우리가 긁는 1층 기관을 「대상 아님」으로 만듭니다.
+                한방·요양·치과·정신은 대학병원이라도 다른 과 전문이라 2층입니다.
+                종합·상급은 심평원 종별을 그대로 봅니다 (선한병원 꼴 · 지침 10-3). */
+             (d."갈래" = '대학병원'
+              and d.kind in ('한방병원', '요양병원', '치과병원', '정신병원'))
           or (d."갈래" in ('상급종합', '종합병원') and z.갈림 = 1 and "민간2층종별"(z.cl_cd_nm))
         )
   ), 묶음 as (
@@ -217,7 +222,8 @@ language sql security definer set search_path = public as $fn$
     left join 긁는곳 gg on gg.k = d.k
     left join 들어온곳 ii on ii.k = d.k
    where g.k is null
-     and ((d."갈래" = '대학병원' and "민간2층종별"(d.kind))
+     and ((d."갈래" = '대학병원'
+           and d.kind in ('한방병원', '요양병원', '치과병원', '정신병원'))
        or (d."갈래" in ('상급종합', '종합병원') and z.갈림 = 1 and "민간2층종별"(z.cl_cd_nm)))
    order by coalesce(z.cl_cd_nm, d.kind), d.name
 $fn$;
