@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 붙여받기 } from './certs/index.mjs';
-import { 목록상태, 목록상태셈, 본문상태, 알림상태 } from './hosp/hs_목록상태.mjs';
+import { 목록상태, 목록상태셈, 본문상태, 알림상태, 없어짐말 } from './hosp/hs_목록상태.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -59,8 +59,10 @@ async function rpc(cfg, fn, body) {
   return t ? JSON.parse(t) : null;
 }
 
-/* 「글이 없어졌다」 고 사이트가 말하는 방식들 — 200 으로 답하면서 글만 없는 곳이 많습니다 */
-const 없어짐말 = /존재하지\s*않는\s*(글|게시물|페이지)|삭제된\s*(글|게시물)|없는\s*게시물|잘못된\s*접근|접근할\s*수\s*없|페이지를\s*찾을\s*수\s*없|Not\s*Found|해당\s*게시물이\s*없|게시물이\s*존재하지/i;
+/* 「글이 없어졌다」 고 사이트가 말하는 방식들 —
+   ★ 2026-10-18 에 `hosp/hs_목록상태.mjs` **한 자리로 옮겼습니다** (지침 6절).
+   여기 있던 것을 제가 원문링크점검.mjs 에 베껴 두 벌이 됐고, 워크넷의
+   「구인정보를 확인할 수 없습니다」 를 한쪽에만 넣을 뻔했습니다. */
 
 async function 하나(x) {
   /* 중간 인증서가 빠진 병원 10곳은 받아둔 것을 붙여 받습니다 (검증은 켠 채로).
