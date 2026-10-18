@@ -75,10 +75,24 @@ const K = cfg.SUPABASE_SERVICE_KEY;
 if (!U || !K) { console.error('✗ SUPABASE_URL / SUPABASE_SERVICE_KEY 가 없습니다'); process.exit(1); }
 const H = { apikey: K, Authorization: 'Bearer ' + K, 'Content-Type': 'application/json' };
 
-/* 사각지대 기관 + hira_org 주소 — 창구로 받습니다 */
-const r0 = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍'), { method: 'POST', headers: H, body: '{}' });
-if (!r0.ok) { console.error('✗ 일층병원_구멍 ' + r0.status + ' ' + (await r0.text()).slice(0, 160)); process.exit(1); }
-const 구멍 = (await r0.json()).filter((x) => x['상태'] === '사각지대'
+/* 사각지대 기관 + hira_org 주소 — 창구로 받습니다.
+   ★ 2026-10-18 — **RPC 결과도 쪽이 나뉩니다.** 처음에 한 번만 불러
+   「사각지대 21곳」 으로 나왔는데 SQL 로 세면 **77곳**이었습니다.
+   Range 로 끝까지 받습니다 (같은 실수를 네 번 했습니다 — 쪽 넘기기를 빠뜨리는 것) */
+const 구멍전부 = [];
+for (let 처음 = 0; ; 처음 += 1000) {
+  const r0 = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍'), {
+    method: 'POST',
+    headers: { ...H, Range: 처음 + '-' + (처음 + 999), 'Range-Unit': 'items' },
+    body: '{}',
+  });
+  if (!r0.ok) { console.error('✗ 일층병원_구멍 ' + r0.status + ' ' + (await r0.text()).slice(0, 160)); process.exit(1); }
+  const 한쪽 = await r0.json();
+  구멍전부.push(...한쪽);
+  if (한쪽.length < 1000) break;
+  if (처음 > 50000) break;
+}
+const 구멍 = 구멍전부.filter((x) => x['상태'] === '사각지대'
   && ['상급종합', '대학병원', '종합병원'].includes(x['갈래'])
   && (!갈래 || x['갈래'] === 갈래));
 const 이름들 = [...new Set(구멍.map((x) => x['기관']))];
