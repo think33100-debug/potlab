@@ -138,6 +138,32 @@ for (let i = 0; i < 이름들.length; i += 40) {
   if (!r.ok) continue;
   for (const x of await r.json()) if (x.hosp_url) 주소[x.yadm_nm] = x.hosp_url;
 }
+
+/* ── 우리가 확인한 주소가 **이깁니다** (2026-10-19 세중님 3번) ──────
+ * `hira_org.hosp_url` 은 심평원 원본이라 틀린 값이 많습니다 — 822줄에 스킴이
+ * 없고, 스킴이 있어도 틀리고(울산대는 http 인데 https 만 받음), 경로가 죽은
+ * 것도 있습니다(울산대 /main/main.asp 는 에러 페이지).
+ * 그래서 **열어 본 주소**를 「기관주소」 표에 적고 여기서 먼저 씁니다.
+ * `주소` 가 null 인 줄은 **「열 수 없다고 확인한 것」** 이므로 심평원 값으로
+ * 되돌아가지 않고 **건너뜁니다** — 다시 두드리지 않기 위해서입니다. */
+const 못여는곳 = new Set();
+{
+  const r = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('기관주소보기'),
+    { method: 'POST', headers: H, body: '{}' });
+  if (r.ok) {
+    const 고친것 = await r.json();
+    let 덮음 = 0;
+    for (const x of 고친것) {
+      if (!(x['이름'] in 주소) && !이름들.includes(x['이름'])) continue;
+      if (x['주소']) { 주소[x['이름']] = x['주소']; 덮음++; }
+      else { delete 주소[x['이름']]; 못여는곳.add(x['이름']); }
+    }
+    console.log('기관주소보기() 받은 줄 ' + 고친것.length
+      + ' — 이 목록에 쓰인 것 ' + 덮음 + '곳 · 열 수 없다고 확인된 것 ' + 못여는곳.size + '곳');
+  } else {
+    console.log('※ 기관주소보기() 를 못 받았습니다 ' + r.status + ' — 심평원 값만 씁니다');
+  }
+}
 const 볼것 = 구멍.filter((x) => 주소[x['기관']]).slice(0, 뚜껑);
 console.log('사각지대 ' + 구멍.length + '곳 (상급종합·대학·종합) · 그중 주소 있는 곳 '
   + 구멍.filter((x) => 주소[x['기관']]).length + '곳 · 볼 것 ' + 볼것.length + '곳');
@@ -213,6 +239,12 @@ const 링크찾기 = (글) => {
 
 for (const [i, x] of 볼것.entries()) {
   const u = 주소[x['기관']];
+  /* 「열 수 없다」고 이미 확인한 곳은 두드리지 않습니다 (기관주소 표) */
+  if (못여는곳.has(x['기관'])) {
+    결과.push({ x, u: '(없음)', robots: '(안 봄)', 꼴: '못 받음 · 열 수 없다고 확인된 곳 (기관주소 표)' });
+    process.stderr.write('\r  ' + (i + 1) + '/' + 볼것.length + '   ');
+    continue;
+  }
   /* 본 주소를 먼저 받아 **쓸 주소**를 정하고, 그 origin 으로 robots 를 봅니다.
      못 받는 곳에 robots 요청을 또 보내지 않습니다 */
   const h = await 잘받기(u);

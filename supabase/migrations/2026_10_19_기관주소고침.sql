@@ -33,21 +33,27 @@ revoke all on table public."기관주소" from public, anon, authenticated;
 grant  select on table public."기관주소" to service_role;
 
 /* ── 읽는 창구 — 한 자리 ────────────────────────────────────────
- * 「우리 칸 먼저, 없으면 hira 값」을 **여기 한 곳**에만 둡니다 (지침 6절).
- * 사각지대훑기·수집기가 이것을 씁니다. */
-create or replace function public."기관주소보기"()
-returns table("이름키" text, "이름" text, "주소" text, "어디서" text)
+ * 「우리 칸이 **이깁니다**」를 여기 한 곳에만 둡니다 (지침 6절).
+ *
+ * ★ hira_org 전체(79,874줄)를 함께 돌려주지 않습니다 — 아침 메일이 그 때문에
+ *   statement timeout 이 난 적이 있습니다 (2026-10-18 · 일층병원_구멍()).
+ *   **우리가 정한 것만** 내놓고, 읽는 쪽은 「이 목록에 있으면 그 값, 없으면
+ *   hira 값」으로 씁니다. 어느 쪽이 이기는지는 여전히 이 함수가 정합니다 —
+ *   목록에 있는 이름은 `주소` 가 null 이어도(열 수 없다고 확인한 것) 그것이
+ *   답이고, 심평원 값으로 되돌아가 다시 두드리지 않습니다. */
+/* 반환 칸이 바뀌면 `create or replace` 가 안 됩니다 — 같은 날 안에서 고치는
+   것이고 ACL 은 바로 아래 revoke/grant 가 같은 값으로 다시 겁니다 (지침 6-2a).
+   전 ACL {postgres=X/postgres,service_role=X/postgres} */
+drop function if exists public."기관주소보기"();
+create function public."기관주소보기"()
+returns table("이름키" text, "이름" text, "주소" text, "어디서" text, "확인일" date)
 language sql security definer set search_path = public as $fn$
-  select coalesce(a."이름키", o.name_key),
-         coalesce(a."이름", o.yadm_nm),
-         coalesce(a."주소", nullif(o.hosp_url, '')),
-         case when a."주소" is not null then '우리 표 (' || a."확인일" || ')'
-              when a."이름키" is not null then '우리 표 — 열 수 없다고 확인'
-              else '심평원' end
-    from hira_org o
-    full join public."기관주소" a on a."이름키" = o.name_key
-   where coalesce(a."주소", nullif(o.hosp_url, '')) is not null
-      or a."이름키" is not null
+  select a."이름키", a."이름", a."주소",
+         case when a."주소" is not null then '우리 표 — 열어 본 주소'
+              else '우리 표 — 열 수 없다고 확인' end,
+         a."확인일"
+    from public."기관주소" a
+   order by a."이름"
 $fn$;
 revoke execute on function public."기관주소보기"() from public, anon, authenticated;
 grant  execute on function public."기관주소보기"() to service_role;
