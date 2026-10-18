@@ -72,19 +72,39 @@ language sql security definer set search_path = public as $fn$
     select distinct "견줄이름"(t.name) as k from org_targets t
      where t."커버리지분모" and t."갈래" in ('공공보건의료', '보건기관')
   ), 종별 as (
-    select distinct on ("견줄이름"(o.yadm_nm)) "견줄이름"(o.yadm_nm) as k, o.cl_cd_nm
-      from hira_org o order by "견줄이름"(o.yadm_nm), o.yadm_nm
+    /* ★ hira_org 는 **79,874줄**입니다. 전체에 "견줄이름"() 을 걸면 아침 메일이
+       statement timeout 으로 ① 숫자를 통째로 못 받습니다 (2026-10-18 에 그랬습니다).
+       그래서 ① **name_key 인덱스**(hira_org_name_key)를 쓰고
+            ② **종합병원 갈래만** 찾습니다 — 대학병원 갈래는 `org_targets.kind` 에
+               이미 심평원 종별이 들어 있습니다(한방 11·병원 5·요양 2·치과 1).
+               종합병원 갈래의 kind 는 전부 '종합병원' 이라(선한병원도) 거기만
+               조인이 필요합니다.
+       ★★ **같은 이름 기관이 전국에 여럿입니다** — 「우리들병원」·「강남병원」·
+       「온누리병원」·「참조은병원」·「대동병원」은 심평원에 여러 줄이 있고 종별이
+       갈립니다. `distinct on` 으로 한 줄을 고르면 **정렬 순서에 따라 다른 종별**이
+       나옵니다 (2026-10-18 에 name_key 정렬과 "견줄이름"() 정렬이 5곳에서 서로
+       다른 종별을 집는 것을 봤습니다). 그래서 **종별이 갈리는 이름은 빼지
+       않습니다** — 어느 기관인지 모르면 짐작하지 않고 분모에 남깁니다 (지침 10-3). */
+    select o.name_key as k,
+           min(o.cl_cd_nm) as cl_cd_nm,
+           count(distinct o.cl_cd_nm) as 갈림
+      from hira_org o
+     where o.name_key in (select d.k from 대상0 d where d."갈래" = '종합병원')
+     group by o.name_key
   ), 대상 as (
     select d.k, d.name, d.kind, d."갈래", d.sido, d.sgg
       from 대상0 d
       left join 공공이름 g on g.k = d.k
       left join 종별 z on z.k = d.k
-     /* 민간2층인가 — 안 B 로 뒤집으려면 아래 한 줄을
-          and not (… and "민간2층종별"(z.cl_cd_nm) and not (d."갈래" = '대학병원' and z.cl_cd_nm = '병원'))
-        로 바꿉니다 (CLAUDE.md 기준 3 — 이름에 대학병원이 들어가면 종별 무관) */
-     where not (d."갈래" in ('상급종합', '대학병원', '종합병원')
-                and g.k is null
-                and "민간2층종별"(z.cl_cd_nm))
+     where g.k is not null          -- 공공이면 종별 무관으로 남깁니다
+        or not (
+             /* 대학병원 갈래는 kind, 종합·상급은 심평원 종별을 봅니다.
+                안 B(대학병원의 종별「병원」을 남기기)로 뒤집으려면 아래
+                `d."갈래" = '대학병원'` 줄에서 '병원' 만 빼면 됩니다 —
+                CLAUDE.md 1층 기준 3 「이름에 대학병원이 들어가면 종별 무관」 */
+             (d."갈래" = '대학병원' and "민간2층종별"(d.kind))
+          or (d."갈래" in ('상급종합', '종합병원') and z.갈림 = 1 and "민간2층종별"(z.cl_cd_nm))
+        )
   ), 묶음 as (
     /* 보건기관만 시군구 하나로 묶습니다 — 보건지소는 상위 보건소에 딸립니다 */
     select d.*,
@@ -164,7 +184,7 @@ returns table("갈래" text, "종별" text, "기관" text, "긁는곳인가" boo
 language sql security definer set search_path = public as $fn$
   with 대상0 as (
     select distinct on ("견줄이름"(t.name))
-           "견줄이름"(t.name) as k, t.name, t."갈래"
+           "견줄이름"(t.name) as k, t.name, t."갈래", t.kind
       from org_targets t
      where t."커버리지분모"
        and t."갈래" in ('공공보건의료', '보건기관', '상급종합', '대학병원', '종합병원')
@@ -175,8 +195,12 @@ language sql security definer set search_path = public as $fn$
     select distinct "견줄이름"(t.name) as k from org_targets t
      where t."커버리지분모" and t."갈래" in ('공공보건의료', '보건기관')
   ), 종별 as (
-    select distinct on ("견줄이름"(o.yadm_nm)) "견줄이름"(o.yadm_nm) as k, o.cl_cd_nm
-      from hira_org o order by "견줄이름"(o.yadm_nm), o.yadm_nm
+    /* 위와 같습니다 — name_key 인덱스 · 종별이 갈리는 이름은 빼지 않습니다 */
+    select o.name_key as k, min(o.cl_cd_nm) as cl_cd_nm,
+           count(distinct o.cl_cd_nm) as 갈림
+      from hira_org o
+     where o.name_key in (select d.k from 대상0 d where d."갈래" = '종합병원')
+     group by o.name_key
   ), 긁는곳 as (
     select "견줄이름"(s.name) as k from hosp_sites s
   ), 들어온곳 as (
@@ -185,17 +209,17 @@ language sql security definer set search_path = public as $fn$
      where j.first_seen > (now() at time zone 'Asia/Seoul')::date - 180
      group by 1
   )
-  select d."갈래", z.cl_cd_nm, d.name,
+  select d."갈래", coalesce(z.cl_cd_nm, d.kind), d.name,
          (gg.k is not null), coalesce(ii.공고, 0)
     from 대상0 d
     left join 공공이름 g on g.k = d.k
     left join 종별 z on z.k = d.k
     left join 긁는곳 gg on gg.k = d.k
     left join 들어온곳 ii on ii.k = d.k
-   where d."갈래" in ('상급종합', '대학병원', '종합병원')
-     and g.k is null
-     and "민간2층종별"(z.cl_cd_nm)
-   order by z.cl_cd_nm, d.name
+   where g.k is null
+     and ((d."갈래" = '대학병원' and "민간2층종별"(d.kind))
+       or (d."갈래" in ('상급종합', '종합병원') and z.갈림 = 1 and "민간2층종별"(z.cl_cd_nm)))
+   order by coalesce(z.cl_cd_nm, d.kind), d.name
 $fn$;
 revoke execute on function public."일층병원_뺀것"() from public, anon, authenticated;
 grant  execute on function public."일층병원_뺀것"() to service_role;
