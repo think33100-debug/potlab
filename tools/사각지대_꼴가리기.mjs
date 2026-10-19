@@ -50,12 +50,22 @@ async function 전부(길) {
   return out;
 }
 
-/* 사각지대 목록 — 창구를 거칩니다 */
-const r0 = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍'), {
-  method: 'POST', headers: H, body: '{}',
-});
-if (!r0.ok) { console.error('✗ 일층병원_구멍 ' + r0.status + ' · ' + (await r0.text()).slice(0, 200)); process.exit(1); }
-const 구멍 = await r0.json();
+/* 사각지대 목록 — 창구를 거칩니다.
+ * ★ 2026-10-19 — **RPC 도 100줄에서 끊깁니다.** 쪽 없이 한 번 불러 100줄만
+ *   받았고, 그중 대학·종합이 6줄이라 「사각지대 6곳」으로 잘못 봤습니다.
+ *   `limit`·`offset` 을 주소에 붙여 **끝까지** 받습니다 (지침 — 받은 줄 수를
+ *   분모와 맞춰 봅니다). 함수가 내는 줄 수는 `일층병원_구멍셈()` 이 말해 줍니다 */
+const 구멍 = [];
+for (let off = 0; ; off += 100) {
+  const r0 = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍')
+    + '?limit=100&offset=' + off, { method: 'POST', headers: H, body: '{}' });
+  if (!r0.ok) { console.error('✗ 일층병원_구멍 ' + r0.status + ' · ' + (await r0.text()).slice(0, 200)); process.exit(1); }
+  const 쪽 = await r0.json();
+  구멍.push(...쪽);
+  if (!Array.isArray(쪽) || 쪽.length < 100) break;
+  if (off > 20000) break;
+}
+console.log('일층병원_구멍() 이 낸 줄 — ' + 구멍.length + '줄');
 const 볼갈래 = 갈래고름 ? [갈래고름] : ['대학병원', '상급종합', '종합병원'];
 const 그갈래 = 구멍.filter((x) => 볼갈래.includes(x['갈래']));
 /* ★ 2026-10-19 — ① 459 안에는 **두 가지**가 섞여 있습니다.
