@@ -14,6 +14,13 @@
  *   salTpNm          급여                  「월급2,350,000원 이상 ~ 2,500,000원 이하,」
  *   certificate·eduNm 지원자격             「물리치료사」 · 「대졸(2~3년)」
  *   workRegion       근무지                「경기 화성시」
+ *   collectPsncnt    모집인원              「1」      ← 2026-10-19 원문에서 찾았습니다
+ *   jobCont          공고 본문             「- 자격 기준 및 조건 …」 (수백 자)
+ *
+ * ★ `collectPsncnt`·`jobCont` 는 응답 원문을 찍어 확인한 것입니다
+ *   (tools/워크넷_상세항목이름.mjs · 공고번호 K180012610190008).
+ *   워크넷 공고는 `jobsNm` 이 직군 하나(물리치료사(306501))라 그 인원은
+ *   **우리 직군 인원**입니다 — 통합공고가 아닙니다 (CLAUDE.md 15절).
  *
  * ★ **한도를 모릅니다.** 이 API 는 `x-ratelimit-*` 헤더를 **안 줍니다**
  *   (2026-10-19 에 상세·목록 둘 다 헤더를 전부 찍어 확인했습니다).
@@ -72,15 +79,23 @@ export function 고용형태글(empTpNm) {
   return s;
 }
 
+/** 모집인원 — 「1」·「2 명」 꼴. 숫자가 아니거나 터무니없으면 null */
+export function 인원칸(v) {
+  const s = 엔티티풀기(v).replace(/[^0-9]/g, '');
+  if (!s) return null;
+  const n = Number(s);
+  return n >= 1 && n <= 999 ? n : null;   /* 0명·세 자리 넘는 것은 안 믿습니다 */
+}
+
 /**
  * 상세 API XML → 우리 칸.
- * 돌려주는 것 { 제목, 고용형태글, 접수마감, 예상연봉, 지원자격, 근무지, 근거 }
+ * 돌려주는 것 { 제목, 고용형태글, 접수마감, 예상연봉, 지원자격, 근무지, 모집인원, 본문, 근거 }
  * **빈 것은 null 입니다** — 부르는 쪽이 「빈 값으로 덮지 않기」를 지킬 수 있게.
  */
 export function 워크넷상세칸(xml) {
   const t = String(xml || '');
   const 낸것 = { 제목: null, 고용형태글: null, 접수마감: null, 예상연봉: null,
-    지원자격: null, 근무지: null, 근거: {} };
+    지원자격: null, 근무지: null, 모집인원: null, 본문: null, 근거: {} };
 
   const 제목 = 집기(t, 'wantedTitle');
   if (제목) { 낸것.제목 = 제목.slice(0, 300); 낸것.근거.제목 = '상세 API wantedTitle'; }
@@ -102,6 +117,14 @@ export function 워크넷상세칸(xml) {
 
   const 지역 = 집기(t, 'workRegion');
   if (지역) { 낸것.근무지 = 지역.slice(0, 80); 낸것.근거.근무지 = '상세 API workRegion'; }
+
+  const 인원 = 인원칸(집기(t, 'collectPsncnt'));
+  if (인원) { 낸것.모집인원 = 인원; 낸것.근거.모집인원 = '상세 API collectPsncnt — ' + 인원 + '명'; }
+
+  /* 공고 본문 — `고용형태판정()` 에 넘길 글입니다. 칸으로 바로 쓰지는 않습니다
+     (지원자격·예상연봉은 이미 98~100% 차 있어 다시 뽑을 자리가 없습니다) */
+  const 본문 = 집기(t, 'jobCont');
+  if (본문) 낸것.본문 = 본문.slice(0, 4000);
 
   return 낸것;
 }
@@ -125,6 +148,8 @@ if (process.argv.includes('--자기점검')) {
     '<eduNm>대졸(2~3년)</eduNm>',
     '<certificate>물리치료사</certificate>',
     '<workRegion>경기 화성시</workRegion>',
+    '<collectPsncnt>1</collectPsncnt>',
+    '<jobCont>- 자격 기준 및 조건 ○ 채용 분야 자격증 소지자</jobCont>',
     '</wanted></wantedDtl>'].join('');
   const r = 워크넷상세칸(견본);
   봐('제목이 온전하다', r.제목 === '화성시장애아동재활센터 물리치료사 채용공고(대체인력/긴급)');
@@ -133,7 +158,12 @@ if (process.argv.includes('--자기점검')) {
   봐('지원자격에 자격·학력', /물리치료사/.test(r.지원자격) && /대졸/.test(r.지원자격));
   봐('근무지', r.근무지 === '경기 화성시');
   봐('고용형태 글에 (기간제) 를 붙인다', /\(기간제\)$/.test(r.고용형태글));
-  봐('근거가 칸마다 있다', Object.keys(r.근거).length === 6);
+  봐('모집인원 1명', r.모집인원 === 1);
+  봐('본문을 가져온다', /자격증 소지자/.test(r.본문 || ''));
+  봐('근거가 칸마다 있다', Object.keys(r.근거).length === 7);
+  봐('0명은 안 믿는다', 인원칸('0') === null);
+  봐('「2 명」 도 2 로 읽는다', 인원칸('2 명') === 2);
+  봐('인원이 비면 null', 인원칸('') === null && 인원칸('명') === null);
 
   /* 엔티티 겹침 — 실제로 본 꼴 */
   const 겹침 = '<wantedDtl><wantedTitle>전주 삼남재활의학과병원에서 신입 &amp;amp; 경력 (작업치료사)선생님을 모집합니다.</wantedTitle></wantedDtl>';
@@ -166,5 +196,5 @@ if (process.argv.includes('--자기점검')) {
     for (const x of 어긴것) console.error('   · ' + x);
     process.exit(1);
   }
-  console.log('○ 워크넷상세칸 자기점검 통과 — 17가지 (API 를 두드리지 않았습니다)');
+  console.log('○ 워크넷상세칸 자기점검 통과 — 22가지 (API 를 두드리지 않았습니다)');
 }

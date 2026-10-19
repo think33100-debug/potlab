@@ -25,10 +25,23 @@
  *                          같은 사이트 3.5초 이상 (지침)
  *
  * 없어짐말은 `hosp/hs_목록상태.mjs` **한 자리**에서 가져옵니다 (지침 6절).
- * 열쇠는 가립니다 (지침 8-11). 아무것도 바꾸지 않습니다 — 목록만 냅니다.
+ * 열쇠는 가립니다 (지침 8-11).
+ *
+ * ── 칸도 함께 받습니다 (2026-10-19 세중님 1번) ──────────
+ * 세중님 지시 — 「이미 찬 것은 정찰(하루 1번)과 겹치게 — **같은 호출에서
+ * 칸도 받기**」. 살아 있다고 판정한 공고의 **그 응답**에서 칸을 뽑아
+ * `칸되메우기` 로 보냅니다. **추가 호출은 0** 입니다.
+ *
+ * ★ 왜 추가 호출을 안 늘리나 — 이 API 는 `x-ratelimit-*` 헤더를 **안 줍니다**
+ *   (2026-10-19 에 상세·목록 둘 다 헤더를 전부 찍어 확인했습니다). 하루 한도를
+ *   모르는 채로 호출을 늘리지 않습니다 (지침 3·4절).
+ * ★ `--정찰보고` 일 때만 보냅니다 — 하루 한 번 도는 그 길입니다.
+ *   `--칸안받기` 를 적으면 안 보냅니다 (판정만 보고 싶을 때).
  */
 import fs from 'node:fs';
 import { 없어짐말, 알림상태 } from './hosp/hs_목록상태.mjs';
+import { 워크넷상세칸 } from './워크넷상세칸.mjs';
+import { 고용형태판정 } from './공고문읽기.mjs';
 
 const argv = process.argv.slice(2);
 const 값 = (이름, 기본) => {
@@ -37,6 +50,8 @@ const 값 = (이름, 기본) => {
 };
 const 바퀴 = 값('--바퀴', '');
 const 견주기 = argv.includes('--견주기');
+const 안받기 = argv.includes('--칸안받기');
+const 제목도 = argv.includes('--제목도');   /* 제목 되메우기는 승인 뒤에 (2026-10-19 3번) */
 const 결과폴더 = '/home/ubuntu/log';
 const 결과파일 = (n) => 결과폴더 + '/없어짐_' + n + '바퀴.json';
 
@@ -150,6 +165,40 @@ const 살아있음 = [];
 
 /* ── 워크넷: 상세 API ── */
 const WURL = 'https://www.work24.go.kr/cm/openApi/call/wk/callOpenApiSvcInfo210L01.do';
+
+/* ── 같은 응답에서 칸도 받습니다 (2026-10-19 세중님 1번) ──────────
+ * 뽑는 자리는 `워크넷상세칸.mjs` **한 자리**이고(지침 6절), 고용형태 판정은
+ * `공고문읽기.mjs` 의 `고용형태판정()` **한 자리**입니다 — 화면 값 셋
+ * (정규직/계약직/무기계약직)으로만 나옵니다 (2026-10-19 세중님 1번).
+ * **빈 값은 안 보냅니다** (null 가드 — 창구도 다시 봅니다). */
+const 칸줄 = [];
+const 칸셈 = { 제목: 0, 고용형태: 0, 접수마감: 0, 모집인원: 0, 근무지: 0, 지원자격: 0, 예상연봉: 0 };
+function 칸모음(x, xml) {
+  if (안받기) return;
+  const c = 워크넷상세칸(xml);
+  const 줄 = { id: x.id };
+  const 근거 = {};
+  /* 제목 — 창구가 **잘린 것만** 바꿉니다(제목바꿀만한가).
+     ★ `--제목도` 를 적어야 보냅니다. 제목 되메우기는 세중님이 「마른 실행 →
+       견본 10 → 승인 → 실행」 으로 묶은 자리라(2026-10-19 3번), 승인 전까지
+       정시 실행이 제목을 바꾸지 않게 꼭지를 따로 둡니다 */
+  if (c.제목 && 제목도) { 줄.title = c.제목; 칸셈.제목++; }
+  if (c.접수마감) { 줄.apply_to = c.접수마감; 줄.마감일출처 = '워크넷 상세 API'; 칸셈.접수마감++; }
+  if (c.모집인원) { 줄.headcount = c.모집인원; 칸셈.모집인원++; }
+  if (c.근무지) { 줄.work_place = c.근무지; 칸셈.근무지++; }
+  /* 고용형태 — 글(empTpNm)과 본문(jobCont)을 함께 넣습니다. 코드보다 글이 먼저입니다 */
+  const 고용 = 고용형태판정(c.제목 || x.title || '', [c.고용형태글, c.본문].filter(Boolean).join('\n'));
+  if (고용) { 줄.employ_type = 고용; 칸셈.고용형태++; }
+  const 뽑은값 = {};
+  if (c.지원자격) { 뽑은값.지원자격 = c.지원자격; 칸셈.지원자격++; }
+  if (c.예상연봉) { 뽑은값.예상연봉 = c.예상연봉; 칸셈.예상연봉++; }
+  /* ★ `근거` 를 통째로 보내지 않습니다 — 창구의 `뽑은값` 합치기는 **한 겹**이라
+     기존 `근거` 를 덮습니다(「근거 덮임」 — 아직 안 고친 자리). 다른 열쇠에 둡니다 */
+  Object.assign(근거, c.근거);
+  if (Object.keys(근거).length) 뽑은값.워크넷상세근거 = 근거;
+  if (Object.keys(뽑은값).length) 줄.뽑은값 = 뽑은값;
+  if (Object.keys(줄).length > 1) 칸줄.push(줄);
+}
 for (const [i, x] of 워크넷.entries()) {
   const no = (String(x.url).match(/wantedAuthNo=([A-Z0-9]+)/) || [])[1];
   if (!no) { 오류.push({ ...x, 왜: '주소에서 공고번호를 못 집음' }); continue; }
@@ -165,7 +214,7 @@ for (const [i, x] of 워크넷.entries()) {
   } catch (e) { 오류.push({ ...x, 왜: '못 받음 · ' + String(e && e.message || e).slice(0, 34) }); await 자고(250); continue; }
   const 왜 = 워크넷없어짐(r);
   if (왜) 없어짐.push({ ...x, 왜: '상세 API — ' + 왜, 앞부분: 가리고(r).replace(/\s+/g, ' ').slice(0, 200) });
-  else 살아있음.push(x.id);
+  else { 살아있음.push(x.id); 칸모음(x, r); }
   process.stderr.write('\r  워크넷 ' + (i + 1) + '/' + 워크넷.length + '   ');
   await 자고(250);
 }
@@ -240,6 +289,23 @@ if (argv.includes('--정찰보고')) {
     try { 받음 = JSON.parse(t); } catch { /* 모양이 다르면 그대로 */ }
   }
   if (받음) console.log('창구가 답한 것 — ' + JSON.stringify(받음));
+
+  /* ── 같은 응답에서 받은 칸을 창구로 (2026-10-19 세중님 1번) ──────
+   * 추가 호출 0 입니다 — 위 판정에 쓴 그 응답에서 뽑았습니다.
+   * `칸되메우기` 가 「비었을 때만」(고용형태·제목은 조건부로) 채웁니다 */
+  if (칸줄.length) {
+    console.log('\n칸 창구(칸되메우기)에 보냅니다 — ' + 칸줄.length + '건 (추가 호출 0)');
+    console.log('  뽑힌 칸 — ' + Object.entries(칸셈).map(([k, v]) => k + ' ' + v).join(' · '));
+    for (let i = 0; i < 칸줄.length; i += 50) {
+      const r = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'), {
+        method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_rows: 칸줄.slice(i, i + 50) }),
+      });
+      const t = await r.text();
+      if (!r.ok) { console.error('✗ 칸되메우기 ' + r.status + ' · ' + t.slice(0, 200)); break; }
+      if (i === 0) console.log('  창구가 답한 것 — ' + t.slice(0, 300));
+    }
+  }
 }
 
 const 낼것 = { 바퀴: Number(바퀴), 잰때: new Date().toISOString(), 본것: 공.length, 없어짐, 오류, 살아있음수: 살아있음.length };
