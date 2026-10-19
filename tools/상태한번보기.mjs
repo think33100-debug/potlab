@@ -4,9 +4,15 @@
 import fs from 'node:fs';
 
 const cfg = {};
-for (const l of fs.readFileSync(new URL('../.env.local', import.meta.url), 'utf8').split(/\r?\n/)) {
-  const m = l.match(/^([A-Z_0-9]+)=(.*)$/);              /* 이름 없는 줄은 버립니다 */
-  if (m) cfg[m[1]] = m[2].replace(/^['"]|['"]$/g, '');
+/* 서버에는 `.env` 이고 내 컴퓨터에는 `.env.local` 입니다 — 둘 다 봅니다
+   (2026-10-19 — 서버에서 ENOENT 로 멈췄습니다) */
+for (const 이름 of ['../.env', '../.env.local']) {
+  const p = new URL(이름, import.meta.url);
+  if (!fs.existsSync(p)) continue;
+  for (const l of fs.readFileSync(p, 'utf8').split(/\r?\n/)) {
+    const m = l.match(/^([A-Z_0-9]+)=(.*)$/);            /* 이름 없는 줄은 버립니다 */
+    if (m && !cfg[m[1]]) cfg[m[1]] = m[2].replace(/^['"]|['"]$/g, '');
+  }
 }
 const URL_ = cfg.SUPABASE_URL, KEY = cfg.SUPABASE_SERVICE_KEY;
 if (!URL_ || !KEY) { console.log('SUPABASE_URL / SUPABASE_SERVICE_KEY 가 없습니다'); process.exit(1); }
