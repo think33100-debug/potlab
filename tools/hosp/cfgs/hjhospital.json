@@ -1,0 +1,19 @@
+{
+ "name": "화성중앙종합병원",
+ "type": "json",
+ "url": "http://hjhospital.co.kr/_Proc/notice_list_proc.php",
+ "방식": "POST",
+ "몸": "pageNo=1&pagesize=50&seq=&rnum=&search_key=",
+ "머리": {
+  "X-Requested-With": "XMLHttpRequest",
+  "Referer": "http://hjhospital.co.kr/bbs/notice.php"
+ },
+ "줄경로": "json.list",
+ "셈경로": "json.TotalCount",
+ "제목열쇠": "title",
+ "날짜열쇠": "REG_DATE",
+ "링크꼴": "http://hjhospital.co.kr/bbs/notice_view.php?seq={seq}",
+ "base": "http://hjhospital.co.kr",
+ "skip": "합격자|발표|결과",
+ "note": "2026-10-19 새로 넣음 (세중님 ④ 승인 · 1층 사각지대 메우기). 종별 종합병원. ★ **목록이 HTML 이 아니라 ajax JSON 입니다** — 쪽(`/bbs/notice.php`)에는 빈 표만 있고 `$.ajax({type:'post', url:'/_Proc/notice_list_proc.php', dataType:'json', data:$('#frm').serialize()})` 가 채웁니다. 열쇠 이름(seq·title·REG_DATE)은 **그 쪽 성공 콜백 코드에 적힌 그대로**입니다 — 짐작이 아닙니다(`'<a href=\"./notice_view.php?seq='+item.seq+'\"><span>'+item.title+'</span></a>'` · `item.REG_DATE`). `#frm` 의 숨은 입력이 pageNo·pagesize·seq·rnum·search_key 라서 몸을 그 꼴로 보냅니다(pagesize 만 10 → 50). ★ **2026-10-19 에 두드려 보니 TotalCount 가 \"0\" 입니다** — 긁을 수 없는 것이 아니라 그 게시판에 글이 없습니다. 새 공고가 올라오면 잡힙니다. https 는 자체서명 인증서라 http 로만 열립니다. 이 사이트는 외부 솔루션(ursmart43.hmandoo.co.kr)을 쓰므로 같은 솔루션 병원이 더 있으면 설정을 베낄 수 있습니다. 근거 docs/데이터주소_찾은것_1019.md"
+}

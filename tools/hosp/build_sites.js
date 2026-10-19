@@ -17,7 +17,11 @@ const jsonSites = [
   /* 위탁 운영 공공병원 — 알리오·나라일터에 안 뜸. 그리팅(greetinghr) __NEXT_DATA__ openings (2026-09-12) */
   { name: '국립교통재활병원', type: 'greeting', host: 'https://ntrh.career.greetinghr.com', url: 'https://ntrh.career.greetinghr.com/ko/guide' }
 ];
-const KEYS = ['name', 'type', 'url', 'host', 'base', 'enc', 'sn', 'settingType', 'dept', 'row', 'title', 'link', 'linkFmt', 'date', 'skip', 'single', 'only', 'not', 'off', 'note'];
+const KEYS = ['name', 'type', 'url', 'host', 'base', 'enc', 'sn', 'settingType', 'dept', 'row', 'title', 'link', 'linkFmt', 'date', 'skip', 'single', 'only', 'not', 'off', 'note',
+  /* type:'json' 이 쓰는 칸 (2026-10-19) — 여기 없으면 hosp_sites.js 에서 **조용히 빠집니다**.
+     수집기는 cfgs/*.json 을 통째로 읽어서 안 빠지지만, 이 도구로 표를 다시 만들면
+     빠지므로 함께 적어 둡니다 (지침 6절 — 같은 기준이 두 자리) */
+  '방식', '몸', '머리', '줄경로', '셈경로', '제목열쇠', '날짜열쇠', '시작열쇠', '끝열쇠', '갈래열쇠', '링크꼴', '링크열쇠'];
 function lit(v) { return typeof v === 'number' ? String(v) : "'" + String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'"; }
 const all = jsonSites.slice();
 fs.readdirSync(dir).filter(f => f.endsWith('.json')).sort().forEach(f => {
@@ -27,6 +31,10 @@ fs.readdirSync(dir).filter(f => f.endsWith('.json')).sort().forEach(f => {
   if (c.type === 'html' && (!c.name || !c.row || !c.title || !c.url)) { console.error('빠진 항목: ' + f); process.exit(1); }
   if (c.type === 'appsite' && (!c.name || !c.host || !c.sn)) { console.error('appsite 항목 부족: ' + f); process.exit(1); }
   if (c.type === 'greeting' && (!c.name || !c.host || !c.url)) { console.error('greeting 항목 부족: ' + f); process.exit(1); }
+  if (c.type === 'json' && (!c.name || !c.url || !c['줄경로'] || !c['제목열쇠'] || !(c['링크꼴'] || c['링크열쇠']))) {
+    console.error('json 항목 부족: ' + f + ' — url · 줄경로 · 제목열쇠 · (링크꼴 또는 링크열쇠) 가 있어야 합니다');
+    process.exit(1);
+  }
   if (all.some(x => x.name === c.name && x.type === c.type && (x.url || x.host) === (c.url || c.host))) { console.error('같은 사이트가 두 번: ' + f); process.exit(1); }
   all.push(c);
 });

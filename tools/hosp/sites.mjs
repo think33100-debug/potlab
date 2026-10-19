@@ -135,6 +135,58 @@ export async function 사이트줄(s) {
        확인법 — 2쪽 첫 글의 jobnoticeSn 이 1쪽과 다른가.
      매일 수집은 접수중인 것만 쓰면 되니 한 쪽(100건)으로 충분합니다.
      옛 공고를 쌓는 것은 백필 몫입니다. */
+  /* ── json — **일반형** (2026-10-19 세중님 ④ 승인) ───────────────
+   * 아래 `listjson` 은 마이다스 솔루션 **전용**입니다 — 주소와 파라미터가
+   * 코드에 박혀 있어 다른 사이트에 못 씁니다. 이쪽은 설정에서 받습니다.
+   *
+   * 설정 칸
+   *   url        두드릴 주소 (목록 쪽이 아니라 **데이터 주소**)
+   *   방식       'POST'(기본) · 'GET'
+   *   몸         POST 일 때 보낼 글 (application/x-www-form-urlencoded)
+   *   머리       더할 헤더 (X-Requested-With · Referer 등)
+   *   줄경로     응답에서 줄 배열까지 — 점으로 잇습니다 ('json.list')
+   *   제목열쇠 · 날짜열쇠 · 시작열쇠 · 끝열쇠 · 갈래열쇠
+   *   링크꼴     '…/view.php?seq={seq}' — `{열쇠}` 를 그 줄의 값으로 바꿉니다
+   *   셈경로     전체 수가 든 자리 (로그에만 씁니다)
+   *
+   * ★ 열쇠 이름을 **짐작하지 않습니다.** 화성중앙은 그 쪽 ajax 성공 콜백에
+   *   `item.seq` · `item.title` · `item.REG_DATE` 가 그대로 적혀 있어서
+   *   그것을 읽어 넣었습니다 (docs/데이터주소_찾은것_1019.md · 지침 3절). */
+  if (s.type === 'json') {
+    const 길따라 = (o, 길) => String(길 || '').split('.').filter(Boolean)
+      .reduce((v, k) => (v == null ? v : v[k]), o);
+    const r = (s['방식'] || 'POST').toUpperCase() === 'GET'
+      ? await 붙여받기(s.url, { headers: { ...(s['머리'] || {}) } })
+        .then((g) => ({ code: g.왜 ? 0 : g.code, text: g.html || '', 왜: g.왜 }))
+      : await 보내기(s.url, { body: s['몸'] || '', headers: { ...(s['머리'] || {}) } });
+    const j = 제이슨(r);
+    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + (r.왜 || String(r.text).slice(0, 80)) };
+    const 다 = 길따라(j, s['줄경로'] || 'list');
+    if (!Array.isArray(다)) {
+      return { err: '줄경로 「' + (s['줄경로'] || 'list') + '」 가 배열이 아닙니다 · 받은 것 '
+        + JSON.stringify(j).slice(0, 120) };
+    }
+    const 셈 = s['셈경로'] ? 길따라(j, s['셈경로']) : 다.length;
+    /* 0건은 **탈이 아닙니다** — 그 게시판에 글이 없을 수 있습니다.
+       빈 목록을 그대로 돌려주어 「오늘 0건」으로 적히게 합니다 */
+    const 줄들 = 다.map((x) => {
+      const 꼴 = String(s['링크꼴'] || '');
+      const url = 꼴
+        ? 꼴.replace(/\{([^}]+)\}/g, (_, k) => encodeURIComponent(String(x[k] ?? '')))
+        : String(x[s['링크열쇠'] || 'url'] || '');
+      return {
+        title: String(x[s['제목열쇠'] || 'title'] || '').trim(),
+        url,
+        from: s['시작열쇠'] ? String(x[s['시작열쇠']] || '') || null : null,
+        to: s['끝열쇠'] ? String(x[s['끝열쇠']] || '') || null : null,
+        posted: s['날짜열쇠'] ? String(x[s['날짜열쇠']] || '') || null : null,
+        cls: s['갈래열쇠'] ? String(x[s['갈래열쇠']] || '') : '',
+      };
+    }).filter((x) => x.title && x.url);
+    return 거르기(s, 줄들, '전체 ' + 셈 + '건 · 쓸 수 있는 줄 ' + 줄들.length + '건',
+      [...new Set(줄들.map((x) => x.cls).filter(Boolean))]);
+  }
+
   if (s.type === 'appsite' || s.type === 'listjson') {
     const r = await 보내기(s.host + '/app/jobnotice/list.json', {
       body: new URLSearchParams({ currentPage: '1', pageSize: '100', keyword: '', recruitClassName: '' }).toString(),
