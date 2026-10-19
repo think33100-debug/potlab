@@ -133,6 +133,10 @@ function 쪽첨부들(html, 밑바탕) {
     if (/(file|down|atch)/i.test(s) && !안.length) 보기('javascript:' + s, '(onclick)');
     for (const v of 안) 보기(v, '(onclick)');
   }
+  /* ★ `<a>…</a>` 로 안 잡히는 자리도 봅니다 — `<iframe src=FileViewer.do…>` 처럼
+     **src** 에 걸린 뷰어가 있습니다 (제주대 305467 이 그 꼴입니다. 2026-10-19 에
+     이 줄을 지웠다가 2건을 놓쳤습니다) */
+  for (const m of html.matchAll(/(?:href|src)=["']([^"']+)["']/gi)) 보기(m[1], '(주소꼴)');
   return 나온것;
 }
 
