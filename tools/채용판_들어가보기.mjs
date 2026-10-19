@@ -24,13 +24,19 @@ const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
 export const 채용말 = /채용|인재|구인|입사|모집|리크루트|recruit|job|employ/i;
 export const 채용말아닌것 = /검진|검사|진료|예약|증명|건강|실습|수련\s*의|전공의|교육\s*신청/;
 
+/* ★ **글 하나로 들어가는** 링크인가 — 메뉴와 글을 가르는 자리입니다
+ *   (2026-10-19 — 씨엠병원 「채용안내」를 공고 목록으로 잘못 봤습니다.
+ *    메뉴 `/cmhospital/sub_N_N.php` 가 **87개** 있어서 「같은 꼴 글 링크」로
+ *    세어졌습니다. 메뉴는 숫자가 달라도 글이 아닙니다 — **글번호 표식**을 봅니다) */
+export const 글번호표식 = /(view|uid=|wr_id|idx=|seq=|no=\d|nttId|articleNo|bbsIdx|board_?no|document_srl|\/\d{2,}(\.html?)?$)/i;
+
 /* ── 이 쪽이 공고 목록인가 ──────────────────────────────────────── */
 export function 공고목록인가(html) {
   const 줄수 = Math.max((html.match(/<tr[\s>]/gi) || []).length, (html.match(/<li[\s>]/gi) || []).length);
   const 날짜 = [...new Set([...html.matchAll(/20\d\d\s?[.\-/]\s?\d{1,2}\s?[.\-/]\s?\d{1,2}/g)].map((m) => m[0]))];
-  /* 글로 가는 링크 — 숫자를 N 으로 바꿔 **같은 꼴이 몇 개**인지 셉니다 */
-  const 링크 = [...html.matchAll(/<a[^>]+href=["']([^"']+)["']/gi)].map((m) => m[1])
-    .filter((h) => /\d/.test(h) && !/^(#|javascript|mailto|tel)/i.test(h));
+  /* 글로 가는 링크 — **글번호 표식이 있는 것만** 세고, 숫자를 N 으로 바꿔 꼴을 셉니다 */
+  const 링크 = [...new Set([...html.matchAll(/<a[^>]+href=["']([^"']+)["']/gi)].map((m) => m[1]))]
+    .filter((h) => !/^(#|javascript|mailto|tel)/i.test(h) && 글번호표식.test(h));
   const 꼴셈 = new Map();
   for (const h of 링크) {
     const k = h.replace(/\d+/g, 'N');
@@ -40,7 +46,7 @@ export function 공고목록인가(html) {
   const 왜 = [];
   if (줄수 < 3) 왜.push('줄(<tr>·<li>)이 ' + 줄수 + '개');
   if (날짜.length < 2) 왜.push('날짜 꼴이 ' + 날짜.length + '개');
-  if (글수 < 3) 왜.push('같은 꼴 글 링크가 ' + 글수 + '개');
+  if (글수 < 3) 왜.push('글번호가 든 링크가 ' + 글수 + '개 (메뉴는 안 셉니다)');
   return { 맞나: 왜.length === 0, 왜: 왜.join(' · '), 줄수, 날짜: 날짜.slice(0, 3), 글꼴, 글수 };
 }
 
@@ -142,6 +148,14 @@ function 검사() {
   재다(옮겨가는곳('<script>location.href="/";</script>', 'http://a.kr/') === null, '같은 자리로 맴돕니다');
   재다(자바스크립트쪽인가('<body><div id="root"></div></body>'), 'SPA 를 못 가립니다');
   재다(!자바스크립트쪽인가('<div id="root"></div><a href="/x">채용</a>'), '링크가 있는 쪽을 SPA 라고 봅니다');
+  /* ⑯~⑲ 씨엠병원 꼴 — **메뉴**가 같은 꼴로 여러 개 있는 안내 쪽 */
+  const 씨엠 = '<table>' + [1, 2, 3, 4, 5].map(() => '<tr><td>채용절차 안내</td></tr>').join('') + '</table>'
+    + ['01_1', '04_1', '05_11', '04_5', '02_3'].map((s) => '<a href="/cmhospital/sub_' + s + '.php">메뉴</a>').join('')
+    + '<span>2020-11-17</span><span>2025.03.17</span>';
+  재다(!공고목록인가(씨엠).맞나, '메뉴 여러 개를 공고 목록으로 봅니다');
+  재다(공고목록인가(씨엠).글수 === 0, '메뉴를 글 링크로 셉니다');
+  재다(글번호표식.test('/bbs/board.php?bo_table=recruit&wr_id=12'), 'wr_id 를 글번호로 안 봅니다');
+  재다(!글번호표식.test('/cmhospital/sub_05_11.php'), '메뉴 주소를 글번호로 봅니다');
   console.log('자기점검 ' + n + '가지 통과');
 }
 
