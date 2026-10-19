@@ -81,7 +81,16 @@ for (const [i, x] of 볼것.entries()) {
     if (r.status !== 200) { 못함['API 탈']++; await 자고(900); continue; }
   } catch { 못함['API 탈']++; await 자고(900); continue; }
   const m = t.match(/<wantedTitle>([^<]*)<\/wantedTitle>/);
-  const 온전 = m ? m[1].trim() : '';
+  /* ★ 엔티티를 **두 번** 풉니다 — 상세 API 가 `&amp;amp;` 로 겹쳐 보냅니다.
+     안 풀면 회원 화면에 「전주 삼남재활의학과병원에서 신입 &amp;amp; 경력」
+     처럼 그대로 보입니다 (2026-10-19 마른 실행에서 봤습니다).
+     XML 응답은 `&amp;`·`&#38;` 를 반드시 푼다 — 지침 5절 */
+  const 풀기 = (s) => String(s)
+    .replace(/&amp;/g, '&').replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#38;/g, '&')
+    .replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  const 온전 = m ? 풀기(m[1]) : '';
   if (!온전) { 못함['상세에도 없음']++; await 자고(900); continue; }
   if (온전 === x.title) { 못함['이미 같음']++; await 자고(900); continue; }
   바뀔것.push({ ...x, 후: 온전 });
