@@ -249,6 +249,35 @@ for (const [이름, 뿌리] of 볼것) {
   for (const x of 후보.filter((x) => x.뺌).slice(0, 3)) {
     console.log('     ✗ 뺌 「' + x.t.slice(0, 26) + '」 — ' + x.뺌);
   }
+  /* ★ 채용 링크가 없으면 **한 단 더** 들어가 봅니다 — 「커뮤니티·게시판·공지」
+   *   안에 채용판이 있는 곳이 있습니다 (서울성심 메뉴가 그 꼴입니다).
+   *   ★ 주소를 만들지 않습니다 — **쪽에 있는 링크**만 따라갑니다 */
+  if (!쓸것.length) {
+    const 묶음말 = /(커뮤니티|게시판|공지|알림|소식|인사|new\s*&?\s*notice|notice|board|community)/i;
+    const 안쪽 = [];
+    for (const p of 본쪽) {
+      for (const m of p.글.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]{0,60}?)<\/a>/gi)) {
+        const t = m[2].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        if (!묶음말.test(t) && !묶음말.test(m[1])) continue;
+        if (/^(#|javascript|mailto|tel)/i.test(m[1])) continue;
+        try { const u = new URL(m[1], p.끝주소).href; if (!안쪽.includes(u)) 안쪽.push(u); } catch { /* 버립니다 */ }
+      }
+    }
+    if (안쪽.length) {
+      console.log('  채용 링크가 없어 **한 단 더** 봅니다 — 커뮤니티·게시판 쪽 ' + 안쪽.length + '개');
+      for (const u of 안쪽.slice(0, 3)) {
+        let q; try { q = await 받기(u); } catch { continue; }
+        if (봇막이인가(q.code, q.글)) { console.log('     ★ 봇 막이 ' + u.slice(0, 56)); continue; }
+        const 더 = 채용링크들(q.글, q.끝주소).filter((x) => !x.뺌);
+        console.log('     ' + u.slice(0, 60) + ' — 채용말 링크 ' + 더.length + '개'
+          + (더.length ? ' 「' + 더[0].t.slice(0, 20) + '」' : ''));
+        for (const x of 더) if (!본주소.has(x.h)) { 본주소.add(x.h); 쓸것.push(x); }
+        await 자고(900);
+        if (쓸것.length) break;
+      }
+    }
+  }
+
   if (!쓸것.length) {
     /* ★ 「없다」고만 적지 않습니다 — **무엇이 있었나**를 함께 찍습니다 (지침 2절).
      *   메뉴 글자를 보면 채용이 다른 말로 적혀 있는지, 아예 없는지가 가려집니다 */
