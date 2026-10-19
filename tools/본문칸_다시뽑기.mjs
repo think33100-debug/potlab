@@ -85,12 +85,27 @@ for (const x of 볼것) {
   try { r = 칸뽑기(글, 글); } catch (e) { console.error('✗ ' + x.id + ' · ' + String(e.message).slice(0, 60)); continue; }
   const 줄 = { id: x.id }; const 뽑은값 = {}; const 근거 = {};
 
-  /* 모집인원 — **우리 직군 인원의 합**. 칸뽑기가 직군별로 냅니다 */
-  const 인원합 = Object.values(r.모집인원 || {}).reduce((a, b) => a + (Number(b) || 0), 0);
-  if (인원합 > 0 && x.headcount == null) {
-    줄.headcount = 인원합; 채울것.모집인원++;
+  /* 모집인원 — **우리 직군 인원의 합**. 칸뽑기가 직군별로 냅니다.
+     ★ 2026-10-19 세중님 — **0 도 값입니다.** 원문에 적힌 그대로 보여 줍니다.
+       그래서 `인원합 > 0` 이 아니라 **칸이 하나라도 있나**로 봅니다 */
+  const 인원칸들 = Object.values(r.모집인원 || {}).map((v) => Number(v)).filter((v) => Number.isFinite(v));
+  if (인원칸들.length && x.headcount == null) {
+    줄.headcount = 인원칸들.reduce((a, b) => a + b, 0); 채울것.모집인원++;
     근거.모집인원 = Object.entries(r.근거 || {}).filter(([k]) => k.startsWith('모집인원'))
       .map(([, v]) => v).join(' / ').slice(0, 200);
+  }
+  /* ★ 동그라미 꼴(○명 = 약간명)은 숫자가 아니라 **글**입니다. int 칸에 못 넣으니
+     `뽑은값.모집인원` 에 둡니다 — 화면이 headcount 다음으로 그 칸을 봅니다
+     (web/app/jobs/[id]/page.tsx:185) */
+  if (r.모집인원글 && x.headcount == null) {
+    const 글값 = Object.values(r.모집인원글)[0];
+    const 이미인원 = (x['뽑은값'] && x['뽑은값'].모집인원) || null;
+    if (글값 && !이미인원) {
+      뽑은값.모집인원 = 글값;
+      근거.모집인원 = Object.entries(r.근거 || {}).filter(([k]) => k.startsWith('모집인원글'))
+        .map(([, v]) => v).join(' / ').slice(0, 200);
+      채울것.모집인원++;
+    }
   }
   const 이미자격 = (x['뽑은값'] && x['뽑은값'].지원자격)
     || (x.detail && (x.detail['뽑은값']?.지원자격 || x.detail.지원자격)) || null;
