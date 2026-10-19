@@ -60,6 +60,7 @@ import { fileURLToPath } from 'node:url';
 import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
+import { 고용형태코드 } from './공고문읽기.mjs';
 import { 날짜풀기, 채용시까지인가 } from './날짜.mjs';
 import { 기관종별, 시설구분 } from './wn-kind.mjs';
 /* ㉮ 덧갈래로 온 줄을 제목으로 가립니다 (2026-10-03 세중님 승인).
@@ -94,13 +95,13 @@ const 직종이름 = { 306500: '물리및작업치료사', 306501: '물리치료
    ⚠ 4(파견)·Y(대체인력)은 **아직 응답으로 못 봤습니다.** 2026-09-30·10-05
      두 번 다 목록에 안 나왔습니다. gas/wage.js 의 HIRE_CODE 를 따른 값이라
      확인되면 고쳐야 합니다. */
-const 고용형태표 = {
-  10: '정규직', 11: '정규직(시간선택제)',
-  20: '기간제', 21: '기간제(시간선택제)',
-  4: '파견', Y: '대체인력',          // ← 확인 안 됨
-};
-const 고용형태 = (v) => String(v || '').split(',')
-  .map((x) => 고용형태표[x.trim()] || x.trim()).filter(Boolean).join(', ');
+/* 코드 → 셋(정규직·계약직·무기계약직) 은 공고문읽기.mjs 의 고용형태코드()
+   **한 자리**입니다 (2026-10-19 세중님 1번). 전에는 이 파일이 자기 표를
+   들고 「기간제」·「정규직(시간선택제)」·「파견」 같은 말을 그대로 넣었습니다 —
+   회원이 보는 말이 열 가지가 넘었습니다 (지침 6절).
+   ★ 쉼표로 여럿이 오면 `고용형태코드()` 가 **섞임으로 보고 비웁니다** —
+     전에는 「정규직, 기간제」 처럼 이어 붙였습니다 */
+const 고용형태 = (v) => (고용형태코드(v) || {}).값 || '';
 
 const argv = process.argv.slice(2);
 const 값 = (이름, 기본) => { const i = argv.indexOf(이름); return i > -1 && argv[i + 1] != null ? Number(argv[i + 1]) : 기본; };

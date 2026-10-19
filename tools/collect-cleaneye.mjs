@@ -49,7 +49,7 @@ import { sortJob } from './sort-rule.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
-import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
+import { 첨부읽기, 칸뽑기, kordoc있나, 고용형태코드 } from './공고문읽기.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
 import { 첨부받기, 기본간격, 통크기, 통쉼, 쉼 } from './cleaneye-file.mjs';
@@ -460,7 +460,9 @@ const 담을것 = 회원.concat(보류).concat(쌓을것).map((x) => {
     id: 'CE' + x.id,
     external_id: x.id,
     org_name: x.org || '(없음)', title: x.title || '(없음)',
-    hire_type: String(o.EMPLOY_GB || ''), employ_type: String(o.JOB_TYPE || ''),
+    hire_type: String(o.EMPLOY_GB || ''),
+    /* 코드 → 셋 은 공고문읽기.mjs 의 고용형태코드() 한 자리 (2026-10-19) */
+    employ_type: (고용형태코드(o.JOB_TYPE) || {}).값 || '',
     work_place: String(o.WORK_PLACE || o.ADDRESS || ''), sido: null, sgg: null,
     edu: '',
     /* 우리 직군 줄의 인원이 있으면 그것, 없으면 API 의 공고 전체 인원 */

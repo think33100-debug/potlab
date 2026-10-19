@@ -27,6 +27,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 모두받기 } from './쪽나눠받기.mjs';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, MEDTECH, 구운날 } from './gas-rules.mjs';
+import { 고용형태코드 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 멈췄나 as OCR멈췄나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 /* 공고문 주소를 job_attachments 에 담습니다 (2026-10-10 · tools/첨부담기.mjs) */
@@ -722,7 +723,9 @@ const 담을것 = 회원.concat(보류).map((x) => {
     id: x.id,
     external_id: x.id,
     org_name: x.org, title: x.title,
-    hire_type: de(r.recrutSeNm), employ_type: de(r.hireTypeNmLst),
+    hire_type: de(r.recrutSeNm),
+    /* 코드 → 셋 은 공고문읽기.mjs 의 고용형태코드() 한 자리 (2026-10-19) */
+    employ_type: (고용형태코드(de(r.hireTypeNmLst)) || {}).값 || '',
     work_place: 지역, sido: null, sgg: null,
     edu: de(r.acbgCondNmLst),
     headcount: x.인원 || null,     /* 우리 직군 몫만. 전체 인원은 detail.공고전체인원 */
