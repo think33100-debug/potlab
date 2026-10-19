@@ -181,8 +181,15 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
        직군인원.작업치료사 ? `작업치료사 ${직군인원.작업치료사}명` : null]
       .filter(Boolean).join(' · ')
     : '';
+  /* ★ 2026-10-19 세중님 ㉢ⓑ — **모집인원은 비로그인도 봅니다.**
+     「0명」은 `headcount`(숫자 칸)에 있어 전부터 누구나 봤는데, 「○명」·「00명」은
+     `뽑은값` 칸이라 **로그인 회원만** 봤습니다 (`공고뽑은값` 이 비로그인에게 `{}`).
+     그래서 `job_one` 이 **비로그인 detail 에 「모집인원」 한 칸**을 더 줍니다 —
+     `anon` 권한을 늘리지 않는 길입니다. 여기서 그 칸을 뒤로 받칩니다.
+     순서 — 직군별 인원 → headcount(관리자가 고치는 칸) → 뽑은값(회원) → detail(누구나) */
   const 모집인원: string | null = 직군인원말
-    || (j.headcount != null ? `${j.headcount}명` : (뽑은값?.['모집인원'] ?? null)) || null;
+    || (j.headcount != null ? `${j.headcount}명`
+        : (뽑은값?.['모집인원'] ?? (detail['모집인원'] as string | undefined) ?? null)) || null;
 
   /* 워크넷(고용24) 공고인가. id 는 수집기가 'WN' + 고용24 공고번호로 만듭니다
      (tools/collect-worknet.mjs 485줄 · 옛 WN 과 새 WN2 가 같은 규칙입니다).
