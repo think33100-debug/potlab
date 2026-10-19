@@ -3,9 +3,9 @@
  "type": "html",
  "url": "http://www.daudh.or.kr/bbs/board.php?bo_table=recruitment",
  "base": "http://www.daudh.or.kr",
- "row": "<tr class=\"[^\"]*\">\\s*<td class=\"td_num2\">[\\s\\S]*?<\\/tr>",
- "title": "<div class=\"bo_tit\">\\s*<a[^>]*>([\\s\\S]*?)<\\/a>",
- "link": "href=\"(http:\\/\\/www\\.daudh\\.or\\.kr\\/bbs\\/board\\.php\\?bo_table=recruitment&amp;wr_id=\\d+)\"",
- "skip": "합격자|발표|결과",
- "note": "그누보드5 표 (2026-10-18 새로 넣음 · 1층 사각지대 메우기). 종별 「병원」·설립 학교법인이지만 이름에 「대학」이 들어가 1층입니다(CLAUDE.md — 이름에 대학병원이 들어가면 종별 무관). 실제 목록으로 시험해 **제목·링크가 10/10** 집혔습니다. ★ 목록에 **날짜가 없습니다** — 마감일은 상세에서 봐야 합니다(강진의료원과 같습니다). 그래서 date 규칙을 안 넣었습니다. ★ 제목 앞에 기관이 **「<마감>」** 을 붙입니다(원문 그대로 &lt;마감&gt;) — 안동병원 D-데이와 같은 꼴로 **제목이 바뀌는 자리**이고, 그래서 공고 열쇠에 제목이 들어가면 같은 글이 두 번 담깁니다(2026-10-18 에 찾은 뿌리). 정찰의 「② 제목에 마감 표시」 규칙이 이 꼴을 잡습니다. robots: 제한 없음(2026-10-18 확인). 우리 직군 공고가 실제로 있습니다 — 「<마감> [재활치료실] 동아대학교대신병원 작업치료사 모집」(wr_id=35)."
+ "row": "<td class=\"td_subject\"[\\s\\S]*?<td class=\"td_datetime\">[^<]*<\\/td>",
+ "title": "<a href=\"[^\"]*bo_table=recruitment[^\"]*wr_id=\\d+\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=recruitment[^\"]*wr_id=\\d+)\"",
+ "skip": "합격자|발표|결과|양식|안내문",
+ "note": "① 사각지대 메우기 (2026-10-19). 그누보드이고 **안성성모병원(ansmc.json)과 글자까지 같은 꼴**입니다 — <td class=td_num2> / td_subject / wr_id / td_name sv_use / td_num(조회) / td_datetime. 뿌리 쪽에서 bo_table 링크 7개를 찾아 그중 recruitment 를 골랐습니다(짐작 아님). 등록일이 **월-일만**(08-03)이라 날짜를 못 뽑습니다 — ansmc 와 같아서 date 를 안 넣었습니다. 마감은 본문에서 읽습니다. robots.txt 200 이고 전면 금지가 아닙니다. http 만 씁니다(뿌리가 http)."
 }
