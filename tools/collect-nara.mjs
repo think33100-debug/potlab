@@ -685,6 +685,43 @@ if (dry) {
     담음 += r['담음'] || 0;
   }
   console.log('\n씀          ' + 담음 + '건');
+
+  /* ★ 2026-10-19 — 상세의 `contents` 를 `job_body` 에 보관합니다 (창구 collect_body).
+   *
+   * 왜 — 회원 화면 GJ2 공고 7건의 **본문이 0자**였습니다. 상세(`/getItem`)의
+   * `contents` 에 모집분야·자격요건이 글로 들어 있는데(이 파일 15줄에 적혀
+   * 있습니다) **받아서 쓰고 버리고** 있었습니다. 보관하면 —
+   *   · `본문칸_다시뽑기.mjs` 가 API 를 안 두드리고 칸을 다시 뽑습니다
+   *   · 「아무것도 못 읽음」 ㉢ 갈래에서 GJ2 32건이 빠집니다
+   *   · 나중에 규칙을 고칠 때 되먹일 재료가 남습니다 (지침 9절)
+   *
+   * 표를 새로 만들지 않습니다 — HS3·CE2·ND2 가 이미 쓰는 표입니다.
+   * 회원 화면에는 안 나갑니다(`job_body` 는 anon 권한이 없습니다).
+   * **담긴 공고만** 보관합니다 — 쓰레기통 줄은 FK 가 없습니다. */
+  const 담은번호 = new Set(넣을것.map((x) => x.id));
+  const 원문들 = 볼것
+    .filter((v) => v.상세 && v.상세.contents && v.x && 담은번호.has('GJ' + v.x.idx))
+    .map((v) => ({
+      job_id: 'GJ' + v.x.idx, kind: '상세 본문', ord: 0,
+      url: String((v.상세 || {}).link01 || '') || null,
+      file_name: null,
+      body: String(v.상세.contents).slice(0, 400000),
+    }));
+  if (원문들.length) {
+    let 보관 = 0; let 바이트 = 0;
+    for (let i = 0; i < 원문들.length; i += 50) {
+      try {
+        const r = await rpc('collect_body', {
+          p_secret: cfg.COLLECT_KEY_GJ2, p_source: SOURCE, p_rows: 원문들.slice(i, i + 50),
+        });
+        보관 += r['담음'] || 0; 바이트 += r['바이트'] || 0;
+      } catch (e) { console.log('   본문 보관 못 함 — ' + String(e.message).slice(0, 110)); break; }
+    }
+    console.log('본문 보관    ' + 보관 + '건 · ' + Math.round(바이트 / 1024) + 'KB');
+  } else {
+    console.log('본문 보관    0건 (상세 contents 가 없거나 담긴 공고가 아닙니다)');
+  }
+
   if (쓰레기.length) {
     let 버림 = 0;
     for (let i = 0; i < 쓰레기.length; i += 200) {
