@@ -107,6 +107,26 @@ const 찍기 = (x) => {
   if (목록.length > 8) console.log('     … 그밖 ' + (목록.length - 8) + '곳');
 };
 
+/* ★ 「새로 넣을 것」이 **어디인지** 찍습니다 — 세중님 조건 ③(견본으로 틀린
+   값 0 확인). 창구는 수만 돌려주므로 표의 이름을 읽어 여기서 견줍니다
+   (읽기만 합니다) */
+const 표이름 = new Set();
+for (let off = 0; ; off += 100) {
+  const r = await fetch(U + '/rest/v1/hosp_sites?select=name&order=name.asc&limit=100&offset=' + off,
+    { headers: { apikey: K, Authorization: 'Bearer ' + K } });
+  if (!r.ok) { console.error('✗ hosp_sites 읽기 ' + r.status); break; }
+  const a = await r.json();
+  for (const x of a) 표이름.add(x.name);
+  if (a.length < 100) break;
+  if (off > 5000) break;
+}
+const 새것 = 줄들.filter((s) => !표이름.has(s.name));
+console.log('표에 있는 이름 ' + 표이름.size + '개 · **표에 없는 cfg 이름 ' + 새것.length + '곳**');
+for (const s of 새것) {
+  console.log('   ★ ' + String(s.name).slice(0, 34).padEnd(36) + String(s.url || '').slice(0, 56));
+}
+console.log('');
+
 console.log('── 마른 실행 ──');
 찍기(await 부르기(true));
 
