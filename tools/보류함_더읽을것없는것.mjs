@@ -71,16 +71,23 @@ const ids = 보류.map((x) => x.id);
 const 첨부 = []; const 본문 = [];
 for (let i = 0; i < ids.length; i += 50) {
   const 조각 = ids.slice(i, i + 50).map(encodeURIComponent).join(',');
-  첨부.push(...await 전부('job_attachments?select=job_id,parsed_at,text&job_id=in.(' + 조각 + ')'));
-  본문.push(...await 전부('job_body?select=job_id,body&job_id=in.(' + 조각 + ')'));
+  /* 첨부 표에는 **읽은 글이 없습니다** — parsed_at·읽기탈 만 있습니다.
+     읽은 글은 상세든 첨부든 `job_body` 에 `kind` 로 구분해 들어갑니다
+     (2026-10-19 에 칸 이름을 찍어 확인했습니다 · 지침 3절) */
+  첨부.push(...await 전부('job_attachments?select=job_id,parsed_at,'
+    + encodeURIComponent('읽기탈') + '&job_id=in.(' + 조각 + ')'));
+  본문.push(...await 전부('job_body?select=job_id,kind,body&job_id=in.(' + 조각 + ')'));
 }
 const 첨부별 = new Map(); for (const a of 첨부) {
   if (!첨부별.has(a.job_id)) 첨부별.set(a.job_id, []);
   첨부별.get(a.job_id).push(a);
 }
-const 본문별 = new Map(); for (const b of 본문) {
-  const 전 = 본문별.get(b.job_id) || '';
-  본문별.set(b.job_id, 전 + '\n' + String(b.body || ''));
+/* 상세 본문과 첨부 글을 **따로** 모읍니다 — 「본문을 읽었나」와
+   「첨부를 읽었나」가 조건에서 다른 뜻이기 때문입니다 */
+const 상세별 = new Map(); const 첨부글별 = new Map();
+for (const b of 본문) {
+  const 통 = b.kind === '상세' ? 상세별 : 첨부글별;
+  통.set(b.job_id, (통.get(b.job_id) || '') + '\n' + String(b.body || ''));
 }
 
 const 고름 = [];      /* 숨김보관으로 보낼 것 */
@@ -91,9 +98,9 @@ for (const j of 보류) {
   if (j.admin_locked || (j.edited_fields || []).length) { 남김['관리자가 손댐']++; continue; }
   const as = 첨부별.get(j.id) || [];
   const 안읽은첨부 = as.filter((a) => !a.parsed_at).length;
-  const 본문글 = 본문별.get(j.id) || '';
-  const 첨부글 = as.map((a) => String(a.text || '')).join('\n');
-  const 읽은것있나 = 본문글.length > 200 || as.some((a) => a.parsed_at);
+  const 본문글 = 상세별.get(j.id) || '';
+  const 첨부글 = 첨부글별.get(j.id) || '';
+  const 읽은것있나 = 본문글.trim().length > 200 || as.some((a) => a.parsed_at);
   const 글 = j.title + '\n' + 본문글 + '\n' + 첨부글;
 
   if (우리직군말.test(글)) { 되살릴것.push({ ...j, 왜: '글에 우리 직군 말이 있습니다' }); continue; }
