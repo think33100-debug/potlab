@@ -85,21 +85,54 @@ const 태그걷기 = (h) => h
   .replace(/&quot;/g, '"').replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)))
   .replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
 
-/* 쪽에 걸려 있는 **첨부로 보이는 링크** — 확장자나 내려받기 길 */
+/* 쪽에 걸려 있는 **첨부로 보이는 링크** — 확장자나 내려받기 길
+ *
+ * ★ 2026-10-19 — 첫 6건을 받아 보고 **재는 쪽을 고쳤습니다**:
+ *   ① `&amp;` 를 안 풀어 주소가 틀렸습니다 (HS490653413 → 5,704바이트 HTML).
+ *      지침 5절에 적힌 바로 그 자리입니다
+ *   ② `javascript:fn_FileDown(` 같은 **함수 호출**을 주소로 받아 두드렸습니다 —
+ *      그건 「JS 로 만드는 주소」 갈래로 **적고 두드리지 않습니다**
+ *   ③ `images/download.png` 같은 **아이콘**을 첨부로 셌습니다 — 뺍니다
+ *   ④ `FileViewer.do`·`synap` 은 **뷰어형**이라 따로 적습니다 */
 const 파일꼴 = /\.(pdf|hwpx?|docx?|xlsx?|pptx?|zip|jpe?g|png|gif|tiff?|txt)(\?|$|#)/i;
-const 내려받기길 = /(download|filedown|fileDown|getFile|nttFileDownload|downFile|atchFile|fileidDownLoad|cmm\/fms)/i;
+const 내려받기길 = /(download|filedown|fileDown|getFile|nttFileDownload|downFile|atchFile|fileidDownLoad|cmm\/fms|FileViewer|fileView)/i;
+const 아이콘길 = /\/(images?|img|assets?|static|skin|resources?|css|js)\//i;
+const 뷰어길 = /(FileViewer|synap|docview|viewer|preview|hwpViewer)/i;
+const 엔티티풀기 = (s) => String(s || '')
+  .replace(/&amp;/g, '&').replace(/&amp;/g, '&')   /* 두 번 — 겹쳐 적힌 쪽이 있습니다 */
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+  .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)));
+
 function 쪽첨부들(html, 밑바탕) {
   const 나온것 = [];
-  const 보기 = (h, t) => {
-    if (!h || /^(#|javascript:void|mailto|tel)/i.test(h)) return;
+  const 보기 = (h0, t) => {
+    const h = 엔티티풀기(h0).trim();
+    if (!h || /^(#|mailto|tel)/i.test(h)) return;
+    const 글 = String(t || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+    /* JS 로 주소를 만드는 꼴 — **적고 두드리지 않습니다** */
+    if (/^javascript:/i.test(h)) {
+      if (/void\s*\(/i.test(h)) return;
+      if (!/(file|down|atch|attach|첨부)/i.test(h)) return;
+      const 이름 = (h.match(/javascript:\s*([A-Za-z_$][\w$.]*)/) || [])[1] || '(모름)';
+      if (!나온것.some((x) => x.갈래 === 'JS주소' && x.함수 === 이름)) {
+        나온것.push({ 갈래: 'JS주소', 함수: 이름, url: null, 글, 원문: h.slice(0, 90) });
+      }
+      return;
+    }
     if (!(파일꼴.test(h) || 내려받기길.test(h))) return;
+    if (아이콘길.test(h) && !내려받기길.test(h.replace(아이콘길, '/'))) return;   /* 아이콘은 뺍니다 */
     let u; try { u = new URL(h, 밑바탕).href; } catch { return; }
-    if (!나온것.some((x) => x.url === u)) 나온것.push({ url: u, 글: String(t || '').replace(/\s+/g, ' ').trim().slice(0, 60) });
+    if (나온것.some((x) => x.url === u)) return;
+    나온것.push({ 갈래: 뷰어길.test(u) ? '뷰어형' : '파일주소', url: u, 글 });
   };
-  for (const m of html.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]{0,80}?)<\/a>/gi)) 보기(m[1], m[2].replace(/<[^>]*>/g, ''));
+  for (const m of html.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]{0,80}?)<\/a>/gi)) 보기(m[1], m[2]);
   /* onclick 안의 주소도 봅니다 — 지침 5절(첨부가 href 가 아니라 onclick 에 있던 자리) */
-  for (const m of html.matchAll(/on(?:click|Click)=["'][^"']*?['"]([^'"]+?)['"]/g)) 보기(m[1], '(onclick)');
-  for (const m of html.matchAll(/(?:href|src)=["']([^"']*(?:download|fileDown|atchFile)[^"']*)["']/gi)) 보기(m[1], '(주소꼴)');
+  for (const m of html.matchAll(/on(?:click|Click)=["']([^"']+)["']/gi)) {
+    const s = 엔티티풀기(m[1]);
+    const 안 = [...s.matchAll(/['"]([^'"]{4,160})['"]/g)].map((y) => y[1]);
+    if (/(file|down|atch)/i.test(s) && !안.length) 보기('javascript:' + s, '(onclick)');
+    for (const v of 안) 보기(v, '(onclick)');
+  }
   return 나온것;
 }
 
@@ -132,8 +165,12 @@ for (const [i, x] of 볼것.entries()) {
 
   /* 첨부 — **DB 에 있는 것 ∪ 쪽에 걸려 있는 것** 을 받아 봅니다 */
   const 받을것 = [];
-  for (const a of (x['첨부'] || [])) 받을것.push({ url: a.url, name: a.name, 어디서: 'DB' });
-  for (const a of 한건.쪽첨부) if (!받을것.some((y) => y.url === a.url)) 받을것.push({ url: a.url, name: a.글, 어디서: '쪽' });
+  for (const a of (x['첨부'] || [])) 받을것.push({ url: 엔티티풀기(a.url), name: a.name, 어디서: 'DB' });
+  /* JS 로 만드는 주소는 **두드리지 않습니다** — 갈래만 적습니다 */
+  for (const a of 한건.쪽첨부) {
+    if (!a.url) continue;
+    if (!받을것.some((y) => y.url === a.url)) 받을것.push({ url: a.url, name: a.글, 어디서: '쪽', 갈래: a.갈래 });
+  }
 
   const 첨방 = path.join(방, '첨부');
   if (받을것.length) fs.mkdirSync(첨방, { recursive: true });
