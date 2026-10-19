@@ -18,7 +18,7 @@
  *     ⚠ 그 창구가 employ_type 을 받는지 먼저 봅니다 — 안 받으면 멈춥니다
  */
 import fs from 'node:fs';
-import { 고용형태판정 } from './공고문읽기.mjs';
+import { 고용형태판정, 고용형태코드, 우리직군줄 } from './공고문읽기.mjs';
 
 const argv = process.argv.slice(2);
 const 진짜 = argv.includes('--진짜');
@@ -75,8 +75,19 @@ const 바뀔것 = []; const 건너뜀 = { '사람이 고친 칸': 0, '관리자�
 for (const j of 볼것) {
   if (j.admin_locked) { 건너뜀['관리자가 손댐']++; continue; }
   if ((j.edited_fields || []).includes('employ_type')) { 건너뜀['사람이 고친 칸']++; continue; }
-  const r = 고용형태판정(j.title, 글별.get(j.id) || '');
   const 지금 = String(j.employ_type || '');
+  /* ① 본문(·첨부)에서 읽습니다 — 통합공고면 **우리 직군 줄만** 떼어 넘깁니다
+        (세중님 2번 · 「모집인원은 우리 직군 인원만」과 같은 원칙) */
+  const 글 = 글별.get(j.id) || '';
+  const 줄 = 우리직군줄(글);
+  let r = 고용형태판정(j.title, 줄 || 글);
+  /* ② 본문으로 못 가렸으면 **지금 값을 셋으로 옮깁니다** (세중님 1번 —
+        「DB 기존 값도 같은 규칙으로 정리」). 기간제·비정규직·숫자코드 등 */
+  if (!r.값) {
+    const c = 고용형태코드(지금);
+    if (c && c.값) r = { 값: c.값, 왜: '지금 값을 셋으로 옮김 — ' + c.왜 };
+    else if (c && !c.값) r = { 값: '', 왜: c.왜 };
+  }
   if (!r.값) { 건너뜀['판정이 비어 그대로']++; continue; }
   if (r.값 === 지금) { 건너뜀['지금과 같음']++; continue; }
   바뀔것.push({ ...j, 전: 지금, 후: r.값, 왜: r.왜 });
