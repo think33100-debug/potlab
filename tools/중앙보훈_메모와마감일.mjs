@@ -77,10 +77,25 @@ console.log('\n── 붙일 메모 ──\n   ' + 메모);
 
 if (!진짜) { console.log('\n[마른] 아무것도 안 바꿉니다 — 붙이려면 --진짜'); process.exit(0); }
 
-/* 메모는 `admin_decide` 창구로 — 표를 직접 쓰지 않습니다.
-   `p_what='메모'` 를 받는지 모르니 먼저 두드려 보고 답을 그대로 적습니다 */
-const r = await fetch(U + '/rest/v1/rpc/admin_decide', {
+/* ★ `admin_decide` 는 **관리자 로그인**이 필요합니다 — service_role 로는
+ *   `42501 관리자만 할 수 있습니다` 가 옵니다 (2026-10-19 에 두드려 보고 알았습니다).
+ *   그래서 **「손으로 확인할 곳」**(`hand_check_put`)에 넣습니다 —
+ *   관리자 화면 `/admin/hand` 에 보이고, 그것이 「세중님이 한 번 보게」의 목적에
+ *   맞습니다. 공고 자체는 보류함에 그대로 있습니다. */
+if (!cfg.COLLECT_KEY_HS3) { console.error('✗ COLLECT_KEY_HS3 가 없습니다'); process.exit(1); }
+const r = await fetch(U + '/rest/v1/rpc/hand_check_put', {
   method: 'POST', headers: H,
-  body: JSON.stringify({ p_id: ID, p_what: '메모', p_job_group: null, p_note: 메모 }),
+  body: JSON.stringify({
+    p_secret: cfg.COLLECT_KEY_HS3, p_source: 'HS3',
+    p_rows: [{
+      이름: '중앙보훈병원(그 공고)',
+      결과: '★ 이 공고를 한 번 봐 주십시오 — ' + ID,
+      공고줄: 1,
+      까닭: 메모,
+      어디서: cfg.POTJOB_WHERE || '(모름)',
+      메모: '보류함에 그대로 있습니다 · 원문 ' + j.url,
+    }],
+  }),
 });
-console.log('\nadmin_decide ' + r.status + ' — ' + (await r.text()).slice(0, 300));
+console.log('\nhand_check_put ' + r.status + ' — ' + (await r.text()).slice(0, 200));
+console.log('관리자 화면 /admin/hand 에서 보입니다');
