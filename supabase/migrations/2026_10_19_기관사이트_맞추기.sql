@@ -129,11 +129,14 @@ begin
        and nullif(r->>'url', '')  is not null
      order by r->>'name'
   )
+  /* ★ `url_key` 는 **생성 칸(generated)** 입니다 — 값을 넣으면 428C9 로 막힙니다.
+     `information_schema.columns` 를 찍을 때 `is_generated` 를 안 봐서
+     처음에 주소를 넣으려 했습니다 (2026-10-19 · 짐작한 자리). 빼고 맡깁니다 */
   insert into hosp_sites
-         (name, url, base, kind, loaded_on, url_key,
+         (name, url, base, kind, loaded_on,
           "채용주소", "갈래", "긁는규칙", "끔", "집에서만", "옮긴날", note)
   select c.name, c.url, c.base, c.kind,
-         (now() at time zone 'Asia/Seoul')::date, c.url,
+         (now() at time zone 'Asia/Seoul')::date,
          c.url, c.kind, coalesce(c.규칙, '{}'::jsonb), false, false,
          (now() at time zone 'Asia/Seoul')::date,
          'cfg 에서 맞춤 (기관사이트_맞추기 · ' || (now() at time zone 'Asia/Seoul')::date || ')'
