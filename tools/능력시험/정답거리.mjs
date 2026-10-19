@@ -54,8 +54,17 @@ for (const id of 볼것) {
   const 사실 = JSON.parse(fs.readFileSync(path.join(방, '사실.json'), 'utf8'));
   console.log('쪽 ' + JSON.stringify(사실.쪽).slice(0, 160));
 
-  const 보이기 = (제목, 글) => {
+  /* ★ 홈페이지 쪽 글에는 **개인정보처리방침·이용약관**이 통째로 붙어 옵니다
+     (뉴고려병원 16,038자 중 대부분이 그것입니다). 읽을 자리를 가리려고 **잘라냅니다** —
+     공고 본문이 아니라고 가린 것이니, 자른 자리를 아래에 적어 둡니다 */
+  const 군더더기 = /(개인정보\s*(처리방침|취급방침|보호책임자)|이용약관|비급여\s*진료비|위탁계약\s*종료시까지|쿠키\s*\(cookie|제\s*\d+\s*조\s*개인정보)/;
+  const 보이기 = (제목, 글0) => {
+    let 글 = 글0;
+    const 잘린곳 = 글.search(군더더기);
+    if (잘린곳 > 400) 글 = 글.slice(0, 잘린곳);
     const 줄 = 글.split('\n').map((l) => l.trim()).filter(Boolean);
+    if (잘린곳 > 400) console.log('   (★ 「' + 글0.slice(잘린곳, 잘린곳 + 14).replace(/\s+/g, ' ')
+      + '…」 부터는 개인정보방침·약관이라 잘랐습니다 — ' + (글0.length - 글.length) + '자)');
     console.log('\n── ' + 제목 + ' (' + 글.length + '자 · ' + 줄.length + '줄) ──');
     const 고른 = new Set();
     줄.forEach((l, i) => { if (표식.test(l)) { for (let k = -1; k <= 1; k++) if (줄[i + k]) 고른.add(i + k); } });
