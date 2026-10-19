@@ -46,6 +46,20 @@ const 곳들 = [
   { 이름: '정읍한국병원', 갈래: '종합병원', 집: 'https://www.jehk.kr',
     게시판: '(주소를 못 엶)',
     왜: '사이트 TLS 가 낡아 Node 가 거부합니다 (ERR_SSL_DH_KEY_TOO_SMALL · http 는 https 로 302). 브라우저로는 열립니다' },
+
+  /* 2026-10-19 세중님 ⑤ — **상급종합**입니다. 사각지대 상급종합 2곳 중 하나라
+     빠뜨리면 안 됩니다. 「매주 확인」으로 적습니다 */
+  { 이름: '학교법인 울산공업학원 울산대학교병원', 갈래: '상급종합',
+    집: 'https://www.uuh.ulsan.kr/',
+    게시판: 'https://recruit.uuh.ulsan.kr:8443/uuhrecruit/',
+    매주: true,
+    왜: 'Vaadin 으로 만든 채용시스템이라 주소 하나를 fetch 하는 길로는 못 긁습니다 '
+      + '(본문이 「You have to enable javascript … built with Vaadin」 · ./VAADIN/vaadinBootstrap.js). '
+      + '서버가 화면을 들고 있어 세션·동기화 토큰을 주고받는 UIDL 통신이 필요합니다. '
+      + '★ hira_org 주소(http://www.uuh.ulsan.kr/main/main.asp)는 **에러 페이지**입니다 — '
+      + '「접속하는 페이지가 없는 경우」. 루트는 살아 있습니다(HTTP 200 · 16,118바이트 · 제목 「울산대학교병원」). '
+      + '대문의 「채용사이트」 → :8443/uuhrecruit/ → 「채용공고/입사지원」 → recruit.uuh.ulsan.kr:8443. '
+      + '2026-10-19 에 브라우저와 fetch 로 직접 확인했습니다' },
 ];
 
 const cfg = {};
@@ -68,10 +82,13 @@ if (!U || !AK || !SEC) {
 
 const 줄 = 곳들.map((x) => ({
   이름: x.이름.slice(0, 20),
-  결과: x.왜 ? '주소를 못 엶 — 사람이 봐야 합니다' : 'robots 전면 금지 — 긁지 않음',
+  결과: x.매주 ? '★ 매주 손으로 확인 (상급종합)'
+    : x.왜 ? '주소를 못 엶 — 사람이 봐야 합니다'
+      : 'robots 전면 금지 — 긁지 않음',
   공고줄: 0,
   까닭: (x.왜 || 'robots.txt 의 User-agent: * 에 Disallow: /') + ' · 게시판 ' + x.게시판,
   어디서: cfg.POTJOB_WHERE || '(모름)',
+  메모: x.매주 ? '매주 한 번 열어 보기 — 1층 상급종합이라 빠뜨리면 안 됩니다' : null,
 }));
 
 console.log('「손으로 확인할 곳」 에 남길 ' + 줄.length + '곳 (1층 종합병원만)\n');
