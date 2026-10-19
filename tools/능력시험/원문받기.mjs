@@ -120,7 +120,9 @@ function 쪽첨부들(html, 밑바탕) {
       return;
     }
     if (!(파일꼴.test(h) || 내려받기길.test(h))) return;
-    if (아이콘길.test(h) && !내려받기길.test(h.replace(아이콘길, '/'))) return;   /* 아이콘은 뺍니다 */
+    /* 아이콘은 뺍니다 — `images/download.png` 가 「download」 때문에 첨부로 세어졌습니다.
+       꾸밈 폴더에 있으면서 **문서 확장자가 아니면** 버립니다 */
+    if (아이콘길.test(h) && !/\.(pdf|hwpx?|docx?|xlsx?|pptx?|zip|txt)(\?|$|#)/i.test(h)) return;
     let u; try { u = new URL(h, 밑바탕).href; } catch { return; }
     if (나온것.some((x) => x.url === u)) return;
     나온것.push({ 갈래: 뷰어길.test(u) ? '뷰어형' : '파일주소', url: u, 글 });
