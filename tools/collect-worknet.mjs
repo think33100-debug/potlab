@@ -62,6 +62,7 @@ import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
 import { 고용형태코드 } from './공고문읽기.mjs';
 import { 워크넷상세칸 } from './워크넷상세칸.mjs';
+import { 세기, 남기기 as 고용24남기기, 막힘인가, 막힘적기, 막혔나 } from './고용24한도.mjs';
 import { 날짜풀기, 채용시까지인가 } from './날짜.mjs';
 import { 기관종별, 시설구분 } from './wn-kind.mjs';
 /* ㉮ 덧갈래로 온 줄을 제목으로 가립니다 (2026-10-03 세중님 승인).
@@ -218,7 +219,7 @@ const 한칸 = (t, 이름) => {
 };
 async function 상세한건(번호, svc) {
   const r = await 받기(주소만들기({ callTp: 'D', wantedAuthNo: 번호, infoSvc: svc }));
-  호출수++;
+  호출수++; 세기('상세');            /* 하루 호출 수 — 목록·상세 따로 (2026-10-19) */
   if (r.code !== 200 || !/<wantedDtl[\s>]/.test(r.글)) {
     return { 탈: 'HTTP ' + r.code + ' ' + 가리기(r.글).replace(/\s+/g, ' ').slice(0, 120) };
   }
@@ -249,6 +250,17 @@ function 상세기억쓰기(표) {
 /* ── 본체 ─────────────────────────────────────────────────── */
 const t0 = Date.now();
 if (한줄) console.log = () => {};
+
+/* 오늘 이미 막힌 출처면 **두드리지 않습니다** (2026-10-19 세중님 2번).
+   호출을 더 써서 한도를 더 밀어내지 않고, 멈춘 것을 메일로 알립니다 */
+for (const 이름 of ['WN2', 'WN2-목록']) {
+  const 막 = 막혔나(이름);
+  if (막) {
+    console.error('★ 고용24(' + 이름 + ')가 오늘 막혔습니다 — ' + 막.수 + '번 · ' + 막.까닭);
+    console.error('  이 바퀴는 **아무것도 하지 않습니다**. 아침 메일에 뜹니다');
+    process.exit(0);
+  }
+}
 
 console.log('워크넷 새 수집기 (' + SOURCE + ') · '
   + new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) + (dry ? ' · **--dry**' : ''));
@@ -299,7 +311,10 @@ function 호출수남기기() {
     const 날들 = Object.keys(표).sort();
     while (날들.length > 60) delete 표[날들.shift()];
     fs.writeFileSync(파일, JSON.stringify(표, null, 1));
-    console.log('  호출 ' + 호출수 + '번 · 오늘 누적 ' + 표[날] + '번 (한도는 공개 안 됨)');
+    const 갈래 = 고용24남기기();   /* 목록·상세 따로 — 아침 메일이 읽습니다 */
+    console.log('  호출 ' + 호출수 + '번 · 오늘 누적 ' + 표[날] + '번'
+      + ' (목록 ' + 갈래.목록 + ' · 상세 ' + 갈래.상세 + ')'
+      + ' · **한도는 신청 화면에 안 적혀 있습니다**');
     호출수 = 0;   /* 적은 만큼 비웁니다 — 상세까지 세려고 두 번 부릅니다 */
   } catch (e) { console.error('호출 수 기록 실패 · ' + String(e.message).slice(0, 120)); }
 }
@@ -336,7 +351,17 @@ let 전체 = null;
 let 이상 = false;
 for (let 쪽 = 1; 쪽 <= 최대쪽; 쪽++) {
   const r = await 받기(주소만들기({ callTp: 'L', startPage: 쪽, display: 100, occupation: 직종.join('|') }));
-  호출수++;
+  호출수++; 세기('목록');
+  /* ★ 2026-10-19 세중님 2번 — 막힘을 **고용24한도 한 자리**에서 가립니다 */
+  const 막힘L = 막힘인가(r.code, r.글);
+  if (막힘L && !/<wantedRoot[s>]/.test(String(r.글 || ''))) {
+    const 상태 = 막힘적기('WN2-목록', 막힘L, r.글);
+    if (상태.멈춤) {
+      console.error('  ★ 고용24 목록이 막혔습니다 — ' + 상태.수 + '번 · ' + 막힘L);
+      console.error('    오늘은 여기서 접습니다. 응답 원문은 log/고용24_막힘.log 에 있습니다');
+      이상 = true; break;
+    }
+  }
   if (r.code !== 200 || !r.글) {
     셈.못받은쪽++;
     이상 = true;
@@ -376,7 +401,7 @@ if (덧켬 && !이상) {
     let 더한것 = 0;
     for (let 쪽 = 1; 쪽 <= 덧최대쪽; 쪽++) {
       const r = await 받기(주소만들기({ callTp: 'L', startPage: 쪽, display: 100, ...인자 }));
-      호출수++;
+      호출수++; 세기('목록');
       /* 이상한 응답이면 **그 갈래만** 접습니다. 본 목록은 이미 받았습니다 */
       if (r.code !== 200 || !r.글 || !/<wantedRoot[\s>]/.test(r.글)) {
         셈.못받은쪽++;

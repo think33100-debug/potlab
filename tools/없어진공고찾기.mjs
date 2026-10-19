@@ -40,6 +40,7 @@
  */
 import fs from 'node:fs';
 import { 차례붙이기 } from './쪽나눠받기.mjs';
+import { 세기, 남기기, 막힘인가, 막힘적기, 막혔나 } from './고용24한도.mjs';
 import { 없어짐말, 알림상태 } from './hosp/hs_목록상태.mjs';
 import { 워크넷상세칸 } from './워크넷상세칸.mjs';
 import { 고용형태판정 } from './공고문읽기.mjs';
@@ -79,8 +80,30 @@ if (argv.includes('--자기점검')) {
   /* 없어짐말이 한 자리에서 오나 */
   봐('없어짐말을 한 자리에서 가져온다', 없어짐말 instanceof RegExp);
   봐('없어짐말 — 치매센터 꼴', 없어짐말.test('게시물이 존재하지 않습니다'));
+
+  /* ★★ 2026-10-19 세중님 2번 — **막힘을 「없어짐」 으로 읽지 않습니다** ★★
+     고용24가 막히면(오류·빈 응답·한도 초과) 그 응답을 「공고가 없어졌다」로
+     읽어 **멀쩡한 공고를 내릴** 수 있습니다. 가장 나쁜 쪽입니다.
+     막힘 판정은 `고용24한도.mjs` 의 `막힘인가()` 한 자리이고, 이 함수는
+     **그 꼴 어느 것도 없어짐으로 보지 않아야** 합니다 */
+  봐('★ 빈 응답을 없어짐으로 읽지 않는다', 워크넷없어짐('') === null);
+  봐('★ HTML 오류 쪽을 없어짐으로 읽지 않는다',
+    워크넷없어짐('<!DOCTYPE html><html><head><title>시스템안내</title></head>'
+      + '<body><script>alert(\'유효하지 않은 요청입니다.\');</script></body></html>') === null);
+  봐('★ 한도 초과 꼴을 없어짐으로 읽지 않는다',
+    워크넷없어짐('<error><code>LIMIT</code><msg>일일 트래픽을 초과하였습니다</msg></error>') === null);
+  봐('★ 봉투가 달라도(wantedDtl 없음) 없어짐이 아니다',
+    워크넷없어짐('<OpenAPI_ServiceResponse><cmmMsgHeader><returnReasonCode>22</returnReasonCode>'
+      + '<errMsg>LIMITED NUMBER OF SERVICE REQUESTS EXCEEDS ERROR</errMsg></cmmMsgHeader></OpenAPI_ServiceResponse>') === null);
+  /* 그리고 `막힘인가()` 가 그 넷을 **막힘으로는** 보는지 — 짝을 함께 봅니다 */
+  봐('막힘인가 가 빈 응답을 막힘으로 본다', 막힘인가(200, '') === '빈 응답');
+  봐('막힘인가 가 한도 초과 꼴을 막힘으로 본다',
+    /응답 꼴이 다름/.test(막힘인가(200, '<error><msg>일일 트래픽을 초과하였습니다</msg></error>') || ''));
+  봐('★ 그런데 messageCd 006 은 막힘이 **아니다** (정말 없어진 것입니다)',
+    막힘인가(200, 없) === null && 워크넷없어짐(없) === 'messageCd 006');
+
   if (어겼나.length) { console.error('✗ 자기 점검 실패 — ' + 어겼나.join(' · ')); process.exit(1); }
-  console.log('○ 자기 점검 통과 — 워크넷 없어짐 판정 6가지 (사이트를 두드리지 않았습니다)');
+  console.log('○ 자기 점검 통과 — 워크넷 없어짐 판정 13가지 (사이트를 두드리지 않았습니다)');
   process.exit(0);
 }
 
@@ -169,6 +192,14 @@ const 살아있음 = [];
 /* ── 워크넷: 상세 API ── */
 const WURL = 'https://www.work24.go.kr/cm/openApi/call/wk/callOpenApiSvcInfo210L01.do';
 
+/* 오늘 이미 막힌 출처면 **두드리지 않습니다** (2026-10-19 세중님 2번) */
+const 이미막힘 = 막혔나('WN2');
+if (이미막힘) {
+  console.error('★ 고용24(WN2)가 오늘 막혔습니다 — ' + 이미막힘.수 + '번 · ' + 이미막힘.까닭);
+  console.error('  워크넷은 건너뜁니다. 그밖 출처만 봅니다 (없어짐으로 오판하지 않게)');
+  워크넷.length = 0;
+}
+
 /* ── 같은 응답에서 칸도 받습니다 (2026-10-19 세중님 1번) ──────────
  * 뽑는 자리는 `워크넷상세칸.mjs` **한 자리**이고(지침 6절), 고용형태 판정은
  * `공고문읽기.mjs` 의 `고용형태판정()` **한 자리**입니다 — 화면 값 셋
@@ -229,9 +260,24 @@ for (const [i, x] of 워크넷.entries()) {
   let r;
   try {
     const res = await fetch(u, { headers: { accept: 'application/xml' }, signal: AbortSignal.timeout(20000) });
-    if (res.status >= 500) { 오류.push({ ...x, 왜: 'HTTP ' + res.status + ' (사이트 장애)' }); await 자고(250); continue; }
+    세기('상세');                                   /* 하루 호출 수 (목록·상세 따로) */
     const t = await res.text();
-    if (!t.length) { 오류.push({ ...x, 왜: '빈 응답' }); await 자고(250); continue; }
+    /* ★ 2026-10-19 세중님 2번 — **막힘인지 먼저 봅니다.**
+       막힘은 「없어짐」 이 아닙니다. 막힌 응답을 없어짐으로 읽으면 멀쩡한
+       공고를 내립니다. 그래서 오류로 돌리고(= alive_mark 에 **안 보냅니다**),
+       다섯 번 이어지면 그날 그 출처를 멈추고 응답 원문을 남깁니다 */
+    const 막힘 = 막힘인가(res.status, t);
+    if (막힘) {
+      const 상태 = 막힘적기('WN2', 막힘, t);
+      오류.push({ ...x, 왜: '고용24 막힘 — ' + 막힘 });
+      if (상태.멈춤) {
+        console.error('\n★ 고용24가 막혔습니다 — ' + 상태.수 + '번 이어짐 · ' + 막힘);
+        console.error('  남은 워크넷 공고는 **안 봅니다**(없어짐으로 오판하지 않게).'
+          + ' 응답 원문은 log/고용24_막힘.log 에 남겼습니다');
+        break;
+      }
+      await 자고(250); continue;
+    }
     r = t;
   } catch (e) { 오류.push({ ...x, 왜: '못 받음 · ' + String(e && e.message || e).slice(0, 34) }); await 자고(250); continue; }
   const 왜 = 워크넷없어짐(r);
@@ -241,6 +287,12 @@ for (const [i, x] of 워크넷.entries()) {
   await 자고(250);
 }
 process.stderr.write('\n');
+/* 하루 호출 수를 남깁니다 — 아침 메일이 목록·상세를 따로 찍습니다 */
+{
+  const n = 남기기();
+  console.log('고용24 호출 — 오늘 누적 목록 ' + n.목록 + ' · 상세 ' + n.상세
+    + ' (합 ' + n.합 + ') · **한도는 신청 화면에 안 적혀 있습니다**');
+}
 
 /* ── 그밖: 쪽 열기 (같은 사이트 3.5초) ── */
 const 끝때 = new Map();
