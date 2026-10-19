@@ -61,6 +61,7 @@ import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
 import { 고용형태코드 } from './공고문읽기.mjs';
+import { 워크넷상세칸 } from './워크넷상세칸.mjs';
 import { 날짜풀기, 채용시까지인가 } from './날짜.mjs';
 import { 기관종별, 시설구분 } from './wn-kind.mjs';
 /* ㉮ 덧갈래로 온 줄을 제목으로 가립니다 (2026-10-03 세중님 승인).
@@ -73,6 +74,8 @@ const 상세최대 = Number((process.argv.find((a) => a.startsWith('--상세최�
 /* --dry 는 상세를 안 받습니다 (09:55 대조용 마른 실행이 호출을 안 쓰게).
    따로 폴더에서 시험할 때만 --상세시험 으로 켭니다 */
 const 상세시험 = process.argv.includes('--상세시험');
+/* 잘린 제목을 상세의 온전한 제목으로 바꿉니다 — 세중님 승인 뒤에 켭니다 (2026-10-19 3번) */
+const 제목도 = process.argv.includes('--제목도');
 const SOURCE = 'WN2';
 const URL_ = 'https://www.work24.go.kr/cm/openApi/call/wk/callOpenApiSvcInfo210L01.do';
 /* 물리및작업치료사 · 물리치료사 · 작업치료사 */
@@ -219,10 +222,15 @@ async function 상세한건(번호, svc) {
   if (r.code !== 200 || !/<wantedDtl[\s>]/.test(r.글)) {
     return { 탈: 'HTTP ' + r.code + ' ' + 가리기(r.글).replace(/\s+/g, ' ').slice(0, 120) };
   }
+  /* 뽑는 자리는 `워크넷상세칸.mjs` **한 자리**입니다 (지침 6절).
+     ★ 제목은 **추가 호출 0** 으로 얻습니다 — 이 응답을 이미 받고 있었고
+       `wantedTitle` 만 안 읽고 있었습니다 (2026-10-19) */
+  const 칸 = 워크넷상세칸(r.글);
   return {
     인원: 한칸(r.글, 'collectPsncnt'),
     자격: 한칸(r.글, 'certificate'),
     급여: 한칸(r.글, 'salTpNm').replace(/,\s*$/, '').slice(0, 120),
+    제목: 칸.제목 || '',
   };
 }
 
@@ -542,7 +550,7 @@ if (!dry || 상세시험) {
     const 번호 = String(v.r.wantedAuthNo || '');
     const 옛 = 기억[번호];
     if (옛 && 옛.m === String(v.r.smodifyDtm || '-')) {
-      상세값.set(번호, { 인원: 옛.n || '', 자격: 옛.c || '', 급여: 옛.s || '' });
+      상세값.set(번호, { 인원: 옛.n || '', 자격: 옛.c || '', 급여: 옛.s || '', 제목: 옛.t || '' });
     }
   }
   /* ② 새 번호이거나 원 출처가 고친 것(smodifyDtm 이 달라진 것)만 받습니다 */
@@ -563,7 +571,7 @@ if (!dry || 상세시험) {
       if (상세탈.length >= 5) { console.error('   ★ 연달아 다섯 번 실패 — 상세만 접습니다'); break; }
     } else {
       상세값.set(번호, r);
-      기억[번호] = { m: String(v.r.smodifyDtm || '-'), n: r.인원, c: r.자격, s: r.급여 };
+      기억[번호] = { m: String(v.r.smodifyDtm || '-'), n: r.인원, c: r.자격, s: r.급여, t: r.제목 };
     }
     await 쉼(300);
   }
@@ -571,10 +579,11 @@ if (!dry || 상세시험) {
   const 살아있는 = new Set(볼것.map((v) => String(v.r.wantedAuthNo || '')));
   for (const k of Object.keys(기억)) if (!살아있는.has(k)) delete 기억[k];
   if (!dry) 상세기억쓰기(기억);
-  const 셈3 = { 인원: 0, 자격: 0, 급여: 0 };
+  const 셈3 = { 인원: 0, 자격: 0, 급여: 0, 제목: 0 };
   for (const v of 상세값.values()) for (const k of Object.keys(셈3)) if (v[k]) 셈3[k]++;
   console.log('   실어 보낼 것 ' + 상세값.size + '건 (기억분 포함) · 못 받음 ' + 상세탈.length + '건'
-    + ' — 모집인원 ' + 셈3.인원 + ' · 지원자격 ' + 셈3.자격 + ' · 급여 ' + 셈3.급여);
+    + ' — 모집인원 ' + 셈3.인원 + ' · 지원자격 ' + 셈3.자격 + ' · 급여 ' + 셈3.급여
+    + ' · 온전한 제목 ' + 셈3.제목);
   for (const t of 상세탈.slice(0, 3)) console.error('   ✗ ' + t);
   호출수남기기();        /* 상세로 쓴 호출도 오늘 누적에 넣습니다 */
 }
@@ -592,7 +601,13 @@ for (const v of 볼것) {
     id: 'WN' + String(r.wantedAuthNo || ''),      /* 옛 수집기와 같은 규칙 — 겹치면 안 덮습니다 */
     external_id: String(r.wantedAuthNo || ''),
     org_name: String(r.company || '').trim(),
-    title: v.제목,
+    /* 제목 — 목록 API 가 30자로 자릅니다. 상세의 `wantedTitle` 이 온전합니다.
+       ★ **잘린 것만** 바꿉니다. 그리고 `--제목도` 를 적어야 바꿉니다 —
+         `collect_put` 은 같은 출처면 title 을 덮으므로, 승인 전에 켜면
+         기존 72건이 이 길로 슬그머니 바뀝니다 (세중님 3번은 「마른 실행 →
+         견본 10 → 승인 → 실행」 입니다). 승인 뒤에 이 꼭지를 지웁니다 */
+    title: (제목도 && /(\.\.\.|…)\s*$/.test(String(v.제목 || '')) && 상.제목)
+      ? 상.제목 : v.제목,
     employ_type: 고용형태(r.empTpCd),
     work_place: 지역손질(r.basicAddr || ''),
     sido: (v.지역.split(' ')[0] || ''),
