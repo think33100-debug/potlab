@@ -96,7 +96,10 @@ const 태그걷기 = (h) => h
  *   ④ `FileViewer.do`·`synap` 은 **뷰어형**이라 따로 적습니다 */
 const 파일꼴 = /\.(pdf|hwpx?|docx?|xlsx?|pptx?|zip|jpe?g|png|gif|tiff?|txt)(\?|$|#)/i;
 const 내려받기길 = /(download|filedown|fileDown|getFile|nttFileDownload|downFile|atchFile|fileidDownLoad|cmm\/fms|FileViewer|fileView)/i;
-const 아이콘길 = /\/(images?|img|assets?|static|skin|resources?|css|js)\//i;
+const 아이콘길 = /\/(images?|img|assets?|static|skin|resources?|css|js|favicons?|icons?|thumb(nail)?s?)\//i;
+/* 꾸밈 그림은 **언제나** 뺍니다 — `favicon/apple-icon-57x57.png` 가 첨부로 세어졌습니다.
+   공고문이 그림(JPG)인 곳이 있으니 **jpg·jpeg·tif 는 남깁니다** (갈래로 적습니다) */
+const 꾸밈그림 = /\.(png|gif|svg|ico|webp|bmp)(\?|$|#)/i;
 const 뷰어길 = /(FileViewer|synap|docview|viewer|preview|hwpViewer)/i;
 const 엔티티풀기 = (s) => String(s || '')
   .replace(/&amp;/g, '&').replace(/&amp;/g, '&')   /* 두 번 — 겹쳐 적힌 쪽이 있습니다 */
@@ -120,12 +123,16 @@ function 쪽첨부들(html, 밑바탕) {
       return;
     }
     if (!(파일꼴.test(h) || 내려받기길.test(h))) return;
-    /* 아이콘은 뺍니다 — `images/download.png` 가 「download」 때문에 첨부로 세어졌습니다.
-       꾸밈 폴더에 있으면서 **문서 확장자가 아니면** 버립니다 */
-    if (아이콘길.test(h) && !/\.(pdf|hwpx?|docx?|xlsx?|pptx?|zip|txt)(\?|$|#)/i.test(h)) return;
+    const 문서확장자 = /\.(pdf|hwpx?|docx?|xlsx?|pptx?|zip|txt)(\?|$|#)/i.test(h);
+    if (꾸밈그림.test(h) && !문서확장자) return;                    /* png·ico 는 첨부가 아닙니다 */
+    if (아이콘길.test(h) && !문서확장자) return;                    /* 꾸밈 폴더도 */
     let u; try { u = new URL(h, 밑바탕).href; } catch { return; }
-    if (나온것.some((x) => x.url === u)) return;
-    나온것.push({ 갈래: 뷰어길.test(u) ? '뷰어형' : '파일주소', url: u, 글 });
+    /* ★ `;jsessionid=…` 는 **받을 때마다 바뀝니다.** 같은 파일을 여러 개로 세지
+       않게 **열쇠에서 뺍니다**. (2026-10-19 — 우리 `job_attachments` 가 이 때문에
+       HS987933081 한 건에 **196줄**(참 파일 4개)을 쌓아 두고 있었습니다) */
+    const 열쇠 = u.replace(/;jsessionid=[^?#]*/i, '');
+    if (나온것.some((x) => x.열쇠 === 열쇠)) return;
+    나온것.push({ 갈래: 뷰어길.test(u) ? '뷰어형' : '파일주소', url: u, 열쇠, 글 });
   };
   for (const m of html.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]{0,80}?)<\/a>/gi)) 보기(m[1], m[2]);
   /* onclick 안의 주소도 봅니다 — 지침 5절(첨부가 href 가 아니라 onclick 에 있던 자리) */
