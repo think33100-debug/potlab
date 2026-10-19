@@ -266,8 +266,12 @@ export default function AdminJobs() {
               </Link>
 
               <p className="mt-1 text-sm text-mute">
+                {/* ★ 2026-10-19 — `r.headcount ?` 는 **0 을 떨어뜨립니다.**
+                    「0명」도 원문에 적힌 값이라 그대로 보여 줍니다 (세중님 결정).
+                    회원 화면(jobs/[id])은 `!= null` 로 봐서 멀쩡했는데 여기만
+                    0 을 숨기고 있었습니다 */}
                 {[r.job_group, r.employ_type, r.work_place,
-                  r.headcount ? `${r.headcount}명` : null,
+                  r.headcount != null ? `${r.headcount}명` : null,
                   r.apply_to ? `~${r.apply_to}` : null,
                   r.id].filter(Boolean).join(' · ')}
               </p>
