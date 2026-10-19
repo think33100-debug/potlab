@@ -41,7 +41,21 @@ const 쪽크기 = 100;          // 서버가 못 넘게 막는 수. 올려도 �
  *  `job_body` 처럼 `id` 가 없는 표는 둘째 인수로 고유한 칸을 적습니다 —
  *    차례붙이기('job_body?select=…', 'job_id.asc,ord.asc,kind.asc')
  */
-export function 차례붙이기(길, 차례칸 = 'id') {
+/* ★ `id` 칸이 **없는** 표들. 안 적어 두면 `order=id` 가 붙어
+     「column job_body.id does not exist」 로 400 이 납니다
+     (2026-10-19 에 `고용형태_바로잡기` 가 그렇게 깨졌습니다 — 제가 깨뜨렸습니다).
+   ★ 새 표를 쓰다 400 이 나면 **여기 한 줄**을 더합니다 (지침 6절). */
+export const 표고유열쇠 = {
+  job_body: 'job_id.asc,ord.asc,kind.asc',
+  job_attachments: 'job_id.asc,kind.asc,url.asc',
+  칸기록: 'id.asc',
+};
+
+export function 차례붙이기(길, 차례칸) {
+  if (차례칸 == null) {
+    const 표 = (String(길).match(/^\/?([^?/]+)/) || [])[1] || '';
+    차례칸 = 표고유열쇠[표] || 'id';
+  }
   const 이미 = (길.match(/[?&]order=([^&]*)/) || [])[1];
   const 첫칸 = String(차례칸).split(',')[0].split('.')[0];
   const 벗긴 = 길.replace(/([?&])order=[^&]*&?/, (m, p1) => (m.endsWith('&') ? p1 : (p1 === '?' ? '?' : '')))
@@ -132,6 +146,17 @@ if (process.argv.includes('--시험')) {
   봐('차례붙이기 — id 없는 표',
     decodeURIComponent(차례붙이기('job_body?select=x', 'job_id.asc,ord.asc')),
     'job_body?select=x&order=job_id.asc,ord.asc');
+  /* ★ 2026-10-19 — **차례칸을 안 줘도** id 없는 표를 알아야 합니다.
+     안 그러면 order=id 가 붙어 「column job_body.id does not exist」 400 입니다 */
+  봐('차례붙이기 — job_body 는 차례칸을 안 줘도 id 를 안 붙인다',
+    decodeURIComponent(차례붙이기('job_body?select=job_id,body&job_id=in.(A,B)')),
+    'job_body?select=job_id,body&job_id=in.(A,B)&order=job_id.asc,ord.asc,kind.asc');
+  봐('차례붙이기 — job_attachments 도',
+    /order=job_id.asc,kind.asc,url.asc/.test(decodeURIComponent(차례붙이기('job_attachments?select=url'))), true);
+  봐('차례붙이기 — 모르는 표는 id',
+    decodeURIComponent(차례붙이기('job_posts?select=id')), 'job_posts?select=id&order=id');
+  봐('차례붙이기 — 앞에 슬래시가 있어도',
+    /order=job_id.asc,ord.asc,kind.asc/.test(decodeURIComponent(차례붙이기('/job_body?select=x'))), true);
   봐('쪽 크기가 100인지', /limit=100/.test(부른주소[0]), true);
   봐('둘째 쪽 offset', /offset=100/.test(부른주소[1]), true);
 
