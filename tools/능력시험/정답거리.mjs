@@ -70,7 +70,8 @@ for (const id of 볼것) {
     줄.forEach((l, i) => { if (표식.test(l)) { for (let k = -1; k <= 1; k++) if (줄[i + k]) 고른.add(i + k); } });
     const 차례 = [...고른].sort((a, b) => a - b);
     let 앞 = -2;
-    for (const i of 차례.slice(0, 70)) {
+    const 몇줄 = argv.includes('--짧게') ? 16 : 70;
+    for (const i of 차례.slice(0, 몇줄)) {
       if (i > 앞 + 1) console.log('   …');
       console.log('   ' + 줄[i].slice(0, 200));
       앞 = i;
