@@ -48,29 +48,34 @@ begin
   perform set_config('app.누가', '기관 사이트 맞추기', true);
   v_줄 := coalesce(jsonb_array_length(p_rows), 0);
 
-  /* cfg 쪽을 다듬어 둡니다 — 이름·주소가 없는 줄은 셈에서 뺍니다 */
-  create temporary table if not exists _맞출것 (
-    name text, url text, base text, kind text, 규칙 jsonb
-  ) on commit drop;
-  delete from _맞출것;                       /* 같은 트랜잭션 안에서 다시 돌 때 */
-  insert into _맞출것
-  select r->>'name',
-         r->>'url',
-         nullif(r->>'base', ''),
-         coalesce(nullif(r->>'type', ''), 'html'),
-         (r - 'name' - 'url' - 'base' - 'type')
-    from jsonb_array_elements(p_rows) r
-   where nullif(r->>'name', '') is not null
-     and nullif(r->>'url', '')  is not null;
+  /* ★ 임시 표를 쓰지 않습니다 — `create temporary` + `delete` 꼴은
+     ㉠ `delete` 에 `where` 가 없어 Supabase 안전장치에 막히고
+     ㉡ `delete` 글자가 승인 창을 띄울 수 있습니다 (지침 8-7)
+     그래서 **CTE** 로 그때그때 만듭니다 (2026-10-19) */
 
   /* 표에만 있고 cfg 에 없는 이름 — **지우지 않고 알려만 줍니다** */
+  with 맞출것 as (
+    select r->>'name' as name
+      from jsonb_array_elements(p_rows) r
+     where nullif(r->>'name', '') is not null
+       and nullif(r->>'url', '')  is not null
+  )
   select coalesce(jsonb_agg(jsonb_build_object('name', s.name, 'url', s.url)
                             order by s.name), '[]'::jsonb)
     into v_표에만
     from hosp_sites s
-   where not exists (select 1 from _맞출것 c where c.name = s.name);
+   where not exists (select 1 from 맞출것 c where c.name = s.name);
 
   /* 셈 — 마른 실행이든 아니든 같은 수를 냅니다 */
+  with 맞출것 as (
+    select r->>'name' as name,
+           r->>'url'  as url,
+           coalesce(nullif(r->>'type', ''), 'html') as kind,
+           (r - 'name' - 'url' - 'base' - 'type') as 규칙
+      from jsonb_array_elements(p_rows) r
+     where nullif(r->>'name', '') is not null
+       and nullif(r->>'url', '')  is not null
+  )
   select count(*) filter (where s.name is null),
          count(*) filter (where s.name is not null
                            and (coalesce(s."채용주소",'') is distinct from coalesce(c.url,'')
@@ -81,7 +86,7 @@ begin
                            and coalesce(s."갈래",'')     = coalesce(c.kind,'')
                            and coalesce(s."긁는규칙",'{}'::jsonb) = coalesce(c.규칙,'{}'::jsonb))
     into v_넣음, v_고침, v_그대로
-    from _맞출것 c
+    from 맞출것 c
     left join hosp_sites s on s.name = c.name;
 
   if p_마른 then
@@ -93,15 +98,37 @@ begin
   end if;
 
   /* 있으면 고칩니다 */
+  with 맞출것 as (
+    select r->>'name' as name,
+           r->>'url'  as url,
+           coalesce(nullif(r->>'type', ''), 'html') as kind,
+           (r - 'name' - 'url' - 'base' - 'type') as 규칙
+      from jsonb_array_elements(p_rows) r
+     where nullif(r->>'name', '') is not null
+       and nullif(r->>'url', '')  is not null
+  )
   update hosp_sites s
      set "채용주소" = c.url,
          "갈래"     = c.kind,
          "긁는규칙" = coalesce(c.규칙, '{}'::jsonb),
          "옮긴날"   = (now() at time zone 'Asia/Seoul')::date
-    from _맞출것 c
+    from 맞출것 c
    where s.name = c.name;
 
-  /* 없으면 넣습니다 — `url_key` 는 지금 표가 쓰는 꼴(주소 그대로)을 따릅니다 */
+  /* 없으면 넣습니다 — `url_key` 는 지금 표가 쓰는 꼴(주소 그대로)을 따릅니다.
+     같은 이름이 cfg 에 여럿이면 하나만 넣습니다 (`distinct on`) */
+  with 맞출것 as (
+    select distinct on (r->>'name')
+           r->>'name' as name,
+           r->>'url'  as url,
+           nullif(r->>'base', '') as base,
+           coalesce(nullif(r->>'type', ''), 'html') as kind,
+           (r - 'name' - 'url' - 'base' - 'type') as 규칙
+      from jsonb_array_elements(p_rows) r
+     where nullif(r->>'name', '') is not null
+       and nullif(r->>'url', '')  is not null
+     order by r->>'name'
+  )
   insert into hosp_sites
          (name, url, base, kind, loaded_on, url_key,
           "채용주소", "갈래", "긁는규칙", "끔", "집에서만", "옮긴날", note)
@@ -110,7 +137,7 @@ begin
          c.url, c.kind, coalesce(c.규칙, '{}'::jsonb), false, false,
          (now() at time zone 'Asia/Seoul')::date,
          'cfg 에서 맞춤 (기관사이트_맞추기 · ' || (now() at time zone 'Asia/Seoul')::date || ')'
-    from _맞출것 c
+    from 맞출것 c
    where not exists (select 1 from hosp_sites s where s.name = c.name)
   on conflict (name, url_key) do nothing;
 
