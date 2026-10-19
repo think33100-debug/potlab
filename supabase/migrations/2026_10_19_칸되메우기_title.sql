@@ -73,6 +73,7 @@ begin
       update job_posts j set title = r->>'title'
        where j.id = r->>'id'
          and not coalesce(j.admin_locked, false)
+         and j.title is distinct from (r->>'title')   /* 같은 글자면 트리거를 깨우지 않습니다 */
          and 제목바꿀만한가(j.title, r->>'title');
       if found then v_제목 := v_제목 + 1; end if;
     end if;
