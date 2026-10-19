@@ -66,7 +66,7 @@ for (const id of 볼것) {
     const 줄 = 글0.split('\n').map((l) => l.trim()).filter(Boolean);
     const 버린줄 = 줄.filter((l) => 군더더기.test(l)).length;
     if (버린줄) console.log('   (개인정보방침·약관으로 보이는 줄 ' + 버린줄 + '개는 안 찍습니다)');
-    console.log('\n── ' + 제목 + ' (' + 글.length + '자 · ' + 줄.length + '줄) ──');
+    console.log('\n── ' + 제목 + ' (' + 글0.length + '자 · ' + 줄.length + '줄) ──');
     const 고른 = new Set();
     줄.forEach((l, i) => {
       if (군더더기.test(l)) return;
