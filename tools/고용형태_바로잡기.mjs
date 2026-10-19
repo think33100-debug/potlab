@@ -54,7 +54,7 @@ async function 전부(길) {
 
 /* 회원 화면 공고만 (기본) — 틀린 값이 **회원에게 보이는** 자리가 먼저입니다 */
 const 공고 = await 전부('job_posts?select=id,source,org_name,title,employ_type,'
-  + 'edited_fields,admin_locked,hidden,hold&order=db_insert_at.desc');
+  + 'edited_fields,admin_locked,hidden,hold&order=db_insert_at.desc,id.asc');
 const 보임 = new Set((await 전부('job_posts_pub?select=id')).map((x) => x.id));
 const 볼것 = 전부볼까 ? 공고 : 공고.filter((x) => 보임.has(x.id));
 console.log('공고 ' + 공고.length + '건 중 ' + (전부볼까 ? '전부' : '회원 화면 ' + 볼것.length + '건')

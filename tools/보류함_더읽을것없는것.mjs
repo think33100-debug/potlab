@@ -64,7 +64,7 @@ async function 전부(길) {
 const 우리직군말 = /(물리|작업|도수)\s*치료\s*(?:사|직|선생)/;
 
 const 보류 = await 전부('job_posts?select=id,source,org_name,title,edited_fields,admin_locked'
-  + '&hold=is.true&hidden=is.false&order=db_insert_at.asc');
+  + '&hold=is.true&hidden=is.false&order=db_insert_at.asc,id.asc');
 console.log('보류함 ' + 보류.length + '건을 받았습니다');
 
 const ids = 보류.map((x) => x.id);

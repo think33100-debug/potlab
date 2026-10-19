@@ -80,7 +80,7 @@ const 한글비율 = (s) => {
 /* 회원 화면 HS3 공고 중 마감일이 없는 것부터 봅니다 */
 const 공고들 = await 전부('job_posts?select=id,org_name,title,url,apply_to'
   + '&source=eq.HS3&hidden=is.false&hold=is.false&' + encodeURIComponent('시험자료') + '=is.false'
-  + '&order=apply_to.asc.nullsfirst');
+  + '&order=apply_to.asc.nullsfirst,id.asc');
 const 볼것 = 공고들.slice(0, 몇개);
 console.log('회원 화면 HS3 ' + 공고들.length + '건 중 ' + 볼것.length + '건을 다시 받습니다\n');
 

@@ -85,7 +85,7 @@ const 오늘 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }
 const 공고들 = await 전부('job_posts?select=id,source,org_name,title,apply_to,apply_to_time,hidden,hold,'
   + encodeURIComponent('시험자료') + ',evidence'
   + '&hidden=is.false&hold=is.false&' + encodeURIComponent('시험자료') + '=is.false'
-  + '&source=in.(HS3,HS,ND2,ND)&order=source.asc');
+  + '&source=in.(HS3,HS,ND2,ND)&order=source.asc,id.asc');
 console.log('회원에게 보이는 HS3·HS·ND2·ND 공고 ' + 공고들.length + '건');
 const 마감있는것 = 공고들.filter((j) => j.apply_to);
 console.log('   그중 마감일이 있는 것 ' + 마감있는것.length + '건\n');

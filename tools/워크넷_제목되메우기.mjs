@@ -58,7 +58,7 @@ async function 전부(길) {
 /* 회원 화면에 보이는 워크넷 공고 중 제목이 잘린 것 — 회원이 보는 자리가 먼저입니다 */
 const 보임 = new Set((await 전부('job_posts_pub?select=id')).map((x) => x.id));
 const 다 = await 전부('job_posts?select=id,source,org_name,title,url,edited_fields,admin_locked'
-  + '&source=in.(WN,WN2)&order=db_insert_at.desc');
+  + '&source=in.(WN,WN2)&order=db_insert_at.desc,id.asc');
 const 볼것 = 다.filter((x) => /(\.\.\.|…)\s*$/.test(x.title || '') && 보임.has(x.id)).slice(0, 몇개);
 console.log('워크넷 공고 ' + 다.length + '건 중 **회원 화면에 보이고 제목이 잘린 것** '
   + 볼것.length + '건\n');

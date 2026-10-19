@@ -48,7 +48,7 @@ const 줄 = [];
 for (let off = 0; ; off += 100) {
   const q = U + '/rest/v1/job_posts?select=id,source,org_name,title,apply_to,apply_to_time'
     + '&hold=is.true&hidden=is.false&apply_to=not.is.null'
-    + '&order=apply_to.asc&limit=100&offset=' + off;
+    + '&order=apply_to.asc,id.asc&limit=100&offset=' + off;
   const r = await fetch(q, { headers: H });
   if (!r.ok) { console.error('✗ 목록 ' + r.status + ' · ' + (await r.text()).slice(0, 200)); process.exit(1); }
   const 한쪽 = await r.json();

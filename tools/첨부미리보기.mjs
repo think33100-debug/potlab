@@ -66,7 +66,7 @@ async function 읽기(길, 한쪽수 = 100, 최대 = 20000) {
 }
 
 /* 보이는 공고 중 공고문 글자가 있는 것부터 — 그게 되메우기에 바로 쓰입니다 */
-const 글자줄 = await 읽기('job_body?select=job_id,kind,file_name,url,body&order=job_id.asc');
+const 글자줄 = await 읽기('job_body?select=job_id,kind,file_name,url,body&order=job_id.asc,ord.asc,kind.asc');
 const 보이는 = await 읽기('job_posts?select=id,source,org_name,title&hidden=eq.false&hold=eq.false');
 const 보이는집 = new Map(보이는.map((j) => [j.id, j]));
 

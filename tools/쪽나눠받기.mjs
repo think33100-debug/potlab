@@ -20,6 +20,15 @@
  *
  *  ★ 차례를 꼭 정해야 합니다. `order=` 가 없으면 쪽마다 차례가 달라져
  *    같은 줄을 두 번 받거나 빠뜨립니다. 안 적으면 여기서 `id` 로 붙입니다.
+ *
+ *  ★★ **`order=` 가 있어도 그 칸이 고유하지 않으면 똑같이 샙니다.**
+ *     동률인 줄들의 차례는 쪽마다 흔들립니다 (2026-10-19 에 또 데었습니다 —
+ *     `order=db_insert_at.desc` 로 워크넷 724줄을 넘겼는데 **722줄**만 왔고,
+ *     제목이 잘린 97건 중 **72건**만 보였습니다. `db_insert_at` 이 724줄 중
+ *     **687줄에서 겹칩니다**(53묶음). 2026-10-12 에 `병원제목대조.mjs` 에서
+ *     같은 일을 겪고 그 파일에만 적어 뒀는데, **여기 한 자리를 안 고쳐서**
+ *     다시 났습니다 — 지침 6절).
+ *     그래서 이제 **차례 끝에 고유한 칸을 붙입니다** (`,id.asc`).
  * ═══════════════════════════════════════════════════════════════ */
 
 const 쪽크기 = 100;          // 서버가 못 넘게 막는 수. 올려도 소용없습니다
@@ -27,14 +36,30 @@ const 쪽크기 = 100;          // 서버가 못 넘게 막는 수. 올려도 �
 export async function 모두받기(주소, 머리, 옵션 = {}) {
   const 최대 = 옵션.최대 ?? 100000;     // 돌다 못 멈추는 일을 막는 울타리
   const 차례칸 = 옵션.차례 ?? 'id';
-  const 이음 = 주소.includes('?') ? '&' : '?';
-  const 차례붙임 = /[?&]order=/.test(주소) ? '' : 이음 + 'order=' + encodeURIComponent(차례칸);
+  /* 차례를 **한 번만** 적습니다 — `order=` 를 둘 적으면 PostgREST 가 탈이 납니다.
+     그래서 있던 것을 떼고 고유한 칸을 덧붙여 **다시** 적습니다 */
+  const 이미차례 = (주소.match(/[?&]order=([^&]*)/) || [])[1];
+  const 벗긴주소 = 주소.replace(/([?&])order=[^&]*&?/, (m, p1) => (m.endsWith('&') ? p1 : (p1 === '?' ? '?' : '')))
+    .replace(/[?&]$/, '');
+  const 찬차례 = 이미차례 == null ? 차례칸
+    : (new RegExp('(^|,)' + 차례칸 + '(\\.|,|$)').test(decodeURIComponent(이미차례))
+        ? decodeURIComponent(이미차례)                    /* 이미 고유한 칸이 들어 있습니다 */
+        : decodeURIComponent(이미차례) + ',' + 차례칸 + '.asc');
+  const 이음 = 벗긴주소.includes('?') ? '&' : '?';
+  const 주소2 = 벗긴주소 + 이음 + 'order=' + encodeURIComponent(찬차례);
 
   const 모두 = [];
+  let 실제 = null;        /* 서버가 말한 전체 줄 수 (Content-Range 의 뒷자리) */
   for (let off = 0; off < 최대; off += 쪽크기) {
-    const u = 주소 + 차례붙임 + (주소.includes('?') || 차례붙임 ? '&' : '?')
-      + 'limit=' + 쪽크기 + '&offset=' + off;
-    const r = await fetch(u, { headers: 머리 });
+    const u = 주소2 + '&limit=' + 쪽크기 + '&offset=' + off;
+    /* 첫 쪽에만 `count=exact` 를 겁니다 — **받은 줄 수를 실제와 맞춰 보려고**.
+       차례가 흔들려 새면 두 수가 다릅니다 (2026-10-19 에 724 → 722 였습니다) */
+    const r = await fetch(u, { headers: off === 0 ? { ...머리, Prefer: 'count=exact' } : 머리 });
+    if (off === 0) {
+      const cr = r.headers?.get?.('content-range');
+      const m = cr && String(cr).match(/\/(\d+)\s*$/);
+      if (m) 실제 = Number(m[1]);
+    }
     if (!r.ok) {
       const t = await r.text();
       throw new Error('HTTP ' + r.status + ' · 응답 앞 300자 — ' + t.slice(0, 300).replace(/\s+/g, ' '));
@@ -43,6 +68,13 @@ export async function 모두받기(주소, 머리, 옵션 = {}) {
     if (!Array.isArray(쪽)) throw new Error('줄 묶음이 아닙니다 — ' + JSON.stringify(쪽).slice(0, 200));
     모두.push(...쪽);
     if (쪽.length < 쪽크기) break;      // 마지막 쪽
+  }
+  /* ★ 셈을 맞춰 봅니다. 다르면 **조용히 넘어가지 않고 멈춥니다** —
+     줄이 샌 채로 「N건입니다」 를 보고하는 것이 가장 나쁩니다 (지침 15절) */
+  if (실제 != null && 모두.length !== 실제 && 모두.length < 최대) {
+    throw new Error('줄이 샜습니다 — 받은 것 ' + 모두.length + '줄 · 서버가 말한 것 '
+      + 실제 + '줄. 차례(order)가 고유하지 않아 동률이 흔들린 것입니다. 주소 — '
+      + 주소2.replace(/apikey=[^&]*/, 'apikey=‹가림›').slice(0, 160));
   }
   return 모두;
 }
@@ -69,7 +101,8 @@ if (process.argv.includes('--시험')) {
     const 끝 = Math.min(off + 100, 250);
     const 줄 = [];
     for (let i = off; i < 끝; i++) 줄.push({ id: i });
-    return { ok: true, json: async () => 줄 };
+    return { ok: true, json: async () => 줄,
+      headers: { get: (k) => (k.toLowerCase() === 'content-range' ? '0-99/250' : null) } };
   };
 
   const 줄 = await 모두받기('https://x/rest/v1/t?select=id', {});
@@ -81,9 +114,41 @@ if (process.argv.includes('--시험')) {
   봐('쪽 크기가 100인지', /limit=100/.test(부른주소[0]), true);
   봐('둘째 쪽 offset', /offset=100/.test(부른주소[1]), true);
 
+  /* ★ 2026-10-19 — **고유하지 않은 차례에 고유한 칸을 덧붙이는지** */
   부른주소.length = 0;
   await 모두받기('https://x/rest/v1/t?select=id&order=created_at.desc', {});
-  봐('이미 차례가 있으면 덧붙이지 않는지', (부른주소[0].match(/order=/g) || []).length, 1);
+  봐('order 는 한 번만 적히는지', (부른주소[0].match(/order=/g) || []).length, 1);
+  봐('고유하지 않은 차례에 id 를 덧붙이는지',
+    decodeURIComponent(부른주소[0]).includes('order=created_at.desc,id.asc'), true);
+  봐('select 는 그대로 남는지', /select=id/.test(부른주소[0]), true);
+
+  /* 이미 id 로 차례가 잡혀 있으면 두 번 붙이지 않습니다 */
+  부른주소.length = 0;
+  await 모두받기('https://x/rest/v1/t?select=id&order=id.asc', {});
+  봐('이미 id 면 그대로', decodeURIComponent(부른주소[0]).includes('order=id.asc'), true);
+  봐('id 를 두 번 안 붙이는지',
+    (decodeURIComponent(부른주소[0]).match(/id\.asc/g) || []).length, 1);
+
+  /* 차례가 둘인 경우에도 끝에 붙입니다 */
+  부른주소.length = 0;
+  await 모두받기('https://x/rest/v1/t?order=source.asc,apply_to.desc&select=id', {});
+  봐('차례가 둘이어도 끝에 붙이는지',
+    decodeURIComponent(부른주소[0]).includes('order=source.asc,apply_to.desc,id.asc'), true);
+
+  /* ★ 셈이 안 맞으면 **멈추는지** — 줄이 샌 것을 조용히 넘기지 않아야 합니다.
+     200줄만 주면서 「실제는 250줄」이라고 말하는 가짜 서버로 봅니다 */
+  globalThis.fetch = async (u) => {
+    const off = Number((u.match(/offset=(\d+)/) || [])[1] ?? 0);
+    const 끝 = Math.min(off + 100, 200);
+    const 줄 = [];
+    for (let i = off; i < 끝; i++) 줄.push({ id: i });
+    return { ok: true, json: async () => 줄,
+      headers: { get: (k) => (k.toLowerCase() === 'content-range' ? '0-99/250' : null) } };
+  };
+  let 멈췄나 = '';
+  try { await 모두받기('https://x/rest/v1/t?select=id', {}); } catch (e) { 멈췄나 = e.message; }
+  봐('셈이 안 맞으면 멈추는지', /줄이 샜습니다/.test(멈췄나), true);
+  봐('몇 줄인지 말하는지', /받은 것 200줄.*말한 것 250줄/.test(멈췄나), true);
 
   globalThis.fetch = 진짜fetch;
   console.log('\n' + (거짓 ? '★ ' + 거짓 + '개 틀렸습니다' : '○ ' + 참 + '개 다 맞았습니다'));
