@@ -77,10 +77,18 @@ for (const [s, a] of [...출처별].sort((x, y) => y[1].length - x[1].length)) {
     + a.filter((x) => (x['첨부'] || []).length).length + '건');
 }
 
-/* 출처마다 **첨부 있는 것부터** 돌아가며 한 건씩 집습니다 (한 출처가 다 먹지 않게) */
+/* 출처마다 **네 바구니**로 나눠 돌아가며 집습니다 —
+ *   첨부+회원화면 · 첨부+숨김·보류 · 첨부없음+회원화면 · 첨부없음+숨김·보류
+ * ★ 왜 — 그냥 「첨부 있는 것부터」로 집으면 **44/50 이 숨김·보류**가 됩니다
+ *   (오래된 공고가 숨겨져 있으니까요). 그러면 「회원이 보는 공고를 제대로
+ *   긁었나」를 못 잽니다. 보임·숨김을 **섞어** 집습니다 */
+const 바구니 = (x) => ((x['첨부'] || []).length ? 0 : 2) + ((x['숨김'] || x['보류']) ? 1 : 0);
 for (const a of 출처별.values()) {
-  a.sort((p, q) => ((q['첨부'] || []).length ? 1 : 0) - ((p['첨부'] || []).length ? 1 : 0)
-    || String(q.id).localeCompare(String(p.id)));
+  const 네개 = [[], [], [], []];
+  for (const x of a) 네개[바구니(x)].push(x);
+  for (const b of 네개) b.sort((p, q) => String(q.id).localeCompare(String(p.id)));
+  a.length = 0;
+  for (let i = 0; 네개.some((b) => i < b.length); i++) for (const b of 네개) if (i < b.length) a.push(b[i]);
 }
 const 표본 = [];
 const 돌림 = [...출처별.keys()];

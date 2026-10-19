@@ -12,6 +12,17 @@ p as (
     join 일층 l on l.k = "견줄이름"(j.org_name)
    where j.db_insert_at >= now() - interval '30 days'
      and coalesce(j."시험자료", false) = false
+  union all
+  /* ★ ND2(치매안심센터)는 **1층 분모가 아닙니다**(CLAUDE.md — 공고가 nid.or.kr
+     중앙 게시판으로 모입니다). 그래서 위 조건으로는 한 건도 안 걸립니다.
+     그런데 세중님이 **출처별로 골고루** 보라고 하셨고 ND2 도 그 목록에 있습니다 —
+     「그 수집기가 제대로 긁나」를 재려면 몇 건은 있어야 합니다. 그래서
+     **ND2 만 1층 조건 없이** 최근 것 몇 건을 함께 넣습니다 (표시는 source 로 됩니다) */
+  select j.*
+    from job_posts j
+   where j.source = 'ND2'
+     and j.db_insert_at >= now() - interval '30 days'
+     and coalesce(j."시험자료", false) = false
 ),
 첨 as (
   select a.job_id,
