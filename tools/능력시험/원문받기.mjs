@@ -66,9 +66,26 @@ async function 머리(주소) {
   return { ...기본, Cookie: 알리오쿠키, Referer: 'https://opendata.alio.go.kr/new/' };
 }
 
-async function 받기(u) {
-  const r = await fetch(u, { headers: await 머리(u), redirect: 'follow', signal: AbortSignal.timeout(30000) });
+/* ★ 그누보드·XE 같은 게시판은 첨부를 줄 때 **쪽을 먼저 본 사람인지** 봅니다 —
+ *   `Referer` 와 **쪽에서 받은 쿠키**가 있어야 파일을 줍니다. 없으면 5,704바이트
+ *   HTML(「잘못된 접근」 쪽)이 옵니다. 2026-10-19 에 청주성모로 재 봤습니다 —
+ *     머리글 없음        5,704바이트 HTML
+ *     Referer 만         5,845바이트 HTML
+ *     Referer + 쿠키     **165,020바이트 %PDF-1.7**
+ *   그래서 쪽을 받을 때 쿠키를 모아 두고 첨부에 함께 보냅니다 */
+let 쪽쿠키 = '';
+let 쪽주소 = '';
+async function 받기(u, 쪽인가 = false) {
+  const 기본 = await 머리(u);
+  const 더 = (!쪽인가 && 쪽쿠키) ? { Cookie: [기본.Cookie, 쪽쿠키].filter(Boolean).join('; ') } : {};
+  const 리퍼 = (!쪽인가 && 쪽주소) ? { Referer: 쪽주소 } : {};
+  const r = await fetch(u, { headers: { ...기본, ...리퍼, ...더 },
+    redirect: 'follow', signal: AbortSignal.timeout(30000) });
   const buf = Buffer.from(await r.arrayBuffer());
+  if (쪽인가) {
+    쪽쿠키 = (r.headers.getSetCookie?.() || []).map((c) => String(c).split(';')[0]).join('; ');
+    쪽주소 = r.url || u;
+  }
   return { code: r.status, ct: r.headers.get('content-type') || '', buf, 끝주소: r.url || u,
     cd: r.headers.get('content-disposition') || '' };
 }
@@ -165,7 +182,8 @@ for (const [i, x] of 볼것.entries()) {
     한건.쪽 = { 왜: '쪽 주소가 없습니다 (API 출처거나 주소를 안 담았습니다)' };
   } else {
     try {
-      const r = await 받기(x['주소']);
+      쪽쿠키 = ''; 쪽주소 = '';            /* 공고마다 새로 모읍니다 */
+      const r = await 받기(x['주소'], true);
       const html = 글자로(r.buf, r.ct);
       const 글 = 태그걷기(html);
       fs.writeFileSync(path.join(방, '쪽.html'), html, 'utf8');
