@@ -57,9 +57,19 @@ const r0 = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('일층병원_�
 if (!r0.ok) { console.error('✗ 일층병원_구멍 ' + r0.status + ' · ' + (await r0.text()).slice(0, 200)); process.exit(1); }
 const 구멍 = await r0.json();
 const 볼갈래 = 갈래고름 ? [갈래고름] : ['대학병원', '상급종합', '종합병원'];
-const 사각 = 구멍.filter((x) => 볼갈래.includes(x['갈래']) && x['상태'] === '사각지대');
-console.log('사각지대 — ' + 볼갈래.join('·') + ' ' + 사각.length + '곳'
-  + (사각.length > 몇개 ? ' (앞 ' + 몇개 + '곳만 봅니다)' : ''));
+const 그갈래 = 구멍.filter((x) => 볼갈래.includes(x['갈래']));
+/* ★ 2026-10-19 — ① 459 안에는 **두 가지**가 섞여 있습니다.
+     「사각지대」      사이트 설정이 **없는** 곳        → 설정을 새로 붙일 자리
+     「사이트있음」     설정은 있는데 **공고가 0**       → 설정이 안 듣거나 공고가 없는 것
+   대학·종합은 **사각지대가 6곳뿐이고 나머지가 「사이트있음」** 입니다.
+   그래서 둘을 갈라 셉니다 — 할 일이 다릅니다 */
+const 상태별 = new Map();
+for (const x of 그갈래) 상태별.set(x['상태'], (상태별.get(x['상태']) || 0) + 1);
+console.log('① ' + 볼갈래.join('·') + ' — ' + 그갈래.length + '곳');
+for (const [s, n] of [...상태별].sort((a, b) => b[1] - a[1])) console.log('   ' + s + ' ' + n + '곳');
+const 사각 = 그갈래.filter((x) => x['상태'] === '사각지대' || x['상태'] === '사이트있음');
+console.log('→ 볼 것 ' + 사각.length + '곳 (사각지대 + 사이트있음·공고 0)'
+  + (사각.length > 몇개 ? ' · 앞 ' + 몇개 + '곳만' : '') + '\n');
 
 /* 주소 — `기관주소`(우리 표)가 먼저, 없으면 `hira_org.hosp_url` */
 const 우리주소 = new Map();
@@ -126,7 +136,7 @@ for (const [i, x] of 사각.slice(0, 몇개).entries()) {
   const 꼴 = 꼴들.find(([, re]) => re.test(html) || 링크들.some((l) => re.test(l)));
   const 이름꼴 = 꼴 ? 꼴[0] : '모름';
   if (!묶음.has(이름꼴)) 묶음.set(이름꼴, []);
-  묶음.get(이름꼴).push({ 이름, 주소: 끝주소, 채용링크: 링크들[0] || null });
+  묶음.get(이름꼴).push({ 이름, 상태: x['상태'], 주소: 끝주소, 채용링크: 링크들[0] || null });
   await 자고(400);
 }
 process.stderr.write('\n');
@@ -135,7 +145,7 @@ console.log('── 꼴 묶음 (많은 것부터) ──');
 for (const [꼴, 들] of [...묶음].sort((a, b) => b[1].length - a[1].length)) {
   console.log('\n★ ' + 꼴 + ' — ' + 들.length + '곳');
   for (const v of 들.slice(0, 14)) {
-    console.log('   ' + v.이름.slice(0, 30).padEnd(32) + (v.주소 || '').slice(0, 46));
+    console.log('   ' + (v.상태 === '사각지대' ? '★ ' : '   ') + v.이름.slice(0, 28).padEnd(30) + (v.주소 || '').slice(0, 42));
     if (v.채용링크) console.log('      채용 링크 — ' + String(v.채용링크).slice(0, 72));
   }
   if (들.length > 14) console.log('   … 그밖 ' + (들.length - 14) + '곳');

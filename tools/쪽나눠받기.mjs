@@ -49,6 +49,10 @@ export const 표고유열쇠 = {
   job_body: 'job_id.asc,ord.asc,kind.asc',
   job_attachments: 'job_id.asc,kind.asc,url.asc',
   칸기록: 'id.asc',
+  hira_org: 'ykiho.asc',        /* 심평원 기관 — 열쇠는 요양기관번호입니다 */
+  hira_detail: 'ykiho.asc',
+  hosp_sites: 'name.asc',
+  기관주소: 'id.asc',
 };
 
 export function 차례붙이기(길, 차례칸) {
