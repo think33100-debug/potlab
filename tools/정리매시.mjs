@@ -27,6 +27,7 @@
  *
  * .env 는 셸로 source 하지 않고 node 로 읽습니다 (지침 8-12).
  */
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 import fs from 'node:fs';
 
 const 마른 = process.argv.includes('--마른');
@@ -79,6 +80,7 @@ const 때 = new Date(이제.getTime() + 9 * 3600e3).toISOString().slice(0, 19).r
 
 /* 쪽을 넘겨 다 받습니다 — 서버가 한 번에 주는 줄 수를 믿지 않습니다 */
 async function 다(path_) {
+  path_ = 차례붙이기(path_);   /* 차례가 고유해야 줄이 안 샙니다 — 이것은 **매시 크론**입니다 (2026-10-19) */
   const 모 = []; let off = 0;
   for (;;) {
     const r = await fetch(`${U}/rest/v1/${path_}&limit=1000&offset=${off}`, { headers: 머리 });

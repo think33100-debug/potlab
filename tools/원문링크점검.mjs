@@ -26,6 +26,7 @@
  *   표본에서 틀린 것이 나오면 `--워크넷 전수` 로 넓힙니다.
  */
 import fs from 'node:fs';
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 import { 알림상태, 없어짐말 } from './hosp/hs_목록상태.mjs';
 
 const argv = process.argv.slice(2);
@@ -89,6 +90,7 @@ if (!U || !K) { console.error('✗ SUPABASE_URL / SUPABASE_SERVICE_KEY 가 없�
 const H = { apikey: K, Authorization: 'Bearer ' + K };
 
 async function 다(q) {
+  q = 차례붙이기(q);   /* 차례가 고유해야 줄이 안 샙니다 (2026-10-19) */
   const 모 = [];
   let off = 0;
   for (;;) {

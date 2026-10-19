@@ -13,6 +13,7 @@
  *
  * 제목만 담습니다 — 기관명·주소·사람 이름은 안 담습니다.
  */
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,7 +46,7 @@ async function 가져오기(표) {
   const 모음 = [];
   let i = 0, 쪽 = 0;
   for (;;) {
-    const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 표 + '?select=title&limit=1000&offset=' + i, {
+    const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 차례붙이기(표 + '?select=title') + '&limit=1000&offset=' + i, {
       headers: { apikey: cfg.KEY, Authorization: 'Bearer ' + cfg.KEY },
     });
     if (!r.ok) { console.error('  ' + 표 + ' HTTP ' + r.status + ' · ' + (await r.text()).slice(0, 200)); break; }

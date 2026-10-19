@@ -20,6 +20,7 @@
  *   다시 만듭니다 (그 자리는 이미 안 잘립니다).
  */
 import fs from 'node:fs';
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 
 const argv = process.argv.slice(2);
 const 진짜 = argv.includes('--진짜');
@@ -41,11 +42,15 @@ if (!U || !K || !WK) { console.error('✗ SUPABASE_URL / SUPABASE_SERVICE_KEY / 
 const H = { apikey: K, Authorization: 'Bearer ' + K, 'Content-Type': 'application/json' };
 const WURL = 'https://www.work24.go.kr/cm/openApi/call/wk/callOpenApiSvcInfo210L01.do';
 
+/* ★ 차례는 `차례붙이기()` 한 자리에서 정합니다 (2026-10-19).
+   차례가 고유하지 않으면 동률의 순서가 쪽마다 흔들려 **줄이 샙니다** —
+   `job_posts_pub?select=id` 는 차례가 아예 없어서 보이는 공고 목록이
+   덜 왔고, 그래서 잘린 제목 97건 중 72건만 보였습니다 */
 async function 전부(길) {
   const out = [];
+  const 길2 = 차례붙이기(길);
   for (let off = 0; ; off += 100) {
-    const r = await fetch(U + '/rest/v1/' + 길 + (길.includes('?') ? '&' : '?')
-      + 'limit=100&offset=' + off, { headers: H });
+    const r = await fetch(U + '/rest/v1/' + 길2 + '&limit=100&offset=' + off, { headers: H });
     if (!r.ok) throw new Error(길.slice(0, 40) + ' ' + r.status + ' ' + (await r.text()).slice(0, 160));
     const 한쪽 = await r.json();
     out.push(...한쪽);

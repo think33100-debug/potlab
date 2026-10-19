@@ -18,6 +18,7 @@
  *     ⚠ 그 창구가 employ_type 을 받는지 먼저 봅니다 — 안 받으면 멈춥니다
  */
 import fs from 'node:fs';
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 import { 고용형태판정, 고용형태코드, 우리직군줄 } from './공고문읽기.mjs';
 
 const argv = process.argv.slice(2);
@@ -39,6 +40,7 @@ if (!U || !K) { console.error('✗ 열쇠가 없습니다 (서버에서 돌리�
 const H = { apikey: K, Authorization: 'Bearer ' + K, 'Content-Type': 'application/json' };
 
 async function 전부(길) {
+  길 = 차례붙이기(길);   /* 차례가 고유해야 줄이 안 샙니다 (2026-10-19) */
   const out = [];
   for (let off = 0; ; off += 100) {
     const r = await fetch(U + '/rest/v1/' + 길 + (길.includes('?') ? '&' : '?')

@@ -24,6 +24,7 @@
  *                 세어 보여 줍니다** — 0 이 아니면 사람이 되살려야 합니다
  */
 import fs from 'node:fs';
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 
 const argv = process.argv.slice(2);
 const 진짜 = argv.includes('--진짜');
@@ -47,6 +48,7 @@ const H = { apikey: K, Authorization: 'Bearer ' + K, 'Content-Type': 'applicatio
 
 /* 100줄에서 끊기므로 offset 으로 넘깁니다 (지침) */
 async function 전부(길) {
+  길 = 차례붙이기(길);   /* 차례가 고유해야 줄이 안 샙니다 (2026-10-19) */
   const out = [];
   for (let off = 0; ; off += 100) {
     const r = await fetch(U + '/rest/v1/' + 길 + (길.includes('?') ? '&' : '?')

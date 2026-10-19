@@ -39,6 +39,7 @@
  *   `--칸안받기` 를 적으면 안 보냅니다 (판정만 보고 싶을 때).
  */
 import fs from 'node:fs';
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 import { 없어짐말, 알림상태 } from './hosp/hs_목록상태.mjs';
 import { 워크넷상세칸 } from './워크넷상세칸.mjs';
 import { 고용형태판정 } from './공고문읽기.mjs';
@@ -137,6 +138,7 @@ if (!U || !K) { console.error('✗ SUPABASE_URL / SUPABASE_SERVICE_KEY 가 없�
 if (!WK) { console.error('✗ WORK_KEY 가 없습니다'); process.exit(1); }
 
 async function 다(q) {
+  q = 차례붙이기(q);   /* 차례가 고유해야 줄이 안 샙니다 (2026-10-19) */
   const 모 = [];
   let off = 0;
   for (;;) {

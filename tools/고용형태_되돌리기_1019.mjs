@@ -17,6 +17,7 @@
  * `edited_fields`·`admin_locked` 를 지키고 `updated_at` 을 안 바꿉니다.
  */
 import fs from 'node:fs';
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 
 const 진짜 = process.argv.includes('--진짜');
 const cfg = {};
@@ -33,6 +34,7 @@ if (!U || !K) { console.error('✗ SUPABASE_URL / SUPABASE_SERVICE_KEY 가 없�
 const H = { apikey: K, Authorization: 'Bearer ' + K, 'Content-Type': 'application/json' };
 
 async function 전부(길) {
+  길 = 차례붙이기(길);   /* 차례가 고유해야 줄이 안 샙니다 (2026-10-19) */
   const out = [];
   for (let off = 0; ; off += 100) {
     const r = await fetch(U + '/rest/v1/' + 길 + (길.includes('?') ? '&' : '?')

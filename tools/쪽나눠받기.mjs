@@ -33,20 +33,31 @@
 
 const 쪽크기 = 100;          // 서버가 못 넘게 막는 수. 올려도 소용없습니다
 
+/** 주소의 `order=` 를 **고유하게** 만듭니다 — 차례가 없으면 넣고, 있으면 끝에 덧붙입니다.
+ *
+ *  자기 쪽매김을 쓰는 도구들이 이것만 부르면 같은 규칙을 씁니다 (지침 6절).
+ *    const r = await fetch(U + '/rest/v1/' + 차례붙이기(길) + '&limit=100&offset=' + off, …);
+ *
+ *  `job_body` 처럼 `id` 가 없는 표는 둘째 인수로 고유한 칸을 적습니다 —
+ *    차례붙이기('job_body?select=…', 'job_id.asc,ord.asc,kind.asc')
+ */
+export function 차례붙이기(길, 차례칸 = 'id') {
+  const 이미 = (길.match(/[?&]order=([^&]*)/) || [])[1];
+  const 첫칸 = String(차례칸).split(',')[0].split('.')[0];
+  const 벗긴 = 길.replace(/([?&])order=[^&]*&?/, (m, p1) => (m.endsWith('&') ? p1 : (p1 === '?' ? '?' : '')))
+    .replace(/[?&]$/, '');
+  const 찬차례 = 이미 == null ? 차례칸
+    : (new RegExp('(^|,)' + 첫칸 + '(\\.|,|$)').test(decodeURIComponent(이미))
+        ? decodeURIComponent(이미)
+        : decodeURIComponent(이미) + ',' + 차례칸);
+  return 벗긴 + (벗긴.includes('?') ? '&' : '?') + 'order=' + encodeURIComponent(찬차례);
+}
+
 export async function 모두받기(주소, 머리, 옵션 = {}) {
   const 최대 = 옵션.최대 ?? 100000;     // 돌다 못 멈추는 일을 막는 울타리
   const 차례칸 = 옵션.차례 ?? 'id';
-  /* 차례를 **한 번만** 적습니다 — `order=` 를 둘 적으면 PostgREST 가 탈이 납니다.
-     그래서 있던 것을 떼고 고유한 칸을 덧붙여 **다시** 적습니다 */
-  const 이미차례 = (주소.match(/[?&]order=([^&]*)/) || [])[1];
-  const 벗긴주소 = 주소.replace(/([?&])order=[^&]*&?/, (m, p1) => (m.endsWith('&') ? p1 : (p1 === '?' ? '?' : '')))
-    .replace(/[?&]$/, '');
-  const 찬차례 = 이미차례 == null ? 차례칸
-    : (new RegExp('(^|,)' + 차례칸 + '(\\.|,|$)').test(decodeURIComponent(이미차례))
-        ? decodeURIComponent(이미차례)                    /* 이미 고유한 칸이 들어 있습니다 */
-        : decodeURIComponent(이미차례) + ',' + 차례칸 + '.asc');
-  const 이음 = 벗긴주소.includes('?') ? '&' : '?';
-  const 주소2 = 벗긴주소 + 이음 + 'order=' + encodeURIComponent(찬차례);
+  /* 차례는 `차례붙이기()` 한 자리에서 정합니다 */
+  const 주소2 = 차례붙이기(주소, /\./.test(차례칸) ? 차례칸 : 차례칸 + '.asc');
 
   const 모두 = [];
   let 실제 = null;        /* 서버가 말한 전체 줄 수 (Content-Range 의 뒷자리) */
@@ -111,6 +122,16 @@ if (process.argv.includes('--시험')) {
   봐('끝 줄', 줄[249].id, 249);
   봐('세 번 불렀는지 (100+100+50)', 부른주소.length, 3);
   봐('차례를 붙였는지', /order=id/.test(부른주소[0]), true);
+  봐('차례붙이기 — 차례가 없으면 넣는지',
+    차례붙이기('t?select=id'), 't?select=id&order=id');
+  봐('차례붙이기 — 있으면 덧붙이는지',
+    decodeURIComponent(차례붙이기('t?order=db_insert_at.desc&select=id')),
+    't?select=id&order=db_insert_at.desc,id');
+  봐('차례붙이기 — 이미 id 면 그대로',
+    decodeURIComponent(차례붙이기('t?order=id.asc')), 't?order=id.asc');
+  봐('차례붙이기 — id 없는 표',
+    decodeURIComponent(차례붙이기('job_body?select=x', 'job_id.asc,ord.asc')),
+    'job_body?select=x&order=job_id.asc,ord.asc');
   봐('쪽 크기가 100인지', /limit=100/.test(부른주소[0]), true);
   봐('둘째 쪽 offset', /offset=100/.test(부른주소[1]), true);
 
