@@ -142,8 +142,14 @@ for (const 답 of 정답들) {
   const 본문표식 = ['접수', '모집', '자격', '채용', '제출', '기간'].filter((w) => 쪽글.includes(w)).length;
   셈.본문[쪽글.length >= 300 && 본문표식 >= 3 ? '○' : (쪽글.length >= 120 ? '△' : '✗')]++;
 
-  /* ③ 첨부 찾기 — 쪽에 걸린 수 대비 */
-  const 쪽첨 = (f.쪽첨부 || []).length; const db첨 = f.DB첨부 || 0;
+  /* ③ 첨부 찾기 — 쪽에 걸린 수 대비
+     ★ `JS주소`(javascript:gfn_fileDown…)는 **쪽만 보고는 받을 수 없는 꼴**이라
+       「쪽에 있는 첨부」로 세지 않습니다. 따로 적습니다 (워크넷·나라일터가 그 꼴이고
+       거기는 **API** 로 받습니다 — getItemFile) */
+  const 쪽첨 = (f.쪽첨부 || []).filter((a) => a.url).length;
+  const js첨 = (f.쪽첨부 || []).filter((a) => !a.url).length;
+  if (js첨) 셈.첨부찾기.JS주소 = (셈.첨부찾기.JS주소 || 0) + 1;
+  const db첨 = f.DB첨부 || 0;
   if (!쪽첨 && !db첨) 셈.첨부찾기.첨부없음++;
   else if (db첨 >= 쪽첨 && db첨 > 0) 셈.첨부찾기['○']++;
   else if (db첨 > 0) 셈.첨부찾기['△']++;
