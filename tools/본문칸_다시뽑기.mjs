@@ -137,7 +137,16 @@ for (const { x, 줄, 근거 } of 견본) {
   console.log('  ' + x.id + ' [' + x.source + '] ' + String(x.org_name).slice(0, 16)
     + (보임.has(x.id) ? ' (회원 화면)' : ''));
   console.log('     ' + String(x.title).slice(0, 56));
-  if (줄.headcount) console.log('     모집인원 → ' + 줄.headcount + '   근거 「' + String(근거.모집인원 || '').slice(0, 110) + '」');
+  /* ★ `!= null` 로 봅니다 — `if (줄.headcount)` 는 **0 을 떨어뜨립니다.**
+     2026-10-19 에 0명 여덟 건이 견본에서 안 보였습니다 (0 도 값입니다) */
+  if (줄.headcount != null) {
+    console.log('     모집인원 → ' + 줄.headcount + '   근거 「'
+      + String(근거.모집인원 || '').slice(0, 110) + '」');
+  }
+  if (줄.뽑은값?.모집인원) {
+    console.log('     모집인원(글) → ' + 줄.뽑은값.모집인원 + '   근거 「'
+      + String(근거.모집인원 || '').slice(0, 110) + '」');
+  }
   if (줄.work_place) console.log('     근무지 → 「' + String(줄.work_place).slice(0, 50) + '」');
   if (줄.apply_to_time) {
     console.log('     마감시각 → ' + 줄.apply_to_time + '   마감일 ' + (x.apply_to || '(없음)')
