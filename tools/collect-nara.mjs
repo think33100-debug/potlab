@@ -48,7 +48,7 @@ import { 공공부르기, 한도알리기, 한도들 } from './공공데이터�
 import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
-import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군 } from './공고문읽기.mjs';
+import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 고용형태판정 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
@@ -148,8 +148,20 @@ const 오늘8 = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10).re
 const 날 = (d) => new Date(Date.now() + d * 86400000 + 9 * 3600000).toISOString().slice(0, 10);
 
 /* 고용형태 코드 — gas 의 job3Type_ 과 같은 표입니다 */
+/* ★ 2026-10-19 세중님 지시 — **「공무원」은 고용형태가 아닙니다.**
+ *
+ *   「공무원에도 계약직이 있습니다. 고용형태는 공고 본문(·첨부)에서 읽어
+ *    정한다. 기관이 국가기관이라는 이유로 정하지 않는다.」
+ *
+ * 전에는 `e01·e02·e03` 을 통째로 **「공무원」**으로 적었습니다. 그래서
+ *   「서귀포시 **임기제**공무원」      기간이 정해진 임용 → 기간제
+ *   「충청북도경찰청 일반직공무원 **경력경쟁채용**」  기간 없는 정규 임용 → 정규직
+ * 이 **같은 값**이 됐습니다. 120건이고 회원 화면에 5건 보였습니다.
+ *
+ * 그 셋은 이제 **표에서 뺍니다** — 제목·본문을 `고용형태판정()` 으로 읽어
+ * 정하고, 못 가리면 비웁니다 (짐작으로 정규직이라 적지 않습니다).
+ * 나머지 코드(e07~e10)는 API 가 직접 말해 주는 값이라 그대로 씁니다. */
 const 고용형태표 = {
-  e01: '공무원', e02: '공무원', e03: '공무원',
   e07: '정규직', e08: '기간제', e09: '무기계약직', e10: '시간선택제',
 };
 const 고용형태 = (t) => 고용형태표[String(t || '').trim()] || '';
@@ -574,7 +586,10 @@ const 줄만들기 = (v) => {
     external_id: String(x.idx || ''),
     org_name: v.기관,
     title: v.제목,
-    employ_type: 고용형태(x.type01) || 고용형태(x.type02) || '',
+    /* API 코드가 말해 주면 그것을 쓰고(e07~e10), 아니면 **제목·본문에서 읽습니다**.
+       판정은 `공고문읽기.mjs` 의 `고용형태판정()` 한 자리입니다 (2026-10-19) */
+    employ_type: 고용형태(x.type01) || 고용형태(x.type02)
+      || 고용형태판정(v.제목, v.글 || (v.상세 || {}).contents || '').값 || '',
     sido: String((v.상세 || {}).areaname || '').split(/[ ,]/)[0] || '',
     apply_from: 날짜(x.begindate),
     apply_to: 날짜(x.enddate),
