@@ -87,8 +87,20 @@ for (const a of 출처별.values()) {
   const 네개 = [[], [], [], []];
   for (const x of a) 네개[바구니(x)].push(x);
   for (const b of 네개) b.sort((p, q) => String(q.id).localeCompare(String(p.id)));
+  /* 첨부 있는 바구니(0·1)를 **한 바퀴에 두 건씩** 집습니다 — 세중님
+     「첨부 있는 공고를 일부러 많이」 */
+  const 몫 = [2, 2, 1, 1];
+  const 자리 = [0, 0, 0, 0];
   a.length = 0;
-  for (let i = 0; 네개.some((b) => i < b.length); i++) for (const b of 네개) if (i < b.length) a.push(b[i]);
+  while (네개.some((b, i) => 자리[i] < b.length)) {
+    let 더 = false;
+    for (let i = 0; i < 4; i++) {
+      for (let k = 0; k < 몫[i]; k++) {
+        if (자리[i] < 네개[i].length) { a.push(네개[i][자리[i]++]); 더 = true; }
+      }
+    }
+    if (!더) break;
+  }
 }
 const 표본 = [];
 const 돌림 = [...출처별.keys()];
