@@ -63,6 +63,14 @@ export function 옮겨가는곳(html, 밑바탕) {
   try { const u = new URL(m[1], 밑바탕).href; return u === 밑바탕 ? null : u; } catch { return null; }
 }
 
+/* ★ 봇 막이 — **뚫지 않습니다.** 보면 그 자리에서 멈추고 손확인으로 넘깁니다
+ *   (2026-10-19 — 강북삼성 채용관 kbsmcrecruit.ninehire.site 가 HTTP 429 +
+ *    「Vercel Security Checkpoint」 였습니다) */
+export function 봇막이인가(code, html) {
+  return code === 429 || code === 403
+    || /Security Checkpoint|Just a moment|cf-browser-verification|captcha/i.test(html.slice(0, 4000));
+}
+
 /* ★ 쪽을 자바스크립트가 그리면(SPA) HTML 에 링크가 하나도 없습니다 — 긁을 수 없습니다 */
 export function 자바스크립트쪽인가(html) {
   return (html.match(/<a[\s>]/gi) || []).length === 0
@@ -156,6 +164,10 @@ function 검사() {
   재다(공고목록인가(씨엠).글수 === 0, '메뉴를 글 링크로 셉니다');
   재다(글번호표식.test('/bbs/board.php?bo_table=recruit&wr_id=12'), 'wr_id 를 글번호로 안 봅니다');
   재다(!글번호표식.test('/cmhospital/sub_05_11.php'), '메뉴 주소를 글번호로 봅니다');
+  /* ⑳~㉓ 봇 막이 — 뚫지 않고 멈춥니다 */
+  재다(봇막이인가(429, '<title>Vercel Security Checkpoint</title>'), 'HTTP 429 를 봇 막이로 안 봅니다');
+  재다(봇막이인가(200, '<title>Just a moment...</title>'), '클라우드플레어 막이를 못 가립니다');
+  재다(!봇막이인가(200, '<table><tr><td>채용 공고</td></tr></table>'), '멀쩡한 쪽을 봇 막이라고 봅니다');
   console.log('자기점검 ' + n + '가지 통과');
 }
 
@@ -205,22 +217,33 @@ for (const [이름, 뿌리] of 볼것) {
   }
   console.log('  뿌리 HTTP ' + r.code + ' · ' + r.바이트 + '바이트');
 
-  /* 빈 껍데기면 **쪽에 적힌 곳으로** 한두 번 따라갑니다 */
+  /* 빈 껍데기면 **쪽에 적힌 곳으로** 한두 번 따라갑니다.
+   * ★ 옮겨 간 쪽이 **더 나쁠 수 있습니다** — 강남을지는 옮겨 간 곳이 손전화 쪽
+   *   (m.eulji.or.kr)이라 메뉴가 줄어 있었습니다. 그래서 **본 쪽마다** 채용
+   *   링크를 모아 **합칩니다.** 어느 한 쪽만 보고 「없다」고 하지 않습니다 */
+  const 본쪽 = [r];
   for (let 걸음 = 0; 걸음 < 2; 걸음++) {
     const 다음 = 옮겨가는곳(r.글, r.끝주소);
     if (!다음) break;
     console.log('  → 쪽이 옮겨 갑니다 — ' + 다음);
     try { r = await 받기(다음); } catch (e) { console.log('     ✗ 못 받음 ' + String(e.message).slice(0, 40)); break; }
     console.log('     HTTP ' + r.code + ' · ' + r.바이트 + '바이트');
+    본쪽.push(r);
     await 자고(600);
   }
 
-  if (자바스크립트쪽인가(r.글)) {
+  if (본쪽.every((p) => 자바스크립트쪽인가(p.글))) {
     console.log('  → **자바스크립트로 그리는 쪽입니다 (SPA)** — HTML 에 링크가 없어 긁을 수 없습니다');
     결과.push({ 이름, 판정: '자바스크립트 쪽(SPA) — 긁을 수 없음' }); continue;
   }
 
-  const 후보 = 채용링크들(r.글, r.끝주소);
+  const 본주소 = new Set(); const 후보 = [];
+  for (const p of 본쪽) {
+    for (const x of 채용링크들(p.글, p.끝주소)) {
+      if (본주소.has(x.h)) continue;
+      본주소.add(x.h); 후보.push(x);
+    }
+  }
   const 쓸것 = 후보.filter((x) => !x.뺌).slice(0, 5);
   console.log('  채용말 링크 ' + 후보.length + '개 (뺀 것 ' + 후보.filter((x) => x.뺌).length + '개)');
   for (const x of 후보.filter((x) => x.뺌).slice(0, 3)) {
@@ -229,7 +252,8 @@ for (const [이름, 뿌리] of 볼것) {
   if (!쓸것.length) {
     /* ★ 「없다」고만 적지 않습니다 — **무엇이 있었나**를 함께 찍습니다 (지침 2절).
      *   메뉴 글자를 보면 채용이 다른 말로 적혀 있는지, 아예 없는지가 가려집니다 */
-    const 메뉴 = [...new Set([...r.글.matchAll(/<a[^>]+href=["'][^"']+["'][^>]*>([\s\S]{0,40}?)<\/a>/gi)]
+    const 메뉴 = [...new Set([...본쪽.map((p) => p.글).join('\n')
+      .matchAll(/<a[^>]+href=["'][^"']+["'][^>]*>([\s\S]{0,40}?)<\/a>/gi)]
       .map((m) => m[1].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim())
       .filter((t) => t.length >= 2 && /[가-힣]/.test(t)))].slice(0, 24);
     console.log('  → **채용 링크가 없습니다** (링크 글 ' + 메뉴.length + '가지)');
@@ -242,6 +266,12 @@ for (const [이름, 뿌리] of 볼것) {
     let p;
     try { p = await 받기(x.h); } catch (e) {
       console.log('     ✗ 「' + x.t.slice(0, 20) + '」 못 받음 ' + String(e.message).slice(0, 30)); continue;
+    }
+    if (봇막이인가(p.code, p.글)) {
+      console.log('     ★ 봇 막이 (HTTP ' + p.code + ') 「' + x.t.slice(0, 22) + '」 ' + x.h.slice(0, 58)
+        + '\n        → **뚫지 않습니다.** 손확인으로 넘깁니다');
+      결과.push({ 이름, 판정: '채용관이 봇 막이 (HTTP ' + p.code + ') — 손확인', 주소: x.h });
+      찾음 = 'bot'; break;
     }
     const j = 공고목록인가(p.글);
     console.log('     ' + (j.맞나 ? '★ 공고 목록' : '· 아님') + ' 「' + x.t.slice(0, 22) + '」 ' + x.h.slice(0, 58));
@@ -257,6 +287,7 @@ for (const [이름, 뿌리] of 볼것) {
     }
     await 자고(1200);
   }
+  if (찾음 === 'bot') { await 자고(600); continue; }   /* 봇 막이는 위에서 이미 적었습니다 */
   결과.push({ 이름, 판정: 찾음 ? '공고 목록 찾음' : '채용 링크는 있지만 공고 목록이 아님', 주소: 찾음?.주소 });
   await 자고(600);
 }
