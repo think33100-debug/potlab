@@ -51,7 +51,8 @@ const 값 = (이름, 기본) => {
 const 바퀴 = 값('--바퀴', '');
 const 견주기 = argv.includes('--견주기');
 const 안받기 = argv.includes('--칸안받기');
-const 제목도 = argv.includes('--제목도');   /* 제목 되메우기는 승인 뒤에 (2026-10-19 3번) */
+const 제목도 = argv.includes('--제목도');
+const 칸마른 = argv.includes('--칸마른');   /* 보낼 것만 찍고 안 씁니다 */
 const 결과폴더 = '/home/ubuntu/log';
 const 결과파일 = (n) => 결과폴더 + '/없어짐_' + n + '바퀴.json';
 
@@ -152,7 +153,7 @@ const 보이는 = (await 다('job_posts_pub?select=id&order=id.asc')).map((x) =>
 const 공 = [];
 for (let i = 0; i < 보이는.length; i += 60) {
   const 조각 = 보이는.slice(i, i + 60).map(encodeURIComponent).join(',');
-  공.push(...await 다('job_posts?select=id,source,org_name,title,url&id=in.(' + 조각 + ')&url=not.is.null'));
+  공.push(...await 다('job_posts?select=id,source,org_name,title,url,employ_type&id=in.(' + 조각 + ')&url=not.is.null'));
 }
 const 워크넷 = 공.filter((x) => ['WN', 'WN2'].includes(x.source));
 const 그밖 = 공.filter((x) => !['WN', 'WN2'].includes(x.source));
@@ -186,9 +187,14 @@ function 칸모음(x, xml) {
   if (c.접수마감) { 줄.apply_to = c.접수마감; 줄.마감일출처 = '워크넷 상세 API'; 칸셈.접수마감++; }
   if (c.모집인원) { 줄.headcount = c.모집인원; 칸셈.모집인원++; }
   if (c.근무지) { 줄.work_place = c.근무지; 칸셈.근무지++; }
-  /* 고용형태 — 글(empTpNm)과 본문(jobCont)을 함께 넣습니다. 코드보다 글이 먼저입니다 */
-  const 고용 = 고용형태판정(c.제목 || x.title || '', [c.고용형태글, c.본문].filter(Boolean).join('\n'));
-  if (고용) { 줄.employ_type = 고용; 칸셈.고용형태++; }
+  /* 고용형태 — `empTpNm` 의 **첫 토막만** 넣습니다 (고용형태글() 이 잘라 줍니다).
+     ★ `jobCont`(본문)는 **안 넣습니다.** 본문에는 다른 직군·다른 자리의
+       고용형태 말이 섞여 있어 「여러 고용형태가 섞인 통합공고」로 비워집니다.
+     ★ `고용형태판정()` 은 **객체** `{값, 왜}` 를 돌려줍니다 — `.값` 을 씁니다.
+       2026-10-19 에 객체를 그대로 칸에 넣어 회원 화면 252건에
+       `{"값": …, "왜": …}` 가 보였습니다. 칸기록의 옛값으로 되돌렸습니다 */
+  const 고용 = 고용형태판정(c.제목 || x.title || '', c.고용형태글 || '').값;
+  if (고용 && typeof 고용 === 'string') { 줄.employ_type = 고용; 칸셈.고용형태++; }
   const 뽑은값 = {};
   if (c.지원자격) { 뽑은값.지원자격 = c.지원자격; 칸셈.지원자격++; }
   if (c.예상연봉) { 뽑은값.예상연봉 = c.예상연봉; 칸셈.예상연봉++; }
@@ -197,7 +203,21 @@ function 칸모음(x, xml) {
   Object.assign(근거, c.근거);
   if (Object.keys(근거).length) 뽑은값.워크넷상세근거 = 근거;
   if (Object.keys(뽑은값).length) 줄.뽑은값 = 뽑은값;
-  if (Object.keys(줄).length > 1) 칸줄.push(줄);
+  if (Object.keys(줄).length > 1) { 줄._지금고용 = x.employ_type ?? null; 칸줄.push(줄); }
+}
+
+/* 고용형태는 **덮는** 칸이라 쓰기 전에 「무엇이 무엇으로 바뀌나」를 먼저 봅니다
+   (세중님 — 「틀린 값 0 이 채움률보다 먼저」). `--칸마른` 이면 여기서 끝냅니다 */
+function 고용형태_바뀔것() {
+  const 짝 = new Map();
+  for (const 줄 of 칸줄) {
+    if (!줄.employ_type) continue;
+    const 전 = 줄._지금고용 || '(빈칸)';
+    if (전 === 줄.employ_type) continue;
+    const k = 전 + ' → ' + 줄.employ_type;
+    (짝.get(k) ?? 짝.set(k, []).get(k)).push(줄.id);
+  }
+  return 짝;
 }
 for (const [i, x] of 워크넷.entries()) {
   const no = (String(x.url).match(/wantedAuthNo=([A-Z0-9]+)/) || [])[1];
@@ -296,10 +316,16 @@ if (argv.includes('--정찰보고')) {
   if (칸줄.length) {
     console.log('\n칸 창구(칸되메우기)에 보냅니다 — ' + 칸줄.length + '건 (추가 호출 0)');
     console.log('  뽑힌 칸 — ' + Object.entries(칸셈).map(([k, v]) => k + ' ' + v).join(' · '));
+    /* 덮는 칸(고용형태)은 **전 → 후**를 먼저 찍습니다 */
+    const 바뀔것 = 고용형태_바뀔것();
+    console.log('  고용형태가 **바뀔** 것 — '
+      + ([...바뀔것].map(([k, v]) => k + ' ' + v.length + '건').join(' · ') || '없습니다'));
+    for (const [k, v] of 바뀔것) console.log('     ' + k + ' 견본 ' + v.slice(0, 5).join(' '));
+    if (칸마른) { console.log('\n[칸마른] 아무것도 안 씁니다'); process.exit(0); }
     for (let i = 0; i < 칸줄.length; i += 50) {
       const r = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'), {
         method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ p_rows: 칸줄.slice(i, i + 50) }),
+        body: JSON.stringify({ p_rows: 칸줄.slice(i, i + 50).map(({ _지금고용, ...나머지 }) => 나머지) }),
       });
       const t = await r.text();
       if (!r.ok) { console.error('✗ 칸되메우기 ' + r.status + ' · ' + t.slice(0, 200)); break; }
