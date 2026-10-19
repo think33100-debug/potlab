@@ -44,6 +44,25 @@ export function 공고목록인가(html) {
   return { 맞나: 왜.length === 0, 왜: 왜.join(' · '), 줄수, 날짜: 날짜.slice(0, 3), 글꼴, 글수 };
 }
 
+/* ★ 뿌리 쪽이 **빈 껍데기**인 때가 많습니다 (2026-10-19 — 11곳 전부 「채용 링크 0개」가
+ *   나와 재는 쪽을 의심했고, 원문을 찍어 보니 이것이었습니다)
+ *     ① 자바스크립트로 옮겨 가는 쪽   location.href = "/index.jsp" 한 줄만 있는 218바이트
+ *     ② meta refresh
+ *   그래서 **한 번 따라갑니다.** 주소를 짐작하는 것이 아니라 쪽에 적힌 것을 씁니다 */
+export function 옮겨가는곳(html, 밑바탕) {
+  const m = html.match(/http-equiv=["']?refresh["']?[^>]*content=["'][^"']*url=([^"']+)["']/i)
+    || html.match(/location\s*\.\s*(?:href|replace)\s*[=(]\s*["']([^"']+)["']/i)
+    || html.match(/location\s*=\s*["']([^"']+)["']/i);
+  if (!m) return null;
+  try { const u = new URL(m[1], 밑바탕).href; return u === 밑바탕 ? null : u; } catch { return null; }
+}
+
+/* ★ 쪽을 자바스크립트가 그리면(SPA) HTML 에 링크가 하나도 없습니다 — 긁을 수 없습니다 */
+export function 자바스크립트쪽인가(html) {
+  return (html.match(/<a[\s>]/gi) || []).length === 0
+    && /<div\s+id=["'](root|app)["']/i.test(html);
+}
+
 /* ── 쪽 받기 ────────────────────────────────────────────────────── */
 async function 받기(u) {
   const r = await fetch(u, {
@@ -112,6 +131,17 @@ function 검사() {
   재다(채용링크들('<a href="javascript:recruit()">채용</a>', 'http://x.kr/').length === 0, 'javascript 를 씁니다');
   /* ⑩ 「전공의 모집」은 우리 쪽이 아닙니다 */
   재다(채용링크들('<a href="/x/1">2027년도 전공의 모집</a>', 'http://x.kr/')[0].뺌, '전공의 모집을 안 뺍니다');
+  /* ⑪~⑮ 빈 껍데기 쪽 — 강북삼성·씨엠·세종여주가 전부 이 꼴이었습니다 */
+  재다(옮겨가는곳('<script> location.href = "/index.jsp"; </script>', 'https://a.kr/') === 'https://a.kr/index.jsp',
+    'location.href 를 못 따라갑니다');
+  재다(옮겨가는곳("<script>location.href='web/';</script>", 'http://a.kr/') === 'http://a.kr/web/',
+    '홑따옴표·상대 주소를 못 따라갑니다');
+  재다(옮겨가는곳('<meta http-equiv="refresh" content="0;url=/main/main.html">', 'http://a.kr/') === 'http://a.kr/main/main.html',
+    'meta refresh 를 못 따라갑니다');
+  재다(옮겨가는곳('<a href="/x">그냥 쪽</a>', 'http://a.kr/') === null, '멀쩡한 쪽을 옮겨 간다고 봅니다');
+  재다(옮겨가는곳('<script>location.href="/";</script>', 'http://a.kr/') === null, '같은 자리로 맴돕니다');
+  재다(자바스크립트쪽인가('<body><div id="root"></div></body>'), 'SPA 를 못 가립니다');
+  재다(!자바스크립트쪽인가('<div id="root"></div><a href="/x">채용</a>'), '링크가 있는 쪽을 SPA 라고 봅니다');
   console.log('자기점검 ' + n + '가지 통과');
 }
 
@@ -160,6 +190,22 @@ for (const [이름, 뿌리] of 볼것) {
     결과.push({ 이름, 판정: '못 받음 — ' + String(e.message).slice(0, 40) }); continue;
   }
   console.log('  뿌리 HTTP ' + r.code + ' · ' + r.바이트 + '바이트');
+
+  /* 빈 껍데기면 **쪽에 적힌 곳으로** 한두 번 따라갑니다 */
+  for (let 걸음 = 0; 걸음 < 2; 걸음++) {
+    const 다음 = 옮겨가는곳(r.글, r.끝주소);
+    if (!다음) break;
+    console.log('  → 쪽이 옮겨 갑니다 — ' + 다음);
+    try { r = await 받기(다음); } catch (e) { console.log('     ✗ 못 받음 ' + String(e.message).slice(0, 40)); break; }
+    console.log('     HTTP ' + r.code + ' · ' + r.바이트 + '바이트');
+    await 자고(600);
+  }
+
+  if (자바스크립트쪽인가(r.글)) {
+    console.log('  → **자바스크립트로 그리는 쪽입니다 (SPA)** — HTML 에 링크가 없어 긁을 수 없습니다');
+    결과.push({ 이름, 판정: '자바스크립트 쪽(SPA) — 긁을 수 없음' }); continue;
+  }
+
   const 후보 = 채용링크들(r.글, r.끝주소);
   const 쓸것 = 후보.filter((x) => !x.뺌).slice(0, 5);
   console.log('  채용말 링크 ' + 후보.length + '개 (뺀 것 ' + 후보.filter((x) => x.뺌).length + '개)');
@@ -167,8 +213,14 @@ for (const [이름, 뿌리] of 볼것) {
     console.log('     ✗ 뺌 「' + x.t.slice(0, 26) + '」 — ' + x.뺌);
   }
   if (!쓸것.length) {
-    console.log('  → **채용 링크가 없습니다**');
-    결과.push({ 이름, 판정: '뿌리에 채용 링크 없음' }); continue;
+    /* ★ 「없다」고만 적지 않습니다 — **무엇이 있었나**를 함께 찍습니다 (지침 2절).
+     *   메뉴 글자를 보면 채용이 다른 말로 적혀 있는지, 아예 없는지가 가려집니다 */
+    const 메뉴 = [...new Set([...r.글.matchAll(/<a[^>]+href=["'][^"']+["'][^>]*>([\s\S]{0,40}?)<\/a>/gi)]
+      .map((m) => m[1].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim())
+      .filter((t) => t.length >= 2 && /[가-힣]/.test(t)))].slice(0, 24);
+    console.log('  → **채용 링크가 없습니다** (링크 글 ' + 메뉴.length + '가지)');
+    console.log('     메뉴 — ' + (메뉴.join(' · ').slice(0, 300) || '한글 링크 글이 없습니다'));
+    결과.push({ 이름, 판정: '쪽에 채용 링크 없음', 메뉴: 메뉴.slice(0, 8).join(' · ') }); continue;
   }
 
   let 찾음 = null;
