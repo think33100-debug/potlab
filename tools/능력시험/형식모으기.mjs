@@ -238,6 +238,61 @@ if (알리오몇) {
   console.log('알리오 쪽 ' + 본것 + '개에서 첨부 ' + 후보.length + '개 (새것 ' + 더한것.length + ') — 후보에 더했습니다');
 }
 
+/* ── ①-3 클린아이 쓸기 — **HWPX·DOCX 는 여기 있습니다** ─────────────
+ *
+ *   node tools/능력시험/형식모으기.mjs --클린아이 120
+ *
+ * 왜 — 쪽 104개와 알리오 80개를 쓸어도 **HWPX 1 · DOCX 0** 입니다.
+ * 우리 출처는 HWP·PDF 가 거의 전부입니다. 그런데 `job_attachments` 를 뒤져 보니
+ * HWPX 는 **클린아이(CE2)** 에 있습니다 —
+ *   「산부인과 채용계획(26.10.13.).hwpx」 · 「직원 채용 공고문.hwpx」
+ * 클린아이 첨부는 **POST** 로만 옵니다 (fn_FileDown 의 세 인자 + Referer).
+ * 통이 15건·2분이라 **10초 간격**을 지킵니다 (tools/cleaneye-file.mjs).
+ */
+const 클린아이몇 = Number(값('--클린아이', 0));
+if (클린아이몇) {
+  const 모두 = [];
+  for (let off = 0; off < 1500 && 모두.length < 클린아이몇; off += 100) {
+    const r = await fetch(U + '/rest/v1/job_posts?select=id,source,org_name,title,url'
+      + '&source=in.(CE2,CE)&url=not.is.null&order=db_insert_at.desc&limit=100&offset=' + off,
+    { headers: H });
+    if (!r.ok) break;
+    const j = await r.json();
+    모두.push(...j);
+    if (j.length < 100) break;
+  }
+  const 볼것 = 모두.slice(0, 클린아이몇);
+  console.log('\n클린아이 공고 쪽 ' + 볼것.length + '개에서 첨부 이름을 봅니다 (희귀 꼴만 받습니다)');
+  const 후보 = [];
+  let 본것 = 0;
+  for (const x of 볼것) {
+    try {
+      const r = await fetch(x.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' },
+        signal: AbortSignal.timeout(25000) });
+      const h = await r.text();
+      for (const m of h.matchAll(/fn_FileDown\(['"]([^'"]*)['"],['"]([^'"]*)['"],['"]([^'"]*)['"]/g)) {
+        const 이름 = m[2] || m[1];
+        /* **희귀 꼴만** 받습니다 — hwp·pdf 는 이미 충분합니다 */
+        if (!/[.](hwpx|docx|xlsx|pptx)$/i.test(이름)) continue;
+        후보.push({ url: 'https://job.cleaneye.go.kr/file/FileDownload.do#' + encodeURIComponent(이름),
+          갈래: '문서', 어디: '클린아이', 공고: x.id, source: x.source, 기관: x.org_name, 쪽: x.url,
+          post: { UPLOAD_FILENAME: m[1], ORIGINAL_FILENAME: m[2], FILE_PATH: m[3] },
+          이름0: 이름, 쉼: 10000 });
+      }
+      본것++;
+      process.stderr.write('\r  ' + 본것 + '/' + 볼것.length + ' · 희귀 꼴 ' + 후보.length + '    ');
+    } catch { /* 못 열면 넘어갑니다 */ }
+    await 자고(간격ms);
+  }
+  process.stderr.write('\n');
+  const 옛 = fs.existsSync(후보파일) ? JSON.parse(fs.readFileSync(후보파일, 'utf8')).후보 || [] : [];
+  const 본주소 = new Set(옛.map((y) => y.url));
+  const 더한것 = 후보.filter((y) => !본주소.has(y.url));
+  fs.writeFileSync(후보파일, JSON.stringify({ 만든때: new Date().toISOString(),
+    본쪽: 본것, 후보: [...옛, ...더한것] }, null, 1) + '\n', 'utf8');
+  console.log('클린아이 쪽 ' + 본것 + '개에서 희귀 꼴 ' + 후보.length + '개 (새것 ' + 더한것.length + ')');
+}
+
 /* ── ② 받아서 읽어 보기 ────────────────────────────────────── */
 if (받기) {
   if (!fs.existsSync(후보파일)) { console.error('✗ 먼저 --쪽 N 으로 후보를 모으십시오'); process.exit(1); }
@@ -262,9 +317,19 @@ if (받기) {
     본것.add(y.url);
     let r;
     try {
-      r = await fetch(y.url, { headers: { 'User-Agent': UA, Referer: y.쪽, Cookie: y.쿠키 || '' },
-        redirect: 'follow', signal: AbortSignal.timeout(30000) });
-    } catch (e) { 결과.push({ ...y, 왜: String(e.message).slice(0, 50) }); await 자고(간격ms); continue; }
+      /* ★ 클린아이는 **POST** 로만 옵니다 (fn_FileDown 의 세 인자 + Referer).
+         `#` 뒤 조각은 이름을 열쇠로 쓰려고 붙인 것이라 **보낼 때는 뗍니다** */
+      const 몸 = y.post ? new URLSearchParams(y.post) : null;
+      const 쏠곳 = y.url.split('#')[0];
+      r = await fetch(쏠곳, {
+        method: 몸 ? 'POST' : 'GET',
+        body: 몸 || undefined,
+        headers: { 'User-Agent': UA, Referer: y.쪽, Cookie: y.쿠키 || '',
+          ...(몸 ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}) },
+        redirect: 'follow',
+        signal: AbortSignal.timeout(30000),
+      });
+    } catch (e) { 결과.push({ ...y, 왜: String(e.message).slice(0, 50) }); await 자고(y.쉼 || 간격ms); continue; }
     const buf = Buffer.from(await r.arrayBuffer());
     받은수++;
     const 꼴 = 진짜형식(buf);
@@ -295,7 +360,7 @@ if (받기) {
     }
     결과.push(한줄);
     process.stderr.write('\r  받은 것 ' + 받은수 + ' · ' + (한줄.묶음속 || 한줄.꼴) + '        ');
-    await 자고(간격ms);
+    await 자고(y.쉼 || 간격ms);
   }
   process.stderr.write('\n');
   /* 옛 것에 **이어 붙입니다** — 묶음을 나눠 모아도 한 자리에 쌓이게 */
