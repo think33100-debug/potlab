@@ -34,6 +34,7 @@ let 볼것 = argv.filter((a) => !a.startsWith('--') && !/^\d+$/.test(a) || /^\d{
 const 출처 = 값('--출처', null);
 const 남은것 = argv.includes('--남은것') ? Number(값('--남은것', 8)) : 0;
 const 몇개 = Number(값('--몇개', 0));
+const 폭 = Number(값('--폭', 1));   /* 표식말 줄의 앞뒤 몇 줄까지 보여 줄지 — 표는 머리줄과 값줄이 떨어져 있어 넓혀 봅니다 */
 if (!볼것.length || 출처 || 남은것) {
   let 뽑 = 표본;
   if (출처) 뽑 = 뽑.filter((x) => x.source === 출처);
@@ -70,11 +71,11 @@ for (const id of 볼것) {
     const 고른 = new Set();
     줄.forEach((l, i) => {
       if (군더더기.test(l)) return;
-      if (표식.test(l)) { for (let k = -1; k <= 1; k++) if (줄[i + k] && !군더더기.test(줄[i + k])) 고른.add(i + k); }
+      if (표식.test(l)) { for (let k = -폭; k <= 폭; k++) if (줄[i + k] && !군더더기.test(줄[i + k])) 고른.add(i + k); }
     });
     const 차례 = [...고른].sort((a, b) => a - b);
     let 앞 = -2;
-    const 몇줄 = argv.includes('--짧게') ? 16 : 70;
+    const 몇줄 = argv.includes('--짧게') ? 16 : Number(값('--줄', 70));
     for (const i of 차례.slice(0, 몇줄)) {
       if (i > 앞 + 1) console.log('   …');
       console.log('   ' + 줄[i].slice(0, 200));
