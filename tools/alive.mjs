@@ -3,6 +3,7 @@
  *   node tools/alive.mjs --dry     확인만 하고 기록하지 않습니다
  *   node tools/alive.mjs           확인하고 기록합니다
  *   node tools/alive.mjs --n 20    앞 20건만
+ *   node tools/alive.mjs --아이디 HS123,HS456   그 공고만 다시
  *
  * ── 왜 있나 ────────────────────────────────────────────────
  * 마감일이 없는 공고(「수시모집」 「상시」)는 날짜로 끝을 알 수 없습니다.
@@ -243,8 +244,26 @@ if (!cfg.ALIVE_KEY) { console.error('ALIVE_KEY 가 없습니다 — 함수 권�
    접수기간을 찾아 아직 안 지났으면 되살립니다 (DB 의 alive_mark 가 합니다).
    평소 정찰은 이 깃발 없이 돌립니다 — 보이는 공고만 봅니다 */
 const 내린것 = argv.includes('--내린것');
-const 볼것0 = await rpc(cfg, 'alive_targets',
-  { p_secret: cfg.ALIVE_KEY, p_n: 100, p_내린것: 내린것 });
+/* --아이디 A,B — **그 공고만** 다시 봅니다 (2026-10-20).
+   `alive_targets` 는 「최근 6일 안에 본 것」을 빼기 때문에, 규칙을 고친 날
+   그날 본 공고는 다음 주까지 안 돌아옵니다. 규칙을 고쳤으면 **그 자리에서
+   다시 돌려 봐야** 합니다 (지침 15-2 ② — 실제 자료로 한 번 돌았는가). */
+const 아이디들 = argv.includes('--아이디')
+  ? String(argv[argv.indexOf('--아이디') + 1] || '').split(',').map((s) => s.trim()).filter(Boolean)
+  : [];
+async function 아이디로받기(ids) {
+  const k = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;
+  const 칸 = 'id,url,title,org_name,source,apply_to,hidden';
+  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/job_posts?select='
+    + encodeURIComponent(칸) + '&id=in.(' + ids.join(',') + ')',
+    { headers: { apikey: k, Authorization: 'Bearer ' + k } });
+  if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
+  return r.json();
+}
+const 볼것0 = 아이디들.length
+  ? await 아이디로받기(아이디들)
+  : await rpc(cfg, 'alive_targets',
+    { p_secret: cfg.ALIVE_KEY, p_n: 100, p_내린것: 내린것 });
 if ((볼것0 || []).length >= 100) {
   console.error('★ 대상이 100건으로 꽉 찼습니다 — Supabase 가 거기서 자릅니다.');
   console.error('  더 있을 수 있습니다. 이번 주에 못 본 것은 다음 주로 밀립니다.');
