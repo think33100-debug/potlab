@@ -242,7 +242,18 @@ if (알리오몇) {
 if (받기) {
   if (!fs.existsSync(후보파일)) { console.error('✗ 먼저 --쪽 N 으로 후보를 모으십시오'); process.exit(1); }
   const { 후보 } = JSON.parse(fs.readFileSync(후보파일, 'utf8'));
-  const 본것 = new Set();
+  /* ★ 이미 받아 둔 주소는 **다시 안 받습니다** — 사이트를 괜히 두드리지 않고
+     하루 뚜껑도 아낍니다 (`--다시받기` 를 적으면 전부 다시) */
+  const 받은파일 = path.join(낼곳, '받은것.json');
+  const 본것 = new Set(
+    (!argv.includes('--다시받기') && fs.existsSync(받은파일))
+      ? (JSON.parse(fs.readFileSync(받은파일, 'utf8')).결과 || []).map((y) => y.url)
+      : [],
+  );
+  const 옛결과 = 본것.size
+    ? (JSON.parse(fs.readFileSync(받은파일, 'utf8')).결과 || [])
+    : [];
+  if (본것.size) console.log('  (이미 받아 둔 ' + 본것.size + '개는 건너뜁니다)');
   const 결과 = [];
   let 받은수 = 0;
   for (const y of 후보) {
@@ -287,11 +298,12 @@ if (받기) {
     await 자고(간격ms);
   }
   process.stderr.write('\n');
-  fs.writeFileSync(path.join(낼곳, '받은것.json'),
-    JSON.stringify({ 만든때: new Date().toISOString(), 결과 }, null, 1) + '\n', 'utf8');
+  /* 옛 것에 **이어 붙입니다** — 묶음을 나눠 모아도 한 자리에 쌓이게 */
+  fs.writeFileSync(받은파일,
+    JSON.stringify({ 만든때: new Date().toISOString(), 결과: [...옛결과, ...결과] }, null, 1) + '\n', 'utf8');
 
   const 모음 = new Map();
-  for (const x of 결과) {
+  for (const x of [...옛결과, ...결과]) {
     const k = x.묶음속 || x.꼴 || '?';
     const t = 모음.get(k) || { n: 0, 받음: 0, 읽음: 0, 직군: 0, 인원: 0, 마감: 0, 초합: 0 };
     t.n++;
