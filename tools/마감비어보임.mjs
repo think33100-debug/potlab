@@ -182,16 +182,26 @@ const 줄 = 빈것.map((x) => {
   return { ...x, source: y.source, db_insert_at: y.db_insert_at,
     지남: 지난날(x.posted_at, String(y.db_insert_at || '').slice(0, 10), 오늘) };
 });
+/* ★ 「며칠 지났나」만으로는 **가장 나쁜 것을 놓칩니다.**
+   광주씨티 HS1650428387 은 **2021년 공고**인데 `posted_at` 이 비어 있고
+   우리가 10-18 에 담아서 「2일」로 보입니다. 그래서 **올린날이 없는 것**도
+   원문 확인 목록에 넣습니다 (2026-10-20 · 세중님 1번 뿌리②) */
 const 오래된것 = 줄.filter((x) => x.지남 != null && x.지남 >= 오래됨일수);
+const 올린날없음 = 줄.filter((x) => !x.posted_at);
+const 확인할것 = [...new Map([...오래된것, ...올린날없음].map((x) => [x.id, x])).values()];
 
 console.log('\n── 마감일이 빈 회원 화면 공고 ' + 줄.length + '건 (' + 오늘 + ') ──');
+console.log('   지남  아이디         출처 올린날       담은날   기관 / 제목');
 for (const x of [...줄].sort((a, b) => (b.지남 ?? -1) - (a.지남 ?? -1))) {
-  console.log('  ' + (x.지남 == null ? '  ?' : String(x.지남).padStart(3)) + '일  '
+  console.log('  ' + (x.지남 == null ? '  ?' : String(x.지남).padStart(4)) + '일 '
     + String(x.id).padEnd(14) + String(x.source || '').padEnd(4) + ' '
-    + String(x.org_name || '').slice(0, 16).padEnd(17) + String(x.title || '').slice(0, 40));
+    + String(x.posted_at || '(없음)   ').padEnd(12)
+    + String(x.db_insert_at || '').slice(0, 10).padEnd(12)
+    + String(x.org_name || '').slice(0, 14).padEnd(15) + String(x.title || '').slice(0, 34));
 }
-console.log('\n  ★ ' + 오래됨일수 + '일 넘은 것 — ' + 오래된것.length + '건'
-  + (오래된것.length ? ' (원문을 확인해야 합니다)' : ' (없습니다)'));
+console.log('\n  ★ 원문을 확인할 것 — ' + 확인할것.length + '건'
+  + '  (' + 오래됨일수 + '일 넘음 ' + 오래된것.length + ' · 올린날 없음 ' + 올린날없음.length + ')');
+for (const x of 확인할것) console.log('     ' + x.id + '  ' + String(x.org_name || '').slice(0, 20));
 
 /* ── 원문 받기 — 쪽 쿠키와 Referer 를 함께 보냅니다 ───────────── */
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0';
@@ -251,7 +261,7 @@ const 마감꼴 = /(접수\s*기간|접수\s*마감|원서\s*접수|제출\s*기
 
 /* ── ② 원문 열어 보기 ──────────────────────────────────── */
 if (원문보기) {
-  for (const x of (오래된것.length ? 오래된것 : 줄)) {
+  for (const x of (확인할것.length ? 확인할것 : 줄)) {
     console.log('\n════ ' + x.id + ' · ' + x.org_name + '\n  ' + x.url);
     try {
       for (const g of await 원문글(x.url)) {
