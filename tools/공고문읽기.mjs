@@ -35,6 +35,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { 읽기, kordoc있나, 워커끝내기, 워커셈 } from './kordoc워커.mjs';
+import { 목록, 꺼내기, 묶음갈래, 공고문먼저, 역사선바로잡기, 서식말, 묶기 } from './묶음파일.mjs';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
@@ -67,9 +68,34 @@ export async function 첨부읽기(buf, 이름 = '공고문.hwp', 옵션 = {}) {
      kordoc 의 detectFormat 과 같은 생각이고, 우리는 바이트만 들고 있어서
      여기서 앞 글자로 봅니다 — 주소가 틀리면 HTML 이 옵니다 */
   const 꼴 = 진짜형식(buf);
-  if (!['pdf', 'hwp', 'zip계열'].includes(꼴)) {
+  if (!읽을수있는꼴.includes(꼴)) {
     return { md: '', 글: '', 왜: '읽을 수 있는 형식이 아닙니다 (' + 꼴 + ' · ' + buf.length + '바이트)', 초: 0, 꼴 };
   }
+
+  /* ★ 2026-10-20 — **묶음(ZIP)은 안을 보고 갈래를 가립니다.**
+   *
+   * 전에는 「ZIP 이면 .hwpx」 였습니다. 그래서 DOCX·XLSX·그냥 ZIP 이
+   * 전부 「HWPX에서 섹션 파일을 찾을 수 없습니다」로 떨어졌습니다 (표본 6건).
+   * `detectZipFormat` 을 부르는 분기가 있었지만 `import('kordoc')` 가
+   * **언제나 실패**해서(모듈을 찾는 자리에 없습니다) 한 번도 안 돌았고,
+   * 돌려 봤더니 그 함수도 세 파일 모두 `unknown` 을 냈습니다.
+   * 그래서 `묶음파일.mjs` 로 **안의 목록을 보고** 가립니다. */
+  let 몸 = buf;
+  let 묶음속 = null;
+  if (꼴 === 'zip계열') {
+    묶음속 = 묶음갈래(buf);
+    /* 역사선 이름(word\document.xml)을 눕혀 다시 묶습니다 — kordoc 이 읽게 */
+    if (묶음속 === 'docx' || 묶음속 === 'xlsx' || 묶음속 === 'pptx' || 묶음속 === 'hwpx') {
+      const 고친 = 역사선바로잡기(buf);
+      if (고친) 몸 = 고친;
+    }
+    /* 그냥 묶음이면 **안의 파일을 하나씩** 읽습니다 (아래 묶음읽기) */
+    if (묶음속 === 'zip') return 묶음읽기(buf, 이름, 옵션);
+  }
+
+  /* 그림은 kordoc 이 OCR 로 읽습니다 — CLI 도움말에 적혀 있습니다
+     (「PNG/JPG/WebP — 이미지는 OCR 자동 적용」). sharp 가 있어야 돕니다 */
+  const 그림인가 = 꼴 === 'jpg' || 꼴 === 'png' || 꼴 === 'webp';
 
   /* 저장 이름은 **ASCII 만** — 한글 경로는 탈이 납니다 (지침 6-2b).
    *
@@ -80,18 +106,13 @@ export async function 첨부읽기(buf, 이름 = '공고문.hwp', 옵션 = {}) {
    * 전에는 ZIP 이면 무조건 `.hwpx` 로 저장했습니다. 공고 첨부에 xlsx·docx 가
    * 섞여 오면 이름과 속이 어긋나, kordoc 이 자동 감지로 살려 주긴 해도
    * 엉뚱한 자리에서 탈이 날 수 있습니다. */
-  let 확장자 = 꼴 === 'pdf' ? '.pdf' : (/\.hwpx$/i.test(이름) || 꼴 === 'zip계열' ? '.hwpx' : '.hwp');
-  let zip속 = null;
-  if (꼴 === 'zip계열') {
-    try {
-      const { detectZipFormat } = await import('kordoc');
-      zip속 = await detectZipFormat(buf.buffer ? buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length) : buf);
-      if (zip속 && zip속 !== 'unknown') 확장자 = '.' + zip속;
-    } catch { /* 못 불러도 .hwpx 로 갑니다 — kordoc 이 자동 감지합니다 */ }
-  }
+  const 확장자 = 꼴 === 'pdf' ? '.pdf'
+    : 그림인가 ? '.' + (꼴 === 'jpg' ? 'jpg' : 꼴)
+      : 꼴 === 'zip계열' ? '.' + (묶음속 && 묶음속 !== 'zip' ? 묶음속 : 'hwpx')
+        : '.hwp';
   const 바닥 = fs.mkdtempSync(path.join(os.tmpdir(), 'kd-'));
   const 넣을곳 = path.join(바닥, 'in' + 확장자);
-  fs.writeFileSync(넣을곳, buf);
+  fs.writeFileSync(넣을곳, 몸);
 
   let 초 = 0; let 결과 = null; let 왜 = ''; let OCR썼나 = false; let rssMB = null;
   try {
@@ -137,12 +158,74 @@ export async function 첨부읽기(buf, 이름 = '공고문.hwp', 옵션 = {}) {
   }
   return {
     md, blocks, 글: (글만(md) + '\n' + 맨손글).trim(), 왜: '', 초, 꼴, rssMB,
-    맨손글자: 맨손글.length, OCR썼나,
+    맨손글자: 맨손글.length,
+    /* ★ 그림은 **글자가 없어서** 늘 OCR 로 읽습니다 — kordoc 이 따로 알려
+       주지 않으니 우리가 적습니다. 뽑은값에 「OCR」 근거를 달고 회원 화면
+       직행을 막는 잣대입니다 (세중님 4번 공통). */
+    OCR썼나: OCR썼나 || 그림인가,
+    그림OCR: 그림인가 || undefined,
+    묶음속: 묶음속 || undefined,
     쪽수: 결과?.pageCount ?? null,
     OCR필요쪽: (결과?.pageQuality || []).filter((q) => q.needsOcr).length,
     OCR묶음신호: 결과?.qualitySummary?.needsOcr ?? null,
   };
 }
+
+/* ── 그냥 묶음(ZIP) — **안의 파일을 하나씩** 읽어 이어 붙입니다 ────────
+ *
+ * 공고 첨부의 ZIP 은 거의 「직무기술서 묶음」입니다 —
+ *   NCS직무기술서.zip  → NCS 직무기술서(물리치료사).hwp · (방사선사).hwp · …
+ * 전에는 ZIP 을 HWPX 로 읽으려다 실패해 **0자**였습니다 (표본 5건).
+ *
+ * ★ 공고문으로 보이는 것을 **먼저** 읽습니다 (`공고문먼저()`).
+ * ★ 지원서·서식도 **읽기는** 하지만 `칸뽑기` 에 쓰는 글(`글`)에는
+ *   넣지 않습니다 — 양식의 빈 칸이 값으로 뽑히면 안 됩니다 (세중님 2번).
+ * ★ 한 단계 더 중첩(묶음 안의 묶음)까지만 풉니다. 폭탄 막기 —
+ *   파일 수 200 · 푼 크기 80MB (묶음파일.mjs 의 상한) · 여기서는 읽는 수도 제한.
+ */
+export const 묶음속읽을수 = 6;
+
+async function 묶음읽기(buf, 이름, 옵션 = {}, 깊이 = 0) {
+  const 들 = 목록(buf) || [];
+  const 차례 = 공고문먼저(들);
+  if (!차례.length) {
+    return { md: '', 글: '', 묶음속: 'zip', 꼴: 'zip계열', 초: 0,
+      왜: '묶음 안에 읽을 수 있는 문서가 없습니다 (' + 들.length + '개: '
+        + 들.slice(0, 3).map((x) => x.이름).join(' · ') + ')' };
+  }
+  const 조각 = []; let 초 = 0; let rssMB = 0; let OCR썼나 = false;
+  for (const x of 차례.slice(0, 묶음속읽을수)) {
+    const 속몸 = 꺼내기(buf, x.이름);
+    if (!속몸) { 조각.push({ 이름: x.이름, 왜: '못 풀었습니다 (압축방식 ' + x.압축방식 + ')' }); continue; }
+    /* 묶음 안의 묶음 — **한 단계만** */
+    const 속꼴 = 진짜형식(속몸);
+    let r;
+    if (속꼴 === 'zip계열' && 묶음갈래(속몸) === 'zip') {
+      if (깊이 >= 1) { 조각.push({ 이름: x.이름, 왜: '묶음이 두 단계 넘게 겹쳐 있습니다' }); continue; }
+      r = await 묶음읽기(속몸, x.이름, 옵션, 깊이 + 1);
+    } else {
+      r = await 첨부읽기(속몸, x.이름, 옵션);
+    }
+    초 += r.초 || 0;
+    rssMB = Math.max(rssMB, r.rssMB || 0);
+    OCR썼나 = OCR썼나 || !!r.OCR썼나;
+    조각.push({ 이름: x.이름, 글자수: String(r.md || '').length, 왜: r.왜 || '',
+      md: String(r.md || ''), 서식인가: 서식말.test(x.이름) });
+  }
+  const 읽힌것 = 조각.filter((c) => c.md);
+  const md = 읽힌것.map((c) => '\n\n## [묶음 속] ' + c.이름 + '\n\n' + c.md).join('');
+  /* 칸뽑기에 쓰는 글은 **서식을 뺀 것**만 */
+  const 칸글 = 읽힌것.filter((c) => !c.서식인가).map((c) => 글만(c.md)).join('\n');
+  return {
+    md, blocks: [], 글: 칸글.trim(), 꼴: 'zip계열', 묶음속: 'zip', 초, rssMB, OCR썼나,
+    묶음조각: 조각.map((c) => ({ 이름: c.이름, 글자수: c.글자수 || 0, 왜: c.왜 || '', 서식인가: !!c.서식인가 })),
+    왜: 읽힌것.length ? '' : '묶음 안 ' + 조각.length + '개를 다 못 읽었습니다',
+  };
+}
+
+/* 읽을 수 있는 꼴 — **한 자리**에 둡니다 (지침 6절).
+   2026-10-20 에 그림(jpg·png·webp)을 넣었습니다 — kordoc 이 OCR 로 읽습니다 */
+export const 읽을수있는꼴 = ['pdf', 'hwp', 'zip계열', 'jpg', 'png', 'webp'];
 
 /* 앞 글자로 본 진짜 형식 — 확장자를 믿지 않습니다 (지침 5절) */
 export function 진짜형식(바이트) {
@@ -156,6 +239,11 @@ export function 진짜형식(바이트) {
   if (같나(0x50, 0x4b, 0x03, 0x04)) return 'zip계열';
   if (같나(0xff, 0xd8, 0xff)) return 'jpg';
   if (같나(0x89, 0x50, 0x4e, 0x47)) return 'png';
+  /* WebP — RIFF…WEBP (2026-10-20 · kordoc 이 읽는 꼴이라 가립니다) */
+  if (같나(0x52, 0x49, 0x46, 0x46) && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return 'webp';
+  if (같나(0x47, 0x49, 0x46, 0x38)) return 'gif';
+  /* TIFF — 스캔 공고가 이 꼴로 오는 일이 있습니다 (kordoc 은 아직 안 읽습니다) */
+  if (같나(0x49, 0x49, 0x2a, 0x00) || 같나(0x4d, 0x4d, 0x00, 0x2a)) return 'tiff';
   if (같나(0x3c, 0x21) || 같나(0x3c, 0x68) || 같나(0x3c, 0x48)) return 'HTML';
   return '모름';
 }
@@ -1154,6 +1242,30 @@ if (import.meta.url === 'file://' + process.argv[1] || process.argv[1]?.endsWith
     봐('「작업 치료사」 띈 것도 걸린다', 본문직군('작업 치료사 면허 소지자') === '작업치료사');
     봐('둘 다 있으면 공통', 본문직군('물리치료사 2명, 작업치료사 1명') === '공통');
     봐('빈 글은 빈 말', 본문직군('') === '' && 본문직군(null) === '');
+
+    /* ★ 2026-10-20 — **형식 가리기 한 자리** (세중님 1번).
+       앞 바이트로 보고, ZIP 이면 **안의 목록**으로 가릅니다.
+       확장자를 믿지 않습니다 — 「.hwp 인데 PDF」 가 실제로 옵니다 (지침 5절) */
+    const 글바 = (s) => Buffer.from(s, 'binary');
+    봐('PDF 앞 바이트', 진짜형식(글바('%PDF-1.7\n…')) === 'pdf');
+    봐('HWP(OLE2) 앞 바이트', 진짜형식(Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0, 0])) === 'hwp');
+    봐('JPG 앞 바이트', 진짜형식(Buffer.from([0xff, 0xd8, 0xff, 0xe0])) === 'jpg');
+    봐('PNG 앞 바이트', 진짜형식(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a])) === 'png');
+    봐('WebP 앞 바이트', 진짜형식(Buffer.concat([글바('RIFF'), Buffer.alloc(4), 글바('WEBP')])) === 'webp');
+    봐('HTML 은 못 받은 것', 진짜형식(글바('<!DOCTYPE html>')) === 'HTML');
+    봐('★ 확장자가 틀려도 앞 바이트를 믿습니다 (.hwp 인데 PDF)',
+      진짜형식(글바('%PDF-1.4 ...')) === 'pdf');
+    봐('읽을 수 있는 꼴에 그림이 들어 있다',
+      읽을수있는꼴.includes('jpg') && 읽을수있는꼴.includes('png'));
+    봐('TIFF 는 아직 못 읽습니다 (가리기만)',
+      진짜형식(Buffer.from([0x49, 0x49, 0x2a, 0x00])) === 'tiff' && !읽을수있는꼴.includes('tiff'));
+    /* 묶음 네 꼴 — 규칙은 묶음파일.mjs 한 자리이고 여기서는 **이어졌나**만 봅니다 */
+    봐('묶음 네 꼴을 가립니다 (hwpx·docx·xlsx·zip)',
+      묶음갈래(묶기([{ 이름: 'Contents/section0.xml', 내용: 글바('<s/>') }])) === 'hwpx'
+      && 묶음갈래(묶기([{ 이름: 'word/document.xml', 내용: 글바('<w/>') }])) === 'docx'
+      && 묶음갈래(묶기([{ 이름: 'xl/workbook.xml', 내용: 글바('<w/>') }])) === 'xlsx'
+      && 묶음갈래(묶기([{ 이름: '직무기술서.hwp', 내용: 글바('aaaa') }])) === 'zip');
+    봐('묶음이 아니면 null', 묶음갈래(글바('%PDF-1.7')) === null);
 
     /* ★ 이전글·다음글 꼬리표 — 광주보훈 HS2108355665 본문 그대로 (2026-10-20) */
     const 보훈 = '[광주보훈병원] 계약직 업무지원직(진료지원) 직원 채용\n\n2. 모집분야 : 진료지원\n\n'
