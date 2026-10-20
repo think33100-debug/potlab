@@ -31,8 +31,16 @@ export function 제목직군(제목) {
   return (matchJob(t) && !notOurs(t)) ? matchJob(t) : '';
 }
 
-/** 한 공고를 가립니다 — 직군이 어디서 왔나 */
-export function 가리기(제목, 본문) {
+/** 한 공고를 가립니다 — 직군이 어디서 왔나
+ *
+ * ★ 2026-10-20 — `우리가적은근거` 를 **따로** 받습니다 (`detail.근거`).
+ *   그것을 **근거로 쓰지 않습니다** — 「공고문에 물리치료사가 안 적혀
+ *   있습니다」가 「적혀 있다」로 읽혔던 자리입니다 (CLAUDE.md 직군의심 절).
+ *   다만 「원문에 없음」과 **「첨부 글이 DB 에 없어서 못 가림」**은 다른 일이라
+ *   갈래를 나눕니다. GJ2 5건이 그 꼴이었습니다 — 첨부 공고문에 「작업치료사」가
+ *   또렷이 있는데(손으로 열어 확인했습니다) 우리는 첨부 **글을 안 남깁니다**.
+ */
+export function 가리기(제목, 본문, 우리가적은근거) {
   const 제 = 제목직군(제목);
   const 원 = 본문직군(String(본문 || '').replace(옆글머리말, (m) => m));   /* 떼기 전 */
   const 전 = (() => {
@@ -49,6 +57,10 @@ export function 가리기(제목, 본문) {
   if (제) return { 갈래: '제목', 직군: 제, 떼기전: 전, 떼기후: 뒤 };
   if (뒤) return { 갈래: '본문', 직군: 뒤, 떼기전: 전, 떼기후: 뒤 };
   if (전) return { 갈래: '옆글에서 샘', 직군: '', 떼기전: 전, 떼기후: 뒤 };
+  if (/첨부/.test(String(우리가적은근거 || ''))) {
+    return { 갈래: '첨부라는데 글이 없음', 직군: '', 떼기전: 전, 떼기후: 뒤,
+      적은근거: String(우리가적은근거) };
+  }
   return { 갈래: '근거 없음', 직군: '', 떼기전: 전, 떼기후: 뒤, 원 };
 }
 
@@ -107,7 +119,7 @@ async function 다받기(길) {
 const 보임 = new Set((await 다받기('job_posts_pub?select=id&order=id.asc')).map((x) => x.id));
 const 조건 = ['job_group=not.is.null', 'job_group=neq.'].join('&')
   + (출처 ? '&source=eq.' + 출처 : '');
-const 공고 = await 다받기('job_posts?select=id,source,org_name,title,job_group,hold,hidden,evidence'
+const 공고 = await 다받기('job_posts?select=id,source,org_name,title,job_group,hold,hidden,evidence,detail'
   + '&' + 조건 + '&order=db_insert_at.desc');
 const 볼것 = 전부 ? 공고 : 공고.filter((x) => 보임.has(x.id));
 console.log('\n직군이 붙은 공고 ' + 볼것.length + '건을 봅니다'
@@ -122,19 +134,19 @@ for (let i = 0; i < 볼것.length; i += 40) {
   for (const b of j) 본문.set(b.job_id, (본문.get(b.job_id) || '') + '\n' + String(b.body || ''));
 }
 
-const 셈 = { 제목: 0, 본문: 0, '옆글에서 샘': 0, '근거 없음': 0, 본문없음: 0 };
+const 셈 = { 제목: 0, 본문: 0, '옆글에서 샘': 0, '첨부라는데 글이 없음': 0, '근거 없음': 0, 본문없음: 0 };
 const 샌것 = []; const 근거없음 = [];
 for (const x of 볼것) {
   const g = 본문.get(x.id);
   if (!g || !g.trim()) { 셈.본문없음++; continue; }
-  const r = 가리기(x.title, g);
+  const r = 가리기(x.title, g, (x.detail && x.detail['근거']) || '');
   셈[r.갈래] = (셈[r.갈래] || 0) + 1;
   if (r.갈래 === '옆글에서 샘') 샌것.push({ ...x, ...r });
   if (r.갈래 === '근거 없음') 근거없음.push({ ...x, ...r });
 }
 
 console.log('\n── 직군이 어디서 왔나 ──');
-for (const k of ['제목', '본문', '옆글에서 샘', '근거 없음', '본문없음']) {
+for (const k of ['제목', '본문', '옆글에서 샘', '첨부라는데 글이 없음', '근거 없음', '본문없음']) {
   console.log('  ' + String(셈[k] || 0).padStart(4) + '건  ' + k);
 }
 
@@ -149,6 +161,12 @@ if (샌것.length) {
       + '지금 직군 ' + String(x.job_group).padEnd(7) + ' ← 옆 글 ' + x.떼기전);
     console.log('      ' + String(x.org_name || '').slice(0, 18) + ' · ' + String(x.title || '').slice(0, 56));
   }
+}
+if (셈['첨부라는데 글이 없음']) {
+  console.log('\n  ※ 「첨부라는데 글이 없음」 ' + 셈['첨부라는데 글이 없음']
+    + '건 — 우리가 적은 근거는 「첨부 공고문」인데');
+  console.log('     **첨부 글을 DB 에 안 남겨서** 제 도구가 못 가립니다. 손으로 열어 보면 있습니다');
+  console.log('     (GJ2 5건을 2026-10-20 에 열어 확인했습니다 — tools/나라일터_직군근거.mjs)');
 }
 if (근거없음.length) {
   console.log('\n★ 원문 어디에도 우리 직군 말이 없는 것 — ' + 근거없음.length + '건');
