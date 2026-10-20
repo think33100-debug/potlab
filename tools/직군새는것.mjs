@@ -121,7 +121,13 @@ const 조건 = ['job_group=not.is.null', 'job_group=neq.'].join('&')
   + (출처 ? '&source=eq.' + 출처 : '');
 const 공고 = await 다받기('job_posts?select=id,source,org_name,title,job_group,hold,hidden,evidence,detail'
   + '&' + 조건 + '&order=db_insert_at.desc');
-const 볼것 = 전부 ? 공고 : 공고.filter((x) => 보임.has(x.id));
+/* ★ offset 으로 넘길 때 **같은 줄이 두 번** 올 수 있습니다 (order 가 같은 값이면
+   쪽 경계에서 흔들립니다). 세는 숫자라 id 로 겹침을 거릅니다 */
+const 겹침없이 = [...new Map(공고.map((x) => [x.id, x])).values()];
+if (겹침없이.length !== 공고.length) {
+  console.log('  (받은 줄 ' + 공고.length + ' → 겹침 거르고 ' + 겹침없이.length + ')');
+}
+const 볼것 = 전부 ? 겹침없이 : 겹침없이.filter((x) => 보임.has(x.id));
 console.log('\n직군이 붙은 공고 ' + 볼것.length + '건을 봅니다'
   + (전부 ? ' (숨김·보류 포함)' : ' (회원 화면만)') + (출처 ? ' · 출처 ' + 출처 : ''));
 
