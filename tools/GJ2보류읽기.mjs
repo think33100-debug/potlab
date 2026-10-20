@@ -28,7 +28,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { matchJob } from './gas-rules.mjs';
 import { 첨부직군 } from './첨부직군.mjs';
-import { pdf글자, 쓸수있나 as OCR쓸수있나 } from './ocr/index.mjs';
+import { 첨부읽기, kordoc있나, 진짜형식 } from './공고문읽기.mjs';
 import { hwp글자 } from './hwp/index.mjs';
 
 /* 창구(collect_put · collect_beat · 판정남기기)를 부를 열쇠.
@@ -72,7 +72,7 @@ console.log('GJ2 보류 첨부 읽기 · ' + new Date().toLocaleString('ko-KR', 
   + (dry ? ' · **--dry · 고치지 않습니다**' : ''));
 console.log('  공공데이터 열쇠  ' + (cfg.ALIO_DETAIL_KEY ? '있음' : '**없음**'));
 console.log('  collect_put     ' + (열쇠 ? '있음' : '**없음**'));
-console.log('  OCR             ' + (OCR쓸수있나() ? '쓸 수 있음' : '**못 씀**'));
+console.log('  첨부 읽기         ' + (kordoc있나() ? 'kordoc (hwp·hwpx·pdf·docx·xlsx·그림 OCR)' : '**kordoc 이 없습니다**'));
 if (!cfg.ALIO_DETAIL_KEY || !cfg.SUPABASE_URL) { console.error('\n열쇠가 모자랍니다'); process.exit(1); }
 if (!dry && !열쇠) { console.error('\nCOLLECT_KEY 가 없습니다 (고치려면 필요합니다)'); process.exit(1); }
 
@@ -152,20 +152,19 @@ async function 첨부받기(idx) {
   return { 고른것, 이름들, 원문길이: t.length };
 }
 
+/* ★ 2026-10-20 세중님 3번 — **kordoc 한 자리로** 바꿨습니다.
+   전에는 hwp 는 맨손, PDF 는 옛 Apps Script OCR 이었습니다. 그 길은 404·500 으로
+   죽어 있고, kordoc 은 hwp·hwpx·pdf·docx·xlsx·그림을 다 읽습니다.
+   `gas/` 는 손대지 않았습니다 — 부르는 자리만 끊었습니다 (지침 0절) */
 async function 파일글자(주소) {
   const r = await fetch(주소, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   const buf = Buffer.from(await r.arrayBuffer());
-  const 머리 = buf.subarray(0, 4).toString('latin1');
-  if (머리 === 'PK\u0003\u0004' || /\.hwpx?$/i.test(주소)) {
-    const g = await hwp글자(buf, '공고문.hwpx');
-    return { 글: (g && (g.글 || g.text)) || '', 꼴: 'hwp', 바이트: buf.length };
-  }
-  if (머리 === '%PDF') {
-    if (!OCR쓸수있나()) return { 글: '', 꼴: 'pdf', 왜: 'OCR 을 맡길 곳이 없습니다', 바이트: buf.length };
-    const g = await pdf글자(buf, '공고문.pdf', {});
-    return { 글: (g && g.글) || '', 꼴: 'pdf', 왜: g && g.왜, 바이트: buf.length };
-  }
-  return { 글: '', 꼴: '모름', 왜: '앞 4바이트 ' + JSON.stringify(머리), 바이트: buf.length };
+  const 꼴 = 진짜형식(buf);
+  if (!kordoc있나()) return { 글: '', 꼴, 왜: 'kordoc 이 안 깔렸습니다', 바이트: buf.length };
+  const 이름 = '공고문' + (꼴 === 'pdf' ? '.pdf' : 꼴 === 'hwp' ? '.hwp' : 꼴 === 'zip계열' ? '.hwpx' : '');
+  const k = await 첨부읽기(buf, 이름);
+  return { 글: k.글 || '', md: k.md, 꼴: k.꼴 || 꼴, 왜: k.왜 || '',
+    OCR썼나: !!k.OCR썼나, 바이트: buf.length };
 }
 
 /* ── 본체 ─────────────────────────────────────────────────── */

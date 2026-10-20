@@ -18,7 +18,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
-import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
+import { 첨부읽기, kordoc있나 } from './공고문읽기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 
@@ -71,7 +71,7 @@ if (!cfg.COLLECT_KEY_AL2) { console.error('COLLECT_KEY_AL2 가 없습니다'); p
 let 할것 = await rpc('alio_post_file_text_todo', { p_secret: cfg.COLLECT_KEY_AL2, p_source: SOURCE });
 if (몇개) 할것 = 할것.slice(0, 몇개);
 console.log('첨부 글자 뽑기 — 할 것 ' + 할것.length + '개'
-  + ' · OCR ' + (OCR쓸수있나() ? OCR이름표 : '없음 (PDF 는 건너뜁니다)') + (dry ? ' · --dry' : ''));
+  + ' · 첨부 읽기 ' + (kordoc있나() ? 'kordoc' : '**kordoc 없음**') + (dry ? ' · --dry' : ''));
 
 const 셈 = { hwp: 0, hwp못: 0, pdf: 0, pdf못: 0, 건너뜀: 0, 못받음: 0 };
 const 담을것 = [];
@@ -94,12 +94,14 @@ for (const f of 할것) {
     if (r.글) { 셈.hwp++; 담을것.push({ sn: f.sn, file_no: f.file_no, 글: r.글 }); }
     else { 셈.hwp못++; 담을것.push({ sn: f.sn, file_no: f.file_no, 왜: r.왜 || '한글 파일을 못 읽었습니다' }); }
   } else if (PDF인가) {
-    if (!OCR쓸수있나()) {
+    /* ★ 2026-10-20 세중님 3번 — 옛 Apps Script OCR 대신 **kordoc** 입니다.
+       스캔 PDF 는 kordoc 내장 OCR 이 읽고, 빈손이면 ocr: 'force' 로 한 번 더 봅니다 */
+    if (!kordoc있나()) {
       셈.건너뜀++;
       담을것.push({ sn: f.sn, file_no: f.file_no,
-        왜: 'PDF 인데 OCR 을 맡길 곳이 없습니다 (OCR_GAS_URL · OCR_KEY 필요)' });
+        왜: 'PDF 인데 kordoc 이 안 깔렸습니다 (cd tools/kordoc && npm ci)' });
     } else {
-      const r = await pdf글자(buf, 이름, { ctype: ctype || '', 공고: String(f.sn || '') });
+      const r = await 첨부읽기(buf, 이름);
       if (r.글) { 셈.pdf++; 담을것.push({ sn: f.sn, file_no: f.file_no, 글: r.글 }); }
       else { 셈.pdf못++; 담을것.push({ sn: f.sn, file_no: f.file_no, 왜: r.왜 || 'PDF 를 못 읽었습니다' }); }
     }
@@ -121,7 +123,7 @@ if (!dry && 담을것.length) {
 console.log('\n── 한글 읽음 ' + 셈.hwp + ' / 못 읽음 ' + 셈.hwp못
   + ' · PDF 읽음 ' + 셈.pdf + ' / 못 읽음 ' + 셈.pdf못
   + ' · 건너뜀 ' + 셈.건너뜀 + ' · 못 받음 ' + 셈.못받음);
-if (셈.건너뜀 && !OCR쓸수있나()) {
-  console.log('   ※ PDF 를 읽으려면 .env.local 에 OCR_GAS_URL · OCR_KEY 를 넣어 주세요.');
+if (셈.건너뜀 && !kordoc있나()) {
+  console.log("   ※ 첨부를 읽으려면 cd tools/kordoc && npm ci 를 돌리십시오.");
 }
 if (dry) console.log('   --dry 라 담지 않았습니다');
