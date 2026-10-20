@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 붙여받기 } from './certs/index.mjs';
-import { 목록상태, 목록상태셈, 본문상태, 알림상태, 없어짐말 } from './hosp/hs_목록상태.mjs';
+import { 목록상태, 목록상태셈, 본문상태, 알림상태, 없어짐말, 제목속살 } from './hosp/hs_목록상태.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -102,7 +102,12 @@ async function 하나(x) {
      ★ 우리가 담은 제목 앞 토막이 그 줄에 같이 있어야 **이 공고의** 마감입니다.
        옆 글 목록의 「(마감)○○ 채용공고」 를 보고 엉뚱한 판정을 하면 안 됩니다
        (포항세명기독병원에서 실제로 그럴 뻔했습니다) */
-  const 열쇠말 = String(x.title || '').replace(/\s+/g, ' ').slice(0, 12).trim();
+  /* ★ 2026-10-20 — **우리 제목의 말머리를 먼저 뗍니다** (세중님 4번).
+     바뀌는 것이 바로 그 말머리입니다. 「[모집]재활치료센터 물」 로 찾으면
+     쪽에는 「[마감]재활치료센터 …」 라 **한 번도 못 찾습니다** — 인화재단
+     한국병원 HS2056094273 이 그래서 36일째 회원 화면에 남아 있었습니다.
+     떼는 규칙은 `hosp/hs_목록상태.mjs` 의 `제목속살()` 한 자리입니다 (지침 6절). */
+  const 열쇠말 = 제목속살(x.title).replace(/\s+/g, ' ').slice(0, 12).trim();
   const 붙 = (s) => String(s || '').replace(/\s/g, '');
   const 글붙 = 붙(글);
   const 제목있나 = 열쇠말.length >= 6 && 글붙.includes(붙(열쇠말));
