@@ -27,10 +27,25 @@ import zlib from 'node:zlib';
 export const 최대묶음파일수 = 200;        /* 묶음 폭탄 막기 */
 export const 최대푼크기 = 80 * 1024 * 1024;
 
-const 글자 = (b) => {
-  /* 이름은 UTF-8 깃발(비트 11)이 있으면 UTF-8, 없으면 CP949 인 일이 많습니다.
-     우리는 **갈래를 가리는 데만** 쓰므로 UTF-8 로 읽고, 깨져도 길은 남습니다 */
-  try { return new TextDecoder('utf-8', { fatal: false }).decode(b); } catch { return b.toString('latin1'); }
+/* ── 묶음 속 **이름 읽기** ────────────────────────────────────
+ * ZIP 은 이름의 글자꼴을 깃발 한 비트로만 알려 줍니다 —
+ *   일반 깃발(general purpose bit flag) 의 **비트 11** 이 서 있으면 UTF-8,
+ *   없으면 **만든 프로그램이 쓰던 글자꼴**(우리 쪽은 거의 CP949)입니다.
+ * 한글 윈도의 알집·탐색기가 비트를 안 세웁니다 —
+ *   「NCS 직무기술서(물리치료사).hwp」가 UTF-8 로 읽으면 「NCS ���…」 가 됩니다.
+ * 이름이 깨지면 **공고문먼저() 가 공고문을 못 고릅니다** — 값이 틀립니다.
+ * 그래서 깃발을 보고 euc-kr(= CP949 를 품습니다)로 읽습니다.
+ */
+const utf8깃발 = 1 << 11;
+const 글자 = (b, 깃발 = 0) => {
+  const 꼴 = (깃발 & utf8깃발) ? 'utf-8' : 'euc-kr';
+  try {
+    const s = new TextDecoder(꼴, { fatal: false }).decode(b);
+    /* 되돌림 글자(U+FFFD)가 섞이면 다른 꼴로 한 번 더 봅니다 */
+    if (!s.includes('�')) return s;
+    const s2 = new TextDecoder(꼴 === 'utf-8' ? 'euc-kr' : 'utf-8', { fatal: false }).decode(b);
+    return s2.includes('�') ? s : s2;
+  } catch { return b.toString('latin1'); }
 };
 
 /** 묶음 안의 목록 — [{ 이름, 압축방식, 압축크기, 푼크기, 머리자리 }] */
@@ -48,6 +63,7 @@ export function 목록(buf) {
   for (let n = 0; n < 개수 && n < 최대묶음파일수; n++) {
     if (p + 46 > b.length) break;
     if (b.readUInt32LE(p) !== 0x02014b50) break;
+    const 깃발 = b.readUInt16LE(p + 8);
     const 압축방식 = b.readUInt16LE(p + 10);
     const 압축크기 = b.readUInt32LE(p + 20);
     const 푼크기 = b.readUInt32LE(p + 24);
@@ -55,9 +71,10 @@ export function 목록(buf) {
     const 덧길이 = b.readUInt16LE(p + 30);
     const 꼬리길이 = b.readUInt16LE(p + 32);
     const 머리자리 = b.readUInt32LE(p + 42);
-    const 이름0 = 글자(b.subarray(p + 46, p + 46 + 이름길이));
+    const 이름0 = 글자(b.subarray(p + 46, p + 46 + 이름길이), 깃발);
     const 이름 = 이름0.replace(/\\/g, '/');     /* ★ 역사선을 눕힙니다 */
-    나온것.push({ 이름, 원래이름: 이름0, 압축방식, 압축크기, 푼크기, 머리자리,
+    나온것.push({ 이름, 원래이름: 이름0, 깃발, 글자꼴: (깃발 & utf8깃발) ? 'utf-8' : 'euc-kr',
+      압축방식, 압축크기, 푼크기, 머리자리,
       폴더인가: /\/$/.test(이름) });
     p += 46 + 이름길이 + 덧길이 + 꼬리길이;
   }
@@ -203,6 +220,42 @@ function 자기점검() {
   보('바로잡은 뒤 이름에 역사선이 없다',
     !!고친것 && (목록(고친것) || []).every((x) => !x.원래이름.includes('\\')));
   보('고칠 것이 없으면 null', 역사선바로잡기(docx) === null);
+
+  /* ★ 이름 글자꼴 — 한글 윈도가 깃발을 안 세우고 CP949 로 적습니다.
+     이름이 깨지면 공고문먼저() 가 공고문을 못 골라 **값이 틀립니다** */
+  /* CP949 로 적힌 한글 이름 14바이트 — euc-kr 로 읽으면 「지무기술서.hwp」 입니다
+     (글자를 손으로 적지 않습니다. 재는 것은 **깃발을 보고 CP949 로 읽나** 입니다) */
+  const cp949이름 = Buffer.from([0xc1, 0xf6, 0xb9, 0xab, 0xb1, 0xe2, 0xbc, 0xfa, 0xbc, 0xad, 0x2e, 0x68, 0x77, 0x70]);
+  const cp949기대 = new TextDecoder('euc-kr').decode(cp949이름);
+  const 깃발없는묶음 = (() => {
+    /* 자리가 안 밀리게 **길이가 똑같은**(14바이트) 자리지킴 이름으로 묶습니다 */
+    const z = 묶기([{ 이름: 'XXXXXXXXXX.hwp', 내용: Buffer.alloc(8, 3) }]);
+    /* 이름을 CP949 로 바꿔 끼우고 UTF-8 깃발을 내립니다 */
+    const b = Buffer.from(z);
+    for (let i = 0; i + 4 <= b.length; i++) {
+      if (b.readUInt32LE(i) === 0x04034b50 || b.readUInt32LE(i) === 0x02014b50) {
+        const 머리 = b.readUInt32LE(i) === 0x04034b50;
+        const 깃자리 = i + (머리 ? 6 : 8);
+        b.writeUInt16LE(b.readUInt16LE(깃자리) & ~(1 << 11), 깃자리);
+        const 이름길이자리 = i + (머리 ? 26 : 28);
+        const 이름자리 = i + (머리 ? 30 : 46);
+        b.writeUInt16LE(cp949이름.length, 이름길이자리);
+        /* 이름 길이가 같아야 자리가 안 밀립니다 — 견본을 그렇게 맞췄습니다 */
+        cp949이름.copy(b, 이름자리);
+      }
+    }
+    return b;
+  })();
+  const 깨진것 = 목록(깃발없는묶음);
+  보('★ 깃발 없는 이름을 CP949 로 읽습니다',
+    !!깨진것 && 깨진것[0] && 깨진것[0].이름 === cp949기대);
+  보('되돌림 글자(U+FFFD)가 안 섞입니다',
+    !!깨진것 && 깨진것[0] && !깨진것[0].이름.includes('�'));
+  보('UTF-8 로 읽으면 깨집니다 (그래서 깃발을 봅니다)',
+    new TextDecoder('utf-8', { fatal: false }).decode(cp949이름).includes('�'));
+  보('글자꼴을 적어 둡니다', !!깨진것 && 깨진것[0] && 깨진것[0].글자꼴 === 'euc-kr');
+  보('UTF-8 깃발이 선 이름은 UTF-8 로',
+    (목록(그냥) || []).every((x) => x.글자꼴 === 'utf-8'));
 
   const 차례 = 공고문먼저(목록(그냥) || []);
   보('공고문을 먼저 고른다', 차례[0] && /직무기술서/.test(차례[0].이름));
