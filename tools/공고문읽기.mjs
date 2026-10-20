@@ -127,8 +127,19 @@ export async function 첨부읽기(buf, 이름 = '공고문.hwp', 옵션 = {}) {
     const 필요쪽 = (결과?.pageQuality || []).filter((q) => q.needsOcr);
     const 묶음신호 = 결과?.qualitySummary?.needsOcr === true;
     const 그림뿐 = 결과?.code === 'IMAGE_BASED_PDF' || 결과?.isImageBased;
-    if (옵션.OCR안함 !== true && (필요쪽.length || 묶음신호 || 그림뿐)) {
-      const r2 = await 읽기(넣을곳, { ocr: 'auto' });
+    /* ★ 2026-10-20 — **빈손 PDF 는 ocr: 'force' 로 한 번 더** (세중님 5번).
+     *
+     * 전에는 kordoc 이 빈손이면 **옛 Apps Script OCR** 로 넘겼습니다
+     * (`collect-cleaneye.mjs` — 「빈손이면 그림만 든 파일일 수 있습니다」).
+     * 그 길이 지금 죽어 있습니다 — 로그에 404·500 이 15번입니다
+     *   「drive.files.insert API를 호출하지 못했습니다. Internal Error (HTTP 500)」
+     * kordoc 이 스캔 PDF 를 100% 읽으니(표본 5건) **여기서 끝냅니다.**
+     * `needsOcr` 신호가 안 와도 글자가 거의 없으면 그림 PDF 로 봅니다. */
+    const 글이없다 = !((결과?.markdown || '').trim().length > 80);
+    const 강제해볼까 = 옵션.OCR안함 !== true && 글이없다
+      && (꼴 === 'pdf' || (꼴 === 'zip계열' && 묶음속 === 'hwpx'));
+    if (옵션.OCR안함 !== true && (필요쪽.length || 묶음신호 || 그림뿐 || 강제해볼까)) {
+      const r2 = await 읽기(넣을곳, { ocr: 강제해볼까 && !(필요쪽.length || 묶음신호 || 그림뿐) ? 'force' : 'auto' });
       초 += r2.초; rssMB = Math.max(rssMB ?? 0, r2.rssMB);
       if (r2.result?.success && (r2.result.markdown || '').length > (결과?.markdown || '').length) {
         결과 = r2.result; OCR썼나 = true;

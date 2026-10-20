@@ -37,7 +37,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
+
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
 import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군 } from './공고문읽기.mjs';
@@ -143,7 +143,7 @@ console.log('  규칙 구운 날  ' + 구운날);
 console.log('  열쇠          없음 (게시판 긁기) · Supabase '
   + (cfg.SUPABASE_ANON_KEY ? '있음' : '**없음**')
   + ' · collect_put ' + (cfg.COLLECT_KEY_ND2 ? '있음' : '**없음**'));
-console.log('  첨부 읽기     한글 tools/hwp · PDF ' + OCR이름표);
+console.log('  첨부 읽기     kordoc (hwp·hwpx·pdf·docx·xlsx·그림 OCR) · 받침 tools/hwp');
 if (!dry && !cfg.COLLECT_KEY_ND2) { console.error('COLLECT_KEY_ND2 가 없습니다'); process.exit(1); }
 
 const 셈 = {
@@ -294,9 +294,11 @@ for (const v of 볼것) {
       || buf.subarray(0, 4).toString('hex') === 'd0cf11e0') {
       글 = hwp글자(buf, 이름.replace(/\.[^.]*$/, '') + '.hwp').글 || '';
     } else if (buf.subarray(0, 5).toString('latin1') === '%PDF-') {
-      if (!OCR쓸수있나()) { v.보류 = 'PDF 인데 OCR 을 맡길 곳이 없습니다'; continue; }
-      글 = (await pdf글자(buf, 이름.replace(/\.[^.]*$/, '') + '.pdf',
-        { ctype: f.headers.get('content-type') || '', 공고: v.x.no })).글 || '';
+      /* ★ 2026-10-20 세중님 5번 — 옛 Apps Script OCR 호출을 끊었습니다.
+         kordoc 이 빈손이면 `첨부읽기()` 가 ocr: 'force' 로 다시 봅니다 —
+         옛 길은 404·500 으로 죽어 있습니다. gas/ 는 손대지 않았습니다 */
+      v.보류 = 'PDF 인데 kordoc 이 빈손이고 OCR(force)로도 글자가 안 나왔습니다';
+      continue;
     } else {
       v.보류 = '첨부가 모르는 꼴입니다 (' + buf.length + '바이트 · 앞5 「'
         + buf.subarray(0, 5).toString('latin1') + '」)';

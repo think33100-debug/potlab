@@ -27,9 +27,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 모두받기 } from './쪽나눠받기.mjs';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, MEDTECH, 구운날 } from './gas-rules.mjs';
-import { 고용형태코드 } from './공고문읽기.mjs';
+import { 고용형태코드, 첨부읽기, kordoc있나, 진짜형식 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
-import { pdf글자, 쓸수있나 as OCR쓸수있나, 멈췄나 as OCR멈췄나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 /* 공고문 주소를 job_attachments 에 담습니다 (2026-10-10 · tools/첨부담기.mjs) */
 import { 첨부모으기 } from './첨부담기.mjs';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
@@ -241,25 +240,31 @@ async function 공고문글자(box, 셈) {
     첨부모음.더하기({ job_id: String(box.sn || box.recrutPblntSn || ''),
                     kind: '공고문', name: String(f.atchFileNm || ''), url: String(f.url || '') });
   }
-  if (!pdf) {
-    const hwp = files.some((f) => String(f.atchFileType) === 'A' && /\.hwpx?$/i.test(String(f.atchFileNm || '')));
-    return { 글: '', 왜: hwp ? '공고문이 한글(hwp)이라 못 읽음' : '공고문 첨부가 없음' };
-  }
-  if (!OCR쓸수있나()) return { 글: '', 왜: 'PDF 공고문 · OCR 을 맡길 곳이 없어 못 읽음' };
+  /* ★ 2026-10-20 세중님 5번 — **kordoc 으로 바꿨습니다.**
+   *
+   * 전에는 이 자리가 **PDF 만** 보고 **옛 Apps Script OCR** 로 바로 넘겼습니다
+   * (kordoc 을 아예 안 거쳤습니다 — 다른 수집기와 달랐습니다). 그 길이 죽어 있어
+   * 로그에 404·500 이 쌓였고, 어제 「알리오 PDF 재독 13% → 13%」 가 그 까닭입니다.
+   * kordoc 은 **hwp·hwpx·pdf·docx·xlsx·그림**을 다 읽습니다. 그래서
+   *   ㉠ 공고문이 PDF 가 아니어도(hwp·hwpx) 읽습니다 — 전에는 「못 읽음」이었습니다
+   *   ㉡ 글자 없는 그림 PDF 는 `첨부읽기()` 가 ocr: 'force' 로 다시 봅니다
+   * `gas/` 는 손대지 않았습니다 (지침 0절) — **부르는 자리만** 끊었습니다.
+   */
+  const 공고문 = pdf || files.find((f) => String(f.atchFileType) === 'A' && f.url);
+  if (!공고문) return { 글: '', 왜: '공고문 첨부가 없음' };
+  if (!kordoc있나()) return { 글: '', 왜: 'kordoc 이 안 깔렸습니다 (cd tools/kordoc && npm ci)' };
   try {
     const ck = await 포털쿠키();
-    const r = await fetch(pdf.url, { headers: { 'User-Agent': UA, Cookie: ck, Referer: 'https://opendata.alio.go.kr/new/' } });
+    const r = await fetch(공고문.url, { headers: { 'User-Agent': UA, Cookie: ck, Referer: 'https://opendata.alio.go.kr/new/' } });
     const buf = Buffer.from(await r.arrayBuffer());
-    /* **받은 것이 정말 PDF 인지 봅니다.** 주소가 틀리면 HTML 이 옵니다 */
-    if (buf.subarray(0, 5).toString('latin1') !== '%PDF-') {
-      return { 글: '', 왜: 'PDF 가 아닌 것이 옴 (' + buf.length + '바이트)' };
+    /* **받은 것이 정말 문서인지 봅니다.** 주소가 틀리면 HTML 이 옵니다 (지침 5절) */
+    const 꼴 = 진짜형식(buf);
+    if (꼴 === 'HTML' || 꼴 === '모름') {
+      return { 글: '', 왜: '문서가 아닌 것이 옴 (' + 꼴 + ' · ' + buf.length + '바이트)' };
     }
-    셈.OCR++;
-    /* 어디에 맡기는지는 tools/ocr/index.mjs 가 정합니다. 여기는 모릅니다.
-       곁들이는 0자가 나왔을 때 남길 자료입니다 (2026-09-30 덫) */
-    return await pdf글자(buf, pdf.atchFileNm,
-      { ctype: r.headers.get('content-type') || '',
-        공고: String(box.sn || box.recrutPblntSn || '') });
+    셈.OCR++;                                   /* 「첨부를 읽어 본 수」로 그대로 씁니다 */
+    const k = await 첨부읽기(buf, String(공고문.atchFileNm || '공고문'));
+    return { 글: k.글 || '', md: k.md, blocks: k.blocks, 왜: k.왜 || '', 꼴: k.꼴, 코드: k.코드 };
   } catch (e) {
     return { 글: '', 왜: 'PDF 를 못 받음 · ' + String(e.message).slice(0, 80) };
   }
@@ -542,10 +547,8 @@ for (const k of ['ALIO_LIST_KEY', 'ALIO_DETAIL_KEY', 'SUPABASE_URL', 'SUPABASE_A
 if (!dry && !cfg.COLLECT_KEY_AL2) { console.error('COLLECT_KEY_AL2 가 없습니다 (담으려면 필요합니다)'); process.exit(1); }
 
 console.log('알리오 새 수집기 · ' + (dry ? '**--dry · 담지 않습니다**' : '담습니다 (source=' + SOURCE + ')'));
-console.log('규칙 구운 날 ' + 구운날 + ' · OCR '
-  + (OCR쓸수있나()
-      ? OCR이름표
-      : '열쇠 없음 → PDF 는 보류함으로'));
+console.log('규칙 구운 날 ' + 구운날 + ' · 첨부 읽기 '
+  + (kordoc있나() ? 'kordoc (hwp·hwpx·pdf·docx·xlsx·그림 OCR)' : '**kordoc 이 없습니다**'));
 console.log('도는 곳 ' + (process.env.GITHUB_ACTIONS ? 'GitHub Actions' : '집 컴퓨터')
   + ' · node ' + process.version);
 
@@ -702,9 +705,7 @@ if (인원기억바뀜) {
   for (const k of Object.keys(인원기억)) if (!살아있는.has(k)) delete 인원기억[k];
   인원기억쓰기(인원기억);
 }
-console.log('OCR        ' + 셈.OCR + '건');
-/* 열쇠가 죽었으면 **조용히 넘어가지 않습니다.** 빨간 줄로 잡히게 exit 1 입니다 */
-if (OCR멈췄나()) { console.error('\n' + OCR멈췄나()); process.exitCode = 1; }
+console.log('첨부 읽어 봄 ' + 셈.OCR + '건');
 console.log('남의 자리   ' + 셈.남의자리 + '건 · 우리와 무관 ' + 셈.우리와무관 + '건 · 마감 ' + 셈.마감 + '건');
 console.log('회원 목록   ' + 회원.length + '건');
 console.log('보류함      ' + 보류.length + '건');

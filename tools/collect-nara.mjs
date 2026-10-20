@@ -45,7 +45,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
-import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
+
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
 import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 고용형태판정, 고용형태코드 } from './공고문읽기.mjs';
@@ -215,7 +215,7 @@ console.log('  규칙 구운 날  ' + 구운날);
 console.log('  열쇠          공공데이터 ' + (cfg.ALIO_DETAIL_KEY ? '있음' : '**없음**')
   + ' · Supabase ' + (cfg.SUPABASE_ANON_KEY ? '있음' : '**없음**')
   + ' · collect_put ' + (cfg.COLLECT_KEY_GJ2 ? '있음' : '**없음**'));
-console.log('  첨부 읽기     한글 tools/hwp · PDF ' + OCR이름표);
+console.log('  첨부 읽기     kordoc (hwp·hwpx·pdf·docx·xlsx·그림 OCR) · 받침 tools/hwp');
 if (!cfg.ALIO_DETAIL_KEY) { console.error('공공데이터 인증키가 없습니다'); process.exit(1); }
 if (!dry && !cfg.COLLECT_KEY_GJ2) { console.error('COLLECT_KEY_GJ2 가 없습니다'); process.exit(1); }
 
@@ -395,8 +395,10 @@ async function 파일글자(주소, 이름) {
     /* 정말 PDF 인지 봅니다 — 주소가 틀리면 HTML 이 옵니다 (CLAUDE.md 5번) */
     const 앞5 = buf.subarray(0, 5).toString('latin1');
     if (앞5 !== '%PDF-') return { 글: '', 왜: 'PDF 가 아닌 것이 옴 (' + buf.length + '바이트 · 앞5 「' + 앞5 + '」)' };
-    if (!OCR쓸수있나()) return { 글: '', 왜: 'PDF 인데 OCR 을 맡길 곳이 없습니다' };
-    return await pdf글자(buf, 이름, { ctype: r.headers.get('content-type') || '' });
+    /* ★ 2026-10-20 세중님 5번 — 옛 Apps Script OCR 호출을 끊었습니다.
+       kordoc 이 빈손이면 `첨부읽기()` 가 ocr: 'force' 로 다시 봅니다 —
+       옛 길은 404·500 으로 죽어 있습니다. gas/ 는 손대지 않았습니다 */
+    return { 글: '', 왜: 'PDF 인데 kordoc 이 빈손이고 OCR(force)로도 글자가 안 나왔습니다' };
   } catch (e) { return { 글: '', 왜: '첨부를 못 받음 · ' + String(e.message).slice(0, 80) }; }
 }
 

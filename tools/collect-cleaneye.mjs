@@ -50,7 +50,6 @@ import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs'
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
 import { 첨부읽기, 칸뽑기, kordoc있나, 고용형태코드 } from './공고문읽기.mjs';
-import { pdf글자, 쓸수있나 as OCR쓸수있나, 이름표 as OCR이름표 } from './ocr/index.mjs';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
 import { 첨부받기, 기본간격, 통크기, 통쉼, 쉼 } from './cleaneye-file.mjs';
 /* 공고문 주소를 job_attachments 에 담습니다 (2026-10-10 · tools/첨부담기.mjs) */
@@ -194,7 +193,9 @@ async function 첨부글자(o, 셈, 옵션) {
       return { 글: k.글, md: k.md, blocks: k.blocks, 왜: '', 꼴: k.꼴, 코드: k.코드 };
     }
     셈.kordoc빈손 = (셈.kordoc빈손 ?? 0) + 1;
-    /* 빈손이면 **그림만 든 파일**일 수 있습니다 — 옛 길로 넘깁니다 */
+    /* 빈손이면 **글자가 없는 그림 PDF** 인 일이 많습니다. 2026-10-20 부터
+       그것도 `첨부읽기()` 안에서 **ocr: 'force'** 로 한 번 더 봅니다 —
+       여기서 옛 길로 넘기지 않습니다 (아래 주석). */
   }
 
   if (한글파일인가(g.이름)) {
@@ -202,13 +203,20 @@ async function 첨부글자(o, 셈, 옵션) {
     if (r.글) 셈.hwp읽음++; else 셈.hwp못읽음++;
     return { 글: r.글, 왜: r.왜, 꼴: 'hwp' };
   }
-  /* PDF — 앞 5글자가 %PDF- 인지 봅니다 (CLAUDE.md 5번) */
+  /* ★ 2026-10-20 세중님 5번 — **옛 Apps Script OCR 호출을 끊었습니다.**
+   *
+   * 언제 불렸나 — kordoc 이 **빈손일 때**(글 80자 이하) 그리고 PDF 일 때만입니다
+   * (바로 위 분기). 그 길이 지금 죽어 있습니다 — 로그에 15번 —
+   *   「OCR 실패: drive.files.insert API를 호출하지 못했습니다. Internal Error (HTTP 500)」
+   *   「OCR 실패 · JSON 이 아닙니다 (HTTP 404) · <!DOCTYPE html>…」
+   * 새 길 — kordoc 내장 OCR. 스캔 PDF 는 이미 100% 읽히고(표본 5건),
+   * 빈손 PDF 는 `첨부읽기()` 가 `ocr: 'force'` 로 다시 봅니다.
+   * `gas/` 는 손대지 않았습니다 (지침 0절) — **부르는 자리만** 끊었습니다.
+   */
   if (g.buf.subarray(0, 5).toString('latin1') === '%PDF-') {
-    if (!OCR쓸수있나()) { 셈.OCR못씀++; return { 글: '', 왜: 'PDF 인데 OCR 을 맡길 곳이 없습니다', 꼴: 'pdf' }; }
-    셈.OCR++;
-    const r = await pdf글자(g.buf, g.이름, { ctype: g.ctype || '', 공고: String(o.NO || '') });
-    if (r.글) 셈.pdf읽음++; else 셈.pdf못읽음++;
-    return { 글: r.글, 왜: r.왜, 꼴: 'pdf' };
+    셈.pdf못읽음++;
+    return { 글: '', 꼴: 'pdf',
+      왜: 'PDF 인데 kordoc 이 빈손이고 OCR(force)로도 글자가 안 나왔습니다' };
   }
   셈.모르는꼴++;
   const 머리 = [...g.buf.subarray(0, 8)].map((x) => x.toString(16).padStart(2, '0')).join(' ');
@@ -354,7 +362,7 @@ console.log('  규칙 구운 날  ' + 구운날);
 console.log('  열쇠          클린아이 ' + (cfg.CLEANEYE_KEY ? cfg.CLEANEYE_KEY.length + '자' : '**없음**')
   + ' · Supabase ' + (cfg.SUPABASE_ANON_KEY ? '있음' : '**없음**')
   + ' · collect_put ' + (cfg.COLLECT_KEY_CE2 ? '있음' : '**없음**'));
-console.log('  첨부 읽기     한글 tools/hwp · PDF ' + (OCR쓸수있나() ? OCR이름표 : '**맡길 곳 없음**')
+console.log('  첨부 읽기     kordoc (hwp·hwpx·pdf·docx·xlsx·그림 OCR) · 받침 tools/hwp'
   + ' · 통 ' + 통크기 + '건/' + (통쉼 / 1000) + '초 · 이번 실행 ' + Math.round(시간예산 / 60000) + '분까지');
 if (!cfg.CLEANEYE_KEY) { console.error('CLEANEYE_KEY 가 없습니다'); process.exit(1); }
 
