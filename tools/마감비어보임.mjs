@@ -153,12 +153,35 @@ const H = { apikey: K, Authorization: 'Bearer ' + K, 'Content-Type': 'applicatio
 const 오늘 = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 
 /* ── ① 그물 — 마감일이 빈 회원 화면 공고 ─────────────────────── */
-const 칸 = 'id,org_name,title,url,apply_to,posted_at,db_insert_at,source';
-const r0 = await fetch(U + '/rest/v1/job_posts_pub?select=' + encodeURIComponent(칸)
-  + '&apply_to=is.null&order=posted_at.asc&limit=200', { headers: H });
-if (!r0.ok) { console.error('✗ ' + r0.status + ' · ' + (await r0.text()).slice(0, 200)); process.exit(1); }
-const 빈것 = await r0.json();
-const 줄 = 빈것.map((x) => ({ ...x, 지남: 지난날(x.posted_at, String(x.db_insert_at || '').slice(0, 10), 오늘) }));
+/* ★ `job_posts_pub` 에는 `source` · `db_insert_at` 이 없습니다 (칸 목록을 찍어
+   확인했습니다). 창구 둘을 따로 묻고 id 로 맞춥니다 — PostgREST 는 표끼리
+   이어 주지 못합니다. 100줄에서 끊기니 **offset 으로 넘깁니다** (지침) */
+async function 다받기(길) {
+  const 모두 = [];
+  for (let off = 0; off < 2000; off += 100) {
+    const r = await fetch(U + '/rest/v1/' + 길 + '&limit=100&offset=' + off, { headers: H });
+    if (!r.ok) { console.error('✗ ' + r.status + ' · ' + (await r.text()).slice(0, 200)); process.exit(1); }
+    const j = await r.json();
+    모두.push(...j);
+    if (j.length < 100) break;
+  }
+  return 모두;
+}
+const 빈것 = await 다받기('job_posts_pub?select='
+  + encodeURIComponent('id,org_name,title,url,apply_to,posted_at,접수문장')
+  + '&apply_to=is.null&order=posted_at.asc');
+const 더 = new Map();
+for (let i = 0; i < 빈것.length; i += 50) {
+  const ids = 빈것.slice(i, i + 50).map((x) => x.id);
+  const j = await 다받기('job_posts?select=id,source,db_insert_at,deadline_src'
+    + '&id=in.(' + ids.join(',') + ')&order=id.asc');
+  for (const y of j) 더.set(y.id, y);
+}
+const 줄 = 빈것.map((x) => {
+  const y = 더.get(x.id) || {};
+  return { ...x, source: y.source, db_insert_at: y.db_insert_at,
+    지남: 지난날(x.posted_at, String(y.db_insert_at || '').slice(0, 10), 오늘) };
+});
 const 오래된것 = 줄.filter((x) => x.지남 != null && x.지남 >= 오래됨일수);
 
 console.log('\n── 마감일이 빈 회원 화면 공고 ' + 줄.length + '건 (' + 오늘 + ') ──');
