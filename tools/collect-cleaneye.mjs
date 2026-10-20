@@ -49,7 +49,8 @@ import { sortJob } from './sort-rule.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
-import { 첨부읽기, 칸뽑기, kordoc있나, 고용형태코드 } from './공고문읽기.mjs';
+import { 첨부읽기, 칸뽑기, kordoc있나, 고용형태코드,
+  그림OCR인가, OCR근거, OCR보류사유 } from './공고문읽기.mjs';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
 import { 첨부받기, 기본간격, 통크기, 통쉼, 쉼 } from './cleaneye-file.mjs';
 /* 공고문 주소를 job_attachments 에 담습니다 (2026-10-10 · tools/첨부담기.mjs) */
@@ -190,7 +191,8 @@ async function 첨부글자(o, 셈, 옵션) {
     if (k.글 && k.글.length > 80) {
       셈.kordoc읽음 = (셈.kordoc읽음 ?? 0) + 1;
       셈.kordoc초 = Math.round(((셈.kordoc초 ?? 0) + k.초) * 100) / 100;
-      return { 글: k.글, md: k.md, blocks: k.blocks, 왜: '', 꼴: k.꼴, 코드: k.코드 };
+      return { 글: k.글, md: k.md, blocks: k.blocks, 왜: '', 꼴: k.꼴, 코드: k.코드,
+        OCR썼나: !!k.OCR썼나, 그림OCR: 그림OCR인가(k) || undefined };
     }
     셈.kordoc빈손 = (셈.kordoc빈손 ?? 0) + 1;
     /* 빈손이면 **글자가 없는 그림 PDF** 인 일이 많습니다. 2026-10-20 부터
@@ -279,10 +281,17 @@ async function 한건(o, 셈, 옵션) {
   const 갈래 = sortJob(title, job || '', 첨부);
   if (!job && 갈래.갈래 === '회원목록' && 갈래.단계 === 5) {
     job = matchJob(첨부.글) || '공통';
-    근거 = '첨부';
+    근거 = OCR근거('첨부', 첨부);
     셈.첨부로가림++;
   }
-  const hold = 갈래.갈래 === '보류함' ? 갈래.왜 : '';
+  /* ★ 2026-10-20 세중님 4번 공통 — **그림 OCR 로 가린 직군은 보류함을 거칩니다.**
+     OCR 은 오타가 섞입니다. 회원 화면으로 바로 보내지 않고 사람이 봅니다.
+     (스캔 PDF 는 전부터 돌고 있어 그대로 둡니다 · 지침 0-0) */
+  let hold = 갈래.갈래 === '보류함' ? 갈래.왜 : '';
+  if (!hold && 첨부 && 첨부.그림OCR && job) {
+    hold = OCR보류사유;
+    셈.그림OCR보류 = (셈.그림OCR보류 ?? 0) + 1;
+  }
   /* 읽은 첨부 글은 **버리지 않고 보관합니다** (2026-09-28 · 세중님이 9/26 정한 원칙).
      지금까지는 직군만 뽑고 버려서, 규칙을 고쳐도 이미 지나간 공고에 다시 못 댔습니다.
      회원 화면에는 안 나갑니다 — job_body 는 anon 에게 권한이 없습니다.

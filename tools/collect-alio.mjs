@@ -27,7 +27,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 모두받기 } from './쪽나눠받기.mjs';
 import { matchJob, notOurs, mixedTitle, titleOtherOnly, MEDTECH, 구운날 } from './gas-rules.mjs';
-import { 고용형태코드, 첨부읽기, kordoc있나, 진짜형식 } from './공고문읽기.mjs';
+import { 고용형태코드, 첨부읽기, kordoc있나, 진짜형식,
+  그림OCR인가, OCR근거, OCR보류사유 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 /* 공고문 주소를 job_attachments 에 담습니다 (2026-10-10 · tools/첨부담기.mjs) */
 import { 첨부모으기 } from './첨부담기.mjs';
@@ -264,7 +265,8 @@ async function 공고문글자(box, 셈) {
     }
     셈.OCR++;                                   /* 「첨부를 읽어 본 수」로 그대로 씁니다 */
     const k = await 첨부읽기(buf, String(공고문.atchFileNm || '공고문'));
-    return { 글: k.글 || '', md: k.md, blocks: k.blocks, 왜: k.왜 || '', 꼴: k.꼴, 코드: k.코드 };
+    return { 글: k.글 || '', md: k.md, blocks: k.blocks, 왜: k.왜 || '', 꼴: k.꼴, 코드: k.코드,
+      OCR썼나: !!k.OCR썼나, 그림OCR: 그림OCR인가(k) || undefined };
   } catch (e) {
     return { 글: '', 왜: 'PDF 를 못 받음 · ' + String(e.message).slice(0, 80) };
   }
@@ -444,8 +446,16 @@ async function 한건(cfg, r, 셈, 옵션) {
         const a = await 공고문글자(box, 셈);
         if (a.글) {
           const j3 = matchJob(a.글);
-          if (j3) { job = j3; 근거 = '첨부 공고문'; }
-          else 못읽은까닭 = '공고문을 읽었지만 우리 직군이 없음';
+          if (j3) {
+            job = j3; 근거 = OCR근거('첨부 공고문', a);
+            /* ★ 2026-10-20 세중님 4번 공통 — **그림 OCR 로 가린 직군은 보류함을 거칩니다.**
+               OCR 은 오타가 섞입니다. 회원 화면으로 바로 보내지 않고 사람이 봅니다.
+               (스캔 PDF 는 전부터 돌고 있어 그대로 둡니다 · 지침 0-0) */
+            if (a.그림OCR) {
+              hold = OCR보류사유;
+              셈.그림OCR보류 = (셈.그림OCR보류 ?? 0) + 1;
+            }
+          } else 못읽은까닭 = '공고문을 읽었지만 우리 직군이 없음';
         } else 못읽은까닭 = a.왜;
       }
 

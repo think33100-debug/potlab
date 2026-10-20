@@ -48,7 +48,8 @@ import { 공공부르기, 한도알리기, 한도들 } from './공공데이터�
 
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
-import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 고용형태판정, 고용형태코드 } from './공고문읽기.mjs';
+import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 고용형태판정, 고용형태코드,
+  그림OCR인가, OCR근거, OCR보류사유 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
@@ -385,7 +386,8 @@ async function 파일글자(주소, 이름) {
       if (k.글 && k.글.length > 80) {
         셈.kordoc읽음 = (셈.kordoc읽음 ?? 0) + 1;
         셈.kordoc초 = Math.round(((셈.kordoc초 ?? 0) + k.초) * 100) / 100;
-        return { 글: k.글, md: k.md, blocks: k.blocks, 왜: '', 꼴: k.꼴, 코드: k.코드 };
+        return { 글: k.글, md: k.md, blocks: k.blocks, 왜: '', 꼴: k.꼴, 코드: k.코드,
+          OCR썼나: !!k.OCR썼나, 그림OCR: 그림OCR인가(k) || undefined };
       }
       셈.kordoc빈손 = (셈.kordoc빈손 ?? 0) + 1;
       /* kordoc 이 빈손이면 **그림만 든 파일**일 수 있습니다 — 옛 길로 넘깁니다 */
@@ -493,8 +495,16 @@ for (const v of 볼것) {
     const g = 첨부직군(a.글);
     if (g.직군) {
       셈.잰것_모집++; 셈.첨부로가림++;
-      v.직군 = g.직군; v.근거 = '첨부 공고문 · 모집 부분';
+      v.직군 = g.직군; v.근거 = OCR근거('첨부 공고문 · 모집 부분', a);
       v.걸린줄 = g.줄;
+      /* ★ 2026-10-20 세중님 4번 공통 — **그림 OCR 로 가린 직군은 보류함을 거칩니다.**
+         OCR 은 오타가 섞입니다. 회원 화면으로 바로 보내지 않고 사람이 봅니다.
+         (스캔 PDF 는 전부터 돌고 있어 그대로 둡니다 — 그쪽까지 보류로 돌리면
+          회원 화면 공고를 숨기는 일이 되어 먼저 물어야 합니다 · 지침 0-0) */
+      if (a.그림OCR) {
+        v.보류 = OCR보류사유;
+        셈.그림OCR보류 = (셈.그림OCR보류 ?? 0) + 1;
+      }
     } else if (g.어디 === '가산점') {
       /* 가산점·자격증 목록에만 있는 것은 우리 자리가 아닙니다.
          쓰레기통으로 보내되 **까닭과 함께 남깁니다** — 지우지 않습니다 */
