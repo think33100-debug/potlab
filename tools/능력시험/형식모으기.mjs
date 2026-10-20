@@ -43,7 +43,7 @@ export const 문서꼴 = /[.](pdf|hwpx?|docx?|xlsx?|pptx?|zip)([?&;]|$|#)/i;
 export const 그림꼴 = /[.](jpe?g|png|webp|tiff?|gif)([?&;]|$|#)/i;
 /* 쪽 꾸밈 그림은 뺍니다 — 「시신기증안내」 1.2MB 배너가 첨부로 세어졌습니다 */
 export const 꾸밈길 = /\/(images?|img|assets?|static|skin|resources?|css|js|favicons?|icons?|thumb(nail)?s?|banner|common|layout|template|editor|_lib\/(?!modulesext))\//i;
-export const 꾸밈이름 = /(logo|banner|btn|button|icon|bullet|arrow|bg_|_bg|top_|bottom_|menu|nav|sprite|blank|spacer|loading|quick|sns|facebook|instagram|youtube|kakao|naver|시신기증|비급여|진료시간|오시는길)/i;
+export const 꾸밈이름 = /(logo|banner|btn|button|icon|bullet|arrow|bg_|_bg|top_|bottom_|menu|nav|sprite|blank|spacer|loading|quick|sns|facebook|instagram|youtube|kakao|naver|시신기증|비급여|진료시간|오시는길|personinfo|pmovie|admin|mobile_main|mfoot|mhead|authmark|webmark|^ci[-_]|[/]ci[-_]|vis_|visual|popup|award|cert|intro)/i;
 
 /** 쪽 글자에서 첨부 후보를 모읍니다 — 갈래를 함께 적습니다 */
 export function 후보들(html, 밑바탕) {
@@ -90,6 +90,13 @@ function 자기점검() {
   보('꾸밈 그림은 뺀다 (길)', 후보들('<img src="/images/logo.png">', 밑).length === 0);
   보('꾸밈 그림은 뺀다 (이름)', 후보들('<img src="/recruit/top_banner.jpg">', 밑).length === 0);
   보('「시신기증안내」는 뺀다', 후보들('<img src="/upload/시신기증안내.jpg">', 밑).length === 0);
+  /* ★ 2026-10-20 — 쪽 104개에서 모은 그림 47개를 읽어 보고 **27개가 꾸밈**이었습니다.
+     이름으로 걸러야 OCR 시간을 안 버리고 엉뚱한 값도 안 뽑힙니다 */
+  보('personInfo1.png 같은 꾸밈은 뺀다', 후보들('<img src="/u/personInfo1.png">', 밑).length === 0);
+  보('mfoot_file.jpg(시신기증 배너)도 뺀다', 후보들('<img src="/u/mfoot_file.jpg">', 밑).length === 0);
+  보('CI·authMark·vis_ 도 뺀다',
+    후보들('<img src="/u/CI-jesid.png"><img src="/u/img_authMark.png"><img src="/u/vis_hospital_1.jpg">', 밑).length === 0);
+  보('참 공고 그림은 남긴다', 후보들('<img src="/upload/20261012165032118.png">', 밑).length === 1);
   보('onclick 속 주소도 집는다 (홑따옴표 속 쌍따옴표)',
     후보들('<a onclick=' + "'" + 'location.href = "/download/download.aspx?path=a.hwp&f=1"' + "'" + '>x</a>', 밑).length === 1);
   보('같은 주소를 두 번 안 센다',
