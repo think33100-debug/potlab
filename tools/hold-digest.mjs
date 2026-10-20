@@ -28,6 +28,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { 열린것견주기 } from './보안_열린것.mjs';
 import { 오늘셈 as 고용24셈, 오늘막힘 as 고용24막힘 } from './고용24한도.mjs';
+import { 그림OCR준비됐나 } from './그림OCR점검.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'HS3';
@@ -180,6 +181,21 @@ function 아침글(네, 늦음, 구멍, 잠금, 의심, 못담음) {
      지난 공고 네 건을 가리고 있었습니다 (광주씨티는 2021년 공고였습니다).
      **0 이 아니면 원문 확인 목록**을 냅니다 — 자동으로 숨기지 않습니다.
      `네숫자()` 에 칸이 아직 없으면 이 줄은 안 찍습니다 (메일을 막지 않게). */
+  /* ★ 2026-10-20 — **그림 OCR 이 준비됐나** 날마다 묻습니다 (세중님 4번).
+     kordoc 은 그림을 읽는데 sharp 의 바탕 꾸러미가 **optional** 이라
+     `tools/kordoc/.npmrc` 의 `omit=optional` 때문에 `npm ci` 로는 빠집니다.
+     빠지면 그림 공고가 **조용히 다시 0%** 가 됩니다 — 그래서 그물을 겁니다.
+     규칙은 `tools/그림OCR점검.mjs` 한 자리입니다 (지침 6절). */
+  try {
+    const g = 그림OCR준비됐나();
+    if (!g.됨) {
+      줄.push('██ 그림 OCR 이 안 됩니다 — ' + g.왜);
+      줄.push('   고치는 법 — cd ~/potlab/tools/kordoc 에서');
+      줄.push('     ONNXRUNTIME_NODE_INSTALL=skip npm install --include=optional --os=linux --cpu=x64');
+    }
+  } catch (e) {
+    줄.push('(그림 OCR 점검을 못 돌렸습니다 — ' + String((e && e.message) || e).slice(0, 80) + ')');
+  }
   if (네 && 네['②마감일비어보임'] !== undefined) {
     const 확 = 네['②마감일비어보임_확인할것'];
     줄.push('   마감일 비어 보임  ' + 네['②마감일비어보임'] + '건'
@@ -486,6 +502,21 @@ function 글로(d, 관리자주소, 잠금, 보안, 구멍, 네) {
      ② 「마감인데 보임」은 apply_to 를 오늘과 견주니 **비어 있으면 0** 입니다.
      그 0 이 마감 지난 공고 네 건을 가리고 있었습니다 (광주씨티는 2021년 공고).
      0 이 아니면 **원문 확인 목록**을 냅니다 — 자동으로 숨기지 않습니다. */
+  /* ★ 2026-10-20 — **그림 OCR 이 준비됐나** 날마다 묻습니다 (세중님 4번).
+     kordoc 은 그림을 읽는데 sharp 의 바탕 꾸러미가 **optional** 이라
+     `tools/kordoc/.npmrc` 의 `omit=optional` 때문에 `npm ci` 로는 빠집니다.
+     빠지면 그림 공고가 **조용히 다시 0%** 가 됩니다 — 그래서 그물을 겁니다.
+     규칙은 `tools/그림OCR점검.mjs` 한 자리입니다 (지침 6절). */
+  try {
+    const g = 그림OCR준비됐나();
+    if (!g.됨) {
+      줄.push('██ 그림 OCR 이 안 됩니다 — ' + g.왜);
+      줄.push('   고치는 법 — cd ~/potlab/tools/kordoc 에서');
+      줄.push('     ONNXRUNTIME_NODE_INSTALL=skip npm install --include=optional --os=linux --cpu=x64');
+    }
+  } catch (e) {
+    줄.push('(그림 OCR 점검을 못 돌렸습니다 — ' + String((e && e.message) || e).slice(0, 80) + ')');
+  }
   if (네 && 네['②마감일비어보임'] !== undefined) {
     const 확 = 네['②마감일비어보임_확인할것'];
     줄.push('마감일 비어 보임 ' + 네['②마감일비어보임'] + '건'

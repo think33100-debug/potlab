@@ -79,3 +79,39 @@ pdfjs-dist  4.10.38  Apache-2.0      PDF 를 읽으려면 있어야 합니다.
 | --- | --- | --- | --- | --- |
 | 정규직 | 물리치료사 | 물리치료 | 1명 | 물리치료사 면허증 소지자 |
 ```
+
+## ★ 그림(JPG·PNG) OCR 을 쓰려면 한 줄을 더 돌립니다 (2026-10-20)
+
+`npm ci` **만으로는 그림이 안 읽힙니다.** 위 `.npmrc` 의 `omit=optional` 때문에
+`sharp` 의 **바탕 꾸러미**(`@img/sharp-linux-x64` · libvips)가 빠집니다.
+빠지면 kordoc 이 이렇게 답합니다 —
+
+```
+{"success": false, "code": "MISSING_DEPENDENCY",
+ "error": "이미지 파싱에는 optional dependency 'sharp' 가 필요합니다 … "}
+{"error": "Could not load the \"sharp\" module using the linux-x64 runtime"}
+```
+
+그래서 깔 때 **두 줄**입니다.
+
+```
+cd ~/potlab/tools/kordoc && npm ci
+cd ~/potlab/tools/kordoc && ONNXRUNTIME_NODE_INSTALL=skip \
+  npm install --include=optional --os=linux --cpu=x64 --no-audit --no-fund
+```
+
+확인은 한 줄입니다 — **됐으면 0, 안 됐으면 1** 로 끝납니다.
+
+```
+node tools/그림OCR점검.mjs
+```
+
+잊을 수 있으니 **날마다 묻습니다** — `tools/hold-digest.mjs` 가 아침 요약 메일에
+「██ 그림 OCR 이 안 됩니다 — …」 와 고치는 명령을 함께 찍습니다
+(지침 — 「사람이 지키는 규칙이 먼저이고, 그물이 뒤를 받칩니다」).
+
+### 왜 바탕 꾸러미를 곧은 의존으로 안 박나
+
+`@img/sharp-linux-x64` 는 **linux 전용**입니다. 곧은 의존으로 적으면
+윈도·맥에서 `npm ci` 가 `EBADPLATFORM` 으로 멈춥니다 (집 컴퓨터에도 이 폴더를
+깝니다). 그래서 **설치 한 줄 + 날마다 묻는 그물**로 둡니다.
