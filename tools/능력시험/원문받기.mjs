@@ -186,10 +186,23 @@ function 쪽첨부들(html, 밑바탕) {
     }
   };
   for (const m of html.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]{0,80}?)<\/a>/gi)) 보기(m[1], m[2]);
-  /* onclick 안의 주소도 봅니다 — 지침 5절(첨부가 href 가 아니라 onclick 에 있던 자리) */
-  for (const m of html.matchAll(/on(?:click|Click)=["']([^"']+)["']/gi)) {
+  /* onclick 안의 주소도 봅니다 — 지침 5절(첨부가 href 가 아니라 onclick 에 있던 자리)
+   *
+   * ★ 2026-10-20 — **따옴표 두 갈래를 따로 봐야 합니다.** `["']([^"']+)["']` 하나로는
+   *   **홑따옴표 속에 쌍따옴표가 든 꼴**을 못 읽습니다 — 값이 첫 `"` 에서 끊깁니다.
+   *   치매안심센터(nid.or.kr) 가 바로 그 꼴입니다 —
+   *     <a href='javascript:return false;'
+   *        onclick='location.href = "/download/download.aspx?path=…hwp&…"'>
+   *   그래서 `location.href = ` 까지만 잡히고 주소를 통째로 놓쳤습니다.
+   *   ND2 다섯 건이 전부 「쪽첨부 0」 으로 세어졌습니다 (우리 DB 도 0줄입니다).
+   *   「쪽에 걸린 첨부 수」가 시험의 잣대라 **재는 쪽이 틀리면 점수가 틀립니다**. */
+  const onclick들 = [
+    ...html.matchAll(/on(?:click|Click)="([^"]*)"/g),
+    ...html.matchAll(/on(?:click|Click)='([^']*)'/g),
+  ];
+  for (const m of onclick들) {
     const s = 엔티티풀기(m[1]);
-    const 안 = [...s.matchAll(/['"]([^'"]{4,160})['"]/g)].map((y) => y[1]);
+    const 안 = [...s.matchAll(/['"]([^'"]{4,400})['"]/g)].map((y) => y[1]);
     if (/(file|down|atch)/i.test(s) && !안.length) 보기('javascript:' + s, '(onclick)');
     for (const v of 안) 보기(v, '(onclick)');
   }
