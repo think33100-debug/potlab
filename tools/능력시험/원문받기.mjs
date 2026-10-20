@@ -91,6 +91,25 @@ async function 받기(u, 쪽인가 = false, 몸 = null) {
   return { code: r.status, ct: r.headers.get('content-type') || '', buf, 끝주소: r.url || u,
     cd: r.headers.get('content-disposition') || '' };
 }
+/* ★ 고용24(work24.go.kr) 상세쪽은 때때로 **스스로 POST 하는 빈 껍데기**로 옵니다 —
+ *   1,307바이트에 <title></title> 과 `<form id="frm" action="(같은 주소)" method="post">`
+ *   + 숨은 칸(wantedAuthNo·infoTypeGroup)만 있습니다. 브라우저는 이 꼴을 곧바로
+ *   보내서 본문을 받습니다. 우리는 GET 한 번으로 끝내고 **글자 0자**로 적었습니다
+ *   (WNK161332608120004 · WNKJ20912609230013. 2026-10-20 에 가렸습니다).
+ *   그래서 이 꼴이면 숨은 칸을 모아 **같은 주소로 POST 해서 다시** 받습니다 */
+function 스스로보내는쪽(html, 밑바탕) {
+  if (html.length > 8000) return null;
+  const f = html.match(/<form[^>]+action=["']([^"']+)["'][^>]*method=["']?post/i)
+    || html.match(/<form[^>]+method=["']?post["']?[^>]*action=["']([^"']+)["']/i);
+  if (!f) return null;
+  const 몸 = new URLSearchParams();
+  for (const m of html.matchAll(/<input[^>]+name=["']([^"']+)["'][^>]*value=["']([^"']*)["']/gi)) {
+    몸.set(엔티티풀기(m[1]), 엔티티풀기(m[2]));
+  }
+  if (![...몸.keys()].length) return null;
+  let u; try { u = new URL(엔티티풀기(f[1]), 밑바탕).href; } catch { return null; }
+  return { url: u, 몸 };
+}
 function 글자로(buf, ct) {
   const cs = (ct.match(/charset=["']?([\w-]+)/i) || [])[1]
     || (buf.subarray(0, 3000).toString('latin1').match(/charset=["']?([\w-]+)/i) || [])[1] || 'utf-8';
@@ -199,13 +218,24 @@ for (const [i, x] of 볼것.entries()) {
   } else {
     try {
       쪽쿠키 = ''; 쪽주소 = '';            /* 공고마다 새로 모읍니다 */
-      const r = await 받기(x['주소'], true);
-      const html = 글자로(r.buf, r.ct);
+      let r = await 받기(x['주소'], true);
+      let html = 글자로(r.buf, r.ct);
+      const 또 = 스스로보내는쪽(html, r.끝주소);
+      if (또) {
+        const r2 = await 받기(또.url, true, 또.몸);
+        const html2 = 글자로(r2.buf, r2.ct);
+        if (html2.length > html.length) {
+          console.log('   (' + x.id + ' — 스스로 POST 하는 쪽이라 다시 보냈습니다: '
+            + html.length + '자 → ' + html2.length + '자)');
+          r = r2; html = html2;
+        }
+      }
       쪽HTML = html;
       const 글 = 태그걷기(html);
       fs.writeFileSync(path.join(방, '쪽.html'), html, 'utf8');
       fs.writeFileSync(path.join(방, '쪽.txt'), 글, 'utf8');
       한건.쪽 = { code: r.code, 바이트: r.buf.length, 끝주소: r.끝주소, 글자수: 글.length,
+        다시보냄: !!또 || undefined,
         우리직군말: /(물리|작업|도수)\s*치료/.test(글), 제목글자: (html.match(/<title>([^<]{0,80})/i) || [])[1] || null };
       한건.쪽첨부 = 쪽첨부들(html, r.끝주소);
     } catch (e) { 한건.쪽 = { 왜: String(e.message).slice(0, 60) }; }
