@@ -180,6 +180,57 @@ if (쪽몇개) {
   console.log(후보파일 + ' 에 적었습니다');
 }
 
+/* ── ①-2 알리오 첨부 쓸기 — ZIP·DOCX 견본이 여기 많습니다 ──────────
+ *
+ *   node tools/능력시험/형식모으기.mjs --알리오 60
+ *
+ * 왜 — 쪽을 104개 열어 모은 후보가 **그림 48 · ZIP 3** 이고 DOCX 는 0 입니다.
+ * 그런데 알리오 공고는 「직무기술서.zip」 을 붙이는 일이 아주 흔합니다
+ * (표본 50건에서만 4개 나왔습니다). 받는 길도 오늘 확인했습니다 —
+ *   https://www.alio.go.kr/download/download.json?fileNo=<번호> + Referer
+ * 쿠키가 필요 없습니다.
+ */
+const 알리오몇 = Number(값('--알리오', 0));
+if (알리오몇) {
+  const 모두 = [];
+  for (let off = 0; off < 1200 && 모두.length < 알리오몇; off += 100) {
+    const r = await fetch(U + '/rest/v1/job_posts?select=id,source,org_name,title'
+      + '&source=in.(AL2,AL)&order=db_insert_at.desc&limit=100&offset=' + off, { headers: H });
+    if (!r.ok) break;
+    const j = await r.json();
+    모두.push(...j);
+    if (j.length < 100) break;
+  }
+  const 볼것 = 모두.slice(0, 알리오몇);
+  console.log('\n알리오 상세쪽 ' + 볼것.length + '개에서 첨부 번호를 모읍니다');
+  const 후보 = [];
+  let 본것 = 0;
+  for (const x of 볼것) {
+    const idx = String(x.id).replace(/^AL2?/, '');
+    const 쪽 = 'https://job.alio.go.kr/recruitview.do?idx=' + idx;
+    try {
+      const r = await fetch(쪽, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' },
+        signal: AbortSignal.timeout(25000) });
+      const h = await r.text();
+      const nos = [...new Set([...h.matchAll(/download\.json\?fileNo=(\d+)/g)].map((m) => m[1]))];
+      for (const no of nos) {
+        후보.push({ url: 'https://www.alio.go.kr/download/download.json?fileNo=' + no,
+          갈래: '문서', 어디: '알리오', 공고: x.id, source: x.source, 기관: x.org_name, 쪽 });
+      }
+      본것++;
+      process.stderr.write('\r  ' + 본것 + '/' + 볼것.length + ' · 첨부 번호 ' + 후보.length + '    ');
+    } catch { /* 못 열면 넘어갑니다 */ }
+    await 자고(간격ms);
+  }
+  process.stderr.write('\n');
+  const 옛 = fs.existsSync(후보파일) ? JSON.parse(fs.readFileSync(후보파일, 'utf8')).후보 || [] : [];
+  const 본주소 = new Set(옛.map((y) => y.url));
+  const 더한것 = 후보.filter((y) => !본주소.has(y.url));
+  fs.writeFileSync(후보파일, JSON.stringify({ 만든때: new Date().toISOString(),
+    본쪽: 본것, 후보: [...옛, ...더한것] }, null, 1) + '\n', 'utf8');
+  console.log('알리오 쪽 ' + 본것 + '개에서 첨부 ' + 후보.length + '개 (새것 ' + 더한것.length + ') — 후보에 더했습니다');
+}
+
 /* ── ② 받아서 읽어 보기 ────────────────────────────────────── */
 if (받기) {
   if (!fs.existsSync(후보파일)) { console.error('✗ 먼저 --쪽 N 으로 후보를 모으십시오'); process.exit(1); }
