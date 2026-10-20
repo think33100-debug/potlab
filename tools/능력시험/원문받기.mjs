@@ -236,6 +236,10 @@ for (const [i, x] of 볼것.entries()) {
       fs.writeFileSync(path.join(방, '쪽.txt'), 글, 'utf8');
       한건.쪽 = { code: r.code, 바이트: r.buf.length, 끝주소: r.끝주소, 글자수: 글.length,
         다시보냄: !!또 || undefined,
+        /* ★ 고용24 는 **마감된 공고를 지웁니다** — 글은 0자인데 `alert()` 안에
+           「해당 구인인증번호의 상세 내역이 없습니다.」 가 들어 있습니다. 「못 읽음」과
+           「쪽이 사라짐」은 다른 일이라 따로 적습니다 (2026-10-20) */
+        없어짐: (html.match(/alert[(]msgStr[)]/) && (html.match(/msgStr = '([^']{4,120})'/) || [])[1]) || undefined,
         우리직군말: /(물리|작업|도수)\s*치료/.test(글), 제목글자: (html.match(/<title>([^<]{0,80})/i) || [])[1] || null };
       한건.쪽첨부 = 쪽첨부들(html, r.끝주소);
     } catch (e) { 한건.쪽 = { 왜: String(e.message).slice(0, 60) }; }
