@@ -43,7 +43,7 @@ export const 문서꼴 = /[.](pdf|hwpx?|docx?|xlsx?|pptx?|zip)([?&;]|$|#)/i;
 export const 그림꼴 = /[.](jpe?g|png|webp|tiff?|gif)([?&;]|$|#)/i;
 /* 쪽 꾸밈 그림은 뺍니다 — 「시신기증안내」 1.2MB 배너가 첨부로 세어졌습니다 */
 export const 꾸밈길 = /\/(images?|img|assets?|static|skin|resources?|css|js|favicons?|icons?|thumb(nail)?s?|banner|common|layout|template|editor|_lib\/(?!modulesext))\//i;
-export const 꾸밈이름 = /(logo|banner|btn|button|icon|bullet|arrow|bg_|_bg|top_|bottom_|menu|nav|sprite|blank|spacer|loading|quick|sns|facebook|instagram|youtube|kakao|naver|시신기증|비급여|진료시간|오시는길|personinfo|pmovie|admin|mobile_main|mfoot|mhead|authmark|webmark|^ci[-_]|[/]ci[-_]|vis_|visual|popup|award|cert|intro)/i;
+export const 꾸밈이름 = /(logo|banner|btn|button|icon|bullet|arrow|bg_|_bg|top_|bottom_|menu|nav|sprite|blank|spacer|loading|quick|sns|facebook|instagram|youtube|kakao|naver|시신기증|비급여|진료시간|오시는길|[/^]ci[.]|personinfo|pmovie|admin|mobile_main|mfoot|mhead|authmark|webmark|^ci[-_]|[/]ci[-_]|vis_|visual|popup|award|cert|intro)/i;
 
 /** 쪽 글자에서 첨부 후보를 모읍니다 — 갈래를 함께 적습니다 */
 export function 후보들(html, 밑바탕) {
