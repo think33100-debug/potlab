@@ -75,11 +75,13 @@ async function 머리(주소) {
  *   그래서 쪽을 받을 때 쿠키를 모아 두고 첨부에 함께 보냅니다 */
 let 쪽쿠키 = '';
 let 쪽주소 = '';
-async function 받기(u, 쪽인가 = false) {
+async function 받기(u, 쪽인가 = false, 몸 = null) {
   const 기본 = await 머리(u);
   const 더 = (!쪽인가 && 쪽쿠키) ? { Cookie: [기본.Cookie, 쪽쿠키].filter(Boolean).join('; ') } : {};
   const 리퍼 = (!쪽인가 && 쪽주소) ? { Referer: 쪽주소 } : {};
-  const r = await fetch(u, { headers: { ...기본, ...리퍼, ...더 },
+  const r = await fetch(u, { method: 몸 ? 'POST' : 'GET', body: 몸 || undefined,
+    headers: { ...기본, ...리퍼, ...더,
+      ...(몸 ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}) },
     redirect: 'follow', signal: AbortSignal.timeout(30000) });
   const buf = Buffer.from(await r.arrayBuffer());
   if (쪽인가) {
@@ -150,6 +152,19 @@ function 쪽첨부들(html, 밑바탕) {
     const 열쇠 = u.replace(/;jsessionid=[^?#]*/i, '');
     if (나온것.some((x) => x.열쇠 === 열쇠)) return;
     나온것.push({ 갈래: 뷰어길.test(u) ? '뷰어형' : '파일주소', url: u, 열쇠, 글 });
+    /* ★ pdf.js 뷰어(`viewer.html?file=…`)는 **참 파일 주소를 품고** 있습니다 —
+       `file=` 값만 떼면 그대로 받아집니다. 2026-10-20 에 제주대 305467 로 재 봤습니다:
+         viewer.html?file=/thumbnail/…PDF  →  그 값만 받으니 143,375바이트 %PDF-1.4 (5쪽)
+       뷰어 주소를 그냥 두드리면 HTML 만 옵니다 */
+    const 품은 = (u.match(/[?&]file=([^&]+)/) || [])[1];
+    if (품은) {
+      try {
+        const v = new URL(decodeURIComponent(품은), u).href;
+        if (/[.](pdf|hwpx?|docx?|xlsx?|zip|jpe?g)([?]|$|[#])/i.test(v) && !나온것.some((y) => y.열쇠 === v)) {
+          나온것.push({ 갈래: '뷰어속참파일', url: v, 열쇠: v, 글: 글 + ' (뷰어가 품은 참 파일)' });
+        }
+      } catch { /* 주소가 아니면 버립니다 */ }
+    }
   };
   for (const m of html.matchAll(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]{0,80}?)<\/a>/gi)) 보기(m[1], m[2]);
   /* onclick 안의 주소도 봅니다 — 지침 5절(첨부가 href 가 아니라 onclick 에 있던 자리) */
@@ -178,6 +193,7 @@ for (const [i, x] of 볼것.entries()) {
     숨김: x['숨김'], 보류: x['보류'], DB첨부: (x['첨부'] || []).length, 쪽: null, 쪽첨부: [], 받은첨부: [] };
   process.stderr.write('\r  ' + (i + 1) + '/' + 볼것.length + ' ' + x.id + '        ');
 
+  let 쪽HTML = '';
   if (!x['주소'] || !/^https?:/.test(String(x['주소']))) {
     한건.쪽 = { 왜: '쪽 주소가 없습니다 (API 출처거나 주소를 안 담았습니다)' };
   } else {
@@ -185,6 +201,7 @@ for (const [i, x] of 볼것.entries()) {
       쪽쿠키 = ''; 쪽주소 = '';            /* 공고마다 새로 모읍니다 */
       const r = await 받기(x['주소'], true);
       const html = 글자로(r.buf, r.ct);
+      쪽HTML = html;
       const 글 = 태그걷기(html);
       fs.writeFileSync(path.join(방, '쪽.html'), html, 'utf8');
       fs.writeFileSync(path.join(방, '쪽.txt'), 글, 'utf8');
@@ -203,12 +220,30 @@ for (const [i, x] of 볼것.entries()) {
     if (!받을것.some((y) => y.url === a.url)) 받을것.push({ url: a.url, name: a.글, 어디서: '쪽', 갈래: a.갈래 });
   }
 
+  /* ★ 클린아이(job.cleaneye.go.kr) 첨부는 **POST /file/FileDownload.do** 로만 옵니다 —
+     `fn_FileDown('<UPLOAD>','<ORIGINAL>','<PATH>')` 의 세 인자 + Referer 가 다 있어야
+     파일을 줍니다 (tools/cleaneye-file.mjs · 지침 6절). GET 으로 두드리면 공고 쪽
+     HTML 이 그대로 와서 「PDF 인 척하는 HTML」로 세어집니다 — 우리 표의 23줄이 그 꼴입니다.
+     ⚠ 통이 15건·2분이라 **10초 간격**을 지킵니다 (줄이면 429 가 나고 더 느립니다) */
+  if (/job[.]cleaneye[.]go[.]kr/.test(String(x["주소"] || "")) && 쪽HTML) {
+    for (const m of 쪽HTML.matchAll(/fn_FileDown[(]['"]([^'"]*)['"],['"]([^'"]*)['"],['"]([^'"]*)['"]/g)) {
+      const 몸 = new URLSearchParams();
+      몸.set('UPLOAD_FILENAME', m[1]); 몸.set('ORIGINAL_FILENAME', m[2]); 몸.set('FILE_PATH', m[3]);
+      const 이름 = m[2] || m[1];
+      if (!받을것.some((y) => y.name === 이름 && y.post)) {
+        받을것.unshift({ url: 'https://job.cleaneye.go.kr/file/FileDownload.do', name: 이름,
+          어디서: '쪽(POST)', 갈래: '받기POST', post: 몸, 쉼: 10000 });
+      }
+    }
+  }
+
   const 첨방 = path.join(방, '첨부');
   if (받을것.length) fs.mkdirSync(첨방, { recursive: true });
   for (const [k, a] of 받을것.slice(0, 첨부뚜껑).entries()) {
     const 한첨 = { 어디서: a.어디서, 이름: a.name, url: a.url };
     try {
-      const r = await 받기(a.url);
+      const r = await 받기(a.url, false, a.post || null);
+      한첨.갈래 = a.갈래 || null;
       한첨.code = r.code; 한첨.바이트 = r.buf.length;
       한첨.앞바이트 = r.buf.subarray(0, 8).toString('latin1').replace(/[^\x20-\x7e]/g, '.');
       한첨.진짜형식 = 진짜형식(r.buf);
@@ -234,7 +269,7 @@ for (const [i, x] of 볼것.entries()) {
       첨부받은수++;
     } catch (e) { 한첨.왜 = String(e.message).slice(0, 60); }
     한건.받은첨부.push(한첨);
-    await 자고(400);
+    await 자고(a.쉼 || 400);
   }
   목록.push(한건);
   fs.writeFileSync(path.join(방, '사실.json'), JSON.stringify(한건, null, 1) + '\n', 'utf8');
