@@ -104,8 +104,17 @@ const 정답들 = fs.readFileSync(정답파일, 'utf8').split('\n').map((l) => l
   .filter((l) => l && !l.startsWith('//')).map((l) => JSON.parse(l));
 const { 표본 } = JSON.parse(fs.readFileSync(path.join(여기, '표본.json'), 'utf8'));
 const 표본맵 = new Map(표본.map((x) => [x.id, x]));
-const 원문사실 = JSON.parse(fs.readFileSync(path.join(여기, '원문', '원문사실.json'), 'utf8'));
-const 사실맵 = new Map(원문사실.목록.map((x) => [x.id, x]));
+/* ★ 2026-10-20 — **공고마다 있는 `원문/<id>/사실.json` 을 바로 읽습니다.**
+   모아 둔 `원문사실.json` 은 **그 바퀴에 받은 것만** 담습니다 — 50건을
+   나눠 받으면 마지막 묶음만 남아, 채점이 45건을 「원문에 없는 정답」으로
+   건너뛰었습니다 (2026-10-20 에 그랬습니다) */
+const 사실맵 = new Map();
+for (const 이름 of fs.readdirSync(path.join(여기, '원문'))) {
+  const p = path.join(여기, '원문', 이름, '사실.json');
+  if (!fs.existsSync(p)) continue;
+  try { const j = JSON.parse(fs.readFileSync(p, 'utf8')); if (j && j.id) 사실맵.set(j.id, j); } catch { /* 깨진 것은 건너뜁니다 */ }
+}
+console.log('원문을 받아 둔 공고 ' + 사실맵.size + '건');
 const 목록결과 = fs.existsSync(path.join(여기, '목록시험.json'))
   ? JSON.parse(fs.readFileSync(path.join(여기, '목록시험.json'), 'utf8')) : null;
 
