@@ -133,8 +133,12 @@ function hsDetailDates(text) {
     /* 「공고기간」 은 게시 기간이라 접수 마감과 다를 때가 많습니다 (경북대 공고기간 ~9.25 · 접수 ~9.16). 접수·모집 쪽을 우선합니다 */
     res.rank = /공고\s*기간/.test(a[0]) ? 1 : 0;
     뚜껑(res);
-    if (res.to && res.rank === 0) return res;
-    if (!best || (res.to && !best.to) || (res.rank < best.rank && res.to)) best = res;
+    /* ★ 2026-10-21 — **첫 창에서 바로 돌려주지 않습니다.** 창마다 점수를 매겨
+       가장 좋은 것을 씁니다 — **범위(시작~마감)를 준 창**이 가장 믿을만합니다.
+       전에는 앞쪽 창이 to 만 내도 바로 이겨서, 뒤쪽 범위 창까지 못 갔습니다
+       (305467·305876 이 마감을 일주일 이르게 잡았습니다) */
+    const 점 = (r) => (!r || !r.to) ? 0 : (r.rank === 0 ? (r.from ? 3 : 2) : 1);
+    if (점(res) > 점(best)) best = res;
   }
   return 뚜껑(best) || { from: '', to: '' };
 }

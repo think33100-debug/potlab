@@ -22,7 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 칸뽑기, 고용형태판정, 본문직군, 우리직군줄 } from '../공고문읽기.mjs';
+import { 칸뽑기, 고용형태판정, 본문직군, 우리직군줄, 마감고르기 } from '../공고문읽기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -141,6 +141,7 @@ export function 정답꼴(어디, 근거) {
   return 바탕 + ' · ' + 꼴;
 }
 const 다시틀린것 = [];
+const 마감보류 = [];   /* 쪽·첨부가 둘 다 마감이라는데 다른 것 */
 const 새글인가 = argv.includes('--새글');
 const 칸이름 = ['모집인원', '접수마감', '마감시각', '근무지', '지원자격', '예상연봉', '고용형태'];
 const 셈 = {
@@ -255,8 +256,10 @@ for (const 답 of 정답들) {
        첨부만 보게 했더니 접수마감이 63%→40% 로 떨어졌습니다 (쪽의 날짜를 잃음) */
     const 온글 = (o.md || '') + '\n' + (o.글 || '');
     const 직 = 본문직군(o.md || o.글) || null;
-    const 첨값 = o.md ? 다시일곱(칸뽑기(o.md, ''), 온글, 직, x.제목 || '') : null;
-    const 쪽값 = o.글 ? 다시일곱(칸뽑기('', o.글), 온글, 직, x.제목 || '') : null;
+    const 첨뽑 = o.md ? 칸뽑기(o.md, '') : null;
+    const 쪽뽑 = o.글 ? 칸뽑기('', o.글) : null;
+    const 첨값 = 첨뽑 ? 다시일곱(첨뽑, 온글, 직, x.제목 || '') : null;
+    const 쪽값 = 쪽뽑 ? 다시일곱(쪽뽑, 온글, 직, x.제목 || '') : null;
     const 다 = {};
     /* ★ **칸마다 바탕이 다릅니다** — 재는 쪽을 수집기에 맞춥니다.
      *   날짜(접수마감·마감시각)는 **쪽·목록**이 기준입니다 (수집기가 거기서 담고
@@ -270,6 +273,19 @@ for (const 답 of 정답들) {
       const 앞 = 쪽먼저.has(k) ? 쪽값 : 첨값;
       const 뒤 = 쪽먼저.has(k) ? 첨값 : 쪽값;
       다[k] = (앞 && 있나(앞[k])) ? 앞[k] : (뒤 && 있나(뒤[k]) ? 뒤[k] : null);
+    }
+    /* ★ 2026-10-21 — **접수마감은 충돌 규칙으로 고릅니다** (세중님 결정 · 마감고르기()).
+       쪽이 시작·게시이거나 이름표가 없고 첨부에 마감이 적혀 있으면 첨부를 믿습니다.
+       둘 다 마감이라는데 날짜가 다르면 비우고 보류합니다 */
+    {
+      const 고 = 마감고르기({
+        쪽값: 쪽값 ? 쪽값.접수마감 : null,
+        쪽근거: 쪽뽑 && 쪽뽑.근거 ? String(쪽뽑.근거.접수마감 || '') : '',
+        첨값: 첨값 ? 첨값.접수마감 : null,
+        첨근거: 첨뽑 && 첨뽑.근거 ? String(첨뽑.근거.접수마감 || '') : '',
+      });
+      다.접수마감 = 고.값;
+      if (고.보류) 마감보류.push({ id: 답.id, 왜: 고.왜 });
     }
     for (const k of 칸이름) {
       const 정 = 답.칸 && 답.칸[k] ? 답.칸[k].값 : undefined;
@@ -329,6 +345,11 @@ if (다시뽑나) {
       + String(c2.애매).padStart(6)
       + (분모2 ? '   정답률 ' + (100 * (c2.맞음 + c2.둘다없음) / 분모2).toFixed(0) + '%' : ''));
   }
+}
+
+if (마감보류.length) {
+  console.log('\n★ 접수마감 충돌로 **보류**할 것 ' + 마감보류.length + '건 (쪽·첨부가 둘 다 마감인데 다릅니다)');
+  for (const x of 마감보류) console.log('  ' + x.id + ' — ' + x.왜);
 }
 
 if (꼴보기) {
