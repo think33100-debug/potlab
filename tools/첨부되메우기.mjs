@@ -213,7 +213,15 @@ async function 틈두고받기(주소) {
     return { 왜: 'HTTP ' + g.status };
   }
   if (!g.ok) return { 왜: 'HTTP ' + g.status };
-  const buf = Buffer.from(await g.arrayBuffer());
+  /* ★ 2026-10-21 — 몸 읽기도 **받습니다.** 시간초과는 머리글을 받은 뒤에
+     터지고, 그때 터지는 곳은 fetch 가 아니라 여기입니다. 받지 않으면
+     한 건 때문에 바퀴 전체가 죽습니다 (그러면 그날 되메우기가 통째로 빕니다) */
+  let buf;
+  try {
+    buf = Buffer.from(await g.arrayBuffer());
+  } catch (e) {
+    return { 왜: '몸 읽기 탈 — ' + String(e && e.message || e).slice(0, 50) };
+  }
   if (!buf.length) {
     const n = (막힘.get(host) || 0) + 1; 막힘.set(host, n);
     if (n >= 3) 멈춘사이트.set(host, '빈 응답 3번');
