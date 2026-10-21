@@ -13,7 +13,7 @@ const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 칸이름 = ['모집인원', '접수마감', '마감시각', '근무지', '지원자격', '예상연봉', '고용형태'];
 const 정답 = fs.readFileSync(path.join(여기, '정답지2.jsonl'), 'utf8').split('\n')
   .map((l) => l.trim()).filter((l) => l.startsWith('{')).map((l) => JSON.parse(l));
-const 결과 = JSON.parse(fs.readFileSync(path.join(여기, '시험결과_둘째6.json'), 'utf8'));
+const 결과 = JSON.parse(fs.readFileSync(path.join(여기, '시험결과_둘째8.json'), 'utf8'));
 const 틀린 = new Map();
 for (const x of (결과.다시틀린것 || [])) 틀린.set(x.id + '|' + x.칸, x);
 const 우리값 = new Map();

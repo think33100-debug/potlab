@@ -34,8 +34,8 @@ export function 갈래셈(결과, 걸러) {
 
 const 표 = [];
 for (const [이름, 결과파일, 정답파일] of [
-  ['첫 표본 50건', '시험결과_다시_32.json', '정답지.jsonl'],
-  ['둘째 표본 30건', '시험결과_둘째6.json', '정답지2.jsonl'],
+  ['첫 표본 50건', '시험결과_다시_33.json', '정답지.jsonl'],
+  ['둘째 표본 30건', '시험결과_둘째8.json', '정답지2.jsonl'],
 ]) {
   if (!fs.existsSync(path.join(여기, 결과파일))) { console.log('(없음 — ' + 결과파일 + ')'); continue; }
   const 결과 = 읽(결과파일);
