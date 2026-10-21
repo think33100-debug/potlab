@@ -37,16 +37,20 @@ const 열쇠 = env.SUPABASE_SERVICE_KEY;
 if (!바탕 || !열쇠) { console.error('SUPABASE_URL·SUPABASE_SERVICE_KEY 가 없습니다'); process.exit(1); }
 const 머리 = { apikey: 열쇠, Authorization: 'Bearer ' + 열쇠 };
 
-/** Supabase 는 한 번에 1000줄까지 줍니다 — offset 으로 넘깁니다 (Range 는 안 통합니다) */
+/** ★ 이 서버는 **100줄에서 끊습니다**(PostgREST max-rows). limit 을 크게 줘도 더 안 옵니다.
+ *  그래서 **받은 줄 수만큼** offset 을 넘기고 **0줄일 때** 멈춥니다 —
+ *  처음에 「1000줄보다 적으면 끝」으로 짰더니 100줄만 보고 멈췄습니다 (공고 2782건을 100건으로) */
 async function 전부(길) {
   const 모은것 = [];
-  for (let off = 0; ; off += 1000) {
+  for (let off = 0; ; ) {
     const u = 바탕 + '/rest/v1/' + 길 + (길.includes('?') ? '&' : '?') + 'limit=1000&offset=' + off;
     const r = await fetch(u, { headers: 머리 });
     if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
     const 줄 = await r.json();
     모은것.push(...줄);
-    if (줄.length < 1000) break;
+    if (!줄.length) break;
+    off += 줄.length;
+    if (off > 200000) throw new Error('너무 많습니다 — 고리를 봅니다');
   }
   return 모은것;
 }
