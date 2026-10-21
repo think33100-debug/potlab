@@ -18,12 +18,13 @@
  *   · `job_attachments` 에 주소가 있는 공고만 봅니다. 없으면 먼저 수집기가
  *     주소를 담아야 합니다 (`POTJOB_ATTACH_WRITE=1`)
  */
+import os from 'node:os';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
 import { 그누보드새주소, 고친주소 } from './첨부주소고치기.mjs';
-import { 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
+import { 쓴메모리MB, 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
 import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이간격 } from './cleaneye-file.mjs';
 import { 첨부받기 as 나라일터첨부받기, 기본간격 as 나라일터간격 } from './gojobs-file.mjs';
 
@@ -303,6 +304,30 @@ async function 틈두고받기(주소, 받는법 = null) {   /* 주소는 안에
 /* ★ 전·후를 **공고마다 한 줄씩 남겨 끝에 셉니다.**
    전에는 고리 안에서 세다가 `continue` 로 빠져 「전 100% → 후 0%」 같은
    헛숫자가 나왔습니다 (2026-10-11 마른 실행에서 잡았습니다) */
+/** 부하가 높나 — load 1분값과 **쓴 메모리**를 봅니다 (2026-10-22 세중님 5번) */
+const 부하뚜껑 = Number(process.env.POTJOB_LOAD_MAX) || 3;
+const 메모리뚜껑MB = Number(process.env.POTJOB_MEM_MAX) || 1400;
+function 부하높나() {
+  const load = os.loadavg()[0];
+  let 메모리 = 0;
+  try { 메모리 = 쓴메모리MB(); } catch { 메모리 = 0; }
+  if (load > 부하뚜껑) return 'load ' + Math.round(load * 100) / 100 + ' > ' + 부하뚜껑;
+  if (메모리 > 메모리뚜껑MB) return '쓴 메모리 ' + 메모리 + 'MB > ' + 메모리뚜껑MB + 'MB';
+  return '';
+}
+/** 높으면 60초씩 최대 10번 기다립니다. 그래도 높으면 바퀴를 끝냅니다 */
+let 쉰횟수 = 0;
+async function 부하기다리기() {
+  for (let i = 0; i < 10; i++) {
+    const 왜 = 부하높나();
+    if (!왜) return '';
+    쉰횟수++;
+    console.log('   [부하] ' + 왜 + ' — 60초 쉽니다 (' + (i + 1) + '/10)');
+    await 자고(60000);
+  }
+  return 부하높나();
+}
+
 const 잰것 = [];
 
 /* ★ 2026-10-21 — **끝남 이유 한 줄.** 갑자기 끝나도 남게 process exit 에 겁니다.
@@ -315,10 +340,21 @@ process.on('exit', (코드) => {
     + ' · 못받음 ' + 못받음 + ' · 담음 ' + 끝.담음
     + ' · 워커 교체 ' + (w.교체 ?? '?') + '(거둠 ' + (w.거둠 ?? '?')
     + ' · 강제 ' + (w.강제종료 ?? 0) + ' · 못거둠 ' + (w.못거둠 ?? 0) + ')'
+    + (쉰횟수 ? ' · 부하로 쉼 ' + 쉰횟수 + '번' : '')
     + ' · 까닭 ' + 끝.까닭 + ' · 끝값 ' + 코드);
 });
 
 for (const j of 볼것) {
+  /* ★ 2026-10-22 — **부하가 높으면 쉽니다** (세중님 5번). 상한을 풀면 150건을
+     쉬지 않고 읽어 서버가 숨을 못 쉽니다 (07:36 에 SSH 가 네 번 끊겼습니다) */
+  {
+    const 아직 = await 부하기다리기();
+    if (아직) {
+      끝.까닭 = '부하가 10분 넘게 높습니다 — ' + 아직;
+      console.log('   [부하] ' + 아직 + ' — 10분을 기다려도 높아 이 바퀴를 끝냅니다');
+      break;
+    }
+  }
   const 잠김 = new Set(j.edited_fields || []);
   const 지금빈 = new Set(빈칸들(j));
   const 한줄 = { id: j.id, 지금빈, 채울것: {} };
