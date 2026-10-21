@@ -67,6 +67,23 @@ for (const x of 볼것) {
     console.log(몸.replace(/\n{2,}/g, '\n').slice(0, 전문)
       .split('\n').map((l) => '     ' + l.slice(0, 118)).join('\n'));
   }
+  /* ★ 2026-10-21 — **표 꼴**을 먼저 찍습니다. 위 패턴은 줄바꿈에서 끊기는데
+     쪽의 표는 칸마다 줄바꿈입니다 (「접수기간 \n | \n 2026-10-01 ~ \n 2026-10-07」).
+     이 자리를 안 찍어서 정답지2 의 접수마감 여섯 칸을 「없음」으로 적었습니다 */
+  {
+    const 평 = 온글.replace(/\s+/g, ' ');
+    const 표것 = new Set();
+    for (const m of 평.matchAll(/(접수|원서|모집|마감|기간|일정)[^가-힣]{0,12}[가-힣]{0,4}[^가-힣]{0,20}(20\d{2}|\d{2})\s*[-./년][^|]{0,60}/g)) {
+      const t = m[0].trim();
+      if (!/20\d{2}|\d{2}\s*[.]\s*\d{1,2}/.test(t)) continue;
+      표것.add(t.slice(0, 110));
+      if (표것.size >= 6) break;
+    }
+    if (표것.size) {
+      console.log('  ── 표 꼴 (빈칸을 눕힌 글 — 쪽의 접수기간 표가 여기 보입니다)');
+      for (const t of 표것) console.log('     ' + t);
+    }
+  }
   for (const [이름, re] of 찾을것) {
     re.lastIndex = 0;
     const 본것 = new Set();
