@@ -1324,12 +1324,21 @@ export function 칸뽑기(md, 합친글 = '') {
   /* 금액은 「내규에 따름」보다 셉니다 — 빈 칸일 때와 **내규로 접은 때**에 봅니다 */
   if (!낸것.예상연봉 || 낸것.예상연봉 === '내규에 따름') {
     const 돈꼴 = /\d[\d,.\s]*(?:만|천|억)?\s*원/;
-    const 줄들 = String(줄글).split(/\r?\n|<br\s*\/?>/i);
+    /* ★ 2026-10-21 — 줄 경계에 </tr> 를 더합니다. 날 HTML 표는 한 줄에 다 들어
+       있어서, \n·<br> 로만 쪼개면 직군과 금액이 **같은 줄**인데도 칸을 못 가립니다
+       (CE79376 첨부가 그 꼴입니다) */
+    const 줄들 = String(줄글).split(/\r?\n|<br\s*\/?>|<\/tr\s*>/i);
     for (const 줄 of 줄들) {
       if (!Object.values(우리직군).some((re) => re.test(줄))) continue;
       if (!돈꼴.test(줄)) continue;
       let 값 = null;
-      if (줄.includes('|')) {
+      if (/<td[\s>]/i.test(줄)) {
+        /* HTML 표 — 칸 가름대가 <td> 입니다. 태그를 걷어 금액이 든 칸만 */
+        const 칸 = 줄.split(/<\/?t[dh][^>]*>/i)
+          .map((c) => c.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
+        값 = 칸.find((c) => 돈꼴.test(c)) || null;
+      } else if (줄.includes('|')) {
         const 칸 = 줄.split('|').map((c) => c.trim()).filter(Boolean);
         값 = 칸.find((c) => 돈꼴.test(c)) || null;
       } else {
