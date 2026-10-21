@@ -58,13 +58,15 @@ async function 전부(길) {
 
 /** 본문이 **CSS·JS 찌꺼기**인가 — 스타일·스크립트가 글로 담긴 것 */
 export function 찌꺼기본문(글) {
-  const t = String(글 || '');
-  if (!t.trim()) return false;
+  const t = String(글 || '').trim();
+  if (!t) return false;
+  /* ★ 2026-10-22 — **앞 200자**로 봅니다. 강진의료원 본문은 2,306자 한 줄인데
+     앞은 CSS 이고 뒤에 쪽 글자가 섞여 있어 「공고말이 있다」로 빠져나갔습니다.
+     공고문은 **앞머리가 CSS 가 아닙니다** */
+  const 앞머리찌꺼기 = t.slice(0, 200);
   const 표 = [/!important/, /\{[^}]{0,80}:[^}]{0,80};/, /function\s*\(/, /<style/i, /<script/i,
-    /\bvar\s+\w+\s*=/, /px\s*;/, /-webkit-|-moz-/];
-  const 맞은수 = 표.filter((re) => re.test(t)).length;
-  const 공고말 = /접수|모집|채용|자격|마감|지원/.test(t);
-  return 맞은수 >= 2 && !공고말;
+    /\bvar\s+\w+\s*=/, /px\s*;/, /-webkit-|-moz-/, /^\s*\/\*/];
+  return 표.filter((re) => re.test(앞머리찌꺼기)).length >= 2;
 }
 
 const 우리말 = /(물리|작업|도수)\s*치료/;
@@ -87,6 +89,10 @@ for (const j of 우리것) {
   if (!우리말.test(글)) continue;            /* 본문에 아예 없음 — 다른 갈래 */
   if (본문직군(글)) continue;                /* 떼고 봐도 있음 — 멀쩡 */
   if (matchJob(j.title || '') && !notOurs(j.title || '')) continue;   /* 제목이 원문입니다 */
+  /* ★ 2026-10-22 — **조교·연구 갈래는 빼둡니다.** 세중님 2026-10-14 결정대로
+     보여 주는 갈래이고, 응시자격에 「작업치료**학** 전공자」 처럼 학과명으로만
+     적히는 때가 많아 본문직군() 이 빈 값을 내는 것이 맞습니다 (ND1724) */
+  if (/조\s*교|연구\s*(?:원|위원|교수)/.test(j.title || '')) continue;
   const 찌 = 찌꺼기본문(글);
   if (찌) 찌꺼기수++;
   의심.push({ ...j, 찌꺼기: 찌 });
