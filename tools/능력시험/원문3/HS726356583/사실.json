@@ -1,0 +1,72 @@
+{
+ "id": "HS726356583",
+ "source": "HS3",
+ "기관": "성남시의료원",
+ "제목": "2026년 제13회 성남시의료원 직원 채용 모집 공고",
+ "주소": "https://www.scmc.kr/recruit/recruitView/?seq=5101",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 2,
+ "쪽": {
+  "code": 200,
+  "바이트": 64841,
+  "끝주소": "https://www.scmc.kr/recruit/recruitView/?seq=5101",
+  "글자수": 4037,
+  "우리직군말": true,
+  "제목글자": "성남시의료원 > 의료원 소식 > 채용공고 > 2026년 제13회 성남시의료원 직원 채용 모집 공고"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.scmc.kr/information/recruit/download/?seq=5101&idx=1",
+   "열쇠": "https://www.scmc.kr/information/recruit/download/?seq=5101&idx=1",
+   "글": "2026년 제13회 성남시의료원 직원 채용 공고문.pdf"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.scmc.kr/information/recruit/download/?seq=5101&idx=2",
+   "열쇠": "https://www.scmc.kr/information/recruit/download/?seq=5101&idx=2",
+   "글": "직무기술서(제13회).pdf"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "2026년 제13회 성남시의료원 직원 채용 공고문.pdf",
+   "url": "https://www.scmc.kr/information/recruit/download/?seq=5101&idx=1",
+   "갈래": null,
+   "code": 200,
+   "바이트": 189038,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "2026년+제13회+성남시의료원+직원+채용+공고문.pdf",
+   "글자수": 7599,
+   "표수": 22,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 6,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 1.5
+  },
+  {
+   "어디서": "DB",
+   "이름": "직무기술서(제13회).pdf",
+   "url": "https://www.scmc.kr/information/recruit/download/?seq=5101&idx=2",
+   "갈래": null,
+   "code": 200,
+   "바이트": 1355688,
+   "앞바이트": "%PDF-1.7",
+   "진짜형식": "pdf",
+   "받은이름": "직무기술서(제13회).pdf",
+   "글자수": 17166,
+   "표수": 5,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 9,
+   "OCR썼나": false,
+   "OCR필요쪽": 1,
+   "초": 17.3
+  }
+ ]
+}

@@ -1,0 +1,72 @@
+{
+ "id": "ND1710",
+ "source": "ND",
+ "기관": "용산구치매안심센터",
+ "제목": "직원 채용 공고",
+ "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1710&page=1&searchfield=&searchword=",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 0,
+ "쪽": {
+  "code": 200,
+  "바이트": 59616,
+  "끝주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1710&page=1&searchfield=&searchword=",
+  "글자수": 5565,
+  "우리직군말": false,
+  "제목글자": "중앙치매센터"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202608280934492427.hwp&filename=202608280934492427.hwp&ori_filename=%ec%a7%81%ec%9b%90%ec%b1%84%ec%9a%a9+%ea%b3%b5%ea%b3%a0%eb%ac%b8.hwp",
+   "열쇠": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202608280934492427.hwp&filename=202608280934492427.hwp&ori_filename=%ec%a7%81%ec%9b%90%ec%b1%84%ec%9a%a9+%ea%b3%b5%ea%b3%a0%eb%ac%b8.hwp",
+   "글": "(onclick)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f20260828093450738.hwp&filename=20260828093450738.hwp&ori_filename=%ec%9d%b4%eb%a0%a5%ec%84%9c%2c+%ec%9e%90%ea%b8%b0%ec%86%8c%ea%b0%9c%ec%84%9c%2c+%ea%b0%9c%ec%9d%b8%ec%a0%95%eb%b3%b4%eb%8f%99%ec%9d%98%ec%84%9c.hwp",
+   "열쇠": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f20260828093450738.hwp&filename=20260828093450738.hwp&ori_filename=%ec%9d%b4%eb%a0%a5%ec%84%9c%2c+%ec%9e%90%ea%b8%b0%ec%86%8c%ea%b0%9c%ec%84%9c%2c+%ea%b0%9c%ec%9d%b8%ec%a0%95%eb%b3%b4%eb%8f%99%ec%9d%98%ec%84%9c.hwp",
+   "글": "(onclick)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "쪽",
+   "이름": "(onclick)",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202608280934492427.hwp&filename=202608280934492427.hwp&ori_filename=%ec%a7%81%ec%9b%90%ec%b1%84%ec%9a%a9+%ea%b3%b5%ea%b3%a0%eb%ac%b8.hwp",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 17408,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "직원채용 공고문.hwp",
+   "글자수": 2312,
+   "표수": 10,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 2,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "(onclick)",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f20260828093450738.hwp&filename=20260828093450738.hwp&ori_filename=%ec%9d%b4%eb%a0%a5%ec%84%9c%2c+%ec%9e%90%ea%b8%b0%ec%86%8c%ea%b0%9c%ec%84%9c%2c+%ea%b0%9c%ec%9d%b8%ec%a0%95%eb%b3%b4%eb%8f%99%ec%9d%98%ec%84%9c.hwp",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 21504,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "이력서, 자기소개서, 개인정보동의서.hwp",
+   "글자수": 4899,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 4,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  }
+ ]
+}

@@ -1,0 +1,97 @@
+{
+ "id": "305065",
+ "source": "AL2",
+ "기관": "부산대학교병원",
+ "제목": "계약직(연구직,보건직,원무직) 공개채용 모집 공고",
+ "주소": "https://job.alio.go.kr/recruitview.do?idx=305065",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 0,
+ "쪽": {
+  "code": 200,
+  "바이트": 30381,
+  "끝주소": "https://job.alio.go.kr/recruitview.do?idx=305065",
+  "글자수": 5303,
+  "우리직군말": false,
+  "제목글자": "공공기관 채용정보시스템"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3075513",
+   "열쇠": "https://www.alio.go.kr/download/download.json?fileNo=3075513",
+   "글": "26년 10월 계약직(연구직_보건직_원무직)공개채용모집계획.pdf"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3075514",
+   "열쇠": "https://www.alio.go.kr/download/download.json?fileNo=3075514",
+   "글": "지원서작성 및 유의사항 채용서류반환청구서 불합격자이의신청서.zip"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3075515",
+   "열쇠": "https://www.alio.go.kr/download/download.json?fileNo=3075515",
+   "글": "직무설명서.zip"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "쪽",
+   "이름": "26년 10월 계약직(연구직_보건직_원무직)공개채용모집계획.pdf",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3075513",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 131731,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "26년 10월 계약직(연구직_보건직_원무직)공개채용모집계획.pdf",
+   "글자수": 7237,
+   "표수": 9,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 4,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0.8
+  },
+  {
+   "어디서": "쪽",
+   "이름": "지원서작성 및 유의사항 채용서류반환청구서 불합격자이의신청서.zip",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3075514",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 539916,
+   "앞바이트": "PK......",
+   "진짜형식": "zip계열",
+   "받은이름": "지원서작성 및 유의사항 채용서류반환청구서 불합격자이의신청서.zip",
+   "글자수": 3748,
+   "표수": 6,
+   "읽기탈": null,
+   "읽은꼴": "zip계열",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0.1
+  },
+  {
+   "어디서": "쪽",
+   "이름": "직무설명서.zip",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3075515",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 197689,
+   "앞바이트": "PK......",
+   "진짜형식": "zip계열",
+   "받은이름": "직무설명서.zip",
+   "글자수": 5440,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "zip계열",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0.3
+  }
+ ]
+}

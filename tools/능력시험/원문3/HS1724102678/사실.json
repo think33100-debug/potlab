@@ -1,0 +1,97 @@
+{
+ "id": "HS1724102678",
+ "source": "HS3",
+ "기관": "영남대학교의과대학부속영천병원",
+ "제목": "영남대학교영천병원 기간제 계약직 물리치료사 수시모집",
+ "주소": "https://yumc.ac.kr:8443/bbs/view.do?bbsId=news5&pageNum=1&wr_id=2499",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 1,
+ "쪽": {
+  "code": 200,
+  "바이트": 165363,
+  "끝주소": "https://yumc.ac.kr:8443/bbs/view.do?bbsId=news5&pageNum=1&wr_id=2499",
+  "글자수": 8853,
+  "우리직군말": true,
+  "제목글자": "영남대학교병원 - 병원소개 - 채용정보 - 영남대학교영천병원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://yumc.ac.kr:8443/yumc/FileDown.do?filename=Recruit_Doc.hwp",
+   "열쇠": "https://yumc.ac.kr:8443/yumc/FileDown.do?filename=Recruit_Doc.hwp",
+   "글": "전공의 지원서 양식"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://yumc.ac.kr:8443/bbs/FileDown.do?bbsId=news5&wr_id=360&num=1",
+   "열쇠": "https://yumc.ac.kr:8443/bbs/FileDown.do?bbsId=news5&wr_id=360&num=1",
+   "글": "영남대학교병원 지원서양식"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://yumc.ac.kr:8443/bbs/FileDown.do?bbsId=news5&wr_id=360&num=2",
+   "열쇠": "https://yumc.ac.kr:8443/bbs/FileDown.do?bbsId=news5&wr_id=360&num=2",
+   "글": "영천영대병원 지원서양식"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "전공의 지원서 양식",
+   "url": "https://yumc.ac.kr:8443/yumc/FileDown.do?filename=Recruit_Doc.hwp",
+   "갈래": null,
+   "code": 200,
+   "바이트": 48128,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "Recruit_Doc.hwp ",
+   "글자수": 2909,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "영남대학교병원 지원서양식",
+   "url": "https://yumc.ac.kr:8443/bbs/FileDown.do?bbsId=news5&wr_id=360&num=1",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 246784,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "영남대학교의료원지원서양식.hwp",
+   "글자수": 8064,
+   "표수": 16,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 5,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "영천영대병원 지원서양식",
+   "url": "https://yumc.ac.kr:8443/bbs/FileDown.do?bbsId=news5&wr_id=360&num=2",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 72704,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "영남대학교영천병원지원서양식.hwp",
+   "글자수": 8315,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 7,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  }
+ ]
+}

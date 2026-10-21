@@ -1,0 +1,47 @@
+{
+ "id": "HS1134728956",
+ "source": "HS3",
+ "기관": "곽병원",
+ "제목": "물리치료사 및 구매관리팀 직원채용공고!",
+ "주소": "https://kwakh.co.kr/bbs/board.php?bo_table=c05&wr_id=35",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 1,
+ "쪽": {
+  "code": 200,
+  "바이트": 95758,
+  "끝주소": "https://kwakh.co.kr/bbs/board.php?bo_table=c05&wr_id=35",
+  "글자수": 4866,
+  "우리직군말": false,
+  "제목글자": "관리팀 직원 모집공고!"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://kwakh.co.kr/bbs/download.php?bo_table=c05&wr_id=35&no=0",
+   "열쇠": "https://kwakh.co.kr/bbs/download.php?bo_table=c05&wr_id=35&no=0",
+   "글": "(주소꼴)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "2026.09.30 15:10 곽병원 입사지원서 소정양식2026년.hwp (133.5K) + 27",
+   "url": "https://kwakh.co.kr/bbs/download.php?bo_table=c05&wr_id=35&no=0",
+   "갈래": null,
+   "code": 200,
+   "바이트": 4509,
+   "앞바이트": "<!doctyp",
+   "진짜형식": "HTML",
+   "받은이름": "2026.09.30 15_10 곽병원 입사지원서 소정양식2026년.hwp (133.5K) + 27",
+   "글자수": 0,
+   "표수": 0,
+   "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 4509바이트)",
+   "읽은꼴": "HTML",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0
+  }
+ ]
+}

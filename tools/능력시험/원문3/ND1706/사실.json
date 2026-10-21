@@ -1,0 +1,72 @@
+{
+ "id": "ND1706",
+ "source": "ND",
+ "기관": "세종광역치매센터",
+ "제목": "기간제근로자 채용 공고",
+ "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1706&page=1&searchfield=&searchword=",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 0,
+ "쪽": {
+  "code": 200,
+  "바이트": 59727,
+  "끝주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1706&page=1&searchfield=&searchword=",
+  "글자수": 5575,
+  "우리직군말": false,
+  "제목글자": "중앙치매센터"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202608240833571230.hwp&filename=202608240833571230.hwp&ori_filename=%ec%84%b8%ec%a2%85%ed%8a%b9%eb%b3%84%ec%9e%90%ec%b9%98%ec%8b%9c%ea%b4%91%ec%97%ad%ec%b9%98%eb%a7%a4%ec%84%bc%ed%84%b0+%ec%9c%a1%ec%95%84%ed%9c%b4%ec%a7%81+%eb%8c%80%ec%b2%b4%ec%9d%b8%eb%a0%a5+%ec%b1%84%ec%9a%a9+%ea%b3%b5%ea%b3%a0.hwp",
+   "열쇠": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202608240833571230.hwp&filename=202608240833571230.hwp&ori_filename=%ec%84%b8%ec%a2%85%ed%8a%b9%eb%b3%84%ec%9e%90%ec%b9%98%ec%8b%9c%ea%b4%91%ec%97%ad%ec%b9%98%eb%a7%a4%ec%84%bc%ed%84%b0+%ec%9c%a1%ec%95%84%ed%9c%b4%ec%a7%81+%eb%8c%80%ec%b2%b4%ec%9d%b8%eb%a0%a5+%ec%b1%84%ec%9a%a9+%ea%b3%b5%ea%b3%a0.hwp",
+   "글": "(onclick)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202608240833572496.hwp&filename=202608240833572496.hwp&ori_filename=%ec%a0%9c%ec%b6%9c%ec%84%9c%eb%a5%98+%ec%96%91%ec%8b%9d.hwp",
+   "열쇠": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202608240833572496.hwp&filename=202608240833572496.hwp&ori_filename=%ec%a0%9c%ec%b6%9c%ec%84%9c%eb%a5%98+%ec%96%91%ec%8b%9d.hwp",
+   "글": "(onclick)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "쪽",
+   "이름": "(onclick)",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202608240833571230.hwp&filename=202608240833571230.hwp&ori_filename=%ec%84%b8%ec%a2%85%ed%8a%b9%eb%b3%84%ec%9e%90%ec%b9%98%ec%8b%9c%ea%b4%91%ec%97%ad%ec%b9%98%eb%a7%a4%ec%84%bc%ed%84%b0+%ec%9c%a1%ec%95%84%ed%9c%b4%ec%a7%81+%eb%8c%80%ec%b2%b4%ec%9d%b8%eb%a0%a5+%ec%b1%84%ec%9a%a9+%ea%b3%b5%ea%b3%a0.hwp",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 32768,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "세종특별자치시광역치매센터 육아휴직 대체인력 채용 공고.hwp",
+   "글자수": 2739,
+   "표수": 18,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 3,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "(onclick)",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202608240833572496.hwp&filename=202608240833572496.hwp&ori_filename=%ec%a0%9c%ec%b6%9c%ec%84%9c%eb%a5%98+%ec%96%91%ec%8b%9d.hwp",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 32768,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "제출서류 양식.hwp",
+   "글자수": 2030,
+   "표수": 34,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 4,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  }
+ ]
+}

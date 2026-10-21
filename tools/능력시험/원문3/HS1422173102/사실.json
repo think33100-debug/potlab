@@ -1,0 +1,129 @@
+{
+ "id": "HS1422173102",
+ "source": "HS",
+ "기관": "제주대학교병원",
+ "제목": "제주대학교병원 휴직대체 계약직&#40;간호사, 업무지원_환경, 보건의료정보관리사, 응급구조사, 행정, 물리치료사&#41;, 단기간 계약직&#40;업무지원_영선&#41; 모집공고",
+ "주소": "https://www.jejunuh.co.kr/prog/rcrutPbanc/main/sub05_03_03_01/view.do?rcrutPbancNo=2653",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 0,
+ "쪽": {
+  "code": 200,
+  "바이트": 236554,
+  "끝주소": "https://www.jejunuh.co.kr/prog/rcrutPbanc/main/sub05_03_03_01/view.do?rcrutPbancNo=2653",
+  "글자수": 30255,
+  "우리직군말": true,
+  "제목글자": "\n\t\t\n\t\t\n\t\t\n\t\t\n\t\t 채용공고 "
+ },
+ "쪽첨부": [
+  {
+   "갈래": "JS주소",
+   "함수": "fn_egov_downFile",
+   "url": null,
+   "글": "(주소꼴)",
+   "원문": "javascript:fn_egov_downFile("
+  },
+  {
+   "갈래": "뷰어형",
+   "url": "https://www.jejunuh.co.kr/mayeye/FileViewer.do?atchFileId=FILE_000000005099Ql1&fileSn=0",
+   "열쇠": "https://www.jejunuh.co.kr/mayeye/FileViewer.do?atchFileId=FILE_000000005099Ql1&fileSn=0",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "뷰어형",
+   "url": "https://www.jejunuh.co.kr/mayeye/FileViewer.do?atchFileId=FILE_000000005100Wx5&fileSn=0",
+   "열쇠": "https://www.jejunuh.co.kr/mayeye/FileViewer.do?atchFileId=FILE_000000005100Wx5&fileSn=0",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "뷰어형",
+   "url": "https://www.jejunuh.co.kr/module/pdf.js/web/viewer.html?file=/thumbnail/rcrutPbanc/rcrutPbanc_202609290104075100.PDF",
+   "열쇠": "https://www.jejunuh.co.kr/module/pdf.js/web/viewer.html?file=/thumbnail/rcrutPbanc/rcrutPbanc_202609290104075100.PDF",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "뷰어속참파일",
+   "url": "https://www.jejunuh.co.kr/thumbnail/rcrutPbanc/rcrutPbanc_202609290104075100.PDF",
+   "열쇠": "https://www.jejunuh.co.kr/thumbnail/rcrutPbanc/rcrutPbanc_202609290104075100.PDF",
+   "글": "(주소꼴) (뷰어가 품은 참 파일)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "쪽",
+   "이름": "(주소꼴)",
+   "url": "https://www.jejunuh.co.kr/mayeye/FileViewer.do?atchFileId=FILE_000000005099Ql1&fileSn=0",
+   "갈래": "뷰어형",
+   "code": 200,
+   "바이트": 14199,
+   "앞바이트": "<!DOCTYP",
+   "진짜형식": "HTML",
+   "받은이름": "(주소꼴)",
+   "글자수": 0,
+   "표수": 0,
+   "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 14199바이트)",
+   "읽은꼴": "HTML",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "(주소꼴)",
+   "url": "https://www.jejunuh.co.kr/mayeye/FileViewer.do?atchFileId=FILE_000000005100Wx5&fileSn=0",
+   "갈래": "뷰어형",
+   "code": 200,
+   "바이트": 13415,
+   "앞바이트": "<!DOCTYP",
+   "진짜형식": "HTML",
+   "받은이름": "(주소꼴)",
+   "글자수": 0,
+   "표수": 0,
+   "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 13415바이트)",
+   "읽은꼴": "HTML",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "(주소꼴)",
+   "url": "https://www.jejunuh.co.kr/module/pdf.js/web/viewer.html?file=/thumbnail/rcrutPbanc/rcrutPbanc_202609290104075100.PDF",
+   "갈래": "뷰어형",
+   "code": 200,
+   "바이트": 19832,
+   "앞바이트": "<!DOCTYP",
+   "진짜형식": "HTML",
+   "받은이름": "(주소꼴)",
+   "글자수": 0,
+   "표수": 0,
+   "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 19832바이트)",
+   "읽은꼴": "HTML",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "(주소꼴) (뷰어가 품은 참 파일)",
+   "url": "https://www.jejunuh.co.kr/thumbnail/rcrutPbanc/rcrutPbanc_202609290104075100.PDF",
+   "갈래": "뷰어속참파일",
+   "code": 200,
+   "바이트": 143375,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "(주소꼴) (뷰어가 품은 참 파일)",
+   "글자수": 5472,
+   "표수": 30,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 5,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 1.8
+  }
+ ]
+}

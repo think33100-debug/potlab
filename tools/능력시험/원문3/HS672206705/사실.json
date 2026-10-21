@@ -1,0 +1,122 @@
+{
+ "id": "HS672206705",
+ "source": "HS3",
+ "기관": "부산광역시의료원",
+ "제목": "직원 모집 공고(물리치료사 - 기간제)",
+ "주소": "https://www.busanmc.or.kr/busanmc/index.php?pCode=recruit&mode=view&idx=112905",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 1,
+ "쪽": {
+  "code": 200,
+  "바이트": 78491,
+  "끝주소": "https://www.busanmc.or.kr/busanmc/index.php?pCode=recruit&mode=view&idx=112905",
+  "글자수": 4776,
+  "우리직군말": true,
+  "제목글자": "채용정보 - 직원 모집 공고(물리치료사 - 기간제) | 부산광역시의료원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "http://windows.microsoft.com/ko-kr/internet-explorer/download-ie",
+   "열쇠": "http://windows.microsoft.com/ko-kr/internet-explorer/download-ie",
+   "글": "Internet Explorer 업그레이드"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.busanmc.or.kr/_Data/Banner/1be3a8847902c283f2ed3f3f567e6e25.jpg",
+   "열쇠": "https://www.busanmc.or.kr/_Data/Banner/1be3a8847902c283f2ed3f3f567e6e25.jpg",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.busanmc.or.kr/busanmc/_Img/vis_service_1_1465896704.jpg",
+   "열쇠": "https://www.busanmc.or.kr/busanmc/_Img/vis_service_1_1465896704.jpg",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.busanmc.or.kr/busanmc/_Img/Content/wa_busanmc2026.pdf",
+   "열쇠": "https://www.busanmc.or.kr/busanmc/_Img/Content/wa_busanmc2026.pdf",
+   "글": "(주소꼴)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "wa_busanmc2026.pdf",
+   "url": "https://www.busanmc.or.kr/busanmc/_Img/Content/wa_busanmc2026.pdf",
+   "갈래": null,
+   "code": 200,
+   "바이트": 737617,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "wa_busanmc2026.pdf",
+   "글자수": 370,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 2.4
+  },
+  {
+   "어디서": "쪽",
+   "이름": "Internet Explorer 업그레이드",
+   "url": "http://windows.microsoft.com/ko-kr/internet-explorer/download-ie",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 97259,
+   "앞바이트": "....<!DO",
+   "진짜형식": "HTML",
+   "받은이름": "Internet Explorer 업그레이드",
+   "글자수": 0,
+   "표수": 0,
+   "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 97259바이트)",
+   "읽은꼴": "HTML",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "(주소꼴)",
+   "url": "https://www.busanmc.or.kr/_Data/Banner/1be3a8847902c283f2ed3f3f567e6e25.jpg",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 52133,
+   "앞바이트": "......Ex",
+   "진짜형식": "jpg",
+   "받은이름": "(주소꼴)",
+   "글자수": 97,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "jpg",
+   "쪽수": 1,
+   "OCR썼나": true,
+   "OCR필요쪽": 0,
+   "초": 1.4
+  },
+  {
+   "어디서": "쪽",
+   "이름": "(주소꼴)",
+   "url": "https://www.busanmc.or.kr/busanmc/_Img/vis_service_1_1465896704.jpg",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 45700,
+   "앞바이트": "......Ex",
+   "진짜형식": "jpg",
+   "받은이름": "(주소꼴)",
+   "글자수": 41,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "jpg",
+   "쪽수": 1,
+   "OCR썼나": true,
+   "OCR필요쪽": 0,
+   "초": 0.7
+  }
+ ]
+}

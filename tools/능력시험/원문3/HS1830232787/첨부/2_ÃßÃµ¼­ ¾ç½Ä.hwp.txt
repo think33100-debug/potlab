@@ -1,0 +1,27 @@
+![image](image_001.png)
+
+
+# 추천서
+
+▷추천대상자
+
+
+![image](image_002.jpg)
+
+<table>
+<tr><th>성명 / 성별</th><th></th><th>추천분야</th></tr>
+<tr><td>생년월일</td><td></td><td>연락처(H.P)</td></tr>
+<tr><td>주 소</td><td colspan="2"></td></tr>
+<tr><td>추천 사유<br>(200자 내외로 작성)</td><td colspan="2"></td></tr>
+<tr><td>추천 일자</td><td colspan="2">년 월 일</td></tr>
+</table>
+
+▷추 천 인
+
+| 성 명 | (인) |
+| --- | --- |
+| 현직종 |  |
+| 연락처 |  |
+| 추천대상자와의 관계 |  |
+
+- 포항세명기독병원 -

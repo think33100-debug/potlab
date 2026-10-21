@@ -1,0 +1,140 @@
+{
+ "id": "HS1830232787",
+ "source": "HS3",
+ "기관": "의료법인한성재단포항세명기독병원",
+ "제목": "작업치료사 채용공고",
+ "주소": "https://www.phgidok.com/main/custom/recruiter/?mode=read&idx=644",
+ "숨김": false,
+ "보류": false,
+ "DB첨부": 1,
+ "쪽": {
+  "code": 200,
+  "바이트": 51236,
+  "끝주소": "https://www.phgidok.com/main/custom/recruiter/?mode=read&idx=644",
+  "글자수": 5317,
+  "우리직군말": true,
+  "제목글자": "작업치료사 채용공고 :: 인재채용 : 포항세명기독병원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=download&aid=42&fid=4bf8871cfb5eaf1c0dee8c83f364162e:236816",
+   "열쇠": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=download&aid=42&fid=4bf8871cfb5eaf1c0dee8c83f364162e:236816",
+   "글": "추천서 양식 다운로드"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=download&aid=53&fid=facdd27d03a738cdabcdbbed62f2323a:241047",
+   "열쇠": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=download&aid=53&fid=facdd27d03a738cdabcdbbed62f2323a:241047",
+   "글": "개인정보 수집ㆍ이용 동의서"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=download&aid=24&fid=6fc61894f227fc0847dbea8097f0c395:231295",
+   "열쇠": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=download&aid=24&fid=6fc61894f227fc0847dbea8097f0c395:231295",
+   "글": "채용서류 반환 및 파기 청구 안내"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=recruit&aid=644&fid=e53d7c14e226f88590380daa9d570817:256675",
+   "열쇠": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=recruit&aid=644&fid=e53d7c14e226f88590380daa9d570817:256675",
+   "글": "채용 공고 - 작업치료001"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.phgidok.com/Ivyimages/site/open_content/main/safe.pdf",
+   "열쇠": "https://www.phgidok.com/Ivyimages/site/open_content/main/safe.pdf",
+   "글": "안전보건경영방침"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.phgidok.com/main/custom/recruiter/recruit/644/screen_8510_ed2b4ae20628406bb79810eaee8c2e2e.jpg",
+   "열쇠": "https://www.phgidok.com/main/custom/recruiter/recruit/644/screen_8510_ed2b4ae20628406bb79810eaee8c2e2e.jpg",
+   "글": "(onclick)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "http://www.phgidok.com/_Lib/modulesext/XNMDirectView.php?path=recruit/644/8510_ed2b4ae20628406bb79810eaee8c2e2e.jpg",
+   "열쇠": "http://www.phgidok.com/_Lib/modulesext/XNMDirectView.php?path=recruit/644/8510_ed2b4ae20628406bb79810eaee8c2e2e.jpg",
+   "글": "(주소꼴)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "안전보건경영방침",
+   "url": "https://www.phgidok.com/Ivyimages/site/open_content/main/safe.pdf",
+   "갈래": null,
+   "code": 200,
+   "바이트": 1392838,
+   "앞바이트": "%PDF-1.5",
+   "진짜형식": "pdf",
+   "받은이름": "안전보건경영방침",
+   "글자수": 784,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 1,
+   "OCR썼나": true,
+   "OCR필요쪽": 1,
+   "초": 21.4
+  },
+  {
+   "어디서": "쪽",
+   "이름": "추천서 양식 다운로드",
+   "url": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=download&aid=42&fid=4bf8871cfb5eaf1c0dee8c83f364162e:236816",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 105984,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "ÃßÃµ¼­ ¾ç½Ä.hwp",
+   "글자수": 426,
+   "표수": 5,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0.3
+  },
+  {
+   "어디서": "쪽",
+   "이름": "개인정보 수집ㆍ이용 동의서",
+   "url": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=download&aid=53&fid=facdd27d03a738cdabcdbbed62f2323a:241047",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 74752,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "È¨ÆäÀÌÁö °Ô½Ã   Ã¤¿ë°ü·Ã °³ÀÎÁ¤º¸ ¼öÁý ÀÌ¿ë µ¿ÀÇ¼­(ÀÀ½ÃÀÚ¿ë).hwp",
+   "글자수": 1136,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "채용서류 반환 및 파기 청구 안내",
+   "url": "https://www.phgidok.com/_Lib/modulesext/XNMDownload.php?board=download&aid=24&fid=6fc61894f227fc0847dbea8097f0c395:231295",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 98304,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "Ã¤¿ë¼­·ù ¹ÝÈ¯Ã»±¸¼­.hwp",
+   "글자수": 911,
+   "표수": 2,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  }
+ ]
+}

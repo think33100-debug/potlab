@@ -1,0 +1,47 @@
+{
+ "id": "HS802239364",
+ "source": "HS3",
+ "기관": "광주기독병원",
+ "제목": "물리치료사(육아휴직대체) 채용공고",
+ "주소": "https://www.kch.or.kr/user/board/view/board_cd/notice/wr_no/992",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 1,
+ "쪽": {
+  "code": 200,
+  "바이트": 40764,
+  "끝주소": "https://www.kch.or.kr/user/board/view/board_cd/notice/wr_no/992",
+  "글자수": 3813,
+  "우리직군말": true,
+  "제목글자": "공지사항 - 물리치료사(육아휴직대체) 채용공고 | 광주기독병원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.kch.or.kr/user/board/download/board_cd/notice/wr_no/992/seq_no/1",
+   "열쇠": "https://www.kch.or.kr/user/board/download/board_cd/notice/wr_no/992/seq_no/1",
+   "글": "물리치료사 채용공고(26.9.29)계약직.hwp (421.0KB)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "물리치료사 채용공고(26.9.29)계약직.hwp (421.0KB)",
+   "url": "https://www.kch.or.kr/user/board/download/board_cd/notice/wr_no/992/seq_no/1",
+   "갈래": null,
+   "code": 200,
+   "바이트": 431616,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "물리치료사 채용공고(26.9.29)계약직.hwp",
+   "글자수": 6066,
+   "표수": 8,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 7,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  }
+ ]
+}

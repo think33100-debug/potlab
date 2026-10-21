@@ -1,0 +1,159 @@
+사 진
+( 3 × 4 )
+
+
+# 이력서
+
+<table>
+<tr><th rowspan="5">성 명</th><th>한 글</th><th colspan="2"></th><th></th><th rowspan="2">지원구분</th><th rowspan="2">□신입 □경력</th></tr>
+<tr><td rowspan="2">한 자</td><td colspan="2" rowspan="2"></td><td></td></tr>
+<tr><td></td><td rowspan="2">지원직종</td><td rowspan="2"></td></tr>
+<tr><td rowspan="2">영 문</td><td colspan="2" rowspan="2"></td><td></td></tr>
+<tr><td></td><td rowspan="2">호주와의<br>관계</td><td rowspan="2">의 ( )</td></tr>
+<tr><td>생년월일</td><td colspan="2">년 월 일</td><td>만 세</td><td></td></tr>
+</table>
+
+<table>
+<tr><th rowspan="3">연락처</th><th>현주소</th><th colspan="3">□□□-□□□</th></tr>
+<tr><td>전화번호</td><td>( ) -</td><td>실거주지</td><td></td></tr>
+<tr><td>휴대폰번호</td><td>- -</td><td>E-mail</td><td>@</td></tr>
+</table>
+
+<table>
+<tr><th rowspan="4">학력사항</th><th>기 간</th><th>학교</th><th>전 공</th><th>소재지</th><th>기 타</th></tr>
+<tr><td>년 월 ～ 년 월</td><td>고등학교</td><td></td><td></td><td>□ 인문 □ 실업 □ 기타</td></tr>
+<tr><td>년 월 ～ 년 월</td><td>대학교<br>대학</td><td>학과</td><td></td><td>□ 졸업 □ 졸업예정</td></tr>
+<tr><td>년 월 ～ 년 월</td><td>대학교<br>대학원</td><td>학과</td><td></td><td>□ 편입 □ 복수전공 □ 대학원</td></tr>
+</table>
+
+<table>
+<tr><th rowspan="6">경력</th><th>근무처</th><th>근무기간</th><th>직 위</th><th>담당업무</th><th>연 봉</th><th>퇴직사유</th></tr>
+<tr><td></td><td>년 월 ～ 년 월</td><td></td><td></td><td>만원</td><td></td></tr>
+<tr><td></td><td>년 월 ～ 년 월</td><td></td><td></td><td>만원</td><td></td></tr>
+<tr><td></td><td>년 월 ～ 년 월</td><td></td><td></td><td>만원</td><td></td></tr>
+<tr><td></td><td>년 월 ～ 년 월</td><td></td><td></td><td>만원</td><td></td></tr>
+<tr><td></td><td>년 월 ～ 년 월</td><td></td><td></td><td>만원</td><td></td></tr>
+</table>
+
+<table>
+<tr><th rowspan="3">자격면허</th><th>자격․면허증</th><th>취득일자</th><th></th><th>자격․면허증</th><th>취득일자</th></tr>
+<tr><td></td><td>. .</td><td></td><td></td><td>. .</td></tr>
+<tr><td></td><td>. .</td><td></td><td></td><td>. .</td></tr>
+</table>
+
+특기사항
+
+<table>
+<tr><th rowspan="2">병역</th><th>군 별</th><th></th><th>계 급</th><th></th><th>제대구분</th><th>□만기 □의가사 □면제 □미필</th></tr>
+<tr><td>복무기간</td><td colspan="3">년 월 일 ～ 년 월 일<br>( 년 개월)</td><td>의가사/면제<br>사 유</td><td></td></tr>
+</table>
+
+<table>
+<tr><th rowspan="6">기타사항</th><th>기간</th><th>내용</th><th>비고</th><th rowspan="6">보훈구분</th><th rowspan="6">□대상 □비대상</th></tr>
+<tr><td></td><td></td><td></td></tr>
+<tr><td></td><td></td><td></td></tr>
+<tr><td></td><td></td><td></td></tr>
+<tr><td></td><td></td><td></td></tr>
+<tr><td></td><td></td><td></td></tr>
+</table>
+
+년 월 일 지원자 (서명)
+
+
+# 영남대학교의료원
+
+자기소개서
+1. 자신의 성장과정과 성격의 장·단점을 기술
+2. 학창시절의 활동과 자격 및 특기사항을 기술
+
+자기소개서
+3. 영남대학교의료원 지원 동기 및 장래 계획을 기술
+4. 기타 사항을 기술
+
+<table>
+<tr><th colspan="27">지 원 서<br>접수번호</th></tr>
+<tr><td colspan="2" rowspan="2">성 명</td><td colspan="4">한 글</td><td colspan="6"></td><td colspan="6" rowspan="2">지원구분</td><td colspan="9" rowspan="2">□신입 □경력</td></tr>
+<tr><td colspan="4">한 자</td><td colspan="6"></td></tr>
+<tr><td colspan="2">생년월일</td><td colspan="10">년 월 일 (만 세)</td><td colspan="6">지원직종</td><td colspan="9"></td></tr>
+<tr><td colspan="2" rowspan="2">연락처</td><td colspan="5">전화번호</td><td colspan="5"></td><td colspan="6">휴대폰</td><td colspan="9"></td></tr>
+<tr><td colspan="3">E-mail</td><td colspan="22"></td></tr>
+<tr><td rowspan="4">학력사항</td><td colspan="10">기 간</td><td colspan="11">학 교</td><td colspan="5">전 공</td></tr>
+<tr><td colspan="10">년 월 ∼ 년 월</td><td colspan="11"></td><td colspan="5"></td></tr>
+<tr><td colspan="10">년 월 ∼ 년 월</td><td colspan="11"></td><td colspan="5"></td></tr>
+<tr><td colspan="10">년 월 ∼ 년 월</td><td colspan="11"></td><td colspan="5"></td></tr>
+<tr><td rowspan="4">경력사항</td><td colspan="3">근무처</td><td colspan="10">근무기간</td><td colspan="9">직위</td><td colspan="3">담당업무</td><td>연봉</td></tr>
+<tr><td colspan="3"></td><td colspan="10">년 월 ∼ 년 월</td><td colspan="9"></td><td colspan="3"></td><td></td></tr>
+<tr><td colspan="3"></td><td colspan="10">년 월 ∼ 년 월</td><td colspan="9"></td><td colspan="3"></td><td></td></tr>
+<tr><td colspan="3"></td><td colspan="10">년 월 ∼ 년 월</td><td colspan="9"></td><td colspan="3"></td><td></td></tr>
+<tr><td rowspan="2">자격면허</td><td colspan="8">자격․면허증</td><td colspan="5">취득일자</td><td colspan="11">자격면허증</td><td colspan="2">취득일자</td></tr>
+<tr><td colspan="8"></td><td colspan="5"></td><td colspan="11"></td><td colspan="2"></td></tr>
+<tr><td>병 역</td><td colspan="2">군별</td><td colspan="5"></td><td colspan="2">계급</td><td colspan="3"></td><td colspan="6">제대구분</td><td colspan="8">□만기 □의가사 □면제 □미필</td></tr>
+<tr><td colspan="15"></td><td></td><td colspan="11"></td></tr>
+<tr><td colspan="15" rowspan="6">접 수 증<br>번호 성명<br>본원에 지원서를 접수하였음을 확인합니다.<br>20 년 월 일<br>영 남 대 학 교 의 료 원 장<br>※ 우측 수험표에 성명, 출신학교 기재 및 사진을 부착하여 주시기<br>바랍니다.</td><td colspan="2" rowspan="5"></td><td colspan="7">수험번호</td><td colspan="3"></td></tr>
+<tr><td colspan="7">성 명</td><td colspan="3"></td></tr>
+<tr><td colspan="7">출신학교</td><td colspan="3"></td></tr>
+<tr><td colspan="3"></td><td colspan="7"></td></tr>
+<tr><td colspan="3"></td><td colspan="7">3×4㎝ 사진</td></tr>
+<tr><td></td><td colspan="5"></td><td colspan="6"></td></tr>
+</table>
+
+개인정보 수집・이용 및 제공 동의서
+
+영남대학교의료원은 「근로기준법」, 「개인정보보호법」 등 관련 법령에 의거하여 개인정보를 수집・이용 및 제공함에 있어 동의를 받고 있습니다. 귀하는 수집된 개인정보에 대하여 열람, 정정, 삭제, 파기 및 처리 정지를 요구할 수 있습니다.
+
+◆ 개인정보의 수집·이용(필수)
+
+<table>
+<tr><th colspan="2">개인정보 수집・이용 목적</th><th>개인정보 항목</th></tr>
+<tr><td colspan="2" rowspan="2">• 인사관리, 급여지급 및 연말정산 등 각종 인사/재무 업무 수행</td><td>1. 인사정보<br>- 성명, 주민등록번호, 신체정보(신체사항), 사진, 전화번호, 휴대전화번호, 이메일, 주소, 학력사항, 보훈여부, 장애구분, 혈액형, 경력사항, 병역사항, 어학능력사항, 면허 및 자격증, 기타 포상 경력, 성적, 취미, 특기, 보훈여부, 장애구분</td></tr>
+<tr><td>2. 가족정보<br>- 성명, 관계, 주민등록번호, 직업, 학력</td></tr>
+<tr><td>개인정보<br>보유・이용・파기</td><td colspan="2">귀하의 개인정보 처리에 관한 동의 철회 의사를 표시한 때부터 지체 없이 파기합니다. 근로기준법, 소득세법, 국민연금법, 국민건강보험법, 고용보험법, 산업재해보상보험법, 개인정보보호법 및 기타 관련 법령기준에 따라 보유하며 퇴사 시 개인정보는 즉시 파기합니다. 다만, 경력증명서 발급 및 기타 업무처리를 위해 일정기간 동안 보관할 수 있습니다.</td></tr>
+<tr><td>동의거부 권리와<br>불이익</td><td colspan="2">귀하가 개인정보의 처리에 관한 동의를 거부할 권리가 있으며, 개인정보 처리에 동의 하지 않을 경우 인사, 급여처리 등에 대한 행정 서비스 제공이 어려울 수 있습니다.</td></tr>
+</table>
+
+\* 위 항목은 근로기준법 제48조, 소득세법 제127조, 4대보험(국민연금법, 국민건강보험법, 고용보험법, 산업재해보상보험법) 등 개인정보보호법 제15조 제1항 제2호, 제4호에 의거하여 직원의 인사, 급여 등 업무처리를 위해 정보주체의 동의를 받지 않고 개인정보를 수집・이용할 수 있습니다.
+
+<table>
+<tr><th colspan="3">◆ 개인정보의 수집·이용(선택)</th><th>전체선택</th><th>□</th><th>□</th></tr>
+<tr><td colspan="2">개인정보 수집・이용 목적</td><td colspan="2">개인정보 항목</td><td>동의</td><td>동의안함</td></tr>
+<tr><td colspan="2" rowspan="2">• 채용확정 후 급여지급, 복리후생 제공 등 각종 인사/총무 업무 수행 지원 및 평가</td><td colspan="2">1. 인사정보<br>- 보훈여부, 장애구분, 성적, 취미, 특기</td><td>□</td><td>□</td></tr>
+<tr><td colspan="2">2. 가족정보<br>- 직업, 학력</td><td>□</td><td>□</td></tr>
+<tr><td>개인정보<br>보유・이용・파기</td><td colspan="5">귀하의 개인정보 처리에 관한 동의 철회 의사를 표시한 때부터 지체 없이 파기합니다. 개인정보보호법 및 기타 관련 법령기준에 따라 보유하며 퇴사 시 개인정보는 즉시 파기합니다. 다만, 복리후생을 위해 일정기간 동안 보관할 수 있습니다.</td></tr>
+<tr><td>동의거부 권리와<br>불이익</td><td colspan="5">귀하가 개인정보의 처리에 관한 동의를 거부할 권리가 있으며, 개인정보 처리에 동의 하지 않을 경우 인사, 급여처리 등에 대한 행정 서비스 제공이 어려울 수 있습니다.</td></tr>
+</table>
+
+개인정보의 수집·이용(선택)에 동의함□ 개인정보의 수집·이용(선택)에 동의하지 않음□
+
+◆ 개인정보의 제3자 제공
+
+| 개인정보를 제공받는 자 | 영남대학교 의학도서관 |
+| --- | --- |
+| 개인정보를 제공받는 자의 개인정보 이용 목적 | 도서대여 및 각종 서비스 |
+| 제공하는 개인정보 항목 | 성명, 사번, 소속, 휴대전화번호 |
+| 제공받는 자의 개인정보 보유 및 이용기간 | 재직기간 및 퇴사 후 5년 후 즉시 파기 |
+| 동의거부 권리와 불이익 | 관련 서비스를 위한 개인정보 제3자 제공 동의를 거부하실 수 있으나, 도서관 각종 서비스 이용에 제한이 있을 수 있습니다. |
+
+개인정보 제3자 제공에 동의함□ 개인정보 제3자 제공에 동의하지 않음□
+
+| 개인정보를 제공받는 자 | 평판조회 요청기관 |
+| --- | --- |
+| 개인정보를 제공받는 자의 개인정보 이용 목적 | 평판 조회(지원자의 평판 조회) |
+| 제공하는 개인정보 항목 | 성명, 생년월일, 근무기간, 근무부서, 직위, 근무형태, 퇴직사유, 상벌사항 |
+| 제공받는 자의 개인정보 보유 및 이용기간 | 정보제공 목적 달성 후 즉시 파기 |
+| 동의거부 권리와 불이익 | 평판 조회를 위한 개인정보 제3자 제공 동의를 거부하실 수 있으나, 관련 기관의 임용 절차에 제한이 있을 수 있습니다. |
+
+개인정보 제3자 제공에 동의함□ 개인정보 제3자 제공에 동의하지 않음□
+
+| ◆ 민감정보(보훈여부, 장애여부)의 수집・이용에 동의하십니까?<br>(개인정보보호법 제23조) | 동의 | □ | 동의 안함 | □ |
+| --- | --- | --- | --- | --- |
+
+| 개인정보의 수집·이용·제공에 대한 동의 철회 | 개인정보의 수집, 이용, 제공에 대해 귀하께서 동의하신 내용을 언제든지 철회하실 수 있으며, 의료원 인사팀(053-620-4633\~4)로 동의 철회를 요청하시면 개인정보의 파기 등 필요한 조치를 취하겠습니다. |
+| --- | --- |
+
+<table>
+<tr><th colspan="4">본인은 『개인정보보호법』 등 관련 법규에 의거하여 위와 같이 개인정보 수집·이용·제공에 대한 내용을 충분히 숙지하였으며, 상기 내용에 대하여 동의합니다.</th></tr>
+<tr><td>작성일자</td><td>20 년 월 일</td><td>성명</td><td>(서명)</td></tr>
+</table>
+
+
+![image](image_001.bmp)

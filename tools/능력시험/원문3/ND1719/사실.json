@@ -1,0 +1,72 @@
+{
+ "id": "ND1719",
+ "source": "ND2",
+ "기관": "도봉구치매안심센터",
+ "제목": "[도봉구치매안심센터] 직원 채용 공고",
+ "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1719",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 0,
+ "쪽": {
+  "code": 200,
+  "바이트": 59556,
+  "끝주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1719",
+  "글자수": 5545,
+  "우리직군말": false,
+  "제목글자": "중앙치매센터"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202609280853242715.hwp&filename=202609280853242715.hwp&ori_filename=2026+%ec%a7%80%ec%9b%90%ec%84%9c.hwp",
+   "열쇠": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202609280853242715.hwp&filename=202609280853242715.hwp&ori_filename=2026+%ec%a7%80%ec%9b%90%ec%84%9c.hwp",
+   "글": "(onclick)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202609281017101359.hwp&filename=202609281017101359.hwp&ori_filename=%eb%8f%84%eb%b4%89%ea%b5%ac%ec%b9%98%eb%a7%a4%ec%95%88%ec%8b%ac%ec%84%bc%ed%84%b0+%ec%a7%81%ec%9b%90+%ec%b1%84%ec%9a%a9+%ea%b3%b5%ea%b3%a0%eb%ac%b8.hwp",
+   "열쇠": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202609281017101359.hwp&filename=202609281017101359.hwp&ori_filename=%eb%8f%84%eb%b4%89%ea%b5%ac%ec%b9%98%eb%a7%a4%ec%95%88%ec%8b%ac%ec%84%bc%ed%84%b0+%ec%a7%81%ec%9b%90+%ec%b1%84%ec%9a%a9+%ea%b3%b5%ea%b3%a0%eb%ac%b8.hwp",
+   "글": "(onclick)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "쪽",
+   "이름": "(onclick)",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202609280853242715.hwp&filename=202609280853242715.hwp&ori_filename=2026+%ec%a7%80%ec%9b%90%ec%84%9c.hwp",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 59904,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "2026 지원서.hwp",
+   "글자수": 3456,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 3,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "(onclick)",
+   "url": "https://www.nid.or.kr/download/download.aspx?path=%2fsupport_notice%2f202609281017101359.hwp&filename=202609281017101359.hwp&ori_filename=%eb%8f%84%eb%b4%89%ea%b5%ac%ec%b9%98%eb%a7%a4%ec%95%88%ec%8b%ac%ec%84%bc%ed%84%b0+%ec%a7%81%ec%9b%90+%ec%b1%84%ec%9a%a9+%ea%b3%b5%ea%b3%a0%eb%ac%b8.hwp",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 51200,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "도봉구치매안심센터 직원 채용 공고문.hwp",
+   "글자수": 2092,
+   "표수": 13,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 2,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  }
+ ]
+}

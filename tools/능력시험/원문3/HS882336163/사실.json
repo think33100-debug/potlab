@@ -1,0 +1,116 @@
+{
+ "id": "HS882336163",
+ "source": "HS3",
+ "기관": "경북대학교병원",
+ "제목": "2026년 제4차 정규직 공개채용 공고",
+ "주소": "https://knuh.kr/content/04information/02_01.asp?proc_type=view&b_num=7513&rtn_url=%2Fcontent%2F04information%2F02%5F01%2Easp",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 4,
+ "쪽": {
+  "code": 200,
+  "바이트": 78532,
+  "끝주소": "https://knuh.kr/content/04information/02_01.asp?proc_type=view&b_num=7513&rtn_url=%2Fcontent%2F04information%2F02%5F01%2Easp",
+  "글자수": 8955,
+  "우리직군말": true,
+  "제목글자": "채용공고 &gt; 정보마당 경북대학교병원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://knuh.kr/content/06introduce/knuh_pamphlet2021.pdf",
+   "열쇠": "https://knuh.kr/content/06introduce/knuh_pamphlet2021.pdf",
+   "글": "홍보책자"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://knuh.kr/img/09system/%EC%9A%94%EC%96%91%EA%B8%89%EC%97%AC%EC%9D%98%EB%A2%B0%EC%84%9C1.pdf",
+   "열쇠": "https://knuh.kr/img/09system/%EC%9A%94%EC%96%91%EA%B8%89%EC%97%AC%EC%9D%98%EB%A2%B0%EC%84%9C1.pdf",
+   "글": "진료의뢰서양식다운로드"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://knuh.kr/data/banner3/260306.jpg",
+   "열쇠": "https://knuh.kr/data/banner3/260306.jpg",
+   "글": "(주소꼴)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "홍보책자",
+   "url": "https://knuh.kr/content/06introduce/knuh_pamphlet2021.pdf",
+   "갈래": null,
+   "code": 200,
+   "바이트": 43665174,
+   "앞바이트": "%PDF-1.6",
+   "진짜형식": "pdf",
+   "받은이름": "홍보책자",
+   "글자수": 14141,
+   "표수": 55,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 9,
+   "OCR썼나": false,
+   "OCR필요쪽": 1,
+   "초": 139.2
+  },
+  {
+   "어디서": "DB",
+   "이름": "2026년 제4차 정규직 공개채용 공고.pdf",
+   "url": "https://knuh.kr/content/board/down.asp?a_num=98296485&b_num=7513&f_num=1",
+   "갈래": null,
+   "code": 200,
+   "바이트": 634688,
+   "앞바이트": "%PDF-1.6",
+   "진짜형식": "pdf",
+   "받은이름": "2026년 제4차 정규직 공개채용 공고.pdf",
+   "글자수": 26090,
+   "표수": 73,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 19,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 21.9
+  },
+  {
+   "어디서": "DB",
+   "이름": "입사지원서 작성 시 안내 및 유의사항.pdf",
+   "url": "https://knuh.kr/content/board/down.asp?a_num=98296485&b_num=7513&f_num=2",
+   "갈래": null,
+   "code": 200,
+   "바이트": 140638,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "입사지원서 작성 시 안내 및 유의사항.pdf",
+   "글자수": 2364,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 3,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 2.7
+  },
+  {
+   "어디서": "DB",
+   "이름": "진료의뢰서양식 다운로드",
+   "url": "https://knuh.kr/img/09system/%EC%9A%94%EC%96%91%EA%B8%89%EC%97%AC%EC%9D%98%EB%A2%B0%EC%84%9C1.pdf",
+   "갈래": null,
+   "code": 200,
+   "바이트": 294575,
+   "앞바이트": "%PDF-1.7",
+   "진짜형식": "pdf",
+   "받은이름": "진료의뢰서양식 다운로드",
+   "글자수": 3170,
+   "표수": 6,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 2,
+   "OCR썼나": false,
+   "OCR필요쪽": 2,
+   "초": 43
+  }
+ ]
+}

@@ -1,0 +1,1041 @@
+{
+ "만든때": "2026-10-21T15:44:27.446Z",
+ "규칙": "최근 30일 · 1층 기관(견줄이름 ↔ 일층병원_구멍) · 숨김·보류 포함 · 출처별 골고루 · 첨부 있는 것 먼저",
+ "몇개": 30,
+ "표본": [
+  {
+   "id": "HS1830232787",
+   "source": "HS3",
+   "기관": "의료법인한성재단포항세명기독병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": false,
+   "제목": "작업치료사 채용공고",
+   "주소": "https://www.phgidok.com/main/custom/recruiter/?mode=read&idx=644",
+   "첨부": [
+    {
+     "url": "https://www.phgidok.com/Ivyimages/site/open_content/main/safe.pdf",
+     "kind": "공고문",
+     "name": "안전보건경영방침",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 2673,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "304248",
+   "source": "AL",
+   "기관": "부산대학교병원",
+   "꼴표": 4,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년도 일반직(행정, 보건, 시설, 원무직) 신규직원 블라인드 공개채용 모집 공고(양산)",
+   "주소": "https://pnuyh.recruiter.co.kr/career/jobs/123364",
+   "첨부": [
+    {
+     "url": "https://infra1-static.recruiter.co.kr/builder/2026/08/25/f1e05d18-cf66-4954-90b8-76d54a8c5736.zip",
+     "kind": "공고문",
+     "name": "공고문 및 첨부파일_2026 일반직.zip",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "경남",
+    "고용형태": "정규직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-09-08",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "ND1710",
+   "source": "ND",
+   "기관": "용산구치매안심센터",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "직원 채용 공고",
+   "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1710&page=1&searchfield=&searchword=",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "서울",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": 4,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": "- 보건, 의료, 복지, 행정 분야 등 학사학위 소지자 아래 항목 중 1개 이상 소지자 간호사 면허증 소지자 작업치료사 면허증 소지자 사회복지사 1급 자격증 소지자 임상심리사 자격증 소지자 음악, 미술, 운동 등 자격증 소지자 우대조건 - 치매관련분야 근무경력자 - 보건 분야 경력, 치매전문교육 이수자 - 문서 활용 가능자 - 실운전 가능자(운전면허 1종, 스타렉스)"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS1422173102",
+   "source": "HS",
+   "기관": "제주대학교병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "제주대학교병원 휴직대체 계약직&#40;간호사, 업무지원_환경, 보건의료정보관리사, 응급구조사, 행정, 물리치료사&#41;, 단기간 계약직&#40;업무지원_영선&#41; 모집공고",
+   "주소": "https://www.jejunuh.co.kr/prog/rcrutPbanc/main/sub05_03_03_01/view.do?rcrutPbancNo=2653",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "제주 제주시",
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-06",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "ND1719",
+   "source": "ND2",
+   "기관": "도봉구치매안심센터",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "[도봉구치매안심센터] 직원 채용 공고",
+   "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1719",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": null,
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-06",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "CE80111",
+   "source": "CE2",
+   "기관": "강원특별자치도강릉의료원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "공고2026-69호 보건직 8급 작업치료사",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80111",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "강원도 강릉시 경강로 2007",
+    "고용형태": "일반정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": "3000만원 이상",
+    "접수마감": "2026-10-12",
+    "지원자격": "작업치료사 면허증"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNK160012609290028",
+   "source": "WN",
+   "기관": "(재)광주기독병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "광주기독병원 재활치료실 물리치료사(육아휴직대체) ...",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K160012609290028&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "광주 남구",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": "연봉 3047만원~3312만원",
+    "접수마감": "2026-10-08",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "JF92494",
+   "source": "JF",
+   "기관": "한양대학교구리병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "재활의학과 작업치료사 - 2025년 신규직원(정규직) 모집",
+   "주소": "https://hyumcguri.recruiter.co.kr/career/jobs/92494",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2025-12-28",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNK141222609010021",
+   "source": "WN2",
+   "기관": "경상북도립김천노인전문요양병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": false,
+   "제목": "경북도립김천노인전문요양병원 물리치료사 육아휴직 (대체인력) 모집합니다.",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K141222609010021&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "경북 김천시 어모면 신애길 100-10",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": "월급2,400,000원 이상 ~ 2,400,000원 이하, 면접 후 재조정 가능",
+    "접수마감": "2026-10-31",
+    "지원자격": "자격 물리치료사 · 학력 학력무관"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "305065",
+   "source": "AL2",
+   "기관": "부산대학교병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "계약직(연구직,보건직,원무직) 공개채용 모집 공고",
+   "주소": "https://job.alio.go.kr/recruitview.do?idx=305065",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "부산",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-01",
+    "지원자격": "[연구직(연구직-임상시험센터)]: 간호사 면허증 소지자, 임상시험종사자교육(신규,심화,보수 중 1개수료)이수자(신규과정은 선이수 20시간 수료시 지원가능)(위 자격 모두 충족)\r\n[방사선사(보건직-영상의학과)]: 방사선사 면허증 소지자, 야간 및 교대근무 가능자(위 자격 모두 충족)\r\n[원무직(원무직-영상의학과)]: 병원급 이상 의료기관 유경험자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS882336163",
+   "source": "HS3",
+   "기관": "경북대학교병원",
+   "꼴표": 2,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 제4차 정규직 공개채용 공고",
+   "주소": "https://knuh.kr/content/04information/02_01.asp?proc_type=view&b_num=7513&rtn_url=%2Fcontent%2F04information%2F02%5F01%2Easp",
+   "첨부": [
+    {
+     "url": "https://knuh.kr/content/06introduce/knuh_pamphlet2021.pdf",
+     "kind": "공고문",
+     "name": "홍보책자",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://knuh.kr/content/board/down.asp?a_num=98296485&b_num=7513&f_num=1",
+     "kind": "공고문",
+     "name": "2026년 제4차 정규직 공개채용 공고.pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://knuh.kr/content/board/down.asp?a_num=98296485&b_num=7513&f_num=2",
+     "kind": "공고문",
+     "name": "입사지원서 작성 시 안내 및 유의사항.pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://knuh.kr/img/09system/%EC%9A%94%EC%96%91%EA%B8%89%EC%97%AC%EC%9D%98%EB%A2%B0%EC%84%9C1.pdf",
+     "kind": "공고문",
+     "name": "진료의뢰서양식 다운로드",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 4302,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "12:00:00",
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-09-16",
+    "지원자격": "(필수1) 물리치료사 면허증 소지자 (필수2) 중추신경계발달재활치료 수가 산정에 필요한 교육(NDT, PNF 또는 Bobath 등) 중 1개 과정을 120시간 이상 이수한 자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "304022",
+   "source": "AL",
+   "기관": "부산대학교병원",
+   "꼴표": 4,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년도 8월 블라인드 공개채용 계약직(간호직, 보건직, 행정직, 간호조무직, 원무직, 업무(시설)지원직) 모집 공고",
+   "주소": "https://pnuyh.recruiter.co.kr/career/jobs/125426",
+   "첨부": [
+    {
+     "url": "https://infra1-static.recruiter.co.kr/builder/2026/08/19/7f8ca1e7-a81c-40ff-8ab3-2b3af3a0ad53.zip",
+     "kind": "공고문",
+     "name": "202608 계약직공고문+직무설명서+지원서작성및유의사항+이의신청서+반환청구서.zip",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "경남",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-09-03",
+    "지원자격": "[원무직_업무지원]해당사항없음,[간호직]간호사 면허증 소지자로 보험심사 경력(종합병원급 이상) 2년 이상,[보건직_방사선사]방사선사 면허증 소지자, [보건직_임상병리사(내분비대사내과,진단검사의학과,뇌신경센터]임상병리사 면허증 소지자, [보건직_작업치료사]작업치료사 면허증 소지자,[보건직_의공기사]의공기사 자격증 소지자,[행정직_일반행정]워드프로세서 또는 컴퓨터활용능력 자격증 소지자,[간호조무직]간호조무사 자격증 소지자,[업무(시설)지원직_전기]국가기술자격법 시행규칙[별표 2]에 의한 병원 업무 구분 중 전기 관련 분야 자격증 소지자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "ND1706",
+   "source": "ND",
+   "기관": "세종광역치매센터",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "기간제근로자 채용 공고",
+   "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1706&page=1&searchfield=&searchword=",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "세종",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "JF129626",
+   "source": "JF",
+   "기관": "가톨릭관동대학교 국제성모병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "재활치료팀 (계약직) 성인 및 소아 작업치료사 모집",
+   "주소": "https://ish-recruiter.recruiter.co.kr/career/jobs/129626",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-06",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNK160042610150015",
+   "source": "WN2",
+   "기관": "광주센트럴병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "물리치료사 재활 써티 이수자 채용 공고(정규 0명...",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K160042610150015&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "광주 광산구 수완로 6",
+    "고용형태": "정규직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-11-14",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-15"
+  },
+  {
+   "id": "HS802239364",
+   "source": "HS3",
+   "기관": "광주기독병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "물리치료사(육아휴직대체) 채용공고",
+   "주소": "https://www.kch.or.kr/user/board/view/board_cd/notice/wr_no/992",
+   "첨부": [
+    {
+     "url": "https://www.kch.or.kr/user/board/download/board_cd/notice/wr_no/992/seq_no/1",
+     "kind": "공고문",
+     "name": "물리치료사 채용공고(26.9.29)계약직.hwp (421.0KB)",
+     "읽기탈": "HTTP 404",
+     "읽어봄": true
+    }
+   ],
+   "본문자": 1824,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS1139484582",
+   "source": "HS3",
+   "기관": "경희대학교병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "계약직 신입직원 [재활의학과 물리치료실 물리치료사] 공개채용 모집공고",
+   "주소": "https://recruit.incruit.com/khmc/job/2610080006",
+   "첨부": [],
+   "본문자": 695,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-14",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-08"
+  },
+  {
+   "id": "HS726356583",
+   "source": "HS3",
+   "기관": "성남시의료원",
+   "꼴표": 2,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 제13회 성남시의료원 직원 채용 모집 공고",
+   "주소": "https://www.scmc.kr/recruit/recruitView/?seq=5101",
+   "첨부": [
+    {
+     "url": "https://www.scmc.kr/information/recruit/download/?seq=5101&idx=1",
+     "kind": "공고문",
+     "name": "2026년 제13회 성남시의료원 직원 채용 공고문.pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://www.scmc.kr/information/recruit/download/?seq=5101&idx=2",
+     "kind": "공고문",
+     "name": "직무기술서(제13회).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 2113,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "17:00:00",
+    "모집인원": 9,
+    "예상연봉": "내규에 따름",
+    "접수마감": "2026-10-26",
+    "지원자격": "·물리치료사(계약직 6급 상당) : 물리치료사 면허 소지자"
+   },
+   "들어온때": "2026-10-15"
+  },
+  {
+   "id": "HS672206705",
+   "source": "HS3",
+   "기관": "부산광역시의료원",
+   "꼴표": 2,
+   "보류": false,
+   "숨김": true,
+   "제목": "직원 모집 공고(물리치료사 - 기간제)",
+   "주소": "https://www.busanmc.or.kr/busanmc/index.php?pCode=recruit&mode=view&idx=112905",
+   "첨부": [
+    {
+     "url": "https://www.busanmc.or.kr/busanmc/_Img/Content/wa_busanmc2026.pdf",
+     "kind": "공고문",
+     "name": "wa_busanmc2026.pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 2943,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS477057035",
+   "source": "HS3",
+   "기관": "청주성모병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "작업치료사 채용",
+   "주소": "https://www.ccmc.or.kr/bbs/board.php?bo_table=commu_02&wr_id=48",
+   "첨부": [
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=48&no=0&nonce=4d32634b467566426e71|1792378634|7e0ef594c6e261e6895c12a328dd1fd3ced75ee3",
+     "kind": "공고문",
+     "name": "작업치료사 채용.pdf (159.8K)",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=48&no=0&nonce=59386f32306468794d56|1792367776|11fd311c6780e7f69a58690fd5c614703a3f3344",
+     "kind": "공고문",
+     "name": "작업치료사 채용.pdf (159.8K)",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=48&no=0&nonce=5a723343537341657654|1792288736|963a2aadeb694ea3918b3bd0942685c592f75bba",
+     "kind": "공고문",
+     "name": "작업치료사 채용.pdf (159.8K)",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=48&no=0&nonce=65616970754d44354a54|1792454158|7754c726740d6659644d3fa21e32a82c37412d00",
+     "kind": "공고문",
+     "name": "작업치료사 채용.pdf (159.8K)",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=48&no=0&nonce=755832486630714d5063|1792216548|30b2139150c2485f6f840439a25258e1d81a4d15",
+     "kind": "공고문",
+     "name": "작업치료사 채용.pdf (159.8K)",
+     "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 5704바이트)",
+     "읽어봄": true
+    }
+   ],
+   "본문자": 1769,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS258943039",
+   "source": "HS3",
+   "기관": "충청북도 충주의료원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "충주의료원 보건직(임상병리사) 채용 공고",
+   "주소": "https://cjmct.or.kr/board/view/syfsx/7142",
+   "첨부": [
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/1/8498/d7101c69bdb6d665c39d92d56f37de85/38b3fcb70d8eeb6dd077ab0258ed8a4293051046/d7101c69bdb6d665c39d92d56f37de857ab8f21a8459e3f96fd3e551bd699318.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_보건직(임상병리사)_채용_공고(2026.09.04.).hwp (76.5KB), Download:524",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/1/8498/d7101c69bdb6d665c39d92d56f37de85/5617af93292c1882e52dcb5c25c4c2443668f1b6/d7101c69bdb6d665c39d92d56f37de857ab8f21a8459e3f96fd3e551bd699318.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_보건직(임상병리사)_채용_공고(2026.09.04.).hwp (76.5KB), Download:527",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/1/8498/d7101c69bdb6d665c39d92d56f37de85/6c38e82b18f7706a4fd16759aa8c82919edcce47/d7101c69bdb6d665c39d92d56f37de857ab8f21a8459e3f96fd3e551bd699318.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_보건직(임상병리사)_채용_공고(2026.09.04.).hwp (76.5KB), Download:519",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/1/8498/d7101c69bdb6d665c39d92d56f37de85/838d10d64ac5d02854cffa4ff5191fb704631405/d7101c69bdb6d665c39d92d56f37de857ab8f21a8459e3f96fd3e551bd699318.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_보건직(임상병리사)_채용_공고(2026.09.04.).hwp (76.5KB), Download:522",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/1/8498/d7101c69bdb6d665c39d92d56f37de85/dcfeab2509e023d2ee9c1dddcfab36163760600b/d7101c69bdb6d665c39d92d56f37de857ab8f21a8459e3f96fd3e551bd699318.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_보건직(임상병리사)_채용_공고(2026.09.04.).hwp (76.5KB), Download:522",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/1/8498/d7101c69bdb6d665c39d92d56f37de85/dd646a4d37e5e7c9c9b7575aa96c045958307d80/d7101c69bdb6d665c39d92d56f37de857ab8f21a8459e3f96fd3e551bd699318.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_보건직(임상병리사)_채용_공고(2026.09.04.).hwp (76.5KB), Download:519",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/2/8499/53fba85fc98b89355a1da79e59a671fe/38b3fcb70d8eeb6dd077ab0258ed8a4293051046/53fba85fc98b89355a1da79e59a671fe8a9138d02a343165a0ab49613cd209dc.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:167",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/2/8499/53fba85fc98b89355a1da79e59a671fe/5617af93292c1882e52dcb5c25c4c2443668f1b6/53fba85fc98b89355a1da79e59a671fe8a9138d02a343165a0ab49613cd209dc.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:168",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/2/8499/53fba85fc98b89355a1da79e59a671fe/6c38e82b18f7706a4fd16759aa8c82919edcce47/53fba85fc98b89355a1da79e59a671fe8a9138d02a343165a0ab49613cd209dc.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:166",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/2/8499/53fba85fc98b89355a1da79e59a671fe/838d10d64ac5d02854cffa4ff5191fb704631405/53fba85fc98b89355a1da79e59a671fe8a9138d02a343165a0ab49613cd209dc.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:166",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/2/8499/53fba85fc98b89355a1da79e59a671fe/dcfeab2509e023d2ee9c1dddcfab36163760600b/53fba85fc98b89355a1da79e59a671fe8a9138d02a343165a0ab49613cd209dc.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:166",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7142/file/2/8499/53fba85fc98b89355a1da79e59a671fe/dd646a4d37e5e7c9c9b7575aa96c045958307d80/53fba85fc98b89355a1da79e59a671fe8a9138d02a343165a0ab49613cd209dc.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:166",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 3333,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "17:30:00",
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS258328719",
+   "source": "HS3",
+   "기관": "충청북도 충주의료원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "충주의료원 육아휴직 대체자 [보건직(물리치료사), 행정직] 채용 공고",
+   "주소": "https://cjmct.or.kr/board/view/syfsx/7141",
+   "첨부": [
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/4ee6cf0d6afeb1a9b470f3b0e0080a05/156a4213cc93e269522c6b54f6861fd955d88a44/4ee6cf0d6afeb1a9b470f3b0e0080a059a629c4252ed5dc1567b83609c9844be.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_육아휴직_대체자_[보건직(물리치료사),_행정직]_채용공고(2026.09.04.).hwp (147.5KB), Download:381",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/4ee6cf0d6afeb1a9b470f3b0e0080a05/57de84d91ed61ef445e7d1874871405d201f04d7/4ee6cf0d6afeb1a9b470f3b0e0080a059a629c4252ed5dc1567b83609c9844be.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_육아휴직_대체자_[보건직(물리치료사),_행정직]_채용공고(2026.09.04.).hwp (147.5KB), Download:381",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/4ee6cf0d6afeb1a9b470f3b0e0080a05/9f17606ab321493cfe5554fd3a0e22041a8010e2/4ee6cf0d6afeb1a9b470f3b0e0080a059a629c4252ed5dc1567b83609c9844be.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_육아휴직_대체자_[보건직(물리치료사),_행정직]_채용공고(2026.09.04.).hwp (147.5KB), Download:383",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/4ee6cf0d6afeb1a9b470f3b0e0080a05/af4224d6fc087787b6f58a737248ea6092907583/4ee6cf0d6afeb1a9b470f3b0e0080a059a629c4252ed5dc1567b83609c9844be.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_육아휴직_대체자_[보건직(물리치료사),_행정직]_채용공고(2026.09.04.).hwp (147.5KB), Download:375",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/4ee6cf0d6afeb1a9b470f3b0e0080a05/cf2db2d7ad01e6150688d3a00ab8219aacd28e12/4ee6cf0d6afeb1a9b470f3b0e0080a059a629c4252ed5dc1567b83609c9844be.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_육아휴직_대체자_[보건직(물리치료사),_행정직]_채용공고(2026.09.04.).hwp (147.5KB), Download:378",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/4ee6cf0d6afeb1a9b470f3b0e0080a05/f8b97dcb8f512dda5ff63e8d9d17e7987cd10526/4ee6cf0d6afeb1a9b470f3b0e0080a059a629c4252ed5dc1567b83609c9844be.hwp",
+     "kind": "공고문",
+     "name": "충주의료원_육아휴직_대체자_[보건직(물리치료사),_행정직]_채용공고(2026.09.04.).hwp (147.5KB), Download:386",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/2/8497/49085e7e1330b5f470a4ac9d4eebfbd3/156a4213cc93e269522c6b54f6861fd955d88a44/49085e7e1330b5f470a4ac9d4eebfbd3f0290769db123e57ef069cd2dae83f35.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:113",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/2/8497/49085e7e1330b5f470a4ac9d4eebfbd3/57de84d91ed61ef445e7d1874871405d201f04d7/49085e7e1330b5f470a4ac9d4eebfbd3f0290769db123e57ef069cd2dae83f35.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:113",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/2/8497/49085e7e1330b5f470a4ac9d4eebfbd3/9f17606ab321493cfe5554fd3a0e22041a8010e2/49085e7e1330b5f470a4ac9d4eebfbd3f0290769db123e57ef069cd2dae83f35.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:114",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/2/8497/49085e7e1330b5f470a4ac9d4eebfbd3/af4224d6fc087787b6f58a737248ea6092907583/49085e7e1330b5f470a4ac9d4eebfbd3f0290769db123e57ef069cd2dae83f35.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:113",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/2/8497/49085e7e1330b5f470a4ac9d4eebfbd3/cf2db2d7ad01e6150688d3a00ab8219aacd28e12/49085e7e1330b5f470a4ac9d4eebfbd3f0290769db123e57ef069cd2dae83f35.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:113",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://cjmct.or.kr/board/download/syfsx/7141/file/2/8497/49085e7e1330b5f470a4ac9d4eebfbd3/f8b97dcb8f512dda5ff63e8d9d17e7987cd10526/49085e7e1330b5f470a4ac9d4eebfbd3f0290769db123e57ef069cd2dae83f35.hwp",
+     "kind": "공고문",
+     "name": "●충주의료원입사지원서.hwp (62.0KB), Download:117",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 3423,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "17:30:00",
+    "모집인원": 1,
+    "예상연봉": "내규에 따름",
+    "접수마감": null,
+    "지원자격": "물리치료사 면허증 소지자 · 경력자 우대"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS1804530245",
+   "source": "HS3",
+   "기관": "광주기독병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "작업치료사(계약직) 채용공고",
+   "주소": "https://www.kch.or.kr/user/board/view/board_cd/notice/wr_no/993",
+   "첨부": [
+    {
+     "url": "https://www.kch.or.kr/user/board/download/board_cd/notice/wr_no/993/seq_no/1",
+     "kind": "공고문",
+     "name": "작업치료사 채용공고(26.9.29)계약직.hwp (421.0KB)",
+     "읽기탈": "HTTP 404",
+     "읽어봄": true
+    }
+   ],
+   "본문자": 1815,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS1724102678",
+   "source": "HS3",
+   "기관": "영남대학교의과대학부속영천병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "영남대학교영천병원 기간제 계약직 물리치료사 수시모집",
+   "주소": "https://yumc.ac.kr:8443/bbs/view.do?bbsId=news5&pageNum=1&wr_id=2499",
+   "첨부": [
+    {
+     "url": "https://yumc.ac.kr:8443/yumc/FileDown.do?filename=Recruit_Doc.hwp",
+     "kind": "공고문",
+     "name": "전공의 지원서 양식",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 5330,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "영남대학교영천병원 ( 경북 영천시 오수 1 길 10)",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": "구 분\n주 요 내 용\n\n학력 및 자격조건\n· 관련학과 졸업자\n· 물리치료 사 면허증 소지자\n\n성별 , 연령\n· 제한 없음"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS1438877331",
+   "source": "HS3",
+   "기관": "청주성모병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "물리치료사 채용",
+   "주소": "https://www.ccmc.or.kr/bbs/board.php?bo_table=commu_02&wr_id=91",
+   "첨부": [
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=91&no=0&nonce=32674b6c365341727745|1792378634|2a649d7664deef7ed7d918dacf3e3d40500b9276",
+     "kind": "공고문",
+     "name": "채용공고물리치료사.pdf (236.6K)",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=91&no=0&nonce=374b386442575478496f|1792216548|cfac5d33e0cad4871e7d7f3f62cf26f2fc98e018",
+     "kind": "공고문",
+     "name": "채용공고물리치료사.pdf (236.6K)",
+     "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 5704바이트)",
+     "읽어봄": true
+    },
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=91&no=0&nonce=3855686759396a6e4547|1792288736|65c05953f05508cb4072ca7b6dbf2d653362e170",
+     "kind": "공고문",
+     "name": "채용공고물리치료사.pdf (236.6K)",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=91&no=0&nonce=53443841663671525531|1792540546|552e8d237292234036d5b5309b26a668f5e89d8b",
+     "kind": "공고문",
+     "name": "채용공고물리치료사.pdf (236.6K)",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=91&no=0&nonce=583979644455345a4762|1792454158|ed8f20a59e150a4049bad19392b8bc9d55050fec",
+     "kind": "공고문",
+     "name": "채용공고물리치료사.pdf (236.6K)",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.ccmc.or.kr/bbs/download.php?bo_table=commu_02&wr_id=91&no=0&nonce=5a39316a334263526573|1792367776|73aedb61f38c6cfc74b0b19269823c8b5a236427",
+     "kind": "공고문",
+     "name": "채용공고물리치료사.pdf (236.6K)",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 1774,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS1148491744",
+   "source": "HS3",
+   "기관": "제주대학교병원",
+   "꼴표": 2,
+   "보류": false,
+   "숨김": true,
+   "제목": "제주대학교병원 휴직대체 계약직&#40;간호사, 업무지원_환경, 보건의료정보관리사, 물리치료사&#41;, 단기간 계약직&#40;업무지원_영선&#41; 모집공고",
+   "주소": "https://www.jejunuh.co.kr/prog/rcrutPbanc/main/sub05_03_03_01/view.do?rcrutPbancNo=2657",
+   "첨부": [
+    {
+     "url": "https://www.jejunuh.co.kr/module/pdf.js/web/viewer.html;jsessionid=00C8B56FF768E52CD437C467F99403CB?file=/thumbnail/rcrutPbanc/rcrutPbanc_202610120904148870.PDF",
+     "kind": "공고문",
+     "name": "rcrutPbanc_202610120904148870.PDF",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.jejunuh.co.kr/module/pdf.js/web/viewer.html;jsessionid=1D11571A467F4CFCFC878B5D5DF2D344?file=/thumbnail/rcrutPbanc/rcrutPbanc_202610120904148870.PDF",
+     "kind": "공고문",
+     "name": "rcrutPbanc_202610120904148870.PDF",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.jejunuh.co.kr/module/pdf.js/web/viewer.html;jsessionid=5DA6EB16F39854552793F55CDBC09EFA?file=/thumbnail/rcrutPbanc/rcrutPbanc_202610120904148870.PDF",
+     "kind": "공고문",
+     "name": "rcrutPbanc_202610120904148870.PDF",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.jejunuh.co.kr/module/pdf.js/web/viewer.html;jsessionid=B9A90E8D5CCE4D3B3D3FEE2E04F26697?file=/thumbnail/rcrutPbanc/rcrutPbanc_202610120904148870.PDF",
+     "kind": "공고문",
+     "name": "rcrutPbanc_202610120904148870.PDF",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 4923,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "12:00:00",
+    "모집인원": 1,
+    "예상연봉": "내규에 따름",
+    "접수마감": "2026-10-19",
+    "지원자격": "물리치료사 면허증 소지자 · 신경계 물리치료 자격증 소지자 우대할 수 있음"
+   },
+   "들어온때": "2026-10-12"
+  },
+  {
+   "id": "HS1134728956",
+   "source": "HS3",
+   "기관": "곽병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "물리치료사 및 구매관리팀 직원채용공고!",
+   "주소": "https://kwakh.co.kr/bbs/board.php?bo_table=c05&wr_id=35",
+   "첨부": [
+    {
+     "url": "https://kwakh.co.kr/bbs/download.php?bo_table=c05&wr_id=35&no=0",
+     "kind": "공고문",
+     "name": "2026.09.30 15:10 곽병원 입사지원서 소정양식2026년.hwp (133.5K) + 27",
+     "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 4384바이트)",
+     "읽어봄": true
+    }
+   ],
+   "본문자": 2728,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": 0,
+    "예상연봉": null,
+    "접수마감": "2026-10-16",
+    "지원자격": "구분\n부서\n업무내용\n응시자격\n인원\n비고\n\n의료기사직\n물리치료실\n물리치료사 업무\n[ 필수사항 ]\n- 물리치료사 면허증 소지자\n["
+   },
+   "들어온때": "2026-10-18"
+  }
+ ]
+}

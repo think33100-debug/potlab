@@ -1,0 +1,48 @@
+{
+ "id": "CE80111",
+ "source": "CE2",
+ "기관": "강원특별자치도강릉의료원",
+ "제목": "공고2026-69호 보건직 8급 작업치료사",
+ "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80111",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 0,
+ "쪽": {
+  "code": 200,
+  "바이트": 27313,
+  "끝주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80111",
+  "글자수": 2539,
+  "우리직군말": true,
+  "제목글자": "공고2026-69호 보건직 8급 작업치료사 : 클린아이 잡플러스"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "JS주소",
+   "함수": "fn_FileDown",
+   "url": null,
+   "글": "(주소꼴)",
+   "원문": "javascript:fn_FileDown("
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "쪽(POST)",
+   "이름": "공고2026-69호.hwp",
+   "url": "https://job.cleaneye.go.kr/file/FileDownload.do",
+   "갈래": "받기POST",
+   "code": 200,
+   "바이트": 215552,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "공고2026-69호.hwp",
+   "글자수": 9541,
+   "표수": 28,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 6,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  }
+ ]
+}

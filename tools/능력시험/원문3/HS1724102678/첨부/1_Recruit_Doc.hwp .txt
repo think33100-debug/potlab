@@ -1,0 +1,67 @@
+<table>
+<tr><th rowspan="5">성 명</th><th rowspan="2">한 글</th><th colspan="2" rowspan="2"></th><th></th><th>수험번호</th><th></th><th rowspan="6">사 진<br>(3 x 4)</th></tr>
+<tr><td rowspan="4"></td><td rowspan="3">군 별</td><td rowspan="3">□ 군보, □ 비군보</td></tr>
+<tr><td>한 자</td><td colspan="2"></td></tr>
+<tr><td rowspan="2">영 문</td><td colspan="2" rowspan="2"></td></tr>
+<tr><td rowspan="2">레지던트<br>지 원 과</td><td rowspan="2">1지망:<br>2지망:</td></tr>
+<tr><td>생년월일</td><td colspan="2">년 월 일</td><td>만 세</td><td></td></tr>
+</table>
+
+<table>
+<tr><th rowspan="2">수련사항</th><th>□ 인턴, □ 레지던트</th><th>병원</th><th>년 월 ~ 년 월</th><th>졸업, 예정, 중퇴</th></tr>
+<tr><td>□ 인턴, □ 레지던트</td><td>병원</td><td>년 월 ~ 년 월</td><td>졸업, 예정, 중퇴</td></tr>
+</table>
+
+
+## 전공의(□인턴,□레지던트)지원서
+
+<table>
+<tr><th rowspan="3">연락처</th><th>현주소</th><th colspan="3">□□□-□□□</th></tr>
+<tr><td>전화번호</td><td>( ) -</td><td>실거주지</td><td></td></tr>
+<tr><td>휴대폰</td><td>- -</td><td>E-mail</td><td>@</td></tr>
+</table>
+
+<table>
+<tr><th rowspan="5">학력사항</th><th>기 간</th><th>학교</th><th>전 공</th><th>소재지</th><th>기 타</th></tr>
+<tr><td>년 월 ~ 년 월</td><td>고등학교</td><td></td><td></td><td>졸업</td></tr>
+<tr><td>년 월 ~ 년 월</td><td>대학교</td><td>학과</td><td></td><td>졸업, 예정, 중퇴</td></tr>
+<tr><td>년 월 ~ 년 월</td><td>의(치)과대학교</td><td>학과</td><td></td><td>졸업, 예정, 중퇴</td></tr>
+<tr><td>년 월 ~ 년 월</td><td>대학원</td><td>학과</td><td></td><td>졸업, 예정, 중퇴</td></tr>
+</table>
+
+<table>
+<tr><th rowspan="4">경력<br>사<br>항</th><th>근무처</th><th>근무기간</th><th>직 위</th><th>담당업무</th><th>퇴직사유</th></tr>
+<tr><td></td><td>년 월 ~ 년 월</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>년 월 ~ 년 월</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>년 월 ~ 년 월</td><td></td><td></td><td></td></tr>
+</table>
+
+<table>
+<tr><th rowspan="3">자격면허</th><th>전공의 번호</th><th>의사 면허번호</th><th>취득일자</th><th rowspan="3">특<br>기<br>사<br>항</th></tr>
+<tr><td></td><td></td><td>. .</td></tr>
+<tr><td></td><td></td><td>. .</td></tr>
+</table>
+
+<table>
+<tr><th rowspan="2">병역<br>사<br>항</th><th>구 분</th><th>복무구분</th><th>계 급</th><th>복무기관</th><th rowspan="2">혈<br>액<br>형</th><th rowspan="2">형</th></tr>
+<tr><td>군필, 미필, 면제</td><td>현역, 공보의, 군의관</td><td></td><td>년 월 일 ~ 년 월 일</td></tr>
+</table>
+
+<table>
+<tr><th rowspan="8">가족사항</th><th>관계</th><th>성명</th><th>나이</th><th>동거여부</th><th rowspan="4">보훈여부</th><th rowspan="4">□ 대상, □ 비 대상</th></tr>
+<tr><td></td><td></td><td></td><td>Y / N</td></tr>
+<tr><td></td><td></td><td></td><td>Y / N</td></tr>
+<tr><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2">Y / N</td></tr>
+<tr><td rowspan="4">긴급<br>연락처</td><td rowspan="2">부</td></tr>
+<tr><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2">Y / N</td></tr>
+<tr><td rowspan="2">모</td></tr>
+<tr><td></td><td></td><td></td><td>Y / N</td></tr>
+</table>
+
+본인은 상기된 내용과 관련하여 허위(오기, 누락)로 기재된 사항이 있을 경우, 이에 따른 불이익을 모두 감수할 것을 확약하며, 귀 원에서 (인턴/ 레지던트) 과정을 수련 하고자 위와 같이 지원서를 제출합니다.
+
+
+### 20 년 월 일 지원자 (서명)
+
+
+# 영남대학교의료원장

@@ -1,0 +1,35 @@
+{
+ "id": "WNK141222609010021",
+ "source": "WN2",
+ "기관": "경상북도립김천노인전문요양병원",
+ "제목": "경북도립김천노인전문요양병원 물리치료사 육아휴직 (대체인력) 모집합니다.",
+ "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K141222609010021&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+ "숨김": false,
+ "보류": false,
+ "DB첨부": 0,
+ "쪽": {
+  "code": 200,
+  "바이트": 351118,
+  "끝주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K141222609010021&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+  "글자수": 28556,
+  "우리직군말": true,
+  "제목글자": "채용정보 상세 | 채용정보 상세검색 | 일자리 찾기 | 채용정보"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "JS주소",
+   "함수": "gfn_downloadAttFile",
+   "url": null,
+   "글": "(onclick)",
+   "원문": "javascript:gfn_downloadAttFile({%=file.mydriveFileDownloadUrl%});"
+  },
+  {
+   "갈래": "JS주소",
+   "함수": "gfn_downMyData",
+   "url": null,
+   "글": "(onclick)",
+   "원문": "javascript:gfn_downMyData(this);"
+  }
+ ],
+ "받은첨부": []
+}
