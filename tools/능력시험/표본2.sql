@@ -64,6 +64,10 @@ p as (
                             order by random()) as 꼴순
     from p left join 첨 on 첨.job_id = p.id left join 본 on 본.job_id = p.id
 )
+/* 첨부 있는 것 16 + 없는 것 14 — 형식을 섞으려고 꼴표로 흩습니다 */
+첨있 as (select * from 줄 where 첨부목록 <> '[]'::jsonb order by 꼴순, random() limit 16),
+첨없 as (select * from 줄 where 첨부목록 = '[]'::jsonb and 출처순 <= 2 order by random() limit 14),
+고른것 as (select * from 첨있 union all select * from 첨없)
 select jsonb_build_object(
   'id', id, 'source', source, '기관', org_name, '제목', title, '주소', url,
   '숨김', coalesce(hidden, false), '보류', coalesce(hold, false),
@@ -77,7 +81,4 @@ select jsonb_build_object(
      '예상연봉', coalesce(nullif("뽑은값"->>'예상연봉',''), nullif(detail->>'연봉',''),
                           nullif(detail->>'예상연봉','')))
 )::text
-  from 줄
- where 출처순 <= 5 or 꼴순 <= 4      -- 출처별 다섯 · 형식별 넷까지 흩어서
- order by 출처순, 꼴순
- limit 30;
+  from 고른것 limit 30;
