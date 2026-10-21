@@ -66,6 +66,9 @@ const 한건제한초 = Number(process.env.KORDOC_TIMEOUT) || 180;
 const 시스템문턱MB = Number(process.env.KORDOC_SYS_MB) || 1100;   /* 쓴 메모리 */
 const 거두기제한초 = Number(process.env.KORDOC_REAP_SEC) || 10;    /* quit 뒤 기다리는 초 */
 const 거두기더초 = Number(process.env.KORDOC_REAP_KILL_SEC) || 5;  /* SIGKILL 뒤 더 기다리는 초 */
+/* KORDOC_REAP=0 이면 **옛 길**입니다 (거두지 않고 떼기만) — 전후를 같은 자리에서
+   견주려고 둔 깃발입니다. 기본은 거두기(1) 입니다 */
+const 거둘까 = process.env.KORDOC_REAP !== '0';
 
 /** 시스템이 지금 쓰는 메모리(MB) — /proc/meminfo 의 MemTotal − MemAvailable */
 export function 쓴메모리MB() {
@@ -267,6 +270,7 @@ function 띄우기() {
 /** 지금 아이를 떼고 **거두기**를 걸어 둡니다. 다음 읽기가 그 약속을 기다립니다 */
 function 거두며교체(까닭) {
   if (!아이 || 거두는중) return;
+  if (!거둘까) { 죽이기(까닭); return; }      /* 옛 길 — 견주기용 깃발 */
   셈.교체++;
   셈.교체까닭[까닭] = (셈.교체까닭[까닭] ?? 0) + 1;
   const 옛 = 아이;
