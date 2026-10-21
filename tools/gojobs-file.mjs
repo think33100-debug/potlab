@@ -26,7 +26,11 @@
 import { 점수 } from './hosp/hs_files.js';
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
-export const 기본간격 = 1500;        /* 같은 집을 두드리는 사이 — 쪽 열기 + 받기 둘 다 */
+/* ★ 2026-10-22 — **5초**. 1.5초로 돌렸더니 밤 바퀴에서 받음 3 뒤에
+   24건이 「쪽에 gfn_fileDown 이 없습니다」로 났습니다. 그 24건을 **한 건씩**
+   다시 두드리면 멀쩡히 옵니다 — 줄줄이 때려서 막힌 것입니다 (쪽이 138KB 입니다).
+   첨부되메우기의 「같은 사이트 3.5초」와 같은 결입니다 */
+export const 기본간격 = 5000;
 export const 받는주소 = 'https://www.gojobs.go.kr/downFile.do';
 
 /** 쪽글에서 `gfn_fileDown('이름','uuid','갈래')` 부름을 모읍니다 */
