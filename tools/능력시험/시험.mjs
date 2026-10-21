@@ -22,7 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 칸뽑기, 고용형태판정, 본문직군, 우리직군줄, 마감고르기 } from '../공고문읽기.mjs';
+import { 칸뽑기, 고용형태판정, 본문직군, 우리직군줄, 마감고르기, 고용형태고르기 } from '../공고문읽기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -191,9 +191,9 @@ export function 다시일곱(뽑, 글, 직군, 제목 = '') {
            (처음에 꾸러미째 견주어 고용형태가 다 틀림으로 찍혔습니다) */
         /* ★ 통합공고는 **우리 직군 줄만** 떼어 넘깁니다 — 고용형태_바로잡기.mjs:85 와 같은 꼴.
        글 전체를 넘기면 「간호사 무기계약직 / 물리치료사 기간제」 가 섞임으로 비워집니다 */
-    고용형태: (() => { const 줄 = 우리직군줄(글 || '');
-      const v = (제목 || 글) ? 고용형태판정(제목 || '', 줄 || 글 || '') : null;
-          return (v && typeof v === 'object' ? (v.값 || null) : v) || null; })() };
+    /* ★ 2026-10-21 — 직군 줄 먼저, 비면 글 전체 (고용형태고르기 한 자리) */
+    고용형태: (() => { const v = 고용형태고르기(제목 || '', 글 || '');
+      return (v && v.값) || null; })() };
 }
 
 const 출처셈 = new Map();
