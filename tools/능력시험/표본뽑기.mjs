@@ -60,7 +60,8 @@ function psql(파일) {
 }
 
 /* ── 표본 — **DB 가 고릅니다** (표본.sql · 한 줄에 공고 하나, JSON) ── */
-const 줄들 = psql(path.join(여기, '표본.sql')).split('\n').map((l) => l.trim()).filter(Boolean);
+const sql파일 = argv.includes('--sql') ? argv[argv.indexOf('--sql')+1] : '표본.sql';
+const 줄들 = psql(path.join(여기, sql파일)).split('\n').map((l) => l.trim()).filter(Boolean);
 const 뽑을것 = 줄들.map((l) => JSON.parse(l));
 console.log('최근 30일 1층 공고 ' + 뽑을것.length + '건 (숨김·보류 포함)');
 
@@ -113,7 +114,7 @@ for (let 바퀴 = 0; 표본.length < 몇개; 바퀴++) {
   if (!더넣었나) break;
 }
 
-const 낼곳 = path.join(여기, '표본.json');
+const 낼곳 = path.join(여기, argv.includes('--낼것') ? argv[argv.indexOf('--낼것')+1] : '표본.json');
 fs.writeFileSync(낼곳, JSON.stringify({
   만든때: new Date().toISOString(),
   규칙: '최근 30일 · 1층 기관(견줄이름 ↔ 일층병원_구멍) · 숨김·보류 포함 · 출처별 골고루 · 첨부 있는 것 먼저',

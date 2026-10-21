@@ -32,7 +32,7 @@ const 몇개 = Number(값('--몇개', 999));
 const 아이디들 = String(값('--아이디', '')).split(',').map((s) => s.trim()).filter(Boolean);
 const 첨부뚜껑 = Number(값('--첨부뚜껑', 4));
 
-const 표본파일 = path.join(여기, '표본.json');
+const 표본파일 = path.join(여기, 값('--표본', '표본.json'));
 if (!fs.existsSync(표본파일)) { console.error('✗ 먼저 표본뽑기.mjs 를 돌리십시오'); process.exit(1); }
 const { 표본 } = JSON.parse(fs.readFileSync(표본파일, 'utf8'));
 const 볼것 = (아이디들.length ? 표본.filter((x) => 아이디들.includes(x.id)) : 표본).slice(0, 몇개);
@@ -213,7 +213,7 @@ function 쪽첨부들(html, 밑바탕) {
   return 나온것;
 }
 
-const 낼곳 = path.join(여기, '원문');
+const 낼곳 = path.join(여기, 값('--방', '원문'));
 fs.mkdirSync(낼곳, { recursive: true });
 const 목록 = [];
 let 첨부받은수 = 0;
