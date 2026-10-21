@@ -24,6 +24,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 칸뽑기, 고용형태고르기, 본문직군 } from './공고문읽기.mjs';
+import { spawnSync } from 'node:child_process';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -64,6 +65,21 @@ async function 전부(길) {
   return 모은것;
 }
 
+/* ★ `--기준 <커밋>` 이면 그 커밋의 공고문읽기.mjs 를 꺼내 **옛 코드 ↔ 새 코드**를
+   같은 글로 견줍니다. 이것이 「규칙 바꿈이 미치는 바」의 참 잣대입니다.
+   안 주면 「DB ↔ 지금 코드」 를 보여 줍니다 (되먹일 거리를 보는 눈) */
+const 기준커밋 = 값('--기준', '');
+let 옛 = null;
+if (기준커밋) {
+  const 낼곳 = path.join(여기, '공고문읽기_기준.mjs');
+  const r = spawnSync('git', ['show', 기준커밋 + ':tools/공고문읽기.mjs'],
+    { encoding: 'utf8', cwd: path.join(여기, '..'), maxBuffer: 1 << 26 });
+  if (r.status !== 0) { console.error('✗ 기준 코드를 못 꺼냈습니다 — ' + String(r.stderr || '').slice(0, 200)); process.exit(1); }
+  fs.writeFileSync(낼곳, r.stdout, 'utf8');
+  옛 = await import('./공고문읽기_기준.mjs');
+  console.log('기준 코드 — ' + 기준커밋 + ' (tools/공고문읽기_기준.mjs 로 꺼냈습니다)');
+}
+
 const 공고 = await 전부('job_posts?select=id,source,org_name,title,job_group,headcount,apply_to,'
   + 'apply_to_time,work_place,employ_type,detail,' + encodeURIComponent('뽑은값')
   + ',edited_fields,admin_locked,hidden,hold');
@@ -90,7 +106,17 @@ const 직군바뀜 = [];
 const 견본 = {};
 
 const 있나 = (v) => v != null && v !== '';
-const 글자 = (v) => (v == null ? '' : String(v).trim());
+/** ★ 2026-10-22 — **꼴을 맞춘 뒤** 견줍니다. 안 맞추면 「11:00:00 ↔ 11:00」·
+    「2026-10-06T00:00 ↔ 2026-10-06」 처럼 **같은 값이 바뀜으로 찍힙니다**
+    (첫 실행에서 마감시각 151건이 그 꼴이었습니다) */
+const 꼴맞추기 = (v) => {
+  let t = (v == null ? '' : String(v)).trim().replace(/\s+/g, ' ');
+  if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(t)) t = t.slice(0, 5);                 /* 시각 — 초를 뗍니다 */
+  const d = t.match(/^(\d{4})[-.\/](\d{1,2})[-.\/](\d{1,2})/);
+  if (d) t = d[1] + '-' + String(d[2]).padStart(2, '0') + '-' + String(d[3]).padStart(2, '0');
+  return t;
+};
+const 글자 = 꼴맞추기;
 
 for (const j of 볼것) {
   const 글 = 글별.get(j.id);
@@ -107,7 +133,19 @@ for (const j of 볼것) {
     고용형태: (() => { try { return 고용형태고르기(j.title || '', 글).값 || null; } catch { return null; } })(),
     직군: (() => { try { return 본문직군(글) || null; } catch { return null; } })(),
   };
-  const 지금 = {
+  /* 기준 코드가 있으면 **옛 코드가 낸 값**과 견줍니다 (없으면 DB 값과) */
+  const 지금 = 옛 ? (() => {
+    let o;
+    try { o = 옛.칸뽑기(글, ''); } catch { o = {}; }
+    return {
+      모집인원: o.모집인원 && Object.keys(o.모집인원).length
+        ? Object.values(o.모집인원)[0] : (o.모집인원글 ? Object.values(o.모집인원글)[0] : null),
+      접수마감: o.접수마감, 마감시각: o.접수시각, 근무지: o.근무지,
+      지원자격: o.지원자격, 예상연봉: o.예상연봉,
+      고용형태: (() => { try { return 옛.고용형태고르기(j.title || '', 글).값 || null; } catch { return null; } })(),
+      직군: (() => { try { return 옛.본문직군(글) || null; } catch { return null; } })(),
+    };
+  })() : {
     모집인원: j.headcount != null ? j.headcount : (p.모집인원 ?? null),
     접수마감: j.apply_to, 마감시각: j.apply_to_time, 근무지: j.work_place,
     지원자격: p.지원자격 ?? d.지원자격 ?? null,
@@ -129,7 +167,10 @@ for (const j of 볼것) {
   }
 }
 
-console.log('── 값이 바뀌는 공고 수 (칸별) ──');
+console.log('── 값이 바뀌는 공고 수 (칸별) — '
+  + (옛 ? '**옛 코드(' + 기준커밋 + ') ↔ 지금 코드**, 같은 본문 글' : 'DB 값 ↔ 지금 코드(본문 글만)') + ' ──');
+if (!옛) console.log('  ※ 「값→빈칸」 은 잃음이 아닙니다 — API 가 준 값(접수마감 따위)은 본문만으론 못 냅니다.');
+if (!옛) console.log('  ※ 규칙 바꿈을 보려면 --기준 <커밋> 으로 **옛 코드와** 견주십시오.');
 console.log('  칸        빈칸→값   값→다른값   값→빈칸     같음  둘다없음');
 let 센 = false;
 for (const k of 칸이름) {
@@ -156,4 +197,5 @@ for (const x of (줄수 ? 직군바뀜.slice(0, 줄수) : 직군바뀜)) {
 console.log('\n' + (센
   ? '★ 문턱(' + 문턱 + '건)을 넘는 칸이 있습니다 — **반영을 멈추고 보고합니다** (세중님 4번)'
   : '○ 문턱(' + 문턱 + '건)을 넘는 칸이 없습니다'));
+if (기준커밋) { try { fs.unlinkSync(path.join(여기, '공고문읽기_기준.mjs')); } catch { /* 이미 없으면 그대로 */ } }
 process.exit(센 ? 2 : 0);
