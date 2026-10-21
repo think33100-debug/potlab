@@ -135,6 +135,15 @@ export function 풀기(호스트, x) {
     }
   }
   const 날 = (v) => (v ? String(v).slice(0, 10) : '');
+  /* ★ 2026-10-21 — **마감 시각**. endDateTime 은 `2026-02-09T17:00:59` 꼴이라
+     날() 이 10자로 자르며 시각을 버렸습니다. 능력시험에서 JF 5건이 마감시각
+     빈칸이었고 정답은 모두 17:00 이었습니다. 00:00 은 마감 시각으로 안 봅니다
+     (자정에 받는 공고는 없습니다 — 공고문읽기.mjs 와 같은 규칙) */
+  const 시각 = (v) => {
+    const m = String(v || '').match(/T(\d{2}):(\d{2})/);
+    if (!m) return '';
+    return m[1] === '00' && m[2] === '00' ? '' : m[1] + ':' + m[2];
+  };
   return {
     id: 'JF' + x.positionSn,
     제목,
@@ -144,6 +153,7 @@ export function 풀기(호스트, x) {
     상태: String(x.submissionStatus || ''),
     시작: 날(x.startDateTime),
     마감: 날(x.endDateTime),
+    마감시각: 시각(x.endDateTime),
     /* ★ 여기서 NEW_CAREER 만 따로 풀던 것을 없앴습니다 (2026-10-07).
        아래 경력조건() 과 **두 벌**이었습니다. 원문 값을 그대로 들고 가고
        말로 바꾸는 것은 경력조건() 한 곳에서만 합니다 (작업지침 6절) */
