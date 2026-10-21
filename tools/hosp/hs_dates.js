@@ -48,6 +48,9 @@ function hsDetailDates(text) {
   text = String(text || '');
   const pad = function (n) { return ('0' + n).slice(-2); };
   const full = /(20\d{2})\s*[.년\-/]\s*(\d{1,2})\s*[.월\-/]\s*(\d{1,2})\s*일?/g;
+  /* ★ 2026-10-21 — **두 자리 해**. 「’26. 10. 2.(금)」 꼴을 공고문이 씁니다.
+     울타리는 DB 함수 deadline_from_title 과 같습니다 — yy 24~40 · 앞에 숫자가 안 붙은 것 */
+  const 두자리 = /(?<![0-9])['’]?(\d{2})\s*[.년\-/]\s*(\d{1,2})\s*[.월\-/]\s*(\d{1,2})\s*일?/g;
   /* ★ 2026-10-13 — **오늘 + 2년보다 뒤면 그 날짜를 안 믿습니다** (세중님 승인).
      병원이 「채용시까지」 를 먼 날짜로 적습니다 —
        길병원 「접수기간 2026.02.06(금) 08:00 ~ 2099.12.31(목) 00:00 D-26742」
@@ -63,12 +66,29 @@ function hsDetailDates(text) {
     if (res && 너무먼날(res.to)) { res.to원문 = res.to; res.to = ''; }
     return res;
   };
-  const anchors = /(원서\s*)?접수\s*(기간|기한|일정|마감|일시|일자|기일)|모집\s*기간|채용\s*기간|지원\s*기간|응시원서\s*접수|마감\s*일시|마감일|공고\s*기간/g;
+  /* ★ 2026-10-21 — 「접수」 뒤에 **낱말 없이 바로 날짜**가 오는 꼴을 더했습니다.
+     공고문 일정 표가 그렇게 적습니다 — 「… 지원서 접수 2026. 09. 29.(화) ~ 2026. 10. 06.(화)」.
+     전에는 창이 안 잡혀 접수마감이 **비었습니다**(305711·305240·HS236379585).
+     뒤쪽 날짜를 고르는 규칙은 아래에 이미 있습니다 — 창만 못 잡고 있었습니다.
+     울타리 — 그 뒤 24자 안에 네 자리 해가 있을 때만 앵커로 봅니다
+     (「접수 마감일시 이전까지 …」 같은 설명 문장은 날짜가 없어 안 걸립니다) */
+  const anchors = /(원서\s*)?접수\s*(기간|기한|일정|마감|일시|일자|기일)|모집\s*기간|채용\s*기간|지원\s*기간|응시원서\s*접수|마감\s*일시|마감일|공고\s*기간|(?:지원서|원서|서류|공고)?\s*접수(?=[^0-9]{0,24}20\d{2})|기\s*간(?=[^0-9]{0,10}20\d{2})|일\s*정(?=[^0-9]{0,14}['’]?\d{2}\s*[.])/g;
   let a, best = null;
   while ((a = anchors.exec(text))) {
     const win = text.slice(a.index, a.index + 140);
     const ds = []; let m; full.lastIndex = 0;
     while ((m = full.exec(win))) ds.push({ i: m.index, e: m.index + m[0].length, v: m[1] + '.' + pad(m[2]) + '.' + pad(m[3]) });
+    /* 네 자리로 한 개도 못 찾았으면 **두 자리 해**로 봅니다 */
+    if (!ds.length) {
+      두자리.lastIndex = 0;
+      while ((m = 두자리.exec(win))) {
+        const yy = Number(m[1]);
+        if (yy < 24 || yy > 40) continue;
+        const mo = Number(m[2]); const d2 = Number(m[3]);
+        if (!(mo >= 1 && mo <= 12 && d2 >= 1 && d2 <= 31)) continue;
+        ds.push({ i: m.index, e: m.index + m[0].length, v: (2000 + yy) + '.' + pad(mo) + '.' + pad(d2) });
+      }
+    }
     if (!ds.length) continue;
     const res = { from: '', to: '' };
     /* ★ 2026-10-11 — **연도 없는 둘째 날짜를 먼저** 봅니다.
