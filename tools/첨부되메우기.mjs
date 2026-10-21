@@ -22,6 +22,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
+import { 고친주소 } from './첨부주소고치기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -134,6 +135,7 @@ const 견본 = []; const 보낼줄 = [];
 let 읽음 = 0; let 빈손 = 0; let 초합 = 0; let 못받음 = 0;
 const 빈손까닭 = new Map();
 const 못받음까닭 = new Map();      /* 못 받은 까닭도 셉니다 (지침 2절) */
+const 고침셈 = new Map();          /* 주소를 바로잡은 수 (첨부주소고치기) */
 
 /* ★ 알리오 첨부는 **쿠키가 있어야** 받습니다. 없으면 파일 대신 포털 첫
    화면(8,333자 HTML)이 옵니다 — 2026-10-11 에 이 되메우기를 마른으로
@@ -194,7 +196,7 @@ const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function 어디(주소) { try { return new URL(주소).host; } catch { return ''; } }
 
-async function 틈두고받기(주소) {
+async function 틈두고받기(주소, 받는법 = null) {
   const host = 어디(주소);
   if (!host) return { 왜: '주소 꼴이 아님' };
   if ((막힘.get(host) || 0) >= 3) return { 왜: '그 사이트 막힘 3번 — 멈췄습니다' };
@@ -203,7 +205,9 @@ async function 틈두고받기(주소) {
   끝때.set(host, Date.now());
   let g;
   try {
-    g = await fetch(주소, { headers: await 머리(주소), signal: AbortSignal.timeout(받기제한초 * 1000) });
+    const 더 = 받는법 && 받는법.Referer ? { Referer: 받는법.Referer } : {};
+    g = await fetch(주소, { headers: { ...(await 머리(주소)), ...더 },
+      signal: AbortSignal.timeout(받기제한초 * 1000) });
   } catch (e) {
     return { 왜: String(e && e.message || e).slice(0, 60) };
   }
@@ -257,7 +261,18 @@ for (const j of 볼것) {
     continue;
   }
 
-  const 받음 = await 틈두고받기(고른것.url);
+  /* ★ 2026-10-21 — **주소를 바로잡고 받습니다** (tools/첨부주소고치기.mjs).
+     능력시험에서 「HTML 이 옴」 12건이 거의 다 **잘못된 주소 줄**이었습니다 —
+     상세 쪽 주소 · 빈 열쇠 · 서버 파일 경로 · 알리오 opendata 내려받기. */
+  const 고친 = 고친주소(고른것.url, j.url || '');
+  if (고친.버릴것) {
+    못받음++; 한줄.왜 = '주소를 버렸습니다 — ' + 고친.왜;
+    못받음까닭.set(한줄.왜, (못받음까닭.get(한줄.왜) ?? 0) + 1);
+    표시할것.push({ job_id: j.id, url: 고른것.url, 왜: 한줄.왜 });
+    continue;
+  }
+  if (고친.url !== 고른것.url) 고침셈.set(고친.왜 || '고침', (고침셈.get(고친.왜 || '고침') || 0) + 1);
+  const 받음 = await 틈두고받기(고친.url, 고친.받는법);
   if (받음.왜) {
     못받음++; 한줄.왜 = 받음.왜;
     못받음까닭.set(받음.왜, (못받음까닭.get(받음.왜) ?? 0) + 1);
@@ -315,6 +330,9 @@ for (const [왜, n] of [...빈손까닭].sort((a, b) => b[1] - a[1])) {
 }
 for (const [왜, n] of [...못받음까닭].sort((a, b) => b[1] - a[1])) {
   console.log('   못받음 ' + String(n).padStart(3) + '건  ' + 왜);
+}
+for (const [왜, n] of [...고침셈].sort((a, b) => b[1] - a[1])) {
+  console.log('   주소고침 ' + String(n).padStart(3) + '건  ' + 왜);
 }
 if (멈춘사이트.size) {
   console.log('  ★ 멈춘 사이트 ' + 멈춘사이트.size + '곳 — ' +
