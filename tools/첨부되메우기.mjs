@@ -122,13 +122,23 @@ const 빈칸들 = (j) => {
   return 빈;
 };
 
+/* ★ 2026-10-21 — **차례를 돌립니다.** 전에는 앞에서 N건을 잘라, 바퀴마다 같은
+   공고를 다시 읽고 「아직 안 본 것」은 차례가 안 왔습니다 (첫 바퀴 읽음 56 · 담음 0).
+   그 공고 첨부의 parsed_at 이 **없는 것 먼저 · 오래된 것 다음**입니다 */
+const 언제봤나 = (id) => {
+  const 들 = (공고별첨부.get(id) || []).map((a) => a.parsed_at).filter(Boolean);
+  return 들.length ? 들.sort().slice(-1)[0] : '';      /* 빈 글자가 가장 앞에 옵니다 */
+};
 const 볼것 = 공고들
   .filter((j) => !출처 || j.source === 출처)
   .filter((j) => !j.admin_locked)
   .filter((j) => 빈칸들(j).length)
+  .sort((a, b) => 언제봤나(a.id).localeCompare(언제봤나(b.id)))
   .slice(0, 몇개);
 console.log('볼 것 ' + 볼것.length + '건' + (출처 ? ' (출처 ' + 출처 + ')' : '')
-  + ' · 관리자 잠금 건너뜀 ' + 공고들.filter((j) => j.admin_locked).length + '건');
+  + ' · 관리자 잠금 건너뜀 ' + 공고들.filter((j) => j.admin_locked).length + '건'
+  + (볼것.length ? ' · 가장 오래 안 본 것 ' + (언제봤나(볼것[0].id) || '아직 안 봄')
+    + ' ~ ' + (언제봤나(볼것[볼것.length - 1].id) || '아직 안 봄') : ''));
 console.log(진짜 ? '\n★ **진짜로 담습니다**' : '\n[마른] 아무것도 안 담습니다 — 담으려면 --진짜');
 
 const 칸이름 = ['모집인원', '마감시각', '근무지', '지원자격', '예상연봉'];
