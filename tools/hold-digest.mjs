@@ -78,17 +78,41 @@ async function rpc(cfg, fn, body) {
  *
  * 못 부르면 **조용히 null** 을 돌려줍니다 — 이 한 줄 때문에 요약 전체가
  * 안 가면 안 됩니다. */
-async function 네숫자받기(cfg) {
+/** 네숫자() — **5분 간격으로 세 번**까지 다시 두드립니다 (2026-10-22 세중님 5번)
+ *
+ *  2026-10-22 05:55 에 `HTTP 500 · {"code":"57014","message":"canceling statement
+ *  due to statement timeout"}` 으로 못 쟀습니다. 그때 밤 바퀴가 DB 를 때리던
+ *  중이었고, 한가할 때 다시 두드리니 **7.6초에 200** 이었습니다.
+ *  한 번 실패로 아침 메일의 숫자가 비면 그날 판단 근거가 없어집니다.
+ *
+ *  ★ 재시도는 **읽기 한 번**입니다 (rpc 는 읽기 전용). 메일을 막지 않게
+ *    세 번 다 실패하면 null 을 돌려주고 메일은 그대로 나갑니다.
+ */
+async function 네숫자받기(cfg, 몇번 = 3, 쉼ms = 5 * 60 * 1000) {
   const k = cfg.SUPABASE_SERVICE_KEY;
   if (!k) return null;
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('네숫자'), {
-    method: 'POST',
-    headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
-    body: '{}',
-  });
-  if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
-  const j = await r.json();
-  return (j && typeof j === 'object') ? j : null;
+  let 끝탈 = null;
+  for (let i = 1; i <= 몇번; i++) {
+    try {
+      const t0 = Date.now();
+      const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('네숫자'), {
+        method: 'POST',
+        headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
+        body: '{}',
+      });
+      if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
+      const j = await r.json();
+      if (i > 1) console.log('  네숫자 — ' + i + '번째에 받았습니다 (' + Math.round((Date.now() - t0) / 100) / 10 + '초)');
+      return (j && typeof j === 'object') ? j : null;
+    } catch (e) {
+      끝탈 = e;
+      console.error('  네숫자 ' + i + '/' + 몇번 + ' 탈 — ' + String((e && e.message) || e).slice(0, 120));
+      if (i < 몇번) await new Promise((y) => setTimeout(y, 쉼ms));
+    }
+  }
+  console.error('  네숫자 — ' + 몇번 + '번 다 실패했습니다. 숫자 없이 메일을 보냅니다');
+  if (끝탈) console.error('     마지막 탈 — ' + String(끝탈.message || 끝탈).slice(0, 200));
+  return null;
 }
 
 /** 아침 짧은 글 — 조용한 날에도 보냅니다 (2026-10-14 세중님 결정) ──
