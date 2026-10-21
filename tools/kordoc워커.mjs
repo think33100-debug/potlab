@@ -36,7 +36,16 @@ const 꾸러미 = path.join(여기, 'kordoc');
 const CLI = path.join(꾸러미, 'node_modules', 'kordoc', 'dist', 'cli.js');
 
 /* 기준 — 환경변수로 올릴 수 있습니다 */
-const RSS한계 = Number(process.env.KORDOC_RSS_MB) || 700;      /* MB */
+/* ★ 2026-10-21 — 700 → 480MB 로 내렸습니다.
+ *
+ * 서버가 2GB 입니다. 700MB 를 넘길 때까지 기다리면 **커널이 먼저 node 를
+ * 죽입니다** — 10/21 06:23~06:31 에 다섯 번 OOM 으로 죽었습니다
+ * (`task_memcg=/system.slice/cron.service` · 06:10 첨부읽기 크론).
+ * 그러면 기다리던 요청이 「워커가 죽었습니다」로 **조용히 버려집니다** —
+ * 그 바퀴에 읽음 114 · 빈손 15(그중 12건이 이 까닭)였습니다.
+ * 그림 한 장이 rss 를 414→579MB 까지 밀어 올립니다(실측). 480 에서 끊으면
+ * 그림 두세 장마다 워커를 바꾸고, 바꾸는 값은 0.3초쯤입니다 — 죽는 것보다 쌉니다. */
+const RSS한계 = Number(process.env.KORDOC_RSS_MB) || 480;      /* MB */
 const 몇건마다 = Number(process.env.KORDOC_RECYCLE) || 200;    /* 건 */
 const 한건제한초 = Number(process.env.KORDOC_TIMEOUT) || 180;
 
@@ -53,7 +62,8 @@ let 다음번호 = 1;
 let 기다리는것 = new Map();   /* id → {맺, 깨, 때 } */
 let 남은줄 = '';
 let 이번건수 = 0;
-let 끝맺음걸었나 = false;     /* beforeExit 를 한 번만 걸게 */
+let 끝맺음걸었나 = false;
+let exit걸었나 = false;      /* process exit 리스너를 한 번만 걸게 (2026-10-21 — 리스너가 쌓였습니다) */
 
 function 죽이기(까닭) {
   if (!아이) return;
@@ -138,10 +148,14 @@ function 띄우기() {
     끝맺음걸었나 = true;
     process.once('beforeExit', () => { if (아이) 죽이기('프로세스가 끝납니다'); });
   }
-  const 그아이 = 아이;
-  const 같이죽기 = () => { try { 그아이.kill('SIGKILL'); } catch { /* 이미 죽었습니다 */ } };
-  process.once('exit', 같이죽기);
-  그아이.on('exit', () => { process.removeListener('exit', 같이죽기); });
+  /* ★ 2026-10-21 — 전에는 워커를 띄울 때마다 `process.once('exit', …)` 를 **새로**
+     걸고 그 아이가 죽을 때 떼었습니다. 아이가 자주 바뀌면 리스너가 쌓여
+     `MaxListenersExceededWarning: 11 exit listeners added to [process]` 가 났습니다
+     (06:10 첨부읽기 크론 로그에 찍혔습니다). **한 번만 걸고 지금 아이를 봅니다.** */
+  if (!exit걸었나) {
+    exit걸었나 = true;
+    process.on('exit', () => { try { 아이?.kill('SIGKILL'); } catch { /* 이미 죽었습니다 */ } });
+  }
 
   아이.on('exit', () => {
     if (!아이) return;            /* 우리가 바꾼 것 */
