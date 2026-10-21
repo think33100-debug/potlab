@@ -180,6 +180,9 @@ function hs첨부주소(html, 바탕주소) {
  * 목록은 **본 것만** 적습니다 (지침 3절). 늘릴 때 파일 이름을 주석에 남깁니다. */
 function 공고아닌첨부(이름, 주소) {
   const t = (String(이름 || '') + ' ' + String(주소 || '')).toLowerCase();
+  /* 이름이 기관마다 다릅니다 — 본 것: wa_qualith_certificate.pdf(광주보훈) ·
+     wa_busanmc2026.pdf(부산의료원). 둘 다 wa_ 로 시작합니다 (2026-10-22) */
+  if (/(?:^|[/\\])wa_[a-z0-9_-]*\.(?:pdf|jpg|jpeg|png|hwp|hwpx)$/i.test(String(이름 || '').trim())) return true;
   return /wa_qualith|품질\s*인증|정보통신\s*접근성|웹\s*접근성/.test(t);
 }
 
