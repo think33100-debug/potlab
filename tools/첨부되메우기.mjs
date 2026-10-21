@@ -174,7 +174,16 @@ async function 머리(주소) {
      기준을 두 벌로 만들지 않습니다). POTJOB_PARSE_MAX 로 바꿉니다. */
 const 하루뚜껑 = Number(process.env.POTJOB_PARSE_MAX) || 300;
 /* 다시 받아도 영영 안 되는 까닭 — 이런 줄은 건너뜁니다 */
-const 영영안됨 = /형식이 아닙니다|섹션 파일을 찾을 수 없/;
+/* ★ 2026-10-21 — 「읽을 수 있는 형식이 아닙니다 (**HTML** · 3,616바이트)」는
+   **영영 안 되는 것이 아닙니다** — 파일이 아니라 **오류 쪽이 온 것**(받기 문제)입니다.
+   그누보드 7건이 이 글귀로 **영영 건너뜀**이 되어 있었습니다. 쿠키·Referer 를
+   붙이면 받아집니다. 그래서 HTML·모름이 든 글귀는 다시 봅니다 */
+const 영영안됨 = (왜) => {
+  const t = String(왜 || '');
+  if (/섹션 파일을 찾을 수 없/.test(t)) return true;
+  if (/형식이 아닙니다/.test(t)) return !/HTML|모름/.test(t);
+  return false;
+};
 const 오늘KST = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
 const 날짜KST = (t) => (t ? new Date(new Date(t).getTime() + 9 * 3600e3).toISOString().slice(0, 10) : '');
 const 표시할것 = [];                /* --진짜 일 때 창구로 보낼 {job_id,url,왜} */
@@ -197,6 +206,30 @@ const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function 어디(주소) { try { return new URL(주소).host; } catch { return ''; } }
 
+/** 상세 쪽을 한 번 받아 **쿠키**를 챕니다 (호스트마다 한 번 · 지침 — 3.5초 틈은 위에서) */
+const 쿠키집 = new Map();
+async function 상세쿠키(상세주소) {
+  const host = 어디(상세주소);
+  if (!host) return '';
+  if (쿠키집.has(host)) return 쿠키집.get(host);
+  let 쿠키 = '';
+  try {
+    const r = await fetch(상세주소, {
+      headers: await 머리(상세주소),
+      redirect: 'follow',
+      signal: AbortSignal.timeout(받기제한초 * 1000),
+    });
+    const 들 = r.headers.getSetCookie?.() || [];
+    쿠키 = 들.map((x) => String(x).split(';')[0]).filter(Boolean).join('; ');
+    셈쿠키.set(host, 쿠키 ? '받음' : '없음');
+  } catch (e) {
+    셈쿠키.set(host, '탈 — ' + String((e && e.message) || e).slice(0, 30));
+  }
+  쿠키집.set(host, 쿠키);
+  return 쿠키;
+}
+const 셈쿠키 = new Map();
+
 async function 틈두고받기(주소, 받는법 = null) {
   const host = 어디(주소);
   if (!host) return { 왜: '주소 꼴이 아님' };
@@ -206,7 +239,13 @@ async function 틈두고받기(주소, 받는법 = null) {
   끝때.set(host, Date.now());
   let g;
   try {
-    const 더 = 받는법 && 받는법.Referer ? { Referer: 받는법.Referer } : {};
+    const 더 = {};
+    if (받는법 && 받는법.Referer) 더.Referer = 받는법.Referer;
+    /* ★ 상세 쪽 쿠키 — 그누보드는 세션이 있어야 파일을 줍니다 (없으면 오류 쪽 HTML) */
+    if (받는법 && 받는법.쿠키 === '상세' && 받는법.Referer) {
+      const c = await 상세쿠키(받는법.Referer);
+      if (c) 더.Cookie = c;
+    }
     g = await fetch(주소, { headers: { ...(await 머리(주소)), ...더 },
       signal: AbortSignal.timeout(받기제한초 * 1000) });
   } catch (e) {
@@ -263,7 +302,7 @@ for (const j of 볼것) {
   /* 공고문 쪽 첨부를 고릅니다 — 지원서·서식은 뒤로 */
   const 점수 = (nm) => (/지원서|응시원서|서식|양식|이력서|직무기술/.test(nm) ? 0 : /공고|모집|채용/.test(nm) ? 2 : 1);
   /* 영영 안 되는 까닭이 적힌 줄은 건너뜁니다 (png·섹션 없는 hwpx 등) */
-  const 쓸만한 = 공고별첨부.get(j.id).filter((a) => !(a['읽기탈'] && 영영안됨.test(a['읽기탈'])));
+  const 쓸만한 = 공고별첨부.get(j.id).filter((a) => !(a['읽기탈'] && 영영안됨(a['읽기탈'])));
   const 고른것 = [...쓸만한].sort((a, b) => 점수(b.name || '') - 점수(a.name || ''))[0];
   if (!고른것) { 한줄.왜 = '쓸 수 있는 첨부가 없습니다 (영영 안 되는 것만)'; continue; }
 
@@ -279,6 +318,11 @@ for (const j of 볼것) {
      능력시험에서 「HTML 이 옴」 12건이 거의 다 **잘못된 주소 줄**이었습니다 —
      상세 쪽 주소 · 빈 열쇠 · 서버 파일 경로 · 알리오 opendata 내려받기. */
   const 고친 = 고친주소(고른것.url, j.url || '');
+  if (고친.받는법 && 고친.받는법.꼴 === 'POST못함') {
+    못받음++; 한줄.왜 = 고친.받는법.왜;
+    못받음까닭.set(한줄.왜, (못받음까닭.get(한줄.왜) ?? 0) + 1);
+    continue;                                  /* 읽음 표시도 안 남깁니다 — 길이 생기면 다시 봅니다 */
+  }
   if (고친.버릴것) {
     못받음++; 한줄.왜 = '주소를 버렸습니다 — ' + 고친.왜;
     못받음까닭.set(한줄.왜, (못받음까닭.get(한줄.왜) ?? 0) + 1);
@@ -353,6 +397,9 @@ for (const [왜, n] of [...못받음까닭].sort((a, b) => b[1] - a[1])) {
 }
 for (const [왜, n] of [...고침셈].sort((a, b) => b[1] - a[1])) {
   console.log('   주소고침 ' + String(n).padStart(3) + '건  ' + 왜);
+}
+if (셈쿠키.size) {
+  console.log('   상세 쿠키 — ' + [...셈쿠키].map(([h, v]) => h + ' ' + v).join(' · ').slice(0, 160));
 }
 if (멈춘사이트.size) {
   console.log('  ★ 멈춘 사이트 ' + 멈춘사이트.size + '곳 — ' +

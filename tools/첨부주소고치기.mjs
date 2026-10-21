@@ -47,6 +47,33 @@ export const 서버경로꼴 = /\/(?:home|var|usr|data)\/(?:hosting_users|www|ht
  * @returns { url, 받는법? , 왜 }  고친 주소 · 그대로면 왜 없음
  *          { 버릴것: true, 왜 }   파일이 아니거나 받을 수 없는 줄
  */
+/**
+ * 주소 꼴로 **받는 법**을 가립니다 (2026-10-21 세중님 4번)
+ *
+ * 실측 — job_attachments 를 갈래로 세어 보니
+ *   고용24  /downFile.do?filenm=..&uuid=..&saveGbn=..   144줄 · **GET 으로 받아집니다**
+ *           (폼 값이 **쿼리 문자열로** 담겨 있어 POST 가 필요 없습니다)
+ *   보훈    /common/nttFileDownload.do?fileKey=..        14줄 · 탈 0 (쿠키 없이도 옵니다)
+ *   그누보드 /bbs/download.php?bo_table=..               105줄 · **탈 7건이 「HTML 이 왔다」**
+ *           → 그누보드는 **상세 쪽 쿠키와 Referer** 를 봅니다 (지침 — 받는 길 ①)
+ *   클린아이 /file/FileDownload.do                        3줄 · 폼 값이 주소에 없어 못 받습니다
+ *           (받는 길은 collect-cleaneye 안에 있습니다 — 거기서는 받아집니다)
+ */
+export function 받는법가리기(주소, 바탕 = '') {
+  const s = String(주소 || '');
+  if (/download[.]php/i.test(s)) {
+    return { 꼴: 'GET', 쿠키: '상세', Referer: 바탕 || undefined,
+      왜: '그누보드는 상세 쪽 쿠키와 Referer 를 봅니다' };
+  }
+  if (/nttFileDownload[.]do/i.test(s)) {
+    return { 꼴: 'GET', Referer: 바탕 || undefined, 왜: '보훈은 Referer 를 봅니다' };
+  }
+  if (/[/]file[/]FileDownload[.]do/i.test(s)) {
+    return { 꼴: 'POST못함', 왜: '클린아이는 폼 세 값이 있어야 합니다 — 주소만으로는 못 받습니다' };
+  }
+  return null;
+}
+
 export function 고친주소(주소, 바탕 = '') {
   const s = String(주소 || '').trim();
   if (!s) return { 버릴것: true, 왜: '주소가 없습니다' };
@@ -89,7 +116,9 @@ export function 고친주소(주소, 바탕 = '') {
     return { url: u, 왜: '뷰어가 품은 참 파일 경로' };
   }
 
-  return { url: s };
+  /* 고칠 것이 없으면 **받는 법만** 붙여 돌려줍니다 */
+  const 법 = 받는법가리기(s, 바탕);
+  return 법 ? { url: s, 받는법: 법, 왜: 법.왜 } : { url: s };
 }
 
 /* ── 자기 점검 ───────────────────────────────────────────────── */
@@ -137,9 +166,17 @@ if (import.meta.url === ('file://' + process.argv[1]) || process.argv[1]?.endsWi
       === 'https://job.cleaneye.go.kr/file/FileDownload.do');
   봐('빈 주소는 버린다', 고친주소('').버릴것 === true);
 
+  /* 받는법 가리기 (2026-10-21) */
+  봐('그누보드는 상세 쿠키·Referer', (() => { const g = 고친주소('https://a.kr/bbs/download.php?bo_table=t&wr_id=1', 'https://a.kr/view?x=1');
+    return g.받는법 && g.받는법.쿠키 === '상세' && g.받는법.Referer === 'https://a.kr/view?x=1'; })());
+  봐('보훈은 Referer 만', (() => { const g = 고친주소('https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=ab12', 'https://www.bohun.or.kr/v?mi=1');
+    return g.받는법 && !g.받는법.쿠키 && /bohun/.test(g.받는법.Referer || ''); })());
+  봐('클린아이 POST 는 못 받는다고 표시', 고친주소('https://job.cleaneye.go.kr/file/FileDownload.do').받는법?.꼴 === 'POST못함');
+  봐('고용24 쿼리 꼴은 그냥 GET', !고친주소('https://www.gojobs.go.kr/downFile.do?filenm=a.hwp&uuid=1&saveGbn=x').받는법);
+
   if (탈.length) {
     console.error('✗ 자기 점검 실패 ' + 탈.length + '가지 — ' + 탈.join(' · '));
     process.exit(1);
   }
-  console.log('○ 첨부주소고치기 자기 점검 통과 — 15가지 (그물을 안 두드렸습니다)');
+  console.log('○ 첨부주소고치기 자기 점검 통과 — 19가지 (그물을 안 두드렸습니다)');
 }
