@@ -55,7 +55,8 @@ async function 전부(길) {
   return 모은것;
 }
 
-const 공고 = await 전부('job_posts?select=id,source,org_name,title,hidden,hold');
+const 공고 = await 전부('job_posts?select=id,source,org_name,title,hidden,hold,tab,'
+  + 'headcount,apply_to,apply_to_time,work_place,employ_type,detail,' + encodeURIComponent('뽑은값'));
 const 보임 = new Set((await 전부('job_posts_pub?select=id')).map((x) => x.id));
 const 볼것 = 전부볼까 ? 공고 : 공고.filter((j) => 보임.has(j.id));
 console.log('공고 ' + 공고.length + '건 · ' + (전부볼까 ? '전부 봅니다' : '회원 화면 ' + 볼것.length + '건을 봅니다'));
@@ -80,12 +81,29 @@ for (const a of 첨부) {
   첨부별.get(a.job_id).push(a);
 }
 
+/** 일곱 칸 가운데 **빈 칸 이름들** — 첨부되메우기의 빈칸들() 과 같은 눈으로 봅니다 */
+function 빈칸수(j) {
+  const p = j['뽑은값'] || {}; const d = j.detail || {};
+  const 있나 = (v) => v != null && v !== '';
+  const 빈 = [];
+  if (!있나(j.headcount) && !있나(p.모집인원)) 빈.push('모집인원');
+  if (!있나(j.apply_to)) 빈.push('접수마감');
+  if (!있나(j.apply_to_time)) 빈.push('마감시각');
+  if (!있나(j.work_place)) 빈.push('근무지');
+  if (!있나(d.지원자격) && !있나(p.지원자격)) 빈.push('지원자격');
+  if (!있나(d.예상연봉) && !있나(p.예상연봉)) 빈.push('예상연봉');
+  if (!있나(j.employ_type)) 빈.push('고용형태');
+  return 빈;
+}
+
 const 갈래 = new Map();          /* 이름 → {수, 견본[], 출처별{}} */
 const 더하기 = (이름, j) => {
   if (!갈래.has(이름)) 갈래.set(이름, { 수: 0, 견본: [], 출처별: {} });
   const g = 갈래.get(이름);
   g.수++;
   g.출처별[j.source || '?'] = (g.출처별[j.source || '?'] || 0) + 1;
+  g.빈칸합 = (g.빈칸합 || 0) + 빈칸수(j).length;
+  g.탭별 = g.탭별 || {}; g.탭별[j.tab || '?'] = (g.탭별[j.tab || '?'] || 0) + 1;
   if (g.견본.length < 줄수) g.견본.push(j);
 };
 
@@ -109,6 +127,9 @@ for (const [이름, g] of [...갈래].sort((a, b) => b[1].수 - a[1].수)) {
     .map(([k, v]) => k + ' ' + v).join(' · ');
   console.log('\n' + 줄맞춤(g.수 + '건', 7) + 이름);
   console.log('        출처 — ' + 출처.slice(0, 150));
+  const 탭 = Object.entries(g.탭별 || {}).sort((a2, b2) => b2[1] - a2[1]).map(([k, v]) => k + ' ' + v).join(' · ');
+  console.log('        탭 — ' + 탭 + '  ·  일곱 칸 가운데 빈 칸 평균 '
+    + (Math.round((10 * (g.빈칸합 || 0)) / g.수) / 10) + '개');
   for (const j of g.견본) {
     console.log('        ' + 줄맞춤(j.id, 16) + 줄맞춤(String(j.org_name || '').slice(0, 14), 16)
       + String(j.title || '').slice(0, 44));
@@ -131,4 +152,33 @@ console.log('  출처    전체   원문 열림');
 for (const [s, o] of [...출처셈].sort((a, b) => b[1].전체 - a[1].전체)) {
   console.log('  ' + 줄맞춤(s, 8) + 줄맞춤(o.전체, 7)
     + o.열림 + ' (' + Math.round((1000 * o.열림) / o.전체) / 10 + '%)');
+}
+
+console.log('\n══ 회원 화면 일곱 칸 — 빈 칸 수 (못 연 것만이 아니라 전부) ══');
+{
+  const 셈 = {};
+  for (const j of 볼것) for (const k of 빈칸수(j)) 셈[k] = (셈[k] || 0) + 1;
+  for (const [k, v] of Object.entries(셈).sort((a, b) => b[1] - a[1])) {
+    console.log('  ' + 줄맞춤(k, 10) + 줄맞춤(v + '건', 8)
+      + '빔 ' + Math.round((1000 * v) / 볼것.length) / 10 + '%');
+  }
+}
+
+console.log('\n══ 탭별 원문 열림 ══');
+{
+  const 셈 = new Map();
+  for (const j of 볼것) {
+    const t = j.tab || '?';
+    if (!셈.has(t)) 셈.set(t, { 전체: 0, 열림: 0, 빈칸합: 0 });
+    const o = 셈.get(t);
+    o.전체++; o.빈칸합 += 빈칸수(j).length;
+    const 글 = 글길이.get(j.id) || 0;
+    if (글 >= 400 || (첨부별.get(j.id) || []).some((a) => a.parsed_at)) o.열림++;
+  }
+  console.log('  탭        전체   원문 열림      빈 칸 평균');
+  for (const [t, o] of [...셈].sort((a, b) => b[1].전체 - a[1].전체)) {
+    console.log('  ' + 줄맞춤(t, 10) + 줄맞춤(o.전체, 7)
+      + 줄맞춤(o.열림 + ' (' + Math.round((1000 * o.열림) / o.전체) / 10 + '%)', 14)
+      + Math.round((10 * o.빈칸합) / o.전체) / 10);
+  }
 }
