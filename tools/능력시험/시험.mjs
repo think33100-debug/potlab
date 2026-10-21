@@ -98,19 +98,22 @@ function 검사() {
 if (argv.includes('--자기점검')) process.exit(0);
 
 /* ── 자료 읽기 ───────────────────────────────────────────────── */
-const 정답파일 = path.join(여기, '정답지.jsonl');
-if (!fs.existsSync(정답파일)) { console.error('✗ 정답지.jsonl 이 없습니다 — 먼저 원문을 읽고 정답을 적습니다'); process.exit(1); }
+/* ★ 2026-10-21 — 둘째 표본(처음 보는 공고 30건)도 같은 자로 채점합니다 */
+const 정답파일 = path.join(여기, 값('--정답', '정답지.jsonl'));
+const 표본파일이름 = 값('--표본', '표본.json');
+const 방이름 = 값('--방', '원문');
+if (!fs.existsSync(정답파일)) { console.error('✗ ' + 정답파일 + ' 이 없습니다 — 먼저 원문을 읽고 정답을 적습니다'); process.exit(1); }
 const 정답들 = fs.readFileSync(정답파일, 'utf8').split('\n').map((l) => l.trim())
   .filter((l) => l && !l.startsWith('//')).map((l) => JSON.parse(l));
-const { 표본 } = JSON.parse(fs.readFileSync(path.join(여기, '표본.json'), 'utf8'));
+const { 표본 } = JSON.parse(fs.readFileSync(path.join(여기, 표본파일이름), 'utf8'));
 const 표본맵 = new Map(표본.map((x) => [x.id, x]));
 /* ★ 2026-10-20 — **공고마다 있는 `원문/<id>/사실.json` 을 바로 읽습니다.**
    모아 둔 `원문사실.json` 은 **그 바퀴에 받은 것만** 담습니다 — 50건을
    나눠 받으면 마지막 묶음만 남아, 채점이 45건을 「원문에 없는 정답」으로
    건너뛰었습니다 (2026-10-20 에 그랬습니다) */
 const 사실맵 = new Map();
-for (const 이름 of fs.readdirSync(path.join(여기, '원문'))) {
-  const p = path.join(여기, '원문', 이름, '사실.json');
+for (const 이름 of fs.readdirSync(path.join(여기, 방이름))) {
+  const p = path.join(여기, 방이름, 이름, '사실.json');
   if (!fs.existsSync(p)) continue;
   try { const j = JSON.parse(fs.readFileSync(p, 'utf8')); if (j && j.id) 사실맵.set(j.id, j); } catch { /* 깨진 것은 건너뜁니다 */ }
 }
@@ -159,7 +162,7 @@ for (const k of 칸이름) 다시셈[k] = { 맞음: 0, 틀림: 0, 빈칸: 0, 헛
 
 /** 받아 둔 원문을 글로 — 첨부 글이 본령, 쪽글은 받침입니다 */
 function 받아둔글(id) {
-  const 방 = path.join(여기, '원문', id);
+  const 방 = path.join(여기, 방이름, id);
   const 쪽p = path.join(방, '쪽.txt');
   const 글 = fs.existsSync(쪽p) ? fs.readFileSync(쪽p, 'utf8') : '';
   let md = '';
@@ -212,7 +215,7 @@ for (const 답 of 정답들) {
 
   /* ② 본문 — 메뉴뿐이 아닌가 */
   const 쪽글 = (() => {
-    const p = path.join(여기, '원문', 답.id, '쪽.txt');
+    const p = path.join(여기, 방이름, 답.id, '쪽.txt');
     return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
   })();
   const 본문표식 = ['접수', '모집', '자격', '채용', '제출', '기간'].filter((w) => 쪽글.includes(w)).length;
