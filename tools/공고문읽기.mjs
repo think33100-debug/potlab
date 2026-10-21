@@ -1283,9 +1283,52 @@ export function 칸뽑기(md, 합친글 = '') {
         break;
       }
     }
+    /* ⓐ-1b **표들() 의 표 줄** — 첨부가 HTML 로 올 때 (2026-10-21)
+       ⓐ-1 은 가름대가 있는 줄만 봅니다. 그런데 첨부 글이 HTML 표 그대로 올 때가
+       있습니다 (HS146236860 순천의료원 — 「재활의학과」를 놓쳤습니다).
+       표들() 은 HTML 표도 **칸으로 끊어** 주므로 그 줄을 씁니다 —
+       모집인원이 쓰는 길과 같습니다 (기준은 한 자리 · 지침 6절) */
+    if (!낸것.근무지) {
+      바깥: for (const 표 of 표들(md)) {
+        for (const 줄 of 표) {
+          if (!Array.isArray(줄)) continue;
+          const 칸 = 줄.map((c) => String(c == null ? '' : c).replace(/\s+/g, ' ').trim()).filter(Boolean);
+          if (칸.length < 2) continue;
+          if (!칸.some((c) => Object.values(우리직군).some((re) => re.test(c)))) continue;
+          const 고른 = 칸.find((c) => !Object.values(우리직군).some((re) => re.test(c))
+            && 부서말.test(c) && 부서끝.test(c) && !머리글칸.test(c));
+          if (고른) {
+            낸것.근무지 = 고른.slice(0, 80);
+            낸것.근거.근무지 = '우리 직군 표 줄의 부서 칸(표들) — ' + 칸.join(' | ').slice(0, 80);
+            break 바깥;
+          }
+        }
+      }
+    }
+    /* ⓐ-1c **짧은 줄(제목 꼴)의 부서** — 「2026년도 재활치료실 신규 작업치료사 채용공고」
+       (HS665496254 뉴고려병원). 표도 표식도 없는 자리입니다.
+       센터·부는 안 받습니다 — 기관 이름이 걸립니다 (2026-10-21) */
+    if (!낸것.근무지) {
+      const 부서끝좁게 = /(?:과|실|팀|병동|클리닉)$/;
+      for (const 줄 of String(줄글).split(/\r?\n/)) {
+        const t = 줄.replace(/\s+/g, ' ').trim();
+        if (!t || t.length > 40) continue;
+        if (!Object.values(우리직군).some((re) => re.test(t))) continue;
+        const 토막 = t.split(/[\s|,·()\[\]]+/).filter(Boolean);
+        const 고른 = 토막.find((c) => c.length >= 2 && c.length <= 12
+          && 부서끝좁게.test(c) && !머리글칸.test(c)
+          && !/병원|의료원|보건소|대학|공고|채용|모집|지원|접수/.test(c)
+          && !Object.values(우리직군).some((re) => re.test(c)));
+        if (고른) {
+          낸것.근무지 = 고른;
+          낸것.근거.근무지 = '짧은 줄의 부서 토막 — 「' + t.slice(0, 60) + '」';
+          break;
+        }
+      }
+    }
     /* ⓐ-2 「ㅇ○○ 근무」 꼴 */
     if (!낸것.근무지) {
-      const m = 줄글.match(/[ㅇ○●◦∘·\-]\s*([가-힣A-Za-z0-9()·\s]{2,24}?)\s*근무(?![지시간])/);
+      const m = 줄글.match(/[ㅇ○●◦∘·\-]\s*([가-힣A-Za-z0-9()·\s]{2,24}?)\s*근무(?![지시간]|\s*(?:경력|경험|가능|희망|예정))/);
       if (m && 부서끝.test(m[1].trim())) {
         낸것.근무지 = m[1].trim().slice(0, 80);
         낸것.근거.근무지 = '「' + m[0].replace(/\s+/g, ' ').trim() + '」 꼴';
@@ -1532,6 +1575,15 @@ if (import.meta.url === 'file://' + process.argv[1] || process.argv[1]?.endsWith
       const 제주 = ['채용분야 : 작업치료사', '2. 근무지 및 담당 업무',
         '가. 재활의학과'].join('\n');
       const f = 칸뽑기('', 삼성); const g = 칸뽑기('', 제주);
+      /* ★ 2026-10-21 — HTML 표 줄의 부서 칸 (HS146236860 순천의료원) */
+      const html표 = ['<table><tr><th>구분</th><th>직종</th><th>인원</th><th>부서</th></tr>',
+        '<tr><td>기간제 보건직</td><td>물리치료사</td><td>1</td><td>재활의학과</td></tr></table>'].join('');
+      봐('HTML 표 줄에서 부서를 집는다', 칸뽑기(html표).근무지 === '재활의학과');
+      /* ★ 2026-10-21 — 짧은 제목 줄의 부서 (HS665496254) · 기관 이름은 안 집습니다 */
+      봐('짧은 제목 줄에서 부서를 집는다',
+        칸뽑기('2026년도 재활치료실 신규 작업치료사 채용공고').근무지 === '재활치료실');
+      봐('기관 이름은 근무지로 안 집는다',
+        칸뽑기('구로구치매안심센터 작업치료사 채용공고').근무지 == null);
       봐('삼성서울 — 근무지역이 지원자격으로 안 간다',
         !/근무\s*지역/.test(f.지원자격 || ''));
       봐('제주 중앙 — 「및 담당 업무」가 근무지가 안 된다',
