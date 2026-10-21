@@ -12,7 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 찌꺼기본문 } from './직군바로잡기.mjs';
+import { 찌꺼기본문 } from './본문찌꺼기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const cfg = {};

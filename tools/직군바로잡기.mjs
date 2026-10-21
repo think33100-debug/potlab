@@ -19,6 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 본문직군 } from './공고문읽기.mjs';
+import { 찌꺼기본문 } from './본문찌꺼기.mjs';   /* 판정 한 자리 (2026-10-22) */
 import { matchJob, notOurs } from './gas-rules.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -54,19 +55,6 @@ async function 전부(길) {
     if (off > 200000) throw new Error('너무 많습니다');
   }
   return 모은것;
-}
-
-/** 본문이 **CSS·JS 찌꺼기**인가 — 스타일·스크립트가 글로 담긴 것 */
-export function 찌꺼기본문(글) {
-  const t = String(글 || '').trim();
-  if (!t) return false;
-  /* ★ 2026-10-22 — **앞 200자**로 봅니다. 강진의료원 본문은 2,306자 한 줄인데
-     앞은 CSS 이고 뒤에 쪽 글자가 섞여 있어 「공고말이 있다」로 빠져나갔습니다.
-     공고문은 **앞머리가 CSS 가 아닙니다** */
-  const 앞머리찌꺼기 = t.slice(0, 200);
-  const 표 = [/!important/, /\{[^}]{0,80}:[^}]{0,80};/, /function\s*\(/, /<style/i, /<script/i,
-    /\bvar\s+\w+\s*=/, /px\s*;/, /-webkit-|-moz-/, /^\s*\/\*/];
-  return 표.filter((re) => re.test(앞머리찌꺼기)).length >= 2;
 }
 
 const 우리말 = /(물리|작업|도수)\s*치료/;
