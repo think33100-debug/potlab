@@ -34,7 +34,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { 읽기, kordoc있나, 워커끝내기, 워커셈 } from './kordoc워커.mjs';
+import { 읽기, kordoc있나, 워커끝내기, 워커셈, 워커비우기 } from './kordoc워커.mjs';
 import { 목록, 꺼내기, 묶음갈래, 공고문먼저, 역사선바로잡기, 서식말, 묶기 } from './묶음파일.mjs';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -135,6 +135,12 @@ export async function 첨부읽기(buf, 이름 = '공고문.hwp', 옵션 = {}) {
     : 그림인가 ? '.' + (꼴 === 'jpg' ? 'jpg' : 꼴)
       : 꼴 === 'zip계열' ? '.' + (묶음속 && 묶음속 !== 'zip' ? 묶음속 : 'hwpx')
         : '.hwp';
+  /* ★ 2026-10-21 — **그림은 깨끗한 워커로 한 장씩** 읽습니다.
+     그림 한 장이 rss 를 400~580MB 까지 밀어 올려, 잇달아 읽으면 우리가 교체할
+     틈 없이 커널이 먼저 죽입니다 (그림이 몰린 조각에서 읽기 51% · 죽음 8번).
+     띄우는 값은 0.3초쯤이고 그림은 한 바퀴에 몇 장뿐이라 값이 쌉니다. */
+  if (그림인가) 워커비우기('그림을 읽기 전에 비웁니다');
+
   const 바닥 = fs.mkdtempSync(path.join(os.tmpdir(), 'kd-'));
   const 넣을곳 = path.join(바닥, 'in' + 확장자);
   fs.writeFileSync(넣을곳, 몸);
