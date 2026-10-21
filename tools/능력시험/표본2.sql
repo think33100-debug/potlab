@@ -63,7 +63,7 @@ p as (
                               + coalesce(첨.zipdoc,0)*4 + coalesce(첨.그림,0)*8
                             order by random()) as 꼴순
     from p left join 첨 on 첨.job_id = p.id left join 본 on 본.job_id = p.id
-)
+),
 /* 첨부 있는 것 16 + 없는 것 14 — 형식을 섞으려고 꼴표로 흩습니다 */
 첨있 as (select * from 줄 where 첨부목록 <> '[]'::jsonb order by 꼴순, random() limit 16),
 첨없 as (select * from 줄 where 첨부목록 = '[]'::jsonb and 출처순 <= 2 order by random() limit 14),
