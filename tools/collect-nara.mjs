@@ -48,7 +48,7 @@ import { 공공부르기, 한도알리기, 한도들 } from './공공데이터�
 
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
-import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 고용형태판정, 고용형태코드,
+import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 고용형태판정, 고용형태고르기, 고용형태코드,
   그림OCR인가, OCR근거, OCR보류사유 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
@@ -602,7 +602,7 @@ const 줄만들기 = (v) => {
     /* API 코드가 말해 주면 그것을 쓰고(e07~e10), 아니면 **제목·본문에서 읽습니다**.
        판정은 `공고문읽기.mjs` 의 `고용형태판정()` 한 자리입니다 (2026-10-19) */
     employ_type: 고용형태(x.type01) || 고용형태(x.type02)
-      || 고용형태판정(v.제목, v.글 || (v.상세 || {}).contents || '').값 || '',
+      || 고용형태고르기(v.제목, v.글 || (v.상세 || {}).contents || '').값 || '',
     sido: String((v.상세 || {}).areaname || '').split(/[ ,]/)[0] || '',
     apply_from: 날짜(x.begindate),
     apply_to: 날짜(x.enddate),
