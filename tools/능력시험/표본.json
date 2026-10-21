@@ -1,0 +1,2645 @@
+{
+ "만든때": "2026-10-19T14:24:38.479Z",
+ "규칙": "최근 30일 · 1층 기관(견줄이름 ↔ 일층병원_구멍) · 숨김·보류 포함 · 출처별 골고루 · 첨부 있는 것 먼저",
+ "몇개": 50,
+ "표본": [
+  {
+   "id": "305467",
+   "source": "AL",
+   "기관": "제주대학교병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "제주대학교병원 휴직대체 계약직(간호사, 업무지원_환경, 보건의료정보관리사, 응급구조사, 행정, 물리치료사), 단기간 계약직(업무지원_영선) 모집공고",
+   "주소": "https://www.jejunuh.co.kr/prog/rcrutPbanc/main/sub05_03_03_01/view.do?rcrutPbancNo=2653",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "제주",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-10-06",
+    "지원자격": "○ 성별, 학력 및 응시연령에 제한은 없으나, 본원 인사규정 제52조(정년)에 의거 만 60세 이상자는 지원 불가\r\n○ 모집부문별 응시자격: 공고문 참고"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "305876",
+   "source": "AL2",
+   "기관": "제주대학교병원",
+   "보류": false,
+   "숨김": false,
+   "제목": "제주대학교병원 휴직대체 계약직(간호사, 업무지원_환경, 보건의료정보관리사, 물리치료사), 단기간 계약직(업무지원_영선) 모집공고",
+   "주소": "https://job.alio.go.kr/recruitview.do?idx=305876",
+   "첨부": [
+    {
+     "url": "https://opendata.alio.go.kr/recruit/downloadAtchFile?recrutAtchFileNo=3079884",
+     "kind": "공고문",
+     "name": "1. 모집공고.pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "제주",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": "내규에 따름",
+    "접수마감": "2026-10-19",
+    "지원자격": "❍ 물리치료사 면허증 소지자 ※ 신경계 물리치료 자격증 소지자 우대할 수 있음"
+   },
+   "들어온때": "2026-10-12"
+  },
+  {
+   "id": "CE79618",
+   "source": "CE",
+   "기관": "충청북도 청주의료원",
+   "보류": false,
+   "숨김": true,
+   "제목": "제26-10회 직원채용 공고(재활치료업무보조,간호업무보조_장애인 제한채용)",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=79618",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "충청북도",
+    "고용형태": "일반계약직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": "1200만원 이하",
+    "접수마감": "2026-09-21",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "CE80464",
+   "source": "CE2",
+   "기관": "성남시의료원",
+   "보류": false,
+   "숨김": false,
+   "제목": "2026년 제13회 성남시의료원 직원채용 모집 공고",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80464",
+   "첨부": [
+    {
+     "url": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80464",
+     "kind": "공고화면",
+     "name": "2026년 제13회 성남시의료원 직원 채용 공고문.pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 5793,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "(13290) 경기도 성남시 수정구 수정로 171번길 10(태평동)",
+    "고용형태": "계약직",
+    "마감시각": "17:00:00",
+    "모집인원": 1,
+    "예상연봉": "내규에 따름",
+    "접수마감": "2026-10-26",
+    "지원자격": "◎ 자격요건 : 아래 필수조건 해당 자 필수조건 : 해당분야 면허(자격) 소지자 ·물리치료사(계약직 6급 상당) : 물리치료사 면허 소지자"
+   },
+   "들어온때": "2026-10-15"
+  },
+  {
+   "id": "GJ304423",
+   "source": "GJ2",
+   "기관": "서울특별시 은평병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "서울특별시 은평병원 시간선택제임기제공무원 채용시험 계획 공고",
+   "주소": "https://www.gojobs.go.kr/apmView.do?empmnsn=304423",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "",
+    "근무지": null,
+    "고용형태": "공무원",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-09-30",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS490653413",
+   "source": "HS",
+   "기관": "청주성모병원",
+   "보류": false,
+   "숨김": false,
+   "제목": "작업치료사(단기간근로) 채용",
+   "주소": "https://www.ccmc.or.kr/bbs/board.php?bo_table=commu_02&wr_id=43",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "충북 청주청원구",
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS445523642",
+   "source": "HS3",
+   "기관": "대구보건대학교병원",
+   "보류": false,
+   "숨김": false,
+   "제목": "작업치료사 채용(신규, 경력)",
+   "주소": "http://dhch.ac.kr/bbs/board.php?bc=employment&idx=1047",
+   "첨부": [
+    {
+     "url": "http://dhch.ac.kr/bbs/download.php?bc=employment&idx=1047&file_idx=8695",
+     "kind": "공고문",
+     "name": "임용지원서 및 개인정보 동의서(본원지정양식).hwp (Size : 17.5 KB)",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 10272,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": 0,
+    "예상연봉": "내규에 따름",
+    "접수마감": null,
+    "지원자격": "작업치료사 면허증 소지자"
+   },
+   "들어온때": "2026-10-18"
+  },
+  {
+   "id": "JF99539",
+   "source": "JF",
+   "기관": "성남시의료원",
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 제4회 성남시의료원 직원 채용 모집 공고",
+   "주소": "https://scmc.recruiter.co.kr/career/jobs/99539",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-03-04",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "ND1726",
+   "source": "ND2",
+   "기관": "강남구치매안심센터",
+   "보류": false,
+   "숨김": true,
+   "제목": "[강남구치매안심센터] 정규직, 기간제 직원 채용 공고(수정)",
+   "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1726",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": null,
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-25",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-12"
+  },
+  {
+   "id": "WNK180512610060043",
+   "source": "WN",
+   "기관": "근로복지공단안산병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년도 하반기 청년(체험형)인턴 일반전형 신규채용(~10/8 17:30까지)",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K180512610060043&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "공통",
+    "근무지": "경기 안산시 상록구",
+    "고용형태": "계약직(시간선택제)",
+    "마감시각": "17:30:00",
+    "모집인원": null,
+    "예상연봉": "월급 176만원~176만원",
+    "접수마감": "2026-10-08",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-06"
+  },
+  {
+   "id": "WNK163022610150014",
+   "source": "WN2",
+   "기관": "제주권역재활병원",
+   "보류": false,
+   "숨김": false,
+   "제목": "제주권역재활병원 작업치료사 직원 모집 (기간제계약직 육아휴직대체)",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K163022610150014&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "제주 서귀포시 동문로 1",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": 2,
+    "예상연봉": "월급2,440,970원 이상 ~ 2,440,970원 이하",
+    "접수마감": "2026-10-27",
+    "지원자격": "자격 작업치료사 · 학력 학력무관"
+   },
+   "들어온때": "2026-10-15"
+  },
+  {
+   "id": "305272",
+   "source": "AL",
+   "기관": "경북대학교병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "칠곡경북대학교병원 2026년 9월 5차 임시직원 채용공고(물리치료사, 간호사, 주차, 조경관리)",
+   "주소": "https://www.knuch.kr:442/content/04info/11_01.asp?proc_type=view&b_num=5090&rtn_url=%2Fcontent%2F04info%2F11%5F01%2Easp",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "대구",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-09-28",
+    "지원자격": "1) 의료기사(물리치료사): 물리치료사 면허 소지자\r\n\r\n 2) 간호사: 간호사 면허 소지자\r\n\r\n 3) 운영지원(주차): 자격무관\r\n\r\n 4) 업무보조(조경관리): 자격무관"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "305814",
+   "source": "AL2",
+   "기관": "충남대학교병원",
+   "보류": false,
+   "숨김": false,
+   "제목": "[세종] 2026년 하반기 세종충남대학교병원 정규직(행정직, 보건직, 간호조무직) 공개채용 공고",
+   "주소": "https://job.alio.go.kr/recruitview.do?idx=305814",
+   "첨부": [
+    {
+     "url": "https://opendata.alio.go.kr/recruit/downloadAtchFile?recrutAtchFileNo=3079523",
+     "kind": "공고문",
+     "name": "[세종] 2026년 하반기 세종충남대학교병원 정규직 채용공고.pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "공통",
+    "근무지": "세종",
+    "고용형태": "정규직",
+    "마감시각": null,
+    "모집인원": 2,
+    "예상연봉": null,
+    "접수마감": "2026-10-21",
+    "지원자격": "직종 및 분야별 응시자격 첨부파일 참고"
+   },
+   "들어온때": "2026-10-07"
+  },
+  {
+   "id": "CE79408",
+   "source": "CE",
+   "기관": "강원특별자치도강릉의료원",
+   "보류": false,
+   "숨김": true,
+   "제목": "공고2026-66호 기간제 물리치료사(육아휴직대체)",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=79408",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "강원",
+    "고용형태": "기간제",
+    "마감시각": null,
+    "모집인원": 2,
+    "예상연봉": "3000만원 이상",
+    "접수마감": "2026-09-14",
+    "지원자격": "물리리료실 치료사 업무"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "CE80512",
+   "source": "CE2",
+   "기관": "경상북도김천의료원",
+   "보류": true,
+   "숨김": false,
+   "제목": "경상북도 김천의료원 신경외과 전문의 채용",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80512",
+   "첨부": [
+    {
+     "url": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80512",
+     "kind": "공고화면",
+     "name": "1채용 공고 (신경외과 전문의1).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 2334,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "(39579) 경북 김천시 모암길 24",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": "1억원 이상",
+    "접수마감": "2026-11-01",
+    "지원자격": "의사면허증 · 신경외과 전문의 자격증 · 척추(내시경)수술 전문의(유경험자)"
+   },
+   "들어온때": "2026-10-19"
+  },
+  {
+   "id": "HS997086843",
+   "source": "HS",
+   "기관": "양산성모병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "양산성모병원 심사팀장 채용공고",
+   "주소": "https://www.yangsansm.com/recruit/11",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "경남 양산시",
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS2108355665",
+   "source": "HS3",
+   "기관": "광주보훈병원",
+   "보류": false,
+   "숨김": false,
+   "제목": "[광주보훈병원] 계약직 업무지원직(진료지원) 직원 채용",
+   "주소": "https://www.bohun.or.kr/gwangju/na/ntt/selectNttInfo.do?mi=32890&bbsId=1158&bbsSysId=gwangju&nttSn=190473",
+   "첨부": [
+    {
+     "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=84f680771ec7bffac2e28239bc89b3bb&bbsSysId=gwangju",
+     "kind": "공고문",
+     "name": "계약직업무지원직(진료지원)직원채용공고문.pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=e18f99f386877bcf5fd3719f806b0f07&bbsSysId=gwangju",
+     "kind": "공고문",
+     "name": "직무기술서(업무지원직-진료지원).hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.bohun.or.kr/images/web/gwangju/sub/wa_qualith_certificate.pdf",
+     "kind": "공고문",
+     "name": "wa_qualith_certificate.pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 2025,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "10:00:00",
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-16"
+  },
+  {
+   "id": "JF98469",
+   "source": "JF",
+   "기관": "한양대학교구리병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "재활의학과 물리치료사 - 2026년 신규직원(임시직) 모집",
+   "주소": "https://hyumcguri.recruiter.co.kr/career/jobs/98469",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-02-09",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "ND1725",
+   "source": "ND2",
+   "기관": "국립중앙의료원 중앙치매센터",
+   "보류": true,
+   "숨김": false,
+   "제목": "[국립중앙의료원 중앙치매센터] 무기계약직 전문상담사(치매상담팀) 채용 공고",
+   "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1725",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "",
+    "근무지": null,
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-07"
+  },
+  {
+   "id": "WNK163022609180020",
+   "source": "WN",
+   "기관": "제주권역재활병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "제주권역재활병원 작업치료사 직원 모집 (기간제계약직 육아휴직대체)",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K163022609180020&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "제주 서귀포시",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": "월급 244만원~244만원",
+    "접수마감": "2026-09-29",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNKJ20912609230013",
+   "source": "WN2",
+   "기관": "국민건강보험공단일산병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "[국민건강보험공단 일산병원] 2026년 9월 기간...",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=KJ20912609230013&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "공통",
+    "근무지": "경기 고양시 일산동구 일산로 100",
+    "고용형태": "기간제",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-07",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-04"
+  },
+  {
+   "id": "305240",
+   "source": "AL",
+   "기관": "국민건강보험공단 일산병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 9월 기간제근로자 모집공고(간호직, 보건직, 사무직, 기능직)",
+   "주소": "https://nhimc.recruiter.co.kr",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "경기",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": 2,
+    "예상연봉": null,
+    "접수마감": "2026-10-07",
+    "지원자격": "1. 간호사(외래지원부) - 상근(2명)\r\nㅁ 간호사 면허증 소지자\r\n\r\n2. 간호사(일차의료개발센터) - 상근(1명)\r\nㅁ 아래 요건을 모두 충족하는 자\r\n · 간호사 면허증 소지자\r\n · 병원 또는 의원급 이상 간호경력 2년 이상인 자로서, 해당경력 중 종합병원급 이상 경력이 1년 이상인 자\r\n · 자동차운전면허증(2종 보통 이상) 소지자로서 운전이 가능한 자\r\n\r\n3. 간호사(일차의료시범사업거점지원단) - 상근(2명)\r\nㅁ 아래 요건을 모두 충족하는 자\r\n · 간호사 면허증 소지자\r\n · 병원 또는 의원급 이상 간호경력 2년 이상인 자로서, 해당경력 중 종합병원급 이상 경력이 1년 이상인 자\r\n · 자동차운전면허증(2종 보통 이상) 소지자로서 운전이 가능한 자\r\n\r\n4. 간호사(건강증진부) - 상근(1명)\r\nㅁ 간호사 면허증 소지자\r\n\r\n5. 임상병리사(병리과) - 상근(1명)\r\nㅁ 아래 요건을 모두 충족하는 자\r\n · 임상병리사 면허증 소지자\r\n · 전문임상병리사 자격증 소지자(분야 : 육안병리검사학)\r\n · 500병상 이상 종합병원 병리과 근무경력 1년 이상인 자\r\n\r\n6. 임상병리사(진단검사의학과) - 상근(교대)(1명)\r\nㅁ 임상병리사 면허증 소지자로서 해당분야 근무경력 6개월 이상인 자\r\n\r\n7. 사회복지사(지역장애인보건의료센터) - 상근(1명)\r\nㅁ 사회복지사 1급 자격증 취득 후 경력 3년 이상이면서, 병원급 의료기관 근무경력 2년 이상인 자\r\n\r\n8. 작업치료사(어린이재활치료부) - 상근(2명)\r\nㅁ 작업치료사 면허증 소지자로서 소아작업치료 업무 경력이 6개월 이상인 자\r\n\r\n9. 언어재활사(어린이재활치료부) - 상근(1명)\r\nㅁ 언어재활사 1급 자격증 소지자\r\n\r\n10. 임상심리사(어린이재활치료부) - 상근(1명)\r\nㅁ 정신건강임상심리사 1급 또는 2급 면허증 소…"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "306138",
+   "source": "AL2",
+   "기관": "경북대학교병원",
+   "보류": true,
+   "숨김": false,
+   "제목": "2026년 제6차 단기 결원 대체인력풀(POOL) 모집 공고",
+   "주소": "https://job.alio.go.kr/recruitview.do?idx=306138",
+   "첨부": [
+    {
+     "url": "https://opendata.alio.go.kr/recruit/downloadAtchFile?recrutAtchFileNo=3081366",
+     "kind": "공고문",
+     "name": "1. 2026년 제6차 단기 결원 대체인력풀(POOL) 채용공고문.pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.alio.go.kr/download/download.json?fileNo=3081366",
+     "kind": "공고문",
+     "name": "1. 2026년 제6차 단기 결원 대체인력풀(POOL) 채용공고문.pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "대구",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-11-03",
+    "지원자격": "1. 운영지원(특별청소)\r\n- 간병인 수료증 또는 요양보호사 자격증 소지자\r\n2. 운영지원(주차관리)\r\n- 없음\r\n3. 원무(간호조무사)\r\n- 간호조무사 자격증 소지자\r\n4. 의료기술(임상병리사)\r\n- 임상병리사 자격증 소지자"
+   },
+   "들어온때": "2026-10-19"
+  },
+  {
+   "id": "CE79381",
+   "source": "CE",
+   "기관": "경상북도안동의료원",
+   "보류": false,
+   "숨김": true,
+   "제목": "경북권 공공어린이재활의료센터 직원 채용 재공고(행정, 작업치료사)",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=79381",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "경북",
+    "고용형태": "기간제",
+    "마감시각": null,
+    "모집인원": 2,
+    "예상연봉": "3400만원 이상",
+    "접수마감": "2026-09-14",
+    "지원자격": "계약직"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "CE80397",
+   "source": "CE2",
+   "기관": "강원특별자치도강릉의료원",
+   "보류": true,
+   "숨김": false,
+   "제목": "공고2026-70호 내과 전문의",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80397",
+   "첨부": [
+    {
+     "url": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80397",
+     "kind": "공고화면",
+     "name": "공고2026-70호.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 15917,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "강원도 강릉시 경강로 2007",
+    "고용형태": "일반정규직",
+    "마감시각": "17:00:00",
+    "모집인원": 1,
+    "예상연봉": "1억원 이상",
+    "접수마감": "2026-10-23",
+    "지원자격": "의사면허증 · 내과 전문의 자격증"
+   },
+   "들어온때": "2026-10-18"
+  },
+  {
+   "id": "HS236379585",
+   "source": "HS",
+   "기관": "충청북도 청주의료원",
+   "보류": false,
+   "숨김": false,
+   "제목": "<제26-8회>직원채용 공고(조리원, 시설미화원, 작업치료사, 물리치료사 및 방사선사)",
+   "주소": "https://www.cjmc.or.kr:443/bbs/board.php?bo_table=recurit_new&wr_id=648",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "공통",
+    "근무지": "충북 청주서원구",
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS98807643",
+   "source": "HS3",
+   "기관": "의료법인인봉의료재단뉴고려병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년도 간호부 신규, 경력직 채용공고...",
+   "주소": "https://www.nkhospital.net/notice/notice.php?jb_code=100&jb_mode=tdetail&jb_idx=2686&search_key=&search_keyword=&page=&dep1=2&dep2=2-1",
+   "첨부": [
+    {
+     "url": "https://nkhospital.net/bbs/download.php?downview=1&file=/home/hosting_users/nkmed/www/bbs/files/jb_100/834c48fe3429728.hwp&name=%EB%89%B4%EA%B3%A0%EB%A0%A4%EB%B3%91%EC%9B%90_%EA%B0%84%ED%98%B8%EB%B6%80(%EC%9E%85%EC%82%AC%EC%A7%80%EC%9B%90%EC%84%9C)_%EC%88%98%EC%A0%95.hwp",
+     "kind": "공고문",
+     "name": "834c48fe3429728.hwp&name=%EB%89%B4%EA%B3%A0%EB%A0%A4%EB%B3%91%EC%9B%90_%EA%B0%84%ED%98%B8%EB%B6%80(%EC%9E%85%EC%82%AC%EC",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.nkhospital.net/bbs/download.php?downview=1&file=/home/hosting_users/nkmed/www/bbs/files/jb_100/834c48fe3418645.hwp&name=%EB%89%B4%EA%B3%A0%EB%A0%A4%EB%B3%91%EC%9B%90_%EA%B0%84%ED%98%B8%EB%B6%80(%EC%9E%85%EC%82%AC%EC%A7%80%EC%9B%90%EC%84%9C)_%EC%88%98%EC%A0%95.hwp",
+     "kind": "공고문",
+     "name": "뉴고려병원_간호부(입사지원서)_수정.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.nkhospital.net/bbs/download.php?downview=1&file=/home/hosting_users/nkmed/www/bbs/files/jb_100/f7208f5e4216514.docx&name=2026%EB%85%84%EB%8F%84%20%EC%8B%A0%EA%B7%9C,%EB%B0%8F%20%EA%B2%BD%EB%A0%A5%EA%B0%84%ED%98%B8%EC%82%AC%EC%B1%84%EC%9A%A9%EA%B3%B5%EA%B3%A0%20-%202026-9-30.docx",
+     "kind": "공고문",
+     "name": "2026년도 신규,및 경력간호사채용공고 - 2026-9-30.docx",
+     "읽기탈": "HWPX에서 섹션 파일을 찾을 수 없습니다",
+     "읽어봄": true
+    }
+   ],
+   "본문자": 12877,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "JF97651",
+   "source": "JF",
+   "기관": "충남대학교병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "[대전] 충남대학교병원 2026년 2월 계약직 직원 채용공고(2차)【채용분야 : 공고참고】",
+   "주소": "https://cnuhinsa.recruiter.co.kr/career/jobs/97651",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "대전",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-02-10",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "ND1724",
+   "source": "ND2",
+   "기관": "서울광역치매센터",
+   "보류": false,
+   "숨김": true,
+   "제목": "[서울광역치매센터] 연구위원(계약직) 채용 공고",
+   "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1724",
+   "첨부": [],
+   "본문자": 2487,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": null,
+    "고용형태": null,
+    "마감시각": "18:00:00",
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-19",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-02"
+  },
+  {
+   "id": "WNK163022609180019",
+   "source": "WN",
+   "기관": "제주권역재활병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "제주권역재활병원 물리치료사 직원 모집 (기간제계약직 육아휴직대체)",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K163022609180019&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "제주 서귀포시",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": "월급 244만원~244만원",
+    "접수마감": "2026-09-29",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNK163022610150013",
+   "source": "WN2",
+   "기관": "제주권역재활병원",
+   "보류": false,
+   "숨김": false,
+   "제목": "제주권역재활병원 물리치료사 직원 모집 (기간제계약직 육아휴직대체)",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K163022610150013&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "제주 서귀포시 동문로 1",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": 4,
+    "예상연봉": "월급2,440,970원 이상 ~ 2,440,970원 이하",
+    "접수마감": "2026-10-27",
+    "지원자격": "자격 물리치료사 · 학력 학력무관"
+   },
+   "들어온때": "2026-10-15"
+  },
+  {
+   "id": "304971",
+   "source": "AL",
+   "기관": "경북대학교병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "칠곡경북대학교병원 2026년 9월 4차 임시직원 채용공고(약사, 간호사, 업무보조, 작업치료사)",
+   "주소": "https://www.knuch.kr:442/content/04info/11_01.asp?proc_type=view&b_num=5089&rtn_url=%2Fcontent%2F04info%2F11%5F01%2Easp",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "대구",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-09-21",
+    "지원자격": "1) 약사: 약사 면허 소지자\r\n\r\n 2) 간호사: 간호사 면허 소지자\r\n\r\n 3) 업무보조: 자격무관\r\n\r\n 4) 의료기사(작업치료사): 작업치료사 면허 소지자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "305641",
+   "source": "AL2",
+   "기관": "국립중앙의료원",
+   "보류": false,
+   "숨김": true,
+   "제목": "기술직 6급 전산행정(정보운영팀) 채용 공고",
+   "주소": "https://nmc.recruiter.co.kr/app/jobnotice/view?systemKindCode=MRS2&jobnoticeSn=268209",
+   "첨부": [
+    {
+     "url": "https://opendata.alio.go.kr/recruit/downloadAtchFile?recrutAtchFileNo=3078615",
+     "kind": "공고문",
+     "name": "제2026-376호_기술직 6급(정보운영팀) 채용 공고.pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "서울",
+    "고용형태": "정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-10-16",
+    "지원자격": "[필수]\r\nㆍ정보처리기사 또는 정보처리산업기사 자격 소지자\r\n\r\n[우대]\r\nㆍ관련 분야 또는 종합병원 2년 이상 근무 경력자\r\nㆍ생성형 AI, LLM, RAG 구축 등 AI 응용기술 및 AI 기반 개발도구 활용 경험이 있는 자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "CE79376",
+   "source": "CE",
+   "기관": "충청북도 충주의료원",
+   "보류": false,
+   "숨김": true,
+   "제목": "충주의료원 육아휴직 대체자 [보건직(물리치료사), 행정직] 채용 공고",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=79376",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "충북",
+    "고용형태": "일반계약직",
+    "마감시각": null,
+    "모집인원": 3,
+    "예상연봉": "3800만원 이상",
+    "접수마감": "2026-09-14",
+    "지원자격": "물리치료사 업무 전반 / 병원 행정업무 전반 / 검진센터 행정업무 전반"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "CE80332",
+   "source": "CE2",
+   "기관": "경상북도안동의료원",
+   "보류": false,
+   "숨김": false,
+   "제목": "경북권 공공어린이재활의료센터 직원 채용 재공고(작업치료사)",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80332",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "경북 안동시 태사2길 55",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": "3400만원 이상",
+    "접수마감": "2026-10-22",
+    "지원자격": "작업치료사 면허 소지자"
+   },
+   "들어온때": "2026-10-12"
+  },
+  {
+   "id": "HS985185312",
+   "source": "HS",
+   "기관": "의료법인 토마스의료재단 윌스기념병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "[수원윌스기념병원] 영양팀 조리장/조리사 채용...",
+   "주소": "https://allspine.com/intro/intro06_03.html?jb_code=20&jb_idx=20466",
+   "첨부": [],
+   "본문자": 5418,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "경기 수원팔달구",
+    "고용형태": null,
+    "마감시각": "17:00:00",
+    "모집인원": null,
+    "예상연봉": "내규에 따름",
+    "접수마감": "2026-09-30",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS987933081",
+   "source": "HS3",
+   "기관": "경상남도마산의료원",
+   "보류": true,
+   "숨김": false,
+   "제목": "신규 직원 채용공고(약사, 운영지원직, 기간제)",
+   "주소": "https://www.mmc.or.kr/board/view?id=16701&boardConfigId=12&menuId=112",
+   "첨부": [
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=0B3337703332382820EB9141A47A162D?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=0B3337703332382820EB9141A47A162D?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=0B3337703332382820EB9141A47A162D?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=0B3337703332382820EB9141A47A162D?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=162321C7D855EE6167A48C0E097B3775?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=162321C7D855EE6167A48C0E097B3775?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=162321C7D855EE6167A48C0E097B3775?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=162321C7D855EE6167A48C0E097B3775?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=1967FFE98BB33E4E3BB51608D146DCD4?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=1967FFE98BB33E4E3BB51608D146DCD4?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=1967FFE98BB33E4E3BB51608D146DCD4?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=1967FFE98BB33E4E3BB51608D146DCD4?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=1D6EB7F88B556F85DC0F70A4BAEB94B5?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=1D6EB7F88B556F85DC0F70A4BAEB94B5?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=1D6EB7F88B556F85DC0F70A4BAEB94B5?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=1D6EB7F88B556F85DC0F70A4BAEB94B5?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=2FF8B8497027792871863E9CA29FD5AB?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=2FF8B8497027792871863E9CA29FD5AB?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=2FF8B8497027792871863E9CA29FD5AB?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=2FF8B8497027792871863E9CA29FD5AB?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=386AF79561C0B84878FD3EAB475AC8A0?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=386AF79561C0B84878FD3EAB475AC8A0?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=386AF79561C0B84878FD3EAB475AC8A0?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=386AF79561C0B84878FD3EAB475AC8A0?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=3B39088441CAD86A47DCA58443257C66?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=3B39088441CAD86A47DCA58443257C66?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=3B39088441CAD86A47DCA58443257C66?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=3B39088441CAD86A47DCA58443257C66?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=3B5D3E890BE902985B507101F3C99C9D?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=3B5D3E890BE902985B507101F3C99C9D?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=3B5D3E890BE902985B507101F3C99C9D?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=3B5D3E890BE902985B507101F3C99C9D?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=45D09A7627E538995A2FC869EC63854D?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=45D09A7627E538995A2FC869EC63854D?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=45D09A7627E538995A2FC869EC63854D?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=45D09A7627E538995A2FC869EC63854D?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=46C5AEA4816039149959DF09DA1F3447?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=46C5AEA4816039149959DF09DA1F3447?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=46C5AEA4816039149959DF09DA1F3447?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=46C5AEA4816039149959DF09DA1F3447?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5118133B5E8827FEDCB282102CBAA9F6?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5118133B5E8827FEDCB282102CBAA9F6?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5118133B5E8827FEDCB282102CBAA9F6?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5118133B5E8827FEDCB282102CBAA9F6?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=58CCAB6D9E2E74BEA938C8397C6D9908?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=58CCAB6D9E2E74BEA938C8397C6D9908?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=58CCAB6D9E2E74BEA938C8397C6D9908?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=58CCAB6D9E2E74BEA938C8397C6D9908?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5C0A61B5EC7D89D41CD50A87485D8DB4?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5C0A61B5EC7D89D41CD50A87485D8DB4?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5C0A61B5EC7D89D41CD50A87485D8DB4?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5C0A61B5EC7D89D41CD50A87485D8DB4?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5E92948DEB43C09A9AC557DA8352B174?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5E92948DEB43C09A9AC557DA8352B174?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5E92948DEB43C09A9AC557DA8352B174?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=5E92948DEB43C09A9AC557DA8352B174?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=61AB27B69339797B01B4CA3BB946D3A2?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=61AB27B69339797B01B4CA3BB946D3A2?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=61AB27B69339797B01B4CA3BB946D3A2?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=61AB27B69339797B01B4CA3BB946D3A2?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=633DD6667EE58288B89F9675964C6950?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=633DD6667EE58288B89F9675964C6950?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=633DD6667EE58288B89F9675964C6950?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=633DD6667EE58288B89F9675964C6950?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=638130881DF173F1E7FB90AA844CC26E?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=638130881DF173F1E7FB90AA844CC26E?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=638130881DF173F1E7FB90AA844CC26E?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=638130881DF173F1E7FB90AA844CC26E?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6CA4975838C17261DB185414A9FF0861?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6CA4975838C17261DB185414A9FF0861?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6CA4975838C17261DB185414A9FF0861?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6CA4975838C17261DB185414A9FF0861?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6E1CA41A0E182A39C2F9D6FF5A3BBC5C?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6E1CA41A0E182A39C2F9D6FF5A3BBC5C?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6E1CA41A0E182A39C2F9D6FF5A3BBC5C?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6E1CA41A0E182A39C2F9D6FF5A3BBC5C?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6FFC229638C1E8A53F77EAC398554BF7?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6FFC229638C1E8A53F77EAC398554BF7?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6FFC229638C1E8A53F77EAC398554BF7?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=6FFC229638C1E8A53F77EAC398554BF7?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=70835E9161F1020583ABA6DBEE44743D?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=70835E9161F1020583ABA6DBEE44743D?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=70835E9161F1020583ABA6DBEE44743D?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=70835E9161F1020583ABA6DBEE44743D?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=76DE9FA498159BC5DBE28F6806C9481F?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=76DE9FA498159BC5DBE28F6806C9481F?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=76DE9FA498159BC5DBE28F6806C9481F?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=76DE9FA498159BC5DBE28F6806C9481F?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=77BABD96911EA934602D29F760EA5B4C?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=77BABD96911EA934602D29F760EA5B4C?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=77BABD96911EA934602D29F760EA5B4C?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=77BABD96911EA934602D29F760EA5B4C?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=8700324F6E163D580068292E6506DADE?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=8700324F6E163D580068292E6506DADE?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=8700324F6E163D580068292E6506DADE?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=8700324F6E163D580068292E6506DADE?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=889CC68A0FD978A8C26D27C522353E9E?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=889CC68A0FD978A8C26D27C522353E9E?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=889CC68A0FD978A8C26D27C522353E9E?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=889CC68A0FD978A8C26D27C522353E9E?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=8DB4F47BD2927F0DE29B8FAEF9BC4FD5?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=8DB4F47BD2927F0DE29B8FAEF9BC4FD5?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=8DB4F47BD2927F0DE29B8FAEF9BC4FD5?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=8DB4F47BD2927F0DE29B8FAEF9BC4FD5?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=960906EB269EC35863578A876104200D?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=960906EB269EC35863578A876104200D?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=960906EB269EC35863578A876104200D?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=960906EB269EC35863578A876104200D?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9971BF06B9E85E1A6ECB8664EFD1F901?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9971BF06B9E85E1A6ECB8664EFD1F901?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9971BF06B9E85E1A6ECB8664EFD1F901?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9971BF06B9E85E1A6ECB8664EFD1F901?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9DE450E7B9E73DE9C8551891A12DBAE5?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9DE450E7B9E73DE9C8551891A12DBAE5?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9DE450E7B9E73DE9C8551891A12DBAE5?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9DE450E7B9E73DE9C8551891A12DBAE5?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9FB7C4305C900676BF8D433844B2A065?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9FB7C4305C900676BF8D433844B2A065?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9FB7C4305C900676BF8D433844B2A065?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=9FB7C4305C900676BF8D433844B2A065?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=A823F4A63F9D508218E7F1336EBBE82F?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=A823F4A63F9D508218E7F1336EBBE82F?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=A823F4A63F9D508218E7F1336EBBE82F?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=A823F4A63F9D508218E7F1336EBBE82F?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=AC40B42FA3ECEF4A0855965E35AFCC19?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=AC40B42FA3ECEF4A0855965E35AFCC19?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=AC40B42FA3ECEF4A0855965E35AFCC19?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=AC40B42FA3ECEF4A0855965E35AFCC19?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=B3BC520F025A5B34C204E41D0330D493?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=B3BC520F025A5B34C204E41D0330D493?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=B3BC520F025A5B34C204E41D0330D493?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=B3BC520F025A5B34C204E41D0330D493?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=B5D93F5BCFD51D6B5ECC5152C0EF5E95?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=B5D93F5BCFD51D6B5ECC5152C0EF5E95?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=B5D93F5BCFD51D6B5ECC5152C0EF5E95?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=B5D93F5BCFD51D6B5ECC5152C0EF5E95?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BACD8E9AE3EBEB715393A89EA6A30155?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BACD8E9AE3EBEB715393A89EA6A30155?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BACD8E9AE3EBEB715393A89EA6A30155?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BACD8E9AE3EBEB715393A89EA6A30155?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BBAB5F85C0E6B6C6CB187B6667ADD0C9?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BBAB5F85C0E6B6C6CB187B6667ADD0C9?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BBAB5F85C0E6B6C6CB187B6667ADD0C9?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BBAB5F85C0E6B6C6CB187B6667ADD0C9?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BF16D731C6BD8CA7EFDD7C094435E1F2?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BF16D731C6BD8CA7EFDD7C094435E1F2?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BF16D731C6BD8CA7EFDD7C094435E1F2?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=BF16D731C6BD8CA7EFDD7C094435E1F2?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=CDD9E8D83CF66E5BF3ABD5AE84847E7D?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=CDD9E8D83CF66E5BF3ABD5AE84847E7D?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=CDD9E8D83CF66E5BF3ABD5AE84847E7D?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=CDD9E8D83CF66E5BF3ABD5AE84847E7D?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D1EC43B47DF97A6F9D7D8B1CE1DFC91B?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D1EC43B47DF97A6F9D7D8B1CE1DFC91B?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D1EC43B47DF97A6F9D7D8B1CE1DFC91B?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D1EC43B47DF97A6F9D7D8B1CE1DFC91B?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D1FD8E7FF0AD1FF03B540292BA94A7D1?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D1FD8E7FF0AD1FF03B540292BA94A7D1?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D1FD8E7FF0AD1FF03B540292BA94A7D1?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D1FD8E7FF0AD1FF03B540292BA94A7D1?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D3EB699F22CBA8E3F110AF437015E011?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D3EB699F22CBA8E3F110AF437015E011?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D3EB699F22CBA8E3F110AF437015E011?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D3EB699F22CBA8E3F110AF437015E011?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D58EBB17A19A76DD7E41CFC6311F1C6D?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D58EBB17A19A76DD7E41CFC6311F1C6D?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D58EBB17A19A76DD7E41CFC6311F1C6D?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D58EBB17A19A76DD7E41CFC6311F1C6D?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D638F2958842B1318D9AD8A02435D61E?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D638F2958842B1318D9AD8A02435D61E?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D638F2958842B1318D9AD8A02435D61E?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=D638F2958842B1318D9AD8A02435D61E?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=DA1323635649728962CA5A705663F961?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=DA1323635649728962CA5A705663F961?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=DA1323635649728962CA5A705663F961?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=DA1323635649728962CA5A705663F961?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=E468668CBA98B2A5FC15DC60A57641AC?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=E468668CBA98B2A5FC15DC60A57641AC?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=E468668CBA98B2A5FC15DC60A57641AC?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=E468668CBA98B2A5FC15DC60A57641AC?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=F5030DE4D11BE2905CCFECE406DA59DE?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=F5030DE4D11BE2905CCFECE406DA59DE?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=F5030DE4D11BE2905CCFECE406DA59DE?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=F5030DE4D11BE2905CCFECE406DA59DE?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=F64ED4C4837443217F3C36BFBCCB6E84?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=F64ED4C4837443217F3C36BFBCCB6E84?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=F64ED4C4837443217F3C36BFBCCB6E84?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=F64ED4C4837443217F3C36BFBCCB6E84?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=FBB025AD057A342EC0093ACB80DCE51F?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=FBB025AD057A342EC0093ACB80DCE51F?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=FBB025AD057A342EC0093ACB80DCE51F?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=FBB025AD057A342EC0093ACB80DCE51F?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=FBFC2FB8CA4121C86D46F2E4068CC7BA?id=10664",
+     "kind": "공고문",
+     "name": "약사 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=FBFC2FB8CA4121C86D46F2E4068CC7BA?id=10665",
+     "kind": "공고문",
+     "name": "직원 채용 공고문.hwpx",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=FBFC2FB8CA4121C86D46F2E4068CC7BA?id=10666",
+     "kind": "공고문",
+     "name": "입사지원서식 한글 서식.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.mmc.or.kr/fileInfo/downFileDoc.do;jsessionid=FBFC2FB8CA4121C86D46F2E4068CC7BA?id=10667",
+     "kind": "공고문",
+     "name": "입사지원서식 서식(PDF).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 3059,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "17:00:00",
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-23",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-13"
+  },
+  {
+   "id": "JF97404",
+   "source": "JF",
+   "기관": "성남시의료원",
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 제3회 성남시의료원 직원 채용 모집 공고",
+   "주소": "https://scmc.recruiter.co.kr/career/jobs/97404",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-02-08",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "ND1722",
+   "source": "ND2",
+   "기관": "은평구치매안심센터",
+   "보류": false,
+   "숨김": true,
+   "제목": "[은평구치매안심센터] 직원(정규직) 채용 공고",
+   "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1722",
+   "첨부": [],
+   "본문자": 3503,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": null,
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": 2,
+    "예상연봉": "내규에 따름",
+    "접수마감": "2026-10-19",
+    "지원자격": "및 서류전형 배점 ❍ 응시자격: 지원 분야의 필수 면허·자격 소지자 ❍ 서류 전형 점수표(30점) - 해당 분야 근무경력: 최대 5점 - 지역사회기관 근무경력: 2점 - 치매전문인력 교육과정 이수: 3점 - 치매 관련 교육 이수: 건당 1점, 최대 5점 - 면허 및 자격증: 건당 1점, 최대 5점 - 지원서류 평가: 10점 (※ 지원서류는 직무이해 및 지원동기, 경력·역량의 구체성, 구성·논리성, 작성의 충실도·완성도를 평가.)"
+   },
+   "들어온때": "2026-10-02"
+  },
+  {
+   "id": "WNK162212608260011",
+   "source": "WN",
+   "기관": "순천중앙병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "물리치료사 모집",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K162212608260011&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "전남 순천시",
+    "고용형태": "10",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": "월급 250만원~250만원",
+    "접수마감": "2026-09-14",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNK161332608120004",
+   "source": "WN2",
+   "기관": "의료법인석천재단고창병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "의료법인석천재단 고창종합병원,고창노인요양병원 물리...",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K161332608120004&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "전북 고창군 고인돌대로 1765",
+    "고용형태": "기간제",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": "월급2,550,000원 이상 ~ 3,200,000원 이하",
+    "접수마감": "2026-10-11",
+    "지원자격": "물리치료사"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "304700",
+   "source": "AL",
+   "기관": "경북대학교병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "칠곡경북대학교병원 2026년 9월 3차 임시직원 채용공고(행정, 임상병리사, 보건의료정보관리사, 물리치료사)",
+   "주소": "https://www.knuch.kr:442/content/04info/11_01.asp?proc_type=view&b_num=5088&rtn_url=%2Fcontent%2F04info%2F11%5F01%2Easp",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "대구",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-09-14",
+    "지원자격": "1) 행정: 자격무관\r\n\r\n 2) 의료기사(임상병리사): 임상병리사 면허 소지자\r\n\r\n 3) 보건의료정보관리사: 보건의료정보관리사 면허 소지자\r\n\r\n 4) 의료기사(물리치료사): 물리치료사 면허 소지 및 임상 경력 2년 이상인 자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "305711",
+   "source": "AL2",
+   "기관": "전남대학교병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 10월 전남대학교병원 직원(대체근로자) 공개채용 공고",
+   "주소": "https://job.alio.go.kr/recruitview.do?idx=305711",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "전남광주",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-10-09",
+    "지원자격": "야간전담 약사 : 약사 면허 소지자\r\n방사선사 : 방사선사 면허 소지자\r\n보건의료정보관리사 : 보건의료정보관리사 면허 소지자\r\n물리치료사 : 물리치료사 면허 소지자\r\n사무보조 : 제한 없음\r\n전기 및 통신 시설관리 : 전기기능사, 전파전자통신기능사, 통신기기기능사, 통신선로기능사 자격 중 1개 이상 소지자"
+   },
+   "들어온때": "2026-10-02"
+  },
+  {
+   "id": "CE80532",
+   "source": "CE2",
+   "기관": "충청북도 청주의료원",
+   "보류": true,
+   "숨김": false,
+   "제목": "제26-11회 직원채용 공고(병동도우미)",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80532",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "충북 청주시 서원구 흥덕로 48",
+    "고용형태": "무기계약직",
+    "마감시각": null,
+    "모집인원": 3,
+    "예상연봉": "2800만원 이상",
+    "접수마감": "2026-10-26",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-19"
+  },
+  {
+   "id": "HS2056094273",
+   "source": "HS",
+   "기관": "의료법인 인화재단 한국병원",
+   "보류": false,
+   "숨김": false,
+   "제목": "[모집]재활치료센터 물리치료사",
+   "주소": "http://www.hanhsp.co.kr/Sub05/Sub05_12.asp?ModuleID=6&Mode=V&Srno=3561",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "충북 청주상당구",
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS996159196",
+   "source": "HS3",
+   "기관": "학교법인 을지학원 의정부을지대학교병원",
+   "보류": false,
+   "숨김": false,
+   "제목": "재활치료실 물리치료사 채용공고",
+   "주소": "https://www.uemc.ac.kr/info/info_pg06_05.jsp?board_code=BOARD_4&board_sequence=25168",
+   "첨부": [],
+   "본문자": 2784,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "16:00:00",
+    "모집인원": 0,
+    "예상연봉": null,
+    "접수마감": "2026-11-03",
+    "지원자격": "응시부문\n모집인원\n지원 자격 조건\n채용형태\n\n물리치료사\n( 재활치료실 )\n0 명\n【 필수사항 】\n· 교육공무원 및 학교법인 직원 임용에 결격 사유가 없는 자\n· 대학 ( 교 ) 관련학과 졸업자\n· 물리치료사 면허증 소지자\n【 우대사항 】\n· 심장호흡재활치료 전문화과정 교육이수자 우대\n· 보바스 , TONA, PNF 자격증 , NDT 소지자 우대\n· 영어 회화 가능자 우대\n계약직\n\n※ 계약직채용 - 1 년 단위 계약 ( 최대 2 년 )\n\n◯ 지원서 접수 및 방법\n1. 접수기간 : 2026.10.19.( 월 ) ~ 2026.11.03."
+   },
+   "들어온때": "2026-10-19"
+  },
+  {
+   "id": "JF97403",
+   "source": "JF",
+   "기관": "성남시의료원",
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 제2회 성남시의료원 직원 채용 모집 공고",
+   "주소": "https://scmc.recruiter.co.kr/career/jobs/97403",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-02-05",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "ND1721",
+   "source": "ND2",
+   "기관": "경기도광역치매센터",
+   "보류": false,
+   "숨김": true,
+   "제목": "[경기도광역치매센터] 직원 채용 공고",
+   "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1721",
+   "첨부": [],
+   "본문자": 2750,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "수원시 장안구 경수대로 1150, 신관 1층 경기도광역치매센터 - ※ 2027년 하반기 근무지 이전 예정(수",
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": "임금 및 복무관련): ‘보건복지부 치매정책 사업안내’에 따름 - ※ 최대 6호봉까지만 인정(이후 근무기간에 따라 호봉승급 인정) - ※ 제수당, 급량비(식대), 출장비 별도 지급 - ○",
+    "접수마감": "2026-10-13",
+    "지원자격": "[필수] 전문직군(간호사, 사회복지사 1급, 작업치료사, 임상심리사) 면허(자격)취득자 [필수] ‘학사’ 이상의 학력을 갖춘 자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNK160012609290029",
+   "source": "WN",
+   "기관": "(재)광주기독병원",
+   "보류": false,
+   "숨김": true,
+   "제목": "광주기독병원 재활치료실 작업치료사(계약직) 모집",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K160012609290029&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "광주 남구",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": "연봉 3047만원~3312만원",
+    "접수마감": "2026-10-08",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNK162212609150005",
+   "source": "WN2",
+   "기관": "순천중앙병원",
+   "보류": false,
+   "숨김": false,
+   "제목": "물리치료사 모집",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K162212609150005&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "전남 순천시 장명로 5",
+    "고용형태": "정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": "월급2,500,000원 이상 ~ 2,500,000원 이하",
+    "접수마감": "2026-11-14",
+    "지원자격": "자격 물리치료사 · 학력 학력무관"
+   },
+   "들어온때": "2026-10-01"
+  }
+ ]
+}
