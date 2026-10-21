@@ -48,6 +48,38 @@ const CLI = path.join(꾸러미, 'node_modules', 'kordoc', 'dist', 'cli.js');
 const RSS한계 = Number(process.env.KORDOC_RSS_MB) || 480;      /* MB */
 const 몇건마다 = Number(process.env.KORDOC_RECYCLE) || 200;    /* 건 */
 const 한건제한초 = Number(process.env.KORDOC_TIMEOUT) || 180;
+/* ★ 2026-10-21 ⓐ (세중님 승인) — **시스템이 쓰는 메모리**로도 교체를 판단합니다.
+ *
+ * 왜 — 10/21 밤에 재 보니 1.3GB 를 쓰는 것은 **kordoc 워커 여럿이 동시에 살아
+ *   있는 것**이었습니다. 한 장면에서 셋이 함께였습니다 —
+ *     20:25:22  쓴것 1,861MB  ·  parse-worker 530MB + 508MB + 329MB
+ *   본체는 128MB, 다른 크론은 많아야 90MB 였습니다. 겹침이 뿌리입니다.
+ *   까닭은 「죽이기()」 가 **아이를 null 로 두고 2초 뒤에 SIGKILL** 하기 때문입니다 —
+ *   그 사이에 새 워커가 떠서 둘이 함께 OCR 모형을 들고 있습니다.
+ *
+ * 그래서 ① 쓴 메모리가 문턱을 넘으면 ② **지금 건을 끝낸 뒤** ③ 옛 워커가
+ * **사라진 것을 보고** 새로 띄웁니다.
+ *
+ * ★ 「파일마다 새로 띄우기」와 다릅니다 — 그것은 10/20 에 **더 나빠져서
+ *   되돌렸습니다**(그림 51%→30% · 죽음 8→14). 그림마다 OCR 모형을 새로 불러
+ *   봉우리가 높아지기 때문입니다. 이것은 **문턱을 넘을 때만** 바꿉니다. */
+const 시스템문턱MB = Number(process.env.KORDOC_SYS_MB) || 1100;   /* 쓴 메모리 */
+const 거두기제한초 = Number(process.env.KORDOC_REAP_SEC) || 10;    /* quit 뒤 기다리는 초 */
+const 거두기더초 = Number(process.env.KORDOC_REAP_KILL_SEC) || 5;  /* SIGKILL 뒤 더 기다리는 초 */
+/* KORDOC_REAP=0 이면 **옛 길**입니다 (거두지 않고 떼기만) — 전후를 같은 자리에서
+   견주려고 둔 깃발입니다. 기본은 거두기(1) 입니다 */
+const 거둘까 = process.env.KORDOC_REAP !== '0';
+
+/** 시스템이 지금 쓰는 메모리(MB) — /proc/meminfo 의 MemTotal − MemAvailable */
+export function 쓴메모리MB() {
+  try {
+    const t = fs.readFileSync('/proc/meminfo', 'utf8');
+    const 집 = (이름) => Number((t.match(new RegExp('^' + 이름 + ':\\s+(\\d+) kB', 'm')) || [])[1] || 0);
+    const 전체 = 집('MemTotal'); const 쓸수 = 집('MemAvailable');
+    if (!전체 || !쓸수) return null;
+    return Math.round((전체 - 쓸수) / 1024);
+  } catch { return null; }   /* 리눅스가 아니면 null — 그러면 이 규칙은 쉽니다 */
+}
 
 export function kordoc있나() { return fs.existsSync(CLI); }
 
@@ -64,6 +96,50 @@ let 남은줄 = '';
 let 이번건수 = 0;
 let 끝맺음걸었나 = false;
 let exit걸었나 = false;      /* process exit 리스너를 한 번만 걸게 (2026-10-21 — 리스너가 쌓였습니다) */
+let 거두는중 = null;          /* 옛 워커를 거두는 약속 — 새로 띄우기 전에 기다립니다 */
+let 바퀴중단 = '';            /* 못 거뒀으면 까닭이 들어가고, 그 뒤 읽기는 바로 탈납니다 */
+export function 바퀴중단인가() { return 바퀴중단; }
+
+/** 살아 있나 — kill(0) 으로 봅니다 (신호를 안 보냅니다) */
+function 살아있나(옛) {
+  if (!옛 || 옛.exitCode !== null || 옛.signalCode) return false;
+  try { process.kill(옛.pid, 0); return true; } catch { return false; }
+}
+
+/** 옛 워커를 **거둡니다** — quit → 10초 → SIGKILL → 5초 → 그래도 남으면 바퀴 중단.
+ *  무한 대기는 하지 않습니다 (세중님 지시) */
+async function 거두기(옛, 까닭) {
+  /* ★ **unref 하지 않습니다** — 거두는 동안 돌림판을 붙잡아야 합니다.
+     unref 로 두었더니 node 가 스스로 끝났습니다(끝값 13 · unsettled top-level await).
+     길어도 15초이고, 끝나면 시계가 사라집니다 */
+  const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
+  const t0 = Date.now();
+  try {
+    if (옛.stdin && !옛.stdin.destroyed && 옛.exitCode === null && !옛.killed) {
+      옛.stdin.once('error', () => { /* EPIPE — 이미 죽었습니다 */ });
+      옛.stdin.write(JSON.stringify({ cmd: 'quit' }) + '\n');
+    }
+  } catch { /* 이미 죽었습니다 */ }
+  try { if (옛.stdin && !옛.stdin.destroyed) 옛.stdin.end(); } catch { /* 이미 닫혔습니다 */ }
+  try { 옛.kill('SIGTERM'); } catch { /* 이미 죽었습니다 */ }
+  while (살아있나(옛) && (Date.now() - t0) / 1000 < 거두기제한초) await 자고(250);
+  if (살아있나(옛)) {
+    셈.강제종료 = (셈.강제종료 ?? 0) + 1;
+    try { 옛.kill('SIGKILL'); } catch { /* 넘어갑니다 */ }
+    const t1 = Date.now();
+    while (살아있나(옛) && (Date.now() - t1) / 1000 < 거두기더초) await 자고(250);
+  }
+  const 걸린 = Math.round((Date.now() - t0) / 100) / 10;
+  if (살아있나(옛)) {
+    바퀴중단 = '워커(pid ' + 옛.pid + ')를 ' + 걸린 + '초 동안 못 거뒀습니다 — ' + 까닭;
+    셈.못거둠 = (셈.못거둠 ?? 0) + 1;
+    console.error('✗ ' + 바퀴중단 + ' → 이 바퀴를 멈춥니다');
+  } else {
+    셈.거둠 = (셈.거둠 ?? 0) + 1;
+    셈.거두기초합 = Math.round(((셈.거두기초합 ?? 0) + 걸린) * 10) / 10;
+  }
+  거두는중 = null;
+}
 
 function 죽이기(까닭) {
   if (!아이) return;
@@ -133,9 +209,14 @@ function 띄우기() {
       const mb = Math.round((o.rss || 0) / 1e6);
       if (mb > 셈.최대rssMB) 셈.최대rssMB = mb;
       기다림.맺({ result: o.result, rssMB: mb, 초: (Date.now() - 기다림.때) / 1000 });
-      /* ★ 응답의 rss 로 교체를 판단합니다 */
-      if (mb > RSS한계) 죽이기('rss ' + mb + 'MB > ' + RSS한계 + 'MB');
-      else if (++이번건수 >= 몇건마다) 죽이기(몇건마다 + '건 돌았습니다');
+      /* ★ 응답의 rss 와 **시스템 쓴 메모리**로 교체를 판단합니다 —
+         지금 건은 위에서 이미 맺었습니다(끝낸 뒤에 바꿉니다) */
+      const 쓴것 = 쓴메모리MB();
+      const 바꿀까닭 = (mb > RSS한계) ? ('rss ' + mb + 'MB > ' + RSS한계 + 'MB')
+        : (쓴것 != null && 쓴것 > 시스템문턱MB)
+          ? ('시스템 쓴 메모리 ' + 쓴것 + 'MB > ' + 시스템문턱MB + 'MB')
+          : (++이번건수 >= 몇건마다) ? (몇건마다 + '건 돌았습니다') : '';
+      if (바꿀까닭) 거두며교체(바꿀까닭);
     }
   });
   /* stderr 는 kordoc 이 진행 글을 뿜는 자리입니다 — 삼킵니다 */
@@ -189,6 +270,22 @@ function 띄우기() {
   return 아이;
 }
 
+/** 지금 아이를 떼고 **거두기**를 걸어 둡니다. 다음 읽기가 그 약속을 기다립니다 */
+function 거두며교체(까닭) {
+  if (!아이 || 거두는중) return;
+  if (!거둘까) { 죽이기(까닭); return; }      /* 옛 길 — 견주기용 깃발 */
+  셈.교체++;
+  셈.교체까닭[까닭] = (셈.교체까닭[까닭] ?? 0) + 1;
+  const 옛 = 아이;
+  아이 = null;
+  남은줄 = '';
+  이번건수 = 0;
+  /* 기다리던 것들은 깨웁니다 — 다시보냄 그물이 한 번 더 보냅니다 */
+  for (const [, v] of 기다리는것) v.깨(new Error('워커가 바뀌었습니다 — ' + 까닭));
+  기다리는것 = new Map();
+  거두는중 = 거두기(옛, 까닭);
+}
+
 /* ★ 2026-10-20 — **워커가 교체될 때 기다리던 요청을 버리지 않습니다.**
  *
  * 워커는 rss 700MB 를 넘거나 200건마다 교체됩니다. 그때 `기다리는것` 에
@@ -203,12 +300,19 @@ export const 다시보냄 = { 수: 0 };
 
 /** 한 파일 읽기. 돌려주는 것은 kordoc 의 ParseResult */
 export async function 읽기(파일, 옵션 = {}) {
+  /* ★ 2026-10-21 ⓐ — **거두는 동안 기다립니다.** 안 기다리면 옛 워커가
+     살아 있는 채 새 워커가 떠서 둘이 겹칩니다 (그것이 1.3GB 의 뿌리였습니다).
+     못 거뒀으면 이 바퀴는 멈춥니다 — 무한 대기는 하지 않습니다 */
+  if (거두는중) await 거두는중;
+  if (바퀴중단) throw new Error(바퀴중단);
   try {
     return await 한번읽기(파일, 옵션);
   } catch (e) {
     if (!워커바뀜.test(String((e && e.message) || e))) throw e;
     다시보냄.수++;
     셈.다시보냄 = 다시보냄.수;
+    if (거두는중) await 거두는중;          /* 다시 보낼 때도 거둔 뒤에 */
+    if (바퀴중단) throw new Error(바퀴중단);
     return await 한번읽기(파일, 옵션);
   }
 }

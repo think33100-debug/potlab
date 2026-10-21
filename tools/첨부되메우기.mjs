@@ -23,6 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
 import { 고친주소 } from './첨부주소고치기.mjs';
+import { 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -240,6 +241,19 @@ async function 틈두고받기(주소, 받는법 = null) {
    헛숫자가 나왔습니다 (2026-10-11 마른 실행에서 잡았습니다) */
 const 잰것 = [];
 
+/* ★ 2026-10-21 — **끝남 이유 한 줄.** 갑자기 끝나도 남게 process exit 에 겁니다.
+   오늘 시험에서 바퀴가 조용히 끝났습니다(끝값 13) — 로그 끝줄만으로는
+   「다 봤다」와 「멎었다」가 구별되지 않았습니다 */
+const 끝 = { 까닭: '까닭을 못 적었습니다 — 갑자기 끝났습니다', 담음: 0 };
+process.on('exit', (코드) => {
+  const w = (() => { try { return 워커셈(); } catch { return {}; } })();
+  console.log('[바퀴 끝남] 본 것 ' + 잰것.length + ' · 읽음 ' + 읽음 + ' · 빈손 ' + 빈손
+    + ' · 못받음 ' + 못받음 + ' · 담음 ' + 끝.담음
+    + ' · 워커 교체 ' + (w.교체 ?? '?') + '(거둠 ' + (w.거둠 ?? '?')
+    + ' · 강제 ' + (w.강제종료 ?? 0) + ' · 못거둠 ' + (w.못거둠 ?? 0) + ')'
+    + ' · 까닭 ' + 끝.까닭 + ' · 끝값 ' + 코드);
+});
+
 for (const j of 볼것) {
   const 잠김 = new Set(j.edited_fields || []);
   const 지금빈 = new Set(빈칸들(j));
@@ -313,6 +327,12 @@ for (const j of 볼것) {
   }
 }
 
+/* ★ 고리를 다 돈 까닭 — 끝남 한 줄에 실립니다 */
+끝.까닭 = 바퀴중단인가()
+  ? ('워커를 못 거둬 바퀴를 멈췄습니다 — ' + 바퀴중단인가())
+  : 상한에걸림 ? ('하루 상한 ' + 하루뚜껑 + '건에 걸렸습니다')
+    : ('볼 것 ' + 볼것.length + '건을 다 봤습니다');
+
 const 전 = {}; const 후 = {};
 for (const k of 칸이름) {
   전[k] = 잰것.filter((x) => !x.지금빈.has(k)).length;
@@ -361,6 +381,7 @@ for (const s of 견본) {
 
 if (!진짜) {
   console.log('\n[마른] 담을 수 있는 공고 ' + 보낼줄.length + '건. 담으려면 --진짜');
+  끝.까닭 = 상한에걸림 ? '하루 상한에 걸렸습니다 (마른 실행)' : '마른 실행이라 담지 않았습니다';
   process.exit(0);
 }
 
@@ -398,10 +419,12 @@ for (let i = 0; i < 줄들.length; i += 50) {
     console.error('✗ 창구가 막혔습니다 — HTTP ' + r.status + ' · ' + t.slice(0, 300));
     console.error('  창구 `칸되메우기(p_rows jsonb)` 가 아직 없으면 먼저 만들어야 합니다.');
     console.error('  **표를 직접 쓰지 않습니다** (지침 — 창구로만).');
+    끝.까닭 = '창구(칸되메우기)가 막혔습니다';
     process.exit(1);
   }
   try { 담음 += (JSON.parse(t) || {})['담음'] || 0; } catch { /* 모양이 다르면 그대로 */ }
 }
+끝.담음 = 담음;
 console.log('담았습니다 — ' + 담음 + '건 (updated_at 은 안 바꿨습니다)');
 
 /* ── 첨부 쪽에 「읽어 봤다」 를 남깁니다 — 표를 직접 안 씁니다 ──────────
@@ -424,3 +447,6 @@ if (표시할것.length) {
   }
   if (표시) console.log('읽음 표시 — ' + JSON.stringify(표시));
 }
+
+/* 끝남 한 줄의 까닭을 마무리합니다 — 여기까지 왔으면 곱게 끝난 것입니다 */
+끝.까닭 = 끝.까닭 + ' · 끝까지 돌았습니다';

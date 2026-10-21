@@ -61,7 +61,8 @@ const 잰것 = [];
 let 아이 = null;
 if (!붙어서만) {
   const 로그 = fs.openSync('/tmp/빈손진단_재기.log', 'w');
-  아이 = spawn(process.execPath, [path.join(여기, '빈손진단.mjs'), '--몇개', String(몇개)], {
+  const 덧 = argv.includes('--매건비우기') ? ['--매건비우기'] : [];
+  아이 = spawn(process.execPath, [path.join(여기, '빈손진단.mjs'), '--몇개', String(몇개), ...덧], {
     cwd: path.join(여기, '..'), stdio: ['ignore', 로그, 로그], env: process.env,
   });
   console.log('빈손진단(' + 몇개 + '건)을 띄우고 ' + 틈초 + '초마다 잽니다 — pid ' + 아이.pid);
@@ -73,23 +74,24 @@ const t0 = Date.now();
 let 끝났나 = false;
 if (아이) 아이.on('exit', (c) => { 끝났나 = true; console.log('\n빈손진단이 끝났습니다 (끝값 ' + c + ')'); });
 
-console.log('\n   때   쓴것   쓸수  워커   본체  다른크론  그밖   겹친 크론');
+console.log('\n   때   쓴것   쓸수  워커(수)   본체  다른크론  그밖   겹친 크론');
 while (!끝났나 && (붙어서만 ? (Date.now() - t0) / 1000 < 붙어서만 : true)) {
   const m = 메모리();
   const ps = 프로세스들();
   const 합 = (g) => ps.filter((x) => x.갈래 === g).reduce((a, b) => a + b.rssMB, 0);
   const 크론들 = [...new Set(ps.filter((x) => x.갈래 === '다른 크론').map((x) => x.이름))];
+  const 워커수 = ps.filter((x) => x.갈래 === 'kordoc 워커').length;
   const 한줄 = {
     초: Math.round((Date.now() - t0) / 1000),
     때: new Date(Date.now() + 9 * 3600e3).toISOString().slice(11, 19),
     쓴것: m && m.쓴것, 쓸수있는것: m && m.쓸수있는것,
-    워커: 합('kordoc 워커'), 본체: 합('재는 본체'), 다른크론: 합('다른 크론'), 그밖: 합('그밖'),
+    워커: 합('kordoc 워커'), 워커수, 본체: 합('재는 본체'), 다른크론: 합('다른 크론'), 그밖: 합('그밖'),
     크론들, 큰것: ps.sort((a, b) => b.rssMB - a.rssMB).slice(0, 3)
       .map((x) => x.이름 + ' ' + x.rssMB + 'MB'),
   };
   잰것.push(한줄);
   console.log('  ' + 한줄.때 + String(한줄.쓴것).padStart(6) + String(한줄.쓸수있는것).padStart(6)
-    + String(한줄.워커).padStart(6) + String(한줄.본체).padStart(7) + String(한줄.다른크론).padStart(8)
+    + String(한줄.워커).padStart(6) + ('(' + 한줄.워커수 + ')').padStart(4) + String(한줄.본체).padStart(7) + String(한줄.다른크론).padStart(8)
     + String(한줄.그밖).padStart(7) + '   ' + 크론들.join(' · ').slice(0, 44));
   await new Promise((r) => setTimeout(r, 틈초 * 1000));
 }
@@ -106,6 +108,7 @@ if (최고) {
 }
 const 크론본적 = [...new Set(잰것.flatMap((x) => x.크론들))];
 console.log('  바퀴 도는 동안 함께 돈 크론 — ' + (크론본적.length ? 크론본적.join(' · ') : '없음'));
+console.log('  ★ 동시 워커 최대 ' + Math.max(...잰것.map((x) => x.워커수 || 0)) + '개');
 console.log('  워커 rss 최고 ' + Math.max(...잰것.map((x) => x.워커)) + 'MB · 본체 최고 '
   + Math.max(...잰것.map((x) => x.본체)) + 'MB · 다른 크론 최고 '
   + Math.max(...잰것.map((x) => x.다른크론)) + 'MB');
