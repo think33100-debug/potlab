@@ -31,6 +31,10 @@ const 고른꼴 = 값('--꼴', null);
 const 건너뛰기 = Number(값('--건너뛰기', 0));
 const 몇개 = Number(값('--몇개', 0));
 const 이어서 = argv.includes('--이어서');
+/* ★ 2026-10-21 — `--글적기` 면 읽은 글을 `<파일>.새.txt` 로 남깁니다.
+ *   옛 `<파일>.txt`(원문받기가 **고치기 전** 읽기로 적은 것)를 **안 덮습니다** —
+ *   시험의 「다시뽑음」이 그 둘을 전/후로 견줍니다. */
+const 글적기 = argv.includes('--글적기');
 
 /** 한 파일의 **능력표 갈래** — 형식별표.mjs 와 같은 생각, 받은 바이트로 */
 export function 갈래(buf, 이름) {
@@ -128,6 +132,7 @@ for (const x of 볼것조각) {
     r = { md: '', 글: '', 초: 0, 왜: '꾸밈 그림이라 안 읽습니다' };
   }
   const md = String(r.md || '');
+  if (글적기 && md) { try { fs.writeFileSync(x.p + '.새.txt', md, 'utf8'); } catch (e) { console.error('  ✗ 글 적기 — ' + e.message); } }
   if (md.length > 50) t.읽음++;
   if ((md.match(/\n\s*\|/g) || []).length) t.표++;
   t.초합 += r.초 || 0;

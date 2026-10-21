@@ -22,7 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 칸뽑기, 고용형태판정, 본문직군 } from '../공고문읽기.mjs';
+import { 칸뽑기, 고용형태판정, 본문직군, 우리직군줄 } from '../공고문읽기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -118,6 +118,30 @@ console.log('원문을 받아 둔 공고 ' + 사실맵.size + '건');
 const 목록결과 = fs.existsSync(path.join(여기, '목록시험.json'))
   ? JSON.parse(fs.readFileSync(path.join(여기, '목록시험.json'), 'utf8')) : null;
 
+/* ★ 2026-10-21 — 머리말이 약속한 **「다시뽑음」을 이제 실제로 잽니다.**
+ *   --다시뽑음   받아 둔 원문(쪽.txt + 첨부 글)에 **뽑기 규칙만** 다시 걸어 채점
+ *   --새글       첨부 글을 *.새.txt (형식다시읽기 --글적기 가 적은 **고친 뒤** 글) 로
+ *   깃발이 없으면 *.txt (**고치기 전** 글) 입니다 → 둘을 돌려 **읽기 고침의 전후**가 나옵니다.
+ *   일곱 칸 본표는 그대로 지금값(회원이 보는 값)입니다 — 그것은 다시 수집해야 움직입니다. */
+const 다시뽑나 = argv.includes('--다시뽑음');
+/* ★ 2026-10-21 — `--못뽑은꼴` : 못 뽑은 칸을 **정답이 원문에 있던 꼴**로 묶습니다.
+ *   꼴을 먼저 보고 고칠 차례를 정하자는 세중님 지시(1번)입니다. 정답지에 칸마다
+ *   적어 둔 `근거`(원문 글귀)와 `어디`(어느 쪽·어느 첨부·어느 표)가 잣대입니다. */
+const 꼴보기 = argv.includes('--못뽑은꼴');
+
+/** 정답이 원문에 있던 **꼴** — 어디 + 근거 글귀의 모양으로 가립니다 */
+export function 정답꼴(어디, 근거) {
+  const d = String(어디 || ''); const g = String(근거 || '');
+  const 바탕 = /첨부/.test(d) ? '첨부' : /쪽/.test(d) ? '쪽' : '모름';
+  const 그림 = /[.](jpe?g|png|webp)/i.test(d) || /OCR/i.test(d);
+  const 표 = /표/.test(d) || /[|]/.test(g);
+  const 괄호 = /[(（][^)）]{1,20}[)）]/.test(g) && !표;
+  const 목록 = /^[\s]*[-·❍○•▪◦□■◇☐*]/.test(g) || /^[0-9]+[.)]/.test(g.trim());
+  const 꼴 = 그림 ? 'OCR 줄' : 표 ? '표 안' : 목록 ? '목록 줄' : 괄호 ? '괄호 안' : '문단';
+  return 바탕 + ' · ' + 꼴;
+}
+const 다시틀린것 = [];
+const 새글인가 = argv.includes('--새글');
 const 칸이름 = ['모집인원', '접수마감', '마감시각', '근무지', '지원자격', '예상연봉', '고용형태'];
 const 셈 = {
   목록: { '○': 0, '✗': 0, 안재봄: 0 },
@@ -129,6 +153,48 @@ const 셈 = {
 };
 const 칸셈 = {};
 for (const k of 칸이름) 칸셈[k] = { 맞음: 0, 틀림: 0, 빈칸: 0, 헛채움: 0, 둘다없음: 0, 애매: 0 };
+const 다시셈 = {};
+for (const k of 칸이름) 다시셈[k] = { 맞음: 0, 틀림: 0, 빈칸: 0, 헛채움: 0, 둘다없음: 0, 애매: 0 };
+
+/** 받아 둔 원문을 글로 — 첨부 글이 본령, 쪽글은 받침입니다 */
+function 받아둔글(id) {
+  const 방 = path.join(여기, '원문', id);
+  const 쪽p = path.join(방, '쪽.txt');
+  const 글 = fs.existsSync(쪽p) ? fs.readFileSync(쪽p, 'utf8') : '';
+  let md = '';
+  const 첨 = path.join(방, '첨부');
+  if (fs.existsSync(첨)) {
+    for (const f of fs.readdirSync(첨).sort()) {
+      if (!f.endsWith('.txt')) continue;
+      if (f.endsWith('.새.txt') !== 새글인가) continue;
+      md += (md ? '\n\n' : '') + fs.readFileSync(path.join(첨, f), 'utf8');
+    }
+  }
+  return { md, 글 };
+}
+
+/** 뽑기 규칙이 낸 것을 **일곱 칸 꼴**로 — 지금값과 같은 자리에 놓고 견주려고 */
+/* ★ 2026-10-21 — **수집기와 같은 길로 부릅니다.**
+ *   수집기는  칸뽑기(첨부md, 첨부글)  ·  고용형태판정(제목, 글)  로 부릅니다
+ *   (collect-cleaneye:472 · collect-nara:473,605 · collect-hosp:675).
+ *   처음에 쪽글을 합친글 자리에 넣었더니, 첨부에만 우리 직군이 적힌 공고에서
+ *   「공고문에 물리치료사·작업치료사가 안 적혀 있습니다」 가드가 걸려
+ *   지원자격·근무지·예상연봉이 통째로 비었습니다 (CE80464). */
+export function 다시일곱(뽑, 글, 직군, 제목 = '') {
+  const 꼴 = 뽑.모집인원 && Object.keys(뽑.모집인원).length ? 뽑.모집인원 : null;
+  const 인 = 꼴 ? (직군 && 꼴[직군] != null ? 꼴[직군] : Object.values(꼴)[0]) : null;
+  return { 모집인원: 인 != null ? 인 : (뽑.모집인원글 || null),
+    접수마감: 뽑.접수마감 || null, 마감시각: 뽑.접수시각 || null,
+    근무지: 뽑.근무지 || null, 지원자격: 뽑.지원자격 || null, 예상연봉: 뽑.예상연봉 || null,
+    /* ★ 고용형태판정() 은 꾸러미({값,왜})를 돌려줍니다 — 값만 집습니다
+           (처음에 꾸러미째 견주어 고용형태가 다 틀림으로 찍혔습니다) */
+        /* ★ 통합공고는 **우리 직군 줄만** 떼어 넘깁니다 — 고용형태_바로잡기.mjs:85 와 같은 꼴.
+       글 전체를 넘기면 「간호사 무기계약직 / 물리치료사 기간제」 가 섞임으로 비워집니다 */
+    고용형태: (() => { const 줄 = 우리직군줄(글 || '');
+      const v = (제목 || 글) ? 고용형태판정(제목 || '', 줄 || 글 || '') : null;
+          return (v && typeof v === 'object' ? (v.값 || null) : v) || null; })() };
+}
+
 const 출처셈 = new Map();
 const 틀린것 = [];
 
@@ -180,6 +246,46 @@ for (const 답 of 정답들) {
   else if (직답 === '아님') 셈.직군.틀림++;
   else 셈.직군[String(x.지금값.직군).includes(String(직답).replace('사', '')) ? '맞음' : '틀림']++;
 
+  /* ⑧ 다시뽑음 — 같은 원문에 **뽑기 규칙만** 다시 (그물·DB 를 안 두드립니다) */
+  if (다시뽑나) {
+    const o = 받아둔글(답.id);
+    /* 첨부 글이 있으면 그것이 본령 — 수집기도 첨부 md 와 첨부 글만 넘깁니다 */
+    /* ★ 첨부와 쪽을 **둘 다** 봅니다 — 첨부가 본령이고, 첨부에 없는 칸만
+       쪽에서 채웁니다. 수집기도 날짜는 쪽·목록에서, 내용은 첨부에서 얻습니다.
+       첨부만 보게 했더니 접수마감이 63%→40% 로 떨어졌습니다 (쪽의 날짜를 잃음) */
+    const 온글 = (o.md || '') + '\n' + (o.글 || '');
+    const 직 = 본문직군(o.md || o.글) || null;
+    const 첨값 = o.md ? 다시일곱(칸뽑기(o.md, ''), 온글, 직, x.제목 || '') : null;
+    const 쪽값 = o.글 ? 다시일곱(칸뽑기('', o.글), 온글, 직, x.제목 || '') : null;
+    const 다 = {};
+    /* ★ **칸마다 바탕이 다릅니다** — 재는 쪽을 수집기에 맞춥니다.
+     *   날짜(접수마감·마감시각)는 **쪽·목록**이 기준입니다 (수집기가 거기서 담고
+     *   칸되메우기는 null 인 칸만 첨부로 채웁니다). 첨부를 먼저 두면 첨부에 적힌
+     *   다른 일정이 쪽의 바른 날짜를 덮습니다 — 접수마감 틀림이 1→5 로 늘었습니다.
+     *   내용 칸(모집인원·지원자격·근무지·예상연봉·고용형태)은 **첨부**가 기준입니다 —
+     *   쪽을 먼저 두면 모집인원 65%→54% · 지원자격 23%→19% 로 떨어집니다. */
+    const 쪽먼저 = new Set(['접수마감', '마감시각']);
+    const 있나 = (v) => v != null && v !== '';
+    for (const k of 칸이름) {
+      const 앞 = 쪽먼저.has(k) ? 쪽값 : 첨값;
+      const 뒤 = 쪽먼저.has(k) ? 첨값 : 쪽값;
+      다[k] = (앞 && 있나(앞[k])) ? 앞[k] : (뒤 && 있나(뒤[k]) ? 뒤[k] : null);
+    }
+    for (const k of 칸이름) {
+      const 정 = 답.칸 && 답.칸[k] ? 답.칸[k].값 : undefined;
+      if (정 === undefined) continue;
+      const r = 칸채점(정, 다[k] == null ? null : 다[k]);
+      다시셈[k][r.점] = (다시셈[k][r.점] || 0) + 1;
+      if (['틀림', '빈칸', '헛채움'].includes(r.점)) {
+        다시틀린것.push({ id: 답.id, source: s, 칸: k, 점: r.점,
+          정답: 정, 우리: 다[k] == null ? null : 다[k],
+          근거: 답.칸[k].근거 || '', 어디: 답.칸[k].어디 || '',
+          꼴: 정답꼴(답.칸[k].어디, 답.칸[k].근거),
+          회원값: x.지금값[k] == null ? null : x.지금값[k] });
+      }
+    }
+  }
+
   /* ⑦ 일곱 칸 — 지금값(회원이 보는 값) 으로 채점 */
   for (const k of 칸이름) {
     const 정 = 답.칸 && 답.칸[k] ? 답.칸[k].값 : undefined;
@@ -211,6 +317,48 @@ for (const k of 칸이름) {
     + String(c.애매).padStart(6)
     + (분모 ? '   정답률 ' + (100 * (c.맞음 + c.둘다없음) / 분모).toFixed(0) + '%' : ''));
 }
+if (다시뽑나) {
+  console.log('\n── 다시뽑음 (같은 원문 · 뽑기 규칙만 · 첨부 글 '
+    + (새글인가 ? '*.새.txt = 고친 뒤' : '*.txt = 고치기 전') + ') ──');
+  console.log('  칸        맞음  틀림  빈칸  헛채움  둘다없음  애매');
+  for (const k of 칸이름) {
+    const c2 = 다시셈[k];
+    const 분모2 = c2.맞음 + c2.틀림 + c2.빈칸 + c2.헛채움 + c2.둘다없음;
+    console.log('  ' + k.padEnd(8) + String(c2.맞음).padStart(4) + String(c2.틀림).padStart(6)
+      + String(c2.빈칸).padStart(6) + String(c2.헛채움).padStart(7) + String(c2.둘다없음).padStart(9)
+      + String(c2.애매).padStart(6)
+      + (분모2 ? '   정답률 ' + (100 * (c2.맞음 + c2.둘다없음) / 분모2).toFixed(0) + '%' : ''));
+  }
+}
+
+if (꼴보기) {
+  const 볼칸 = ['지원자격', '예상연봉', '고용형태', '마감시각'];
+  console.log('\n\n══ 못 뽑은 칸의 **정답이 있던 꼴** (틀린 수가 많은 칸부터) ══');
+  for (const k of 볼칸) {
+    const 들 = 다시틀린것.filter((v) => v.칸 === k);
+    const 묶 = new Map();
+    for (const v of 들) {
+      const t = 묶.get(v.꼴) || { n: 0, 틀림: 0, 빈칸: 0, 헛채움: 0, 보기: [] };
+      t.n++; t[v.점]++; if (t.보기.length < 3) t.보기.push(v);
+      묶.set(v.꼴, t);
+    }
+    console.log('\n── ' + k + ' — 못 뽑음 ' + 들.length + '건 ──');
+    for (const [꼴, t] of [...묶].sort((a, b) => b[1].n - a[1].n)) {
+      console.log('  ' + 꼴.padEnd(14) + String(t.n).padStart(3) + '건'
+        + '  (틀림 ' + t.틀림 + ' · 빈칸 ' + t.빈칸 + ' · 헛채움 ' + t.헛채움 + ')');
+      for (const v of t.보기) {
+        console.log('      ' + v.id.padEnd(19) + v.source.padEnd(4) + v.점
+          + '  정답 「' + String(v.정답).slice(0, 46) + '」');
+        console.log('          우리 ' + JSON.stringify(v.우리) + ' · 회원값 ' + JSON.stringify(v.회원값));
+        console.log('          근거 「' + String(v.근거).slice(0, 72) + '」 (' + v.어디 + ')');
+      }
+    }
+  }
+  fs.writeFileSync(path.join(여기, '못뽑은꼴.json'),
+    JSON.stringify({ 잰때: new Date().toISOString(), 다시틀린것 }, null, 1) + '\n', 'utf8');
+  console.log('\n  (' + path.join(여기, '못뽑은꼴.json') + ' 에 전부 적었습니다)');
+}
+
 console.log('\n── 출처별 ──');
 for (const [s, c] of [...출처셈].sort((a, b) => b[1].공고 - a[1].공고)) {
   const 분모 = c.맞음 + c.틀림 + c.빈칸 + c.헛채움;
@@ -225,7 +373,10 @@ for (const v of 틀린것.slice(0, 40)) {
   if (v.근거) console.log('      정답 근거 「' + v.근거 + '」 ' + (v.어디 ? '(' + v.어디 + ')' : ''));
 }
 
-const 낼곳 = path.join(여기, '시험결과.json');
-fs.writeFileSync(낼곳, JSON.stringify({ 잰때: new Date().toISOString(), 셈, 칸셈,
+const 낼이름 = 값('--낼것', 다시뽑나 ? ('시험결과_다시' + (새글인가 ? '_후' : '_전') + '.json') : '시험결과.json');
+const 낼곳 = path.isAbsolute(낼이름) ? 낼이름 : path.join(여기, 낼이름);
+fs.writeFileSync(낼곳, JSON.stringify({ 잰때: new Date().toISOString(), 셈,
+  /* ★ 다시뽑음일 때는 **다시셈**을 칸셈 자리에 적습니다 — 점수견주기가 그 자리를 봅니다 */
+  칸셈: 다시뽑나 ? 다시셈 : 칸셈, 회원이보는값: 다시뽑나 ? 칸셈 : undefined,
   출처별: Object.fromEntries(출처셈), 틀린것 }, null, 1) + '\n', 'utf8');
 console.log('\n' + 낼곳 + ' 에 적었습니다. DB 에 아무것도 쓰지 않았습니다.');
