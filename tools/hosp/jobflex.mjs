@@ -104,6 +104,52 @@ async function 한쪽(호스트, 쪽, 크기) {
   return { 쪽정보: j.pagination || {}, 목록: j.list || [], 바이트: t.length };
 }
 
+/* 날·시각 — 풀기() 와 상세() 가 함께 씁니다 (2026-10-22 · 지침 6절) */
+const 날 = (v) => (v ? String(v).slice(0, 10) : '');
+/* ★ 2026-10-21 — **마감 시각**. endDateTime 은 `2026-02-09T17:00:59` 꼴이라
+   날() 이 10자로 자르며 시각을 버렸습니다. 능력시험에서 JF 5건이 마감시각
+   빈칸이었고 정답은 모두 17:00 이었습니다. 00:00 은 마감 시각으로 안 봅니다
+   (자정에 받는 공고는 없습니다 — 공고문읽기.mjs 와 같은 규칙) */
+const 시각 = (v) => {
+  const m = String(v || '').match(/T(\d{2}):(\d{2})/);
+  if (!m) return '';
+  return m[1] === '00' && m[2] === '00' ? '' : m[1] + ':' + m[2];
+};
+
+/** 공고 **상세** — 전문(jobDescription)과 첨부 주소를 줍니다 (2026-10-22)
+ *
+ *  돌려주는 것 — { 제목, 글, 꼴, 시작, 마감, 마감시각, 첨부: [{이름, 주소}], 상태 }
+ *  탈나면 { 왜 } 만 옵니다 (부르는 쪽이 건너뛰게).
+ *  ★ 길은 클라이언트 묶음에서 읽은 것입니다 — v1 은 401, **v2 가 200** 입니다. */
+export async function 상세(호스트, sn) {
+  const u = 'https://api-recruiter.recruiter.co.kr/position/v2/jobflex/' + encodeURIComponent(sn);
+  let r, t;
+  try {
+    r = await fetch(u, {
+      headers: {
+        Accept: 'application/json, text/plain, */*',
+        'User-Agent': UA,
+        Referer: 'https://' + 호스트 + '.recruiter.co.kr/career/jobs/' + sn,
+        prefix: 호스트 + '.recruiter.co.kr',      // ← 목록과 똑같이 필요합니다
+      },
+    });
+    t = await r.text();
+  } catch (e) { return { 왜: String(e && (e.cause?.code || e.message)).slice(0, 60) }; }
+  if (!r.ok) return { 왜: 'HTTP ' + r.status + ' · ' + t.slice(0, 100), code: r.status };
+  let j;
+  try { j = JSON.parse(t); } catch { return { 왜: 'JSON 이 아닙니다 · ' + t.slice(0, 100) }; }
+  const 첨부 = (j.attachFileDtoList || [])
+    .filter((f) => f && f.fileUrl)
+    .map((f) => ({ 이름: String(f.fileName || f.fileUid || '').slice(0, 200), 주소: String(f.fileUrl) }));
+  return {
+    제목: j.title || '',
+    글: String(j.jobDescription || ''),
+    꼴: j.jobDescriptionType || '',
+    시작: 날(j.startDateTime), 마감: 날(j.endDateTime), 마감시각: 시각(j.endDateTime),
+    첨부, 상태: j.submissionStatus || '', 바이트: t.length,
+  };
+}
+
 /** 한 곳의 공고를 **전부** 받습니다 (쪽 넘김까지) */
 export async function 목록(호스트, 최대쪽 = 20) {
   const 첫 = await 한쪽(호스트, 1, 100);
@@ -134,16 +180,7 @@ export function 풀기(호스트, x) {
       if (곳.가르기[t]) { 기관 = 곳.가르기[t]; break; }
     }
   }
-  const 날 = (v) => (v ? String(v).slice(0, 10) : '');
-  /* ★ 2026-10-21 — **마감 시각**. endDateTime 은 `2026-02-09T17:00:59` 꼴이라
-     날() 이 10자로 자르며 시각을 버렸습니다. 능력시험에서 JF 5건이 마감시각
-     빈칸이었고 정답은 모두 17:00 이었습니다. 00:00 은 마감 시각으로 안 봅니다
-     (자정에 받는 공고는 없습니다 — 공고문읽기.mjs 와 같은 규칙) */
-  const 시각 = (v) => {
-    const m = String(v || '').match(/T(\d{2}):(\d{2})/);
-    if (!m) return '';
-    return m[1] === '00' && m[2] === '00' ? '' : m[1] + ':' + m[2];
-  };
+
   return {
     id: 'JF' + x.positionSn,
     제목,

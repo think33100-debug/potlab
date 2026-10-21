@@ -43,7 +43,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 곳들, 목록, 풀기, 꼬리표가르기, 경력조건 } from './hosp/jobflex.mjs';
+import { 곳들, 목록, 풀기, 상세, 꼬리표가르기, 경력조건 } from './hosp/jobflex.mjs';
+import { 첨부모으기 } from './첨부담기.mjs';   /* 첨부 주소는 이 창구 한 자리 (2026-10-22) */
 import { sortJob } from './sort-rule.mjs';
 import { mixedTitle, 구운날 } from './gas-rules.mjs';
 
@@ -84,7 +85,10 @@ async function rpc(cfg, fn, body) {
 const argv = process.argv.slice(2);
 const dry = argv.includes('--dry');
 const 백필 = argv.includes('--백필');
-const 찾을말 = argv.filter((x) => !x.startsWith('--'));
+/* ★ 2026-10-22 — `--상세 6` 의 **「6」이 기관 찾을말로 읽혀** 0곳이 됐습니다.
+   값을 받는 깃발(`--상세`) 바로 뒤의 토막은 찾을말이 아닙니다 */
+const 값받는깃발 = ['--상세'];
+const 찾을말 = argv.filter((x, i) => !x.startsWith('--') && !값받는깃발.includes(argv[i - 1]));
 const 볼것 = 찾을말.length
   ? 곳들.filter((c) => 찾을말.some((w) => c.호스트.includes(w) || c.이름.includes(w)))
   : 곳들;
@@ -153,6 +157,38 @@ if (우리.length) {
     + (x.직군 || '?').padEnd(7) + x.기관.slice(0, 16).padEnd(18) + x.제목.slice(0, 44)));
 }
 
+/* ③-0 상세 — **전문과 첨부 주소**를 받습니다 (2026-10-22 세중님 3번 ①)
+ *
+ * 전에는 목록 API 만 썼습니다. 그래서 JF 공고 **233건이 원문 없이** 일곱 칸을
+ * 비우고 있었습니다 (tools/못연까닭.mjs 로 셌습니다).
+ * 상세 `GET /position/v2/jobflex/{sn}` 가 `jobDescription`(전문)과
+ * `attachFileDtoList`(공고문 PDF 직접 주소)를 줍니다. 받은 것은
+ * `collect_body` · `첨부담기` **이미 있는 창구**로 담고, 일곱 칸은
+ * `첨부되메우기`·`본문칸_다시뽑기` 가 채웁니다 (새 길을 또 만들지 않습니다).
+ *
+ * 울타리 — 한 바퀴 상한 60건(`--상세 N` · `JF_DETAIL_MAX`) · 사이 400ms.
+ *   `--dry` 면 두드리기만 하고 담지 않습니다.
+ */
+const 상세상한 = Number(argv[argv.indexOf('--상세') + 1]) || Number(process.env.JF_DETAIL_MAX) || 60;
+const 상세모음 = new Map();      /* id → { 글, 첨부[], 마감시각 } */
+let 상세탈 = 0;
+if (상세상한 > 0 && 후보.length) {
+  console.log('\n③-0 상세 — 앞 ' + Math.min(상세상한, 후보.length) + '건을 엽니다'
+    + ' (상한 ' + 상세상한 + ' · 사이 400ms)');
+  for (const x of 후보.slice(0, 상세상한)) {
+    const d = await 상세(x.곳.호스트, String(x.id).slice(2));
+    if (d.왜) {
+      상세탈++;
+      if (상세탈 <= 3) console.error('  ✗ ' + x.id + ' · ' + d.왜);
+    } else 상세모음.set(x.id, d);
+    await new Promise((y) => setTimeout(y, 400));
+  }
+  const 첨부수 = [...상세모음.values()].reduce((a, d) => a + d.첨부.length, 0);
+  const 글있는것 = [...상세모음.values()].filter((d) => String(d.글 || '').length > 200).length;
+  console.log('  열림 ' + 상세모음.size + '건 · 탈 ' + 상세탈 + '건'
+    + ' · 글 200자 넘는 것 ' + 글있는것 + '건 · 첨부 ' + 첨부수 + '개');
+}
+
 /* ③ 담을 줄 만들기 */
 const 이제 = new Date().toISOString();
 const 담을것 = 후보.map((x) => {
@@ -195,7 +231,9 @@ return ({
      옛 줄 22건은 마이그레이션으로 함께 바꿉니다 (세중님 승인 뒤) */
   deadline_src: x.마감 ? 'API:JobFlex' : null,
   /* ★ 2026-10-21 — 마감 시각은 목록 API 가 줍니다 (endDateTime 의 시각 부분) */
-  ...(x.마감시각 ? { apply_to_time: x.마감시각 } : {}),
+  /* ★ 2026-10-22 — 목록에 없으면 **상세의 endDateTime** 으로 (같은 칸입니다) */
+  ...((x.마감시각 || (상세모음.get(x.id) || {}).마감시각)
+    ? { apply_to_time: x.마감시각 || 상세모음.get(x.id).마감시각 } : {}),
   /* ★ 원래 올린 날. job_posts 의 트리거가 이것으로 first_seen 을 잡습니다 */
   posted_at: x.시작 || null,
   url: x.주소,
@@ -244,6 +282,54 @@ if (dry) {
     (r['건너뛴것'] || []).slice(0, 5).forEach((x) => console.error('  건너뜀 ' + x.id + ' · ' + x.why));
   }
   console.log('\n씀          ' + 담음 + '건' + (건너뜀 ? ' · 건너뜀 ' + 건너뜀 + '건' : ''));
+
+  /* ③-0 에서 받은 **전문·첨부**를 담습니다 (2026-10-22).
+     글은 HTML 그대로 둡니다 — 읽는 쪽(칸뽑기)이 표를 보려면 태그가 필요합니다 */
+  if (상세모음.size) {
+    const 원문들 = [];
+    for (const x of 후보) {
+      const d = 상세모음.get(x.id);
+      if (!d) continue;
+      const 글만 = String(d.글 || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ').trim();
+      if (글만.length > 60) {
+        원문들.push({ job_id: x.id, kind: '상세', ord: 0, url: x.주소 || null, body: d.글 });
+      }
+    }
+    let 글담음 = 0;
+    for (let i = 0; i < 원문들.length; i += 50) {
+      try {
+        const r = await rpc(cfg, 'collect_body', {
+          p_secret: cfg.COLLECT_KEY_JF, p_source: SOURCE, p_rows: 원문들.slice(i, i + 50),
+        });
+        글담음 += r['담음'] || 0;
+      } catch (e) {
+        console.error('  ✗ collect_body — ' + String(e.message).slice(0, 140));
+        break;
+      }
+    }
+    console.log('전문        ' + 글담음 + '건 (job_body · 보낸 것 ' + 원문들.length + ')');
+
+    const 첨부 = 첨부모으기(SOURCE, { 마른: false });
+    let 첨부줄 = 0;
+    for (const x of 후보) {
+      const d = 상세모음.get(x.id);
+      if (!d) continue;
+      for (const f of d.첨부) {
+        첨부.더하기({ job_id: x.id, kind: '공고문', name: f.이름, url: f.주소 });
+        첨부줄++;
+      }
+    }
+    if (첨부줄) {
+      try {
+        const a = await 첨부.끝내기(cfg);
+        console.log('첨부        ' + 첨부줄 + '개 보냄'
+          + (a && a['담음'] != null ? ' · 담음 ' + a['담음'] : ''));
+      } catch (e) {
+        console.error('  ✗ 첨부담기 — ' + String(e.message).slice(0, 140));
+      }
+    }
+  }
 
   let 버림 = 0;
   for (let i = 0; i < 버릴것.length; i += 200) {
