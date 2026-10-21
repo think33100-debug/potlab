@@ -1,0 +1,127 @@
+{
+ "id": "HS190712781",
+ "source": "HS3",
+ "기관": "광주보훈병원",
+ "제목": "[광주보훈병원] 계약직 보건직(작업치료사) - 휴직대체 직원 채용",
+ "주소": "https://www.bohun.or.kr/gwangju/na/ntt/selectNttInfo.do?mi=32890&bbsId=1158&bbsSysId=gwangju&nttSn=190472",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 3,
+ "쪽": {
+  "code": 200,
+  "바이트": 76261,
+  "끝주소": "https://www.bohun.or.kr/gwangju/na/ntt/selectNttInfo.do?mi=32890&bbsId=1158&bbsSysId=gwangju&nttSn=190472",
+  "글자수": 5659,
+  "우리직군말": true,
+  "제목글자": "채용 상세 &lt; 병원소개 &lt; 광주보훈병원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=",
+   "열쇠": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172817744.jpeg",
+   "열쇠": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172817744.jpeg",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172827176.jpeg",
+   "열쇠": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172827176.jpeg",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172849052.jpeg",
+   "열쇠": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172849052.jpeg",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172852519.jpeg",
+   "열쇠": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172852519.jpeg",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172856695.jpeg",
+   "열쇠": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172856695.jpeg",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172901153.jpeg",
+   "열쇠": "https://www.bohun.or.kr/upload/editor/xfree/20261016/IMG_172901153.jpeg",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/images/web/gwangju/sub/wa_qualith_certificate.pdf",
+   "열쇠": "https://www.bohun.or.kr/images/web/gwangju/sub/wa_qualith_certificate.pdf",
+   "글": "(주소꼴)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "계약직보건직(작업치료사)-휴직대체직원채용공고문.pdf",
+   "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=785cf7e0cfd503b0a1ddb5f8f9db9e1f&bbsSysId=gwangju",
+   "갈래": null,
+   "code": 200,
+   "바이트": 193545,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "계약직 보건직(작업치료사) - 휴직대체 직원 채용 공고문.pdf",
+   "글자수": 7787,
+   "표수": 13,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 6,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 3.6
+  },
+  {
+   "어디서": "DB",
+   "이름": "직무기술서(작업치료사).hwp",
+   "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=9effb551b58a85600c8cde4357851ae1&bbsSysId=gwangju",
+   "갈래": null,
+   "code": 200,
+   "바이트": 79872,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "직무기술서(작업치료사).hwp",
+   "글자수": 1821,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0.6
+  },
+  {
+   "어디서": "DB",
+   "이름": "wa_qualith_certificate.pdf",
+   "url": "https://www.bohun.or.kr/images/web/gwangju/sub/wa_qualith_certificate.pdf",
+   "갈래": null,
+   "code": 200,
+   "바이트": 212123,
+   "앞바이트": "%PDF-1.5",
+   "진짜형식": "pdf",
+   "받은이름": "wa_qualith_certificate.pdf",
+   "글자수": 352,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 1.4
+  }
+ ]
+}

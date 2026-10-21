@@ -22,7 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 칸뽑기, 고용형태판정, 본문직군, 우리직군줄, 마감고르기, 고용형태고르기 } from '../공고문읽기.mjs';
+import { 공고아닌첨부, 칸뽑기, 고용형태판정, 본문직군, 우리직군줄, 마감고르기, 고용형태고르기 } from '../공고문읽기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -171,6 +171,7 @@ function 받아둔글(id) {
     for (const f of fs.readdirSync(첨).sort()) {
       if (!f.endsWith('.txt')) continue;
       if (f.endsWith('.새.txt') !== 새글인가) continue;
+      if (공고아닌첨부(f)) continue;   /* 쪽 꼬리말 인증서 (2026-10-21) */
       md += (md ? '\n\n' : '') + fs.readFileSync(path.join(첨, f), 'utf8');
     }
   }
@@ -402,5 +403,7 @@ const 낼곳 = path.isAbsolute(낼이름) ? 낼이름 : path.join(여기, 낼이
 fs.writeFileSync(낼곳, JSON.stringify({ 잰때: new Date().toISOString(), 셈,
   /* ★ 다시뽑음일 때는 **다시셈**을 칸셈 자리에 적습니다 — 점수견주기가 그 자리를 봅니다 */
   칸셈: 다시뽑나 ? 다시셈 : 칸셈, 회원이보는값: 다시뽑나 ? 칸셈 : undefined,
+  /* ★ 다시뽑음 쪽 틀린 목록도 넣습니다 — 하위 갈래(우리 직군만·원문 연 것만)를 다시 세려면 필요합니다 */
+  다시틀린것: 다시뽑나 ? 다시틀린것 : undefined,
   출처별: Object.fromEntries(출처셈), 틀린것 }, null, 1) + '\n', 'utf8');
 console.log('\n' + 낼곳 + ' 에 적었습니다. DB 에 아무것도 쓰지 않았습니다.');

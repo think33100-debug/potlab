@@ -1,0 +1,44 @@
+# 경상대학교병원 - 지원자현황검색
+
+# Page 1 of 2
+
+<table>
+<tr><th colspan="2">응시구분</th><th colspan="4"></th><th colspan="2">지원부문</th><th colspan="3"></th></tr>
+<tr><td colspan="2">희망근무지</td><td colspan="4"></td><td colspan="2">경력구분</td><td colspan="3"></td></tr>
+<tr><td colspan="11">기본정보</td></tr>
+<tr><td colspan="2" rowspan="8"></td><td colspan="2">성명(한글)</td><td colspan="5"></td><td>생월일</td><td></td></tr>
+<tr><td colspan="2">성명(한자)</td><td colspan="2"></td><td>전화번호</td><td colspan="4"></td></tr>
+<tr><td colspan="2">성명(영문)</td><td colspan="2"></td><td>휴대전화</td><td colspan="4"></td></tr>
+<tr><td colspan="2">주소</td><td colspan="7"></td></tr>
+<tr><td colspan="2">장애인<br>대상여부</td><td colspan="2"></td><td>장애유형</td><td colspan="2"></td><td>장애등급</td><td>등급</td></tr>
+<tr><td colspan="2">중증여부</td><td colspan="2"></td><td>보훈여부</td><td colspan="2"></td><td>보훈번호</td><td></td></tr>
+<tr><td colspan="2">관계</td><td colspan="2"></td><td>보훈발급지청</td><td colspan="4"></td></tr>
+<tr><td colspan="2">이메일</td><td colspan="7"></td></tr>
+<tr><td colspan="11">병력사항</td></tr>
+<tr><td>병역구분</td><td colspan="3">군별 병과</td><td>계급</td><td colspan="6">복무기간 면제사유</td></tr>
+<tr><td></td><td colspan="3"></td><td></td><td colspan="6"></td></tr>
+<tr><td colspan="11">경력사항</td></tr>
+<tr><td>근무시작년월</td><td colspan="2">근무종료년월</td><td colspan="6">총근무기간 직장명 담당업무 소재지</td><td colspan="2">퇴직사유</td></tr>
+</table>
+
+## 자격 및 면허
+
+자격(면허)명
+
+취득일자	자격면허인가번호
+
+인가관청
+
+https://recruit.gnuh.co.kr:8443/adrecruit/03\_applicant/02\_general\_popup/applicant\_popup\_ge.js... 2020-05-26 경상대학교병원 - 지원자현황검색
+
+## 직무수행계획서
+
+# Page 2 of 2
+
+
+
+
+
+### 닫기	수정
+
+https://recruit.gnuh.co.kr:8443/adrecruit/03\_applicant/02\_general\_popup/applicant\_popup\_ge.js... 2020-05-26

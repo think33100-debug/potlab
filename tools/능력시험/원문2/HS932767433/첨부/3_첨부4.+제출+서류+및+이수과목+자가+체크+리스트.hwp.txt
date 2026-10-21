@@ -1,0 +1,44 @@
+[붙임3]
+
+건국대학교병원 수련 임상심리사 선발
+
+- 제출 서류 및 이수과목 자가 체크 리스트
+
+이 름 :
+
+생년월일 :
+
+소 속 :
+
+<table>
+<tr><th colspan="2">제출 서류</th></tr>
+<tr><td>서류명</td><td>제출여부</td></tr>
+<tr><td>1. 석사학위 (예정) 증명서</td><td></td></tr>
+<tr><td>2. 대학교 성적 증명서</td><td></td></tr>
+<tr><td>3. 대학원 성적 증명서</td><td></td></tr>
+<tr><td>4. 석사학위 졸업 논문 초록</td><td></td></tr>
+</table>
+
+<table>
+<tr><th colspan="4">임상심리전문가 과목(대학원 임상심리 관련 과목)</th></tr>
+<tr><td colspan="2">영 역</td><td>과 목 명(인정학점)</td><td>이 수 학 기<br>[0000년 0학기]</td></tr>
+<tr><td rowspan="3">임상 관련</td><td>정신병리</td><td></td><td></td></tr>
+<tr><td>심리치료</td><td></td><td></td></tr>
+<tr><td>심리평가</td><td></td><td></td></tr>
+<tr><td colspan="2">방법론 관련</td><td></td><td></td></tr>
+</table>
+
+<table>
+<tr><th colspan="4">정신건강임상심리사 과목(대학원 임상심리 관련 과목)</th></tr>
+<tr><td colspan="2">영 역</td><td>과목명</td><td>이 수 학 기<br>[0000년 0학기]</td></tr>
+<tr><td colspan="2" rowspan="4">필수과목</td><td></td><td></td></tr>
+<tr><td></td><td></td></tr>
+<tr><td></td><td></td></tr>
+<tr><td></td><td></td></tr>
+<tr><td rowspan="3">선택과목</td><td>영역1:</td><td></td><td></td></tr>
+<tr><td>영역2:</td><td></td><td></td></tr>
+<tr><td>영역3:</td><td></td><td></td></tr>
+</table>
+
+
+![image](image_001.jpg)

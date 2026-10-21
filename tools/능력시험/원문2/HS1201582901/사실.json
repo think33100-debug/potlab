@@ -1,0 +1,47 @@
+{
+ "id": "HS1201582901",
+ "source": "HS3",
+ "기관": "경상북도김천의료원",
+ "제목": "[영상·진단검사의학과] 초단기 근로자 (단기간 아르...",
+ "주소": "https://www.gcmc.or.kr/news/news_03.php?boardid=job&mode=view&idx=662&sk=&sw=&offset=&category=",
+ "숨김": false,
+ "보류": true,
+ "DB첨부": 1,
+ "쪽": {
+  "code": 200,
+  "바이트": 32464,
+  "끝주소": "https://www.gcmc.or.kr/news/news_03.php?boardid=job&mode=view&idx=662&sk=&sw=&offset=&category=",
+  "글자수": 4928,
+  "우리직군말": false,
+  "제목글자": "김천의료원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.gcmc.or.kr/uploaded/board/job/_d332822264bdf168b760d084fa9000ee1.pdf",
+   "열쇠": "https://www.gcmc.or.kr/uploaded/board/job/_d332822264bdf168b760d084fa9000ee1.pdf",
+   "글": "10채용 공고 ((영상1,진단1) 초단시간근로자 계약2).pdf"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "10채용 공고 ((영상1,진단1) 초단시간근로자 계약2).pdf",
+   "url": "https://www.gcmc.or.kr/uploaded/board/job/_d332822264bdf168b760d084fa9000ee1.pdf",
+   "갈래": null,
+   "code": 200,
+   "바이트": 128983,
+   "앞바이트": "%PDF-1.6",
+   "진짜형식": "pdf",
+   "받은이름": "10채용 공고 ((영상1,진단1) 초단시간근로자 계약2).pdf",
+   "글자수": 3245,
+   "표수": 10,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 3,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 2.4
+  }
+ ]
+}

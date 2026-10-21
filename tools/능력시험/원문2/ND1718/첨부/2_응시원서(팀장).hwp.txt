@@ -1,0 +1,72 @@
+# 지원서
+
+<table>
+<tr><th colspan="4">성 명</th><th colspan="6"></th><th colspan="3">성 별</th><th colspan="4">남 ( ) 여 ( )</th></tr>
+<tr><td colspan="4">직 군</td><td colspan="6"></td><td colspan="3">생년월일</td><td colspan="4"></td></tr>
+<tr><td rowspan="2">주 소</td><td colspan="7" rowspan="2"></td><td colspan="2" rowspan="2">전 화</td><td colspan="7">자 택 :</td></tr>
+<tr><td colspan="7">휴대전화 :</td></tr>
+<tr><td rowspan="3">학력<br>(전문<br>대학<br>이상)</td><td colspan="4">부 터</td><td colspan="4">까 지</td><td colspan="6">학교명</td><td colspan="2">전공학과</td></tr>
+<tr><td colspan="4"></td><td colspan="4"></td><td colspan="6"></td><td colspan="2"></td></tr>
+<tr><td colspan="4"></td><td colspan="4"></td><td colspan="6"></td><td colspan="2"></td></tr>
+<tr><td colspan="17">자격면허</td></tr>
+<tr><td colspan="2">년 월 일</td><td colspan="4">종 별</td><td>발급처</td><td colspan="5">년 월 일</td><td colspan="2">종 별</td><td colspan="3">발급처</td></tr>
+<tr><td colspan="2"></td><td colspan="4"></td><td></td><td colspan="5"></td><td colspan="2"></td><td colspan="3"></td></tr>
+<tr><td colspan="2"></td><td colspan="4"></td><td></td><td colspan="5"></td><td colspan="2"></td><td colspan="3"></td></tr>
+<tr><td colspan="2"></td><td colspan="4"></td><td></td><td colspan="5"></td><td colspan="2"></td><td colspan="3"></td></tr>
+<tr><td rowspan="7">경력</td><td colspan="2">근무기관</td><td colspan="5">근무기간</td><td colspan="3">직위</td><td colspan="5">담당업무(구체적)</td><td>퇴직사유</td></tr>
+<tr><td colspan="2">기관명 작성</td><td colspan="5">20**.00.00~20**.00.00<br>(0년 0개월 0일)</td><td colspan="3"></td><td colspan="5"></td><td></td></tr>
+<tr><td colspan="2"></td><td colspan="5"></td><td colspan="3"></td><td colspan="5"></td><td></td></tr>
+<tr><td colspan="2"></td><td colspan="5"></td><td colspan="3"></td><td colspan="5"></td><td></td></tr>
+<tr><td colspan="2"></td><td colspan="5"></td><td colspan="3"></td><td colspan="5"></td><td></td></tr>
+<tr><td colspan="2"></td><td colspan="5"></td><td colspan="3"></td><td colspan="5"></td><td></td></tr>
+<tr><td colspan="2"></td><td colspan="5"></td><td colspan="3"></td><td colspan="5"></td><td></td></tr>
+</table>
+
+위에 기재한 사항은 사실과 다름이 없음을 확인합니다.
+
+2026. . .
+
+성 명 (서명)
+
+
+# 자기소개서
+
+※ 자기소개, 경력기술, 업무성과, 자기개발노력, 계획, 조직의 미래지향적 관점 등 자신의 의견을 자유롭게 작성
+※ 자기소개서는 최대 1장 이내/ 굴림체, 10포인트, 줄간격 160%
+
+
+# 팀 운영 및 사업 계획서
+
+※ 현재 치매안심센터에서 운영 중인 ①치매조기검진사업, ②치매환자사례관리사업, ③인지프로그램 운영사업 ④치매인식개선 사업 중 지원자가 1개 사업을 선택하여 팀 운영 및 사업 계획서를 작성하고 이를 바탕으로 PPT 발표자료를 작성하여 제출
+※ 최대 3장 이내/ 굴림체, 10포인트, 줄간격 160% 지킴
+
+2026. . .
+
+제출자 (서명)
+
+
+# 개인정보 및 고유식별 처리 동의서
+
+| 구 분 | 세부 서류 (지원자 성명 : ) |
+| --- | --- |
+| 지원서 | 성명, 생년월일, 성별, 주소, 학력, 경력, 자격증 |
+| 자기소개서 | 자기소개서 내용 |
+
+
+### [ 개인정보 및 고유식별정보 수집․이용에 관한 안내 ]
+
+〔개인정보 및 고유식별정보 수집․이용〕
+
+◈ (수집․이용목적) 채용심사에 필요한 인적사항 및 입증서류 확인, 채용 결격 사유 확인
+
+◈ (수집항목) 지원서(성명, 주소, 전화번호, 성별, 학력, 자격증 등), 자기소개서
+
+◈ (보유․이용기간) 채용심사에 필요한 보존기한 완료시까지
+
+◈ (동의 거부권리 안내) 본 ｢개인정보 및 고유식별정보 수집․이용｣에 대한 동의를 거부할 수 있으나, 이 경우 채용심사에서 자료 미확인으로 불이익이 있을 수 있습니다.
+
+위 사항을 숙지하고 [개인정보보호법] 제15조 제1항 제1호, 제17조 제1항 제1호, 제24조 제1항 제1호에 따라 귀 기관에서 본인의 개인정보 수집․이용에 동의합니다.
+
+2026년 월 일
+
+성명 : (서명)

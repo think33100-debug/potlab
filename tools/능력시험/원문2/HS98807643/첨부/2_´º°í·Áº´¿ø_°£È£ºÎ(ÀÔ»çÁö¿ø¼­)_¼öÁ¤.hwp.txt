@@ -1,0 +1,41 @@
+- 입 사 지 원 서 - 의료법인 인봉의료재단 뉴고려병원
+
+<table>
+<tr><th colspan="5">1. 인적사항</th></tr>
+<tr><td>경력구분</td><td>신입 ( ) / 경력 ( )</td><td>지원분야</td><td></td><td>생년월일</td></tr>
+<tr><td>성명</td><td colspan="4">(한글)</td></tr>
+<tr><td>현주소</td><td colspan="4"></td></tr>
+<tr><td rowspan="2">연락처</td><td>(본인휴대폰)</td><td rowspan="2">전자우편</td><td colspan="2" rowspan="2"></td></tr>
+<tr><td>(비상연락처)</td></tr>
+<tr><td>최종학교 소재지</td><td></td><td>병역 (남성)</td><td colspan="2">□ 군필 □ 미필 □ 비대상</td></tr>
+</table>
+
+<table>
+<tr><th colspan="6">2. 자격/면허사항</th></tr>
+<tr><td colspan="6">* 자격/면허사항을 기입해 주십시오.</td></tr>
+<tr><td>면허증명</td><td>발급기관</td><td>취득일자</td><td>면허증명</td><td>발급기관</td><td>취득일자</td></tr>
+<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+
+<table>
+<tr><th colspan="4">3. 경험 혹은 경력사항</th></tr>
+<tr><td colspan="4">* 지원직무 관련 경험 혹은 경력사항(최근)을 기입해 주십시오.</td></tr>
+<tr><td>구분</td><td>근무처</td><td>직책</td><td>근무기간</td></tr>
+<tr><td>□ 신규 □ 경력</td><td></td><td></td><td>년 월 ~ 년 월</td></tr>
+</table>
+
+4. 자기소개서
+\* 자신의 소개를 지원동기 및 포부와 함께 200자 내외로 작성해 주십시오.
+
+<table>
+<tr><th colspan="3">5. 지원확인</th></tr>
+<tr><td colspan="3">* 위 사항은 사실과 다름이 없음을 확인합니다.</td></tr>
+<tr><td>지원날짜</td><td>2019. . .</td><td>지원자</td></tr>
+</table>
+
+뉴고려병원 간호부와 함께 여러분의 꿈을 펼쳐보시기 바랍니다.
+
+뉴고려병원 간호부는 아낌없는 지원과 배려로 여러분과 함께합니다.
+
+
+### 지원해 주셔서 감사합니다.

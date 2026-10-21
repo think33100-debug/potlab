@@ -1,0 +1,47 @@
+{
+ "id": "HS2009051784",
+ "source": "HS3",
+ "기관": "동아대학교병원",
+ "제목": "건강증진지원과(종합검진센터) 임시직 업무보조 공개채용 공고",
+ "주소": "https://www.damc.or.kr/05/03_2017_view.php?hire_web_sqno=2218&p=1&key=&keyword=&rePart=",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 0,
+ "쪽": {
+  "code": 200,
+  "바이트": 23671,
+  "끝주소": "https://www.damc.or.kr/05/03_2017_view.php?hire_web_sqno=2218&p=1&key=&keyword=&rePart=",
+  "글자수": 2445,
+  "우리직군말": false,
+  "제목글자": "동아대학교병원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.damc.or.kr/file/CI.zip",
+   "열쇠": "https://www.damc.or.kr/file/CI.zip",
+   "글": "CI"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "쪽",
+   "이름": "CI",
+   "url": "https://www.damc.or.kr/file/CI.zip",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 1168056,
+   "앞바이트": "PK......",
+   "진짜형식": "zip계열",
+   "받은이름": "CI",
+   "글자수": 43,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "zip계열",
+   "쪽수": null,
+   "OCR썼나": true,
+   "OCR필요쪽": null,
+   "초": 7.4
+  }
+ ]
+}

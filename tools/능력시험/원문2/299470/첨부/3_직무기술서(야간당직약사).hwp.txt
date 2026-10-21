@@ -1,0 +1,15 @@
+<table>
+<tr><th colspan="6">【 경상국립대학교병원 NCS 기반 직무설명서 : 야간당직 약사 】</th></tr>
+<tr><td rowspan="3">직무분야</td><td colspan="5">NCS 분류체계</td></tr>
+<tr><td colspan="2">대분류</td><td>중분류</td><td>소분류</td><td>세분류</td></tr>
+<tr><td colspan="2">06.보건/의료</td><td>01.보건</td><td>03.약무</td><td>-</td></tr>
+<tr><td colspan="2">핵심직무</td><td colspan="4">○ 의약품 처방감사, 조제, 조제 후 감사 및 투약</td></tr>
+<tr><td colspan="2">직무수행<br>내용</td><td colspan="4">• 환자정보 및 약력관리<br>• 의약품 처방 감사<br>• 의약품 조제 및 감사<br>• 의약품 투약 및 복약설명<br>• 자가의약품 식별</td></tr>
+<tr><td colspan="2">필요<br>지식</td><td colspan="4">• 약학 일반<br>- 약품별 효능, 용법용량, 적응증 및 보관방법 <br> - 의약품의 물리화학적 특성, 제형구분, 안정성 및 감염과 면역, 제조와 품질관리 등<br>• 임상약학 및 약물치료학<br>- 질환별 병태생리 및 약물요법의 이해<br>- 약리작용 및 약동학적 약력학적 특성<br>• 의약관계법규 및 제도<br>- 약사법, 마약류 관리에 관한 법률, 의료법 등</td></tr>
+<tr><td colspan="2">필요<br>기술</td><td colspan="4">○ 컴퓨터 및 시스템 활용 능력, 정보 검색 및 분석, 평가 능력, 고객/환자/업무 담당자와의 대화, 상담기술 및 협업 관리, 커뮤니케이션 및 상황별 대응 또는 문제해결 능력</td></tr>
+<tr><td colspan="2">직무수행태도</td><td colspan="4">○ 정확한 업무수행 태도, 주의 깊은 관찰력, 타부서와의 협업적 태도, 조직윤리에 따라 업무를 수행하는 자세, 책임감 있는 자세, 고객에 대한 적극적 응대 및 정확한 정보제공 등</td></tr>
+<tr><td colspan="2">직업기초능력</td><td colspan="4">○ 문제해결능력, 직업윤리, 의사소통능력, 대인관계능력, 정보능력</td></tr>
+<tr><td colspan="2">전형방법</td><td colspan="4">○ 서류전형 → 면접시험 → 최종합격자 발표</td></tr>
+<tr><td colspan="2">자격요건</td><td colspan="4">○ 약사 면허 소지자</td></tr>
+<tr><td colspan="2">참고<br>사이트</td><td colspan="4">○ [www.ncs.go.kr](http://www.ncs.go.kr) 홈페이지 → NCS 학습모듈 검색</td></tr>
+</table>

@@ -1,0 +1,967 @@
+{
+ "만든때": "2026-10-21T13:51:16.634Z",
+ "규칙": "최근 30일 · 1층 기관(견줄이름 ↔ 일층병원_구멍) · 숨김·보류 포함 · 출처별 골고루 · 첨부 있는 것 먼저",
+ "몇개": 50,
+ "표본": [
+  {
+   "id": "HS98807643",
+   "source": "HS3",
+   "기관": "의료법인인봉의료재단뉴고려병원",
+   "꼴표": 5,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년도 간호부 신규, 경력직 채용공고...",
+   "주소": "https://www.nkhospital.net/notice/notice.php?jb_code=100&jb_mode=tdetail&jb_idx=2686&search_key=&search_keyword=&page=&dep1=2&dep2=2-1",
+   "첨부": [
+    {
+     "url": "https://nkhospital.net/bbs/download.php?downview=1&file=/home/hosting_users/nkmed/www/bbs/files/jb_100/834c48fe3429728.hwp&name=%EB%89%B4%EA%B3%A0%EB%A0%A4%EB%B3%91%EC%9B%90_%EA%B0%84%ED%98%B8%EB%B6%80(%EC%9E%85%EC%82%AC%EC%A7%80%EC%9B%90%EC%84%9C)_%EC%88%98%EC%A0%95.hwp",
+     "kind": "공고문",
+     "name": "834c48fe3429728.hwp&name=%EB%89%B4%EA%B3%A0%EB%A0%A4%EB%B3%91%EC%9B%90_%EA%B0%84%ED%98%B8%EB%B6%80(%EC%9E%85%EC%82%AC%EC",
+     "읽기탈": "주소를 버렸습니다 — 서버 파일 경로입니다 — 그물 주소가 아닙니다",
+     "읽어봄": true
+    },
+    {
+     "url": "https://www.nkhospital.net/bbs/download.php?downview=1&file=/home/hosting_users/nkmed/www/bbs/files/jb_100/834c48fe3418645.hwp&name=%EB%89%B4%EA%B3%A0%EB%A0%A4%EB%B3%91%EC%9B%90_%EA%B0%84%ED%98%B8%EB%B6%80(%EC%9E%85%EC%82%AC%EC%A7%80%EC%9B%90%EC%84%9C)_%EC%88%98%EC%A0%95.hwp",
+     "kind": "공고문",
+     "name": "뉴고려병원_간호부(입사지원서)_수정.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.nkhospital.net/bbs/download.php?downview=1&file=/home/hosting_users/nkmed/www/bbs/files/jb_100/f7208f5e4216514.docx&name=2026%EB%85%84%EB%8F%84%20%EC%8B%A0%EA%B7%9C,%EB%B0%8F%20%EA%B2%BD%EB%A0%A5%EA%B0%84%ED%98%B8%EC%82%AC%EC%B1%84%EC%9A%A9%EA%B3%B5%EA%B3%A0%20-%202026-9-30.docx",
+     "kind": "공고문",
+     "name": "2026년도 신규,및 경력간호사채용공고 - 2026-9-30.docx",
+     "읽기탈": "HWPX에서 섹션 파일을 찾을 수 없습니다",
+     "읽어봄": true
+    }
+   ],
+   "본문자": 12877,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "CE80089",
+   "source": "CE2",
+   "기관": "강원특별자치도삼척의료원",
+   "꼴표": 2,
+   "보류": false,
+   "숨김": true,
+   "제목": "공고2026-64 진료비심사청구담당직 기간제근로자(육아휴직대체) 채용(재)공고",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80089",
+   "첨부": [
+    {
+     "url": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=80089",
+     "kind": "공고화면",
+     "name": "공고64 진료비심사청구담당직(육아휴직대체) 채용 재공고.pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 4783,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "강원특별자치도 삼척시 오십천로 418",
+    "고용형태": "기간제",
+    "마감시각": "12:00:00",
+    "모집인원": 1,
+    "예상연봉": "3600만원 이상",
+    "접수마감": "2026-10-15",
+    "지원자격": "간호사 면허증 소지자 · 보건의료정보관리사 면허증 소지자 · 의료기관 진료비심사청구 업무 유경험자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "305575",
+   "source": "AL2",
+   "기관": "충북대학교병원",
+   "꼴표": 4,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 10월 충북대학교병원 기간제근무자 모집 공고",
+   "주소": "https://cbnuh.recruiter.co.kr/app/jobnotice/view?systemKindCode=MRS2&jobnoticeSn=267767",
+   "첨부": [
+    {
+     "url": "https://opendata.alio.go.kr/recruit/downloadAtchFile?recrutAtchFileNo=3078299",
+     "kind": "공고문",
+     "name": "(2026년10월)공고문.zip",
+     "읽기탈": "HWPX에서 섹션 파일을 찾을 수 없습니다",
+     "읽어봄": true
+    }
+   ],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "충북",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-15",
+    "지원자격": "- 일반간호사(임상시험센터)\r\n분야별 공고문 참고\r\n\r\n- 언어치료사(이비인후과)\r\n분야별 공고문 참고\r\n\r\n- 시설관리(기계)(시설관리팀)\r\n분야별 공고문 참고\r\n\r\n- 디자인(대외협력실)\r\n분야별 공고문 참고\r\n\r\n- 미화원(총무과)\r\n분야별 공고문 참고"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "ND1718",
+   "source": "ND2",
+   "기관": "구로구치매안심센터",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "[구로구치매안심센터] 팀장 채용 재공공",
+   "주소": "https://www.nid.or.kr/notification/recruit_view.aspx?no=1718",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": null,
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-06",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS91785292",
+   "source": "HS",
+   "기관": "인제대학교 상계백병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "[상계백병원] 진단검사의학과(종합건강증진센터) 비정규직 임상병리사 채용 공고",
+   "주소": "https://www.paik.ac.kr/recruit/user/job/view.do?menuNo=2400004&jobId=2008",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "서울 노원구",
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-07",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "GJ304423",
+   "source": "GJ2",
+   "기관": "서울특별시 은평병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "서울특별시 은평병원 시간선택제임기제공무원 채용시험 계획 공고",
+   "주소": "https://www.gojobs.go.kr/apmView.do?empmnsn=304423",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "",
+    "근무지": null,
+    "고용형태": "공무원",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-09-30",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "JF92794",
+   "source": "JF",
+   "기관": "한양대학교구리병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "재활의학과 물리치료사 - 2025년 신규직원(임시직) 모집",
+   "주소": "https://hyumcguri.recruiter.co.kr/career/jobs/92794",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2025-12-30",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNK152312610010016",
+   "source": "WN2",
+   "기관": "강원특별자치도강릉의료원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "보건직 8급 작업치료사 채용",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K152312610010016&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "강원 강릉시 경강로 2007",
+    "고용형태": "정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": "월급2,300,000원 이상 ~ 3,000,000원 이하, 상여금 : 180(미 포함) ",
+    "접수마감": "2026-10-12",
+    "지원자격": "작업치료사"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "303898",
+   "source": "AL",
+   "기관": "국민건강보험공단 일산병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 8월 기간제근로자 모집공고(보건직, 기능직)",
+   "주소": "https://nhimc.recruiter.co.kr/",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "공통",
+    "근무지": "경기",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-09-02",
+    "지원자격": "1. 방사선사(영상의학과) - 상근(1명)\nㅁ 방사선사 면허증 소지자\n2. 치과위생사(외래지원부) - 상근(1명)\nㅁ 치과위생사 면허증 소지자\n3. 진료접수(외래지원부) - 상근(3명)\nㅁ 해당업무 수행가능자\n ※ 해당 업무 : 원활한 외래진료를 위한 제반 업무보조, 진료준비, 진료접수 보조, 환자안내 및 관리보조 등\n4. 진료접수(어린이재활치료부) - 상근(1명)\nㅁ 해당업무 수행가능자\n ※ 해당 업무 : 공공 어린이재활병원 치료 예약 및 접수, 상담 및 치료 일정 설명, 환자 이동보조 및 지원, 사업수행 관련 기타 업무지원 등\n"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNK180512610060043",
+   "source": "WN",
+   "기관": "근로복지공단안산병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년도 하반기 청년(체험형)인턴 일반전형 신규채용(~10/8 17:30까지)",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K180512610060043&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "공통",
+    "근무지": "경기 안산시 상록구",
+    "고용형태": "계약직(시간선택제)",
+    "마감시각": "17:30:00",
+    "모집인원": null,
+    "예상연봉": "월급 176만원~176만원",
+    "접수마감": "2026-10-08",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-06"
+  },
+  {
+   "id": "CE79618",
+   "source": "CE",
+   "기관": "충청북도 청주의료원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "제26-10회 직원채용 공고(재활치료업무보조,간호업무보조_장애인 제한채용)",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=79618",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "충청북도",
+    "고용형태": "일반계약직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": "1200만원 이하",
+    "접수마감": "2026-09-21",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS932767433",
+   "source": "HS3",
+   "기관": "건국대학교병원",
+   "꼴표": 3,
+   "보류": true,
+   "숨김": false,
+   "제목": "2027년도 건국대학교병원 정신건강전문요원(임상심리사) 수련과정 모집 공고",
+   "주소": "https://www.kuh.ac.kr/recruit/apply/noticeView.do?anc_seq=1486",
+   "첨부": [
+    {
+     "url": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=1.0&anc_seq=1486",
+     "kind": "공고문",
+     "name": "첨부2. 모집 공고 세부사항.hwp",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=2.0&anc_seq=1486",
+     "kind": "공고문",
+     "name": "첨부3. 2026년 정신건강전문요원제도 운영 안내.pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=3.0&anc_seq=1486",
+     "kind": "공고문",
+     "name": "첨부4. 제출 서류 및 이수과목 자가 체크 리스트.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 2617,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "17:00:00",
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-11-04",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-21"
+  },
+  {
+   "id": "CE72430",
+   "source": "CE2",
+   "기관": "전북특별자치도 군산의료원",
+   "꼴표": 1,
+   "보류": false,
+   "숨김": true,
+   "제목": "군산의료원 의사직(일반의) 채용 공고",
+   "주소": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=72430",
+   "첨부": [
+    {
+     "url": "https://job.cleaneye.go.kr/user/ypCareersData.do?idx=72430",
+     "kind": "공고화면",
+     "name": "[공고 제2026-27호] 군산의료원 의사직(일반의) 채용 공고.hwp",
+     "읽기탈": "클린아이 — 클린아이가 다운로드를 막고 있습니다 (HTTP 429 · 1번 시도) — 간격을",
+     "읽어봄": true
+    }
+   ],
+   "본문자": 10731,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "전북특별자치도 군산시 의료원로 27",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": 3,
+    "예상연봉": "1억원 이상",
+    "접수마감": "2026-12-31",
+    "지원자격": "의사면허증 소지자 · 인턴과정 수료자 · 응급의학과, 내과, 외과 사직 전공의 우대"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "305526",
+   "source": "AL2",
+   "기관": "부산대학교병원",
+   "꼴표": 1,
+   "보류": false,
+   "숨김": true,
+   "제목": "영상의학과 전문의 모집 공고",
+   "주소": "https://pnuh.recruiter.co.kr/app/jobnotice/view?systemKindCode=MRS2&jobnoticeSn=267982",
+   "첨부": [
+    {
+     "url": "https://opendata.alio.go.kr/recruit/downloadAtchFile?recrutAtchFileNo=3078040",
+     "kind": "공고문",
+     "name": "[공고문] 영상의학과 계약직의사 모집 공고.hwp",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "부산",
+    "고용형태": "비정규직",
+    "마감시각": "17:00:00",
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-10-15",
+    "지원자격": "· 영상의학과 전문의\r\n· 상급종합병원 신경두경부 분야 2년 이상(전임의 포함)"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS552018502",
+   "source": "HS",
+   "기관": "아주대학교병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "어린이집 교사(계약직/휴직대체)",
+   "주소": "https://ajoumc.recruiter.co.kr/app/jobnotice/view?systemKindCode=MRS2&jobnoticeSn=265914",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "경기 수원영통구",
+    "고용형태": null,
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-09-30",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "JF120454",
+   "source": "JF",
+   "기관": "충남대학교병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "[대전] 충남대학교병원 2026년 7월 보조금직원 채용공고【채용분야 : 공고참고】",
+   "주소": "https://cnuhinsa.recruiter.co.kr/career/jobs/120454",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "대전",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-07-15",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "301321",
+   "source": "AL",
+   "기관": "국민건강보험공단 일산병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 6월 기간제근로자 모집공고(사무직, 보건직, 기능직, 시설직, 약무직)",
+   "주소": "https://nhimc.recruiter.co.kr/",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "경기",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-06-23",
+    "지원자격": "3.작업치료사(어린이 재활치료부)-상근(1명)\nㅁ작업치료사 면허증 소지자로서 소아작업치료 업무 6개월 이상 경력자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "WNK163022609180020",
+   "source": "WN",
+   "기관": "제주권역재활병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "제주권역재활병원 작업치료사 직원 모집 (기간제계약직 육아휴직대체)",
+   "주소": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K163022609180020&infoTypeCd=VALIDATION&infoTypeGroup=tb_workinfoworknet",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "제주 서귀포시",
+    "고용형태": "계약직",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": "월급 244만원~244만원",
+    "접수마감": "2026-09-29",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS2009051784",
+   "source": "HS3",
+   "기관": "동아대학교병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "건강증진지원과(종합검진센터) 임시직 업무보조 공개채용 공고",
+   "주소": "https://www.damc.or.kr/05/03_2017_view.php?hire_web_sqno=2218&p=1&key=&keyword=&rePart=",
+   "첨부": [],
+   "본문자": 1094,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-12-31",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-16"
+  },
+  {
+   "id": "299470",
+   "source": "AL2",
+   "기관": "경상국립대학교병원",
+   "꼴표": 0,
+   "보류": false,
+   "숨김": true,
+   "제목": "[창원경상국립대학교병원] 계약직(야간당직약사) 채용공고",
+   "주소": "https://job.alio.go.kr/recruitview.do?idx=299470",
+   "첨부": [],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "경남",
+    "고용형태": "비정규직",
+    "마감시각": null,
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-12-31",
+    "지원자격": "1. 약사 면허증 소지자\r\n2. 입사지원서 접수 마감일 현재 만18세 이상이면서 60세 미만인 자\r\n3. 본원 계약직근무자규정 제6조 제1항 제1호에 따른 결격사유에 해당되지 않는 자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS665496254",
+   "source": "HS3",
+   "기관": "의료법인인봉의료재단뉴고려병원",
+   "꼴표": 5,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년도 재활치료실 신규 작업치료사 채용...",
+   "주소": "https://www.nkhospital.net/notice/notice.php?jb_code=100&jb_mode=tdetail&jb_idx=2913&search_key=&search_keyword=&page=&dep1=2&dep2=2-1",
+   "첨부": [
+    {
+     "url": "https://nkhospital.net/bbs/download.php?downview=1&file=/home/hosting_users/nkmed/www/bbs/files//jb_100/773053727584863.hwp&name=%EB%89%B4%EA%B3%A0%EB%A0%A4%EB%B3%91%EC%9B%90%20%EC%9E%85%EC%82%AC%EC%A7%80%EC%9B%90%EC%84%9C.hwp",
+     "kind": "공고문",
+     "name": "773053727584863.hwp&name=%EB%89%B4%EA%B3%A0%EB%A0%A4%EB%B3%91%EC%9B%90%20%EC%9E%85%EC%82%AC%EC%A7%80%EC%9B%90%EC%84%9C.h",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.nkhospital.net/bbs/download.php?downview=1&file=/home/hosting_users/nkmed/www/bbs/files/jb_100/2a88253b8731677.docx&name=%EB%89%B4%EA%B3%A0%EB%A0%A4%EB%B3%91%EC%9B%90_%EC%9E%AC%ED%99%9C%EC%B9%98%EB%A3%8C%EC%8B%A4%20%EC%B1%84%EC%9A%A9%EA%B3%B5%EA%B3%A0.docx",
+     "kind": "공고문",
+     "name": "뉴고려병원_재활치료실 채용공고.docx",
+     "읽기탈": "주소를 버렸습니다 — 서버 파일 경로입니다 — 그물 주소가 아닙니다",
+     "읽어봄": true
+    },
+    {
+     "url": "https://www.nkhospital.net/bbs/download.php?downview=1&file=/home/hosting_users/nkmed/www/bbs/files/jb_100/773053727584863.hwp&name=%EB%89%B4%EA%B3%A0%EB%A0%A4%EB%B3%91%EC%9B%90%20%EC%9E%85%EC%82%AC%EC%A7%80%EC%9B%90%EC%84%9C.hwp",
+     "kind": "공고문",
+     "name": "뉴고려병원 입사지원서.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 12584,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": "작업치료사, 2026년도 면허 취득 예정자"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "305472",
+   "source": "AL2",
+   "기관": "충남대학교병원",
+   "꼴표": 2,
+   "보류": false,
+   "숨김": true,
+   "제목": "[대전] 2026년 하반기 충남대학교병원 보건직(의학물리사) 공개채용",
+   "주소": "https://job.alio.go.kr/recruitview.do?idx=305472",
+   "첨부": [
+    {
+     "url": "https://opendata.alio.go.kr/recruit/downloadAtchFile?recrutAtchFileNo=3077774",
+     "kind": "공고문",
+     "name": "[대전] 2026년 하반기 보건직(의학물리사) 공개채용 공고.pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 0,
+   "본문줄": 0,
+   "지금값": {
+    "직군": null,
+    "근무지": "대전",
+    "고용형태": "정규직",
+    "마감시각": "17:00:00",
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-10-13",
+    "지원자격": "응시자격 첨부파일 참고"
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS190712781",
+   "source": "HS3",
+   "기관": "광주보훈병원",
+   "꼴표": 3,
+   "보류": false,
+   "숨김": true,
+   "제목": "[광주보훈병원] 계약직 보건직(작업치료사) - 휴직대체 직원 채용",
+   "주소": "https://www.bohun.or.kr/gwangju/na/ntt/selectNttInfo.do?mi=32890&bbsId=1158&bbsSysId=gwangju&nttSn=190472",
+   "첨부": [
+    {
+     "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=785cf7e0cfd503b0a1ddb5f8f9db9e1f&bbsSysId=gwangju",
+     "kind": "공고문",
+     "name": "계약직보건직(작업치료사)-휴직대체직원채용공고문.pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=9effb551b58a85600c8cde4357851ae1&bbsSysId=gwangju",
+     "kind": "공고문",
+     "name": "직무기술서(작업치료사).hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.bohun.or.kr/images/web/gwangju/sub/wa_qualith_certificate.pdf",
+     "kind": "공고문",
+     "name": "wa_qualith_certificate.pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 2063,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "작업치료사",
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "10:00:00",
+    "모집인원": 1,
+    "예상연봉": "내규에 따름",
+    "접수마감": null,
+    "지원자격": "(필수) 작업치료사 면허증 소지자 (우대) 연하재활교육(Adult-Advanced course, 기능적 전기자극 치료과정) 이수자"
+   },
+   "들어온때": "2026-10-16"
+  },
+  {
+   "id": "HS1628741383",
+   "source": "HS3",
+   "기관": "인제대학교부산백병원",
+   "꼴표": 1,
+   "보류": false,
+   "숨김": true,
+   "제목": "진료교원(중환자실 또는 입원 전담전문의, 간암검진 전담의, 병리과) 모집 공고",
+   "주소": "https://www.paik.ac.kr/recruit/user/job/view.do?menuNo=2400004&jobId=1648",
+   "첨부": [
+    {
+     "url": "https://www.paik.ac.kr/recruit/cmmn/file/fileDown.do?menuNo=2400004&atchFileId=a03300226fb140019b122fb05df6778e&fileSn=1",
+     "kind": "공고문",
+     "name": "[서식] 비전임교원초빙지원서 양식(지원서, 자기소개서, 정보이용수집동의서) _예시.hwp",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 2322,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS1559904275",
+   "source": "HS3",
+   "기관": "경북대학교병원",
+   "꼴표": 2,
+   "보류": false,
+   "숨김": true,
+   "제목": "2026년 10월 제2차 임시직원 모집 공고(간호조무, 기계설비, 응급구조사, 장례물품판매, 임상병리사)",
+   "주소": "https://knuh.kr/content/04information/02_01.asp?proc_type=view&b_num=7523&rtn_url=%2Fcontent%2F04information%2F02%5F01%2Easp",
+   "첨부": [
+    {
+     "url": "https://knuh.kr/content/06introduce/knuh_pamphlet2021.pdf",
+     "kind": "공고문",
+     "name": "홍보책자",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://knuh.kr/content/board/down.asp?a_num=98296485&b_num=7523&f_num=1",
+     "kind": "공고문",
+     "name": "1. 2026년 10월 제2차 임시직원 채용공고문.pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://knuh.kr/img/09system/%EC%9A%94%EC%96%91%EA%B8%89%EC%97%AC%EC%9D%98%EB%A2%B0%EC%84%9C1.pdf",
+     "kind": "공고문",
+     "name": "진료의뢰서양식 다운로드",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 3906,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "13:00:00",
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-10-20",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-15"
+  },
+  {
+   "id": "HS154900927",
+   "source": "HS3",
+   "기관": "대림성모병원",
+   "꼴표": 4,
+   "보류": false,
+   "숨김": true,
+   "제목": "간호사 및 간호조무사 채용 (내시경실, 수술실, 응급실) - 마감",
+   "주소": "https://www.drh.co.kr/new/front/index.php?g_page=intro&m_page=intro08&page=1&bb_code=609g0100go9d821&view=read&wd=9",
+   "첨부": [
+    {
+     "url": "https://www.drh.co.kr/new/front/index.php?g_page=intro&m_page=intro08&act=down&bb_code=609g0100go9d821&bf_code=271",
+     "kind": "공고문",
+     "name": "대림성모병원_입사지원서_공통_개정.docx",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 3716,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-01"
+  },
+  {
+   "id": "HS146236860",
+   "source": "HS3",
+   "기관": "한국보훈복지의료공단 중앙보훈병원",
+   "꼴표": 3,
+   "보류": false,
+   "숨김": true,
+   "제목": "[중앙보훈병원] 기간제 직원 채용 공고(10월)",
+   "주소": "https://www.bohun.or.kr/seoul/na/ntt/selectNttInfo.do?mi=32253&nttSn=189986",
+   "첨부": [
+    {
+     "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=189c72f1443ba8ac00691423b9676704&bbsSysId=seoul",
+     "kind": "공고문",
+     "name": "채용공고문및직무설명서(기간제_10월).pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=fcf0253579960170ad32845fdf375139&bbsSysId=seoul",
+     "kind": "공고문",
+     "name": "업무지원직입사지원서양식(조리,청소).hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.bohun.or.kr/images/web/seoul/sub/wa_qualith_certificate.pdf",
+     "kind": "공고문",
+     "name": "wa_qualith_certificate.pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 2352,
+   "본문줄": 1,
+   "지금값": {
+    "직군": "물리치료사",
+    "근무지": "",
+    "고용형태": "계약직",
+    "마감시각": "09:00:00",
+    "모집인원": 1,
+    "예상연봉": null,
+    "접수마감": "2026-10-16",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-02"
+  },
+  {
+   "id": "HS1421557054",
+   "source": "HS3",
+   "기관": "계명대학교 경주동산병원",
+   "꼴표": 1,
+   "보류": false,
+   "숨김": true,
+   "제목": "계약직원 채용공고(감염병관리 지원 업무)",
+   "주소": "https://gyeongju.dsmc.or.kr:49890/content/03use/07_03.php?proc_type=view&a_num=16352981&b_num=441&rtn_url=%2Fcontent%2F03use%2F07_03.php",
+   "첨부": [
+    {
+     "url": "https://gyeongju.dsmc.or.kr:49890/content/board/down.php?a_num=16352981&b_num=441&f_num=1",
+     "kind": "공고문",
+     "name": "1. 응시지원서(경주동산병원)(24).hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://gyeongju.dsmc.or.kr:49890/content/board/down.php?a_num=16352981&b_num=441&f_num=2",
+     "kind": "공고문",
+     "name": "2. 개인정보 수집 · 이용 · 제공 동의서(23).hwp",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://gyeongju.dsmc.or.kr:49890/img/common/%EC%9D%91%EC%8B%9C%EC%A7%80%EC%9B%90%EC%84%9C_%EA%B2%BD%EC%A3%BC%EB%8F%99%EC%82%B0%EB%B3%91%EC%9B%90.hwp",
+     "kind": "공고문",
+     "name": "응시원서 다운로드",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 3957,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "15:00:00",
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2022-03-08",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-14"
+  },
+  {
+   "id": "HS1305146806",
+   "source": "HS3",
+   "기관": "한국보훈복지의료공단 부산보훈병원",
+   "꼴표": 3,
+   "보류": false,
+   "숨김": true,
+   "제목": "[부산보훈병원] 계약직(간호조무사, 간병지원, 행정) 긴급채용공고",
+   "주소": "https://www.bohun.or.kr/busan/na/ntt/selectNttInfo.do?mi=33215&nttSn=189964",
+   "첨부": [
+    {
+     "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=30e7776876d3ae758a1a8be2ca22c583&bbsSysId=busan",
+     "kind": "공고문",
+     "name": "공고문(계약직).pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    },
+    {
+     "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=94250c44f89bb6b3db5a7da4f2750f87&bbsSysId=busan",
+     "kind": "공고문",
+     "name": "반환청구서류.hwp",
+     "읽기탈": null,
+     "읽어봄": false
+    },
+    {
+     "url": "https://www.bohun.or.kr/images/web/busan/sub/wa_qualith_certificate.pdf",
+     "kind": "공고문",
+     "name": "wa_qualith_certificate.pdf",
+     "읽기탈": null,
+     "읽어봄": false
+    }
+   ],
+   "본문자": 2209,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": "10:00:00",
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": null,
+    "지원자격": null
+   },
+   "들어온때": "2026-10-02"
+  },
+  {
+   "id": "HS1201582901",
+   "source": "HS3",
+   "기관": "경상북도김천의료원",
+   "꼴표": 2,
+   "보류": true,
+   "숨김": false,
+   "제목": "[영상·진단검사의학과] 초단기 근로자 (단기간 아르...",
+   "주소": "https://www.gcmc.or.kr/news/news_03.php?boardid=job&mode=view&idx=662&sk=&sw=&offset=&category=",
+   "첨부": [
+    {
+     "url": "https://www.gcmc.or.kr/uploaded/board/job/_d332822264bdf168b760d084fa9000ee1.pdf",
+     "kind": "공고문",
+     "name": "10채용 공고 ((영상1,진단1) 초단시간근로자 계약2).pdf",
+     "읽기탈": null,
+     "읽어봄": true
+    }
+   ],
+   "본문자": 2792,
+   "본문줄": 1,
+   "지금값": {
+    "직군": null,
+    "근무지": "",
+    "고용형태": "",
+    "마감시각": null,
+    "모집인원": null,
+    "예상연봉": null,
+    "접수마감": "2026-11-01",
+    "지원자격": null
+   },
+   "들어온때": "2026-10-19"
+  }
+ ]
+}

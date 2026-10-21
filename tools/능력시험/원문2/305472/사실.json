@@ -1,0 +1,97 @@
+{
+ "id": "305472",
+ "source": "AL2",
+ "기관": "충남대학교병원",
+ "제목": "[대전] 2026년 하반기 충남대학교병원 보건직(의학물리사) 공개채용",
+ "주소": "https://job.alio.go.kr/recruitview.do?idx=305472",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 1,
+ "쪽": {
+  "code": 200,
+  "바이트": 22106,
+  "끝주소": "https://job.alio.go.kr/recruitview.do?idx=305472",
+  "글자수": 2740,
+  "우리직군말": false,
+  "제목글자": "공공기관 채용정보시스템"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3077774",
+   "열쇠": "https://www.alio.go.kr/download/download.json?fileNo=3077774",
+   "글": "[대전] 2026년 하반기 보건직(의학물리사) 공개채용 공고.pdf"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3077775",
+   "열쇠": "https://www.alio.go.kr/download/download.json?fileNo=3077775",
+   "글": "입사지원서 양식(대전)_260929.pdf"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3077776",
+   "열쇠": "https://www.alio.go.kr/download/download.json?fileNo=3077776",
+   "글": "직무기술서(보건직(의학물리사)).hwp"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "[대전] 2026년 하반기 보건직(의학물리사) 공개채용 공고.pdf",
+   "url": "https://opendata.alio.go.kr/recruit/downloadAtchFile?recrutAtchFileNo=3077774",
+   "갈래": null,
+   "code": 200,
+   "바이트": 8333,
+   "앞바이트": "<!DOCTYP",
+   "진짜형식": "HTML",
+   "받은이름": "[대전] 2026년 하반기 보건직(의학물리사) 공개채용 공고.pdf",
+   "글자수": 0,
+   "표수": 0,
+   "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 8333바이트)",
+   "읽은꼴": "HTML",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "[대전] 2026년 하반기 보건직(의학물리사) 공개채용 공고.pdf",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3077774",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 917541,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "[대전] 2026년 하반기 보건직(의학물리사) 공개채용 공고.pdf",
+   "글자수": 10949,
+   "표수": 36,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 2,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 5.6
+  },
+  {
+   "어디서": "쪽",
+   "이름": "입사지원서 양식(대전)_260929.pdf",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3077775",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 1186848,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "입사지원서 양식(대전)_260929.pdf",
+   "글자수": 7238,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 6,
+   "OCR썼나": true,
+   "OCR필요쪽": 6,
+   "초": 89.9
+  }
+ ]
+}

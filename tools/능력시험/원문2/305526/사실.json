@@ -1,0 +1,97 @@
+{
+ "id": "305526",
+ "source": "AL2",
+ "기관": "부산대학교병원",
+ "제목": "영상의학과 전문의 모집 공고",
+ "주소": "https://pnuh.recruiter.co.kr/app/jobnotice/view?systemKindCode=MRS2&jobnoticeSn=267982",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 1,
+ "쪽": {
+  "code": 200,
+  "바이트": 11345,
+  "끝주소": "https://pnuh.recruiter.co.kr/app/jobnotice/view?systemKindCode=MRS2&jobnoticeSn=267982",
+  "글자수": 375,
+  "우리직군말": false,
+  "제목글자": null
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://pnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=5a8e7aab-a020-426b-b494-7ec2f9adebab.pdf",
+   "열쇠": "https://pnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=5a8e7aab-a020-426b-b494-7ec2f9adebab.pdf",
+   "글": "붙임_직무설명서 전문의_영상의학과(신경두경부).pdf"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://pnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=0e9371c1-715f-4f32-b68a-ccf43fbd049e.zip",
+   "열쇠": "https://pnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=0e9371c1-715f-4f32-b68a-ccf43fbd049e.zip",
+   "글": "붙임_채용공고(제출서류).zip"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://pnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=f108ea89-cf66-43fa-924a-2a4f5746ff5f.pdf",
+   "열쇠": "https://pnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=f108ea89-cf66-43fa-924a-2a4f5746ff5f.pdf",
+   "글": "붙임_지원서 양식.pdf"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "[공고문] 영상의학과 계약직의사 모집 공고.hwp",
+   "url": "https://opendata.alio.go.kr/recruit/downloadAtchFile?recrutAtchFileNo=3078040",
+   "갈래": null,
+   "code": 200,
+   "바이트": 8333,
+   "앞바이트": "<!DOCTYP",
+   "진짜형식": "HTML",
+   "받은이름": "[공고문] 영상의학과 계약직의사 모집 공고.hwp",
+   "글자수": 0,
+   "표수": 0,
+   "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 8333바이트)",
+   "읽은꼴": "HTML",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "붙임_직무설명서 전문의_영상의학과(신경두경부).pdf",
+   "url": "https://pnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=5a8e7aab-a020-426b-b494-7ec2f9adebab.pdf",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 70248,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "붙임_직무설명서 전문의_영상의학과(신경두경부).pdf",
+   "글자수": 1750,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0.8
+  },
+  {
+   "어디서": "쪽",
+   "이름": "붙임_채용공고(제출서류).zip",
+   "url": "https://pnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=0e9371c1-715f-4f32-b68a-ccf43fbd049e.zip",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 578144,
+   "앞바이트": "PK......",
+   "진짜형식": "zip계열",
+   "받은이름": "붙임_채용공고(제출서류).zip",
+   "글자수": 8017,
+   "표수": 4,
+   "읽기탈": null,
+   "읽은꼴": "zip계열",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0.1
+  }
+ ]
+}

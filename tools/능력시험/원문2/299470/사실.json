@@ -1,0 +1,97 @@
+{
+ "id": "299470",
+ "source": "AL2",
+ "기관": "경상국립대학교병원",
+ "제목": "[창원경상국립대학교병원] 계약직(야간당직약사) 채용공고",
+ "주소": "https://job.alio.go.kr/recruitview.do?idx=299470",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 0,
+ "쪽": {
+  "code": 200,
+  "바이트": 25131,
+  "끝주소": "https://job.alio.go.kr/recruitview.do?idx=299470",
+  "글자수": 3846,
+  "우리직군말": false,
+  "제목글자": "공공기관 채용정보시스템"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3043992",
+   "열쇠": "https://www.alio.go.kr/download/download.json?fileNo=3043992",
+   "글": "창원경상국립대학교병원 계약직(야간당직약사) 채용공고.pdf"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3043993",
+   "열쇠": "https://www.alio.go.kr/download/download.json?fileNo=3043993",
+   "글": "입사지원서(일반직 외)..pdf"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3043994",
+   "열쇠": "https://www.alio.go.kr/download/download.json?fileNo=3043994",
+   "글": "직무기술서(야간당직약사).hwp"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "쪽",
+   "이름": "창원경상국립대학교병원 계약직(야간당직약사) 채용공고.pdf",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3043992",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 94383,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "창원경상국립대학교병원 계약직(야간당직약사) 채용공고.pdf",
+   "글자수": 5841,
+   "표수": 14,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 5,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 2.9
+  },
+  {
+   "어디서": "쪽",
+   "이름": "입사지원서(일반직 외)..pdf",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3043993",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 114695,
+   "앞바이트": "%PDF-1.6",
+   "진짜형식": "pdf",
+   "받은이름": "입사지원서(일반직 외)..pdf",
+   "글자수": 1701,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 2,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0.5
+  },
+  {
+   "어디서": "쪽",
+   "이름": "직무기술서(야간당직약사).hwp",
+   "url": "https://www.alio.go.kr/download/download.json?fileNo=3043994",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 91648,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "직무기술서(야간당직약사).hwp",
+   "글자수": 1458,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0.6
+  }
+ ]
+}

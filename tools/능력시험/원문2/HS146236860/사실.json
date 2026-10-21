@@ -1,0 +1,97 @@
+{
+ "id": "HS146236860",
+ "source": "HS3",
+ "기관": "한국보훈복지의료공단 중앙보훈병원",
+ "제목": "[중앙보훈병원] 기간제 직원 채용 공고(10월)",
+ "주소": "https://www.bohun.or.kr/seoul/na/ntt/selectNttInfo.do?mi=32253&nttSn=189986",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 3,
+ "쪽": {
+  "code": 200,
+  "바이트": 81507,
+  "끝주소": "https://www.bohun.or.kr/seoul/na/ntt/selectNttInfo.do?mi=32253&nttSn=189986",
+  "글자수": 6015,
+  "우리직군말": false,
+  "제목글자": "채용정보 상세 &lt; 병원 소식 &lt; 병원소개 &lt; 중앙보훈병원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=",
+   "열쇠": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/upload/editor/xfree/20261002/IMG_164316645.jpg",
+   "열쇠": "https://www.bohun.or.kr/upload/editor/xfree/20261002/IMG_164316645.jpg",
+   "글": "(주소꼴)"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.bohun.or.kr/images/web/seoul/sub/wa_qualith_certificate.pdf",
+   "열쇠": "https://www.bohun.or.kr/images/web/seoul/sub/wa_qualith_certificate.pdf",
+   "글": "(주소꼴)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "채용공고문및직무설명서(기간제_10월).pdf",
+   "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=189c72f1443ba8ac00691423b9676704&bbsSysId=seoul",
+   "갈래": null,
+   "code": 200,
+   "바이트": 658469,
+   "앞바이트": "%PDF-1.4",
+   "진짜형식": "pdf",
+   "받은이름": "채용공고문 및 직무설명서(기간제_10월).pdf",
+   "글자수": 21044,
+   "표수": 37,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 16,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 6.7
+  },
+  {
+   "어디서": "DB",
+   "이름": "업무지원직입사지원서양식(조리,청소).hwp",
+   "url": "https://www.bohun.or.kr/common/nttFileDownload.do?fileKey=fcf0253579960170ad32845fdf375139&bbsSysId=seoul",
+   "갈래": null,
+   "code": 200,
+   "바이트": 22528,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "업무지원직 입사지원서 양식(조리, 청소).hwp",
+   "글자수": 3781,
+   "표수": 2,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 3,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  },
+  {
+   "어디서": "DB",
+   "이름": "wa_qualith_certificate.pdf",
+   "url": "https://www.bohun.or.kr/images/web/seoul/sub/wa_qualith_certificate.pdf",
+   "갈래": null,
+   "code": 200,
+   "바이트": 211651,
+   "앞바이트": "%PDF-1.5",
+   "진짜형식": "pdf",
+   "받은이름": "wa_qualith_certificate.pdf",
+   "글자수": 350,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "pdf",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 1.1
+  }
+ ]
+}

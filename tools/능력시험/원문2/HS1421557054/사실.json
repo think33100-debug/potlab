@@ -1,0 +1,91 @@
+{
+ "id": "HS1421557054",
+ "source": "HS3",
+ "기관": "계명대학교 경주동산병원",
+ "제목": "계약직원 채용공고(감염병관리 지원 업무)",
+ "주소": "https://gyeongju.dsmc.or.kr:49890/content/03use/07_03.php?proc_type=view&a_num=16352981&b_num=441&rtn_url=%2Fcontent%2F03use%2F07_03.php",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 3,
+ "쪽": {
+  "code": 200,
+  "바이트": 130058,
+  "끝주소": "https://gyeongju.dsmc.or.kr:49890/content/03use/07_03.php?proc_type=view&a_num=16352981&b_num=441&rtn_url=%2Fcontent%2F03use%2F07_03.php",
+  "글자수": 5843,
+  "우리직군말": false,
+  "제목글자": "경주동산병원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://gyeongju.dsmc.or.kr:49890/img/common/%EC%9D%91%EC%8B%9C%EC%A7%80%EC%9B%90%EC%84%9C_%EA%B2%BD%EC%A3%BC%EB%8F%99%EC%82%B0%EB%B3%91%EC%9B%90.hwp",
+   "열쇠": "https://gyeongju.dsmc.or.kr:49890/img/common/%EC%9D%91%EC%8B%9C%EC%A7%80%EC%9B%90%EC%84%9C_%EA%B2%BD%EC%A3%BC%EB%8F%99%EC%82%B0%EB%B3%91%EC%9B%90.hwp",
+   "글": "응시원서 다운로드"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "http://www.hancom.com/downLoad.downPU.do?mcd=002",
+   "열쇠": "http://www.hancom.com/downLoad.downPU.do?mcd=002",
+   "글": "(주소꼴)"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "1. 응시지원서(경주동산병원)(24).hwp",
+   "url": "https://gyeongju.dsmc.or.kr:49890/content/board/down.php?a_num=16352981&b_num=441&f_num=1",
+   "갈래": null,
+   "code": 200,
+   "바이트": 18944,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "1. 응시지원서(경주동산병원)(24).hwp",
+   "글자수": 3521,
+   "표수": 2,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 2,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  },
+  {
+   "어디서": "DB",
+   "이름": "2. 개인정보 수집 · 이용 · 제공 동의서(23).hwp",
+   "url": "https://gyeongju.dsmc.or.kr:49890/content/board/down.php?a_num=16352981&b_num=441&f_num=2",
+   "갈래": null,
+   "code": 200,
+   "바이트": 16384,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "2. 개인정보 수집 · 이용 · 제공 동의서(23).hwp",
+   "글자수": 1807,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0
+  },
+  {
+   "어디서": "DB",
+   "이름": "응시원서 다운로드",
+   "url": "https://gyeongju.dsmc.or.kr:49890/img/common/%EC%9D%91%EC%8B%9C%EC%A7%80%EC%9B%90%EC%84%9C_%EA%B2%BD%EC%A3%BC%EB%8F%99%EC%82%B0%EB%B3%91%EC%9B%90.hwp",
+   "갈래": null,
+   "code": 200,
+   "바이트": 18944,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "응시원서 다운로드",
+   "글자수": 3466,
+   "표수": 2,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 2,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0.6
+  }
+ ]
+}

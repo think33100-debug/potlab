@@ -1,0 +1,103 @@
+{
+ "id": "305575",
+ "source": "AL2",
+ "기관": "충북대학교병원",
+ "제목": "2026년 10월 충북대학교병원 기간제근무자 모집 공고",
+ "주소": "https://cbnuh.recruiter.co.kr/app/jobnotice/view?systemKindCode=MRS2&jobnoticeSn=267767",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 1,
+ "쪽": {
+  "code": 200,
+  "바이트": 12047,
+  "끝주소": "https://cbnuh.recruiter.co.kr/app/jobnotice/view?systemKindCode=MRS2&jobnoticeSn=267767",
+  "글자수": 432,
+  "우리직군말": false,
+  "제목글자": null
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://cbnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=17b05a85-7def-45a6-afb2-c20e3ab76d56.zip",
+   "열쇠": "https://cbnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=17b05a85-7def-45a6-afb2-c20e3ab76d56.zip",
+   "글": "(2026년10월)공고문.zip"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://cbnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=1d222b1d-b43d-47e6-98df-e664538a042b.zip",
+   "열쇠": "https://cbnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=1d222b1d-b43d-47e6-98df-e664538a042b.zip",
+   "글": "(2026년10월)응시원서.zip"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://cbnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=c7e64f98-e740-479a-823c-e70061039836.zip",
+   "열쇠": "https://cbnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=c7e64f98-e740-479a-823c-e70061039836.zip",
+   "글": "(2026년10월)직무설명서.zip"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://cbnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=17f81efa-7d7e-4202-a628-4f12f30cf8d9.hwp",
+   "열쇠": "https://cbnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=17f81efa-7d7e-4202-a628-4f12f30cf8d9.hwp",
+   "글": "(2026년10월)미화원 응시원서(이메일접수).hwp"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "(2026년10월)공고문.zip",
+   "url": "https://opendata.alio.go.kr/recruit/downloadAtchFile?recrutAtchFileNo=3078299",
+   "갈래": null,
+   "code": 200,
+   "바이트": 8333,
+   "앞바이트": "<!DOCTYP",
+   "진짜형식": "HTML",
+   "받은이름": "(2026년10월)공고문.zip",
+   "글자수": 0,
+   "표수": 0,
+   "읽기탈": "읽을 수 있는 형식이 아닙니다 (HTML · 8333바이트)",
+   "읽은꼴": "HTML",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0
+  },
+  {
+   "어디서": "쪽",
+   "이름": "(2026년10월)공고문.zip",
+   "url": "https://cbnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=17b05a85-7def-45a6-afb2-c20e3ab76d56.zip",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 268586,
+   "앞바이트": "PK......",
+   "진짜형식": "zip계열",
+   "받은이름": "(2026년10월)공고문.zip",
+   "글자수": 11625,
+   "표수": 4,
+   "읽기탈": null,
+   "읽은꼴": "zip계열",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 5.1
+  },
+  {
+   "어디서": "쪽",
+   "이름": "(2026년10월)응시원서.zip",
+   "url": "https://cbnuh.recruiter.co.kr/mrs2/attachFile/downloadFile?fileUid=1d222b1d-b43d-47e6-98df-e664538a042b.zip",
+   "갈래": "파일주소",
+   "code": 200,
+   "바이트": 849818,
+   "앞바이트": "PK......",
+   "진짜형식": "zip계열",
+   "받은이름": "(2026년10월)응시원서.zip",
+   "글자수": 8487,
+   "표수": 16,
+   "읽기탈": null,
+   "읽은꼴": "zip계열",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 3.6
+  }
+ ]
+}

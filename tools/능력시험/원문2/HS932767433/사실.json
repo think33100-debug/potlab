@@ -1,0 +1,97 @@
+{
+ "id": "HS932767433",
+ "source": "HS3",
+ "기관": "건국대학교병원",
+ "제목": "2027년도 건국대학교병원 정신건강전문요원(임상심리사) 수련과정 모집 공고",
+ "주소": "https://www.kuh.ac.kr/recruit/apply/noticeView.do?anc_seq=1486",
+ "숨김": false,
+ "보류": true,
+ "DB첨부": 3,
+ "쪽": {
+  "code": 200,
+  "바이트": 52586,
+  "끝주소": "https://www.kuh.ac.kr/recruit/apply/noticeView.do?anc_seq=1486",
+  "글자수": 4311,
+  "우리직군말": false,
+  "제목글자": "채용사이트 | 건국대학교병원"
+ },
+ "쪽첨부": [
+  {
+   "갈래": "파일주소",
+   "url": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=1.0&anc_seq=1486",
+   "열쇠": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=1.0&anc_seq=1486",
+   "글": "첨부2. 모집 공고 세부사항.hwp"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=2.0&anc_seq=1486",
+   "열쇠": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=2.0&anc_seq=1486",
+   "글": "첨부3. 2026년 정신건강전문요원제도 운영 안내.pdf"
+  },
+  {
+   "갈래": "파일주소",
+   "url": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=3.0&anc_seq=1486",
+   "열쇠": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=3.0&anc_seq=1486",
+   "글": "첨부4. 제출 서류 및 이수과목 자가 체크 리스트.hwp"
+  }
+ ],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "첨부2. 모집 공고 세부사항.hwp",
+   "url": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=1.0&anc_seq=1486",
+   "갈래": null,
+   "code": 200,
+   "바이트": 88576,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "첨부2.+모집+공고+세부사항.hwp",
+   "글자수": 1800,
+   "표수": 8,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 2,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0.6
+  },
+  {
+   "어디서": "DB",
+   "이름": "첨부3. 2026년 정신건강전문요원제도 운영 안내.pdf",
+   "url": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=2.0&anc_seq=1486",
+   "갈래": null,
+   "code": 200,
+   "바이트": 4393586,
+   "앞바이트": "%PDF-1.6",
+   "진짜형식": "pdf",
+   "받은이름": "첨부3.+2026년+정신건강전문요원제도+운영+안내.pdf",
+   "글자수": 0,
+   "표수": 0,
+   "읽기탈": "kordoc 탈 · kordoc 이 180초 안에 안 끝났습니다",
+   "읽은꼴": "pdf",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": null,
+   "초": 0
+  },
+  {
+   "어디서": "DB",
+   "이름": "첨부4. 제출 서류 및 이수과목 자가 체크 리스트.hwp",
+   "url": "https://www.kuh.ac.kr/recruit/apply/noticeAttFileDownload.do?anc_year=2026&att_seq=3.0&anc_seq=1486",
+   "갈래": null,
+   "code": 200,
+   "바이트": 177664,
+   "앞바이트": "........",
+   "진짜형식": "hwp",
+   "받은이름": "첨부4.+제출+서류+및+이수과목+자가+체크+리스트.hwp",
+   "글자수": 1174,
+   "표수": 0,
+   "읽기탈": null,
+   "읽은꼴": "hwp",
+   "쪽수": 1,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0.7
+  }
+ ]
+}

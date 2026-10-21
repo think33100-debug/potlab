@@ -42,6 +42,9 @@ import { fileURLToPath } from 'node:url';
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const require_ = createRequire(import.meta.url);
 const { hsDetailDates } = require_('./hosp/hs_dates.js');
+/* 공고 아닌 첨부(쪽 꼬리말 인증서) 규칙 — hs_files.js 한 자리 (2026-10-21) */
+const { 공고아닌첨부 } = require_('./hosp/hs_files.js');
+export { 공고아닌첨부 };
 
 /* kordoc있나 · 읽기 는 tools/kordoc워커.mjs 한 곳에 있습니다 (지침 6절) */
 export { kordoc있나, 워커끝내기, 워커셈 };
@@ -1579,7 +1582,9 @@ if (import.meta.url === 'file://' + process.argv[1] || process.argv[1]?.endsWith
       '물리치료사 채용',
       '제출서류 : 응시원서, 개인정보수집 이용 및 제3자 제공에 관한 동의서 각 1부.',
     ].join('\n');
-    봐('「개인정보수집」을 보수로 안 읽는다', 칸뽑기(가짜보수).예상연봉 == null);
+    봐('웹접근성 인증서는 공고가 아니다', 공고아닌첨부('wa_qualith_certificate.pdf') === true);
+  봐('공고문은 거르지 않는다', 공고아닌첨부('계약직 보건직(작업치료사) 채용 공고문.pdf') === false);
+  봐('「개인정보수집」을 보수로 안 읽는다', 칸뽑기(가짜보수).예상연봉 == null);
 
     /* ★ 숫자도 금액 말도 없으면 급여가 아닙니다 */
     봐('급여 말만 있고 값이 없으면 안 낸다',

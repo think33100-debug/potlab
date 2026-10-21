@@ -1,0 +1,40 @@
+{
+ "id": "HS154900927",
+ "source": "HS3",
+ "기관": "대림성모병원",
+ "제목": "간호사 및 간호조무사 채용 (내시경실, 수술실, 응급실) - 마감",
+ "주소": "https://www.drh.co.kr/new/front/index.php?g_page=intro&m_page=intro08&page=1&bb_code=609g0100go9d821&view=read&wd=9",
+ "숨김": true,
+ "보류": false,
+ "DB첨부": 1,
+ "쪽": {
+  "code": 200,
+  "바이트": 87506,
+  "끝주소": "https://www.drh.co.kr/new/front/index.php?g_page=intro&m_page=intro08&page=1&bb_code=609g0100go9d821&view=read&wd=9",
+  "글자수": 8514,
+  "우리직군말": false,
+  "제목글자": "채용공고 - 대림성모병원"
+ },
+ "쪽첨부": [],
+ "받은첨부": [
+  {
+   "어디서": "DB",
+   "이름": "대림성모병원_입사지원서_공통_개정.docx",
+   "url": "https://www.drh.co.kr/new/front/index.php?g_page=intro&m_page=intro08&act=down&bb_code=609g0100go9d821&bf_code=271",
+   "갈래": null,
+   "code": 200,
+   "바이트": 24544,
+   "앞바이트": "PK......",
+   "진짜형식": "zip계열",
+   "받은이름": "대림성모병원_입사지원서_공통_개정.docx",
+   "글자수": 4111,
+   "표수": 9,
+   "읽기탈": null,
+   "읽은꼴": "zip계열",
+   "쪽수": null,
+   "OCR썼나": false,
+   "OCR필요쪽": 0,
+   "초": 0.9
+  }
+ ]
+}
