@@ -73,8 +73,18 @@ function 죽이기(까닭) {
   아이 = null;
   /* 곱게 끝내기 — quit 을 보내고 **stdin 을 닫습니다.** 닫지 않으면 워커가
      다음 줄을 기다리며 그대로 서 있습니다. 2초 뒤에도 살아 있으면 죽입니다 */
-  try { 옛.stdin.write(JSON.stringify({ cmd: 'quit' }) + '\n'); } catch { /* 이미 죽었습니다 */ }
-  try { 옛.stdin.end(); } catch { /* 이미 닫혔습니다 */ }
+  /* ★ 2026-10-21 — **EPIPE 는 비동기로 터집니다.** 이미 죽은 워커의 stdin 에
+     쓰면 `try/catch` 가 못 잡고 소켓의 'error' 사건으로 올라와 **프로세스가
+     죽습니다.** 10/21 09:3x 측정이 그렇게 끝났습니다 —
+       Error: write EPIPE … at 죽이기 (kordoc워커.mjs:76) … errno: -32
+     그래서 쓰기 전에 **살아 있나 보고**, 소켓에 error 받이를 걸어 둡니다. */
+  try {
+    if (옛.stdin && !옛.stdin.destroyed && 옛.exitCode === null && !옛.killed) {
+      옛.stdin.once('error', () => { /* EPIPE — 이미 죽었습니다 */ });
+      옛.stdin.write(JSON.stringify({ cmd: 'quit' }) + '\n');
+    }
+  } catch { /* 이미 죽었습니다 */ }
+  try { if (옛.stdin && !옛.stdin.destroyed) 옛.stdin.end(); } catch { /* 이미 닫혔습니다 */ }
   setTimeout(() => { try { 옛.kill('SIGKILL'); } catch { /* 넘어갑니다 */ } }, 2000).unref?.();
   /* 기다리던 것들은 깨웁니다 — 안 깨우면 부르는 쪽이 영영 멈춥니다 */
   for (const [, v] of 기다리는것) v.깨(new Error('워커가 바뀌었습니다 — ' + 까닭));
@@ -89,6 +99,19 @@ function 띄우기() {
   셈.띄운횟수++;
   아이 = spawn(process.execPath, [CLI, 'parse-worker'], {
     cwd: 꾸러미, stdio: ['pipe', 'pipe', 'pipe'],
+  });
+  /* ★ 2026-10-21 — 관 셋에 **error 받이**를 겁니다. 워커가 먼저 죽으면
+     EPIPE·ECONNRESET 이 **비동기 'error' 사건**으로 올라오고, 받이가 없으면
+     우리 프로세스가 통째로 죽습니다 (지침 2절 — 조용히 죽지 않게 까닭을 적습니다) */
+  for (const [이름, 관] of [['stdin', 아이.stdin], ['stdout', 아이.stdout], ['stderr', 아이.stderr]]) {
+    관?.on('error', (e) => {
+      셈.관탈 = (셈.관탈 ?? 0) + 1;
+      셈.관탈까닭 = 이름 + ' ' + String((e && e.code) || (e && e.message) || e).slice(0, 40);
+    });
+  }
+  아이.on('error', (e) => {
+    셈.관탈 = (셈.관탈 ?? 0) + 1;
+    셈.관탈까닭 = '아이 ' + String((e && e.code) || (e && e.message) || e).slice(0, 40);
   });
   아이.stdout.setEncoding('utf8');
   아이.stdout.on('data', (조각) => {
