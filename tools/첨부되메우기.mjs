@@ -25,6 +25,7 @@ import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
 import { 고친주소 } from './첨부주소고치기.mjs';
 import { 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
 import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이간격 } from './cleaneye-file.mjs';
+import { 첨부받기 as 나라일터첨부받기, 기본간격 as 나라일터간격 } from './gojobs-file.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -148,7 +149,8 @@ let 읽음 = 0; let 빈손 = 0; let 초합 = 0; let 못받음 = 0;
 const 빈손까닭 = new Map();
 const 못받음까닭 = new Map();      /* 못 받은 까닭도 셉니다 (지침 2절) */
 const 고침셈 = new Map();          /* 주소를 바로잡은 수 (첨부주소고치기) */
-const 클린아이셈 = new Map();      /* 클린아이 두 걸음 길 (cleaneye-file.mjs) */
+const 클린아이셈 = new Map();
+const 나라일터셈 = new Map();      /* 나라일터 두 걸음 길 (gojobs-file.mjs · 2026-10-22) */
 
 /* ★ 알리오 첨부는 **쿠키가 있어야** 받습니다. 없으면 파일 대신 포털 첫
    화면(8,333자 HTML)이 옵니다 — 2026-10-11 에 이 되메우기를 마른으로
@@ -356,6 +358,31 @@ for (const j of 볼것) {
     }
   }
 
+  /* ★ 2026-10-22 — **나라일터도 두 걸음입니다** (tools/gojobs-file.mjs 한 자리).
+   *   첨부 주소가 `javascript:gfn_fileDown('이름','uuid','갈래')` 라서 담을 주소가
+   *   없습니다. 그래서 첨부 줄에는 **쪽 주소**를 담아 두고(클린아이와 같은 꼴),
+   *   받을 때 쪽을 다시 열어 그 쪽이 말하는 uuid 로 `POST /downFile.do` 합니다.
+   *   원문으로 확인 — 304423 공고문 663,103바이트 %PDF-1.4 (2026-10-22) */
+  if (!받음클린아이 && /gojobs[.]go[.]kr/.test(String(고른것.url || '') + ' ' + String(j.url || ''))) {
+    const 쪽주소 = /apmView[.]do/.test(String(고른것.url || '')) ? 고른것.url : (j.url || 고른것.url);
+    const 지난g = Date.now() - (끝때.get('www.gojobs.go.kr') || 0);
+    if (지난g < 나라일터간격) await 자고(나라일터간격 - 지난g);
+    끝때.set('www.gojobs.go.kr', Date.now());
+    const rg = await 나라일터첨부받기(쪽주소);
+    if (rg && rg.buf && rg.buf.length) {
+      받음클린아이 = { buf: rg.buf };          /* 아래 길을 그대로 씁니다 */
+      고른것.name = rg.이름 || 고른것.name || '공고문';
+      나라일터셈.set('받음', (나라일터셈.get('받음') || 0) + 1);
+    } else {
+      const 왜g = String((rg && rg.왜) || '못 받음').slice(0, 44);
+      나라일터셈.set(왜g, (나라일터셈.get(왜g) || 0) + 1);
+      못받음++; 한줄.왜 = '나라일터 — ' + 왜g;
+      못받음까닭.set(한줄.왜, (못받음까닭.get(한줄.왜) ?? 0) + 1);
+      표시할것.push({ job_id: j.id, url: 고른것.url, 왜: 한줄.왜 });
+      continue;
+    }
+  }
+
   const 고친 = 고친주소(고른것.url, j.url || '');
   if (!받음클린아이 && 고친.받는법 && 고친.받는법.꼴 === 'POST못함') {
     못받음++; 한줄.왜 = 고친.받는법.왜;
@@ -436,6 +463,9 @@ for (const [왜, n] of [...못받음까닭].sort((a, b) => b[1] - a[1])) {
 }
 for (const [왜, n] of [...고침셈].sort((a, b) => b[1] - a[1])) {
   console.log('   주소고침 ' + String(n).padStart(3) + '건  ' + 왜);
+}
+if (나라일터셈.size) {
+  console.log('   나라일터 두 걸음 — ' + [...나라일터셈].map(([k, v]) => k + ' ' + v).join(' · ').slice(0, 150));
 }
 if (클린아이셈.size) {
   console.log('   클린아이 두 걸음 — ' + [...클린아이셈].map(([k, v]) => k + ' ' + v).join(' · ').slice(0, 150));
