@@ -109,7 +109,10 @@ function 살아있나(옛) {
 /** 옛 워커를 **거둡니다** — quit → 10초 → SIGKILL → 5초 → 그래도 남으면 바퀴 중단.
  *  무한 대기는 하지 않습니다 (세중님 지시) */
 async function 거두기(옛, 까닭) {
-  const 자고 = (ms) => new Promise((r) => setTimeout(r, ms).unref?.());
+  /* ★ **unref 하지 않습니다** — 거두는 동안 돌림판을 붙잡아야 합니다.
+     unref 로 두었더니 node 가 스스로 끝났습니다(끝값 13 · unsettled top-level await).
+     길어도 15초이고, 끝나면 시계가 사라집니다 */
+  const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
   const t0 = Date.now();
   try {
     if (옛.stdin && !옛.stdin.destroyed && 옛.exitCode === null && !옛.killed) {
