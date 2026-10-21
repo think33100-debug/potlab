@@ -24,6 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
 import { 고친주소 } from './첨부주소고치기.mjs';
 import { 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
+import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이간격 } from './cleaneye-file.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -147,6 +148,7 @@ let 읽음 = 0; let 빈손 = 0; let 초합 = 0; let 못받음 = 0;
 const 빈손까닭 = new Map();
 const 못받음까닭 = new Map();      /* 못 받은 까닭도 셉니다 (지침 2절) */
 const 고침셈 = new Map();          /* 주소를 바로잡은 수 (첨부주소고치기) */
+const 클린아이셈 = new Map();      /* 클린아이 두 걸음 길 (cleaneye-file.mjs) */
 
 /* ★ 알리오 첨부는 **쿠키가 있어야** 받습니다. 없으면 파일 대신 포털 첫
    화면(8,333자 HTML)이 옵니다 — 2026-10-11 에 이 되메우기를 마른으로
@@ -327,20 +329,47 @@ for (const j of 볼것) {
   /* ★ 2026-10-21 — **주소를 바로잡고 받습니다** (tools/첨부주소고치기.mjs).
      능력시험에서 「HTML 이 옴」 12건이 거의 다 **잘못된 주소 줄**이었습니다 —
      상세 쪽 주소 · 빈 열쇠 · 서버 파일 경로 · 알리오 opendata 내려받기. */
+  /* ★ 2026-10-21 — **클린아이는 두 걸음으로 받습니다** (tools/cleaneye-file.mjs 한 자리).
+   *   첨부 주소가 **공고 화면 주소**라 그냥 받으면 HTML 이 옵니다 —
+   *   밤 바퀴 못받음 27건 가운데 **22건**이 그 꼴이었습니다.
+   *     ① 그 화면에서 fn_FileDown('<UPLOAD>','<ORIGINAL>','<PATH>')
+   *     ② POST /file/FileDownload.do  그 셋 + Referer
+   *   통이 15건·2분이라 **10초 간격**을 지킵니다 (그 모듈의 기본간격). */
+  let 받음클린아이 = null;
+  if (/job[.]cleaneye[.]go[.]kr/.test(String(고른것.url || '') + ' ' + String(j.url || ''))) {
+    const 쪽주소 = /ypCareersData[.]do/.test(String(고른것.url || '')) ? 고른것.url : (j.url || 고른것.url);
+    const 지난c = Date.now() - (끝때.get('job.cleaneye.go.kr') || 0);
+    if (지난c < 클린아이간격) await 자고(클린아이간격 - 지난c);
+    끝때.set('job.cleaneye.go.kr', Date.now());
+    const rc = await 클린아이첨부받기(쪽주소, { 다시: 0 });
+    if (rc && rc.buf && rc.buf.length) {
+      받음클린아이 = { buf: rc.buf };
+      고른것.name = rc.이름 || 고른것.name || '공고문';
+      클린아이셈.set('받음', (클린아이셈.get('받음') || 0) + 1);
+    } else {
+      const 왜c = String((rc && rc.왜) || '못 받음').slice(0, 44);
+      클린아이셈.set(왜c, (클린아이셈.get(왜c) || 0) + 1);
+      못받음++; 한줄.왜 = '클린아이 — ' + 왜c;
+      못받음까닭.set(한줄.왜, (못받음까닭.get(한줄.왜) ?? 0) + 1);
+      표시할것.push({ job_id: j.id, url: 고른것.url, 왜: 한줄.왜 });
+      continue;
+    }
+  }
+
   const 고친 = 고친주소(고른것.url, j.url || '');
-  if (고친.받는법 && 고친.받는법.꼴 === 'POST못함') {
+  if (!받음클린아이 && 고친.받는법 && 고친.받는법.꼴 === 'POST못함') {
     못받음++; 한줄.왜 = 고친.받는법.왜;
     못받음까닭.set(한줄.왜, (못받음까닭.get(한줄.왜) ?? 0) + 1);
     continue;                                  /* 읽음 표시도 안 남깁니다 — 길이 생기면 다시 봅니다 */
   }
-  if (고친.버릴것) {
+  if (!받음클린아이 && 고친.버릴것) {
     못받음++; 한줄.왜 = '주소를 버렸습니다 — ' + 고친.왜;
     못받음까닭.set(한줄.왜, (못받음까닭.get(한줄.왜) ?? 0) + 1);
     표시할것.push({ job_id: j.id, url: 고른것.url, 왜: 한줄.왜 });
     continue;
   }
   if (고친.url !== 고른것.url) 고침셈.set(고친.왜 || '고침', (고침셈.get(고친.왜 || '고침') || 0) + 1);
-  const 받음 = await 틈두고받기(고친.url, 고친.받는법);
+  const 받음 = 받음클린아이 || await 틈두고받기(고친.url, 고친.받는법);
   if (받음.왜) {
     못받음++; 한줄.왜 = 받음.왜;
     못받음까닭.set(받음.왜, (못받음까닭.get(받음.왜) ?? 0) + 1);
@@ -407,6 +436,9 @@ for (const [왜, n] of [...못받음까닭].sort((a, b) => b[1] - a[1])) {
 }
 for (const [왜, n] of [...고침셈].sort((a, b) => b[1] - a[1])) {
   console.log('   주소고침 ' + String(n).padStart(3) + '건  ' + 왜);
+}
+if (클린아이셈.size) {
+  console.log('   클린아이 두 걸음 — ' + [...클린아이셈].map(([k, v]) => k + ' ' + v).join(' · ').slice(0, 150));
 }
 if (셈쿠키.size) {
   console.log('   상세 쿠키 — ' + [...셈쿠키].map(([h, v]) => h + ' ' + v).join(' · ').slice(0, 160));
