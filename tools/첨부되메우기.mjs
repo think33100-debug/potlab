@@ -22,7 +22,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
-import { 고친주소 } from './첨부주소고치기.mjs';
+import { 그누보드새주소, 고친주소 } from './첨부주소고치기.mjs';
 import { 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
 import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이간격 } from './cleaneye-file.mjs';
 import { 첨부받기 as 나라일터첨부받기, 기본간격 as 나라일터간격 } from './gojobs-file.mjs';
@@ -233,6 +233,8 @@ async function 상세쿠키(상세주소) {
       redirect: 'follow',
       signal: AbortSignal.timeout(받기제한초 * 1000),
     });
+    /* ★ 2026-10-22 — **쪽글도 기억합니다.** 그누보드 nonce 를 여기서 새로 읽습니다 */
+    try { 쪽글집.set(상세주소, await r.text()); } catch { /* 글은 없어도 쿠키는 씁니다 */ }
     const 들 = r.headers.getSetCookie?.() || [];
     쿠키 = 들.map((x) => String(x).split(';')[0]).filter(Boolean).join('; ');
     셈쿠키.set(host, 쿠키 ? '받음' : '없음');
@@ -243,8 +245,10 @@ async function 상세쿠키(상세주소) {
   return 쿠키;
 }
 const 셈쿠키 = new Map();
+let nonce새로 = 0;              /* 그누보드 nonce 를 새로 읽은 수 */
+const 쪽글집 = new Map();     /* 상세주소 → 쪽글 (그누보드 nonce 새로 읽기 · 2026-10-22) */
 
-async function 틈두고받기(주소, 받는법 = null) {
+async function 틈두고받기(주소, 받는법 = null) {   /* 주소는 안에서 새 nonce 로 바뀔 수 있습니다 */
   const host = 어디(주소);
   if (!host) return { 왜: '주소 꼴이 아님' };
   if ((막힘.get(host) || 0) >= 3) return { 왜: '그 사이트 막힘 3번 — 멈췄습니다' };
@@ -259,6 +263,13 @@ async function 틈두고받기(주소, 받는법 = null) {
     if (받는법 && 받는법.쿠키 === '상세' && 받는법.Referer) {
       const c = await 상세쿠키(받는법.Referer);
       if (c) 더.Cookie = c;
+      /* ★ 2026-10-22 — **nonce 를 쪽글에서 새로** 읽습니다. 담아 둔 nonce 는
+         몇 시간 지나면 죽고 5~6KB HTML 이 옵니다 (셋째 표본 HS3 7건의 까닭) */
+      const 쪽글 = 쪽글집.get(받는법.Referer);
+      if (쪽글) {
+        const 새 = 그누보드새주소(주소, 쪽글);
+        if (새 !== 주소) { 주소 = 새; nonce새로++; }
+      }
     }
     g = await fetch(주소, { headers: { ...(await 머리(주소)), ...더 },
       signal: AbortSignal.timeout(받기제한초 * 1000) });
@@ -464,6 +475,7 @@ for (const [왜, n] of [...못받음까닭].sort((a, b) => b[1] - a[1])) {
 for (const [왜, n] of [...고침셈].sort((a, b) => b[1] - a[1])) {
   console.log('   주소고침 ' + String(n).padStart(3) + '건  ' + 왜);
 }
+if (nonce새로) console.log('   그누보드 nonce 새로 읽음 ' + nonce새로 + '건');
 if (나라일터셈.size) {
   console.log('   나라일터 두 걸음 — ' + [...나라일터셈].map(([k, v]) => k + ' ' + v).join(' · ').slice(0, 150));
 }

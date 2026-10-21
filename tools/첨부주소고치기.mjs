@@ -59,6 +59,31 @@ export const 서버경로꼴 = /\/(?:home|var|usr|data)\/(?:hosting_users|www|ht
  *   클린아이 /file/FileDownload.do                        3줄 · 폼 값이 주소에 없어 못 받습니다
  *           (받는 길은 collect-cleaneye 안에 있습니다 — 거기서는 받아집니다)
  */
+/** 그누보드 첨부 주소의 **nonce 를 쪽글에서 새로** 읽습니다 (2026-10-22)
+ *
+ *  `nonce=<열쇠>|<때>|<해시>` 의 가운데가 때입니다. 쪽을 열 때 세션에 맞춰
+ *  만들어지므로 DB 에 담아 둔 주소는 죽습니다 (받아 보면 5~6KB HTML).
+ *  그래서 **같은 bo_table·wr_id·no** 를 가리키는 주소를 쪽글에서 찾아 바꿉니다.
+ *  못 찾으면 **원래 주소를 그대로** 돌려줍니다 (지어내지 않습니다).
+ */
+export function 그누보드새주소(주소, 쪽글) {
+  const s = String(주소 || '');
+  if (!/download[.]php/i.test(s)) return s;
+  const 값 = (이름, 글) => {
+    const m = String(글).match(new RegExp('[?&]' + 이름 + '=([^&"\'<>\\s]*)'));
+    return m ? m[1] : '';
+  };
+  const 표 = 값('bo_table', s); const wr = 값('wr_id', s); const no = 값('no', s);
+  if (!표 || !wr) return s;
+  for (const m of String(쪽글 || '').matchAll(/https?:\/\/[^"'<>\s]*download\.php[^"'<>\s]*/g)) {
+    const u = m[0].replace(/&amp;/g, '&');
+    if (값('bo_table', u) !== 표 || 값('wr_id', u) !== wr) continue;
+    if (no && 값('no', u) && 값('no', u) !== no) continue;
+    return u;
+  }
+  return s;
+}
+
 export function 받는법가리기(주소, 바탕 = '') {
   const s = String(주소 || '');
   if (/download[.]php/i.test(s)) {
@@ -158,6 +183,18 @@ if (import.meta.url === ('file://' + process.argv[1]) || process.argv[1]?.endsWi
   봐('그냥 파일 주소는 그대로',
     고친주소('https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/a/b/c.hwp').url
       === 'https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/a/b/c.hwp');
+  /* ★ 2026-10-22 — nonce 새로 읽기 (셋째 표본 · 청주성모병원) */
+  봐('쪽글의 새 nonce 로 바꾼다', 그누보드새주소(
+    'https://a.kr/bbs/download.php?bo_table=t&wr_id=48&no=0&nonce=옛것|1|aa',
+    '<a href="https://a.kr/bbs/download.php?bo_table=t&amp;wr_id=48&amp;no=0&amp;nonce=새것|2|bb">공고문</a>')
+    === 'https://a.kr/bbs/download.php?bo_table=t&wr_id=48&no=0&nonce=새것|2|bb');
+  봐('다른 글의 주소는 안 쓴다', 그누보드새주소(
+    'https://a.kr/bbs/download.php?bo_table=t&wr_id=48&no=0&nonce=옛것|1|aa',
+    '<a href="https://a.kr/bbs/download.php?bo_table=t&amp;wr_id=99&amp;no=0&amp;nonce=새것|2|bb">딴 글</a>')
+    === 'https://a.kr/bbs/download.php?bo_table=t&wr_id=48&no=0&nonce=옛것|1|aa');
+  봐('그누보드가 아니면 그대로',
+    그누보드새주소('https://a.kr/x.pdf', '<a href="https://a.kr/bbs/download.php?bo_table=t&wr_id=1">x</a>')
+      === 'https://a.kr/x.pdf');
   봐('그누보드 주소는 그대로',
     고친주소('https://www.cjmc.or.kr/bbs/download.php?bo_table=recurit_new&wr_id=648&no=0').url
       === 'https://www.cjmc.or.kr/bbs/download.php?bo_table=recurit_new&wr_id=648&no=0');
@@ -178,5 +215,5 @@ if (import.meta.url === ('file://' + process.argv[1]) || process.argv[1]?.endsWi
     console.error('✗ 자기 점검 실패 ' + 탈.length + '가지 — ' + 탈.join(' · '));
     process.exit(1);
   }
-  console.log('○ 첨부주소고치기 자기 점검 통과 — 19가지 (그물을 안 두드렸습니다)');
+  console.log('○ 첨부주소고치기 자기 점검 통과 — 22가지 (그물을 안 두드렸습니다)');
 }
