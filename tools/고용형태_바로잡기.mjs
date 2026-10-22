@@ -133,7 +133,8 @@ if (!진짜) { console.log('\n[마른] 아무것도 안 바꿉니다 — 바꾸�
    표를 직접 쓰지 않습니다 (지침 6절) */
 const 시험 = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'), {
   method: 'POST', headers: H,
-  body: JSON.stringify({ p_rows: [{ id: 바뀔것[0].id, employ_type: 바뀔것[0].후 }] }),
+  body: JSON.stringify({ p_rows: [{ id: 바뀔것[0].id, employ_type: 바뀔것[0].후,
+    '뽑은값': { 고용형태근거: 바뀔것[0].왜 || '' } }] }),
 });
 const 시험글 = await 시험.text();
 if (!시험.ok) { console.error('✗ 칸되메우기 ' + 시험.status + ' · ' + 시험글.slice(0, 250)); process.exit(1); }
@@ -145,7 +146,19 @@ if (!/employ_type/.test(시험글)) {
 }
 let 바꿈 = 1;
 for (let i = 1; i < 바뀔것.length; i += 50) {
-  const 토막 = 바뀔것.slice(i, i + 50).map((x) => ({ id: x.id, employ_type: x.후 }));
+  /* ★ 2026-10-22 — **왜 그렇게 정했는지 함께 남깁니다** (`뽑은값.고용형태근거`).
+     까닭은 두 가지입니다 —
+       ① 나중에 「이 값이 어디서 왔나」를 댈 수 있어야 합니다 (지침 2절)
+       ② `collect_put` 이 그 표시를 보고 **수집기가 안 덮게** 합니다.
+          오늘 11:23 에 채운 175건을 12:01 수집기 HS3 가 168건이나 다시
+          비웠고, 11:42 에 수집기 WN2 가 육아휴직 대체 공고 둘에 「정규직」을
+          다시 넣었습니다 (칸기록). 그 한 줄 고침은
+          supabase/migrations/2026_10_22_collect_put_고용형태안덮음.sql 입니다
+          — **세중님 승인 뒤에 올립니다.** 표시는 미리 남겨도 해가 없습니다.
+     `칸되메우기` 는 뽑은값을 **합칩니다**(`||`) — 다른 칸을 안 지웁니다 */
+  const 토막 = 바뀔것.slice(i, i + 50).map((x) => ({
+    id: x.id, employ_type: x.후, '뽑은값': { 고용형태근거: x.왜 || '' },
+  }));
   const r = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'), {
     method: 'POST', headers: H, body: JSON.stringify({ p_rows: 토막 }),
   });
