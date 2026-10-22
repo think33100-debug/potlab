@@ -36,6 +36,13 @@ const 값 = (이름, 기본) => {
 };
 const 전부 = argv.includes('--전부');
 const 흠몇 = Number(값('--흠', 14));
+/* ★ 2026-10-22 밤 — 표본을 **건마다** 찍습니다 (세중님 4번).
+   묶음 하나만 보고(--묶음 알리오), 공고문 글이 담긴 것 가운데 N건을 고릅니다.
+   고르는 자는 **id 를 글자순으로** — 돌릴 때마다 같은 표본이 나와야 견줄 수 있습니다.
+   --표본 0 (기본) 이면 전처럼 묶음 표만 찍습니다 */
+const 묶음고르기 = 값('--묶음', '');
+const 표본 = Number(값('--표본', 0));
+const 건마다 = argv.includes('--건마다') || 표본 > 0;
 
 const cfg = {};
 for (const f of [path.join(여기, '..', '.env'), path.join(여기, '..', '.env.local')]) {
@@ -121,9 +128,16 @@ for (const b of await 다받기('job_body?select=job_id,kind,body')) {
   if (k === '첨부' || !원문갈래.has(b.job_id)) 원문갈래.set(b.job_id, k);
 }
 
-const 볼것 = 공고
+let 볼것 = 공고
   .filter((j) => (묶음이름[j.source] || j.source) !== '워크넷')
-  .filter((j) => 전부 || 보임.has(j.id));
+  .filter((j) => 전부 || 보임.has(j.id))
+  .filter((j) => !묶음고르기 || (묶음이름[j.source] || j.source) === 묶음고르기);
+if (표본 > 0) {
+  /* 공고문 글이 **담긴** 것만 — 원문이 없으면 댈 것이 없습니다 */
+  볼것 = 볼것.filter((j) => 글자만(공고문글.get(j.id) || '').length > 200)
+    .sort((a, b) => String(a.id).localeCompare(String(b.id)))
+    .slice(0, 표본);
+}
 
 const 뽑 = (j, k) => {
   const v = (j['뽑은값'] || {})[k];
@@ -161,6 +175,7 @@ const 칸칸 = () => Object.fromEntries(칸들.map((k) =>
   [k, { 맞음: 0, 틀림: 0, 빈칸: 0, 원문없음: 0, 포털칸: 0, 규칙말: 0 }]));
 const 셈 = new Map();
 const 흠 = [];
+const 건별 = [];            /* --건마다 용 — [{id, 기관, 칸마다}] */
 let 공고문있는것 = 0;
 
 for (const j of 볼것) {
@@ -173,35 +188,67 @@ for (const j of 볼것) {
   const 원문있나 = 원문글자.length > 200;
   if (원문있나) { s.공고문++; 공고문있는것++; }
   const 값 = 우리값(j);
+  const 이건 = { id: j.id, 출처: j.source, 기관: j.org_name, 제목: j.title,
+    원문갈래: 원문갈래.get(j.id) || '없음', 원문글자수: 원문글자.length, 칸마다: [] };
+  const 적기 = (칸이름, 판정, 우리것, 까닭) =>
+    이건.칸마다.push({ 칸: 칸이름, 판정, 값: 우리것, 까닭 });
   for (const k of 칸들) {
     const 칸 = s.칸[k];
     const u = 값[k];
-    if (!u) { 칸.빈칸++; continue; }
+    if (!u) { 칸.빈칸++; 적기(k, '빈칸', null, ''); continue; }
     const v = 눕(u.값);
-    if (!v) { 칸.빈칸++; continue; }
-    if (규칙말.test(v)) { 칸.규칙말++; continue; }          /* ③ */
-    if (u.어디서 === '포털칸') { 칸.포털칸++; continue; }    /* ② */
-    if (!원문있나) { 칸.원문없음++; continue; }              /* ① */
+    if (!v) { 칸.빈칸++; 적기(k, '빈칸', null, ''); continue; }
+    if (규칙말.test(v)) { 칸.규칙말++; 적기(k, '규칙말', v, '우리가 고른 말 — 분모 밖'); continue; }  /* ③ */
+    if (u.어디서 === '포털칸') { 칸.포털칸++; 적기(k, '포털칸', v, '포털이 준 값 — 분모 밖'); continue; }  /* ② */
+    if (!원문있나) { 칸.원문없음++; 적기(k, '원문없음', v, '공고문 글이 안 담겼습니다'); continue; }  /* ① */
     const 꼴 = k === '접수마감' ? 날짜꼴들(v) : k === '마감시각' ? 시각꼴들(v) : null;
     if (꼴) {
-      if (꼴.some((x) => 원문글자.includes(글자만(x)))) 칸.맞음++;
-      else { 칸.틀림++; 흠.push([묶, k, j.id, j.org_name, v, '공고문에 그 날짜·시각이 없음']); }
+      if (꼴.some((x) => 원문글자.includes(글자만(x)))) { 칸.맞음++; 적기(k, '맞음', v, '공고문에 그 날짜·시각이 있음'); }
+      else { 칸.틀림++; 적기(k, '틀림', v, '공고문에 그 날짜·시각이 없음');
+             흠.push([묶, k, j.id, j.org_name, v, '공고문에 그 날짜·시각이 없음']); }
       continue;
     }
     if (k === '고용형태') {
       const 말 = 고용형태말[v];
-      if (말 && 말.test(원문)) 칸.맞음++;
-      else { 칸.틀림++; 흠.push([묶, k, j.id, j.org_name, v, '공고문에 그 고용형태 말이 없음']); }
+      if (말 && 말.test(원문)) { 칸.맞음++; 적기(k, '맞음', v, '공고문에 그 말이 있음'); }
+      else { 칸.틀림++; 적기(k, '틀림', v, '공고문에 그 고용형태 말이 없음');
+             흠.push([묶, k, j.id, j.org_name, v, '공고문에 그 고용형태 말이 없음']); }
       continue;
     }
     const 조각 = 조각내기(v);
     const 남는것 = 조각.filter((x) => !원문글자.includes(글자만(x)));
-    if (!조각.length || !남는것.length) 칸.맞음++;
+    if (!조각.length || !남는것.length) { 칸.맞음++; 적기(k, '맞음', v, '조각 ' + 조각.length + '개가 다 공고문에 있음'); }
     else {
       칸.틀림++;
+      적기(k, '틀림', v, '공고문에 없는 조각 「' + 남는것[0].slice(0, 22) + '」');
       흠.push([묶, k, j.id, j.org_name, v.slice(0, 40), '공고문에 없는 조각 「' + 남는것[0].slice(0, 22) + '」']);
     }
   }
+  건별.push(이건);
+}
+
+/* ── --건마다 — 표본을 건마다 찍습니다 (세중님 4번) ────────────────── */
+if (건마다) {
+  console.log('표본 ' + 건별.length + '건 · 건마다 칸별 판정'
+    + (묶음고르기 ? ' · 묶음 ' + 묶음고르기 : '') + '\n');
+  let 맞 = 0, 틀 = 0;
+  for (const x of 건별) {
+    console.log('■ ' + x.id + ' [' + x.출처 + '] ' + String(x.기관 || '').slice(0, 20)
+      + ' — ' + String(x.제목 || '').slice(0, 42));
+    console.log('   원문 ' + x.원문갈래 + ' ' + x.원문글자수 + '자');
+    for (const c of x.칸마다) {
+      if (c.판정 === '빈칸') { console.log('   ' + c.칸.padEnd(6) + '빈칸'); continue; }
+      if (c.판정 === '맞음') 맞++;
+      if (c.판정 === '틀림') 틀++;
+      console.log('   ' + c.칸.padEnd(6) + (c.판정 === '맞음' ? '맞음  ' : c.판정 === '틀림' ? '**틀림**' : c.판정.padEnd(6))
+        + ' 「' + String(c.값).slice(0, 52) + '」'
+        + (c.까닭 ? '   ← ' + c.까닭 : ''));
+    }
+    console.log('');
+  }
+  console.log('표본 셈 — 원문에 댄 칸 ' + (맞 + 틀) + '개 · 맞음 ' + 맞 + ' · **틀림 ' + 틀 + '**'
+    + ((맞 + 틀) ? ' · 맞음률 ' + Math.round((100 * 맞) / (맞 + 틀)) + '%' : ''));
+  console.log('');
 }
 
 console.log('긁기 출처 ' + 볼것.length + '건' + (전부 ? ' (숨김·보류까지)' : ' (회원 화면만)')
