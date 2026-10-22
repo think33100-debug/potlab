@@ -115,6 +115,17 @@ for (const x of 바뀔것.slice(0, 12)) {
 }
 if (바뀔것.length > 12) console.log('    … 그밖 ' + (바뀔것.length - 12) + '건');
 
+/* ★ 값 → 다른 값은 **전부** 찍습니다 (세중님 안전장치) — 빈칸을 채우는 것과
+   달리 **전에 맞았을 수도 있는 값을 덮는** 자리입니다 */
+const 덮는것 = 바뀔것.filter((x) => String(x.전 || '').trim());
+console.log('\n  ★ 덮어쓰는 것 (값 → 다른 값) ' + 덮는것.length + '건 — 전부 —');
+for (const x of 덮는것) {
+  console.log('    ' + x.id + ' [' + x.source + '] ' + String(x.org_name).slice(0, 20)
+    + '  「' + x.전 + '」 → 「' + x.후 + '」');
+  console.log('        ' + String(x.title).slice(0, 60));
+  console.log('        왜 — ' + x.왜);
+}
+
 if (!바뀔것.length) { console.log('\n바꿀 것이 없습니다'); process.exit(0); }
 if (!진짜) { console.log('\n[마른] 아무것도 안 바꿉니다 — 바꾸려면 --진짜'); process.exit(0); }
 
