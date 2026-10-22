@@ -97,11 +97,28 @@ const 칸들 = ['모집인원', '접수마감', '마감시각', '근무지', '�
 const 공고 = await 다받기('job_posts?select=id,source,org_name,title,job_group,headcount,'
   + 'apply_to,apply_to_time,work_place,employ_type,detail,' + encodeURIComponent('뽑은값'));
 const 보임 = new Set((await 다받기('job_posts_pub?select=id')).map((x) => x.id));
-/** 공고문 글만 모읍니다 — 상세 본문은 **원문이 아닙니다** (①) */
+/** 원문으로 쓸 글을 모읍니다 (①)
+ *
+ * ★ 2026-10-22 밤 — 처음에는 `kind='첨부'` 만 봤습니다. 그래서 **잴 수 있는 회원
+ *   공고가 3건**뿐이었고 「공고문이 안 담겼다」고 보고했습니다. 틀렸습니다 —
+ *   **병원자체(HS3)의 원문은 첨부가 아니라 공고 쪽 본문**입니다. 회원 공고 16건이
+ *   `kind='상세'` 로 평균 2,580자씩 **이미 담겨 있었습니다.**
+ *   첨부 줄을 만들어 보니(병원첨부채우기 --회원만) 13건 다 **첨부가 아예 없는**
+ *   공고였습니다 — 쪽 본문이 공고문입니다.
+ *
+ *   첨부   기관이 올린 공고문 파일          → 원문 ○
+ *   상세   병원 **자체 사이트**의 공고 본문  → 원문 ○ (그 기관이 쓴 글입니다)
+ *   상세 본문  포털이 준 **줄인 글**(평균 470자) → 원문 ✗ (거기 없는 값을 틀림으로
+ *              세면 안 됩니다. 나라일터·클린아이 목록 API 가 주는 요약입니다)
+ */
+const 원문갈래 = new Map();
 const 공고문글 = new Map();
 for (const b of await 다받기('job_body?select=job_id,kind,body')) {
-  if (String(b.kind || '') !== '첨부') continue;
+  const k = String(b.kind || '');
+  if (k !== '첨부' && k !== '상세') continue;
   공고문글.set(b.job_id, (공고문글.get(b.job_id) || '') + '\n' + String(b.body || ''));
+  /* 첨부가 있으면 첨부라고 적습니다 — 더 센 근거입니다 */
+  if (k === '첨부' || !원문갈래.has(b.job_id)) 원문갈래.set(b.job_id, k);
 }
 
 const 볼것 = 공고
