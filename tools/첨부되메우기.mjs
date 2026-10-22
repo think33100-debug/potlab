@@ -29,6 +29,15 @@ import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이�
 import { 첨부받기 as 나라일터첨부받기, 기본간격 as 나라일터간격 } from './gojobs-file.mjs';
 import { 점수 } from './hosp/hs_files.js';
 
+/* ★ 2026-10-22 — 읽은 글에서 **널 글자와 홀로 남은 서러게이트를 뺍니다.**
+   알리오 220건을 담을 때 collect_body 가 `400 PGRST102 Empty or invalid json` 으로
+   **4,454KB 를 통째로 거절했습니다.** OCR 로 읽은 PDF 글에 U+0000 이 섞여 오고,
+   JSON 은 그 글자를 못 싣습니다 — 조각으로 나눠 보내도 같습니다(크기가 아니라 글자). */
+const 글깨끗이 = (t) => String(t == null ? '' : t)
+  .split('\u0000').join(' ')
+  .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, ' ');
+
+
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
 const 값 = (이름, 기본) => {
@@ -532,7 +541,7 @@ for (const j of 볼것) {
         ord: Math.max(0, 차례),
         url: 고친.url,
         file_name: String(고른것.name || ''),
-        body: String(k.md || k.글 || '') },
+        body: 글깨끗이(k.md || k.글) },
     });
   }
 
