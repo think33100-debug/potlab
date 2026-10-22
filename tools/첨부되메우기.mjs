@@ -155,13 +155,22 @@ const 언제봤나 = (id) => {
   const 들 = (공고별첨부.get(id) || []).map((a) => a.parsed_at).filter(Boolean);
   return 들.length ? 들.sort().slice(-1)[0] : '';      /* 빈 글자가 가장 앞에 옵니다 */
 };
+/* ★ 2026-10-22 — **회원 화면부터** 볼 수 있게 깃발 둘을 더했습니다.
+   바퀴는 「가장 오래 안 본 것」 차례라 회원 공고가 뒤로 밀립니다 —
+   긁기 출처의 맞음률을 재려면 그 공고의 공고문이 먼저 담겨야 합니다. */
+const 회원만 = process.argv.includes('--회원만');
+const 워크넷빼기 = process.argv.includes('--워크넷빼기');
+const 보임 = 회원만 ? new Set((await 전부('job_posts_pub?select=id')).map((x) => x.id)) : null;
 const 볼것 = 공고들
   .filter((j) => !출처 || j.source === 출처)
+  .filter((j) => !회원만 || 보임.has(j.id))
+  .filter((j) => !워크넷빼기 || !/^WN/.test(String(j.source || '')))
   .filter((j) => !j.admin_locked)
   .filter((j) => 빈칸들(j).length)
   .sort((a, b) => 언제봤나(a.id).localeCompare(언제봤나(b.id)))
   .slice(0, 몇개);
 console.log('볼 것 ' + 볼것.length + '건' + (출처 ? ' (출처 ' + 출처 + ')' : '')
+  + (회원만 ? ' · **회원 화면만**' : '') + (워크넷빼기 ? ' · 워크넷 뺌' : '')
   + ' · 관리자 잠금 건너뜀 ' + 공고들.filter((j) => j.admin_locked).length + '건'
   + (볼것.length ? ' · 가장 오래 안 본 것 ' + (언제봤나(볼것[0].id) || '아직 안 봄')
     + ' ~ ' + (언제봤나(볼것[볼것.length - 1].id) || '아직 안 봄') : ''));
