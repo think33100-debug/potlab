@@ -558,558 +558,6 @@
   "로그인": {
     "함수": [
       {
-        "이름": "admin_alio_compete(p_year integer, p_inst text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_alio_group_one(\"p_묶음키\" text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_alio_groups(\"p_기관\" text, \"p_직군\" text, \"p_지역\" text, \"p_연도\" integer, \"p_찾기\" text, \"p_고용형태\" text, \"p_다른직군\" boolean)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_alio_merge_candidates(\"p_직군\" text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_alio_set_hiretype(p_sn bigint, p_group_no integer, \"p_고용형태\" text, \"p_메모\" text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_api_quota()",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_decide(p_id text, p_what text, p_job_group text, p_note text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_hand_check()",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_hand_check_seen(\"p_이름\" text, \"p_메모\" text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_new_collect_secret(p_source text, p_note text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "admin_ocr_zero()",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_rival()",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_rival_add(\"p_경쟁사\" text, \"p_기관명\" text, \"p_제목\" text, \"p_본날짜\" timestamp with time zone, \"p_링크\" text, \"p_기관분류\" text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_rival_org_todo(\"p_기관명\" text, \"p_어디서\" text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_rival_set(\"p_경쟁사\" text, \"p_글번호\" text, \"p_상태\" text, \"p_메모\" text, \"p_원인\" text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_stats_daily(p_days integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_stats_devices(p_days integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_stats_now()",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_stats_screens(p_days integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_stats_top_jobs(p_days integer, p_limit integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_stats_top_posts(p_days integer, p_limit integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_공고내리기(p_job text, \"p_왜\" text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_공고신고목록(\"p_처리전만\" boolean, p_page integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_공고신고처리(p_id bigint, p_note text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_공고올리기(p_job text, \"p_왜\" text, \"p_순서\" integer, \"p_부터\" date, \"p_까지\" date)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_광고배너()",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_광고배너고치기(\"p_자리\" text, \"p_이름\" text, \"p_그림\" text, \"p_링크\" text, \"p_표시초\" integer, \"p_켜짐\" boolean, \"p_시작일\" date, \"p_끝일\" date)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_교육기관(p_page integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_교육기관고치기(\"p_이름\" text, \"p_소개\" text, \"p_그림\" text, \"p_누리집\" text, \"p_차례\" integer, \"p_보임\" boolean)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_권한거두기(\"p_회원번호\" bigint, \"p_코드\" text, \"p_까닭\" text)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "admin_권한기록(\"p_몇줄\" integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_권한주기(\"p_회원번호\" bigint, \"p_코드\" text, \"p_까닭\" text)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "admin_담당자신청(\"p_상태\" text)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "admin_담당자정하기(\"p_자격id\" bigint, \"p_상태\" text, \"p_까닭\" text)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "admin_동의기록(p_profile_id uuid)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_마지막알림()",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_신고목록(\"p_처리전만\" boolean, p_page integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_신고처리(p_id bigint, p_note text)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_올린공고목록(\"p_지난것\" boolean)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_운영진글감추기(\"p_글\" bigint[], \"p_댓글\" bigint[])",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "admin_운영진글목록(\"p_역할\" text, \"p_몇줄\" integer)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "admin_인증자료열기(\"p_자료id\" bigint)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "admin_재직인증(\"p_상태\" text)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "admin_재직인증열기(p_id bigint)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "admin_재직인증정하기(p_id bigint, \"p_상태\" text, \"p_까닭\" text)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "admin_접속기록(p_page integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_제목확인()",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_직원넣기(\"p_회원번호\" bigint, \"p_메모\" text)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "admin_직원목록()",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_직원빼기(\"p_회원번호\" bigint, \"p_까닭\" text)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "admin_탈퇴이름(p_profile_id uuid)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_회원목록(p_page integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_회원정보보기(p_profile_id uuid)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "admin_회원표(p_ids uuid[], p_page integer)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "alio_compete_fix(p_secret text, p_source text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_compete_put(p_secret text, p_source text, p_rows jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_compete_state_get(p_secret text, p_source text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_compete_state_put(p_secret text, p_source text, \"p_말\" text, \"p_다음쪽\" integer, \"p_전체쪽\" integer, \"p_다한날\" date, \"p_메모\" text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_compete_web_all(p_secret text, p_source text, p_limit integer)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_compete_web_put(p_secret text, p_source text, p_rows jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_compete_web_todo(p_secret text, p_source text, p_limit integer)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_group_put(p_secret text, p_source text, p_rows jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_group_refresh(p_secret text, p_source text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_group_src(p_secret text, p_source text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_post_file_put(p_secret text, p_source text, p_rows jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_post_file_text_put(p_secret text, p_source text, p_rows jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_post_file_text_todo(p_secret text, p_source text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_post_file_todo(p_secret text, p_source text, \"p_모름만\" boolean)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_post_meta_put(p_secret text, p_source text, p_rows jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_post_meta_todo(p_secret text, p_source text, p_limit integer)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "alio_web_health()",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "alio_web_peek(p_secret text, p_source text, p_keys jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "beat_health()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "bump_nickname_change()",
-        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
-      },
-      {
-        "이름": "bump_post_view(p_id bigint)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "bump_report_count()",
-        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
-      },
-      {
-        "이름": "collect_after(p_secret text, p_source text, p_days integer, p_rolling_days integer)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "collect_body(p_secret text, p_source text, p_rows jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "collect_gap_get(p_secret text, p_source text, p_new text, p_old text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "collect_peek(p_secret text, p_source text, p_of text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "collect_trash(p_secret text, p_source text, p_rows jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "deadline_from_title(p_title text, p_base date)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "hand_check_put(p_secret text, p_source text, p_rows jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "hide_post(p_id bigint, p_hide boolean)",
-        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
-      },
-      {
-        "이름": "hide_www_twins(p_secret text, p_source text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "hira_name_key(s text)",
-        "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
-      },
-      {
-        "이름": "hold_digest(p_secret text, p_source text, p_hours integer)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "home_stats()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "is_admin()",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "job_counts(p_job text, p_sido text, p_q text, p_all boolean, p_tabs text[])",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "job_list(p_job text, p_sido text, p_tab text, p_q text, p_all boolean, p_sort text, p_page integer)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "job_one(p_id text)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "job_posts_first_seen_keep()",
-        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
-      },
-      {
-        "이름": "job_posts_one_state_trg()",
-        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
-      },
-      {
-        "이름": "job_state_log_trg()",
-        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
-      },
-      {
-        "이름": "job_totals()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "job_views(p_ids text[])",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "keep_one_admin()",
-        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
-      },
-      {
-        "이름": "lang_bands()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "lang_points(p_exam text, p_score integer, p_level text)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "lang_points_check()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "lang_stats()",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "ocr_zero_put(p_secret text, p_source text, p_x jsonb)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "org_detail(p_name text, p_sido text)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "org_facets()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "org_hospital_by_name(p_name text)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "org_jobs(p_name text, p_n integer)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "org_key(s text)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "org_name_key(s text, p_drop_sido boolean)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "org_nearby(p_name text, p_sido text, p_n integer)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "org_public(p_name text, p_sido text, p_title text, p_src text)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "org_search(p_q text, p_tile text, p_sido text, p_sgg text, p_sort text, p_limit integer, p_offset integer)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "org_sgg(p_sido text, p_sgg text, p_addr text)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "org_sido(p_sido text, p_addr text)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "org_tile(p_kinds text[], p_sources text[], p_name text)",
-        "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
-      },
-      {
-        "이름": "org_total()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "pay_band(p_hired_year integer)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "pay_stats(p_job text, p_region text, p_type text, p_band text, p_employ text)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "post_state(p_id bigint)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "pub_baseline_check()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "pub_baseline_get(p_secret text, p_source text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "pub_leak()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "rejudge_forget(p_secret text, p_ids text[])",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "rejudge_hold_list(p_secret text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "reset_my_account()",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "rival_match_go(p_secret text, p_source text)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "rival_put(p_secret text, p_source text, p_rows jsonb, \"p_첫판\" boolean)",
-        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
-      },
-      {
-        "이름": "rookie_salary(p_job text)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "route_health()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "salary_stats(p_hospital_type text, p_region text, p_hired_year integer)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "save_my_survey(p_salary jsonb, p_spec jsonb, p_langs jsonb)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "sido_has(p_stored text, p_want text)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "spec_langs_cap()",
-        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
-      },
-      {
-        "이름": "spec_parts(p_gpa numeric, p_gpa_scale numeric, p_lang_pt integer, p_school text, p_licenses text[], p_trainings text[], p_rows jsonb)",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "spec_parts_check()",
-        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
-      },
-      {
-        "이름": "spec_score(s student_specs)",
-        "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
-      },
-      {
-        "이름": "spec_stats()",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "unread_count(p_room bigint)",
-        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
         "이름": "가입하기(\"p_닉네임\" text, \"p_직군\" text, \"p_역할\" text, \"p_사진\" text, \"p_약관판\" text)",
         "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
       },
@@ -1168,6 +616,10 @@
       {
         "이름": "공고원문제목(p_id text)",
         "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "공고접수마감글(p_id text)",
+        "왜": "회원 화면이 「접수 마감」 칸에 기관이 적은 말(「채용시까지」 등)을 그리려고 마감표시() 안에서 부릅니다 (2026-10-22 세중님 2번). anon 에게는 안 줍니다 — 비로그인 화면은 일곱 칸을 안 그립니다. 읽기만 하고 job_posts 의 뽑은값.접수마감글 한 칸만 돌려줍니다"
       },
       {
         "이름": "공고조회수(p_id text)",
@@ -1622,6 +1074,10 @@
         "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
       },
       {
+        "이름": "조교연구갈래(\"p_제목\" text, \"p_기관\" text, \"p_글\" text)",
+        "왜": "job_posts_pub 뷰가 본문에서 이 함수를 부릅니다. 뷰는 **부르는 사람 권한으로** 돌기 때문에(지침 6-2c) 여기서 걷으면 회원 화면 목록이 깨집니다. 표를 읽지 않는 순수 함수이고(입력 글자만 봄) SECURITY INVOKER · IMMUTABLE 이며 다른 함수를 부르지 않습니다 — 2026-10-18 에 prosrc·prosecdef·provolatile 을 찍어 확인했습니다."
+      },
+      {
         "이름": "주소도메인(u text)",
         "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
       },
@@ -1694,8 +1150,556 @@
         "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
       },
       {
-        "이름": "조교연구갈래(\"p_제목\" text, \"p_기관\" text, \"p_글\" text)",
-        "왜": "job_posts_pub 뷰가 본문에서 이 함수를 부릅니다. 뷰는 **부르는 사람 권한으로** 돌기 때문에(지침 6-2c) 여기서 걷으면 회원 화면 목록이 깨집니다. 표를 읽지 않는 순수 함수이고(입력 글자만 봄) SECURITY INVOKER · IMMUTABLE 이며 다른 함수를 부르지 않습니다 — 2026-10-18 에 prosrc·prosecdef·provolatile 을 찍어 확인했습니다."
+        "이름": "admin_공고내리기(p_job text, \"p_왜\" text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_공고신고목록(\"p_처리전만\" boolean, p_page integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_공고신고처리(p_id bigint, p_note text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_공고올리기(p_job text, \"p_왜\" text, \"p_순서\" integer, \"p_부터\" date, \"p_까지\" date)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_광고배너()",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_광고배너고치기(\"p_자리\" text, \"p_이름\" text, \"p_그림\" text, \"p_링크\" text, \"p_표시초\" integer, \"p_켜짐\" boolean, \"p_시작일\" date, \"p_끝일\" date)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_교육기관(p_page integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_교육기관고치기(\"p_이름\" text, \"p_소개\" text, \"p_그림\" text, \"p_누리집\" text, \"p_차례\" integer, \"p_보임\" boolean)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_권한거두기(\"p_회원번호\" bigint, \"p_코드\" text, \"p_까닭\" text)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "admin_권한기록(\"p_몇줄\" integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_권한주기(\"p_회원번호\" bigint, \"p_코드\" text, \"p_까닭\" text)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "admin_담당자신청(\"p_상태\" text)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "admin_담당자정하기(\"p_자격id\" bigint, \"p_상태\" text, \"p_까닭\" text)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "admin_동의기록(p_profile_id uuid)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_마지막알림()",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_신고목록(\"p_처리전만\" boolean, p_page integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_신고처리(p_id bigint, p_note text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_올린공고목록(\"p_지난것\" boolean)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_운영진글감추기(\"p_글\" bigint[], \"p_댓글\" bigint[])",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "admin_운영진글목록(\"p_역할\" text, \"p_몇줄\" integer)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "admin_인증자료열기(\"p_자료id\" bigint)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "admin_재직인증(\"p_상태\" text)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "admin_재직인증열기(p_id bigint)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "admin_재직인증정하기(p_id bigint, \"p_상태\" text, \"p_까닭\" text)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "admin_접속기록(p_page integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_제목확인()",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_직원넣기(\"p_회원번호\" bigint, \"p_메모\" text)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "admin_직원목록()",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_직원빼기(\"p_회원번호\" bigint, \"p_까닭\" text)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "admin_탈퇴이름(p_profile_id uuid)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_회원목록(p_page integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_회원정보보기(p_profile_id uuid)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_회원표(p_ids uuid[], p_page integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_alio_compete(p_year integer, p_inst text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_alio_group_one(\"p_묶음키\" text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_alio_groups(\"p_기관\" text, \"p_직군\" text, \"p_지역\" text, \"p_연도\" integer, \"p_찾기\" text, \"p_고용형태\" text, \"p_다른직군\" boolean)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_alio_merge_candidates(\"p_직군\" text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_alio_set_hiretype(p_sn bigint, p_group_no integer, \"p_고용형태\" text, \"p_메모\" text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_api_quota()",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_decide(p_id text, p_what text, p_job_group text, p_note text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_hand_check_seen(\"p_이름\" text, \"p_메모\" text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_hand_check()",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_new_collect_secret(p_source text, p_note text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "admin_ocr_zero()",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_rival_add(\"p_경쟁사\" text, \"p_기관명\" text, \"p_제목\" text, \"p_본날짜\" timestamp with time zone, \"p_링크\" text, \"p_기관분류\" text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_rival_org_todo(\"p_기관명\" text, \"p_어디서\" text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_rival_set(\"p_경쟁사\" text, \"p_글번호\" text, \"p_상태\" text, \"p_메모\" text, \"p_원인\" text)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_rival()",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_stats_daily(p_days integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_stats_devices(p_days integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_stats_now()",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_stats_screens(p_days integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_stats_top_jobs(p_days integer, p_limit integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "admin_stats_top_posts(p_days integer, p_limit integer)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "alio_compete_fix(p_secret text, p_source text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_compete_put(p_secret text, p_source text, p_rows jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_compete_state_get(p_secret text, p_source text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_compete_state_put(p_secret text, p_source text, \"p_말\" text, \"p_다음쪽\" integer, \"p_전체쪽\" integer, \"p_다한날\" date, \"p_메모\" text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_compete_web_all(p_secret text, p_source text, p_limit integer)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_compete_web_put(p_secret text, p_source text, p_rows jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_compete_web_todo(p_secret text, p_source text, p_limit integer)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_group_put(p_secret text, p_source text, p_rows jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_group_refresh(p_secret text, p_source text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_group_src(p_secret text, p_source text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_post_file_put(p_secret text, p_source text, p_rows jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_post_file_text_put(p_secret text, p_source text, p_rows jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_post_file_text_todo(p_secret text, p_source text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_post_file_todo(p_secret text, p_source text, \"p_모름만\" boolean)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_post_meta_put(p_secret text, p_source text, p_rows jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_post_meta_todo(p_secret text, p_source text, p_limit integer)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "alio_web_health()",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "alio_web_peek(p_secret text, p_source text, p_keys jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "beat_health()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "bump_nickname_change()",
+        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+      },
+      {
+        "이름": "bump_post_view(p_id bigint)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "bump_report_count()",
+        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+      },
+      {
+        "이름": "collect_after(p_secret text, p_source text, p_days integer, p_rolling_days integer)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "collect_body(p_secret text, p_source text, p_rows jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "collect_gap_get(p_secret text, p_source text, p_new text, p_old text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "collect_peek(p_secret text, p_source text, p_of text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "collect_trash(p_secret text, p_source text, p_rows jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "deadline_from_title(p_title text, p_base date)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "hand_check_put(p_secret text, p_source text, p_rows jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "hide_post(p_id bigint, p_hide boolean)",
+        "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
+      },
+      {
+        "이름": "hide_www_twins(p_secret text, p_source text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "hira_name_key(s text)",
+        "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+      },
+      {
+        "이름": "hold_digest(p_secret text, p_source text, p_hours integer)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "home_stats()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "is_admin()",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "job_counts(p_job text, p_sido text, p_q text, p_all boolean, p_tabs text[])",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "job_list(p_job text, p_sido text, p_tab text, p_q text, p_all boolean, p_sort text, p_page integer)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "job_one(p_id text)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "job_posts_first_seen_keep()",
+        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+      },
+      {
+        "이름": "job_posts_one_state_trg()",
+        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+      },
+      {
+        "이름": "job_state_log_trg()",
+        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+      },
+      {
+        "이름": "job_totals()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "job_views(p_ids text[])",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "keep_one_admin()",
+        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+      },
+      {
+        "이름": "lang_bands()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "lang_points_check()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "lang_points(p_exam text, p_score integer, p_level text)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "lang_stats()",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "ocr_zero_put(p_secret text, p_source text, p_x jsonb)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "org_detail(p_name text, p_sido text)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "org_facets()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "org_hospital_by_name(p_name text)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "org_jobs(p_name text, p_n integer)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "org_key(s text)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "org_name_key(s text, p_drop_sido boolean)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "org_nearby(p_name text, p_sido text, p_n integer)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "org_public(p_name text, p_sido text, p_title text, p_src text)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "org_search(p_q text, p_tile text, p_sido text, p_sgg text, p_sort text, p_limit integer, p_offset integer)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "org_sgg(p_sido text, p_sgg text, p_addr text)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "org_sido(p_sido text, p_addr text)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "org_tile(p_kinds text[], p_sources text[], p_name text)",
+        "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+      },
+      {
+        "이름": "org_total()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "pay_band(p_hired_year integer)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "pay_stats(p_job text, p_region text, p_type text, p_band text, p_employ text)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "post_state(p_id bigint)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "pub_baseline_check()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "pub_baseline_get(p_secret text, p_source text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "pub_leak()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "rejudge_forget(p_secret text, p_ids text[])",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "rejudge_hold_list(p_secret text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "reset_my_account()",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "rival_match_go(p_secret text, p_source text)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "rival_put(p_secret text, p_source text, p_rows jsonb, \"p_첫판\" boolean)",
+        "왜": "수집기가 anon 열쇠 + p_secret 으로 돕니다 (tools/collect-*.mjs · 밤정리 · 재판정). 여기서 anon 을 걷으면 수집이 멈춥니다. 막는 자리는 p_secret 입니다"
+      },
+      {
+        "이름": "rookie_salary(p_job text)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "route_health()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "salary_stats(p_hospital_type text, p_region text, p_hired_year integer)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "save_my_survey(p_salary jsonb, p_spec jsonb, p_langs jsonb)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "sido_has(p_stored text, p_want text)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "spec_langs_cap()",
+        "왜": "트리거 함수 — 직접 못 부릅니다 (PostgreSQL 이 막습니다)"
+      },
+      {
+        "이름": "spec_parts_check()",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "spec_parts(p_gpa numeric, p_gpa_scale numeric, p_lang_pt integer, p_school text, p_licenses text[], p_trainings text[], p_rows jsonb)",
+        "왜": "★ 닫아야 할 후보. 관리자·회원 자리인데 아무 검사 없이 열려 있습니다. 닫을 때 이 줄을 지웁니다"
+      },
+      {
+        "이름": "spec_score(s student_specs)",
+        "왜": "순수 계산 — 인수만 가공하고 표를 안 읽습니다"
+      },
+      {
+        "이름": "spec_stats()",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
+      },
+      {
+        "이름": "unread_count(p_room bigint)",
+        "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
       }
     ],
     "표": [
