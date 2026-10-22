@@ -70,9 +70,15 @@ async function 전부(길) {
 
 const 공고 = await 전부('job_posts?select=id,source,org_name,title,url,hidden,hold&source=in.(HS,HS3)');
 const 첨있 = new Set((await 전부('job_attachments?select=job_id')).map((x) => x.job_id));
+/* ★ 2026-10-22 밤 — **--회원만**. 바퀴는 오래된 것부터 보지만, 맞음률을 재려면
+   **회원 화면에 보이는 공고**의 공고문이 먼저 담겨야 합니다
+   (알리오·나라일터·첨부되메우기와 같은 깃발) */
+const 회원만 = argv.includes('--회원만');
+const 보임 = 회원만 ? new Set((await 전부('job_posts_pub?select=id')).map((x) => x.id)) : null;
 const 볼것 = 공고
   .filter((j) => /^https?:\/\//.test(String(j.url || '')))
   .filter((j) => !첨있.has(j.id))
+  .filter((j) => !회원만 || 보임.has(j.id))
   .filter((j) => !집고르기 || String(j.url).includes(집고르기));
 
 /* 집별로 모아 돌립니다 — 같은 집을 줄줄이 때리지 않게 번갈아 */
@@ -94,7 +100,7 @@ const 차례 = [];
 }
 
 console.log('HS·HS3 공고 ' + 공고.length + '건 · 첨부 줄 없는 것 ' + 볼것.length + '건 ('
-  + 집별.size + '집)' + (집고르기 ? ' · 집 「' + 집고르기 + '」' : '')
+  + 집별.size + '집)' + (집고르기 ? ' · 집 「' + 집고르기 + '」' : '') + (회원만 ? ' · **회원 화면만**' : '')
   + ' → 앞 ' + Math.min(몇개, 차례.length) + '건' + (진짜 ? '' : ' · **마른**'));
 
 const 첨부 = 첨부모으기('HS3', { 마른: !진짜 });
