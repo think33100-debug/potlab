@@ -92,9 +92,13 @@ for (const v of 보임) {
 }
 
 /* ② — 주 1회 손으로 재서 적는 값 (log/신뢰셋_틀림.json) */
-const 틀림터 = path.join(여기, '..', 'log', '신뢰셋_틀림.json');
+/* 서버의 로그 자리는 저장소 **바깥**(~/log)입니다 — 둘 다 봅니다 */
+const 틀림터들 = [path.join(여기, '..', 'log', '신뢰셋_틀림.json'),
+  path.join(process.env.HOME || '', 'log', '신뢰셋_틀림.json')];
 let 틀림 = null;
-try { 틀림 = JSON.parse(fs.readFileSync(틀림터, 'utf8')); } catch { /* 아직 없습니다 */ }
+for (const t of 틀림터들) {
+  try { 틀림 = JSON.parse(fs.readFileSync(t, 'utf8')); break; } catch { /* 다음 자리 */ }
+}
 
 const 첫째 = (네['②마감인데보임'] ?? 0) + (네['②원문없어짐인데보임'] ?? 0);
 const 셋째 = 직군빈칸.length + 자격증목록꼴.length + (의심['의심'] ?? 0);
