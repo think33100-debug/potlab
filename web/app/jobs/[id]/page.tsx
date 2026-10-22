@@ -176,10 +176,11 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   /* ★ 2026-10-22 세중님 1번 — 포털 **상세** 칸이 날짜가 아닌 말이면(「채용시까지」)
      그 말을 보여 줍니다. 담는 곳은 `뽑은값.접수마감글` 이고 정찰이 날마다 채웁니다.
      ⚠ `뽑은값` 은 **회원만** 받습니다(`공고뽑은값` 이 비로그인에게 `{}`) — 그래서
-       비회원에게는 아직 날짜가 보입니다. 비회원까지 맞추려면 `job_one` 이 그 칸을
-       detail 에 함께 내려야 하는데 **함수를 다시 만들어야** 해서(승인 자리)
-       모집인원 때와 같이 따로 물었습니다 */
-  const 마감글: string | null = (뽑은값?.['접수마감글'] ?? null) || null;
+       비회원은 `job_one` 이 **detail 에 함께 내려** 줍니다 (모집인원과 같은 꼴 ·
+       supabase/migrations/2026_10_22_job_one_접수마감글.sql). 그 SQL 을 올리기 전에는
+       detail 에 이 칸이 없어 **전과 같이 날짜**가 보입니다 — 화면은 먼저 올려도 됩니다 */
+  const 마감글: string | null =
+    (뽑은값?.['접수마감글'] ?? (detail['접수마감글'] as string | undefined) ?? null) || null;
   /* ★ 2026-10-11 — 모집 인원도 뽑은값을 봅니다.
      `headcount` 칸을 채워 주는 출처가 거의 없어서(373건 중 13건) 이 칸이
      거의 안 그려졌습니다. 워크넷 상세 API 의 `collectPsncnt` 를 읽어

@@ -100,6 +100,13 @@ assert.match(todayKst(), /^\d{4}-\d{2}-\d{2}$/);
   assert.equal(없음.over, false);
   assert.equal(마감배지(null, null, null, 그날저녁).text, '마감일 공고문 확인');
 
+  /* ★ 2026-10-22 — 날짜가 **있어도** 마감표시() 가 말을 내면 그 말을 씁니다
+     (워크넷 상세 칸 「채용시까지」 · 회원 화면 160건). 마감 뒤에는 「마감」이 이깁니다 */
+  assert.equal(마감배지('2026-12-08', '채용시까지', null, 그날낮).text, '채용시까지');
+  assert.equal(마감배지('2026-12-08', '채용시까지', null, 그날낮).urgent, false);
+  assert.equal(마감배지('2026-10-07', '채용시까지', null, 그날낮).text, '마감');
+  assert.equal(마감배지('2026-10-11', '', null, 그날낮).text, 'D-3');
+
   /* 남은 날수 — 사흘 이하만 빨강 */
   assert.equal(마감배지('2026-10-11', null, null, 그날낮).text, 'D-3');
   assert.equal(마감배지('2026-10-11', null, null, 그날낮).urgent, true);
