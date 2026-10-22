@@ -41,6 +41,7 @@
  * 상세 열기는 사이트당 하루 50건 규칙으로 따로 붙일 자리입니다.
  */
 import fs from 'node:fs';
+import { 고용형태코드 } from './공고문읽기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 곳들, 목록, 풀기, 상세, 꼬리표가르기, 경력조건 } from './hosp/jobflex.mjs';
@@ -216,7 +217,11 @@ return ({
      그래서 **낱말을 알아볼 때만** 그 칸에 넣고, 모르면 버리지 않고
      detail 에 남깁니다. */
   work_place: 간것.근무지,
-  employ_type: 간것.고용형태,
+  /* ★ 2026-10-22 세중님 1번 ⓑ — 꼬리표 낱말을 **셋으로 옮겨** 보냅니다.
+     전에는 생글자를 그대로 보냈습니다 — 「정규직, 비정규직」 처럼 쉼표로
+     이어진 값이 DB 에 그대로 담겨 있습니다(지금 46건 가운데 일부).
+     규칙은 `고용형태코드()` 한 자리이고, 섞이면 **비웁니다** */
+  employ_type: (고용형태코드(간것.고용형태) || {}).값 || '',
   title: x.제목 || '(없음)',
   /* careerType 은 **경력 조건**입니다. 원문으로 본 값 여섯은
      tools/hosp/jobflex.mjs 의 경력조건() 주석에 적어 두었습니다 (2026-10-07).
