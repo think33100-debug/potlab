@@ -67,6 +67,13 @@ const 뽑은값받기 = async (sb: SupabaseClient, id: string) => {
    DB 의 마감표시() 가 정해서 job_one 이 「마감표시」 칸으로 내려 줍니다
    (세중님 지시). 목록(app/jobs/page.tsx)의 dday 도 같은 칸을 읽습니다 */
 /* 「2026-10-16」 → 「금」. 한국 날짜 글자를 그대로 읽습니다 (시간대를 안 탑니다) */
+/* 「2026-11-04」 → 「11/04」. 작게 붙이는 **게시 만료일**용입니다 (2026-10-22).
+   글자를 그대로 자릅니다 — Date 를 안 거치므로 시간대를 안 탑니다 */
+function 게시날(ymd: string | null | undefined): string {
+  const m = String(ymd || '').match(/^\d{4}-(\d{2})-(\d{2})$/);
+  return m ? m[1] + '/' + m[2] : String(ymd || '');
+}
+
 function 요일(ymd: string | null | undefined): string | null {
   if (!ymd || !/^\d{4}-\d{2}-\d{2}/.test(ymd)) return null;
   const [y, m, d] = ymd.slice(0, 10).split('-').map(Number);
@@ -166,6 +173,13 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const 연봉 = 연봉말(연봉원문);
   const 지원자격: string | null =
     (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
+  /* ★ 2026-10-22 세중님 1번 — 포털 **상세** 칸이 날짜가 아닌 말이면(「채용시까지」)
+     그 말을 보여 줍니다. 담는 곳은 `뽑은값.접수마감글` 이고 정찰이 날마다 채웁니다.
+     ⚠ `뽑은값` 은 **회원만** 받습니다(`공고뽑은값` 이 비로그인에게 `{}`) — 그래서
+       비회원에게는 아직 날짜가 보입니다. 비회원까지 맞추려면 `job_one` 이 그 칸을
+       detail 에 함께 내려야 하는데 **함수를 다시 만들어야** 해서(승인 자리)
+       모집인원 때와 같이 따로 물었습니다 */
+  const 마감글: string | null = (뽑은값?.['접수마감글'] ?? null) || null;
   /* ★ 2026-10-11 — 모집 인원도 뽑은값을 봅니다.
      `headcount` 칸을 채워 주는 출처가 거의 없어서(373건 중 13건) 이 칸이
      거의 안 그려졌습니다. 워크넷 상세 API 의 `collectPsncnt` 를 읽어
@@ -337,12 +351,24 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               {/* ★ 2026-10-08 — 마감 **시각**이 있으면 함께 보여줍니다.
                   「2026-10-16 (금) 오전 9시 마감」. 전에는 날짜만 보여줘서
                   09:00 마감 공고가 그날 저녁까지 열린 것처럼 보였습니다 */}
+              {/* ★ 2026-10-22 세중님 1번 — **포털 목록 칸 ↔ 상세 칸이 다르면,
+                  보여 주는 값은 상세이고 숨기는 기준은 목록입니다** (CLAUDE.md 원칙).
+                  워크넷 상세 API 의 `receiptCloseDt` 는 기관이 적는 자리라
+                  「채용시까지」가 흔한데(회원 화면 **160건**), 목록 API 는 같은 공고에
+                  **게시 만료일**(날짜)을 줍니다. 전에는 그 날짜를 접수마감으로 보여 줘서
+                  회원이 「그날까지 여유 있다」고 읽었습니다.
+                  → 값은 `뽑은값.접수마감글`, 날짜는 **작게 「(게시 ~MM/DD)」**.
+                  `apply_to` 는 그대로 — 숨김·정렬·정찰은 바뀌지 않습니다 */}
               <Core icon={icons['job.deadline']} label="접수 마감"
-                    v={j.apply_to
-                        ? j.apply_to + (요일(j.apply_to) ? ` (${요일(j.apply_to)})` : '')
-                          + (시각말(j.apply_to_time) ? ` ${시각말(j.apply_to_time)} 마감` : '')
-                        : (j.마감표시 || '마감일 공고문 확인')}
-                    sub={j.apply_from ? `${j.apply_from} 시작` : null} />
+                    v={마감글
+                        ? 마감글
+                        : (j.apply_to
+                          ? j.apply_to + (요일(j.apply_to) ? ` (${요일(j.apply_to)})` : '')
+                            + (시각말(j.apply_to_time) ? ` ${시각말(j.apply_to_time)} 마감` : '')
+                          : (j.마감표시 || '마감일 공고문 확인'))}
+                    sub={[마감글 && j.apply_to ? `게시 ~${게시날(j.apply_to)}` : null,
+                      j.apply_from ? `${j.apply_from} 시작` : null]
+                      .filter(Boolean).join(' · ') || null} />
               {/* 근무지도 지역보임 을 먼저 읽습니다. 자세한 주소(work_place)는
                   다르면 아래 줄에 덧붙입니다 — 상세는 더 보여 줄 수 있습니다.
                   공고문에 없으면 기관표 주소가 들어와 있습니다 */}
