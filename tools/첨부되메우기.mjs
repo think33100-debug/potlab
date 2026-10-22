@@ -160,17 +160,30 @@ const 언제봤나 = (id) => {
    긁기 출처의 맞음률을 재려면 그 공고의 공고문이 먼저 담겨야 합니다. */
 const 회원만 = process.argv.includes('--회원만');
 const 워크넷빼기 = process.argv.includes('--워크넷빼기');
+/* ★ 2026-10-22 밤 — **--글없는것**. 바퀴는 「빈 칸이 있는 공고」만 봅니다. 그래서
+   칸이 다 찬 공고는 **공고문 글이 영영 안 담깁니다** — 나라일터 첨부 259개가
+   「읽음(parsed_at)」인데 job_body 에 한 줄도 없는 것이 그 까닭입니다. 글을 보관하기
+   전에 읽어서 글은 사라졌고, parsed_at 때문에 다시 읽지도 않습니다.
+   맞음률을 재려면 **그 글이 있어야** 하니, 글이 없는 공고를 다시 읽는 길을 둡니다.
+   ★ 다시 받는 일이라 **울타리를 그대로 씁니다** — --몇개 · 3.5초 틈 · 하루 상한.
+   ★ 첨부는 영영안됨(섹션 없음·형식 아님)만 건너뜁니다 — parsed_at 은 안 봅니다. */
+const 글없는것 = process.argv.includes('--글없는것');
 const 보임 = 회원만 ? new Set((await 전부('job_posts_pub?select=id')).map((x) => x.id)) : null;
+const 글있는공고 = 글없는것
+  ? new Set((await 전부('job_body?select=job_id,kind'))
+      .filter((b) => String(b.kind || '') === '첨부').map((b) => b.job_id))
+  : null;
 const 볼것 = 공고들
   .filter((j) => !출처 || j.source === 출처)
   .filter((j) => !회원만 || 보임.has(j.id))
   .filter((j) => !워크넷빼기 || !/^WN/.test(String(j.source || '')))
   .filter((j) => !j.admin_locked)
-  .filter((j) => 빈칸들(j).length)
+  .filter((j) => (글없는것 ? !글있는공고.has(j.id) : 빈칸들(j).length))
   .sort((a, b) => 언제봤나(a.id).localeCompare(언제봤나(b.id)))
   .slice(0, 몇개);
 console.log('볼 것 ' + 볼것.length + '건' + (출처 ? ' (출처 ' + 출처 + ')' : '')
   + (회원만 ? ' · **회원 화면만**' : '') + (워크넷빼기 ? ' · 워크넷 뺌' : '')
+  + (글없는것 ? ' · **공고문 글이 없는 것**' : '')
   + ' · 관리자 잠금 건너뜀 ' + 공고들.filter((j) => j.admin_locked).length + '건'
   + (볼것.length ? ' · 가장 오래 안 본 것 ' + (언제봤나(볼것[0].id) || '아직 안 봄')
     + ' ~ ' + (언제봤나(볼것[볼것.length - 1].id) || '아직 안 봄') : ''));
