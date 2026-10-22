@@ -12,7 +12,10 @@ AS $function$
      「간호사, 사회복지사, 작업치료사 … 중 1개 이상」처럼 **여러 직종 자격 요건**이거나
      「‘담당업무’는 물리·작업치료 관련 경력임을 기재」처럼 **서식 안내문**인 것입니다.
      직군의심() 은 원문에 글자가 있으면 통과시켜 이 꼴을 못 봅니다 — 그래서 따로 셉니다. */
-  의심 as (select "직군의심"() as j),
+  /* ★ as materialized — 없으면 PostgreSQL 이 이 CTE 를 **줄마다 펼쳐서**
+     직군의심() (0.8초) 을 회원 공고 수만큼 부릅니다. 10-22 밤에 그렇게 해서
+     네숫자() 가 **statement timeout** 으로 터졌습니다 (57014) */
+  의심 as materialized (select "직군의심"() as j),
   "직군셋" as (
     select v.id,
            btrim(coalesce(v.job_group, '')) = '' as "빈칸",
