@@ -119,11 +119,18 @@ const 칸이름 = { headcount: '모집인원', apply_to: '접수마감', apply_t
   'detail.지원자격': '지원자격', 'detail.예상연봉': '예상연봉' };
 const 읽어담은칸 = new Set();      /* 「job_id\t칸이름」 */
 for (const r of await 다받기('%EC%B9%B8%EA%B8%B0%EB%A1%9D?select=job_id,'
-  + encodeURIComponent('칸') + ',' + encodeURIComponent('누가')
+  + encodeURIComponent('칸') + ',' + encodeURIComponent('누가') + ',' + encodeURIComponent('옛값')
   + '&order=' + encodeURIComponent('바뀐때') + '.asc')) {
   const k = 칸이름[String(r['칸'] || '')];
   if (!k) continue;
-  if (/되메우기/.test(String(r['누가'] || ''))) 읽어담은칸.add(r.job_id + '\t' + k);
+  if (!/되메우기/.test(String(r['누가'] || ''))) continue;
+  /* ★ **옛값이 있던 칸은 포털칸입니다.** 되메우기가 employ_type 1,437건을
+     「비정규직」→「계약직」처럼 **이름만 바꿔** 적었습니다 — 알리오가 준 값을
+     세중님 셋(정규직·계약직·무기계약직)으로 줄인 것이고 공고문을 읽은 것이
+     아닙니다. 공고문에 그 말이 없다고 틀림으로 세면 안 됩니다.
+     우리가 **빈 칸을 채운 것**만 공고문으로 셉니다 (옛값이 빈 것) */
+  if (String(r['옛값'] ?? '').trim() !== '') continue;
+  읽어담은칸.add(r.job_id + '\t' + k);
 }
 /** 원문으로 쓸 글을 모읍니다 (①)
  *
