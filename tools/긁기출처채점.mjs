@@ -27,6 +27,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+/* ★ 재는 규칙은 **tools/칸대조.mjs 한 자리**입니다 (2026-10-22 밤 · 지침 6절).
+   「긁기 출처 맞음률」과 「신뢰 셋 ②」가 **같은 자**로 재야 합니다 — 사본을 두면
+   오늘 신뢰 셋에서 겪은 것처럼 두 숫자가 갈라집니다. */
+import { 묶음이름, 칸들, 눕, 글자만, 규칙말, 날짜꼴들, 시각꼴들,
+  표식뗀값, 조각내기, 고용형태말, 원문쓸만한가, 칸판정 } from './칸대조.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -77,28 +82,8 @@ async function 다받기(길) {
   return 모은것;
 }
 
-const 묶음이름 = { WN: '워크넷', WN2: '워크넷', WNX: '워크넷', AL: '알리오', AL2: '알리오',
-  AL2C: '알리오', CE: '클린아이', CE2: '클린아이', GJ: '나라일터', GJ2: '나라일터',
-  HS: '병원자체', HS2: '병원자체', HS3: '병원자체', JF: '고용24', ND: '치매센터', ND2: '치매센터' };
 
-const 눕 = (s) => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
-const 글자만 = (s) => String(s == null ? '' : s).replace(/[^0-9A-Za-z가-힣]/g, '');
-const 규칙말 = /^(?:내규|보수\s*규정|규정)에?\s*따름$|^협의$|^추후\s*협의$/;
 /** 날짜·시각은 **여러 꼴**로 찾습니다 — 원문은 「2026. 10. 28.」 처럼 적습니다 */
-const 날짜꼴들 = (v) => {
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(눕(v));
-  if (!m) return null;
-  const [, y, mo, d] = m;
-  return [`${y}${mo}${d}`, `${y}${String(Number(mo))}${String(Number(d))}`,
-    `${mo}${d}`, `${String(Number(mo))}${String(Number(d))}`];
-};
-const 시각꼴들 = (v) => {
-  const m = /^(\d{1,2}):(\d{2})/.exec(눕(v));
-  if (!m) return null;
-  const [, h, mi] = m;
-  return [`${h}${mi}`, `${String(Number(h))}${mi}`,
-    `${String(Number(h))}시${Number(mi) ? mi + '분' : ''}`];
-};
 /* ★ 2026-10-22 밤 — **우리가 앞에 붙인 표식 낱말**을 떼고 봅니다.
    `칸뽑기()` 는 예상연봉을 「표식 + 값」으로 담습니다(공고문읽기.mjs) —
      우리 값   「보수 월 2,323천원(세전) 수준」
@@ -108,12 +93,6 @@ const 시각꼴들 = (v) => {
    (근로복지공단 305475 · 한림대동탄 3건). 표식은 우리가 붙인 말이라 **원문에
    댈 것이 아닙니다** — 떼고 **값만** 댑니다.
    ※ 「표식을 아예 안 붙이는 쪽이 낫지 않나」는 화면 문구 문제라 세중님께 묻습니다. */
-const 표식뗀값 = (s) => 눕(s).replace(/^(?:급\s*여|보\s*수|임\s*금|연\s*봉|처\s*우|기본급)\s*(?:수준|조건|기준)?\s*[:：]?\s*/, '');
-const 조각내기 = (s) => 표식뗀값(s).split(/[,，、·/|]|\s-\s/)
-  .map((x) => x.replace(/^(?:자격|학력|면허|경력|근무지|지역)\s*[:：]?\s*/, '').trim())
-  .filter((x) => 글자만(x).length >= 2);
-
-const 칸들 = ['모집인원', '접수마감', '마감시각', '근무지', '지원자격', '예상연봉', '고용형태'];
 
 const 공고 = await 다받기('job_posts?select=id,source,org_name,title,job_group,headcount,'
   + 'apply_to,apply_to_time,work_place,employ_type,detail,' + encodeURIComponent('뽑은값'));
@@ -201,9 +180,6 @@ const 우리값 = (j) => ({
     ? { 값: j.employ_type, 어디서: 뽑(j, '고용형태근거') ? '공고문' : '포털칸' } : null,
 });
 
-const 고용형태말 = { 정규직: /정규직|기간의?\s*정함이?\s*없|공무직|무기계약/,
-  계약직: /계약직|기간제|임기제|한시|대체|임시직|인턴|촉탁|단기/,
-  무기계약직: /무기계약|공무직|기간의?\s*정함이?\s*없/ };
 
 const 칸칸 = () => Object.fromEntries(칸들.map((k) =>
   [k, { 맞음: 0, 틀림: 0, 빈칸: 0, 원문없음: 0, 포털칸: 0, 규칙말: 0 }]));
@@ -257,35 +233,17 @@ for (const j of 볼것) {
     이건.칸마다.push({ 칸: 칸이름, 판정, 값: 우리것, 까닭 });
   for (const k of 칸들) {
     const 칸 = s.칸[k];
-    const u = 값[k];
-    if (!u) { 칸.빈칸++; 적기(k, '빈칸', null, ''); continue; }
-    const v = 눕(u.값);
-    if (!v) { 칸.빈칸++; 적기(k, '빈칸', null, ''); continue; }
-    if (규칙말.test(v)) { 칸.규칙말++; 적기(k, '규칙말', v, '우리가 고른 말 — 분모 밖'); continue; }  /* ③ */
-    if (u.어디서 === '포털칸') { 칸.포털칸++; 적기(k, '포털칸', v, '포털이 준 값 — 분모 밖'); continue; }  /* ② */
-    if (!원문있나) { 칸.원문없음++; 적기(k, '원문없음', v, '공고문 글이 안 담겼습니다'); continue; }  /* ① */
-    const 꼴 = k === '접수마감' ? 날짜꼴들(v) : k === '마감시각' ? 시각꼴들(v) : null;
-    if (꼴) {
-      if (꼴.some((x) => 원문글자.includes(글자만(x)))) { 칸.맞음++; 적기(k, '맞음', v, '공고문에 그 날짜·시각이 있음'); }
-      else { 칸.틀림++; 적기(k, '틀림', v, '공고문에 그 날짜·시각이 없음');
-             흠.push([묶, k, j.id, j.org_name, v, '공고문에 그 날짜·시각이 없음']); }
-      continue;
-    }
-    if (k === '고용형태') {
-      const 말 = 고용형태말[v];
-      if (말 && 말.test(원문)) { 칸.맞음++; 적기(k, '맞음', v, '공고문에 그 말이 있음'); }
-      else { 칸.틀림++; 적기(k, '틀림', v, '공고문에 그 고용형태 말이 없음');
-             흠.push([묶, k, j.id, j.org_name, v, '공고문에 그 고용형태 말이 없음']); }
-      continue;
-    }
-    const 조각 = 조각내기(v);
-    const 남는것 = 조각.filter((x) => !원문글자.includes(글자만(x)));
-    if (!조각.length || !남는것.length) { 칸.맞음++; 적기(k, '맞음', v, '조각 ' + 조각.length + '개가 다 공고문에 있음'); }
-    else {
+    /* ★ 재는 자는 tools/칸대조.mjs 하나입니다 — 여기서 다시 세지 않습니다 */
+    const 판 = 칸판정(k, 값[k], 원문있나 ? 원문 : '');
+    적기(k, 판.판정, 판.값, 판.까닭);
+    if (판.판정 === '맞음') 칸.맞음++;
+    else if (판.판정 === '틀림') {
       칸.틀림++;
-      적기(k, '틀림', v, '공고문에 없는 조각 「' + 남는것[0].slice(0, 22) + '」');
-      흠.push([묶, k, j.id, j.org_name, v.slice(0, 40), '공고문에 없는 조각 「' + 남는것[0].slice(0, 22) + '」']);
-    }
+      흠.push([묶, k, j.id, j.org_name, String(판.값).slice(0, 40), 판.까닭]);
+    } else if (판.판정 === '규칙말') 칸.규칙말++;
+    else if (판.판정 === '포털칸') 칸.포털칸++;
+    else if (판.판정 === '원문없음') 칸.원문없음++;
+    else 칸.빈칸++;
   }
   건별.push(이건);
 }
