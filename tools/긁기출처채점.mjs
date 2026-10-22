@@ -108,6 +108,23 @@ const 칸들 = ['모집인원', '접수마감', '마감시각', '근무지', '�
 const 공고 = await 다받기('job_posts?select=id,source,org_name,title,job_group,headcount,'
   + 'apply_to,apply_to_time,work_place,employ_type,detail,' + encodeURIComponent('뽑은값'));
 const 보임 = new Set((await 다받기('job_posts_pub?select=id')).map((x) => x.id));
+
+/* ★ 2026-10-22 밤 — **칸의 출처는 칸기록이 압니다.**
+   「첨부 되메우기」 는 공고문을 읽어 headcount·apply_to_time·work_place·employ_type
+   같은 **표의 칸**을 채웁니다. 그것을 「포털칸」으로 세면 읽기 실력이 분모에서
+   빠집니다 (알리오 표본에서 칸 70개 중 8개만 분모에 들어왔습니다).
+   그래서 칸기록에 「되메우기」가 적힌 (공고, 칸) 은 **공고문**으로 셉니다. */
+const 칸이름 = { headcount: '모집인원', apply_to: '접수마감', apply_to_time: '마감시각',
+  work_place: '근무지', employ_type: '고용형태',
+  'detail.지원자격': '지원자격', 'detail.예상연봉': '예상연봉' };
+const 읽어담은칸 = new Set();      /* 「job_id\t칸이름」 */
+for (const r of await 다받기('%EC%B9%B8%EA%B8%B0%EB%A1%9D?select=job_id,'
+  + encodeURIComponent('칸') + ',' + encodeURIComponent('누가')
+  + '&order=' + encodeURIComponent('바뀐때') + '.asc')) {
+  const k = 칸이름[String(r['칸'] || '')];
+  if (!k) continue;
+  if (/되메우기/.test(String(r['누가'] || ''))) 읽어담은칸.add(r.job_id + '\t' + k);
+}
 /** 원문으로 쓸 글을 모읍니다 (①)
  *
  * ★ 2026-10-22 밤 — 처음에는 `kind='첨부'` 만 봤습니다. 그래서 **잴 수 있는 회원
@@ -146,7 +163,8 @@ const 디 = (j, k) => {
   const v = (j.detail || {})[k];
   return v == null || v === '' ? null : v;
 };
-/** 칸마다 {값, 어디서} — 어디서 = '공고문'(뽑은값) · '포털칸' */
+/** 칸마다 {값, 어디서} — 어디서 = '공고문'(우리가 읽음) · '포털칸'(포털이 줌)
+ *  ★ 표의 칸이라도 **칸기록에 되메우기가 적혀 있으면 공고문**입니다 (위 설명) */
 const 우리값 = (j) => ({
   모집인원: 뽑(j, '모집인원') ? { 값: 뽑(j, '모집인원'), 어디서: '공고문' }
     : j.headcount != null ? { 값: String(j.headcount), 어디서: '포털칸' }
@@ -173,6 +191,17 @@ const 고용형태말 = { 정규직: /정규직|기간의?\s*정함이?\s*없|�
 const 칸칸 = () => Object.fromEntries(칸들.map((k) =>
   [k, { 맞음: 0, 틀림: 0, 빈칸: 0, 원문없음: 0, 포털칸: 0, 규칙말: 0 }]));
 const 셈 = new Map();
+/** 우리값() 에 칸기록을 덮어 「어디서」를 바로잡습니다 */
+const 출처고친값 = (j) => {
+  const v = 우리값(j);
+  for (const k of 칸들) {
+    if (v[k] && v[k].어디서 === '포털칸' && 읽어담은칸.has(j.id + '\t' + k)) {
+      v[k] = { ...v[k], 어디서: '공고문' };
+    }
+  }
+  return v;
+};
+
 /* ── 표본 고르기 — **우리값() 이 생긴 뒤**에 합니다 ──────────────────
    --뽑은것만 : 우리가 공고문을 읽어 담은 칸이 하나라도 있는 공고만.
                 알리오·나라일터는 포털 API 가 칸을 거의 다 줘서, 그냥 뽑으면
@@ -181,7 +210,7 @@ const 셈 = new Map();
                 (돌릴 때마다 같은 표본이 나와야 다음 주와 견줍니다) */
 if (뽑은것만) {
   볼것 = 볼것.filter((j) => 칸들.some((k) => {
-    const u = 우리값(j)[k];
+    const u = 출처고친값(j)[k];
     return u && u.어디서 === '공고문' && String(u.값 ?? '').trim() !== '';
   }));
 }
@@ -204,7 +233,7 @@ for (const j of 볼것) {
   const 원문글자 = 글자만(원문);
   const 원문있나 = 원문글자.length > 200;
   if (원문있나) { s.공고문++; 공고문있는것++; }
-  const 값 = 우리값(j);
+  const 값 = 출처고친값(j);
   const 이건 = { id: j.id, 출처: j.source, 기관: j.org_name, 제목: j.title,
     원문갈래: 원문갈래.get(j.id) || '없음', 원문글자수: 원문글자.length, 칸마다: [] };
   const 적기 = (칸이름, 판정, 우리것, 까닭) =>
