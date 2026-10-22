@@ -214,6 +214,11 @@ export async function 사이트줄(s) {
           title: String(x.title || '').trim(),
           from: 밀리초날짜(x.createdDt), to: 밀리초날짜(x.recruitClosedDt),
           url: s.base + '/page/board/recruit/' + x.articleNo,
+          /* ★ 2026-10-22 — **본문을 목록이 같이 줍니다.** 상세 주소는 302 로
+             첫 화면으로 되돌아가서(meta refresh /page/main) 열면 95자 껍데기만
+             옵니다 — 받은 것을 그대로 씁니다 (collect-hosp 가 `글` 이 있으면
+             쪽을 안 엽니다). 서울성모(상급종합)가 그 자리였습니다 */
+          글: String(x.content || ''),
         })),
       raw: '배열 ' + j.length + '건',
     };
