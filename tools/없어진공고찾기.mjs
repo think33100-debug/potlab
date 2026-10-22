@@ -206,10 +206,28 @@ if (이미막힘) {
  * (정규직/계약직/무기계약직)으로만 나옵니다 (2026-10-19 세중님 1번).
  * **빈 값은 안 보냅니다** (null 가드 — 창구도 다시 봅니다). */
 const 칸줄 = [];
+/* ★ 2026-10-22 세중님 5번 — 정찰이 이미 받은 **본문(jobCont)을 담을 자리**입니다.
+   기본은 안 담습니다 — POTJOB_BODY_WRITE=1 일 때만 창구로 보냅니다 */
+const 글줄 = [];
+const 글담을까 = process.env.POTJOB_BODY_WRITE === '1';
 const 칸셈 = { 제목: 0, 고용형태: 0, 접수마감: 0, 모집인원: 0, 근무지: 0, 지원자격: 0, 예상연봉: 0 };
 function 칸모음(x, xml) {
-  if (안받기) return;
   const c = 워크넷상세칸(xml);
+  /* ★ 2026-10-22 세중님 5번 — **받은 본문을 담습니다** (추가 호출 0).
+     ★ `--칸안받기` 보다 **위**에 둡니다 — 「칸은 안 보내고 **글만 담기**」가
+       되게요. 글은 칸이 아니라 **재료**입니다 (뒤에 다시 뽑을 수 있게 둡니다).
+     칸으로 쓰지는 않습니다 — 아래 주석 그대로, 본문에는 다른 자리의
+     고용형태 말이 섞여 있습니다. 담아 두면 전수 마른 실행이 워크넷
+     공고를 볼 수 있고, 뒤에 칸을 다시 뽑을 수도 있습니다 */
+  if (c.본문) {
+    글줄.push({ job_id: x.id,
+      kind: '상세',
+      ord: 0,
+      url: x.url || '',
+      file_name: '',
+      body: String(c.본문) });
+  }
+  if (안받기) return;
   const 줄 = { id: x.id };
   const 근거 = {};
   /* 제목 — 창구가 **잘린 것만** 바꿉니다(제목바꿀만한가).
@@ -384,6 +402,36 @@ if (argv.includes('--정찰보고')) {
       const t = await r.text();
       if (!r.ok) { console.error('✗ 칸되메우기 ' + r.status + ' · ' + t.slice(0, 200)); break; }
       if (i === 0) console.log('  창구가 답한 것 — ' + t.slice(0, 300));
+    }
+  }
+}
+
+/* ── 받은 본문을 담습니다 (세중님 5번) ────────────────────────────
+   표를 직접 안 씁니다 — 창구 `collect_body` 로만. 열쇠는 `COLLECT_KEY_<출처>`,
+   없으면 HS3 것입니다 (WN2 는 HS3 와 같은 값인 것을 collect_secret 에서
+   견주어 확인했습니다 · 2026-10-22). 안 통하면 세어서 찍고 넘어갑니다 */
+if (글줄.length) {
+  const 바이트 = 글줄.reduce((a, x) => a + Buffer.byteLength(x.body, 'utf8'), 0);
+  console.log('\n받은 본문 ' + 글줄.length + '건 · ' + Math.round(바이트 / 1024) + 'KB'
+    + ' · 한 건 평균 ' + Math.round(바이트 / 글줄.length / 1024 * 10) / 10 + 'KB'
+    + (글담을까 ? '' : ' — 담으려면 POTJOB_BODY_WRITE=1'));
+  if (글담을까) {
+    const 열쇠 = cfg.COLLECT_KEY_WN2 || cfg.COLLECT_KEY_HS3 || '';
+    if (!열쇠) console.error('  ✗ 글 보관 못함 — 열쇠가 없습니다');
+    else {
+      let 담음 = 0; let 쓴바이트 = 0; let 탈 = null;
+      for (let i = 0; i < 글줄.length; i += 25) {
+        const r = await fetch(U + '/rest/v1/rpc/collect_body', {
+          method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_secret: 열쇠, p_source: 'WN2', p_rows: 글줄.slice(i, i + 25) }),
+        });
+        const t = await r.text();
+        if (!r.ok) { 탈 = r.status + ' ' + t.slice(0, 160); break; }
+        try { const j = JSON.parse(t); 담음 += j['담음'] || 0; 쓴바이트 += j['바이트'] || 0; }
+        catch { /* 모양이 다르면 그대로 */ }
+      }
+      if (탈) console.error('  ✗ 글 보관 못함 — ' + 탈);
+      else console.log('  글 보관 — ' + 담음 + '건 · ' + Math.round(쓴바이트 / 1024) + 'KB');
     }
   }
 }
