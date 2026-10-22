@@ -109,7 +109,12 @@ const 번호들 = [...공고별첨부.keys()];
 const 공고들 = [];
 for (let i = 0; i < 번호들.length; i += 60) {
   const 조각 = 번호들.slice(i, i + 60).map(encodeURIComponent).join(',');
-  공고들.push(...await 전부('job_posts?select=id,source,org_name,title,job_group,headcount,'
+  /* ★ 2026-10-22 — **url 을 꼭 받습니다.** 안 받으면 j.url 이 undefined 라서 나라일터
+     두 걸음이 쪽 주소 대신 downFile.do 를 열어 **12건 전부** 「쪽에 gfn_fileDown 이
+     없습니다」로 났습니다. 손으로 첨부받기(apmView 주소) 를 부르면 921,569바이트
+     %PDF 가 그대로 옵니다 — **쪽이 아니라 이 줄이 까닭입니다.** 고친주소(…, j.url) 의
+     바탕도 빈 글자였습니다 (뷰어·상대 주소를 못 고칩니다) */
+  공고들.push(...await 전부('job_posts?select=id,source,org_name,title,job_group,headcount,url,'
     + 'apply_to,apply_to_time,work_place,detail,' + encodeURIComponent('뽑은값')
     + ',edited_fields,admin_locked,hidden,hold&id=in.(' + 조각 + ')'));
 }
