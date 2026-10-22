@@ -33,17 +33,15 @@ import fs from 'node:fs';
 const 마른 = process.argv.includes('--마른');
 const 점검 = process.argv.includes('--자기점검');
 
-/* 「마감이 지났나」 — DB 의 hide_stale_posts ①③ 과 화면의 isClosed 와 **같은 규칙**.
-   시각이 없으면 그날 23:59 KST 까지 보입니다 */
-export function 지났나(마감일, 마감시각, 이제 = new Date()) {
-  if (!마감일) return false;
-  const d = String(마감일).slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
-  const t = (마감시각 ? String(마감시각) : '23:59:00').slice(0, 8);
-  return new Date(`${d}T${t}+09:00`) < 이제;
-}
+/* 「마감이 지났나」는 **tools/마감지남.mjs 한 자리**입니다 (2026-10-22).
+   여기 있던 것을 떼어 냈습니다 — 보류함 정리 도구가 **아홉 시간 틀린 사본**을
+   쓰고 있었고, 그 사본 때문에 보류함 공고가 회원 화면으로 샜습니다.
+   `--자기점검` 은 그대로 돕니다(10가지). */
+import { 지났나 } from './마감지남.mjs';
+export { 지났나 };
 
 if (점검) {
+  /* 규칙이 옮겨 갔습니다 — 같은 시험을 그 파일에서 돕니다 */
   const 어겼나 = [];
   const 봐 = (이름, 참) => { if (!참) 어겼나.push(이름); };
   const 이제 = new Date('2026-10-17T09:45:00+09:00');

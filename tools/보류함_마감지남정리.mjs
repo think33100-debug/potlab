@@ -18,6 +18,7 @@
  *   지났다」가 두 자리가 됩니다.
  */
 import fs from 'node:fs';
+import { 지났나 } from './마감지남.mjs';   /* 규칙 한 자리 (지침 6절) */
 
 const 진짜 = process.argv.includes('--진짜');
 const 뚜껑 = Number(process.argv.includes('--뚜껑')
@@ -58,12 +59,16 @@ for (let off = 0; ; off += 100) {
 }
 console.log('보류함에서 마감일이 적힌 공고 ' + 줄.length + '건을 받았습니다');
 
-const 이제 = new Date(Date.now() + 9 * 3600e3);          /* KST */
-const 지났나 = (x) => {
-  const t = String(x.apply_to_time || '23:59').slice(0, 5);
-  return new Date(x.apply_to + 'T' + t + ':00+09:00') < 이제;
-};
-const 감출것 = 줄.filter(지났나);
+/* ★ 2026-10-22 — **여기가 아홉 시간 틀렸습니다.**
+   `new Date(Date.now() + 9 * 3600e3)` 는 「KST 지금」이 아니라 **아홉 시간 뒤**입니다
+   (+9시간은 `toISOString()` 으로 벽시계 글자를 만들 때만 맞습니다).
+   그래서 **마감일이 오늘인 보류함 공고**를 「마감 지남」으로 감췄고,
+   매시 :01 의 `hide_stale_posts` 가 「안 지났다」며 다시 보이게 했습니다 —
+   그 사이 `hold` 가 풀려 **보류함 공고가 회원 화면으로 새 나갔습니다**
+   (이레 동안 41건 · 10-22 저녁에 6건이 보이고 있었습니다).
+   규칙은 이제 `tools/마감지남.mjs` 한 자리입니다 — 사본을 만들지 마십시오 */
+const 이제 = new Date();
+const 감출것 = 줄.filter((x) => 지났나(x.apply_to, x.apply_to_time, 이제));
 
 console.log('그중 **마감이 지난 것 ' + 감출것.length + '건**\n');
 const 출처별 = {};
