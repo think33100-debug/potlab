@@ -51,6 +51,47 @@ console.log('세 사람으로 들어갔습니다\n');
 const 승인 = await 창구(마스터, 'admin_담당자정하기', { p_자격id: 25, p_상태: '승인', p_까닭: null });
 적자('⓪ 시험병원 담당자 승인', 승인.ok, 승인.ok ? '자격 25 → 승인' : JSON.stringify(승인.답).slice(0, 110));
 
+/* ★ 2026-10-22 — **지난 바퀴가 남긴 시험 공고를 먼저 치웁니다** (세중님 F).
+   이 바퀴는 돌 때마다 공고를 하나씩 남겼습니다 — 10-11 부터 BIZ000010~18 이
+   쌓였습니다. 회원 화면에는 안 보이지만(시험자료) 쌓이는 것은 쌓이는 것입니다.
+   가입그물이 auth 계정을 되감는 것과 같은 결입니다 (지침 8-17 — 치운 뒤에 셉니다).
+
+   ★ 첨부는 **`첨부치우기()` 창구**로 치웁니다 — 표만 지우면 보관함에 파일이
+     남습니다. 그리고 `공고첨부` 의 외래키는 cascade 가 아니라 **no action** 이라,
+     첨부가 붙은 공고를 바로 지우려 하면 오류가 납니다.
+   ★ 「[예시]」 세 줄(BIZ000005~7)은 **남깁니다** — 관리자 흐름 시험에 씁니다.
+   ★ 글(job_body)이 붙은 줄은 그대로 둡니다 — job_body 는 외래키가 없어서
+     공고를 지우면 고아줄이 됩니다 (docs/고아줄_1022.md). */
+try {
+  const 묵은r = await 섬김('job_posts?select=id&시험자료=is.true'
+    + '&title=like.시험 공고 *&id=not.in.(BIZ000005,BIZ000006,BIZ000007)');
+  const 묵은 = 묵은r.ok ? await 묵은r.json() : [];
+  let 치움 = 0; let 첨부치움 = 0; let 남김 = 0;
+  for (const x of 묵은) {
+    const b = await 섬김('job_body?select=job_id&job_id=eq.' + x.id);
+    if (!b.ok || (await b.json()).length) { 남김++; continue; }
+    /* 첨부를 창구로 치웁니다 (보관함 파일까지) */
+    const a = await 섬김('공고첨부?select=id&공고id=eq.' + x.id);
+    const 첨부들 = a.ok ? await a.json() : [];
+    let 못치운첨부 = 0;
+    for (const f of 첨부들) {
+      const d = await 창구(빈계정, '첨부치우기', { p_id: f.id });
+      if (d.ok) 첨부치움++; else 못치운첨부++;
+    }
+    if (못치운첨부) { 남김++; continue; }
+    const d2 = await 섬김('job_posts?id=eq.' + x.id, { method: 'DELETE',
+      headers: { Prefer: 'return=minimal' } });
+    if (d2.ok) 치움++; else 남김++;
+  }
+  if (묵은.length) {
+    적자('⓪-2 지난 바퀴 치우기', 남김 === 0,
+      '공고 ' + 치움 + '/' + 묵은.length + '줄 · 첨부 ' + 첨부치움 + '개'
+      + (남김 ? ' · 못 치운 것 ' + 남김 + '줄' : ''));
+  }
+} catch (e) {
+  적자('⓪-2 지난 바퀴 치우기', false, String(e.message).slice(0, 90));
+}
+
 console.log('\n── 공고 ──');
 /* ① 공고 쓰기 */
 const 오늘 = new Date().toISOString().slice(0, 10);

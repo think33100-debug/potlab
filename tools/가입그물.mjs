@@ -95,6 +95,27 @@ try {
   }
 }
 
+/* ★ 2026-10-22 — **치운 뒤에 세어 봅니다** (지침 8-17).
+   이 파일 머리말에 「profiles 는 cascade」 라고 적어 뒀지만 **그 외래키가
+   없었습니다.** 그래서 10-11 부터 profiles 가 하루 한 줄씩 쌓여 37줄 가운데
+   28줄이 고아였습니다. 10-22 에 FK(on delete cascade)를 걸었으니 이제 auth 를
+   지우면 profiles 도 따라 지워집니다 — **그것을 여기서 확인합니다.**
+   다시 쌓이면 이 줄이 빨간 줄로 알려 줍니다. */
+try {
+  const r = await fetch(URL_ + '/rest/v1/profiles?select=id&limit=2000', { headers: 관리 });
+  const 줄 = r.ok ? await r.json() : [];
+  const u = await fetch(URL_ + '/auth/v1/admin/users?page=1&per_page=1000', { headers: 관리 });
+  const 사람 = u.ok ? new Set((((await u.json()) || {}).users || []).map((x) => x.id)) : null;
+  if (사람 && 줄.length) {
+    const 고아 = 줄.filter((x) => !사람.has(x.id)).length;
+    적자('⑥ profiles 고아줄', 고아 === 0,
+      고아 === 0 ? '0줄 (cascade 가 돕니다)'
+        : 고아 + '줄 남았습니다 — FK 가 빠졌나 보십시오 (지침 8-17)');
+  }
+} catch (e) {
+  적자('⑥ profiles 고아줄', false, '못 셌습니다 — ' + String(e.message).slice(0, 80));
+}
+
 const 탈 = 적기.filter(([, b]) => !b).length;
 console.log('\n' + (탈 ? '✗ 가입 길이 막혀 있습니다 — ' + 탈 + '곳' : '○ 새 회원이 닉네임까지 저장됩니다'));
 process.exit(탈 ? 1 : 0);
