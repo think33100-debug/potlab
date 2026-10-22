@@ -100,7 +100,7 @@ function hs첨부주소(html, 바탕주소) {
   /* ⚠ 이름을 **가진** 쪽이 셉니다. 뒤 규칙(②③)은 주소만 알고 이름을 모르는데,
      그때 주소 끝글자로 이름을 지어내면 「입사지원서」(점수 0)가
      「cccc.hwp」(점수 1)로 덮입니다 — 자기 점검에서 걸렸습니다 (2026-10-11) */
-  const 더하기 = (주소, 이름, 이름믿음, 받는법) => {
+  const 더하기 = (주소, 이름, 이름믿음, 받는법, 그림인가) => {
     /* ★ 2026-10-14 — **`&amp;` 를 여기서 풉니다.** 그누보드 주소가
        `…?bo_table=t&amp;wr_id=648&amp;no=0` 꼴로 옵니다. 안 풀면
        `첨부담기.더하기` 가 「&amp; 가 남아 있습니다」로 던집니다 —
@@ -124,13 +124,29 @@ function hs첨부주소(html, 바탕주소) {
        그 안의 「인증기간 2026.1.27 ~ 2027.1.26」 이 마감일을 눌렀습니다 */
     if (공고아닌첨부(이름, u)) return;
     /* 확장자가 주소에도 이름에도 없으면 안 씁니다 */
-    if (!쓸꼴.test(u) && !이름꼴.test(이름 || '')) return;
+    /* ★ 2026-10-22 — **본문 그림 공고문**은 확장자 울타리를 비켜 갑니다.
+       그림은 pdf·hwp 가 아니지만 kordoc 이 OCR 로 읽습니다. 아이콘·배너는
+       그림공고문인가() 에서 이미 걸렀습니다 */
+    if (!그림인가 && !쓸꼴.test(u) && !이름꼴.test(이름 || '')) return;
     const 준이름 = String(이름 || '').trim();
     const nm = 준이름 || (u.split('/').pop() || '').slice(0, 120);
     const 전 = 모은것.get(u);
     if (전 && (전.이름믿음 || !이름믿음)) return;      /* 이미 믿을 이름이 있으면 그대로 */
     모은것.set(u, { name: nm, 점수: 점수(nm), 이름믿음: !!이름믿음 && !!준이름, 받는법 });
   };
+
+  /* ★ 2026-10-22 — **본문의 큰 그림**을 공고문으로 집습니다 (포항세명기독병원).
+     `<a>` 가 아니라 `<img>` 라서 아래 고리들에 안 걸립니다. 그림은 OCR 로 읽습니다 */
+  for (const m of s.matchAll(/<img\b[^>]*>/gi)) {
+    const 토막 = m[0];
+    const 집 = (이름) => {
+      const g = 토막.match(new RegExp(이름 + '\\s*=\\s*["\']([^"\']*)["\']', 'i'));
+      return g ? g[1] : '';
+    };
+    const src = 집('src'); const alt = 집('alt');
+    if (!그림공고문인가({ src, alt, width: 집('width'), height: 집('height') })) continue;
+    더하기(src, alt || '공고문 그림', true, null, true);
+  }
 
   /* ① <a href="…"> 글 </a> — 가장 흔한 꼴 (충주의료원이 이것입니다) */
   for (const m of s.matchAll(/<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]{0,300}?)<\/a>/gi)) {
@@ -186,7 +202,24 @@ function 공고아닌첨부(이름, 주소) {
   return /wa_qualith|품질\s*인증|정보통신\s*접근성|웹\s*접근성/.test(t);
 }
 
-module.exports = { hs첨부주소, 점수, 공고아닌첨부 };
+/** **쪽 본문의 큰 그림이 공고문인가** (2026-10-22)
+ *
+ * 포항세명기독병원은 공고문을 첨부가 아니라 본문 그림으로 올립니다
+ * (950×1343 jpg · alt 「채용 공고 - 작업치료001」). 그림은 kordoc 이 OCR 로 읽습니다.
+ * 아이콘·배너가 섞이지 않게 **알림말이나 크기**로 가립니다. */
+function 그림공고문인가({ src, alt, width, height }) {
+  const u = String(src || '');
+  const a = String(alt || '');
+  if (!u) return false;
+  if (/icon|logo|btn|button|banner|sprite|blank|spacer|thumb/i.test(u)) return false;
+  const 그림꼴 = /[.](jpe?g|png|webp)(\b|$|[?&])/i.test(u);
+  if (!그림꼴) return false;
+  const 말 = /공\s*고|채\s*용|모\s*집/.test(a);
+  const 큼 = Number(width) >= 600 && Number(height) >= 700;
+  return 말 || 큼;
+}
+
+module.exports = { hs첨부주소, 점수, 공고아닌첨부, 그림공고문인가 };
 
 /* ── 자기 점검 ───────────────────────────────────────────────── */
 if (require.main === module) {
