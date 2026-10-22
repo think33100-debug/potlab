@@ -146,6 +146,11 @@ console.log(진짜 ? '\n★ **진짜로 담습니다**' : '\n[마른] 아무것�
 
 const 칸이름 = ['모집인원', '마감시각', '근무지', '지원자격', '예상연봉'];
 const 견본 = []; const 보낼줄 = [];
+/* ★ 2026-10-22 세중님 5번 — 읽은 글을 담을 자리입니다 (안전장치 구멍).
+   기본은 **안 담습니다** — POTJOB_BODY_WRITE=1 일 때만 창구로 보냅니다.
+   마른 실행에서도 몇 건·몇 KB 인지는 세어 찍습니다 (용량을 미리 보려고) */
+const 보관할것 = [];
+const 글보관 = process.env.POTJOB_BODY_WRITE === '1';
 let 읽음 = 0; let 빈손 = 0; let 초합 = 0; let 못받음 = 0;
 const 빈손까닭 = new Map();
 const 못받음까닭 = new Map();      /* 못 받은 까닭도 셉니다 (지침 2절) */
@@ -188,6 +193,44 @@ async function 머리(주소) {
    ★ 상한 300 은 **첨부담기(주소 담기)와 같은 값**으로 맞췄습니다 (지침 6절 —
      기준을 두 벌로 만들지 않습니다). POTJOB_PARSE_MAX 로 바꿉니다. */
 const 하루뚜껑 = Number(process.env.POTJOB_PARSE_MAX) || 300;
+
+/** 읽은 글이 몇 건·몇 KB 인가 (마른 실행에서도 찍습니다) */
+function 글용량찍기() {
+  if (!보관할것.length) return;
+  const 바이트 = 보관할것.reduce((a, x) => a + Buffer.byteLength(x.줄.body, 'utf8'), 0);
+  console.log('읽은 글 ' + 보관할것.length + '건 · ' + Math.round(바이트 / 1024) + 'KB'
+    + ' · 한 건 평균 ' + Math.round(바이트 / 보관할것.length / 1024 * 10) / 10 + 'KB'
+    + (글보관 ? '' : ' — 담으려면 POTJOB_BODY_WRITE=1'));
+}
+
+/** 읽은 글을 `collect_body` 창구로 담습니다 — 출처마다 열쇠가 다릅니다 */
+async function 글담기() {
+  글용량찍기();
+  if (!글보관 || !보관할것.length) return;
+  const 출처별 = new Map();
+  for (const x of 보관할것) {
+    if (!출처별.has(x.출처)) 출처별.set(x.출처, []);
+    출처별.get(x.출처).push(x.줄);
+  }
+  let 보관 = 0; let 바이트 = 0; const 막힌출처 = new Map();
+  for (const [출처, 줄들] of 출처별) {
+    const 열쇠 = cfg['COLLECT_KEY_' + 출처] || cfg.COLLECT_KEY_HS3 || '';
+    if (!열쇠) { 막힌출처.set(출처, '열쇠가 없습니다'); continue; }
+    for (let i = 0; i < 줄들.length; i += 25) {
+      const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/collect_body', {
+        method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_secret: 열쇠, p_source: 출처, p_rows: 줄들.slice(i, i + 25) }),
+      });
+      const t = await r.text();
+      if (!r.ok) { 막힌출처.set(출처, r.status + ' ' + t.slice(0, 90)); break; }
+      try { const j = JSON.parse(t); 보관 += j['담음'] || 0; 바이트 += j['바이트'] || 0; }
+      catch { /* 모양이 다르면 그대로 */ }
+    }
+  }
+  console.log('글 보관 — ' + 보관 + '건 · ' + Math.round(바이트 / 1024) + 'KB');
+  for (const [출처, 왜] of 막힌출처) console.error('  ✗ 글 보관 못함 [' + 출처 + '] ' + 왜);
+  끝.글보관 = 보관;
+}
 /* 다시 받아도 영영 안 되는 까닭 — 이런 줄은 건너뜁니다 */
 /* ★ 2026-10-21 — 「읽을 수 있는 형식이 아닙니다 (**HTML** · 3,616바이트)」는
    **영영 안 되는 것이 아닙니다** — 파일이 아니라 **오류 쪽이 온 것**(받기 문제)입니다.
@@ -463,6 +506,22 @@ for (const j of 볼것) {
   읽음++;
   표시할것.push({ job_id: j.id, url: 고른것.url, 왜: '' });
 
+  /* ★ 2026-10-22 세중님 5번 — **읽은 글을 담습니다.** ord 는 그 공고의 첨부
+     차례입니다 — 같은 파일을 다시 읽으면 덮습니다(겹쳐 쌓이지 않게).
+     `k.md` 를 먼저 씁니다 — 표가 살아 있는 쪽이고, 칸뽑기도 그것을 봅니다 */
+  {
+    const 차례 = (공고별첨부.get(j.id) || []).findIndex((a) => a.url === 고른것.url);
+    보관할것.push({
+      출처: String(j.source || ''),
+      줄: { job_id: j.id,
+        kind: '첨부',
+        ord: Math.max(0, 차례),
+        url: 고친.url,
+        file_name: String(고른것.name || ''),
+        body: String(k.md || k.글 || '') },
+    });
+  }
+
   const 칸 = 칸뽑기(k.md, k.글);
   const 내직군인원 = j.job_group ? 칸.모집인원?.[j.job_group] : null;
 
@@ -548,6 +607,7 @@ for (const s of 견본) {
 
 if (!진짜) {
   console.log('\n[마른] 담을 수 있는 공고 ' + 보낼줄.length + '건. 담으려면 --진짜');
+  글용량찍기();
   끝.까닭 = 상한에걸림 ? '하루 상한에 걸렸습니다 (마른 실행)' : '마른 실행이라 담지 않았습니다';
   process.exit(0);
 }
@@ -593,6 +653,13 @@ for (let i = 0; i < 줄들.length; i += 50) {
 }
 끝.담음 = 담음;
 console.log('담았습니다 — ' + 담음 + '건 (updated_at 은 안 바꿨습니다)');
+
+/* ── 읽은 글을 담습니다 (세중님 5번) ───────────────────────────────
+   표를 직접 안 씁니다 — 창구 `collect_body` 로만. 열쇠는 출처마다 다릅니다
+   (`COLLECT_KEY_<출처>`, 없으면 HS3 것. CE2·GJ2·ND2·WN2·WNX·RIVAL 은 HS3 와
+   같은 값이라 그것으로 통합니다 — 2026-10-22 에 collect_secret 을 견주어
+   확인했습니다). 안 통하는 출처는 **세어서 찍고 넘어갑니다** */
+await 글담기();
 
 /* ── 첨부 쪽에 「읽어 봤다」 를 남깁니다 — 표를 직접 안 씁니다 ──────────
    이 표시가 없으면 같은 파일을 날마다 다시 받고, 하루 상한도 못 겁니다 */
