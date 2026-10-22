@@ -213,7 +213,12 @@ export async function 사이트줄(s) {
         .map((x) => ({
           title: String(x.title || '').trim(),
           from: 밀리초날짜(x.createdDt), to: 밀리초날짜(x.recruitClosedDt),
-          url: s.base + '/page/board/recruit/' + x.articleNo,
+          /* ★ 2026-10-22 세중님 1번 ② — **경로 꼴이 깨집니다.**
+             `/page/board/recruit/{articleNo}` 는 302 로 첫 화면으로 가고
+             (여섯 곳 다) `/page/board/recruit` 는 200 으로 열립니다.
+             물음표 꼴로 달면 **게시판이 열리고 공고 번호도 남습니다** —
+             정찰이 그 번호로 목록과 대조합니다 (없어진공고찾기) */
+          url: s.base + '/page/board/recruit?articleNo=' + x.articleNo,
           /* ★ 2026-10-22 — **본문을 목록이 같이 줍니다.** 상세 주소는 302 로
              첫 화면으로 되돌아가서(meta refresh /page/main) 열면 95자 껍데기만
              옵니다 — 받은 것을 그대로 씁니다 (collect-hosp 가 `글` 이 있으면

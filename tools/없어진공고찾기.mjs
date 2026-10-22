@@ -312,11 +312,73 @@ process.stderr.write('\n');
     + ' (합 ' + n.합 + ') · **한도는 신청 화면에 안 적혀 있습니다**');
 }
 
+/* ── 가톨릭중앙의료원(cmc): **목록 대조** (2026-10-22 세중님 1번 ②) ──────
+   담긴 주소가 게시판(`/page/board/recruit?articleNo=N`)이라 쪽을 열어서는
+   없어짐을 못 봅니다 — 게시판은 늘 살아 있습니다. 그래서 그 집의 목록 API 를
+   **집마다 한 번** 불러 지금 올라와 있는 번호를 모읍니다.
+   게시판 번호는 구운 설정(tools/hosp/hosp-sites.json)의 cmc 줄에 있습니다 —
+   지어내지 않습니다. 못 읽으면 대조를 건너뛰고 **오류**로 둡니다 */
+const cmc번호꼴 = /\/page\/board\/recruit\?articleNo=(\d+)/;
+const cmc목록 = new Map();      /* host → Set(articleNo) · null 이면 못 받음 */
+{
+  const 집들 = new Map();       /* host → 목록 API 주소 */
+  try {
+    const 구운것 = JSON.parse(fs.readFileSync(new URL('./hosp/hosp-sites.json', import.meta.url), 'utf8'));
+    for (const c of 구운것.사이트 || []) {
+      if (c.type !== 'cmc' || !c.base || !c.url) continue;
+      try { 집들.set(new URL(c.base).host, c.url); } catch { /* 주소 꼴이 아니면 건너뜀 */ }
+    }
+  } catch (e) {
+    console.error('  ⚠ 구운 설정을 못 읽었습니다 — cmc 목록 대조를 건너뜁니다 · '
+      + String(e && e.message || e).slice(0, 60));
+  }
+  const 볼집 = new Set();
+  for (const x of 그밖) {
+    if (!cmc번호꼴.test(String(x.url || Array(0)))) continue;
+    try { 볼집.add(new URL(x.url).host); } catch { /* 건너뜀 */ }
+  }
+  for (const host of 볼집) {
+    const 길 = 집들.get(host);
+    if (!길) { cmc목록.set(host, null); continue; }
+    try {
+      /* ★ 수집용 주소는 `size=12` 입니다 — **대조에는 넉넉히** 받습니다.
+         12건만 받으면 13번째부터는 「목록에 없다」가 되어 멀쩡한 공고를
+         없어짐으로 읽습니다 (실제로 서울성모 목록이 10건입니다) */
+      const 대조길 = 길.replace(/([?&]size=)\d+/, '$1500');
+      const r = await fetch(대조길, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; potjob/1.0)' },
+        signal: AbortSignal.timeout(20000) });
+      const j = r.ok ? await r.json() : null;
+      if (!Array.isArray(j)) { cmc목록.set(host, null); continue; }
+      cmc목록.set(host, new Set(j.filter((x) => String(x.delYn || 'N') !== 'Y')
+        .map((x) => String(x.articleNo))));
+    } catch { cmc목록.set(host, null); }
+  }
+  if (볼집.size) {
+    console.log('  cmc 목록 대조 — 집 ' + 볼집.size + '곳 · 받은 곳 '
+      + [...cmc목록.values()].filter(Boolean).length + '곳');
+  }
+}
+
 /* ── 그밖: 쪽 열기 (같은 사이트 3.5초) ── */
 const 끝때 = new Map();
 for (const [i, x] of 그밖.entries()) {
   let host;
   try { host = new URL(x.url).host; } catch { 오류.push({ ...x, 왜: '주소 꼴이 아님' }); continue; }
+  /* ★ cmc — 목록에 그 번호가 있나로 가립니다 (쪽을 안 엽니다) */
+  const cmc번호 = (String(x.url || Array(0)).match(cmc번호꼴) || [])[1];
+  if (cmc번호) {
+    const 목 = cmc목록.get(host);
+    if (!목) {
+      오류.push({ ...x, 왜: 'cmc 목록을 못 받았습니다 (없어짐으로 안 셉니다)' });
+    } else if (목.has(cmc번호)) {
+      살아있음.push(x.id);
+    } else {
+      없어짐.push({ ...x, 왜: 'cmc 게시판 목록에 없습니다 (번호 ' + cmc번호 + ')',
+        앞부분: '(목록 대조)' });
+    }
+    process.stderr.write('\r  그밖 ' + (i + 1) + '/' + 그밖.length + '   ');
+    continue;
+  }
   const 지난 = Date.now() - (끝때.get(host) || 0);
   if (지난 < 3500) await 자고(3500 - 지난);
   끝때.set(host, Date.now());
