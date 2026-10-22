@@ -289,7 +289,20 @@ for (const [i, x] of 볼것.entries()) {
   for (const [k, a] of 받을것.slice(0, 첨부뚜껑).entries()) {
     const 한첨 = { 어디서: a.어디서, 이름: a.name, url: a.url };
     try {
-      const r = await 받기(a.url, false, a.post || null);
+      /* ★ 2026-10-22 — **나라일터는 두 걸음으로 받습니다** (tools/gojobs-file.mjs).
+         그냥 GET 하면 쪽 HTML 이 옵니다 — 그래서 받아 둔 `.hwpx` 의 앞 바이트가
+         `0a 0a 0a 0a 3c 21 44 4f`(= `<!DO…`) 였고, 저는 그것을 「hwpx 변환 실패」로
+         읽어 7칸을 「판정 못함」으로 적었습니다. **변환이 아니라 받는 길 문제**였습니다.
+         수집기(첨부되메우기)는 처음부터 이 길을 쓰고 있었습니다 — 시험 도구만
+         안 쓰고 있었습니다 (지침 12절 — 시험은 보내는 쪽과 같은 도구로) */
+      const r = /gojobs\.go\.kr/.test(String(a.url))
+        ? await (async () => {
+          const { 첨부받기 } = await import('../gojobs-file.mjs');
+          const g = await 첨부받기(x.주소 || a.url);
+          if (g.왜 || !g.buf) throw new Error('나라일터 두 걸음 — ' + (g.왜 || '빈 응답'));
+          return { code: 200, buf: g.buf, cd: 'filename="' + String(g.이름 || '공고문') + '"' };
+        })()
+        : await 받기(a.url, false, a.post || null);
       한첨.갈래 = a.갈래 || null;
       한첨.code = r.code; 한첨.바이트 = r.buf.length;
       한첨.앞바이트 = r.buf.subarray(0, 8).toString('latin1').replace(/[^\x20-\x7e]/g, '.');
