@@ -7,6 +7,13 @@
  * ★ robots.txt 를 먼저 봅니다. 전면 금지면 멈춥니다.
  * ★ 아무것도 바꾸지 않습니다.
  */
+
+/* ★ 2026-10-22 — robots 판정은 `robots.mjs` 한 자리에서 합니다 (지침 6절).
+   길만()은 주소에서 경로+물음표만 떼 냅니다 — robots 는 경로로 가립니다 */
+import { robots읽기, 가도되나 } from './robots.mjs';
+const 길만 = (u) => {
+  try { const x = new URL(u); return x.pathname + (x.search || ''); } catch { return '/'; }
+};
 const UA = 'Mozilla/5.0 (compatible; potjob/1.0)';
 const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -29,9 +36,12 @@ for (const u0 of process.argv.slice(2).filter((a) => !a.startsWith('--'))) {
 
   try {
     const rb = await 받기(기원 + '/robots.txt');
-    const 금지 = /User-agent:\s*\*[^\n]*\n(?:[^\n]*\n)*?\s*Disallow:\s*\/\s*(\n|$)/i.test(rb.글);
-    console.log('  robots ' + rb.code + ' · ' + (금지 ? '★ 전면 금지 — 멈춥니다' : '전면 금지 아님'));
-    if (금지) continue;
+    /* ★ 2026-10-22 — 판정은 robots.mjs 한 자리입니다 (지침 6절).
+       성냥을 여기 따로 두었더니 **다른 봇의 Disallow 를 우리 것으로** 읽었습니다
+       (recruit.cmcnu.or.kr 의 AhrefsBot 줄) */
+    const 봄 = 가도되나(robots읽기(rb.글), 길만(u0));
+    console.log('  robots ' + rb.code + ' · ' + (봄.됨 ? '가도 됩니다 — ' + 봄.왜 : '★ 막힙니다 — ' + 봄.왜));
+    if (!봄.됨) continue;
   } catch { console.log('  robots 못 받음 (없는 것으로 봅니다)'); }
 
   let r;

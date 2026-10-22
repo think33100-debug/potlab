@@ -17,6 +17,13 @@
  * ★ robots.txt 전면 금지면 멈춥니다.
  * ★ 아무것도 바꾸지 않습니다.
  */
+
+/* ★ 2026-10-22 — robots 판정은 `robots.mjs` 한 자리에서 합니다 (지침 6절).
+   길만()은 주소에서 경로+물음표만 떼 냅니다 — robots 는 경로로 가립니다 */
+import { robots읽기, 가도되나 } from './robots.mjs';
+const 길만 = (u) => {
+  try { const x = new URL(u); return x.pathname + (x.search || ''); } catch { return '/'; }
+};
 const UA = 'Mozilla/5.0 (compatible; potjob/1.0)';
 const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -204,9 +211,11 @@ for (const [이름, 뿌리] of 볼것) {
   let 기원; try { 기원 = new URL(뿌리).origin; } catch { console.log('  ✗ 주소 꼴이 아닙니다'); continue; }
   try {
     const rb = await 받기(기원 + '/robots.txt');
-    if (/User-agent:\s*\*[^\n]*\n(?:[^\n]*\n)*?\s*Disallow:\s*\/\s*(\n|$)/i.test(rb.글)) {
-      console.log('  robots **전면 금지** — 멈춥니다');
-      결과.push({ 이름, 판정: 'robots 전면 금지' }); continue;
+    /* ★ 2026-10-22 — 판정은 robots.mjs 한 자리입니다 (지침 6절) */
+    const 봄 = 가도되나(robots읽기(rb.글), 길만(뿌리));
+    if (!봄.됨) {
+      console.log('  robots **막힙니다** — ' + 봄.왜);
+      결과.push({ 이름, 판정: 'robots 막힘 — ' + 봄.왜 }); continue;
     }
   } catch { /* 없으면 넘어갑니다 */ }
 
