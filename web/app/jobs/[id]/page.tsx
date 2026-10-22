@@ -314,9 +314,12 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               전형방법 · 우대사항 · 결격사유 · 문의처 · 제출서류 · **학력**은
               그리지 않습니다. 「원문 보기」 링크는 남깁니다 (회원만).
 
-              ★ 못 찾은 칸은 **그리지 않습니다.** 「공고에 없음」이라고 적으면
-                회원이 공고문을 안 찾아봅니다 (15절과 같은 까닭).
-                빈 칸은 관리자 「빈칸 공고」 목록으로 갑니다
+              ★ 2026-10-22 세중님 4번 — **모집 인원·지원 자격은 비어도 그립니다.**
+                「공고문 확인」 + 원문 링크입니다 (접수 마감과 같은 꼴).
+                「공고에 없음」이라고 적지 않는 것은 그대로입니다 — 우리가 못 읽은
+                것일 수 있으니 회원을 **공고문으로 보냅니다** (15절).
+                남은 칸(근무지 등)은 전처럼 안 그립니다.
+                빈 칸은 관리자 「빈칸 공고」 목록으로도 갑니다
 
               ★ 2026-10-14 — **예상 연봉만 예외입니다.** 금액이 없으면
                 「내규에 따름」으로 그립니다. 공고에 금액이 안 적힌 것이 흔하고
@@ -324,10 +327,13 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                 「공고에 없는 것」인지 알 수 없었습니다 */}
           <Rise>
             <dl className="mt-6 grid grid-cols-2 gap-3">
-              {모집인원 && (
-                <Core icon={icons['job.headcount']} label="모집 인원"
-                      v={모집인원} />
-              )}
+              {/* ★ 2026-10-22 세중님 4번 — **비어도 칸을 그립니다.** 「공고문 확인」 +
+                  원문 링크입니다 (접수 마감과 같은 꼴). 전에는 안 그려서, 회원이
+                  「우리가 못 읽은 것」인지 「공고에 없는 것」인지 알 수 없었습니다.
+                  「0명」·「○명」은 **원문 글자 그대로** 그립니다 — 그 규칙은 그대로입니다 */}
+              <Core icon={icons['job.headcount']} label="모집 인원"
+                    v={모집인원 || '공고문 확인'}
+                    url={모집인원 ? null : j.url} />
               {/* ★ 2026-10-08 — 마감 **시각**이 있으면 함께 보여줍니다.
                   「2026-10-16 (금) 오전 9시 마감」. 전에는 날짜만 보여줘서
                   09:00 마감 공고가 그날 저녁까지 열린 것처럼 보였습니다 */}
@@ -427,16 +433,28 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               ★ 2026-10-09 세중님 확정 — 상세에 그리는 글 칸은 **지원 자격 하나**입니다.
               전형방법 · 우대사항 · 결격사유 · 문의처 · 제출서류는 그리지 않습니다.
               그 내용은 원문 공고에 있고, 아래 「원문 보기」로 갑니다 */}
-          {지원자격 && (
-            <Rise>
-              <Block icon={icons['job.require']} title="지원 자격">
+          {/* ★ 2026-10-22 세중님 4번 — **비어도 묶음을 그립니다.** 「공고문 확인」 +
+              원문 링크입니다 (모집 인원 칸과 같은 까닭) */}
+          <Rise>
+            <Block icon={icons['job.require']} title="지원 자격">
+              {지원자격 ? (
                 <p className="whitespace-pre-wrap break-keep text-[15px] leading-[1.75]
                               text-[#4A5056]" style={{ overflowWrap: 'break-word' }}>
                   {지원자격}
                 </p>
-              </Block>
-            </Rise>
-          )}
+              ) : j.url ? (
+                <a href={j.url} target="_blank" rel="noopener noreferrer"
+                   className="inline-flex items-center gap-1 break-keep text-[15px]
+                              font-bold text-[#1B2025] underline
+                              decoration-[#C9C9C2] underline-offset-[3px]">
+                  공고문 확인
+                  <Icon name="arrow-up-right" size={15} className="shrink-0 text-[#5F666C]" />
+                </a>
+              ) : (
+                <p className="break-keep text-[15px] text-[#4A5056]">공고문 확인</p>
+              )}
+            </Block>
+          </Rise>
 
           {/* ★ 워크넷 급여란 고정 안내 (2026-10-07 세중님 지시).
               워크넷이 주는 숫자는 1호봉 기준이라 그대로 읽으면 오해합니다.
@@ -450,11 +468,11 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
           {/* 첨부 — 담당자가 올린 공고문·그림 (회원만 받습니다) */}
           <NoticeFiles 갈래="채용" 공고={j.id} 고칠수있나={false} />
 
-          {!지원자격 && !연봉원문 && (
-            <p className="mt-7 break-keep text-[15px] text-[#5F666C]">
-              이 공고는 본문을 못 받아왔어요. 아래 단추로 원문을 열어 주세요
-            </p>
-          )}
+          {/* ★ 2026-10-22 — 「이 공고는 본문을 못 받아왔어요」 줄을 뺐습니다.
+              위 **지원 자격** 묶음이 이제 비면 「공고문 확인」 + 원문 링크를
+              그려서 같은 말을 두 번 하게 됩니다. 그 줄은 비회원에게도 떴는데
+              (비회원은 detail 을 아예 안 받습니다) 비회원에게는 **사실이
+              아니었습니다** — 우리가 못 받아온 것이 아니라 안 보내는 것입니다 */}
 
           {/* ⑨ 출처 ───────────────────────────── */}
           <Rise>
@@ -597,16 +615,28 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 }
 
 function Core({
-  icon, label, v, sub = null,
-}: { icon: string; label: string; v: string; sub?: string | null }) {
+  icon, label, v, sub = null, url = null,
+}: { icon: string; label: string; v: string; sub?: string | null; url?: string | null }) {
   return (
     <div className="rounded-[12px] border border-[#E3E3DE] bg-white p-5">
       <dt className="flex items-center gap-1.5 text-[13px] text-[#5F666C]">
         <Icon name={icon} size={14} className="shrink-0" />
         <span className="break-keep">{label}</span>
       </dt>
+      {/* ★ 2026-10-22 세중님 4번 — 우리가 못 읽은 칸은 「공고문 확인」이고,
+          **그 자리에서 원문으로 갈 수 있게** 합니다. 주소는 비회원에게는
+          창구가 안 줍니다(job_one) — 그때는 글자만 그립니다 */}
       <dd className="mt-1.5 break-keep text-[17px] font-bold text-[#1B2025]"
-          style={{ overflowWrap: 'break-word' }}>{v}</dd>
+          style={{ overflowWrap: 'break-word' }}>
+        {url ? (
+          <a href={url} target="_blank" rel="noopener noreferrer"
+             className="inline-flex items-center gap-1 underline
+                        decoration-[#C9C9C2] underline-offset-[3px]">
+            {v}
+            <Icon name="arrow-up-right" size={15} className="shrink-0 text-[#5F666C]" />
+          </a>
+        ) : v}
+      </dd>
       {/* 마감일만 있고 시작일이 없어서 「접수가 열렸나」를 못 알아봤습니다 */}
       {sub && <p className="mt-1 break-keep text-[12px] text-[#5F666C]">{sub}</p>}
     </div>
