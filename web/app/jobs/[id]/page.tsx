@@ -373,12 +373,18 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               {/* 근무지도 지역보임 을 먼저 읽습니다. 자세한 주소(work_place)는
                   다르면 아래 줄에 덧붙입니다 — 상세는 더 보여 줄 수 있습니다.
                   공고문에 없으면 기관표 주소가 들어와 있습니다 */}
-              {(j.지역보임 || j.work_place) && (
-                <Core icon={icons['job.place']} label="근무지"
-                      v={j.지역보임 ?? j.work_place ?? ''}
-                      sub={j.work_place && j.work_place.includes(' ')
-                           && j.work_place !== j.지역보임 ? j.work_place : null} />
-              )}
+              {/* ★ 2026-10-23 — **비어도 칸을 그립니다** (세중님 2026-10-22 4번 규칙을
+                  근무지에도). 전에는 `{(j.지역보임 || j.work_place) && …}` 라서 둘 다
+                  비면 **칸이 아예 사라졌습니다** — 모집 인원·지원 자격은 「공고문 확인」 +
+                  원문 링크를 그리는데 근무지만 안 그렸습니다. 회원이 「우리가 못 읽은
+                  것」인지 「공고에 없는 것」인지 알 수 없습니다.
+                  회원 화면 **6건**이 그 꼴이었습니다 (국립재활원 둘 · 수원병원 ·
+                  대구보건대 · 원광대 · 경남광역치매센터 — 여섯 다 원문 링크가 있습니다) */}
+              <Core icon={icons['job.place']} label="근무지"
+                    v={j.지역보임 || j.work_place || '공고문 확인'}
+                    url={(j.지역보임 || j.work_place) ? null : j.url}
+                    sub={j.work_place && j.work_place.includes(' ')
+                         && j.work_place !== j.지역보임 ? j.work_place : null} />
               {/* ★ 2026-10-14 — 회원에게는 **언제나** 그립니다. 비면 「내규에 따름」.
                   비회원에게는 detail 이 아예 안 실려 오므로(DB 가 빈 것을 줍니다)
                   「내규에 따름」이 사실이 아닙니다 — 그 자리는 전처럼 안 그립니다 */}
