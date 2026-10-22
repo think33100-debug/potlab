@@ -245,7 +245,30 @@ async function 글담기() {
         body: JSON.stringify({ p_secret: 열쇠, p_source: 출처, p_rows: 줄들.slice(i, i + 25) }),
       });
       const t = await r.text();
-      if (!r.ok) { 막힌출처.set(출처, r.status + ' ' + t.slice(0, 90)); break; }
+      /* ★ 2026-10-22 — **한 조각이 거절당해도 멈추지 않습니다.**
+         알리오 220건(4,454KB)이 `400 PGRST102 Empty or invalid json` 하나에
+         **통째로** 안 담겼습니다. 예전 코드가 첫 실패에서 `break` 했기 때문입니다.
+         크기는 까닭이 아닙니다 — 창구에 2,905KB 한 줄을 쏴 보니 HTTP 200 입니다.
+         그래서 **한 줄씩 다시 보내** 말썽인 공고만 건너뛰고 나머지는 담습니다. */
+      if (!r.ok) {
+        막힌출처.set(출처, r.status + ' ' + t.slice(0, 90));
+        for (const 한줄 of 줄들.slice(i, i + 25)) {
+          const r2 = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/collect_body', {
+            method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ p_secret: 열쇠, p_source: 출처, p_rows: [한줄] }),
+          });
+          const t2 = await r2.text();
+          if (!r2.ok) {
+            console.error('  ✗ 이 공고 글이 안 담깁니다 — ' + 한줄.job_id
+              + ' · ' + Buffer.byteLength(한줄.body, 'utf8') + '바이트 · '
+              + r2.status + ' ' + t2.slice(0, 70));
+            continue;
+          }
+          try { const j2 = JSON.parse(t2); 보관 += j2['담음'] || 0; 바이트 += j2['바이트'] || 0; }
+          catch { /* 모양이 다르면 그대로 */ }
+        }
+        continue;
+      }
       try { const j = JSON.parse(t); 보관 += j['담음'] || 0; 바이트 += j['바이트'] || 0; }
       catch { /* 모양이 다르면 그대로 */ }
     }
