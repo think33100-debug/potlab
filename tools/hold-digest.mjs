@@ -23,6 +23,7 @@
  * ⚠ service_role 열쇠는 쓰지 않습니다. anon 열쇠 + 경로 내부 열쇠로만 갑니다.
  */
 import fs from 'node:fs';
+import { 새는것, 한줄 as 새는한줄 } from './보류함새는것.mjs';   /* 2026-10-22 세중님 1번 */
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -153,6 +154,10 @@ function 고용24줄() {
  *  숫자는 `네숫자()` 의 '신뢰셋' 한 자리에서 옵니다 — 여기서 다시 세지 않습니다.
  *  ② 는 주 1회 손으로 재어 site_settings['신뢰셋_틀림'] 에 넣습니다.
  *  **안 쟀으면 「아직 못 잼」 이라고 적습니다 — 0 으로 적으면 거짓입니다** (지침 15절). */
+/** 보류함에서 풀려 회원 화면으로 간 공고 — 글을 만들기 **전에** 한 번 재서 담습니다.
+ *  글로()·아침글() 은 sync 라 안에서 await 를 못 합니다. 못 재면 null 이고 줄을 뺍니다. */
+let 샌것 = null;
+
 function 신뢰셋줄(네) {
   const t = 네 && 네['신뢰셋'];
   if (!t) return [];
@@ -171,6 +176,10 @@ function 신뢰셋줄(네) {
     + ' · 직군의심 ' + (t['③직군의심'] ?? '?')
     + (t['③겹친것'] ? ' · 겹침 ' + t['③겹친것'] : '') + ')');
   if (둘째 === null) 줄.push('     ※ ② 는 주 1회 손으로 잽니다 — 이번 주 아직 안 쟀습니다');
+  /* ★ 2026-10-22 — ③ 을 **지키는 줄**입니다. ③ 은 「지금 보이나」만 보고,
+     이 줄은 「어떻게 거기 갔나」를 봅니다. 10-22 에 보류함이 매시 새는 것을
+     아무 숫자도 안 보고 있었습니다 */
+  줄.push(...새는한줄(샌것));
   줄.push('');
   return 줄;
 }
@@ -636,6 +645,8 @@ if (조용한척 || (!d['보낼것있나'] && !잠금.length && !(보안 && 보�
   let 네 = null;
   try { 네 = await 네숫자받기(cfg); }
   catch (e) { console.error('네 숫자를 못 받았습니다 — ' + String(e.message || e).slice(0, 120)); }
+  try { 샌것 = await 새는것(cfg); }
+  catch (e) { console.error('보류함에서 풀린 것을 못 셌습니다 — ' + String(e.message || e).slice(0, 120)); }
   const 짧은본문 = 아침글(네, d['늦은 수집기'] || [], 구멍, 잠금, d['직군 의심'], d['담지 못한 줄']);
   const 짧은제목 = '[피오티잡] 아침 숫자 — 안 긁는 1층 기관 '
     + (구멍 ? 구멍.사각 + '곳' : '?') + ' · 마감인데 보임 '
@@ -672,6 +683,8 @@ const 관리자 = cfg.ADMIN_URL || 'https://potjob-web.vercel.app/admin/jobs';
 let 네긴 = null;
 try { 네긴 = await 네숫자받기(cfg); }
 catch (e) { console.error('네 숫자를 못 받았습니다 — ' + String(e.message || e).slice(0, 120)); }
+try { 샌것 = await 새는것(cfg); }
+catch (e) { console.error('보류함에서 풀린 것을 못 셌습니다 — ' + String(e.message || e).slice(0, 120)); }
 const 본문 = 글로(d, 관리자, 잠금, 보안, 구멍, 네긴);
 const 제목 = '[피오티잡] 확인할 공고 ' + d['새 보류 건수'] + '건'
   + ((보안 && 보안.밖합) ? ' · ⚠ 허용 목록 밖 ' + 보안.밖합 + '건' : '')
