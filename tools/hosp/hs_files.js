@@ -214,9 +214,32 @@ function 그림공고문인가({ src, alt, width, height }) {
   if (/icon|logo|btn|button|banner|sprite|blank|spacer|thumb/i.test(u)) return false;
   const 그림꼴 = /[.](jpe?g|png|webp)(\b|$|[?&])/i.test(u);
   if (!그림꼴) return false;
-  const 말 = /공\s*고|채\s*용|모\s*집/.test(a);
+  /* ★ 2026-10-22 — **글귀만으로는 안 됩니다.** 「공고|채용|모집」 으로 봤더니
+     메뉴 그림(alt 「채용안내」·「채용사이트」·「ENGLISH」)이 섞였습니다.
+     글귀는 **공고문 꼴**만 봅니다 */
+  const 말 = /공고문|채\s*용\s*공고|모\s*집\s*공고|공고\s*[-–—]|공고\s*제?\s*\d/.test(a);
+  const 재어둠 = Number(width) > 0 && Number(height) > 0;
   const 큼 = Number(width) >= 600 && Number(height) >= 700;
+  /* 크기가 적혀 있으면 **큰 것만** 봅니다 (메뉴 그림은 작습니다).
+     크기가 없으면 공고문 꼴 글귀로만 받습니다 */
+  if (재어둠) return 큼;
   return 말 || 큼;
+}
+
+/* ── 자기 점검 — 그림 공고문 가름 (2026-10-22) ──
+   node tools/hosp/hs_files.js --자기점검   (그물을 안 두드립니다) */
+if (require.main === module && process.argv.includes('--자기점검')) {
+  let 틀림 = 0;
+  const 봐 = (이름, 참) => { if (!참) { 틀림++; console.error('✗ ' + 이름); } };
+  봐('950x1343 공고 그림을 받는다', 그림공고문인가({ src: '/x/s.jpg?fid=a', alt: '채용 공고 - 작업치료001', width: 950, height: 1343 }) === true);
+  봐('작은 그림은 뺀다', 그림공고문인가({ src: '/x/a.jpg', alt: '채용 공고', width: 120, height: 60 }) === false);
+  봐('메뉴 글귀(채용안내)는 뺀다', 그림공고문인가({ src: '/x/m.jpg', alt: '채용안내' }) === false);
+  봐('ENGLISH 는 뺀다', 그림공고문인가({ src: '/x/e.jpg', alt: 'ENGLISH' }) === false);
+  봐('공고문 글귀는 받는다', 그림공고문인가({ src: '/x/n.jpg', alt: '2026년 채용 공고문' }) === true);
+  봐('아이콘 길은 뺀다', 그림공고문인가({ src: '/img/icon_file.gif', alt: '채용 공고문', width: 900, height: 900 }) === false);
+  봐('웹접근성 인증서는 공고가 아니다', 공고아닌첨부('wa_qualith_certificate.pdf') === true);
+  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 7가지');
+  process.exit(틀림 ? 1 : 0);
 }
 
 module.exports = { hs첨부주소, 점수, 공고아닌첨부, 그림공고문인가 };
