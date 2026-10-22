@@ -178,7 +178,7 @@ const 보이는 = (await 다('job_posts_pub?select=id&order=id.asc')).map((x) =>
 const 공 = [];
 for (let i = 0; i < 보이는.length; i += 60) {
   const 조각 = 보이는.slice(i, i + 60).map(encodeURIComponent).join(',');
-  공.push(...await 다('job_posts?select=id,source,org_name,title,url,employ_type&id=in.(' + 조각 + ')&url=not.is.null'));
+  공.push(...await 다('job_posts?select=id,source,org_name,title,url,employ_type,뽑은값&id=in.(' + 조각 + ')&url=not.is.null'));
 }
 const 워크넷 = 공.filter((x) => ['WN', 'WN2'].includes(x.source));
 const 그밖 = 공.filter((x) => !['WN', 'WN2'].includes(x.source));
@@ -244,7 +244,15 @@ function 칸모음(x, xml) {
      ★ `고용형태판정()` 은 **객체** `{값, 왜}` 를 돌려줍니다 — `.값` 을 씁니다.
        2026-10-19 에 객체를 그대로 칸에 넣어 회원 화면 252건에
        `{"값": …, "왜": …}` 가 보였습니다. 칸기록의 옛값으로 되돌렸습니다 */
-  const 고용 = 고용형태판정(c.제목 || x.title || '', c.고용형태글 || '').값;
+  /* ★ 2026-10-22 — **본문에서 읽어 정한 값은 안 덮습니다.** 그 표시가
+     `뽑은값.고용형태근거` 입니다 (고용형태_바로잡기·첨부되메우기가 남깁니다).
+     여기서 보내는 값은 상세 API 의 `empTpNm` 한 줄이고, 공고문·첨부를 읽어
+     정한 값보다 **덜 압니다** — 오늘 12:01 에 수집기가 되메운 168건을 지운 것과
+     같은 자리입니다. `collect_put` 은 그 표시를 보게 고쳤는데(12:47 올림)
+     **`칸되메우기` 는 덮습니다** — 그래서 보내는 쪽에서 가립니다 */
+  const 근거있나 = !!((x['뽑은값'] || {})['고용형태근거']);
+  const 고용 = 근거있나 ? '' : 고용형태판정(c.제목 || x.title || '', c.고용형태글 || '').값;
+  if (근거있나) 칸셈.고용형태건드리지않음 = (칸셈.고용형태건드리지않음 || 0) + 1;
   if (고용 && typeof 고용 === 'string') { 줄.employ_type = 고용; 칸셈.고용형태++; }
   const 뽑은값 = {};
   if (c.지원자격) { 뽑은값.지원자격 = c.지원자격; 칸셈.지원자격++; }
