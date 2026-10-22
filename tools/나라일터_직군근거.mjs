@@ -19,6 +19,7 @@
 import fs from 'node:fs';
 import { 공공부르기 } from './공공데이터부르기.mjs';
 import { 첨부읽기, 진짜형식, 이전다음글떼기, 워커끝내기 } from './공고문읽기.mjs';
+import { 점수 } from './hosp/hs_files.js';
 
 const BASE = 'https://apis.data.go.kr/1760000/PblJobService';
 const argv = process.argv.slice(2);
@@ -153,8 +154,7 @@ for (const x of 공고) {
       길: (태그값(s, 'filepath')[0] || '').trim(),
     })).filter((f) => f.길);
     /* 공고문으로 보이는 것을 먼저 (collect-nara 와 같은 점수) */
-    const 점수 = (nm) => (/직무기술|제출서류|서식|응시원서|양식|명세서/.test(nm) ? 0
-      : /공고|모집|채용/.test(nm) ? 2 : 1);
+    /* ★ 2026-10-22 — 첨부 고르는 순서는 **hs_files 의 점수() 한 자리**입니다 (지침 6절) */
     파일.sort((a, b) => 점수(b.이름) - 점수(a.이름));
     console.log('  ③ 첨부 ' + 파일.length + '개');
     for (const f of 파일.slice(0, 3)) {

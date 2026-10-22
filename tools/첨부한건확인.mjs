@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 첨부읽기, 칸뽑기 } from './공고문읽기.mjs';
+import { 점수 } from './hosp/hs_files.js';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const BASE = 'https://apis.data.go.kr/1760000/PblJobService';
@@ -68,7 +69,7 @@ console.log('첨부 ' + 파일들.length + '개 (HTTP ' + r.status + ')');
 for (const f of 파일들) console.log('   ' + f.이름.slice(0, 80) + '   ' + f.크기 + '바이트');
 
 /* 공고문 쪽을 고릅니다 — 응시원서·서식은 뒤로 */
-const 점수 = (nm) => (/응시원서|지원서|서식|양식|이력서/.test(nm) ? 0 : /공고/.test(nm) ? 2 : 1);
+/* ★ 2026-10-22 — 첨부 고르는 순서는 **hs_files 의 점수() 한 자리**입니다 (지침 6절) */
 const 고른것 = [...파일들].sort((a, b) => 점수(b.이름) - 점수(a.이름))[0];
 if (!고른것) { console.error('첨부가 없습니다'); process.exit(1); }
 console.log('\n고른 것 — ' + 고른것.이름.slice(0, 90));

@@ -30,6 +30,7 @@ import { matchJob } from './gas-rules.mjs';
 import { 첨부직군 } from './첨부직군.mjs';
 import { 첨부읽기, kordoc있나, 진짜형식 } from './공고문읽기.mjs';
 import { hwp글자 } from './hwp/index.mjs';
+import { 점수 } from './hosp/hs_files.js';
 
 /* 창구(collect_put · collect_beat · 판정남기기)를 부를 열쇠.
    **service_role 이 있으면 그것**을 씁니다 (2026-10-11). anon 은 브라우저에
@@ -112,8 +113,7 @@ async function 보류읽기() {
 
 /* ② 첨부 — collect-nara.mjs 와 **같은 규칙**으로 고릅니다.
    규칙이 두 벌로 갈라지면 또 짐작으로 고치게 됩니다 */
-const 점수 = (nm) => (/직무기술|제출서류|서식|응시원서|양식|명세서/.test(nm) ? 0
-  : /공고|모집|채용/.test(nm) ? 2 : 1);
+/* ★ 2026-10-22 — 첨부 고르는 순서는 **hs_files 의 점수() 한 자리**입니다 (지침 6절) */
 const 온전히 = (fp) => {
   let p = String(fp || '').trim();
   if (!p) return '';

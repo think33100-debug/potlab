@@ -56,6 +56,7 @@ import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
 import { 첨부직군 } from './첨부직군.mjs';
 /* 공고문 주소를 job_attachments 에 담습니다 (2026-10-10 · tools/첨부담기.mjs) */
 import { 첨부모으기 } from './첨부담기.mjs';
+import { 점수 } from './hosp/hs_files.js';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'GJ2';
@@ -342,8 +343,7 @@ async function 첨부받기(idx) {
   const r = await 공공부르기(BASE + '/getItemFile?serviceKey=' + cfg.ALIO_DETAIL_KEY + '&idx=' + idx,
     { headers: { accept: 'application/xml' } });
   if (r.code !== 200) return { pdf: '', hwp: '' };
-  const 점수 = (nm) => (/직무기술|제출서류|서식|응시원서|양식|명세서/.test(nm) ? 0
-    : /공고|모집|채용/.test(nm) ? 2 : 1);
+  /* ★ 2026-10-22 — 첨부 고르는 순서는 **hs_files 의 점수() 한 자리**입니다 (지침 6절) */
   /* 주소를 온전하게 — XML 에서 &amp; 로 와서 그대로 쓰면 오류 화면(HTML)이 옵니다.
      값만 감싸고 뼈대(? & =)는 안 건드립니다 (CLAUDE.md 5번) */
   const 온전히 = (fp) => {

@@ -27,6 +27,7 @@ import { 그누보드새주소, 고친주소 } from './첨부주소고치기.mjs
 import { 쓴메모리MB, 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
 import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이간격 } from './cleaneye-file.mjs';
 import { 첨부받기 as 나라일터첨부받기, 기본간격 as 나라일터간격 } from './gojobs-file.mjs';
+import { 점수 } from './hosp/hs_files.js';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -417,7 +418,7 @@ for (const j of 볼것) {
   잰것.push(한줄);
 
   /* 공고문 쪽 첨부를 고릅니다 — 지원서·서식은 뒤로 */
-  const 점수 = (nm) => (/지원서|응시원서|서식|양식|이력서|직무기술/.test(nm) ? 0 : /공고|모집|채용/.test(nm) ? 2 : 1);
+  /* ★ 2026-10-22 — 첨부 고르는 순서는 **hs_files 의 점수() 한 자리**입니다 (지침 6절) */
   /* 영영 안 되는 까닭이 적힌 줄은 건너뜁니다 (png·섹션 없는 hwpx 등) */
   const 쓸만한 = 공고별첨부.get(j.id).filter((a) => !(a['읽기탈'] && 영영안됨(a['읽기탈'])));
   const 고른것 = [...쓸만한].sort((a, b) => 점수(b.name || '') - 점수(a.name || ''))[0];
