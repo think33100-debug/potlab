@@ -169,9 +169,13 @@ const 워크넷빼기 = process.argv.includes('--워크넷빼기');
    ★ 첨부는 영영안됨(섹션 없음·형식 아님)만 건너뜁니다 — parsed_at 은 안 봅니다. */
 const 글없는것 = process.argv.includes('--글없는것');
 const 보임 = 회원만 ? new Set((await 전부('job_posts_pub?select=id')).map((x) => x.id)) : null;
+/* ★ 2026-10-23 세중님 E 판정 — 기준을 **「글이 아무것도 없음」**으로 좁혔습니다.
+   전에는 `kind='첨부'` 글만 보아서 분모가 **587건**이었는데, 그 안에 HS3 병원
+   자체 공고 ~98건이 섞여 있었습니다. 그 공고들은 **쪽 본문(kind='상세')이 원문**이고
+   그것이 이미 담겨 있어서, 첨부를 다시 받을 까닭이 없습니다 (docs/글없는공고_1023.md ④).
+   좁힌 분모 = **430건** (회원 화면 0건). 품을 그만큼 덜 씁니다. */
 const 글있는공고 = 글없는것
-  ? new Set((await 전부('job_body?select=job_id,kind'))
-      .filter((b) => String(b.kind || '') === '첨부').map((b) => b.job_id))
+  ? new Set((await 전부('job_body?select=job_id')).map((b) => b.job_id))
   : null;
 const 볼것 = 공고들
   .filter((j) => !출처 || j.source === 출처)
