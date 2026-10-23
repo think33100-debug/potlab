@@ -29,6 +29,11 @@ import { 새는것, 한줄 as 새는한줄 } from './보류함새는것.mjs';   
    빠뜨립니다. 재기() 는 crontab 을 못 읽으면 null 을 주고, 한줄() 은 null 에
    빈 배열을 줍니다 — **메일이 이것 때문에 죽지 않습니다** */
 import { 재기 as 크론재기, 한줄 as 크론한줄 } from './크론다도나.mjs';
+/* ★ 2026-10-23 — 「면접일정 안내」 같은 **결과·안내 공고**가 회원 화면에 있나.
+   거르기는 **담을 때 한 번**만 돌고, 나중에 제목이 온전해져도 다시 안 봅니다
+   (HS102260084 이 그렇게 들어왔습니다). 그래서 **지금 제목**으로 다시 댑니다.
+   크론 줄은 더하지 않습니다 (세중님) — 아침 메일 한 줄로만 봅니다 */
+import { HS_SKIP_RE } from './gas-rules.mjs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -66,6 +71,59 @@ async function rpc(cfg, fn, body) {
   const t = await r.text();
   if (!r.ok) throw new Error(r.status + ' ' + t.slice(0, 300));
   return t ? JSON.parse(t) : null;
+}
+
+/** 결과·안내 공고가 회원 화면에 있나 — **지금 제목**을 HS_SKIP_RE 에 다시 댑니다
+ *  (2026-10-23 · tools/결과공고다시거르기.mjs 와 같은 자) */
+async function 결과공고세기(cfg) {
+  const k = cfg.SUPABASE_SERVICE_KEY;
+  if (!k) return null;
+  const H = { apikey: k, Authorization: 'Bearer ' + k };
+  const 받 = async (길) => {
+    const out = [];
+    for (let off = 0; ; off += 100) {
+      const 이음 = 길.includes('?') ? '&' : '?';
+      const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길 + 이음
+        + 'order=id&limit=100&offset=' + off, { headers: H });
+      if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 120));
+      const a = await r.json();
+      out.push(...a);
+      if (a.length < 100) break;
+      if (off > 40000) break;
+    }
+    return out;
+  };
+  try {
+    const 원문 = new Map((await 받('job_posts_pub?select=id,' + encodeURIComponent('원문제목')))
+      .map((x) => [x.id, x['원문제목'] || '']));
+    const 다 = await 받('job_posts?select=id,org_name,title,'
+      + encodeURIComponent('보여줄제목'));
+    const 걸린것 = [];
+    for (const x of 다) {
+      if (!원문.has(x.id)) continue;
+      const 제목 = [원문.get(x.id) || '', x['보여줄제목'] || '', x.title || '']
+        .map(String).sort((a, b) => b.length - a.length)[0];
+      const m = 제목.match(HS_SKIP_RE);
+      if (m) 걸린것.push({ id: x.id, 기관: x.org_name || '', 걸린말: m[0], 제목 });
+    }
+    return { 분모: 원문.size, 걸린것 };
+  } catch { return null; }
+}
+
+/** 아침 메일에 넣을 줄 */
+function 결과공고줄(r) {
+  if (!r) return [];
+  if (!r.걸린것.length) {
+    return ['   결과·안내 공고      0건  ✓   (회원 화면 ' + r.분모 + '건을 제목으로 다시 댔습니다)'];
+  }
+  const 줄 = ['   ★ 결과·안내 공고가 회원 화면에 **' + r.걸린것.length + '건** 있습니다'
+    + '   (마감 지난 공고·결과 발표 공고는 회원에게 안 보입니다 — CLAUDE.md 15절)'];
+  for (const x of r.걸린것.slice(0, 5)) {
+    줄.push('      ' + x.id + ' 「' + x.걸린말 + '」 ' + String(x.기관).slice(0, 12)
+      + ' — ' + String(x.제목).slice(0, 44));
+  }
+  줄.push('      → 관리자 화면에서 「숨기기」 (node tools/결과공고다시거르기.mjs 로 목록 전체)');
+  return 줄;
 }
 
 /** 마스터 계정이 **지금 어느 역할**인가 (2026-10-23 세중님 3번) ────
@@ -238,6 +296,8 @@ function 신뢰셋줄(네) {
   /* ★ 2026-10-23 — 크론 줄이 다 도는지. 2026-10-12 에 ~/수집크론.sh 의 실행
      권한이 빠져 5시간 7분 몰랐던 꼴을 잡습니다 (지침 8-15) */
   try { 줄.push(...크론한줄(크론재기())); } catch { /* 못 재면 적지 않습니다 */ }
+  /* ★ 2026-10-23 — 결과·안내 공고가 회원 화면에 있나 (제목을 다시 댑니다) */
+  try { 줄.push(...결과공고줄(결과공고)); } catch { /* 못 재면 적지 않습니다 */ }
   줄.push('');
   return 줄;
 }
@@ -705,6 +765,8 @@ const 조용한척 = argv.includes('--조용한척');
    안에서 process.exit 로 끝나니, 안에 선언하면 긴 메일 쪽이 못 봅니다.
    읽기만 하고, 못 읽으면 null 이라 줄이 빠집니다 (메일은 그대로 나갑니다) */
 const 역할목록 = await 지금역할(cfg);
+/* ★ 2026-10-23 — 결과·안내 공고 (읽기만 · 못 재면 null 이라 줄이 빠집니다) */
+const 결과공고 = await 결과공고세기(cfg);
 
 if (조용한척 || (!d['보낼것있나'] && !잠금.length && !(보안 && 보안.밖합))) {
   if (!아침인가) {
