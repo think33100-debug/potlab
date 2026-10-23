@@ -24,6 +24,11 @@
  */
 import fs from 'node:fs';
 import { 새는것, 한줄 as 새는한줄 } from './보류함새는것.mjs';   /* 2026-10-22 세중님 1번 */
+/* ★ 2026-10-23 — 「크론 N줄 다 도나」를 **손으로** 적고 있었습니다
+   (docs/동결까지_남은일_1023.md 2절 — 날마다 한 줄). 156줄을 눈으로 보면
+   빠뜨립니다. 재기() 는 crontab 을 못 읽으면 null 을 주고, 한줄() 은 null 에
+   빈 배열을 줍니다 — **메일이 이것 때문에 죽지 않습니다** */
+import { 재기 as 크론재기, 한줄 as 크론한줄 } from './크론다도나.mjs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -182,6 +187,9 @@ function 신뢰셋줄(네) {
      이 줄은 「어떻게 거기 갔나」를 봅니다. 10-22 에 보류함이 매시 새는 것을
      아무 숫자도 안 보고 있었습니다 */
   줄.push(...새는한줄(샌것));
+  /* ★ 2026-10-23 — 크론 줄이 다 도는지. 2026-10-12 에 ~/수집크론.sh 의 실행
+     권한이 빠져 5시간 7분 몰랐던 꼴을 잡습니다 (지침 8-15) */
+  try { 줄.push(...크론한줄(크론재기())); } catch { /* 못 재면 적지 않습니다 */ }
   줄.push('');
   return 줄;
 }

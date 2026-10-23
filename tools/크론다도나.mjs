@@ -164,6 +164,16 @@ function 자기점검() {
   보('줄풀기 — 환경변수 줄은 건너뜀', 줄풀기('MAILTO=a@b.c') === null);
   보('줄풀기 — 로그가 없으면 null', 줄풀기('0 4 * * *   /usr/bin/true')?.로그 === null);
 
+  /* 한줄() — 셈만 주면 글을 냅니다 (DB·crontab 안 봅니다) */
+  보('한줄() — 다 돌았으면 한 줄',
+    한줄({ 도는줄: 40, 돌았음: 28, 안돌았음: 0, 아직: 2, 함께씀: 0, 볼수없음: 10, 늦은목록: [] })
+      .length === 1);
+  보('한줄() — 안 돈 줄이 있으면 이름까지',
+    한줄({ 도는줄: 40, 돌았음: 27, 안돌았음: 1, 아직: 0, 함께씀: 0, 볼수없음: 12,
+           늦은목록: [{ 이름: '밤정리.mjs', 꼴: '0 23 * * *' }] })
+      .some((l) => l.includes('밤정리.mjs')));
+  보('한줄() — 못 재면 빈 배열', 한줄(null).length === 0);
+
   const 어긴것 = 잼.filter(([, ok]) => !ok);
   for (const [무엇, ok] of 잼) if (!ok || !늦은것만) console.log((ok ? '  ○ ' : '  ✗ ') + 무엇);
   if (어긴것.length) { console.error('✗ 자기점검 ' + 어긴것.length + '가지 실패'); process.exit(1); }
@@ -173,66 +183,88 @@ function 자기점검() {
 if (자기점검만) { console.log('── 자기점검 ──'); 자기점검(); process.exit(0); }
 
 /* ── 크론 읽기 ── */
-let 크론;
-try { 크론 = execFileSync('crontab', ['-l'], { encoding: 'utf8' }); } catch (e) {
-  console.error('✗ crontab -l 을 못 읽었습니다 (서버에서 돌리십시오) — ' + String(e.message).slice(0, 80));
-  process.exit(1);
-}
-const 줄들 = 크론.split(/\r?\n/);
-const 일감 = [];
-for (const l of 줄들) { const r = 줄풀기(l); if (r) 일감.push(r); }
 
-/* 같은 로그를 쓰는 줄 세기 */
-const 로그쓰는수 = new Map();
-for (const x of 일감) if (x.로그) 로그쓰는수.set(x.로그, (로그쓰는수.get(x.로그) || 0) + 1);
+/** 크론을 읽어 줄마다 판정합니다. 못 읽으면 **null** 입니다 (아침 메일이 죽지 않게) */
+export function 재기(이제 = new Date()) {
+  let 크론;
+  try { 크론 = execFileSync('crontab', ['-l'], { encoding: 'utf8' }); } catch { return null; }
+  const 줄들 = 크론.split(/\r?\n/);
+  const 일감 = [];
+  for (const l of 줄들) { const r = 줄풀기(l); if (r) 일감.push(r); }
 
-const 이제 = new Date();
-const 표 = [];
-for (const x of 일감) {
-  const 예정 = 지난예정(x.꼴, 이제);
-  let 로그때 = null;
-  if (x.로그 && fs.existsSync(x.로그)) {
-    try { 로그때 = fs.statSync(x.로그).mtime; } catch { /* 못 읽으면 null */ }
+  /* 같은 로그를 쓰는 줄 세기 */
+  const 로그쓰는수 = new Map();
+  for (const x of 일감) if (x.로그) 로그쓰는수.set(x.로그, (로그쓰는수.get(x.로그) || 0) + 1);
+
+  const 표 = [];
+  for (const x of 일감) {
+    const 예정 = 지난예정(x.꼴, 이제);
+    let 로그때 = null;
+    if (x.로그 && fs.existsSync(x.로그)) {
+      try { 로그때 = fs.statSync(x.로그).mtime; } catch { /* 못 읽으면 null */ }
+    }
+    const 함께 = x.로그 ? (로그쓰는수.get(x.로그) || 1) : 0;
+    let 판정;
+    if (!x.로그) 판정 = '—볼수없음';
+    /* ★ 로그 파일이 **아예 없으면** 「안 돌았다」로 세지 않습니다 —
+       ① 새로 넣은 줄 (신뢰셋표본 — 목요일 줄인데 10-23(금) 넣었습니다)
+       ② 해마다 한 번 도는 줄 (공휴일 받기 — 1월 2일)
+       둘을 **가릴 수가 없습니다.** 파일이 생긴 뒤 오래된 것만 ✗ 입니다 (지침 10절) */
+    else if (!로그때) 판정 = '?아직로그없음';
+    else if (예정 && 로그때.getTime() >= 예정.getTime()) 판정 = '○돌았음';
+    else 판정 = (함께 > 1 ? '?함께씀' : '✗안돌았음');
+    표.push({ ...x, 예정, 로그때, 함께, 판정 });
   }
-  const 함께 = x.로그 ? (로그쓰는수.get(x.로그) || 1) : 0;
-  let 판정;
-  if (!x.로그) 판정 = '—볼수없음';
-  /* ★ 로그 파일이 **아예 없으면** 「안 돌았다」로 세지 않습니다 —
-     ① 오늘 새로 넣은 줄 (신뢰셋표본 — 목요일 줄인데 오늘(금) 넣었습니다)
-     ② 해마다 한 번 도는 줄 (공휴일 받기 — 1월 2일)
-     둘을 **가릴 수가 없습니다.** 파일이 생긴 뒤 오래된 것만 ✗ 입니다 (지침 10절) */
-  else if (!로그때) 판정 = '?아직로그없음';
-  else if (예정 && 로그때.getTime() >= 예정.getTime()) 판정 = '○돌았음';
-  else 판정 = (함께 > 1 ? '?함께씀' : '✗안돌았음');
-  표.push({ ...x, 예정, 로그때, 함께, 판정 });
+  const 셈 = (v) => 표.filter((x) => x.판정 === v).length;
+  return {
+    이제, 크론줄: 줄들.length, 도는줄: 일감.length, 표,
+    돌았음: 셈('○돌았음'), 안돌았음: 셈('✗안돌았음'), 아직: 셈('?아직로그없음'),
+    함께씀: 셈('?함께씀'), 볼수없음: 셈('—볼수없음'),
+    늦은목록: 표.filter((x) => x.판정 === '✗안돌았음'),
+  };
 }
 
-const 늦은 = 표.filter((x) => x.판정 === '✗안돌았음');
-const 아직 = 표.filter((x) => x.판정 === '?아직로그없음');
-const 볼것 = 늦은것만 ? 늦은 : 표;
-
-console.log('크론 ' + 줄들.length + '줄 가운데 **도는 줄 ' + 일감.length + '개**'
-  + ' · 이제 ' + 때글(이제) + ' (서버 때)');
-console.log('  ○ 돌았음 ' + 표.filter((x) => x.판정 === '○돌았음').length
-  + ' · ✗ 안 돌았음 ' + 표.filter((x) => x.판정 === '✗안돌았음').length
-  + ' · ? 아직 로그 없음 ' + 표.filter((x) => x.판정 === '?아직로그없음').length
-  + ' · ? 로그를 함께 씀 ' + 표.filter((x) => x.판정 === '?함께씀').length
-  + ' · — 볼 수 없음 ' + 표.filter((x) => x.판정 === '—볼수없음').length + '\n');
-
-const 꼴맞 = (d) => 때글(d).slice(5);
-for (const x of 볼것) {
-  console.log(x.판정.padEnd(9) + ' ' + x.꼴.padEnd(16) + ' ' + String(x.이름).slice(0, 26).padEnd(27)
-    + ' 예정 ' + 꼴맞(x.예정) + ' · 로그 ' + 꼴맞(x.로그때)
-    + (x.함께 > 1 ? ' · 로그를 ' + x.함께 + '줄이 함께 씀' : ''));
+/** 아침 메일에 넣을 줄 (셈만 받습니다 — crontab 을 다시 안 읽습니다) */
+export function 한줄(r) {
+  if (!r) return [];
+  const 줄 = ['   크론 도는 줄     ' + r.도는줄 + '개 중 **' + r.돌았음 + '개 돌았음**'
+    + ' · 안 돈 것 ' + r.안돌았음 + (r.아직 ? ' · 아직 로그 없음 ' + r.아직 : '')
+    + (r.볼수없음 ? ' · 로그로 못 보는 것 ' + r.볼수없음 : '')];
+  for (const x of (r.늦은목록 || []).slice(0, 6)) {
+    줄.push('   ★ 안 돌았습니다 — ' + x.이름 + ' (' + x.꼴 + ')');
+  }
+  return 줄;
 }
 
-if (아직.length) {
-  console.log('\n? 로그가 아직 없는 줄 ' + 아직.length + '개 — 새로 넣은 줄이거나 차례가 안 왔습니다');
-  for (const x of 아직) console.log('  ' + x.이름 + ' (' + x.꼴 + ')   ' + x.로그);
+/* ── 손으로 돌릴 때만 ── */
+if (process.argv[1] && process.argv[1].endsWith('크론다도나.mjs')) {
+  const r = 재기();
+  if (!r) {
+    console.error('✗ crontab -l 을 못 읽었습니다 (서버에서 돌리십시오)');
+    process.exit(1);
+  }
+  console.log('크론 ' + r.크론줄 + '줄 가운데 **도는 줄 ' + r.도는줄 + '개**'
+    + ' · 이제 ' + 때글(r.이제) + ' (서버 때)');
+  console.log('  ○ 돌았음 ' + r.돌았음 + ' · ✗ 안 돌았음 ' + r.안돌았음
+    + ' · ? 아직 로그 없음 ' + r.아직 + ' · ? 로그를 함께 씀 ' + r.함께씀
+    + ' · — 볼 수 없음 ' + r.볼수없음 + '\n');
+
+  const 꼴맞 = (d) => 때글(d).slice(5);
+  for (const x of (늦은것만 ? r.늦은목록 : r.표)) {
+    console.log(x.판정.padEnd(9) + ' ' + x.꼴.padEnd(16) + ' ' + String(x.이름).slice(0, 26).padEnd(27)
+      + ' 예정 ' + 꼴맞(x.예정) + ' · 로그 ' + 꼴맞(x.로그때)
+      + (x.함께 > 1 ? ' · 로그를 ' + x.함께 + '줄이 함께 씀' : ''));
+  }
+
+  const 아직들 = r.표.filter((x) => x.판정 === '?아직로그없음');
+  if (아직들.length) {
+    console.log('\n? 로그가 아직 없는 줄 ' + 아직들.length + '개 — 새로 넣은 줄이거나 차례가 안 왔습니다');
+    for (const x of 아직들) console.log('  ' + x.이름 + ' (' + x.꼴 + ')   ' + x.로그);
+  }
+  if (r.늦은목록.length) {
+    console.log('\n★ 안 돈 줄 ' + r.늦은목록.length + '개 — 로그를 열어 까닭을 보십시오');
+    for (const x of r.늦은목록) console.log('  ' + x.이름 + '   ' + x.로그);
+    process.exit(1);
+  }
+  console.log('\n○ 로그로 볼 수 있는 줄은 **다 돌았습니다**');
 }
-if (늦은.length) {
-  console.log('\n★ 안 돈 줄 ' + 늦은.length + '개 — 로그를 열어 까닭을 보십시오');
-  for (const x of 늦은) console.log('  ' + x.이름 + '   ' + x.로그);
-  process.exit(1);
-}
-console.log('\n○ 로그로 볼 수 있는 줄은 **다 돌았습니다**');
