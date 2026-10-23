@@ -149,7 +149,9 @@ if (할까('--노출')) {
                        from pg_attribute a
                       where a.attrelid = c.oid and a.attnum > 0 and not a.attisdropped
                         and format_type(a.atttypid, null) in ('jsonb', 'json')), ''),
-           case when c.relkind = 'r' then c.relrowsecurity::text else '-' end
+           case when c.relkind = 'r' then c.relrowsecurity::text else '-' end,
+           coalesce(array_to_string(c.reloptions, ' '), ''),
+           case when c.relkind in ('v', 'm') then pg_get_viewdef(c.oid) else '' end
       from pg_class c join pg_namespace n on n.oid = c.relnamespace
      where n.nspname = 'public' and c.relkind in ('r', 'v', 'm')
        and (has_table_privilege('anon', c.oid, 'select')
@@ -159,10 +161,18 @@ if (할까('--노출')) {
   const 걸린뷰 = 뷰.filter((r) => (r[4] || '').trim());
   console.log('\n볼 수 있는 표·뷰 ' + 뷰.length + '개 가운데 **jsonb 칸을 가진 것 '
     + 걸린뷰.length + '개**\n');
-  for (const [이름, 꼴, a, b, 칸, rls] of 걸린뷰) {
+  for (const [이름, 꼴, a, b, 칸, rls, 옵션, 본문] of 걸린뷰) {
     console.log('  ● ' + 이름 + ' (' + (꼴 === 'r' ? '표 · RLS ' + rls : 꼴 === 'v' ? '뷰' : '굳힌뷰')
       + ')  [' + [a, b].filter(Boolean).join('+') + ']');
     console.log('      ' + 칸);
+    if (꼴 !== 'r') {
+      /* ★ 뷰는 기본으로 **만든 사람 권한**으로 돕니다 — 밑 표의 RLS 를 건너뜁니다.
+         그래서 ㉠ `security_invoker` 가 켜졌나 ㉡ 본문이 스스로 막나 둘을 봅니다 */
+      const 막는것 = (String(본문 || '').match(/is_admin\(\)|마스터인가\(\)|auth\.uid\(\)|운영진인가\(\)/g) || []);
+      console.log('      security_invoker ' + (/security_invoker\s*=\s*(on|true)/i.test(옵션 || '') ? '**켜짐**' : '꺼짐')
+        + ' · 본문이 보는 것 ' + (막는것.length ? [...new Set(막는것)].join(' ') : '**(없음)**')
+        + (옵션 ? ' · 옵션 ' + 옵션 : ''));
+    }
   }
 }
 
@@ -262,4 +272,22 @@ if (할까('--개인정보')) {
     목록열쇠 = 줄 ? Object.keys(줄).join(' · ') : '(빈 응답)';
   } catch { /* 글 그대로 */ }
   console.log('  카드 열쇠 — ' + 목록열쇠);
+
+  /* ── 회원 눈으로 **표·뷰를 바로** 긁어 봅니다 ──────────────
+     ① 이 자리에 jsonb 칸이 있었습니다. 권한이 열려 있어도 **줄이 안 오면**
+     막힌 것입니다 — 「열려 있다」와 「나온다」는 다릅니다 (지침 12절). */
+  console.log('\n── 회원 눈으로 표·뷰를 바로 긁어 봅니다 ──');
+  for (const 이름 of ['admin_jobs', 'job_meta', 'alio_compete', 'hosp_sites',
+    'site_settings', 'student_specs', '공개글', '공개댓글']) {
+    const r = await fetch(U + '/rest/v1/' + encodeURIComponent(이름) + '?select=*&limit=2',
+      { headers: 회원 });
+    const t = await r.text();
+    let 줄수 = '-';
+    try { const j = JSON.parse(t); if (Array.isArray(j)) 줄수 = String(j.length); } catch { /* 글 그대로 */ }
+    const f = 개인정보찾기(t);
+    console.log('  ' + 이름.padEnd(14) + r.status + ' · 줄 ' + String(줄수).padEnd(3)
+      + ' · ' + t.length + '자'
+      + (f.메일.length || f.전화.length ? '  ★ 메일 ' + f.메일.length + ' · 전화 ' + f.전화.length : '')
+      + (r.ok ? '' : '  ' + t.replace(/\s+/g, ' ').slice(0, 90)));
+  }
 }
