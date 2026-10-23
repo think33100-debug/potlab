@@ -176,6 +176,36 @@ if (할까('--노출')) {
   }
 }
 
+/* ── ③ 근무지에 **장소가 아닌 글**이 든 것 ────────────────
+   표본 40 재검에서 GJ305988(경찰청 충청북도경찰청)의 근무지가
+   「7배수 20배수 초과」였습니다 — 선발 배수 안내를 근무지로 집은 것입니다.
+   한 건을 고치면 되는지, 뽑기 규칙을 고쳐야 하는지 **형제를 세어** 가립니다. */
+if (할까('--근무지')) {
+  const U = cfg.SUPABASE_URL;
+  const K = cfg.SUPABASE_SERVICE_KEY;
+  if (!U || !K) { console.error('✗ SUPABASE_URL·SERVICE 가 없습니다'); process.exit(1); }
+  const H = { apikey: K, Authorization: 'Bearer ' + K };
+  console.log('\n══ ③ 근무지에 장소가 아닌 글이 든 것 ══\n');
+  const 줄 = [];
+  for (let off = 0; ; off += 100) {
+    const r = await fetch(U + '/rest/v1/job_posts_pub?select=id,org_name,work_place,source'
+      + '&order=id&limit=100&offset=' + off, { headers: H });
+    if (!r.ok) { console.error('✗ job_posts_pub ' + r.status); process.exit(1); }
+    const a = await r.json();
+    줄.push(...a);
+    if (a.length < 100) break;
+  }
+  /* 장소 같지 않은 꼴 — 배수·초과·퍼센트·「명」·날짜가 든 것, 또는 숫자만 */
+  const 수상한꼴 = /배수|초과|이내|퍼센트|%|\d+\s*명|\d{4}[-.]\d{1,2}|원$|시간/;
+  const 수상 = 줄.filter((x) => x.work_place && 수상한꼴.test(String(x.work_place)));
+  console.log('회원 화면 ' + 줄.length + '건 · 근무지 찬 것 '
+    + 줄.filter((x) => x.work_place).length + '건 · **수상한 것 ' + 수상.length + '건**\n');
+  for (const x of 수상) {
+    console.log('  ● ' + String(x.id).padEnd(18) + '[' + String(x.source).padEnd(4) + '] '
+      + String(x.org_name || '').slice(0, 16).padEnd(17) + '「' + x.work_place + '」');
+  }
+}
+
 /* ── ② 회원 응답에 개인정보 꼴이 든 건수 ──────────────── */
 if (할까('--개인정보')) {
   const U = cfg.SUPABASE_URL;
