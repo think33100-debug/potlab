@@ -217,6 +217,47 @@ const 한칸 = (t, 이름) => {
   if (까 < 0) return '';
   return 겹친것풀기(글.slice(여 + 이름.length + 2, 까)).trim();
 };
+/* ── 자기점검 — node tools/collect-worknet.mjs --자기점검 ───────────
+ * 워크넷 상세 두 칸 자기점검 (2026-10-23 세중님 2번).
+ * API 도 DB 도 안 두드립니다 — `한칸()` 이 응답 글에서 칸을 제대로 집나만 봅니다.
+ * 견본은 **실제 응답에서 본 꼴**입니다 (rcptMthd 「이메일」 · homePg 는 빈 칸). */
+if (process.argv.includes('--자기점검')) {
+  const 잼 = [];
+  const 보 = (무엇, 참) => 잼.push([무엇, !!참]);
+  const 견본 = [
+    '<wantedDtl>',
+    '  <wantedAuthNo>K180012610190008</wantedAuthNo>',
+    '  <rcptMthd>이메일</rcptMthd>',
+    '  <homePg>http://www.example-hosp.or.kr</homePg>',
+    '  <collectPsncnt>1</collectPsncnt>',
+    '  <certificate>물리치료사</certificate>',
+    '</wantedDtl>',
+  ].join('\n');
+  const 빈홈 = 견본.replace('<homePg>http://www.example-hosp.or.kr</homePg>', '<homePg></homePg>');
+  const 없는것 = 견본.replace(/<homePg>.*<\/homePg>/, '');
+
+  보('접수방법을 원문 그대로 집는다', 한칸(견본, 'rcptMthd') === '이메일');
+  보('홈페이지 주소를 집는다', 한칸(견본, 'homePg') === 'http://www.example-hosp.or.kr');
+  보('빈 칸이면 빈 글자', 한칸(빈홈, 'homePg') === '');
+  보('칸이 아예 없으면 빈 글자', 한칸(없는것, 'homePg') === '');
+  보('다른 칸은 그대로', 한칸(견본, 'collectPsncnt') === '1' && 한칸(견본, 'certificate') === '물리치료사');
+  /* ★ 빈 값이면 detail 에 **열쇠를 안 넣는** 꼴인지 — collect_put 이 합치므로
+     빈 글자를 넣으면 전에 찬 값을 덮습니다 (세중님 — null 로 덮지 않기) */
+  const 담기 = (상) => ({ ...(상.접수방법 ? { 접수방법: String(상.접수방법) } : {}),
+                        ...(상.홈페이지 ? { 기관홈페이지: String(상.홈페이지) } : {}) });
+  보('값이 있으면 두 열쇠가 들어간다',
+    Object.keys(담기({ 접수방법: '이메일', 홈페이지: 'http://a.b' })).length === 2);
+  보('★ 빈 값이면 열쇠가 **아예 없다** (덮지 않습니다)',
+    Object.keys(담기({ 접수방법: '', 홈페이지: '' })).length === 0);
+  보('한쪽만 있으면 한 열쇠만', Object.keys(담기({ 접수방법: '방문', 홈페이지: '' })).length === 1);
+
+  const 어긴것 = 잼.filter(([, ok]) => !ok);
+  for (const [무엇, ok] of 잼) console.log((ok ? '  ○ ' : '  ✗ ') + 무엇);
+  if (어긴것.length) { console.error('✗ 자기점검 ' + 어긴것.length + '가지 실패'); process.exit(1); }
+  console.log('○ 자기점검 통과 — ' + 잼.length + '가지');
+  process.exit(0);
+}
+
 async function 상세한건(번호, svc) {
   const r = await 받기(주소만들기({ callTp: 'D', wantedAuthNo: 번호, infoSvc: svc }));
   호출수++; 세기('상세');            /* 하루 호출 수 — 목록·상세 따로 (2026-10-19) */
@@ -232,6 +273,13 @@ async function 상세한건(번호, svc) {
     자격: 한칸(r.글, 'certificate'),
     급여: 한칸(r.글, 'salTpNm').replace(/,\s*$/, '').slice(0, 120),
     제목: 칸.제목 || '',
+    /* ★ 2026-10-23 세중님 2번 — **접수방법·기관 홈페이지.** 추가 호출 0 입니다
+       (이 응답을 이미 받고 있었고 두 칸만 안 읽고 있었습니다 · 지침 4절).
+       `rcptMthd` 는 **글**입니다(이 공고는 「이메일」). 값 목록을 보고 갈래를
+       정하기 전까지 **손질하지 않고 원문 그대로** 담습니다 (세중님 — 값 짐작 금지).
+       `homePg` 는 기관 홈페이지입니다 — **채용 페이지가 아닙니다.** */
+    접수방법: 한칸(r.글, 'rcptMthd').slice(0, 120),
+    홈페이지: 한칸(r.글, 'homePg').slice(0, 300),
   };
 }
 
@@ -581,7 +629,8 @@ if (!dry || 상세시험) {
         제목이 온전해집니다 — 가드는 지키고 이쪽은 채웁니다) */
     const 제목잘림 = /(\.\.\.|…)\s*$/.test(String(v.제목 || ''));
     if (옛 && 옛.m === String(v.r.smodifyDtm || '-') && !(제목잘림 && !옛.t)) {
-      상세값.set(번호, { 인원: 옛.n || '', 자격: 옛.c || '', 급여: 옛.s || '', 제목: 옛.t || '' });
+      상세값.set(번호, { 인원: 옛.n || '', 자격: 옛.c || '', 급여: 옛.s || '', 제목: 옛.t || '',
+        접수방법: 옛.a || '', 홈페이지: 옛.h || '' });
     }
   }
   /* ② 새 번호이거나 원 출처가 고친 것(smodifyDtm 이 달라진 것)만 받습니다 */
@@ -602,7 +651,11 @@ if (!dry || 상세시험) {
       if (상세탈.length >= 5) { console.error('   ★ 연달아 다섯 번 실패 — 상세만 접습니다'); break; }
     } else {
       상세값.set(번호, r);
-      기억[번호] = { m: String(v.r.smodifyDtm || '-'), n: r.인원, c: r.자격, s: r.급여, t: r.제목 };
+      기억[번호] = { m: String(v.r.smodifyDtm || '-'), n: r.인원, c: r.자격, s: r.급여, t: r.제목,
+        /* ★ 2026-10-23 — 기억에도 담습니다. 안 담으면 **기억으로 넘긴 바퀴**에서
+           두 칸이 빈 채로 가고, collect_put 이 빈 값을 안 덮긴 하지만 새로 찬
+           칸도 안 생깁니다 (지침 9절 — 이미 쌓인 자료는 안 고쳐집니다) */
+        a: r.접수방법, h: r.홈페이지 };
     }
     await 쉼(300);
   }
@@ -666,6 +719,20 @@ for (const v of 볼것) {
          「월급2,413,950원 이상 ~ 2,413,950원 이하」 로 옵니다 */
       ...(상.자격 ? { 지원자격: String(상.자격).slice(0, 300) } : {}),
       ...(상.급여 && /[0-9]/.test(상.급여) ? { 연봉: 상.급여 } : {}),
+      /* ★ 2026-10-23 세중님 2번 — 접수방법·기관 홈페이지.
+         **빈 값이면 열쇠를 아예 안 넣습니다** — collect_put 이 detail 을 합치므로
+         (`j.detail || excluded.detail`) 빈 글자를 넣으면 **전에 찬 값을 덮습니다**
+         (세중님 — null 로 덮지 않기).
+         ★ 세중님 글에는 「뽑은값에」라고 적혀 있었는데 **detail 에 담았습니다** —
+           까닭 하나입니다: collect_put 의 `뽑은때` 가
+             case when excluded."뽑은값" = '{}' then j."뽑은때" else now() end
+           이라, 수집기가 뽑은값을 보내기 시작하면 **공고마다 「공고문 읽은 때」가
+           바퀴마다 지금으로** 바뀝니다. 그 값이 거짓이 됩니다.
+           detail 도 같은 jsonb 이고 **합쳐지며**(표·칸 추가 없음) 이 수집기의
+           다른 API 칸들(직종코드·업종·급여·경력)이 이미 그 자리에 있습니다.
+           뽑은값으로 옮기라 하시면 한 줄입니다 */
+      ...(상.접수방법 ? { 접수방법: String(상.접수방법) } : {}),
+      ...(상.홈페이지 ? { 기관홈페이지: String(상.홈페이지) } : {}),
       경력: String(r.career || ''),
       휴일: String(r.holidayTpNm || ''),
       시설구분: 구분,                              /* 병원 · 요양·주간보호 · 모름 */
