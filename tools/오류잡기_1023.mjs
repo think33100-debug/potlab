@@ -219,6 +219,9 @@ if (할까('--개인정보')) {
     const t = await r.text();
     if (!r.ok) { console.log('  ✗ ' + id + ' job_one ' + r.status + ' ' + t.slice(0, 120)); continue; }
     let j = null; try { j = JSON.parse(t); } catch { /* 글 그대로 */ }
+    /* ★ 창구가 **표를 돌려주면** PostgREST 는 배열로 싸서 줍니다 — 벗겨야
+       칸 이름이 보입니다. 안 벗기면 열쇠가 「0」 하나로 보입니다 (2026-10-23 겪음) */
+    if (Array.isArray(j)) j = j[0] || null;
     if (!j || !Object.keys(j).length) { 빈것++; continue; }
 
     for (const 칸 of ['detail', '뽑은값', 'evidence', 'payload']) {
@@ -257,8 +260,12 @@ if (할까('--개인정보')) {
   }
 
   /* 목록 창구도 같이 — 카드에 통째로 실려 나가는지 */
+  /* 인수 이름은 화면이 부르는 그대로입니다 (web/app/jobs/page.tsx:103) —
+     빈 몸으로 부르면 404 가 옵니다 (인수가 안 맞으면 PostgREST 가 함수를 못 찾습니다) */
   const r2 = await fetch(U + '/rest/v1/rpc/job_list', {
-    method: 'POST', headers: 회원, body: JSON.stringify({}),
+    method: 'POST', headers: 회원, body: JSON.stringify({
+      p_job: null, p_sido: null, p_tab: null, p_q: null, p_all: false, p_sort: null, p_page: 1,
+    }),
   });
   const t2 = await r2.text();
   const f2 = 개인정보찾기(t2);
@@ -285,8 +292,19 @@ if (할까('--개인정보')) {
     let 줄수 = '-';
     try { const j = JSON.parse(t); if (Array.isArray(j)) 줄수 = String(j.length); } catch { /* 글 그대로 */ }
     const f = 개인정보찾기(t);
+    /* jsonb 칸 안의 **열쇠 이름**까지 봅니다 — 「profiles」 같은 칸에 무엇이 실려
+       나가는지 숫자로만 보면 모릅니다 */
+    let 속열쇠 = '';
+    try {
+      const j = JSON.parse(t);
+      const 줄 = Array.isArray(j) ? j[0] : j;
+      if (줄 && typeof 줄 === 'object') {
+        속열쇠 = Object.entries(줄).filter(([, v]) => v && typeof v === 'object')
+          .map(([k, v]) => k + '{' + Object.keys(v).join(',') + '}').join(' ');
+      }
+    } catch { /* 글 그대로 */ }
     console.log('  ' + 이름.padEnd(14) + r.status + ' · 줄 ' + String(줄수).padEnd(3)
-      + ' · ' + t.length + '자'
+      + ' · ' + t.length + '자' + (속열쇠 ? ' · ' + 속열쇠.slice(0, 120) : '')
       + (f.메일.length || f.전화.length ? '  ★ 메일 ' + f.메일.length + ' · 전화 ' + f.전화.length : '')
       + (r.ok ? '' : '  ' + t.replace(/\s+/g, ' ').slice(0, 90)));
   }
