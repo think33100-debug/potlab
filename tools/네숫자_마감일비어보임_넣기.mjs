@@ -180,8 +180,14 @@ if (!진짜) {
 /* ★ 2026-10-23 — /tmp 금지 (세중님 1번). ~/되돌림/ 에 날짜를 붙입니다 */
 const 되돌림터 = path.join(os.homedir(), '되돌림');
 fs.mkdirSync(되돌림터, { recursive: true });
-const 되돌림 = path.join(되돌림터, '네숫자_되돌리기_'
-  + new Date().toISOString().replace(/[-:T]/g, '').slice(0, 15) + '.sql');
+/* ★ 2026-10-23 — 서버 지역 시각(KST)으로 · 점이 겹치지 않게 */
+const 두때 = (() => {
+  const d = new Date();
+  const 두 = (n) => String(n).padStart(2, '0');
+  return String(d.getFullYear()) + 두(d.getMonth() + 1) + 두(d.getDate())
+    + '_' + 두(d.getHours()) + 두(d.getMinutes()) + 두(d.getSeconds());
+})();
+const 되돌림 = path.join(되돌림터, '네숫자_되돌리기_' + 두때 + '.sql');
 fs.writeFileSync(되돌림, 본문 + ';\n', 'utf8');
 console.log('\n되돌릴 본문을 ' + 되돌림 + ' 에 남겼습니다');
 psql(새본문 + ';');

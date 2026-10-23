@@ -45,7 +45,13 @@ const 되돌림자리 = () => {
   const 집 = os.homedir();
   const 터 = path.join(집, '되돌림');
   fs.mkdirSync(터, { recursive: true });
-  const 때 = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 15);
+  /* ★ 2026-10-23 — **서버 지역 시각(KST)**으로 적습니다. toISOString() 은 UTC 라
+     로그·크론·보고(다 KST)와 아홉 시간 어긋났습니다. 밀리초 점도 빼서
+     이름에 점이 겹치지 않게 합니다 */
+  const d = new Date();
+  const 두 = (n) => String(n).padStart(2, '0');
+  const 때 = String(d.getFullYear()) + 두(d.getMonth() + 1) + 두(d.getDate())
+    + '_' + 두(d.getHours()) + 두(d.getMinutes()) + 두(d.getSeconds());
   return path.join(터, '네숫자_목록꼴_되돌리기_' + 때 + '.sql');
 };
 
