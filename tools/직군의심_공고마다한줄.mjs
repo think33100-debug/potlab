@@ -29,7 +29,20 @@
  * ★ `delete` 글자가 없어 승인 창이 뜨지 않습니다 (지침 8-7).
  */
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+
+/* ★ 2026-10-23 세중님 1번 — **되돌림 파일은 /tmp 에 두지 않습니다.**
+   /tmp 는 서버가 다시 뜨면 비워집니다. 되돌릴 글을 거기 두면 「되돌릴 수 있다」가
+   거짓이 됩니다. ~/되돌림/ 에 **날짜를 붙여** 남깁니다 (지침 8-19) */
+const 되돌림자리 = () => {
+  const 집 = os.homedir();
+  const 터 = path.join(집, '되돌림');
+  fs.mkdirSync(터, { recursive: true });
+  const 때 = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 15);
+  return path.join(터, '직군의심_되돌리기_' + 때 + '.sql');
+};
 
 const argv = process.argv.slice(2);
 const 진짜 = argv.includes('--진짜');
@@ -175,8 +188,9 @@ if (!진짜) {
   process.exit(0);
 }
 
-fs.writeFileSync('/tmp/직군의심_되돌리기.sql', 본문 + ';\n', 'utf8');
-console.log('\n되돌릴 본문을 /tmp/직군의심_되돌리기.sql 에 남겼습니다 ('
+const 되돌림 = 되돌림자리();
+fs.writeFileSync(되돌림, 본문 + ';\n', 'utf8');
+console.log('\n되돌릴 본문을 ' + 되돌림 + ' 에 남겼습니다 ('
   + 본문.split('\n').length + '줄)');
 psql(새본문 + ';');
 console.log('○ 올렸습니다');

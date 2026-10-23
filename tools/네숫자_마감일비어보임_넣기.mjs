@@ -26,6 +26,8 @@
  *   그래서 **SQL 전문을 먼저 찍고**, 세중님 확인 뒤에만 `--진짜` 입니다 (지침 8-5).
  */
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const argv = process.argv.slice(2);
@@ -175,8 +177,13 @@ if (!진짜) {
   process.exit(0);
 }
 
-fs.writeFileSync('/tmp/네숫자_되돌리기.sql', 본문 + ';\n', 'utf8');
-console.log('\n되돌릴 본문을 /tmp/네숫자_되돌리기.sql 에 남겼습니다');
+/* ★ 2026-10-23 — /tmp 금지 (세중님 1번). ~/되돌림/ 에 날짜를 붙입니다 */
+const 되돌림터 = path.join(os.homedir(), '되돌림');
+fs.mkdirSync(되돌림터, { recursive: true });
+const 되돌림 = path.join(되돌림터, '네숫자_되돌리기_'
+  + new Date().toISOString().replace(/[-:T]/g, '').slice(0, 15) + '.sql');
+fs.writeFileSync(되돌림, 본문 + ';\n', 'utf8');
+console.log('\n되돌릴 본문을 ' + 되돌림 + ' 에 남겼습니다');
 psql(새본문 + ';');
 console.log('○ 올렸습니다');
 
