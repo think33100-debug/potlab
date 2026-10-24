@@ -26,53 +26,13 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { 전화숫자, 쪽글, 속뜻글자, 흔한말, 고유글자, 맞나 } from './주소맞나.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 뿌리 = path.join(여기, '..');
 const argv = process.argv.slice(2);
 const 진짜 = argv.includes('--진짜');
 const 몇개 = Number(argv.includes('--몇개') ? argv[argv.indexOf('--몇개') + 1] : 500) || 500;
-
-export const 전화숫자 = (s) => String(s || '').replace(/[^0-9]/g, '');
-/** 쪽에서 글자만 남깁니다 */
-export const 쪽글 = (html) => String(html || '')
-  .replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')
-  .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ');
-/** 기관 이름의 **속뜻 글자** — 법인·종별·지역 꾸밈말을 뗍니다 (쪽에서 찾을 말) */
-export const 속뜻글자 = (이름) => String(이름 || '')
-  .replace(/\([^)]*\)/g, ' ')
-  .replace(/(의료법인|재단법인|학교법인|사회복지법인|사단법인|주식회사|\(의\)|\(재\)|\(학\))/g, ' ')
-  .replace(/(의료재단|복지재단|교육재단|의료원재단)/g, ' ')
-  .replace(/(특별자치도|특별자치시|특별시|광역시|도립|시립|군립|구립|국립|공립)/g, ' ')
-  .replace(/\s+/g, ' ').trim();
-/* ★ **흔한 종별 말은 근거가 못 됩니다** (2026-10-24 밤에 고쳤습니다).
-   「천안시립노인전문병원」의 뒤 토막 「노인전문병원」은 그런 쪽 수십 곳에 다 있습니다 —
-   그걸 근거로 담으면 **엉뚱한 병원 주소**를 담습니다 (지침 10-5 — 재는 자를 먼저 의심).
-   그래서 토막에서 흔한 말을 뺀 **고유 글자가 두 글자 이상**일 때만 받습니다 */
-export const 흔한말 = /(노인전문|노인|전문|요양|재활|정신|치과|한방|한의|종합|의료원|보건소|보건지소|보건의료원|병원|의원|센터|의료재단|시립|도립|군립|구립|제[0-9]|병동)/g;
-export const 고유글자 = (토막) => String(토막 || '').replace(흔한말, '');
-
-/** 쪽이 그 기관인가 — 전화 또는 이름 글자 */
-export function 맞나(html, 이름, 전화) {
-  const 글 = 쪽글(html);
-  const 숫 = 전화숫자(전화);
-  if (숫 && 숫.length >= 9) {
-    const 쪽숫 = (글.match(/0\d{1,2}[-)\s]\s?\d{3,4}[-\s]\d{4}/g) || []).map(전화숫자);
-    if (쪽숫.includes(숫)) return { 됨: true, 왜: '쪽 전화 ' + 전화 + ' 가 심평원과 같습니다' };
-  }
-  /* ★ 이름 글자는 **앞 토막과 뒤 토막 둘 다** 봅니다. 「경상북도포항의료원」처럼
-     지역이 앞에 붙은 이름은 쪽에 「포항의료원」만 적혀 있습니다 — 앞만 보면 못 찾습니다 */
-  const 속 = 속뜻글자(이름).replace(/\s+/g, '');
-  const 쪽 = 글.replace(/\s+/g, '');
-  for (let n = Math.min(속.length, 12); n >= 4; n--) {
-    for (const 토막 of [속.slice(0, n), 속.slice(-n)]) {
-      if (토막.length >= 4 && 고유글자(토막).length >= 2 && 쪽.includes(토막)) {
-        return { 됨: true, 왜: '쪽에 「' + 토막 + '」 가 있습니다' };
-      }
-    }
-  }
-  return { 됨: false, 왜: '전화도 이름 글자도 못 찾았습니다' };
-}
 
 if (argv.includes('--자기점검')) {
   const 잼 = [];
