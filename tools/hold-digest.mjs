@@ -113,6 +113,45 @@ async function 결과공고세기(cfg) {
   } catch { return null; }
 }
 
+/* 공고가 기관에 붙었나 (2026-10-24 세중님 M4) — 번호 % · 이름 % · 없음 · 의심.
+   「번호로」가 1순위입니다. 이름으로만 붙은 것은 **동명 기관을 한 묶음으로 볼 수**
+   있어서, 의심 건은 회원 화면에 기관 정보를 붙이지 않습니다 (docs/매칭규칙_1024.md) */
+async function 매칭재기(cfg) {
+  try {
+    const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY };
+    const 받아 = async (길) => {
+      const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    };
+    const 보임 = new Set((await 받아('job_posts_pub?select=id&limit=2000')).map((x) => x.id));
+    const 다 = await 받아('job_posts?select=id,' + encodeURIComponent('기관번호') + ',sido&limit=20000');
+    const 볼것 = 다.filter((x) => 보임.has(x.id));
+    const 번호 = 볼것.filter((x) => String(x['기관번호'] || '').startsWith('HIRA:')).length;
+    const 이름 = 볼것.filter((x) => String(x['기관번호'] || '').startsWith('NAME:')).length;
+    const 없음 = 볼것.filter((x) => !x['기관번호']).length;
+    /* 의심 = 한 NAME: 묶음에 공고 시도가 둘 이상 (가장 센 신호 하나만 아침에 찍습니다) */
+    const 묶음 = new Map();
+    for (const x of 다.filter((y) => String(y['기관번호'] || '').startsWith('NAME:'))) {
+      const k = x['기관번호'];
+      if (!묶음.has(k)) 묶음.set(k, new Set());
+      if (x.sido) 묶음.get(k).add(x.sido);
+    }
+    const 의심 = [...묶음.values()].filter((s2) => s2.size > 1).length;
+    return { 분모: 볼것.length, 번호, 이름, 없음, 의심 };
+  } catch { return null; }
+}
+
+/** 아침 메일에 넣을 줄 */
+function 매칭줄(m) {
+  if (!m || !m.분모) return [];
+  const 퍼 = (n) => Math.round((100 * n) / m.분모) + '%';
+  return ['   기관 매칭        번호로 ' + 퍼(m.번호) + ' (' + m.번호 + '건)'
+    + ' · 이름으로 ' + 퍼(m.이름) + ' (' + m.이름 + '건)'
+    + ' · 없음 ' + m.없음 + '건 · **의심 ' + m.의심 + '묶음**'
+    + (m.없음 || m.의심 ? '   (docs/손확인_매핑_1024.md)' : '  ✓')];
+}
+
 /** 아침 메일에 넣을 줄 */
 function 결과공고줄(r) {
   if (!r) return [];
@@ -301,6 +340,8 @@ function 신뢰셋줄(네) {
   try { 줄.push(...크론한줄(크론재기())); } catch { /* 못 재면 적지 않습니다 */ }
   /* ★ 2026-10-23 — 결과·안내 공고가 회원 화면에 있나 (제목을 다시 댑니다) */
   try { 줄.push(...결과공고줄(결과공고)); } catch { /* 못 재면 적지 않습니다 */ }
+  /* ★ 2026-10-24 세중님 M4 — 기관 매칭률 한 줄 */
+  try { 줄.push(...매칭줄(매칭)); } catch { /* 못 재면 적지 않습니다 */ }
   줄.push('');
   return 줄;
 }
@@ -552,6 +593,9 @@ function 글로(d, 관리자주소, 잠금, 보안, 구멍, 네, 역할) {
      보이지 않습니다 (고용24줄 에서 같은 실수를 한 번 했습니다) */
   줄.push(...신뢰셋줄(네));
 
+  /* ★ 2026-10-24 세중님 M4 — 기관 매칭률 한 줄 (긴 메일에도) */
+  try { 줄.push(...매칭줄(매칭)); } catch { /* 못 재면 적지 않습니다 */ }
+
   /* ★ 2026-10-14 — 「대상인데 안 긁는 1층 병원」 (세중님 지시).
      경보가 아니라 **늘 보이는 한 줄**입니다 — 숫자가 늘면 눈에 띕니다 */
   if (구멍) {
@@ -781,6 +825,8 @@ const 조용한척 = argv.includes('--조용한척');
 const 역할목록 = await 지금역할(cfg);
 /* ★ 2026-10-23 — 결과·안내 공고 (읽기만 · 못 재면 null 이라 줄이 빠집니다) */
 const 결과공고 = await 결과공고세기(cfg);
+/* 기관 매칭률 (2026-10-24 세중님 M4 · 읽기만 · 못 재면 null 이라 줄이 빠집니다) */
+const 매칭 = await 매칭재기(cfg);
 
 if (조용한척 || (!d['보낼것있나'] && !잠금.length && !(보안 && 보안.밖합))) {
   if (!아침인가) {
