@@ -110,13 +110,17 @@ update 기관 o
 with 짝 as (
   select o.기관번호, min(s."채용주소") as 채용페이지, count(*) as 몇
     from 기관 o
-    join hosp_sites s on s."이름열쇠" = o.이름키
+    /* ★ 2026-10-24 세중님 2번 — 사이트표를 **번호(ykiho)로** 잇습니다. 이름열쇠로 이으면
+       같은 이름 다른 병원의 채용 주소가 붙습니다 (한일병원: 진주 ↔ 서울 한전).
+       사이트표 ykiho 는 266/297줄 채워져 있고, 빈 줄은 **전처럼 이름열쇠로** 잇습니다 */
+    join hosp_sites s on ((s.ykiho is not null and s.ykiho = o.ykiho)
+                       or (s.ykiho is null and s."이름열쇠" = o.이름키))
    where coalesce(s."채용주소", '') <> '' and o."확인한때" is null
    group by o.기관번호
 )
 update 기관 o
    set "채용페이지" = 짝.채용페이지,
-       "불변근거"   = o."불변근거" || jsonb_build_object('채용페이지', 'hosp_sites(이름열쇠)'),
+       "불변근거"   = o."불변근거" || jsonb_build_object('채용페이지', 'hosp_sites(ykiho)'),
        "고친때"     = now()
   from 짝
  where 짝.기관번호 = o.기관번호 and 짝.몇 = 1 and o."채용페이지" is null;

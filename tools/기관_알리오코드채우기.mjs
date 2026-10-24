@@ -92,13 +92,15 @@ const 볼것 = `
   with 받은것(이름, 코드) as (values
          ${값들}
        ), 키로 as (
-         select hira_name_key(이름) as 이름키, min(코드) as 코드, count(distinct 코드) as 몇
-           from 받은것 group by 1
+         /* ★ 2026-10-24 세중님 2번 — 이름 → **번호**로 풉니다. 심평원에 그 이름이
+            여럿이면 창구가 null 을 주므로 **안 채웁니다** (짐작 금지 · 지침 10-3) */
+         select "기관번호_이름으로"(이름) as 번호, min(코드) as 코드, count(distinct 코드) as 몇
+           from 받은것 where "기관번호_이름으로"(이름) is not null group by 1
        )
   select count(*) filter (where o."알리오코드" is null and k.몇 = 1) as 채울것,
          count(*) filter (where o."알리오코드" is not null) as 이미찬것,
-         count(*) filter (where k.몇 > 1) as 이름키겹침
-    from 기관 o join 키로 k on k.이름키 = o.이름키
+         count(*) filter (where k.몇 > 1) as 코드겹침
+    from 기관 o join 키로 k on k.번호 = o."기관번호"
    where o."확인한때" is null;`;
 console.log('\n── 기관 표에 댄 결과 ──\n' + psql(볼것));
 
@@ -108,15 +110,17 @@ const 채우기 = `
   with 받은것(이름, 코드) as (values
          ${값들}
        ), 키로 as (
-         select hira_name_key(이름) as 이름키, min(코드) as 코드, count(distinct 코드) as 몇
-           from 받은것 group by 1
+         /* ★ 2026-10-24 세중님 2번 — 이름 → **번호**로 풉니다. 심평원에 그 이름이
+            여럿이면 창구가 null 을 주므로 **안 채웁니다** (짐작 금지 · 지침 10-3) */
+         select "기관번호_이름으로"(이름) as 번호, min(코드) as 코드, count(distinct 코드) as 몇
+           from 받은것 where "기관번호_이름으로"(이름) is not null group by 1
        )
   update 기관 o
      set "알리오코드" = k.코드,
          "불변근거"   = o."불변근거" || jsonb_build_object('알리오코드', '알리오 목록(instNm→pblntInstCd)'),
          "고친때"     = now()
     from 키로 k
-   where k.이름키 = o.이름키 and k.몇 = 1
+   where k.번호 = o."기관번호" and k.몇 = 1
      and o."알리오코드" is null and o."확인한때" is null
   returning o.기관번호;`;
 const 된것 = psql(채우기);
