@@ -68,7 +68,16 @@ for (const x of 공고) {
      (기존 길 그대로 — tools/hosp/본문자르기.mjs · collect-hosp:562 가 쓰는 그것).
      선택자는 사이트마다 다르니 **흔한 것부터** 대 보고, 자른 글이 200자 미만이면
      **안 쓰고 쪽 전체**를 씁니다 (몰래 짧은 글을 넘기지 않습니다) */
-  const 후보 = ['#bo_v_con', '.board_view', '.view_content', '.bbs_view', '.board-view',
+  /* ★ 집마다 **열어서 확인한** 선택자를 먼저 씁니다 (2026-10-24 · 짐작 아님) —
+     medical.or.kr 는 `td.view`(table.view_table 안) · phgidok.com 은 `div.cont` 입니다.
+     이 둘을 안 넣었더니 2,300~2,600자가 **거의 전부 메뉴**였습니다 */
+  const 집선택자 = [
+    [/medical.or.kr/i, 'td.view'],
+    [/phgidok.com/i, 'div.cont'],
+  ];
+  const 집것 = (집선택자.find(([re]) => re.test(x.url)) || [])[1];
+  const 후보 = [...(집것 ? [집것] : []),
+    '#bo_v_con', '.board_view', '.view_content', '.bbs_view', '.board-view',
     '#contents', '.contents', '#content', '.content', '.sub_content', 'article'];
   let 글 = r.글;
   let 자른자 = '(안 자름)';
