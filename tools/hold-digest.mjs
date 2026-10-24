@@ -128,10 +128,12 @@ async function 매칭재기(cfg) {
        자르고, 두 쪽이 서로 어긋나 분모가 **1** 로 나왔습니다 (지침 8-20 ③) */
     const 다받아 = async (길) => {
       const out = [];
-      for (let off = 0; ; off += 1000) {
-        const a = await 받아(길 + '&order=id.asc&limit=1000&offset=' + off);
+      /* ★ 창구가 **100줄에서 끊습니다**(max-rows). 1000 으로 넘기면 첫 쪽만 받고
+         끝난 줄 알아 분모가 쪼그라듭니다 — 2026-10-24 에 분모가 1 → 0 이 됐습니다 */
+      for (let off = 0; ; off += 100) {
+        const a = await 받아(길 + '&order=id.asc&limit=100&offset=' + off);
         out.push(...a);
-        if (a.length < 1000) break;
+        if (a.length < 100) break;
         if (off > 40000) break;
       }
       return out;
