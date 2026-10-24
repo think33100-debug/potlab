@@ -90,6 +90,8 @@ const 줄들 = psql(`
            hira_name_key(g."기관") as k
       from "일층병원_구멍"() g where g."상태" = '사각지대'
   )
+  /* ★ UNION 뒤에는 order by 에 식을 못 씁니다 (칸 이름만) — 바깥에서 차례를 줍니다 */
+  select * from (
   /* ⓐ 심평원 hosp_url — 주소가 **딱 한 줄**일 때만 */
   select s."갈래", s."기관", s.시도, s.시군구, o.ykiho, o.yadm_nm, o.hosp_url,
          coalesce(o.tel,''), coalesce(o.addr,''), coalesce(o.cl_cd,''), coalesce(o.cl_cd_nm,''),
@@ -117,7 +119,9 @@ const 줄들 = psql(`
      and (select count(*) from hira_org h where h.name_key = s.k) = 1
      and (select count(*) from public_hospitals q where hira_name_key(q.name) = s.k
             and coalesce(btrim(q.homepage),'') <> '') = 1
-   order by case 1 when 1 then 0 end, 2
+  ) t
+   order by case t."갈래" when '상급종합' then 1 when '대학병원' then 2 when '종합병원' then 3
+                          when '공공보건의료' then 4 else 5 end, t."기관"
    limit ${몇개};`).split('\n').filter(Boolean).map((l) => l.split('\t'));
 
 console.log('심평원 주소가 **딱 한 줄**인 사각지대 ' + 줄들.length + '곳 — 열어서 확인합니다 (한 집 0.8초)');
