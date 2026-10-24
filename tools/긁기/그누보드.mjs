@@ -24,6 +24,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 받기, 설정, 담기, 최근인가 } from './공통.mjs';
 import { sortJob } from '../sort-rule.mjs';
+import { 그누읽기, 꼬리말, 엔티티풀기 } from './읽기들.mjs';
+
+export { 꼬리말, 엔티티풀기 };
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -31,41 +34,10 @@ const 진짜 = argv.includes('--진짜');
 const 몇개 = Number(argv.includes('--몇개') ? argv[argv.indexOf('--몇개') + 1] : 99) || 99;
 const 출처 = argv.includes('--출처') ? argv[argv.indexOf('--출처') + 1] : 'HS4';
 
-export const 꼬리말 = /\s*(?:채용\s*공고)?\s*상세\s*보기\s*$|\s*새글\s*$|\s*N\s*$/;
-export const 엔티티풀기 = (s) => String(s || '').replace(/&amp;/g, '&').replace(/&#38;/g, '&')
-  .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
-
-/** 목록 쪽에서 줄을 읽습니다 — wr_id · 제목 · (있으면) 올린날 */
-export function 목록읽기(html, 바탕) {
-  const t = String(html || '');
-  const 본것 = new Set();
-  const 낸것 = [];
-  const re = /<a[^>]+href=["']([^"']*wr_id=(\d+)[^"']*)["'][^>]*>([\s\S]{0,300}?)<\/a>/gi;
-  for (const m of t.matchAll(re)) {
-    const [, 날주소, wr, 속] = m;
-    if (본것.has(wr)) continue;
-    /* ★ **태그를 먼저 걷고** 엔티티를 풉니다. 거꾸로 하면 `&lt;제26-12회&gt;` 가
-       `<제26-12회>` 로 풀린 뒤 **태그로 걷혀** 사라집니다 (자기점검이 잡았습니다) */
-    const 제목 = 엔티티풀기(String(속).replace(/<[^>]+>/g, ' '))
-      .replace(/\s+/g, ' ').trim().replace(꼬리말, '').trim();
-    if (!제목 || 제목.length < 4) continue;
-    본것.add(wr);
-    /* ★ 날짜는 **그 줄(tr·li) 안에서만** 찾습니다. ±300자 창으로 하면
-       **윗줄의 날짜**를 끌어옵니다 (자기점검이 잡았습니다 — 날짜 없는 줄에
-       윗줄 날짜가 붙었습니다). 줄 경계를 못 찾으면 ±150자로 좁힙니다 */
-    const 앞 = Math.max(t.lastIndexOf('<tr', m.index), t.lastIndexOf('<li', m.index));
-    const 뒤끝 = t.slice(m.index).search(/<\/tr>|<\/li>/i);
-    const 창 = 앞 >= 0 && 뒤끝 >= 0
-      ? t.slice(앞, m.index + 뒤끝)
-      : t.slice(Math.max(0, m.index - 150), m.index + m[0].length + 150);
-    const 날 = 창.match(/(20\d\d)[-.\/](\d{1,2})[-.\/](\d{1,2})/);
-    let 주소 = 엔티티풀기(날주소);
-    try { 주소 = new URL(주소, 바탕).toString(); } catch { /* 그대로 */ }
-    낸것.push({ wr, 제목, 주소,
-      올린날: 날 ? 날[1] + '-' + String(날[2]).padStart(2, '0') + '-' + String(날[3]).padStart(2, '0') : null });
-  }
-  return 낸것;
-}
+/* 읽는 함수는 **읽기들.mjs 한 자리**입니다 (지침 6절) — 여기서는 이름만 빌려 씁니다.
+   떼어 낸 까닭: 이 파일은 들여오면 바로 긁기를 시작해서, 다른 도구가 읽기만
+   쓸 수 없었습니다 (한바퀴표.mjs 가 그것을 씁니다) */
+export const 목록읽기 = 그누읽기;
 
 if (argv.includes('--자기점검')) {
   const 잼 = [];

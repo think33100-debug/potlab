@@ -25,6 +25,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 받기, 설정, 담기, 최근인가 } from './공통.mjs';
 import { sortJob } from '../sort-rule.mjs';
+import { 표준읽기, 꼬리말, 엔티티풀기 } from './읽기들.mjs';
+
+export { 꼬리말, 엔티티풀기 };
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -32,45 +35,10 @@ const 진짜 = argv.includes('--진짜');
 const 몇개 = Number(argv.includes('--몇개') ? argv[argv.indexOf('--몇개') + 1] : 999) || 999;
 const 출처 = argv.includes('--출처') ? argv[argv.indexOf('--출처') + 1] : 'HS4';
 
-export const 메뉴말 = /^(?:더\s*보기|목\s*록|처음|이전|다음|맨\s*끝|검\s*색|닫\s*기|자세히|바로가기|home|list|more)$/i;
-export const 번호열쇠 = /(?:^|[?&])(?:seq|seqno|seq_no|nttSn|ntt_sn|wr_id|bbsSeq|bbs_seq|brd_no|brdNo|idx|no|num|articleNo|article_no|bno|boardSeq|board_seq|id|pk)=(\d{1,12})(?:&|$)/i;
-export const 자바열쇠 = /(?:fn?View|goView|view_?detail|boardView|viewPage|detail)\s*\(\s*['"]?(\d{1,12})['"]?/i;
-export const 엔티티풀기 = (s) => String(s || '').replace(/&amp;/g, '&').replace(/&#38;/g, '&')
-  .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
-export const 꼬리말 = /\s*(?:채용\s*공고)?\s*상세\s*보기\s*$|\s*새글\s*$|\s*N\s*$|\s*\[?알림\]?\s*$/;
-
-/** 목록 쪽에서 줄을 읽습니다 — 번호·제목·(있으면) 올린날 */
-export function 목록읽기(html, 바탕) {
-  const t = String(html || '');
-  const 본것 = new Set();
-  const 낸것 = [];
-  for (const m of t.matchAll(/<a[^>]+href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]{0,400}?)<\/a>/gi)) {
-    const [, 날주소, 속] = m;
-    const 주소글 = 엔티티풀기(날주소);
-    const 번호 = (주소글.match(번호열쇠) || [])[1] || (주소글.match(자바열쇠) || [])[1]
-      || (String(m[0]).match(자바열쇠) || [])[1];
-    if (!번호) continue;
-    if (/\.(?:css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|zip|pdf|hwpx?)(?:[?#]|$)/i.test(주소글)) continue;
-    const 제목 = 엔티티풀기(String(속).replace(/<[^>]+>/g, ' '))
-      .replace(/\s+/g, ' ').trim().replace(꼬리말, '').trim();
-    if (제목.length < 6 || 메뉴말.test(제목)) continue;
-    const 열쇠 = 번호 + '|' + 제목.slice(0, 20);
-    if (본것.has(열쇠)) continue;
-    본것.add(열쇠);
-    /* 날짜는 그 줄(tr·li) 안에서만 */
-    const 앞 = Math.max(t.lastIndexOf('<tr', m.index), t.lastIndexOf('<li', m.index));
-    const 뒤끝 = t.slice(m.index).search(/<\/tr>|<\/li>/i);
-    const 창 = 앞 >= 0 && 뒤끝 >= 0 ? t.slice(앞, m.index + 뒤끝)
-      : t.slice(Math.max(0, m.index - 150), m.index + m[0].length + 150);
-    const 날 = 창.match(/(20\d\d)[-.\/](\d{1,2})[-.\/](\d{1,2})/);
-    let 주소 = 주소글;
-    if (/^javascript:/i.test(주소)) 주소 = 바탕;           /* POST 로 여는 쪽 — 목록 주소를 둡니다 */
-    else { try { 주소 = new URL(주소, 바탕).toString(); } catch { /* 그대로 */ } }
-    낸것.push({ 번호, 제목, 주소,
-      올린날: 날 ? 날[1] + '-' + String(날[2]).padStart(2, '0') + '-' + String(날[3]).padStart(2, '0') : null });
-  }
-  return 낸것;
-}
+/* 읽는 함수는 **읽기들.mjs 한 자리**입니다 (지침 6절) — 여기서는 이름만 빌려 씁니다.
+   떼어 낸 까닭: 이 파일은 들여오면 바로 긁기를 시작해서, 다른 도구가 읽기만
+   쓸 수 없었습니다 (한바퀴표.mjs 가 그것을 씁니다) */
+export const 목록읽기 = 표준읽기;
 
 if (argv.includes('--자기점검')) {
   const 잼 = [];

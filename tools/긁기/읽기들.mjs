@@ -1,0 +1,70 @@
+/* 긁기 — **목록 읽기 함수 한 자리** (2026-10-24 · 지침 6절)
+ *
+ * 왜 떼어 냈나 — `그누보드.mjs`·`표준게시판.mjs` 는 **들여오면 바로 긁기를 시작합니다**
+ * (맨 바깥에서 돕니다). 그래서 다른 도구(`한바퀴표.mjs`)가 읽기 함수만 쓸 수 없었습니다.
+ * `오류잡기_1023.mjs` 에서 같은 일을 겪었습니다 (들여오기만으로 부르는 쪽이 끝났습니다).
+ */
+
+export const 엔티티풀기 = (s) => String(s || '').replace(/&amp;/g, '&').replace(/&#38;/g, '&')
+  .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
+export const 꼬리말 = /\s*(?:채용\s*공고)?\s*상세\s*보기\s*$|\s*새글\s*$|\s*N\s*$|\s*\[?알림\]?\s*$/;
+export const 메뉴말 = /^(?:더\s*보기|목\s*록|처음|이전|다음|맨\s*끝|검\s*색|닫\s*기|자세히|바로가기|home|list|more)$/i;
+export const 번호열쇠 = /(?:^|[?&])(?:seq|seqno|seq_no|nttSn|ntt_sn|wr_id|bbsSeq|bbs_seq|brd_no|brdNo|idx|no|num|articleNo|article_no|bno|boardSeq|board_seq|id|pk)=(\d{1,12})(?:&|$)/i;
+export const 자바열쇠 = /(?:fn?View|goView|view_?detail|boardView|viewPage|detail)\s*\(\s*['"]?(\d{1,12})['"]?/i;
+
+/** 그 줄(tr·li) 안에서만 날짜를 찾습니다 — 창을 넓히면 **윗줄 날짜**가 붙습니다 */
+export function 줄안의날(t, 자리, 길이) {
+  const 앞 = Math.max(t.lastIndexOf('<tr', 자리), t.lastIndexOf('<li', 자리));
+  const 뒤끝 = t.slice(자리).search(/<\/tr>|<\/li>/i);
+  const 창 = 앞 >= 0 && 뒤끝 >= 0 ? t.slice(앞, 자리 + 뒤끝)
+    : t.slice(Math.max(0, 자리 - 150), 자리 + 길이 + 150);
+  const m = 창.match(/(20\d\d)[-.\/](\d{1,2})[-.\/](\d{1,2})/);
+  return m ? m[1] + '-' + String(m[2]).padStart(2, '0') + '-' + String(m[3]).padStart(2, '0') : null;
+}
+
+/** 그누보드 꼴 — `/bbs/board.php?…wr_id=NNN` */
+export function 그누읽기(html, 바탕) {
+  const t = String(html || '');
+  const 본것 = new Set();
+  const 낸것 = [];
+  const re = /<a[^>]+href=["']([^"']*wr_id=(\d+)[^"']*)["'][^>]*>([\s\S]{0,300}?)<\/a>/gi;
+  for (const m of t.matchAll(re)) {
+    const [, 날주소, wr, 속] = m;
+    if (본것.has(wr)) continue;
+    /* 태그를 먼저 걷고 엔티티를 풉니다 (거꾸로 하면 「&lt;제26-12회&gt;」 가 태그로 걷힙니다) */
+    const 제목 = 엔티티풀기(String(속).replace(/<[^>]+>/g, ' '))
+      .replace(/\s+/g, ' ').trim().replace(꼬리말, '').trim();
+    if (!제목 || 제목.length < 4) continue;
+    본것.add(wr);
+    let 주소 = 엔티티풀기(날주소);
+    try { 주소 = new URL(주소, 바탕).toString(); } catch { /* 그대로 */ }
+    낸것.push({ wr, 번호: wr, 제목, 주소, 올린날: 줄안의날(t, m.index, m[0].length) });
+  }
+  return 낸것;
+}
+
+/** 표준게시판 꼴 — 글 번호가 든 링크(seq·nttSn·brd_no…)나 javascript 번호 */
+export function 표준읽기(html, 바탕) {
+  const t = String(html || '');
+  const 본것 = new Set();
+  const 낸것 = [];
+  for (const m of t.matchAll(/<a[^>]+href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]{0,400}?)<\/a>/gi)) {
+    const [, 날주소, 속] = m;
+    const 주소글 = 엔티티풀기(날주소);
+    const 번호 = (주소글.match(번호열쇠) || [])[1] || (주소글.match(자바열쇠) || [])[1]
+      || (String(m[0]).match(자바열쇠) || [])[1];
+    if (!번호) continue;
+    if (/\.(?:css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|zip|pdf|hwpx?)(?:[?#]|$)/i.test(주소글)) continue;
+    const 제목 = 엔티티풀기(String(속).replace(/<[^>]+>/g, ' '))
+      .replace(/\s+/g, ' ').trim().replace(꼬리말, '').trim();
+    if (제목.length < 6 || 메뉴말.test(제목)) continue;
+    const 열쇠 = 번호 + '|' + 제목.slice(0, 20);
+    if (본것.has(열쇠)) continue;
+    본것.add(열쇠);
+    let 주소 = 주소글;
+    if (/^javascript:/i.test(주소)) 주소 = 바탕;      /* POST 로 여는 쪽 — 목록 주소를 둡니다 */
+    else { try { 주소 = new URL(주소, 바탕).toString(); } catch { /* 그대로 */ } }
+    낸것.push({ 번호, 제목, 주소, 올린날: 줄안의날(t, m.index, m[0].length) });
+  }
+  return 낸것;
+}
