@@ -28,6 +28,8 @@ const argv = process.argv.slice(2);
 const 진짜 = argv.includes('--진짜');
 const 출처 = argv.includes('--출처') ? argv[argv.indexOf('--출처') + 1] : 'HS4';
 const 한건 = argv.includes('--아이디') ? argv[argv.indexOf('--아이디') + 1] : null;
+/* ★ 2026-10-24 — 크론이 한 바퀴에 볼 수를 묶습니다 (부하 울타리 · 기본 40) */
+const 몇개 = Number(argv.includes('--몇개') ? argv[argv.indexOf('--몇개') + 1] : 40) || 40;
 
 const cfg = 설정();
 const 열쇠 = cfg['COLLECT_KEY_' + 출처];
@@ -44,7 +46,7 @@ const rpc = async (이름, 몸) => {
 };
 
 const 길 = 'job_posts?select=id,org_name,title,url,job_group,apply_to,work_place,hold'
-  + '&source=eq.' + 출처 + (한건 ? '&id=eq.' + encodeURIComponent(한건) : '') + '&order=id&limit=100';
+  + '&source=eq.' + 출처 + (한건 ? '&id=eq.' + encodeURIComponent(한건) : '') + '&order=id&limit=' + Math.min(100, 몇개);
 const r0 = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
 if (!r0.ok) { console.error('✗ ' + r0.status + ' ' + (await r0.text()).slice(0, 200)); process.exit(1); }
 const 공고 = await r0.json();
