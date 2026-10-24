@@ -124,8 +124,20 @@ async function 매칭재기(cfg) {
       if (!r.ok) throw new Error(String(r.status));
       return r.json();
     };
-    const 보임 = new Set((await 받아('job_posts_pub?select=id&limit=2000')).map((x) => x.id));
-    const 다 = await 받아('job_posts?select=id,' + encodeURIComponent('기관번호') + ',sido&limit=20000');
+    /* ★ 쪽을 **차례를 붙여** 넘깁니다. 처음에 limit 만 크게 줬더니 창구가 100줄로
+       자르고, 두 쪽이 서로 어긋나 분모가 **1** 로 나왔습니다 (지침 8-20 ③) */
+    const 다받아 = async (길) => {
+      const out = [];
+      for (let off = 0; ; off += 1000) {
+        const a = await 받아(길 + '&order=id.asc&limit=1000&offset=' + off);
+        out.push(...a);
+        if (a.length < 1000) break;
+        if (off > 40000) break;
+      }
+      return out;
+    };
+    const 보임 = new Set((await 다받아('job_posts_pub?select=id')).map((x) => x.id));
+    const 다 = await 다받아('job_posts?select=id,' + encodeURIComponent('기관번호') + ',sido');
     const 볼것 = 다.filter((x) => 보임.has(x.id));
     const 번호 = 볼것.filter((x) => String(x['기관번호'] || '').startsWith('HIRA:')).length;
     const 이름 = 볼것.filter((x) => String(x['기관번호'] || '').startsWith('NAME:')).length;
@@ -592,9 +604,6 @@ function 글로(d, 관리자주소, 잠금, 보안, 구멍, 네, 역할) {
      찍습니다 — 보류 공고가 있는 날에는 아침글() 이 안 돌아서, 그쪽만 고치면
      보이지 않습니다 (고용24줄 에서 같은 실수를 한 번 했습니다) */
   줄.push(...신뢰셋줄(네));
-
-  /* ★ 2026-10-24 세중님 M4 — 기관 매칭률 한 줄 (긴 메일에도) */
-  try { 줄.push(...매칭줄(매칭)); } catch { /* 못 재면 적지 않습니다 */ }
 
   /* ★ 2026-10-14 — 「대상인데 안 긁는 1층 병원」 (세중님 지시).
      경보가 아니라 **늘 보이는 한 줄**입니다 — 숫자가 늘면 눈에 띕니다 */
