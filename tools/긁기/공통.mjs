@@ -16,7 +16,32 @@
  *     이름 매칭을 거치지 않습니다 (세중님 C3 · docs/매칭규칙_1024.md)
  */
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { robots읽기, 가도되나 } from '../robots.mjs';
+
+const 여기 = path.dirname(fileURLToPath(import.meta.url));
+
+/* ★ 2026-10-24 밤 세중님 ㉩ 승인 — **HS3 가 긁는 곳에서는 HS4 가 안 돕니다.**
+   139곳 전부 사이트표(hosp_sites)에 줄이 있었고 95곳은 최근 30일 공고를 받고
+   있었습니다 (docs/HS3진단_1024.md). 같은 곳을 또 두드리면 남의 서버만 괴롭히고
+   공고는 두 벌이 됩니다. HS4 의 자리는 **사각지대 456곳**입니다 — 손확인 ② 주소가
+   들어오는 대로 그 곳들을 긁습니다.
+   ★ 울타리의 자는 **진단 문서**입니다 (사이트줄 > 0). 문서가 없으면 울타리가 없습니다 —
+     그때는 안 막고 **지나갑니다** (울타리가 조용히 전부를 막지 않게) */
+let hs3곳 = null;
+export function HS3가긁나(이름) {
+  if (!hs3곳) {
+    hs3곳 = new Map();
+    try {
+      const j = JSON.parse(fs.readFileSync(
+        path.join(여기, '..', '..', 'docs', 'HS3진단_1024.json'), 'utf8'));
+      for (const x of j.목록 || []) hs3곳.set(이름글자(x.이름), x);
+    } catch { /* 문서가 없으면 빈 표 — 아무것도 막지 않습니다 */ }
+  }
+  const x = hs3곳.get(이름글자(이름));
+  return !!(x && x.사이트줄 > 0);
+}
 
 export const UA = 'Mozilla/5.0 (compatible; potjob-collector/1.0; +https://potjob.co.kr)';
 export const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));

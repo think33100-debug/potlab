@@ -22,7 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 받기, 설정, 담기, 최근인가 } from './공통.mjs';
+import { 받기, 설정, 담기, 최근인가, HS3가긁나 } from './공통.mjs';
 import { sortJob } from '../sort-rule.mjs';
 import { 그누읽기, 꼬리말, 엔티티풀기 } from './읽기들.mjs';
 
@@ -78,8 +78,11 @@ const { 곳들 } = JSON.parse(fs.readFileSync(설정자리, 'utf8'));
 const cfg = 설정();
 const 담을것 = [];
 const 안담음 = [];
+let 건너뜀 = 0;
 let 열린곳 = 0; let 못연곳 = 0;
 for (const 곳 of 곳들.slice(0, 몇개)) {
+  /* ★ 세중님 ㉩ (10/24 밤) — HS3 가 긁는 곳은 건너뜁니다 */
+  if (HS3가긁나(곳.이름)) { 건너뜀++; continue; }
   const r = await 받기(곳.주소);
   if (!r.됨) { 못연곳++; console.log('✗ ' + 곳.이름.slice(0, 20) + ' — ' + r.왜); continue; }
   열린곳++;
@@ -109,7 +112,7 @@ for (const 곳 of 곳들.slice(0, 몇개)) {
     });
   }
 }
-console.log('\n열린 곳 ' + 열린곳 + ' · 못 연 곳 ' + 못연곳 + ' · 담을 것 ' + 담을것.length
+console.log('\nHS3 가 긁어 건너뜀 ' + 건너뜀 + ' (세중님 ㉩) · 열린 곳 ' + 열린곳 + ' · 못 연 곳 ' + 못연곳 + ' · 담을 것 ' + 담을것.length
   + '건 (hold=true 고정 · 기관 붙는 것 ' + 담을것.filter((x) => x.기관번호).length + '건)');
 
 const 결과 = await 담기(cfg, 출처, 담을것, { 진짜 });

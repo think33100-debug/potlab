@@ -22,7 +22,7 @@
  * ★ 10/31 까지 **보류함만** (hold=true 고정 · 공통.mjs).
  * ★ 기관번호를 **설정에 적어** 둡니다 (이름 매칭을 거치지 않습니다 · 세중님 C3).
  */
-import { 받기, 설정, 담기 } from './공통.mjs';
+import { 받기, 설정, 담기, HS3가긁나 } from './공통.mjs';
 import { sortJob } from '../sort-rule.mjs';
 
 const argv = process.argv.slice(2);
@@ -96,8 +96,11 @@ if (argv.includes('--자기점검')) {
 }
 
 const cfg = 설정();
+let 건너뜀 = 0;
 const 담을것 = [];
 for (const 곳 of 곳들) {
+  /* ★ 세중님 ㉩ (10/24 밤) — HS3 가 긁는 곳은 건너뜁니다 */
+  if (HS3가긁나(곳.이름)) { 건너뜀++; continue; }
   const 주소 = 목록주소(곳);
   const r = await 받기(주소);
   if (!r.됨) { console.log('✗ ' + 곳.이름 + ' — ' + r.왜); continue; }
@@ -123,7 +126,7 @@ for (const 곳 of 곳들) {
   }
 }
 
-console.log('\n── 담을 것 ' + 담을것.length + '건 (hold=true 고정) ──');
+console.log('\nHS3 가 긁어 건너뜀 ' + 건너뜀 + '곳 (세중님 ㉩) · 담을 것 ' + 담을것.length + '건 (hold=true 고정) ──');
 const 결과 = await 담기(cfg, 출처, 담을것, { 진짜 });
 if (!결과.됨) {
   console.log('✗ 담지 못했습니다 — ' + (결과.왜 || 결과.답));

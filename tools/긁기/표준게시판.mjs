@@ -23,7 +23,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 받기, 설정, 담기, 최근인가 } from './공통.mjs';
+import { 받기, 설정, 담기, 최근인가, HS3가긁나 } from './공통.mjs';
 import { sortJob } from '../sort-rule.mjs';
 import { 표준읽기, 꼬리말, 엔티티풀기 } from './읽기들.mjs';
 
@@ -79,8 +79,11 @@ if (!fs.existsSync(설정자리)) {
 const { 곳들 } = JSON.parse(fs.readFileSync(설정자리, 'utf8'));
 const cfg = 설정();
 const 담을것 = []; const 안담음 = [];
+let 건너뜀 = 0;
 let 열림 = 0; let 못열림 = 0; let 줄없음 = 0;
 for (const 곳 of 곳들.slice(0, 몇개)) {
+  /* ★ 세중님 ㉩ (10/24 밤) — HS3 가 긁는 곳은 건너뜁니다 */
+  if (HS3가긁나(곳.이름)) { 건너뜀++; continue; }
   const r = await 받기(곳.주소);
   if (!r.됨) { 못열림++; console.log('  ✗ ' + 곳.이름.slice(0, 20).padEnd(21) + r.왜); continue; }
   열림++;
@@ -102,7 +105,7 @@ for (const 곳 of 곳들.slice(0, 몇개)) {
       sido: (곳.지역 || '').split(' ')[0] || null, 기관번호: 곳.기관번호 || null });
   }
 }
-console.log('\n열린 곳 ' + 열림 + ' · 못 연 곳 ' + 못열림 + ' · 줄 0 인 곳 ' + 줄없음
+console.log('\nHS3 가 긁어 건너뜀 ' + 건너뜀 + ' (세중님 ㉩) · 열린 곳 ' + 열림 + ' · 못 연 곳 ' + 못열림 + ' · 줄 0 인 곳 ' + 줄없음
   + ' · 담을 것 ' + 담을것.length + '건 (안 담음 ' + 안담음.length
   + ' — 날짜 없음 ' + 안담음.filter((x) => !x.올린날).length + ' · 오램 '
   + 안담음.filter((x) => x.올린날).length + ')');
