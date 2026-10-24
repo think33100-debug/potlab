@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { 받기, 설정 } from './공통.mjs';
 import { 칸뽑기, 본문직군, 고용형태고르기 } from '../공고문읽기.mjs';
 import { 첨부모으기 } from '../첨부담기.mjs';
+import { 본문자르기 } from '../hosp/본문자르기.mjs';
 import { sortJob } from '../sort-rule.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -61,7 +62,24 @@ for (const x of 공고) {
   const r = await 받기(x.url);
   if (!r.됨) { 못열림++; console.log('  ✗ ' + x.id + ' — ' + r.왜); continue; }
   열림++;
-  const 글 = r.글;
+  /* ★ 2026-10-24 — **본문 영역만** 잘라냅니다. 안 자르면 쪽 **메뉴가 통째로**
+     본문이 됩니다 — 미래로21병원 2,058자 가운데 거의 전부가 「진단검사의학과
+     종합검진실 … 물리치료실 …」 메뉴였고, 그 때문에 직군·마감 채움률이 낮았습니다
+     (기존 길 그대로 — tools/hosp/본문자르기.mjs · collect-hosp:562 가 쓰는 그것).
+     선택자는 사이트마다 다르니 **흔한 것부터** 대 보고, 자른 글이 200자 미만이면
+     **안 쓰고 쪽 전체**를 씁니다 (몰래 짧은 글을 넘기지 않습니다) */
+  const 후보 = ['#bo_v_con', '.board_view', '.view_content', '.bbs_view', '.board-view',
+    '#contents', '.contents', '#content', '.content', '.sub_content', 'article'];
+  let 글 = r.글;
+  let 자른자 = '(안 자름)';
+  for (const sel of 후보) {
+    const 잘린 = 본문자르기(r.html, sel);
+    if (!잘린) continue;
+    const t = String(잘린).replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+    if (t.length >= 200 && t.length < 글.length) { 글 = t; 자른자 = sel; break; }
+  }
   if (글.length > 60) 본문들.push({ job_id: x.id, kind: '상세', ord: 0, url: x.url, body: 글 });
 
   /* 첨부 — 쪽에서 파일 링크를 모읍니다 (기존 첨부 길이 받아 읽습니다) */
@@ -98,7 +116,7 @@ for (const x of 공고) {
   if (Object.keys(칸).length > 1) 칸줄.push(칸);
 
   console.log('  ○ ' + x.id.padEnd(18) + String(x.org_name).slice(0, 14).padEnd(15)
-    + '글 ' + String(글.length).padStart(5) + '자'
+    + '글 ' + String(글.length).padStart(5) + '자(' + 자른자 + ')'
     + ' · 직군 ' + (직군 || '(안 보임)').padEnd(6)
     + ' · 갈래 ' + 갈래.갈래.padEnd(5)
     + ' · 마감 ' + (뽑.접수마감 || x.apply_to || '(없음)')
