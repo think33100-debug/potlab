@@ -109,7 +109,8 @@ const 줄들 = psql(`
     select v.name, hira_name_key(v.name) as k from (values ${값들}) as v(name)
   ), 기 as (
     select 곳.name, 곳.k, o."기관번호", coalesce(o."채용페이지",'') as 채용페이지
-      from 곳 left join 기관 o on o.이름키 = 곳.k
+      /* ★ 2026-10-24 세중님 ㉫ — 번호로 잇습니다 */
+      from 곳 left join 기관 o on o."기관번호" = "기관번호_이름으로"(곳.name)
   ), 사이트 as (
     select 기.name,
            coalesce(string_agg(nullif(s.url,''), ' | '), '') as 사이트주소,

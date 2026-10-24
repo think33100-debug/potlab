@@ -118,7 +118,7 @@ console.log('\n══ ③ 기관 표의 불변 칸 ══');
          as t(이름 text, 갈래 text, sido text, sgg text, 사이트 text))
   select count(*)::text as 일층대상,
          count(*) filter (where exists (
-           select 1 from 기관 o where o.이름키 = hira_name_key(일층.이름)
+           select 1 from 기관 o where o."기관번호" = "기관번호_이름으로"(일층.이름)
          ))::text as 이름키로_기관표에_있음
     from 일층;`);
 

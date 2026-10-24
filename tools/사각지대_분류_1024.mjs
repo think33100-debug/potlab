@@ -123,7 +123,9 @@ const 줄들 = psql(`
          coalesce(o."기관번호",''), coalesce(o."채용페이지",''), coalesce(o."홈페이지",''),
          coalesce(h.hosp_url,''), coalesce(s.url,'')
     from "일층병원_구멍"() g
-    left join 기관 o on o.이름키 = hira_name_key(g."기관")
+    /* ★ 2026-10-24 세중님 ㉫ — **번호로** 잇습니다. 이름키로 이으면 같은 이름 다른
+       병원에서 엉뚱한 줄이 붙습니다 (한일병원: 서울 한전 → 진주 줄) */
+    left join 기관 o on o."기관번호" = "기관번호_이름으로"(g."기관")
     left join hira_org h on h.ykiho = o.ykiho
     left join hosp_sites s on s."이름열쇠" = o.이름키 and coalesce(s."끔", false) = false
    where g."상태" = '${상태고름}'
