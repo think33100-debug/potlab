@@ -18,7 +18,8 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 
 const 공고들 = ['GJ305543', 'GJ305988'];
-const 시험열쇠 = '직군근거원문';   /* 2026-10-23 에 넣은 열쇠 */
+/* 2026-10-23 에 넣은 열쇠 **넷** — 근거는 `뽑은값` 에 그대로 남습니다 (지침 8-21) */
+const 시험열쇠들 = ['직군근거원문', '직군근거까닭', '직군근거누가', '직군근거적은때'];
 const 지우기 = process.argv.includes('--지우기');
 
 const cfg = {};
@@ -68,12 +69,14 @@ fs.mkdirSync(되돌림터, { recursive: true });
 const 때 = new Date().toLocaleString('sv-SE').replace(/[-: ]/g, '').slice(0, 15)
   .replace(/^(\d{8})(\d{6})$/, '$1_$2');
 const 둘곳 = path.join(되돌림터, 'evidence시험값_' + 때 + '.txt');
-fs.writeFileSync(둘곳, '지우기 전 원문 (2026-10-23 시험 열쇠 「' + 시험열쇠 + '」)\n\n' + 전 + '\n');
+fs.writeFileSync(둘곳, '지우기 전 원문 (2026-10-23 시험 열쇠 「'
+  + 시험열쇠들.join('」·「') + '」)\n\n' + 전 + '\n');
 console.log('\n○ 지우기 전 원문을 남겼습니다 — ' + 둘곳);
 
-/* 그 열쇠 하나만 뺍니다. updated_at 은 안 건드립니다 (지침 9절) */
-const 센것 = psql("update job_posts set evidence = evidence - '" + 시험열쇠 + "'\n"
-  + ' where id in ' + 어디 + " and evidence ? '" + 시험열쇠 + "'\n"
+/* 그 열쇠들만 뺍니다 (`- text[]`). updated_at 은 안 건드립니다 (지침 9절) */
+const 뺄것 = "array['" + 시험열쇠들.join("','") + "']::text[]";
+const 센것 = psql('update job_posts set evidence = evidence - ' + 뺄것 + '\n'
+  + ' where id in ' + 어디 + ' and evidence ?| ' + 뺄것 + '\n'
   + ' returning id;');
 console.log('○ 열쇠를 뺀 공고 — ' + (센것 ? 센것.split('\n').join(' · ') : '(없음 — 이미 빠져 있었습니다)'));
 
