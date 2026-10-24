@@ -1,0 +1,62 @@
+{
+ "잰때": "2026-10-24T12:40",
+ "곳들": [
+  {
+   "이름": "노원구보건소",
+   "시도": "서울",
+   "시군구": "노원구",
+   "보건소": "https://www.nowon.kr/www/index.do",
+   "뿌리": "https://www.nowon.kr/",
+   "후보": [
+    {
+     "글자": "일자리&amp;생활법률 무료상담",
+     "주소": "https://www.nowon.kr/www/administ/administ4/administ4_01/administ4_01_01.jsp"
+    },
+    {
+     "글자": "어르신일자리정보",
+     "주소": "https://www.nowon.kr/www/info/info2/info2_03/info2_03_02/info2_03_02_01.jsp"
+    },
+    {
+     "글자": "여성일자리정보",
+     "주소": "https://www.nowon.kr/www/info/info2/info2_05/info2_05_03/info2_05_03_01.jsp"
+    },
+    {
+     "글자": "일자리/경제",
+     "주소": "https://www.nowon.kr/www/info/info7/info7_13.jsp"
+    },
+    {
+     "글자": "채용공고",
+     "주소": "https://www.nowon.kr/www/user/bbs/BD_selectBbsList.do?q_bbsCode=1003&q_estnColumn7=Y"
+    },
+    {
+     "글자": "채용공고",
+     "주소": "https://www.nowon.kr/#employ-board"
+    },
+    {
+     "글자": "노원 청년일자리센터 청년내일",
+     "주소": "https://nwjob.kr/"
+    },
+    {
+     "글자": "노원어르신일자리지원센터",
+     "주소": "http://www.nowonjob.or.kr/"
+    }
+   ]
+  },
+  {
+   "이름": "상록수보건소",
+   "시도": "경기",
+   "시군구": "안산상록구",
+   "보건소": "https://www.ansan.go.kr/snshealth/",
+   "뿌리": "https://www.ansan.go.kr/",
+   "후보": []
+  },
+  {
+   "이름": "옥천군보건소",
+   "시도": "충북",
+   "시군구": "옥천군",
+   "보건소": "https://www.oc.go.kr/health/index.do",
+   "뿌리": "https://www.oc.go.kr/",
+   "후보": []
+  }
+ ]
+}
