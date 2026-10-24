@@ -72,8 +72,10 @@ for (const x of 공고) {
      medical.or.kr 는 `td.view`(table.view_table 안) · phgidok.com 은 `div.cont` 입니다.
      이 둘을 안 넣었더니 2,300~2,600자가 **거의 전부 메뉴**였습니다 */
   const 집선택자 = [
-    [/medical.or.kr/i, 'td.view'],
-    [/phgidok.com/i, 'div.cont'],
+    /* ★ `td.view` 는 **제목 줄 69자**만 나옵니다 — 본문·첨부까지 담은 것은
+       `table.view_table`(652자)입니다 (2026-10-24 에 대 보고 골랐습니다) */
+    [/medical\.or\.kr/i, 'table.view_table'],
+    [/phgidok\.com/i, 'div.cont'],
   ];
   const 집것 = (집선택자.find(([re]) => re.test(x.url)) || [])[1];
   const 후보 = [...(집것 ? [집것] : []),
