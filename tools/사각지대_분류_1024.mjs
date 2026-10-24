@@ -181,7 +181,11 @@ for (const x of 주소있는것.slice(0, 몇개)) {
     const 글 = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')
       .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
     const 링크 = [...html.matchAll(/href\s*=\s*["']([^"']+)["']/gi)].map((m) => m[1]);
-    const 게시판링크 = 링크.filter((l) => 게시판꼴.test(l));
+    /* ★ 2026-10-24 — **붙박이 파일(css·js·그림)을 뺍니다.** 안 빼면
+       `/skin/board/css/default.css` 같은 것이 「게시판 링크」로 잡혀, 근거 줄에
+       뜬금없는 스타일시트가 적힙니다 (첫 판에서 ① 근거가 다 그 꼴이었습니다) */
+    const 붙박이 = /\.(?:css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|map)(?:[?#]|$)/i;
+    const 게시판링크 = 링크.filter((l) => 게시판꼴.test(l) && !붙박이.test(l));
     const 판 = 갈래가리기({ 코드: r.status, html, 글자수: 글.length, 링크수: 링크.length,
       게시판링크수: 게시판링크.length, 스크립트비율: html.length ? 스크립트 / html.length : 0 });
     낸것.push({ ...x, 주소, 어디서, 끝주소: r.url, 코드: r.status, 글자수: 글.length,
