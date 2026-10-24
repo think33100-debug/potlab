@@ -57,15 +57,19 @@ const env = {
   PGDATABASE: decodeURIComponent(u.pathname.replace(/^\//, '')) || 'postgres',
   PGSSLMODE: u.searchParams.get('sslmode') || 'require',
 };
-function psql(sql) {
+function psql(sql, 꼴 = ['-X', '-A', '-q', '-F', '  ']) {
   const 임시 = path.join(os.tmpdir(), '인원한건_' + process.pid + '.sql');
   fs.writeFileSync(임시, sql, 'utf8');
-  const r = spawnSync('psql', ['-X', '-A', '-q', '-F', '  ', '-v', 'ON_ERROR_STOP=1', '-f', 임시],
+  const r = spawnSync('psql', [...꼴, '-v', 'ON_ERROR_STOP=1', '-f', 임시],
     { encoding: 'utf8', maxBuffer: 1 << 26, env });
   fs.unlinkSync(임시);
   if (r.status) { console.error('✗ psql\n' + (r.stderr || '').slice(0, 900)); process.exit(1); }
   return (r.stdout || '').trimEnd();
 }
+/* ★ 2026-10-24 — **값 하나를 읽을 때는 `-t`(줄만)** 를 씁니다. 안 쓰면 꼬리의
+   「(1 row)」 가 값으로 들어옵니다 — 첫 판에서 칸기록 옛값과 되돌림 글에
+   「(1 row)」 가 적혔습니다 (그 자리에서 바로잡았습니다) */
+const 한값 = (sql) => psql(sql, ['-X', '-A', '-t', '-q']).trim();
 const 따옴 = (s) => String(s == null ? '' : s).replace(/'/g, "''");
 const 보기 = `
   select p.id, p.source, p.org_name, left(p.title, 44) as 제목,
@@ -77,8 +81,7 @@ const 보기 = `
     from job_posts p where p.id = '${따옴(아이디)}';`;
 
 console.log('── 고치기 전 원문 ──\n' + psql(보기));
-const 지금 = psql(`select coalesce(headcount::text,'') from job_posts where id = '${따옴(아이디)}';`)
-  .split('\n').pop().trim();
+const 지금 = 한값(`select coalesce(headcount::text,'') from job_posts where id = '${따옴(아이디)}';`);
 if (!지금 && 지금 !== '0') { console.error('✗ 그 공고가 없거나 headcount 가 빈칸입니다'); process.exit(1); }
 console.log('\n고칠 것 — headcount ' + 지금 + ' → **' + 새값 + '** · admin_locked → true');
 console.log('근거 — ' + (근거 || '(안 적었습니다)'));
