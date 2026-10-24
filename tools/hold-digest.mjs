@@ -168,7 +168,7 @@ async function 긁기재기(cfg) {
     /* 창구가 100줄에서 끊습니다 — 쪽을 넘깁니다 (지침 8-20 ③) */
     const 다 = [];
     for (let off = 0; ; off += 100) {
-      const a = await 받아('job_posts?select=id,hold,hidden,job_group,apply_to,'
+      const a = await 받아('job_posts?select=id,hold,hidden,hidden_why,job_group,apply_to,'
         + encodeURIComponent('기관번호') + '&source=eq.HS4&order=id.asc&limit=100&offset=' + off);
       다.push(...a);
       if (a.length < 100) break;
@@ -196,6 +196,9 @@ async function 긁기재기(cfg) {
     return { 공고: 다.length,
       보류함: 다.filter((x) => x.hold).length,
       숨김: 다.filter((x) => x.hidden).length,
+      /* ★ 2026-10-24 밤 — 숨긴 까닭을 **갈라** 찍습니다. 「마감 지남」으로만 적으면
+         HS3 와 겹쳐 숨긴 19건이 마감 지난 것처럼 보입니다 (까닭을 틀리게 적는 것입니다) */
+      겹침숨김: 다.filter((x) => x.hidden && /같은 공고/.test(x.hidden_why || '')).length,
       회원화면: 다.filter((x) => !x.hold && !x.hidden).length,
       직군, 첨부대기, 남의직군, 후보: 직군 + 첨부대기,
       마감: 다.filter((x) => x.apply_to).length,
@@ -211,7 +214,8 @@ function 긁기줄(g) {
     + ' · **직군 ' + g.직군 + '/' + g.후보 + '** (우리 직군 후보 중)'
     + ' · 남의 직군 ' + g.남의직군 + ' · 첨부 대기 ' + g.첨부대기
     + ' · 마감 ' + 퍼(g.마감) + ' · 기관 ' + 퍼(g.기관)
-    + ' · 숨김 ' + g.숨김 + '(마감 지남)'
+    + ' · 숨김 ' + g.숨김 + (g.겹침숨김 ? '(HS3 겹침 ' + g.겹침숨김 + ' · 마감 지남 '
+      + (g.숨김 - g.겹침숨김) + ')' : '(마감 지남)')
     + (g.회원화면 ? '  ★ **회원 화면에 ' + g.회원화면 + '건 있습니다**' : '  (회원 화면 0 ✓)')];
 }
 
