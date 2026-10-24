@@ -28,6 +28,13 @@ import { robots읽기, 가도되나 } from './robots.mjs';
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
 const 몇개 = Number(argv.includes('--몇개') ? argv[argv.indexOf('--몇개') + 1] : 9999) || 9999;
+/* ★ 2026-10-24 — 상태 셋입니다 (일층병원_구멍) —
+     사각지대 456곳    **주소를 모르는 곳**입니다. 열어 볼 거리가 없습니다
+                       (기관 표·심평원·사이트표 어디에도 주소가 없습니다 — 0곳 확인)
+     사이트있음 301곳  **주소는 있는데 공고가 안 들어오는 곳** ← 긁기 분류의 자리
+     공고만들어옴 20곳  이미 들어옵니다
+   그래서 기본은 「사이트있음」입니다. `--상태 사각지대` 로 바꿀 수 있습니다. */
+const 상태고름 = argv.includes('--상태') ? argv[argv.indexOf('--상태') + 1] : '사이트있음';
 
 /* ── 갈래 가리기 (자기점검이 보는 자리) ───────────────────── */
 export const 봇검사꼴 = /cf-browser-verification|cf_chl_|recaptcha|hcaptcha|captcha|보안문자|자동입력\s*방지|Incapsula|imperva|AWSALB.*challenge/i;
@@ -116,7 +123,7 @@ const 줄들 = psql(`
     left join 기관 o on o.이름키 = hira_name_key(g."기관")
     left join hira_org h on h.ykiho = o.ykiho
     left join hosp_sites s on s."이름열쇠" = o.이름키 and coalesce(s."끔", false) = false
-   where g."상태" = '사각지대'
+   where g."상태" = '${상태고름}'
    order by g."갈래", g."기관";`).split('\n').filter(Boolean).map((l) => {
   const [갈래, 종류, 기관, 시도, 시군구, 기관번호, 채용페이지, 홈페이지, 심평원주소, 사이트표] = l.split('\t');
   return { 갈래, 종류, 기관, 시도, 시군구, 기관번호, 채용페이지, 홈페이지, 심평원주소, 사이트표 };
