@@ -95,12 +95,16 @@ if (만들기) {
   const 줄들 = psql(`
     select g."갈래", coalesce(g."종류",''), g."기관", coalesce(g."시도",''), coalesce(g."시군구",''),
            coalesce(o."기관번호",''), coalesce(o.ykiho,''),
-           coalesce((select h.ykiho from hira_org h where h.name_key = hira_name_key(g."기관") limit 1), '')
+           coalesce((select h.ykiho from hira_org h where h.name_key = hira_name_key(g."기관") limit 1), ''),
+           /* 이미 주소를 아는 곳은 적어 둡니다 — 세중님이 그 줄을 비워 두시게 */
+           coalesce(o."채용페이지", ''), coalesce(o."불변근거"->>'채용페이지', '')
       from "일층병원_구멍"() g
       left join 기관 o on o.이름키 = hira_name_key(g."기관")
      where g."상태" = '사각지대'
+     /* ★ 2026-10-24 세중님 4번 — **종합병원 먼저**입니다 (가장 많고 공고도 큽니다),
+        그다음 상급종합·대학병원, 그다음 공공보건의료 */
      order by case g."갈래"
-                when '상급종합' then 1 when '대학병원' then 2 when '종합병원' then 3
+                when '종합병원' then 1 when '상급종합' then 2 when '대학병원' then 3
                 when '공공보건의료' then 4 when '보건기관' then 5 else 6 end,
               g."기관"
      limit ${몇개};`).split('\n').filter(Boolean).map((l) => l.split('\t'));
