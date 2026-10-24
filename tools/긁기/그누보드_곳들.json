@@ -1,0 +1,160 @@
+{
+ "꼴": "그누보드",
+ "만든때": "2026-10-24 16:58:05",
+ "곳": 19,
+ "기관번호붙음": 19,
+ "곳들": [
+  {
+   "이름": "강원특별자치도삼척의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.ksmc.or.kr/board/bbs/board.php?bo_table=recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjEyMjIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "강원특별자치도영월의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.youngwol.org/bbs/board.php?bo_table=info_05",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjE4MzIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "전라남도 강진의료원",
+   "종류": "병원",
+   "지역": "",
+   "주소": "https://www.gjmed.or.kr/bbs/board.php?bo_table=notice3",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQyNjE0ODEjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "제주특별자치도 서귀포의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.jjsmc.or.kr/bbs/board.php?bo_table=4_5_1_1",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkOCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQ0NjEwMDIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "충청북도 청주의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.cjmc.or.kr/bbs/board.php?bo_table=recurit_new",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkOCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQyNjEwMDIjNTEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "대구보건대학교병원",
+   "종류": "병원",
+   "지역": "대구 대구북구",
+   "주소": "http://dhch.ac.kr/bbs/board.php?bc=employment",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkOTkkMzgxMzUxIzIxIyQxIyQ1IyQ5OSQzNjE0ODEjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "곽병원",
+   "종류": "종합병원",
+   "지역": "대구 대구중구",
+   "주소": "https://kwakh.co.kr/bbs/board.php?bo_table=c05",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQzIyQwMCQ0NjE0ODEjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "목포기독병원",
+   "종류": "종합병원",
+   "지역": "전남 목포시",
+   "주소": "https://www.mch.co.kr/bbs/board.php?bo_table=employ_notice",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQzNjEyMjIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "울산엘리야병원",
+   "종류": "종합병원",
+   "지역": "울산 울산북구",
+   "주소": "https://useh.kr/bbs/board.php?bo_table=basic_recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQ0NjEwMDIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 명지의료재단 명지병원",
+   "종류": "종합병원",
+   "지역": "충북 제천시",
+   "주소": "http://jcmj.co.kr/web/bbs/board.php?bo_table=d06",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkOCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQyNjEyMjIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 양진의료재단 평택성모병원",
+   "종류": "종합병원",
+   "지역": "경기 평택시",
+   "주소": "https://www.ptsm.co.kr/bbs/board.php?tbl=bbs52",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ5OSQyNjEyMjIjNjEjJDEjJDAjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 일심의료재단 포천우리병원",
+   "종류": "종합병원",
+   "지역": "경기 포천시",
+   "주소": "http://swoori.co.kr/bbs/board.php?bo_table=recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ3OSQzNjEwMDIjNjEjJDEjJDAjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 플러스의료재단 단원병원",
+   "종류": "종합병원",
+   "지역": "경기 안산단원구",
+   "주소": "https://www.dwhosp.co.kr/bbs/board.php?bo_table=recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ2MiQyNjE0ODEjNTEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 행도의료재단 해동병원",
+   "종류": "종합병원",
+   "지역": "부산 부산영도구",
+   "주소": "https://www.hdh.co.kr/gnuboard/bbs/board.php?bo_table=jobboard",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQzNjE4MzIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인대송의료재단 무안병원",
+   "종류": "종합병원",
+   "지역": "전남 무안군",
+   "주소": "http://www.muangh.co.kr/bbs/board.php?bo_table=recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQzNjE0ODEjNTEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인동춘의료재단문경제일병원",
+   "종류": "종합병원",
+   "지역": "경북 문경시",
+   "주소": "https://www.mgjh.co.kr/bbs/board.php?bo_table=job_01",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQyNjE0ODEjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인자인의료재단(더자인병원)",
+   "종류": "종합병원",
+   "지역": "경기 고양덕양구",
+   "주소": "https://www.the-jain.co.kr/bbs/board.php?bo_table=ot",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ3MiQyNjE0ODEjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "청주성모병원",
+   "종류": "종합병원",
+   "지역": "충북 청주청원구",
+   "주소": "https://www.ccmc.or.kr/bbs/board.php?bo_table=commu_02",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkOCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjEyMjIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "효산의료재단 안양샘병원",
+   "종류": "종합병원",
+   "지역": "경기 안양만안구",
+   "주소": "https://anyang.samhospital.com/bbs/board.php?bo_table=recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQ0NjEwMDIjNzEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  }
+ ]
+}
