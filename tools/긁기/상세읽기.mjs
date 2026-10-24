@@ -45,8 +45,11 @@ const rpc = async (이름, 몸) => {
   return t ? JSON.parse(t) : null;
 };
 
+/* ★ 2026-10-24 밤 — **숨긴 것은 안 읽습니다.** 안 걸러내면 `collect_put` 이
+   `hold:true` 를 다시 적어 **숨긴 공고가 보류함으로 돌아옵니다** (HS3 와 겹쳐 숨긴 19건이
+   그 자리였습니다). 상세를 읽을 거리도 아닙니다 — 쓸데없이 쪽을 두드립니다 */
 const 길 = 'job_posts?select=id,org_name,title,url,job_group,apply_to,work_place,hold'
-  + '&source=eq.' + 출처 + (한건 ? '&id=eq.' + encodeURIComponent(한건) : '') + '&order=id&limit=' + Math.min(100, 몇개);
+  + '&source=eq.' + 출처 + '&hidden=is.false' + (한건 ? '&id=eq.' + encodeURIComponent(한건) : '') + '&order=id&limit=' + Math.min(100, 몇개);
 const r0 = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
 if (!r0.ok) { console.error('✗ ' + r0.status + ' ' + (await r0.text()).slice(0, 200)); process.exit(1); }
 const 공고 = await r0.json();
