@@ -22,7 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 받기, 설정, 담기 } from './공통.mjs';
+import { 받기, 설정, 담기, 최근인가 } from './공통.mjs';
 import { sortJob } from '../sort-rule.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -105,6 +105,7 @@ if (!fs.existsSync(설정자리)) {
 const { 곳들 } = JSON.parse(fs.readFileSync(설정자리, 'utf8'));
 const cfg = 설정();
 const 담을것 = [];
+const 안담음 = [];
 let 열린곳 = 0; let 못연곳 = 0;
 for (const 곳 of 곳들.slice(0, 몇개)) {
   const r = await 받기(곳.주소);
@@ -121,6 +122,9 @@ for (const 곳 of 곳들.slice(0, 몇개)) {
       + x.제목.slice(0, 54));
   }
   for (const x of 우리것) {
+    /* ★ 올린날이 있고 **90일 안**인 것만 담습니다 (공통.mjs 의 최근인가) —
+       날짜 없는 줄·오래된 줄은 아래에서 세어 찍기만 합니다 */
+    if (!최근인가(x.올린날, 90)) { 안담음.push({ 곳: 곳.이름, ...x }); continue; }
     담을것.push({
       id: 'HS4-' + 표(x) + '-' + x.wr,
       source: 출처,
