@@ -115,7 +115,8 @@ for (const x of 담김) {
   값셈.get(접(x)).push(x);
 }
 for (const [v, 들] of [...값셈].sort((a, b) => b[1].length - a[1].length)) {
-  console.log('  ' + String(들.length).padStart(4) + '건  「' + v + '」');
+  console.log('  ' + String(들.length).padStart(4) + '건 (회원 화면 '
+    + 들.filter((x) => 보임.has(x.id)).length + ')  「' + v + '」');
   /* 견본 셋을 함께 찍습니다 — 값이 수상하면 그 공고를 바로 열어 봐야 합니다 (지침 2절) */
   console.log('        ' + 들.slice(0, 3).map((x) => x.id + '(' + x.source + ')').join(' · '));
 }
