@@ -116,6 +116,7 @@ const 줄들 = psql(`
     left join 기관 o on o.이름키 = hira_name_key(g."기관")
     left join hira_org h on h.ykiho = o.ykiho
     left join hosp_sites s on s."이름열쇠" = o.이름키 and coalesce(s."끔", false) = false
+   where g."상태" = '사각지대'
    order by g."갈래", g."기관";`).split('\n').filter(Boolean).map((l) => {
   const [갈래, 종류, 기관, 시도, 시군구, 기관번호, 채용페이지, 홈페이지, 심평원주소, 사이트표] = l.split('\t');
   return { 갈래, 종류, 기관, 시도, 시군구, 기관번호, 채용페이지, 홈페이지, 심평원주소, 사이트표 };
