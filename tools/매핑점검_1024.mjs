@@ -93,14 +93,25 @@ const 이름것 = 줄로(`
   select i."기관번호", i.이름키, i.이름, i.공고::text, i.회원화면::text,
          i.시도수::text, coalesce(i.시도들,''),
          (select count(*) from hira_org h where h.name_key like '%' || i.이름키 || '%')::text as 품은곳,
-         length(i.이름키)::text, i.견본공고, i.견본기관이름
+         length(i.이름키)::text, i.견본공고, i.견본기관이름,
+         /* ★ 2026-10-24 세중님 E — **심평원 시도 ↔ 공고 시도**. 「경기도 ↔ 경기」 처럼
+            글자만 다른 것을 의심으로 세지 않게 **앞 두 글자**로 견줍니다 */
+         coalesce((select string_agg(distinct left(h.sido_nm, 2), '·')
+                     from hira_org h where h.name_key like '%' || i.이름키 || '%'), '') as 심평원시도,
+         coalesce(left(i.시도들, 2), '') as 공고시도
     from 이름붙음 i
    order by i.회원화면 desc, i.공고 desc;`);
 
 const 의심 = [];
 for (const r of 이름것) {
-  const [기관번호, 이름키, 이름, 공고, 회원화면, 시도수, 시도들, 품은곳, 키길이, 견본공고, 견본이름] = r;
+  const [기관번호, 이름키, 이름, 공고, 회원화면, 시도수, 시도들, 품은곳, 키길이,
+    견본공고, 견본이름, 심평원시도, 공고시도] = r;
   const 까닭 = [];
+  /* ④ 지역이 어긋남 — 공고 시도가 심평원 시도 목록에 **없을 때만** (앞 두 글자로) */
+  if (공고시도 && 심평원시도 && Number(시도수) === 1
+      && !String(심평원시도).split('·').includes(공고시도)) {
+    까닭.push('지역 어긋남 (공고 ' + 공고시도 + ' ↔ 심평원 ' + String(심평원시도).slice(0, 24) + ')');
+  }
   if (Number(시도수) > 1) 까닭.push('공고 시도가 ' + 시도수 + '곳 (' + 시도들 + ')');
   if (Number(품은곳) > 1) 까닭.push('심평원에 그 이름을 품은 곳 ' + 품은곳 + '곳');
   if (Number(키길이) <= 4) 까닭.push('이름키가 짧음(' + 키길이 + '자)');
