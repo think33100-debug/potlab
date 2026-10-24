@@ -102,9 +102,15 @@ export async function 담기(cfg, 출처, 줄들, { 진짜 = false } = {}) {
     연결근거: '긁기 설정',
   }));
   if (!진짜) return { 됨: true, 마른: true, 줄: 줄.length };
+  /* ★ `collect_put` 은 **service_role 에만** 열려 있습니다 (ACL 확인 —
+     {postgres,service_role}). anon 으로 부르면 42501 입니다. 기존 수집기도
+     service_role 로 부릅니다 (collect-hosp.mjs:117) — 권한은 그 위에
+     **출처 열쇠(p_secret)** 로 한 번 더 봅니다 */
+  const 창구열쇠 = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;
   const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/collect_put', {
     method: 'POST',
-    headers: { apikey: cfg.SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+    headers: { apikey: 창구열쇠, Authorization: 'Bearer ' + 창구열쇠,
+      'Content-Type': 'application/json' },
     body: JSON.stringify({ p_secret: 열쇠, p_source: 출처, p_rows: 줄 }),
   });
   const t = await r.text();
