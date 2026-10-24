@@ -35,6 +35,12 @@ const 값 = (이름, 기본) => { const i = argv.indexOf(이름); return i > -1 
 const 진짜 = argv.includes('--진짜');
 const 건마다 = argv.includes('--건마다');
 const 몇개 = Number(값('--몇개', 40)) || 40;
+/* ★ 2026-10-24 세중님 1번 — **이미 쓴 공고를 고친 자로 다시** 재 봅니다.
+   칸대조.mjs 의 조각내기() 를 고쳤고(꼬리표가 두 번째 조각부터 안 떨어졌습니다),
+   근무지 자를 화면과 맞췄습니다. 새 표본을 뽑으면 **고친 효과를 못 봅니다** —
+   같은 공고로 전후를 견주어야 합니다. 쓴 것 기록(log/신뢰셋_표본기록.json)에서
+   고릅니다. ★ --진짜 와 함께 쓰지 않습니다 (표본 기록을 더럽히지 않습니다) */
+const 쓴것다시 = argv.includes('--쓴것다시');
 const 반 = Math.floor(몇개 / 2);
 const 틈ms = Number(process.env.POTJOB_WN_GAP_MS) || 3500;
 
@@ -136,17 +142,22 @@ const 워크넷인가 = (j) => (묶음이름[j.source] || j.source) === '워크�
 const 안쓴것먼저 = (a, b) => (이미썼나.has(a.id) ? 1 : 0) - (이미썼나.has(b.id) ? 1 : 0)
   || String(a.id).localeCompare(String(b.id));
 
-const 워크넷들 = 공고.filter((j) => 워크넷인가(j) && /^https?:\/\//.test(String(j.url || '')))
-  .sort(안쓴것먼저).slice(0, 반);
+const 쓴것먼저 = (a, b) => (이미썼나.has(a.id) ? 0 : 1) - (이미썼나.has(b.id) ? 0 : 1)
+  || String(a.id).localeCompare(String(b.id));
+const 차례 = 쓴것다시 ? 쓴것먼저 : 안쓴것먼저;
+const 쓴것만 = (a) => (쓴것다시 ? a.filter((j) => 이미썼나.has(j.id)) : a);
+
+const 워크넷들 = 쓴것만(공고.filter((j) => 워크넷인가(j) && /^https?:\/\//.test(String(j.url || ''))))
+  .sort(차례).slice(0, 반);
 
 /* 긁기 출처는 **출처를 고르게** — 묶음별로 번갈아 집습니다 (한 출처가 다 먹지 않게) */
 const 긁기묶음 = new Map();
-for (const j of 공고.filter((x) => !워크넷인가(x) && 원문쓸만한가(글.get(x.id) || ''))) {
+for (const j of 쓴것만(공고.filter((x) => !워크넷인가(x) && 원문쓸만한가(글.get(x.id) || '')))) {
   const 묶 = 묶음이름[j.source] || j.source;
   if (!긁기묶음.has(묶)) 긁기묶음.set(묶, []);
   긁기묶음.get(묶).push(j);
 }
-for (const a of 긁기묶음.values()) a.sort(안쓴것먼저);
+for (const a of 긁기묶음.values()) a.sort(차례);
 const 긁기들 = [];
 for (let i = 0; 긁기들.length < 반; i++) {
   let 넣음 = false;
