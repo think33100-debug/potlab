@@ -1,0 +1,944 @@
+{
+ "꼴": "표준게시판",
+ "만든때": "2026-10-24 17:29:17",
+ "곳": 117,
+ "기관번호붙음": 111,
+ "곳들": [
+  {
+   "이름": "강원특별자치도강릉의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.gnmc.or.kr/recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjEwMDIjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "강원특별자치도원주의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.kwmc.or.kr/comm/recruit.html",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQ0NjE0ODEjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "경상남도마산의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.mmc.or.kr/board/list?id=12&menuId=112",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQyNjEyMjIjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "경찰병원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.nph.go.kr/nph/bbs/B0000018/list.do?menuNo=200110",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjE4MzIjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "광주보훈병원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.bohun.or.kr/gwangju/na/ntt/selectNttList.do?mi=32890&bbsId=1158",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQyNjE4MzIjNzEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "국립암센터",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.ncc.re.kr/board.ncc?uri=notice06&searchKey=total&searchValue=&pageNum=1",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5MiQzNjE0ODEjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "국립중앙의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.nmc.or.kr/nmc/board/B0000007",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQ3IyQwMCQyNjEwMDIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "대전보훈병원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.bohun.or.kr/daejeon/na/ntt/selectNttList.do?mi=33414&bbsId=1158",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkMiMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQyNjE4MzIjNzEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "부산광역시의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.busanmc.or.kr/busanmc/index.php?pCode=recruit",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQyNjE0ODEjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "서울특별시보라매병원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.brmh.org/job/list.do",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQzNjE0ODEjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "서울특별시서울의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.seoulmc.or.kr/pms/board/list.do?sitecdv=S0000100&decorator=pmsweb&boardidn=216&menucdv=06030000",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQ3IyQwMCQyNjEyMjIjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "성남시의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.scmc.kr/recruit/recruitList/",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQ3IyQwMCQzNjEyMjIjNjEjJDEjJDAjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "영주적십자병원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.rch.or.kr/web/rchyoungju/bbs/employment",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQyNjEwMDIjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "전라남도 순천의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://jsmc.or.kr/?contentId=c9f0f895fb98ab9159f51fd0297e236d",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQxMyQzNjE4MzIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "전북특별자치도 남원의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.namwonmed.or.kr/content/hire_notice",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkNiMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQ0NjE0ODEjNzEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "충청남도 공주의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://gjmc.or.kr/board/kwzey",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkMiMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQyNjE4MzIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "충청남도 서산의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://seosanmc.or.kr/board/recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkMiMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjEyMjIjNjEjJDEjJDAjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "충청남도 천안의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.camc.or.kr/board/syfsx",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkMiMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjEwMDIjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "충청남도 홍성의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.hsmc.or.kr/board/syfsx",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkMiMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQyNjEyMjIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "충청북도 충주의료원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://cjmct.or.kr/board/syfsx",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkOCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjEyMjIjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "한국보훈복지의료공단 대구보훈병원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.bohun.or.kr/daegu/na/ntt/selectNttList.do?mi=33151&bbsId=1158",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQyNjEyMjIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "한국원자력의학원원자력병원",
+   "종류": "종합병원",
+   "지역": "",
+   "주소": "https://www.kirams.re.kr/board/generalBoardList7.do",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ5OSQ0NjEwMDIjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "가톨릭대학교 은평성모병원",
+   "종류": "종합병원",
+   "지역": "서울 은평구",
+   "주소": "https://www.cmcep.or.kr/api/article/837?page=1&size=12",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjEwMDIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "가톨릭대학교부천성모병원",
+   "종류": "종합병원",
+   "지역": "경기 부천원미구",
+   "주소": "https://www.cmcbucheon.or.kr/api/article/141?page=1&size=12",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQyNjEwMDIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "가톨릭대학교의정부성모병원",
+   "종류": "종합병원",
+   "지역": "경기 의정부시",
+   "주소": "https://www.cmcujb.or.kr/api/article/128?page=1&size=12",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQ0NjEwMDIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "건국대학교 충주병원",
+   "종류": "종합병원",
+   "지역": "충북 충주시",
+   "주소": "https://www.kuh.co.kr/bbs/data/list.do?per_menu_idx=51&tabCnt=3&menu_idx=134",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkOCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQyNjE4MzIjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "계명대학교 경주동산병원",
+   "종류": "병원",
+   "지역": "경북 경주시",
+   "주소": "https://gyeongju.dsmc.or.kr:49890/content/03use/07_03.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkOTkkMzgxMzUxIzIxIyQxIyQ1IyQwMyQzNjEyMjIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "계명대학교대구동산병원",
+   "종류": "종합병원",
+   "지역": "대구 대구중구",
+   "주소": "https://daegu.dsmc.or.kr:49880/content/03use/07_03.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQzNjEwMDIjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "노원을지대학교병원",
+   "종류": "종합병원",
+   "지역": "서울 노원구",
+   "주소": "https://www.eulji.or.kr/info/info_pg06_04.jsp",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ3OSQyNjEwMDIjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "대구가톨릭대학교 칠곡가톨릭병원",
+   "종류": "종합병원",
+   "지역": "대구 대구북구",
+   "주소": "http://www.tcmcch.co.kr/content/04client/02_01.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQzIyQwMCQzNjE4MzIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "동국대학교일산불교병원",
+   "종류": "종합병원",
+   "지역": "경기 고양일산동구",
+   "주소": "https://www.dumc.or.kr/is/board/commBoardRecruitList.do",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQwMyQ0NjE0ODEjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "연세대학교 의과대학 용인세브란스병원",
+   "종류": "종합병원",
+   "지역": "경기 용인기흥구",
+   "주소": "https://yi.severance.healthcare/yi/index.do",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQyNjE4MzIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "인제대학교 상계백병원",
+   "종류": "종합병원",
+   "지역": "서울 노원구",
+   "주소": "https://www.paik.ac.kr/sanggye/user/job/list.do?menuNo=700029",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQwMyQyNjEwMDIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "인제대학교 해운대백병원",
+   "종류": "종합병원",
+   "지역": "부산 부산해운대구",
+   "주소": "https://www.paik.ac.kr/haeundae/user/job/list.do?menuNo=900101",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQyNjE0ODEjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "제주대학교병원",
+   "종류": "종합병원",
+   "지역": "제주 제주시",
+   "주소": "https://www.jejunuh.co.kr/prog/rcrutPbanc/main/sub05_03_03_01/list.do",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkOCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQyNjE0ODEjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "차의과학대학교부속구미차병원",
+   "종류": "종합병원",
+   "지역": "경북 구미시",
+   "주소": "https://gumi.chamc.co.kr/Default.cha",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQzIyQwMCQzNjE0ODEjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "차의과학대학교분당차병원",
+   "종류": "종합병원",
+   "지역": "경기 성남분당구",
+   "주소": "https://bundang.chamc.co.kr/Default.cha",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQyNjEwMDIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "학교법인 을지학원 의정부을지대학교병원",
+   "종류": "종합병원",
+   "지역": "경기 의정부시",
+   "주소": "https://www.uemc.ac.kr/info/info_pg06_04.jsp",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ2MiQyNjEwMDIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "한림대학교 강남성심병원",
+   "종류": "종합병원",
+   "지역": "서울 영등포구",
+   "주소": "https://recruit.hallym.or.kr/hrt_p10_list.jsp?inggbn=ing&movePage=1",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQzIyQwMCQyNjE0ODEjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "가톨릭대학교 성빈센트병원",
+   "종류": "상급종합",
+   "지역": "경기 수원팔달구",
+   "주소": "https://www.cmcvincent.or.kr/api/article/167?page=1&size=12&vincentRecruitYn=Y",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjEwMDIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "강릉아산병원",
+   "종류": "상급종합",
+   "지역": "강원 강릉시",
+   "주소": "https://www.gnah.co.kr/kor/CMS/RecruitMgr/list.do?mCode=MN122",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQ0NjEwMDIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "건국대학교병원",
+   "종류": "상급종합",
+   "지역": "서울 광진구",
+   "주소": "https://www.kuh.ac.kr/recruit/apply/noticeList.do",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQyNjE4MzIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "경북대학교병원",
+   "종류": "상급종합",
+   "지역": "대구 대구중구",
+   "주소": "https://knuh.kr/content/04information/02_01.asp",
+   "기관번호": null,
+   "왜": "이름키로 2곳 — 손확인 (짐작 금지)"
+  },
+  {
+   "이름": "경북대학교병원",
+   "종류": "상급종합",
+   "지역": "대구 대구중구",
+   "주소": "https://knuh.kr/content/04information/02_01.asp",
+   "기관번호": null,
+   "왜": "이름키로 2곳 — 손확인 (짐작 금지)"
+  },
+  {
+   "이름": "계명대학교동산병원",
+   "종류": "상급종합",
+   "지역": "대구 대구달서구",
+   "주소": "https://dongsan.dsmc.or.kr:49870/content/03intro/04_01.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQyNjEyMjIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "고신대학교복음병원",
+   "종류": "상급종합",
+   "지역": "부산 부산서구",
+   "주소": "https://www.kosinmed.or.kr/service/service_3.php",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQyNjE4MzIjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "대구가톨릭대학교병원",
+   "종류": "상급종합",
+   "지역": "대구 대구남구",
+   "주소": "https://www.dcmc.co.kr/content/06customer/10_03.asp",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQ0NjEwMDIjNTEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "동아대학교병원",
+   "종류": "상급종합",
+   "지역": "부산 부산서구",
+   "주소": "https://www.damc.or.kr/05/03_2017.php",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQzIyQwMCQ0NjEwMDIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "분당서울대학교병원",
+   "종류": "상급종합",
+   "지역": "경기 성남분당구",
+   "주소": "https://www.snubh.org/index.do",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQwMyQyNjEwMDIjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "삼성서울병원",
+   "종류": "상급종합",
+   "지역": "서울 강남구",
+   "주소": "https://www.samsunghospital.com/home/recruit/recruitInfo/recruitNotice.do",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQxMyQzNjEwMDIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "서울대학교병원",
+   "종류": "상급종합",
+   "지역": "서울 종로구",
+   "주소": "https://www.snuh.org/about/news/recruit/recruList.do",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjE4MzIjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "아주대학교병원",
+   "종류": "상급종합",
+   "지역": "경기 수원영통구",
+   "주소": "https://hosp.ajoumc.or.kr/",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQzNjE4MzIjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "영남대학교병원",
+   "종류": "상급종합",
+   "지역": "대구 대구남구",
+   "주소": "https://yumc.ac.kr/",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjE0ODEjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "영남대학교병원",
+   "종류": "상급종합",
+   "지역": "대구 대구남구",
+   "주소": "https://yumc.ac.kr/apply/web/recruit/RecruitList.do?agp=20",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjE0ODEjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "인제대학교부산백병원",
+   "종류": "상급종합",
+   "지역": "부산 부산진구",
+   "주소": "https://www.paik.ac.kr/busan/user/job/list.do?menuNo=900101",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjEyMjIjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "인하대학교의과대학부속병원",
+   "종류": "상급종합",
+   "지역": "인천 인천중구",
+   "주소": "https://www.inha.com/page/main",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQzNjEwMDIjNjEjJDEjJDAjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "학교법인 건양교육재단 건양대학교병원",
+   "종류": "상급종합",
+   "지역": "대전 대전서구",
+   "주소": "https://www.kyuh.ac.kr/prog/recruitNotice/list.do?lyMcd=sub01_01&pageUnit=15",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkMiMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQzNjE0ODEjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "학교법인가톨릭학원가톨릭대학교서울성모병원",
+   "종류": "상급종합",
+   "지역": "서울 서초구",
+   "주소": "https://www.cmcseoul.or.kr/api/article/64?page=1&size=12",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQzIyQwMCQyNjE4MzIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "학교법인성균관대학삼성창원병원",
+   "종류": "상급종합",
+   "지역": "경남 창원마산회원구",
+   "주소": "https://smc.skku.edu/recruit/recruit/recruitInfo/list.do?mId=32",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQyNjEyMjIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "한림대학교성심병원",
+   "종류": "상급종합",
+   "지역": "경기 안양동안구",
+   "주소": "https://recruit.hallym.or.kr/hrt_p10_list.jsp?inggbn=ing&movePage=1",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQyNjEyMjIjNzEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "화순전남대학교병원",
+   "종류": "상급종합",
+   "지역": "전남 화순군",
+   "주소": "https://www.cnuhh.com/main.cs",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQ0NjEwMDIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "(의)나사렛의료재단 나사렛국제병원",
+   "종류": "종합병원",
+   "지역": "인천 인천연수구",
+   "주소": "https://www.nasaret.co.kr/sub04/sub04-8.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ3OSQyNjEwMDIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "검단탑병원",
+   "종류": "종합병원",
+   "지역": "인천 인천서구",
+   "주소": "https://www.tophospital.co.kr/about/recruit.html",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQxMyQzNjE4MzIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "광주기독병원",
+   "종류": "종합병원",
+   "지역": "전남 광주남구",
+   "주소": "https://www.kch.or.kr/user/board/lists/board_cd/notice",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQyNjE4MzIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "광주씨티병원",
+   "종류": "종합병원",
+   "지역": "전남 광주남구",
+   "주소": "https://ct119.co.kr/index.php?cate=004004",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQyNjEwMDIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "구미강동병원",
+   "종류": "종합병원",
+   "지역": "경북 구미시",
+   "주소": "http://www.gumigd.com/about/jobnotice_announcement.html",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQyNjEyMjIjNjEjJDEjJDAjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "구포성심병원",
+   "종류": "종합병원",
+   "지역": "부산 부산북구",
+   "주소": "https://www.guposs.com/kr/?pCode=recruit",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQzNjEyMjIjNzEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "남양주 한양병원",
+   "종류": "종합병원",
+   "지역": "경기 남양주시",
+   "주소": "https://www.hynyj.co.kr/recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQxMyQ0NjEwMDIjNjEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "대구파티마병원",
+   "종류": "종합병원",
+   "지역": "대구 대구동구",
+   "주소": "https://www.fatima.or.kr/employ/recruit_notice/list.do",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQyNjE4MzIjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "대동병원",
+   "종류": "종합병원",
+   "지역": "부산 부산동래구",
+   "주소": "https://www.ddh.co.kr/board/%EA%B3%A0%EA%B0%9D%EC%84%9C%EB%B9%84%EC%8A%A4/%EC%B1%84%EC%9A%A9%EC%86%8C%EC%8B%9D",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQ0NjE0ODEjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "대림성모병원",
+   "종류": "종합병원",
+   "지역": "서울 영등포구",
+   "주소": "https://www.drh.co.kr/new/front/index.php?g_page=intro&m_page=intro08",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQ0NjEwMDIjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "대진의료재단 분당제생병원",
+   "종류": "종합병원",
+   "지역": "경기 성남분당구",
+   "주소": "https://www.dmc.or.kr/recruit/recruit/list.do",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQzNjE4MzIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "대청병원",
+   "종류": "종합병원",
+   "지역": "대전 대전서구",
+   "주소": "https://www.dchp.or.kr/board/recruit/",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkMiMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQzNjE0ODEjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "더블유병원",
+   "종류": "종합병원",
+   "지역": "대구 대구달서구",
+   "주소": "https://www.w-hospital.co.kr/board/recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQzNjE0ODEjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "미래로21병원",
+   "종류": "종합병원",
+   "지역": "전남 광주서구",
+   "주소": "https://www.mr21mc.kr/Module/Board/Board.asp?ModuleID=4",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQwMyQzNjE4MzIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "부민병원",
+   "종류": "종합병원",
+   "지역": "서울 강서구",
+   "주소": "http://www.bumin.co.kr/busan/",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQyNjE4MzIjNTEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "부산성모병원(재단법인 천주교부산교구유지재단)",
+   "종류": "종합병원",
+   "지역": "부산 부산남구",
+   "주소": "https://www.bsm.or.kr/05_comm/0501.asp",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjEwMDIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "삼육서울병원",
+   "종류": "종합병원",
+   "지역": "서울 동대문구",
+   "주소": "https://www.symcs.co.kr/",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjE0ODEjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "서산중앙병원",
+   "종류": "종합병원",
+   "지역": "충남 서산시",
+   "주소": "https://www.isjh.co.kr/careers_3",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkMiMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQ0NjE0ODEjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "성심의료재단강동성심병원",
+   "종류": "종합병원",
+   "지역": "서울 강동구",
+   "주소": "https://recruit.kdh.or.kr/sub_51.php",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5MiQyNjEyMjIjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "양산성모병원",
+   "종류": "종합병원",
+   "지역": "경남 양산시",
+   "주소": "https://www.yangsansm.com/recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5MiQyNjEyMjIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "에스포항병원",
+   "종류": "종합병원",
+   "지역": "경북 포항남구",
+   "주소": "https://pssh.kr/RecruitmentAnnouncement",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQzNjE4MzIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "여천전남병원",
+   "종류": "종합병원",
+   "지역": "전남 여수시",
+   "주소": "http://www.yccnhosp.com/Board/boardList.asp?Gubun=1&Key=&KeyWord=&page=1&pagesize=10",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ3OSQyNjEyMjIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 갈렌의료재단 박병원",
+   "종류": "종합병원",
+   "지역": "경기 평택시",
+   "주소": "https://www.parkmedical.co.kr/board/recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ5OSQzNjEwMDIjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 강릉동인병원",
+   "종류": "종합병원",
+   "지역": "강원 강릉시",
+   "주소": "http://www.dong-in.or.kr/portal/bbs02/list.do?menuNo=2040200",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQ0NjEwMDIjNjEjJDEjJDAjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 거붕 백병원",
+   "종류": "종합병원",
+   "지역": "경남 거제시",
+   "주소": "http://www.gbh.or.kr/info/info04.html",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjE0ODEjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 건명의료재단 중앙제일병원",
+   "종류": "종합병원",
+   "지역": "충북 진천군",
+   "주소": "https://joongangjeil.co.kr/introduction/recruit.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkOCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQyNjE4MzIjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 덕산의료재단 수원덕산병원",
+   "종류": "종합병원",
+   "지역": "경기 수원권선구",
+   "주소": "https://www.swdeoksanmc.com/employ/recruit_notice/list.do",
+   "기관번호": "HIRA:JDU4MTI3MSM1MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQyNjEyMjIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 동강의료재단 동강병원",
+   "종류": "종합병원",
+   "지역": "울산 울산중구",
+   "주소": "https://www.dkmc.or.kr/hosguide/hosguide04_01.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQ0NjE0ODEjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 동강의료재단 동천동강병원",
+   "종류": "종합병원",
+   "지역": "울산 울산중구",
+   "주소": "https://dc.dkmc.or.kr/medical/medical06_01.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQzNjE0ODEjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 동해동인병원",
+   "종류": "종합병원",
+   "지역": "강원 동해시",
+   "주소": "http://www.dhdongin.or.kr/Board/boardList.asp?Gubun=7&Key=&KeyWord=&page=1&pagesize=10",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQyNjE0ODEjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 백제병원",
+   "종류": "종합병원",
+   "지역": "충남 논산시",
+   "주소": "https://www.bjhosp.co.kr/RecruitInfo/RecruitInfoList.asp",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkMiMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjEyMjIjNzEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 은성의료재단 좋은삼정병원",
+   "종류": "종합병원",
+   "지역": "울산 울산남구",
+   "주소": "http://www.sam-jeong.or.kr/samjeong/board/list.do?mId=67",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQ0NjE0ODEjNjEjJDEjJDAjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 정산의료재단 효성병원",
+   "종류": "종합병원",
+   "지역": "충북 청주상당구",
+   "주소": "http://106.248.126.61/hyosung/forum.cfm?forum=66",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkOCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQyNjEwMDIjNzEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 정안의료재단 중앙병원",
+   "종류": "종합병원",
+   "지역": "울산 울산남구",
+   "주소": "https://www.jeju-jungangh.com/kor/wpbbs/list.php?wpboard=recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkOCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjE4MzIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 토마스의료재단 윌스기념병원",
+   "종류": "종합병원",
+   "지역": "경기 수원팔달구",
+   "주소": "https://allspine.com/intro/intro06_03.html",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ2MiQyNjE4MzIjNzEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인 혜인의료재단 한국병원",
+   "종류": "종합병원",
+   "지역": "제주 제주시",
+   "주소": "http://www.hanhsp.co.kr/index.asp?",
+   "기관번호": null,
+   "왜": "이름키로 2곳 — 손확인 (짐작 금지)"
+  },
+  {
+   "이름": "의료법인 혜인의료재단 한국병원",
+   "종류": "종합병원",
+   "지역": "제주 제주시",
+   "주소": "https://www.hankookhospital.co.kr/",
+   "기관번호": null,
+   "왜": "이름키로 2곳 — 손확인 (짐작 금지)"
+  },
+  {
+   "이름": "의료법인 혜인의료재단 한국병원",
+   "종류": "종합병원",
+   "지역": "제주 제주시",
+   "주소": "http://www.hanhsp.co.kr/index.asp?",
+   "기관번호": null,
+   "왜": "이름키로 2곳 — 손확인 (짐작 금지)"
+  },
+  {
+   "이름": "의료법인 혜인의료재단 한국병원",
+   "종류": "종합병원",
+   "지역": "제주 제주시",
+   "주소": "https://www.hankookhospital.co.kr/",
+   "기관번호": null,
+   "왜": "이름키로 2곳 — 손확인 (짐작 금지)"
+  },
+  {
+   "이름": "의료법인거명의료재단 영광기독병원",
+   "종류": "종합병원",
+   "지역": "전남 영광군",
+   "주소": "https://www.ygch.co.kr/?page_id=3917",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQwMyQyNjEyMjIjNDEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인백송의료재단 굿모닝병원",
+   "종류": "종합병원",
+   "지역": "경기 평택시",
+   "주소": "https://www.goodmhospital.co.kr/app/communication/recruit.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5MiQzNjE4MzIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인서울효천의료재단 에이치플러스양지병원",
+   "종류": "종합병원",
+   "지역": "서울 관악구",
+   "주소": "https://www.newyjh.com/hospital/hospital-100200.html",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQ3IyQwMCQ0NjEwMDIjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인안동병원",
+   "종류": "종합병원",
+   "지역": "경북 안동시",
+   "주소": "https://www.andonghospital.co.kr/recruit/job/list.do",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQyNjEyMjIjNTEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인영경의료재단전주병원",
+   "종류": "종합병원",
+   "지역": "전북 전주완산구",
+   "주소": "https://www.jjhospital.co.kr/bbs/recruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkNiMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQyNjEwMDIjNjEjJDEjJDAjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인우리의료재단김포우리병원",
+   "종류": "종합병원",
+   "지역": "경기 김포시",
+   "주소": "https://www.gwhospital.co.kr/intro/recruit_list.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ3OSQ0NjE0ODEjODEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인인봉의료재단뉴고려병원",
+   "종류": "종합병원",
+   "지역": "경기 김포시",
+   "주소": "https://www.nkhospital.net/notice/notice.php?jb_code=100",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ4OSQyNjE0ODEjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인정화의료재단 봉생기념병원",
+   "종류": "종합병원",
+   "지역": "부산 부산동구",
+   "주소": "http://bsmh.or.kr/page/board/board.php?tno=1415",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQzNjEyMjIjNTEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인한성재단포항세명기독병원",
+   "종류": "종합병원",
+   "지역": "경북 포항남구",
+   "주소": "https://www.phgidok.com/main/custom/recruiter/",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQyNjEwMDIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인한전의료재단 한일병원",
+   "종류": "종합병원",
+   "지역": "서울 도봉구",
+   "주소": "https://www.hanilhosp.co.kr/",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQzNjEyMjIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인한전의료재단 한일병원",
+   "종류": "종합병원",
+   "지역": "서울 도봉구",
+   "주소": "https://www.hanilmed.net/portal/index.do;jsessionid=1MRyxJyOKV1tksZOXk5Lf8qSbNc66zrMUIU1ctz7Gup1hpVYTUCGS1HynDUAKKmj.hpwebr02_servlet_hompg",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4MiQzNjEyMjIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "의료법인합포의료재단에스엠지연세병원",
+   "종류": "종합병원",
+   "지역": "경남 창원마산합포구",
+   "주소": "https://www.smgysh.co.kr/news/employment.php",
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQyIyQzIyQwMCQ0NjEwMDIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "인천세종병원",
+   "종류": "종합병원",
+   "지역": "인천 인천계양구",
+   "주소": "https://incheon.sejongh.co.kr/recruit?cate1=178&cate2=321&html_mode=board&Depth=2",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ5OSQzNjEyMjIjNzEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "재단법인예수병원유지재단예수병원",
+   "종류": "종합병원",
+   "지역": "전북 전주완산구",
+   "주소": "https://www.jesushospital.com/khospital/khospital01_04_01?lang=kor",
+   "기관번호": "HIRA:JDQ4MTYyMiM2MSMkMSMkNiMkODkkMzgxMzUxIzExIyQxIyQzIyQ3OSQyNjEyMjIjODEjJDEjJDIjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "학교법인)동의병원",
+   "종류": "종합병원",
+   "지역": "부산 부산진구",
+   "주소": "https://www.demc.kr/05_plaza/?mcode=0405030000",
+   "기관번호": "HIRA:JDQ4MTAxMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQyNjEwMDIjNDEjJDEjJDgjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "현대병원",
+   "종류": "종합병원",
+   "지역": "경기 남양주시",
+   "주소": "https://www.hdgh.co.kr/intro/recruit.php?m_menu_code=MM0010&s_menu_code=SM1004&m_seq=4&s_seq=78",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ3OSQyNjE0ODEjNTEjJDEjJDYjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "홍천아산병원",
+   "종류": "종합병원",
+   "지역": "강원 홍천군",
+   "주소": "https://hch.asanfoundation.or.kr/asan/depts/D140/K/bbs.do?menuId=4985",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjE4MzIjNjEjJDEjJDQjJDgz",
+   "왜": "기관 표에서 이름키로 하나"
+  }
+ ]
+}
