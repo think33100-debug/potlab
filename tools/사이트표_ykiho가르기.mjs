@@ -44,6 +44,30 @@ export const 손으로가린것 = [
     왜: '쪽 주소 「서울특별시 도봉구 우이천로 308」 · 전화 02-901-3114 = 심평원 한전의료재단 한일병원(종합병원 · 1층 대상)' },
 ];
 
+/** 전화번호를 숫자만 남겨 견줍니다 (「02-901-3114」 ↔ 「029013114」) */
+export const 전화숫자 = (s) => String(s || '').replace(/[^0-9]/g, '');
+/** 쪽에서 전화 꼴을 모읍니다 */
+export const 쪽전화들 = (html) => {
+  const 글 = String(html || '').replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
+  return [...new Set((글.match(/0\d{1,2}[-)\s]\s?\d{3,4}[-\s]\d{4}/g) || []).map(전화숫자))];
+};
+
+if (process.argv.includes('--자기점검')) {
+  const 잼 = [];
+  const 보 = (무엇, 참) => 잼.push([무엇, !!참]);
+  보('전화 숫자만', 전화숫자('02-901-3114') === '029013114');
+  보('쪽에서 전화를 모은다', 쪽전화들('<p>대표전화 : 02-901-3114</p>').includes('029013114'));
+  보('괄호 꼴도 모은다', 쪽전화들('TEL 055) 759-7777').includes('0557597777'));
+  보('전화가 없으면 빈 배열', 쪽전화들('<p>전화 없음</p>').length === 0);
+  const 어긴것 = 잼.filter(([, ok]) => !ok);
+  for (const [무엇, ok] of 잼) console.log((ok ? '  ○ ' : '  ✗ ') + 무엇);
+  if (어긴것.length) { console.error('✗ 자기점검 ' + 어긴것.length + '가지 실패'); process.exit(1); }
+  console.log('○ 자기점검 통과 — ' + 잼.length + '가지');
+  process.exit(0);
+}
+
 const cfg = {};
 for (const f of ['.env', '.env.local']) {
   const p = path.join(뿌리, f);
@@ -95,6 +119,39 @@ for (const [열쇠, 이름, 주소, n] of 여럿) {
 console.log('  — 모두 ' + 여럿.length + '줄 (손으로 가린 것 '
   + 여럿.filter(([, , 주소]) => 손으로가린것.some((x) => String(주소).includes(x.집))).length + '줄)');
 
+/* ── ★ 여럿인 줄을 **열어서 전화로** 가립니다 (짐작 아님 · 세중님 1번) ──
+   심평원 후보의 전화와 쪽의 전화가 **딱 하나** 맞을 때만 받습니다. 둘 이상 맞거나
+   하나도 안 맞으면 **비워 둡니다** (지침 3절 — 짐작하지 않습니다) */
+const 전화로가린것 = [];
+console.log('\n── 여럿인 줄을 열어 전화로 가립니다 (한 집마다 0.8초) ──');
+for (const [열쇠, 이름, 주소] of 여럿) {
+  if (손으로가린것.some((x) => String(주소).includes(x.집))) continue;
+  if (!주소) { console.log('  · ' + String(이름).slice(0, 24).padEnd(25) + '주소 없음'); continue; }
+  const 후보 = psql(`select ykiho, yadm_nm, coalesce(tel,''), sido_nm, sggu_nm
+       from hira_org where name_key = '${String(열쇠).replace(/'/g, "''")}' order by ykiho;`)
+    .split('\n').filter(Boolean).map((l) => l.split('\t'));
+  let html = '';
+  try {
+    const r = await fetch(주소, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; potjob-collector/1.0; +https://potjob.co.kr)' },
+      signal: AbortSignal.timeout(15000), redirect: 'follow' });
+    if (!r.ok) { console.log('  ✗ ' + String(이름).slice(0, 24).padEnd(25) + 'HTTP ' + r.status); continue; }
+    html = await r.text();
+  } catch (e) { console.log('  ✗ ' + String(이름).slice(0, 24).padEnd(25) + String(e.message).slice(0, 34)); continue; }
+  await new Promise((z) => setTimeout(z, 800));
+  const 쪽들 = 쪽전화들(html);
+  const 맞음 = 후보.filter((c) => c[2] && 쪽들.includes(전화숫자(c[2])));
+  if (맞음.length === 1) {
+    전화로가린것.push({ 주소, ykiho: 맞음[0][0],
+      왜: '쪽 전화 ' + 맞음[0][2] + ' = 심평원 ' + 맞음[0][1] + '(' + 맞음[0][3] + ' ' + 맞음[0][4] + ')' });
+    console.log('  ○ ' + String(이름).slice(0, 24).padEnd(25) + 전화로가린것.at(-1).왜);
+  } else {
+    console.log('  · ' + String(이름).slice(0, 24).padEnd(25)
+      + '못 가립니다 — 쪽 전화 ' + (쪽들.slice(0, 2).join(',') || '없음')
+      + ' · 맞는 후보 ' + 맞음.length + '/' + 후보.length + ' → **비워 둡니다**');
+  }
+}
+console.log('  — 전화로 가린 것 ' + 전화로가린것.length + '줄 / 여럿 ' + 여럿.length + '줄');
+
 if (!진짜) {
   console.log('\n[마른] 아무것도 안 바꿨습니다 — --진짜 로 합니다');
   console.log('\n── 돌릴 글 ──');
@@ -138,7 +195,14 @@ for (const x of 손으로가린것) {
   console.log('  ○ ' + x.집.padEnd(22) + n + '줄 — ' + x.왜);
   손 += n;
 }
-console.log('\n채운 줄 — 심평원 한 곳 ' + 자동 + '줄 · 열어서 확인 ' + 손 + '줄');
+let 전화 = 0;
+for (const x of 전화로가린것) {
+  전화 += psql(`update hosp_sites set ykiho = '${x.ykiho}'
+     where url = '${String(x.주소).replace(/'/g, "''")}' and ykiho is distinct from '${x.ykiho}'
+     returning 1;`).split('\n').filter(Boolean).length;
+}
+console.log('\n채운 줄 — 심평원 한 곳 ' + 자동 + '줄 · 열어서 확인(손) ' + 손
+  + '줄 · 전화로 가림 ' + 전화 + '줄');
 
 /* ── 후 원문 ── */
 console.log('\n── 후 · 칸 ──\n' + psql(
