@@ -85,9 +85,43 @@ if (argv.includes('--찾기')) {
   process.exit(0);
 }
 
-if (!argv.includes('--읽기')) {
-  console.error('쓰는 법 — --찾기 | --읽기 [--몇개 5] | --자기점검');
+if (!argv.includes('--읽기') && !argv.includes('--표읽기')) {
+  console.error('쓰는 법 — --찾기 | --읽기 | --표읽기 [--주소 …] [--쪽 12] | --자기점검');
   process.exit(2);
+}
+
+/* ── `--표읽기` — **링크 없는 표 꼴** 게시판을 글자로 읽습니다 (2026-10-24 밤)
+   노원구 통합 공고 게시판(BD_selectBbsList.do)은 상세가 **자바스크립트**라
+   `표준읽기`(링크에 글 번호가 있어야 함)로는 줄 0 입니다. 그런데 **표 글자**에는
+   「번호 제목 담당부서 날짜 조회」가 다 있습니다. 시범으로 **한 곳만** 세어 봅니다.
+   ★ 담지 않습니다 — 세기만 합니다 */
+if (argv.includes('--표읽기')) {
+  const 바탕 = argv.includes('--주소') ? argv[argv.indexOf('--주소') + 1]
+    : 'https://www.nowon.kr/www/user/bbs/BD_selectBbsList.do?q_bbsCode=1003';
+  const 쪽수 = Number(argv.includes('--쪽') ? argv[argv.indexOf('--쪽') + 1] : 12) || 12;
+  const 서른 = new Date(Date.now() - 30 * 24 * 3600e3).toISOString().slice(0, 10);
+  console.log('표 꼴로 읽습니다 — 30일 기준 ' + 서른 + ' · 최대 ' + 쪽수 + '쪽\n' + 바탕 + '\n');
+  const 줄꼴 = /(\d{2,5})\s+(.{4,120}?)\s+([가-힣]{2,10}(?:과|팀|실|센터|소|국))\s+(20\d\d-\d\d-\d\d)/g;
+  const 모음 = []; let 멈춤 = false;
+  for (let p = 1; p <= 쪽수 && !멈춤; p++) {
+    const 주소 = 바탕 + (바탕.includes('?') ? '&' : '?') + 'q_currPage=' + p;
+    const r = await 받기(주소);
+    if (!r.됨) { console.log('  ✗ ' + p + '쪽 — ' + r.왜); break; }
+    await 자고(3500);
+    const 줄들 = [...r.글.matchAll(줄꼴)].map((m) => ({ 번호: m[1], 제목: m[2].replace(/\sN$/, '').trim(), 부서: m[3], 올린날: m[4] }));
+    if (!줄들.length) { console.log('  · ' + p + '쪽 — 줄 0 (꼴이 다릅니다)'); break; }
+    for (const x of 줄들) { if (x.올린날 >= 서른) 모음.push(x); else 멈춤 = true; }
+    console.log('  ' + p + '쪽 — 줄 ' + 줄들.length + ' (30일 안 ' + 줄들.filter((x) => x.올린날 >= 서른).length + ')');
+  }
+  const 우리 = 모음.filter((x) => sortJob(x.제목, null, null).갈래 === '회원목록');
+  const 보건 = 모음.filter((x) => 보건말.test(x.제목) || 보건말.test(x.부서));
+  const 채용 = 모음.filter((x) => 채용말.test(x.제목));
+  console.log('\n── 셈 (30일) ──');
+  console.log('  전체 ' + 모음.length + '건 · 채용 글 ' + 채용.length + '건 · **우리 직군 ' + 우리.length
+    + '건** · 보건 쪽 ' + 보건.length + '건');
+  for (const x of 보건.slice(0, 8)) console.log('    보건 쪽 — ' + x.올린날 + ' [' + x.부서 + '] ' + x.제목.slice(0, 46));
+  for (const x of 우리.slice(0, 5)) console.log('    우리 직군 — ' + x.올린날 + ' [' + x.부서 + '] ' + x.제목.slice(0, 46));
+  process.exit(0);
 }
 
 /* ── 읽기 — --찾기 로 확인한 주소에서 30일치를 셉니다 ── */
@@ -123,37 +157,3 @@ console.log('  읽은 게시판 ' + 표.length + '개 · 30일 줄 ' + 표.reduc
 fs.writeFileSync(path.join(여기, '..', '..', 'docs', '시군청채용_시범_1024.json'),
   JSON.stringify({ 잰때: new Date().toISOString().slice(0, 16), 서른날전, 표 }, null, 1) + '\n');
 console.log('○ docs/시군청채용_시범_1024.json 에 적었습니다 (담지 않았습니다)');
-
-/* ── `--표읽기` — **링크 없는 표 꼴** 게시판을 글자로 읽습니다 (2026-10-24 밤)
-   노원구 통합 공고 게시판(BD_selectBbsList.do)은 상세가 **자바스크립트**라
-   `표준읽기`(링크에 글 번호가 있어야 함)로는 줄 0 입니다. 그런데 **표 글자**에는
-   「번호 제목 담당부서 날짜 조회」가 다 있습니다. 시범으로 **한 곳만** 세어 봅니다.
-   ★ 담지 않습니다 — 세기만 합니다 */
-if (argv.includes('--표읽기')) {
-  const 바탕 = argv.includes('--주소') ? argv[argv.indexOf('--주소') + 1]
-    : 'https://www.nowon.kr/www/user/bbs/BD_selectBbsList.do?q_bbsCode=1003';
-  const 쪽수 = Number(argv.includes('--쪽') ? argv[argv.indexOf('--쪽') + 1] : 12) || 12;
-  const 서른 = new Date(Date.now() - 30 * 24 * 3600e3).toISOString().slice(0, 10);
-  console.log('표 꼴로 읽습니다 — 30일 기준 ' + 서른 + ' · 최대 ' + 쪽수 + '쪽\n' + 바탕 + '\n');
-  const 줄꼴 = /(\d{2,5})\s+(.{4,120}?)\s+([가-힣]{2,10}(?:과|팀|실|센터|소|국))\s+(20\d\d-\d\d-\d\d)/g;
-  const 모음 = []; let 멈춤 = false;
-  for (let p = 1; p <= 쪽수 && !멈춤; p++) {
-    const 주소 = 바탕 + (바탕.includes('?') ? '&' : '?') + 'q_currPage=' + p;
-    const r = await 받기(주소);
-    if (!r.됨) { console.log('  ✗ ' + p + '쪽 — ' + r.왜); break; }
-    await 자고(3500);
-    const 줄들 = [...r.글.matchAll(줄꼴)].map((m) => ({ 번호: m[1], 제목: m[2].replace(/\sN$/, '').trim(), 부서: m[3], 올린날: m[4] }));
-    if (!줄들.length) { console.log('  · ' + p + '쪽 — 줄 0 (꼴이 다릅니다)'); break; }
-    for (const x of 줄들) { if (x.올린날 >= 서른) 모음.push(x); else 멈춤 = true; }
-    console.log('  ' + p + '쪽 — 줄 ' + 줄들.length + ' (30일 안 ' + 줄들.filter((x) => x.올린날 >= 서른).length + ')');
-  }
-  const 우리 = 모음.filter((x) => sortJob(x.제목, null, null).갈래 === '회원목록');
-  const 보건 = 모음.filter((x) => 보건말.test(x.제목) || 보건말.test(x.부서));
-  const 채용 = 모음.filter((x) => 채용말.test(x.제목));
-  console.log('\n── 셈 (30일) ──');
-  console.log('  전체 ' + 모음.length + '건 · 채용 글 ' + 채용.length + '건 · **우리 직군 ' + 우리.length
-    + '건** · 보건 쪽 ' + 보건.length + '건');
-  for (const x of 보건.slice(0, 8)) console.log('    보건 쪽 — ' + x.올린날 + ' [' + x.부서 + '] ' + x.제목.slice(0, 46));
-  for (const x of 우리.slice(0, 5)) console.log('    우리 직군 — ' + x.올린날 + ' [' + x.부서 + '] ' + x.제목.slice(0, 46));
-  process.exit(0);
-}
