@@ -20,7 +20,7 @@ import { ShareButtons } from '@/components/share-buttons';
 import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
-import { isClosed, todayKst, 금액있나, 마감배지, 시각말, 연봉말, 조교연구말 } from '@/lib/job-state';
+import { isClosed, todayKst, 금액있나, 마감배지, 시각말, 연봉말, 조교연구말, 지원방법말 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { MembersOnly } from '@/components/members-only';
@@ -625,6 +625,28 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
         <div className="fixed inset-x-0 bottom-[calc(62px+env(safe-area-inset-bottom))]
                         z-30 border-t border-[#E3E3DE]
                         bg-white/95 px-6 py-3 backdrop-blur md:bottom-0 md:px-7">
+          {/* ★ 2026-10-24 세중님 ㉡ — 단추 옆 **「지원 방법」 한 줄**.
+              칸을 새로 만들지 않습니다 (일곱 칸은 그대로 · CLAUDE.md).
+              무엇을 적을지는 lib/job-state.ts 의 지원방법말() 한 자리에서 정합니다 —
+              **아는 낱말만** 적습니다(옛 길이 넣은 마감 안내 문장이 140건 있습니다).
+              배치(글꼴·자리)는 11/1~6 화면 작업 때 다듬습니다 */}
+          {(() => {
+            const 지원 = 지원방법말(detail['접수방법'] as string | undefined);
+            if (!지원.낱말.length) return null;
+            return (
+              <div className="mx-auto mb-2 flex w-full max-w-2xl flex-wrap items-center gap-x-1.5
+                              text-[13px] leading-[1.5] text-[#5F666C]">
+                <span className="shrink-0 font-bold text-[#1B2025]">지원 방법</span>
+                <span className="break-keep">{지원.낱말.join(' · ')}</span>
+                {지원.채용페이지 && (
+                  <a href={지원.채용페이지} target="_blank" rel="noopener noreferrer"
+                     className="underline decoration-[#C9CCCF] underline-offset-2">
+                    병원 채용 페이지
+                  </a>
+                )}
+              </div>
+            );
+          })()}
           <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
             <JobSave id={j.id} big />
             <JobOpenLink
