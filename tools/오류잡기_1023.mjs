@@ -200,8 +200,10 @@ if (할까('--근무지')) {
   console.log('뷰가 내는 칸 — ' + Object.keys(줄[0] || {}).join(' · ') + '\n');
   const 근무지칸 = Object.keys(줄[0] || {}).find((k) => /work_place|근무지/.test(k));
   if (!근무지칸) { console.error('✗ 근무지 칸이 없습니다'); process.exit(1); }
-  /* 장소 같지 않은 꼴 — 배수·초과·퍼센트·「명」·날짜가 든 것 */
-  const 수상한꼴 = /배수|초과|이내|퍼센트|%|\d+\s*명|\d{4}[-.]\d{1,2}|원$|시간/;
+  /* ★ 자를 좁혔습니다 (2026-10-23) — 첫 판은 `원$`·`\d{4}-\d{1,2}` 가 있어서
+     「대자인**병원**」·「새천년대로 1135-78」 같은 **멀쩡한 주소 7건**을 수상하다고
+     셌습니다. 틀림이 갑자기 여럿이면 재는 자가 틀린 것입니다 (지침 10-5) */
+  const 수상한꼴 = /배수|퍼센트|%|\d+\s*명|점수|가산/;
   const 값 = (x) => String(x[근무지칸] || '');
   const 수상 = 줄.filter((x) => 값(x) && 수상한꼴.test(값(x)));
   console.log('회원 화면 ' + 줄.length + '건 · 근무지(' + 근무지칸 + ') 찬 것 '
@@ -209,6 +211,16 @@ if (할까('--근무지')) {
   for (const x of 수상) {
     console.log('  ● ' + String(x.id).padEnd(18) + '[' + String(x.source || '-').padEnd(4) + '] '
       + String(x.org_name || x['기관'] || '').slice(0, 16).padEnd(17) + '「' + 값(x) + '」');
+  }
+  /* 표본에서 걸린 그 한 건 — 지금 회원 화면에 어떤 글자로 있나 */
+  const 그건 = 줄.find((x) => String(x.id) === 'GJ305988');
+  console.log('\n── 표본에서 걸린 GJ305988 ──');
+  if (!그건) console.log('  회원 화면에 **없습니다** (288건 안에 없음)');
+  else {
+    console.log('  근무지 「' + 값(그건) + '」 · 지역 ' + (그건.sido || '-') + ' ' + (그건.sgg || '-'));
+    const d = 그건.detail || {};
+    console.log('  detail 근무지 쪽 열쇠 — ' + Object.keys(d).filter((k) => /근무|지역|주소/.test(k))
+      .map((k) => k + '「' + String(d[k]).slice(0, 60) + '」').join(' · ') || '  (없음)');
   }
 }
 
