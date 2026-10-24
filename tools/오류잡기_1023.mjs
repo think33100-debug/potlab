@@ -188,21 +188,27 @@ if (할까('--근무지')) {
   console.log('\n══ ③ 근무지에 장소가 아닌 글이 든 것 ══\n');
   const 줄 = [];
   for (let off = 0; ; off += 100) {
-    const r = await fetch(U + '/rest/v1/job_posts_pub?select=id,org_name,work_place,source'
+    /* 칸 이름을 짐작하지 않습니다 — 뷰가 무엇을 내는지 모르니 통째로 받아
+       **열쇠 목록을 찍고** 근무지 쪽 칸을 골라 씁니다 (2026-10-23 에 400 을 맞았습니다) */
+    const r = await fetch(U + '/rest/v1/job_posts_pub?select=*'
       + '&order=id&limit=100&offset=' + off, { headers: H });
     if (!r.ok) { console.error('✗ job_posts_pub ' + r.status); process.exit(1); }
     const a = await r.json();
     줄.push(...a);
     if (a.length < 100) break;
   }
-  /* 장소 같지 않은 꼴 — 배수·초과·퍼센트·「명」·날짜가 든 것, 또는 숫자만 */
+  console.log('뷰가 내는 칸 — ' + Object.keys(줄[0] || {}).join(' · ') + '\n');
+  const 근무지칸 = Object.keys(줄[0] || {}).find((k) => /work_place|근무지/.test(k));
+  if (!근무지칸) { console.error('✗ 근무지 칸이 없습니다'); process.exit(1); }
+  /* 장소 같지 않은 꼴 — 배수·초과·퍼센트·「명」·날짜가 든 것 */
   const 수상한꼴 = /배수|초과|이내|퍼센트|%|\d+\s*명|\d{4}[-.]\d{1,2}|원$|시간/;
-  const 수상 = 줄.filter((x) => x.work_place && 수상한꼴.test(String(x.work_place)));
-  console.log('회원 화면 ' + 줄.length + '건 · 근무지 찬 것 '
-    + 줄.filter((x) => x.work_place).length + '건 · **수상한 것 ' + 수상.length + '건**\n');
+  const 값 = (x) => String(x[근무지칸] || '');
+  const 수상 = 줄.filter((x) => 값(x) && 수상한꼴.test(값(x)));
+  console.log('회원 화면 ' + 줄.length + '건 · 근무지(' + 근무지칸 + ') 찬 것 '
+    + 줄.filter((x) => 값(x)).length + '건 · **수상한 것 ' + 수상.length + '건**\n');
   for (const x of 수상) {
-    console.log('  ● ' + String(x.id).padEnd(18) + '[' + String(x.source).padEnd(4) + '] '
-      + String(x.org_name || '').slice(0, 16).padEnd(17) + '「' + x.work_place + '」');
+    console.log('  ● ' + String(x.id).padEnd(18) + '[' + String(x.source || '-').padEnd(4) + '] '
+      + String(x.org_name || x['기관'] || '').slice(0, 16).padEnd(17) + '「' + 값(x) + '」');
   }
 }
 
