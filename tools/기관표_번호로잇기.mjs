@@ -81,49 +81,53 @@ if (있나 !== '0') {
    where n.nspname='public' and p.proname='기관번호_이름으로';`));
 }
 
-/* ── 마른 실행 — 두 길이 어떻게 다른가 (함수 없이 같은 셈을 합니다) ── */
-const 번호식 = `(select 'HIRA:' || min(h.ykiho) from hira_org h
-        where h.name_key = hira_name_key(g."기관")
-       having count(distinct h.ykiho) = 1)`;
+/* ── 마른 실행 — 두 길을 견줍니다 ──
+   ★ 2026-10-24 — 처음엔 상관 서브쿼리로 썼다가 **52분을 돌고도 안 끝났습니다**.
+     `일층병원_구멍()` 이 CTE 안에서 **줄마다 펼쳐지기** 때문입니다 (지침 6-4).
+     `as materialized` 로 한 번만 부르고, 이름→번호 표도 한 번만 만듭니다 */
 console.log('\n── 마른 실행 · 1층 대상 777곳에서 두 길을 견줍니다 ──');
-console.log(psql(`
-  with g as (select "갈래", "기관", "상태" from "일층병원_구멍"()),
-  t as (
-    select g.*,
-           (select o."기관번호" from 기관 o where o.이름키 = hira_name_key(g."기관") limit 1) as 이름키로,
-           (select count(*) from 기관 o where o.이름키 = hira_name_key(g."기관")) as 이름키줄,
-           ${번호식} as 번호로,
-           (select count(*) from 기관 o where o."기관번호" = ${번호식}) as 번호줄
-      from g)
+const 마른 = `
+  with g as materialized (
+    select "갈래", "기관", "상태", hira_name_key("기관") as nk from "일층병원_구멍"()
+  ), k as materialized (
+    select h.name_key, min(h.ykiho) as ykiho, count(distinct h.ykiho) as 심평원곳
+      from hira_org h group by 1
+  ), o as materialized (
+    select o.이름키, min(o."기관번호") as 한줄, count(*) as 줄수 from 기관 o group by 1
+  ), t as (
+    select g.*, k.심평원곳,
+           case when k.심평원곳 = 1 then 'HIRA:' || k.ykiho end as 번호,
+           o.한줄 as 이름키로, coalesce(o.줄수, 0) as 이름키줄수
+      from g left join k on k.name_key = g.nk left join o on o.이름키 = g.nk
+  ), u as (
+    select t.*, (select count(*) from 기관 q where q."기관번호" = t.번호) as 번호줄수
+      from t
+  )`;
+console.log(psql(마른 + `
   select '전체 ' || count(*)
-      || ' · 이름키로 붙는 곳 ' || count(이름키로)
-      || ' · 번호로 붙는 곳 ' || count(*) filter (where 번호줄 = 1)
-      || E'\\n' ||
-         '같은 줄에 붙음 ' || count(*) filter (where 이름키로 is not null and 이름키로 = 번호로)
-      || ' · **다른 줄에 붙음 ' || count(*) filter (where 이름키로 is not null and 번호로 is not null and 이름키로 <> 번호로) || '**'
-      || ' · 이름키로만 붙음(번호 못 풀림) ' || count(*) filter (where 이름키로 is not null and 번호로 is null)
-      || ' · 번호로만 붙음 ' || count(*) filter (where 이름키로 is null and 번호줄 = 1)
-    from t;`, ['-X', '-A', '-t', '-q']));
-
-console.log('\n── 「이름키로 붙는데 번호로는 못 푸는 곳」 (이름이 심평원에 여럿 · 짐작이던 자리) ──');
-console.log(psql(`
-  with g as (select "갈래", "기관", "상태" from "일층병원_구멍"())
-  select '  ' || rpad(g."갈래", 12) || rpad(left(g."기관", 26), 28) || g."상태"
-      || '  → 기관 표 줄 ' || (select count(*) from 기관 o where o.이름키 = hira_name_key(g."기관"))
-      || ' · 심평원 ' || (select count(distinct h.ykiho) from hira_org h where h.name_key = hira_name_key(g."기관")) || '곳'
-    from g
-   where (select count(*) from 기관 o where o.이름키 = hira_name_key(g."기관")) > 0
-     and ${번호식} is null
-   order by g."기관";`, ['-X', '-A', '-t', '-q']));
-
-console.log('\n── 기관 표 줄이 **둘 이상** 붙는 이름 (어느 줄을 집을지 모르던 자리) ──');
-console.log(psql(`
-  with g as (select "기관" from "일층병원_구멍"())
-  select '  ' || rpad(left(g."기관", 30), 32) || '기관 표 줄 '
-      || (select count(*) from 기관 o where o.이름키 = hira_name_key(g."기관"))
-    from g
-   where (select count(*) from 기관 o where o.이름키 = hira_name_key(g."기관")) > 1
-   order by g."기관";`, ['-X', '-A', '-t', '-q']));
+      || ' · 이름키로 붙는 곳 ' || count(*) filter (where 이름키줄수 > 0)
+      || ' · 번호로 붙는 곳 ' || count(*) filter (where 번호줄수 = 1)
+      || E'\n' ||
+         '같은 줄 ' || count(*) filter (where 이름키줄수 = 1 and 번호줄수 = 1 and 이름키로 = 번호)
+      || ' · **다른 줄 ' || count(*) filter (where 이름키줄수 > 0 and 번호줄수 = 1 and 이름키로 <> 번호) || '**'
+      || ' · 이름키로만(번호 못 풀림) ' || count(*) filter (where 이름키줄수 > 0 and 번호 is null)
+      || ' · 이름키 줄이 둘 이상 ' || count(*) filter (where 이름키줄수 > 1)
+      || ' · 번호로만 ' || count(*) filter (where 이름키줄수 = 0 and 번호줄수 = 1)
+    from u;`, ['-X','-A','-t','-q']));
+console.log('\n── 이름키로는 붙는데 **번호로는 못 푸는** 곳 (심평원에 이름이 여럿) ──');
+console.log(psql(마른 + `
+  select '  ' || rpad("갈래", 13) || rpad(left("기관", 26), 28) || rpad("상태", 12)
+      || '기관표 줄 ' || 이름키줄수 || ' · 심평원 ' || coalesce(심평원곳, 0) || '곳'
+    from u where 이름키줄수 > 0 and 번호 is null order by "기관";`, ['-X','-A','-t','-q']));
+console.log('\n── 이름키로 **딴 줄**이 붙던 곳 (번호로 고쳐지는 자리) ──');
+console.log(psql(마른 + `
+  select '  ' || rpad(left("기관", 30), 32) || '이름키로 ' || left(이름키로, 14)
+      || ' → 번호로 ' || left(번호, 14)
+    from u where 이름키줄수 > 0 and 번호줄수 = 1 and 이름키로 <> 번호 order by "기관";`, ['-X','-A','-t','-q']));
+console.log('\n── 기관 표 줄이 **둘 이상** 붙는 이름 ──');
+console.log(psql(마른 + `
+  select '  ' || rpad(left("기관", 30), 32) || '기관표 줄 ' || 이름키줄수
+    from u where 이름키줄수 > 1 order by "기관";`, ['-X','-A','-t','-q']));
 
 if (!진짜) { console.log('\n[마른] 함수를 안 올렸습니다 — --진짜 로 올립니다'); process.exit(0); }
 
