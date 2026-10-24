@@ -177,6 +177,35 @@ export default function AdminJobEdit() {
         })}
       </div>
 
+      {/* ★ 2026-10-24 세중님 2번 — **모집인원은 두 꼴**입니다. 어느 것이 회원에게
+          보이는지 헷갈리기 쉬워서 **화면이 보는 순서**를 그대로 적어 둡니다
+          (web/app/jobs/[id]/page.tsx:207 과 같은 순서입니다) */}
+      <section className="mt-8 rounded-xs border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-950">
+        <h2 className="text-sm font-bold text-mute">모집인원 — 회원 화면이 보는 순서</h2>
+        <ol className="mt-2 list-decimal space-y-1 pl-5 text-lg">
+          <li>
+            직군별 인원{' '}
+            <b>{(job.detail?.['직군인원'] as string | undefined) || '(없음)'}</b>
+          </li>
+          <li>
+            위에서 고치는 <b>모집인원(숫자)</b>{' '}
+            <b>{job.headcount == null ? '(빈칸)' : `${job.headcount}명`}</b>
+          </li>
+          <li>
+            원문 그대로 글꼴(○명·0명){' '}
+            <b>
+              {((job.detail?.['뽑은값'] as unknown as Record<string, string> | undefined)?.모집인원)
+                || (job.detail?.['모집인원'] as string | undefined) || '(이 뷰에 없음)'}
+            </b>
+          </li>
+        </ol>
+        <p className="mt-2 text-sm text-mute">
+          숫자가 비면 글꼴을 보여 줍니다. 숫자를 고치면 수집기가 그 칸을 다시 덮지
+          않습니다(edited_fields). 글꼴은 <code>뽑은값</code> 칸에 있고 이 화면의 뷰에는
+          아직 그 칸이 없어 「(이 뷰에 없음)」으로 보일 수 있습니다 — 뷰·창구는 승인 자리입니다
+        </p>
+      </section>
+
       {/* 본문 — 보기만 합니다 */}
       {Object.keys(job.detail ?? {}).length > 0 && (
         <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">

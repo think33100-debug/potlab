@@ -89,6 +89,15 @@ export const EDITABLE: { key: keyof AdminJob; label: string; long?: boolean }[] 
   { key: 'title',      label: '공고명', long: true },
   { key: 'job_group',  label: '직군' },
   { key: 'employ_type', label: '고용형태' },
+  /* ★ 2026-10-24 세중님 2번 — **모집인원(숫자)**. 통합 공고에서 다른 직군 인원을
+     집은 건(하온어린이집 2명 → 1명)을 관리자 화면에서 바로 고치게 합니다.
+     손으로 고치면 `edited_fields` 에 'headcount' 가 들어가고, 수집기가 그 칸을
+     **안 덮습니다** (collect_put:126 이 edited_fields 를 봅니다). 칸기록은
+     `칸기록_after` 트리거가 남깁니다 (옛값·새값).
+     ★ 「원문 그대로」 글꼴(○명·0명)은 `뽑은값.모집인원` 에 있고 **관리자 뷰에
+       그 칸이 없습니다** — 뷰에 칸을 더하는 것은 승인 자리라 아래 「모집인원」
+       상자에서 detail 쪽 값만 보여 줍니다 (docs/승인대기_1024.md) */
+  { key: 'headcount', label: '모집인원(숫자)' },
   { key: 'work_place', label: '근무지' },
   { key: 'sido',       label: '시도' },
   { key: 'sgg',        label: '시군구' },
