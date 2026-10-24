@@ -156,6 +156,42 @@ async function 매칭재기(cfg) {
   } catch { return null; }
 }
 
+/* 긁기 한 줄 (2026-10-24 세중님 D2 · 담기 시작한 뒤부터) — 꼴·곳·보류함·채움률 */
+async function 긁기재기(cfg) {
+  try {
+    const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY };
+    const 받아 = async (길) => {
+      const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    };
+    /* 창구가 100줄에서 끊습니다 — 쪽을 넘깁니다 (지침 8-20 ③) */
+    const 다 = [];
+    for (let off = 0; ; off += 100) {
+      const a = await 받아('job_posts?select=id,hold,job_group,apply_to,'
+        + encodeURIComponent('기관번호') + '&source=eq.HS4&order=id.asc&limit=100&offset=' + off);
+      다.push(...a);
+      if (a.length < 100) break;
+      if (off > 10000) break;
+    }
+    if (!다.length) return null;
+    return { 공고: 다.length,
+      보류함: 다.filter((x) => x.hold).length,
+      직군: 다.filter((x) => x.job_group).length,
+      마감: 다.filter((x) => x.apply_to).length,
+      기관: 다.filter((x) => x['기관번호']).length };
+  } catch { return null; }
+}
+
+/** 아침 메일에 넣을 줄 */
+function 긁기줄(g) {
+  if (!g || !g.공고) return [];
+  const 퍼 = (n) => Math.round((100 * n) / g.공고) + '%';
+  return ['   긁기(HS4)       공고 ' + g.공고 + '건 · 보류함 ' + g.보류함 + '건'
+    + ' · 직군 ' + 퍼(g.직군) + ' · 마감 ' + 퍼(g.마감) + ' · 기관 ' + 퍼(g.기관)
+    + (g.보류함 === g.공고 ? '  (10/31 까지 보류함만 ✓)' : '  ★ 보류함 밖에 있습니다')];
+}
+
 /** 아침 메일에 넣을 줄 */
 function 매칭줄(m) {
   if (!m || !m.분모) return [];
@@ -356,6 +392,8 @@ function 신뢰셋줄(네) {
   try { 줄.push(...결과공고줄(결과공고)); } catch { /* 못 재면 적지 않습니다 */ }
   /* ★ 2026-10-24 세중님 M4 — 기관 매칭률 한 줄 */
   try { 줄.push(...매칭줄(매칭)); } catch { /* 못 재면 적지 않습니다 */ }
+  /* ★ 2026-10-24 세중님 D2 — 긁기 한 줄 (담기 시작한 뒤부터 보입니다) */
+  try { 줄.push(...긁기줄(긁기)); } catch { /* 못 재면 적지 않습니다 */ }
   줄.push('');
   return 줄;
 }
@@ -838,6 +876,8 @@ const 역할목록 = await 지금역할(cfg);
 const 결과공고 = await 결과공고세기(cfg);
 /* 기관 매칭률 (2026-10-24 세중님 M4 · 읽기만 · 못 재면 null 이라 줄이 빠집니다) */
 const 매칭 = await 매칭재기(cfg);
+/* 긁기 (2026-10-24 · 읽기만 · 못 재면 null 이라 줄이 빠집니다) */
+const 긁기 = await 긁기재기(cfg);
 
 if (조용한척 || (!d['보낼것있나'] && !잠금.length && !(보안 && 보안.밖합))) {
   if (!아침인가) {
