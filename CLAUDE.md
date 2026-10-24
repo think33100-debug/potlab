@@ -1995,3 +1995,34 @@ collect_put:191~193  "뽑은값" = case when j.admin_locked then j."뽑은값"
 ```
 
 **`evidence` 는 수집기 것**으로 읽습니다 — 사람·도구가 남길 글은 `뽑은값` 입니다.
+
+### ★ 2026-10-23 에 `collect_put` 을 고쳤습니다 — `evidence` 도 **합칩니다** (세중님 승인)
+
+```sql
+evidence = case when j.admin_locked then j.evidence
+                when excluded.evidence is null or excluded.evidence = '{}'::jsonb then j.evidence
+                when (j.source = p_source or j.source = v_짝)
+                     then coalesce(j.evidence, '{}'::jsonb) || excluded.evidence
+                else j.evidence end,
+```
+되돌림 — `~/되돌림/collect_put_되돌리기_20261023_142541.sql` (211줄) · ACL 동일.
+
+**참말인지 확인했습니다** — GJ305543·GJ305988 의 `evidence` 에 시험 열쇠 넷을
+10-23 09:49 에 넣고, 수집 바퀴를 **열 번 넘게** 지난 10-24 12:19 에 **그대로
+살아 있는 것**을 봤습니다 (전에는 13:42 한 바퀴에 `{}` 가 됐습니다).
+
+**그래도 근거는 `뽑은값` 에 둡니다** — `evidence` 는 「같은 출처가 다시 담을 때만」
+합쳐지므로 출처가 바뀌면 여전히 안전하지 않습니다.
+
+### 운영 DB 시험값은 **이번 한 번만** 입니다 (2026-10-23 세중님 · 8-9 절의 예외)
+
+8-9 절은 「시험 자료를 실제 회원 계정에 넣지 않습니다」입니다. 위 확인은
+**공고 두 건의 `evidence`** 에 열쇠를 넣은 것이라 그 울타리 안쪽이지만,
+세중님이 **예외로 한 번만** 허락하신 것입니다.
+
+```
+지운 때    2026-10-24 12:19 (확인한 그 자리에서)
+지운 길    tools/evidence시험값치우기.mjs --지우기  (열쇠 넷만 `- text[]` 로)
+전후 원문  ~/되돌림/evidence시험값_20261024_121953.txt · 지운 뒤 `evidence={}`
+다음부터   확인은 **시험 출처(TEST)** 공고를 만들어 거기서 합니다
+```

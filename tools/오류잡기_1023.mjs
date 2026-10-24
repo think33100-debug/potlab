@@ -21,6 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 /* ── 재는 자 ──────────────────────────────────────────────
    「개인정보 꼴」은 **글자 꼴**로만 봅니다 — 이름을 아는 길이 없으니까요.
@@ -47,7 +48,12 @@ export const 개인정보찾기 = (글) => {
 export const 통째꼴 = /(?:[a-z]\.(?:detail|"뽑은값"|evidence|payload)(?!\s*(?:->|#>))|to_jsonb\s*\(\s*[a-z]\.\*|row_to_json)/i;
 export const jsonb칸꼴 = /(?:\bdetail\b|"뽑은값"|\bevidence\b|\bpayload\b)/;
 
-if (process.argv.includes('--자기점검')) {
+/* ★ 다른 도구가 `개인정보찾기` 를 들여올 때 **이 파일의 일이 돌지 않게** 합니다 —
+   들여오기만 해도 자기점검이 돌고 `process.exit(0)` 으로 **부르는 쪽을 끝냈습니다**
+   (2026-10-23 에 워크넷접수방법셈.mjs 가 그렇게 끝났습니다) */
+const 내가주인 = import.meta.url === pathToFileURL(process.argv[1] || '.').href;
+
+if (내가주인 && process.argv.includes('--자기점검')) {
   const 잼 = [];
   const 보 = (무엇, 참) => 잼.push([무엇, !!참]);
 
@@ -89,7 +95,9 @@ for (const f of ['.env', '.env.local']) {
   }
 }
 const 할것 = process.argv.slice(2).filter((x) => x.startsWith('--'));
-const 할까 = (x) => !할것.length || 할것.includes(x);
+/* 인수가 없으면 할까() 가 다 참이라, 들여오기만 해도 DB 를 두드렸습니다 —
+   그래서 `내가주인`(위에서 쟀습니다)을 함께 봅니다 */
+const 할까 = (x) => 내가주인 && (!할것.length || 할것.includes(x));
 
 /* ── ① 통째로 나가는 자리 (psql · 읽기만) ─────────────── */
 if (할까('--노출')) {
