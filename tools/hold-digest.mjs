@@ -175,9 +175,24 @@ async function 긁기재기(cfg) {
       if (off > 10000) break;
     }
     if (!다.length) return null;
+    /* ★ 2026-10-24 세중님 3번 — 직군은 **우리 직군 후보 중 몇**인지로 봅니다.
+       29건 가운데 21건은 **남의 직군**(영양사·방사선사·전문의…)이라 직군이 비는 것이
+       맞습니다. 그것을 분모에 넣으면 「17%」로 보여 일을 잘못 고릅니다.
+       첨부가 있는데 직군이 빈 것은 **첨부 대기**입니다 (공고문을 읽으면 채워집니다) */
+    const 첨 = new Set();
+    for (let off = 0; ; off += 100) {
+      const a = await 받아('job_attachments?select=job_id&order=job_id.asc&limit=100&offset=' + off
+        + '&job_id=in.(' + 다.map((x) => x.id).join(',') + ')');
+      for (const r of a) 첨.add(r.job_id);
+      if (a.length < 100) break;
+      if (off > 5000) break;
+    }
+    const 직군 = 다.filter((x) => x.job_group).length;
+    const 첨부대기 = 다.filter((x) => !x.job_group && 첨.has(x.id)).length;
+    const 남의직군 = 다.filter((x) => !x.job_group && !첨.has(x.id)).length;
     return { 공고: 다.length,
       보류함: 다.filter((x) => x.hold).length,
-      직군: 다.filter((x) => x.job_group).length,
+      직군, 첨부대기, 남의직군, 후보: 직군 + 첨부대기,
       마감: 다.filter((x) => x.apply_to).length,
       기관: 다.filter((x) => x['기관번호']).length };
   } catch { return null; }
@@ -188,8 +203,10 @@ function 긁기줄(g) {
   if (!g || !g.공고) return [];
   const 퍼 = (n) => Math.round((100 * n) / g.공고) + '%';
   return ['   긁기(HS4)       공고 ' + g.공고 + '건 · 보류함 ' + g.보류함 + '건'
-    + ' · 직군 ' + 퍼(g.직군) + ' · 마감 ' + 퍼(g.마감) + ' · 기관 ' + 퍼(g.기관)
-    + (g.보류함 === g.공고 ? '  (10/31 까지 보류함만 ✓)' : '  ★ 보류함 밖에 있습니다')];
+    + ' · **직군 ' + g.직군 + '/' + g.후보 + '** (우리 직군 후보 중)'
+    + ' · 남의 직군 ' + g.남의직군 + ' · 첨부 대기 ' + g.첨부대기
+    + ' · 마감 ' + 퍼(g.마감) + ' · 기관 ' + 퍼(g.기관)
+    + (g.보류함 === g.공고 ? '  (보류함만 ✓)' : '  ★ 보류함 밖에 있습니다')];
 }
 
 /** 아침 메일에 넣을 줄 */
