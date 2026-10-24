@@ -51,7 +51,10 @@ function env() {
     if (!fs.existsSync(f)) continue;
     fs.readFileSync(f, 'utf8').split(/\r?\n/).forEach((l) => {
       const m = l.match(/^\s*([A-Z_0-9]+)\s*=\s*(.*?)\s*$/);
-      if (m && !out[m[1]]) out[m[1]] = m[2];
+      /* ★ 2026-10-24 — **따옴표를 벗깁니다.** 크론은 `set -a && . ./.env` 로 읽어서
+         셸이 벗겨 주는데, 손으로 `node tools/hold-digest.mjs --보기` 를 돌리면
+         `'https://…'` 가 그대로 들어와 `Invalid URL` 로 죽었습니다 (미리보기가 안 됨) */
+      if (m && !out[m[1]]) out[m[1]] = m[2].replace(/^(['"])(.*)\1$/, '$2');
     });
   }
   Object.keys(process.env).forEach((k) => { if (process.env[k]) out[k] = process.env[k]; });
