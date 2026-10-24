@@ -766,6 +766,13 @@ const 담을것 = 회원.concat(보류).map((x) => {
       우대사항: 자르기(de(r.prefCn || r.prefCondCn), 700),
       결격사유: 자르기(de(r.disqlfcRsn), 700),
       기관홈: de(r.srcUrl),
+      /* ★ 2026-10-24 세중님 ㉯ — **알리오 기관 코드.** 목록 응답에 이미 옵니다
+         (추가 호출 0 · 두드려 확인했습니다 — `pblntInstCd` C0331 ·
+         `pbadmsStdInstCd` B552907). `기관.알리오코드` 를 채우는 밑감입니다.
+         빈 값이면 **열쇠를 안 넣습니다** — collect_put 이 detail 을 합치므로
+         빈 글자를 넣으면 전에 찬 값을 덮습니다 */
+      ...(de(r.pblntInstCd) ? { 알리오기관코드: de(r.pblntInstCd) } : {}),
+      ...(de(r.pbadmsStdInstCd) ? { 알리오표준기관코드: de(r.pbadmsStdInstCd) } : {}),
     },
     evidence: {
       직군근거: x.근거 || '',
