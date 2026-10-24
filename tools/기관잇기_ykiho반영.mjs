@@ -151,7 +151,8 @@ const 후셈 = psql(셈SQL, ['-X', '-A', '-t', '-q', '-F', '\t']);
 console.log('\n후 (회원 화면) — 번호로/이름으로/안붙음/전체 = ' + 후셈);
 console.log('\n── 연결근거별 (회원 화면) ──\n' + psql(`
   select coalesce(j."연결근거",'(빈칸)') || '  ' || count(*) from job_posts j
-   where j.id in (select id from job_posts_pub) group by 1 order by 2 desc;`));
+   where j.id in (select id from job_posts_pub)
+   group by 1 order by count(*) desc;`));
 console.log('\n── 사이트표 ykiho 로 바뀐 공고 견본 ──\n' + psql(`
   select j.id || '  ' || left(j.org_name, 22) || '  ' || coalesce(j."연결근거",'')
     from job_posts j where j.id in (select id from job_posts_pub)
