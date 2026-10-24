@@ -168,7 +168,7 @@ async function 긁기재기(cfg) {
     /* 창구가 100줄에서 끊습니다 — 쪽을 넘깁니다 (지침 8-20 ③) */
     const 다 = [];
     for (let off = 0; ; off += 100) {
-      const a = await 받아('job_posts?select=id,hold,job_group,apply_to,'
+      const a = await 받아('job_posts?select=id,hold,hidden,job_group,apply_to,'
         + encodeURIComponent('기관번호') + '&source=eq.HS4&order=id.asc&limit=100&offset=' + off);
       다.push(...a);
       if (a.length < 100) break;
@@ -190,8 +190,13 @@ async function 긁기재기(cfg) {
     const 직군 = 다.filter((x) => x.job_group).length;
     const 첨부대기 = 다.filter((x) => !x.job_group && 첨.has(x.id)).length;
     const 남의직군 = 다.filter((x) => !x.job_group && !첨.has(x.id)).length;
+    /* ★ 2026-10-24 — 「보류함 밖」을 경고로 쓰면 안 됩니다. 마감이 지난 보류함 공고는
+       보류함 마감지남 정리(20분 크론)가 **숨김**으로 보냅니다 — 그것이 설계입니다.
+       봐야 할 것은 **회원 화면 수**입니다 (0 이어야 합니다) */
     return { 공고: 다.length,
       보류함: 다.filter((x) => x.hold).length,
+      숨김: 다.filter((x) => x.hidden).length,
+      회원화면: 다.filter((x) => !x.hold && !x.hidden).length,
       직군, 첨부대기, 남의직군, 후보: 직군 + 첨부대기,
       마감: 다.filter((x) => x.apply_to).length,
       기관: 다.filter((x) => x['기관번호']).length };
@@ -206,7 +211,8 @@ function 긁기줄(g) {
     + ' · **직군 ' + g.직군 + '/' + g.후보 + '** (우리 직군 후보 중)'
     + ' · 남의 직군 ' + g.남의직군 + ' · 첨부 대기 ' + g.첨부대기
     + ' · 마감 ' + 퍼(g.마감) + ' · 기관 ' + 퍼(g.기관)
-    + (g.보류함 === g.공고 ? '  (보류함만 ✓)' : '  ★ 보류함 밖에 있습니다')];
+    + ' · 숨김 ' + g.숨김 + '(마감 지남)'
+    + (g.회원화면 ? '  ★ **회원 화면에 ' + g.회원화면 + '건 있습니다**' : '  (회원 화면 0 ✓)')];
 }
 
 /** 아침 메일에 넣을 줄 */
