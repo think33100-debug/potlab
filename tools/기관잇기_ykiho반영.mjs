@@ -130,7 +130,7 @@ const 셈SQL = `
          count(*) filter (where "기관번호" is not null and "기관번호" like 'NAME:%') as 이름으로,
          count(*) filter (where "기관번호" is null) as 안붙음,
          count(*) as 전체
-    from job_posts_pub;`;
+    from job_posts j where j.id in (select id from job_posts_pub);`;
 const 전셈 = psql(셈SQL, ['-X', '-A', '-t', '-q', '-F', '\t']);
 console.log('\n전 (회원 화면) — 번호로/이름으로/안붙음/전체 = ' + 전셈);
 
@@ -150,8 +150,9 @@ console.log('\n── 기관잇기() 한 바퀴 ──\n' + psql(`select * from 
 const 후셈 = psql(셈SQL, ['-X', '-A', '-t', '-q', '-F', '\t']);
 console.log('\n후 (회원 화면) — 번호로/이름으로/안붙음/전체 = ' + 후셈);
 console.log('\n── 연결근거별 (회원 화면) ──\n' + psql(`
-  select coalesce("연결근거",'(빈칸)') || '  ' || count(*) from job_posts_pub
-   group by 1 order by 2 desc;`));
+  select coalesce(j."연결근거",'(빈칸)') || '  ' || count(*) from job_posts j
+   where j.id in (select id from job_posts_pub) group by 1 order by 2 desc;`));
 console.log('\n── 사이트표 ykiho 로 바뀐 공고 견본 ──\n' + psql(`
-  select id || '  ' || left(org_name, 22) || '  ' || coalesce("연결근거",'')
-    from job_posts_pub where "연결근거" ilike '%사이트%' order by id limit 10;`));
+  select j.id || '  ' || left(j.org_name, 22) || '  ' || coalesce(j."연결근거",'')
+    from job_posts j where j.id in (select id from job_posts_pub)
+     and j."연결근거" ilike '%사이트%' order by j.id limit 10;`));
