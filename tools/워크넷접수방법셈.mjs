@@ -110,9 +110,14 @@ const 층 = (x) => (일층꼴.test(String(x.org_kind || '')) ? '1층' : '2층');
 
 console.log('\n══ ① 접수방법 값 목록 **전수** (원문 그대로) ══\n');
 const 값셈 = new Map();
-for (const x of 담김) 값셈.set(접(x), (값셈.get(접(x)) || 0) + 1);
-for (const [v, n] of [...값셈].sort((a, b) => b[1] - a[1])) {
-  console.log('  ' + String(n).padStart(4) + '건  「' + v + '」');
+for (const x of 담김) {
+  if (!값셈.has(접(x))) 값셈.set(접(x), []);
+  값셈.get(접(x)).push(x);
+}
+for (const [v, 들] of [...값셈].sort((a, b) => b[1].length - a[1].length)) {
+  console.log('  ' + String(들.length).padStart(4) + '건  「' + v + '」');
+  /* 견본 셋을 함께 찍습니다 — 값이 수상하면 그 공고를 바로 열어 봐야 합니다 (지침 2절) */
+  console.log('        ' + 들.slice(0, 3).map((x) => x.id + '(' + x.source + ')').join(' · '));
 }
 console.log('\n── 조각별 (쉼표로 가른 뒤) ──');
 const 조각셈 = new Map();
