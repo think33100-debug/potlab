@@ -28,6 +28,11 @@ const 적기 = argv.includes('--적기');
 export const 꼴가리기 = {
   그누보드: (주소) => /\/bbs\/board\.php\?/.test(주소),
   경기도의료원: (주소) => /medical\.or\.kr\/front\/boardList\.do/.test(주소),
+  /* ★ 2026-10-24 — **표준게시판**: 위 둘이 아닌 ①HTML게시판 전부.
+     list.do(16곳) · board(10곳) · php·html·jsp 꼴이 섞여 있는데 **읽는 법은 같습니다** —
+     「글 번호가 든 링크 + 그 줄의 제목·날짜」. 읽기 하나로 넓게 덮습니다 */
+  표준게시판: (주소) => !/\/bbs\/board\.php\?/.test(주소)
+    && !/medical\.or\.kr\/front\/boardList\.do/.test(주소),
 };
 
 const 분류자리 = path.join(여기, '..', '..', 'docs', '사각지대_분류_1024.json');
