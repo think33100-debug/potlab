@@ -108,5 +108,22 @@ export async function 담기(cfg, 출처, 줄들, { 진짜 = false } = {}) {
     body: JSON.stringify({ p_secret: 열쇠, p_source: 출처, p_rows: 줄 }),
   });
   const t = await r.text();
-  return { 됨: r.ok, 코드: r.status, 답: t.slice(0, 300) };
+  if (!r.ok) return { 됨: false, 코드: r.status, 답: t.slice(0, 300) };
+
+  /* ★ `collect_put` 은 **기관번호를 안 받습니다**(칸 목록에 없습니다 · 전문 확인).
+     그래서 담은 뒤 그 칸만 따로 적습니다 — 긁기는 기관을 알고 시작하니
+     이름 매칭을 거치지 않습니다 (세중님 C3). 연결상태 「사람」이라 규칙이 안 덮습니다 */
+  let 기관붙임 = 0;
+  for (const x of 줄들) {
+    if (!x.기관번호) continue;
+    const p = await fetch(cfg.SUPABASE_URL + '/rest/v1/job_posts?id=eq.' + encodeURIComponent(x.id), {
+      method: 'PATCH',
+      headers: { apikey: cfg.SUPABASE_SERVICE_KEY,
+        Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY,
+        'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ 기관번호: x.기관번호, 연결상태: '사람', 연결근거: '긁기 설정' }),
+    });
+    if (p.ok) 기관붙임++;
+  }
+  return { 됨: true, 코드: r.status, 답: t.slice(0, 300), 기관붙임 };
 }

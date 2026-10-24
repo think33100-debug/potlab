@@ -32,9 +32,14 @@ const 출처 = argv.includes('--출처') ? argv[argv.indexOf('--출처') + 1] : 
 /* 곳마다 **열어서 확인한** 주소입니다 (짐작 금지 · 지침 3절).
    기관번호는 2026-10-24 기준 `기관` 표에서 찾아 적습니다 — 비면 담기 전에 채웁니다 */
 export const 곳들 = [
-  { 이름: '경기도의료원 수원병원', 게시판: 227, 메뉴: 731, 기관번호: null },
-  { 이름: '경기도의료원 이천병원', 게시판: 266, 메뉴: 913, 기관번호: null },
-  { 이름: '경기도의료원의정부병원', 게시판: 240, 메뉴: 786, 기관번호: null },
+  /* 기관번호는 2026-10-24 에 `기관` 표에서 찾아 적었습니다 (ykiho 와 같은 값입니다).
+     긁기는 어느 기관인지 알고 시작하므로 **이름 매칭을 거치지 않습니다** (세중님 C3) */
+  { 이름: '경기도의료원 수원병원', 게시판: 227, 메뉴: 731,
+    기관번호: 'HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQxMyQ0NjE0ODEjODEjJDEjJDIjJDgz' },
+  { 이름: '경기도의료원 이천병원', 게시판: 266, 메뉴: 913,
+    기관번호: 'HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ4OSQzNjEwMDIjNDEjJDEjJDgjJDgz' },
+  { 이름: '경기도의료원의정부병원', 게시판: 240, 메뉴: 786,
+    기관번호: 'HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ5OSQ0NjE0ODEjNzEjJDEjJDgjJDgz' },
 ];
 export const 목록주소 = (곳) => 'https://www.medical.or.kr/front/boardList.do?brd_mgrno='
   + 곳.게시판 + '&menu_no=' + 곳.메뉴;
