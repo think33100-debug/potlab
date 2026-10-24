@@ -125,21 +125,33 @@ console.log('심평원 주소가 **딱 한 줄**인 사각지대 ' + 줄들.leng
 const 담을것 = []; const 못쓴것 = [];
 for (const [갈래, 기관, 시도, 시군구, ykiho, 심이름, 주소0, 전화, 심주소, cl, cl이름, 심시도, 심시군구, 있나, 어디서] of 줄들) {
   const 주소 = /^https?:\/\//i.test(주소0) ? 주소0 : 'http://' + 주소0;
-  let r; let html = '';
-  try {
-    r = await fetch(주소, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; potjob-collector/1.0; +https://potjob.co.kr)' },
-      signal: AbortSignal.timeout(15000), redirect: 'follow' });
-    html = await r.text();
-  } catch (e) {
-    못쓴것.push({ 기관, 주소, 왜: '못 열었음 (' + String(e.message).slice(0, 30) + ')' });
-    console.log('  ✗ ' + 기관.slice(0, 22).padEnd(23) + '못 열었음 — ' + String(e.message).slice(0, 26));
-    await new Promise((z) => setTimeout(z, 800));
-    continue;
+  /* ★ 2026-10-24 밤 — 심평원 주소가 **옛 길**일 때가 많습니다. 경주시·익산시는 심평원
+     주소로는 안 열리는데 **같은 집의 뿌리 주소**(https://host/)는 200 입니다.
+     그래서 ① 적힌 주소 ② https 로 바꾼 것 ③ **같은 집의 뿌리** 를 차례로 두드립니다.
+     ★ 다른 집으로 가지 않고, **봇 검사를 우회하지도 않습니다** — 우리 이름(User-Agent)
+       그대로이고, 403·404 면 그냥 손확인 길로 보냅니다 (지침 · 우회 금지) */
+  const 시도들 = [...new Set([주소,
+    주소.replace(/^http:/i, 'https:'),
+    (() => { try { return new URL(주소).origin + '/'; } catch { return ''; } })(),
+    (() => { try { return 'https://' + new URL(주소).host + '/'; } catch { return ''; } })(),
+  ].filter(Boolean))];
+  let r = null; let html = ''; let 마지막왜 = '';
+  for (const 시도 of 시도들) {
+    try {
+      const rr = await fetch(시도, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; potjob-collector/1.0; +https://potjob.co.kr)' },
+        signal: AbortSignal.timeout(15000), redirect: 'follow' });
+      await new Promise((z) => setTimeout(z, 800));
+      if (!rr.ok) { 마지막왜 = 'HTTP ' + rr.status; continue; }
+      r = rr; html = await rr.text();
+      break;
+    } catch (e) {
+      마지막왜 = '못 열었음 (' + String((e.cause && e.cause.code) || e.message).slice(0, 24) + ')';
+      await new Promise((z) => setTimeout(z, 800));
+    }
   }
-  await new Promise((z) => setTimeout(z, 800));
-  if (!r.ok) {
-    못쓴것.push({ 기관, 주소, 왜: 'HTTP ' + r.status });
-    console.log('  ✗ ' + 기관.slice(0, 22).padEnd(23) + 'HTTP ' + r.status);
+  if (!r) {
+    못쓴것.push({ 기관, 주소, 왜: 마지막왜 || '못 열었음' });
+    console.log('  ✗ ' + 기관.slice(0, 22).padEnd(23) + 마지막왜 + ' (' + 시도들.length + '가지 길)');
     continue;
   }
   const 봄 = 맞나(html, 기관, 전화);
