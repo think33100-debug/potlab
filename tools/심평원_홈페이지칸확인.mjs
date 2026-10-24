@@ -73,9 +73,28 @@ if (ykiho) {
   }
 }
 
-/* ── ③ 우리 사본이 빈 곳 — 심평원에 **지금** 물어 봅니다 ── */
+/* ── ③ 우리 사본이 빈 곳 — 심평원에 **지금** 물어 봅니다 ──
+   ★ 심평원 열쇠는 **서버에 없습니다** (web/.env.local 에만). 그래서 손으로 돌릴 때는
+     이름을 줘서 묻습니다 — `--이름 "가,나,다"` */
+const 손이름 = process.argv.includes('--이름')
+  ? process.argv[process.argv.indexOf('--이름') + 1].split(',').map((x) => x.trim()).filter(Boolean) : [];
+if (손이름.length) {
+  console.log('\n── ③ 손으로 준 ' + 손이름.length + '곳을 심평원에 묻습니다 ──');
+  for (const 이름 of 손이름) {
+    const r = await 두드려('③ ' + 이름,
+      `${ORG}?serviceKey=${KEY}&yadmNm=${encodeURIComponent(이름)}&numOfRows=3&pageNo=1&_type=json`, 200);
+    if (r && r.length) {
+      for (const x of r) {
+        console.log('     · ' + (x.yadmNm || '') + ' / ' + (x.sidoCdNm || '') + ' ' + (x.sgguCdNm || '')
+          + ' → hospUrl 「' + (x.hospUrl ?? '(칸 없음)') + '」');
+      }
+    }
+    await new Promise((z) => setTimeout(z, 500));
+  }
+  process.exit(0);
+}
 if (!cfg.SUPABASE_DB_URL) {
-  console.log('\n(③ 은 서버에서만 — SUPABASE_DB_URL 이 없습니다)');
+  console.log('\n(③ 은 DB 나 --이름 이 있어야 합니다)');
   process.exit(0);
 }
 const u = new URL(cfg.SUPABASE_DB_URL);
