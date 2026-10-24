@@ -87,11 +87,59 @@ export function 설정() {
  * @param {string} 출처   collect_source 에 등록된 출처 코드 (아직 없으면 **안 담습니다**)
  * @param {object[]} 줄들 {id, org_name, title, url, 기관번호, apply_to, ...}
  */
+/* ★ 2026-10-24 밤 — **HS3 가 이미 긁은 공고를 두 벌 담지 않습니다** (제 잘못을 막는 자리)
+   139곳을 「긁기 후보」로 보고 긁었더니 **136곳이 이미 HS3 분모**였고, HS4 29건 가운데
+   **19건이 HS3 공고와 같은 공고**였습니다. 회원 화면은 0건이었지만 **보류함에 두 벌**이
+   쌓였습니다 — 보류함은 사람이 한 건씩 보는 자리입니다 (CLAUDE.md 15절).
+   기준은 **좁게** — 같은 기관(번호 또는 이름 글자) + **제목 글자**가 같을 때만.
+   애매하면 담습니다 (빠지지 않는 것이 먼저입니다 — CLAUDE.md 맨 앞). */
+export const 글자만 = (s) => String(s || '').replace(/[^가-힣0-9a-zA-Z]/g, '');
+export const 이름글자 = (s) => 글자만(s)
+  .replace(/(의료법인|재단법인|학교법인|사회복지법인|주식회사|사단법인)/g, '');
+
+let 겹침표캐시 = null;
+/** HS3·HS 공고의 열쇠 모음 (한 번만 받아 둡니다 · 100줄씩 — PostgREST 뚜껑) */
+export async function 겹침표(cfg) {
+  if (겹침표캐시) return 겹침표캐시;
+  const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY };
+  const 셋 = new Set();
+  for (let off = 0; off < 20000; off += 100) {
+    const r = await fetch(cfg.SUPABASE_URL
+      + '/rest/v1/job_posts?select=org_name,title,기관번호&source=in.(HS3,HS)'
+      + '&order=id.asc&limit=100&offset=' + off, { headers: H });
+    if (!r.ok) break;
+    const a = await r.json();
+    for (const x of a) {
+      const 글 = 글자만(x.title);
+      if (!글) continue;
+      셋.add(이름글자(x.org_name) + '|' + 글);
+      if (x['기관번호']) 셋.add('N:' + x['기관번호'] + '|' + 글);
+    }
+    if (a.length < 100) break;
+  }
+  겹침표캐시 = 셋;
+  return 셋;
+}
+export const 겹치나 = (셋, x) => {
+  const 글 = 글자만(x.title);
+  if (!글) return false;
+  return 셋.has(이름글자(x.org_name) + '|' + 글)
+    || (!!x['기관번호'] && 셋.has('N:' + x['기관번호'] + '|' + 글));
+};
+
 export async function 담기(cfg, 출처, 줄들, { 진짜 = false } = {}) {
   const 열쇠 = cfg['COLLECT_KEY_' + 출처];
   if (!열쇠) {
     return { 됨: false, 왜: 'COLLECT_KEY_' + 출처 + ' 가 없습니다 — 출처 등록이 먼저입니다'
       + ' (collect_source 줄 + collect_secret 열쇠 · 승인 자리)' };
+  }
+  /* ★ HS3·HS 와 겹치는 것은 **담지 않습니다** (위 머리글) */
+  const 셋 = await 겹침표(cfg);
+  const 겹친것 = 줄들.filter((x) => 겹치나(셋, x));
+  줄들 = 줄들.filter((x) => !겹치나(셋, x));
+  if (겹친것.length) {
+    console.log('  · HS3·HS 와 같은 공고 ' + 겹친것.length + '건은 **안 담습니다** — '
+      + 겹친것.slice(0, 3).map((x) => String(x.title).slice(0, 20)).join(' / '));
   }
   const 줄 = 줄들.map((x) => ({
     ...x,
@@ -101,7 +149,7 @@ export async function 담기(cfg, 출처, 줄들, { 진짜 = false } = {}) {
     연결상태: '사람',
     연결근거: '긁기 설정',
   }));
-  if (!진짜) return { 됨: true, 마른: true, 줄: 줄.length };
+  if (!진짜) return { 됨: true, 마른: true, 줄: 줄.length, 겹침: 겹친것.length };
   /* ★ `collect_put` 은 **service_role 에만** 열려 있습니다 (ACL 확인 —
      {postgres,service_role}). anon 으로 부르면 42501 입니다. 기존 수집기도
      service_role 로 부릅니다 (collect-hosp.mjs:117) — 권한은 그 위에
@@ -131,7 +179,7 @@ export async function 담기(cfg, 출처, 줄들, { 진짜 = false } = {}) {
     });
     if (p.ok) 기관붙임++;
   }
-  return { 됨: true, 코드: r.status, 답: t.slice(0, 300), 기관붙임 };
+  return { 됨: true, 코드: r.status, 답: t.slice(0, 300), 기관붙임, 겹침: 겹친것.length };
 }
 
 /* ★ 2026-10-24 — **오래된 공고는 안 담습니다.** 게시판에는 2022년 글까지 남아 있어서

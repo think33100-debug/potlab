@@ -26,6 +26,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { 표만들기 } from './긁기/목록주소필요.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -139,6 +140,9 @@ if (만들기) {
   if (이미) {
     줄.splice(5, 0, '★ ' + 이미 + '곳은 **이미 주소가 있습니다** — 그 줄은 비워 두셔도 됩니다.', '');
   }
+  /* ★ 2026-10-24 세중님 4번 — ⑤목록 아님 22곳도 **같은 문서**에 붙입니다
+     (주소는 아는데 그 주소가 목록이 아닌 곳 · tools/긁기/목록주소필요.mjs 한 자리) */
+  줄.push(...표만들기());
   줄.push('', '★ 제가 채우지 않습니다 — **주소 짐작 금지** (지침 3절).',
     '★ 다 채우지 않아도 됩니다. 채운 줄만 읽습니다.');
   fs.writeFileSync(문서자리, 줄.join('\n') + '\n');
