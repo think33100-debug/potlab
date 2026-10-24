@@ -73,7 +73,11 @@ for (const t of 기록터) { try { 쓴것 = JSON.parse(fs.readFileSync(t, 'utf8'
 const 이미썼나 = new Set(쓴것.쓴공고 || []);
 
 /* ── 공고·글 받기 ──────────────────────────────────────────────── */
-const 보임 = new Set((await 다받기('job_posts_pub?select=id')).map((x) => x.id));
+/* `지역보임` 도 받습니다 — 화면이 근무지 자리에 **그 칸을 먼저** 그립니다
+   (web/app/jobs/[id]/page.tsx:383 `j.지역보임 || j.work_place`) */
+const 보임줄 = await 다받기('job_posts_pub?select=id,' + encodeURIComponent('지역보임'));
+const 보임 = new Set(보임줄.map((x) => x.id));
+const 지역보임 = new Map(보임줄.map((x) => [x.id, x['지역보임'] || '']));
 const 공고 = (await 다받기('job_posts?select=id,source,org_name,title,url,headcount,'
   + 'apply_to,apply_to_time,work_place,employ_type,detail,' + encodeURIComponent('뽑은값')))
   .filter((j) => 보임.has(j.id));
@@ -107,7 +111,12 @@ const 우리값 = (j) => {
       : j.headcount != null ? { 값: String(j.headcount), 어디서: '포털칸' } : null,
     접수마감: j.apply_to ? { 값: j.apply_to, 어디서: '포털칸' } : null,
     마감시각: j.apply_to_time ? { 값: String(j.apply_to_time), 어디서: '포털칸' } : null,
-    근무지: 뽑(j, '근무지') != null ? { 값: 뽑(j, '근무지'), 어디서: '공고문' }
+    /* ★ 2026-10-23 — **화면과 같은 순서로 고칩니다.** 전에는 `뽑은값.근무지` 를
+       먼저 봤는데 **화면은 그 칸을 읽지 않습니다** (`j.지역보임 || j.work_place`).
+       그래서 GJ305988 의 `뽑은값.근무지`(「7배수 20배수 초과」)를 「회원 화면에
+       틀린 값 1건」으로 셌습니다 — 회원에게는 「충북」으로 보입니다.
+       재는 자가 화면과 다르면 신뢰 셋 ② 가 거짓이 됩니다 (지침 10-5) */
+    근무지: 지역보임.get(j.id) ? { 값: 지역보임.get(j.id), 어디서: '포털칸' }
       : j.work_place ? { 값: j.work_place, 어디서: '포털칸' } : null,
     지원자격: 뽑(j, '지원자격') != null ? { 값: 뽑(j, '지원자격'), 어디서: '공고문' }
       : 디(j, '지원자격') != null ? { 값: 디(j, '지원자격'), 어디서: '포털칸' } : null,
