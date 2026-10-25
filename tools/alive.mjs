@@ -251,14 +251,23 @@ const 내린것 = argv.includes('--내린것');
 const 아이디들 = argv.includes('--아이디')
   ? String(argv[argv.indexOf('--아이디') + 1] || '').split(',').map((s) => s.trim()).filter(Boolean)
   : [];
+/* ★ 2026-10-25 — **아이디를 90개씩 나눠** 받고 **차례**를 붙입니다.
+   PostgREST 는 한 번에 100줄에서 끊습니다 — 아이디를 100개 넘게 주면 **조용히 잘립니다**
+   (지침 8-20 ③ · tools/백줄검사 가 이 줄을 집었습니다). 크론은 `--아이디` 없이 도므로
+   그 길은 멀쩡했지만, 손으로 많이 줄 때를 막습니다. */
 async function 아이디로받기(ids) {
   const k = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;
   const 칸 = 'id,url,title,org_name,source,apply_to,hidden';
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/job_posts?select='
-    + encodeURIComponent(칸) + '&id=in.(' + ids.join(',') + ')',
-    { headers: { apikey: k, Authorization: 'Bearer ' + k } });
-  if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
-  return r.json();
+  const 모 = [];
+  for (let i = 0; i < ids.length; i += 90) {
+    const 묶 = ids.slice(i, i + 90);
+    const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/job_posts?select='
+      + encodeURIComponent(칸) + '&order=id.asc&id=in.(' + 묶.join(',') + ')',
+      { headers: { apikey: k, Authorization: 'Bearer ' + k } });
+    if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
+    모.push(...await r.json());
+  }
+  return 모;
 }
 const 볼것0 = 아이디들.length
   ? await 아이디로받기(아이디들)

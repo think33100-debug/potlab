@@ -129,6 +129,15 @@ export function 첨부모으기(source, 옵션 = {}) {
      서버 지역 시각(KST)으로 찍습니다 — `toISOString()` 은 UTC 입니다 (지침 8-20 결) */
   const 때글 = () => new Date().toLocaleString('sv-SE').replace('T', ' ');
   console.log('[' + 때글() + '] ── 첨부줄 · ' + source + (마른 ? ' · 마른' : ' · 진짜'));
+  /* ★ 2026-10-25 세중님 2번 — **바퀴마다 걸린 시간·최대 메모리**를 로그에 남깁니다.
+     크론 줄을 건드리지 않고(승인 자리입니다) **도구 안에서** 잽니다 —
+     세 다리가 다 이 함수를 부르니 여기 한 자리입니다 (지침 6절). */
+  const 시작ms = Date.now();
+  let 최대rss = 0;
+  const 메모리보기 = setInterval(() => {
+    최대rss = Math.max(최대rss, process.memoryUsage().rss);
+  }, 1000);
+  메모리보기.unref?.();
 
   return {
     마른,
@@ -190,6 +199,7 @@ export function 첨부모으기(source, 옵션 = {}) {
         console.log(`  첨부 담을 것 없음 (${source})`
           + ` · 주소없음 ${셈.주소없음} · 겹침 ${셈.겹침}`
           + ' — 더하기() 가 한 번도 안 불렸으면 셋 다 0입니다');
+        이바퀴끝(source, 시작ms, () => 최대rss, 메모리보기);
         return;
       }
       if (마른) {
@@ -203,6 +213,7 @@ export function 첨부모으기(source, 옵션 = {}) {
         fs.writeFileSync(낼곳, JSON.stringify(전, null, 1) + '\n');
         console.log(`  [마른] 첨부 ${줄들.length}줄 → docs/첨부_미리보기_1010.json (${source})`
           + (켜졌나() ? '' : ' · 담으려면 POTJOB_ATTACH_WRITE=1'));
+        이바퀴끝(source, 시작ms, () => 최대rss, 메모리보기);
         return;
       }
 
@@ -212,12 +223,14 @@ export function 첨부모으기(source, 옵션 = {}) {
       catch (e) {
         console.error('  ★ 오늘 담은 수를 못 셌습니다 — ' + String(e.message || e).slice(0, 140));
         console.error('     상한을 모르는 채 담지 않습니다. 다음 바퀴로 넘깁니다');
+        이바퀴끝(source, 시작ms, () => 최대rss, 메모리보기);
         return;
       }
       const 남은몫 = 하루상한() - 이미;
       if (남은몫 <= 0) {
         console.log(`  첨부 ${줄들.length}줄 — 오늘 상한(${하루상한()})을 다 썼습니다`
           + ` (오늘 ${이미}건). **담지 않습니다.** 다음 바퀴로 넘깁니다`);
+        이바퀴끝(source, 시작ms, () => 최대rss, 메모리보기);
         return;
       }
       let 담을줄 = 줄들;
@@ -267,6 +280,16 @@ export function 첨부모으기(source, 옵션 = {}) {
         + ` · 겹침 ${합.겹침} · 건너뜀 ${합.건너뜀} · 그 공고가 표에 없음 ${합.공고없음}`
         + ` · 묶음 ${묶음 ?? '(없음)'} · 표 전체 ${표줄수}줄`);
       if (첫탈) console.log(`  ⚠ 첫 탈 — ${첫탈}`);
+      이바퀴끝(source, 시작ms, () => 최대rss, 메모리보기);
     },
   };
+}
+
+/** 바퀴 한 줄 — 걸린 시간·최대 메모리 (한 자리) */
+function 이바퀴끝(source, 시작ms, 최대rss보기, 재는것) {
+  clearInterval(재는것);
+  const 초 = ((Date.now() - 시작ms) / 1000).toFixed(1);
+  const rss = Math.max(최대rss보기(), process.memoryUsage().rss);
+  console.log('  [바퀴] ' + source + ' · 걸린 시간 ' + 초 + '초 · 최대 메모리 '
+    + (rss / 1024 / 1024).toFixed(0) + 'MB');
 }
