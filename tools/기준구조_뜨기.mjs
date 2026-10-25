@@ -70,6 +70,50 @@ const env = { ...process.env,
   PGDATABASE: decodeURIComponent(u.pathname.replace(/^\//, '')) || 'postgres',
   PGSSLMODE: u.searchParams.get('sslmode') || 'require' };
 
+/* ── `--저장소정책` — **우리가 만든 storage 정책 23개**를 DDL 로 뜹니다 (2026-10-25 세중님 2번)
+   왜 따로 — `pg_dump --schema=public` 에는 **안 들어갑니다**(storage 스키마입니다). 그런데
+   그 23개는 **전부 우리 것**입니다 (공고 첨부·아바타·인증자료·광고·홈 그림 버킷).
+   개발용에서 파일 올리기를 시험하려면 이 파일도 올려야 합니다.
+   ★ Supabase 가 만든 정책은 없습니다 — 이름이 다 우리 말입니다 (2026-10-25 확인) */
+if (argv.includes('--저장소정책')) {
+  const 자리 = path.join(뿌리, 'sql', '기준구조_storage정책_1025.sql');
+  const 글2 = spawnSync('psql', ['-X', '-A', '-t', '-q', '-v', 'ON_ERROR_STOP=1', '-c', `
+    select 'create policy ' || quote_ident(p.polname) || E'\n  on storage.' || c.relname
+        || ' as ' || case when p.polpermissive then 'permissive' else 'restrictive' end
+        || ' for ' || case p.polcmd when 'r' then 'select' when 'a' then 'insert'
+                                    when 'w' then 'update' when 'd' then 'delete' else 'all' end
+        || E'\n  to ' || case when p.polroles = '{0}'::oid[] then 'public'
+                 else array_to_string(p.polroles::regrole[]::text[], ', ') end
+        || coalesce(E'\n  using (' || pg_get_expr(p.polqual, p.polrelid) || ')', '')
+        || coalesce(E'\n  with check (' || pg_get_expr(p.polwithcheck, p.polrelid) || ')', '')
+        || ';'
+      from pg_policy p join pg_class c on c.oid = p.polrelid
+      join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'storage'
+     order by c.relname, p.polname;`], { encoding: 'utf8', env, maxBuffer: 1 << 24 });
+  if (글2.status) { console.error('✗ psql\n' + (글2.stderr || '').slice(0, 600)); process.exit(1); }
+  const 본문 = (글2.stdout || '').trim();
+  const 몇 = (본문.match(/^create policy /gm) || []).length;
+  /* 비밀 글자 검사 — 같은 자로 */
+  const 걸림 = [];
+  본문.split('\n').forEach((줄, i) => {
+    if (봐주는꼴.some((re) => re.test(줄))) return;
+    for (const [이름, re] of 비밀자) if (re.test(줄)) 걸림.push(i + 1 + '줄 [' + 이름 + ']');
+  });
+  console.log('저장소 정책 ' + 몇 + '개 · 비밀 글자 ' + (걸림.length ? '✗ ' + 걸림.join(' · ') : '**0**'));
+  if (걸림.length) { console.error('✗ 걸린 줄이 있어 저장소에 안 넣습니다'); process.exit(1); }
+  fs.mkdirSync(path.dirname(자리), { recursive: true });
+  fs.writeFileSync(자리,
+    ['-- 우리가 만든 storage 정책 (2026-10-25 · pg_dump --schema=public 에는 안 들어갑니다)',
+      '-- 올리는 차례 — ① sql/기준구조_1025.sql (public: 표·함수·정책) ② 이 파일',
+      '-- ★ 정책이 부르는 함수(첨부올릴수있나 등)는 ① 에 있습니다',
+      '', '-- 버킷을 먼저 만들어 두십시오 (Supabase 화면 Storage → New bucket):',
+      '--   notices · proofs · ad-images · avatars · posts · chat · home', '',
+      본문, ''].join('\n'), 'utf8');
+  console.log('○ sql/기준구조_storage정책_1025.sql 에 적었습니다 (' + 몇 + '개)');
+  process.exit(0);
+}
+
 /* ── ⓐ 구조만 뜨기 (운영은 읽기만) ── */
 const 임시자리 = path.join(뿌리, 'tmp');
 fs.mkdirSync(임시자리, { recursive: true });
