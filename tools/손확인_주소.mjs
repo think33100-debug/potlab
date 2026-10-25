@@ -27,6 +27,9 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { 표만들기 } from './긁기/목록주소필요.mjs';
+/* ★ 2026-10-25 세중님 1번 — robots 가 막은 곳은 **세중님 목록에 두지 않습니다**
+   (찾아 주셔도 우리가 못 긁습니다). 그 자를 긁기 쪽과 **같은 것**으로 씁니다 */
+import { 가도되나집 } from './긁기/공통.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -145,7 +148,17 @@ if (만들기) {
      limit ${몇개};`).split('\n').filter(Boolean).map((l) => l.split('\t'));
 
   const 포털것 = 줄들.filter((r) => r[8] === '포털');
-  const 물을것 = 줄들.filter((r) => r[8] !== '포털');
+  const 물을것0 = 줄들.filter((r) => r[8] !== '포털');
+  /* ★ 후보 주소가 있는 줄은 그 집 robots 를 봅니다 — 금지면 「손등록 후보(긁기 불가)」 */
+  const 못긁음 = []; const 물을것 = [];
+  for (const r of 물을것0) {
+    const 후보 = r[6] || r[7];
+    if (!후보) { 물을것.push(r); continue; }
+    const 됨 = await 가도되나집(후보);
+    if (됨.됨) 물을것.push(r);
+    else 못긁음.push({ 줄: r, 왜: 됨.왜 });
+  }
+  console.log('robots 로 가름 — 찾을 곳 ' + 물을것.length + ' · 긁기 불가 ' + 못긁음.length);
   const 셈2 = {};
   for (const r of 물을것) 셈2[r[0]] = (셈2[r[0]] || 0) + 1;
 
@@ -162,6 +175,7 @@ if (만들기) {
     '           → 기관 표 `채용페이지` 에 담고 근거를 「세중 손확인 <날짜>」 로 남깁니다',
     '차례       ' + Object.entries(셈2).map(([k, v]) => k + ' ' + v).join(' · '),
     '```', '',
+    '## 주소 찾기 — ' + 물을것.length + '곳', '',
     '| # | 갈래 | 기관 | 지역 | 후보 주소 | 맞음/아님 | 채용 게시판 주소 |',
     '|---:|---|---|---|---|---|---|'];
   물을것.forEach((r, i) => {
@@ -172,6 +186,20 @@ if (만들기) {
       + ' | ' + (후보 ? String(후보).slice(0, 46) + (심주소 ? ' (심평원)' : ' (공공표)') : '**모릅니다**')
       + ' |  |');
   });
+  if (못긁음.length) {
+    줄.push('', '## 손등록 후보 (긁기 불가) — ' + 못긁음.length + '곳', '',
+      '이 곳들은 **robots.txt 가 긁기를 막았습니다.** 주소를 찾아 주셔도 우리가 두드리지',
+      '않습니다 (지침 — 우회 금지). 그래서 **세중님 목록에서 뺐습니다.**',
+      '길은 둘입니다 — ㉠ 기관에 「채용 알림을 받는 길」을 묻기 ㉡ 관리자가 손으로 올리기', '',
+      '| 갈래 | 기관 | 지역 | 막은 주소 | robots |', '|---|---|---|---|---|');
+    for (const x of 못긁음) {
+      const [갈래, , 기관, 시도, 시군구, , 심주소, 공공주소] = x.줄;
+      줄.push('| ' + 갈래 + ' | ' + String(기관).replace(/|/g, '/')
+        + ' | ' + (시도 + ' ' + 시군구).trim()
+        + ' | ' + String(심주소 || 공공주소).slice(0, 44)
+        + ' | ' + String(x.왜).slice(0, 30) + ' |');
+    }
+  }
   if (포털것.length) {
     줄.push('', '## 포털로 들어옴 — **손확인 필요 없습니다** (' + 포털것.length + '곳)', '',
       '그 시군구의 **보건 쪽 기관**(치매안심센터·정신건강복지센터·보건소) 우리 직군 공고가',
