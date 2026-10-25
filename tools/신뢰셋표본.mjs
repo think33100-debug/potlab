@@ -41,6 +41,11 @@ const 몇개 = Number(값('--몇개', 40)) || 40;
    같은 공고로 전후를 견주어야 합니다. 쓴 것 기록(log/신뢰셋_표본기록.json)에서
    고릅니다. ★ --진짜 와 함께 쓰지 않습니다 (표본 기록을 더럽히지 않습니다) */
 const 쓴것다시 = argv.includes('--쓴것다시');
+/* ★ 2026-10-25 세중님 B — **전수**: 표본 40 이 아니라 **회원 화면 전부**를 댑니다.
+   밖으로 한 번도 안 두드립니다 — 워크넷 쪽을 받지 않고 **담긴 원문(job_body)** 에만 댑니다.
+   그래서 원문이 담긴 공고만 셈에 듭니다 (나머지는 「원문없음」으로 분모 밖입니다).
+   묻는 것 — 「신뢰 셋 ② 가 표본 밖에서 놓친 틀린 값이 있나」 */
+const 전수 = argv.includes('--전수');
 const 반 = Math.floor(몇개 / 2);
 const 틈ms = Number(process.env.POTJOB_WN_GAP_MS) || 3500;
 
@@ -159,6 +164,9 @@ for (const j of 쓴것만(공고.filter((x) => !워크넷인가(x) && 원문쓸�
 }
 for (const a of 긁기묶음.values()) a.sort(차례);
 const 긁기들 = [];
+if (전수) {
+  긁기들.push(...공고.filter((x) => !워크넷인가(x)));
+} else
 for (let i = 0; 긁기들.length < 반; i++) {
   let 넣음 = false;
   for (const a of 긁기묶음.values()) {
@@ -169,7 +177,10 @@ for (let i = 0; 긁기들.length < 반; i++) {
   if (!넣음) break;
 }
 
-console.log('표본 — 워크넷 ' + 워크넷들.length + '건 (바라던 ' + 반 + ') · 긁기 출처 '
+if (전수) console.log('**전수** — 회원 화면 ' + 공고.length + '건 (워크넷 ' + 워크넷들.length
+  + ' · 긁기 출처 ' + 긁기들.length + ') · 담긴 원문이 있는 공고 '
+  + [...글.keys()].filter((id) => 보임.has(id)).length + '건');
+else console.log('표본 — 워크넷 ' + 워크넷들.length + '건 (바라던 ' + 반 + ') · 긁기 출처 '
   + 긁기들.length + '건 (바라던 ' + 반 + ')');
 if (긁기들.length) {
   const 셈 = {};
@@ -182,7 +193,7 @@ console.log('   한 번도 안 쓴 공고 ' + [...워크넷들, ...긁기들].fi
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
 const 쪽글 = new Map();
 let 못받음 = 0;
-for (const j of 워크넷들) {
+for (const j of (전수 ? [] : 워크넷들)) {
   await 자고(틈ms);
   try {
     const r = await fetch(j.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, signal: AbortSignal.timeout(20000) });
@@ -206,7 +217,8 @@ for (const [갈래, 목록] of [['워크넷', 워크넷들], ['긁기 출처', �
   const s = 셈.get(갈래);
   for (const j of 목록) {
     s.건수++;
-    const 원문 = 갈래 === '워크넷' ? (쪽글.get(j.id) || '') : (글.get(j.id) || '');
+    const 원문 = 전수 ? (글.get(j.id) || '')
+      : (갈래 === '워크넷' ? (쪽글.get(j.id) || '') : (글.get(j.id) || ''));
     if (원문쓸만한가(원문)) s.원문++;
     const v = 우리값(j);
     const 이건 = { id: j.id, 갈래, 출처: j.source, 기관: j.org_name, 제목: j.title, 칸마다: [] };
