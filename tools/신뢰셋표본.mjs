@@ -152,8 +152,10 @@ const 쓴것먼저 = (a, b) => (이미썼나.has(a.id) ? 0 : 1) - (이미썼나.
 const 차례 = 쓴것다시 ? 쓴것먼저 : 안쓴것먼저;
 const 쓴것만 = (a) => (쓴것다시 ? a.filter((j) => 이미썼나.has(j.id)) : a);
 
-const 워크넷들 = 쓴것만(공고.filter((j) => 워크넷인가(j) && /^https?:\/\//.test(String(j.url || ''))))
-  .sort(차례).slice(0, 반);
+const 워크넷들 = 전수
+  ? 공고.filter((j) => 워크넷인가(j) && /^https?:\/\//.test(String(j.url || '')))
+  : 쓴것만(공고.filter((j) => 워크넷인가(j) && /^https?:\/\//.test(String(j.url || ''))))
+    .sort(차례).slice(0, 반);
 
 /* 긁기 출처는 **출처를 고르게** — 묶음별로 번갈아 집습니다 (한 출처가 다 먹지 않게) */
 const 긁기묶음 = new Map();
@@ -193,7 +195,7 @@ console.log('   한 번도 안 쓴 공고 ' + [...워크넷들, ...긁기들].fi
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
 const 쪽글 = new Map();
 let 못받음 = 0;
-for (const j of (전수 ? [] : 워크넷들)) {
+for (const j of 워크넷들) {
   await 자고(틈ms);
   try {
     const r = await fetch(j.url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, signal: AbortSignal.timeout(20000) });
@@ -217,8 +219,10 @@ for (const [갈래, 목록] of [['워크넷', 워크넷들], ['긁기 출처', �
   const s = 셈.get(갈래);
   for (const j of 목록) {
     s.건수++;
-    const 원문 = 전수 ? (글.get(j.id) || '')
-      : (갈래 === '워크넷' ? (쪽글.get(j.id) || '') : (글.get(j.id) || ''));
+    /* ★ 2026-10-25 — 전수에서도 **원문 고르는 법은 같습니다.** 워크넷 값의 원문은
+       **공고 쪽**이고, 담긴 첨부에 대면 멀쩡한 값이 전부 틀림으로 나옵니다
+       (처음 전수에서 그렇게 16건이 나왔고, 자가 틀린 것이었습니다 · 지침 10-5) */
+    const 원문 = 갈래 === '워크넷' ? (쪽글.get(j.id) || '') : (글.get(j.id) || '');
     if (원문쓸만한가(원문)) s.원문++;
     const v = 우리값(j);
     const 이건 = { id: j.id, 갈래, 출처: j.source, 기관: j.org_name, 제목: j.title, 칸마다: [] };
