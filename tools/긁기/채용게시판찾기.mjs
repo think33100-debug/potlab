@@ -29,6 +29,7 @@ const 뿌리 = path.join(여기, '..', '..');
 const argv = process.argv.slice(2);
 const 진짜 = argv.includes('--진짜');
 const 몇개 = Number(argv.includes('--몇개') ? argv[argv.indexOf('--몇개') + 1] : 20) || 20;
+const 건너 = Number(argv.includes('--건너') ? argv[argv.indexOf('--건너') + 1] : 0) || 0;
 
 export const 채용말 = /(채용|구인|임용|인재\s*채용|직원\s*모집|인력\s*모집)/;
 export const 빼는말 = /(입찰|낙찰|용역|물품|공사|수의계약|매각|임대)/;
@@ -82,7 +83,7 @@ const 줄들 = psql(`
      and o."불변근거"->>'홈페이지' like '%열어서 확인%'
    order by case coalesce(o."종별이름",'')
               when '상급종합' then 1 when '종합병원' then 2 when '병원' then 3 else 4 end, o.이름
-   limit ${몇개};`).split('\n').filter(Boolean).map((l) => l.split('\t'));
+   limit ${몇개} offset ${건너};`).split('\n').filter(Boolean).map((l) => l.split('\t'));
 console.log('홈페이지는 있고 채용 게시판을 모르는 기관 ' + 줄들.length + '곳 — 열어 봅니다\n');
 
 const 찾음 = []; const 못찾음 = [];
