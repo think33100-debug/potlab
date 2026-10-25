@@ -28,6 +28,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 묶음이름, 칸들, 칸판정, 원문쓸만한가 } from './칸대조.mjs';
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -63,10 +64,15 @@ if (!U || !K) { console.error('SUPABASE_URL·열쇠가 없습니다 (서버에�
 const H = { apikey: K, Authorization: 'Bearer ' + K };
 const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/* ★ 2026-10-25 — **차례(order)를 반드시 붙입니다.** 안 붙이면 offset 으로 넘길 때
+   줄이 **겹치거나 빠집니다** (지침 8-20 ③ · PostgREST 는 한 번에 100줄에서 끊습니다).
+   그래서 회원 화면을 **219건**으로 세고 전수 검사를 돌렸는데, 그때 실제는 **281건**이었습니다
+   — 62건을 못 보고 「전부 0건」이라고 적을 뻔했습니다.
+   차례를 붙이는 자는 `tools/쪽나눠받기.mjs` 의 `차례붙이기()` 하나입니다 (지침 6절). */
 async function 다받기(길) {
   const 모 = [];
   for (let off = 0; ;) {
-    const r = await fetch(U + '/rest/v1/' + 길 + (길.includes('?') ? '&' : '?') + 'limit=1000&offset=' + off, { headers: H });
+    const r = await fetch(U + '/rest/v1/' + 차례붙이기(길) + '&limit=1000&offset=' + off, { headers: H });
     if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 160));
     const a = await r.json();
     모.push(...a);
