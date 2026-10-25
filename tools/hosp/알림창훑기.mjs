@@ -20,6 +20,10 @@
  * ★ 같은 사이트는 **3.5초 이상** 띄웁니다. 403·429 가 이어지면 그 사이트를 멈춥니다.
  */
 import fs from 'node:fs';
+/* ★ 2026-10-25 — 쪽을 넘길 때는 **차례(order)를 반드시** 붙입니다. 안 붙이면 줄이
+   겹치거나 빠집니다 (지침 8-20 ③ · 10/23 에 292→231, 10/25 에 281→219 로 잘못 셌습니다).
+   자는 tools/쪽나눠받기.mjs 의 차례붙이기() 하나입니다 — **직접 offset 을 쓰지 않습니다**. */
+import { 차례붙이기 } from '../쪽나눠받기.mjs';
 import { 알림상태 } from './hs_목록상태.mjs';
 
 const argv = process.argv.slice(2);
@@ -80,7 +84,7 @@ const H = { apikey: K, Authorization: 'Bearer ' + K };
 async function 다(q) {
   const 모 = []; let off = 0;
   for (;;) {
-    const r = await fetch(`${U}/rest/v1/${q}&limit=1000&offset=${off}`, { headers: H });
+    const r = await fetch(`${U}/rest/v1/${차례붙이기(q)}&limit=1000&offset=${off}`, { headers: H });
     if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
     const a = await r.json(); 모.push(...a);
     if (!a.length) return 모;

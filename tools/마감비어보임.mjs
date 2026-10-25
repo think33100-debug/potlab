@@ -20,6 +20,10 @@
  *   없으면 그 건은 **건너뜁니다** — 짐작으로 날짜를 넣지 않습니다.
  */
 import fs from 'node:fs';
+/* ★ 2026-10-25 — 쪽을 넘길 때는 **차례(order)를 반드시** 붙입니다. 안 붙이면 줄이
+   겹치거나 빠집니다 (지침 8-20 ③ · 10/23 에 292→231, 10/25 에 281→219 로 잘못 셌습니다).
+   자는 tools/쪽나눠받기.mjs 의 차례붙이기() 하나입니다 — **직접 offset 을 쓰지 않습니다**. */
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 import { 첨부읽기, 진짜형식, 워커끝내기 } from './공고문읽기.mjs';
 
 const argv = process.argv.slice(2);
@@ -160,7 +164,7 @@ const 오늘 = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 async function 다받기(길) {
   const 모두 = [];
   for (let off = 0; off < 2000; off += 100) {
-    const r = await fetch(U + '/rest/v1/' + 길 + '&limit=100&offset=' + off, { headers: H });
+    const r = await fetch(U + '/rest/v1/' + 차례붙이기(길) + '&limit=100&offset=' + off, { headers: H });
     if (!r.ok) { console.error('✗ ' + r.status + ' · ' + (await r.text()).slice(0, 200)); process.exit(1); }
     const j = await r.json();
     모두.push(...j);

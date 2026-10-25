@@ -113,8 +113,11 @@ const H = { apikey: K, Authorization: 'Bearer ' + K, 'Content-Type': 'applicatio
  *   것**이 유일한 그물입니다. 그래서 아래에 받은 줄 수를 찍습니다. */
 const 구멍전부 = [];
 for (let off = 0; ; off += 100) {
+  /* ★ 2026-10-25 — 창구 쪽나눔에도 **차례**를 줍니다 (지침 8-20 ③).
+     `일층병원_구멍()` 은 기관 이름을 내므로 그 칸으로 차례를 세웁니다 */
   const r0 = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍')
-    + '?limit=100&offset=' + off, { method: 'POST', headers: H, body: '{}' });
+    + '?order=' + encodeURIComponent('기관') + '&limit=100&offset=' + off,
+    { method: 'POST', headers: H, body: '{}' });
   if (!r0.ok) { console.error('✗ 일층병원_구멍 ' + r0.status + ' ' + (await r0.text()).slice(0, 160)); process.exit(1); }
   const 한쪽 = await r0.json();
   구멍전부.push(...한쪽);

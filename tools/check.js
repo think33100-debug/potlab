@@ -117,6 +117,18 @@ try {
   problems.push("100줄 한도 — 조용히 잘릴 수 있는 조회가 있습니다 (위 ★ 를 보십시오)");
 }
 
+/* ── 쪽 나눠 받을 때 **차례(order)** (2026-10-25) ────────────────
+   PostgREST 는 100줄에서 끊고, order 없이 offset 으로 넘기면 줄이
+   **겹치거나 빠집니다.** 두 번 밟았습니다 (10/23 292→231 · 10/25 281→219).
+   자세한 것은 tools/쪽나눠받기_점검.mjs — 새 도구가 직접 offset 을 쓰면 여기서 걸립니다. */
+try {
+  const { execFileSync } = require("child_process");
+  execFileSync(process.execPath, [require("path").join(__dirname, "쪽나눠받기_점검.mjs")],
+    { stdio: "inherit" });
+} catch (e) {
+  problems.push("쪽나눔 — 차례(order) 없이 offset 으로 넘기는 자리가 있습니다 (위 ✗ 를 보십시오)");
+}
+
 if (!problems.length) {
   console.log('\n어긋난 곳 없습니다.');
 } else {

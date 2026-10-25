@@ -94,8 +94,10 @@ async function rpc(fn, body, 꼬리 = '') {
 async function 다받기(열쇠값, source, of) {
   const 모음 = [];
   for (let off = 0; off < 6000; off += 100) {
+    /* ★ 2026-10-25 — 창구 쪽나눔에 **차례**를 줍니다 (지침 8-20 ③).
+       collect_peek 은 공고 줄을 내므로 `id` 로 세웁니다 */
     const 줄 = await rpc('collect_peek', { p_secret: 열쇠값, p_source: source, p_of: of },
-      '?limit=100&offset=' + off);
+      '?order=id.asc&limit=100&offset=' + off);
     const n = 줄 || [];
     모음.push(...n);
     if (n.length < 100) break;

@@ -1,29 +1,24 @@
 {
   "_읽는이에게": "열쇠는 「파일|조회이름」입니다. 줄 번호를 쓰면 코드가 밀릴 때마다 깨집니다 (2026-10-04에 하루 두 번 깨져서 바꿨습니다). 까닭 없이 넘기지 마십시오.",
-
   "web/app/admin/beat/page.tsx|beat_health": "경로 수만큼 — 지금 7줄. 수집 경로가 100이 될 일 없습니다",
   "web/app/admin/beat/page.tsx|수집기박동": "수집기 수만큼 — 지금 13줄",
   "web/components/route-health.tsx|route_health": "경로 수만큼 — 지금 15줄",
   "web/components/route-health.tsx|beat_health": "경로 수만큼 — 지금 7줄",
-
   "web/app/admin/stats/page.tsx|admin_stats_daily": "p_days 만큼 줄이 나옵니다 — 화면이 30 을 넘깁니다",
   "web/app/admin/stats/page.tsx|admin_stats_screens": "화면 갈래 수만큼 — 지금 8줄",
   "web/app/admin/stats/page.tsx|admin_stats_top_jobs": "함수 안에서 limit p_limit — 화면이 10 을 넘깁니다",
   "web/app/admin/stats/page.tsx|admin_stats_top_posts": "함수 안에서 limit p_limit — 화면이 10 을 넘깁니다",
   "web/app/admin/stats/page.tsx|admin_stats_devices": "기기 갈래 수만큼 — 지금 2줄",
-
   "web/components/signup-survey.tsx|lang_bands": "시험·등급 표 — 지금 18줄, 손으로 넣는 고정 목록",
   "web/lib/job-views.ts|job_views": "화면에 보이는 공고 id 만 넘깁니다 (한 쪽 20건). 부르는 곳 둘 다 20건 이하",
   "web/lib/org.ts|org_public": "기관 하나를 찾는 것 — 첫 줄만 씁니다",
   "web/lib/org.ts|org_nearby": "p_n: 3 으로 묶습니다",
   "web/lib/org.ts|org_jobs": "p_n: 10 으로 묶습니다",
   "web/components/org-stat.tsx|org_detail": "기관 하나 — 함수 안에 limit 1",
-
   "web/app/jobs/page.tsx|공개공고": "공개공고() 가 함수 안에서 100 으로 묶습니다 (2026-10-04에 고침). 「비로그인_공고수」가 -1 이거나 100 을 넘어도 100 까지만 줍니다 — 비로그인 화면은 쪽 넘기기가 없어 이게 맞습니다",
-
   "web/app/jobs/page.tsx|내프로필": "내프로필() 은 RLS 로 **내 줄 하나만** 돌려줍니다. 여러 줄 함수로 선언돼 있을 뿐입니다",
-  "web/app/edu/page.tsx|내프로필": "내프로필() 은 RLS 로 **내 줄 하나만** 돌려줍니다. 여러 줄 함수로 선언돼 있을 뿐입니다"
-,
-
-  "tools/나라일터_직급재보기.mjs|job_posts": "표본 도구입니다 — limit 을 argv 로 **일부러** 주고(기본 30) 받은 줄 수를 「견줄 공고 N건」으로 찍습니다. 조용히 잘리는 자리가 아닙니다. 아무것도 담지 않습니다"
+  "web/app/edu/page.tsx|내프로필": "내프로필() 은 RLS 로 **내 줄 하나만** 돌려줍니다. 여러 줄 함수로 선언돼 있을 뿐입니다",
+  "tools/나라일터_직급재보기.mjs|job_posts": "표본 도구입니다 — limit 을 argv 로 **일부러** 주고(기본 30) 받은 줄 수를 「견줄 공고 N건」으로 찍습니다. 조용히 잘리는 자리가 아닙니다. 아무것도 담지 않습니다",
+  "tools/지원방법_회원눈확인.mjs|job_one": "job_one 은 **한 건씩** 부릅니다 (공고 하나에 한 번) — 잘릴 줄이 없습니다 (2026-10-25)",
+  "tools/오류잡기_1023.mjs|job_one": "job_one 은 **한 건씩** 부릅니다 — 잘릴 줄이 없습니다 (2026-10-25)"
 }

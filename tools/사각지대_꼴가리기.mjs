@@ -57,8 +57,10 @@ async function 전부(길) {
  *   분모와 맞춰 봅니다). 함수가 내는 줄 수는 `일층병원_구멍셈()` 이 말해 줍니다 */
 const 구멍 = [];
 for (let off = 0; ; off += 100) {
+  /* ★ 2026-10-25 — 창구 쪽나눔에도 **차례**를 줍니다 (지침 8-20 ③) */
   const r0 = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍')
-    + '?limit=100&offset=' + off, { method: 'POST', headers: H, body: '{}' });
+    + '?order=' + encodeURIComponent('기관') + '&limit=100&offset=' + off,
+    { method: 'POST', headers: H, body: '{}' });
   if (!r0.ok) { console.error('✗ 일층병원_구멍 ' + r0.status + ' · ' + (await r0.text()).slice(0, 200)); process.exit(1); }
   const 쪽 = await r0.json();
   구멍.push(...쪽);

@@ -193,7 +193,11 @@ async function 가리키지않는것치우기({ 통, 표, 칸 }) {
 async function list(bucket, prefix) {
   const r = await fetch(`${URL}/storage/v1/object/list/${bucket}`, {
     method: 'POST', headers: H,
-    body: JSON.stringify({ prefix, limit: 1000, offset: 0 }),
+    /* ★ 2026-10-25 — Storage 목록도 **차례를 적어 줍니다** (지침 8-20 ③).
+       limit 1000 한 번에 받고 offset 0 이라 지금은 쪽을 안 넘기지만, 차례를 적어 두면
+       나중에 쪽을 넘길 때 줄이 빠지지 않습니다 */
+    body: JSON.stringify({ prefix, limit: 1000, offset: 0,
+      sortBy: { column: 'name', order: 'asc' } }),
   });
   if (!r.ok) throw new Error(`list ${bucket}/${prefix} → HTTP ${r.status}`);
   return r.json();

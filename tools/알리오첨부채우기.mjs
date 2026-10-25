@@ -22,6 +22,10 @@
  * ★ 상세 한도는 하루 100,000 입니다(응답 머리글). 485건은 0.5% 입니다.
  */
 import fs from 'node:fs';
+/* ★ 2026-10-25 — 쪽을 넘길 때는 **차례(order)를 반드시** 붙입니다. 안 붙이면 줄이
+   겹치거나 빠집니다 (지침 8-20 ③ · 10/23 에 292→231, 10/25 에 281→219 로 잘못 셌습니다).
+   자는 tools/쪽나눠받기.mjs 의 차례붙이기() 하나입니다 — **직접 offset 을 쓰지 않습니다**. */
+import { 차례붙이기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 첨부모으기 } from './첨부담기.mjs';
@@ -60,7 +64,7 @@ const 머리 = { apikey: 열쇠, Authorization: 'Bearer ' + 열쇠 };
 async function 전부(길) {
   const 모은것 = [];
   for (let off = 0; ;) {
-    const u = 바탕 + '/rest/v1/' + 길 + (길.includes('?') ? '&' : '?') + 'limit=1000&offset=' + off;
+    const u = 바탕 + '/rest/v1/' + 차례붙이기(길) + '&limit=1000&offset=' + off;
     const r = await fetch(u, { headers: 머리 });
     if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 160));
     const 줄 = await r.json();
