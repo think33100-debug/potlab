@@ -101,9 +101,9 @@ console.log('  — 모두 ' + 모두 + '줄');
 if (!진짜) { console.log('\n[마른] 아무것도 안 지웠습니다 — --진짜 로 지웁니다'); process.exit(0); }
 if (!모두) {
   /* 지울 것이 없어도 **돌았다는 기록**은 남깁니다 (크론이 도는지 보려고) */
-  psql(`insert into site_settings (key, value, updated_by)
-        values ('오래된것지우기', jsonb_build_object('돈때','${이제}','지운줄',0,'표별','{}'::jsonb), 'cron')
-        on conflict (key) do update set value = excluded.value, updated_at = now(), updated_by = 'cron';`);
+  psql(`insert into site_settings (key, value)
+        values ('오래된것지우기', jsonb_build_object('돈때','${이제}','지운줄',0,'표별','{}'::jsonb))
+        on conflict (key) do update set value = excluded.value, updated_at = now();`);
   console.log('\n지울 것이 없습니다 — 돌았다는 기록만 남겼습니다');
   process.exit(0);
 }
@@ -131,11 +131,11 @@ for (const x of 셈) {
 }
 fs.writeFileSync(되돌림, 줄.join('\n') + '\n', 'utf8');
 const 지운합 = Object.values(결과).reduce((a, b) => a + b, 0);
-psql(`insert into site_settings (key, value, updated_by)
+psql(`insert into site_settings (key, value)
       values ('오래된것지우기', jsonb_build_object('돈때','${이제}','지운줄',${지운합},
                  '표별','${JSON.stringify(결과).replace(/'/g, "''")}'::jsonb,
-                 '되돌림','${되돌림.replace(/'/g, "''")}'), 'cron')
-      on conflict (key) do update set value = excluded.value, updated_at = now(), updated_by = 'cron';`);
+                 '되돌림','${되돌림.replace(/'/g, "''")}'))
+      on conflict (key) do update set value = excluded.value, updated_at = now();`);
 const 로그 = path.join(os.homedir(), 'log', '오래된것지우기.log');
 fs.mkdirSync(path.dirname(로그), { recursive: true });
 fs.appendFileSync(로그, '[' + 이제 + '] 지운 줄 ' + 지운합 + ' — '
