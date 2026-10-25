@@ -56,9 +56,21 @@ console.log('○ test-pt 로 로그인했습니다 (회원 눈)');
 const H = { apikey: ANON, Authorization: 'Bearer ' + j0.access_token, 'Content-Type': 'application/json' };
 
 /* ── 회원 화면 공고 몇 건 ── */
-const r1 = await fetch(U + '/rest/v1/job_posts_pub?select=id,org_name,title&order=id.asc&limit=' + 몇개, { headers: H });
-const 공고 = await r1.json();
-if (!Array.isArray(공고) || !공고.length) { console.error('✗ 공고를 못 받았습니다'); process.exit(1); }
+/* ★ 회원은 표를 직접 안 읽습니다 — **창구(job_list)** 로 받습니다 (그게 화면이 하는 일입니다) */
+const r1 = await fetch(U + '/rest/v1/rpc/job_list', {
+  method: 'POST', headers: H,
+  /* 인수 이름은 화면이 부르는 꼴 그대로입니다 (web/app/jobs/page.tsx:103) */
+  body: JSON.stringify({ p_job: null, p_sido: null, p_tab: null, p_q: null,
+    p_all: false, p_sort: null, p_page: 1 }),
+});
+const t1 = await r1.text();
+let 공고 = [];
+try { const j1 = JSON.parse(t1); 공고 = Array.isArray(j1) ? j1 : (j1 && (j1.rows || j1['목록'])) || []; } catch { /* 아래에서 찍습니다 */ }
+if (!공고.length) {
+  console.error('✗ job_list 로 공고를 못 받았습니다 — ' + r1.status + ' ' + t1.slice(0, 200));
+  console.error('  (창구 인수 이름이 다를 수 있습니다 — web/ 에서 부르는 꼴을 보고 맞추십시오)');
+  process.exit(1);
+}
 
 let 보임 = 0; let 공고문확인 = 0;
 for (const x of 공고) {
