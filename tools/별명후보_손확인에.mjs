@@ -67,7 +67,7 @@ const 줄들 = psql(`
             '(의료법인|재단법인|학교법인|사회복지법인|사단법인|주식회사|의료재단|복지재단|특별시|광역시|특별자치도)', '', 'g'), 6) as 꼬리,
          coalesce((select string_agg(
                      h.yadm_nm || ' [' || h.cl_cd_nm || ' · ' || h.sido_nm || ' ' || coalesce(h.sggu_nm,'') || ']'
-                     || ' HIRA:' || h.ykiho, E'\\n' order by h.yadm_nm)
+                     || ' HIRA:' || h.ykiho, ' ## ' order by h.yadm_nm)
                     from hira_org h
                    where h.name_key like '%' || right(regexp_replace(hira_name_key(n.org_name),
                          '(의료법인|재단법인|학교법인|사회복지법인|사단법인|주식회사|의료재단|복지재단|특별시|광역시|특별자치도)', '', 'g'), 6) || '%'
