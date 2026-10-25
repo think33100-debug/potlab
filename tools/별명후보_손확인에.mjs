@@ -85,8 +85,8 @@ const 줄들 = psql(`
     from n order by n.회원화면 desc, n.공고 desc;`);
 
 const 곳들 = 줄들.split('\n').filter(Boolean).map((l) => {
-  const [이름, 공고, 회원화면, 견본, 꼬리, ...나머지] = l.split('\t');
-  return { 이름, 공고, 회원화면, 견본, 꼬리, 후보: 나머지.join('\t') };
+  const [이름, 공고, 회원화면, 견본, 꼬리, 후보, 후보수] = l.split('\t');
+  return { 이름, 공고, 회원화면, 견본, 꼬리, 후보, 후보수 };
 });
 console.log('병원 꼴인데 심평원에 이름이 없는 곳 ' + 곳들.length + '곳\n');
 for (const x of 곳들) {
