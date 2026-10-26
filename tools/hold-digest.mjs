@@ -207,6 +207,36 @@ async function 긁기재기(cfg) {
 }
 
 /** 아침 메일에 넣을 줄 */
+/* ★ 2026-10-26 세중님 1번 ⓒ — **서버 시계 차이 한 줄.**
+   10/26 05:30 에 Supabase 가 `PGRST303 "JWT issued at future"` 로 401 을 줘서 알리오 다리가
+   죽었습니다. 그때 **우리 시계는 완벽했습니다** (NTP 켜짐 · 어긋남 0.0000004초 ·
+   외부 세 곳 HTTP Date 와 같은 초). 그래도 「시계가 어긋나면 바로 보이게」 한 줄을 둡니다 —
+   어긋나기 시작하면 그날 아침에 드러납니다.
+   재는 법 — 바깥 쪽의 `Date:` 머리글과 우리 시계를 견줍니다 (열쇠 안 씁니다 · 한 곳만 두드립니다) */
+function 시계재기() {
+  try {
+    const t = execFileSync('chronyc', ['tracking'], { encoding: 'utf8', timeout: 5000 });
+    const 어긋남 = (t.match(/System times*:s*([d.]+) seconds (slow|fast)/) || []);
+    const 맞춤 = /Leap statuss*:s*Normal/.test(t);
+    if (!어긋남[1]) return null;
+    const 초 = Number(어긋남[1]) * (어긋남[2] === 'fast' ? 1 : -1);
+    return { 초, 맞춤, 어디서: 'chronyc' };
+  } catch { /* chrony 가 없으면 timedatectl */ }
+  try {
+    const t = execFileSync('timedatectl', ['show'], { encoding: 'utf8', timeout: 5000 });
+    return { 초: null, 맞춤: /NTPSynchronized=yes/.test(t), 어디서: 'timedatectl' };
+  } catch { return null; }
+}
+function 시계줄(c) {
+  if (!c) return [];
+  const 큼 = c.초 != null && Math.abs(c.초) >= 5;
+  const 값 = c.초 == null ? '(못 쟀습니다)'
+    : (c.초 >= 0 ? '+' : '') + (Math.round(c.초 * 1000) / 1000) + '초';
+  return ['   서버 시계      NTP 와 ' + 값 + ' 어긋남 · 맞춰짐 ' + (c.맞춤 ? '예' : '**아니오**')
+    + (큼 || !c.맞춤 ? '  ★ **보십시오 — PGRST303(JWT issued at future) 이 그 꼴로 납니다**' : '  (괜찮습니다)')
+    + '   (' + c.어디서 + ')'];
+}
+
 function 긁기줄(g) {
   if (!g || !g.공고) return [];
   const 퍼 = (n) => Math.round((100 * n) / g.공고) + '%';
@@ -421,6 +451,8 @@ function 신뢰셋줄(네) {
   try { 줄.push(...매칭줄(매칭)); } catch { /* 못 재면 적지 않습니다 */ }
   /* ★ 2026-10-24 세중님 D2 — 긁기 한 줄 (담기 시작한 뒤부터 보입니다) */
   try { 줄.push(...긁기줄(긁기)); } catch { /* 못 재면 적지 않습니다 */ }
+  /* ★ 2026-10-26 세중님 1번 ⓒ — 서버 시계 차이 한 줄 */
+  try { 줄.push(...시계줄(시계재기())); } catch { /* 못 재면 적지 않습니다 */ }
   줄.push('');
   return 줄;
 }
