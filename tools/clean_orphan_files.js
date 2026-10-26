@@ -106,10 +106,23 @@ const 가리키는통 = [
   { 통: 'chat-images', 표: 'chat_messages', 칸: ['image_path', 'image_thumb_path'] },
 ];
 
-async function rest(path) {
-  const r = await fetch(`${URL}/rest/v1/${path}`, { headers: H });
-  if (!r.ok) throw new Error(`${path} → HTTP ${r.status} ${await r.text()}`);
-  return r.json();
+/* ★ 2026-10-26 세중님 1번 — **실패 시 닫힙니다.**
+   이 도구는 10분마다 `--yes` 로 돌며 **정말로 파일을 지웁니다.** 그래서 「표를 못 읽었다」와
+   「표가 비었다」를 절대 헷갈리면 안 됩니다 —
+     ㉠ 조회가 실패하면 **그 자리에서 멈춥니다** (main().catch → exit 1 · 아무것도 안 지웁니다)
+     ㉡ **100줄에서 잘리는 것**도 막습니다. 전에는 `profiles?select=id` 를 **한 번만** 불러
+        회원이 101명이 되는 날부터 **101번째 회원의 파일을 「주인 없음」으로 지울** 참이었습니다
+        (지금 9명이라 아직 안 터졌습니다 · 지침 8-20 ③)
+     ㉢ 지나가는 401(PGRST303)·5xx 는 **다시 두드립니다** (공용 받아보기)
+   쪽나눔·재시도·셈 맞추기는 모두 `tools/쪽나눠받기.mjs` 한 자리 것입니다 (지침 6절). */
+let 공용 = null;
+async function 공용받기() {
+  if (!공용) 공용 = await import('./쪽나눠받기.mjs');
+  return 공용;
+}
+async function rest(path, 차례 = 'id') {
+  const { 모두받기 } = await 공용받기();
+  return 모두받기(`${URL}/rest/v1/${path}`, H, { 차례 });
 }
 
 async function main() {
@@ -153,9 +166,15 @@ async function 가리키지않는것치우기({ 통, 표, 칸 }) {
   const 쓰는것 = new Set();
   for (const c of 칸) {
     const q = `${encodeURIComponent(표)}?select=${encodeURIComponent(c)}&${encodeURIComponent(c)}=not.is.null`;
-    const r = await fetch(`${URL}/rest/v1/${q}`, { headers: H });
-    if (!r.ok) { console.error(`${표}.${c} 를 못 읽었습니다 — HTTP ${r.status}`); return; }
-    for (const x of await r.json()) if (x[c]) 쓰는것.add(x[c]);
+    let 줄들;
+    try { 줄들 = await rest(q); }
+    catch (e) {
+      /* ★ 못 읽으면 **그 통은 손대지 않습니다** (지우기 0) — 「비었다」로 읽지 않습니다 */
+      console.error(`${표}.${c} 를 못 읽었습니다 — ${String(e.message).slice(0, 160)}`);
+      console.error('   → 그 통은 **건너뜁니다** (아무것도 안 지웁니다)');
+      return;
+    }
+    for (const x of 줄들) if (x[c]) 쓰는것.add(x[c]);
   }
 
   const 지울것 = [];
