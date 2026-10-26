@@ -39,6 +39,11 @@
  *   `--칸안받기` 를 적으면 안 보냅니다 (판정만 보고 싶을 때).
  */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB·저장소 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(`PGRST303 "JWT issued at future"`)·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 최근 로그에 그 401 이 **28번** 났고,
+   첨부 다리는 그 한 번에 죽었습니다 (10/26 05:30). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import { 차례붙이기 } from './쪽나눠받기.mjs';
 import { 세기, 남기기, 막힘인가, 막힘적기, 막혔나 } from './고용24한도.mjs';
 import { 없어짐말, 알림상태 } from './hosp/hs_목록상태.mjs';
@@ -165,7 +170,7 @@ async function 다(q) {
   const 모 = [];
   let off = 0;
   for (;;) {
-    const r = await fetch(U + '/rest/v1/' + q + '&limit=1000&offset=' + off, { headers: H });
+    const r = await 받아보기(U + '/rest/v1/' + q + '&limit=1000&offset=' + off, { headers: H });
     if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
     const a = await r.json();
     모.push(...a);
@@ -446,7 +451,7 @@ if (argv.includes('--정찰보고')) {
     + ' · alive ' + 살아있음.length + ' · 오류 ' + 오류.length + '건은 **안 보냅니다**');
   let 받음 = null;
   for (let i = 0; i < 줄.length; i += 200) {
-    const r = await fetch(U + '/rest/v1/rpc/alive_mark', {
+    const r = await 받아보기(U + '/rest/v1/rpc/alive_mark', {
       method: 'POST',
       headers: { ...H, 'Content-Type': 'application/json' },
       body: JSON.stringify({ p_secret: cfg.ALIVE_KEY, p_rows: 줄.slice(i, i + 200) }),
@@ -470,7 +475,7 @@ if (argv.includes('--정찰보고')) {
     for (const [k, v] of 바뀔것) console.log('     ' + k + ' 견본 ' + v.slice(0, 5).join(' '));
     if (칸마른) { console.log('\n[칸마른] 아무것도 안 씁니다'); process.exit(0); }
     for (let i = 0; i < 칸줄.length; i += 50) {
-      const r = await fetch(U + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'), {
+      const r = await 받아보기(U + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'), {
         method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
         body: JSON.stringify({ p_rows: 칸줄.slice(i, i + 50).map(({ _지금고용, ...나머지 }) => 나머지) }),
       });
@@ -496,7 +501,7 @@ if (글줄.length) {
     else {
       let 담음 = 0; let 쓴바이트 = 0; let 탈 = null;
       for (let i = 0; i < 글줄.length; i += 25) {
-        const r = await fetch(U + '/rest/v1/rpc/collect_body', {
+        const r = await 받아보기(U + '/rest/v1/rpc/collect_body', {
           method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
           body: JSON.stringify({ p_secret: 열쇠, p_source: 'WN2', p_rows: 글줄.slice(i, i + 25) }),
         });

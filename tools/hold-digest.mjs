@@ -23,6 +23,11 @@
  * ⚠ service_role 열쇠는 쓰지 않습니다. anon 열쇠 + 경로 내부 열쇠로만 갑니다.
  */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB·저장소 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(`PGRST303 "JWT issued at future"`)·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 최근 로그에 그 401 이 **28번** 났고,
+   첨부 다리는 그 한 번에 죽었습니다 (10/26 05:30). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import { 새는것, 한줄 as 새는한줄 } from './보류함새는것.mjs';   /* 2026-10-22 세중님 1번 */
 /* ★ 2026-10-23 — 「크론 N줄 다 도나」를 **손으로** 적고 있었습니다
    (docs/동결까지_남은일_1023.md 2절 — 날마다 한 줄). 156줄을 눈으로 보면
@@ -66,7 +71,7 @@ function env() {
 async function rpc(cfg, fn, body) {
   const k = cfg.SUPABASE_ANON_KEY;
   if (!k) throw new Error('SUPABASE_ANON_KEY 가 없습니다');
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+  const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',
     headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
     body: JSON.stringify(body || {}),
@@ -86,7 +91,7 @@ async function 결과공고세기(cfg) {
     const out = [];
     for (let off = 0; ; off += 100) {
       const 이음 = 길.includes('?') ? '&' : '?';
-      const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길 + 이음
+      const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + 길 + 이음
         + 'order=id&limit=100&offset=' + off, { headers: H });
       if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 120));
       const a = await r.json();
@@ -120,7 +125,7 @@ async function 매칭재기(cfg) {
   try {
     const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY };
     const 받아 = async (길) => {
-      const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
+      const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
       if (!r.ok) throw new Error(String(r.status));
       return r.json();
     };
@@ -161,7 +166,7 @@ async function 긁기재기(cfg) {
   try {
     const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY };
     const 받아 = async (길) => {
-      const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
+      const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
       if (!r.ok) throw new Error(String(r.status));
       return r.json();
     };
@@ -291,7 +296,7 @@ async function 지금역할(cfg) {
   const k = cfg.SUPABASE_SERVICE_KEY;
   if (!k) return null;
   try {
-    const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/'
+    const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/'
       + encodeURIComponent('마스터페르소나') + '?select=' + encodeURIComponent('지금역할,바뀐때'),
     { headers: { apikey: k, Authorization: 'Bearer ' + k } });
     if (!r.ok) return null;
@@ -356,11 +361,11 @@ async function 네숫자받기(cfg, 몇번 = 3, 쉼ms = 5 * 60 * 1000) {
   for (let i = 1; i <= 몇번; i++) {
     try {
       const t0 = Date.now();
-      const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('네숫자'), {
+      const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('네숫자'), {
         method: 'POST',
         headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
         body: '{}',
-      });
+      }, 1);
       if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
       const j = await r.json();
       if (i > 1) console.log('  네숫자 — ' + i + '번째에 받았습니다 (' + Math.round((Date.now() - t0) / 100) / 10 + '초)');
@@ -625,7 +630,7 @@ function 아침글(네, 늦음, 구멍, 잠금, 의심, 못담음, 역할) {
 async function 일층구멍(cfg) {
   const k = cfg.SUPABASE_SERVICE_KEY;
   if (!k) return null;
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍셈'), {
+  const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('일층병원_구멍셈'), {
     method: 'POST',
     headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
     body: '{}',

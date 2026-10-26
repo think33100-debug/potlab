@@ -37,6 +37,10 @@
  *    중간에 죽었을 때 두 번 갑니다. 그래서 남기기를 먼저 하고, 결과는 뒤에 고칩니다.
  * ═══════════════════════════════════════════════════════════════ */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import webpush from 'web-push';
@@ -115,7 +119,7 @@ webpush.setVapidDetails(cfg.VAPID_MAIL, cfg.VAPID_PUBLIC, cfg.VAPID_PRIVATE);
 /* 보낼알림·알림보낸것남기기 는 service_role 만 부를 수 있습니다 */
 async function rpc(이름, body) {
   const k = cfg.SUPABASE_SERVICE_KEY;
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent(이름), {
+  const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent(이름), {
     method: 'POST',
     headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

@@ -25,6 +25,10 @@
  * ★ DB 는 `site_settings['신뢰셋_틀림']` 한 줄만 고칩니다 (--진짜 일 때).
  */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 묶음이름, 칸들, 칸판정, 원문쓸만한가 } from './칸대조.mjs';
@@ -72,7 +76,7 @@ const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
 async function 다받기(길) {
   const 모 = [];
   for (let off = 0; ;) {
-    const r = await fetch(U + '/rest/v1/' + 차례붙이기(길) + '&limit=1000&offset=' + off, { headers: H });
+    const r = await 받아보기(U + '/rest/v1/' + 차례붙이기(길) + '&limit=1000&offset=' + off, { headers: H });
     if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 160));
     const a = await r.json();
     모.push(...a);
@@ -311,7 +315,7 @@ fs.writeFileSync(path.join(적을터, '신뢰셋_표본기록.json'), JSON.strin
 console.log('\n○ ' + path.join(적을터, '신뢰셋_틀림.json') + ' 에 적었습니다 (쓴 공고 '
   + 기록.쓴공고.length + '건 기록)');
 
-const r = await fetch(U + '/rest/v1/site_settings?on_conflict=key', {
+const r = await 받아보기(U + '/rest/v1/site_settings?on_conflict=key', {
   method: 'POST',
   headers: { ...H, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
   body: JSON.stringify([{ key: '신뢰셋_틀림', value: 잰것 }]),

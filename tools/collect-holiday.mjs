@@ -21,6 +21,10 @@
  *    node tools/collect-holiday.mjs --dry      받기만 하고 안 담습니다
  */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -103,7 +107,7 @@ if (dry) { console.log('--dry 라 안 담았습니다'); process.exit(탈 ? 1 : 
    같은 날이 또 와도 이름만 새로 씁니다 */
 const k = cfg.SUPABASE_SERVICE_KEY;
 if (!k || !cfg.SUPABASE_URL) { console.error('SUPABASE_SERVICE_KEY 또는 URL 이 없습니다'); process.exit(1); }
-const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + encodeURIComponent('공휴일')
+const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + encodeURIComponent('공휴일')
   + '?on_conflict=' + encodeURIComponent('날'), {
   method: 'POST',
   headers: { apikey: k, Authorization: 'Bearer ' + k,

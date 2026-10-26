@@ -28,6 +28,10 @@
  * .env 는 셸로 source 하지 않고 node 로 읽습니다 (지침 8-12).
  */
 import { 차례붙이기 } from './쪽나눠받기.mjs';
+/* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import fs from 'node:fs';
 
 const 마른 = process.argv.includes('--마른');
@@ -81,7 +85,7 @@ async function 다(path_) {
   path_ = 차례붙이기(path_);   /* 차례가 고유해야 줄이 안 샙니다 — 이것은 **매시 크론**입니다 (2026-10-19) */
   const 모 = []; let off = 0;
   for (;;) {
-    const r = await fetch(`${U}/rest/v1/${path_}&limit=1000&offset=${off}`, { headers: 머리 });
+    const r = await 받아보기(`${U}/rest/v1/${path_}&limit=1000&offset=${off}`, { headers: 머리 });
     if (!r.ok) throw new Error(r.status + ' ' + 가리고((await r.text()).slice(0, 200)));
     const a = await r.json();
     모.push(...a);
@@ -103,7 +107,7 @@ if (마른) {
   process.exit(0);
 }
 
-const r = await fetch(`${U}/rest/v1/rpc/hide_stale_posts`, {
+const r = await 받아보기(`${U}/rest/v1/rpc/hide_stale_posts`, {
   method: 'POST', headers: 머리,
   body: JSON.stringify({ p_days: 30, p_rolling_days: 180 }),   /* 밤정리와 같은 값 */
 });

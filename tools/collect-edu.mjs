@@ -33,6 +33,10 @@
  *  (값은 어디에도 찍지 않습니다)
  * ═══════════════════════════════════════════════════════════════ */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -686,7 +690,7 @@ if (날짜없는것.length && !process.argv.includes('--상세없이')) {
   if (URL0 && SK0) {
     try {
       for (let off = 0; ; off += 100) {
-        const r = await fetch(URL0 + '/rest/v1/' + encodeURIComponent('교육')
+        const r = await 받아보기(URL0 + '/rest/v1/' + encodeURIComponent('교육')
           + '?select=' + encodeURIComponent('번호,올린날')
           + '&' + encodeURIComponent('올린날') + '=not.is.null'
           + '&order=' + encodeURIComponent('번호') + '&limit=100&offset=' + off,
@@ -728,7 +732,7 @@ const SK = cfg.SUPABASE_SERVICE_KEY;
 if (!URL_ || !SK) { console.error('\n열쇠가 모자랍니다 — SUPABASE_URL · SUPABASE_SERVICE_KEY'); process.exit(1); }
 
 const 부르기 = async (fn, body) => {
-  const r = await fetch(URL_ + '/rest/v1/rpc/' + encodeURIComponent(fn), {
+  const r = await 받아보기(URL_ + '/rest/v1/rpc/' + encodeURIComponent(fn), {
     method: 'POST',
     headers: { apikey: SK, Authorization: 'Bearer ' + SK, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -741,7 +745,7 @@ const 부르기 = async (fn, body) => {
 /* 열쇠가 .env 에 없으면 서버 열쇠로 읽어 씁니다 — 값은 찍지 않습니다 */
 let 열쇠 = cfg.COLLECT_KEY_EDU;
 if (!열쇠) {
-  const r = await fetch(URL_ + "/rest/v1/collect_secret?source=eq.EDU&select=secret",
+  const r = await 받아보기(URL_ + "/rest/v1/collect_secret?source=eq.EDU&select=secret",
     { headers: { apikey: SK, Authorization: 'Bearer ' + SK } });
   열쇠 = ((await r.json())[0] || {}).secret;
   if (!열쇠) { console.error('\nEDU 열쇠가 collect_secret 에 없습니다'); process.exit(1); }

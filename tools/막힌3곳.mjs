@@ -18,6 +18,10 @@
  * 인증서 검증은 끄지 않습니다. `tools/certs` 의 받는 자리를 그대로 씁니다.
  */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 사이트줄 } from './hosp/sites.mjs';
@@ -86,7 +90,7 @@ console.table(표);
 /* 관리자 화면이 「마지막 확인 날짜」 를 보여줄 수 있게 DB 에 남깁니다 */
 if (process.env.SUPABASE_URL && process.env.COLLECT_KEY_HS3) {
   try {
-    await fetch(process.env.SUPABASE_URL + '/rest/v1/rpc/hand_check_put', {
+    await 받아보기(process.env.SUPABASE_URL + '/rest/v1/rpc/hand_check_put', {
       method: 'POST',
       headers: { apikey: process.env.SUPABASE_ANON_KEY,
         Authorization: 'Bearer ' + process.env.SUPABASE_ANON_KEY,

@@ -41,6 +41,10 @@
  * 규칙을 클린아이 전용 코드에 두면 두 벌이 됩니다.
  */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 모두받기 } from './쪽나눠받기.mjs';
@@ -316,7 +320,7 @@ function 자르기(s, n) { const t = String(s || '').trim(); return t ? t.slice(
 
 /* ── DB ───────────────────────────────────────────────────── */
 async function rpc(cfg, fn, body) {
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+  const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',
     headers: { apikey: 창구열쇠(cfg), Authorization: 'Bearer ' + 창구열쇠(cfg),
                'Content-Type': 'application/json' },

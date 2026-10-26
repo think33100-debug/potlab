@@ -22,6 +22,11 @@
  * 「어디까지 봤는지 기억하기」 구조를 안 옮긴 까닭입니다.
  */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB·저장소 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(`PGRST303 "JWT issued at future"`)·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 최근 로그에 그 401 이 **28번** 났고,
+   첨부 다리는 그 한 번에 죽었습니다 (10/26 05:30). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import { 직군인원 } from './알리오직군셈.mjs';   /* 셈은 한 자리에만 */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -490,7 +495,7 @@ async function 한건(cfg, r, 셈, 옵션) {
 
 /* ── DB ───────────────────────────────────────────────────── */
 async function rpc(cfg, fn, body) {
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+  const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',
     headers: { apikey: 창구열쇠(cfg), Authorization: 'Bearer ' + 창구열쇠(cfg),
                'Content-Type': 'application/json' },
@@ -636,7 +641,7 @@ if (순찰 && rows.length) {
        덜 거르면 상세를 더 열 뿐이라 공고가 빠지지는 않지만, 순찰의 뜻이 없어집니다 */
     const 있는것 = new Set();
     for (let i = 0; i < 번호들.length; i += 100) {
-      const res = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('있는번호'), {
+      const res = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('있는번호'), {
         method: 'POST',
         headers: {
           apikey: 창구열쇠(cfg),

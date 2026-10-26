@@ -42,6 +42,10 @@
  *   COLLECT_KEY_GJ2 (없으면 COLLECT_KEY_HS3 — 같은 값입니다)
  */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
@@ -197,7 +201,7 @@ const 먼저 = /지역사회중심재활|치매안심센터|치매|보건소|보
 async function rpc(fn, body) {
   const k = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;   /* 창구는 service_role 로 (2026-10-11) */
   if (!k) throw new Error('SUPABASE_ANON_KEY 가 없습니다');
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+  const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + fn, {
     method: 'POST',
     headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

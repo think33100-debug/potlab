@@ -19,6 +19,11 @@
  *     주소를 담아야 합니다 (`POTJOB_ATTACH_WRITE=1`)
  */
 import os from 'node:os';
+/* ★ 2026-10-26 세중님 3번 — DB·저장소 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(`PGRST303 "JWT issued at future"`)·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 최근 로그에 그 401 이 **28번** 났고,
+   첨부 다리는 그 한 번에 죽었습니다 (10/26 05:30). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -73,7 +78,7 @@ const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUP
 async function 전부(길, 뚜껑 = Infinity) {
   const 모두 = [];
   for (let 처음 = 0; 처음 < 뚜껑; 처음 += 100) {
-    const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길,
+    const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + 길,
       { headers: { ...H, Range: `${처음}-${처음 + 99}`, 'Range-Unit': 'items' } });
     if (!r.ok) throw new Error(길.slice(0, 60) + ' HTTP ' + r.status + ' · ' + (await r.text()).slice(0, 200));
     const 한쪽 = await r.json();
@@ -266,7 +271,7 @@ async function 글담기() {
     const 열쇠 = cfg['COLLECT_KEY_' + 출처] || cfg.COLLECT_KEY_HS3 || '';
     if (!열쇠) { 막힌출처.set(출처, '열쇠가 없습니다'); continue; }
     for (let i = 0; i < 줄들.length; i += 25) {
-      const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/collect_body', {
+      const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/collect_body', {
         method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
         body: JSON.stringify({ p_secret: 열쇠, p_source: 출처, p_rows: 줄들.slice(i, i + 25) }),
       });
@@ -279,7 +284,7 @@ async function 글담기() {
       if (!r.ok) {
         막힌출처.set(출처, r.status + ' ' + t.slice(0, 90));
         for (const 한줄 of 줄들.slice(i, i + 25)) {
-          const r2 = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/collect_body', {
+          const r2 = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/collect_body', {
             method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
             body: JSON.stringify({ p_secret: 열쇠, p_source: 출처, p_rows: [한줄] }),
           });
@@ -708,7 +713,7 @@ const 줄들 = 보낼줄.map(({ j, 칸, 채울것, 내직군인원 }) => ({
 }));
 let 담음 = 0;
 for (let i = 0; i < 줄들.length; i += 50) {
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'), {
+  const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'), {
     method: 'POST',
     headers: { ...H, 'Content-Type': 'application/json' },
     body: JSON.stringify({ p_rows: 줄들.slice(i, i + 50) }),
@@ -738,7 +743,7 @@ await 글담기();
 if (표시할것.length) {
   let 표시 = null;
   for (let i = 0; i < 표시할것.length; i += 100) {
-    const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('첨부읽음표시'), {
+    const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('첨부읽음표시'), {
       method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
       body: JSON.stringify({ p_rows: 표시할것.slice(i, i + 100) }),
     });

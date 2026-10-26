@@ -18,6 +18,11 @@
  *   지났다」가 두 자리가 됩니다.
  */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB·저장소 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(`PGRST303 "JWT issued at future"`)·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 최근 로그에 그 401 이 **28번** 났고,
+   첨부 다리는 그 한 번에 죽었습니다 (10/26 05:30). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from './쪽나눠받기.mjs';
 import { 지났나 } from './마감지남.mjs';   /* 규칙 한 자리 (지침 6절) */
 
 const 진짜 = process.argv.includes('--진짜');
@@ -50,7 +55,7 @@ for (let off = 0; ; off += 100) {
   const q = U + '/rest/v1/job_posts?select=id,source,org_name,title,apply_to,apply_to_time'
     + '&hold=is.true&hidden=is.false&apply_to=not.is.null'
     + '&order=apply_to.asc,id.asc&limit=100&offset=' + off;
-  const r = await fetch(q, { headers: H });
+  const r = await 받아보기(q, { headers: H });
   if (!r.ok) { console.error('✗ 목록 ' + r.status + ' · ' + (await r.text()).slice(0, 200)); process.exit(1); }
   const 한쪽 = await r.json();
   줄.push(...한쪽);
@@ -96,7 +101,7 @@ if (!진짜) { console.log('\n[마른] 아무것도 안 바꿉니다 — 감추�
 let 감춤 = 0;
 for (let i = 0; i < 감출것.length; i += 200) {
   const 토막 = 감출것.slice(i, i + 200).map((x) => x.id);
-  const r = await fetch(U + '/rest/v1/rpc/rejudge_hold_apply', {
+  const r = await 받아보기(U + '/rest/v1/rpc/rejudge_hold_apply', {
     method: 'POST', headers: H,
     body: JSON.stringify({ p_secret: SEC, p_show: [], p_hide: 토막, p_why: '마감 지남' }),
   });
@@ -107,6 +112,6 @@ for (let i = 0; i < 감출것.length; i += 200) {
 }
 console.log('\n감췄습니다 — ' + 감춤 + '건 (hidden_why = 「마감 지남」)');
 
-const 후 = await fetch(U + '/rest/v1/job_posts?select=id&hold=is.true&hidden=is.false&limit=1',
+const 후 = await 받아보기(U + '/rest/v1/job_posts?select=id&hold=is.true&hidden=is.false&limit=1',
   { headers: { ...H, Prefer: 'count=exact' } });
 console.log('보류함 (뒤) — ' + (후.headers.get('content-range') || '?').split('/')[1] + '건');

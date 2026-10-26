@@ -15,6 +15,10 @@
  * ★ 직군이 안 보이면 **비웁니다** — 짐작하지 않습니다 (지침 10-3).
  */
 import fs from 'node:fs';
+/* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
+   지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
+   두드립니다 (404·403 은 바로 올립니다). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
+import { 받아보기 } from '../쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 받기, 설정 } from './공통.mjs';
@@ -38,7 +42,7 @@ if (!cfg.SUPABASE_URL || !섬김) { console.error('✗ SUPABASE_URL·열쇠가 �
 if (!열쇠 && 진짜) { console.error('✗ COLLECT_KEY_' + 출처 + ' 가 없습니다'); process.exit(1); }
 const H = { apikey: 섬김, Authorization: 'Bearer ' + 섬김, 'Content-Type': 'application/json' };
 const rpc = async (이름, 몸) => {
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent(이름),
+  const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent(이름),
     { method: 'POST', headers: H, body: JSON.stringify(몸) });
   const t = await r.text();
   if (!r.ok) throw new Error(r.status + ' ' + t.slice(0, 200));
@@ -50,7 +54,7 @@ const rpc = async (이름, 몸) => {
    그 자리였습니다). 상세를 읽을 거리도 아닙니다 — 쓸데없이 쪽을 두드립니다 */
 const 길 = 'job_posts?select=id,org_name,title,url,job_group,apply_to,work_place,hold'
   + '&source=eq.' + 출처 + '&hidden=is.false' + (한건 ? '&id=eq.' + encodeURIComponent(한건) : '') + '&order=id&limit=' + Math.min(100, 몇개);
-const r0 = await fetch(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
+const r0 = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
 if (!r0.ok) { console.error('✗ ' + r0.status + ' ' + (await r0.text()).slice(0, 200)); process.exit(1); }
 const 공고 = await r0.json();
 console.log(출처 + ' 공고 ' + 공고.length + '건 — 상세를 읽습니다 (같은 집 3.5초)');
@@ -161,7 +165,7 @@ if (공고줄.length) {
   console.log('공고 칸 담음 — ' + JSON.stringify(r).slice(0, 200));
 }
 if (칸줄.length) {
-  const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'),
+  const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('칸되메우기'),
     { method: 'POST', headers: H, body: JSON.stringify({ p_rows: 칸줄 }) });
   console.log('뽑은값 담음 — ' + (await r.text()).slice(0, 200));
 }
