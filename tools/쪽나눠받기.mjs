@@ -71,6 +71,35 @@ export function 차례붙이기(길, 차례칸) {
   return 벗긴 + (벗긴.includes('?') ? '&' : '?') + 'order=' + encodeURIComponent(찬차례);
 }
 
+/* ★ 2026-10-26 — **한 번 실패에 다리가 죽지 않게** 짧게 다시 두드립니다.
+   10/26 05:30 바퀴에서 알리오 다리가 **401 `PGRST303 "JWT issued at future"`** 한 번에
+   그대로 죽었습니다 (1초 뒤 나라일터 다리는 멀쩡했습니다 — **지나가는 탈**이었습니다).
+   재시도가 없어서 그 바퀴에 알리오를 **아예 안 봤습니다** (로그에 그 다리가 없습니다).
+   다시 두드리는 것 — 401(PGRST303)·408·429·5xx·연결 탈. **아닌 것은 바로 올립니다**
+   (404·403 처럼 다시 해도 같은 답이면 기다릴 까닭이 없습니다). */
+export async function 받아보기(u, 옵션 = {}, 몇번 = 3) {
+  let 마지막 = null;
+  for (let i = 0; i < 몇번; i++) {
+    try {
+      const r = await fetch(u, 옵션);
+      if (r.ok) return r;
+      const 글 = await r.clone().text().catch(() => '');
+      const 다시할까 = r.status === 408 || r.status === 429 || r.status >= 500
+        || (r.status === 401 && /PGRST303|issued at future|expired/i.test(글));
+      if (!다시할까 || i === 몇번 - 1) return r;
+      마지막 = 'HTTP ' + r.status + ' ' + 글.slice(0, 80);
+    } catch (e) {
+      마지막 = String(e.message || e).slice(0, 80);
+      if (i === 몇번 - 1) throw e;
+    }
+    const 쉴것 = 1000 * 2 ** i;
+    console.error('  ⚠ 다시 두드립니다 (' + (i + 1) + '/' + (몇번 - 1) + ' · '
+      + 쉴것 / 1000 + '초 뒤) — ' + 마지막);
+    await new Promise((z) => setTimeout(z, 쉴것));
+  }
+  throw new Error('다시 두드려도 안 됩니다 — ' + 마지막);
+}
+
 export async function 모두받기(주소, 머리, 옵션 = {}) {
   const 최대 = 옵션.최대 ?? 100000;     // 돌다 못 멈추는 일을 막는 울타리
   const 차례칸 = 옵션.차례 ?? 'id';
@@ -83,7 +112,7 @@ export async function 모두받기(주소, 머리, 옵션 = {}) {
     const u = 주소2 + '&limit=' + 쪽크기 + '&offset=' + off;
     /* 첫 쪽에만 `count=exact` 를 겁니다 — **받은 줄 수를 실제와 맞춰 보려고**.
        차례가 흔들려 새면 두 수가 다릅니다 (2026-10-19 에 724 → 722 였습니다) */
-    const r = await fetch(u, { headers: off === 0 ? { ...머리, Prefer: 'count=exact' } : 머리 });
+    const r = await 받아보기(u, { headers: off === 0 ? { ...머리, Prefer: 'count=exact' } : 머리 });
     if (off === 0) {
       const cr = r.headers?.get?.('content-range');
       const m = cr && String(cr).match(/\/(\d+)\s*$/);
