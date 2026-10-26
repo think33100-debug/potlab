@@ -212,12 +212,12 @@ async function 긁기재기(cfg) {
    죽었습니다. 그때 **우리 시계는 완벽했습니다** (NTP 켜짐 · 어긋남 0.0000004초 ·
    외부 세 곳 HTTP Date 와 같은 초). 그래도 「시계가 어긋나면 바로 보이게」 한 줄을 둡니다 —
    어긋나기 시작하면 그날 아침에 드러납니다.
-   재는 법 — 바깥 쪽의 `Date:` 머리글과 우리 시계를 견줍니다 (열쇠 안 씁니다 · 한 곳만 두드립니다) */
+   재는 법 — 서버의 **chronyc tracking**(NTP 와의 어긋남)을 읽습니다. 바깥을 두드리지 않습니다 */
 function 시계재기() {
   try {
     const t = execFileSync('chronyc', ['tracking'], { encoding: 'utf8', timeout: 5000 });
-    const 어긋남 = (t.match(/System times*:s*([d.]+) seconds (slow|fast)/) || []);
-    const 맞춤 = /Leap statuss*:s*Normal/.test(t);
+    const 어긋남 = (t.match(/System time\s*:\s*([\d.]+) seconds (slow|fast)/) || []);
+    const 맞춤 = /Leap status\s*:\s*Normal/.test(t);
     if (!어긋남[1]) return null;
     const 초 = Number(어긋남[1]) * (어긋남[2] === 'fast' ? 1 : -1);
     return { 초, 맞춤, 어디서: 'chronyc' };
