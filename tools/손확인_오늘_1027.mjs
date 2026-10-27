@@ -20,7 +20,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { 뗄말, 후보SQL, 후보칸, 이층인가 } from './심평원후보.mjs';
+import { 뗄말, 후보SQL, 후보칸, 이층인가, 공공출처SQL } from './심평원후보.mjs';
 
 const 뿌리 = path.join(import.meta.dirname, '..');
 const 적기 = process.argv.includes('--적기');
@@ -118,13 +118,15 @@ for (const [번호, 이름, 공고, 눈, 견본, 후보, 후보수] of 별명) {
 const 이름붙음 = 줄로(`
   with m as (
     select p."기관번호" as 번호, min(p.org_name) as 이름, count(*) as 공고,
-           count(*) filter (where exists (select 1 from job_posts_pub v where v.id = p.id)) as 회원화면
+           count(*) filter (where exists (select 1 from job_posts_pub v where v.id = p.id)) as 회원화면,
+           ${공공출처SQL} as 공공출처
       from job_posts p where p."기관번호" like 'NAME:%' group by 1
   )
   select m.번호, m.이름, m.공고::text, m.회원화면::text,
-         (select count(*) from hira_org h where h.name_key = hira_name_key(m.이름))::text
+         (select count(*) from hira_org h where h.name_key = hira_name_key(m.이름))::text,
+         m.공공출처::text
     from m order by m.회원화면 desc, m.공고 desc;`);
-const 이층 = 이름붙음.filter(([, 이름, , , 딱수]) => 이층인가(이름, 딱수));
+const 이층 = 이름붙음.filter(([, 이름, , , 딱수, 공공]) => 이층인가(이름, 딱수, 공공 === 't'));
 console.log('\n══ 3) 2층 업체 (심평원 밖) ' + 이층.length + '곳 — 세중님 목록에서 뺍니다 ══');
 for (const [번호, 이름, 공고, 눈] of 이층.slice(0, 10)) {
   console.log('  · ' + 이름.padEnd(26) + '공고 ' + String(공고).padStart(3)

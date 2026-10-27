@@ -23,7 +23,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 /* ★ 2026-10-27 세중님 2번 — 후보를 펼치는 규칙·2층 가리기는 한 자리입니다 */
-import { 후보SQL, 후보수SQL, 딱맞는곳SQL, 후보칸, 이층인가 } from './심평원후보.mjs';
+import { 후보SQL, 후보수SQL, 딱맞는곳SQL, 후보칸, 이층인가, 공공출처SQL } from './심평원후보.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 손확인만들기 = process.argv.includes('--손확인');
@@ -85,7 +85,8 @@ const 이름것 = 줄로(`
            count(*) filter (where v.id is not null) as 회원화면,
            count(distinct nullif(p.sido,'')) as 시도수,
            string_agg(distinct nullif(p.sido,''), '·') as 시도들,
-           min(p.id) as 견본공고, min(p.org_name) as 견본기관이름
+           min(p.id) as 견본공고, min(p.org_name) as 견본기관이름,
+           ${공공출처SQL} as 공공출처
       from job_posts p
       left join job_posts_pub v on v.id = p.id
       join 기관 o on o.기관번호 = p."기관번호"
@@ -104,14 +105,15 @@ const 이름것 = 줄로(`
          /* ★ 2026-10-27 세중님 2번 — 「심평원에 N곳」 숫자만으로는 못 고릅니다.
             그 N곳을 **넷까지 펼쳐** 「이름 · 종별 · 시군구 · 번호」로 적습니다 */
          ${후보SQL('i.이름키')} as 후보,
-         ${딱맞는곳SQL('hira_name_key(i.견본기관이름)')}::text as 딱맞는곳
+         ${딱맞는곳SQL('hira_name_key(i.견본기관이름)')}::text as 딱맞는곳,
+         i.공공출처::text
     from 이름붙음 i
    order by i.회원화면 desc, i.공고 desc;`);
 
 const 의심 = [];
 for (const r of 이름것) {
   const [기관번호, 이름키, 이름, 공고, 회원화면, 시도수, 시도들, 품은곳, 키길이,
-    견본공고, 견본이름, 심평원시도, 공고시도, 후보, 딱맞는곳] = r;
+    견본공고, 견본이름, 심평원시도, 공고시도, 후보, 딱맞는곳, 공공출처] = r;
   const 까닭 = [];
   /* ④ 지역이 어긋남 — 공고 시도가 심평원 시도 목록에 **없을 때만** (앞 두 글자로) */
   if (공고시도 && 심평원시도 && Number(시도수) === 1
@@ -122,13 +124,13 @@ for (const r of 이름것) {
   if (Number(품은곳) > 1) 까닭.push('심평원에 그 이름을 품은 곳 ' + 품은곳 + '곳');
   if (Number(키길이) <= 4) 까닭.push('이름키가 짧음(' + 키길이 + '자)');
   if (까닭.length) 의심.push({ 기관번호, 이름키, 이름, 공고, 회원화면, 까닭,
-    견본공고, 견본이름, 후보, 딱맞는곳 });
+    견본공고, 견본이름, 후보, 딱맞는곳, 공공출처 });
 }
 /* ★ 2026-10-27 세중님 2번 — **2층 업체는 세중님 목록에서 뺍니다.**
    요양원·방문요양·주식회사 꼴이고 심평원에 그 이름이 **없는** 곳입니다 —
    붙일 1층 기관이 없으므로 「기관 없음(2층)」으로 둡니다 (tools/심평원후보.mjs). */
-const 이층것 = 의심.filter((x) => 이층인가(x.견본이름, x.딱맞는곳));
-const 세중것 = 의심.filter((x) => !이층인가(x.견본이름, x.딱맞는곳));
+const 이층것 = 의심.filter((x) => 이층인가(x.견본이름, x.딱맞는곳, x.공공출처));
+const 세중것 = 의심.filter((x) => !이층인가(x.견본이름, x.딱맞는곳, x.공공출처));
 console.log('이름으로 붙은 기관 ' + 이름것.length + '곳 · **매칭 의심 ' + 의심.length
   + '곳** (세중님이 볼 것 ' + 세중것.length + ' · 2층으로 자동 ' + 이층것.length + ')');
 console.log('  (의심 까닭 ① 공고 시도가 둘 이상 ② 심평원에 그 이름을 품은 곳이 둘 이상 ③ 이름키가 짧음)\n');
