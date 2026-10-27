@@ -77,7 +77,11 @@ const 안붙음 = 줄로(`
          ${후보SQL(꼬리식('p.org_name'))},
          (select count(*) from hira_org h where h.name_key = hira_name_key(p.org_name))::text
     from job_posts p join job_posts_pub v on v.id = p.id
-   where p."기관번호" is null order by p.id;`);
+   where p."기관번호" is null
+     /* ★ 손확인·2층으로 **이미 정한 것은 다시 묻지 않습니다** (2026-10-27) —
+        「아님」으로 기관 없음이 된 줄이 여기 다시 올라오면 세중님이 같은 줄을 두 번 봅니다 */
+     and coalesce(p."연결상태", '') <> '사람'
+   order by p.id;`);
 /* ★ 후보가 **하나도 없는** 줄은 세중님이 고를 것이 없습니다 (지자체·요양원 꼴) —
    따로 적고 **고를 표에서 뺍니다** (2026-10-27 세중님 3번 「짧은 표」). */
 const 후보있나 = (r) => !String(Number(r[7]) > 0 ? r[5] : r[6]).startsWith('(심평원에');
