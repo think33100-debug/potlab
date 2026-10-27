@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { 기관이름말 } from '@/lib/job-state';
 import type { JobListItem } from '@/lib/supabase';
 import { orgJobs, orgPublic, place, shortKinds, TILE_NAME } from '@/lib/org';
 import { serverSupabase } from '@/lib/supabase-server';
@@ -41,7 +42,7 @@ export async function OrgPanel(
       <p className="text-xs text-mute">이 기관은 이런 곳이에요</p>
       {/* 색을 박습니다. 물려받게 두면 어두운 모드에서 흰색이 되어
           종이색 바탕 위에서 안 보였습니다 (#14181C 로 16.2:1) */}
-      <p className="mt-2 text-h3 font-bold text-ink">{org?.name ?? orgName}</p>
+      <p className="mt-2 text-h3 font-bold text-ink">{기관이름말(org?.name ?? orgName)}</p>
 
       {facts.length > 0 ? (
         <dl className="mt-5 grid grid-cols-[5rem_1fr] gap-y-2 text-lg">

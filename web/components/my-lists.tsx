@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { 기관이름말 } from '@/lib/job-state';
 import { useEffect, useState } from 'react';
 import { channelName } from '@/lib/channels';
 import { browserSupabase } from '@/lib/supabase-browser';
@@ -88,7 +89,7 @@ export function MyLists({ profileId }: { profileId: string }) {
             {stars?.map((s) => (
               <li key={s.job_id} className="py-5">
                 <Link href={`/jobs/${s.job_id}`} className="block hover:underline">
-                  <span className="text-sm text-mute">{s.job_posts?.org_name}</span>
+                  <span className="text-sm text-mute">{기관이름말(s.job_posts?.org_name)}</span>
                   <p className="mt-1 truncate text-body-lg font-medium">{s.job_posts?.title ?? '지워진 공고'}</p>
                   {s.job_posts?.apply_to && (
                     <p className="mt-1 text-sm text-mute">~{s.job_posts.apply_to}</p>

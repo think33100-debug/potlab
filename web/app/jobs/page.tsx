@@ -4,7 +4,7 @@ import { Icon } from '@/components/icon';
 import { JobTabs } from '@/components/job-tabs';
 import { ListFilters } from '@/components/list-filters';
 import { MembersOnly } from '@/components/members-only';
-import { 마감배지, 조교연구말 } from '@/lib/job-state';
+import { 기관이름말, 마감배지, 조교연구말 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { SIDOS } from '@/lib/org';
 import { supabase, TABS, tabLabel, type JobListItem, type 맛보기공고 } from '@/lib/supabase';
@@ -279,7 +279,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                 <li key={r.id}>
                   <Link href={`/jobs/${r.id}`}
                     className="block rounded-sm border border-gray-200 p-5 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950">
-                    <p className="text-sm text-mute">{r.org_name}</p>
+                    <p className="text-sm text-mute">{기관이름말(r.org_name)}</p>
                     <p className="mt-1 break-keep text-body-lg font-medium">
                       {r.is_intern && (
                         <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-gray-900 ring-1 ring-warning dark:text-gray-100">
@@ -335,7 +335,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
                   className="-mx-4 block rounded-sm px-4 py-6 hover:bg-gray-50 dark:hover:bg-gray-950"
                 >
                   <div className="flex items-baseline justify-between gap-5">
-                    <span className="break-keep text-sm text-mute">{r.org_name}</span>
+                    <span className="break-keep text-sm text-mute">{기관이름말(r.org_name)}</span>
                     {dd && (
                       <span className={
                         'shrink-0 text-sm font-bold ' +

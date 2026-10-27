@@ -20,7 +20,8 @@ import { ShareButtons } from '@/components/share-buttons';
 import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
-import { isClosed, todayKst, 금액있나, 마감배지, 시각말, 연봉말, 조교연구말, 지원방법말 } from '@/lib/job-state';
+import { isClosed, todayKst, 금액있나, 기관이름말, 마감배지, 시각말, 연봉말, 조교연구말,
+  지원링크, 지원방법말 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { MembersOnly } from '@/components/members-only';
@@ -103,7 +104,7 @@ export async function generateMetadata({
     : j.apply_from ? `${j.apply_from} ~ ${j.apply_to} 접수`
     : `~${j.apply_to} 마감`;
 
-  const title = `${j.org_name} ${j.job_group ?? '치료사'} 채용`;
+  const title = `${기관이름말(j.org_name)} ${j.job_group ?? '치료사'} 채용`;
   const desc = [j.title, when, j.지역보임].filter(Boolean).join(' · ');
   const img = `${siteUrl()}/api/og/job/${j.id}`;
 
@@ -171,6 +172,11 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     (뽑은값?.['예상연봉'] ?? detail['연봉'] ?? detail['예상연봉'] ?? null) || null;
   const 금액 = 금액있나(연봉원문);
   const 연봉 = 연봉말(연봉원문);
+  /* ★ 2026-10-28 세중님 2번 — 「지원하러 가기」가 갈 자리와 「지원 방법」 줄.
+     차례는 lib/job-state.ts 한 자리에서 정합니다 (지침 6절) */
+  const 지원 = 지원링크(j.url, detail['접수방법'] as string | undefined,
+    detail['기관홈'] as string | undefined);
+  const 지원방법 = 지원방법말(detail['접수방법'] as string | undefined);
   const 지원자격: string | null =
     (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
   /* ★ 2026-10-22 세중님 1번 — 포털 **상세** 칸이 날짜가 아닌 말이면(「채용시까지」)
@@ -247,7 +253,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
           <div className="-mr-5 flex items-center gap-3">
             <JobSave id={j.id} />
             <ShareButtons
-              title={`${j.org_name} ${j.job_group ?? '치료사'} 채용`}
+              title={`${기관이름말(j.org_name)} ${j.job_group ?? '치료사'} 채용`}
               text={j.title}
               path={`/jobs/${j.id}`}
               compact
@@ -311,7 +317,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                 (2026-10-07 확정 방침). 전에는 work_place 를 그대로 써서
                 순천병원이 「전남광주」로 나왔습니다 */}
             <p className="mt-3 break-keep text-[16px] text-[#4A5056]">
-              {j.org_name}
+              {기관이름말(j.org_name)}
               {j.지역보임 && <span className="text-[#5F666C]"> · {j.지역보임}</span>}
             </p>
 
@@ -582,7 +588,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               이 기관, 몇 대 일이었을까요
             </p>
             <p className="mt-2 break-keep text-[15px] text-[#5F666C]">
-              {j.org_name}의 지난 채용 경쟁률을 모아 뒀어요
+              {기관이름말(j.org_name)}의 지난 채용 경쟁률을 모아 뒀어요
             </p>
             {/* ★ 2026-10-09 — 경쟁률은 **회원 자료**입니다 (방침 2026-10-01).
                 비회원에게는 /compete 로 보내지 않고 로그인 안내로 바꿉니다.
@@ -630,38 +636,51 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               무엇을 적을지는 lib/job-state.ts 의 지원방법말() 한 자리에서 정합니다 —
               **아는 낱말만** 적습니다(옛 길이 넣은 마감 안내 문장이 140건 있습니다).
               배치(글꼴·자리)는 11/1~6 화면 작업 때 다듬습니다 */}
-          {(() => {
-            const 지원 = 지원방법말(detail['접수방법'] as string | undefined);
-            if (!지원.낱말.length) return null;
-            return (
-              <div className="mx-auto mb-2 flex w-full max-w-2xl flex-wrap items-center gap-x-1.5
-                              text-[13px] leading-[1.5] text-[#5F666C]">
-                <span className="shrink-0 font-bold text-[#1B2025]">지원 방법</span>
-                <span className="break-keep">{지원.낱말.join(' · ')}</span>
-                {지원.채용페이지 && (
-                  <a href={지원.채용페이지} target="_blank" rel="noopener noreferrer"
-                     className="underline decoration-[#C9CCCF] underline-offset-2">
-                    병원 채용 페이지
-                  </a>
-                )}
-              </div>
-            );
-          })()}
+          {(지원방법.낱말.length > 0 || (member && !지원.주소)) && (
+            <div className="mx-auto mb-2 flex w-full max-w-2xl flex-wrap items-center gap-x-1.5
+                            text-[13px] leading-[1.5] text-[#5F666C]">
+              <span className="shrink-0 font-bold text-[#1B2025]">지원 방법</span>
+              {지원방법.낱말.length > 0 && (
+                <span className="break-keep">{지원방법.낱말.join(' · ')}</span>
+              )}
+              {지원방법.채용페이지 && (
+                <a href={지원방법.채용페이지} target="_blank" rel="noopener noreferrer"
+                   className="underline decoration-[#C9CCCF] underline-offset-2">
+                  병원 채용 페이지
+                </a>
+              )}
+              {/* ★ 2026-10-28 세중님 2번 ④ — 갈 주소가 아무것도 없으면 단추를 숨기고
+                  이 줄이 「공고문 확인」을 맡습니다. 회원에게만 적습니다 —
+                  비회원은 창구가 주소를 안 줘서 「없음」인 것이라 사실이 아닙니다 */}
+              {member && !지원.주소 && (
+                <span className="break-keep font-medium text-[#4A5056]">· 공고문 확인</span>
+              )}
+            </div>
+          )}
           <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
             <JobSave id={j.id} big />
-            <JobOpenLink
-              id={j.id}
-              url={j.url}
-              className="flex h-[50px] flex-1 items-center justify-center gap-1.5
-                         rounded-[12px] bg-[#FF3B30] text-[16px] font-bold text-white
-                         transition-transform duration-[120ms] active:translate-y-[2px]
-                         active:scale-[0.99]
-                         active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.25)]
-                         motion-reduce:transition-none"
-            >
-              지원하러 가기
-              <Icon name="arrow-up-right" size={17} />
-            </JobOpenLink>
+            {/* ★ 2026-10-28 세중님 2번 — 「지원하러 가기」는 **그 공고로** 갑니다.
+                차례는 lib/job-state.ts 의 지원링크() 한 자리 —
+                  ① 원문 공고 주소 ② 자사채용사이트(URL) ③ 기관 홈페이지
+                넷째(아무 주소도 없음)는 **단추를 안 그립니다** — 위 「지원 방법」 줄과
+                지원 자격 칸의 「공고문 확인」이 그 자리를 맡습니다.
+                비회원에게는 창구가 url 을 안 주므로 ①이 비고, JobOpenLink 가
+                「로그인하고 지원하러 가기」를 그립니다 (화면이 스스로 판정하지 않습니다) */}
+            {(지원.주소 || !member) && (
+              <JobOpenLink
+                id={j.id}
+                url={지원.주소}
+                className="flex h-[50px] flex-1 items-center justify-center gap-1.5
+                           rounded-[12px] bg-[#FF3B30] text-[16px] font-bold text-white
+                           transition-transform duration-[120ms] active:translate-y-[2px]
+                           active:scale-[0.99]
+                           active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.25)]
+                           motion-reduce:transition-none"
+              >
+                지원하러 가기
+                <Icon name="arrow-up-right" size={17} />
+              </JobOpenLink>
+            )}
           </div>
         </div>
       )}
