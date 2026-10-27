@@ -50,7 +50,7 @@ console.log(psql(`
   select p.id, p.source, p.org_name, p.title,
          p."뽑은값"->>'부서' as 뽑은값_부서,
          p.detail->>'부서' as detail_부서,
-         p.job_group, p."통합공고"::text
+         p.job_group, p."같은공고"::text
     from job_posts p
    where p.title like '%마취통증의학과%'
    order by p.id;`));
@@ -59,7 +59,7 @@ console.log('\n── 그 공고의 원문 제목·근거 (있는 대로) ──
 console.log(psql(`
   \\pset pager off
   \\x on
-  select p.id, p."원본제목" as 원본제목, left(p.evidence::text, 700) as evidence,
+  select p.id,  left(p.evidence::text, 700) as evidence,
          left(p."뽑은값"::text, 700) as 뽑은값, left(p.detail::text, 700) as detail
     from job_posts p where p.title like '%마취통증의학과%' limit 2;`));
 
