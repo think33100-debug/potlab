@@ -185,7 +185,8 @@ for (const [id, 기관, , 주소] of 줄들) {
   let 코드 = '-', 제목 = '';
   try {
     const r = await fetch(주소, { redirect: 'follow', signal: AbortSignal.timeout(15000),
-      headers: { 'user-agent': 'Mozilla/5.0 (potjob 확인)' } });
+      /* ★ 헤더 값은 latin-1 입니다 — 한글을 넣으면 fetch 가 통째로 죽습니다 (지침 12) */
+      headers: { 'user-agent': 'Mozilla/5.0 (potjob-check)' } });
     코드 = String(r.status);
     const 글 = (await r.text()).slice(0, 200000);
     제목 = (글.match(/<title[^>]*>([\s\S]{0,120}?)<\/title>/i)?.[1] || '').replace(/\s+/g, ' ').trim();
