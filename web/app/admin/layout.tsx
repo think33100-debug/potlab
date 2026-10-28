@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../auth';
 import { RouteHealth } from '@/components/route-health';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { AdminRoleGate } from '@/components/admin-role-gate';
 
 /* 관리자 화면의 껍데기입니다.
 
@@ -139,7 +140,9 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
           ))}
         </nav>
       </header>
-      {children}
+      {/* ★ 2026-10-28 세중님 1번 — 역할이 관리자가 아니면 띠를 보이고 안쪽을 잠급니다.
+          한 자리에 두면 관리자 화면 **전부**에 걸립니다 (지침 6절) */}
+      <AdminRoleGate>{children}</AdminRoleGate>
     </div>
   );
 }
