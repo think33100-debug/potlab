@@ -86,8 +86,11 @@ const 줄들 = psql(머리 + `
       from job_posts p join job_posts_pub v on v.id = p.id
      where coalesce(p.employ_type,'') = ''
   )
+  /* ★ 본문에는 **줄바꿈이 들어 있습니다** — 안 지우면 한 공고가 여러 줄로 쪼개져
+     「317건」처럼 터무니없는 수가 나옵니다 (2026-10-28 에 그랬습니다) */
   select id || E'\\t' || source || E'\\t' || left(org_name, 24) || E'\\t'
-      || replace(제목, E'\\t', ' ') || E'\\t' || left(replace(본문, E'\\t', ' '), 4000)
+      || regexp_replace(제목, '[\\r\\n\\t]+', ' ', 'g') || E'\\t'
+      || left(regexp_replace(본문, '[\\r\\n\\t]+', ' ', 'g'), 6000)
     from x order by id;`, ['-X', '-A', '-t', '-q']);
 let 채워질것 = 0;
 for (const l of 줄들.split('\n').filter(Boolean)) {
