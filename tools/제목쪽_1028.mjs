@@ -148,24 +148,25 @@ begin
 end $fn$;`;
 
 /* ───────────────────── 전 본문·ACL (되돌림) ───────────────────── */
-const 고칠것 = [
-  ['제목기관', 'j public.job_posts'],
-  ['제목산하', 'p_title text, p_org text'],
-  ['고용형태보임행', 'j public.job_posts'],
-];
-const 전것 = 고칠것.map(([이름, 인수]) => ({
-  이름, 인수,
+const 고칠것 = ['제목기관', '제목산하', '고용형태보임행'];
+const 전것 = 고칠것.map((이름) => ({
+  이름,
+  /* 벌이 둘 이상이면 어느 것을 고칠지 모릅니다 — 세어 보고 멈춥니다 (지침 6-2a) */
+  몇벌: 글만(`select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and p.proname = '${이름}';`),
+  인수: 글만(`select pg_get_function_identity_arguments(p.oid) from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and p.proname = '${이름}';`),
   정의: psql(`\\pset pager off
     select pg_get_functiondef(p.oid) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-     where n.nspname = 'public' and p.proname = '${이름}'
-       and pg_get_function_identity_arguments(p.oid) = '${인수}';`, ['-X', '-A', '-t', '-q']),
+     where n.nspname = 'public' and p.proname = '${이름}';`, ['-X', '-A', '-t', '-q']),
   acl: 글만(`select coalesce(p.proacl::text,'(기본값)') from pg_proc p
     join pg_namespace n on n.oid = p.pronamespace
-   where n.nspname = 'public' and p.proname = '${이름}'
-     and pg_get_function_identity_arguments(p.oid) = '${인수}';`),
+   where n.nspname = 'public' and p.proname = '${이름}';`),
 }));
 for (const x of 전것) {
-  if (!x.정의.trim()) { console.error('✗ ' + x.이름 + '(' + x.인수 + ') 정의를 못 읽었습니다'); process.exit(1); }
+  if (x.몇벌 !== '1') { console.error('✗ ' + x.이름 + ' 이 ' + x.몇벌 + '벌입니다 (1 이어야 합니다)'); process.exit(1); }
+  if (!x.정의.trim()) { console.error('✗ ' + x.이름 + ' 정의를 못 읽었습니다'); process.exit(1); }
   console.log('전 — ' + x.이름 + '(' + x.인수 + ') · ' + x.정의.split('\n').length + '줄 · ACL ' + x.acl);
 }
 const 새함수있나 = 글만(`select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
@@ -296,8 +297,7 @@ console.log(psql(바꾸기SQL));
 for (const x of 전것) {
   const 후acl = 글만(`select coalesce(p.proacl::text,'(기본값)') from pg_proc p
     join pg_namespace n on n.oid = p.pronamespace
-   where n.nspname = 'public' and p.proname = '${x.이름}'
-     and pg_get_function_identity_arguments(p.oid) = '${x.인수}';`);
+   where n.nspname = 'public' and p.proname = '${x.이름}';`);
   console.log('후 ACL — ' + x.이름 + ' ' + 후acl + (후acl === x.acl ? '  (전과 같습니다)' : '  ⚠ 전과 다릅니다'));
 }
 /* 새 함수는 회원에게 열지 않습니다 — 제목 함수들이 안에서만 씁니다 */
