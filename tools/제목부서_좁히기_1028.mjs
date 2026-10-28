@@ -105,9 +105,9 @@ fs.writeFileSync(되돌림, [
   전본문.trimEnd(),
   '$$;',
   '/* 되돌린 뒤 제목을 다시 만듭니다 */',
-  'update job_posts set "보여줄제목" = null where id in (',
-  "  select id from job_posts where \"보여줄제목\" is distinct from 제목만들기행(job_posts.*)",
-  "    and not ('보여줄제목' = any(coalesce(edited_fields, '{}'))));",
+  'update job_posts set "보여줄제목" = 제목만들기행(job_posts)',
+  '  where "보여줄제목" is distinct from 제목만들기행(job_posts)',
+  '    and 제목만들기행(job_posts) is not null;',
 ].join('\n') + '\n', 'utf8');
 console.log('\n○ 되돌릴 글 — ' + 되돌림);
 
@@ -128,9 +128,13 @@ const 후ACL = 글만(`select coalesce(p.proacl::text, '(비어 있음 = 기본�
 console.log('후 ACL — ' + 후ACL + (후ACL === 전ACL ? '  (전과 같습니다)' : '  ⚠ 전과 다릅니다'));
 
 /* 제목 다시 만들기 — 트리거가 합니다 */
+/* ★ 2026-10-28 — **보여줄제목만 쓰면 트리거가 안 불립니다.** 제목채우기_고칠때 는
+   BEFORE UPDATE **OF** title, org_name, job_group, employ_type, sido, sgg, work_place,
+   detail 입니다. 그 목록에 보여줄제목이 없어서 = null 이 그대로 써졌고, 회원 화면
+   공고 하나의 제목이 2~3분 비었습니다 (2026-10-28 09:05). 그래서 **값을 직접 넣습니다** */
 const 몇 = 글만(`with x as (
-    update job_posts set "보여줄제목" = null
-     where id in (${바뀔것SQL.replace(/\bp\./g, 'job_posts.')}) returning id)
+    update job_posts set "보여줄제목" = 제목만들기행(job_posts)
+     where id in (${바뀔것SQL.replace(/\bp\./g, 'job_posts.')}) and 제목만들기행(job_posts) is not null returning id)
   select count(*) from x;`);
 console.log('제목을 다시 만든 줄 — ' + 몇 + '개');
 
