@@ -88,8 +88,10 @@ const 바꿈들 = [
     옛: `  select j.id, 기관이름보정_아이디로(j.id, j.org_name,`,
     새: `  select j.id,
          /* ★ 2026-10-28 세중님 ㉭ — 출처를 내립니다. 화면이 공고 번호 앞머리로
-            「긁기인가」를 짐작하던 자리를 없앱니다 (web/lib/job-state.ts 긁기공고인가) */
-         j.source,
+            「긁기인가」를 짐작하던 자리를 없앱니다 (web/lib/job-state.ts 긁기공고인가).
+            ★ job_posts_pub 뷰에는 source 칸이 **없습니다** — job_posts 를 따로
+              읽습니다 (이 함수는 security definer 라 됩니다 · 모집인원과 같은 꼴) */
+         (select x.source from job_posts x where x.id = j.id),
          기관이름보정_아이디로(j.id, j.org_name,` },
 ];
 let 새정의 = 전정의;
