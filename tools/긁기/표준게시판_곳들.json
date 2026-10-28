@@ -1,8 +1,8 @@
 {
  "꼴": "표준게시판",
  "만든때": "2026-10-24 17:29:17",
- "곳": 117,
- "기관번호붙음": 111,
+ "곳": 119,
+ "기관번호붙음": 113,
  "곳들": [
   {
    "이름": "강원특별자치도강릉의료원",
@@ -939,6 +939,22 @@
    "주소": "https://hch.asanfoundation.or.kr/asan/depts/D140/K/bbs.do?menuId=4985",
    "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ4OSQzNjE4MzIjNjEjJDEjJDQjJDgz",
    "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "경기도립정신병원",
+   "종류": "공공보건의료",
+   "지역": "",
+   "주소": "https://www.mentalhospital.or.kr/59",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkOTkkNTgxMzUxIzUxIyQxIyQxIyQ4MiQ0NjE0ODEjNjEjJDEjJDQjJDgz",
+   "왜": "사각지대 · 채용 게시판 열어서 확인 2026-10-28 (줄 10 · 울타리 넷 통과)"
+  },
+  {
+   "이름": "목포시보건소",
+   "종류": "보건기관",
+   "지역": "",
+   "주소": "https://health.mokpo.go.kr/www/mokpo_news/notification/incruit",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkOTIkMzgxMzUxIzExIyQxIyQzIyQ3OSQzNjE0ODEjNjEjJDEjJDQjJDgz",
+   "왜": "사각지대 · 채용 게시판 열어서 확인 2026-10-28 (줄 3 · 울타리 넷 통과)"
   }
  ]
 }

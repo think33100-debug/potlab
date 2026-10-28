@@ -23,7 +23,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 받기, 설정, 담기, 최근인가, HS3가긁나 } from './공통.mjs';
+import { 받기, 설정, 담기, 최근인가, HS3가긁나, 도는곳줄 } from './공통.mjs';
 import { sortJob } from '../sort-rule.mjs';
 import { 표준읽기, 꼬리말, 엔티티풀기 } from './읽기들.mjs';
 
@@ -114,3 +114,8 @@ const 결과 = await 담기(cfg, 출처, 담을것, { 진짜 });
 if (!결과.됨) { console.log('✗ 담지 못했습니다 — ' + (결과.왜 || 결과.답)); process.exit(1); }
 console.log(결과.마른 ? '[마른] 아무것도 안 담았습니다 — --진짜 로 담습니다'
   : '○ 담았습니다 — ' + 결과.답 + ' · 기관번호 붙임 ' + 결과.기관붙임 + '건');
+
+/* ★ 2026-10-28 세중님 2번 — 날마다 **한 줄**로 「도는 곳 N/777」.
+   22:40 크론에서 이 파일이 **맨 뒤 목록 긁기**라 여기서 한 번만 찍습니다
+   (경기도의료원 → 그누보드 → 표준게시판 차례 · 크론 줄은 안 건드립니다) */
+console.log('긁기_날마다 — ' + 도는곳줄());

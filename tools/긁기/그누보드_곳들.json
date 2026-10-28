@@ -1,8 +1,8 @@
 {
  "꼴": "그누보드",
  "만든때": "2026-10-24 16:58:05",
- "곳": 19,
- "기관번호붙음": 19,
+ "곳": 23,
+ "기관번호붙음": 23,
  "곳들": [
   {
    "이름": "강원특별자치도삼척의료원",
@@ -155,6 +155,38 @@
    "주소": "https://anyang.samhospital.com/bbs/board.php?bo_table=recruit",
    "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQ0NjEwMDIjNzEjJDEjJDgjJDgz",
    "왜": "기관 표에서 이름키로 하나"
+  },
+  {
+   "이름": "공립무안군노인전문요양병원",
+   "종류": "공공보건의료",
+   "지역": "",
+   "주소": "https://muansh.co.kr/bbs/board.php?bo_table=careers",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkOTkkNTgxMzUxIzExIyQxIyQzIyQ5OSQyNjEwMDIjNjEjJDEjJDgjJDgz",
+   "왜": "사각지대 · 채용 게시판 열어서 확인 2026-10-28 (줄 5 · 울타리 넷 통과)"
+  },
+  {
+   "이름": "장흥통합의료병원",
+   "종류": "공공보건의료",
+   "지역": "",
+   "주소": "https://www.wkujim.co.kr/bbs/board.php?bo_table=606040",
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkOTkkMzgxMzUxIzIxIyQxIyQ5IyQxMyQzNjE0ODEjNTEjJDEjJDYjJDgz",
+   "왜": "사각지대 · 채용 게시판 열어서 확인 2026-10-28 (줄 15 · 울타리 넷 통과)"
+  },
+  {
+   "이름": "정선군립병원",
+   "종류": "공공보건의료",
+   "지역": "",
+   "주소": "https://www.jeongseonmc.com/bbs/board.php?bo_table=3_sub5",
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkNCMkOTkkMzgxMzUxIzExIyQxIyQ3IyQ5OSQ0NjEwMDIjNDEjJDEjJDQjJDgz",
+   "왜": "사각지대 · 채용 게시판 열어서 확인 2026-10-28 (줄 10 · 울타리 넷 통과)"
+  },
+  {
+   "이름": "푸르메재단 넥슨어린이재활병원",
+   "종류": "공공보건의료",
+   "지역": "",
+   "주소": "http://www.purmehospital.org/bbs/board.php?bo_table=recruit&theme=eb4_hosp_001",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkOTkkNTgxMzUxIzIxIyQyIyQxIyQwMCQyNjEwMDIjNTEjJDEjJDIjJDgz",
+   "왜": "사각지대 · 채용 게시판 열어서 확인 2026-10-28 (줄 15 · 울타리 넷 통과)"
   }
  ]
 }
