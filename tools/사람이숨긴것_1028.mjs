@@ -134,6 +134,62 @@ console.log(psql(머리 + `
     from job_state_log l join job_posts p on p.id = l.job_id
    where l."새_hidden" and l."누가" like '%관리자%' and l."바뀐때" >= '2026-10-23';`));
 
+console.log('\n══ ⑥ 틈 — 원문 제목이 **잘린 채** 담긴 회원 화면 공고 ══');
+/* 거르기는 **담을 때 한 번**만 돕니다. 제목이 잘려 오면 뒤에 있는 「면접일정 안내」·
+   「합격자 발표」를 못 보고 회원 화면에 올립니다 (tools/결과공고다시거르기.mjs 머리글).
+   상세를 읽어도 제목이 **그대로 잘려 있으면** 다시 걸러도 못 잡습니다 — HS102260084 */
+console.log(psql(머리 + `
+  select count(*) as "회원 화면",
+         count(*) filter (where p.title ~ '(\\.\\.\\.|…)\\s*$') as "제목이 잘린 것",
+         count(*) filter (where p.title ~ '(\\.\\.\\.|…)\\s*$' and p.source like 'HS%') as "그중 긁기",
+         count(*) filter (where length(p.title) between 54 and 62) as "제목 길이 54~62자"
+    from job_posts p join job_posts_pub v on v.id = p.id;`));
+console.log('── 잘린 제목 전수 ──');
+console.log(psql(머리 + `
+  select p.id, p.source, length(p.title) as 길이, p.title as 원문제목
+    from job_posts p join job_posts_pub v on v.id = p.id
+   where p.title ~ '(\\.\\.\\.|…)\\s*$' order by p.id;`));
+
+/* ── --이것숨기기 — 한 건만 숨기고 **잠급니다** (세중님이 10/23 에 누르려던 것) ── */
+if (process.argv.includes('--이것숨기기')) {
+  const 전 = 글만(`select p.hidden::text, coalesce(p.hidden_why,''), p.admin_locked::text,
+      coalesce(p.edited_fields::text,'{}') from job_posts p where p.id = '${공고}';`).split('\t');
+  if (!진짜) {
+    console.log('\n[마른] ' + 공고 + ' — 지금 hidden ' + 전[0] + ' · 잠금 ' + 전[2]
+      + ' → **숨김 + 잠금**으로 바꿉니다 (--이것숨기기 --진짜)');
+    process.exit(0);
+  }
+  const d2 = new Date(); const 두2 = (n) => String(n).padStart(2, '0');
+  const 때2 = String(d2.getFullYear()) + 두2(d2.getMonth() + 1) + 두2(d2.getDate())
+    + '_' + 두2(d2.getHours()) + 두2(d2.getMinutes()) + 두2(d2.getSeconds());
+  const 터 = path.join(os.homedir(), '되돌림');
+  fs.mkdirSync(터, { recursive: true });
+  const 길 = path.join(터, '공고숨김_되돌리기_' + 때2 + '.sql');
+  fs.writeFileSync(길, '/* 되돌리기 — ' + 공고 + ' 숨김·잠금 (2026-10-28) */\n'
+    + `update job_posts set hidden = ${전[0]}, hidden_why = ${전[1] ? "'" + 전[1].replace(/'/g, "''") + "'" : 'null'}`
+    + `, hidden_on = null, admin_locked = ${전[2]}, edited_fields = '${전[3]}'::text[]`
+    + ` where id = '${공고}';` + '\n', 'utf8');
+  console.log('\n○ 되돌릴 글 — ' + 길);
+  console.log(psql(머리 + `
+select set_config('app.누가', '관리자', true);
+select set_config('app.왜', '숨기기 · 면접일정 안내(결과 안내문) · 우리 직군 아님 — 세중님 2026-10-23 뜻 2026-10-28 반영', true);
+update job_posts p set hidden = true, hold = false,
+       hidden_why = '관리자가 숨김 · 면접일정 안내(결과 안내문) · 제목이 잘려 거르기를 지나쳤습니다',
+       hidden_on = (now() at time zone 'Asia/Seoul')::date,
+       admin_locked = true, admin_at = now(),
+       admin_note = '세중님 2026-10-23 숨기기 — DB 에 안 닿아 2026-10-28 에 다시',
+       edited_fields = (select array_agg(distinct x)
+                          from unnest(coalesce(p.edited_fields, '{}') || array['hidden','hold']) x)
+ where p.id = '${공고}';`));
+  console.log('── 후 ──');
+  console.log(psql(머리 + `
+    select p.id, p.hidden, p.hold, p.admin_locked, p.hidden_why,
+           exists (select 1 from job_posts_pub v where v.id = p.id) as "회원 화면에 있나"
+      from job_posts p where p.id = '${공고}';`));
+  console.log('회원 화면 — ' + 글만('select count(*) from job_posts_pub;') + '건');
+  process.exit(0);
+}
+
 if (!진짜) {
   console.log('\n[마른] 아무것도 안 바꿨습니다 — --진짜 로 다시 숨기고 잠급니다');
   process.exit(0);
