@@ -210,7 +210,7 @@ fs.writeFileSync(되돌림, [
   '/* 되돌리기 — 2026-10-28 사고 고침 (긁기 지난 공고 · 상세 못 읽음) */',
   ...내릴것.map((id) => `update job_posts set hidden = false, hidden_why = null, hidden_on = null`
     + ` where id = '${id}';`),
-  ...보류할것.map((id) => `update job_posts set hold = false where id = '${id}';`),
+  ...보류할것.map((id) => `update job_posts set hold = false, edited_fields = (select array_remove(coalesce(edited_fields,'{}'), 'hold')) where id = '${id}';`),
 ].join('\n') + '\n', 'utf8');
 console.log('\n○ 되돌릴 글 — ' + 되돌림 + ' (내림 ' + 내릴것.length + ' · 보류 ' + 보류할것.length + ')');
 
@@ -221,7 +221,15 @@ update job_posts p set hidden = true, hold = false,
        hidden_why = '게시일 30일 지남 (긁기)', hidden_on = ${오늘SQL}
  where ${지난공고조건} and not p.hidden;
 select set_config('app.누가', '사고 고침 2026-10-28 (상세 못 읽음)', true);
-update job_posts p set hold = true
+/* ★ 2026-10-28 — hold 만 켜면 **수집기 한 바퀴에 풀립니다.**
+   collect_put 의 hold 줄(sql/기준구조_1025.sql:3181)이 excluded.hold 로 덮는데,
+   그 앞에 **빠져나갈 길 둘**이 있습니다 — admin_locked 이거나
+   **edited_fields 에 'hold' 가 있으면** 우리 값을 지킵니다.
+   실제로 16:00 에 hold 를 켰는데 **16:01 에 수집기 HS3 가 풀었습니다**(job_state_log).
+   그래서 edited_fields 에 'hold' 를 함께 적습니다 — 「사람이 정한 값」 표시입니다 */
+update job_posts p set hold = true,
+       edited_fields = (select array_agg(distinct x)
+                          from unnest(coalesce(p.edited_fields, '{}') || array['hold']) x)
  where ${못읽음조건} and not p.hold and not p.hidden;
 commit;`));
 
