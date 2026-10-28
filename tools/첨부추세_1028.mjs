@@ -76,6 +76,20 @@ console.log(psql(`
 
 /* 중간값으로 셈 — 하루치가 들쭉날쭉합니다 (크론이 못 돈 날이 섞입니다) */
 const 남은것 = Number(글만(`select count(*) from job_attachments where parsed_at is null and "읽기탈" is null;`));
+/* ★ 2026-10-28 — **창을 둘로 봅니다.** 10/21~10/23 은 받아보기() 재시도도 없고
+   첨부 다리가 죽어 있던 날들입니다(10/22 에 943줄이 한꺼번에 들어왔습니다). 그 날들을
+   섞은 이레 중간값은 **지금 속도가 아닙니다** — 고친 코드로 돈 **나흘**을 따로 셉니다 */
+const 중간값 = (날수) => Number(글만(`
+  with d as (
+    select (now() at time zone 'Asia/Seoul')::date - g as 날 from generate_series(1, ${날수}) g
+  ), x as (
+    select (select count(*) from job_attachments a
+             where (a.parsed_at at time zone 'Asia/Seoul')::date = d.날)
+         - (select count(*) from job_attachments a
+             where (a."만든때" at time zone 'Asia/Seoul')::date = d.날) as v
+      from d
+  )
+  select coalesce(percentile_cont(0.5) within group (order by v), 0)::int from x;`));
 const 순감소 = Number(글만(`
   with d as (
     select (now() at time zone 'Asia/Seoul')::date - g as 날 from generate_series(1, 7) g
@@ -90,11 +104,15 @@ const 순감소 = Number(글만(`
 
 console.log('\n══ 다 읽히는 날 ══');
 console.log('아직 안 본 것 ' + 남은것 + '줄 · 하루 순감소(이레 중간값) ' + 순감소 + '줄');
-if (순감소 <= 0) {
+const 요새 = 중간값(4);
+console.log('                   하루 순감소(**나흘** 중간값 · 고친 코드) ' + 요새 + '줄');
+const 쓸값 = 요새 > 순감소 ? 요새 : 순감소;
+if (요새 > 순감소) console.log('→ 셈에는 **나흘 값**을 씁니다 (이레 값은 다리가 죽어 있던 날이 섞입니다)');
+if (쓸값 <= 0) {
   console.log('✗ **순감소가 0 이하입니다 — 지금 설정으로는 안 끝납니다.**');
   console.log('  → 차례를 바꾸는 안(회원 화면 공고 첨부 먼저)을 승인대기에 올립니다');
 } else {
-  const 날수 = Math.ceil(남은것 / 순감소);
+  const 날수 = Math.ceil(남은것 / 쓸값);
   const 끝날 = new Date(Date.now() + 날수 * 86400000 + 9 * 3600000);
   console.log('→ ' + 날수 + '일 뒤 = ' + 끝날.toISOString().slice(0, 10) + ' 무렵에 끝납니다'
     + (끝날 < new Date('2026-11-10T00:00:00Z') ? '  (11/10 오픈 전입니다)' : '  ⚠ **11/10 오픈 뒤입니다**'));
