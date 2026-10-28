@@ -1,0 +1,161 @@
+/* E 보강 — 「지원하러 가기」 ① 채용 게시판 주소를 **공고 쪽으로 잇는 길** 재 보기
+ *   (2026-10-28 세중님 — ①이 0 인 까닭은 주소가 **사이트표에만** 있는 것입니다)
+ *
+ *   node tools/지원링크_잇기_1028.mjs           읽기만 합니다
+ *   node tools/지원링크_잇기_1028.mjs --표본 20  고른 주소를 **열어** 봅니다 (200 인지)
+ *
+ * ── 어떻게 잇나 ─────────────────────────────────────────────
+ *   공고.기관번호 는 두 꼴입니다 — `HIRA:<ykiho>` (심평원) · `NAME:<이름키>` (이름)
+ *     ① 기관 표.채용페이지        기관번호로 바로
+ *     ② 사이트표(hosp_sites).채용주소
+ *          ykiho 로 · 없으면 이름열쇠(= 견줄이름) 로
+ *   ★ 「의심」(연결상태 = '대기') 은 **뺍니다** — 어느 기관인지 아직 모르는 줄입니다
+ *     (세중님 「이름으로 붙은 기관(의심 아닌 것만)도 포함」)
+ */
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+
+const 뿌리 = path.join(import.meta.dirname, '..');
+const 표본수 = (() => {
+  const i = process.argv.indexOf('--표본');
+  return i < 0 ? 0 : Math.max(0, Number(process.argv[i + 1] || 20));
+})();
+
+const cfg = {};
+for (const f of ['.env', '.env.local']) {
+  const p = path.join(뿌리, f);
+  if (!fs.existsSync(p)) continue;
+  for (const l of fs.readFileSync(p, 'utf8').split(/\r?\n/)) {
+    const m = l.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (m && !cfg[m[1]]) cfg[m[1]] = m[2].replace(/^["']|["']$/g, '');
+  }
+}
+if (!cfg.SUPABASE_DB_URL) { console.error('✗ SUPABASE_DB_URL 이 없습니다 (서버에서 돌리십시오)'); process.exit(1); }
+const u = new URL(cfg.SUPABASE_DB_URL);
+const env = { ...process.env,
+  PGHOST: u.hostname, PGPORT: u.port || '5432',
+  PGUSER: decodeURIComponent(u.username), PGPASSWORD: decodeURIComponent(u.password),
+  PGDATABASE: decodeURIComponent(u.pathname.replace(/^\//, '')) || 'postgres',
+  PGSSLMODE: u.searchParams.get('sslmode') || 'require' };
+function psql(sql, 꼴 = ['-X', '-q']) {
+  const 임시 = path.join(os.tmpdir(), '지원링크_' + process.pid + '.sql');
+  fs.writeFileSync(임시, sql, 'utf8');
+  const r = spawnSync('psql', [...꼴, '-v', 'ON_ERROR_STOP=1', '-f', 임시],
+    { encoding: 'utf8', maxBuffer: 1 << 26, env });
+  fs.unlinkSync(임시);
+  if (r.status) { console.error('✗ psql\n' + (r.stderr || '').slice(0, 1200)); process.exit(1); }
+  return (r.stdout || '').trimEnd();
+}
+const 머리 = '\\pset pager off\n';
+
+/* 잇는 길 한 자리 — 아래 모든 셈이 이 CTE 를 씁니다 */
+const 이은것 = `
+  with 공고 as (
+    select p.id, p.source, p.org_name, p.url, p."기관번호", p."연결상태",
+           nullif(p.detail->>'기관홈','')        as 기관홈,
+           nullif(p.detail->>'기관홈페이지','')  as 기관홈2
+      from job_posts p join job_posts_pub v on v.id = p.id
+  ), 이음 as (
+    select c.*,
+           /* ① 기관 표.채용페이지 */
+           nullif(o."채용페이지", '')  as 기관표_채용페이지,
+           nullif(o."홈페이지", '')    as 기관표_홈페이지,
+           /* ② 사이트표.채용주소 — ykiho 로, 없으면 이름열쇠로 */
+           nullif(coalesce(sy."채용주소", sn."채용주소"), '') as 사이트표_채용주소,
+           nullif(coalesce(sy.url, sn.url), '')               as 사이트표_홈,
+           case when sy.name is not null then 'ykiho'
+                when sn.name is not null then '이름열쇠' end   as 사이트표_어떻게
+      from 공고 c
+      left join "기관" o on o."기관번호" = c."기관번호"
+      left join hosp_sites sy
+             on c."기관번호" like 'HIRA:%'
+            and sy.ykiho = substr(c."기관번호", 6) and not sy."끔"
+      left join hosp_sites sn
+             on sn."이름열쇠" = coalesce(o."이름키", "견줄이름"(c.org_name)) and not sn."끔"
+     where coalesce(c."연결상태",'') <> '대기'        /* ★ 의심은 뺍니다 */
+  ), 차례 as (
+    select i.*,
+           case when i.기관표_채용페이지 is not null then '① 채용게시판(기관표)'
+                when i.사이트표_채용주소  is not null then '① 채용게시판(사이트표)'
+                when i.기관표_홈페이지    is not null then '② 기관홈(기관표)'
+                when i.사이트표_홈        is not null then '② 기관홈(사이트표)'
+                when coalesce(i.기관홈, i.기관홈2) is not null then '② 기관홈(공고 detail)'
+                when i.url is not null                then '③ 원문'
+                else '없음' end as 갈래,
+           coalesce(i.기관표_채용페이지, i.사이트표_채용주소,
+                    i.기관표_홈페이지, i.사이트표_홈,
+                    i.기관홈, i.기관홈2, i.url) as 쓸주소
+      from 이음 i
+  )`;
+
+console.log('══ ①이 0 이던 까닭 — 공고에 담긴 칸을 그대로 셉니다 ══');
+console.log(psql(머리 + `
+  select count(*) as 회원화면,
+         count(*) filter (where coalesce(p.detail->>'채용게시판','') <> '') as "공고에_채용게시판칸",
+         count(*) filter (where coalesce(p.detail->>'기관홈','') <> ''
+                             or coalesce(p.detail->>'기관홈페이지','') <> '') as "공고에_기관홈칸",
+         count(*) filter (where coalesce(p.url,'') <> '') as "원문주소"
+    from job_posts p join job_posts_pub v on v.id = p.id;`));
+console.log('── 주소가 있는 자리 (사이트표·기관 표) ──');
+console.log(psql(머리 + `
+  select count(*) as "사이트표_줄", count(*) filter (where coalesce("채용주소",'') <> '') as "채용주소있음",
+         count(*) filter (where coalesce(url,'') <> '') as "홈있음",
+         count(*) filter (where ykiho is not null) as "ykiho있음",
+         count(*) filter (where "끔") as "끈것"
+    from hosp_sites;`));
+console.log(psql(머리 + `
+  select count(*) as "기관표_줄", count(*) filter (where coalesce("채용페이지",'') <> '') as "채용페이지있음",
+         count(*) filter (where coalesce("홈페이지",'') <> '') as "홈페이지있음"
+    from "기관";`));
+
+console.log('\n══ 이어 보니 — 회원 화면 공고의 갈래 ══');
+console.log(psql(머리 + 이은것 + `
+  select 갈래, count(*) as 공고 from 차례 group by 1 order by 1;`));
+console.log('── 연결상태별 (의심 「대기」는 위 셈에서 빠져 있습니다) ──');
+console.log(psql(머리 + `
+  select coalesce(p."연결상태",'(빈칸)') as 연결상태, count(*) as 회원화면,
+         count(*) filter (where p."기관번호" like 'HIRA:%') as "심평원번호",
+         count(*) filter (where p."기관번호" like 'NAME:%') as "이름으로"
+    from job_posts p join job_posts_pub v on v.id = p.id group by 1 order by 2 desc;`));
+console.log('── 사이트표를 어떻게 찾았나 ──');
+console.log(psql(머리 + 이은것 + `
+  select coalesce(사이트표_어떻게,'(못찾음)') as 어떻게, count(*) as 공고,
+         count(*) filter (where 사이트표_채용주소 is not null) as "채용주소있음"
+    from 차례 group by 1 order by 2 desc;`));
+
+if (!표본수) {
+  console.log('\n★ 아무것도 바꾸지 않았습니다 (읽기만). --표본 20 으로 주소를 열어 봅니다.');
+  process.exit(0);
+}
+
+/* ── 표본 — ① 로 뽑힌 주소를 **열어** 봅니다 ── */
+const 뽑기 = psql(머리 + 이은것 + `
+  select id || E'\\t' || org_name || E'\\t' || 갈래 || E'\\t' || 쓸주소
+    from 차례 where 갈래 like '①%' order by random() limit ${표본수};`, ['-X', '-A', '-t', '-q']);
+const 줄들 = 뽑기.split('\n').map((l) => l.split('\t')).filter((a) => a.length === 4);
+if (!줄들.length) {
+  console.log('\n표본 — ① 로 뽑히는 공고가 **0 건**입니다 (열어 볼 것이 없습니다).');
+  process.exit(0);
+}
+console.log('\n══ 표본 ' + 줄들.length + '건 — ① 주소를 열어 봅니다 ══');
+let 이백 = 0, 이름보임 = 0;
+for (const [id, 기관, , 주소] of 줄들) {
+  let 코드 = '-', 제목 = '';
+  try {
+    const r = await fetch(주소, { redirect: 'follow', signal: AbortSignal.timeout(15000),
+      headers: { 'user-agent': 'Mozilla/5.0 (potjob 확인)' } });
+    코드 = String(r.status);
+    const 글 = (await r.text()).slice(0, 200000);
+    제목 = (글.match(/<title[^>]*>([\s\S]{0,120}?)<\/title>/i)?.[1] || '').replace(/\s+/g, ' ').trim();
+    if (r.status === 200) 이백 += 1;
+    /* 그 기관의 채용 게시판인가 — 기관 이름의 앞 토막이 쪽 안에 있나 (지침 10-3: 짐작 안 함) */
+    const 토막 = (기관.replace(/\(.*?\)|주식회사|의료법인|재단법인|사회복지법인/g, '').trim().slice(0, 4));
+    if (토막.length >= 2 && (글.includes(토막) || 제목.includes(토막))) 이름보임 += 1;
+  } catch (e) { 코드 = '✗ ' + String(e.message || e).slice(0, 40); }
+  console.log([코드.padEnd(6), id.padEnd(20), 기관.slice(0, 22).padEnd(24),
+    주소.slice(0, 68), 제목.slice(0, 40)].join(' '));
+}
+console.log('\n200 — ' + 이백 + '/' + 줄들.length + ' · 쪽에 기관 이름이 보인 것 — ' + 이름보임 + '/' + 줄들.length);
+console.log('★ 아무것도 바꾸지 않았습니다 (읽기만).');
