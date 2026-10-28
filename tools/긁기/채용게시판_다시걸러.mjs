@@ -143,8 +143,21 @@ const 갈래셈 = {};
 for (const x of 통과) 갈래셈[x.갈래] = (갈래셈[x.갈래] || 0) + 1;
 console.log('  ' + Object.entries(갈래셈).map(([k, v]) => k + ' ' + v).join(' · '));
 
-if (!진짜) { console.log('\n[마른] 아무것도 안 비웠습니다 — --진짜 로 걸린 것을 비웁니다'); process.exit(0); }
-if (!걸림.length) { console.log('\n비울 것이 없습니다'); process.exit(0); }
+/* ★ 걸린 것을 둘로 가릅니다 (2026-10-28) — **다 비우면 멀쩡한 주소를 잃습니다.**
+     ㉠ 비움 — 주소 **꼴**이 게시판이 아닌 것 (글 하나 · 첫 화면 · 같은 주소 두 기관).
+              이것은 쪽이 비었는지와 무관하게 **틀린 주소**입니다
+     ㉡ 둠   — robots 금지 · 못 받음 · 줄이 모자람. 주소는 맞는데 **우리가 못 본 것**이거나
+              **그 게시판에 글이 아직 적은 것**일 수 있습니다. 비우면 다시 찾아야 합니다 —
+              대신 HS4 에 **등록하지 않습니다** (「등록 보류」) */
+const 꼴틀림 = /글 하나 꼴 주소|첫 화면|같은 주소를 다른 기관도 씀/;
+const 비울것 = 걸림.filter((x) => 꼴틀림.test(x.왜));
+const 둘것 = 걸림.filter((x) => !꼴틀림.test(x.왜));
+console.log('\n걸린 것을 가르면 — **비울 것 ' + 비울것.length + '곳**(주소 꼴이 게시판이 아님) · '
+  + '**둘 것 ' + 둘것.length + '곳**(주소는 맞을 수 있음 · 등록만 보류)');
+for (const x of 둘것) console.log('  · 둠  ' + x.기관.slice(0, 24).padEnd(26) + x.왜);
+
+if (!진짜) { console.log('\n[마른] 아무것도 안 비웠습니다 — --진짜 로 **비울 것만** 비웁니다'); process.exit(0); }
+if (!비울것.length) { console.log('\n비울 것이 없습니다'); process.exit(0); }
 
 const 되돌림터 = path.join(os.homedir(), '되돌림');
 fs.mkdirSync(되돌림터, { recursive: true });
@@ -153,7 +166,7 @@ const 때 = String(d.getFullYear()) + 두(d.getMonth() + 1) + 두(d.getDate()) +
   + 두(d.getHours()) + 두(d.getMinutes()) + 두(d.getSeconds());
 const 되돌림 = path.join(되돌림터, '채용게시판_다시걸러_되돌리기_' + 때 + '.sql');
 const 글 = ['/* 되돌리기 — 비운 채용페이지를 전 값으로 (2026-10-28 울타리 넷) */'];
-for (const x of 걸림) {
+for (const x of 비울것) {
   글.push(`update 기관 set "채용페이지" = '${따옴(x.주소)}' where "기관번호" = '${따옴(x.번호)}';`);
   psql(`update 기관
           set "채용페이지" = null,
@@ -164,7 +177,7 @@ for (const x of 걸림) {
         where "기관번호" = '${따옴(x.번호)}';`);
 }
 fs.writeFileSync(되돌림, 글.join('\n') + '\n', 'utf8');
-console.log('\n○ ' + 걸림.length + '곳을 비웠습니다 · 되돌림 ' + 되돌림);
+console.log('\n○ ' + 비울것.length + '곳을 비웠습니다 (둔 것 ' + 둘것.length + '곳) · 되돌림 ' + 되돌림);
 console.log('\n── 후 · 기관 표 ──\n' + psql(`
   select count(*) || '줄 · 채용페이지 ' || count("채용페이지")
       || ' · 비운 까닭이 적힌 줄 '
