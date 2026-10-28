@@ -22,7 +22,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { 표준읽기, 게시판인가 } from './읽기들.mjs';
+import { 표준읽기, 게시판인가, 꼴정하기 } from './읽기들.mjs';
 import { 가도되나집, 받기, 자고 } from './공통.mjs';
 
 const argv = process.argv.slice(2);
@@ -142,6 +142,44 @@ console.log('\n── 등록 가능한 곳 (갈래별) ──');
 const 갈래셈 = {};
 for (const x of 통과) 갈래셈[x.갈래] = (갈래셈[x.갈래] || 0) + 1;
 console.log('  ' + Object.entries(갈래셈).map(([k, v]) => k + ' ' + v).join(' · '));
+
+/* ── --등록 — **방금 열어 본** 통과 곳들을 HS4 곳 목록에 더합니다 (2026-10-28 세중님 2번) ──
+ * 열어 보지 않은 것은 안 더합니다. 그래서 등록은 이 도구 안에서 합니다 (한 번의 확인으로).
+ *   hold=true · robots · 틈은 **긁기 쪽(공통.mjs·담기)** 이 이미 지킵니다 — 설정에 안 적습니다
+ *   기관번호는 **직접** 적습니다 (이름 매칭을 안 거칩니다 · 세중님 C3)
+ */
+if (argv.includes('--등록')) {
+  const 여기 = import.meta.dirname;
+  const 더할것 = {};
+  for (const x of 통과) {
+    if (!x.번호) { console.log('  · 건너뜀 (기관번호 없음) ' + x.기관); continue; }
+    const 꼴 = 꼴정하기(x.주소);
+    (더할것[꼴] = 더할것[꼴] || []).push(x);
+  }
+  for (const [꼴, 들] of Object.entries(더할것)) {
+    const 자리 = path.join(여기, 꼴 + '_곳들.json');
+    if (!fs.existsSync(자리)) { console.error('✗ ' + 자리 + ' 가 없습니다 — 건너뜁니다'); continue; }
+    const j = JSON.parse(fs.readFileSync(자리, 'utf8'));
+    const 전 = j.곳들.length;
+    let 더함 = 0;
+    for (const x of 들) {
+      if (j.곳들.some((c) => c.기관번호 === x.번호 || c.주소 === x.주소)) continue;
+      j.곳들.push({ 이름: x.기관, 종류: x.갈래, 지역: '', 주소: x.주소, 기관번호: x.번호,
+        왜: '사각지대 · 채용 게시판 열어서 확인 2026-10-28 (줄 ' + x.줄 + ' · 울타리 넷 통과)' });
+      더함 += 1;
+    }
+    j.곳 = j.곳들.length;
+    j.기관번호붙음 = j.곳들.filter((c) => c.기관번호).length;
+    j.만든때 = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    if (!argv.includes('--진짜')) {
+      console.log('[마른] ' + 꼴 + '_곳들.json — 전 ' + 전 + ' → 후 ' + j.곳들.length + ' (더할 것 ' + 더함 + ')');
+      continue;
+    }
+    fs.writeFileSync(자리, JSON.stringify(j, null, 1) + '\n', 'utf8');
+    console.log('○ ' + 꼴 + '_곳들.json — 전 ' + 전 + ' → 후 ' + j.곳들.length + ' (더함 ' + 더함 + ')');
+  }
+  process.exit(0);
+}
 
 /* ★ 걸린 것을 둘로 가릅니다 (2026-10-28) — **다 비우면 멀쩡한 주소를 잃습니다.**
      ㉠ 비움 — 주소 **꼴**이 게시판이 아닌 것 (글 하나 · 첫 화면 · 같은 주소 두 기관).

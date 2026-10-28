@@ -18,22 +18,17 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { 꼴가리기 } from './읽기들.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
 const 꼴 = argv.includes('--꼴') ? argv[argv.indexOf('--꼴') + 1] : '그누보드';
 const 적기 = argv.includes('--적기');
 
-/** 꼴을 가리는 자 — 분류표의 주소·게시판 링크로 봅니다 */
-export const 꼴가리기 = {
-  그누보드: (주소) => /\/bbs\/board\.php\?/.test(주소),
-  경기도의료원: (주소) => /medical\.or\.kr\/front\/boardList\.do/.test(주소),
-  /* ★ 2026-10-24 — **표준게시판**: 위 둘이 아닌 ①HTML게시판 전부.
-     list.do(16곳) · board(10곳) · php·html·jsp 꼴이 섞여 있는데 **읽는 법은 같습니다** —
-     「글 번호가 든 링크 + 그 줄의 제목·날짜」. 읽기 하나로 넓게 덮습니다 */
-  표준게시판: (주소) => !/\/bbs\/board\.php\?/.test(주소)
-    && !/medical\.or\.kr\/front\/boardList\.do/.test(주소),
-};
+/** 꼴을 가리는 자 — **`읽기들.mjs` 한 자리**입니다 (2026-10-28 에 옮겼습니다).
+ *  이 파일은 들여오면 바로 목록을 만들기 때문에, 다른 도구가 이 자만 빌려 쓸 수
+ *  없었습니다 (표준게시판.mjs 가 읽기를 떼어 낸 것과 같은 까닭 · 지침 6-3) */
+export { 꼴가리기, 꼴정하기 } from './읽기들.mjs';
 
 const 분류자리 = path.join(여기, '..', '..', 'docs', '사각지대_분류_1024.json');
 if (!fs.existsSync(분류자리)) { console.error('✗ 분류표가 없습니다 — ' + 분류자리); process.exit(1); }
