@@ -68,3 +68,30 @@ export function 표준읽기(html, 바탕) {
   }
   return 낸것;
 }
+
+/* ── 「채용 게시판 목록인가」 울타리 넷 (2026-10-28 세중님 1번) ───────────────
+ * 전에는 「목록 줄이 **하나라도** 나오면 게시판」이었습니다. 그래서 —
+ *   · 기관 **첫 화면**(main.do · index.jsp)이 공지 목록 때문에 통과했습니다 (5곳)
+ *   · **글 하나**(mode=view&idx=62)인 쪽도 줄이 하나 나와 통과했습니다 (1곳)
+ *   · 분원이 본원과 **같은 주소**를 받았습니다 (인천의료원 ↔ 백령병원)
+ * 21곳 가운데 일곱이 그렇게 들어와 있었습니다 (docs/1층넓히기_1028.md ⑥).
+ * ★ 넷째(같은 주소 두 기관)는 주소만 보고 알 수 없어 **표를 보는 쪽**에서 봅니다 —
+ *   여기서는 ㉠㉡㉢ 만 보고, 넷째는 담는 도구가 `같은주소쓰는기관()` 으로 가립니다.
+ */
+export const 글하나꼴 =
+  /[?&](?:mode=view|mode=read|wr_id|idx|nttSn|ntt_sn|articleNo|article_no|bbsIdx|bIdx|seq|seqno|num|no)=\d/i;
+export const 첫화면꼴 =
+  /^https?:\/\/[^/]+\/?$|\/(?:main|index|default|home)(?:\.(?:do|jsp|php|html?|aspx?))?(?:\?.*)?$/i;
+
+export function 게시판인가(주소, 줄들) {
+  const 줄 = Array.isArray(줄들) ? 줄들 : [];
+  /* ㉠ 글 하나를 가리키는 주소는 목록이 아닙니다 */
+  if (글하나꼴.test(주소)) return { 됨: false, 왜: '글 하나 꼴 주소' };
+  /* ㉢ 첫 화면은 게시판이 아닙니다 (공지 목록이 있어도) */
+  if (첫화면꼴.test(주소)) return { 됨: false, 왜: '첫 화면' };
+  /* ㉡ 줄이 둘 이상이고 **글 번호가 서로 달라야** 합니다 */
+  if (줄.length < 2) return { 됨: false, 왜: '목록 줄 ' + 줄.length + '개 (둘 이상이어야)' };
+  const 번호들 = new Set(줄.map((x) => x && x.번호).filter(Boolean));
+  if (번호들.size < 2) return { 됨: false, 왜: '글 번호가 ' + 번호들.size + '가지 (둘 이상이어야)' };
+  return { 됨: true, 왜: '줄 ' + 줄.length + ' · 글 번호 ' + 번호들.size + '가지' };
+}

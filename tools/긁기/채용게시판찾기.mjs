@@ -22,7 +22,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { 가도되나집, 받기, 자고 } from './공통.mjs';
-import { 표준읽기 } from './읽기들.mjs';
+import { 표준읽기, 게시판인가 } from './읽기들.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 뿌리 = path.join(여기, '..', '..');
@@ -106,7 +106,7 @@ for (const [번호, 이름, 홈, 종별, 시도] of 줄들) {
   }
   if (!후보.length) { 못찾음.push({ 이름, 왜: '홈페이지에 채용 링크 없음' }); console.log('  · ' + 이름.slice(0, 20).padEnd(21) + '채용 링크 없음'); continue; }
   /* 후보를 열어 목록인지 봅니다 */
-  let 정한것 = null;
+  let 정한것 = null; const 막힌까닭 = [];
   for (const c of 후보) {
     const 됨2 = await 가도되나집(c.주소);
     if (!됨2.됨) continue;
@@ -114,9 +114,26 @@ for (const [번호, 이름, 홈, 종별, 시도] of 줄들) {
     await 자고(3500);
     if (!r2.됨) continue;
     const 줄 = 표준읽기(r2.html, c.주소) || [];
-    if (줄.length) { 정한것 = { ...c, 줄: 줄.length, 끝주소: r2.주소 || c.주소 }; break; }
+    /* ★ 2026-10-28 세중님 1번 — 울타리 넷 (읽기들.mjs 한 자리).
+       전에는 「줄이 하나라도」였고, 그래서 첫 화면·글 하나가 통과했습니다 */
+    const 끝 = r2.주소 || c.주소;
+    const 본 = 게시판인가(끝, 줄);
+    if (!본.됨) { 막힌까닭.push(본.왜); continue; }
+    정한것 = { ...c, 줄: 줄.length, 끝주소: 끝, 왜: 본.왜 }; break;
   }
-  if (!정한것) { 못찾음.push({ 이름, 왜: '링크를 열었지만 목록 줄 0' }); console.log('  · ' + 이름.slice(0, 20).padEnd(21) + '링크 ' + 후보.length + '개 — 목록 줄 0'); continue; }
+  if (!정한것) {
+    const 왜 = 막힌까닭.length ? '게시판이 아님 (' + 막힌까닭[0] + ')' : '링크를 열었지만 목록 줄 0';
+    못찾음.push({ 이름, 왜 });
+    console.log('  · ' + 이름.slice(0, 20).padEnd(21) + '링크 ' + 후보.length + '개 — ' + 왜); continue;
+  }
+  /* ㉣ 같은 주소를 **다른 기관**이 이미 쓰면 담지 않습니다 (분원이 본원 주소를 받습니다) */
+  const 남이쓰나 = psql(`select 이름 from 기관
+    where "채용페이지" = '${따옴(정한것.끝주소)}' and "기관번호" <> '${따옴(번호)}' limit 1;`);
+  if (남이쓰나) {
+    못찾음.push({ 이름, 왜: '같은 주소를 다른 기관이 씀' });
+    console.log('  · ' + 이름.slice(0, 20).padEnd(21) + '같은 주소를 「' + 남이쓰나.slice(0, 16) + '」가 씁니다 — 안 담습니다');
+    continue;
+  }
   찾음.push({ 번호, 이름, 종별, 시도, ...정한것 });
   console.log('  ○ ' + 이름.slice(0, 20).padEnd(21) + '「' + 정한것.글자.padEnd(12) + '」 줄 '
     + String(정한것.줄).padStart(3) + '  ' + 정한것.끝주소.slice(0, 50));
