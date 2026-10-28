@@ -168,6 +168,40 @@ async function 매칭재기(cfg) {
 }
 
 /* 긁기 한 줄 (2026-10-24 세중님 D2 · 담기 시작한 뒤부터) — 꼴·곳·보류함·채움률 */
+/** ★ 2026-10-28 세중님 ⓔ — 신뢰 셋 ① 에 **긁기 공고** 줄을 더합니다.
+ *
+ *  까닭: 긁기 공고는 마감일이 없는 것이 많고, `hide_stale_posts()` ② 는
+ *  **담은 날**만 보고 **정찰 면제**(14일 안에 살아 있다고 본 것)가 있어서
+ *  지난 공고가 회원 화면에 남습니다 — 10/28 에 포항세명·청주성모·대자인 셋이
+ *  그랬습니다 (55·41·36일). 그래서 **보이는 자리에 숫자를 둡니다.**
+ *  ★ 기준은 `게시일(없으면 담은 날) + 30일` 입니다 (승인대기 ㉬ 와 같은 자).
+ */
+async function 긁기지난것재기(cfg) {
+  try {
+    const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY };
+    const { 모두받기 } = await import('./쪽나눠받기.mjs');
+    /* 쪽은 공용 함수로만 넘깁니다 (지침 8-20 ③) */
+    const 보이는 = await 모두받기(cfg.SUPABASE_URL + '/rest/v1/job_posts_pub?select=id', H, { 차례: 'id' });
+    const 보임 = new Set(보이는.map((r) => r.id));
+    const 긁기 = await 모두받기(cfg.SUPABASE_URL
+      + '/rest/v1/job_posts?select=id,source,apply_to,posted_at,first_seen,collected_at'
+      + '&source=like.HS*', H, { 차례: 'id' });
+    const 오늘 = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+    const 지난날 = new Date(Date.parse(오늘 + 'T00:00:00Z') - 30 * 86400e3).toISOString().slice(0, 10);
+    const 셈 = { 긁기: 0, 마감없음: 0, 서른일지남: 0 };
+    for (const p of 긁기) {
+      if (!보임.has(p.id)) continue;
+      셈.긁기 += 1;
+      if (p.apply_to) continue;
+      셈.마감없음 += 1;
+      const 기준 = p.posted_at || p.first_seen
+        || (p.collected_at ? String(p.collected_at).slice(0, 10) : null);
+      if (기준 && 기준 < 지난날) 셈.서른일지남 += 1;
+    }
+    return 셈;
+  } catch { return null; }
+}
+
 async function 긁기재기(cfg) {
   try {
     const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY };
@@ -460,6 +494,7 @@ let 샌것 = null;
 /** ★ 2026-10-28 세중님 1번 — 「지난 교육」 줄도 **글을 만들기 전에** 재서 담습니다
  *  (글로()·아침글() 은 sync 라 안에서 await 를 못 합니다 — 위 샌것 과 같은 꼴) */
 let 교육줄들 = [];
+let 긁기지난줄 = [];
 
 function 신뢰셋줄(네) {
   const t = 네 && 네['신뢰셋'];
@@ -477,6 +512,9 @@ function 신뢰셋줄(네) {
   줄.push('  ③ 우리 직군이 아닌 공고 · 직군 빈칸      ' + 표(셋째)
     + '   (빈칸 ' + (t['③직군빈칸'] ?? '?') + ' · 직군의심 ' + (t['③직군의심'] ?? '?')
     + (t['③겹친것'] ? ' · 겹침 ' + t['③겹친것'] : '') + ')');
+  /* ★ 2026-10-28 세중님 ⓔ — 긁기 공고는 마감일이 없는 것이 많아 **①에 걸리지
+     않으면서** 지난 공고로 남습니다. 그래서 그 갈래를 ① 아래에 붙입니다 */
+  줄.push(...긁기지난줄);
   /* ★ 2026-10-23 세중님 H-2 = ⓐ — 목록꼴은 ③ 에서 뺐습니다. 목표값 없는 **보조 줄**입니다 */
   줄.push('     └ 보조 · 자격증 목록꼴                ' + (t['③자격증목록꼴'] ?? '?')
     + '건 (목표 없음 — 우리 직군 공고로 둡니다)');
@@ -998,6 +1036,11 @@ if (조용한척 || (!d['보낼것있나'] && !잠금.length && !(보안 && 보�
   catch (e) { console.error('네 숫자를 못 받았습니다 — ' + String(e.message || e).slice(0, 120)); }
   try { 샌것 = await 새는것(cfg); }
   catch (e) { console.error('보류함에서 풀린 것을 못 셌습니다 — ' + String(e.message || e).slice(0, 120)); }
+  /* ★ 2026-10-28 세중님 ⓔ — 긁기 공고 지난 것 줄 (신뢰셋줄 이 읽습니다) */
+  {
+    const g = await 긁기지난것재기(cfg);
+    긁기지난줄 = g ? ['     └ 긁기 공고 ' + g.긁기 + '건 — 마감 없음 ' + g.마감없음 + '건 · 게시일(없으면 담은날) 30일 지남 ' + g.서른일지남 + '건' + (g.서른일지남 === 0 ? '  ✓' : '  ← 0 이어야 합니다')] : [];
+  }
   교육줄들 = await 지난교육줄(cfg);
   const 짧은본문 = 아침글(네, d['늦은 수집기'] || [], 구멍, 잠금, d['직군 의심'], d['담지 못한 줄'], 역할목록);
   const 짧은제목 = '[피오티잡] 아침 숫자 — 안 긁는 1층 기관 '
@@ -1037,6 +1080,11 @@ try { 네긴 = await 네숫자받기(cfg); }
 catch (e) { console.error('네 숫자를 못 받았습니다 — ' + String(e.message || e).slice(0, 120)); }
 try { 샌것 = await 새는것(cfg); }
 catch (e) { console.error('보류함에서 풀린 것을 못 셌습니다 — ' + String(e.message || e).slice(0, 120)); }
+  /* ★ 2026-10-28 세중님 ⓔ — 긁기 공고 지난 것 줄 (신뢰셋줄 이 읽습니다) */
+  {
+    const g = await 긁기지난것재기(cfg);
+    긁기지난줄 = g ? ['     └ 긁기 공고 ' + g.긁기 + '건 — 마감 없음 ' + g.마감없음 + '건 · 게시일(없으면 담은날) 30일 지남 ' + g.서른일지남 + '건' + (g.서른일지남 === 0 ? '  ✓' : '  ← 0 이어야 합니다')] : [];
+  }
 if (!교육줄들.length) 교육줄들 = await 지난교육줄(cfg);
 const 본문 = 글로(d, 관리자, 잠금, 보안, 구멍, 네긴, 역할목록);
 const 제목 = '[피오티잡] 확인할 공고 ' + d['새 보류 건수'] + '건'
