@@ -169,12 +169,15 @@ console.log(psql(머리 + 이은것 + `
      마른 실행은 ① 19 라고 했고 job_one 실행 뒤 셈은 ① 18 입니다. 어느 줄이 다른지
      찍습니다 — 숫자가 다르면 자가 틀린 것입니다 (지침 10-5) */
 console.log('\n══ ⑥ 마른 셈 ↔ job_one 이 내리는 것 (다른 줄만) ══');
-console.log(psql(`\o /dev/null
+/* ★ job_one 은 auth.uid() 가 없으면 **비회원 갈래**를 갑니다 — 회원 갈래를 재려면
+   요청 claim 을 세웁니다 (이 연결에서만 · 자료는 안 건드립니다) */
+const 회원되기 = String.raw`\o /dev/null
 select set_config('request.jwt.claims',
   '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}', false);
 \o
 \pset pager off
-` + 이은것 + `,
+`;
+console.log(psql(회원되기 + 이은것 + `,
   둘 as (
     select c.id, c.org_name,
            (c.갈래 like '①%') as "마른이_①",
@@ -186,12 +189,7 @@ select set_config('request.jwt.claims',
   )
   select * from 둘 where "마른이_①" is distinct from "job_one_①";`));
 console.log('── 둘의 셈 ──');
-console.log(psql(`\o /dev/null
-select set_config('request.jwt.claims',
-  '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}', false);
-\o
-\pset pager off
-` + 이은것 + `
+console.log(psql(회원되기 + 이은것 + `
   select count(*) filter (where 갈래 like '①%') as "마른 셈 ①",
          count(*) filter (where coalesce((job_one(id)).detail->>'채용게시판','') <> '') as "job_one ①"
     from 차례;`));
