@@ -111,3 +111,23 @@ console.log(psql(머리 + `
     from 이름 n join "기관" o on o."이름키" = n.k
    where coalesce(o."채용페이지",'') <> ''
    order by n."갈래", n."기관";`));
+
+/* ★ ⑦ 울타리 ㉡ 가 막고 있는 것 — 손확인 ①②가 들어오면 몇 건이 풀리나
+     (2026-10-28 세중님 4번) */
+console.log('\n══ ⑦ 울타리 ㉡ (NAME + 확인한때 없음) 가 막고 있는 것 ══');
+console.log(psql(머리 + `
+  select count(*) as "NAME 로 붙은 회원 화면 공고",
+         count(*) filter (where o."기관번호" is not null) as "기관 표에 줄 있음",
+         count(*) filter (where coalesce(o."채용페이지",'') <> '') as "채용페이지도 있음",
+         count(*) filter (where coalesce(o."채용페이지",'') <> ''
+                            and o."확인한때" is null) as "확인한때만 비어 막힌 것",
+         count(distinct o."기관번호") filter (where coalesce(o."채용페이지",'') <> ''
+                            and o."확인한때" is null) as "그 기관 수"
+    from job_posts p join job_posts_pub v on v.id = p.id
+    left join "기관" o on o."기관번호" = p."기관번호"
+   where p."기관번호" like 'NAME:%';`));
+console.log('── 확인한때가 찍힌 기관 (손확인이 들어온 것) ──');
+console.log(psql(머리 + `
+  select coalesce("확인한사람", '(빈칸)') as 누가, count(*) as 기관,
+         count(*) filter (where coalesce("채용페이지",'') <> '') as 채용페이지있음
+    from "기관" where "확인한때" is not null group by 1 order by 2 desc;`));
