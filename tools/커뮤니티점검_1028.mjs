@@ -79,8 +79,10 @@ console.log('→ 즉 **신고 = 알림**이고, **숨김 = 사람의 판단**입
 if (!진짜) { console.log('\n[마른] 시험 글을 안 넣었습니다 — --진짜 로 한 바퀴 돕니다'); process.exit(0); }
 
 /* ── 한 바퀴 — 넣기 → 신고 → 감추기 → 확인 → 지우기 ── */
-const 관리자 = 글만(`select id::text from profiles where role = 'admin' order by created_at limit 1;`);
-if (!관리자) { console.error('✗ 관리자 계정을 못 찾았습니다 (profiles.role = admin)'); process.exit(1); }
+/* 관리자는 `admins` 표에 있습니다 (profiles.role 은 현직·학생입니다 · is_admin() 이 그 표를 봅니다) */
+const 관리자 = 글만(`select a.profile_id::text from admins a
+  where a."끈때" is null order by a.profile_id limit 1;`);
+if (!관리자) { console.error('✗ 관리자 계정을 못 찾았습니다 (admins 표)'); process.exit(1); }
 console.log('\n글쓴이 — 관리자 계정 (끝 4글자 …' + 관리자.slice(-4) + ')');
 
 const 전 = 글만(`select count(*)::text || ' / ' || (select count(*) from reports)::text from posts;`);
