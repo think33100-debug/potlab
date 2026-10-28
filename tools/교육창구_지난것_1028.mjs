@@ -54,8 +54,8 @@ function psql(sql, 꼴 = ['-X', '-q']) {
 const 글만 = (sql) => psql(sql, ['-X', '-A', '-t', '-q']);
 
 /* ── 올릴 글 ── */
-export const 전문 = `
-/* ① 지난 교육인가 — web/lib/edu-state.ts 와 같은 규칙 (2026-10-28 세중님 ㉪) */
+/* 새 함수 하나 — 규칙은 web/lib/edu-state.ts 와 같습니다 */
+export const 새함수 = `
 create or replace function public."지난교육인가"(
   "p_끝" date, "p_시작" date, "p_올린날" date, "p_오늘" date)
 returns boolean language sql immutable as $fn$
@@ -69,39 +69,38 @@ returns boolean language sql immutable as $fn$
 $fn$;
 revoke execute on function public."지난교육인가"(date, date, date, date) from public, anon;
 grant execute on function public."지난교육인가"(date, date, date, date)
-  to authenticated, service_role;
+  to authenticated, service_role;`;
 
-/* ② 교육목록 — 울타리만 바꿉니다 (나머지 글자는 그대로) */
-create or replace function public."교육목록"(
-  "p_직군" text, "p_출처" text, "p_지난것" boolean, p_page integer)
-returns table("번호" text, "출처" text, "직군" text, "갈래" text, "제목" text,
-  "시작" date, "끝" date, "장소" text, "모집인원" text, "상태" text,
-  "올린날" date, "링크" text)
-language sql stable security definer as $fn$
-  select e.번호, e.출처, e.직군, e.갈래, e.제목, e.시작, e.끝,
-         e.장소, e.모집인원, e.상태, e.올린날, e.링크
-  from 교육 e
-  where (p_출처 is null or e.출처 = p_출처)
-    and (p_직군 is null or p_직군 = '전체'
-         or e.직군 = p_직군 or e.직군 = '공통')
-    and (p_지난것
-         or not "지난교육인가"(e.끝, e.시작, e.올린날, (now() at time zone 'Asia/Seoul')::date))
-  order by e.시작 asc nulls last, e.올린날 desc nulls last, e.번호
-  limit 20 offset greatest(0, coalesce(p_page, 0)) * 20;
-$fn$;
+/* ★ 창구 둘은 **지금 정의(pg_get_functiondef)를 그대로 받아** 울타리만 바꿉니다.
+   create or replace 를 손으로 쓰면 **인수 기본값(default)** 이 빠져
+   `cannot remove parameter defaults` 로 막힙니다 (2026-10-28 에 한 번 막혔습니다).
+   받아서 고치면 기본값·권한·security definer·stable 이 다 그대로 따라옵니다 */
+export const 옛울타리 = /and \(p_지난것\s*or e\.끝 is null\s*or e\.끝 >= \(now\(\) at time zone 'Asia\/Seoul'\)::date\)/;
+export const 새울타리 = `and (p_지난것
+         or not "지난교육인가"(e.끝, e.시작, e.올린날, (now() at time zone 'Asia/Seoul')::date))`;
 
-/* ③ 교육셈 — 같은 울타리 */
-create or replace function public."교육셈"(
-  "p_직군" text, "p_출처" text, "p_지난것" boolean)
-returns integer language sql stable security definer as $fn$
-  select count(*)::int
-  from 교육 e
-  where (p_출처 is null or e.출처 = p_출처)
-    and (p_직군 is null or p_직군 = '전체'
-         or e.직군 = p_직군 or e.직군 = '공통')
-    and (p_지난것
-         or not "지난교육인가"(e.끝, e.시작, e.올린날, (now() at time zone 'Asia/Seoul')::date));
-$fn$;`;
+/** 지금 정의를 받아 울타리를 바꿉니다 — 못 찾으면 null (짐작으로 안 고칩니다) */
+export function 고친정의(정의) {
+  if (!옛울타리.test(정의)) return null;
+  return 정의.replace(옛울타리, 새울타리);
+}
+/** 올릴 글 전체 — 새 함수 + 울타리만 고친 창구 둘 */
+function 바꿀글() {
+  const 글 = [새함수];
+  for (const 이름 of ['교육목록', '교육셈']) {
+    const 정의 = 정의받기(이름);
+    const 고친 = 고친정의(정의);
+    if (!고친) { console.error('✗ ' + 이름 + ' — 옛 울타리를 못 찾았습니다 (짐작으로 안 고칩니다)'); process.exit(1); }
+    글.push(고친);
+  }
+  return glue(글);
+}
+const glue = (a) => a.join(String.fromCharCode(10));
+function 정의받기(이름) {
+  return 글만(`select pg_get_functiondef(p.oid) from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and p.proname = '${이름}';`);
+}
 
 /* ── 전 본문·ACL (되돌림) ── */
 const 전것 = ['교육목록', '교육셈'].map((이름) => ({
@@ -112,6 +111,7 @@ const 전것 = ['교육목록', '교육셈'].map((이름) => ({
     join pg_namespace n on n.oid = p.pronamespace
    where n.nspname = 'public' and p.proname = '${이름}';`),
 }));
+const 옛정의 = { 교육목록: 정의받기('교육목록'), 교육셈: 정의받기('교육셈') };
 for (const x of 전것) {
   console.log('전 — ' + x.이름 + ' · ACL ' + x.acl);
   if (!x.본문.trim()) { console.error('✗ ' + x.이름 + ' 본문을 못 읽었습니다'); process.exit(1); }
@@ -157,7 +157,7 @@ fs.writeFileSync(되돌림, [
 ].join('\n') + '\n', 'utf8');
 console.log('\n○ 되돌릴 글 — ' + 되돌림);
 
-console.log(psql(전문));
+console.log(psql(바꿀글()));
 for (const x of 전것) {
   const 후 = 글만(`select coalesce(p.proacl::text,'(기본값)') from pg_proc p
     join pg_namespace n on n.oid = p.pronamespace
