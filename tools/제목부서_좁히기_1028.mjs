@@ -74,7 +74,11 @@ const 뽑기 = (식) => `nullif(btrim((select m[1] from regexp_matches(coalesce(
 const 바뀔것SQL = `
   select p.id from job_posts p
    where ${뽑기(지금식)} is distinct from ${뽑기(새식)}
-     and not ('보여줄제목' = any(coalesce(p.edited_fields, '{}')))`;
+     and not ('보여줄제목' = any(coalesce(p.edited_fields, '{}')))
+     /* ★ 제목이 **담겨 있는 줄만** 건드립니다 — 직군이 없는 보류함 줄은 제목이
+        아예 없어서(제목만들기행 이 null) 다시 만들어도 같습니다. 159줄이 그렇습니다.
+        쓸데없이 건드리면 칸기록·상태기록만 쌓입니다 (지침 9절) */
+     and p."보여줄제목" is not null`;
 
 console.log('\n── 바뀌는 줄 (전체 공고 · 손으로 정한 제목은 뺍니다) ──');
 console.log(psql(`
