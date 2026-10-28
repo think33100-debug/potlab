@@ -65,15 +65,52 @@ const 빈칸수SQL = `
           and coalesce(p.detail->>'예상연봉','') = '' then 1 else 0 end)`;
 
 const 오늘SQL = `(now() at time zone 'Asia/Seoul')::date`;
+/* ★ 2026-10-28 — **이 첫 줄이 없어서 사고가 났습니다.** 마른 실행은 job_posts_pub 과
+   이어 3건을 보여 줬는데, 실행하는 update 에는 그 이음이 없어 **보류함 공고 14건까지**
+   숨겼습니다. 조건을 **한 자리**로 두고 마른·실행이 같은 글자를 쓰게 합니다 (지침 6절) */
 const 지난공고조건 = `
-    p.source like 'HS%' and p.apply_to is null and not p.admin_locked
+    exists (select 1 from job_posts_pub v where v.id = p.id)
+    and p.source like 'HS%' and p.apply_to is null and not p.admin_locked
     and coalesce(p.posted_at, p.first_seen, (p.collected_at at time zone 'Asia/Seoul')::date)
         < ${오늘SQL} - 30`;
 const 못읽음조건 = `
-    p.source like 'HS%' and not p.admin_locked
+    exists (select 1 from job_posts_pub v where v.id = p.id)
+    and p.source like 'HS%' and not p.admin_locked
     and (select count(*) from job_body b where b.job_id = p.id) = 0
     and (select count(*) from "공고첨부" a where a."공고id" = p.id) = 0
     and ${빈칸수SQL} >= 3`;
+
+/* ── --보류함되살리기 — 2026-10-28 에 **잘못 숨긴 보류함 공고**를 되돌립니다 ──
+ * 위 「이 첫 줄이 없어서」 사고로 보류함 공고 14건이 숨겨졌습니다 (전부 우리 직군이
+ * 아닌 공고 — 재무팀·조리사·방사선사·홍보팀 …). 보류함은 **관리자 검사 줄**이라
+ * 제가 건드릴 자리가 아닙니다. `job_state_log` 의 `옛_hold` 가 true 였던 줄만
+ * 보류함으로 되돌립니다. */
+if (process.argv.includes('--보류함되살리기')) {
+  const 되살릴것 = 글만(`select distinct l.job_id from job_state_log l
+    where l."누가" like '사고 고침 2026-10-28%' and l."옛_hold" order by 1;`)
+    .split('\n').filter(Boolean);
+  if (!되살릴것.length) { console.log('되살릴 줄이 없습니다'); process.exit(0); }
+  const 목록 = 되살릴것.map((x) => "'" + x + "'").join(',');
+  console.log('되살릴 줄 — ' + 되살릴것.length + '건');
+  if (!진짜) {
+    console.log(psql(머리 + `select p.id, p.source, p.hold, p.hidden, p.hidden_why,
+        left(coalesce(p."보여줄제목", p.title), 44) as 제목
+      from job_posts p where p.id in (${목록}) order by p.id;`));
+    console.log('[마른] 안 되살렸습니다 — --보류함되살리기 --진짜');
+    process.exit(0);
+  }
+  console.log(psql(머리 + `
+    select set_config('app.누가', '사고 고침 되돌리기 2026-10-28 (보류함으로)', true);
+    update job_posts set hidden = false, hidden_why = null, hidden_on = null, hold = true
+     where id in (${목록});`));
+  console.log('── 후 ──');
+  console.log(psql(머리 + `select count(*) as "되살린 줄",
+      count(*) filter (where hold) as "보류함",
+      count(*) filter (where hidden) as "아직 숨김(0 이어야)"
+    from job_posts where id in (${목록});`));
+  console.log('회원 화면 — ' + 글만('select count(*) from job_posts_pub;') + '건');
+  process.exit(0);
+}
 
 /* ── --살펴보기 — 오늘 이 도구가 **무엇을 바꿨나** (job_state_log 로) ── */
 if (process.argv.includes('--살펴보기')) {
