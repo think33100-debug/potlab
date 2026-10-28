@@ -98,3 +98,16 @@ console.log(psql(머리 + `
     from job_posts p where p.source like 'HS4%' group by 1 order by 2 desc;`));
 
 console.log('\n★ 아무것도 바꾸지 않았습니다 (읽기만).');
+
+/* ★ ⑤ 「사각지대 ∩ 채용 게시판 있음」 21곳 — HS4 가 갈 자리의 전수 목록 */
+console.log('\n══ ⑤ HS4 가 갈 21곳 (사각지대이고 채용 게시판 주소를 압니다) ══');
+console.log(psql(머리 + `
+  with 구멍 as (select * from "일층병원_구멍"()),
+  이름 as materialized (select "견줄이름"(g."기관") as k, g."기관", g."갈래", g."상태",
+                               g."시도", g."시군구" from 구멍 g where g."상태" = '사각지대')
+  select n."기관", n."갈래", n."시도",
+         o."채용페이지",
+         coalesce(o."불변근거"->>'채용페이지','(근거 없음)') as 근거
+    from 이름 n join "기관" o on o."이름키" = n.k
+   where coalesce(o."채용페이지",'') <> ''
+   order by n."갈래", n."기관";`));
