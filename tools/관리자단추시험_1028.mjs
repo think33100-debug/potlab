@@ -91,17 +91,17 @@ for (const [무엇, 직군] of [['숨기기', null], ['보류함으로', null], 
 
 console.log('\n══ ③ 신고 처리 단추 ══');
 console.log(psql(머리 + 마스터되기 + `
-  select count(*) as "신고 줄", count(*) filter (where coalesce("처리상태",'') = '') as "처리 전"
+  select count(*) as "신고 줄", count(*) filter (where "처리한때" is null) as "처리 전"
     from reports;`));
 console.log(psql(머리 + 마스터되기 + `begin;
   update "마스터페르소나" set "지금역할" = '학생';
   select '학생' as 역할, is_admin() as "is_admin()";
-  select "admin_신고처리"((select r.id from reports r order by r.id limit 1), '처리끝', '단추 시험') as 창구가낸값;
+  select "admin_신고처리"((select r.id from reports r order by r.id limit 1), '단추 시험') as 창구가낸값;
   rollback;`));
 console.log(psql(머리 + 마스터되기 + `begin;
   update "마스터페르소나" set "지금역할" = '관리자';
   select '관리자' as 역할, is_admin() as "is_admin()";
-  select "admin_신고처리"((select r.id from reports r order by r.id limit 1), '처리끝', '단추 시험') as 창구가낸값;
+  select "admin_신고처리"((select r.id from reports r order by r.id limit 1), '단추 시험') as 창구가낸값;
   rollback;`));
 
 console.log('\n── 지금 역할이 그대로인지 (되돌림 안에서만 바꿨습니다) ──');
