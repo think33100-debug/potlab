@@ -193,11 +193,22 @@ async function 긁기지난것재기(cfg) {
        새_hidden 이 참인 줄이 있는 공고 (admin_decide 가 app.누가 를 '관리자' 로 둡니다) */
     const 숨긴기록 = await 모두받기(cfg.SUPABASE_URL + '/rest/v1/job_state_log?select=job_id&' + encodeURIComponent('새_hidden') + '=is.true&' + encodeURIComponent('누가') + '=like.*관리자*', H, { 차례: 'id' });
     const 사람이숨긴것 = new Set(숨긴기록.map((r) => r.job_id));
+    /* ★ 2026-10-28 세중님 2번 — 「보조원」 꼴이 회원 화면에 있나.
+       판정 자는 `tools/보조원_1028.mjs` 의 `보조원인가()` **한 자리**입니다 (지침 6절).
+       ★ 세중님은 「직군의심() 자에 보조를 넣어 메일에 걸리게(도구라 바로)」라 하셨는데,
+         `직군의심()` 은 **DB 함수**입니다 (sql/기준구조_1025.sql:12463). 그래서 함수 전문은
+         승인대기에 올리고, **메일 줄은 도구로** 먼저 답니다 — 보이는 자리가 생기는 것이
+         세중님이 원하신 것이라 봅니다 */
+    const { 보조원인가 } = await import('./보조원_1028.mjs');
+    const 제목들 = await 모두받기(cfg.SUPABASE_URL + '/rest/v1/job_posts?select=id,title,job_group&job_group=not.is.null', H, { 차례: 'id' });
+    const 보조꼴 = 제목들.filter((r) => (r.job_group || '') !== '' && 보조원인가(r.title).됨);
     const 오늘 = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
     const 지난날 = new Date(Date.parse(오늘 + 'T00:00:00Z') - 30 * 86400e3).toISOString().slice(0, 10);
     const 셈 = { 긁기: 0, 마감없음: 0, 서른일지남: 0,
       사람이숨긴것: 사람이숨긴것.size,
-      다시보임: [...사람이숨긴것].filter((id) => 보임.has(id)).length };
+      다시보임: [...사람이숨긴것].filter((id) => 보임.has(id)).length,
+      보조꼴: 보조꼴.length,
+      보조꼴보임: 보조꼴.filter((r) => 보임.has(r.id)).length };
     for (const p of 긁기) {
       if (!보임.has(p.id)) continue;
       셈.긁기 += 1;
@@ -1056,6 +1067,10 @@ if (조용한척 || (!d['보낼것있나'] && !잠금.length && !(보안 && 보�
       '     └ 사람이 숨긴 것 다시 보임 ' + g.다시보임 + '건'
         + (g.다시보임 === 0 ? '  ✓' : '  ← 0 이어야 합니다')
         + '   (사람이 숨긴 공고 ' + g.사람이숨긴것 + '건 가운데)',
+      /* ★ 2026-10-28 세중님 2번 — 「보조원」은 우리 직군이 아닙니다 */
+      '     └ 「보조원」 꼴이 회원 화면에 ' + g.보조꼴보임 + '건'
+        + (g.보조꼴보임 === 0 ? '  ✓' : '  ← 0 이어야 합니다')
+        + '   (직군이 붙은 보조 꼴 ' + g.보조꼴 + '건 가운데)',
     ] : [];
   }
   교육줄들 = await 지난교육줄(cfg);
@@ -1108,6 +1123,10 @@ catch (e) { console.error('보류함에서 풀린 것을 못 셌습니다 — ' 
       '     └ 사람이 숨긴 것 다시 보임 ' + g.다시보임 + '건'
         + (g.다시보임 === 0 ? '  ✓' : '  ← 0 이어야 합니다')
         + '   (사람이 숨긴 공고 ' + g.사람이숨긴것 + '건 가운데)',
+      /* ★ 2026-10-28 세중님 2번 — 「보조원」은 우리 직군이 아닙니다 */
+      '     └ 「보조원」 꼴이 회원 화면에 ' + g.보조꼴보임 + '건'
+        + (g.보조꼴보임 === 0 ? '  ✓' : '  ← 0 이어야 합니다')
+        + '   (직군이 붙은 보조 꼴 ' + g.보조꼴 + '건 가운데)',
     ] : [];
   }
 if (!교육줄들.length) 교육줄들 = await 지난교육줄(cfg);
