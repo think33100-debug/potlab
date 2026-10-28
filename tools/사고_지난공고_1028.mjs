@@ -28,6 +28,8 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const 뿌리 = path.join(import.meta.dirname, '..');
+const 찾을말 = (() => { const i = process.argv.indexOf('--기관');
+  return i < 0 ? "'%포항세명%'" : "'%" + String(process.argv[i+1]||'').replace(/'/g,"''") + "%'"; })();
 const 쪽안열기 = process.argv.includes('--쪽안열기');
 const cfg = {};
 for (const f of ['.env', '.env.local']) {
@@ -77,8 +79,8 @@ console.log('══ ⓐ 세중님이 보신 두 건 ══');
 const 두건 = 글만(`
   select p.id, p.source, coalesce(p.url,'') from job_posts p
    join job_posts_pub v on v.id = p.id
-   where (p.org_name like '%포항세명%' or p.org_name like '%청주성모%')
-     and coalesce(p.job_group,'') like '%작업치료%'
+   where (p.org_name like 찾을말)
+     
    order by p.org_name;`).split('\n').filter(Boolean).map((l) => l.split('\t'));
 console.log(psql(머리 + `
   select p.id, p.source, p.org_name,
@@ -96,8 +98,8 @@ console.log(psql(머리 + `
          ${빈칸수SQL} as "빈 칸(다섯 중)",
          left(p."보여줄제목", 44) as 보여줄제목
     from job_posts p join job_posts_pub v on v.id = p.id
-   where (p.org_name like '%포항세명%' or p.org_name like '%청주성모%')
-     and coalesce(p.job_group,'') like '%작업치료%'
+   where (p.org_name like 찾을말)
+     
    order by p.org_name;`));
 console.log('── 원문 제목·주소 · detail·뽑은값 열쇠 ──');
 console.log(psql(머리 + `
@@ -106,8 +108,8 @@ console.log(psql(머리 + `
          coalesce((select string_agg(k, ',' order by k) from jsonb_object_keys(coalesce(p."뽑은값",'{}'::jsonb)) k), '(없음)') as 뽑은값열쇠,
          coalesce(p.url,'(없음)') as 원문주소
     from job_posts p join job_posts_pub v on v.id = p.id
-   where (p.org_name like '%포항세명%' or p.org_name like '%청주성모%')
-     and coalesce(p.job_group,'') like '%작업치료%'
+   where (p.org_name like 찾을말)
+     
    order by p.org_name;`));
 console.log('── 상태가 바뀐 기록 (job_state_log) ──');
 console.log(psql(머리 + `
@@ -115,8 +117,8 @@ console.log(psql(머리 + `
          l."옛_hidden", l."새_hidden", l."옛_hold", l."새_hold"
     from job_state_log l
    where l.job_id in (select p.id from job_posts p
-                        where (p.org_name like '%포항세명%' or p.org_name like '%청주성모%')
-                          and coalesce(p.job_group,'') like '%작업치료%')
+                        where (p.org_name like 찾을말)
+                          )
    order by l."바뀐때" desc limit 10;`));
 
 if (!쪽안열기) {

@@ -4,7 +4,7 @@
    멀쩡한 공고에 「마감」 띠가 붙거나, 끝난 공고를 계속 지원하러 보냅니다. */
 import assert from 'node:assert/strict';
 import { isClosed, todayKst, nowTimeKst, 마감배지, 시각말, 금액있나, 연봉말, 내규말, 조교연구말,
-  돈꼴, 기관이름말, 지원링크, 자사채용주소, 근무처이름, 보여줄기관이름 } from './job-state.ts';
+  돈꼴, 기관이름말, 지원링크, 자사채용주소, 근무처이름, 보여줄기관이름, 긁기공고인가 } from './job-state.ts';
 
 /* ① 마감일이 빈 공고는 마감이 아닙니다.
       인수인계 원칙 — 「마감일이 비어 있으면 잘못 읽은 것」입니다.
@@ -258,19 +258,54 @@ console.log('표시 통일 통과 — 연봉 꼴 · 법인 표기 · 지원 링�
   assert.equal(보여줄기관이름('주식회사 분당시니어', '[구포] 물리치료사'), '분당시니어');
   assert.equal(보여줄기관이름('의료법인안동병원'), '안동병원');
 
-  /* E — 새 차례 ① 채용 게시판 ② 기관 홈페이지 ③ 원문 */
+  /* E — 차례 ⓪ 그 공고 글 → ① 채용 게시판 → ② 기관 홈페이지
+     ★ 2026-10-28 저녁에 ⓪ 가 맨 앞으로 왔습니다 (고창종합병원 사고 · 위 ⑮) */
   const 게 = 'https://hosp.or.kr/recruit/view?no=3';
   const 홈 = 'https://hosp.or.kr';
   const 원 = 'https://work24.go.kr/x';
-  assert.equal(지원링크(원, null, 홈, 게).갈래, '채용게시판');
-  assert.equal(지원링크(원, null, 홈, 게).주소, 게);
-  assert.equal(지원링크(원, null, 홈, null).갈래, '기관홈');
+  assert.equal(지원링크(원, null, 홈, 게).갈래, '원문');       /* 전에는 채용게시판 */
+  assert.equal(지원링크(원, null, 홈, 게).주소, 원);
+  assert.equal(지원링크(원, null, 홈, null).갈래, '원문');
   assert.equal(지원링크(원, null, null, null).갈래, '원문');
   assert.equal(지원링크(null, null, null, null).갈래, '없음');
-  /* 자사채용사이트(URL) 도 ① 로 봅니다 */
-  assert.equal(지원링크(원, '자사채용사이트(https://a.or.kr/r)', 홈, null).갈래, '채용게시판');
+  /* 원문이 없을 때 — ① 채용 게시판 → ② 기관 홈 차례는 그대로입니다 */
+  assert.equal(지원링크(null, null, 홈, 게).갈래, '채용게시판');
+  assert.equal(지원링크(null, null, 홈, null).갈래, '기관홈');
+  /* 자사채용사이트(URL) 도 ① 로 봅니다 (원문이 없을 때) */
+  assert.equal(지원링크(null, '자사채용사이트(https://a.or.kr/r)', 홈, null).갈래, '채용게시판');
   /* 주소 꼴이 아니면 안 씁니다 */
   assert.equal(지원링크(원, null, '홈페이지 참조', null).갈래, '원문');
 }
 
+/* ⑮ 2026-10-28 세중님 2번 — **긁기 공고는 그 공고 글이 맨 앞** */
+{
+  const 게 = 'https://gochang.or.kr/bbs/board.php?bo_table=recruit';   /* 게시판 첫 쪽 */
+  const 홈 = 'https://gochang.or.kr';
+  const 글 = 'https://gochang.or.kr/bbs/board.php?bo_table=recruit&wr_id=812';
+  /* 긁기(HS…) — ⓪ 글 주소가 이깁니다 (게시판 첫 쪽으로 보내면 공고를 못 찾습니다) */
+  assert.equal(지원링크(글, null, 홈, 게, 'HS1234567').갈래, '원문');
+  assert.equal(지원링크(글, null, 홈, 게, 'HS1234567').주소, 글);
+  assert.equal(지원링크(글, null, 홈, 게, 'HS4-227-100725').주소, 글);
+  assert.equal(지원링크(글, null, 홈, 게, 'HS3-x').주소, 글);
+  /* 긁기인데 글 주소가 없으면 전 차례대로 (① → ② → ③) */
+  assert.equal(지원링크(null, null, 홈, 게, 'HS1234567').갈래, '채용게시판');
+  assert.equal(지원링크(null, null, 홈, null, 'HS1234567').갈래, '기관홈');
+  /* ★ 워크넷·알리오도 **그 공고 글**이 맨 앞입니다 — 고창종합병원이 워크넷이었고
+     까닭이 같았습니다 (기관 표 홈페이지가 병원 첫 쪽 main.php) */
+  assert.equal(지원링크(글, null, 홈, 게, 'WNK180322610010004').주소, 글);
+  assert.equal(지원링크(글, null, 홈, 게, '306248').주소, 글);
+  assert.equal(지원링크(글, null, 홈, 게, 'GJ306101').주소, 글);
+  /* 고창 꼴 — 채용게시판 없음 · 기관홈이 병원 첫 쪽 · 원문은 워크넷 그 공고 */
+  const 고창홈 = 'http://www.gchospital.net/main.php';
+  const 고창원문 = 'https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K1613';
+  assert.equal(지원링크(고창원문, null, 고창홈, null, 'WNK161332610120006').주소, 고창원문);
+  /* 원문이 없으면 ① → ② 로 내려갑니다 (비회원은 창구가 url 을 안 줍니다) */
+  assert.equal(지원링크(null, null, 고창홈, null, 'WNK161332610120006').갈래, '기관홈');
+  assert.equal(지원링크(글, null, 홈, 게).주소, 글);
+  assert.equal(긁기공고인가('HS490653413'), true);
+  assert.equal(긁기공고인가('WNK1'), false);
+  assert.equal(긁기공고인가(null), false);
+}
+
 console.log('A·C·E 통과 — 근무처 이름 · 한자·기호 떼기 · 지원 링크 차례');
+console.log('긁기 공고 지원 링크 통과 — ⓪ 그 공고 글이 맨 앞 (세중님 2번)');
