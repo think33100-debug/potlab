@@ -214,3 +214,54 @@ const 후acl = 글만(`select coalesce(p.proacl::text,'(기본값)') from pg_pro
 console.log('후 ACL — job_one ' + 후acl + (후acl === 전acl ? '  (전과 같습니다)' : '  ⚠ 전과 다릅니다'));
 console.log('\n══ 후 — 갈래 ══');
 console.log(psql(머리 + 회원되기 + 갈래SQL));
+
+console.log('\n══ 후 — job_one 이 내리는 열쇠 (회원) ══');
+console.log(psql(머리 + 회원되기 + `
+  with x as (select jsonb_object_keys((job_one(j.id)).detail) as k from job_posts_pub j)
+  select k as 열쇠, count(*) as 공고 from x group by 1 order by 2 desc;`));
+
+console.log('── 비회원은 그대로인가 (url 은 null · 열쇠는 셋뿐) ──');
+console.log(psql(머리 + `
+  with x as (select (job_one(j.id)).url as u, (job_one(j.id)).detail as d from job_posts_pub j)
+  select count(*) as 공고, count(u) as "url 준 것(0 이어야)",
+         count(*) filter (where d ? '채용게시판') as "채용게시판(0 이어야)",
+         count(*) filter (where d ? '기관주소')  as "기관주소(0 이어야)",
+         count(*) filter (where d ? '기관전화')  as "기관전화(0 이어야)"
+    from x;`));
+
+/* ── 표본 — 회원 갈래에서 **단추가 실제로 가는 주소**를 열어 봅니다 ── */
+const 표본수 = (() => { const i = process.argv.indexOf('--표본');
+  return i < 0 ? 10 : Math.max(0, Number(process.argv[i + 1] || 10)); })();
+if (표본수) {
+  const 뽑기 = psql(머리 + 회원되기 + `
+    with x as (
+      select j.id, j.org_name, (job_one(j.id)).detail as d, (job_one(j.id)).url as u
+        from job_posts_pub j
+    )
+    select id || E'\\t' || org_name || E'\\t'
+        || coalesce(nullif(d->>'채용게시판',''), nullif(d->>'기관홈',''),
+                    nullif(d->>'기관홈페이지',''), u, '(없음)') || E'\\t'
+        || case when coalesce(d->>'채용게시판','') <> '' then '①'
+                when coalesce(d->>'기관홈','') <> '' or coalesce(d->>'기관홈페이지','') <> '' then '②'
+                else '③' end
+      from x where coalesce(d->>'채용게시판','') <> ''
+     order by random() limit ${표본수};`, ['-X', '-A', '-t', '-q']);
+  const 줄들 = 뽑기.split('\n').map((l) => l.split('\t')).filter((a) => a.length === 4);
+  console.log('\n══ 표본 ' + 줄들.length + '건 — **회원 갈래**에서 단추가 가는 주소를 엽니다 ══');
+  let 이백 = 0;
+  for (const [id, 기관, 주소, 갈래] of 줄들) {
+    let 코드 = '-', 제목 = '';
+    try {
+      /* ★ 헤더 값은 latin-1 입니다 — 한글을 넣으면 fetch 가 죽습니다 (지침 12) */
+      const r = await fetch(주소, { redirect: 'follow', signal: AbortSignal.timeout(15000),
+        headers: { 'user-agent': 'Mozilla/5.0 (potjob-check)' } });
+      코드 = String(r.status);
+      제목 = ((await r.text()).match(/<title[^>]*>([\s\S]{0,120}?)<\/title>/i)?.[1] || '')
+        .replace(/\s+/g, ' ').trim();
+      if (r.status === 200) 이백 += 1;
+    } catch (e) { 코드 = '✗ ' + String(e.message || e).slice(0, 40); }
+    console.log([갈래, 코드.padEnd(6), id.padEnd(20), 기관.slice(0, 20).padEnd(22),
+      주소.slice(0, 60), 제목.slice(0, 42)].join(' '));
+  }
+  console.log('\n200 — ' + 이백 + '/' + 줄들.length);
+}
