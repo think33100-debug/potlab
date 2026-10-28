@@ -80,6 +80,23 @@ const 못읽음조건 = `
     and (select count(*) from "공고첨부" a where a."공고id" = p.id) = 0
     and ${빈칸수SQL} >= 3`;
 
+/* ── --지금셈 — 회원 화면이 몇이고 오늘 고친 셋이 어디 있나 ── */
+if (process.argv.includes('--지금셈')) {
+  console.log(psql(머리 + `select count(*) as "회원 화면" from job_posts_pub;`));
+  console.log(psql(머리 + `select p.id, p.source, p.hidden, p.hold, coalesce(p.hidden_why,'') as 까닭,
+      exists (select 1 from job_posts_pub v where v.id = p.id) as 회원화면,
+      left(coalesce(p."보여줄제목", p.title), 40) as 제목
+    from job_posts p where p.id in ('HS1830232787','HS490653413','HS1004062063',
+      'HS1264216454','HS1428827340','HS1607287002') order by p.id;`));
+  console.log('── 오늘 숨김이 풀린 줄 (job_state_log) ──');
+  console.log(psql(머리 + `select l.job_id, l."누가", l."바뀐때" at time zone 'Asia/Seoul' as 때,
+      l."옛_hidden", l."새_hidden", l."옛_hold", l."새_hold"
+    from job_state_log l
+   where l."바뀐때" > now() - interval '3 hours' and l."옛_hidden" and not l."새_hidden"
+   order by l."바뀐때" desc limit 20;`));
+  process.exit(0);
+}
+
 /* ── --보류함되살리기 — 2026-10-28 에 **잘못 숨긴 보류함 공고**를 되돌립니다 ──
  * 위 「이 첫 줄이 없어서」 사고로 보류함 공고 14건이 숨겨졌습니다 (전부 우리 직군이
  * 아닌 공고 — 재무팀·조리사·방사선사·홍보팀 …). 보류함은 **관리자 검사 줄**이라
