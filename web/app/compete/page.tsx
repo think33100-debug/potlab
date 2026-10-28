@@ -176,13 +176,21 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
     );
   }
 
-  const { data, error } = await sb.rpc('경쟁률찾기목록', {
+  /* ★ 2026-10-28 세중님 ⓑ — **둘을 함께 띄웁니다.**
+     전에는 목록을 받고 **그 뒤에** 한 묶음을 받았습니다. 그런데 한 묶음은
+     목록 값을 **안 봅니다** — 주소의 `묶음` 하나만 봅니다. 그래서 왕복 둘이
+     차례로 가며 시간이 더해졌습니다 (docs/속도진단_1028.md ⓑ).
+     ★ 먼저 **띄우고** 나중에 기다립니다 — `await` 를 미루는 것이 묶는 것입니다 */
+  const 목록약속 = sb.rpc('경쟁률찾기목록', {
     p_직군: sp.job && sp.job !== '전체' ? sp.job : null,
     p_지역: sp.sido || null,
     p_기관: sp.org || null,
     p_찾기: sp.q || null,
     p_쪽: 쪽,
   });
+  const 한묶음약속 = 고른묶음 ? sb.rpc('경쟁률한묶음', { p_묶음키: 고른묶음 }) : null;
+
+  const { data, error } = await 목록약속;
 
   if (error) {
     return (
@@ -201,8 +209,9 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
   /* ── 한 묶음 보기 ─────────────────────────────────────────── */
   let 한것: 한묶음 | null = null;
   let 숫자탈: string | null = null;
-  if (고른묶음) {
-    const r = await sb.rpc('경쟁률한묶음', { p_묶음키: 고른묶음 });
+  if (고른묶음 && 한묶음약속) {
+    /* 위에서 이미 띄워 둔 것을 **여기서 기다립니다** — 목록과 겹쳐 돌았습니다 */
+    const r = await 한묶음약속;
     if (r.error) 숫자탈 = r.error.message;
     else 한것 = r.data as 한묶음;
   }
