@@ -83,16 +83,26 @@ const 바꾸기SQL = 전정의.split(옛몸통).join(새몸통).trimEnd() + ';';
 
 /* 자기점검 — 역할마다 어떻게 나오나 (되돌림 안에서 역할을 바꿔 봅니다) */
 const 역할들 = ['관리자', '학생', '작업치료사', '물리치료사', '채용담당자', '교육담당자', '비회원'];
+/* ★ psql 에는 `auth.uid()` 가 없습니다 — 그러면 마스터인가()·is_admin() 이 둘 다 거짓이라
+   **역할을 무엇으로 두든 f** 가 나옵니다 (2026-10-28 에 그렇게 나왔습니다).
+   그래서 **마스터 계정의 열쇠를 세워** 봅니다. 값은 **안 찍습니다** (지침 8-11) */
+const 마스터되기 = String.raw`\o /dev/null
+select set_config('request.jwt.claims',
+  json_build_object('sub', m.auth_id, 'role', 'authenticated')::text, false)
+  from "마스터페르소나" m limit 1;
+\o
+`;
 const 점검SQL = 역할들.map((r) => `
   update "마스터페르소나" set "지금역할" = '${r}';
-  select '${r}' as 역할, "시험자료볼까"() as 시험자료볼까,
+  select '${r}' as 역할, "시험자료볼까"() as 시험자료볼까, is_admin() as "is_admin()",
+         "마스터인가"() as "마스터인가()",
          (select count(*) from job_posts_pub v join job_posts p on p.id = v.id
            where p.org_name like '%마스터%') as "회원 화면에 보이는 마스터 시험 공고";`).join('\n');
 
 console.log('\n══ 전 — 역할마다 (되돌림 안 · 역할을 바꿔 봅니다) ══');
-console.log(psql(머리 + `begin;\n${점검SQL}\nrollback;`));
+console.log(psql(머리 + 마스터되기 + `begin;\n${점검SQL}\nrollback;`));
 console.log('\n══ 마른 실행 — 바꾼 뒤 역할마다 (되돌림 안) ══');
-console.log(psql(머리 + `begin;\n${바꾸기SQL}\n${점검SQL}\nrollback;`));
+console.log(psql(머리 + 마스터되기 + `begin;\n${바꾸기SQL}\n${점검SQL}\nrollback;`));
 
 if (!진짜) {
   console.log('\n[마른] 아무것도 안 바꿨습니다 (rollback) — --진짜 로 바꿉니다');
@@ -116,9 +126,9 @@ const 후acl = 글만(`select coalesce(p.proacl::text,'(기본값)') from pg_pro
  where n.nspname = 'public' and p.proname = '시험자료볼까';`);
 console.log('후 ACL — ' + 후acl + (후acl === 전acl ? '  (전과 같습니다)' : '  ⚠ 전과 다릅니다'));
 console.log('\n══ 후 — 지금 역할과 셈 ══');
-console.log(psql(머리 + `
+console.log(psql(머리 + 마스터되기 + `
   select m."지금역할", "시험자료볼까"() as 시험자료볼까 from "마스터페르소나" m;`));
 console.log('── 역할마다 (되돌림 안에서 바꿔 보고 되돌립니다) ──');
-console.log(psql(머리 + `begin;\n${점검SQL}\nrollback;`));
+console.log(psql(머리 + 마스터되기 + `begin;\n${점검SQL}\nrollback;`));
 console.log('\n── 지금 역할이 그대로인지 ──');
 console.log(psql(머리 + `select m."지금역할" from "마스터페르소나" m;`));
