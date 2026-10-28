@@ -111,10 +111,10 @@ console.log(psql(머리 + `
    order by p.org_name;`));
 console.log('── 상태가 바뀐 기록 (job_state_log) ──');
 console.log(psql(머리 + `
-  select l."공고id", l."누가", l."바뀐때" at time zone 'Asia/Seoul' as 바뀐때,
+  select l.job_id, l."누가", l."왜", l."바뀐때" at time zone 'Asia/Seoul' as 바뀐때,
          l."옛_hidden", l."새_hidden", l."옛_hold", l."새_hold"
     from job_state_log l
-   where l."공고id" in (select p.id from job_posts p
+   where l.job_id in (select p.id from job_posts p
                         where (p.org_name like '%포항세명%' or p.org_name like '%청주성모%')
                           and coalesce(p.job_group,'') like '%작업치료%')
    order by l."바뀐때" desc limit 10;`));
