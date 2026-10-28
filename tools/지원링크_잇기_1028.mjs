@@ -165,6 +165,37 @@ console.log(psql(머리 + 이은것 + `
          count(*) filter (where 사이트표_채용주소 is not null) as "채용주소있음"
     from 차례 group by 1 order by 2 desc;`));
 
+/* ★ ⑥ job_one 이 실제로 내리는 ① 과 위 셈을 **맞대어** 봅니다 (2026-10-28)
+     마른 실행은 ① 19 라고 했고 job_one 실행 뒤 셈은 ① 18 입니다. 어느 줄이 다른지
+     찍습니다 — 숫자가 다르면 자가 틀린 것입니다 (지침 10-5) */
+console.log('\n══ ⑥ 마른 셈 ↔ job_one 이 내리는 것 (다른 줄만) ══');
+console.log(psql(`\o /dev/null
+select set_config('request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}', false);
+\o
+\pset pager off
+` + 이은것 + `,
+  둘 as (
+    select c.id, c.org_name,
+           (c.갈래 like '①%') as "마른이_①",
+           (coalesce((job_one(c.id)).detail->>'채용게시판','') <> '') as "job_one_①",
+           c.기관표_채용페이지 is not null as "기관표",
+           c.사이트표_채용주소 is not null as "사이트표",
+           c."연결상태"
+      from 차례 c
+  )
+  select * from 둘 where "마른이_①" is distinct from "job_one_①";`));
+console.log('── 둘의 셈 ──');
+console.log(psql(`\o /dev/null
+select set_config('request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}', false);
+\o
+\pset pager off
+` + 이은것 + `
+  select count(*) filter (where 갈래 like '①%') as "마른 셈 ①",
+         count(*) filter (where coalesce((job_one(id)).detail->>'채용게시판','') <> '') as "job_one ①"
+    from 차례;`));
+
 if (!표본수) {
   console.log('\n★ 아무것도 바꾸지 않았습니다 (읽기만). --표본 20 으로 주소를 열어 봅니다.');
   process.exit(0);
@@ -200,34 +231,3 @@ for (const [id, 기관, , 주소] of 줄들) {
 }
 console.log('\n200 — ' + 이백 + '/' + 줄들.length + ' · 쪽에 기관 이름이 보인 것 — ' + 이름보임 + '/' + 줄들.length);
 console.log('★ 아무것도 바꾸지 않았습니다 (읽기만).');
-
-/* ★ ⑥ job_one 이 실제로 내리는 ① 과 위 셈을 **맞대어** 봅니다 (2026-10-28)
-     마른 실행은 ① 19 라고 했고 job_one 실행 뒤 셈은 ① 18 입니다. 어느 줄이 다른지
-     찍습니다 — 숫자가 다르면 자가 틀린 것입니다 (지침 10-5) */
-console.log('\n══ ⑥ 마른 셈 ↔ job_one 이 내리는 것 (다른 줄만) ══');
-console.log(psql(`\o /dev/null
-select set_config('request.jwt.claims',
-  '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}', false);
-\o
-\pset pager off
-` + 이은것 + `,
-  둘 as (
-    select c.id, c.org_name,
-           (c.갈래 like '①%') as "마른이_①",
-           (coalesce((job_one(c.id)).detail->>'채용게시판','') <> '') as "job_one_①",
-           c.기관표_채용페이지 is not null as "기관표",
-           c.사이트표_채용주소 is not null as "사이트표",
-           c."연결상태"
-      from 차례 c
-  )
-  select * from 둘 where "마른이_①" is distinct from "job_one_①";`));
-console.log('── 둘의 셈 ──');
-console.log(psql(`\o /dev/null
-select set_config('request.jwt.claims',
-  '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}', false);
-\o
-\pset pager off
-` + 이은것 + `
-  select count(*) filter (where 갈래 like '①%') as "마른 셈 ①",
-         count(*) filter (where coalesce((job_one(id)).detail->>'채용게시판','') <> '') as "job_one ①"
-    from 차례;`));
