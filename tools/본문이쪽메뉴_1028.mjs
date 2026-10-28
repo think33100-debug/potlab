@@ -125,9 +125,9 @@ if (걸린것.length) {
     select p.id, p.apply_to as 마감, p.headcount as 인원,
            coalesce(p.work_place,'(없음)') as 근무지,
            coalesce(p.detail->>'연봉', p."뽑은값"->>'예상연봉', '(없음)') as 연봉,
-           coalesce(p."뽑은값"->>'지원자격", p.detail->>'지원자격', '(없음)') as 지원자격
+           coalesce(p."뽑은값"->>'지원자격', p.detail->>'지원자격', '(없음)') as 지원자격
       from job_posts p where p.id in (${걸린것.map((x) => "'" + x.id + "'").join(',')})
-     order by p.id;`).replace(/"지원자격"/g, "'지원자격'"));
+     order by p.id;`));
 }
 
 if (!진짜) {
