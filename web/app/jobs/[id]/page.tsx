@@ -21,7 +21,7 @@ import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
 import { isClosed, todayKst, 금액있나, 기관이름말, 마감배지, 시각말, 연봉말, 조교연구말,
-  지원링크, 지원방법말 } from '@/lib/job-state';
+  보여줄기관이름, 지원링크, 지원방법말 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { MembersOnly } from '@/components/members-only';
@@ -175,7 +175,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   /* ★ 2026-10-28 세중님 2번 — 「지원하러 가기」가 갈 자리와 「지원 방법」 줄.
      차례는 lib/job-state.ts 한 자리에서 정합니다 (지침 6절) */
   const 지원 = 지원링크(j.url, detail['접수방법'] as string | undefined,
-    detail['기관홈'] as string | undefined);
+    (detail['기관홈'] ?? detail['기관홈페이지']) as string | undefined,
+    detail['채용게시판'] as string | undefined);
   const 지원방법 = 지원방법말(detail['접수방법'] as string | undefined);
   const 지원자격: string | null =
     (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
@@ -317,7 +318,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                 (2026-10-07 확정 방침). 전에는 work_place 를 그대로 써서
                 순천병원이 「전남광주」로 나왔습니다 */}
             <p className="mt-3 break-keep text-[16px] text-[#4A5056]">
-              {기관이름말(j.org_name)}
+              {보여줄기관이름(j.org_name, 기관원문)}
               {j.지역보임 && <span className="text-[#5F666C]"> · {j.지역보임}</span>}
             </p>
 
@@ -652,6 +653,15 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               {/* ★ 2026-10-28 세중님 2번 ④ — 갈 주소가 아무것도 없으면 단추를 숨기고
                   이 줄이 「공고문 확인」을 맡습니다. 회원에게만 적습니다 —
                   비회원은 창구가 주소를 안 줘서 「없음」인 것이라 사실이 아닙니다 */}
+              {/* ★ 2026-10-28 세중님 E — 「원문 보기」 작은 줄은 **항상** 그립니다.
+                  단추가 ①채용 게시판·②기관 홈페이지로 갈 수 있으니, 공고 원문으로 가는
+                  길이 따로 늘 있어야 합니다 (비회원은 창구가 주소를 안 줘서 안 그려집니다) */}
+              {j.url && (
+                <a href={j.url} target="_blank" rel="noopener noreferrer"
+                   className="break-keep underline decoration-[#C9CCCF] underline-offset-2">
+                  원문 보기
+                </a>
+              )}
               {member && !지원.주소 && (
                 <span className="break-keep font-medium text-[#4A5056]">· 공고문 확인</span>
               )}

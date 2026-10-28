@@ -4,7 +4,7 @@
    멀쩡한 공고에 「마감」 띠가 붙거나, 끝난 공고를 계속 지원하러 보냅니다. */
 import assert from 'node:assert/strict';
 import { isClosed, todayKst, nowTimeKst, 마감배지, 시각말, 금액있나, 연봉말, 내규말, 조교연구말,
-  돈꼴, 기관이름말, 지원링크, 자사채용주소 } from './job-state.ts';
+  돈꼴, 기관이름말, 지원링크, 자사채용주소, 근무처이름, 보여줄기관이름 } from './job-state.ts';
 
 /* ① 마감일이 빈 공고는 마감이 아닙니다.
       인수인계 원칙 — 「마감일이 비어 있으면 잘못 읽은 것」입니다.
@@ -208,17 +208,69 @@ console.log('마감 판단 통과 — 10가지 (조교·연구 배지 포함)');
   assert.equal(기관이름말(null), '');
 }
 
-/* ⑬ 「지원하러 가기」 차례 (2026-10-28 세중님 2번) */
+/* ⑬ 「지원하러 가기」 차례 — **2026-10-28 11:20 에 바뀌었습니다**
+      전: 공고 → 자사 → 기관홈   후: **채용 게시판 → 기관 홈페이지 → 원문** (세중님 E)
+      아래 ⑭ 에서 새 차례를 봅니다. 여기는 **자사채용사이트 주소 집기**만 남깁니다 */
 {
-  const 자사 = '자사채용사이트(https://recruit.example.or.kr/view?no=3)';
-  assert.equal(지원링크('https://work24.go.kr/x', 자사, 'https://h.or.kr').갈래, '공고');
-  assert.equal(지원링크(null, 자사, 'https://h.or.kr').갈래, '자사');
-  assert.equal(지원링크(null, 자사, 'https://h.or.kr').주소, 'https://recruit.example.or.kr/view?no=3');
-  assert.equal(지원링크(null, '이메일, 방문', 'https://h.or.kr').갈래, '기관홈');
-  assert.equal(지원링크(null, '이메일, 방문', null).갈래, '없음');
-  assert.equal(지원링크(null, null, null).주소, null);
+  assert.equal(자사채용주소('자사채용사이트(https://recruit.example.or.kr/view?no=3)'),
+    'https://recruit.example.or.kr/view?no=3');
+  assert.equal(자사채용주소('이메일, 방문'), null);
   /* 주소 꼴이 아니면 안 씁니다 */
   assert.equal(자사채용주소('자사채용사이트(홈페이지 참조)'), null);
 }
 
 console.log('표시 통일 통과 — 연봉 꼴 · 법인 표기 · 지원 링크 차례');
+
+/* ⑭ A·C·E — 근무처 이름 · 한자·기호 떼기 · 지원 링크 새 차례 (2026-10-28 세중님) */
+{
+  /* C — 괄호 속 한자·㈜·기호 */
+  assert.equal(기관이름말('삼성(杉晟)센텀정형외과의원'), '삼성센텀정형외과의원');
+  assert.equal(기관이름말('계양효(孝)요양원'), '계양효요양원');
+  assert.equal(기관이름말('㈜케어플러스'), '케어플러스');
+  assert.equal(기관이름말('★서울재활병원★'), '서울재활병원');
+  assert.equal(기관이름말('【공공】서울의료원'), '공공 서울의료원');  /* 기호만 뗍니다 */
+  /* 떼서 두 글자 이하면 원문 유지 */
+  assert.equal(기관이름말('㈜이지'), '㈜이지');
+  /* 전에 넣은 규칙은 그대로 */
+  assert.equal(기관이름말('의료법인 인당의료재단 부민병원'), '인당의료재단 부민병원');
+
+  /* A — 근무처 이름 (원문 제목 앞머리) */
+  assert.equal(근무처이름('[행복한요양원 분당점]-물리치료사 추가 채용', '주식회사 분당시니어'),
+    '행복한요양원 분당점');
+  assert.equal(근무처이름('[우림요양원] 물리치료사 채용 공고', '주식회사 우림홀딩스'), '우림요양원');
+  assert.equal(근무처이름('[본점3관] 작업치료사 채용', '주식회사 삼성케어'), '본점3관');
+  /* 지역·부서·법인·조건·직군은 안 씁니다 */
+  assert.equal(근무처이름('[구포] 행정부 재활치료실 작업치료사', '의료법인 인당의료재단 부민병원'), null);
+  assert.equal(근무처이름('[건진팀] 부속의원지원파트 물리치료사 채용 공고', '삼성창원병원'), null);
+  assert.equal(근무처이름('[주4.5일] 용인 수지 연세탑튼튼의원 물치팀 채용', '연세탑튼튼의원'), null);
+  assert.equal(근무처이름('[물리치료사] 바른아동발달연구소에서', '바른아동발달연구소'), null);
+  assert.equal(근무처이름('[ 온라인 ] 재활의학과 작업치료사 모집', '분당제생병원'), null);
+  /* 법인명에 이미 있으면 안 씁니다 */
+  assert.equal(근무처이름('[계양효요양원] 작업치료사 구인', '계양효(孝)요양원'), null);
+  assert.equal(근무처이름('[차오름요양원] 물리치료사', '차오름요양원'), null);
+  /* 앞머리가 없으면 null */
+  assert.equal(근무처이름('물리치료사 함께일하실분을 모십니다', '동화의원'), null);
+  assert.equal(근무처이름(null, '어떤기관'), null);
+
+  /* 보여줄기관이름 — 근무처가 있으면 그것, 없으면 법인 표기 뗀 이름 */
+  assert.equal(보여줄기관이름('주식회사 분당시니어', '[행복한요양원 분당점]-물리치료사'),
+    '행복한요양원 분당점');
+  assert.equal(보여줄기관이름('주식회사 분당시니어', '[구포] 물리치료사'), '분당시니어');
+  assert.equal(보여줄기관이름('의료법인안동병원'), '안동병원');
+
+  /* E — 새 차례 ① 채용 게시판 ② 기관 홈페이지 ③ 원문 */
+  const 게 = 'https://hosp.or.kr/recruit/view?no=3';
+  const 홈 = 'https://hosp.or.kr';
+  const 원 = 'https://work24.go.kr/x';
+  assert.equal(지원링크(원, null, 홈, 게).갈래, '채용게시판');
+  assert.equal(지원링크(원, null, 홈, 게).주소, 게);
+  assert.equal(지원링크(원, null, 홈, null).갈래, '기관홈');
+  assert.equal(지원링크(원, null, null, null).갈래, '원문');
+  assert.equal(지원링크(null, null, null, null).갈래, '없음');
+  /* 자사채용사이트(URL) 도 ① 로 봅니다 */
+  assert.equal(지원링크(원, '자사채용사이트(https://a.or.kr/r)', 홈, null).갈래, '채용게시판');
+  /* 주소 꼴이 아니면 안 씁니다 */
+  assert.equal(지원링크(원, null, '홈페이지 참조', null).갈래, '원문');
+}
+
+console.log('A·C·E 통과 — 근무처 이름 · 한자·기호 떼기 · 지원 링크 차례');
