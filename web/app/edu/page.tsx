@@ -3,6 +3,8 @@ import Link from 'next/link';
 
 import { ListFilters } from '@/components/list-filters';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
+import { 교육지났나 } from '@/lib/edu-state';
+import { todayKst } from '@/lib/job-state';
 
 /* 교육·학술 (2026-10-03).
 
@@ -142,7 +144,14 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
     ...보일탭.map((t) => sb.rpc('교육셈', { p_직군: 고른직군, p_출처: t.출처, p_지난것: 지난것 })),
   ]);
 
-  const rows = (목록.data ?? []) as unknown as 줄[];
+  /* ★ 2026-10-28 세중님 1번 — **지난 교육을 내립니다.**
+     교육 113건 가운데 끝 날짜가 있는 것이 3건뿐이라, 창구의 `끝 is null` 울타리에
+     105건이 걸려 영영 목록에 남았습니다. 규칙은 lib/edu-state.ts 한 자리입니다 —
+     끝 → 시작 → **담은 날 +30일**, 셋 다 모르면 안 내립니다.
+     ⚠ 창구(교육목록)는 **그대로**입니다 — 여기서 걸러서 **한 쪽의 건수가 들쭉날쭉**
+       할 수 있습니다. 창구까지 고치는 안은 docs/승인대기_1025.md 에 올려 뒀습니다 */
+  const 받은것 = (목록.data ?? []) as unknown as 줄[];
+  const rows = 지난것 ? 받은것 : 받은것.filter((v) => !교육지났나(v, todayKst()));
   const 셈 = Object.fromEntries(보일탭.map((t, i) => [t.key, (셈들[i]?.data as number | null) ?? 0]));
 
   const 링크칸 = 링크만.filter((x) => !고른직군 || x.직군 === 고른직군);
