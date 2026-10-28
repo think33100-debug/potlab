@@ -74,8 +74,9 @@ console.log('전 ACL — ' + 전acl);
 /* ── 누가 이 함수를 부르나 (다른 함수 안에서 부르면 drop 이 막힙니다) ── */
 console.log('── job_one 을 부르는 다른 함수 ──');
 console.log(psql(머리 + `
+  /* prokind 'f' 만 — 모둠 함수(array_agg 꼴)에 pg_get_functiondef 를 걸면 죽습니다 */
   select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-   where n.nspname = 'public' and p.proname <> 'job_one'
+   where n.nspname = 'public' and p.proname <> 'job_one' and p.prokind = 'f'
      and pg_get_functiondef(p.oid) ~ 'job_one\\s*\\(' order by 1;`));
 
 /* ── 바꿀 자리 둘 — 반환 꼴과 select 목록 ── */
