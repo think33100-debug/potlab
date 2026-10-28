@@ -1,5 +1,8 @@
 'use client';
 
+import { 미리받기 } from '@/lib/routes';
+import { 가는중 } from '@/components/가는중';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/auth';
@@ -49,6 +52,8 @@ export function TabBar() {
           <li key={t.href} className="flex-1">
             <Link
               href={t.href}
+              /* ★ 2026-10-29 세중님 — 공고·커뮤니티는 **데이터까지** 미리 받습니다 */
+              prefetch={미리받기(t.href)}
               aria-current={on(t.href) ? 'page' : undefined}
               /* ★ 2026-10-03 — 어두운 구역에 dark: 짝을 달았습니다.
                  커뮤니티(어두운 바탕)에서 눌린 탭이 teal-strong(oklch 0.378 ·
@@ -70,6 +75,7 @@ export function TabBar() {
               <span className="text-sm leading-normal font-medium tracking-normal whitespace-nowrap">
                 {t.label}
               </span>
+              <가는중 />
             </Link>
           </li>
         ))}
@@ -100,6 +106,7 @@ export function TopNav() {
           }
         >
           {t.label}
+          <가는중 />
         </Link>
       ))}
     </nav>
