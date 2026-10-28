@@ -8,7 +8,7 @@ import {
   Anonymous, FinalCta, HowTo, JobSection, Joined, PaySection, Together,
 } from '@/components/home/sections';
 import { getHome, metricLine } from '@/lib/home';
-import { safeHref } from '@/lib/routes';
+import { safeHref, 미리받기 } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +48,7 @@ export default async function Home() {
                     <li key={c.id}>
                       <Link
                         href={safeHref(c.href)}
+                        prefetch={미리받기(c.href)}
                         className="flex flex-col items-center gap-2 rounded-sm px-1 py-5 text-center hover:bg-card"
                       >
                         {/* 이름이 비었거나 오타면 기본 아이콘으로 떨어집니다 */}
@@ -91,6 +92,7 @@ export default async function Home() {
                   <li key={x.href}>
                     <Link
                       href={safeHref(x.href)}
+                      prefetch={미리받기(x.href)}
                       className="flex h-full items-center gap-3 rounded-sm border border-line
                                  bg-card px-5 py-5 hover:bg-paper"
                     >
@@ -120,6 +122,7 @@ export default async function Home() {
                   <Link
                     key={b.id}
                     href={safeHref(b.href)}
+                    prefetch={미리받기(b.href)}
                     className="flex min-h-[200px] w-full flex-col justify-between rounded-sm
                                border border-line bg-card p-7 hover:bg-paper"
                   >

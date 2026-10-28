@@ -1,21 +1,26 @@
-/* 목록 화면의 **뼈대** — 누르는 순간 이것이 먼저 뜹니다 (2026-10-28 세중님 ⓐ)
+/* 화면이 뜨기 **직전**의 모습 — **비상용**입니다 (2026-10-29 세중님 2번)
  *
- * ── 왜 이것이 느림을 고치나 ──────────────────────────────────
- * 느린 여섯(/jobs·/community·/orgs·/edu·/youth·/compete)은 `dynamic = 'force-dynamic'`
- * 입니다. 그러면 Next 가 **미리 받아 둘 것이 없어서**, 누른 뒤에야 서버 왕복을
- * 시작합니다 — 그동안 화면이 **안 바뀝니다** (세중님이 느낀 2초).
- * `loading.tsx` 를 두면 ㉠ 누르는 순간 이 뼈대가 뜨고 ㉡ Next 가 그 **뼈대만 미리
- * 받아 둘 수 있습니다**. 빠른 둘(/pay·/spec)은 **정적(○)** 이라 이미 그 값을 받고 있습니다
- * (docs/속도진단_1028.md).
+ * ── 어제와 무엇이 다른가 ────────────────────────────────────
+ * 어제는 **회색 뼈대 칸**을 그렸습니다. 세중님이 「회색 뼈대 싫음」이라 하셨습니다 —
+ * 맞습니다. 뼈대가 보이면 **화면이 두 번 바뀝니다**(뼈대 → 목록). 「딱 넘어가는」
+ * 느낌이 아닙니다.
  *
- * ── 뼈대를 어떻게 그리나 ────────────────────────────────────
- *   · 글자를 쓰지 않습니다 — 「불러오는 중…」 같은 말은 **화면이 두 번 바뀌어** 더 산만합니다
- *   · 참 화면과 **같은 테두리·같은 폭**을 씁니다 (max-w-3xl · px-6 py-7) — 안 맞으면 뜰 때 덜컹합니다
- *   · `animate-pulse` 하나만 씁니다. 돌아가는 바퀴는 안 씁니다 (0.3초면 끝나는 자리입니다)
- *   · 몇 줄을 그릴지는 `줄` 로 받습니다 — 화면마다 길이가 다릅니다
+ * ── 그래서 지금은 ───────────────────────────────────────────
+ *   · **흰 바탕**만 둡니다 (틀도 안 그립니다 — 그리면 그만큼 덜컹합니다)
+ *   · 맨 위에 **얇은 진행 막대** 하나 (2px · 브랜드색) — 「받고 있다」만 알립니다
+ *   · 글자 없음 · 회색 칸 없음
+ *
+ * ── 그리고 이것은 **거의 안 보여야** 맞습니다 ───────────────
+ * 여섯 메뉴는 `<Link prefetch={true}>` 로 **데이터까지 미리 받습니다**
+ * (web/lib/routes.ts · next.config.ts 의 staleTimes 30초).
+ * 미리 받아 둔 것이 있으면 Next 는 **이 화면을 안 거치고** 바로 목록을 그립니다.
+ * 이것이 보이는 때는 ㉠ 미리 받기가 아직 안 끝났거나 ㉡ 30초가 지나 버렸거나
+ * ㉢ 미리 받기를 안 거는 다른 길로 들어왔을 때입니다 — **비상용**입니다.
+ *
+ * ★ `loading.tsx` 를 **지우지 않는** 까닭 — 지우면 그 쪽은 미리 받기 기본값에서
+ *   「받아 둘 뼈대」가 없어지고, 느린 길로 들어왔을 때 **아무 표시도 없이** 멈춥니다.
  */
-export function 목록뼈대({ 줄 = 6, 제목 = true, 폭 = 'max-w-3xl' }:
-  { 줄?: number; 제목?: boolean; 폭?: string }) {
+export function 목록뼈대({ 폭 = 'max-w-3xl' }: { 줄?: number; 제목?: boolean; 폭?: string }) {
   return (
     <main
       className={`mx-auto w-full ${폭} px-6 py-7 pb-[88px] md:px-7 md:pb-7`}
@@ -24,16 +29,12 @@ export function 목록뼈대({ 줄 = 6, 제목 = true, 폭 = 'max-w-3xl' }:
     >
       {/* 눈에는 안 보이고 읽어 주는 기계에만 들립니다 */}
       <span className="sr-only">불러오는 중</span>
-      <div className="animate-pulse">
-        {제목 && <div className="h-7 w-40 rounded-sm bg-line" />}
-        <div className="mt-5 space-y-3">
-          {Array.from({ length: 줄 }).map((_, i) => (
-            <div key={i} className="rounded-sm border border-line bg-card px-5 py-5">
-              <div className="h-4 w-3/4 rounded-sm bg-line" />
-              <div className="mt-3 h-3 w-1/2 rounded-sm bg-line" />
-            </div>
-          ))}
-        </div>
+      {/* 맨 위 얇은 막대 — 화면 맨 위에 붙입니다 (틀 바깥) */}
+      <div
+        className="fixed inset-x-0 top-0 z-[70] h-[2px] overflow-hidden bg-transparent"
+        role="presentation"
+      >
+        <div className="h-full w-1/3 animate-진행 bg-ink/70" />
       </div>
     </main>
   );

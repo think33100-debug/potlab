@@ -1,8 +1,9 @@
-/* 누르는 순간 뜨는 뼈대입니다 (2026-10-28 세중님 ⓐ · docs/속도진단_1028.md).
-   이 쪽은 force-dynamic 이라 loading.tsx 가 없으면 **미리 받아 둘 것이 없습니다** —
-   그러면 누른 뒤 서버 왕복이 끝날 때까지 화면이 안 바뀝니다 */
+/* 화면이 뜨기 직전 — **비상용**입니다 (2026-10-29 세중님 2번).
+   여섯 메뉴는 <Link prefetch={true}> 로 **데이터까지** 미리 받으므로
+   (web/lib/routes.ts · staleTimes 30초) 이 화면은 **거의 안 보입니다**.
+   보이는 때는 미리 받기가 안 끝났거나 30초가 지났을 때입니다 */
 import { 목록뼈대 } from '@/components/목록뼈대';
 
 export default function Loading() {
-  return <목록뼈대 줄={7} 폭="max-w-3xl" />;
+  return <목록뼈대 폭="max-w-3xl" />;
 }
