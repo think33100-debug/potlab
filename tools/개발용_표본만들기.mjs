@@ -59,7 +59,7 @@ const 넣을글 = psql(`
   select string_agg(
     'insert into job_posts(id, source, org_name, title, url, job_group, employ_type, '
     || 'headcount, apply_from, apply_to, apply_to_time, sido, sgg, work_place, '
-    || '"기관번호", "연결상태", "뽑은값", detail, hold, hidden, first_seen_at) values ('
+    || '"기관번호", "연결상태", "뽑은값", detail, hold, hidden, first_seen) values ('
     || quote_literal(id) || ', ' || quote_literal(source) || ', ' || quote_nullable(org_name) || ', '
     || quote_nullable(title) || ', ' || quote_nullable(url) || ', ' || quote_nullable(job_group) || ', '
     || quote_nullable(employ_type) || ', ' || coalesce(headcount::text, 'null') || ', '
@@ -70,7 +70,7 @@ const 넣을글 = psql(`
     || quote_literal(coalesce("뽑은값", '{}'::jsonb) - '근거') || '::jsonb, '
     || quote_literal(coalesce(detail, '{}'::jsonb) - '근거') || '::jsonb, '
     || hold::text || ', ' || hidden::text || ', '
-    || quote_nullable(first_seen_at::text) || '::timestamptz);', E'\\n')
+    || quote_nullable(first_seen::text) || '::timestamptz);', E'\\n')
     from 고른것;`);
 const 글수 = psql(`
   with 뽑기 as (
