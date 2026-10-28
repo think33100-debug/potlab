@@ -396,10 +396,10 @@ async function 지난교육줄(cfg) {
   if (!k) return [];
   try {
     const { 모두받기 } = await import('./쪽나눠받기.mjs');
-    const 칸 = ['번호', '시작', '끝', '올린날'].map(encodeURIComponent).join(',');
+    const 칸 = ['번호', '시작', '끝', '올린날'].join(',');
     const 줄 = await 모두받기(cfg.SUPABASE_URL + '/rest/v1/' + encodeURIComponent('교육')
       + '?select=' + 칸, { apikey: k, Authorization: 'Bearer ' + k },
-      { 차례: encodeURIComponent('번호') });
+      { 차례: '번호' });   /* 차례붙이기() 가 알아서 encode 합니다 */
     const 오늘 = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
     const 지난것 = 줄.filter((e) => 교육지났나(e, 오늘));
     const 갈래 = {};
