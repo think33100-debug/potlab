@@ -1,6 +1,7 @@
 'use client';
 
 import { 미리받기 } from '@/lib/routes';
+import { 가는중 } from '@/components/가는중';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -74,6 +75,7 @@ export function TabBar() {
               <span className="text-sm leading-normal font-medium tracking-normal whitespace-nowrap">
                 {t.label}
               </span>
+              <가는중 />
             </Link>
           </li>
         ))}
@@ -104,6 +106,7 @@ export function TopNav() {
           }
         >
           {t.label}
+          <가는중 />
         </Link>
       ))}
     </nav>

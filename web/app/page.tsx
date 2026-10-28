@@ -9,6 +9,7 @@ import {
 } from '@/components/home/sections';
 import { getHome, metricLine } from '@/lib/home';
 import { safeHref, 미리받기 } from '@/lib/routes';
+import { 가는중 } from '@/components/가는중';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,6 +55,7 @@ export default async function Home() {
                         {/* 이름이 비었거나 오타면 기본 아이콘으로 떨어집니다 */}
                         <Icon name={c.icon} size={24} className="text-ink" />
                         <span className="text-sm font-medium leading-tight text-body">{c.title}</span>
+                        <가는중 />
                       </Link>
                     </li>
                   ))}
@@ -101,6 +103,7 @@ export default async function Home() {
                         <span className="block text-body-lg font-bold text-ink">{x.title}</span>
                         <span className="block break-keep text-sm text-mute">{x.sub}</span>
                       </span>
+                      <가는중 />
                     </Link>
                   </li>
                 ))}
@@ -128,6 +131,7 @@ export default async function Home() {
                   >
                     <p className="break-keep text-h2 font-bold text-ink">{b.title}</p>
                     <p className="mt-5 break-keep text-body-lg text-body">{metricLine(b, metrics)}</p>
+                    <가는중 />
                   </Link>
                 ))}
               </Rail>
