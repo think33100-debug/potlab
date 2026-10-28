@@ -160,3 +160,25 @@ console.log(psql(머리 + `
 console.log(psql(머리 + `
   select count(*) as "보류함 전체", count(*) filter (where hold) as hold
     from job_posts where hold;`));
+
+/* ── --살펴보기 — 오늘 이 도구가 **무엇을 바꿨나** (job_state_log 로) ── */
+if (process.argv.includes('--살펴보기')) {
+  console.log('══ 오늘 이 도구가 바꾼 줄 (job_state_log) ══');
+  console.log(psql(머리 + `
+    select l."누가", count(*) as 줄,
+           count(*) filter (where l."옛_hold") as "전에 보류함이던 것",
+           count(*) filter (where not coalesce(l."옛_hold", false)) as "전에 보류함이 아닌 것",
+           count(*) filter (where l."새_hidden") as "숨김이 된 것"
+      from job_state_log l
+     where l."누가" like '사고 고침 2026-10-28%'
+     group by 1 order by 1;`));
+  console.log('── 전에 **보류함**이던 줄 (회원 화면이 아니었습니다 · 되살릴 자리) ──');
+  console.log(psql(머리 + `
+    select l.job_id, p.source, p.org_name, p.posted_at as 게시일, p.first_seen as 담은날,
+           l."옛_hold", l."새_hold", l."옛_hidden", l."새_hidden",
+           left(coalesce(p."보여줄제목", p.title), 40) as 제목
+      from job_state_log l join job_posts p on p.id = l.job_id
+     where l."누가" like '사고 고침 2026-10-28%' and l."옛_hold"
+     order by l.job_id;`));
+  process.exit(0);
+}
