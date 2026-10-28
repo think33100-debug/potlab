@@ -199,7 +199,7 @@ async function 긁기지난것재기(cfg) {
          `직군의심()` 은 **DB 함수**입니다 (sql/기준구조_1025.sql:12463). 그래서 함수 전문은
          승인대기에 올리고, **메일 줄은 도구로** 먼저 답니다 — 보이는 자리가 생기는 것이
          세중님이 원하신 것이라 봅니다 */
-    const { 보조원인가 } = await import('./보조원_1028.mjs');
+    const { 보조원인가 } = await import('./보조원규칙.mjs');
     const 제목들 = await 모두받기(cfg.SUPABASE_URL + '/rest/v1/job_posts?select=id,title,job_group&job_group=not.is.null', H, { 차례: 'id' });
     const 보조꼴 = 제목들.filter((r) => (r.job_group || '') !== '' && 보조원인가(r.title).됨);
     const 오늘 = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);

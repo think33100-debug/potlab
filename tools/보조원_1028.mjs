@@ -19,16 +19,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-/* ── 판정 자 ── */
-export const 보조말 = /물리\s*치료\s*보조|작업\s*치료\s*보조|치료\s*보조\s*원|보조\s*원|보조\s*인력/;
-export const 우리직군말 = /(물리|작업|도수)\s*치료\s*(사|직|선생)/;
-
-export function 보조원인가(제목) {
-  const t = String(제목 || '');
-  const 보조 = 보조말.test(t);
-  const 우리 = 우리직군말.test(t);
-  return { 됨: 보조 && !우리, 보조, 우리 };
-}
+/* ── 판정 자는 `보조원규칙.mjs` **한 자리**입니다 (곁효과 없는 모듈 · 지침 6-3) ── */
+import { 보조원인가, 보조말, 우리직군말 } from './보조원규칙.mjs';
+export { 보조원인가, 보조말, 우리직군말 };
 
 if (process.argv.includes('--자기점검')) {
   const 잼 = []; const 보 = (무엇, 참) => 잼.push([무엇, !!참]);
