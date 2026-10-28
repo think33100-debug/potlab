@@ -181,18 +181,20 @@ console.log(psql(회원되기 + 이은것 + `,
   둘 as (
     select c.id, c.org_name,
            (c.갈래 like '①%') as "마른이_①",
-           (coalesce((job_one(c.id)).detail->>'채용게시판','') <> '') as "job_one_①",
+           (coalesce(j.detail->>'채용게시판','') <> '') as "job_one_①",
            c.기관표_채용페이지 is not null as "기관표",
            c.사이트표_채용주소 is not null as "사이트표",
            c."연결상태"
       from 차례 c
+      /* ★ job_one 은 여러 줄 함수라 coalesce 안에서 못 부릅니다 — lateral 로 풉니다 */
+      left join lateral job_one(c.id) j on true
   )
   select * from 둘 where "마른이_①" is distinct from "job_one_①";`));
 console.log('── 둘의 셈 ──');
 console.log(psql(회원되기 + 이은것 + `
-  select count(*) filter (where 갈래 like '①%') as "마른 셈 ①",
-         count(*) filter (where coalesce((job_one(id)).detail->>'채용게시판','') <> '') as "job_one ①"
-    from 차례;`));
+  select count(*) filter (where c.갈래 like '①%') as "마른 셈 ①",
+         count(*) filter (where coalesce(j.detail->>'채용게시판','') <> '') as "job_one ①"
+    from 차례 c left join lateral job_one(c.id) j on true;`));
 
 if (!표본수) {
   console.log('\n★ 아무것도 바꾸지 않았습니다 (읽기만). --표본 20 으로 주소를 열어 봅니다.');
