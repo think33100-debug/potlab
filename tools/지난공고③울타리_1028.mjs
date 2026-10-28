@@ -145,6 +145,34 @@ console.log(psql(머리 + `begin;\nselect hide_stale_posts(7, 180) as 낸값;\n$
 console.log('── 새 정의로 7일 ──');
 console.log(psql(머리 + `begin;\n${바꾸기SQL}\nselect hide_stale_posts(7, 180) as 낸값;\n${센다(7)}\nrollback;`));
 
+/* ── ㉱ 에 맞는 증명 ────────────────────────────────────────
+ * ③ 갈래는 지금 0건이라 위 「7일」 증명으로는 안 보입니다. 그래서 **되돌림 안에서**
+ * 관리자가 숨긴 공고 하나의 까닭을 '마감 지남' 으로 바꾸고 마감을 앞날로 둔 뒤
+ * 함수를 돌립니다 — 옛 정의는 **올립니다**, 새 정의는 **안 올립니다**. */
+const 시험공고 = psql(`select p.id from job_posts p
+  where p.hidden and p.admin_locked order by p.hidden_on desc nulls last, p.id limit 1;`,
+  ['-X', '-A', '-t', '-q']).trim();
+if (시험공고) {
+  const 꾸미기 = `
+    update job_posts set hidden_why = '마감 지남',
+           apply_to = (now() at time zone 'Asia/Seoul')::date + 7
+     where id = '${시험공고}';`;
+  const 보기 = `
+    select '${시험공고}' as 공고, p.hidden, p.admin_locked, coalesce(p.hidden_why,'(없음)') as 까닭
+      from job_posts p where p.id = '${시험공고}';`;
+  console.log('\n══ ㉱ 증명 — 관리자가 숨긴 공고(' + 시험공고 + ')의 까닭을 「마감 지남」으로 ══');
+  console.log('── 옛 정의 ──');
+  console.log(psql(머리 + `begin;${꾸미기}
+    select hide_stale_posts(30, 180) -> '다시 보이게' as "다시 보이게";${보기}
+    rollback;`));
+  console.log('── 새 정의 ──');
+  console.log(psql(머리 + `begin;\n${바꾸기SQL}${꾸미기}
+    select hide_stale_posts(30, 180) -> '다시 보이게' as "다시 보이게";${보기}
+    rollback;`));
+} else {
+  console.log('\n(관리자가 숨긴 공고가 없어 ㉱ 증명을 건너뜁니다)');
+}
+
 if (!진짜) {
   console.log('\n[마른] 아무것도 안 바꿨습니다 (rollback) — --진짜 로 바꿉니다');
   process.exit(0);
