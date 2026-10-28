@@ -55,7 +55,7 @@ const 줄들 = JSON.parse(psql(회원되기 + `
     select p.id, p.source, p.org_name, p.title, j.url, j.detail
       from job_posts p join job_posts_pub v on v.id = p.id
       left join lateral job_one(p.id) j on true
-     where ${기관찾기 ? "p.org_name like '%" + 기관찾기.replace(/'/g, "''") + "%'" : "p.source like 'HS%'"}
+     where ${process.argv.includes("--전부") ? "true" : (기관찾기 ? "p.org_name like '%" + 기관찾기.replace(/'/g, "''") + "%'" : "p.source like 'HS%'")}
      order by p.id
   ) x;`));
 console.log('회원 화면 긁기 공고 ' + 줄들.length + '건 — 표본 ' + Math.min(몇개, 줄들.length) + '건을 엽니다\n');
