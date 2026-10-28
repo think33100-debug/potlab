@@ -110,6 +110,31 @@ console.log(psql(머리 + `
          count(*) filter (where coalesce("홈페이지",'') <> '') as "홈페이지있음"
     from "기관";`));
 
+/* ★ 재는 자를 먼저 의심합니다 (지침 10-5) — 아침 마른 실행은 「기관 표 홈페이지 0건」
+   이라고 적었는데 아래 갈래 셈은 19건을 냅니다. 둘 다 맞을 수 없으니 함께 찍습니다 */
+console.log('\n══ 대조 — 아침에 쓴 질의 ↔ 이어 본 셈 (둘이 다르면 자가 틀린 것입니다) ══');
+console.log(psql(머리 + `
+  select count(*) as "회원화면(join 뒤 줄 수)",
+         count(distinct p.id) as "공고 수",
+         count(*) filter (where o."홈페이지" is not null and o."홈페이지" <> '') as "기관표에_홈페이지",
+         count(*) filter (where o."채용페이지" is not null and o."채용페이지" <> '') as "기관표에_채용페이지",
+         count(*) filter (where p."기관번호" is null) as "기관번호_빈것",
+         count(*) filter (where o."기관번호" is null) as "기관표에_없는번호"
+    from job_posts p join job_posts_pub v on v.id = p.id
+    left join "기관" o on o."기관번호" = p."기관번호";`));
+console.log('── 사이트표가 한 공고에 여러 줄 붙나 (붙으면 갈래 셈이 부풀니다) ──');
+console.log(psql(머리 + `
+  select 'ykiho' as 열쇠, count(*) as "여러줄인_열쇠", coalesce(sum(n) - count(*), 0) as "늘어나는_줄"
+    from (select ykiho, count(*) as n from hosp_sites where ykiho is not null and not "끔"
+           group by 1 having count(*) > 1) x
+  union all
+  select '이름열쇠', count(*), coalesce(sum(n) - count(*), 0)
+    from (select "이름열쇠", count(*) as n from hosp_sites
+           where "이름열쇠" is not null and not "끔" group by 1 having count(*) > 1) y;`));
+console.log('── 갈래 셈의 줄 수 ↔ 공고 수 ──');
+console.log(psql(머리 + 이은것 + `
+  select count(*) as "갈래셈_줄수", count(distinct id) as "공고수" from 차례;`));
+
 console.log('\n══ 이어 보니 — 회원 화면 공고의 갈래 ══');
 console.log(psql(머리 + 이은것 + `
   select 갈래, count(*) as 공고 from 차례 group by 1 order by 1;`));
