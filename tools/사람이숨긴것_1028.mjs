@@ -79,11 +79,26 @@ console.log(psql(머리 + `
    order by k."바뀐때" limit 40;`));
 
 console.log('\n══ ④ 결과 안내문 거르기에 왜 안 걸렸나 ══');
-console.log(psql(머리 + `
-  select p.id, left(p.title, 60) as 원문제목,
-         "결과공고인가"(p.title) as "결과공고인가()",
-         left(coalesce(p."보여줄제목",''), 50) as 보여줄제목
-    from job_posts p where p.id = '${공고}';`));
+/* 거르기 규칙은 `tools/gas-rules.mjs` 의 `HS_SKIP_RE` **한 자리**입니다 (DB 함수가 아닙니다) */
+const { HS_SKIP_RE } = await import('./gas-rules.mjs');
+const 제목들 = 글만(`select coalesce(p.title,''), coalesce(p."보여줄제목",''),
+    coalesce(p.job_group,''), coalesce(p.employ_type,'')
+  from job_posts p where p.id = '${공고}';`).split('\t');
+const [원문제목, 보여줄제목, 직군, 고용형태] = 제목들;
+console.log('  원문 제목 (' + 원문제목.length + '자)');
+console.log('    ' + 원문제목);
+console.log('  보여줄 제목');
+console.log('    ' + 보여줄제목);
+console.log('  직군 ' + (직군 || '(빈칸)') + ' · 고용형태 ' + (고용형태 || '(빈칸)'));
+const 걸림 = (t) => { HS_SKIP_RE.lastIndex = 0; const m = HS_SKIP_RE.exec(t); return m ? m[0] : null; };
+console.log('  거르기(HS_SKIP_RE) — 원문 제목 전체 → '
+  + (걸림(원문제목) ? '★ 걸립니다 「' + 걸림(원문제목) + '」' : '안 걸립니다'));
+for (const n of [30, 60, 80]) {
+  console.log('    앞 ' + n + '자로 자르면 → '
+    + (걸림(원문제목.slice(0, n)) ? '걸립니다 「' + 걸림(원문제목.slice(0, n)) + '」' : '**안 걸립니다**'));
+}
+console.log('  보여줄 제목으로 대면 → '
+  + (걸림(보여줄제목) ? '걸립니다 「' + 걸림(보여줄제목) + '」' : '**안 걸립니다** (제목을 우리가 다시 지어서입니다)'));
 
 console.log('\n══ ⑤ 전수 — 10/23 뒤 **사람이 숨겼는데 지금 보이는** 공고 ══');
 /* 「사람이 숨겼다」의 자: job_state_log 에 누가='관리자' 이고 새_hidden 이 참인 줄이 있음.
