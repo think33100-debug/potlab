@@ -55,7 +55,10 @@ if (!목록열쇠.length) { console.log('\n걸린 공고가 없습니다 (목록
 for (const 열쇠 of 목록열쇠) {
   console.log('\n══ ' + 열쇠 + ' — ' + 의심[열쇠].length + '건 ══');
   for (const x of 의심[열쇠]) {
-    const id = typeof x === 'string' ? x : (x.id || x['공고id'] || x['공고']);
+    const id = typeof x === 'string' ? x
+      : (x.id || x['공고id'] || x['공고'] || x['번호']
+         || (String(x['주소'] || '').match(/wantedAuthNo=([A-Za-z0-9]+)/) ? 'WN' + String(x['주소']).match(/wantedAuthNo=([A-Za-z0-9]+)/)[1] : null));
+    if (!id) console.log('   (열쇠 전문) ' + JSON.stringify(x));
     if (!id) { console.log('  (공고 번호를 못 찾았습니다) ' + JSON.stringify(x).slice(0, 160)); continue; }
     console.log('\n── ' + id + ' ──');
     if (typeof x === 'object') {
