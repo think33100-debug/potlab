@@ -148,6 +148,23 @@ select '— 이번에 내려간 줄 (보류함은 0 이어야 합니다) —' as
 ${내려갈SQL}
 rollback;`));
 
+/* ── 증명 — 면제 해제가 **정말 듣나** ───────────────────────────
+ * 지금 숫자로는 함수가 내릴 것이 0건입니다 (낮에 손으로 셋을 내렸습니다).
+ * 그래서 **기준을 잠깐 7일로 낮춰** 옛 정의와 새 정의를 견줍니다 (지침 8-16 —
+ * 「기준을 잠깐 낮춰 정말 도는지 보고 원래대로」). 둘 다 **되돌림 안**입니다. */
+const 센다 = (몇일) => `
+  select count(*) filter (where p.source like 'HS%') as "긁기 내려감",
+         count(*) filter (where p.source not like 'HS%') as "그밖 내려감",
+         count(*) filter (where p.hold) as "보류함 건드림(0 이어야)"
+    from job_posts p
+   where p.hidden_on = (now() at time zone 'Asia/Seoul')::date
+     and p.hidden_why = ${몇일} || '일 지남';`;
+console.log('\n══ 증명 — 기준을 7일로 낮춰 옛 정의 ↔ 새 정의 (둘 다 되돌림 안) ══');
+console.log('── 옛 정의로 7일 ──');
+console.log(psql(머리 + `begin;\nselect hide_stale_posts(7, 180) as 낸값;\n${센다(7)}\nrollback;`));
+console.log('── 새 정의로 7일 ──');
+console.log(psql(머리 + `begin;\n${바꾸기SQL}\nselect hide_stale_posts(7, 180) as 낸값;\n${센다(7)}\nrollback;`));
+
 if (!진짜) {
   console.log('\n[마른] 아무것도 안 바꿨습니다 (rollback) — --진짜 로 바꿉니다');
   process.exit(0);
