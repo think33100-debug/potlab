@@ -69,7 +69,7 @@ console.log('\n══ ③ 사각지대와 겹쳐 보기 — HS4 가 **갈 수 �
 console.log(psql(머리 + `
   with 구멍 as (select * from "일층병원_구멍"()),
   이름 as materialized (
-    select "견줄이름"(g."기관") as k, g."상태", g."갈래" from 구멍
+    select "견줄이름"(g."기관") as k, g."상태", g."갈래" from 구멍 g
   ), 기관붙임 as (
     select n.k, n."상태", n."갈래",
            max(case when coalesce(o."채용페이지",'') <> '' then 1 else 0 end) as 게시판,
