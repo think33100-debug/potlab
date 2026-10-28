@@ -144,7 +144,7 @@ ${바꾸기SQL}
 select hide_stale_posts(30, 180) as "함수가 낸 값";
 select '— 그 뒤 회원 화면 —' as x;
 ${셈SQL}
-select '— 이번에 내려간 줄 (보류함은 0 이어야 합니다) —' as x;
+select '— 까닭이 「30일 지남」인 줄 **전부** (이번 바퀴 것만이 아닙니다) · 보류함 0 이어야 —' as x;
 ${내려갈SQL}
 rollback;`));
 
@@ -197,5 +197,5 @@ console.log('\n══ 실행 — 함수를 한 번 돌립니다 ══');
 console.log(psql(머리 + `select hide_stale_posts(30, 180) as "함수가 낸 값";`));
 console.log('── 후 · 회원 화면 ──');
 console.log(psql(머리 + 셈SQL));
-console.log('── 이번에 내려간 줄 ──');
+console.log('── 까닭이 「30일 지남」인 줄 전부 (이번 바퀴 것만이 아닙니다) ──');
 console.log(psql(머리 + 내려갈SQL));
