@@ -1192,6 +1192,58 @@ DB 함수를 고치는 도구들이 「되돌릴 본문」을 `/tmp` 에 남기�
 
 ---
 
+## 8-25. **밀기를 묶습니다** — Vercel 하루 배포 한도는 100 입니다 (2026-10-28)
+
+2026-10-28 20:34 에 **배포가 막혔습니다.** Vercel 이 GitHub 커밋 상태에 적은 글 —
+
+```
+state — failure
+글    — Deployment rate limited — retry in 24 hours.
+때    — 2026-10-28T11:34:38Z (= 20:34 KST)
+주소  — …?upgradeToPro=build-rate-limit
+```
+
+공식 숫자 (vercel.com/docs/limits · last_updated 2026-09-16) —
+
+```
+| Deployments Created per Day | Hobby **100** | Pro 6000 |
+#### Deployments per day (Hobby)
+You are able to deploy `100` times every `86400` seconds (1 day).
+```
+
+**까닭은 제 버릇입니다** — 그날 `main` 에 **133번** 밀었습니다. 커밋마다 한 번씩
+밀었고, Vercel 은 **무엇이 바뀌었든 밀 때마다 Production 배포를 만듭니다.**
+그래서 `web/` 를 건드린 커밋은 **여덟** 개뿐인데 배포는 133번 생겼습니다.
+
+### ★ `ignoreCommand` 로는 **한도가 안 줄어듭니다** (문서 확인)
+
+```
+vercel.com/docs/project-configuration/project-settings#ignored-build-step
+  "Canceled builds are counted as full deployments as they execute a build command
+   in the build step. This means that any canceled builds initiated using the ignore
+   build step will still count towards your deployment quotas"
+exit 0 → 빌드 중단(CANCELED) · exit 1 → 빌드 계속   ← 숫자가 거꾸로입니다. 조심
+```
+
+`git.deploymentEnabled` 는 **가지(branch) 단위**라 「`web/` 가 바뀐 커밋만」을 못 적습니다.
+**파일 경로로 배포 자체를 막는 설정은 없습니다.**
+
+### 지킬 것
+
+- **커밋은 자주, 밀기는 묶어서.** `docs/`·`tools/`·`sql/` 만 고친 커밋은 **모아 두었다가
+  한 번** 밉니다. 회원 화면(`web/`)을 고친 때만 그 자리에서 밉니다
+- 한 답장 안에서 **밀기는 한 번**을 목표로 합니다 (커밋은 여러 개여도 됩니다)
+- **빈 커밋을 밀어 배포를 다시 당기지 않습니다** — 한도를 더 깎습니다
+- 막혔으면 **24시간 기다립니다.** 그동안 회원 화면은 **마지막 성공한 배포**로 돕니다
+- 막혔는지 보는 법 — GitHub 커밋 상태에 Vercel 이 적습니다 (열쇠 없이 읽힙니다)
+
+```bash
+curl -s "https://api.github.com/repos/<주인>/<저장소>/commits/main/status"
+```
+
+- `web/vercel.json` 의 `ignoreCommand` 는 **빌드 시간과 큐**를 줄입니다 (Hobby 는
+  **동시 빌드 1개**라 줄이 막히면 다 늦어집니다). **한도는 안 줄입니다** — 위 인용 그대로
+
 ## 10-6. 보고의 숫자는 **도구 출력에서 그대로 복사**합니다 (2026-10-28 세중님 1번)
 
 **손으로 옮겨 적지 않습니다.** 도구가 찍은 줄을 그대로 붙입니다. 숫자가 바뀌었으면
