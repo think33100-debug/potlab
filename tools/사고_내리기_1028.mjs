@@ -88,6 +88,14 @@ if (process.argv.includes('--지금셈')) {
       left(coalesce(p."보여줄제목", p.title), 40) as 제목
     from job_posts p where p.id in ('HS1830232787','HS490653413','HS1004062063',
       'HS1264216454','HS1428827340','HS1607287002') order by p.id;`));
+  console.log('── 오늘 고친 여섯 줄의 상태 기록 (누가 바꿨나) ──');
+  console.log(psql(머리 + `select l.job_id, l."누가", l."바뀐때" at time zone 'Asia/Seoul' as 때,
+      l."옛_hold", l."새_hold", l."옛_hidden", l."새_hidden"
+    from job_state_log l
+   where l.job_id in ('HS1830232787','HS490653413','HS1004062063',
+         'HS1264216454','HS1428827340','HS1607287002')
+     and l."바뀐때" > now() - interval '6 hours'
+   order by l."바뀐때" desc, l.job_id limit 24;`));
   console.log('── 오늘 숨김이 풀린 줄 (job_state_log) ──');
   console.log(psql(머리 + `select l.job_id, l."누가", l."바뀐때" at time zone 'Asia/Seoul' as 때,
       l."옛_hidden", l."새_hidden", l."옛_hold", l."새_hold"
