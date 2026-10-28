@@ -4,7 +4,7 @@
    멀쩡한 공고에 「마감」 띠가 붙거나, 끝난 공고를 계속 지원하러 보냅니다. */
 import assert from 'node:assert/strict';
 import { isClosed, todayKst, nowTimeKst, 마감배지, 시각말, 금액있나, 연봉말, 내규말, 조교연구말,
-  돈꼴, 기관이름말, 지원링크, 자사채용주소, 근무처이름, 보여줄기관이름 } from './job-state.ts';
+  돈꼴, 기관이름말, 지원링크, 자사채용주소, 근무처이름, 보여줄기관이름, 긁기공고인가 } from './job-state.ts';
 
 /* ① 마감일이 빈 공고는 마감이 아닙니다.
       인수인계 원칙 — 「마감일이 비어 있으면 잘못 읽은 것」입니다.
@@ -273,4 +273,29 @@ console.log('표시 통일 통과 — 연봉 꼴 · 법인 표기 · 지원 링�
   assert.equal(지원링크(원, null, '홈페이지 참조', null).갈래, '원문');
 }
 
+/* ⑮ 2026-10-28 세중님 2번 — **긁기 공고는 그 공고 글이 맨 앞** */
+{
+  const 게 = 'https://gochang.or.kr/bbs/board.php?bo_table=recruit';   /* 게시판 첫 쪽 */
+  const 홈 = 'https://gochang.or.kr';
+  const 글 = 'https://gochang.or.kr/bbs/board.php?bo_table=recruit&wr_id=812';
+  /* 긁기(HS…) — ⓪ 글 주소가 이깁니다 (게시판 첫 쪽으로 보내면 공고를 못 찾습니다) */
+  assert.equal(지원링크(글, null, 홈, 게, 'HS1234567').갈래, '원문');
+  assert.equal(지원링크(글, null, 홈, 게, 'HS1234567').주소, 글);
+  assert.equal(지원링크(글, null, 홈, 게, 'HS4-227-100725').주소, 글);
+  assert.equal(지원링크(글, null, 홈, 게, 'HS3-x').주소, 글);
+  /* 긁기인데 글 주소가 없으면 전 차례대로 (① → ② → ③) */
+  assert.equal(지원링크(null, null, 홈, 게, 'HS1234567').갈래, '채용게시판');
+  assert.equal(지원링크(null, null, 홈, null, 'HS1234567').갈래, '기관홈');
+  /* 워크넷·알리오·나라일터는 **그대로** ① → ② → ③ */
+  assert.equal(지원링크(글, null, 홈, 게, 'WNK180322610010004').갈래, '채용게시판');
+  assert.equal(지원링크(글, null, 홈, 게, '306248').갈래, '채용게시판');
+  assert.equal(지원링크(글, null, 홈, 게, 'GJ306101').갈래, '채용게시판');
+  /* 공고 번호를 안 넘기면 전과 똑같이 돕니다 (부르는 곳을 다 못 고쳤을 때 안전하게) */
+  assert.equal(지원링크(글, null, 홈, 게).갈래, '채용게시판');
+  assert.equal(긁기공고인가('HS490653413'), true);
+  assert.equal(긁기공고인가('WNK1'), false);
+  assert.equal(긁기공고인가(null), false);
+}
+
 console.log('A·C·E 통과 — 근무처 이름 · 한자·기호 떼기 · 지원 링크 차례');
+console.log('긁기 공고 지원 링크 통과 — ⓪ 그 공고 글이 맨 앞 (세중님 2번)');

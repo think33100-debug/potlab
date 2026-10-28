@@ -366,16 +366,36 @@ export type 지원링크꼴 = { 주소: string | null; 갈래: '채용게시판'
  *   비어 있습니다. 그래서 **차례만 세워 둡니다** — 주소가 이어지는 대로 앞섭니다
  *   (주소를 잇는 것은 창구·수집기 자리라 동결 뒤입니다 · docs/표시규칙_1028.md E).
  */
+/** 긁기(HS·HS3·HS4)로 들어온 공고인가 — 공고 번호 앞머리로 봅니다.
+ *
+ * ★ 2026-10-28 세중님 2번 — 긁기 공고는 **원문 주소가 그 공고 글**입니다
+ *   (`?mode=read&idx=644` · `&wr_id=43` 꼴). 그런데 기관 표의 채용 게시판 주소는
+ *   **게시판 첫 쪽**이라, ①을 먼저 쓰면 회원이 **그 공고를 못 찾습니다**
+ *   (고창종합병원이 그랬습니다). 그래서 긁기 공고만 **글 주소를 맨 앞**에 둡니다.
+ * ★ 왜 번호 앞머리로 보나 — `job_one` 창구가 `source` 를 **안 내려줍니다.**
+ *   창구에 칸을 더하는 것은 승인 자리라, 지금은 우리가 매긴 번호 꼴로 봅니다
+ *   (긁기 HS…· 워크넷 WN…· 알리오·나라일터는 숫자/GJ…). 승인대기 ㉭ 에 적었습니다.
+ */
+export function 긁기공고인가(공고번호: string | null | undefined): boolean {
+  return /^HS/i.test(String(공고번호 || '').trim());
+}
+
 export function 지원링크(
   공고주소: string | null | undefined,
   접수방법: string | null | undefined,
   기관홈: string | null | undefined,
   채용게시판?: string | null,
+  공고번호?: string | null,
 ): 지원링크꼴 {
   const 주소꼴 = (v: string | null | undefined) => {
     const s = String(v || '').trim();
     return /^https?:\/\//.test(s) ? s : null;
   };
+  /* ⓪ 긁기 공고는 **그 공고 글**이 맨 앞입니다 (세중님 2번) */
+  if (긁기공고인가(공고번호)) {
+    const 글 = 주소꼴(공고주소);
+    if (글) return { 주소: 글, 갈래: '원문' };
+  }
   const 게시판 = 주소꼴(채용게시판) || 자사채용주소(접수방법);
   if (게시판) return { 주소: 게시판, 갈래: '채용게시판' };
   const h = 주소꼴(기관홈);

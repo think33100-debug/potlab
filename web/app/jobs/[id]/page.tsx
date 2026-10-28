@@ -174,9 +174,11 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const 연봉 = 연봉말(연봉원문);
   /* ★ 2026-10-28 세중님 2번 — 「지원하러 가기」가 갈 자리와 「지원 방법」 줄.
      차례는 lib/job-state.ts 한 자리에서 정합니다 (지침 6절) */
+  /* ★ 2026-10-28 세중님 2번 — 공고 번호를 함께 넘깁니다. 긁기 공고(HS…)는
+     게시판 첫 쪽이 아니라 **그 공고 글**로 가야 합니다 (고창종합병원) */
   const 지원 = 지원링크(j.url, detail['접수방법'] as string | undefined,
     (detail['기관홈'] ?? detail['기관홈페이지']) as string | undefined,
-    detail['채용게시판'] as string | undefined);
+    detail['채용게시판'] as string | undefined, j.id);
   const 지원방법 = 지원방법말(detail['접수방법'] as string | undefined);
   const 지원자격: string | null =
     (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
