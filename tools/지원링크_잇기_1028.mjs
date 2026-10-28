@@ -69,11 +69,19 @@ const 이은것 = `
                 when sn.name is not null then '이름열쇠' end   as 사이트표_어떻게
       from 공고 c
       left join "기관" o on o."기관번호" = c."기관번호"
-      left join hosp_sites sy
-             on c."기관번호" like 'HIRA:%'
-            and sy.ykiho = substr(c."기관번호", 6) and not sy."끔"
-      left join hosp_sites sn
-             on sn."이름열쇠" = coalesce(o."이름키", "견줄이름"(c.org_name)) and not sn."끔"
+      /* ★ 사이트표에 같은 열쇠가 여러 줄인 곳이 여덜 군데입니다 (ykiho 3 · 이름열쇠 5).
+         그냥 join 하면 공고 하나가 두 줄로 세어집니다 — **한 줄만** 고릅니다
+         (채용주소가 있는 쪽 → 홈이 있는 쪽 → 이름 차례) */
+      left join lateral (
+        select s.name, s."채용주소", s.url from hosp_sites s
+         where c."기관번호" like 'HIRA:%' and s.ykiho = substr(c."기관번호", 6) and not s."끔"
+         order by (nullif(s."채용주소",'') is null), (nullif(s.url,'') is null), s.name
+         limit 1) sy on true
+      left join lateral (
+        select s.name, s."채용주소", s.url from hosp_sites s
+         where s."이름열쇠" = coalesce(o."이름키", "견줄이름"(c.org_name)) and not s."끔"
+         order by (nullif(s."채용주소",'') is null), (nullif(s.url,'') is null), s.name
+         limit 1) sn on true
      where coalesce(c."연결상태",'') <> '대기'        /* ★ 의심은 뺍니다 */
   ), 차례 as (
     select i.*,
@@ -131,6 +139,13 @@ console.log(psql(머리 + `
   select '이름열쇠', count(*), coalesce(sum(n) - count(*), 0)
     from (select "이름열쇠", count(*) as n from hosp_sites
            where "이름열쇠" is not null and not "끔" group by 1 having count(*) > 1) y;`));
+console.log('── 기관 표 주소가 **언제** 담겼나 (아침 11:35 에 0 이던 것이 참인가) ──');
+console.log(psql(머리 + `
+  select ("고친때" at time zone 'Asia/Seoul')::date as 고친날,
+         count(*) filter (where coalesce("홈페이지",'') <> '') as 홈페이지,
+         count(*) filter (where coalesce("채용페이지",'') <> '') as 채용페이지
+    from "기관" where coalesce("홈페이지",'') <> '' or coalesce("채용페이지",'') <> ''
+   group by 1 order by 1 desc limit 8;`));
 console.log('── 갈래 셈의 줄 수 ↔ 공고 수 ──');
 console.log(psql(머리 + 이은것 + `
   select count(*) as "갈래셈_줄수", count(distinct id) as "공고수" from 차례;`));
