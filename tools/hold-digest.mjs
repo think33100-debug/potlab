@@ -183,9 +183,8 @@ async function 긁기지난것재기(cfg) {
     /* 쪽은 공용 함수로만 넘깁니다 (지침 8-20 ③) */
     const 보이는 = await 모두받기(cfg.SUPABASE_URL + '/rest/v1/job_posts_pub?select=id', H, { 차례: 'id' });
     const 보임 = new Set(보이는.map((r) => r.id));
-    const 긁기 = await 모두받기(cfg.SUPABASE_URL
-      + '/rest/v1/job_posts?select=id,source,apply_to,posted_at,first_seen,collected_at'
-      + '&source=like.HS*', H, { 차례: 'id' });
+    /* 한 줄로 둡니다 — 줄을 나누면 `쪽나눠받기_점검` 이 「차례 없는 조회」로 봅니다 */
+    const 긁기 = await 모두받기(cfg.SUPABASE_URL + '/rest/v1/job_posts?select=id,source,apply_to,posted_at,first_seen,collected_at&source=like.HS*', H, { 차례: 'id' });
     const 오늘 = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
     const 지난날 = new Date(Date.parse(오늘 + 'T00:00:00Z') - 30 * 86400e3).toISOString().slice(0, 10);
     const 셈 = { 긁기: 0, 마감없음: 0, 서른일지남: 0 };
