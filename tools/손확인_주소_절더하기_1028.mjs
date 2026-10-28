@@ -53,9 +53,9 @@ const 뽑기 = (상태, 게시판있나, 홈있나) => psql(`
            g."종류" as 종류, g."시도" as 시도, g."시군구" as 시군구
       from 구멍 g where g."상태" = '${상태}')
   select n.갈래, coalesce(n.종류,'') , n.기관, btrim(coalesce(n.시도,'') || ' ' || coalesce(n.시군구,'')),
-         coalesce(o."홈페이지",'')
+         max(coalesce(o."홈페이지",'')) as 홈
     from 이름 n left join "기관" o on o."이름키" = n.k
-   group by 1,2,3,4,5
+   group by 1,2,3,4
   having ${게시판있나 ? '' : 'not '}bool_or(coalesce(o."채용페이지",'') <> '')
      and ${홈있나 ? '' : 'not '}bool_or(coalesce(o."홈페이지",'') <> '')
    order by case n.갈래 when '상급종합' then 1 when '대학병원' then 2
@@ -135,7 +135,10 @@ ${robots막힘.map((n, i) => '| ' + (i + 1) + ' | ' + n + ' |  |  |').join('\n')
 \`\`\`
 `;
 
-if (!적기) { console.log('\n[마른] 문서에 안 붙였습니다 — --적기 로 붙입니다\n'); process.exit(0); }
+/* ★ 서버에서는 **문서를 적지 않습니다** — docs/ 도 저장소 파일이라 `git pull` 로만
+   갑니다 (지침 8-10). 그래서 `--내보내기` 로 글만 찍고, 붙이는 것은 손에서 합니다 */
+if (process.argv.includes('--내보내기')) { process.stdout.write(글); process.exit(0); }
+if (!적기) { console.log('\n[마른] 문서에 안 붙였습니다 — --내보내기 로 글을 받아 손에서 붙입니다\n'); process.exit(0); }
 const 자리 = path.join(뿌리, 'docs', '손확인_주소_1024.md');
 const 전 = fs.readFileSync(자리, 'utf8');
 if (전.includes('★ 2026-10-28 보탬 (세중님 3번)')) {
