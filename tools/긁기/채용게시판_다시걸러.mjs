@@ -173,6 +173,9 @@ if (argv.includes('--등록')) {
     j.만든때 = new Date().toISOString().slice(0, 19).replace('T', ' ');
     if (!argv.includes('--진짜')) {
       console.log('[마른] ' + 꼴 + '_곳들.json — 전 ' + 전 + ' → 후 ' + j.곳들.length + ' (더할 것 ' + 더함 + ')');
+      /* ★ 서버에서는 **적지 않습니다** — 설정도 저장소 파일이라 `git pull` 로만 갑니다
+         (지침 8-10). 그래서 더할 줄을 **찍어** 주고, 그것을 손으로 저장소에 넣습니다 */
+      for (const c of j.곳들.slice(전)) console.log('  더할줄 ' + 꼴 + ' ' + JSON.stringify(c));
       continue;
     }
     fs.writeFileSync(자리, JSON.stringify(j, null, 1) + '\n', 'utf8');
