@@ -48,6 +48,28 @@ export function 직군보기(제목) {
   return '직군 안 적힘';
 }
 
+/* ── 열린 공고인가 — 목록 줄의 **마감 뱃지**로 봅니다 (2026-10-29 살펴보기에서 확인) ──
+ * 원문에서 제목 다음에 이렇게 붙습니다 —
+ *   <a href=".../board1/4141">…제목…</a>
+ *   <span style="color:#369a4d …">**D-6**</span>
+ * 꼴은 셋입니다 — `D-N`(N일 남음) · `D-day` · 「채용 시 마감」.
+ * ★ `rival-ty.mjs` 를 **안 고칩니다** — 그 파일은 시간마다 도는 수집기
+ *   (`collect-rival.mjs`)가 씁니다. 10/30 동결 앞이라 수집기 길은 건드리지 않습니다.
+ *   그래서 상태만 **여기서** 집습니다 (읽기 전용).
+ */
+export function 상태집기(html, 번호) {
+  const h = String(html || '');
+  const i = h.indexOf('/board1/' + 번호);
+  if (i < 0) return { 열림: null, 글: '' };
+  const 뒤 = h.slice(i, i + 700);
+  const d = 뒤.match(/>\s*D-(\d+)\s*</);
+  if (d) return { 열림: true, 글: 'D-' + d[1], 남은날: Number(d[1]) };
+  if (/>\s*D-?day\s*</i.test(뒤)) return { 열림: true, 글: 'D-day', 남은날: 0 };
+  if (/채용\s*시\s*마감/.test(뒤)) return { 열림: true, 글: '채용 시 마감' };
+  if (/>\s*마감\s*</.test(뒤)) return { 열림: false, 글: '마감' };
+  return { 열림: null, 글: '(상태 글자를 못 찾았습니다)' };
+}
+
 /** 1층인가 — **땡큐오티 분류 글자**로만 봅니다 (우리 기준은 CLAUDE.md 1층 대상) */
 export const 일층분류 = ['대학병원', '공단·공공병원', '종합병원', '치매안심센터', '보건소', '공공기관'];
 export const 이층분류 = ['재활·요양병원', '의원', '복지관', '주간보호', '센터', '학교', '기타'];
@@ -70,6 +92,12 @@ if (argv.includes('--자기점검')) {
   보('공단·공공병원은 1층', 층보기('공단·공공병원') === '1층');
   보('재활·요양병원은 2층', 층보기('재활·요양병원') === '2층');
   보('모르는 분류는 모름', 층보기('') === '모름');
+  const 견본 = '<a href="https://www.thankyouot.com/board1/4141">제목</a>'
+    + '<span style="color:#369a4d !important;">D-6</span>';
+  보('D-N 을 집는다', 상태집기(견본, 4141).남은날 === 6 && 상태집기(견본, 4141).열림 === true);
+  보('채용 시 마감도 열림', 상태집기('<a href="/board1/9">제목</a><span>채용 시 마감</span>', 9).열림 === true);
+  보('마감은 닫힘', 상태집기('<a href="/board1/9">제목</a><span>마감</span>', 9).열림 === false);
+  보('못 찾으면 null', 상태집기('<a href="/board1/9">제목</a>', 9).열림 === null);
   const 어긴것 = 잼.filter(([, ok]) => !ok);
   for (const [무엇, ok] of 잼) console.log((ok ? '  ○ ' : '  ✗ ') + 무엇);
   if (어긴것.length) { console.error('✗ 자기점검 ' + 어긴것.length + '가지 실패'); process.exit(1); }
@@ -171,26 +199,64 @@ function psql(sql) {
 const 줄로 = (sql) => psql(sql).split('\n').filter(Boolean).map((l) => l.split('\t'));
 const 따옴 = (s) => String(s == null ? '' : s).replace(/'/g, "''");
 
-/* 땡큐오티 목록 — 쪽을 몇 장 받습니다 (1.5초 띄우고) */
+/* 땡큐오티 목록 — 쪽을 몇 장 받습니다 (1.5초 띄우고)
+   ★ 2026-10-29 살펴보기 — 문서에 적힌 `/bbs/board.php?…page=2` 는 **첫 쪽을 다시 줍니다**
+     (번호 4141~4138 그대로). 그래서 쪽 넘기기 꼴을 **셋** 시험해 보고, 새 글이 오는
+     것을 씁니다. 다 안 되면 **첫 쪽만** 보고 그렇게 적습니다 (짐작하지 않습니다) */
+export const 쪽주소후보 = (p) => [
+  목록주소 + '?page=' + p,
+  목록주소 + '/p/' + p,
+  목록주소.replace(/\/board1$/, '/bbs/board.php') + '?bo_table=board1&page=' + p,
+];
 const 저쪽 = [];
+const 쪽글 = new Map();         /* 번호 → 그 줄이 있던 쪽 html (상태를 집으려고) */
+let 쓰는꼴 = null;
+let 두드림 = 0;
 for (let p = 1; p <= 몇쪽; p++) {
-  const 주소 = p === 1 ? 목록주소
-    : 목록주소.replace(/\/board1$/, '/bbs/board.php')
-      + '?bo_table=board1&sst=wr_datetime&sod=desc&page=' + p;
-  const r = await 쪽받기(주소);
-  if (!r.됨) { console.log('  ✗ ' + p + '쪽 — HTTP ' + r.코드); break; }
-  const 줄 = 목록읽기(r.html);
-  const 새것 = 줄.filter((x) => !저쪽.some((y) => y.번호 === x.번호));
-  console.log('  ' + p + '쪽 — ' + 줄.length + '줄 (새 글 ' + 새것.length + ')');
+  const 후보 = p === 1 ? [목록주소] : (쓰는꼴 ? [쓰는꼴(p)] : 쪽주소후보(p));
+  let 새것 = []; let 쓴주소 = '';
+  for (const 주소 of 후보) {
+    if (두드림 >= 12) break;        /* 남의 서버 울타리 — 한 번에 12번까지 */
+    const r = await 쪽받기(주소); 두드림++;
+    if (!r.됨) { console.log('  ✗ ' + p + '쪽 — HTTP ' + r.코드 + ' · ' + 주소); continue; }
+    const 줄 = 목록읽기(r.html);
+    새것 = 줄.filter((x) => !저쪽.some((y) => y.번호 === x.번호));
+    console.log('  ' + p + '쪽 — ' + 줄.length + '줄 (새 글 ' + 새것.length + ') · ' + 주소);
+    if (새것.length) {
+      for (const x of 새것) 쪽글.set(x.번호, r.html);
+      쓴주소 = 주소;
+      break;
+    }
+  }
+  if (!새것.length) { console.log('  → 새 글이 없습니다. 여기서 멈춥니다'); break; }
   저쪽.push(...새것);
-  if (!새것.length) break;        /* 같은 쪽이 또 오면 멈춥니다 */
+  if (p === 2 && 쓴주소) {
+    /* 두 번째 쪽에서 먹힌 꼴을 뒤 쪽에도 씁니다 (같은 꼴을 세 번 시험하지 않게) */
+    const 꼴 = 쪽주소후보(2).findIndex((a) => a === 쓴주소);
+    if (꼴 >= 0) 쓰는꼴 = (n) => 쪽주소후보(n)[꼴];
+  }
 }
-console.log('땡큐오티 목록 — 모두 ' + 저쪽.length + '줄');
+console.log('땡큐오티 목록 — 모두 ' + 저쪽.length + '줄 (두드림 ' + 두드림 + '번)');
 
-const 작업것 = 저쪽.filter((x) => 직군보기(x.제목).startsWith('작업'));
+/* 열림·마감을 **줄마다** 집습니다 (D-N · D-day · 채용 시 마감 · 마감) */
+for (const x of 저쪽) {
+  const s = 상태집기(쪽글.get(x.번호) || '', x.번호);
+  x.열림 = s.열림; x.상태 = s.글;
+}
+const 상태셈 = {};
+for (const x of 저쪽) 상태셈[x.상태] = (상태셈[x.상태] || 0) + 1;
+console.log('   상태 — ' + Object.entries(상태셈).map(([k, v]) => k + ' ' + v).join(' · '));
+
+/* **열린 것만** 셉니다 (세중님 「열린 공고 N」) — 마감으로 찍힌 줄은 빼고,
+   상태를 못 읽은 줄은 **따로** 적습니다 (못 본 것을 열렸다고 하지 않습니다 · 지침 15절) */
+const 닫힘 = 저쪽.filter((x) => x.열림 === false);
+const 상태모름 = 저쪽.filter((x) => x.열림 === null);
+const 열린것 = 저쪽.filter((x) => x.열림 === true);
+console.log('   열린 것 ' + 열린것.length + ' · 마감 ' + 닫힘.length + ' · 상태 모름 ' + 상태모름.length);
+const 작업것 = 열린것.filter((x) => 직군보기(x.제목).startsWith('작업'));
 console.log('그 가운데 **작업치료사 공고** — ' + 작업것.length + '건'
-  + ' (직군 안 적힌 글 ' + 저쪽.filter((x) => 직군보기(x.제목) === '직군 안 적힘').length
-  + ' · 다른 직군 ' + 저쪽.filter((x) => 직군보기(x.제목) === '다른직군').length + ')');
+  + ' (직군 안 적힌 글 ' + 열린것.filter((x) => 직군보기(x.제목) === '직군 안 적힘').length
+  + ' · 다른 직군 ' + 열린것.filter((x) => 직군보기(x.제목) === '다른직군').length + ')');
 
 /* 우리 쪽 — **작업치료사 · 회원 화면** 공고의 기관 이름 (읽기만) */
 const 우리 = 줄로(`select coalesce(p.org_name,''), coalesce(p."기관번호",''), p.id,
