@@ -131,8 +131,8 @@ if (둘다 || argv.includes('--4140')) {
              from org_targets where name like '%종로%' order by name;`));
 
   줄('\n② 도는 곳인가 — 홈페이지 긁기(HS·HS3·HS4) 설정에 종로가 있나');
-  줄(psql(`select "이름", "이름열쇠", kind, coalesce(nullif(url,''),'(주소 없음)') as url, "끔"
-             from hosp_sites where "이름" like '%종로%';`));
+  줄(psql(`select name, "이름열쇠", kind, coalesce(nullif(url,''),'(주소 없음)') as url, "끔"
+             from hosp_sites where name like '%종로%';`));
   const 구운것 = path.join(뿌리, 'tools', 'hosp', 'hosp-sites.json');
   const S = JSON.parse(fs.readFileSync(구운것, 'utf8'));
   const 종로설정 = (S.사이트 || []).filter((s) => String(s.name || '').includes('종로'));
@@ -204,10 +204,11 @@ if (둘다 || argv.includes('--4118')) {
   const 곳 = (S.사이트 || []).find((s) => String(s.name || '').includes('삼성서울'));
   줄('\n① 도는 곳인가 — hosp-sites.json 줄 (HS3 가 쓰는 설정 그대로)');
   줄('   ' + (곳 ? JSON.stringify(곳) : '**없습니다**'));
-  줄(psql(`select "이름", kind, coalesce(nullif(url,''),'(주소 없음)') as url, "끔"
-             from hosp_sites where "이름" like '%삼성서울%';`));
-  줄(psql(`select source, kind as 꼴, off as 꺼짐, fail as 실패수, checked_at::date as 본날
-             from site_state where source like '%삼성서울%' or source like '%samsung%' limit 5;`));
+  줄(psql(`select name, kind, coalesce(nullif(url,''),'(주소 없음)') as url, "끔", "끈까닭", "채용주소"
+             from hosp_sites where name like '%삼성서울%';`));
+  줄(psql(`select name, auto, fail_streak as 연속실패, left(last_fail,40) as 마지막탈,
+                  off_on as 끈날, on_on as 켠날, tried_on as 두드린날
+             from site_state where name like '%삼성서울%' limit 5;`));
 
   줄('\n② 경로 원문 — HS3 와 **같은 자**(사이트줄)로 목록을 읽습니다');
   if (!곳) 줄('   설정이 없어 못 읽었습니다');
