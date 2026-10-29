@@ -28,10 +28,24 @@ export function 쪽살피기(html) {
   const a수 = (t.match(/<a\b/gi) || []).length;
   const src = [...t.matchAll(/<script[^>]+src=["']([^"']+)["']/gi)].map((m) => m[1]);
   const 번호든a = (t.match(/<a[^>]+href=["'][^"']*(?:seq|idx|wr_id|nttSn|no|num|bno|articleNo|id)=\d/gi) || []).length;
-  return { a수, src, 번호든a, 길이: t.length };
+  /* 판정이 **원문 앞머리**를 봐야 합니다 (frameset·그림) — 함께 들고 다닙니다 */
+  return { a수, src, 번호든a, 길이: t.length, 앞글자: t.slice(0, 400) };
 }
-/** 판정 — **둘 중 하나만** (세중님: JS인지 꼴이 다른지만) */
-export function 판정(살핀것) {
+/** 판정 — **둘 중 하나만** (세중님: JS인지 꼴이 다른지만). 「꼴이 다릅니다」는 **왜**를 답니다.
+ *  ★ 2026-10-29 — 처음에는 「a 태그 0개면 JS」로만 봤는데 **틀렸습니다.** 원광은
+ *    `<frameset>` 이고 조은금강은 **HTML 이 아니라 PNG 그림**이 옵니다. 둘 다 JS 가
+ *    아닙니다 — 원문 앞 1200자를 보고 고쳤습니다 (지침 10-5 · 재는 자를 먼저 의심) */
+export function 판정(살핀것, html) {
+  const t = String(html || 살핀것.앞글자 || '');
+  if (t && !/<html|<!doctype/i.test(t.slice(0, 400))) {
+    const 그림 = /^\x89PNG|^\xff\xd8\xff|^GIF8|^%PDF/.test(t) ? (t.startsWith('%PDF') ? 'PDF' : '그림')
+      : '알 수 없는 꼴';
+    return '꼴이 다릅니다 — HTML 이 아닙니다 (' + 그림 + ' 가 옵니다 · ' + 살핀것.길이 + '바이트)';
+  }
+  if (/<frameset|<frame\s/i.test(t)) {
+    const 속 = (t.match(/<frame[^>]+src=["']([^"']+)["']/i) || [])[1] || '';
+    return '꼴이 다릅니다 — 프레임(frameset) 입니다' + (속 ? ' · 속 쪽 ' + 속 : '');
+  }
   if (살핀것.a수 <= 3 && 살핀것.src.some((s) => 그리는묶음.test(s))) {
     return 'JS 로 그립니다 (a 태그 ' + 살핀것.a수 + '개 · 그리는 묶음 있음)';
   }
@@ -56,7 +70,14 @@ if (argv.includes('--자기점검')) {
     쪽살피기('<a href="/v.do?seq=12">ㄱ</a><a href="/menu">ㄴ</a>').번호든a === 1);
   보('a 가 없고 묶음이 있으면 JS', /^JS 로 그립니다 \(/.test(판정(js)));
   보('a 는 많은데 번호가 없으면 꼴이 다름',
-    /꼴이 다릅니다/.test(판정({ a수: 40, src: [], 번호든a: 0, 길이: 1000 })));
+    /꼴이 다릅니다/.test(판정({ a수: 40, src: [], 번호든a: 0, 길이: 1000, 앞글자: '<html><a>x</a>' })));
+  const 프레임 = '<!DOCTYPE HTML><html lang="ko"><head><title>원광종합병원</title></head>'
+    + '<frameset frameborder="NO"><frame src="main/main.asp" name="main"></frameset></html>';
+  보('프레임은 JS 가 아니라 꼴이 다름',
+    /프레임\(frameset\)/.test(판정(쪽살피기(프레임), 프레임)));
+  보('프레임 속 쪽 주소를 적는다', /main\/main\.asp/.test(판정(쪽살피기(프레임), 프레임)));
+  보('HTML 이 아니면 그렇게 적는다',
+    /HTML 이 아닙니다/.test(판정(쪽살피기('\x89PNG\r\n\x1a\n'), '\x89PNG\r\n\x1a\n')));
   const 잘린창 = '<li><a href="/v?idx=1">글 제목</a></li><span class="date">2026-07-16</span>';
   보('닫는 태그 뒤 날짜는 줄안의날이 못 집는다',
     줄안의날(잘린창, 잘린창.indexOf('글 제목'), 5) === null);
@@ -87,7 +108,7 @@ if (argv.includes('--못읽음')) {
       + 읽기(r.html, 곳.주소).length + '줄');
     console.log('  script src — ' + (살핀것.src.length ? '' : '(없음)'));
     for (const s of 살핀것.src.slice(0, 12)) console.log('      · ' + s);
-    console.log('  → **' + 판정(살핀것) + '**');
+    console.log('  → **' + 판정(살핀것, r.html) + '**');
     console.log('  ── 원문 앞 1200자 ──');
     console.log(String(r.html || '').slice(0, 1200).replace(/\r?\n/g, ' ⏎ '));
   }
