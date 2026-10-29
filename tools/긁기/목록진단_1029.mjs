@@ -38,9 +38,13 @@ export function 쪽살피기(html) {
 export function 판정(살핀것, html) {
   const t = String(html || 살핀것.앞글자 || '');
   if (t && !/<html|<!doctype/i.test(t.slice(0, 400))) {
-    const 그림 = /^\x89PNG|^\xff\xd8\xff|^GIF8|^%PDF/.test(t) ? (t.startsWith('%PDF') ? 'PDF' : '그림')
-      : '알 수 없는 꼴';
-    return '꼴이 다릅니다 — HTML 이 아닙니다 (' + 그림 + ' 가 옵니다 · ' + 살핀것.길이 + '바이트)';
+    /* ★ `받기()` 는 몸을 **UTF-8 글자로 풀어** 줍니다 — 그림의 첫 바이트(0x89)는
+       바뀜표(U+FFFD)가 됩니다. 그래서 바이트가 아니라 **앞 여덜 글자에 든 이름**을
+       봅니다 (2026-10-29 조은금강에서 「알 수 없는 꼴」로 찍히는 것을 보고 고쳤습니다) */
+    const 머리 = t.slice(0, 12);
+    const 그림 = /PNG/.test(머리) ? '그림(PNG)' : /JFIF|Exif/.test(머리) ? '그림(JPEG)'
+      : /^GIF8/.test(머리) ? '그림(GIF)' : /^%PDF/.test(머리) ? 'PDF' : '알 수 없는 꼴';
+    return '꼴이 다릅니다 — HTML 이 아닙니다 (' + 그림 + '이 옵니다 · ' + 살핀것.길이 + '바이트)';
   }
   if (/<frameset|<frame\s/i.test(t)) {
     const 속 = (t.match(/<frame[^>]+src=["']([^"']+)["']/i) || [])[1] || '';
@@ -78,6 +82,9 @@ if (argv.includes('--자기점검')) {
   보('프레임 속 쪽 주소를 적는다', /main\/main\.asp/.test(판정(쪽살피기(프레임), 프레임)));
   보('HTML 이 아니면 그렇게 적는다',
     /HTML 이 아닙니다/.test(판정(쪽살피기('\x89PNG\r\n\x1a\n'), '\x89PNG\r\n\x1a\n')));
+  /* 글자로 풀린 그림 — 첫 바이트가 바뀜표(U+FFFD)로 옵니다 (조은금강이 그 꼴입니다) */
+  보('글자로 풀린 PNG 도 그림이라 적는다',
+    /그림\(PNG\)/.test(판정(쪽살피기('�PNG\r\n\x1a\n IHDR'), '�PNG\r\n\x1a\n IHDR')));
   const 잘린창 = '<li><a href="/v?idx=1">글 제목</a></li><span class="date">2026-07-16</span>';
   보('닫는 태그 뒤 날짜는 줄안의날이 못 집는다',
     줄안의날(잘린창, 잘린창.indexOf('글 제목'), 5) === null);
