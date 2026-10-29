@@ -61,7 +61,12 @@ export function 상태집기(html, 번호) {
   const h = String(html || '');
   const i = h.indexOf('/board1/' + 번호);
   if (i < 0) return { 열림: null, 글: '' };
-  const 뒤 = h.slice(i, i + 700);
+  /* ★ 창을 **다음 줄 앞까지**로 잡습니다 (2026-10-29 — 700자로 잘랐더니 다섯 줄의
+     상태를 못 읽었습니다. 「채용 시 마감」 뱃지가 조회·댓글 뒤에 옵니다).
+     다음 줄 앞까지면 **딴 줄 상태를 집을 일도 없습니다** */
+  const 다음 = h.indexOf('/board1/', i + 10);
+  const 끝 = 다음 > i ? 다음 : Math.min(h.length, i + 2500);
+  const 뒤 = h.slice(i, 끝);
   const d = 뒤.match(/>\s*D-(\d+)\s*</);
   if (d) return { 열림: true, 글: 'D-' + d[1], 남은날: Number(d[1]) };
   if (/>\s*D-?day\s*</i.test(뒤)) return { 열림: true, 글: 'D-day', 남은날: 0 };
@@ -266,19 +271,37 @@ const 우리 = 줄로(`select coalesce(p.org_name,''), coalesce(p."기관번호"
 console.log('우리 회원 화면 작업치료사·공통 공고 — ' + 우리.length + '건');
 
 /* 이름 맞추기 — `견줄이름` 한 자리를 씁니다 (우리 집 자 · 읽기만) */
-const 이름키 = (s) => 줄로(`select "견줄이름"('${따옴(s)}');`)[0][0] || '';
-const 우리키 = new Map();
-for (const [이름, 번호, id, 본날] of 우리) {
-  const k = 이름키(이름);
-  if (!우리키.has(k)) 우리키.set(k, []);
-  우리키.get(k).push({ 이름, 번호, id, 본날 });
+/* 이름 맞추는 열쇠는 **우리 집 자**(`견줄이름`)를 씁니다 — 한 자리입니다 (지침 6절).
+   ★ 전에는 줄마다 psql 을 띄웠습니다 — 빈 이름에서 터지고(결과 0줄) 느렸습니다.
+     **한 번에** 물어 표로 들고 있습니다 */
+const 이름키표 = new Map();
+function 이름키채우기(이름들) {
+  const 새것 = [...new Set(이름들.filter(Boolean))].filter((n) => !이름키표.has(n));
+  for (let i = 0; i < 새것.length; i += 200) {
+    const 묶음 = 새것.slice(i, i + 200);
+    const 값 = 묶음.map((n) => "('" + 따옴(n) + "')").join(',');
+    for (const [이름, k] of 줄로(`select v.n, coalesce("견줄이름"(v.n),'')
+        from (values ${값}) as v(n);`)) 이름키표.set(이름, k);
+    for (const n of 묶음) if (!이름키표.has(n)) 이름키표.set(n, '');
+  }
 }
+const 이름키 = (s) => (s ? (이름키표.get(s) ?? '') : '');
 
 /* 저쪽 제목에서 **기관 이름**을 집습니다 — 못 집으면 ⓔ 로 셉니다 (짐작 금지) */
 export function 기관집기(제목) {
   const t = String(제목 || '');
   const m = t.match(/([가-힣A-Za-z0-9()·\s]{2,30}?(?:대학교병원|대학병원|의료원|병원|보건소|센터|의원))/);
   return m ? m[1].replace(/^[\s·]+/, '').trim() : '';
+}
+
+/* 이름 열쇠를 **한 번에** 받아 둡니다 (우리 쪽 + 저쪽 제목에서 집은 기관) */
+이름키채우기([...우리.map(([이름]) => 이름), ...작업것.map((x) => 기관집기(x.제목))]);
+const 우리키 = new Map();
+for (const [이름, 번호, id, 본날] of 우리) {
+  const k = 이름키(이름);
+  if (!k) continue;
+  if (!우리키.has(k)) 우리키.set(k, []);
+  우리키.get(k).push({ 이름, 번호, id, 본날 });
 }
 
 /* 갈래 이름 — ⓐ둘다 ⓑ놓침 ⓒ이층 ⓓ우리만 ⓔ못맞춤 (동그라미 글자는 변수 이름에 못 씁니다) */
