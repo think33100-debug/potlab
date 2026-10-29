@@ -76,7 +76,15 @@ if (!fs.existsSync(설정자리)) {
   console.error('✗ ' + 설정자리 + ' 가 없습니다 — 먼저 node tools/긁기/곳들만들기.mjs --꼴 표준게시판 --적기');
   process.exit(1);
 }
-const { 곳들 } = JSON.parse(fs.readFileSync(설정자리, 'utf8'));
+/* ★ 2026-10-29 세중님 — 손확인 ② 로 들어온 **채용 전용 게시판**도 같은 읽기로 긁습니다.
+   파일을 **따로** 둔 까닭 — `표준게시판_곳들.json` 은 `곳들만들기.mjs` 가 분류표에서
+   다시 만드는 파일입니다. 거기 손으로 받은 곳을 넣으면 다음에 다시 만들 때 조용히
+   사라집니다 (지침 9절 — 「이미 쌓인 자료는 안 고쳐집니다」의 거꾸로 꼴) */
+const 더할자리 = path.join(여기, '손확인추가_곳들.json');
+const 곳들 = [
+  ...JSON.parse(fs.readFileSync(설정자리, 'utf8')).곳들,
+  ...(fs.existsSync(더할자리) ? JSON.parse(fs.readFileSync(더할자리, 'utf8')).곳들 : []),
+];
 const cfg = 설정();
 const 담을것 = []; const 안담음 = [];
 let 건너뜀 = 0;
