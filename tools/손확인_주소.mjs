@@ -259,7 +259,15 @@ if (만들기) {
 }
 
 /* ── 읽기 ── */
-if (!fs.existsSync(문서자리)) { console.error('✗ 문서가 없습니다 — 먼저 --만들기'); process.exit(1); }
+/* ★ 2026-10-29 세중님 — **짧은 표도 함께** 읽습니다 (손확인_주소_오늘_1029.md).
+   그 표의 머리글은 「번호 | 병원 이름 | 지역 | 홈페이지 | 채용 게시판 주소」라서
+   칸 찾기가 `#`·`기관` 말고 `번호`·`병원 이름` 도 봅니다. 문서가 바뀔 때마다
+   칸 차례를 **다시** 찾습니다 (안 그러면 앞 문서의 칸 수를 뒤 문서에 씁니다) */
+const 새문서표 = '|--새문서--|';
+const 읽을문서들 = ['손확인_주소_1024.md', '손확인_주소_오늘_1029.md']
+  .map((n) => path.join(여기, '..', 'docs', n)).filter((p) => fs.existsSync(p));
+if (!읽을문서들.length) { console.error('✗ 문서가 없습니다 — 먼저 --만들기'); process.exit(1); }
+for (const p of 읽을문서들) console.log('  읽은 문서 — ' + path.basename(p));
 /* ★ 2026-10-24 밤 — 칸 **차례를 머리글에서** 읽습니다. 전에는 「기관은 넷째 칸」으로
    박아 두었는데, 표를 고치면(칸을 더하거나 빼면) 읽는 쪽이 **조용히 엉뚱한 칸**을
    집습니다. 이 문서에는 표가 둘(사각지대 · ⑤목록 아님)이고 칸 수가 다릅니다.
@@ -267,10 +275,11 @@ if (!fs.existsSync(문서자리)) { console.error('✗ 문서가 없습니다 �
 const 채운것 = [];
 const 아님것 = [];
 let 기관칸 = -1; let 주소칸 = -1; let 후보칸 = -1; let 맞음칸 = -1;
-for (const l of fs.readFileSync(문서자리, 'utf8').split(/\r?\n/)) {
-  if (/^\|\s*#\s*\|/.test(l)) {
+for (const l of 읽을문서들.flatMap((p) => [새문서표, ...fs.readFileSync(p, 'utf8').split(/\r?\n/)])) {
+  if (l === 새문서표) { 기관칸 = -1; 주소칸 = -1; 후보칸 = -1; 맞음칸 = -1; continue; }
+  if (/^\|\s*(?:#|번호)\s*\|/.test(l)) {
     const 머리 = l.split('|').slice(1, -1).map((s) => s.trim());
-    기관칸 = 머리.findIndex((h) => h === '기관');
+    기관칸 = 머리.findIndex((h) => h === '기관' || /병원 이름/.test(h));
     후보칸 = 머리.findIndex((h) => /후보 주소/.test(h));
     맞음칸 = 머리.findIndex((h) => /맞음/.test(h));
     주소칸 = 머리.length - 1;
