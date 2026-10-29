@@ -239,7 +239,7 @@ if (둘다 || argv.includes('--4118')) {
          이미 밀려났는지 보려고 **둘째·셋째 쪽**을 읽습니다 — `cPage` 는 쪽 원문의
          링크에 적혀 있던 칸입니다(짐작 아님 · 위 원문 `…&cPage=1`). 1.5초 띄웁니다 */
       const 뒷쪽글 = [];
-      for (const p of [2, 3]) {
+      for (const p of [2, 3, 4, 5, 6]) {
         await new Promise((f) => setTimeout(f, 1500));
         const 주소 = 곳.url + (곳.url.includes('?') ? '&' : '?') + 'cPage=' + p;
         const rp = await 사이트줄({ ...곳, url: 주소 });
@@ -264,6 +264,30 @@ if (둘다 || argv.includes('--4118')) {
           + ' · mixed=' + (mixedTitle(x.title) ? 'O' : 'X')
           + ' → ' + v.갈래 + '(' + v.왜 + (v.걸린단어 && v.걸린단어.length ? ' · 걸린말 ' + v.걸린단어.join(',') : '') + ')');
         줄('       공고ID ' + 공고ID(곳.name, x.url, x.title) + ' · 주소 ' + String(x.url || '').slice(0, 90));
+      }
+
+      /* ★ 그 병원이 **다른 채용 게시판**을 따로 두는지 — 쪽에 적힌 **자기 링크·고르는 칸**만
+         봅니다 (주소를 짐작하지 않습니다 · 지침 10-3) */
+      줄('\n②-2 그 쪽에 적힌 채용 관련 링크·고르는 칸 (다른 게시판이 있나)');
+      {
+        const g2 = await 글받기(곳.url, { enc: 곳.enc });
+        const 길들 = [...new Set([...String(g2.html || '').matchAll(/href="([^"]*recruit[^"]*)"/gi)]
+          .map((m) => m[1]).filter((h) => !/recruitNoticeView/.test(h)))];
+        줄('   recruit 든 링크 ' + 길들.length + '개 — ' + (길들.slice(0, 20).join(' · ') || '없음'));
+        /* 그 쪽의 **찾기 틀**을 봅니다 — 칸 이름을 짐작하지 않고 원문에서 집습니다 */
+        const 틀 = String(g2.html || '').match(/<form[\s\S]{0,2500}?<\/form>/i);
+        if (틀) {
+          const act = (틀[0].match(/action="([^"]*)"/i) || [])[1] || '(없음)';
+          const 칸들 = [...틀[0].matchAll(/<(?:input|select)[^>]*name="([^"]+)"[^>]*>/gi)].map((m) => m[1]);
+          줄('   찾기 틀 — action ' + act + ' · 칸 ' + [...new Set(칸들)].join(', '));
+        } else 줄('   찾기 틀 — 없음');
+        const 고르기 = [...String(g2.html || '').matchAll(/<select[\s\S]{0,2000}?<\/select>/gi)];
+        줄('   고르는 칸 ' + 고르기.length + '개');
+        고르기.forEach((m, i) => {
+          const 옵 = [...m[0].matchAll(/<option[^>]*>([\s\S]*?)<\/option>/g)]
+            .map((o) => o[1].replace(/\s+/g, ' ').trim()).filter(Boolean);
+          줄('     ' + (i + 1) + ') ' + 옵.join(' | ').slice(0, 220));
+        });
       }
 
       /* ★ 그 글이 목록에 없을 때를 위해 — **제목만으로 판정이 어떻게 나는지**를
@@ -299,6 +323,38 @@ if (둘다 || argv.includes('--4118')) {
              from job_trash where org_name like '%삼성서울%' and trashed_at > now() - interval '60 days'
             order by trashed_at desc;`));
   줄(psql(`select count(*) as 삼성서울_전체줄 from job_posts where org_name like '%삼성서울%';`));
+}
+
+/* ══════════════ ㉢ 저쪽 글이 가리키는 **원래 자리** ══════════════
+ * 우리 경로에 그 글이 없을 때, 「어디에 올린 글인가」를 알아야 갈래를 고를 수 있습니다.
+ * 땡큐오티 **상세 두 쪽만** 열어 ① 바깥 링크 ② 접수기간 글자만 봅니다 —
+ * robots 를 먼저 보고(금지면 멈춤) · 1.5초 띄우고 · 글은 **옮겨 적지 않습니다**. */
+if (둘다 || argv.includes('--원래자리')) {
+  줄('\n══════════ ㉢ 땡큐오티 글이 가리키는 원래 자리 (상세 두 쪽만) ══════════');
+  const { robots읽기, 가도되나 } = await import('./robots.mjs');
+  const { 목록주소 } = await import('./rival-ty.mjs');
+  const 뿌리주소 = new URL(목록주소).origin;
+  const rg = await 글받기(뿌리주소 + '/robots.txt');
+  const rb = robots읽기(rg.code === 200 ? rg.html : '');
+  줄('   robots.txt — HTTP ' + rg.code + ' · ' + String(rg.html || '').length + '자 · 모두 규칙 '
+    + (rb.있나 ? '있음(금지 ' + rb.금지.length + '개)' : '없음'));
+  for (const 번호 of ['4140', '4118']) {
+    const 주소 = 목록주소 + '/' + 번호;
+    const 허락 = 가도되나(rb, new URL(주소).pathname);
+    if (!허락.됨) { 줄('   ' + 번호 + ' — robots 가 막습니다(' + 허락.왜 + '). 멈춥니다 (우회 없음)'); continue; }
+    await new Promise((f) => setTimeout(f, 1500));
+    const g = await 글받기(주소, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; potjob-check/1.0)' } });
+    줄('   ' + 번호 + ' — HTTP ' + g.code + ' · ' + String(g.html || '').length + '자');
+    if (g.code !== 200) continue;
+    const 밖링크 = [...new Set([...String(g.html).matchAll(/https?:\/\/[^"'<>\s)]+/g)].map((m) => m[0])
+      .filter((h) => !/thankyouot|google|facebook|kakao|naver\.com\/(?:common|favicon)|wixstatic|wix\.com|parastorage|jquery|cloudflare|gstatic|youtube|instagram/i.test(h)))];
+    줄('      바깥 링크 ' + 밖링크.length + '개 — ' + (밖링크.slice(0, 12).join(' · ') || '없음'));
+    const 글 = String(g.html).replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
+    for (const 말 of ['접수기간', '접수 기간', '마감', '공고 바로가기', '홈페이지']) {
+      const i = 글.indexOf(말);
+      if (i >= 0) 줄('      「' + 말 + '」 자리 ' + i + ' — ' + 글.slice(i, i + 70));
+    }
+  }
 }
 
 줄('\n(까닭만 찾았습니다 — 아무것도 안 고쳤고 DB 에 한 줄도 안 썼습니다)');
