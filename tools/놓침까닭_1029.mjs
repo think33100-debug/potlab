@@ -92,14 +92,17 @@ for (const f of ['.env', '.env.local']) {
     if (m && !cfg[m[1]]) cfg[m[1]] = m[2].replace(/^["']|["']$/g, '');
   }
 }
-if (!cfg.SUPABASE_DB_URL) { console.error('✗ SUPABASE_DB_URL 이 없습니다 (서버에서 돌리십시오)'); process.exit(1); }
-const u = new URL(cfg.SUPABASE_DB_URL);
-const env = { ...process.env,
+/* ★ DB 열쇠가 없어도 **원문 보는 자리는 돕니다** — 집 컴퓨터에서 목록 원문·판정을
+   먼저 보고, DB 는 서버에서 봅니다. 없는 것을 「0」으로 적지 않습니다 (지침 15절) */
+const DB있나 = !!cfg.SUPABASE_DB_URL;
+const u = DB있나 ? new URL(cfg.SUPABASE_DB_URL) : null;
+const env = DB있나 ? { ...process.env,
   PGHOST: u.hostname, PGPORT: u.port || '5432',
   PGUSER: decodeURIComponent(u.username), PGPASSWORD: decodeURIComponent(u.password),
   PGDATABASE: decodeURIComponent(u.pathname.replace(/^\//, '')) || 'postgres',
-  PGSSLMODE: u.searchParams.get('sslmode') || 'require' };
+  PGSSLMODE: u.searchParams.get('sslmode') || 'require' } : process.env;
 function psql(sql) {
+  if (!DB있나) return '   (DB 를 못 봤습니다 — SUPABASE_DB_URL 이 없습니다 · 서버에서 돌리십시오)';
   if (/\b(insert|update|delete|drop|alter|truncate|grant|revoke|create)\b/i.test(sql)) {
     console.error('✗ 이 도구는 **읽기 전용**입니다 — 쓰는 글이 섞였습니다'); process.exit(1);
   }
@@ -150,8 +153,8 @@ if (둘다 || argv.includes('--4140')) {
     const BASE = 'https://apis.data.go.kr/1760000/PblJobService';
     const 날 = (더할) => { const d = new Date(Date.now() + 더할 * 86400000); return d.toISOString().slice(0, 10).replace(/-/g, ''); };
     const 찾을말 = ['종로', '작업치료', '작업 치료'];
-    let 읽은줄 = 0, 찾음 = [];
-    for (let 쪽 = 1; 쪽 <= 12; 쪽++) {
+    let 읽은줄 = 0, 찾음 = [], 날들 = [];
+    for (let 쪽 = 1; 쪽 <= 30; 쪽++) {
       const url = BASE + '/getList?serviceKey=' + cfg.ALIO_DETAIL_KEY
         + '&pageNo=' + 쪽 + '&numOfRows=100&Sort_order=2&Begin_de=' + 날(-며칠) + '&End_de=' + 날(1);
       const r = await 공공부르기(url, { headers: { accept: 'application/xml' } });
@@ -160,11 +163,16 @@ if (둘다 || argv.includes('--4140')) {
       if (!조각들.length) break;
       읽은줄 += 조각들.length;
       for (const 조각 of 조각들) {
+        const d = 칸(조각, 'regdate').replace(/[^0-9]/g, '');
+        if (d.length === 8) 날들.push(d);
         if (걸리나(칸(조각, 'title') + ' ' + 칸(조각, 'insttname'), 찾을말)) 찾음.push(조각);
       }
       if (조각들.length < 100) break;
     }
-    줄('   읽은 줄 ' + 읽은줄 + '건 · 「종로」 또는 「작업치료」 든 것 **' + 찾음.length + '건**');
+    날들.sort();
+    줄('   읽은 줄 ' + 읽은줄 + '건 · 올린날 ' + (날들[0] || '—') + ' ~ ' + (날들[날들.length - 1] || '—')
+      + ' (**이 창 안에서만** 봤습니다)');
+    줄('   「종로」 또는 「작업치료」 든 것 **' + 찾음.length + '건**');
     for (const 조각 of 찾음.slice(0, 8)) {
       줄('   ── 원문 그대로 ──\n' + 조각.replace(/\s+/g, ' ').slice(0, 1200));
     }
@@ -226,8 +234,26 @@ if (둘다 || argv.includes('--4118')) {
         줄(w.자리 < 0 ? 짧게(g.html, 1200) : w.창);
       }
 
+      /* ★ HS3 는 **첫 쪽만** 읽습니다 (설정에 쪽 넘김 칸이 없습니다). 그 글이 첫 쪽에서
+         이미 밀려났는지 보려고 **둘째·셋째 쪽**을 읽습니다 — `cPage` 는 쪽 원문의
+         링크에 적혀 있던 칸입니다(짐작 아님 · 위 원문 `…&cPage=1`). 1.5초 띄웁니다 */
+      const 뒷쪽글 = [];
+      for (const p of [2, 3]) {
+        await new Promise((f) => setTimeout(f, 1500));
+        const 주소 = 곳.url + (곳.url.includes('?') ? '&' : '?') + 'cPage=' + p;
+        const rp = await 사이트줄({ ...곳, url: 주소 });
+        if (rp.err) { 줄('   ' + p + '쪽 ✗ ' + rp.err); continue; }
+        줄('   ' + p + '쪽 — ' + rp.rows.length + '건');
+        for (const x of rp.rows) {
+          const 눈 = /연구|소아|재활|작업|치료/.test(x.title);
+          줄('      ' + (눈 ? '★ ' : '  ') + String(x.title).slice(0, 56)
+            + '  | 접수 ' + (x.from || '—') + '~' + (x.to || '—'));
+          if (눈) 뒷쪽글.push(x);
+        }
+      }
+
       줄('\n③ 판정 되풀이 — HS3 가 제목으로 내리는 판정 그대로 (쓰지 않습니다)');
-      const 볼것 = r.rows.filter((x) => /연구|소아|재활|작업|치료/.test(x.title));
+      const 볼것 = [...r.rows.filter((x) => /연구|소아|재활|작업|치료/.test(x.title)), ...뒷쪽글];
       for (const x of 볼것) {
         const 직군 = (matchJob(x.title) && !notOurs(x.title)) ? matchJob(x.title) : '';
         const v = sortJob(x.title, 직군, null);
@@ -237,6 +263,20 @@ if (둘다 || argv.includes('--4118')) {
           + ' · mixed=' + (mixedTitle(x.title) ? 'O' : 'X')
           + ' → ' + v.갈래 + '(' + v.왜 + (v.걸린단어 && v.걸린단어.length ? ' · 걸린말 ' + v.걸린단어.join(',') : '') + ')');
         줄('       공고ID ' + 공고ID(곳.name, x.url, x.title) + ' · 주소 ' + String(x.url || '').slice(0, 90));
+      }
+
+      /* ★ 그 글이 목록에 없을 때를 위해 — **제목만으로 판정이 어떻게 나는지**를
+         시험해 둡니다 (읽기 전용 · 순수 함수). 땡큐오티 제목과 병원이 쓸 만한 꼴 둘 */
+      줄('\n③-2 만약 그 글을 읽었다면 — 제목 꼴로 판정 시험 (글이 목록에 없을 때 대비)');
+      for (const t of ['삼성서울병원 재활의학과 소아재활 임상연구원(작업치료) 채용',
+                       '재활의학과 소아재활 임상연구원(작업치료) 채용',
+                       '[재활의학과] 임상연구원(작업치료사) 모집',
+                       '소아재활 연구원 채용']) {
+        const 직군 = (matchJob(t) && !notOurs(t)) ? matchJob(t) : '';
+        const v = sortJob(t, 직군, null);
+        줄('   ' + t.padEnd(46) + ' matchJob=' + (matchJob(t) || '—')
+          + ' · notOurs=' + (notOurs(t) ? 'O' : 'X') + ' → ' + v.갈래 + '(' + v.왜
+          + (v.걸린단어 && v.걸린단어.length ? ' · 걸린말 ' + v.걸린단어.join(',') : '') + ')');
       }
 
       줄('\n④ 우리 DB — 그 공고ID 가 어디 있나');
