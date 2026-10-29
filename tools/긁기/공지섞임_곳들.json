@@ -1,25 +1,25 @@
 {
  "꼴": "공지섞임",
  "만든때": "2026-10-29",
- "어디서": "세중님 손확인 ② 답 2026-10-29 15:13 — 「공지사항 섞임」 갈래. 주소는 세중님이 적어 주신 글자 그대로입니다 (tools/손확인2_1029.mjs 의 묶음과 같은 글자)",
+ "어디서": "세중님 손확인 ② 답 2026-10-29 15:13 — 「공지사항 섞임」 갈래. 주소는 세중님이 적어 주신 글자 그대로입니다 (tools/손확인2_1029.mjs 의 묶음과 같은 글자). 기관번호는 tools/손확인2_1029.mjs --곳목록 출력에서 그대로 옮겼습니다 (지침 10-6)",
  "곳": 9,
- "기관번호붙음": 0,
+ "기관번호붙음": 8,
  "곳들": [
   {
    "이름": "드림종합병원",
    "종류": "종합병원",
    "지역": "대구 대구남구",
    "주소": "http://dreamh.co.kr/front/board/list.php?code=notice",
-   "기관번호": null,
-   "왜": "세중님 10/29 — 지난 채용 글 있음 · 기관번호는 손확인2 점검 뒤 채웁니다"
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ3MiQzNjEyMjIjNjEjJDEjJDAjJDgz",
+   "왜": "세중님 10/29 — 지난 채용 글 있음 · HTTP 200"
   },
   {
    "이름": "비에스종합병원",
    "종류": "종합병원",
    "지역": "인천 인천강화군",
    "주소": "http://bs.ibsh.kr/bbs/board.php?bo_table=sosig",
-   "기관번호": null,
-   "왜": "세중님 10/29 — 공고 있었음 · 그누보드 꼴"
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQ3IyQwMCQyNjE4MzIjNDEjJDEjJDQjJDgz",
+   "왜": "세중님 10/29 — 공고 있었음 · 그누보드 꼴 · HTTP 200"
   },
   {
    "이름": "온누리병원",
@@ -27,55 +27,55 @@
    "지역": "인천 인천서구",
    "주소": "https://www.onnurihosp.com/notice",
    "기관번호": null,
-   "왜": "세중님 10/29"
+   "왜": "세중님 10/29 · HTTP 200. ★ 심평원에 「온누리병원」 이름열쇠가 **하나가 아닙니다** — 기관번호_이름으로 가 null 을 냅니다. 기관을 안 붙이고 담습니다 (손확인 길)"
   },
   {
    "이름": "의료법인 인덕의료재단 복주회복병원",
    "종류": "요양병원",
    "지역": "경북 안동시",
    "주소": "https://bokjurh.co.kr/sub/07_community/community_01",
-   "기관번호": null,
-   "왜": "세중님 10/29 — 지금 공고 있음"
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkMCMkOTkkMzgxMzUxIzIxIyQyIyQ1IyQwMCQyNjE0ODEjNjEjJDEjJDAjJDgz",
+   "왜": "세중님 10/29 — 지금 공고 있음 · HTTP 200"
   },
   {
    "이름": "빛가람종합병원",
    "종류": "종합병원",
    "지역": "전남 나주시",
    "주소": "http://bitgaramhospital.co.kr/wp_board/index.html?code=press&mode=list",
-   "기관번호": null,
-   "왜": "세중님 10/29 — 지금 공고 없음"
+   "기관번호": "HIRA:JDQ4MTYyMiM3MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ3OSQ0NjEwMDIjNjEjJDEjJDQjJDgz",
+   "왜": "세중님 10/29 — 지금 공고 없음. ★ 우리 봇에게 HTTP 403 입니다 — 돌 때마다 ✗ 로 찍히고 **우회하지 않습니다**"
   },
   {
    "이름": "의료법인 원광의료재단 원광종합병원",
    "종류": "종합병원",
    "지역": "경기 화성병점구",
    "주소": "http://wkgh.co.kr/",
-   "기관번호": null,
-   "왜": "세중님 10/29 — 공지만 · 공고 없음. ★ 첫 화면 주소라 울타리 ㉢ 에서 걸립니다 (목록 아님)"
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQyIyQ3IyQwMCQzNjEwMDIjNjEjJDEjJDgjJDgz",
+   "왜": "세중님 10/29 — 공지만 · 공고 없음. ★ 첫 화면 주소라 울타리 ㉢ 에서 걸립니다 (목록 아님 · 438바이트)"
   },
   {
    "이름": "의료법인환명의료재단 조은금강병원",
    "종류": "종합병원",
    "지역": "경남 김해시",
    "주소": "https://ggmc.or.kr/html/?pCode=24",
-   "기관번호": null,
-   "왜": "세중님 10/29 — 공고 없음"
+   "기관번호": "HIRA:JDQ4MTYyMiM4MSMkMSMkNCMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQ0NjEwMDIjNjEjJDEjJDQjJDgz",
+   "왜": "세중님 10/29 — 공고 없음 · HTTP 200"
   },
   {
    "이름": "현대유비스병원",
    "종류": "종합병원",
    "지역": "인천 인천미추홀구",
    "주소": "https://www.uvishospital.co.kr/news?tab=notice",
-   "기관번호": null,
-   "왜": "세중님 10/29 — 공고 없음"
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ4OSQzNjEyMjIjNDEjJDEjJDQjJDgz",
+   "왜": "세중님 10/29 — 공고 없음 · HTTP 200"
   },
   {
    "이름": "화성유일병원",
    "종류": "종합병원",
    "지역": "경기 화성만세구",
    "주소": "http://hsyuil.kr/about/notice.php?cate=hospital",
-   "기관번호": null,
-   "왜": "세중님 10/29 — 공고 없음"
+   "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ3MiQyNjEwMDIjODEjJDEjJDIjJDgz",
+   "왜": "세중님 10/29 — 공고 없음 · HTTP 200"
   }
  ]
 }

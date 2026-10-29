@@ -1,0 +1,39 @@
+{
+ "꼴": "손확인추가",
+ "만든때": "2026-10-29",
+ "어디서": "세중님 손확인 ② 답 2026-10-29 15:13 의 ① 갈래(채용 전용 게시판) 가운데 robots 가 되고 HTTP 200 이고 HS3 땅이 아닌 곳. 글자는 tools/손확인2_1029.mjs --곳목록 출력에서 그대로 옮겼습니다 (지침 10-6)",
+ "곳": 1,
+ "기관번호붙음": 1,
+ "곳들": [
+  {
+   "이름": "씨엠병원",
+   "종류": "종합병원",
+   "지역": "서울 영등포구",
+   "주소": "https://www.cmhospital.co.kr/cmhospital/sub_05_11.php",
+   "기관번호": "HIRA:JDQ4MTg4MSM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQ3IyQ5OSQzNjE0ODEjNjEjJDEjJDQjJDgz",
+   "왜": "세중님 손확인 ② 2026-10-29 · HTTP 200 로 열림 · HS3 땅 아님"
+  }
+ ],
+ "안넣은곳": [
+  {
+   "이름": "서광병원",
+   "주소": "http://sghospital.kr/wp_recruit/index.html?code=recruit&mode=list",
+   "왜": "우리 봇에게 HTTP 403 입니다 — 우회하지 않습니다. 채용페이지로는 담았습니다 (회원이 직접 누릅니다)"
+  },
+  {
+   "이름": "재단법인일신기독교선교회 일신기독병원",
+   "주소": "https://www.ilsin.or.kr/community/bbs.asp?code=srecru",
+   "왜": "robots 금지 (Disallow: /community/) — 긁지 않습니다. 채용페이지로는 담았습니다"
+  },
+  {
+   "이름": "재단법인 일신기독교선교회 화명일신기독병원",
+   "주소": "https://www.hmilsin.or.kr/community/bbs.asp?code=incrt",
+   "왜": "robots 금지 (Disallow: /community/) · 심평원 종별 「병원」 이고 일층병원_구멍() 에 없습니다 (1층 대상 아님 · 2층)"
+  },
+  {
+   "이름": "강북삼성병원",
+   "주소": "https://kbsmcrecruit.ninehire.site/4qxkvknx",
+   "왜": "세중님 「긁기 보류」 (외부 ATS·JS 가능성 · robots 먼저 보고 미팅 안건). 우리 봇에게는 HTTP 429 였습니다"
+  }
+ ]
+}
