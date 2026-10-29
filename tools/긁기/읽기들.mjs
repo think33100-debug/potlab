@@ -38,7 +38,10 @@ export function 그누읽기(html, 바탕) {
     본것.add(wr);
     let 주소 = 엔티티풀기(날주소);
     try { 주소 = new URL(주소, 바탕).toString(); } catch { /* 그대로 */ }
-    낸것.push({ wr, 번호: wr, 제목, 주소, 올린날: 줄안의날(t, m.index, m[0].length) });
+    /* `자리`·`창길이` 는 **진단용**입니다 (2026-10-29) — 날짜를 왜 못 집었나 볼 때
+       원문에서 그 줄이 어디인지 알아야 합니다. 긁기 쪽은 이 칸을 안 씁니다 */
+    낸것.push({ wr, 번호: wr, 제목, 주소, 올린날: 줄안의날(t, m.index, m[0].length),
+      자리: m.index, 창길이: m[0].length });
   }
   return 낸것;
 }
@@ -64,7 +67,9 @@ export function 표준읽기(html, 바탕) {
     let 주소 = 주소글;
     if (/^javascript:/i.test(주소)) 주소 = 바탕;      /* POST 로 여는 쪽 — 목록 주소를 둡니다 */
     else { try { 주소 = new URL(주소, 바탕).toString(); } catch { /* 그대로 */ } }
-    낸것.push({ 번호, 제목, 주소, 올린날: 줄안의날(t, m.index, m[0].length) });
+    /* `자리`·`창길이` — 진단용 (위 그누읽기와 같은 까닭) */
+    낸것.push({ 번호, 제목, 주소, 올린날: 줄안의날(t, m.index, m[0].length),
+      자리: m.index, 창길이: m[0].length });
   }
   return 낸것;
 }

@@ -109,8 +109,11 @@ if (argv.includes('--복주')) {
   const 볼줄 = 날짜든줄[0] || 줄들[2] || 줄들[0];
   if (!볼줄) { console.log('  볼 줄이 없습니다'); process.exit(0); }
   console.log('\n  ── 그 줄의 원문 창 ──');
-  const 자리 = t.indexOf(볼줄.제목.slice(0, 12));
-  const 제목자리 = 자리 >= 0 ? 자리 : t.indexOf('bokju');
+  /* ★ 읽기가 **그 줄을 찾은 자리**를 그대로 씁니다 (`읽기들.mjs` 가 `자리` 로 냅니다).
+     전에는 `t.indexOf(제목)` 으로 찾았는데 **못 찾았습니다** — 제목은 태그를 걷고
+     빈칸을 눕힌 글자라 원문에 그대로 없습니다. 그래서 창이 쪽 머리(head)로 찍혔습니다 */
+  const 제목자리 = Number.isInteger(볼줄.자리) ? 볼줄.자리 : -1;
+  if (제목자리 < 0) { console.log('  읽기가 자리를 안 냈습니다'); process.exit(0); }
   const 앞tr = t.lastIndexOf('<tr', 제목자리);
   const 앞li = t.lastIndexOf('<li', 제목자리);
   const 뒤끝 = t.slice(제목자리).search(/<\/tr>|<\/li>/i);
@@ -128,7 +131,7 @@ if (argv.includes('--복주')) {
       + (멀기 >= 0 ? '+' : '') + 멀기 + '자) · 앞 60자 「'
       + t.slice(Math.max(0, m.index - 60), m.index).replace(/\r?\n/g, ' ').slice(-60) + '」');
   }
-  const 잰것 = 줄안의날(t, 제목자리, 볼줄.제목.length);
+  const 잰것 = 줄안의날(t, 제목자리, 볼줄.창길이 || 볼줄.제목.length);
   console.log('\n  줄안의날 이 그 자리에서 낸 값 — ' + (잰것 || '(없음)'));
   console.log('  ★ 고치지 않습니다 (세중님 3번) — 상세를 열어 날짜를 받는 길로 갑니다');
 }
