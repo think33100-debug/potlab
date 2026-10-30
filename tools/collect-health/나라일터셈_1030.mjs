@@ -21,7 +21,7 @@ import fs from 'node:fs';
 const 인수 = process.argv.slice(2);
 const 값 = (이름, 기본) => { const i = 인수.indexOf(이름); return i < 0 ? 기본 : 인수[i + 1]; };
 const 며칠 = Number(값('--며칠', '90'));
-const 최대쪽 = Number(값('--쪽', '60'));
+const 최대쪽 = Number(값('--쪽', '90'));   /* 90일이면 7,300건쯤 — 100건씩 74쪽 */
 const 자기점검 = 인수.includes('--자기점검');
 
 /* ── 셈 규칙 (한 자리) ─────────────────────────────────────── */
@@ -35,6 +35,14 @@ export const 갈래 = (기관) => {
   if (지자체꼴.test(g)) return '지자체(그 밖)';
   return '그 밖';
 };
+/* ★ 기관 이름이 「○○시」 뿐이고 **제목에만** 보건소가 적히는 꼴이 있습니다 —
+   그래서 제목까지 봅니다 (기관 쪽에서 이미 걸린 것은 여기서 두 번 안 셉니다) */
+export const 제목에보건 = (제목) => {
+  const t = String(제목 || '');
+  if (치매꼴.test(t)) return '치매';
+  if (보건기관꼴.test(t)) return '보건기관';
+  return null;
+};
 
 if (자기점검) {
   const 짝 = [
@@ -45,12 +53,21 @@ if (자기점검) {
     ['가평군', '지자체(그 밖)'], ['종로구청', '지자체(그 밖)'],
     ['한국철도공사', '그 밖'], ['국민건강보험공단', '그 밖'],
   ];
+  const 제목짝 = [
+    ['2026년 ○○구보건소 기간제근로자 채용 공고', '보건기관'],
+    ['치매안심센터 작업치료사 채용', '치매'],
+    ['환경미화원 채용 공고', null],
+  ];
   let 틀림 = 0;
   for (const [기관, 바람] of 짝) {
     const 난것 = 갈래(기관);
     if (난것 !== 바람) { 틀림++; console.log('✗ ' + 기관 + ' → ' + 난것 + ' (바란 것 ' + 바람 + ')'); }
   }
-  console.log((틀림 ? '✗ ' + 틀림 + '건 틀림' : '○ ' + 짝.length + '가지 통과'));
+  for (const [제목, 바람] of 제목짝) {
+    const 난것 = 제목에보건(제목);
+    if (난것 !== 바람) { 틀림++; console.log('✗ [제목] ' + 제목 + ' → ' + 난것 + ' (바란 것 ' + 바람 + ')'); }
+  }
+  console.log((틀림 ? '✗ ' + 틀림 + '건 틀림' : '○ ' + (짝.length + 제목짝.length) + '가지 통과'));
   process.exit(틀림 ? 1 : 0);
 }
 
@@ -67,13 +84,15 @@ if (!cfg.ALIO_DETAIL_KEY) { console.error('✗ ALIO_DETAIL_KEY 가 없습니다 
 
 const BASE = 'https://apis.data.go.kr/1760000/PblJobService';
 const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
-const 날 = (더할) => {
-  const d = new Date(Date.now() + 더할 * 86400000);
-  return d.toISOString().slice(0, 10).replace(/-/g, '');
-};
+/* collect-nara.mjs 와 **같은 꼴**로 보냅니다 — YYYY-MM-DD · 한국 시각 */
+const 날 = (더할) => new Date(Date.now() + 더할 * 86400000 + 9 * 3600000).toISOString().slice(0, 10);
 const 칸 = (글, 이름) => {
-  const m = 글.match(new RegExp('<' + 이름 + '>([\s\S]*?)</' + 이름 + '>'));
-  return m ? m[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').trim() : '';
+  /* 정규식 **문자열**을 안 씁니다 — 셸을 지나며 역슬래시가 깨져 [\s\S] 가 [sS] 가 됐습니다
+     (2026-10-30 12:45 · 그래서 모든 칸이 빈칸으로 나왔습니다) */
+  const 열 = '<' + 이름 + '>', 닫 = '</' + 이름 + '>';
+  const a = 글.indexOf(열); if (a < 0) return '';
+  const b = 글.indexOf(닫, a + 열.length); if (b < 0) return '';
+  return 글.slice(a + 열.length, b).replace('<![CDATA[', '').replace(']]>', '').trim();
 };
 const 아이템들 = (글) => (글.match(/<item>[\s\S]*?<\/item>/g) || []).map((it) => ({
   idx: 칸(it, 'idx'), title: 칸(it, 'title'), 기관: 칸(it, 'insttname'),
@@ -114,10 +133,23 @@ for (const [k, v] of Object.entries(셈).sort((a, b) => b[1] - a[1])) {
   console.log('  ' + k.padEnd(14) + String(v).padStart(6) + '건');
 }
 
+/* 기관 이름으로 걸린 것 + **제목으로만** 걸린 것 */
 const 보건 = 모은것.filter((x) => 갈래(x.기관) === '보건기관');
 const 치매 = 모은것.filter((x) => 갈래(x.기관) === '치매');
+const 제목만 = 모은것.filter((x) => !['보건기관', '치매'].includes(갈래(x.기관)) && 제목에보건(x.title));
+const 제목만보건 = 제목만.filter((x) => 제목에보건(x.title) === '보건기관');
+const 제목만치매 = 제목만.filter((x) => 제목에보건(x.title) === '치매');
 console.log('\n★ 한 줄 — 최근 ' + 며칠 + '일 나라일터 ' + 모은것.length + '건 중 '
-  + '보건기관 ' + 보건.length + '건 · 치매 ' + 치매.length + '건');
+  + '보건기관 ' + (보건.length + 제목만보건.length) + '건('
+  + '기관이름 ' + 보건.length + ' + 제목만 ' + 제목만보건.length + ') · '
+  + '치매 ' + (치매.length + 제목만치매.length) + '건('
+  + '기관이름 ' + 치매.length + ' + 제목만 ' + 제목만치매.length + ')');
+if (제목만.length) {
+  console.log('\n제목으로만 걸린 것 — ' + 제목만.length + '건 (앞 8건)');
+  for (const x of 제목만.slice(0, 8)) {
+    console.log('  ' + x.등록일.padEnd(11) + (x.기관 || '').slice(0, 20).padEnd(22) + (x.title || '').slice(0, 44));
+  }
+}
 
 const 곳셈 = (줄들) => {
   const m = new Map();
