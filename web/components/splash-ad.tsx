@@ -87,10 +87,13 @@ export function SplashAd() {
       role="dialog"
       aria-label="광고"
     >
-      {/* 「광고」라고 작게라도 반드시 밝힙니다 — 표시광고 고지 의무입니다 */}
+      {/* 광고라고 작게라도 반드시 밝힙니다 — 표시광고 고지 의무입니다.
+          2026-11-02 세중님 — 글자를 「광고」 → 「AD」 로 통일했습니다
+          (홈·커뮤니티 배너와 같은 글자 · components/home-banner.tsx · comm-banner.tsx).
+          스크린리더가 읽는 aria-label·alt 는 「광고」로 둡니다 — 소리로는 그쪽이 분명합니다 */}
       <span className="absolute left-6 top-6 rounded-xs bg-gray-100 px-3 py-1 text-sm text-gray-600
                        dark:bg-gray-800 dark:text-gray-400">
-        광고
+        AD
       </span>
 
       <button

@@ -57,6 +57,37 @@ export function PostComments({ postId }: { postId: number }) {
     await load();
   };
 
+  /* 확인 중에 누르면 잠깐 기다립니다 — /login 으로 보내면 회원이 튀깁니다
+     (components/post-actions.tsx 의 needLogin 과 같은 꼴) */
+  const needLogin = () => {
+    sessionStorage.setItem('potjob.after-login', location.pathname);
+    toast('로그인하면 쓸 수 있어요');
+    router.push('/login');
+  };
+
+  /* 댓글 신고 (2026-11-02 세중님) — **글 신고와 같은 표·같은 흐름**입니다.
+     reports 표의 target_type 제약에 'comment' 가 이미 있어서 DB 는 손대지 않았습니다.
+     같은 댓글을 두 번 신고하면 23505(겹침)로 막힙니다 */
+  const report = async (id: number) => {
+    if (loading) return toast('잠시만요 — 로그인을 확인하고 있어요');
+    if (!me) return needLogin();
+    const reason = prompt('어떤 점이 문제인가요? (비방·저격·허위사실·광고 등)');
+    if (!reason?.trim()) return;
+    if (!confirm('이 댓글을 신고할까요? 신고는 취소할 수 없어요')) return;
+
+    const { error } = await browserSupabase().from('reports').insert({
+      target_type: 'comment', target_id: id, reporter_id: me.id, reason: reason.trim(),
+    });
+    if (error) {
+      toast(
+        error.code === '23505' ? '이미 신고하신 댓글이에요' : `신고하지 못했어요 — ${error.message}`,
+        { tone: 'danger' },
+      );
+      return;
+    }
+    toast('신고했어요. 관리자가 확인할게요');
+  };
+
   const remove = async (id: number) => {
     if (!confirm('이 댓글을 지울까요?')) return;
     const { error } = await browserSupabase().from('comments').delete().eq('id', id);
@@ -132,13 +163,13 @@ export function PostComments({ postId }: { postId: number }) {
         <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
           {roots.map((c) => (
             <li key={c.id} className="py-5">
-              <One c={c} mine={!!c.내글} onRemove={remove}
+              <One c={c} mine={!!c.내글} onRemove={remove} onReport={report}
                 onReply={me ? () => setReplyTo(c.id) : undefined} />
               {kids(c.id).length > 0 && (
                 <ul className="mt-5 space-y-5 border-l border-gray-100 pl-6 dark:border-gray-800">
                   {kids(c.id).map((k) => (
                     <li key={k.id}>
-                      <One c={k} mine={!!k.내글} onRemove={remove} />
+                      <One c={k} mine={!!k.내글} onRemove={remove} onReport={report} />
                     </li>
                   ))}
                 </ul>
@@ -152,10 +183,11 @@ export function PostComments({ postId }: { postId: number }) {
 }
 
 function One({
-  c, mine, onRemove, onReply,
+  c, mine, onRemove, onReply, onReport,
 }: {
   c: CommentRow; mine: boolean;
   onRemove: (id: number) => void; onReply?: () => void;
+  onReport?: (id: number) => void;
 }) {
   return (
     <div>
@@ -171,11 +203,17 @@ function One({
             답글
           </button>
         )}
-        {mine && (
+        {/* 내 댓글이면 지우기 · 남의 댓글이면 신고 — 글 단추 줄과 같은 가름입니다
+            (components/post-actions.tsx) */}
+        {mine ? (
           <button type="button" onClick={() => onRemove(c.id)} className="text-mute hover:text-brand-red">
             지우기
           </button>
-        )}
+        ) : onReport ? (
+          <button type="button" onClick={() => onReport(c.id)} className="text-mute hover:text-brand-red">
+            신고
+          </button>
+        ) : null}
       </div>
       <p className="mt-1 whitespace-pre-wrap break-words text-lg text-gray-700 dark:text-gray-300">
         {c.body}
