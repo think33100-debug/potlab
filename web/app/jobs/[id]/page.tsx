@@ -120,6 +120,69 @@ export async function generateMetadata({
    규칙이었는데, 이제 상세는 정해진 일곱 칸만 그립니다 (세중님 확정).
    전형방법·우대사항·결격사유·문의처·제출서류는 원문 공고에서 봅니다 */
 
+/* ★ 2026-11-01 화면 작업 ⑤ (docs/화면작업_1101.md) — **「공고문 확인」을 한 자리로.**
+   이 파일 안에 그 글자가 **열한 곳**에 흩어져 있어서, 글꼴·색을 고치려면 열한 곳을
+   찾아야 했고 한 곳을 빠뜨리면 회원 눈에 **다른 꼴**로 보였습니다 (지침 6절).
+   ★ 글자는 바꾸지 않습니다 — 「공고문 확인」 그대로입니다 (CLAUDE.md 예상연봉·일곱 칸 절). */
+export const 못읽은칸말 = '공고문 확인';
+export const 마감못읽은말 = '마감일 공고문 확인';
+
+/** ★ 2026-11-01 화면 작업 ① — 단추 옆 **「지원 방법」 한 줄**을 조각으로 뗐습니다.
+   무엇을 적을지는 lib/job-state.ts 의 지원방법말() 한 자리 그대로이고,
+   **자리·글꼴만** 이 조각 안에서 다듬습니다 (시안을 받으면 여기만 고칩니다). */
+/* ★ 2026-11-02 합칠 때 — `ui/1101` 의 이 조각(10/25~11/01)에는 main 의 **10/28 두 줄**이
+   없었습니다(「원문 보기」 · 「· 공고문 확인」). 조각을 쓰되 **그 두 줄을 안으로 옮겨**
+   합쳤습니다 — 어느 쪽도 버리지 않습니다. 그래서 받는 값이 셋입니다. */
+function 지원방법줄({
+  접수방법, 원문주소, 갈곳없나,
+}: {
+  접수방법?: string;
+  /** 공고 원문 주소 (j.url) — 있으면 「원문 보기」를 늘 답니다 (2026-10-28 세중님 E) */
+  원문주소?: string | null;
+  /** 회원인데 갈 주소가 아무것도 없나 — 그때만 「· 공고문 확인」 (2026-10-28 세중님 2번 ④).
+      비회원은 창구가 주소를 안 줘서 「없음」인 것이라 적으면 사실이 아닙니다 */
+  갈곳없나?: boolean;
+}) {
+  const 지원 = 지원방법말(접수방법);
+  if (!지원.낱말.length && !갈곳없나) return null;
+  return (
+    <div className="mx-auto mb-2 flex w-full max-w-2xl flex-wrap items-center gap-x-1.5
+                    text-[13px] leading-[1.5] text-[#5F666C]">
+      <span className="shrink-0 font-bold text-[#1B2025]">지원 방법</span>
+      {지원.낱말.length > 0 && <span className="break-keep">{지원.낱말.join(' · ')}</span>}
+      {지원.채용페이지 && (
+        <a href={지원.채용페이지} target="_blank" rel="noopener noreferrer"
+           className="underline decoration-[#C9CCCF] underline-offset-2">
+          병원 채용 페이지
+        </a>
+      )}
+      {원문주소 && (
+        <a href={원문주소} target="_blank" rel="noopener noreferrer"
+           className="break-keep underline decoration-[#C9CCCF] underline-offset-2">
+          원문 보기
+        </a>
+      )}
+      {갈곳없나 && (
+        <span className="break-keep font-medium text-[#4A5056]">· 공고문 확인</span>
+      )}
+    </div>
+  );
+}
+
+/** 못 읽은 칸 — 원문 링크가 있으면 **링크로**, 없으면 글자만 (꼴은 이 한 자리) */
+function 못읽은칸({ url }: { url?: string | null }) {
+  if (!url) return <p className="break-keep text-[15px] text-[#4A5056]">{못읽은칸말}</p>;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer"
+       className="inline-flex items-center gap-1 break-keep text-[15px]
+                  font-bold text-[#1B2025] underline
+                  decoration-[#C9C9C2] underline-offset-[3px]">
+      {못읽은칸말}
+      <Icon name="arrow-up-right" size={15} className="shrink-0 text-[#5F666C]" />
+    </a>
+  );
+}
+
 export default async function JobDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
@@ -179,7 +242,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const 지원 = 지원링크(j.url, detail['접수방법'] as string | undefined,
     (detail['기관홈'] ?? detail['기관홈페이지']) as string | undefined,
     detail['채용게시판'] as string | undefined, j.id);
-  const 지원방법 = 지원방법말(detail['접수방법'] as string | undefined);
+  /* 「지원 방법」 낱말은 이제 <지원방법줄> 조각이 스스로 셉니다 (2026-11-02 합칠 때) —
+     여기서 또 세면 두 벌이 됩니다 (지침 6절) */
   const 지원자격: string | null =
     (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
   /* ★ 2026-10-22 세중님 1번 — 포털 **상세** 칸이 날짜가 아닌 말이면(「채용시까지」)
@@ -356,7 +420,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                   「우리가 못 읽은 것」인지 「공고에 없는 것」인지 알 수 없었습니다.
                   「0명」·「○명」은 **원문 글자 그대로** 그립니다 — 그 규칙은 그대로입니다 */}
               <Core icon={icons['job.headcount']} label="모집 인원"
-                    v={모집인원 || '공고문 확인'}
+                    v={모집인원 || 못읽은칸말}
                     url={모집인원 ? null : j.url} />
               {/* ★ 2026-10-08 — 마감 **시각**이 있으면 함께 보여줍니다.
                   「2026-10-16 (금) 오전 9시 마감」. 전에는 날짜만 보여줘서
@@ -375,7 +439,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                         : (j.apply_to
                           ? j.apply_to + (요일(j.apply_to) ? ` (${요일(j.apply_to)})` : '')
                             + (시각말(j.apply_to_time) ? ` ${시각말(j.apply_to_time)} 마감` : '')
-                          : (j.마감표시 || '마감일 공고문 확인'))}
+                          : (j.마감표시 || 마감못읽은말))}
                     sub={[마감글 && j.apply_to ? `게시 ~${게시날(j.apply_to)}` : null,
                       j.apply_from ? `${j.apply_from} 시작` : null]
                       .filter(Boolean).join(' · ') || null} />
@@ -390,7 +454,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                   회원 화면 **6건**이 그 꼴이었습니다 (국립재활원 둘 · 수원병원 ·
                   대구보건대 · 원광대 · 경남광역치매센터 — 여섯 다 원문 링크가 있습니다) */}
               <Core icon={icons['job.place']} label="근무지"
-                    v={j.지역보임 || j.work_place || '공고문 확인'}
+                    v={j.지역보임 || j.work_place || 못읽은칸말}
                     url={(j.지역보임 || j.work_place) ? null : j.url}
                     sub={j.work_place && j.work_place.includes(' ')
                          && j.work_place !== j.지역보임 ? j.work_place : null} />
@@ -484,16 +548,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
                               text-[#4A5056]" style={{ overflowWrap: 'break-word' }}>
                   {지원자격}
                 </p>
-              ) : j.url ? (
-                <a href={j.url} target="_blank" rel="noopener noreferrer"
-                   className="inline-flex items-center gap-1 break-keep text-[15px]
-                              font-bold text-[#1B2025] underline
-                              decoration-[#C9C9C2] underline-offset-[3px]">
-                  공고문 확인
-                  <Icon name="arrow-up-right" size={15} className="shrink-0 text-[#5F666C]" />
-                </a>
               ) : (
-                <p className="break-keep text-[15px] text-[#4A5056]">공고문 확인</p>
+                <못읽은칸 url={j.url} />
               )}
             </Block>
           </Rise>
@@ -639,36 +695,11 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               무엇을 적을지는 lib/job-state.ts 의 지원방법말() 한 자리에서 정합니다 —
               **아는 낱말만** 적습니다(옛 길이 넣은 마감 안내 문장이 140건 있습니다).
               배치(글꼴·자리)는 11/1~6 화면 작업 때 다듬습니다 */}
-          {(지원방법.낱말.length > 0 || (member && !지원.주소)) && (
-            <div className="mx-auto mb-2 flex w-full max-w-2xl flex-wrap items-center gap-x-1.5
-                            text-[13px] leading-[1.5] text-[#5F666C]">
-              <span className="shrink-0 font-bold text-[#1B2025]">지원 방법</span>
-              {지원방법.낱말.length > 0 && (
-                <span className="break-keep">{지원방법.낱말.join(' · ')}</span>
-              )}
-              {지원방법.채용페이지 && (
-                <a href={지원방법.채용페이지} target="_blank" rel="noopener noreferrer"
-                   className="underline decoration-[#C9CCCF] underline-offset-2">
-                  병원 채용 페이지
-                </a>
-              )}
-              {/* ★ 2026-10-28 세중님 2번 ④ — 갈 주소가 아무것도 없으면 단추를 숨기고
-                  이 줄이 「공고문 확인」을 맡습니다. 회원에게만 적습니다 —
-                  비회원은 창구가 주소를 안 줘서 「없음」인 것이라 사실이 아닙니다 */}
-              {/* ★ 2026-10-28 세중님 E — 「원문 보기」 작은 줄은 **항상** 그립니다.
-                  단추가 ①채용 게시판·②기관 홈페이지로 갈 수 있으니, 공고 원문으로 가는
-                  길이 따로 늘 있어야 합니다 (비회원은 창구가 주소를 안 줘서 안 그려집니다) */}
-              {j.url && (
-                <a href={j.url} target="_blank" rel="noopener noreferrer"
-                   className="break-keep underline decoration-[#C9CCCF] underline-offset-2">
-                  원문 보기
-                </a>
-              )}
-              {member && !지원.주소 && (
-                <span className="break-keep font-medium text-[#4A5056]">· 공고문 확인</span>
-              )}
-            </div>
-          )}
+          <지원방법줄
+            접수방법={detail['접수방법'] as string | undefined}
+            원문주소={j.url}
+            갈곳없나={member && !지원.주소}
+          />
           <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
             <JobSave id={j.id} big />
             {/* ★ 2026-10-28 세중님 2번 — 「지원하러 가기」는 **그 공고로** 갑니다.

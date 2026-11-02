@@ -3,10 +3,26 @@ import { createClient } from '@supabase/supabase-js';
 /* 브라우저에 나가도 되는 열쇠입니다.
    무엇을 읽을 수 있는지는 DB 쪽 RLS 가 정합니다 — 여기서 막는 게 아닙니다.
    service_role 키는 절대 이쪽에 두지 않습니다. */
+/* ★ 2026-11-01 화면 작업 ④ (docs/화면작업_1101.md) — **Multiple GoTrueClient 경고.**
+   이 파일은 **모듈 자리에서** 열쇠꾸러미를 하나 만들고, 많은 화면이 그걸 가져다 씁니다.
+   그런데 로그인하는 화면은 `lib/supabase-browser.ts` 의 꾸러미도 함께 씁니다 —
+   그래서 한 쪽(브라우저 한 창)에 **꾸러미가 둘**이 되고, supabase-js 가
+   「Multiple GoTrueClient instances detected … under the same storage key」를 찍었습니다.
+   ★ 고친 것은 **저장 열쇠 이름뿐**입니다 (`storageKey`). 이 꾸러미는 `persistSession: false`
+     라 세션을 저장하지 않으므로, 이름을 갈라도 로그인 흐름이 바뀌지 않습니다.
+     꾸러미를 합치는 쪽이 더 깔끔하지만 이 파일은 **서버 길(app/api/*)도** 쓰므로
+     그건 더 큰 손질입니다 → 오픈 뒤 목록으로 둡니다. */
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  { auth: { persistSession: false } }
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storageKey: 'potjob-anon-nosession',
+    },
+  }
 );
 
 /* 공고를 받는 길은 2026-09-25 에 함수로 바뀌었습니다.

@@ -145,24 +145,19 @@ export default function AdminJobs() {
     await reload();
   };
 
-  /* 살릴 때는 직군을 골라야 합니다 — 물리/작업/공통 */
-  const 살리기 = (id: string, title: string) => {
-    const 물음 = [
-      `「${title.slice(0, 40)}」 를 회원 화면에 올립니다.`,
-      '',
-      '직군을 고르세요 —',
-      '  1  물리치료사',
-      '  2  작업치료사',
-      '  3  공통(둘 다)',
-      '',
-      '번호를 넣어 주세요',
-    ].join('\n');
-    const 답 = prompt(물음, '3');
-    if (답 === null) return;
-    const 직군 = { 1: '물리치료사', 2: '작업치료사', 3: '공통' }[Number(답.trim()) as 1 | 2 | 3];
-    if (!직군) { toast('1 · 2 · 3 중에 골라 주세요', { tone: 'danger' }); return; }
+  /* ★ 2026-11-01 화면 작업 ③ (docs/화면작업_1101.md) — **prompt 창을 단추로.**
+     전에는 번호(1·2·3)를 **글로 받았습니다.** 창이 뜨면 화면이 멈추고, 잘못 넣으면
+     「1 · 2 · 3 중에 골라 주세요」로 되돌아왔습니다. 이제 그 줄에서 **단추 셋**을 그립니다. */
+  const [고를공고, set고를공고] = useState<{ id: string; title: string } | null>(null);
+  const 직군고름 = (직군: '물리치료사' | '작업치료사' | '공통') => {
+    if (!고를공고) return;
+    const { id } = 고를공고;
+    set고를공고(null);
     void decide(id, '살리기', 직군);
   };
+
+  /* 살릴 때는 직군을 골라야 합니다 — 물리/작업/공통 (단추로 고릅니다) */
+  const 살리기 = (id: string, title: string) => set고를공고({ id, title });
 
   const remove = async (id: string, title: string) => {
     if (!confirm(`「${title}」를 지울까요?\n되돌릴 수 없어요. 보류함으로 보내는 쪽이 안전해요`)) return;
@@ -300,8 +295,17 @@ export default function AdminJobs() {
 
               <div className="mt-5 flex flex-wrap gap-2">
                 {/* 살리기 · 숨기기 · 보류함으로 — 셋 중 하나. 지금 상태인 것은 안 보입니다 */}
-                {(r.hold || r.hidden) && (
+                {(r.hold || r.hidden) && 고를공고?.id !== r.id && (
                   <Act onClick={() => 살리기(r.id, r.title)} busy={busy === r.id}>회원 화면에 올리기</Act>
+                )}
+                {고를공고?.id === r.id && (
+                  <>
+                    <span className="self-center text-sm text-mute">어느 직군으로 올릴까요?</span>
+                    <Act onClick={() => 직군고름('물리치료사')} busy={busy === r.id}>물리치료사</Act>
+                    <Act onClick={() => 직군고름('작업치료사')} busy={busy === r.id}>작업치료사</Act>
+                    <Act onClick={() => 직군고름('공통')} busy={busy === r.id}>공통(둘 다)</Act>
+                    <Act onClick={() => set고를공고(null)} busy={false}>그만</Act>
+                  </>
                 )}
                 {!r.hidden && (
                   <Act onClick={() => decide(r.id, '숨기기')} busy={busy === r.id}>숨기기</Act>
