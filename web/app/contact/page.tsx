@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { InquiryForm } from '@/components/inquiry-form';
 import { COMPANY, HELP_EMAIL, PRIVACY_EMAIL, PRIVACY_OFFICER } from '@/lib/contact';
+import { 문의폼_켰나 } from '@/lib/inquiry';
 
 /* 문의하기 (2026-10-01).
 
@@ -23,13 +25,24 @@ const 무엇을 = [
     설명: '불편한 점, 있었으면 하는 기능 — 무엇이든 좋습니다' },
 ];
 
-export default function ContactPage() {
+export default async function ContactPage(
+  { searchParams }: { searchParams: Promise<{ [k: string]: string | string[] | undefined }> },
+) {
+  /* 폼은 스위치로 켭니다 (lib/inquiry.ts). 창구가 아직 DB 에 없어서 기본은 꺼짐이고,
+     미리보기에서 보려면 ?폼=1 — 회원에게는 안 보입니다 */
+  const q = await searchParams;
+  const 폼보이기 = 문의폼_켰나 || q['폼'] === '1';
+
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <h1 className="text-h2 font-bold">문의하기</h1>
       <p className="mt-2 break-keep text-lg text-mute">
-        아래 메일로 보내주세요. 평일에 확인하고 답을 드립니다
+        {폼보이기
+          ? '아래에서 바로 보내시거나, 메일로 보내주세요. 평일에 확인하고 답을 드립니다'
+          : '아래 메일로 보내주세요. 평일에 확인하고 답을 드립니다'}
       </p>
+
+      {폼보이기 && <InquiryForm />}
 
       <a
         href={`mailto:${HELP_EMAIL}`}

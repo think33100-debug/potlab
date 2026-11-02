@@ -47,6 +47,9 @@ const MENU = [
   /* 치료사 재직 확인 — 확인하면 파일을 바로 지웁니다 (2026-10-09) */
   { href: '/admin/verify', label: '재직 확인' },
   { href: '/admin/reports', label: '신고' },
+  /* 앱 안 「문의하기」로 들어온 글 (2026-11-02 세중님).
+     창구는 docs/승인대기_1102.md ㉠ 이 올라간 뒤에 돕니다 */
+  { href: '/admin/inquiries', label: '문의' },
   { href: '/admin/access', label: '개인정보 접속기록' },
   { href: '/admin/reset', label: '내 계정 초기화' },
 ];

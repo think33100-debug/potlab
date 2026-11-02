@@ -24,7 +24,7 @@
      그 화면을 만들 때 지우는 길과 함께 글도 고칩니다 (약관점검 8절).
 
    2026-11-02 (둘째 묶음 · 판은 그대로 2026-11-10) — 세중님
-   ㉠ 메일 주소를 회사 것으로 — privacy@rapohelp.co.kr · help@rapohelp.co.kr
+   ㉠ 메일 주소를 회사 것으로 — privacy@rapojob.co.kr · help@rapojob.co.kr
      (lib/contact.ts 한 자리. 개인 메일 think0331@naver.com 은 회원 화면에서 사라집니다)
    ㉡ **1:1 대화를 오픈 때 닫습니다** → 「채팅에 남긴 말·사진」 줄을 **뺐습니다**.
      표(chat_rooms·chat_messages)와 저장소(chat 버킷)는 그대로 두고 화면만 닫습니다
@@ -157,9 +157,7 @@ export const TERMS: Record<TermKey, { title: string; draft: boolean; body: strin
     (1600 Amphitheatre Parkway, Mountain View, CA 94043, 미국)
   · 왜 — 문의 메일을 받고 보관하기 위해서입니다
   · 무엇을 — 문의 메일에 담긴 이름 · 이메일 주소 · 내용
-  · 어느 나라로 — 미국.
-    그 밖에 Google 이 운영하는 데이터센터가 있는 나라로도 옮겨질 수 있습니다
-    [확인 필요 — 나라 목록]
+  · 어느 나라로 — 미국 등 Google 데이터센터 소재 국가
   · 언제 · 어떻게 — 문의 메일을 주고받을 때마다, 인터넷을 통해 보냅니다
   · 얼마나 — 위 「얼마나 두나요」의 문의 메일과 같습니다 (답을 드린 뒤 1년)
   · 거부하실 수 있습니다 — 메일로 문의하지 않으시면 이 이전은 일어나지 않습니다.
@@ -185,8 +183,8 @@ export const TERMS: Record<TermKey, { title: string; draft: boolean; body: strin
   · 열람 · 정정 · 삭제 · 처리정지를 요청하실 수 있습니다 (아래 문의처)
 
 개인정보 보호책임자
-  · 주식회사 빈틈 운영팀 · privacy@rapohelp.co.kr
-  · 그 밖의 문의 · help@rapohelp.co.kr
+  · 주식회사 빈틈 운영팀 · privacy@rapojob.co.kr
+  · 그 밖의 문의 · help@rapojob.co.kr
   · 우편 — 대구 북구 동북로 291, 901-A156호
 
 동의하지 않으셔도 채용공고는 보실 수 있습니다.

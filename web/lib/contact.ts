@@ -10,10 +10,10 @@
    관리자 내부 알림(NOTIFY_EMAIL · 서버 .env)은 이 파일과 **무관**합니다 */
 
 /** 개인정보 보호책임자 메일 — 열람·정정·삭제·처리정지 */
-export const PRIVACY_EMAIL = 'privacy@rapohelp.co.kr';
+export const PRIVACY_EMAIL = 'privacy@rapojob.co.kr';
 
 /** 일반 문의 메일 */
-export const HELP_EMAIL = 'help@rapohelp.co.kr';
+export const HELP_EMAIL = 'help@rapojob.co.kr';
 
 /* 개인정보 보호책임자 — **사람 이름을 적지 않습니다** (2026-10-05 세중님 지시).
 
