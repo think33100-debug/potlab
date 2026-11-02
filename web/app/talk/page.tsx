@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth';
 import { Avatar } from '@/components/avatar';
+import { NothingHere } from '@/components/nothing-here';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { 대화닫힘안내, 대화열렸나 } from '@/lib/talk';
 
 /* 1:1 대화 목록 (2026-10-09 · 뼈대 6절).
  *
@@ -28,7 +30,19 @@ type 방 = {
 const 날 = (s: string | null) => (!s ? '' : new Date(s).toLocaleString('ko-KR',
   { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }));
 
+/* ★ 2026-11-02 세중님 — 오픈 때 1:1 대화는 **닫습니다**.
+   아래 대화목록() 은 그대로 두고 **문 앞에서 돌려보냅니다** — 주소를 직접 쳐도
+   창구를 안 부르니 아무것도 안 보입니다. 다시 열 때는 lib/talk.ts 의 한 줄입니다.
+   (여기서 바로 return 하면 아래 훅들이 조건부가 되어 린트가 막습니다 —
+    그래서 **쪽을 감싸는 꼴**로 둡니다) */
 export default function Talk() {
+  if (!대화열렸나) {
+    return <NothingHere title={대화닫힘안내.제목} body={대화닫힘안내.본문} />;
+  }
+  return <TalkList />;
+}
+
+function TalkList() {
   const { loading, session, isAdmin } = useAuth();
   const [마스터, set마스터] = useState(false);
   const [방들, set방들] = useState<방[]>([]);

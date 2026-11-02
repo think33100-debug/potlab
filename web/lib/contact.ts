@@ -4,8 +4,16 @@
    여기저기 따로 적어두면 한 곳만 안 바뀌어 틀린 주소가 남습니다.
    바꿀 일이 생기면 이 파일만 고치세요. */
 
-/** 개인정보 보호책임자 겸 문의 메일 */
-export const CONTACT_EMAIL = 'think0331@naver.com';
+/* ★ 2026-11-02 세중님 — 개인 메일(think0331@naver.com)에서 회사 메일로 바꿨습니다.
+   둘로 갈라 둡니다: 개인정보 일은 privacy@, 그 밖의 문의는 help@.
+   회원에게 보이는 자리는 **이 두 상수만** 씁니다 (꼬리말·문의하기·약관).
+   관리자 내부 알림(NOTIFY_EMAIL · 서버 .env)은 이 파일과 **무관**합니다 */
+
+/** 개인정보 보호책임자 메일 — 열람·정정·삭제·처리정지 */
+export const PRIVACY_EMAIL = 'privacy@rapohelp.co.kr';
+
+/** 일반 문의 메일 */
+export const HELP_EMAIL = 'help@rapohelp.co.kr';
 
 /* 개인정보 보호책임자 — **사람 이름을 적지 않습니다** (2026-10-05 세중님 지시).
 

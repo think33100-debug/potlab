@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { COMPANY, CONTACT_EMAIL, PRIVACY_OFFICER } from '@/lib/contact';
+import { COMPANY, HELP_EMAIL, PRIVACY_EMAIL, PRIVACY_OFFICER } from '@/lib/contact';
 
 /* 문의하기 (2026-10-01).
 
@@ -32,10 +32,10 @@ export default function ContactPage() {
       </p>
 
       <a
-        href={`mailto:${CONTACT_EMAIL}`}
+        href={`mailto:${HELP_EMAIL}`}
         className="mt-6 block rounded-md bg-teal-strong px-6 py-5 text-center text-body-lg font-bold text-white hover:opacity-90 active:scale-[0.98]"
       >
-        {CONTACT_EMAIL} 으로 메일 보내기
+        {HELP_EMAIL} 으로 메일 보내기
       </a>
 
       <section className="mt-8">
@@ -56,8 +56,8 @@ export default function ContactPage() {
           {PRIVACY_OFFICER.이름}
           {PRIVACY_OFFICER.직책 ? ` (${PRIVACY_OFFICER.직책})` : ''}
           <br />
-          <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
-            {CONTACT_EMAIL}
+          <a href={`mailto:${PRIVACY_EMAIL}`} className="underline underline-offset-2">
+            {PRIVACY_EMAIL}
           </a>
         </p>
         <p className="mt-3 break-keep text-sm text-mute">

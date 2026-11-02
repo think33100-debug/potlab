@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
+import { NothingHere } from '@/components/nothing-here';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { 대화닫힘안내, 대화열렸나 } from '@/lib/talk';
 
 /* 대화 한 방 (2026-10-09).
  *
@@ -26,7 +28,16 @@ type 줄 = {
 const 때 = (s: string) => new Date(s).toLocaleString('ko-KR',
   { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit' });
 
+/* ★ 2026-11-02 세중님 — 오픈 때 1:1 대화는 **닫습니다** (lib/talk.ts).
+   방 주소를 직접 쳐도 안내만 보이고 창구(대화읽기)를 안 부릅니다 */
 export default function TalkRoom() {
+  if (!대화열렸나) {
+    return <NothingHere title={대화닫힘안내.제목} body={대화닫힘안내.본문} />;
+  }
+  return <TalkRoomInner />;
+}
+
+function TalkRoomInner() {
   const { room } = useParams<{ room: string }>();
   const 방 = Number(room);
   const { loading, session } = useAuth();

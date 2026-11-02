@@ -7,7 +7,7 @@ import { PersonaBar } from "@/components/persona-bar";
 import { SplashAd } from "@/components/splash-ad";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
-import { COMPANY, CONTACT_EMAIL, PRIVACY_OFFICER } from "@/lib/contact";
+import { COMPANY, PRIVACY_EMAIL, PRIVACY_OFFICER } from "@/lib/contact";
 import { siteUrl } from "@/lib/site-url";
 import { AuthProvider } from "./auth";
 import { BackGuard } from "./back-guard";
@@ -93,8 +93,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                   찾을 수 있어야 합니다 (2026-10-01).
                   사람 이름 대신 팀 이름을 적습니다 (2026-10-05 세중님 지시) */}
               개인정보 보호책임자 {PRIVACY_OFFICER.이름} ·{' '}
-              <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
-                {CONTACT_EMAIL}
+              <a href={`mailto:${PRIVACY_EMAIL}`} className="underline underline-offset-2">
+                {PRIVACY_EMAIL}
               </a>
             </p>
             <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-mute dark:text-gray-400"
