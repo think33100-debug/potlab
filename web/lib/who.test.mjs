@@ -16,10 +16,10 @@ assert.equal(shownName({ nickname: '시험닉' }), '시험닉');
       DB 가 「지운계정-<uuid>」 를 넣어둡니다 (reset_my_account) */
 assert.equal(
   shownName({ nickname: '지운계정-3f8a1c2d4e5f6071', erased_at: '2026-09-23T00:00:00Z' }),
-  '탈퇴한 회원',
+  '찾을 수 없는 회원',
 );
 /* 원래 닉네임이 그대로 남아 있는 경우에도 지운 표시가 이깁니다 */
-assert.equal(shownName({ nickname: '시험닉', erased_at: '2026-09-23T00:00:00Z' }), '탈퇴한 회원');
+assert.equal(shownName({ nickname: '시험닉', erased_at: '2026-09-23T00:00:00Z' }), '찾을 수 없는 회원');
 
 /* ③ 줄 자체가 없을 때 — 이건 탈퇴와 다릅니다. 「알 수 없음」 그대로 */
 assert.equal(shownName(null), '알 수 없음');

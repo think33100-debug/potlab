@@ -34,7 +34,9 @@ type Row = {
 
 /* 탈퇴한 분의 원래 이름은 2026-10-01 부터 **어디에도 안 남깁니다.**
    닉네임·직군·역할은 탈퇴 즉시 파기하기로 정해 erased_accounts 에서 뺐습니다.
-   그래서 관리자 화면도 「탈퇴한 회원」 까지만 보여줍니다 */
+   그래서 관리자 화면도 「찾을 수 없는 회원」 까지만 보여줍니다
+   (2026-11-02 에 글자를 「탈퇴한 회원」 → 「찾을 수 없는 회원」 으로 바꿨습니다 ·
+    회원 화면 쪽은 lib/who.ts 의 shownName 한 자리입니다) */
 
 /* profiles 로 가는 길이 둘이라(글쓴이·감춘 사람) 관계 이름을 박아야 합니다.
    그냥 profiles 라고 쓰면 PGRST201 이 납니다 — lib/supabase.ts 의 AUTHOR 와 같은 사정입니다 */
@@ -168,7 +170,7 @@ export default function AdminPosts() {
   const nameOf = (p: Person, id?: string) => {
     if (id && 이름표[id]) return 이름표[id];
     if (!p) return '알 수 없음';
-    return p.erased_at ? '탈퇴한 회원' : p.nickname;
+    return p.erased_at ? '찾을 수 없는 회원' : p.nickname;
   };
 
   /* 누가 감췄는지 한 줄로. 글쓴이 본인이면 「지웠어요」, 아니면 관리자가 내린 것입니다 */

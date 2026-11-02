@@ -81,6 +81,16 @@ export default function Verify() {
         주민등록번호 뒷자리는 가리고 올려 주세요.
       </p>
 
+      {/* 개인정보처리방침 — 증빙 파일을 받는 화면이라 이 자리에 링크를 둡니다
+          (세중님 2026-11-02 · docs/약관점검_1025.md 7절 ④).
+          꼬리말·문의·내 정보·가입 첫 화면과 **같은 주소**입니다 */}
+      <p className="mt-3 break-keep text-lg text-mute">
+        <Link href="/terms/privacy" className="underline underline-offset-4 hover:text-brand-red">
+          개인정보처리방침
+        </Link>
+        {' '}에서 무엇을 받고 언제 지우는지 보실 수 있어요.
+      </p>
+
       {탈 && <p className="mt-4 text-lg text-brand-red-dark">{탈}</p>}
 
       {지금?.상태 === '확인' ? (

@@ -37,6 +37,11 @@ function Slide({ b }: { b: HomeBlock }) {
     >
       {/* 그림 위에 글씨를 얹으면 안 읽힙니다 — 어둡게 한 겹 깝니다 */}
       {bg && <span aria-hidden className="absolute inset-0 bg-black/35" />}
+      {/* 표시광고 고지 — 이 배너는 관리자가 넣는 광고 자리입니다 (세중님 2026-11-02).
+          오픈 화면 배너(components/splash-ad.tsx)에는 전부터 「광고」가 붙어 있습니다 */}
+      <span className="absolute right-4 top-4 rounded-xs bg-black/55 px-2 py-0.5 text-sm font-bold text-white">
+        AD
+      </span>
       <span className="relative break-keep text-h3 font-bold">{b.title}</span>
       {b.descr && <span className="relative mt-1 break-keep text-lg text-white/85">{b.descr}</span>}
     </Link>

@@ -24,6 +24,10 @@ export type Role = (typeof ROLES)[number];
 
    2026-10-01 에 「알 수 없음」 → 「탈퇴한 회원」 으로 바꿨습니다.
    「알 수 없음」은 글쓴이 줄이 사라진 것과 구별이 안 됐습니다.
+   2026-11-02 에 「탈퇴한 회원」 → 「찾을 수 없는 회원」 으로 바꿨습니다 (세중님).
+   ★ 약관 글(lib/terms.ts)에는 아직 「탈퇴한 회원」이라고 적혀 있습니다 —
+     그 글을 고치면 TERMS_VERSION 과 약관동의 표의 판이 함께 올라가므로
+     세중님 결정 자리입니다 (docs/약관점검_1025.md 6절).
 
    관리자 화면도 이제 원래 이름을 못 봅니다 — 닉네임·직군·역할은
    탈퇴 즉시 파기하기로 정해서 erased_accounts 에서 뺐습니다 (2026-10-01). */
@@ -34,10 +38,10 @@ export type Author = {
 } | null | undefined;
 
 /** 화면에 내보낼 이름.
- *  탈퇴한 분은 「탈퇴한 회원」, 줄 자체가 없으면 「알 수 없음」입니다 */
+ *  탈퇴한 분은 「찾을 수 없는 회원」, 줄 자체가 없으면 「알 수 없음」입니다 */
 export function shownName(p: Author): string {
   if (!p) return '알 수 없음';
-  if (p.erased_at) return '탈퇴한 회원';
+  if (p.erased_at) return '찾을 수 없는 회원';
   return p.nickname;
 }
 

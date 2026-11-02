@@ -36,6 +36,10 @@ function Slide({ b }: { b: HomeBlock }) {
       style={bg ? { backgroundImage: `url(${bg})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
     >
       {bg && <span aria-hidden className="absolute inset-0 bg-black/45" />}
+      {/* 표시광고 고지 — 홈 배너와 같은 자리입니다 (세중님 2026-11-02) */}
+      <span className="absolute right-4 top-4 rounded-xs bg-white/15 px-2 py-0.5 text-sm font-bold text-white">
+        AD
+      </span>
       <span className="relative break-keep text-h3 font-bold">{b.title}</span>
       {b.descr && <span className="relative mt-1 break-keep text-lg text-mute">{b.descr}</span>}
     </Link>

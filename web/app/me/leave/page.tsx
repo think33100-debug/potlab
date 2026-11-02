@@ -106,7 +106,7 @@ export default function LeavePage() {
       <div className="mt-3 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
         <p className="text-lg font-bold">남는 것</p>
         <ul className="mt-2 space-y-1 break-keep text-lg text-gray-600 dark:text-gray-400">
-          <li>· 내가 쓴 글과 댓글 — 글쓴이가 「탈퇴한 회원」으로 바뀌어요</li>
+          <li>· 내가 쓴 글과 댓글 — 글쓴이가 「찾을 수 없는 회원」으로 바뀌어요</li>
           <li>· 채팅에 남긴 말 — 보낸 사람 표시가 가려지고, 쓴 지 1년이 되면 지워져요</li>
           <li>· 언제 가입해서 언제 탈퇴했는지</li>
           <li>
@@ -158,7 +158,7 @@ export default function LeavePage() {
 
       <p className="mt-5 break-keep text-sm text-mute">
         탈퇴한 뒤 같은 카카오·네이버로 다시 로그인하면 <span className="font-bold">새 계정</span>으로
-        가입 첫 화면부터 시작해요. 예전 글은 「탈퇴한 회원」이 쓴 글로 남습니다
+        가입 첫 화면부터 시작해요. 예전 글은 「찾을 수 없는 회원」이 쓴 글로 남습니다
       </p>
     </main>
   );

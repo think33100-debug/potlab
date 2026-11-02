@@ -224,6 +224,13 @@ export default function MyPage() {
           로그아웃
         </button>
 
+        {/* 개인정보처리방침 — 내 정보 화면에서도 바로 열 수 있게 (세중님 2026-11-02).
+            꼬리말(app/layout.tsx)·문의(app/contact)·가입 첫 화면과 **같은 주소**입니다 */}
+        <Link href="/terms/privacy"
+          className="mt-4 block text-lg text-mute underline underline-offset-4 hover:text-brand-red">
+          개인정보처리방침
+        </Link>
+
         {/* 애플 심사 기준 5.1.1(v) — 앱에서 가입할 수 있으면 앱 안에서 탈퇴도
             할 수 있어야 합니다. 찾기 쉬운 자리에 둡니다 (2026-10-01) */}
         <Link href="/me/leave"
