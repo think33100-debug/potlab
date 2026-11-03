@@ -77,8 +77,12 @@ const ver = (appSrc.match(/var APP_JS_VER = '([^']+)'/) || [])[1] || '?';
 /* ── 갈래 규칙이 두 벌로 갈라지지 않았나 (2026-09-28) ──────────
    gas 의 갈래 규칙은 tools/sort-rule.mjs 에서 **구워 넣은** 것입니다.
    누가 gas 쪽을 손으로 고치면 두 벌이 됩니다 — 2026-09-28 에 제목 940건 중
-   550건(58%)이 갈라져 있던 것을 찾았습니다. 여기서 매번 봅니다. */
-try {
+   550건(58%)이 갈라져 있던 것을 찾았습니다. 여기서 매번 봅니다.
+   gas/wage.js 가 없으면 견줄 것이 없어 건너뜁니다 (위 서버 대조와 같습니다) —
+   없는 것을 「규칙이 다릅니다」로 적고 있었습니다 (2026-11-03). */
+if (!fs.existsSync(path.join(root, 'gas', 'wage.js'))) {
+  console.log('· gas/wage.js 가 없어 갈래 규칙 대조는 건너뜁니다');
+} else try {
   const out = require('child_process').execFileSync(
     process.execPath, [path.join(__dirname, 'sort-rule-to-gas.mjs'), '--검사'],
     { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
