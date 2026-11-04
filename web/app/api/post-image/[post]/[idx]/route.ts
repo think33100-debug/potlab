@@ -12,7 +12,9 @@ import { supabase } from '@/lib/supabase';
  * ── 왜 저장소 경로를 안 바꿨나 ──────────────────────────────
  * 경로를 `<글번호>/…` 로 바꾸려면 저장소 규칙 둘(INSERT·DELETE)을 고치고
  * 이미 올라간 파일을 옮기고 post_images 줄도 고쳐야 합니다. 그래도 **옛 글은
- * 주소가 이미 밖에 나가 있습니다.** 여기서 가리면 옛 글까지 한 번에 끝납니다.
+ * 주소가 이미 밖에 나가 있습니다.** 이 중계는 기존 캐시나 Storage 공개 URL을
+ * 회수하지 않으며 작성자 경로 가림을 해결하지 않습니다. 이번 캐시 수정은 앞으로
+ * 이 경로가 반환하는 응답과 upstream fetch를 저장하지 않도록 하는 범위입니다.
  *
  * ponytail: 사진이 1건이라 우리가 바이트를 중계해도 쌉니다. 커뮤니티가 커져
  *   이 중계가 눈에 띄면 그때 경로를 글번호로 바꾸고 저장소 규칙을 고칩니다.
@@ -35,7 +37,7 @@ export async function GET(
   const 글번호 = Number(post);
   const 번 = Number(idx);
   if (!Number.isInteger(글번호) || !Number.isInteger(번) || 번 < 0 || 번 > 99) {
-    return new NextResponse('잘못된 주소', { status: 400 });
+    return new NextResponse('잘못된 주소', { status: 400, headers: { 'Cache-Control': 'private, no-store' } });
   }
 
   /* 작은 그림(목록 썸네일)인지 */
@@ -46,18 +48,17 @@ export async function GET(
      비로그인은 posts 를 못 읽어 규칙이 터지기 때문입니다 (2026-10-07) */
   const { data: 사진들 } = await supabase.rpc('글사진', { p_post: 글번호 });
   const 한장 = ((사진들 ?? []) as { 큰것: string; 작은것: string }[])[번];
-  if (!한장) return new NextResponse('없는 사진', { status: 404 });
+  if (!한장) return new NextResponse('없는 사진', { status: 404, headers: { 'Cache-Control': 'private, no-store' } });
 
   const 길 = 작은것 ? 한장.작은것 : 한장.큰것;
-  const r = await fetch(저장소(길));
-  if (!r.ok || !r.body) return new NextResponse('사진을 못 읽었어요', { status: 502 });
+  const r = await fetch(저장소(길), { cache: 'no-store' });
+  if (!r.ok || !r.body) return new NextResponse('사진을 못 읽었어요', { status: 502, headers: { 'Cache-Control': 'private, no-store' } });
 
   return new NextResponse(r.body, {
     status: 200,
     headers: {
       'Content-Type': r.headers.get('content-type') ?? 'image/webp',
-      /* 사진은 한 번 올리면 안 바뀝니다 — 오래 붙들어 둡니다 */
-      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Cache-Control': 'private, no-store',
     },
   });
 }
