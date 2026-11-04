@@ -142,12 +142,12 @@ if (cfg.RESEND_KEY && cfg.NOTIFY_EMAIL) {
   try { id = (JSON.parse(t) || {}).id || ''; } catch { /* 모양이 바뀌어도 넘어갑니다 */ }
   console.log('보냈습니다 — ' + 제목);
   console.log('   Resend id ' + (id || '(응답에 id 가 없습니다: ' + t.slice(0, 120) + ')'));
+  /* 보낸 것만 기록합니다 — 못 보냈으면 다음 번에 다시 시도합니다 */
+  보낼것.forEach((x) => { 기록[x.경로] = 이제; });
+  fs.writeFileSync(기록파일, JSON.stringify(기록, null, 1) + '\n');
+  console.log('쉬는 기록을 적었습니다 — ' + 기록파일);
 } else {
   console.log('※ RESEND_KEY · NOTIFY_EMAIL 이 없어 화면에만 찍습니다\n');
   console.log('제목: ' + 제목 + '\n' + 본문);
+  console.log('\n메일을 보내지 않아 쉬는 기록을 남기지 않았습니다 — 다음 번에 다시 시도합니다');
 }
-
-/* 보낸 것만 기록합니다 — 못 보냈으면 다음 번에 다시 시도합니다 */
-보낼것.forEach((x) => { 기록[x.경로] = 이제; });
-fs.writeFileSync(기록파일, JSON.stringify(기록, null, 1) + '\n');
-console.log('쉬는 기록을 적었습니다 — ' + 기록파일);
