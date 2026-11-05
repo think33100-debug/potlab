@@ -1,3 +1,4 @@
+import { toPublicHomeStats, type HomeStats } from './home-stats';
 import type { Texts } from './home-text';
 import { supabase } from './supabase';
 import { daysAgoIso } from './time';
@@ -30,15 +31,9 @@ export const DEADLINE_DAYS = 7;
 const HOT_DAYS = 7;
 
 /* 홈에 뜨는 숫자. 전부 DB 에서 옵니다 (home_stats()).
-   코드에 박으면 다음 분기에 틀린 화면이 됩니다 */
-export type HomeStats = {
-  hospitals: number;        // 심평원 병원 수
-  ot: number;               // 작업치료사
-  pt: number;               // 물리치료사
-  hira_ver: string | null;  // 심평원 자료판. 화면에는 안 씁니다 — 분기 표기를 안 내보내기로 했습니다
-  joined: { job: string; n: number; mid: number | null }[];
-  min_n: number;            // 이 수보다 적으면 중위값을 안 내보냅니다
-};
+   코드에 박으면 다음 분기에 틀린 화면이 됩니다.
+   브라우저로 넘길 칸은 lib/home-stats.ts 가 고릅니다 */
+export type { HomeStats };
 
 export type HomeData = {
   top: HomeBlock[];
@@ -96,8 +91,7 @@ export async function getHome(): Promise<HomeData> {
     bigs: rows.filter((b) => b.kind === 'big'),
     seconds: Number((settings.data as { value: unknown } | null)?.value ?? 5) || 5,
     texts: words,
-    stats: (stats.data as HomeStats | null)
-      ?? { hospitals: 0, ot: 0, pt: 0, hira_ver: null, joined: [], min_n: 3 },
+    stats: toPublicHomeStats(stats.data),
     metrics: {
       deadline: (totals.data as { deadline?: number } | null)?.deadline ?? 0,
       jobs: (totals.data as { jobs?: number } | null)?.jobs ?? 0,

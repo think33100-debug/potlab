@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { Icon } from '@/components/icon';
-import { PayNote } from '@/components/pay-note';
 import { tx, txLines, type Texts } from '@/lib/home-text';
+import { PAY_PREREG } from '@/lib/pay-prereg';
 import { Count } from './hero';
 import { useSeen } from '@/lib/reveal';
 import { therapists, type HomeStats } from '@/lib/home';
@@ -64,35 +64,14 @@ function Feature({
   );
 }
 
-/* ───────── 2. 참여 현황 ───────── */
-export function Joined({ stats, texts }: { stats: HomeStats; texts: Texts }) {
-  const t = (k: string, f?: Record<string, string | number>) => tx(texts, k, f);
-  const rows = ['작업치료사', '물리치료사'].map((job) => ({
-    job, hit: stats.joined.find((j) => j.job === job),
-  }));
-
+/* ───────── 2. 연봉 통계 사전 신청 안내 ───────── */
+export function PayPrereg() {
   return (
     <Reveal>
       <section className="py-8">
-        <h2 className="break-keep text-h2 font-bold text-ink">{t('joined.title')}</h2>
-        <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-          {rows.map(({ job, hit }) => (
-            <li key={job}>
-              <Card>
-                <p className="text-body-lg font-bold text-ink">{job}</p>
-                <p className="mt-1 text-lg text-body">
-                  {hit ? `${hit.n}명 참여` : '0명 참여'}
-                  {' · '}
-                  {hit?.mid != null ? `중위 ${hit.mid}만원` : '아직 집계 전'}
-                </p>
-              </Card>
-            </li>
-          ))}
-        </ul>
-        <PayNote className="mt-5 text-mute" />
-        <p className="mt-2 whitespace-pre-line break-keep text-lg text-mute">
-          {t('joined.tail', { min: stats.min_n })}
-        </p>
+        <h2 className="break-keep text-h2 font-bold text-ink">{PAY_PREREG.title}</h2>
+        <p className="mt-3 break-keep text-lg text-body">{PAY_PREREG.body}</p>
+        <p className="mt-2 break-keep text-sm text-mute">{PAY_PREREG.note}</p>
       </section>
     </Reveal>
   );

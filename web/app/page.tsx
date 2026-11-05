@@ -5,7 +5,7 @@ import { Icon } from '@/components/icon';
 import { Rail } from '@/components/rail';
 import { Hero } from '@/components/home/hero';
 import {
-  Anonymous, FinalCta, HowTo, JobSection, Joined, PaySection, Together,
+  Anonymous, FinalCta, HowTo, JobSection, PayPrereg, PaySection, Together,
 } from '@/components/home/sections';
 import { getHome, metricLine } from '@/lib/home';
 import { safeHref, 미리받기 } from '@/lib/routes';
@@ -143,8 +143,8 @@ export default async function Home() {
             <Hero stats={stats} texts={texts} />
           </div>
 
-          {/* ⑤ 참여 현황 */}
-          <Joined stats={stats} texts={texts} />
+          {/* ⑤ 연봉 통계 사전 신청 안내 */}
+          <PayPrereg />
 
           {/* ⑥ 급여 01~05 */}
           <PaySection texts={texts} />

@@ -137,10 +137,10 @@ export default function PayTool() {
           >
             <span className="min-w-0">
               <span className="block break-keep text-[15px] font-bold text-[#1B2025]">
-                또래 중에 내가 어디쯤인지 보기
+                연봉 통계 사전 신청 안내
               </span>
               <span className="mt-1 block break-keep text-[13px] text-[#5F666C]">
-                같은 직군 · 연차 · 지역끼리 견줍니다. 회원만 볼 수 있어요
+                11월에는 연봉 통계를 공개하지 않아요
               </span>
             </span>
             <Icon name="chevron-left" size={16}
