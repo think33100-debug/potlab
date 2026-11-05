@@ -104,6 +104,8 @@ export const createPreregController = ({ enabled, getClient, onChange }: {
   let 남은실패: { 회원: string | null; 오류: PreregError } | null = null;
 
   const 그리기 = (view: PreregView) => { 지금 = view; onChange(view); };
+  /* await 뒤에는 앞서 좁힌 타입이 아니라 그때의 상태를 읽습니다 */
+  const 최신보기 = (): PreregView => 지금;
 
   const 받기 = async (
     일: (client: PreregClient) => Promise<PreregResult>,
@@ -152,7 +154,7 @@ export const createPreregController = ({ enabled, getClient, onChange }: {
       if (닫힘) return;
       if (이번 === 세대) return 결과그리기(결과);
       if (!결과.ok) 남은실패 = { 회원: 표.회원, 오류: 결과.error };
-      if (표.회원 === 현재회원 && 지금.단계 === '불러오는중') 열기();
+      if (표.회원 === 현재회원 && 최신보기().단계 === '불러오는중') 열기();
     })();
   };
 
