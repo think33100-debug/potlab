@@ -117,6 +117,25 @@ describe('가리기', () => {
     assert.deepEqual(실패기록({ code: 500, text: '<html>' }).항목이름, []);
   });
 
+  test('Content-Type — 아는 MIME · charset 만 남기고 모르는 값은 가립니다', () => {
+    const 값 = (v) => 실패기록({ code: 500, text: '', headers: 머리({ 'Content-Type': v }) }).contentType;
+    assert.equal(값('Text/HTML; Charset=UTF-8'), 'text/html; charset=utf-8');
+    assert.equal(값('text/html; charset="EUC-KR"'), 'text/html; charset=euc-kr');
+    assert.equal(값('application/json'), 'application/json');
+    assert.equal(값('application/synthetic.person.echo'), '‹가림›');
+    assert.equal(값('synthetic/QK111; charset=utf-8'), '‹가림›');
+    assert.equal(값('text/plain; charset=synthetic-person'), 'text/plain; charset=‹가림›');
+    assert.equal(값('text/plain; x-charset=QK111'), 'text/plain');
+    assert.equal(값('text/html,QK111'), '‹가림›');
+  });
+
+  test('JSON 항목 이름 — 아는 진단 칸만 남기고 모르는 이름은 가립니다', () => {
+    const r = 실패기록({ code: 500, text: JSON.stringify({
+      SyntheticPerson: 1, synthetic_person: 2, QK111: 3, status: 4, list: [], Status: 5, constructor: 6,
+    }) });
+    assert.deepEqual(r.항목이름, ['‹칸›', '‹칸›', '‹칸›', 'status', 'list', '‹칸›', '‹칸›']);
+  });
+
   test('망가진 입력에도 던지지 않습니다', () => {
     const 나쁜머리 = { get() { throw new Error('x'); } };
     const 나쁜값 = Object.create(null);

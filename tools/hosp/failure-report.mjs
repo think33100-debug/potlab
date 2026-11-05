@@ -6,6 +6,7 @@
  * 나머지를 가립니다** — 태그 이름 · 진단 낱말 · 네 자리 이하 숫자 · 문장부호만 통과합니다.
  * 한계: 이름이 허용 낱말과 우연히 같으면 통과합니다. 기관 이름·처음 보는 오류 문구는
  * 가려지므로, 진단에 더 필요하면 그 낱말을 목록에 더합니다.
+ * Content-Type 과 JSON 항목 이름도 같습니다 — 목록에 있는 값만 남습니다.
  * 순서: 가리기 → 자르기. 값이 자르는 자리에 걸쳐도 앞조각이 안 남습니다.
  */
 
@@ -13,6 +14,17 @@
 export const 본문길이 = 800;
 const 원문상한 = 32000;   // 가리기 전 앞자르기 — 큰 응답에서도 정규식 시간을 묶습니다
 const 항목상한 = 40;
+
+const 아는형식 = new Set(`text/html text/plain text/xml text/css text/javascript text/csv
+application/json application/xml application/xhtml+xml application/javascript application/octet-stream
+application/pdf application/x-www-form-urlencoded application/problem+json application/problem+xml
+multipart/form-data image/png image/jpeg image/gif image/webp image/svg+xml`.split(/\s+/));
+const 아는문자셋 = new Set(['utf-8', 'utf8', 'euc-kr', 'euckr', 'ks_c_5601-1987', 'cp949', 'x-windows-949', 'windows-949',
+  'iso-8859-1', 'us-ascii']);
+/* JSON 항목 이름 — 사람 이름·번호가 열쇠로 올 수 있어 아는 진단 칸만 남깁니다 (대소문자까지 같아야 합니다) */
+const 진단칸 = new Set(['message', 'msg', 'error', 'errors', 'code', 'status', 'statusCode', 'result', 'results', 'success',
+  'data', 'list', 'rows', 'items', 'total', 'count', 'page', 'pageUtil', 'recordCount', 'timestamp', 'path', 'detail', 'title',
+  'recruitAnnouncementListMain']);
 
 const 영어 = new Set(`html head title body meta div span p h1 h2 h3 h4 h5 h6 hr br center table tbody thead tr td th
 ul ol li a pre form input link b i strong em address main section header footer nav doctype
@@ -97,8 +109,16 @@ function 항목이름(본문) {
   let j;
   try { j = JSON.parse(본문); } catch { return []; }
   if (!j || typeof j !== 'object' || Array.isArray(j)) return [];
-  return Object.keys(j).slice(0, 항목상한).map((k) => (/^[A-Za-z_][\w.-]{0,39}$/.test(k)
-    && !/token|secret|passw|pwd|key|cookie|auth|session|sessid|sig|name|mail|phone|tel|mobile|user/i.test(k) ? k : '‹칸›'));
+  return Object.keys(j).slice(0, 항목상한).map((k) => (진단칸.has(k) ? k : '‹칸›'));
+}
+
+/* 아는 값만 남깁니다 — 모르는 MIME 은 통째로, 모르는 charset 은 그 값만 가립니다 */
+function 안전형식(ct) {
+  const 형식 = (ct.match(/^\s*([^\s;]{1,100})\s*(?:;|$)/) || [])[1]?.toLowerCase();
+  if (!아는형식.has(형식)) return '‹가림›';
+  const cs = (ct.match(/;\s*charset\s*=\s*["']?([^"'\s;]{1,40})/i) || [])[1]?.toLowerCase();
+  if (!cs) return 형식;
+  return 형식 + '; charset=' + (아는문자셋.has(cs) ? cs : '‹가림›');
 }
 
 /** 보고의 「못 받은 곳」 한 줄 — 옛 칸(이름·왜)은 그대로이고 실패 칸만 더합니다 */
@@ -129,7 +149,6 @@ export function 실패기록(입력) {
   const ra = 머리칸(읽기, 'retry-after');
   const sv = 머리칸(읽기, 'server');
   const ct = 머리칸(읽기, 'content-type');
-  const ctm = ct && ct.match(/^\s*([a-z0-9!#$&^_.+-]{1,40}\/[a-z0-9!#$&^_.+-]{1,60})(?:\s*;.{0,200}?\bcharset=["']?([\w-]{1,20}))?/i);
   let 머리받음 = !!읽기;
   if (읽기) { try { r.headers.get('server'); } catch { 머리받음 = false; } }
   return {
@@ -138,7 +157,7 @@ export function 실패기록(입력) {
     retryAfter: ra == null ? null
       : (/^(?:\d{1,7}|[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT)$/.test(ra.trim()) ? ra.trim() : '‹가림›'),
     server: sv == null ? null : 안전글(sv, 120),
-    contentType: ct == null ? null : (ctm ? ctm[1] + (ctm[2] ? '; charset=' + ctm[2] : '') : '‹가림›'),
+    contentType: ct == null ? null : 안전형식(ct),
     머리받음,                      // false 면 머리 셋의 null 은 「응답에 없음」이 아니라 「못 받음」입니다
     본문자수: 본문.length,
     앞글: 안전글(본문),
