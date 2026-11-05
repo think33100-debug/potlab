@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { PAY_PREREG } from '@/lib/pay-prereg';
+import { PreregPanel } from './prereg-panel';
 
 /* 월급 확인. 11월에는 연봉 통계를 공개하지 않아 준비 안내만 둡니다.
 
-   통계를 부르지 않고, 아무것도 입력받거나 저장하지 않습니다.
+   통계를 부르지 않습니다. 사전 신청 패널은 문이 닫혀 있어 아무것도 그리지 않습니다.
    계산기는 통계와 상관없이 쓸 수 있어 입구를 남깁니다. */
 export default function PayPage() {
   return (
@@ -15,6 +16,8 @@ export default function PayPage() {
         <p className="mt-2 break-keep text-lg text-mute">{PAY_PREREG.body}</p>
         <p className="mt-2 break-keep text-sm text-mute">{PAY_PREREG.note}</p>
       </section>
+
+      <PreregPanel />
 
       <Link
         href="/tools"
