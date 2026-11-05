@@ -86,6 +86,31 @@ describe('상태 계약', () => {
       assert.ok(!JSON.stringify(r).includes('SECRET-MSG'));
     }
   });
+  test('HTTP 실패(200 아님)는 호출자 rowCount 를 남기지 않음 — 0 도 양수도 null', () => {
+    for (const status of [100, 204, 301, 403, 404, 500, 599]) {
+      for (const rowCount of [0, 5]) {
+        const r = observe({ status, rowCount, html: '<p>본문</p>' });
+        assert.equal(r.state, STATE.HTTP_NOT_OK, String(status));
+        assert.equal(r.rowCount, null, status + '/' + rowCount);
+      }
+    }
+  });
+  test('networkError 비정상이면 rowCount 도 null (명시)', () => {
+    for (const v of ['ECONNRESET', new Error('x'), 1, 0, {}, []]) {
+      for (const rowCount of [0, 5]) {
+        const r = observe({ networkError: v, status: 200, rowCount, html: '' });
+        assert.equal(r.rowCount, null);
+        assert.equal(r.unknownReason, UNKNOWN_REASON.NETWORK_STATE_INVALID);
+      }
+    }
+  });
+  test('정상 200 경계 회귀 — 양수와 0행은 기존 의미 그대로', () => {
+    assert.equal(observe({ status: 200, rowCount: 5, html: '', networkError: false }).rowCount, 5);
+    assert.equal(observe({ status: 200, rowCount: 5, html: '' }).state, STATE.ROWS_PARSED);
+    const z = observe({ status: 200, rowCount: 0, html: '' });
+    assert.equal(z.rowCount, 0);
+    assert.equal(z.state, STATE.ZERO_ROWS_UNCONFIRMED);
+  });
   test('입력이 아예 없으면 미정 · null 입력에도 죽지 않음', () => {
     for (const input of [undefined, null, 'x', 7, []]) {
       const r = observe(input);

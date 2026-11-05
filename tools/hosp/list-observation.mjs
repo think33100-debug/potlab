@@ -24,7 +24,8 @@
  *   칸은 아래 열 개로 고정이고 값은 null / 불리언 / 정수 / 이 파일의 고정 코드뿐입니다.
  *   입력 글을 어떤 꼴로도 돌려주지 않습니다.
  *     httpStatus · networkError · rowCount   검증을 통과한 입력. 아니면 null (모르는 값)
- *                                            rowCount 는 네트워크 오류면 언제나 null 입니다
+ *                                            rowCount 는 네트워크 오류·networkError 비정상·status 가 200 이 아니면
+ *                                            (없음·비정상 포함) 언제나 null 입니다 — 받지 못했거나 오류 응답의 행 수는 0행이 아닙니다
  *     errorSignature                         ERROR_SIGNATURE 또는 null (아래 뜻 참고)
  *     state · unknownReason                  아래 표
  *     boardTotal · latestPosted              **언제나 null**
@@ -253,7 +254,7 @@ export function observeList(input) {
     httpStatus: validStatus(i.status),
     networkError: networkGiven && networkValid ? i.networkError : null,
     errorSignature: null,
-    rowCount: i.networkError === true ? null : validRowCount(i.rowCount),
+    rowCount: (i.networkError === true || (networkGiven && !networkValid) || validStatus(i.status) !== 200) ? null : validRowCount(i.rowCount),
     boardTotal: null,
     boardTotalState: NOT_MEASURED,
     latestPosted: null,
