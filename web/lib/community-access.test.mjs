@@ -104,7 +104,13 @@ const 문글 = 원문('components/community-door.tsx');
 assert.equal(문글.split('{children}').length - 1, 1);
 앞서나(문글, "판.표시 === '내용'", '{children}', '문');
 const 인증글 = 원문('app/auth.tsx');
-앞서나(인증글.slice(인증글.indexOf('signOut: async')), "router.push('/')", 'router.refresh()', '로그아웃');
+앞서나(인증글.slice(인증글.lastIndexOf('signOut: async')), "router.push('/')", 'router.refresh()', '로그아웃');
+/* 늦은 응답 차단은 lib/auth-flow.test.mjs 가 실제로 돌려 봅니다. 여기서는 연결만 봅니다 */
+for (const 낱말 of ['흐름.시작()', '흐름.로그아웃(', '흐름.다시읽기()', '로그아웃알림: () => router.refresh()']) {
+  assert.ok(인증글.includes(낱말), `app/auth.tsx 에 ${낱말} 이 없습니다`);
+}
+assert.ok(!인증글.includes('.then('), 'app/auth.tsx 에 흐름 밖 비동기가 남았습니다');
+assert.equal(인증글.split('setSession').length - 1, 2, '세션을 정하는 자리가 늘었습니다');
 
 /* ⑥ 첫 화면 — 응답에 커뮤니티 글이 없습니다. 공고 숫자는 그대로입니다 */
 const 홈 = 원문('lib/home.ts');
@@ -115,6 +121,7 @@ assert.ok(홈.includes("supabase.rpc('job_totals')"));
 const 첫화면 = 원문('app/page.tsx');
 assert.ok(!첫화면.includes('공개글'));
 assert.ok(!첫화면.includes('metrics.hot'));
+assert.ok(첫화면.includes('<MemberHotLine'), '회원 인기 글 줄이 빠졌습니다');
 
 /* ⑦ 공고 — 비회원 길에 커뮤니티 문을 걸지 않았습니다 */
 for (const 길 of ['app/jobs/page.tsx', 'app/jobs/[id]/page.tsx']) {

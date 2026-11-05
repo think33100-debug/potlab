@@ -70,8 +70,8 @@ export async function getHome(): Promise<HomeData> {
     /* org_directory 는 anon 이 못 읽습니다 (통째로 긁어가는 길을 닫았습니다).
        세어 둔 값을 함수로 받습니다 */
     supabase.rpc('org_total'),
-    /* 커뮤니티 글은 첫 화면에서 읽지 않습니다 (2026-11-05) —
-       비회원 응답에 글 제목이 실리면 안 됩니다 */
+    /* 커뮤니티 글은 이 응답에서 읽지 않습니다 (2026-11-05) — 비회원 응답에 글 제목이
+       실리면 안 됩니다. 회원의 인기 글은 components/home/member-hot.tsx 가 읽습니다 */
     supabase.rpc('home_stats'),
     supabase.from('home_texts').select('key,value'),
   ]);
@@ -122,6 +122,6 @@ export async function commBanners(): Promise<{ items: HomeBlock[]; seconds: numb
 export function metricLine(b: HomeBlock, m: HomeData['metrics']): string | null {
   if (b.metric === 'deadline') return `${m.deadline}건이 ${DEADLINE_DAYS}일 안에 닫혀요`;
   if (b.metric === 'coverage') return `공고 ${m.jobs.toLocaleString()}건 · 기관 ${m.orgs.toLocaleString()}곳`;
-  /* metric='hot' 도 글 제목 대신 관리자가 쓴 설명을 씁니다 (2026-11-05) */
+  /* metric='hot' 은 회원 세션에서 따로 그립니다 (components/home/member-hot.tsx) */
   return b.descr;
 }
