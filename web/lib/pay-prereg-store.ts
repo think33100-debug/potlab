@@ -97,35 +97,63 @@ export const createPreregController = ({ enabled, getClient, onChange }: {
   let 세대 = 0;            // 세대가 바뀌면 앞서 나간 요청의 응답은 버립니다
   let 인증열쇠: string | null = null;
   let 닫힘 = !enabled;     // 문이 닫혔으면 처음부터 닫힌 것과 같습니다
+  let 현재회원: string | null = null;
+  /* 세대가 바뀌어도 쓰기는 서버에서 계속 돕니다. 끝날 때까지 따로 들고 있습니다 */
+  let 진행쓰기: { 회원: string | null } | null = null;
+  /* 인증이 흔들리는 사이 끝난 쓰기의 실패. 뒤의 새 조회가 가리지 않게 남깁니다 */
+  let 남은실패: { 회원: string | null; 오류: PreregError } | null = null;
 
   const 그리기 = (view: PreregView) => { 지금 = view; onChange(view); };
 
-  const 돌리기 = async (일: (client: PreregClient) => Promise<PreregResult>) => {
-    const 이번 = ++세대;
-    let 결과: PreregResult;
+  const 받기 = async (
+    일: (client: PreregClient) => Promise<PreregResult>,
+  ): Promise<PreregResult> => {
     try {
-      결과 = await 일(getClient());
+      return await 일(getClient());
     } catch {
-      결과 = { ok: false, error: 'failed' };
+      return { ok: false, error: 'failed' };
     }
-    if (닫힘 || 이번 !== 세대) return;
-    그리기(결과.ok
-      ? { 단계: '준비', status: 결과.status, 처리중: null }
-      : { 단계: '오류', 오류: 결과.error });
   };
 
-  const 불러오기 = () => {
+  const 결과그리기 = (결과: PreregResult) => 그리기(결과.ok
+    ? { 단계: '준비', status: 결과.status, 처리중: null }
+    : { 단계: '오류', 오류: 결과.error });
+
+  const 불러오기 = async () => {
     그리기({ 단계: '불러오는중' });
-    void 돌리기(myPreregStatus);
+    const 이번 = ++세대;
+    const 결과 = await 받기(myPreregStatus);
+    if (닫힘 || 이번 !== 세대) return;
+    결과그리기(결과);
+  };
+
+  /* 이 회원의 쓰기가 끝나기 전에는 읽지 않습니다. 먼저 읽으면 옛 상태로 단추가 다시 열립니다 */
+  const 열기 = () => {
+    if (진행쓰기?.회원 === 현재회원) return 그리기({ 단계: '불러오는중' });
+    const 실패 = 남은실패?.회원 === 현재회원 ? 남은실패 : null;
+    남은실패 = null;
+    if (실패) return 그리기({ 단계: '오류', 오류: 실패.오류 });
+    void 불러오기();
   };
 
   const 쓰기 = (
     kind: PreregKind,
     일: (client: PreregClient, kind: PreregKind) => Promise<PreregResult>,
   ) => {
-    if (닫힘 || 지금.단계 !== '준비' || 지금.처리중) return;   // 중복 클릭은 여기서 끝납니다
+    /* 중복 클릭은 여기서 끝납니다 */
+    if (닫힘 || 진행쓰기 || 지금.단계 !== '준비' || 지금.처리중) return;
+    const 표 = { 회원: 현재회원 };
+    진행쓰기 = 표;
     그리기({ ...지금, 처리중: kind });
-    void 돌리기((client) => 일(client, kind));
+    void (async () => {
+      const 이번 = ++세대;
+      const 결과 = await 받기((client) => 일(client, kind));
+      진행쓰기 = null;
+      if (닫힘) return;
+      if (이번 === 세대) return 결과그리기(결과);
+      if (!결과.ok) 남은실패 = { 회원: 표.회원, 오류: 결과.error };
+      if (표.회원 === 현재회원 && 지금.단계 === '불러오는중') 열기();
+    })();
   };
 
   return {
@@ -137,16 +165,17 @@ export const createPreregController = ({ enabled, getClient, onChange }: {
       if (열쇠 === 인증열쇠) return;
       인증열쇠 = 열쇠;
       세대 += 1;
+      현재회원 = who === '회원' ? userId : null;
       if (who === '비회원') return 그리기({ 단계: '로그인필요' });
       if (who === '모름' || !userId || 설문 === '모름') return 그리기({ 단계: '확인중' });
       if (설문 === '안마침') return 그리기({ 단계: '가입미완료' });
-      불러오기();
+      열기();
     },
     신청: (kind) => 쓰기(kind, addPrereg),
     취소: (kind) => 쓰기(kind, cancelPrereg),
     다시확인: () => {
       if (닫힘 || 지금.단계 !== '오류') return;
-      불러오기();
+      void 불러오기();
     },
     닫기: () => { 닫힘 = true; 세대 += 1; },
   };

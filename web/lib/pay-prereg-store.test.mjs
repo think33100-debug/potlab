@@ -238,6 +238,52 @@ test('오류 뒤 — 지난 성공 상태를 남기지 않고, 다시 확인해�
   assert.deepEqual(c.보기(), { 단계: '준비', status: { 연봉: true, 후기: false }, 처리중: null });
 });
 
+test('같은 회원이 설문 모름→마침을 거쳐도 — 쓰기가 끝나기 전에 읽지 않고, 실패를 가리지 않습니다', async () => {
+  const 모름 = { who: '회원', userId: '가짜-A', 설문: '모름' };
+  const 쓰기중에돌아옴 = async () => {
+    const client = 줄세운가짜();
+    const { c } = 조립(client);
+    await 준비시키기(client, c);
+    c.신청('후기');
+    c.인증바뀜(모름);
+    c.인증바뀜(회원('가짜-A'));
+    return { client, c, 쓰기: client.호출[1] };
+  };
+
+  /* 성공 — 잠긴 채 기다렸다가, 쓰기가 끝난 뒤에야 상태를 다시 읽습니다 */
+  const 성공 = await 쓰기중에돌아옴();
+  assert.equal(성공.client.호출.length, 2, '쓰기 완료 전 상태 조회가 나가면 옛 상태로 열립니다');
+  assert.deepEqual(성공.c.보기(), { 단계: '불러오는중' });
+  성공.c.취소('연봉');
+  assert.equal(성공.client.호출.length, 2, '기다리는 동안 다른 쓰기가 나가면 안 됩니다');
+  성공.쓰기.풀기(상태(true, true));
+  await 차례();
+  assert.equal(성공.client.호출.at(-1).name, 'pay_prereg_my_status');
+  assert.deepEqual(성공.c.보기(), { 단계: '불러오는중' });
+  성공.client.호출.at(-1).풀기(상태(true, true));
+  await 차례();
+  assert.deepEqual(성공.c.보기(), { 단계: '준비', status: { 연봉: true, 후기: true }, 처리중: null });
+
+  /* 실패 — 돌아온 뒤 실패해도 오류로 남고 옛 상태로 열리지 않습니다 */
+  const 실패 = await 쓰기중에돌아옴();
+  실패.쓰기.풀기({ data: null, error: { code: '42501', message: '가짜-원문' } });
+  await 차례();
+  assert.equal(실패.client.호출.length, 2);
+  assert.deepEqual(실패.c.보기(), { 단계: '오류', 오류: 'denied' });
+
+  /* 설문 모름인 동안 실패 — 마침으로 돌아와도 새 조회로 덮지 않습니다 */
+  const client = 줄세운가짜();
+  const { c } = 조립(client);
+  await 준비시키기(client, c);
+  c.신청('후기');
+  c.인증바뀜(모름);
+  client.호출[1].풀기({ data: null, error: { code: '가짜-기타' } });
+  await 차례();
+  c.인증바뀜(회원('가짜-A'));
+  assert.equal(client.호출.length, 2);
+  assert.deepEqual(c.보기(), { 단계: '오류', 오류: 'failed' });
+});
+
 test('client 를 못 만들면 — 원문 없이 실패 갈래로 닫습니다', async () => {
   const c = createPreregController({
     enabled: true,
