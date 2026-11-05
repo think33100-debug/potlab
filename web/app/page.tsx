@@ -4,6 +4,7 @@ import { HomeBanner } from '@/components/home-banner';
 import { Icon } from '@/components/icon';
 import { Rail } from '@/components/rail';
 import { Hero } from '@/components/home/hero';
+import { MemberHotLine } from '@/components/home/member-hot';
 import {
   Anonymous, FinalCta, HowTo, JobSection, Joined, PaySection, Together,
 } from '@/components/home/sections';
@@ -130,7 +131,12 @@ export default async function Home() {
                                border border-line bg-card p-7 hover:bg-paper"
                   >
                     <p className="break-keep text-h2 font-bold text-ink">{b.title}</p>
-                    <p className="mt-5 break-keep text-body-lg text-body">{metricLine(b, metrics)}</p>
+                    {/* 인기 글 제목은 이 응답에 싣지 않습니다 — 회원 세션에서 따로 읽습니다 */}
+                    {b.metric === 'hot' ? (
+                      <MemberHotLine 설명={b.descr} className="mt-5 break-keep text-body-lg text-body" />
+                    ) : (
+                      <p className="mt-5 break-keep text-body-lg text-body">{metricLine(b, metrics)}</p>
+                    )}
                     <가는중 />
                   </Link>
                 ))}

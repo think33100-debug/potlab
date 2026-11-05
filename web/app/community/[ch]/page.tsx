@@ -1,13 +1,15 @@
 import Link from 'next/link';
+import { CommunityDoor } from '@/components/community-door';
 import { Hit } from '@/components/hit';
 import { notFound } from 'next/navigation';
 import { PostItem } from '@/components/post-row';
 import { CHANNEL_BY_ID } from '@/lib/channels';
+import { 커뮤니티문확인 } from '@/lib/community-access';
 import { POST_LIST_COLS, type PostRow } from '@/lib/supabase';
 /* ★ 2026-10-09 — 세션 없는 열쇠꾸러미로 읽으면 **학생이 학생 방을 못 봅니다.**
    공개글 보기가 방볼수있나() 로 가리는데, 그 함수가 auth.uid() 를 봅니다.
    쿠키를 읽는 꾸러미로 바꿉니다 (lib/supabase-server.ts) */
-import { serverSupabase } from '@/lib/supabase-server';
+import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +27,10 @@ export default async function ChannelPage({
   const hot = sort === 'hot';
   const sb = await serverSupabase();
 
+  /* 비회원·확인 중이면 커뮤니티 조회를 아예 안 보냅니다 (2026-11-05) */
+  const 문 = await 커뮤니티문확인(sb, await serverWho(sb));
+  if (문.상태 !== '열림') return <CommunityDoor 서버={문.상태} />;
+
   /* 이 방에 글을 쓸 수 있나 (2026-10-09). 막는 자리는 표의 정책이고,
      여기서는 못 쓸 단추를 안 보일 뿐입니다 —
      학생에게 치료사 방은 보이되 글쓰기가 없습니다 */
@@ -39,6 +45,7 @@ export default async function ChannelPage({
   const rows = (data ?? []) as unknown as PostRow[];
 
   return (
+    <CommunityDoor 서버="열림">
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <Hit kind="community" />
       <Link href="/community" className="text-lg text-interaction-blue hover:underline">← 방 고르기</Link>
@@ -89,6 +96,7 @@ export default async function ChannelPage({
         {rows.map((p) => <PostItem key={p.id} p={p} />)}
       </ul>
     </main>
+    </CommunityDoor>
   );
 }
 

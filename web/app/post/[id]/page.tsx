@@ -1,15 +1,16 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { CommunityDoor } from '@/components/community-door';
 import { NothingHere } from '@/components/nothing-here';
 import { Hit } from '@/components/hit';
 import { PostActions } from '@/components/post-actions';
 import { PostComments } from '@/components/post-comments';
 import { ViewBump } from '@/components/view-bump';
 import { channelName } from '@/lib/channels';
+import { 커뮤니티문확인 } from '@/lib/community-access';
 import { supabase, POST_ONE_COLS, type PostRow } from '@/lib/supabase';
-import { serverSupabase } from '@/lib/supabase-server';
-import { siteUrl } from '@/lib/site-url';
+import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { shownName } from '@/lib/who';
 import { Clip, JoinCta, Members } from '@/app/gate';
 
@@ -19,9 +20,7 @@ export const dynamic = 'force-dynamic';
    글쓴이 회원번호가 화면으로 안 나갑니다. 「내 글인가」는 보기의 `내글` 칸입니다.
 
    그래서 **세션으로 읽어야** 합니다 — `내글` 이 `author_id = auth.uid()` 라,
-   세션 없는 열쇠로 읽으면 늘 거짓이고 글쓴이에게 지우기 단추가 안 보입니다.
-   미리보기(generateMetadata)는 크롤러라 세션이 없으니 공개 열쇠로 읽습니다 —
-   거기서는 `내글` 을 안 씁니다. */
+   세션 없는 열쇠로 읽으면 늘 거짓이고 글쓴이에게 지우기 단추가 안 보입니다. */
 async function getPost(sb: SupabaseClient, id: string) {
   const n = Number(id);
   if (!Number.isFinite(n)) return null;
@@ -45,7 +44,7 @@ async function stateOf(id: string): Promise<'gone' | 'hidden'> {
   return data === 'hidden' ? 'hidden' : 'gone';
 }
 
-/* 두 경우의 말. 미리보기 제목과 화면이 같은 말을 쓰게 한 곳에 둡니다 */
+/* 두 경우의 말 */
 const GONE = {
   gone: {
     title: '찾는 글이 없어요',
@@ -68,43 +67,23 @@ async function countImages(id: number) {
   return (data ?? []).length as number;
 }
 
-/* 카톡 미리보기는 절대 주소여야 합니다 */
-const 사진주소 = (postId: number, i: number) => `${siteUrl()}/api/post-image/${postId}/${i}`;
-
-/* 카톡·트위터에 뜨는 미리보기입니다.
-   공유가 이 제품의 들어오는 문이라 여기가 비면 링크만 덩그러니 갑니다.
-   글은 누구나 읽을 수 있으므로(RLS: not hidden) 세션 없이 서버에서 그립니다. */
-export async function generateMetadata({
-  params,
-}: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params;
-  const p = await getPost(supabase, id);
-  /* 카톡에 뜨는 제목도 갈라 적습니다 — 누르기 전에 알 수 있게 */
-  if (!p) return { title: `${GONE[await stateOf(id)].title} · POTJOB` };
-
-  const 장수 = await countImages(p.id);
-  const title = p.title || p.body.slice(0, 40);
-  const desc = p.body.slice(0, 120).replace(/\s+/g, ' ');
-  const image = 장수 > 0 ? 사진주소(p.id, 0) : '/og.png';
-
-  return {
-    title: `${title} · ${channelName(p.channel)} · POTJOB`,
-    description: desc,
-    openGraph: {
-      type: 'article',
-      siteName: 'POTJOB',
-      title,
-      description: desc,
-      images: [{ url: image }],
-    },
-    twitter: { card: 'summary_large_image', title, description: desc, images: [image] },
-  };
-}
+/* 미리보기에는 글 내용을 안 넣습니다 (2026-11-05).
+   크롤러·카톡은 세션이 없어서, 여기서 읽으면 비회원에게 제목과 본문이 나갑니다 */
+export const metadata: Metadata = {
+  title: '커뮤니티 · POTJOB',
+  robots: { index: false, follow: false },
+};
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   /* 쿠키에 실려 온 세션으로 읽습니다 — 그래야 「내글」 이 참이 됩니다 */
-  const p = await getPost(await serverSupabase(), id);
+  const sb = await serverSupabase();
+
+  /* 비회원·확인 중이면 글·상태·사진 조회를 아예 안 보냅니다 (2026-11-05) */
+  const 문 = await 커뮤니티문확인(sb, await serverWho(sb));
+  if (문.상태 !== '열림') return <CommunityDoor 서버={문.상태} />;
+
+  const p = await getPost(sb, id);
 
   /* 404 를 내는 대신 화면을 보여줍니다. 받은 사람이 왜 안 보이는지는
      알게 해야 합니다 — 빈 화면은 「서비스가 고장 났다」로 읽힙니다 */
@@ -122,6 +101,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const 장수 = await countImages(p.id);
 
   return (
+    <CommunityDoor 서버="열림">
     <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <Hit kind="post" target={p.id} />
       <ViewBump id={p.id} />
@@ -175,5 +155,6 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         <PostComments postId={p.id} />
       </Members>
     </main>
+    </CommunityDoor>
   );
 }
