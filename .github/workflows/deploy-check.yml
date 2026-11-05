@@ -34,35 +34,35 @@ jobs:
 
       - name: 운영 화면이 어느 커밋인지 묻습니다
         env:
-          주소: https://potjob-web.vercel.app/api/build
-          바라는것: ${{ github.sha }}
-          까닭: ${{ github.event_name }}
+          BUILD_URL: https://potjob-web.vercel.app/api/build
+          EXPECTED_SHA: ${{ github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -u
           # 밀고 나면 Vercel 이 짓는 데 시간이 걸립니다. 15초마다 20분까지 기다립니다.
           # 날마다 도는 쪽은 기다릴 까닭이 없으니 한 번만 봅니다.
-          if [ "$까닭" = "push" ]; then 끝=80; else 끝=1; fi
+          if [ "$EVENT_NAME" = "push" ]; then MAX_ATTEMPTS=80; else MAX_ATTEMPTS=1; fi
           i=0
-          while [ "$i" -lt "$끝" ]; do
+          while [ "$i" -lt "$MAX_ATTEMPTS" ]; do
             i=$((i+1))
-            글=$(curl -fsS --max-time 20 "$주소" || echo '{}')
-            지금=$(printf '%s' "$글" | sed -n 's/.*"sha":"\([0-9a-f]*\)".*/\1/p')
-            if [ -n "$지금" ]; then
-              echo "[$i] 운영 화면 = ${지금:0:7}"
+            body=$(curl -fsS --max-time 20 "$BUILD_URL" || echo '{}')
+            current_sha=$(printf '%s' "$body" | sed -n 's/.*"sha":"\([0-9a-f]*\)".*/\1/p')
+            if [ -n "$current_sha" ]; then
+              echo "[$i] 운영 화면 = ${current_sha:0:7}"
             else
-              echo "[$i] /api/build 가 아직 답하지 않습니다 — $글"
+              echo "[$i] /api/build 가 아직 답하지 않습니다 — $body"
             fi
-            if [ "$까닭" != "push" ]; then
+            if [ "$EVENT_NAME" != "push" ]; then
               # 날마다 도는 쪽 — 지금 main 끝과 같은지만 봅니다
-              바라는것=$(git rev-parse HEAD)
+              EXPECTED_SHA=$(git rev-parse HEAD)
             fi
-            if [ "$지금" = "$바라는것" ]; then
-              echo "○ 운영 화면이 ${바라는것:0:7} 입니다"
+            if [ "$current_sha" = "$EXPECTED_SHA" ]; then
+              echo "○ 운영 화면이 ${EXPECTED_SHA:0:7} 입니다"
               exit 0
             fi
-            [ "$i" -lt "$끝" ] && sleep 15
+            [ "$i" -lt "$MAX_ATTEMPTS" ] && sleep 15
           done
-          echo "✗ 운영 화면이 ${바라는것:0:7} 가 아닙니다 (지금 ${지금:-모름})."
+          echo "✗ 운영 화면이 ${EXPECTED_SHA:0:7} 가 아닙니다 (지금 ${current_sha:-모름})."
           echo "   Vercel 배포가 ERROR 이거나 아직 안 끝났습니다."
           echo "   https://vercel.com/think33100-7375s-projects/potjob-web 에서 보십시오."
           exit 1
