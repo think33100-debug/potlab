@@ -111,6 +111,15 @@ const 비공개사람칸 = 값칸꼴(String.raw`담당자?|성명|이름|주민(
   '[:=]', String.raw`[^\n<]*`);
 const 표칸꼴 = /(담당자?|성명|이름|연락처|전화(?:번호)?|휴대(?:폰|전화)?|핸드폰|이메일|주소)(\s*(?:<[^<>]{0,60}>\s*){1,6})([^<\n]{1,120})/gu;
 const 민감이름꼴 = new RegExp(String.raw`\b(?:name|id|property)\s*=\s*["']?[^"'\s>]*(?:${비밀낱말}|${사람낱말})`, 'i');
+/* XML 태그 칸 <token>값</token> — 안쪽 태그째 가립니다. 안 닫혔으면 이어지는 태그와 글까지 가립니다.
+   비밀 낱말은 글자 일부로도 잡으므로 aside(sid) · keygen(key) 같은 보통 태그는 뺍니다 */
+const 태그칸꼴 = (칸) => new RegExp(String.raw`<((?:[\w.-]+:)?(?:${칸}))(\s[^<>]*?)?(?:/>|>(?:[\s\S]{0,8000}?(</\1\s*>)|(?:\s*<[^<>]*>)*[^<]*))`, 'giu');
+const 비밀태그칸 = 태그칸꼴(String.raw`(?!aside\b|keygen\b)(?:${비밀칸글})`);
+const 사람태그칸 = 태그칸꼴(String.raw`(?:[\w.-]*[_-])?(?:담당자?|성명|이름|주민(?:등록)?(?:번호)?|연락처|전화(?:번호)?|휴대(?:폰|전화)?|핸드폰|이메일|사번|아이디|주소|e-?mail|mail|name|user(?:name|id)?|phone|tel|mobile|address)(?:[_-][\w.-]*)?|(?:contact|person|manager|first|last|full|sender)[_-]?name|(?:tele|cell)phone`);
+const 태그값가림 = (표) => (m, 이름, 속성, 닫음) => {
+  const 속 = 속성 ? ' ‹가림›' : '';
+  return m.endsWith('/>') && !닫음 ? `<${이름}${속}/>` : `<${이름}${속}>${표}${닫음 || ''}`;
+};
 
 function 풀기(s) {
   return s
@@ -140,6 +149,8 @@ export function 비공개글(값, 길이 = 비공개길이) {
     s = 풀기(s)
       .replace(/<(?:input|meta)\b[^<>]*>/gi, (태그) => (민감이름꼴.test(태그)
         ? 태그.replace(/\b(value|content)\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '$1=‹가림›') : 태그))
+      .replace(비밀태그칸, 태그값가림('‹가림›'))
+      .replace(사람태그칸, 태그값가림('‹이름›'))
       .replace(/\b(?:bearer|basic)\s+\S+/gi, '‹가림›')
       .replace(비공개비밀쌍점, '$1$2‹가림›')
       .replace(비공개비밀등호, '$1$2‹가림›')

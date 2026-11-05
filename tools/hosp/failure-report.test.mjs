@@ -397,6 +397,42 @@ describe('비공개앞글 — 원문 앞 1200자 · 찍어서 가리기', () => 
       'https://host1.example.invalid/waf‹가림›');
   });
 
+  test('XML 태그 칸 — 비밀·이름·연락처·주소 값을 가립니다 (안에 태그가 있어도 · 안 닫혀도)', () => {
+    assert.equal(비공개('<error><token>QK111</token></error>'), '<error><token>‹가림›</token></error>');
+    for (const 글 of [
+      '<accessToken>QK111</accessToken>',
+      '<ns:api_key>QK111</ns:api_key>',
+      '<Cookie>a=QK111; b=QK111</Cookie>',
+      '<password kind="x">QK111</password>',
+      '<token value="QK111"/>',
+      '<token><value>QK111</value><x>QK111</x></token>',
+      '<token><![CDATA[QK111]]></token>',
+      '<error><token><value>QK111</value>',
+      '<token>QK111',
+      '<secret>\nQK111\n</secret>',
+      '&lt;token&gt;QK111&lt;/token&gt;',
+      '<name>QK111</name>',
+      '<userName>QK111</userName>',
+      '<contactName>QK111</contactName>',
+      '<email>QK111</email>',
+      '<phone>QK111</phone>',
+      '<tel>QK111</tel>',
+      '<address>QK111</address>',
+      '<담당자>QK111</담당자>',
+      '<연락처>QK111</연락처>',
+    ]) 없다(비공개(글), 'QK111');
+  });
+
+  test('XML 태그 칸 — 진단 글과 보통 태그는 그대로이고 옛 요약은 안 바뀝니다', () => {
+    assert.equal(비공개('<Error><Code>AccessDenied</Code><Message>Zephyr quota drained</Message><hostname>gw1</hostname></Error>'
+      + '<token>QK111</token><Detail>뒤 문구</Detail>'),
+    '<Error><Code>AccessDenied</Code><Message>Zephyr quota drained</Message><hostname>gw1</hostname></Error>'
+      + '<token>‹가림›</token><Detail>뒤 문구</Detail>');
+    assert.equal(비공개('<aside>Zephyr</aside><section>막힘</section><token/><p>끝</p>'),
+      '<aside>Zephyr</aside><section>막힘</section><token/><p>끝</p>');
+    assert.equal(안전글('<error><token>QK111</token></error>'), '<error><‹영문›>‹값›</‹영문›></error>');
+  });
+
   test('진단에 쓸 태그 속성은 남깁니다', () => {
     const 글 = 비공개('<meta name="description" content="Zephyr WAF block"><h1 class="x">막힘</h1>');
     assert.ok(글.includes('name="description"') && 글.includes('Zephyr WAF block') && 글.includes('막힘'), 글);
