@@ -12,6 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 실패기록, 안전글, 목록실패줄, 상세실패표, 본문길이 } from './failure-report.mjs';
 import { 사이트줄 } from './sites.mjs';
+import { 글받기 } from '../certs/index.mjs';
 
 const 머리 = (o) => new Headers(o);
 
@@ -208,15 +209,34 @@ describe('목록 보고 연결 — 사이트줄', () => {
     assert.equal(g.실패.왜, 'ECONNRESET');
   });
 
-  test('html 갈래 — 상태와 앞글은 남습니다. 글받기 가 머리를 안 돌려주므로 머리받음 false 입니다', async () => {
-    const { g, 부름 } = await 돌리기({ status: 403, body: '<h1>Forbidden</h1>', headers: 머리셋 },
-      { type: 'html', name: '합성기관', url: 'https://a.example.invalid/list' });
-    assert.equal(부름.length, 1);
-    assert.equal(g.err, 'HTTP 403 · 18자');
-    assert.equal(g.실패.http, 403);
-    assert.equal(g.실패.앞글, '<h1>Forbidden</h1>');
-    assert.equal(g.실패.머리받음, false);
-    assert.equal(g.실패.server, null);
+  test('html · greeting 갈래 — 글받기 를 거쳐도 응답 머리 셋이 그대로 남고 요청은 한 번입니다', async () => {
+    for (const [s, err] of [
+      [{ type: 'html', name: '합성기관', url: 'https://a.example.invalid/list' }, 'HTTP 403 · 18자'],
+      [{ type: 'greeting', name: '합성기관', url: 'https://a.example.invalid/list', host: 'https://a.example.invalid' }, 'HTTP 403'],
+    ]) {
+      const { g, 부름 } = await 돌리기({ status: 403, body: '<h1>Forbidden</h1>', headers: 머리셋 }, s);
+      assert.equal(부름.length, 1, s.type);
+      assert.equal(g.err, err, s.type);
+      assert.equal(g.실패.http, 403, s.type);
+      assert.equal(g.실패.앞글, '<h1>Forbidden</h1>', s.type);
+      assert.equal(g.실패.머리받음, true, s.type);
+      assert.equal(g.실패.retryAfter, '30', s.type);
+      assert.equal(g.실패.server, 'nginx', s.type);
+      assert.equal(g.실패.contentType, 'text/html', s.type);
+    }
+  });
+
+  test('글받기 — 머리를 그대로 넘기고 못 받은 때의 꼴은 전과 같습니다', async () => {
+    const 진짜 = globalThis.fetch;
+    let 부름 = 0;
+    globalThis.fetch = async () => { 부름++; return new Response('error', { status: 200, headers: 머리셋 }); };
+    try {
+      const g = await 글받기('https://a.example.invalid/list', {});
+      assert.equal(부름, 1);
+      assert.equal(g.headers.get('server'), 'nginx');
+      assert.deepEqual(Object.keys(g).sort(), ['buf', 'code', 'cs', 'headers', 'html', '바이트'].sort());
+      assert.deepEqual(await 글받기('주소 아님', {}), { 왜: '주소가 아닙니다' });
+    } finally { globalThis.fetch = 진짜; }
   });
 
   test('json · cmc · cha · schmc · greeting 갈래도 실패 칸을 냅니다', async () => {
