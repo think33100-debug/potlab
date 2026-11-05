@@ -186,6 +186,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await sb.auth.signOut();
       setMe(null);
       router.push('/');
+      /* 브라우저에 남은 화면 자료를 비웁니다 — 뒤로 가도 이전 글을 다시 쓰지 않게 */
+      router.refresh();
     },
   }), [loading, session, me, isAdmin, 관리, who, 설문, sb, loadMe, router]);
 

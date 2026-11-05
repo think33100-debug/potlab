@@ -1,6 +1,5 @@
 import type { Texts } from './home-text';
 import { supabase } from './supabase';
-import { daysAgoIso } from './time';
 
 /* 홈 화면이 DB 에서 받아오는 것들.
 
@@ -27,7 +26,6 @@ export const HOME_COLS =
   'id,kind,sort,enabled,emoji,icon,image_path,title,descr,href,metric';
 
 export const DEADLINE_DAYS = 7;
-const HOT_DAYS = 7;
 
 /* 홈에 뜨는 숫자. 전부 DB 에서 옵니다 (home_stats()).
    코드에 박으면 다음 분기에 틀린 화면이 됩니다 */
@@ -52,7 +50,6 @@ export type HomeData = {
     deadline: number;
     jobs: number;
     orgs: number;
-    hot: { id: number; title: string } | null;
   };
 };
 
@@ -62,7 +59,7 @@ export const therapists = (s: HomeStats) => s.ot + s.pt;
 
 export async function getHome(): Promise<HomeData> {
 
-  const [blocks, settings, totals, orgs, hot, stats, texts] = await Promise.all([
+  const [blocks, settings, totals, orgs, stats, texts] = await Promise.all([
     supabase.from('home_blocks').select(HOME_COLS).eq('enabled', true).order('sort'),
     supabase.from('site_settings').select('key,value').eq('key', 'top_banner_seconds').maybeSingle(),
 
@@ -73,10 +70,8 @@ export async function getHome(): Promise<HomeData> {
     /* org_directory 는 anon 이 못 읽습니다 (통째로 긁어가는 길을 닫았습니다).
        세어 둔 값을 함수로 받습니다 */
     supabase.rpc('org_total'),
-    /* 회원번호를 안 받는 공개 보기입니다 (2026-10-07) */
-    supabase.from('공개글').select('id,title,body')
-      .gte('created_at', daysAgoIso(HOT_DAYS))
-      .order('view_count', { ascending: false }).limit(1),
+    /* 커뮤니티 글은 첫 화면에서 읽지 않습니다 (2026-11-05) —
+       비회원 응답에 글 제목이 실리면 안 됩니다 */
     supabase.rpc('home_stats'),
     supabase.from('home_texts').select('key,value'),
   ]);
@@ -88,7 +83,6 @@ export async function getHome(): Promise<HomeData> {
   const words: Texts = {};
   ((texts.data ?? []) as { key: string; value: string }[])
     .forEach((r) => { words[r.key] = r.value; });
-  const hotRow = (hot.data ?? [])[0] as { id: number; title: string | null; body: string } | undefined;
 
   return {
     top: rows.filter((b) => b.kind === 'top' && b.title),
@@ -102,7 +96,6 @@ export async function getHome(): Promise<HomeData> {
       deadline: (totals.data as { deadline?: number } | null)?.deadline ?? 0,
       jobs: (totals.data as { jobs?: number } | null)?.jobs ?? 0,
       orgs: (orgs.data as number | null) ?? 0,
-      hot: hotRow ? { id: hotRow.id, title: hotRow.title || hotRow.body.slice(0, 30) } : null,
     },
   };
 }
@@ -129,6 +122,6 @@ export async function commBanners(): Promise<{ items: HomeBlock[]; seconds: numb
 export function metricLine(b: HomeBlock, m: HomeData['metrics']): string | null {
   if (b.metric === 'deadline') return `${m.deadline}건이 ${DEADLINE_DAYS}일 안에 닫혀요`;
   if (b.metric === 'coverage') return `공고 ${m.jobs.toLocaleString()}건 · 기관 ${m.orgs.toLocaleString()}곳`;
-  if (b.metric === 'hot') return m.hot ? m.hot.title : '아직 이번 주 글이 없어요';
+  /* metric='hot' 도 글 제목 대신 관리자가 쓴 설명을 씁니다 (2026-11-05) */
   return b.descr;
 }
