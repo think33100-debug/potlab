@@ -78,99 +78,11 @@ export function PayPrereg() {
 }
 
 /* ───────── 6. 급여 섹션 01~05 ───────── */
-export function PaySection({ texts }: { texts: Texts }) {
-  const t = (k: string) => tx(texts, k);
-  return (
-    <section className="py-8">
-      <Reveal>
-        <Eyebrow>{t('pay.eyebrow')}</Eyebrow>
-        <h2 className="mt-5 whitespace-pre-line break-keep text-h1 font-bold leading-[1.25] text-ink">
-          {t('pay.title')}
-        </h2>
-        <p className="mt-5 break-keep text-body-lg text-body">{t('pay.lead')}</p>
-      </Reveal>
-
-      <div className="mt-7">
-        {/* 아이콘 이름과 번호는 코드에 둡니다 — 오타가 나면 아이콘이 점으로 떨어집니다 */}
-        <Feature no="01" icon="bar-chart" title={t('pay.f01.title')} body={t('pay.f01.body')}>
-          <Spread />
-        </Feature>
-        <Feature no="02" icon="trending-up" title={t('pay.f02.title')} body={t('pay.f02.body')}>
-          <Compare />
-        </Feature>
-        <Feature no="03" icon="clock" title={t('pay.f03.title')} body={t('pay.f03.body')} />
-        <Feature no="04" icon="calculator" title={t('pay.f04.title')} body={t('pay.f04.body')} />
-        <Feature no="05" icon="share" title={t('pay.f05.title')} body={t('pay.f05.body')} />
-      </div>
-    </section>
-  );
-}
-
-/* 01 — 분포 막대. 내 자리만 빨강입니다.
-   보여주기용 모양이라 숫자를 자료로 쓰지 않습니다 (「예시」라고 적습니다) */
-function Spread() {
-  const { ref, seen } = useSeen<HTMLDivElement>();
-  const bars = [8, 16, 30, 52, 74, 96, 82, 58, 34, 18];
-  const mine = 7;
-
-  return (
-    <div ref={ref} className="mt-6">
-      <div className="flex h-[72px] items-end gap-1">
-        {bars.map((h, i) => (
-          <span
-            key={i}
-            className={'flex-1 rounded-xs ' + (i === mine ? 'bg-brand-red' : 'bg-line')}
-            style={{
-              height: `${h}%`,
-              transition: 'transform 0.7s cubic-bezier(0.22,1,0.36,1)',
-              transitionDelay: `${i * 45}ms`,
-              transformOrigin: 'bottom',
-              transform: seen ? 'scaleY(1)' : 'scaleY(0)',
-            }}
-          />
-        ))}
-      </div>
-      <p className="mt-3 text-lg">
-        <b className="text-ink">상위 23%</b>
-        <span className="text-mute"> · 같은 조건 47명 중</span>
-      </p>
-      <p className="mt-1 text-sm text-mute">화면 예시입니다</p>
-    </div>
-  );
-}
-
-/* 02 — 비교 막대 */
-function Compare() {
-  const { ref, seen } = useSeen<HTMLDivElement>();
-  const rows = [
-    { name: '대학병원', w: 100, right: '+31만원 (연 +372만원)', hot: true },
-    { name: '요양병원 (지금)', w: 72, right: '±0', hot: false },
-  ];
-  return (
-    <div ref={ref} className="mt-6 space-y-3">
-      {rows.map((r, i) => (
-        <div key={r.name}>
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-lg text-body">{r.name}</span>
-            <span className={'text-lg font-bold ' + (r.hot ? 'text-ink' : 'text-mute')}>{r.right}</span>
-          </div>
-          <div className="mt-1 h-2 rounded-md bg-line">
-            <div
-              className={'h-2 rounded-md ' + (r.hot ? 'bg-brand-red' : 'bg-mute')}
-              style={{
-                width: `${r.w}%`,
-                transformOrigin: 'left',
-                transition: 'transform 0.7s cubic-bezier(0.22,1,0.36,1)',
-                transitionDelay: `${i * 120}ms`,
-                transform: seen ? 'scaleX(1)' : 'scaleX(0)',
-              }}
-            />
-          </div>
-        </div>
-      ))}
-      <p className="text-sm text-mute">화면 예시입니다</p>
-    </div>
-  );
+/* 11월 연봉 통계 비공개(Q39)와 부딪혀 그리지 않습니다 — 그림·예시값도 뺐고,
+   DB 글(pay.*)을 읽지 않으므로 home_texts 에 값이 있어도 화면에 안 나옵니다.
+   app/page.tsx 의 호출을 건드리지 않으려고 자리와 인수만 둡니다. */
+export function PaySection(_: { texts: Texts }) {
+  return null;
 }
 
 /* ───────── 7. 취업·이직 섹션 06~09 ───────── */

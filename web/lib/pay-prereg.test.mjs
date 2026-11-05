@@ -83,6 +83,17 @@ test('/pay 로 가는 단추 — 통계를 바로 볼 수 있다고 말하지 �
   assert.doesNotMatch(코드('app/tools/pay/page.tsx'), /또래 중에 내가 어디쯤인지|회원만 볼 수 있어요/);
 });
 
+test('첫 화면 — 급여 홍보 구역은 그리지 않고, 사전 신청 안내와 취업 구역은 둡니다', () => {
+  const s = 코드('components/home/sections.tsx');
+  assert.match(s, /export function PaySection\([^)]*\) \{\s*return null;\s*\}/);
+  assert.doesNotMatch(s, /pay\.(eyebrow|title|lead|f0[1-5])/);
+  assert.doesNotMatch(s, /Spread|Compare|상위 23%|47명|31만원|372만원/);
+  assert.match(s, /PAY_PREREG\.title/);
+  assert.match(s, /PAY_PREREG\.body/);
+  assert.match(s, /t\('job\.f06\.title'\)/);
+  assert.match(코드('app/page.tsx'), /<PayPrereg \/>/);
+});
+
 test('/spec — 급여 호출과 표시만 닫습니다', () => {
   const s = 코드('app/spec/page.tsx');
   assert.doesNotMatch(s, 닫은호출);
