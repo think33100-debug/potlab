@@ -2,10 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { PayNote } from '@/components/pay-note';
 import { useAuth } from '../auth';
 import { browserSupabase } from '@/lib/supabase-browser';
-import { man10 } from '@/lib/pay';
+import { PAY_PREREG } from '@/lib/pay-prereg';
 import { NEXT_WHY, PART_LABEL, PART_ORDER, cheerOf, nextUp, tierOf, type PartKey } from '@/lib/spec';
 
 /* 스펙쌓기. 옛 앱의 학생 결과 화면(getStudentResult)을 옮긴 것입니다.
@@ -191,7 +190,17 @@ export default function SpecPage() {
           </section>
 
           <NextUp parts={me.parts} />
-          <Rookie job={me.job_group} />
+
+          {/* 11월에는 신입 급여도 공개하지 않습니다. 위 스펙 결과는 그대로입니다 */}
+          <Link
+            href="/pay"
+            className="mt-7 flex items-center justify-between gap-3 rounded-sm
+                       border border-gray-200 px-6 py-5 hover:bg-gray-50
+                       dark:border-gray-700 dark:hover:bg-gray-950"
+          >
+            <span className="block min-w-0 break-keep text-body-lg font-bold">{PAY_PREREG.cta}</span>
+            <span aria-hidden className="shrink-0 text-mute">→</span>
+          </Link>
 
           {/* 「계산기 보기」 카드를 **여기서 뺐습니다** (2026-10-02 세중님 결정).
               계산기는 월급확인(/pay)에서 나와야 합니다. 그리고 거기에
@@ -227,62 +236,6 @@ export default function SpecPage() {
         <span aria-hidden className="shrink-0 text-mute">→</span>
       </Link>
     </main>
-  );
-}
-
-/* 유형별 신입 급여 — 학생이 제일 궁금해하는 숫자입니다.
-   옛 앱 rookieSalary 와 같게 연차 2년 이하 · 3명 미만인 유형은 안 보여줍니다 */
-function Rookie({ job }: { job: string | null }) {
-  const [d, setD] = useState<{
-    job: string | null; min_n: number; base: number;
-    types: { type: string; n: number; median_year: number; median_base: number }[];
-  } | null>(null);
-
-  useEffect(() => {
-    browserSupabase().rpc('rookie_salary', { p_job: job })
-      .then(({ data }) => setD(data ?? null));
-  }, [job]);
-
-  if (!d) return null;
-
-  return (
-    <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-      <h2 className="text-h3 font-bold">여기 가면 얼마 받나요</h2>
-      <p className="mt-1 text-sm text-mute">
-        {d.job ?? '치료사'} 중 <b>연차 2년 이하</b>가 적어준 연 총소득이에요
-      </p>
-
-      {d.types.length === 0 ? (
-        <p className="mt-5 text-lg text-mute">
-          신입 급여가 아직 {d.min_n}명은 모이지 않았어요. 지금은 {d.base}명이에요
-        </p>
-      ) : (
-        <>
-          <div className="mt-5">
-            {d.types.map((t) => (
-              <div key={t.type}
-                className="flex items-baseline justify-between border-b border-gray-50 py-5 last:border-0 dark:border-gray-800">
-                <span className="min-w-0 text-lg font-medium">
-                  {t.type}
-                  <span className="ml-2 text-sm text-mute">{t.n}명</span>
-                </span>
-                <span className="shrink-0 text-right">
-                  <b className="text-h3">{man10(t.median_year)}</b>
-                  <span className="block text-sm text-mute">
-                    고정 월급 {t.median_base}만원
-                  </span>
-                </span>
-              </div>
-            ))}
-          </div>
-          <PayNote className="mt-5 text-mute"
-                   source="연차 2년 이하 회원이 직접 올린 급여" />
-          <p className="mt-1 text-sm text-mute">
-            가운데 값(중위값)이에요. {d.min_n}명이 안 되는 유형은 안 보여드려요
-          </p>
-        </>
-      )}
-    </section>
   );
 }
 

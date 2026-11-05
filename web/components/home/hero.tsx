@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { PayNote } from '@/components/pay-note';
 import { tx, txLines, type Texts } from '@/lib/home-text';
+import { PAY_PREREG } from '@/lib/pay-prereg';
 import { useCountUp } from '@/lib/reveal';
 import type { HomeStats } from '@/lib/home';
 
@@ -20,16 +20,6 @@ import type { HomeStats } from '@/lib/home';
    눈금이 있어서 어두운 배경에 얹기 좋습니다. */
 export function Hero({ stats, texts }: { stats: HomeStats; texts: Texts }) {
   const t = (k: string) => tx(texts, k);
-  const ot = stats.joined.find((j) => j.job === '작업치료사');
-  const joined = stats.joined.reduce((s, j) => s + j.n, 0);
-
-  /* 아직 안 쌓인 칸은 아예 뺍니다. 「아직 집계 전」이 두 번 뜨면 비어 보입니다.
-     자료가 쌓이면 칸이 저절로 늘어납니다 — 개수를 세어 격자를 만듭니다 */
-  const cells = [
-    ot?.mid != null ? { n: ot.mid, unit: '만원', label: t('hero.stat.ot') } : null,
-    joined >= stats.min_n ? { n: joined, unit: '명', label: t('hero.stat.joined') } : null,
-    stats.hospitals > 0 ? { n: stats.hospitals, label: t('hero.stat.hosp') } : null,
-  ].filter((c) => c !== null);
 
   return (
     /* 밝은 바탕을 뚫고 가로로 꽉 찹니다 — 가운데 어두운 띠가 되게 */
@@ -66,7 +56,7 @@ export function Hero({ stats, texts }: { stats: HomeStats; texts: Texts }) {
             href="/pay"
             className="rounded-md bg-brand-red px-7 py-5 text-center text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
           >
-            {t('hero.cta1')}
+            {PAY_PREREG.cta}
           </Link>
           <Link
             href="/jobs"
@@ -76,25 +66,14 @@ export function Hero({ stats, texts }: { stats: HomeStats; texts: Texts }) {
           </Link>
         </div>
 
-        {/* 쌓인 만큼만 보여줍니다. 한 칸만 남으면 가로로 꽉 찹니다 */}
-        {cells.length > 0 && (
-          <dl
-            className="mt-8 grid gap-5 border-t border-gray-800 pt-7"
-            style={{ gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))` }}
-          >
-            {cells.map((c) => (
-              <div key={c.label}>
-                <dd className="text-h2 font-bold">
-                  <Count to={c.n} />{c.unit && <span className="text-h3">{c.unit}</span>}
-                </dd>
-                <dt className="mt-1 text-sm text-mute">{c.label}</dt>
-              </div>
-            ))}
+        {stats.hospitals > 0 && (
+          <dl className="mt-8 border-t border-gray-800 pt-7">
+            <div>
+              <dd className="text-h2 font-bold"><Count to={stats.hospitals} /></dd>
+              <dt className="mt-1 text-sm text-mute">{t('hero.stat.hosp')}</dt>
+            </div>
           </dl>
         )}
-
-        {/* 중위값만 크게 보이면 「내가 받을 돈」으로 읽힙니다 */}
-        {ot?.mid != null && <PayNote className="mt-5 text-mute" />}
       </div>
     </section>
   );
