@@ -9,6 +9,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import https from 'node:https';
+import { EventEmitter } from 'node:events';
 import { fileURLToPath } from 'node:url';
 import { 실패기록, 안전글, 목록실패줄, 상세실패표, 본문길이 } from './failure-report.mjs';
 import { 사이트줄 } from './sites.mjs';
@@ -212,10 +214,13 @@ describe('목록 보고 연결 — 사이트줄', () => {
     assert.equal(g.실패.server, 'nginx');
     assert.equal(g.실패.contentType, 'text/html');
     assert.ok(g.실패.앞글.startsWith('Service Unavailable'));
+    /* 공개로 갈 수 있는 칸은 전과 같이 다 가립니다. 비공개앞글은 Q66 대로 호스트와 자유 글 속 이름이 남고 비밀만 가립니다 */
+    const { 비공개앞글, ...공개칸 } = g.실패;
     for (const m of ['QK111', '010-', '합성이름', 'example']) {
       assert.ok(!g.err.includes(m), 'err: ' + g.err);
-      assert.ok(!JSON.stringify(g.실패).includes(m), '실패: ' + JSON.stringify(g.실패));
+      assert.ok(!JSON.stringify(공개칸).includes(m), '실패: ' + JSON.stringify(공개칸));
     }
+    for (const m of ['QK111', '010-', 'serviceKey']) assert.ok(!비공개앞글.includes(m), '비공개앞글: ' + 비공개앞글);
   });
 
   test('네트워크 실패 — 까닭을 남기고 다시 부르지 않습니다', async () => {
@@ -304,5 +309,261 @@ describe('목록 보고 연결 — 사이트줄', () => {
   test('보고 줄 — 이름 · 왜 · 실패를 담고 실패가 없어도 꼴을 지킵니다', () => {
     assert.deepEqual(목록실패줄('합성기관', { err: 'x', 실패: { http: 500 } }), { 이름: '합성기관', 왜: 'x', 실패: { http: 500 } });
     assert.deepEqual(목록실패줄('합성기관', { err: 'y' }), { 이름: '합성기관', 왜: 'y', 실패: null });
+  });
+});
+
+describe('비공개앞글 — 원문 앞 1200자 · 찍어서 가리기', () => {
+  const 비공개 = (글) => 실패기록({ code: 503, text: 글 }).비공개앞글;
+  const 없다 = (글, ...말들) => { for (const m of 말들) assert.ok(!글.includes(m), m + ' 가 남았습니다: ' + 글); };
+
+  test('처음 보는 진단 문구가 남고 비밀은 가립니다 — 옛 앞글은 여전히 아는 낱말만입니다', () => {
+    const 글 = 'Zephyr gateway refused: quota bucket drained 코끼리방화벽 규칙 7번 token=QK111 '
+      + 'synthetic.person@example.invalid 010-0000-0000\n담당자: 합성이름\n'
+      + 'see https://usr1:pw1@host1.example.invalid/block/page?serviceKey=QK222#fragsecret end';
+    const r = 실패기록({ code: 503, text: 글 });
+    for (const m of ['Zephyr gateway refused', 'quota bucket drained', '코끼리방화벽 규칙 7번', 'host1.example.invalid/block/page', 'end']) {
+      assert.ok(r.비공개앞글.includes(m), m + ' 가 사라졌습니다: ' + r.비공개앞글);
+    }
+    없다(r.비공개앞글, 'QK111', 'QK222', 'synthetic.person', '010-', '합성이름', 'usr1', 'pw1', 'fragsecret');
+    없다(r.앞글, 'Zephyr', 'quota', '코끼리방화벽');
+  });
+
+  test('값만 가리고 뒤따르는 진단은 남깁니다', () => {
+    const 글 = 비공개('{"token":"QK111","count":123456,"token2":123456,"message":"quota drained"}');
+    없다(글, 'QK111');
+    assert.ok(글.includes('"message":"quota drained"'), 글);
+    assert.ok(글.includes('"token":‹가림›'), 글);
+    없다(비공개('{"token":123456,"message":"quota drained"}'), '123456');
+    assert.ok(비공개('{"token":123456,"message":"quota drained"}').includes('quota drained'));
+  });
+
+  test('1200자에서 자릅니다', () => {
+    assert.equal([...비공개('error '.repeat(400))].length, 1200);
+    assert.equal(비공개('짧은 문구'), '짧은 문구');
+    assert.equal(실패기록({ code: 500, text: 'error '.repeat(400) }).본문자수, 2400);
+  });
+
+  test('가린 뒤에 자릅니다 — 가려서 줄어든 만큼 뒤 글이 들어오고 경계에 걸친 값은 앞조각도 안 남습니다', () => {
+    const 글 = 비공개('token="' + 'Q'.repeat(3000) + '" 문구끝');
+    assert.ok(글.includes('문구끝'), 글);
+    없다(글, 'QQQ');
+    for (const [값, ...조각] of [
+      ['010-0000-0000', '010', '0000'],
+      ['token=1234567', '123'],
+      ['https://usr1:pw1@h.example.invalid/p?serviceKey=QK111', 'usr1', 'pw1', 'QK', 'serviceKey'],
+      ['a.b@example.invalid', 'a.b', 'example'],
+      ['Bearer AbC123xyz', 'AbC'],
+      ['{"password":"QK111"}', 'QK'],
+      ['담당자: 합성이름', '합성'],
+      ['000000-0000000', '000000'],
+    ]) {
+      for (let 자리 = 1175; 자리 < 1200; 자리++) {
+        const 나온것 = 비공개('e'.repeat(자리) + ' ' + 값);
+        assert.ok([...나온것].length <= 1200);
+        없다(나온것, ...조각);
+      }
+    }
+  });
+
+  test('앞자르기(32,000자)에 걸친 값도 안 샙니다 · 큰 응답에서도 끝납니다', () => {
+    없다(비공개('token="' + 'Q'.repeat(31980) + '" 010 0000 0000 tail'), '010', 'QQQ');
+    assert.equal([...비공개('x'.repeat(100000))].length, 1200);
+  });
+
+  test('꼴을 바꾼 비밀 — 엔티티 · 이스케이프 · 전각 · 숨은 입력칸 · 표 칸 · 긴 토큰', () => {
+    없다(비공개('&#48;&#49;&#48;-0000-0000'), '010', '0000', '&#48');
+    없다(비공개('a&#64;example.invalid'), 'example');
+    없다(비공개('{&quot;token&quot;:&quot;QK111&quot;}'), 'QK111');
+    없다(비공개('{\\"token\\":\\"QK111\\",\\"x\\":1}'), 'QK111');
+    없다(비공개('\\u0074oken=QK111'), 'QK111');
+    없다(비공개('０１０-００００-００００'), '０１０', '010');
+    없다(비공개('<input type="hidden" name="csrf_token" value="QK111">'), 'QK111');
+    없다(비공개('<input value="QK111" id="user_tel">'), 'QK111');
+    없다(비공개('<meta name="csrf-token" content="QK111">'), 'QK111');
+    없다(비공개('JSESSIONID=9f8e7d; Path=/'), '9f8e7d');
+    없다(비공개('eyJhbGciOi.eyJzdWIi.sigpart'), 'eyJ', 'sigpart');
+    없다(비공개('10.0.0.1'), '10.0.0.1');
+    const 표 = 비공개('<th>담당자</th><td>합성이름</td>');
+    없다(표, '합성이름');
+    assert.ok(표.includes('담당자'));
+    const 긴것 = 비공개('trace a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4 end');
+    없다(긴것, 'a1b2c3');
+    assert.ok(긴것.includes('trace') && 긴것.includes('end'));
+  });
+
+  test('주소 — 호스트 · 경로는 남기고 사용자정보 · 쿼리 · 조각 · 경로 인자는 가립니다', () => {
+    assert.equal(비공개('https://host1.example.invalid/waf/block'), 'https://host1.example.invalid/waf/block');
+    assert.equal(비공개('https://usr1:pw1@host1.example.invalid/waf;jsessionid=QK1?serviceKey=QK111#frag'),
+      'https://host1.example.invalid/waf‹가림›');
+  });
+
+  test('진단에 쓸 태그 속성은 남깁니다', () => {
+    const 글 = 비공개('<meta name="description" content="Zephyr WAF block"><h1 class="x">막힘</h1>');
+    assert.ok(글.includes('name="description"') && 글.includes('Zephyr WAF block') && 글.includes('막힘'), 글);
+  });
+
+  test('★ 자유 글 속 이름은 못 가립니다 — 그래서 비공개 칸입니다 (이 시험이 한계를 못 박습니다)', () => {
+    assert.ok(비공개('문의는 합성사람 선생님께 부탁드립니다').includes('합성사람'));
+  });
+
+  test('망가진 입력에도 던지지 않고 글을 냅니다', () => {
+    const 나쁜값 = Object.create(null);
+    for (const 입력 of [undefined, null, 7, 'x', {}, { code: 'abc', text: 나쁜값 }, { code: 99999, text: 12, headers: 1 }]) {
+      assert.equal(typeof 실패기록(입력).비공개앞글, 'string');
+    }
+    assert.equal(실패기록({ code: 200, buf: Buffer.from('Zephyr') }).비공개앞글, 'Zephyr');
+    assert.equal(비공개('&#99999999;'), '&#99999999;');
+  });
+});
+
+describe('★ 비공개앞글은 공개 자리로 못 갑니다', () => {
+  const 표지 = 'Zephyr 코끼리방화벽 quota drained';
+  const 머리셋 = { 'Retry-After': '30', Server: 'nginx', 'Content-Type': 'text/html' };
+  const 받기 = async (s, 응답) => {
+    const 진짜 = globalThis.fetch;
+    globalThis.fetch = async () => new Response(응답.body, { status: 응답.status, headers: 머리셋 });
+    try { return await 사이트줄(s); } finally { globalThis.fetch = 진짜; }
+  };
+  const 없다 = (글, ...말들) => { for (const m of 말들) assert.ok(!글.includes(m), m + ' 가 남았습니다: ' + 글); };
+  const 읽기 = (...길) => fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), ...길), 'utf8');
+
+  test('옛 요약(err · 왜) · 곳별 · 상세표에는 안 들어가고 실패 칸에만 있습니다', async () => {
+    for (const s of [
+      { type: 'appsite', name: '합성기관', host: 'https://a.example.invalid' },
+      { type: 'html', name: '합성기관', url: 'https://a.example.invalid/list' },
+      { type: 'json', name: '합성기관', url: 'https://a.example.invalid/d' },
+    ]) {
+      const g = await 받기(s, { status: 503, body: 표지 + ' token=QK111' });
+      assert.ok(g.실패.비공개앞글.includes(표지), s.type);
+      없다(g.err, 'Zephyr', '코끼리방화벽', 'quota', 'QK111');
+      const 줄 = 목록실패줄(s.name, g);
+      없다(줄.왜, 'Zephyr', '코끼리방화벽', 'quota');
+      없다(JSON.stringify({ 이름: s.name, 왜: g.err }), 'Zephyr', '코끼리방화벽', 'quota');        // 곳별 줄 — 아래 시험이 꼴을 못 박습니다
+      없다(JSON.stringify(상세실패표([{ 이름: s.name, 왜: g.err }])), 'Zephyr', '코끼리방화벽', 'quota');
+      없다(줄.실패.앞글, 'Zephyr', '코끼리방화벽', 'quota');
+    }
+  });
+
+  test('옛 요약의 글은 전과 같습니다 — 안전글 · 본문길이 · 기록 칸', () => {
+    assert.equal(안전글('Zephyr gateway refused 403'), '‹영문› gateway ‹영문› 403');
+    assert.equal(본문길이, 800);
+    const 칸 = Object.keys(실패기록({ code: 500, text: 'x' }));
+    for (const k of ['http', '왜', 'retryAfter', 'server', 'contentType', '머리받음', '본문자수', '앞글', '항목이름']) assert.ok(칸.includes(k), k);
+  });
+
+  test('collect-hosp — 곳별 · 콘솔 · DB 보류사유 · 박동이 실패 칸을 안 집습니다', () => {
+    const 수집 = 읽기('..', 'collect-hosp.mjs');
+    assert.ok(수집.includes('곳별.push({ 이름: s.name, 왜: g.err });'));
+    assert.ok(수집.includes("x.상세왜 = g.왜 || ('HTTP ' + g.code);"));
+    assert.ok(수집.includes("보류사유: x.갈래.갈래 === '보류함' ? (x.상세왜 ? x.갈래.왜 + ' · 상세 ' + x.상세왜 : x.갈래.왜) : '',"));
+    assert.ok(수집.includes("못받은곳.slice(0, 12).forEach((x) => console.log('    ✗ ' + x.이름.slice(0, 24).padEnd(26) + x.왜.slice(0, 56)));"));
+    없다(수집, '비공개', '.실패', '실패기록', '안전글(');
+    /* 못받은곳 을 쓰는 줄이 늘면 이 시험이 먼저 멈춥니다 — 새 줄이 어디로 내보내는지 보십시오 */
+    const 쓰는줄 = 수집.split(/\r?\n/).filter((l) => l.includes('못받은곳')).map((l) => l.trim());
+    assert.deepEqual(쓰는줄, [
+      'const 못받은곳 = [];',
+      '못받은곳.push(목록실패줄(s.name, g));',
+      'if (못받은곳.length) {',
+      "못받은곳.slice(0, 12).forEach((x) => console.log('    ✗ ' + x.이름.slice(0, 24).padEnd(26) + x.왜.slice(0, 56)));",
+      "if (못받은곳.length > 12) console.log('    … 그리고 ' + (못받은곳.length - 12) + '곳 더');",
+      'JSON.stringify({ 잰날: 오늘, 셈, 곳별, 못받은곳, 상세실패: 상세실패표(상세실패) }, null, 1), \'utf8\');',
+    ]);
+  });
+
+  test('sites 는 비공개 칸을 이름으로 안 집고, 보고 파일은 저장소에 안 올라갑니다', () => {
+    없다(읽기('sites.mjs'), '비공개');
+    assert.ok(읽기('..', '..', '.gitignore').split(/\r?\n/).includes('tools/hosp/reports/collect-hosp.json'));
+  });
+});
+
+describe('인증서 길(붙여받기) — 진짜 https.request 자리를 가짜로 바꿔 돌립니다 (실제 요청 0)', () => {
+  /* 느슨한 파서 호스트는 fetch 를 건너뛰고 곧장 https.request 로 갑니다. fetch 를 부르면 시험이 깨집니다 */
+  const 곳 = 'https://www.kunmed.or.kr';
+  async function 돌리기(대본, 일) {
+    const 진짜요청 = https.request;
+    const 진짜fetch = globalThis.fetch;
+    const 부름 = [];
+    https.request = (opt, cb) => {
+      const n = 부름.push(opt);
+      const req = new EventEmitter();
+      req.setTimeout = () => req;
+      req.destroy = () => {};
+      req.end = () => { setImmediate(() => 대본({ req, 응답: (status, headers, ...덩이) => {
+        const res = new EventEmitter();
+        Object.assign(res, { statusCode: status, headers, resume() {} });
+        cb(res);
+        for (const d of 덩이) res.emit('data', d);
+        res.emit('end');
+      } }, n)); };
+      return req;
+    };
+    globalThis.fetch = async () => { throw new Error('fetch 를 부르면 안 됩니다'); };
+    try { return { g: await 일(), 부름 }; } finally { https.request = 진짜요청; globalThis.fetch = 진짜fetch; }
+  }
+
+  test('html 갈래 — 상태 · 머리 셋 · EUC-KR 본문이 실패 칸까지 옵니다 · 요청은 한 번 · 검증은 켠 채', async () => {
+    const 차단 = Buffer.from([0xC2, 0xF7, 0xB4, 0xDC]);   // EUC-KR 「차단」
+    const { g, 부름 } = await 돌리기(({ 응답 }) => 응답(503, {
+      'retry-after': '120', server: 'nginx/1.18.0', 'content-type': 'text/html; charset=euc-kr',
+    }, Buffer.from('Zephyr gateway '), 차단, Buffer.from(' token=QK111 010-0000-0000')),
+    () => 사이트줄({ type: 'html', name: '합성기관', url: 곳 + '/list?x=1' }));
+    assert.equal(부름.length, 1);
+    assert.equal(부름[0].method, 'GET');
+    assert.equal(부름[0].path, '/list?x=1');
+    assert.equal(부름[0].rejectUnauthorized, true);
+    assert.match(g.err, /^HTTP 503 · \d+자$/);
+    assert.equal(g.실패.http, 503);
+    assert.equal(g.실패.retryAfter, '120');
+    assert.equal(g.실패.server, 'nginx/1.18.0');
+    assert.equal(g.실패.contentType, 'text/html; charset=euc-kr');
+    assert.equal(g.실패.머리받음, true);
+    assert.ok(g.실패.비공개앞글.startsWith('Zephyr gateway 차단 token='), g.실패.비공개앞글);
+    for (const m of ['QK111', '010-']) assert.ok(!JSON.stringify(g.실패).includes(m), m);
+    assert.ok(!g.실패.앞글.includes('Zephyr'));
+    assert.ok(!g.err.includes('Zephyr'));
+  });
+
+  test('머리가 없으면 null 입니다 — 받았지만 응답에 없음', async () => {
+    const { g } = await 돌리기(({ 응답 }) => 응답(500, {}, Buffer.from('x')),
+      () => 사이트줄({ type: 'html', name: '합성기관', url: 곳 + '/list' }));
+    assert.equal(g.실패.http, 500);
+    assert.equal(g.실패.머리받음, true);
+    assert.equal(g.실패.retryAfter, null);
+    assert.equal(g.실패.server, null);
+    assert.equal(g.실패.contentType, null);
+  });
+
+  test('json GET 갈래 — buf 만 있는 응답도 본문이 옵니다', async () => {
+    const { g, 부름 } = await 돌리기(({ 응답 }) => 응답(429, { 'retry-after': '5', server: 'nginx', 'content-type': 'application/json' },
+      Buffer.from('{"message":"quota drained","token":"QK111"}')),
+    () => 사이트줄({ type: 'json', 방식: 'GET', name: '합성기관', url: 곳 + '/d' }));
+    assert.equal(부름.length, 1);
+    assert.equal(g.실패.http, 429);
+    assert.equal(g.실패.retryAfter, '5');
+    assert.ok(g.실패.비공개앞글.includes('quota drained'));
+    assert.ok(!g.실패.비공개앞글.includes('QK111'));
+    assert.deepEqual(g.실패.항목이름, ['message', '‹칸›']);
+  });
+
+  test('자리 옮김은 전처럼 한 번 따라가고 마지막 응답을 기록합니다', async () => {
+    const { g, 부름 } = await 돌리기(({ 응답 }, n) => (n === 1
+      ? 응답(302, { location: '/next' })
+      : 응답(403, { server: 'nginx' }, Buffer.from('<h1>Forbidden</h1>')))
+    , () => 사이트줄({ type: 'html', name: '합성기관', url: 곳 + '/list' }));
+    assert.equal(부름.length, 2);
+    assert.equal(부름[1].path, '/next');
+    assert.equal(g.실패.http, 403);
+    assert.equal(g.실패.server, 'nginx');
+  });
+
+  test('인증서 오류 — 코드를 까닭으로 남기고 다시 부르지 않습니다', async () => {
+    const { g, 부름 } = await 돌리기(({ req }) => req.emit('error', Object.assign(new Error('certificate has expired'), { code: 'CERT_HAS_EXPIRED' })),
+      () => 사이트줄({ type: 'html', name: '합성기관', url: 곳 + '/list' }));
+    assert.equal(부름.length, 1);
+    assert.equal(g.err, '못 받음 · CERT_HAS_EXPIRED');
+    assert.equal(g.실패.왜, 'CERT_HAS_EXPIRED');
+    assert.equal(g.실패.http, null);
+    assert.equal(g.실패.머리받음, false);
+    assert.equal(g.실패.비공개앞글, '');
   });
 });
