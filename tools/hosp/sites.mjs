@@ -21,6 +21,10 @@
  */
 import { createRequire } from 'node:module';
 import { 글받기, 붙여받기 } from '../certs/index.mjs';
+import { 실패기록, 안전글, 안전왜 } from './failure-report.mjs';
+
+/* err 에 붙는 짧은 앞글 — 앞 80자 꼴은 그대로이고, 가린 뒤에 자릅니다 */
+const 앞글 = (r) => (r.왜 ? 안전왜(r.왜) : 안전글(r.text, 80));
 
 const require = createRequire(import.meta.url);
 const { hospParseHtml, UA } = require('./hs_test.js');
@@ -94,7 +98,7 @@ async function 보내기(url, { body, contentType, headers } = {}) {
       headers: { ...기본머리, 'Content-Type': contentType || 'application/x-www-form-urlencoded', ...(headers || {}) },
       body,
     });
-    return { code: r.status, text: await r.text() };
+    return { code: r.status, text: await r.text(), headers: r.headers };
   } catch (e) {
     return { code: 0, text: '', 왜: String(e && (e.cause?.code || e.message)).slice(0, 80) };
   }
@@ -120,13 +124,13 @@ export async function 사이트줄(s) {
   /* ── html — 261줄 ── */
   if (s.type === 'html') {
     const g = await 글받기(s.url, { headers: 기본머리, enc: s.enc });
-    if (g.왜) return { err: '못 받음 · ' + g.왜 };
+    if (g.왜) return { err: '못 받음 · ' + 안전왜(g.왜), 실패: 실패기록(g) };
     if (g.code !== 200 || (g.html || '').length < 300) {
-      return { err: 'HTTP ' + g.code + ' · ' + (g.html || '').length + '자' };
+      return { err: 'HTTP ' + g.code + ' · ' + (g.html || '').length + '자', 실패: 실패기록(g) };
     }
     let rows;
     try { rows = hospParseHtml(g.html, s); }
-    catch (e) { return { err: '규칙이 깨졌습니다 · ' + String(e.message).slice(0, 80) }; }
+    catch (e) { return { err: '규칙이 깨졌습니다 · ' + 안전글(e.message, 80), 실패: 실패기록(g) }; }
     return { rows, raw: g.바이트 + '바이트 · ' + (g.cs || '') };
   }
 
@@ -157,14 +161,14 @@ export async function 사이트줄(s) {
       .reduce((v, k) => (v == null ? v : v[k]), o);
     const r = (s['방식'] || 'POST').toUpperCase() === 'GET'
       ? await 붙여받기(s.url, { headers: { ...(s['머리'] || {}) } })
-        .then((g) => ({ code: g.왜 ? 0 : g.code, text: g.html || '', 왜: g.왜 }))
+        .then((g) => ({ code: g.왜 ? 0 : g.code, text: g.html || '', 왜: g.왜, buf: g.buf, headers: g.headers }))
       : await 보내기(s.url, { body: s['몸'] || '', headers: { ...(s['머리'] || {}) } });
     const j = 제이슨(r);
-    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + (r.왜 || String(r.text).slice(0, 80)) };
+    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + 앞글(r), 실패: 실패기록(r) };
     const 다 = 길따라(j, s['줄경로'] || 'list');
     if (!Array.isArray(다)) {
       return { err: '줄경로 「' + (s['줄경로'] || 'list') + '」 가 배열이 아닙니다 · 받은 것 '
-        + JSON.stringify(j).slice(0, 120) };
+        + 안전글(JSON.stringify(j), 120), 실패: 실패기록(r) };
     }
     const 셈 = s['셈경로'] ? 길따라(j, s['셈경로']) : 다.length;
     /* 0건은 **탈이 아닙니다** — 그 게시판에 글이 없을 수 있습니다.
@@ -192,9 +196,9 @@ export async function 사이트줄(s) {
       body: new URLSearchParams({ currentPage: '1', pageSize: '100', keyword: '', recruitClassName: '' }).toString(),
     });
     const j = 제이슨(r);
-    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + (r.왜 || String(r.text).slice(0, 80)) };
+    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + 앞글(r), 실패: 실패기록(r) };
     const 다 = j.list || [];
-    if (!다.length) return { err: 'list.json 이 0건 · pageUtil ' + JSON.stringify(j.pageUtil || {}).slice(0, 90) };
+    if (!다.length) return { err: 'list.json 이 0건 · pageUtil ' + 안전글(JSON.stringify(j.pageUtil || {}), 90), 실패: 실패기록(r) };
     const 접수중 = 다.filter((x) => /접수중/.test(String(x.receiptState || '')));
     return 거르기(s, 마이다스줄(접수중, s.host),
       '전체 ' + ((j.pageUtil || {}).recordCount || 다.length) + '건 중 접수중 ' + 접수중.length + '건',
@@ -204,10 +208,10 @@ export async function 사이트줄(s) {
   /* ── 가톨릭중앙의료원 — 6줄 ── */
   if (s.type === 'cmc') {
     const g = await 붙여받기(s.url, { headers: 기본머리 });
-    if (g.왜) return { err: '못 받음 · ' + g.왜 };
+    if (g.왜) return { err: '못 받음 · ' + 안전왜(g.왜), 실패: 실패기록(g) };
     let j;
     try { j = JSON.parse(g.buf.toString('utf8')); } catch { j = null; }
-    if (!Array.isArray(j)) return { err: 'HTTP ' + g.code + ' 배열 아님 · ' + g.buf.toString('utf8').slice(0, 80) };
+    if (!Array.isArray(j)) return { err: 'HTTP ' + g.code + ' 배열 아님 · ' + 안전글(g.buf, 80), 실패: 실패기록(g) };
     return {
       rows: j.filter((x) => String(x.recruitStatus || '') !== '마감' && String(x.delYn || 'N') !== 'Y')
         .map((x) => ({
@@ -240,7 +244,7 @@ export async function 사이트줄(s) {
       }),
     });
     const j = 제이슨(r);
-    if (!Array.isArray(j)) return { err: 'HTTP ' + r.code + ' 배열 아님 · ' + (r.왜 || String(r.text).slice(0, 80)) };
+    if (!Array.isArray(j)) return { err: 'HTTP ' + r.code + ' 배열 아님 · ' + 앞글(r), 실패: 실패기록(r) };
     return {
       rows: j.filter((x) => String(x.isclosed) !== '1').map((x) => ({
         title: String(x.jobtitle || '').trim(),
@@ -281,9 +285,9 @@ export async function 사이트줄(s) {
       headers: { Accept: 'application/json, text/plain, */*', Referer: s.host + '/page.ckd' },
     });
     const j = 제이슨(r);
-    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + (r.왜 || String(r.text).slice(0, 80)) };
+    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + 앞글(r), 실패: 실패기록(r) };
     const 다 = j.recruitAnnouncementListMain || [];
-    if (!다.length) return { err: '목록이 0건 · result ' + j.result };
+    if (!다.length) return { err: '목록이 0건 · result ' + 안전글(j.result, 80), 실패: 실패기록(r) };
     const 접수중 = 다.filter((x) => String(x.closYn || '') !== 'Y');
     const 줄 = 접수중.map((x) => ({
       title: String(x.recrNm || '').trim(),
@@ -298,16 +302,16 @@ export async function 사이트줄(s) {
 
   if (s.type === 'greeting') {
     const g = await 글받기(s.url, { headers: 기본머리 });
-    if (g.왜) return { err: '못 받음 · ' + g.왜 };
-    if (g.code !== 200) return { err: 'HTTP ' + g.code };
+    if (g.왜) return { err: '못 받음 · ' + 안전왜(g.왜), 실패: 실패기록(g) };
+    if (g.code !== 200) return { err: 'HTTP ' + g.code, 실패: 실패기록(g) };
     const m = g.html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-    if (!m) return { err: '__NEXT_DATA__ 없음 · ' + g.html.length + '자' };
+    if (!m) return { err: '__NEXT_DATA__ 없음 · ' + g.html.length + '자', 실패: 실패기록(g) };
     let nd;
-    try { nd = JSON.parse(m[1]); } catch { return { err: 'NEXT_DATA 가 JSON 이 아닙니다' }; }
+    try { nd = JSON.parse(m[1]); } catch { return { err: 'NEXT_DATA 가 JSON 이 아닙니다', 실패: 실패기록(g) }; }
     const qs = (((nd.props || {}).pageProps || {}).dehydratedState || {}).queries || [];
     const q = qs.find((x) => JSON.stringify(x.queryKey) === '["openings"]');
     if (!q) {
-      return { err: 'openings 질의 없음 · 질의 ' + qs.map((x) => JSON.stringify(x.queryKey).slice(0, 40)).join(' | ') };
+      return { err: 'openings 질의 없음 · 질의 ' + qs.map((x) => 안전글(JSON.stringify(x.queryKey), 40)).join(' | '), 실패: 실패기록(g) };
     }
     const list = (q.state && Array.isArray(q.state.data)) ? q.state.data : ((q.state && q.state.data && q.state.data.data) || []);
     const 한국날 = (iso) => {

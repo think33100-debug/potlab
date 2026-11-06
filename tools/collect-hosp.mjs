@@ -42,6 +42,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { 사이트줄 } from './hosp/sites.mjs';
+import { 목록실패줄, 상세실패표 } from './hosp/failure-report.mjs';
 import { 글받기 } from './certs/index.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
@@ -305,6 +306,7 @@ const 주소없는곳 = new Map();
 const 모은것 = [];
 const 곳별 = [];
 const 못받은곳 = [];
+const 상세실패 = [];
 
 for (let i = 0; i < 볼것.length; i += 동시) {
   await Promise.all(볼것.slice(i, i + 동시).map(async (s) => {
@@ -318,7 +320,7 @@ for (let i = 0; i < 볼것.length; i += 동시) {
     const g = await 사이트줄(s);
     if (g.err) {
       셈.못받음++;
-      못받은곳.push({ 이름: s.name, 왜: g.err });
+      못받은곳.push(목록실패줄(s.name, g));
       곳별.push({ 이름: s.name, 왜: g.err });
       return;
     }
@@ -546,7 +548,11 @@ if (상세몫 > 0) {
         ? { code: 200, html: String(x.글) }
         : await 글받기(상세주소(x.url), { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, enc: x.곳.enc });
       if (!x.글) 상세연것++; else 목록본문쓴것++;
-      if (g.왜 || g.code !== 200) { x.상세왜 = g.왜 || ('HTTP ' + g.code); return; }
+      if (g.왜 || g.code !== 200) {
+        x.상세왜 = g.왜 || ('HTTP ' + g.code);
+        상세실패.push({ 이름: x.곳.name, 왜: x.상세왜 });
+        return;
+      }
       /* ★ 2026-10-12 — **`<style>` 과 주석도 걷습니다.**
          전에는 `<script>` 만 걷어서 CSS 가 본문으로 들어왔습니다 —
          본문 28건·기관 11곳이 평균 **56,128자**(중괄호 505개)로 부풀었고,
@@ -1072,5 +1078,5 @@ if (첨부모음.줄들.length && 첨부모음.마른) await 첨부모음.형식
 await 첨부모음.끝내기(cfg);
 
 fs.writeFileSync(path.join(여기, 'hosp', 'reports', 'collect-hosp.json'),
-  JSON.stringify({ 잰날: 오늘, 셈, 곳별, 못받은곳 }, null, 1), 'utf8');
+  JSON.stringify({ 잰날: 오늘, 셈, 곳별, 못받은곳, 상세실패: 상세실패표(상세실패) }, null, 1), 'utf8');
 if (탈) process.exit(1);
