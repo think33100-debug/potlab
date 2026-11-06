@@ -106,8 +106,10 @@ const 값칸꼴 = (칸, 구분, 끝) => new RegExp(String.raw`(?<![\w-])(${칸})
 const 비밀칸글 = String.raw`[\w-]{0,32}?(?:${비밀낱말})[\w-]{0,16}|비밀번호|암호|토큰|인증키`;
 const 비공개비밀쌍점 = 값칸꼴(비밀칸글, ':', String.raw`[^\n<]*`);
 const 비공개비밀등호 = 값칸꼴(비밀칸글, '=', String.raw`[^\s&;,<"']*`);
+/* 복합 사람 칸 — 칸 앞에 글자가 붙으면 값칸꼴의 앞 울타리에 걸리므로 이름째 적습니다 (태그 칸과 한 자리) */
+const 복합사람칸 = String.raw`(?:contact|person|manager|first|last|full|sender)[_-]?name|(?:tele|cell)phone`;
 /* name 은 태그 속성(<meta name="description">)이면 안 가립니다 — 그 자리의 값은 민감입력칸이 봅니다 */
-const 비공개사람칸 = 값칸꼴(String.raw`담당자?|성명|이름|주민(?:등록)?(?:번호)?|연락처|전화(?:번호)?|휴대(?:폰|전화)?|핸드폰|이메일|사번|아이디|주소|e-?mail|(?<!<[a-z][^<>]{0,300})name|user(?:name|id)?|phone|tel|mobile|address`,
+const 비공개사람칸 = 값칸꼴(String.raw`담당자?|성명|이름|주민(?:등록)?(?:번호)?|연락처|전화(?:번호)?|휴대(?:폰|전화)?|핸드폰|이메일|사번|아이디|주소|e-?mail|(?<!<[a-z][^<>]{0,300})name|user(?:[_-]?(?:name|id))?|phone|tel|mobile|address|${복합사람칸}`,
   '[:=]', String.raw`[^\n<]*`);
 const 표칸꼴 = /(담당자?|성명|이름|연락처|전화(?:번호)?|휴대(?:폰|전화)?|핸드폰|이메일|주소)(\s*(?:<[^<>]{0,60}>\s*){1,6})([^<\n]{1,120})/gu;
 const 민감이름꼴 = new RegExp(String.raw`\b(?:name|id|property)\s*=\s*["']?[^"'\s>]*(?:${비밀낱말}|${사람낱말})`, 'i');
@@ -115,7 +117,7 @@ const 민감이름꼴 = new RegExp(String.raw`\b(?:name|id|property)\s*=\s*["']?
    비밀 낱말은 글자 일부로도 잡으므로 aside(sid) · keygen(key) 같은 보통 태그는 뺍니다 */
 const 태그칸꼴 = (칸) => new RegExp(String.raw`<((?:[\w.-]+:)?(?:${칸}))(\s[^<>]*?)?(?:/>|>(?:[\s\S]{0,8000}?(</\1\s*>)|(?:\s*<[^<>]*>)*[^<]*))`, 'giu');
 const 비밀태그칸 = 태그칸꼴(String.raw`(?!aside\b|keygen\b)(?:${비밀칸글})`);
-const 사람태그칸 = 태그칸꼴(String.raw`(?:[\w.-]*[_-])?(?:담당자?|성명|이름|주민(?:등록)?(?:번호)?|연락처|전화(?:번호)?|휴대(?:폰|전화)?|핸드폰|이메일|사번|아이디|주소|e-?mail|mail|name|user(?:name|id)?|phone|tel|mobile|address)(?:[_-][\w.-]*)?|(?:contact|person|manager|first|last|full|sender)[_-]?name|(?:tele|cell)phone`);
+const 사람태그칸 = 태그칸꼴(String.raw`(?:[\w.-]*[_-])?(?:담당자?|성명|이름|주민(?:등록)?(?:번호)?|연락처|전화(?:번호)?|휴대(?:폰|전화)?|핸드폰|이메일|사번|아이디|주소|e-?mail|mail|name|user(?:name|id)?|phone|tel|mobile|address)(?:[_-][\w.-]*)?|${복합사람칸}`);
 const 태그값가림 = (표) => (m, 이름, 속성, 닫음) => {
   const 속 = 속성 ? ' ‹가림›' : '';
   return m.endsWith('/>') && !닫음 ? `<${이름}${속}/>` : `<${이름}${속}>${표}${닫음 || ''}`;

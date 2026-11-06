@@ -433,6 +433,25 @@ describe('비공개앞글 — 원문 앞 1200자 · 찍어서 가리기', () => 
     assert.equal(안전글('<error><token>QK111</token></error>'), '<error><‹영문›>‹값›</‹영문›></error>');
   });
 
+  test('복합 사람 칸 — contactName · user_name · manager_name 의 값을 가리고 처음 보는 진단 문구는 남깁니다', () => {
+    for (const 칸 of ['contactName', 'contact_name', 'userName', 'user_name', 'user-name', 'managerName', 'manager_name']) {
+      for (const 글 of [
+        `{"${칸}":"합성이름","message":"Zephyr quota drained"}`,
+        `{'${칸}':'합성이름','message':'Zephyr quota drained'}`,
+        `${칸}: 합성이름\nZephyr quota drained`,
+        `${칸}=합성이름\nZephyr quota drained`,
+      ]) {
+        const 나온것 = 비공개(글);
+        없다(나온것, '합성이름');
+        assert.ok(나온것.includes(칸) && 나온것.includes('Zephyr quota drained'), 나온것);
+      }
+      없다(비공개(`{\\"${칸}\\":\\"합성이름\\"}`), '합성이름');
+    }
+    /* 사람 칸이 아닌 비슷한 이름은 진단이므로 그대로입니다 */
+    const 글 = 'hostname=gw1\nserver_name: gw2\nuser-agent: Zephyr';
+    assert.equal(비공개(글), 'hostname=gw1 server_name: gw2 user-agent: Zephyr');
+  });
+
   test('진단에 쓸 태그 속성은 남깁니다', () => {
     const 글 = 비공개('<meta name="description" content="Zephyr WAF block"><h1 class="x">막힘</h1>');
     assert.ok(글.includes('name="description"') && 글.includes('Zephyr WAF block') && 글.includes('막힘'), 글);
