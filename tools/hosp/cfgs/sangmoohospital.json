@@ -1,12 +1,13 @@
 {
- "name": "상무병원",
- "type": "html",
- "url": "https://www.sangmoohospital.co.kr/bbs/board.php?bo_table=recruit",
- "base": "https://www.sangmoohospital.co.kr",
- "row": "<tr class=\"bo_notice\">[\\s\\S]*?<\\/tr>|<tr class=\"\">[\\s\\S]*?<\\/tr>",
- "title": "<a href=\"https:\\/\\/www\\.sangmoohospital\\.co\\.kr[^\"]*wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
- "link": "href=\"(https:\\/\\/www\\.sangmoohospital\\.co\\.kr[^\"]*wr_id=\\d+)\"",
- "skip": "반환|양식|합격|발표",
- "note": "광주 서구 상무병원(치평동). 그누보드 기본 스킨. 글이 공지 2개뿐(간호사 상시모집 · 채용서류 반환). 날짜가 월-일(09-24)뿐이라 date 없음 → 날짜없음. robots Allow /. 실제 직종별 공고는 사람인 등에 올리는 듯.",
- "off": "구글 서버에서 못 엶(HTTP 0 Timeout) 2026-09-17 · 컴퓨터에서는 열림"
+  "name": "상무병원",
+  "type": "html",
+  "url": "https://www.sangmoohospital.co.kr/bbs/board.php?bo_table=recruit",
+  "base": "https://www.sangmoohospital.co.kr",
+  "row": "<tr class=\"[^\"]*\">[\\s\\S]*?<\\/tr>",
+  "title": "<a href=\"https:\\/\\/www\\.sangmoohospital\\.co\\.kr[^\"]*wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
+  "link": "href=\"(https:\\/\\/www\\.sangmoohospital\\.co\\.kr[^\"]*wr_id=\\d+)\"",
+  "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+  "single": "posted",
+  "skip": "반환|양식|합격|발표",
+  "note": "광주 서구 상무병원(치평동). 그누보드. 2026-11-09 고침 — 행 class 가 「bo_notice」 딱 그 글자에서 「bo_notice even」·「bo_notice 」 로 바뀌어 전 규칙(<tr class=\"bo_notice\">)이 0블록이었습니다. class 가 있는 <tr> 을 다 잡습니다(머리 행은 class 없음). 날짜도 월-일에서 연-월-일(2019-09-24)로 바뀌어 date 를 넣었습니다(등록일 하나 · posted). 글은 공지 2개뿐(간호사 상시모집 2019 · 채용서류 반환은 skip). robots Allow /. 실제 직종별 공고는 사람인 등에 올리는 듯. 09-17 Timeout 으로 off 였다가 09-25 밤 구글에서 HTTP 200 으로 켰음(off 없음)."
 }
