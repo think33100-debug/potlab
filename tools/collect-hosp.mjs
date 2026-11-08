@@ -331,7 +331,16 @@ for (let i = 0; i < 볼것.length; i += 동시) {
     if (s.not) rows = rows.filter((r) => !new RegExp(s.not).test(r.title));
     if (!rows.length) 셈.규칙0++;
     셈.줄 += rows.length;
-    곳별.push({ 이름: s.name, 줄: rows.length, raw: g.raw });
+    /* 2026-11-08 세중님 — 직군과 상관없이 첫 쪽에서 가장 최근 글 날짜를 남깁니다.
+       「최근 공고 없음」 곳이 다른 직군 채용은 하는지, 게시판이 사실상 멈췄는지 가르려고요.
+       올린 날 → 시작일 → 마감일 순으로 집습니다. 기록만 남기고 수집 동작은 그대로입니다 */
+    const 최근글 = rows.map((r) => String(r.posted || r.from || r.to || ''))
+      .map((d) => {
+        const m = d.match(/(20\d{2})[.\-/]\s?(\d{1,2})[.\-/]\s?(\d{1,2})/);
+        return m ? m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2) : '';
+      })
+      .filter(Boolean).sort().pop() || null;
+    곳별.push({ 이름: s.name, 줄: rows.length, raw: g.raw, 최근글 });
     /* ⚠ 주소가 없는 줄은 담을 수 없습니다. **그런데 말없이 버리면 안 됩니다** —
        강진의료원이 link 규칙 하나 때문에 7줄을 통째로 잃고 있었는데
        「줄 7」 이라고만 찍혀서 두 주 동안 아무도 몰랐습니다 (2026-09-30). */
