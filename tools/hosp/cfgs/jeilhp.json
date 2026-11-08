@@ -1,14 +1,14 @@
 {
- "name": "의료법인한마음의료재단 여수제일병원",
- "type": "html",
- "url": "https://jeilhp.com/recruit",
- "base": "https://jeilhp.com",
- "row": "<tr class=\"notice\"[\\s\\S]*?<\\/tr>",
- "title": "<a href=\"https:\\/\\/jeilhp\\.com\\/recruit\\/[^\"]+\"[^>]*class=\"title_text\">([\\s\\S]*?)<\\/a>",
- "link": "href=\"(https:\\/\\/jeilhp\\.com\\/recruit\\/[^\"]+)\"",
- "date": "column-created_at\" title=\"(20\\d{2}-\\d{1,2}-\\d{1,2})",
- "skip": "양식|합격자|발표|결과",
- "single": "posted",
- "note": "XE3 게시판. 공지·일반 행 모두 tr.notice. 글이 「직원 상시 채용공고」 1건뿐이고 상세에 직종별 내용. 날짜는 등록일 하나. robots Allow /",
- "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
+  "name": "의료법인한마음의료재단 여수제일병원",
+  "type": "html",
+  "url": "https://jeilhp.com/recruit",
+  "base": "https://jeilhp.com",
+  "row": "<tr><td><span class=\"nitem__cat[^\"]*\">[\\s\\S]*?<\\/tr>",
+  "title": "<a href=\"news-view\\.html\\?id=[^\"]+\">([\\s\\S]*?)<\\/a>",
+  "link": "href=\"(news-view\\.html\\?id=[^\"]+)\"",
+  "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+  "skip": "양식|합격자|발표|결과",
+  "single": "posted",
+  "note": "2026-11-09 고침 — 홈페이지가 XE3 게시판에서 정적 쪽으로 다시 만들어졌습니다(canonical https://jeilhp.com/recruit.html). 전 규칙(tr.notice · a.title_text · column-created_at)이 0블록. 지금은 <tr><td><span class=\"nitem__cat …\">공지|양식</span></td><td><a href=\"news-view.html?id=…\">제목</a></td><td>2024.09.02</td></tr>. 링크가 상대 주소라 base 로 https://jeilhp.com/news-view.html?id=… 가 됩니다(쪽이 /recruit.html 이라 같은 층). 글은 「직원 상시 채용공고」(2024.09.02) 1건 + 입사지원서 양식(skip). 날짜는 등록일 하나. robots Allow / (admin 만 Disallow)",
+  "off": "구글 서버에서 못 엶(HTTP 403) 2026-09-17 · 컴퓨터에서는 열림"
 }
