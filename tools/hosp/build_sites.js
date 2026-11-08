@@ -3,13 +3,14 @@
 const fs = require('fs'), path = require('path');
 const dir = path.join(__dirname, 'cfgs');
 const jsonSites = [
-  { name: '전남대학교병원', type: 'appsite', host: 'https://cnuh.recruiter.co.kr', sn: 4978, settingType: 'E', not: '화순' },
-  { name: '화순전남대학교병원', type: 'appsite', host: 'https://cnuh.recruiter.co.kr', sn: 4978, settingType: 'E', only: '화순' },
-  { name: '전북대학교병원', type: 'appsite', host: 'https://jbuh.recruiter.co.kr', sn: 13192, settingType: 'A' },
-  { name: '충북대학교병원', type: 'appsite', host: 'https://cbnuh.recruiter.co.kr', sn: 9932, settingType: 'E' },
-  { name: '의료법인 길의료재단 길병원', type: 'appsite', host: 'https://gilhospital.recruiter.co.kr', sn: 2714, settingType: 'E' },
-  { name: '분당서울대학교병원', type: 'appsite', host: 'https://snubh.recruiter.co.kr', sn: 658, settingType: 'E' },
-  { name: '아주대학교병원', type: 'appsite', host: 'https://ajoumc.recruiter.co.kr', sn: 3327, settingType: 'E' },
+  /* 천천히: true — robots 예외(현황판/robots예외.csv) · 하루 두 번만 (2026-11-09 세중님) */
+  { name: '전남대학교병원', type: 'appsite', host: 'https://cnuh.recruiter.co.kr', sn: 4978, settingType: 'E', not: '화순', 천천히: true },
+  { name: '화순전남대학교병원', type: 'appsite', host: 'https://cnuh.recruiter.co.kr', sn: 4978, settingType: 'E', only: '화순', 천천히: true },
+  { name: '전북대학교병원', type: 'appsite', host: 'https://jbuh.recruiter.co.kr', sn: 13192, settingType: 'A', 천천히: true },
+  { name: '충북대학교병원', type: 'appsite', host: 'https://cbnuh.recruiter.co.kr', sn: 9932, settingType: 'E', 천천히: true },
+  { name: '의료법인 길의료재단 길병원', type: 'appsite', host: 'https://gilhospital.recruiter.co.kr', sn: 2714, settingType: 'E', 천천히: true },
+  { name: '분당서울대학교병원', type: 'appsite', host: 'https://snubh.recruiter.co.kr', sn: 658, settingType: 'E', 천천히: true },
+  { name: '아주대학교병원', type: 'appsite', host: 'https://ajoumc.recruiter.co.kr', sn: 3327, settingType: 'E', 천천히: true },
   { name: '부산대학교병원', type: 'listjson', host: 'https://pnuh.recruiter.co.kr' },
   { name: '학교법인가톨릭학원가톨릭대학교서울성모병원', type: 'cmc', url: 'https://www.cmcseoul.or.kr/api/article/64?page=1&size=12', base: 'https://www.cmcseoul.or.kr' },
   { name: '가톨릭대학교 성빈센트병원', type: 'cmc', url: 'https://www.cmcvincent.or.kr/api/article/167?page=1&size=12&vincentRecruitYn=Y', base: 'https://www.cmcvincent.or.kr' },
@@ -21,7 +22,9 @@ const KEYS = ['name', 'type', 'url', 'host', 'base', 'enc', 'sn', 'settingType',
   /* type:'json' 이 쓰는 칸 (2026-10-19) — 여기 없으면 hosp_sites.js 에서 **조용히 빠집니다**.
      수집기는 cfgs/*.json 을 통째로 읽어서 안 빠지지만, 이 도구로 표를 다시 만들면
      빠지므로 함께 적어 둡니다 (지침 6절 — 같은 기준이 두 자리) */
-  '방식', '몸', '머리', '줄경로', '셈경로', '제목열쇠', '날짜열쇠', '시작열쇠', '끝열쇠', '갈래열쇠', '링크꼴', '링크열쇠'];
+  '방식', '몸', '머리', '줄경로', '셈경로', '제목열쇠', '날짜열쇠', '시작열쇠', '끝열쇠', '갈래열쇠', '링크꼴', '링크열쇠',
+  /* 2026-11-09 세중님 — robots 예외 곳은 하루 두 번만 (09~12 · 13~18 랜덤). 규칙은 tools/hosp/천천히.mjs */
+  '천천히'];
 function lit(v) { return typeof v === 'number' ? String(v) : "'" + String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'"; }
 const all = jsonSites.slice();
 fs.readdirSync(dir).filter(f => f.endsWith('.json')).sort().forEach(f => {

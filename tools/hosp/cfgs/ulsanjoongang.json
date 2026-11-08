@@ -9,6 +9,7 @@
  "date": "<span class=\"read\">(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
  "skip": "\\[완료\\]|합격자|발표|결과",
  "single": "posted",
+ "천천히": true,
  "note": "울산 중앙병원(울산 남구 문수로 472 · 777 이름 「의료법인 정안의료재단 중앙병원」) 채용정보 게시판. 2026-11-08 세중님 주소. 목록: li > a.subj(제목 strong · 접수마감이면 「[완료]」 꼬리 + label end) · span.read 가 올린 날 · 링크는 ?proc_type=view&a_num=9150467&b_num=N 꼴(a_num 은 게시판 번호 · 목록 안 모두 같음) → b_num 만 잡아 linkFmt 로 조립. ★ robots 는 모든 봇 금지(`* Disallow /` · Crawl-delay 30 · 검색엔진만 허용)인데 **세중님 2026-11-08 결정 「긁자」로 켬** — 보건소 9곳·리크루터 /app 과 같은 「robots 거부 곳 우회 안 함」 규칙의 예외 갈래. 조건: 한 곳 한 시간 한 번 이하 · 첫 쪽만 · 첨부 대량 받기 없음 · 병원이 그만해 달라면 즉시 끔(off 로 되돌림). 전 PR #25 에서 off 로 뒀던 것을 PR 로 뺌. 받아 둔 HTML 로 규칙만 시험함(2026-11-08).",
  "linkFmt": "https://www.ulsanjoongang.co.kr/content/07customer/07_01.php?proc_type=view&a_num=9150467&b_num={1}"
 }
