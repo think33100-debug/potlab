@@ -37,15 +37,15 @@ const HTTP = (status, body = '{"id":"합성-응답"}') => async () => ({
   ok: status >= 200 && status < 300, status, text: async () => body,
 });
 
-/* 소스 원문에서 import 다섯 줄만 뗍니다. 줄 수가 달라지면 모의가 모자란 것이니 바로 멈춥니다 */
+/* 소스 원문에서 import 여섯 줄만 뗍니다 (2026-11-08 spawnSync 가 더해져 다섯 → 여섯). 줄 수가 달라지면 모의가 모자란 것이니 바로 멈춥니다 */
 const 소스 = (() => {
   const 원문 = fs.readFileSync(원본경로, 'utf8');
   let 뗀수 = 0;
   const 본문 = 원문.replace(/^import\s[^;\n]*;[ \t]*$/gm, () => { 뗀수 += 1; return ''; });
-  if (뗀수 !== 5 || /^\s*import[\s(]/m.test(본문)) throw new Error('원 도구의 import 꼴이 바뀌었습니다 — 모의를 다시 맞추십시오');
+  if (뗀수 !== 6 || /^\s*import[\s(]/m.test(본문)) throw new Error('원 도구의 import 꼴이 바뀌었습니다 — 모의를 다시 맞추십시오');
   return 본문.replaceAll('import.meta.url', '가짜메타주소');
 })();
-const 이름들 = ['fs', '받아보기', 'path', 'os', 'fileURLToPath', 'process', 'Date', 'fetch', 'console', '가짜메타주소'];
+const 이름들 = ['fs', '받아보기', 'path', 'os', 'fileURLToPath', 'process', 'Date', 'fetch', 'console', 'spawnSync', '가짜메타주소'];
 const 도구 = vm.runInNewContext('(async function (' + 이름들.join(', ') + ') {\n' + 소스 + '\n})',
   Object.create(null), { filename: '수집기멈춤경보.mjs(합성)' });
 
@@ -58,7 +58,7 @@ async function 돌리기({ argv = [], env = 기본환경, 늦음 = [늦은것()]
   쓰기실패 = false, 지금 = 이제 } = {}) {
   const 파일들 = new Map();
   if (저장원문 !== null) 파일들.set(기록파일, 저장원문);
-  const 결과 = { 발송: 0, 기록: 0, 지움: 0, RPC: 0, 종료: null, 던짐: false, 딴데씀: 0, 출력: '', 메일요청: null };
+  const 결과 = { 발송: 0, 기록: 0, 지움: 0, RPC: 0, 종료: null, 던짐: false, 딴데씀: 0, 출력: '', 메일요청: null, 자식호출: 0 };
 
   const 찍기 = (...글) => { 결과.출력 += 글.join(' ') + '\n'; };
   const 가짜fs = {
@@ -100,6 +100,8 @@ async function 돌리기({ argv = [], env = 기본환경, 늦음 = [늦은것()]
       { now: () => 지금 },
       가짜fetch,
       { log: 찍기, error: 찍기 },
+      /* 2026-11-08 — 중복공고경보를 따로 떨어진 프로세스로 부르는 자리. 합성에서는 부르지 않고 셈만 합니다 */
+      () => { 결과.자식호출 += 1; return { status: 0 }; },
       'file:///합성저장소/tools/수집기멈춤경보.mjs',
     );
   } catch (e) {
