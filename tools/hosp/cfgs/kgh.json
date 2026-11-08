@@ -1,0 +1,12 @@
+{
+ "name": "고흥군공립노인전문요양병원",
+ "type": "html",
+ "url": "https://kgh.kr/skgh/bbs/board.php?bo_table=skgh_notice",
+ "base": "https://kgh.kr",
+ "row": "<tr class=\"[^\"]*\">\\s*<td class=\"td_num2\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*bo_table=skgh_notice&amp;wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=skgh_notice&amp;wr_id=\\d+)\"",
+ "skip": "합격|발표|결과",
+ "only": "모집|채용",
+ "note": "그누보드 기본 표(td_num2·td_subject·td_datetime). 채용 전용이 아니라 공지사항 게시판이라 비급여·지침 글이 섞임 → only 「모집|채용」 만 남김. 지금 채용 글은 2012~2020년 간호사 모집뿐(제목 연도로 옛글 거르기에 걸림). 날짜가 월-일(03-18)만 있어 못 뽑음. robots.txt 는 넘겨주기 고리로 못 읽음(redirect count exceeded) — 막는 규칙 확인 못 함. 2026-11-08 확인 · 세중님 11/8 손확인 주소"
+}

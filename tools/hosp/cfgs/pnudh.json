@@ -1,0 +1,14 @@
+{
+ "name": "양산부산대학교치과병원",
+ "type": "html",
+ "url": "https://www.pnudh.co.kr/pnudh/board/list.do?cmnx=29",
+ "base": "https://www.pnudh.co.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"view\\.do\\?cmnx=29&idx=\\d+\">([\\s\\S]*?)<\\/a>",
+ "link": "idx=(\\d+)\"",
+ "linkFmt": "https://www.pnudh.co.kr/pnudh/board/view.do?cmnx=29&idx={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격|발표|결과|시험|면접|친인척",
+ "single": "posted",
+ "note": "표(번호·구분·제목·채용기간·진행상황). 채용기간 「시작 ~ 끝」 두 날짜. 공지 행(회색)이 번호 행과 같은 글이라 번호 행만 잡음. 시험·면접·합격 안내와 친인척 현황 글은 skip. 제목에 &#40; &#41; 가 글자 그대로 남음(stripTags 가 안 풂). robots.txt 빈 파일. 2026-11-08 확인 · 세중님 11/8 손확인 주소"
+}
