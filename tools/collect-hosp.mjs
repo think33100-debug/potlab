@@ -313,6 +313,10 @@ for (let i = 0; i < 볼것.length; i += 동시) {
     if (s.off && /알리오로 들어옴|클린아이로 들어옴/.test(String(s.off))) {
       셈.꺼짐++; 곳별.push({ 이름: s.name, 건너뜀: '다른 경로로 들어옴' }); return;
     }
+    /* 2026-11-08 세중님 — robots 가 사이트 전체를 막은 곳은 손확인으로 돌립니다 (용인세브란스) */
+    if (s.off && /봇 금지/.test(String(s.off))) {
+      셈.꺼짐++; 곳별.push({ 이름: s.name, 건너뜀: '봇 금지 · 손확인' }); return;
+    }
     if (!s.url && !s.host) { 곳별.push({ 이름: s.name, 건너뜀: '주소가 없음' }); return; }
 
     const g = await 사이트줄(s);
