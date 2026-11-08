@@ -1,0 +1,12 @@
+{
+ "name": "강원특별자치도립 강릉요양병원",
+ "type": "html",
+ "url": "http://gnmch.or.kr/new/sub/sub3_4.php/?bo_table=ad&skin=basic&type=list",
+ "base": "http://gnmch.or.kr",
+ "row": "<tr>\\s*<td>(?:<strong>공지<\\/strong>|\\d+)<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*bo_table=ad&amp;skin=basic&amp;type=view&amp;wr_id=\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "wr_id=(\\d+)",
+ "linkFmt": "http://gnmch.or.kr/new/sub/sub3_4.php/?bo_table=ad&skin=basic&type=view&wr_id={1}",
+ "skip": "마감|합격|발표|결과",
+ "note": "그누보드 계열 표(번호·제목·작성자·날짜·조회). 공지 행 포함. 날짜가 월-일(11-04)만 있어 못 뽑음 · 제목 앞 「26.11.4~11.14」 도 두 자리 해라 못 읽음. 긴 제목은 「…」로 잘림. 링크 끝 &page=1 을 떼려고 wr_id 로 linkFmt 조립. robots.txt 없음(404 쪽으로 넘어감). 2026-11-08 확인 · 세중님 11/8 손확인 주소"
+}

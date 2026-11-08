@@ -1,0 +1,14 @@
+{
+ "name": "영광군공립요양병원",
+ "type": "html",
+ "url": "https://ge.ygmc.co.kr/?pn=board.list&_menu=normal_jobs",
+ "base": "https://ge.ygmc.co.kr",
+ "row": "<tr[^>]*>\\s*<td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"#none\" onclick=\"location\\.href='[^']*board\\.view[^']*'[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "_uid=(\\d+)",
+ "linkFmt": "https://ge.ygmc.co.kr/?pn=board.view&_uid={1}",
+ "date": "(20\\d{2}[.\\-/]\\d{1,2}[.\\-/]\\d{1,2})",
+ "skip": "마감|합격|발표|양식",
+ "single": "posted",
+ "note": "영광종합병원(ygmc.json)과 같은 판의 하위 사이트 ge.ygmc.co.kr 채용 게시판(_menu=normal_jobs). 링크가 onclick 안 location.href 라 _uid 로 linkFmt 조립. 공지 행은 날짜 열이 없어 날짜없음. 작성일 하나(2026.10.06 꼴). robots.txt 없음(404). 2026-11-08 확인 · 세중님 11/8 손확인 주소"
+}

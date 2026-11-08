@@ -1,0 +1,15 @@
+{
+ "name": "안산시립노인전문병원",
+ "type": "html",
+ "url": "http://bumomam.or.kr/bbs/common/list.asp?table=bbs_notice&category=3",
+ "enc": "EUC-KR",
+ "base": "http://bumomam.or.kr",
+ "row": "<tr height=\"30px\">[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"list\\.asp\\?show_idx=\\d+[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "show_idx=(\\d+)",
+ "linkFmt": "http://bumomam.or.kr/bbs/common/list.asp?show_idx={1}&table=bbs_notice&category=3",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "마감|합격|발표|결과",
+ "single": "posted",
+ "note": "ASP 게시판 표(번호·제목·작성자·작성일·조회) · EUC-KR. 글 보기도 list.asp?show_idx=N 이라 번호로 linkFmt 조립. 작성일 하나. 끝난 공고는 제목에 (마감) 붙임 → skip. robots.txt 없음(404). 2026-11-08 확인 · 세중님 11/8 손확인 주소"
+}
