@@ -5,7 +5,7 @@
  "base": "https://www.ulsanjoongang.co.kr",
  "row": "<li>\\s*<a href='\\?proc_type=view[^']*'\\s+class=\"subj\">[\\s\\S]*?<\\/li>",
  "title": "<strong>([\\s\\S]*?)<\\/strong>",
- "link": "b_num=(d+)",
+ "link": "b_num=(\\d+)",
  "date": "<span class=\"read\">(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
  "skip": "\\[완료\\]|합격자|발표|결과",
  "single": "posted",
