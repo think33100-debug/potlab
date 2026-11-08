@@ -1,14 +1,14 @@
 {
- "name": "광주현대병원",
- "type": "html",
- "url": "http://www.hyundae-hosp.co.kr/apps/community/job.php?bcb_bcode=31",
- "enc": "EUC-KR",
- "base": "http://www.hyundae-hosp.co.kr",
- "row": "<tr>\\s*<td class='bd_no'>[\\s\\S]*?<\\/tr>",
- "title": "<a href='[^']*mode=v'>([\\s\\S]*?)<\\/a>",
- "link": "href='([^']*mode=v)'",
- "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
- "skip": "마감|양식|합격|발표",
- "single": "posted",
- "note": "EUC-KR. 표: 번호·제목·파일·이름·날짜·조회. 공지(고정) 행은 colspan 이라 bd_no 로 시작하는 일반 행만 잡음(공지는 아래 일반 행에도 있음). 날짜는 등록일 하나. 제목에 <채용마감>/<마감> 붙이는 방식. robots.txt 404."
+  "name": "광주현대병원",
+  "type": "html",
+  "url": "http://www.hyundae-hosp.co.kr/apps/community/job.php?bcb_bcode=31",
+  "enc": "EUC-KR",
+  "base": "http://www.hyundae-hosp.co.kr",
+  "row": "<tr>\\s*<td (?:colspan='5' class='tleft'|class='bd_no')[\\s\\S]*?<\\/tr>",
+  "title": "<a href='[^']*mode=v'>([\\s\\S]*?)<\\/a>",
+  "link": "href='([^']*mode=v)'",
+  "date": "(20\\d{2}\\.\\d{1,2}\\.\\d{1,2})",
+  "skip": "마감|양식|합격|발표",
+  "single": "posted",
+  "note": "EUC-KR. 2026-11-09 고침 — 전에는 번호 셀(bd_no)로 시작하는 일반 행만 잡았는데, 지금은 **진행 중인 공고가 공지(고정) 행에만** 있고(colspan='5' · 날짜 없음) 일반 행 10개는 전부 〈채용마감〉 이라 skip 되어 0줄이었습니다. 공지 행도 함께 잡습니다. 공지 행은 날짜가 없어 posted 가 비니 상세에서 채워야 합니다. 공지로 올라온 「★채용공고 입사지원서 양식★」 은 양식 skip. 제목에 <채용마감>/<마감> 붙이는 방식 그대로. robots.txt 404."
 }
