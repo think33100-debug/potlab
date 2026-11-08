@@ -1,0 +1,14 @@
+{
+ "name": "부민병원",
+ "type": "html",
+ "url": "https://www.bumin.co.kr/seoul/board/media/01/02_List.do",
+ "base": "https://www.bumin.co.kr",
+ "row": "<tr>\\s*<td class=\"num\">[\\s\\S]*?<td class=\"date\">20\\d{2}-\\d{1,2}-\\d{1,2}<\\/td>\\s*<\\/tr>",
+ "title": "onclick=\"javascript:fn_Detail\\('[^']*','[^']*','\\d+','\\d+'\\);\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "fn_Detail\\('[^']*','[^']*','\\d+','(\\d+)'\\)",
+ "linkFmt": "https://www.bumin.co.kr/seoul/board/media/01/02_View.do?siteCd=001000000&menuCd=&boardMngNo=8&boardNo={1}",
+ "date": "<td class=\"date\">(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과",
+ "single": "posted",
+ "note": "서울부민병원(서울 강서구 · 777 이름 「부민병원」) 자체 채용공고 게시판 PC 판. 표: 번호·제목·작성자·조회수·파일·등록일. 제목 앞에 [서울부민병원] 접두. 링크는 onclick fn_Detail(siteCd,menuCd,boardMngNo,boardNo) 로 폼 POST → linkFmt 로 같은 값을 GET 조립(열어 봄 · 2026-11-08). 세중님이 준 m_seoul 판은 날짜 칸이 없어 PC 판(/seoul/)을 씀. 그룹 공동 채용관(buminhr.recruiter.co.kr appsite · 「의료법인 인당의료재단 부민병원」 cfg)에도 [서울] 글이 섞여 오므로 그쪽은 not 으로 뺌. robots: * Allow / (Googlebot 만 금지). 2026-11-08 세중님 주소"
+}
