@@ -360,6 +360,13 @@
     outline: 3px solid var(--color-focus-ring);
     outline-offset: 2px;
   }
+
+  /* 새 디자인 화면 안에서만 포커스 색을 새 토큰(color/stroke/focus-ring)으로 씁니다 (2026-11-11).
+     전역 규칙은 그대로 둡니다 — 옛 화면의 키보드 포커스는 바뀌지 않습니다.
+     굵기 3px · 띄움 2px 은 위와 같습니다(원본에 포커스 치수 지정이 없습니다) */
+  [data-rapo-u01] :focus-visible {
+    outline-color: var(--rapo-color-stroke-focus-ring);
+  }
 }
 
 /* ────────────────────────────────────────────────────────────────
