@@ -79,6 +79,21 @@ export function RapoJobList({ lists }: { lists: RapoJobLists }) {
   );
 }
 
+/* 비회원 — 테스트 동안 공고는 회원만 봅니다 (2026-11-11 클로즈드 베타 · 공개공고() 가 비회원에게 닫힘).
+   홈은 비회원에게도 열고(대표 11/11 밤), 이 칸만 가입 안내로 바꿉니다. 꼴은 오류·없음과 같은 RapoStatusPanel */
+export function RapoJobsGuest() {
+  return (
+    <Frame sort="new">
+      <RapoStatusPanel
+        icon="jobs"
+        title="공고는 회원만 볼 수 있어요"
+        text="지금은 테스트 기간이라 가입한 분께만 보여 드려요. 가입은 1분이면 끝나요."
+        action={<RapoButton href="/login" full>로그인하고 공고 보기</RapoButton>}
+      />
+    </Frame>
+  );
+}
+
 /* 못 받았을 때 — 원본 설명 「해당 영역만 재시도하며 다른 영역은 유지」 (rapo-retry.tsx) */
 export function RapoJobsError() {
   return (

@@ -22,7 +22,9 @@ import { supabase, type JobListItem, type 맛보기공고 } from './supabase';
 
 export type RapoHomeJobs =
   | { status: 'ok'; lists: RapoJobLists }
-  | { status: 'error' };
+  | { status: 'error' }
+  /* 비회원 — 2026-11-11 클로즈드 베타로 공개공고() 가 비회원에게 닫혔습니다(42501). 홈은 열고 공고 칸만 「회원 전용」 안내 */
+  | { status: 'guest' };
 
 const 줄수 = 4;   // 원본 홈이 네 줄입니다
 
@@ -98,6 +100,7 @@ export async function getRapoHomeJobs(sb: SupabaseClient): Promise<RapoHomeJobs>
 
 async function 비회원줄(): Promise<RapoHomeJobs> {
   const { data, error } = await supabase.rpc('공개공고');
+  if (error?.code === '42501') return { status: 'guest' };
   if (error) return { status: 'error' };
   const 줄 = (data ?? []) as 맛보기공고[];
   const views = await 조회수(줄.map((r) => r.id));

@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { Suspense } from 'react';
 import { Hit } from '@/components/hit';
 import { HomeU01 } from '@/components/rapo/home-u01';
-import { RapoJobList, RapoJobsError, RapoJobsLoading } from '@/components/rapo/rapo-job-list';
+import { RapoJobList, RapoJobsError, RapoJobsGuest, RapoJobsLoading } from '@/components/rapo/rapo-job-list';
 import { getRapoHomeJobs } from '@/lib/rapo-home';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
@@ -53,5 +53,5 @@ export default async function Home() {
 
 async function HomeJobs({ sb }: { sb: SupabaseClient }) {
   const r = await getRapoHomeJobs(sb);
-  return r.status === 'ok' ? <RapoJobList lists={r.lists} /> : <RapoJobsError />;
+  return r.status === 'ok' ? <RapoJobList lists={r.lists} /> : r.status === 'guest' ? <RapoJobsGuest /> : <RapoJobsError />;
 }
