@@ -111,7 +111,7 @@ export function InquiryForm() {
             가려 달라는 공고 주소 <span className="text-brand-red">(꼭 적어 주세요)</span>
           </label>
           <input id="문의공고주소" value={주소} onChange={(e) => set주소(e.target.value)}
-            placeholder="https://potjob.co.kr/jobs/…"
+            placeholder="https://www.rapojob.co.kr/jobs/…"
             className="mt-2 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950" />
           <p className="mt-1 break-keep text-sm text-mute">
             공고 화면에서 주소를 복사해 붙여 주세요. 주소가 없으면 어느 공고인지 찾기 어렵습니다
