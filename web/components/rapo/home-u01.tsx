@@ -76,9 +76,12 @@ function Banners({ member }: { member: boolean }) {
       <div role="group" aria-roledescription="slide" aria-label="1 / 3"
         className="relative h-[246px] w-full shrink-0 snap-start overflow-hidden"
         style={{ backgroundImage: 'linear-gradient(124.8deg, #FF4F40 0%, #FF3524 101.03%)' }}>
-        {/* 원본 414 에서 오른쪽 31px. 그보다 좁은 화면에서는 글자를 덮지 않게 왼쪽 221px 을
-            지키고 오른쪽이 잘리게 둡니다 (임시 규칙 · 360 에서 확인) */}
-        <div className="absolute left-[max(221px,calc(100%-193px))] top-[47px] h-[172px] w-[162px]">
+        {/* 원본(414)에서 사진은 162×172 · 오른쪽 31px · 아래 27px 로 네모 틀 **안**에 있습니다.
+            전에는 좁은 화면에서 왼쪽 자리(221px)만 지켜서 사진이 틀 오른쪽 밖으로 나갔습니다
+            (390 폭 휴대폰에서 보임 · 2026-11-11 대표 지적). 이제 오른쪽·아래를 틀에 붙여 두고,
+            화면이 좁으면 사진을 같은 비율로 줄입니다 — 왼쪽 끝은 원본과 같은 221px 에 머뭅니다.
+            414 이상에서는 원본 크기 그대로입니다. */}
+        <div className="absolute bottom-[27px] right-[31px] aspect-[162/172] w-[clamp(110px,calc(100%-252px),162px)]">
           {/* 첫 화면에 바로 보이는 그림이라 늦게 받지 않습니다 (Next 16 문서 — loading="eager") */}
           <Image src="/rapo/home/banner1-therapist.png" alt="" fill sizes="162px" loading="eager"
             className="object-cover object-bottom" />
