@@ -37,6 +37,17 @@ export function Avatar({
     );
   }
 
+  if (a.kind === 'animal') {
+    /* RAPO 동물 아바타 — 둥근 바탕 위 그림 (Figma 「RAPO / Avatar / 회원」 1412:56103) */
+    return (
+      <span aria-hidden className={'flex shrink-0 items-center justify-center overflow-hidden rounded-full ' + className}
+        style={{ width: px, height: px, background: a.color }}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+        <img src={`/rapo/animals/${a.key}.svg`} alt="" width={px} height={px} className="size-full" />
+      </span>
+    );
+  }
+
   return (
     <span
       aria-hidden

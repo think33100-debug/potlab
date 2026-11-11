@@ -26,9 +26,17 @@ export const AVATAR_COLORS = [
   '#DDD6FE', '#FED7AA', '#C7D2FE', '#A7F3D0',
 ];
 
+/* RAPO 동물 아바타 (2026-11-11 밤 · Figma 「RAPO / Animal / *」 1506:936~1032 · 바탕 없는 그림).
+   값은 "a/<열쇠>|#색" — 그림은 public/rapo/animals/<열쇠>.svg. 바탕색은 원본 설명대로 동물과 따로 고릅니다 */
+export const AVATAR_ANIMALS = [
+  { key: 'otter', name: '수달' }, { key: 'cat', name: '고양이' }, { key: 'rabbit', name: '토끼' },
+  { key: 'fox', name: '여우' }, { key: 'bear', name: '곰' }, { key: 'dog', name: '강아지' },
+] as const;
+
 export type Avatar =
   | { kind: 'emoji'; emoji: string; color: string }
-  | { kind: 'photo'; path: string; color: string };
+  | { kind: 'photo'; path: string; color: string }
+  | { kind: 'animal'; key: string; color: string };
 
 /* 값 하나를 쪼갭니다. 사진 경로에 | 가 들어갈 일은 없지만,
    색은 늘 맨 뒤 한 조각이라 뒤에서부터 떼어냅니다 */
@@ -41,6 +49,7 @@ function split(v: string): { head: string; color: string } {
 export function parseAvatar(v: string | null | undefined): Avatar {
   const { head, color } = split(v ?? '');
   if (head.startsWith('u/')) return { kind: 'photo', path: head.slice(2), color };
+  if (head.startsWith('a/') && AVATAR_ANIMALS.some((x) => x.key === head.slice(2))) return { kind: 'animal', key: head.slice(2), color };
   return { kind: 'emoji', emoji: head || AVATAR_EMOJIS[0], color };
 }
 
@@ -50,6 +59,11 @@ export function parseAvatar(v: string | null | undefined): Avatar {
 export function withColor(v: string | null | undefined, color: string) {
   const { head } = split(v ?? '');
   return `${head || AVATAR_EMOJIS[0]}|${color}`;
+}
+
+export function withAnimal(v: string | null | undefined, key: string) {
+  const { color } = split(v ?? '');
+  return `a/${key}|${color}`;
 }
 
 export function withEmoji(v: string | null | undefined, emoji: string) {
