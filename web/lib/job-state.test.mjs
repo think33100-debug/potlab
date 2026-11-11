@@ -315,6 +315,10 @@ console.log('표시 통일 통과 — 연봉 꼴 · 법인 표기 · 지원 링�
     { 주소: 병원판, 갈래: '병원게시판' });
   /* 창구가 없거나 못 찾으면(null) · 주소 꼴이 아니면 전 차례 그대로 */
   assert.equal(지원링크(클린아이, null, 홈, 게, 'CE1', null).주소, 클린아이);
+  /* 게시판이 없으면 병원 첫 화면이라도 — 포털 글보다 앞섭니다 (11/11 밤 · 고용24 도) */
+  const 고용24글 = 'https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=K1';
+  assert.deepEqual(지원링크(고용24글, null, 홈, null, 'WNK1', { 주소: 홈, 갈래: '병원홈' }),
+    { 주소: 홈, 갈래: '병원홈' });
   assert.equal(지원링크(클린아이, null, 홈, 게, 'CE1', { 주소: '없음', 갈래: '병원글' }).주소, 클린아이);
 }
 

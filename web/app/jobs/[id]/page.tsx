@@ -65,7 +65,7 @@ const 병원주소받기 = async (sb: SupabaseClient, id: string): Promise<병�
   const { data, error } = await sb.rpc('공고병원주소', { p_id: id });
   if (error || !data) return null;
   const v = data as { 주소?: string; 갈래?: string };
-  if (!v.주소 || (v.갈래 !== '병원글' && v.갈래 !== '병원게시판')) return null;
+  if (!v.주소 || (v.갈래 !== '병원글' && v.갈래 !== '병원게시판' && v.갈래 !== '병원홈')) return null;
   return { 주소: v.주소, 갈래: v.갈래 };
 };
 
@@ -709,7 +709,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               배치(글꼴·자리)는 11/1~6 화면 작업 때 다듬습니다 */}
           <지원방법줄
             접수방법={detail['접수방법'] as string | undefined}
-            원문주소={j.url}
+            원문주소={병원?.주소 ?? j.url}
             갈곳없나={member && !지원.주소}
           />
           <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
