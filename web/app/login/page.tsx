@@ -113,7 +113,7 @@ export default function Login() {
         )}
         <RapoLoginButtons last={halfway ? null : last} busy={busy} onStart={start} />
         {/* 지금은 테스터만 볼 수 있어 비회원은 안내 화면(/beta)으로 갑니다 — 원본 글은 그대로 둡니다 */}
-        <Link href="/" className="rapo-type-t4-medium w-full text-center">지금은 둘러볼게요</Link>
+        <Link href="/" className="rapo-type-t4-medium flex h-(--rapo-touch-min) w-full items-center justify-center">지금은 둘러볼게요</Link>
       </>
     } />
   );

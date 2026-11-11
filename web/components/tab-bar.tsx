@@ -1,13 +1,13 @@
 'use client';
 
-import { 미리받기 } from '@/lib/routes';
 import { 가는중 } from '@/components/가는중';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/auth';
-import { Icon } from '@/components/icon';
-import { NAV_TABS, 관리길, 아래탐색, 새틀화면, 켜진길 } from '@/lib/nav';
+import { isDark } from '@/app/surface';
+import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
+import { NAV_TABS, 관리길, 새틀화면 } from '@/lib/nav';
 
 /* 아래 탭바.
 
@@ -21,53 +21,16 @@ const TABS = NAV_TABS;
 
 export function TabBar() {
   const pathname = usePathname();
-  const { 관리 } = useAuth();
 
   if (새틀화면(pathname)) return null;
 
-  const on = (href: string) => 켜진길(pathname, href);
-  const tabs = 아래탐색(관리);
-
+  /* ★ 2026-11-12 밤 근무 — 아직 옛 모양인 화면들도 **아래 탐색만은 새 디자인**(RapoBottomNav)으로 그립니다.
+     화면마다 탭 모양이 달라 보이지 않게 하려는 것입니다. 휴대폰에서만(전과 같음) · 어두운 화면(커뮤니티 방 등)은 어두운 판.
+     길(탭 · 담당자 메뉴 · 차례)은 전과 같이 lib/nav.ts 한 자리입니다 */
   return (
-    <nav
-      aria-label="아래 탭"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-100 bg-white md:hidden dark:border-gray-800 dark:bg-gray-900"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-    >
-      <ul className="mx-auto flex max-w-3xl">
-        {tabs.map((t) => (
-          <li key={t.href} className="flex-1">
-            <Link
-              href={t.href}
-              /* ★ 2026-10-29 세중님 — 공고·커뮤니티는 **데이터까지** 미리 받습니다 */
-              prefetch={미리받기(t.href)}
-              aria-current={on(t.href) ? 'page' : undefined}
-              /* ★ 2026-10-03 — 어두운 구역에 dark: 짝을 달았습니다.
-                 커뮤니티(어두운 바탕)에서 눌린 탭이 teal-strong(oklch 0.378 ·
-                 어두운 청록)이라 잉크색 바탕에서 **1.8:1** 로 안 보였습니다.
-                 위쪽 길(TopNav)은 처음부터 dark:text-white 짝이 있었는데
-                 아래 탭바만 빠져 있었습니다. 같은 방식으로 맞춥니다.
-                 안 눌린 탭도 mute(#5F666C)가 어두운 바탕에서 안 보여
-                 gray-400 으로 올립니다 — 어두운 구역 전용 값입니다. */
-              className={
-                'flex flex-col items-center gap-1 py-4 ' +
-                (on(t.href)
-                  ? 'text-teal-strong dark:text-white'
-                  : 'text-mute dark:text-gray-400')
-              }
-            >
-              <Icon name={t.icon} size={20} />
-              {/* text-xs 는 10px 오버라인 라벨용이라 탭 이름에는 너무 작습니다.
-                  글자를 키우는 설정을 쓰는 분이 있어 줄바꿈과 자간도 막아둡니다 */}
-              <span className="text-sm leading-normal font-medium tracking-normal whitespace-nowrap">
-                {t.label}
-              </span>
-              <가는중 />
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <div className="md:hidden">
+      <RapoBottomNav dark={isDark(pathname)} />
+    </div>
   );
 }
 

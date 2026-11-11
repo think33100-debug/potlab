@@ -9,6 +9,7 @@ import { 비교알림동의, 비교알림켜짐 } from '@/lib/beta-compare';
 import { SignupSurvey } from '@/components/signup-survey';
 import { defaultAvatar } from '@/lib/avatar';
 import { BETA_AGREEMENTS, 표없음 } from '@/lib/beta';
+import { RapoButton } from '@/components/rapo/rapo-ui';
 import { clearAfterLogin, peekAfterLogin } from '@/lib/after-login';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
@@ -201,89 +202,106 @@ export default function Welcome() {
     setStep(5);
   };
 
+  /* ── 그리기 — 새 디자인 「U05 회원가입」 (2026-11-12 밤 근무 · 대표: 피그마가 최종본).
+     원본: 07 · B 가입 → U05-01 이용 동의 1211:25913 · U05-02 직군·근무 경험 1211:26089.
+     앱 바(뒤로 · 회원가입) · 진행 막대(이름 + n / 5) · 큰 제목 두 줄 · 본문 · 아래 고정 단추(navy).
+     ★ 단계·저장·동의 문구는 그대로입니다 — 모양만 바꿨습니다.
+     원본의 「근무 경험」·「학력」·「자격」·「희망 조건」 단계는 저장할 곳이 달라 아직 없습니다(밤 근무 보고에 적음) */
+  const 단계이름 = ['이용 동의', '내 정보', '닉네임', '프로필 사진', '급여·스펙'];
+  const 제목 = [
+    <>이용약관을 확인하고<br />라포를 시작해요</>,
+    <>직군과 역할을<br />알려주세요</>,
+    <>닉네임을<br />정해 주세요</>,
+    <>프로필 사진을<br />골라 주세요</>,
+    null,
+  ][step - 1];
+  const 다시하기 = async () => {
+    await browserSupabase().auth.signOut({ scope: 'local' });
+    toast('처음부터 다시 해요');
+    router.replace('/login');
+  };
+  const 뒤로 = () => {
+    if (step === 2) { setStep(1); return; }
+    /* 가입 도중에 막히면 나갈 길이 있어야 합니다 — 로그인 화면에서 다른 수단으로 다시 들어올 수 있습니다 */
+    if (step === 1 || confirm('처음부터 다시 할까요? 로그인 화면으로 돌아가요.')) void 다시하기();
+  };
+  const 아래단추 = step === 1
+    ? <RapoButton onClick={베타동의남기기} disabled={!allRequired || busy} full>{busy ? '확인하는 중…' : allRequired ? '동의하고 다음' : '필수 항목에 모두 동의해 주세요'}</RapoButton>
+    : step === 2
+    ? <RapoButton onClick={saveWho} disabled={busy || !job || !role} full>{busy ? '저장하는 중…' : (!job || !role) ? '둘 다 골라 주세요' : '다음'}</RapoButton>
+    : step === 3
+    /* 닉네임을 넣는 이 단추가 가입(profiles 줄 만들기)입니다 — 그래서 「가입하기」 */
+    ? <RapoButton onClick={saveNickname} disabled={busy || nick.trim().length < 2} full>{busy ? '저장하는 중…' : '가입하기'}</RapoButton>
+    : step === 4
+    ? (
+      <RapoButton disabled={busy} full onClick={async () => {
+        /* 사진을 올린 뒤에 바탕색만 바꾸셨을 수 있어서 늘 한 번 저장합니다 */
+        await browserSupabase().from('profiles').update({ avatar }).eq('id', session.user.id);
+        await reload();
+        setStep(5);
+      }}>다음</RapoButton>
+    ) : null;
+
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      {/* ⑤ 급여·스펙은 칸이 많고 설명 줄이 길어서 26rem 안에서는 자꾸 줄이 접힙니다.
-          PC 에서만 넓힙니다 — 폰은 어차피 화면 폭을 다 씁니다 */}
-      <div className={'mx-auto w-full ' + (step === 5 ? 'max-w-[34rem]' : 'max-w-[26rem]')}>
-        {/* 가입 도중에 막히면 나갈 길이 있어야 합니다.
-            여기서 나가면 로그인 화면에서 다른 수단으로 다시 들어올 수 있습니다 */}
-        <div className="mb-5 flex justify-end">
-          <button
-            type="button"
-            onClick={async () => {
-              await browserSupabase().auth.signOut({ scope: 'local' });
-              toast('처음부터 다시 해요');
-              router.replace('/login');
-            }}
-            className="text-sm text-mute hover:underline"
-          >
-            처음부터 다시 하기
-          </button>
+    <div data-rapo className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-(--rapo-color-bg-layer-default)">
+      <header className="sticky top-0 z-20 flex h-[56px] shrink-0 items-center gap-(--rapo-dimension-x2) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x2)">
+        <button type="button" onClick={뒤로} aria-label={step === 2 ? '이전 단계' : '처음부터 다시 하기'}
+          className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2) active:bg-(--rapo-color-bg-transparent-pressed)">
+          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+          <img src="/rapo/detail/arrow-left-20.svg" alt="" width={20} height={20} />
+        </button>
+        <p className="rapo-type-t5-bold min-w-0 flex-1 text-center text-(color:--rapo-color-fg-neutral)">회원가입</p>
+        <span aria-hidden className="size-(--rapo-touch-min) shrink-0" />
+      </header>
+
+      <main className="flex-1 px-(--rapo-dimension-x5) pb-(--rapo-dimension-x6)">
+        {/* 진행 — 이름 · n / 5 · 막대 다섯 */}
+        <div className="pt-(--rapo-dimension-x4)" role="group" aria-label={`가입 순서 ${step} / 5 · ${단계이름[step - 1]}`}>
+          <div className="flex items-center">
+            <p className="rapo-type-t3-regular min-w-0 flex-1 text-(color:--rapo-color-fg-neutral-muted)">{단계이름[step - 1]}</p>
+            <p className="rapo-type-t3-bold text-(color:--rapo-color-fg-neutral)">{step} / 5</p>
+          </div>
+          <div aria-hidden className="mt-(--rapo-dimension-x2) flex gap-(--rapo-dimension-x1)">
+            {단계이름.map((t, i) => (
+              <span key={t} className={'h-(--rapo-dimension-x1) flex-1 rounded-(--rapo-radius-full) ' +
+                (i < step ? 'bg-(--rapo-color-bg-identity)' : 'bg-(--rapo-color-bg-neutral-weak)')} />
+            ))}
+          </div>
         </div>
 
-        <ol className="mb-7 flex flex-wrap gap-2 text-sm" aria-label="가입 순서">
-          {['약관 동의', '직군·역할', '닉네임', '사진', '급여·스펙'].map((t, i) => (
-            <li
-              key={t}
-              aria-current={step === i + 1 ? 'step' : undefined}
-              className={
-                'rounded-md px-4 py-1 font-medium ' +
-                (step === i + 1
-                  ? 'bg-teal-strong text-white'
-                  : step > i + 1 ? 'bg-badge-teal-bg text-teal-strong' : 'bg-gray-50 text-mute dark:bg-gray-950')
-              }
-            >
-              {i + 1}. {t}
-            </li>
-          ))}
-        </ol>
+        {제목 && <h1 className="rapo-type-t11-bold mt-(--rapo-dimension-x6) break-keep text-(color:--rapo-color-fg-neutral)">{제목}</h1>}
 
         {step === 1 && (
-          <section>
-            <h1 className="text-h2 font-bold">시작하기 전에</h1>
-            <p className="mt-2 text-lg text-mute">아래 항목에 동의해 주세요</p>
-
-            {/* 테스트 기간 안내 (2026-11-11 밤 — 초대 코드 칸은 거뒀습니다) */}
-            <div className="mt-6 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
-              <p className="text-sm font-bold text-teal-strong">RAPO 는 지금 테스트 중이에요</p>
-              <p className="mt-2 text-lg">가입하시면 모든 화면을 볼 수 있어요</p>
-              {betaErr && <p className="mt-2 text-lg text-brand-red">{betaErr}</p>}
-            </div>
-
-            <button
-              type="button"
-              onClick={toggleAll}
-              className="mt-6 flex w-full items-center gap-5 rounded-sm border border-gray-200 px-6 py-5 text-left dark:border-gray-700"
-            >
+          <section className="mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x4)">
+            {/* 전체 동의 */}
+            <button type="button" onClick={toggleAll} aria-pressed={allChecked}
+              className="flex items-center gap-(--rapo-dimension-x4) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) px-(--rapo-dimension-x5) py-(--rapo-dimension-x4) text-left">
               <Box on={allChecked} />
-              <span className="text-body-lg font-bold">모두 동의할래요</span>
+              <span>
+                <span className="rapo-type-t6-bold block text-(color:--rapo-color-fg-neutral)">전체 동의</span>
+                <span className="rapo-type-t3-regular block text-(color:--rapo-color-fg-neutral-muted)">선택 항목을 포함해 모두 동의해요</span>
+              </span>
             </button>
 
-            <ul className="mt-5 space-y-1">
+            <ul className="flex flex-col">
               {AGREEMENTS.map((a) => (
-                <li key={a.key} className="flex items-center gap-3">
-                  <label className="flex flex-1 cursor-pointer items-center gap-5 py-4">
-                    <input
-                      type="checkbox"
-                      className="sr-only"
-                      checked={!!checked[a.key]}
-                      onChange={(e) => setChecked({ ...checked, [a.key]: e.target.checked })}
-                    />
+                <li key={a.key} className="flex items-center gap-(--rapo-dimension-x2) border-b border-(--rapo-color-stroke-neutral-weak)">
+                  <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-(--rapo-dimension-x4) py-(--rapo-dimension-x3)">
+                    <input type="checkbox" className="sr-only" checked={!!checked[a.key]}
+                      onChange={(e) => setChecked({ ...checked, [a.key]: e.target.checked })} />
                     <Box on={!!checked[a.key]} />
-                    <span className="text-lg">
-                      {a.required
-                        ? <span className="text-brand-red">[필수] </span>
-                        : <span className="text-mute">[선택] </span>}
-                      {a.label}
+                    <span className="min-w-0">
+                      <span className="rapo-type-t5-medium block break-keep text-(color:--rapo-color-fg-neutral)">{a.label}</span>
+                      <span className={'rapo-type-t3-regular block ' + (a.required ? 'text-(color:--rapo-color-fg-brand-contrast)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
+                        {a.required ? '필수' : '선택'}
+                      </span>
                     </span>
                   </label>
                   {a.doc && (
-                    <Link
-                      href={`/terms/${a.doc}`}
-                      className="shrink-0 rounded-xs border border-gray-200 px-4 py-1 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
-                    >
-                      보기
+                    <Link href={`/terms/${a.doc}`} aria-label={`${a.label} 전문 보기`}
+                      className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2) active:bg-(--rapo-color-bg-transparent-pressed)">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+                      <img src="/rapo/me/chevron-18.svg" alt="" width={18} height={18} />
                     </Link>
                   )}
                 </li>
@@ -291,154 +309,100 @@ export default function Welcome() {
               {/* ★ 2026-11-11 클로즈드 베타 동의 — 세중님 문구 그대로 (lib/beta.ts).
                   수집 항목·목적·보유 기간·거부할 권리를 접지 않고 다 보입니다 */}
               {베타동의들.map((a) => (
-                <li key={a.key}>
-                  <label className="flex cursor-pointer items-center gap-5 py-4">
-                    <input
-                      type="checkbox"
-                      className="sr-only"
-                      checked={!!checked[a.key]}
-                      onChange={(e) => setChecked({ ...checked, [a.key]: e.target.checked })}
-                    />
+                <li key={a.key} className="border-b border-(--rapo-color-stroke-neutral-weak) py-(--rapo-dimension-x3)">
+                  <label className="flex cursor-pointer items-center gap-(--rapo-dimension-x4)">
+                    <input type="checkbox" className="sr-only" checked={!!checked[a.key]}
+                      onChange={(e) => setChecked({ ...checked, [a.key]: e.target.checked })} />
                     <Box on={!!checked[a.key]} />
-                    <span className="text-lg">
-                      {a.required
-                        ? <span className="text-brand-red">[필수] </span>
-                        : <span className="text-mute">[선택] </span>}
-                      {a.label}
+                    <span className="min-w-0">
+                      <span className="rapo-type-t5-medium block break-keep text-(color:--rapo-color-fg-neutral)">{a.label}</span>
+                      <span className={'rapo-type-t3-regular block ' + (a.required ? 'text-(color:--rapo-color-fg-brand-contrast)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
+                        {a.required ? '필수' : '선택'}
+                      </span>
                     </span>
                   </label>
-                  <ul className="mb-2 ml-[42px] space-y-1 text-sm text-mute">
+                  <ul className="rapo-type-t3-regular ml-[38px] mt-(--rapo-dimension-x2) flex flex-col gap-(--rapo-dimension-x1) text-(color:--rapo-color-fg-neutral-muted)">
                     {a.lines.map((l) => <li key={l} className="break-keep">{l}</li>)}
                   </ul>
                 </li>
               ))}
             </ul>
 
-            <button
-              type="button"
-              disabled={!allRequired || busy}
-              onClick={베타동의남기기}
-              className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {busy ? '확인하는 중…' : allRequired ? '다음' : '필수 항목에 모두 동의해 주세요'}
-            </button>
+            {/* 안내 상자 — 테스트 기간 안내(2026-11-11 밤 문구 그대로) + 원본의 선택 항목 안내 */}
+            <div className="rapo-type-t4-regular rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
+              <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">RAPO 는 지금 테스트 중이에요</p>
+              <p className="mt-(--rapo-dimension-x1)">가입하시면 모든 화면을 볼 수 있어요</p>
+              <p className="mt-(--rapo-dimension-x2)">선택 항목에 동의하지 않아도 가입할 수 있어요.</p>
+            </div>
+            {betaErr && <p role="alert" className="rapo-type-t4-medium text-(color:--rapo-color-fg-brand-contrast)">{betaErr}</p>}
           </section>
         )}
 
         {step === 2 && (
-          <section>
-            <h1 className="text-h2 font-bold">어떤 분이신가요</h1>
-            <p className="mt-2 text-lg text-mute">
-              커뮤니티에서 보이는 방이 이걸로 갈려요. 나중에 바꿀 수 있어요
+          <section className="mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x3)">
+            <h2 className="rapo-type-t5-medium text-(color:--rapo-color-fg-neutral)">직군</h2>
+            <div className="grid grid-cols-2 gap-(--rapo-dimension-x2)">
+              {JOB_GROUPS.map((g) => <Choice key={g} on={job === g} go={() => setJob(g)}>{g}</Choice>)}
+            </div>
+            <h2 className="rapo-type-t6-bold mt-(--rapo-dimension-x3) text-(color:--rapo-color-fg-neutral)">지금 어떤 상황인가요?</h2>
+            <div className="flex flex-col gap-(--rapo-dimension-x3)">
+              {ROLES.map((r) => <Choice key={r} on={role === r} go={() => setRole(r)} sub={ROLE_DESC[r]}>{r}</Choice>)}
+            </div>
+            <p className="rapo-type-t4-regular rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
+              커뮤니티에서 보이는 방이 이걸로 갈려요. 나중에 바꿀 수 있어요.
             </p>
-
-            <h2 className="mt-7 text-sm font-bold text-mute">직군</h2>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {JOB_GROUPS.map((g) => (
-                <Choice key={g} on={job === g} go={() => setJob(g)}>{g}</Choice>
-              ))}
-            </div>
-
-            <h2 className="mt-6 text-sm font-bold text-mute">역할</h2>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {ROLES.map((r) => (
-                <Choice key={r} on={role === r} go={() => setRole(r)} sub={ROLE_DESC[r]}>
-                  {r}
-                </Choice>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              disabled={busy || !job || !role}
-              onClick={saveWho}
-              className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {busy ? '저장하는 중…' : (!job || !role) ? '둘 다 골라 주세요' : '다음'}
-            </button>
           </section>
         )}
 
         {step === 3 && (
-          <section>
-            <h1 className="text-h2 font-bold">닉네임을 정해 주세요</h1>
-            <p className="mt-2 text-lg text-mute">
-              커뮤니티에서 이 이름으로 보여요. 나중에 5번까지 바꿀 수 있어요
-            </p>
-
-            <input
-              value={nick}
-              onChange={(e) => { setNick(e.target.value); setNickErr(null); }}
-              maxLength={12}
-              placeholder="2~12자"
-              aria-label="닉네임"
-              className="mt-6 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-body-lg dark:border-gray-700 dark:bg-gray-950"
-            />
-            {nickErr && <p className="mt-2 text-lg text-brand-red">{nickErr}</p>}
-
-            <button
-              type="button"
-              disabled={busy || nick.trim().length < 2}
-              onClick={saveNickname}
-              className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
-            >
-              {/* 닉네임을 넣는 이 단추가 가입(profiles 줄 만들기)입니다 — 그래서 「가입하기」 */}
-              {busy ? '저장하는 중…' : '가입하기'}
-            </button>
+          <section className="mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x3)">
+            <p className="rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">커뮤니티에서 이 이름으로 보여요. 나중에 5번까지 바꿀 수 있어요.</p>
+            <input value={nick} onChange={(e) => { setNick(e.target.value); setNickErr(null); }} maxLength={12} placeholder="2~12자" aria-label="닉네임"
+              className="rapo-type-t5-regular h-(--rapo-dimension-x13) w-full rounded-(--rapo-radius-r3) border-(length:--rapo-border-default)
+                         border-(color:--rapo-color-stroke-neutral-weak) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral)
+                         placeholder:text-(color:--rapo-color-fg-placeholder)" />
+            {nickErr && <p role="alert" className="rapo-type-t4-medium text-(color:--rapo-color-fg-brand-contrast)">{nickErr}</p>}
           </section>
         )}
 
         {step === 4 && (
-          <section>
-            <h1 className="text-h2 font-bold">프로필 사진 (선택)</h1>
-            <p className="mt-2 text-lg text-mute">
-              안 올리시면 아래 이모지 아바타로 시작해요
-            </p>
-
-            <div className="mt-6">
-              <AvatarPicker
-                userId={session.user.id}
-                value={avatar}
-                onChange={async (next) => { setAvatar(next); await reload(); }}
-              />
-            </div>
-
-            <button
-              type="button"
-              disabled={busy}
-              onClick={async () => {
-                /* 사진을 올린 뒤에 바탕색만 바꾸셨을 수 있어서 늘 한 번 저장합니다 */
-                await browserSupabase().from('profiles').update({ avatar }).eq('id', session.user.id);
-                await reload();
-                setStep(5);
-              }}
-              className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
-            >
-              다음
-            </button>
+          <section className="mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x4)">
+            <p className="rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">안 고르시면 기본 아바타로 시작해요. 나중에 바꿀 수 있어요.</p>
+            <AvatarPicker userId={session.user.id} value={avatar}
+              onChange={async (next) => { setAvatar(next); await reload(); }} />
           </section>
         )}
 
         {step === 5 && (
-          <SignupSurvey
-            userId={session.user.id}
-            job={job ?? me?.job_group ?? '작업치료사'}
-            role={(role ?? me?.role ?? '현직') as Role}
-            onDone={async () => {
-              /* survey_at 은 save_my_survey 가 이미 찍었습니다. 여기선 다시 읽기만 합니다 */
-              await reload();
-              /* 공유 링크를 보고 들어오신 분은 그 공고로 돌려보냅니다.
-                 홈으로 떨어뜨리면 뭘 보러 왔는지 잊고 그냥 나갑니다 */
-              let back: string | null = null;
-              try {
-                back = peekAfterLogin();
-                clearAfterLogin();
-              } catch { /* 사생활 보호 창 */ }
-              router.push(back || '/');
-            }}
-          />
+          <div className="mt-(--rapo-dimension-x6)">
+            <SignupSurvey
+              userId={session.user.id}
+              job={job ?? me?.job_group ?? '작업치료사'}
+              role={(role ?? me?.role ?? '현직') as Role}
+              onDone={async () => {
+                /* survey_at 은 save_my_survey 가 이미 찍었습니다. 여기선 다시 읽기만 합니다 */
+                await reload();
+                /* 공유 링크를 보고 들어오신 분은 그 공고로 돌려보냅니다.
+                   홈으로 떨어뜨리면 뭘 보러 왔는지 잊고 그냥 나갑니다 */
+                let back: string | null = null;
+                try {
+                  back = peekAfterLogin();
+                  clearAfterLogin();
+                } catch { /* 사생활 보호 창 */ }
+                router.push(back || '/');
+              }}
+            />
+          </div>
         )}
-      </div>
+      </main>
+
+      {/* 아래 고정 단추 — 원본 RAPO / Button / Filled (navy · 52) */}
+      {아래단추 && (
+        <div className="sticky bottom-0 bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x5) pt-(--rapo-dimension-x2)
+                        pb-[calc(var(--rapo-dimension-x4)+env(safe-area-inset-bottom))]">
+          {아래단추}
+        </div>
+      )}
 
       {/* 「가입하기」 뒤 비교 알림 창. 꺼져 있으면 compareOpen 이 늘 false 입니다 */}
       {비교알림켜짐 && compareOpen && (
@@ -449,48 +413,42 @@ export default function Welcome() {
           onDone={() => setCompareOpen(false)}
         />
       )}
-    </main>
+    </div>
   );
 }
 
-/* 둘 중 하나 고르는 큰 네모. 켜진 것은 teal 입니다 —
-   빨강은 아이덴티티·CTA 자리라 「다음」 단추와 다투면 안 됩니다 */
+/* 고르는 카드 — 원본 U05-02 의 선택 카드: 고르면 brand-weak 바탕 + brand 테두리 + 채운 동그라미 */
 function Choice({
   on, go, sub, children,
 }: {
   on: boolean; go: () => void; sub?: string; children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={go}
-      aria-pressed={on}
+    <button type="button" onClick={go} aria-pressed={on}
       className={
-        'rounded-sm border px-6 py-5 text-left transition-colors ' +
-        (on
-          ? 'border-teal-strong bg-badge-teal-bg'
-          : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950')
-      }
-    >
-      <span className={'block text-body-lg font-bold ' + (on ? 'text-teal-strong' : '')}>
-        {children}
+        'flex items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) px-(--rapo-dimension-x5) py-(--rapo-dimension-x4) text-left ' +
+        (on ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak)'
+            : 'border-(color:--rapo-color-stroke-neutral-weak) active:bg-(--rapo-color-bg-transparent-pressed)')
+      }>
+      <span className="min-w-0 flex-1">
+        <span className="rapo-type-t6-bold block text-(color:--rapo-color-fg-neutral)">{children}</span>
+        {sub && <span className="rapo-type-t3-regular mt-(--rapo-dimension-x1) block text-(color:--rapo-color-fg-neutral-muted)">{sub}</span>}
       </span>
-      {sub && <span className="mt-1 block text-sm text-mute">{sub}</span>}
+      <span aria-hidden className={'flex size-[20px] shrink-0 items-center justify-center rounded-(--rapo-radius-full) border-(length:--rapo-border-default) ' +
+        (on ? 'border-(color:--rapo-color-bg-navy-solid) bg-(--rapo-color-bg-navy-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
+        {on && <span className="size-[8px] rounded-(--rapo-radius-full) bg-(--rapo-color-bg-layer-default)" />}
+      </span>
     </button>
   );
 }
 
-/* 체크박스는 label 과 묶어 라벨 전체가 눌리게 합니다 — teamsparta.md */
+/* 체크 네모 — 원본: 켜지면 navy 바탕에 흰 체크 */
 function Box({ on }: { on: boolean }) {
   return (
-    <span
-      aria-hidden
-      className={
-        /* ✓ 는 빨강 위 흰 글자라 굵게 둡니다 — 얇으면 3.55:1 에서 흐려 보입니다 */
-        'flex size-[22px] shrink-0 items-center justify-center rounded-xs border text-body-lg font-bold text-white ' +
-        (on ? 'border-brand-red bg-brand-red' : 'border-gray-300 dark:border-gray-600')
-      }
-    >
+    <span aria-hidden
+      className={'flex size-[22px] shrink-0 items-center justify-center rounded-(--rapo-radius-r1) border-(length:--rapo-border-default) text-[14px] font-bold leading-none ' +
+        (on ? 'border-(color:--rapo-color-bg-navy-solid) bg-(--rapo-color-bg-navy-solid) text-(color:--rapo-color-fg-on-navy-solid)'
+            : 'border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default)')}>
       {on ? '✓' : ''}
     </span>
   );

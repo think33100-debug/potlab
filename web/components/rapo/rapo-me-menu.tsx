@@ -53,10 +53,12 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
       </RapoMeSection>
 
       <RapoMeSection title="내 활동과 희망 조건">
-        <RapoMeRow icon="/rapo/me/save-24.svg" href="/me/activity">저장한 공고</RapoMeRow>
-        <RapoMeRow icon="/rapo/me/hospital-24.svg" href={준비('hosp')}>관심 병원</RapoMeRow>
+        <RapoMeRow icon="/rapo/me/save-24.svg" href="/me/saved">저장한 공고</RapoMeRow>
+        <RapoMeRow icon="/rapo/me/hospital-24.svg" href="/me/hospitals">관심 병원</RapoMeRow>
         <RapoMeRow icon="/rapo/me/pref-24.svg" href={준비('pref')}>희망 취업 조건</RapoMeRow>
         <RapoMeRow icon="/rapo/me/save-24.svg" href={준비('edu')}>내 교육 관리</RapoMeRow>
+        {/* 원본에는 없는 줄 — 내가 쓴 글·댓글을 볼 길이 없어지지 않게 둡니다 (2026-11-12 밤 근무 · 아침에 정할 것) */}
+        <RapoMeRow icon="/rapo/me/contact-24.svg" href="/me/activity">내가 쓴 글 · 댓글</RapoMeRow>
       </RapoMeSection>
 
       {/* 담당자로 승인된 분과 마스터에게만 (내관리메뉴 창구 · 아래 탐색과 같은 값) — 원본 「U14 / 관리 메뉴」 1508:2398 */}

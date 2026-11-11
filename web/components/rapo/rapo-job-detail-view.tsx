@@ -61,9 +61,52 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         </RapoKeyRow>
       </section>
 
+      {/* 04 본문 바로가기 (원본 「04 본문 바로가기」 · 52px) — 아래 세 칸으로 내려갑니다 (2026-11-12 밤 근무) */}
+      <nav aria-label="본문 바로가기" className="flex h-(--rapo-dimension-x13) items-center px-(--rapo-dimension-x5)">
+        {[['#d-work', '근무조건'], ['#d-duty', '업무·자격'], ['#d-apply', '지원 방법']].map(([href, label], i) => (
+          <a key={href} href={href}
+            className={'rapo-type-t4-bold flex h-(--rapo-touch-min) flex-1 items-center justify-center rounded-(--rapo-radius-r1) active:bg-(--rapo-color-bg-transparent-pressed) ' +
+              (i === 0 ? 'text-(color:--rapo-color-fg-brand-contrast)' : 'text-(color:--rapo-color-fg-neutral)')}>
+            {label}
+          </a>
+        ))}
+      </nav>
+
+      <RapoSectionGap />
+
+      {/* 05 근무조건 — 원본의 계약기간 · 가입 보험. 수집하지 않는 값이라 「공고문 확인」(못 읽은 칸 규칙 그대로).
+          근무시간 줄은 대표 결정(11/11)으로 안 그립니다 */}
+      <div id="d-work" className="scroll-mt-[64px]">
+        <RapoDetailSection title="근무조건">
+          <div className="flex flex-col gap-(--rapo-dimension-x3)">
+            <RapoGuideRow label="계약기간">{member ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
+            <RapoGuideRow label="가입 보험">{member ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
+          </div>
+        </RapoDetailSection>
+      </div>
+
+      <RapoSectionGap />
+
+      {/* 06 업무·지원 자격 — 필수 자격은 위 03 과 같은 값. 담당 업무·근무 부서·우대는 수집하지 않아 「공고문 확인」 */}
+      <div id="d-duty" className="scroll-mt-[64px]">
+        <RapoDetailSection title="업무·지원 자격">
+          <div className="flex flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
+            <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">필수 자격</p>
+            {!member ? <p className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">로그인 후 볼 수 있어요</p>
+              : p.지원자격 ? <p className="rapo-type-t5-bold whitespace-pre-wrap break-keep text-(color:--rapo-color-fg-neutral) [overflow-wrap:anywhere]">{p.지원자격}</p>
+              : <원문칸 url={p.url} />}
+          </div>
+          <div className="flex flex-col gap-(--rapo-dimension-x3)">
+            <RapoGuideRow label="담당 업무">{member ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
+            <RapoGuideRow label="근무 부서">{member ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
+          </div>
+        </RapoDetailSection>
+      </div>
+
       <RapoSectionGap />
 
       {/* 07 지원 방법 */}
+      <div id="d-apply" className="scroll-mt-[64px]" />
       <RapoDetailSection title="지원 방법">
         <RapoPeriodCard {...p.기간} />
         {member && (p.접수방법.낱말.length > 0 || p.모집인원없음) && (
@@ -120,6 +163,15 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         <RapoSectionGap />
         <RapoInstitution org={p.기관} 주소={p.주소} />
 
+        {/* 이 병원 이야기 (원본 「이 병원 이야기 · 가로 후기」 983:22167) — 병원별 이야기·후기 기능이 아직 없어 빈 상태로 둡니다.
+            지어낸 후기를 넣지 않습니다 (2026-11-12 밤 근무) */}
+        <section className="flex flex-col gap-(--rapo-dimension-x3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+          <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{p.기관} 이야기</p>
+          <h2 className="rapo-type-t10-bold break-keep text-(color:--rapo-color-fg-neutral)">이 병원에서 일한<br />동료들의 이야기</h2>
+          <p className="rapo-type-t4-regular text-(color:--rapo-color-fg-neutral-muted)">아직 이야기가 비어 있어요. 커뮤니티에서 먼저 물어보세요.</p>
+          <RapoButton href="/community" tone="deep-coral" full>커뮤니티에서 물어보기</RapoButton>
+        </section>
+
         {/* 비슷한 공고 — 회원만 줄이 옵니다. 비회원은 「전체 공고 둘러보기」만 */}
         <RapoSectionGap />
         <RapoDetailSection title="비슷한 공고" sub={p.비슷한제목말}>
@@ -164,7 +216,7 @@ function 원문칸({ url }: { url?: string | null }) {
   if (!url) return <p className="rapo-type-t5-bold">{못읽은칸말}</p>;
   return (
     <a href={url} target="_blank" rel="noopener noreferrer"
-       className="rapo-type-t5-bold inline-flex items-center gap-(--rapo-dimension-x1) underline
+       className="rapo-type-t5-bold -my-[11px] inline-flex min-h-(--rapo-touch-min) items-center gap-(--rapo-dimension-x1) underline
                   decoration-(--rapo-color-stroke-neutral-weak) underline-offset-[3px]">
       {못읽은칸말}
       {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}

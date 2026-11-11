@@ -8,6 +8,8 @@ import { MAX_POST_IMAGES, postImagePair } from '@/lib/image';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useAuth } from '../../auth';
 import { setAfterLogin } from '@/lib/after-login';
+import { 어둠 } from '@/components/rapo/rapo-community';
+import { RapoMaskIcon } from '@/components/rapo/rapo-ui';
 import { useToast } from '../../toast';
 
 export default function WritePage() {
@@ -119,95 +121,95 @@ function Write() {
     }
   };
 
+  /* ── 그리기 — 새 디자인 「U09-01 · 공개 글쓰기」 1447:6971 (2026-11-12 밤 근무 · 어두운 판).
+     작성 공간 · 관련 병원(선택) · 제목 · 내용 · 사진 · 태그(선택) · 등록.
+     ★ 올리는 일(submit · 사진 줄이기 · 중고거래 값)은 그대로입니다 — 모양만.
+     「관련 병원」·「태그」는 저장할 곳이 없어 눌리지 않는 빈 칸으로 둡니다(밤 근무 보고에 적음) */
+  const 칸 = 'w-full rounded-[12px] px-[14px] text-[16px] leading-[24px] outline-none placeholder:text-[#8fa3b3] ' +
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffa691]';
+  const 칸색 = { background: 어둠.면, color: 어둠.글 } as const;
+  const 이름표 = 'mt-[20px] block text-[16px] font-bold leading-[24px]';
+  const 도움 = 'mt-[6px] text-[13px] leading-[18px]';
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <h1 className="text-h2 font-bold">글쓰기</h1>
+    <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: 어둠.바탕 }}>
+      <header className="sticky top-0 z-20 flex h-[56px] items-center gap-[8px] px-[8px]" style={{ background: 어둠.바탕 }}>
+        <Link href="/community" aria-label="커뮤니티로" className="flex size-[44px] items-center justify-center rounded-[8px]">
+          <RapoMaskIcon src="/rapo/detail/arrow-left-20.svg" w={20} h={20} className="text-[#f6f8fa]" />
+        </Link>
+        <h1 className="text-[18px] font-bold" style={{ color: 어둠.글 }}>글쓰기</h1>
+      </header>
 
-      <label className="mt-6 block text-sm font-bold text-mute">방</label>
-      <select
-        value={ch}
-        onChange={(e) => setCh(e.target.value)}
-        className="mt-1 w-full appearance-none rounded-xs border border-gray-200 bg-gray-50 py-4 pl-5 pr-[36px] text-lg dark:border-gray-700 dark:bg-gray-950"
-      >
-        {rooms.map((c) => <option key={c.id} value={c.id}>{c.name} — {c.desc}</option>)}
-      </select>
+      <main className="px-[22px] pb-[40px]">
+        <label htmlFor="w-room" className={이름표 + ' !mt-[8px]'} style={{ color: 어둠.글 }}>작성 공간</label>
+        <select id="w-room" value={ch} onChange={(e) => setCh(e.target.value)}
+          className={칸 + ' mt-[8px] h-[48px] appearance-none'} style={칸색}>
+          {rooms.map((c) => <option key={c.id} value={c.id}>{c.name} — {c.desc}</option>)}
+        </select>
+        <p className={도움} style={{ color: 어둠.흐린글 }}>닉네임으로 게시되며 회원이면 누구나 읽을 수 있어요.</p>
 
-      <label className="mt-6 block text-sm font-bold text-mute">제목 (없어도 돼요)</label>
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        maxLength={60}
-        className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
-      />
+        <p className={이름표} style={{ color: 어둠.글 }}>관련 병원 (선택)</p>
+        <div aria-disabled className={칸 + ' mt-[8px] flex h-[48px] items-center opacity-50'} style={칸색}>병원 검색·선택  ›</div>
+        <p className={도움} style={{ color: 어둠.흐린글 }}>병원 연결은 아직 비어 있어요. 곧 열려요.</p>
 
-      {/* ★ 중고거래에만 — 값과 상태 (2026-10-11) */}
-      {ch === 'market' && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <input
-            value={값}
-            onChange={(e) => set값(e.target.value.replace(/[^0-9]/g, ''))}
-            inputMode="numeric" placeholder="값 (원) — 비워 두면 「값 안 적음」"
-            className="min-w-[200px] flex-1 rounded-sm border border-gray-200 px-5 py-4 text-lg" />
-          <select
-            value={거래상태} onChange={(e) => set거래상태(e.target.value)}
-            className="rounded-sm border border-gray-200 px-4 py-4 text-lg">
-            <option value="판매중">판매중</option>
-            <option value="예약중">예약중</option>
-            <option value="거래완료">거래완료</option>
-          </select>
-        </div>
-      )}
+        <label htmlFor="w-title" className={이름표} style={{ color: 어둠.글 }}>제목</label>
+        <input id="w-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={60} placeholder="제목을 입력해 주세요 (없어도 돼요)"
+          className={칸 + ' mt-[8px] h-[48px]'} style={칸색} />
+        <p className={도움} style={{ color: 어둠.흐린글 }}>{title.length} / 60</p>
 
-      <label className="mt-6 block text-sm font-bold text-mute">내용</label>
-      <textarea
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        rows={10}
-        className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
-      />
+        {ch === 'market' && (
+          <div className="mt-[12px] flex flex-wrap items-center gap-[8px]">
+            <input value={값} onChange={(e) => set값(e.target.value.replace(/[^0-9]/g, ''))}
+              inputMode="numeric" placeholder="값 (원) — 비워 두면 「값 안 적음」" aria-label="값"
+              className={칸 + ' h-[48px] min-w-[200px] flex-1'} style={칸색} />
+            <select value={거래상태} onChange={(e) => set거래상태(e.target.value)} aria-label="거래 상태"
+              className={칸 + ' h-[48px] !w-auto appearance-none'} style={칸색}>
+              <option value="판매중">판매중</option>
+              <option value="예약중">예약중</option>
+              <option value="거래완료">거래완료</option>
+            </select>
+          </div>
+        )}
 
-      <div className="mt-6 flex items-center gap-5">
-        <label className="cursor-pointer rounded-md border border-gray-200 px-6 py-4 text-lg font-medium hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950">
-          사진 넣기
+        <label htmlFor="w-body" className={이름표} style={{ color: 어둠.글 }}>내용</label>
+        <textarea id="w-body" value={body} onChange={(e) => setBody(e.target.value)} rows={6} placeholder="경험이나 궁금한 점을 적어 주세요"
+          className={칸 + ' mt-[8px] py-[12px]'} style={칸색} />
+        <p className={도움} style={{ color: 어둠.흐린글 }}>{body.length.toLocaleString('ko-KR')}자</p>
+
+        <p className={이름표} style={{ color: 어둠.글 }}>사진</p>
+        <label className={칸 + ' mt-[8px] flex h-[48px] cursor-pointer items-center gap-[12px]'} style={칸색}>
+          <span aria-hidden>+</span> 사진 추가
           <input type="file" accept="image/*" multiple className="sr-only"
             onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ''; }} />
         </label>
-        <span className="text-sm text-mute">
-          {picks.length}/{MAX_POST_IMAGES}장 · 올릴 때 1600px WebP 로 줄입니다
-        </span>
-      </div>
+        <p className={도움} style={{ color: 어둠.흐린글 }}>{picks.length}/{MAX_POST_IMAGES}장 · 올릴 때 1600px 로 줄여요</p>
+        {picks.length > 0 && (
+          <ul className="mt-[12px] flex flex-wrap gap-[8px]">
+            {picks.map((p, i) => (
+              <li key={p.preview} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element -- 고른 사진 미리보기(blob 주소) */}
+                <img src={p.preview} alt="" className="size-[72px] rounded-[8px] object-cover" />
+                <button type="button" aria-label={`사진 ${i + 1} 빼기`} onClick={() => setPicks(picks.filter((_, j) => j !== i))}
+                  className="absolute -right-[4px] -top-[4px] size-[22px] rounded-full text-[14px]" style={{ background: 어둠.글, color: 어둠.바탕 }}>
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      {picks.length > 0 && (
-        <ul className="mt-5 flex flex-wrap gap-2">
-          {picks.map((p, i) => (
-            <li key={p.preview} className="relative">
-              {/* eslint-disable-next-line @next/next/no-img-element -- 브라우저 안 미리보기입니다 */}
-              <img src={p.preview} alt="" className="size-[72px] rounded-sm object-cover" />
-              <button
-                type="button"
-                aria-label={`사진 ${i + 1} 빼기`}
-                onClick={() => setPicks(picks.filter((_, j) => j !== i))}
-                className="absolute -right-1 -top-1 size-[22px] rounded-md bg-gray-900 text-sm text-white"
-              >
-                ×
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+        <p className={이름표} style={{ color: 어둠.글 }}>태그 (선택)</p>
+        <div aria-disabled className={칸 + ' mt-[8px] flex h-[48px] items-center opacity-50'} style={칸색}>태그 추가  +</div>
+        <p className={도움} style={{ color: 어둠.흐린글 }}>태그는 아직 비어 있어요. 곧 열려요.</p>
 
-      <button
-        type="button"
-        onClick={submit}
-        disabled={busy}
-        className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
-      >
-        {busy ? '올리는 중…' : '올리기'}
-      </button>
-
-      <p className="mt-5 text-sm text-mute">
-        남 비방·저격·허위사실·광고는 지워져요 — 커뮤니티 이용규칙
-      </p>
-    </main>
+        <button type="button" onClick={submit} disabled={busy}
+          className="mt-[32px] h-[48px] w-full rounded-[12px] text-[16px] font-bold disabled:opacity-50"
+          style={{ background: 어둠.쓰기, color: 어둠.글 }}>
+          {busy ? '올리는 중…' : '등록'}
+        </button>
+        <p className={도움 + ' text-center'} style={{ color: 어둠.흐린글 }}>
+          남 비방·저격·허위사실·광고는 지워져요 — <Link href="/terms/community" className="underline">커뮤니티 이용규칙</Link>
+        </p>
+      </main>
+    </div>
   );
 }

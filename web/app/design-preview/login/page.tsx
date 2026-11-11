@@ -18,7 +18,7 @@ export default async function DesignPreviewLogin({ searchParams }: { searchParam
       <>
         {!최근 && <p className="rapo-type-t4-regular text-center">처음이라면 같은 방법으로 가입할 수 있어요</p>}
         <RapoLoginButtons last={최근 as LoginMethod | null} busy={null} />
-        <Link href="/design-preview/login" className="rapo-type-t4-medium w-full text-center">지금은 둘러볼게요</Link>
+        <Link href="/design-preview/login" className="rapo-type-t4-medium flex h-(--rapo-touch-min) w-full items-center justify-center">지금은 둘러볼게요</Link>
       </>
     } />
   );
