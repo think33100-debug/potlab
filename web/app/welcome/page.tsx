@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AvatarPicker } from '@/components/avatar-picker';
+import { CompareNotify } from '@/components/compare-notify';
+import { 비교알림동의, 비교알림켜짐 } from '@/lib/beta-compare';
 import { SignupSurvey } from '@/components/signup-survey';
 import { defaultAvatar } from '@/lib/avatar';
 import {
@@ -45,6 +47,8 @@ export default function Welcome() {
   const [invite, setInvite] = useState<string>(() =>
     typeof window === 'undefined' ? '' : (초대코드읽기() ?? ''));
   const [inviteErr, setInviteErr] = useState<string | null>(null);
+  /* 「가입하기」 뒤 비교 알림 창 — 비교알림켜짐 이 false 인 동안은 한 번도 안 뜹니다 (13일 뒤 켬) */
+  const [compareOpen, setCompareOpen] = useState(false);
 
   /* 아무것도 안 고르셨으면 기본 아바타. 상태로 안 두고 계산합니다 —
      effect 안에서 setState 하면 그릴 때마다 한 번 더 그립니다 */
@@ -69,7 +73,9 @@ export default function Welcome() {
   /* ★ 2026-11-11 — 베타 동의(개인정보 [필수] · 설문 경품 [선택])를 기존 동의 뒤에 더합니다.
      기존 다섯 항목과 동의남기기() 는 그대로입니다 (그 창구는 다섯 키만 받습니다).
      베타 동의는 `테스터초대` 줄의 칸으로 남습니다 — 아래 초대확인() */
-  const 모든동의 = [...AGREEMENTS, ...BETA_AGREEMENTS];
+  /* [선택] 연봉·스펙 비교 알림 신청은 13일 뒤 켭니다 (lib/beta-compare.ts) */
+  const 베타동의들 = 비교알림켜짐 ? [...BETA_AGREEMENTS, 비교알림동의] : BETA_AGREEMENTS;
+  const 모든동의 = [...AGREEMENTS, ...베타동의들];
   const required = 모든동의.filter((a) => a.required);
   const allRequired = required.every((a) => checked[a.key]);
   const allChecked = 모든동의.every((a) => checked[a.key]);
@@ -91,6 +97,8 @@ export default function Welcome() {
     const 동의칸 = {
       개인정보동의: !!checked.beta_privacy,
       경품동의: !!checked.survey_prize,
+      /* 이 칸은 13일 뒤 SQL(나중_비교알림_13일뒤.sql)이 더합니다 — 켜기 전에는 안 보냅니다 */
+      ...(비교알림켜짐 ? { 비교알림동의: !!checked.compare_notify } : {}),
     };
     let { error } = await sb.from('테스터초대').insert({ 사람: session.user.id, 코드, ...동의칸 });
     /* 이미 넣은 분(뒤로 갔다가 다시 온 분) — 동의 칸만 새로 적습니다 */
@@ -195,6 +203,8 @@ export default function Welcome() {
     await reload();
     setBusy(false);
     setStep(4);
+    /* 「가입하기」 뒤 비교 알림 창 — 13일 뒤 켬 (lib/beta-compare.ts) */
+    if (비교알림켜짐) setCompareOpen(true);
   };
 
   /* ② 직군·역할 — 둘 다 필수입니다.
@@ -325,7 +335,7 @@ export default function Welcome() {
               ))}
               {/* ★ 2026-11-11 클로즈드 베타 동의 — 세중님 문구 그대로 (lib/beta.ts).
                   수집 항목·목적·보유 기간·거부할 권리를 접지 않고 다 보입니다 */}
-              {BETA_AGREEMENTS.map((a) => (
+              {베타동의들.map((a) => (
                 <li key={a.key}>
                   <label className="flex cursor-pointer items-center gap-5 py-4">
                     <input
@@ -474,6 +484,16 @@ export default function Welcome() {
           />
         )}
       </div>
+
+      {/* 「가입하기」 뒤 비교 알림 창 — 13일 뒤 켬. 꺼져 있으면 compareOpen 이 늘 false 입니다 */}
+      {비교알림켜짐 && compareOpen && (
+        <CompareNotify
+          userId={session.user.id}
+          job={job ?? (me?.job_group as JobGroup | undefined) ?? null}
+          email={session.user.email ?? null}
+          onDone={() => setCompareOpen(false)}
+        />
+      )}
     </main>
   );
 }
