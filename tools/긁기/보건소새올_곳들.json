@@ -2,9 +2,9 @@
  "꼴": "보건소새올",
  "만든때": "2026-11-11",
  "어디서": "앱 Claude 최종표 RAPO노트/수집기/보건소_수집대상_앱Claude확인_1111.csv (192곳 · 새올 125 · 게시판 30 · 못 읽음 37). 새올 갈래는 호스트마다 05 목록을 한 번 받아 마지막 05 글이 30일 안이면 05, 아니면 01~05. 게시판은 표준읽기로 다시 읽어 제목·날짜가 맞는 곳만. 이름은 777 기관 이름(보건소 칸) 그대로",
- "곳": 175,
- "새올": 153,
- "누리집": 22,
+ "곳": 185,
+ "새올": 160,
+ "누리집": 25,
  "기관번호붙음": 0,
  "곳들": [
   {
@@ -2091,17 +2091,153 @@
    "기관번호": null,
    "왜": "① 서버에서 시도 — 이 PC 에서 2026-11-11 두 번(간격 30분↑) 다 연결 시간 초과·끊김 · DNS 있음·443 연결은 됨 · robots 는 아직 못 읽음(서버에서 robots.txt 부터 안 붙으면 목록을 안 두드림) · 새올인지·갈래는 열린 뒤 확인 — 그때까지 01~05 · 기관번호는 이름으로 잇습니다",
    "서버에서시도": true
-  }
- ],
- "안넣은곳": [
+  },
+  {
+   "이름": "도봉구보건소",
+   "종류": "보건기관",
+   "지역": "서울 도봉구",
+   "읽기": "새올",
+   "주소": "https://dobong.eminwon.seoul.kr/emwp/gov/mogaha/ntis/web/ofr/action/OfrAction.do",
+   "보건만": true,
+   "아이디머리": "sa-dobong-seoul",
+   "기관번호": null,
+   "왜": "2026-11-11 재시도 — 서울 새올 호스트(<구>.eminwon.seoul.kr)를 열어 확인 · robots.txt 404 · 05 POST 줄 15(2024-06-07~2026-11-11 · 보건 1) · 갈래 05(마지막 05 글 2026-11-11) · 구청 누리집 bbs.asp 는 robots 금지라 안 씀 · 기관번호는 이름으로 잇습니다"
+  },
+  {
+   "이름": "서울특별시송파구보건소",
+   "종류": "보건기관",
+   "지역": "서울 송파구",
+   "읽기": "새올",
+   "주소": "https://songpa.eminwon.seoul.kr/emwp/gov/mogaha/ntis/web/ofr/action/OfrAction.do",
+   "보건만": true,
+   "상세안열기": true,
+   "아이디머리": "sa-songpa-seoul",
+   "기관번호": null,
+   "왜": "2026-11-11 재시도 — 서울 새올 호스트를 열어 확인 · robots.txt 404 · 05 POST 줄 6(2026-11-04~11-10 · 보건 0) · 갈래 05 · 구청 누리집 robots 가 Crawl-delay 3600 이라 새올 호스트도 하루 한 번 목록만(상세안열기 — 잘린 제목도 상세를 안 엶) · 기관번호는 이름으로 잇습니다"
+  },
+  {
+   "이름": "천안시서북구보건소",
+   "종류": "보건기관",
+   "지역": "충남 천안시",
+   "읽기": "새올",
+   "주소": "https://eminwon.cheonan.go.kr/emwp/gov/mogaha/ntis/web/ofr/action/OfrAction.do",
+   "보건만": true,
+   "부서말제외": "동남구",
+   "아이디머리": "sa-cheonan",
+   "기관번호": null,
+   "왜": "2026-11-11 재시도 — 천안시 새올이 이번엔 열림 · robots.txt 404 · 05 POST 줄 30(2026-07-08~11-10 · 보건 0) · 갈래 05(01~05 는 30줄이 하루치뿐) · 천안시 공통 게시판이라 서북구·동남구 글이 섞이고 부서 칸(건강관리과)으로는 못 가름 → 제목에 「동남구」가 든 줄만 빼고 나머지는 서북구로(동남구보건소는 이 목록의 대상이 아님) · 시청 공지사항(www.cheonan.go.kr)은 우리 이름표로 robots.txt·목록 모두 HTTP 403 이라 안 씀 · 기관번호는 이름으로 잇습니다"
+  },
+  {
+   "이름": "서울특별시 중구보건소",
+   "종류": "보건기관",
+   "지역": "서울 중구",
+   "읽기": "규칙",
+   "주소": "https://www.junggu.seoul.kr/content.do?cmsid=15450",
+   "규칙": {
+    "row": "<tr>\\s*<td class=\"mo_none\">[\\s\\S]*?<\\/tr>",
+    "title": "<p class=\"title\">\\s*<a[^>]*>([\\s\\S]*?)<\\/a>",
+    "link": "href=\"(\\/content\\.do\\?cmsid=15450&amp;mode=view&amp;cid=\\d+)\"",
+    "base": "https://www.junggu.seoul.kr",
+    "번호": "cid=(\\d+)\"",
+    "date": "(20\\d{2}-\\d{2}-\\d{2})"
+   },
+   "보건만": true,
+   "아이디머리": "nr-junggu-seoul",
+   "기관번호": null,
+   "왜": "2026-11-11 재시도 — 구청 누리집 「채용정보」 게시판(첫 화면 메뉴 링크) · 중간 인증서 tools/certs/www.junggu.seoul.kr.pem(검증 켠 채) · robots 허락(막는 것은 고시/공고 cmsid=14232 와 /search 뿐 — 고시/공고는 안 씀) · 규칙 읽기 줄 10(날짜 10 · 보건 1 — 통합돌봄 건강돌봄센터 간호사·운동사·작업치료사) · 상세 200 · 새올(eminwon.junggu.seoul.kr)은 게시물 0개라 안 씀 · 기관번호는 이름으로 잇습니다"
+  },
   {
    "이름": "강릉시보건소",
-   "왜": "② 손확인 — 게시판(selectBbsNttList bbsNo=128)에 게시일 칸이 없고 「마감일」뿐(2026-11-11 원문) · 날짜를 지어내지 않음 · 새올 호스트(eminwon.gn.go.kr)는 짐작 주소였고 없음(ENOTFOUND)"
+   "종류": "보건기관",
+   "지역": "강원 강릉시",
+   "읽기": "규칙",
+   "주소": "https://www.gn.go.kr/www/selectBbsNttList.do?bbsNo=128&key=4444",
+   "규칙": {
+    "row": "<tr>\\s*<td class=\"first\">\\d+[\\s\\S]*?<\\/tr>",
+    "title": "<td class=\"subject\">[\\s\\S]*?<a[^>]*>([\\s\\S]*?)<\\/a>",
+    "link": "href=\"\\.\\/(selectBbsNttView\\.do\\?[^\"]+)\"",
+    "base": "https://www.gn.go.kr/www",
+    "번호": "nttNo=(\\d+)",
+    "date": "<td class=\"last\">(20\\d{2}-\\d{2}-\\d{2})<\\/td>",
+    "single": "deadline"
+   },
+   "보건만": true,
+   "아이디머리": "nr-gn",
+   "기관번호": null,
+   "왜": "2026-11-11 재시도 — 시청 시험·채용공고 게시판 · 게시일 칸이 없고 마감일 칸뿐 → 규칙 single \"deadline\" 으로 마감(apply_to · 출처 「목록」)만 담고 올린날은 비움(지어내지 않음) · 마감이 안 지난 줄만 담음 · robots 허락(User-agent * Allow: /) · 줄 10(마감 10 · 보건 0) · 상세 200 · 기관번호는 이름으로 잇습니다"
+  },
+  {
+   "이름": "담양군보건소",
+   "종류": "보건기관",
+   "지역": "전남 담양군",
+   "읽기": "규칙",
+   "주소": "https://www.damyang.go.kr/eminwon/getSearchList?listType=05&listGubun=&searchKey=&searchVal=",
+   "규칙": {
+    "row": "\\{\"col[^{}]*\"col0\"[^{}]*\\}",
+    "title": "\"col3\":\"([^\"]*)\"",
+    "link": "\"col0\":\"(\\d+)\"",
+    "linkFmt": "https://www.damyang.go.kr/eminwon/searchDetail?notAncmtMgtNo={1}&domainId=DOM_0000001&menuCd=DOM_000000190001002001&contentsSid=3&listType=05",
+    "date": "\"col5\":\"(20\\d{2}\\.\\d{2}\\.\\d{2})\""
+   },
+   "보건만": true,
+   "아이디머리": "nr-damyang",
+   "기관번호": null,
+   "왜": "2026-11-11 재시도 (멘토 1.14 데이터 주소 찾기) — 군청 채용공고 쪽(/eminwon/searchList … listType=05)이 화면 스크립트로 /eminwon/getSearchList 를 GET 해 JSON 을 그림 → 그 주소를 쪽 원문에서 찾아 씀(짐작 아님) · robots 허락(User-agent * Allow: /) · 줄 10(날짜 10 · 보건 2 — 3월 건강증진과) · 상세 주소는 쪽 스크립트가 만드는 꼴 그대로 · 상세 200 · 기관번호는 이름으로 잇습니다"
   },
   {
    "이름": "경주시보건소",
-   "왜": "⑥ 손확인 — 새올: 우리 수집기 이름표로 목록 POST 를 보내면 연결이 끊김(ECONNRESET · 11/11 세 번 · robots.txt 는 열림) · 이름표를 바꿔 우회하지 않음"
+   "종류": "보건기관",
+   "지역": "경북 경주시",
+   "읽기": "새올",
+   "주소": "https://eminwon.gyeongju.go.kr/emwp/gov/mogaha/ntis/web/ofr/action/OfrAction.do",
+   "새올갈래": "01,02,03,04,05",
+   "보건만": true,
+   "아이디머리": "sa-gyeongju",
+   "기관번호": null,
+   "왜": "⑥ 서버에서 시도 — 우리 이름표로 목록 POST 가 끊김(ECONNRESET · 11/11 세 번) · 11/11 재시도에선 robots.txt 부터 ECONNRESET · 이름표는 안 바꿈 · 서버 IP 에서 robots 가 안 붙으면 목록을 안 두드림 · 갈래는 열린 뒤 확인 — 그때까지 01~05 · 기관번호는 이름으로 잇습니다",
+   "서버에서시도": true
   },
+  {
+   "이름": "문경시보건소",
+   "종류": "보건기관",
+   "지역": "경북 문경시",
+   "읽기": "새올",
+   "주소": "https://eminwon.gbmg.go.kr/emwp/gov/mogaha/ntis/web/ofr/action/OfrAction.do",
+   "새올갈래": "01,02,03,04,05",
+   "보건만": true,
+   "아이디머리": "sa-gbmg",
+   "기관번호": null,
+   "왜": "⑥ 서버에서 시도 — 우리 이름표로 목록 POST 가 끊김(ECONNRESET · 11/11 세 번) · 11/11 재시도에선 robots.txt 부터 ECONNRESET · 이름표는 안 바꿈 · 시청 누리집 새올 보기(www.gbmg.go.kr/portal/saeol/gosi)는 중간 인증서 빠짐이라 다음 차례 · 갈래는 열린 뒤 확인 — 그때까지 01~05 · 기관번호는 이름으로 잇습니다",
+   "서버에서시도": true
+  },
+  {
+   "이름": "양주시보건소",
+   "종류": "보건기관",
+   "지역": "경기 양주시",
+   "읽기": "새올",
+   "주소": "https://eminwon.yangju.go.kr/emwp/gov/mogaha/ntis/web/ofr/action/OfrAction.do",
+   "새올갈래": "01,02,03,04,05",
+   "보건만": true,
+   "아이디머리": "sa-yangju",
+   "기관번호": null,
+   "왜": "⑥ 서버에서 시도 — 우리 이름표로 목록 POST 가 끊김(ECONNRESET · 11/11 세 번) · 11/11 재시도에선 robots.txt 부터 소켓 끊김(UND_ERR_SOCKET) · 이름표는 안 바꿈 · 갈래는 열린 뒤 확인 — 그때까지 01~05 · 기관번호는 이름으로 잇습니다",
+   "서버에서시도": true
+  },
+  {
+   "이름": "영등포구보건소",
+   "종류": "보건기관",
+   "지역": "서울 영등포구",
+   "읽기": "새올",
+   "주소": "https://eminwon.ydp.go.kr/emwp/gov/mogaha/ntis/web/ofr/action/OfrAction.do",
+   "새올갈래": "01,02,03,04,05",
+   "보건만": true,
+   "아이디머리": "sa-ydp",
+   "기관번호": null,
+   "왜": "⑥ 서버에서 시도 — 우리 이름표로 목록 POST 가 끊김(ECONNRESET · 11/11 세 번) · 서울 꼴 ydp.eminwon.seoul.kr 은 없음(ENOTFOUND) · 구청 누리집 www.ydp.go.kr 도 robots.txt 부터 소켓 끊김이라 iframe 을 못 봄 · 이름표는 안 바꿈 · 갈래는 열린 뒤 확인 — 그때까지 01~05 · 기관번호는 이름으로 잇습니다",
+   "서버에서시도": true
+  }
+ ],
+ "안넣은곳": [
   {
    "이름": "고흥군보건소",
    "왜": "⑦ 손확인 — 보건소 게시판 robots 금지(Disallow: /) · 새올(eminwon.goheung.go.kr)은 짐작 주소 · 안 열림(AbortError)"
@@ -2111,48 +2247,16 @@
    "왜": "④ 손확인 — 시청 누리집(nonsan.go.kr) robots: User-agent * 에 Disallow: / (검색엔진 이름 묶음에만 /kor/·/job/ 허락) · 새올 호스트 없음(ENOTFOUND) 2026-11-11"
   },
   {
-   "이름": "담양군보건소",
-   "왜": "④ 손확인 — 새올 호스트 없음(ENOTFOUND) · 군청 고시공고(/eminwon/searchList)는 robots 허락이나 목록을 화면 스크립트가 그려 받은 HTML 에 줄 0 (2026-11-11)"
-  },
-  {
-   "이름": "도봉구보건소",
-   "왜": "④ 손확인 — 구청 누리집 robots: Disallow: / (Allow 는 /default.asp·/Contents.asp·/dbmobileweb/ 뿐 · 게시판 bbs.asp 는 금지) · 새올 호스트 없음(ENOTFOUND) 2026-11-11"
-  },
-  {
    "이름": "동두천시보건소",
    "왜": "④ 손확인 — 공식 누리집은 www.ddc.go.kr(제목 「동두천시 대표홈페이지」 · 표의 ddc21.net 은 안 씀) · 채용공고·고시공고(selectGosiList.do)가 robots Disallow: /*selectGosiList.do 2026-11-11"
-  },
-  {
-   "이름": "문경시보건소",
-   "왜": "⑥ 손확인 — 새올: 우리 수집기 이름표로 목록 POST 를 보내면 연결이 끊김(ECONNRESET · 11/11 세 번 · robots.txt 는 열림) · 이름표를 바꿔 우회하지 않음"
-  },
-  {
-   "이름": "서울특별시 중구보건소",
-   "왜": "③ 인증서는 풀림(tools/certs/eminwon.junggu.seoul.kr.pem · 검증 켠 채) · robots.txt 404 · 그러나 새올 목록이 05·01~05 모두 「전체게시물 0개」 — 구청이 이 새올을 누리집 공고에 안 쓰는 것으로 보임 · 손확인 2026-11-11"
-  },
-  {
-   "이름": "서울특별시송파구보건소",
-   "왜": "④ 손확인 — 새올 호스트 없음(ENOTFOUND) · 구청 robots 가 Crawl-delay 3600(한 시간에 한 번) · 첫 화면에 고시공고 링크 글자 없음(스크립트 메뉴) — 더 두드리지 않음 2026-11-11"
   },
   {
    "이름": "신안군보건소",
    "왜": "② 손확인 — 군청 공고 게시판 목록 주소(…/participation_07_04)는 robots 글자에 안 걸리지만 그 아래(/participation_07_04/)를 Disallow — 게시판을 막으려는 뜻으로 보고 넣지 않음 · 새올(eminwon.shinan) 안 열림 2026-11-11"
   },
   {
-   "이름": "양주시보건소",
-   "왜": "⑥ 손확인 — 새올: 우리 수집기 이름표로 목록 POST 를 보내면 연결이 끊김(ECONNRESET · 11/11 세 번 · robots.txt 는 열림) · 이름표를 바꿔 우회하지 않음"
-  },
-  {
    "이름": "영광군보건소",
-   "왜": "① 손확인 — 새올(eminwon.yeonggwang.go.kr) 443 이 연결 거부(ECONNREFUSED · 11/11 두 번) — 서버가 아예 안 받는 것이라 서버에서도 같을 것으로 봄 · 게시판 주소 없음"
-  },
-  {
-   "이름": "영등포구보건소",
-   "왜": "⑥ 손확인 — 새올: 우리 수집기 이름표로 목록 POST 를 보내면 연결이 끊김(ECONNRESET · 11/11 세 번 · robots.txt 는 열림) · 이름표를 바꿔 우회하지 않음"
-  },
-  {
-   "이름": "천안시서북구보건소",
-   "왜": "⑦ 손확인 — 게시판 HTTP 403 · 새올(eminwon.cheonan.go.kr) 안 열림(AbortError)"
+   "왜": "① 손확인 — 새올(eminwon.yeonggwang.go.kr) 443 연결 거부(ECONNREFUSED · 11/11 두 번) · 군청 누리집(www.yeonggwang.go.kr)은 2026-11-11 재시도에서 robots.txt 부터 시간 초과라 고시공고·채용 게시판 주소를 열어 확인하지 못함(짐작 주소는 안 넣음)"
   },
   {
    "이름": "평택시 송탄보건소",
@@ -2160,8 +2264,8 @@
   },
   {
    "이름": "해남군보건소",
-   "왜": "② 손확인 — 보건소 공지 게시판(/health/)은 규칙으로 줄 10 읽히나 회원이 누를 상세 주소(./view.9is)가 404 — 확인 못 한 주소를 담지 않음 · 새올(eminwon.haenam) 연결 시간 초과 2026-11-11"
+   "왜": "② 손확인 — 보건소 공지(/health/index.9is)가 robots 가 막은 /planweb/board/list.9is 로 넘깁니다(302 · Disallow: /planweb/board/). 전에 읽힌 줄 10 은 그 넘김을 말없이 따라간 것이었고, 2026-11-11 받기()가 넘김도 robots 를 보게 고친 뒤로는 금지 · 상세(./view.9is)도 404 · 새올(eminwon.haenam) 연결 시간 초과 2026-11-11"
   }
  ],
- "고친때": "2026-11-11 (안넣은곳 59 → 17 · 인증서·옛 판 새올·곳마다 규칙)"
+ "고친때": "2026-11-11 (안넣은곳 59 → 17 → 7 · 서울 새올 호스트 · 데이터 주소 · 마감일만 게시판 · 서버에서 시도)"
 }

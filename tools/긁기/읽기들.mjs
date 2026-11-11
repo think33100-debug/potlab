@@ -225,7 +225,10 @@ export function 규칙읽기(html, 규칙) {
     if (!번호 || 본것.has(번호)) continue;
     본것.add(번호);
     const 날 = (x.posted || x.from || '').replace(/\./g, '-') || null;
-    낸것.push({ 번호, 제목: x.title, 주소: x.url, 올린날: 날, 부서: stripTags(덩이), 자리: m.index });
+    /* ★ 2026-11-11 — 마감일(to)도 넘깁니다. 게시일 칸이 없고 마감일만 있는 게시판(강릉시 · 규칙 `single: "deadline"`)은
+       올린날이 비고 마감만 찹니다 — 올린날을 마감으로 **채우지 않습니다**(지어내지 않음) */
+    const 마감 = (x.to || '').replace(/\./g, '-') || null;
+    낸것.push({ 번호, 제목: x.title, 주소: x.url, 올린날: 날, 마감, 부서: stripTags(덩이), 자리: m.index });
   }
   return 낸것;
 }

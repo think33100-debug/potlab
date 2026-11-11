@@ -26,19 +26,53 @@ import { 붙여받기, 있나 as 인증서있나 } from '../certs/index.mjs';
    검증은 **켠 채**입니다 — 뿌리 묶음에 그 중간 인증서를 더해 사슬을 잇는 것뿐입니다
    (`rejectUnauthorized` 를 끄지 않습니다 · tools/certs/index.mjs 머리글).
    .pem 이 없는 호스트는 전과 똑같이 맨 fetch 입니다 */
-async function 맨받기(주소, { method = 'GET', headers = {}, body, timeout = 20000 } = {}) {
+/* ★ 2026-11-11 — **자리 옮김(301·302…)도 robots 를 봅니다** (`넘김확인`).
+   해남군 보건소 공지(/health/index.9is)가 robots 가 막은 /planweb/board/list.9is 로 넘겼는데,
+   fetch 가 넘김을 말없이 따라가 막힌 쪽을 받고 있었습니다. 이제 넘김마다 `넘김확인(다음 주소)` 을 묻고,
+   금지면 **그 쪽을 두드리지 않고** `막힘` 을 돌려줍니다. robots.txt 를 받을 때는 이것을 안 씁니다(넘김 그대로).
+   중간 인증서 길(붙여받기)은 넘김을 안에서 따라가므로 **받은 뒤** 마지막 주소를 보고 금지면 버립니다 */
+async function 맨받기(주소, { method = 'GET', headers = {}, body, timeout = 20000, 넘김확인 = null } = {}) {
   let 호스트 = '';
   try { 호스트 = new URL(주소).hostname; } catch { /* 아래 fetch 가 까닭을 냅니다 */ }
   if (호스트 && 인증서있나(호스트)) {
     const g = await 붙여받기(주소, { method, headers, body, timeout });
     if (g.왜) throw new Error(g.왜);
-    return { ok: g.code >= 200 && g.code < 300, status: g.code, url: g.url || 주소,
+    const 끝 = g.url || 주소;
+    if (넘김확인 && 끝 !== 주소) {
+      const 판 = await 넘김확인(끝);
+      if (!판.됨) return { ok: false, status: g.code, url: 끝, headers: g.headers, buf: Buffer.alloc(0), 막힘: 판.왜 };
+    }
+    return { ok: g.code >= 200 && g.code < 300, status: g.code, url: 끝,
       headers: g.headers, buf: g.buf };
   }
-  const r = await fetch(주소, { method, headers, body,
-    signal: AbortSignal.timeout(timeout), redirect: 'follow' });
-  return { ok: r.ok, status: r.status, url: r.url, headers: r.headers,
-    buf: Buffer.from(await r.arrayBuffer()) };
+  if (!넘김확인) {
+    const r = await fetch(주소, { method, headers, body,
+      signal: AbortSignal.timeout(timeout), redirect: 'follow' });
+    return { ok: r.ok, status: r.status, url: r.url, headers: r.headers,
+      buf: Buffer.from(await r.arrayBuffer()) };
+  }
+  let 지금 = 주소; let 방법 = method; let 몸 = body; let 머리 = headers;
+  for (let 번 = 0; 번 < 6; 번++) {
+    const r = await fetch(지금, { method: 방법, headers: 머리, body: 몸,
+      signal: AbortSignal.timeout(timeout), redirect: 'manual' });
+    const 갈곳 = r.headers.get('location');
+    if ([301, 302, 303, 307, 308].includes(r.status) && 갈곳) {
+      const 다음 = new URL(갈곳, 지금).toString();
+      try { await r.body?.cancel(); } catch { /* 넘김 쪽 몸은 안 읽습니다 */ }
+      const 판 = await 넘김확인(다음);
+      if (!판.됨) return { ok: false, status: r.status, url: 다음, headers: r.headers, buf: Buffer.alloc(0), 막힘: 판.왜 };
+      /* POST 를 301·302·303 으로 옮기면 GET 으로 따라갑니다 (fetch 의 redirect: 'follow' 와 같은 규칙) */
+      if ([301, 302, 303].includes(r.status) && 방법 !== 'GET') {
+        방법 = 'GET'; 몸 = undefined;
+        머리 = Object.fromEntries(Object.entries(머리).filter(([k]) => k.toLowerCase() !== 'content-type'));
+      }
+      지금 = 다음;
+      continue;
+    }
+    return { ok: r.ok, status: r.status, url: 지금, headers: r.headers,
+      buf: Buffer.from(await r.arrayBuffer()) };
+  }
+  throw new Error('자리 옮김이 여섯 번을 넘음');
 }
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -133,7 +167,8 @@ export async function 받기(주소, { 몸 = null } = {}) {
     const 머리 = { 'User-Agent': UA, 'Accept-Language': 'ko' };
     if (몸) 머리['Content-Type'] = 'application/x-www-form-urlencoded';
     const r = await 맨받기(주소, { method: 몸 ? 'POST' : 'GET', headers: 머리,
-      body: 몸 ? new URLSearchParams(몸).toString() : undefined, timeout: 20000 });
+      body: 몸 ? new URLSearchParams(몸).toString() : undefined, timeout: 20000, 넘김확인: 가도되나집 });
+    if (r.막힘) return { 됨: false, 코드: r.status, 주소: r.url, html: '', 글: '', 왜: 'robots 금지 — 넘겨준 곳 (' + r.막힘 + ')' };
     const html = 글자풀기(r.buf, (r.headers && r.headers.get('content-type')) || '');
     return { 됨: r.ok, 코드: r.status, 주소: r.url, html,
       글: html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')
