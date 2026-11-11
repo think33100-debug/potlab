@@ -709,7 +709,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               배치(글꼴·자리)는 11/1~6 화면 작업 때 다듬습니다 */}
           <지원방법줄
             접수방법={detail['접수방법'] as string | undefined}
-            원문주소={j.url}
+            원문주소={병원?.주소 ?? j.url}
             갈곳없나={member && !지원.주소}
           />
           <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
