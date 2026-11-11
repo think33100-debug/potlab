@@ -37,8 +37,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/* 주소창·작업전환 화면 색. 브랜드 빨강입니다 */
-export const viewport: Viewport = { themeColor: "#FF3B30" };
+/* 휴대폰 주소창 색 — 새 디자인 헤더가 흰색이라 흰색 (2026-11-11 · site.webmanifest 의 theme_color 와 한 쌍) */
+export const viewport: Viewport = { themeColor: "#FFFFFF" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
