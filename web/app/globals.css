@@ -397,7 +397,8 @@ html[data-splash="on"] #splash {
   padding-bottom: 96px;            /* 원본처럼 가운데보다 조금 위 (로고 230~540 / 896) */
   background-color: #FFFFFF;
   text-align: center;
-  animation: splash-out 2.3s forwards;
+  /* 2026-11-11 밤 대표 「문구가 안 나오고 후다닥 사라져」 → 2.3초에서 3.2초로. 문구는 0.4초에 나타나 2.4초쯤 머뭅니다 */
+  animation: splash-out 3.2s forwards;
 }
 
 /* 커뮤니티로 들어왔을 때는 어둡게 (2026-10-04).
@@ -407,16 +408,16 @@ html[data-splash="on"] #splash {
    피그마 스플래시는 흰 바탕 하나뿐입니다. */
 
 html[data-splash="on"] #splash .splash-name { animation: splash-in 0.55s 0.1s both; }
-html[data-splash="on"] #splash .splash-line { animation: splash-in 0.55s 0.75s both; }
+html[data-splash="on"] #splash .splash-line { animation: splash-in 0.5s 0.4s both; }
 
 @keyframes splash-in {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: none; }
 }
 
-/* 마지막 0.4초에만 사라집니다. visibility 까지 꺼야 밑이 눌립니다 */
+/* 마지막 0.4초에만 사라집니다(3.2초의 87.5%). visibility 까지 꺼야 밑이 눌립니다 */
 @keyframes splash-out {
-  0%, 82%  { opacity: 1; visibility: visible; }
+  0%, 87.5%  { opacity: 1; visibility: visible; }
   100%     { opacity: 0; visibility: hidden; }
 }
 

@@ -53,6 +53,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: SURFACE_SCRIPT }} />
         {/* 앱 시작 화면을 띄울지만 정합니다. 그리는 것은 CSS 입니다 */}
         <script dangerouslySetInnerHTML={{ __html: SPLASH_SCRIPT }} />
+        {/* 첫 화면 로고 그림을 먼저 받아 둡니다 — 늦게 오면 로고가 뜨자마자 사라지는 것처럼 보였습니다 (16KB · 2026-11-11) */}
+        <link rel="preload" as="image" href="/rapo/home/splash-logo.webp" type="image/webp" />
       </head>
       {/* 밝은 바탕은 potjob_paper 입니다. 흰색은 카드 안쪽에만 씁니다 —
           종이색 위에 흰 카드가 떠야 카드가 카드로 보입니다 */}
