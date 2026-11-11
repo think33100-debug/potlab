@@ -201,8 +201,7 @@ for (const [이름, 바이트, 형식] of [
 
 /* 7b. 커뮤니티 사진 — 같은 「저장소에 올라가나」 질문이라 여기서 같이 봅니다.
    ★ 2026-11-11 — 경로 꼴은 web/lib/post-image-path.ts 한 자리 것을 씁니다
-   (`i/<uuid>.webp` · 회원 id 가 안 들어갑니다). 남의 폴더(옛 꼴)에 못 올리는 것과
-   **비회원이 목록을 못 받는 것**도 함께 봅니다.
+   (`i/<uuid>.webp`). 남의 폴더(옛 꼴)에 못 올리는 것과 목록 규칙도 함께 봅니다.
    넣은 파일은 바로 치웁니다 (지우기 규칙은 「올린 사람」 기준입니다). */
 {
   const { 새글사진경로 } = await import('../web/lib/post-image-path.ts');
@@ -210,7 +209,7 @@ for (const [이름, 바이트, 형식] of [
   const 내번호 = 나?.id;
   적기(!!내번호, '커뮤니티 사진 — 로그인 확인');
 
-  /* 비회원(anon 열쇠만)으로 목록 — 글쓴이 폴더가 보이면 안 됩니다 */
+  /* 비회원(anon 열쇠만)으로 목록 — 비어 있어야 합니다 */
   const 목록 = await fetch(`${URL_}/storage/v1/object/list/post-images`, {
     method: 'POST', headers: { apikey: ANON, Authorization: 'Bearer ' + ANON, 'Content-Type': 'application/json' },
     body: JSON.stringify({ prefix: '', limit: 5, offset: 0, sortBy: { column: 'name', order: 'asc' } }),
