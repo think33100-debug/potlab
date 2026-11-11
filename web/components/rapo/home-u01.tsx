@@ -90,10 +90,13 @@ function Banners({ member }: { member: boolean }) {
         </Link>
       </div>
 
-      {/* 2 · 실사 · 내 스펙 */}
+      {/* 2 · 실사 · 내 스펙.
+          ★ 2026-11-12 세중님 「2번 3번 그림이 나가버림 · 첫 번째처럼 조절」 — 전에는 틀 전체를 사진으로 덮어서(cover)
+            좁은 휴대폰에서는 오른쪽 사람이, 넓은 화면에서는 얼굴 위아래가 잘렸습니다.
+            두 사진은 배경이 한 가지 색이라, 사진은 <배너사진> 으로 옆이 안 잘리게 놓고 남는 자리는 그 배경색으로 채웁니다 */}
       <div role="group" aria-roledescription="slide" aria-label="2 / 3"
-        className="relative h-[246px] w-full shrink-0 snap-start overflow-hidden">
-        <Image src="/rapo/home/banner2.png" alt="" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
+        className="relative h-[246px] w-full shrink-0 snap-start overflow-hidden bg-[#102233]">
+        <배너사진 src="/rapo/home/banner2.png" />
         <Frame tone="white" />
         <p className="absolute left-[36px] top-[65px] w-[240px] text-[23px] font-bold leading-[30px] text-(color:--rapo-brand-color-white)">
           내 경력과 스펙을<br />한눈에 확인해요
@@ -107,8 +110,8 @@ function Banners({ member }: { member: boolean }) {
 
       {/* 3 · 실사 · 교육학술 */}
       <div role="group" aria-roledescription="slide" aria-label="3 / 3"
-        className="relative h-[246px] w-full shrink-0 snap-start overflow-hidden">
-        <Image src="/rapo/home/banner3.png" alt="" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
+        className="relative h-[246px] w-full shrink-0 snap-start overflow-hidden bg-[#edf6f0]">
+        <배너사진 src="/rapo/home/banner3.png" />
         <Frame tone="navy" />
         <p className="absolute left-[36px] top-[65px] w-[240px] text-[23px] font-bold leading-[30px] text-(color:--rapo-brand-color-navy)">
           {member ? <>다음 배움을<br />찾아보세요</> : <>내 직군에 맞는<br />교육·학술 일정</>}
@@ -120,6 +123,18 @@ function Banners({ member }: { member: boolean }) {
         </Link>
       </div>
     </RapoBannerCarousel>
+  );
+}
+
+/* 실사 배너 사진(1536×1024 · 3:2) — 원본 414 폭에서는 폭에 맞춰 414×276 으로 놓고 위아래 15px 씩 잘립니다(FILL).
+   그 모양을 어느 폭에서나 지킵니다: 사진 폭 = min(배너 폭, 414) · 오른쪽에 붙임 · 위아래 가운데.
+     414 보다 좁으면  옆은 안 잘리고 위아래에 배경색이 몇 px 보입니다(사진 배경과 같은 색)
+     414 보다 넓으면  사진은 414 그대로 오른쪽에 두고 왼쪽(글자 자리)은 배경색입니다 — 얼굴이 안 잘립니다 */
+function 배너사진({ src }: { src: string }) {
+  return (
+    <div className="absolute right-0 top-1/2 aspect-[3/2] w-[min(100%,414px)] -translate-y-1/2">
+      <Image src={src} alt="" fill sizes="414px" className="object-cover" />
+    </div>
   );
 }
 
