@@ -2,6 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useRef, useState, type FormEvent } from 'react';
+import { useAuth } from '@/app/auth';
+import { CompareNotify } from '@/components/compare-notify';
+import { JOB_GROUPS, type JobGroup } from '@/lib/who';
 import { RapoButton, RapoChip, RapoMaskIcon } from './rapo-ui';
 
 /* 공고 목록의 검색칸 · 조건 칩 줄 · 조건 시트 (2026-11-11).
@@ -114,6 +117,14 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
   const [직군, set직군] = useState<string>(지금.job ?? '전체');
   const [지역, set지역] = useState<string>(지금.sido ?? '전국');
   const [고용, set고용] = useState<string>(지금.type ?? '전체');
+  /* 급여 「알림 신청」 — 시트를 닫고 연봉 비교 알림 신청 창을 띄웁니다 (시트는 맨 위 층이라 그 위에 창을 못 띄웁니다) */
+  const { session, me } = useAuth();
+  const [알림창, set알림창] = useState(false);
+  const 알림신청 = () => {
+    닫기();
+    if (!session) return 로그인으로(router, 목록주소(지금, 회원));
+    set알림창(true);
+  };
 
   const 켜짐: Record<분류, boolean> = { 직군: !!지금.job, 지역: !!지금.sido, 급여: false, 상세: !!지금.type };
 
@@ -203,7 +214,7 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
             </div>
           )}
 
-          {탭 === '급여' ? <급여오픈전 /> : (
+          {탭 === '급여' ? <급여오픈전 onApply={알림신청} /> : (
             <div className="flex gap-(--rapo-dimension-x3)">
               <RapoButton tone="outline" onClick={() => { set직군('전체'); set지역('전국'); set고용('전체'); }} className="w-[104px] shrink-0">초기화</RapoButton>
               <RapoButton onClick={적용} className="min-w-0 flex-1">조건 적용</RapoButton>
@@ -211,6 +222,15 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
           )}
         </div>
       </dialog>
+
+      {알림창 && session && (
+        <CompareNotify
+          userId={session.user.id}
+          job={(JOB_GROUPS as readonly string[]).includes(me?.job_group ?? '') ? (me!.job_group as JobGroup) : null}
+          email={session.user.email ?? null}
+          onDone={() => set알림창(false)}
+        />
+      )}
     </>
   );
 }
@@ -219,11 +239,11 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
    원본의 급여 편집(509:5444)은 아직 열지 않습니다. 같은 시트 안에서 무엇이 준비되고 있는지
    알려 주고 오픈 알림 신청으로 이끕니다. 글은 대표가 준 첫 문장에 기능 설명을 붙인 것입니다.
 
-   ⚠ 「알림 신청」 한 번에 **연봉에 관한 신청을 모두** 겁니다 (2026-11-11 대표):
-       ① 연봉 비교 알림 — 비교알림신청 (PR #36 · components/compare-notify.tsx)
-       ② 연봉 통계 사전 신청 — 사전 신청 kind '연봉' (PR #15 · lib/pay-prereg-store.ts)
-     두 창구와 그 SQL 이 아직 main·운영에 없어 단추를 잠가 둡니다 (막힌 것) */
-function 급여오픈전() {
+   「알림 신청」 한 번에 **연봉에 관한 신청을 모두** 겁니다 (2026-11-11 대표).
+     가입 뒤 뜨는 연봉 비교 알림 신청 창(components/compare-notify.tsx)을 그대로 띄웁니다 — 저장은 「비교알림신청」 표 하나.
+     그 창이 알리는 서비스(같은 직군·연차·지역 연봉과 스펙 비교)가 곧 연봉 통계라 표를 따로 만들지 않았습니다.
+     이미 신청한 회원은 창이 「이미 신청하셨어요」로 끝납니다(23505). 동의 안내는 창 첫 화면 작은 글 그대로입니다. */
+function 급여오픈전({ onApply }: { onApply: () => void }) {
   const 할수있는것 = [
     '급여가 공개된 공고만 모아서 볼 수 있어요',
     '같은 직군·지역 공고의 급여를 한눈에 비교할 수 있어요',
@@ -246,8 +266,7 @@ function 급여오픈전() {
       </ul>
       <p className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">오픈 알림을 받고 싶다면 알림 신청을 눌러주세요.<br />
         연봉 비교 알림과 연봉 통계 소식을 한 번에 보내 드려요.</p>
-      <RapoButton onClick={() => {}} disabled full>알림 신청</RapoButton>
-      <p className="rapo-type-t3-regular text-center text-(color:--rapo-color-fg-neutral-muted)">알림 신청은 곧 열려요.</p>
+      <RapoButton onClick={onApply} full>알림 신청</RapoButton>
     </div>
   );
 }
