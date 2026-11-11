@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { RapoLoginButtons, 넓은단추, 로그인틀, type Method } from '@/components/rapo/rapo-login';
 import {
   readLastLogin, writeLastLogin, subscribeLastLogin, serverLastLogin, type LoginMethod,
@@ -38,6 +38,15 @@ export default function Login() {
 
   /* 서버에는 localStorage 가 없습니다. 서버 그림은 null 로 두고 브라우저에 붙은 뒤 실제 값으로 바뀝니다 */
   const last = useSyncExternalStore(subscribeLastLogin, readLastLogin, serverLastLogin);
+
+  /* 가려던 주소 — middleware 가 비회원을 여기로 보낼 때 ?next= 로 실어 보냅니다 (2026-11-11 밤).
+     로그인 뒤 auth/callback 이 potjob.after-login 을 읽어 그 자리로 보냅니다. 우리 사이트 안 주소만 받습니다 */
+  useEffect(() => {
+    try {
+      const next = new URLSearchParams(location.search).get('next');
+      if (next && next.startsWith('/') && !next.startsWith('//')) sessionStorage.setItem('potjob.after-login', next);
+    } catch { /* 사파리 비공개 */ }
+  }, []);
 
   const start = async (m: Method) => {
     writeLastLogin(m.key);
