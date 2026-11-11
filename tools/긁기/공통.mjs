@@ -64,7 +64,9 @@ export function HS3가긁나(이름) {
   return !!(x && x.사이트줄 > 0);
 }
 
-export const UA = 'Mozilla/5.0 (compatible; potjob-collector/1.0; +https://potjob.co.kr)';
+/* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
+import { 이름표 } from '../수집기이름표.mjs';
+export const UA = 이름표('Mozilla/5.0 (compatible; potjob-collector/1.0; +https://potjob.co.kr)');
 export const 자고 = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const robots표 = new Map();

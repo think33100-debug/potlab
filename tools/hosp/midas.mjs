@@ -27,7 +27,9 @@
  *   「2026년 8월 **화순전남대학교병원** 직원(대체근로자) 공개채용 공고」
  * 그래서 한 번 받아 제목으로 나눠 붙입니다.
  */
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0';
+/* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
+import { 이름표 } from '../수집기이름표.mjs';
+const UA = 이름표('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0');
 
 /* 'cnuh' 도 'https://cnuh.recruiter.co.kr' 도 받습니다 (수집기 설정은 host 가 주소 꼴) */
 const 뿌리 = (호스트) => (/^https?:\/\//.test(String(호스트))

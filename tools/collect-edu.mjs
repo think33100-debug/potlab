@@ -59,7 +59,10 @@ const cfg = {
 const dry = process.argv.includes('--dry');
 const 시험 = process.argv.includes('--시험');
 const 시작한때 = Date.now();      // 박동에 「얼마나 걸렸나」를 남기려고
-const UA = 'Mozilla/5.0 (compatible; POTJOB/1.0; +https://potjob.co.kr)';
+/* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리).
+   아래 `값 = (이름표) => …` 는 칸 이름이라 겹치지 않게 다른 이름으로 들여옵니다 */
+import { 이름표 as 수집기이름표 } from './수집기이름표.mjs';
+const UA = 수집기이름표('Mozilla/5.0 (compatible; POTJOB/1.0; +https://potjob.co.kr)');
 
 /* ── 글자 다루기 ───────────────────────────────────────────── */
 const 풀기 = (s) => String(s || '')

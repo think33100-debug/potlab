@@ -31,9 +31,11 @@ import { fileURLToPath } from 'node:url';
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 둘곳 = path.join(여기, 'certs');
 fs.mkdirSync(둘곳, { recursive: true });
-const UA = process.argv.includes('--호스트')
+/* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
+import { 이름표 } from './수집기이름표.mjs';
+const UA = 이름표(process.argv.includes('--호스트')
   ? 'Mozilla/5.0 (compatible; potjob-collector/1.0; +https://potjob.co.kr)'
-  : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0';
+  : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0');
 
 /* SSL 로 안 열리던 곳 — hs_census 가 남긴 기록에서 이름을 가져옵니다 */
 const 찾을말 = process.argv.slice(2).filter((x) => !x.startsWith('--'));

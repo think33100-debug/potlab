@@ -30,7 +30,9 @@ import { 붙여받기 } from './certs/index.mjs';
 import { 목록상태, 목록상태셈, 본문상태, 알림상태, 없어짐말, 제목속살 } from './hosp/hs_목록상태.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
+/* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
+import { 이름표 } from './수집기이름표.mjs';
+const UA = 이름표('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36');
 
 function env() {
   const out = {};
