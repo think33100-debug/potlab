@@ -82,9 +82,12 @@ export async function middleware(req: NextRequest) {
     /* 모름 — 회원일 수도 있으니 주소는 그대로 두고 안내만 보입니다.
        새로고침하면 다시 물어봅니다 */
     if (모름) return 쿠키싣기(NextResponse.rewrite(new URL('/beta?r=1', req.url)));
+    /* ★ 2026-11-11 밤 세중님 — 비회원이 공고·커뮤니티·내 정보 등을 누르면 「테스트 중」(/beta) 대신 **바로 로그인**.
+       가려던 주소는 next 로 실어 보내고, 로그인 화면이 돌아올 자리(potjob.after-login)에 적습니다 */
     const to = req.nextUrl.clone();
-    to.pathname = '/beta';
+    to.pathname = '/login';
     to.search = '';
+    to.searchParams.set('next', path + req.nextUrl.search);
     return 쿠키싣기(NextResponse.redirect(to));
   }
 
