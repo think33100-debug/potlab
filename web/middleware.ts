@@ -27,6 +27,13 @@ const 막는API = ['/api/og', '/api/post-image'];
 const 색인막기 = 'noindex, nofollow';
 
 export async function middleware(req: NextRequest) {
+  /* 디자인 견본(/design-preview)은 **개발 서버에서만** 문을 지나갑니다 (2026-11-11).
+     그 화면들은 배포에서 스스로 404 이고(각 page.tsx 의 NODE_ENV 검사), 배포에서는 이 줄이 아예 안 돕니다.
+     비회원길(lib/beta.ts)에 넣지 않은 까닭 — 거기 넣으면 배포에서도 비회원에게 열립니다 */
+  if (process.env.NODE_ENV !== 'production' && req.nextUrl.pathname.startsWith('/design-preview')) {
+    return NextResponse.next({ request: req });
+  }
+
   let res = NextResponse.next({ request: req });
 
   const sb = createServerClient(
