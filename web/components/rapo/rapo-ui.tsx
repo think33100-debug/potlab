@@ -134,7 +134,7 @@ export function RapoSortTabs<K extends string>({ label, items, value, onChange }
             disabled={!onChange}
             onClick={onChange ? () => onChange(s.key) : undefined}
             className={
-              'flex h-(--rapo-touch-min) w-[80px] items-center justify-center rounded-(--rapo-radius-r2) whitespace-nowrap ' +
+              'flex h-(--rapo-touch-min) min-w-[80px] items-center justify-center rounded-(--rapo-radius-r2) px-(--rapo-dimension-x3) whitespace-nowrap ' +
               'disabled:cursor-default ' +
               (켜짐
                 ? 'rapo-type-t4-bold bg-(--rapo-brand-color-blush) text-[#8E241E]'
@@ -146,6 +146,33 @@ export function RapoSortTabs<K extends string>({ label, items, value, onChange }
         );
       })}
     </div>
+  );
+}
+
+/* 정렬 단추 — 링크판. 공고 목록(서버 화면)처럼 정렬을 주소(?sort=)로 바꾸는 곳에서 씁니다. 모양은 RapoSortTabs 그대로 */
+export function RapoSortLinks<K extends string>({ label, items, value, href }: {
+  label: string;
+  items: readonly { key: K; label: string }[];
+  value: K;
+  href: (k: K) => string;
+}) {
+  return (
+    <nav aria-label={label} className="flex h-(--rapo-touch-min) gap-(--rapo-dimension-x1)">
+      {items.map((s) => {
+        const 켜짐 = value === s.key;
+        return (
+          <Link key={s.key} href={href(s.key)} scroll={false} aria-current={켜짐 ? 'true' : undefined}
+            className={
+              'flex h-(--rapo-touch-min) min-w-[80px] items-center justify-center rounded-(--rapo-radius-r2) px-(--rapo-dimension-x3) whitespace-nowrap ' +
+              (켜짐
+                ? 'rapo-type-t4-bold bg-(--rapo-brand-color-blush) text-[#8E241E]'
+                : 'rapo-type-t4-medium text-[#3F4C57] active:bg-(--rapo-color-bg-transparent-pressed)')
+            }>
+            {s.label}
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
 

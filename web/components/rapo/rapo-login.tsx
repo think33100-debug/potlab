@@ -22,17 +22,28 @@ export const 넓은단추 = 'rapo-type-t5-bold flex h-(--rapo-dimension-x13) w-f
 
 /* 화면 틀 — 남색 바탕 · 사진(위 120 · 높이 560) · 상하 명암 · 브랜드 메시지 · 아래 행동.
    원본은 414 폭 한 장이라 넓은 화면에서는 480 기둥 가운데에 둡니다 (사진 자르기 비율이 원본과 같게) */
+/* 원본 세 장의 자르기 자리 — 왼쪽은 414 폭에 대한 %, 위는 px (사진 2 · 3 · 4) */
+const 사진자리 = [
+  { left: '-116.62%', top: -45.9 },
+  { left: '-6.16%', top: -658.75 },
+  { left: '-116.62%', top: -658.75 },
+];
+
 export function 로그인틀({ 아래 }: { 아래: ReactNode }) {
   return (
     <div data-rapo className="min-h-dvh bg-(--rapo-color-bg-navy-solid)">
       <main className="relative mx-auto flex min-h-dvh w-full max-w-[480px] flex-col overflow-hidden text-(color:--rapo-color-fg-on-neutral-solid)">
-        {/* 사진 — 원본 「사진 2 / 커뮤니티」: 923.1×1230.8 을 414×560 틀에 왼쪽 -482.8 · 위 -45.9 로 자름 (폭 비율로 옮김) */}
+        {/* 사진 — 원본 「사진 2·3·4 / 커뮤니티」: 같은 사진(923.1×1230.8)을 414×560 틀에 세 군데로 잘라 번갈아 보입니다
+            (2026-11-12 세중님 「그림이 더 나오지 않았나」). 폭 비율로 옮김. 움직임 줄이기를 켠 기기에서는 첫 장만 */}
         <div aria-hidden className="absolute inset-x-0 top-[120px] h-[560px] overflow-hidden">
           {/* ★ 화질 (2026-11-11 대표 「깨져」): 피그마 원본 자체가 1086×1448 뿐이라 이 자르기는 휴대폰에서 약 2.5배로 늘어납니다.
               그래서 원본 PNG 를 곱게 2배로 키우고(lanczos3 + 약한 선명하게) WebP 88 로 한 번만 담습니다. unoptimized — Next 가 품질 75 로 또 줄이지 않게.
               더 선명하려면 같은 사진의 큰 원본(가로 2600px 이상)이 있어야 합니다 */}
-          <Image src="/rapo/login/photo-colleagues.webp" alt="" width={2172} height={2896} loading="eager" unoptimized
-            className="absolute max-w-none" style={{ width: '222.97%', height: 'auto', left: '-116.62%', top: -45.9 }} />
+          {사진자리.map((p, i) => (
+            <Image key={i} src="/rapo/login/photo-colleagues.webp" alt="" width={2172} height={2896} loading="eager" unoptimized
+              className={'rapo-login-photo absolute max-w-none' + (i === 0 ? ' rapo-login-photo-first' : '')}
+              style={{ width: '222.97%', height: 'auto', left: p.left, top: p.top, animationDelay: `${i * 5 - 1.05}s` }} />
+          ))}
         </div>
         {/* 가독성 / 상하 명암 — 원본 그라디언트 그대로 (#112231 = brand navy) */}
         <div aria-hidden className="absolute inset-0" style={{

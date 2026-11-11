@@ -5,7 +5,8 @@ import { RapoJobGuestWall } from '@/components/rapo/rapo-job-guest-wall';
 import { 견본공고 } from '@/components/rapo/home-u01-sample';
 import { 받는중, 목록, 못받음, 없음 } from '@/components/rapo/rapo-job-results';
 import { RapoShell } from '@/components/rapo/rapo-shell';
-import { RapoPagination } from '@/components/rapo/rapo-ui';
+import { RapoPagination, RapoSortLinks } from '@/components/rapo/rapo-ui';
+import { 공고정렬들, 기본정렬 } from '@/lib/rapo-job-options';
 
 /* 새 디자인 공고 목록 — **디자인 견본으로** 상태를 보는 자리 (2026-11-11).
    개발 서버에서만 열립니다(배포에서는 404). 실제 목록은 app/jobs/page.tsx 입니다.
@@ -46,6 +47,11 @@ export default async function DesignPreviewJobs({ searchParams }: {
         </div>
       )}
       <div aria-hidden className="h-(--rapo-dimension-x1_5) bg-(--rapo-color-bg-neutral-weak)" />
+      {회원 && (
+        <div className="px-(--rapo-dimension-x5) pt-(--rapo-dimension-x4)">
+          <RapoSortLinks label="공고 정렬" items={공고정렬들} value={기본정렬} href={() => '#'} />
+        </div>
+      )}
       {결과}
     </RapoShell>
   );
