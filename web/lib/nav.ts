@@ -39,5 +39,6 @@ export const 켜진길 = (pathname: string, href: string) =>
    (전에는 그려 놓고 CSS 로 가렸습니다 — components/chrome-switch.tsx).
    새 디자인을 다른 화면에 입히면 여기에 그 길을 더합니다. 한꺼번에 바꾸지 않습니다. */
 export function 새틀화면(pathname: string): boolean {
-  return pathname === '/' || pathname.startsWith('/design-preview');
+  /* 공고 목록(/jobs)은 2026-11-11 부터 새 틀입니다. 상세(/jobs/<번호>)는 아직 옛 틀이라 넣지 않습니다 */
+  return pathname === '/' || pathname === '/jobs' || pathname.startsWith('/design-preview');
 }
