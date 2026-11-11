@@ -52,6 +52,7 @@ import os from 'node:os';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { 사이트줄 } from './hosp/sites.mjs';
+import { 목록실패줄, 상세실패표 } from './hosp/failure-report.mjs';
 import { 글받기 } from './certs/index.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
@@ -107,8 +108,10 @@ function 더하기(점날, 날수) {
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = 'HS3';
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-  + '(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
+/* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
+import { 이름표 } from './수집기이름표.mjs';
+const UA = 이름표('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+  + '(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36');
 
 /* ── 설정 ─────────────────────────────────────────────────── */
 function env() {
@@ -319,6 +322,7 @@ const 주소없는곳 = new Map();
 const 모은것 = [];
 const 곳별 = [];
 const 못받은곳 = [];
+const 상세실패 = [];
 
 /* ★ 2026-11-09 세중님 — **「천천히」 곳은 하루 두 번만** (오전 9~12 · 오후 1~6 랜덤).
  *   robots 가 막는데 긁기로 정한 곳(현황판/robots예외.csv · 리크루터 12 · 울산 중앙)이
@@ -366,7 +370,7 @@ for (let i = 0; i < 볼것.length; i += 동시) {
     const g = await 사이트줄(s);
     if (g.err) {
       셈.못받음++;
-      못받은곳.push({ 이름: s.name, 왜: g.err });
+      못받은곳.push(목록실패줄(s.name, g));
       곳별.push({ 이름: s.name, 왜: g.err });
       return;
     }
@@ -625,7 +629,11 @@ if (상세몫 > 0) {
         ? { code: 200, html: String(x.글) }
         : await 글받기(상세주소(x.url), { headers: { 'User-Agent': UA, 'Accept-Language': 'ko' }, enc: x.곳.enc });
       if (!x.글) 상세연것++; else 목록본문쓴것++;
-      if (g.왜 || g.code !== 200) { x.상세왜 = g.왜 || ('HTTP ' + g.code); return; }
+      if (g.왜 || g.code !== 200) {
+        x.상세왜 = g.왜 || ('HTTP ' + g.code);
+        상세실패.push({ 이름: x.곳.name, 왜: x.상세왜 });
+        return;
+      }
       /* ★ 2026-10-12 — **`<style>` 과 주석도 걷습니다.**
          전에는 `<script>` 만 걷어서 CSS 가 본문으로 들어왔습니다 —
          본문 28건·기관 11곳이 평균 **56,128자**(중괄호 505개)로 부풀었고,
@@ -1151,5 +1159,5 @@ if (첨부모음.줄들.length && 첨부모음.마른) await 첨부모음.형식
 await 첨부모음.끝내기(cfg);
 
 fs.writeFileSync(path.join(여기, 'hosp', 'reports', 'collect-hosp.json'),
-  JSON.stringify({ 잰날: 오늘, 셈, 곳별, 못받은곳 }, null, 1), 'utf8');
+  JSON.stringify({ 잰날: 오늘, 셈, 곳별, 못받은곳, 상세실패: 상세실패표(상세실패) }, null, 1), 'utf8');
 if (탈) process.exit(1);

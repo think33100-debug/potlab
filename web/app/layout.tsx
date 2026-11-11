@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import { LegacyChrome, RapoChromeGap } from "@/components/chrome-switch";
 import { DiagStrip } from "@/components/diag";
 import { Logo } from "@/components/logo";
 import { SPLASH_SCRIPT, Splash } from "@/components/splash";
@@ -65,7 +66,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               없거나 꺼져 있으면 아무것도 안 그립니다 (2026-10-04) */}
           <SplashAd />
 
-          {/* 탑바 56px · 그림자 없이 아래 보더만 — teamsparta.md */}
+          {/* 탑바 56px · 그림자 없이 아래 보더만 — teamsparta.md.
+              새 디자인 화면(홈)은 자기 헤더를 그리므로 거기서는 이 줄을 그리지 않습니다
+              (LegacyChrome · lib/nav.ts 의 새틀화면). 줄 안쪽은 그대로입니다 */}
+          <LegacyChrome>
           <header className="sticky top-0 z-40 h-[56px] shrink-0 border-b border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900">
             <div className="mx-auto flex h-full max-w-3xl items-center justify-between px-6 md:px-7">
               <div className="flex items-center gap-6">
@@ -77,6 +81,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <TopbarUser />
             </div>
           </header>
+          </LegacyChrome>
 
           {children}
 
@@ -107,6 +112,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/contact" className="hover:underline">문의하기</Link>
             </nav>
           </footer>
+          {/* 새 디자인 화면의 하단 탐색은 넓은 화면에서도 보여서, 그만큼 밑을 띄웁니다 */}
+          <RapoChromeGap />
 
           {/* 주소 끝에 ?진단=1 을 붙였을 때만 보입니다.
               관리자에게만 보이게 할 수가 없습니다 — 관리자인지 아는 방법이

@@ -28,6 +28,9 @@
 import fs from 'node:fs';
 import { 차례붙이기 } from './쪽나눠받기.mjs';
 import { 알림상태, 없어짐말 } from './hosp/hs_목록상태.mjs';
+/* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
+import { 이름표 } from './수집기이름표.mjs';
+const 정찰UA = 이름표('Mozilla/5.0 (compatible; potjob/1.0)');
 
 const argv = process.argv.slice(2);
 const 값 = (이름, 기본) => {
@@ -140,7 +143,7 @@ for (const [i, x] of 볼것.entries()) {
   let code;
   try {
     const r = await fetch(x.url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; potjob/1.0)', 'Accept-Language': 'ko' },
+      headers: { 'User-Agent': 정찰UA, 'Accept-Language': 'ko' },
       redirect: 'follow',
       signal: AbortSignal.timeout(20000),
     });

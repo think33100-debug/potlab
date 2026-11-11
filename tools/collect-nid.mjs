@@ -86,8 +86,10 @@ const SOURCE = 'ND2';
 const 바탕 = 'https://www.nid.or.kr';
 const 목록URL = 바탕 + '/notification/recruit_list.aspx';
 const 상세URL = 바탕 + '/notification/recruit_view.aspx';
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-  + '(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
+/* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
+import { 이름표 } from './수집기이름표.mjs';
+const UA = 이름표('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+  + '(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36');
 
 const argv = process.argv.slice(2);
 const 값 = (이름, 기본) => { const i = argv.indexOf(이름); return i > -1 && argv[i + 1] != null ? Number(argv[i + 1]) : 기본; };

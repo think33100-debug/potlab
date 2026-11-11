@@ -57,6 +57,9 @@ gas_백업_*/
 # 수집기가 돌 때마다 새로 쓰는 보고서 — 서버에서 git pull 을 막습니다
 tools/hosp/reports/collect-hosp.json
 tools/hosp/reports/jobflex.json
+# ★ 2026-11-11 — HS4 긁기(표준게시판.mjs)의 곳별 리포트·연속 실패 상태도 같은 까닭으로 뺍니다
+tools/hosp/reports/hs4-board.json
+tools/hosp/reports/hs4-board-state.json
 # ★ 2026-10-18 — 첨부 마른 실행이 덮어쓰는 미리보기도 같은 까닭으로 뺍니다.
 # 추적 중이라 서버에서 「고쳐진 파일」로 남아 있었고(마른 실행이 돌 때마다),
 # 그대로 두면 이 파일을 건드리는 커밋이 올 때 git pull 이 멈춥니다.

@@ -1,10 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { RapoBottomNav } from './rapo-bottom-nav';
+import { RapoBannerCarousel } from './rapo-banner-carousel';
 import { RapoHeader } from './rapo-header';
-import { RapoJobList, type RapoJobLists } from './rapo-job-list';
+import { RapoDivider, RapoSectionTitle } from './rapo-ui';
+import type { ReactNode } from 'react';
 import type { Who } from '@/lib/supabase-server';
-import './rapo-home.css';
 
 /* RAPO 새 디자인 · 홈 · 비회원 · 기본 (2026-11-11)
    Figma 「U01 · 홈 · 비회원 · 기본」 701:1644 (414 × 2872) — 섹션 차례 그대로입니다.
@@ -25,12 +26,20 @@ import './rapo-home.css';
    (회원 배너의 그림이 비회원과 같은지는 글자만 대조해 아직 확인 못 했습니다)
 
    who 가 「모름」이면 로그인도 내 정보도 그리지 않습니다 (lib/supabase-server.ts 규칙).
-   sample 은 미리보기 전용 — 공고 칸이 디자인 견본임을 알리는 띠를 답니다. */
-export function HomeU01({ jobs, who, sample = false }: { jobs: RapoJobLists; who: Who; sample?: boolean }) {
+   jobs 는 「채용 공고」 칸입니다 — 받는 중·줄 있음·없음·오류를 부르는 쪽이 골라 넣습니다
+   (app/page.tsx · rapo-job-list.tsx). sample 은 미리보기 전용 띠입니다.
+
+   옛 위쪽 줄·옛 탭바는 이 화면에서 그려지지 않습니다 (lib/nav.ts 새틀화면 ·
+   components/chrome-switch.tsx). 전에 쓰던 CSS 가리기(rapo-home.css)는 없앴습니다.
+   키보드 포커스 테두리는 이 틀 안에서만 새 토큰 색을 씁니다 (app/globals.css). */
+export function HomeU01({ jobs, who, sample = false, 관리덮기 }: {
+  jobs: ReactNode; who: Who; sample?: boolean;
+  관리덮기?: { 채용관리: boolean; 교육관리: boolean };   // 미리보기 전용 (rapo-bottom-nav.tsx)
+}) {
   return (
     <div data-rapo-u01 className="mx-auto w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
       <RapoHeader who={who} />
-      <hr aria-hidden className="h-px border-0 bg-(--rapo-color-stroke-neutral-weak)" />
+      <RapoDivider />
 
       <main>
         <Banners member={who === '회원'} />
@@ -45,90 +54,99 @@ export function HomeU01({ jobs, who, sample = false }: { jobs: RapoJobLists; who
             미리보기 · 아래 공고는 디자인 원본의 견본입니다 (실제 공고 아님)
           </p>
         )}
-        <RapoJobList lists={jobs} />
+        {jobs}
         <MoreServices />
       </main>
 
       {/* 마지막 콘텐츠가 아래 탐색(72 + 선 1 + 안전 영역)에 가리지 않게 */}
       <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
-      <RapoBottomNav current="/" />
+      <RapoBottomNav current="/" 관리덮기={관리덮기} />
     </div>
   );
 }
 
 /* ── 배너 셋 · 「02 · 배너 캐러셀 · 좌우 스크롤」 956:17786 ────────────────
-   스크롤 스냅만으로 밉니다 — 자바스크립트가 없어도 손가락·트랙패드·방향키로 넘어갑니다.
-   점은 장마다 원본에 그려져 있는 그림을 그대로 둡니다(지금 몇 번째인지 그 장이 알립니다). */
+   미는 틀과 점 표시는 rapo-banner-carousel.tsx 가 그립니다 — 점은 배너와 따로 자리에 고정입니다.
+   폭이 늘어도 깨지지 않게: 글자·단추는 왼쪽 기준, 화살표·사진은 오른쪽 기준으로 두고,
+   네모 틀은 늘이는 그림이 아니라 4px 선 네 줄로 그립니다(Frame). */
 function Banners({ member }: { member: boolean }) {
   return (
-    <section
-      aria-roledescription="carousel"
-      aria-label="라포 소개"
-      tabIndex={0}
-      className="flex h-[246px] snap-x snap-mandatory overflow-x-auto overflow-y-hidden
-                 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-    >
+    <RapoBannerCarousel label="라포 소개" tones={['white', 'white', 'navy']}>
       {/* 1 · 그라데이션 + 치료사 사진 */}
       <div role="group" aria-roledescription="slide" aria-label="1 / 3"
         className="relative h-[246px] w-full shrink-0 snap-start overflow-hidden"
         style={{ backgroundImage: 'linear-gradient(124.8deg, #FF4F40 0%, #FF3524 101.03%)' }}>
-        {/* 원본 414 에서 오른쪽 31px. 그보다 좁은 화면에서는 글자를 덮지 않게 왼쪽 221px 을
-            지키고 오른쪽이 잘리게 둡니다 (임시 규칙 · 360 에서 확인) */}
-        <div className="absolute left-[max(221px,calc(100%-193px))] top-[47px] h-[172px] w-[162px]">
+        {/* 원본(414)에서 사진은 162×172 · 오른쪽 31px · 아래 27px 로 네모 틀 **안**에 있습니다.
+            전에는 좁은 화면에서 왼쪽 자리(221px)만 지켜서 사진이 틀 오른쪽 밖으로 나갔습니다
+            (390 폭 휴대폰에서 보임 · 2026-11-11 대표 지적). 이제 오른쪽·아래를 틀에 붙여 두고,
+            화면이 좁으면 사진을 같은 비율로 줄입니다 — 왼쪽 끝은 원본과 같은 221px 에 머뭅니다.
+            414 이상에서는 원본 크기 그대로입니다. */}
+        <div className="absolute bottom-[27px] right-[31px] aspect-[162/172] w-[clamp(110px,calc(100%-252px),162px)]">
           {/* 첫 화면에 바로 보이는 그림이라 늦게 받지 않습니다 (Next 16 문서 — loading="eager") */}
           <Image src="/rapo/home/banner1-therapist.png" alt="" fill sizes="162px" loading="eager"
             className="object-cover object-bottom" />
         </div>
-        <Frame src="/rapo/home/banner-frame-white.svg" />
+        <Frame tone="white" />
         <Arrow right={20} top={25} /><Arrow right={20} top={52} /><Arrow right={48} top={25} />
         <p className="absolute left-[40px] top-[57px] w-[239px] text-[23px] font-bold leading-[28px] text-(color:--rapo-brand-color-white)">
           궁금한 병원 이야기부터<br />내가 찾던 일자리까지
         </p>
         <Link href={member ? '/jobs' : '/login'}
           className="absolute left-[40px] top-[168px] flex h-[36px] w-[180px] items-center
-                     whitespace-pre text-[14px] font-bold leading-[1.45] text-(color:--rapo-brand-color-white)">
+                     rounded-(--rapo-radius-r1) whitespace-pre text-[14px] font-bold leading-[1.45] text-(color:--rapo-brand-color-white)
+                     active:bg-(--rapo-color-bg-transparent-pressed)">
           {member ? '공고 둘러보기  →' : '회원가입하기  →'}
         </Link>
-        <Dots src="/rapo/home/banner1-dots.svg" />
       </div>
 
       {/* 2 · 실사 · 내 스펙 */}
       <div role="group" aria-roledescription="slide" aria-label="2 / 3"
         className="relative h-[246px] w-full shrink-0 snap-start overflow-hidden">
         <Image src="/rapo/home/banner2.png" alt="" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
-        <Frame src="/rapo/home/banner-frame-white.svg" />
+        <Frame tone="white" />
         <p className="absolute left-[36px] top-[65px] w-[240px] text-[23px] font-bold leading-[30px] text-(color:--rapo-brand-color-white)">
           내 경력과 스펙을<br />한눈에 확인해요
         </p>
         <Link href="/spec"
-          className="absolute left-[36px] top-[185px] w-[220px] text-[14px] font-bold leading-[24px] text-(color:--rapo-brand-color-white)">
+          className="absolute left-[36px] top-[185px] w-[220px] rounded-(--rapo-radius-r1) text-[14px] font-bold leading-[24px] text-(color:--rapo-brand-color-white)
+                     active:bg-(--rapo-color-bg-transparent-pressed)">
           입사 스펙 비교하기 →
         </Link>
-        <ThreeDots off="/rapo/home/dot-white-off.svg" on="/rapo/home/dot-white-on.svg" at={1} />
       </div>
 
       {/* 3 · 실사 · 교육학술 */}
       <div role="group" aria-roledescription="slide" aria-label="3 / 3"
         className="relative h-[246px] w-full shrink-0 snap-start overflow-hidden">
         <Image src="/rapo/home/banner3.png" alt="" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
-        <Frame src="/rapo/home/banner-frame-navy.svg" />
+        <Frame tone="navy" />
         <p className="absolute left-[36px] top-[65px] w-[240px] text-[23px] font-bold leading-[30px] text-(color:--rapo-brand-color-navy)">
           {member ? <>다음 배움을<br />찾아보세요</> : <>내 직군에 맞는<br />교육·학술 일정</>}
         </p>
         <Link href="/edu"
-          className="absolute left-[36px] top-[185px] w-[220px] text-[14px] font-bold leading-[24px] text-(color:--rapo-brand-color-navy)">
+          className="absolute left-[36px] top-[185px] w-[220px] rounded-(--rapo-radius-r1) text-[14px] font-bold leading-[24px] text-(color:--rapo-brand-color-navy)
+                     active:bg-(--rapo-color-bg-transparent-pressed)">
           교육학술 보기 →
         </Link>
-        <ThreeDots off="/rapo/home/dot-navy-off.svg" on="/rapo/home/dot-navy-on.svg" at={2} />
       </div>
-    </section>
+    </RapoBannerCarousel>
   );
 }
 
-/* 「RAPO / 열린 네모 프레임 / 벡터」 — 원본 374×196, 좌우 20 · 위 25 */
-function Frame({ src }: { src: string }) {
-  /* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */
-  return <img src={src} alt="" className="pointer-events-none absolute left-[20px] right-[20px] top-[25px] h-[196px] w-[calc(100%-40px)]" />;
+/* 「RAPO / 열린 네모 프레임 / 벡터」 — 원본 374×196 · 좌우 20 · 위 25 · 선 4px.
+   원본은 오른쪽 위 모서리가 열린 네모입니다(위 선은 오른쪽 94px 앞에서 끝나고,
+   오른쪽 선은 위에서 66px 아래부터 시작 — 그 빈 자리에 화살표 셋이 놓입니다).
+   SVG 를 폭에 맞춰 늘이면 세로 선만 굵어져서(디자이너 지적 2026-11-11) 선 네 줄로 그립니다.
+   폭이 얼마든 선은 4px, 열린 자리는 94×66 그대로입니다. */
+function Frame({ tone }: { tone: 'white' | 'navy' }) {
+  const 색 = tone === 'navy' ? 'bg-(--rapo-brand-color-navy)' : 'bg-(--rapo-brand-color-white)';
+  return (
+    <span aria-hidden className="pointer-events-none absolute left-[20px] right-[20px] top-[25px] h-[196px]">
+      <span className={`absolute left-0 right-[94px] top-0 h-[4px] ${색}`} />
+      <span className={`absolute bottom-0 left-0 top-0 w-[4px] ${색}`} />
+      <span className={`absolute bottom-0 left-0 right-0 h-[4px] ${색}`} />
+      <span className={`absolute bottom-0 right-0 top-[66px] w-[4px] ${색}`} />
+    </span>
+  );
 }
 
 /* 「RAPO / 안으로 향하는 화살표」 — 21×21 을 -90° 돌려 씁니다(원본 그대로) */
@@ -140,44 +158,28 @@ function Arrow({ right, top }: { right: number; top: number }) {
   );
 }
 
-function Dots({ src }: { src: string }) {
-  /* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */
-  return <img src={src} alt="" width={40} height={8} className="absolute left-[calc(50%-20px)] top-[229px]" />;
-}
-
-function ThreeDots({ off, on, at }: { off: string; on: string; at: number }) {
-  return (
-    <span aria-hidden className="absolute left-[calc(50%-17px)] top-[231px] flex gap-[6px]">
-      {[0, 1, 2].map((i) => (
-        /* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */
-        <img key={i} src={i === at ? on : off} alt="" width={6} height={6} />
-      ))}
-    </span>
-  );
-}
-
 /* ── 라포에서 시작하기 · 「RAPO / Home / 주요 서비스 영역」 1210:1139 ──────── */
 function StartHere() {
   return (
     <section aria-labelledby="rapo-home-start"
       className="flex flex-col gap-(--rapo-dimension-x4) px-(--rapo-dimension-x5) py-(--rapo-dimension-x6)">
-      <h2 id="rapo-home-start" className="rapo-type-section-title text-(color:--rapo-brand-color-navy)">라포에서 시작하기</h2>
+      <RapoSectionTitle id="rapo-home-start">라포에서 시작하기</RapoSectionTitle>
       <div className="grid h-[216px] grid-cols-2 gap-(--rapo-dimension-x3)">
         <Link href="/community"
-          className="relative flex flex-col gap-[6px] overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-navy)
+          className="relative flex flex-col gap-(--rapo-dimension-x1_5) overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-navy)
                      p-(--rapo-dimension-x4) active:bg-(--rapo-color-bg-navy-solid-pressed)">
-          <span className="text-[18px] font-bold leading-[24px] text-(color:--rapo-brand-color-white)">커뮤니티 보기</span>
+          <span className="rapo-type-t6-bold text-(color:--rapo-brand-color-white)">커뮤니티 보기</span>
           <span className="text-[12px] leading-[17px] text-(color:--rapo-brand-color-white)">어디서도 나눌 수 없던<br />우리만의 이야기</span>
-          <span aria-hidden className="absolute left-[21px] top-[92px] flex h-[124px] w-[160px] items-start overflow-hidden">
+          <span aria-hidden className="absolute bottom-0 right-0 flex h-[124px] w-[160px] items-start overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_20px),linear-gradient(to_bottom,transparent,#000_20px)] [mask-composite:intersect]">
             <Image src="/rapo/home/start-community.png" alt="" width={160} height={160} className="size-[160px] shrink-0 object-contain" />
           </span>
         </Link>
         <Link href="/jobs"
-          className="relative flex flex-col gap-[6px] overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-mist)
+          className="relative flex flex-col gap-(--rapo-dimension-x1_5) overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-mist)
                      p-(--rapo-dimension-x4) active:bg-(--rapo-color-bg-neutral-weak-pressed)">
-          <span className="text-[18px] font-bold leading-[24px] text-(color:--rapo-brand-color-navy)">공고 찾기</span>
+          <span className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">공고 찾기</span>
           <span className="text-[12px] leading-[17px] text-(color:--rapo-brand-color-navy)">내게 맞는 일을 찾아요</span>
-          <span aria-hidden className="absolute left-[21px] top-[92px] flex h-[124px] w-[160px] items-center justify-center overflow-hidden">
+          <span aria-hidden className="absolute bottom-0 right-0 flex h-[124px] w-[160px] items-center justify-center overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_20px),linear-gradient(to_bottom,transparent,#000_20px)] [mask-composite:intersect]">
             <Image src="/rapo/home/start-jobs.png" alt="" width={160} height={160} className="size-[160px] shrink-0 object-contain" />
           </span>
         </Link>
@@ -199,9 +201,7 @@ function AnonymousTalk() {
   return (
     <section aria-labelledby="rapo-home-talk"
       className="flex flex-col gap-(--rapo-dimension-x5) bg-(--rapo-brand-color-navy) px-(--rapo-dimension-x5) py-(--rapo-dimension-x6)">
-      <h2 id="rapo-home-talk" className="text-[20px] font-bold leading-[28px] text-(color:--rapo-color-bg-layer-default)">
-        어디서도 나눌 수 없던<br />우리만의 이야기
-      </h2>
+      <RapoSectionTitle id="rapo-home-talk" tone="inverse">어디서도 나눌 수 없던<br />우리만의 이야기</RapoSectionTitle>
       <div className="flex flex-col gap-(--rapo-dimension-x3)">
         <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x4)">
           <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">익명의 동료가 물었어요</p>
@@ -210,7 +210,7 @@ function AnonymousTalk() {
         <ul className="flex flex-col gap-(--rapo-dimension-x2) pl-(--rapo-dimension-x6)">
           {답변.map((a) => (
             <li key={a.img} className="flex items-start gap-(--rapo-dimension-x2)">
-              <Image src={a.img} alt="" width={32} height={32} className="size-[32px] shrink-0 rounded-full object-contain" />
+              <Image src={a.img} alt="" width={32} height={32} className="size-(--rapo-dimension-x8) shrink-0 rounded-(--rapo-radius-full) object-contain" />
               <div className="flex min-w-0 flex-1 flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x3)">
                 <p className="text-[12px] font-medium leading-[19px] text-(color:--rapo-color-fg-neutral-muted)">익명</p>
                 <p className="text-[14px] leading-[20px] text-(color:--rapo-color-fg-neutral)">{a.text[0]}<br />{a.text[1]}</p>
@@ -238,17 +238,17 @@ function JobCurations() {
     <section aria-labelledby="rapo-home-curation"
       className="flex flex-col gap-(--rapo-dimension-x4) bg-(--rapo-color-bg-neutral-weak) py-(--rapo-dimension-x5) pl-(--rapo-dimension-x5)">
       <div className="flex flex-col gap-(--rapo-dimension-x1) pr-(--rapo-dimension-x5)">
-        <h2 id="rapo-home-curation" className="text-[20px] font-bold leading-[28px] text-(color:--rapo-brand-color-navy)">조건으로 공고 찾기</h2>
+        <RapoSectionTitle id="rapo-home-curation">조건으로 공고 찾기</RapoSectionTitle>
         <p className="text-[13px] leading-[19px] text-(color:--rapo-color-fg-neutral-muted)">비교하고 싶은 조건부터 골라보세요</p>
       </div>
       <ul className="flex snap-x gap-(--rapo-dimension-x3) overflow-x-auto pr-(--rapo-dimension-x5) [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {조건카드.map((c) => (
-          <li key={c.title} className="w-[244px] shrink-0 snap-start">
+          <li key={c.title} className="w-[244px] shrink-0 [flex-grow:1] snap-start">
             <Link href="/jobs"
-              className={`flex h-full flex-col gap-(--rapo-dimension-x3) rounded-[12px] p-(--rapo-dimension-x4) ${c.bg}`}>
+              className={`flex h-full flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) p-(--rapo-dimension-x4) ${c.bg}`}>
               <span className="flex items-center gap-(--rapo-dimension-x3)">
-                <span className="flex size-[56px] shrink-0 items-center justify-center rounded-[16px] bg-(--rapo-color-bg-layer-default)">
-                  <span className="relative size-[48px] overflow-hidden">
+                <span className="flex size-(--rapo-dimension-x14) shrink-0 items-center justify-center rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-layer-default)">
+                  <span className="relative size-(--rapo-dimension-x12) overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
                     <img src={c.art.src} alt="" width={c.art.w} height={c.art.w} className="absolute" style={{ left: c.art.l, top: c.art.t }} />
                   </span>
@@ -281,7 +281,7 @@ function MoreServices() {
   return (
     <section aria-labelledby="rapo-home-more"
       className="flex flex-col gap-(--rapo-dimension-x3) bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x5) py-(--rapo-dimension-x6)">
-      <h2 id="rapo-home-more" className="text-[20px] font-bold leading-[28px] text-(color:--rapo-brand-color-navy)">라포 더 둘러보기</h2>
+      <RapoSectionTitle id="rapo-home-more">라포 더 둘러보기</RapoSectionTitle>
       <div className="flex min-h-[128px] items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x4)">
         <div className="flex min-w-0 flex-1 flex-col gap-(--rapo-dimension-x1)">
           <p className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">라포 올인원 툴킷</p>
@@ -294,9 +294,9 @@ function MoreServices() {
         {서비스.map((s) => (
           <li key={s.href}>
             <Link href={s.href}
-              className="flex h-[64px] items-center gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-layer-default)
+              className="flex h-(--rapo-dimension-x16) items-center gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-layer-default)
                          px-(--rapo-dimension-x3) active:bg-(--rapo-color-bg-layer-default-pressed)">
-              <span className="relative size-[28px] shrink-0">
+              <span className="relative size-(--rapo-dimension-x7) shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
                 <img src={s.art.src} alt="" width={s.art.w} height={s.art.w} className="absolute max-w-none" style={{ left: s.art.l, top: s.art.t }} />
               </span>

@@ -39,7 +39,9 @@ import { matchJob, notOurs } from '../gas-rules.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const API = 'https://api-recruiter.recruiter.co.kr/position/v1/jobflex';
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
+/* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
+import { 이름표 } from '../수집기이름표.mjs';
+const UA = 이름표('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36');
 
 /* 신형으로 확인된 곳 — tools/hosp/reports/batch*.md 와 HOSP_SITES 에서 모았습니다.
    「지어낸 주소」 가 아니라 보고서에 적힌 것만 넣었습니다.
