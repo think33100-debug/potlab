@@ -9,6 +9,7 @@ import { 비교알림동의, 비교알림켜짐 } from '@/lib/beta-compare';
 import { SignupSurvey } from '@/components/signup-survey';
 import { defaultAvatar } from '@/lib/avatar';
 import { BETA_AGREEMENTS, 표없음 } from '@/lib/beta';
+import { clearAfterLogin, peekAfterLogin } from '@/lib/after-login';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
 import { JOB_GROUPS, ROLES, ROLE_DESC, type JobGroup, type Role } from '@/lib/who';
@@ -430,8 +431,8 @@ export default function Welcome() {
                  홈으로 떨어뜨리면 뭘 보러 왔는지 잊고 그냥 나갑니다 */
               let back: string | null = null;
               try {
-                back = sessionStorage.getItem('potjob.after-login');
-                sessionStorage.removeItem('potjob.after-login');
+                back = peekAfterLogin();
+                clearAfterLogin();
               } catch { /* 사생활 보호 창 */ }
               router.push(back || '/');
             }}
