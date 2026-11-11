@@ -6,10 +6,18 @@
  */
 
 export const 엔티티풀기 = (s) => String(s || '').replace(/&amp;/g, '&').replace(/&#38;/g, '&')
-  .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
+  .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ')
+  /* ★ 2026-11-11 — 숫자 꼴(&#45380; · &#xBCF4;)도 풉니다. 수원시 보건소 게시판 제목이 통째로 그 꼴입니다.
+     `&#38;`(&) 은 위에서 먼저 풀었으므로 「&amp;lt;」 같은 두 겹을 한 번 더 풀지 않습니다 */
+  .replace(/&#(\d{2,7});/g, (m, n) => { const c = Number(n); return c > 0 && c < 0x110000 ? String.fromCodePoint(c) : m; })
+  .replace(/&#x([0-9a-f]{2,6});/gi, (m, h) => { const c = parseInt(h, 16); return c > 0 && c < 0x110000 ? String.fromCodePoint(c) : m; })
+  .replace(/&middot;/g, '·');
 export const 꼬리말 = /\s*(?:채용\s*공고)?\s*상세\s*보기\s*$|\s*새글\s*$|\s*N\s*$|\s*\[?알림\]?\s*$/;
 export const 메뉴말 = /^(?:더\s*보기|목\s*록|처음|이전|다음|맨\s*끝|검\s*색|닫\s*기|자세히|바로가기|home|list|more)$/i;
-export const 번호열쇠 = /(?:^|[?&])(?:seq|seqno|seq_no|nttSn|ntt_sn|wr_id|bbsSeq|bbs_seq|brd_no|brdNo|idx|no|num|articleNo|article_no|bno|boardSeq|board_seq|id|pk)=(\d{1,12})(?:&|$)/i;
+/* ★ 2026-11-11 — 시·군·구청 게시판 열쇠를 보탭니다 (열어서 본 꼴 그대로) —
+     nttNo(강릉 selectBbsNttView) · notAncmtMgtNo(안동 saeol/gosi/view) · ancmtMgtNo(울진) ·
+     q_bbscttSn(광명 BD_selectBbs · **17자리**라 자릿수 뚜껑도 12 → 20) · bod_uid(성주 page.do) */
+export const 번호열쇠 = /(?:^|[?&])(?:seq|seqno|seq_no|nttSn|ntt_sn|nttNo|wr_id|bbsSeq|bbs_seq|brd_no|brdNo|idx|no|num|articleNo|article_no|bno|boardSeq|board_seq|id|pk|notAncmtMgtNo|not_ancmt_mgt_no|ancmtMgtNo|q_bbscttSn|bbscttSn|bod_uid)=(\d{1,20})(?:&|$)/i;
 export const 자바열쇠 = /(?:fn?View|goView|view_?detail|boardView|viewPage|detail)\s*\(\s*['"]?(\d{1,12})['"]?/i;
 
 /** 그 줄(tr·li) 안에서만 날짜를 찾습니다 — 창을 넓히면 **윗줄 날짜**가 붙습니다 */
@@ -73,6 +81,108 @@ export function 표준읽기(html, 바탕) {
   }
   return 낸것;
 }
+
+/* ── 보건소 공고를 시·군·구청 게시판에서 받기 (2026-11-11 · 멘토-1.2-3 · 멘토-1.13-2) ──
+ * 보건소 채용 공고는 대개 보건소 누리집이 아니라 **시·군·구청 고시공고(새올)** 에 올라옵니다.
+ * 그 게시판에는 모든 부서 글이 섞이므로 **보건 글만** 남깁니다 — 직군 가리기는 그 뒤에
+ * 늘 하던 대로 `sortJob` → (보류함이면) `상세읽기.mjs` 가 합니다. 새 직군 규칙은 없습니다.
+ */
+/** 그 공고가 보건 쪽인가 (제목·기관 이름으로) — 2026-10-24 `시군청채용.mjs` 에 있던 것을 여기로 옮겼습니다 */
+export const 보건말 = /(보건소|보건지소|보건의료원|치매안심|치매센터|정신건강|방문건강|건강증진)/;
+/** **부서 칸**만 보는 말 — 부서 이름은 짧아서(「보건정책과」·「건강증진과」·「감염병관리과」) 넓게 봅니다 */
+export const 보건부서말 = /(보건|건강|치매|감염병|의약|정신)/;
+/** 우리 직군 쪽 말 — 부서가 보건이 아니어도(복지관·재활원) 남깁니다 */
+export const 재활말 = /(재활(?!용)|물리\s*치료|작업\s*치료)/;   /* 「재활용품」을 막습니다 (괴산군 마른 시험에서 걸림) */
+/** 남길 줄인가 — 제목은 보건말·재활말, 부서(또는 그 줄 글)는 보건부서말까지 */
+export const 보건거름 = (제목, 부서 = '') => 보건말.test(제목 || '') || 재활말.test(제목 || '')
+  || 보건말.test(부서 || '') || 보건부서말.test(부서 || '');
+
+/** 그 링크가 든 **줄(tr·li) 글자** — 부서 칸을 따로 못 집는 누리집 게시판에서 거름에 씁니다 */
+export function 줄글(html, 자리) {
+  const t = String(html || '');
+  const 앞 = Math.max(t.lastIndexOf('<tr', 자리), t.lastIndexOf('<li', 자리));
+  const 뒤끝 = t.slice(자리).search(/<\/tr>|<\/li>/i);
+  if (앞 < 0 || 뒤끝 < 0) return '';
+  return 엔티티풀기(t.slice(앞, 자리 + 뒤끝).replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+}
+
+/** 새올(eminwon) 목록·상세 길 — 2026-11-11 에 eminwon.gangdong.go.kr 로 열어 확인했습니다.
+ *  목록 쪽(OfrNotAncmtLSub.jsp)은 GET 으로 열면 표가 비고, 화면이 이 action 에 POST 합니다 */
+export const 새올길 = '/emwp/gov/mogaha/ntis/web/ofr/action/OfrAction.do';
+/** 목록 POST 몸 — `ofr_pageSize` 30 은 **요청 한 번**에 30줄입니다(10 이면 강동구 엿새치뿐 · 30 이 받아들여짐 확인) */
+export const 새올목록몸 = (갈래 = '05', 몇줄 = 30) => ({
+  pageIndex: '1', jndinm: 'OfrNotAncmtEJB', context: 'NTIS', method: 'selectListOfrNotAncmt',
+  methodnm: 'selectListOfrNotAncmtHomepage', not_ancmt_mgt_no: '', homepage_pbs_yn: 'Y', subCheck: 'Y',
+  ofr_pageSize: String(몇줄), not_ancmt_se_code: 갈래, cha_dep_code_nm: '', initValue: '', countYn: 'Y',
+  list_gubun: '', homepagetype: 'new', not_ancmt_sj: '' });
+/** 회원이 누를 **GET 상세 주소** — 화면의 searchDetail() 이 보내는 form 값 그대로입니다.
+ *  ★ 몇 칸을 빼고 GET 하면 400(Bad Request)이 났습니다 — 칸을 줄이지 마십시오 */
+export function 새올상세주소(바탕, 번호, 갈래 = '05') {
+  const q = new URLSearchParams({ jndinm: 'OfrNotAncmtEJB', context: 'NTIS', method: 'selectOfrNotAncmt',
+    methodnm: 'selectOfrNotAncmtRegst', not_ancmt_mgt_no: String(번호), homepage_pbs_yn: 'Y', subCheck: 'Y',
+    ofr_pageSize: '10', not_ancmt_se_code: 갈래, title: '고시공고', cha_dep_code_nm: '', initValue: 'Y',
+    countYn: 'Y', list_gubun: '', not_ancmt_sj: '', not_ancmt_cn: '', dept_nm: '', epcCheck: 'Y',
+    yyyy: '', pageIndex: '1' });
+  return new URL(새올길, 바탕).origin + 새올길 + '?' + q.toString();
+}
+/** 새올 목록 읽기 — `<tr>` 마다 searchDetail(번호) · 고시공고번호 · 제목 · 담당부서 · 등록일
+ *  ★ 꼴이 둘입니다 (2026-11-11 에 열어 봄) —
+ *    새 꼴(강동구)  `<td class="title"><a href="javascript:searchDetail(59320)">제목</a></td>`
+ *    옛 꼴(경산시)  `<td onclick="javaScript:searchDetail('51656')">…</td>` 가 **칸마다** 붙고 <a> 가 없습니다
+ *  그래서 **머리줄의 칸 이름**(제목·담당부서·등록일)으로 자리를 잡고, 머리줄이 없으면
+ *  searchDetail 이 든 <a> 칸을 제목으로 봅니다 */
+export function 새올읽기(html, 바탕, 갈래 = '05') {
+  const 낸것 = [];
+  const 본것 = new Set();
+  const 풀기 = (s) => 엔티티풀기(String(s || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+  let 머리 = null;
+  /* ★ 줄은 「<tr 부터 다음 <tr 앞까지」로 자릅니다 — 진주시는 줄 끝을 `</tr>` 대신 `<tr>` 로 닫아서
+     `<tr>…</tr>` 로 찾으면 30줄 가운데 1줄만 나왔습니다 (2026-11-11) */
+  for (const 조각 of String(html || '').split(/(?=<tr[\s>])/i)) {
+    if (!/^<tr[\s>]/i.test(조각)) continue;
+    const 끝 = 조각.search(/<\/tr>/i);
+    const 줄 = 끝 >= 0 ? 조각.slice(0, 끝) : 조각;
+    const 칸 = [...줄.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)].map((c) => c[1]);
+    const 글칸 = 칸.map(풀기);
+    const 번호 = (줄.match(/searchDetail\(\s*['"]?(\d{1,12})['"]?\s*\)/) || [])[1]
+      || (줄.match(/not_ancmt_mgt_no=(\d{1,12})/) || [])[1];
+    if (!번호) {
+      const 제 = 글칸.findIndex((s) => /^제\s*목$/.test(s));
+      if (제 >= 0) {
+        머리 = { 제목: 제, 부서: 글칸.findIndex((s) => /부서/.test(s)),
+          날: 글칸.findIndex((s) => /등록일|게시일|작성일|날짜/.test(s)),
+          공고번호: 글칸.findIndex((s) => /공고\s*번호/.test(s)) };
+      }
+      continue;
+    }
+    if (본것.has(번호)) continue;
+    let 제목칸 = 머리 && 칸.length > 머리.제목 ? 머리.제목 : -1;
+    if (제목칸 < 0) 제목칸 = 칸.findIndex((c) => /<a[^>]+(?:searchDetail|not_ancmt_mgt_no=)/i.test(c));
+    if (제목칸 < 0) continue;
+    /* 셋째 꼴(남동구) — 제목 <a> 가 **GET 상세 주소**를 그대로 품습니다. 그때는 그 쪽 링크를 씁니다 */
+    const 쪽링크 = (칸[제목칸].match(/<a[^>]+href\s*=\s*["']([^"']*not_ancmt_mgt_no=\d+[^"']*)["']/i) || [])[1];
+    let 상세 = 새올상세주소(바탕, 번호, 갈래);
+    if (쪽링크) { try { 상세 = new URL(엔티티풀기(쪽링크), 바탕).toString(); } catch { /* 위 주소 그대로 */ } }
+    const 제목 = 풀기((칸[제목칸].match(/<a[^>]*>([\s\S]*?)<\/a>/i) || [])[1] || 칸[제목칸]);
+    if (!제목) continue;
+    const 부서칸 = 머리 && 머리.부서 >= 0 ? 머리.부서 : 제목칸 + 1;
+    const 공고칸 = 머리 && 머리.공고번호 >= 0 ? 머리.공고번호 : 제목칸 - 1;
+    const 날 = ((머리 && 머리.날 >= 0 ? 글칸[머리.날] : 글칸.join(' ')) || '').match(/(20\d\d)-(\d\d)-(\d\d)/);
+    본것.add(번호);
+    낸것.push({ 번호, 제목, 공고번호: 공고칸 >= 0 ? (글칸[공고칸] || '') : '',
+      부서: 글칸[부서칸] || '', 올린날: 날 ? 날[0] : null, 주소: 상세 });
+  }
+  return 낸것;
+}
+/** 새올 상세 쪽에서 **온 제목** — 목록 제목이 「…」로 잘렸을 때만 씁니다 */
+export function 새올상세제목(html) {
+  const 글 = 엔티티풀기(String(html || '').replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ');
+  /* 칸 이름이 곳마다 조금씩 다릅니다 — 강동 「제목 … 담당부서」 · 진주 「제목 … 고시공고구분」 ·
+     남동 「제 목 … 번 호」. 그다음 칸 이름 앞에서 끊습니다 */
+  return ((글.match(/제\s*목\s+(.{4,300}?)\s+(?:번\s*호|고시공고구분|게재제호|고시공고번호|구\s*분|담당\s*부서|등\s*록\s*일)\s/) || [])[1] || '').trim();
+}
+export const 잘린꼴 = /(?:\.\.\.|…)\s*$/;
 
 /* ── 「채용 게시판 목록인가」 울타리 넷 (2026-10-28 세중님 1번) ───────────────
  * 전에는 「목록 줄이 **하나라도** 나오면 게시판」이었습니다. 그래서 —
