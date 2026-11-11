@@ -17,7 +17,7 @@ import { useToast } from '@/app/toast';
 export function ShareButtons({
   title, text, path, compact = false,
 }: {
-  /* 공유창에 뜨는 제목. 뒤에 · POTJOB 이 붙습니다 */
+  /* 공유창에 뜨는 제목. 뒤에 · RAPO 가 붙습니다 */
   title: string;
   /* 한 줄 설명. 안 주면 제목을 그대로 씁니다 */
   text?: string;
@@ -32,7 +32,7 @@ export function ShareButtons({
   const url = () => `${location.origin}${path}`;
 
   const share = async () => {
-    const data = { title: `${title} · POTJOB`, text: text ?? title, url: url() };
+    const data = { title: `${title} · RAPO`, text: text ?? title, url: url() };
 
     if (navigator.share && navigator.canShare?.(data)) {
       try { await navigator.share(data); return; }

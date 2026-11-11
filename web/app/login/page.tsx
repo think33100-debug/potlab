@@ -163,6 +163,12 @@ export default function Login() {
           </div>
         )}
 
+        {!halfway && (
+          <p className="mt-5 rounded-sm bg-badge-teal-bg px-5 py-4 text-sm text-teal-strong">
+            RAPO 는 지금 테스트 중이에요. 처음이시면 아래에서 가입을 시작해 주세요. 가입하시면 모든 화면을 볼 수 있어요.
+          </p>
+        )}
+
         <div className="mt-8 space-y-5">
           {halfway && (
             <p className="text-sm text-mute">

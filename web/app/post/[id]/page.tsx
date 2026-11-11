@@ -7,7 +7,7 @@ import { PostActions } from '@/components/post-actions';
 import { PostComments } from '@/components/post-comments';
 import { ViewBump } from '@/components/view-bump';
 import { channelName } from '@/lib/channels';
-import { supabase, POST_ONE_COLS, type PostRow } from '@/lib/supabase';
+import { POST_ONE_COLS, type PostRow } from '@/lib/supabase';
 import { serverSupabase } from '@/lib/supabase-server';
 import { siteUrl } from '@/lib/site-url';
 import { shownName } from '@/lib/who';
@@ -38,10 +38,14 @@ async function getPost(sb: SupabaseClient, id: string) {
 
    그래서 상태 한 낱말만 물어봅니다. 본문은 한 글자도 안 나갑니다
    (DB 의 post_state 함수). */
+/* ★ 2026-11-11 클로즈드 베타 — 비회원에게 post_state·글사진·공개글을 닫으므로
+   이 파일의 세 자리(미리보기·상태·사진 수)도 **세션으로** 읽습니다 (RAPO노트/SQL_1113).
+   로봇은 middleware 가 /beta 로 보내 여기까지 안 옵니다 */
 async function stateOf(id: string): Promise<'gone' | 'hidden'> {
   const n = Number(id);
   if (!Number.isFinite(n)) return 'gone';
-  const { data } = await supabase.rpc('post_state', { p_id: n });
+  const sb = await serverSupabase();
+  const { data } = await sb.rpc('post_state', { p_id: n });
   return data === 'hidden' ? 'hidden' : 'gone';
 }
 
@@ -64,7 +68,8 @@ const GONE = {
 async function countImages(id: number) {
   /* post_images 를 직접 안 셉니다 — 그 표의 규칙이 posts 를 보는데 비로그인은
      posts 를 못 읽어 규칙이 터집니다. DB 의 글사진() 이 감춰진 글도 걸러 줍니다 */
-  const { data } = await supabase.rpc('글사진', { p_post: id });
+  const sb = await serverSupabase();
+  const { data } = await sb.rpc('글사진', { p_post: id });
   return (data ?? []).length as number;
 }
 
@@ -78,9 +83,9 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const p = await getPost(supabase, id);
+  const p = await getPost(await serverSupabase(), id);
   /* 카톡에 뜨는 제목도 갈라 적습니다 — 누르기 전에 알 수 있게 */
-  if (!p) return { title: `${GONE[await stateOf(id)].title} · POTJOB` };
+  if (!p) return { title: `${GONE[await stateOf(id)].title} · RAPO` };
 
   const 장수 = await countImages(p.id);
   const title = p.title || p.body.slice(0, 40);
@@ -88,11 +93,11 @@ export async function generateMetadata({
   const image = 장수 > 0 ? 사진주소(p.id, 0) : '/og.png';
 
   return {
-    title: `${title} · ${channelName(p.channel)} · POTJOB`,
+    title: `${title} · ${channelName(p.channel)} · RAPO`,
     description: desc,
     openGraph: {
       type: 'article',
-      siteName: 'POTJOB',
+      siteName: 'RAPO',
       title,
       description: desc,
       images: [{ url: image }],

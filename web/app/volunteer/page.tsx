@@ -34,7 +34,7 @@ import { serverSupabase, serverWho } from '@/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '봉사활동 찾기 · POTJOB',
+  title: '봉사활동 찾기 · RAPO',
   description: '지역과 분야로 봉사할 곳을 찾습니다. 신청은 VMS 에서 합니다',
 };
 

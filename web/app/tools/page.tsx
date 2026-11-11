@@ -20,7 +20,7 @@ import { RATE_YEAR } from '@/lib/rates';
    해가 바뀌면 그 한 줄만 고칩니다. */
 
 export const metadata = {
-  title: '계산기 · POTJOB',
+  title: '계산기 · RAPO',
   description: '세전·세후 · 퇴직금 · 연차를 한 자리에서',
 };
 

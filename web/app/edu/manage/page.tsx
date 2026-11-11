@@ -158,7 +158,7 @@ export default function EduManage() {
       </p>
       <h1 className="mt-5 break-keep text-h1 font-bold">교육 관리</h1>
       <p className="mt-2 break-keep text-lg text-mute">
-        결제와 환불은 기관과 신청자 사이의 일이에요. POTJOB 은 계좌 안내만 전달합니다.
+        결제와 환불은 기관과 신청자 사이의 일이에요. RAPO 는 계좌 안내만 전달합니다.
       </p>
 
       {탈 && <p className="mt-4 rounded-sm border border-brand-red p-4 text-lg text-brand-red-dark">{탈}</p>}

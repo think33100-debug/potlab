@@ -29,7 +29,7 @@ export async function generateMetadata({ searchParams }: PageProps<'/orgs'>): Pr
   const org = typeof sp.org === 'string' ? sp.org : null;
   if (!org) {
     return {
-      title: '병원정보 찾기 · POTJOB',
+      title: '병원정보 찾기 · RAPO',
       description: '치료사가 일하는 곳을 이름·종별·지역으로 찾아봐요',
     };
   }
@@ -37,12 +37,12 @@ export async function generateMetadata({ searchParams }: PageProps<'/orgs'>): Pr
   /* 회원이 공유한 링크면 제목이 제대로 붙고, 아니면 이름만 붙습니다 —
      기관 자료는 회원만 읽을 수 있습니다 */
   const o = await orgPublic(await serverSupabase(), org, sido);
-  if (!o) return { title: `${org} · POTJOB` };
+  if (!o) return { title: `${org} · RAPO` };
 
   const desc = [TILE_NAME[o.tile] ?? '기관', place(o.sido_std, o.sgg_std)]
     .filter(Boolean).join(' · ');
   return {
-    title: `${o.name} · POTJOB`,
+    title: `${o.name} · RAPO`,
     description: desc,
     openGraph: { title: o.name, description: desc, type: 'article' },
   };

@@ -1,4 +1,5 @@
 import type { Texts } from './home-text';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { daysAgoIso } from './time';
 
@@ -60,7 +61,12 @@ export type HomeData = {
    한쪽 자료만 바뀌면 합계가 조용히 어긋납니다 */
 export const therapists = (s: HomeStats) => s.ot + s.pt;
 
-export async function getHome(): Promise<HomeData> {
+/* ★ 2026-11-11 클로즈드 베타 — 「인기 글」은 커뮤니티 글이라 비회원에게 닫습니다
+   (공개글 보기 · RAPO노트/SQL_1113). 그래서 그 한 줄만 **부른 쪽이 건넨 세션**으로 읽습니다.
+   이 파일은 화면(client)도 HOME_COLS 를 가져다 써서 next/headers 를 직접 못 부릅니다 —
+   그래서 인수로 받습니다. 안 건네면 예전처럼 세션 없이 읽습니다 */
+export async function getHome(회원?: SupabaseClient): Promise<HomeData> {
+  const 글읽기 = 회원 ?? supabase;
 
   const [blocks, settings, totals, orgs, hot, stats, texts] = await Promise.all([
     supabase.from('home_blocks').select(HOME_COLS).eq('enabled', true).order('sort'),
@@ -74,7 +80,7 @@ export async function getHome(): Promise<HomeData> {
        세어 둔 값을 함수로 받습니다 */
     supabase.rpc('org_total'),
     /* 회원번호를 안 받는 공개 보기입니다 (2026-10-07) */
-    supabase.from('공개글').select('id,title,body')
+    글읽기.from('공개글').select('id,title,body')
       .gte('created_at', daysAgoIso(HOT_DAYS))
       .order('view_count', { ascending: false }).limit(1),
     supabase.rpc('home_stats'),

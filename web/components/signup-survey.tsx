@@ -751,7 +751,7 @@ function LangBands() {
   return (
     <div className="mt-2">
       <p className="text-sm text-mute">
-        점수 기준은 POTJOB 자체 기준이에요.
+        점수 기준은 RAPO 자체 기준이에요.
         시험끼리 환산한 게 아니라 각 시험이 발표한 등급을 그대로 따랐어요
       </p>
       <button type="button" onClick={() => setOpen(!open)}

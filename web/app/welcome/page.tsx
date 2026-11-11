@@ -4,8 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AvatarPicker } from '@/components/avatar-picker';
+import { CompareNotify } from '@/components/compare-notify';
+import { 비교알림동의, 비교알림켜짐 } from '@/lib/beta-compare';
 import { SignupSurvey } from '@/components/signup-survey';
 import { defaultAvatar } from '@/lib/avatar';
+import { BETA_AGREEMENTS, 표없음 } from '@/lib/beta';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
 import { JOB_GROUPS, ROLES, ROLE_DESC, type JobGroup, type Role } from '@/lib/who';
@@ -34,6 +37,11 @@ export default function Welcome() {
      ③ 사진 칸을 못 보고 홈으로 튕깁니다 */
   const [justMade, setJustMade] = useState(false);
 
+  /* 첫 단계 「다음」에서 베타 동의를 못 남겼을 때의 글 (2026-11-11 밤 — 초대 코드는 거뒀습니다) */
+  const [betaErr, setBetaErr] = useState<string | null>(null);
+  /* 「가입하기」 뒤 비교 알림 창 — 비교알림켜짐 이 false 면 한 번도 안 뜹니다 (lib/beta-compare.ts) */
+  const [compareOpen, setCompareOpen] = useState(false);
+
   /* 아무것도 안 고르셨으면 기본 아바타. 상태로 안 두고 계산합니다 —
      effect 안에서 setState 하면 그릴 때마다 한 번 더 그립니다 */
   const avatar = picked ?? (session ? defaultAvatar(session.user.id) : '');
@@ -54,13 +62,44 @@ export default function Welcome() {
     return <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8"><p className="text-lg text-mute">잠시만요…</p></main>;
   }
 
-  const required = AGREEMENTS.filter((a) => a.required);
+  /* ★ 2026-11-11 — 베타 동의(개인정보 [필수] · 설문 경품 [선택])를 기존 동의 뒤에 더합니다.
+     기존 다섯 항목과 동의남기기() 는 그대로입니다 (그 창구는 다섯 키만 받습니다).
+     베타 동의는 `베타동의` 표의 내 줄로 남습니다 — 아래 베타동의남기기() */
+  /* [선택] 연봉·스펙 비교 알림 신청 — 켜고 끄는 문은 lib/beta-compare.ts 하나입니다 */
+  const 베타동의들 = 비교알림켜짐 ? [...BETA_AGREEMENTS, 비교알림동의] : BETA_AGREEMENTS;
+  const 모든동의 = [...AGREEMENTS, ...베타동의들];
+  const required = 모든동의.filter((a) => a.required);
   const allRequired = required.every((a) => checked[a.key]);
-  const allChecked = AGREEMENTS.every((a) => checked[a.key]);
+  const allChecked = 모든동의.every((a) => checked[a.key]);
 
   const toggleAll = () => {
     const on = !allChecked;
-    setChecked(Object.fromEntries(AGREEMENTS.map((a) => [a.key, on])));
+    setChecked(Object.fromEntries(모든동의.map((a) => [a.key, on])));
+  };
+
+  /* ① 「다음」 — 베타 동의를 `베타동의` 표의 내 줄로 남깁니다.
+     2026-11-11 밤 세중님 — 초대 코드는 거둡니다(누구나 가입). 그래서 여기서 가입을 막지 않고
+     동의만 적습니다. 표가 아직 없으면(SQL 올리기 전) 그냥 넘어갑니다 */
+  const 베타동의남기기 = async () => {
+    setBusy(true); setBetaErr(null);
+    const sb = browserSupabase();
+    const 동의칸 = {
+      개인정보동의: !!checked.beta_privacy,
+      경품동의: !!checked.survey_prize,
+      비교알림동의: 비교알림켜짐 && !!checked.compare_notify,
+    };
+    let { error } = await sb.from('베타동의').insert({ 사람: session.user.id, ...동의칸 });
+    /* 이미 넣은 분(뒤로 갔다가 다시 온 분) — 동의 칸만 새로 적습니다 */
+    if (error?.code === '23505') {
+      ({ error } = await sb.from('베타동의')
+        .update({ ...동의칸, 동의때: new Date().toISOString() }).eq('사람', session.user.id));
+    }
+    setBusy(false);
+    if (error && !표없음(error)) {
+      setBetaErr(`동의를 저장하지 못했어요 — ${error.message}`);
+      return;
+    }
+    setStep(2);
   };
 
   /* ③ 닉네임 — profiles 줄을 여기서 만듭니다.
@@ -136,6 +175,8 @@ export default function Welcome() {
     await reload();
     setBusy(false);
     setStep(4);
+    /* 「가입하기」 뒤 비교 알림 창 (lib/beta-compare.ts) */
+    if (비교알림켜짐) setCompareOpen(true);
   };
 
   /* ② 직군·역할 — 둘 다 필수입니다.
@@ -202,6 +243,13 @@ export default function Welcome() {
             <h1 className="text-h2 font-bold">시작하기 전에</h1>
             <p className="mt-2 text-lg text-mute">아래 항목에 동의해 주세요</p>
 
+            {/* 테스트 기간 안내 (2026-11-11 밤 — 초대 코드 칸은 거뒀습니다) */}
+            <div className="mt-6 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
+              <p className="text-sm font-bold text-teal-strong">RAPO 는 지금 테스트 중이에요</p>
+              <p className="mt-2 text-lg">가입하시면 모든 화면을 볼 수 있어요</p>
+              {betaErr && <p className="mt-2 text-lg text-brand-red">{betaErr}</p>}
+            </div>
+
             <button
               type="button"
               onClick={toggleAll}
@@ -239,15 +287,39 @@ export default function Welcome() {
                   )}
                 </li>
               ))}
+              {/* ★ 2026-11-11 클로즈드 베타 동의 — 세중님 문구 그대로 (lib/beta.ts).
+                  수집 항목·목적·보유 기간·거부할 권리를 접지 않고 다 보입니다 */}
+              {베타동의들.map((a) => (
+                <li key={a.key}>
+                  <label className="flex cursor-pointer items-center gap-5 py-4">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={!!checked[a.key]}
+                      onChange={(e) => setChecked({ ...checked, [a.key]: e.target.checked })}
+                    />
+                    <Box on={!!checked[a.key]} />
+                    <span className="text-lg">
+                      {a.required
+                        ? <span className="text-brand-red">[필수] </span>
+                        : <span className="text-mute">[선택] </span>}
+                      {a.label}
+                    </span>
+                  </label>
+                  <ul className="mb-2 ml-[42px] space-y-1 text-sm text-mute">
+                    {a.lines.map((l) => <li key={l} className="break-keep">{l}</li>)}
+                  </ul>
+                </li>
+              ))}
             </ul>
 
             <button
               type="button"
-              disabled={!allRequired}
-              onClick={() => setStep(2)}
+              disabled={!allRequired || busy}
+              onClick={베타동의남기기}
               className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {allRequired ? '다음' : '필수 항목에 모두 동의해 주세요'}
+              {busy ? '확인하는 중…' : allRequired ? '다음' : '필수 항목에 모두 동의해 주세요'}
             </button>
           </section>
         )}
@@ -309,7 +381,8 @@ export default function Welcome() {
               onClick={saveNickname}
               className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40"
             >
-              {busy ? '저장하는 중…' : '다음'}
+              {/* 닉네임을 넣는 이 단추가 가입(profiles 줄 만들기)입니다 — 그래서 「가입하기」 */}
+              {busy ? '저장하는 중…' : '가입하기'}
             </button>
           </section>
         )}
@@ -365,6 +438,16 @@ export default function Welcome() {
           />
         )}
       </div>
+
+      {/* 「가입하기」 뒤 비교 알림 창. 꺼져 있으면 compareOpen 이 늘 false 입니다 */}
+      {비교알림켜짐 && compareOpen && (
+        <CompareNotify
+          userId={session.user.id}
+          job={job ?? (me?.job_group as JobGroup | undefined) ?? null}
+          email={session.user.email ?? null}
+          onDone={() => setCompareOpen(false)}
+        />
+      )}
     </main>
   );
 }

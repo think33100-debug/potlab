@@ -112,7 +112,7 @@ export const HOME_TEXT: TextRow[] = [
     value: '가입하신 분만 들어갑니다. 새 공고를 제일 먼저 받아보세요' },
 
   /* ── 마지막 CTA ── */
-  { key: 'cta.eyebrow', area: '마지막 CTA', label: '눈썹', value: 'POTJOB' },
+  { key: 'cta.eyebrow', area: '마지막 CTA', label: '눈썹', value: 'RAPO' },
   { key: 'cta.title', area: '마지막 CTA', label: '제목', multiline: true,
     value: '치료사의 숫자는\n치료사가 만듭니다' },
   { key: 'cta.button', area: '마지막 CTA', label: '단추', value: '지금 시작하기' },

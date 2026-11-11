@@ -117,7 +117,7 @@ export default function EduSession() {
               <dd>{s.계좌.입금자명규칙 ?? '이름 그대로'}</dd></div>
           </dl>
           <p className="mt-4 break-keep text-lg text-mute">
-            결제와 환불은 교육 기관과 신청자 사이의 일이며 POTJOB 은 결제에 관여하지 않습니다.
+            결제와 환불은 교육 기관과 신청자 사이의 일이며 RAPO 는 결제에 관여하지 않습니다.
           </p>
         </section>
       ) : session && (

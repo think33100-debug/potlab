@@ -54,7 +54,7 @@ export default async function ChannelPage({
         <section className="mb-7 rounded-sm border border-warning p-5">
           <p className="break-keep text-lg font-bold">거래는 두 분 사이의 일이에요</p>
           <p className="mt-2 break-keep text-lg text-mute">
-            POTJOB 은 돈이나 물건을 맡아 두지 않고, 거래에 끼지 않아요.
+            RAPO 는 돈이나 물건을 맡아 두지 않고, 거래에 끼지 않아요.
             먼저 보내 달라고 하거나 이상하면 <b>글 아래 신고</b>를 눌러 주세요.
           </p>
         </section>

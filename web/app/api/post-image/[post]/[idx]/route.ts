@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { serverSupabase } from '@/lib/supabase-server';
 
 /* 커뮤니티 글 사진을 **우리 주소로** 내보냅니다 (2026-10-07 세중님 결정 ㉯).
  *
@@ -44,7 +44,10 @@ export async function GET(
   /* 감춰진 글의 사진은 함수가 아예 안 내줍니다 (DB 의 글사진).
      post_images 를 직접 안 읽는 것은, 그 표의 규칙이 posts 를 보는데
      비로그인은 posts 를 못 읽어 규칙이 터지기 때문입니다 (2026-10-07) */
-  const { data: 사진들 } = await supabase.rpc('글사진', { p_post: 글번호 });
+  /* ★ 2026-11-11 클로즈드 베타 — 글사진() 을 비회원에게 닫으므로 **세션으로** 묻습니다.
+     비회원 요청은 middleware 가 401 로 먼저 막습니다 (RAPO노트/SQL_1113) */
+  const sb = await serverSupabase();
+  const { data: 사진들 } = await sb.rpc('글사진', { p_post: 글번호 });
   const 한장 = ((사진들 ?? []) as { 큰것: string; 작은것: string }[])[번];
   if (!한장) return new NextResponse('없는 사진', { status: 404 });
 
@@ -56,8 +59,9 @@ export async function GET(
     status: 200,
     headers: {
       'Content-Type': r.headers.get('content-type') ?? 'image/webp',
-      /* 사진은 한 번 올리면 안 바뀝니다 — 오래 붙들어 둡니다 */
-      'Cache-Control': 'public, max-age=31536000, immutable',
+      /* 사진은 한 번 올리면 안 바뀝니다 — 오래 붙들어 둡니다.
+         ★ 2026-11-11 클로즈드 베타 — 회원에게만 주므로 public → private (중간 캐시에 안 남김) */
+      'Cache-Control': 'private, max-age=31536000, immutable',
     },
   });
 }
