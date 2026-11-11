@@ -1,6 +1,7 @@
 {
  "name": "의료법인 인당의료재단 부민병원",
  "type": "appsite",
+ "천천히": "하루1",
  "host": "https://buminhr.recruiter.co.kr",
  "sn": 5556,
  "settingType": "E",
