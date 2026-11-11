@@ -23,7 +23,9 @@
  * · `$` 는 끝맞춤, `*` 는 아무 글자로 봅니다
  */
 
-/** robots.txt 글 → { 있나, 허용:[], 금지:[] } */
+/** robots.txt 글 → { 있나, 허용:[], 금지:[], 지연 }
+ *  지연 = `*` 묶음의 Crawl-delay(초 · 숫자). 없으면 null (2026-11-11 멘토 11/9 지시문 3 —
+ *  같은 서버 간격은 Crawl-delay 가 있으면 그 값. 쓰는 곳 tools/hosp/detail-host-queue.mjs) */
 export function robots읽기(글) {
   const 줄들 = String(글 || '').split(/\r?\n/)
     .map((l) => l.replace(/#.*$/, '').trim())      /* ① 주석을 먼저 지웁니다 */
@@ -31,6 +33,7 @@ export function robots읽기(글) {
 
   let 안에있나 = false, 별묶음있나 = false;
   const 허용 = [], 금지 = [];
+  let 지연 = null;
   let 앞줄이이름 = false;
 
   for (const l of 줄들) {
@@ -48,8 +51,9 @@ export function robots읽기(글) {
     if (!안에있나) continue;
     if (칸 === 'allow' && 값) 허용.push(값);
     if (칸 === 'disallow') { if (값) 금지.push(값); }
+    if (칸 === 'crawl-delay' && 지연 == null && /^\d+(?:\.\d+)?$/.test(값)) 지연 = Number(값);
   }
-  return { 있나: 별묶음있나, 허용, 금지 };
+  return { 있나: 별묶음있나, 허용, 금지, 지연 };
 }
 
 const 맞나 = (틀, 길) => {
@@ -96,6 +100,20 @@ if (process.argv[1] && process.argv[1].endsWith('robots.mjs')) {
     if (!ok) 틀림++;
     console.log((ok ? '○ ' : '★ ') + 이름.padEnd(32)
       + (g.됨 ? '가도 됨' : '막힘  ').padEnd(10) + g.왜);
+  }
+  /* Crawl-delay — `*` 묶음 것만 · 숫자만 · 없으면 null (2026-11-11) */
+  const 지연시험 = [
+    ['Crawl-Delay 15 (대소문자)', 'User-agent: *\nCrawl-Delay: 15\nDisallow: /admin', 15],
+    ['소수 0.5', 'User-agent: *\ncrawl-delay: 0.5', 0.5],
+    ['다른 묶음 것은 안 봄', 'User-agent: Yeti\nCrawl-delay: 30\n\nUser-agent: *\nDisallow:', null],
+    ['숫자가 아니면 null', 'User-agent: *\nCrawl-delay: soon', null],
+    ['없으면 null', 'User-agent: *\nDisallow: /x', null],
+  ];
+  for (const [이름, 글, 바란것] of 지연시험) {
+    const 값 = robots읽기(글).지연;
+    const ok = 값 === 바란것;
+    if (!ok) 틀림++;
+    console.log((ok ? '○ ' : '★ ') + ('지연 · ' + 이름).padEnd(32) + String(값));
   }
   console.log(틀림 ? '\n★ ' + 틀림 + '개 틀렸습니다' : '\n○ 다 맞습니다');
   process.exit(틀림 ? 1 : 0);
