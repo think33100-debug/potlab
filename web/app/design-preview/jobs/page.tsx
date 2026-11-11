@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { RapoJobFilters, RapoJobSearch } from '@/components/rapo/rapo-job-filters';
+import { RapoJobGuestWall } from '@/components/rapo/rapo-job-guest-wall';
 import { 견본공고 } from '@/components/rapo/home-u01-sample';
 import { 받는중, 목록, 못받음, 없음 } from '@/components/rapo/rapo-job-results';
 import { RapoShell } from '@/components/rapo/rapo-shell';
@@ -22,6 +23,8 @@ export default async function DesignPreviewJobs({ searchParams }: {
   const rows = 견본공고.new.map((j) => ({ ...j, id: undefined, deadline: j.deadline, likes: null, views: null }));
   const 결과 = state === 'loading' ? <받는중 />
     : state === 'error' ? <못받음 />
+    /* ?state=guest — 비회원 맛보기 + 가입 권유 (숫자는 견본) */
+    : state === 'guest' ? <><목록 rows={rows.slice(0, 2)} 제목="공고 280개" /><RapoJobGuestWall 남은={278} /></>
     : state === 'empty' ? <없음 조건있음 초기화주소="/design-preview/jobs" />
     : state === 'none' ? <없음 조건있음={false} 초기화주소="/design-preview/jobs" />
     : <목록 rows={rows} 제목={`공고 ${rows.length}개`}

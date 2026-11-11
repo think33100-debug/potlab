@@ -4,6 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { Suspense } from 'react';
 import { Hit } from '@/components/hit';
 import { RapoJobFilters, RapoJobSearch, type 조건 } from '@/components/rapo/rapo-job-filters';
+import { RapoJobGuestWall } from '@/components/rapo/rapo-job-guest-wall';
 import { 고용형태들 } from '@/lib/rapo-job-options';
 import type { RapoJob } from '@/components/rapo/rapo-job-row';
 import { 받는중, 목록, 못받음, 없음 } from '@/components/rapo/rapo-job-results';
@@ -45,6 +46,7 @@ export const metadata: Metadata = { title: 'RAPO · 채용 공고' };
 type SP = { job?: string; sido?: string; q?: string; p?: string; type?: string };
 
 const PAGE = 20;   // DB 의 job_list() 와 같아야 합니다
+const 맛보기수 = 5;  // 비회원에게 보이는 공고 수 (2026-11-12 밤 · 세중님이 정할 값)
 
 export default async function Jobs({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
@@ -132,18 +134,32 @@ async function 결과({ sb, 고른직군, 고른시도, 고른고용, q, page, �
     p_employ: 고른고용,
   });
 
-  /* 42501 = 권한 없음 = 로그인 안 한 분 → 맛보기 */
+  /* 42501 = 권한 없음 = 로그인 안 한 분 → 맛보기 몇 건 + 가입 권유 (2026-11-12 밤 세중님).
+     ★ 비회원에게 가는 칸은 공개공고() 가 주는 목록 칸뿐입니다 — id · 제목 · 기관 · 시도 · 직군 · 마감일 · 인턴 여부.
+       원문 주소(url)는 창구가 비회원에게 null 로 줍니다. 급여·자격·본문은 안 갑니다.
+       건수는 창구가 자르고(보여주는수), 여기서도 한 번 더 맛보기수 로 자릅니다.
+     ★ 그 창구가 지금(11/11 클로즈드 베타)은 비회원에게 닫혀 있습니다(42501). 그때는 맛보기 없이 가입 권유만 보입니다.
+       다시 여는 SQL 은 금고 초안(RAPO노트/SQL_1113/H_비회원_공고맛보기.sql) — 올리는 것은 세중님 */
   if (list.error?.code === '42501') {
     const 맛 = await supabase.rpc('공개공고');
+    if (맛.error?.code === '42501') return <RapoJobGuestWall 남은={null} />;
     if (맛.error) return <못받음 />;
-    const 줄 = (맛.data ?? []) as 맛보기공고[];
+    const 받은 = (맛.data ?? []) as (맛보기공고 & { 전체건수?: number | null })[];
+    const 줄 = 받은.slice(0, 맛보기수);
+    const 전체 = Number(받은[0]?.전체건수 ?? 0) || null;
     const rows: RapoJob[] = 줄.map((r) => ({
       id: r.id, org: 기관이름말(r.org_name), orgArt: 기관그림(r.org_name || r.id), title: r.title,
       pay: { text: '이용 권한 확인 후 공개', kind: 'value' },   // 원본 비회원 문구
       tags: 태그(r.sido, r.job_group, r.is_intern && '체험형 인턴'),
       deadline: 마감배지(r.apply_to).text,
     }));
-    return rows.length ? <목록 rows={rows} 제목={`공고 ${rows.length}개`} /> : <없음 조건있음={false} 초기화주소={초기화주소} />;
+    if (rows.length === 0) return <없음 조건있음={false} 초기화주소={초기화주소} />;
+    return (
+      <>
+        <목록 rows={rows} 제목={전체 ? `공고 ${전체.toLocaleString('ko-KR')}개` : `공고 ${rows.length}개`} />
+        <RapoJobGuestWall 남은={전체 ? Math.max(0, 전체 - rows.length) : null} />
+      </>
+    );
   }
   if (list.error) return <못받음 />;
 
