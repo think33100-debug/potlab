@@ -78,6 +78,10 @@ export async function middleware(req: NextRequest) {
 
   if (!user) {
     if (!모름 && 길에있나(path, 비회원길)) return 쿠키싣기(res);
+    /* ★ 2026-11-12 밤 세중님 — 공고 **목록**(/jobs 딱 그 주소)만 비회원에게 엽니다: 맛보기 몇 건 + 가입 권유.
+       공고 상세(/jobs/<번호>)와 그 밖은 전처럼 로그인으로 갑니다. 비회원길(lib/beta.ts)에 넣지 않은 까닭 —
+       거기는 아래 길(/jobs/…)까지 같이 열립니다 */
+    if (!모름 && path === '/jobs') return 쿠키싣기(res);
     if (api) return 쿠키싣기(new NextResponse('회원 전용입니다', { status: 401 }));
     /* 모름 — 회원일 수도 있으니 주소는 그대로 두고 안내만 보입니다.
        새로고침하면 다시 물어봅니다 */
