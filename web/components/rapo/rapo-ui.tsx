@@ -70,20 +70,23 @@ const 버튼색 = {
   navy: 'bg-(--rapo-color-bg-navy-solid) text-(color:--rapo-color-fg-on-navy-solid) enabled:active:bg-(--rapo-color-bg-navy-solid-pressed)',
   coral: 'bg-(--rapo-color-bg-identity) text-(color:--rapo-color-fg-on-identity) enabled:active:bg-(--rapo-color-bg-identity-pressed)',
   'deep-coral': 'bg-(--rapo-color-bg-deep-coral) text-(color:--rapo-color-fg-on-deep-coral) enabled:active:bg-(--rapo-color-bg-deep-coral-pressed)',
+  /* RAPO / Button / Outline 172:67 — 선 1px(stroke/neutral-muted) · 글자 fg/neutral */
+  outline: 'border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-muted) bg-(--rapo-color-bg-transparent) ' +
+           'text-(color:--rapo-color-fg-neutral) enabled:active:bg-(--rapo-color-bg-transparent-pressed)',
 } as const;
 const 버튼크기 = {
   40: 'rapo-type-t4-bold h-(--rapo-dimension-x10) px-(--rapo-dimension-x4) py-(--rapo-dimension-x2_5) rounded-(--rapo-radius-r2)',
   52: 'rapo-type-t6-bold h-(--rapo-dimension-x13) px-(--rapo-dimension-x5) py-(--rapo-dimension-x3_5) rounded-(--rapo-radius-r3)',
 } as const;
 
-type 버튼공통 = { tone?: keyof typeof 버튼색; size?: keyof typeof 버튼크기; full?: boolean; children: ReactNode };
+type 버튼공통 = { tone?: keyof typeof 버튼색; size?: keyof typeof 버튼크기; full?: boolean; className?: string; children: ReactNode };
 
 export function RapoButton(p: 버튼공통 & (
   | { href: string; onClick?: undefined; loading?: undefined; disabled?: undefined }
   | { href?: undefined; onClick: () => void; loading?: boolean; disabled?: boolean }
 )) {
-  const { tone = 'navy', size = 52, full = false, children } = p;
-  const 틀 = `flex items-center justify-center gap-(--rapo-dimension-x2) whitespace-nowrap ${버튼크기[size]} ${full ? 'w-full' : ''} `;
+  const { tone = 'navy', size = 52, full = false, className = '', children } = p;
+  const 틀 = `flex items-center justify-center gap-(--rapo-dimension-x2) whitespace-nowrap ${버튼크기[size]} ${full ? 'w-full' : ''} ${className} `;
   if (p.href !== undefined) {
     /* 링크에는 enabled: 가 안 걸려서 눌림 색을 따로 붙입니다 */
     return <Link href={p.href} className={틀 + 버튼색[tone].split('enabled:active:').join('active:')}>{children}</Link>;
@@ -168,5 +171,89 @@ export function RapoStatusPanel({ icon, title, text, action, role }: {
       <p className="rapo-type-t4-medium text-center text-(color:--rapo-color-fg-neutral-muted)">{text}</p>
       {action}
     </div>
+  );
+}
+
+/* ── 선택 칩 ───────────────────────────────────────────────
+   RAPO / Chip / Selection 172:86 — 보이는 높이 32 · 누르는 자리 44 · 14/19 Medium ·
+   full radius · 좌우 12 · 선 1. 선택 = 면 bg/neutral-weak + 선 stroke/neutral-contrast.
+   원본 비활성 변형은 값이 없어 fg/disabled·stroke 그대로로 둡니다(원본확인 D). */
+export function RapoChip({ label, on, onClick, disabled, className = '' }: {
+  label: string; on: boolean; onClick?: () => void; disabled?: boolean; className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={on}
+      disabled={disabled}
+      onClick={onClick}
+      className={`group flex h-(--rapo-touch-min) items-center justify-center disabled:cursor-not-allowed ${className}`}
+    >
+      <span className={
+        'rapo-type-t4-medium flex h-(--rapo-dimension-x8) min-w-(--rapo-touch-min) items-center justify-center whitespace-nowrap ' +
+        'rounded-(--rapo-radius-full) border-(length:--rapo-border-default) px-(--rapo-dimension-x3) ' +
+        'group-enabled:group-active:bg-(--rapo-color-bg-transparent-pressed) group-disabled:text-(color:--rapo-color-fg-disabled) ' +
+        (on
+          ? 'border-(color:--rapo-color-stroke-neutral-contrast) bg-(--rapo-color-bg-neutral-weak) text-(color:--rapo-color-fg-neutral)'
+          : 'border-(color:--rapo-color-stroke-neutral-muted) bg-(--rapo-color-bg-transparent) text-(color:--rapo-color-fg-neutral)')
+      }>
+        {label}
+      </span>
+    </button>
+  );
+}
+
+/* ── 쪽 넘기기 ─────────────────────────────────────────────
+   RAPO / Pagination 1412:47195 — 이전·다음 56×44 · 쪽 44×44 · radius 8 · 14/19 Medium ·
+   지금 쪽 면 bg/brand-weak · 갈 수 없는 이전/다음은 35% 흐림.
+   글자색은 원본이 변수 없는 검정이라 palette/static-black 을 씁니다.
+   쪽 번호는 지금 쪽을 가운데 두고 다섯 개까지 보입니다 (원본은 두 쪽 견본뿐). */
+export function RapoPagination({ page, pages, href }: {
+  page: number;            // 0 부터
+  pages: number;           // 전체 쪽 수
+  href: (p: number) => string;
+}) {
+  if (pages <= 1) return null;
+  const 처음 = Math.max(0, Math.min(page - 2, pages - 5));
+  const 쪽들 = Array.from({ length: Math.min(5, pages) }, (_, i) => 처음 + i);
+  const 칸 = 'rapo-type-t4-medium flex h-(--rapo-touch-min) items-center justify-center rounded-(--rapo-radius-r2) ' +
+             'text-(color:--rapo-color-palette-static-black)';
+  const 넘김 = (to: number, label: string, ok: boolean) => ok
+    ? <Link href={href(to)} className={`${칸} w-(--rapo-dimension-x14) active:bg-(--rapo-color-bg-transparent-pressed)`}>{label}</Link>
+    : <span aria-disabled className={`${칸} w-(--rapo-dimension-x14) opacity-35`}>{label}</span>;
+  return (
+    <nav aria-label="쪽 넘기기" className="flex items-center justify-center gap-(--rapo-dimension-x2)">
+      {넘김(page - 1, '이전', page > 0)}
+      {쪽들.map((p) => p === page
+        ? <span key={p} aria-current="page" className={`${칸} size-(--rapo-touch-min) bg-(--rapo-color-bg-brand-weak)`}>{p + 1}</span>
+        : <Link key={p} href={href(p)} className={`${칸} size-(--rapo-touch-min) active:bg-(--rapo-color-bg-transparent-pressed)`}>{p + 1}</Link>)}
+      {넘김(page + 1, '다음', page < pages - 1)}
+    </nav>
+  );
+}
+
+/* ── 자리표시 막대 ─────────────────────────────────────────
+   RAPO / Skeleton / 자리표시자 1412:55393 — palette/gray-300 · radius 4 */
+export function RapoSkeleton({ className }: { className: string }) {
+  return <span aria-hidden className={`block rounded-(--rapo-radius-r1) bg-(--rapo-color-palette-gray-300) ${className}`} />;
+}
+
+/* ── 원본 SVG 를 글자색으로 칠하기 ─────────────────────────────
+   Figma 원본 아이콘은 색이 SVG 안에 박혀 있습니다. 켜짐·꺼짐처럼 색만 다른 모양은
+   원본 모양을 **가림판(mask)** 으로 쓰고 글자색(currentColor)으로 칠합니다 —
+   모양·크기는 원본 그대로이고 색만 토큰을 따릅니다. */
+export function RapoMaskIcon({ src, w, h, className = '' }: { src: string; w: number; h: number; className?: string }) {
+  const m = `url(${src})`;
+  return (
+    <span
+      aria-hidden
+      className={`inline-block shrink-0 bg-current ${className}`}
+      style={{
+        width: w, height: h,
+        maskImage: m, WebkitMaskImage: m,
+        maskSize: '100% 100%', WebkitMaskSize: '100% 100%',
+        maskRepeat: 'no-repeat', WebkitMaskRepeat: 'no-repeat',
+      }}
+    />
   );
 }
