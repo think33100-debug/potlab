@@ -1,402 +1,154 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { Icon, ICON_NAMES } from '@/components/icon';
-import { HOME_COLS, type HomeBlock } from '@/lib/home';
-import { PhotoPicker } from '@/components/photo-picker';
-import { shrinkToWebp } from '@/lib/image';
-import { ROUTES } from '@/lib/routes';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
 import { browserSupabase } from '@/lib/supabase-browser';
-import { useToast } from '../toast';
 
-/* 홈 꾸미기.
+/* 관리자 홈 — 새 디자인 「관리자 홈 · PC UI」 1406:399 (2026-11-12 세중님 「관리자 페이지도 적용 시작」).
+   전에 이 자리에 있던 「홈 꾸미기」는 /admin/home-blocks 로 옮겼습니다 (메뉴 「그 밖의 도구」).
 
-   여기서 고친 것이 바로 홈에 나갑니다 — 배포가 필요 없습니다.
-   가는 곳은 직접 못 적고 lib/routes.ts 의 목록에서만 고릅니다.
-   아무 주소나 넣으면 없는 화면으로 보내 404 가 나기 때문입니다. */
+   카드 셋 가운데 값이 있는 것만 진짜 숫자로 채웁니다 — 지어낸 숫자는 넣지 않습니다.
+     방문자 수        admin_stats_daily 의 visits(그날 방문자 · 관리자 제외)를 기간만큼 더한 값.
+                     ★ 날마다 센 방문자의 합이라 같은 사람이 이틀 오면 두 번 셉니다 — 카드 아래에 그 뜻을 적습니다
+     가입 이탈률      가입을 시작한 사람을 세는 자리가 아직 없습니다 → 「아직 세지 않아요」
+     공유 버튼 클릭 수 공유 누름을 세는 자리가 아직 없습니다 → 「아직 세지 않아요」
+   원본의 시작일·종료일 고르기는 두 단추(최근 1일 · 최근 7일)로 정해지는 날짜를 보여 주기만 합니다. */
 
-const METRICS: { v: string; label: string }[] = [
-  { v: '', label: '숫자 없이 아래 설명만' },
-  { v: 'deadline', label: '이번 주 마감 건수' },
-  { v: 'coverage', label: '공고 수 · 기관 수' },
-  { v: 'hot', label: '이번 주 인기 글 제목' },
-];
+type Daily = { day: string; visits: number };
+type 보류줄 = { id: string; title: string | null; org_name: string | null; collected_at: string | null; evidence: Record<string, unknown> | null };
+
+const 날 = (s: string | null) => (s ? s.slice(0, 10).replaceAll('-', '.') : '—');
 
 export default function AdminHome() {
-  const toast = useToast();
-  const [blocks, setBlocks] = useState<HomeBlock[] | null>(null);
-  const [seconds, setSeconds] = useState('5');
-  const [savedSeconds, setSavedSeconds] = useState('5');
-  const [commSeconds, setCommSeconds] = useState('5');
-  const [savedCommSeconds, setSavedCommSeconds] = useState('5');
-
-  /* 받아오는 일과 상태에 넣는 일을 갈라둡니다 —
-     effect 안에서 바로 setState 하면 그릴 때마다 한 번 더 그립니다 */
-  const fetchAll = useCallback(async () => {
-    const sb = browserSupabase();
-    const [b, s, c] = await Promise.all([
-      sb.from('home_blocks').select(HOME_COLS).order('kind').order('sort'),
-      sb.from('site_settings').select('value').eq('key', 'top_banner_seconds').maybeSingle(),
-      sb.from('site_settings').select('value').eq('key', 'comm_banner_seconds').maybeSingle(),
-    ]);
-    return {
-      blocks: (b.data ?? []) as unknown as HomeBlock[],
-      sec: String((s.data as { value: unknown } | null)?.value ?? 5),
-      commSec: String((c.data as { value: unknown } | null)?.value ?? 5),
-    };
-  }, []);
-
-  const load = useCallback(async () => {
-    const r = await fetchAll();
-    setBlocks(r.blocks);
-    setSeconds(r.sec);
-    setSavedSeconds(r.sec);
-    setCommSeconds(r.commSec);
-    setSavedCommSeconds(r.commSec);
-  }, [fetchAll]);
+  const [기간, set기간] = useState<1 | 7>(7);
+  const [daily, setDaily] = useState<Daily[] | null>(null);
+  const [보류, set보류] = useState<{ rows: 보류줄[]; count: number } | null>(null);
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    let alive = true;
-    fetchAll().then((r) => {
-      if (!alive) return;
-      setBlocks(r.blocks);
-      setSeconds(r.sec);
-      setSavedSeconds(r.sec);
-      setCommSeconds(r.commSec);
-      setSavedCommSeconds(r.commSec);
-    });
-    return () => { alive = false; };
-  }, [fetchAll]);
-
-  if (!blocks) return <p className="text-lg text-mute">불러오는 중…</p>;
-
-  const of = (kind: HomeBlock['kind']) =>
-    blocks.filter((b) => b.kind === kind).sort((a, c) => a.sort - c.sort);
-
-  const patch = (id: number, v: Partial<HomeBlock>) =>
-    setBlocks((all) => (all ?? []).map((b) => (b.id === id ? { ...b, ...v } : b)));
-
-  const save = async (b: HomeBlock) => {
-    const { error } = await browserSupabase().from('home_blocks').update({
-      enabled: b.enabled, emoji: b.emoji, icon: b.icon, image_path: b.image_path,
-      title: b.title, descr: b.descr, href: b.href, metric: b.metric,
-      updated_at: new Date().toISOString(),
-    }).eq('id', b.id);
-
-    if (error) { toast(`저장하지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
-    toast('저장했어요');
-  };
-
-  /* 순서 바꾸기 — 옆 줄과 sort 값을 맞바꿉니다 */
-  const move = async (b: HomeBlock, dir: -1 | 1) => {
-    const list = of(b.kind);
-    const i = list.findIndex((x) => x.id === b.id);
-    const j = i + dir;
-    if (j < 0 || j >= list.length) return;
-
-    const other = list[j];
     const sb = browserSupabase();
-    const r = await Promise.all([
-      sb.from('home_blocks').update({ sort: other.sort }).eq('id', b.id),
-      sb.from('home_blocks').update({ sort: b.sort }).eq('id', other.id),
-    ]);
-    const bad = r.find((x) => x.error);
-    if (bad?.error) { toast(`순서를 못 바꿨어요 — ${bad.error.message}`, { tone: 'danger' }); return; }
-    await load();
-    toast('순서를 바꿨어요');
-  };
+    sb.rpc('admin_stats_daily', { p_days: 7 }).then(({ data, error }) => {
+      if (error) setErr(error.message); else setDaily((data ?? []) as Daily[]);
+    });
+    sb.from('admin_jobs').select('id,title,org_name,collected_at,evidence', { count: 'exact' })
+      .eq('hold', true).order('collected_at', { ascending: false }).order('id').limit(5)
+      .then(({ data, count, error }) => {
+        if (error) setErr(error.message); else set보류({ rows: (data ?? []) as 보류줄[], count: count ?? 0 });
+      });
+  }, []);
 
-  const upload = async (b: HomeBlock, file: File) => {
-    try {
-      const webp = await shrinkToWebp(file, 1600);
-      const path = `${b.kind}/${b.id}-${Date.now()}.webp`;
-      const sb = browserSupabase();
-      const { error } = await sb.storage.from('home-images')
-        .upload(path, webp, { contentType: 'image/webp', upsert: true });
-      if (error) throw error;
-      await sb.from('home_blocks').update({ image_path: path }).eq('id', b.id);
-      patch(b.id, { image_path: path });
-      toast('그림을 올렸어요');
-    } catch (e) {
-      toast(`그림을 올리지 못했어요 — ${(e as Error).message}`, { tone: 'danger', ms: 4000 });
-    }
-  };
-
-  const saveSeconds = async (key: string, raw: string, done: (v: string) => void) => {
-    const n = Number(raw);
-    if (!Number.isFinite(n) || n < 2 || n > 60) {
-      toast('2초에서 60초 사이로 넣어 주세요', { tone: 'danger' }); return;
-    }
-    const { error } = await browserSupabase().from('site_settings')
-      .update({ value: n, updated_at: new Date().toISOString() })
-      .eq('key', key);
-    if (error) { toast(`저장하지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
-    done(String(n));
-    toast(`${n}초마다 넘기게 했어요`);
-  };
+  const 고른날 = daily ? daily.slice(-기간) : null;
+  const 방문합 = 고른날?.reduce((a, d) => a + Number(d.visits ?? 0), 0) ?? null;
 
   return (
-    <div className="space-y-8">
-      {/* ── 상단 배너 ── */}
-      <Section
-        title="상단 배너"
-        note={`켜진 것만 홈에 나와요 · 제목이 비면 안 나와요 · 지금 ${of('top').filter((b) => b.enabled && b.title).length}개`}
-      >
-        <div className="mb-6 flex flex-wrap items-end gap-3 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-          <label className="text-sm font-bold text-mute">
-            넘어가는 속도
-            <div className="mt-2 flex gap-2">
-              <input
-                type="number" min={2} max={60}
-                value={seconds}
-                onChange={(e) => setSeconds(e.target.value)}
-                className="w-[88px] rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
-              />
-              <span className="self-center text-lg text-mute">초</span>
-            </div>
-          </label>
-          <button
-            type="button" onClick={() => saveSeconds('top_banner_seconds', seconds, setSavedSeconds)}
-            disabled={seconds === savedSeconds}
-            className="rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
-          >
-            속도 저장
-          </button>
+    <div className="max-w-[932px]">
+      <RapoAdminHeader title="관리자 홈">
+        <div role="group" aria-label="조회 기간"
+          className="flex items-center gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r2) border border-[#dde4e6] bg-white px-(--rapo-dimension-x2) py-[5px]">
+          {([1, 7] as const).map((n) => (
+            <button key={n} type="button" aria-pressed={기간 === n} onClick={() => set기간(n)}
+              className={'rounded-[5px] px-(--rapo-dimension-x2) py-[5px] text-[14px] text-[#112231] '
+                + (기간 === n ? 'bg-[#dde7ee] font-bold' : '')}>
+              최근 {n}일
+            </button>
+          ))}
+          {고른날 && 고른날.length > 0 && (
+            <span className="flex items-center gap-(--rapo-dimension-x2) px-(--rapo-dimension-x2) text-[14px] text-[#112231]">
+              {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG */}
+              <img src="/rapo/admin/calendar.svg" alt="" width={16} height={16} />
+              {날(고른날[0].day)} – {날(고른날[고른날.length - 1].day)}
+            </span>
+          )}
         </div>
+      </RapoAdminHeader>
 
-        {of('top').map((b, i, arr) => (
-          <Row key={b.id} b={b} i={i} last={arr.length - 1}
-            onPatch={patch} onSave={save} onMove={move} onUpload={upload}>
-            <Field label="제목" v={b.title} set={(v) => patch(b.id, { title: v })} />
-            <Field label="설명" v={b.descr ?? ''} set={(v) => patch(b.id, { descr: v })} />
-            <Href b={b} set={(v) => patch(b.id, { href: v })} />
-            <Picture b={b} onUpload={upload} onClear={() => patch(b.id, { image_path: null })} />
-          </Row>
-        ))}
-      </Section>
+      {err && <p role="alert" className="mb-(--rapo-dimension-x6) rounded-(--rapo-radius-r2) bg-[#fff5f3] p-(--rapo-dimension-x4) text-[14px] text-[#b42a21]">못 불러왔어요 — {err}</p>}
 
-      {/* ── 카테고리 ── */}
-      <Section title="큰 카테고리" note="홈 가운데 다섯 칸 · 나중에 이모지 대신 그림도 넣을 수 있어요">
-        {of('category').map((b, i, arr) => (
-          <Row key={b.id} b={b} i={i} last={arr.length - 1}
-            onPatch={patch} onSave={save} onMove={move} onUpload={upload}>
-            {/* 이모지는 안 씁니다 — 라인 아이콘 이름을 고릅니다.
-                없는 이름이 들어와도 화면은 기본 아이콘으로 떨어집니다 */}
-            <IconField v={b.icon ?? ''} set={(v) => patch(b.id, { icon: v })} />
-            <Field label="글씨" v={b.title} set={(v) => patch(b.id, { title: v })} />
-            <Href b={b} set={(v) => patch(b.id, { href: v })} />
-          </Row>
-        ))}
-      </Section>
-
-      {/* ── 커뮤니티 배너 ── */}
-      <Section
-        title="커뮤니티 배너"
-        note={`커뮤니티 맨 위에 옆으로 밀리는 줄 · 제목이 비면 안 나와요 · 지금 ${of('comm').filter((b) => b.enabled && b.title).length}개`}
-      >
-        <div className="mb-6 flex flex-wrap items-end gap-3 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-          <label className="text-sm font-bold text-mute">
-            넘어가는 속도
-            <div className="mt-2 flex gap-2">
-              <input
-                type="number" min={2} max={60}
-                value={commSeconds}
-                onChange={(e) => setCommSeconds(e.target.value)}
-                className="w-[88px] rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
-              />
-              <span className="self-center text-lg text-mute">초</span>
-            </div>
-          </label>
-          <button
-            type="button"
-            onClick={() => saveSeconds('comm_banner_seconds', commSeconds, setSavedCommSeconds)}
-            disabled={commSeconds === savedCommSeconds}
-            className="rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
-          >
-            속도 저장
-          </button>
+      <section aria-labelledby="admin-metrics" className="mb-[32px] flex flex-col gap-(--rapo-dimension-x4)">
+        <h2 id="admin-metrics" className="rapo-type-t6-bold">선택 기간 주요 지표</h2>
+        <div className="grid gap-(--rapo-dimension-x4) md:grid-cols-3">
+          <지표카드 그림="/rapo/admin/metric-visitors.svg" 이름="방문자 수"
+            값={방문합 == null ? null : 방문합.toLocaleString('ko-KR')} 단위="명"
+            설명={기간 === 1 ? '오늘 방문자 (관리자 제외)' : '날마다 센 방문자의 합 (관리자 제외)'}
+            그래프={고른날 && 고른날.length > 1 ? <꺾은선 값들={고른날.map((d) => Number(d.visits ?? 0))} /> : null} />
+          <지표카드 그림="/rapo/admin/metric-leave.svg" 이름="가입 이탈률" 값={null} 빈말="아직 세지 않아요"
+            설명="가입을 시작한 사람을 세는 자리가 아직 없어요" />
+          <지표카드 그림="/rapo/admin/metric-share.svg" 이름="공유 버튼 클릭 수" 값={null} 빈말="아직 세지 않아요"
+            설명="공유 단추 누름을 세는 자리가 아직 없어요" />
         </div>
+      </section>
 
-        {of('comm').map((b, i, arr) => (
-          <Row key={b.id} b={b} i={i} last={arr.length - 1}
-            onPatch={patch} onSave={save} onMove={move} onUpload={upload}>
-            <Field label="제목" v={b.title} set={(v) => patch(b.id, { title: v })} />
-            <Field label="설명" v={b.descr ?? ''} set={(v) => patch(b.id, { descr: v })} />
-            <Href b={b} set={(v) => patch(b.id, { href: v })} />
-            <Picture b={b} onUpload={upload} onClear={() => patch(b.id, { image_path: null })} />
-          </Row>
-        ))}
-      </Section>
-
-      {/* ── 큰 배너 ── */}
-      <Section title="큰 배너" note="가로로 밀어서 보는 칸 · 숫자는 화면이 세어서 넣어요">
-        {of('big').map((b, i, arr) => (
-          <Row key={b.id} b={b} i={i} last={arr.length - 1}
-            onPatch={patch} onSave={save} onMove={move} onUpload={upload}>
-            <Field label="제목" v={b.title} set={(v) => patch(b.id, { title: v })} />
-            <label className="block">
-              <span className="text-sm font-bold text-mute">안에 넣을 숫자</span>
-              <select
-                value={b.metric ?? ''}
-                onChange={(e) => patch(b.id, { metric: (e.target.value || null) as HomeBlock['metric'] })}
-                className="mt-1 w-full appearance-none rounded-xs border border-gray-200 bg-gray-50 py-4 pl-5 pr-[36px] text-lg dark:border-gray-700 dark:bg-gray-950"
-              >
-                {METRICS.map((m) => <option key={m.v} value={m.v}>{m.label}</option>)}
-              </select>
-            </label>
-            <Field label="설명 (숫자를 안 쓸 때만 보여요)" v={b.descr ?? ''} set={(v) => patch(b.id, { descr: v })} />
-            <Href b={b} set={(v) => patch(b.id, { href: v })} />
-            <Picture b={b} onUpload={upload} onClear={() => patch(b.id, { image_path: null })} />
-          </Row>
-        ))}
-      </Section>
+      <section aria-labelledby="admin-hold" className="flex flex-col gap-(--rapo-dimension-x4)">
+        <div className="flex items-center justify-between">
+          <h2 id="admin-hold" className="flex items-center gap-(--rapo-dimension-x2)">
+            <span className="rapo-type-t8-bold">현재 보류 공고</span>
+            {보류 && <span className="rapo-type-t6-bold text-[#b42a21]">{보류.count}건</span>}
+          </h2>
+          <Link href="/admin/jobs?state=hold" className="rapo-type-t4-bold flex h-(--rapo-touch-min) items-center">보류함 보기&nbsp;&nbsp;→</Link>
+        </div>
+        <div className="overflow-x-auto rounded-[12px] border border-[#dde4e6] bg-white">
+          <table className="w-full min-w-[640px] text-left">
+            <thead className="bg-[#f1f5f8] text-[13px] font-bold text-[#304f65]">
+              <tr>
+                <th className="h-[42px] px-[18px] font-bold">공고명</th>
+                <th className="px-(--rapo-dimension-x4) font-bold">기관명</th>
+                <th className="px-(--rapo-dimension-x4) font-bold">보류 사유</th>
+                <th className="px-(--rapo-dimension-x4) font-bold">수집일</th>
+              </tr>
+            </thead>
+            <tbody>
+              {보류 == null ? (
+                <tr><td colSpan={4} className="h-[57px] px-[18px] text-[14px] text-[#304f65]">불러오는 중…</td></tr>
+              ) : 보류.rows.length === 0 ? (
+                <tr><td colSpan={4} className="h-[57px] px-[18px] text-[14px] text-[#304f65]">보류 공고가 없어요</td></tr>
+              ) : 보류.rows.map((r) => (
+                <tr key={r.id} className="border-t border-[#dde4e6]">
+                  <td className="h-[57px] px-[18px] text-[16px] font-bold text-[#112231]">
+                    <Link href={`/admin/jobs/${encodeURIComponent(r.id)}`} className="hover:underline">{r.title ?? '(제목 없음)'}</Link>
+                  </td>
+                  <td className="px-(--rapo-dimension-x4) text-[14px] text-[#304f65]">{r.org_name ?? '—'}</td>
+                  <td className="px-(--rapo-dimension-x4) text-[14px] text-[#304f65]">{String(r.evidence?.['보류사유'] ?? '—')}</td>
+                  <td className="whitespace-nowrap px-(--rapo-dimension-x4) text-[14px] text-[#304f65]">{날(r.collected_at)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────── */
-
-function Section({ title, note, children }: { title: string; note: string; children: React.ReactNode }) {
-  return (
-    <section>
-      <h2 className="text-h3 font-bold">{title}</h2>
-      <p className="mt-1 text-sm text-mute">{note}</p>
-      <div className="mt-5 space-y-5">{children}</div>
-    </section>
-  );
-}
-
-function Row({
-  b, i, last, onSave, onMove, onPatch, children,
-}: {
-  b: HomeBlock; i: number; last: number;
-  onSave: (b: HomeBlock) => void;
-  onMove: (b: HomeBlock, d: -1 | 1) => void;
-  onPatch: (id: number, v: Partial<HomeBlock>) => void;
-  onUpload: (b: HomeBlock, f: File) => void;
-  children: React.ReactNode;
+/* 원본 「RAPO / 운영 / 지표 카드」 1406:386 — 흰 바탕 · 테두리 · radius 12 · 높이 114 */
+function 지표카드({ 그림, 이름, 값, 단위, 설명, 그래프, 빈말 }: {
+  그림: string; 이름: string; 값: string | null; 단위?: string; 설명: string; 그래프?: React.ReactNode; 빈말?: string;
 }) {
   return (
-    <div className={'rounded-sm border p-6 ' + (b.enabled ? 'border-gray-200 dark:border-gray-700' : 'border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-950')}>
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <label className="flex cursor-pointer items-center gap-3">
-          <input
-            type="checkbox" className="sr-only"
-            checked={b.enabled}
-            onChange={(e) => onPatch(b.id, { enabled: e.target.checked })}
-          />
-          <span className={
-            'flex size-[22px] items-center justify-center rounded-xs border text-white ' +
-            (b.enabled ? 'border-teal-strong bg-teal-strong' : 'border-gray-300 dark:border-gray-600')
-          }>{b.enabled ? '✓' : ''}</span>
-          <span className="text-lg font-medium">{b.enabled ? '켜짐' : '꺼짐'}</span>
-        </label>
-
-        <span className="text-sm text-mute">{i + 1}번째</span>
-
-        <button type="button" onClick={() => onMove(b, -1)} disabled={i === 0}
-          aria-label="위로" className="rounded-md border border-gray-200 px-4 py-1 text-lg disabled:opacity-30 dark:border-gray-700">↑</button>
-        <button type="button" onClick={() => onMove(b, 1)} disabled={i === last}
-          aria-label="아래로" className="rounded-md border border-gray-200 px-4 py-1 text-lg disabled:opacity-30 dark:border-gray-700">↓</button>
-
-        <span className="flex-1" />
-
-        <button type="button" onClick={() => onSave(b)}
-          className="rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
-          저장
-        </button>
+    <div className="relative flex min-h-[114px] flex-col justify-between rounded-[12px] border border-[#dde4e6] bg-white px-[15px] py-[12px]">
+      <p className="flex items-center gap-[6px] text-[16px] font-bold text-[#304f65]">
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG */}
+        <img src={그림} alt="" width={19} height={19} />
+        {이름}
+      </p>
+      <div className="flex items-end justify-between gap-(--rapo-dimension-x3)">
+        {값 != null
+          ? <p className="flex items-baseline gap-[3px] font-bold text-[#112231]"><span className="text-[32px] leading-none">{값}</span><span className="text-[15px]">{단위}</span></p>
+          : <p className="text-[16px] font-bold text-[#304f65]">{빈말 ?? '불러오는 중…'}</p>}
+        {그래프}
       </div>
-
-      <div className="space-y-5">{children}</div>
+      <p className="text-[13px] text-[#304f65]">{설명}</p>
     </div>
   );
 }
 
-function Field({
-  label, v, set, wide = true,
-}: { label: string; v: string; set: (v: string) => void; wide?: boolean }) {
+/* 방문자 꺾은선 — 원본 Vector 114×26 자리. 진짜 날별 값으로 그립니다 */
+function 꺾은선({ 값들 }: { 값들: number[] }) {
+  const w = 114, h = 26, 큰 = Math.max(1, ...값들);
+  const 점 = 값들.map((v, i) => `${(i / (값들.length - 1)) * w},${h - (v / 큰) * h}`).join(' ');
   return (
-    <label className="block">
-      <span className="text-sm font-bold text-mute">{label}</span>
-      <input
-        value={v}
-        onChange={(e) => set(e.target.value)}
-        className={
-          'mt-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950 '
-          + (wide ? 'w-full' : 'w-[88px] text-center')
-        }
-      />
-    </label>
-  );
-}
-
-/* 아이콘은 코드가 아는 이름 중에서만 고릅니다.
-   글자로 직접 치게 두면 오타가 나고, 그러면 화면에 기본 아이콘만 남습니다 */
-function IconField({ v, set }: { v: string; set: (v: string) => void }) {
-  return (
-    <label className="block">
-      <span className="text-sm font-bold text-mute">아이콘</span>
-      <span className="mt-1 flex items-center gap-3">
-        <span className="flex size-[44px] shrink-0 items-center justify-center rounded-xs border border-gray-200 dark:border-gray-700">
-          <Icon name={v} size={20} />
-        </span>
-        <select
-          value={v}
-          onChange={(e) => set(e.target.value)}
-          className="min-w-0 flex-1 appearance-none rounded-xs border border-gray-200 bg-gray-50 py-4 pl-5 pr-[36px] text-lg dark:border-gray-700 dark:bg-gray-950"
-        >
-          <option value="">없음 (점으로 보여요)</option>
-          {ICON_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
-        </select>
-      </span>
-    </label>
-  );
-}
-
-/* 가는 곳은 코드가 아는 주소 중에서만 고릅니다 */
-function Href({ b, set }: { b: HomeBlock; set: (v: string) => void }) {
-  return (
-    <label className="block">
-      <span className="text-sm font-bold text-mute">누르면 갈 곳</span>
-      <select
-        value={b.href ?? ''}
-        onChange={(e) => set(e.target.value)}
-        className="mt-1 w-full appearance-none rounded-xs border border-gray-200 bg-gray-50 py-4 pl-5 pr-[36px] text-lg dark:border-gray-700 dark:bg-gray-950"
-      >
-        <option value="">안 눌리게</option>
-        {ROUTES.map((r) => (
-          <option key={r.href} value={r.href}>
-            {r.label}{r.soon ? ' (아직 준비 중 — 「곧 찾아올게요」로 가요)' : ''}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function Picture({
-  b, onUpload, onClear,
-}: { b: HomeBlock; onUpload: (b: HomeBlock, f: File) => void; onClear: () => void }) {
-  const url = b.image_path
-    ? browserSupabase().storage.from('home-images').getPublicUrl(b.image_path).data.publicUrl
-    : null;
-
-  return (
-    <div>
-      <span className="text-sm font-bold text-mute">그림 (없으면 teal 바탕에 글씨만)</span>
-      <div className="mt-2 flex flex-wrap items-center gap-3">
-        {url && (
-          // eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다
-          <img src={url} alt="" className="h-[56px] w-[100px] rounded-xs object-cover" />
-        )}
-        <PhotoPicker label={url ? '그림 바꾸기' : '그림 넣기'} onPick={(f) => onUpload(b, f)} />
-        {url && (
-          <button type="button" onClick={onClear}
-            className="text-sm text-mute hover:underline">
-            그림 빼기 (저장을 눌러야 적용돼요)
-          </button>
-        )}
-      </div>
-    </div>
+    <svg width={w} height={h + 2} viewBox={`0 -1 ${w} ${h + 2}`} aria-hidden className="shrink-0">
+      <polyline points={점} fill="none" stroke="#223d51" strokeWidth={1.8} strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
   );
 }

@@ -51,5 +51,7 @@ export function 새틀화면(pathname: string): boolean {
     || pathname === '/me' || ['/me/profile', '/me/spec', '/me/activity', '/me/notify', '/me/account', '/me/soon', '/me/saved', '/me/hospitals'].includes(pathname)
     /* 가입(/welcome)도 2026-11-12 밤부터 새 틀(자기 앱 바 · 아래 고정 단추) */
     || pathname === '/welcome'
+    /* 관리자 화면도 2026-11-12 부터 새 틀(왼쪽 운영 메뉴 · components/rapo/rapo-admin.tsx) */
+    || pathname === '/admin' || pathname.startsWith('/admin/')
     || pathname.startsWith('/design-preview');
 }
