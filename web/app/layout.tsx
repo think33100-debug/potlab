@@ -32,6 +32,8 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   appleWebApp: { title: "POTJOB" },
+  /* ★ 2026-11-11 — 클로즈드 베타 동안 검색엔진에 안 올립니다 (app/robots.ts · middleware.ts 와 한 쌍) */
+  robots: { index: false, follow: false },
 };
 
 /* 주소창·작업전환 화면 색. 브랜드 빨강입니다 */

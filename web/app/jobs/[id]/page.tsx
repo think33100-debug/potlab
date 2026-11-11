@@ -25,7 +25,7 @@ import { isClosed, todayKst, 금액있나, 기관이름말, 마감배지, 시각
 import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { MembersOnly } from '@/components/members-only';
-import { supabase, type JobPost } from '@/lib/supabase';
+import type { JobPost } from '@/lib/supabase';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
@@ -91,9 +91,10 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  /* 카톡·검색 로봇에는 세션이 없습니다. 공개 열쇠꾸러미로 읽습니다 —
-     제목·기관·마감일만 쓰므로 본문이 없어도 됩니다 */
-  const j = await one(supabase, id);
+  /* 카톡·검색 로봇에는 세션이 없습니다. 제목·기관·마감일만 쓰므로 본문이 없어도 됩니다.
+     ★ 2026-11-11 클로즈드 베타 — 비회원에게 공고 창구(job_one)를 닫으므로 **세션으로** 읽습니다.
+     로봇은 middleware 가 /beta 로 보내 여기까지 안 옵니다 (RAPO노트/SQL_1113) */
+  const j = await one(await serverSupabase(), id);
   if (!j) return { title: '없는 공고입니다 · POTJOB' };
 
   const closed = isClosed(j.apply_to, todayKst(), j.apply_to_time);

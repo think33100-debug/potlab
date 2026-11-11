@@ -8,6 +8,7 @@ import { Logo } from '@/components/logo';
 import {
   readLastLogin, writeLastLogin, subscribeLastLogin, serverLastLogin, type LoginMethod,
 } from '@/lib/last-login';
+import { 초대코드읽기 } from '@/lib/beta';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useAuth } from '../auth';
 import { useToast } from '../toast';
@@ -38,6 +39,9 @@ const METHODS: Method[] = [
   },
 ];
 
+/* 초대 코드는 이 탭에서만 바뀌므로 따로 알릴 일이 없습니다 */
+const 구독없음 = () => () => {};
+
 export default function Login() {
   const toast = useToast();
   const router = useRouter();
@@ -47,6 +51,10 @@ export default function Login() {
   /* 서버에는 localStorage 가 없습니다. 서버 그림은 null 로 두고
      브라우저에 붙은 뒤 실제 값으로 바뀝니다 — 안 그러면 두 그림이 어긋납니다 */
   const last = useSyncExternalStore(subscribeLastLogin, readLastLogin, serverLastLogin);
+
+  /* ★ 2026-11-11 클로즈드 베타 — 초대 링크(/join)로 왔나. 서버 그림은 null 입니다.
+     안내만 바꿉니다. 코드가 맞는지는 가입 화면에서 DB 가 정합니다 */
+  const 초대 = useSyncExternalStore(구독없음, 초대코드읽기, () => null);
 
   /* 마지막에 쓴 수단을 맨 위로 올립니다. 처음 오신 분은 적어둔 순서 그대로입니다.
      가입할 때 쓴 것을 잊고 다른 걸 누르면 계정이 갈라지기 때문에,
@@ -161,6 +169,14 @@ export default function Login() {
               처음부터 다시 하기
             </button>
           </div>
+        )}
+
+        {!halfway && (
+          <p className="mt-5 rounded-sm bg-badge-teal-bg px-5 py-4 text-sm text-teal-strong">
+            {초대
+              ? '초대 링크로 오셨어요. 처음이시면 아래에서 시작해 주세요.'
+              : 'RAPO 는 지금 테스터 전용이에요. 처음 오셨다면 초대 링크로 들어와 주세요. 이미 가입하신 분은 로그인하시면 돼요.'}
+          </p>
         )}
 
         <div className="mt-8 space-y-5">

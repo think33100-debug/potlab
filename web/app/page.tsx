@@ -9,6 +9,7 @@ import {
 } from '@/components/home/sections';
 import { getHome, metricLine } from '@/lib/home';
 import { safeHref, 미리받기 } from '@/lib/routes';
+import { serverSupabase } from '@/lib/supabase-server';
 import { 가는중 } from '@/components/가는중';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +30,8 @@ export const dynamic = 'force-dynamic';
 
    바탕은 밝은 종이색이고 히어로와 마지막 CTA 만 어둡습니다. */
 export default async function Home() {
-  const { top, categories, bigs, seconds, metrics, stats, texts } = await getHome();
+  /* ★ 2026-11-11 클로즈드 베타 — 「인기 글」(공개글)을 비회원에게 닫으므로 세션으로 읽습니다 */
+  const { top, categories, bigs, seconds, metrics, stats, texts } = await getHome(await serverSupabase());
 
   return (
     <>
