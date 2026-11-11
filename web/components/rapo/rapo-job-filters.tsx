@@ -221,13 +221,15 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
    원본의 급여 편집(509:5444)은 아직 열지 않습니다. 같은 시트 안에서 무엇이 준비되고 있는지
    알려 주고 오픈 알림 신청으로 이끕니다. 글은 대표가 준 첫 문장에 기능 설명을 붙인 것입니다.
 
-   ⚠ 「알림 신청」은 사전 등록 창구에 이어야 합니다. 그 창구(가입 뒤 연봉 비교 알림 · PR #36)가
-     아직 main 에 없어 단추를 잠가 둡니다 — 이어지면 onClick 만 바꾸면 됩니다 (막힌 것) */
+   ⚠ 「알림 신청」 한 번에 **연봉에 관한 신청을 모두** 겁니다 (2026-11-11 대표):
+       ① 연봉 비교 알림 — 비교알림신청 (PR #36 · components/compare-notify.tsx)
+       ② 연봉 통계 사전 신청 — 사전 신청 kind '연봉' (PR #15 · lib/pay-prereg-store.ts)
+     두 창구와 그 SQL 이 아직 main·운영에 없어 단추를 잠가 둡니다 (막힌 것) */
 function 급여오픈전() {
   const 할수있는것 = [
     '급여가 공개된 공고만 모아서 볼 수 있어요',
-    '원하는 연봉 범위로 공고를 좁힐 수 있어요',
     '같은 직군·지역 공고의 급여를 한눈에 비교할 수 있어요',
+    '직군·연차별 연봉 통계를 가장 먼저 받아볼 수 있어요',
   ];
   return (
     /* 시트 바탕(흰색) 위에 그대로 둡니다 — 회색 판 위에서는 잠긴 단추가 바탕과 같은 색이라 안 보였습니다 */
@@ -244,7 +246,8 @@ function 급여오픈전() {
           </li>
         ))}
       </ul>
-      <p className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">오픈 알림을 받고 싶다면 알림 신청을 눌러주세요.</p>
+      <p className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">오픈 알림을 받고 싶다면 알림 신청을 눌러주세요.<br />
+        연봉 비교 알림과 연봉 통계 소식을 한 번에 보내 드려요.</p>
       <RapoButton onClick={() => {}} disabled full>알림 신청</RapoButton>
       <p className="rapo-type-t3-regular text-center text-(color:--rapo-color-fg-neutral-muted)">알림 신청은 곧 열려요.</p>
     </div>
