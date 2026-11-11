@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Avatar } from '@/components/avatar';
 import { PhotoCropper } from '@/components/photo-cropper';
 import { PhotoPicker } from '@/components/photo-picker';
-import { AVATAR_COLORS, AVATAR_EMOJIS, isPhoto, withColor, withEmoji, withPhoto } from '@/lib/avatar';
+import { AVATAR_ANIMALS, AVATAR_COLORS, AVATAR_EMOJIS, isPhoto, withAnimal, withColor, withEmoji, withPhoto } from '@/lib/avatar';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '@/app/toast';
 
@@ -69,7 +69,20 @@ export function AvatarPicker({
         <PhotoPicker label="이미지 직접 가져오기" onPick={pickPhoto} disabled={busy} />
       </div>
 
-      <p className="mt-6 text-sm text-mute">이모지와 색을 골라도 돼요</p>
+      {/* RAPO 동물 — 피그마 기본 아바타 여섯 (2026-11-11 밤 · 대표 「동물 선택할 수 있게」) */}
+      <p className="mt-6 text-sm text-mute">RAPO 동물 친구</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {AVATAR_ANIMALS.map((a) => (
+          <button key={a.key} type="button" aria-label={a.name} disabled={busy}
+            onClick={() => { if (askOverwrite()) save(withAnimal(value, a.key)); }}
+            className="flex size-[52px] items-center justify-center rounded-full border border-gray-200 bg-white disabled:opacity-40 dark:border-gray-700">
+            {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+            <img src={`/rapo/animals/${a.key}.svg`} alt="" width={44} height={44} />
+          </button>
+        ))}
+      </div>
+
+      <p className="mt-6 text-sm text-mute">이모지와 바탕색을 골라도 돼요</p>
       <div className="mt-2 flex flex-wrap gap-2">
         {AVATAR_EMOJIS.map((em) => (
           <button key={em} type="button" aria-label={em} disabled={busy}

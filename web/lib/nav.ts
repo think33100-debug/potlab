@@ -46,6 +46,6 @@ export function 새틀화면(pathname: string): boolean {
     /* 커뮤니티 피드(/community)도 2026-11-11 밤부터 새 틀(어두운 판). 방·글·글쓰기는 아직 옛 틀 */
     || pathname === '/community'
     /* 내 정보(/me)와 그 아래 다섯 화면도 2026-11-11 밤부터 새 틀. 탈퇴(/me/leave)는 아직 옛 틀 */
-    || pathname === '/me' || ['/me/profile', '/me/spec', '/me/activity', '/me/notify', '/me/account'].includes(pathname)
+    || pathname === '/me' || ['/me/profile', '/me/spec', '/me/activity', '/me/notify', '/me/account', '/me/soon'].includes(pathname)
     || pathname.startsWith('/design-preview');
 }
