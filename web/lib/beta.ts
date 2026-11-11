@@ -15,6 +15,7 @@
 /** 비회원(로그인 안 함)이 열 수 있는 길. 나머지는 전부 /beta 로 갑니다.
     ★ 여기에 화면을 더하면 그 화면이 비회원에게 열립니다 — 더하기 전에 세중님께 */
 export const 비회원길 = [
+  '/',              // 홈 — 2026-11-11 밤 세중님 「비회원도 라포 홈이랑 영상 보이게」. 공고 칸은 「회원 전용」 안내(공개공고는 닫힌 그대로)
   '/beta',          // 「테스트 중 · 가입하면 볼 수 있어요」 안내
   '/login',         // 로그인 · 처음 오신 분의 가입 시작
   '/auth/callback', // 카카오·네이버·애플에서 돌아오는 자리
@@ -23,7 +24,8 @@ export const 비회원길 = [
 ] as const;
 
 /** 로그인은 했는데 가입(닉네임)을 안 마친 사람이 열 수 있는 길 */
-export const 가입중길 = [...비회원길, '/welcome'] as const;
+/* 홈('/')은 뺍니다 — 가입을 덜 마친 분은 전처럼 홈 대신 가입 화면(/welcome)으로 갑니다 (2026-11-11 밤) */
+export const 가입중길: readonly string[] = [...비회원길.filter((p) => p !== '/'), '/welcome'];
 
 export function 길에있나(pathname: string, 목록: readonly string[]): boolean {
   return 목록.some((p) => pathname === p || pathname.startsWith(p + '/'));
