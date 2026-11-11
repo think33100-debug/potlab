@@ -1,172 +1,38 @@
-import Link from 'next/link';
+import type { Metadata } from 'next';
 import { Hit } from '@/components/hit';
-import { HomeBanner } from '@/components/home-banner';
-import { Icon } from '@/components/icon';
-import { Rail } from '@/components/rail';
-import { Hero } from '@/components/home/hero';
-import {
-  Anonymous, FinalCta, HowTo, JobSection, Joined, PaySection, Together,
-} from '@/components/home/sections';
-import { getHome, metricLine } from '@/lib/home';
-import { safeHref, 미리받기 } from '@/lib/routes';
-import { serverSupabase } from '@/lib/supabase-server';
-import { 가는중 } from '@/components/가는중';
+import { HomeU01 } from '@/components/rapo/home-u01';
+import { getRapoHomeJobs } from '@/lib/rapo-home';
+import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
-/* 홈.
+/* 탭 제목 — 서비스 이름은 RAPO 입니다. 다른 화면의 제목은 app/layout.tsx 가 정합니다 */
+export const metadata: Metadata = { title: 'RAPO · 채용공고' };
 
-   앱을 열면 늘 쓰던 홈(배너·카테고리·큰배너)이 먼저 나오고,
-   내리면 랜딩이 이어집니다. 매일 들어오는 분이 첫 화면에서
-   긴 소개글부터 만나면 안 됩니다.
+/* 홈 — 새 디자인 「U01 · 홈」 (2026-11-11 대표 지시: 실제 앱에 바로 적용).
 
-   ① 배너 · ② 카테고리 · ③ 큰배너는 전부 DB 에서 옵니다 (home_blocks).
-   관리자가 /admin 에서 고칩니다 — 배포를 안 해도 바뀝니다.
-   이 셋의 구조는 손대지 않았습니다. 뒤에 구역만 붙였습니다.
-   가는 곳은 lib/routes.ts 가 아는 주소만 통과시켜 404 를 막습니다.
+   화면은 components/rapo/home-u01.tsx, 공고 줄은 lib/rapo-home.ts 가 냅니다.
+   로그인 상태(회원·비회원·모름)에 따라 헤더 단추와 배너 글자, 공고 창구가 갈립니다.
 
-   화면에 뜨는 숫자는 하나도 코드에 없습니다 (home_stats()).
-   박아두면 다음 분기에 틀린 화면이 됩니다.
+   ── 전 홈에서 빠진 것 ──────────────────────────────────────────
+   DB 배너·카테고리·큰배너(home_blocks) · 「더 찾아보기」 · 히어로 · 참여 현황 ·
+   급여·취업 이야기 · 익명 · 이용 방법 · 마지막 CTA.
+   코드는 지우지 않았습니다 — components/home/* · components/home-banner.tsx ·
+   lib/home.ts 그대로이고, 되돌리려면 이 파일만 전 판으로 돌리면 됩니다
+   (git log -- web/app/page.tsx). 관리자 화면의 홈 배너·글 고치기는 지금 홈에 안 보입니다.
 
-   바탕은 밝은 종이색이고 히어로와 마지막 CTA 만 어둡습니다. */
+   ── 아직 견본 글인 칸 ──────────────────────────────────────────
+   「익명 질문과 답변」은 디자인 원본의 예시 글입니다(실제 회원 글 아님).
+   「급여 공개 공고」·「신입 지원 공고」는 거르기가 아직 없어 공고 목록으로만 갑니다
+   — 오픈 뒤에 넣을 기능입니다 (docs/rapo-design-implementation.md). */
 export default async function Home() {
-  /* ★ 2026-11-11 클로즈드 베타 — 「인기 글」(공개글)을 비회원에게 닫으므로 세션으로 읽습니다 */
-  const { top, categories, bigs, seconds, metrics, stats, texts } = await getHome(await serverSupabase());
+  const sb = await serverSupabase();
+  const [who, jobs] = await Promise.all([serverWho(sb), getRapoHomeJobs(sb)]);
 
   return (
     <>
       <Hit kind="home" />
-
-      <main className="bg-paper">
-        <div className="mx-auto w-full max-w-3xl px-6 pt-6 pb-[88px] md:px-7 md:pb-8">
-          {/* ① 상단 배너 — DB */}
-          <HomeBanner items={top} seconds={seconds} />
-
-          {/* ② 큰 카테고리 — DB */}
-          {categories.length > 0 && (
-            <div className="pt-8">
-              <nav aria-label="바로가기">
-                <ul className="grid grid-cols-5 gap-2">
-                  {categories.map((c) => (
-                    <li key={c.id}>
-                      <Link
-                        href={safeHref(c.href)}
-                        prefetch={미리받기(c.href)}
-                        className="flex flex-col items-center gap-2 rounded-sm px-1 py-5 text-center hover:bg-card"
-                      >
-                        {/* 이름이 비었거나 오타면 기본 아이콘으로 떨어집니다 */}
-                        <Icon name={c.icon} size={24} className="text-ink" />
-                        <span className="text-sm font-medium leading-tight text-body">{c.title}</span>
-                        <가는중 />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </div>
-          )}
-
-          {/* ②-2 아래 줄 — **코드**에 둡니다 (2026-10-03 세중님 지시).
-
-              위 다섯 칸은 DB(home_blocks)에서 오고 관리자가 고칩니다.
-              여기는 거기에 **섞지 않습니다** — 다섯 칸을 건드리지 말라는
-              지시가 있었고, 섞으면 관리자가 실수로 지울 수 있습니다.
-
-              청년정책은 아직 없습니다. 열쇠를 아직 서버로 안 옮겨
-              자료가 한 건도 없습니다 (창구는 멀쩡합니다 — 2026-10-04 에
-              200 · 3,150건 확인). 자료가 들어오면 **아래 배열에 한 줄**
-              더하면 됩니다.
-              없는 화면으로 보내지 않으려고 일부러 비워 둡니다. */}
-          <div className="pt-8">
-            <nav aria-label="더 찾아보기">
-              <h2 className="text-sm font-bold text-mute">더 찾아보기</h2>
-              <ul className="mt-3 grid grid-cols-2 gap-2">
-                {[
-                  { href: '/edu', icon: 'graduation-cap', title: '교육·학술',
-                    sub: '학회 교육과정·학술대회' },
-                  /* 아이콘은 components/icon.tsx 에 있는 것만 씁니다 —
-                     없는 이름을 적으면 기본 아이콘으로 떨어집니다 */
-                  { href: '/youth', icon: 'list-checks', title: '청년정책',
-                    sub: '취업·교육비·주거 지원' },
-                  /* 경쟁률 (2026-10-05). 목록은 누구나, 숫자는 회원만 —
-                     그래서 비로그인에게도 걸어 둡니다 */
-                  { href: '/compete', icon: 'bar-chart', title: '경쟁률',
-                    sub: '공공기관 지난 채용 경쟁률' },
-                ].map((x) => (
-                  <li key={x.href}>
-                    <Link
-                      href={safeHref(x.href)}
-                      prefetch={미리받기(x.href)}
-                      className="flex h-full items-center gap-3 rounded-sm border border-line
-                                 bg-card px-5 py-5 hover:bg-paper"
-                    >
-                      <Icon name={x.icon} size={22} className="shrink-0 text-ink" />
-                      <span className="min-w-0">
-                        <span className="block text-body-lg font-bold text-ink">{x.title}</span>
-                        <span className="block break-keep text-sm text-mute">{x.sub}</span>
-                      </span>
-                      <가는중 />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-
-          {/* ③ 큰 배너 — DB.
-
-              한 번 세로로 쌓았다가(카드가 76% 라 옆 카드가 반씩 잘려
-              「우리가 보고 있…」 처럼 글이 끊겼습니다) 다시 옆으로 밉니다.
-              이번엔 카드가 줄 폭에서 40px 만 모자라서 글이 안 잘리고,
-              다음 카드가 25px 만 보여 「더 있다」만 알립니다.
-              손으로 밀면 scroll-snap 이 딱 멈춰 줍니다 (components/rail.tsx) */}
-          {bigs.length > 0 && (
-            <div className="pt-8">
-              <Rail label="살펴보기">
-                {bigs.map((b) => (
-                  <Link
-                    key={b.id}
-                    href={safeHref(b.href)}
-                    prefetch={미리받기(b.href)}
-                    className="flex min-h-[200px] w-full flex-col justify-between rounded-sm
-                               border border-line bg-card p-7 hover:bg-paper"
-                  >
-                    <p className="break-keep text-h2 font-bold text-ink">{b.title}</p>
-                    <p className="mt-5 break-keep text-body-lg text-body">{metricLine(b, metrics)}</p>
-                    <가는중 />
-                  </Link>
-                ))}
-              </Rail>
-            </div>
-          )}
-
-          {/* ④ 히어로 — 여기서 이야기가 시작됩니다 */}
-          <div className="pt-8">
-            <Hero stats={stats} texts={texts} />
-          </div>
-
-          {/* ⑤ 참여 현황 */}
-          <Joined stats={stats} texts={texts} />
-
-          {/* ⑥ 급여 01~05 */}
-          <PaySection texts={texts} />
-
-          {/* ⑦ 취업·이직 06~09 */}
-          <JobSection stats={stats} texts={texts} />
-
-          {/* ⑧ 함께 만듭니다 */}
-          <Together texts={texts} />
-
-          {/* ⑨ 익명 */}
-          <Anonymous texts={texts} />
-
-          {/* ⑩ 이용 방법 */}
-          <HowTo texts={texts} />
-
-          {/* ⑪ 마지막 CTA + 출처 */}
-          <FinalCta stats={stats} texts={texts} />
-        </div>
-      </main>
+      <HomeU01 jobs={jobs} who={who} />
     </>
   );
 }

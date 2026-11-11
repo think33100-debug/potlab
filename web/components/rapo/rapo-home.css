@@ -1,0 +1,13 @@
+/* 새 홈(U01)이 떠 있는 동안만 — 지금 앱의 위쪽 줄과 아래 탭바를 가립니다.
+   U01 은 자기 헤더·아래 탐색을 가지고 있어 둘이 겹치기 때문입니다.
+   :has() 라서 [data-rapo-u01] 이 화면에 있을 때만 걸립니다(다른 화면으로 가면 풀립니다).
+   다른 화면까지 새 헤더·탐색으로 바꿀 때 app/layout.tsx 에서 갈아 끼우고 이 파일을 지웁니다.
+   맨 아래 사업자 정보(footer)는 법으로 모든 화면에 있어야 해서 가리지 않고,
+   아래 탐색에 안 가리게 밑 여백만 늘립니다. */
+body:has([data-rapo-u01]) header:not([data-rapo-u01] header),
+body:has([data-rapo-u01]) nav[aria-label="아래 탭"] {
+  display: none;
+}
+body:has([data-rapo-u01]) footer:not([data-rapo-u01] footer) {
+  padding-bottom: calc(73px + env(safe-area-inset-bottom) + 16px);
+}

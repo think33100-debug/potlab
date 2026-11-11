@@ -11,7 +11,7 @@ import { useToast } from '@/app/toast';
 
    로그인 전에 누르면 막지 않고 로그인으로 보냅니다 —
    돌아올 자리를 적어 두니 로그인하면 이 공고로 돌아옵니다. */
-export function JobSave({ id, big = false }: { id: string; big?: boolean }) {
+export function JobSave({ id, big = false, look }: { id: string; big?: boolean; look?: 'rapo' }) {
   const { loading, session } = useAuth();
   const router = useRouter();
   const [on, setOn] = useState<boolean | null>(null);
@@ -56,6 +56,11 @@ export function JobSave({ id, big = false }: { id: string; big?: boolean }) {
     setBusy(false);
   }
 
+  /* RAPO 새 디자인의 저장 단추 (2026-11-11 · Figma 「RAPO / Action / 저장」 353:442).
+     누르는 자리 44px · 보이는 면 32px. 하는 일은 위와 같습니다 — 모양만 다릅니다.
+     저장된 모양은 원본에 아직 없어 옅은 면만 깔아 둡니다(임시 · docs/rapo-design-implementation.md) */
+  if (look === 'rapo') return <RapoSaveFace on={!!on} busy={busy} onClick={toggle} />;
+
   if (big) {
     return (
       <button
@@ -81,6 +86,33 @@ export function JobSave({ id, big = false }: { id: string; big?: boolean }) {
       <Icon name="bookmark" filled={!!on} size={24}
             className={on ? 'text-[#FF3B30]' : 'text-[#4A5056]'} />
       <span className="sr-only">{on ? '저장 취소' : '저장'}</span>
+    </button>
+  );
+}
+
+/* 견본 공고(id 없음)에도 같은 면을 쓰려고 떼어 둡니다 — 그때는 onClick 없이 비활성입니다 */
+export function RapoSaveFace({ on = false, busy = false, onClick }: {
+  on?: boolean; busy?: boolean; onClick?: () => void;
+}) {
+  const off = !onClick;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={off || busy}
+      aria-pressed={off ? undefined : on}
+      aria-busy={busy || undefined}
+      className="group flex size-[44px] shrink-0 items-center justify-end disabled:cursor-not-allowed"
+    >
+      <span className={
+        'flex size-[32px] items-center justify-center rounded-(--rapo-radius-r1) ' +
+        (on ? 'bg-(--rapo-color-bg-brand-weak) ' : '') +
+        'group-enabled:group-active:bg-(--rapo-color-bg-transparent-pressed) group-disabled:opacity-40'
+      }>
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+        <img src="/rapo/home/icon-save.svg" alt="" width={15.8} height={19.8} />
+      </span>
+      <span className="sr-only">{off ? '견본 공고라 저장할 수 없어요' : on ? '저장 취소' : '저장'}</span>
     </button>
   );
 }
