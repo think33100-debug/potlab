@@ -8,6 +8,7 @@ import { browserSupabase } from '@/lib/supabase-browser';
 import type { CommentRow } from '@/lib/supabase';
 import { shownName } from '@/lib/who';
 import { Avatar } from './avatar';
+import { setAfterLogin } from '@/lib/after-login';
 import { ago } from './post-row';
 
 /* 댓글은 2단까지입니다. 더 깊게 달려고 하면 DB 트리거가 막습니다
@@ -60,7 +61,7 @@ export function PostComments({ postId }: { postId: number }) {
   /* 확인 중에 누르면 잠깐 기다립니다 — /login 으로 보내면 회원이 튀깁니다
      (components/post-actions.tsx 의 needLogin 과 같은 꼴) */
   const needLogin = () => {
-    sessionStorage.setItem('potjob.after-login', location.pathname);
+    setAfterLogin(location.pathname);
     toast('로그인하면 쓸 수 있어요');
     router.push('/login');
   };
@@ -112,7 +113,7 @@ export function PostComments({ postId }: { postId: number }) {
           <button
             type="button"
             onClick={() => {
-              sessionStorage.setItem('potjob.after-login', location.pathname);
+              setAfterLogin(location.pathname);
               router.push('/login');
             }}
             className="mt-5 rounded-md bg-brand-red px-7 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"

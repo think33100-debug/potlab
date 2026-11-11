@@ -7,6 +7,7 @@ import { channelsFor } from '@/lib/channels';
 import { MAX_POST_IMAGES, postImagePair } from '@/lib/image';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useAuth } from '../../auth';
+import { setAfterLogin } from '@/lib/after-login';
 import { useToast } from '../../toast';
 
 export default function WritePage() {
@@ -34,7 +35,7 @@ function Write() {
 
   useEffect(() => {
     if (loading) return;
-    if (!session) { sessionStorage.setItem('potjob.after-login', location.pathname + location.search); router.replace('/login'); return; }
+    if (!session) { setAfterLogin(location.pathname + location.search); router.replace('/login'); return; }
     if (!me) router.replace('/welcome');
   }, [loading, session, me, router]);
 

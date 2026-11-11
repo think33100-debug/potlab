@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
 import NotifyToggle from '@/components/notify-toggle';
+import { setAfterLogin } from '@/lib/after-login';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 마감된 공고 맨 위에 붙는 띠.
@@ -44,7 +45,7 @@ export function JobClosed({ jobId }: { jobId: string }) {
     if (loading) { toast('잠시만요 — 로그인을 확인하고 있어요'); return; }
 
     if (!session || !me) {
-      try { sessionStorage.setItem('potjob.after-login', `/jobs/${jobId}`); } catch { /* 사생활 보호 창 */ }
+      try { setAfterLogin(`/jobs/${jobId}`); } catch { /* 사생활 보호 창 */ }
       router.push(session ? '/welcome' : '/login');
       return;
     }

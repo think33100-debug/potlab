@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { RapoLoginButtons, 넓은단추, 로그인틀, type Method } from '@/components/rapo/rapo-login';
 import {
-  readLastLogin, writeLastLogin, subscribeLastLogin, serverLastLogin, type LoginMethod,
+  readLastLogin, subscribeLastLogin, serverLastLogin, type LoginMethod,
 } from '@/lib/last-login';
+import { setAfterLogin, setLoginTry } from '@/lib/after-login';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useAuth } from '../auth';
 import { useToast } from '../toast';
@@ -44,12 +45,13 @@ export default function Login() {
   useEffect(() => {
     try {
       const next = new URLSearchParams(location.search).get('next');
-      if (next && next.startsWith('/') && !next.startsWith('//')) sessionStorage.setItem('potjob.after-login', next);
+      if (next) setAfterLogin(next);   // 탭이 바뀌어도 남게 (lib/after-login.ts)
     } catch { /* 사파리 비공개 */ }
   }, []);
 
   const start = async (m: Method) => {
-    writeLastLogin(m.key);
+    /* 「최근에 ○○로 만났어요」는 로그인이 **끝난 뒤** auth/callback 이 적습니다. 여기서는 누른 수단만 쪽지로 */
+    setLoginTry(m.key);
     setBusy(m.key);
     const { error } = await browserSupabase().auth.signInWithOAuth({
       provider: m.oauth,

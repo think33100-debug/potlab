@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link, { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/auth';
 import { Icon } from '@/components/icon';
@@ -56,31 +56,41 @@ export function RapoBottomNav({ current, 관리덮기, dark = false }: {
               <Link
                 href={t.href}
                 aria-current={켜짐 ? 'page' : undefined}
-                className={
-                  'relative flex h-(--rapo-dimension-x13) flex-col items-center gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r1) ' +
-                  'active:bg-(--rapo-color-bg-transparent-pressed) ' +
-                  (dark
-                    ? (켜짐 ? 'rapo-type-t2-bold text-[#ffa691]' : 'rapo-type-t2-medium text-[#b7c6d1]')
-                    : 켜짐
-                    ? 'rapo-type-t2-bold text-(color:--rapo-color-fg-brand-contrast)'
-                    : 'rapo-type-t2-medium text-(color:--rapo-color-fg-neutral-muted)')
-                }
+                /* 누르는 순간 살짝 눌리고(scale), 받는 동안에는 켜진 모양이 먼저 옵니다(NavTabBody · useLinkStatus) —
+                   2026-11-11 밤 대표 「누른 느낌도 잘 안 나고」 */
+                className="relative flex h-(--rapo-dimension-x13) flex-col items-center gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r1)
+                           transition-transform duration-[90ms] active:scale-[0.92] active:bg-(--rapo-color-bg-transparent-pressed) motion-reduce:transition-none"
               >
-                {켜짐 && !dark && (
-                  <span aria-hidden className="absolute left-1/2 top-[-4px] h-(--rapo-dimension-x9) w-(--rapo-dimension-x12) -translate-x-1/2
-                                               rounded-(--rapo-radius-r1) bg-(--rapo-color-bg-brand-weak)" />
-                )}
-                <span className="relative flex size-(--rapo-dimension-x7) items-center justify-center">
-                  {그림
-                    ? <RapoMaskIcon src={그림.src} w={그림.w} h={그림.h} />
-                    : <Icon name={t.icon} size={24} />}
-                </span>
-                <span className="relative whitespace-nowrap">{t.label}</span>
+                <NavTabBody 켜짐={켜짐} dark={dark} 그림={그림} icon={t.icon} label={t.label} />
               </Link>
             </li>
           );
         })}
       </ul>
     </nav>
+  );
+}
+
+/* 탭 한 칸의 안쪽 — 링크가 받는 중(pending)이면 이미 켜진 것처럼 그립니다(Next useLinkStatus).
+   그래서 누르자마자 색이 바뀌고, 다음 화면이 오면 그대로 이어집니다 */
+function NavTabBody({ 켜짐, dark, 그림, icon, label }: {
+  켜짐: boolean; dark: boolean; 그림?: { src: string; w: number; h: number }; icon: string; label: string;
+}) {
+  const { pending } = useLinkStatus();
+  const on = 켜짐 || pending;
+  const 글 = dark
+    ? (on ? 'rapo-type-t2-bold text-[#ffa691]' : 'rapo-type-t2-medium text-[#b7c6d1]')
+    : on ? 'rapo-type-t2-bold text-(color:--rapo-color-fg-brand-contrast)' : 'rapo-type-t2-medium text-(color:--rapo-color-fg-neutral-muted)';
+  return (
+    <span className={'flex flex-col items-center gap-(--rapo-dimension-x1) ' + 글}>
+      {on && !dark && (
+        <span aria-hidden className="absolute left-1/2 top-[-4px] h-(--rapo-dimension-x9) w-(--rapo-dimension-x12) -translate-x-1/2
+                                     rounded-(--rapo-radius-r1) bg-(--rapo-color-bg-brand-weak)" />
+      )}
+      <span className="relative flex size-(--rapo-dimension-x7) items-center justify-center">
+        {그림 ? <RapoMaskIcon src={그림.src} w={그림.w} h={그림.h} /> : <Icon name={icon} size={24} />}
+      </span>
+      <span className="relative whitespace-nowrap">{label}</span>
+    </span>
   );
 }

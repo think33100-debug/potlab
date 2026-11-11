@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { setAfterLogin } from '@/lib/after-login';
 
 /* 「로그인하고 보기」 — 비회원이 회원 전용 자리를 눌렀을 때 (2026-10-09).
  *
@@ -25,8 +26,7 @@ export function LoginFirst({
 
   const 가기 = () => {
     try {
-      sessionStorage.setItem('potjob.after-login',
-        어디로 ?? location.pathname + location.search);
+      setAfterLogin(어디로 ?? location.pathname + location.search);
     } catch { /* 사생활 보호 창 — 돌아오는 자리만 못 적습니다 */ }
     router.push('/login');
   };

@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { clearAfterLogin, peekAfterLogin, takeLoginTry } from '@/lib/after-login';
+import { writeLastLogin } from '@/lib/last-login';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 카카오에서 돌아오는 자리입니다.
@@ -80,12 +82,20 @@ export default function AuthCallback() {
       const { data: prof } = await sb
         .from('profiles').select('id').eq('id', data.session.user.id).maybeSingle();
 
-      const back = sessionStorage.getItem('potjob.after-login');
+      /* 로그인이 **끝났으니** 이제 「최근에 ○○로 만났어요」로 기억합니다 (2026-11-11 밤 대표 — 누르자마자 뜨던 것 고침).
+         누른 수단 쪽지가 없으면(다른 기기 등) 세션의 제공자 이름으로 가립니다 */
+      const 누른 = takeLoginTry();
+      const 제공 = String(data.session.user.app_metadata?.provider ?? '');
+      const 수단 = 누른 ?? (제공.includes('naver') ? 'naver' : 제공 === 'kakao' || 제공 === 'apple' ? 제공 : null);
+      if (수단 === 'kakao' || 수단 === 'naver' || 수단 === 'apple') writeLastLogin(수단);
+
+      /* 탭이 바뀌어도(카카오 앱에서 돌아오면 새 탭) 돌아올 자리를 찾습니다 — lib/after-login.ts */
+      const back = peekAfterLogin();
       /* 이미 가입한 분은 여기서 바로 보내고 자리를 지웁니다.
          처음 오신 분은 /welcome 을 거치므로 자리를 남겨 둡니다 —
          지워버리면 가입을 마친 뒤 홈으로 떨어져서, 보러 왔던 공고를
          다시 못 찾고 그냥 나갑니다 */
-      if (prof) sessionStorage.removeItem('potjob.after-login');
+      if (prof) clearAfterLogin();
       router.replace(prof ? (back || '/') : '/welcome');
     })();
 

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
 import { ShareButtons } from '@/components/share-buttons';
+import { setAfterLogin } from '@/lib/after-login';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 글 아래 단추 줄 — 좋아요 · 공유 · 신고 · (내 글이면) 지우기 */
@@ -41,7 +42,7 @@ export function PostActions({
   /* 확인 중에 누르면 **잠긐 기다립니다.** /login 으로 보내면 안 됩니다 —
      회원인데 들어오자마자 누르면 로그인 화면으로 튀깁니다 (2026-09-25) */
   const needLogin = () => {
-    sessionStorage.setItem('potjob.after-login', location.pathname);
+    setAfterLogin(location.pathname);
     toast('로그인하면 쓸 수 있어요');
     router.push('/login');
   };
