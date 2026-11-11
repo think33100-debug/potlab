@@ -407,12 +407,21 @@ html[data-splash="on"] #splash {
 /* ★ 2026-11-11 밤 — 어두운 바탕 변형을 걷었습니다. 새 로고 그림이 흰 바탕째라 어두운 화면에서는 흰 네모가 됩니다.
    피그마 스플래시는 흰 바탕 하나뿐입니다. */
 
-html[data-splash="on"] #splash .splash-name { animation: splash-in 0.55s 0.1s both; }
-html[data-splash="on"] #splash .splash-line { animation: splash-in 0.5s 0.4s both; }
+/* 로고 움직임 (2026-11-11 밤 · 대표 「움직이는 모션」) — 피그마의 3초 로고 동영상(RAPO_로고모션_최종_3초.mp4 · 1220:2135)은
+   연결로 꺼낼 수 없어, 그 동영상 1.65초 장면 그림을 살짝 작게 → 조금 크게 → 제자리로 튀어나오게 합니다.
+   원본 mp4 를 받으면 그 영상으로 바꿉니다 */
+html[data-splash="on"] #splash .splash-name { animation: splash-pop 0.9s 0.05s cubic-bezier(.2,.8,.2,1) both; }
+html[data-splash="on"] #splash .splash-line { animation: splash-in 0.6s 0.7s cubic-bezier(.2,.8,.2,1) both; }
 
 @keyframes splash-in {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: none; }
+}
+
+@keyframes splash-pop {
+  0%   { opacity: 0; transform: scale(0.82); }
+  55%  { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 /* 마지막 0.4초에만 사라집니다(3.2초의 87.5%). visibility 까지 꺼야 밑이 눌립니다 */
