@@ -8,6 +8,10 @@
    숫자에만 쓰이므로 900 한 벌만 받습니다 */
 @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@900&display=swap");
 @import "tailwindcss";
+/* RAPO 디자인 토큰 (2026-11-11 · Figma 현행 토큰 전체).
+   tools/rapo-tokens.mjs 가 만드는 파일입니다 — 손으로 고치지 마세요.
+   이름이 전부 --rapo- 로 시작하고 @theme 밖이라 아래 토큰과 기존 화면은 안 바뀝니다 */
+@import "./rapo-tokens.css";
 
 /* 어두운 쪽 토큰이 켜지는 조건은 둘입니다.
 

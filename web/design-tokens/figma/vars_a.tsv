@@ -1,0 +1,119 @@
+RAPO · 브랜드 기준	VariableID:32:3	색상/coral	COLOR	#FF4F40	FRAME_FILL,SHAPE_FILL,TEXT_FILL,STROKE_COLOR
+RAPO · 브랜드 기준	VariableID:32:4	색상/blush	COLOR	#FFE9E6	FRAME_FILL,SHAPE_FILL,TEXT_FILL,STROKE_COLOR
+RAPO · 브랜드 기준	VariableID:32:5	색상/navy	COLOR	#112231	FRAME_FILL,SHAPE_FILL,TEXT_FILL,STROKE_COLOR
+RAPO · 브랜드 기준	VariableID:32:6	색상/mist	COLOR	#F2F8F3	FRAME_FILL,SHAPE_FILL,TEXT_FILL,STROKE_COLOR
+RAPO · 브랜드 기준	VariableID:32:7	색상/white	COLOR	#FFFFFF	FRAME_FILL,SHAPE_FILL,TEXT_FILL,STROKE_COLOR
+RAPO · 브랜드 기준	VariableID:32:8	색상/muted	COLOR	#56636D	FRAME_FILL,SHAPE_FILL,TEXT_FILL,STROKE_COLOR
+RAPO · 브랜드 기준	VariableID:32:9	색상/line	COLOR	#DDE4E6	FRAME_FILL,SHAPE_FILL,TEXT_FILL,STROKE_COLOR
+RAPO · 브랜드 기준	VariableID:32:10	간격/8	FLOAT	8	GAP
+RAPO · 브랜드 기준	VariableID:32:11	간격/16	FLOAT	16	GAP
+RAPO · 브랜드 기준	VariableID:32:12	간격/24	FLOAT	24	GAP
+RAPO · 브랜드 기준	VariableID:32:13	간격/32	FLOAT	32	GAP
+RAPO · 브랜드 기준	VariableID:32:14	간격/48	FLOAT	48	GAP
+RAPO · 브랜드 기준	VariableID:32:15	간격/64	FLOAT	64	GAP
+RAPO · 브랜드 기준	VariableID:32:16	간격/96	FLOAT	96	GAP
+RAPO / Color palette	VariableID:185:6	color/palette/gray-00	COLOR	#FFFFFF	
+RAPO / Color palette	VariableID:185:7	color/palette/gray-100	COLOR	#F7F8F9	
+RAPO / Color palette	VariableID:185:8	color/palette/gray-200	COLOR	#F3F4F5	
+RAPO / Color palette	VariableID:185:9	color/palette/gray-300	COLOR	#EEEFF1	
+RAPO / Color palette	VariableID:185:10	color/palette/gray-400	COLOR	#DCDEE3	
+RAPO / Color palette	VariableID:185:11	color/palette/gray-500	COLOR	#D1D3D8	
+RAPO / Color palette	VariableID:185:12	color/palette/gray-600	COLOR	#B0B3BA	
+RAPO / Color palette	VariableID:185:13	color/palette/gray-700	COLOR	#868B94	
+RAPO / Color palette	VariableID:185:14	color/palette/gray-800	COLOR	#555D6D	
+RAPO / Color palette	VariableID:185:15	color/palette/gray-900	COLOR	#2A3038	
+RAPO / Color palette	VariableID:185:16	color/palette/gray-1000	COLOR	#1A1C20	
+RAPO / Color palette	VariableID:185:17	color/palette/coral-100	COLOR	#FFF1EE	
+RAPO / Color palette	VariableID:185:18	color/palette/coral-200	COLOR	#FFE5E1	
+RAPO / Color palette	VariableID:185:19	color/palette/coral-300	COLOR	#FED0C9	
+RAPO / Color palette	VariableID:185:20	color/palette/coral-400	COLOR	#FFB1A5	
+RAPO / Color palette	VariableID:185:21	color/palette/coral-500	COLOR	#FD8878	
+RAPO / Color palette	VariableID:185:22	color/palette/coral-600	COLOR	->VariableID:32:3	
+RAPO / Color palette	VariableID:185:23	color/palette/coral-700	COLOR	#D8372B	
+RAPO / Color palette	VariableID:185:24	color/palette/coral-800	COLOR	#B8281F	
+RAPO / Color palette	VariableID:185:25	color/palette/coral-900	COLOR	#851E17	
+RAPO / Color palette	VariableID:185:26	color/palette/coral-1000	COLOR	#470F0A	
+RAPO / Color palette	VariableID:185:27	color/palette/navy-100	COLOR	#F5F8FA	
+RAPO / Color palette	VariableID:185:28	color/palette/navy-200	COLOR	#F1F3F5	
+RAPO / Color palette	VariableID:185:29	color/palette/navy-300	COLOR	#EAEEF2	
+RAPO / Color palette	VariableID:185:30	color/palette/navy-400	COLOR	#D3DDE5	
+RAPO / Color palette	VariableID:185:31	color/palette/navy-500	COLOR	#C7D1D9	
+RAPO / Color palette	VariableID:185:32	color/palette/navy-600	COLOR	#A1AEBB	
+RAPO / Color palette	VariableID:185:33	color/palette/navy-700	COLOR	#728394	
+RAPO / Color palette	VariableID:185:34	color/palette/navy-800	COLOR	#335370	
+RAPO / Color palette	VariableID:185:35	color/palette/navy-900	COLOR	->VariableID:32:5	
+RAPO / Color palette	VariableID:185:36	color/palette/navy-1000	COLOR	#0B1319	
+RAPO / Color palette	VariableID:185:37	color/palette/blue-100	COLOR	#EFF6FF	
+RAPO / Color palette	VariableID:185:38	color/palette/blue-200	COLOR	#E2EDFC	
+RAPO / Color palette	VariableID:185:39	color/palette/blue-300	COLOR	#CBDFFA	
+RAPO / Color palette	VariableID:185:40	color/palette/blue-400	COLOR	#AACEFD	
+RAPO / Color palette	VariableID:185:41	color/palette/blue-500	COLOR	#85B8FD	
+RAPO / Color palette	VariableID:185:42	color/palette/blue-600	COLOR	#5E98FE	
+RAPO / Color palette	VariableID:185:43	color/palette/blue-700	COLOR	#217CF9	
+RAPO / Color palette	VariableID:185:44	color/palette/blue-800	COLOR	#135FCD	
+RAPO / Color palette	VariableID:185:45	color/palette/blue-900	COLOR	#0B4596	
+RAPO / Color palette	VariableID:185:46	color/palette/blue-1000	COLOR	#032451	
+RAPO / Color palette	VariableID:185:47	color/palette/red-100	COLOR	#FDF0F0	
+RAPO / Color palette	VariableID:185:48	color/palette/red-200	COLOR	#FDE7E7	
+RAPO / Color palette	VariableID:185:49	color/palette/red-300	COLOR	#FED4D2	
+RAPO / Color palette	VariableID:185:50	color/palette/red-400	COLOR	#FEB7B3	
+RAPO / Color palette	VariableID:185:51	color/palette/red-500	COLOR	#FE928D	
+RAPO / Color palette	VariableID:185:52	color/palette/red-600	COLOR	#FC6A66	
+RAPO / Color palette	VariableID:185:53	color/palette/red-700	COLOR	#FA342C	
+RAPO / Color palette	VariableID:185:54	color/palette/red-800	COLOR	#CA1D13	
+RAPO / Color palette	VariableID:185:55	color/palette/red-900	COLOR	#921708	
+RAPO / Color palette	VariableID:185:56	color/palette/red-1000	COLOR	#4A1209	
+RAPO / Color palette	VariableID:185:57	color/palette/green-100	COLOR	#EDFAF6	
+RAPO / Color palette	VariableID:185:58	color/palette/green-200	COLOR	#D9F6E9	
+RAPO / Color palette	VariableID:185:59	color/palette/green-300	COLOR	#B9E9D2	
+RAPO / Color palette	VariableID:185:60	color/palette/green-400	COLOR	#7DDCB3	
+RAPO / Color palette	VariableID:185:61	color/palette/green-500	COLOR	#42C593	
+RAPO / Color palette	VariableID:185:62	color/palette/green-600	COLOR	#10AB7D	
+RAPO / Color palette	VariableID:185:63	color/palette/green-700	COLOR	#079171	
+RAPO / Color palette	VariableID:185:64	color/palette/green-800	COLOR	#00745F	
+RAPO / Color palette	VariableID:185:65	color/palette/green-900	COLOR	#075445	
+RAPO / Color palette	VariableID:185:66	color/palette/green-1000	COLOR	#0A2B24	
+RAPO / Color palette	VariableID:185:67	color/palette/yellow-100	COLOR	#FFF7DE	
+RAPO / Color palette	VariableID:185:68	color/palette/yellow-200	COLOR	#FDEFB9	
+RAPO / Color palette	VariableID:185:69	color/palette/yellow-300	COLOR	#FBDC65	
+RAPO / Color palette	VariableID:185:70	color/palette/yellow-400	COLOR	#E9C647	
+RAPO / Color palette	VariableID:185:71	color/palette/yellow-500	COLOR	#D4AB28	
+RAPO / Color palette	VariableID:185:72	color/palette/yellow-600	COLOR	#C49725	
+RAPO / Color palette	VariableID:185:73	color/palette/yellow-700	COLOR	#9B7821	
+RAPO / Color palette	VariableID:185:74	color/palette/yellow-800	COLOR	#755B22	
+RAPO / Color palette	VariableID:185:75	color/palette/yellow-900	COLOR	#4F3E1F	
+RAPO / Color palette	VariableID:185:76	color/palette/yellow-1000	COLOR	#2C2512	
+RAPO / Color palette	VariableID:185:77	color/palette/purple-100	COLOR	#F5F3FE	
+RAPO / Color palette	VariableID:185:78	color/palette/purple-200	COLOR	#EFEAFE	
+RAPO / Color palette	VariableID:185:79	color/palette/purple-300	COLOR	#E1D8FF	
+RAPO / Color palette	VariableID:185:80	color/palette/purple-400	COLOR	#D0C0FF	
+RAPO / Color palette	VariableID:185:81	color/palette/purple-500	COLOR	#B8A1FF	
+RAPO / Color palette	VariableID:185:82	color/palette/purple-600	COLOR	#9F84FB	
+RAPO / Color palette	VariableID:185:83	color/palette/purple-700	COLOR	#8969EA	
+RAPO / Color palette	VariableID:185:84	color/palette/purple-800	COLOR	#6D50CB	
+RAPO / Color palette	VariableID:185:85	color/palette/purple-900	COLOR	#50379B	
+RAPO / Color palette	VariableID:185:86	color/palette/purple-1000	COLOR	#29175D	
+RAPO / Color palette	VariableID:185:87	color/palette/static-black	COLOR	#000000	
+RAPO / Color palette	VariableID:185:88	color/palette/static-white	COLOR	#FFFFFF	
+RAPO / Color palette	VariableID:185:89	color/palette/transparent	COLOR	#000000@0	
+RAPO / Color palette	VariableID:185:90	color/palette/static-black-alpha-100	COLOR	#000000@0.0275	
+RAPO / Color palette	VariableID:185:91	color/palette/static-black-alpha-200	COLOR	#000000@0.0471	
+RAPO / Color palette	VariableID:185:92	color/palette/static-black-alpha-300	COLOR	#000000@0.0627	
+RAPO / Color palette	VariableID:185:93	color/palette/static-black-alpha-400	COLOR	#000000@0.1294	
+RAPO / Color palette	VariableID:185:94	color/palette/static-black-alpha-500	COLOR	#000000@0.1725	
+RAPO / Color palette	VariableID:185:95	color/palette/static-black-alpha-600	COLOR	#000000@0.298	
+RAPO / Color palette	VariableID:185:96	color/palette/static-black-alpha-700	COLOR	#000000@0.4549	
+RAPO / Color palette	VariableID:185:97	color/palette/static-black-alpha-800	COLOR	#000000@0.6353	
+RAPO / Color palette	VariableID:185:98	color/palette/static-black-alpha-900	COLOR	#000000@0.8157	
+RAPO / Color palette	VariableID:185:99	color/palette/static-black-alpha-1000	COLOR	#000000@0.8902	
+RAPO / Color palette	VariableID:185:100	color/palette/static-white-alpha-50	COLOR	#FFFFFF@0.051	
+RAPO / Color palette	VariableID:185:101	color/palette/static-white-alpha-100	COLOR	#FFFFFF@0.0902	
+RAPO / Color palette	VariableID:185:102	color/palette/static-white-alpha-200	COLOR	#FFFFFF@0.1255	
+RAPO / Color palette	VariableID:185:103	color/palette/static-white-alpha-300	COLOR	#FFFFFF@0.1804	
+RAPO / Color palette	VariableID:185:104	color/palette/static-white-alpha-400	COLOR	#FFFFFF@0.2392	
+RAPO / Color palette	VariableID:185:105	color/palette/static-white-alpha-500	COLOR	#FFFFFF@0.3765	
+RAPO / Color palette	VariableID:185:106	color/palette/static-white-alpha-600	COLOR	#FFFFFF@0.5451	
+RAPO / Color palette	VariableID:185:107	color/palette/static-white-alpha-700	COLOR	#FFFFFF@0.702	
+RAPO / Color palette	VariableID:185:108	color/palette/static-white-alpha-800	COLOR	#FFFFFF@0.8706	
+RAPO / Color palette	VariableID:185:109	color/palette/static-white-alpha-900	COLOR	#FFFFFF@0.9176	
+RAPO / Color palette	VariableID:185:110	color/palette/static-white-alpha-1000	COLOR	#FFFFFF@0.9569	
