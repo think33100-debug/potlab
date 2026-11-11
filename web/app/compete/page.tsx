@@ -43,7 +43,7 @@ import { serverSupabase, serverWho } from '@/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '경쟁률 찾아보기 · POTJOB',
+  title: '경쟁률 찾아보기 · RAPO',
   description: '공공기관이 공개한 지난 채용의 경쟁률을 자리별로 모았습니다. 알리오 공개 자료 기준',
 };
 

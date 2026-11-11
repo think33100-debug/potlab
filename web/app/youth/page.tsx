@@ -36,7 +36,7 @@ import { serverSupabase } from '@/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '청년정책 찾기 · POTJOB',
+  title: '청년정책 찾기 · RAPO',
   description: '취업·교육비·주거·금융 지원 등 청년정책을 한자리에서 봅니다. 신청은 각 기관에서 합니다',
 };
 

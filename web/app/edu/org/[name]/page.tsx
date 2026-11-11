@@ -27,7 +27,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ name: string }> },
 ): Promise<Metadata> {
   const { name } = await params;
-  return { title: decodeURIComponent(name) + ' · 교육 · POTJOB' };
+  return { title: decodeURIComponent(name) + ' · 교육 · RAPO' };
 }
 
 const 날 = (s: string) => Number(s.slice(5, 7)) + '월 ' + Number(s.slice(8, 10)) + '일';

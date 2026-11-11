@@ -8,7 +8,7 @@ import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말
 import { jobViews } from '@/lib/job-views';
 import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
 import { siteUrl } from '@/lib/site-url';
-import { supabase, type JobListItem, type JobPost } from '@/lib/supabase';
+import type { JobListItem, JobPost } from '@/lib/supabase';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
@@ -53,7 +53,7 @@ const 병원주소받기 = async (sb: SupabaseClient, id: string): Promise<병�
   const { data, error } = await sb.rpc('공고병원주소', { p_id: id });
   if (error || !data) return null;
   const v = data as { 주소?: string; 갈래?: string };
-  if (!v.주소 || (v.갈래 !== '병원글' && v.갈래 !== '병원게시판')) return null;
+  if (!v.주소 || (v.갈래 !== '병원글' && v.갈래 !== '병원게시판' && v.갈래 !== '병원홈')) return null;
   return { 주소: v.주소, 갈래: v.갈래 };
 };
 
@@ -83,8 +83,9 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  /* 카톡·검색 로봇에는 세션이 없습니다. 공개 열쇠꾸러미로 읽습니다 — 제목·기관·마감일만 씁니다 */
-  const j = await one(supabase, id);
+  /* 제목·기관·마감일만 씁니다. ★ 2026-11-11 클로즈드 베타 — 비회원에게 공고 창구(job_one)를 닫으므로 **세션으로** 읽습니다.
+     로봇은 middleware 가 /beta 로 보내 여기까지 안 옵니다 (RAPO노트/SQL_1113) */
+  const j = await one(await serverSupabase(), id);
   if (!j) return { title: '없는 공고입니다 · RAPO' };
 
   const closed = isClosed(j.apply_to, todayKst(), j.apply_to_time);
@@ -187,7 +188,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
         views: views[j.id] ?? null, 인원: 모집인원 || 못읽은칸말, 마감: 식별마감,
       }}
       pay={{ 값: 연봉말(연봉원문), 덧말: 연봉덧말 }}
-      지원자격={지원자격} url={j.url || null}
+      지원자격={지원자격} url={병원?.주소 ?? (j.url || null)}
       기간={{ 달: 끝?.달 ?? null, 날: 끝?.날 ?? null, 기간, 강조, 덧말: 기간덧말 }}
       접수방법={지원방법} 모집인원없음={모집인원 == null}
       기관={기관} 주소={주소}
