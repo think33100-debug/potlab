@@ -6,6 +6,7 @@ import { Logo } from "@/components/logo";
 import { SPLASH_SCRIPT, Splash } from "@/components/splash";
 import { PersonaBar } from "@/components/persona-bar";
 import { SplashAd } from "@/components/splash-ad";
+import { KakaoFab } from "@/components/kakao-fab";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
 import { COMPANY, PRIVACY_EMAIL, PRIVACY_OFFICER } from "@/lib/contact";
@@ -124,6 +125,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
           {/* 휴대폰에서만 보이는 아래 탭바 */}
           <TabBar />
+
+          {/* 카카오톡 문의 단추 — 모든 화면 오른쪽 아래에 떠 있습니다 (2026-11-12 세중님) */}
+          <KakaoFab />
 
           {/* 마스터 계정에게만 보이는 역할 바꾸기 띠 (2026-10-09).
               탭바(z-40) 위에 얹습니다 — z-[60] */}

@@ -15,6 +15,9 @@ export const PRIVACY_EMAIL = 'privacy@rapojob.co.kr';
 /** 일반 문의 메일 */
 export const HELP_EMAIL = 'help@rapojob.co.kr';
 
+/* 카카오톡 문의 채널 — 모든 화면 오른쪽 아래 단추(components/kakao-fab.tsx)가 엽니다 (2026-11-12 세중님) */
+export const KAKAO_CHANNEL = 'https://pf.kakao.com/_ybINX';
+
 /* 개인정보 보호책임자 — **사람 이름을 적지 않습니다** (2026-10-05 세중님 지시).
 
    법이 요구하는 것은 「책임자를 밝히고 연락이 닿게 하는 것」이지
