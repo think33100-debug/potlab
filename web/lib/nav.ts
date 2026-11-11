@@ -53,5 +53,7 @@ export function 새틀화면(pathname: string): boolean {
     || pathname === '/welcome'
     /* 관리자 화면도 2026-11-12 부터 새 틀(왼쪽 운영 메뉴 · components/rapo/rapo-admin.tsx) */
     || pathname === '/admin' || pathname.startsWith('/admin/')
+    /* 교육·학술 목록(/edu)도 2026-11-12 부터 새 틀(U12 · 자기 목록 상단). 회차·기관 화면은 아직 옛 틀 */
+    || pathname === '/edu'
     || pathname.startsWith('/design-preview');
 }

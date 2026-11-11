@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { ListFilters } from '@/components/list-filters';
+import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
+import { RapoEduFilter, RapoEduPastToggle, RapoEduRow, RapoEduTop } from '@/components/rapo/rapo-edu';
+import { RapoPagination } from '@/components/rapo/rapo-ui';
+import { 기관그림 } from '@/lib/rapo-home';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { 교육지났나 } from '@/lib/edu-state';
 import { todayKst } from '@/lib/job-state';
@@ -34,7 +37,11 @@ import { todayKst } from '@/lib/job-state';
 
    ── 로그인 없이 봅니다 ────────────────────────────────────────
    학회가 공개한 교육 안내이고 개인정보가 한 칸도 없습니다.
-   /volunteer · /orgs 와 같은 결입니다. */
+   /volunteer · /orgs 와 같은 결입니다.
+
+   ── 새 디자인 (2026-11-12) ───────────────────────────────────
+   「U12 · 과정 목록」 1377:37059 — 넣은 것·뺀 것은 components/rapo/rapo-edu.tsx 머리에 있습니다.
+   자료를 읽는 길(교육목록 · 교육셈 · 지난 교육 거르기)은 그대로입니다. */
 
 export const dynamic = 'force-dynamic';
 
@@ -104,12 +111,6 @@ function 날쓰기(v: 줄) {
   };
 }
 
-const 갈래색: Record<string, string> = {
-  교육: 'bg-badge-teal-bg text-gray-700 dark:text-gray-200',
-  학술대회: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-  공지: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-};
-
 export default async function Edu({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const page = Math.max(0, Number(sp.p ?? 0) || 0);
@@ -122,12 +123,10 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
   /* ★ profiles 를 직접 읽으면 안 됩니다 — authenticated 에게 SELECT 권한이
      없어서 늘 빈 값이 옵니다. 정식 통로는 내프로필() 입니다 (2026-10-04) */
   let 내직군: string | null = null;
-  let 내역할: string | null = null;
   if (await serverWho(sb) === '회원') {
     const { data } = await sb.rpc('내프로필');
-    const 나 = ((data ?? []) as { job_group?: string | null; role?: string | null }[])[0];
+    const 나 = ((data ?? []) as { job_group?: string | null }[])[0];
     내직군 = 나?.job_group ?? null;
-    내역할 = 나?.role ?? null;
   }
   const 고른직군 = sp.job === '전체' ? null : (sp.job ?? 내직군);
 
@@ -169,166 +168,92 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
     return '/edu' + (s ? '?' + s : '');
   };
 
+  /* 직군 칩 — 회원이 가입 때 고른 직군이 기본입니다. 「전체」는 job=전체 로 적습니다 */
+  const 직군선택지 = JOBS.map((j) => ({
+    글: j.label,
+    주소: 길({ job: j.직군 ?? '전체', tab: 'all', p: '0' }),
+    켜짐: (j.직군 ?? null) === 고른직군,
+  }));
+  const 기관선택지 = 보일탭.map((t) => ({
+    글: t.key === 'all' ? '학회 전체' : t.label,
+    주소: 길({ tab: t.key, p: '0' }),
+    켜짐: t.key === tab.key,
+    수: 셈[t.key],
+  }));
+  const 직군글 = JOBS.find((j) => j.직군 === 고른직군 && j.직군)?.label ?? null;
+  const 건수 = 셈[tab.key] ?? 0;
+
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <h1 className="text-h1 font-bold">교육·학술</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
-        학회 교육과정과 학술대회입니다. <b>신청은 각 학회에서</b> 합니다
-      </p>
-      <p className="mt-2">
-        <Link href="/edu/org"
-          className="text-lg font-bold text-brand-red underline underline-offset-4">
-          교육기관으로 보기 ›
-        </Link>
-      </p>
-
-      {/* 직군 줄 */}
-      {/* 거르기 줄 — 채용공고와 같은 부품입니다 (2026-10-04 세중님 결정).
-          교육은 **지역 칸을 숨깁니다** — 자료에 시·도 칸이 없고 장소가
-          자유 글이라 거르는 칸으로 못 씁니다 */}
-      <div className="mt-6">
-        <ListFilters
-          기준={{ job: sp.job ?? 내직군 ?? undefined, past: 지난것 }}
-          지역숨김
-          기본직군={내직군}
-          역할={내역할}
-          마감말="끝난 것도"
-          뿌리="/edu"
-          /* 학회 고르기 — 전에는 탭 10개가 늘어서서 휴대폰에서 두 줄을
-             먹었습니다. 건수는 선택지 안에 「(14)」로 넣어 안 잃습니다 */
-          고름={{
-            이름: 'tab',
-            전체말: '학회 전체',
-            고른값: tab.key === 'all' ? undefined : tab.key,
-            선택지: 보일탭.filter((t) => t.key !== 'all')
-              .map((t) => ({ 값: t.key, 글: t.label, 수: 셈[t.key] })),
-          }}
-        />
-      </div>
-
-      {/* 학회 탭 — 스펙쌓기 「이수 교육」 의 학회 이름과 같습니다 */}
-      <p className="mt-5 text-lg text-mute">
-        <b className="text-ink">{셈[tab.key]}건</b>
-        {지난것 ? ' (끝난 것까지)' : ' · 아직 안 끝난 것'}
-      </p>
-
-      {/* 출처와 한계를 화면에 밝힙니다 */}
-      <p className="mt-4 break-keep rounded-sm border border-line bg-card p-5 text-sm leading-relaxed text-mute">
-        학회 홈페이지에 공개된 안내를 모은 것입니다. <b>신청·문의는 학회에서</b> 하세요.
-        <br />
-        날짜가 없는 줄은 <b>올린 날</b>을 적었습니다 — 교육 날짜가 아닙니다.
-        <br />
-        <b>대한인지재활학회</b>는 홈페이지가 긁기를 막아 두어, 첫 화면에 실린
-        제목과 날짜만 가져옵니다. 자세한 것은 학회 화면에서 보세요.
-      </p>
-
-      {/* robots.txt 가 막은 곳 — 자료는 안 가져오고 길만 열어 둡니다 */}
-      {링크칸.length > 0 && (
-        <div className="mt-3 break-keep rounded-sm border border-line bg-card p-5 text-sm leading-relaxed text-mute">
-          아래 두 곳은 홈페이지가 <b>자동 수집을 막아 두어</b> 공고를 모으지 않습니다.
-          직접 들어가서 보세요.
-          <ul className="mt-2 flex flex-col gap-1">
-            {링크칸.map((x) => (
-              <li key={x.주소}>
-                <a href={x.주소} target="_blank" rel="noopener noreferrer"
-                  className="font-bold text-brand-red underline underline-offset-4">
-                  {x.이름} ›
-                </a>
-              </li>
-            ))}
-          </ul>
+    <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
+      <RapoEduTop />
+      <main className="px-(--rapo-dimension-x5) pb-(--rapo-dimension-x8)">
+        {/* 조건 — 직군 · 기관(학회) */}
+        <div className="flex flex-wrap gap-(--rapo-dimension-x2) pt-(--rapo-dimension-x4)">
+          <RapoEduFilter icon="/rapo/list/briefcase-16.svg" label="직군" 고른것={직군글} 선택지={직군선택지} />
+          <RapoEduFilter icon="/rapo/edu/academy-16.svg" label="기관" 고른것={tab.key === 'all' ? null : tab.label} 선택지={기관선택지} />
         </div>
-      )}
 
-      {목록.error && (
-        <p className="mt-6 rounded-sm border border-brand-red/40 bg-brand-red-soft p-6 text-lg text-brand-red-dark">
-          불러오지 못했어요 — {목록.error.message}
-          <span className="mt-1 block text-sm">app/edu/page.tsx · 교육목록()</span>
-        </p>
-      )}
+        <div className="flex items-center justify-between gap-(--rapo-dimension-x3) pt-(--rapo-dimension-x2)">
+          <h2 className="text-[20px] font-bold leading-[22px] text-(color:--rapo-brand-color-navy)">교육 목록 {건수}건</h2>
+          <RapoEduPastToggle on={지난것} href={길({ past: 지난것 ? '0' : '1', p: '0' })} />
+        </div>
 
-      {!목록.error && rows.length === 0 && (
-        <p className="mt-6 break-keep rounded-sm border border-line bg-card p-7 text-lg text-mute">
-          {지난것 ? '모아둔 것이 없어요.' : '지금 열려 있는 것이 없어요.'}
-          {!지난것 && (
-            <>
-              {' '}
-              <Link href={길({ past: '1', p: '0' })} className="underline underline-offset-4">
-                끝난 것까지 보기
+        {목록.error && (
+          <p role="alert" className="rapo-type-t4-regular mt-(--rapo-dimension-x4) rounded-(--rapo-radius-r2) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x4) text-[#b42a21]">
+            교육 목록을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.
+          </p>
+        )}
+
+        {!목록.error && rows.length === 0 && (
+          <div className="flex flex-col items-center gap-(--rapo-dimension-x3) py-(--rapo-dimension-x12) text-center">
+            <p className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">{지난것 ? '모아 둔 교육이 없어요' : '지금 열려 있는 교육이 없어요'}</p>
+            {!지난것 && (
+              <Link href={길({ past: '1', p: '0' })} className="rapo-type-t4-bold flex h-(--rapo-touch-min) items-center text-[#b42a21] underline underline-offset-4">
+                종료된 일정까지 보기
               </Link>
-            </>
+            )}
+          </div>
+        )}
+
+        <ul>
+          {rows.map((v) => {
+            const d = 날쓰기(v);
+            /* 날짜가 없으면 올린 날을 「게시」로 밝힙니다 — 교육 날짜인 척 보이지 않게 (원본 「9월 14일 게시」) */
+            const 날짜 = d ? (d.꼬리 ? `${d.글} 게시` : d.글) : '교육일은 학회에서 확인';
+            return (
+              <li key={v.번호}>
+                <RapoEduRow href={v.링크} 기관={v.출처} 그림={기관그림(v.출처)} 제목={v.제목}
+                  날짜={<>{날짜}{v.장소 && <>&nbsp;&nbsp;&nbsp;{v.장소}</>}</>} />
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* 쪽 넘기기 — 한 쪽 20건입니다 (교육목록() 과 같아야 합니다) */}
+        <div className="pt-(--rapo-dimension-x4)">
+          <RapoPagination page={page} pages={Math.max(1, Math.ceil(건수 / 20))} href={(p) => 길({ p: String(p) })} />
+        </div>
+
+        {/* 출처와 한계 — 원본에 없지만 지침 15절대로 맨 아래에 작게 둡니다 */}
+        <section aria-label="자료 안내" className="rapo-type-t3-regular mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-[#3f4c57]">
+          <p className="break-keep">학회 홈페이지에 공개된 안내를 모았어요. <b>신청·문의는 학회에서</b> 해 주세요.</p>
+          <p className="break-keep">대한인지재활학회는 홈페이지가 수집을 막아 두어 첫 화면의 제목과 날짜만 가져와요.</p>
+          {링크칸.length > 0 && (
+            <p className="break-keep">
+              수집을 막아 둔 곳은 직접 들어가서 보세요 —{' '}
+              {링크칸.map((x, i) => (
+                <span key={x.주소}>
+                  {i > 0 && ' · '}
+                  <a href={x.주소} target="_blank" rel="noopener noreferrer" className="font-bold underline underline-offset-4">{x.이름}</a>
+                </span>
+              ))}
+            </p>
           )}
-        </p>
-      )}
-
-      <ul className="mt-5 flex flex-col gap-3">
-        {rows.map((v) => {
-          const d = 날쓰기(v);
-          return (
-            <li key={v.번호}>
-              <a
-                href={v.링크}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block rounded-sm border border-line bg-card p-6 hover:bg-paper"
-              >
-                <p className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className={'rounded-xs px-3 py-1 ' + (갈래색[v.갈래] ?? 갈래색.공지)}>
-                    {v.갈래}
-                  </span>
-                  <span className="text-mute">{v.출처}</span>
-                  {v.상태 && v.상태 !== '모름' && (
-                    <span className={'font-bold ' + (v.상태 === '접수마감' ? 'text-mute' : 'text-brand-red')}>
-                      {v.상태}
-                    </span>
-                  )}
-                </p>
-
-                <p className="mt-2 break-keep text-body-lg font-bold text-ink">{v.제목}</p>
-
-                {d && (
-                  <p className="mt-2 text-lg text-mute">
-                    {d.글}
-                    {d.꼬리 && <span className="ml-1 text-sm">{d.꼬리}</span>}
-                    {v.장소 && <> · {v.장소}</>}
-                  </p>
-                )}
-                {!d && v.장소 && <p className="mt-2 text-lg text-mute">{v.장소}</p>}
-
-                {/* 「100명 (선착순)」 은 「모집 …」 으로, 「접수 8월 24일 ~ …」 은
-                    그대로 찍습니다. 보바스는 교육 날짜 없이 **접수 기간**만
-                    내놓는데 「모집 접수 …」 로 찍으면 말이 안 됩니다 */}
-                {v.모집인원 && (
-                  <p className="mt-1 text-sm text-mute">
-                    {/^\d/.test(v.모집인원) ? '모집 ' + v.모집인원 : v.모집인원}
-                  </p>
-                )}
-
-                <p className="mt-3 text-lg font-bold text-brand-red">학회 화면에서 보기 ›</p>
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-
-      {/* 쪽 넘기기 — 한 쪽 20건입니다 (교육목록() 과 같아야 합니다) */}
-      {(page > 0 || rows.length === 20) && (
-        <nav aria-label="쪽 넘기기" className="mt-7 flex items-center justify-between">
-          {page > 0 ? (
-            <Link href={길({ p: String(page - 1) })}
-              className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">
-              ‹ 앞으로
-            </Link>
-          ) : <span />}
-          <span className="text-sm text-mute">{page + 1}쪽</span>
-          {rows.length === 20 ? (
-            <Link href={길({ p: String(page + 1) })}
-              className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">
-              다음 ›
-            </Link>
-          ) : <span />}
-        </nav>
-      )}
-    </main>
+          <p><Link href="/edu/org" className="font-bold underline underline-offset-4">교육기관으로 보기</Link></p>
+        </section>
+      </main>
+      <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
+      <RapoBottomNav current="/" />
+    </div>
   );
 }
