@@ -20,7 +20,7 @@ export const metadata: Metadata = {
      이게 없으면 /og.png 가 상대 주소로 나가 카톡이 그림을 못 찾습니다.
      배포 주소는 Vercel 이 알아서 알려줍니다 — lib/site-url.ts 참고 */
   metadataBase: new URL(siteUrl()),
-  title: "POTJOB · 채용공고",
+  title: "RAPO · 채용공고",
   description: "작업치료사·물리치료사 채용공고를 한곳에서",
   /* 브랜드 명세서 7번 — 파비콘·홈 화면 아이콘·PWA */
   icons: {
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     apple: [{ url: "/icons/apple-touch-icon-180.png", sizes: "180x180" }],
   },
   manifest: "/site.webmanifest",
-  appleWebApp: { title: "POTJOB" },
+  appleWebApp: { title: "RAPO" },
   /* ★ 2026-11-11 — 클로즈드 베타 동안 검색엔진에 안 올립니다 (app/robots.ts · middleware.ts 와 한 쌍) */
   robots: { index: false, follow: false },
 };
@@ -69,7 +69,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <header className="sticky top-0 z-40 h-[56px] shrink-0 border-b border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900">
             <div className="mx-auto flex h-full max-w-3xl items-center justify-between px-6 md:px-7">
               <div className="flex items-center gap-6">
-                <Link href="/" aria-label="POTJOB 홈">
+                <Link href="/" aria-label="RAPO 홈">
                   <Logo />
                 </Link>
                 <TopNav />
