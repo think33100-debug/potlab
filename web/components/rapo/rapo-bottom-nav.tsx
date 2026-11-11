@@ -25,8 +25,11 @@ const 원본아이콘: Record<string, { src: string; w: number; h: number }> = {
   '/me':        { src: '/rapo/home/nav-me.svg',        w: 20.77, h: 23.1 },
 };
 
-export function RapoBottomNav({ current, 관리덮기 }: {
+/* dark — 커뮤니티의 어두운 판 「하단 탐색 · 커뮤니티」 1264:61 (바탕 #0d1d29 · 꺼짐 #b7c6d1 · 켜짐 #ffa691 · 켜짐 바탕 없음).
+   원본 값 그대로입니다 — 현행 토큰에 같은 값이 없습니다 (components/rapo/rapo-community.tsx 의 어둠) */
+export function RapoBottomNav({ current, 관리덮기, dark = false }: {
   current?: string;
+  dark?: boolean;
   /* 미리보기에서 담당자 메뉴 모양을 보려고 둔 자리입니다 (app/design-preview). 실제 화면은 안 넘깁니다 */
   관리덮기?: { 채용관리: boolean; 교육관리: boolean };
 }) {
@@ -40,10 +43,9 @@ export function RapoBottomNav({ current, 관리덮기 }: {
   return (
     <nav
       aria-label="아래 탐색"
-      className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-3xl
-                 border-t-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak)
-                 bg-(--rapo-color-bg-layer-default)"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className={'fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-3xl ' + (dark ? ''
+        : 'border-t-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default)')}
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)', ...(dark ? { background: '#0d1d29' } : {}) }}
     >
       <ul className="flex h-[72px] items-start px-(--rapo-dimension-x3_5) py-(--rapo-dimension-x2_5)">
         {tabs.map((t) => {
@@ -57,12 +59,14 @@ export function RapoBottomNav({ current, 관리덮기 }: {
                 className={
                   'relative flex h-(--rapo-dimension-x13) flex-col items-center gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r1) ' +
                   'active:bg-(--rapo-color-bg-transparent-pressed) ' +
-                  (켜짐
+                  (dark
+                    ? (켜짐 ? 'rapo-type-t2-bold text-[#ffa691]' : 'rapo-type-t2-medium text-[#b7c6d1]')
+                    : 켜짐
                     ? 'rapo-type-t2-bold text-(color:--rapo-color-fg-brand-contrast)'
                     : 'rapo-type-t2-medium text-(color:--rapo-color-fg-neutral-muted)')
                 }
               >
-                {켜짐 && (
+                {켜짐 && !dark && (
                   <span aria-hidden className="absolute left-1/2 top-[-4px] h-(--rapo-dimension-x9) w-(--rapo-dimension-x12) -translate-x-1/2
                                                rounded-(--rapo-radius-r1) bg-(--rapo-color-bg-brand-weak)" />
                 )}
