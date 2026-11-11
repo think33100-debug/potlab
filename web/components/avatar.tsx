@@ -3,7 +3,7 @@
 import { parseAvatar } from '@/lib/avatar';
 import { browserSupabase } from '@/lib/supabase-browser';
 
-const SIZES = { sm: 28, md: 36, lg: 72 } as const;
+const SIZES = { sm: 28, md: 36, profile: 56, lg: 72 } as const;   // profile — 내 정보 프로필 요약(Figma 1376:37165)
 
 /* 커뮤니티에 사람이 보이는 유일한 자리입니다.
    여기서 쓰는 값은 profiles.avatar 하나뿐입니다 — 로그인 수단이 준 사진은 안 씁니다.
