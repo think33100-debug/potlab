@@ -16,7 +16,7 @@ import { GUEST_COOKIE } from '@/lib/guest-view';
    「비회원은 아무것도 못 본다」 — 로그인 안 한 사람은 어느 주소로 오든
    /beta 안내 화면으로 갑니다 (lib/beta.ts 의 비회원길만 예외).
    ⚠ 여기는 **첫 벽**입니다. 요청을 직접 쏘는 사람은 화면을 안 거치므로,
-   DB 쪽 벽(비회원에게 데이터 창구 닫기 · RAPO노트/SQL_1113/A_테스터가입.sql)이
+   DB 쪽 벽(비회원에게 데이터 창구 닫기 · RAPO노트/SQL_1113/A2_회원전용.sql)이
    함께 올라가야 닫힌 것입니다. */
 
 /* 비회원에게 막는 API — 공고 미리보기 그림 · 커뮤니티 글 사진.
@@ -71,7 +71,7 @@ export async function middleware(req: NextRequest) {
 
   if (!user) {
     if (!모름 && 길에있나(path, 비회원길)) return 쿠키싣기(res);
-    if (api) return 쿠키싣기(new NextResponse('테스터 전용입니다', { status: 401 }));
+    if (api) return 쿠키싣기(new NextResponse('회원 전용입니다', { status: 401 }));
     /* 모름 — 회원일 수도 있으니 주소는 그대로 두고 안내만 보입니다.
        새로고침하면 다시 물어봅니다 */
     if (모름) return 쿠키싣기(NextResponse.rewrite(new URL('/beta?r=1', req.url)));
@@ -81,8 +81,8 @@ export async function middleware(req: NextRequest) {
     return 쿠키싣기(NextResponse.redirect(to));
   }
 
-  /* 로그인은 했는데 **가입을 안 마친** 사람 (초대 없이 카카오만 누른 사람 포함).
-     세션만 보고 열면 초대 없이 공고를 다 보게 됩니다 — 그래서 profiles 줄을 봅니다.
+  /* 로그인은 했는데 **가입을 안 마친** 사람 (카카오만 누르고 멈춘 사람 포함).
+     세션만 보고 열면 가입(동의·닉네임) 없이 공고를 다 보게 됩니다 — 그래서 profiles 줄을 봅니다.
      자기 줄은 읽을 수 있습니다 (auth/callback 이 같은 질의를 씁니다) */
   if (!길에있나(path, 가입중길)) {
     const { data: prof, error: profErr } = await sb

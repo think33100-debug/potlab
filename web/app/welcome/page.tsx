@@ -8,9 +8,7 @@ import { CompareNotify } from '@/components/compare-notify';
 import { 비교알림동의, 비교알림켜짐 } from '@/lib/beta-compare';
 import { SignupSurvey } from '@/components/signup-survey';
 import { defaultAvatar } from '@/lib/avatar';
-import {
-  BETA_AGREEMENTS, 코드꺼내기, 초대코드담기, 초대코드읽기, 초대코드지우기, 표없음,
-} from '@/lib/beta';
+import { BETA_AGREEMENTS, 표없음 } from '@/lib/beta';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
 import { JOB_GROUPS, ROLES, ROLE_DESC, type JobGroup, type Role } from '@/lib/who';
@@ -39,15 +37,9 @@ export default function Welcome() {
      ③ 사진 칸을 못 보고 홈으로 튕깁니다 */
   const [justMade, setJustMade] = useState(false);
 
-  /* ★ 2026-11-11 클로즈드 베타 — 초대 코드 (lib/beta.ts).
-     /join 이 담아 둔 것을 씁니다. 없으면 첫 단계에서 붙여 넣게 합니다.
-     맞는지는 DB 가 정합니다 — 첫 단계 「다음」에서 `테스터초대` 표에 넣을 때
-     RLS 가 코드의 해시를 대 보고, 틀리면 못 넣습니다.
-     이 칸은 「잠시만요」를 그린 뒤에야 화면에 나오므로 서버 그림과 어긋나지 않습니다 */
-  const [invite, setInvite] = useState<string>(() =>
-    typeof window === 'undefined' ? '' : (초대코드읽기() ?? ''));
-  const [inviteErr, setInviteErr] = useState<string | null>(null);
-  /* 「가입하기」 뒤 비교 알림 창 — 비교알림켜짐 이 false 인 동안은 한 번도 안 뜹니다 (13일 뒤 켬) */
+  /* 첫 단계 「다음」에서 베타 동의를 못 남겼을 때의 글 (2026-11-11 밤 — 초대 코드는 거뒀습니다) */
+  const [betaErr, setBetaErr] = useState<string | null>(null);
+  /* 「가입하기」 뒤 비교 알림 창 — 비교알림켜짐 이 false 면 한 번도 안 뜹니다 (lib/beta-compare.ts) */
   const [compareOpen, setCompareOpen] = useState(false);
 
   /* 아무것도 안 고르셨으면 기본 아바타. 상태로 안 두고 계산합니다 —
@@ -72,8 +64,8 @@ export default function Welcome() {
 
   /* ★ 2026-11-11 — 베타 동의(개인정보 [필수] · 설문 경품 [선택])를 기존 동의 뒤에 더합니다.
      기존 다섯 항목과 동의남기기() 는 그대로입니다 (그 창구는 다섯 키만 받습니다).
-     베타 동의는 `테스터초대` 줄의 칸으로 남습니다 — 아래 초대확인() */
-  /* [선택] 연봉·스펙 비교 알림 신청은 13일 뒤 켭니다 (lib/beta-compare.ts) */
+     베타 동의는 `베타동의` 표의 내 줄로 남습니다 — 아래 베타동의남기기() */
+  /* [선택] 연봉·스펙 비교 알림 신청 — 켜고 끄는 문은 lib/beta-compare.ts 하나입니다 */
   const 베타동의들 = 비교알림켜짐 ? [...BETA_AGREEMENTS, 비교알림동의] : BETA_AGREEMENTS;
   const 모든동의 = [...AGREEMENTS, ...베타동의들];
   const required = 모든동의.filter((a) => a.required);
@@ -85,37 +77,28 @@ export default function Welcome() {
     setChecked(Object.fromEntries(모든동의.map((a) => [a.key, on])));
   };
 
-  /* ① 「다음」 — 초대 코드를 DB 에 넣어 봅니다 (2026-11-11 클로즈드 베타).
-     `테스터초대` 표의 RLS 가 코드의 해시를 `초대코드` 표와 대 봅니다. 틀리거나 꺼진
-     코드면 넣지 못하고(42501), 그러면 가입(닉네임 저장)도 profiles 트리거가 막습니다.
-     표가 아직 없으면(SQL 올리기 전) 막지 않고 예전 길로 갑니다 — 그때는 트리거도 없습니다 */
-  const 초대확인 = async () => {
-    const 코드 = 코드꺼내기(invite);
-    if (!코드) { setInviteErr('초대 링크나 코드를 붙여 넣어 주세요'); return; }
-    setBusy(true); setInviteErr(null);
+  /* ① 「다음」 — 베타 동의를 `베타동의` 표의 내 줄로 남깁니다.
+     2026-11-11 밤 세중님 — 초대 코드는 거둡니다(누구나 가입). 그래서 여기서 가입을 막지 않고
+     동의만 적습니다. 표가 아직 없으면(SQL 올리기 전) 그냥 넘어갑니다 */
+  const 베타동의남기기 = async () => {
+    setBusy(true); setBetaErr(null);
     const sb = browserSupabase();
     const 동의칸 = {
       개인정보동의: !!checked.beta_privacy,
       경품동의: !!checked.survey_prize,
-      /* 이 칸은 13일 뒤 SQL(나중_비교알림_13일뒤.sql)이 더합니다 — 켜기 전에는 안 보냅니다 */
-      ...(비교알림켜짐 ? { 비교알림동의: !!checked.compare_notify } : {}),
+      비교알림동의: 비교알림켜짐 && !!checked.compare_notify,
     };
-    let { error } = await sb.from('테스터초대').insert({ 사람: session.user.id, 코드, ...동의칸 });
+    let { error } = await sb.from('베타동의').insert({ 사람: session.user.id, ...동의칸 });
     /* 이미 넣은 분(뒤로 갔다가 다시 온 분) — 동의 칸만 새로 적습니다 */
     if (error?.code === '23505') {
-      ({ error } = await sb.from('테스터초대')
+      ({ error } = await sb.from('베타동의')
         .update({ ...동의칸, 동의때: new Date().toISOString() }).eq('사람', session.user.id));
     }
     setBusy(false);
     if (error && !표없음(error)) {
-      setInviteErr(
-        error.code === '42501'
-          ? '초대 코드가 맞지 않거나 마감됐어요. 받은 링크를 다시 눌러 주세요'
-          : `확인하지 못했어요 — ${error.message}`,
-      );
+      setBetaErr(`동의를 저장하지 못했어요 — ${error.message}`);
       return;
     }
-    초대코드담기(코드);
     setStep(2);
   };
 
@@ -163,14 +146,6 @@ export default function Welcome() {
         return;
       }
 
-      /* ★ 2026-11-11 — 28000 은 profiles 트리거가 「초대 줄이 없다」며 막은 것입니다
-         (RAPO노트/SQL_1113/A_테스터가입.sql). 첫 단계로 돌아가 코드를 넣게 합니다 */
-      if (error.code === '28000') {
-        setInviteErr('초대 링크로 들어와 주세요 — 받은 링크나 코드를 다시 넣어 주세요');
-        setStep(1);
-        return;
-      }
-
       setNickErr(
         error.code === '23505'
           ? '이미 쓰고 있는 닉네임이에요. 다른 것으로 해주세요'
@@ -178,9 +153,6 @@ export default function Welcome() {
       );
       return;
     }
-
-    /* 가입을 마쳤으니 이 기기에 담아 둔 초대 코드는 치웁니다 */
-    초대코드지우기();
 
     /* 동의는 증빙이라 **문서별로** 남깁니다 (2026-10-01).
        profiles.terms_version 한 칸으로는 어느 문서에 동의한 건지 알 수 없습니다.
@@ -203,7 +175,7 @@ export default function Welcome() {
     await reload();
     setBusy(false);
     setStep(4);
-    /* 「가입하기」 뒤 비교 알림 창 — 13일 뒤 켬 (lib/beta-compare.ts) */
+    /* 「가입하기」 뒤 비교 알림 창 (lib/beta-compare.ts) */
     if (비교알림켜짐) setCompareOpen(true);
   };
 
@@ -271,29 +243,11 @@ export default function Welcome() {
             <h1 className="text-h2 font-bold">시작하기 전에</h1>
             <p className="mt-2 text-lg text-mute">아래 항목에 동의해 주세요</p>
 
-            {/* ★ 2026-11-11 클로즈드 베타 — 초대 코드. /join 으로 오셨으면 이미 담겨 있습니다 */}
+            {/* 테스트 기간 안내 (2026-11-11 밤 — 초대 코드 칸은 거뒀습니다) */}
             <div className="mt-6 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
-              <p className="text-sm font-bold text-teal-strong">RAPO 클로즈드 베타 · 테스터 전용</p>
-              {코드꺼내기(invite) && !inviteErr ? (
-                <p className="mt-2 text-lg">초대 링크로 오셨어요 ✓</p>
-              ) : (
-                <>
-                  <label htmlFor="invite" className="mt-2 block text-lg">
-                    초대 링크로 들어와 주세요. 받은 링크나 코드를 붙여 넣어도 돼요
-                  </label>
-                  <input
-                    id="invite"
-                    value={invite}
-                    onChange={(e) => { setInvite(e.target.value); setInviteErr(null); }}
-                    autoComplete="off"
-                    autoCapitalize="off"
-                    spellCheck={false}
-                    placeholder="초대 링크 또는 코드"
-                    className="mt-3 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-body-lg dark:border-gray-700 dark:bg-gray-950"
-                  />
-                </>
-              )}
-              {inviteErr && <p className="mt-2 text-lg text-brand-red">{inviteErr}</p>}
+              <p className="text-sm font-bold text-teal-strong">RAPO 는 지금 테스트 중이에요</p>
+              <p className="mt-2 text-lg">가입하시면 모든 화면을 볼 수 있어요</p>
+              {betaErr && <p className="mt-2 text-lg text-brand-red">{betaErr}</p>}
             </div>
 
             <button
@@ -362,7 +316,7 @@ export default function Welcome() {
             <button
               type="button"
               disabled={!allRequired || busy}
-              onClick={초대확인}
+              onClick={베타동의남기기}
               className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {busy ? '확인하는 중…' : allRequired ? '다음' : '필수 항목에 모두 동의해 주세요'}
@@ -485,7 +439,7 @@ export default function Welcome() {
         )}
       </div>
 
-      {/* 「가입하기」 뒤 비교 알림 창 — 13일 뒤 켬. 꺼져 있으면 compareOpen 이 늘 false 입니다 */}
+      {/* 「가입하기」 뒤 비교 알림 창. 꺼져 있으면 compareOpen 이 늘 false 입니다 */}
       {비교알림켜짐 && compareOpen && (
         <CompareNotify
           userId={session.user.id}

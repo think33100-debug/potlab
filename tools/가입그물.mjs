@@ -66,43 +66,12 @@ try {
   적자('② 로그인', !!토큰, 토큰 ? '됐습니다' : 'HTTP ' + r2.status);
   if (!토큰) throw new Error('멈춥니다');
 
-  const 회원머리 = { apikey: ANON, Authorization: 'Bearer ' + 토큰, 'Content-Type': 'application/json' };
-  const 가입부르기 = () => fetch(`${URL_}/rest/v1/rpc/${encodeURIComponent('가입하기')}`, {
-    method: 'POST', headers: 회원머리,
+  /* ③ **닉네임까지 저장** — 화면이 부르는 그 창구를 그대로 */
+  const r3 = await fetch(`${URL_}/rest/v1/rpc/${encodeURIComponent('가입하기')}`, {
+    method: 'POST',
+    headers: { apikey: ANON, Authorization: 'Bearer ' + 토큰, 'Content-Type': 'application/json' },
     body: JSON.stringify({ p_닉네임: 닉, p_직군: '물리치료사', p_역할: '학생', p_사진: null, p_약관판: 'v1' }),
   });
-
-  /* ②-1~3 ★ 2026-11-11 클로즈드 베타 — **초대 줄이 있어야** 가입됩니다
-     (RAPO노트/SQL_1113/A_테스터가입.sql · 화면은 web/app/welcome 첫 단계).
-     서버 쪽 두 벽을 함께 봅니다 — ① 틀린 코드는 `테스터초대` 에 못 넣는다(RLS)
-     ② 초대 줄 없이 가입하면 profiles 트리거가 막는다(28000).
-     표가 아직 없으면(SQL 올리기 전) 옛 길 그대로 시험합니다.
-     맞는 코드는 GitHub Secret `BETA_INVITE_CODE` 에서 옵니다 (값은 세중님 · 여기 안 찍습니다) */
-  const 초대넣기 = (코드) => fetch(`${URL_}/rest/v1/${encodeURIComponent('테스터초대')}`, {
-    method: 'POST', headers: { ...회원머리, Prefer: 'return=minimal' },
-    body: JSON.stringify({ 사람: 누구, 코드, 개인정보동의: true, 경품동의: false }),
-  });
-  const 틀린 = await 초대넣기('signup-check-wrong-' + 표);
-  if (틀린.status === 404) {
-    적자('②-1 초대 표', true, '아직 없습니다 — 옛 길로 시험합니다');
-  } else {
-    적자('②-1 틀린 코드는 막히나', !틀린.ok, 틀린.ok ? '★ 틀린 코드가 들어갔습니다' : 'HTTP ' + 틀린.status + ' 로 막혔습니다');
-    const 막힘 = await 가입부르기();
-    const 막힘글 = await 막힘.text();
-    적자('②-2 초대 없이 가입은 막히나', !막힘.ok && 막힘글.includes('28000'),
-      막힘.ok ? '★ 초대 없이 가입됐습니다 (트리거가 없나 보십시오)' : 'HTTP ' + 막힘.status + ' · ' + 막힘글.replace(/\s+/g, ' ').slice(0, 80));
-    const 초대 = process.env.BETA_INVITE_CODE;
-    if (!초대) {
-      적자('②-3 맞는 코드로 초대 줄', false, 'GitHub Secret BETA_INVITE_CODE 가 없습니다 (세중님 손)');
-      throw new Error('멈춥니다');
-    }
-    const 맞는 = await 초대넣기(초대);
-    적자('②-3 맞는 코드로 초대 줄', 맞는.ok, 맞는.ok ? '넣었습니다' : 'HTTP ' + 맞는.status + ' — Secret 값과 DB 의 코드가 같나 보십시오');
-    if (!맞는.ok) throw new Error('멈춥니다');
-  }
-
-  /* ③ **닉네임까지 저장** — 화면이 부르는 그 창구를 그대로 */
-  const r3 = await 가입부르기();
   const t3 = await r3.text();
   적자('③ 닉네임 저장', r3.ok, r3.ok ? '저장됐습니다' : 'HTTP ' + r3.status + ' · ' + t3.replace(/\s+/g, ' ').slice(0, 140));
 

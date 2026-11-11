@@ -4,11 +4,11 @@ import { redirect } from 'next/navigation';
 import { Logo } from '@/components/logo';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
-/* 클로즈드 베타 「테스터 전용」 안내 (2026-11-11 세중님 결정 · 줄 A).
+/* 테스트 기간 「회원 전용」 안내 (2026-11-11 세중님 결정 · 줄 A · 같은 날 밤 초대 코드 거둠).
 
    로그인 안 한 사람은 어느 주소로 오든 여기로 옵니다 (middleware.ts).
-   보여 줄 것은 둘뿐입니다 — 이미 가입한 분의 로그인 길, 처음 오신 분께
-   「초대 링크로 들어와 주세요」. 공고·커뮤니티 자료는 한 줄도 안 그립니다.
+   보여 줄 것은 하나뿐입니다 — 로그인·회원가입으로 가는 길.
+   가입은 누구나 합니다. 공고·커뮤니티 자료는 한 줄도 안 그립니다.
 
    ?r=1 — 로그인 여부를 **못 물어본** 때(연결 끊김)입니다. 회원일 수도 있으니
    「가입하세요」가 아니라 「다시 시도」를 보입니다 (web/회원여부_읽는_법.md).
@@ -20,7 +20,7 @@ import { serverSupabase, serverWho } from '@/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'RAPO 클로즈드 베타 · 테스터 전용',
+  title: 'RAPO · 테스트 중',
   robots: { index: false, follow: false },
 };
 
@@ -41,9 +41,9 @@ export default async function Beta({
       <div className="mx-auto w-full max-w-[22rem]">
         <Logo className="!text-h1" />
         <p className="mt-5 inline-block rounded-md bg-badge-teal-bg px-3 py-1 text-sm font-bold text-teal-strong">
-          클로즈드 베타
+          테스트 중
         </p>
-        <h1 className="mt-3 text-h2 font-bold">RAPO 클로즈드 베타 · 테스터 전용</h1>
+        <h1 className="mt-3 text-h2 font-bold">RAPO 는 지금 테스트 중이에요</h1>
 
         {다시 ? (
           <>
@@ -55,10 +55,10 @@ export default async function Beta({
         ) : (
           <>
             <p className="mt-3 text-lg text-gray-700 dark:text-gray-300">
-              지금은 초대받은 테스터만 쓸 수 있어요.
+              회원만 볼 수 있어요.
             </p>
             <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">
-              처음 오셨다면 <b>초대 링크로 들어와 주세요.</b>
+              처음 오셨다면 <b>가입하고 바로 둘러보세요.</b>
             </p>
           </>
         )}
@@ -67,13 +67,10 @@ export default async function Beta({
           href="/login"
           className="mt-7 block w-full rounded-md bg-brand-red px-6 py-5 text-center text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
         >
-          이미 가입했어요 · 로그인
+          로그인 · 회원가입
         </Link>
 
         <p className="mt-7 text-sm text-mute">
-          초대 링크를 받으셨는데 이 화면이 보이면, 받은 링크를 다시 눌러 주세요.
-        </p>
-        <p className="mt-2 text-sm text-mute">
           궁금한 점은{' '}
           <Link href="/contact" className="underline underline-offset-2">문의하기</Link>
           로 남겨 주세요.
