@@ -412,8 +412,27 @@ html[data-splash="on"] #splash {
    원본 mp4 를 받으면 그 영상으로 바꿉니다 */
 /* ★ 2026-11-11 밤 대표 「이미지 한 번 줬다가 다시 새 화면이 뜨는 것처럼」 — 로고가 투명에서 시작해 한 번 사라졌다 나타나는 것처럼 보였습니다.
    이제 첫 장면부터 로고가 보이고(투명 없음) 그 자리에서 살짝 커졌다 돌아옵니다. 기다림(delay)도 없습니다 */
-html[data-splash="on"] #splash .splash-name { animation: splash-pop 1.2s cubic-bezier(.2,.8,.2,1) both; }
+/* ★ 2026-11-11 밤 대표 「앱 · 이어지게」 — 첫 장면 = 휴대폰 시작 화면(흰 바탕 · 가운데 R 아이콘).
+   ① 가운데 R(.splash-mark)이 0.55초 동안 커지며 흐려지고 ② 그 자리에 RAPO 로고(.splash-name)가 겹쳐 나타나고
+   ③ 문구가 1초쯤 올라옵니다. 그래서 「사진 한 장 → 새 화면」이 아니라 한 움직임으로 보입니다 */
+#splash .splash-mark { display: none; }
+html[data-splash="on"] #splash .splash-mark {
+  display: block; position: absolute; left: 50%; top: 50%; width: 84px; height: auto;
+  transform: translate(-50%, -50%);
+  animation: splash-mark 0.75s cubic-bezier(.4,0,.2,1) both;
+}
+html[data-splash="on"] #splash .splash-name { animation: splash-grow 0.8s 0.25s cubic-bezier(.2,.8,.2,1) both; }
 html[data-splash="on"] #splash .splash-line { animation: splash-in 0.7s 1s cubic-bezier(.2,.8,.2,1) both; }
+
+@keyframes splash-mark {
+  0%, 30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100%    { opacity: 0; transform: translate(-50%, -62%) scale(1.9); }
+}
+@keyframes splash-grow {
+  0%   { opacity: 0; transform: scale(0.6); }
+  60%  { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
 
 @keyframes splash-in {
   from { opacity: 0; transform: translateY(14px); }
@@ -437,6 +456,8 @@ html[data-splash="on"] #splash .splash-line { animation: splash-in 0.7s 1s cubic
   html[data-splash="on"] #splash {
     animation: splash-cut 1.4s forwards;
   }
+  /* 움직임 줄이기면 가운데 R 은 안 그리고 로고만 바로 */
+  html[data-splash="on"] #splash .splash-mark { display: none; }
   html[data-splash="on"] #splash .splash-name,
   html[data-splash="on"] #splash .splash-line {
     animation: none;
