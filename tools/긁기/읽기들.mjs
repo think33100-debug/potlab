@@ -110,11 +110,18 @@ export function 줄글(html, 자리) {
  *  목록 쪽(OfrNotAncmtLSub.jsp)은 GET 으로 열면 표가 비고, 화면이 이 action 에 POST 합니다 */
 export const 새올길 = '/emwp/gov/mogaha/ntis/web/ofr/action/OfrAction.do';
 /** 목록 POST 몸 — `ofr_pageSize` 30 은 **요청 한 번**에 30줄입니다(10 이면 강동구 엿새치뿐 · 30 이 받아들여짐 확인) */
-export const 새올목록몸 = (갈래 = '05', 몇줄 = 30) => ({
-  pageIndex: '1', jndinm: 'OfrNotAncmtEJB', context: 'NTIS', method: 'selectListOfrNotAncmt',
-  methodnm: 'selectListOfrNotAncmtHomepage', not_ancmt_mgt_no: '', homepage_pbs_yn: 'Y', subCheck: 'Y',
-  ofr_pageSize: String(몇줄), not_ancmt_se_code: 갈래, cha_dep_code_nm: '', initValue: '', countYn: 'Y',
-  list_gubun: '', homepagetype: 'new', not_ancmt_sj: '' });
+/* ★ 옛판(곳 설정 `새올옛판: true`) — `homepagetype` 칸을 **뺍니다**. 2026-11-11 예산·화천·동해 새올이
+     이 칸이 있으면 HTTP 400 을 냈고, 그 호스트의 목록 쪽(OfrNotAncmtLSub.jsp) form 에는 이 칸이 없었습니다.
+     빼고 보내니 셋 다 200 · 줄 14·8·30 (search() 가 넣는 method 값은 같습니다) */
+export const 새올목록몸 = (갈래 = '05', 몇줄 = 30, 옛판 = false) => {
+  const 몸 = {
+    pageIndex: '1', jndinm: 'OfrNotAncmtEJB', context: 'NTIS', method: 'selectListOfrNotAncmt',
+    methodnm: 'selectListOfrNotAncmtHomepage', not_ancmt_mgt_no: '', homepage_pbs_yn: 'Y', subCheck: 'Y',
+    ofr_pageSize: String(몇줄), not_ancmt_se_code: 갈래, cha_dep_code_nm: '', initValue: '', countYn: 'Y',
+    list_gubun: '', homepagetype: 'new', not_ancmt_sj: '' };
+  if (옛판) delete 몸.homepagetype;
+  return 몸;
+};
 /** 회원이 누를 **GET 상세 주소** — 화면의 searchDetail() 이 보내는 form 값 그대로입니다.
  *  ★ 몇 칸을 빼고 GET 하면 400(Bad Request)이 났습니다 — 칸을 줄이지 마십시오 */
 export function 새올상세주소(바탕, 번호, 갈래 = '05') {
@@ -183,6 +190,45 @@ export function 새올상세제목(html) {
   return ((글.match(/제\s*목\s+(.{4,300}?)\s+(?:번\s*호|고시공고구분|게재제호|고시공고번호|구\s*분|담당\s*부서|등\s*록\s*일)\s/) || [])[1] || '').trim();
 }
 export const 잘린꼴 = /(?:\.\.\.|…)\s*$/;
+
+/* ── 곳마다 읽기 규칙 (곳 설정 `읽기: "규칙"` + `규칙: {...}`) — 2026-11-11 ──────────────
+ * 표준읽기(글 번호가 든 href)로 못 읽는 시·군·구청 게시판이 있습니다 — 포항시는 제목 <a> 가
+ * `href="#" data-action="…view.do?notAncmtMgtNo=76371…"` 꼴이라 표준읽기가 줄 0 이었습니다.
+ * ★ 공통 읽기(표준읽기)는 **바꾸지 않습니다.** 대신 병원 수집기의 html 꼴 설정(`tools/hosp/cfgs/*.json`)과
+ *   **같은 칸 이름**(row · title · link · linkFmt · date · skip · single)으로 곳마다 규칙을 적고,
+ *   읽기는 `tools/hosp/hs_test.js` 의 `hospParseHtml` 을 **그대로 빌려 씁니다** (규칙을 두 벌로 만들지 않습니다 · 지침 6절).
+ * 이 자리에서 더하는 것은 둘뿐입니다 —
+ *   번호 = 그 줄에서 `link` 의 첫 캡처 (아이디에 씁니다 · 없으면 그 줄은 버립니다 — 지어내지 않습니다)
+ *   부서 = 그 줄(row) 글자 전부 (보건 거름·구 이름 가름에 씁니다 — 공고번호 칸 「포항시 남구보건소 공고」 도 들어갑니다)
+ * 날짜는 hospParseHtml 의 posted(올린 날)만 씁니다. 줄에 날짜가 둘이면(시작~마감) 시작을 올린 날로 둡니다. */
+import { createRequire } from 'node:module';
+const 들여오기 = createRequire(import.meta.url);
+let 병원읽기 = null;
+export function 규칙읽기(html, 규칙) {
+  if (!병원읽기) 병원읽기 = 들여오기('../hosp/hs_test.js');
+  const { hospParseHtml, stripTags } = 병원읽기;
+  const 낸것 = [];
+  const 본것 = new Set();
+  const 줄틀 = new RegExp(규칙.row, 'g');
+  const 링크틀 = 규칙.link ? new RegExp(규칙.link) : null;
+  const t = String(html || '');
+  for (const m of t.matchAll(줄틀)) {
+    const 덩이 = m[0];
+    /* 한 줄만 든 덩이를 hospParseHtml 에 그대로 줍니다 — 제목·주소·날짜 규칙이 병원 쪽과 글자까지 같습니다 */
+    const [x] = hospParseHtml(덩이, 규칙);
+    if (!x) continue;
+    /* link 캡처가 주소 통째(쪽이 준 href 그대로 쓰는 곳)면 그 안의 **마지막 숫자**를 번호로 봅니다 */
+    /* 규칙에 `번호`(정규식)가 있으면 그것을 먼저 씁니다 — 주소 끝에 다른 숫자 칸이 붙는 곳(해남 pBoardId=…201) */
+    const 캡처 = 규칙.번호 ? ((덩이.match(new RegExp(규칙.번호)) || [])[1] || '')
+      : (링크틀 ? ((덩이.match(링크틀) || [])[1] || '') : '');
+    const 번호 = /^\d+$/.test(캡처) ? 캡처 : ((캡처.match(/(\d+)(?!.*\d)/) || [])[1] || '');
+    if (!번호 || 본것.has(번호)) continue;
+    본것.add(번호);
+    const 날 = (x.posted || x.from || '').replace(/\./g, '-') || null;
+    낸것.push({ 번호, 제목: x.title, 주소: x.url, 올린날: 날, 부서: stripTags(덩이), 자리: m.index });
+  }
+  return 낸것;
+}
 
 /* ── 「채용 게시판 목록인가」 울타리 넷 (2026-10-28 세중님 1번) ───────────────
  * 전에는 「목록 줄이 **하나라도** 나오면 게시판」이었습니다. 그래서 —

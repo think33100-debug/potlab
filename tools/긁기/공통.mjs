@@ -19,6 +19,27 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { robots읽기, 가도되나 } from '../robots.mjs';
+import { 붙여받기, 있나 as 인증서있나 } from '../certs/index.mjs';
+
+/* ★ 2026-11-11 — **중간 인증서를 빼먹은 서버**(UNABLE_TO_VERIFY_LEAF_SIGNATURE)는
+   `tools/certs/<호스트>.pem` 이 있을 때만 `붙여받기` 로 받습니다 (robots.txt 도 같은 길).
+   검증은 **켠 채**입니다 — 뿌리 묶음에 그 중간 인증서를 더해 사슬을 잇는 것뿐입니다
+   (`rejectUnauthorized` 를 끄지 않습니다 · tools/certs/index.mjs 머리글).
+   .pem 이 없는 호스트는 전과 똑같이 맨 fetch 입니다 */
+async function 맨받기(주소, { method = 'GET', headers = {}, body, timeout = 20000 } = {}) {
+  let 호스트 = '';
+  try { 호스트 = new URL(주소).hostname; } catch { /* 아래 fetch 가 까닭을 냅니다 */ }
+  if (호스트 && 인증서있나(호스트)) {
+    const g = await 붙여받기(주소, { method, headers, body, timeout });
+    if (g.왜) throw new Error(g.왜);
+    return { ok: g.code >= 200 && g.code < 300, status: g.code, url: g.url || 주소,
+      headers: g.headers, buf: g.buf };
+  }
+  const r = await fetch(주소, { method, headers, body,
+    signal: AbortSignal.timeout(timeout), redirect: 'follow' });
+  return { ok: r.ok, status: r.status, url: r.url, headers: r.headers,
+    buf: Buffer.from(await r.arrayBuffer()) };
+}
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 
@@ -55,11 +76,10 @@ export async function 가도되나집(주소) {
   try { U = new URL(주소); } catch { return { 됨: false, 왜: '주소 꼴이 아닙니다' }; }
   if (!robots표.has(U.host)) {
     try {
-      const r = await fetch(U.origin + '/robots.txt', { headers: { 'User-Agent': UA },
-        signal: AbortSignal.timeout(12000), redirect: 'follow' });
+      const r = await 맨받기(U.origin + '/robots.txt', { headers: { 'User-Agent': UA }, timeout: 12000 });
       /* robots.txt 가 없으면(404) **규칙이 없는 것**이라 가도 됩니다 (tools/robots.mjs 머리글) */
-      robots표.set(U.host, r.ok ? robots읽기(await r.text()) : null);
-    } catch { robots표.set(U.host, null); }
+      robots표.set(U.host, r.ok ? robots읽기(r.buf.toString('utf8')) : null);
+    } catch { robots표.set(U.host, null); robots못받음.add(U.host); }
     await 자고(500);
   }
   const rb = robots표.get(U.host);
@@ -72,6 +92,13 @@ export async function 가도되나집(주소) {
    새올 호스트(eminwon.*)는 시청 누리집과 robots 가 따로라, 호스트마다 받기 전에 읽었다는 증거로 남깁니다 */
 const robots막힘 = new Set();
 export const robots셈 = () => ({ 읽은호스트: robots표.size, 막은호스트: [...robots막힘] });
+/* ★ 2026-11-11 — robots.txt 를 **연결부터 못 받은**(시간 초과·끊김 · HTTP 답이 없음) 호스트.
+   404·400 처럼 답이 온 것은 여기 안 듭니다(그건 「규칙 없음」). 「서버에서 시도」 곳은 이것이면
+   목록을 두드리지 않고 넘어갑니다 — 안 열리는 곳이 하루 한 바퀴에 20초씩 더 잡아먹지 않게 */
+const robots못받음 = new Set();
+export function robots못받았나(주소) {
+  try { return robots못받음.has(new URL(주소).host); } catch { return false; }
+}
 
 /** 같은 집이면 3.5초, 다른 집이면 0.8초 띄웁니다 */
 export async function 틈지키기(주소) {
@@ -105,10 +132,9 @@ export async function 받기(주소, { 몸 = null } = {}) {
   try {
     const 머리 = { 'User-Agent': UA, 'Accept-Language': 'ko' };
     if (몸) 머리['Content-Type'] = 'application/x-www-form-urlencoded';
-    const r = await fetch(주소, { method: 몸 ? 'POST' : 'GET', headers: 머리,
-      body: 몸 ? new URLSearchParams(몸).toString() : undefined,
-      signal: AbortSignal.timeout(20000), redirect: 'follow' });
-    const html = 글자풀기(Buffer.from(await r.arrayBuffer()), r.headers.get('content-type') || '');
+    const r = await 맨받기(주소, { method: 몸 ? 'POST' : 'GET', headers: 머리,
+      body: 몸 ? new URLSearchParams(몸).toString() : undefined, timeout: 20000 });
+    const html = 글자풀기(r.buf, (r.headers && r.headers.get('content-type')) || '');
     return { 됨: r.ok, 코드: r.status, 주소: r.url, html,
       글: html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')
         .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim(),
@@ -266,7 +292,9 @@ export function 도는곳셈() {
     let j;
     try { j = JSON.parse(fs.readFileSync(path.join(여기, 꼴 + '_곳들.json'), 'utf8')); }
     catch { continue; }
-    const 곳들 = j.곳들 || [];
+    /* ★ 2026-11-11 — `서버에서시도` 곳은 이 PC 에서 한 번도 안 열린 곳이라 **도는 곳으로 세지 않습니다**
+       (설정 곳 수에서도 뺍니다 · 열린 것이 확인되면 그 표시를 지우고 그때 셉니다) */
+    const 곳들 = (j.곳들 || []).filter((c) => !c.서버에서시도);
     전부 += 곳들.length;
     const n = 곳들.filter((c) => !HS3가긁나(c.이름)).length;
     도는것 += n; 건너뜀 += 곳들.length - n;
