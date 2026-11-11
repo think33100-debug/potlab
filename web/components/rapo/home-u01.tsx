@@ -37,6 +37,7 @@ export function HomeU01({ jobs, who, sample = false, 관리덮기 }: {
 }) {
   return (
     <RapoShell who={who} current="/" 관리덮기={관리덮기}>
+        <h1 className="sr-only">RAPO 홈</h1>
         <Banners member={who === '회원'} />
         <StartHere />
         <AnonymousTalk />

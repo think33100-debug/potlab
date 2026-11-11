@@ -58,12 +58,15 @@ export function RapoMeFrame({ title, back = '/me', nav = false, children }: {
   title: string; back?: string; nav?: boolean; children: (me: NonNullable<ReturnType<typeof useAuth>['me']>) => ReactNode;
 }) {
   const router = useRouter();
-  const { loading, session, me } = useAuth();
+  const { loading, session, me, 설문 } = useAuth();
   useEffect(() => {
     if (loading) return;
     if (!session) { router.replace('/login?next=' + encodeURIComponent(location.pathname)); return; }
-    if (!me) router.replace('/welcome');
-  }, [loading, session, me, router]);
+    /* 프로필을 **못 읽은** 것(잠깐 끊김 · 설문 「모름」)과 **없는** 것(가입 전)을 가릅니다 (2026-11-12 밤 점검).
+       전에는 못 읽었을 때도 가입 화면(/welcome · 옛 모양)으로 보냈다가 되돌아와, 내 정보에 들어갈 때
+       옛 화면이 잠깐 비칠 수 있었습니다 — 원인 후보이고, 이 PC 에서는 다시 일으키지 못했습니다 */
+    if (!me && 설문 !== '모름') router.replace('/welcome');
+  }, [loading, session, me, 설문, router]);
 
   return (
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">

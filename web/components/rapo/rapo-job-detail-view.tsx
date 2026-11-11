@@ -216,7 +216,7 @@ function 원문칸({ url }: { url?: string | null }) {
   if (!url) return <p className="rapo-type-t5-bold">{못읽은칸말}</p>;
   return (
     <a href={url} target="_blank" rel="noopener noreferrer"
-       className="rapo-type-t5-bold inline-flex items-center gap-(--rapo-dimension-x1) underline
+       className="rapo-type-t5-bold -my-[11px] inline-flex min-h-(--rapo-touch-min) items-center gap-(--rapo-dimension-x1) underline
                   decoration-(--rapo-color-stroke-neutral-weak) underline-offset-[3px]">
       {못읽은칸말}
       {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
