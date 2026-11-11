@@ -145,7 +145,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         <h1 className="text-[18px] font-bold" style={{ color: 어둠.글 }}>게시글</h1>
       </header>
 
-      <main className="px-[22px] pb-[96px]">
+      <main className="px-[22px]">
         <article className="pt-[16px]">
           {직군 && <p className="text-[14px] font-bold leading-[20px]" style={{ color: 어둠.밑줄 }}>{직군}</p>}
           {p.title && <h2 className="mt-[8px] break-keep text-[26px] font-bold leading-[36px] [overflow-wrap:anywhere]" style={{ color: 어둠.글 }}>{p.title}</h2>}

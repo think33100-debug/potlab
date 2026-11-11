@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Avatar } from '@/components/avatar';
 import { shownName } from '@/lib/who';
+import { RapoMaskIcon } from './rapo-ui';
 
 /* 커뮤니티 — 새 디자인 「U06-01 · 커뮤니티 피드」 조각 (2026-11-11 밤 · 대표: 피그마 우선).
    원본: 08 · C 커뮤니티와 병원 탐색 → 「커뮤니티 피드」 1328:2659 (공개 피드 상단 1299:878 ·
@@ -37,14 +38,19 @@ export const 직군탭 = ['전체', '작업치료사', '물리치료사'] as con
 export type 직군탭값 = (typeof 직군탭)[number];
 
 /* 상단 — 「커뮤니티」 제목 · 직군 탭 · 이용 안내 · 「○○ 게시글」과 정렬.
-   원본의 「병원 찾기」 단추는 기능이 없어 뺐습니다(병원 탐색은 뒤로) */
+   「병원 찾기」는 지금 있는 기관 찾기(/orgs)로 잇습니다 */
 export function RapoCommunityTop({ 탭, 정렬, 주소 }: {
   탭: 직군탭값; 정렬: 'new' | 'hot'; 주소: (탭: 직군탭값, 정렬: 'new' | 'hot') => string;
 }) {
   return (
     <header className="flex flex-col">
       <div className="flex h-[56px] items-center px-[22px]">
-        <h1 className="text-[21px] font-bold leading-[30px]" style={{ color: 어둠.글 }}>커뮤니티</h1>
+        <h1 className="min-w-0 flex-1 text-[21px] font-bold leading-[30px]" style={{ color: 어둠.글 }}>커뮤니티</h1>
+        {/* 병원 찾기 (원본 1266:1973) — 지금 있는 기관 찾기(/orgs)로 갑니다. 그 화면 안쪽은 아직 전 모양 (2026-11-12 밤 근무) */}
+        <Link href="/orgs" className="flex h-[34px] items-center gap-[7px] rounded-[17px] px-[12px] text-[14px] font-bold leading-[20px]" style={{ background: 어둠.면, color: 어둠.글 }}>
+          <RapoMaskIcon src="/rapo/list/search-20.svg" w={16} h={16} />
+          병원 찾기
+        </Link>
       </div>
       <nav aria-label="직군" className="mx-[22px] mt-[16px] flex h-[44px]">
         {직군탭.map((t) => (
