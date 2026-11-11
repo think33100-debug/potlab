@@ -191,7 +191,7 @@ function StartHere() {
    회원 화면에 이대로 낼지는 대표 확인 자리입니다(docs/rapo-design-implementation.md). */
 const 답변 = [
   { img: '/rapo/home/avatar-1.png', text: ['교육 기간과 담당 환자 수를', '면접에서 같이 물어보세요.'] },
-  { img: '/rapo/home/avatar-2.png', text: ['저도 가온 지원 준비 중이에요.', '교육 담당 선생님이 계신가요?'] },
+  { img: '/rapo/home/avatar-2.png', text: ['저도 라포 지원 준비 중이에요.', '교육 담당 선생님이 계신가요?'] },
   { img: '/rapo/home/avatar-3.png', text: ['혼자 치료를 시작하는 시점도', '함께 확인하면 좋겠네요.'] },
 ];
 
@@ -205,7 +205,7 @@ function AnonymousTalk() {
       <div className="flex flex-col gap-(--rapo-dimension-x3)">
         <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x4)">
           <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">익명의 동료가 물었어요</p>
-          <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">가온재활병원 다녀보신 분,<br />신입 교육은 어떤가요?</p>
+          <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">라포재활병원 다녀보신 분,<br />신입 교육은 어떤가요?</p>
         </div>
         <ul className="flex flex-col gap-(--rapo-dimension-x2) pl-(--rapo-dimension-x6)">
           {답변.map((a) => (
