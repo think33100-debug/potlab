@@ -5,6 +5,7 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { channelsFor } from '@/lib/channels';
 import { MAX_POST_IMAGES, postImagePair } from '@/lib/image';
+import { 새글사진경로 } from '@/lib/post-image-path';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useAuth } from '../../auth';
 import { useToast } from '../../toast';
@@ -96,16 +97,18 @@ function Write() {
          post_images 규칙이 「내 글의 사진만」이라 글 id 가 있어야 통과합니다 */
       for (let i = 0; i < picks.length; i++) {
         const { full, thumb } = await postImagePair(picks[i].file);
-        const base = `${me.id}/${post.id}/${i}`;
+        /* ★ 2026-11-11 — 경로에 회원 id·글 번호를 안 넣습니다 (lib/post-image-path.ts).
+           이름이 매번 새것이라 덮어쓰기(upsert)가 필요 없습니다 */
+        const 길 = 새글사진경로();
         const up = await Promise.all([
-          sb.storage.from('post-images').upload(`${base}.webp`, full, { contentType: 'image/webp', upsert: true }),
-          sb.storage.from('post-images').upload(`${base}-t.webp`, thumb, { contentType: 'image/webp', upsert: true }),
+          sb.storage.from('post-images').upload(길.큰것, full, { contentType: 'image/webp', upsert: false }),
+          sb.storage.from('post-images').upload(길.작은것, thumb, { contentType: 'image/webp', upsert: false }),
         ]);
         const bad = up.find((u) => u.error);
         if (bad?.error) throw bad.error;
 
         const { error: rowErr } = await sb.from('post_images').insert({
-          post_id: post.id, path: `${base}.webp`, thumb_path: `${base}-t.webp`, sort: i,
+          post_id: post.id, path: 길.큰것, thumb_path: 길.작은것, sort: i,
         });
         if (rowErr) throw rowErr;
       }
