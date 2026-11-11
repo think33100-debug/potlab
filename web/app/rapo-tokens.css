@@ -1,0 +1,643 @@
+/* 자동으로 만든 파일입니다 — 손으로 고치지 마세요.
+   만드는 법: cd web && node tools/rapo-tokens.mjs
+   원본: Figma 「RAPO 디자인 프로젝트」 현행 토큰 (design-tokens/figma/, 2026-11-11 읽음)
+   변수 305 · 글자 스타일 45 · 그림자 3
+
+   기존 화면에는 영향이 없습니다 — 이름이 모두 --rapo- 로 시작하고 Tailwind @theme 밖입니다.
+   글꼴: Figma 는 "Pretendard", 웹은 globals.css 가 받는 "Pretendard Variable" 입니다.
+   그래서 글자 스타일은 var(--rapo-font-family) 뒤에 var(--font-sans) 를 이어 둡니다. */
+:root {
+  /* ── RAPO · 브랜드 기준 ── */
+  --rapo-brand-color-coral: #FF4F40;
+  --rapo-brand-color-blush: #FFE9E6;
+  --rapo-brand-color-navy: #112231;
+  --rapo-brand-color-mist: #F2F8F3;
+  --rapo-brand-color-white: #FFFFFF;
+  --rapo-brand-color-muted: #56636D;
+  --rapo-brand-color-line: #DDE4E6;
+  --rapo-brand-space-8: 8px;
+  --rapo-brand-space-16: 16px;
+  --rapo-brand-space-24: 24px;
+  --rapo-brand-space-32: 32px;
+  --rapo-brand-space-48: 48px;
+  --rapo-brand-space-64: 64px;
+  --rapo-brand-space-96: 96px;
+  /* ── RAPO / Color palette ── */
+  --rapo-color-palette-gray-00: #FFFFFF;
+  --rapo-color-palette-gray-100: #F7F8F9;
+  --rapo-color-palette-gray-200: #F3F4F5;
+  --rapo-color-palette-gray-300: #EEEFF1;
+  --rapo-color-palette-gray-400: #DCDEE3;
+  --rapo-color-palette-gray-500: #D1D3D8;
+  --rapo-color-palette-gray-600: #B0B3BA;
+  --rapo-color-palette-gray-700: #868B94;
+  --rapo-color-palette-gray-800: #555D6D;
+  --rapo-color-palette-gray-900: #2A3038;
+  --rapo-color-palette-gray-1000: #1A1C20;
+  --rapo-color-palette-coral-100: #FFF1EE;
+  --rapo-color-palette-coral-200: #FFE5E1;
+  --rapo-color-palette-coral-300: #FED0C9;
+  --rapo-color-palette-coral-400: #FFB1A5;
+  --rapo-color-palette-coral-500: #FD8878;
+  --rapo-color-palette-coral-600: var(--rapo-brand-color-coral);
+  --rapo-color-palette-coral-700: #D8372B;
+  --rapo-color-palette-coral-800: #B8281F;
+  --rapo-color-palette-coral-900: #851E17;
+  --rapo-color-palette-coral-1000: #470F0A;
+  --rapo-color-palette-navy-100: #F5F8FA;
+  --rapo-color-palette-navy-200: #F1F3F5;
+  --rapo-color-palette-navy-300: #EAEEF2;
+  --rapo-color-palette-navy-400: #D3DDE5;
+  --rapo-color-palette-navy-500: #C7D1D9;
+  --rapo-color-palette-navy-600: #A1AEBB;
+  --rapo-color-palette-navy-700: #728394;
+  --rapo-color-palette-navy-800: #335370;
+  --rapo-color-palette-navy-900: var(--rapo-brand-color-navy);
+  --rapo-color-palette-navy-1000: #0B1319;
+  --rapo-color-palette-blue-100: #EFF6FF;
+  --rapo-color-palette-blue-200: #E2EDFC;
+  --rapo-color-palette-blue-300: #CBDFFA;
+  --rapo-color-palette-blue-400: #AACEFD;
+  --rapo-color-palette-blue-500: #85B8FD;
+  --rapo-color-palette-blue-600: #5E98FE;
+  --rapo-color-palette-blue-700: #217CF9;
+  --rapo-color-palette-blue-800: #135FCD;
+  --rapo-color-palette-blue-900: #0B4596;
+  --rapo-color-palette-blue-1000: #032451;
+  --rapo-color-palette-red-100: #FDF0F0;
+  --rapo-color-palette-red-200: #FDE7E7;
+  --rapo-color-palette-red-300: #FED4D2;
+  --rapo-color-palette-red-400: #FEB7B3;
+  --rapo-color-palette-red-500: #FE928D;
+  --rapo-color-palette-red-600: #FC6A66;
+  --rapo-color-palette-red-700: #FA342C;
+  --rapo-color-palette-red-800: #CA1D13;
+  --rapo-color-palette-red-900: #921708;
+  --rapo-color-palette-red-1000: #4A1209;
+  --rapo-color-palette-green-100: #EDFAF6;
+  --rapo-color-palette-green-200: #D9F6E9;
+  --rapo-color-palette-green-300: #B9E9D2;
+  --rapo-color-palette-green-400: #7DDCB3;
+  --rapo-color-palette-green-500: #42C593;
+  --rapo-color-palette-green-600: #10AB7D;
+  --rapo-color-palette-green-700: #079171;
+  --rapo-color-palette-green-800: #00745F;
+  --rapo-color-palette-green-900: #075445;
+  --rapo-color-palette-green-1000: #0A2B24;
+  --rapo-color-palette-yellow-100: #FFF7DE;
+  --rapo-color-palette-yellow-200: #FDEFB9;
+  --rapo-color-palette-yellow-300: #FBDC65;
+  --rapo-color-palette-yellow-400: #E9C647;
+  --rapo-color-palette-yellow-500: #D4AB28;
+  --rapo-color-palette-yellow-600: #C49725;
+  --rapo-color-palette-yellow-700: #9B7821;
+  --rapo-color-palette-yellow-800: #755B22;
+  --rapo-color-palette-yellow-900: #4F3E1F;
+  --rapo-color-palette-yellow-1000: #2C2512;
+  --rapo-color-palette-purple-100: #F5F3FE;
+  --rapo-color-palette-purple-200: #EFEAFE;
+  --rapo-color-palette-purple-300: #E1D8FF;
+  --rapo-color-palette-purple-400: #D0C0FF;
+  --rapo-color-palette-purple-500: #B8A1FF;
+  --rapo-color-palette-purple-600: #9F84FB;
+  --rapo-color-palette-purple-700: #8969EA;
+  --rapo-color-palette-purple-800: #6D50CB;
+  --rapo-color-palette-purple-900: #50379B;
+  --rapo-color-palette-purple-1000: #29175D;
+  --rapo-color-palette-static-black: #000000;
+  --rapo-color-palette-static-white: #FFFFFF;
+  --rapo-color-palette-transparent: rgb(0 0 0 / 0);
+  --rapo-color-palette-static-black-alpha-100: rgb(0 0 0 / 0.0275);
+  --rapo-color-palette-static-black-alpha-200: rgb(0 0 0 / 0.0471);
+  --rapo-color-palette-static-black-alpha-300: rgb(0 0 0 / 0.0627);
+  --rapo-color-palette-static-black-alpha-400: rgb(0 0 0 / 0.1294);
+  --rapo-color-palette-static-black-alpha-500: rgb(0 0 0 / 0.1725);
+  --rapo-color-palette-static-black-alpha-600: rgb(0 0 0 / 0.298);
+  --rapo-color-palette-static-black-alpha-700: rgb(0 0 0 / 0.4549);
+  --rapo-color-palette-static-black-alpha-800: rgb(0 0 0 / 0.6353);
+  --rapo-color-palette-static-black-alpha-900: rgb(0 0 0 / 0.8157);
+  --rapo-color-palette-static-black-alpha-1000: rgb(0 0 0 / 0.8902);
+  --rapo-color-palette-static-white-alpha-50: rgb(255 255 255 / 0.051);
+  --rapo-color-palette-static-white-alpha-100: rgb(255 255 255 / 0.0902);
+  --rapo-color-palette-static-white-alpha-200: rgb(255 255 255 / 0.1255);
+  --rapo-color-palette-static-white-alpha-300: rgb(255 255 255 / 0.1804);
+  --rapo-color-palette-static-white-alpha-400: rgb(255 255 255 / 0.2392);
+  --rapo-color-palette-static-white-alpha-500: rgb(255 255 255 / 0.3765);
+  --rapo-color-palette-static-white-alpha-600: rgb(255 255 255 / 0.5451);
+  --rapo-color-palette-static-white-alpha-700: rgb(255 255 255 / 0.702);
+  --rapo-color-palette-static-white-alpha-800: rgb(255 255 255 / 0.8706);
+  --rapo-color-palette-static-white-alpha-900: rgb(255 255 255 / 0.9176);
+  --rapo-color-palette-static-white-alpha-1000: rgb(255 255 255 / 0.9569);
+  /* ── RAPO / Color roles ── */
+  --rapo-color-fg-brand: var(--rapo-color-palette-coral-600);
+  --rapo-color-fg-brand-contrast: var(--rapo-color-palette-coral-700);
+  --rapo-color-fg-neutral: var(--rapo-color-palette-gray-1000);
+  --rapo-color-fg-neutral-muted: var(--rapo-color-palette-gray-800);
+  --rapo-color-fg-neutral-subtle: var(--rapo-color-palette-gray-700);
+  --rapo-color-fg-on-neutral-solid: var(--rapo-color-palette-gray-00);
+  --rapo-color-fg-on-brand-solid: var(--rapo-color-palette-static-white);
+  --rapo-color-fg-on-critical-solid: var(--rapo-color-palette-static-white);
+  --rapo-color-fg-on-positive-solid: var(--rapo-color-palette-static-white);
+  --rapo-color-fg-on-informative-solid: var(--rapo-color-palette-static-white);
+  --rapo-color-fg-on-warning-solid: var(--rapo-color-palette-static-black-alpha-900);
+  --rapo-color-fg-disabled: var(--rapo-color-palette-gray-500);
+  --rapo-color-fg-placeholder: var(--rapo-color-palette-gray-600);
+  --rapo-color-bg-brand-solid: var(--rapo-color-palette-coral-600);
+  --rapo-color-bg-brand-solid-pressed: var(--rapo-color-palette-coral-700);
+  --rapo-color-bg-brand-weak: var(--rapo-color-palette-coral-100);
+  --rapo-color-bg-brand-weak-pressed: var(--rapo-color-palette-coral-200);
+  --rapo-color-bg-neutral-solid: var(--rapo-color-palette-gray-900);
+  --rapo-color-bg-neutral-solid-pressed: var(--rapo-color-palette-gray-800);
+  --rapo-color-bg-neutral-weak: var(--rapo-color-palette-gray-200);
+  --rapo-color-bg-neutral-weak-pressed: var(--rapo-color-palette-gray-300);
+  --rapo-color-bg-disabled: var(--rapo-color-palette-gray-200);
+  --rapo-color-bg-layer-basement: var(--rapo-color-palette-gray-200);
+  --rapo-color-bg-layer-default: var(--rapo-color-palette-gray-00);
+  --rapo-color-bg-layer-default-pressed: var(--rapo-color-palette-gray-100);
+  --rapo-color-bg-layer-floating: var(--rapo-color-palette-gray-00);
+  --rapo-color-bg-layer-floating-pressed: var(--rapo-color-palette-gray-100);
+  --rapo-color-bg-transparent: var(--rapo-color-palette-transparent);
+  --rapo-color-bg-transparent-pressed: var(--rapo-color-palette-static-black-alpha-100);
+  --rapo-color-bg-transparent-selected: var(--rapo-color-palette-static-black-alpha-200);
+  --rapo-color-bg-transparent-selected-pressed: var(--rapo-color-palette-static-black-alpha-300);
+  --rapo-color-bg-neutral-weak-alpha: var(--rapo-color-palette-static-black-alpha-200);
+  --rapo-color-bg-neutral-weak-alpha-pressed: var(--rapo-color-palette-static-black-alpha-300);
+  --rapo-color-bg-overlay: var(--rapo-color-palette-static-black-alpha-700);
+  --rapo-color-bg-overlay-muted: var(--rapo-color-palette-static-black-alpha-500);
+  --rapo-color-stroke-brand-solid: var(--rapo-color-palette-coral-700);
+  --rapo-color-stroke-brand-weak: var(--rapo-color-palette-coral-300);
+  --rapo-color-stroke-neutral-contrast: var(--rapo-color-palette-gray-1000);
+  --rapo-color-stroke-neutral-solid: var(--rapo-color-palette-gray-800);
+  --rapo-color-stroke-neutral-weak: var(--rapo-color-palette-gray-400);
+  --rapo-color-stroke-neutral-muted: var(--rapo-color-palette-static-black-alpha-300);
+  --rapo-color-stroke-neutral-subtle: var(--rapo-color-palette-static-black-alpha-200);
+  --rapo-color-stroke-focus-ring: var(--rapo-color-palette-blue-600);
+  --rapo-color-fg-critical: var(--rapo-color-palette-red-700);
+  --rapo-color-fg-critical-contrast: var(--rapo-color-palette-red-900);
+  --rapo-color-bg-critical-solid: var(--rapo-color-palette-red-700);
+  --rapo-color-bg-critical-solid-pressed: var(--rapo-color-palette-red-800);
+  --rapo-color-bg-critical-weak: var(--rapo-color-palette-red-100);
+  --rapo-color-bg-critical-weak-pressed: var(--rapo-color-palette-red-200);
+  --rapo-color-stroke-critical-solid: var(--rapo-color-palette-red-700);
+  --rapo-color-stroke-critical-weak: var(--rapo-color-palette-red-300);
+  --rapo-color-fg-positive: var(--rapo-color-palette-green-700);
+  --rapo-color-fg-positive-contrast: var(--rapo-color-palette-green-900);
+  --rapo-color-bg-positive-solid: var(--rapo-color-palette-green-700);
+  --rapo-color-bg-positive-solid-pressed: var(--rapo-color-palette-green-800);
+  --rapo-color-bg-positive-weak: var(--rapo-color-palette-green-100);
+  --rapo-color-bg-positive-weak-pressed: var(--rapo-color-palette-green-200);
+  --rapo-color-stroke-positive-solid: var(--rapo-color-palette-green-700);
+  --rapo-color-stroke-positive-weak: var(--rapo-color-palette-green-300);
+  --rapo-color-fg-informative: var(--rapo-color-palette-blue-700);
+  --rapo-color-fg-informative-contrast: var(--rapo-color-palette-blue-900);
+  --rapo-color-bg-informative-solid: var(--rapo-color-palette-blue-700);
+  --rapo-color-bg-informative-solid-pressed: var(--rapo-color-palette-blue-800);
+  --rapo-color-bg-informative-weak: var(--rapo-color-palette-blue-100);
+  --rapo-color-bg-informative-weak-pressed: var(--rapo-color-palette-blue-200);
+  --rapo-color-stroke-informative-solid: var(--rapo-color-palette-blue-700);
+  --rapo-color-stroke-informative-weak: var(--rapo-color-palette-blue-300);
+  --rapo-color-fg-warning: var(--rapo-color-palette-yellow-700);
+  --rapo-color-fg-warning-contrast: var(--rapo-color-palette-yellow-900);
+  --rapo-color-bg-warning-solid: var(--rapo-color-palette-yellow-300);
+  --rapo-color-bg-warning-solid-pressed: var(--rapo-color-palette-yellow-400);
+  --rapo-color-bg-warning-weak: var(--rapo-color-palette-yellow-100);
+  --rapo-color-bg-warning-weak-pressed: var(--rapo-color-palette-yellow-200);
+  --rapo-color-stroke-warning-solid: var(--rapo-color-palette-yellow-700);
+  --rapo-color-stroke-warning-weak: var(--rapo-color-palette-yellow-300);
+  --rapo-color-bg-navy-solid: var(--rapo-color-palette-navy-900);
+  --rapo-color-bg-navy-solid-pressed: var(--rapo-color-palette-navy-800);
+  --rapo-color-fg-on-navy-solid: var(--rapo-color-palette-static-white);
+  --rapo-color-bg-identity: var(--rapo-color-palette-coral-600);
+  --rapo-color-bg-identity-pressed: var(--rapo-color-palette-coral-500);
+  --rapo-color-fg-on-identity: var(--rapo-color-palette-navy-900);
+  --rapo-color-bg-deep-coral: var(--rapo-color-palette-coral-700);
+  --rapo-color-bg-deep-coral-pressed: var(--rapo-color-palette-coral-800);
+  --rapo-color-fg-on-deep-coral: var(--rapo-color-palette-static-white);
+  --rapo-color-stroke-spinner-track-inverse: var(--rapo-color-palette-static-white-alpha-300);
+  --rapo-color-stroke-spinner-track-neutral: var(--rapo-color-palette-gray-500);
+  --rapo-color-bg-neutral-muted: var(--rapo-color-palette-gray-100);
+  --rapo-color-bg-neutral-subtle: var(--rapo-color-palette-gray-00);
+  /* ── RAPO / Dimensions ── */
+  --rapo-dimension-x0_5: 2px;
+  --rapo-dimension-x1: 4px;
+  --rapo-dimension-x1_5: 6px;
+  --rapo-dimension-x2: 8px;
+  --rapo-dimension-x2_5: 10px;
+  --rapo-dimension-x3: 12px;
+  --rapo-dimension-x3_5: 14px;
+  --rapo-dimension-x4: 16px;
+  --rapo-dimension-x4_5: 18px;
+  --rapo-dimension-x5: 20px;
+  --rapo-dimension-x6: 24px;
+  --rapo-dimension-x7: 28px;
+  --rapo-dimension-x8: 32px;
+  --rapo-dimension-x9: 36px;
+  --rapo-dimension-x10: 40px;
+  --rapo-dimension-x12: 48px;
+  --rapo-dimension-x13: 52px;
+  --rapo-dimension-x14: 56px;
+  --rapo-dimension-x16: 64px;
+  --rapo-radius-r0_5: 2px;
+  --rapo-radius-r1: 4px;
+  --rapo-radius-r1_5: 6px;
+  --rapo-radius-r2: 8px;
+  --rapo-radius-r2_5: 10px;
+  --rapo-radius-r3: 12px;
+  --rapo-radius-r3_5: 14px;
+  --rapo-radius-r4: 16px;
+  --rapo-radius-r5: 20px;
+  --rapo-radius-r6: 24px;
+  --rapo-radius-full: 9999px;
+  --rapo-border-default: 1px;
+  --rapo-touch-min: 44px;
+  --rapo-dimension-spacing-x-between-chips: var(--rapo-dimension-x2);
+  --rapo-dimension-spacing-x-global-gutter: var(--rapo-dimension-x4);
+  --rapo-dimension-spacing-y-component-default: var(--rapo-dimension-x3);
+  --rapo-dimension-spacing-y-nav-to-title: var(--rapo-dimension-x5);
+  --rapo-dimension-spacing-y-screen-bottom: var(--rapo-dimension-x14);
+  --rapo-dimension-spacing-y-between-text: var(--rapo-dimension-x1_5);
+  /* ── RAPO / Typography ── */
+  --rapo-font-size-t1: 11px;
+  --rapo-line-height-t1: 15px;
+  --rapo-font-size-t2: 12px;
+  --rapo-line-height-t2: 16px;
+  --rapo-font-size-t3: 13px;
+  --rapo-line-height-t3: 18px;
+  --rapo-font-size-t4: 14px;
+  --rapo-line-height-t4: 19px;
+  --rapo-font-size-t5: 16px;
+  --rapo-line-height-t5: 22px;
+  --rapo-font-size-t6: 18px;
+  --rapo-line-height-t6: 24px;
+  --rapo-font-size-t7: 20px;
+  --rapo-line-height-t7: 27px;
+  --rapo-font-size-t8: 22px;
+  --rapo-line-height-t8: 30px;
+  --rapo-font-size-t9: 24px;
+  --rapo-line-height-t9: 32px;
+  --rapo-font-size-t10: 26px;
+  --rapo-line-height-t10: 35px;
+  --rapo-font-size-t11: 28px;
+  --rapo-line-height-t11: 38px;
+  --rapo-font-size-t12: 32px;
+  --rapo-line-height-t12: 42px;
+  --rapo-font-size-t13: 40px;
+  --rapo-line-height-t13: 52px;
+  --rapo-font-size-t14: 48px;
+  --rapo-line-height-t14: 60px;
+  --rapo-font-weight-regular: 400;
+  --rapo-font-weight-medium: 500;
+  --rapo-font-weight-bold: 700;
+  --rapo-font-family: "Pretendard";
+  --rapo-font-size-t1-static: var(--rapo-font-size-t1);
+  --rapo-line-height-t1-static: var(--rapo-line-height-t1);
+  --rapo-font-size-t2-static: var(--rapo-font-size-t2);
+  --rapo-line-height-t2-static: var(--rapo-line-height-t2);
+  --rapo-font-size-t3-static: var(--rapo-font-size-t3);
+  --rapo-line-height-t3-static: var(--rapo-line-height-t3);
+  --rapo-font-size-t4-static: var(--rapo-font-size-t4);
+  --rapo-line-height-t4-static: var(--rapo-line-height-t4);
+  --rapo-font-size-t5-static: var(--rapo-font-size-t5);
+  --rapo-line-height-t5-static: var(--rapo-line-height-t5);
+  --rapo-font-size-t6-static: var(--rapo-font-size-t6);
+  --rapo-line-height-t6-static: var(--rapo-line-height-t6);
+  --rapo-font-size-t7-static: var(--rapo-font-size-t7);
+  --rapo-line-height-t7-static: var(--rapo-line-height-t7);
+  --rapo-font-size-t8-static: var(--rapo-font-size-t8);
+  --rapo-line-height-t8-static: var(--rapo-line-height-t8);
+  --rapo-font-size-t9-static: var(--rapo-font-size-t9);
+  --rapo-line-height-t9-static: var(--rapo-line-height-t9);
+  --rapo-font-size-t10-static: var(--rapo-font-size-t10);
+  --rapo-line-height-t10-static: var(--rapo-line-height-t10);
+  --rapo-font-size-t11-static: var(--rapo-font-size-t11);
+  --rapo-line-height-t11-static: var(--rapo-line-height-t11);
+  --rapo-font-size-t12-static: var(--rapo-font-size-t12);
+  --rapo-line-height-t12-static: var(--rapo-line-height-t12);
+  --rapo-font-size-t13-static: var(--rapo-font-size-t13);
+  --rapo-line-height-t13-static: var(--rapo-line-height-t13);
+  --rapo-font-size-t14-static: var(--rapo-font-size-t14);
+  --rapo-line-height-t14-static: var(--rapo-line-height-t14);
+  /* ── RAPO/Shadow (효과 스타일) ── */
+  --rapo-shadow-s1: 0px 1px 4px 0px rgb(0 0 0 / 0.0784);
+  --rapo-shadow-s2: 0px 2px 10px 0px rgb(0 0 0 / 0.102);
+  --rapo-shadow-s3: 0px 4px 16px 0px rgb(0 0 0 / 0.1216);
+}
+
+/* ── RAPO/Type (글자 스타일) ── */
+@layer components {
+  .rapo-type-t1-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t1);
+    line-height: var(--rapo-line-height-t1);
+    letter-spacing: 0;
+  }
+  .rapo-type-t1-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t1);
+    line-height: var(--rapo-line-height-t1);
+    letter-spacing: 0;
+  }
+  .rapo-type-t1-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t1);
+    line-height: var(--rapo-line-height-t1);
+    letter-spacing: 0;
+  }
+  .rapo-type-t2-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t2);
+    line-height: var(--rapo-line-height-t2);
+    letter-spacing: 0;
+  }
+  .rapo-type-t2-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t2);
+    line-height: var(--rapo-line-height-t2);
+    letter-spacing: 0;
+  }
+  .rapo-type-t2-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t2);
+    line-height: var(--rapo-line-height-t2);
+    letter-spacing: 0;
+  }
+  .rapo-type-t3-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t3);
+    line-height: var(--rapo-line-height-t3);
+    letter-spacing: 0;
+  }
+  .rapo-type-t3-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t3);
+    line-height: var(--rapo-line-height-t3);
+    letter-spacing: 0;
+  }
+  .rapo-type-t3-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t3);
+    line-height: var(--rapo-line-height-t3);
+    letter-spacing: 0;
+  }
+  .rapo-type-t4-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t4);
+    line-height: var(--rapo-line-height-t4);
+    letter-spacing: 0;
+  }
+  .rapo-type-t4-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t4);
+    line-height: var(--rapo-line-height-t4);
+    letter-spacing: 0;
+  }
+  .rapo-type-t4-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t4);
+    line-height: var(--rapo-line-height-t4);
+    letter-spacing: 0;
+  }
+  .rapo-type-t5-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t5);
+    line-height: var(--rapo-line-height-t5);
+    letter-spacing: 0;
+  }
+  .rapo-type-t5-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t5);
+    line-height: var(--rapo-line-height-t5);
+    letter-spacing: 0;
+  }
+  .rapo-type-t5-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t5);
+    line-height: var(--rapo-line-height-t5);
+    letter-spacing: 0;
+  }
+  .rapo-type-t6-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t6);
+    line-height: var(--rapo-line-height-t6);
+    letter-spacing: 0;
+  }
+  .rapo-type-t6-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t6);
+    line-height: var(--rapo-line-height-t6);
+    letter-spacing: 0;
+  }
+  .rapo-type-t6-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t6);
+    line-height: var(--rapo-line-height-t6);
+    letter-spacing: 0;
+  }
+  .rapo-type-t7-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t7);
+    line-height: var(--rapo-line-height-t7);
+    letter-spacing: 0;
+  }
+  .rapo-type-t7-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t7);
+    line-height: var(--rapo-line-height-t7);
+    letter-spacing: 0;
+  }
+  .rapo-type-t7-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t7);
+    line-height: var(--rapo-line-height-t7);
+    letter-spacing: 0;
+  }
+  .rapo-type-t8-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t8);
+    line-height: var(--rapo-line-height-t8);
+    letter-spacing: 0;
+  }
+  .rapo-type-t8-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t8);
+    line-height: var(--rapo-line-height-t8);
+    letter-spacing: 0;
+  }
+  .rapo-type-t8-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t8);
+    line-height: var(--rapo-line-height-t8);
+    letter-spacing: 0;
+  }
+  .rapo-type-t9-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t9);
+    line-height: var(--rapo-line-height-t9);
+    letter-spacing: 0;
+  }
+  .rapo-type-t9-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t9);
+    line-height: var(--rapo-line-height-t9);
+    letter-spacing: 0;
+  }
+  .rapo-type-t9-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t9);
+    line-height: var(--rapo-line-height-t9);
+    letter-spacing: 0;
+  }
+  .rapo-type-t10-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t10);
+    line-height: var(--rapo-line-height-t10);
+    letter-spacing: 0;
+  }
+  .rapo-type-t10-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t10);
+    line-height: var(--rapo-line-height-t10);
+    letter-spacing: 0;
+  }
+  .rapo-type-t10-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t10);
+    line-height: var(--rapo-line-height-t10);
+    letter-spacing: 0;
+  }
+  .rapo-type-t11-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t11);
+    line-height: var(--rapo-line-height-t11);
+    letter-spacing: 0;
+  }
+  .rapo-type-t11-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t11);
+    line-height: var(--rapo-line-height-t11);
+    letter-spacing: 0;
+  }
+  .rapo-type-t11-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t11);
+    line-height: var(--rapo-line-height-t11);
+    letter-spacing: 0;
+  }
+  .rapo-type-t12-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t12);
+    line-height: var(--rapo-line-height-t12);
+    letter-spacing: 0;
+  }
+  .rapo-type-t12-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t12);
+    line-height: var(--rapo-line-height-t12);
+    letter-spacing: 0;
+  }
+  .rapo-type-t12-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t12);
+    line-height: var(--rapo-line-height-t12);
+    letter-spacing: 0;
+  }
+  .rapo-type-t13-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t13);
+    line-height: var(--rapo-line-height-t13);
+    letter-spacing: 0;
+  }
+  .rapo-type-t13-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t13);
+    line-height: var(--rapo-line-height-t13);
+    letter-spacing: 0;
+  }
+  .rapo-type-t13-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t13);
+    line-height: var(--rapo-line-height-t13);
+    letter-spacing: 0;
+  }
+  .rapo-type-t14-regular {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: var(--rapo-font-size-t14);
+    line-height: var(--rapo-line-height-t14);
+    letter-spacing: 0;
+  }
+  .rapo-type-t14-medium {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-medium);
+    font-size: var(--rapo-font-size-t14);
+    line-height: var(--rapo-line-height-t14);
+    letter-spacing: 0;
+  }
+  .rapo-type-t14-bold {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: var(--rapo-font-size-t14);
+    line-height: var(--rapo-line-height-t14);
+    letter-spacing: 0;
+  }
+  .rapo-type-screen-title {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: 26px;
+    line-height: 35px;
+    letter-spacing: 0;
+  }
+  .rapo-type-article-body {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-regular);
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0;
+  }
+  .rapo-type-section-title {
+    font-family: var(--rapo-font-family), var(--font-sans);
+    font-weight: var(--rapo-font-weight-bold);
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: 0;
+  }
+}
