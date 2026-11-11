@@ -3,8 +3,8 @@
  * gas 의 `hospSiteRows_` 를 node 로 옮긴 것입니다. 갈래 다섯 가지를 다 다룹니다 —
  *
  *   html      261줄   목록 HTML 을 정규식으로 (hs_test.js 의 hospParseHtml 그대로)
- *   appsite    12줄   마이다스 구형 · robots 가 허락하면 POST /appsite/company/getMainView,
- *                     막으면 POST /app/jobnotice/list.json (2026-11-11 Q86 · 아래 마이다스길)
+ *   appsite    12줄   마이다스 구형 · POST /app/jobnotice/list.json (설정 「길」=getMainView 면
+ *                     /appsite/company/getMainView · 2026-11-11 Q86·Q87 · 아래 마이다스길)
  *   listjson    1줄   같은 것 (gas 에서 이미 하나로 합쳤습니다)
  *   cmc         6줄   가톨릭중앙의료원 · JSON 배열
  *   schmc       4줄   순천향 · POST getJobAllListFromFrontNew
@@ -22,7 +22,6 @@
  */
 import { createRequire } from 'node:module';
 import { 글받기, 붙여받기 } from '../certs/index.mjs';
-import { robots읽기, 가도되나 } from '../robots.mjs';
 import { 진행중원본 } from './midas.mjs';
 
 const require = createRequire(import.meta.url);
@@ -114,39 +113,20 @@ function 마이다스줄(list, host) {
   }));
 }
 
-/** 마이다스 구형 — 어느 길로 받나 (2026-11-11 세중님 Q86 「1번 하자」) ───────
+/** 마이다스 구형 — 어느 길로 받나 (2026-11-11 세중님 Q86 「1번 하자」 · Q87 「① 지금 길 그대로」) ──
  *
  * 리크루터 채용관은 robots 가 두 꼴입니다 (2026-11-11 tools/robots.mjs 로 21곳 판정) —
- *   (가) `Disallow: /` + `Allow: /appsite/`  → getMainView 는 허락 · list.json 은 금지
- *   (나) `Disallow: /app*` 꼴로 다 막음        → 둘 다 금지 · 세중님 Q84 예외로 list.json 그대로
- * **이름 목록을 코드에 박지 않고 그 곳의 robots.txt 를 받아 판정합니다** — 판정은
- * robots.mjs 한 자리이고, 사이트가 robots 를 바꾸면 길도 저절로 따라갑니다.
- *   list.json 이 허락               → 'list.json' (전부 받는 길 · 지금 21곳엔 없음)
- *   list.json 금지 · getMainView 허락 → 'getMainView' (가)
- *   둘 다 금지                       → 'list.json' (나) Q84 예외 곳
- *   robots 를 못 읽음                → 'getMainView' — 어느 꼴이든 list.json 보다 더 막힌 길이 아닙니다
- * 설정에 `"길": "list.json" | "getMainView"` 를 적으면 그게 이깁니다 (곳마다 되돌리기용).
- * robots 는 한 바퀴에 host 마다 한 번만 받습니다 (같은 채용관을 여러 병원 줄이 씁니다).
- *
- * ⚠ getMainView 의 진행중 목록은 **첫 화면 6칸**까지입니다 (hs_pages.mjs 머리 ·
- *   2026-09-27 에 이 6 때문에 list.json 으로 옮겼습니다). 6칸이 꽉 차면 raw 에 적습니다. */
-const robots들 = new Map();
+ *   (가) 14곳 `Disallow: /` + `Allow: /appsite/`  → getMainView 는 허락 · list.json 은 금지
+ *   (나)  7곳 `Disallow: /app*` 꼴로 다 막음        → 둘 다 금지
+ * 그런데 **getMainView 는 진행중 목록을 첫 화면 6칸까지만** 주고(hs_pages.mjs 머리 ·
+ * 2026-09-27 에 이 6 때문에 list.json 으로 옮겼습니다) 상세(/app/jobnotice/view)도 막혀
+ * 본문을 못 읽습니다. 11/11 대 보니 세브란스 신촌 13→4 · 부민 셋 24→6 · 가천대길 15→6.
+ * 그래서 세중님 Q87 「① 지금 길 그대로」 — **기본은 list.json · 하루 1번(천천히 하루1)**.
+ * (Q84·Q86 에서 세중님이 robots 예외를 정하셨고, 기관이 그만해 달라면 즉시 끕니다)
+ * 설정에 `"길": "getMainView"` 를 적은 곳만 허락된 길로 받습니다 (곳마다 바꾸기용). */
 async function 마이다스길(s) {
-  if (s['길'] === 'list.json' || s['길'] === 'getMainView') return { 길: s['길'], 왜: '설정 「길」' };
-  if (!robots들.has(s.host)) {
-    robots들.set(s.host, 붙여받기(s.host + '/robots.txt', { headers: 기본머리 }).then((g) => {
-      if (g.왜 || g.code !== 200) return null;
-      return robots읽기(g.buf.toString('utf8'));
-    }).catch(() => null));
-  }
-  const r = await robots들.get(s.host);
-  if (!r) return { 길: 'getMainView', 왜: 'robots 못 읽음' };
-  const 목록판 = 가도되나(r, '/app/jobnotice/list.json');
-  if (목록판.됨) return { 길: 'list.json', 왜: 'robots 가 list.json 허락' };
-  const 판 = 가도되나(r, '/appsite/company/getMainView');
-  return 판.됨
-    ? { 길: 'getMainView', 왜: 'robots list.json 금지 · getMainView 허락' }
-    : { 길: 'list.json', 왜: 'robots 둘 다 금지 · Q84 예외' };
+  if (s['길'] === 'getMainView') return { 길: 'getMainView', 왜: '설정 「길」' };
+  return { 길: 'list.json', 왜: 'Q87 기본' };
 }
 
 /**
