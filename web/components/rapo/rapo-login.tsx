@@ -3,8 +3,9 @@
 import type { Provider } from '@supabase/supabase-js';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { LoginMethod } from '@/lib/last-login';
+import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 로그인 화면 조각 — 새 디자인 「U04-01 / 로그인」 (2026-11-11).
    실제 로그인(app/login/page.tsx)과 견본(app/design-preview/login)이 같이 씁니다.
@@ -29,6 +30,43 @@ const 사진자리 = [
   { left: '-116.62%', top: -658.75 },
 ];
 
+/* 사진 한 장이 머무는 초 — 관리자 「화면 글」(/admin/texts · 로그인 칸)에서 고칩니다 (2026-11-12 세중님).
+   DB home_texts 의 login.photo_seconds. 못 읽거나 숫자가 아니면 5초, 2~30초 밖이면 그 끝으로 맞춥니다 */
+const 사진기본초 = 5;
+export function 사진초로(v: unknown): number {
+  const n = Number(String(v ?? '').trim());
+  if (!Number.isFinite(n) || n <= 0) return 사진기본초;
+  return Math.min(30, Math.max(2, n));
+}
+
+/* 훅 이름은 영어여야 검사(rules-of-hooks)가 훅으로 알아봅니다 */
+function useLoginPhotoSeconds(): number {
+  const [초, set초] = useState(사진기본초);
+  useEffect(() => {
+    let 살아있음 = true;
+    browserSupabase().from('home_texts').select('value').eq('key', 'login.photo_seconds').maybeSingle()
+      .then(({ data }) => { if (살아있음 && data) set초(사진초로(data.value)); }, () => {});
+    return () => { 살아있음 = false; };
+  }, []);
+  return 초;
+}
+
+/* 사진 세 장 — 훅을 쓰므로 영어 이름 조각으로 둡니다 */
+function LoginPhotos() {
+  const 초 = useLoginPhotoSeconds();
+  return (
+    <>
+      {사진자리.map((p, i) => (
+        <Image key={i} src="/rapo/login/photo-colleagues.webp" alt="" width={2172} height={2896} loading="eager" unoptimized
+          className={'rapo-login-photo absolute max-w-none' + (i === 0 ? ' rapo-login-photo-first' : '')}
+          style={{ width: '222.97%', height: 'auto', left: p.left, top: p.top,
+            /* 한 바퀴 = 3장 × 초 · 첫 장이 처음부터 보이게 바뀜 구간(한 바퀴의 7%)만큼 당겨 시작 */
+            animationDuration: `${초 * 3}s`, animationDelay: `${i * 초 - 초 * 3 * 0.07}s` }} />
+      ))}
+    </>
+  );
+}
+
 export function 로그인틀({ 아래 }: { 아래: ReactNode }) {
   return (
     <div data-rapo className="min-h-dvh bg-(--rapo-color-bg-navy-solid)">
@@ -39,11 +77,7 @@ export function 로그인틀({ 아래 }: { 아래: ReactNode }) {
           {/* ★ 화질 (2026-11-11 대표 「깨져」): 피그마 원본 자체가 1086×1448 뿐이라 이 자르기는 휴대폰에서 약 2.5배로 늘어납니다.
               그래서 원본 PNG 를 곱게 2배로 키우고(lanczos3 + 약한 선명하게) WebP 88 로 한 번만 담습니다. unoptimized — Next 가 품질 75 로 또 줄이지 않게.
               더 선명하려면 같은 사진의 큰 원본(가로 2600px 이상)이 있어야 합니다 */}
-          {사진자리.map((p, i) => (
-            <Image key={i} src="/rapo/login/photo-colleagues.webp" alt="" width={2172} height={2896} loading="eager" unoptimized
-              className={'rapo-login-photo absolute max-w-none' + (i === 0 ? ' rapo-login-photo-first' : '')}
-              style={{ width: '222.97%', height: 'auto', left: p.left, top: p.top, animationDelay: `${i * 5 - 1.05}s` }} />
-          ))}
+          <LoginPhotos />
         </div>
         {/* 가독성 / 상하 명암 — 원본 그라디언트 그대로 (#112231 = brand navy) */}
         <div aria-hidden className="absolute inset-0" style={{

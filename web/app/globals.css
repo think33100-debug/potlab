@@ -472,7 +472,7 @@ html[data-splash="on"] #splash .splash-line { animation: splash-in 0.7s 1.25s cu
   }
 }
 
-/* 로그인 사진 세 장 번갈아 — 15초 한 바퀴, 한 장 5초 · 1초 겹쳐 바뀜. 첫 장은 처음부터 보이게 1.05초 당겨 시작 (components/rapo/rapo-login.tsx) */
+/* 로그인 사진 세 장 번갈아 — 한 장 머무는 초는 관리자가 정합니다(기본 5초 · 한 바퀴 15초). 길이·시작은 rapo-login.tsx 가 줍니다 */
 .rapo-login-photo { opacity: 0; animation: rapo-login-photo 15s linear infinite; }
 @keyframes rapo-login-photo {
   0% { opacity: 0; } 7% { opacity: 1; } 33% { opacity: 1; } 40% { opacity: 0; } 100% { opacity: 0; }

@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth';
 import { RouteHealth } from '@/components/route-health';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AdminRoleGate } from '@/components/admin-role-gate';
+import { RapoAdminShell } from '@/components/rapo/rapo-admin';
 
 /* 관리자 화면의 껍데기입니다.
 
@@ -15,48 +15,11 @@ import { AdminRoleGate } from '@/components/admin-role-gate';
    is_admin() 이고, 출처 칸은 권한 자체가 없습니다.
    브라우저에서 isAdmin 을 true 로 바꿔도 서버가 안 해줍니다. */
 
-const MENU = [
-  { href: '/admin', label: '홈 꾸미기' },
-  { href: '/admin/texts', label: '홈 글' },
-  { href: '/admin/jobs', label: '공고' },
-  /* 상세 일곱 칸 중 비어 있는 칸이 있는 공고 (2026-10-09).
-     못 찾은 칸은 회원 화면에 안 그리고 여기로 모읍니다 */
-  { href: '/admin/blanks', label: '빈칸 공고' },
-  { href: '/admin/trash', label: '쓰레기통' },
-  /* 추천순 맨 위로 올린 공고 (2026-10-07). 나중에 유료 광고와 이어질 자리입니다 */
-  { href: '/admin/boost', label: '추천 올린 공고' },
-  { href: '/admin/posts', label: '커뮤니티 글' },
-  { href: '/admin/icons', label: '아이콘' },
-  { href: '/admin/stats', label: '통계' },
-  { href: '/admin/compete', label: '경쟁률' },
-  { href: '/admin/hand', label: '손으로 확인할 곳' },
-  { href: '/admin/edu-orgs', label: '교육기관' },
-  { href: '/admin/ads', label: '오픈 화면 광고' },
-  /* 수집기가 돌았나 / 공고가 들어왔나 — collect_beat 을 읽는 화면이 없어서
-     「돌았는데 안 들어온다」를 못 가렸습니다 (2026-10-02 에 만들었습니다) */
-  { href: '/admin/beat', label: '수집기 상태' },
-  /* 만들어 놓고 메뉴에 안 걸려 있던 것들 (2026-10-01 에 걸었습니다) */
-  { href: '/admin/rival', label: '경쟁사 비교' },
-  { href: '/admin/members', label: '회원' },
-  /* 직원과 권한 (2026-10-09). 보는 것은 운영진 누구나, 고치는 것은 대표만 */
-  { href: '/admin/staff', label: '직원과 권한' },
-  /* 마스터가 페르소나로 쓴 글 모아보기 (2026-10-09) */
-  { href: '/admin/ops', label: '운영진 글' },
-  /* 채용·교육 담당자 승인 (2026-10-09 · 권한 「기관승인」) */
-  { href: '/admin/partners', label: '담당자 승인' },
-  /* 치료사 재직 확인 — 확인하면 파일을 바로 지웁니다 (2026-10-09) */
-  { href: '/admin/verify', label: '재직 확인' },
-  { href: '/admin/reports', label: '신고' },
-  /* 앱 안 「문의하기」로 들어온 글 (2026-11-02 세중님).
-     창구는 docs/승인대기_1102.md ㉠ 이 올라간 뒤에 돕니다 */
-  { href: '/admin/inquiries', label: '문의' },
-  { href: '/admin/access', label: '개인정보 접속기록' },
-  { href: '/admin/reset', label: '내 계정 초기화' },
-];
+/* 메뉴는 새 디자인 틀(components/rapo/rapo-admin.tsx)로 옮겼습니다 (2026-11-12).
+   원본 일곱 + 「그 밖의 도구」. 전에 이 자리에 있던 메뉴 목록과 같은 화면을 모두 잇습니다 */
 
 export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
   const { loading, session, isAdmin } = useAuth();
-  const pathname = usePathname();
 
   /* ★ 2026-10-05 — 거절하기 **전에 한 번 더** 물어봅니다.
      is_admin() 은 비로그인도 부를 수 있고 그때 **거짓**을 돌려줍니다.
@@ -118,34 +81,14 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
+    <RapoAdminShell>
       {/* 공고가 안 들어오는 경로가 있으면 여기 빨간 줄이 뜹니다 (2026-09-25).
           조용한 실패를 우연히 발견하는 일이 없게 하려고 맨 위에 둡니다 */}
       <RouteHealth />
 
-      <header className="mb-7">
-        <h1 className="text-h1 font-bold">관리자</h1>
-        <nav className="mt-5 flex flex-wrap gap-2" aria-label="관리자 메뉴">
-          {MENU.map((m) => (
-            <Link
-              key={m.href}
-              href={m.href}
-              aria-current={m.href === '/admin' ? (pathname === '/admin' ? 'page' : undefined) : (pathname.startsWith(m.href) ? 'page' : undefined)}
-              className={
-                'rounded-md border px-6 py-4 text-lg font-medium ' +
-                ((m.href === '/admin' ? pathname === '/admin' : pathname.startsWith(m.href))
-                  ? 'border-teal-strong bg-teal-strong text-white'
-                  : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400')
-              }
-            >
-              {m.label}
-            </Link>
-          ))}
-        </nav>
-      </header>
       {/* ★ 2026-10-28 세중님 1번 — 역할이 관리자가 아니면 띠를 보이고 안쪽을 잠급니다.
           한 자리에 두면 관리자 화면 **전부**에 걸립니다 (지침 6절) */}
       <AdminRoleGate>{children}</AdminRoleGate>
-    </div>
+    </RapoAdminShell>
   );
 }
