@@ -10,18 +10,18 @@ import { KAKAO_CHANNEL } from '@/lib/contact';
    자리 — 본문 기둥(max-w-3xl) 오른쪽 끝에 맞춥니다(PC 에서 화면 끝까지 밀려나지 않게).
      기본          하단 탐색(72) 위 16
      공고 상세     고정 행동(저장·지원 112) 위 16
-     커뮤니티 피드  「내 직군 글쓰기」(72 + 12 + 44) 위 12
    안 띄우는 곳 — 아래쪽이 큰 단추로 꽉 찬 화면과 운영 화면
-     로그인 · 가입 · 로그인 확인 · 글쓰기 · 관리자
+     로그인 · 가입 · 로그인 확인 · 커뮤니티 쪽 전부 · 관리자
    모양 — 카카오 노랑(#FEE500) 동그라미 52 + 카카오 말풍선(로그인 단추와 같은 원본 SVG). 피그마에 원본이 없는 단추입니다. */
 
 const 안띄움 = (p: string) =>
-  p === '/login' || p === '/welcome' || p.startsWith('/auth') || p === '/community/write'
+  p === '/login' || p === '/welcome' || p.startsWith('/auth')
+  /* 커뮤니티 쪽(피드·방·글쓰기·글)은 「내 직군 글쓰기」·댓글 입력과 걸려서 뺍니다 (2026-11-12 세중님 「커뮤니티에서는 빼자」) */
+  || p === '/community' || p.startsWith('/community/') || p.startsWith('/post/')
   || p === '/admin' || p.startsWith('/admin/');
 
 function 아래자리(p: string): string {
   if (p.startsWith('/jobs/')) return 'calc(112px + 16px + env(safe-area-inset-bottom))';
-  if (p === '/community') return 'calc(72px + 12px + 44px + 12px + env(safe-area-inset-bottom))';
   return 'calc(72px + 16px + env(safe-area-inset-bottom))';
 }
 
