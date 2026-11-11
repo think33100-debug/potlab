@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/auth';
 import { Icon } from '@/components/icon';
 import { 아래탐색, 켜진길 } from '@/lib/nav';
+import { RapoMaskIcon } from './rapo-ui';
 
 /* RAPO 새 디자인의 아래 탐색 (2026-11-11).
    Figma 「선택=홈」 954:946 · 높이 72 · 좌우 14 · 위아래 10 · 아이콘 28 · 이름 t2.
@@ -12,10 +13,11 @@ import { 아래탐색, 켜진길 } from '@/lib/nav';
    무슨 길이 있는지는 lib/nav.ts 가 정합니다(옛 탭바와 같은 데이터) — 담당자·마스터에게는
    「채용 관리」·「교육 관리」가 「내 정보」 앞에 붙습니다. 여기는 그리는 모양만 정합니다.
 
-   아이콘 — 네 기본 길은 Figma 원본 SVG 입니다(색이 SVG 안에 박혀 있음).
-   ⚠ 원본에는 「홈이 켜진」 모양만 있어 다른 길이 켜진 아이콘은 아직 없습니다.
-   ⚠ 담당자 길은 원본 아이콘이 없어 옛 탭바의 아이콘(Lucide)을 28 틀에 맞춰 씁니다.
-     둘 다 디자이너 확인 대상입니다(docs/rapo-design/원본확인_1111.md C). */
+   아이콘 — 네 기본 길은 Figma 원본 SVG 모양을 가림판으로 쓰고 글자색으로 칠합니다
+   (RapoMaskIcon). 그래서 켜진 길은 어느 것이든 fg/brand-contrast, 꺼진 길은 fg/neutral-muted 로
+   원본 「홈 켜짐」(954:946)·「내 정보 켜짐」(1375:1672)과 같은 규칙으로 칠해집니다.
+   (공고 목록 원본 462:4070 은 「검토 시안」이라 쓰지 않습니다 — 2026-11-11 대표: 채택안 우선)
+   ⚠ 담당자 길은 원본 아이콘이 없어 옛 탭바의 아이콘(Lucide)을 씁니다(원본확인 D-2). */
 const 원본아이콘: Record<string, { src: string; w: number; h: number }> = {
   '/':          { src: '/rapo/home/nav-home.svg',      w: 23.1,  h: 23.1 },
   '/jobs':      { src: '/rapo/home/nav-jobs.svg',      w: 23.1,  h: 21.93 },
@@ -33,14 +35,17 @@ export function RapoBottomNav({ current, 관리덮기 }: {
   const here = current ?? pathname;
   const tabs = 아래탐색(관리덮기 ?? 관리);
 
+  /* 배경·윗선도 본문 기둥(max-w-3xl · 768)과 같은 폭입니다 — PC 에서 화면 끝까지 펼쳐지지 않게
+     (2026-11-11 디자이너 검토). 휴대폰에서는 화면 폭이 768 보다 좁아 전처럼 꽉 찹니다 */
   return (
     <nav
       aria-label="아래 탐색"
-      className="fixed inset-x-0 bottom-0 z-40 border-t-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak)
+      className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-3xl
+                 border-t-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak)
                  bg-(--rapo-color-bg-layer-default)"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <ul className="mx-auto flex h-[72px] max-w-3xl items-start px-(--rapo-dimension-x3_5) py-(--rapo-dimension-x2_5)">
+      <ul className="flex h-[72px] items-start px-(--rapo-dimension-x3_5) py-(--rapo-dimension-x2_5)">
         {tabs.map((t) => {
           const 켜짐 = 켜진길(here, t.href);
           const 그림 = 원본아이콘[t.href];
@@ -63,8 +68,7 @@ export function RapoBottomNav({ current, 관리덮기 }: {
                 )}
                 <span className="relative flex size-(--rapo-dimension-x7) items-center justify-center">
                   {그림
-                    /* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */
-                    ? <img src={그림.src} alt="" width={그림.w} height={그림.h} />
+                    ? <RapoMaskIcon src={그림.src} w={그림.w} h={그림.h} />
                     : <Icon name={t.icon} size={24} />}
                 </span>
                 <span className="relative whitespace-nowrap">{t.label}</span>

@@ -1,9 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { RapoBottomNav } from './rapo-bottom-nav';
 import { RapoBannerCarousel } from './rapo-banner-carousel';
-import { RapoHeader } from './rapo-header';
-import { RapoDivider, RapoSectionTitle } from './rapo-ui';
+import { RapoShell } from './rapo-shell';
+import { RapoSectionTitle } from './rapo-ui';
 import type { ReactNode } from 'react';
 import type { Who } from '@/lib/supabase-server';
 
@@ -37,11 +36,7 @@ export function HomeU01({ jobs, who, sample = false, 관리덮기 }: {
   관리덮기?: { 채용관리: boolean; 교육관리: boolean };   // 미리보기 전용 (rapo-bottom-nav.tsx)
 }) {
   return (
-    <div data-rapo-u01 className="mx-auto w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
-      <RapoHeader who={who} />
-      <RapoDivider />
-
-      <main>
+    <RapoShell who={who} current="/" 관리덮기={관리덮기}>
         <Banners member={who === '회원'} />
         <StartHere />
         <AnonymousTalk />
@@ -56,12 +51,7 @@ export function HomeU01({ jobs, who, sample = false, 관리덮기 }: {
         )}
         {jobs}
         <MoreServices />
-      </main>
-
-      {/* 마지막 콘텐츠가 아래 탐색(72 + 선 1 + 안전 영역)에 가리지 않게 */}
-      <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
-      <RapoBottomNav current="/" 관리덮기={관리덮기} />
-    </div>
+    </RapoShell>
   );
 }
 

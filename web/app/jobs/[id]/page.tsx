@@ -1,65 +1,53 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { AdminJobTools } from '@/components/admin-job-tools';
-import { Hit } from '@/components/hit';
-import { Icon } from '@/components/icon';
-import { JobBusy } from '@/components/job-busy';
-import { JobClosed } from '@/components/job-closed';
-import { JobHospital } from '@/components/job-hospital';
-import { JobOpenLink } from '@/components/job-open-link';
-import { JobReport } from '@/components/job-report';
-import { JobSave } from '@/components/job-save';
-import { LoginFirst } from '@/components/login-first';
-import { NoticeFiles } from '@/components/notice-files';
-import { Rise } from '@/components/job-parts';
-import { OrgPanel } from '@/components/org-panel';
-import { JobVeil } from '@/components/job-veil';
-import { ShareButtons } from '@/components/share-buttons';
-import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
-import { hospitalStat } from '@/lib/hospital';
-import { iconMap } from '@/lib/icons';
-import { isClosed, todayKst, 금액있나, 기관이름말, 마감배지, 시각말, 연봉말, 조교연구말,
+import type { 모집상태 } from '@/components/rapo/rapo-job-detail';
+import { RapoJobDetailView, 못읽은칸말 } from '@/components/rapo/rapo-job-detail-view';
+import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말, 조교연구말,
   보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
+import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
 import { siteUrl } from '@/lib/site-url';
-import { MembersOnly } from '@/components/members-only';
-import type { JobPost } from '@/lib/supabase';
+import type { JobListItem, JobPost } from '@/lib/supabase';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
-/* 공고 한 건.
+/* 공고 한 건 — 새 디자인 「U03 · 공고 상세」 (2026-11-11 대표: 피그마 우선 · 들어가는 정보가 적어 많이 뺌).
+   조각은 components/rapo/rapo-job-detail.tsx, 원본 위치도 그 파일 머리에 있습니다.
 
-   2026-09-25 — 공고 뷰를 통째로 읽는 길을 닫아서 이제 함수로 받습니다.
-   **공유 링크가 살아야 하므로 이 한 건은 로그인 없이도 열립니다.**
-   다만 본문(detail)은 회원에게만 실려 옵니다 — 비회원에게는 DB 가 빈 것을 줍니다.
-   그 자리는 어차피 흐려져 있었는데, 전에는 흐리기만 하고 자료는 나갔습니다. */
+   ── 자료 규칙은 전과 같습니다 ─────────────────────────────────────
+   **공유 링크가 살아야 하므로 이 한 건은 로그인 없이도 열립니다** (job_one).
+   본문(detail)·뽑은값·원문 주소는 회원에게만 실려 옵니다 — 비회원에게는 DB 가 빈 것을 줍니다.
+   그래서 비회원의 보수 칸은 원본 「보수 비공개」(이용 권한 확인 후 공개)이고, 원문·지원은 로그인으로 보냅니다.
+   가입을 덜 마친 회원은 JobVeil 이 흐립니다(공유 링크로 들어온 첫 화면은 빼고 · job-veil.tsx).
+
+   값 규칙도 그대로입니다 — 못 읽은 칸은 숨기지 않고 「공고문 확인」, 연봉은 공고 글 그대로 / 없으면 「내규에 따름」,
+   모집인원은 원문 글자 그대로(0명·○명), 포털 상세의 「채용시까지」는 그 말을 보이고 게시 만료일은 작게.
+
+   ── 원본에 있지만 자료가 없어 뺀 것 ─────────────────────────────────
+   04 본문 바로가기 탭 · 05 근무조건(계약기간·근무시간·가입 보험) · 06 업무·지원 자격의 담당 업무·근무 부서·우대·
+   공통 응시조건 · 07 의 방문/우편 접수·접수처·문의·첨부 상자·준비할 서류·전형 일정·공고 번호·등록일 ·
+   08 의 기관 사진 · 기관 공식 로고 · 「이 병원 이야기」 · 좋아요 · 저장한 사람 수 · 「알림받기」 · 근무시간 줄(대표 결정).
+
+   ── 예전 화면에 있었지만 피그마에 없어 잠시 빠진 것 (대표: 하나씩 다시 넣을 예정) ──────────
+   병원 뜯어보기·얼마나 바쁜 곳(JobHospital·JobBusy) · 경쟁률 보러 가기 · 오류 신고(JobReport) ·
+   담당자가 올린 첨부(NoticeFiles) · 기관 원문 제목 줄 · 기관 홈페이지 열기 · 같은 기관 다른 공고(OrgPanel) ·
+   직군 색 배지. 담당자·마스터의 공고 도구(AdminJobTools)는 그대로 둡니다(회원 화면이 아닙니다). */
+
 const one = async (sb: SupabaseClient, id: string) => {
   const { data } = await sb.rpc('job_one', { p_id: id }).maybeSingle();
   return (data as unknown as JobPost | null) ?? null;
 };
 
-/* 기관이 쓴 원문 제목 (2026-10-05).
-
-   화면 제목은 우리가 이어 붙인 「보여 줄 제목」입니다. 회원이 기관 공고와
-   맞춰 볼 수 있어야 해서 원문을 아래에 작게 둡니다.
-
-   왜 job_one 에 안 싣고 따로 부르나 — job_one 의 돌려주는 칸을 바꾸려면
-   함수를 drop 했다가 다시 만들어야 합니다(승인 창). 작은 함수를 더하는
-   쪽이 쌉니다. 보여 줄 제목과 **같으면 null** 이라 그 줄이 안 그려집니다. */
-const 원문제목 = async (sb: SupabaseClient, id: string) => {
-  const { data } = await sb.rpc('공고원문제목', { p_id: id });
-  return (data as string | null) ?? null;
+/* 공고문에서 **읽어낸** 값 (job_posts.뽑은값 · 2026-10-09). 화면은 뽑은값을 먼저 보고 없으면 detail 을 봅니다.
+   비회원에게는 DB 가 {} 를 줍니다 */
+const 뽑은값받기 = async (sb: SupabaseClient, id: string) => {
+  const { data } = await sb.rpc('공고뽑은값', { p_id: id });
+  return (data as Record<string, string> | null) ?? {};
 };
 
-/* ★ 2026-10-09 — 공고문에서 **읽어낸** 값 (job_posts.뽑은값).
-   detail 은 출처가 준 원문이라 덮지 않습니다. 화면은 뽑은값을 먼저 보고,
-   없으면 detail 을 봅니다. 비회원에게는 DB 가 빈 것을 줍니다.
-   job_one 에 안 싣는 까닭은 위 원문제목과 같습니다 (칸을 더하려면 drop) */
-/* ★ 2026-11-11 밤 세중님 — 포털 공고의 「지원하러 가기」는 **병원 홈페이지 안 공고**로.
-   주소는 화면이 못 읽는 표(숨은 짝 줄 · 기관 표 · 사이트표)에 있어 창구가 골라 줍니다.
+/* 포털 공고의 「지원하러 가기」는 **병원 홈페이지 안 공고**로 (2026-11-11 밤 대표).
    창구는 회원에게만 열려 있고, 아직 안 올라갔으면 오류 → null → 전 차례 그대로입니다 */
 const 병원주소받기 = async (sb: SupabaseClient, id: string): Promise<병원주소꼴> => {
   const { data, error } = await sb.rpc('공고병원주소', { p_id: id });
@@ -69,48 +57,38 @@ const 병원주소받기 = async (sb: SupabaseClient, id: string): Promise<병�
   return { 주소: v.주소, 갈래: v.갈래 };
 };
 
-const 뽑은값받기 = async (sb: SupabaseClient, id: string) => {
-  const { data } = await sb.rpc('공고뽑은값', { p_id: id });
-  return (data as Record<string, string> | null) ?? {};
+/* 비슷한 공고 — 같은 직군·시도의 열린 공고 (회원 목록 창구 그대로 · 새 창구 없음).
+   비회원은 창구가 거절(42501)하므로 부르지 않습니다 */
+const 비슷한공고 = async (sb: SupabaseClient, j: JobPost) => {
+  const { data, error } = await sb.rpc('job_list', {
+    p_job: j.job_group, p_sido: j.sido, p_tab: null, p_q: null, p_all: false, p_sort: null, p_page: 0,
+  });
+  if (error) return [];
+  return ((data ?? []) as JobListItem[]).filter((r) => r.id !== j.id).slice(0, 3).map(목록줄);
 };
 
+export const 마감못읽은말 = '마감일 공고문 확인';
 
-/* ★ 2026-10-07 — 마감일이 없을 때 쓸 말을 **화면이 정하지 않습니다.**
-   DB 의 마감표시() 가 정해서 job_one 이 「마감표시」 칸으로 내려 줍니다
-   (세중님 지시). 목록(app/jobs/page.tsx)의 dday 도 같은 칸을 읽습니다 */
-/* 「2026-10-16」 → 「금」. 한국 날짜 글자를 그대로 읽습니다 (시간대를 안 탑니다) */
-/* 「2026-11-04」 → 「11/04」. 작게 붙이는 **게시 만료일**용입니다 (2026-10-22).
-   글자를 그대로 자릅니다 — Date 를 안 거치므로 시간대를 안 탑니다 */
-function 게시날(ymd: string | null | undefined): string {
-  const m = String(ymd || '').match(/^\d{4}-(\d{2})-(\d{2})$/);
-  return m ? m[1] + '/' + m[2] : String(ymd || '');
+const 요일들 = ['일', '월', '화', '수', '목', '금', '토'];
+/* 「2026-10-30」 → { 달:'10월', 날:'30', 짧게:'10.30(금)' }. 글자를 그대로 잘라 시간대를 안 탑니다 */
+function 날짜꼴(ymd: string | null | undefined) {
+  const m = String(ymd || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return null;
+  const 요일 = 요일들[new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay()];
+  return { 달: `${+m[2]}월`, 날: String(+m[3]), 짧게: `${m[2]}.${m[3]}(${요일})` };
 }
-
-function 요일(ymd: string | null | undefined): string | null {
-  if (!ymd || !/^\d{4}-\d{2}-\d{2}/.test(ymd)) return null;
-  const [y, m, d] = ymd.slice(0, 10).split('-').map(Number);
-  return ['일', '월', '화', '수', '목', '금', '토'][new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
-}
-
-/* ★ 2026-10-09 — 여기 있던 dday() 를 지웠습니다.
-   목록에도 같은 이름이 한 벌 있었고, 2026-10-08 에 마감 시각을 넣을 때 목록만
-   고쳐서 **시각이 지난 그날 이 화면만 빨간 「오늘 마감」** 이 남았습니다.
-   이제 lib/job-state.ts 의 마감배지() 한 벌만 씁니다 */
 
 /* 카톡·문자에 뜨는 미리보기 */
 export async function generateMetadata({
   params,
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  /* 카톡·검색 로봇에는 세션이 없습니다. 제목·기관·마감일만 쓰므로 본문이 없어도 됩니다.
-     ★ 2026-11-11 클로즈드 베타 — 비회원에게 공고 창구(job_one)를 닫으므로 **세션으로** 읽습니다.
+  /* 제목·기관·마감일만 씁니다. ★ 2026-11-11 클로즈드 베타 — 비회원에게 공고 창구(job_one)를 닫으므로 **세션으로** 읽습니다.
      로봇은 middleware 가 /beta 로 보내 여기까지 안 옵니다 (RAPO노트/SQL_1113) */
   const j = await one(await serverSupabase(), id);
   if (!j) return { title: '없는 공고입니다 · RAPO' };
 
   const closed = isClosed(j.apply_to, todayKst(), j.apply_to_time);
-  /* 받는 사람이 「언제부터 언제까지」를 미리보기에서 바로 알아야 합니다.
-     시작일이 자료에 없으면 예전처럼 마감일만 적습니다 */
   const when = !j.apply_to ? (j.apply_from ? `${j.apply_from} 접수 시작` : '마감일 미정')
     : closed ? `${j.apply_to} 마감됨`
     : j.apply_from ? `${j.apply_from} ~ ${j.apply_to} 접수`
@@ -128,661 +106,95 @@ export async function generateMetadata({
   };
 }
 
-/* CORE_SKIP 은 2026-10-09 에 없앴습니다 — detail 의 **남은 칸을 전부 그리던**
-   규칙이었는데, 이제 상세는 정해진 일곱 칸만 그립니다 (세중님 확정).
-   전형방법·우대사항·결격사유·문의처·제출서류는 원문 공고에서 봅니다 */
-
-/* ★ 2026-11-01 화면 작업 ⑤ (docs/화면작업_1101.md) — **「공고문 확인」을 한 자리로.**
-   이 파일 안에 그 글자가 **열한 곳**에 흩어져 있어서, 글꼴·색을 고치려면 열한 곳을
-   찾아야 했고 한 곳을 빠뜨리면 회원 눈에 **다른 꼴**로 보였습니다 (지침 6절).
-   ★ 글자는 바꾸지 않습니다 — 「공고문 확인」 그대로입니다 (CLAUDE.md 예상연봉·일곱 칸 절). */
-export const 못읽은칸말 = '공고문 확인';
-export const 마감못읽은말 = '마감일 공고문 확인';
-
-/** ★ 2026-11-01 화면 작업 ① — 단추 옆 **「지원 방법」 한 줄**을 조각으로 뗐습니다.
-   무엇을 적을지는 lib/job-state.ts 의 지원방법말() 한 자리 그대로이고,
-   **자리·글꼴만** 이 조각 안에서 다듬습니다 (시안을 받으면 여기만 고칩니다). */
-/* ★ 2026-11-02 합칠 때 — `ui/1101` 의 이 조각(10/25~11/01)에는 main 의 **10/28 두 줄**이
-   없었습니다(「원문 보기」 · 「· 공고문 확인」). 조각을 쓰되 **그 두 줄을 안으로 옮겨**
-   합쳤습니다 — 어느 쪽도 버리지 않습니다. 그래서 받는 값이 셋입니다. */
-function 지원방법줄({
-  접수방법, 원문주소, 갈곳없나,
-}: {
-  접수방법?: string;
-  /** 공고 원문 주소 (j.url) — 있으면 「원문 보기」를 늘 답니다 (2026-10-28 세중님 E) */
-  원문주소?: string | null;
-  /** 회원인데 갈 주소가 아무것도 없나 — 그때만 「· 공고문 확인」 (2026-10-28 세중님 2번 ④).
-      비회원은 창구가 주소를 안 줘서 「없음」인 것이라 적으면 사실이 아닙니다 */
-  갈곳없나?: boolean;
-}) {
-  const 지원 = 지원방법말(접수방법);
-  if (!지원.낱말.length && !갈곳없나) return null;
-  return (
-    <div className="mx-auto mb-2 flex w-full max-w-2xl flex-wrap items-center gap-x-1.5
-                    text-[13px] leading-[1.5] text-[#5F666C]">
-      <span className="shrink-0 font-bold text-[#1B2025]">지원 방법</span>
-      {지원.낱말.length > 0 && <span className="break-keep">{지원.낱말.join(' · ')}</span>}
-      {지원.채용페이지 && (
-        <a href={지원.채용페이지} target="_blank" rel="noopener noreferrer"
-           className="underline decoration-[#C9CCCF] underline-offset-2">
-          병원 채용 페이지
-        </a>
-      )}
-      {원문주소 && (
-        <a href={원문주소} target="_blank" rel="noopener noreferrer"
-           className="break-keep underline decoration-[#C9CCCF] underline-offset-2">
-          원문 보기
-        </a>
-      )}
-      {갈곳없나 && (
-        <span className="break-keep font-medium text-[#4A5056]">· 공고문 확인</span>
-      )}
-    </div>
-  );
-}
-
-/** 못 읽은 칸 — 원문 링크가 있으면 **링크로**, 없으면 글자만 (꼴은 이 한 자리) */
-function 못읽은칸({ url }: { url?: string | null }) {
-  if (!url) return <p className="break-keep text-[15px] text-[#4A5056]">{못읽은칸말}</p>;
-  return (
-    <a href={url} target="_blank" rel="noopener noreferrer"
-       className="inline-flex items-center gap-1 break-keep text-[15px]
-                  font-bold text-[#1B2025] underline
-                  decoration-[#C9C9C2] underline-offset-[3px]">
-      {못읽은칸말}
-      <Icon name="arrow-up-right" size={15} className="shrink-0 text-[#5F666C]" />
-    </a>
-  );
-}
-
 export default async function JobDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  /* 쿠키에 실려 온 세션으로 읽습니다. 로그인 안 했으면
-     본문도 병원 숫자도 안 실려 옵니다 (막는 자리는 DB) */
+  /* 회원 · 비회원 · 모름 세 값. 「모름」은 둘 다 아닙니다 — 보수 칸도 로그인 권유도 안 그립니다 */
   const sb = await serverSupabase();
-  /* 회원 · 비회원 · 모름 세 값입니다.
-     「모름」은 회원도 비회원도 아닙니다 — 병원 자료도, 가입 권유도 안 그립니다 */
   const who = await serverWho(sb);
   const member = who === '회원';
 
   const j = await one(sb, id);
   if (!j) notFound();
 
-  /* 기관이 쓴 원문 제목. 보여 줄 제목과 같으면 null 이라 안 그려집니다 */
-  const 기관원문 = await 원문제목(sb, id);
-
-  /* 마감돼도 막지 않습니다. 이미 주소를 아는 사람이라 빈 화면을 주면 링크가 죽습니다 */
   const closed = isClosed(j.apply_to, todayKst(), j.apply_to_time);
   const detail = j.detail ?? {};
 
-  /* 병원 자료가 없으면 null 입니다 — 그 구역을 통째로 감춥니다.
-     0 으로 채우면 「치료사가 없는 병원」으로 읽혀 더 나쁩니다 */
-  const [hosp, icons, views, 경쟁률있나, 뽑은값, 병원] = await Promise.all([
-    /* 회원만 옵니다. 비회원에게는 null 이고 그 구역을 통째로 감춥니다 —
-       0 으로 채우면 「치료사가 없는 병원」으로 읽혀서 더 나쁩니다 */
-    member ? hospitalStat(sb, j.org_name) : Promise.resolve(null),
-    iconMap('공고 상세'),
+  const [views, 뽑은값, 병원, 비슷한] = await Promise.all([
     jobViews([j.id]),
-    /* 이 공고의 기관에 경쟁률 자료가 있나 (2026-10-09). 단추를 보일지만 정합니다.
-       공고 번호만 넘깁니다 — 기관번호 찾기와 본부 잇기는 DB 가 합니다
-       (알리오 경쟁률은 본부 이름으로 쌓이고 공고는 분원 이름으로 옵니다) */
-    sb.rpc('공고경쟁률있나', { p_공고: j.id }),
     뽑은값받기(sb, id),
     member ? 병원주소받기(sb, id) : Promise.resolve(null),
+    member ? 비슷한공고(sb, j) : Promise.resolve([]),
   ]);
-  const 경쟁률 = 경쟁률있나.data === true;
 
-  const d = 마감배지(j.apply_to, j.마감표시, j.apply_to_time);
-  /* 마감된 공고는 회색으로 내려앉습니다 */
-  const badge = closed ? '#8A9299' : (JOB_COLOR[j.job_group ?? ''] ?? JOB_COLOR_FALLBACK);
-
-  /* ★ 2026-10-09 세중님 확정 — 「예상 연봉」은 공고에 적힌 **말 그대로** 씁니다.
-     「3000만원 이상」 「월급 230만원~300만원」 「내규에 따름」 「협의」 모두
-     그대로 보여줍니다. 숫자를 만들지 않습니다.
-     뽑은값(공고문에서 읽어낸 것)이 있으면 먼저 봅니다 — 원문 detail 은
-     그대로 두고 따로 담습니다 */
-  /* ★ 2026-10-14 세중님 확정 — 금액이 없으면 「내규에 따름」이고 **칸은 숨기지
-     않습니다.** 가리는 규칙은 lib/job-state.ts 한 자리입니다 */
+  /* 예상 연봉 — 공고에 적힌 **말 그대로** · 금액이 없으면 「내규에 따름」 (2026-10-09 · 10-14 대표 확정) */
   const 연봉원문: string | null =
     (뽑은값?.['예상연봉'] ?? detail['연봉'] ?? detail['예상연봉'] ?? null) || null;
-  const 금액 = 금액있나(연봉원문);
-  const 연봉 = 연봉말(연봉원문);
-  /* ★ 2026-10-28 세중님 2번 — 「지원하러 가기」가 갈 자리와 「지원 방법」 줄.
-     차례는 lib/job-state.ts 한 자리에서 정합니다 (지침 6절) */
-  /* ★ 2026-10-28 세중님 2번 — 공고 번호를 함께 넘깁니다. 긁기 공고(HS…)는
-     게시판 첫 쪽이 아니라 **그 공고 글**로 가야 합니다 (고창종합병원) */
+  /* 워크넷(고용24) 공고 — 숫자가 1호봉 기준이라 고정 안내를 붙입니다 (2026-10-07 대표 지시) */
+  const 워크넷 = j.id.startsWith('WN');
+  const 연봉덧말 = 금액있나(연봉원문) && 워크넷 ? '1호봉 예정 급여예요. 호봉 인정과 경력에 따라 달라질 수 있어요.' : null;
+
   const 지원 = 지원링크(j.url, detail['접수방법'] as string | undefined,
     (detail['기관홈'] ?? detail['기관홈페이지']) as string | undefined,
     detail['채용게시판'] as string | undefined, j.id, 병원);
-  /* 「지원 방법」 낱말은 이제 <지원방법줄> 조각이 스스로 셉니다 (2026-11-02 합칠 때) —
-     여기서 또 세면 두 벌이 됩니다 (지침 6절) */
-  const 지원자격: string | null =
-    (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
-  /* ★ 2026-10-22 세중님 1번 — 포털 **상세** 칸이 날짜가 아닌 말이면(「채용시까지」)
-     그 말을 보여 줍니다. 담는 곳은 `뽑은값.접수마감글` 이고 정찰이 날마다 채웁니다.
-     ⚠ `뽑은값` 은 **회원만** 받습니다(`공고뽑은값` 이 비로그인에게 `{}`) — 그래서
-       비회원은 `job_one` 이 **detail 에 함께 내려** 줍니다 (모집인원과 같은 꼴 ·
-       supabase/migrations/2026_10_22_job_one_접수마감글.sql). 그 SQL 을 올리기 전에는
-       detail 에 이 칸이 없어 **전과 같이 날짜**가 보입니다 — 화면은 먼저 올려도 됩니다 */
+  const 지원방법 = 지원방법말(detail['접수방법'] as string | undefined);
+  const 지원자격: string | null = (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
+
+  /* 포털 **상세** 칸이 날짜가 아닌 말이면(「채용시까지」) 그 말을 보입니다 (2026-10-22 대표 1번) */
   const 마감글: string | null =
     (뽑은값?.['접수마감글'] ?? (detail['접수마감글'] as string | undefined) ?? null) || null;
-  /* ★ 2026-10-11 — 모집 인원도 뽑은값을 봅니다.
-     `headcount` 칸을 채워 주는 출처가 거의 없어서(373건 중 13건) 이 칸이
-     거의 안 그려졌습니다. 워크넷 상세 API 의 `collectPsncnt` 를 읽어
-     뽑은값에 넣었으니(247건) 그걸 뒤로 받칩니다.
-     `headcount` 가 먼저입니다 — 관리자가 고치는 칸이 그쪽입니다 */
-  /* ★ 2026-10-11 — 알리오 통합 공고는 **직군별로** 적습니다.
-     「물리치료사 3명 · 작업치료사 1명」. 공고 전체 인원(233명 같은 것)을
-     우리 인원처럼 보이면 안 됩니다 (작업지침 15절) */
-  const 직군인원 = (detail['직군인원'] ?? null) as
-    { 물리치료사?: number; 작업치료사?: number } | null;
+
+  /* 모집인원 — 직군별 인원 → headcount(관리자가 고치는 칸) → 뽑은값(회원) → detail(누구나) · 원문 글자 그대로 */
+  const 직군인원 = (detail['직군인원'] ?? null) as unknown as { 물리치료사?: number; 작업치료사?: number } | null;
   const 직군인원말 = 직군인원
     ? [직군인원.물리치료사 ? `물리치료사 ${직군인원.물리치료사}명` : null,
-       직군인원.작업치료사 ? `작업치료사 ${직군인원.작업치료사}명` : null]
-      .filter(Boolean).join(' · ')
+       직군인원.작업치료사 ? `작업치료사 ${직군인원.작업치료사}명` : null].filter(Boolean).join(' · ')
     : '';
-  /* ★ 2026-10-19 세중님 ㉢ⓑ — **모집인원은 비로그인도 봅니다.**
-     「0명」은 `headcount`(숫자 칸)에 있어 전부터 누구나 봤는데, 「○명」·「00명」은
-     `뽑은값` 칸이라 **로그인 회원만** 봤습니다 (`공고뽑은값` 이 비로그인에게 `{}`).
-     그래서 `job_one` 이 **비로그인 detail 에 「모집인원」 한 칸**을 더 줍니다 —
-     `anon` 권한을 늘리지 않는 길입니다. 여기서 그 칸을 뒤로 받칩니다.
-     순서 — 직군별 인원 → headcount(관리자가 고치는 칸) → 뽑은값(회원) → detail(누구나) */
   const 모집인원: string | null = 직군인원말
     || (j.headcount != null ? `${j.headcount}명`
         : (뽑은값?.['모집인원'] ?? (detail['모집인원'] as string | undefined) ?? null)) || null;
 
-  /* 워크넷(고용24) 공고인가. id 는 수집기가 'WN' + 고용24 공고번호로 만듭니다
-     (tools/collect-worknet.mjs 485줄 · 옛 WN 과 새 WN2 가 같은 규칙입니다).
-     job_one 의 돌려주는 칸에 source 를 더하려면 함수를 drop 했다 다시 만들어야
-     해서(승인 창), 위 「원문제목」과 같은 이유로 id 로 가립니다 */
-  const 워크넷 = j.id.startsWith('WN');
+  /* 날짜 */
+  const 끝 = 날짜꼴(j.apply_to);
+  const 시작 = 날짜꼴(j.apply_from);
+  const 시각 = 시각말(j.apply_to_time);
+  const 수시 = !j.apply_to && j.마감표시 === '수시채용';
+  const 상태: 모집상태 = closed ? '모집 마감' : (!j.apply_to && !수시 && !마감글) ? '확인 필요' : '접수 중';
+  const 식별마감 = 마감글 || 끝?.짧게 || j.마감표시 || 마감못읽은말;
+  const 기간 = 끝
+    ? (마감글 ? 마감글 : 시작 ? `${시작.짧게}–${끝.짧게}` : `${끝.짧게}까지`)
+    : (마감글 || j.마감표시 || 마감못읽은말);
+  const 강조 = 끝 && !closed
+    ? (마감글 ? `게시 ${끝.짧게}까지` : 시각 ? `${끝.짧게} ${시각} 마감` : null)
+    : null;
+  const 기간덧말 = 수시
+    ? '마감일이 정해져 있지 않아요. 병원에서 공고를 내리면 RAPO에서도 내려가요.'
+    : !끝 && !마감글 ? '접수 기간을 아직 확인하지 못했어요. 원문 공고에서 꼭 확인해 주세요.' : null;
+
+  const 기관 = 보여줄기관이름(j.org_name, null);
+  const 주소 = j.work_place && j.work_place !== j.지역보임 ? j.work_place : j.지역보임;
+  const 비슷한주소 = `/jobs?${new URLSearchParams({
+    ...(j.job_group ? { job: j.job_group } : {}),
+    ...(j.sido ? { sido: j.sido } : {}),
+  }).toString()}`;
 
   return (
-    <div className={closed ? 'bg-[#F4F4F1]' : 'bg-[#F4F4F1]'}>
-      {/* ★ 2026-10-09 — 아래 여백에 **안전 영역**을 더합니다.
-          재 보니 휴대폰에서 아래에 겹쳐 있는 것이 둘입니다 —
-            지원 띠   border 1 + py-3(12+12) + 단추 50 = 75px
-            탭바                                      = 62px
-          둘이 137px 인데 여백이 152px 이라 평평한 화면에서는 15px 남습니다.
-          그런데 탭바는 `padding-bottom: env(safe-area-inset-bottom)` 을 더
-          먹습니다(components/tab-bar.tsx). 아이폰 홈 막대가 있는 기기에서는
-          34px 쯤이 더 붙어 **171px > 152px** 이 되어 마지막 줄이 가려집니다.
-          그래서 여백도 같은 값을 더합니다. md 부터는 탭바가 없어 96px 그대로.
-
-          ※ 캡처에서 본 「본문이 잘림」은 **촬영 자국**이었습니다 —
-            fullPage 는 고정 띠를 한 번만 그려서 글 한가운데 얹힙니다.
-            실제 기기에서는 스크롤하면 비켜납니다 (지침 1절 — 고치기 전에
-            원인부터 확인했습니다) */}
-      <main className="mx-auto w-full max-w-2xl px-6 pt-4
-                       pb-[calc(152px+env(safe-area-inset-bottom))] md:px-7 md:pb-[96px]">
-        <Hit kind="job" target={j.id} />
-
-        {/* ① 상단바 ─────────────────────────────── */}
-        <div className="flex items-center justify-between">
-          <Link
-            href="/jobs"
-            className="-ml-5 flex h-[48px] w-[48px] items-center justify-center rounded-full
-                       text-[#4A5056] transition-transform duration-[120ms]
-                       active:scale-[0.88] motion-reduce:transition-none"
-          >
-            <Icon name="chevron-left" size={24} />
-            <span className="sr-only">목록으로</span>
-          </Link>
-          {/* gap-1(4px)이면 저장과 공유가 손가락 하나에 같이 눌립니다 */}
-          <div className="-mr-5 flex items-center gap-3">
-            <JobSave id={j.id} />
-            <ShareButtons
-              title={`${기관이름말(j.org_name)} ${j.job_group ?? '치료사'} 채용`}
-              text={j.title}
-              path={`/jobs/${j.id}`}
-              compact
-            />
-          </div>
-        </div>
-
-        {/* ⑤ 마감 띠 — 제일 위 ─────────────────── */}
-        {closed && <JobClosed jobId={j.id} />}
-
-        <div className={closed ? 'opacity-[0.55]' : ''}>
-          {/* ② 공고 머리 ───────────────────────── */}
-          <header className="mt-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className="rounded-full px-3 py-1 text-[13px] font-bold text-white"
-                style={{ backgroundColor: badge }}
-              >
-                {j.job_group ?? '치료사'}
-              </span>
-              {/* ★ 2026-10-14 세중님 결정 — 「조교·연구」 배지.
-                  물리치료·작업치료 **전공자를 받는 자리이지만 치료사 자리가
-                  아닌** 공고입니다(학과 조교·연구원·연구위원). 안 보여주면
-                  회원이 기회를 놓치고, 제목을 「○○치료사 채용공고」로 바꾸면
-                  거짓입니다. 그래서 **제목은 원문 그대로 + 이 배지**입니다.
-                  가르는 일은 DB 의 조교연구갈래() 한 자리가 합니다 —
-                  화면은 detail.조교연구 를 읽어 글자만 바꿉니다(조교연구말) */}
-              {조교연구말(detail['조교연구']) && (
-                <span className="rounded-full border border-[#C9A227] bg-[#FFF9E6] px-3 py-1
-                                 text-[13px] font-bold text-[#8A6D1A]">
-                  {조교연구말(detail['조교연구'])}
-                </span>
-              )}
-              {/* 못 가린 공고는 칸을 비우지 않고 「공고문 참고」 (2026-10-07 세중님).
-                  DB 값은 비워 둔 채로 화면 표시만 바꿉니다. 목록 카드도 같은 말입니다 */}
-              <span className="rounded-full border border-[#E3E3DE] bg-white px-3 py-1
-                               text-[13px] text-[#4A5056]">
-                {j.employ_type || '공고문 참고'}
-              </span>
-              <span className={`rounded-full px-3 py-1 text-[13px] font-bold ${
-                d.urgent ? 'bg-[#FF3B30] text-white' : 'bg-[#ECECE8] text-[#4A5056]'}`}>
-                {d.text}
-              </span>
-            </div>
-
-            <h1 className="mt-4 break-keep text-[26px] font-bold leading-[1.35] text-[#1B2025]"
-                style={{ overflowWrap: 'break-word' }}>
-              {j.title}
-            </h1>
-
-            {/* ★ 기관이 쓴 원문 제목 (2026-10-05).
-                위 제목은 우리가 이어 붙인 것입니다. 회원이 기관 공고와
-                맞춰 볼 수 있어야 해서 원문을 그대로 둡니다 */}
-            {기관원문 && (
-              <p className="mt-2 break-keep text-[13px] leading-[1.6] text-[#8A9199]">
-                기관 원문 제목 — {기관원문}
-              </p>
-            )}
-
-            {/* ★ 지역은 j.지역보임 을 읽습니다 — 카드·제목과 **같은 계산**입니다
-                (2026-10-07 확정 방침). 전에는 work_place 를 그대로 써서
-                순천병원이 「전남광주」로 나왔습니다 */}
-            <p className="mt-3 break-keep text-[16px] text-[#4A5056]">
-              {보여줄기관이름(j.org_name, 기관원문)}
-              {j.지역보임 && <span className="text-[#5F666C]"> · {j.지역보임}</span>}
-            </p>
-
-            {/* 조회수 — 몇 명이나 보고 있는 자리인지 */}
-            <p className="mt-2 flex items-center gap-1.5 text-[13px] text-[#5F666C]">
-              <Icon name="eye" size={15} className="shrink-0" />
-              <span className="num tabular-nums">{views[j.id] ?? 0}</span>
-            </p>
-          </header>
-
-          {/* ③ 핵심 칸 ──────────────────────────────────────────
-              ★ 2026-10-09 세중님 확정 — 공고 상세는 **이 일곱 칸만** 그립니다.
-                모집인원 · 접수마감 · 근무지 · 지원자격 · 예상 연봉 ·
-                얼마나 바쁜 곳 · 병원 뜯어보기
-              전형방법 · 우대사항 · 결격사유 · 문의처 · 제출서류 · **학력**은
-              그리지 않습니다. 「원문 보기」 링크는 남깁니다 (회원만).
-
-              ★ 2026-10-22 세중님 4번 — **모집 인원·지원 자격은 비어도 그립니다.**
-                「공고문 확인」 + 원문 링크입니다 (접수 마감과 같은 꼴).
-                「공고에 없음」이라고 적지 않는 것은 그대로입니다 — 우리가 못 읽은
-                것일 수 있으니 회원을 **공고문으로 보냅니다** (15절).
-                남은 칸(근무지 등)은 전처럼 안 그립니다.
-                빈 칸은 관리자 「빈칸 공고」 목록으로도 갑니다
-
-              ★ 2026-10-14 — **예상 연봉만 예외입니다.** 금액이 없으면
-                「내규에 따름」으로 그립니다. 공고에 금액이 안 적힌 것이 흔하고
-                (1층 39건 중 31건), 칸을 숨기면 회원이 「우리가 못 받아온 것」인지
-                「공고에 없는 것」인지 알 수 없었습니다 */}
-          <Rise>
-            <dl className="mt-6 grid grid-cols-2 gap-3">
-              {/* ★ 2026-10-22 세중님 4번 — **비어도 칸을 그립니다.** 「공고문 확인」 +
-                  원문 링크입니다 (접수 마감과 같은 꼴). 전에는 안 그려서, 회원이
-                  「우리가 못 읽은 것」인지 「공고에 없는 것」인지 알 수 없었습니다.
-                  「0명」·「○명」은 **원문 글자 그대로** 그립니다 — 그 규칙은 그대로입니다 */}
-              <Core icon={icons['job.headcount']} label="모집 인원"
-                    v={모집인원 || 못읽은칸말}
-                    url={모집인원 ? null : j.url} />
-              {/* ★ 2026-10-08 — 마감 **시각**이 있으면 함께 보여줍니다.
-                  「2026-10-16 (금) 오전 9시 마감」. 전에는 날짜만 보여줘서
-                  09:00 마감 공고가 그날 저녁까지 열린 것처럼 보였습니다 */}
-              {/* ★ 2026-10-22 세중님 1번 — **포털 목록 칸 ↔ 상세 칸이 다르면,
-                  보여 주는 값은 상세이고 숨기는 기준은 목록입니다** (CLAUDE.md 원칙).
-                  워크넷 상세 API 의 `receiptCloseDt` 는 기관이 적는 자리라
-                  「채용시까지」가 흔한데(회원 화면 **160건**), 목록 API 는 같은 공고에
-                  **게시 만료일**(날짜)을 줍니다. 전에는 그 날짜를 접수마감으로 보여 줘서
-                  회원이 「그날까지 여유 있다」고 읽었습니다.
-                  → 값은 `뽑은값.접수마감글`, 날짜는 **작게 「(게시 ~MM/DD)」**.
-                  `apply_to` 는 그대로 — 숨김·정렬·정찰은 바뀌지 않습니다 */}
-              <Core icon={icons['job.deadline']} label="접수 마감"
-                    v={마감글
-                        ? 마감글
-                        : (j.apply_to
-                          ? j.apply_to + (요일(j.apply_to) ? ` (${요일(j.apply_to)})` : '')
-                            + (시각말(j.apply_to_time) ? ` ${시각말(j.apply_to_time)} 마감` : '')
-                          : (j.마감표시 || 마감못읽은말))}
-                    sub={[마감글 && j.apply_to ? `게시 ~${게시날(j.apply_to)}` : null,
-                      j.apply_from ? `${j.apply_from} 시작` : null]
-                      .filter(Boolean).join(' · ') || null} />
-              {/* 근무지도 지역보임 을 먼저 읽습니다. 자세한 주소(work_place)는
-                  다르면 아래 줄에 덧붙입니다 — 상세는 더 보여 줄 수 있습니다.
-                  공고문에 없으면 기관표 주소가 들어와 있습니다 */}
-              {/* ★ 2026-10-23 — **비어도 칸을 그립니다** (세중님 2026-10-22 4번 규칙을
-                  근무지에도). 전에는 `{(j.지역보임 || j.work_place) && …}` 라서 둘 다
-                  비면 **칸이 아예 사라졌습니다** — 모집 인원·지원 자격은 「공고문 확인」 +
-                  원문 링크를 그리는데 근무지만 안 그렸습니다. 회원이 「우리가 못 읽은
-                  것」인지 「공고에 없는 것」인지 알 수 없습니다.
-                  회원 화면 **6건**이 그 꼴이었습니다 (국립재활원 둘 · 수원병원 ·
-                  대구보건대 · 원광대 · 경남광역치매센터 — 여섯 다 원문 링크가 있습니다) */}
-              <Core icon={icons['job.place']} label="근무지"
-                    v={j.지역보임 || j.work_place || 못읽은칸말}
-                    url={(j.지역보임 || j.work_place) ? null : j.url}
-                    sub={j.work_place && j.work_place.includes(' ')
-                         && j.work_place !== j.지역보임 ? j.work_place : null} />
-              {/* ★ 2026-10-14 — 회원에게는 **언제나** 그립니다. 비면 「내규에 따름」.
-                  비회원에게는 detail 이 아예 안 실려 오므로(DB 가 빈 것을 줍니다)
-                  「내규에 따름」이 사실이 아닙니다 — 그 자리는 전처럼 안 그립니다 */}
-              {(member || 금액) && (
-                <Core icon={icons['job.pay'] ?? icons['job.headcount']} label="예상 연봉"
-                      v={연봉} />
-              )}
-            </dl>
-          </Rise>
-
-          {/* ★ 2026-10-08 — 오늘이 마감일이고 **시각**이 정해져 있으면 한 줄 더.
-              「오늘 오전 9시에 마감됩니다」. 아침에 보고 저녁에 넣으려다 놓치는 일을
-              막습니다. 이미 지난 뒤에는 말이 바뀝니다 */}
-          {j.apply_to === todayKst() && 시각말(j.apply_to_time) && (
-            <Rise>
-              <p className={'mt-3 break-keep rounded-[12px] border p-5 text-[14px] leading-[1.7] '
-                + (closed
-                    ? 'border-[#E3E3DE] bg-[#F7F7F4] text-[#5F666C]'
-                    : 'border-brand-red/30 bg-brand-red/5 font-bold text-brand-red')}>
-                {closed
-                  ? `오늘 ${시각말(j.apply_to_time)}에 마감됐습니다.`
-                  : `오늘 ${시각말(j.apply_to_time)}에 마감됩니다.`}
-              </p>
-            </Rise>
-          )}
-
-          {/* ③-2 수시채용 안내 (2026-10-07 확정 방침).
-              문구는 세중님이 정한 그대로입니다 — 글자를 바꾸지 마십시오.
-              ★ 「30일이 지나면 지난 공고로」 한 줄을 뺐습니다 (2026-10-07).
-                 정찰이 원 공고가 살아 있다고 보면 **날수를 안 셉니다.**
-                 30일은 「아무 신호가 없을 때」만 쓰는 뒷줄이라, 회원에게
-                 「30일이면 내려간다」 고 적으면 사실과 다릅니다 */}
-          {/* ★ 2026-10-07 — 안내를 **두 갈래**로 갈랐습니다 (세중님 지시).
-              전에는 마감일이 없으면 무조건 「수시채용 공고입니다」 라고 했습니다.
-              그런데 그중 대부분은 수시가 아니라 **우리가 접수기간을 못 읽은 것**
-              이었습니다. 못 읽은 것을 「수시」 라고 하면 회원이 마감일을
-              안 찾아보고 놓칩니다. 어느 쪽인지는 DB 의 마감표시() 가 정합니다 */}
-          {!j.apply_to && j.마감표시 === '수시채용' && (
-            <Rise>
-              <p className="mt-3 break-keep rounded-[12px] border border-[#E3E3DE]
-                            bg-[#F7F7F4] p-5 text-[14px] leading-[1.7] text-[#4A5056]">
-                수시채용 공고입니다. 마감일이 정해져 있지 않으며,
-                병원에서 공고를 내리면 RAPO에서도 내려갑니다.
-              </p>
-            </Rise>
-          )}
-          {!j.apply_to && j.마감표시 !== '수시채용' && (
-            <Rise>
-              <p className="mt-3 break-keep rounded-[12px] border border-[#E3E3DE]
-                            bg-[#F7F7F4] p-5 text-[14px] leading-[1.7] text-[#4A5056]">
-                접수 마감일을 아직 확인하지 못했습니다. 아래 ⑨ 출처의 원 공고문에서
-                접수기간을 꼭 확인해 주세요. 저희도 다시 읽어 채워 넣겠습니다.
-              </p>
-            </Rise>
-          )}
-
-          {/* 세 갈래입니다 (2026-09-25).
-                비회원  자료가 아예 안 옵니다 (막는 자리는 DB). 안내 카드를 놓습니다
-                회원    진짜 자료. 가입을 아직 안 마쳤으면 JobVeil 이 흐립니다
-                모름    **아무것도 안 그립니다.** 물어봤는데 답을 못 받은 것이라
-                        가입 권유를 그리면 회원에게 「가입하고 전부 보기」 가 뜹니다 */}
-          {who === '모름' ? null : who === '비회원' ? (
-            <MembersOnly
-              title={<>이 병원이 어떤 곳인지<br />회원만 볼 수 있어요</>}
-              body="치료사 인원 · 병상 · 얼마나 바쁜 곳인지와 지원 자격 · 전형 방법까지. 가입은 3분이면 끝나요."
-              진단="app/jobs/[id]/page.tsx · 서버(serverWho)"
-            />
-          ) : (
-          <JobVeil>
-          {/* ④ 병원 뜯어보기 · ⑤ 얼마나 바쁜 곳인지 ─ */}
-          {hosp && (
-            <>
-              <Rise><JobHospital h={hosp} icons={icons} /></Rise>
-              {hosp.band && <Rise><JobBusy h={hosp} icons={icons} /></Rise>}
-            </>
-          )}
-
-          {/* ⑥ 지원 자격 ────────────────────────
-              ★ 2026-10-09 세중님 확정 — 상세에 그리는 글 칸은 **지원 자격 하나**입니다.
-              전형방법 · 우대사항 · 결격사유 · 문의처 · 제출서류는 그리지 않습니다.
-              그 내용은 원문 공고에 있고, 아래 「원문 보기」로 갑니다 */}
-          {/* ★ 2026-10-22 세중님 4번 — **비어도 묶음을 그립니다.** 「공고문 확인」 +
-              원문 링크입니다 (모집 인원 칸과 같은 까닭) */}
-          <Rise>
-            <Block icon={icons['job.require']} title="지원 자격">
-              {지원자격 ? (
-                <p className="whitespace-pre-wrap break-keep text-[15px] leading-[1.75]
-                              text-[#4A5056]" style={{ overflowWrap: 'break-word' }}>
-                  {지원자격}
-                </p>
-              ) : (
-                <못읽은칸 url={j.url} />
-              )}
-            </Block>
-          </Rise>
-
-          {/* ★ 워크넷 급여란 고정 안내 (2026-10-07 세중님 지시).
-              워크넷이 주는 숫자는 1호봉 기준이라 그대로 읽으면 오해합니다.
-              연봉 칸을 위로 옮겼으므로 안내도 따라옵니다 */}
-          {금액 && 워크넷 && (
-            <p className="mt-3 break-keep text-[12px] leading-relaxed text-[#5F666C]">
-              예상 연봉은 1호봉 예정 급여이며, 호봉 인정 및 경력에 따라 상이할 수 있음
-            </p>
-          )}
-
-          {/* 첨부 — 담당자가 올린 공고문·그림 (회원만 받습니다) */}
-          <NoticeFiles 갈래="채용" 공고={j.id} 고칠수있나={false} />
-
-          {/* ★ 2026-10-22 — 「이 공고는 본문을 못 받아왔어요」 줄을 뺐습니다.
-              위 **지원 자격** 묶음이 이제 비면 「공고문 확인」 + 원문 링크를
-              그려서 같은 말을 두 번 하게 됩니다. 그 줄은 비회원에게도 떴는데
-              (비회원은 detail 을 아예 안 받습니다) 비회원에게는 **사실이
-              아니었습니다** — 우리가 못 받아온 것이 아니라 안 보내는 것입니다 */}
-
-          {/* ⑨ 출처 ───────────────────────────── */}
-          <Rise>
-            <div className="mt-7 flex items-start gap-2 rounded-[10px] bg-[#ECECE8] p-5">
-              <Icon name={icons['job.source']} size={15}
-                    className="mt-0.5 shrink-0 text-[#5F666C]" />
-              <p className="break-keep text-[12px] leading-relaxed text-[#5F666C]">
-                기관이 올린 공고를 모아 옮긴 것입니다. 마감일·인원은 바뀔 수 있으니
-                지원 전에 원문을 한 번 봐 주세요
-              </p>
-            </div>
-          </Rise>
-
-          {/* 오류 신고 (2026-10-07). 출처 안내 바로 아래입니다 —
-              「우리가 옮긴 것」을 읽은 자리에서 「틀렸다」를 말할 수 있어야 합니다 */}
-          <JobReport id={j.id} />
-
-          {detail['기관홈'] && (
-            <Rise>
-              <a
-                href={detail['기관홈']}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 flex items-center justify-between gap-3 rounded-[12px]
-                           border border-[#E3E3DE] bg-white px-6 py-5
-                           transition-transform duration-[120ms] active:scale-[0.99]
-                           motion-reduce:transition-none"
-              >
-                <span className="break-keep text-[15px] font-medium text-[#4A5056]">
-                  기관 홈페이지 열기
-                </span>
-                <Icon name="arrow-up-right" size={16} className="shrink-0 text-[#5F666C]" />
-              </a>
-            </Rise>
-          )}
-
-          <OrgPanel orgName={j.org_name} exceptJobId={j.id} jobTitle={j.title} jobUrl={j.url} />
-          </JobVeil>
-          )}
-        </div>
-
-        {/* ⑤ 마감이면 하단 고정 버튼 대신 「지금 열려 있는 비슷한 공고」 */}
-        {closed && (
-          <section className="mt-7 rounded-[14px] border border-[#E3E3DE] bg-white p-6">
-            <p className="break-keep text-[17px] font-bold text-[#1B2025]">
-              지금 열려 있는 비슷한 공고
-            </p>
-            <p className="mt-2 break-keep text-[15px] text-[#5F666C]">
-              {[j.job_group, j.sido].filter(Boolean).join(' · ') || '전체'} 조건으로 찾아드려요
-            </p>
-            <Link
-              href={`/jobs?${new URLSearchParams({
-                ...(j.job_group ? { job: j.job_group } : {}),
-                ...(j.sido ? { sido: j.sido } : {}),
-              }).toString()}`}
-              className="mt-5 block w-full rounded-[12px] bg-[#FF3B30] px-7 py-4 text-center
-                         text-[16px] font-bold text-white transition-transform duration-[120ms]
-                         active:translate-y-[2px] active:scale-[0.99]
-                         active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.25)]
-                         motion-reduce:transition-none"
-            >
-              비슷한 공고 보기
-            </Link>
-          </section>
-        )}
-
-        {/* 경쟁률 보러 가기 (2026-10-09).
-            **그 기관 자료가 있을 때만** 보입니다. 경쟁률은 알리오 공공기관
-            19곳뿐이라, 없는 기관에 단추를 달면 눌러서 빈 화면을 봅니다.
-            판정은 DB 의 경쟁률있나() 가 합니다 — 화면이 짐작하지 않습니다 */}
-        {경쟁률 && (
-          <section className="mt-7 rounded-[14px] border border-[#E3E3DE] bg-white p-6">
-            <p className="break-keep text-[17px] font-bold text-[#1B2025]">
-              이 기관, 몇 대 일이었을까요
-            </p>
-            <p className="mt-2 break-keep text-[15px] text-[#5F666C]">
-              {기관이름말(j.org_name)}의 지난 채용 경쟁률을 모아 뒀어요
-            </p>
-            {/* ★ 2026-10-09 — 경쟁률은 **회원 자료**입니다 (방침 2026-10-01).
-                비회원에게는 /compete 로 보내지 않고 로그인 안내로 바꿉니다.
-                /compete 쪽도 서버에서 같은 기준으로 막습니다 — 한쪽만 막으면
-                주소를 쳐서 들어옵니다 */}
-            {member ? (
-              <Link
-                href={`/compete?${new URLSearchParams({
-                  org: j.org_name,
-                  ...(j.job_group && j.job_group !== '공통' ? { job: j.job_group } : {}),
-                }).toString()}`}
-                className="mt-5 block w-full rounded-[12px] border border-[#E3E3DE] px-7 py-4
-                           text-center text-[16px] font-bold text-[#1B2025]
-                           transition-transform duration-[120ms]
-                           active:translate-y-[2px] active:scale-[0.99] motion-reduce:transition-none"
-              >
-                경쟁률 보러 가기
-              </Link>
-            ) : (
-              <LoginFirst
-                className="mt-5 block w-full rounded-[12px] border border-[#E3E3DE] px-7 py-4
-                           text-center text-[16px] font-bold text-[#1B2025]"
-              >
-                로그인하고 경쟁률 보기
-              </LoginFirst>
-            )}
-          </section>
-        )}
-
-        <AdminJobTools id={j.id} />
-      </main>
-
-      {/* ⑩ 하단 고정 버튼 — 마감된 공고에는 없습니다 */}
-      {!closed && (
-        /* 탭바(62px·md 미만에만 있음) 위에 얹습니다.
-           둘 다 bottom-0 이면 탭바가 z-40 이라 이 줄이 통째로 가려집니다 */
-        /* ★ 2026-10-09 — 지원 띠도 탭바가 안전 영역만큼 커지는 것을 따라갑니다.
-           안 따라가면 홈 막대가 있는 기기에서 탭바가 이 띠를 밀고 올라옵니다.
-           인라인 style 로 쓰면 md:bottom-0 을 이겨서 데스크톱이 어긋납니다 */
-        <div className="fixed inset-x-0 bottom-[calc(62px+env(safe-area-inset-bottom))]
-                        z-30 border-t border-[#E3E3DE]
-                        bg-white/95 px-6 py-3 backdrop-blur md:bottom-0 md:px-7">
-          {/* ★ 2026-10-24 세중님 ㉡ — 단추 옆 **「지원 방법」 한 줄**.
-              칸을 새로 만들지 않습니다 (일곱 칸은 그대로 · CLAUDE.md).
-              무엇을 적을지는 lib/job-state.ts 의 지원방법말() 한 자리에서 정합니다 —
-              **아는 낱말만** 적습니다(옛 길이 넣은 마감 안내 문장이 140건 있습니다).
-              배치(글꼴·자리)는 11/1~6 화면 작업 때 다듬습니다 */}
-          <지원방법줄
-            접수방법={detail['접수방법'] as string | undefined}
-            원문주소={병원?.주소 ?? j.url}
-            갈곳없나={member && !지원.주소}
-          />
-          <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
-            <JobSave id={j.id} big />
-            {/* ★ 2026-10-28 세중님 2번 — 「지원하러 가기」는 **그 공고로** 갑니다.
-                차례는 lib/job-state.ts 의 지원링크() 한 자리 —
-                  ① 원문 공고 주소 ② 자사채용사이트(URL) ③ 기관 홈페이지
-                넷째(아무 주소도 없음)는 **단추를 안 그립니다** — 위 「지원 방법」 줄과
-                지원 자격 칸의 「공고문 확인」이 그 자리를 맡습니다.
-                비회원에게는 창구가 url 을 안 주므로 ①이 비고, JobOpenLink 가
-                「로그인하고 지원하러 가기」를 그립니다 (화면이 스스로 판정하지 않습니다) */}
-            {(지원.주소 || !member) && (
-              <JobOpenLink
-                id={j.id}
-                url={지원.주소}
-                className="flex h-[50px] flex-1 items-center justify-center gap-1.5
-                           rounded-[12px] bg-[#FF3B30] text-[16px] font-bold text-white
-                           transition-transform duration-[120ms] active:translate-y-[2px]
-                           active:scale-[0.99]
-                           active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.25)]
-                           motion-reduce:transition-none"
-              >
-                지원하러 가기
-                <Icon name="arrow-up-right" size={17} />
-              </JobOpenLink>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Core({
-  icon, label, v, sub = null, url = null,
-}: { icon: string; label: string; v: string; sub?: string | null; url?: string | null }) {
-  return (
-    <div className="rounded-[12px] border border-[#E3E3DE] bg-white p-5">
-      <dt className="flex items-center gap-1.5 text-[13px] text-[#5F666C]">
-        <Icon name={icon} size={14} className="shrink-0" />
-        <span className="break-keep">{label}</span>
-      </dt>
-      {/* ★ 2026-10-22 세중님 4번 — 우리가 못 읽은 칸은 「공고문 확인」이고,
-          **그 자리에서 원문으로 갈 수 있게** 합니다. 주소는 비회원에게는
-          창구가 안 줍니다(job_one) — 그때는 글자만 그립니다 */}
-      <dd className="mt-1.5 break-keep text-[17px] font-bold text-[#1B2025]"
-          style={{ overflowWrap: 'break-word' }}>
-        {url ? (
-          <a href={url} target="_blank" rel="noopener noreferrer"
-             className="inline-flex items-center gap-1 underline
-                        decoration-[#C9C9C2] underline-offset-[3px]">
-            {v}
-            <Icon name="arrow-up-right" size={15} className="shrink-0 text-[#5F666C]" />
-          </a>
-        ) : v}
-      </dd>
-      {/* 마감일만 있고 시작일이 없어서 「접수가 열렸나」를 못 알아봤습니다 */}
-      {sub && <p className="mt-1 break-keep text-[12px] text-[#5F666C]">{sub}</p>}
-    </div>
-  );
-}
-
-function Block({
-  icon, title, children,
-}: { icon: string; title: string; children: React.ReactNode }) {
-  return (
-    <section className="mt-7 rounded-[14px] border border-[#E3E3DE] bg-white p-6">
-      <h2 className="flex items-center gap-2 text-[17px] font-bold text-[#1B2025]">
-        <Icon name={icon} size={18} className="shrink-0 text-[#5F666C]" />
-        <span className="break-keep">{title}</span>
-      </h2>
-      <div className="mt-4">{children}</div>
-    </section>
+    <RapoJobDetailView
+      id={j.id} who={who} closed={closed}
+      shareTitle={`${기관이름말(j.org_name)} ${j.job_group ?? '치료사'} 채용`}
+      identity={{
+        org: 기관, orgArt: 기관그림(j.org_name || j.id), 상태, title: j.title,
+        tags: 태그(j.employ_type || '공고문 참고', 조교연구말(detail['조교연구']), j.is_intern && '체험형 인턴', j.job_group),
+        views: views[j.id] ?? null, 인원: 모집인원 || 못읽은칸말, 마감: 식별마감,
+      }}
+      pay={{ 값: 연봉말(연봉원문), 덧말: 연봉덧말 }}
+      지원자격={지원자격} url={병원?.주소 ?? (j.url || null)}
+      기간={{ 달: 끝?.달 ?? null, 날: 끝?.날 ?? null, 기간, 강조, 덧말: 기간덧말 }}
+      접수방법={지원방법} 모집인원없음={모집인원 == null}
+      기관={기관} 주소={주소}
+      비슷한={비슷한} 비슷한주소={비슷한주소}
+      비슷한제목말={[j.job_group, j.지역보임?.split(' ')[0]].filter(Boolean).join(' · ') || undefined}
+      지원주소={지원.주소}
+    />
   );
 }

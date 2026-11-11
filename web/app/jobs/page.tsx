@@ -1,465 +1,153 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { Suspense } from 'react';
 import { Hit } from '@/components/hit';
-import { Icon } from '@/components/icon';
-import { JobTabs } from '@/components/job-tabs';
-import { ListFilters } from '@/components/list-filters';
-import { MembersOnly } from '@/components/members-only';
-import { 기관이름말, 마감배지, 조교연구말 } from '@/lib/job-state';
-import { jobViews } from '@/lib/job-views';
-import { SIDOS } from '@/lib/org';
-import { supabase, TABS, tabLabel, type JobListItem, type 맛보기공고 } from '@/lib/supabase';
+import { RapoJobFilters, RapoJobSearch, type 조건 } from '@/components/rapo/rapo-job-filters';
+import type { RapoJob } from '@/components/rapo/rapo-job-row';
+import { 받는중, 목록, 못받음, 없음 } from '@/components/rapo/rapo-job-results';
+import { RapoShell } from '@/components/rapo/rapo-shell';
+import { RapoPagination } from '@/components/rapo/rapo-ui';
+import { 기관이름말, 마감배지 } from '@/lib/job-state';
+import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
+import { supabase, type JobListItem, type 맛보기공고 } from '@/lib/supabase';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
-import { OrgCard } from '../org-card';
 
 export const dynamic = 'force-dynamic';   // 공고는 자주 바뀝니다
 
-/* 공고 목록·검색.
+/* 탭 제목 — 서비스 이름은 RAPO 입니다 */
+export const metadata: Metadata = { title: 'RAPO · 채용 공고' };
 
-   ── 2026-09-25 에 바뀐 것 ──────────────────────────────────────────
-   **회원만 봅니다. 한 번에 20건씩.**
+/* 공고 목록 — 새 디자인 「U02 · 공고 목록」 (2026-11-11 대표 지시: 피그마 우선).
 
-   그 전에는 로그인 없이 요청 한 번에 100건이 나갔습니다 (총 497건).
-   실제로 쏴서 확인했습니다 — Content-Range: 0-99/497.
-   화면에서 흐리기만 했지 자료는 그대로 나가고 있었습니다.
+   Figma 기준 화면 (06 · A 공고 탐색과 공유 → 02 공고 목록)
+     비회원 795:16046 · 회원 795:16079 · 쪽 넘기기 606:14291 · 검색 606:14511
+     불러오는 중 509:4787 · 조건 결과 없음 509:4911 · 전체 공고 없음 509:5024 · 조회 오류 509:5135
 
-   지금은 DB 의 job_list() 만 이 목록을 내줍니다. 그 함수가
-     · auth.uid() 가 없으면 거절하고
-     · 20건에서 끊습니다 — 부르는 쪽이 더 달라고 해도
-   화면은 서버에서 **그 사람의 쿠키로** 읽습니다 (lib/supabase-server.ts).
+   ── 자료 규칙은 전과 같습니다 ─────────────────────────────────────
+   **회원만 목록 창구(job_list)를 씁니다. 한 번에 20건씩.** auth.uid() 가 없으면 DB 가 거절하고(42501)
+   그때는 최신 몇 건만 주는 맛보기(공개공고)로 그립니다 — 근거·상세·급여는 비회원에게 안 나갑니다.
+   검색·조건·쪽 넘기기는 그대로 로그인이 필요합니다(비회원이 누르면 로그인으로 · rapo-job-filters.tsx).
+   직군 기본값 = 회원이 가입 때 고른 직군. 주소에 job 이 있으면 그것이 먼저, 「전체」는 job=전체.
 
-   맛보기(Clip)는 뺐습니다. 자료가 아예 안 오기 때문에 흐릴 것이 없습니다 —
-   대신 「회원만 볼 수 있어요」 카드를 놓습니다. */
+   ── 피그마에 없어 잠시 빠진 것 (대표: 하나씩 다시 넣을 예정) ────────────
+   기관 갈래 탭(공공·대학·종합 등 넷) · 정렬(추천·최신·마감·조회) · 지난 공고 보기 · 검색 때 기관 카드 ·
+   조회수 · 맛보기 아래 「로그인하면 다 볼 수 있어요」 카드.
+   갈래 탭이 빠져 기본 목록이 「공공기관·대학·종합」 갈래만이 아니라 **모든 갈래**가 됐습니다.
+   예전 주소의 tab · sort · past · all 값은 읽지 않습니다(깨지지는 않습니다).
 
-const JOBS = ['작업치료사', '물리치료사'];
-/* 시도 목록은 lib/org.ts 한 벌뿐입니다 (2026-09-25).
-   여기에 또 두었더니 두 곳의 순서가 달랐습니다 — 같은 화면에서 같은 목록이
-   달리 보이면 어느 쪽이 맞는지 아무도 모릅니다. DB 쪽도 sido_has 하나입니다 */
+   ── 원본에 있지만 넣지 않은 것 ───────────────────────────────────
+   근무시간 줄(수집하지 않는 값) · 상세의 지원 경력·근무일(대표 결정) ·
+   급여 조건(오픈 전 안내) · 고용형태 조건(DB 칸이 없어 잠금 — 막힌 것). */
 
-/** 한 쪽에 몇 건인지. DB 의 job_list() 와 같아야 합니다 */
-const PAGE = 20;
+type SP = { job?: string; sido?: string; q?: string; p?: string };
 
-function d(v: string | null) {
-  return v ? v.slice(5).replace('-', '.') : '';
-}
-/* ★ 2026-10-07 — 마감일이 없을 때 쓸 말을 **화면이 정하지 않습니다.**
-   DB 의 마감표시() 가 정해서 job_list 가 「마감표시」 칸으로 내려 줍니다
-   (세중님 지시: 「판정은 DB 함수 하나에만 두고, 화면 두 곳과 관리자 화면은
-   그 함수를 부르게」).
-
-   전에는 여기서 `if (!to) return '수시채용'` 으로 정했습니다. 그래서
-   공공기관 공고 42건이 「수시채용」 으로 떴습니다 — 사실은 우리가 접수기간을
-   못 읽은 것이었습니다.
-
-   표시 가 비어 있으면 마감일이 있다는 뜻이고 날수를 셉니다. */
-/* ★ 2026-10-09 — 마감 배지는 lib/job-state.ts 의 마감배지() 한 벌만 씁니다.
-   여기 있던 dday() 는 상세에도 같은 이름으로 한 벌 더 있었고,
-   마감 시각을 넣을 때 이쪽만 고쳐서 상세가 틀렸습니다 */
-
-type SP = {
-  /* `all` 은 옛 이름입니다. 2026-10-04 에 네 화면을 `past` 로 맞췄는데,
-     밖에 나간 링크가 깨지지 않게 **둘 다 읽습니다** */
-  job?: string; sido?: string; all?: string; past?: string; tab?: string;
-  q?: string; sort?: string; p?: string;
-};
+const PAGE = 20;   // DB 의 job_list() 와 같아야 합니다
 
 export default async function Jobs({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const q = (sp.q ?? '').trim();
-  const searching = q.length > 0;
   const page = Math.max(0, Number(sp.p ?? 0) || 0);
-
-  /* 검색 중에는 탭을 안 씁니다 — 전체에서 찾고, 어느 탭 공고인지 줄마다 붙입니다 */
-  const active = searching ? null : (TABS.find((t) => t.key === sp.tab) ?? TABS[0]);
 
   /* 쿠키에 실려 온 세션으로 읽습니다. 로그인 안 했으면 job_list 가 거절합니다 */
   const sb = await serverSupabase();
+  const who = await serverWho(sb);
+  const 회원 = who === '회원';
 
-  /* 마감된 것도 보기 — `past` 가 새 이름, `all` 은 옛 이름입니다 (둘 다 읽습니다) */
-  const 지난것 = sp.past === '1' || !!sp.all;
-
-  /* 직군 기본값 = 회원이 가입 때 고른 직군 (세중님 결정 2026-10-04).
-     비로그인은 null 이라 「전체」가 됩니다.
-     ★ 주소에 job 이 있으면 **그것이 먼저**입니다 — 회원이 「전체」를 골랐는데
-       가입 직군으로 되돌리면 고른 것이 무시됩니다. 그래서 `'전체'` 라는
-       또렷한 값을 따로 둡니다 */
-  /* ★ `profiles` 를 **직접 읽으면 안 됩니다.**
-     그 표는 authenticated 에게 SELECT 권한이 아예 없습니다
-     (DELETE·REFERENCES·TRIGGER·TRUNCATE 뿐). RLS 에 「내 프로필은 내가
-     읽습니다」 정책이 있어도, 표 권한이 먼저라 거절됩니다.
-     2026-10-04 에 직접 읽게 짰다가 **늘 빈 값이 와서 직군 기본값이
-     하나도 안 걸렸습니다.** 세중님이 「고정이 안 된다」고 하신 그것입니다.
-     정식 통로는 `내프로필()` 입니다 — 학생·현직(role)까지 같이 줍니다. */
+  /* 가입 직군 — profiles 를 직접 읽지 않고 내프로필() 창구로 (전과 같음) */
   let 내직군: string | null = null;
-  let 내역할: string | null = null;
-  if (await serverWho(sb) === '회원') {
+  if (회원) {
     const { data } = await sb.rpc('내프로필');
-    const 나 = ((data ?? []) as { job_group?: string | null; role?: string | null }[])[0];
-    내직군 = 나?.job_group ?? null;
-    내역할 = 나?.role ?? null;
+    내직군 = ((data ?? []) as { job_group?: string | null }[])[0]?.job_group ?? null;
   }
   const 고른직군 = sp.job === '전체' ? null : (sp.job ?? 내직군);
+  const 기본직군 = !sp.job && !!내직군;           // 「내 직군: …」 줄로 보일지
+  const 고른시도 = sp.sido || null;
+  const 지금: 조건 = { q, job: 고른직군, sido: 고른시도 };
 
-  const [list, counts, cards] = await Promise.all([
-    sb.rpc('job_list', {
-      p_job: 고른직군,
-      p_sido: sp.sido ?? null,
-      p_tab: active?.like ?? null,
-      p_q: q || null,
-      p_all: 지난것,
-      p_sort: sp.sort ?? null,
-      p_page: page,
-    }),
-    sb.rpc('job_counts', {
-      p_job: sp.job ?? null,
-      p_sido: sp.sido ?? null,
-      p_q: q || null,
-      p_all: 지난것,
-      p_tabs: TABS.map((t) => t.like),
-    }),
-    /* 분류 카드 그림은 누구나 봅니다 (관리자가 올린 그림 경로뿐입니다) */
-    supabase.from('job_tab_cards').select('tab_key,image_path'),
-  ]);
+  /* 적용 조건 줄 (RAPO / List / 적용 조건 506:107) — 실제로 건 조건만 씁니다 */
+  const 조건말 = [고른직군, 고른시도].filter(Boolean).join(' · ');
+  const 적용줄 = !회원 ? null
+    : 기본직군 && !고른시도 ? `내 직군: ${고른직군}`
+    : 조건말 ? `적용 조건: ${조건말}` : null;
+  /* 초기화 = 조건을 모두 뺀 목록. 회원은 job=전체 로 적어야 가입 직군이 다시 안 걸립니다 */
+  const 초기화주소 = 회원 ? (q ? `/jobs?q=${encodeURIComponent(q)}&job=전체` : '/jobs?job=전체') : '/jobs';
 
-  /* 42501 = 권한 없음. 로그인 안 한 분입니다 — 오류가 아니라 안내를 그립니다 */
-  const locked = list.error?.code === '42501';
-  const rows = (list.data ?? []) as unknown as JobListItem[];
-
-  /* 로그인 안 한 분에게도 **최신 몇 건은** 보여줍니다 (2026-10-01).
-     세중님 결정 — 「최신 공고 일부만 공개, 나머지는 로그인」.
-     몇 건인지는 DB 의 site_settings 「비로그인_공고수」 한 줄로 정합니다
-     (-1 이면 접수 중인 것 전부. 애플 심사에서 걸리면 숫자만 바꾸면 됩니다).
-
-     job_list 를 비로그인에 열지 않고 **칸을 좁힌 다른 창구**를 씁니다 —
-     근거·상세·점수·인원·고용형태·경쟁률·급여는 한 칸도 안 나갑니다.
-     검색·필터·쪽 넘기기·찜·알림은 그대로 로그인이 필요합니다. */
-  const 맛보기 = locked ? await supabase.rpc('공개공고') : null;
-  const 맛보기줄 = (맛보기?.data ?? []) as 맛보기공고[];
-  const 전체건수 = Number(맛보기줄[0]?.전체건수 ?? 0);
-
-  /* 조건에 맞는 전체 건수입니다. job_list 가 줄마다 같은 값을 붙여 보냅니다
-     (org_search 와 같은 방식). 「다음 쪽이 있나」를 이걸로 가릅니다 —
-     「받은 줄이 20이면 다음 쪽이 있다」로 보면, 전체가 딱 20의 배수일 때
-     빈 쪽으로 가는 「다음쪽」이 생깁니다. 오늘이 정확히 그랬습니다 (320건) */
-  const matched = Number((rows[0] as unknown as { total?: number })?.total ?? 0);
-  const hasNext = (page + 1) * PAGE < matched;
-
-  const tally = (counts.data ?? {}) as Record<string, number>;
-  const tabCounts = TABS.map((t) => Number(tally[t.like] ?? 0));
-  /* ★ 탭 건수를 더하면 안 됩니다 (2026-10-07). 탭이 빈 공고 86건이 네 탭에
-     **다 들어가** 있어 합이 전체보다 큽니다. job_counts 가 겹치지 않게 센
-     「(전체)」 를 따로 보냅니다. 없으면(배포가 어긋난 때) 옛 방식으로 내려갑니다 */
-  const total = Number(tally['(전체)'] ?? tabCounts.reduce((a, b) => a + b, 0));
-
-  const tabImages: Record<string, string | null> = {};
-  ((cards.data ?? []) as { tab_key: string; image_path: string | null }[])
-    .forEach((c) => { tabImages[c.tab_key] = c.image_path; });
-
-  /* 지금 화면에 뜨는 것만 셉니다 (lib/job-views.ts) */
-  const views = await jobViews(rows.map((r) => r.id));
-
-  const link = (patch: Partial<Record<keyof SP, string | undefined>>) => {
-    /* 조건을 바꾸면 쪽 번호는 처음으로 돌아갑니다 —
-       3쪽을 보다 지역을 바꾸면 없는 쪽으로 가서 빈 화면이 납니다 */
-    const next = { ...sp, p: undefined, ...patch };
-    const p = new URLSearchParams();
-    Object.entries(next).forEach(([k, v]) => { if (v) p.set(k, v); });
-    const s = p.toString();
-    return s ? '/jobs?' + s : '/jobs';
+  const 쪽주소 = (p: number) => {
+    const u = new URLSearchParams();
+    if (q) u.set('q', q);
+    if (sp.job) u.set('job', sp.job);
+    if (고른시도) u.set('sido', 고른시도);
+    if (p > 0) u.set('p', String(p));
+    const s = u.toString();
+    return s ? `/jobs?${s}` : '/jobs';
   };
 
-  const byDeadline = sp.sort === 'deadline';
-
-  /* 정렬 네 가지 (2026-10-07 세중님 지시).
-     주소에 sort 가 없으면 추천순입니다 — 홈의 「마감 임박 공고」 (`?sort=deadline`)
-     같은 밖에 나간 링크는 그대로 돕니다.
-     순서와 뜻은 DB 의 job_list(p_sort) 한 곳에서 정합니다 — 여기는 이름표뿐입니다 */
-  const SORTS = [
-    { key: undefined, label: '추천순' },
-    { key: 'new',      label: '최신순' },
-    { key: 'deadline', label: '마감순' },
-    { key: 'views',    label: '조회순' },
-  ] as const;
-  const 지금정렬 = SORTS.some((s) => s.key === sp.sort) ? sp.sort : undefined;
-
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
+    <RapoShell who={who} current="/jobs">
       <Hit kind="jobs" />
 
-      <header className="mb-7">
-        <h1 className="break-keep text-h1 font-bold">{byDeadline ? '마감 임박 공고' : '채용공고'}</h1>
-        <p className="mt-1 break-keep text-lg text-mute">
-          {byDeadline
-            ? '마감일이 가까운 순서입니다'
-            : '작업치료사 · 물리치료사 · 공공기관과 병원에서 모아요'}
-        </p>
-      </header>
+      {/* 제목과 검색 · RAPO / List / 제목과 검색 1210:1178 */}
+      <section className="flex flex-col gap-(--rapo-dimension-x4) p-(--rapo-dimension-x5)">
+        <h1 className="rapo-type-t8-bold text-(color:--rapo-color-fg-neutral)">채용 공고</h1>
+        <RapoJobSearch 지금={지금} 회원={회원} />
+      </section>
 
-      {/* 정렬 — 자바스크립트 없이도 되게 그냥 링크입니다 */}
-      <nav aria-label="정렬" className="mb-5 flex flex-wrap gap-x-5 gap-y-2">
-        {SORTS.map((s) => (
-          <Link
-            key={s.label}
-            href={link({ sort: s.key })}
-            aria-current={지금정렬 === s.key ? 'true' : undefined}
-            className={
-              'text-lg ' + (지금정렬 === s.key
-                ? 'font-bold text-ink underline underline-offset-4'
-                : 'text-mute hover:underline')
-            }
-          >
-            {s.label}
-          </Link>
-        ))}
-      </nav>
+      <RapoJobFilters 지금={지금} 회원={회원} />
 
-      {/* 검색 — 서버가 받게 GET 폼입니다. 자바스크립트 없이도 됩니다 */}
-      <form action="/jobs" method="get" role="search" className="mb-6 flex gap-2">
-        {sp.job && <input type="hidden" name="job" value={sp.job} />}
-        {sp.sido && <input type="hidden" name="sido" value={sp.sido} />}
-        {sp.all && <input type="hidden" name="all" value={sp.all} />}
-        <input
-          type="search"
-          name="q"
-          defaultValue={q}
-          placeholder="기관 이름이나 공고 제목으로 찾기"
-          aria-label="공고 검색"
-          className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg placeholder:text-mute dark:border-gray-700 dark:bg-gray-950"
-        />
-        <button
-          type="submit"
-          className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98]"
-        >
-          찾기
-        </button>
-      </form>
-
-      {searching ? (
-        <div className="mb-6 flex flex-wrap items-baseline gap-3">
-          <p className="break-keep text-lg text-gray-700 dark:text-gray-300">
-            <span className="font-bold">{q}</span>
-            {locked ? ' — 회원만 볼 수 있어요' : ` — 공고 ${total}건에서 찾았어요`}
-          </p>
-          <Link href={link({ q: undefined })} className="text-sm text-interaction-blue hover:underline">
-            검색 지우기
+      {적용줄 && (
+        <div className="flex items-center gap-(--rapo-dimension-x2) px-(--rapo-dimension-x5)">
+          <p className="rapo-type-t4-medium min-w-0 flex-1 text-(color:--rapo-color-fg-neutral)">{적용줄}</p>
+          <Link href={초기화주소}
+            className="rapo-type-t2-medium flex h-(--rapo-touch-min) w-(--rapo-dimension-x16) items-center justify-end
+                       rounded-(--rapo-radius-r1) text-(color:--rapo-color-fg-neutral-muted) active:bg-(--rapo-color-bg-transparent-pressed)">
+            초기화
           </Link>
         </div>
-      ) : (
-        /* 분류 카드. 로그인 전에는 건수를 안 붙입니다 — 셀 수가 없습니다 */
-        <JobTabs
-          images={tabImages}
-          hrefs={Object.fromEntries(TABS.map((t) => [t.key, link({ tab: t.key })]))}
-          active={active?.key ?? null}
-          counts={locked ? null : tabCounts}
-        />
       )}
 
-      {/* 거르기 줄 — 네 화면이 같이 쓰는 부품입니다 (2026-10-04 세중님 결정).
-          전에는 칩이 세 줄이라 휴대폰에서 자리를 많이 먹었습니다 */}
-      <ListFilters
-        기준={{ job: sp.job ?? 내직군 ?? undefined, sido: sp.sido, past: 지난것 }}
-        시도들={SIDOS}
-        기본직군={내직군}
-        역할={내역할}
-        뿌리="/jobs"
-        남길값={{
-          ...(sp.tab ? { tab: sp.tab } : {}),
-          ...(q ? { q } : {}),
-          ...(sp.sort ? { sort: sp.sort } : {}),
-        }}
-      />
+      {/* 영역 구분 6px · 공통 표면 / Divider (bg/neutral-weak) */}
+      <div aria-hidden className="h-(--rapo-dimension-x1_5) bg-(--rapo-color-bg-neutral-weak)" />
 
-      {/* 기관 이름으로 찾으면 그 기관이 어떤 곳인지 먼저 보여줍니다 (회원만) */}
-      {searching && !locked && <OrgCard name={q} />}
-
-      {locked && (
-        <>
-          {맛보기줄.length > 0 && (
-            <ul className="space-y-3">
-              {맛보기줄.map((r) => (
-                <li key={r.id}>
-                  <Link href={`/jobs/${r.id}`}
-                    className="block rounded-sm border border-gray-200 p-5 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950">
-                    <p className="text-sm text-mute">{기관이름말(r.org_name)}</p>
-                    <p className="mt-1 break-keep text-body-lg font-medium">
-                      {r.is_intern && (
-                        <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-gray-900 ring-1 ring-warning dark:text-gray-100">
-                          체험형 인턴
-                        </span>
-                      )}
-                      {r.title}
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mute">
-                      {r.job_group && (
-                        <span className="font-medium text-gray-700 dark:text-gray-300">{r.job_group}</span>
-                      )}
-                      {r.sido && <span>{r.sido}</span>}
-                      {r.apply_to && <span>~{d(r.apply_to)}</span>}
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <div className="mt-6">
-            <MembersOnly
-              title={<>로그인하면<br />공고 {전체건수}건을 다 볼 수 있어요</>}
-              body={`지금 보시는 건 최신 ${맛보기줄.length}건이에요. 로그인하면 공고 ${전체건수}건 전체와 경쟁률 · 급여 비교 · 마감 알림을 볼 수 있어요. 가입은 3분이면 끝나요.`}
-              진단="app/jobs/page.tsx · 비로그인 맛보기(공개공고)"
-            />
-          </div>
-        </>
-      )}
-
-      {!locked && list.error && (
-        <p className="break-keep rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
-          공고를 불러오지 못했어요 — {list.error.message}
-        </p>
-      )}
-
-      {!locked && !list.error && rows.length === 0 && (
-        <p className="break-keep py-8 text-center text-lg text-mute">
-          {searching ? `「${q}」 로 찾은 공고가 없어요`
-            : page > 0 ? '이 쪽에는 공고가 없어요' : '조건에 맞는 공고가 없어요'}
-        </p>
-      )}
-
-      {!locked && (
-        <ul className="divide-y divide-gray-100 dark:divide-gray-800">
-          {rows.map((r) => {
-            const dd = 마감배지(r.apply_to, r.마감표시, r.apply_to_time);
-            return (
-              <li key={r.id}>
-                <Link
-                  href={`/jobs/${r.id}`}
-                  className="-mx-4 block rounded-sm px-4 py-6 hover:bg-gray-50 dark:hover:bg-gray-950"
-                >
-                  <div className="flex items-baseline justify-between gap-5">
-                    <span className="break-keep text-sm text-mute">{기관이름말(r.org_name)}</span>
-                    {dd && (
-                      <span className={
-                        'shrink-0 text-sm font-bold ' +
-                        (dd.over ? 'text-mute' : dd.urgent ? 'text-brand-red' : 'text-gray-600')
-                      }>
-                        {dd.text}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 break-keep text-body-lg font-medium">
-                    {/* 체험형 인턴은 정규 채용과 구분해 보여줍니다 (2026-10-01).
-                        이런 공고에도 우리 직군 직렬이 실제로 있습니다 —
-                        근로복지공단 청년인턴 응시자격에 「(물리치료사) 면허증
-                        소지자」가 적혀 있어 올립니다. 다만 인턴이라 헷갈리지
-                        않게 표시합니다. 판단은 DB(job_posts_pub.is_intern)가 합니다 */}
-                    {/* 관리자가 위로 올린 공고에는 「추천」 을 붙입니다 (2026-10-07).
-                        나중에 유료 광고와 이어질 자리라, 왜 위에 있는지 회원이
-                        알 수 있어야 합니다. 판단은 DB(job_list.올림)가 합니다 */}
-                    {r.올림 && (
-                      <span className="mr-2 whitespace-nowrap rounded-md bg-badge-blue-bg px-2 py-0.5 align-middle text-sm font-bold text-interaction-blue">
-                        추천
-                      </span>
-                    )}
-                    {r.is_intern && (
-                      <span className="mr-2 whitespace-nowrap rounded-md px-2 py-0.5 align-middle text-sm font-bold text-gray-900 ring-1 ring-warning dark:text-gray-100">
-                        체험형 인턴
-                      </span>
-                    )}
-                    {/* ★ 2026-10-14 세중님 결정 — 「조교·연구」 배지.
-                        전공자를 받는 자리이지만 **치료사 자리가 아닌** 공고입니다
-                        (학과 조교·연구원·연구위원). 제목은 원문 그대로 두고
-                        배지로 가립니다. 판단은 DB 의 조교연구갈래() 한 자리 */}
-                    {조교연구말(r.조교연구) && (
-                      <span className="mr-2 whitespace-nowrap rounded-md bg-[#FFF9E6] px-2 py-0.5 align-middle text-sm font-bold text-[#8A6D1A] ring-1 ring-[#C9A227]">
-                        {조교연구말(r.조교연구)}
-                      </span>
-                    )}
-                    {r.title}
-                  </p>
-                  {/* 아래 줄은 **직군 · 지역 · 고용형태 · 공고 기간 · 조회수** 로 고정입니다
-                      (2026-10-07 확정 방침). 공고마다 칸을 빼거나 더하지 않습니다.
-                      ★ 지역은 r.지역보임 을 읽습니다 — 제목과 **같은 계산**입니다.
-                        전에는 work_place 를 그대로 써서 제목과 어긋났습니다 —
-                        인하대는 빈칸, 순천병원은 「전남광주」가 그대로 나왔습니다.
-                      ★ 모집 인원은 아래 줄에서 뺐습니다. 상세의 「모집 인원」 칸에 있습니다 */}
-                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mute">
-                    {searching && r.tab && (
-                      <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
-                        {tabLabel(r.tab)}
-                      </span>
-                    )}
-                    {r.job_group && <span className="font-medium text-gray-700 dark:text-gray-300">{r.job_group}</span>}
-                    {r.지역보임 && <span>{r.지역보임}</span>}
-                    {/* 고용형태를 못 가린 공고는 칸을 비우지 않고 「공고문 참고」 라고
-                        적습니다 (2026-10-07 세중님). DB 값은 비워 둔 채입니다 —
-                        화면 표시만 바꿉니다. 상세도 같은 말을 씁니다 */}
-                    <span>{r.employ_type || '공고문 참고'}</span>
-                    {(r.apply_from || r.apply_to) && (
-                      <span>{d(r.apply_from)}~{d(r.apply_to)}</span>
-                    )}
-                    <span className="flex items-center gap-1">
-                      <Icon name="eye" size={13} className="shrink-0" />
-                      <span className="num tabular-nums">{views[r.id] ?? 0}</span>
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {/* 쪽 넘기기. 한 번에 20건이라 여기가 있어야 끝까지 볼 수 있습니다 */}
-      {!locked && (page > 0 || hasNext) && (
-        <nav className="mt-7 flex items-center justify-between gap-3" aria-label="쪽 넘기기">
-          {page > 0 ? (
-            <Link
-              href={link({ p: String(page - 1) || undefined })}
-              className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
-            >
-              ← 앞쪽
-            </Link>
-          ) : <span />}
-
-          <span className="break-keep text-sm text-mute">{page + 1}쪽</span>
-
-          {hasNext ? (
-            <Link
-              href={link({ p: String(page + 1) })}
-              className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400"
-            >
-              다음쪽 →
-            </Link>
-          ) : <span />}
-        </nav>
-      )}
-
-      {!locked && (
-        <p className="mt-7 break-keep text-sm text-mute">
-          {searching
-            ? `공고 ${total}건에서 찾음 · 이 쪽에 ${rows.length}건`
-            : `${active?.label} ${tabCounts[TABS.findIndex((t) => t.key === active?.key)]}건 중 이 쪽에 ${rows.length}건`}
-          {' · 한 번에 '}{PAGE}{'건씩 보여드려요'}
-        </p>
-      )}
-    </main>
+      {/* 공고 칸만 늦게 채웁니다 — 받는 동안 위쪽(검색·조건)은 먼저 보입니다 */}
+      <Suspense key={`${q}|${sp.job ?? ''}|${고른시도 ?? ''}|${page}`} fallback={<받는중 />}>
+        <결과 sb={sb} 고른직군={고른직군} 고른시도={고른시도} q={q} page={page}
+          조건있음={!!(q || 고른시도 || 고른직군)} 초기화주소={초기화주소} 쪽주소={쪽주소} />
+      </Suspense>
+    </RapoShell>
   );
 }
 
-function Chip({ href, on, children }: { href: string; on: boolean; children: React.ReactNode }) {
+async function 결과({ sb, 고른직군, 고른시도, q, page, 조건있음, 초기화주소, 쪽주소 }: {
+  sb: SupabaseClient; 고른직군: string | null; 고른시도: string | null; q: string; page: number;
+  조건있음: boolean; 초기화주소: string; 쪽주소: (p: number) => string;
+}) {
+  const list = await sb.rpc('job_list', {
+    p_job: 고른직군, p_sido: 고른시도, p_tab: null, p_q: q || null, p_all: false, p_sort: null, p_page: page,
+  });
+
+  /* 42501 = 권한 없음 = 로그인 안 한 분 → 맛보기 */
+  if (list.error?.code === '42501') {
+    const 맛 = await supabase.rpc('공개공고');
+    if (맛.error) return <못받음 />;
+    const 줄 = (맛.data ?? []) as 맛보기공고[];
+    const rows: RapoJob[] = 줄.map((r) => ({
+      id: r.id, org: 기관이름말(r.org_name), orgArt: 기관그림(r.org_name || r.id), title: r.title,
+      pay: { text: '이용 권한 확인 후 공개', kind: 'value' },   // 원본 비회원 문구
+      tags: 태그(r.sido, r.job_group, r.is_intern && '체험형 인턴'),
+      deadline: 마감배지(r.apply_to).text,
+    }));
+    return rows.length ? <목록 rows={rows} 제목={`공고 ${rows.length}개`} /> : <없음 조건있음={false} 초기화주소={초기화주소} />;
+  }
+  if (list.error) return <못받음 />;
+
+  const 줄 = (list.data ?? []) as JobListItem[];
+  const 전체 = Number((줄[0] as unknown as { total?: number })?.total ?? 0);
+  if (줄.length === 0) return <없음 조건있음={조건있음 || page > 0} 초기화주소={초기화주소} />;
+
+  const rows = 줄.map(목록줄);
   return (
-    <Link
-      href={href}
-      aria-current={on ? 'true' : undefined}
-      /* 켜진 칩은 teal 입니다 — 빨강은 아이덴티티·CTA 자리라
-         한 화면에서 마감 D-day 와 primary 를 두고 다투면 안 됩니다 */
-      className={
-        'rounded-md border px-4 py-1 text-sm font-medium transition-colors ' +
-        (on
-          ? 'border-teal-strong bg-teal-strong text-white'
-          : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950')
-      }
-    >
-      {children}
-    </Link>
+    <목록 rows={rows} 제목={q ? `검색 결과 ${전체}개` : `공고 ${전체}개`}
+      쪽={<RapoPagination page={page} pages={Math.ceil(전체 / PAGE)} href={쪽주소} />} />
   );
 }

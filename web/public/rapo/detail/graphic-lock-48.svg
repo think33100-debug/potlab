@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="RAPO / Graphic / &#235;&#179;&#180;&#236;&#136;&#152; &#236;&#158;&#160;&#234;&#184;&#136;">
+<path id="Vector" d="M15 22V15C15 12.6131 15.9482 10.3239 17.636 8.63604C19.3239 6.94821 21.6131 6 24 6C26.3869 6 28.6761 6.94821 30.364 8.63604C32.0518 10.3239 33 12.6131 33 15V22" stroke-width="4" stroke-linecap="round" stroke="#112231"/>
+<path id="Vector_2" d="M32 19H16C12.134 19 9 22.134 9 26V37C9 40.866 12.134 44 16 44H32C35.866 44 39 40.866 39 37V26C39 22.134 35.866 19 32 19Z" fill="#FF5148"/>
+<path id="Vector_3" d="M24 32C25.6569 32 27 30.6569 27 29C27 27.3431 25.6569 26 24 26C22.3431 26 21 27.3431 21 29C21 30.6569 22.3431 32 24 32Z" fill="white"/>
+<g id="Vector_4">
+<path d="M24 31V36Z" fill="black"/>
+<path d="M24 31V36" stroke-width="3" stroke-linecap="round" stroke="white"/>
+</g>
+</g>
+</svg>
