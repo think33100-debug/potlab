@@ -3,7 +3,8 @@
  * gas 의 `hospSiteRows_` 를 node 로 옮긴 것입니다. 갈래 다섯 가지를 다 다룹니다 —
  *
  *   html      261줄   목록 HTML 을 정규식으로 (hs_test.js 의 hospParseHtml 그대로)
- *   appsite    12줄   마이다스 구형 · POST /app/jobnotice/list.json
+ *   appsite    12줄   마이다스 구형 · robots 가 허락하면 POST /appsite/company/getMainView,
+ *                     막으면 POST /app/jobnotice/list.json (2026-11-11 Q86 · 아래 마이다스길)
  *   listjson    1줄   같은 것 (gas 에서 이미 하나로 합쳤습니다)
  *   cmc         6줄   가톨릭중앙의료원 · JSON 배열
  *   schmc       4줄   순천향 · POST getJobAllListFromFrontNew
@@ -21,6 +22,8 @@
  */
 import { createRequire } from 'node:module';
 import { 글받기, 붙여받기 } from '../certs/index.mjs';
+import { robots읽기, 가도되나 } from '../robots.mjs';
+import { 진행중원본 } from './midas.mjs';
 
 const require = createRequire(import.meta.url);
 const { hospParseHtml, UA } = require('./hs_test.js');
@@ -111,6 +114,41 @@ function 마이다스줄(list, host) {
   }));
 }
 
+/** 마이다스 구형 — 어느 길로 받나 (2026-11-11 세중님 Q86 「1번 하자」) ───────
+ *
+ * 리크루터 채용관은 robots 가 두 꼴입니다 (2026-11-11 tools/robots.mjs 로 21곳 판정) —
+ *   (가) `Disallow: /` + `Allow: /appsite/`  → getMainView 는 허락 · list.json 은 금지
+ *   (나) `Disallow: /app*` 꼴로 다 막음        → 둘 다 금지 · 세중님 Q84 예외로 list.json 그대로
+ * **이름 목록을 코드에 박지 않고 그 곳의 robots.txt 를 받아 판정합니다** — 판정은
+ * robots.mjs 한 자리이고, 사이트가 robots 를 바꾸면 길도 저절로 따라갑니다.
+ *   list.json 이 허락               → 'list.json' (전부 받는 길 · 지금 21곳엔 없음)
+ *   list.json 금지 · getMainView 허락 → 'getMainView' (가)
+ *   둘 다 금지                       → 'list.json' (나) Q84 예외 곳
+ *   robots 를 못 읽음                → 'getMainView' — 어느 꼴이든 list.json 보다 더 막힌 길이 아닙니다
+ * 설정에 `"길": "list.json" | "getMainView"` 를 적으면 그게 이깁니다 (곳마다 되돌리기용).
+ * robots 는 한 바퀴에 host 마다 한 번만 받습니다 (같은 채용관을 여러 병원 줄이 씁니다).
+ *
+ * ⚠ getMainView 의 진행중 목록은 **첫 화면 6칸**까지입니다 (hs_pages.mjs 머리 ·
+ *   2026-09-27 에 이 6 때문에 list.json 으로 옮겼습니다). 6칸이 꽉 차면 raw 에 적습니다. */
+const robots들 = new Map();
+async function 마이다스길(s) {
+  if (s['길'] === 'list.json' || s['길'] === 'getMainView') return { 길: s['길'], 왜: '설정 「길」' };
+  if (!robots들.has(s.host)) {
+    robots들.set(s.host, 붙여받기(s.host + '/robots.txt', { headers: 기본머리 }).then((g) => {
+      if (g.왜 || g.code !== 200) return null;
+      return robots읽기(g.buf.toString('utf8'));
+    }).catch(() => null));
+  }
+  const r = await robots들.get(s.host);
+  if (!r) return { 길: 'getMainView', 왜: 'robots 못 읽음' };
+  const 목록판 = 가도되나(r, '/app/jobnotice/list.json');
+  if (목록판.됨) return { 길: 'list.json', 왜: 'robots 가 list.json 허락' };
+  const 판 = 가도되나(r, '/appsite/company/getMainView');
+  return 판.됨
+    ? { 길: 'getMainView', 왜: 'robots list.json 금지 · getMainView 허락' }
+    : { 길: 'list.json', 왜: 'robots 둘 다 금지 · Q84 예외' };
+}
+
 /**
  * 사이트 하나를 받아 공고 줄을 돌려줍니다.
  * 돌려주는 것 { rows: [{title,url,from,to,posted?,cls?}], raw } · 못 받으면 { err }
@@ -188,6 +226,21 @@ export async function 사이트줄(s) {
   }
 
   if (s.type === 'appsite' || s.type === 'listjson') {
+    /* 2026-11-11 Q86 — robots 가 list.json 을 막고 /appsite/ 만 허락하면 getMainView 로 (위 마이다스길).
+       줄 꼴·링크는 list.json 과 같은 마이다스줄() 한 벌이고, 접수중만 쓰는 것도 같습니다.
+       상세(/app/jobnotice/view)도 그 robots 가 막으므로 `상세막힘` 을 달아 ③ 에서 안 엽니다
+       (회원이 누르는 링크는 그대로 그 주소입니다 — 사람이 여는 것이라 robots 와 무관) */
+    const 길 = await 마이다스길(s);
+    if (길.길 === 'getMainView') {
+      const m = await 진행중원본(s.host, { sn: s.sn, st: s.settingType });
+      if (m.왜) return { err: m.왜 + ' (' + 길.왜 + ')' };
+      const 접수중 = m.줄.filter((x) => /접수중/.test(String(x.receiptState || '')));
+      const 줄 = 마이다스줄(접수중, s.host).map((x) => ({ ...x, 상세막힘: 'robots · /app/ 금지' }));
+      return 거르기(s, 줄,
+        'getMainView 진행중 ' + m.줄.length + '건 중 접수중 ' + 접수중.length + '건'
+          + (m.줄.length >= 6 ? ' ★첫 화면 6칸 꽉 참 — 더 있을 수 있음' : '') + ' · ' + 길.왜,
+        [...new Set(m.줄.map((x) => x.recruitClassName).filter(Boolean))]);
+    }
     const r = await 보내기(s.host + '/app/jobnotice/list.json', {
       body: new URLSearchParams({ currentPage: '1', pageSize: '100', keyword: '', recruitClassName: '' }).toString(),
     });
@@ -197,7 +250,7 @@ export async function 사이트줄(s) {
     if (!다.length) return { err: 'list.json 이 0건 · pageUtil ' + JSON.stringify(j.pageUtil || {}).slice(0, 90) };
     const 접수중 = 다.filter((x) => /접수중/.test(String(x.receiptState || '')));
     return 거르기(s, 마이다스줄(접수중, s.host),
-      '전체 ' + ((j.pageUtil || {}).recordCount || 다.length) + '건 중 접수중 ' + 접수중.length + '건',
+      '전체 ' + ((j.pageUtil || {}).recordCount || 다.length) + '건 중 접수중 ' + 접수중.length + '건 · ' + 길.왜,
       [...new Set(다.map((x) => x.recruitClassName).filter(Boolean))]);
   }
 

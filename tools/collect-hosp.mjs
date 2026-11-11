@@ -599,7 +599,12 @@ if (상세몫 > 0) {
   }
   if (직군이어받음) console.log('  상세를 건너뛰며 직군을 이어받은 공고 ' + 직군이어받음 + '건');
 
-  const 뽑을것 = [...new Set([...보류, ...열어야할것])].filter((x) => !건너뛸것.has(x.id));
+  /* 2026-11-11 Q86 — robots 가 상세 쪽을 막은 줄(마이다스 (가) getMainView 길 · sites.mjs 가 `상세막힘`
+     을 답니다)은 안 엽니다. 목록에서 받은 제목·날짜만 씁니다 */
+  const 상세막힌것 = [...new Set([...보류, ...열어야할것])].filter((x) => x.상세막힘);
+  if (상세막힌것.length) console.log('  robots 가 상세를 막아 안 여는 공고 ' + 상세막힌것.length + '건 ('
+    + [...new Set(상세막힌것.map((x) => x.곳.name))].slice(0, 6).join(' · ') + ')');
+  const 뽑을것 = [...new Set([...보류, ...열어야할것])].filter((x) => !건너뛸것.has(x.id) && !x.상세막힘);
   const 열것 = 뽑을것.filter((x) => {
     const n = 곳마다.get(x.곳.name) || 0;
     if (n >= 상세몫) return false;
