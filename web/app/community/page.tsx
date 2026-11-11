@@ -1,15 +1,17 @@
 import Link from 'next/link';
 import { CommBanner } from '@/components/comm-banner';
+import { CommunityDoor } from '@/components/community-door';
 import { Hit } from '@/components/hit';
 import { PostItem } from '@/components/post-row';
 import { Rail } from '@/components/rail';
 import { CHANNELS, GROUPS } from '@/lib/channels';
+import { 커뮤니티문확인 } from '@/lib/community-access';
 import { commBanners } from '@/lib/home';
 import { POST_LIST_COLS, type PostRow } from '@/lib/supabase';
 /* ★ 2026-10-09 — 세션 없는 열쇠꾸러미로 읽으면 **학생이 학생 방을 못 봅니다.**
    공개글 보기가 방볼수있나() 로 가리는데, 그 함수가 auth.uid() 를 봅니다.
    쿠키를 읽는 꾸러미로 바꿉니다 (lib/supabase-server.ts) */
-import { serverSupabase } from '@/lib/supabase-server';
+import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { daysAgoIso } from '@/lib/time';
 
 export const dynamic = 'force-dynamic';
@@ -35,11 +37,14 @@ export default async function Community() {
   const since = daysAgoIso(HOT_DAYS);
   const sb = await serverSupabase();
 
+  /* 비회원·확인 중이면 커뮤니티 조회를 아예 안 보냅니다 (2026-11-05) */
+  const 문 = await 커뮤니티문확인(sb, await serverWho(sb));
+  if (문.상태 !== '열림') return <CommunityDoor 서버={문.상태} />;
+
   /* 내 역할 — 방 묶음을 가립니다 (2026-10-09).
      표에서도 막지만(공개글 보기 + RLS), 안 보일 방을 그려 놓고 눌렀을 때
      빈 화면을 보여 주면 안 됩니다. 두 군데가 같은 규칙이어야 합니다 */
-  const { data: 나 } = await sb.rpc('내프로필').maybeSingle();
-  const 역할 = (나 as { role?: string } | null)?.role ?? null;
+  const 역할 = 문.역할;
   /* 학생이 아니면 학생 방 묶음을 아예 안 그립니다.
      학생에게는 치료사 방이 보입니다 (읽기만 — 글쓰기 단추는 그 방에서 감춥니다) */
   const 보일묶음 = 역할 === '학생' ? GROUPS : GROUPS.filter((g) => g.for !== 'stu');
@@ -65,6 +70,7 @@ export default async function Community() {
   });
 
   return (
+    <CommunityDoor 서버="열림">
     <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
       <Hit kind="community" />
 
@@ -127,5 +133,6 @@ export default async function Community() {
         )}
       </section>
     </main>
+    </CommunityDoor>
   );
 }

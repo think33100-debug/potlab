@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
+import { CommunityDoor } from '@/components/community-door';
 import { NothingHere } from '@/components/nothing-here';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { 대화닫힘안내, 대화열렸나 } from '@/lib/talk';
@@ -34,7 +35,7 @@ export default function TalkRoom() {
   if (!대화열렸나) {
     return <NothingHere title={대화닫힘안내.제목} body={대화닫힘안내.본문} />;
   }
-  return <TalkRoomInner />;
+  return <CommunityDoor 서버="열림"><TalkRoomInner /></CommunityDoor>;
 }
 
 function TalkRoomInner() {
