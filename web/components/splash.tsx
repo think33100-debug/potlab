@@ -28,16 +28,16 @@ export const SPLASH_SCRIPT =
   `d.splash="on";d.splashSlot=s;` +
   `}catch(e){}})()`;
 
+/* 2026-11-11 밤 대표 — 피그마 「APP-START / 스플래시」 1226:342 로 바꿨습니다 (옛 이름 「피오티잡」 글자를 걷음).
+   흰 바탕 · 「RAPO / 최종 로고 캡처 / 1.65초」 그림(414×310.5) · 그 바로 아래 「동료의 이야기를 더 가까이」 18/24 Medium.
+   그림은 리액트 없이도 바로 뜨도록 그냥 img 입니다 (lazy 아님). 나타나고 사라지는 것은 그대로 CSS 가 합니다. */
 export function Splash() {
   return (
     <div id="splash" aria-hidden>
-      <p className="splash-name break-keep text-[40px] font-bold leading-none text-[#14181C]">
-        피오티잡
-      </p>
-      <p className="splash-line break-keep text-[15px] leading-[1.7] text-[#4A5056]">
-        치료사들이 더 나은 곳으로 갈 수 있게
-        <br />
-        함께하겠습니다
+      {/* eslint-disable-next-line @next/next/no-img-element -- 리액트가 붙기 전에도 떠야 해서 next/image 를 안 씁니다 */}
+      <img src="/rapo/home/splash-logo.webp" alt="" width={414} height={311} className="splash-name block h-auto w-full max-w-[414px]" />
+      <p className="splash-line rapo-type-t6-medium break-keep text-(color:--rapo-color-fg-neutral)">
+        동료의 이야기를 더 가까이
       </p>
     </div>
   );
