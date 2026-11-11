@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ListFilters } from '@/components/list-filters';
+import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
+import { RapoEduFilter, RapoEduPastToggle, RapoEduTop, RapoExploreNote, RapoExploreRow } from '@/components/rapo/rapo-edu';
+import { RapoPagination } from '@/components/rapo/rapo-ui';
+import { 기관그림 } from '@/lib/rapo-home';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 /* 봉사활동 찾기 (2026-10-02).
@@ -29,7 +32,11 @@ import { serverSupabase, serverWho } from '@/lib/supabase-server';
    아니며, 1,099건 중 1,019건(93%)만 압니다. 거르는 칸으로 쓰면 나머지
    7%가 소리 없이 사라집니다.
 
-   ⚷ 담당자·시설장 실명은 DB 에 칸 자체가 없습니다. 여기로 올 길이 없습니다. */
+   ⚷ 담당자·시설장 실명은 DB 에 칸 자체가 없습니다. 여기로 올 길이 없습니다.
+
+   ── 새 디자인 (2026-11-12 · 세중님 「봉사활동, 청년정책도 시작」) ──
+   피그마에 이 화면 전용 원본이 없어 교육 목록(U12)의 틀을 빌립니다 (components/rapo/rapo-edu.tsx 머리).
+   자료를 읽는 길과 거르는 규칙은 그대로이고 모양만 바꿨습니다. 출처 안내는 맨 아래 회색 칸으로 옮겼습니다. */
 
 export const dynamic = 'force-dynamic';
 
@@ -121,148 +128,94 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
     const s = next.sido ?? (sp.sido ?? (sido ? sido : 'all'));
     if (t && t !== 'all') q.set('tab', t);
     if (s) q.set('sido', s);
+    /* 「모집 끝난 것 포함」을 쪽 넘기기·조건 바꾸기에도 이어 갑니다 (2026-11-12 · 전에는 다음 쪽에서 풀렸습니다) */
+    const pa = next.past ?? sp.past;
+    if (pa === '1') q.set('past', '1');
     if (next.p && next.p !== '0') q.set('p', next.p);
     const str = q.toString();
     return '/volunteer' + (str ? '?' + str : '');
   };
 
+  /* 조건 칩 — 분야 · 지역(시·도). 고르면 첫 쪽으로 */
+  const 분야선택지 = TABS.map((t) => ({
+    글: t.key === 'all' ? '분야 전체' : t.label,
+    주소: 길({ tab: t.key, p: '0' }),
+    켜짐: t.key === tab.key,
+    수: c ? (t.갈래 === null ? c.전체 : t.갈래 === '기타' ? c.기타 : c['복지·보건']) : undefined,
+  }));
+  const 지역선택지 = [
+    { 글: '전국', 주소: 길({ sido: 'all', p: '0' }), 켜짐: !sido },
+    ...(c?.시도들 ?? []).map((x) => ({ 글: x.시도, 주소: 길({ sido: x.시도, p: '0' }), 켜짐: sido === x.시도, 수: x.수 })),
+  ];
+
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <h1 className="text-h1 font-bold">봉사활동 찾기</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
-        지역과 분야로 봉사할 곳을 찾습니다. 신청은 <b>VMS</b>에서 합니다
-      </p>
+    <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
+      <RapoEduTop title="봉사활동" art="/rapo/home/graphic-volunteer-28.svg" />
+      <main className="px-(--rapo-dimension-x5) pb-(--rapo-dimension-x8)">
+        <div className="flex flex-wrap gap-(--rapo-dimension-x2) pt-(--rapo-dimension-x4)">
+          <RapoEduFilter icon="/rapo/list/sliders-16.svg" label="분야" 고른것={tab.key === 'all' ? null : tab.label} 선택지={분야선택지} />
+          <RapoEduFilter icon="/rapo/list/pin-16.svg" label="지역" 고른것={sido} 선택지={지역선택지} />
+        </div>
 
-      {/* 분야 탭 */}
+        <div className="flex items-center justify-between gap-(--rapo-dimension-x3) pt-(--rapo-dimension-x2)">
+          <h2 className="text-[20px] font-bold leading-[22px] text-(color:--rapo-brand-color-navy)">봉사활동 {이탭수}건</h2>
+          <RapoEduPastToggle on={지난것} label="모집 끝난 것 포함"
+            href={길({ past: 지난것 ? '0' : '1', p: '0' })} />
+        </div>
 
-      {/* 시·도 — 거르는 칸은 이것 하나입니다 */}
-      {/* 거르기 줄 — 네 화면이 같이 쓰는 부품입니다 (2026-10-04 세중님 결정).
-          봉사는 **직군 칸을 숨깁니다** — 직군 구분이 없는 자료입니다.
-          「마감된 것도」는 모집 상태를 푸는 것으로 잇습니다 */}
-      <div className="mt-3">
-        <ListFilters
-          기준={{ sido: sido ?? undefined, past: 지난것 }}
-          시도들={(c?.시도들 ?? []).map((s) => s.시도)}
-          직군숨김
-          마감말="모집 끝난 것도"
-          뿌리="/volunteer"
-          고름={{
-            이름: 'tab',
-            전체말: '분야 전체',
-            고른값: tab.key === 'all' ? undefined : tab.key,
-            선택지: TABS.filter((t) => t.key !== 'all').map((t) => ({
-              값: t.key,
-              글: t.label,
-              수: c ? (t.갈래 === '기타' ? c.기타 : c['복지·보건']) : undefined,
-            })),
-          }}
-        />
-      </div>
-
-
-      <p className="mt-5 text-lg text-mute">
-        {sido ?? '전국'} · <b className="text-ink">{이탭수}건</b> 모집 중
-        {tab.갈래 === null && c && c.모름 > 0 && (
-          <span className="text-sm text-mute">
-            {' '}(분야를 알 수 없는 {c.모름}건 포함 — 「전체」에만 나옵니다)
-          </span>
+        {목록.error && (
+          <p role="alert" className="rapo-type-t4-regular mt-(--rapo-dimension-x4) rounded-(--rapo-radius-r2) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x4) text-[#b42a21]">
+            봉사활동 목록을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.
+          </p>
         )}
-      </p>
 
-      {/* 어디서 온 자료인지 밝힙니다. 출처와 한계를 화면에 적는다는 규칙 */}
-      <p className="mt-4 break-keep rounded-sm border border-line bg-card p-5 text-sm leading-relaxed text-mute">
-        한국사회복지협의회 <b>VMS</b> 자료입니다. 오늘부터 180일 안에 하는 봉사만 모았습니다.
-        <br />
-        <b>신청은 VMS 에서</b> 합니다 — 회원가입이 필요할 수 있습니다.
-        {' '}열리지 않으면 기관에 전화로 물어보세요.
-        <br />
-        구·군은 <b>기관이 있는 곳</b>이고 봉사하는 곳이 아닙니다. 모르는 곳은 비워 뒀습니다.
-        {c?.마지막수집 && (
-          <>
-            <br />
-            마지막으로 받아온 때 {new Date(c.마지막수집).toLocaleString('ko-KR', {
+        {!목록.error && rows.length === 0 && (
+          <div className="flex flex-col items-center gap-(--rapo-dimension-x3) py-(--rapo-dimension-x12) text-center">
+            <p className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">{sido ?? '전국'}에 지금 올라온 봉사활동이 없어요</p>
+            {sido && (
+              <Link href={길({ sido: 'all', p: '0' })} className="rapo-type-t4-bold flex h-(--rapo-touch-min) items-center text-[#b42a21] underline underline-offset-4">
+                전국으로 보기
+              </Link>
+            )}
+          </div>
+        )}
+
+        <ul>
+          {rows.map((v) => {
+            const 남은자리 = v.모집인원 && v.신청인원 !== null && v.신청인원 <= v.모집인원 ? v.모집인원 - v.신청인원 : 0;
+            const 곳 = [v.시도, v.시군구].filter(Boolean).join(' ');
+            return (
+              <li key={v.번호}>
+                <RapoExploreRow href={v.주소} 기관={v.기관} 그림={기관그림(v.기관 || String(v.번호))} 제목={v.제목} 바깥말="VMS 에서 신청"
+                  설명={v.장소}
+                  태그={[v.활동종류, v.분야, v.청소년 ? '청소년 가능' : null,
+                    v.모집인원 ? `${v.신청인원 ?? 0}/${v.모집인원}명${남은자리 > 0 ? ` · ${남은자리}자리` : ''}` : null]
+                    .filter((x): x is string => !!x)}
+                  날짜={v.기간 || 곳 ? <>{v.기간}{v.기간 && 곳 && <>&nbsp;&nbsp;&nbsp;</>}{곳}</> : null} />
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* 쪽 넘기기 — 한 쪽 20건입니다 (봉사목록() 과 같아야 합니다) */}
+        <div className="pt-(--rapo-dimension-x4)">
+          <RapoPagination page={page} pages={Math.max(1, Math.ceil(이탭수 / 20))} href={(p) => 길({ p: String(p) })} />
+        </div>
+
+        <RapoExploreNote>
+          <p>한국사회복지협의회 <b>VMS</b> 자료예요. 오늘부터 180일 안에 하는 봉사만 모았어요.</p>
+          <p><b>신청은 VMS 에서</b> 해요 — 회원가입이 필요할 수 있어요. 열리지 않으면 기관에 전화로 물어보세요.</p>
+          <p>구·군은 <b>기관이 있는 곳</b>이고 봉사하는 곳이 아니에요. 모르는 곳은 비워 뒀어요.</p>
+          {tab.갈래 === null && c && c.모름 > 0 && <p>분야를 알 수 없는 {c.모름}건은 「분야 전체」에만 나와요.</p>}
+          {c?.마지막수집 && (
+            <p>마지막으로 받아온 때 {new Date(c.마지막수집).toLocaleString('ko-KR', {
               timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
-            })}
-          </>
-        )}
-      </p>
-
-      {목록.error && (
-        <p className="mt-6 rounded-sm border border-brand-red/40 bg-brand-red-soft p-6 text-lg text-brand-red-dark">
-          불러오지 못했어요 — {목록.error.message}
-          <span className="mt-1 block text-sm">app/volunteer/page.tsx · 봉사목록()</span>
-        </p>
-      )}
-
-      {!목록.error && rows.length === 0 && (
-        <p className="mt-6 break-keep rounded-sm border border-line bg-card p-7 text-lg text-mute">
-          {sido ?? '전국'}에 지금 올라온 것이 없어요.
-          {sido && <> <Link href={길({ sido: 'all', p: '0' })} className="underline underline-offset-4">전국으로 보기</Link></>}
-        </p>
-      )}
-
-      <ul className="mt-5 flex flex-col gap-3">
-        {rows.map((v) => {
-          const 남은자리 = v.모집인원 && v.신청인원 !== null && v.신청인원 <= v.모집인원
-            ? v.모집인원 - v.신청인원 : 0;
-          return (
-            <li key={v.번호}>
-              <a
-                href={v.주소 ?? '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block rounded-sm border border-line bg-card p-6 hover:bg-paper"
-              >
-                <p className="break-keep text-body-lg font-bold text-ink">{v.제목}</p>
-                <p className="mt-2 break-keep text-lg text-mute">
-                  {v.기관}
-                  {v.장소 && <><br />{v.장소}</>}
-                </p>
-                <p className="mt-2 text-sm text-mute">
-                  {[v.시도, v.시군구].filter(Boolean).join(' ')}
-                  {!v.시군구 && v.시도 && ' · 구·군 모름'}
-                </p>
-                <p className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-                  {v.활동종류 && (
-                    <span className="rounded-xs bg-badge-teal-bg px-3 py-1 text-gray-700 dark:text-gray-200">
-                      {v.활동종류}
-                    </span>
-                  )}
-                  {v.기간 && <span className="rounded-xs bg-gray-100 px-3 py-1 text-gray-600 dark:bg-gray-800 dark:text-gray-400">{v.기간}</span>}
-                  {v.청소년 && <span className="rounded-xs bg-gray-100 px-3 py-1 text-gray-600 dark:bg-gray-800 dark:text-gray-400">청소년 가능</span>}
-                  {v.분야 && <span className="rounded-xs bg-gray-100 px-3 py-1 text-gray-600 dark:bg-gray-800 dark:text-gray-400">{v.분야}</span>}
-                  {!!v.모집인원 && (
-                    <span className="text-mute">
-                      {v.신청인원 ?? 0}/{v.모집인원}명
-                      {남은자리 > 0 && <> · {남은자리}자리</>}
-                    </span>
-                  )}
-                </p>
-                <p className="mt-3 text-lg font-bold text-brand-red">VMS 에서 신청하기 ›</p>
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-
-      {/* 쪽 넘기기 — 한 쪽 20건입니다 (봉사목록() 과 같아야 합니다) */}
-      {(page > 0 || rows.length === 20) && (
-        <nav aria-label="쪽 넘기기" className="mt-7 flex items-center justify-between">
-          {page > 0 ? (
-            <Link href={길({ p: String(page - 1) })}
-              className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">
-              ‹ 앞으로
-            </Link>
-          ) : <span />}
-          <span className="text-sm text-mute">{page + 1}쪽</span>
-          {rows.length === 20 ? (
-            <Link href={길({ p: String(page + 1) })}
-              className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">
-              다음 ›
-            </Link>
-          ) : <span />}
-        </nav>
-      )}
-    </main>
+            })}</p>
+          )}
+        </RapoExploreNote>
+      </main>
+      <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
+      <RapoBottomNav current="/" />
+    </div>
   );
 }
