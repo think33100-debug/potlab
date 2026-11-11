@@ -1,9 +1,11 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Hit } from '@/components/hit';
 import { OrgDetail } from '@/components/org-detail';
 import { OrgSearch } from '@/components/org-search';
-import { iconMap } from '@/lib/icons';
+import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
+import { RapoAppBar } from '@/components/rapo/rapo-me';
 import { MembersOnly } from '@/components/members-only';
 import { orgPublic, ourNumbers, place, TILE_NAME, type OrgFacets } from '@/lib/org';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
@@ -14,7 +16,25 @@ export const dynamic = 'force-dynamic';
 
    목록과 상세를 한 주소에서 다룹니다 — 기관 이름에 빗금·물음표가 들어간 곳이
    있고(10곳), 같은 이름이 자료 두 곳에 있는 경우도 있어서
-   주소 조각(/orgs/이름)으로는 가리키기가 어렵습니다. */
+   주소 조각(/orgs/이름)으로는 가리키기가 어렵습니다.
+
+   ── 새 디자인 (2026-11-12) ──
+   목록은 「병원 찾기」 1328:2689 의 어두운 판(자기 앱 바 · 어두운 하단 탐색) — components/org-search.tsx 머리.
+   기관 상세(?org=)는 아직 옛 내용이고, 새 틀이라 옛 위쪽 줄이 없어서 밝은 앱 바(뒤로 → 병원 찾기)만 얹었습니다. */
+
+/* 원본 「RAPO / App Bar」 어두운 판 — #0d1d29 · 56 높이 · 뒤로 20 · 제목 18 Bold #f6f8fa */
+function 어두운앱바() {
+  return (
+    <header className="sticky top-0 z-20 flex h-[56px] items-center gap-(--rapo-dimension-x1) bg-[#0d1d29] px-(--rapo-dimension-x2)">
+      <Link href="/" aria-label="뒤로"
+        className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2) active:bg-white/10">
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+        <img src="/rapo/orgs/back-20.svg" alt="" width={20} height={20} />
+      </Link>
+      <h1 className="min-w-0 flex-1 text-[18px] font-bold leading-[26px] text-[#f6f8fa]">병원 찾기</h1>
+    </header>
+  );
+}
 
 /* 거르기 목록도 회원만입니다 (2026-09-25 · org_facets 의 실행 권한을 걷었습니다).
    로그인 안 한 분에게는 빈 것이 오고, 아래에서 가입 권유를 그립니다 */
@@ -55,14 +75,16 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
 
   if (org) {
     return (
-      <div className="bg-[#F4F4F1]">
-        {/* 하단 고정 줄(50px) + 탭바(62px) 위로 올라오게 아래를 비웁니다 */}
+      <div data-rapo className="mx-auto w-full max-w-3xl bg-[#F4F4F1]">
+        <RapoAppBar title="병원 정보" back="/orgs" />
+        {/* 하단 고정 줄(50px) + 탭바(72px) 위로 올라오게 아래를 비웁니다 */}
         <main className="mx-auto w-full max-w-2xl px-6 pt-4 pb-[152px] md:px-7 md:pb-[96px]">
           <Hit kind="org" target={org} />
           <Suspense fallback={<p className="text-[15px] text-[#5F666C]">불러오는 중이에요…</p>}>
             <OrgDetail name={org} sido={sido} />
           </Suspense>
         </main>
+        <RapoBottomNav current="/" />
       </div>
     );
   }
@@ -100,14 +122,17 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
     );
   }
 
-  const [f, icons] = await Promise.all([facets(sb), iconMap('병원정보 · 종별')]);
+  const f = await facets(sb);
 
   return (
-    <div className="bg-[#F4F4F1]">
-      <main className="mx-auto w-full max-w-2xl px-6 pt-6 pb-[88px] md:px-7">
+    <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-[#112332]">
+      <어두운앱바 />
+      <main className="px-[22px] pb-(--rapo-dimension-x6) pt-[15px]">
         <Hit kind="orgs" />
-        <OrgSearch facets={f} icons={icons} />
+        <OrgSearch facets={f} />
       </main>
+      <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
+      <RapoBottomNav current="/" dark />
     </div>
   );
 }

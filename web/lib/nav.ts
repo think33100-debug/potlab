@@ -55,5 +55,7 @@ export function 새틀화면(pathname: string): boolean {
     || pathname === '/admin' || pathname.startsWith('/admin/')
     /* 교육·학술 목록(/edu)도 2026-11-12 부터 새 틀(U12 · 자기 목록 상단). 회차·기관 화면은 아직 옛 틀 */
     || pathname === '/edu'
+    /* 병원 찾기(/orgs)도 2026-11-12 부터 새 틀(어두운 판 · 자기 앱 바). 기관 상세(?org=)는 밝은 앱 바만 */
+    || pathname === '/orgs'
     || pathname.startsWith('/design-preview');
 }
