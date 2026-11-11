@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState, type FormEvent } from 'react';
 import { useAuth } from '@/app/auth';
 import { CompareNotify } from '@/components/compare-notify';
+import { 고용형태들 } from '@/lib/rapo-job-options';
 import { JOB_GROUPS, type JobGroup } from '@/lib/who';
 import { RapoButton, RapoChip, RapoMaskIcon } from './rapo-ui';
 
@@ -31,7 +32,7 @@ export const 직군들 = ['전체', '작업치료사', '물리치료사'] as con
 /* 원본(509:5320) 차례 그대로입니다 — lib/org.ts 의 SIDOS 와 같은 이름 · 다른 차례 */
 export const 지역들 = ['전국', '서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
   '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'] as const;
-export const 고용형태들 = ['전체', '정규직', '계약직', '시간제'] as const;
+/* 고용형태 목록은 서버 화면도 써서 lib/rapo-job-options.ts 에 둡니다 ('use client' 파일에서 내보내면 서버에서 깨집니다) */
 
 type 분류 = '직군' | '지역' | '급여' | '상세';
 const 분류들: { key: 분류; icon: string; w: number; h: number; 내림: boolean }[] = [
