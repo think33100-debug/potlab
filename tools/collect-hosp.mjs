@@ -6,6 +6,15 @@
  *   node tools/collect-hosp.mjs --dry 한림 순천향  이름에 그 말이 든 곳만
  *   node tools/collect-hosp.mjs --상세 0          상세 열기를 끕니다
  *   node tools/collect-hosp.mjs --직군다시 HS123   그 공고의 직군을 처음부터 다시
+ *   node tools/collect-hosp.mjs --dry --천천히무시 울산   「천천히」 곳을 창과 상관없이 받아 봅니다 (손시험용)
+ *
+ * ── 「천천히」 곳은 하루 두 번만 (세중님 2026-11-09) ─────────────
+ *   robots 가 막는데 세중님 결정으로 긁는 곳(현황판/robots예외.csv)은 설정에
+ *   `"천천히": true` 가 붙어 있고, 오전 9~12시 · 오후 1~6시 창 안에서 곳마다
+ *   날짜 해시로 정한 시각이 지난 첫 바퀴에만 받습니다. 규칙은 tools/hosp/천천히.mjs
+ *   한 자리 · 받은 기록은 POTJOB_SLOW_STATE 또는 ~/천천히기록.json (저장소 밖).
+ *   2026-11-11 세중님 Q86 — `"천천히": "하루1"` 은 하루 **한 번**(09~18시 한 창) · 리크루터 채용관.
+ *   크론이 그 창에 안 돌면 그날은 건너뜁니다 — 메일·경보 없이 로그 한 줄만.
  *
  * ── 왜 옮기나 ────────────────────────────────────────────────
  * Apps Script 로는 안 되는 것이 넷이었습니다 —
@@ -39,6 +48,7 @@ import fs from 'node:fs';
    두드립니다 (404·403 은 바로 올립니다). 자는 tools/쪽나눠받기.mjs 한 자리입니다. */
 import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
+import os from 'node:os';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { 사이트줄 } from './hosp/sites.mjs';
@@ -51,6 +61,8 @@ import { 본문직군, 칸뽑기, 고용형태고르기 } from './공고문읽�
 import { 본문자르기 } from './hosp/본문자르기.mjs';   /* 2026-10-17 세중님 2-② */
 /* 본문을 받아오는 주소가 목록 주소와 다른 곳 (인크루트 /jobcont/) — 한 자리 */
 import { 상세주소 } from './hosp/상세주소.mjs';
+/* 「천천히」 곳(robots 예외)은 하루 두 번만 — 규칙은 저 파일 한 자리 (세중님 2026-11-09) */
+import { 받을차례, 받음표시, 건너뜀말 } from './hosp/천천히.mjs';
 /* ★ 2026-10-14 — 첨부 담기 (세중님 ㉯). `hs_files.js` 는 2026-10-11 에 만들어
    자기점검까지 통과했는데 **부르는 곳이 한 군데도 없었습니다** — 지침 6절의
    「코드가 저장소에 있어도 아무도 import 하지 않으면 없는 기능입니다」 그대로입니다 */
@@ -279,6 +291,8 @@ const 회원것다시 = argv.includes('--회원것다시');
 const 직군다시 = argv.includes('--직군다시')
   ? String(argv[argv.indexOf('--직군다시') + 1] || '').split(',').map((s) => s.trim()).filter(Boolean)
   : [];
+/* 2026-11-09 — 손으로 시험할 때만. 「천천히」 곳을 창·기록과 상관없이 받습니다 (기록은 안 적습니다) */
+const 천천히무시 = argv.includes('--천천히무시');
 const 찾을말 = argv.filter((x, i) => !x.startsWith('--')
   && !['--동시', '--상세', '--직군다시'].includes(argv[i - 1]));
 
@@ -301,12 +315,30 @@ if (!dry && !cfg.COLLECT_KEY_HS3) { console.error('COLLECT_KEY_HS3 가 없습니
 
 /* ── ① 목록 받기 ─────────────────────────────────────────── */
 console.log('\n① 목록 —');
-const 셈 = { 못받음: 0, 규칙0: 0, 줄: 0, 꺼짐: 0, 주소없음: 0 };
+const 셈 = { 못받음: 0, 규칙0: 0, 줄: 0, 꺼짐: 0, 주소없음: 0, 천천히대기: 0 };
 const 주소없는곳 = new Map();
 const 모은것 = [];
 const 곳별 = [];
 const 못받은곳 = [];
 const 상세실패 = [];
+
+/* ★ 2026-11-09 세중님 — **「천천히」 곳은 하루 두 번만** (오전 9~12 · 오후 1~6 랜덤).
+ *   robots 가 막는데 긁기로 정한 곳(현황판/robots예외.csv · 리크루터 12 · 울산 중앙)이
+ *   설정에 `천천히: true` 를 달고 있습니다. 시각은 날짜+이름 해시라 바퀴마다 같고,
+ *   받기에 **성공한 때만** 기록합니다 — 못 받았으면 다음 바퀴가 다시 봅니다.
+ *   기록은 저장소 밖(~/천천히기록.json · 수집기멈춤경보의 ~/경보기록.json 과 같은 결).
+ *   `--dry` 와 `--천천히무시` 에서는 기록을 안 적습니다. */
+const 천천히기록파일 = process.env.POTJOB_SLOW_STATE || path.join(os.homedir(), '천천히기록.json');
+let 천천히기록 = {};
+try {
+  if (fs.existsSync(천천히기록파일)) 천천히기록 = JSON.parse(fs.readFileSync(천천히기록파일, 'utf8')) || {};
+} catch (e) {
+  /* 깨진 기록은 빈 것으로 — 그러면 창 안에서 한 번 더 받을 뿐입니다. 조용히 넘기지 않고 찍습니다 */
+  console.log('  천천히 기록을 못 읽어 빈 것으로 시작 · ' + String(e.message || e).slice(0, 80));
+  천천히기록 = {};
+}
+const 천천히받은곳 = [];
+const 천천히기다리는곳 = [];
 
 for (let i = 0; i < 볼것.length; i += 동시) {
   await Promise.all(볼것.slice(i, i + 동시).map(async (s) => {
@@ -315,7 +347,23 @@ for (let i = 0; i < 볼것.length; i += 동시) {
     if (s.off && /알리오로 들어옴|클린아이로 들어옴/.test(String(s.off))) {
       셈.꺼짐++; 곳별.push({ 이름: s.name, 건너뜀: '다른 경로로 들어옴' }); return;
     }
+    /* 2026-11-08 세중님 — robots 가 사이트 전체를 막은 곳은 손확인으로 돌립니다 (용인세브란스) */
+    if (s.off && /봇 금지/.test(String(s.off))) {
+      셈.꺼짐++; 곳별.push({ 이름: s.name, 건너뜀: '봇 금지 · 손확인' }); return;
+    }
     if (!s.url && !s.host) { 곳별.push({ 이름: s.name, 건너뜀: '주소가 없음' }); return; }
+    /* 2026-11-09 세중님 — 「천천히」 곳은 오늘의 두 창 안 · 정한 시각 뒤 · 그 창에서 아직 안 받았을 때만 */
+    /* 2026-11-11 세중님 Q86 — 설정이 `"천천히": "하루1"` 이면 하루 한 번(09~18 한 창 · 리크루터) */
+    let 천천히창 = null;
+    if (s.천천히 && !천천히무시) {
+      천천히창 = 받을차례(천천히기록, s.name, Date.now(), s.천천히);
+      if (!천천히창) {
+        const 말 = 건너뜀말(천천히기록, s.name, Date.now(), s.천천히);
+        셈.천천히대기++; 천천히기다리는곳.push(s.name + '(' + 말.replace(/^천천히 · /, '') + ')');
+        곳별.push({ 이름: s.name, 건너뜀: 말 });
+        return;
+      }
+    }
 
     const g = await 사이트줄(s);
     if (g.err) {
@@ -324,12 +372,23 @@ for (let i = 0; i < 볼것.length; i += 동시) {
       곳별.push({ 이름: s.name, 왜: g.err });
       return;
     }
+    /* 받기에 성공했을 때만 「이 창에서 받았다」 — 못 받았으면 위에서 돌아가 다음 바퀴가 다시 봅니다 */
+    if (천천히창) { 받음표시(천천히기록, s.name, 천천히창, Date.now(), s.천천히); 천천히받은곳.push(s.name + '(' + 천천히창 + ')'); }
     let rows = g.rows;
     if (s.only) rows = rows.filter((r) => new RegExp(s.only).test(r.title));
     if (s.not) rows = rows.filter((r) => !new RegExp(s.not).test(r.title));
     if (!rows.length) 셈.규칙0++;
     셈.줄 += rows.length;
-    곳별.push({ 이름: s.name, 줄: rows.length, raw: g.raw });
+    /* 2026-11-08 세중님 — 직군과 상관없이 첫 쪽에서 가장 최근 글 날짜를 남깁니다.
+       「최근 공고 없음」 곳이 다른 직군 채용은 하는지, 게시판이 사실상 멈췄는지 가르려고요.
+       올린 날 → 시작일 → 마감일 순으로 집습니다. 기록만 남기고 수집 동작은 그대로입니다 */
+    const 최근글 = rows.map((r) => String(r.posted || r.from || r.to || ''))
+      .map((d) => {
+        const m = d.match(/(20\d{2})[.\-/]\s?(\d{1,2})[.\-/]\s?(\d{1,2})/);
+        return m ? m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2) : '';
+      })
+      .filter(Boolean).sort().pop() || null;
+    곳별.push({ 이름: s.name, 줄: rows.length, raw: g.raw, 최근글 });
     /* ⚠ 주소가 없는 줄은 담을 수 없습니다. **그런데 말없이 버리면 안 됩니다** —
        강진의료원이 link 규칙 하나 때문에 7줄을 통째로 잃고 있었는데
        「줄 7」 이라고만 찍혀서 두 주 동안 아무도 몰랐습니다 (2026-09-30). */
@@ -341,7 +400,22 @@ for (let i = 0; i < 볼것.length; i += 동시) {
   }));
 }
 console.log('  줄 ' + 셈.줄 + ' · 못 받음 ' + 셈.못받음 + '곳 · 한 줄도 못 뽑음 ' + 셈.규칙0
-  + '곳 · 건너뜀 ' + 셈.꺼짐 + '곳');
+  + '곳 · 건너뜀 ' + 셈.꺼짐 + '곳' + (셈.천천히대기 ? ' · 천천히 대기 ' + 셈.천천히대기 + '곳' : ''));
+/* 「천천히」 곳 — 받았으면 기록을 남기고(마른 실행·--천천히무시 는 안 남김), 기다리는 곳은 한 줄로 */
+if (천천히받은곳.length || 천천히기다리는곳.length) {
+  console.log('  천천히(하루 2번 · 리크루터 1번) — 받음 ' + 천천히받은곳.length + '곳'
+    + (천천히받은곳.length ? ' ' + 천천히받은곳.join(' · ') : '')
+    + ' · 대기 ' + 천천히기다리는곳.length + '곳'
+    + (천천히기다리는곳.length ? ' ' + 천천히기다리는곳.slice(0, 14).join(' · ') : ''));
+  if (천천히받은곳.length && !dry && !천천히무시) {
+    try {
+      fs.writeFileSync(천천히기록파일, JSON.stringify(천천히기록, null, 1) + '\n', 'utf8');
+    } catch (e) {
+      /* 기록을 못 쓰면 다음 바퀴가 같은 창에서 한 번 더 받을 수 있습니다 — 숨기지 않고 찍습니다 */
+      console.log('  ★ 천천히 기록을 못 썼습니다 ' + 천천히기록파일 + ' · ' + String(e.message || e).slice(0, 80));
+    }
+  }
+}
 if (셈.주소없음) {
   console.log('  ★ 주소를 못 뽑아 버린 줄 ' + 셈.주소없음 + '건 — link 규칙을 봐야 합니다');
   [...주소없는곳.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8)
@@ -527,7 +601,12 @@ if (상세몫 > 0) {
   }
   if (직군이어받음) console.log('  상세를 건너뛰며 직군을 이어받은 공고 ' + 직군이어받음 + '건');
 
-  const 뽑을것 = [...new Set([...보류, ...열어야할것])].filter((x) => !건너뛸것.has(x.id));
+  /* 2026-11-11 Q86 — robots 가 상세 쪽을 막은 줄(마이다스 (가) getMainView 길 · sites.mjs 가 `상세막힘`
+     을 답니다)은 안 엽니다. 목록에서 받은 제목·날짜만 씁니다 */
+  const 상세막힌것 = [...new Set([...보류, ...열어야할것])].filter((x) => x.상세막힘);
+  if (상세막힌것.length) console.log('  robots 가 상세를 막아 안 여는 공고 ' + 상세막힌것.length + '건 ('
+    + [...new Set(상세막힌것.map((x) => x.곳.name))].slice(0, 6).join(' · ') + ')');
+  const 뽑을것 = [...new Set([...보류, ...열어야할것])].filter((x) => !건너뛸것.has(x.id) && !x.상세막힘);
   const 열것 = 뽑을것.filter((x) => {
     const n = 곳마다.get(x.곳.name) || 0;
     if (n >= 상세몫) return false;

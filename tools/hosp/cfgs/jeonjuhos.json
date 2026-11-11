@@ -1,0 +1,13 @@
+{
+ "name": "전주시립요양병원",
+ "type": "html",
+ "url": "http://www.jeonjuhos.co.kr/bbs/recruit",
+ "base": "http://www.jeonjuhos.co.kr",
+ "row": "<li class=\"clr\">[\\s\\S]*?<\\/li>",
+ "title": "<a href=\"\\/bbs_shop\\/read\\.htm[^\"]*\">\\s*<span>([\\s\\S]*?)<\\/span>",
+ "link": "href=\"(\\/bbs_shop\\/read\\.htm[^\"]*idx=\\d+)\"",
+ "date": "col_date\">(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "완료|합격|발표|결과",
+ "single": "posted",
+ "note": "목록이 ul/li 꼴(li.clr · col_subject · col_date). 글 보기 /bbs_shop/read.htm?…&idx=N 원래 주소 그대로. 날짜는 작성일 하나. 끝난 공고는 제목에 「채용완료」 붙임 → skip. robots: * 는 문서 파일·편집기 경로만 막고 Allow /. 2026-11-08 확인 · 세중님 11/8 손확인 주소"
+}

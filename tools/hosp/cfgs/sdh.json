@@ -1,0 +1,14 @@
+{
+ "name": "서울특별시장애인치과병원",
+ "type": "html",
+ "url": "https://www.sdh.go.kr/hospitalNews/recruitNotice/jobapply/noticeList/_/list.do",
+ "base": "https://www.sdh.go.kr",
+ "row": "<tr>\\s*<td>\\d+<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"javascript:goView\\('\\d+'\\);\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "goView\\('(\\d+)'\\)",
+ "linkFmt": "https://www.sdh.go.kr/hospitalNews/recruitNotice/jobapply/noticeList/_/{1}/view.do",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격|발표|결과",
+ "single": "posted",
+ "note": "표(번호·제목·상태·작성자·작성일·조회). 링크가 javascript:goView('N') 이고 쪽 스크립트가 ./N/view.do 로 보냄 → linkFmt 조립(상세 주소는 열어 보지 않음). 상태 칸(접수중·전형완료)은 제목 밖이라 skip 에 안 걸림. 작성일 하나. robots: * 는 /member/ /admin/ 만 막음. 2026-11-08 확인 · 세중님 11/8 손확인 주소"
+}

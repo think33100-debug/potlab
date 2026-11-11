@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import { 받아보기 } from '../쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 받기, 설정 } from './공통.mjs';
+import { 받기, 설정, 가도되나집 } from './공통.mjs';
 import { 칸뽑기, 본문직군, 고용형태고르기 } from '../공고문읽기.mjs';
 import { 첨부모으기 } from '../첨부담기.mjs';
 import { 본문자르기 } from '../hosp/본문자르기.mjs';
@@ -108,6 +108,22 @@ for (const x of 공고) {
     try { 주소 = new URL(주소, x.url).toString(); } catch { continue; }
     const 이름 = decodeURIComponent(주소.split('/').pop().split('?')[0]).slice(0, 120);
     첨부.더하기({ job_id: x.id, kind: '공고문', name: 이름, url: 주소 });
+    셈.첨부++;
+  }
+  /* ★ 2026-11-11 — 새올(시·군·구청 고시공고) 상세는 첨부가 `javascript:goDownLoad('이름','파일','경로')` 입니다.
+     그 쪽 스크립트가 여는 주소 그대로 엮습니다 (eminwon.gangdong.go.kr 상세 쪽에서 확인 —
+     location.href = "/emwp/jsp/ofr/FileDown.jsp?user_file_nm=…&sys_file_nm=…&file_path=…") */
+  for (const m of r.html.matchAll(/goDownLoad\(\s*'([^']*)'\s*,\s*'([^']*)'\s*,\s*'([^']*)'\s*\)/g)) {
+    const [, 이름, 파일, 경로] = m;
+    if (!/\.(?:pdf|hwpx?|docx?|xlsx?|zip|jpe?g|png)$/i.test(이름)) continue;
+    let 주소;
+    try {
+      주소 = new URL('/emwp/jsp/ofr/FileDown.jsp?user_file_nm=' + encodeURI(이름) + '&sys_file_nm=' + encodeURI(파일)
+        + '&file_path=' + encodeURI(경로), x.url).toString();
+    } catch { continue; }
+    /* ★ 첨부 길(첨부담기.mjs)은 robots 를 안 봅니다 — 그래서 **여기서** 그 호스트 robots 를 먼저 봅니다 */
+    if (!(await 가도되나집(주소)).됨) continue;
+    첨부.더하기({ job_id: x.id, kind: '공고문', name: 이름.slice(0, 120), url: 주소 });
     셈.첨부++;
   }
 

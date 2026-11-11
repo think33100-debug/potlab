@@ -1,0 +1,15 @@
+{
+ "name": "포항성모병원",
+ "type": "html",
+ "url": "https://www.pohangsmh.co.kr/content/01intro/12_01.php",
+ "base": "https://www.pohangsmh.co.kr",
+ "row": "<tr>\\s*<td[^>]*>(?:\\d+|<img[^>]*alt=\"공지\"[^>]*\\/?>)<\\/td>\\s*<td[^>]*>채용중<\\/td>[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*proc_type=view[^\"]*\"[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "b_num=(\\d+)",
+ "linkFmt": "https://www.pohangsmh.co.kr/content/01intro/12_01.php?proc_type=view&a_num=14380283&b_num={1}",
+ "date": "(20\\d{2}[.-]\\d{1,2}[.-]\\d{1,2})",
+ "skip": "양식|반환|합격자|발표|결과",
+ "single": "posted",
+ "천천히": true,
+ "note": "포항성모병원(경북 포항남구 · 종합병원) 인재채용 > 채용공고. 표: 번호·구분(채용중/마감/기타)·제목·글쓴이 — **목록에 날짜 칸이 없음** → 상세 열기에 맡김. 구분이 「채용중」인 줄만 잡음(마감·기타 양식 글은 뺌). 공지 줄은 href 가 /content/… 전체 경로, 일반 줄은 ?proc_type=view… 상대 경로라 b_num 만 잡아 linkFmt 로 조립(a_num 14380283 은 이 게시판 번호 · 목록 안 모두 같음). ★ robots.txt `User-agent: *` `Disallow: /`(Yeti·Amazonbot 만 허용)인데 **세중님 2026-11-09 결정 「포항도 긁자」**로 켬 — robots 예외 갈래(리크루터·보건소 9·울산 중앙과 같음) · 「천천히」= 하루 2번(09~12·13~18 랜덤 · 세중님 2026-11-09 · 코드는 별도 PR) · 병원이 그만해 달라면 즉시 off. 2026-11-09 받아 둔 HTML 로 규칙 시험(채용중 13줄). 11/8 Computer use 기록의 「접속 실패」는 그때 일시 장애였거나 앱 브라우저 주소만 막힌 것(11/9 이 PC 에서 200)."
+}

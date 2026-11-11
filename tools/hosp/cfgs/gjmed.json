@@ -1,12 +1,14 @@
 {
- "name": "전라남도 강진의료원",
- "type": "html",
- "url": "https://gjmed.or.kr/bbs/board.php?bo_table=notice3",
- "base": "https://gjmed.or.kr",
- "row": "<tr class=\"[^\"]*\">\\s*<td class=\"td_num mo_none\">[\\s\\S]*?<\\/tr>",
- "title": "<a href=\"https:\\/\\/www\\.gjmed\\.or\\.kr\\/bbs\\/board\\.php\\?bo_table=notice3&amp;wr_id=\\d+\">([\\s\\S]*?)<\\/a>",
- "link": "href=\"(https:\\/\\/www\\.gjmed\\.or\\.kr\\/bbs\\/board\\.php\\?bo_table=notice3&amp;wr_id=\\d+)\"",
- "skip": "합격자|발표|결과|서식|양식|임용후보",
- "note": "그누보드5 표. 날짜가 MM-DD 만 있어 연도 없음 → 날짜 안 뽑음(상세에서). 공지 행(증명서 서식)은 skip. robots Allow / / 2026-10-22 — www 를 붙이면 그누보드가 「url에 타 도메인을 지정할 수 없습니다」 로 막습니다(글자 1,047자 메뉴뿐). 목록 링크는 www 없이 옵니다. 본문선택자 #bo_v_con 로 98~1,600자 본문이 잘립니다",
- "본문선택자": "#bo_v_con"
+  "name": "전라남도 강진의료원",
+  "type": "html",
+  "url": "https://www.gjmed.or.kr/bbs/board.php?bo_table=notice3",
+  "base": "https://www.gjmed.or.kr",
+  "row": "<tr class=\"[^\"]*\">\\s*<td class=\"c-num\">[\\s\\S]*?<\\/tr>",
+  "title": "<a href=\"https:\\/\\/(?:www\\.)?gjmed\\.or\\.kr\\/bbs\\/board\\.php\\?bo_table=notice3&amp;wr_id=\\d+\" class=\"subj\">([\\s\\S]*?)<\\/a>",
+  "link": "href=\"(https:\\/\\/(?:www\\.)?gjmed\\.or\\.kr\\/bbs\\/board\\.php\\?bo_table=notice3&amp;wr_id=\\d+)\"",
+  "date": "<td class=\"c-date\">(20\\d{2}-\\d{1,2}-\\d{1,2})<\\/td>",
+  "single": "posted",
+  "skip": "합격자|발표|결과|서식|양식|임용후보",
+  "본문선택자": "#bo_v_con",
+  "note": "그누보드5. 2026-11-09 고침 — 게시판 스킨이 바뀌었습니다. 전에는 <td class=\"td_num mo_none\"> 로 시작하는 행이었는데 지금은 <tr class=\"\"><td class=\"c-num\"> · 제목 <a … class=\"subj\"> · 날짜 <td class=\"c-date\">2026-11-06</td>(연도 있음 · 전에는 MM-DD 만이라 날짜를 안 뽑았음). 게시판 주소(notice3 = 채용공고)는 첫 화면 메뉴로 다시 확인했습니다 — 그대로입니다. 같은 행에 「게시마감 2026-11-14」(c-state) 와 m-meta 날짜도 있어 날짜는 c-date 로만 잡습니다(single posted). 목록 제목은 「…」 로 잘려 오므로 전체 제목은 상세에서. 공지 행(증명서 서식)은 skip. robots Allow /. 본문선택자 #bo_v_con."
 }

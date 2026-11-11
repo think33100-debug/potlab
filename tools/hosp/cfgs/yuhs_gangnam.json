@@ -1,6 +1,7 @@
 {
   "name": "연세대학교의과대학 강남세브란스병원",
   "type": "appsite",
+  "천천히": "하루1",
   "cls": "^강남$",
   "host": "https://yuhs.recruiter.co.kr",
   "sn": 4468,

@@ -29,9 +29,14 @@
  */
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0';
 
+/* 'cnuh' 도 'https://cnuh.recruiter.co.kr' 도 받습니다 (수집기 설정은 host 가 주소 꼴) */
+const 뿌리 = (호스트) => (/^https?:\/\//.test(String(호스트))
+  ? String(호스트).replace(/\/+$/, '')
+  : 'https://' + 호스트 + '.recruiter.co.kr');
+
 /** 구형 appsite 에서 { appsiteSn, settingType } 를 읽습니다 */
 export async function 자리번호(호스트) {
-  const u = 'https://' + 호스트 + '.recruiter.co.kr/appsite/company/index';
+  const u = 뿌리(호스트) + '/appsite/company/index';
   const h = await (await fetch(u, { headers: { 'User-Agent': UA } })).text();
   const sn = (h.match(/id=["']appsiteSn["'][^>]*value=["'](\d+)/)
     || h.match(/appsiteSn["']?\s*[:=]\s*["']?(\d+)/) || [])[1];
@@ -39,29 +44,46 @@ export async function 자리번호(호스트) {
   return { sn, st, 쪽크기: h.length, 주소: u };
 }
 
-/** 구형 appsite 의 공고 목록. 못 받으면 { 왜 } */
-export async function 목록(호스트) {
-  const a = await 자리번호(호스트);
-  if (!a.sn) return { 왜: '쪽에서 appsiteSn 을 못 찾았습니다 (신형일 수 있습니다)', ...a };
-  const b = new URLSearchParams({ appsiteSn: a.sn, settingType: a.st });
-  const r = await fetch('https://' + 호스트 + '.recruiter.co.kr/appsite/company/getMainView', {
-    method: 'POST', body: b,
-    headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded',
-      accept: 'application/json', Referer: a.주소 } });
-  const t = await r.text();
-  if (!r.ok) return { 왜: 'HTTP ' + r.status + ' · ' + t.slice(0, 200), ...a };
+/** 구형 appsite 의 진행중 목록 **원본 줄** (수집기 sites.mjs 가 씁니다 · 2026-11-11 Q86).
+ *  둘 다 robots 가 허락한 `/appsite/` 아래입니다 — index(GET) → getMainView(POST).
+ *  index 에서 번호를 못 읽으면 설정의 sn·settingType 을 씁니다 (`미리`).
+ *  돌려주는 것 { 줄: [...], sn, st, 몸크기 } · 못 받으면 { 왜 }. 던지지 않습니다.
+ *  ⚠ 진행중 목록은 **첫 화면 6칸**까지입니다 (hs_pages.mjs 머리 · 2026-09-27). */
+export async function 진행중원본(호스트, 미리 = {}) {
+  let a;
+  try { a = await 자리번호(호스트); } catch (e) { a = { 주소: 뿌리(호스트) + '/appsite/company/index', 왜index: String(e && (e.cause?.code || e.message)).slice(0, 80) }; }
+  const sn = a.sn || (미리.sn != null ? String(미리.sn) : '');
+  const st = a.sn ? a.st : (미리.st || a.st || 'C');
+  if (!sn) return { 왜: 'index 에서 appsiteSn 을 못 찾았고 설정에도 sn 이 없습니다' + (a.왜index ? ' · ' + a.왜index : '') };
+  let r, t;
+  try {
+    r = await fetch(뿌리(호스트) + '/appsite/company/getMainView', {
+      method: 'POST', body: new URLSearchParams({ appsiteSn: sn, settingType: st }),
+      headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded',
+        accept: 'application/json', Referer: a.주소 } });
+    t = await r.text();
+  } catch (e) { return { 왜: 'getMainView 못 받음 · ' + String(e && (e.cause?.code || e.message)).slice(0, 80) }; }
+  if (!r.ok) return { 왜: 'getMainView HTTP ' + r.status + ' · ' + t.slice(0, 120) };
   let j;
-  try { j = JSON.parse(t); } catch { return { 왜: 'JSON 이 아닙니다 · 앞 200자 ' + t.slice(0, 200), ...a }; }
+  try { j = JSON.parse(t); } catch { return { 왜: 'getMainView 가 JSON 이 아닙니다 · 앞 120자 ' + t.slice(0, 120) }; }
   /* 진행중 목록이 어느 칸에 있는지 이름이 판마다 다를 수 있어 훑어 찾습니다 */
   const 진행 = 찾기(j, (k) => /jobnoticeInProgressList|inProgressList/i.test(k));
-  const 것들 = (진행 || []).map((x) => ({
+  if (!진행) return { 왜: 'getMainView 에 진행중 목록 칸이 없습니다 · 열쇠 ' + Object.keys(j).join(',').slice(0, 120) };
+  return { 줄: 진행, sn, st, 몸크기: t.length };
+}
+
+/** 구형 appsite 의 공고 목록. 못 받으면 { 왜 } */
+export async function 목록(호스트) {
+  const m = await 진행중원본(호스트);
+  if (m.왜) return { 왜: m.왜 };
+  const 것들 = m.줄.map((x) => ({
     제목: String(x.jobnoticeName || x.noticeName || x.title || x.subject || '').trim(),
     부터: x.applyStartDate || x.receiptStartDate || '',
     까지: x.applyEndDate || x.receiptEndDate || '',
     상태: x.receiptState || x.state || '',
     번호: x.jobnoticeSn || x.sn || x.id || '',
   })).filter((x) => x.제목);
-  return { ...a, 몸크기: t.length, 것들 };
+  return { sn: m.sn, st: m.st, 몸크기: m.몸크기, 것들 };
 }
 
 /* 어느 칸에 있는지 몰라 나무를 훑습니다 */

@@ -1,0 +1,8 @@
+{
+  "name": "양산부산대학교한방병원",
+  "type": "appsite",
+  "host": "https://pnuyh.recruiter.co.kr",
+  "only": "한방",
+  "note": "양산부산대학교한방병원(경남 양산시 · 공공보건의료). 자체 사이트 www.pnukh.co.kr 는 안 열림(11/9). 세중님 2026-11-09 「양산부산대랑 채용공고 사이트가 같아 · https://pnuyh.recruiter.co.kr/career/job」 → 양산부산대병원 채용관(마이다스 appsite) 안에서 제목에 「한방」이 든 글만(only). recruitClassName 은 직종(일반직·전문의·상시…)이라 cls 로는 못 가름. 11/9 00시 접수중 6건 중 한방 글 0건 → 한방 글이 없을 때는 「only 에 걸린 것 0건」으로 나옴(공고 없음의 뜻 · 규칙 고장 아님). 양산부산대학교병원 cfg 에는 not 한방. robots /app* 금지 → Q84 예외(리크루터 갈래) · 천천히(하루 2번) 대상.",
+  "천천히": "하루1"
+}
