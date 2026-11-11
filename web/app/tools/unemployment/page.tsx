@@ -23,7 +23,7 @@ import { UnemploymentForm } from './form';
    (임금일액 · 셈한일액 · 어디에걸렸나 · 일수). 세중님 지적대로입니다. */
 
 export const metadata: Metadata = {
-  title: '실업급여 계산기 · POTJOB',
+  title: '실업급여 계산기 · RAPO',
   description: '하루 얼마씩 며칠 받는지. 2026년 기준 · 출처 고용노동부',
 };
 

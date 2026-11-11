@@ -19,7 +19,7 @@ import { serverSupabase, serverWho } from '@/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '교육기관 · POTJOB',
+  title: '교육기관 · RAPO',
   description: '학회·협회가 어떤 교육을 여는지 한자리에서 봅니다',
 };
 

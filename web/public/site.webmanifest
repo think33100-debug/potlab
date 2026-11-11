@@ -1,6 +1,6 @@
 {
-  "name": "POTJOB",
-  "short_name": "POTJOB",
+  "name": "RAPO",
+  "short_name": "RAPO",
   "description": "작업치료사 · 물리치료사 채용정보",
   "start_url": "/",
   "display": "standalone",

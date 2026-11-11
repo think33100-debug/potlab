@@ -95,7 +95,7 @@ export async function generateMetadata({
      ★ 2026-11-11 클로즈드 베타 — 비회원에게 공고 창구(job_one)를 닫으므로 **세션으로** 읽습니다.
      로봇은 middleware 가 /beta 로 보내 여기까지 안 옵니다 (RAPO노트/SQL_1113) */
   const j = await one(await serverSupabase(), id);
-  if (!j) return { title: '없는 공고입니다 · POTJOB' };
+  if (!j) return { title: '없는 공고입니다 · RAPO' };
 
   const closed = isClosed(j.apply_to, todayKst(), j.apply_to_time);
   /* 받는 사람이 「언제부터 언제까지」를 미리보기에서 바로 알아야 합니다.
@@ -110,7 +110,7 @@ export async function generateMetadata({
   const img = `${siteUrl()}/api/og/job/${j.id}`;
 
   return {
-    title: `${title} · POTJOB`,
+    title: `${title} · RAPO`,
     description: desc,
     openGraph: { title, description: desc, images: [img], type: 'article' },
     twitter: { card: 'summary_large_image', title, description: desc, images: [img] },
@@ -501,7 +501,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
               <p className="mt-3 break-keep rounded-[12px] border border-[#E3E3DE]
                             bg-[#F7F7F4] p-5 text-[14px] leading-[1.7] text-[#4A5056]">
                 수시채용 공고입니다. 마감일이 정해져 있지 않으며,
-                병원에서 공고를 내리면 POTJOB에서도 내려갑니다.
+                병원에서 공고를 내리면 RAPO에서도 내려갑니다.
               </p>
             </Rise>
           )}

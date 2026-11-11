@@ -77,7 +77,7 @@ export async function GET(
 
   const font = await loadFont();
 
-  let org = 'POTJOB';
+  let org = 'RAPO';
   let skin = FALLBACK;
   /* 공고를 못 찾았을 때 아래에 깔리는 한 줄.
      공고를 찾으면 「직군 · 마감일」로 바뀝니다 */
@@ -94,7 +94,7 @@ export async function GET(
       apply_from: string | null; apply_to: string | null; apply_to_time?: string | null;
     } | null;
     if (j) {
-      org = j.org_name || 'POTJOB';
+      org = j.org_name || 'RAPO';
       skin = (j.job_group && SKIN[j.job_group]) || FALLBACK;
       closed = isClosed(j.apply_to, undefined, j.apply_to_time);
       /* 시작일이 있으면 「언제부터」까지 그립니다 */
@@ -119,7 +119,7 @@ export async function GET(
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 34, letterSpacing: 4, opacity: 0.85 }}>POTJOB</div>
+          <div style={{ fontSize: 34, letterSpacing: 4, opacity: 0.85 }}>RAPO</div>
           {closed && (
             <div style={{
               display: 'flex', fontSize: 28, padding: '10px 26px', borderRadius: 50,

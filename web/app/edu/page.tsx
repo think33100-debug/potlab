@@ -39,7 +39,7 @@ import { todayKst } from '@/lib/job-state';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '교육·학술 · POTJOB',
+  title: '교육·학술 · RAPO',
   description: '학회 교육과정과 학술대회를 한자리에서 봅니다. 신청은 각 학회에서 합니다',
 };
 

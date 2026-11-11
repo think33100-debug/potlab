@@ -85,7 +85,7 @@ export async function generateMetadata({
   const { id } = await params;
   const p = await getPost(await serverSupabase(), id);
   /* 카톡에 뜨는 제목도 갈라 적습니다 — 누르기 전에 알 수 있게 */
-  if (!p) return { title: `${GONE[await stateOf(id)].title} · POTJOB` };
+  if (!p) return { title: `${GONE[await stateOf(id)].title} · RAPO` };
 
   const 장수 = await countImages(p.id);
   const title = p.title || p.body.slice(0, 40);
@@ -93,11 +93,11 @@ export async function generateMetadata({
   const image = 장수 > 0 ? 사진주소(p.id, 0) : '/og.png';
 
   return {
-    title: `${title} · ${channelName(p.channel)} · POTJOB`,
+    title: `${title} · ${channelName(p.channel)} · RAPO`,
     description: desc,
     openGraph: {
       type: 'article',
-      siteName: 'POTJOB',
+      siteName: 'RAPO',
       title,
       description: desc,
       images: [{ url: image }],
