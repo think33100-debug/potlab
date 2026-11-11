@@ -5,6 +5,7 @@ import { Avatar } from '@/components/avatar';
 import { PhotoCropper } from '@/components/photo-cropper';
 import { PhotoPicker } from '@/components/photo-picker';
 import { AVATAR_COLORS, AVATAR_EMOJIS, isPhoto, withColor, withEmoji, withPhoto } from '@/lib/avatar';
+import { 새프로필사진경로 } from '@/lib/avatar-path';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '@/app/toast';
 
@@ -41,10 +42,12 @@ export function AvatarPicker({
   const upload = async (blob: Blob) => {
     setBusy(true);
     try {
-      const path = `${userId}/${Date.now()}.webp`;
+      /* 경로에 회원 id·시각을 안 넣습니다 — 무작위 이름 하나 (lib/avatar-path.ts).
+         이름이 늘 새것이라 덮어쓰기(upsert)는 끕니다 */
+      const path = 새프로필사진경로();
       const sb = browserSupabase();
       const { error } = await sb.storage.from('avatars')
-        .upload(path, blob, { contentType: 'image/webp', upsert: true });
+        .upload(path, blob, { contentType: 'image/webp', upsert: false });
       if (error) throw error;
       await save(withPhoto(value, path));
       toast('프로필 사진이 바뀌었어요!');
