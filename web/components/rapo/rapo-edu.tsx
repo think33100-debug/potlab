@@ -10,10 +10,14 @@ import type { RapoJob } from './rapo-job-row';
    원본에 있지만 뺀 것 검색 칸 — 교육 창구(교육목록)가 검색어를 받지 않습니다. 한 쪽 안에서만 거르면
                      「없다」고 잘못 보여서 넣지 않았습니다
                      신청 회차 행(모집 중 · 금액) — 여러 기관의 회차를 한 번에 주는 창구가 아직 없습니다
-   원본에 없지만 남긴 것 맨 아래 출처 안내와 「직접 들어가서 보세요」 링크 — 지침 15절(출처와 한계를 화면에 밝힘) */
+   원본에 없지만 남긴 것 맨 아래 출처 안내와 「직접 들어가서 보세요」 링크 — 지침 15절(출처와 한계를 화면에 밝힘)
+
+   ★ 봉사활동(/volunteer)·청년정책(/youth)도 이 조각을 씁니다 (2026-11-12 세중님 「봉사활동, 청년정책도 시작」).
+     두 화면은 피그마에 전용 화면이 없고 그림(「RAPO / Graphic / 봉사활동·청년정책」 479:4184·4192)만 있어서,
+     같은 「라포 더 둘러보기」 갈래인 교육 목록(U12)의 틀을 그대로 빌립니다 → RapoExploreRow */
 
 /* 목록 상단 — 원본 「교육 탐색 / 목록 상단」 1400:960 · 64 높이 · 뒤로 20 · 제목 t9 Bold · 오른쪽 그림 52 */
-export function RapoEduTop({ back = '/' }: { back?: string }) {
+export function RapoEduTop({ back = '/', title = '교육', art = '/rapo/edu/hero-52.webp' }: { back?: string; title?: string; art?: string }) {
   return (
     <header className="flex h-[64px] items-center gap-(--rapo-dimension-x1) bg-(--rapo-color-bg-layer-default) pl-(--rapo-dimension-x1_5) pr-(--rapo-dimension-x5)">
       <Link href={back} aria-label="뒤로"
@@ -21,9 +25,9 @@ export function RapoEduTop({ back = '/' }: { back?: string }) {
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/detail/arrow-left-20.svg" alt="" width={20} height={20} />
       </Link>
-      <h1 className="rapo-type-t9-bold min-w-0 flex-1 text-(color:--rapo-brand-color-navy)">교육</h1>
-      {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 그림 「임상 실습 교재와 교육 일정」 */}
-      <img src="/rapo/edu/hero-52.webp" alt="" width={52} height={52} className="shrink-0" />
+      <h1 className="rapo-type-t9-bold min-w-0 flex-1 text-(color:--rapo-brand-color-navy)">{title}</h1>
+      {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 그림 (교육 「임상 실습 교재와 교육 일정」 · 봉사·청년 「RAPO / Graphic」) */}
+      <img src={art} alt="" width={52} height={52} className="size-[52px] shrink-0" />
     </header>
   );
 }
@@ -65,7 +69,7 @@ export function RapoEduFilter({ icon, label, 고른것, 선택지 }: {
 }
 
 /* 「종료된 일정 포함」 — 원본 「RAPO / Checkbox」 205:46 (마크 20 · 라벨 t4 Regular · 터치 44). 주소로 켜고 끕니다 */
-export function RapoEduPastToggle({ on, href }: { on: boolean; href: string }) {
+export function RapoEduPastToggle({ on, href, label = '종료된 일정 포함' }: { on: boolean; href: string; label?: string }) {
   return (
     <Link href={href} role="checkbox" aria-checked={on}
       className="flex min-h-(--rapo-touch-min) items-center gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r1) active:bg-(--rapo-color-bg-transparent-pressed)">
@@ -73,7 +77,7 @@ export function RapoEduPastToggle({ on, href }: { on: boolean; href: string }) {
         + (on ? 'border-(color:--rapo-brand-color-navy) bg-(--rapo-brand-color-navy) text-white' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
         {on && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2 5 8.5l4.5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>}
       </span>
-      <span className="rapo-type-t4-regular text-(color:--rapo-color-fg-neutral)">종료된 일정 포함</span>
+      <span className="rapo-type-t4-regular text-(color:--rapo-color-fg-neutral)">{label}</span>
     </Link>
   );
 }
@@ -105,5 +109,65 @@ export function RapoEduRow({ href, 기관, 그림, 제목, 날짜 }: {
         <span className="rapo-type-t4-regular min-w-0 text-[#3f4c57]">{날짜}</span>
       </span>
     </a>
+  );
+}
+
+/* 둘러보기 목록 한 줄 — 교육의 「학회 원문 행」 틀에 정보 태그(원본 「용도=정보」 453:3335)를 더한 것.
+   봉사활동·청년정책이 씁니다. href 가 없으면 누를 수 없는 줄입니다(갈 곳을 모르는 정책) */
+export function RapoExploreRow({ href, 기관, 그림, 제목, 설명, 태그, 날짜, 급함 = false, 바깥말 }: {
+  href: string | null; 기관: string | null; 그림: RapoJob['orgArt']; 제목: string; 설명?: string | null;
+  태그: string[]; 날짜: ReactNode | null; 급함?: boolean; 바깥말: string;
+}) {
+  const 속 = (
+    <>
+      {기관 && (
+        <span className="flex items-center gap-(--rapo-dimension-x2)">
+          <span className="flex size-(--rapo-dimension-x8) shrink-0 items-center justify-center rounded-(--rapo-radius-r1) bg-(--rapo-color-bg-neutral-weak)">
+            {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+            <img src={`/rapo/home/org-${그림}.svg`} alt="" width={32} height={32} />
+          </span>
+          <span className="rapo-type-t4-medium min-w-0 truncate text-[#3f4c57]">{기관}</span>
+        </span>
+      )}
+      <span className="flex items-start gap-[6px]">
+        <span className="rapo-type-t7-bold min-w-0 break-keep text-(color:--rapo-brand-color-navy)">{제목}</span>
+        {href && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+            <img src="/rapo/edu/external-14.svg" alt="" width={14} height={14} className="mt-[7px] shrink-0" />
+            <span className="sr-only">({바깥말} · 새 창)</span>
+          </>
+        )}
+      </span>
+      {설명 && <span className="rapo-type-t4-regular line-clamp-2 break-keep text-[#3f4c57]">{설명}</span>}
+      {태그.length > 0 && (
+        <span className="flex flex-wrap gap-(--rapo-dimension-x1)">
+          {태그.map((t) => (
+            <span key={t} className="rapo-type-t2-medium rounded-[4px] bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x2) py-[4px] text-(color:--rapo-color-fg-neutral)">{t}</span>
+          ))}
+        </span>
+      )}
+      {날짜 && (
+        <span className="flex items-center gap-[6px]">
+          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+          <img src="/rapo/edu/calendar-16.svg" alt="" width={16} height={16} className="shrink-0" />
+          <span className={'min-w-0 ' + (급함 ? 'rapo-type-t4-bold text-[#b42a21]' : 'rapo-type-t4-regular text-[#3f4c57]')}>{날짜}</span>
+        </span>
+      )}
+    </>
+  );
+  const 틀 = 'flex flex-col gap-(--rapo-dimension-x3) border-b border-[#dde4e6] py-(--rapo-dimension-x4)';
+  return href
+    ? <a href={href} target="_blank" rel="noopener noreferrer" className={틀 + ' active:bg-(--rapo-color-bg-transparent-pressed)'}>{속}</a>
+    : <div className={틀}>{속}</div>;
+}
+
+/* 맨 아래 출처 안내 — 원본에 없지만 지침 15절(출처와 한계를 화면에 밝힘)대로 작게 둡니다 */
+export function RapoExploreNote({ children }: { children: ReactNode }) {
+  return (
+    <section aria-label="자료 안내"
+      className="rapo-type-t3-regular mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-[#3f4c57] [&_p]:break-keep">
+      {children}
+    </section>
   );
 }

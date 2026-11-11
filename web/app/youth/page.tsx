@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { ListFilters } from '@/components/list-filters';
+import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
+import { RapoEduFilter, RapoEduPastToggle, RapoEduTop, RapoExploreNote, RapoExploreRow } from '@/components/rapo/rapo-edu';
+import { RapoPagination } from '@/components/rapo/rapo-ui';
+import { 기관그림 } from '@/lib/rapo-home';
 import { serverSupabase } from '@/lib/supabase-server';
 
 /* 청년정책 찾기 (2026-10-04).
@@ -31,7 +34,11 @@ import { serverSupabase } from '@/lib/supabase-server';
    정부가 공개한 정책 안내이고 개인정보가 한 칸도 없습니다.
    /volunteer · /edu · /orgs 와 같은 결입니다.
 
-   ⚷ 담당자 실명은 DB 에 칸 자체가 없습니다. 여기로 올 길이 없습니다. */
+   ⚷ 담당자 실명은 DB 에 칸 자체가 없습니다. 여기로 올 길이 없습니다.
+
+   ── 새 디자인 (2026-11-12 · 세중님 「봉사활동, 청년정책도 시작」) ──
+   피그마에 이 화면 전용 원본이 없어 교육 목록(U12)의 틀을 빌립니다 (components/rapo/rapo-edu.tsx 머리).
+   자료를 읽는 길과 거르는 규칙은 그대로이고 모양만 바꿨습니다. 출처 안내는 맨 아래 회색 칸으로 옮겼습니다. */
 
 export const dynamic = 'force-dynamic';
 
@@ -120,157 +127,84 @@ export default async function Youth({ searchParams }: { searchParams: Promise<SP
     return '/youth' + (str ? '?' + str : '');
   };
 
+  /* 조건 칩 — 갈래 · 지역(시·도 · 고르면 그 지역 + 전국). 고르면 첫 쪽으로 */
+  const 갈래선택지 = TABS.map((t) => ({
+    글: t.key === 'all' ? '갈래 전체' : t.label,
+    주소: 길({ tab: t.key, p: '0' }),
+    켜짐: t.key === tab.key,
+    수: c ? (t.갈래 === null ? c.전체 : (c.갈래?.[t.갈래] ?? 0)) : undefined,
+  }));
+  const 지역선택지 = [
+    { 글: '전국', 주소: 길({ sido: 'all', p: '0' }), 켜짐: !sido },
+    ...(c?.시도들 ?? []).map((x) => ({ 글: x.시도, 주소: 길({ sido: x.시도, p: '0' }), 켜짐: sido === x.시도, 수: x.수 })),
+  ];
+
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <h1 className="text-h1 font-bold">청년정책 찾기</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
-        취업·교육비·주거·금융 지원입니다. <b>신청은 각 기관에서</b> 합니다
-      </p>
+    <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
+      <RapoEduTop title="청년정책" art="/rapo/home/graphic-youth-28.svg" />
+      <main className="px-(--rapo-dimension-x5) pb-(--rapo-dimension-x8)">
+        <div className="flex flex-wrap gap-(--rapo-dimension-x2) pt-(--rapo-dimension-x4)">
+          <RapoEduFilter icon="/rapo/list/sliders-16.svg" label="갈래" 고른것={tab.key === 'all' ? null : tab.label} 선택지={갈래선택지} />
+          <RapoEduFilter icon="/rapo/list/pin-16.svg" label="지역" 고른것={sido ? `${sido} + 전국` : null} 선택지={지역선택지} />
+        </div>
 
-      {/* 갈래 탭 */}
+        <div className="flex items-center justify-between gap-(--rapo-dimension-x3) pt-(--rapo-dimension-x2)">
+          <h2 className="text-[20px] font-bold leading-[22px] text-(color:--rapo-brand-color-navy)">청년정책 {이탭수}건</h2>
+          <RapoEduPastToggle on={지난것} label="신청 끝난 것 포함" href={길({ past: 지난것 ? '0' : '1', p: '0' })} />
+        </div>
 
-      {/* 시·도 — 고르면 그 지역 + 전국이 함께 나옵니다 */}
-      {/* 거르기 줄 — 채용공고·교육과 같은 부품입니다 (2026-10-04 세중님 결정).
-          청년정책은 **직군 칸을 숨깁니다** — 치료사용으로 고르지 않는 화면이라
-          직군 구분이 아예 없습니다 */}
-      <div className="mt-3">
-        <ListFilters
-          기준={{ sido: sido ?? undefined, past: 지난것 }}
-          시도들={(c?.시도들 ?? []).map((s) => s.시도)}
-          직군숨김
-          마감말="신청 끝난 것도"
-          뿌리="/youth"
-          고름={{
-            이름: 'tab',
-            전체말: '갈래 전체',
-            고른값: tab.key === 'all' ? undefined : tab.key,
-            선택지: TABS.filter((t) => t.key !== 'all').map((t) => ({
-              값: t.key,
-              글: t.label,
-              수: c && t.갈래 ? (c.갈래?.[t.갈래] ?? 0) : undefined,
-            })),
-          }}
-        />
-      </div>
-
-      <p className="mt-5 text-lg text-mute">
-        {sido ? sido + ' + 전국' : '전국'} · <b className="text-ink">{이탭수}건</b>
-        {지난것 ? ' (신청 끝난 것까지)' : ' 신청할 수 있는 것'}
-        {' · '}
-        <Link href={길({ past: 지난것 ? '0' : '1', p: '0' })} className="underline underline-offset-4">
-          {지난것 ? '신청 가능한 것만' : '끝난 것까지 보기'}
-        </Link>
-      </p>
-
-      {/* 세중님이 정하신 안내 줄 — 출처와 한계를 화면에 밝힙니다 */}
-      <p className="mt-4 break-keep rounded-sm border border-line bg-card p-5 text-sm leading-relaxed text-mute">
-        <b>청년 일반 정책입니다. 나이·소득 조건은 각 정책에서 확인하세요.</b>
-        <br />
-        치료사용으로 고르지 않았습니다 — 청년이면 누구나 보는 정책을 그대로 모았습니다.
-        <br />
-        자료는 <b>온통청년</b>(한국고용정보원)에서 받아 옵니다.
-        <b> 신청·문의는 각 기관에서</b> 하세요.
-        <br />
-        지역은 <b>맡은 기관 이름</b>으로 가린 것입니다. 중앙부처 정책은 <b>전국</b>으로 두고,
-        알 수 없는 것은 시·도 줄에 올리지 않았습니다.
-        {c?.마지막수집 && (
-          <>
-            <br />
-            마지막으로 받아온 때 {new Date(c.마지막수집).toLocaleString('ko-KR', {
-              timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
-            })}
-          </>
+        {목록.error && (
+          <p role="alert" className="rapo-type-t4-regular mt-(--rapo-dimension-x4) rounded-(--rapo-radius-r2) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x4) text-[#b42a21]">
+            청년정책 목록을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.
+          </p>
         )}
-      </p>
 
-      {목록.error && (
-        <p className="mt-6 rounded-sm border border-brand-red/40 bg-brand-red-soft p-6 text-lg text-brand-red-dark">
-          불러오지 못했어요 — {목록.error.message}
-          <span className="mt-1 block text-sm">app/youth/page.tsx · 청년목록()</span>
-        </p>
-      )}
-
-      {!목록.error && rows.length === 0 && (
-        <p className="mt-6 break-keep rounded-sm border border-line bg-card p-7 text-lg text-mute">
-          {지난것 ? '모아둔 것이 없어요.' : '지금 신청할 수 있는 것이 없어요.'}
-          {!지난것 && (
-            <>
-              {' '}
-              <Link href={길({ past: '1', p: '0' })} className="underline underline-offset-4">
-                끝난 것까지 보기
+        {!목록.error && rows.length === 0 && (
+          <div className="flex flex-col items-center gap-(--rapo-dimension-x3) py-(--rapo-dimension-x12) text-center">
+            <p className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">{지난것 ? '모아 둔 정책이 없어요' : '지금 신청할 수 있는 정책이 없어요'}</p>
+            {!지난것 && (
+              <Link href={길({ past: '1', p: '0' })} className="rapo-type-t4-bold flex h-(--rapo-touch-min) items-center text-[#b42a21] underline underline-offset-4">
+                신청 끝난 것까지 보기
               </Link>
-            </>
+            )}
+          </div>
+        )}
+
+        <ul>
+          {rows.map((v) => {
+            const 기간 = 기간쓰기(v);
+            const 나이 = 나이쓰기(v);
+            return (
+              <li key={v.번호}>
+                <RapoExploreRow href={v.신청주소 || v.참고주소} 기관={v.소관기관} 그림={기관그림(v.소관기관 || v.번호)} 제목={v.정책명} 바깥말="신청하러 가기"
+                  설명={v.설명}
+                  태그={[v.갈래, v.시도 === '전국' ? '전국' : v.시도, 나이, v.중분류].filter((x): x is string => !!x)}
+                  날짜={기간?.글 ?? null} 급함={!!기간?.급한가} />
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* 쪽 넘기기 — 한 쪽 20건입니다 (청년목록() 과 같아야 합니다) */}
+        <div className="pt-(--rapo-dimension-x4)">
+          <RapoPagination page={page} pages={Math.max(1, Math.ceil(이탭수 / 20))} href={(p) => 길({ p: String(p) })} />
+        </div>
+
+        {/* 세중님이 정하신 안내 줄 — 출처와 한계를 화면에 밝힙니다 */}
+        <RapoExploreNote>
+          <p><b>청년 일반 정책이에요. 나이·소득 조건은 각 정책에서 확인하세요.</b></p>
+          <p>치료사용으로 고르지 않았어요 — 청년이면 누구나 보는 정책을 그대로 모았어요.</p>
+          <p>자료는 <b>온통청년</b>(한국고용정보원)에서 받아 와요. <b>신청·문의는 각 기관에서</b> 하세요.</p>
+          <p>지역은 <b>맡은 기관 이름</b>으로 가린 것이에요. 중앙부처 정책은 <b>전국</b>으로 두고, 알 수 없는 것은 지역 칸에 올리지 않았어요.</p>
+          {c?.마지막수집 && (
+            <p>마지막으로 받아온 때 {new Date(c.마지막수집).toLocaleString('ko-KR', {
+              timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
+            })}</p>
           )}
-        </p>
-      )}
-
-      <ul className="mt-5 flex flex-col gap-3">
-        {rows.map((v) => {
-          const 기간 = 기간쓰기(v);
-          const 나이 = 나이쓰기(v);
-          const 갈곳 = v.신청주소 || v.참고주소;
-          const 속 = (
-            <>
-              <p className="flex flex-wrap items-center gap-2 text-sm">
-                <span className="rounded-xs bg-badge-teal-bg px-3 py-1 text-gray-700 dark:text-gray-200">
-                  {v.갈래}
-                </span>
-                <span className="text-mute">{v.시도 === '전국' ? '전국' : v.시도}</span>
-                {기간 && (
-                  <span className={기간.급한가 ? 'font-bold text-brand-red' : 'font-bold text-teal-strong dark:text-white'}>
-                    {기간.글}
-                  </span>
-                )}
-              </p>
-
-              <p className="mt-2 break-keep text-body-lg font-bold text-ink">{v.정책명}</p>
-
-              {v.설명 && (
-                <p className="mt-2 line-clamp-2 break-keep text-lg text-mute">{v.설명}</p>
-              )}
-
-              <p className="mt-2 text-sm text-mute">
-                {v.소관기관}
-                {나이 && <> · {나이}</>}
-                {v.중분류 && <> · {v.중분류}</>}
-              </p>
-
-              {갈곳 && <p className="mt-3 text-lg font-bold text-brand-red">신청하러 가기 ›</p>}
-            </>
-          );
-          return (
-            <li key={v.번호}>
-              {갈곳 ? (
-                <a href={갈곳} target="_blank" rel="noopener noreferrer"
-                  className="block rounded-sm border border-line bg-card p-6 hover:bg-paper">
-                  {속}
-                </a>
-              ) : (
-                <div className="block rounded-sm border border-line bg-card p-6">{속}</div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-
-      {/* 쪽 넘기기 — 한 쪽 20건입니다 (청년목록() 과 같아야 합니다) */}
-      {(page > 0 || rows.length === 20) && (
-        <nav aria-label="쪽 넘기기" className="mt-7 flex items-center justify-between">
-          {page > 0 ? (
-            <Link href={길({ p: String(page - 1) })}
-              className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">
-              ‹ 앞으로
-            </Link>
-          ) : <span />}
-          <span className="text-sm text-mute">{page + 1}쪽</span>
-          {rows.length === 20 ? (
-            <Link href={길({ p: String(page + 1) })}
-              className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">
-              다음 ›
-            </Link>
-          ) : <span />}
-        </nav>
-      )}
-    </main>
+        </RapoExploreNote>
+      </main>
+      <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
+      <RapoBottomNav current="/" />
+    </div>
   );
 }
