@@ -92,9 +92,14 @@ export async function 붙여받기(url, opt) {
 
   return new Promise((done) => {
     const 머리 = (opt && opt.headers) || {};
+    /* ★ 2026-11-11 — POST 도 받습니다 (새올 목록은 화면이 POST 로 그립니다 · 긁기 공통.mjs 받기()).
+       `opt.method`·`opt.body`(글자) 를 주지 않으면 전처럼 GET 입니다 */
+    const 방법 = (opt && opt.method) || 'GET';
+    const 몸 = 방법 !== 'GET' && opt && opt.body != null ? String(opt.body) : null;
     const req = https.request({
-      host: u.hostname, port: u.port || 443, path: u.pathname + u.search, method: 'GET',
-      headers: { ...머리, Host: u.hostname }, servername: u.hostname,
+      host: u.hostname, port: u.port || 443, path: u.pathname + u.search, method: 방법,
+      headers: { ...머리, Host: u.hostname,
+        ...(몸 != null ? { 'Content-Length': Buffer.byteLength(몸) } : {}) }, servername: u.hostname,
       rejectUnauthorized: true,                              // ← 끄지 않습니다
       ...(pem ? { ca: [...tls.rootCertificates, pem] } : {}),  // ← 사슬만 이어줍니다
       ...(느슨 ? { insecureHTTPParser: true } : {}),           // ← 줄 끝만 관용 (군산의료원)
@@ -104,7 +109,10 @@ export async function 붙여받기(url, opt) {
       if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
         res.resume();
         const 다음 = new URL(res.headers.location, url).toString();
-        return done(붙여받기(다음, opt));
+        /* POST 를 301·302·303 으로 옮기면 GET 으로 따라갑니다 (fetch 와 같은 규칙) */
+        const 다음opt = 몸 != null && [301, 302, 303].includes(res.statusCode)
+          ? { ...opt, method: 'GET', body: undefined } : opt;
+        return done(붙여받기(다음, 다음opt));
       }
       const 덩이 = [];
       res.on('data', (c) => 덩이.push(c));
@@ -113,7 +121,7 @@ export async function 붙여받기(url, opt) {
     });
     req.on('error', (e) => done({ 왜: e.code || e.message }));
     req.setTimeout((opt && opt.timeout) || 20000, () => { req.destroy(); done({ 왜: 'TIMEOUT' }); });
-    req.end();
+    if (몸 != null) req.end(몸); else req.end();
   });
 }
 

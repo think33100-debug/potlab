@@ -23,10 +23,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 받기, 설정, 담기, 최근인가, HS3가긁나, 도는곳줄, 글자풀기, robots셈 } from './공통.mjs';
+import { 받기, 설정, 담기, 최근인가, HS3가긁나, 도는곳줄, 글자풀기, robots셈, 가도되나집, robots못받았나 } from './공통.mjs';
 import { sortJob } from '../sort-rule.mjs';
 import { 표준읽기, 꼬리말, 엔티티풀기, 새올읽기, 새올목록몸, 새올상세주소, 새올상세제목, 잘린꼴,
-  보건거름, 줄글 } from './읽기들.mjs';
+  보건거름, 줄글, 규칙읽기 } from './읽기들.mjs';
 
 export { 꼬리말, 엔티티풀기 };
 
@@ -93,6 +93,8 @@ if (argv.includes('--자기점검')) {
     && /epcCheck=Y/.test(s[1].주소));
   보('새올 — 갈래를 상세 주소에 싣는다', /not_ancmt_se_code=01%2C04%2C05/.test(새올상세주소(바탕, 1, '01,04,05')));
   보('새올 목록 몸 — 채용(05) · 30줄 한 번', 새올목록몸().not_ancmt_se_code === '05' && 새올목록몸().ofr_pageSize === '30');
+  보('새올 목록 몸 — 옛판은 homepagetype 을 뺀다(예산·화천·동해 400)', !('homepagetype' in 새올목록몸('05', 30, true))
+    && 새올목록몸().homepagetype === 'new' && 새올목록몸('05', 30, true).method === 'selectListOfrNotAncmt');
   /* 옛 꼴 — eminwon.gbgs.go.kr(경산시) 응답 그대로: <a> 가 없고 칸마다 onclick, 머리줄도 <td> */
   const 옛꼴 = `<table><tr height=23 bgcolor=BAE6E7 align=center>
       <td width="40">번호</td><td>고시공고번호</td><td width="300">제목</td><td width="80">담당부서</td><td width="80">등록일</td></tr>
@@ -155,6 +157,24 @@ if (argv.includes('--자기점검')) {
     '<tr><td>x</td></tr><tr><td>'.length) === '공고 건강증진과');
   보('글자 — 머리가 EUC-KR 이면 EUC-KR 로 푼다',
     글자풀기(Buffer.from([0xba, 0xb8, 0xb0, 0xc7, 0xbc, 0xd2]), 'text/html; charset=EUC-KR') === '보건소');
+  /* 곳마다 규칙 — www.pohang.go.kr 채용공고 목록 꼴 그대로 (href="#" · data-action 에 번호) */
+  const 포항 = `<tbody><tr><td class="list_num">6580</td><td>포항시 남구보건소 공고 <br/> 제2026-78호</td>
+    <td class="taL list_tit"><a href="#" data-action="/portal/saeol/gosi/view.do?notAncmtMgtNo=76371&mid=0202020000" onclick="req.post(this); return false;">
+      2026년 포항시 남구 치매안심센터 기간제근로자(송영) 채용 공고</a></td><td class="list_dept">건강관리과</td>
+    <td class="list_date">2026-11-10</td></tr>
+    <tr><td class="list_num">6575</td><td>포항시 북구 공고 <br/> 제2026-499호</td>
+    <td class="taL list_tit"><a href="#" data-action="/portal/saeol/gosi/view.do?notAncmtMgtNo=76290&mid=0202020000" onclick="req.post(this); return false;">
+      북구보건소 기간제근로자(물리치료사) 채용 공고</a></td><td class="list_dept">보건정책과</td>
+    <td class="list_date">2026-11-05</td></tr></tbody>`;
+  const 포항규칙 = { row: '<tr>\\s*<td class="list_num">[\\s\\S]*?<\\/tr>', title: '<a[^>]*data-action[^>]*>([\\s\\S]*?)<\\/a>',
+    link: 'notAncmtMgtNo=(\\d+)', linkFmt: 'https://www.pohang.go.kr/portal/saeol/gosi/view.do?notAncmtMgtNo={1}&mid=0202020000',
+    date: '(20\\d{2}-\\d{2}-\\d{2})' };
+  const ph = 규칙읽기(포항, 포항규칙);
+  보('규칙 — 두 줄 · 번호 · 날짜(올린 날) · 주소 조립', ph.length === 2 && ph[0].번호 === '76371' && ph[0].올린날 === '2026-11-10'
+    && ph[0].주소 === 'https://www.pohang.go.kr/portal/saeol/gosi/view.do?notAncmtMgtNo=76371&mid=0202020000');
+  보('규칙 — 제목은 태그·빈칸 걷음', ph[1] && ph[1].제목 === '북구보건소 기간제근로자(물리치료사) 채용 공고');
+  보('규칙 — 부서는 줄 글자(공고번호 칸의 「남구보건소」 포함)', ph[0] && /남구보건소/.test(ph[0].부서) && /건강관리과/.test(ph[0].부서));
+  보('규칙 — link 번호 없는 줄은 버린다', 규칙읽기(포항.replace(/notAncmtMgtNo=76290/, 'x=1'), 포항규칙).length === 1);
   보('글자 — 말이 없으면 UTF-8 그대로', 글자풀기(Buffer.from('보건소', 'utf8'), 'text/html') === '보건소');
   const 어긴것 = 잼.filter(([, ok]) => !ok);
   for (const [무엇, ok] of 잼) console.log((ok ? '  ○ ' : '  ✗ ') + 무엇);
@@ -192,10 +212,11 @@ const 곳들 = [
      01~05 · 30줄은 시청마다 사흘~엿새치라 하루 한 번이면 빠지지 않습니다 */
 const 받은목록 = new Map();
 async function 목록받기(곳) {
-  const 열쇠 = 곳.주소 + '|' + (곳.읽기 === '새올' ? (곳.새올갈래 || '05') + '|' + (곳.새올줄 || 30) : 'GET');
+  const 열쇠 = 곳.주소 + '|' + (곳.읽기 === '새올' ? (곳.새올갈래 || '05') + '|' + (곳.새올줄 || 30)
+    + (곳.새올옛판 ? '|옛판' : '') : 'GET');
   if (!받은목록.has(열쇠)) {
     받은목록.set(열쇠, 곳.읽기 === '새올'
-      ? await 받기(곳.주소, { 몸: 새올목록몸(곳.새올갈래 || '05', 곳.새올줄 || 30) }) : await 받기(곳.주소));
+      ? await 받기(곳.주소, { 몸: 새올목록몸(곳.새올갈래 || '05', 곳.새올줄 || 30, !!곳.새올옛판) }) : await 받기(곳.주소));
   }
   return 받은목록.get(열쇠);
 }
@@ -203,14 +224,24 @@ let 보건곳 = 0; let 상세받음 = 0;
 const cfg = 설정();
 const 담을것 = []; const 안담음 = [];
 let 건너뜀 = 0;
-let 열림 = 0; let 못열림 = 0; let 줄없음 = 0;
+let 열림 = 0; let 못열림 = 0; let 줄없음 = 0; let 서버시도못열림 = 0;
 for (const 곳 of 곳들.slice(0, 몇개)) {
   /* ★ 세중님 ㉩ (10/24 밤) — HS3 가 긁는 곳은 건너뜁니다 */
   if (HS3가긁나(곳.이름)) { 건너뜀++; continue; }
+  /* ★ 2026-11-11 — `서버에서시도` 곳: 이 PC 에서는 연결부터 안 됐던 곳입니다(연결 시간 초과·끊김 · 두 번).
+     서버 쪽 길에서는 열릴 수 있어 하루 한 바퀴 넣어 둡니다. **robots.txt 부터 연결이 안 되면 목록을 두드리지 않고**
+     넘어갑니다 — 곳마다 robots 12초가 상한이고, 다른 곳 차례는 막지 않습니다(한 줄씩 돌고 실패는 잡힙니다) */
+  if (곳.서버에서시도) {
+    await 가도되나집(곳.주소);
+    if (robots못받았나(곳.주소)) { 서버시도못열림++; 못열림++; console.log('  ✗ ' + 곳.이름.slice(0, 20).padEnd(21) + '서버에서 시도 — robots.txt 부터 연결 안 됨 (목록 안 두드림)'); continue; }
+  }
   const r = await 목록받기(곳);
   if (!r.됨) { 못열림++; console.log('  ✗ ' + 곳.이름.slice(0, 20).padEnd(21) + r.왜); continue; }
   열림++;
-  let 줄들 = 곳.읽기 === '새올' ? 새올읽기(r.html, 곳.주소, 곳.새올갈래 || '05') : 목록읽기(r.html, 곳.주소);
+  /* `규칙` — 표준읽기로 못 읽는 게시판만 곳 설정에 규칙을 적어 읽습니다 (읽기들.mjs 규칙읽기 · 2026-11-11) */
+  /* 새올인데 표가 아니라 <ul><li> 로 그리는 곳(광주 남구)은 `읽기: "새올"` + `규칙` — POST 는 새올대로, 읽기만 규칙으로 */
+  let 줄들 = 곳.규칙 && (곳.읽기 === '규칙' || 곳.읽기 === '새올') ? 규칙읽기(r.html, 곳.규칙)
+    : (곳.읽기 === '새올' ? 새올읽기(r.html, 곳.주소, 곳.새올갈래 || '05') : 목록읽기(r.html, 곳.주소));
   if (!줄들.length) { 줄없음++; console.log('  · ' + 곳.이름.slice(0, 20).padEnd(21) + '줄 0 (꼴이 다릅니다 — 손확인)'); continue; }
   const 목록수 = 줄들.length;
   /* ★ 시·군·구청 게시판은 모든 부서 글이 섞입니다 — **보건 글만** (부서 칸 · 없으면 그 줄 글) */
@@ -252,7 +283,8 @@ for (const 곳 of 곳들.slice(0, 몇개)) {
       sido: (곳.지역 || '').split(' ')[0] || null, 기관번호: 곳.기관번호 || null });
   }
 }
-console.log('\nHS3 가 긁어 건너뜀 ' + 건너뜀 + ' (세중님 ㉩) · 열린 곳 ' + 열림 + ' · 못 연 곳 ' + 못열림 + ' · 줄 0 인 곳 ' + 줄없음
+console.log('\nHS3 가 긁어 건너뜀 ' + 건너뜀 + ' (세중님 ㉩) · 열린 곳 ' + 열림 + ' · 못 연 곳 ' + 못열림
+  + (서버시도못열림 ? ' (그중 서버에서 시도 ' + 서버시도못열림 + ')' : '') + ' · 줄 0 인 곳 ' + 줄없음
   + ' · 보건 줄 나온 곳 ' + 보건곳 + ' · 잘린 제목 상세 ' + 상세받음 + '번'
   + ' · robots 읽은 호스트 ' + robots셈().읽은호스트 + ' (막은 곳 ' + robots셈().막은호스트.length
   + (robots셈().막은호스트.length ? ' — ' + robots셈().막은호스트.join(', ') : '') + ')'

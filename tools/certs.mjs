@@ -31,24 +31,37 @@ import { fileURLToPath } from 'node:url';
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 둘곳 = path.join(여기, 'certs');
 fs.mkdirSync(둘곳, { recursive: true });
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0';
+const UA = process.argv.includes('--호스트')
+  ? 'Mozilla/5.0 (compatible; potjob-collector/1.0; +https://potjob.co.kr)'
+  : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0';
 
 /* SSL 로 안 열리던 곳 — hs_census 가 남긴 기록에서 이름을 가져옵니다 */
 const 찾을말 = process.argv.slice(2).filter((x) => !x.startsWith('--'));
-const GAS = fs.readFileSync(new URL('../gas/wage.js', import.meta.url), 'utf8');
-const i0 = GAS.indexOf('const HOSP_SITES = [');
-let d = 0, end = -1;
-for (let k = GAS.indexOf('[', i0); k < GAS.length; k++) {
-  if (GAS[k] === '[') d++; else if (GAS[k] === ']' && --d === 0) { end = k + 1; break; }
-}
-const SITES = new Function('return ' + GAS.slice(GAS.indexOf('[', i0), end))();
-const 이름들 = ['경상국립대학교병원', '제주한라병원', '동래봉생병원', '동수원병원',
-  '중앙제일병원', '세명종합병원', '안동성소병원', '대전선병원', '유성선병원'];
+/* ★ 2026-11-11 — `--호스트 a.go.kr,b.go.kr` 로 **호스트를 직접** 줄 수 있습니다 (보건소 새올 호스트).
+   이 길은 `gas/` 를 **읽지 않습니다** — gas/ 는 읽기도 안 하는 자리입니다 (지침 0절).
+   시험 주소는 그 호스트의 robots.txt 입니다 (첫 화면을 두드리지 않습니다 · 받을 쪽은 긁기가 robots 를 본 뒤 받습니다).
+   이름표(UA)도 이 길에서는 **우리 수집기 이름표**를 씁니다 (긁기 공통.mjs 와 같은 것) */
+const 호스트줄 = process.argv.includes('--호스트') ? process.argv[process.argv.indexOf('--호스트') + 1] : '';
 const 볼것 = [];
-for (const n of (찾을말.length ? 찾을말 : 이름들)) {
-  for (const s of SITES.filter((x) => x.name.includes(n) && x.url)) {
-    let h; try { h = new URL(s.url).hostname; } catch { continue; }
-    if (!볼것.some((x) => x.host === h)) 볼것.push({ 이름: s.name, host: h, url: s.url });
+if (호스트줄) {
+  for (const h of 호스트줄.split(',').map((x) => x.trim()).filter(Boolean)) {
+    볼것.push({ 이름: h, host: h, url: 'https://' + h + '/robots.txt' });
+  }
+} else {
+  const GAS = fs.readFileSync(new URL('../gas/wage.js', import.meta.url), 'utf8');
+  const i0 = GAS.indexOf('const HOSP_SITES = [');
+  let d = 0, end = -1;
+  for (let k = GAS.indexOf('[', i0); k < GAS.length; k++) {
+    if (GAS[k] === '[') d++; else if (GAS[k] === ']' && --d === 0) { end = k + 1; break; }
+  }
+  const SITES = new Function('return ' + GAS.slice(GAS.indexOf('[', i0), end))();
+  const 이름들 = ['경상국립대학교병원', '제주한라병원', '동래봉생병원', '동수원병원',
+    '중앙제일병원', '세명종합병원', '안동성소병원', '대전선병원', '유성선병원'];
+  for (const n of (찾을말.length ? 찾을말 : 이름들)) {
+    for (const s of SITES.filter((x) => x.name.includes(n) && x.url)) {
+      let h; try { h = new URL(s.url).hostname; } catch { continue; }
+      if (!볼것.some((x) => x.host === h)) 볼것.push({ 이름: s.name, host: h, url: s.url });
+    }
   }
 }
 
@@ -150,4 +163,5 @@ for (const x of 볼것) {
 const 열림 = 결과.filter((r) => /열림/.test(r.상태));
 console.log('\n── ' + 결과.length + '곳 중 열린 곳 ' + 열림.length + ' · 아직 ' + (결과.length - 열림.length));
 console.log('   인증서 검증은 한 곳도 끄지 않았습니다 (사슬을 읽을 때만 껐고, 그 연결로는 자료를 안 받습니다)');
-fs.writeFileSync(path.join(여기, 'hosp', 'reports', 'certs.json'), JSON.stringify(결과, null, 1), 'utf8');
+/* --호스트 길은 병원 기록(certs.json)을 덮어쓰지 않습니다 — 결과는 위 화면 줄이 전부입니다 */
+if (!호스트줄) fs.writeFileSync(path.join(여기, 'hosp', 'reports', 'certs.json'), JSON.stringify(결과, null, 1), 'utf8');
