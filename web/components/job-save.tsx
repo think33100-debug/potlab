@@ -11,7 +11,11 @@ import { useToast } from '@/app/toast';
 
    로그인 전에 누르면 막지 않고 로그인으로 보냅니다 —
    돌아올 자리를 적어 두니 로그인하면 이 공고로 돌아옵니다. */
-export function JobSave({ id, big = false, look }: { id: string; big?: boolean; look?: 'rapo' }) {
+export function JobSave({ id, big = false, look, 마감 = false }: {
+  id: string; big?: boolean; look?: 'rapo' | 'rapo-bar';
+  /** rapo-bar 전용 — 마감된 공고는 새로 저장하지 못합니다(원본 D-03). 이미 저장한 것은 풀 수 있습니다 */
+  마감?: boolean;
+}) {
   const { loading, session } = useAuth();
   const router = useRouter();
   const [on, setOn] = useState<boolean | null>(null);
@@ -61,6 +65,10 @@ export function JobSave({ id, big = false, look }: { id: string; big?: boolean; 
      옛 모양은 먼저 바꿔 보여 주고 실패하면 되돌리지만, 새 모양은 **저장이 된 뒤에만** 채운 책갈피로
      바뀝니다(원본 설명). 받는 동안 on 은 이미 뒤집혀 있어 직전 값(!on)을 그대로 보여 줍니다 */
   if (look === 'rapo') return <RapoSaveFace on={busy ? !on : !!on} busy={busy} onClick={toggle} />;
+  if (look === 'rapo-bar') {
+    const 보임 = busy ? !on : !!on;
+    return <RapoSaveBar on={보임} busy={busy} disabled={마감 && !보임} onClick={toggle} />;
+  }
 
   if (big) {
     return (
@@ -128,6 +136,29 @@ export function RapoSaveFace({ on = false, busy = false, onClick }: {
       <span className="sr-only">
         {off ? '견본 공고라 저장할 수 없어요' : busy ? '저장하는 중' : on ? '저장 취소' : '저장'}
       </span>
+    </button>
+  );
+}
+
+/* 공고 상세 아래 고정 줄의 저장 단추 — Figma 「RAPO / Detail / Sticky actions / Compact two rows」 1047:1101
+   의 「저장하고 알림받기」 칸 (40px). 원본의 숫자(저장한 사람 수)와 「알림받기」는 자료가 없어 뺍니다 —
+   저장만 합니다. 좋아요 칸도 기능이 없어 뺐고, 그래서 이 단추가 한 줄을 다 씁니다.
+   마감된 공고(D-03)는 흐리게 잠급니다. 이미 저장한 것(D-03-saved)은 풀 수 있게 둡니다 */
+export function RapoSaveBar({ on, busy, disabled, onClick }: {
+  on: boolean; busy: boolean; disabled: boolean; onClick?: () => void;   // 없으면 견본(미리보기)
+}) {
+  return (
+    <button
+      type="button" onClick={onClick} disabled={busy || disabled}
+      aria-pressed={on} aria-busy={busy || undefined}
+      className="rapo-type-t2-medium flex h-(--rapo-dimension-x10) min-w-0 flex-1 items-center justify-center
+                 gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r2) border border-(--rapo-color-stroke-neutral-weak)
+                 bg-(--rapo-color-bg-neutral-weak) text-(color:--rapo-color-fg-neutral)
+                 enabled:active:bg-(--rapo-color-bg-transparent-pressed) disabled:opacity-40"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+      <img src={on ? '/rapo/home/icon-save-on.svg' : '/rapo/detail/save-18.svg'} alt="" width={12} height={15} />
+      {busy ? '저장하는 중' : on ? '저장됨' : '저장'}
     </button>
   );
 }

@@ -8,7 +8,8 @@ import type { RapoJob } from '@/components/rapo/rapo-job-row';
 import { 받는중, 목록, 못받음, 없음 } from '@/components/rapo/rapo-job-results';
 import { RapoShell } from '@/components/rapo/rapo-shell';
 import { RapoPagination } from '@/components/rapo/rapo-ui';
-import { 기관이름말, 마감배지, 조교연구말 } from '@/lib/job-state';
+import { 기관이름말, 마감배지 } from '@/lib/job-state';
+import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
 import { supabase, type JobListItem, type 맛보기공고 } from '@/lib/supabase';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
@@ -117,15 +118,6 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
   );
 }
 
-const 그림 = ['01', '03', '06'] as const;
-/* 「기관 기본 이미지」 — 기관마다 늘 같은 그림 (lib/rapo-home.ts 와 같은 셈) */
-function 기관그림(열쇠: string): RapoJob['orgArt'] {
-  let h = 0;
-  for (let i = 0; i < 열쇠.length; i++) h = (h * 31 + 열쇠.charCodeAt(i)) >>> 0;
-  return 그림[h % 그림.length];
-}
-const 태그 = (...xs: (string | null | undefined | false)[]) => [...new Set(xs.filter((x): x is string => !!x))];
-
 async function 결과({ sb, 고른직군, 고른시도, q, page, 조건있음, 초기화주소, 쪽주소 }: {
   sb: SupabaseClient; 고른직군: string | null; 고른시도: string | null; q: string; page: number;
   조건있음: boolean; 초기화주소: string; 쪽주소: (p: number) => string;
@@ -153,13 +145,7 @@ async function 결과({ sb, 고른직군, 고른시도, q, page, 조건있음, �
   const 전체 = Number((줄[0] as unknown as { total?: number })?.total ?? 0);
   if (줄.length === 0) return <없음 조건있음={조건있음 || page > 0} 초기화주소={초기화주소} />;
 
-  const rows: RapoJob[] = 줄.map((r) => ({
-    id: r.id, org: 기관이름말(r.org_name), orgArt: 기관그림(r.org_name || r.id), title: r.title,
-    pay: null,   // 목록 창구가 급여를 안 줍니다
-    /* 「추천」·「체험형 인턴」·「조교·연구」는 공고를 잘못 읽지 않게 하는 표시라 태그로 남깁니다 */
-    tags: 태그(r.올림 && '추천', r.is_intern && '체험형 인턴', 조교연구말(r.조교연구), r.지역보임, r.employ_type || '공고문 참고', r.job_group),
-    deadline: 마감배지(r.apply_to, r.마감표시, r.apply_to_time).text,
-  }));
+  const rows = 줄.map(목록줄);
   return (
     <목록 rows={rows} 제목={q ? `검색 결과 ${전체}개` : `공고 ${전체}개`}
       쪽={<RapoPagination page={page} pages={Math.ceil(전체 / PAGE)} href={쪽주소} />} />

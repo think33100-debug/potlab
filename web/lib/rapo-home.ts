@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { RapoJob, RapoJobLists, RapoSortKey } from '@/components/rapo/rapo-job-list';
-import { 기관이름말, 마감배지 } from './job-state';
+import { 기관이름말, 마감배지, 조교연구말 } from './job-state';
 import { supabase, type JobListItem, type 맛보기공고 } from './supabase';
 
 /* 새 홈(「U01 · 홈」)의 「채용 공고」 칸에 넣을 줄 (2026-11-11).
@@ -27,15 +27,28 @@ export type RapoHomeJobs =
 const 줄수 = 4;   // 원본 홈이 네 줄입니다
 
 const 그림 = ['01', '03', '06'] as const;
-/* 「기관 기본 이미지」 — 원본 설명대로 공고(기관)마다 늘 같은 그림이 나오게 고릅니다 */
-function 기관그림(열쇠: string): RapoJob['orgArt'] {
+/* 「기관 기본 이미지」 — 원본 설명대로 공고(기관)마다 늘 같은 그림이 나오게 고릅니다.
+   홈 · 공고 목록 · 공고 상세가 같이 씁니다 (한 기관이 화면마다 다른 그림이면 안 됩니다) */
+export function 기관그림(열쇠: string): RapoJob['orgArt'] {
   let h = 0;
   for (let i = 0; i < 열쇠.length; i++) h = (h * 31 + 열쇠.charCodeAt(i)) >>> 0;
   return 그림[h % 그림.length];
 }
 
-const 태그 = (...xs: (string | null | undefined | false)[]) =>
+export const 태그 = (...xs: (string | null | undefined | false)[]) =>
   [...new Set(xs.filter((x): x is string => !!x))];
+
+/* 회원 목록 창구(job_list) 한 줄 → 새 디자인 공고 행. 공고 목록(/jobs)과 상세의 「비슷한 공고」가 같이 씁니다.
+   목록 창구는 급여를 안 줍니다 — pay 는 비웁니다.
+   「추천」·「체험형 인턴」·「조교·연구」는 공고를 잘못 읽지 않게 하는 표시라 태그로 남깁니다 */
+export function 목록줄(r: JobListItem): RapoJob {
+  return {
+    id: r.id, org: 기관이름말(r.org_name), orgArt: 기관그림(r.org_name || r.id), title: r.title,
+    pay: null,
+    tags: 태그(r.올림 && '추천', r.is_intern && '체험형 인턴', 조교연구말(r.조교연구), r.지역보임, r.employ_type || '공고문 참고', r.job_group),
+    deadline: 마감배지(r.apply_to, r.마감표시, r.apply_to_time).text,
+  };
+}
 
 /* 조회수 — 못 받으면 null (lib/job-views.ts 는 실패를 {} 로 돌려줘 0 과 못 가립니다) */
 async function 조회수(ids: string[]): Promise<Record<string, number> | null> {

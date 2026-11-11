@@ -15,9 +15,11 @@ import { useToast } from '@/app/toast';
    (지금 가진 것은 로그인용 REST 키라 다릅니다).
    데스크톱에는 공유창이 없어 링크 복사로 떨어집니다. */
 export function ShareButtons({
-  title, text, path, compact = false,
+  title, text, path, compact = false, look,
 }: {
-  /* 공유창에 뜨는 제목. 뒤에 · POTJOB 이 붙습니다 */
+  /* 'rapo' — 새 디자인 상세 헤더의 공유 단추 (Figma 「RAPO / Detail / Header」 517:354 · 44px) */
+  look?: 'rapo';
+  /* 공유창에 뜨는 제목. 뒤에 · RAPO 가 붙습니다 */
   title: string;
   /* 한 줄 설명. 안 주면 제목을 그대로 씁니다 */
   text?: string;
@@ -32,7 +34,7 @@ export function ShareButtons({
   const url = () => `${location.origin}${path}`;
 
   const share = async () => {
-    const data = { title: `${title} · POTJOB`, text: text ?? title, url: url() };
+    const data = { title: `${title} · RAPO`, text: text ?? title, url: url() };
 
     if (navigator.share && navigator.canShare?.(data)) {
       try { await navigator.share(data); return; }
@@ -51,6 +53,18 @@ export function ShareButtons({
       toast(`복사하지 못했어요 — 주소: ${u}`, { tone: 'danger', ms: 5000 });
     }
   };
+
+  if (look === 'rapo') {
+    return (
+      <button type="button" onClick={share}
+        className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2)
+                   active:bg-(--rapo-color-bg-transparent-pressed)">
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+        <img src="/rapo/detail/share-20.svg" alt="" width={20} height={20} />
+        <span className="sr-only">공유</span>
+      </button>
+    );
+  }
 
   if (compact) {
     return (

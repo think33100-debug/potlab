@@ -1,0 +1,237 @@
+import Link from 'next/link';
+import type { ReactNode } from 'react';
+import { RapoMaskIcon } from './rapo-ui';
+
+/* 공고 상세 — 새 디자인 「U03 · 공고 상세」 조각들 (2026-11-11 대표: 피그마 우선, 없는 정보는 뺌).
+
+   Figma 기준 화면 (04 공고 상세 614:18829)
+     최종 전체 화면 983:22146 · 비회원 보수 비공개 795:16114 · 모집 마감 D-03 605:10901
+
+   조각 차례 (원본 번호 그대로)
+     01 상세 탐색 517:362     ← RapoDetailHeader
+     02 공고 식별 983:22398   ← RapoDetailIdentity
+     03 핵심 조건 983:22154   ← RapoPayCard · RapoKeyRow
+     07 지원 방법 517:651     ← RapoApplyGuide · RapoPeriodCard · RapoGuideRow
+     08 근무 기관 517:658     ← RapoInstitution
+     비슷한 공고 983:22176    ← app/jobs/[id]/page.tsx 가 공고 행(RapoJobRow)으로
+     고정 행동 517:664        ← app/jobs/[id]/page.tsx (저장 · 지원)
+
+   이 파일은 **그리기만** 합니다. 값(무엇을 「공고문 확인」으로 둘지 등)은 page.tsx 가 정해 넘깁니다. */
+
+/* 01 상세 탐색 — 뒤로 · 로고 · 공유 (64px · 좌우 12) */
+export function RapoDetailHeader({ share }: { share: ReactNode }) {
+  return (
+    <header className="sticky top-0 z-20 flex h-(--rapo-dimension-x16) items-center justify-between
+                       bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x3)">
+      <Link href="/jobs" aria-label="공고 목록으로"
+        className="flex size-(--rapo-touch-min) items-center justify-center rounded-(--rapo-radius-r2)
+                   active:bg-(--rapo-color-bg-transparent-pressed)">
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+        <img src="/rapo/detail/arrow-left-20.svg" alt="" width={20} height={20} />
+      </Link>
+      <Link href="/" aria-label="RAPO 홈" className="relative block h-[31.5px] w-[120px] shrink-0">
+        {/* eslint-disable @next/next/no-img-element -- Figma 원본 SVG 그대로 (rapo-header.tsx 와 같은 자리) */}
+        <img src="/rapo/home/logo-symbol.svg" alt="" className="absolute left-0 top-0 h-[31.5px] w-[32.25px]" />
+        <img src="/rapo/home/logo-wordmark.svg" alt=""
+          className="absolute bottom-[24.37%] left-[34.21%] right-[0.04%] top-[24.67%]" />
+        {/* eslint-enable @next/next/no-img-element */}
+      </Link>
+      {share}
+    </header>
+  );
+}
+
+export type 모집상태 = '접수 중' | '모집 마감' | '확인 필요';
+
+/* 02 공고 식별 — 남색 판. 기관 · 모집 상태 · 제목 · 태그 · 조회 · 모집인원과 접수 마감.
+   원본의 기관 공식 로고·부서 줄은 자료가 없어 기관 기본 그림을 흰 상자에 둡니다(로고는 오픈 뒤 · 11/5) */
+export function RapoDetailIdentity({ org, orgArt, 상태, title, tags, views, 인원, 마감 }: {
+  org: string; orgArt: string; 상태: 모집상태; title: string; tags: string[];
+  views: number | null; 인원: string; 마감: string;
+}) {
+  return (
+    <section className="flex flex-col gap-(--rapo-dimension-x4) bg-(--rapo-color-bg-navy-solid) p-(--rapo-dimension-x5)
+                        text-(color:--rapo-color-fg-on-neutral-solid)">
+      <div className="flex items-center gap-(--rapo-dimension-x3)">
+        <div className="flex size-[96px] shrink-0 items-center justify-center rounded-(--rapo-radius-r2)
+                        bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x2)">
+          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+          <img src={`/rapo/home/org-${orgArt}.svg`} alt="" className="size-full object-contain" />
+        </div>
+        <p className="rapo-type-t5-bold min-w-0 flex-1 break-keep">{org}</p>
+        {/* 모집 상태 — 접수 중 · 모집 마감(D-03) · 확인 필요(D-04 · 마감일을 못 읽은 공고) */}
+        <span className="rapo-type-t4-bold shrink-0 whitespace-nowrap rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-brand-weak)
+                         px-(--rapo-dimension-x3) py-(--rapo-dimension-x2) text-(color:--rapo-color-fg-brand-contrast)">
+          {상태}
+        </span>
+      </div>
+      <h1 className="rapo-type-t11-bold break-keep [overflow-wrap:anywhere]">{title}</h1>
+      <div className="flex items-center gap-(--rapo-dimension-x2)">
+        <div className="flex min-w-0 flex-1 flex-wrap gap-(--rapo-dimension-x2)">
+          {tags.map((t) => (
+            <span key={t} className="rapo-type-t2-medium whitespace-nowrap rounded-[4px] bg-(--rapo-color-palette-static-white-alpha-100)
+                                     px-(--rapo-dimension-x2) py-(--rapo-dimension-x1)">{t}</span>
+          ))}
+        </div>
+        {views != null && (
+          <p className="rapo-type-t2-medium flex shrink-0 items-center gap-[6px] opacity-75">
+            <RapoMaskIcon src="/rapo/detail/eye-18.svg" w={18} h={18} />
+            조회 {views.toLocaleString('ko-KR')}
+          </p>
+        )}
+      </div>
+      <dl className="grid grid-cols-2 gap-(--rapo-dimension-x3)">
+        <식별칸 icon="/rapo/detail/person-20.svg" iconW={17.8} iconH={19.8} label="모집인원" v={인원} />
+        <식별칸 icon="/rapo/detail/calendar-20.svg" iconW={20} iconH={20} label="접수 마감" v={마감} />
+      </dl>
+    </section>
+  );
+}
+
+function 식별칸({ icon, iconW, iconH, label, v }: { icon: string; iconW: number; iconH: number; label: string; v: string }) {
+  return (
+    <div className="flex min-w-0 items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r2)
+                    bg-(--rapo-color-palette-static-white-alpha-200) p-(--rapo-dimension-x3)">
+      <span className="flex size-(--rapo-dimension-x7) shrink-0 items-center justify-center">
+        <RapoMaskIcon src={icon} w={iconW} h={iconH} />
+      </span>
+      <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
+        <dt className="rapo-type-t2-regular opacity-70">{label}</dt>
+        {/* 원본 20/28 Bold — 토큰 글꼴 가운데 같은 것이 t8 입니다 */}
+        <dd className="rapo-type-t8-bold break-keep [overflow-wrap:anywhere]">{v}</dd>
+      </div>
+    </div>
+  );
+}
+
+/* 03 보수 — 「공고 명시 보수」 (RAPO / Detail / Pay summary 517:392 · 보수 비공개 1210:1072).
+   잠김이면 비회원 원본 글 그대로입니다. 금액 글이 길면(「월급 230만원~300만원」) 한 단계 작은 글꼴 */
+export function RapoPayCard({ 잠김, 값, 덧말 }: { 잠김: boolean; 값: string; 덧말: string | null }) {
+  const 긴값 = 값.length > 12;
+  return (
+    <div className="relative flex flex-col gap-(--rapo-dimension-x2) overflow-hidden rounded-(--rapo-radius-r3)
+                    bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+      <p className="rapo-type-t4-bold pr-(--rapo-dimension-x16) text-(color:--rapo-color-fg-brand-contrast)">공고 명시 보수</p>
+      <p className={`${잠김 || 긴값 ? 'rapo-type-t9-bold' : 'rapo-type-t12-bold'} break-keep pr-(--rapo-dimension-x12)
+                     text-(color:--rapo-color-fg-neutral) [overflow-wrap:anywhere]`}>
+        {잠김 ? '이용 권한 확인 후 공개' : 값}
+      </p>
+      {(잠김 || 덧말) && (
+        <p className="rapo-type-t3-regular whitespace-pre-line text-(color:--rapo-color-fg-neutral-muted)">
+          {잠김 ? '로그인 후 이용 상태를 확인해 주세요.\n이용 가능한 회원에게 보수를 공개해요.' : 덧말}
+        </p>
+      )}
+      {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+      <img src={잠김 ? '/rapo/detail/graphic-lock-48.svg' : '/rapo/home/graphic-pay-48.svg'} alt=""
+        width={48} height={48} className="absolute right-(--rapo-dimension-x5) top-(--rapo-dimension-x5)" />
+    </div>
+  );
+}
+
+/* 03 핵심 조건 한 줄 (RAPO / Detail / Key conditions 517:421) — 아이콘 · 이름 · 값 */
+export function RapoKeyRow({ icon, label, children }: { icon: string; label: string; children: ReactNode }) {
+  return (
+    <div className="flex items-start gap-(--rapo-dimension-x3)">
+      {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+      <img src={icon} alt="" width={20} height={20} className="mt-[9px] shrink-0" />
+      <div className="flex min-w-0 flex-1 flex-col gap-(--rapo-dimension-x1)">
+        <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{label}</p>
+        <div className="text-(color:--rapo-color-fg-neutral)">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/* 영역 구분 8px (원본 「영역 구분」) */
+export function RapoSectionGap() {
+  return <div aria-hidden className="h-(--rapo-dimension-x2) bg-(--rapo-color-bg-neutral-weak)" />;
+}
+
+/* 07 지원 방법 / 08 근무 기관 / 비슷한 공고 — 제목 20/28 + 본문 (흰 판 · 20 여백) */
+export function RapoDetailSection({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
+  return (
+    <section className="flex flex-col gap-(--rapo-dimension-x5) bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x5)">
+      <div className="flex flex-col gap-(--rapo-dimension-x1)">
+        <h2 className="rapo-type-section-title text-(color:--rapo-color-fg-neutral)">{title}</h2>
+        {sub && <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{sub}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/* 접수 기간 카드 (RAPO / Detail / Application period 517:519).
+   날짜 상자는 마감일이 있을 때만 — 없으면 글만(마감일 공고문 확인 · 수시채용) */
+export function RapoPeriodCard({ 달, 날, 기간, 강조, 덧말 }: {
+  달: string | null; 날: string | null; 기간: string; 강조: string | null; 덧말: string | null;
+}) {
+  return (
+    <div className="flex items-center gap-(--rapo-dimension-x4) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+      {달 && 날 && (
+        <div className="flex w-[72px] shrink-0 flex-col rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-layer-default)
+                        p-(--rapo-dimension-x2) text-center">
+          <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">{달}</p>
+          <p className="rapo-type-t12-bold text-(color:--rapo-color-fg-neutral)">{날}</p>
+        </div>
+      )}
+      <div className="flex min-w-0 flex-1 flex-col gap-(--rapo-dimension-x2)">
+        <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">접수 기간</p>
+        <p className="rapo-type-t5-bold break-keep text-(color:--rapo-color-fg-neutral)">{기간}</p>
+        {강조 && <p className="rapo-type-t4-bold break-keep text-(color:--rapo-color-fg-brand)">{강조}</p>}
+        {덧말 && <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{덧말}</p>}
+      </div>
+    </div>
+  );
+}
+
+/* 지원 방법 안의 이름-값 줄 (원본 「방문 접수」·「접수처」 줄 · 이름 72px) */
+export function RapoGuideRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex items-start gap-(--rapo-dimension-x4)">
+      <p className="rapo-type-t4-medium w-[72px] shrink-0 pt-[2px] text-(color:--rapo-color-fg-neutral-muted)">{label}</p>
+      <div className="rapo-type-article-body min-w-0 flex-1 break-keep text-(color:--rapo-color-fg-neutral)">{children}</div>
+    </div>
+  );
+}
+
+/* 08 근무 기관 (RAPO / Detail / Institution 517:658) — 기관 사진은 오픈 뒤(11/5)라 이름과 주소만 */
+export function RapoInstitution({ org, 주소 }: { org: string; 주소: string | null }) {
+  return (
+    <RapoDetailSection title="근무 기관">
+      <div className="flex flex-col gap-(--rapo-dimension-x1)">
+        <p className="rapo-type-t6-bold break-keep text-(color:--rapo-color-fg-neutral)">{org}</p>
+        {주소 && <p className="rapo-type-article-body break-keep text-(color:--rapo-color-fg-neutral-muted)">{주소}</p>}
+      </div>
+    </RapoDetailSection>
+  );
+}
+
+/* 고정 행동 (RAPO / Detail / Sticky actions 517:664 · 112px + 안전 여백).
+   위 줄 = 저장 (좋아요는 기능이 없어 뺐습니다) · 아래 줄 = 지원. 마감이면 원본 D-03 안내를 위에 띄웁니다 */
+export function RapoStickyActions({ 안내, 저장, 지원 }: { 안내: string | null; 저장: ReactNode; 지원: ReactNode }) {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-3xl">
+      {안내 && (
+        <p role="status" className="rapo-type-t4-medium mx-auto mb-(--rapo-dimension-x2) w-fit max-w-[calc(100%-40px)] break-keep
+                                     rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x4)
+                                     py-(--rapo-dimension-x3) text-center text-(color:--rapo-color-fg-neutral) shadow-(--rapo-shadow-s2)">
+          {안내}
+        </p>
+      )}
+      <div className="flex flex-col gap-(--rapo-dimension-x2) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x5)
+                      pt-(--rapo-dimension-x2) pb-[calc(var(--rapo-dimension-x2)+env(safe-area-inset-bottom))]">
+        <div className="flex">{저장}</div>
+        {지원}
+      </div>
+    </div>
+  );
+}
+
+/* 지원 단추 꼴 — 48px deep coral (원본 1047:1109). 마감이면 흐린 잠금 */
+export const 지원단추꼴 =
+  'rapo-type-t4-bold flex h-(--rapo-dimension-x12) w-full items-center justify-center gap-(--rapo-dimension-x2) ' +
+  'rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-deep-coral) px-(--rapo-dimension-x5) text-(color:--rapo-color-fg-on-deep-coral) ' +
+  'active:bg-(--rapo-color-bg-deep-coral-pressed)';
+export const 잠긴단추꼴 =
+  'rapo-type-t4-bold flex h-(--rapo-dimension-x12) w-full items-center justify-center rounded-(--rapo-radius-r3) ' +
+  'bg-(--rapo-color-bg-neutral-weak) text-(color:--rapo-color-fg-neutral-muted)';
