@@ -16,7 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 가도되나집, 받기, 자고 } from './공통.mjs';
-import { 표준읽기, 줄안의날 } from './읽기들.mjs';
+import { 표준읽기, 줄안의날, 보건말 } from './읽기들.mjs';
 import { sortJob } from '../sort-rule.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -34,8 +34,9 @@ export const 곳들 = [
 
 /** 링크 글자가 채용 자리를 가리키나 */
 export const 채용말 = /(채용|구인|임용|일자리|인력\s*모집|직원\s*모집)/;
-/** 그 공고가 보건 쪽인가 (제목·기관 이름으로) */
-export const 보건말 = /(보건소|보건지소|보건의료원|치매안심|치매센터|정신건강|방문건강|건강증진)/;
+/** 그 공고가 보건 쪽인가 — **읽기들.mjs 한 자리**로 옮겼습니다 (2026-11-11 · 지침 6-3).
+ *  표준게시판.mjs 의 새올 거름이 같은 자를 씁니다 */
+export { 보건말 };
 
 if (argv.includes('--자기점검')) {
   const 잼 = [];

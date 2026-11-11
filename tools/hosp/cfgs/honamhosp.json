@@ -1,0 +1,13 @@
+{
+ "name": "호남권역재활병원",
+ "type": "html",
+ "url": "https://honamhosp.or.kr/bbs/board.php?bo_table=6040",
+ "base": "https://honamhosp.or.kr",
+ "row": "<tr[^>]*>\\s*<td class=\"td_subject\"[\\s\\S]*?<\\/tr>",
+ "title": "<a href=\"[^\"]*bo_table=6040&amp;wr_id=\\d+\" class=\"sub_j\">([\\s\\S]*?)<\\/a>",
+ "link": "href=\"([^\"]*bo_table=6040&amp;wr_id=\\d+)\"",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})(?= \\d{1,2}:\\d{2})",
+ "skip": "합격|발표|결과",
+ "single": "posted",
+ "note": "그누보드 변형 스킨(td_subject 하나에 상태·기간·제목·작성일). 「기간 : 2026-10-29 17:00 ~ 2026-11-09 10:00」 의 시각 붙은 두 날짜만 잡음 — 작성일까지 잡으면 마감이 작성일이 됨. 기간 없는 글은 날짜없음. 합격자 발표 글 skip. robots.txt 없음(404). 2026-11-08 확인 · 세중님 11/8 손확인 주소"
+}

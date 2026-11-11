@@ -31,6 +31,7 @@ import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const 기록파일 = process.env.POTJOB_ALARM_STATE || path.join(os.homedir(), '경보기록.json');
@@ -61,6 +62,19 @@ if (잊기) {
   console.log('쉬는 기록을 비웠습니다 — ' + 기록파일);
   process.exit(0);
 }
+/* ★ 2026-11-08 세중님 — 「같은 공고가 두 번 보이나」 알림을 **여기서 함께** 부릅니다.
+   크론 줄을 새로 만들지 않으려고 30분마다 도는 이 파일에 얹었습니다 (크론은 세중님 몫).
+   **따로 떨어진 프로세스로** 부르고 2분에서 끊습니다 — 그쪽이 탈 나도 멈춤 경보는 그대로 갑니다.
+   읽기 + 메일뿐입니다 (숨기지 않습니다). 끄려면 POTJOB_DUP_ALARM=off */
+if (process.env.POTJOB_DUP_ALARM !== 'off') {
+  try {
+    const r = spawnSync(process.execPath, [path.join(여기, '중복공고경보.mjs'), ...(보기만 ? ['--마른'] : [])],
+      { stdio: 'inherit', timeout: 120e3, env: process.env });
+    if (r.error || r.status !== 0) console.error('  ⚠ 중복공고경보가 끝까지 못 돌았습니다 ('
+      + (r.error ? String(r.error.message).slice(0, 80) : 'exit ' + r.status) + ') — 멈춤 경보는 이어서 봅니다');
+  } catch (e) { console.error('  ⚠ 중복공고경보를 못 불렀습니다 — ' + String(e.message).slice(0, 80)); }
+}
+
 if (!cfg.COLLECT_KEY_HS3) { console.error('COLLECT_KEY_HS3 가 없습니다'); process.exit(1); }
 
 async function rpc(fn, body) {

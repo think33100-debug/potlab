@@ -1,0 +1,9 @@
+{
+ "name": "서울특별시 북부병원",
+ "type": "appsite",
+ "host": "https://seoulbbh.recruiter.co.kr",
+ "sn": 4881,
+ "settingType": "A",
+ "천천히": "하루1",
+ "note": "서울특별시 북부병원 채용관(마이다스 구형 appsite · seoulbbh.recruiter.co.kr). index 의 hidden appsiteSn 4881 · settingType A, getMainView 진행중 6건(2026-11-11). 2026-11-11 robots 판정(tools/robots.mjs) — `Disallow: /` + `Allow: /appsite/` 라 /appsite/company/index·getMainView 는 허락, /app/jobnotice/list.json·view 는 금지 → 수집기는 getMainView 로 받고 상세는 안 엽니다(sites.mjs 마이다스길). 2026-11-11 세중님 Q86 「1번 하자」 — 리크루터 채용관은 서버 수집기로 하루 1번(천천히 하루1)."
+}

@@ -15,6 +15,7 @@
 //   "date":  "(20\\d{2}[.\\-/]\\d{1,2}[.\\-/]\\d{1,2})", ← 블록 안의 날짜들 (여러 개면 처음=시작, 마지막=마감)
 //   "skip":  "공지|합격자|발표",                       ← 선택 · 제목에 있으면 건너뜀
 //   "single": "posted" | "deadline",                 ← 선택 · 블록에 날짜가 하나뿐일 때 그것이 올린 날인지 마감일인지 (기본 posted)
+//   "천천히": true,                                   ← 선택 · robots 예외 곳(현황판/robots예외.csv) · 수집기가 하루 2번만(09~12 · 13~18 랜덤) 받음 (tools/hosp/천천히.mjs · 2026-11-09)
 //   "note":  "사람이 알아야 할 것"
 // }
 const fs = require('fs');
@@ -44,7 +45,22 @@ function stripTags(s) {
     .replace(/<![^>]*>/g, ' ')
     .replace(/<\/?[a-zA-Z][a-zA-Z0-9:-]*(\s[^>]*?)?\/?>/g, ' ')
     .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim();
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&#(?:[xX]([0-9a-fA-F]{1,6})|([0-9]{1,7}));/g, 숫자엔티티)
+    .replace(/\s+/g, ' ').trim();
+}
+/* 숫자로 적힌 글자(`&#40;` `&#x28;`)를 풉니다 (2026-11-08)
+ * 양산부산대학교치과병원 목록 제목이 「… &#40;계약직&#41;」 처럼 괄호를 숫자로
+ * 적어서, 제목에 `&#40;` 가 글자 그대로 남았습니다. 이름 붙은 것(&amp; 등)만
+ * 풀고 숫자 꼴은 안 풀고 있었습니다.
+ * 못 쓰는 번호(0 · 서로게이트 · 10FFFF 넘음)는 **원문 그대로** 둡니다.
+ * 제어 글자(탭·줄바꿈 등)는 빈칸으로 바꿉니다 — DB 의 text 가 NUL 을 못 받고,
+ * 제목에 줄바꿈이 들어갈 자리도 없습니다. */
+function 숫자엔티티(원문, 열여섯, 열) {
+  const n = 열여섯 ? parseInt(열여섯, 16) : Number(열);
+  if (!(n > 0) || n > 0x10FFFF || (n >= 0xD800 && n <= 0xDFFF)) return 원문;
+  if (n < 32 || (n >= 127 && n <= 159)) return ' ';
+  return String.fromCodePoint(n);
 }
 function abs(href, base) {
   href = String(href || '').trim().replace(/&amp;/g, '&');
