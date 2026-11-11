@@ -28,8 +28,10 @@ export function 로그인틀({ 아래 }: { 아래: ReactNode }) {
       <main className="relative mx-auto flex min-h-dvh w-full max-w-[480px] flex-col overflow-hidden text-(color:--rapo-color-fg-on-neutral-solid)">
         {/* 사진 — 원본 「사진 2 / 커뮤니티」: 923.1×1230.8 을 414×560 틀에 왼쪽 -482.8 · 위 -45.9 로 자름 (폭 비율로 옮김) */}
         <div aria-hidden className="absolute inset-x-0 top-[120px] h-[560px] overflow-hidden">
-          <Image src="/rapo/login/photo-colleagues.jpg" alt="" width={1086} height={1448} loading="eager"
-            sizes="(max-width: 480px) 223vw, 1071px"
+          {/* ★ 화질 (2026-11-11 대표 「깨져」): 피그마 원본 자체가 1086×1448 뿐이라 이 자르기는 휴대폰에서 약 2.5배로 늘어납니다.
+              그래서 원본 PNG 를 곱게 2배로 키우고(lanczos3 + 약한 선명하게) WebP 88 로 한 번만 담습니다. unoptimized — Next 가 품질 75 로 또 줄이지 않게.
+              더 선명하려면 같은 사진의 큰 원본(가로 2600px 이상)이 있어야 합니다 */}
+          <Image src="/rapo/login/photo-colleagues.webp" alt="" width={2172} height={2896} loading="eager" unoptimized
             className="absolute max-w-none" style={{ width: '222.97%', height: 'auto', left: '-116.62%', top: -45.9 }} />
         </div>
         {/* 가독성 / 상하 명암 — 원본 그라디언트 그대로 (#112231 = brand navy) */}
