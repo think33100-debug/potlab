@@ -1,266 +1,33 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { AvatarPicker } from '@/components/avatar-picker';
-import { MyLists } from '@/components/my-lists';
-import NotifyToggle from '@/components/notify-toggle';
-import { SurveyEdit } from '@/components/survey-edit';
-
-import { browserSupabase } from '@/lib/supabase-browser';
-import { JOB_GROUPS, ROLES, ROLE_DESC, type Role } from '@/lib/who';
+import { RapoMeFrame } from '@/components/rapo/rapo-me';
+import { RapoMeMenu } from '@/components/rapo/rapo-me-menu';
 import { useAuth } from '../auth';
-import { useToast } from '../toast';
-import { BlockList } from '@/components/block-list';
 
-const FREE_CHANGES = 5;
+/* 내 정보 — 새 디자인 「U14-01 / 내 정보」 1375:160 (2026-11-11 밤 · 대표: 피그마 우선).
+   조각은 components/rapo/rapo-me.tsx. 원본 ↔ 지금 기능 맞대기: RAPO노트/디자인적용_내정보_1111.md
 
+   전 화면에 한 장으로 있던 칸들을 메뉴 아래 화면으로 나눴습니다 — 하는 일은 그대로입니다.
+     프로필 편집        /me/profile   사진 · 닉네임(5번) · 직군 · 역할
+     스펙 확인·수정     /me/spec      급여 · 스펙 (SurveyEdit)
+     저장한 공고        /me/activity  찜한 공고 · 내 글 · 내 댓글 (MyLists)
+     공고 알림 설정     /me/notify    알림 켜고 끄기 (NotifyToggle)
+     개인정보·탈퇴      /me/account   차단한 분 · 로그아웃 · 개인정보처리방침 · 회원 탈퇴
+     문의하기           /contact
+   담당자 메뉴(채용 관리 · 교육 관리 · 담당자 신청 · 재직 인증)는 원본 「U14 / 관리 메뉴」 꼴로 그대로 둡니다.
+
+   ── 원본에 있지만 기능이 없어 뺀 것 ─────────────────────────────────
+   내 급여 카드 · 경력/근무 병원 요약 · 입사 스펙 비교 · 내 급여 비교 · 관심 병원 목록 · 희망 취업 조건 ·
+   내 교육 관리 · 이용 상태·학적 정보 · 신고 센터 */
 export default function MyPage() {
-  const router = useRouter();
-  const toast = useToast();
-  const { loading, session, me, isAdmin, 관리, reload, signOut } = useAuth();
-  /* 숨겨 둔 화면에 들어갈 길을 보일지. 관리자이거나 마스터(어느 페르소나든) */
+  const { isAdmin, 관리 } = useAuth();
   const 운영진 = isAdmin || 관리.페르소나역할 != null;
 
-  /* 안 건드렸으면 지금 닉네임을 보여줍니다. 상태로 미리 채우지 않습니다 —
-     effect 안 setState 는 그릴 때마다 한 번 더 그립니다 */
-  const [typed, setTyped] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-
-  const nick = typed ?? me?.nickname ?? '';
-  const setNick = setTyped;
-
-  useEffect(() => {
-    if (loading) return;
-    if (!session) { router.replace('/login'); return; }
-    if (!me) router.replace('/welcome');
-  }, [loading, session, me, router]);
-
-  if (loading || !me) {
-    return <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7"><p className="text-lg text-mute">잠시만요…</p></main>;
-  }
-
-  const used = me.nickname_changes;
-  const left = Math.max(0, FREE_CHANGES - used);
-  const locked = left === 0;
-
-  /* 이 칸에서 바뀐 게 있는지. 없으면 단추를 잠급니다 —
-     「지금 쓰는 닉네임과 같아요」를 오류로 띄우면, 사진만 바꾸러 온 분이
-     저장이 통째로 막힌 줄로 압니다. 이 화면은 칸마다 따로 저장됩니다 */
-  const nickChanged = nick.trim() !== me.nickname;
-
-  const saveNick = async () => {
-    const name = nick.trim();
-    if (!nickChanged) return;
-    if (name.length < 2 || name.length > 12) { setErr('2자에서 12자까지 쓸 수 있어요'); return; }
-
-    /* 남은 횟수는 DB 가 셉니다 (profiles.nickname_changes).
-       한 번 쓰면 안 돌아오니 누르기 전에 몇 번 남았는지 알려드립니다 */
-    if (!confirm(
-      `앞으로 ${left}번 바꿀 수 있어요. 그다음부터는 유료로 바뀝니다. 바꿀까요?`,
-    )) return;
-
-    setBusy(true); setErr(null);
-    const { error } = await browserSupabase()
-      .from('profiles').update({ nickname: name }).eq('id', me.id);
-    setBusy(false);
-
-    if (error) {
-      /* 5번을 넘기면 DB 트리거가 막습니다. 화면에서만 막으면
-         요청을 손으로 만들어 넘길 수 있어서 막는 자리를 DB 에 뒀습니다 */
-      setErr(
-        error.code === '23505'
-          ? '이미 쓰고 있는 닉네임이에요'
-          : error.message.includes('5번')
-            ? '더 바꾸려면 결제가 필요해요'
-            : `바꾸지 못했어요 — ${error.message}`,
-      );
-      return;
-    }
-    await reload();
-    toast(`닉네임이 바뀌었어요! ${left - 1}번 더 바꿀 수 있어요`);
-  };
-
-  /* 직군·역할 바꾸기. 닉네임과 달리 횟수 제한이 없습니다 —
-     졸업하면 학생에서 현직으로 옮겨야 하기 때문입니다 */
-  const setWho = async (patch: { job_group?: string; role?: string }) => {
-    const { error } = await browserSupabase().from('profiles').update(patch).eq('id', me.id);
-    if (error) { toast(`바꾸지 못했어요 — ${error.message}`, { tone: 'danger' }); return; }
-    await reload();
-    toast(patch.role ? `${patch.role}으로 바꿨어요` : `${patch.job_group}로 바꿨어요`);
-  };
-
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <h1 className="text-h1 font-bold">내 정보</h1>
-      <p className="mt-2 text-lg text-mute">칸마다 따로 저장돼요. 하나만 바꿔도 돼요</p>
-
-      <section className="mt-7">
-        <h2 className="text-h3 font-bold">프로필 사진</h2>
-        <p className="mt-1 text-sm text-mute">고르면 바로 저장돼요</p>
-        <div className="mt-5">
-          <AvatarPicker userId={me.id} value={me.avatar} onChange={reload} />
-        </div>
-      </section>
-
-      <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
-        <h2 className="text-h3 font-bold">닉네임</h2>
-        <p className="mt-1 text-lg text-mute">
-          {locked
-            ? '무료로 바꿀 수 있는 5번을 다 쓰셨어요'
-            : `${FREE_CHANGES}번 중 ${left}번 남았어요`}
-        </p>
-
-        {/* 남은 횟수를 눈금으로도 보여줍니다 */}
-        <div className="mt-2 flex gap-1" aria-hidden>
-          {Array.from({ length: FREE_CHANGES }, (_, i) => (
-            <span key={i}
-              className={'h-1 w-[28px] rounded-md ' + (i < used ? 'bg-gray-200 dark:bg-gray-700' : 'bg-teal-strong')} />
-          ))}
-        </div>
-
-        <div className="mt-5 flex gap-2">
-          <input
-            value={nick}
-            onChange={(e) => { setNick(e.target.value); setErr(null); }}
-            disabled={locked}
-            maxLength={12}
-            aria-label="닉네임"
-            className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg disabled:opacity-40 dark:border-gray-700 dark:bg-gray-950"
-          />
-          <button
-            type="button"
-            onClick={saveNick}
-            disabled={busy || locked || !nickChanged}
-            className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            바꾸기
-          </button>
-        </div>
-
-        {err && <p className="mt-2 text-lg text-brand-red">{err}</p>}
-
-        {locked && (
-          <p className="mt-5 rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
-            더 바꾸려면 결제가 필요해요.
-            <span className="mt-1 block text-sm">결제는 아직 준비 중이에요</span>
-          </p>
-        )}
-      </section>
-
-      <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
-        <h2 className="text-h3 font-bold">직군 · 역할</h2>
-        <p className="mt-1 text-lg text-mute">
-          커뮤니티에서 보이는 방이 역할로 갈려요. 졸업하시면 현직으로 바꿔 주세요
-        </p>
-        <p className="mt-1 text-sm text-mute">누르면 바로 저장돼요</p>
-
-        <h3 className="mt-6 text-sm font-bold text-mute">직군</h3>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {JOB_GROUPS.map((g) => (
-            <Pick key={g} on={me.job_group === g} go={() => setWho({ job_group: g })}>{g}</Pick>
-          ))}
-        </div>
-
-        <h3 className="mt-6 text-sm font-bold text-mute">역할</h3>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {ROLES.map((r) => (
-            <Pick key={r} on={me.role === r} go={() => setWho({ role: r })}>
-              {r}
-              <span className={'ml-2 text-sm font-medium ' + (me.role === r ? 'text-white/70' : 'text-mute')}>
-                {ROLE_DESC[r]}
-              </span>
-            </Pick>
-          ))}
-        </div>
-      </section>
-
-      {/* 담당자로 승인된 분과 마스터에게만 붙습니다 (2026-10-09).
-          탑바·아래 탭바와 **같은 값**(내관리메뉴 창구)을 봅니다 — 한쪽만 보이면
-          「분명 승인받았는데 들어갈 길이 없다」가 됩니다 */}
-      {(관리.채용관리 || 관리.교육관리 || 운영진) && (
-        <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
-          <h2 className="text-h3 font-bold">담당자 화면</h2>
-          {운영진 && (
-            <p className="mt-1 text-sm text-mute">
-              아래 둘은 아직 숨겨 둔 화면이라 운영진에게만 보여요
-            </p>
-          )}
-          <div className="mt-4 flex flex-wrap gap-2">
-            {관리.채용관리 && <길 href="/biz">채용 관리</길>}
-            {관리.교육관리 && <길 href="/edu/manage">교육 관리</길>}
-            {/* ★ 2026-10-09 — 이 둘은 **코드에만 있고 들어갈 길이 없었습니다.**
-                web/ 전체를 grep 해서 링크 0곳으로 나왔습니다. 길이 없으면
-                없는 기능입니다 (작업지침 6절) */}
-            {운영진 && <길 href="/partner">담당자 신청</길>}
-            {운영진 && <길 href="/verify">재직 인증</길>}
-          </div>
-        </section>
+    <RapoMeFrame title="내 정보" nav>
+      {(me) => (
+        <RapoMeMenu me={me} 관리={관리} 운영진={운영진} />
       )}
-
-      <SurveyEdit profileId={me.id} role={(me.role ?? '현직') as Role} job={me.job_group ?? '작업치료사'} />
-
-      <MyLists profileId={me.id} />
-
-      {/* 알림 — 찜한 기관·공고를 켜 두면 여기서 알림을 받습니다 (2026-10-02).
-          켜고 끄는 자리가 따로 없어서 공고 화면에서만 켤 수 있었습니다 */}
-      <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
-        <h2 className="text-h3 font-bold">알림</h2>
-        <p className="mt-2 break-keep text-lg text-mute">
-          찜한 기관에 새 공고가 뜨거나, 찜한 공고가 마감 3일 전이면 알려드려요.
-          밤 10시부터 아침 7시까지는 보내지 않고 아침에 모아서 보냅니다
-        </p>
-        <div className="mt-4"><NotifyToggle /></div>
-      </section>
-
-      {/* 차단한 분 — 풀 수 있어야 합니다 (애플 심사 1.2). 없으면 안 그립니다 */}
-      <BlockList />
-
-      <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
-        <button type="button" onClick={signOut}
-          className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950">
-          로그아웃
-        </button>
-
-        {/* 개인정보처리방침 — 내 정보 화면에서도 바로 열 수 있게 (세중님 2026-11-02).
-            꼬리말(app/layout.tsx)·문의(app/contact)·가입 첫 화면과 **같은 주소**입니다 */}
-        <Link href="/terms/privacy"
-          className="mt-4 block text-lg text-mute underline underline-offset-4 hover:text-brand-red">
-          개인정보처리방침
-        </Link>
-
-        {/* 애플 심사 기준 5.1.1(v) — 앱에서 가입할 수 있으면 앱 안에서 탈퇴도
-            할 수 있어야 합니다. 찾기 쉬운 자리에 둡니다 (2026-10-01) */}
-        <Link href="/me/leave"
-          className="mt-4 block text-lg text-mute underline underline-offset-4 hover:text-brand-red">
-          회원 탈퇴
-        </Link>
-      </section>
-    </main>
-  );
-}
-
-/* 담당자 화면으로 가는 단추 하나. 생김새가 네 곳에서 같아야 해서 뺐습니다 */
-function 길({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link href={href}
-      className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950">
-      {children}
-    </Link>
-  );
-}
-
-function Pick({ on, go, children }: { on: boolean; go: () => void; children: React.ReactNode }) {
-  return (
-    <button type="button" onClick={go} aria-pressed={on}
-      className={
-        'rounded-md border px-6 py-4 text-lg font-medium transition-colors ' +
-        (on ? 'border-teal-strong bg-teal-strong text-white'
-            : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950')
-      }>
-      {children}
-    </button>
+    </RapoMeFrame>
   );
 }
