@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState, type FormEvent } from 'react';
 import { useAuth } from '@/app/auth';
 import { CompareNotify } from '@/components/compare-notify';
-import { 고용형태들 } from '@/lib/rapo-job-options';
+import { 고용형태들, 기본정렬 } from '@/lib/rapo-job-options';
 import { JOB_GROUPS, type JobGroup } from '@/lib/who';
 import { RapoButton, RapoChip, RapoMaskIcon } from './rapo-ui';
 
@@ -42,7 +42,7 @@ const 분류들: { key: 분류; icon: string; w: number; h: number; 내림: bool
   { key: '상세', icon: '/rapo/list/sliders-16.svg',   w: 13.5,    h: 13.5,    내림: false },
 ];
 
-export type 조건 = { q: string; job: string | null; sido: string | null; type?: string | null };
+export type 조건 = { q: string; job: string | null; sido: string | null; type?: string | null; sort?: string | null };
 
 /* 조건 → 주소. 직군 「전체」는 회원이면 job=전체 로 적습니다 —
    안 적으면 서버가 가입 때 고른 직군을 다시 걸기 때문입니다 (app/jobs/page.tsx) */
@@ -53,6 +53,7 @@ export function 목록주소(c: 조건, 회원: boolean): string {
   else if (회원) p.set('job', '전체');
   if (c.sido && c.sido !== '전국') p.set('sido', c.sido);
   if (c.type && c.type !== '전체') p.set('type', c.type);
+  if (c.sort && c.sort !== 기본정렬) p.set('sort', c.sort);   // 기본(인기순)은 주소에 안 적습니다
   const s = p.toString();
   return s ? `/jobs?${s}` : '/jobs';
 }
@@ -135,7 +136,7 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
   };
   const 닫기 = () => 창.current?.close();
   const 적용 = () => {
-    const 갈곳 = 목록주소({ q: 지금.q, job: 직군, sido: 지역, type: 고용 }, 회원);
+    const 갈곳 = 목록주소({ q: 지금.q, job: 직군, sido: 지역, type: 고용, sort: 지금.sort }, 회원);
     닫기();
     if (!회원) return 로그인으로(router, 갈곳);
     router.push(갈곳);

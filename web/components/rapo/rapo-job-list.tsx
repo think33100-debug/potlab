@@ -4,6 +4,7 @@ import { useState, type ReactNode } from 'react';
 import { RapoRetryButton } from './rapo-retry';
 import { RapoJobRow, type RapoJob } from './rapo-job-row';
 import { RapoButton, RapoDivider, RapoSectionTitle, RapoSortTabs, RapoStatusPanel, RapoTextAction } from './rapo-ui';
+import { 공고정렬들, 기본정렬, type 공고정렬 } from '@/lib/rapo-job-options';
 
 /* RAPO 새 디자인 · 홈의 「채용 공고」 (2026-11-11).
    Figma 원본 — 기본 955:710 · 로딩 955:767 · 없음 955:802 · 오류 955:835.
@@ -16,17 +17,13 @@ import { RapoButton, RapoDivider, RapoSectionTitle, RapoSortTabs, RapoStatusPane
      RapoJobsError     못 받음 — 이 칸만 다시 불러옵니다
 
    정렬 셋은 서버가 차례대로 받아 온 세 줄(lists)을 바꿔 보여 주기만 합니다 —
-   최신순 new · 인기순 views(조회수) · 마감순 deadline (lib/rapo-home.ts).
+   인기순 views(조회수 · 기본) · 최신순 new · 마감 임박순 deadline (lib/rapo-job-options.ts · lib/rapo-home.ts).
    좋아요는 공고에 아직 없는 기능이라 값이 없으면 그리지 않습니다. */
 
 export type { RapoJob } from './rapo-job-row';
 
-export const RAPO_SORTS = [
-  { key: 'new',      label: '최신순' },
-  { key: 'views',    label: '인기순' },
-  { key: 'deadline', label: '마감순' },
-] as const;
-export type RapoSortKey = (typeof RAPO_SORTS)[number]['key'];
+export const RAPO_SORTS = 공고정렬들;
+export type RapoSortKey = 공고정렬;
 export type RapoJobLists = Record<RapoSortKey, RapoJob[]>;
 
 /* 제목 줄 + 정렬 탭 — 네 상태가 같은 틀을 씁니다. onSort 가 없으면 탭이 눌리지 않습니다 */
@@ -52,7 +49,7 @@ function Frame({ sort, onSort, busy, children }: {
 }
 
 export function RapoJobList({ lists }: { lists: RapoJobLists }) {
-  const [sort, setSort] = useState<RapoSortKey>('new');
+  const [sort, setSort] = useState<RapoSortKey>(기본정렬);
   const shown = lists[sort];
 
   return (
@@ -83,7 +80,7 @@ export function RapoJobList({ lists }: { lists: RapoJobLists }) {
    홈은 비회원에게도 열고(대표 11/11 밤), 이 칸만 가입 안내로 바꿉니다. 꼴은 오류·없음과 같은 RapoStatusPanel */
 export function RapoJobsGuest() {
   return (
-    <Frame sort="new">
+    <Frame sort={기본정렬}>
       <RapoStatusPanel
         icon="jobs"
         title="공고는 회원만 볼 수 있어요"
@@ -97,7 +94,7 @@ export function RapoJobsGuest() {
 /* 못 받았을 때 — 원본 설명 「해당 영역만 재시도하며 다른 영역은 유지」 (rapo-retry.tsx) */
 export function RapoJobsError() {
   return (
-    <Frame sort="new">
+    <Frame sort={기본정렬}>
       <RapoStatusPanel
         role="alert"
         icon="error"
@@ -126,7 +123,7 @@ const 뼈대 = [
 
 export function RapoJobsLoading() {
   return (
-    <Frame sort="new" busy>
+    <Frame sort={기본정렬} busy>
       <p className="sr-only" role="status">공고를 불러오는 중이에요</p>
       <ul aria-hidden className="flex flex-col">
         {[0, 1, 2, 3].map((i) => (
