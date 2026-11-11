@@ -36,9 +36,9 @@ export function Splash() {
     <div id="splash" aria-hidden>
       {/* ★ 2026-11-11 밤 대표 「앱 · 이어지게」 — 휴대폰(안드로이드 홈 화면 앱)이 먼저 띄우는 시작 화면은
           흰 바탕 가운데 R 아이콘입니다(site.webmanifest 의 아이콘·바탕색). 우리 첫 장면을 **그것과 같게** 시작해서
-          그 R 이 커지며 RAPO 로고로 바뀌게 합니다 — 두 화면이 하나로 이어져 보입니다 */}
+          그 R 이 로고 속 R 자리로 올라가 RAPO 로고로 이어집니다 (자리·크기는 2026-11-12 화면 녹화로 잰 값 · globals.css) */}
       {/* eslint-disable-next-line @next/next/no-img-element -- 리액트가 붙기 전에도 떠야 합니다 */}
-      <img src="/rapo/home/logo-symbol.svg" alt="" width={84} height={82} className="splash-mark" />
+      <img src="/rapo/home/logo-symbol.svg" alt="" width={130} height={127} className="splash-mark" />
       {/* eslint-disable-next-line @next/next/no-img-element -- 리액트가 붙기 전에도 떠야 해서 next/image 를 안 씁니다 */}
       <img src="/rapo/home/splash-logo.webp" alt="" width={414} height={311} className="splash-name block h-auto w-full max-w-[414px]" />
       <p className="splash-line rapo-type-t6-medium break-keep text-(color:--rapo-color-fg-neutral)">
