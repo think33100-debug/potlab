@@ -1,10 +1,9 @@
 'use client';
 
-import type { Provider } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useSyncExternalStore } from 'react';
-import { Logo } from '@/components/logo';
+import { RapoLoginButtons, 넓은단추, 로그인틀, type Method } from '@/components/rapo/rapo-login';
 import {
   readLastLogin, writeLastLogin, subscribeLastLogin, serverLastLogin, type LoginMethod,
 } from '@/lib/last-login';
@@ -12,31 +11,24 @@ import { browserSupabase } from '@/lib/supabase-browser';
 import { useAuth } from '../auth';
 import { useToast } from '../toast';
 
-/* 카카오·네이버 색은 teamsparta.md 토큰이 아니라 각 회사가 정한 값입니다.
-   저쪽 심사 기준이라 우리 팔레트로 바꾸면 안 됩니다 — 그래서 값을 그대로 씁니다.
+/* 로그인 — 새 디자인 「U04-01 / 로그인」 (2026-11-11 대표: 피그마 우선).
+   원본: 「RAPO / B / 사진 로그인 / 채택」 1479:4401 (07 · B 가입과 원래 화면 복귀 → 01 공통 가입 1529:17621).
 
-   oauth 는 Supabase 에 적힌 이름 그대로여야 합니다. 2026-09-19 두드려 본 값:
-     kakao         302 → kauth.kakao.com
-     custom:naver  302 → nid.naver.com   ← 네이버는 custom 제공자로 켜져 있습니다
-     naver         400 "Unsupported provider"  (이름을 이렇게 부르면 안 됩니다)
-     apple         400 — 열쇠를 아직 안 받았습니다 */
-type Method = {
-  key: LoginMethod; label: string; cls: string; why?: string;
-  /* 값이 있으면 켜진 수단입니다. 없으면 자리만 있는 것 */
-  oauth?: Provider;
-};
+   원본 설명 — 정지 사진 로그인. 최근 로그인 기록이 있으면 로그인 행동의 안내 문구 자리에
+   마지막 제공자를 말풍선으로 보인다(「최근에 카카오로 만났어요」).
+   원본 컴포넌트에 사진 세 장이 번갈아 나오는 움직임이 있지만 이름이 「정지 사진」이라 첫 장만 둡니다.
 
-const METHODS: Method[] = [
-  { key: 'kakao', label: '카카오로 시작하기', cls: 'bg-[#FEE500] text-[#191600]', oauth: 'kakao' },
-  { key: 'naver', label: '네이버로 시작하기', cls: 'bg-[#03C75A] text-white', oauth: 'custom:naver' },
-  {
-    /* ★ 2026-10-11 — 이었습니다. Supabase 대시보드 → Authentication →
-       Providers → Apple 을 켜면 바로 돕니다 (docs/애플로그인_준비.md).
-       아직 안 켜져 있으면 「Unsupported provider」 가 그대로 뜹니다 —
-       무엇을 고쳐야 할지 보이는 쪽이 낫습니다 */
-    key: 'apple', label: 'Apple로 시작하기', cls: 'bg-black text-white', oauth: 'apple',
-  },
-];
+   하는 일은 전과 같습니다 — 카카오 · 네이버(custom:naver) · Apple 로 Supabase OAuth,
+   마지막 수단은 이 기기에만 기억(lib/last-login.ts), 가입 중간이면 이어서/처음부터, 이미 로그인이면 안내.
+   ★ 수단 순서는 원본대로 **고정**입니다(카카오 · 네이버 · Apple). 전에는 마지막 수단을 맨 위로 올렸는데,
+     이제 그 단추 바로 위 말풍선이 같은 일을 합니다(다른 수단을 누르면 계정이 갈라짐을 막는 표시).
+
+   카카오·네이버·Apple 색은 각 회사가 정한 값입니다(심사 기준) — 토큰으로 바꾸지 않습니다.
+   oauth 이름은 Supabase 에 적힌 그대로여야 합니다 (2026-09-19 두드려 봄: kakao 302 · custom:naver 302 ·
+   naver 400 Unsupported provider · apple 은 대시보드에서 켜야 돕니다 — docs/애플로그인_준비.md).
+
+   피그마에 없어 뺀 것 — 「RAPO 는 지금 테스트 중이에요…」 안내 상자(테스터 안내는 /beta 가 맡습니다) ·
+   「마지막에 쓴 수단은 이 기기에만 기억해요」 줄 · 숨 쉬는 단추 움직임. */
 
 export default function Login() {
   const toast = useToast();
@@ -44,176 +36,74 @@ export default function Login() {
   const { loading, session, me } = useAuth();
   const [busy, setBusy] = useState<LoginMethod | null>(null);
 
-  /* 서버에는 localStorage 가 없습니다. 서버 그림은 null 로 두고
-     브라우저에 붙은 뒤 실제 값으로 바뀝니다 — 안 그러면 두 그림이 어긋납니다 */
+  /* 서버에는 localStorage 가 없습니다. 서버 그림은 null 로 두고 브라우저에 붙은 뒤 실제 값으로 바뀝니다 */
   const last = useSyncExternalStore(subscribeLastLogin, readLastLogin, serverLastLogin);
 
-  /* 마지막에 쓴 수단을 맨 위로 올립니다. 처음 오신 분은 적어둔 순서 그대로입니다.
-     가입할 때 쓴 것을 잊고 다른 걸 누르면 계정이 갈라지기 때문에,
-     배지만 달지 않고 자리까지 올립니다 */
-  const ordered = last
-    ? [...METHODS].sort((a, b) => Number(b.key === last) - Number(a.key === last))
-    : METHODS;
-
   const start = async (m: Method) => {
-    if (!m.oauth) return;
     writeLastLogin(m.key);
     setBusy(m.key);
-
     const { error } = await browserSupabase().auth.signInWithOAuth({
       provider: m.oauth,
       options: { redirectTo: `${location.origin}/auth/callback` },
-      /* 지금 카카오 동의 화면이 profile_image 까지 달라고 합니다.
-         우리는 그 값을 아예 안 읽지만(lib/avatar.ts), 안 쓸 것을 받아두면
-         언젠가 새어 나갑니다.
-
-         여기서는 못 뺍니다 — options.scopes 는 서버에 적힌 기본값을
-         덮는 게 아니라 뒤에 덧붙입니다 (직접 확인: scope 에 두 번 실려 갔습니다).
-         Supabase 대시보드 → Authentication → Providers → Kakao → Scopes 에서
-         profile_image 를 지워야 합니다. */
+      /* 카카오 profile_image 는 여기서 못 뺍니다 — options.scopes 는 덧붙기만 합니다.
+         Supabase 대시보드 → Authentication → Providers → Kakao → Scopes 에서 지웁니다 */
     });
-
-    /* 넘어가지 못하면 진짜 이유를 그대로 보여줍니다.
-       「로그인에 실패했습니다」 로는 무엇을 고쳐야 할지 알 수 없습니다 */
+    /* 넘어가지 못하면 진짜 이유를 그대로 보여줍니다 */
     if (error) {
       setBusy(null);
-      toast(`${m.key} 로그인을 시작하지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 });
+      toast(`${m.이름} 로그인을 시작하지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 });
     }
   };
 
-  /* 로그인은 됐는데 가입을 안 마친 상태입니다.
-     예전에는 여기서 「가입 마저 하기」 단추 하나만 보여줘서,
-     카카오로 하다 튕기면 네이버로 넘어갈 길이 없었습니다.
-     그래서 이어서 할 길과 다른 수단으로 갈 길을 둘 다 둡니다 */
+  /* 로그인은 됐는데 가입을 안 마친 상태 — 이어서 할 길과 다른 수단으로 갈 길을 둘 다 둡니다 */
   const halfway = !!session && !me;
-
   const restart = async () => {
     await browserSupabase().auth.signOut({ scope: 'local' });
     toast('처음부터 다시 해요');
   };
 
-  /* 확인 중에는 아무것도 안 그립니다 (2026-09-25).
-     전에는 loading 을 안 받아서, 로그인한 분이 이 화면을 열면 첫 그림에
-     카카오·네이버 단추가 통째로 뗴다가 바뀌었습니다. 자기가 로그아웃된 줄 알게 됩니다 */
+  /* 확인 중에는 단추를 안 그립니다 — 로그인한 분에게 카카오 단추가 떴다가 바뀌면 로그아웃된 줄 압니다 */
   if (loading) {
-    return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-        <div className="mx-auto w-full max-w-[22rem]">
-          <Logo className="!text-h1" />
-          <p className="mt-2 text-lg text-mute">잠시만요…</p>
-        </div>
-      </main>
-    );
+    return <로그인틀 아래={<p role="status" className="rapo-type-t4-regular text-center">잠시만요…</p>} />;
   }
 
   /* 가입까지 마친 분이 다시 들어온 경우 */
   if (session && me) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-        <div className="mx-auto w-full max-w-[22rem]">
-          <Logo className="!text-h1" />
-          <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">
-            이미 로그인되어 있어요 — {me.nickname} 님
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push('/jobs')}
-            className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
-          >
+      <로그인틀 아래={
+        <>
+          <p className="rapo-type-t4-regular text-center">이미 로그인되어 있어요 — {me.nickname} 님</p>
+          <button type="button" onClick={() => router.push('/jobs')} className={넓은단추 + ' bg-(--rapo-color-bg-deep-coral) text-(color:--rapo-color-fg-on-deep-coral)'}>
             공고 보러 가기
           </button>
-          <button
-            type="button"
-            onClick={restart}
-            className="mt-2 w-full rounded-md border border-gray-200 px-6 py-5 text-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950"
-          >
-            다른 계정으로 로그인
-          </button>
-        </div>
-      </main>
+          <button type="button" onClick={restart} className="rapo-type-t4-medium w-full text-center">다른 계정으로 로그인</button>
+        </>
+      } />
     );
   }
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <div className="mx-auto w-full max-w-[22rem]">
-        <Logo className="!text-h1" />
-        <p className="mt-2 text-lg text-mute">
-          작업치료사 · 물리치료사 채용공고를 한곳에서
-        </p>
-
+    <로그인틀 아래={
+      <>
         {halfway && (
-          <div className="mt-6 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-            <p className="text-lg text-gray-700 dark:text-gray-300">
-              가입을 하다가 멈추셨어요
-            </p>
-            <Link
-              href="/welcome"
-              className="mt-5 block w-full rounded-md bg-brand-red px-6 py-5 text-center text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
-            >
+          <div className="flex flex-col gap-(--rapo-dimension-x3)">
+            <p className="rapo-type-t4-regular text-center">가입을 하다가 멈추셨어요</p>
+            <Link href="/welcome" className={넓은단추 + ' bg-(--rapo-color-bg-deep-coral) text-(color:--rapo-color-fg-on-deep-coral)'}>
               이어서 하기
             </Link>
-            <button
-              type="button"
-              onClick={restart}
-              className="mt-2 w-full rounded-md px-6 py-4 text-sm text-mute hover:underline"
-            >
-              처음부터 다시 하기
-            </button>
+            <button type="button" onClick={restart} className="rapo-type-t4-medium w-full text-center opacity-80">처음부터 다시 하기</button>
           </div>
         )}
-
-        {!halfway && (
-          <p className="mt-5 rounded-sm bg-badge-teal-bg px-5 py-4 text-sm text-teal-strong">
-            RAPO 는 지금 테스트 중이에요. 처음이시면 아래에서 가입을 시작해 주세요. 가입하시면 모든 화면을 볼 수 있어요.
-          </p>
+        {/* 안내 문구 — 최근 수단이 있으면 그 단추 위 말풍선이 대신합니다(원본 설명) */}
+        {halfway ? (
+          <p className="rapo-type-t4-regular text-center">다른 수단으로 로그인하면 새 계정이 돼요</p>
+        ) : !last && (
+          <p className="rapo-type-t4-regular text-center">처음이라면 같은 방법으로 가입할 수 있어요</p>
         )}
-
-        <div className="mt-8 space-y-5">
-          {halfway && (
-            <p className="text-sm text-mute">
-              다른 수단으로 로그인하면 새 계정이 돼요
-            </p>
-          )}
-
-          {ordered.map((m) => {
-            const isLast = last === m.key;
-            return (
-              <div key={m.key}>
-                {isLast && (
-                  <p className="mb-1">
-                    <span className="rounded-md bg-badge-teal-bg px-3 py-1 text-sm font-medium text-teal-strong">
-                      최근에 이걸로 로그인했어요
-                    </span>
-                  </p>
-                )}
-                <button
-                  type="button"
-                  disabled={!m.oauth || busy !== null}
-                  onClick={() => start(m)}
-                  className={
-                    'w-full rounded-md px-6 py-5 text-lg font-bold transition-colors active:scale-[0.98] ' +
-                    m.cls +
-                    (m.oauth ? '' : ' cursor-not-allowed opacity-40') +
-                    (busy === m.key ? ' opacity-60' : '') +
-                    /* 맨 위로 올라온 수단만 아주 천천히 숨을 쉽니다.
-                       teamsparta.md 가 flat-first 라 그림자를 키우지 않고
-                       크기만 1.5% 움직입니다. 움직임 줄이기 설정이면 멈춥니다 */
-                    (isLast ? ' animate-breathe ring-2 ring-teal-strong ring-offset-2 dark:ring-offset-gray-900' : '')
-                  }
-                >
-                  {busy === m.key ? '넘어가는 중…' : m.label}
-                </button>
-                {m.why && <p className="mt-1 text-sm text-mute">{m.why}</p>}
-              </div>
-            );
-          })}
-        </div>
-
-        <p className="mt-7 text-sm text-mute">
-          마지막에 쓴 수단은 이 기기에만 기억해요. 서버로 보내지 않아요
-        </p>
-      </div>
-    </main>
+        <RapoLoginButtons last={halfway ? null : last} busy={busy} onStart={start} />
+        {/* 지금은 테스터만 볼 수 있어 비회원은 안내 화면(/beta)으로 갑니다 — 원본 글은 그대로 둡니다 */}
+        <Link href="/" className="rapo-type-t4-medium w-full text-center">지금은 둘러볼게요</Link>
+      </>
+    } />
   );
 }
