@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Suspense } from 'react';
 import { Hit } from '@/components/hit';
-import { RapoJobFilters, RapoJobSearch, type 조건 } from '@/components/rapo/rapo-job-filters';
+import { RapoJobFilters, RapoJobSearch, 고용형태들, type 조건 } from '@/components/rapo/rapo-job-filters';
 import type { RapoJob } from '@/components/rapo/rapo-job-row';
 import { 받는중, 목록, 못받음, 없음 } from '@/components/rapo/rapo-job-results';
 import { RapoShell } from '@/components/rapo/rapo-shell';
@@ -38,9 +38,10 @@ export const metadata: Metadata = { title: 'RAPO · 채용 공고' };
 
    ── 원본에 있지만 넣지 않은 것 ───────────────────────────────────
    근무시간 줄(수집하지 않는 값) · 상세의 지원 경력·근무일(대표 결정) ·
-   급여 조건(오픈 전 안내) · 고용형태 조건(DB 칸이 없어 잠금 — 막힌 것). */
+   급여 조건(오픈 전 안내).
+   고용형태 조건은 2026-11-11 밤 DB 에 p_employ 를 더해 열었습니다 (주소 type= · RAPO노트/SQL_1113/F_고용형태_조건.sql). */
 
-type SP = { job?: string; sido?: string; q?: string; p?: string };
+type SP = { job?: string; sido?: string; q?: string; p?: string; type?: string };
 
 const PAGE = 20;   // DB 의 job_list() 와 같아야 합니다
 
@@ -63,12 +64,14 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
   const 고른직군 = sp.job === '전체' ? null : (sp.job ?? 내직군);
   const 기본직군 = !sp.job && !!내직군;           // 「내 직군: …」 줄로 보일지
   const 고른시도 = sp.sido || null;
-  const 지금: 조건 = { q, job: 고른직군, sido: 고른시도 };
+  /* 고용형태 — 시트의 칩 값만 받습니다 (다른 글자는 무시) */
+  const 고른고용 = sp.type && sp.type !== '전체' && (고용형태들 as readonly string[]).includes(sp.type) ? sp.type : null;
+  const 지금: 조건 = { q, job: 고른직군, sido: 고른시도, type: 고른고용 };
 
   /* 적용 조건 줄 (RAPO / List / 적용 조건 506:107) — 실제로 건 조건만 씁니다 */
-  const 조건말 = [고른직군, 고른시도].filter(Boolean).join(' · ');
+  const 조건말 = [고른직군, 고른시도, 고른고용].filter(Boolean).join(' · ');
   const 적용줄 = !회원 ? null
-    : 기본직군 && !고른시도 ? `내 직군: ${고른직군}`
+    : 기본직군 && !고른시도 && !고른고용 ? `내 직군: ${고른직군}`
     : 조건말 ? `적용 조건: ${조건말}` : null;
   /* 초기화 = 조건을 모두 뺀 목록. 회원은 job=전체 로 적어야 가입 직군이 다시 안 걸립니다 */
   const 초기화주소 = 회원 ? (q ? `/jobs?q=${encodeURIComponent(q)}&job=전체` : '/jobs?job=전체') : '/jobs';
@@ -78,6 +81,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
     if (q) u.set('q', q);
     if (sp.job) u.set('job', sp.job);
     if (고른시도) u.set('sido', 고른시도);
+    if (고른고용) u.set('type', 고른고용);
     if (p > 0) u.set('p', String(p));
     const s = u.toString();
     return s ? `/jobs?${s}` : '/jobs';
@@ -110,20 +114,21 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       <div aria-hidden className="h-(--rapo-dimension-x1_5) bg-(--rapo-color-bg-neutral-weak)" />
 
       {/* 공고 칸만 늦게 채웁니다 — 받는 동안 위쪽(검색·조건)은 먼저 보입니다 */}
-      <Suspense key={`${q}|${sp.job ?? ''}|${고른시도 ?? ''}|${page}`} fallback={<받는중 />}>
-        <결과 sb={sb} 고른직군={고른직군} 고른시도={고른시도} q={q} page={page}
-          조건있음={!!(q || 고른시도 || 고른직군)} 초기화주소={초기화주소} 쪽주소={쪽주소} />
+      <Suspense key={`${q}|${sp.job ?? ''}|${고른시도 ?? ''}|${고른고용 ?? ''}|${page}`} fallback={<받는중 />}>
+        <결과 sb={sb} 고른직군={고른직군} 고른시도={고른시도} 고른고용={고른고용} q={q} page={page}
+          조건있음={!!(q || 고른시도 || 고른직군 || 고른고용)} 초기화주소={초기화주소} 쪽주소={쪽주소} />
       </Suspense>
     </RapoShell>
   );
 }
 
-async function 결과({ sb, 고른직군, 고른시도, q, page, 조건있음, 초기화주소, 쪽주소 }: {
-  sb: SupabaseClient; 고른직군: string | null; 고른시도: string | null; q: string; page: number;
+async function 결과({ sb, 고른직군, 고른시도, 고른고용, q, page, 조건있음, 초기화주소, 쪽주소 }: {
+  sb: SupabaseClient; 고른직군: string | null; 고른시도: string | null; 고른고용: string | null; q: string; page: number;
   조건있음: boolean; 초기화주소: string; 쪽주소: (p: number) => string;
 }) {
   const list = await sb.rpc('job_list', {
     p_job: 고른직군, p_sido: 고른시도, p_tab: null, p_q: q || null, p_all: false, p_sort: null, p_page: page,
+    p_employ: 고른고용,
   });
 
   /* 42501 = 권한 없음 = 로그인 안 한 분 → 맛보기 */
