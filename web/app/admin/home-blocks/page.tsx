@@ -144,7 +144,7 @@ export default function AdminHome() {
       >
         <div className="mb-6 flex flex-wrap items-end gap-3 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
           <label className="text-sm font-bold text-mute">
-            넘어가는 속도
+            넘어가는 속도 <span className="font-normal">(새 홈 맨 위 배너도 이 값으로 넘어가요)</span>
             <div className="mt-2 flex gap-2">
               <input
                 type="number" min={2} max={60}
