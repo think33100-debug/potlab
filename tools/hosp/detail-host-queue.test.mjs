@@ -1,12 +1,14 @@
-/* 상세 요청 host 큐 시험 — 네트워크·타이머 없이 통제 Promise 로 동시성만 봅니다.
+/* 상세 요청 host 큐 시험 — 네트워크 없이 통제 Promise 로 동시성을, 짧은 ms 로 간격을 봅니다.
  *   node --test tools/hosp/detail-host-queue.test.mjs
- * 간격·대기 시간·실제 HTTP 수는 이 시험 범위가 아닙니다. */
+ * 실제 HTTP 수·실제 3~6초 대기는 이 시험 범위가 아닙니다 (간격은 수십 ms 로 줄여 봅니다). */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 호스트별실행, 호스트열쇠, 상세요청열쇠 } from './detail-host-queue.mjs';
+import {
+  호스트별실행, 호스트열쇠, 상세요청열쇠, 쉴틈, 다시때ms, 속도제한기다림, robots지연읽기, 다른호스트상한, 물러남,
+} from './detail-host-queue.mjs';
 
 const 틱 = () => new Promise((r) => setImmediate(r));
 /* 통제 Promise: 시험이 직접 끝낸다 */
@@ -156,5 +158,101 @@ test('collect-hosp.mjs 가 실제로 helper 를 부른다 (독립 모형이 아�
   const 여기 = path.dirname(fileURLToPath(import.meta.url));
   const src = fs.readFileSync(path.join(여기, '..', 'collect-hosp.mjs'), 'utf8');
   assert.match(src, /from '\.\/hosp\/detail-host-queue\.mjs'/);
-  assert.match(src, /await 호스트별실행\(\s*열것\s*,\s*동시\s*,[\s\S]{0,80}상세요청열쇠\(x,\s*상세주소\)/);
+  assert.match(src, /await 호스트별실행\(\s*열것\s*,\s*Math\.min\(동시,\s*다른호스트상한\)\s*,[\s\S]{0,80}상세요청열쇠\(x,\s*상세주소\)/);
+  /* 간격 · 429 · robots 지연이 그 호출에 실제로 이어져 있다 */
+  assert.match(src, /\{ 간격: \(k\) => 쉴틈\(지연표\.get\(k\)\) \}\);/);
+  assert.match(src, /속도제한기다림\(n, g\.headers/);
+  assert.match(src, /await robots지연읽기\(상세주소\(x\.url\), UA\)/);
+});
+
+/* ── 멘토 11/9 지시문 3 요청 규칙 ── */
+const 잠깐 = (ms) => new Promise((r) => setTimeout(r, ms));
+
+test('쉴틈: Crawl-delay 가 있으면 그 값, 없으면 3~5초 + 0~1초', () => {
+  assert.equal(쉴틈(15), 15000);
+  assert.equal(쉴틈(0.5), 500);
+  assert.equal(쉴틈(0), 0);
+  assert.equal(쉴틈(null, () => 0), 3000);
+  assert.equal(쉴틈(undefined, () => 0.999999), 6000);
+  assert.equal(쉴틈(null, () => 0.5), 4500);
+  for (let i = 0; i < 200; i++) { const v = 쉴틈(null); assert.ok(v >= 3000 && v <= 6000, String(v)); }
+});
+
+test('다른 host 상한은 5, 물러남은 1분 → 5분 → 30분', () => {
+  assert.equal(다른호스트상한, 5);
+  assert.deepEqual(물러남, [60000, 300000, 1800000]);
+});
+
+test('다시때ms: 초 수 · HTTP 날짜 · 못 읽음', () => {
+  const 지금 = Date.parse('2026-11-11T03:00:00Z');
+  assert.equal(다시때ms('120', 지금), 120000);
+  assert.equal(다시때ms('Wed, 11 Nov 2026 03:02:00 GMT', 지금), 120000);
+  assert.equal(다시때ms('Wed, 11 Nov 2026 02:00:00 GMT', 지금), 0);
+  assert.equal(다시때ms('', 지금), null);
+  assert.equal(다시때ms(null, 지금), null);
+  assert.equal(다시때ms('soon', 지금), null);
+});
+
+test('속도제한기다림: Retry-After 가 먼저, 없으면 1·5·30분, 넷째는 null(그 바퀴 건너뜀)', () => {
+  assert.equal(속도제한기다림(1, null), 60000);
+  assert.equal(속도제한기다림(2, null), 300000);
+  assert.equal(속도제한기다림(3, null), 1800000);
+  assert.equal(속도제한기다림(4, null), null);
+  assert.equal(속도제한기다림(1, '7'), 7000);
+  assert.equal(속도제한기다림(3, '7'), 7000);
+  assert.equal(속도제한기다림(4, '7'), null);
+  assert.equal(속도제한기다림(1, '3600'), null);   /* 30분보다 길면 그 바퀴는 건너뜁니다 */
+  assert.equal(속도제한기다림(0, null), null);
+});
+
+test('같은 host 다음 요청은 간격 뒤에 시작하고, 기다리는 동안 다른 host 가 자리를 쓴다', async () => {
+  const 항 = [{ id: 'a1', h: 'A' }, { id: 'a2', h: 'A' }, { id: 'b1', h: 'B' }];
+  const 때 = {};
+  const t0 = Date.now();
+  await 호스트별실행(항, 1, 열쇠, async (x) => { 때[x.id] = Date.now() - t0; }, { 간격: (k) => (k === 'A' ? 80 : 0) });
+  /* 자리는 하나뿐인데 a1 뒤 A 가 쉬는 동안 b1 이 먼저 돈다 */
+  assert.ok(때.b1 < 때.a2, JSON.stringify(때));
+  assert.ok(때.a2 - 때.a1 >= 70, JSON.stringify(때));
+});
+
+test('{ 다시: ms } 는 그 건을 다시 넣고 host 를 쉬게 한다 (자리는 놓는다)', async () => {
+  const 항 = [{ id: 'a1', h: 'A' }, { id: 'b1', h: 'B' }];
+  const 순서 = [];
+  let 처음 = true;
+  await 호스트별실행(항, 1, 열쇠, async (x) => {
+    순서.push(x.id);
+    if (x.id === 'a1' && 처음) { 처음 = false; return { 다시: 60 }; }
+    return undefined;
+  });
+  assert.deepEqual(순서, ['a1', 'b1', 'a1']);
+});
+
+test('{ 요청안함: true } 는 간격을 걸지 않는다', async () => {
+  const 항 = [{ id: 'a1', h: 'A' }, { id: 'a2', h: 'A' }];
+  const t0 = Date.now();
+  await 호스트별실행(항, 6, 열쇠, async () => ({ 요청안함: true }), { 간격: () => 5000 });
+  assert.ok(Date.now() - t0 < 1000);
+});
+
+test('던진 작업 뒤에도 같은 host 간격을 지킨다', async () => {
+  const 항 = [{ id: 'a1', h: 'A' }, { id: 'a2', h: 'A' }];
+  const 때 = {};
+  const t0 = Date.now();
+  await assert.rejects(호스트별실행(항, 6, 열쇠, async (x) => {
+    때[x.id] = Date.now() - t0; if (x.id === 'a1') throw new Error('boom');
+  }, { 간격: () => 60 }));
+  assert.ok(때.a2 - 때.a1 >= 50, JSON.stringify(때));
+});
+
+test('robots지연읽기: 200 이면 Crawl-delay, 아니면 null · 던지지 않음 · origin/robots.txt 를 부름', async () => {
+  const 부른곳 = [];
+  const 가짜 = (글, code = 200) => async (u, o) => { 부른곳.push([u, o.headers['User-Agent']]); return { code, buf: Buffer.from(글) }; };
+  assert.equal(await robots지연읽기('https://h.kr:8443/a/b?c=1', 'UA시험', 가짜('User-agent: *\nCrawl-delay: 15')), 15);
+  assert.deepEqual(부른곳[0], ['https://h.kr:8443/robots.txt', 'UA시험']);
+  assert.equal(await robots지연읽기('https://h.kr/x', 'UA', 가짜('User-agent: *\nDisallow: /x')), null);
+  assert.equal(await robots지연읽기('https://h.kr/x', 'UA', 가짜('User-agent: *\nCrawl-delay: 9', 404)), null);
+  assert.equal(await robots지연읽기('https://h.kr/x', 'UA', async () => ({ 왜: 'TIMEOUT' })), null);
+  assert.equal(await robots지연읽기('https://h.kr/x', 'UA', async () => { throw new Error('x'); }), null);
+  assert.equal(await robots지연읽기('not a url', 'UA', 가짜('')), null);
+  await 잠깐(0);
 });

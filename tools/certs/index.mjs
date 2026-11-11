@@ -133,7 +133,7 @@ export async function 붙여받기(url, opt) {
  * 그중 한 군데가 EUC-KR 을 안 본 탓이었습니다. 한 벌로 모읍니다 (2026-09-28).
  *
  * `enc` 를 주면 그걸 씁니다 (사이트 설정의 `s.enc`).
- * 돌려주는 것 { code, html, cs, 바이트, buf, 왜 } — 던지지 않습니다.
+ * 돌려주는 것 { code, html, cs, 바이트, buf, headers, 왜 } — 던지지 않습니다.
  */
 export async function 글받기(url, opt) {
   const o = opt || {};
@@ -146,5 +146,5 @@ export async function 글받기(url, opt) {
   let html;
   try { html = new TextDecoder(cs.toLowerCase()).decode(g.buf); }
   catch { html = g.buf.toString('utf8'); cs += '(못 읽어 utf-8)'; }
-  return { code: g.code, html, cs, 바이트: g.buf.length, buf: g.buf };
+  return { code: g.code, html, cs, 바이트: g.buf.length, buf: g.buf, headers: g.headers };
 }
