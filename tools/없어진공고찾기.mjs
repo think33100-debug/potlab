@@ -49,6 +49,9 @@ import { 세기, 남기기, 막힘인가, 막힘적기, 막혔나 } from './고�
 import { 없어짐말, 알림상태 } from './hosp/hs_목록상태.mjs';
 import { 워크넷상세칸 } from './워크넷상세칸.mjs';
 import { 고용형태판정 } from './공고문읽기.mjs';
+/* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
+import { 이름표 } from './수집기이름표.mjs';
+const 정찰UA = 이름표('Mozilla/5.0 (compatible; potjob/1.0)');
 
 const argv = process.argv.slice(2);
 const 값 = (이름, 기본) => {
@@ -363,7 +366,7 @@ const cmc목록 = new Map();      /* host → Set(articleNo) · null 이면 못 
          12건만 받으면 13번째부터는 「목록에 없다」가 되어 멀쩡한 공고를
          없어짐으로 읽습니다 (실제로 서울성모 목록이 10건입니다) */
       const 대조길 = 길.replace(/([?&]size=)\d+/, '$1500');
-      const r = await fetch(대조길, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; potjob/1.0)' },
+      const r = await fetch(대조길, { headers: { 'User-Agent': 정찰UA },
         signal: AbortSignal.timeout(20000) });
       const j = r.ok ? await r.json() : null;
       if (!Array.isArray(j)) { cmc목록.set(host, null); continue; }
@@ -403,7 +406,7 @@ for (const [i, x] of 그밖.entries()) {
   let html;
   try {
     const res = await fetch(x.url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; potjob/1.0)', 'Accept-Language': 'ko' },
+      headers: { 'User-Agent': 정찰UA, 'Accept-Language': 'ko' },
       redirect: 'follow',
       signal: AbortSignal.timeout(20000),
     });

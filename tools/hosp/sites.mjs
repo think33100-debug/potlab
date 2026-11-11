@@ -31,7 +31,10 @@ const 앞글 = (r) => (r.왜 ? 안전왜(r.왜) : 안전글(r.text, 80));
 const require = createRequire(import.meta.url);
 const { hospParseHtml, UA } = require('./hs_test.js');
 
-const 기본머리 = { 'User-Agent': UA, 'Accept-Language': 'ko' };
+/* 이름표 — hs_test.js 의 UA 를 옛 값으로 넘깁니다. 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는
+   그 값 그대로 (tools/수집기이름표.mjs 한 자리 · hs_test.js 는 CommonJS 라 여기서 감쌉니다) */
+import { 이름표 } from '../수집기이름표.mjs';
+const 기본머리 = { 'User-Agent': 이름표(UA), 'Accept-Language': 'ko' };
 
 /* gas 의 hsYmd_ 와 같습니다 */
 export function 날짜(s) {
