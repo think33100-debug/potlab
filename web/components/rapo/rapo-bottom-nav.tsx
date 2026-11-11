@@ -33,14 +33,17 @@ export function RapoBottomNav({ current, 관리덮기 }: {
   const here = current ?? pathname;
   const tabs = 아래탐색(관리덮기 ?? 관리);
 
+  /* 배경·윗선도 본문 기둥(max-w-3xl · 768)과 같은 폭입니다 — PC 에서 화면 끝까지 펼쳐지지 않게
+     (2026-11-11 디자이너 검토). 휴대폰에서는 화면 폭이 768 보다 좁아 전처럼 꽉 찹니다 */
   return (
     <nav
       aria-label="아래 탐색"
-      className="fixed inset-x-0 bottom-0 z-40 border-t-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak)
+      className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-3xl
+                 border-t-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak)
                  bg-(--rapo-color-bg-layer-default)"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <ul className="mx-auto flex h-[72px] max-w-3xl items-start px-(--rapo-dimension-x3_5) py-(--rapo-dimension-x2_5)">
+      <ul className="flex h-[72px] items-start px-(--rapo-dimension-x3_5) py-(--rapo-dimension-x2_5)">
         {tabs.map((t) => {
           const 켜짐 = 켜진길(here, t.href);
           const 그림 = 원본아이콘[t.href];
