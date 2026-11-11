@@ -10,41 +10,34 @@ import { JobSave, RapoSaveFace } from '@/components/job-save';
    조건 태그는 「RAPO / Badge · 용도=정보」 453:3335 (읽기용 · 누르지 않음),
    좋아요·조회는 「RAPO / Home / 공고 좋아요·조회수」.
 
-   정렬 셋은 지금 /jobs 의 sort 값과 이어 둡니다 — 최신순 new · 인기순 views · 마감순 deadline.
-   이 화면 안에서는 받은 줄을 다시 늘어놓기만 합니다(새 창구를 부르지 않습니다). */
+   정렬 셋은 서버가 차례대로 받아 온 세 줄(lists)을 바꿔 보여 주기만 합니다 —
+   최신순 new · 인기순 views(조회수) · 마감순 deadline (lib/rapo-home.ts).
+   좋아요는 공고에 아직 없는 기능이라 값이 없으면 그리지 않습니다. */
 
 export type RapoJob = {
   id?: string;               // 없으면 견본 — 저장 단추가 잠기고 줄이 링크가 아닙니다
   org: string;
   orgArt: '01' | '03' | '06'; // 「기관 기본 이미지」 여섯 가운데 원본에 쓰인 셋
   title: string;
-  /* 급여 칸 — 값이면 그대로, 원문 확인이면 문서 아이콘과 흐린 글씨 */
-  pay: { text: string; kind: 'value' | 'check' };
+  /* 급여 칸 — 값이면 그대로, 원문 확인이면 문서 아이콘과 흐린 글씨. 모르면 줄을 뺍니다 */
+  pay?: { text: string; kind: 'value' | 'check' } | null;
   tags: string[];
   likes?: number | null;
   views?: number | null;
-  deadline: string;          // 화면에 쓰는 말 그대로 (「11.15 마감」 · 「마감일 확인 필요」)
-  deadlineSort: number | null; // 마감순 정렬 열쇠 · null 은 맨 뒤
-  order: number;             // 최신순(받은 차례)
+  deadline: string;          // 화면에 쓰는 말 그대로 (lib/job-state.ts 마감배지)
 };
 
-const SORTS = [
+export const RAPO_SORTS = [
   { key: 'new',      label: '최신순' },
   { key: 'views',    label: '인기순' },
   { key: 'deadline', label: '마감순' },
 ] as const;
-type SortKey = (typeof SORTS)[number]['key'];
+export type RapoSortKey = (typeof RAPO_SORTS)[number]['key'];
+export type RapoJobLists = Record<RapoSortKey, RapoJob[]>;
 
-function 늘어놓기(rows: RapoJob[], s: SortKey) {
-  const xs = [...rows];
-  if (s === 'new') return xs.sort((a, b) => a.order - b.order);
-  if (s === 'views') return xs.sort((a, b) => (b.views ?? -1) - (a.views ?? -1) || a.order - b.order);
-  return xs.sort((a, b) => (a.deadlineSort ?? Infinity) - (b.deadlineSort ?? Infinity) || a.order - b.order);
-}
-
-export function RapoJobList({ rows, moreHref = '/jobs' }: { rows: RapoJob[]; moreHref?: string }) {
-  const [sort, setSort] = useState<SortKey>('new');
-  const shown = 늘어놓기(rows, sort);
+export function RapoJobList({ lists }: { lists: RapoJobLists }) {
+  const [sort, setSort] = useState<RapoSortKey>('new');
+  const shown = lists[sort];
 
   return (
     <section
@@ -56,14 +49,15 @@ export function RapoJobList({ rows, moreHref = '/jobs' }: { rows: RapoJob[]; mor
         <h2 id="rapo-home-jobs" className="rapo-type-section-title min-w-0 flex-1 text-(color:--rapo-color-fg-neutral)">
           채용 공고
         </h2>
-        <Link href={moreHref}
+        {/* 지금 고른 정렬 그대로 목록으로 갑니다 */}
+        <Link href={`/jobs?sort=${sort}`}
           className="rapo-type-t2-medium flex h-[44px] w-[90px] items-center justify-end text-(color:--rapo-color-fg-neutral-muted)">
           더 보기<span className="sr-only"> — 채용 공고 전체</span>
         </Link>
       </div>
 
       <div role="group" aria-label="공고 정렬" className="flex h-[44px] gap-(--rapo-dimension-x1)">
-        {SORTS.map((s) => {
+        {RAPO_SORTS.map((s) => {
           const 켜짐 = sort === s.key;
           return (
             <button
@@ -93,7 +87,7 @@ export function RapoJobList({ rows, moreHref = '/jobs' }: { rows: RapoJob[]; mor
       ) : (
         <ul className="flex flex-col gap-(--rapo-dimension-x3)">
           {shown.map((j, i) => (
-            <li key={j.id ?? `${j.org}-${j.title}-${j.order}`} className="flex flex-col gap-(--rapo-dimension-x3)">
+            <li key={j.id ?? `${j.org}-${j.title}`} className="flex flex-col gap-(--rapo-dimension-x3)">
               {i > 0 && <hr aria-hidden className="h-px border-0 bg-(--rapo-color-stroke-neutral-weak)" />}
               <RapoJobRow job={j} />
             </li>
@@ -126,21 +120,23 @@ function RapoJobRow({ job }: { job: RapoJob }) {
             : 제목}
         </h3>
 
-        <div className="flex items-center gap-(--rapo-dimension-x1_5)">
-          {job.pay.kind === 'check' && (
-            <span className="flex size-[16px] shrink-0 items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 (16 틀 안 9.4×13.4) */}
-              <img src="/rapo/home/icon-doc.svg" alt="" width={9.4} height={13.4} />
-            </span>
-          )}
-          <p className={
-            'min-w-0 flex-1 ' + (job.pay.kind === 'check'
-              ? 'rapo-type-t4-medium text-(color:--rapo-color-fg-neutral-muted)'
-              : 'rapo-type-t5-medium text-(color:--rapo-color-fg-neutral)')
-          }>
-            {job.pay.text}
-          </p>
-        </div>
+        {job.pay && (
+          <div className="flex items-center gap-(--rapo-dimension-x1_5)">
+            {job.pay.kind === 'check' && (
+              <span className="flex size-[16px] shrink-0 items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 (16 틀 안 9.4×13.4) */}
+                <img src="/rapo/home/icon-doc.svg" alt="" width={9.4} height={13.4} />
+              </span>
+            )}
+            <p className={
+              'min-w-0 flex-1 ' + (job.pay.kind === 'check'
+                ? 'rapo-type-t4-medium text-(color:--rapo-color-fg-neutral-muted)'
+                : 'rapo-type-t5-medium text-(color:--rapo-color-fg-neutral)')
+            }>
+              {job.pay.text}
+            </p>
+          </div>
+        )}
 
         {job.tags.length > 0 && (
           <ul aria-label="조건" className="flex flex-wrap gap-(--rapo-dimension-x2)">

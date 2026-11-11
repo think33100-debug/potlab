@@ -2,7 +2,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { RapoBottomNav } from './rapo-bottom-nav';
 import { RapoHeader } from './rapo-header';
-import { RapoJobList, type RapoJob } from './rapo-job-list';
+import { RapoJobList, type RapoJobLists } from './rapo-job-list';
+import type { Who } from '@/lib/supabase-server';
+import './rapo-home.css';
 
 /* RAPO 새 디자인 · 홈 · 비회원 · 기본 (2026-11-11)
    Figma 「U01 · 홈 · 비회원 · 기본」 701:1644 (414 × 2872) — 섹션 차례 그대로입니다.
@@ -18,15 +20,20 @@ import { RapoJobList, type RapoJob } from './rapo-job-list';
    (Archive · Wireframe review)에 묶여 있던 자리는 같은 값의 현행 토큰으로 옮겼고,
    현행에 같은 값이 없는 둘(#3F4C57 · #8E241E)만 값 그대로 둡니다 — docs/rapo-design 참고.
 
-   jobs 를 안 주면 공고 칸에 원본의 견본 줄을 씁니다(미리보기 전용). */
-export function HomeU01({ jobs, sample = false }: { jobs: RapoJob[]; sample?: boolean }) {
+   회원이면 「U01 · 홈 · 회원 · 기본」 795:15922 과 다른 글자만 바꿉니다 —
+   헤더 단추 「내 정보」 · 배너1 「공고 둘러보기 →」 · 배너3 제목 「다음 배움을 찾아보세요」.
+   (회원 배너의 그림이 비회원과 같은지는 글자만 대조해 아직 확인 못 했습니다)
+
+   who 가 「모름」이면 로그인도 내 정보도 그리지 않습니다 (lib/supabase-server.ts 규칙).
+   sample 은 미리보기 전용 — 공고 칸이 디자인 견본임을 알리는 띠를 답니다. */
+export function HomeU01({ jobs, who, sample = false }: { jobs: RapoJobLists; who: Who; sample?: boolean }) {
   return (
     <div data-rapo-u01 className="mx-auto w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
-      <RapoHeader />
+      <RapoHeader who={who} />
       <hr aria-hidden className="h-px border-0 bg-(--rapo-color-stroke-neutral-weak)" />
 
       <main>
-        <Banners />
+        <Banners member={who === '회원'} />
         <StartHere />
         <AnonymousTalk />
         <div aria-hidden className="h-[6px] bg-(--rapo-color-bg-layer-default)" />
@@ -38,7 +45,7 @@ export function HomeU01({ jobs, sample = false }: { jobs: RapoJob[]; sample?: bo
             미리보기 · 아래 공고는 디자인 원본의 견본입니다 (실제 공고 아님)
           </p>
         )}
-        <RapoJobList rows={jobs} />
+        <RapoJobList lists={jobs} />
         <MoreServices />
       </main>
 
@@ -52,7 +59,7 @@ export function HomeU01({ jobs, sample = false }: { jobs: RapoJob[]; sample?: bo
 /* ── 배너 셋 · 「02 · 배너 캐러셀 · 좌우 스크롤」 956:17786 ────────────────
    스크롤 스냅만으로 밉니다 — 자바스크립트가 없어도 손가락·트랙패드·방향키로 넘어갑니다.
    점은 장마다 원본에 그려져 있는 그림을 그대로 둡니다(지금 몇 번째인지 그 장이 알립니다). */
-function Banners() {
+function Banners({ member }: { member: boolean }) {
   return (
     <section
       aria-roledescription="carousel"
@@ -77,10 +84,10 @@ function Banners() {
         <p className="absolute left-[40px] top-[57px] w-[239px] text-[23px] font-bold leading-[28px] text-(color:--rapo-brand-color-white)">
           궁금한 병원 이야기부터<br />내가 찾던 일자리까지
         </p>
-        <Link href="/login"
+        <Link href={member ? '/jobs' : '/login'}
           className="absolute left-[40px] top-[168px] flex h-[36px] w-[180px] items-center
                      whitespace-pre text-[14px] font-bold leading-[1.45] text-(color:--rapo-brand-color-white)">
-          {'회원가입하기  →'}
+          {member ? '공고 둘러보기  →' : '회원가입하기  →'}
         </Link>
         <Dots src="/rapo/home/banner1-dots.svg" />
       </div>
@@ -106,7 +113,7 @@ function Banners() {
         <Image src="/rapo/home/banner3.png" alt="" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
         <Frame src="/rapo/home/banner-frame-navy.svg" />
         <p className="absolute left-[36px] top-[65px] w-[240px] text-[23px] font-bold leading-[30px] text-(color:--rapo-brand-color-navy)">
-          내 직군에 맞는<br />교육·학술 일정
+          {member ? <>다음 배움을<br />찾아보세요</> : <>내 직군에 맞는<br />교육·학술 일정</>}
         </p>
         <Link href="/edu"
           className="absolute left-[36px] top-[185px] w-[220px] text-[14px] font-bold leading-[24px] text-(color:--rapo-brand-color-navy)">
