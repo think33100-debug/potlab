@@ -65,7 +65,7 @@ const 병원주소받기 = async (sb: SupabaseClient, id: string): Promise<병�
   const { data, error } = await sb.rpc('공고병원주소', { p_id: id });
   if (error || !data) return null;
   const v = data as { 주소?: string; 갈래?: string };
-  if (!v.주소 || (v.갈래 !== '병원글' && v.갈래 !== '병원게시판')) return null;
+  if (!v.주소 || (v.갈래 !== '병원글' && v.갈래 !== '병원게시판' && v.갈래 !== '병원홈')) return null;
   return { 주소: v.주소, 갈래: v.갈래 };
 };
 
