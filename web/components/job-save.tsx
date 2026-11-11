@@ -58,8 +58,9 @@ export function JobSave({ id, big = false, look }: { id: string; big?: boolean; 
 
   /* RAPO 새 디자인의 저장 단추 (2026-11-11 · Figma 「RAPO / Action / 저장」 353:442).
      누르는 자리 44px · 보이는 면 32px. 하는 일은 위와 같습니다 — 모양만 다릅니다.
-     저장된 모양은 원본에 아직 없어 옅은 면만 깔아 둡니다(임시 · docs/rapo-design-implementation.md) */
-  if (look === 'rapo') return <RapoSaveFace on={!!on} busy={busy} onClick={toggle} />;
+     옛 모양은 먼저 바꿔 보여 주고 실패하면 되돌리지만, 새 모양은 **저장이 된 뒤에만** 채운 책갈피로
+     바뀝니다(원본 설명). 받는 동안 on 은 이미 뒤집혀 있어 직전 값(!on)을 그대로 보여 줍니다 */
+  if (look === 'rapo') return <RapoSaveFace on={busy ? !on : !!on} busy={busy} onClick={toggle} />;
 
   if (big) {
     return (
@@ -90,7 +91,16 @@ export function JobSave({ id, big = false, look }: { id: string; big?: boolean; 
   );
 }
 
-/* 견본 공고(id 없음)에도 같은 면을 쓰려고 떼어 둡니다 — 그때는 onClick 없이 비활성입니다 */
+/* 새 디자인의 저장 단추 면 — Figma 「RAPO / Action / 저장」 353:442
+   (Selected=false 353:430 · Selected=true 353:436). 누르는 자리 44px(rapo/touch/min) · 보이는 면 32px.
+   견본 공고(id 없음)에도 같은 면을 쓰려고 떼어 둡니다 — 그때는 onClick 없이 비활성입니다.
+
+   상태
+     기본      빈 책갈피 (icon-save.svg)
+     저장됨    채운 책갈피 (icon-save-on.svg) — 원본 설명대로 **실제 저장 성공 뒤에만** 바뀝니다
+     누름      면에 bg/transparent-pressed
+     저장 중   눌리지 않음(disabled · aria-busy). 모양은 직전 상태 그대로 — 원본에 저장 중 모양이 없습니다
+     비활성    견본 공고만. 흐리게 */
 export function RapoSaveFace({ on = false, busy = false, onClick }: {
   on?: boolean; busy?: boolean; onClick?: () => void;
 }) {
@@ -102,17 +112,22 @@ export function RapoSaveFace({ on = false, busy = false, onClick }: {
       disabled={off || busy}
       aria-pressed={off ? undefined : on}
       aria-busy={busy || undefined}
-      className="group flex size-[44px] shrink-0 items-center justify-end disabled:cursor-not-allowed"
+      className="group flex size-(--rapo-touch-min) shrink-0 items-center justify-end disabled:cursor-not-allowed"
     >
       <span className={
-        'flex size-[32px] items-center justify-center rounded-(--rapo-radius-r1) ' +
-        (on ? 'bg-(--rapo-color-bg-brand-weak) ' : '') +
-        'group-enabled:group-active:bg-(--rapo-color-bg-transparent-pressed) group-disabled:opacity-40'
+        'flex size-(--rapo-dimension-x8) items-center justify-end rounded-(--rapo-radius-r1) ' +
+        'group-enabled:group-active:bg-(--rapo-color-bg-transparent-pressed) ' +
+        (off ? 'opacity-40' : '')
       }>
-        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-        <img src="/rapo/home/icon-save.svg" alt="" width={15.8} height={19.8} />
+        {/* 원본: 32 면의 오른쪽에 붙은 24 틀 안 가운데 */}
+        <span className="flex size-(--rapo-dimension-x6) items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+          <img src={on ? '/rapo/home/icon-save-on.svg' : '/rapo/home/icon-save.svg'} alt="" width={15.8} height={19.8} />
+        </span>
       </span>
-      <span className="sr-only">{off ? '견본 공고라 저장할 수 없어요' : on ? '저장 취소' : '저장'}</span>
+      <span className="sr-only">
+        {off ? '견본 공고라 저장할 수 없어요' : busy ? '저장하는 중' : on ? '저장 취소' : '저장'}
+      </span>
     </button>
   );
 }

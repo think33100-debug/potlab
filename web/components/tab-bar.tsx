@@ -7,39 +7,26 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/auth';
 import { Icon } from '@/components/icon';
+import { NAV_TABS, 관리길, 아래탐색, 새틀화면, 켜진길 } from '@/lib/nav';
 
-/* 아래 탭바. 앱의 뼈대라 DB 가 아니라 코드에 둡니다 —
-   여기를 바꾸면 라우팅도 같이 바뀝니다.
+/* 아래 탭바.
 
    휴대폰에서만 보입니다. 데스크톱은 위쪽 줄로 충분하고,
-   넓은 화면 아래에 띠가 붙어 있으면 어색합니다. */
-/* 아이콘 이름은 Lucide 이름을 그대로 씁니다 (components/icon.tsx) */
-const TABS = [
-  { href: '/',          label: '홈',       icon: 'house' },
-  { href: '/jobs',      label: '공고',     icon: 'briefcase' },
-  { href: '/community', label: '커뮤니티', icon: 'message-circle' },
-  { href: '/me',        label: '내 정보',  icon: 'user-round' },
-];
+   넓은 화면 아래에 띠가 붙어 있으면 어색합니다.
 
-/* 「채용 관리」·「교육 관리」 는 **승인된 담당자와 마스터에게만** 붙습니다
-   (2026-10-09). 값은 내관리메뉴() 창구가 줍니다 — 화면이 짐작하지 않습니다.
-   링크를 숨기는 것은 길 안내일 뿐이고, 막는 자리는 DB 입니다. */
-function 관리길(관리: { 채용관리: boolean; 교육관리: boolean }) {
-  const xs: { href: string; label: string; icon: string }[] = [];
-  if (관리.채용관리) xs.push({ href: '/biz', label: '채용 관리', icon: 'building-2' });
-  if (관리.교육관리) xs.push({ href: '/edu/manage', label: '교육 관리', icon: 'graduation-cap' });
-  return xs;
-}
+   ★ 2026-11-11 — 무슨 길이 있는지(네 탭 · 담당자 길 · 차례)는 lib/nav.ts 한 자리로 옮겼습니다.
+     새 디자인의 하단 탐색(components/rapo/rapo-bottom-nav.tsx)도 같은 것을 씁니다.
+     새 디자인 화면(홈)에서는 이 탭바를 그리지 않습니다 — 그 화면이 자기 탐색을 그립니다 */
+const TABS = NAV_TABS;
 
 export function TabBar() {
   const pathname = usePathname();
   const { 관리 } = useAuth();
 
-  const on = (href: string) =>
-    href === '/' ? pathname === '/' : pathname.startsWith(href);
+  if (새틀화면(pathname)) return null;
 
-  /* 담당자 길은 **「내 정보」 앞**에 끼웁니다 — 내 정보는 늘 맨 오른쪽입니다 */
-  const tabs = [...TABS.slice(0, 3), ...관리길(관리), ...TABS.slice(3)];
+  const on = (href: string) => 켜진길(pathname, href);
+  const tabs = 아래탐색(관리);
 
   return (
     <nav
