@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { browserSupabase } from '@/lib/supabase-browser';
 import { RapoMaskIcon } from './rapo-ui';
 
 /* 관리자 화면 틀 — 새 디자인 「16 · 관리자 운영 화면」 (2026-11-12 세중님 「관리자 페이지도 적용 시작」).
@@ -84,6 +85,36 @@ function 메뉴줄({ m, 켜짐 }: { m: 메뉴; 켜짐: boolean }) {
   );
 }
 
+/* 근무 현황판 — 이 PC 에서 도는 수집 현황판(RAPO/현황판)으로 가는 바깥 링크 (2026-11-12 세중님 「1번으로」).
+   주소는 공개 저장소에 두지 않고 site_settings 「현황판주소」에 둡니다(고치기는 관리자만 · 금고 SQL_1113/J).
+   Tailscale 에 붙은 기기에서만 열립니다. 주소를 못 읽으면 메뉴에 안 그립니다 */
+function useDashboardUrl(): string | null {
+  const [주소, set주소] = useState<string | null>(null);
+  useEffect(() => {
+    let 살아있음 = true;
+    browserSupabase().from('site_settings').select('value').eq('key', '현황판주소').maybeSingle()
+      .then(({ data }) => {
+        const v = typeof data?.value === 'string' ? data.value : null;
+        if (살아있음 && v && /^https?:\/\//.test(v)) set주소(v);
+      }, () => {});
+    return () => { 살아있음 = false; };
+  }, []);
+  return 주소;
+}
+
+function DashboardLink() {
+  const 주소 = useDashboardUrl();
+  if (!주소) return null;
+  return (
+    <a href={주소} target="_blank" rel="noopener noreferrer"
+      className="rapo-type-t4-bold flex h-[44px] w-full items-center gap-[15px] rounded-(--rapo-radius-r2) pl-[14px] text-[#112231] hover:bg-[#f6f8f9]">
+      <span aria-hidden className="flex size-[20px] shrink-0 items-center justify-center"><통계그림 /></span>
+      근무 현황판 ↗
+      <span className="sr-only">(새 창 · Tailscale 연결이 필요해요)</span>
+    </a>
+  );
+}
+
 export function RapoAdminShell({ children }: { children: ReactNode }) {
   const path = usePathname();
   return (
@@ -101,6 +132,7 @@ export function RapoAdminShell({ children }: { children: ReactNode }) {
         <div aria-hidden className="mx-[20px] h-px bg-[#dde4e6]" />
         <nav aria-label="관리자 메뉴" className="flex flex-col gap-[6px] px-[16px] py-[24px]">
           {원본메뉴.map((m) => <메뉴줄 key={m.href} m={m} 켜짐={켜졌나(path, m.href)} />)}
+          <DashboardLink />
           <details className="mt-(--rapo-dimension-x4)" open={그밖도구.some((m) => 켜졌나(path, m.href))}>
             <summary className="rapo-type-t3-bold cursor-pointer list-none px-[14px] py-(--rapo-dimension-x2) text-[#304f65]">
               그 밖의 도구 ▾
