@@ -305,6 +305,17 @@ console.log('표시 통일 통과 — 연봉 꼴 · 법인 표기 · 지원 링�
   assert.equal(긁기공고인가('HS490653413'), true);
   assert.equal(긁기공고인가('WNK1'), false);
   assert.equal(긁기공고인가(null), false);
+  /* 2026-11-11 밤 세중님 — 포털 공고는 **병원 쪽 자리**가 먼저 (부산의료원 꼴) */
+  const 클린아이 = 'https://www.cleaneye.go.kr/user/itemGongsi.do?x=1';
+  const 병원글 = 'https://www.busanmc.or.kr/busanmc/index.php?pCode=recruit&mode=view&idx=9';
+  const 병원판 = 'https://www.busanmc.or.kr/busanmc/index.php?pCode=recruit';
+  assert.deepEqual(지원링크(클린아이, null, 홈, 게, 'CE1', { 주소: 병원글, 갈래: '병원글' }),
+    { 주소: 병원글, 갈래: '병원글' });
+  assert.deepEqual(지원링크(클린아이, null, 홈, 게, 'CE1', { 주소: 병원판, 갈래: '병원게시판' }),
+    { 주소: 병원판, 갈래: '병원게시판' });
+  /* 창구가 없거나 못 찾으면(null) · 주소 꼴이 아니면 전 차례 그대로 */
+  assert.equal(지원링크(클린아이, null, 홈, 게, 'CE1', null).주소, 클린아이);
+  assert.equal(지원링크(클린아이, null, 홈, 게, 'CE1', { 주소: '없음', 갈래: '병원글' }).주소, 클린아이);
 }
 
 console.log('A·C·E 통과 — 근무처 이름 · 한자·기호 떼기 · 지원 링크 차례');

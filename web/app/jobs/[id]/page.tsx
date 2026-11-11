@@ -21,7 +21,7 @@ import { JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { hospitalStat } from '@/lib/hospital';
 import { iconMap } from '@/lib/icons';
 import { isClosed, todayKst, 금액있나, 기관이름말, 마감배지, 시각말, 연봉말, 조교연구말,
-  보여줄기관이름, 지원링크, 지원방법말 } from '@/lib/job-state';
+  보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
 import { jobViews } from '@/lib/job-views';
 import { siteUrl } from '@/lib/site-url';
 import { MembersOnly } from '@/components/members-only';
@@ -58,6 +58,17 @@ const 원문제목 = async (sb: SupabaseClient, id: string) => {
    detail 은 출처가 준 원문이라 덮지 않습니다. 화면은 뽑은값을 먼저 보고,
    없으면 detail 을 봅니다. 비회원에게는 DB 가 빈 것을 줍니다.
    job_one 에 안 싣는 까닭은 위 원문제목과 같습니다 (칸을 더하려면 drop) */
+/* ★ 2026-11-11 밤 세중님 — 포털 공고의 「지원하러 가기」는 **병원 홈페이지 안 공고**로.
+   주소는 화면이 못 읽는 표(숨은 짝 줄 · 기관 표 · 사이트표)에 있어 창구가 골라 줍니다.
+   창구는 회원에게만 열려 있고, 아직 안 올라갔으면 오류 → null → 전 차례 그대로입니다 */
+const 병원주소받기 = async (sb: SupabaseClient, id: string): Promise<병원주소꼴> => {
+  const { data, error } = await sb.rpc('공고병원주소', { p_id: id });
+  if (error || !data) return null;
+  const v = data as { 주소?: string; 갈래?: string };
+  if (!v.주소 || (v.갈래 !== '병원글' && v.갈래 !== '병원게시판')) return null;
+  return { 주소: v.주소, 갈래: v.갈래 };
+};
+
 const 뽑은값받기 = async (sb: SupabaseClient, id: string) => {
   const { data } = await sb.rpc('공고뽑은값', { p_id: id });
   return (data as Record<string, string> | null) ?? {};
@@ -206,7 +217,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
 
   /* 병원 자료가 없으면 null 입니다 — 그 구역을 통째로 감춥니다.
      0 으로 채우면 「치료사가 없는 병원」으로 읽혀 더 나쁩니다 */
-  const [hosp, icons, views, 경쟁률있나, 뽑은값] = await Promise.all([
+  const [hosp, icons, views, 경쟁률있나, 뽑은값, 병원] = await Promise.all([
     /* 회원만 옵니다. 비회원에게는 null 이고 그 구역을 통째로 감춥니다 —
        0 으로 채우면 「치료사가 없는 병원」으로 읽혀서 더 나쁩니다 */
     member ? hospitalStat(sb, j.org_name) : Promise.resolve(null),
@@ -217,6 +228,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
        (알리오 경쟁률은 본부 이름으로 쌓이고 공고는 분원 이름으로 옵니다) */
     sb.rpc('공고경쟁률있나', { p_공고: j.id }),
     뽑은값받기(sb, id),
+    member ? 병원주소받기(sb, id) : Promise.resolve(null),
   ]);
   const 경쟁률 = 경쟁률있나.data === true;
 
@@ -241,7 +253,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
      게시판 첫 쪽이 아니라 **그 공고 글**로 가야 합니다 (고창종합병원) */
   const 지원 = 지원링크(j.url, detail['접수방법'] as string | undefined,
     (detail['기관홈'] ?? detail['기관홈페이지']) as string | undefined,
-    detail['채용게시판'] as string | undefined, j.id);
+    detail['채용게시판'] as string | undefined, j.id, 병원);
   /* 「지원 방법」 낱말은 이제 <지원방법줄> 조각이 스스로 셉니다 (2026-11-02 합칠 때) —
      여기서 또 세면 두 벌이 됩니다 (지침 6절) */
   const 지원자격: string | null =
