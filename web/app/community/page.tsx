@@ -1,131 +1,92 @@
-import Link from 'next/link';
-import { CommBanner } from '@/components/comm-banner';
+import type { Metadata } from 'next';
 import { Hit } from '@/components/hit';
-import { PostItem } from '@/components/post-row';
-import { Rail } from '@/components/rail';
-import { CHANNELS, GROUPS } from '@/lib/channels';
-import { commBanners } from '@/lib/home';
-import { POST_LIST_COLS, type PostRow } from '@/lib/supabase';
-/* ★ 2026-10-09 — 세션 없는 열쇠꾸러미로 읽으면 **학생이 학생 방을 못 봅니다.**
-   공개글 보기가 방볼수있나() 로 가리는데, 그 함수가 auth.uid() 를 봅니다.
-   쿠키를 읽는 꾸러미로 바꿉니다 (lib/supabase-server.ts) */
+import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
+import {
+  RapoCommunityEmpty, RapoCommunityPost, RapoCommunityTop, RapoCommunityWrite, 어둠, 직군탭, type 직군탭값, type 커뮤니티글,
+} from '@/components/rapo/rapo-community';
 import { serverSupabase } from '@/lib/supabase-server';
 import { daysAgoIso } from '@/lib/time';
 
 export const dynamic = 'force-dynamic';
+export const metadata: Metadata = { title: 'RAPO · 커뮤니티' };
 
-/* 커뮤니티.
+/* 커뮤니티 — 새 디자인 「U06-01 · 커뮤니티 피드」 (2026-11-11 밤 · 대표: 피그마 우선).
+   조각과 원본 위치는 components/rapo/rapo-community.tsx 머리에 있습니다.
 
-   여기만 어둡습니다 — 바탕 #14181C · 카드 #1B2025 (app/surface.tsx 가
-   html 에 data-surface="dark" 를 답니다). 글을 읽는 곳이라 눈이 편해야 하고,
-   들어왔을 때 「다른 공간」이라는 게 바로 보여야 합니다.
+   ── 자료 ─────────────────────────────────────────────────────────
+   공개글 뷰(회원만 읽음 · 숨김·차단·방 권한은 뷰가 거름)에서 최신 20건.
+   탭 「작업치료사」·「물리치료사」는 **글쓴이 가입 직군**으로 거릅니다 — 공개글.profiles.job_group
+   (2026-11-11 밤 대표 「피그마 그대로 자동 표시」 · DB: RAPO노트/SQL_1113/G_커뮤니티_글쓴이직군.sql).
+   인기순 = 최근 7일 안에 올라온 글 중 조회 많은 순(전 화면과 같은 기준).
+   댓글 미리보기 = 그 글의 가장 이른 댓글 한 줄(공개댓글 뷰 · 숨김 걸러짐).
 
-   어두운 구역에서는 보조 글자를 #9BA3AB 보다 연하게 쓰지 않습니다.
-   화면마다 클래스를 바꾸지 않고 globals.css 가 그 구역의 토큰 값을
-   갈아 끼웁니다 — text-mute 이 붙은 자리가 전부 한 번에 밝아집니다.
+   ── 피그마에 없어 잠시 빠진 것 (대표: 하나씩 다시 넣을 예정) ──────────────
+   주제방 17개(자유·임상·급여·처우 …)와 방별 글 수 · 인기 글 칸 · 맨 위 배너(home_blocks comm) ·
+   「치료사끼리 묻고 답하는 곳」 소개 줄. 방 화면(/community/[ch])은 주소로는 그대로 열립니다.
+   ── 원본에 있지만 아직 못 넣은 것 ─────────────────────────────────
+   병원 찾기 단추(병원 탐색 기능 없음) · 글 사이 광고 배너(원본이 「예시」) · 학생 공간 */
 
-   맨 위 배너는 홈과 같은 표(home_blocks kind='comm')에서 옵니다.
-   관리자가 /admin 에서 고칩니다 — 배포가 필요 없습니다. */
+type SP = { job?: string; sort?: string };
 
-/* 인기 글은 「최근 7일 안에 올라온 것 중 조회수 높은 순」입니다.
-   기간을 안 자르면 한 번 뜬 글이 영영 맨 위에 눌러앉습니다. */
-const HOT_DAYS = 7;
+export default async function Community({ searchParams }: { searchParams: Promise<SP> }) {
+  const sp = await searchParams;
+  const 탭: 직군탭값 = (직군탭 as readonly string[]).includes(sp.job ?? '') ? (sp.job as 직군탭값) : '전체';
+  const 정렬 = sp.sort === 'hot' ? 'hot' : 'new';
+  const 주소 = (t: 직군탭값, s: 'new' | 'hot') => {
+    const u = new URLSearchParams();
+    if (t !== '전체') u.set('job', t);
+    if (s === 'hot') u.set('sort', 'hot');
+    const q = u.toString();
+    return q ? `/community?${q}` : '/community';
+  };
 
-export default async function Community() {
-  const since = daysAgoIso(HOT_DAYS);
   const sb = await serverSupabase();
+  let q = sb.from('공개글').select('id,title,body,created_at,comment_count,profiles');
+  if (탭 !== '전체') q = q.eq('profiles->>job_group', 탭);
+  q = 정렬 === 'hot'
+    ? q.gte('created_at', daysAgoIso(7)).order('view_count', { ascending: false }).order('created_at', { ascending: false })
+    : q.order('created_at', { ascending: false });
+  const { data, error } = await q.limit(20);
 
-  /* 내 역할 — 방 묶음을 가립니다 (2026-10-09).
-     표에서도 막지만(공개글 보기 + RLS), 안 보일 방을 그려 놓고 눌렀을 때
-     빈 화면을 보여 주면 안 됩니다. 두 군데가 같은 규칙이어야 합니다 */
-  const { data: 나 } = await sb.rpc('내프로필').maybeSingle();
-  const 역할 = (나 as { role?: string } | null)?.role ?? null;
-  /* 학생이 아니면 학생 방 묶음을 아예 안 그립니다.
-     학생에게는 치료사 방이 보입니다 (읽기만 — 글쓰기 단추는 그 방에서 감춥니다) */
-  const 보일묶음 = 역할 === '학생' ? GROUPS : GROUPS.filter((g) => g.for !== 'stu');
+  type 줄 = { id: number; title: string | null; body: string; created_at: string; comment_count: number;
+    profiles: { nickname: string; avatar: string | null; erased_at: string | null; job_group?: string | null } | null };
+  const 글들 = (data ?? []) as unknown as 줄[];
 
-  const [hot, fresh, counts, banner] = await Promise.all([
-    sb.from('공개글').select(POST_LIST_COLS)
-      .gte('created_at', since)
-      .order('view_count', { ascending: false })
-      .limit(5),
-    sb.from('공개글').select(POST_LIST_COLS)
-      .order('created_at', { ascending: false })
-      .limit(20),
-    sb.from('공개글').select('channel'),
-    commBanners(),
-  ]);
+  /* 댓글 미리보기 — 글마다 가장 이른 댓글 하나 (한 번에 받아 글별로 고름) */
+  const 첫댓글 = new Map<number, 커뮤니티글['댓글']>();
+  const 댓글있는글 = 글들.filter((g) => g.comment_count > 0).map((g) => g.id);
+  if (댓글있는글.length) {
+    const { data: cs } = await sb.from('공개댓글').select('post_id,body,created_at,profiles')
+      .in('post_id', 댓글있는글).is('parent_id', null).order('created_at', { ascending: true }).limit(200);
+    for (const c of (cs ?? []) as unknown as { post_id: number; body: string; profiles: 줄['profiles'] }[]) {
+      if (!첫댓글.has(c.post_id)) 첫댓글.set(c.post_id, { 글쓴이: c.profiles, body: c.body });
+    }
+  }
 
-  const hotRows = (hot.data ?? []) as unknown as PostRow[];
-  const freshRows = (fresh.data ?? []) as unknown as PostRow[];
-
-  const n: Record<string, number> = {};
-  ((counts.data ?? []) as { channel: string }[]).forEach((r) => {
-    n[r.channel] = (n[r.channel] ?? 0) + 1;
-  });
+  const 보일글: 커뮤니티글[] = 글들.map((g) => ({
+    id: g.id, title: g.title, body: g.body, created_at: g.created_at, comment_count: g.comment_count,
+    글쓴이: g.profiles, job_group: g.profiles?.job_group ?? null, 댓글: 첫댓글.get(g.id) ?? null,
+  }));
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
+    <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: 어둠.바탕 }}>
       <Hit kind="community" />
-
-      {/* ① 배너 — DB. 제목이 비어 있는 자리는 안 나옵니다 */}
-      <CommBanner items={banner.items} seconds={banner.seconds} />
-
-      <header className={banner.items.length > 0 ? 'mb-7 mt-8' : 'mb-7'}>
-        <h1 className="break-keep text-h1 font-bold">커뮤니티</h1>
-        <p className="mt-1 break-keep text-lg text-mute">치료사끼리 묻고 답하는 곳</p>
-      </header>
-
-      {/* ② 주제 — 옆으로 밉니다. 묶음(둘 다 · 치료사 · 학생)마다 한 줄 */}
-      <nav className="mb-8" aria-label="방">
-        {보일묶음.map((g) => (
-          <section key={g.for} className="mb-7">
-            <h2 className="mb-3 text-sm font-bold text-mute">{g.title}</h2>
-            <Rail label={`${g.title} 주제`} dark>
-              {CHANNELS.filter((c) => c.for === g.for).map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/community/${c.id}`}
-                  className="flex min-h-[116px] w-full flex-col justify-between rounded-sm
-                             bg-gray-950 p-6 transition-transform duration-[120ms]
-                             active:scale-[0.99] motion-reduce:transition-none"
-                >
-                  <p className="break-keep text-h3 font-bold">
-                    {c.name}
-                    <span className="ml-2 text-sm font-medium text-mute">{n[c.id] ?? 0}</span>
-                  </p>
-                  <p className="mt-3 break-keep text-lg text-mute">{c.desc}</p>
-                </Link>
-              ))}
-            </Rail>
-          </section>
-        ))}
-      </nav>
-
-      {hotRows.length > 0 && (
-        <section className="mb-8 rounded-sm bg-gray-950 p-6">
-          <h2 className="break-keep text-h3 font-bold">
-            지금 많이 본 글
-            <span className="ml-2 text-sm font-medium text-mute">최근 {HOT_DAYS}일</span>
-          </h2>
-          <ul className="mt-2 divide-y divide-white/10">
-            {hotRows.map((p) => <PostItem key={p.id} p={p} showChannel />)}
-          </ul>
-        </section>
-      )}
-
-      <section>
-        <h2 className="break-keep text-h3 font-bold">새 글</h2>
-        {freshRows.length === 0 ? (
-          <p className="break-keep py-8 text-center text-lg text-mute">
-            아직 글이 없어요. 첫 글을 써보세요
-          </p>
+      <RapoCommunityTop 탭={탭} 정렬={정렬} 주소={주소} />
+      <main className="mt-[6px]">
+        {error ? (
+          <RapoCommunityEmpty>
+            <p className="text-[14px]" style={{ color: 어둠.흐린글 }}>글을 불러오지 못했어요. 잠시 후 다시 열어 주세요.</p>
+          </RapoCommunityEmpty>
+        ) : 보일글.length === 0 ? (
+          <RapoCommunityEmpty />
         ) : (
-          <ul className="mt-2 divide-y divide-white/10">
-            {freshRows.map((p) => <PostItem key={p.id} p={p} showChannel />)}
-          </ul>
+          보일글.map((p) => <RapoCommunityPost key={p.id} p={p} />)
         )}
-      </section>
-    </main>
+      </main>
+      {/* 글쓰기 단추·하단 탐색에 마지막 글이 가리지 않게 */}
+      <div aria-hidden style={{ height: 'calc(72px + 68px + env(safe-area-inset-bottom))' }} />
+      <RapoCommunityWrite href="/community/write" />
+      <RapoBottomNav current="/community" dark />
+    </div>
   );
 }

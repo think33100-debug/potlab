@@ -43,5 +43,7 @@ export function 새틀화면(pathname: string): boolean {
      상세는 원본대로 하단 탐색 없이 고정 행동(저장·지원)만 둡니다 (app/jobs/[id]/page.tsx).
      로그인(/login)도 같은 날부터 새 디자인 한 장(사진 로그인)이라 옛 위쪽 줄·탭바를 그리지 않습니다 */
   return pathname === '/' || pathname === '/jobs' || pathname.startsWith('/jobs/') || pathname === '/login'
+    /* 커뮤니티 피드(/community)도 2026-11-11 밤부터 새 틀(어두운 판). 방·글·글쓰기는 아직 옛 틀 */
+    || pathname === '/community'
     || pathname.startsWith('/design-preview');
 }
