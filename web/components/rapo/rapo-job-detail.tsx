@@ -320,16 +320,27 @@ function 시설보임(s: 시설숫자): { 구분: string | null; 칸: 숫자칸[
 
 /* ── 숫자 칸 (2026-11-13 세중님 「숫자 다시 우리 디자인 지침에 맞게 · 서울 1위 51곳 넘어가네」) ──
    지침(RAPO노트/디자인적용_지침_1111.md) — 360·414 폭에서 넘침 0 · 작은 화면은 줄바꿈·카드·그리드로 맞춤.
-   그래서 칸 안에는 **숫자 + 단위만** 둡니다. 숫자는 줄을 안 바꾸고(nowrap) 숫자 t7 Bold(칸이 셋이면 t6 — 360 폭에서 「1,234명」이
-   5px 넘쳤습니다) · 단위 t4 Bold muted —
-   아래 치료사 카드(숫자 t12 · 단위 t5)와 같은 「큰 숫자 · 작은 단위」 꼴입니다.
+   그래서 칸 안에는 **숫자 + 단위만** 둡니다. 숫자는 줄을 안 바꾸고(nowrap) **크게** — 아래 치료사 카드(숫자 t12)와 같은
+   「큰 숫자 · 작은 단위」 꼴입니다(세중님 「숫자는 더 크고 강조」). 크기는 숫자크기() 한 자리가 칸 수와 글자 수로 고릅니다.
+   단위는 t4 Bold muted.
    「51곳 중」 같은 기준은 덧말 줄(t3)로, 「상급종합병원」 같은 글자 값은 칸 밖의 배지(RapoBadge)로 뺍니다.
    이름(재활의학과 전문의)은 좁은 폭에서 두 줄이 될 수 있어 칸을 위아래로 벌려 숫자 줄을 맞춥니다. 0·빈 값은 칸을 안 그립니다 */
 type 숫자칸 = { 이름: string; 수: number | null | undefined; 단위: string; 덧말?: string };
+
+/* 360 폭에서 재서 정한 표 (2026-11-13 · 운영 화면에 같은 마크업을 넣어 Range 로 잼 · 넘친 칸 0).
+   칸 하나 t12 · 둘 t10(「2,446」 다섯 글자까지, 넘으면 t8) · 셋 t10(「999」 세 글자까지, 넘으면 t6).
+   지금 자료의 최댓값 — 병상 2,446 · 복지관 종사자 90 · 치매센터 34 · 요양원 정원 389 — 은 모두 큰 쪽입니다 */
+function 숫자크기(칸: 숫자칸[]): string {
+  const 글자 = Math.max(...칸.map((x) => (x.수 as number).toLocaleString('ko-KR').length));
+  if (칸.length >= 3) return 글자 <= 3 ? 'rapo-type-t10-bold' : 'rapo-type-t6-bold';
+  if (칸.length === 2) return 글자 <= 5 ? 'rapo-type-t10-bold' : 'rapo-type-t8-bold';
+  return 'rapo-type-t12-bold';
+}
 const 숫자만 = (칸: 숫자칸[]) => 칸.filter((x) => x.수 != null && x.수 > 0);
 
 function 숫자칸들({ 칸 }: { 칸: 숫자칸[] }) {
   if (칸.length === 0) return null;
+  const 크기 = 숫자크기(칸);
   return (
     <dl className="grid gap-(--rapo-dimension-x2)" style={{ gridTemplateColumns: `repeat(${칸.length}, minmax(0, 1fr))` }}>
       {칸.map((x) => (
@@ -337,7 +348,7 @@ function 숫자칸들({ 칸 }: { 칸: 숫자칸[] }) {
           <dt className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{x.이름}</dt>
           <dd className="flex flex-col">
             <span className="whitespace-nowrap text-(color:--rapo-color-fg-neutral)">
-              <span className={(칸.length >= 3 ? 'rapo-type-t6-bold' : 'rapo-type-t7-bold') + ' tabular-nums'}>{(x.수 as number).toLocaleString('ko-KR')}</span>
+              <span className={크기 + ' tabular-nums'}>{(x.수 as number).toLocaleString('ko-KR')}</span>
               <span className="rapo-type-t4-bold ml-[2px] text-(color:--rapo-color-fg-neutral-muted)">{x.단위}</span>
             </span>
             {x.덧말 && <span className="rapo-type-t3-regular whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">{x.덧말}</span>}
