@@ -22,7 +22,7 @@ import {
    하는 일(이름 찾기 · 지역 · 종별 · 정렬 · 20곳씩 더 보기)은 그대로이고 모양만 바꿨습니다.
      종별 타일 줄 → 원본의 「기관 유형 전체」 조건 칩(펼치면 같은 여덟 갈래)
      결과 줄 셋째 줄 — 원본은 별점·후기 수인데 **근무 후기가 아직 없어** 그 자리에
-       공고 있음 · 치료사 수(작업·물리·재활의학과)를 적습니다. 별점은 지어내지 않습니다
+       공고 있음 · 치료사 수(작업·물리·재활의학과 전문의)를 적습니다. 별점은 지어내지 않습니다
      원본에 없는 「바쁜 곳/보통/여유로운 곳」 띠와 병상·정원 수는 잠시 뺐습니다 (세중님 규칙: 피그마 우선)
    색은 원본 값 그대로(#112332 바탕 · #203747 칸 · #f4f6f8 글씨 · #bacad4 흐린 글씨 · #ffa691 강조) —
    커뮤니티 어둠 판(components/rapo/rapo-community.tsx)과 같은 처리입니다. */
@@ -205,7 +205,7 @@ function OrgFilterChip({ label, on, onClick, 펼침 }: { label: string; on: bool
 function Card({ r }: { r: OrgListRow }) {
   const kind = TILE_NAME[r.tile] ?? (shortKinds(r.kinds) || '기관');
   const 인력 = r.staffed
-    ? [r.ot != null && `작업 ${r.ot}`, r.pt != null && `물리 ${r.pt}`, r.rehab != null && `재활의학과 ${r.rehab}`].filter(Boolean).join(' · ')
+    ? [r.ot != null && `작업 ${r.ot}`, r.pt != null && `물리 ${r.pt}`, r.rehab != null && `재활의학과 전문의 ${r.rehab}`].filter(Boolean).join(' · ')
     : '인력 정보 없음';
   return (
     <Link href={`/orgs?org=${encodeURIComponent(r.name)}&sido=${encodeURIComponent(r.sido_std ?? '')}`}

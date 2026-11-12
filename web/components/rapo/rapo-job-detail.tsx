@@ -318,7 +318,7 @@ function 시설보임(s: 시설숫자): { 개요: [string, string][]; 치료사:
 
 /* 「얼마나 바쁜 곳인지」는 일단 뺐습니다 (2026-11-12 저녁 세중님 「일단 빼자」). 계산은 lib/hospital.ts busyWord 에 그대로 있고,
    그리던 조각은 이 파일의 11/12 낮 판(커밋 5fe1f19)에 있습니다 */
-export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false, 보수 = null, 시설 = null }: {
+export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false, 보수 = null, 시설 = null, 공고없이 = false }: {
   치료사: { pt: number | null; ot: number | null; 기준: string | null } | null;
   /* 병원이 아닌 곳 — 복지관 · 치매센터 · 요양원 (2026-11-12 밤 세중님 · 옛 앱 「이 복지관은 이런 곳입니다」) */
   시설?: 시설숫자 | null;
@@ -327,13 +327,15 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
   경쟁률: 경쟁률줄[];
   /* 이번 공고가 인턴인가 — 인턴 경쟁률은 공개되지 않은 곳이 많아 안내 글을 바꿉니다 (11/12 세중님) */
   인턴?: boolean;
+  /* 병원 게시판 「병원 정보」 탭 (2026-11-13) — 이번 공고가 없으니 「이번 공고와 같은 고용형태」 안내 줄을 안 그립니다 */
+  공고없이?: boolean;
 }) {
   /* 구분·병상 — 옛 웹 공고 상세의 「종별 · 병상」을 다시 넣습니다 (2026-11-12 세중님 「병상, 구분 이런 것도 넣자」).
      자료는 치료사 인원과 같은 심평원 행(org_hospital_by_name)이라 새 창구가 없습니다. 0·빈 값은 칸을 안 그립니다 */
   const 개요 = 바쁨 ? ([
     ['구분', 바쁨.kind || null],
     ['병상', 바쁨.bed > 0 ? `${바쁨.bed.toLocaleString('ko-KR')}개` : null],
-    ['재활의학과 의사', 바쁨.rehab != null && 바쁨.rehab > 0 ? `${바쁨.rehab.toLocaleString('ko-KR')}명` : null],
+    ['재활의학과 전문의', 바쁨.rehab != null && 바쁨.rehab > 0 ? `${바쁨.rehab.toLocaleString('ko-KR')}명` : null],
   ] as const).filter(([, v]) => v) : [];
   const 곳 = 시설 ? 시설보임(시설) : null;
   if (!치료사 && !보수 && 경쟁률.length === 0 && 개요.length === 0 && !곳) return null;
@@ -402,7 +404,7 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
       )}
       {보수 && <연봉칸 보수={보수} />}
       {/* 이번 공고와 같은 고용형태 자료가 없으면 한 줄로 밝힙니다 (11/12 세중님 — 청년인턴 공고에 공무직·기간제만 보였음) */}
-      {경쟁률.length > 0 && !경쟁률.some((g) => g.같은형태) && (
+      {!공고없이 && 경쟁률.length > 0 && !경쟁률.some((g) => g.같은형태) && (
         <p className="rapo-type-t3-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x3) text-(color:--rapo-color-fg-neutral-muted)">
           {인턴
             ? '인턴 채용 경쟁률은 이 병원에서 공개하지 않았어요. 같은 병원의 다른 채용을 참고로 보여 드려요.'
