@@ -13,7 +13,7 @@ import { RapoMaskIcon } from './rapo-ui';
      02 공고 식별 983:22398   ← RapoDetailIdentity
      03 핵심 조건 983:22154   ← RapoPayCard · RapoKeyRow
      07 지원 방법 517:651     ← RapoApplyGuide · RapoPeriodCard · RapoGuideRow
-     08 근무 기관 517:658     ← RapoInstitution
+     08 근무 기관 517:658     ← 2026-11-12 밤 세중님 「없애자」 — 근무 장소는 근무 조건 칸으로
      비슷한 공고 983:22176    ← app/jobs/[id]/page.tsx 가 공고 행(RapoJobRow)으로
      고정 행동 517:664        ← app/jobs/[id]/page.tsx (저장 · 지원)
 
@@ -198,17 +198,6 @@ export function RapoGuideRow({ label, children }: { label: string; children: Rea
 }
 
 /* 08 근무 기관 (RAPO / Detail / Institution 517:658) — 기관 사진은 오픈 뒤(11/5)라 이름과 주소만 */
-export function RapoInstitution({ org, 주소 }: { org: string; 주소: string | null }) {
-  return (
-    <RapoDetailSection title="근무 기관">
-      <div className="flex flex-col gap-(--rapo-dimension-x1)">
-        <p className="rapo-type-t6-bold break-keep text-(color:--rapo-color-fg-neutral)">{org}</p>
-        {주소 && <p className="rapo-type-article-body break-keep text-(color:--rapo-color-fg-neutral-muted)">{주소}</p>}
-      </div>
-    </RapoDetailSection>
-  );
-}
-
 /* 고정 행동 (RAPO / Detail / Sticky actions 517:664 · 112px + 안전 여백).
    위 줄 = 저장 (좋아요는 기능이 없어 뺐습니다) · 아래 줄 = 지원. 마감이면 원본 D-03 안내를 위에 띄웁니다 */
 export function RapoStickyActions({ 안내, 저장, 지원 }: { 안내: string | null; 저장: ReactNode; 지원: ReactNode }) {
@@ -270,9 +259,9 @@ function 연봉칸({ 보수 }: { 보수: 병원보수 }) {
         {보일칸.map(([이름, v, 이상]) => (
           <div key={이름} className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
             <p className="rapo-type-t4-bold break-keep text-(color:--rapo-color-fg-brand-contrast)">{이름}</p>
-            <p className="text-(color:--rapo-color-fg-brand)">
-              <span className="rapo-type-t12-bold">{만원(v as number)}</span>
-              <span className="rapo-type-t5-bold ml-[2px]">만 원{이상 ? ' 이상' : ''}</span>
+            <p className="whitespace-nowrap text-(color:--rapo-color-fg-neutral)">
+              <span className="rapo-type-t10-bold">{만원(v as number)}</span>
+              <span className="rapo-type-t4-bold ml-[2px] text-(color:--rapo-color-fg-neutral-muted)">만 원{이상 ? ' 이상' : ''}</span>
             </p>
           </div>
         ))}
@@ -324,7 +313,7 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
             {([['물리치료사', 치료사.pt], ['작업치료사', 치료사.ot]] as const).map(([이름, n]) => (
               <div key={이름} className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
                 <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{이름}</p>
-                <p className="text-(color:--rapo-color-fg-brand)">
+                <p className="whitespace-nowrap text-(color:--rapo-color-fg-neutral)">
                   <span className="rapo-type-t12-bold">{n == null ? '—' : n.toLocaleString('ko-KR')}</span>
                   {n != null && <span className="rapo-type-t5-bold ml-[2px]">명</span>}
                 </p>
@@ -352,7 +341,7 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
           </p>
           <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
             <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">평균 경쟁률</p>
-            <p className="text-(color:--rapo-color-fg-brand)">
+            <p className="whitespace-nowrap text-(color:--rapo-color-fg-neutral)">
               <span className="rapo-type-t12-bold">{g.평균 == null ? '—' : Number(g.평균).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}</span>
               {g.평균 != null && <span className="rapo-type-t6-bold ml-[4px]">: 1</span>}
             </p>
