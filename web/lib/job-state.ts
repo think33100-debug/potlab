@@ -466,7 +466,24 @@ export function 자사채용주소(접수방법: string | null | undefined): str
 export function 조교연구말(갈래: string | null | undefined): string | null {
   if (갈래 === '조교') return '조교';
   if (갈래 === '연구') return '연구';
+  /* ★ 2026-11-12 세중님 — 「행정」: 치료사로 일하는 자리는 아니지만 우리 직군이 **지원할 수 있는** 자리
+     (국립중앙의료원 「계약직 행정(치매사례관리팀)」 — 우대 전공에 작업치료학). 가르는 일은 같은 DB 함수가 합니다 */
+  if (갈래 === '행정') return '행정';
   return null;                       /* 모르는 값은 안 찍습니다 — 지어내지 않습니다 */
+}
+
+/* ★ 2026-11-12 세중님 「작업치료사가 지원할 수 있냐 없냐가 중요해」 — 직군 태그에 찍을 말 한 자리.
+ * 「행정」 갈래는 그 직군으로 **일하는** 자리가 아니라서, 태그가 「작업치료사」면 치료사 채용으로 읽힙니다.
+ * 그래서 「작업치료사 지원 가능」으로 찍습니다. 조교·연구는 10/14 결정(한 낱말 배지) 그대로 직군만 찍습니다. */
+export function 직군태그(직군: string | null | undefined, 갈래: string | null | undefined): string | null {
+  if (!직군) return null;
+  return 갈래 === '행정' ? `${직군} 지원 가능` : 직군;
+}
+
+/* 공유·미리보기 제목 — 조교·연구·행정 갈래는 「○○ 작업치료사 채용」이 거짓이라 **원문 제목**을 씁니다 (2026-11-12) */
+export function 공유제목(기관: string, 직군: string | null | undefined, 갈래: string | null | undefined, 원문제목: string | null | undefined): string {
+  if (조교연구말(갈래) && 원문제목) return `${기관} ${원문제목}`.trim();
+  return `${기관} ${직군 ?? '치료사'} 채용`;
 }
 
 /* ★ 2026-10-24 세중님 ㉡ — 「지원 방법」 한 줄 **한 자리**.
