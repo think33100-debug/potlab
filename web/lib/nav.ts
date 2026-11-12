@@ -61,5 +61,7 @@ export function 새틀화면(pathname: string): boolean {
     || pathname === '/volunteer' || pathname === '/youth'
     /* 경쟁률(/compete · 회차별 보기)도 2026-11-12 부터 새 틀(피그마 없음 · 목록 상단·카드 조각) */
     || pathname === '/compete'
+    /* 문의하기(/contact)도 2026-11-13 부터 새 틀(피그마 T05 짧은 문의 안내 · 자기 뒤로 줄) */
+    || pathname === '/contact'
     || pathname.startsWith('/design-preview');
 }
