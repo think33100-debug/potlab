@@ -19,11 +19,21 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   /* 공유한 링크의 미리보기 그림 주소를 절대 주소로 만들어 줍니다.
-     이게 없으면 /og.png 가 상대 주소로 나가 카톡이 그림을 못 찾습니다.
+     이게 없으면 미리보기 그림(/api/og/site 등)이 상대 주소로 나가 카톡이 그림을 못 찾습니다.
      배포 주소는 Vercel 이 알아서 알려줍니다 — lib/site-url.ts 참고 */
   metadataBase: new URL(siteUrl()),
   title: "RAPO · 채용공고",
   description: "작업치료사·물리치료사 채용공고를 한곳에서",
+  /* ★ 2026-11-12 밤 세중님 — 공고가 아닌 링크(홈·가입 링크·로그인 …)의 카톡 미리보기 그림.
+     전에는 없어서 카톡이 예전에 받아 둔 옛 그림을 보였습니다. 공고·글은 자기 그림으로 덮어씁니다 */
+  openGraph: {
+    type: "website",
+    siteName: "RAPO",
+    title: "RAPO · 채용공고",
+    description: "작업치료사·물리치료사 채용공고를 한곳에서",
+    images: ["/api/og/site"],
+  },
+  twitter: { card: "summary_large_image", images: ["/api/og/site"] },
   /* 브랜드 명세서 7번 — 파비콘·홈 화면 아이콘·PWA */
   icons: {
     icon: [

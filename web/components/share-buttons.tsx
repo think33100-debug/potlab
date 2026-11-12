@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { useToast } from '@/app/toast';
+import { 공유주소 } from '@/lib/site-url';
 
 /* 공유 · 링크 복사.
 
@@ -32,7 +33,8 @@ export function ShareButtons({
 }) {
   const toast = useToast();
 
-  const url = () => `${location.origin}${path}`;
+  /* 늘 RAPO 대표 주소로 — 옛 이름 주소(potjob-web.vercel.app)에서 눌러도 (lib/site-url.ts 공유주소) */
+  const url = () => 공유주소(path);
 
   const share = async () => {
     const data = { title: `${title} · RAPO`, text: text ?? title, url: url() };
