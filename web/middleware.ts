@@ -20,8 +20,13 @@ import { GUEST_COOKIE } from '@/lib/guest-view';
    함께 올라가야 닫힌 것입니다. */
 
 /* 비회원에게 막는 API — 공고 미리보기 그림 · 커뮤니티 글 사진.
-   나머지 API(hit · build · biz · apple-revoke · diag-who)는 예전처럼 안 거칩니다 */
+   나머지 API(hit · build · biz · apple-revoke · diag-who)는 예전처럼 안 거칩니다.
+   ★ 2026-11-12 세중님 「공유하기 하면 누구든 그 공고를 볼 수 있어야」 — 공고 미리보기 그림(/api/og/job/…)은 엽니다.
+     카톡이 링크 미리보기를 만들 때 비회원으로 그림을 받아 가기 때문입니다 (아래 공유공고길) */
 const 막는API = ['/api/og', '/api/post-image'];
+/* 공유받은 공고 — 공고 하나(/jobs/<번호>)와 그 미리보기 그림은 비회원에게도 엽니다 (2026-11-12 세중님).
+   비회원에게 무엇이 나가는지는 DB 창구 job_one 이 정합니다 — 원문 주소·지원 자격·급여는 안 나갑니다(10월 규칙 그대로) */
+const 공유공고길 = (p: string) => /^\/jobs\/[^/]+$/.test(p) || /^\/api\/og\/job\/[^/]+$/.test(p);
 
 /* 검색엔진 색인을 막습니다 (테스트 동안). app/robots.ts 와 한 쌍 */
 const 색인막기 = 'noindex, nofollow';
@@ -86,6 +91,8 @@ export async function middleware(req: NextRequest) {
        공고 상세(/jobs/<번호>)와 그 밖은 전처럼 로그인으로 갑니다. 비회원길(lib/beta.ts)에 넣지 않은 까닭 —
        거기는 아래 길(/jobs/…)까지 같이 열립니다 */
     if (!모름 && path === '/jobs') return 쿠키싣기(res);
+    /* ★ 2026-11-12 세중님 — 공유받은 공고 상세와 그 미리보기 그림도 비회원에게 엽니다. 아래 가입 권유로 이어집니다 */
+    if (!모름 && 공유공고길(path)) return 쿠키싣기(res);
     if (api) return 쿠키싣기(new NextResponse('회원 전용입니다', { status: 401 }));
     /* 모름 — 회원일 수도 있으니 주소는 그대로 두고 안내만 보입니다.
        새로고침하면 다시 물어봅니다 */

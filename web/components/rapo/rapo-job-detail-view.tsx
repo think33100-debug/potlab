@@ -198,6 +198,30 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
           <RapoButton href={p.비슷한주소} tone="outline" full>전체 공고 둘러보기</RapoButton>
         </RapoDetailSection>
 
+        {/* 공유받은 비회원에게 가입 권유 (2026-11-12 세중님 「내용이 만족스러웠나요? 1분 만에 회원가입하고 둘러보기」).
+            적는 것은 회원이 실제로 보는 것만입니다. 가입하면 이 공고로 돌아옵니다(로그인 화면의 next) */}
+        {p.who === '비회원' && (
+          <>
+            <RapoSectionGap />
+            <section aria-labelledby="share-join" className="flex flex-col gap-(--rapo-dimension-x3) p-(--rapo-dimension-x5)">
+              <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">내용이 만족스러웠나요?</p>
+              <h2 id="share-join" className="rapo-type-t10-bold break-keep text-(color:--rapo-color-fg-neutral)">라포에서 더 많은 걸<br />볼 수 있어요</h2>
+              <ul className="flex flex-col gap-(--rapo-dimension-x2) py-(--rapo-dimension-x1)">
+                {['공공기관·대학병원·종합병원 공고를 한곳에서', '공고마다 급여·지원 자격·공고 원문까지', '치료사끼리 나누는 커뮤니티', '교육·학술 일정과 병원 정보'].map((t) => (
+                  <li key={t} className="rapo-type-t5-regular flex items-start gap-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d8372b" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mt-[1px] shrink-0">
+                      <path d="M5 12.5 10 17.5 19 7" />
+                    </svg>
+                    <span className="break-keep">{t}</span>
+                  </li>
+                ))}
+              </ul>
+              <RapoButton href={`/login?next=${encodeURIComponent(p.id ? `/jobs/${p.id}` : '/jobs')}`} tone="deep-coral" full>1분 만에 가입하고 둘러보기</RapoButton>
+              <p className="rapo-type-t3-regular text-center text-(color:--rapo-color-fg-neutral-muted)">가입은 무료예요 · 이미 회원이라면 같은 단추로 로그인돼요</p>
+            </section>
+          </>
+        )}
+
         {p.id && <div className="px-(--rapo-dimension-x5)"><AdminJobTools id={p.id} /></div>}
       </main>
 
