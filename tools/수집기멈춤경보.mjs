@@ -74,6 +74,16 @@ if (process.env.POTJOB_DUP_ALARM !== 'off') {
       + (r.error ? String(r.error.message).slice(0, 80) : 'exit ' + r.status) + ') — 멈춤 경보는 이어서 봅니다');
   } catch (e) { console.error('  ⚠ 중복공고경보를 못 불렀습니다 — ' + String(e.message).slice(0, 80)); }
 }
+/* ★ 2026-11-13 세중님 — 「회원 가입 하는 사람 있으면 나한테 이메일」. 위 중복공고경보와 같은 결로 얹습니다
+   (크론 줄을 새로 만들지 않습니다). 따로 떨어진 프로세스 · 2분에서 끊음 · 읽기 + 메일뿐. 끄려면 POTJOB_SIGNUP_ALARM=off */
+if (process.env.POTJOB_SIGNUP_ALARM !== 'off') {
+  try {
+    const r = spawnSync(process.execPath, [path.join(여기, '가입알림.mjs'), ...(보기만 ? ['--마른'] : [])],
+      { stdio: 'inherit', timeout: 120e3, env: process.env });
+    if (r.error || r.status !== 0) console.error('  ⚠ 가입알림이 끝까지 못 돌았습니다 ('
+      + (r.error ? String(r.error.message).slice(0, 80) : 'exit ' + r.status) + ') — 멈춤 경보는 이어서 봅니다');
+  } catch (e) { console.error('  ⚠ 가입알림을 못 불렀습니다 — ' + String(e.message).slice(0, 80)); }
+}
 
 if (!cfg.COLLECT_KEY_HS3) { console.error('COLLECT_KEY_HS3 가 없습니다'); process.exit(1); }
 
