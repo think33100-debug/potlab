@@ -242,7 +242,7 @@ export const 잠긴단추꼴 =
    값은 page.tsx 가 고릅니다 — 치료사는 심평원 신고 인원(hospitalStat), 경쟁률은 알리오 묶음(공고경쟁률요약 · 지점까지 맞는 것만).
    둘 다 없으면 이 칸을 그리지 않습니다. 지어낸 숫자는 넣지 않습니다 */
 export type 경쟁률줄 = {
-  묶음키: string; 고용형태: string | null; 회차: number; 첫해: number | null; 끝해: number | null;
+  묶음키: string; 직군?: string | null; 고용형태: string | null; 같은형태?: boolean; 회차: number; 첫해: number | null; 끝해: number | null;
   평균: number | null; 가장낮음: number | null; 가장높음: number | null;
 };
 
@@ -307,10 +307,16 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률 }: {
         </div>
       )}
       {바쁨?.band && <바쁨칸 h={바쁨} />}
+      {/* 이번 공고와 같은 고용형태 자료가 없으면 한 줄로 밝힙니다 (11/12 세중님 — 청년인턴 공고에 공무직·기간제만 보였음) */}
+      {경쟁률.length > 0 && !경쟁률.some((g) => g.같은형태) && (
+        <p className="rapo-type-t3-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x3) text-(color:--rapo-color-fg-neutral-muted)">
+          이번 공고와 같은 고용형태의 경쟁률 자료는 아직 없어요. 같은 병원의 다른 채용을 참고로 보여 드려요.
+        </p>
+      )}
       {경쟁률.map((g) => (
         <div key={g.묶음키} className="flex flex-col gap-(--rapo-dimension-x2)">
           <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">
-            지난 채용 경쟁률{g.고용형태 ? ` · ${g.고용형태}` : ''}
+            지난 채용 경쟁률{g.직군 ? ` · ${g.직군}` : ''}{g.고용형태 ? ` · ${g.고용형태}` : ''}
           </p>
           <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
             <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">평균 경쟁률</p>
