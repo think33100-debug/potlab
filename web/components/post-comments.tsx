@@ -10,6 +10,8 @@ import { shownName } from '@/lib/who';
 import { Avatar } from './avatar';
 import { setAfterLogin } from '@/lib/after-login';
 import { 어둠 } from '@/components/rapo/rapo-community';
+import { RapoMaskIcon } from '@/components/rapo/rapo-ui';
+import { RapoSheet } from '@/components/rapo/rapo-sheet';
 import { ago } from './post-row';
 
 /* 댓글은 2단까지입니다. 더 깊게 달려고 하면 DB 트리거가 막습니다
@@ -103,7 +105,9 @@ export function PostComments({ postId }: { postId: number }) {
   /* ── 그리기 — 새 디자인 「게시글 상세와 댓글」 1328:2667 의 댓글 (2026-11-12 밤 근무 · 어두운 판).
      댓글 행(아바타 · 이름 · 시간 · 본문 · 답글) · 답글은 들여쓰기 · 입력칸은 둥근 알약 + ↑ 보내기.
      「댓글 N」 제목은 글 화면(app/post/[id]/page.tsx)이 그립니다 — 여기서 또 그리면 두 번 나옵니다.
-     달기·지우기·신고·답글 동작은 그대로입니다. 원본의 「비밀 댓글」은 기능이 없어 아직 */
+     달기·지우기·신고·답글 동작은 그대로입니다. 원본의 「비밀 댓글」은 기능이 없어 아직
+     ★ 2026-11-12 세중님 「예전 버전 같아」 — 행 오른쪽 「신고」·「지우기」 글자 → 원본 「•••」 메뉴(아래 시트) · 아바타 32 ·
+       보내기는 빨간 동그라미 → 원본 RAPO / send 화살표 */
   return (
     <section className="mt-[12px]">
       {!loading && !session && (
@@ -155,15 +159,15 @@ export function PostComments({ postId }: { postId: number }) {
               <button type="button" onClick={() => setReplyTo(null)} className="underline" style={{ color: 어둠.밑줄 }}>그만두기</button>
             </p>
           )}
-          <div className="flex h-[48px] items-center gap-[8px] rounded-[24px] pl-[20px] pr-[6px]" style={{ background: 어둠.면 }}>
+          <div className="flex h-[48px] items-center gap-[8px] rounded-[24px] pl-[19px] pr-[12px]" style={{ background: 어둠.면 }}>
             <input value={body} onChange={(e) => setBody(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) send(); }}
               placeholder={replyTo ? '답글을 남겨 주세요' : '댓글을 남겨 주세요'} aria-label="댓글"
-              className="h-full min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-[#8fa3b3]" style={{ color: 어둠.글 }} />
+              className="h-full min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-[#afbfca]" style={{ color: 어둠.글 }} />
             <button type="button" onClick={send} disabled={busy || !body.trim()} aria-label="댓글 달기"
-              className="flex size-[36px] shrink-0 items-center justify-center rounded-full text-[18px] font-bold disabled:opacity-40"
-              style={{ background: 어둠.쓰기, color: 어둠.글 }}>
-              ↑
+              className="flex size-[40px] shrink-0 items-center justify-center rounded-full disabled:opacity-50"
+              style={{ color: body.trim() ? 어둠.글 : 어둠.흐린글 }}>
+              <RapoMaskIcon src="/rapo/detail/send-21.svg" w={21} h={21} />
             </button>
           </div>
         </div>
@@ -179,24 +183,33 @@ function One({
   onRemove: (id: number) => void; onReply?: () => void;
   onReport?: (id: number) => void;
 }) {
+  const [열림, set열림] = useState(false);
+  const 닫기 = useCallback(() => set열림(false), []);
+  /* 내 댓글이면 삭제하기 · 남의 댓글이면 신고하기 — 글 메뉴와 같은 가름입니다 (components/post-actions.tsx PostMenu) */
+  const 항목 = mine
+    ? [{ 글: '삭제하기', 할일: () => onRemove(c.id), 붉게: true }]
+    : onReport ? [{ 글: '신고하기', 할일: () => onReport(c.id) }] : [];
   return (
     <div className="flex items-start gap-[10px]">
-      <Avatar value={c.profiles?.avatar} size="sm" />
+      <Avatar value={c.profiles?.avatar} size="c32" className="mt-[4px]" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-[8px]">
           <span className="truncate text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{shownName(c.profiles)}</span>
           <span className="flex-1" />
-          {/* 내 댓글이면 지우기 · 남의 댓글이면 신고 — 글 단추 줄과 같은 가름입니다 (components/post-actions.tsx) */}
-          {mine ? (
-            <button type="button" onClick={() => onRemove(c.id)} className="text-[12px]" style={{ color: 어둠.흐린글 }}>지우기</button>
-          ) : onReport ? (
-            <button type="button" onClick={() => onReport(c.id)} className="text-[12px]" style={{ color: 어둠.흐린글 }}>신고</button>
-          ) : null}
+          {/* 원본 「•••」 13 #afbfca — 누르면 아래 시트 */}
+          {항목.length > 0 && (
+            <button type="button" onClick={() => set열림(true)} aria-haspopup="dialog" aria-label="댓글 메뉴"
+              className="-mr-[8px] -mt-[10px] flex h-[40px] min-w-[40px] items-center justify-center text-[13px] leading-[19px] tracking-[1px]"
+              style={{ color: 어둠.흐린글 }}>
+              •••
+            </button>
+          )}
+          {열림 && <RapoSheet 제목={mine ? '내 댓글' : '댓글'} 항목={항목} 닫기={닫기} />}
         </div>
         <p className="text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{ago(c.created_at)}</p>
-        <p className="mt-[6px] whitespace-pre-wrap break-words text-[15px] leading-[24px]" style={{ color: 어둠.글 }}>{c.body}</p>
+        <p className="mt-[7px] whitespace-pre-wrap break-words text-[15px] leading-[22px]" style={{ color: 어둠.글 }}>{c.body}</p>
         {onReply && (
-          <button type="button" onClick={onReply} className="mt-[6px] text-[13px] font-medium" style={{ color: 어둠.흐린글 }}>답글</button>
+          <button type="button" onClick={onReply} className="mt-[12px] text-[14px] leading-[20px]" style={{ color: '#bacad4' }}>답글</button>
         )}
       </div>
     </div>

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { NothingHere } from '@/components/nothing-here';
 import { Hit } from '@/components/hit';
-import { PostActions } from '@/components/post-actions';
+import { PostLike, PostMenu } from '@/components/post-actions';
 import { PostComments } from '@/components/post-comments';
 import { ViewBump } from '@/components/view-bump';
 import { Avatar } from '@/components/avatar';
@@ -133,34 +133,37 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const 직군 = (p.profiles as { job_group?: string | null } | null)?.job_group ?? null;
   return (
     /* 새 디자인 「게시글 상세와 댓글」 1328:2667 (2026-11-11 밤 · 대표 「글 누르면 예전 화면」).
-       어두운 판 · 앱 바(뒤로 · 게시글) · 글쓴이 직군 · 제목 26 · 글쓴이 · 본문 · 사진 · 좋아요/공유(PostActions) · 댓글(PostComments).
+       어두운 판 · 앱 바(뒤로 · 게시글 · •••) · 글쓴이 직군 · 제목 27 · 글쓴이 · 본문 · 사진 · 좋아요 · 댓글(PostComments).
+       ★ 2026-11-12 세중님 「예전 버전 같아」 — 옛 단추 줄(빨간 공유 등)을 걷고 원본대로 앱 바 #0d1d29 · 「•••」 메뉴(PostMenu) ·
+         본문 아래 「♡ 좋아요 N」(PostLike) · 조회 수 뺌(원본에 없음).
        좋아요·신고·지우기·댓글·답글·차단은 전 조각 그대로입니다(이 화면은 어두운 바탕 · app/surface.tsx).
        원본의 태그 · 「이 글에서 이야기하는 병원」 · 비밀 댓글은 기능이 없어 아직 */
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: 어둠.바탕 }}>
       <Hit kind="post" target={p.id} />
       <ViewBump id={p.id} />
-      <header className="sticky top-0 z-20 flex h-[56px] items-center gap-[8px] px-[8px]" style={{ background: 어둠.바탕 }}>
+      <header className="sticky top-0 z-20 flex h-[56px] items-center gap-[8px] px-[8px]" style={{ background: 어둠.아래탐색 }}>
         <Link href="/community" aria-label="커뮤니티로" className="flex size-[44px] items-center justify-center rounded-[8px]">
           <RapoMaskIcon src="/rapo/detail/arrow-left-20.svg" w={20} h={20} className="text-[#f6f8fa]" />
         </Link>
         <h1 className="text-[18px] font-bold" style={{ color: 어둠.글 }}>게시글</h1>
+        <PostMenu id={p.id} mine={!!p.내글} title={p.title || p.body.slice(0, 40)} />
       </header>
 
       <main className="px-[22px]">
         <article className="pt-[16px]">
           {직군 && <p className="text-[14px] font-bold leading-[20px]" style={{ color: 어둠.밑줄 }}>{직군}</p>}
-          {p.title && <h2 className="mt-[8px] break-keep text-[26px] font-bold leading-[36px] [overflow-wrap:anywhere]" style={{ color: 어둠.글 }}>{p.title}</h2>}
+          {p.title && <h2 className="mt-[8px] break-keep text-[27px] font-bold leading-[39px] [overflow-wrap:anywhere]" style={{ color: 어둠.글 }}>{p.title}</h2>}
           <div className="mt-[16px] flex items-center gap-[10px]">
-            <Avatar value={p.profiles?.avatar} size="md" />
+            <Avatar value={p.profiles?.avatar} size="c32" />
             <div>
               <p className="text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{shownName(p.profiles)}</p>
-              <p className="text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{지난때(p.created_at)} · 조회 {p.view_count}</p>
+              <p className="text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{지난때(p.created_at)}</p>
             </div>
           </div>
           <div aria-hidden className="mt-[20px] h-px" style={{ background: 어둠.선 }} />
           {/* 가입 전에는 본문을 일부만 보여줍니다 — app/gate.tsx */}
           <Clip max="22rem">
-            <p className="mt-[24px] whitespace-pre-wrap break-words text-[17px] leading-[30px]" style={{ color: 어둠.글 }}>{p.body}</p>
+            <p className="mt-[24px] whitespace-pre-wrap break-words text-[17px] leading-[25px]" style={{ color: 어둠.글 }}>{p.body}</p>
             {장수 > 0 && (
               <ul className="mt-[20px] flex flex-col gap-[12px]">
                 {Array.from({ length: 장수 }, (_, i) => (
@@ -174,13 +177,13 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           </Clip>
         </article>
 
-        <PostActions id={p.id} mine={!!p.내글} likeCount={p.like_count} title={p.title || p.body.slice(0, 40)} />
+        <PostLike id={p.id} likeCount={p.like_count} />
 
         <JoinCta what="이 글과 댓글" />
 
         <div aria-hidden className="-mx-[22px] mt-[24px] h-[8px]" style={{ background: '#0d1d29' }} />
         <section id="comments" className="pt-[24px]">
-          <h2 className="text-[22px] font-bold leading-[32px]" style={{ color: 어둠.글 }}>댓글 {p.comment_count}</h2>
+          <h2 className="text-[21px] font-bold leading-[30px]" style={{ color: 어둠.글 }}>댓글 {p.comment_count}</h2>
           {/* 댓글은 가입을 마친 분에게만 */}
           <Members>
             <PostComments postId={p.id} />
