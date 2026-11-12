@@ -46,7 +46,7 @@ import fs from 'node:fs';
 import { 받아보기 } from './쪽나눠받기.mjs';
 import { 차례붙이기 } from './쪽나눠받기.mjs';
 import { 세기, 남기기, 막힘인가, 막힘적기, 막혔나 } from './고용24한도.mjs';
-import { 없어짐말, 알림상태 } from './hosp/hs_목록상태.mjs';
+import { 없어짐말, 알림상태, 제목마감 } from './hosp/hs_목록상태.mjs';
 import { 워크넷상세칸 } from './워크넷상세칸.mjs';
 import { 고용형태판정 } from './공고문읽기.mjs';
 /* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
@@ -429,6 +429,10 @@ for (const [i, x] of 그밖.entries()) {
     없어짐.push({ ...x, 왜: '쪽 — 없어짐말 「' + m[0] + '」', 앞부분: html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200) });
   } else if (알림상태(html).결과 === 'closed') {
     없어짐.push({ ...x, 왜: '쪽 — ' + 알림상태(html).왜, 앞부분: String(알림상태(html).줄글).slice(0, 200) });
+  } else if (제목마감(html, x.title).결과 === 'closed') {
+    /* ★ 2026-11-12 — 쪽은 열리는데 제목이 「(마감)…」 으로 바뀐 곳 (익산병원 HS1354697494).
+       예전엔 「살아 있음」 으로 보고해 seen_on 을 날마다 새로 적었고, 그래서 alive.mjs ② 차례가 안 왔습니다 */
+    없어짐.push({ ...x, 왜: '쪽 — ' + 제목마감(html, x.title).왜, 앞부분: '(제목 말머리)' });
   } else 살아있음.push(x.id);
   process.stderr.write('\r  그밖 ' + (i + 1) + '/' + 그밖.length + '   ');
 }
