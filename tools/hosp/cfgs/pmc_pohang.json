@@ -1,0 +1,15 @@
+{
+ "name": "경상북도포항의료원",
+ "type": "html",
+ "url": "https://pmc.or.kr/front/bbsList.do?bbsId=BBS_0003",
+ "base": "https://pmc.or.kr",
+ "row": "<tr class=\"[^\"]*\">\\s*<td class=\"num\">[\\s\\S]*?<\\/tr>",
+ "title": "<td class=\"tal\"><a[^>]*>([\\s\\S]*?)<\\/a>",
+ "link": "fnViewArticle\\('(\\d+)'",
+ "linkFmt": "https://pmc.or.kr/front/viewAritcle.do?bbsId=BBS_0003&nttId={1}",
+ "date": "<td class=\"date\">(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "합격자|발표|결과|면접.*안내",
+ "single": "posted",
+ "천천히": "하루1",
+ "note": "포항의료원(경북 포항 북구 · 지방의료원 · 심평원 이름 「경상북도포항의료원」) 정보마당 > 채용공고. 2026-11-12 세중님 주소. 표: 번호·제목·작성자·작성일·조회수 — 제목 a 는 href 가 없고 onclick=fnViewArticle('nttId','BBS_0003') → 폼(get)이 /front/viewAritcle.do 로 가므로 nttId 만 잡아 linkFmt 로 조립(viewAritcle 는 사이트의 철자 그대로). 날짜는 작성일 하나(올린 날). ★ robots.txt `User-agent: *` `Disallow: /front/bbsList.do` 인데 **세중님 2026-11-12 결정 「하루 1번으로 넣어」**로 켬 — robots 예외 갈래(현황판/robots예외.csv) · 하루 1번 · 첫 쪽만 · 첨부 대량 받기 없음 · 병원이 그만해 달라면 즉시 끔. 공고가 한 번도 안 들어와 기관 표에 줄이 없던 곳(11/12 밤 병원 연봉 작업 때 찾음)."
+}
