@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import type { HospitalStat } from '@/lib/hospital';
+import type { HospitalStat, 시설숫자 } from '@/lib/hospital';
 import { RapoMaskIcon } from './rapo-ui';
 
 /* 공고 상세 — 새 디자인 「U03 · 공고 상세」 조각들 (2026-11-11 대표: 피그마 우선, 없는 정보는 뺌).
@@ -283,10 +283,44 @@ function 연봉칸({ 보수 }: { 보수: 병원보수 }) {
   );
 }
 
+/* 병원이 아닌 곳의 숫자를 화면 글로 — 복지관 · 치매센터 · 장기요양기관 (2026-11-12 밤 세중님 「전에 웹 참고해서」).
+   옛 앱(index.html loadJobWf)과 같은 값입니다 — 복지관은 종사자 전체 수와 순위·정원, 「치료사가 몇 명인지는 따로 나오지 않습니다」.
+   0·빈 값은 칸을 안 그립니다. 치료사 칸은 한 명이라도 있을 때만 그립니다 */
+function 시설보임(s: 시설숫자): { 개요: [string, string][]; 치료사: { pt: number | null; ot: number | null } | null; 글: string } {
+  const 명 = (n: number | null | undefined) => (n != null && n > 0 ? `${n.toLocaleString('ko-KR')}명` : null);
+  const 칸 = (줄: [string, string | null][]) => 줄.filter((x): x is [string, string] => !!x[1]);
+  const 치료사 = (s.pt ?? 0) > 0 || (s.ot ?? 0) > 0 ? { pt: s.pt ?? null, ot: s.ot ?? null } : null;
+  if (s.갈래 === '복지관') {
+    return {
+      개요: 칸([
+        ['종사자', 명(s.종사자)],
+        ['정원', 명(s.정원)],
+        ['규모', s.시도순위 && s.시도곳수 ? `${s.시도 ?? ''} ${s.시도순위}위 / ${s.시도곳수}곳`.trim() : null],
+      ]),
+      치료사: null,
+      글: `${s.출처 ?? '보건복지부 장애인복지관 현황'} 기준이에요. 종사자 전체 수이고, 치료사가 몇 명인지는 따로 나오지 않아요.`,
+    };
+  }
+  if (s.갈래 === '치매센터') {
+    return {
+      개요: 칸([['의사', 명(s.의사)], ['간호사', 명(s.간호사)], ['사회복지사', 명(s.사회복지사)]]),
+      치료사,
+      글: `센터 전체 인원이에요 (공고 인원 아님) · ${s.출처 ?? '치매센터 자료'}${s.기준 ? ` · ${s.기준} 기준` : ''}`,
+    };
+  }
+  return {
+    개요: 칸([['구분', s.종류 ?? null], ['정원', 명(s.정원)]]),
+    치료사,
+    글: `기관 전체 인원이에요 (공고 인원 아님) · ${s.출처 ?? '장기요양기관 자료'} · 지금과 다를 수 있어요`,
+  };
+}
+
 /* 「얼마나 바쁜 곳인지」는 일단 뺐습니다 (2026-11-12 저녁 세중님 「일단 빼자」). 계산은 lib/hospital.ts busyWord 에 그대로 있고,
    그리던 조각은 이 파일의 11/12 낮 판(커밋 5fe1f19)에 있습니다 */
-export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false, 보수 = null }: {
+export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false, 보수 = null, 시설 = null }: {
   치료사: { pt: number | null; ot: number | null; 기준: string | null } | null;
+  /* 병원이 아닌 곳 — 복지관 · 치매센터 · 요양원 (2026-11-12 밤 세중님 · 옛 앱 「이 복지관은 이런 곳입니다」) */
+  시설?: 시설숫자 | null;
   보수?: 병원보수 | null;
   바쁨?: HospitalStat | null;
   경쟁률: 경쟁률줄[];
@@ -300,10 +334,42 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
     ['병상', 바쁨.bed > 0 ? `${바쁨.bed.toLocaleString('ko-KR')}개` : null],
     ['재활의학과 의사', 바쁨.rehab != null && 바쁨.rehab > 0 ? `${바쁨.rehab.toLocaleString('ko-KR')}명` : null],
   ] as const).filter(([, v]) => v) : [];
-  if (!치료사 && !보수 && 경쟁률.length === 0 && 개요.length === 0) return null;
+  const 곳 = 시설 ? 시설보임(시설) : null;
+  if (!치료사 && !보수 && 경쟁률.length === 0 && 개요.length === 0 && !곳) return null;
   const 배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })} : 1`);
   return (
-    <RapoDetailSection title="병원 한눈에" sub="공개된 자료로 모은 숫자예요">
+    <RapoDetailSection title={곳 ? '기관 한눈에' : '병원 한눈에'} sub="공개된 자료로 모은 숫자예요">
+      {곳 && (
+        <div className="flex flex-col gap-(--rapo-dimension-x3)">
+          {곳.개요.length > 0 && (
+            <dl className="grid gap-(--rapo-dimension-x2)" style={{ gridTemplateColumns: `repeat(${곳.개요.length}, minmax(0, 1fr))` }}>
+              {곳.개요.map(([이름, 값]) => (
+                <div key={이름} className="flex min-w-0 flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x3) py-(--rapo-dimension-x4)">
+                  <dt className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{이름}</dt>
+                  <dd className="rapo-type-t6-bold break-keep text-(color:--rapo-color-fg-neutral)">{값}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {곳.치료사 && (
+            <div className="flex flex-col gap-(--rapo-dimension-x2)">
+              <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">이 기관 치료사</p>
+              <div className="grid grid-cols-2 gap-(--rapo-dimension-x3)">
+                {([['물리치료사', 곳.치료사.pt], ['작업치료사', 곳.치료사.ot]] as const).map(([이름, n]) => (
+                  <div key={이름} className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+                    <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{이름}</p>
+                    <p className="whitespace-nowrap text-(color:--rapo-color-fg-neutral)">
+                      <span className="rapo-type-t12-bold">{n == null ? '—' : n.toLocaleString('ko-KR')}</span>
+                      {n != null && <span className="rapo-type-t5-bold ml-[2px]">명</span>}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{곳.글}</p>
+        </div>
+      )}
       {개요.length > 0 && (
         <dl className="grid gap-(--rapo-dimension-x2)" style={{ gridTemplateColumns: `repeat(${개요.length}, minmax(0, 1fr))` }}>
           {개요.map(([이름, 값]) => (

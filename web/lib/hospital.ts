@@ -26,6 +26,26 @@ export type HospitalStat = {
   kind_n: number | null;
   band: 'easy' | 'mid' | 'busy' | null;
   data_version: string | null;
+  /* 병원이 아닌 곳 — 복지관 · 치매센터 · 장기요양기관(요양원·주야간보호). DB 공고병원숫자() 가 병원을 못 찾았을 때만 채웁니다
+     (2026-11-12 밤 세중님 「전에 웹 참고해서 아까 말한 기관들도 추가해」 · 금고 SQL_1113/W). 이 칸이 있으면 위 병원 칸은 비어 있습니다 */
+  시설?: 시설숫자 | null;
+};
+
+export type 시설숫자 = {
+  갈래: '복지관' | '치매센터' | '장기요양';
+  이름: string;
+  종류?: string | null;
+  출처?: string | null;
+  기준?: string | null;
+  /* 장기요양 — 입소·이용 정원 · 복지관 — 종사자 정원 */
+  정원?: number | null;
+  /* 복지관 — 종사자 **전체** 수와 그 순위 (치료사만 따로는 자료에 없습니다) */
+  종사자?: number | null;
+  전국순위?: number | null; 전국곳수?: number | null;
+  시도?: string | null; 시도순위?: number | null; 시도곳수?: number | null;
+  /* 치매센터 — 직종별 */
+  의사?: number | null; 간호사?: number | null; 사회복지사?: number | null;
+  pt?: number | null; ot?: number | null;
 };
 
 /* 기관 이름으로 찾습니다. 못 찾으면 null —
