@@ -31,7 +31,7 @@
  *  얼마나 드는가 — 병원 하나에 찾기 1~3번 + 상세 1번 + 기간별 12번(최근 1년). 견본 20곳이면 300번 안팎.
  *
  *  열쇠
- *    NPS_KEY   공공데이터포털 인증키. **이 도구는 값을 찍지 않습니다** — 원문을 찍을 때도 serviceKey 를 가립니다.
+ *    NPS_KEY → 없으면 ALIO_DETAIL_KEY   공공데이터포털 인증키(계정에 하나 · 서버 .env 에 이미 있음). **이 도구는 값을 찍지 않습니다** — 원문을 찍을 때도 serviceKey 를 가립니다.
  *              인코딩된 값(% 가 있음)이면 그대로, 아니면 encodeURIComponent 로 감쌉니다.
  * ═══════════════════════════════════════════════════════════════ */
 import fs from 'node:fs';
@@ -52,9 +52,10 @@ const 읽기 = (f) => {
   return o;
 };
 const cfg = { ...읽기(path.join(ROOT, '.env.local')), ...읽기(path.join(ROOT, '.env')), ...process.env };
-const 열쇠 = cfg.NPS_KEY || '';
+/* 공공데이터포털 열쇠는 계정마다 하나 — 나라일터·알리오가 쓰는 ALIO_DETAIL_KEY 와 같은 값입니다 (collect-holiday.mjs 와 같은 꼴) */
+const 열쇠 = cfg.NPS_KEY || cfg.ALIO_DETAIL_KEY || '';
 if (!열쇠) {
-  console.error('NPS_KEY 가 없습니다 — 서버 ~/potlab/.env 에 NPS_KEY=… 한 줄을 넣어 주세요 (값은 여기에 찍지 않습니다)');
+  console.error('공공데이터 열쇠(NPS_KEY 또는 ALIO_DETAIL_KEY)가 없습니다 — 서버 ~/potlab 에서 돌려 주세요 (값은 여기에 찍지 않습니다)');
   process.exit(2);
 }
 const 열쇠붙임 = /%[0-9A-Fa-f]{2}/.test(열쇠) ? 열쇠 : encodeURIComponent(열쇠);
