@@ -8,7 +8,7 @@ import { LoginFirst } from '@/components/login-first';
 import { ShareButtons } from '@/components/share-buttons';
 import type { Who } from '@/lib/supabase-server';
 import {
-  RapoDetailHeader, RapoDetailIdentity, RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoInstitution, RapoKeyRow,
+  RapoDetailHeader, RapoDetailIdentity, RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoKeyRow,
   RapoPayCard, RapoPeriodCard, RapoSectionGap, RapoStickyActions, 지원단추꼴, 잠긴단추꼴, type 경쟁률줄, type 모집상태, type 병원보수,
 } from './rapo-job-detail';
 import { RapoJobRow, type RapoJob } from './rapo-job-row';
@@ -76,9 +76,9 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       </section>
 
       {/* 04 본문 바로가기 (원본 「04 본문 바로가기」 · 52px) — 아래 칸으로 내려갑니다 (2026-11-12 밤 근무).
-          ★ 2026-11-12 세중님 「업무·지원 자격 아예 빼고 · 근무조건 탭은 근무기간」 — 탭 둘(근무기간 · 지원 방법) */}
+          ★ 2026-11-12 세중님 「업무·지원 자격 아예 빼고」 → 같은 날 밤 「근무 기간을 근무 조건으로」 — 탭 둘(근무조건 · 지원 방법) */}
       <nav aria-label="본문 바로가기" className="flex h-(--rapo-dimension-x13) items-center px-(--rapo-dimension-x5)">
-        {[['#d-work', '근무기간'], ['#d-apply', '지원 방법']].map(([href, label], i) => (
+        {[['#d-work', '근무조건'], ['#d-apply', '지원 방법']].map(([href, label], i) => (
           <a key={href} href={href}
             className={'rapo-type-t4-bold flex h-(--rapo-touch-min) flex-1 items-center justify-center rounded-(--rapo-radius-r1) active:bg-(--rapo-color-bg-transparent-pressed) ' +
               (i === 0 ? 'text-(color:--rapo-color-fg-brand-contrast)' : 'text-(color:--rapo-color-fg-neutral)')}>
@@ -93,8 +93,10 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
           수집하지 않는 값이라 「공고문 확인」(못 읽은 칸 규칙 그대로). 근무시간 줄은 대표 결정(11/11)으로 안 그립니다.
           ★ 06 업무·지원 자격 칸(필수 자격 · 담당 업무 · 근무 부서)은 같은 날 세중님 결정으로 뺐습니다 — 필수 자격은 위 03 핵심 조건에 그대로 있습니다 */}
       <div id="d-work" className="scroll-mt-[64px]">
-        <RapoDetailSection title="근무기간">
+        {/* 2026-11-12 밤 세중님 「근무 기간을 근무 조건으로 · 근무 장소 · 근무 기간 2개 · 아래 근무 기관은 없애자」 */}
+        <RapoDetailSection title="근무 조건">
           <div className="flex flex-col gap-(--rapo-dimension-x3)">
+            <RapoGuideRow label="근무 장소">{p.주소 ? <span className="break-keep">{p.기관} · {p.주소}</span> : p.기관}</RapoGuideRow>
             <RapoGuideRow label="근무 기간">{봄 ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
           </div>
         </RapoDetailSection>
@@ -167,8 +169,6 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         {/* 가입을 덜 마친 회원만 흐립니다. 비회원은 DB 가 본문을 안 주므로 덮을 것이 없습니다 */}
         {member && p.id ? <JobVeil>{본문}</JobVeil> : 본문}
 
-        <RapoSectionGap />
-        <RapoInstitution org={p.기관} 주소={p.주소} />
 
         {/* 이 병원 이야기 (원본 「이 병원 이야기 · 가로 후기」 983:22167) — 병원별 이야기·후기 기능이 아직 없어 빈 상태로 둡니다.
             지어낸 후기를 넣지 않습니다 (2026-11-12 밤 근무) */}
