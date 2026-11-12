@@ -32,6 +32,7 @@ export default async function DesignPreviewJob({ searchParams }: {
         }}
         pay={{ 값: '2,458,000원', 덧말: '2026년 기준 · 원천징수 전 · 제수당 포함\n초과근무수당·명절휴가비 별도' }}
         지원자격="작업치료사 면허" url="https://example.com/"
+        바쁨={who !== 'member' ? null : { name: '견본', kind: '종합병원', bed: 312, rehab: 3, ot: 6, pt: 20, per_bed: 0, kind_med: null, kind_p25: null, kind_p75: null, kind_n: null, band: 'mid', data_version: null }}
         기간={nodate
           ? { 달: null, 날: null, 기간: '마감일 공고문 확인', 강조: null, 덧말: '접수 기간을 아직 확인하지 못했어요. 원문 공고에서 꼭 확인해 주세요.' }
           : { 달: '10월', 날: '30', 기간: '10.26(월)–10.30(금)', 강조: closed ? null : '10.30(금) 17:30 마감', 덧말: null }}

@@ -283,10 +283,27 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률 }: {
   바쁨?: HospitalStat | null;
   경쟁률: 경쟁률줄[];
 }) {
-  if (!치료사 && !바쁨?.band && 경쟁률.length === 0) return null;
+  /* 구분·병상 — 옛 웹 공고 상세의 「종별 · 병상」을 다시 넣습니다 (2026-11-12 세중님 「병상, 구분 이런 것도 넣자」).
+     자료는 치료사 인원과 같은 심평원 행(org_hospital_by_name)이라 새 창구가 없습니다. 0·빈 값은 칸을 안 그립니다 */
+  const 개요 = 바쁨 ? ([
+    ['구분', 바쁨.kind || null],
+    ['병상', 바쁨.bed > 0 ? `${바쁨.bed.toLocaleString('ko-KR')}개` : null],
+    ['재활의학과 의사', 바쁨.rehab != null && 바쁨.rehab > 0 ? `${바쁨.rehab.toLocaleString('ko-KR')}명` : null],
+  ] as const).filter(([, v]) => v) : [];
+  if (!치료사 && !바쁨?.band && 경쟁률.length === 0 && 개요.length === 0) return null;
   const 배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })} : 1`);
   return (
     <RapoDetailSection title="병원 한눈에" sub="공개된 자료로 모은 숫자예요">
+      {개요.length > 0 && (
+        <dl className="grid gap-(--rapo-dimension-x2)" style={{ gridTemplateColumns: `repeat(${개요.length}, minmax(0, 1fr))` }}>
+          {개요.map(([이름, 값]) => (
+            <div key={이름} className="flex min-w-0 flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x3) py-(--rapo-dimension-x4)">
+              <dt className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{이름}</dt>
+              <dd className="rapo-type-t6-bold break-keep text-(color:--rapo-color-fg-neutral)">{값}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
       {치료사 && (
         <div className="flex flex-col gap-(--rapo-dimension-x2)">
           <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">이 병원 치료사</p>
