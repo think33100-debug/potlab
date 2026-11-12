@@ -27,7 +27,7 @@ import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 붙여받기 } from './certs/index.mjs';
-import { 목록상태, 목록상태셈, 본문상태, 알림상태, 없어짐말, 제목속살 } from './hosp/hs_목록상태.mjs';
+import { 목록상태, 목록상태셈, 본문상태, 알림상태, 없어짐말, 제목마감 } from './hosp/hs_목록상태.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 /* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
@@ -114,17 +114,10 @@ async function 하나(x) {
      바뀌는 것이 바로 그 말머리입니다. 「[모집]재활치료센터 물」 로 찾으면
      쪽에는 「[마감]재활치료센터 …」 라 **한 번도 못 찾습니다** — 인화재단
      한국병원 HS2056094273 이 그래서 36일째 회원 화면에 남아 있었습니다.
-     떼는 규칙은 `hosp/hs_목록상태.mjs` 의 `제목속살()` 한 자리입니다 (지침 6절). */
-  const 열쇠말 = 제목속살(x.title).replace(/\s+/g, ' ').slice(0, 12).trim();
-  const 붙 = (s) => String(s || '').replace(/\s/g, '');
-  const 글붙 = 붙(글);
-  const 제목있나 = 열쇠말.length >= 6 && 글붙.includes(붙(열쇠말));
-  if (제목있나) {
-    const i = 글붙.indexOf(붙(열쇠말));
-    const 둘레 = 글붙.slice(Math.max(0, i - 20), i + 붙(열쇠말).length + 20);
-    const m = 둘레.match(/\[?\(?\s*(마감|채용완료|모집종료|접수마감|채용종료)\s*\)?\]?/);
-    if (m) return { 결과: 'closed', 왜: '제목에 「' + m[1] + '」 가 붙었습니다' };
-  }
+     떼는 규칙은 `hosp/hs_목록상태.mjs` 의 `제목속살()` 한 자리입니다 (지침 6절).
+     ★ 2026-11-12 — 판정 전체를 `제목마감()` 한 자리로 옮겼습니다. 없어진공고찾기.mjs 도 같이 씁니다 */
+  const T = 제목마감(html, x.title);
+  if (T.결과 === 'closed') return { 결과: 'closed', 왜: T.왜 };
 
   /* ── ③ 본문에 「접수기간 : <마감>」 (2026-10-07) ─────────────
      굿모닝병원이 이 꼴입니다 — 기간 자리에 날짜 대신 「<마감>」 을 적습니다 */
