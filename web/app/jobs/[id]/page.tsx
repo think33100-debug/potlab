@@ -1,10 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import type { 모집상태 } from '@/components/rapo/rapo-job-detail';
+import type { 경쟁률줄, 모집상태 } from '@/components/rapo/rapo-job-detail';
 import { RapoJobDetailView, 못읽은칸말 } from '@/components/rapo/rapo-job-detail-view';
 import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말, 조교연구말,
   보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
+import { hospitalStat } from '@/lib/hospital';
 import { jobViews } from '@/lib/job-views';
 import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
 import { siteUrl } from '@/lib/site-url';
@@ -67,6 +68,13 @@ const 비슷한공고 = async (sb: SupabaseClient, j: JobPost) => {
   return ((data ?? []) as JobListItem[]).filter((r) => r.id !== j.id).slice(0, 3).map(목록줄);
 };
 
+/* 병원 한눈에 · 지난 채용 경쟁률 (2026-11-12 세중님) — 알리오 묶음 중 **지점까지 맞는 것**만 DB 가 줍니다(회원만) */
+const 경쟁률받기 = async (sb: SupabaseClient, id: string): Promise<경쟁률줄[]> => {
+  const { data, error } = await sb.rpc('공고경쟁률요약', { p_공고: id });
+  if (error || !Array.isArray(data)) return [];
+  return data as 경쟁률줄[];
+};
+
 export const 마감못읽은말 = '마감일 공고문 확인';
 
 const 요일들 = ['일', '월', '화', '수', '목', '금', '토'];
@@ -120,12 +128,17 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const closed = isClosed(j.apply_to, todayKst(), j.apply_to_time);
   const detail = j.detail ?? {};
 
-  const [views, 뽑은값, 병원, 비슷한] = await Promise.all([
+  const [views, 뽑은값, 병원, 비슷한, 병원숫자, 경쟁률] = await Promise.all([
     jobViews([j.id]),
     뽑은값받기(sb, id),
     member ? 병원주소받기(sb, id) : Promise.resolve(null),
     member ? 비슷한공고(sb, j) : Promise.resolve([]),
+    /* 치료사 인원 — 심평원 신고 인원. 이름으로 못 찾으면 null 이고 칸을 안 그립니다 (0 으로 안 채움) */
+    member ? hospitalStat(sb, j.org_name ?? '') : Promise.resolve(null),
+    member ? 경쟁률받기(sb, id) : Promise.resolve([]),
   ]);
+  const 치료사 = 병원숫자 && (병원숫자.pt != null || 병원숫자.ot != null)
+    ? { pt: 병원숫자.pt, ot: 병원숫자.ot, 기준: 병원숫자.data_version?.replace(/^심평원\s*/, '') ?? null } : null;
 
   /* 예상 연봉 — 공고에 적힌 **말 그대로** · 금액이 없으면 「내규에 따름」 (2026-10-09 · 10-14 대표 확정) */
   const 연봉원문: string | null =
@@ -195,6 +208,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       비슷한={비슷한} 비슷한주소={비슷한주소}
       비슷한제목말={[j.job_group, j.지역보임?.split(' ')[0]].filter(Boolean).join(' · ') || undefined}
       지원주소={지원.주소}
+      치료사={치료사} 경쟁률={경쟁률}
     />
   );
 }

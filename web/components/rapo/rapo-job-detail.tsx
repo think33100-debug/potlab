@@ -235,3 +235,62 @@ export const 지원단추꼴 =
 export const 잠긴단추꼴 =
   'rapo-type-t4-bold flex h-(--rapo-dimension-x12) w-full items-center justify-center rounded-(--rapo-radius-r3) ' +
   'bg-(--rapo-color-bg-neutral-weak) text-(color:--rapo-color-fg-neutral-muted)';
+
+/* 병원 한눈에 — 치료사 인원 · 지난 채용 경쟁률 (2026-11-12 세중님 「공고 상세에 넣어 · 지금 디자인 그대로」).
+   피그마 원본에는 없는 칸이라 근무 기관 아래에 **같은 조각(섹션 · 브랜드 옅은 카드)** 으로 둡니다.
+   값은 page.tsx 가 고릅니다 — 치료사는 심평원 신고 인원(hospitalStat), 경쟁률은 알리오 묶음(공고경쟁률요약 · 지점까지 맞는 것만).
+   둘 다 없으면 이 칸을 그리지 않습니다. 지어낸 숫자는 넣지 않습니다 */
+export type 경쟁률줄 = {
+  묶음키: string; 고용형태: string | null; 회차: number; 첫해: number | null; 끝해: number | null;
+  평균: number | null; 가장낮음: number | null; 가장높음: number | null;
+};
+
+export function RapoHospitalFacts({ 치료사, 경쟁률 }: {
+  치료사: { pt: number | null; ot: number | null; 기준: string | null } | null;
+  경쟁률: 경쟁률줄[];
+}) {
+  if (!치료사 && 경쟁률.length === 0) return null;
+  const 몇 = (n: number | null) => (n == null ? '—' : `${n.toLocaleString('ko-KR')}명`);
+  const 배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })} : 1`);
+  return (
+    <RapoDetailSection title="병원 한눈에" sub="공개된 자료로 모은 숫자예요">
+      {치료사 && (
+        <div className="flex flex-col gap-(--rapo-dimension-x2)">
+          <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">이 병원 치료사</p>
+          <div className="grid grid-cols-2 gap-(--rapo-dimension-x3)">
+            {([['물리치료사', 치료사.pt], ['작업치료사', 치료사.ot]] as const).map(([이름, n]) => (
+              <div key={이름} className="flex flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x4)">
+                <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">{이름}</p>
+                <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">{몇(n)}</p>
+              </div>
+            ))}
+          </div>
+          <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
+            건강보험심사평가원에 신고된 인원{치료사.기준 ? ` · ${치료사.기준} 기준` : ''}
+          </p>
+        </div>
+      )}
+      {경쟁률.map((g) => (
+        <div key={g.묶음키} className="flex flex-col gap-(--rapo-dimension-x2)">
+          <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">
+            지난 채용 경쟁률{g.고용형태 ? ` · ${g.고용형태}` : ''}
+          </p>
+          <div className="flex items-center justify-between gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x4)">
+            <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
+              <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">평균</p>
+              <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">{배(g.평균)}</p>
+            </div>
+            <p className="rapo-type-t3-regular break-keep text-right text-(color:--rapo-color-fg-neutral-muted)">
+              {g.첫해 && g.끝해 ? (g.첫해 === g.끝해 ? `${g.첫해}년` : `${g.첫해}–${g.끝해}년`) : ''} · {g.회차}번<br />
+              가장 낮음 {배(g.가장낮음)} · 가장 높음 {배(g.가장높음)}
+            </p>
+          </div>
+          <Link href={`/compete?g=${encodeURIComponent(g.묶음키)}`}
+             className="rapo-type-t3-regular self-end underline decoration-(--rapo-color-stroke-neutral-weak) underline-offset-2 text-(color:--rapo-color-fg-neutral-muted)">
+            회차별로 보기
+          </Link>
+        </div>
+      ))}
+    </RapoDetailSection>
+  );
+}

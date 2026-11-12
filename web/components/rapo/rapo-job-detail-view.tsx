@@ -7,8 +7,8 @@ import { LoginFirst } from '@/components/login-first';
 import { ShareButtons } from '@/components/share-buttons';
 import type { Who } from '@/lib/supabase-server';
 import {
-  RapoDetailHeader, RapoDetailIdentity, RapoDetailSection, RapoGuideRow, RapoInstitution, RapoKeyRow,
-  RapoPayCard, RapoPeriodCard, RapoSectionGap, RapoStickyActions, 지원단추꼴, 잠긴단추꼴, type 모집상태,
+  RapoDetailHeader, RapoDetailIdentity, RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoInstitution, RapoKeyRow,
+  RapoPayCard, RapoPeriodCard, RapoSectionGap, RapoStickyActions, 지원단추꼴, 잠긴단추꼴, type 경쟁률줄, type 모집상태,
 } from './rapo-job-detail';
 import { RapoJobRow, type RapoJob } from './rapo-job-row';
 import { RapoButton, RapoDivider } from './rapo-ui';
@@ -38,6 +38,9 @@ export type RapoJobDetailProps = {
   비슷한제목말: string | undefined;
   비슷한주소: string;
   지원주소: string | null;
+  /* 병원 한눈에 (2026-11-12) — 회원만 값이 옵니다. 없으면 칸을 안 그립니다 */
+  치료사?: { pt: number | null; ot: number | null; 기준: string | null } | null;
+  경쟁률?: 경쟁률줄[];
 };
 
 export function RapoJobDetailView(p: RapoJobDetailProps) {
@@ -162,6 +165,13 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
 
         <RapoSectionGap />
         <RapoInstitution org={p.기관} 주소={p.주소} />
+
+        {(p.치료사 || (p.경쟁률?.length ?? 0) > 0) && (
+          <>
+            <RapoSectionGap />
+            <RapoHospitalFacts 치료사={p.치료사 ?? null} 경쟁률={p.경쟁률 ?? []} />
+          </>
+        )}
 
         {/* 이 병원 이야기 (원본 「이 병원 이야기 · 가로 후기」 983:22167) — 병원별 이야기·후기 기능이 아직 없어 빈 상태로 둡니다.
             지어낸 후기를 넣지 않습니다 (2026-11-12 밤 근무) */}

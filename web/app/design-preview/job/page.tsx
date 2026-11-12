@@ -43,6 +43,11 @@ export default async function DesignPreviewJob({ searchParams }: {
         }]}
         비슷한제목말="작업치료사 · 서울" 비슷한주소="/design-preview/jobs"
         지원주소="https://example.com/"
+        /* 병원 한눈에 (2026-11-12) — 견본 숫자입니다. 실제 화면은 심평원 인원·알리오 경쟁률을 씁니다 */
+        치료사={who === 'member' ? { pt: 20, ot: 6, 기준: '2026-09-25' } : null}
+        경쟁률={who === 'member' ? [{
+          묶음키: '견본', 고용형태: '기간제', 회차: 8, 첫해: 2019, 끝해: 2026, 평균: 5.9, 가장낮음: 2, 가장높음: 13,
+        }] : []}
       />
     </>
   );
