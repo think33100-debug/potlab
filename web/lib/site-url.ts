@@ -22,3 +22,13 @@ export function siteUrl(): string {
 
   return 'http://localhost:3000';
 }
+
+/* 남에게 보내는 링크의 주소 — 늘 RAPO 대표 주소입니다 (2026-11-12 세중님 「공유할 때 왜 링크에 potjob 영어가 들어가냐 · 우리 RAPO 잖아」).
+   사이트는 Vercel 의 옛 이름 주소(potjob-web.vercel.app)로도 열립니다. 거기서 공유하면 location.origin 이
+   그 주소라 링크에 potjob 이 찍혔습니다. 내 컴퓨터(localhost)에서만 지금 주소를 씁니다 — 개발 서버에서 눌러 보게. */
+export const 대표주소 = 'https://www.rapojob.co.kr';
+
+export function 공유주소(path: string): string {
+  if (typeof location !== 'undefined' && /^(localhost|127\.|\[::1\])/.test(location.hostname)) return location.origin + path;
+  return 대표주소 + path;
+}

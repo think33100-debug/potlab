@@ -93,7 +93,8 @@ export async function generateMetadata({
   const 장수 = await countImages(p.id);
   const title = p.title || p.body.slice(0, 40);
   const desc = p.body.slice(0, 120).replace(/\s+/g, ' ');
-  const image = 장수 > 0 ? 사진주소(p.id, 0) : '/og.png';
+  /* 사진이 없으면 커뮤니티 기본 그림 — ★ 2026-11-12 세중님: 옛 「POT LAB」 그림(/og.png)은 걷었습니다 */
+  const image = 장수 > 0 ? 사진주소(p.id, 0) : '/api/og/site?k=post';
 
   return {
     title: `${title} · ${channelName(p.channel)} · RAPO`,

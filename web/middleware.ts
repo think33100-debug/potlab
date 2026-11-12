@@ -26,7 +26,9 @@ import { GUEST_COOKIE } from '@/lib/guest-view';
 const 막는API = ['/api/og', '/api/post-image'];
 /* 공유받은 공고 — 공고 하나(/jobs/<번호>)와 그 미리보기 그림은 비회원에게도 엽니다 (2026-11-12 세중님).
    비회원에게 무엇이 나가는지는 DB 창구 job_one 이 정합니다 — 원문 주소·지원 자격·급여는 안 나갑니다(10월 규칙 그대로) */
-const 공유공고길 = (p: string) => /^\/jobs\/[^/]+$/.test(p) || /^\/api\/og\/job\/[^/]+$/.test(p);
+const 공유공고길 = (p: string) => /^\/jobs\/[^/]+$/.test(p) || /^\/api\/og\/job\/[^/]+$/.test(p)
+  /* ★ 2026-11-12 밤 — 기본 미리보기 그림(홈·가입 링크·커뮤니티 글)도 카톡 로봇이 받아 가야 합니다. 브랜드 글뿐입니다 */
+  || p === '/api/og/site';
 
 /* 검색엔진 색인을 막습니다 (테스트 동안). app/robots.ts 와 한 쌍 */
 const 색인막기 = 'noindex, nofollow';
