@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { ListFilters } from '@/components/list-filters';
+import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
+import { RapoEduFilter, RapoEduTop, RapoExploreNote } from '@/components/rapo/rapo-edu';
+import { RapoButton, RapoPagination } from '@/components/rapo/rapo-ui';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 /* 경쟁률 찾아보기 (2026-10-05 · 꼴은 2026-10-07 에 다시 짰습니다).
@@ -117,23 +119,28 @@ function 률칸(r: 회차) {
 
 /* 출처와 한계 — 화면 아래 **늘** 붙습니다 (경쟁률_화면_설계.md 4절) */
 function 밝힘({ 기본값단계 }: { 기본값단계?: boolean }) {
-  const 굵게 = 'font-medium text-gray-700 dark:text-gray-300';
   return (
-    <p className="mt-8 break-keep border-t border-gray-100 pt-5 text-sm leading-relaxed text-mute dark:border-gray-800">
-      알리오(공공기관 경영정보 공개시스템)에 기관이 올린 자료 기준이에요.
-      <b className={굵게}> 공공기관만 해당돼요</b> — 민간 병원은 이 자료에 없어요.
-      경쟁률은 <b className={굵게}>첫 단계 응시자 ÷ 최종 선발 인원</b>이에요.
-      뽑은 사람이 0명이면 비율 대신 <b className={굵게}>지원·선발 인원</b>을 그대로 적고,
-      기관이 인원을 안 적은 회차는 <b className={굵게}>「안 적었어요」</b>로 둬요 — 0으로 적지 않아요.
-      {기본값단계 && (
-        <> 단계가 서류인지 면접인지 공고 설명에 없으면 <b className={굵게}>일반적인 전형 순서 기준</b>으로 적어요.</>
-      )}
-    </p>
+    <RapoExploreNote>
+      <p>알리오(공공기관 경영정보 공개시스템)에 기관이 올린 자료 기준이에요. <b>공공기관만 해당돼요</b> — 민간 병원은 이 자료에 없어요.</p>
+      <p>경쟁률은 <b>첫 단계 응시자 ÷ 최종 선발 인원</b>이에요. 뽑은 사람이 0명이면 비율 대신 <b>지원·선발 인원</b>을 그대로 적고, 기관이 인원을 안 적은 회차는 <b>「안 적었어요」</b>로 둬요 — 0으로 적지 않아요.</p>
+      {기본값단계 && <p>단계가 서류인지 면접인지 공고 설명에 없으면 <b>일반적인 전형 순서 기준</b>으로 적어요.</p>}
+    </RapoExploreNote>
   );
 }
 
-/* 공고 목록의 분류 꼬리표와 **같은 것**을 씁니다 (web/app/jobs/page.tsx:328) */
-const 꼬리표 = 'rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue';
+/* ── 새 디자인 (2026-11-12 세중님 「회차별로 보기가 옛날 거 · 피그마에 없으니 우리 형식 살려서」) ──
+   피그마에 이 화면이 없어 우리 새 디자인 조각으로 짰습니다 —
+     머리      RapoEduTop(뒤로 · 「경쟁률」 · 그림 대신 없음) — 교육·봉사·청년정책과 같은 목록 상단
+     한 묶음   공고 상세 「지난 채용 경쟁률」 카드(brand-weak · 평균 t12)와 같은 카드 → 회차 줄(아래 선 #dde4e6)
+     목록      조건 칩(RapoEduFilter: 직군 · 지역 · 기관) · 찾기 칸 · RapoExploreRow · 쪽 넘기기
+     밝힘      RapoExploreNote(맨 아래 회색 칸)
+   자료를 읽는 길(경쟁률찾기목록 · 경쟁률한묶음)과 회차 칸 규칙(률칸)·요약 문장(요약문)은 그대로입니다. */
+
+function 배(v: string | null) {
+  if (v == null) return '—';
+  const n = Number(v);
+  return Number.isFinite(n) ? `${n.toLocaleString('ko-KR', { maximumFractionDigits: 1 })} : 1` : `${v} : 1`;
+}
 
 export default async function Compete({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
@@ -145,42 +152,31 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
 
   const sb = await serverSupabase();
   const 누구 = await serverWho(sb);
-  const 회원인가 = 누구 === '회원';
 
-  /* ★ 2026-10-09 밤 — **비회원에게는 목록도 안 보입니다.**
-     세중님 지시로 바뀐 자리입니다. 앞 결정과 나란히 적어 둡니다 —
+  const 틀 = (뒤로: string, 속: React.ReactNode) => (
+    <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
+      <RapoEduTop title="경쟁률" back={뒤로} art="/rapo/home/graphic-cert-28.svg" />
+      <main className="px-(--rapo-dimension-x5) pb-(--rapo-dimension-x8)">{속}</main>
+      <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
+      <RapoBottomNav current="/jobs" />
+    </div>
+  );
 
+  /* ★ 2026-10-09 밤 — **비회원에게는 목록도 안 보입니다.** (세중님 지시 · 앞 결정과 나란히)
        2026-10-05  「목록은 누구나 봅니다. 숫자는 회원만」 (가운데 길)
        2026-10-09  「/compete 직접 접속도 서버에서 로그인 안내로」
-
-     공고 상세의 「경쟁률 보러 가기」도 같은 기준으로 바뀌었습니다. 한쪽만
-     막으면 주소를 쳐서 들어옵니다. 「모름」일 때는 막지 않습니다 —
-     물어보지 못한 것을 「비회원」으로 읽으면, 잠깐 끊긴 회원이 쫓겨납니다
-     (lib/supabase-server.ts 의 세 값 규칙). */
+     「모름」일 때는 막지 않습니다 — 잠깐 끊긴 회원이 쫓겨납니다 (lib/supabase-server.ts 의 세 값 규칙). */
   if (누구 === '비회원') {
-    return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-        <h1 className="break-keep text-h1 font-bold">경쟁률 찾아보기</h1>
-        <p className="mt-3 break-keep text-lg text-mute">
-          공공기관이 공개한 지난 채용의 경쟁률이에요. <b>로그인하시면 보여드릴게요.</b>
-        </p>
-        <Link href="/login"
-          className="mt-7 inline-block rounded-md bg-brand-red px-7 py-5 text-btn font-bold text-white
-                     hover:bg-brand-red-dark">
-          로그인하고 보기
-        </Link>
-        <p className="mt-4 break-keep text-sm text-mute">
-          카카오·네이버로 10초면 됩니다. 보시던 자리로 돌아와요.
-        </p>
-      </main>
-    );
+    return 틀('/', (
+      <section className="flex flex-col gap-(--rapo-dimension-x3) pt-(--rapo-dimension-x8)">
+        <h2 className="rapo-type-t10-bold break-keep text-(color:--rapo-brand-color-navy)">지난 채용 경쟁률은<br />회원에게 보여드려요</h2>
+        <p className="rapo-type-t5-regular break-keep text-[#3f4c57]">공공기관이 공개한 지난 채용의 지원·선발 인원을 회차별로 모았어요.</p>
+        <RapoButton href={'/login?next=' + encodeURIComponent(고른묶음 ? `/compete?g=${고른묶음}` : '/compete')} tone="deep-coral" full>1분 만에 가입하고 보기</RapoButton>
+      </section>
+    ));
   }
 
-  /* ★ 2026-10-28 세중님 ⓑ — **둘을 함께 띄웁니다.**
-     전에는 목록을 받고 **그 뒤에** 한 묶음을 받았습니다. 그런데 한 묶음은
-     목록 값을 **안 봅니다** — 주소의 `묶음` 하나만 봅니다. 그래서 왕복 둘이
-     차례로 가며 시간이 더해졌습니다 (docs/속도진단_1028.md ⓑ).
-     ★ 먼저 **띄우고** 나중에 기다립니다 — `await` 를 미루는 것이 묶는 것입니다 */
+  /* ★ 2026-10-28 세중님 ⓑ — **둘을 함께 띄웁니다** (목록과 한 묶음은 서로를 안 봅니다 · docs/속도진단_1028.md ⓑ) */
   const 목록약속 = sb.rpc('경쟁률찾기목록', {
     p_직군: sp.job && sp.job !== '전체' ? sp.job : null,
     p_지역: sp.sido || null,
@@ -189,33 +185,6 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
     p_쪽: 쪽,
   });
   const 한묶음약속 = 고른묶음 ? sb.rpc('경쟁률한묶음', { p_묶음키: 고른묶음 }) : null;
-
-  const { data, error } = await 목록약속;
-
-  if (error) {
-    return (
-      <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
-        <h1 className="text-h1 font-bold">경쟁률 찾아보기</h1>
-        <p className="mt-4 text-lg text-brand-red-dark">
-          목록을 못 읽었어요 — {error.message}
-        </p>
-      </main>
-    );
-  }
-
-  const d = data as 목록;
-  const 끝쪽 = Math.max(1, Math.ceil(d.전체 / d.쪽당));
-
-  /* ── 한 묶음 보기 ─────────────────────────────────────────── */
-  let 한것: 한묶음 | null = null;
-  let 숫자탈: string | null = null;
-  if (고른묶음 && 한묶음약속) {
-    /* 위에서 이미 띄워 둔 것을 **여기서 기다립니다** — 목록과 겹쳐 돌았습니다 */
-    const r = await 한묶음약속;
-    if (r.error) 숫자탈 = r.error.message;
-    else 한것 = r.data as 한묶음;
-  }
-  const 로그인하라 = !!숫자탈 && 숫자탈.includes('로그인');
 
   const 주소 = (바꿀: Partial<SP>) => {
     const q = new URLSearchParams();
@@ -228,214 +197,146 @@ export default async function Compete({ searchParams }: { searchParams: Promise<
     return s ? '/compete?' + s : '/compete';
   };
 
-  return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <header>
-        <h1 className="break-keep text-h1 font-bold">경쟁률 찾아보기</h1>
-        <p className="mt-2 break-keep text-lg text-mute">
-          공공기관이 공개한 지난 채용의 경쟁률이에요. 자리{' '}
-          <b className="num font-bold tabular-nums text-ink">{d.전체}곳</b>
-          {!회원인가 && (
-            <> · 숫자는 <b className="font-bold text-ink">로그인하면</b> 보여요</>
-          )}
-        </p>
-      </header>
+  /* ── 한 묶음(회차별) 보기 ─────────────────────────────────── */
+  if (고른묶음 && 한묶음약속) {
+    const r = await 한묶음약속;
+    const 한것 = r.error ? null : (r.data as 한묶음 | null);
+    return 틀(주소({ g: undefined }), 한것 ? (
+      <div className="flex flex-col gap-(--rapo-dimension-x5) pt-(--rapo-dimension-x4)">
+        {/* 머리 — 기관 · 지역 · 고용형태 작게, 직군 크게 */}
+        <div className="flex flex-col gap-(--rapo-dimension-x1)">
+          <p className="rapo-type-t4-medium break-keep text-[#3f4c57]">
+            {[한것.머리.기관, 한것.머리.지역, 한것.머리.고용형태].filter(Boolean).join(' · ')}
+          </p>
+          <h2 className="rapo-type-t9-bold break-keep text-(color:--rapo-brand-color-navy)">{한것.머리.직군} 지난 채용</h2>
+          {한것.머리.자리 && <p className="rapo-type-t4-regular break-keep text-[#3f4c57]">{한것.머리.자리}</p>}
+        </div>
 
-      {/* ── 고른 묶음 ───────────────────────────────────────── */}
-      {고른묶음 && (
-        <section className="mt-7">
-          <Link href={주소({ g: undefined })}
-            className="text-sm font-medium text-interaction-blue hover:underline">
-            ← 목록으로
-          </Link>
+        {/* 요약 카드 — 공고 상세 「지난 채용 경쟁률」과 같은 꼴 */}
+        <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+          <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">{한것.머리.회차 === 1 ? '경쟁률' : '평균 경쟁률'}</p>
+          <p className="text-(color:--rapo-color-fg-brand)">
+            <span className="rapo-type-t12-bold">{한것.머리.평균 == null ? '—' : Number(한것.머리.평균).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}</span>
+            {한것.머리.평균 != null && <span className="rapo-type-t6-bold ml-[4px]">: 1</span>}
+          </p>
+          <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
+            {요약문(한것.머리)}
+            {한것.머리.평균 && 한것.머리.가장낮음 && 한것.머리.회차 > 1 ? ` · 가장 낮음 ${배(한것.머리.가장낮음)} · 가장 높음 ${배(한것.머리.가장높음)}` : ''}
+          </p>
+        </div>
 
-          {숫자탈 ? (
-            /* 로그인 유도 — 카드 하나로 또렷하게 */
-            <div className="mt-4 rounded-sm border border-gray-200 bg-gray-50 p-7 dark:border-gray-700 dark:bg-gray-950">
-              <p className="break-keep text-h3 font-bold text-ink">
-                {로그인하라 ? '로그인하면 경쟁률을 볼 수 있어요' : '못 읽었어요'}
-              </p>
-              <p className="mt-2 break-keep text-lg leading-relaxed text-mute">
-                {로그인하라
-                  ? '어느 자리에 몇 번 채용했는지는 로그인 없이 보여요. 경쟁률 숫자만 회원에게 보여드려요.'
-                  : 숫자탈}
-              </p>
-              {로그인하라 && (
-                <Link href={'/login?next=' + encodeURIComponent(주소({}))}
-                  className="mt-6 inline-block rounded-md bg-brand-red px-7 py-4 text-btn font-bold
-                             text-white transition-colors hover:bg-brand-red-dark active:scale-[0.98]">
-                  로그인하기
-                </Link>
-              )}
-            </div>
-          ) : 한것 ? (
-            <div className="mt-4">
-              {/* 머리 — 기관은 작게, 요약 문장이 가장 큽니다 */}
-              <p className="break-keep text-sm text-mute">
-                {한것.머리.기관} · {한것.머리.지역}
-                {한것.머리.고용형태 ? ' · ' + 한것.머리.고용형태 : ''}
-              </p>
-              <h2 className="mt-1 break-keep text-h2 font-bold">{한것.머리.직군}</h2>
-              <p className="mt-3 break-keep text-body-lg font-bold text-ink">{요약문(한것.머리)}</p>
-              {한것.머리.평균 && 한것.머리.가장낮음 && (
-                <p className="mt-1 text-lg text-mute">
-                  가장 낮았을 때 <span className="num tabular-nums">{한것.머리.가장낮음}</span> 대 1 ·
-                  가장 높았을 때 <span className="num tabular-nums">{한것.머리.가장높음}</span> 대 1
-                </p>
-              )}
-              {한것.머리.자리 && (
-                <p className="mt-2 break-keep text-sm text-mute">{한것.머리.자리}</p>
-              )}
-
-              {/* 회차 — 공고 목록과 같은 divide-y 리듬 */}
-              <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
-                {한것.회차들.map((r) => {
-                  const v = 률칸(r);
-                  return (
-                    <li key={r.sn} className="py-6">
-                      <div className="flex items-baseline justify-between gap-5">
-                        <span className="text-sm text-mute">
-                          {r.해}년{r.마감 ? ` · 마감 ${r.마감}` : ''}
-                        </span>
-                        <span className={'shrink-0 text-right ' + (v.흐림 ? 'text-mute' : '')}>
-                          {v.큰글 && (
-                            <b className="num block text-h3 font-bold tabular-nums text-ink">{v.큰글}</b>
-                          )}
-                          {v.작은글 && (
-                            <span className={'block text-sm '
-                              + (v.큰글 ? 'text-mute' : 'font-medium text-gray-700 dark:text-gray-300')}>
-                              {v.작은글}
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                      {r.공고제목 && (
-                        <p className="mt-1 break-keep text-body-lg font-medium">{r.공고제목}</p>
-                      )}
-                      {r.자리이름 && <p className="mt-0.5 break-keep text-sm text-mute">{r.자리이름}</p>}
-
-                      {r.단계들 && r.단계들.length > 0 && (
-                        <ul className="mt-3 flex flex-col gap-1">
-                          {r.단계들.map((t, i) => (
-                            <li key={i} className="flex flex-wrap gap-x-3 text-sm text-mute">
-                              <b className="min-w-[3.5rem] font-medium text-gray-700 dark:text-gray-300">
-                                {t.이름 ?? (i + 1) + '차'}
-                              </b>
-                              {t.선발 != null && <span className="num tabular-nums">{t.선발}명 뽑음</span>}
-                              {t.응시 != null && <span className="num tabular-nums">{t.응시}명 지원</span>}
-                              {t.확정일 && <span>결과 {t.확정일}</span>}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      {r.첫응시 != null && r.끝선발 ? (
-                        <p className="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {r.첫응시}명이 지원해 {r.끝선발}명을 뽑았어요
-                        </p>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
-              <밝힘 기본값단계={한것.머리.기본값단계} />
-            </div>
-          ) : null}
-        </section>
-      )}
-
-      {/* ── 목록 ────────────────────────────────────────────── */}
-      {!고른묶음 && (
-        <>
-          <div className="mt-6">
-            <ListFilters
-              기준={{ job: sp.job, sido: sp.sido }}
-              시도들={d.지역들}
-              마감숨김
-              고름={{
-                이름: 'org',
-                전체말: '기관 전체',
-                선택지: d.기관들.map((x) => ({ 값: x, 글: x })),
-                고른값: sp.org,
-              }}
-              뿌리="/compete"
-              남길값={sp.q ? { q: sp.q } : {}}
-            />
-
-            {/* 자리 이름으로 찾기 — 공고 목록의 찾기 줄과 같은 꼴입니다 */}
-            <form action="/compete" method="get" className="mb-2 flex gap-2">
-              {sp.job && <input type="hidden" name="job" value={sp.job} />}
-              {sp.sido && <input type="hidden" name="sido" value={sp.sido} />}
-              {sp.org && <input type="hidden" name="org" value={sp.org} />}
-              <input name="q" defaultValue={sp.q ?? ''} placeholder="기관·자리 이름으로 찾기"
-                aria-label="기관이나 자리 이름으로 찾기"
-                className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg
-                           placeholder:text-mute dark:border-gray-700 dark:bg-gray-950" />
-              <button type="submit"
-                className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white
-                           transition-colors hover:bg-brand-red-dark active:scale-[0.98]">
-                찾기
-              </button>
-            </form>
-          </div>
-
-          {d.묶음.length === 0 ? (
-            <p className="mt-7 text-lg text-mute">고른 조건에 맞는 자리가 없어요.</p>
-          ) : (
-            <ul className="divide-y divide-gray-100 dark:divide-gray-800">
-              {d.묶음.map((g) => (
-                <li key={g.묶음키}>
-                  <Link href={주소({ g: g.묶음키, p: undefined })}
-                    className="-mx-4 block rounded-sm px-4 py-6 hover:bg-gray-50 dark:hover:bg-gray-950">
-                    {/* 공고 목록과 같은 차례 — 기관 작게, 제목 크게, 꼬리표 아래 */}
-                    <div className="flex items-baseline justify-between gap-5">
-                      <span className="break-keep text-sm text-mute">
-                        {g.기관} · {g.지역}
+        {/* 회차 — 최근 것부터 */}
+        <section aria-labelledby="rounds">
+          <h3 id="rounds" className="rapo-type-t7-bold text-(color:--rapo-brand-color-navy)">회차별 경쟁률 {한것.회차들.length}번</h3>
+          <ul>
+            {한것.회차들.map((c) => {
+              const v = 률칸(c);
+              return (
+                <li key={c.sn} className="flex flex-col gap-(--rapo-dimension-x2) border-b border-[#dde4e6] py-(--rapo-dimension-x4)">
+                  <div className="flex items-start justify-between gap-(--rapo-dimension-x3)">
+                    <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
+                      <span className="flex items-center gap-[6px]">
+                        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+                        <img src="/rapo/edu/calendar-16.svg" alt="" width={16} height={16} className="shrink-0" />
+                        <span className="rapo-type-t4-regular text-[#3f4c57]">{c.해}년{c.마감 ? ` · 마감 ${c.마감}` : ''}</span>
                       </span>
-                      <span className="num shrink-0 text-sm font-bold tabular-nums text-gray-600 dark:text-gray-400">
-                        {g.회차}번 채용
-                      </span>
+                      {c.공고제목 && <p className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy) [overflow-wrap:anywhere]">{c.공고제목}</p>}
+                      {c.자리이름 && <p className="rapo-type-t3-regular break-keep text-[#3f4c57]">{c.자리이름}</p>}
                     </div>
-                    <p className="mt-1 break-keep text-body-lg font-medium">
-                      {g.직군}
-                      {g.고용형태 ? ' · ' + g.고용형태 : ''}
-                    </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-mute">
-                      <span className={꼬리표}>{g.첫해}~{g.끝해}년</span>
-                      {g.기본값단계 && <span>단계 이름 기본값</span>}
-                      {g.자리 && <span className="break-keep">{g.자리}</span>}
-                      <span className="font-medium text-interaction-blue">
-                        {회원인가 ? '경쟁률 보기' : '로그인하면 경쟁률을 볼 수 있어요'}
-                      </span>
+                    <div className="shrink-0 text-right">
+                      {v.큰글 && <p className={'rapo-type-t8-bold tabular-nums ' + (v.흐림 ? 'text-[#3f4c57]' : 'text-(color:--rapo-color-fg-brand)')}>{v.큰글}</p>}
+                      {v.작은글 && <p className="rapo-type-t3-regular max-w-[140px] break-keep text-[#3f4c57]">{v.작은글}</p>}
                     </div>
-                  </Link>
+                  </div>
+                  {c.단계들 && c.단계들.length > 0 && (
+                    <ul className="flex flex-wrap gap-(--rapo-dimension-x1)">
+                      {c.단계들.map((t, i) => (
+                        <li key={i} className="rapo-type-t2-medium rounded-[4px] bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x2) py-[4px] text-(color:--rapo-color-fg-neutral)">
+                          {t.이름 ?? `${i + 1}차`}{t.응시 != null ? ` · ${t.응시}명 지원` : ''}{t.선발 != null ? ` · ${t.선발}명 뽑음` : ''}{t.확정일 ? ` · 결과 ${t.확정일}` : ''}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {c.첫응시 != null && c.끝선발 ? (
+                    <p className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">{c.첫응시}명이 지원해 {c.끝선발}명을 뽑았어요</p>
+                  ) : null}
                 </li>
-              ))}
-            </ul>
-          )}
+              );
+            })}
+          </ul>
+        </section>
+        <밝힘 기본값단계={한것.머리.기본값단계} />
+      </div>
+    ) : (
+      <p role="alert" className="rapo-type-t4-regular mt-(--rapo-dimension-x4) rounded-(--rapo-radius-r2) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x4) text-[#b42a21]">
+        경쟁률을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.
+      </p>
+    ));
+  }
 
-          {끝쪽 > 1 && (
-            <nav aria-label="쪽" className="mt-7 flex items-center justify-between">
-              {쪽 > 1
-                ? <Link href={주소({ p: String(쪽 - 1) })}
-                    className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium
-                               text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">
-                    이전
-                  </Link>
-                : <span />}
-              <span className="num text-lg tabular-nums text-mute">{쪽} / {끝쪽}</span>
-              {쪽 < 끝쪽
-                ? <Link href={주소({ p: String(쪽 + 1) })}
-                    className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium
-                               text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400">
-                    다음
-                  </Link>
-                : <span />}
-            </nav>
-          )}
+  /* ── 목록 ────────────────────────────────────────────────── */
+  const { data, error } = await 목록약속;
+  if (error) {
+    return 틀('/', (
+      <p role="alert" className="rapo-type-t4-regular mt-(--rapo-dimension-x4) rounded-(--rapo-radius-r2) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x4) text-[#b42a21]">
+        목록을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.
+      </p>
+    ));
+  }
+  const d = data as 목록;
+  const 끝쪽 = Math.max(1, Math.ceil(d.전체 / d.쪽당));
+  const 직군선택지 = ['전체', ...d.직군들].map((x) => ({ 글: x, 주소: 주소({ job: x === '전체' ? undefined : x, p: undefined }), 켜짐: (sp.job ?? '전체') === x }));
+  const 지역선택지 = ['전국', ...d.지역들].map((x) => ({ 글: x, 주소: 주소({ sido: x === '전국' ? undefined : x, p: undefined }), 켜짐: (sp.sido ?? '전국') === x }));
+  const 기관선택지 = ['기관 전체', ...d.기관들].map((x) => ({ 글: x, 주소: 주소({ org: x === '기관 전체' ? undefined : x, p: undefined }), 켜짐: (sp.org ?? '기관 전체') === x }));
 
-          <밝힘 />
-        </>
+  return 틀('/', (
+    <>
+      <p className="rapo-type-t4-regular break-keep pt-(--rapo-dimension-x4) text-[#3f4c57]">공공기관이 공개한 지난 채용의 경쟁률이에요.</p>
+      {/* 자리 이름으로 찾기 */}
+      <form action="/compete" method="get" className="mt-(--rapo-dimension-x3)">
+        {sp.job && <input type="hidden" name="job" value={sp.job} />}
+        {sp.sido && <input type="hidden" name="sido" value={sp.sido} />}
+        {sp.org && <input type="hidden" name="org" value={sp.org} />}
+        <label className="flex h-[52px] items-center gap-(--rapo-dimension-x2_5) rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak) px-(--rapo-dimension-x4)">
+          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+          <img src="/rapo/list/search-20.svg" alt="" width={20} height={20} className="shrink-0" />
+          <span className="sr-only">기관이나 자리 이름으로 찾기</span>
+          <input name="q" defaultValue={sp.q ?? ''} placeholder="기관·자리 이름으로 찾기" enterKeyHint="search"
+            className="rapo-type-t5-regular min-w-0 flex-1 bg-transparent outline-none placeholder:text-(color:--rapo-color-fg-placeholder)" />
+        </label>
+      </form>
+      <div className="flex flex-wrap gap-(--rapo-dimension-x2) pt-(--rapo-dimension-x3)">
+        <RapoEduFilter icon="/rapo/list/briefcase-16.svg" label="직군" 고른것={sp.job && sp.job !== '전체' ? sp.job : null} 선택지={직군선택지} />
+        <RapoEduFilter icon="/rapo/list/pin-16.svg" label="지역" 고른것={sp.sido || null} 선택지={지역선택지} />
+        <RapoEduFilter icon="/rapo/edu/academy-16.svg" label="기관" 고른것={sp.org || null} 선택지={기관선택지} />
+      </div>
+      <h2 className="pt-(--rapo-dimension-x2) text-[20px] font-bold leading-[22px] text-(color:--rapo-brand-color-navy)">채용 자리 {d.전체}곳</h2>
+
+      {d.묶음.length === 0 ? (
+        <p className="rapo-type-t5-regular py-(--rapo-dimension-x8) text-center text-[#3f4c57]">고른 조건에 맞는 자리가 없어요.</p>
+      ) : (
+        <ul>
+          {d.묶음.map((g) => (
+            <li key={g.묶음키}>
+              <Link href={주소({ g: g.묶음키, p: undefined })}
+                className="flex flex-col gap-(--rapo-dimension-x2) border-b border-[#dde4e6] py-(--rapo-dimension-x4) active:bg-(--rapo-color-bg-transparent-pressed)">
+                <span className="rapo-type-t4-medium break-keep text-[#3f4c57]">{g.기관} · {g.지역}</span>
+                <span className="rapo-type-t7-bold break-keep text-(color:--rapo-brand-color-navy)">{g.직군}{g.고용형태 ? ` · ${g.고용형태}` : ''}</span>
+                {g.자리 && <span className="rapo-type-t3-regular break-keep text-[#3f4c57]">{g.자리}</span>}
+                <span className="flex flex-wrap items-center gap-(--rapo-dimension-x1)">
+                  <span className="rapo-type-t2-medium rounded-[4px] bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x2) py-[4px]">{g.첫해 === g.끝해 ? `${g.첫해}년` : `${g.첫해}~${g.끝해}년`}</span>
+                  <span className="rapo-type-t2-medium rounded-[4px] bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x2) py-[4px]">{g.회차}번 채용</span>
+                  <span className="rapo-type-t4-bold ml-auto text-[#b42a21]">회차별로 보기 ›</span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
-    </main>
-  );
+      <div className="pt-(--rapo-dimension-x4)">
+        <RapoPagination page={쪽 - 1} pages={끝쪽} href={(p) => 주소({ p: String(p + 1) })} />
+      </div>
+      <밝힘 />
+    </>
+  ));
 }
