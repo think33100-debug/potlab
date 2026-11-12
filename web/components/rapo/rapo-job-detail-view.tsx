@@ -113,7 +113,8 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       </div>
 
       {/* 병원 한눈에 — 예전 앱처럼 지원 자격 바로 아래 (2026-11-12 세중님 「예전 앱 위치 참고」) */}
-      {(p.치료사 || p.바쁨?.band || (p.경쟁률?.length ?? 0) > 0) && (
+      {/* 병원 자료(구분·병상)만 있어도 칸을 그립니다 (2026-11-12) */}
+      {(p.치료사 || p.바쁨 || (p.경쟁률?.length ?? 0) > 0) && (
         <>
           <RapoSectionGap />
           <RapoHospitalFacts 치료사={p.치료사 ?? null} 바쁨={p.바쁨 ?? null} 경쟁률={p.경쟁률 ?? []} 인턴={p.인턴} />
