@@ -20,7 +20,7 @@ export const UNLOCKS: Unlock[] = [
     desc: '전국 채용사이트에서 공고를 자동으로 모아요. 마감 지난 건 안 올려요' },
   { emoji: '⭐', title: '담아둔 공고',
     desc: '관심 있는 공고를 담아두고 한자리에서 볼 수 있어요' },
-  { emoji: '💬', title: 'POT 커뮤니티',
+  { emoji: '💬', title: 'RAPO 커뮤니티',
     desc: '급여를 등록한 치료사끼리만 묻고 답해요' },
   { emoji: '🏥', title: '병원 찾기·비교',
     desc: '전국 병원의 치료사 인원·병상·전문의 수를 나란히 놓고 봐요' },

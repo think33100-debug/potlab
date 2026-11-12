@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { CompareNotify } from '@/components/compare-notify';
-import { 비교알림동의, 비교알림켜짐 } from '@/lib/beta-compare';
+import { 비교알림켜짐 } from '@/lib/beta-compare';
 import { SignupSurvey } from '@/components/signup-survey';
 import { defaultAvatar } from '@/lib/avatar';
 import { BETA_AGREEMENTS, 표없음 } from '@/lib/beta';
@@ -67,9 +67,12 @@ export default function Welcome() {
   /* ★ 2026-11-11 — 베타 동의(개인정보 [필수] · 설문 경품 [선택])를 기존 동의 뒤에 더합니다.
      기존 다섯 항목과 동의남기기() 는 그대로입니다 (그 창구는 다섯 키만 받습니다).
      베타 동의는 `베타동의` 표의 내 줄로 남습니다 — 아래 베타동의남기기() */
-  /* [선택] 연봉·스펙 비교 알림 신청 — 켜고 끄는 문은 lib/beta-compare.ts 하나입니다 */
-  const 베타동의들 = 비교알림켜짐 ? [...BETA_AGREEMENTS, 비교알림동의] : BETA_AGREEMENTS;
-  const 모든동의 = [...AGREEMENTS, ...베타동의들];
+  /* 2026-11-12 저녁 세중님 — ① 「연봉·스펙 비교 알림 신청」 동의는 1단계에서 뺍니다(가입 뒤 알림 창에서 다시 묻습니다 ·
+     창의 「알림 받을래요」가 그 동의입니다). ② 선택 항목은 전부 필수 아래로 모읍니다 */
+  type 동의줄 = { key: string; label: string; required: boolean; doc?: string; lines?: string[] };
+  const 모든동의: 동의줄[] = [...AGREEMENTS, ...BETA_AGREEMENTS];
+  const 필수동의 = 모든동의.filter((a) => a.required);
+  const 선택동의 = 모든동의.filter((a) => !a.required);
   const required = 모든동의.filter((a) => a.required);
   const allRequired = required.every((a) => checked[a.key]);
   const allChecked = 모든동의.every((a) => checked[a.key]);
@@ -88,7 +91,8 @@ export default function Welcome() {
     const 동의칸 = {
       개인정보동의: !!checked.beta_privacy,
       경품동의: !!checked.survey_prize,
-      비교알림동의: 비교알림켜짐 && !!checked.compare_notify,
+      /* 1단계에서 뺐습니다 (2026-11-12 저녁) — 신청은 가입 뒤 창의 「비교알림신청」 줄로 남습니다 */
+      비교알림동의: false,
     };
     let { error } = await sb.from('베타동의').insert({ 사람: session.user.id, ...동의칸 });
     /* 이미 넣은 분(뒤로 갔다가 다시 온 분) — 동의 칸만 새로 적습니다 */
@@ -283,50 +287,19 @@ export default function Welcome() {
               </span>
             </button>
 
-            <ul className="flex flex-col">
-              {AGREEMENTS.map((a) => (
-                <li key={a.key} className="flex items-center gap-(--rapo-dimension-x2) border-b border-(--rapo-color-stroke-neutral-weak)">
-                  <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-(--rapo-dimension-x4) py-(--rapo-dimension-x3)">
-                    <input type="checkbox" className="sr-only" checked={!!checked[a.key]}
-                      onChange={(e) => setChecked({ ...checked, [a.key]: e.target.checked })} />
-                    <Box on={!!checked[a.key]} />
-                    <span className="min-w-0">
-                      <span className="rapo-type-t5-medium block break-keep text-(color:--rapo-color-fg-neutral)">{a.label}</span>
-                      <span className={'rapo-type-t3-regular block ' + (a.required ? 'text-(color:--rapo-color-fg-brand-contrast)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
-                        {a.required ? '필수' : '선택'}
-                      </span>
-                    </span>
-                  </label>
-                  {a.doc && (
-                    <Link href={`/terms/${a.doc}`} aria-label={`${a.label} 전문 보기`}
-                      className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2) active:bg-(--rapo-color-bg-transparent-pressed)">
-                      {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-                      <img src="/rapo/me/chevron-18.svg" alt="" width={18} height={18} />
-                    </Link>
-                  )}
-                </li>
-              ))}
-              {/* ★ 2026-11-11 클로즈드 베타 동의 — 세중님 문구 그대로 (lib/beta.ts).
-                  수집 항목·목적·보유 기간·거부할 권리를 접지 않고 다 보입니다 */}
-              {베타동의들.map((a) => (
-                <li key={a.key} className="border-b border-(--rapo-color-stroke-neutral-weak) py-(--rapo-dimension-x3)">
-                  <label className="flex cursor-pointer items-center gap-(--rapo-dimension-x4)">
-                    <input type="checkbox" className="sr-only" checked={!!checked[a.key]}
-                      onChange={(e) => setChecked({ ...checked, [a.key]: e.target.checked })} />
-                    <Box on={!!checked[a.key]} />
-                    <span className="min-w-0">
-                      <span className="rapo-type-t5-medium block break-keep text-(color:--rapo-color-fg-neutral)">{a.label}</span>
-                      <span className={'rapo-type-t3-regular block ' + (a.required ? 'text-(color:--rapo-color-fg-brand-contrast)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
-                        {a.required ? '필수' : '선택'}
-                      </span>
-                    </span>
-                  </label>
-                  <ul className="rapo-type-t3-regular ml-[38px] mt-(--rapo-dimension-x2) flex flex-col gap-(--rapo-dimension-x1) text-(color:--rapo-color-fg-neutral-muted)">
-                    {a.lines.map((l) => <li key={l} className="break-keep">{l}</li>)}
-                  </ul>
-                </li>
-              ))}
-            </ul>
+            {/* 필수 다음에 선택 — 2026-11-12 저녁 세중님 「선택 항목은 아래로 다 내리자 · 선택은 동일하게」.
+                두 묶음 모두 같은 줄(동의행)로 그립니다. 베타 동의의 수집 항목·목적·보유 기간은 접지 않고 다 보입니다 */}
+            {([['필수', 필수동의], ['선택', 선택동의]] as const).map(([묶음, 줄들]) => (
+              <div key={묶음}>
+                <p className="rapo-type-t3-bold pb-(--rapo-dimension-x1) text-(color:--rapo-color-fg-neutral-muted)">{묶음} 항목</p>
+                <ul className="flex flex-col">
+                  {줄들.map((a) => (
+                    <동의행 key={a.key} a={a} on={!!checked[a.key]}
+                      set={(v) => setChecked({ ...checked, [a.key]: v })} />
+                  ))}
+                </ul>
+              </div>
+            ))}
 
             {/* 안내 상자 — 테스트 기간 안내(2026-11-11 밤 문구 그대로) + 원본의 선택 항목 안내 */}
             <div className="rapo-type-t4-regular rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
@@ -439,6 +412,41 @@ function Choice({
         {on && <span className="size-[8px] rounded-(--rapo-radius-full) bg-(--rapo-color-bg-layer-default)" />}
       </span>
     </button>
+  );
+}
+
+/* 동의 한 줄 — 필수·선택이 같은 꼴입니다 (원본 「RAPO / B GUI / 약관 행」 + 아래 설명 줄) */
+function 동의행({ a, on, set }: {
+  a: { key: string; label: string; required: boolean; doc?: string; lines?: string[] };
+  on: boolean; set: (v: boolean) => void;
+}) {
+  return (
+    <li className="border-b border-(--rapo-color-stroke-neutral-weak) py-(--rapo-dimension-x1)">
+      <div className="flex items-center gap-(--rapo-dimension-x2)">
+        <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-(--rapo-dimension-x4) py-(--rapo-dimension-x2)">
+          <input type="checkbox" className="sr-only" checked={on} onChange={(e) => set(e.target.checked)} />
+          <Box on={on} />
+          <span className="min-w-0">
+            <span className="rapo-type-t5-medium block break-keep text-(color:--rapo-color-fg-neutral)">{a.label}</span>
+            <span className={'rapo-type-t3-regular block ' + (a.required ? 'text-(color:--rapo-color-fg-brand-contrast)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
+              {a.required ? '필수' : '선택'}
+            </span>
+          </span>
+        </label>
+        {a.doc && (
+          <Link href={`/terms/${a.doc}`} aria-label={`${a.label} 전문 보기`}
+            className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2) active:bg-(--rapo-color-bg-transparent-pressed)">
+            {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+            <img src="/rapo/me/chevron-18.svg" alt="" width={18} height={18} />
+          </Link>
+        )}
+      </div>
+      {a.lines && a.lines.length > 0 && (
+        <ul className="rapo-type-t3-regular mb-(--rapo-dimension-x2) ml-[38px] flex flex-col gap-(--rapo-dimension-x1) text-(color:--rapo-color-fg-neutral-muted)">
+          {a.lines.map((l) => <li key={l} className="break-keep">{l}</li>)}
+        </ul>
+      )}
+    </li>
   );
 }
 
