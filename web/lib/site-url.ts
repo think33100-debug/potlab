@@ -32,3 +32,9 @@ export function 공유주소(path: string): string {
   if (typeof location !== 'undefined' && /^(localhost|127\.|\[::1\])/.test(location.hostname)) return location.origin + path;
   return 대표주소 + path;
 }
+
+/* 미리보기 그림 주소 끝에 붙이는 판 번호 (2026-11-12 세중님 「?a=1 붙여도 같은디」).
+   카카오는 미리보기 **그림을 그림 주소별로** 기억합니다 — 공고 주소를 바꿔 다시 보내도
+   그림 주소(/api/og/job/306828)가 같으면 옛 그림을 그대로 씁니다.
+   lib/og-card.tsx 의 그림 모양을 바꾸면 **이 번호를 하나 올립니다** — 그래야 카카오가 새로 받아 갑니다 */
+export const 그림판 = '2';

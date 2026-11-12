@@ -8,7 +8,7 @@ import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말
 import type { HospitalStat } from '@/lib/hospital';
 import { jobViews } from '@/lib/job-views';
 import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
-import { siteUrl } from '@/lib/site-url';
+import { siteUrl, 그림판 } from '@/lib/site-url';
 import type { JobListItem, JobPost } from '@/lib/supabase';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
@@ -120,7 +120,7 @@ export async function generateMetadata({
 
   const title = 공유제목(기관이름말(j.org_name), j.job_group, (j.detail ?? {})['조교연구'] as string | undefined, j.title);
   const desc = [j.title, when, j.지역보임].filter(Boolean).join(' · ');
-  const img = `${siteUrl()}/api/og/job/${j.id}`;
+  const img = `${siteUrl()}/api/og/job/${j.id}?v=${그림판}`;
 
   return {
     title: `${title} · RAPO`,
