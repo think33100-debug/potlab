@@ -5,7 +5,9 @@ import { RapoOrgBoard } from '@/components/rapo/rapo-org-board';
 import { OrgSearch } from '@/components/org-search';
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
 import { MembersOnly } from '@/components/members-only';
-import { orgPublic, ourNumbers, place, TILE_NAME, type OrgFacets } from '@/lib/org';
+import { orgJobs, orgPublic, ourNumbers, place, TILE_NAME, type OrgFacets } from '@/lib/org';
+import { hospitalStat, type HospitalStat } from '@/lib/hospital';
+import { RapoHospitalFacts, type 경쟁률줄, type 병원보수 } from '@/components/rapo/rapo-job-detail';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
@@ -33,6 +35,28 @@ function 어두운앱바() {
       <h1 className="min-w-0 flex-1 text-[18px] font-bold leading-[26px] text-[#f6f8fa]">병원 찾기</h1>
     </header>
   );
+}
+
+/* 병원 게시판 「병원 정보」 탭 (2026-11-13 세중님 「채용공고 상세에 나오는 병원 정보 저기 뜨게」).
+   공고 상세 「병원 한눈에」와 **같은 창구**를 씁니다 — 새 DB 함수를 만들지 않았습니다.
+     이 기관 공고가 있으면  그 공고 하나로 공고병원숫자 · 공고병원보수 · 공고경쟁률요약 (공고 상세와 글자까지 같은 값)
+     공고가 없으면          org_hospital_by_name(이름) — 심평원 구분·병상·재활의학과 전문의·치료사만 (연봉·경쟁률·시설은 공고로만 찾습니다)
+   숫자가 하나도 없으면 null — 탭은 「아직 모은 정보가 없어요」를 그립니다 */
+async function 병원정보받기(sb: Awaited<ReturnType<typeof serverSupabase>>, name: string) {
+  const 공고 = (await orgJobs(sb, name))[0]?.id ?? null;
+  const [숫자, 보수, 경쟁률] = 공고
+    ? await Promise.all([
+        sb.rpc('공고병원숫자', { p_공고: 공고 }).maybeSingle().then(({ data }) => (data as unknown as HospitalStat | null) ?? null),
+        sb.rpc('공고병원보수', { p_공고: 공고 }).maybeSingle().then(({ data }) => (data as unknown as 병원보수 | null) ?? null),
+        sb.rpc('공고경쟁률요약', { p_공고: 공고 }).then(({ data }) => (Array.isArray(data) ? data as 경쟁률줄[] : [])),
+      ])
+    : [await hospitalStat(sb, name), null, [] as 경쟁률줄[]];
+  /* 공고로 못 찾은 병원 숫자는 이름으로 한 번 더 */
+  const 병원숫자 = 숫자 ?? (공고 ? await hospitalStat(sb, name) : null);
+  const 시설 = 병원숫자?.시설 ?? null;
+  const 치료사 = 병원숫자 && !시설 && (병원숫자.pt != null || 병원숫자.ot != null)
+    ? { pt: 병원숫자.pt, ot: 병원숫자.ot, 기준: 병원숫자.data_version?.replace(/^심평원s*/, '') ?? null } : null;
+  return RapoHospitalFacts({ 치료사, 바쁨: 시설 ? null : 병원숫자, 시설, 경쟁률, 보수, 공고없이: true });
 }
 
 /* 거르기 목록도 회원만입니다 (2026-09-25 · org_facets 의 실행 권한을 걷었습니다).
@@ -74,12 +98,15 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
 
   if (org) {
     /* 병원 이름이 자료에 있는지만 봅니다(없으면 책갈피를 안 그리고 안내 한 줄). 회원만 읽히는 창구라 비회원은 문지기에서 이미 로그인으로 갑니다 */
-    const 있나 = !!(await orgPublic(await serverSupabase(), org, sido));
-    const 탭 = sp.tab === 'review' ? 'review' : 'talk';
+    const sb = await serverSupabase();
+    const 있나 = !!(await orgPublic(sb, org, sido));
+    /* 처음 열면 「병원 정보」 (2026-11-13 세중님) */
+    const 탭 = sp.tab === 'review' ? 'review' : sp.tab === 'talk' ? 'talk' : 'info';
+    const 정보 = 탭 === 'info' && 있나 ? await 병원정보받기(sb, org) : null;
     return (
       <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: '#112332' }}>
         <Hit kind="org" target={org} />
-        <RapoOrgBoard name={org} sido={sido} 탭={탭} 있나={있나} />
+        <RapoOrgBoard name={org} sido={sido} 탭={탭} 있나={있나} 정보={정보} />
         <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
         <RapoBottomNav current="/community" dark />
       </div>
