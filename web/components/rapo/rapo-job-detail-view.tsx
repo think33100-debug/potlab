@@ -45,14 +45,18 @@ export type RapoJobDetailProps = {
 
 export function RapoJobDetailView(p: RapoJobDetailProps) {
   const member = p.who === '회원';
+  /* ★ 2026-11-12 세중님 「다 볼 수 있게 · 경쟁률이나 보수나 다 좋은 경험을」 — 공유받은 비회원도 회원과 같은 내용을 봅니다.
+     보이는 값은 DB 가 정합니다(금고 SQL_1113/N · 비회원도 회원용 허용 목록). 「모름」만 비웁니다.
+     회원만 남는 것: 저장(로그인으로 보냄) · 가입 덜 마친 회원 흐림(JobVeil) · 비슷한 공고(목록 창구가 회원만) */
+  const 봄 = p.who !== '모름';
 
   const 본문 = (
     <>
       {/* 03 핵심 조건 — 보수 · 필수 자격 (근무시간 줄은 대표 결정으로 뺌) */}
       <section className="flex flex-col gap-(--rapo-dimension-x5) p-(--rapo-dimension-x5)">
-        {p.who !== '모름' && <RapoPayCard 잠김={!member} 값={p.pay.값} 덧말={p.pay.덧말} />}
+        {p.who !== '모름' && <RapoPayCard 잠김={!봄} 값={p.pay.값} 덧말={p.pay.덧말} />}
         <RapoKeyRow icon="/rapo/detail/file-text-20.svg" label="필수 자격">
-          {!member ? (
+          {!봄 ? (
             <p className="rapo-type-t5-bold">로그인 후 볼 수 있어요</p>
           ) : p.지원자격 ? (
             <p className={`${p.지원자격.length > 40 ? 'rapo-type-article-body' : 'rapo-type-t5-bold'} whitespace-pre-wrap break-keep [overflow-wrap:anywhere]`}>
@@ -82,8 +86,8 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       <div id="d-work" className="scroll-mt-[64px]">
         <RapoDetailSection title="근무조건">
           <div className="flex flex-col gap-(--rapo-dimension-x3)">
-            <RapoGuideRow label="계약기간">{member ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
-            <RapoGuideRow label="가입 보험">{member ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
+            <RapoGuideRow label="계약기간">{봄 ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
+            <RapoGuideRow label="가입 보험">{봄 ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
           </div>
         </RapoDetailSection>
       </div>
@@ -95,13 +99,13 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         <RapoDetailSection title="업무·지원 자격">
           <div className="flex flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
             <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">필수 자격</p>
-            {!member ? <p className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">로그인 후 볼 수 있어요</p>
+            {!봄 ? <p className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">로그인 후 볼 수 있어요</p>
               : p.지원자격 ? <p className="rapo-type-t5-bold whitespace-pre-wrap break-keep text-(color:--rapo-color-fg-neutral) [overflow-wrap:anywhere]">{p.지원자격}</p>
               : <원문칸 url={p.url} />}
           </div>
           <div className="flex flex-col gap-(--rapo-dimension-x3)">
-            <RapoGuideRow label="담당 업무">{member ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
-            <RapoGuideRow label="근무 부서">{member ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
+            <RapoGuideRow label="담당 업무">{봄 ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
+            <RapoGuideRow label="근무 부서">{봄 ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
           </div>
         </RapoDetailSection>
       </div>
@@ -120,7 +124,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       <div id="d-apply" className="scroll-mt-[64px]" />
       <RapoDetailSection title="지원 방법">
         <RapoPeriodCard {...p.기간} />
-        {member && (p.접수방법.낱말.length > 0 || p.모집인원없음) && (
+        {봄 && (p.접수방법.낱말.length > 0 || p.모집인원없음) && (
           <div className="flex flex-col gap-(--rapo-dimension-x3)">
             {p.접수방법.낱말.length > 0 && (
               <RapoGuideRow label="접수 방법">
@@ -138,7 +142,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
           기관이 올린 공고를 모아 옮긴 것이에요. 마감일·인원은 바뀔 수 있으니 지원 전에 원문을 한 번 봐 주세요.
         </p>
-        {member ? (
+        {봄 ? (
           /* 원문은 바깥 사이트라 새 창으로 엽니다 (RapoButton 은 안쪽 길용) — 꼴은 Outline 52 그대로 */
           p.url && (
             <a href={p.url} target="_blank" rel="noopener noreferrer"
@@ -208,7 +212,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
               <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">내용이 만족스러웠나요?</p>
               <h2 id="share-join" className="rapo-type-t10-bold break-keep text-(color:--rapo-color-fg-neutral)">라포에서 더 많은 걸<br />볼 수 있어요</h2>
               <ul className="flex flex-col gap-(--rapo-dimension-x2) py-(--rapo-dimension-x1)">
-                {['공공기관·대학병원·종합병원 공고를 한곳에서', '공고마다 급여·지원 자격·공고 원문까지', '치료사끼리 나누는 커뮤니티', '교육·학술 일정과 병원 정보'].map((t) => (
+                {['공공기관·대학병원·종합병원 공고 전체를 한곳에서', '관심 공고 저장과 마감 임박 알림', '치료사끼리 나누는 커뮤니티', '교육·학술 일정과 병원 정보'].map((t) => (
                   <li key={t} className="rapo-type-t5-regular flex items-start gap-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral)">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d8372b" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mt-[1px] shrink-0">
                       <path d="M5 12.5 10 17.5 19 7" />
@@ -234,8 +238,8 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         저장={p.id ? <JobSave id={p.id} look="rapo-bar" 마감={p.closed} /> : <RapoSaveBar on={false} busy={false} disabled />}
         지원={p.closed ? (
           <button type="button" disabled className={잠긴단추꼴}>모집 마감</button>
-        ) : p.who === '모름' ? null : (p.지원주소 || !member) ? (
-          /* 비회원은 창구가 주소를 안 주므로 JobOpenLink 가 「로그인하고 지원하러 가기」를 그립니다 */
+        ) : p.who === '모름' ? null : p.지원주소 ? (
+          /* 2026-11-12 — 비회원도 창구가 주소를 줍니다(금고 N). 갈 주소가 없으면 회원과 같이 아래 잠금 */
           <JobOpenLink id={p.id ?? ''} url={p.지원주소} className={지원단추꼴}>지원하러 가기</JobOpenLink>
         ) : (
           /* 회원인데 갈 주소가 아무것도 없음 — 원문 공고문으로 확인해 달라는 잠금 */
