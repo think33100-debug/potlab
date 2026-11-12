@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { JobSave, RapoSaveFace } from '@/components/job-save';
+import { 기관로고 } from '@/lib/org-logo';
 import { RapoBadge } from './rapo-ui';
 
 /* 공고 한 줄 — 홈과 공고 목록이 같이 씁니다 (2026-11-11).
@@ -24,6 +25,7 @@ export type RapoJob = {
 };
 
 export function RapoJobRow({ job, variant }: { job: RapoJob; variant: 'home' | 'list' }) {
+  const 로고 = 기관로고(job.org);   // 공통 로고(보건소·치매센터)가 있으면 기본 그림 대신 (2026-11-13)
   const 제목 = (
     <span className="rapo-type-t6-bold block text-(color:--rapo-color-fg-neutral)">{job.title}</span>
   );
@@ -32,8 +34,8 @@ export function RapoJobRow({ job, variant }: { job: RapoJob; variant: 'home' | '
       <div className="flex flex-col gap-(--rapo-dimension-x2) pt-(--rapo-dimension-x2)">
         <div className="flex items-center gap-(--rapo-dimension-x2_5)">
           <span className="flex size-(--rapo-dimension-x8) shrink-0 items-center justify-center rounded-(--rapo-radius-r1) bg-(--rapo-color-bg-neutral-weak)">
-            {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-            <img src={`/rapo/home/org-${job.orgArt}.svg`} alt="" width={32} height={32} />
+            {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 · 로고는 우리 주소(/api/org-logo) */}
+            <img src={로고 ?? `/rapo/home/org-${job.orgArt}.svg`} alt="" width={32} height={32} className={로고 ? 'size-6 object-contain' : undefined} />
           </span>
           <p className="rapo-type-t4-medium min-w-0 flex-1 truncate text-(color:--rapo-color-fg-neutral-muted)">{job.org}</p>
           {job.id ? <JobSave id={job.id} look="rapo" /> : <RapoSaveFace />}

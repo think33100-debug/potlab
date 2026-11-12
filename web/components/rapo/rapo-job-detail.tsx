@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { HospitalStat, 시설숫자 } from '@/lib/hospital';
+import { 기관로고 } from '@/lib/org-logo';
 import { RapoMaskIcon } from './rapo-ui';
 
 /* 공고 상세 — 새 디자인 「U03 · 공고 상세」 조각들 (2026-11-11 대표: 피그마 우선, 없는 정보는 뺌).
@@ -58,8 +59,8 @@ export function RapoDetailIdentity({ org, orgArt, 상태, title, tags, views, �
       <div className="flex items-center gap-(--rapo-dimension-x3)">
         <div className="flex size-[96px] shrink-0 items-center justify-center rounded-(--rapo-radius-r2)
                         bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x2)">
-          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-          <img src={`/rapo/home/org-${orgArt}.svg`} alt="" className="size-full object-contain" />
+          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 · 공통 로고(보건소·치매센터)가 있으면 그것 (2026-11-13) */}
+          <img src={기관로고(org) ?? `/rapo/home/org-${orgArt}.svg`} alt="" className={기관로고(org) ? 'size-14 object-contain' : 'size-full object-contain'} />
         </div>
         <p className="rapo-type-t5-bold min-w-0 flex-1 break-keep">{org}</p>
         {/* 모집 상태 — 접수 중 · 모집 마감(D-03) · 확인 필요(D-04 · 마감일을 못 읽은 공고) */}
