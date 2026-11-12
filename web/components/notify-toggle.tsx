@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { 푸시살피기, 푸시켜기 } from '@/lib/push-client';
 import { useToast } from '@/app/toast';
 
 /* 알림 켜기·끄기 단추 (2026-10-02).
@@ -24,19 +25,7 @@ import { useToast } from '@/app/toast';
  * 단추만 안 먹으면 회원은 고장인 줄 압니다.
  */
 
-/* 공개키는 base64url 입니다. 브라우저는 BufferSource 를 받습니다.
-   ArrayBuffer 를 먼저 만들고 그 위에 Uint8Array 를 올립니다 —
-   그냥 new Uint8Array(n) 로 만들면 타입이 ArrayBufferLike 라
-   applicationServerKey 가 안 받습니다 (SharedArrayBuffer 일 수도 있어서) */
-function 열쇠바꾸기(b64: string): Uint8Array<ArrayBuffer> {
-  const 채움 = '='.repeat((4 - (b64.length % 4)) % 4);
-  const s = (b64 + 채움).replace(/-/g, '+').replace(/_/g, '/');
-  const raw = atob(s);
-  const buf = new ArrayBuffer(raw.length);
-  const out = new Uint8Array(buf);
-  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-  return out;
-}
+/* 구독 살피기·켜기는 lib/push-client.ts 한 자리입니다 (2026-11-12 — 공고 상세 「마감 임박 시 알림받기」와 같이 씁니다) */
 
 type 상태 = '모름' | '못씀' | '꺼짐' | '켜짐' | '막힘';
 
@@ -45,50 +34,24 @@ export default function NotifyToggle({ 작게 = false }: { 작게?: boolean }) {
   const [바쁨, set바쁨] = useState(false);
   const toast = useToast();
 
-  const 살피기 = useCallback(async () => {
-    if (typeof window === 'undefined') return;
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) { set상태('못씀'); return; }
-    if (Notification.permission === 'denied') { set상태('막힘'); return; }
-    try {
-      const reg = await navigator.serviceWorker.getRegistration('/sw.js');
-      const sub = reg ? await reg.pushManager.getSubscription() : null;
-      set상태(sub ? '켜짐' : '꺼짐');
-    } catch { set상태('꺼짐'); }
+  useEffect(() => {
+    let 살아있나 = true;
+    푸시살피기().then((v) => { if (살아있나) set상태(v); });
+    return () => { 살아있나 = false; };
   }, []);
-
-  useEffect(() => { 살피기(); }, [살피기]);
 
   const 켜기 = async () => {
     set바쁨(true);
     try {
-      const 공개키 = process.env.NEXT_PUBLIC_VAPID_PUBLIC;
-      if (!공개키) { toast('알림 열쇠가 없어요. 잠시 뒤 다시 해주세요'); return; }
-
-      const perm = await Notification.requestPermission();
-      if (perm !== 'granted') {
-        set상태(perm === 'denied' ? '막힘' : '꺼짐');
-        toast('알림이 허용되지 않았어요');
+      const r = await 푸시켜기();
+      if (r.상태 !== '켜짐') {
+        /* 열쇠 없음·등록 실패는 전처럼 상태를 안 바꿉니다. 허락 거절만 「막힘/꺼짐」으로 */
+        if (r.상태 === '막힘' || r.상태 === '못씀') set상태(r.상태);
+        toast(r.상태 === '막힘' ? '알림이 허용되지 않았어요' : (r.까닭 ?? '알림을 못 켰어요'));
         return;
       }
-      const reg = await navigator.serviceWorker.register('/sw.js');
-      await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.getSubscription()
-        ?? await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: 열쇠바꾸기(공개키),
-        });
-
-      const j = sub.toJSON() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
-      const { error } = await browserSupabase().rpc('알림기기등록', {
-        p_주소: j.endpoint ?? '',
-        p_열쇠1: j.keys?.p256dh ?? '',
-        p_열쇠2: j.keys?.auth ?? '',
-      });
-      if (error) { toast(error.message); return; }
       set상태('켜짐');
       toast('알림을 켰어요. 찜한 기관에 새 공고가 뜨면 알려드릴게요');
-    } catch (e) {
-      toast('알림을 못 켰어요 · ' + String((e as Error).message).slice(0, 60));
     } finally { set바쁨(false); }
   };
 

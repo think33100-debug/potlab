@@ -1,5 +1,6 @@
 import { AdminJobTools } from '@/components/admin-job-tools';
 import { Hit } from '@/components/hit';
+import { JobDeadlineNotify } from '@/components/job-deadline-notify';
 import { JobOpenLink } from '@/components/job-open-link';
 import { JobSave, RapoSaveBar } from '@/components/job-save';
 import { JobVeil } from '@/components/job-veil';
@@ -25,7 +26,7 @@ export type RapoJobDetailProps = {
   who: Who;
   closed: boolean;
   shareTitle: string;
-  identity: { org: string; orgArt: string; 상태: 모집상태; title: string; tags: string[]; views: number | null; 인원: string; 마감: string };
+  identity: { org: string; orgArt: string; 상태: 모집상태; title: string; tags: string[]; views: number | null; 인원: string; 인원이름?: string; 마감: string };
   pay: { 값: string; 덧말: string | null };
   지원자격: string | null;
   url: string | null;
@@ -42,6 +43,8 @@ export type RapoJobDetailProps = {
   치료사?: { pt: number | null; ot: number | null; 기준: string | null } | null;
   바쁨?: import('@/lib/hospital').HospitalStat | null;
   인턴?: boolean;
+  /* 마감 임박 알림 단추를 그릴까 — 마감일을 알고 아직 안 닫힌 공고만 (2026-11-12 세중님) */
+  마감알림?: boolean;
   경쟁률?: 경쟁률줄[];
 };
 
@@ -127,6 +130,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       <div id="d-apply" className="scroll-mt-[64px]" />
       <RapoDetailSection title="지원 방법">
         <RapoPeriodCard {...p.기간} />
+        {p.마감알림 && p.id && <JobDeadlineNotify id={p.id} />}
         {봄 && (p.접수방법.낱말.length > 0 || p.모집인원없음) && (
           <div className="flex flex-col gap-(--rapo-dimension-x3)">
             {p.접수방법.낱말.length > 0 && (
