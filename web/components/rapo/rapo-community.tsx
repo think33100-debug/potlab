@@ -37,6 +37,26 @@ export function 지난때(iso: string): string {
 export const 직군탭 = ['전체', '작업치료사', '물리치료사'] as const;
 export type 직군탭값 = (typeof 직군탭)[number];
 
+/* 직군 게시판 소개 — 원본 「작업치료사 게시판 · 소개」 1301:903 · 「물리치료사 게시판 · 소개」 1305:995
+   (U07-01 · U07 물리치료사 피드 · 2026-11-12). 108 높이 · 둥근 14 · 제목 22 Bold · 설명 14 Medium · 오른쪽 그림 134×100.
+   바탕·글 색은 원본 값 그대로입니다(직군마다 바탕이 다름) */
+const 직군소개: Record<Exclude<직군탭값, '전체'>, { 바탕: string; 설명: [string, string]; 그림: string; 그림폭: number }> = {
+  작업치료사: { 바탕: '#203b41', 설명: ['치료실에서 써 본 도구부터', '일상생활 훈련 이야기까지'], 그림: '/rapo/community/intro-ot.svg', 그림폭: 134 },
+  물리치료사: { 바탕: '#26334d', 설명: ['보행 훈련 준비부터', '치료실에서 써 본 도구까지'], 그림: '/rapo/community/intro-pt.svg', 그림폭: 132 },
+};
+
+function 직군소개카드({ 탭 }: { 탭: Exclude<직군탭값, '전체'> }) {
+  const c = 직군소개[탭];
+  return (
+    <section aria-label={`${탭} 게시판 소개`} className="relative mx-[22px] mt-[16px] h-[108px] overflow-hidden rounded-[14px]" style={{ background: c.바탕 }}>
+      <p className="absolute left-[16px] top-[18px] text-[22px] font-bold leading-[28px] text-[#f4f8f5]">{탭} 게시판</p>
+      <p className="absolute left-[16px] top-[54px] text-[14px] font-medium leading-[20px] text-[#c8deda]">{c.설명[0]}<br />{c.설명[1]}</p>
+      {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+      <img src={c.그림} alt="" width={c.그림폭} height={100} className="absolute right-0 top-[7px]" />
+    </section>
+  );
+}
+
 /* 상단 — 「커뮤니티」 제목 · 직군 탭 · 이용 안내 · 「○○ 게시글」과 정렬.
    「병원 찾기」는 지금 있는 기관 찾기(/orgs)로 잇습니다 */
 export function RapoCommunityTop({ 탭, 정렬, 주소 }: {
@@ -62,6 +82,8 @@ export function RapoCommunityTop({ 탭, 정렬, 주소 }: {
           </Link>
         ))}
       </nav>
+      {/* 직군 탭이면 그 직군 게시판 소개 카드 (원본 U07 순서: 탭 → 소개 → 이용 안내 → 최근 이야기) */}
+      {탭 !== '전체' && <직군소개카드 탭={탭} />}
       {/* RAPO / Callout / 공지 · 다크 — 커뮤니티 이용 규칙(/terms/community)으로 갑니다 */}
       <Link href="/terms/community" className="mx-[22px] mt-[12px] flex h-[40px] items-center gap-[12px] rounded-[8px] px-[13px]"
         style={{ background: 어둠.면 }}>
@@ -73,7 +95,8 @@ export function RapoCommunityTop({ 탭, 정렬, 주소 }: {
       </Link>
       <div className="mx-[22px] mt-[24px] flex h-[32px] items-center">
         <h2 className="min-w-0 flex-1 text-[22px] font-bold leading-[32px]" style={{ color: 어둠.글 }}>
-          {탭 === '전체' ? '전체 게시글' : `${탭} 게시글`}
+          {/* 원본: 전체 피드는 「전체 게시글」, 직군 피드(U07)는 「최근 이야기」 */}
+          {탭 === '전체' ? '전체 게시글' : '최근 이야기'}
         </h2>
         {/* 정렬 — 누르면 최신순 ↔ 인기순(최근 7일 조회 많은 순) */}
         <Link href={주소(탭, 정렬 === 'new' ? 'hot' : 'new')}
