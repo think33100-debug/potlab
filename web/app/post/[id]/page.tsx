@@ -12,7 +12,7 @@ import { RapoMaskIcon } from '@/components/rapo/rapo-ui';
 import { channelName } from '@/lib/channels';
 import { POST_ONE_COLS, type PostRow } from '@/lib/supabase';
 import { serverSupabase } from '@/lib/supabase-server';
-import { siteUrl } from '@/lib/site-url';
+import { siteUrl, 그림판 } from '@/lib/site-url';
 import { shownName } from '@/lib/who';
 import { Clip, JoinCta, Members } from '@/app/gate';
 
@@ -94,7 +94,7 @@ export async function generateMetadata({
   const title = p.title || p.body.slice(0, 40);
   const desc = p.body.slice(0, 120).replace(/\s+/g, ' ');
   /* 사진이 없으면 커뮤니티 기본 그림 — ★ 2026-11-12 세중님: 옛 「POT LAB」 그림(/og.png)은 걷었습니다 */
-  const image = 장수 > 0 ? 사진주소(p.id, 0) : '/api/og/site?k=post';
+  const image = 장수 > 0 ? 사진주소(p.id, 0) : `/api/og/site?k=post&v=${그림판}`;
 
   return {
     title: `${title} · ${channelName(p.channel)} · RAPO`,

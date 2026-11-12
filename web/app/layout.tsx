@@ -10,7 +10,7 @@ import { KakaoFab } from "@/components/kakao-fab";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
 import { COMPANY, PRIVACY_EMAIL, PRIVACY_OFFICER } from "@/lib/contact";
-import { siteUrl } from "@/lib/site-url";
+import { siteUrl, 그림판 } from "@/lib/site-url";
 import { AuthProvider } from "./auth";
 import { BackGuard } from "./back-guard";
 import { SURFACE_SCRIPT, Surface } from "./surface";
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
     siteName: "RAPO",
     title: "RAPO · 채용공고",
     description: "작업치료사·물리치료사 채용공고를 한곳에서",
-    images: ["/api/og/site"],
+    images: [`/api/og/site?v=${그림판}`],
   },
-  twitter: { card: "summary_large_image", images: ["/api/og/site"] },
+  twitter: { card: "summary_large_image", images: [`/api/og/site?v=${그림판}`] },
   /* 브랜드 명세서 7번 — 파비콘·홈 화면 아이콘·PWA */
   icons: {
     icon: [
