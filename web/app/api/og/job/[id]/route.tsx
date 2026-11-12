@@ -1,5 +1,4 @@
 import { ImageResponse } from 'next/og';
-import { CLOSED_COLOR, JOB_COLOR, JOB_COLOR_FALLBACK } from '@/lib/brand';
 import { isClosed } from '@/lib/job-state';
 import { siteUrl } from '@/lib/site-url';
 import { supabase } from '@/lib/supabase';
@@ -12,7 +11,15 @@ import { supabase } from '@/lib/supabase';
 
    ※ 카톡은 미리보기를 한 번 만들어두고 계속 씁니다.
      보낼 당시 마감 전이었으면 나중에도 마감 전 그림이 뜹니다.
-     이건 우리가 못 막습니다 — 진짜는 화면 안의 띠입니다. */
+     이건 우리가 못 막습니다 — 진짜는 화면 안의 띠입니다.
+
+   ★ 2026-11-12 새 디자인 — 피그마 「RAPO / OG / 공개 공고」 596:566 · 「O04 · 공고 상태별 OG 이미지」 596:12114
+     (세중님 「카톡 미리보기 이미지도 적용해야 해 · 지금은 옛날 거」).
+     남색 바탕 · 위 RAPO 로고와 모집 상태 · 가운데 흰 판(빨간 열린 테두리 · 안으로 향하는 화살표)에 기관 · 제목 · 조건 · 아래 마감.
+     상태 넷 — 모집 중(「10.30 접수 마감」) · 모집 마감(「모집이 종료된 공고예요」) · 마감일 없음(「마감일 확인 필요」) ·
+     없는 공고(「공고 안내 · 공고를 확인할 수 없어요」).
+     원본의 오른쪽 기관 로고 칸은 비웁니다 — 병원 로고 자료가 아직 없습니다(원본에 로고 없는 모양도 있음).
+     글꼴은 Pretendard Bold 하나뿐이라 원본의 Medium(조건 줄)도 Bold 로 그립니다 */
 
 /* edge 여야 합니다. nodejs 에서는 fetch 가 file:// 를 못 열어서
    글꼴을 못 읽고 500 이 납니다 (실제로 그렇게 났습니다) */
@@ -39,108 +46,116 @@ async function loadFont(): Promise<ArrayBuffer> {
 }
 export const dynamic = 'force-dynamic';
 
+/* 그림(svg)도 글꼴처럼 받아 두고 data: 주소로 넣습니다.
+   satori 에 주소를 그대로 주면 Next 16 이 자기 주소로 가는 그림을 막습니다(SSRF 보호 · 개발 서버에서 실제로 막힘).
+   받아 두면 요청마다 그림을 다시 받지도 않습니다 */
+const svgCache = new Map<string, string>();
+async function svgData(name: string): Promise<string> {
+  const hit = svgCache.get(name);
+  if (hit) return hit;
+  const res = await fetch(siteUrl() + '/rapo/og/' + name, { cache: 'force-cache' });
+  if (!res.ok) throw new Error('그림을 못 받았습니다: ' + name + ' ' + res.status);
+  const text = await res.text();
+  const uri = 'data:image/svg+xml;base64,' + btoa(String.fromCharCode(...new TextEncoder().encode(text)));
+  svgCache.set(name, uri);
+  return uri;
+}
+
 const W = 1200;
 const H = 630;
+const 남색 = '#112231';
+const 글 = '#1a1c20';
 
-/* 직군마다 바탕색.
-
-   teamsparta.md 가 정해 둔 배지 색 네 갈래를 그대로 씁니다
-   (pill-teal 정보성 · pill-green 완료 · pill-red 강조 · 중립 회색).
-   한 화면에 같이 놓이는 게 아니라 그림 한 장에 하나만 쓰므로,
-   red 와 blue 를 primary 로 섞지 말라는 금지에 안 걸립니다.
-   interaction-blue 는 안 씁니다 — 링크·포커스 자리라 뜻이 흐려집니다.
-
-   흰 글자가 읽히도록 teal 과 green 은 눈금보다 어둡게 내렸습니다.
-   (teamsparta 의 success 는 oklch 0.627 이라 흰 글자가 2.9:1 로 흐립니다) */
-const SKIN: Record<string, { bg: string; name: string }> = {
-  작업치료사: { bg: JOB_COLOR.작업치료사, name: '작업치료사' },
-  물리치료사: { bg: JOB_COLOR.물리치료사, name: '물리치료사' },
-  공통:       { bg: JOB_COLOR.공통, name: '작업 · 물리치료사' },
-};
-const FALLBACK = { bg: JOB_COLOR_FALLBACK, name: '치료사' };   // 아직 못 가린 것
-
-/* 병원 이름은 제일 크게 갑니다. 이게 클릭을 만듭니다.
-   길면 글자를 줄여서라도 한 화면에 다 넣습니다 */
-function nameSize(s: string): number {
-  if (s.length <= 10) return 96;
-  if (s.length <= 14) return 80;
-  if (s.length <= 20) return 66;
-  return 54;
-}
 const cut = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+
+type 그릴것 = { 상태: string; 기관: string; 제목: string; 조건: string; 아래: string };
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-
   const font = await loadFont();
+  const [로고, 글자로고, 테두리, 화살표] = await Promise.all(
+    ['symbol.svg', 'wordmark.svg', 'frame.svg', 'arrow.svg'].map(svgData));
 
-  let org = 'RAPO';
-  let skin = FALLBACK;
-  /* 공고를 못 찾았을 때 아래에 깔리는 한 줄.
-     공고를 찾으면 「직군 · 마감일」로 바뀝니다 */
-  let foot = '치료사 채용공고를 한곳에서';
-  let closed = false;
+  /* 공고를 못 찾았을 때 — 원본 「공고 안내」 상태 */
+  let g: 그릴것 = {
+    상태: '공고 안내', 기관: '라포', 제목: '공고를 확인할 수 없어요',
+    조건: '공개 가능한 다른 공고를 둘러보세요', 아래: '라포에서 채용 공고 찾기',
+  };
 
   /* 없는 번호를 넣어도 터지지 않고 기본 그림이 나가야 합니다 */
   try {
-    /* 2026-09-25 — 공고 뷰를 통째로 읽는 길을 닫아서 함수로 받습니다.
-       미리보기 그림에는 세션이 없습니다. job_one 은 그래서 열어뒀습니다 */
+    /* 미리보기 그림에는 세션이 없습니다 — job_one 은 비회원에게도 열려 있습니다(금고 SQL_1113/M · N) */
     const { data } = await supabase.rpc('job_one', { p_id: id }).maybeSingle();
     const j = data as {
-      org_name: string; job_group: string | null;
-      apply_from: string | null; apply_to: string | null; apply_to_time?: string | null;
+      org_name: string | null; title: string | null; job_group: string | null;
+      employ_type: string | null; sido: string | null; sgg: string | null; headcount: number | null;
+      apply_to: string | null; apply_to_time?: string | null;
     } | null;
     if (j) {
-      org = j.org_name || 'RAPO';
-      skin = (j.job_group && SKIN[j.job_group]) || FALLBACK;
-      closed = isClosed(j.apply_to, undefined, j.apply_to_time);
-      /* 시작일이 있으면 「언제부터」까지 그립니다 */
-      const when = !j.apply_to ? (j.apply_from ? `${j.apply_from} 접수 시작` : '마감일 미정')
-        : closed ? `${j.apply_to} 마감`
-        : j.apply_from ? `${j.apply_from} ~ ${j.apply_to} 접수`
-        : `~${j.apply_to} 접수`;
-      foot = `${skin.name} · ${when}`;
+      const 기관 = (j.org_name || '').trim() || '라포';
+      /* 제목 앞머리가 기관 이름이면 떼어 냅니다 — 위 줄에 기관이 이미 있습니다 */
+      const 원제목 = (j.title || `${j.job_group ?? '치료사'} 채용`).trim();
+      const 제목 = 원제목.startsWith(기관) ? 원제목.slice(기관.length).trim() || 원제목 : 원제목;
+      const closed = isClosed(j.apply_to, undefined, j.apply_to_time);
+      const m = String(j.apply_to || '').match(/^\d{4}-(\d{2})-(\d{2})/);
+      g = {
+        상태: closed ? '모집 마감' : '모집 중',
+        기관,
+        제목,
+        조건: [[j.sido, j.sgg].filter(Boolean).join(' '), j.employ_type, j.headcount ? `${j.headcount}명` : null]
+          .filter(Boolean).join('   '),
+        아래: closed ? '모집이 종료된 공고예요' : m ? `${m[1]}.${m[2]} 접수 마감` : '마감일 확인 필요',
+      };
     }
   } catch { /* 자료를 못 읽어도 그림은 나가야 합니다 */ }
 
+  const 짧은제목 = g.제목.length <= 16;
+
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: W, height: H, display: 'flex', flexDirection: 'column',
-          /* ★ 2026-10-09 — 마감된 공고는 직군 색 대신 회색입니다.
-             직군이 「공통」이면 #FF3B30 이라, 끝난 공고가 카톡에서 가장 급해
-             보였습니다. 앱 안에서는 같은 공고를 흐리게 눌러 둡니다 */
-          justifyContent: 'space-between', backgroundColor: closed ? CLOSED_COLOR : skin.bg,
-          padding: 72, fontFamily: 'Pretendard', color: '#FFFFFF',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 34, letterSpacing: 4, opacity: 0.85 }}>RAPO</div>
-          {closed && (
-            <div style={{
-              display: 'flex', fontSize: 28, padding: '10px 26px', borderRadius: 50,
-              backgroundColor: 'rgba(0,0,0,0.32)',
-            }}>
-              마감
-            </div>
-          )}
+      <div style={{
+        width: W, height: H, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+        backgroundColor: 남색, padding: 48, fontFamily: 'Pretendard', color: '#FFFFFF',
+      }}>
+        {/* 브랜드와 모집 상태 */}
+        <div style={{ display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', width: 216, height: 57, position: 'relative' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- satori 는 img 만 받습니다 */}
+            <img src={로고} width={58} height={57} alt="" />
+            {/* eslint-disable-next-line @next/next/no-img-element -- satori 는 img 만 받습니다 */}
+            <img src={글자로고} width={142} height={29} alt="" style={{ marginLeft: 16 }} />
+          </div>
+          <div style={{ display: 'flex', fontSize: 36, lineHeight: '45px' }}>{g.상태}</div>
         </div>
 
-        {/* 병원 이름 — 낱말 중간에서 안 끊기게 (화면의 word-break: keep-all 과 같은 뜻) */}
+        {/* 공고 정보 — 흰 판 + 빨간 열린 테두리 + 안으로 향하는 화살표 */}
         <div style={{
-          display: 'flex', fontSize: nameSize(org), lineHeight: 1.2,
-          wordBreak: 'keep-all', letterSpacing: -2,
+          display: 'flex', position: 'relative', width: 1104, height: 350, backgroundColor: '#FFFFFF',
+          padding: '32px 64px 32px 32px', alignItems: 'center',
         }}>
-          {cut(org, 28)}
+          {/* eslint-disable-next-line @next/next/no-img-element -- satori 는 img 만 받습니다 */}
+          <img src={테두리} width={1104} height={350} alt="" style={{ position: 'absolute', left: 0, top: 0 }} />
+          {/* eslint-disable-next-line @next/next/no-img-element -- satori 는 img 만 받습니다 */}
+          <img src={화살표} width={72} height={72} alt="" style={{ position: 'absolute', left: 1006, top: 18, transform: 'rotate(-90deg)' }} />
+          <div style={{
+            display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: 900, height: 286, color: 글,
+          }}>
+            <div style={{ display: 'flex', fontSize: 40, lineHeight: '50px' }}>{cut(g.기관, 24)}</div>
+            <div style={{
+              display: 'flex', fontSize: 짧은제목 ? 64 : 52, lineHeight: 짧은제목 ? '80px' : '64px',
+              maxHeight: 짧은제목 ? 80 : 128, overflow: 'hidden', wordBreak: 'keep-all', letterSpacing: -1,
+            }}>
+              {cut(g.제목, 40)}
+            </div>
+            <div style={{ display: 'flex', fontSize: 36, lineHeight: '45px', whiteSpace: 'pre' }}>{cut(g.조건, 36)}</div>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', fontSize: 38, opacity: 0.9 }}>
-          {foot}
-        </div>
+        {/* 마감과 서비스 */}
+        <div style={{ display: 'flex', height: 48, alignItems: 'center', fontSize: 36, lineHeight: '45px' }}>{g.아래}</div>
       </div>
     ),
     {

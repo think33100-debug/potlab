@@ -59,5 +59,7 @@ export function 새틀화면(pathname: string): boolean {
     || pathname === '/orgs'
     /* 봉사활동·청년정책도 2026-11-12 부터 새 틀(교육 목록 틀을 빌림) */
     || pathname === '/volunteer' || pathname === '/youth'
+    /* 경쟁률(/compete · 회차별 보기)도 2026-11-12 부터 새 틀(피그마 없음 · 목록 상단·카드 조각) */
+    || pathname === '/compete'
     || pathname.startsWith('/design-preview');
 }
