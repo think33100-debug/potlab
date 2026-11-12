@@ -174,6 +174,12 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                 ))}
               </ul>
             )}
+            {/* 태그 — 원본 「#신입    #교육    #첫출근」 14 #afbfca (1294:350 · 2026-11-12 세중님 「태그 그냥 열어」) */}
+            {(p.태그 ?? []).length > 0 && (
+              <p className="mt-[24px] flex flex-wrap gap-x-[16px] gap-y-[4px] text-[14px] leading-[20px]" style={{ color: 어둠.흐린글 }}>
+                {(p.태그 ?? []).map((t) => <span key={t}>#{t}</span>)}
+              </p>
+            )}
           </Clip>
         </article>
 
