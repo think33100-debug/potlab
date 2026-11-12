@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Suspense } from 'react';
 import { Hit } from '@/components/hit';
+import { RapoHomeNotice } from '@/components/rapo/home-notice';
 import { HomeU01 } from '@/components/rapo/home-u01';
 import { RapoJobList, RapoJobsError, RapoJobsGuest, RapoJobsLoading } from '@/components/rapo/rapo-job-list';
 import { getRapoHomeJobs } from '@/lib/rapo-home';
@@ -43,6 +44,8 @@ export default async function Home() {
   return (
     <>
       <Hit kind="home" />
+      {/* 「순차적으로 오픈 중」 안내 팝업 — 다시 보지 않기는 기기에 기억 (2026-11-12 세중님) */}
+      <RapoHomeNotice />
       <HomeU01
         who={who}
         jobs={<Suspense fallback={<RapoJobsLoading />}><HomeJobs sb={sb} /></Suspense>}
