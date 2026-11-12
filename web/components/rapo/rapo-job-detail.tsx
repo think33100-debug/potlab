@@ -295,8 +295,9 @@ function 시설보임(s: 시설숫자): { 구분: string | null; 칸: 숫자칸[
       칸: 숫자만([
         { 이름: '종사자', 수: s.종사자, 단위: '명' },
         { 이름: '정원', 수: s.정원, 단위: '명' },
-        /* 「서울 1위 / 51곳」을 한 칸에 넣으면 좁은 폰에서 두 줄로 넘칩니다(2026-11-13 세중님) — 순위만 크게, 곳 수는 덧말로 */
-        { 이름: `${s.시도 ?? '시도'} 순위`, 수: s.시도곳수 ? s.시도순위 : null, 단위: '위', 덧말: s.시도곳수 ? `${s.시도곳수.toLocaleString('ko-KR')}곳 중` : undefined },
+        /* 「서울 1위 / 51곳」을 한 칸에 넣으면 좁은 폰에서 두 줄로 넘칩니다(2026-11-13 세중님) — 이름 「서울 51곳 중」 · 숫자 「1위」.
+           곳 수를 숫자 아래 덧말로 두면 이 칸만 숫자가 위로 떠서 옆 칸과 줄이 안 맞았습니다 */
+        { 이름: `${s.시도 ?? '시도'} ${(s.시도곳수 ?? 0).toLocaleString('ko-KR')}곳\u00a0중`, 수: s.시도곳수 ? s.시도순위 : null, 단위: '위' },
       ]),
       치료사: null,
       글: `${s.출처 ?? '보건복지부 장애인복지관 현황'} 기준이에요. 종사자 전체 수이고, 치료사가 몇 명인지는 따로 나오지 않아요.`,
@@ -323,9 +324,9 @@ function 시설보임(s: 시설숫자): { 구분: string | null; 칸: 숫자칸[
    그래서 칸 안에는 **숫자 + 단위만** 둡니다. 숫자는 줄을 안 바꾸고(nowrap) **크게** — 아래 치료사 카드(숫자 t12)와 같은
    「큰 숫자 · 작은 단위」 꼴입니다(세중님 「숫자는 더 크고 강조」). 크기는 숫자크기() 한 자리가 칸 수와 글자 수로 고릅니다.
    단위는 t4 Bold muted.
-   「51곳 중」 같은 기준은 덧말 줄(t3)로, 「상급종합병원」 같은 글자 값은 칸 밖의 배지(RapoBadge)로 뺍니다.
+   「51곳 중」 같은 기준은 이름 쪽에, 「상급종합병원」 같은 글자 값은 칸 밖의 배지(RapoBadge)로 뺍니다.
    이름(재활의학과 전문의)은 좁은 폭에서 두 줄이 될 수 있어 칸을 위아래로 벌려 숫자 줄을 맞춥니다. 0·빈 값은 칸을 안 그립니다 */
-type 숫자칸 = { 이름: string; 수: number | null | undefined; 단위: string; 덧말?: string };
+type 숫자칸 = { 이름: string; 수: number | null | undefined; 단위: string };
 
 /* 360 폭에서 재서 정한 표 (2026-11-13 · 운영 화면에 같은 마크업을 넣어 Range 로 잼 · 넘친 칸 0).
    칸 하나 t12 · 둘 t10(「2,446」 다섯 글자까지, 넘으면 t8) · 셋 t10(「999」 세 글자까지, 넘으면 t6).
@@ -346,12 +347,11 @@ function 숫자칸들({ 칸 }: { 칸: 숫자칸[] }) {
       {칸.map((x) => (
         <div key={x.이름} className="flex min-w-0 flex-col justify-between gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x3) py-(--rapo-dimension-x4)">
           <dt className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{x.이름}</dt>
-          <dd className="flex flex-col">
+          <dd>
             <span className="whitespace-nowrap text-(color:--rapo-color-fg-neutral)">
               <span className={크기 + ' tabular-nums'}>{(x.수 as number).toLocaleString('ko-KR')}</span>
               <span className="rapo-type-t4-bold ml-[2px] text-(color:--rapo-color-fg-neutral-muted)">{x.단위}</span>
             </span>
-            {x.덧말 && <span className="rapo-type-t3-regular whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">{x.덧말}</span>}
           </dd>
         </div>
       ))}
