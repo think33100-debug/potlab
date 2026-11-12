@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { 경쟁률줄, 모집상태 } from '@/components/rapo/rapo-job-detail';
 import { RapoJobDetailView, 못읽은칸말 } from '@/components/rapo/rapo-job-detail-view';
-import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말, 조교연구말,
+import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말, 조교연구말, 직군태그, 공유제목,
   보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
 import type { HospitalStat } from '@/lib/hospital';
 import { jobViews } from '@/lib/job-views';
@@ -110,7 +110,7 @@ export async function generateMetadata({
     : j.apply_from ? `${j.apply_from} ~ ${j.apply_to} 접수`
     : `~${j.apply_to} 마감`;
 
-  const title = `${기관이름말(j.org_name)} ${j.job_group ?? '치료사'} 채용`;
+  const title = 공유제목(기관이름말(j.org_name), j.job_group, (j.detail ?? {})['조교연구'] as string | undefined, j.title);
   const desc = [j.title, when, j.지역보임].filter(Boolean).join(' · ');
   const img = `${siteUrl()}/api/og/job/${j.id}`;
 
@@ -212,10 +212,10 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   return (
     <RapoJobDetailView
       id={j.id} who={who} closed={closed}
-      shareTitle={`${기관이름말(j.org_name)} ${j.job_group ?? '치료사'} 채용`}
+      shareTitle={공유제목(기관이름말(j.org_name), j.job_group, detail['조교연구'] as string | undefined, j.title)}
       identity={{
         org: 기관, orgArt: 기관그림(j.org_name || j.id), 상태, title: j.title,
-        tags: 태그(j.employ_type || '공고문 참고', 조교연구말(detail['조교연구']), j.is_intern && '체험형 인턴', j.job_group),
+        tags: 태그(j.employ_type || '공고문 참고', 조교연구말(detail['조교연구']), j.is_intern && '체험형 인턴', 직군태그(j.job_group, detail['조교연구'] as string | undefined)),
         views: views[j.id] ?? null, ...식별인원, 마감: 식별마감,
       }}
       pay={{ 값: 연봉말(연봉원문), 덧말: 연봉덧말 }}
