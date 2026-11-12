@@ -136,17 +136,9 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
           기관이 올린 공고를 모아 옮긴 것이에요. 마감일·인원은 바뀔 수 있으니 지원 전에 원문을 한 번 봐 주세요.
         </p>
-        {봄 ? (
-          /* 원문은 바깥 사이트라 새 창으로 엽니다 (RapoButton 은 안쪽 길용) — 꼴은 Outline 52 그대로 */
-          p.url && (
-            <a href={p.url} target="_blank" rel="noopener noreferrer"
-               className="rapo-type-t6-bold flex h-(--rapo-dimension-x13) w-full items-center justify-center rounded-(--rapo-radius-r3)
-                          border border-(--rapo-color-stroke-neutral-muted) text-(color:--rapo-color-fg-neutral)
-                          active:bg-(--rapo-color-bg-transparent-pressed)">
-              공고 원문 보기
-            </a>
-          )
-        ) : p.who === '비회원' ? (
+        {/* ★ 2026-11-12 밤 세중님 「공고 원문 보기 있을 필요 없어서 빼줘」 — 회원에게는 아래 「지원하러 가기」 하나만 둡니다.
+             비회원의 「로그인하고 원문 보기」는 로그인 권유라 그대로 둡니다 */}
+        {봄 ? null : p.who === '비회원' ? (
           <LoginFirst className="rapo-type-t6-bold flex h-(--rapo-dimension-x13) w-full items-center justify-center rounded-(--rapo-radius-r3)
                                  border border-(--rapo-color-stroke-neutral-muted) text-(color:--rapo-color-fg-neutral)">
             로그인하고 원문 보기
