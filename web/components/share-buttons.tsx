@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { useToast } from '@/app/toast';
 
@@ -54,17 +55,7 @@ export function ShareButtons({
     }
   };
 
-  if (look === 'rapo') {
-    return (
-      <button type="button" onClick={share}
-        className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2)
-                   active:bg-(--rapo-color-bg-transparent-pressed)">
-        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-        <img src="/rapo/detail/share-20.svg" alt="" width={20} height={20} />
-        <span className="sr-only">공유</span>
-      </button>
-    );
-  }
+  if (look === 'rapo') return <RapoShare share={share} url={url} />;
 
   if (compact) {
     return (
@@ -101,5 +92,85 @@ export function ShareButtons({
         링크 복사
       </button>
     </>
+  );
+}
+
+/* 새 디자인 공고 상세의 공유 — 「U03-S · 공유 수단 선택」 589:5105 · 「링크 복사 완료」 589:5140 ·
+   「S-06 · 링크 복사 실패」 605:13261 · 「S-07 · 카카오톡 미지원」 605:13327 (2026-11-12 세중님 「다 피그마 기준」).
+   공유 단추를 누르면 오른쪽 위에 작은 창(카카오톡 · 링크 복사)이 열립니다.
+   ★ 카카오톡 — 카카오 공유 SDK 는 JavaScript 키가 있어야 해서(지금은 로그인용 REST 키뿐), 휴대폰의 공유창으로 보냅니다.
+     공유창에 카카오톡이 들어 있습니다. 공유창이 없는 기기(대개 PC)에서는 원본 S-07 안내를 띄웁니다.
+   ★ 결과 안내는 원본처럼 아래 고정 행동(저장·지원 112) 바로 위에 남색 띠로 2.5초 띄웁니다 */
+function RapoShare({ share, url }: { share: () => Promise<void>; url: () => string }) {
+  const [열림, set열림] = useState(false);
+  const [알림, set알림] = useState<{ 글: string; 잘됨: boolean } | null>(null);
+  const 시계 = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (시계.current) clearTimeout(시계.current); }, []);
+  const 띄우기 = (글: string, 잘됨: boolean) => {
+    set알림({ 글, 잘됨 });
+    if (시계.current) clearTimeout(시계.current);
+    시계.current = setTimeout(() => set알림(null), 2500);
+  };
+
+  const 카톡 = async () => {
+    set열림(false);
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') { await share(); return; }
+    띄우기('이 기기에서는 카카오톡으로 바로 보낼 수 없어요. 링크를 복사해 보내 주세요', false);
+  };
+  const 복사 = async () => {
+    set열림(false);
+    try { await navigator.clipboard.writeText(url()); 띄우기('링크를 복사했어요', true); }
+    catch { 띄우기('링크를 복사하지 못했어요. 잠시 뒤 다시 눌러 주세요', false); }
+  };
+
+  return (
+    <span className="relative flex shrink-0">
+      <button type="button" onClick={() => set열림((v) => !v)} aria-expanded={열림} aria-haspopup="menu"
+        className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2)
+                   active:bg-(--rapo-color-bg-transparent-pressed)">
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+        <img src="/rapo/detail/share-20.svg" alt="" width={20} height={20} />
+        <span className="sr-only">공유</span>
+      </button>
+      {열림 && (
+        <>
+          {/* 바깥을 누르면 닫힙니다 */}
+          <button type="button" aria-label="공유 닫기" onClick={() => set열림(false)} className="fixed inset-0 z-40 cursor-default" />
+          <span role="menu" className="absolute right-0 top-[52px] z-50 flex w-[192px] rounded-[16px] bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x3) shadow-(--rapo-shadow-s2)">
+            <button type="button" role="menuitem" onClick={카톡}
+              className="flex flex-1 flex-col items-center gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r2) py-(--rapo-dimension-x2) active:bg-(--rapo-color-bg-transparent-pressed)">
+              <span className="flex size-[44px] items-center justify-center rounded-[12px] bg-[#FEE500]">
+                {/* eslint-disable-next-line @next/next/no-img-element -- 카카오 말풍선 원본 SVG (로그인 단추와 같은 것) */}
+                <img src="/rapo/login/kakao-20.svg" alt="" width={24} height={24} />
+              </span>
+              <span className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">카카오톡</span>
+            </button>
+            <button type="button" role="menuitem" onClick={복사}
+              className="flex flex-1 flex-col items-center gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r2) py-(--rapo-dimension-x2) active:bg-(--rapo-color-bg-transparent-pressed)">
+              <span className="flex size-[44px] items-center justify-center rounded-full bg-(--rapo-color-bg-neutral-weak) text-(color:--rapo-color-fg-neutral)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+              </span>
+              <span className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">링크 복사</span>
+            </button>
+          </span>
+        </>
+      )}
+      {알림 && (
+        <span role="status" className="pointer-events-none fixed inset-x-0 z-50 mx-auto flex w-full max-w-3xl px-(--rapo-dimension-x5)"
+          style={{ bottom: 'calc(112px + 12px + env(safe-area-inset-bottom))' }}>
+          <span className="rapo-type-t5-bold flex min-h-[52px] w-full items-center justify-center gap-(--rapo-dimension-x2) break-keep rounded-[12px] bg-[#112231] px-(--rapo-dimension-x4) py-(--rapo-dimension-x3) text-center text-white">
+            {알림.잘됨 && (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0">
+                <path d="M5 12.5 10 17.5 19 7" />
+              </svg>
+            )}
+            {알림.글}
+          </span>
+        </span>
+      )}
+    </span>
   );
 }
