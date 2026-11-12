@@ -40,6 +40,7 @@ export type RapoJobDetailProps = {
   지원주소: string | null;
   /* 병원 한눈에 (2026-11-12) — 회원만 값이 옵니다. 없으면 칸을 안 그립니다 */
   치료사?: { pt: number | null; ot: number | null; 기준: string | null } | null;
+  바쁨?: import('@/lib/hospital').HospitalStat | null;
   경쟁률?: 경쟁률줄[];
 };
 
@@ -111,10 +112,10 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       </div>
 
       {/* 병원 한눈에 — 예전 앱처럼 지원 자격 바로 아래 (2026-11-12 세중님 「예전 앱 위치 참고」) */}
-      {(p.치료사 || (p.경쟁률?.length ?? 0) > 0) && (
+      {(p.치료사 || p.바쁨?.band || (p.경쟁률?.length ?? 0) > 0) && (
         <>
           <RapoSectionGap />
-          <RapoHospitalFacts 치료사={p.치료사 ?? null} 경쟁률={p.경쟁률 ?? []} />
+          <RapoHospitalFacts 치료사={p.치료사 ?? null} 바쁨={p.바쁨 ?? null} 경쟁률={p.경쟁률 ?? []} />
         </>
       )}
 

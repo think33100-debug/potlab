@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { BANDS, busyWord, type HospitalStat } from '@/lib/hospital';
 import { RapoMaskIcon } from './rapo-ui';
 
 /* 공고 상세 — 새 디자인 「U03 · 공고 상세」 조각들 (2026-11-11 대표: 피그마 우선, 없는 정보는 뺌).
@@ -245,11 +246,44 @@ export type 경쟁률줄 = {
   평균: number | null; 가장낮음: number | null; 가장높음: number | null;
 };
 
-export function RapoHospitalFacts({ 치료사, 경쟁률 }: {
+/* 얼마나 바쁜 곳인지 — 예전 웹 JobBusy(components/job-busy.tsx) 그대로의 계산(busyWord · 같은 종별끼리 4분위)을
+   새 디자인 꼴로 그립니다 (2026-11-12 세중님 「예전 웹에 있던 것 넣어」). 「치료사 1명당 병상」 숫자는 예전처럼 안 보입니다 */
+function 바쁨칸({ h }: { h: HospitalStat }) {
+  const w = busyWord(h);
+  return (
+    <div className="flex flex-col gap-(--rapo-dimension-x2)">
+      <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">얼마나 바쁜 곳인지</p>
+      <div className="flex flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
+        <div className="flex flex-col gap-(--rapo-dimension-x1)">
+          <p className="rapo-type-t12-bold break-keep" style={{ color: w.color }}>{w.label}</p>
+          <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{w.where}</p>
+        </div>
+        <div className="flex items-end gap-(--rapo-dimension-x2)">
+          {BANDS.map((b) => {
+            const on = b.key === h.band;
+            return (
+              <div key={b.key}
+                className={'flex flex-1 items-center justify-center rounded-(--rapo-radius-r2) '
+                  + (on ? 'rapo-type-t4-bold h-[48px] text-white' : 'rapo-type-t3-regular h-[36px] bg-(--rapo-color-bg-layer-default) text-(color:--rapo-color-fg-neutral-muted)')}
+                style={on ? { backgroundColor: w.color } : undefined}>
+                {b.label}
+              </div>
+            );
+          })}
+        </div>
+        <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">{w.head}</p>
+        <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{w.body}</p>
+      </div>
+    </div>
+  );
+}
+
+export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률 }: {
   치료사: { pt: number | null; ot: number | null; 기준: string | null } | null;
+  바쁨?: HospitalStat | null;
   경쟁률: 경쟁률줄[];
 }) {
-  if (!치료사 && 경쟁률.length === 0) return null;
+  if (!치료사 && !바쁨?.band && 경쟁률.length === 0) return null;
   const 배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })} : 1`);
   return (
     <RapoDetailSection title="병원 한눈에" sub="공개된 자료로 모은 숫자예요">
@@ -258,9 +292,9 @@ export function RapoHospitalFacts({ 치료사, 경쟁률 }: {
           <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">이 병원 치료사</p>
           <div className="grid grid-cols-2 gap-(--rapo-dimension-x3)">
             {([['물리치료사', 치료사.pt], ['작업치료사', 치료사.ot]] as const).map(([이름, n]) => (
-              <div key={이름} className="flex flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x4)">
-                <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">{이름}</p>
-                <p className="text-(color:--rapo-color-fg-neutral)">
+              <div key={이름} className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+                <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{이름}</p>
+                <p className="text-(color:--rapo-color-fg-brand)">
                   <span className="rapo-type-t12-bold">{n == null ? '—' : n.toLocaleString('ko-KR')}</span>
                   {n != null && <span className="rapo-type-t5-bold ml-[2px]">명</span>}
                 </p>
@@ -268,10 +302,11 @@ export function RapoHospitalFacts({ 치료사, 경쟁률 }: {
             ))}
           </div>
           <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
-            건강보험심사평가원에 신고된 인원{치료사.기준 ? ` · ${치료사.기준} 기준` : ''}
+            병원 전체 인원이에요 (공고 인원 아님) · 건강보험심사평가원 신고{치료사.기준 ? ` · ${치료사.기준} 기준` : ''}
           </p>
         </div>
       )}
+      {바쁨?.band && <바쁨칸 h={바쁨} />}
       {경쟁률.map((g) => (
         <div key={g.묶음키} className="flex flex-col gap-(--rapo-dimension-x2)">
           <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">

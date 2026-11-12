@@ -210,7 +210,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       비슷한={비슷한} 비슷한주소={비슷한주소}
       비슷한제목말={[j.job_group, j.지역보임?.split(' ')[0]].filter(Boolean).join(' · ') || undefined}
       지원주소={지원.주소}
-      치료사={치료사} 경쟁률={경쟁률}
+      치료사={치료사} 바쁨={병원숫자} 경쟁률={경쟁률}
     />
   );
 }
