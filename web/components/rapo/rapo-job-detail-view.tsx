@@ -42,6 +42,8 @@ export type RapoJobDetailProps = {
   /* 병원 한눈에 (2026-11-12) — 회원만 값이 옵니다. 없으면 칸을 안 그립니다 */
   치료사?: { pt: number | null; ot: number | null; 기준: string | null } | null;
   바쁨?: import('@/lib/hospital').HospitalStat | null;
+  /* 병원이 아닌 곳(복지관·치매센터·요양원)의 숫자 — 2026-11-12 밤 */
+  시설?: import('@/lib/hospital').시설숫자 | null;
   인턴?: boolean;
   /* 마감 임박 알림 단추를 그릴까 — 마감일을 알고 아직 안 닫힌 공고만 (2026-11-12 세중님) */
   마감알림?: boolean;
@@ -104,10 +106,10 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
 
       {/* 병원 한눈에 — 예전 앱처럼 지원 자격 바로 아래 (2026-11-12 세중님 「예전 앱 위치 참고」) */}
       {/* 병원 자료(구분·병상)만 있어도 칸을 그립니다 (2026-11-12) */}
-      {(p.치료사 || p.바쁨 || p.보수 || (p.경쟁률?.length ?? 0) > 0) && (
+      {(p.치료사 || p.바쁨 || p.시설 || p.보수 || (p.경쟁률?.length ?? 0) > 0) && (
         <>
           <RapoSectionGap />
-          <RapoHospitalFacts 치료사={p.치료사 ?? null} 바쁨={p.바쁨 ?? null} 경쟁률={p.경쟁률 ?? []} 인턴={p.인턴} 보수={p.보수 ?? null} />
+          <RapoHospitalFacts 치료사={p.치료사 ?? null} 바쁨={p.바쁨 ?? null} 시설={p.시설 ?? null} 경쟁률={p.경쟁률 ?? []} 인턴={p.인턴} 보수={p.보수 ?? null} />
         </>
       )}
 

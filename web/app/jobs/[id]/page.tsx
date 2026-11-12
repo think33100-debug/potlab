@@ -156,7 +156,9 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     봄 ? 경쟁률받기(sb, id) : Promise.resolve([]),
     봄 ? 병원보수받기(sb, id) : Promise.resolve(null),
   ]);
-  const 치료사 = 병원숫자 && (병원숫자.pt != null || 병원숫자.ot != null)
+  /* 병원이 아닌 곳(복지관·치매센터·요양원)은 「시설」 칸으로 옵니다 — 그때는 병원 칸(구분·병상·치료사)을 안 씁니다 */
+  const 시설 = 병원숫자?.시설 ?? null;
+  const 치료사 = 병원숫자 && !시설 && (병원숫자.pt != null || 병원숫자.ot != null)
     ? { pt: 병원숫자.pt, ot: 병원숫자.ot, 기준: 병원숫자.data_version?.replace(/^심평원\s*/, '') ?? null } : null;
 
   /* 예상 연봉 — 공고에 적힌 **말 그대로** · 금액이 없으면 「내규에 따름」 (2026-10-09 · 10-14 대표 확정) */
@@ -235,7 +237,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       비슷한={비슷한} 비슷한주소={비슷한주소}
       비슷한제목말={[j.job_group, j.지역보임?.split(' ')[0]].filter(Boolean).join(' · ') || undefined}
       지원주소={지원.주소}
-      치료사={치료사} 바쁨={병원숫자} 경쟁률={경쟁률} 보수={보수}
+      치료사={치료사} 바쁨={시설 ? null : 병원숫자} 시설={시설} 경쟁률={경쟁률} 보수={보수}
       인턴={!!j.is_intern || /인턴/.test(j.employ_type ?? '')}
       마감알림={봄 && !closed && !!j.apply_to}
     />
