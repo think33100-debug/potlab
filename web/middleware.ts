@@ -52,8 +52,12 @@ export async function middleware(req: NextRequest) {
   );
 
   /* 이 한 줄이 갱신을 일으킵니다 —
-     빼면 토큰이 안 늘어나고, 한 시간 뒤부터 로그인이 풀립니다 */
-  const { data, error } = await sb.auth.getUser();
+     빼면 토큰이 안 늘어나고, 한 시간 뒤부터 로그인이 풀립니다.
+     ★ 2026-11-12 (세중님 「속도 최적화」) — getUser() → getClaims().
+       getClaims 도 안에서 getSession 을 불러 만료된 토큰을 갱신하고 쿠키를 다시 씁니다(위 setAll).
+       다른 점은 **로그인 서버에 묻지 않고** 증표 서명을 여기서 확인한다는 것 하나입니다(ES256 · 공개 열쇠 10분 기억).
+       화면을 바꿀 때마다 들던 왕복 한 번이 빠집니다. 자세한 것은 lib/supabase-server.ts serverWho */
+  const { data, error } = await sb.auth.getClaims();
 
   /* 다른 응답(돌려보내기·바꿔 보여주기)으로 갈아탈 때 갱신한 쿠키를 같이 싣습니다.
      안 실으면 돌려보낸 화면에서 다시 옛 토큰을 들고 옵니다 */
@@ -73,10 +77,10 @@ export async function middleware(req: NextRequest) {
   /* 회원 · 비회원 · 모름 세 값 (web/회원여부_읽는_법.md).
      getUser 의 AuthSessionMissingError 만 「비회원」이라는 답이고,
      그 밖의 오류는 못 물어본 것이라 「모름」입니다 */
-  const user = 비회원보기 ? null : data?.user ?? null;
-  const 모름 = !비회원보기 && !user && !!error && error.name !== 'AuthSessionMissingError';
+  const 아이디 = 비회원보기 ? null : ((data?.claims?.sub as string | undefined) ?? null);
+  const 모름 = !비회원보기 && !아이디 && !!error && error.name !== 'AuthSessionMissingError';
 
-  if (!user) {
+  if (!아이디) {
     if (!모름 && 길에있나(path, 비회원길)) return 쿠키싣기(res);
     /* ★ 2026-11-12 밤 세중님 — 공고 **목록**(/jobs 딱 그 주소)만 비회원에게 엽니다: 맛보기 몇 건 + 가입 권유.
        공고 상세(/jobs/<번호>)와 그 밖은 전처럼 로그인으로 갑니다. 비회원길(lib/beta.ts)에 넣지 않은 까닭 —
@@ -100,7 +104,7 @@ export async function middleware(req: NextRequest) {
      자기 줄은 읽을 수 있습니다 (auth/callback 이 같은 질의를 씁니다) */
   if (!길에있나(path, 가입중길)) {
     const { data: prof, error: profErr } = await sb
-      .from('profiles').select('id').eq('id', user.id).maybeSingle();
+      .from('profiles').select('id').eq('id', 아이디).maybeSingle();
     if (profErr) {
       if (api) return 쿠키싣기(new NextResponse('잠시 뒤 다시', { status: 503 }));
       return 쿠키싣기(NextResponse.rewrite(new URL('/beta?r=1', req.url)));
