@@ -1,8 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
+import { RapoButton, RapoChip } from '@/components/rapo/rapo-ui';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { 문의갈래, type 문의갈래값 } from '@/lib/inquiry';
 
@@ -10,10 +12,19 @@ import { 문의갈래, type 문의갈래값 } from '@/lib/inquiry';
 
    보내면 창구 `문의넣기()` 를 부릅니다 — 글은 **대한민국 서울(Supabase)** 에만
    저장되고 메일로 나가지 않습니다 (국외 이전이 없습니다 · lib/terms.ts 의 그 절).
+   그래서 이 폼은 처리방침의 「거부 방법」이 가리키는 자리입니다 — 빼지 않습니다.
 
-   ★ 창구는 **아직 DB 에 없습니다** (승인대기_1102.md ㉠). 그래서 이 폼은
-     lib/inquiry.ts 의 스위치가 꺼진 동안 회원에게 안 보입니다. 미리보기에서
-     ?폼=1 로 열어 보면 「보내기」가 창구 없음 오류를 냅니다 — 그게 맞는 상태입니다. */
+   ── 새 디자인 (2026-11-13) ──
+   피그마에 일반 문의 폼은 없습니다. 같은 파일의 「S-ACCESS-INQUIRY / 이용 문의」 1375:531
+   (입력 칸 「RAPO / 공통 / 텍스트 입력」 · 채움 버튼 52)을 그대로 빌렸습니다.
+   갈래 고르기는 「RAPO / Chip / Selection」(RapoChip) 입니다. 동작(창구·검사·글자 수)은 전과 같습니다. */
+
+/* 「RAPO / 공통 / 텍스트 입력」 1245:956 — 이름 14/19 Medium · 칸 선 1 stroke/neutral-weak · radius 12 · 안쪽 16 · 글 16/22 */
+const 칸 = 'rapo-type-t5-regular w-full rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) ' +
+  'bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) placeholder:text-(color:--rapo-color-fg-placeholder)';
+const 칸이름 = 'rapo-type-t4-medium text-(color:--rapo-color-fg-on-identity)';
+const 도움말 = 'rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)';
+
 export function InquiryForm() {
   const { loading, session, me } = useAuth();
   const toast = useToast();
@@ -49,103 +60,78 @@ export function InquiryForm() {
   };
 
   if (loading) {
-    return <p className="mt-6 text-lg text-mute">잠시만요…</p>;
+    return <p role="status" className={도움말}>잠시만요…</p>;
   }
 
-  /* 비회원·가입 중인 분은 메일 단추를 쓰십니다 (아래에 그대로 있습니다).
+  /* 비회원·가입 중인 분은 위의 메일 단추를 쓰십니다.
      폼을 비회원에게 열면 누가 보냈는지 알 수 없고 스팸을 막을 길이 없습니다 */
   if (!session || !me) {
     return (
-      <p className="mt-6 break-keep rounded-sm border border-gray-200 p-5 text-lg text-mute dark:border-gray-700">
-        로그인하시면 <b>앱 안에서 바로</b> 보낼 수 있어요. 그 글은 대한민국 서울에만
-        저장되고 메일로 나가지 않습니다. 로그인 없이 보내시려면 아래 메일을 써 주세요
-      </p>
+      <div className="flex flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
+        <p className="rapo-type-t5-regular break-keep text-(color:--rapo-color-fg-neutral)">
+          로그인하시면 앱 안에서 바로 보낼 수 있어요. 그 글은 대한민국 서울에만 저장되고 메일로 나가지 않아요.
+        </p>
+        <RapoButton href="/login?next=%2Fcontact" tone="outline" size={40} className="self-start">로그인하고 보내기</RapoButton>
+      </div>
     );
   }
 
   if (보냈나) {
     return (
-      <div className="mt-6 rounded-sm border border-teal-strong p-6">
-        <p className="break-keep text-lg font-bold">보냈어요</p>
-        <p className="mt-2 break-keep text-lg text-mute">
-          평일에 확인하고 답을 드립니다. 더 보내실 것이 있으면{' '}
-          <button type="button" onClick={() => set보냈나(false)}
-            className="text-interaction-blue underline underline-offset-2">
-            하나 더 쓰기
-          </button>
-        </p>
+      <div role="status" className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
+        <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">문의가 접수됐어요</p>
+        <p className="rapo-type-t5-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">평일에 확인하고 답을 드릴게요.</p>
+        <button type="button" onClick={() => set보냈나(false)}
+          className="rapo-type-t4-bold mt-(--rapo-dimension-x1) self-start text-(color:--rapo-color-fg-neutral) underline underline-offset-2">
+          하나 더 쓰기
+        </button>
       </div>
     );
   }
 
   return (
-    <section className="mt-6 rounded-sm border border-gray-200 p-5 dark:border-gray-700">
-      <h2 className="text-h3 font-bold">앱 안에서 보내기</h2>
-      <p className="mt-2 break-keep text-lg text-mute">
-        여기로 보내시면 글이 <b>대한민국 서울</b>에만 저장됩니다 (메일로 나가지 않습니다)
-      </p>
-
-      <fieldset className="mt-5">
-        <legend className="text-lg font-bold">무엇에 대한 문의인가요</legend>
-        <div className="mt-3 space-y-2">
+    <div className="flex flex-col gap-(--rapo-dimension-x5)">
+      <fieldset className="flex flex-col gap-(--rapo-dimension-x2)">
+        <legend className={칸이름}>무엇에 대한 문의인가요</legend>
+        <div className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
           {문의갈래.map((x) => (
-            <label key={x.값}
-              className={'flex cursor-pointer items-start gap-3 rounded-sm border p-4 '
-                + (갈래 === x.값
-                  ? 'border-teal-strong bg-badge-teal-bg dark:bg-transparent'
-                  : 'border-gray-200 dark:border-gray-700')}>
-              <input type="radio" name="문의갈래" value={x.값} checked={갈래 === x.값}
-                onChange={() => set갈래(x.값)} className="mt-1 size-5 accent-[#0B7A75]" />
-              <span className="break-keep">
-                <span className="block text-lg font-medium">{x.이름}</span>
-                <span className="block text-sm text-mute">{x.설명}</span>
-              </span>
-            </label>
+            <RapoChip key={x.값} label={x.이름} on={갈래 === x.값} onClick={() => set갈래(x.값)} />
           ))}
         </div>
+        <p className={도움말}>{고른것.설명}</p>
       </fieldset>
 
       {주소필요 && (
-        <div className="mt-5">
-          <label htmlFor="문의공고주소" className="block text-lg font-medium">
-            가려 달라는 공고 주소 <span className="text-brand-red">(꼭 적어 주세요)</span>
+        <div className="flex flex-col gap-(--rapo-dimension-x2)">
+          <label htmlFor="문의공고주소" className={칸이름}>
+            가려 달라는 공고 주소 <span className="text-(color:--rapo-color-fg-brand-contrast)">(꼭 적어 주세요)</span>
           </label>
           <input id="문의공고주소" value={주소} onChange={(e) => set주소(e.target.value)}
-            placeholder="https://www.rapojob.co.kr/jobs/…"
-            className="mt-2 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950" />
-          <p className="mt-1 break-keep text-sm text-mute">
-            공고 화면에서 주소를 복사해 붙여 주세요. 주소가 없으면 어느 공고인지 찾기 어렵습니다
-          </p>
+            placeholder="https://www.rapojob.co.kr/jobs/…" className={칸} />
+          <p className={도움말}>공고 화면에서 주소를 복사해 붙여 주세요. 주소가 없으면 어느 공고인지 찾기 어려워요</p>
         </div>
       )}
 
-      <div className="mt-5">
-        <label htmlFor="문의글" className="block text-lg font-medium">하고 싶은 말</label>
-        <textarea id="문의글" value={글} onChange={(e) => set글(e.target.value)} rows={6}
-          placeholder="다섯 글자 이상 적어 주세요"
-          className="mt-2 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950" />
-        <p className="mt-1 text-sm text-mute">
-          <span className="num tabular-nums">{글.trim().length}</span> / 4000
-        </p>
+      <div className="flex flex-col gap-(--rapo-dimension-x2)">
+        <label htmlFor="문의글" className={칸이름}>문의 내용</label>
+        <textarea id="문의글" value={글} onChange={(e) => set글(e.target.value)} rows={6} maxLength={4000}
+          placeholder="다섯 글자 이상 적어 주세요" className={칸 + ' resize-y'} />
+        <p className={도움말}><span className="tabular-nums">{글.trim().length}</span> / 4000</p>
       </div>
 
-      <div className="mt-5">
-        <label htmlFor="문의메일" className="block text-lg font-medium">
-          답 받을 메일 <span className="text-mute">(비워도 됩니다 — 앱 알림으로 알려드려요)</span>
-        </label>
+      <div className="flex flex-col gap-(--rapo-dimension-x2)">
+        <label htmlFor="문의메일" className={칸이름}>답 받을 메일 (비워도 돼요 — 앱 알림으로 알려 드려요)</label>
         <input id="문의메일" type="email" value={메일} onChange={(e) => set메일(e.target.value)}
-          placeholder="answer@example.com"
-          className="mt-2 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950" />
+          placeholder="answer@example.com" className={칸} />
       </div>
 
-      <button type="button" onClick={보내기} disabled={!보낼수있나 || 보내는중}
-        className="mt-6 w-full rounded-md bg-teal-strong px-6 py-5 text-btn font-bold text-white hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
-        {보내는중 ? '보내는 중…' : 보낼수있나 ? '보내기' : 주소필요 && !주소.trim() ? '공고 주소를 적어 주세요' : '다섯 글자 이상 적어 주세요'}
-      </button>
+      <RapoButton onClick={보내기} disabled={!보낼수있나} loading={보내는중} full>
+        {보내는중 ? '보내는 중…' : 보낼수있나 ? '문의 보내기' : 주소필요 && !주소.trim() ? '공고 주소를 적어 주세요' : '다섯 글자 이상 적어 주세요'}
+      </RapoButton>
 
-      <p className="mt-3 break-keep text-sm text-mute">
-        보내신 글은 답을 드린 뒤 1년이 지나면 지웁니다 (개인정보처리방침과 같습니다)
+      <p className={도움말}>
+        보내신 글은 답을 드린 뒤 1년이 지나면 지워요 (<Link href="/terms/privacy" className="underline underline-offset-2">개인정보처리방침</Link>과 같아요)
       </p>
-    </section>
+    </div>
   );
 }
