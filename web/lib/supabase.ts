@@ -191,6 +191,8 @@ export type PostRow = {
   /* 중고거래에만 — 다른 방은 null (2026-10-11) */
   값?: number | null;
   거래상태?: string | null;
+  /* 글 태그 — 3개까지 · # 없이 담습니다 (2026-11-12 세중님 「그냥 열어」 · 금고 SQL_1113/U) */
+  태그?: string[] | null;
 };
 
 /* 목록에서는 본문을 통째로 안 받습니다. 사진도 썸네일 경로만 받습니다.
@@ -214,7 +216,7 @@ export const POST_LIST_COLS =
 
 export const POST_ONE_COLS =
   'id,channel,title,body,comment_count,like_count,view_count,created_at,edited_at,'
-  + '내글,profiles';
+  + '내글,profiles,태그';
 
 export type CommentRow = {
   id: number;

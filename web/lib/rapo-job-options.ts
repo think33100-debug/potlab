@@ -17,3 +17,18 @@ export const 공고정렬들 = [
 ] as const;
 export type 공고정렬 = (typeof 공고정렬들)[number]['key'];
 export const 기본정렬: 공고정렬 = 'views';
+
+/** 상세 조건 · 기관 분류 — 여러 개 고를 수 있습니다 (2026-11-12 밤 세중님 「대학병원 종합병원 공공기관 재활 요양병원 복지관 요양원 아동센터 · 중복 선택 · 필터해 놓으면 기본으로 유지」).
+    어느 공고가 어느 분류인지는 DB 의 공고분류() 한 자리가 정합니다(기관 표 공식 값 먼저 · 금고 SQL_1113/T). job_list 의 p_kinds 로 거릅니다.
+    고른 값은 쿠키(분류쿠키)에 1년 둡니다 — 다음에 /jobs 를 열어도 그대로 걸립니다(이 기기에서). 주소의 kind= 가 있으면 그것이 먼저입니다 */
+export const 기관분류들 = ['대학병원', '종합병원', '공공기관', '재활', '요양병원', '복지관', '요양원', '아동센터'] as const;
+export const 분류쿠키 = 'rapo_kind';
+
+/** 「대학병원,요양원」 꼴 글 → 아는 분류만 남긴 목록 (차례는 기관분류들 차례) */
+export function 분류읽기(글: string | null | undefined): string[] {
+  if (!글) return [];
+  let 풀린 = 글;
+  try { 풀린 = decodeURIComponent(글); } catch { /* 이미 풀린 글 */ }
+  const 고른 = new Set(풀린.split(','));
+  return 기관분류들.filter((k) => 고른.has(k));
+}

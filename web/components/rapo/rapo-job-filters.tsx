@@ -1,10 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useAuth } from '@/app/auth';
 import { CompareNotify } from '@/components/compare-notify';
-import { 고용형태들, 기본정렬 } from '@/lib/rapo-job-options';
+import { 고용형태들, 기관분류들, 기본정렬, 분류쿠키 } from '@/lib/rapo-job-options';
 import { JOB_GROUPS, type JobGroup } from '@/lib/who';
 import { RapoButton, RapoChip, RapoMaskIcon } from './rapo-ui';
 
@@ -23,6 +23,7 @@ import { RapoButton, RapoChip, RapoMaskIcon } from './rapo-ui';
      · 급여 — 아직 오픈 전 기능. 칩은 그대로 두고, 누르면 「오픈 전」 안내와 알림 신청 단추가 뜹니다
      · 상세 — 「고용형태」만 남기고 「지원 경력」·「근무일」은 뺍니다
        고용형태는 job_list 의 p_employ 로 거릅니다 (2026-11-11 DB · RAPO노트/SQL_1113/F_고용형태_조건.sql) · 주소는 type=
+     · 상세 — 「기관 분류」 여러 개 고르기 (2026-11-12 밤 세중님) · job_list 의 p_kinds · 주소는 kind= · 고른 값은 쿠키에 남아 다음에도 걸립니다
 
    비회원은 검색·조건이 열려 있지 않습니다(지금 규칙 그대로 · app/jobs/page.tsx).
    비회원이 검색하거나 조건을 적용하면 그 주소를 기억해 두고 로그인으로 보냅니다 —
@@ -42,7 +43,14 @@ const 분류들: { key: 분류; icon: string; w: number; h: number; 내림: bool
   { key: '상세', icon: '/rapo/list/sliders-16.svg',   w: 13.5,    h: 13.5,    내림: false },
 ];
 
-export type 조건 = { q: string; job: string | null; sido: string | null; type?: string | null; sort?: string | null };
+export type 조건 = { q: string; job: string | null; sido: string | null; type?: string | null; sort?: string | null; kinds?: string[] };
+
+/* 고른 기관 분류를 이 기기에 1년 기억합니다 — 빈 목록이면 지웁니다 (lib/rapo-job-options.ts 분류쿠키) */
+export function 분류기억(kinds: string[]) {
+  document.cookie = kinds.length
+    ? `${분류쿠키}=${encodeURIComponent(kinds.join(','))}; path=/; max-age=31536000; samesite=lax`
+    : `${분류쿠키}=; path=/; max-age=0; samesite=lax`;
+}
 
 /* 조건 → 주소. 직군 「전체」는 회원이면 job=전체 로 적습니다 —
    안 적으면 서버가 가입 때 고른 직군을 다시 걸기 때문입니다 (app/jobs/page.tsx) */
@@ -54,6 +62,7 @@ export function 목록주소(c: 조건, 회원: boolean): string {
   if (c.sido && c.sido !== '전국') p.set('sido', c.sido);
   if (c.type && c.type !== '전체') p.set('type', c.type);
   if (c.sort && c.sort !== 기본정렬) p.set('sort', c.sort);   // 기본(인기순)은 주소에 안 적습니다
+  if (c.kinds?.length) p.set('kind', c.kinds.join(','));
   const s = p.toString();
   return s ? `/jobs?${s}` : '/jobs';
 }
@@ -119,6 +128,7 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
   const [직군, set직군] = useState<string>(지금.job ?? '전체');
   const [지역, set지역] = useState<string>(지금.sido ?? '전국');
   const [고용, set고용] = useState<string>(지금.type ?? '전체');
+  const [분류, set분류] = useState<string[]>(지금.kinds ?? []);
   /* 급여 「알림 신청」 — 시트를 닫고 연봉 비교 알림 신청 창을 띄웁니다 (시트는 맨 위 층이라 그 위에 창을 못 띄웁니다) */
   const { session, me } = useAuth();
   const [알림창, set알림창] = useState(false);
@@ -128,16 +138,19 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
     set알림창(true);
   };
 
-  const 켜짐: Record<분류, boolean> = { 직군: !!지금.job, 지역: !!지금.sido, 급여: false, 상세: !!지금.type };
+  const 켜짐: Record<분류, boolean> = { 직군: !!지금.job, 지역: !!지금.sido, 급여: false, 상세: !!지금.type || !!지금.kinds?.length };
 
   const 열기 = (k: 분류) => {
-    set탭(k); set직군(지금.job ?? '전체'); set지역(지금.sido ?? '전국'); set고용(지금.type ?? '전체');
+    set탭(k); set직군(지금.job ?? '전체'); set지역(지금.sido ?? '전국'); set고용(지금.type ?? '전체'); set분류(지금.kinds ?? []);
     창.current?.showModal();
   };
   const 닫기 = () => 창.current?.close();
   const 적용 = () => {
-    const 갈곳 = 목록주소({ q: 지금.q, job: 직군, sido: 지역, type: 고용, sort: 지금.sort }, 회원);
+    const 주소 = 목록주소({ q: 지금.q, job: 직군, sido: 지역, type: 고용, sort: 지금.sort, kinds: 분류 }, 회원);
+    /* 기억해 둔 분류를 모두 뺐으면 「kind=」을 실어 보냅니다 — 안 실으면 주소가 전과 같아 목록을 다시 안 받을 수 있습니다 */
+    const 갈곳 = !분류.length && 지금.kinds?.length ? 주소 + (주소.includes('?') ? '&' : '?') + 'kind=' : 주소;
     닫기();
+    분류기억(분류);
     if (!회원) return 로그인으로(router, 갈곳);
     router.push(갈곳);
   };
@@ -213,12 +226,20 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
               <div role="group" aria-label="고용형태" className="flex gap-(--rapo-dimension-x2)">
                 {고용형태들.map((t) => <RapoChip key={t} label={t} on={고용 === t} onClick={() => set고용(t)} className="flex-1" />)}
               </div>
+              {/* 기관 분류 — 여러 개 (2026-11-12 밤 세중님). 아무것도 안 고르면 전체 */}
+              <p className="rapo-type-t5-medium text-(color:--rapo-color-fg-neutral)">기관 분류 <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">여러 개 고를 수 있어요</span></p>
+              <div role="group" aria-label="기관 분류" className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
+                {기관분류들.map((k) => (
+                  <RapoChip key={k} label={k} on={분류.includes(k)}
+                    onClick={() => set분류(분류.includes(k) ? 분류.filter((x) => x !== k) : 기관분류들.filter((x) => x === k || 분류.includes(x)))} />
+                ))}
+              </div>
             </div>
           )}
 
           {탭 === '급여' ? <급여오픈전 onApply={알림신청} /> : (
             <div className="flex gap-(--rapo-dimension-x3)">
-              <RapoButton tone="outline" onClick={() => { set직군('전체'); set지역('전국'); set고용('전체'); }} className="w-[104px] shrink-0">초기화</RapoButton>
+              <RapoButton tone="outline" onClick={() => { set직군('전체'); set지역('전국'); set고용('전체'); set분류([]); }} className="w-[104px] shrink-0">초기화</RapoButton>
               <RapoButton onClick={적용} className="min-w-0 flex-1">조건 적용</RapoButton>
             </div>
           )}
@@ -271,4 +292,12 @@ function 급여오픈전({ onApply }: { onApply: () => void }) {
       <RapoButton onClick={onApply} full>알림 신청</RapoButton>
     </div>
   );
+}
+
+/* 주소에 kind= 가 적혀 왔을 때(조건 적용 · 초기화 · 받은 링크) 그 값을 이 기기의 기본으로 남깁니다.
+   초기화 링크는 「kind=」(빈 값)를 실어 기억을 지웁니다 — 서버 화면(app/jobs/page.tsx)은 쿠키를 못 쓰기 때문입니다 */
+export function RapoKindRemember({ kinds }: { kinds: string[] }) {
+  const 글 = kinds.join(',');
+  useEffect(() => { 분류기억(글 ? 글.split(',') : []); }, [글]);
+  return null;
 }
