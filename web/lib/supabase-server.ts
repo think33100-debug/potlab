@@ -82,8 +82,14 @@ export async function serverSupabase(): Promise<SupabaseClient> {
 export type Who = '회원' | '비회원' | '모름';
 
 export async function serverWho(sb: SupabaseClient): Promise<Who> {
-  const { data, error } = await sb.auth.getUser();
-  if (data?.user) return '회원';
+  /* ★ 2026-11-12 (세중님 「속도 최적화」) — getUser() 대신 getClaims().
+     getUser 는 화면마다 로그인 서버에 한 번 더 물었습니다(문지기가 이미 물은 뒤인데도).
+     getClaims 는 로그인 증표의 서명을 이 서버에서 바로 확인합니다 — 이 프로젝트의 증표는 ES256(비대칭)이라
+     공개 열쇠(JWKS)만 있으면 되고, 그 열쇠는 서버 안에 10분 기억됩니다(auth-js GLOBAL_JWKS).
+     증표가 옛 방식(HS256)이면 라이브러리가 알아서 getUser 로 되돌아갑니다 — 결과는 같습니다.
+     세션이 없으면 data·error 둘 다 null 이 옵니다 = 「물어본 답」이라 비회원입니다 */
+  const { data, error } = await sb.auth.getClaims();
+  if (data?.claims?.sub) return '회원';
   /* AuthSessionMissingError 는 「쿠키에 세션이 없다」 — 물어본 답입니다.
      그 밖의 오류는 못 물어본 것이라 「모름」 입니다 */
   if (error && error.name !== 'AuthSessionMissingError') return '모름';
