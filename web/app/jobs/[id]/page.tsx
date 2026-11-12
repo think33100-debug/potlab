@@ -121,6 +121,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const sb = await serverSupabase();
   const who = await serverWho(sb);
   const member = who === '회원';
+  /* 2026-11-12 세중님 「다 볼 수 있게」 — 비회원도 병원 링크·치료사 인원·경쟁률을 받습니다(금고 SQL_1113/N). 비슷한 공고만 회원 */
+  const 봄 = who !== '모름';
 
   const j = await one(sb, id);
   if (!j) notFound();
@@ -131,11 +133,11 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const [views, 뽑은값, 병원, 비슷한, 병원숫자, 경쟁률] = await Promise.all([
     jobViews([j.id]),
     뽑은값받기(sb, id),
-    member ? 병원주소받기(sb, id) : Promise.resolve(null),
+    봄 ? 병원주소받기(sb, id) : Promise.resolve(null),
     member ? 비슷한공고(sb, j) : Promise.resolve([]),
     /* 치료사 인원 — 심평원 신고 인원. 이름으로 못 찾으면 null 이고 칸을 안 그립니다 (0 으로 안 채움) */
-    member ? hospitalStat(sb, j.org_name ?? '') : Promise.resolve(null),
-    member ? 경쟁률받기(sb, id) : Promise.resolve([]),
+    봄 ? hospitalStat(sb, j.org_name ?? '') : Promise.resolve(null),
+    봄 ? 경쟁률받기(sb, id) : Promise.resolve([]),
   ]);
   const 치료사 = 병원숫자 && (병원숫자.pt != null || 병원숫자.ot != null)
     ? { pt: 병원숫자.pt, ot: 병원숫자.ot, 기준: 병원숫자.data_version?.replace(/^심평원\s*/, '') ?? null } : null;
