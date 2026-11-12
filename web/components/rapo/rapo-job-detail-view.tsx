@@ -9,7 +9,7 @@ import { ShareButtons } from '@/components/share-buttons';
 import type { Who } from '@/lib/supabase-server';
 import {
   RapoDetailHeader, RapoDetailIdentity, RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoInstitution, RapoKeyRow,
-  RapoPayCard, RapoPeriodCard, RapoSectionGap, RapoStickyActions, 지원단추꼴, 잠긴단추꼴, type 경쟁률줄, type 모집상태,
+  RapoPayCard, RapoPeriodCard, RapoSectionGap, RapoStickyActions, 지원단추꼴, 잠긴단추꼴, type 경쟁률줄, type 모집상태, type 병원보수,
 } from './rapo-job-detail';
 import { RapoJobRow, type RapoJob } from './rapo-job-row';
 import { RapoButton, RapoDivider } from './rapo-ui';
@@ -46,6 +46,8 @@ export type RapoJobDetailProps = {
   /* 마감 임박 알림 단추를 그릴까 — 마감일을 알고 아직 안 닫힌 공고만 (2026-11-12 세중님) */
   마감알림?: boolean;
   경쟁률?: 경쟁률줄[];
+  /* 이 병원 연봉 — 알리오 공시 또는 국민연금 추정 (2026-11-12 · 금고 SQL_1113/P) */
+  보수?: 병원보수 | null;
 };
 
 export function RapoJobDetailView(p: RapoJobDetailProps) {
@@ -100,10 +102,10 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
 
       {/* 병원 한눈에 — 예전 앱처럼 지원 자격 바로 아래 (2026-11-12 세중님 「예전 앱 위치 참고」) */}
       {/* 병원 자료(구분·병상)만 있어도 칸을 그립니다 (2026-11-12) */}
-      {(p.치료사 || p.바쁨 || (p.경쟁률?.length ?? 0) > 0) && (
+      {(p.치료사 || p.바쁨 || p.보수 || (p.경쟁률?.length ?? 0) > 0) && (
         <>
           <RapoSectionGap />
-          <RapoHospitalFacts 치료사={p.치료사 ?? null} 바쁨={p.바쁨 ?? null} 경쟁률={p.경쟁률 ?? []} 인턴={p.인턴} />
+          <RapoHospitalFacts 치료사={p.치료사 ?? null} 바쁨={p.바쁨 ?? null} 경쟁률={p.경쟁률 ?? []} 인턴={p.인턴} 보수={p.보수 ?? null} />
         </>
       )}
 

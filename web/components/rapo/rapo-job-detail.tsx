@@ -248,10 +248,49 @@ export type 경쟁률줄 = {
   평균: number | null; 가장낮음: number | null; 가장높음: number | null;
 };
 
+/* 이 병원 연봉 (2026-11-12 세중님 「국립대는 알리오 공시 기준으로 신입사원 연봉」 · 금고 SQL_1113/P).
+   알리오 — 경영공시 「직원 평균보수」의 신입사원 초임(대졸 사무직 신입 기준) · 정규직 1인당 평균 보수 · 결산 해
+   국민연금 — 고지금액으로 추정한 **의사 포함 전체 직원** 평균. 가입자 수가 병상 수보다 적은 병원(사학연금 등)은 DB 가 안 줍니다 */
+export type 병원보수 = {
+  출처: '알리오' | '국민연금'; 공시기관: string | null; 신입초임: number | null; 평균보수: number | null;
+  기준해: number | null; 가입자수: number | null; 상한근처: boolean;
+};
+const 만원 = (v: number) => `${Math.round(v / 1e4).toLocaleString('ko-KR')}`;
+
+function 연봉칸({ 보수 }: { 보수: 병원보수 }) {
+  const 칸 = (보수.출처 === '알리오'
+    ? [['신입 초임', 보수.신입초임, false], ['직원 평균', 보수.평균보수, false]]
+    : [['병원 전체 평균 (추정)', 보수.평균보수, 보수.상한근처]]) as [string, number | null, boolean][];
+  const 보일칸 = 칸.filter(([, v]) => v != null && v > 0);
+  if (보일칸.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-(--rapo-dimension-x2)">
+      <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">이 병원 연봉</p>
+      <div className="grid gap-(--rapo-dimension-x3)" style={{ gridTemplateColumns: `repeat(${보일칸.length}, minmax(0, 1fr))` }}>
+        {보일칸.map(([이름, v, 이상]) => (
+          <div key={이름} className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+            <p className="rapo-type-t4-bold break-keep text-(color:--rapo-color-fg-brand-contrast)">{이름}</p>
+            <p className="text-(color:--rapo-color-fg-brand)">
+              <span className="rapo-type-t12-bold">{만원(v as number)}</span>
+              <span className="rapo-type-t5-bold ml-[2px]">만 원{이상 ? ' 이상' : ''}</span>
+            </p>
+          </div>
+        ))}
+      </div>
+      <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
+        {보수.출처 === '알리오'
+          ? `알리오 공시${보수.공시기관 ? ` (${보수.공시기관})` : ''}${보수.기준해 ? ` · ${보수.기준해}년 결산` : ''} · 신입 초임은 대졸 신입 기준, 직원 평균은 정규직 전체예요`
+          : `국민연금 가입 자료로 추정한 의사 포함 전체 직원 평균이에요${보수.가입자수 ? ` · 가입자 ${보수.가입자수.toLocaleString('ko-KR')}명` : ''}${보수.상한근처 ? ' · 소득 상한 때문에 실제보다 낮게 나와요' : ''}`}
+      </p>
+    </div>
+  );
+}
+
 /* 「얼마나 바쁜 곳인지」는 일단 뺐습니다 (2026-11-12 저녁 세중님 「일단 빼자」). 계산은 lib/hospital.ts busyWord 에 그대로 있고,
    그리던 조각은 이 파일의 11/12 낮 판(커밋 5fe1f19)에 있습니다 */
-export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false }: {
+export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false, 보수 = null }: {
   치료사: { pt: number | null; ot: number | null; 기준: string | null } | null;
+  보수?: 병원보수 | null;
   바쁨?: HospitalStat | null;
   경쟁률: 경쟁률줄[];
   /* 이번 공고가 인턴인가 — 인턴 경쟁률은 공개되지 않은 곳이 많아 안내 글을 바꿉니다 (11/12 세중님) */
@@ -264,7 +303,7 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
     ['병상', 바쁨.bed > 0 ? `${바쁨.bed.toLocaleString('ko-KR')}개` : null],
     ['재활의학과 의사', 바쁨.rehab != null && 바쁨.rehab > 0 ? `${바쁨.rehab.toLocaleString('ko-KR')}명` : null],
   ] as const).filter(([, v]) => v) : [];
-  if (!치료사 && 경쟁률.length === 0 && 개요.length === 0) return null;
+  if (!치료사 && !보수 && 경쟁률.length === 0 && 개요.length === 0) return null;
   const 배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })} : 1`);
   return (
     <RapoDetailSection title="병원 한눈에" sub="공개된 자료로 모은 숫자예요">
@@ -297,6 +336,7 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
           </p>
         </div>
       )}
+      {보수 && <연봉칸 보수={보수} />}
       {/* 이번 공고와 같은 고용형태 자료가 없으면 한 줄로 밝힙니다 (11/12 세중님 — 청년인턴 공고에 공무직·기간제만 보였음) */}
       {경쟁률.length > 0 && !경쟁률.some((g) => g.같은형태) && (
         <p className="rapo-type-t3-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x3) text-(color:--rapo-color-fg-neutral-muted)">
