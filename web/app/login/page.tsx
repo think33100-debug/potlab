@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { LoginWithId } from '@/components/login-id';
 import { RapoLoginButtons, 넓은단추, 로그인틀, type Method } from '@/components/rapo/rapo-login';
 import {
   readLastLogin, subscribeLastLogin, serverLastLogin, type LoginMethod,
@@ -113,6 +114,8 @@ export default function Login() {
           <p className="rapo-type-t4-regular text-center">처음이라면 같은 방법으로 가입할 수 있어요</p>
         )}
         <RapoLoginButtons last={halfway ? null : last} busy={busy} onStart={start} />
+        {/* 운영진이 만든 계정만 — 피그마에 없는 작은 글씨 한 줄 (2026-11-12 세중님 · components/login-id.tsx) */}
+        {!halfway && <LoginWithId />}
         {/* 지금은 테스터만 볼 수 있어 비회원은 안내 화면(/beta)으로 갑니다 — 원본 글은 그대로 둡니다 */}
         <Link href="/" className="rapo-type-t4-medium flex h-(--rapo-touch-min) w-full items-center justify-center">지금은 둘러볼게요</Link>
       </>
