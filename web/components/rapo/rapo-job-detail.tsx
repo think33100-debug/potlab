@@ -250,7 +250,6 @@ export function RapoHospitalFacts({ 치료사, 경쟁률 }: {
   경쟁률: 경쟁률줄[];
 }) {
   if (!치료사 && 경쟁률.length === 0) return null;
-  const 몇 = (n: number | null) => (n == null ? '—' : `${n.toLocaleString('ko-KR')}명`);
   const 배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })} : 1`);
   return (
     <RapoDetailSection title="병원 한눈에" sub="공개된 자료로 모은 숫자예요">
@@ -261,7 +260,10 @@ export function RapoHospitalFacts({ 치료사, 경쟁률 }: {
             {([['물리치료사', 치료사.pt], ['작업치료사', 치료사.ot]] as const).map(([이름, n]) => (
               <div key={이름} className="flex flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x4)">
                 <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">{이름}</p>
-                <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">{몇(n)}</p>
+                <p className="text-(color:--rapo-color-fg-neutral)">
+                  <span className="rapo-type-t12-bold">{n == null ? '—' : n.toLocaleString('ko-KR')}</span>
+                  {n != null && <span className="rapo-type-t5-bold ml-[2px]">명</span>}
+                </p>
               </div>
             ))}
           </div>
@@ -275,14 +277,14 @@ export function RapoHospitalFacts({ 치료사, 경쟁률 }: {
           <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">
             지난 채용 경쟁률{g.고용형태 ? ` · ${g.고용형태}` : ''}
           </p>
-          <div className="flex items-center justify-between gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x4)">
-            <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
-              <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">평균</p>
-              <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">{배(g.평균)}</p>
-            </div>
-            <p className="rapo-type-t3-regular break-keep text-right text-(color:--rapo-color-fg-neutral-muted)">
-              {g.첫해 && g.끝해 ? (g.첫해 === g.끝해 ? `${g.첫해}년` : `${g.첫해}–${g.끝해}년`) : ''} · {g.회차}번<br />
-              가장 낮음 {배(g.가장낮음)} · 가장 높음 {배(g.가장높음)}
+          <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+            <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">평균 경쟁률</p>
+            <p className="text-(color:--rapo-color-fg-brand)">
+              <span className="rapo-type-t12-bold">{g.평균 == null ? '—' : Number(g.평균).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}</span>
+              {g.평균 != null && <span className="rapo-type-t6-bold ml-[4px]">: 1</span>}
+            </p>
+            <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
+              {g.첫해 && g.끝해 ? (g.첫해 === g.끝해 ? `${g.첫해}년` : `${g.첫해}–${g.끝해}년`) : ''} · {g.회차}번 채용 · 가장 낮음 {배(g.가장낮음)} · 가장 높음 {배(g.가장높음)}
             </p>
           </div>
           <Link href={`/compete?g=${encodeURIComponent(g.묶음키)}`}

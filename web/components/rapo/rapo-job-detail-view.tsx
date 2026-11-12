@@ -106,6 +106,14 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         </RapoDetailSection>
       </div>
 
+      {/* 병원 한눈에 — 예전 앱처럼 지원 자격 바로 아래 (2026-11-12 세중님 「예전 앱 위치 참고」) */}
+      {(p.치료사 || (p.경쟁률?.length ?? 0) > 0) && (
+        <>
+          <RapoSectionGap />
+          <RapoHospitalFacts 치료사={p.치료사 ?? null} 경쟁률={p.경쟁률 ?? []} />
+        </>
+      )}
+
       <RapoSectionGap />
 
       {/* 07 지원 방법 */}
@@ -165,13 +173,6 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
 
         <RapoSectionGap />
         <RapoInstitution org={p.기관} 주소={p.주소} />
-
-        {(p.치료사 || (p.경쟁률?.length ?? 0) > 0) && (
-          <>
-            <RapoSectionGap />
-            <RapoHospitalFacts 치료사={p.치료사 ?? null} 경쟁률={p.경쟁률 ?? []} />
-          </>
-        )}
 
         {/* 이 병원 이야기 (원본 「이 병원 이야기 · 가로 후기」 983:22167) — 병원별 이야기·후기 기능이 아직 없어 빈 상태로 둡니다.
             지어낸 후기를 넣지 않습니다 (2026-11-12 밤 근무) */}
