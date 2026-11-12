@@ -5,7 +5,7 @@ import type { 경쟁률줄, 모집상태 } from '@/components/rapo/rapo-job-deta
 import { RapoJobDetailView, 못읽은칸말 } from '@/components/rapo/rapo-job-detail-view';
 import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말, 조교연구말,
   보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
-import { hospitalStat } from '@/lib/hospital';
+import type { HospitalStat } from '@/lib/hospital';
 import { jobViews } from '@/lib/job-views';
 import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
 import { siteUrl } from '@/lib/site-url';
@@ -75,6 +75,14 @@ const 경쟁률받기 = async (sb: SupabaseClient, id: string): Promise<경쟁�
   return data as 경쟁률줄[];
 };
 
+/* 이 병원 치료사 · 얼마나 바쁜 곳 — DB 공고병원숫자() 가 찾습니다 (2026-11-12 세중님).
+   기관 이름이 본사(「근로복지공단」)인 공고는 제목의 지점([인천병원])을 붙여 다시 찾습니다. 못 찾으면 null */
+const 병원숫자받기 = async (sb: SupabaseClient, id: string): Promise<HospitalStat | null> => {
+  const { data, error } = await sb.rpc('공고병원숫자', { p_공고: id }).maybeSingle();
+  if (error) return null;
+  return (data as unknown as HospitalStat | null) ?? null;
+};
+
 export const 마감못읽은말 = '마감일 공고문 확인';
 
 const 요일들 = ['일', '월', '화', '수', '목', '금', '토'];
@@ -136,7 +144,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     봄 ? 병원주소받기(sb, id) : Promise.resolve(null),
     member ? 비슷한공고(sb, j) : Promise.resolve([]),
     /* 치료사 인원 — 심평원 신고 인원. 이름으로 못 찾으면 null 이고 칸을 안 그립니다 (0 으로 안 채움) */
-    봄 ? hospitalStat(sb, j.org_name ?? '') : Promise.resolve(null),
+    봄 ? 병원숫자받기(sb, id) : Promise.resolve(null),
     봄 ? 경쟁률받기(sb, id) : Promise.resolve([]),
   ]);
   const 치료사 = 병원숫자 && (병원숫자.pt != null || 병원숫자.ot != null)
