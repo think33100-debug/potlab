@@ -14,7 +14,7 @@ import { useToast } from '@/app/toast';
 
    탭바(md 미만 62px) 위에 얹습니다. 둘 다 bottom-0 이면 탭바가 z-40 이라
    이 줄이 통째로 가려집니다 — 공고 상세에서 한 번 가려졌던 자리입니다. */
-export function OrgSave({ name, sido }: { name: string; sido: string | null }) {
+export function OrgSave({ name, sido, look = 'bar' }: { name: string; sido: string | null; look?: 'bar' | 'round' }) {
   const { loading, session } = useAuth();
   const router = useRouter();
   const [saved, setSaved] = useState(false);
@@ -84,6 +84,18 @@ export function OrgSave({ name, sido }: { name: string; sido: string | null }) {
         { tone: 'danger', ms: 4000 });
     }
     setBusy(false);
+  }
+
+  /* 병원 게시판(새 디자인 · 1312:7741) 머리의 책갈피 — 48 동그라미 하나. 저장만 합니다(원본에 알림 단추가 없음) */
+  if (look === 'round') {
+    return (
+      <button type="button" onClick={star} aria-pressed={saved}
+        className="flex size-[48px] shrink-0 items-center justify-center rounded-full bg-[#e8f1f6]
+                   transition-transform duration-[120ms] active:scale-[0.9] motion-reduce:transition-none">
+        <Icon name="bookmark" filled={saved} size={22} className={saved ? 'text-[#d8372b]' : 'text-[#112231]'} />
+        <span className="sr-only">{saved ? '관심 병원에서 빼기' : '관심 병원으로 저장'}</span>
+      </button>
+    );
   }
 
   return (

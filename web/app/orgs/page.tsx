@@ -1,11 +1,9 @@
-import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Hit } from '@/components/hit';
-import { OrgDetail } from '@/components/org-detail';
+import { RapoOrgBoard } from '@/components/rapo/rapo-org-board';
 import { OrgSearch } from '@/components/org-search';
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
-import { RapoAppBar } from '@/components/rapo/rapo-me';
 import { MembersOnly } from '@/components/members-only';
 import { orgPublic, ourNumbers, place, TILE_NAME, type OrgFacets } from '@/lib/org';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
@@ -20,7 +18,8 @@ export const dynamic = 'force-dynamic';
 
    ── 새 디자인 (2026-11-12) ──
    목록은 「병원 찾기」 1328:2689 의 어두운 판(자기 앱 바 · 어두운 하단 탐색) — components/org-search.tsx 머리.
-   기관 상세(?org=)는 아직 옛 내용이고, 새 틀이라 옛 위쪽 줄이 없어서 밝은 앱 바(뒤로 → 병원 찾기)만 얹었습니다. */
+   기관 상세(?org=)는 「병원 게시판」(1328:2695) 어두운 판입니다 — components/rapo/rapo-org-board.tsx 머리 (2026-11-12 세중님 「다 피그마 기준」).
+   전의 기관 정보 화면(components/org-detail.tsx)은 쓰지 않지만 지우지 않았습니다. */
 
 /* 원본 「RAPO / App Bar」 어두운 판 — #0d1d29 · 56 높이 · 뒤로 20 · 제목 18 Bold #f6f8fa */
 function 어두운앱바() {
@@ -74,17 +73,15 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
   const sido = typeof sp.sido === 'string' && sp.sido ? sp.sido : null;
 
   if (org) {
+    /* 병원 이름이 자료에 있는지만 봅니다(없으면 책갈피를 안 그리고 안내 한 줄). 회원만 읽히는 창구라 비회원은 문지기에서 이미 로그인으로 갑니다 */
+    const 있나 = !!(await orgPublic(await serverSupabase(), org, sido));
+    const 탭 = sp.tab === 'review' ? 'review' : 'talk';
     return (
-      <div data-rapo className="mx-auto w-full max-w-3xl bg-[#F4F4F1]">
-        <RapoAppBar title="병원 정보" back="/orgs" />
-        {/* 하단 고정 줄(50px) + 탭바(72px) 위로 올라오게 아래를 비웁니다 */}
-        <main className="mx-auto w-full max-w-2xl px-6 pt-4 pb-[152px] md:px-7 md:pb-[96px]">
-          <Hit kind="org" target={org} />
-          <Suspense fallback={<p className="text-[15px] text-[#5F666C]">불러오는 중이에요…</p>}>
-            <OrgDetail name={org} sido={sido} />
-          </Suspense>
-        </main>
-        <RapoBottomNav current="/" />
+      <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: '#112332' }}>
+        <Hit kind="org" target={org} />
+        <RapoOrgBoard name={org} sido={sido} 탭={탭} 있나={있나} />
+        <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
+        <RapoBottomNav current="/community" dark />
       </div>
     );
   }
