@@ -31,6 +31,8 @@ export const 원본메뉴: 메뉴[] = [
 
 export const 그밖도구: 메뉴[] = [
   { href: '/admin/beat', label: '수집기 상태' },
+  /* 숨긴 중복 짝 + 묶을 후보 (2026-11-12 세중님) */
+  { href: '/admin/dups', label: '중복 공고' },
   { href: '/admin/blanks', label: '빈칸 공고' },
   { href: '/admin/hand', label: '손으로 확인할 곳' },
   { href: '/admin/trash', label: '쓰레기통' },
