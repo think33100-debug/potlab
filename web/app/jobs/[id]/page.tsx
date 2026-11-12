@@ -177,6 +177,14 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     || (j.headcount != null ? `${j.headcount}명`
         : (뽑은값?.['모집인원'] ?? (detail['모집인원'] as string | undefined) ?? null)) || null;
 
+  /* 위 남색 판의 모집인원 칸 — 직군이 하나면 직군을 이름 줄로(「작업치료사 모집」), 값은 「1명」만 (11/12 세중님 「한 줄에」) */
+  const 한직군 = 직군인원
+    ? ([['물리치료사', 직군인원.물리치료사], ['작업치료사', 직군인원.작업치료사]] as const).filter(([, n]) => n)
+    : [];
+  const 식별인원 = 한직군.length === 1
+    ? { 인원: `${한직군[0][1]}명`, 인원이름: `${한직군[0][0]} 모집` }
+    : { 인원: 모집인원 || 못읽은칸말 };
+
   /* 날짜 */
   const 끝 = 날짜꼴(j.apply_to);
   const 시작 = 날짜꼴(j.apply_from);
@@ -208,7 +216,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       identity={{
         org: 기관, orgArt: 기관그림(j.org_name || j.id), 상태, title: j.title,
         tags: 태그(j.employ_type || '공고문 참고', 조교연구말(detail['조교연구']), j.is_intern && '체험형 인턴', j.job_group),
-        views: views[j.id] ?? null, 인원: 모집인원 || 못읽은칸말, 마감: 식별마감,
+        views: views[j.id] ?? null, ...식별인원, 마감: 식별마감,
       }}
       pay={{ 값: 연봉말(연봉원문), 덧말: 연봉덧말 }}
       지원자격={지원자격} url={병원?.주소 ?? (j.url || null)}
@@ -220,6 +228,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       지원주소={지원.주소}
       치료사={치료사} 바쁨={병원숫자} 경쟁률={경쟁률}
       인턴={!!j.is_intern || /인턴/.test(j.employ_type ?? '')}
+      마감알림={봄 && !closed && !!j.apply_to}
     />
   );
 }

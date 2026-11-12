@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { BANDS, busyWord, type HospitalStat } from '@/lib/hospital';
+import type { HospitalStat } from '@/lib/hospital';
 import { RapoMaskIcon } from './rapo-ui';
 
 /* 공고 상세 — 새 디자인 「U03 · 공고 상세」 조각들 (2026-11-11 대표: 피그마 우선, 없는 정보는 뺌).
@@ -46,9 +46,11 @@ export type 모집상태 = '접수 중' | '모집 마감' | '확인 필요';
 
 /* 02 공고 식별 — 남색 판. 기관 · 모집 상태 · 제목 · 태그 · 조회 · 모집인원과 접수 마감.
    원본의 기관 공식 로고·부서 줄은 자료가 없어 기관 기본 그림을 흰 상자에 둡니다(로고는 오픈 뒤 · 11/5) */
-export function RapoDetailIdentity({ org, orgArt, 상태, title, tags, views, 인원, 마감 }: {
+export function RapoDetailIdentity({ org, orgArt, 상태, title, tags, views, 인원, 인원이름, 마감 }: {
   org: string; orgArt: string; 상태: 모집상태; title: string; tags: string[];
   views: number | null; 인원: string; 마감: string;
+  /* 직군이 하나면 「작업치료사 모집 · 1명」처럼 직군을 이름 줄로 올립니다 — 값에 같이 쓰면 「1명」이 다음 줄로 떨어졌습니다 (11/12 세중님) */
+  인원이름?: string;
 }) {
   return (
     <section className="flex flex-col gap-(--rapo-dimension-x4) bg-(--rapo-color-bg-navy-solid) p-(--rapo-dimension-x5)
@@ -82,7 +84,7 @@ export function RapoDetailIdentity({ org, orgArt, 상태, title, tags, views, �
         )}
       </div>
       <dl className="grid grid-cols-2 gap-(--rapo-dimension-x3)">
-        <식별칸 icon="/rapo/detail/person-20.svg" iconW={17.8} iconH={19.8} label="모집인원" v={인원} />
+        <식별칸 icon="/rapo/detail/person-20.svg" iconW={17.8} iconH={19.8} label={인원이름 ?? '모집인원'} v={인원} />
         <식별칸 icon="/rapo/detail/calendar-20.svg" iconW={20} iconH={20} label="접수 마감" v={마감} />
       </dl>
     </section>
@@ -97,9 +99,9 @@ function 식별칸({ icon, iconW, iconH, label, v }: { icon: string; iconW: numb
         <RapoMaskIcon src={icon} w={iconW} h={iconH} />
       </span>
       <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
-        <dt className="rapo-type-t2-regular opacity-70">{label}</dt>
-        {/* 원본 20/28 Bold — 토큰 글꼴 가운데 같은 것이 t8 입니다 */}
-        <dd className="rapo-type-t8-bold break-keep [overflow-wrap:anywhere]">{v}</dd>
+        <dt className="rapo-type-t2-regular break-keep opacity-70">{label}</dt>
+        {/* 원본 20/28 Bold — 토큰 글꼴 가운데 같은 것이 t8 입니다. 긴 값(「물리치료사 3명 · 작업치료사 1명」)은 한 단계 작게 */}
+        <dd className={(v.length > 7 ? 'rapo-type-t5-bold' : 'rapo-type-t8-bold') + ' break-keep [overflow-wrap:anywhere]'}>{v}</dd>
       </div>
     </div>
   );
@@ -246,38 +248,8 @@ export type 경쟁률줄 = {
   평균: number | null; 가장낮음: number | null; 가장높음: number | null;
 };
 
-/* 얼마나 바쁜 곳인지 — 예전 웹 JobBusy(components/job-busy.tsx) 그대로의 계산(busyWord · 같은 종별끼리 4분위)을
-   새 디자인 꼴로 그립니다 (2026-11-12 세중님 「예전 웹에 있던 것 넣어」). 「치료사 1명당 병상」 숫자는 예전처럼 안 보입니다 */
-function 바쁨칸({ h }: { h: HospitalStat }) {
-  const w = busyWord(h);
-  return (
-    <div className="flex flex-col gap-(--rapo-dimension-x2)">
-      <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">얼마나 바쁜 곳인지</p>
-      <div className="flex flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
-        <div className="flex flex-col gap-(--rapo-dimension-x1)">
-          <p className="rapo-type-t12-bold break-keep" style={{ color: w.color }}>{w.label}</p>
-          <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{w.where}</p>
-        </div>
-        <div className="flex items-end gap-(--rapo-dimension-x2)">
-          {BANDS.map((b) => {
-            const on = b.key === h.band;
-            return (
-              <div key={b.key}
-                className={'flex flex-1 items-center justify-center rounded-(--rapo-radius-r2) '
-                  + (on ? 'rapo-type-t4-bold h-[48px] text-white' : 'rapo-type-t3-regular h-[36px] bg-(--rapo-color-bg-layer-default) text-(color:--rapo-color-fg-neutral-muted)')}
-                style={on ? { backgroundColor: w.color } : undefined}>
-                {b.label}
-              </div>
-            );
-          })}
-        </div>
-        <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">{w.head}</p>
-        <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{w.body}</p>
-      </div>
-    </div>
-  );
-}
-
+/* 「얼마나 바쁜 곳인지」는 일단 뺐습니다 (2026-11-12 저녁 세중님 「일단 빼자」). 계산은 lib/hospital.ts busyWord 에 그대로 있고,
+   그리던 조각은 이 파일의 11/12 낮 판(커밋 5fe1f19)에 있습니다 */
 export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false }: {
   치료사: { pt: number | null; ot: number | null; 기준: string | null } | null;
   바쁨?: HospitalStat | null;
@@ -292,7 +264,7 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
     ['병상', 바쁨.bed > 0 ? `${바쁨.bed.toLocaleString('ko-KR')}개` : null],
     ['재활의학과 의사', 바쁨.rehab != null && 바쁨.rehab > 0 ? `${바쁨.rehab.toLocaleString('ko-KR')}명` : null],
   ] as const).filter(([, v]) => v) : [];
-  if (!치료사 && !바쁨?.band && 경쟁률.length === 0 && 개요.length === 0) return null;
+  if (!치료사 && 경쟁률.length === 0 && 개요.length === 0) return null;
   const 배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })} : 1`);
   return (
     <RapoDetailSection title="병원 한눈에" sub="공개된 자료로 모은 숫자예요">
@@ -325,7 +297,6 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
           </p>
         </div>
       )}
-      {바쁨?.band && <바쁨칸 h={바쁨} />}
       {/* 이번 공고와 같은 고용형태 자료가 없으면 한 줄로 밝힙니다 (11/12 세중님 — 청년인턴 공고에 공무직·기간제만 보였음) */}
       {경쟁률.length > 0 && !경쟁률.some((g) => g.같은형태) && (
         <p className="rapo-type-t3-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x3) text-(color:--rapo-color-fg-neutral-muted)">

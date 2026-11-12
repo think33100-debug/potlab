@@ -6,6 +6,7 @@ import { useAuth } from '@/app/auth';
 import { Icon } from '@/components/icon';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '@/app/toast';
+import { 별바뀜 } from '@/components/job-deadline-notify';
 
 /* 공고 저장(찜). 저장한 것은 /me 의 「찜한 공고」에 모입니다.
 
@@ -28,6 +29,16 @@ export function JobSave({ id, big = false, look, 마감 = false }: {
     sb.from('job_stars').select('job_id').eq('job_id', id).maybeSingle()
       .then(({ data }) => setOn(!!data));
   }, [session, id]);
+
+  /* 공고 상세의 「마감 임박 시 알림받기」가 저장을 바꾸면 여기도 따라갑니다 (2026-11-12) */
+  useEffect(() => {
+    const h = (e: Event) => {
+      const d = (e as CustomEvent<{ id: string; on: boolean }>).detail;
+      if (d?.id === id) setOn(d.on);
+    };
+    window.addEventListener(별바뀜, h);
+    return () => window.removeEventListener(별바뀜, h);
+  }, [id]);
 
   async function toggle() {
     /* 확인 중이면 **아무것도 안 합니다.** /login 으로 보내면 안 됩니다 —
@@ -56,6 +67,8 @@ export function JobSave({ id, big = false, look, 마감 = false }: {
       setOn(!next);
       toast(`${next ? '저장' : '저장 취소'}하지 못했어요 — ${error.message}`,
         { tone: 'danger', ms: 4000 });
+    } else {
+      window.dispatchEvent(new CustomEvent(별바뀜, { detail: { id, on: next } }));
     }
     setBusy(false);
   }

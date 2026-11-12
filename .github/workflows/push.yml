@@ -38,7 +38,9 @@ jobs:
           node-version: '20'
 
       - name: 준비
-        run: npm install web-push --no-save
+        # ★ 2026-11-12 — 판을 못박습니다. 11/6 에 web-push 4.0.0 이 나오며 default export 가 없어져
+        #   (import webpush from 'web-push' 가 SyntaxError) **11/6 부터 알림이 한 번도 안 나갔습니다.**
+        run: npm install web-push@3.6.7 --no-save
 
       - name: 보내기
         env:
