@@ -1,0 +1,15 @@
+{
+ "name": "진안군의료원",
+ "type": "html",
+ "url": "https://www.jgmc.kr/content/index.sgk?gubun=recruit&dname=news",
+ "base": "https://www.jgmc.kr",
+ "row": "<TR onMouseOver[\\s\\S]*?<\\/TR>",
+ "title": "<a href=\"\\?gubun=recruit[^\"]*mode=view[^\"]*\">([\\s\\S]*?)<\\/a>",
+ "link": "mode=view&no=(\\d+)",
+ "linkFmt": "https://www.jgmc.kr/content/index.sgk?gubun=recruit&dname=news&mode=view&no={1}&board_id=2&board_skin=list",
+ "date": "class=\"cline\">(20\\d{2}-\\d{1,2}-\\d{1,2})<",
+ "skip": "합격자|발표|결과|채용종료|면접.*안내",
+ "single": "posted",
+ "천천히": "하루1",
+ "note": "진안군의료원(전북 진안 · 지방의료원 · 종별 병원) 의료원소식 > 채용정보. 2026-11-12 세중님 주소. 표: 번호·제목·(빈칸)·글쓴이·작성일·첨부·조회 — 줄은 <TR onMouseOver…>, 제목 링크는 ?gubun=recruit&dname=news&mode=view&no=N&board_id=2… 상대 경로라 no 만 잡아 linkFmt 로 조립. 날짜는 작성일 하나(올린 날). 맨 위 고정 글 「병동 간호사 수시채용 [1회차 채용종료]」는 skip. ★ robots.txt `User-agent: *` `Disallow: /content/` 인데 **세중님 2026-11-12 결정 「하루 1번으로 넣어」**로 켬 — robots 예외 갈래(현황판/robots예외.csv) · 하루 1번 · 첫 쪽만 · 첨부 대량 받기 없음 · 병원이 그만해 달라면 즉시 끔. 공고가 한 번도 안 들어와 기관 표에 줄이 없던 곳(11/12 밤 병원 연봉 작업 때 찾음)."
+}
