@@ -278,10 +278,12 @@ function 바쁨칸({ h }: { h: HospitalStat }) {
   );
 }
 
-export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률 }: {
+export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false }: {
   치료사: { pt: number | null; ot: number | null; 기준: string | null } | null;
   바쁨?: HospitalStat | null;
   경쟁률: 경쟁률줄[];
+  /* 이번 공고가 인턴인가 — 인턴 경쟁률은 공개되지 않은 곳이 많아 안내 글을 바꿉니다 (11/12 세중님) */
+  인턴?: boolean;
 }) {
   if (!치료사 && !바쁨?.band && 경쟁률.length === 0) return null;
   const 배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })} : 1`);
@@ -310,7 +312,9 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률 }: {
       {/* 이번 공고와 같은 고용형태 자료가 없으면 한 줄로 밝힙니다 (11/12 세중님 — 청년인턴 공고에 공무직·기간제만 보였음) */}
       {경쟁률.length > 0 && !경쟁률.some((g) => g.같은형태) && (
         <p className="rapo-type-t3-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x3) text-(color:--rapo-color-fg-neutral-muted)">
-          이번 공고와 같은 고용형태의 경쟁률 자료는 아직 없어요. 같은 병원의 다른 채용을 참고로 보여 드려요.
+          {인턴
+            ? '인턴 채용 경쟁률은 이 병원에서 공개하지 않았어요. 같은 병원의 다른 채용을 참고로 보여 드려요.'
+            : '이번 공고와 같은 고용형태의 경쟁률 자료는 아직 없어요. 같은 병원의 다른 채용을 참고로 보여 드려요.'}
         </p>
       )}
       {경쟁률.map((g) => (
