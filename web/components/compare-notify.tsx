@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { 표없음 } from '@/lib/beta';
-import { 비교알림동의, 비교창, 연락처꼴, 연봉구간 } from '@/lib/beta-compare';
+import { RapoButton } from '@/components/rapo/rapo-ui';
+import { 비교알림동의, 비교창, 연락처꼴, 연봉구간, 연봉물음 } from '@/lib/beta-compare';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { JOB_GROUPS, type JobGroup } from '@/lib/who';
 
@@ -54,7 +55,7 @@ export function CompareNotify({
   }, [userId]);
 
   const 신청 = async () => {
-    if (!연락처꼴(연락처)) { setErr('이메일이나 휴대전화번호를 적어 주세요'); return; }
+    if (!연락처꼴(연락처)) { setErr('이메일을 적어 주세요'); return; }
     if (!직군) { setErr('직군을 골라 주세요'); return; }
     if (!구간) { setErr('연봉 구간을 골라 주세요'); return; }
     setBusy(true); setErr(null);
@@ -73,62 +74,54 @@ export function CompareNotify({
     set단계('끝');
   };
 
-  const 단추 = 'w-full rounded-md px-4 py-5 text-btn font-bold active:scale-[0.98] disabled:opacity-40';
+  /* ── 그리기 — 새 디자인 꼴 (2026-11-12 저녁 세중님 「옛날 거 그대로 · 피그마 참고해서」).
+     피그마에 이 창 원본은 없어 가입 화면(U05)의 조각을 씁니다: 아래에서 올라오는 판 · navy/outline 단추(52) ·
+     brand-weak 고르기 카드 · 입력 칸(r3 · stroke-neutral-weak). 두 단추는 같은 크기(세중님) */
+  const 칸 = 'rapo-type-t5-regular h-(--rapo-dimension-x13) w-full rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) ' +
+    'border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) ' +
+    'placeholder:text-(color:--rapo-color-fg-placeholder)';
+  const 칸이름 = 'rapo-type-t4-bold block text-(color:--rapo-color-fg-neutral)';
   const 상세 = 비교알림동의;
 
   return (
     <div
+      data-rapo
       role="dialog"
       aria-modal="true"
       aria-labelledby="compare-notify-title"
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-black/40 p-4 md:items-center"
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-(--rapo-color-bg-overlay) md:items-center md:p-(--rapo-dimension-x4)"
     >
-      <div className="max-h-[90vh] w-full max-w-[26rem] overflow-y-auto rounded-sm bg-white p-6 shadow-lg dark:bg-gray-900">
+      <div className="max-h-[90dvh] w-full max-w-[26rem] overflow-y-auto rounded-t-(--rapo-radius-r5) bg-(--rapo-color-bg-layer-default)
+                      px-(--rapo-dimension-x5) pt-(--rapo-dimension-x6) pb-[calc(var(--rapo-dimension-x5)+env(safe-area-inset-bottom))] md:rounded-(--rapo-radius-r5)">
         {단계 === '묻기' && (
           <>
-            <h2 id="compare-notify-title" className="text-h3 font-bold break-keep">{비교창.제목}</h2>
-            <p className="mt-3 text-lg text-gray-700 break-keep dark:text-gray-300">{비교창.설명}</p>
-            <ul className="mt-4 space-y-2">
+            <p className="rapo-type-t3-bold text-(color:--rapo-color-fg-brand)">연봉·스펙 비교 · 준비 중</p>
+            <h2 id="compare-notify-title" className="rapo-type-t9-bold mt-(--rapo-dimension-x2) break-keep text-(color:--rapo-color-fg-neutral)">{비교창.제목}</h2>
+            <p className="rapo-type-t5-regular mt-(--rapo-dimension-x3) break-keep text-(color:--rapo-color-fg-neutral-muted)">{비교창.무엇}</p>
+            <p className="rapo-type-t5-regular mt-(--rapo-dimension-x1) break-keep text-(color:--rapo-color-fg-neutral-muted)">{비교창.설명}</p>
+            <ul className="mt-(--rapo-dimension-x4) flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x4)">
               {비교창.점.map((t) => (
-                <li key={t} className="flex gap-2 text-lg break-keep">
-                  <span aria-hidden className="font-bold text-teal-strong">✔</span>
+                <li key={t} className="rapo-type-t5-medium flex gap-(--rapo-dimension-x2) break-keep text-(color:--rapo-color-fg-neutral)">
+                  <span aria-hidden className="text-(color:--rapo-color-fg-brand)">✓</span>
                   <span>{t}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-sm text-mute break-keep">{비교창.안내}</p>
+            <p className="rapo-type-t3-regular mt-(--rapo-dimension-x3) break-keep text-(color:--rapo-color-fg-neutral-muted)">{비교창.안내}</p>
 
-            {/* 두 단추는 같은 크기입니다 (세중님) — 둘 다 grid 한 칸을 꽉 채웁니다 */}
-            <div className="mt-6 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => set단계('적기')}
-                className={단추 + ' bg-brand-red text-white hover:bg-brand-red-dark'}
-              >
-                {비교창.받기}
-              </button>
-              <button
-                type="button"
-                onClick={onDone}
-                className={단추 + ' border border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-950'}
-              >
-                {비교창.다음}
-              </button>
+            <div className="mt-(--rapo-dimension-x5) grid grid-cols-2 gap-(--rapo-dimension-x2)">
+              <RapoButton tone="outline" full onClick={onDone}>{비교창.다음}</RapoButton>
+              <RapoButton full onClick={() => set단계('적기')}>{비교창.받기}</RapoButton>
             </div>
 
-            <p className="mt-4 text-xs leading-relaxed text-mute break-keep">
+            <p className="rapo-type-t2-regular mt-(--rapo-dimension-x4) break-keep text-(color:--rapo-color-fg-neutral-subtle)">
               {비교창.작은글}{' '}
-              <button
-                type="button"
-                onClick={() => set자세히(!자세히)}
-                aria-expanded={자세히}
-                className="underline underline-offset-2"
-              >
-                자세히 보기 ›
+              <button type="button" onClick={() => set자세히(!자세히)} aria-expanded={자세히} className="underline underline-offset-2">
+                자세히 보기
               </button>
             </p>
             {자세히 && 상세 && (
-              <ul className="mt-2 space-y-1 rounded-xs bg-gray-50 p-3 text-xs text-mute dark:bg-gray-950">
+              <ul className="rapo-type-t2-regular mt-(--rapo-dimension-x2) flex flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x3) text-(color:--rapo-color-fg-neutral-muted)">
                 {상세.lines.map((l) => <li key={l} className="break-keep">{l}</li>)}
               </ul>
             )}
@@ -137,90 +130,54 @@ export function CompareNotify({
 
         {단계 === '적기' && (
           <>
-            <h2 id="compare-notify-title" className="text-h3 font-bold">알림 받을 곳을 적어 주세요</h2>
-            <p className="mt-2 text-sm text-mute break-keep">
-              서비스가 열릴 때 한 번 보내요. 이 밖의 일에는 쓰지 않아요.
+            <h2 id="compare-notify-title" className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">알림 받을 이메일을 적어 주세요</h2>
+            <p className="rapo-type-t4-regular mt-(--rapo-dimension-x2) break-keep text-(color:--rapo-color-fg-neutral-muted)">
+              서비스가 열릴 때 이메일로 한 번 보내요. 이 밖의 일에는 쓰지 않아요.
             </p>
 
-            <label className="mt-5 block text-sm font-bold text-mute" htmlFor="compare-contact">
-              연락처 (이메일 또는 휴대전화)
-            </label>
-            <input
-              id="compare-contact"
-              value={연락처}
+            <label className={칸이름 + ' mt-(--rapo-dimension-x5)'} htmlFor="compare-contact">이메일</label>
+            <input id="compare-contact" type="email" value={연락처}
               onChange={(e) => { set연락처(e.target.value); setErr(null); }}
-              inputMode="email"
-              autoComplete="email"
-              placeholder="example@email.com 또는 010-0000-0000"
-              className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-4 py-3 text-lg dark:border-gray-700 dark:bg-gray-950"
-            />
+              inputMode="email" autoComplete="email" placeholder="example@email.com"
+              className={칸 + ' mt-(--rapo-dimension-x2)'} />
 
-            <p className="mt-4 text-sm font-bold text-mute">직군</p>
-            <div className="mt-1 grid grid-cols-2 gap-2">
+            <p className={칸이름 + ' mt-(--rapo-dimension-x5)'}>직군</p>
+            <div className="mt-(--rapo-dimension-x2) grid grid-cols-2 gap-(--rapo-dimension-x2)">
               {JOB_GROUPS.map((g) => (
-                <button
-                  key={g}
-                  type="button"
-                  aria-pressed={직군 === g}
-                  onClick={() => { set직군(g); setErr(null); }}
-                  className={
-                    'rounded-sm border px-4 py-3 text-lg font-bold ' +
+                <button key={g} type="button" aria-pressed={직군 === g} onClick={() => { set직군(g); setErr(null); }}
+                  className={'rapo-type-t5-bold h-(--rapo-dimension-x13) rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) ' +
                     (직군 === g
-                      ? 'border-teal-strong bg-badge-teal-bg text-teal-strong'
-                      : 'border-gray-200 dark:border-gray-700')
-                  }
-                >
+                      ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak) text-(color:--rapo-color-fg-neutral)'
+                      : 'border-(color:--rapo-color-stroke-neutral-weak) text-(color:--rapo-color-fg-neutral-muted) active:bg-(--rapo-color-bg-transparent-pressed)')}>
                   {g}
                 </button>
               ))}
             </div>
 
-            <label className="mt-4 block text-sm font-bold text-mute" htmlFor="compare-band">
-              연봉 구간 (세전 · 대략)
-            </label>
-            <select
-              id="compare-band"
-              value={구간}
-              onChange={(e) => { set구간(e.target.value); setErr(null); }}
-              className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-4 py-3 text-lg dark:border-gray-700 dark:bg-gray-950"
-            >
-              <option value="">골라 주세요</option>
+            {/* 2026-11-12 저녁 세중님 문구 — 「연봉 구간」 대신 묻는 말로 */}
+            <label className={칸이름 + ' mt-(--rapo-dimension-x5) break-keep'} htmlFor="compare-band">{연봉물음.제목}</label>
+            <p className="rapo-type-t3-regular mt-(--rapo-dimension-x1) text-(color:--rapo-color-fg-brand)">{연봉물음.덧말}</p>
+            <select id="compare-band" value={구간} onChange={(e) => { set구간(e.target.value); setErr(null); }}
+              className={칸 + ' mt-(--rapo-dimension-x2)'}>
+              <option value="">세전 · 대략 골라 주세요</option>
               {연봉구간.map((b) => <option key={b} value={b}>{b}</option>)}
             </select>
 
-            {err && <p className="mt-3 text-lg text-brand-red">{err}</p>}
+            {err && <p role="alert" className="rapo-type-t4-medium mt-(--rapo-dimension-x3) text-(color:--rapo-color-fg-critical)">{err}</p>}
 
-            <div className="mt-6 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={신청}
-                className={단추 + ' bg-brand-red text-white hover:bg-brand-red-dark'}
-              >
-                {busy ? '저장하는 중…' : '신청하기'}
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={onDone}
-                className={단추 + ' border border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-950'}
-              >
-                {비교창.다음}
-              </button>
+            <div className="mt-(--rapo-dimension-x6) grid grid-cols-2 gap-(--rapo-dimension-x2)">
+              <RapoButton tone="outline" full disabled={busy} onClick={onDone}>{비교창.다음}</RapoButton>
+              <RapoButton full loading={busy} onClick={신청}>신청하기</RapoButton>
             </div>
           </>
         )}
 
         {단계 === '끝' && (
           <>
-            <h2 id="compare-notify-title" className="text-h3 font-bold break-keep">{끝말}</h2>
-            <button
-              type="button"
-              onClick={onDone}
-              className={단추 + ' mt-6 bg-brand-red text-white hover:bg-brand-red-dark'}
-            >
-              가입 이어서 하기
-            </button>
+            <h2 id="compare-notify-title" className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">{끝말}</h2>
+            <div className="mt-(--rapo-dimension-x6)">
+              <RapoButton full onClick={onDone}>가입 이어서 하기</RapoButton>
+            </div>
           </>
         )}
       </div>

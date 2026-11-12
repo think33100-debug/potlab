@@ -13,7 +13,7 @@ import {
 import { annualTotal, hourlyWage, man10, monthlyHours } from '@/lib/pay';
 import { progress } from '@/lib/progress';
 import { RATE_YEAR, grossFromNet, netFromGross, 만원 } from '@/lib/tax';
-import { FIELD_HINT, PRIVACY_LINE, UNLOCKS } from '@/lib/unlocks';
+import { FIELD_HINT, PRIVACY_LINE } from '@/lib/unlocks';
 import type { Role } from '@/lib/who';
 
 /* 가입 마지막 — 급여·스펙을 받습니다. 건너뛰기는 없습니다.
@@ -41,8 +41,8 @@ const loadDraft = (uid: string): Form => {
    밝은 바탕에서는 연한 teal 을 깔고, 어두운 바탕에서는 테두리만 씁니다 —
    어두운 화면에 연한 덩어리가 있으면 그 줄만 튀어 보입니다 */
 const PANEL =
-  'rounded-sm p-6 text-lg text-teal-strong bg-badge-teal-bg '
-  + 'dark:bg-transparent dark:border dark:border-teal-strong/40';
+  'rounded-(--rapo-radius-r3) p-6 rapo-type-t5-regular text-(color:--rapo-color-fg-brand) bg-(--rapo-color-bg-brand-weak) '
+  + '';
 
 /* 빈 칸은 0 이 아니라 '안 적음' 입니다. 0 으로 넣으면 평균이 내려갑니다 */
 const num = (v: string | undefined) => (v && v.trim() !== '' ? Number(v) : null);
@@ -129,32 +129,8 @@ export function SignupSurvey({
 
   /* ── 화면 목록 ── */
   const steps: { title: string; sub?: string; ok?: boolean; body: React.ReactNode }[] = [
-    /* 고칠 때는 「채우면 열려요」 안내를 안 보여줍니다. 이미 채우신 분입니다 */
-    ...(edit ? [] : [{
-      title: '무엇이 열리나요',
-      sub: '여기까지 채우면 아래가 열려요',
-      body: (
-        <div>
-          <ul className="mt-6 space-y-1">
-            {UNLOCKS.map((u) => (
-              <li key={u.title} className="flex gap-5 rounded-sm border border-gray-100 px-6 py-5 dark:border-gray-800">
-                <span aria-hidden className="text-h3">{u.emoji}</span>
-                <span className="min-w-0">
-                  <b className="block text-lg">
-                    {u.title}
-                    {u.soon && <span className="ml-2 rounded-xs bg-gray-50 px-2 py-1 text-sm font-medium text-mute dark:bg-gray-950">준비 중</span>}
-                  </b>
-                  <span className="mt-1 block text-sm text-mute">{u.desc}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className={'mt-6 ' + PANEL}>{PRIVACY_LINE}</p>
-          <p className="mt-2 text-sm text-mute">병원 이름은 받지 않아요</p>
-        </div>
-      ),
-    }]),
-
+    /* 첫 장(「무엇이 열리나요」 → 「내 급여, 어느 정도일까요?」)은 가입 화면(/welcome 5단계)으로 옮겼습니다 —
+       2026-11-12 저녁 세중님 「급여는 선택」. 그 화면에서 「직접 입력하기」를 누르면 여기로 옵니다 */
     ...(stu ? [
       {
         title: '학교', ok: has('grade') && has('school_type'),
@@ -215,9 +191,9 @@ export function SignupSurvey({
             {/* 빨간 바탕을 안 씁니다 — teamsparta.md 「입력 오류에 빨강 배경을
                 사용하지 않는다. 보더·헬퍼 텍스트로 전달한다」 */}
             {flag && (
-              <p className="mt-2 rounded-sm border border-brand-red/40 p-5 text-lg text-brand-red">
+              <p className="mt-2 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-critical-weak) p-5 rapo-type-t5-regular text-(color:--rapo-color-fg-critical)">
                 <b className="block">{flag.t}</b>
-                <span className="mt-1 block text-sm text-mute">{flag.d}</span>
+                <span className="mt-1 block rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{flag.d}</span>
               </p>
             )}
             <Num k="extra_pay_monthly" label="추가 수당" req unit="만원 / 월" ph="0"
@@ -310,8 +286,8 @@ export function SignupSurvey({
             <>
               <Num k="hired_year" label="첫 입사연도" hint="치료사로 처음 일 시작한 해" v={f.hired_year} on={set} unit="년" ph="2021" req f={f} />
               <Num k="current_hired_year" label="지금 병원 입사연도" hint="첫 직장이면 위와 같게" v={f.current_hired_year} on={set} unit="년" ph="2024" req f={f} />
-              <p className="mt-6 text-sm font-bold text-mute">이전 근무지 (선택 · 최대 5개)</p>
-              <p className="mt-1 text-sm text-mute">없으시면 비워 두고 넘어가실 수 있어요</p>
+              <p className="mt-6 rapo-type-t3-bold text-(color:--rapo-color-fg-neutral-muted)">이전 근무지 (선택 · 최대 5개)</p>
+              <p className="mt-1 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">없으시면 비워 두고 넘어가실 수 있어요</p>
             </>
           )}
           <Rows rows={rows} none={stu ? '실습 없음' : '경력 없음'}
@@ -421,30 +397,30 @@ export function SignupSurvey({
   if (phase === 'confirm') {
     return (
       <section>
-        <h1 className="text-h2 font-bold">{edit ? '이대로 고칠까요?' : '등록하시겠어요?'}</h1>
-        <p className="mt-2 text-lg text-mute">
+        <h1 className="rapo-type-t11-bold">{edit ? '이대로 고칠까요?' : '등록하시겠어요?'}</h1>
+        <p className="mt-2 rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">
           적어 주신 내용을 이대로 {edit ? '저장해요' : '등록해요'}. 고칠 게 있으면 돌아가서 바꿀 수 있어요
         </p>
 
         <p className={'mt-6 '
           + (edit && editsLeft === 1
-            ? 'rounded-sm border border-brand-red/40 p-6 text-lg text-brand-red'
+            ? 'rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-critical-weak) p-6 rapo-type-t5-regular text-(color:--rapo-color-fg-critical)'
             : PANEL)}>
           {edit
             ? <>지금 저장하면 올해 <b>{Math.max(0, (editsLeft ?? 2) - 1)}번</b> 남아요</>
             : <>등록하고 나면 <b>내 정보에서 1년에 2번</b> 고칠 수 있어요</>}
         </p>
-        {!stu && <p className="mt-5 text-sm text-mute">{PRIVACY_LINE}</p>}
+        {!stu && <p className="mt-5 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{PRIVACY_LINE}</p>}
 
-        {err && <p className="mt-5 text-lg text-brand-red">{err}</p>}
+        {err && <p className="mt-5 rapo-type-t5-regular text-(color:--rapo-color-fg-critical)">{err}</p>}
 
         <div className="mt-7 flex gap-2">
           <button type="button" onClick={() => { setPhase('form'); setErr(null); }} disabled={busy}
-            className="w-[96px] shrink-0 rounded-md border border-gray-200 py-5 text-lg font-medium disabled:opacity-40 dark:border-gray-700">
+            className="w-[96px] shrink-0 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak) py-5 rapo-type-t5-medium disabled:opacity-40">
             돌아가기
           </button>
           <button type="button" onClick={finish} disabled={busy}
-            className="flex-1 rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-40">
+            className="flex-1 rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-navy-solid) px-6 py-5 rapo-type-t6-bold text-(color:--rapo-color-fg-on-navy-solid) disabled:opacity-40">
             {busy ? '저장하는 중…' : edit ? '이대로 저장할래요' : '등록할래요'}
           </button>
         </div>
@@ -455,22 +431,22 @@ export function SignupSurvey({
   if (phase === 'done') {
     return (
       <section className="py-8 text-center">
-        <p aria-hidden className="text-h1">🌱</p>
-        <h1 className="mt-6 text-h2 font-bold">
+        <p aria-hidden className="rapo-type-t13-bold">🌱</p>
+        <h1 className="mt-6 rapo-type-t11-bold">
           {edit ? '고쳤어요' : '등록해주셔서 고마워요'}
         </h1>
-        <p className="mt-5 text-body-lg leading-relaxed text-mute">
+        <p className="mt-5 rapo-type-t5-regular leading-relaxed text-(color:--rapo-color-fg-neutral-muted)">
           {edit
             ? '바꾸신 내용으로 저장했어요'
             : <>치료사들의 더 나은 미래를 위해<br />힘을 보태주셨어요</>}
         </p>
-        <p className="mt-7 rounded-sm bg-gray-50 p-6 text-lg text-mute dark:bg-gray-950">
+        <p className="mt-7 rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-6 rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">
           {edit
             ? <>올해 <b>{Math.max(0, (editsLeft ?? 2) - 1)}번</b> 더 고칠 수 있어요</>
             : <>적어 주신 내용은 <b>내 정보에서 1년에 2번</b> 고칠 수 있어요</>}
         </p>
         <button type="button" onClick={() => onDone()}
-          className="mt-7 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
+          className="mt-7 w-full rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-navy-solid) px-6 py-5 rapo-type-t6-bold text-(color:--rapo-color-fg-on-navy-solid)">
           {edit ? '내 정보로 돌아가기' : '시작하기'}
         </button>
       </section>
@@ -481,31 +457,31 @@ export function SignupSurvey({
     <section>
       {/* 진행 막대 — 몇 칸 남았는지 안 보이면 중간에 나갑니다 */}
       <div className="flex items-center gap-5">
-        <div className="h-1 flex-1 rounded-md bg-gray-100 dark:bg-gray-800">
-          <div className="h-1 rounded-md bg-teal-strong transition-[width]"
+        <div className="h-1 flex-1 rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak)">
+          <div className="h-1 rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-navy-solid) transition-[width]"
                style={{ width: `${(at / (steps.length - 1)) * 100}%` }} />
         </div>
-        <span className="shrink-0 text-sm text-mute">{at + 1} / {steps.length}</span>
+        <span className="shrink-0 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{at + 1} / {steps.length}</span>
       </div>
 
       {/* 숫자만 있으면 밋밋합니다. 한 줄 붙이고 남은 시간도 알려줍니다 —
           끝이 안 보이면 중간에 나갑니다 (lib/progress.ts) */}
-      <p className="mt-2 flex flex-wrap items-baseline gap-3 text-sm">
-        <span className="font-bold text-teal-strong">{step.msg}</span>
-        {step.left && <span className="text-mute">{step.left}</span>}
+      <p className="mt-2 flex flex-wrap items-baseline gap-3 rapo-type-t3-regular">
+        <span className=" text-(color:--rapo-color-fg-brand)">{step.msg}</span>
+        {step.left && <span className="text-(color:--rapo-color-fg-neutral-muted)">{step.left}</span>}
       </p>
 
-      <h1 className="mt-5 text-h2 font-bold">{cur.title}</h1>
-      {cur.sub && <p className="mt-2 text-lg text-mute">{cur.sub}</p>}
+      <h1 className="mt-5 rapo-type-t11-bold">{cur.title}</h1>
+      {cur.sub && <p className="mt-2 rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">{cur.sub}</p>}
 
       <div className="mt-6">{cur.body}</div>
 
-      {err && <p className="mt-5 text-lg text-brand-red">{err}</p>}
+      {err && <p className="mt-5 rapo-type-t5-regular text-(color:--rapo-color-fg-critical)">{err}</p>}
 
       <div className="mt-7 flex gap-2">
         {at > 0 && (
           <button type="button" onClick={() => go(at - 1)} disabled={busy}
-            className="w-[96px] shrink-0 rounded-md border border-gray-200 py-5 text-lg font-medium disabled:opacity-40 dark:border-gray-700">
+            className="w-[96px] shrink-0 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak) py-5 rapo-type-t5-medium disabled:opacity-40">
             이전
           </button>
         )}
@@ -513,13 +489,13 @@ export function SignupSurvey({
           type="button"
           disabled={busy || blocked}
           onClick={() => (last ? setPhase('confirm') : go(at + 1))}
-          className="flex-1 rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex-1 rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-navy-solid) px-6 py-5 rapo-type-t6-bold text-(color:--rapo-color-fg-on-navy-solid) disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {blocked ? '위 칸을 채워 주세요' : last ? '다 됐어요' : at === 0 ? '채우러 가기' : '다음'}
+          {blocked ? '위 칸을 채워 주세요' : last ? '다 됐어요' : '다음'}
         </button>
       </div>
 
-      {at > 0 && !stu && <p className="mt-5 text-sm text-mute">{PRIVACY_LINE}</p>}
+      {at > 0 && !stu && <p className="mt-5 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{PRIVACY_LINE}</p>}
     </section>
   );
 }
@@ -532,12 +508,12 @@ function Label({ label, hint, req, k }: { label: string; hint?: string; req?: bo
   const why = k ? FIELD_HINT[k] : undefined;
   return (
     <>
-      <span className="block text-lg font-bold">
+      <span className="block rapo-type-t5-bold">
         {label}
-        {req && <span className="ml-1 text-brand-red">*</span>}
+        {req && <span className="ml-1 text-(color:--rapo-color-fg-critical)">*</span>}
       </span>
-      {hint && <span className="mt-1 block text-sm text-mute">{hint}</span>}
-      {why && <span className="mt-1 block text-sm text-teal-strong">{why}</span>}
+      {hint && <span className="mt-1 block rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{hint}</span>}
+      {why && <span className="mt-1 block rapo-type-t3-regular text-(color:--rapo-color-fg-brand)">{why}</span>}
     </>
   );
 }
@@ -545,19 +521,19 @@ function Label({ label, hint, req, k }: { label: string; hint?: string; req?: bo
 /* 모든 칸이 같은 자리에서 끝나야 합니다.
    단위(만원·년)를 칸 밖에 두면 그 줄만 짧아져서 네모가 제각각으로 보입니다 —
    그래서 테두리는 바깥 상자가 갖고, 단위는 그 안에 넣습니다 */
-const SKIN = 'rounded-xs border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-950';
+const SKIN = 'rounded-(--rapo-radius-r2) border border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-neutral-weak)';
 /* 단위가 붙는 칸 — 테두리는 이 상자가 갖습니다.
    폭은 INPUT 과 같은 이유로 여기서 안 정합니다 */
-const BOX = `flex items-center ${SKIN} focus-within:outline-[3px] focus-within:outline-focus-ring focus-within:outline-offset-2`;
-const BARE = 'min-w-0 flex-1 bg-transparent px-5 py-4 text-lg outline-none';
+const BOX = `flex items-center ${SKIN} focus-within:outline-[3px] focus-within:outline-(--rapo-color-stroke-focus-ring) focus-within:outline-offset-2`;
+const BARE = 'min-w-0 flex-1 bg-transparent px-5 py-4 rapo-type-t5-regular outline-none';
 /* 틀린 칸은 테두리 색으로 알립니다 — teamsparta.md 는 오류에 빨강 배경을 금합니다 */
-const BOX_BAD = BOX.replace('border-gray-200', 'border-brand-red').replace('dark:border-gray-700', 'dark:border-brand-red');
+const BOX_BAD = BOX.replace('border-(color:--rapo-color-stroke-neutral-weak)', 'border-(color:--rapo-color-stroke-critical-solid)').replace('', '');
 /* 단위가 없는 칸 (고르는 칸·여러 줄).
    폭은 여기서 안 정합니다 — w-full 을 넣어두면 줄 안에서 w-[88px] 과 부딪혀
    어느 쪽이 이길지 클래스 적는 순서로는 안 정해집니다. 쓰는 자리에서 정합니다 */
-const INPUT = `block ${SKIN} px-5 py-4 text-lg`;
+const INPUT = `block ${SKIN} px-5 py-4 rapo-type-t5-regular`;
 /* 고르는 칸도 틀리면 테두리 색으로 알립니다 (BOX_BAD 와 같은 규칙) */
-const INPUT_BAD = INPUT.replace('border-gray-200', 'border-brand-red').replace('dark:border-gray-700', 'dark:border-brand-red');
+const INPUT_BAD = INPUT.replace('border-(color:--rapo-color-stroke-neutral-weak)', 'border-(color:--rapo-color-stroke-critical-solid)').replace('', '');
 
 function Num({
   k, label, hint, v, on, unit, ph, step, req, f, noWhy,
@@ -581,10 +557,10 @@ function Num({
         <input type="number" inputMode="decimal" step={step} value={v ?? ''} placeholder={ph}
           min={r?.min} max={max} aria-invalid={err ? true : undefined}
           onChange={(e) => on(k, e.target.value)} className={BARE} />
-        {unit && <span className="shrink-0 pr-5 text-lg text-mute">{unit}</span>}
+        {unit && <span className="shrink-0 pr-5 rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">{unit}</span>}
       </span>
       {/* 무엇이 틀렸는지 그 자리에서 적습니다 — 「다음」이 안 눌리는 이유가 보여야 합니다 */}
-      {err && <span className="mt-1 block text-sm text-brand-red">{err}</span>}
+      {err && <span className="mt-1 block rapo-type-t3-regular text-(color:--rapo-color-fg-critical)">{err}</span>}
     </label>
   );
 }
@@ -638,9 +614,9 @@ function Two({
       <div className="mt-2 grid grid-cols-2 gap-2">
         {([['Y', yes], ['N', no]] as const).map(([val, text]) => (
           <button key={val} type="button" onClick={() => on(k, val)} aria-pressed={v === val}
-            className={'rounded-md border py-5 text-lg font-medium transition-colors '
-              + (v === val ? 'border-teal-strong bg-teal-strong text-white'
-                           : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-400')}>
+            className={'rounded-(--rapo-radius-r3) border py-5 rapo-type-t5-medium transition-colors '
+              + (v === val ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-navy-solid) text-(color:--rapo-color-fg-on-navy-solid)'
+                           : 'border-(color:--rapo-color-stroke-neutral-weak) text-(color:--rapo-color-fg-neutral-muted)')}>
             {text}
           </button>
         ))}
@@ -664,20 +640,20 @@ function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
 
   return (
     <div className="mt-6">
-      <p className="text-lg font-bold">어학</p>
-      <p className="mt-1 text-lg text-mute">어학 점수가 있으면 넣어주세요. 없어도 괜찮아요</p>
+      <p className="rapo-type-t5-bold">어학</p>
+      <p className="mt-1 rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">어학 점수가 있으면 넣어주세요. 없어도 괜찮아요</p>
 
       {rows.map((r, i) => {
         const used = taken(i);
         const spec = EXAMS.find((x) => x.name === r.exam);
         const bad = langError(r);
         return (
-          <div key={i} className="mt-5 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
+          <div key={i} className="mt-5 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak) p-5">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-mute">{i + 1}번째</span>
+              <span className="rapo-type-t3-bold text-(color:--rapo-color-fg-neutral-muted)">{i + 1}번째</span>
               <button type="button" aria-label={`${i + 1}번째 어학 지우기`}
                 onClick={() => on(rows.filter((_, j) => j !== i))}
-                className="rounded-md px-4 py-1 text-sm text-mute hover:bg-gray-50 dark:hover:bg-gray-950">
+                className="rounded-(--rapo-radius-r3) px-4 py-1 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted) hover:bg-(--rapo-color-bg-neutral-weak)">
                 지우기
               </button>
             </div>
@@ -690,9 +666,9 @@ function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
                 return (
                   <button key={x.name} type="button" disabled={off} aria-pressed={on_}
                     onClick={() => edit(i, { exam: x.name, score: '', level: '' })}
-                    className={'rounded-sm border px-3 py-4 text-lg font-medium transition-colors '
-                      + (on_ ? 'border-teal-strong bg-badge-teal-bg text-teal-strong dark:bg-transparent'
-                             : 'border-gray-200 disabled:opacity-30 dark:border-gray-700')}>
+                    className={'rounded-(--rapo-radius-r3) border px-3 py-4 rapo-type-t5-medium transition-colors '
+                      + (on_ ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak) text-(color:--rapo-color-fg-brand)'
+                             : 'border-(color:--rapo-color-stroke-neutral-weak) disabled:opacity-30')}>
                     {x.name}
                   </button>
                 );
@@ -711,18 +687,18 @@ function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
                 <input type="number" inputMode="numeric" aria-label={`${r.exam} 점수`}
                   value={r.score} min={0} max={spec?.max} placeholder={spec?.ph}
                   onChange={(e) => edit(i, { score: e.target.value })} className={BARE} />
-                <span className="shrink-0 pr-5 text-lg text-mute">점</span>
+                <span className="shrink-0 pr-5 rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">점</span>
               </span>
             ) : null}
 
-            {bad && <p className="mt-2 text-sm text-brand-red">{bad}</p>}
+            {bad && <p className="mt-2 rapo-type-t3-regular text-(color:--rapo-color-fg-critical)">{bad}</p>}
           </div>
         );
       })}
 
       {rows.length < LANG_MAX && (
         <button type="button" onClick={() => on([...rows, emptyLang()])}
-          className="mt-5 w-full rounded-md border border-dashed border-gray-300 px-6 py-5 text-lg font-medium text-mute dark:border-gray-600">
+          className="mt-5 w-full rounded-(--rapo-radius-r3) border border-dashed border-(color:--rapo-color-stroke-neutral-weak) px-6 py-5 rapo-type-t5-medium text-(color:--rapo-color-fg-neutral-muted)">
           + 어학 추가
         </button>
       )}
@@ -750,35 +726,35 @@ function LangBands() {
 
   return (
     <div className="mt-2">
-      <p className="text-sm text-mute">
+      <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
         점수 기준은 RAPO 자체 기준이에요.
         시험끼리 환산한 게 아니라 각 시험이 발표한 등급을 그대로 따랐어요
       </p>
       <button type="button" onClick={() => setOpen(!open)}
-        className="mt-1 text-sm text-teal-strong underline">
+        className="mt-1 rapo-type-t3-regular text-(color:--rapo-color-fg-brand) underline">
         {open ? '기준표 접기' : '기준표 보기'}
       </button>
 
       {open && (
-        <div className="mt-2 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
-          {bands === null ? <p className="text-sm text-mute">불러오는 중…</p> : (
+        <div className="mt-2 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak) p-5">
+          {bands === null ? <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">불러오는 중…</p> : (
             <>
               {EXAMS.map((e) => {
                 const rows = byExam[e.name] ?? [];
                 if (rows.length === 0) return null;
                 return (
                   <div key={e.name} className="mt-5 first:mt-0">
-                    <p className="text-sm font-bold">{e.name}</p>
+                    <p className="rapo-type-t3-bold">{e.name}</p>
                     <dl className="mt-1 space-y-1">
                       {rows.map((b, i) => (
                         /* flex-wrap 을 쓰면 설명이 길 때 줄 전체가 아래로 떨어져
                            점수와 내용이 따로 놉니다. 옆에 붙인 채로 안에서 접히게 둡니다 */
-                        <div key={i} className="flex items-baseline gap-3 text-sm">
-                          <dt className="w-[52px] shrink-0 font-medium text-teal-strong">{b.points}점</dt>
+                        <div key={i} className="flex items-baseline gap-3 rapo-type-t3-regular">
+                          <dt className="w-[52px] shrink-0  text-(color:--rapo-color-fg-brand)">{b.points}점</dt>
                           <dd className="min-w-0">
                             {b.levels ? b.levels.join(' · ')
                               : b.min_score != null ? `${b.min_score}점 이상` : '그 아래'}
-                            <span className="ml-2 text-mute">{b.source}</span>
+                            <span className="ml-2 text-(color:--rapo-color-fg-neutral-muted)">{b.source}</span>
                           </dd>
                         </div>
                       ))}
@@ -786,7 +762,7 @@ function LangBands() {
                   </div>
                 );
               })}
-              <p className="mt-6 text-sm text-mute">
+              <p className="mt-6 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
                 여러 개 넣으면 그중 제일 높은 점수 하나만 써요. 더하지 않아요.
                 어학을 넣으면 어떤 점수든 최소 2점이에요
               </p>
@@ -800,8 +776,8 @@ function LangBands() {
 
 function Tick({ on }: { on: boolean }) {
   return (
-    <span aria-hidden className={'flex size-[22px] shrink-0 items-center justify-center rounded-xs border text-white '
-      + (on ? 'border-teal-strong bg-teal-strong' : 'border-gray-300 dark:border-gray-600')}>
+    <span aria-hidden className={'flex size-[22px] shrink-0 items-center justify-center rounded-(--rapo-radius-r2) border text-(color:--rapo-color-fg-on-navy-solid) '
+      + (on ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-navy-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
       {on ? '✓' : ''}
     </span>
   );
@@ -816,7 +792,7 @@ function Area({
       <Label label={label} hint={hint} k={k} />
       <textarea rows={4} maxLength={300} value={v ?? ''} placeholder={ph}
         onChange={(e) => on(k, e.target.value)} className={INPUT + ' mt-2 w-full'} />
-      <span className="mt-1 block text-right text-sm text-mute">{n} / 300</span>
+      <span className="mt-1 block text-right rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{n} / 300</span>
     </label>
   );
 }
@@ -846,19 +822,19 @@ function Chips({
         {groups.map((g) => g.s.length === 0 ? (
           <Chip key={g.n} on={picked.includes(g.n)} go={() => toggle(g.n)}>{g.n}</Chip>
         ) : (
-          <details key={g.n} className="group rounded-sm border border-gray-200 dark:border-gray-700">
+          <details key={g.n} className="group rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak)">
             {/* summary 를 flex 로 두면 브라우저가 그리던 삼각형이 사라집니다.
                 열고 닫을 수 있다는 표시가 없으면 아무도 안 눌러서 직접 답니다 */}
-            <summary className="flex cursor-pointer list-none items-center gap-3 px-6 py-4 text-lg font-medium">
+            <summary className="flex cursor-pointer list-none items-center gap-3 px-6 py-4 rapo-type-t5-medium">
               {/* 개수 대신 체크 표시 — 몇 개인지보다 골랐는지가 먼저 보여야 합니다 */}
               {picked.some((p) => p.startsWith(g.n + ' - ')) && (
                 <span aria-label="고름"
-                  className="flex size-[20px] shrink-0 items-center justify-center rounded-md bg-teal-strong text-sm text-white">
+                  className="flex size-[20px] shrink-0 items-center justify-center rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-navy-solid) rapo-type-t3-regular text-(color:--rapo-color-fg-on-navy-solid)">
                   ✓
                 </span>
               )}
               {g.n}
-              <span aria-hidden className="ml-auto shrink-0 text-lg text-mute transition-transform group-open:rotate-90">
+              <span aria-hidden className="ml-auto shrink-0 rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted) transition-transform group-open:rotate-90">
                 ›
               </span>
             </summary>
@@ -890,7 +866,7 @@ function Chips({
           }} />
         <button type="button"
           onClick={() => { const v = etc.trim(); if (v && !picked.includes(v)) toggle(v); setEtc(''); }}
-          className="shrink-0 rounded-md border border-gray-200 px-6 py-4 text-lg font-medium dark:border-gray-700">
+          className="shrink-0 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak) px-6 py-4 rapo-type-t5-medium">
           추가
         </button>
       </div>
@@ -898,10 +874,10 @@ function Chips({
       {/* 제일 아래 — 없으면 없다고 찍어야 넘어갑니다 */}
       <button type="button" aria-pressed={noneOn}
         onClick={() => on(noneOn ? [] : [NONE])}
-        className={'mt-5 flex w-full items-center gap-5 rounded-sm border px-6 py-5 text-left transition-colors '
-          + (noneOn ? 'border-teal-strong bg-badge-teal-bg' : 'border-gray-200 dark:border-gray-700')}>
+        className={'mt-5 flex w-full items-center gap-5 rounded-(--rapo-radius-r3) border px-6 py-5 text-left transition-colors '
+          + (noneOn ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
         <Tick on={noneOn} />
-        <span className="text-lg font-medium">{none}</span>
+        <span className="rapo-type-t5-medium">{none}</span>
       </button>
     </div>
   );
@@ -910,9 +886,9 @@ function Chips({
 function Chip({ on, go, children }: { on: boolean; go: () => void; children: React.ReactNode }) {
   return (
     <button type="button" onClick={go} aria-pressed={on}
-      className={'rounded-md border px-5 py-3 text-lg transition-colors '
-        + (on ? 'border-teal-strong bg-teal-strong text-white'
-              : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-400')}>
+      className={'rounded-(--rapo-radius-r3) border px-5 py-3 rapo-type-t5-regular transition-colors '
+        + (on ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-navy-solid) text-(color:--rapo-color-fg-on-navy-solid)'
+              : 'border-(color:--rapo-color-stroke-neutral-weak) text-(color:--rapo-color-fg-neutral-muted)')}>
       {children}
     </button>
   );
@@ -922,7 +898,7 @@ function Chip({ on, go, children }: { on: boolean; go: () => void; children: Rea
 /* 비어있는 칸 옆에 붙는 한 줄. 빨간 바탕을 안 씁니다 —
    teamsparta.md 「입력 오류에 빨강 배경을 사용하지 않는다」 */
 function 비었어요({ children }: { children: React.ReactNode }) {
-  return <p className="mt-1 text-sm text-brand-red">{children}</p>;
+  return <p className="mt-1 rapo-type-t3-regular text-(color:--rapo-color-fg-critical)">{children}</p>;
 }
 
 function Rows({
@@ -946,12 +922,12 @@ function Rows({
           return (
           /* min-w-0 이 없으면 고르는 칸이 제 글자 길이만큼 버텨서
              줄 전체가 오른쪽으로 삐져나갑니다 */
-          <div key={i} className="mt-5 rounded-sm border border-gray-100 p-5 first:mt-0 dark:border-gray-800">
+          <div key={i} className="mt-5 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak) p-5 first:mt-0">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-mute">{i + 1}번째</span>
+              <span className="rapo-type-t3-bold text-(color:--rapo-color-fg-neutral-muted)">{i + 1}번째</span>
               <button type="button" aria-label={`${i + 1}번째 줄 지우기`}
                 onClick={() => on(rows.filter((_, j) => j !== i))}
-                className="rounded-md px-4 py-1 text-sm text-mute hover:bg-gray-50 dark:hover:bg-gray-950">
+                className="rounded-(--rapo-radius-r3) px-4 py-1 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted) hover:bg-(--rapo-color-bg-neutral-weak)">
                 지우기
               </button>
             </div>
@@ -972,7 +948,7 @@ function Rows({
                 <input type="number" inputMode="numeric" placeholder="개월" value={r.months}
                   min={RANGE.months.min} max={RANGE.months.max}
                   onChange={(e) => edit(i, { months: e.target.value })} className={BARE} />
-                <span className="shrink-0 pr-5 text-lg text-mute">개월</span>
+                <span className="shrink-0 pr-5 rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">개월</span>
               </span>
             </div>
             {(칸빈(r.region) || 칸빈(r.months)) && (
@@ -987,7 +963,7 @@ function Rows({
 
         <button type="button" disabled={rows.length >= MAX_ROWS || noneOn}
           onClick={() => on([...rows, { hospital: '', region: '', months: '' }])}
-          className="mt-5 w-full rounded-md border border-dashed border-gray-300 px-6 py-5 text-lg font-medium text-mute disabled:opacity-40 dark:border-gray-600">
+          className="mt-5 w-full rounded-(--rapo-radius-r3) border border-dashed border-(color:--rapo-color-stroke-neutral-weak) px-6 py-5 rapo-type-t5-medium text-(color:--rapo-color-fg-neutral-muted) disabled:opacity-40">
           {rows.length >= MAX_ROWS ? '최대 5개까지 넣을 수 있어요' : '+ 한 줄 추가'}
         </button>
       </div>
@@ -995,10 +971,10 @@ function Rows({
       {/* 제일 아래 — 없으면 없다고 찍어야 넘어갑니다 */}
       <button type="button" aria-pressed={noneOn}
         onClick={() => { setNone(!noneOn); if (!noneOn) on([]); }}
-        className={'mt-5 flex w-full items-center gap-5 rounded-sm border px-6 py-5 text-left transition-colors '
-          + (noneOn ? 'border-teal-strong bg-badge-teal-bg' : 'border-gray-200 dark:border-gray-700')}>
+        className={'mt-5 flex w-full items-center gap-5 rounded-(--rapo-radius-r3) border px-6 py-5 text-left transition-colors '
+          + (noneOn ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
         <Tick on={noneOn} />
-        <span className="text-lg font-medium">{none}</span>
+        <span className="rapo-type-t5-medium">{none}</span>
       </button>
     </div>
   );
@@ -1009,9 +985,9 @@ function Rows({
 /* 라벨 줄 수가 달라 칸이 좌우로 어긋나던 것을 묶음으로 감싸 줄을 맞춥니다 */
 function Group({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="mt-6 rounded-sm border border-gray-100 p-5 first:mt-0 dark:border-gray-800">
-      <p className="text-lg font-bold">{title}</p>
-      {hint && <p className="mt-1 text-sm text-mute">{hint}</p>}
+    <div className="mt-6 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak) p-5 first:mt-0">
+      <p className="rapo-type-t5-bold">{title}</p>
+      {hint && <p className="mt-1 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{hint}</p>}
       <div className="mt-2 grid grid-cols-3 gap-2 [&>label]:mt-0">{children}</div>
     </div>
   );
@@ -1037,35 +1013,35 @@ function Gross({ f, patch }: { f: Form; patch: (p: Form) => void }) {
       <Num k="base_monthly" label="고정 월급" req unit="만원" ph="250"
         hint="근로계약서에 적힌 기본급이에요. 수당·상여는 빼고요"
         v={f.base_monthly} on={(k, v) => patch({ [k]: v, pay_basis: 'gross' })} f={f} />
-      <p className="mt-1 text-sm text-mute">세전 — 세금·4대보험 떼기 전 금액이에요</p>
+      <p className="mt-1 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">세전 — 세금·4대보험 떼기 전 금액이에요</p>
 
       <button type="button" aria-pressed={unsure}
         onClick={() => patch(unsure
           ? { pay_unsure: '', net_monthly: '', dependents: '', pay_basis: 'gross' }
           : { pay_unsure: 'Y' })}
-        className={'mt-5 flex w-full items-center gap-5 rounded-sm border px-6 py-5 text-left transition-colors '
-          + (unsure ? 'border-teal-strong bg-badge-teal-bg dark:border-teal-strong/40 dark:bg-transparent'
-                    : 'border-gray-200 dark:border-gray-700')}>
+        className={'mt-5 flex w-full items-center gap-5 rounded-(--rapo-radius-r3) border px-6 py-5 text-left transition-colors '
+          + (unsure ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak)'
+                    : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
         <Tick on={unsure} />
-        <span className="text-lg font-medium">세전을 모르겠어요</span>
+        <span className="rapo-type-t5-medium">세전을 모르겠어요</span>
       </button>
 
       {unsure && put && (
         <div className={'mt-5 ' + PANEL}>
           세전 월급 <b>{f.base_monthly}만원</b>으로 넣었어요
-          <span className="mt-1 block text-sm">
+          <span className="mt-1 block rapo-type-t3-regular">
             세후 {f.net_monthly}만원 · 부양가족 {f.dependents}명에서 계산한 값이에요.
             위 고정 월급 칸에서 고치셔도 돼요
           </span>
           <button type="button" onClick={() => patch({ pay_basis: 'gross' })}
-            className="mt-5 rounded-md border border-teal-strong px-6 py-4 text-lg font-medium text-teal-strong">
+            className="mt-5 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-fg-brand-contrast) px-6 py-4 rapo-type-t5-medium text-(color:--rapo-color-fg-brand)">
             다시 계산할래요
           </button>
         </div>
       )}
 
       {unsure && !put && (
-        <div className="mt-5 rounded-sm border border-gray-100 p-5 dark:border-gray-800">
+        <div className="mt-5 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak) p-5">
           <Num k="net_monthly" label="세후(실수령) 월급" req unit="만원" ph="220"
             hint="통장에 들어오는 금액이에요"
             v={f.net_monthly} on={(k, v) => patch({ [k]: v })} f={f} />
@@ -1077,16 +1053,16 @@ function Gross({ f, patch }: { f: Form; patch: (p: Form) => void }) {
             <>
               <p className={'mt-6 ' + PANEL}>
                 세전 약 <b>{guess}만원</b>으로 보여요
-                <span className="mt-1 block text-sm">
+                <span className="mt-1 block rapo-type-t3-regular">
                   {RATE_YEAR}년 4대보험 요율과 국세청 세율로 계산했어요. 소득세는 간이세액표라 대략이에요
                 </span>
               </p>
               <button type="button"
                 onClick={() => patch({ base_monthly: String(guess), pay_basis: 'estimated' })}
-                className="mt-5 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
+                className="mt-5 w-full rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-navy-solid) px-6 py-5 rapo-type-t6-bold text-(color:--rapo-color-fg-on-navy-solid)">
                 이 값으로 넣을게요
               </button>
-              <p className="mt-2 text-sm text-mute">넣고 나서 위 고정 월급 칸에서 고치셔도 돼요</p>
+              <p className="mt-2 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">넣고 나서 위 고정 월급 칸에서 고치셔도 돼요</p>
             </>
           )}
         </div>
@@ -1113,16 +1089,16 @@ function PaySummary({ f }: { f: Form }) {
   const hour = hourlyWage(p);
 
   return (
-    <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-      <p className="text-sm font-bold text-mute">적어 주신 걸로 계산하면</p>
-      <p className="mt-2 text-h1 font-bold">연 {man10(year)}</p>
-      <dl className="mt-5 space-y-2 text-lg">
+    <section className="mt-7 rounded-(--rapo-radius-r3) border border-(color:--rapo-color-stroke-neutral-weak) p-6">
+      <p className="rapo-type-t3-bold text-(color:--rapo-color-fg-neutral-muted)">적어 주신 걸로 계산하면</p>
+      <p className="mt-2 rapo-type-t12-bold">연 {man10(year)}</p>
+      <dl className="mt-5 space-y-2 rapo-type-t5-regular">
         <Line k="월 평균" v={`약 ${month}만원`} />
         <Line k="1인 가구 실수령" v={`약 ${net}만원`} />
         <Line k="시급" v={`약 ${hour.toLocaleString('ko-KR')}원`}
           note={`실제 일하는 ${monthlyHours(p)}시간 기준 · 당직·주말 포함`} />
       </dl>
-      <p className="mt-5 text-sm text-mute">
+      <p className="mt-5 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
         다르면 위 칸을 고쳐 주세요. {RATE_YEAR}년 요율 기준이고 소득세는 대략이에요
       </p>
     </section>
@@ -1132,10 +1108,10 @@ function PaySummary({ f }: { f: Form }) {
 function Line({ k, v, note }: { k: string; v: string; note?: string }) {
   return (
     <div className="flex items-baseline justify-between gap-5">
-      <dt className="shrink-0 text-mute">{k}</dt>
+      <dt className="shrink-0 text-(color:--rapo-color-fg-neutral-muted)">{k}</dt>
       <dd className="text-right">
         <b>{v}</b>
-        {note && <span className="mt-1 block text-sm text-mute">{note}</span>}
+        {note && <span className="mt-1 block rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{note}</span>}
       </dd>
     </div>
   );
