@@ -13,7 +13,7 @@ import {
 import { annualTotal, hourlyWage, man10, monthlyHours } from '@/lib/pay';
 import { progress } from '@/lib/progress';
 import { RATE_YEAR, grossFromNet, netFromGross, 만원 } from '@/lib/tax';
-import { FIELD_HINT, PRIVACY_LINE, UNLOCKS } from '@/lib/unlocks';
+import { FIELD_HINT, PRIVACY_LINE } from '@/lib/unlocks';
 import type { Role } from '@/lib/who';
 
 /* 가입 마지막 — 급여·스펙을 받습니다. 건너뛰기는 없습니다.
@@ -129,47 +129,8 @@ export function SignupSurvey({
 
   /* ── 화면 목록 ── */
   const steps: { title: string; sub?: string; ok?: boolean; body: React.ReactNode }[] = [
-    /* 고칠 때는 「채우면 열려요」 안내를 안 보여줍니다. 이미 채우신 분입니다 */
-    /* 2026-11-12 저녁 세중님 「무엇이 열리나요 — 옛날 거 그대로 · 피그마 참고해서」.
-       원본 U05-05 「급여 선택」(1245:3886)의 머리 — 제목 · 짙은 카드(비슷한 조건에서 내 위치 · 가상 예시) — 를 옮기고,
-       열리는 것은 짧은 줄로 둡니다. 묻는 칸·저장은 그대로입니다 */
-    ...(edit ? [] : [{
-      title: '내 급여, 어느 정도일까요?',
-      sub: '급여를 입력하면 내 위치와 다른 근무 조건의 급여 차이를 확인할 수 있어요',
-      body: (
-        <div>
-          <div className="rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-navy-solid) p-(--rapo-dimension-x5)">
-            <p className="rapo-type-t4-medium text-(color:--rapo-color-fg-on-navy-solid) opacity-80">비슷한 조건에서 내 위치</p>
-            <p className="rapo-type-t13-bold mt-(--rapo-dimension-x2) text-(color:--rapo-color-fg-on-navy-solid)">상위 ○○%</p>
-            <div aria-hidden className="mt-(--rapo-dimension-x4) flex h-[64px] items-end gap-(--rapo-dimension-x1_5)">
-              {[22, 38, 52, 60, 64, 58, 46, 30, 20].map((h, k) => (
-                <span key={k} style={{ height: `${h}px` }}
-                  className={'flex-1 rounded-t-(--rapo-radius-r1) ' + (k === 6 ? 'bg-(--rapo-color-bg-identity)' : 'bg-(--rapo-color-fg-on-navy-solid) opacity-25')} />
-              ))}
-            </div>
-            <p className="rapo-type-t3-regular mt-(--rapo-dimension-x3) text-(color:--rapo-color-fg-on-navy-solid) opacity-70">같은 직군·연차·병원 유형 기준 · 화면은 예시예요</p>
-          </div>
-          <p className="rapo-type-t6-bold mt-(--rapo-dimension-x6) text-(color:--rapo-color-fg-neutral)">채우면 이런 걸 볼 수 있어요</p>
-          <ul className="mt-(--rapo-dimension-x3) flex flex-col gap-(--rapo-dimension-x2)">
-            {UNLOCKS.map((u) => (
-              <li key={u.title} className="flex items-start gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x4) py-(--rapo-dimension-x3)">
-                <span aria-hidden className="rapo-type-t6-regular">{u.emoji}</span>
-                <span className="min-w-0">
-                  <span className="rapo-type-t5-bold flex flex-wrap items-center gap-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral)">
-                    {u.title}
-                    {u.soon && <span className="rapo-type-t2-medium rounded-(--rapo-radius-r1) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x1_5) py-[2px] text-(color:--rapo-color-fg-neutral-muted)">준비 중</span>}
-                  </span>
-                  <span className="rapo-type-t3-regular mt-(--rapo-dimension-x1) block break-keep text-(color:--rapo-color-fg-neutral-muted)">{u.desc}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className={'mt-6 ' + PANEL}>{PRIVACY_LINE}</p>
-          <p className="mt-2 rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">병원 이름은 받지 않아요</p>
-        </div>
-      ),
-    }]),
-
+    /* 첫 장(「무엇이 열리나요」 → 「내 급여, 어느 정도일까요?」)은 가입 화면(/welcome 5단계)으로 옮겼습니다 —
+       2026-11-12 저녁 세중님 「급여는 선택」. 그 화면에서 「직접 입력하기」를 누르면 여기로 옵니다 */
     ...(stu ? [
       {
         title: '학교', ok: has('grade') && has('school_type'),
@@ -530,7 +491,7 @@ export function SignupSurvey({
           onClick={() => (last ? setPhase('confirm') : go(at + 1))}
           className="flex-1 rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-navy-solid) px-6 py-5 rapo-type-t6-bold text-(color:--rapo-color-fg-on-navy-solid) disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {blocked ? '위 칸을 채워 주세요' : last ? '다 됐어요' : at === 0 ? '채우러 가기' : '다음'}
+          {blocked ? '위 칸을 채워 주세요' : last ? '다 됐어요' : '다음'}
         </button>
       </div>
 

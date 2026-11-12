@@ -43,6 +43,8 @@ export default function Welcome() {
   const [betaErr, setBetaErr] = useState<string | null>(null);
   /* 「가입하기」 뒤 비교 알림 창 — 비교알림켜짐 이 false 면 한 번도 안 뜹니다 (lib/beta-compare.ts) */
   const [compareOpen, setCompareOpen] = useState(false);
+  /* ⑤ 급여 정보 (선택) — 안내(피그마 U05-05)에서 「직접 입력하기」를 누르면 true (2026-11-12 저녁 세중님 「급여는 선택」) */
+  const [급여입력, set급여입력] = useState(false);
 
   /* 아무것도 안 고르셨으면 기본 아바타. 상태로 안 두고 계산합니다 —
      effect 안에서 setState 하면 그릴 때마다 한 번 더 그립니다 */
@@ -181,8 +183,27 @@ export default function Welcome() {
     await reload();
     setBusy(false);
     setStep(4);
-    /* 「가입하기」 뒤 비교 알림 창 (lib/beta-compare.ts) */
-    if (비교알림켜짐) setCompareOpen(true);
+    /* 「가입하기」 뒤에 바로 뜨던 비교 알림 창은 뺐습니다 — 5단계 「연봉 비교 알림 받기」와 겹칩니다
+       (2026-11-12 저녁 세중님 「혹시나 중복된다면 여기서는 빼기」) */
+  };
+
+  /* ⑤ 끝 — 급여를 넣었든(save_my_survey 가 survey_at 을 찍음) 나중으로 미뤘든(가입마치기 · 금고 SQL_1113/Q) 여기로 옵니다.
+     공유 링크를 보고 들어오신 분은 그 공고로 돌려보냅니다. 홈으로 떨어뜨리면 뭘 보러 왔는지 잊고 그냥 나갑니다 */
+  const 가입끝 = async () => {
+    await reload();
+    let back: string | null = null;
+    try {
+      back = peekAfterLogin();
+      clearAfterLogin();
+    } catch { /* 사생활 보호 창 */ }
+    router.push(back || '/');
+  };
+  const 나중에입력 = async () => {
+    setBusy(true);
+    const { error } = await browserSupabase().rpc('가입마치기');
+    setBusy(false);
+    if (error) { toast(`가입을 마치지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
+    await 가입끝();
   };
 
   /* ② 직군·역할 — 둘 다 필수입니다.
@@ -211,13 +232,13 @@ export default function Welcome() {
      앱 바(뒤로 · 회원가입) · 진행 막대(이름 + n / 5) · 큰 제목 두 줄 · 본문 · 아래 고정 단추(navy).
      ★ 단계·저장·동의 문구는 그대로입니다 — 모양만 바꿨습니다.
      원본의 「근무 경험」·「학력」·「자격」·「희망 조건」 단계는 저장할 곳이 달라 아직 없습니다(밤 근무 보고에 적음) */
-  const 단계이름 = ['이용 동의', '내 정보', '닉네임', '프로필 사진', '급여·스펙'];
+  const 단계이름 = ['이용 동의', '내 정보', '닉네임', '프로필 사진', '급여 정보 (선택)'];
   const 제목 = [
     <>이용약관을 확인하고<br />라포를 시작해요</>,
     <>직군과 역할을<br />알려주세요</>,
     <>닉네임을<br />정해 주세요</>,
     <>프로필 사진을<br />골라 주세요</>,
-    null,
+    급여입력 ? null : <>내 급여,<br />어느 정도일까요?</>,
   ][step - 1];
   const 다시하기 = async () => {
     await browserSupabase().auth.signOut({ scope: 'local' });
@@ -226,6 +247,7 @@ export default function Welcome() {
   };
   const 뒤로 = () => {
     if (step === 2) { setStep(1); return; }
+    if (step === 5 && 급여입력) { set급여입력(false); return; }
     /* 가입 도중에 막히면 나갈 길이 있어야 합니다 — 로그인 화면에서 다른 수단으로 다시 들어올 수 있습니다 */
     if (step === 1 || confirm('처음부터 다시 할까요? 로그인 화면으로 돌아가요.')) void 다시하기();
   };
@@ -301,12 +323,9 @@ export default function Welcome() {
               </div>
             ))}
 
-            {/* 안내 상자 — 테스트 기간 안내(2026-11-11 밤 문구 그대로) + 원본의 선택 항목 안내 */}
-            <div className="rapo-type-t4-regular rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
-              <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">RAPO 는 지금 테스트 중이에요</p>
-              <p className="mt-(--rapo-dimension-x1)">가입하시면 모든 화면을 볼 수 있어요</p>
-              <p className="mt-(--rapo-dimension-x2)">선택 항목에 동의하지 않아도 가입할 수 있어요.</p>
-            </div>
+            {/* 「RAPO 는 지금 테스트 중이에요」 상자는 뺐습니다 (2026-11-12 세중님 「회원가입 할 땐 아래 있는 건 빼줘」 —
+                같은 안내는 홈 팝업으로 갑니다 · PR #101). 원본 U05-01 의 선택 항목 안내 한 줄만 남깁니다 */}
+            <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">선택 항목에 동의하지 않아도 가입할 수 있어요.</p>
             {betaErr && <p role="alert" className="rapo-type-t4-medium text-(color:--rapo-color-fg-brand-contrast)">{betaErr}</p>}
           </section>
         )}
@@ -346,24 +365,50 @@ export default function Welcome() {
           </section>
         )}
 
-        {step === 5 && (
+        {/* ⑤ 급여 정보 (선택) — 원본 U05-05 「급여 선택 · 하단」 1245:3935 (2026-11-12 저녁 세중님 「급여는 선택 ·
+            1분 안에 갖고 오기는 우리 알림 받기로 대체」). 짙은 예시 카드 · 근무 조건 도움말 · navy 단추(→ 연봉 비교 알림 창) ·
+            「직접 입력하기」 행(→ 급여·스펙 입력) · 「나중에 입력하고 가입 완료」 */}
+        {step === 5 && !급여입력 && (
+          <section className="mt-(--rapo-dimension-x2) flex flex-col gap-(--rapo-dimension-x5)">
+            <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">급여를 입력하면 내 위치와 다른 근무 조건의 급여 차이를 확인할 수 있어요.</p>
+            <div className="flex flex-col gap-(--rapo-dimension-x4) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-navy-solid) p-(--rapo-dimension-x6)">
+              <p className="rapo-type-t5-medium text-(color:--rapo-color-fg-on-navy-solid)">비슷한 조건에서 내 위치</p>
+              <p className="rapo-type-t13-bold text-(color:--rapo-color-fg-on-navy-solid)">상위 23%</p>
+              <div aria-hidden className="flex h-[65px] items-end gap-[6px]">
+                {[20, 37, 52, 62, 65, 62, 52, 37, 20].map((h, k) => (
+                  <span key={k} style={{ height: `${h}px` }}
+                    className={'flex-1 rounded-(--rapo-radius-r1) ' + (k === 6 ? 'bg-(--rapo-color-bg-identity)' : 'bg-(--rapo-color-fg-on-navy-solid) opacity-30')} />
+                ))}
+              </div>
+              <p className="rapo-type-t2-regular text-(color:--rapo-color-fg-on-navy-solid) opacity-70">같은 조건 47명 기준 / 가상 예시</p>
+            </div>
+            <p className="rapo-type-t8-bold text-(color:--rapo-color-fg-neutral)">근무 조건이 달라지면?</p>
+            <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
+              지역과 기관 유형에 따른 급여 차이도 비교할 수 있어요. 실제 이직 시 받을 급여를 뜻하지 않아요.
+            </p>
+            {비교알림켜짐 && <RapoButton full onClick={() => setCompareOpen(true)}>연봉 비교 알림 받기</RapoButton>}
+            <button type="button" onClick={() => set급여입력(true)}
+              className="flex items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-left active:bg-(--rapo-color-bg-neutral-weak-pressed)">
+              <span className="rapo-type-t5-medium min-w-0 flex-1 break-keep text-(color:--rapo-color-fg-neutral)">지금 내 급여 직접 입력하기</span>
+              <span aria-hidden className="rapo-type-t8-regular text-(color:--rapo-color-fg-neutral)">›</span>
+            </button>
+            <button type="button" onClick={나중에입력} disabled={busy}
+              className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral) underline underline-offset-4 disabled:opacity-40">
+              {busy ? '가입을 마치는 중…' : '나중에 입력하고 가입 완료'}
+            </button>
+            <p className="rapo-type-t4-regular -mt-(--rapo-dimension-x3) break-keep text-(color:--rapo-color-fg-neutral-muted)">
+              급여는 선택 항목이에요. 나중에 내 정보 → 스펙 확인·수정에서 입력할 수 있어요.
+            </p>
+          </section>
+        )}
+        {step === 5 && 급여입력 && (
           <div className="mt-(--rapo-dimension-x6)">
             <SignupSurvey
               userId={session.user.id}
               job={job ?? me?.job_group ?? '작업치료사'}
               role={(role ?? me?.role ?? '현직') as Role}
-              onDone={async () => {
-                /* survey_at 은 save_my_survey 가 이미 찍었습니다. 여기선 다시 읽기만 합니다 */
-                await reload();
-                /* 공유 링크를 보고 들어오신 분은 그 공고로 돌려보냅니다.
-                   홈으로 떨어뜨리면 뭘 보러 왔는지 잊고 그냥 나갑니다 */
-                let back: string | null = null;
-                try {
-                  back = peekAfterLogin();
-                  clearAfterLogin();
-                } catch { /* 사생활 보호 창 */ }
-                router.push(back || '/');
-              }}
+              /* survey_at 은 save_my_survey 가 이미 찍었습니다 */
+              onDone={가입끝}
             />
           </div>
         )}
