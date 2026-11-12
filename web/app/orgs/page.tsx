@@ -6,7 +6,7 @@ import { OrgSearch } from '@/components/org-search';
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
 import { MembersOnly } from '@/components/members-only';
 import { orgJobs, orgPublic, ourNumbers, place, TILE_NAME, type OrgFacets } from '@/lib/org';
-import { hospitalStat, type HospitalStat } from '@/lib/hospital';
+import { hospitalStat, type HospitalStat, type 시설숫자 } from '@/lib/hospital';
 import { RapoHospitalFacts, type 경쟁률줄, type 병원보수 } from '@/components/rapo/rapo-job-detail';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 
@@ -42,7 +42,46 @@ function 어두운앱바() {
      이 기관 공고가 있으면  그 공고 하나로 공고병원숫자 · 공고병원보수 · 공고경쟁률요약 (공고 상세와 글자까지 같은 값)
      공고가 없으면          org_hospital_by_name(이름) — 심평원 구분·병상·재활의학과 전문의·치료사만 (연봉·경쟁률·시설은 공고로만 찾습니다)
    숫자가 하나도 없으면 null — 탭은 「아직 모은 정보가 없어요」를 그립니다 */
-async function 병원정보받기(sb: Awaited<ReturnType<typeof serverSupabase>>, name: string) {
+/* 공고가 없는 복지관·치매센터 — 기관 이름으로 인원 표를 바로 읽습니다 (2026-11-13 세중님 「복지관이랑 치매센터 인원정보는 안 뜨네?」).
+   공고 쪽(DB 공고시설찾기)과 같은 표·같은 칸이고, 화면 글은 공고 상세와 같은 조각(시설보임)이 만듭니다.
+     장애인복지관  welfare_centers — 원래 누구나 읽힘 · 종사자 전체 수와 순위·정원
+     치매센터      dementia_centers — 회원에게 인원 칸만 열었습니다 (금고 SQL_1113/Y · 운영자 칸은 막힘)
+   ★ 종합사회복지관(welfare_facilities)은 인원 자료가 **없습니다** — 그래서 「아직 모은 정보가 없어요」가 맞습니다.
+   이름이 같은 곳이 둘 이상이면 시도로 가리고, 그래도 둘이면 안 그립니다(엉뚱한 곳 숫자를 안 붙이게). */
+async function 시설숫자받기(sb: Awaited<ReturnType<typeof serverSupabase>>, name: string, sido: string | null): Promise<시설숫자 | null> {
+  const 하나 = <T extends { sido?: string | null }>(줄: T[] | null): T | null => {
+    const 후보 = (줄 ?? []).filter((x) => !sido || !x.sido || x.sido.startsWith(sido) || sido.startsWith(x.sido));
+    return 후보.length === 1 ? 후보[0] : null;
+  };
+  const { data: 복지 } = await sb.from('welfare_centers').select('name, sido, staff_now, staff_quota').eq('name', name);
+  const w = 하나(복지 as { name: string; sido: string | null; staff_now: number | null; staff_quota: number | null }[] | null);
+  if (w && w.staff_now != null) {
+    /* 순위는 공고 쪽과 같은 셈 — 종사자가 더 많은 곳 수 + 1 */
+    const { data: 모두 } = await sb.from('welfare_centers').select('sido, staff_now').not('staff_now', 'is', null).limit(2000);
+    const 줄 = (모두 ?? []) as { sido: string | null; staff_now: number }[];
+    const 시도줄 = 줄.filter((y) => y.sido === w.sido);
+    return {
+      갈래: '복지관', 이름: w.name, 종사자: w.staff_now, 정원: w.staff_quota, 시도: w.sido,
+      전국순위: 줄.filter((y) => y.staff_now > w.staff_now!).length + 1, 전국곳수: 줄.length,
+      시도순위: 시도줄.filter((y) => y.staff_now > w.staff_now!).length + 1, 시도곳수: 시도줄.length,
+      출처: '보건복지부 장애인복지관 현황 2024년 4월',
+    };
+  }
+  const { data: 치매 } = await sb.from('dementia_centers').select('name, kind, doctors, nurses, social_workers, others').eq('name', name);
+  const 치매줄 = (치매 ?? []) as { name: string; kind: string | null; doctors: number | null; nurses: number | null; social_workers: number | null; others: string | null }[];
+  const d = 치매줄.length === 1 ? 치매줄[0] : null;
+  if (d) {
+    /* 「그밖」 글에서 작업·물리치료사 수 — 공고 쪽 정규식과 같은 꼴 (예: 작업치료사(1)+보건직(1)) */
+    const 수 = (말: string) => { const m = (d.others ?? '').match(new RegExp(말 + String.raw`\s*\(?\s*([0-9]+)`)); return m ? Number(m[1]) : null; };
+    return {
+      갈래: '치매센터', 이름: d.name, 종류: d.kind, 의사: d.doctors, 간호사: d.nurses, 사회복지사: d.social_workers,
+      ot: 수('작업치료사'), pt: 수('물리치료사'), 출처: '전국치매센터표준데이터',
+    };
+  }
+  return null;
+}
+
+async function 병원정보받기(sb: Awaited<ReturnType<typeof serverSupabase>>, name: string, sido: string | null) {
   const 공고 = (await orgJobs(sb, name))[0]?.id ?? null;
   const [숫자, 보수, 경쟁률] = 공고
     ? await Promise.all([
@@ -53,9 +92,10 @@ async function 병원정보받기(sb: Awaited<ReturnType<typeof serverSupabase>>
     : [await hospitalStat(sb, name), null, [] as 경쟁률줄[]];
   /* 공고로 못 찾은 병원 숫자는 이름으로 한 번 더 */
   const 병원숫자 = 숫자 ?? (공고 ? await hospitalStat(sb, name) : null);
-  const 시설 = 병원숫자?.시설 ?? null;
+  /* 병원으로도 공고로도 못 찾았으면 복지관·치매센터 표를 이름으로 */
+  const 시설 = 병원숫자?.시설 ?? (병원숫자 ? null : await 시설숫자받기(sb, name, sido));
   const 치료사 = 병원숫자 && !시설 && (병원숫자.pt != null || 병원숫자.ot != null)
-    ? { pt: 병원숫자.pt, ot: 병원숫자.ot, 기준: 병원숫자.data_version?.replace(/^심평원s*/, '') ?? null } : null;
+    ? { pt: 병원숫자.pt, ot: 병원숫자.ot, 기준: 병원숫자.data_version?.replace(/^심평원\s*/, '') ?? null } : null;
   return RapoHospitalFacts({ 치료사, 바쁨: 시설 ? null : 병원숫자, 시설, 경쟁률, 보수, 공고없이: true });
 }
 
@@ -102,7 +142,7 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
     const 있나 = !!(await orgPublic(sb, org, sido));
     /* 처음 열면 「병원 정보」 (2026-11-13 세중님) */
     const 탭 = sp.tab === 'review' ? 'review' : sp.tab === 'talk' ? 'talk' : 'info';
-    const 정보 = 탭 === 'info' && 있나 ? await 병원정보받기(sb, org) : null;
+    const 정보 = 탭 === 'info' && 있나 ? await 병원정보받기(sb, org, sido) : null;
     return (
       <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: '#112332' }}>
         <Hit kind="org" target={org} />
