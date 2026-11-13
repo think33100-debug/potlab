@@ -367,3 +367,17 @@ console.log('긁기 공고 지원 링크 통과 — ⓪ 그 공고 글이 맨 �
   assert.equal(인턴태그(true, null), '체험형 인턴');
   assert.equal(인턴태그(false, '계약직'), false);
 }
+
+/* ── 2026-11-13 세중님 — 기관 태그 (DB 공고분류() 값 → 태그) ── */
+{
+  const { 기관태그 } = await import('./job-state.ts');
+  assert.deepEqual(기관태그(['대학병원', '종합병원']), ['대학병원']);           // 강동경희대 — 종합병원은 안 겹쳐 붙임
+  assert.deepEqual(기관태그(['종합병원', '공공기관']), ['공공기관', '종합병원']); // 근로복지공단 창원병원
+  assert.deepEqual(기관태그(['대학병원', '종합병원', '공공기관']), ['대학병원', '공공기관']); // 국립대병원
+  assert.deepEqual(기관태그(['요양원']), ['요양원']);
+  assert.deepEqual(기관태그([]), []);
+  assert.deepEqual(기관태그(null), []);
+  assert.deepEqual(기관태그('대학병원'), []);                                  // 배열이 아니면 안 그림
+  assert.deepEqual(기관태그(['모르는말']), []);
+  console.log('기관 태그 통과 — 8가지');
+}
