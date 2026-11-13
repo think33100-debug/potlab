@@ -17,13 +17,15 @@ export const 색인길 = ['/', '/jobs', '/contact', '/community', '/edu', '/orgs
 export const 색인아래길 = ['/terms/', '/guide/'] as const;
 
 /** 안내 글 (/guide/…) — 검색으로 들어오는 분을 위한 글입니다 (2026-11-13 세중님). 앱 메뉴에는 걸지 않고 사이트맵에만 올립니다.
-    글을 더하면 여기에 한 줄 더합니다 — app/sitemap.ts 가 주소를 싣고, 글 끝의 「다른 안내 글」(app/guide/guide-parts.tsx)이 이름을 씁니다 */
-export const 안내글들 = [
+    글을 더하면 여기에 한 줄 더합니다 — app/sitemap.ts 가 주소를 싣고, 글 끝의 「다른 안내 글」(app/guide/guide-parts.tsx)이 이름을 씁니다.
+    꼬리말 = 모든 화면 맨 아래 「안내」 줄(app/layout.tsx)에 적을 짧은 이름. 없으면 꼬리말에 안 겁니다 —
+    비교 글은 세중님 「최대한 안 보이는 곳에」(11/13)라 걸지 않습니다 */
+export const 안내글들: readonly { 주소: string; 이름: string; 꼬리말?: string }[] = [
   { 주소: '/guide/job-sites', 이름: '땡큐오티 · 굿잡피티 · RAPO 비교' },
-  { 주소: '/guide/ot-associations', 이름: '작업치료사협회와 작업치료 학회 안내' },
-  { 주소: '/guide/pt-associations', 이름: '물리치료사협회와 물리치료 학회 안내' },
-  { 주소: '/guide/therapist-salary', 이름: '물리치료사·작업치료사 연봉, 공공병원 공시로 보기' },
-] as const;
+  { 주소: '/guide/ot-associations', 이름: '작업치료사협회와 작업치료 학회 안내', 꼬리말: '작업치료사협회' },
+  { 주소: '/guide/pt-associations', 이름: '물리치료사협회와 물리치료 학회 안내', 꼬리말: '물리치료사협회' },
+  { 주소: '/guide/therapist-salary', 이름: '물리치료사·작업치료사 연봉, 공공병원 공시로 보기', 꼬리말: '공공병원 연봉' },
+];
 export const 안내글길 = 안내글들.map((g) => g.주소);
 
 /** 공고 한 건 (/jobs/<번호>) — 2026-11-13 세중님 「공고 글도 검색되게 · 열자」.
