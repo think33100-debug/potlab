@@ -4,7 +4,8 @@ import { Hit } from '@/components/hit';
 import { RapoOrgBoard } from '@/components/rapo/rapo-org-board';
 import { OrgSearch } from '@/components/org-search';
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
-import { MembersOnly } from '@/components/members-only';
+import { RapoGuestPreview } from '@/components/rapo/rapo-guest-preview';
+import { 색인메타 } from '@/lib/seo';
 import { orgJobs, orgPublic, ourNumbers, place, TILE_NAME, type OrgFacets, type OrgPublic } from '@/lib/org';
 import { hospitalStat, type HospitalStat, type 시설숫자 } from '@/lib/hospital';
 import { RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoSectionGap, type 경쟁률줄, type 병원보수 } from '@/components/rapo/rapo-job-detail';
@@ -137,6 +138,15 @@ function 기관정보칸(o: OrgPublic, 운영기관: string | null) {
 
 /* 거르기 목록도 회원만입니다 (2026-09-25 · org_facets 의 실행 권한을 걷었습니다).
    로그인 안 한 분에게는 빈 것이 오고, 아래에서 가입 권유를 그립니다 */
+/* 맛보기 화면의 곳 수 — 지어내지 않고 실제로 셉니다. org_total 은 줄이 안 나가서 로그인 없이도 부를 수 있게 열어 둔 창구입니다.
+   못 받으면 숫자 줄을 안 그립니다 */
+async function 곳수말(): Promise<string | null> {
+  try {
+    const n = (await ourNumbers()).orgs;
+    return n > 0 ? `병원·기관 ${n.toLocaleString('ko-KR')}곳의 정보를 모았어요` : null;
+  } catch { return null; }
+}
+
 async function facets(sb: Awaited<ReturnType<typeof serverSupabase>>): Promise<OrgFacets> {
   const { data } = await sb.rpc('org_facets');
   return (data as OrgFacets | null)
@@ -147,9 +157,11 @@ export async function generateMetadata({ searchParams }: PageProps<'/orgs'>): Pr
   const sp = await searchParams;
   const org = typeof sp.org === 'string' ? sp.org : null;
   if (!org) {
+    /* 검색엔진에 올립니다 (2026-11-13 세중님 · lib/seo.ts 색인길) — 로봇은 비회원이라 맛보기 화면만 봅니다 */
     return {
-      title: '병원정보 찾기 · RAPO',
-      description: '치료사가 일하는 곳을 이름·종별·지역으로 찾아봐요',
+      title: '병원 정보 찾기 · 치료사 인원·연봉·경쟁률 · RAPO',
+      description: '병원마다 물리치료사·작업치료사 인원, 병상 수, 공시된 연봉, 지난 채용 경쟁률을 공개 자료로 모았어요. 이름·종별·지역으로 찾아봐요.',
+      robots: 색인메타, alternates: { canonical: '/orgs' },
     };
   }
   const sido = typeof sp.sido === 'string' && sp.sido ? sp.sido : null;
@@ -173,8 +185,10 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
   const sido = typeof sp.sido === 'string' && sp.sido ? sp.sido : null;
 
   if (org) {
-    /* 병원 이름이 자료에 있는지만 봅니다(없으면 책갈피를 안 그리고 안내 한 줄). 회원만 읽히는 창구라 비회원은 문지기에서 이미 로그인으로 갑니다 */
+    /* 병원 이름이 자료에 있는지만 봅니다(없으면 책갈피를 안 그리고 안내 한 줄). 회원만 읽히는 창구입니다.
+       ★ 2026-11-13 — 문지기가 /orgs 를 비회원에게 열면서 /orgs?org=… 도 같이 열립니다. 비회원은 맛보기로 돌립니다 */
     const sb = await serverSupabase();
+    if (await serverWho(sb) === '비회원') return <RapoGuestPreview 갈래="orgs" 셈={await 곳수말()} />;
     const 기관 = await orgPublic(sb, org, sido);
     const 있나 = !!기관;
     /* 처음 열면 「병원 정보」 (2026-11-13 세중님) — 맨 위 기관 정보(종류·주소), 그 아래 한눈에 숫자 */
@@ -210,26 +224,8 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
      같은 함수를 쓰는 세 곳이 막힐 때 가는 방향이 달랐습니다. 한쪽으로 맞췥니다 */
   if (who === '모름') return null;
 
-  if (who === '비회원') {
-    return (
-      <div className="bg-[#F4F4F1]">
-        <main className="mx-auto w-full max-w-2xl px-6 pt-6 pb-[88px] md:px-7">
-          <Hit kind="orgs" />
-          <h1 className="break-keep text-h1 font-bold text-[#14181C]">병원정보 찾기</h1>
-          <p className="mt-2 break-keep text-lg text-[#5F666C]">
-            치료사가 일하는 곳을 이름 · 종별 · 지역으로 찾아봐요
-          </p>
-          {/* 곳 수는 지어내지 않고 실제로 셉니다 — org_total 은 줄이 안 나가서
-              로그인 없이도 부를 수 있게 열어뒀습니다 */}
-          <MembersOnly
-            title={<>병원정보는<br />회원만 볼 수 있어요</>}
-            body={`치료사가 일하는 곳 ${(await ourNumbers()).orgs.toLocaleString('ko-KR')} 곳. 인원 · 병상 · 얼마나 바쁜 곳인지까지 찾아볼 수 있어요.`}
-            진단="app/orgs/page.tsx · 서버(serverWho)"
-          />
-        </main>
-      </div>
-    );
-  }
+  /* 비회원 — 맛보기 화면 (2026-11-13 세중님 「채용공고처럼 · 자세히 보려면 가입」 · 전에는 옛 모양 「회원만」 안내) */
+  if (who === '비회원') return <RapoGuestPreview 갈래="orgs" 셈={await 곳수말()} />;
 
   const f = await facets(sb);
 

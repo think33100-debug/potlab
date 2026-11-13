@@ -4,11 +4,18 @@ import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
 import {
   RapoCommunityEmpty, RapoCommunityPost, RapoCommunityTop, RapoCommunityWrite, 어둠, 직군탭, type 직군탭값, type 커뮤니티글,
 } from '@/components/rapo/rapo-community';
-import { serverSupabase } from '@/lib/supabase-server';
+import { RapoGuestPreview } from '@/components/rapo/rapo-guest-preview';
+import { 색인메타 } from '@/lib/seo';
+import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { daysAgoIso } from '@/lib/time';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'RAPO · 커뮤니티' };
+/* 검색엔진에 올립니다 (2026-11-13 세중님 · lib/seo.ts 색인길) — 로봇은 비회원이라 아래 맛보기 화면만 봅니다 */
+export const metadata: Metadata = {
+  title: '물리치료사·작업치료사 커뮤니티 · RAPO',
+  description: '물리치료사·작업치료사가 병원 분위기, 급여와 처우, 이직, 임상 고민을 나누는 커뮤니티. 병원별 자유토론과 근무 후기도 있어요.',
+  robots: 색인메타, alternates: { canonical: '/community' },
+};
 
 /* 커뮤니티 — 새 디자인 「U06-01 · 커뮤니티 피드」 (2026-11-11 밤 · 대표: 피그마 우선).
    조각과 원본 위치는 components/rapo/rapo-community.tsx 머리에 있습니다.
@@ -41,6 +48,8 @@ export default async function Community({ searchParams }: { searchParams: Promis
   };
 
   const sb = await serverSupabase();
+  /* 비회원 — 맛보기 화면 (2026-11-13 세중님). 글은 한 줄도 안 내려보냅니다(익명 글 · components/rapo/rapo-guest-preview.tsx) */
+  if (await serverWho(sb) === '비회원') return <RapoGuestPreview 갈래="community" />;
   let q = sb.from('공개글').select('id,title,body,created_at,comment_count,profiles');
   if (탭 !== '전체') q = q.eq('profiles->>job_group', 탭);
   q = 정렬 === 'hot'

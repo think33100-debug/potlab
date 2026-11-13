@@ -3,8 +3,10 @@ import Link from 'next/link';
 
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
 import { RapoEduFilter, RapoEduPastToggle, RapoEduRow, RapoEduTop } from '@/components/rapo/rapo-edu';
+import { RapoGuestPreview } from '@/components/rapo/rapo-guest-preview';
 import { RapoPagination } from '@/components/rapo/rapo-ui';
 import { 기관그림 } from '@/lib/rapo-home';
+import { 색인메타 } from '@/lib/seo';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { 교육지났나 } from '@/lib/edu-state';
 import { todayKst } from '@/lib/job-state';
@@ -45,9 +47,11 @@ import { todayKst } from '@/lib/job-state';
 
 export const dynamic = 'force-dynamic';
 
+/* 검색엔진에 올립니다 (2026-11-13 세중님 · lib/seo.ts 색인길) — 로봇은 비회원이라 맛보기 화면만 봅니다 */
 export const metadata: Metadata = {
-  title: '교육·학술 · RAPO',
+  title: '물리치료·작업치료 학회 교육·학술대회 일정 · RAPO',
   description: '학회 교육과정과 학술대회를 한자리에서 봅니다. 신청은 각 학회에서 합니다',
+  robots: 색인메타, alternates: { canonical: '/edu' },
 };
 
 /* 학회 이름은 COURSES_OT · COURSES_PT 와 **글자 그대로 같아야** 합니다.
@@ -123,7 +127,10 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
   /* ★ profiles 를 직접 읽으면 안 됩니다 — authenticated 에게 SELECT 권한이
      없어서 늘 빈 값이 옵니다. 정식 통로는 내프로필() 입니다 (2026-10-04) */
   let 내직군: string | null = null;
-  if (await serverWho(sb) === '회원') {
+  const who = await serverWho(sb);
+  /* 비회원 — 맛보기 화면 (2026-11-13 세중님 「채용공고처럼 · 자세히 보려면 가입」) */
+  if (who === '비회원') return <RapoGuestPreview 갈래="edu" />;
+  if (who === '회원') {
     const { data } = await sb.rpc('내프로필');
     const 나 = ((data ?? []) as { job_group?: string | null }[])[0];
     내직군 = 나?.job_group ?? null;
