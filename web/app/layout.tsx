@@ -9,6 +9,8 @@ import { SplashAd } from "@/components/splash-ad";
 import { KakaoFab } from "@/components/kakao-fab";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
+import { RapoInstallToast } from "@/components/rapo/rapo-install-toast";
+import { INSTALL_SCRIPT } from "@/lib/install-hint";
 import { COMPANY, PRIVACY_EMAIL, PRIVACY_OFFICER } from "@/lib/contact";
 import { siteUrl, 그림판 } from "@/lib/site-url";
 import { AuthProvider } from "./auth";
@@ -71,6 +73,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: SURFACE_SCRIPT }} />
         {/* 앱 시작 화면을 띄울지만 정합니다. 그리는 것은 CSS 입니다 */}
         <script dangerouslySetInnerHTML={{ __html: SPLASH_SCRIPT }} />
+        {/* 설치 신호(크롬·엣지)를 화면이 뜨기 전에 받아 둡니다 — 가입 직후 설치 안내 토스트가 씁니다 (2026-11-13 · lib/install-hint.ts) */}
+        <script dangerouslySetInnerHTML={{ __html: INSTALL_SCRIPT }} />
         {/* 첫 화면 로고 그림을 먼저 받아 둡니다 — 늦게 오면 로고가 뜨자마자 사라지는 것처럼 보였습니다 (16KB · 2026-11-11) */}
         <link rel="preload" as="image" href="/rapo/home/splash-logo.webp" type="image/webp" />
       </head>
@@ -85,6 +89,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {/* 광고 배너가 걸려 있을 때만 오픈 화면 위에 덮습니다.
               없거나 꺼져 있으면 아무것도 안 그립니다 (2026-10-04) */}
           <SplashAd />
+          {/* 가입을 막 마친 분에게 한 번 — 바탕화면(휴대폰은 홈 화면) 설치 안내 (2026-11-13 세중님) */}
+          <RapoInstallToast />
 
           {/* 탑바 56px · 그림자 없이 아래 보더만 — teamsparta.md.
               새 디자인 화면(홈)은 자기 헤더를 그리므로 거기서는 이 줄을 그리지 않습니다
