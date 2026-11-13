@@ -90,7 +90,7 @@ export default async function JobSitesGuide() {
             땡큐오티 · 굿잡피티 · RAPO, 무엇이 다를까요?
           </h1>
           <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-            물리치료사·작업치료사 취업 사이트 비교 · {기준일} 기준
+            취업 사이트 비교 · {기준일} 기준
           </p>
           <p className={본문}>
             물리치료사·작업치료사가 채용 공고를 찾을 때 쓰는 사이트 세 곳을 나란히 정리했어요.
