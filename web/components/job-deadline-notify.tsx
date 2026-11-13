@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/auth';
+import { setAfterLogin } from '@/lib/after-login';
 import { useToast } from '@/app/toast';
 import { RapoButton, RapoMaskIcon } from '@/components/rapo/rapo-ui';
 import { 푸시살피기, 푸시켜기, type 푸시상태 } from '@/lib/push-client';
@@ -77,7 +78,7 @@ export function JobDeadlineNotify({ id }: { id: string }) {
   function 열기() {
     if (loading || busy) return;
     if (!session) {
-      try { sessionStorage.setItem('after_login', `/jobs/${id}`); } catch { /* 사파리 비공개 */ }
+      setAfterLogin(`/jobs/${id}`);   // 로그인 뒤 이 자리로 (lib/after-login.ts · 2026-11-13 옛 이름 after_login 은 아무도 안 읽어 홈으로 떨어졌음)
       router.push('/login');
       return;
     }
