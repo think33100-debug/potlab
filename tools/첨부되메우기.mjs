@@ -27,7 +27,7 @@ import { 받아보기 } from './쪽나눠받기.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 첨부읽기, 칸뽑기, kordoc있나 } from './공고문읽기.mjs';
+import { 첨부읽기, 칸뽑기, kordoc있나, 더담을칸 } from './공고문읽기.mjs';
 import { 그누보드새주소, 고친주소 } from './첨부주소고치기.mjs';
 import { 쓴메모리MB, 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
 import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이간격 } from './cleaneye-file.mjs';
@@ -129,7 +129,7 @@ for (let i = 0; i < 번호들.length; i += 60) {
      없습니다」로 났습니다. 손으로 첨부받기(apmView 주소) 를 부르면 921,569바이트
      %PDF 가 그대로 옵니다 — **쪽이 아니라 이 줄이 까닭입니다.** 고친주소(…, j.url) 의
      바탕도 빈 글자였습니다 (뷰어·상대 주소를 못 고칩니다) */
-  공고들.push(...await 전부('job_posts?select=id,source,org_name,title,job_group,headcount,url,'
+  공고들.push(...await 전부('job_posts?select=id,source,org_name,title,job_group,employ_type,headcount,url,'
     + 'apply_to,apply_to_time,work_place,detail,' + encodeURIComponent('뽑은값')
     + ',edited_fields,admin_locked,hidden,hold&id=in.(' + 조각 + ')'));
 }
@@ -150,6 +150,9 @@ const 빈칸들 = (j) => {
      이제 **공고문 값이 없으면 빈 칸으로 봅니다.** 화면은 이미 뽑은값을 먼저 봅니다
      (web/app/jobs/[id]/page.tsx:164). 마감일은 그대로 포털 우선입니다 (세중님) */
   if (!p['예상연봉']) 빈.push('예상연봉');
+  /* ★ 2026-11-13 세중님 「근무기간 보수 오케이 앞으로 읽자」 — 근무기간도 빈 칸으로 봅니다.
+     정규직은 기간이 없어 화면이 「정규직」으로 적습니다(web/lib/job-state.ts 근무기간말) — 그것 때문에 다시 읽지 않습니다 */
+  if (!p['근무기간'] && j.employ_type !== '정규직') 빈.push('근무기간');
   return 빈;
 };
 
@@ -198,7 +201,7 @@ console.log('볼 것 ' + 볼것.length + '건' + (출처 ? ' (출처 ' + 출처 
     + ' ~ ' + (언제봤나(볼것[볼것.length - 1].id) || '아직 안 봄') : ''));
 console.log(진짜 ? '\n★ **진짜로 담습니다**' : '\n[마른] 아무것도 안 담습니다 — 담으려면 --진짜');
 
-const 칸이름 = ['모집인원', '마감시각', '근무지', '지원자격', '예상연봉'];
+const 칸이름 = ['모집인원', '마감시각', '근무지', '지원자격', '예상연봉', '근무기간'];
 const 견본 = []; const 보낼줄 = [];
 /* ★ 2026-10-22 세중님 5번 — 읽은 글을 담을 자리입니다 (안전장치 구멍).
    기본은 **안 담습니다** — POTJOB_BODY_WRITE=1 일 때만 창구로 보냅니다.
@@ -609,6 +612,7 @@ for (const j of 볼것) {
   if (지금빈.has('근무지') && !잠김.has('work_place') && 칸.근무지) 채울것.근무지 = 칸.근무지;
   if (지금빈.has('지원자격') && 칸.지원자격) 채울것.지원자격 = 칸.지원자격;
   if (지금빈.has('예상연봉') && 칸.예상연봉) 채울것.예상연봉 = 칸.예상연봉;
+  if (지금빈.has('근무기간') && 칸.근무기간) 채울것.근무기간 = 칸.근무기간;
 
   if (Object.keys(채울것).length) {
     보낼줄.push({ j, 칸, 채울것, 내직군인원, 파일: 고른것.name || '' });
@@ -708,6 +712,7 @@ const 줄들 = 보낼줄.map(({ j, 칸, 채울것, 내직군인원 }) => ({
     ...(칸.지원자격 ? { 지원자격: 칸.지원자격 } : {}),
     ...(칸.근무지 ? { 근무지: 칸.근무지 } : {}),
     ...(칸.예상연봉 ? { 예상연봉: 칸.예상연봉 } : {}),
+    ...더담을칸(칸),   /* 근무기간 · 근무기간덧말 · 보수덧말 (2026-11-13) */
     근거: 칸.근거 || {}, 읽은법: 'kordoc',
   },
 }));

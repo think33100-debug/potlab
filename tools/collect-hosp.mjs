@@ -57,7 +57,7 @@ import { 글받기 } from './certs/index.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, mixedTitle, 구운날 } from './gas-rules.mjs';
-import { 본문직군, 칸뽑기, 고용형태고르기 } from './공고문읽기.mjs';
+import { 본문직군, 칸뽑기, 고용형태고르기, 더담을칸 } from './공고문읽기.mjs';
 import { 본문자르기 } from './hosp/본문자르기.mjs';   /* 2026-10-17 세중님 2-② */
 /* 본문을 받아오는 주소가 목록 주소와 다른 곳 (인크루트 /jobcont/) — 한 자리 */
 import { 상세주소 } from './hosp/상세주소.mjs';
@@ -776,6 +776,7 @@ if (상세몫 > 0) {
         if (칸.지원자격) 담을것.지원자격 = 칸.지원자격;
         if (칸.근무지) 담을것.근무지 = 칸.근무지;
         if (칸.예상연봉) 담을것.예상연봉 = 칸.예상연봉;
+        Object.assign(담을것, 더담을칸(칸));   /* 근무기간 · 근무기간덧말 · 보수덧말 (2026-11-13) */
         if (Object.keys(칸.모집인원 || {}).length) 담을것.직군별인원 = 칸.모집인원;
         if (Object.keys(담을것).length) {
           담을것.근거 = 칸.근거 || {};
