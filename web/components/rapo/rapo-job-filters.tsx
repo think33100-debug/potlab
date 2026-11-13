@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useAuth } from '@/app/auth';
+import { setAfterLogin } from '@/lib/after-login';
 import { CompareNotify } from '@/components/compare-notify';
 import { 고용형태들, 기관분류들, 기본정렬, 분류쿠키 } from '@/lib/rapo-job-options';
 import { JOB_GROUPS, type JobGroup } from '@/lib/who';
@@ -27,7 +28,7 @@ import { RapoButton, RapoChip, RapoMaskIcon } from './rapo-ui';
 
    비회원은 검색·조건이 열려 있지 않습니다(지금 규칙 그대로 · app/jobs/page.tsx).
    비회원이 검색하거나 조건을 적용하면 그 주소를 기억해 두고 로그인으로 보냅니다 —
-   로그인하면 그 주소로 돌아옵니다(after_login · components/job-save.tsx 와 같은 길). */
+   로그인하면 그 주소로 돌아옵니다(lib/after-login.ts setAfterLogin · 2026-11-13 옛 after_login 쪽지는 아무도 안 읽었음). */
 
 export const 직군들 = ['전체', '작업치료사', '물리치료사'] as const;
 /* 원본(509:5320) 차례 그대로입니다 — lib/org.ts 의 SIDOS 와 같은 이름 · 다른 차례 */
@@ -71,7 +72,7 @@ export function 목록주소(c: 조건, 회원: boolean): string {
 }
 
 function 로그인으로(router: ReturnType<typeof useRouter>, 돌아올곳: string) {
-  try { sessionStorage.setItem('after_login', 돌아올곳); } catch { /* 사파리 비공개 */ }
+  setAfterLogin(돌아올곳);   // 로그인 뒤 이 자리로 (lib/after-login.ts · 2026-11-13 옛 이름 after_login 은 아무도 안 읽어 홈으로 떨어졌음)
   router.push('/login');
 }
 

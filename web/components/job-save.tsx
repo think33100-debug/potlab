@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/auth';
+import { setAfterLogin } from '@/lib/after-login';
 import { Icon } from '@/components/icon';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '@/app/toast';
@@ -47,7 +48,7 @@ export function JobSave({ id, big = false, look, 마감 = false }: {
     if (loading) return;
 
     if (!session) {
-      try { sessionStorage.setItem('after_login', `/jobs/${id}`); } catch { /* 사파리 비공개 */ }
+      setAfterLogin(`/jobs/${id}`);   // 로그인 뒤 이 자리로 (lib/after-login.ts · 2026-11-13 옛 이름 after_login 은 아무도 안 읽어 홈으로 떨어졌음)
       router.push('/login');
       return;
     }

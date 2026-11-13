@@ -102,18 +102,29 @@ export default function AuthCallback() {
     return () => { alive = false; };
   }, [router]);
 
+  /* ★ 2026-11-13 세중님 「카카오톡 로그인할 때 잠깐 옛날 화면이 뜬다 · 다시 로그인하라고 뜨는 거 같은데」 —
+     이 화면이 옛 틀이라 옛 위쪽 줄(POTJOB 로고 · 세션을 읽기 전의 「로그인」 단추)이 1~2초 보였습니다.
+     새 틀(lib/nav.ts 새틀화면)로 옮겨 RAPO 로고와 한 줄만 그립니다. 로그인 단추는 없습니다 */
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
+    <main data-rapo className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center gap-(--rapo-dimension-x6)
+                               bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x6) text-center">
+      <div className="relative h-[31.5px] w-[120px] shrink-0">
+        {/* eslint-disable @next/next/no-img-element -- Figma 원본 SVG 그대로 (가로형 로고 · components/rapo/home-notice.tsx 와 같은 꼴) */}
+        <img src="/rapo/home/logo-symbol.svg" alt="" className="absolute left-0 top-0 h-[31.5px] w-[32.25px]" />
+        <img src="/rapo/home/logo-wordmark.svg" alt="RAPO" className="absolute bottom-[24.37%] left-[34.21%] right-[0.04%] top-[24.67%]" />
+        {/* eslint-enable @next/next/no-img-element */}
+      </div>
       {err ? (
-        <div className="rounded-sm bg-brand-red-soft p-6">
-          <p className="text-lg font-bold text-brand-red-dark">로그인을 마치지 못했어요</p>
-          <p className="mt-2 text-lg text-brand-red-dark">{err}</p>
-          <a href="/login" className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-btn font-bold text-white">
+        <div className="flex w-full max-w-[340px] flex-col gap-(--rapo-dimension-x3)">
+          <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">로그인을 마치지 못했어요</p>
+          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{err}</p>
+          <a href="/login" className="rapo-type-t5-bold flex h-(--rapo-dimension-x13) w-full items-center justify-center rounded-(--rapo-radius-r3)
+                                      bg-(--rapo-color-bg-deep-coral) text-(color:--rapo-color-fg-on-deep-coral) active:bg-(--rapo-color-bg-deep-coral-pressed)">
             다시 해보기
           </a>
         </div>
       ) : (
-        <p className="text-lg text-mute">로그인을 마치는 중이에요…</p>
+        <p role="status" className="rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">로그인을 마치는 중이에요…</p>
       )}
     </main>
   );
