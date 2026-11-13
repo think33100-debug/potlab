@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { RapoHeader } from '@/components/rapo/rapo-header';
 import { RapoButton } from '@/components/rapo/rapo-ui';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
+import { OtherGuides, 도움말, 밑줄, 본문, 작은제목 } from './guide-parts';
 
 /* 협회·학회 안내 글의 틀 (2026-11-13 세중님 「협회는 바로가기 만들어서 연관성을」 · 「학회 설명을 간략하게 적고 바로가기로」).
    작업치료 쪽(app/guide/ot-associations)과 물리치료 쪽(app/guide/pt-associations)이 같은 틀에 자료만 달리 넣습니다.
@@ -29,14 +30,11 @@ export type 협회안내자료 = {
   학회머리: string;
   학회들: 학회[];
   학회출처: ReactNode;
-  다른글: 바로가기[];
+  /** 이 글의 주소 — 「다른 안내 글」에서 자기 자신을 뺍니다 */
+  지금: string;
   제휴아님: string;
 };
 
-const 작은제목 = 'rapo-type-t7-bold break-keep text-(color:--rapo-color-fg-neutral)';
-const 본문 = 'rapo-type-article-body break-keep text-(color:--rapo-color-fg-neutral)';
-const 도움말 = 'rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)';
-export const 밑줄 = 'underline underline-offset-2';
 /* 「RAPO / Button / Outline」 40 과 같은 모양 — 바깥 사이트로 가는 링크라 RapoButton(Link) 대신 a 로 그립니다 */
 const 바깥단추 = 'rapo-type-t4-bold flex h-(--rapo-dimension-x10) items-center justify-center whitespace-nowrap rounded-(--rapo-radius-r2) ' +
   'border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-muted) px-(--rapo-dimension-x4) ' +
@@ -130,14 +128,7 @@ export async function AssociationGuide({ 자료 }: { 자료: 협회안내자료 
           <RapoButton href="/jobs" full>RAPO 채용 공고 보기</RapoButton>
         </section>
 
-        <section aria-labelledby="안내-다른글" className="flex flex-col gap-(--rapo-dimension-x3)">
-          <h2 id="안내-다른글" className={작은제목}>다른 안내 글</h2>
-          <ul className="flex flex-col gap-(--rapo-dimension-x2)">
-            {자료.다른글.map((b) => (
-              <li key={b.주소} className={본문}><Link href={b.주소} className={밑줄}>{b.이름}</Link></li>
-            ))}
-          </ul>
-        </section>
+        <OtherGuides 지금={자료.지금} />
 
         <div aria-hidden className="h-px bg-(--rapo-color-stroke-neutral-muted)" />
 

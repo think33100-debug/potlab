@@ -17,8 +17,14 @@ export const 색인길 = ['/', '/jobs', '/contact', '/community', '/edu', '/orgs
 export const 색인아래길 = ['/terms/', '/guide/'] as const;
 
 /** 안내 글 (/guide/…) — 검색으로 들어오는 분을 위한 글입니다 (2026-11-13 세중님). 앱 메뉴에는 걸지 않고 사이트맵에만 올립니다.
-    글을 더하면 여기에 주소를 더합니다 — app/sitemap.ts 가 이 목록을 싣습니다 */
-export const 안내글길 = ['/guide/job-sites', '/guide/ot-associations', '/guide/pt-associations'] as const;
+    글을 더하면 여기에 한 줄 더합니다 — app/sitemap.ts 가 주소를 싣고, 글 끝의 「다른 안내 글」(app/guide/guide-parts.tsx)이 이름을 씁니다 */
+export const 안내글들 = [
+  { 주소: '/guide/job-sites', 이름: '땡큐오티 · 굿잡피티 · RAPO 비교' },
+  { 주소: '/guide/ot-associations', 이름: '작업치료사협회와 작업치료 학회 안내' },
+  { 주소: '/guide/pt-associations', 이름: '물리치료사협회와 물리치료 학회 안내' },
+  { 주소: '/guide/therapist-salary', 이름: '물리치료사·작업치료사 연봉, 공공병원 공시로 보기' },
+] as const;
+export const 안내글길 = 안내글들.map((g) => g.주소);
 
 /** 공고 한 건 (/jobs/<번호>) — 2026-11-13 세중님 「공고 글도 검색되게 · 열자」.
     비회원에게 이미 열린 쪽(공유 링크)이라 새로 드러나는 값은 없습니다 — 로봇도 비회원 화면만 봅니다.
