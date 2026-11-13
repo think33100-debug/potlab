@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { RapoBackButton } from '@/components/rapo/rapo-back';
+import { 색인메타 } from '@/lib/seo';
 import { TERMS, TERMS_VERSION, 초안띠보이나, type TermKey } from '@/lib/terms';
 
 export function generateStaticParams() {
@@ -50,6 +51,8 @@ function 조각내기(body: string): 조각[] {
   });
   return out;
 }
+/* 검색엔진에 올리는 쪽입니다 (2026-11-13 세중님 「검색 가능하게」 · lib/seo.ts 색인길과 짝) */
+export const metadata = { robots: 색인메타 };
 
 export default async function TermsPage({ params }: { params: Promise<{ doc: string }> }) {
   const { doc } = await params;

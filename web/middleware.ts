@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { 가입중길, 길에있나, 비회원길 } from '@/lib/beta';
 import { GUEST_COOKIE } from '@/lib/guest-view';
+import { 색인되나 } from '@/lib/seo';
 
 /* 로그인 토큰을 이어주는 자리입니다 (2026-09-25).
 
@@ -30,7 +31,9 @@ const 공유공고길 = (p: string) => /^\/jobs\/[^/]+$/.test(p) || /^\/api\/og\
   /* ★ 2026-11-12 밤 — 기본 미리보기 그림(홈·가입 링크·커뮤니티 글)도 카톡 로봇이 받아 가야 합니다. 브랜드 글뿐입니다 */
   || p === '/api/og/site';
 
-/* 검색엔진 색인을 막습니다 (테스트 동안). app/robots.ts 와 한 쌍 */
+/* 검색엔진 색인을 막습니다 (테스트 동안).
+   ★ 2026-11-13 세중님 「검색 가능하게」 — 비회원도 보는 쪽(홈·공고 목록·문의·약관)만 대표 주소에서 엽니다.
+   그 목록은 lib/seo.ts 한 자리입니다 */
 const 색인막기 = 'noindex, nofollow';
 
 export async function middleware(req: NextRequest) {
@@ -70,7 +73,7 @@ export async function middleware(req: NextRequest) {
      안 실으면 돌려보낸 화면에서 다시 옛 토큰을 들고 옵니다 */
   const 쿠키싣기 = (r: NextResponse) => {
     res.cookies.getAll().forEach((c) => r.cookies.set(c));
-    r.headers.set('X-Robots-Tag', 색인막기);
+    if (!색인되나(req.nextUrl.hostname, path)) r.headers.set('X-Robots-Tag', 색인막기);
     return r;
   };
 
@@ -134,7 +137,7 @@ export const config = {
   matcher: [
     /* 그림·글꼴·파비콘에는 안 걸립니다. 걸어두면 요청마다 헛일을 합니다.
        _next(빌드 산출물) · api(자기 열쇠로 돕니다) · 확장자가 붙은 파일 제외 */
-    '/((?!_next/static|_next/image|api/|favicon|icons/|robots\\.txt|site\\.webmanifest|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|css|js)$).*)',
+    '/((?!_next/static|_next/image|api/|favicon|icons/|robots\\.txt|sitemap\\.xml|site\\.webmanifest|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|css|js)$).*)',
     /* ★ 2026-11-11 — 비회원에게 막는 API 둘은 따로 겁니다 (베타 · 위 막는API) */
     '/api/og/:path*',
     '/api/post-image/:path*',

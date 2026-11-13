@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Suspense } from 'react';
+import { 색인메타 } from '@/lib/seo';
+import { 대표주소 } from '@/lib/site-url';
 import { Hit } from '@/components/hit';
 import { RapoHomeNotice } from '@/components/rapo/home-notice';
 import { HomeU01 } from '@/components/rapo/home-u01';
@@ -11,7 +13,8 @@ import { serverSupabase, serverWho } from '@/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 /* 탭 제목 — 서비스 이름은 RAPO 입니다. 다른 화면의 제목은 app/layout.tsx 가 정합니다 */
-export const metadata: Metadata = { title: 'RAPO · 채용공고' };
+/* 검색엔진에 올리는 쪽입니다 (2026-11-13 세중님 「검색 가능하게」 · lib/seo.ts 색인길과 짝) */
+export const metadata: Metadata = { title: 'RAPO · 채용공고', robots: 색인메타, alternates: { canonical: '/' } };
 
 /* 홈 — 새 디자인 「U01 · 홈」 (2026-11-11 대표 지시: 실제 앱에 바로 적용).
 
@@ -37,12 +40,23 @@ export const metadata: Metadata = { title: 'RAPO · 채용공고' };
    「익명 질문과 답변」은 디자인 원본의 예시 글입니다(실제 회원 글 아님).
    「급여 공개 공고」·「신입 지원 공고」는 거르기가 아직 없어 공고 목록으로만 갑니다
    — 오픈 뒤에 넣을 기능입니다 (docs/rapo-design-implementation.md). */
+const 사이트표 = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'RAPO',
+  alternateName: ['라포'],
+  url: `${대표주소}/`,
+};
+
 export default async function Home() {
   const sb = await serverSupabase();
   const who = await serverWho(sb);
 
   return (
     <>
+      {/* 검색 결과에 사이트 이름을 「RAPO」로 띄워 달라는 표 (2026-11-13 · 구글 「사이트 이름」 안내의 WebSite 구조화 데이터).
+          화면에는 안 보입니다. 이름은 RAPO · 한글로 찾는 분을 위해 「라포」를 다른 이름으로 둡니다 */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(사이트표) }} />
       <Hit kind="home" />
       {/* 「순차적으로 오픈 중」 안내 팝업 — 다시 보지 않기는 기기에 기억 (2026-11-12 세중님) */}
       <RapoHomeNotice />
