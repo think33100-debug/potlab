@@ -308,14 +308,15 @@ function 시설보임(s: 시설숫자): { 구분: string | null; 칸: 숫자칸[
       구분: null,
       칸: 숫자만([{ 이름: '의사', 수: s.의사, 단위: '명' }, { 이름: '간호사', 수: s.간호사, 단위: '명' }, { 이름: '사회복지사', 수: s.사회복지사, 단위: '명' }]),
       치료사,
-      글: `센터 전체 인원이에요 (공고 인원 아님) · ${s.출처 ?? '치매센터 자료'}${s.기준 ? ` · ${s.기준} 기준` : ''}`,
+      /* 출처 글은 360 폭에서 한 줄 (2026-11-13 세중님 「공고인원 아님 빼자 · 한 줄로」) — 기준일은 연·월만 */
+      글: `센터 전체 인원 · ${s.출처 ?? '치매센터 자료'}${s.기준 ? ` · ${s.기준.slice(0, 7)}` : ''}`,
     };
   }
   return {
     구분: s.종류 ?? null,
     칸: 숫자만([{ 이름: '정원', 수: s.정원, 단위: '명' }]),
     치료사,
-    글: `기관 전체 인원이에요 (공고 인원 아님) · ${s.출처 ?? '장기요양기관 자료'} · 지금과 다를 수 있어요`,
+    글: `기관 전체 인원 · ${s.출처 ?? '장기요양기관 자료'}`,
   };
 }
 
@@ -370,7 +371,8 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
   경쟁률: 경쟁률줄[];
   /* 이번 공고가 인턴인가 — 인턴 경쟁률은 공개되지 않은 곳이 많아 안내 글을 바꿉니다 (11/12 세중님) */
   인턴?: boolean;
-  /* 병원 게시판 「병원 정보」 탭 (2026-11-13) — 이번 공고가 없으니 「이번 공고와 같은 고용형태」 안내 줄을 안 그립니다 */
+  /* 병원 게시판 「병원 정보」 탭 (2026-11-13) — 이번 공고가 없으니 「이번 공고와 같은 고용형태」 안내 줄을 안 그립니다.
+     종류 배지도 안 그립니다(위 「기관 정보」 칸에 종류가 있음) */
   공고없이?: boolean;
 }) {
   /* 구분·병상 — 옛 웹 공고 상세의 「종별 · 병상」을 다시 넣습니다 (2026-11-12 세중님 「병상, 구분 이런 것도 넣자」).
@@ -387,7 +389,7 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
     <RapoDetailSection title={곳 ? '기관 한눈에' : '병원 한눈에'} sub="공개된 자료로 모은 숫자예요">
       {곳 && (
         <div className="flex flex-col gap-(--rapo-dimension-x3)">
-          {곳.구분 && <div><RapoBadge>{곳.구분}</RapoBadge></div>}
+          {곳.구분 && !공고없이 && <div><RapoBadge>{곳.구분}</RapoBadge></div>}
           <숫자칸들 칸={곳.칸} />
           {곳.치료사 && (
             <div className="flex flex-col gap-(--rapo-dimension-x2)">
@@ -408,7 +410,8 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
           <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{곳.글}</p>
         </div>
       )}
-      {구분 && !곳 && <div><RapoBadge>{구분}</RapoBadge></div>}
+      {/* 병원 게시판은 맨 위 「기관 정보」에 종류가 이미 있어 배지를 안 그립니다(서송병원에서 「병원」이 두 번 나왔음) */}
+      {구분 && !곳 && !공고없이 && <div><RapoBadge>{구분}</RapoBadge></div>}
       <숫자칸들 칸={개요} />
       {치료사 && (
         <div className="flex flex-col gap-(--rapo-dimension-x2)">
@@ -425,7 +428,8 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
             ))}
           </div>
           <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
-            병원 전체 인원이에요 (공고 인원 아님) · 건강보험심사평가원 신고{치료사.기준 ? ` · ${치료사.기준} 기준` : ''}
+            {/* 360 폭에서 한 줄 (2026-11-13 세중님) — 「병원 전체 인원」은 남깁니다(공고 인원으로 읽히지 않게 · lib/hospital.ts 머리) */}
+            병원 전체 인원 · 심평원 신고{치료사.기준 ? ` · ${치료사.기준} 기준` : ''}
           </p>
         </div>
       )}
