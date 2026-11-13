@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { 색인메타 } from '@/lib/seo';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Suspense } from 'react';
 import { Hit } from '@/components/hit';
@@ -19,7 +20,8 @@ import { serverSupabase, serverWho } from '@/lib/supabase-server';
 export const dynamic = 'force-dynamic';   // 공고는 자주 바뀝니다
 
 /* 탭 제목 — 서비스 이름은 RAPO 입니다 */
-export const metadata: Metadata = { title: 'RAPO · 채용 공고' };
+/* 검색엔진에 올리는 쪽입니다 (2026-11-13 세중님 「검색 가능하게」 · lib/seo.ts 색인길과 짝) */
+export const metadata: Metadata = { title: 'RAPO · 채용 공고', robots: 색인메타, alternates: { canonical: '/jobs' } };
 
 /* 공고 목록 — 새 디자인 「U02 · 공고 목록」 (2026-11-11 대표 지시: 피그마 우선).
 

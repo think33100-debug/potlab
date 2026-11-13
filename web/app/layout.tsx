@@ -44,7 +44,8 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   appleWebApp: { title: "RAPO" },
-  /* ★ 2026-11-11 — 클로즈드 베타 동안 검색엔진에 안 올립니다 (app/robots.ts · middleware.ts 와 한 쌍) */
+  /* ★ 2026-11-11 — 클로즈드 베타 동안 검색엔진에 안 올립니다 (기본값).
+     2026-11-13 세중님 「검색 가능하게」 — 비회원도 보는 쪽(홈·공고 목록·문의·약관)만 자기 metadata 로 덮어 엽니다 (lib/seo.ts) */
   robots: { index: false, follow: false },
 };
 
