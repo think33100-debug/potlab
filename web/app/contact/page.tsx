@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { InquiryForm } from '@/components/inquiry-form';
 import { HELP_EMAIL } from '@/lib/contact';
 import { 문의폼_켰나 } from '@/lib/inquiry';
+import { 색인메타 } from '@/lib/seo';
 
 /* 문의하기 (2026-10-01 · 새 디자인 2026-11-13 세중님 「문의하기 누르면 옛날 화면이 나와 · 피그마 확인」).
 
@@ -15,7 +16,8 @@ import { 문의폼_켰나 } from '@/lib/inquiry';
    ② 권익 침해 구제 기관 — 저장소에서 이 화면에만 적혀 있습니다. 빼면 회원이 볼 자리가 없어집니다
    만든 곳·보호책임자는 꼬리말(app/layout.tsx)에 이미 있어 뺐습니다. 주소는 lib/contact.ts 한 곳입니다. */
 
-export const metadata = { title: '문의하기' };
+/* 검색엔진에 올리는 쪽입니다 (2026-11-13 세중님 「검색 가능하게」 · lib/seo.ts 색인길과 짝) */
+export const metadata = { title: '문의하기', robots: 색인메타, alternates: { canonical: '/contact' } };
 
 const 구제기관 = [
   '개인정보 침해신고센터 — privacy.kisa.or.kr · 국번없이 118',
