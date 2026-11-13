@@ -101,8 +101,24 @@ async function 병원정보받기(sb: Awaited<ReturnType<typeof serverSupabase>>
 
 /* 「병원 정보」 탭 맨 위 — 어떤 곳이고 어디 있는지 (2026-11-13 세중님 「주소 정도만 같이 추가되면 어디에 있는 거군아 정도 알 것 같아」).
    종류는 기관 표의 kinds 에서 더 넓은 말(「복지관」 ⊂ 「장애인복지관」)을 빼고 남은 것 · 없으면 타일 이름.
-   주소는 자료에 따라 시도가 빠져 있어(「강동구 고덕로 201」) 시도를 앞에 붙입니다. 공고 상세 「근무 장소」와 같은 줄 모양 */
-function 기관정보칸(o: OrgPublic) {
+   주소는 자료에 따라 시도가 빠져 있어(「강동구 고덕로 201」) 시도를 앞에 붙입니다. 공고 상세 「근무 장소」와 같은 줄 모양.
+   운영 기관 — 어느 병원·법인이 맡아 운영하는지 (2026-11-13 세중님 「운영 기관으로 명칭 통일하고 장애인 복지관이랑 치매센터 둘 다」).
+     장애인복지관  welfare_centers.corp (266곳 모두 있음 · 누구나 읽힘)
+     치매센터      dementia_centers.operator (317곳 모두 있음 · 회원에게 이 칸만 열었음 · 금고 SQL_1113/Y2 · 대표자·전화는 막힘)
+   글은 자료 그대로이고 끝의 「위탁」·「(직영)」만 뗍니다. 이름이 겹쳐 어느 곳인지 못 가리면 안 그립니다(시설숫자받기와 같은 규칙) */
+async function 운영기관받기(sb: Awaited<ReturnType<typeof serverSupabase>>, name: string, sido: string | null): Promise<string | null> {
+  const 다듬기 = (v: string | null | undefined) => (v ?? '').replace(/\s*(위탁|\(직영\))$/, '').trim() || null;
+  const { data: 복지 } = await sb.from('welfare_centers').select('sido, corp').eq('name', name);
+  const 복지줄 = ((복지 ?? []) as { sido: string | null; corp: string | null }[])
+    .filter((x) => !sido || !x.sido || x.sido.startsWith(sido) || sido.startsWith(x.sido));
+  if (복지줄.length === 1) return 다듬기(복지줄[0].corp);
+  if (복지줄.length > 1) return null;
+  const { data: 치매 } = await sb.from('dementia_centers').select('operator').eq('name', name);
+  const 치매줄 = (치매 ?? []) as { operator: string | null }[];
+  return 치매줄.length === 1 ? 다듬기(치매줄[0].operator) : null;
+}
+
+function 기관정보칸(o: OrgPublic, 운영기관: string | null) {
   const 종류들 = (o.kinds ?? []).filter((k, _, 모두) => !모두.some((x) => x !== k && x.includes(k)));
   const 종류 = 종류들.slice(0, 2).join(' · ') || TILE_NAME[o.tile] || null;
   const 시도 = o.sido_std ?? '';
@@ -113,6 +129,7 @@ function 기관정보칸(o: OrgPublic) {
       <div className="flex flex-col gap-(--rapo-dimension-x3)">
         {종류 && <RapoGuideRow label="종류">{종류}</RapoGuideRow>}
         {주소 && <RapoGuideRow label="주소">{주소}</RapoGuideRow>}
+        {운영기관 && <RapoGuideRow label="운영 기관">{운영기관}</RapoGuideRow>}
       </div>
     </RapoDetailSection>
   );
@@ -163,7 +180,7 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
     /* 처음 열면 「병원 정보」 (2026-11-13 세중님) — 맨 위 기관 정보(종류·주소), 그 아래 한눈에 숫자 */
     const 탭 = sp.tab === 'review' ? 'review' : sp.tab === 'talk' ? 'talk' : 'info';
     const 숫자 = 탭 === 'info' && 기관 ? await 병원정보받기(sb, org, sido) : null;
-    const 위칸 = 탭 === 'info' && 기관 ? 기관정보칸(기관) : null;
+    const 위칸 = 탭 === 'info' && 기관 ? 기관정보칸(기관, await 운영기관받기(sb, org, sido)) : null;
     const 정보 = 위칸 || 숫자 ? (
       <>
         {위칸}
