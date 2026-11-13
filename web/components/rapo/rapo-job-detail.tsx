@@ -370,7 +370,8 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
   경쟁률: 경쟁률줄[];
   /* 이번 공고가 인턴인가 — 인턴 경쟁률은 공개되지 않은 곳이 많아 안내 글을 바꿉니다 (11/12 세중님) */
   인턴?: boolean;
-  /* 병원 게시판 「병원 정보」 탭 (2026-11-13) — 이번 공고가 없으니 「이번 공고와 같은 고용형태」 안내 줄을 안 그립니다 */
+  /* 병원 게시판 「병원 정보」 탭 (2026-11-13) — 이번 공고가 없으니 「이번 공고와 같은 고용형태」 안내 줄을 안 그립니다.
+     종류 배지도 안 그립니다(위 「기관 정보」 칸에 종류가 있음) */
   공고없이?: boolean;
 }) {
   /* 구분·병상 — 옛 웹 공고 상세의 「종별 · 병상」을 다시 넣습니다 (2026-11-12 세중님 「병상, 구분 이런 것도 넣자」).
@@ -387,7 +388,7 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
     <RapoDetailSection title={곳 ? '기관 한눈에' : '병원 한눈에'} sub="공개된 자료로 모은 숫자예요">
       {곳 && (
         <div className="flex flex-col gap-(--rapo-dimension-x3)">
-          {곳.구분 && <div><RapoBadge>{곳.구분}</RapoBadge></div>}
+          {곳.구분 && !공고없이 && <div><RapoBadge>{곳.구분}</RapoBadge></div>}
           <숫자칸들 칸={곳.칸} />
           {곳.치료사 && (
             <div className="flex flex-col gap-(--rapo-dimension-x2)">
@@ -408,7 +409,8 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
           <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{곳.글}</p>
         </div>
       )}
-      {구분 && !곳 && <div><RapoBadge>{구분}</RapoBadge></div>}
+      {/* 병원 게시판은 맨 위 「기관 정보」에 종류가 이미 있어 배지를 안 그립니다(서송병원에서 「병원」이 두 번 나왔음) */}
+      {구분 && !곳 && !공고없이 && <div><RapoBadge>{구분}</RapoBadge></div>}
       <숫자칸들 칸={개요} />
       {치료사 && (
         <div className="flex flex-col gap-(--rapo-dimension-x2)">
