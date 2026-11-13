@@ -18,7 +18,7 @@ export const 색인아래길 = ['/terms/', '/guide/'] as const;
 
 /** 안내 글 (/guide/…) — 검색으로 들어오는 분을 위한 글입니다 (2026-11-13 세중님). 앱 메뉴에는 걸지 않고 사이트맵에만 올립니다.
     글을 더하면 여기에 주소를 더합니다 — app/sitemap.ts 가 이 목록을 싣습니다 */
-export const 안내글길 = ['/guide/job-sites'] as const;
+export const 안내글길 = ['/guide/job-sites', '/guide/ot-associations', '/guide/pt-associations'] as const;
 
 /** 공고 한 건 (/jobs/<번호>) — 2026-11-13 세중님 「공고 글도 검색되게 · 열자」.
     비회원에게 이미 열린 쪽(공유 링크)이라 새로 드러나는 값은 없습니다 — 로봇도 비회원 화면만 봅니다.

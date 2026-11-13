@@ -168,6 +168,14 @@ export default async function JobSitesGuide() {
           </dl>
         </section>
 
+        <section aria-labelledby="비교-다른글" className="flex flex-col gap-(--rapo-dimension-x3)">
+          <h2 id="비교-다른글" className={작은제목}>다른 안내 글</h2>
+          <ul className="flex flex-col gap-(--rapo-dimension-x2)">
+            <li className={본문}><Link href="/guide/ot-associations" className={밑줄}>작업치료사협회와 작업치료 학회 안내</Link></li>
+            <li className={본문}><Link href="/guide/pt-associations" className={밑줄}>물리치료사협회와 물리치료 학회 안내</Link></li>
+          </ul>
+        </section>
+
         <div aria-hidden className="h-px bg-(--rapo-color-stroke-neutral-muted)" />
 
         <p className={도움말}>
