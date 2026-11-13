@@ -47,9 +47,12 @@ export const metadata: Metadata = {
   /* ★ 2026-11-11 — 클로즈드 베타 동안 검색엔진에 안 올립니다 (기본값).
      2026-11-13 세중님 「검색 가능하게」 — 비회원도 보는 쪽(홈·공고 목록·문의·약관)만 자기 metadata 로 덮어 엽니다 (lib/seo.ts) */
   robots: { index: false, follow: false },
-  /* 검색엔진 주인 확인 (2026-11-13 세중님 등록) — 구글 서치 콘솔 「HTML 태그」 값. 비밀이 아니라 누구나 보는 값입니다.
-     지우면 서치 콘솔이 주인 확인을 다시 하라고 합니다. 네이버 값이 오면 other 에 'naver-site-verification' 으로 더합니다 */
-  verification: { google: "Wzvm2N9IyH40A72GmOb4T5B50ixK29Mx0WGfEE3Mdu4" },
+  /* 검색엔진 주인 확인 (2026-11-13 세중님 등록) — 구글 서치 콘솔 · 네이버 서치어드바이저 「HTML 태그」 값.
+     비밀이 아니라 누구나 보는 값입니다. 지우면 두 곳이 주인 확인을 다시 하라고 합니다 */
+  verification: {
+    google: "Wzvm2N9IyH40A72GmOb4T5B50ixK29Mx0WGfEE3Mdu4",
+    other: { "naver-site-verification": "ecb94855f5126c0a737c9c62b1b95ac906ca80b0" },
+  },
 };
 
 /* 휴대폰 주소창 색 — 새 디자인 헤더가 흰색이라 흰색 (2026-11-11 · site.webmanifest 의 theme_color 와 한 쌍) */
