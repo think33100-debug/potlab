@@ -21,7 +21,12 @@ export const dynamic = 'force-dynamic';   // 공고는 자주 바뀝니다
 
 /* 탭 제목 — 서비스 이름은 RAPO 입니다 */
 /* 검색엔진에 올리는 쪽입니다 (2026-11-13 세중님 「검색 가능하게」 · lib/seo.ts 색인길과 짝) */
-export const metadata: Metadata = { title: 'RAPO · 채용 공고', robots: 색인메타, alternates: { canonical: '/jobs' } };
+/* 제목·설명 글은 검색 결과에 그대로 뜹니다 — 2026-11-13 세중님 키워드(물리치료사·작업치료사 채용·구인·취업)를 넣었습니다 */
+export const metadata: Metadata = {
+  title: '물리치료사·작업치료사 채용공고 · 구인 · 취업 | RAPO',
+  description: '물리치료사·작업치료사 채용공고를 모았어요. 공공기관·대학병원·종합병원 구인 공고를 마감일·지역·고용형태로 한눈에 보고, 취업 준비에 필요한 병원 정보도 함께 볼 수 있어요.',
+  robots: 색인메타, alternates: { canonical: '/jobs' },
+};
 
 /* 공고 목록 — 새 디자인 「U02 · 공고 목록」 (2026-11-11 대표 지시: 피그마 우선).
 

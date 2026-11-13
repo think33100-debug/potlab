@@ -1,11 +1,11 @@
 import type { MetadataRoute } from 'next';
 import { 대표주소 } from '@/lib/site-url';
-import { 색인길 } from '@/lib/seo';
+import { 색인길, 안내글길 } from '@/lib/seo';
 import { supabase } from '@/lib/supabase';
 import { TERMS } from '@/lib/terms';
 
 /* 검색엔진에 알려 주는 쪽 목록 (2026-11-13 세중님 「검색 가능하게」).
-   lib/seo.ts 의 색인길 · 약관 세 장 · **마감 전 공고 전부**(세중님 「공고 글도 검색되게」).
+   lib/seo.ts 의 색인길 · 안내 글(안내글길) · 약관 세 장 · **마감 전 공고 전부**(세중님 「공고 글도 검색되게」).
    구글 서치 콘솔·네이버 서치어드바이저에 이 주소를 냅니다 — https://www.rapojob.co.kr/sitemap.xml
 
    공고 목록은 DB 창구 sitemap_jobs() 가 줍니다 — 공고 번호와 올린 날 두 칸뿐입니다
@@ -33,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
   return [
     ...색인길.map((p) => ({ url: 대표주소 + p })),
+    ...안내글길.map((p) => ({ url: 대표주소 + p })),
     ...Object.keys(TERMS).map((doc) => ({ url: `${대표주소}/terms/${doc}` })),
     ...공고,
   ];

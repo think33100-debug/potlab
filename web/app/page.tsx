@@ -14,7 +14,12 @@ export const dynamic = 'force-dynamic';
 
 /* 탭 제목 — 서비스 이름은 RAPO 입니다. 다른 화면의 제목은 app/layout.tsx 가 정합니다 */
 /* 검색엔진에 올리는 쪽입니다 (2026-11-13 세중님 「검색 가능하게」 · lib/seo.ts 색인길과 짝) */
-export const metadata: Metadata = { title: 'RAPO · 채용공고', robots: 색인메타, alternates: { canonical: '/' } };
+/* 제목·설명 글은 검색 결과에 그대로 뜹니다 — 2026-11-13 세중님 키워드(물리치료사·작업치료사 채용·구인·취업)를 넣었습니다 */
+export const metadata: Metadata = {
+  title: 'RAPO 라포 · 물리치료사·작업치료사 채용공고',
+  description: '물리치료사·작업치료사 채용·구인 공고를 한곳에서. 공공기관·대학병원·종합병원 취업 공고를 모아 병원 정보와 함께 보여 드려요.',
+  robots: 색인메타, alternates: { canonical: '/' },
+};
 
 /* 홈 — 새 디자인 「U01 · 홈」 (2026-11-11 대표 지시: 실제 앱에 바로 적용).
 

@@ -65,5 +65,7 @@ export function 새틀화면(pathname: string): boolean {
     || pathname === '/contact'
     /* 약관·개인정보 글(/terms/<문서>)도 2026-11-13 부터 새 틀(자기 뒤로 줄 · 세중님 「옛날 느낌」) */
     || pathname.startsWith('/terms/')
+    /* 안내 글(/guide/…)도 2026-11-13 부터 새 틀(홈의 위쪽 줄 · 글 화면 틀) */
+    || pathname.startsWith('/guide/')
     || pathname.startsWith('/design-preview');
 }
