@@ -186,9 +186,12 @@ function One({
   const [열림, set열림] = useState(false);
   const 닫기 = useCallback(() => set열림(false), []);
   /* 내 댓글이면 삭제하기 · 남의 댓글이면 신고하기 — 글 메뉴와 같은 가름입니다 (components/post-actions.tsx PostMenu) */
+  /* ★ 2026-11-13 세중님 — 관리자에게는 남의 댓글에도 「삭제하기 (관리자)」. DB 규칙 「내 댓글만 지웁니다」가 글쓴이 또는 is_admin() 을 받습니다 */
+  const { isAdmin } = useAuth();
   const 항목 = mine
     ? [{ 글: '삭제하기', 할일: () => onRemove(c.id), 붉게: true }]
-    : onReport ? [{ 글: '신고하기', 할일: () => onReport(c.id) }] : [];
+    : [...(onReport ? [{ 글: '신고하기', 할일: () => onReport(c.id) }] : []),
+       ...(isAdmin ? [{ 글: '삭제하기 (관리자)', 할일: () => onRemove(c.id), 붉게: true }] : [])];
   return (
     <div className="flex items-start gap-[10px]">
       <Avatar value={c.profiles?.avatar} size="c32" className="mt-[4px]" />

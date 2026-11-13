@@ -93,7 +93,7 @@ export function PostMenu({ id, mine, title }: {
      판정은 DB 의 공개글 보기가 합니다 (세중님 결정 ㉯) */
   id: number; mine: boolean; title: string;
 }) {
-  const { loading, session, me } = useAuth();
+  const { loading, session, me, isAdmin } = useAuth();
   const toast = useToast();
   const router = useRouter();
   const needLogin = useNeedLogin();
@@ -178,7 +178,10 @@ export function PostMenu({ id, mine, title }: {
   const 내것 = !!session && mine;
   const 항목 = 내것
     ? [{ 글: '공유하기', 할일: share }, { 글: '링크 복사', 할일: copyLink }, { 글: '삭제하기', 할일: remove, 붉게: true }]
-    : [{ 글: '공유하기', 할일: share }, { 글: '링크 복사', 할일: copyLink }, { 글: '신고하기', 할일: report }, { 글: '차단하기', 할일: block, 붉게: true }];
+    : [{ 글: '공유하기', 할일: share }, { 글: '링크 복사', 할일: copyLink }, { 글: '신고하기', 할일: report }, { 글: '차단하기', 할일: block, 붉게: true },
+       /* ★ 2026-11-13 세중님 「커뮤니티 글 지울 수 없나 마스터가」 — 관리자(마스터 계정이 「관리자」 역할일 때 포함)에게 남의 글 삭제.
+          막는 자리는 DB 입니다(hide_post 가 글쓴이 또는 is_admin() 만 받음). 지운 글은 /admin/posts 에서 되살릴 수 있습니다 */
+       ...(isAdmin ? [{ 글: '삭제하기 (관리자)', 할일: remove, 붉게: true }] : [])];
 
   return (
     <>
