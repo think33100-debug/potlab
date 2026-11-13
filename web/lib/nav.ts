@@ -67,6 +67,8 @@ export function 새틀화면(pathname: string): boolean {
     || pathname.startsWith('/terms/')
     /* 소셜 로그인에서 돌아오는 자리(/auth/callback)도 2026-11-13 부터 새 틀 — 옛 위쪽 줄과 그 「로그인」 단추가 잠깐 비쳤음 */
     || pathname === '/auth/callback'
+    /* 운영 전용 계정 로그인(/master)도 2026-11-13 부터 새 틀 — 세중님 「마스터 키 모드 들어갈 때 예전 화면」 */
+    || pathname === '/master'
     /* 안내 글(/guide/…)도 2026-11-13 부터 새 틀(홈의 위쪽 줄 · 글 화면 틀) */
     || pathname.startsWith('/guide/')
     || pathname.startsWith('/design-preview');

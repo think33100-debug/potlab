@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Logo } from '@/components/logo';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 마스터 계정 로그인 — 운영 전용입니다 (2026-10-09).
@@ -81,40 +80,43 @@ export default function Master() {
       : `맞지 않습니다. ${최대 - 센}번 남았어요.`);
   };
 
+  /* ★ 2026-11-13 세중님 「관리자 마스터 키 모드 들어갈 때 예전 화면 뜨더라」 — 새 틀(lib/nav.ts 새틀화면) · RAPO 토큰으로.
+     동작(잠금 · 틀린 횟수 · 무엇이 틀렸는지 안 알림)은 그대로입니다 */
+  const 칸꼴 = 'rapo-type-t5-regular h-(--rapo-dimension-x13) w-full rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) '
+    + 'border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) '
+    + 'placeholder:text-(color:--rapo-color-fg-placeholder) focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-(--rapo-color-stroke-focus-ring)';
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <div className="mx-auto w-full max-w-[22rem]">
-        <Logo className="!text-h1" />
-        <p className="mt-2 text-lg text-mute">운영 전용 계정</p>
+    <main data-rapo className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x6)">
+      <div className="flex w-full max-w-[340px] flex-col gap-(--rapo-dimension-x6)">
+        <div className="flex flex-col items-center gap-(--rapo-dimension-x3)">
+          <div className="relative h-[31.5px] w-[120px] shrink-0">
+            {/* eslint-disable @next/next/no-img-element -- Figma 원본 SVG 그대로 (가로형 로고 · components/rapo/home-notice.tsx 와 같은 꼴) */}
+            <img src="/rapo/home/logo-symbol.svg" alt="" className="absolute left-0 top-0 h-[31.5px] w-[32.25px]" />
+            <img src="/rapo/home/logo-wordmark.svg" alt="RAPO" className="absolute bottom-[24.37%] left-[34.21%] right-[0.04%] top-[24.67%]" />
+            {/* eslint-enable @next/next/no-img-element */}
+          </div>
+          <p className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral-muted)">운영 전용 계정</p>
+        </div>
 
-        <form
-          className="mt-8 space-y-4"
-          onSubmit={(e) => { e.preventDefault(); 들어가기(); }}
-        >
-          <input
-            type="email" value={메일} onChange={(e) => set메일(e.target.value)}
-            autoComplete="username" placeholder="메일 주소"
-            className="w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
-          <input
-            type="password" value={비번} onChange={(e) => set비번(e.target.value)}
-            autoComplete="current-password" placeholder="비밀번호"
-            className="w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
-
-          <button
-            type="submit" disabled={도는중 || 남은초 > 0}
-            className="w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white
-                       hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-50">
+        <form className="flex flex-col gap-(--rapo-dimension-x3)" onSubmit={(e) => { e.preventDefault(); 들어가기(); }}>
+          <input type="email" value={메일} onChange={(e) => set메일(e.target.value)}
+            autoComplete="username" placeholder="메일 주소" aria-label="메일 주소" className={칸꼴} />
+          <input type="password" value={비번} onChange={(e) => set비번(e.target.value)}
+            autoComplete="current-password" placeholder="비밀번호" aria-label="비밀번호" className={칸꼴} />
+          <button type="submit" disabled={도는중 || 남은초 > 0}
+            className="rapo-type-t5-bold mt-(--rapo-dimension-x1) flex h-(--rapo-dimension-x13) w-full items-center justify-center rounded-(--rapo-radius-r3)
+                       bg-(--rapo-color-bg-navy-solid) text-(color:--rapo-color-fg-on-navy-solid) active:bg-(--rapo-color-bg-navy-solid-pressed) disabled:opacity-50">
             {남은초 > 0
               ? `잠겼어요 — ${Math.floor(남은초 / 60)}분 ${남은초 % 60}초`
               : 도는중 ? '들어가는 중…' : '들어가기'}
           </button>
         </form>
 
-        {탈 && <p className="mt-4 text-lg text-brand-red-dark">{탈}</p>}
+        {탈 && <p role="alert" className="rapo-type-t4-medium text-center text-(color:--rapo-color-fg-brand-contrast)">{탈}</p>}
 
-        <p className="mt-8 text-sm text-mute">
+        <p className="rapo-type-t3-regular break-keep text-center text-(color:--rapo-color-fg-neutral-muted)">
           여기로는 가입할 수 없어요. 치료사·학생이시면{' '}
-          <a href="/login" className="underline underline-offset-4">카카오·네이버로 시작하기</a>.
+          <a href="/login" className="underline underline-offset-2">카카오·네이버로 시작하기</a>.
         </p>
       </div>
     </main>
