@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import type { 경쟁률줄, 모집상태, 병원보수 } from '@/components/rapo/rapo-job-detail';
 import { RapoJobDetailView, 못읽은칸말 } from '@/components/rapo/rapo-job-detail-view';
 import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말, 조교연구말, 직군태그, 공유제목,
-  보수요약, 근무기간말, 인턴태그, 기관태그, 보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
+  보수요약, 근무기간말, 인턴태그, 기관태그, 직군띄어쓰기, 보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
 import type { HospitalStat } from '@/lib/hospital';
 import { jobViews } from '@/lib/job-views';
 import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
@@ -186,7 +186,9 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     (detail['기관홈'] ?? detail['기관홈페이지']) as string | undefined,
     detail['채용게시판'] as string | undefined, j.id, 병원);
   const 지원방법 = 지원방법말(detail['접수방법'] as string | undefined);
-  const 지원자격: string | null = (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
+  /* 직군 이름이 띄어 적힌 원문(「물리치료 사」)은 붙여 보여 줍니다 — lib/job-state.ts 직군띄어쓰기 (2026-11-13 세중님) */
+  const 자격원문: string | null = (뽑은값?.['지원자격'] ?? detail['지원자격'] ?? null) || null;
+  const 지원자격 = 자격원문 ? 직군띄어쓰기(자격원문) : null;
 
   /* 포털 **상세** 칸이 날짜가 아닌 말이면(「채용시까지」) 그 말을 보입니다 (2026-10-22 대표 1번) */
   const 마감글: string | null =
