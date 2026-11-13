@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { RapoHeader } from '@/components/rapo/rapo-header';
 import { RapoButton } from '@/components/rapo/rapo-ui';
-import { 공시해, 알리미, 알리오 } from '@/lib/guide-pay';
+import { 공시해, 공시확인일, 만, 병원정보, 셈, 알리미, 알리오 } from '@/lib/guide-pay';
 import { 색인메타 } from '@/lib/seo';
 import { 그림판 } from '@/lib/site-url';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
@@ -21,9 +21,9 @@ import { OtherGuides, 단추폭, 도움말, 밑줄, 본문, 작은제목, 점붙
    ── 적는 규칙 ──────────────────────────────────────────────
    · **치료사만의 연봉이 아니라는 것**을 맨 위에 밝힙니다. 숫자를 「물리치료사 평균 연봉」처럼 부르지 않습니다.
    · 범위·가운데 값은 이 표의 숫자로 여기서 셉니다 (적어 두지 않습니다 — 표가 바뀌면 같이 바뀌게).
-   · 숫자와 단위는 한 줄에 둡니다 (RAPO노트/화면표시_규칙_1113.md 1번). 표는 360·375 폭에서 넘치지 않게 재고 올립니다. */
+   · 숫자와 단위는 한 줄에 둡니다 (RAPO노트/화면표시_규칙_1113.md 1번). 표는 360·375 폭에서 넘치지 않게 재고 올립니다.
+   · 표의 병원 이름을 누르면 그 병원 쪽([slug]/page.tsx)으로 갑니다 (2026-11-13 세중님 「거창적십자병원 연봉 이런 식으로」). */
 
-const 기준일 = '2026년 11월 13일';
 const 제목 = `물리치료사·작업치료사 연봉, 공공병원 공시로 보기 | ${공시해}년 보건직 평균·신입 초임`;
 const 설명 = `물리치료사·작업치료사 연봉이 궁금할 때 볼 공공병원 공시 자료예요. 지방의료원·적십자병원 ${알리미.length}곳의 보건직 평균 연봉과 국립대병원 등 ${알리오.length}곳의 신입 초임(${공시해}년)을 병원별로 정리했어요.`;
 
@@ -34,15 +34,6 @@ export const metadata = {
   alternates: { canonical: '/guide/therapist-salary' },
   openGraph: { type: 'article', siteName: 'RAPO', title: 제목, description: 설명, images: [`/api/og/site?v=${그림판}`] },
 };
-
-/** 원 → 「6,330」(만 원 단위 · 반올림) */
-const 만 = (원: number) => Math.round(원 / 10000).toLocaleString('ko-KR');
-const 가운데 = (xs: readonly number[]) => {
-  const s = [...xs].sort((a, b) => a - b);
-  const m = s.length >> 1;
-  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
-};
-const 셈 = (xs: readonly number[]) => ({ 낮: Math.min(...xs), 높: Math.max(...xs), 가운데: 가운데(xs) });
 
 const 보건직셈 = 셈(알리미.map((r) => r[1]));
 const 초임셈 = 셈(알리오.map((r) => r[1]));
@@ -85,7 +76,7 @@ export default async function TherapistSalaryGuide() {
             물리치료사·작업치료사 연봉, 공공병원 공시로 보기
           </h1>
           <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-            {점붙임(`${공시해}년 공시 자료 · ${기준일} 확인`)}
+            {점붙임(`${공시해}년 공시 자료 · ${공시확인일} 확인`)}
           </p>
           <p className={본문}>
             물리치료사·작업치료사 연봉이 궁금할 때 참고할 수 있는 숫자를 모았어요. 공공병원이 스스로 공시한 보수 자료예요.
@@ -132,7 +123,7 @@ export default async function TherapistSalaryGuide() {
             <tbody>
               {알리미.map(([이름, 보건직, 신입]) => (
                 <tr key={이름} className={줄선}>
-                  <th scope="row" className={이름칸}>{이름}</th>
+                  <th scope="row" className={이름칸}><Link href={`/guide/therapist-salary/${병원정보[이름].슬러그}`} className={밑줄}>{이름}</Link></th>
                   <td className={숫자칸}><Amount 원={보건직} 굵게 /></td>
                   <td className={숫자칸}><Amount 원={신입} /></td>
                 </tr>
@@ -161,7 +152,7 @@ export default async function TherapistSalaryGuide() {
             <tbody>
               {알리오.map(([이름, 초임]) => (
                 <tr key={이름} className={줄선}>
-                  <th scope="row" className={이름칸}>{이름}</th>
+                  <th scope="row" className={이름칸}><Link href={`/guide/therapist-salary/${병원정보[이름].슬러그}`} className={밑줄}>{이름}</Link></th>
                   <td className={숫자칸}><Amount 원={초임} 굵게 /></td>
                 </tr>
               ))}
