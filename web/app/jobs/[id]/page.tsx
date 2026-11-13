@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import type { 경쟁률줄, 모집상태, 병원보수 } from '@/components/rapo/rapo-job-detail';
 import { RapoJobDetailView, 못읽은칸말 } from '@/components/rapo/rapo-job-detail-view';
 import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말, 조교연구말, 직군태그, 공유제목,
-  보수요약, 근무기간말, 인턴태그, 보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
+  보수요약, 근무기간말, 인턴태그, 기관태그, 보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
 import type { HospitalStat } from '@/lib/hospital';
 import { jobViews } from '@/lib/job-views';
 import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
@@ -240,7 +240,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       shareTitle={공유제목(기관이름말(j.org_name), j.job_group, detail['조교연구'] as string | undefined, j.title)}
       identity={{
         org: 기관, orgArt: 기관그림(j.org_name || j.id), 상태, title: j.title,
-        tags: 태그(j.employ_type || '공고문 참고', 조교연구말(detail['조교연구']), 인턴태그(j.is_intern, j.employ_type), 직군태그(j.job_group, detail['조교연구'] as string | undefined)),
+        tags: 태그(...기관태그(detail['기관분류']), j.employ_type || '공고문 참고', 조교연구말(detail['조교연구']), 인턴태그(j.is_intern, j.employ_type), 직군태그(j.job_group, detail['조교연구'] as string | undefined)),
         views: views[j.id] ?? null, ...식별인원, 마감: 식별마감,
       }}
       pay={{ 값: 요약?.값 ?? 연봉말(연봉원문), 덧말: 연봉덧말 }}
