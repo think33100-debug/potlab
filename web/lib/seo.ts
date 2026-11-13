@@ -9,7 +9,9 @@
    ★ 여기에 쪽을 더하면 검색에 그 쪽이 뜹니다 — 더하기 전에 세중님께 */
 
 /** 딱 그 주소만 올리는 쪽 (/jobs?직군=… 같은 걸러 보기는 주소 뒤 ?만 다르므로 같은 쪽입니다) */
-export const 색인길 = ['/', '/jobs', '/contact'] as const;
+/* ★ 2026-11-13 세중님 — 커뮤니티 · 교육·학술 · 병원 찾기 첫 화면도 올립니다(비회원·로봇에게는 맛보기 화면).
+   네이버 검색 결과의 메뉴 줄(사이트링크)에 붙을 수 있게 — 로봇이 못 여는 화면은 붙지 않습니다 */
+export const 색인길 = ['/', '/jobs', '/contact', '/community', '/edu', '/orgs'] as const;
 
 /** 아래 길까지 올리는 쪽 — 약관 세 장 (/terms/service · privacy · community) · 안내 글 (/guide/…) */
 export const 색인아래길 = ['/terms/', '/guide/'] as const;
