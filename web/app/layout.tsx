@@ -20,6 +20,9 @@ import { SURFACE_SCRIPT, Surface } from "./surface";
 import { ToastProvider } from "./toast";
 import "./globals.css";
 
+/* 아이콘 판 — 아이콘 그림을 바꾸면 올립니다. 브라우저가 옛 아이콘을 붙들지 않게 주소 끝에 붙습니다 (2026-11-13) */
+const 아이콘판 = "rapo1113";
+
 export const metadata: Metadata = {
   /* 공유한 링크의 미리보기 그림 주소를 절대 주소로 만들어 줍니다.
      이게 없으면 미리보기 그림(/api/og/site 등)이 상대 주소로 나가 카톡이 그림을 못 찾습니다.
@@ -37,15 +40,19 @@ export const metadata: Metadata = {
     images: [`/api/og/site?v=${그림판}`],
   },
   twitter: { card: "summary_large_image", images: [`/api/og/site?v=${그림판}`] },
-  /* 브랜드 명세서 7번 — 파비콘·홈 화면 아이콘·PWA */
+  /* 브랜드 명세서 7번 — 파비콘·홈 화면 아이콘·PWA.
+     ★ 2026-11-13 세중님 「파비콘 아직 옛날 거」 — 그림은 11/11 에 RAPO 로 바뀌었는데, 브라우저가 옛 POTJOB 아이콘을
+       오래 붙들고 있었습니다(파비콘은 따로 오래 기억합니다). 주소 끝에 판(?v=)을 붙여 새 주소로 다시 받게 합니다.
+       아이콘 그림을 또 바꾸면 아이콘판을 올립니다 */
   icons: {
     icon: [
-      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: `/icons/favicon-32.png?v=${아이콘판}`, sizes: "32x32", type: "image/png" },
+      { url: `/icons/favicon-16.png?v=${아이콘판}`, sizes: "16x16", type: "image/png" },
+      { url: `/favicon.ico?v=${아이콘판}`, sizes: "48x48", type: "image/x-icon" },
     ],
-    apple: [{ url: "/icons/apple-touch-icon-180.png", sizes: "180x180" }],
+    apple: [{ url: `/icons/apple-touch-icon-180.png?v=${아이콘판}`, sizes: "180x180" }],
   },
-  manifest: "/site.webmanifest",
+  manifest: `/site.webmanifest?v=${아이콘판}`,
   appleWebApp: { title: "RAPO" },
   /* ★ 2026-11-11 — 클로즈드 베타 동안 검색엔진에 안 올립니다 (기본값).
      2026-11-13 세중님 「검색 가능하게」 — 비회원도 보는 쪽(홈·공고 목록·문의·약관)만 자기 metadata 로 덮어 엽니다 (lib/seo.ts) */
