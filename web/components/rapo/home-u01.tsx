@@ -273,9 +273,10 @@ function JobCurations() {
 
 /* ── 라포 더 둘러보기 · 「RAPO / Home / 라포 더 둘러보기 / 통합 툴킷」 954:827 ──
    가는 곳은 지금 앱에 있는 화면만 씁니다(lib/routes.ts). 「공시 병원 급여」는
-   병원정보(/orgs)로 둡니다 — 맞는 자리인지 확인 필요(진행 파일 질문). */
+   연봉 안내 글(/guide/therapist-salary · 공공병원 60곳의 공시 보수 표)로 갑니다 (2026-11-13) —
+   전에는 맞는 화면이 없어 병원 찾기(/orgs)로 보냈습니다. 병원 찾기는 그 글의 「병원별로 찾아보기」 단추로 이어집니다. */
 const 서비스 = [
-  { label: '공시 병원 급여', href: '/orgs',      art: { src: '/rapo/home/graphic-pay-28.svg',       w: 25.8461, l: 0.92, t: 2.42 } },
+  { label: '공시 병원 급여', href: '/guide/therapist-salary', art: { src: '/rapo/home/graphic-pay-28.svg',       w: 25.8461, l: 0.92, t: 2.42 } },
   { label: '입사 스펙 비교', href: '/spec',      art: { src: '/rapo/home/graphic-cert-28.svg',      w: 28,      l: 0,    t: 0 } },
   { label: '교육·학술',      href: '/edu',       art: { src: '/rapo/home/graphic-edu-28.svg',       w: 28.0002, l: 0,    t: -0.35 } },
   { label: '계산기',         href: '/tools',     art: { src: '/rapo/home/graphic-calc-28.svg',      w: 27.0967, l: 0.11, t: 0.11 } },

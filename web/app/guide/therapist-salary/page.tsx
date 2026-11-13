@@ -188,6 +188,8 @@ export default async function TherapistSalaryGuide() {
             공시 자료가 있는 병원은 공고 화면에서 그 병원의 연봉을 함께 볼 수 있어요.
           </p>
           <RapoButton href="/jobs" full>RAPO 채용 공고 보기</RapoButton>
+          {/* 홈 「공시 병원 급여」가 이 글로 오므로(2026-11-13), 전에 그 칸이 가던 병원 찾기를 여기서 잇습니다 */}
+          <RapoButton href="/orgs" tone="outline" full>병원별로 찾아보기</RapoButton>
         </section>
 
         <OtherGuides 지금="/guide/therapist-salary" />
