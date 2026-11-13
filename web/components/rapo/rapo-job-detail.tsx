@@ -112,7 +112,9 @@ function 식별칸({ icon, iconW, iconH, label, v }: { icon: string; iconW: numb
 /* 03 보수 — 「공고 명시 보수」 (RAPO / Detail / Pay summary 517:392 · 보수 비공개 1210:1072).
    잠김이면 비회원 원본 글 그대로입니다. 금액 글이 길면(「월급 230만원~300만원」) 한 단계 작은 글꼴 */
 export function RapoPayCard({ 잠김, 값, 덧말 }: { 잠김: boolean; 값: string; 덧말: string | null }) {
-  const 긴값 = 값.length > 12;
+  /* 열 자부터 한 단계 작게 (2026-11-13) — 12 자 기준일 때 「월 350~360만원」(11자)이 360 폭에서 「월 / 350~360만원」으로 갈렸습니다.
+     「약 4,900만원」「월 약 176만원」(9자)은 큰 글씨 그대로 한 줄 */
+  const 긴값 = 값.length > 9;
   return (
     <div className="relative flex flex-col gap-(--rapo-dimension-x2) overflow-hidden rounded-(--rapo-radius-r3)
                     bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
