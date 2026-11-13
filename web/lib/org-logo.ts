@@ -8,7 +8,13 @@
 
 const 판 = '1';   // 표의 그림을 바꾸면 올립니다 (브라우저가 오래 붙들고 있습니다)
 
+/* 2026-11-13 세중님 「일단 내리자」 — 법률 검토(AI 답): 치매센터 심볼은 약관상 승인 없는 수정·배포 제한 · 배경을 뗐음,
+   보건소 표지는 원본 파일의 민간 앱 사용 조건 미확인. 허락을 받을 때까지 끕니다. 그림은 표에 그대로 둡니다.
+   다시 켤 때는 허락받은 열쇠만 여기에 넣습니다 (예: ['health']) */
+const 켠로고: readonly string[] = [];
+
 export function 기관로고(이름: string | null | undefined): string | null {
+  if (!켠로고.length) return null;
   const n = (이름 ?? '').replace(/\s+/g, '');
   if (!n || /(병원|요양원|의원)$/.test(n) || /요양병원/.test(n)) return null;
   const 열쇠 = /치매(안심)?센터/.test(n) ? 'dementia' : /보건(소|의료원|지소)/.test(n) ? 'health' : null;
