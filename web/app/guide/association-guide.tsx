@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { RapoHeader } from '@/components/rapo/rapo-header';
 import { RapoButton } from '@/components/rapo/rapo-ui';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
-import { OtherGuides, 도움말, 밑줄, 본문, 작은제목 } from './guide-parts';
+import { OtherGuides, 단추폭, 도움말, 밑줄, 본문, 작은제목, 점붙임 } from './guide-parts';
 
 /* 협회·학회 안내 글의 틀 (2026-11-13 세중님 「협회는 바로가기 만들어서 연관성을」 · 「학회 설명을 간략하게 적고 바로가기로」).
    작업치료 쪽(app/guide/ot-associations)과 물리치료 쪽(app/guide/pt-associations)이 같은 틀에 자료만 달리 넣습니다.
@@ -55,7 +55,7 @@ export async function AssociationGuide({ 자료 }: { 자료: 협회안내자료 
         <section className="flex flex-col gap-(--rapo-dimension-x3)">
           <h1 className="rapo-type-screen-title break-keep text-(color:--rapo-color-fg-neutral)">{자료.큰제목}</h1>
           <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-            하는 일 · 공식 사이트 바로가기 · {자료.기준일} 기준
+            {점붙임(`하는 일 · 공식 사이트 바로가기 · ${자료.기준일} 기준`)}
           </p>
           <p className={본문}>{자료.소개}</p>
         </section>
@@ -102,12 +102,13 @@ export async function AssociationGuide({ 자료 }: { 자료: 협회안내자료 
 
         <section aria-labelledby="안내-학회들" className="flex flex-col gap-(--rapo-dimension-x4)">
           <h2 id="안내-학회들" className={작은제목}>{자료.학회머리}</h2>
-          <ul className="flex flex-col gap-(--rapo-dimension-x2)">
+          {/* 큰 화면(768 이상)에서는 두 줄로 나란히 — 짧은 글이 든 칸이 화면 끝까지 늘어나 어색했습니다 (2026-11-13 세중님 「피씨 모드」) */}
+          <ul className="grid gap-(--rapo-dimension-x2) md:grid-cols-2">
             {자료.학회들.map((h) => (
               <li key={h.이름}
                 className="flex flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x5) py-(--rapo-dimension-x4)">
                 <h3 className="rapo-type-t5-bold break-keep text-(color:--rapo-color-fg-neutral) [overflow-wrap:anywhere]">{h.이름}</h3>
-                {h.분야 && <p className={도움말}>{h.분야}</p>}
+                {h.분야 && <p className={도움말}>{점붙임(h.분야)}</p>}
                 {h.주소 && (
                   <a href={h.주소} target="_blank" rel="noopener noreferrer" aria-label={`${h.이름} 공식 사이트 (새 창)`}
                     className={`rapo-type-t4-medium self-start text-(color:--rapo-color-fg-neutral) [overflow-wrap:anywhere] ${밑줄}`}>
@@ -125,7 +126,7 @@ export async function AssociationGuide({ 자료 }: { 자료: 협회안내자료 
           <p className={본문}>
             RAPO(라포)는 물리치료사·작업치료사 채용 공고를 모아 보여 주는 사이트예요. 공공기관·대학병원·종합병원 공고를 중심으로 모아요.
           </p>
-          <RapoButton href="/jobs" full>RAPO 채용 공고 보기</RapoButton>
+          <RapoButton href="/jobs" full className={단추폭}>RAPO 채용 공고 보기</RapoButton>
         </section>
 
         <OtherGuides 지금={자료.지금} />
