@@ -53,7 +53,7 @@ import { 공공부르기, 한도알리기, 한도들 } from './공공데이터�
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
 import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 고용형태판정, 고용형태고르기, 고용형태코드,
-  그림OCR인가, OCR근거, OCR보류사유 } from './공고문읽기.mjs';
+  그림OCR인가, OCR근거, OCR보류사유, 더담을칸 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정한것빼기, 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
@@ -594,6 +594,7 @@ const 줄만들기 = (v) => {
     ...(칸.지원자격 ? { 지원자격: 칸.지원자격 } : {}),
     ...(칸.근무지 ? { 근무지: 칸.근무지 } : {}),
     ...(칸.예상연봉 ? { 예상연봉: 칸.예상연봉 } : {}),
+    ...더담을칸(칸),   /* 근무기간 · 근무기간덧말 · 보수덧말 (2026-11-13) */
     근거: 칸.근거 || {},
     읽은법: 'kordoc',
   } : null;
