@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next';
 import { 대표주소 } from '@/lib/site-url';
 import { 색인길, 안내글길 } from '@/lib/seo';
+import { 병원정보 } from '@/lib/guide-pay';
+import { 물리치료학교들, 작업치료학교들 } from '@/lib/guide-schools';
 import { supabase } from '@/lib/supabase';
 import { TERMS } from '@/lib/terms';
 
@@ -34,6 +36,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...색인길.map((p) => ({ url: 대표주소 + p })),
     ...안내글길.map((p) => ({ url: 대표주소 + p })),
+    /* 안내 글 아래의 한 곳짜리 쪽 — 병원별 연봉 · 학교별 학과 (2026-11-13) */
+    ...Object.values(병원정보).map((h) => ({ url: `${대표주소}/guide/therapist-salary/${h.슬러그}` })),
+    ...작업치료학교들.map((s) => ({ url: `${대표주소}/guide/ot-schools/${s.슬러그}` })),
+    ...물리치료학교들.map((s) => ({ url: `${대표주소}/guide/pt-schools/${s.슬러그}` })),
     ...Object.keys(TERMS).map((doc) => ({ url: `${대표주소}/terms/${doc}` })),
     ...공고,
   ];

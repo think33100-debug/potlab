@@ -25,6 +25,8 @@ export const 안내글들: readonly { 주소: string; 이름: string; 꼬리말?
   { 주소: '/guide/ot-associations', 이름: '작업치료사협회와 작업치료 학회 안내', 꼬리말: '작업치료사협회' },
   { 주소: '/guide/pt-associations', 이름: '물리치료사협회와 물리치료 학회 안내', 꼬리말: '물리치료사협회' },
   { 주소: '/guide/therapist-salary', 이름: '물리치료사·작업치료사 연봉, 공공병원 공시로 보기', 꼬리말: '공공병원 연봉' },
+  { 주소: '/guide/ot-schools', 이름: '전국 작업치료(학)과 대학', 꼬리말: '작업치료학과' },
+  { 주소: '/guide/pt-schools', 이름: '전국 물리치료(학)과 대학', 꼬리말: '물리치료학과' },
 ];
 export const 안내글길 = 안내글들.map((g) => g.주소);
 
