@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { RapoJob, RapoJobLists, RapoSortKey } from '@/components/rapo/rapo-job-list';
-import { 기관이름말, 마감배지, 조교연구말, 직군태그 } from './job-state';
+import { 기관이름말, 마감배지, 조교연구말, 직군태그, 인턴태그 } from './job-state';
 import { supabase, type JobListItem, type 맛보기공고 } from './supabase';
 
 /* 새 홈(「U01 · 홈」)의 「채용 공고」 칸에 넣을 줄 (2026-11-11).
@@ -47,7 +47,7 @@ export function 목록줄(r: JobListItem): RapoJob {
   return {
     id: r.id, org: 기관이름말(r.org_name), orgArt: 기관그림(r.org_name || r.id), title: r.title,
     pay: null,
-    tags: 태그(r.올림 && '추천', r.is_intern && '체험형 인턴', 조교연구말(r.조교연구), r.지역보임, r.employ_type || '공고문 참고', 직군태그(r.job_group, r.조교연구)),
+    tags: 태그(r.올림 && '추천', 인턴태그(r.is_intern, r.employ_type), 조교연구말(r.조교연구), r.지역보임, r.employ_type || '공고문 참고', 직군태그(r.job_group, r.조교연구)),
     deadline: 마감배지(r.apply_to, r.마감표시, r.apply_to_time).text,
   };
 }
@@ -86,7 +86,7 @@ export async function getRapoHomeJobs(sb: SupabaseClient): Promise<RapoHomeJobs>
       title: r.title,
       pay: null,
       /* 지역은 지역보임 을 읽습니다 — 제목과 같은 계산입니다 (lib/supabase.ts) */
-      tags: 태그(조교연구말(r.조교연구), r.지역보임, r.employ_type, 직군태그(r.job_group, r.조교연구), r.is_intern && '체험형 인턴'),
+      tags: 태그(조교연구말(r.조교연구), r.지역보임, r.employ_type, 직군태그(r.job_group, r.조교연구), 인턴태그(r.is_intern, r.employ_type)),
       likes: null,
       views: 본수(views, r.id),
       deadline: 마감배지(r.apply_to, r.마감표시, r.apply_to_time).text,

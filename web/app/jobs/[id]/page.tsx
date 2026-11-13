@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import type { 경쟁률줄, 모집상태, 병원보수 } from '@/components/rapo/rapo-job-detail';
 import { RapoJobDetailView, 못읽은칸말 } from '@/components/rapo/rapo-job-detail-view';
 import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말, 조교연구말, 직군태그, 공유제목,
-  보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
+  보수요약, 근무기간말, 인턴태그, 보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
 import type { HospitalStat } from '@/lib/hospital';
 import { jobViews } from '@/lib/job-views';
 import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
@@ -166,7 +166,18 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     (뽑은값?.['예상연봉'] ?? detail['연봉'] ?? detail['예상연봉'] ?? null) || null;
   /* 워크넷(고용24) 공고 — 숫자가 1호봉 기준이라 고정 안내를 붙입니다 (2026-10-07 대표 지시) */
   const 워크넷 = j.id.startsWith('WN');
-  const 연봉덧말 = 금액있나(연봉원문) && 워크넷 ? '1호봉 예정 급여예요. 호봉 인정과 경력에 따라 달라질 수 있어요.' : null;
+  /* 문단이 통째로 들어온 보수 글은 대표 금액만 크게 · 공고문에서 읽은 조건(뽑은값.보수덧말)은 아래 작은 글로 (2026-11-13 세중님) */
+  const 요약 = 보수요약(연봉원문);
+  const 연봉덧말 = 요약?.덧말 ?? ((뽑은값?.['보수덧말'] as string | undefined) || null)
+    ?? (금액있나(연봉원문) && 워크넷 ? '1호봉 예정 급여예요. 호봉 인정과 경력에 따라 달라질 수 있어요.' : null);
+
+  /* 근무 기간 — 월 단위 (2026-11-13 세중님). 공고문에서 읽은 값 → 워크넷 상세의 계약 달 수 → 보수 문단의 「계약기간」 → 정규직 */
+  const 근무기간 = 근무기간말({
+    뽑은: 뽑은값?.['근무기간'],
+    워크넷고용형태: (뽑은값?.['워크넷상세근거'] as unknown as { 고용형태?: string } | undefined)?.고용형태 ?? null,
+    글: [연봉원문], 고용형태: j.employ_type,
+  });
+  const 근무기간덧말 = 근무기간 ? ((뽑은값?.['근무기간덧말'] as string | undefined) || null) : null;
 
   const 지원 = 지원링크(j.url, detail['접수방법'] as string | undefined,
     (detail['기관홈'] ?? detail['기관홈페이지']) as string | undefined,
@@ -226,10 +237,11 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       shareTitle={공유제목(기관이름말(j.org_name), j.job_group, detail['조교연구'] as string | undefined, j.title)}
       identity={{
         org: 기관, orgArt: 기관그림(j.org_name || j.id), 상태, title: j.title,
-        tags: 태그(j.employ_type || '공고문 참고', 조교연구말(detail['조교연구']), j.is_intern && '체험형 인턴', 직군태그(j.job_group, detail['조교연구'] as string | undefined)),
+        tags: 태그(j.employ_type || '공고문 참고', 조교연구말(detail['조교연구']), 인턴태그(j.is_intern, j.employ_type), 직군태그(j.job_group, detail['조교연구'] as string | undefined)),
         views: views[j.id] ?? null, ...식별인원, 마감: 식별마감,
       }}
-      pay={{ 값: 연봉말(연봉원문), 덧말: 연봉덧말 }}
+      pay={{ 값: 요약?.값 ?? 연봉말(연봉원문), 덧말: 연봉덧말 }}
+      근무기간={근무기간} 근무기간덧말={근무기간덧말}
       지원자격={지원자격} url={병원?.주소 ?? (j.url || null)}
       기간={{ 달: 끝?.달 ?? null, 날: 끝?.날 ?? null, 기간, 강조, 덧말: 기간덧말 }}
       접수방법={지원방법} 모집인원없음={모집인원 == null}

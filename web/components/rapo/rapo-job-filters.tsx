@@ -43,6 +43,9 @@ const 분류들: { key: 분류; icon: string; w: number; h: number; 내림: bool
   { key: '상세', icon: '/rapo/list/sliders-16.svg',   w: 13.5,    h: 13.5,    내림: false },
 ];
 
+/* 화면에 적는 분류 이름 — 「상세」는 「필터」로 적습니다 (2026-11-13 세중님) */
+const 분류이름: Record<분류, string> = { 직군: '직군', 지역: '지역', 급여: '급여', 상세: '필터' };
+
 export type 조건 = { q: string; job: string | null; sido: string | null; type?: string | null; sort?: string | null; kinds?: string[] };
 
 /* 고른 기관 분류를 이 기기에 1년 기억합니다 — 빈 목록이면 지웁니다 (lib/rapo-job-options.ts 분류쿠키) */
@@ -139,6 +142,10 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
   };
 
   const 켜짐: Record<분류, boolean> = { 직군: !!지금.job, 지역: !!지금.sido, 급여: false, 상세: !!지금.type || !!지금.kinds?.length };
+  /* 칩에 적는 글 (2026-11-13 세중님 「물리치료사 선택하면 그 칸에 물리치료사 · 상세보단 필터」).
+     직군·지역은 고른 값이 있으면 그 값을 적습니다. 「상세」는 화면 글만 「필터」로 바꿉니다(안쪽 이름은 그대로) */
+  const 칩글: Record<분류, string> = { 직군: 지금.job ?? '직군', 지역: 지금.sido ?? '지역', 급여: '급여', 상세: '필터' };
+  const 값적힘: Record<분류, boolean> = { 직군: !!지금.job, 지역: !!지금.sido, 급여: false, 상세: false };
 
   const 열기 = (k: 분류) => {
     set탭(k); set직군(지금.job ?? '전체'); set지역(지금.sido ?? '전국'); set고용(지금.type ?? '전체'); set분류(지금.kinds ?? []);
@@ -160,20 +167,23 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
       <div className="flex h-[60px] items-center gap-(--rapo-dimension-x2) px-(--rapo-dimension-x5)">
         {분류들.map((b) => (
           <button key={b.key} type="button" onClick={(e) => { 연단추.current = e.currentTarget; 열기(b.key); }} aria-haspopup="dialog"
-            aria-label={켜짐[b.key] ? `${b.key} 조건 바꾸기 (적용됨)` : `${b.key} 조건 고르기`}
-            className="group flex h-(--rapo-touch-min) min-w-0 flex-1 items-center justify-center">
+            aria-label={켜짐[b.key] ? `${분류이름[b.key]} 조건 바꾸기 (적용됨${값적힘[b.key] ? ` · ${칩글[b.key]}` : ''})` : `${분류이름[b.key]} 조건 고르기`}
+            className="group flex h-(--rapo-touch-min) min-w-0 flex-auto items-center justify-center">
             <span className={
               'flex h-(--rapo-dimension-x10) w-full items-center justify-center gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r1_5) ' +
-              'px-(--rapo-dimension-x2) ' +
+              'px-(--rapo-dimension-x1_5) ' +
               (켜짐[b.key]
                 ? 'bg-(--rapo-color-bg-brand-weak) text-(color:--rapo-color-fg-brand-contrast) group-active:bg-(--rapo-color-bg-brand-weak-pressed)'
                 : 'bg-(--rapo-color-bg-neutral-weak) text-(color:--rapo-color-fg-neutral-muted) group-active:bg-(--rapo-color-bg-neutral-weak-pressed)')
             }>
-              <span className="flex size-(--rapo-dimension-x4) items-center justify-center">
-                <RapoMaskIcon src={b.icon} w={b.w} h={b.h} />
-              </span>
+              {/* 고른 값을 적은 칩은 아이콘을 뺍니다(「물리치료사」 다섯 자가 들어갈 자리) · 375 보다 좁은 폰은 아이콘을 모두 뺍니다 — 360 폭에서 넘침 0 */}
+              {!값적힘[b.key] && (
+                <span className="flex size-(--rapo-dimension-x4) items-center justify-center max-[374px]:hidden">
+                  <RapoMaskIcon src={b.icon} w={b.w} h={b.h} />
+                </span>
+              )}
               <span className={'rapo-type-t4-medium whitespace-nowrap ' +
-                (켜짐[b.key] ? '' : 'text-(color:--rapo-color-fg-neutral)')}>{b.key}</span>
+                (켜짐[b.key] ? '' : 'text-(color:--rapo-color-fg-neutral)')}>{칩글[b.key]}</span>
               {b.내림 && (
                 <span className="flex size-(--rapo-dimension-x3) items-center justify-center">
                   <RapoMaskIcon src="/rapo/list/down-12.svg" w={7.4} h={4.4} />
@@ -205,7 +215,7 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
           </div>
 
           <div role="group" aria-label="조건 분류" className="flex gap-(--rapo-dimension-x2)">
-            {분류들.map((b) => <RapoChip key={b.key} label={b.key} on={탭 === b.key} onClick={() => set탭(b.key)} className="flex-1" />)}
+            {분류들.map((b) => <RapoChip key={b.key} label={분류이름[b.key]} on={탭 === b.key} onClick={() => set탭(b.key)} className="flex-1" />)}
           </div>
 
           {탭 === '직군' && (
