@@ -28,6 +28,9 @@ export type RapoJobDetailProps = {
   shareTitle: string;
   identity: { org: string; orgArt: string; 상태: 모집상태; title: string; tags: string[]; views: number | null; 인원: string; 인원이름?: string; 마감: string };
   pay: { 값: string; 덧말: string | null };
+  /* 근무 기간 — 월 단위 글(「6개월」) · 못 읽었으면 null → 「공고문 확인」 (2026-11-13 세중님) */
+  근무기간?: string | null;
+  근무기간덧말?: string | null;
   지원자격: string | null;
   url: string | null;
   기간: { 달: string | null; 날: string | null; 기간: string; 강조: string | null; 덧말: string | null };
@@ -92,14 +95,22 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       <RapoSectionGap />
 
       {/* 05 근무기간 — 원본의 「근무조건」(계약기간 · 가입 보험)에서 근무 기간만 남깁니다 (2026-11-12 세중님 「가입보험 빼고 · 근무기간만」).
-          수집하지 않는 값이라 「공고문 확인」(못 읽은 칸 규칙 그대로). 근무시간 줄은 대표 결정(11/11)으로 안 그립니다.
+          ★ 2026-11-13 세중님 「근무 기간을 월 단위로 · 3개월 6개월」 — 값은 page.tsx 가 고릅니다(lib/job-state.ts 근무기간말). 못 읽으면 「공고문 확인」.
+          근무시간 줄은 대표 결정(11/11)으로 안 그립니다.
           ★ 06 업무·지원 자격 칸(필수 자격 · 담당 업무 · 근무 부서)은 같은 날 세중님 결정으로 뺐습니다 — 필수 자격은 위 03 핵심 조건에 그대로 있습니다 */}
       <div id="d-work" className="scroll-mt-[64px]">
         {/* 2026-11-12 밤 세중님 「근무 기간을 근무 조건으로 · 근무 장소 · 근무 기간 2개 · 아래 근무 기관은 없애자」 */}
         <RapoDetailSection title="근무 조건">
           <div className="flex flex-col gap-(--rapo-dimension-x3)">
             <RapoGuideRow label="근무 장소">{p.주소 ? <span className="break-keep">{p.기관} · {p.주소}</span> : p.기관}</RapoGuideRow>
-            <RapoGuideRow label="근무 기간">{봄 ? <원문칸 url={p.url} /> : '로그인 후 볼 수 있어요'}</RapoGuideRow>
+            <RapoGuideRow label="근무 기간">
+              {!봄 ? '로그인 후 볼 수 있어요' : p.근무기간 ? (
+                <>
+                  <span className="rapo-type-t5-bold">{p.근무기간}</span>
+                  {p.근무기간덧말 && <span className="rapo-type-t3-regular block text-(color:--rapo-color-fg-neutral-muted)">{p.근무기간덧말}</span>}
+                </>
+              ) : <원문칸 url={p.url} />}
+            </RapoGuideRow>
           </div>
         </RapoDetailSection>
       </div>

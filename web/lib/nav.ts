@@ -63,5 +63,7 @@ export function 새틀화면(pathname: string): boolean {
     || pathname === '/compete'
     /* 문의하기(/contact)도 2026-11-13 부터 새 틀(피그마 T05 짧은 문의 안내 · 자기 뒤로 줄) */
     || pathname === '/contact'
+    /* 약관·개인정보 글(/terms/<문서>)도 2026-11-13 부터 새 틀(자기 뒤로 줄 · 세중님 「옛날 느낌」) */
+    || pathname.startsWith('/terms/')
     || pathname.startsWith('/design-preview');
 }

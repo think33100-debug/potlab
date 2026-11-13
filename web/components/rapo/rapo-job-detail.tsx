@@ -102,7 +102,8 @@ function 식별칸({ icon, iconW, iconH, label, v }: { icon: string; iconW: numb
       <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
         <dt className="rapo-type-t2-regular break-keep opacity-70">{label}</dt>
         {/* 원본 20/28 Bold — 토큰 글꼴 가운데 같은 것이 t8 입니다. 긴 값(「물리치료사 3명 · 작업치료사 1명」)은 한 단계 작게 */}
-        <dd className={(v.length > 7 ? 'rapo-type-t5-bold' : 'rapo-type-t8-bold') + ' break-keep [overflow-wrap:anywhere]'}>{v}</dd>
+        {/* 한글 다섯 자부터도 작게 — 「공고문 확인」·「채용시까지」가 t8 로는 칸(360 폭 약 90px)을 넘어 두 줄이 됐습니다 (2026-11-13) */}
+        <dd className={(v.length > 7 || (v.match(/[가-힣]/g)?.length ?? 0) >= 5 ? 'rapo-type-t5-bold' : 'rapo-type-t8-bold') + ' break-keep [overflow-wrap:anywhere]'}>{v}</dd>
       </div>
     </div>
   );
@@ -384,7 +385,7 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
   ]) : [];
   const 곳 = 시설 ? 시설보임(시설) : null;
   if (!치료사 && !보수 && 경쟁률.length === 0 && 개요.length === 0 && !구분 && !곳) return null;
-  const 배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })} : 1`);
+  const 짧은배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}:1`);
   return (
     <RapoDetailSection title={곳 ? '기관 한눈에' : '병원 한눈에'} sub="공개된 자료로 모은 숫자예요">
       {곳 && (
@@ -453,8 +454,12 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
               <span className="rapo-type-t12-bold">{g.평균 == null ? '—' : Number(g.평균).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}</span>
               {g.평균 != null && <span className="rapo-type-t6-bold ml-[4px]">: 1</span>}
             </p>
-            <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-              {g.첫해 && g.끝해 ? (g.첫해 === g.끝해 ? `${g.첫해}년` : `${g.첫해}–${g.끝해}년`) : ''} · {g.회차}번 채용 · 가장 낮음 {배(g.가장낮음)} · 가장 높음 {배(g.가장높음)}
+            {/* 두 줄로 나눠 적습니다 — 한 줄에 이으면 「가장 높음 / 13 : 1」처럼 말 가운데서 줄이 바뀌었습니다 (2026-11-13 세중님) */}
+            <p className="rapo-type-t3-regular flex flex-col text-(color:--rapo-color-fg-neutral-muted)">
+              <span className="whitespace-nowrap">
+                {g.첫해 && g.끝해 ? `${g.첫해 === g.끝해 ? `${g.첫해}년` : `${g.첫해}–${g.끝해}년`} · ` : ''}{g.회차}번 채용
+              </span>
+              <span className="whitespace-nowrap">가장 낮음 {짧은배(g.가장낮음)} · 가장 높음 {짧은배(g.가장높음)}</span>
             </p>
           </div>
           <Link href={`/compete?g=${encodeURIComponent(g.묶음키)}`}
