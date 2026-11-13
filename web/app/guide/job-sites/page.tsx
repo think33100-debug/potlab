@@ -6,6 +6,7 @@ import { 색인메타 } from '@/lib/seo';
 import { 그림판 } from '@/lib/site-url';
 import { supabase } from '@/lib/supabase';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
+import { OtherGuides, 도움말, 밑줄, 본문, 작은제목 } from '../guide-parts';
 
 /* 채용 사이트 비교 글 (2026-11-13 세중님 「땡큐오티와 굿잡피티 그리고 우리를 비교하는 글을 적어서 넣자」).
 
@@ -72,10 +73,6 @@ const 묻는말: [string, string][] = [
     '지금은 테스트 기간이에요. 카카오·네이버·애플 계정으로 가입하면 공고를 모두 볼 수 있어요.'],
 ];
 
-const 작은제목 = 'rapo-type-t7-bold break-keep text-(color:--rapo-color-fg-neutral)';
-const 본문 = 'rapo-type-article-body break-keep text-(color:--rapo-color-fg-neutral)';
-const 도움말 = 'rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)';
-const 밑줄 = 'underline underline-offset-2';
 
 export default async function JobSitesGuide() {
   const [who, 공고] = await Promise.all([serverWho(await serverSupabase()), 공고수()]);
@@ -168,13 +165,7 @@ export default async function JobSitesGuide() {
           </dl>
         </section>
 
-        <section aria-labelledby="비교-다른글" className="flex flex-col gap-(--rapo-dimension-x3)">
-          <h2 id="비교-다른글" className={작은제목}>다른 안내 글</h2>
-          <ul className="flex flex-col gap-(--rapo-dimension-x2)">
-            <li className={본문}><Link href="/guide/ot-associations" className={밑줄}>작업치료사협회와 작업치료 학회 안내</Link></li>
-            <li className={본문}><Link href="/guide/pt-associations" className={밑줄}>물리치료사협회와 물리치료 학회 안내</Link></li>
-          </ul>
-        </section>
+        <OtherGuides 지금="/guide/job-sites" />
 
         <div aria-hidden className="h-px bg-(--rapo-color-stroke-neutral-muted)" />
 

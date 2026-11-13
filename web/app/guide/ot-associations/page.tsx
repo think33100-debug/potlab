@@ -1,6 +1,7 @@
 import { 색인메타 } from '@/lib/seo';
 import { 그림판 } from '@/lib/site-url';
-import { 밑줄, AssociationGuide, type 협회안내자료 } from '../association-guide';
+import { AssociationGuide, type 협회안내자료 } from '../association-guide';
+import { 밑줄 } from '../guide-parts';
 
 /* 작업치료사협회·작업치료 학회 안내 (2026-11-13 세중님 키워드 「작업치료사협회」 · 틀과 적는 규칙은 ../association-guide.tsx).
 
@@ -71,10 +72,7 @@ const 자료: 협회안내자료 = {
       에 실린 것이에요({기준일} 확인). 분야는 학회 이름을 풀어 적었어요. 확인한 날 주소가 열리지 않은 두 곳은 이름만 적었어요.
     </>
   ),
-  다른글: [
-    { 이름: '물리치료사협회와 물리치료 학회 안내', 주소: '/guide/pt-associations' },
-    { 이름: '땡큐오티 · 굿잡피티 · RAPO 비교', 주소: '/guide/job-sites' },
-  ],
+  지금: '/guide/ot-associations',
   제휴아님: 'RAPO는 대한작업치료사협회·각 학회와 제휴 관계가 아니에요.',
 };
 
