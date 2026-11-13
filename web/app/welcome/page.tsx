@@ -15,6 +15,7 @@ import { browserSupabase } from '@/lib/supabase-browser';
 import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
 import { JOB_GROUPS, ROLES, ROLE_DESC, type JobGroup, type Role } from '@/lib/who';
 
+import { 설치안내남기기 } from '@/lib/install-hint';
 import { useAuth } from '../auth';
 import { useToast } from '../toast';
 
@@ -191,6 +192,8 @@ export default function Welcome() {
      공유 링크를 보고 들어오신 분은 그 공고로 돌려보냅니다. 홈으로 떨어뜨리면 뭘 보러 왔는지 잊고 그냥 나갑니다 */
   const 가입끝 = async () => {
     await reload();
+    /* 다음 화면에서 설치 안내 토스트가 한 번 뜨게 (2026-11-13 세중님 · lib/install-hint.ts) */
+    설치안내남기기();
     let back: string | null = null;
     try {
       back = peekAfterLogin();
