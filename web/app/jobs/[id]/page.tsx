@@ -8,6 +8,7 @@ import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말
 import type { HospitalStat } from '@/lib/hospital';
 import { jobViews } from '@/lib/job-views';
 import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
+import { 색인메타 } from '@/lib/seo';
 import { siteUrl, 그림판 } from '@/lib/site-url';
 import type { JobListItem, JobPost } from '@/lib/supabase';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
@@ -107,8 +108,8 @@ export async function generateMetadata({
   params,
 }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  /* 제목·기관·마감일만 씁니다. ★ 2026-11-11 클로즈드 베타 — 비회원에게 공고 창구(job_one)를 닫으므로 **세션으로** 읽습니다.
-     로봇은 middleware 가 /beta 로 보내 여기까지 안 옵니다 (RAPO노트/SQL_1113) */
+  /* 제목·기관·마감일만 씁니다. 세션으로 읽습니다 — 비회원·검색 로봇도 job_one 이 이 한 건을 줍니다(공유 링크).
+     ★ 2026-11-13 세중님 「공고 글도 검색되게」 — 이 쪽을 검색에 올립니다(lib/seo.ts). 제목·설명 글이 그대로 검색 결과에 뜹니다 */
   const j = await one(await serverSupabase(), id);
   if (!j) return { title: '없는 공고입니다 · RAPO' };
 
@@ -125,6 +126,8 @@ export async function generateMetadata({
   return {
     title: `${title} · RAPO`,
     description: desc,
+    robots: 색인메타,
+    alternates: { canonical: `/jobs/${encodeURIComponent(j.id)}` },
     openGraph: { title, description: desc, images: [img], type: 'article' },
     twitter: { card: 'summary_large_image', title, description: desc, images: [img] },
   };
