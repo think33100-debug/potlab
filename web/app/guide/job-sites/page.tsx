@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import { RapoHeader } from '@/components/rapo/rapo-header';
-import { RapoGuideRow } from '@/components/rapo/rapo-job-detail';
 import { RapoButton } from '@/components/rapo/rapo-ui';
 import { 색인메타 } from '@/lib/seo';
 import { 그림판 } from '@/lib/site-url';
 import { supabase } from '@/lib/supabase';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
-import { OtherGuides, 도움말, 밑줄, 본문, 작은제목 } from '../guide-parts';
+import { GuideRow, OtherGuides, 단추폭, 도움말, 밑줄, 본문, 작은제목, 점붙임 } from '../guide-parts';
 
 /* 채용 사이트 비교 글 (2026-11-13 세중님 「땡큐오티와 굿잡피티 그리고 우리를 비교하는 글을 적어서 넣자」).
 
@@ -20,7 +19,8 @@ import { OtherGuides, 도움말, 밑줄, 본문, 작은제목 } from '../guide-p
    · 내용을 고치면 기준일도 같이 고칩니다.
 
    피그마에 이 화면은 없습니다 — 글 화면 틀(app/terms/[doc] · 화면 제목 26/35 · 본문 16/24)과
-   홈의 위쪽 줄(RapoHeader) · 공고 상세의 이름-값 줄(RapoGuideRow)을 빌렸습니다. */
+   홈의 위쪽 줄(RapoHeader) · 공고 상세의 이름-값 줄(RapoGuideRow → ../guide-parts 의 GuideRow)을 빌렸습니다.
+   큰 화면(768 이상)에서는 세 곳을 옆으로 나란히 놓습니다 — 한 줄씩 길게 늘어선 칸이 어색했습니다 (2026-11-13 세중님 「피씨 모드」). */
 
 const 기준일 = '2026년 11월 13일';
 const 제목 = '땡큐오티·굿잡피티·RAPO 비교 | 물리치료사·작업치료사 취업 사이트';
@@ -84,10 +84,10 @@ export default async function JobSitesGuide() {
       <main className="flex flex-col gap-(--rapo-dimension-x8) p-(--rapo-dimension-x5) pb-(--rapo-dimension-x10)">
         <section className="flex flex-col gap-(--rapo-dimension-x3)">
           <h1 className="rapo-type-screen-title break-keep text-(color:--rapo-color-fg-neutral)">
-            땡큐오티 · 굿잡피티 · RAPO, 무엇이 다를까요?
+            {점붙임('땡큐오티 · 굿잡피티 · RAPO, 무엇이 다를까요?')}
           </h1>
           <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-            취업 사이트 비교 · {기준일} 기준
+            {점붙임(`취업 사이트 비교 · ${기준일} 기준`)}
           </p>
           <p className={본문}>
             물리치료사·작업치료사가 채용 공고를 찾을 때 쓰는 사이트 세 곳을 나란히 정리했어요.
@@ -97,18 +97,18 @@ export default async function JobSitesGuide() {
 
         <section aria-labelledby="비교-한눈" className="flex flex-col gap-(--rapo-dimension-x4)">
           <h2 id="비교-한눈" className={작은제목}>한눈에 보기</h2>
-          <ul className="flex flex-col gap-(--rapo-dimension-x3)">
+          <ul className="grid gap-(--rapo-dimension-x3) md:grid-cols-3">
             {사이트들.map((s) => (
               <li key={s.이름}
                 className="flex flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
                 <h3 className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">{s.이름}</h3>
-                <RapoGuideRow label="대상">{s.대상}</RapoGuideRow>
-                <RapoGuideRow label="다루는 것">{s.다루는것}</RapoGuideRow>
-                <RapoGuideRow label="주소">
+                <GuideRow label="대상">{점붙임(s.대상)}</GuideRow>
+                <GuideRow label="다루는 것">{점붙임(s.다루는것)}</GuideRow>
+                <GuideRow label="주소">
                   {s.주소.startsWith('/')
                     ? <Link href={s.주소} className={밑줄}>{s.보임}</Link>
                     : <a href={s.주소} target="_blank" rel="nofollow noopener noreferrer" className={밑줄}>{s.보임}</a>}
-                </RapoGuideRow>
+                </GuideRow>
               </li>
             ))}
           </ul>
@@ -132,7 +132,7 @@ export default async function JobSitesGuide() {
               </li>
             )}
           </ul>
-          <RapoButton href="/jobs" full>RAPO 채용 공고 보기</RapoButton>
+          <RapoButton href="/jobs" full className={단추폭}>RAPO 채용 공고 보기</RapoButton>
         </section>
 
         <section aria-labelledby="비교-맞는곳" className="flex flex-col gap-(--rapo-dimension-x4)">

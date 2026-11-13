@@ -5,7 +5,7 @@ import { 공시해, 알리미, 알리오 } from '@/lib/guide-pay';
 import { 색인메타 } from '@/lib/seo';
 import { 그림판 } from '@/lib/site-url';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
-import { OtherGuides, 도움말, 밑줄, 본문, 작은제목 } from '../guide-parts';
+import { OtherGuides, 단추폭, 도움말, 밑줄, 본문, 작은제목, 점붙임 } from '../guide-parts';
 
 /* 연봉 안내 글 (2026-11-13 세중님 키워드 「물리치료사연봉 · 작업치료사연봉」 · 「공시 급여로 만들어」).
 
@@ -85,23 +85,26 @@ export default async function TherapistSalaryGuide() {
             물리치료사·작업치료사 연봉, 공공병원 공시로 보기
           </h1>
           <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-            {공시해}년 공시 자료 · {기준일} 확인
+            {점붙임(`${공시해}년 공시 자료 · ${기준일} 확인`)}
           </p>
           <p className={본문}>
             물리치료사·작업치료사 연봉이 궁금할 때 참고할 수 있는 숫자를 모았어요. 공공병원이 스스로 공시한 보수 자료예요.
           </p>
           <p className="rapo-type-t4-medium break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-brand-contrast)">
-            치료사만 따로 낸 연봉은 아니에요. 「보건직 평균」은 치료사·방사선사 같은 의료기사 직종 전체의 평균이고, 「신입」 값은 직군을 나누지 않은 값이에요.
+            {/* 낫표로 묶은 말은 조사까지 한 덩이로 — 390 폭에서 「」은」이 줄 머리로 넘어갔습니다 */}
+            치료사만 따로 낸 연봉은 아니에요. <span className="whitespace-nowrap">「보건직 평균」은</span> 치료사나 방사선사 같은 의료기사 직종 전체의 평균이고,{' '}
+            <span className="whitespace-nowrap">「신입」 값은</span> 직군을 나누지 않은 값이에요.
           </p>
         </section>
 
         <section aria-labelledby="연봉-한눈" className="flex flex-col gap-(--rapo-dimension-x4)">
           <h2 id="연봉-한눈" className={작은제목}>한눈에 보기</h2>
-          <ul className="flex flex-col gap-(--rapo-dimension-x3)">
+          {/* 큰 화면(768 이상)에서는 두 칸을 나란히 (2026-11-13 세중님 「피씨 모드는 어색」) */}
+          <ul className="grid gap-(--rapo-dimension-x3) md:grid-cols-2">
             {한눈에.map((c) => (
               <li key={c.머리}
                 className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
-                <p className="rapo-type-t4-medium break-keep text-(color:--rapo-color-fg-neutral-muted)">{c.머리} · {c.무엇}</p>
+                <p className="rapo-type-t4-medium break-keep text-(color:--rapo-color-fg-neutral-muted)">{c.머리}{'\u00a0'}· {c.무엇}</p>
                 <p className="rapo-type-t8-bold whitespace-nowrap tabular-nums text-(color:--rapo-color-fg-neutral)">
                   {만(c.셈.낮)}만~{만(c.셈.높)}만 원
                 </p>
@@ -114,9 +117,10 @@ export default async function TherapistSalaryGuide() {
         </section>
 
         <section aria-labelledby="연봉-의료원" className="flex flex-col gap-(--rapo-dimension-x4)">
-          <h2 id="연봉-의료원" className={작은제목}>지방의료원·적십자병원 {알리미.length}곳</h2>
+          <h2 id="연봉-의료원" className={작은제목}>지방의료원·적십자병원 {알리미.length}곳 연봉</h2>
           <p className={본문}>보건직 평균이 높은 차례로 적었어요.</p>
-          <table className="w-full border-collapse">
+          {/* 큰 화면에서 표가 글 기둥 끝까지 늘어나면 이름과 금액이 너무 멀어집니다 — 560 까지만 */}
+          <table className="w-full border-collapse md:max-w-[560px]">
             <caption className="sr-only">지방의료원·적십자병원의 보건직 평균과 신입 평균 ({공시해}년 공시)</caption>
             <thead>
               <tr className={줄선}>
@@ -137,15 +141,16 @@ export default async function TherapistSalaryGuide() {
           </table>
           <p className={도움말}>
             출처는 지역거점공공병원 알리미의 「직원 평균보수(직종별)」 {공시해}년 공시예요.
-            보건직 평균은 치료사·방사선사 같은 의료기사 직종의 평균이고, 신입 평균은 모든 직종 신입의 평균이에요.
+            보건직 평균은 치료사나 방사선사 같은 의료기사 직종의 평균이고, 신입 평균은 모든 직종 신입의 평균이에요.
             제주의료원의 신입 평균은 값을 확인하지 못해 비워 두었어요.
           </p>
         </section>
 
         <section aria-labelledby="연봉-국립대" className="flex flex-col gap-(--rapo-dimension-x4)">
-          <h2 id="연봉-국립대" className={작은제목}>국립대병원·공공기관 {알리오.length}곳</h2>
+          <h2 id="연봉-국립대" className={작은제목}>국립대병원·공공기관 {알리오.length}곳 신입 초임</h2>
           <p className={본문}>신입 초임이 높은 차례로 적었어요.</p>
-          <table className="w-full border-collapse">
+          {/* 큰 화면에서 표가 글 기둥 끝까지 늘어나면 이름과 금액이 너무 멀어집니다 — 560 까지만 */}
+          <table className="w-full border-collapse md:max-w-[560px]">
             <caption className="sr-only">국립대병원·공공기관의 신입 초임 ({공시해}년 결산 공시)</caption>
             <thead>
               <tr className={줄선}>
@@ -187,9 +192,9 @@ export default async function TherapistSalaryGuide() {
             RAPO(라포)는 물리치료사·작업치료사 채용 공고를 모아 보여 주는 사이트예요.
             공시 자료가 있는 병원은 공고 화면에서 그 병원의 연봉을 함께 볼 수 있어요.
           </p>
-          <RapoButton href="/jobs" full>RAPO 채용 공고 보기</RapoButton>
+          <RapoButton href="/jobs" full className={단추폭}>RAPO 채용 공고 보기</RapoButton>
           {/* 홈 「공시 병원 급여」가 이 글로 오므로(2026-11-13), 전에 그 칸이 가던 병원 찾기를 여기서 잇습니다 */}
-          <RapoButton href="/orgs" tone="outline" full>병원별로 찾아보기</RapoButton>
+          <RapoButton href="/orgs" tone="outline" full className={단추폭}>병원별로 찾아보기</RapoButton>
         </section>
 
         <OtherGuides 지금="/guide/therapist-salary" />
