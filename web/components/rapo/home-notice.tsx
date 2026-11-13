@@ -11,7 +11,7 @@ import { HELP_EMAIL, KAKAO_CHANNEL } from '@/lib/contact';
    기억은 기기마다 따로입니다 — 회원 계정에 묶지 않았습니다(DB 칸이 없습니다). 다른 기기·브라우저에서는 한 번 더 뜹니다.
    저장소를 못 쓰는 브라우저(비공개 창 등)에서는 기억을 못 해 홈을 열 때마다 뜹니다.
 
-   글은 세중님이 주신 그대로입니다. 문의 길은 lib/contact.ts 한 자리(카카오톡 채널 · help 메일).
+   글은 세중님이 주신 그대로입니다(2026-11-13 브랜드 소개 두 문단 더함 — 「모두의 창업」 지원 · 의료기사 통합 앱 · 연봉 비교·합격 스펙). 문의 길은 lib/contact.ts 한 자리(카카오톡 채널 · help 메일).
    피그마 원본에 없는 조각이라 새 디자인 토큰만으로 그렸습니다(흰 카드 · radius r3 · navy 단추). */
 
 const 숨김 = 'rapo.home-notice.hide';     // localStorage — 다시 보지 않기
@@ -57,7 +57,8 @@ export function RapoHomeNotice() {
     <div data-rapo role="dialog" aria-modal="true" aria-labelledby="home-notice-title"
       className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-(--rapo-dimension-x5)"
       onClick={(e) => { if (e.target === e.currentTarget) 닫기(); }}>
-      <div className="flex w-full max-w-[340px] flex-col gap-(--rapo-dimension-x5) rounded-(--rapo-radius-r3)
+      {/* 글이 길어져 작은 폰(높이 640)에서도 닫기 단추까지 닿게 — 넘치면 카드 안에서 굴립니다 */}
+      <div className="flex max-h-[calc(100dvh-40px)] w-full max-w-[340px] flex-col gap-(--rapo-dimension-x5) overflow-y-auto rounded-(--rapo-radius-r3)
                       bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x6) text-(color:--rapo-color-fg-neutral) shadow-lg">
         <div className="relative mx-auto h-[31.5px] w-[120px] shrink-0">
           {/* eslint-disable @next/next/no-img-element -- Figma 원본 SVG 그대로 (가로형 로고 · components/rapo/rapo-header.tsx 와 같은 자리) */}
@@ -66,10 +67,18 @@ export function RapoHomeNotice() {
           {/* eslint-enable @next/next/no-img-element */}
         </div>
 
+        {/* ★ 2026-11-13 세중님 「우리 팝업창에도 우리 브랜드 글을 좀 넣자」 — 세중님이 주신 뜻을 세 문단으로 다듬었습니다 */}
         <div className="flex flex-col gap-(--rapo-dimension-x3) text-center">
           <h2 id="home-notice-title" className="rapo-type-t6-bold break-keep">RAPO 는 순차적으로 오픈 중입니다</h2>
+          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">
+            RAPO는 <span className="whitespace-nowrap">「모두의 창업」</span>의 지원을 받아 만들고 있는 채용·커뮤니티 통합 앱입니다.
+            <span className="whitespace-nowrap">작업치료사·물리치료사를</span> 넘어 모든 의료기사가 함께 쓰는 곳을 만들고 있습니다.
+          </p>
+          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">
+            기능은 순차적으로 열리고 있으며, 앞으로 투명한 연봉 비교와 합격 스펙까지 함께 나누는 의료기사를 위한 앱으로 거듭나겠습니다. <span className="whitespace-nowrap">지켜봐 주세요!</span>
+          </p>
           <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-            오류나 수정해야 할 부분이 있다면 언제든지 카카오톡 문의하기나 메일로 연락 주시면 적극 대처하겠습니다. 감사합니다.
+            개선할 점이나 오류는 카카오톡 문의하기나 메일로 알려 주시면 바로 고쳐 놓겠습니다. 감사합니다.
           </p>
         </div>
 
