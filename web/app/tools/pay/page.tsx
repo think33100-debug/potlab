@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { RapoToolPage } from '@/components/rapo/rapo-tool';
 import { Basis, BigNum, Card, Line, NumField, PickTwo, ResultHint, man, num, won } from '@/components/tool-parts';
@@ -20,14 +21,26 @@ import { grossFromNet, netFromGross } from '@/lib/tax';
    또래 비교는 여기 없습니다. /pay 의 「내 위치」가 이미 하고,
    그건 회원 자료를 읽어야 해서 로그인이 필요합니다. 아래 링크로 보냅니다. */
 
-type Mode = 'gross' | 'net';
+type Mode = 'year' | 'gross' | 'net';
 
 /* 주 40시간 · 월 209시간 (주휴 포함). 고용노동부 통상임금 산정 기준시간 */
 const MONTH_HOURS = 209;
 
 export default function PayTool() {
-  const [mode, setMode] = useState<Mode>('gross');
-  const [amount, setAmount] = useState('300');
+  return <Suspense><PayToolBody /></Suspense>;
+}
+
+/* 주소에 ?y=연봉(원) 또는 ?m=월급(원)이 있으면 미리 채웁니다 — 공고 상세 「연봉이 얼마인지 궁금하세요?」에서 옵니다 (2026-11-14) */
+function PayToolBody() {
+  const sp = useSearchParams();
+  const 처음 = (() => {
+    const y = Number(sp.get('y')), m = Number(sp.get('m'));
+    if (y > 0) return { mode: 'year' as Mode, amount: String(Math.round(y / 10_000)) };
+    if (m > 0) return { mode: 'gross' as Mode, amount: String(Math.round(m / 10_000)) };
+    return { mode: 'year' as Mode, amount: '3600' };
+  })();
+  const [mode, setMode] = useState<Mode>(처음.mode);
+  const [amount, setAmount] = useState(처음.amount);
   const [dep, setDep] = useState('1');
 
   const 만 = num(amount);
@@ -35,6 +48,7 @@ export default function PayTool() {
 
   /* 세후를 넣었으면 세전을 먼저 찾아옵니다 (이분법 — lib/tax.ts) */
   const grossMonth = 만 <= 0 ? 0
+    : mode === 'year' ? 만 * 10_000 / 12
     : mode === 'gross' ? 만 * 10_000 : grossFromNet(만 * 10_000, 부양);
   const b = netFromGross(grossMonth, 부양);
   const has = 만 > 0;
@@ -45,13 +59,14 @@ export default function PayTool() {
       {/* ── 넣는 칸 ── */}
       <Card title="급여 조건">
         <div className="flex flex-col gap-(--rapo-dimension-x4)">
-          <PickTwo<Mode> label="무엇을 넣을지" value={mode} onChange={setMode} options={[['gross', '세전으로 넣기'], ['net', '세후로 넣기']]} />
+          <PickTwo<Mode> label="무엇을 넣을지" value={mode} onChange={setMode} options={[['year', '세전 연봉'], ['gross', '세전 월급'], ['net', '세후 월급']]} />
           <NumField
-            label={mode === 'gross' ? '세전 월급' : '세후 월급 (실수령)'}
+            label={mode === 'year' ? '세전 연봉' : mode === 'gross' ? '세전 월급' : '세후 월급 (실수령)'}
             value={amount}
             onChange={setAmount}
             unit="만원"
-            placeholder="300"
+            hint={mode === 'year' ? '연봉을 12로 나눠 월급으로 셉니다' : undefined}
+            placeholder={mode === 'year' ? '3600' : '300'}
           />
           <NumField
             label="부양가족 수"
@@ -76,14 +91,12 @@ export default function PayTool() {
             />
           </div>
 
-          <Card title="한 해로 보면">
+          <Card title="내 금액">
             <Line k="세전 연봉" v={man(b.gross * 12)} />
+            <Line k="세전 월급" v={man(b.gross)} />
+            <Line k="세후 월급 (실수령)" v={man(b.net)} strong />
             <Line k="세후 연 총소득" v={man(b.net * 12)} />
-            <Line k="월 평균 실수령" v={man(b.net)} strong />
-            <Line
-              k="시급으로 치면"
-              v={won(Math.round(b.gross / MONTH_HOURS))}
-            />
+            <Line k="시급으로 치면" v={won(Math.round(b.gross / MONTH_HOURS))} />
           </Card>
 
           <Card title="떼는 것" note={`${RATE_YEAR}년 요율입니다`}>
@@ -96,7 +109,7 @@ export default function PayTool() {
             <Line k="공제 합계" v={won(b.공제합계)} strong />
           </Card>
 
-          <Link href="/pay"
+          <Link href="/me/soon?k=paycmp"
             className="flex items-center justify-between gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x5) active:bg-(--rapo-color-bg-transparent-pressed)">
             <span className="min-w-0">
               <span className="rapo-type-t5-bold block break-keep text-(color:--rapo-brand-color-navy)">또래 중에 내가 어디쯤인지 보기</span>

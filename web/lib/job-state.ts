@@ -632,3 +632,17 @@ export function 지원방법말(접수방법: string | null | undefined): 지원
   }
   return { 낱말, 채용페이지 };
 }
+
+/* 공고 보수 글에서 금액 하나를 뽑아 계산기에 미리 채워 줍니다 (2026-11-14 세중님 「공고에서 연봉이 얼마인지 궁금하세요? 누르면 그 공고의
+   월급에 대한 세전 연봉·세전 월급·세후 월급을 바로 연결」). 못 읽으면 null — 그때 계산기는 빈 채로 열립니다. 범위(350~360만원)는 앞 값.
+   종류: 「월」이 있으면 월급 · 「연」이 있으면 연봉 · 둘 다 없으면 1천만 원 이상은 연봉, 그 밑은 월급으로 봅니다 */
+export function 보수금액뽑기(값: string | null | undefined): { 종류: 'm' | 'y'; 원: number } | null {
+  const t = String(값 ?? '');
+  const m = /([0-9][0-9,]*(?:\.[0-9]+)?)\s*(억|백만|십만|만|천)?\s*(?:[~\-–]\s*[0-9][0-9,.]*\s*)?(억|백만|십만|만|천)?\s*원/.exec(t);
+  if (!m) return null;
+  const 배 = { 억: 1e8, 백만: 1e6, 십만: 1e5, 만: 1e4, 천: 1e3 }[(m[2] ?? m[3]) as '억'] ?? 1;
+  const 원 = Math.round(Number(m[1].replace(/,/g, '')) * 배);
+  if (!Number.isFinite(원) || 원 <= 0) return null;
+  const 종류 = /연봉|연\s*[0-9약]|연간|연\s*총/.test(t) ? 'y' : /월/.test(t) ? 'm' : 원 >= 1e7 ? 'y' : 'm';
+  return { 종류, 원 };
+}

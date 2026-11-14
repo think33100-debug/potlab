@@ -237,12 +237,19 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
               <div role="group" aria-label="고용형태" className="flex gap-(--rapo-dimension-x2)">
                 {고용형태들.map((t) => <RapoChip key={t} label={t} on={고용 === t} onClick={() => set고용(t)} className="flex-1" />)}
               </div>
-              {/* 기관 분류 — 여러 개 (2026-11-12 밤 세중님). 아무것도 안 고르면 전체 */}
+              {/* 기관 분류 — 여러 개 (2026-11-12 밤 세중님). 2026-11-14 세중님 「기관 분류에도 전체 · 전체 누르면 다 누른 느낌」 —
+                  아무것도 안 고른 것 = 전체(거름 없음)이고, 그때는 「전체」와 모든 분류가 다 켜진 모양으로 그립니다.
+                  전체에서 하나를 누르면 그것만 · 다 골라지면 다시 전체로 돌아옵니다 */}
               <p className="rapo-type-t5-medium text-(color:--rapo-color-fg-neutral)">기관 분류 <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">여러 개 고를 수 있어요</span></p>
               <div role="group" aria-label="기관 분류" className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
+                <RapoChip label="전체" on={분류.length === 0} onClick={() => set분류([])} />
                 {기관분류들.map((k) => (
-                  <RapoChip key={k} label={k} on={분류.includes(k)}
-                    onClick={() => set분류(분류.includes(k) ? 분류.filter((x) => x !== k) : 기관분류들.filter((x) => x === k || 분류.includes(x)))} />
+                  <RapoChip key={k} label={k} on={분류.length === 0 || 분류.includes(k)}
+                    onClick={() => {
+                      if (분류.length === 0) { set분류([k]); return; }
+                      const 다음 = 분류.includes(k) ? 분류.filter((x) => x !== k) : 기관분류들.filter((x) => x === k || 분류.includes(x));
+                      set분류(다음.length === 기관분류들.length ? [] : 다음);
+                    }} />
                 ))}
               </div>
             </div>

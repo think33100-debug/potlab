@@ -47,7 +47,7 @@ export function 목록줄(r: JobListItem): RapoJob {
   return {
     id: r.id, org: 기관이름말(r.org_name), orgArt: 기관그림(r.org_name || r.id), title: r.title,
     pay: null,
-    tags: 태그(...기관태그(r.분류), r.올림 && '추천', 인턴태그(r.is_intern, r.employ_type), 조교연구말(r.조교연구), r.지역보임, r.employ_type || '공고문 참고', 직군태그(r.job_group, r.조교연구)),
+    tags: 태그(...기관태그(r.분류), r.올림 && '추천', 인턴태그(r.is_intern, r.employ_type), 조교연구말(r.조교연구), r.지역보임, r.employ_type || '공고문 참고', r.신입가능 && '신입 가능', 직군태그(r.job_group, r.조교연구)),
     deadline: 마감배지(r.apply_to, r.마감표시, r.apply_to_time).text,
   };
 }

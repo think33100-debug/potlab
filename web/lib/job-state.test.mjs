@@ -395,3 +395,16 @@ console.log('긁기 공고 지원 링크 통과 — ⓪ 그 공고 글이 맨 �
   assert.equal(직군띄어쓰기('물리치료사 면허 소지자'), '물리치료사 면허 소지자');
   console.log('직군 띄어쓰기 통과 — 7가지');
 }
+
+/* ── 2026-11-14 공고 보수 글 → 계산기 미리 채우기 ── */
+{
+  const { 보수금액뽑기 } = await import('./job-state.ts');
+  assert.deepEqual(보수금액뽑기('2,458,000원'), { 종류: 'm', 원: 2458000 });
+  assert.deepEqual(보수금액뽑기('월 350~360만원'), { 종류: 'm', 원: 3500000 });
+  assert.deepEqual(보수금액뽑기('약 4,900만원'), { 종류: 'y', 원: 49000000 });
+  assert.deepEqual(보수금액뽑기('연봉 3,600만원'), { 종류: 'y', 원: 36000000 });
+  assert.deepEqual(보수금액뽑기('월 약 176만원'), { 종류: 'm', 원: 1760000 });
+  assert.equal(보수금액뽑기('내규에 따름'), null);
+  assert.equal(보수금액뽑기(null), null);
+  console.log('보수 금액 뽑기 통과 — 7가지');
+}

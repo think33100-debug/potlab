@@ -24,7 +24,8 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
         <div className="min-w-0 flex-1">
           <p className="truncate text-[28px] font-bold leading-[34px] text-(color:--rapo-color-fg-neutral)">{me.nickname}</p>
           <p className="rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">
-            {[me.job_group, me.role].filter(Boolean).join(' · ')}
+            {/* 점 뒤에서만 줄이 바뀌게 — 「· 현직」이 줄 머리에 오지 않게 (2026-11-14 · 320 폭) */}
+            {[me.job_group, me.role].filter(Boolean).map((t, i) => <span key={i} className="whitespace-nowrap">{i > 0 ? ' · ' : ''}{t}</span>)}
           </p>
         </div>
         <Link href="/me/profile"
@@ -46,6 +47,7 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
         <img src="/rapo/home/graphic-pay-48.svg" alt="" width={48} height={48} className="shrink-0" />
       </Link>
 
+      {/* 2026-11-14 세중님 「토큰 중복되는 것들도 바꿔줘」 — 줄마다 다른 아이콘. 피그마에 없는 일곱은 같은 선 규칙(24 · 1.6 · 둥근 끝 · #465568)으로 그렸습니다 */}
       <RapoMeSection title="경력과 스펙" first>
         <RapoMeRow icon="/rapo/me/spec-24.svg" href="/me/spec">스펙 확인·수정</RapoMeRow>
         <RapoMeRow icon="/rapo/me/compare-24.svg" href={준비('spec')}>입사 스펙 비교</RapoMeRow>
@@ -54,20 +56,21 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
 
       <RapoMeSection title="내 활동과 희망 조건">
         <RapoMeRow icon="/rapo/me/save-24.svg" href="/me/saved">저장한 공고</RapoMeRow>
+        <RapoMeRow icon="/rapo/me/hide-24.svg" href="/me/hidden">숨긴 공고</RapoMeRow>
         <RapoMeRow icon="/rapo/me/hospital-24.svg" href="/me/hospitals">관심 병원</RapoMeRow>
         <RapoMeRow icon="/rapo/me/pref-24.svg" href={준비('pref')}>희망 취업 조건</RapoMeRow>
-        <RapoMeRow icon="/rapo/me/save-24.svg" href={준비('edu')}>내 교육 관리</RapoMeRow>
+        <RapoMeRow icon="/rapo/me/edu-24.svg" href={준비('edu')}>내 교육 관리</RapoMeRow>
         {/* 원본에는 없는 줄 — 내가 쓴 글·댓글을 볼 길이 없어지지 않게 둡니다 (2026-11-12 밤 근무 · 아침에 정할 것) */}
-        <RapoMeRow icon="/rapo/me/contact-24.svg" href="/me/activity">내가 쓴 글 · 댓글</RapoMeRow>
+        <RapoMeRow icon="/rapo/me/write-24.svg" href="/me/activity">내가 쓴 글 · 댓글</RapoMeRow>
       </RapoMeSection>
 
       {/* 담당자로 승인된 분과 마스터에게만 (내관리메뉴 창구 · 아래 탐색과 같은 값) — 원본 「U14 / 관리 메뉴」 1508:2398 */}
       {(관리.채용관리 || 관리.교육관리 || 운영진) && (
         <RapoMeSection title="담당자 메뉴">
-          {관리.채용관리 && <RapoMeRow icon="/rapo/me/hospital-24.svg" href="/biz">채용 관리</RapoMeRow>}
-          {관리.교육관리 && <RapoMeRow icon="/rapo/me/save-24.svg" href="/edu/manage">교육 관리</RapoMeRow>}
-          {운영진 && <RapoMeRow icon="/rapo/me/save-24.svg" href="/partner">담당자 신청</RapoMeRow>}
-          {운영진 && <RapoMeRow icon="/rapo/me/save-24.svg" href="/verify">재직 인증</RapoMeRow>}
+          {관리.채용관리 && <RapoMeRow icon="/rapo/me/work-24.svg" href="/biz">채용 관리</RapoMeRow>}
+          {관리.교육관리 && <RapoMeRow icon="/rapo/me/class-24.svg" href="/edu/manage">교육 관리</RapoMeRow>}
+          {운영진 && <RapoMeRow icon="/rapo/me/apply-24.svg" href="/partner">담당자 신청</RapoMeRow>}
+          {운영진 && <RapoMeRow icon="/rapo/me/verify-24.svg" href="/verify">재직 인증</RapoMeRow>}
         </RapoMeSection>
       )}
 
@@ -75,8 +78,8 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
         <RapoMeRow icon="/rapo/me/bell-24.svg" href="/me/notify">알림 설정</RapoMeRow>
         <RapoMeRow icon="/rapo/me/school-24.svg" href={준비('status')}>이용 상태 · 학적 정보</RapoMeRow>
         <RapoMeRow icon="/rapo/me/contact-24.svg" href="/contact">문의하기</RapoMeRow>
-        <RapoMeRow icon="/rapo/me/save-24.svg" href={준비('report')}>신고 센터</RapoMeRow>
-        <RapoMeRow icon="/rapo/me/save-24.svg" href="/me/account">개인정보·탈퇴</RapoMeRow>
+        <RapoMeRow icon="/rapo/me/report-24.svg" href={준비('report')}>신고 센터</RapoMeRow>
+        <RapoMeRow icon="/rapo/me/lock-24.svg" href="/me/account">개인정보·탈퇴</RapoMeRow>
       </RapoMeSection>
 
       {onSignOut && (

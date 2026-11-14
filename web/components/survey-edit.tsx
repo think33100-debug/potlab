@@ -51,7 +51,7 @@ export function SurveyEdit({ profileId, role, job }: { profileId: string; role: 
 
   if (open && draft) {
     return (
-      <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
+      <section className="pt-(--rapo-dimension-x4)">
         <SignupSurvey
           userId={profileId} job={job} role={role}
           initial={draft} editsLeft={left ?? FREE_EDITS}
@@ -67,36 +67,40 @@ export function SurveyEdit({ profileId, role, job }: { profileId: string; role: 
 
   const none = left === 0;
 
+  /* 닫힌 모양 — 새 디자인 토큰 (2026-11-14 세중님 「이 부분도 수정」). 쓰는 곳은 /me/spec 하나라 위 여백·윗선을 뺐습니다(전에는 빈 띠와 선이 떠 보였음).
+     고치는 설문(SignupSurvey)은 아직 옛 모양입니다 — 피그마 「U14-SPEC-*」는 다음 차례 */
   return (
-    <section className="mt-8 border-t border-gray-100 pt-7 dark:border-gray-800">
-      <h2 className="text-h3 font-bold">급여 · 스펙</h2>
-      <p className="mt-1 text-lg text-mute">
-        {left === null ? '불러오는 중이에요…'
-          : none ? '올해 고칠 수 있는 2번을 다 쓰셨어요'
-          : `1년에 2번 고칠 수 있어요. ${left}번 남았어요`}
-      </p>
+    <section className="flex flex-col gap-(--rapo-dimension-x4) pt-(--rapo-dimension-x4)">
+      <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
+        <h2 className="rapo-type-t7-bold text-(color:--rapo-color-fg-neutral)">급여 · 스펙</h2>
+        <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
+          {left === null ? '불러오는 중이에요…'
+            : none ? '올해 고칠 수 있는 2번을 다 쓰셨어요'
+            : `1년에 2번 고칠 수 있어요. ${left}번 남았어요`}
+        </p>
+        {/* 남은 횟수를 눈금으로도 */}
+        {left !== null && (
+          <div className="flex gap-(--rapo-dimension-x1)" aria-hidden>
+            {Array.from({ length: FREE_EDITS }, (_, i) => (
+              <span key={i} className={'h-[4px] w-[28px] rounded-full ' + (i < FREE_EDITS - left ? 'bg-(--rapo-color-stroke-neutral-muted)' : 'bg-(--rapo-color-bg-navy-solid)')} />
+            ))}
+          </div>
+        )}
+      </div>
 
-      {/* 남은 횟수를 눈금으로도 — 닉네임 칸과 같은 방식입니다 */}
-      {left !== null && (
-        <div className="mt-2 flex gap-1" aria-hidden>
-          {Array.from({ length: FREE_EDITS }, (_, i) => (
-            <span key={i}
-              className={'h-1 w-[28px] rounded-md ' + (i < FREE_EDITS - left ? 'bg-gray-200 dark:bg-gray-700' : 'bg-teal-strong')} />
-          ))}
-        </div>
-      )}
-
-      {err && <p className="mt-2 text-lg text-brand-red">{err}</p>}
+      {err && <p role="alert" className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-critical-contrast)">{err}</p>}
 
       <button type="button" disabled={!draft || none} onClick={() => setOpen(true)}
-        className="mt-5 rounded-md border border-gray-200 px-6 py-4 text-lg font-medium disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700">
-        고치기
+        className="rapo-type-t6-bold flex h-(--rapo-dimension-x13) w-full items-center justify-center rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-navy-solid)
+                   text-(color:--rapo-color-fg-on-navy-solid) enabled:active:bg-(--rapo-color-bg-navy-solid-pressed)
+                   disabled:cursor-not-allowed disabled:bg-(--rapo-color-bg-disabled) disabled:text-(color:--rapo-color-fg-disabled)">
+        급여 · 스펙 고치기
       </button>
 
       {none && (
-        <p className="mt-5 rounded-sm border border-brand-red/40 p-6 text-lg text-brand-red">
+        <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5) text-(color:--rapo-color-fg-neutral)">
           다음 해가 되면 다시 2번 고칠 수 있어요.
-          <span className="mt-1 block text-sm text-mute">자료가 자꾸 바뀌면 통계를 믿을 수 없어서 횟수를 둡니다</span>
+          <span className="rapo-type-t3-regular mt-(--rapo-dimension-x1) block text-(color:--rapo-color-fg-neutral-muted)">자료가 자꾸 바뀌면 통계를 믿을 수 없어서 횟수를 둡니다</span>
         </p>
       )}
     </section>
