@@ -33,7 +33,7 @@ function HospitalList() {
     const { error } = await browserSupabase().from('org_stars').upsert({ org_name: r.org_name, notify: next });
     if (error) { toast(`바꾸지 못했어요 — ${error.message}`, { tone: 'danger' }); return; }
     setRows((xs) => Array.isArray(xs) ? xs.map((x) => x.org_name === r.org_name ? { ...x, notify: next } : x) : xs);
-    toast(next ? '새 공고 알림을 켰어요' : '새 공고 알림을 껐어요');
+    toast(next ? '공고가 뜨면 알려드릴게요!' : '새 공고 알림을 껐어요');   // 2026-11-14 세중님이 정한 글
   };
 
   return (

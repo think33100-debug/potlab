@@ -52,7 +52,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={t.id}
             data-toast
             className={
-              'animate-toast-in max-w-full truncate rounded-sm px-6 py-5 text-lg font-medium text-white shadow-lg ' +
+              /* 2026-11-14 — 한 줄로 자르지(truncate) 않고 말 단위로 줄을 바꿉니다. 긴 글(「공고를 숨겼어요! …」)이 좁은 폰에서 「…」로 잘렸습니다. 글 안의 줄바꿈도 그대로 */
+              'animate-toast-in max-w-full whitespace-pre-line break-keep rounded-sm px-6 py-5 text-center text-lg font-medium text-white shadow-lg ' +
               (t.tone === 'danger' ? 'bg-brand-red-dark' : 'bg-gray-900')
             }
           >
