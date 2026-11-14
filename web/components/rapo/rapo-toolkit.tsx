@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Hit } from '@/components/hit';
 import { RapoBottomNav } from './rapo-bottom-nav';
+import { RapoServiceGrid } from './home-u01';
 import { RapoEduTop } from './rapo-edu';
 import { RapoDivider, RapoSectionTitle } from './rapo-ui';
 
@@ -18,6 +19,22 @@ type 묶음 = { id: string; 제목: string; 덧말: string; 도구: 도구[] };
 const 계산그림 = '/rapo/home/graphic-calc-28.svg';
 const 묶음들: 묶음[] = [
   {
+    id: 'grow', 제목: '배움과 활동', 덧말: '교육 일정과 봉사, 청년 지원을 한곳에서',
+    도구: [
+      { 이름: '교육 · 학술', 설명: '학회와 협회의 교육 일정을 직군별로 모았어요', href: '/edu', 그림: '/rapo/home/graphic-edu-28.svg' },
+      { 이름: '봉사활동', 설명: '지역과 분야로 지금 모집 중인 봉사를 찾아요', href: '/volunteer', 그림: '/rapo/home/graphic-volunteer-28.svg' },
+      { 이름: '청년정책', 설명: '일자리·주거·금융 등 받을 수 있는 청년 지원을 지역별로', href: '/youth', 그림: '/rapo/home/graphic-youth-28.svg' },
+    ],
+  },
+  {
+    id: 'career', 제목: '입사 준비', 덧말: '지원하기 전에 병원과 나를 견줘 봐요',
+    도구: [
+      { 이름: '공시 병원 급여', 설명: '공공병원이 공개한 신입 연봉과 평균 연봉을 병원별로', href: '/guide/therapist-salary', 그림: '/rapo/home/graphic-pay-28.svg' },
+      { 이름: '입사 스펙 비교', 설명: '관심 병원 입사자와 내 스펙을 견주는 기능이에요. 준비 중이라 오픈 알림을 받을 수 있어요', href: '/me/soon?k=spec', 그림: '/rapo/home/graphic-spec-48.svg' },
+      { 이름: '지난 채용 경쟁률', 설명: '공공기관이 공개한 회차별 경쟁률을 병원별로 봐요', href: '/compete', 그림: '/rapo/home/graphic-cert-28.svg' },
+    ],
+  },
+  {
     id: 'pay', 제목: '돈 계산', 덧말: '받을 돈을 미리 셈해 봐요. 넣은 값은 저장하지 않아요',
     도구: [
       { 이름: '세전 · 세후 계산기', 설명: '연봉이나 월급을 넣으면 실제로 받는 월급과 공제 내역을 보여 줘요', href: '/tools/pay', 그림: 계산그림 },
@@ -26,36 +43,6 @@ const 묶음들: 묶음[] = [
       { 이름: '실업급여 계산기', 설명: '하루에 얼마씩, 며칠 동안 받는지 알아봐요', href: '/tools/unemployment', 그림: 계산그림 },
     ],
   },
-  {
-    id: 'career', 제목: '입사 준비', 덧말: '지원하기 전에 병원과 나를 견줘 봐요',
-    도구: [
-      { 이름: '공시 병원 급여', 설명: '공공병원이 공개한 신입 연봉과 평균 연봉을 병원별로', href: '/guide/therapist-salary', 그림: '/rapo/home/graphic-pay-28.svg' },
-      { 이름: '입사 스펙 비교', 설명: '먼저 들어간 선배들의 학점·자격·경력과 내 스펙을 견줘요', href: '/spec', 그림: '/rapo/home/graphic-spec-48.svg' },
-      { 이름: '지난 채용 경쟁률', 설명: '공공기관이 공개한 회차별 경쟁률을 병원별로 봐요', href: '/compete', 그림: '/rapo/home/graphic-cert-28.svg' },
-    ],
-  },
-  {
-    id: 'grow', 제목: '배움과 활동', 덧말: '교육 일정과 봉사, 청년 지원을 한곳에서',
-    도구: [
-      { 이름: '교육 · 학술', 설명: '학회와 협회의 교육 일정을 직군별로 모았어요', href: '/edu', 그림: '/rapo/home/graphic-edu-28.svg' },
-      { 이름: '봉사활동', 설명: '지역과 분야로 지금 모집 중인 봉사를 찾아요', href: '/volunteer', 그림: '/rapo/home/graphic-volunteer-28.svg' },
-      { 이름: '청년정책', 설명: '일자리·주거·금융 등 받을 수 있는 청년 지원을 지역별로', href: '/youth', 그림: '/rapo/home/graphic-youth-28.svg' },
-    ],
-  },
-];
-
-/* 「선택도 쉽게」 — 맨 위 칩 한 줄. 누르면 그 도구로 바로 갑니다 */
-const 바로가기 = [
-  { 글: '세후 월급', href: '/tools/pay' },
-  { 글: '병원 연봉', href: '/guide/therapist-salary' },
-  { 글: '퇴직금', href: '/tools/severance' },
-  { 글: '연차', href: '/tools/leave' },
-  { 글: '실업급여', href: '/tools/unemployment' },
-  { 글: '입사 스펙', href: '/spec' },
-  { 글: '교육', href: '/edu' },
-  { 글: '봉사', href: '/volunteer' },
-  { 글: '청년정책', href: '/youth' },
-  { 글: '알림 받기', href: '/me/notify' },
 ];
 
 export function RapoToolkit() {
@@ -64,20 +51,9 @@ export function RapoToolkit() {
       <Hit kind="other" target="toolkit" />
       <RapoEduTop title="라포 올인원 툴킷" art="/rapo/home/toolkit.svg" />
       <main className="flex flex-col gap-(--rapo-dimension-x8) px-(--rapo-dimension-x5) pb-(--rapo-dimension-x8) pt-(--rapo-dimension-x2)">
-        <section aria-labelledby="toolkit-pick" className="flex flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x5)">
-          <p id="toolkit-pick" className="rapo-type-t6-bold break-keep text-(color:--rapo-brand-color-navy)">무엇이 궁금하세요?</p>
-          <p className="rapo-type-t3-regular break-keep text-[#3F4C57]">입사 준비부터 배움과 생활 정보까지, 필요한 도구를 골라 바로 가요</p>
-          <ul className="flex flex-wrap gap-(--rapo-dimension-x2)">
-            {바로가기.map((c) => (
-              <li key={c.href}>
-                <Link href={c.href}
-                  className="rapo-type-t4-medium flex h-(--rapo-touch-min) items-center whitespace-nowrap rounded-(--rapo-radius-r1_5) bg-(--rapo-color-bg-layer-default)
-                             px-(--rapo-dimension-x3) text-(color:--rapo-brand-color-navy) active:bg-(--rapo-color-bg-layer-default-pressed)">
-                  {c.글}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        {/* 맨 위 — 홈 「라포 더 둘러보기」의 여섯 칸 틀 그대로 (2026-11-14 세중님 「미리 만들어 둔 저 틀을 넣자」) */}
+        <section aria-label="서비스 바로 가기" className="rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x3)">
+          <RapoServiceGrid />
         </section>
 
         {묶음들.map((m) => (

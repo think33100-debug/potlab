@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { HospitalStat, 시설숫자 } from '@/lib/hospital';
+import { 정부자료연봉말 } from '@/lib/job-state';
 import { 기관로고 } from '@/lib/org-logo';
 import { RapoBadge, RapoMaskIcon } from './rapo-ui';
 
@@ -150,10 +151,7 @@ export function RapoPayCard({ 잠김, 값, 덧말, 공시 }: { 잠김: boolean; 
         </p>
       )}
       {공시씀 ? (
-        /* 두 줄로 끊어 둡니다 — 이어 쓰면 320 폭에서 말 가운데가 갈렸습니다 */
-        <p className="rapo-type-t3-regular whitespace-pre-line break-keep text-(color:--rapo-color-fg-neutral-muted)">
-          {`${공시!.기준해 ? `${공시!.기준해}년 ` : ''}${공시!.출처 === '알리오' ? '알리오' : '공공병원 알리미'} 공시예요\n공고에는 금액이 적혀 있지 않아요`}
-        </p>
+        <p className="rapo-type-t3-regular whitespace-pre-line break-keep text-(color:--rapo-color-fg-neutral-muted)">{정부자료연봉말}</p>
       ) : (잠김 || 덧말) && (
         <p className="rapo-type-t3-regular whitespace-pre-line text-(color:--rapo-color-fg-neutral-muted)">
           {잠김 ? '로그인 후 이용 상태를 확인해 주세요.\n이용 가능한 회원에게 보수를 공개해요.' : 덧말}
@@ -317,13 +315,8 @@ function 연봉칸({ 보수 }: { 보수: 병원보수 }) {
           </div>
         ))}
       </div>
-      <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-        {보수.출처 === '알리오'
-          ? `알리오 공시${보수.공시기관 ? ` (${보수.공시기관})` : ''}${보수.기준해 ? ` · ${보수.기준해}년 결산` : ''} · 신입 초임은 대졸 신입 기준, 직원 평균은 정규직 전체예요`
-          : 보수.출처 === '알리미'
-          ? `지역거점공공병원 알리미 공시${보수.공시기관 ? ` (${보수.공시기관})` : ''}${보수.기준해 ? ` · ${보수.기준해}년` : ''} · 신입은 모든 직종 신입의 평균, 보건직은 치료사·방사선사 같은 의료기사 직종의 평균이에요`
-          : `국민연금 가입 자료로 추정한 의사 포함 전체 직원 평균이에요${보수.가입자수 ? ` · 가입자 ${보수.가입자수.toLocaleString('ko-KR')}명` : ''}${보수.상한근처 ? ' · 소득 상한 때문에 실제보다 낮게 나와요' : ''}`}
-      </p>
+      {/* 출처 글은 한 자리(정부자료연봉말) — 2026-11-14 세중님 「엄청 구체적으로 쓸 이유는 없을 듯」 */}
+      <p className="rapo-type-t3-regular whitespace-pre-line break-keep text-(color:--rapo-color-fg-neutral-muted)">{정부자료연봉말}</p>
     </div>
   );
 }
@@ -473,7 +466,8 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
           </div>
           <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
             {/* 360 폭에서 한 줄 (2026-11-13 세중님) — 「병원 전체 인원」은 남깁니다(공고 인원으로 읽히지 않게 · lib/hospital.ts 머리) */}
-            병원 전체 인원 · 심평원 신고{치료사.기준 ? ` · ${치료사.기준} 기준` : ''}
+            {/* 2026-11-14 — 공공기관 자료 출처는 「정부 데이터를 기반으로」 한 꼴로 (기관 이름·기준일은 안 씀) */}
+            정부 데이터를 기반으로 한 병원 전체 인원이에요
           </p>
         </div>
       )}
@@ -491,18 +485,38 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
           <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">
             지난 채용 경쟁률{g.직군 ? ` · ${g.직군}` : ''}{g.고용형태 ? ` · ${g.고용형태}` : ''}
           </p>
-          <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
-            <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-brand-contrast)">평균 경쟁률</p>
+          {/* 2026-11-14 세중님 「경쟁률 칸은 토큰을 경쟁률다운 걸로」 — 보수 칸(코랄)과 겹치지 않게 정보색(informative) 바탕 +
+              가장 낮음~가장 높음 막대 위에 평균 점. 피그마에 경쟁률 원본이 없어 토큰만 씁니다 */}
+          <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-informative-weak) p-(--rapo-dimension-x5)">
+            <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-informative-contrast)">평균 경쟁률</p>
             <p className="whitespace-nowrap text-(color:--rapo-color-fg-neutral)">
-              <span className="rapo-type-t12-bold">{g.평균 == null ? '—' : Number(g.평균).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}</span>
-              {g.평균 != null && <span className="rapo-type-t6-bold ml-[4px]">: 1</span>}
+              <span className="rapo-type-t12-bold tabular-nums">{g.평균 == null ? '—' : Number(g.평균).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}</span>
+              {g.평균 != null && <span className="rapo-type-t6-bold ml-[4px] text-(color:--rapo-color-fg-informative-contrast)">: 1</span>}
             </p>
-            {/* 두 줄로 나눠 적습니다 — 한 줄에 이으면 「가장 높음 / 13 : 1」처럼 말 가운데서 줄이 바뀌었습니다 (2026-11-13 세중님) */}
-            <p className="rapo-type-t3-regular flex flex-col text-(color:--rapo-color-fg-neutral-muted)">
-              <span className="whitespace-nowrap">
-                {g.첫해 && g.끝해 ? `${g.첫해 === g.끝해 ? `${g.첫해}년` : `${g.첫해}–${g.끝해}년`} · ` : ''}{g.회차}번 채용
-              </span>
-              <span className="whitespace-nowrap">가장 낮음 {짧은배(g.가장낮음)} · 가장 높음 {짧은배(g.가장높음)}</span>
+            {g.가장낮음 != null && g.가장높음 != null && g.평균 != null && Number(g.가장높음) > Number(g.가장낮음) && (() => {
+              const 위치 = Math.min(100, Math.max(0, ((Number(g.평균) - Number(g.가장낮음)) / (Number(g.가장높음) - Number(g.가장낮음))) * 100));
+              return (
+                <div className="mt-(--rapo-dimension-x1) flex flex-col gap-(--rapo-dimension-x1)">
+                  <div aria-hidden className="relative h-[8px] rounded-full bg-(--rapo-color-stroke-informative-weak)">
+                    <span className="absolute inset-y-0 left-0 w-full rounded-full bg-(--rapo-color-stroke-informative-weak)" />
+                    <span className="absolute top-1/2 size-[16px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-(--rapo-color-bg-layer-default) bg-(--rapo-color-bg-informative-solid)"
+                      style={{ left: `${위치}%` }} />
+                  </div>
+                  <div className="rapo-type-t3-regular flex justify-between text-(color:--rapo-color-fg-neutral-muted)">
+                    <span className="whitespace-nowrap">가장 낮음 {짧은배(g.가장낮음)}</span>
+                    <span className="whitespace-nowrap">가장 높음 {짧은배(g.가장높음)}</span>
+                  </div>
+                </div>
+              );
+            })()}
+            {/* 막대를 못 그리는 때(값이 하나뿐 등)는 글로만 */}
+            {!(g.가장낮음 != null && g.가장높음 != null && g.평균 != null && Number(g.가장높음) > Number(g.가장낮음)) && (
+              <p className="rapo-type-t3-regular whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">
+                가장 낮음 {짧은배(g.가장낮음)} · 가장 높음 {짧은배(g.가장높음)}
+              </p>
+            )}
+            <p className="rapo-type-t3-regular whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">
+              {g.첫해 && g.끝해 ? `${g.첫해 === g.끝해 ? `${g.첫해}년` : `${g.첫해}–${g.끝해}년`} · ` : ''}{g.회차}번 채용
             </p>
           </div>
           <Link href={`/compete?g=${encodeURIComponent(g.묶음키)}`}

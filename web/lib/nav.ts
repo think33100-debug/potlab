@@ -76,5 +76,7 @@ export function 새틀화면(pathname: string): boolean {
     || pathname.startsWith('/guide/')
     /* 라포 올인원 툴킷(/toolkit)은 2026-11-14 새로 만든 화면이라 처음부터 새 틀 */
     || pathname === '/toolkit'
+    /* 계산기 넷(/tools/…)도 같은 날부터 새 틀(피그마 T03 · 계산 도구형) */
+    || pathname.startsWith('/tools/')
     || pathname.startsWith('/design-preview');
 }

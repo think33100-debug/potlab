@@ -18,7 +18,8 @@ export default async function DesignPreviewJob({ searchParams }: {
 }) {
   if (process.env.NODE_ENV === 'production') notFound();
   const { who, state, pay } = await searchParams;
-  const 보수 = pay === 'alimi'
+  /* ?pay=below — 공고에 금액이 있고 공시도 있는 공고 (공시는 아래 「병원 한눈에 › 이 병원 연봉」에만) */
+  const 보수 = pay === 'alimi' || pay === 'below'
     ? { 출처: '알리미' as const, 공시기관: '부산의료원', 신입초임: 37967000, 평균보수: 68602000, 기준해: 2025, 가입자수: null, 상한근처: false, 보건직평균: 61495000 }
     : pay === 'alio'
     ? { 출처: '알리오' as const, 공시기관: '부산대학교병원', 신입초임: 45002000, 평균보수: 77120000, 기준해: 2025, 가입자수: null, 상한근처: false }
@@ -38,7 +39,7 @@ export default async function DesignPreviewJob({ searchParams }: {
           title: '작업치료사 채용', tags: ['기간제', '휴직대체'], views: 318, 인원: '2명',
           마감: nodate ? '마감일 공고문 확인' : '10.30(금)',
         }}
-        pay={pay ? { 값: '내규에 따름', 덧말: null } : { 값: '2,458,000원', 덧말: '2026년 기준 · 원천징수 전 · 제수당 포함\n초과근무수당·명절휴가비 별도' }}
+        pay={pay && pay !== 'below' ? { 값: '내규에 따름', 덧말: null } : { 값: '2,458,000원', 덧말: '2026년 기준 · 원천징수 전 · 제수당 포함\n초과근무수당·명절휴가비 별도' }}
         보수={보수}
         지원자격="작업치료사 면허" url="https://example.com/"
         바쁨={who !== 'member' ? null : { name: '견본', kind: '종합병원', bed: 312, rehab: 3, ot: 6, pt: 20, per_bed: 0, kind_med: null, kind_p25: null, kind_p75: null, kind_n: null, band: 'mid', data_version: null }}
