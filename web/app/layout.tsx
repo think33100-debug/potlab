@@ -141,12 +141,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             {/* 안내 글 바로가기 (2026-11-13 세중님 「우리 사이트에서 바로가기」) — 검색으로 들어오는 글이지만
                 회원도 찾을 수 있게, 모든 화면 맨 아래에 작게 둡니다. 목록은 lib/seo.ts 안내글들(꼬리말 이름이 있는 글만).
                 약관 줄 위에 둡니다 — 아래에 두면 약관 줄이 올라가 떠 있는 카카오 단추에 「문의하기」가 더 가립니다 */}
-            <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-mute dark:text-gray-400" aria-label="안내 글">
+            {/* 오른쪽 76px 은 떠 있는 카카오 단추 자리입니다 — 링크가 그 밑으로 들어가 「작업치료학과」가 가렸습니다 (2026-11-14) */}
+            <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 pr-[76px] text-sm text-mute dark:text-gray-400" aria-label="안내 글">
               {안내글들.filter((g) => g.꼬리말).map((g) => (
                 <Link key={g.주소} href={g.주소} className="hover:underline">{g.꼬리말}</Link>
               ))}
             </nav>
-            <nav className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-mute dark:text-gray-400"
+            <nav className="mt-2 flex flex-wrap gap-x-4 gap-y-1 pr-[76px] text-sm text-mute dark:text-gray-400"
               aria-label="약관과 문의">
               <Link href="/terms/service" className="hover:underline">이용약관</Link>
               <Link href="/terms/privacy" className="font-bold hover:underline">개인정보처리방침</Link>

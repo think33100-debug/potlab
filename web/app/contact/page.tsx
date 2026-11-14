@@ -82,9 +82,13 @@ export default function ContactPage() {
             저희 답이 만족스럽지 않으시면 아래에 도움을 청하실 수 있어요.{' '}
             <Link href="/terms/privacy" className="underline underline-offset-2">개인정보처리방침</Link>
           </p>
-          <ul className="flex flex-col gap-(--rapo-dimension-x1)">
+          <ul className="flex flex-col gap-(--rapo-dimension-x3)">
             {구제기관.map((x) => (
-              <li key={x} className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">· {x}</li>
+              /* 이름 한 줄 · 연락처 한 줄 — 한 줄에 이으면 「국번없이 / 118」처럼 끝이 잘려 넘어갔습니다 (2026-11-14 세중님 「글씨 잘리고」) */
+              <li key={x} className="rapo-type-t4-regular flex flex-col text-(color:--rapo-color-fg-neutral-muted)">
+                <span className="rapo-type-t4-medium break-keep text-(color:--rapo-color-fg-neutral)">{x.split(' — ')[0]}</span>
+                <span className="whitespace-nowrap">{x.split(' — ')[1]}</span>
+              </li>
             ))}
           </ul>
         </section>
