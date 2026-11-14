@@ -83,6 +83,8 @@ export function OrgSave({ name, sido, look = 'bar' }: { name: string; sido: stri
       setNotify(!next);
       toast(`알림을 ${next ? '켜' : '꺼'}지 못했어요 — ${error.message}`,
         { tone: 'danger', ms: 4000 });
+    } else if (next) {
+      toast('공고가 뜨면 알려드릴게요!', { ms: 3000 });   // 2026-11-14 세중님이 정한 글
     }
     setBusy(false);
   }

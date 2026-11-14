@@ -70,6 +70,8 @@ export function JobSave({ id, big = false, look, 마감 = false }: {
         { tone: 'danger', ms: 4000 });
     } else {
       window.dispatchEvent(new CustomEvent(별바뀜, { detail: { id, on: next } }));
+      /* 2026-11-14 세중님이 정한 글 — 저장하면 한 번 */
+      if (next) toast('공고가 뜨면 알려드릴게요!', { ms: 3000 });
     }
     setBusy(false);
   }
