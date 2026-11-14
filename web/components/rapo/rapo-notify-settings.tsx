@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/app/toast';
 import NotifyToggle from '@/components/notify-toggle';
+import { RapoAppLaunchNotify } from './rapo-install';
 import { RapoButton, RapoDivider } from './rapo-ui';
 import { browserSupabase } from '@/lib/supabase-browser';
 
@@ -53,6 +54,9 @@ export function RapoNotifySettings({ 미리켬 = false }: { 미리켬?: boolean 
       <RapoDivider />
       <AreaSection id="youth" 갈래="청년" 제목="청년정책"
         설명="고른 지역(전국 정책 포함)에 새 청년정책 신청이 시작되면 알려 드려요." 미리켬={미리켬} />
+      <RapoDivider />
+      {/* 앱 출시 알림 — 설치 화면과 같은 칸 (2026-11-14) */}
+      <RapoAppLaunchNotify 견본={미리켬} />
     </div>
   );
 }
