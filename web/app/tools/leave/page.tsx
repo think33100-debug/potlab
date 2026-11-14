@@ -1,10 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
-import { Hit } from '@/components/hit';
-import { Icon } from '@/components/icon';
-import { Basis, BigNum, Card, DateField, Line, Warn } from '@/components/tool-parts';
+import { RapoToolPage } from '@/components/rapo/rapo-tool';
+import { Basis, BigNum, Card, DateField, Line, ResultHint, Warn } from '@/components/tool-parts';
 import { leave, ymd } from '@/lib/labor';
 
 /* 연차 계산기.
@@ -23,35 +21,23 @@ export default function LeaveTool() {
   const r = ok && !backwards ? leave(new Date(joined + 'T00:00:00'), new Date(at + 'T00:00:00')) : null;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <Hit kind="other" target="tools/leave" />
+    <RapoToolPage 지금="/tools/leave" hit="tools/leave" 제목="연차 계산" 설명="입사일을 넣으면 올해 연차가 며칠인지 알려 드려요. 넣은 값은 저장하지 않아요.">
 
-      <Link href="/tools"
-        className="-ml-5 flex h-[48px] w-[48px] items-center justify-center rounded-full
-                   text-[#4A5056] transition-transform duration-[120ms] active:scale-[0.88]
-                   motion-reduce:transition-none">
-        <Icon name="chevron-left" size={24} />
-        <span className="sr-only">계산기 목록으로</span>
-      </Link>
-
-      <h1 className="mt-4 break-keep text-h1 font-bold text-[#14181C]">연차 계산기</h1>
-      <p className="mt-2 break-keep text-lg text-[#5F666C]">
-        넣은 값은 저장하지 않아요. 전부 이 화면 안에서 계산합니다
-      </p>
-
-      <Card>
-        <div className="flex flex-col gap-5">
+      <Card title="근로 조건">
+        <div className="flex flex-col gap-(--rapo-dimension-x4)">
           <DateField label="입사일" value={joined} onChange={setJoined} />
           <DateField label="언제 기준으로 볼지" value={at} onChange={setAt}
                      hint="오늘로 두면 지금 쓸 수 있는 일수가 나와요" />
         </div>
       </Card>
 
+      {!ok && <ResultHint title="연차를 확인해 보세요">입사일을 넣으면 올해 쓸 수 있는 연차 일수를 바로 보여 드려요.</ResultHint>}
+
       {backwards && <Warn>기준일이 입사일보다 빨라요. 날짜를 다시 봐 주세요.</Warn>}
 
       {r && (
         <>
-          <div className="mt-6">
+          <div>
             <BigNum
               label="쓸 수 있는 연차"
               value={r.days}
@@ -101,6 +87,6 @@ export default function LeaveTool() {
         회계연도(1월 1일)를 기준으로 주는 회사도 많아서, 실제 일수는
         취업규칙을 확인해 주세요. 연차는 생긴 날부터 1년 안에 써야 합니다.
       </Basis>
-    </main>
+    </RapoToolPage>
   );
 }

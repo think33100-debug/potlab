@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Hit } from '@/components/hit';
+import { RapoToolPage } from '@/components/rapo/rapo-tool';
+import { Basis, Warn } from '@/components/tool-parts';
 import { 기본설정, type 실업급여설정 } from '@/lib/unemployment';
 import { supabase } from '@/lib/supabase';
 import { UnemploymentForm } from './form';
@@ -36,30 +36,18 @@ export default async function Unemployment() {
   const s = 설정 ?? 기본설정;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <Hit kind="other" target="tools-unemployment" />
-
-      <Link href="/tools" className="text-lg text-mute hover:underline">← 계산기</Link>
-      <h1 className="mt-3 break-keep text-h1 font-bold">실업급여 계산기</h1>
-
-      {/* ★ 꼭 밝히는 줄 */}
-      <p className="mt-2 break-keep text-lg text-mute">
-        하루 얼마씩 며칠 받는지 봅니다.
-        {' '}<b className="text-ink">{s.기준해}년 기준 · 출처 {s.출처}</b>
-      </p>
-
+    <RapoToolPage 지금="/tools/unemployment" hit="tools-unemployment" 제목="실업급여 계산" 설명={`하루 얼마씩 며칠 받는지 봅니다. ${s.기준해}년 기준 · 출처 ${s.출처}`}>
       {!설정 && (
-        <p className="mt-5 break-keep rounded-sm border border-brand-red/40 bg-brand-red-soft p-5 text-lg text-brand-red-dark">
-          기준값을 못 읽었습니다 — 코드에 적어 둔 {기본설정.기준해}년 값으로 셉니다.
-          <span className="mt-1 block text-sm">관리자 설정 「실업급여_{기본설정.기준해}」을 확인해 주세요</span>
-        </p>
+        <Warn>
+          기준값을 못 읽었습니다 — 코드에 적어 둔 {기본설정.기준해}년 값으로 셉니다. 관리자 설정 「실업급여_{기본설정.기준해}」을 확인해 주세요
+        </Warn>
       )}
 
       <UnemploymentForm 설정={s} />
 
       {/* 기준값을 그대로 보여줍니다 — 어디서 온 숫자인지 알 수 있게 */}
-      <section className="mt-8 rounded-sm border border-line bg-card p-6">
-        <h2 className="text-h3 font-bold">{s.기준해}년 기준값</h2>
+      <section className="rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) p-(--rapo-dimension-x5)">
+        <h2 className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">{s.기준해}년 기준값</h2>
         <dl className="mt-4">
           {[
             ['구직급여 상한액', '하루 ' + s.구직급여상한.toLocaleString('ko-KR') + '원',
@@ -69,12 +57,12 @@ export default async function Unemployment() {
               + Math.round(s.하한비율 * 100) + '% × ' + s.하루소정근로시간 + '시간'],
             ['지급률', '평균임금의 ' + Math.round(s.지급률 * 100) + '%', '2019년 10월 이후 이직자'],
           ].map(([a, b, c]) => (
-            <div key={a} className="flex items-baseline justify-between gap-4 border-b border-gray-50 py-4 last:border-0 dark:border-gray-800">
-              <dt className="min-w-0 break-keep text-lg">
+            <div key={a} className="flex items-baseline justify-between gap-(--rapo-dimension-x4) border-b-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) py-(--rapo-dimension-x3) last:border-0">
+              <dt className="rapo-type-t4-regular min-w-0 break-keep">
                 {a}
-                <span className="mt-0.5 block text-sm text-mute">{c}</span>
+                <span className="rapo-type-t3-regular block text-(color:--rapo-color-fg-neutral-muted)">{c}</span>
               </dt>
-              <dd className="shrink-0 break-keep text-lg font-bold">{b}</dd>
+              <dd className="rapo-type-t4-bold shrink-0 break-keep">{b}</dd>
             </div>
           ))}
         </dl>
@@ -83,17 +71,17 @@ export default async function Unemployment() {
             경계가 3개월 일수(89~92일)에 따라 달라져서, 숫자를 적으면 틀립니다.
             같은 월 336만원이 92일이면 하한에 걸리고 90일이면 안 걸립니다.
             그래서 틈이 좁다는 사실만 한 줄로 알립니다. */}
-        <p className="mt-4 break-keep rounded-sm bg-gray-50 p-4 text-sm leading-relaxed text-gray-600 dark:bg-gray-950 dark:text-gray-400">
+        <p className="rapo-type-t3-regular mt-(--rapo-dimension-x4) break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
           올해는 상한과 하한 차이가{' '}
           <b>{(s.구직급여상한 - s.구직급여하한).toLocaleString('ko-KR')}원</b>뿐이라,
           대부분 둘 중 하나에 걸립니다.
         </p>
 
-        <h3 className="mt-6 text-sm font-bold text-mute">소정급여일수</h3>
-        <div className="mt-2 overflow-x-auto">
-          <table className="w-full text-lg">
+        <h3 className="rapo-type-t4-bold mt-(--rapo-dimension-x5)">소정급여일수</h3>
+        <div className="mt-(--rapo-dimension-x2) overflow-x-auto">
+          <table className="rapo-type-t4-regular w-full">
             <thead>
-              <tr className="border-b border-gray-100 text-sm text-mute dark:border-gray-800">
+              <tr className="rapo-type-t3-regular border-b-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) text-(color:--rapo-color-fg-neutral-muted)">
                 <th className="py-2 text-left font-medium">고용보험 가입기간</th>
                 <th className="py-2 text-right font-medium">50세 미만</th>
                 <th className="py-2 text-right font-medium">50세 이상·장애인</th>
@@ -101,7 +89,7 @@ export default async function Unemployment() {
             </thead>
             <tbody>
               {s.소정급여일수.map((r) => (
-                <tr key={r.가입기간} className="border-b border-gray-50 last:border-0 dark:border-gray-800">
+                <tr key={r.가입기간} className="border-b-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) last:border-0">
                   <td className="py-3 break-keep">{r.가입기간}</td>
                   <td className="py-3 text-right">{r.아래}일</td>
                   <td className="py-3 text-right">{r.위}일</td>
@@ -112,7 +100,7 @@ export default async function Unemployment() {
         </div>
 
         {Object.keys(s.출처주소 ?? {}).length > 0 && (
-          <p className="mt-5 break-keep text-sm text-mute">
+          <p className="rapo-type-t3-regular mt-(--rapo-dimension-x4) break-keep text-(color:--rapo-color-fg-neutral-muted)">
             출처 —{' '}
             {Object.entries(s.출처주소).map(([이름, 주소], i) => (
               <span key={이름}>
@@ -125,7 +113,7 @@ export default async function Unemployment() {
         )}
       </section>
 
-      <p className="mt-6 break-keep rounded-sm bg-gray-50 p-5 text-sm leading-relaxed text-mute dark:bg-gray-950">
+      <Basis>
         <b>참고용입니다.</b> 실제 금액은 이직 사유·가입 이력·나이에 따라 달라집니다.
         스스로 그만둔 경우에는 받지 못할 수 있습니다.
         <br />
@@ -134,7 +122,7 @@ export default async function Unemployment() {
         <br />
         신청은 <a href="https://www.ei.go.kr" target="_blank" rel="noopener noreferrer"
           className="underline underline-offset-2">고용보험 누리집(ei.go.kr)</a>에서 합니다.
-      </p>
-    </main>
+      </Basis>
+    </RapoToolPage>
   );
 }

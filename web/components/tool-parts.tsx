@@ -2,13 +2,15 @@
 
 import { useCountTo } from '@/lib/reveal';
 
-/* 계산기 셋이 같이 쓰는 조각들 (연봉 · 퇴직금 · 연차).
+/* 계산기 넷이 같이 쓰는 조각들 (실수령액 · 퇴직금 · 연차 · 실업급여).
 
-   세 벌로 두면 다음에 「기준을 밝히는 줄」 문구를 고칠 때 한쪽만 고치게 됩니다.
+   2026-11-14 새 디자인으로 바꿨습니다 — 피그마 「T03 · 계산 도구형」(614:861)과 RAPO 토큰만 씁니다.
+   이름·인수는 그대로라 계산 화면 쪽 코드는 안 바뀝니다. 틀(위쪽 줄 · 알약 · 제목)은 components/rapo/rapo-tool.tsx 입니다.
+   넷 다 같은 조각이어야 「기준을 밝히는 줄」 문구를 고칠 때 한쪽만 고치는 일이 없습니다. */
 
-   색은 전부 여기서 정합니다 —
-     바탕 #F4F4F1 · 카드 #FFFFFF · 어두운 카드 #14181C · 빨강 #FF3B30
-   빨강 위 흰 글자는 16px 이상 굵게만 씁니다 (#FF3B30 위 흰 글자가 3.55:1). */
+const 칸틀 = 'min-w-0 flex-1 h-(--rapo-dimension-x13) rounded-(--rapo-radius-r2) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-muted) '
+  + 'bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x4) rapo-type-t5-regular text-(color:--rapo-color-fg-neutral) '
+  + 'placeholder:text-(color:--rapo-color-fg-neutral-muted) focus:border-(color:--rapo-color-stroke-focus-ring)';
 
 /* ── 넣는 칸 ─────────────────────────────────────── */
 
@@ -25,8 +27,8 @@ export function NumField({
 }) {
   return (
     <label className="block">
-      <span className="block break-keep text-sm font-bold text-[#5F666C]">{label}</span>
-      <span className="mt-2 flex items-center gap-3">
+      <span className="rapo-type-t4-medium block break-keep text-(color:--rapo-color-fg-neutral)">{label}{unit ? ` · ${unit}` : ''}</span>
+      <span className="mt-(--rapo-dimension-x2) flex items-center">
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -35,12 +37,10 @@ export function NumField({
           type="text"
           inputMode="decimal"
           placeholder={placeholder}
-          className="min-w-0 flex-1 rounded-xs border border-[#E3E3DE] bg-white px-5 py-4
-                     text-[17px] text-[#14181C] placeholder:text-[#8A9299]"
+          className={칸틀}
         />
-        {unit && <span className="shrink-0 break-keep text-[15px] text-[#5F666C]">{unit}</span>}
       </span>
-      {hint && <span className="mt-1 block break-keep text-sm text-[#5F666C]">{hint}</span>}
+      {hint && <span className="rapo-type-t3-regular mt-(--rapo-dimension-x1) block break-keep text-(color:--rapo-color-fg-neutral-muted)">{hint}</span>}
     </label>
   );
 }
@@ -53,22 +53,40 @@ export function DateField({
 }) {
   return (
     <label className="block">
-      <span className="block break-keep text-sm font-bold text-[#5F666C]">{label}</span>
+      <span className="rapo-type-t4-medium block break-keep text-(color:--rapo-color-fg-neutral)">{label}</span>
       <input
         type="date"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full rounded-xs border border-[#E3E3DE] bg-white px-5 py-4
-                   text-[17px] text-[#14181C]"
+        className={칸틀 + ' mt-(--rapo-dimension-x2) w-full'}
       />
-      {hint && <span className="mt-1 block break-keep text-sm text-[#5F666C]">{hint}</span>}
+      {hint && <span className="rapo-type-t3-regular mt-(--rapo-dimension-x1) block break-keep text-(color:--rapo-color-fg-neutral-muted)">{hint}</span>}
     </label>
+  );
+}
+
+/** 「세전으로 넣기 / 세후로 넣기」 같은 둘 중 하나 고르기 */
+export function PickTwo<T extends string>({ label, value, onChange, options }: {
+  label: string; value: T; onChange: (v: T) => void; options: [T, string][];
+}) {
+  return (
+    <div role="group" aria-label={label} className="flex gap-(--rapo-dimension-x2)">
+      {options.map(([k, t]) => (
+        <button key={k} type="button" onClick={() => onChange(k)} aria-pressed={value === k}
+          className={'rapo-type-t4-bold h-(--rapo-touch-min) flex-1 rounded-(--rapo-radius-r2) border-(length:--rapo-border-default) '
+            + (value === k
+              ? 'border-(color:--rapo-color-bg-navy-solid) bg-(--rapo-color-bg-navy-solid) text-(color:--rapo-color-fg-on-navy-solid)'
+              : 'border-(color:--rapo-color-stroke-neutral-muted) bg-(--rapo-color-bg-layer-default) text-(color:--rapo-color-fg-neutral-muted)')}>
+          {t}
+        </button>
+      ))}
+    </div>
   );
 }
 
 /* ── 결과 ────────────────────────────────────────── */
 
-/** 제일 큰 숫자 하나. 값이 바뀌면 세어 올라갑니다 (움직임 줄이기면 바로) */
+/** 제일 큰 숫자 하나 — 피그마 「예상 월 실수령액」 연한 코랄 카드. 값이 바뀌면 세어 올라갑니다 (움직임 줄이기면 바로) */
 export function BigNum({
   label, value, unit, sub,
 }: {
@@ -76,13 +94,13 @@ export function BigNum({
 }) {
   const n = useCountTo(value);
   return (
-    <div className="rounded-[14px] bg-[#14181C] p-7 text-white">
-      <p className="break-keep text-[13px] text-[#9BA3AB]">{label}</p>
-      <p className="num mt-2 text-[40px] font-black leading-none tabular-nums">
-        {n.toLocaleString('ko-KR')}
-        <span className="ml-1 text-[17px] font-medium text-[#9BA3AB]">{unit}</span>
+    <div className="flex flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+      <p className="rapo-type-t4-bold break-keep text-(color:--rapo-color-fg-brand-contrast)">{label}</p>
+      <p className="whitespace-nowrap text-(color:--rapo-color-fg-neutral)">
+        <span className="rapo-type-t12-bold tabular-nums">{n.toLocaleString('ko-KR')}</span>
+        <span className="rapo-type-t6-bold ml-[2px] text-(color:--rapo-color-fg-neutral-muted)">{unit}</span>
       </p>
-      {sub && <p className="mt-3 break-keep text-[14px] text-[#9BA3AB]">{sub}</p>}
+      {sub && <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{sub}</p>}
     </div>
   );
 }
@@ -92,45 +110,53 @@ export function Line({
   k, v, strong = false,
 }: { k: string; v: string; strong?: boolean }) {
   return (
-    <div className="flex items-baseline justify-between gap-5 border-b border-[#ECECE8] py-4
-                    last:border-0">
-      <span className="break-keep text-[14px] text-[#5F666C]">{k}</span>
-      <span className={'num shrink-0 tabular-nums '
-        + (strong ? 'text-[17px] font-black text-[#14181C]' : 'text-[15px] text-[#14181C]')}>
+    <div className="flex items-baseline justify-between gap-(--rapo-dimension-x4) border-b-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) py-(--rapo-dimension-x3) last:border-0">
+      <span className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{k}</span>
+      <span className={'shrink-0 tabular-nums text-(color:--rapo-color-fg-neutral) ' + (strong ? 'rapo-type-t5-bold' : 'rapo-type-t4-medium')}>
         {v}
       </span>
     </div>
   );
 }
 
-/** 흰 카드 */
+/** 카드 — 넣는 칸이면 제목 없이, 결과면 제목(「산정 기준」 같은)을 답니다 */
 export function Card({
   title, note, children,
 }: { title?: string; note?: string; children: React.ReactNode }) {
   return (
-    <section className="mt-6 rounded-[14px] border border-[#E3E3DE] bg-white p-6">
-      {title && <h2 className="break-keep text-[17px] font-bold text-[#1B2025]">{title}</h2>}
-      {note && <p className="mt-1 break-keep text-sm leading-relaxed text-[#5F666C]">{note}</p>}
-      <div className={title || note ? 'mt-5' : ''}>{children}</div>
+    <section className="rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x5)">
+      {title && <h2 className="rapo-type-t6-bold break-keep text-(color:--rapo-brand-color-navy)">{title}</h2>}
+      {note && <p className="rapo-type-t3-regular mt-(--rapo-dimension-x1) break-keep text-(color:--rapo-color-fg-neutral-muted)">{note}</p>}
+      <div className={title || note ? 'mt-(--rapo-dimension-x3)' : ''}>{children}</div>
     </section>
   );
 }
 
-/** 맨 아래 기준과 한계. **계산기마다 반드시 하나씩 답니다** */
-export function Basis({ children }: { children: React.ReactNode }) {
+/** 값을 넣기 전 빈 결과 칸 — 피그마 「예상 금액을 확인해 보세요」 */
+export function ResultHint({ title = '예상 금액을 확인해 보세요', children }: { title?: string; children: React.ReactNode }) {
   return (
-    <p className="mt-6 break-keep rounded-[10px] bg-[#ECECE8] p-5 text-[12px]
-                  leading-relaxed text-[#5F666C]">
-      {children}
-    </p>
+    <div className="flex flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
+      <p className="rapo-type-t5-bold break-keep text-(color:--rapo-color-fg-neutral)">{title}</p>
+      <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{children}</p>
+    </div>
   );
 }
 
-/** 못 계산하는 경우의 안내 (1년 미만 퇴직 같은) */
+/** 맨 아래 기준과 한계 — 피그마 「산정 기준」. **계산기마다 반드시 하나씩 답니다** */
+export function Basis({ children }: { children: React.ReactNode }) {
+  return (
+    <section className="flex flex-col gap-(--rapo-dimension-x1)">
+      <h2 className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">산정 기준</h2>
+      <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{children}</p>
+    </section>
+  );
+}
+
+/** 못 계산하는 경우의 안내 (1년 미만 퇴직 같은) — 피그마 「입력 오류」의 빨간 선 꼴 */
 export function Warn({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-6 rounded-[14px] border border-[#FF3B30]/30 bg-brand-red-soft p-6">
-      <p className="break-keep text-[15px] leading-relaxed text-brand-red-dark">{children}</p>
+    <div role="alert" className="rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-critical-solid) bg-(--rapo-color-bg-critical-weak) p-(--rapo-dimension-x5)">
+      <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-critical-contrast)">{children}</p>
     </div>
   );
 }

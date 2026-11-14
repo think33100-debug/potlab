@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BigNum, Card, Line, NumField, Warn, num, won } from '@/components/tool-parts';
+import { BigNum, Card, Line, NumField, PickTwo, ResultHint, Warn, num, won } from '@/components/tool-parts';
 import { 실업급여셈, 삼개월일수, type 실업급여설정 } from '@/lib/unemployment';
 
 /* 실업급여 입력과 결과.
@@ -25,8 +25,8 @@ export function UnemploymentForm({ 설정 }: { 설정: 실업급여설정 }) {
 
   return (
     <>
-      <Card>
-        <div className="flex flex-col gap-6">
+      <Card title="퇴직 조건">
+        <div className="flex flex-col gap-(--rapo-dimension-x4)">
           <NumField
             label="퇴직 전 3개월 평균 월급"
             value={월급}
@@ -37,34 +37,22 @@ export function UnemploymentForm({ 설정 }: { 설정: 실업급여설정 }) {
           />
 
           <div>
-            <span className="block break-keep text-sm font-bold text-[#5F666C]">나이</span>
-            <div className="mt-2 flex gap-2">
-              {[['50세 미만', false], ['50세 이상 또는 장애인', true]].map(([이름, 값]) => (
-                <button
-                  key={String(이름)}
-                  type="button"
-                  onClick={() => set오십이상(값 as boolean)}
-                  aria-pressed={오십이상 === 값}
-                  className={'flex-1 break-keep rounded-xs border px-4 py-4 text-[15px] font-medium transition-colors '
-                    + (오십이상 === 값
-                      ? 'border-teal-strong bg-teal-strong text-white'
-                      : 'border-[#E3E3DE] bg-white text-[#5F666C] hover:bg-[#F7F7F4]')}
-                >
-                  {이름 as string}
-                </button>
-              ))}
+            <span className="rapo-type-t4-medium block break-keep">나이</span>
+            <div className="mt-(--rapo-dimension-x2)">
+              <PickTwo<'under' | 'over'> label="나이" value={오십이상 ? 'over' : 'under'} onChange={(v) => set오십이상(v === 'over')}
+                options={[['under', '50세 미만'], ['over', '50세 이상 또는 장애인']]} />
             </div>
-            <span className="mt-1 block break-keep text-sm text-[#5F666C]">
+            <span className="rapo-type-t3-regular mt-(--rapo-dimension-x1) block break-keep text-(color:--rapo-color-fg-neutral-muted)">
               이직한 날의 나이입니다. 받는 날수가 달라집니다
             </span>
           </div>
 
           <label className="block">
-            <span className="block break-keep text-sm font-bold text-[#5F666C]">고용보험 가입기간</span>
+            <span className="rapo-type-t4-medium block break-keep">고용보험 가입기간</span>
             <select
               value={가입기간}
               onChange={(e) => set가입기간(e.target.value)}
-              className="mt-2 w-full rounded-xs border border-[#E3E3DE] bg-white px-5 py-4 text-[17px] text-[#14181C]"
+              className="rapo-type-t5-regular mt-(--rapo-dimension-x2) h-(--rapo-dimension-x13) w-full rounded-(--rapo-radius-r2) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-muted) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral)"
             >
               {설정.소정급여일수.map((x) => (
                 <option key={x.가입기간} value={x.가입기간}>{x.가입기간}</option>
@@ -75,12 +63,12 @@ export function UnemploymentForm({ 설정 }: { 설정: 실업급여설정 }) {
       </Card>
 
       {!셀수있나 && (
-        <p className="mt-6 break-keep text-lg text-mute">월급을 넣으면 바로 나옵니다</p>
+        <ResultHint>월급을 넣으면 하루 받는 돈과 받는 날수를 바로 보여 드려요.</ResultHint>
       )}
 
       {r && (
         <>
-          <div className="mt-6">
+          <div>
             <BigNum
               label="하루 받는 돈"
               value={r.일액}
@@ -112,7 +100,7 @@ export function UnemploymentForm({ 설정 }: { 설정: 실업급여설정 }) {
         </>
       )}
 
-      <p className="mt-4 break-keep text-sm text-[#5F666C]">
+      <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
         3개월 일수는 오늘({new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric' })})
         기준 {d3}일로 셉니다. 퇴직일에 따라 89~92일로 달라집니다
       </p>

@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Hit } from '@/components/hit';
 import { Icon } from '@/components/icon';
-import { Basis, BigNum, Card, Line, NumField, man, num, won } from '@/components/tool-parts';
+import { RapoToolPage } from '@/components/rapo/rapo-tool';
+import { Basis, BigNum, Card, Line, NumField, PickTwo, ResultHint, man, num, won } from '@/components/tool-parts';
 import { RATE_YEAR } from '@/lib/rates';
 import { grossFromNet, netFromGross } from '@/lib/tax';
 
@@ -40,44 +40,12 @@ export default function PayTool() {
   const has = 만 > 0;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <Hit kind="other" target="tools/pay" />
-
-      <Link href="/tools"
-        className="-ml-5 flex h-[48px] w-[48px] items-center justify-center rounded-full
-                   text-[#4A5056] transition-transform duration-[120ms] active:scale-[0.88]
-                   motion-reduce:transition-none">
-        <Icon name="chevron-left" size={24} />
-        <span className="sr-only">계산기 목록으로</span>
-      </Link>
-
-      <h1 className="mt-4 break-keep text-h1 font-bold text-[#14181C]">세전 · 세후 계산기</h1>
-      <p className="mt-2 break-keep text-lg text-[#5F666C]">
-        넣은 값은 저장하지 않아요. 전부 이 화면 안에서 계산합니다
-      </p>
+    <RapoToolPage 지금="/tools/pay" hit="tools/pay" 제목="실수령액 계산" 설명="월급과 조건을 입력해 예상 금액을 확인하세요. 넣은 값은 저장하지 않아요.">
 
       {/* ── 넣는 칸 ── */}
-      <Card>
-        <div role="group" aria-label="무엇을 넣을지" className="flex gap-2">
-          {([['gross', '세전으로 넣기'], ['net', '세후로 넣기']] as [Mode, string][]).map(([k, t]) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => setMode(k)}
-              aria-pressed={mode === k}
-              className={
-                'flex-1 rounded-[12px] border px-5 py-4 text-[15px] font-bold transition-colors '
-                + (mode === k
-                  ? 'border-[#14181C] bg-[#14181C] text-white'
-                  : 'border-[#E3E3DE] bg-white text-[#5F666C]')
-              }
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-5 flex flex-col gap-5">
+      <Card title="급여 조건">
+        <div className="flex flex-col gap-(--rapo-dimension-x4)">
+          <PickTwo<Mode> label="무엇을 넣을지" value={mode} onChange={setMode} options={[['gross', '세전으로 넣기'], ['net', '세후로 넣기']]} />
           <NumField
             label={mode === 'gross' ? '세전 월급' : '세후 월급 (실수령)'}
             value={amount}
@@ -99,7 +67,7 @@ export default function PayTool() {
       {has && (
         <>
           {/* ── 결과 ── */}
-          <div className="mt-6">
+          <div>
             <BigNum
               label="세후 월급 (실수령)"
               value={Math.round(b.net / 10_000)}
@@ -128,26 +96,17 @@ export default function PayTool() {
             <Line k="공제 합계" v={won(b.공제합계)} strong />
           </Card>
 
-          <Link
-            href="/pay"
-            className="mt-6 flex items-center justify-between gap-3 rounded-[12px]
-                       border border-[#E3E3DE] bg-white px-6 py-5
-                       transition-transform duration-[120ms] active:scale-[0.99]
-                       motion-reduce:transition-none"
-          >
+          <Link href="/pay"
+            className="flex items-center justify-between gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x5) active:bg-(--rapo-color-bg-transparent-pressed)">
             <span className="min-w-0">
-              <span className="block break-keep text-[15px] font-bold text-[#1B2025]">
-                또래 중에 내가 어디쯤인지 보기
-              </span>
-              <span className="mt-1 block break-keep text-[13px] text-[#5F666C]">
-                같은 직군 · 연차 · 지역끼리 견줍니다. 회원만 볼 수 있어요
-              </span>
+              <span className="rapo-type-t5-bold block break-keep text-(color:--rapo-brand-color-navy)">또래 중에 내가 어디쯤인지 보기</span>
+              <span className="rapo-type-t3-regular mt-(--rapo-dimension-x1) block break-keep text-(color:--rapo-color-fg-neutral-muted)">같은 직군 · 연차 · 지역끼리 견줍니다. 회원만 볼 수 있어요</span>
             </span>
-            <Icon name="chevron-left" size={16}
-                  className="shrink-0 rotate-180 text-[#8A9299]" />
+            <Icon name="chevron-left" size={16} className="shrink-0 rotate-180 text-(color:--rapo-color-fg-neutral-muted)" />
           </Link>
         </>
       )}
+      {!has && <ResultHint>월급을 넣으면 세후 월급과 공제 내역을 바로 보여 드려요.</ResultHint>}
 
       <Basis>
         {RATE_YEAR}년 요율 기준입니다. 실제와 다를 수 있어요.
@@ -156,6 +115,6 @@ export default function PayTool() {
         비과세(식대 등)는 회사마다 달라서 안 넣었어요.
         시급은 월 {MONTH_HOURS}시간(주 40시간 · 주휴 포함) 기준입니다.
       </Basis>
-    </main>
+    </RapoToolPage>
   );
 }

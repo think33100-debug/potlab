@@ -101,7 +101,7 @@ function Banners({ member }: { member: boolean }) {
         <p className="absolute left-[36px] top-[65px] w-[240px] text-[23px] font-bold leading-[30px] text-(color:--rapo-brand-color-white)">
           내 경력과 스펙을<br />한눈에 확인해요
         </p>
-        <Link href="/spec"
+        <Link href="/me/soon?k=spec"
           className="absolute left-[36px] top-[185px] w-[220px] rounded-(--rapo-radius-r1) text-[14px] font-bold leading-[24px] text-(color:--rapo-brand-color-white)
                      active:bg-(--rapo-color-bg-transparent-pressed)">
           입사 스펙 비교하기 →
@@ -277,12 +277,36 @@ function JobCurations() {
    전에는 맞는 화면이 없어 병원 찾기(/orgs)로 보냈습니다. 병원 찾기는 그 글의 「병원별로 찾아보기」 단추로 이어집니다. */
 const 서비스 = [
   { label: '공시 병원 급여', href: '/guide/therapist-salary', art: { src: '/rapo/home/graphic-pay-28.svg',       w: 25.8461, l: 0.92, t: 2.42 } },
-  { label: '입사 스펙 비교', href: '/spec',      art: { src: '/rapo/home/graphic-cert-28.svg',      w: 28,      l: 0,    t: 0 } },
+  { label: '입사 스펙 비교', href: '/me/soon?k=spec', art: { src: '/rapo/home/graphic-cert-28.svg',      w: 28,      l: 0,    t: 0 } },
   { label: '교육·학술',      href: '/edu',       art: { src: '/rapo/home/graphic-edu-28.svg',       w: 28.0002, l: 0,    t: -0.35 } },
-  { label: '계산기',         href: '/tools',     art: { src: '/rapo/home/graphic-calc-28.svg',      w: 27.0967, l: 0.11, t: 0.11 } },
+  { label: '계산기',         href: '/toolkit#pay',     art: { src: '/rapo/home/graphic-calc-28.svg',      w: 27.0967, l: 0.11, t: 0.11 } },
   { label: '봉사활동',       href: '/volunteer', art: { src: '/rapo/home/graphic-volunteer-28.svg', w: 24.5215, l: 1.74, t: 1.82 } },
   { label: '청년정책',       href: '/youth',     art: { src: '/rapo/home/graphic-youth-28.svg',     w: 27.3067, l: -0.34, t: -0.6 } },
 ];
+
+/* 여섯 서비스 두 줄 틀 — 홈 「라포 더 둘러보기」와 툴킷 화면이 같이 씁니다 (2026-11-14 세중님 「미리 만들어 둔 저 틀을 넣자」) */
+export function RapoServiceGrid() {
+  return (
+     <ul className="grid grid-cols-2 gap-x-(--rapo-dimension-x3) gap-y-(--rapo-dimension-x2)">
+          {서비스.map((s) => (
+            <li key={s.href}>
+              <Link href={s.href}
+                className="flex h-(--rapo-dimension-x16) items-center gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-layer-default)
+                           px-(--rapo-dimension-x3) active:bg-(--rapo-color-bg-layer-default-pressed)">
+                <span className="relative size-(--rapo-dimension-x7) shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+                  <img src={s.art.src} alt="" width={s.art.w} height={s.art.w} className="absolute max-w-none" style={{ left: s.art.l, top: s.art.t }} />
+                </span>
+                <span className="rapo-type-t4-medium min-w-0 flex-1 break-keep text-(color:--rapo-brand-color-navy)">{s.label}</span>
+                {/* 320 폭에서는 셰브런을 접습니다 — 「봉사 / 활동」처럼 말 가운데가 갈렸습니다 (2026-11-14) */}
+                {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+                <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0 max-[359px]:hidden" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+  );
+}
 
 function MoreServices() {
   return (
@@ -299,24 +323,7 @@ function MoreServices() {
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/home/toolkit.svg" alt="" width={72} height={72} className="shrink-0" />
       </Link>
-      <ul className="grid grid-cols-2 gap-x-(--rapo-dimension-x3) gap-y-(--rapo-dimension-x2)">
-        {서비스.map((s) => (
-          <li key={s.href}>
-            <Link href={s.href}
-              className="flex h-(--rapo-dimension-x16) items-center gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-layer-default)
-                         px-(--rapo-dimension-x3) active:bg-(--rapo-color-bg-layer-default-pressed)">
-              <span className="relative size-(--rapo-dimension-x7) shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-                <img src={s.art.src} alt="" width={s.art.w} height={s.art.w} className="absolute max-w-none" style={{ left: s.art.l, top: s.art.t }} />
-              </span>
-              <span className="rapo-type-t4-medium min-w-0 flex-1 break-keep text-(color:--rapo-brand-color-navy)">{s.label}</span>
-              {/* 320 폭에서는 셰브런을 접습니다 — 「봉사 / 활동」처럼 말 가운데가 갈렸습니다 (2026-11-14) */}
-              {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-              <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0 max-[359px]:hidden" />
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <RapoServiceGrid />
     </section>
   );
 }
