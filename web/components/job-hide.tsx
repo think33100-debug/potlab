@@ -31,7 +31,8 @@ export function JobHide({ id }: { id?: string }) {
     if (error) { toast(`${다음 ? '숨기' : '숨김 해제하'}지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
     setOn(다음);
     /* 2026-11-14 세중님이 정한 글 그대로 */
-    toast(다음 ? '공고를 숨겼어요! 내 정보에서 언제든지 해제할 수 있어요' : '숨김을 풀었어요', { ms: 3500 });
+    toast(다음 ? '공고를 숨겼어요!
+내 정보에서 언제든지 해제할 수 있어요' : '숨김을 풀었어요', { ms: 3500 });
   }
 
   const 보임 = !!on;
