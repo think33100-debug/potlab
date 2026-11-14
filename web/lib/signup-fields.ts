@@ -228,6 +228,9 @@ export function toDraft(
     f[k] = s(spec?.[k]);
   }
 
+  /* 학생이 「아직 성적이 없어요」로 등록했던 것 — 학년은 학생만 적습니다 */
+  if (spec && spec.grade && spec.gpa == null) f.gpa_none = 'Y';
+
   const raw = (spec?.career ?? spec?.practice ?? []) as WorkRow[];
   const rows = Array.isArray(raw)
     ? raw.map((r) => ({ hospital: s(r.hospital), region: s(r.region), months: s(r.months) }))

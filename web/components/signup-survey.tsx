@@ -137,19 +137,34 @@ export function SignupSurvey({
         body: (
           <>
             <Sel k="grade" label="학년" v={f.grade} on={set} opts={GRADES} req />
-            <Schools v={f.school_type} on={set} req />
+            {/* 재학 중인 분에게 「최종 학력」은 어색합니다 — 피그마 U05-03 은 「학력」 (2026-11-14) */}
+            <Schools v={f.school_type} on={set} req label="학력" />
           </>
         ),
       },
       {
         title: '학점 · 어학',
-        ok: has('gpa') && has('gpa_scale') && !bad(['gpa','gpa_scale']) && langs.every((r) => !langError(r)),
+        /* 「아직 성적이 없어요」도 답입니다 (피그마 U05-03 · 2026-11-14) — 1학년 1학기에는 학점이 없어서
+           이 칸이 필수면 여기서 못 넘어갔습니다. 고르면 학점은 빈 값(null)으로 담깁니다 */
+        ok: (f.gpa_none === 'Y' || (has('gpa') && has('gpa_scale') && !bad(['gpa','gpa_scale'])))
+          && langs.every((r) => !langError(r)),
         body: (
           <>
-            <div className="grid grid-cols-2 gap-2">
-              <Num k="gpa" label="학점" v={f.gpa} on={set} unit="점" step="0.01" ph="3.8" req f={f} />
+            <div className={'grid grid-cols-2 gap-2 [&>label]:mt-0 ' + (f.gpa_none === 'Y' ? 'pointer-events-none opacity-60' : '')}
+              aria-hidden={f.gpa_none === 'Y' || undefined}>
+              <Num k="gpa" label="학점" v={f.gpa} on={set} unit="점" step="0.01" ph="3.8" req f={f} noWhy />
               <Num k="gpa_scale" label="만점 기준" v={f.gpa_scale} on={set} unit="점" step="0.1" ph="4.5" req f={f} />
             </div>
+            {/* 안내는 두 칸 아래 한 줄로 — 반쪽 칸 안에 두면 그 칸만 두 줄이 돼 네모가 어긋났습니다 (2026-11-14) */}
+            <p className="mt-2 rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-brand)">{FIELD_HINT.gpa}</p>
+            <button type="button" aria-pressed={f.gpa_none === 'Y'}
+              onClick={() => patch(f.gpa_none === 'Y' ? { gpa_none: '' } : { gpa_none: 'Y', gpa: '', gpa_scale: '' })}
+              className={'mt-5 flex w-full items-center gap-5 rounded-(--rapo-radius-r3) border px-6 py-5 text-left transition-colors '
+                + (f.gpa_none === 'Y' ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
+              <Tick on={f.gpa_none === 'Y'} />
+              <span className="rapo-type-t5-medium whitespace-nowrap">아직 성적이 없어요</span>
+            </button>
+            <p className="mt-2 mb-6 rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">성적이 없으면 학점을 입력하지 않아도 돼요.</p>
             <Langs rows={langs} on={putLangs} />
           </>
         ),
@@ -247,10 +262,12 @@ export function SignupSurvey({
         body: (
           <>
             <Schools v={f.school_type} on={set} req />
-            <div className="grid grid-cols-2 gap-2">
-              <Num k="gpa" label="학점" v={f.gpa} on={set} unit="점" step="0.01" ph="3.8" req f={f} />
+            <div className="mt-6 grid grid-cols-2 gap-2 [&>label]:mt-0">
+              <Num k="gpa" label="학점" v={f.gpa} on={set} unit="점" step="0.01" ph="3.8" req f={f} noWhy />
               <Num k="gpa_scale" label="만점 기준" v={f.gpa_scale} on={set} unit="점" step="0.1" ph="4.5" req f={f} />
             </div>
+            {/* 안내는 두 칸 아래 한 줄로 — 반쪽 칸 안에 두면 그 칸만 두 줄이 돼 네모가 어긋났습니다 (2026-11-14) */}
+            <p className="mt-2 rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-brand)">{FIELD_HINT.gpa}</p>
             <Langs rows={langs} on={putLangs} />
           </>
         ),
@@ -336,7 +353,8 @@ export function SignupSurvey({
     const spec = {
       school_type: f.school_type || null,
       grade: stu ? f.grade || null : null,
-      gpa: num(f.gpa), gpa_scale: num(f.gpa_scale),
+      gpa: stu && f.gpa_none === 'Y' ? null : num(f.gpa),
+      gpa_scale: stu && f.gpa_none === 'Y' ? null : num(f.gpa_scale),
       licenses: strip(certs), trainings: strip(courses),
       practice: stu ? filled : null,
       career: stu ? null : filled,
@@ -584,10 +602,10 @@ function Sel({
 
 /* 최종 학력만 묶음이 있어서 따로 뒀습니다.
    학생은 필수, 현직은 선택입니다 — 옛 submit 의 req 배열과 같습니다 */
-function Schools({ v, on, req }: { v?: string; on: (k: string, v: string) => void; req?: boolean }) {
+function Schools({ v, on, req, label = '최종 학력' }: { v?: string; on: (k: string, v: string) => void; req?: boolean; label?: string }) {
   return (
     <label className="mt-6 block first:mt-0">
-      <Label label="최종 학력" req={req} k="school_type" />
+      <Label label={label} req={req} k="school_type" />
       <select value={v ?? ''} onChange={(e) => on('school_type', e.target.value)} className={INPUT + ' mt-2 w-full'}>
         <option value="">선택</option>
         {SCHOOLS.map((g) => (
