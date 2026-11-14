@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
-import { RapoEduFilter, RapoEduPastToggle, RapoEduRow, RapoEduTop } from '@/components/rapo/rapo-edu';
+import { RapoEduFilter, RapoEduPastToggle, RapoEduRow, RapoEduTop, RapoNotifyLink } from '@/components/rapo/rapo-edu';
 import { RapoGuestPreview } from '@/components/rapo/rapo-guest-preview';
 import { RapoPagination } from '@/components/rapo/rapo-ui';
 import { 기관그림 } from '@/lib/rapo-home';
@@ -199,6 +199,7 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
           <RapoEduFilter icon="/rapo/list/briefcase-16.svg" label="직군" 고른것={직군글} 선택지={직군선택지} />
           <RapoEduFilter icon="/rapo/edu/academy-16.svg" label="기관" 고른것={tab.key === 'all' ? null : tab.label} 선택지={기관선택지} />
         </div>
+        <RapoNotifyLink href="/me/notify#edu">관심 학회 새 교육 알림 받기</RapoNotifyLink>
 
         <div className="flex items-center justify-between gap-(--rapo-dimension-x3) pt-(--rapo-dimension-x2)">
           <h2 className="text-[20px] font-bold leading-[22px] text-(color:--rapo-brand-color-navy)">교육 목록 {건수}건</h2>

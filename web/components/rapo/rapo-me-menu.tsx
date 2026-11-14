@@ -72,7 +72,7 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
       )}
 
       <RapoMeSection title="설정">
-        <RapoMeRow icon="/rapo/me/bell-24.svg" href="/me/notify">공고 알림 설정</RapoMeRow>
+        <RapoMeRow icon="/rapo/me/bell-24.svg" href="/me/notify">알림 설정</RapoMeRow>
         <RapoMeRow icon="/rapo/me/school-24.svg" href={준비('status')}>이용 상태 · 학적 정보</RapoMeRow>
         <RapoMeRow icon="/rapo/me/contact-24.svg" href="/contact">문의하기</RapoMeRow>
         <RapoMeRow icon="/rapo/me/save-24.svg" href={준비('report')}>신고 센터</RapoMeRow>

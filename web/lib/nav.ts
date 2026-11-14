@@ -7,12 +7,15 @@
    앱의 뼈대라 DB 가 아니라 코드에 둡니다 — 여기를 바꾸면 라우팅도 같이 바뀝니다.
    icon 은 옛 탭바가 쓰는 Lucide 이름입니다 (components/icon.tsx).
    새 하단 탐색은 href 로 Figma 원본 아이콘을 고르고, 원본이 없는 길(담당자 메뉴)만 icon 을 씁니다. */
-export type NavItem = { href: string; label: string; icon: string };
+/* 짧게 — 아래 탐색에 칸이 여섯·일곱이 되면(담당자) 이름이 칸을 넘습니다. 그때 아래 탐색만 이 이름을 씁니다 (2026-11-14 · 툴킷 칸이 더해짐) */
+export type NavItem = { href: string; label: string; icon: string; 짧게?: string };
 
 export const NAV_TABS: NavItem[] = [
   { href: '/',          label: '홈',       icon: 'house' },
   { href: '/jobs',      label: '공고',     icon: 'briefcase' },
   { href: '/community', label: '커뮤니티', icon: 'message-circle' },
+  /* 2026-11-14 세중님 「커뮤니티를 중간에 넣고 커뮤니티와 내정보 사이에 라포 올인원 툴킷」 — 다섯 칸 */
+  { href: '/toolkit',   label: '툴킷',     icon: 'calculator' },
   { href: '/me',        label: '내 정보',  icon: 'user-round' },
 ];
 
@@ -21,14 +24,14 @@ export const NAV_TABS: NavItem[] = [
    링크를 숨기는 것은 길 안내일 뿐이고, 막는 자리는 DB 입니다. */
 export function 관리길(관리: { 채용관리: boolean; 교육관리: boolean }): NavItem[] {
   const xs: NavItem[] = [];
-  if (관리.채용관리) xs.push({ href: '/biz', label: '채용 관리', icon: 'building-2' });
-  if (관리.교육관리) xs.push({ href: '/edu/manage', label: '교육 관리', icon: 'graduation-cap' });
+  if (관리.채용관리) xs.push({ href: '/biz', label: '채용 관리', icon: 'building-2', 짧게: '채용' });
+  if (관리.교육관리) xs.push({ href: '/edu/manage', label: '교육 관리', icon: 'graduation-cap', 짧게: '교육' });
   return xs;
 }
 
 /* 아래 탐색에 놓는 차례 — 담당자 길은 **「내 정보」 앞**에 끼웁니다 (내 정보는 늘 맨 오른쪽) */
 export function 아래탐색(관리: { 채용관리: boolean; 교육관리: boolean }): NavItem[] {
-  return [...NAV_TABS.slice(0, 3), ...관리길(관리), ...NAV_TABS.slice(3)];
+  return [...NAV_TABS.slice(0, -1), ...관리길(관리), ...NAV_TABS.slice(-1)];
 }
 
 export const 켜진길 = (pathname: string, href: string) =>
@@ -71,5 +74,7 @@ export function 새틀화면(pathname: string): boolean {
     || pathname === '/master'
     /* 안내 글(/guide/…)도 2026-11-13 부터 새 틀(홈의 위쪽 줄 · 글 화면 틀) */
     || pathname.startsWith('/guide/')
+    /* 라포 올인원 툴킷(/toolkit)은 2026-11-14 새로 만든 화면이라 처음부터 새 틀 */
+    || pathname === '/toolkit'
     || pathname.startsWith('/design-preview');
 }

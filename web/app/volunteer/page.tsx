@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
-import { RapoEduFilter, RapoEduPastToggle, RapoEduTop, RapoExploreNote, RapoExploreRow } from '@/components/rapo/rapo-edu';
+import { RapoEduFilter, RapoEduPastToggle, RapoEduTop, RapoExploreNote, RapoExploreRow, RapoNotifyLink } from '@/components/rapo/rapo-edu';
 import { RapoPagination } from '@/components/rapo/rapo-ui';
 import { 기관그림 } from '@/lib/rapo-home';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
@@ -156,6 +156,7 @@ export default async function Volunteer({ searchParams }: { searchParams: Promis
           <RapoEduFilter icon="/rapo/list/sliders-16.svg" label="분야" 고른것={tab.key === 'all' ? null : tab.label} 선택지={분야선택지} />
           <RapoEduFilter icon="/rapo/list/pin-16.svg" label="지역" 고른것={sido} 선택지={지역선택지} />
         </div>
+        <RapoNotifyLink href="/me/notify#volunteer">우리 지역 새 봉사활동 알림 받기</RapoNotifyLink>
 
         <div className="flex items-center justify-between gap-(--rapo-dimension-x3) pt-(--rapo-dimension-x2)">
           <h2 className="text-[20px] font-bold leading-[22px] text-(color:--rapo-brand-color-navy)">봉사활동 {이탭수}건</h2>
