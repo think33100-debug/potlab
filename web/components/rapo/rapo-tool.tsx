@@ -47,7 +47,7 @@ export function RapoToolPage({ 지금, hit, 제목, 설명, children }: {
         </header>
         {children}
         {/* 2026-11-14 세중님 「계산 결과 아래에 라포 올인원 툴킷 더 둘러보기」 — 계산기 넷 모두 맨 아래에 같은 단추 */}
-        <RapoButton href="/toolkit" tone="navy" size={52} full>라포 올인원 툴킷 더 둘러보기</RapoButton>
+        <RapoButton href="/toolkit" tone="coral" size={52} full>라포 올인원 툴킷 더 둘러보기</RapoButton>
       </main>
       <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
       <RapoBottomNav current="/toolkit" />
