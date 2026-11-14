@@ -108,8 +108,8 @@ export function RapoInstallToastFace({ 갈래, 폰 = 갈래 === 'ios', 아래 = 
         <p className="rapo-type-t3-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x3) py-(--rapo-dimension-x2)
                       text-(color:--rapo-color-fg-neutral)">
           {/* 두 문장을 줄로 나눕니다 — 이으면 좁은 폰에서 「만나 볼 / 수 있어요」로 갈렸습니다(화면표시 규칙 1) */}
-          <span className="block">지금 RAPO 앱도 만들고 있어요.</span>
-          <span className="block">곧 앱으로도 만나 볼 수 있어요!</span>
+          <span className="block">지금 라포 앱도 만들고 있어요!</span>
+          <span className="block">곧 앱으로 만나볼 수 있습니다.</span>
         </p>
         {갈래 === 'prompt' ? (
           <div className="flex gap-(--rapo-dimension-x2)">

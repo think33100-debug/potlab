@@ -41,6 +41,8 @@ export const 그밖도구: 메뉴[] = [
   { href: '/admin/posts', label: '커뮤니티 글' },
   { href: '/admin/ops', label: '운영진 글' },
   { href: '/admin/inquiries', label: '문의' },
+  /* 종류별 알림 신청한 사람 수 (2026-11-14 세중님) */
+  { href: '/admin/notify', label: '알림 신청 현황' },
   { href: '/admin/partners', label: '담당자 승인' },
   { href: '/admin/verify', label: '재직 확인' },
   { href: '/admin/staff', label: '직원과 권한' },

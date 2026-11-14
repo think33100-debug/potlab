@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Avatar } from '@/components/avatar';
+import { RapoInstallCard } from './rapo-install';
 import { RapoMeRow, RapoMeSection } from './rapo-me';
 
 /* 내 정보 첫 화면의 몸통 — app/me/page.tsx 와 견본(app/design-preview/me)이 같이 씁니다.
@@ -35,6 +36,9 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
           프로필 편집
         </Link>
       </div>
+
+      {/* 설치 유도 — 아직 홈 화면에 안 둔 분에게만 (2026-11-14 세중님) */}
+      <RapoInstallCard />
 
       {/* 내 급여 요약 (1441:1459) — 급여는 아직 오픈 전이라 금액 대신 안내 · 누르면 알림 신청으로 */}
       <Link href={준비('pay')} className="flex items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-brand-weak) px-(--rapo-dimension-x5) py-(--rapo-dimension-x4)">
@@ -75,6 +79,7 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
       )}
 
       <RapoMeSection title="설정">
+        <RapoMeRow icon="/rapo/me/install-24.svg" href="/me/install">핸드폰에 설치하기</RapoMeRow>
         <RapoMeRow icon="/rapo/me/bell-24.svg" href="/me/notify">알림 설정</RapoMeRow>
         <RapoMeRow icon="/rapo/me/school-24.svg" href={준비('status')}>이용 상태 · 학적 정보</RapoMeRow>
         <RapoMeRow icon="/rapo/me/contact-24.svg" href="/contact">문의하기</RapoMeRow>
