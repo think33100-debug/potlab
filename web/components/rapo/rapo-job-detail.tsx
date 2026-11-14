@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { HospitalStat, 시설숫자 } from '@/lib/hospital';
-import { 정부자료연봉말 } from '@/lib/job-state';
+import { 보수금액뽑기, 정부자료연봉말 } from '@/lib/job-state';
 import { 기관로고 } from '@/lib/org-logo';
 import { RapoBadge, RapoMaskIcon } from './rapo-ui';
 
@@ -157,12 +157,13 @@ export function RapoPayCard({ 잠김, 값, 덧말, 공시 }: { 잠김: boolean; 
           {잠김 ? '로그인 후 이용 상태를 확인해 주세요.\n이용 가능한 회원에게 보수를 공개해요.' : 덧말}
         </p>
       )}
-      {/* 2026-11-14 세중님 「아래 작게 세후 월급은 어느정도인지 궁금하세요? 누르면 라포 올인원 툴킷」 */}
+      {/* 2026-11-14 세중님 「공고에서 연봉이 얼마인지 궁금하세요? 누르면 그 공고의 월급에 대한 세전 연봉·세전 월급·세후 월급을 바로 연결」
+          공고에 금액이 있으면 그 금액을 계산기에 미리 채워 열고, 없으면(내규에 따름·공시만) 빈 계산기로 엽니다 */}
       {!잠김 && (
-        <Link href="/toolkit#pay"
+        <Link href={(() => { const 보수 = 공시씀 ? null : 보수금액뽑기(값); return 보수 ? `/tools/pay?${보수.종류}=${보수.원}` : '/tools/pay'; })()}
           className="rapo-type-t3-medium mt-(--rapo-dimension-x1) flex w-fit items-center gap-(--rapo-dimension-x1) break-keep
                      text-(color:--rapo-color-fg-neutral) underline decoration-(--rapo-color-stroke-neutral-muted) underline-offset-4">
-          세후 월급은 어느 정도인지 궁금하세요?
+          연봉이 얼마인지 궁금하세요?
           {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
           <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0" />
         </Link>

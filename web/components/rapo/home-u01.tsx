@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { RapoBannerCarousel } from './rapo-banner-carousel';
 import { RapoShell } from './rapo-shell';
-import { RapoSectionTitle } from './rapo-ui';
+import { RapoButton, RapoSectionTitle } from './rapo-ui';
 import type { ReactNode } from 'react';
 import type { Who } from '@/lib/supabase-server';
 
@@ -324,6 +324,8 @@ function MoreServices() {
         <img src="/rapo/home/toolkit.svg" alt="" width={72} height={72} className="shrink-0" />
       </Link>
       <RapoServiceGrid />
+      {/* 2026-11-14 세중님 「더 둘러보기 아래 버튼 CTA · 누르면 올인원 툴킷」 */}
+      <RapoButton href="/toolkit" tone="navy" size={52} full>라포 올인원 툴킷 둘러보기</RapoButton>
     </section>
   );
 }
