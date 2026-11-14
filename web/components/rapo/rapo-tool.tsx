@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Hit } from '@/components/hit';
 import { RapoBottomNav } from './rapo-bottom-nav';
 import { RapoEduTop } from './rapo-edu';
+import { RapoButton } from './rapo-ui';
 
 /* 계산 도구형 화면 틀 — 피그마 「T03 · 계산 도구형」 (15 · 기본 화면 템플릿 614:861) (2026-11-14 세중님 「돈계산들은 다 예전 화면 · 피그마 확인해서 교체」).
    위쪽 줄 → 도구 이름 알약 넷 → 제목·설명 → 넣는 카드 → 결과 칸. 계산 규칙은 건드리지 않았습니다(lib/tax · labor · unemployment).
@@ -45,6 +46,8 @@ export function RapoToolPage({ 지금, hit, 제목, 설명, children }: {
           <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{설명}</p>
         </header>
         {children}
+        {/* 2026-11-14 세중님 「계산 결과 아래에 라포 올인원 툴킷 더 둘러보기」 — 계산기 넷 모두 맨 아래에 같은 단추 */}
+        <RapoButton href="/toolkit" tone="navy" size={52} full>라포 올인원 툴킷 더 둘러보기</RapoButton>
       </main>
       <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
       <RapoBottomNav current="/toolkit" />
