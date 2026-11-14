@@ -111,7 +111,11 @@ function 식별칸({ icon, iconW, iconH, label, v }: { icon: string; iconW: numb
 
 /* 03 보수 — 「공고 명시 보수」 (RAPO / Detail / Pay summary 517:392 · 보수 비공개 1210:1072).
    잠김이면 비회원 원본 글 그대로입니다. 금액 글이 길면(「월급 230만원~300만원」) 한 단계 작은 글꼴 */
-export function RapoPayCard({ 잠김, 값, 덧말 }: { 잠김: boolean; 값: string; 덧말: string | null }) {
+/* ★ 시안 (2026-11-14 세중님 「공공의료원은 보수 있잖아 · 시안만들어」) — 공고에 금액이 없을 때만
+   「내규에 따름」 아래에 이 병원 **공시** 연봉을 한 줄 붙입니다. 공시(알리오·알리미)만 — 국민연금 추정은
+   의사 포함 전체 평균이라 맨 위 보수 칸에는 안 올립니다(아래 「병원 한눈에」에 그대로 있습니다) */
+export type 공시한줄 = { 출처: '알리오' | '알리미'; 기준해: number | null; 칸: [string, number][] };
+export function RapoPayCard({ 잠김, 값, 덧말, 공시 }: { 잠김: boolean; 값: string; 덧말: string | null; 공시?: 공시한줄 | null }) {
   /* 열 자부터 한 단계 작게 (2026-11-13) — 12 자 기준일 때 「월 350~360만원」(11자)이 360 폭에서 「월 / 350~360만원」으로 갈렸습니다.
      「약 4,900만원」「월 약 176만원」(9자)은 큰 글씨 그대로 한 줄 */
   const 긴값 = 값.length > 9;
@@ -127,6 +131,24 @@ export function RapoPayCard({ 잠김, 값, 덧말 }: { 잠김: boolean; 값: str
         <p className="rapo-type-t3-regular whitespace-pre-line text-(color:--rapo-color-fg-neutral-muted)">
           {잠김 ? '로그인 후 이용 상태를 확인해 주세요.\n이용 가능한 회원에게 보수를 공개해요.' : 덧말}
         </p>
+      )}
+      {!잠김 && 공시 && 공시.칸.length > 0 && (
+        <div className="mt-(--rapo-dimension-x1) flex flex-col gap-(--rapo-dimension-x1) border-t border-(--rapo-color-stroke-neutral-weak) pt-(--rapo-dimension-x3)">
+          <p className="rapo-type-t4-bold break-keep text-(color:--rapo-color-fg-neutral)">이 병원 공시 연봉</p>
+          {/* 두 칸 나란히 — 한 줄로 이으면 375 폭에서 「· 보건직 평균」이 줄 머리에 옵니다 (11/13 줄 머리 부호 규칙) */}
+          <dl className="grid gap-(--rapo-dimension-x3)" style={{ gridTemplateColumns: `repeat(${공시.칸.length}, minmax(0, 1fr))` }}>
+            {공시.칸.map(([이름, v]) => (
+              <div key={이름} className="flex min-w-0 flex-col">
+                <dt className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{이름}</dt>
+                <dd className="rapo-type-t5-bold whitespace-nowrap text-(color:--rapo-color-fg-neutral)">{Math.round(v / 1e4).toLocaleString('ko-KR')}만원</dd>
+              </div>
+            ))}
+          </dl>
+          {/* 두 줄로 끊어 둡니다 — 이어 쓰면 320 폭에서 「이 / 공고만의」처럼 갈렸습니다 */}
+          <p className="rapo-type-t3-regular whitespace-pre-line break-keep text-(color:--rapo-color-fg-neutral-muted)">
+            {`${공시.기준해 ? `${공시.기준해}년 ` : ''}${공시.출처 === '알리오' ? '알리오' : '공공병원 알리미'} 공시\n이 공고가 아닌 병원 전체 숫자예요`}
+          </p>
+        </div>
       )}
       {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
       <img src={잠김 ? '/rapo/detail/graphic-lock-48.svg' : '/rapo/home/graphic-pay-48.svg'} alt=""
