@@ -24,7 +24,8 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
         <div className="min-w-0 flex-1">
           <p className="truncate text-[28px] font-bold leading-[34px] text-(color:--rapo-color-fg-neutral)">{me.nickname}</p>
           <p className="rapo-type-t5-regular text-(color:--rapo-color-fg-neutral-muted)">
-            {[me.job_group, me.role].filter(Boolean).join(' · ')}
+            {/* 점 뒤에서만 줄이 바뀌게 — 「· 현직」이 줄 머리에 오지 않게 (2026-11-14 · 320 폭) */}
+            {[me.job_group, me.role].filter(Boolean).map((t, i) => <span key={i} className="whitespace-nowrap">{i > 0 ? ' · ' : ''}{t}</span>)}
           </p>
         </div>
         <Link href="/me/profile"
@@ -54,6 +55,7 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
 
       <RapoMeSection title="내 활동과 희망 조건">
         <RapoMeRow icon="/rapo/me/save-24.svg" href="/me/saved">저장한 공고</RapoMeRow>
+        <RapoMeRow icon="/rapo/me/hide-24.svg" href="/me/hidden">숨긴 공고</RapoMeRow>
         <RapoMeRow icon="/rapo/me/hospital-24.svg" href="/me/hospitals">관심 병원</RapoMeRow>
         <RapoMeRow icon="/rapo/me/pref-24.svg" href={준비('pref')}>희망 취업 조건</RapoMeRow>
         <RapoMeRow icon="/rapo/me/save-24.svg" href={준비('edu')}>내 교육 관리</RapoMeRow>

@@ -134,7 +134,7 @@ export function RapoSortTabs<K extends string>({ label, items, value, onChange }
             disabled={!onChange}
             onClick={onChange ? () => onChange(s.key) : undefined}
             className={
-              'flex h-(--rapo-touch-min) min-w-[80px] items-center justify-center rounded-(--rapo-radius-r2) px-(--rapo-dimension-x3) whitespace-nowrap ' +
+              'flex h-(--rapo-touch-min) min-w-[72px] items-center justify-center rounded-(--rapo-radius-r2) px-(--rapo-dimension-x3) whitespace-nowrap ' +
               'disabled:cursor-default ' +
               (켜짐
                 ? 'rapo-type-t4-bold bg-(--rapo-brand-color-blush) text-[#8E241E]'
@@ -150,20 +150,22 @@ export function RapoSortTabs<K extends string>({ label, items, value, onChange }
 }
 
 /* 정렬 단추 — 링크판. 공고 목록(서버 화면)처럼 정렬을 주소(?sort=)로 바꾸는 곳에서 씁니다. 모양은 RapoSortTabs 그대로 */
-export function RapoSortLinks<K extends string>({ label, items, value, href }: {
+export function RapoSortLinks<K extends string>({ label, items, value, href, extra }: {
   label: string;
   items: readonly { key: K; label: string }[];
   value: K;
   href: (k: K) => string;
+  /* 정렬 옆 켜고 끄는 칩 — 「신입 가능」 (2026-11-14 세중님). 정렬과 따로 켜지고 같이 걸립니다 */
+  extra?: { label: string; on: boolean; href: string };
 }) {
   return (
-    <nav aria-label={label} className="flex h-(--rapo-touch-min) gap-(--rapo-dimension-x1)">
+    <nav aria-label={label} className="flex h-(--rapo-touch-min) gap-(--rapo-dimension-x1) overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {items.map((s) => {
         const 켜짐 = value === s.key;
         return (
           <Link key={s.key} href={href(s.key)} scroll={false} aria-current={켜짐 ? 'true' : undefined}
             className={
-              'flex h-(--rapo-touch-min) min-w-[80px] items-center justify-center rounded-(--rapo-radius-r2) px-(--rapo-dimension-x3) whitespace-nowrap ' +
+              'flex h-(--rapo-touch-min) min-w-[72px] items-center justify-center rounded-(--rapo-radius-r2) px-(--rapo-dimension-x3) whitespace-nowrap ' +
               (켜짐
                 ? 'rapo-type-t4-bold bg-(--rapo-brand-color-blush) text-[#8E241E]'
                 : 'rapo-type-t4-medium text-[#3F4C57] active:bg-(--rapo-color-bg-transparent-pressed)')
@@ -172,6 +174,20 @@ export function RapoSortLinks<K extends string>({ label, items, value, href }: {
           </Link>
         );
       })}
+      {extra && (
+        <>
+          <span aria-hidden className="my-(--rapo-dimension-x3) w-(--rapo-border-default) shrink-0 bg-(--rapo-color-stroke-neutral-weak)" />
+          <Link href={extra.href} scroll={false} aria-pressed={extra.on}
+            className={
+              'flex h-(--rapo-touch-min) min-w-[72px] shrink-0 items-center justify-center rounded-(--rapo-radius-r2) px-(--rapo-dimension-x3) whitespace-nowrap ' +
+              (extra.on
+                ? 'rapo-type-t4-bold bg-(--rapo-brand-color-blush) text-[#8E241E]'
+                : 'rapo-type-t4-medium text-[#3F4C57] active:bg-(--rapo-color-bg-transparent-pressed)')
+            }>
+            {extra.label}
+          </Link>
+        </>
+      )}
     </nav>
   );
 }

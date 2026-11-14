@@ -2,6 +2,7 @@ import { AdminJobTools } from '@/components/admin-job-tools';
 import { Hit } from '@/components/hit';
 import { JobDeadlineNotify } from '@/components/job-deadline-notify';
 import { JobOpenLink } from '@/components/job-open-link';
+import { JobHide } from '@/components/job-hide';
 import { JobSave, RapoSaveBar } from '@/components/job-save';
 import { JobVeil } from '@/components/job-veil';
 import { LoginFirst } from '@/components/login-first';
@@ -245,7 +246,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
 
       <RapoStickyActions
         안내={p.closed ? '모집이 종료됐어요. 원문과 공유는 이용할 수 있어요.' : null}
-        저장={p.id ? <JobSave id={p.id} look="rapo-bar" 마감={p.closed} /> : <RapoSaveBar on={false} busy={false} disabled />}
+        저장={p.id ? <><JobSave id={p.id} look="rapo-bar" 마감={p.closed} /><JobHide id={p.id} /></> : <><RapoSaveBar on={false} busy={false} disabled /><JobHide /></>}
         지원={p.closed ? (
           <button type="button" disabled className={잠긴단추꼴}>모집 마감</button>
         ) : p.who === '모름' ? null : p.지원주소 ? (

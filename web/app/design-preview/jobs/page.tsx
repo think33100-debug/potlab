@@ -15,13 +15,13 @@ import { 공고정렬들, 기본정렬 } from '@/lib/rapo-job-options';
 export const metadata: Metadata = { title: 'RAPO · 공고 목록 미리보기', robots: { index: false } };
 
 export default async function DesignPreviewJobs({ searchParams }: {
-  searchParams: Promise<{ state?: string; who?: string }>;
+  searchParams: Promise<{ state?: string; who?: string; new?: string }>;
 }) {
   if (process.env.NODE_ENV === 'production') notFound();
-  const { state, who } = await searchParams;
+  const { state, who, new: 신입 } = await searchParams;
   const 회원 = who === 'member';
   const 지금 = { q: '', job: 회원 ? '작업치료사' : null, sido: null };
-  const rows = 견본공고.new.map((j) => ({ ...j, id: undefined, deadline: j.deadline, likes: null, views: null }));
+  const rows = 견본공고.new.map((j, i) => ({ ...j, id: undefined, deadline: j.deadline, likes: null, views: null, tags: i % 2 === 0 ? [...j.tags, '신입 가능'] : j.tags }));
   const 결과 = state === 'loading' ? <받는중 />
     : state === 'error' ? <못받음 />
     /* ?state=guest — 비회원 맛보기 + 가입 권유 (숫자는 견본) */
@@ -49,7 +49,8 @@ export default async function DesignPreviewJobs({ searchParams }: {
       <div aria-hidden className="h-(--rapo-dimension-x1_5) bg-(--rapo-color-bg-neutral-weak)" />
       {회원 && (
         <div className="px-(--rapo-dimension-x5) pt-(--rapo-dimension-x4)">
-          <RapoSortLinks label="공고 정렬" items={공고정렬들} value={기본정렬} href={() => '#'} />
+          <RapoSortLinks label="공고 정렬" items={공고정렬들} value={기본정렬} href={() => '#'}
+            extra={{ label: '신입 가능', on: 신입 === '1', href: 신입 === '1' ? '/design-preview/jobs?who=member' : '/design-preview/jobs?who=member&new=1' }} />
         </div>
       )}
       {결과}

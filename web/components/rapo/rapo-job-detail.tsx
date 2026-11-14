@@ -256,7 +256,7 @@ export function RapoStickyActions({ 안내, 저장, 지원 }: { 안내: string |
       )}
       <div className="flex flex-col gap-(--rapo-dimension-x2) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x5)
                       pt-(--rapo-dimension-x2) pb-[calc(var(--rapo-dimension-x2)+env(safe-area-inset-bottom))]">
-        <div className="flex">{저장}</div>
+        <div className="flex gap-(--rapo-dimension-x2)">{저장}</div>
         {지원}
       </div>
     </div>
