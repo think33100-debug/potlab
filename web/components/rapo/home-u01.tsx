@@ -289,14 +289,16 @@ function MoreServices() {
     <section aria-labelledby="rapo-home-more"
       className="flex flex-col gap-(--rapo-dimension-x3) bg-(--rapo-color-bg-neutral-weak) px-(--rapo-dimension-x5) py-(--rapo-dimension-x6)">
       <RapoSectionTitle id="rapo-home-more">라포 더 둘러보기</RapoSectionTitle>
-      <div className="flex min-h-[128px] items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x4)">
-        <div className="flex min-w-0 flex-1 flex-col gap-(--rapo-dimension-x1)">
-          <p className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">라포 올인원 툴킷</p>
-          <p className="rapo-type-t3-regular text-[#3F4C57]">입사 준비부터 배움과 생활 정보까지<br />필요한 도구를 한곳에서 찾아보세요</p>
-        </div>
+      {/* 2026-11-14 — 누르면 툴킷 화면(/toolkit)으로. 전에는 누를 수 없는 카드였습니다 */}
+      <Link href="/toolkit" className="flex min-h-[128px] items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x4)
+                                       active:opacity-90">
+        <span className="flex min-w-0 flex-1 flex-col gap-(--rapo-dimension-x1)">
+          <span className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">라포 올인원 툴킷</span>
+          <span className="rapo-type-t3-regular text-[#3F4C57]">입사 준비부터 배움과 생활 정보까지<br />필요한 도구를 한곳에서 찾아보세요</span>
+        </span>
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/home/toolkit.svg" alt="" width={72} height={72} className="shrink-0" />
-      </div>
+      </Link>
       <ul className="grid grid-cols-2 gap-x-(--rapo-dimension-x3) gap-y-(--rapo-dimension-x2)">
         {서비스.map((s) => (
           <li key={s.href}>
@@ -307,9 +309,10 @@ function MoreServices() {
                 {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
                 <img src={s.art.src} alt="" width={s.art.w} height={s.art.w} className="absolute max-w-none" style={{ left: s.art.l, top: s.art.t }} />
               </span>
-              <span className="rapo-type-t4-medium min-w-0 flex-1 text-(color:--rapo-brand-color-navy)">{s.label}</span>
+              <span className="rapo-type-t4-medium min-w-0 flex-1 break-keep text-(color:--rapo-brand-color-navy)">{s.label}</span>
+              {/* 320 폭에서는 셰브런을 접습니다 — 「봉사 / 활동」처럼 말 가운데가 갈렸습니다 (2026-11-14) */}
               {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-              <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0" />
+              <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0 max-[359px]:hidden" />
             </Link>
           </li>
         ))}

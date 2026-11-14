@@ -69,6 +69,19 @@ export function RapoEduFilter({ icon, label, 고른것, 선택지 }: {
 }
 
 /* 「종료된 일정 포함」 — 원본 「RAPO / Checkbox」 205:46 (마크 20 · 라벨 t4 Regular · 터치 44). 주소로 켜고 끕니다 */
+/* 「알림 받기」 작은 길 — 교육·봉사·청년 목록 필터 아래 (2026-11-14 세중님 「봉사랑 청년 교육 모두 알림」).
+   누르면 알림 설정(/me/notify)의 그 칸으로 갑니다 */
+export function RapoNotifyLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link href={href}
+      className="rapo-type-t4-medium flex h-(--rapo-touch-min) w-fit items-center gap-(--rapo-dimension-x1) break-keep text-(color:--rapo-color-fg-brand-contrast)">
+      {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+      <img src="/rapo/me/bell-24.svg" alt="" width={16} height={16} className="shrink-0" />
+      {children}
+    </Link>
+  );
+}
+
 export function RapoEduPastToggle({ on, href, label = '종료된 일정 포함' }: { on: boolean; href: string; label?: string }) {
   return (
     <Link href={href} role="checkbox" aria-checked={on}

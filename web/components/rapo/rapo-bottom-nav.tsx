@@ -22,6 +22,8 @@ const 원본아이콘: Record<string, { src: string; w: number; h: number }> = {
   '/':          { src: '/rapo/home/nav-home.svg',      w: 23.1,  h: 23.1 },
   '/jobs':      { src: '/rapo/home/nav-jobs.svg',      w: 23.1,  h: 21.93 },
   '/community': { src: '/rapo/home/nav-community.svg', w: 28,    h: 28 },
+  /* 툴킷 — 피그마 원본이 없어 같은 규칙(23.1 상자 · 선 2.1 · 둥근 끝)으로 그린 「네 칸」 (2026-11-14 · 공고의 가방과 헷갈리지 않게) */
+  '/toolkit':   { src: '/rapo/home/nav-toolkit.svg',   w: 23.1,  h: 23.1 },
   '/me':        { src: '/rapo/home/nav-me.svg',        w: 20.77, h: 23.1 },
 };
 
@@ -61,7 +63,7 @@ export function RapoBottomNav({ current, 관리덮기, dark = false }: {
                 className="relative flex h-(--rapo-dimension-x13) flex-col items-center gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r1)
                            transition-transform duration-[90ms] active:scale-[0.92] active:bg-(--rapo-color-bg-transparent-pressed) motion-reduce:transition-none"
               >
-                <NavTabBody 켜짐={켜짐} dark={dark} 그림={그림} icon={t.icon} label={t.label} />
+                <NavTabBody 켜짐={켜짐} dark={dark} 그림={그림} icon={t.icon} label={tabs.length > 5 && t.짧게 ? t.짧게 : t.label} />
               </Link>
             </li>
           );
@@ -84,7 +86,7 @@ function NavTabBody({ 켜짐, dark, 그림, icon, label }: {
   return (
     <span className={'flex flex-col items-center gap-(--rapo-dimension-x1) ' + 글}>
       {on && !dark && (
-        <span aria-hidden className="absolute left-1/2 top-[-4px] h-(--rapo-dimension-x9) w-(--rapo-dimension-x12) -translate-x-1/2
+        <span aria-hidden className="absolute left-1/2 top-[-4px] h-(--rapo-dimension-x9) w-[min(var(--rapo-dimension-x12),100%)] -translate-x-1/2
                                      rounded-(--rapo-radius-r1) bg-(--rapo-color-bg-brand-weak)" />
       )}
       <span className="relative flex size-(--rapo-dimension-x7) items-center justify-center">

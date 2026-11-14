@@ -216,7 +216,9 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const 끝 = 날짜꼴(j.apply_to);
   const 시작 = 날짜꼴(j.apply_from);
   const 시각 = 시각말(j.apply_to_time);
-  const 수시 = !j.apply_to && j.마감표시 === '수시채용';
+  /* 2026-11-14 세중님 「상시 채용으로 적어야겠네 · 공고에도 상시채용으로 적혀있음」 — DB 마감표시() 가 원문 말대로
+     「상시채용」과 「수시채용」을 나눠 냅니다. 둘 다 마감일이 없는 공고입니다 */
+  const 수시 = !j.apply_to && (j.마감표시 === '수시채용' || j.마감표시 === '상시채용');
   const 상태: 모집상태 = closed ? '모집 마감' : (!j.apply_to && !수시 && !마감글) ? '확인 필요' : '접수 중';
   const 식별마감 = 마감글 || 끝?.짧게 || j.마감표시 || 마감못읽은말;
   const 기간 = 끝

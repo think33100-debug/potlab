@@ -6,10 +6,11 @@ import { JobSave, RapoSaveBar } from '@/components/job-save';
 import { JobVeil } from '@/components/job-veil';
 import { LoginFirst } from '@/components/login-first';
 import { ShareButtons } from '@/components/share-buttons';
+import { 내규말 } from '@/lib/job-state';
 import type { Who } from '@/lib/supabase-server';
 import {
   RapoDetailHeader, RapoDetailIdentity, RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoKeyRow,
-  RapoPayCard, RapoPeriodCard, RapoSectionGap, RapoStickyActions, 지원단추꼴, 잠긴단추꼴, type 경쟁률줄, type 모집상태, type 병원보수,
+  RapoPayCard, RapoPeriodCard, RapoSectionGap, RapoStickyActions, 지원단추꼴, 잠긴단추꼴, type 경쟁률줄, type 모집상태, type 병원보수, type 공시한줄,
 } from './rapo-job-detail';
 import { RapoJobRow, type RapoJob } from './rapo-job-row';
 import { RapoButton, RapoDivider } from './rapo-ui';
@@ -55,18 +56,30 @@ export type RapoJobDetailProps = {
   보수?: 병원보수 | null;
 };
 
+/* 2026-11-14 — 공고에 금액이 없을 때 보수 칸에 올릴 공시 연봉. 아래 「이 병원 연봉」 칸과 같은 이름·같은 값입니다 */
+function 공시줄(보수: 병원보수 | null | undefined): 공시한줄 | null {
+  if (!보수 || 보수.출처 === '국민연금') return null;
+  const 칸: [string, number | null | undefined][] = 보수.출처 === '알리오'
+    ? [['신입 초임', 보수.신입초임], ['직원 평균', 보수.평균보수]]
+    : [['신입 평균', 보수.신입초임], ['보건직 평균', 보수.보건직평균]];
+  const 남은 = 칸.filter((c): c is [string, number] => c[1] != null && c[1] > 0);
+  return 남은.length ? { 출처: 보수.출처, 기준해: 보수.기준해, 칸: 남은 } : null;
+}
+
 export function RapoJobDetailView(p: RapoJobDetailProps) {
   const member = p.who === '회원';
   /* ★ 2026-11-12 세중님 「다 볼 수 있게 · 경쟁률이나 보수나 다 좋은 경험을」 — 공유받은 비회원도 회원과 같은 내용을 봅니다.
      보이는 값은 DB 가 정합니다(금고 SQL_1113/N · 비회원도 회원용 허용 목록). 「모름」만 비웁니다.
      회원만 남는 것: 저장(로그인으로 보냄) · 가입 덜 마친 회원 흐림(JobVeil) · 비슷한 공고(목록 창구가 회원만) */
   const 봄 = p.who !== '모름';
+  /* 공고에 금액이 없으면 공시 연봉을 보수 칸으로 올립니다 — 올렸으면 아래 「병원 한눈에」 연봉 칸은 다시 안 그립니다 */
+  const 위공시 = 봄 && p.pay.값 === 내규말 ? 공시줄(p.보수) : null;
 
   const 본문 = (
     <>
       {/* 03 핵심 조건 — 보수 · 필수 자격 (근무시간 줄은 대표 결정으로 뺌) */}
       <section className="flex flex-col gap-(--rapo-dimension-x5) p-(--rapo-dimension-x5)">
-        {p.who !== '모름' && <RapoPayCard 잠김={!봄} 값={p.pay.값} 덧말={p.pay.덧말} />}
+        {p.who !== '모름' && <RapoPayCard 잠김={!봄} 값={p.pay.값} 덧말={p.pay.덧말} 공시={위공시} />}
         <RapoKeyRow icon="/rapo/detail/file-text-20.svg" label="필수 자격">
           {!봄 ? (
             <p className="rapo-type-t5-bold">로그인 후 볼 수 있어요</p>
@@ -120,7 +133,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       {(p.치료사 || p.바쁨 || p.시설 || p.보수 || (p.경쟁률?.length ?? 0) > 0) && (
         <>
           <RapoSectionGap />
-          <RapoHospitalFacts 치료사={p.치료사 ?? null} 바쁨={p.바쁨 ?? null} 시설={p.시설 ?? null} 경쟁률={p.경쟁률 ?? []} 인턴={p.인턴} 보수={p.보수 ?? null} />
+          <RapoHospitalFacts 치료사={p.치료사 ?? null} 바쁨={p.바쁨 ?? null} 시설={p.시설 ?? null} 경쟁률={p.경쟁률 ?? []} 인턴={p.인턴} 보수={위공시 ? null : p.보수 ?? null} />
         </>
       )}
 
