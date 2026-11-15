@@ -183,7 +183,7 @@ export async function generateMetadata({ searchParams }: PageProps<'/orgs'>): Pr
 /* 근무 후기 탭 (2026-11-15 · 금고 SQL_1113/ZN) — 공개근무후기 보기 + 내 재직 인증(확인)이 이 병원인가 */
 async function 후기칸(sb: Awaited<ReturnType<typeof serverSupabase>>, org: string, sido: string | null) {
   const [h, w] = await Promise.all([
-    sb.from('공개근무후기').select('id,기관,별점,교육,일정,휴게,글,쓴때,내것,닉네임,그림,더있음').eq('기관', org).order('쓴때', { ascending: false }).limit(100),
+    sb.from('공개근무후기').select('id,기관,별점,교육,일정,휴게,글,쓴때,내것,닉네임,그림,더있음,재직인증').eq('기관', org).order('쓴때', { ascending: false }).limit(100),
     sb.from('재직인증').select('병원이름').eq('상태', '확인'),
   ]);
   const 인증됨 = ((w.data ?? []) as unknown as { 병원이름: string | null }[]).some((x) => x.병원이름 === org);

@@ -16,6 +16,7 @@ import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
 import { JOB_GROUPS, type JobGroup, type Role } from '@/lib/who';
 import { 날말, 무료끝날, 미래인가, 연월말, 졸업연월, 학력목록 } from '@/lib/school-period';
 import { todayKst } from '@/lib/job-state';
+import { 관심대상들, 관심분야예시, 듣고싶은교육예시, 예시고르기, 학교목록, 학교부연 } from '@/lib/signup-school';
 
 import { 설치안내남기기 } from '@/lib/install-hint';
 import { useAuth } from '../auth';
@@ -37,17 +38,20 @@ import { useToast } from '../toast';
    역할 값(profiles.role)은 그대로 「학생 / 현직」입니다 — 경험 없음 = 학생 · 경험 있음 = 현직 (커뮤니티 방이 이 값을 봅니다).
    스펙은 ⑥(경험 있음은 ⑦)에서 save_my_survey 한 번으로 담습니다. 두 번 부르면 두 번째가 「1년 2번 고치기」로 세어집니다. */
 
-type 단계 = '동의' | '내정보' | '닉네임' | '학교' | '스펙' | '희망' | '급여' | '끝';
+type 단계 = '동의' | '내정보' | '닉네임' | '학교' | '스펙' | '희망' | '관심' | '급여' | '끝';
 type 경험 = '없음' | '있음';
 
 const 희망유형 = ['대학병원', '종합병원', '재활병원'] as const;
 const 희망지역 = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
   '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'] as const;
-const 만점들 = ['4.0', '4.3', '4.5'] as const;
+/* 학점은 4.5 만점으로만 받고, 넣을지 말지는 선택 (2026-11-15 세중님 「학점 4.5 만점에 기입 · 학점은 선택 · 기입하면 가입한 사람들과 비교」) */
+const 만점 = 4.5;
 
 /* 중간에 나갔다 와도 적은 게 남게 — 이 기기에만 둡니다 (옛 설문과 같은 결) */
 type 초안 = {
-  학력?: string; 학적?: '재학' | '졸업'; 입학년?: string; 입학월?: string; 학점?: string; 만점?: string; 학점없음?: boolean;
+  학교?: string; 학교직접?: boolean;
+  학력?: string; 학적?: '재학' | '졸업'; 입학년?: string; 입학월?: string; 학점?: string;
+  관심대상?: string; 관심분야?: string[]; 듣고싶은교육?: string[];
   병원?: string; 입사연도?: string;
   certs?: string[]; courses?: string[]; rows?: WorkRow[]; rowsNone?: boolean; langs?: LangRow[];
   희망유형?: string; 희망지역?: string;
@@ -87,7 +91,8 @@ export default function Welcome() {
   /* 경험은 가입 줄이 생긴 뒤에는 role 에서 읽습니다 */
   const 경험값: 경험 | null = exp ?? (me?.role === '현직' ? '있음' : me?.role === '학생' ? '없음' : null);
   const 있음 = 경험값 === '있음';
-  const 순서: 단계[] = ['동의', '내정보', '닉네임', '학교', '스펙', '희망', ...(있음 ? ['급여' as const] : [])];
+  /* 학생·취준생은 「관심」 한 장 더 (성인/소아 · 관심 분야 · 듣고 싶은 교육 · 2026-11-15 세중님) */
+  const 순서: 단계[] = ['동의', '내정보', '닉네임', '학교', '스펙', '희망', ...(있음 ? ['급여' as const] : ['관심' as const])];
   const resume: 단계 = !me ? '동의' : (me.job_group && me.role) ? '학교' : '내정보';
   const step = stepPick ?? resume;
   const go = (s: 단계) => { setStepPick(s); setSaveErr(null); window.scrollTo(0, 0); };
@@ -194,11 +199,13 @@ export default function Welcome() {
   const 끝날 = 무료끝날(졸업);
   const 끝남 = !!끝날 && 끝날 < todayKst();
   const 학점수 = Number(d.학점);
-  const 학점틀림 = !d.학점없음 && !!d.학점 && (!Number.isFinite(학점수) || 학점수 < 0 || (!!d.만점 && 학점수 > Number(d.만점)));
-  const 학점됨 = d.학점없음 || (!!d.학점 && !!d.만점 && !학점틀림);
+  const 학점틀림 = !!d.학점?.trim() && (!Number.isFinite(학점수) || 학점수 < 0 || 학점수 > 만점);
+  const 학점됨 = !학점틀림;   // 비워도 됨
+  const 학교들 = 학교목록(job ?? me?.job_group);
+  const 고른학교 = 학교들.find((x) => x.이름 === d.학교) ?? null;
   const 학교됨 = 있음
     ? !!d.병원?.trim() && !!d.입사연도 && !!d.학력 && (학교없음 || 학점됨)
-    : !!d.학력 && (학교없음 || (!!d.학적 && !!입학 && !입학미래 && 학점됨));
+    : !!d.학력 && (학교없음 || (!!d.학교?.trim() && !!d.학적 && !!입학 && !입학미래 && 학점됨));
 
   /* ── ⑤ 자격·교육·실습·어학 ── 「없음」도 답 — 고르거나 없음을 눌러야 넘어갑니다 */
   const certs = d.certs ?? [], courses = d.courses ?? [], rows = d.rows ?? [], langs = d.langs ?? [];
@@ -206,14 +213,19 @@ export default function Welcome() {
 
   /* ── ⑥ 희망 ── */
   const 희망됨 = !!d.희망유형 && !!d.희망지역;
+  const 관심됨 = !!d.관심대상;
 
   /* 담는 꼴 — save_my_survey 의 p_spec (금고 SQL_1113/ZL) */
   const 실습 = d.rowsNone ? [] : rowsToSave(rows);
   const spec: Record<string, unknown> = {
     school_type: d.학력 ?? null,
     grade: null,
-    gpa: 학교없음 || d.학점없음 ? null : Number(d.학점),
-    gpa_scale: 학교없음 || d.학점없음 ? null : Number(d.만점),
+    gpa: 학교없음 || !d.학점?.trim() ? null : Number(d.학점),
+    gpa_scale: 학교없음 || !d.학점?.trim() ? null : 만점,
+    학교: !있음 && !학교없음 ? d.학교?.trim() || null : null,
+    관심대상: 있음 ? null : d.관심대상 ?? null,
+    관심분야: 있음 ? null : d.관심분야 ?? [],
+    듣고싶은교육: 있음 ? null : d.듣고싶은교육 ?? [],
     licenses: certs.filter((x) => x !== NONE), trainings: courses.filter((x) => x !== NONE),
     practice: 실습, practice_months: 실습.reduce((s, r) => s + (Number(r.months) || 0), 0),
     career: null, career_months: null,
@@ -248,7 +260,7 @@ export default function Welcome() {
   /* ── 그리기 ── */
   const 단계이름: Record<단계, string> = {
     동의: '이용 동의', 내정보: '내 정보', 닉네임: '닉네임', 학교: '학력·학점',
-    스펙: '자격·교육·실습', 희망: '희망 취업 조건', 급여: '급여 정보 (선택)', 끝: '',
+    스펙: '자격·교육·실습', 희망: '희망 취업 조건', 관심: '관심 분야', 급여: '급여 정보 (선택)', 끝: '',
   };
   const n = 순서.indexOf(step) + 1;
   const 제목: Partial<Record<단계, React.ReactNode>> = {
@@ -258,6 +270,7 @@ export default function Welcome() {
     학교: 있음 ? <>입사 당시 학력과<br />학점을 알려주세요</> : 학교없음 ? <>학교 경험이 없어도<br />괜찮아요</> : <>학력과 학점을<br />알려주세요</>,
     스펙: 있음 ? <>입사 당시 자격과<br />교육·실습을 알려주세요</> : <>자격·교육과<br />실습을 알려주세요</>,
     희망: <>어디로<br />가고 싶으세요?</>,
+    관심: <>어떤 분야에<br />관심 있으세요?</>,
     급여: 급여입력 ? null : <>내 급여,<br />어느 정도일까요?</>,
   };
   const 설명: Partial<Record<단계, string>> = {
@@ -266,6 +279,7 @@ export default function Welcome() {
       : '관심 병원 입사자 정보와 내 스펙을 비교할 수 있어요.',
     스펙: 있음 ? '입사할 때 보유했던 자격과 이수한 교육을 선택해 주세요.' : '입사자들이 어떤 자격과 교육을 갖췄는지 비교할 수 있어요.',
     희망: '희망 지역과 기관 유형에 맞는 공고를 먼저 보여드려요.',
+    관심: '관심에 맞는 교육·공고 소식을 먼저 알려드려요.',
   };
 
   const 다시하기 = async () => {
@@ -287,7 +301,8 @@ export default function Welcome() {
     : step === '닉네임' ? <RapoButton onClick={saveNickname} disabled={busy || nick.trim().length < 2} full>{busy ? '저장하는 중…' : '가입하기'}</RapoButton>
     : step === '학교' ? <RapoButton onClick={() => go('스펙')} disabled={!학교됨} full>{학교됨 ? '다음' : '위 칸을 채워 주세요'}</RapoButton>
     : step === '스펙' ? <RapoButton onClick={() => go('희망')} disabled={!스펙됨} full>{스펙됨 ? '다음' : '위 칸을 채워 주세요'}</RapoButton>
-    : step === '희망' ? <RapoButton onClick={() => (있음 ? go('급여') : 스펙저장())} disabled={!희망됨 || busy} full>{busy ? '저장하는 중…' : !희망됨 ? '위 칸을 채워 주세요' : 있음 ? '다음' : '가입 완료'}</RapoButton>
+    : step === '희망' ? <RapoButton onClick={() => go(있음 ? '급여' : '관심')} disabled={!희망됨} full>{!희망됨 ? '위 칸을 채워 주세요' : '다음'}</RapoButton>
+    : step === '관심' ? <RapoButton onClick={스펙저장} disabled={!관심됨 || busy} full>{busy ? '저장하는 중…' : !관심됨 ? '성인·소아 중 하나를 골라 주세요' : '가입 완료'}</RapoButton>
     : step === '끝' ? <RapoButton onClick={가입끝} full>{학교없음 && !있음 ? '공개된 정보 둘러보기' : '시작하기'}</RapoButton>
     : null;
 
@@ -398,6 +413,24 @@ export default function Welcome() {
               </>
             )}
 
+            {/* 학교 — 협회 목록의 작업치료·물리치료 학과 전부 (직군에 맞춰) · 고르면 아래에 「경기 · 3년제」 · 학력도 맞춰 채움 */}
+            {!있음 && !학교없음 && (
+              <div className="flex flex-col gap-(--rapo-dimension-x2)">
+                {d.학교직접 ? (
+                  <label className="flex flex-col gap-(--rapo-dimension-x2)">
+                    <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">학교</span>
+                    <input value={d.학교 ?? ''} onChange={(e) => put({ 학교: e.target.value })} placeholder="학교와 학과 이름" className={칸} />
+                  </label>
+                ) : (
+                  <골라 label="학교" v={d.학교 ?? ''} opts={학교들.map((x) => x.이름)} ph="학교를 선택해 주세요"
+                    on={(v) => { const x = 학교들.find((y) => y.이름 === v); put({ 학교: v, ...(x?.학력 ? { 학력: x.학력 } : {}) }); }} />
+                )}
+                {고른학교 && 학교부연(고른학교) && <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{학교부연(고른학교)}</p>}
+                <button type="button" onClick={() => put({ 학교직접: !d.학교직접, 학교: '' })}
+                  className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">{d.학교직접 ? '목록에서 고르기 ›' : '목록에 없나요? 직접 입력 ›'}</button>
+              </div>
+            )}
+
             <골라 label={있음 ? '입사 당시 학력' : '학력'} v={d.학력 ?? ''} opts={학력목록} ph="학력을 선택해 주세요" on={(v) => put({ 학력: v })} />
 
             {!있음 && !학교없음 && (
@@ -432,23 +465,19 @@ export default function Welcome() {
             )}
 
             {!학교없음 && (
-              <div className="flex flex-col gap-(--rapo-dimension-x2)">
-                <div className={'grid grid-cols-2 gap-(--rapo-dimension-x2) ' + (d.학점없음 ? 'pointer-events-none opacity-50' : '')}>
-                  <label className="flex flex-col gap-(--rapo-dimension-x2)">
-                    <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">{있음 ? '입사 당시 학점' : '누적 학점'}</span>
-                    <input value={d.학점 ?? ''} onChange={(e) => put({ 학점: e.target.value })} inputMode="decimal" placeholder="학점 입력"
-                      className={칸 + (학점틀림 ? ' border-(color:--rapo-color-stroke-critical-solid)' : '')} />
-                  </label>
-                  <골라 label={있음 ? '만점' : '만점 기준'} v={d.만점 ?? ''} opts={만점들} ph="만점 선택" on={(v) => put({ 만점: v })} />
-                </div>
-                {학점틀림 && <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-critical)">학점은 0부터 선택한 만점까지 입력해 주세요.</p>}
-                <label className="flex cursor-pointer items-center gap-(--rapo-dimension-x3) py-(--rapo-dimension-x2)">
-                  <input type="checkbox" className="sr-only" checked={!!d.학점없음}
-                    onChange={(e) => put(e.target.checked ? { 학점없음: true, 학점: '', 만점: '' } : { 학점없음: false })} />
-                  <Box on={!!d.학점없음} />
-                  <span className="rapo-type-t4-regular text-(color:--rapo-color-fg-neutral)">{있음 ? '성적 없음' : '아직 성적이 없어요'}</span>
-                </label>
-              </div>
+              <label className="flex flex-col gap-(--rapo-dimension-x2)">
+                <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">
+                  {있음 ? '입사 당시 학점' : '누적 학점'} <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span>
+                </span>
+                <span className={'flex items-center rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) ' + (학점틀림 ? 'border-(color:--rapo-color-stroke-critical-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
+                  <input value={d.학점 ?? ''} onChange={(e) => put({ 학점: e.target.value })} inputMode="decimal" placeholder="예) 3.8"
+                    className="rapo-type-t5-regular h-(--rapo-dimension-x13) min-w-0 flex-1 rounded-(--rapo-radius-r3) bg-transparent px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) outline-none placeholder:text-(color:--rapo-color-fg-placeholder)" />
+                  <span className="rapo-type-t5-regular shrink-0 pr-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">/ 4.5</span>
+                </span>
+                <span className={'rapo-type-t3-regular break-keep ' + (학점틀림 ? 'text-(color:--rapo-color-fg-critical)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
+                  {학점틀림 ? '학점은 0부터 4.5까지 입력해 주세요.' : '4.5 만점 기준이에요. 입력하면 가입한 사람들과 학점을 비교할 수 있어요.'}
+                </span>
+              </label>
             )}
 
             {학교없음 && !있음 && (
@@ -486,6 +515,21 @@ export default function Welcome() {
             <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
               {있음 ? '현재 근무조건과 별개로, 앞으로 일하고 싶은 곳의 조건이에요.' : '희망 조건은 가입 후 내 정보에서 바꿀 수 있어요.'}
             </p>
+            {saveErr && <p role="alert" className="rapo-type-t4-medium break-keep text-(color:--rapo-color-fg-critical)">{saveErr}</p>}
+          </section>
+        )}
+
+        {/* 관심 (학생·취준생) — 2026-11-15 세중님 「성인, 소아 중 더 관심 있는 분야 · 듣고 싶은 교육의 종류 · 관심 있는 분야 — 물리·작업 학생에 맞게 예시」 */}
+        {step === '관심' && (
+          <section className="mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x6)">
+            <div className="flex flex-col gap-(--rapo-dimension-x2)">
+              <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">성인, 소아 중 더 관심 있는 분야는?</span>
+              <div className="grid grid-cols-3 gap-(--rapo-dimension-x2)">
+                {관심대상들.map((x) => <Choice key={x} on={d.관심대상 === x} go={() => put({ 관심대상: x })} small>{x}</Choice>)}
+              </div>
+            </div>
+            <고른칩 제목="관심 있는 분야는?" 덧="여러 개 골라도 돼요" 예시={예시고르기(관심분야예시, job ?? me?.job_group)} 고름={d.관심분야 ?? []} on={(v) => put({ 관심분야: v })} />
+            <고른칩 제목="듣고 싶은 교육의 종류는?" 덧="여러 개 골라도 돼요" 예시={예시고르기(듣고싶은교육예시, job ?? me?.job_group)} 고름={d.듣고싶은교육 ?? []} on={(v) => put({ 듣고싶은교육: v })} />
             {saveErr && <p role="alert" className="rapo-type-t4-medium break-keep text-(color:--rapo-color-fg-critical)">{saveErr}</p>}
           </section>
         )}
@@ -558,7 +602,7 @@ export default function Welcome() {
                   <span className="rapo-type-t5-medium min-w-0 flex-1 text-(color:--rapo-color-fg-neutral)">아직 임상 경험이 없어요 / 문의</span>
                   <span aria-hidden className="rapo-type-t8-regular text-(color:--rapo-color-fg-neutral)">›</span>
                 </Link>
-                <Link href="/me/spec" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">근무 경험이 생겼다면 정보 등록 ›</Link>
+                <Link href="/me/convert" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">근무 경험이 생겼다면 정보 등록 ›</Link>
               </>
             ) : (
               <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">라포에서 동료들의<br />이야기를 만나보세요</p>
@@ -668,6 +712,38 @@ function 동의행({ a, on, set }: {
         </ul>
       )}
     </li>
+  );
+}
+
+/* 여러 개 고르는 칩 + 직접 추가 (관심 분야 · 듣고 싶은 교육) */
+function 고른칩({ 제목, 덧, 예시, 고름, on }: { 제목: string; 덧?: string; 예시: readonly string[]; 고름: string[]; on: (v: string[]) => void }) {
+  const [글, set글] = useState('');
+  const 모두 = [...예시, ...고름.filter((x) => !예시.includes(x))];
+  const 토글 = (x: string) => on(고름.includes(x) ? 고름.filter((y) => y !== x) : [...고름, x]);
+  const 더하기 = () => { const t = 글.trim().slice(0, 20); set글(''); if (t && !고름.includes(t)) on([...고름, t]); };
+  return (
+    <div className="flex flex-col gap-(--rapo-dimension-x2)">
+      <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">{제목}</span>
+      {덧 && <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{덧}</span>}
+      <div className="flex flex-wrap gap-(--rapo-dimension-x2)">
+        {모두.map((x) => {
+          const 켬 = 고름.includes(x);
+          return (
+            <button key={x} type="button" aria-pressed={켬} onClick={() => 토글(x)}
+              className={'rapo-type-t4-medium rounded-(--rapo-radius-full) border-(length:--rapo-border-default) px-(--rapo-dimension-x4) py-(--rapo-dimension-x2) '
+                + (켬 ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak) text-(color:--rapo-color-fg-brand-contrast)'
+                      : 'border-(color:--rapo-color-stroke-neutral-weak) text-(color:--rapo-color-fg-neutral)')}>
+              {x}
+            </button>
+          );
+        })}
+      </div>
+      <span className="flex gap-(--rapo-dimension-x2)">
+        <input value={글} onChange={(e) => set글(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) { e.preventDefault(); 더하기(); } }}
+          placeholder="직접 추가" aria-label={제목 + ' 직접 추가'} className={칸 + ' flex-1'} />
+        <button type="button" onClick={더하기} className="rapo-type-t4-bold shrink-0 rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-muted) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral)">추가</button>
+      </span>
+    </div>
   );
 }
 

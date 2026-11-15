@@ -76,6 +76,8 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
           </dl>
         )}
         {me.role === '현직' && <RapoMeRow icon="/rapo/me/work-24.svg" href="/me/spec">경력 수정</RapoMeRow>}
+        {/* 학생·취준생 → 임상가 전환 (2026-11-15 세중님 · 근무 병원·입사 당시 스펙·근무 후기) */}
+        {me.role === '학생' && <RapoMeRow icon="/rapo/me/work-24.svg" href="/me/convert">취업했어요 · 임상가 전환</RapoMeRow>}
         <RapoMeRow icon="/rapo/me/spec-24.svg" href="/me/spec">스펙 확인·수정</RapoMeRow>
         <RapoMeRow icon="/rapo/me/compare-24.svg" href={준비('spec')}>입사 스펙 비교</RapoMeRow>
         <RapoMeRow icon="/rapo/me/pay-24.svg" href={준비('paycmp')}>내 급여 비교</RapoMeRow>
