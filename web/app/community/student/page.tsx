@@ -62,12 +62,15 @@ export default async function StudentSpace({ searchParams }: { searchParams: Pro
       if (!첫댓글.has(c.post_id)) 첫댓글.set(c.post_id, { 글쓴이: c.profiles, body: c.body ?? '비밀 댓글입니다.' });
     }
   }
-  const 방이름 = Object.fromEntries(CHANNELS.map((c) => [c.id, c.name]));
   const 보일글: 커뮤니티글[] = 글들.map((g) => ({
     id: g.id, title: g.title, body: g.body, created_at: g.created_at, comment_count: g.comment_count,
-    글쓴이: g.profiles, job_group: 방이름[g.channel] ?? g.profiles?.job_group ?? null, 댓글: 첫댓글.get(g.id) ?? null,
+    글쓴이: g.profiles, job_group: g.profiles?.job_group ?? null, 댓글: 첫댓글.get(g.id) ?? null,
   }));
 
-  return <StudentSpaceView 탭={탭} 정렬={정렬} 주소={주소} 학생={학생} 탈={탈} 보일글={보일글} />;
+  /* 라포 소개 자리 — 지금광고('학생피드') (켜짐 · 기간 안 · 그림 있음일 때만 한 줄) */
+  const { data: 광고 } = 학생 ? await sb.rpc('지금광고', { p_자리: '학생피드' }) : { data: null };
+  const 소개줄 = ((광고 ?? []) as { 그림: string | null; 링크: string | null }[])[0];
+  const 소개 = 소개줄?.그림 ? { 그림: 소개줄.그림, 링크: 소개줄.링크 } : null;
+  return <StudentSpaceView 탭={탭} 정렬={정렬} 주소={주소} 학생={학생} 탈={탈} 보일글={보일글} 소개={소개} />;
 }
 

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="740" height="292" viewBox="0 0 740 292" role="img" aria-label="RAPO 올인원 툴킷 — 연봉 계산부터 교육·봉사 알림까지 한곳에">
+  <rect width="740" height="292" fill="#FFE9E6"/>
+  <text x="44" y="64" font-family="Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="24" fill="#56636D">RAPO</text>
+  <text x="44" y="124" font-family="Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="42" font-weight="700" fill="#112231">라포 올인원 툴킷</text>
+  <text x="44" y="172" font-family="Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="26" fill="#112231">연봉 계산부터 교육·봉사 알림까지 한곳에</text>
+  <rect x="44" y="204" width="210" height="56" rx="28" fill="#112231"/>
+  <text x="149" y="241" text-anchor="middle" font-family="Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="24" font-weight="700" fill="#FFFFFF">둘러보기 →</text>
+  <g transform="translate(548 70)">
+    <rect width="150" height="150" rx="34" fill="#FF4F40"/>
+    <path d="M44 38h42c19 0 32 12 32 29 0 13-8 23-20 27l22 30h-23l-19-27H64v27H44V38zm20 18v23h21c8 0 13-5 13-12s-5-11-13-11H64z" fill="#FFFFFF"/>
+  </g>
+</svg>

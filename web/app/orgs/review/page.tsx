@@ -5,40 +5,27 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { 어둠 } from '@/components/rapo/rapo-community';
-import { 별, 후기날, type 근무후기 } from '@/components/rapo/rapo-org-reviews';
+import { 별, 후기쓴이, type 근무후기 } from '@/components/rapo/rapo-org-reviews';
 import { browserSupabase } from '@/lib/supabase-browser';
-import { todayKst } from '@/lib/job-state';
 
 /* 근무 후기 상세 — 피그마 「근무 후기 · 상세」 1328:2703 · 「학생 / 오늘 후기 열람 완료」 1496:4464 (2026-11-15).
-   학생·취준생은 하루에 서로 다른 후기 3개까지(한국 시간 자정에 다시 3개). 같은 후기를 다시 읽으면 줄지 않습니다.
-   ★ 막는 자리가 화면입니다(후기열람 표에 내 기록을 남기고 셈) — 단단히 막으려면 DB 함수가 필요해 세중님 허락 자리로 남깁니다 (금고 SQL_1113/ZN). */
+   전문은 DB 함수 근무후기보기() 로만 받습니다 — 학생·취준생이면 함수가 오늘 본 후기를 세고, 서로 다른 후기 3개가 넘으면 막습니다
+   (같은 후기를 다시 보면 안 줄어듦 · 한국 시간 자정에 다시 3개 · 금고 SQL_1113/ZO · 세중님 허락 DEFINER). */
 
 const 하루 = 3;
+type 받음 = 근무후기 & { 학생?: boolean; 오늘?: number | null; 막힘?: boolean; 없음?: boolean };
 
 function Body() {
   const id = Number(useSearchParams().get('id'));
-  const { session, me } = useAuth();
-  const 학생 = me?.role === '학생';
-  const [h, setH] = useState<근무후기 | null | undefined>(undefined);
-  const [열람, set열람] = useState<{ 오늘: number; 막힘: boolean } | null>(null);
+  const { session } = useAuth();
+  const [h, setH] = useState<받음 | undefined>(undefined);
 
   useEffect(() => {
     if (!session || !id) return;
-    (async () => {
-      const sb = browserSupabase();
-      const { data } = await sb.from('공개근무후기').select('id,기관,별점,교육,일정,휴게,글,쓴때,내것').eq('id', id).maybeSingle();
-      const 후기 = (data as unknown as 근무후기 | null) ?? null;
-      if (후기 && 학생 && !후기.내것) {
-        const 날 = todayKst();
-        const { data: 본것 } = await sb.from('후기열람').select('후기').eq('날', 날);
-        const 목록 = ((본것 ?? []) as unknown as { 후기: number }[]).map((x) => x.후기);
-        if (!목록.includes(id) && 목록.length >= 하루) { set열람({ 오늘: 목록.length, 막힘: true }); setH(null); return; }
-        if (!목록.includes(id)) await sb.from('후기열람').insert({ 후기: id, 날 });
-        set열람({ 오늘: 목록.includes(id) ? 목록.length : 목록.length + 1, 막힘: false });
-      }
-      setH(후기);
-    })();
-  }, [session, id, 학생]);
+    browserSupabase().rpc('근무후기보기', { p_id: id }).then(({ data, error }) => {
+      setH(error ? { 없음: true } as 받음 : (data as 받음));
+    });
+  }, [session, id]);
 
   return (
     <div data-rapo className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col" style={{ background: 어둠.바탕 }}>
@@ -50,7 +37,9 @@ function Body() {
       </header>
 
       <main className="flex flex-1 flex-col gap-[16px] px-[22px] pb-[24px] pt-[28px]">
-        {열람?.막힘 ? (
+        {h === undefined ? (
+          <p role="status" className="text-[15px]" style={{ color: 어둠.흐린글 }}>불러오는 중…</p>
+        ) : h.막힘 ? (
           <section className="flex flex-col gap-[16px] pt-[80px]">
             <h1 className="text-[24px] font-bold leading-[34px]" style={{ color: 어둠.글 }}>오늘의 후기를 모두 읽었어요</h1>
             <p className="break-keep text-[15px] leading-[23px]" style={{ color: 어둠.흐린글 }}>
@@ -58,9 +47,7 @@ function Body() {
             </p>
             <Link href="/community/student" className="mt-[24px] flex items-center gap-[8px] text-[15px] font-bold" style={{ color: '#ffa691' }}>학생·취준생 공간으로 ›</Link>
           </section>
-        ) : h === undefined ? (
-          <p role="status" className="text-[15px]" style={{ color: 어둠.흐린글 }}>불러오는 중…</p>
-        ) : h === null ? (
+        ) : h.없음 ? (
           <p className="text-[15px]" style={{ color: 어둠.흐린글 }}>후기를 찾지 못했어요. 지워졌거나 숨겨졌을 수 있어요.</p>
         ) : (
           <>
@@ -70,19 +57,13 @@ function Body() {
                 <Link href={`/orgs/review/write?org=${encodeURIComponent(h.기관)}`} className="mt-[6px] shrink-0 whitespace-nowrap text-[14px] font-bold" style={{ color: 어둠.글 }}>내 후기 관리 ›</Link>
               )}
             </div>
-            {학생 && 열람 && !h.내것 && (
+            {h.학생 && h.오늘 != null && (
               <p className="break-keep rounded-[8px] px-[12px] py-[10px] text-[13px] leading-[19px]" style={{ background: 어둠.면, color: 어둠.흐린글 }}>
-                학생·취준생 · 오늘 {열람.오늘}/{하루}개 열람 · 같은 후기를 다시 읽어도 횟수는 줄지 않아요.
+                학생·취준생 · 오늘 {h.오늘}/{하루}개 열람 · 같은 후기를 다시 읽어도 횟수는 줄지 않아요.
               </p>
             )}
             <section className="flex flex-col gap-[12px] rounded-[16px] p-[16px]" style={{ background: 어둠.면 }}>
-              <div className="flex items-center gap-[10px]">
-                <span aria-hidden className="flex size-[32px] items-center justify-center rounded-full text-[15px]" style={{ background: '#f5f8fa' }}>🏥</span>
-                <span>
-                  <span className="block text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{h.내것 ? '내 후기' : '근무 인증 회원'}</span>
-                  <span className="block text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{후기날(h.쓴때)}</span>
-                </span>
-              </div>
+              <후기쓴이 h={h} />
               <p className="text-[15px] font-bold" style={{ color: '#ffa691' }} aria-label={`별점 ${h.별점}점`}>
                 <span aria-hidden className="tracking-[1px]">{별(h.별점)}</span>&nbsp;&nbsp;{h.별점}점
               </p>

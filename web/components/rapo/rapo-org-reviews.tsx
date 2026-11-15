@@ -1,17 +1,35 @@
 import Link from 'next/link';
+import { Avatar } from '@/components/avatar';
 import { 어둠 } from './rapo-community';
 
 /* 병원 근무 후기 — 피그마 「08 · C / 06 근무 후기」 병원별 목록 1328:2701 · 「작성자 3명 미만」 1496:4472 (2026-11-15 세중님 「피그마댓글 대로」).
    자료는 app/orgs/page.tsx 가 공개근무후기 보기에서 받아 넘깁니다(금고 SQL_1113/ZN).
 
-   ★ 쓴 사람 이름은 안 보입니다 — 피그마는 닉네임이지만, 재직 인증한 병원과 닉네임이 함께 보이면 그 닉네임의 커뮤니티 글까지
-     누가 썼는지 드러납니다(가장 두려운 사고). 그래서 모두 「근무 인증 회원」 · 기본 그림입니다.
+   ★ 쓴 사람 — 닉네임 + 「재직 인증」 딱지 (2026-11-15 세중님 「닉네임+재직인증 딱지를 붙여서」). 탈퇴한 분은 「찾을 수 없는 회원」.
+     목록은 글을 앞 120자만 받습니다(공개근무후기 보기) — 전문은 상세에서 근무후기보기() 로 (학생 하루 3개 · 금고 SQL_1113/ZO).
    ★ 평균 별점은 작성자 3명부터 (피그마 「3명부터 평균 평점 공개」). */
 
 export type 근무후기 = {
   id: number; 기관: string; 별점: number; 교육: string; 일정: string; 휴게: string;
   글: string | null; 쓴때: string; 내것: boolean;
+  닉네임?: string | null; 그림?: string | null; 더있음?: boolean | null;
 };
+
+/* 쓴 사람 줄 — 그림 32 · 닉네임 · 재직 인증 딱지 · 날 (목록·상세가 같이 씁니다) */
+export function 후기쓴이({ h }: { h: 근무후기 }) {
+  return (
+    <div className="flex min-w-0 flex-1 items-center gap-[10px]">
+      <Avatar value={h.그림 ?? null} size="c32" className="shrink-0" />
+      <span className="min-w-0 flex-1">
+        <span className="flex min-w-0 items-center gap-[6px]">
+          <span className="truncate text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{h.닉네임 ?? '찾을 수 없는 회원'}</span>
+          <span className="shrink-0 whitespace-nowrap rounded-[4px] px-[6px] py-[1px] text-[11px] font-bold leading-[16px]" style={{ background: '#264e58', color: '#def9f2' }}>재직 인증</span>
+        </span>
+        <span className="block text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{후기날(h.쓴때)}{h.내것 ? ' · 내 후기' : ''}</span>
+      </span>
+    </div>
+  );
+}
 
 export const 후기날 = (iso: string) => {
   const d = new Date(new Date(iso).getTime() + 9 * 3600_000);
@@ -61,11 +79,7 @@ export function RapoOrgReviews({ name, sido, 후기들, 인증됨 }: { name: str
           <li key={h.id}>
             <Link href={`/orgs/review?id=${h.id}`} className="flex flex-col gap-[12px] rounded-[16px] p-[16px] active:opacity-80" style={{ background: 어둠.면 }}>
               <div className="flex items-center gap-[10px]">
-                <span aria-hidden className="flex size-[32px] shrink-0 items-center justify-center rounded-full text-[15px]" style={{ background: '#f5f8fa' }}>🏥</span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{h.내것 ? '내 후기' : '근무 인증 회원'}</span>
-                  <span className="block text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{후기날(h.쓴때)}</span>
-                </span>
+                <후기쓴이 h={h} />
                 <span className="shrink-0 whitespace-nowrap text-[15px] font-bold" style={{ color: '#ffa691' }}>★ {h.별점}점</span>
               </div>
               <dl className="grid grid-cols-3 gap-[8px] rounded-[8px] px-[12px] py-[10px]" style={{ background: '#132636' }}>

@@ -1,12 +1,15 @@
 import Link from 'next/link';
+import { Fragment } from 'react';
 import { Hit } from '@/components/hit';
 import { RapoBottomNav } from './rapo-bottom-nav';
 import { RapoCommunityEmpty, RapoCommunityPost, RapoCommunityWrite, 어둠, 직군탭, type 직군탭값, type 커뮤니티글 } from './rapo-community';
 
 /* 학생·취준생 공간 그리기 — 피그마 U07-ST 1649:5467. 자료는 app/community/student/page.tsx 가 고릅니다.
    미리보기(/design-preview/community-student)가 같이 씁니다 */
-export function StudentSpaceView({ 탭, 정렬, 주소, 학생, 탈, 보일글 }: {
+export function StudentSpaceView({ 탭, 정렬, 주소, 학생, 탈, 보일글, 소개 }: {
   탭: 직군탭값; 정렬: 'new' | 'hot'; 주소: (t: 직군탭값, s: 'new' | 'hot') => string; 학생: boolean; 탈: boolean; 보일글: 커뮤니티글[];
+  /* 글 사이 라포 소개 그림 (광고배너 자리 「학생피드」 · 관리자 → 광고에서 바꿈 · 2026-11-15 세중님 「광고 말고 라포 광고 이미지」) */
+  소개?: { 그림: string; 링크: string | null } | null;
 }) {
   const 머리 = '#264e58';
   return (
@@ -60,11 +63,32 @@ export function StudentSpaceView({ 탭, 정렬, 주소, 학생, 탈, 보일글 }
           <RapoCommunityEmpty>
             <p className="text-[14px]" style={{ color: 어둠.흐린글 }}>글을 불러오지 못했어요. 잠시 후 다시 열어 주세요.</p>
           </RapoCommunityEmpty>
-        ) : 보일글.length === 0 ? <RapoCommunityEmpty /> : 보일글.map((p) => <RapoCommunityPost key={p.id} p={p} />)}
+        ) : 보일글.length === 0 ? <RapoCommunityEmpty /> : 보일글.map((p, i) => (
+          <Fragment key={p.id}>
+            <RapoCommunityPost p={p} />
+            {/* 원본 1585:5255 자리 — 첫 글 다음 (글이 하나뿐이어도 그 아래) */}
+            {i === 0 && 소개 && <소개칸 그림={소개.그림} 링크={소개.링크} />}
+          </Fragment>
+        ))}
       </main>
       <div aria-hidden style={{ height: 'calc(72px + 68px + env(safe-area-inset-bottom))' }} />
       {학생 && <RapoCommunityWrite href="/community/write?space=stu" 글="전용 글쓰기" />}
       <RapoBottomNav current="/community" dark />
+    </div>
+  );
+}
+
+function 소개칸({ 그림, 링크 }: { 그림: string; 링크: string | null }) {
+  const 몸 = (
+    /* eslint-disable-next-line @next/next/no-img-element -- 관리자가 올린 그림(또는 기본 라포 소개 그림) */
+    <img src={그림} alt="RAPO 소개" className="block h-auto w-full" />
+  );
+  return (
+    <div className="px-[22px] pb-[26px]">
+      <p className="mb-[8px] text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>RAPO 소개</p>
+      <div className="overflow-hidden rounded-[12px]">
+        {링크 ? <Link href={링크}>{몸}</Link> : 몸}
+      </div>
     </div>
   );
 }
