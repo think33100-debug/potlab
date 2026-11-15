@@ -71,7 +71,11 @@ export function RapoHomeNotice() {
         <div className="flex flex-col gap-(--rapo-dimension-x3) text-center">
           <h2 id="home-notice-title" className="rapo-type-t6-bold break-keep">RAPO 는 순차적으로 오픈 중입니다</h2>
           <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">
-            RAPO는 <span className="whitespace-nowrap">「모두의 창업」</span>의 지원을 받아 만들고 있는 채용·커뮤니티 통합 앱입니다.
+            {/* 「모두의 창업」 — 2026-11-15 세중님 「실제 로고 참고해서」 · 공식 누리집(modoo.or.kr) 머리 로고 logo-full.png 그대로 */}
+            RAPO는{' '}
+            {/* eslint-disable-next-line @next/next/no-img-element -- 사업 공식 로고 원본 그대로 */}
+            <img src="/rapo/home/modoo-logo.png" alt="모두의 창업" width={84} height={28} className="mx-[2px] inline-block h-[28px] w-auto align-middle" />
+            의 지원을 받아 만들고 있는 채용·커뮤니티 통합 앱입니다.
           </p>
           {/* 2026-11-15 세중님 「통합 앱입니다 하고 한 문단 띄어줘」 */}
           <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">
