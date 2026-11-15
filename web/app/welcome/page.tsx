@@ -602,7 +602,7 @@ export default function Welcome() {
                   <span className="rapo-type-t5-medium min-w-0 flex-1 text-(color:--rapo-color-fg-neutral)">아직 임상 경험이 없어요 / 문의</span>
                   <span aria-hidden className="rapo-type-t8-regular text-(color:--rapo-color-fg-neutral)">›</span>
                 </Link>
-                <Link href="/me/spec" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">근무 경험이 생겼다면 정보 등록 ›</Link>
+                <Link href="/me/convert" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">근무 경험이 생겼다면 정보 등록 ›</Link>
               </>
             ) : (
               <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">라포에서 동료들의<br />이야기를 만나보세요</p>

@@ -6,13 +6,15 @@ import { 어둠 } from './rapo-community';
    자료는 app/orgs/page.tsx 가 공개근무후기 보기에서 받아 넘깁니다(금고 SQL_1113/ZN).
 
    ★ 쓴 사람 — 닉네임 + 「재직 인증」 딱지 (2026-11-15 세중님 「닉네임+재직인증 딱지를 붙여서」). 탈퇴한 분은 「찾을 수 없는 회원」.
+     딱지는 그 병원 재직 인증(확인)을 받은 후기에만 — 임상가 전환(/me/convert)으로 쓴 후기는 인증 없이 들어옵니다
+     (세중님 「재직 인증 없이 하고 추후에 한 번에 쭉 인증」 · 보기의 「재직인증」 칸 · 금고 SQL_1113/ZT).
      목록은 글을 앞 120자만 받습니다(공개근무후기 보기) — 전문은 상세에서 근무후기보기() 로 (학생 하루 3개 · 금고 SQL_1113/ZO).
    ★ 평균 별점은 작성자 3명부터 (피그마 「3명부터 평균 평점 공개」). */
 
 export type 근무후기 = {
   id: number; 기관: string; 별점: number; 교육: string; 일정: string; 휴게: string;
   글: string | null; 쓴때: string; 내것: boolean;
-  닉네임?: string | null; 그림?: string | null; 더있음?: boolean | null;
+  닉네임?: string | null; 그림?: string | null; 더있음?: boolean | null; 재직인증?: boolean | null;
 };
 
 /* 쓴 사람 줄 — 그림 32 · 닉네임 · 재직 인증 딱지 · 날 (목록·상세가 같이 씁니다) */
@@ -23,7 +25,7 @@ export function 후기쓴이({ h }: { h: 근무후기 }) {
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 items-center gap-[6px]">
           <span className="truncate text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{h.닉네임 ?? '찾을 수 없는 회원'}</span>
-          <span className="shrink-0 whitespace-nowrap rounded-[4px] px-[6px] py-[1px] text-[11px] font-bold leading-[16px]" style={{ background: '#264e58', color: '#def9f2' }}>재직 인증</span>
+          {h.재직인증 && <span className="shrink-0 whitespace-nowrap rounded-[4px] px-[6px] py-[1px] text-[11px] font-bold leading-[16px]" style={{ background: '#264e58', color: '#def9f2' }}>재직 인증</span>}
         </span>
         <span className="block text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{후기날(h.쓴때)}{h.내것 ? ' · 내 후기' : ''}</span>
       </span>

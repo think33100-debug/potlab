@@ -65,7 +65,7 @@ function Body({ role }: { role: string | null }) {
         학적과 입학 연월은 직접 바꿀 수 없어요. 휴학 등으로 달라졌다면 운영자에게 알려 주세요.
       </p>
       <Link href="/contact" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-brand-contrast)">문의하기 ›</Link>
-      {!현직 && <Link href="/me/spec" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">근무 경험이 생겼다면 정보 등록 ›</Link>}
+      {!현직 && <Link href="/me/convert" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">근무 경험이 생겼다면 정보 등록 ›</Link>}
     </section>
   );
 }

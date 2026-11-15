@@ -9,7 +9,8 @@ import { 어둠 } from '@/components/rapo/rapo-community';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 근무 후기 쓰기·고치기 — 피그마 「근무 후기 · 작성」 1447:7164 · 「수정」 1312:8051 · 「작성 자격 안내」 1447:7292 (2026-11-15).
-   그 병원 재직 인증(확인)을 마친 회원만 씁니다 — 막는 자리는 DB 규칙(근무후기_인증한_병원만_쓰기 · 금고 SQL_1113/ZN).
+   그 병원 재직 인증(확인)을 마친 회원, 또는 그 병원을 근무 병원으로 적은 회원(임상가 전환 · 인증은 나중에 한꺼번에)만 씁니다
+   — 막는 자리는 DB 규칙(근무후기_인증한_병원만_쓰기 · 금고 SQL_1113/ZN·ZT).
    인증이 없으면 「이 병원에서 일해 보셨나요?」 안내 → 재직 인증(/verify). 한 병원에 한 사람 한 후기(고치기는 같은 자리). */
 
 const 교육들 = ['충분해요', '보통이에요', '부족해요'] as const;
@@ -37,11 +38,13 @@ function Body() {
     if (loading || !session || !org) return;
     (async () => {
       const sb = browserSupabase();
-      const [w, h] = await Promise.all([
+      const [w, h, s] = await Promise.all([
         sb.from('재직인증').select('병원이름').eq('상태', '확인'),
         sb.from('근무후기').select('id,별점,교육,일정,휴게,글').eq('기관', org).maybeSingle(),
+        sb.from('student_specs').select('근무병원').maybeSingle(),
       ]);
-      set인증됨(((w.data ?? []) as unknown as { 병원이름: string | null }[]).some((x) => x.병원이름 === org));
+      const 내병원 = (s.data as unknown as { 근무병원: string | null } | null)?.근무병원 ?? null;
+      set인증됨(내병원 === org || ((w.data ?? []) as unknown as { 병원이름: string | null }[]).some((x) => x.병원이름 === org));
       const 옛 = h.data as { id: number; 별점: number; 교육: string; 일정: string; 휴게: string; 글: string | null } | null;
       if (옛) { set내것(옛.id); set별점(옛.별점); set교육(옛.교육); set일정(옛.일정); set휴게(옛.휴게); set글(옛.글 ?? ''); }
     })();
@@ -108,7 +111,7 @@ function Body() {
           <div>
             <h1 className="break-keep text-[24px] font-bold leading-[34px]" style={{ color: 어둠.글 }}>{org}</h1>
             <p className="mt-[10px] break-keep text-[14px] leading-[21px]" style={{ color: 어둠.흐린글 }}>
-              <span className="block">근무 인증된 {org}에 작성해요.</span>
+              <span className="block">근무한 {org}에 작성해요.</span>
               <span className="block">별점·객관식은 필수, 글은 선택이에요.</span>
             </p>
           </div>
