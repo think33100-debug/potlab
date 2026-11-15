@@ -20,7 +20,7 @@ const 안띄움 = (p: string) =>
   || p === '/community' || p.startsWith('/community/') || p.startsWith('/post/')
   || p === '/admin' || p.startsWith('/admin/')
   /* 근무 후기 쓰기·상세는 아래가 큰 단추 (2026-11-15) */
-  || p.startsWith('/orgs/review') || p.startsWith('/edu/session/') || p === '/me/convert';
+  || p.startsWith('/orgs/review') || p.startsWith('/edu/session/') || p === '/me/convert' || p === '/me/leave';
 
 function 아래자리(p: string): string {
   if (p.startsWith('/jobs/')) return 'calc(112px + 16px + env(safe-area-inset-bottom))';
