@@ -1,18 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { AvatarPicker } from '@/components/avatar-picker';
+import Link from 'next/link';
+import { useRef, useState } from 'react';
+import { Avatar } from '@/components/avatar';
+import { PhotoCropper } from '@/components/photo-cropper';
 import { RapoMeFrame } from '@/components/rapo/rapo-me';
-import { RapoButton, RapoChip } from '@/components/rapo/rapo-ui';
+import { RapoButton } from '@/components/rapo/rapo-ui';
+import { AVATAR_ANIMALS, AVATAR_COLORS, isPhoto, parseAvatar, withAnimal, withColor, withPhoto } from '@/lib/avatar';
 import { browserSupabase } from '@/lib/supabase-browser';
-import { JOB_GROUPS, ROLES, ROLE_DESC } from '@/lib/who';
 import { useAuth } from '../../auth';
 import { useToast } from '../../toast';
 
 const FREE_CHANGES = 5;
 
-/* 프로필 편집 — 내 정보(U14-01)의 「프로필 편집」 (2026-11-11 밤).
-   전 /me 한 장에 있던 사진 · 닉네임 · 직군·역할 칸을 그대로 옮겼습니다 — 저장 규칙은 같습니다.
+/* 프로필 편집 — 피그마 「12 · 내 정보」 08 프로필 편집 1508:2532 (2026-11-15 세중님 「내정보 쪽이 예전 게 많은 거 같아 … 피그마 확인해서 수정」).
+   위에서부터 — 내 프로필 미리보기 · 닉네임 · 프로필 동물 여섯 · 배경색 · 프로필 사진 직접 올리기 · 저장.
+   동물·배경색·닉네임은 고른 뒤 「저장」 한 번에 담습니다(전에는 누르는 대로 바로 저장).
+   사진은 자르기 화면을 거쳐 그 자리에서 올립니다(전과 같음 · 저장소 avatars).
+
+   피그마에 없어 빠진 것 — 이모지 고르기 · 직군·역할 바꾸기.
+     역할은 학생 → 임상가 전환(/me/convert · 근무 후기 필수)으로만 바꿉니다. 여기서 바로 바꾸면 그 길을 건너뜁니다.
+     직군을 잘못 고른 분은 문의하기로.
    ★ 닉네임 5번 제한은 DB 트리거가 막습니다(화면은 남은 횟수만 알립니다) */
 export default function ProfileEdit() {
   return <RapoMeFrame title="프로필 편집">{(me) => <ProfileForm me={me} />}</RapoMeFrame>;
@@ -21,78 +29,134 @@ export default function ProfileEdit() {
 function ProfileForm({ me }: { me: NonNullable<ReturnType<typeof useAuth>['me']> }) {
   const toast = useToast();
   const { reload } = useAuth();
-  const [typed, setTyped] = useState<string | null>(null);
+  const [nick, setNick] = useState(me.nickname);
+  const [그림, set그림] = useState<string | null>(me.avatar);
+  const [사진, set사진] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const 파일 = useRef<HTMLInputElement>(null);
 
-  const nick = typed ?? me.nickname;
-  const used = me.nickname_changes;
-  const left = Math.max(0, FREE_CHANGES - used);
+  const left = Math.max(0, FREE_CHANGES - me.nickname_changes);
   const locked = left === 0;
-  const nickChanged = nick.trim() !== me.nickname;
+  const 닉바뀜 = nick.trim() !== me.nickname;
+  const 그림바뀜 = 그림 !== me.avatar;
+  const 지금 = parseAvatar(그림);
+  const 고른동물 = 지금.kind === 'animal' ? 지금.key : null;
 
-  const saveNick = async () => {
+  /* 사진 → 동물로 바꾸면 사진은 되돌릴 수 없어 한 번 묻습니다 (바탕색은 사진을 그대로 둠) */
+  const 동물고르기 = (key: string) => {
+    if (isPhoto(그림) && !confirm('프로필 사진 대신 동물로 바꿀까요? 지금 사진은 되돌릴 수 없어요')) return;
+    set그림(withAnimal(그림, key));
+  };
+
+  const 저장 = async () => {
+    if (busy || (!닉바뀜 && !그림바뀜)) return;
     const name = nick.trim();
-    if (!nickChanged) return;
-    if (name.length < 2 || name.length > 12) { setErr('2자에서 12자까지 쓸 수 있어요'); return; }
-    if (!confirm(`앞으로 ${left}번 바꿀 수 있어요. 그다음부터는 유료로 바뀝니다. 바꿀까요?`)) return;
+    if (닉바뀜) {
+      if (name.length < 2 || name.length > 12) { setErr('2자에서 12자까지 쓸 수 있어요'); return; }
+      if (!confirm(`닉네임은 앞으로 ${left}번 바꿀 수 있어요. 그다음부터는 유료로 바뀝니다. 바꿀까요?`)) return;
+    }
     setBusy(true); setErr(null);
-    const { error } = await browserSupabase().from('profiles').update({ nickname: name }).eq('id', me.id);
+    const 바꿀 = { ...(닉바뀜 ? { nickname: name } : {}), ...(그림바뀜 ? { avatar: 그림 } : {}) };
+    const { error } = await browserSupabase().from('profiles').update(바꿀).eq('id', me.id);
     setBusy(false);
     if (error) {
       setErr(error.code === '23505' ? '이미 쓰고 있는 닉네임이에요'
-        : error.message.includes('5번') ? '더 바꾸려면 결제가 필요해요'
-        : `바꾸지 못했어요 — ${error.message}`);
+        : error.message.includes('5번') ? '닉네임을 더 바꾸려면 결제가 필요해요'
+        : `저장하지 못했어요 — ${error.message}`);
       return;
     }
     await reload();
-    toast(`닉네임이 바뀌었어요! ${left - 1}번 더 바꿀 수 있어요`);
+    toast('프로필을 저장했어요');
   };
 
-  /* 직군·역할 — 횟수 제한 없음(졸업하면 학생 → 현직) */
-  const setWho = async (patch: { job_group?: string; role?: string }) => {
-    const { error } = await browserSupabase().from('profiles').update(patch).eq('id', me.id);
-    if (error) { toast(`바꾸지 못했어요 — ${error.message}`, { tone: 'danger' }); return; }
-    await reload();
-    toast(patch.role ? `${patch.role}으로 바꿨어요` : `${patch.job_group}로 바꿨어요`);
+  /* 사진 올리기 — 자른 400x400 WebP 를 저장소에 올리고 바로 담습니다 (전과 같음) */
+  const 올리기 = async (blob: Blob) => {
+    setBusy(true);
+    try {
+      const path = `${me.id}/${Date.now()}.webp`;
+      const sb = browserSupabase();
+      const { error } = await sb.storage.from('avatars').upload(path, blob, { contentType: 'image/webp', upsert: true });
+      if (error) throw error;
+      const next = withPhoto(그림, path);
+      const r = await sb.from('profiles').update({ avatar: next }).eq('id', me.id);
+      if (r.error) throw r.error;
+      set그림(next);
+      await reload();
+      toast('프로필 사진이 바뀌었어요');
+    } catch (e) {
+      toast(`사진을 올리지 못했어요 — ${(e as Error).message}`, { tone: 'danger', ms: 4000 });
+    }
+    set사진(null);
+    setBusy(false);
   };
 
-  const 제목 = 'rapo-type-t7-bold text-(color:--rapo-color-fg-neutral)';
-  const 설명 = 'rapo-type-t4-regular text-(color:--rapo-color-fg-neutral-muted)';
+  if (사진) return <div className="pt-(--rapo-dimension-x4)"><PhotoCropper file={사진} onDone={올리기} onCancel={() => set사진(null)} /></div>;
+
+  const 소제목 = 'rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)';
 
   return (
     <div className="flex flex-col gap-(--rapo-dimension-x8) pt-(--rapo-dimension-x4)">
-      <section className="flex flex-col gap-(--rapo-dimension-x3)">
-        <h2 className={제목}>프로필 사진</h2>
-        <p className={설명}>고르면 바로 저장돼요</p>
-        <AvatarPicker userId={me.id} value={me.avatar} onChange={reload} />
+      {/* 내 프로필 미리보기 */}
+      <div className="flex items-center gap-(--rapo-dimension-x4) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-positive-weak) p-(--rapo-dimension-x5)">
+        <Avatar value={그림} size="profile" className="shrink-0" />
+        <div className="min-w-0">
+          <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">내 프로필</p>
+          <p className="rapo-type-t8-bold truncate text-(color:--rapo-color-fg-neutral)">{nick.trim() || me.nickname}</p>
+        </div>
+      </div>
+
+      <section className="flex flex-col gap-(--rapo-dimension-x2)">
+        <label htmlFor="닉네임" className="rapo-type-t5-medium text-(color:--rapo-color-fg-neutral)">닉네임</label>
+        <input id="닉네임" value={nick} onChange={(e) => { setNick(e.target.value); setErr(null); }} disabled={locked} maxLength={12}
+          className="rapo-type-t5-regular h-(--rapo-dimension-x13) w-full rounded-(--rapo-radius-r3) border-(length:--rapo-border-default)
+                     border-(color:--rapo-color-stroke-neutral-weak) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) disabled:opacity-40" />
+        <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
+          {locked ? '무료로 바꿀 수 있는 5번을 다 쓰셨어요. 결제는 아직 준비 중이에요.' : `닉네임은 ${FREE_CHANGES}번 중 ${left}번 더 바꿀 수 있어요.`}
+        </p>
       </section>
 
       <section className="flex flex-col gap-(--rapo-dimension-x3)">
-        <h2 className={제목}>닉네임</h2>
-        <p className={설명}>{locked ? '무료로 바꿀 수 있는 5번을 다 쓰셨어요' : `${FREE_CHANGES}번 중 ${left}번 남았어요`}</p>
-        <div className="flex gap-(--rapo-dimension-x2)">
-          <input value={nick} onChange={(e) => { setTyped(e.target.value); setErr(null); }} disabled={locked} maxLength={12} aria-label="닉네임"
-            className="rapo-type-t5-regular h-(--rapo-dimension-x13) min-w-0 flex-1 rounded-(--rapo-radius-r3) border-(length:--rapo-border-default)
-                       border-(color:--rapo-color-stroke-neutral-weak) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) disabled:opacity-40" />
-          <RapoButton onClick={saveNick} disabled={busy || locked || !nickChanged} tone="deep-coral" className="shrink-0">바꾸기</RapoButton>
+        <h2 className={소제목}>프로필 동물</h2>
+        <div className="grid grid-cols-3 justify-items-center gap-(--rapo-dimension-x4)">
+          {AVATAR_ANIMALS.map((a) => (
+            <button key={a.key} type="button" aria-label={a.name} aria-pressed={고른동물 === a.key} disabled={busy} onClick={() => 동물고르기(a.key)}
+              className={'flex size-[72px] items-center justify-center overflow-hidden rounded-(--rapo-radius-full) disabled:opacity-40 '
+                + (고른동물 === a.key ? 'ring-2 ring-(--rapo-color-fg-positive) ring-offset-2' : '')}
+              style={{ background: 지금.color }}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+              <img src={`/rapo/animals/${a.key}.svg`} alt="" width={72} height={72} className="size-full" />
+            </button>
+          ))}
         </div>
-        {err && <p role="alert" className="rapo-type-t4-medium text-(color:--rapo-color-fg-brand-contrast)">{err}</p>}
-        {locked && <p className={설명}>더 바꾸려면 결제가 필요해요. 결제는 아직 준비 중이에요.</p>}
       </section>
 
       <section className="flex flex-col gap-(--rapo-dimension-x3)">
-        <h2 className={제목}>직군 · 역할</h2>
-        <p className={설명}>커뮤니티에서 보이는 방이 역할로 갈려요. 졸업하시면 현직으로 바꿔 주세요. 누르면 바로 저장돼요.</p>
-        <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral-muted)">직군</p>
-        <div className="flex flex-wrap gap-(--rapo-dimension-x2)">
-          {JOB_GROUPS.map((g) => <RapoChip key={g} label={g} on={me.job_group === g} onClick={() => setWho({ job_group: g })} />)}
-        </div>
-        <p className="rapo-type-t4-bold mt-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral-muted)">역할</p>
-        <div className="flex flex-wrap gap-(--rapo-dimension-x2)">
-          {ROLES.map((r) => <RapoChip key={r} label={`${r} · ${ROLE_DESC[r]}`} on={me.role === r} onClick={() => setWho({ role: r })} />)}
+        <h2 className={소제목}>배경색</h2>
+        <div className="flex flex-wrap gap-(--rapo-dimension-x3)">
+          {AVATAR_COLORS.map((c) => (
+            <button key={c} type="button" aria-label={'배경색 ' + c} aria-pressed={지금.color === c} disabled={busy} onClick={() => set그림(withColor(그림, c))}
+              className={'size-[36px] rounded-(--rapo-radius-full) disabled:opacity-40 ' + (지금.color === c ? 'ring-2 ring-(--rapo-color-fg-neutral) ring-offset-2' : '')}
+              style={{ background: c }} />
+          ))}
         </div>
       </section>
+
+      <div>
+        <RapoButton full tone="outline" disabled={busy} onClick={() => 파일.current?.click()}>프로필 사진 직접 올리기</RapoButton>
+        <input ref={파일} type="file" accept="image/*" hidden onChange={(e) => {
+          const f = e.target.files?.[0]; e.target.value = '';
+          if (f && (!isPhoto(그림) || confirm('프로필 사진을 바꿀까요? 지금 사진은 되돌릴 수 없어요'))) set사진(f);
+        }} />
+      </div>
+
+      {err && <p role="alert" className="rapo-type-t4-medium text-(color:--rapo-color-fg-critical)">{err}</p>}
+      <RapoButton full onClick={저장} disabled={busy || (!닉바뀜 && !그림바뀜)}>{busy ? '저장하는 중…' : '저장'}</RapoButton>
+
+      <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
+        직군을 잘못 고르셨다면 <Link href="/contact" className="underline underline-offset-2">문의하기</Link>로 알려 주세요.
+        {me.role === '학생' && <> 취업하셨다면 <Link href="/me/convert" className="underline underline-offset-2">임상가 전환</Link>에서 바꿔요.</>}
+      </p>
     </div>
   );
 }

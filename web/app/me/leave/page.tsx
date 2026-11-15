@@ -3,163 +3,117 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { RapoLeaveDone, RapoLeaveFrame as Frame } from '@/components/rapo/rapo-leave';
+import { RapoButton } from '@/components/rapo/rapo-ui';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useAuth } from '../../auth';
 import { useToast } from '../../toast';
 
-/* 회원 탈퇴 (2026-10-01).
+/* 회원 탈퇴 — 피그마 「12 · 내 정보」 개인정보·탈퇴 1508:2485 · 안내 확인 후 1509:2786 · 탈퇴 완료 1508:2517 (2026-11-15 세중님 「회원탈퇴 옛날거 뜨네」).
+
+   ★ 피그마·옛 화면과 다르게 적은 것 (2026-11-15 DB 에서 확인) — 둘 다 「글·후기는 남는다」고 적었지만 지금은 다 지워집니다.
+     reset_my_account() 가 auth.users 를 지우면 profiles(on delete cascade) → posts·comments·chat_messages(author/sender cascade)
+     · 근무후기(회원 cascade) 가 연달아 지워집니다. 탈퇴한 3명(10/11~10/15) 모두 프로필 줄이 없습니다.
+     남는 것은 erased_accounts(가입일·탈퇴일·30일 잠근 원래 닉네임)뿐입니다. 화면은 실제 동작대로 적었습니다.
+     2026-11-15 세중님 「다 지우자」(질문함 Q95) — 지금 동작 그대로 둡니다.
 
    ── 왜 앱 안에 있어야 하나 ───────────────────────────────────
-   애플 심사 기준 5.1.1(v) — 앱에서 계정을 만들 수 있으면 **앱 안에서**
-   계정을 지울 수도 있어야 합니다 (2022-06-30 부터).
-   메일로 요청받는 방식은 안 됩니다. 그래서 설정(내 정보)에서 바로 갑니다.
+   애플 심사 기준 5.1.1(v) — 앱에서 계정을 만들 수 있으면 **앱 안에서** 계정을 지울 수도 있어야 합니다.
 
    ── 지우는 일은 DB 가 합니다 ─────────────────────────────────
-   reset_my_account() 한 곳입니다. auth.uid() 하나만 건드리게 못 박혀 있어
-   화면을 뚫어도 남의 계정은 못 지웁니다.
+   reset_my_account() 한 곳입니다. auth.uid() 하나만 건드리게 못 박혀 있어 화면을 뚫어도 남의 계정은 못 지웁니다.
    관리자 화면(/admin/reset)도 **같은 함수**를 부릅니다 — 규칙이 한 벌입니다.
 
-   ── 글과 댓글을 남기는 이유 ──────────────────────────────────
-   글까지 지우면 이미 나간 공유 링크가 죽고, 그 글에 달린 남의 댓글이
-   누구한테 한 말인지 알 수 없게 됩니다. 글은 남기고 글쓴이만 가립니다.
-
-   ── 애플 연결 끊기 (2026-10-11 에 붙였습니다) ────────────────
-   애플은 탈퇴할 때 Sign in with Apple REST API 의 /auth/revoke 를 불러
-   토큰을 거두라고 요구합니다 (5.1.1(v)).
-   **reset_my_account() 를 부르기 전에** /api/apple-revoke 를 부릅니다 —
-   계정을 지운 뒤에는 그 사람 토큰으로 창구를 못 부릅니다.
-   애플 열쇠가 아직 없으면 그 자리가 「없습니다」만 돌려주고 **탈퇴는
-   그대로 됩니다.** 애플로 로그인한 적이 없는 분에게도 할 일이 없습니다. */
-
-const SURE = '탈퇴';
+   ── 애플 연결 끊기 (2026-10-11) ──────────────────────────────
+   **reset_my_account() 를 부르기 전에** /api/apple-revoke 를 부릅니다 — 계정을 지운 뒤에는 그 사람 토큰으로 창구를 못 부릅니다.
+   애플 열쇠가 없으면 그 자리가 「없습니다」만 돌려주고 탈퇴는 그대로 됩니다. */
 
 export default function LeavePage() {
-  const { me, session, loading } = useAuth();
+  const { session, loading } = useAuth();
   const toast = useToast();
   const router = useRouter();
-
-  const [typed, setTyped] = useState('');
+  const [확인, set확인] = useState(false);
   const [busy, setBusy] = useState(false);
-
-  if (loading) {
-    return <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
-      <p className="text-lg text-mute">잠시만요…</p>
-    </main>;
-  }
-  if (!session) {
-    return <main className="mx-auto w-full max-w-3xl px-6 py-8 md:px-7">
-      <h1 className="text-h2 font-bold">로그인한 분만 쓸 수 있어요</h1>
-      <Link href="/login"
-        className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-btn font-bold text-white hover:bg-brand-red-dark">
-        로그인하기
-      </Link>
-    </main>;
-  }
+  const [끝, set끝] = useState(false);
 
   const run = async () => {
+    if (!확인 || busy || !session) return;
     setBusy(true);
     const sb = browserSupabase();
-    /* ★ 애플 연결을 **먼저** 끊습니다 — 계정을 지운 뒤에는 못 부릅니다.
-       실패해도 탈퇴는 그대로 갑니다 (애플 쪽은 관리자가 따로 볼 수 있습니다) */
+    /* ★ 애플 연결을 **먼저** 끊습니다. 실패해도 탈퇴는 그대로 갑니다 */
     try {
-      const tok = session?.access_token;
-      if (tok) {
-        await fetch('/api/apple-revoke', {
-          method: 'POST', headers: { Authorization: 'Bearer ' + tok },
-        });
-      }
+      await fetch('/api/apple-revoke', { method: 'POST', headers: { Authorization: 'Bearer ' + session.access_token } });
     } catch { /* 탈퇴를 막지 않습니다 */ }
 
     const { error } = await sb.rpc('reset_my_account');
-
     if (error) {
       setBusy(false);
       toast(`탈퇴하지 못했어요 — ${error.message}`, { tone: 'danger', ms: 5000 });
       return;
     }
-
     /* 계정이 사라졌으니 들고 있던 토큰도 버립니다 */
+    set끝(true);
     await sb.auth.signOut({ scope: 'local' });
-    toast('탈퇴했어요. 그동안 고마웠습니다', { ms: 4000 });
-    router.replace('/');
+    window.scrollTo(0, 0);
   };
 
+  /* 탈퇴 완료 1508:2517 */
+  if (끝) return <RapoLeaveDone onHome={() => router.replace('/')} />;
+
+  if (loading) {
+    return <Frame title="개인정보·탈퇴"><p role="status" className="rapo-type-t4-regular pt-(--rapo-dimension-x6) text-(color:--rapo-color-fg-neutral-muted)">잠시만요…</p></Frame>;
+  }
+  if (!session) {
+    return (
+      <Frame title="개인정보·탈퇴">
+        <section className="flex flex-col gap-(--rapo-dimension-x4) pt-(--rapo-dimension-x6)">
+          <h2 className="rapo-type-t9-bold text-(color:--rapo-color-fg-neutral)">로그인한 분만 쓸 수 있어요</h2>
+          <Link href="/login" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">로그인하기 ›</Link>
+        </section>
+      </Frame>
+    );
+  }
+
+  /* 개인정보·탈퇴 1508:2485 · 안내 확인 후 1509:2786 */
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <h1 className="text-h2 font-bold">회원 탈퇴</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
-        탈퇴하면 되돌릴 수 없어요. 무엇이 지워지고 무엇이 남는지 먼저 봐주세요
-      </p>
+    <Frame title="개인정보·탈퇴" back="/me/account" 아래={
+      <div className="flex flex-col gap-(--rapo-dimension-x4)">
+        <label className="flex cursor-pointer items-center gap-(--rapo-dimension-x2)">
+          <input type="checkbox" className="sr-only" checked={확인} onChange={(e) => set확인(e.target.checked)} />
+          <span aria-hidden className={'flex size-[22px] shrink-0 items-center justify-center rounded-(--rapo-radius-r1) border-(length:--rapo-border-default) text-[14px] font-bold leading-none '
+            + (확인 ? 'border-(color:--rapo-color-bg-navy-solid) bg-(--rapo-color-bg-navy-solid) text-(color:--rapo-color-fg-on-navy-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
+            {확인 ? '✓' : ''}
+          </span>
+          <span className="rapo-type-t4-regular text-(color:--rapo-color-fg-neutral)">안내 내용을 확인했어요</span>
+        </label>
+        <RapoButton full onClick={run} disabled={!확인 || busy}>{busy ? '탈퇴하는 중…' : '탈퇴하기'}</RapoButton>
+      </div>
+    }>
+      <h2 className="rapo-type-t11-bold mt-(--rapo-dimension-x6) break-keep text-(color:--rapo-color-fg-neutral)">탈퇴 전에 확인해 주세요</h2>
 
-      <div className="mt-6 rounded-sm bg-brand-red-soft p-6">
-        <p className="text-lg font-bold text-brand-red-dark">바로 지워지는 것</p>
-        <ul className="mt-2 space-y-1 break-keep text-lg text-brand-red-dark">
-          <li>· 로그인 수단 — 카카오 · 네이버 연결이 끊어져요</li>
-          <li>· 닉네임 · 프로필 사진 · 직군 · 역할</li>
-          <li>· 급여 · 스펙 · 어학 점수</li>
-          <li>· 알림 설정 · 알림 받던 기기</li>
-          <li>· 관심 공고 · 관심 기관</li>
-          <li>· 내가 누른 좋아요 (글에 붙은 합계 숫자는 그대로예요)</li>
-        </ul>
+      <div className="mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x3)">
+        <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+          <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">삭제되는 정보</p>
+          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">계정과 프로필, 급여·스펙, 내가 쓴 글·댓글·근무 후기가 모두 바로 삭제돼요.</p>
+        </div>
+        <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
+          <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">남는 정보</p>
+          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">언제 가입하고 탈퇴했는지와, 30일 동안 잠가 두는 원래 닉네임만 남아요.</p>
+        </div>
       </div>
 
-      <div className="mt-3 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-        <p className="text-lg font-bold">남는 것</p>
-        <ul className="mt-2 space-y-1 break-keep text-lg text-gray-600 dark:text-gray-400">
-          <li>· 내가 쓴 글과 댓글 — 글쓴이가 「찾을 수 없는 회원」으로 바뀌어요</li>
-          <li>· 채팅에 남긴 말 — 보낸 사람 표시가 가려지고, 쓴 지 1년이 되면 지워져요</li>
-          <li>· 언제 가입해서 언제 탈퇴했는지</li>
-          <li>
-            · 원래 닉네임 — <span className="font-bold">30일 동안만</span> 암호로 잠가서 보관해요.
-            분쟁이 생겼을 때 누구 글인지 가리기 위해서예요. 30일이 지나면 자동으로 지워져요
-          </li>
-        </ul>
-        <p className="mt-4 break-keep text-sm text-mute">
-          내 글에 신고가 걸려 있으면 그 신고 처리가 끝날 때까지 원래 닉네임을 더 보관해요.
-          처리가 끝나면 바로 지워져요. 잠가 둔 닉네임은 관리자만 열어볼 수 있고,
-          열어본 기록이 따로 남아요
-        </p>
-        <p className="mt-5 break-keep text-sm text-mute">
-          글까지 지우면 남이 받아 둔 공유 링크가 죽고, 그 글에 달린 남의 댓글이
-          누구한테 한 말인지 알 수 없게 돼요. 그래서 글은 남기고 이름만 가려요
-        </p>
-      </div>
+      {/* 자세한 내용 — 옛 화면에 있던 안내 그대로 (무엇이 지워지고 남는지 · 30일 보관) */}
+      <details className="mt-(--rapo-dimension-x4) rounded-(--rapo-radius-r3) px-(--rapo-dimension-x1)">
+        <summary className="rapo-type-t4-bold cursor-pointer py-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral-muted)">자세히 보기</summary>
+        <div className="rapo-type-t3-regular flex flex-col gap-(--rapo-dimension-x3) break-keep pb-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral-muted)">
+          <p>바로 지워지는 것 — 로그인 수단(카카오·네이버·애플 연결) · 닉네임 · 프로필 사진 · 직군 · 급여 · 스펙 · 어학 점수 · 내가 쓴 글·댓글·채팅 · 병원 근무 후기 · 알림 설정 · 저장한 공고 · 관심 병원 · 내가 누른 좋아요.</p>
+          <p>남는 것 — 언제 가입해서 언제 탈퇴했는지 · 원래 닉네임은 30일 동안만 암호로 잠가 보관해요. 분쟁이 생겼을 때 가리기 위해서예요. 30일이 지나면 자동으로 지워져요.</p>
+          <p>같은 카카오·네이버로 다시 로그인하면 새 계정으로 가입 첫 화면부터 시작해요.</p>
+        </div>
+      </details>
 
-      <p className="mt-6 text-lg text-gray-700 dark:text-gray-300">
-        지금 계정: <span className="font-bold">{me?.nickname ?? '(가입 전)'}</span>
-      </p>
-
-      <label className="mt-6 block">
-        <span className="text-sm font-bold text-mute">
-          정말 탈퇴하시려면 「{SURE}」 라고 쳐주세요
-        </span>
-        <input
-          value={typed}
-          onChange={(e) => setTyped(e.target.value)}
-          placeholder={SURE}
-          aria-label="확인 글자"
-          className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
-        />
-      </label>
-
-      <button
-        type="button"
-        onClick={run}
-        disabled={busy || typed.trim() !== SURE}
-        className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        {busy ? '탈퇴하는 중…' : typed.trim() === SURE ? '탈퇴하기' : `「${SURE}」 라고 쳐주세요`}
-      </button>
-
-      <Link href="/me"
-        className="mt-3 block w-full rounded-md border border-gray-200 px-6 py-5 text-center text-body-lg font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-950">
-        그만두기
-      </Link>
-
-      <p className="mt-5 break-keep text-sm text-mute">
-        탈퇴한 뒤 같은 카카오·네이버로 다시 로그인하면 <span className="font-bold">새 계정</span>으로
-        가입 첫 화면부터 시작해요. 예전 글은 「찾을 수 없는 회원」이 쓴 글로 남습니다
-      </p>
-    </main>
+      <h3 className="rapo-type-t6-bold mt-(--rapo-dimension-x8) text-(color:--rapo-color-fg-neutral)">남은 정보도 삭제하고 싶다면</h3>
+      <p className="rapo-type-t4-regular mt-(--rapo-dimension-x2) break-keep text-(color:--rapo-color-fg-neutral-muted)">탈퇴 후에도 삭제를 요청할 수 있어요. 운영자가 확인한 뒤 처리해요.</p>
+    </Frame>
   );
 }

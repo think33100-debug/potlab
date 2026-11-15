@@ -6,6 +6,9 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { Chips, Langs, Rows } from '@/components/signup-survey';
 import { RapoButton } from '@/components/rapo/rapo-ui';
+import { RapoFormFrame as Frame, 골라, 만점읽기, 칸, 학년별담기, 학년별읽기, 학년수구하기, 학점칸, 학점들틀렸나 } from '@/components/rapo/rapo-spec-form';
+import { 둥근별 } from '@/components/rapo/rapo-org-reviews';
+import { 답다됨, 후기질문, type 후기답 } from '@/lib/work-review';
 import { todayKst } from '@/lib/job-state';
 import { 학력목록 } from '@/lib/school-period';
 import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave, toDraft, type LangRow, type WorkRow } from '@/lib/signup-fields';
@@ -22,10 +25,6 @@ import { browserSupabase } from '@/lib/supabase-browser';
 type 단계 = '병원' | '스펙' | '후기' | '끝';
 const 순서: 단계[] = ['병원', '스펙', '후기'];
 const 단계이름: Record<단계, string> = { 병원: '근무 병원', 스펙: '입사 당시 스펙', 후기: '근무 후기', 끝: '' };
-const 만점 = 4.5;
-const 교육들 = ['충분해요', '보통이에요', '부족해요'] as const;
-const 일정들 = ['예측 가능해요', '자주 바뀌어요'] as const;
-const 휴게들 = ['확보돼요', '보통이에요', '어려워요'] as const;
 const 최대 = 5000;
 
 type 옛스펙 = Record<string, unknown> & { want_type?: string | null; want_region?: string | null; 근무경험?: boolean | null; 근무병원?: string | null };
@@ -41,15 +40,15 @@ export default function Convert() {
   const [입사연도, set입사연도] = useState('');
   const [학력, set학력] = useState('');
   const [학점, set학점] = useState('');
+  const [만점값, set만점값] = useState('4.5');
+  const [학년별, set학년별] = useState<string[]>([]);
   const [certs, setCerts] = useState<string[]>([]);
   const [courses, setCourses] = useState<string[]>([]);
   const [rows, setRows] = useState<WorkRow[]>([]);
   const [rowsNone, setRowsNone] = useState(false);
   const [langs, setLangs] = useState<LangRow[]>([]);
   const [별점, set별점] = useState(0);
-  const [교육, set교육] = useState('');
-  const [일정, set일정] = useState('');
-  const [휴게, set휴게] = useState('');
+  const [답, set답] = useState<후기답>({});
   const [글, set글] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -70,7 +69,7 @@ export default function Convert() {
       set옛(s);
       const d = toDraft(null, s, (ls.data ?? []) as Record<string, unknown>[]);
       set학력(d.f.school_type ?? '');
-      set학점(d.f.gpa ?? '');
+      set학점(d.f.gpa ?? ''); set만점값(만점읽기(d.f.gpa_scale)); set학년별(학년별읽기(s?.학년별학점));
       setCerts(d.certs); setCourses(d.courses); setRows(d.rows); setRowsNone(d.f.rows_none === 'Y'); setLangs(d.langs);
     })();
   }, [loading, session, me, router]);
@@ -114,17 +113,20 @@ export default function Convert() {
   const job = me.job_group ?? '작업치료사';
   const 학교없음 = 학력 === '학교 경험 없음';
   const 학점수 = Number(학점);
-  const 학점틀림 = !학교없음 && !!학점.trim() && (!Number.isFinite(학점수) || 학점수 < 0 || 학점수 > 만점);
+  const 학년수 = 학년수구하기(학력);
+  const 학점틀림 = !학교없음 && 학점들틀렸나(학점, 학년별, 학년수, 만점값);
+  const 학년별값 = 학교없음 ? null : 학년별담기(학년별, 학년수);
+  const 학점있음 = !학교없음 && (!!학점.trim() || !!학년별값);
   const 병원됨 = !!병원.trim() && !!입사연도 && !!학력 && !학점틀림;
   const 스펙됨 = certs.length > 0 && courses.length > 0 && (rowsNone || rowsReady(rows)) && langs.every((r) => !langError(r));
-  const 후기됨 = 별점 > 0 && !!교육 && !!일정 && !!휴게;
+  const 후기됨 = 별점 > 0 && 답다됨(답);
 
   const 실습 = rowsNone ? [] : rowsToSave(rows);
   const spec: Record<string, unknown> = {
     school_type: 학력 || null,
     grade: null,
     gpa: 학교없음 || !학점.trim() ? null : 학점수,
-    gpa_scale: 학교없음 || !학점.trim() ? null : 만점,
+    gpa_scale: 학점있음 ? Number(만점값) : null, 학년별학점: 학년별값,
     licenses: certs.filter((x) => x !== NONE), trainings: courses.filter((x) => x !== NONE),
     practice: 실습, practice_months: 실습.reduce((s, r) => s + (Number(r.months) || 0), 0),
     career: null, career_months: null,
@@ -144,7 +146,7 @@ export default function Convert() {
       if (error) { setBusy(false); setErr(`저장하지 못했어요. 입력한 내용은 그대로예요 — ${error.message}`); return; }
       set전환됨(true);
     }
-    const { error } = await sb.from('근무후기').insert({ 기관: 병원.trim(), 별점, 교육, 일정, 휴게, 글: 글.trim() || null });
+    const { error } = await sb.from('근무후기').insert({ 기관: 병원.trim(), 별점, ...답, 글: 글.trim() || null });
     setBusy(false);
     if (error) {
       setErr(error.code === '23505' ? '이 병원에는 이미 후기를 쓰셨어요.' : `근무 정보는 저장했지만 후기를 담지 못했어요. 다시 눌러 주세요 — ${error.message}`);
@@ -159,7 +161,7 @@ export default function Convert() {
   const 아래단추 =
     step === '병원' ? <RapoButton onClick={() => go('스펙')} disabled={!병원됨} full>{병원됨 ? '다음' : '위 칸을 채워 주세요'}</RapoButton>
     : step === '스펙' ? <RapoButton onClick={() => go('후기')} disabled={!스펙됨} full>{스펙됨 ? '다음' : '위 칸을 채워 주세요'}</RapoButton>
-    : step === '후기' ? <RapoButton onClick={저장} disabled={!후기됨 || busy} full>{busy ? '저장하는 중…' : 후기됨 ? '임상가로 전환하기' : '별점과 세 가지를 골라 주세요'}</RapoButton>
+    : step === '후기' ? <RapoButton onClick={저장} disabled={!후기됨 || busy} full>{busy ? '저장하는 중…' : 후기됨 ? '임상가로 전환하기' : '별점과 일곱 가지를 골라 주세요'}</RapoButton>
     : <RapoButton onClick={() => router.push(`/orgs?org=${encodeURIComponent(병원.trim())}&tab=review`)} full>내 후기 보러 가기</RapoButton>;
 
   return (
@@ -207,21 +209,7 @@ export default function Convert() {
             <골라 label="입사연도" v={입사연도} ph="입사연도를 선택해 주세요" 붙임="년"
               opts={Array.from({ length: 11 }, (_, i) => String(Number(todayKst().slice(0, 4)) - i))} on={set입사연도} />
             <골라 label="입사 당시 학력" v={학력} opts={학력목록} ph="학력을 선택해 주세요" on={set학력} />
-            {!학교없음 && (
-              <label className="flex flex-col gap-(--rapo-dimension-x2)">
-                <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">
-                  입사 당시 학점 <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span>
-                </span>
-                <span className={'flex items-center rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) ' + (학점틀림 ? 'border-(color:--rapo-color-stroke-critical-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
-                  <input value={학점} onChange={(e) => set학점(e.target.value)} inputMode="decimal" placeholder="예) 3.8"
-                    className="rapo-type-t5-regular h-(--rapo-dimension-x13) min-w-0 flex-1 rounded-(--rapo-radius-r3) bg-transparent px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) outline-none placeholder:text-(color:--rapo-color-fg-placeholder)" />
-                  <span className="rapo-type-t5-regular shrink-0 pr-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">/ 4.5</span>
-                </span>
-                <span className={'rapo-type-t3-regular break-keep ' + (학점틀림 ? 'text-(color:--rapo-color-fg-critical)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
-                  {학점틀림 ? '학점은 0부터 4.5까지 입력해 주세요.' : '졸업 학점으로 바꿔 주세요. 4.5 만점 기준이에요.'}
-                </span>
-              </label>
-            )}
+            {!학교없음 && <학점칸 label="입사 당시 학점" v={학점} on={set학점} 만점값={만점값} on만점={set만점값} 학년수={학년수} 학년별={학년별} on학년별={set학년별} 도움="졸업 학점으로 바꿔 주세요." />}
             <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
               병원과 스펙 정보는 게시글이나 댓글에 표시되지 않아요.
             </p>
@@ -256,15 +244,13 @@ export default function Convert() {
               <div className="flex gap-(--rapo-dimension-x3)" role="radiogroup" aria-label="종합 별점">
                 {[1, 2, 3, 4, 5].map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={별점 === k} aria-label={`${k}점`} onClick={() => set별점(k)}
-                    className="flex size-(--rapo-touch-min) items-center justify-center text-[30px] leading-none text-(color:--rapo-color-bg-identity)">
-                    {k <= 별점 ? '★' : '☆'}
+                    className="flex size-(--rapo-touch-min) items-center justify-center">
+                    <둥근별 켬={k <= 별점} 크기={32} 색="var(--rapo-color-bg-identity)" />
                   </button>
                 ))}
               </div>
             </div>
-            <셋 제목="교육·인수인계" 값들={교육들} 지금={교육} on={set교육} />
-            <셋 제목="근무 일정" 값들={일정들} 지금={일정} on={set일정} />
-            <셋 제목="휴게 시간" 값들={휴게들} 지금={휴게} on={set휴게} />
+            {후기질문.map((q) => <셋 key={q.칸} 제목={q.질문} 값들={q.값들} 지금={답[q.칸] ?? ''} on={(v) => set답((a) => ({ ...a, [q.칸]: v }))} />)}
             <label className="flex flex-col gap-(--rapo-dimension-x2)">
               <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">자유 후기 <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span></span>
               <textarea value={글} onChange={(e) => set글(e.target.value.slice(0, 최대))} rows={5}
@@ -292,62 +278,15 @@ export default function Convert() {
   );
 }
 
-function Frame({ title, onBack, 아래, children }: { title: string; onBack?: () => void; 아래?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div data-rapo className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-(--rapo-color-bg-layer-default)">
-      <header className="sticky top-0 z-20 flex h-[56px] shrink-0 items-center gap-(--rapo-dimension-x2) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x2)">
-        {onBack ? (
-          <button type="button" onClick={onBack} aria-label="뒤로"
-            className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2) active:bg-(--rapo-color-bg-transparent-pressed)">
-            {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-            <img src="/rapo/detail/arrow-left-20.svg" alt="" width={20} height={20} />
-          </button>
-        ) : <span aria-hidden className="size-(--rapo-touch-min) shrink-0" />}
-        <p className="rapo-type-t5-bold min-w-0 flex-1 text-center text-(color:--rapo-color-fg-neutral)">{title}</p>
-        <span aria-hidden className="size-(--rapo-touch-min) shrink-0" />
-      </header>
-      <main className="flex-1 px-(--rapo-dimension-x5) pb-(--rapo-dimension-x6)">{children}</main>
-      {아래 && (
-        <div className="sticky bottom-0 bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x5) pt-(--rapo-dimension-x2) pb-[calc(var(--rapo-dimension-x4)+env(safe-area-inset-bottom))]">
-          {아래}
-        </div>
-      )}
-    </div>
-  );
-}
-
-const 칸 = 'rapo-type-t5-regular h-(--rapo-dimension-x13) w-full min-w-0 rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) '
-  + 'border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) '
-  + 'placeholder:text-(color:--rapo-color-fg-placeholder)';
-
-/* 고르는 칸 — 가입 화면(app/welcome)과 같은 꼴 */
-function 골라({ label, v, opts, ph, on, 붙임 = '' }: { label: string; v: string; opts: readonly string[]; ph: string; on: (v: string) => void; 붙임?: string }) {
-  return (
-    <label className="flex flex-col gap-(--rapo-dimension-x2)">
-      <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">{label}</span>
-      <span className="relative block">
-        <select value={v} onChange={(e) => on(e.target.value)}
-          className={칸 + ' appearance-none pr-(--rapo-dimension-x10) ' + (v ? '' : 'text-(color:--rapo-color-fg-placeholder)')}>
-          <option value="" disabled>{ph}</option>
-          {opts.map((o) => <option key={o} value={o}>{o}{붙임}</option>)}
-        </select>
-        <svg aria-hidden className="pointer-events-none absolute right-(--rapo-dimension-x4) top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
-    </label>
-  );
-}
-
-/* 후기 객관식 한 줄 — 근무 후기 쓰기(app/orgs/review/write)와 같은 값 */
+/* 후기 객관식 한 묶음 — 값은 lib/work-review.ts (후기 쓰기와 같은 자리) */
 function 셋({ 제목, 값들, 지금, on }: { 제목: string; 값들: readonly string[]; 지금: string; on: (v: string) => void }) {
   return (
     <fieldset className="flex flex-col gap-(--rapo-dimension-x2)">
       <legend className="rapo-type-t5-bold mb-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral)">{제목}</legend>
-      <div className={(값들.length === 2 ? 'grid-cols-2' : 'grid-cols-3') + ' grid gap-(--rapo-dimension-x2)'}>
+      <div className="flex flex-col gap-(--rapo-dimension-x2)">
         {값들.map((x) => (
           <button key={x} type="button" aria-pressed={지금 === x} onClick={() => on(x)}
-            className={'rapo-type-t4-medium min-h-(--rapo-touch-min) break-keep rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) px-(--rapo-dimension-x2) py-(--rapo-dimension-x2) '
+            className={'rapo-type-t5-medium min-h-(--rapo-touch-min) break-keep rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) px-(--rapo-dimension-x4) py-(--rapo-dimension-x3) text-left '
               + (지금 === x ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak) text-(color:--rapo-color-fg-neutral)'
                            : 'border-(color:--rapo-color-stroke-neutral-weak) text-(color:--rapo-color-fg-neutral)')}>
             {x}

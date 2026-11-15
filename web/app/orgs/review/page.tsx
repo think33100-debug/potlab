@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { 어둠 } from '@/components/rapo/rapo-community';
-import { 별, 후기쓴이, type 근무후기 } from '@/components/rapo/rapo-org-reviews';
+import { 별줄, 후기쓴이, type 근무후기 } from '@/components/rapo/rapo-org-reviews';
+import { 후기질문 } from '@/lib/work-review';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 근무 후기 상세 — 피그마 「근무 후기 · 상세」 1328:2703 · 「학생 / 오늘 후기 열람 완료」 1496:4464 (2026-11-15).
@@ -64,17 +65,17 @@ function Body() {
             )}
             <section className="flex flex-col gap-[12px] rounded-[16px] p-[16px]" style={{ background: 어둠.면 }}>
               <후기쓴이 h={h} />
-              <p className="text-[15px] font-bold" style={{ color: '#ffa691' }} aria-label={`별점 ${h.별점}점`}>
-                <span aria-hidden className="tracking-[1px]">{별(h.별점)}</span>&nbsp;&nbsp;{h.별점}점
+              <p className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: '#ffa691' }} aria-label={`별점 ${h.별점}점`}>
+                <별줄 n={h.별점} 크기={18} />{h.별점}점
               </p>
               {h.글 && <p className="whitespace-pre-wrap break-keep text-[15px] leading-[23px]" style={{ color: 어둠.글 }}>{h.글}</p>}
             </section>
             <section className="flex flex-col gap-[10px] rounded-[16px] p-[16px]" style={{ background: 어둠.면 }}>
               <h2 className="text-[17px] font-bold leading-[24px]" style={{ color: 어둠.글 }}>작성자의 근무 환경 평가</h2>
-              {([['교육·인수인계', h.교육], ['근무 일정', h.일정], ['휴게 시간', h.휴게]] as const).map(([k, v]) => (
-                <p key={k} className="flex gap-[16px] text-[14px] leading-[20px]">
-                  <span className="w-[100px] shrink-0" style={{ color: 어둠.흐린글 }}>{k}</span>
-                  <span className="font-bold" style={{ color: 어둠.글 }}>{v}</span>
+              {후기질문.map((q) => (
+                <p key={q.칸} className="flex gap-[16px] text-[14px] leading-[20px]">
+                  <span className="w-[92px] shrink-0 break-keep" style={{ color: 어둠.흐린글 }}>{q.짧게}</span>
+                  <span className="min-w-0 break-keep font-bold" style={{ color: 어둠.글 }}>{h[q.칸] ?? '—'}</span>
                 </p>
               ))}
             </section>

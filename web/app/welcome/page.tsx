@@ -2,21 +2,22 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CompareNotify } from '@/components/compare-notify';
 import { Chips, Langs, Rows, SignupSurvey } from '@/components/signup-survey';
 import { 비교알림켜짐 } from '@/lib/beta-compare';
 import { defaultAvatar } from '@/lib/avatar';
 import { BETA_AGREEMENTS, 표없음 } from '@/lib/beta';
 import { RapoButton } from '@/components/rapo/rapo-ui';
+import { 학년별담기, 학년수구하기, 학교찾기칸, 학점칸, 학점들틀렸나, 희망유형들 as 희망유형, 희망지역들 as 희망지역 } from '@/components/rapo/rapo-spec-form';
 import { clearAfterLogin, peekAfterLogin } from '@/lib/after-login';
 import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave, type LangRow, type WorkRow } from '@/lib/signup-fields';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
 import { JOB_GROUPS, type JobGroup, type Role } from '@/lib/who';
-import { 날말, 무료끝날, 미래인가, 연월말, 졸업연월, 학력목록 } from '@/lib/school-period';
+import { 날말, 무료끝날, 미래인가, 연월말, 졸업연월, 취업인증안내 as 인증안내, 학력목록 } from '@/lib/school-period';
 import { todayKst } from '@/lib/job-state';
-import { 관심대상들, 관심분야예시, 듣고싶은교육예시, 예시고르기, 학교목록, 학교부연 } from '@/lib/signup-school';
+import { 관심대상들, 관심분야예시, 듣고싶은교육예시, 예시고르기, 학교목록 } from '@/lib/signup-school';
 
 import { 설치안내남기기 } from '@/lib/install-hint';
 import { useAuth } from '../auth';
@@ -41,21 +42,23 @@ import { useToast } from '../toast';
 type 단계 = '동의' | '내정보' | '닉네임' | '학교' | '스펙' | '희망' | '관심' | '급여' | '끝';
 type 경험 = '없음' | '있음';
 
-const 희망유형 = ['대학병원', '종합병원', '재활병원'] as const;
-const 희망지역 = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
-  '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'] as const;
-/* 학점은 4.5 만점으로만 받고, 넣을지 말지는 선택 (2026-11-15 세중님 「학점 4.5 만점에 기입 · 학점은 선택 · 기입하면 가입한 사람들과 비교」) */
-const 만점 = 4.5;
+/* 학점은 선택 (2026-11-15 세중님 「학점은 선택 · 기입하면 가입한 사람들과 비교」) · 만점 기준은 4.5/4.0 고르기 (같은 날 「보통 4.5 인데 4.0 도 있어」) — 칸은 components/rapo/rapo-spec-form 의 학점칸 */
 
 /* 중간에 나갔다 와도 적은 게 남게 — 이 기기에만 둡니다 (옛 설문과 같은 결) */
 type 초안 = {
-  학교?: string; 학교직접?: boolean;
-  학력?: string; 학적?: '재학' | '졸업'; 입학년?: string; 입학월?: string; 학점?: string;
+  학교?: string;
+  학력?: string; 학적?: '재학' | '졸업'; 입학년?: string; 입학월?: string; 학점?: string; 만점?: string; 학년별?: string[];
   관심대상?: string; 관심분야?: string[]; 듣고싶은교육?: string[];
   병원?: string; 입사연도?: string;
   certs?: string[]; courses?: string[]; rows?: WorkRow[]; rowsNone?: boolean; langs?: LangRow[];
   희망유형?: string; 희망지역?: string;
 };
+/* 학생 가입 끝 추천 메뉴 (2026-11-15 세중님) — 실습 후기는 커뮤니티 「실습」 방 */
+const 추천메뉴 = [
+  { 이름: '실습 후기 확인하고 남기러 가기', href: '/community/prac' },
+  { 이름: '봉사활동 찾아보기', href: '/volunteer' },
+  { 이름: '청년 정책 찾아보기', href: '/youth' },
+] as const;
 const 초안열쇠 = (uid: string) => `rapo.signup.${uid}`;
 const 초안읽기 = (uid: string): 초안 => { try { return JSON.parse(localStorage.getItem(초안열쇠(uid)) || '{}'); } catch { return {}; } };
 
@@ -82,6 +85,16 @@ export default function Welcome() {
   const [직접입력, set직접입력] = useState(false);
 
   useEffect(() => { if (session) setD(초안읽기(session.user.id)); }, [session]);
+  /* 가입 줄이 생긴 뒤 ②③으로 돌아왔을 때 — 이미 고른 직군·닉네임을 채워 둡니다 (2026-11-15 세중님 「2-3으로도 돌아갈 수 있게」) */
+  useEffect(() => { if (me) { setJob((j) => j ?? (me.job_group as JobGroup | null)); setNick((n) => n || me.nickname); } }, [me]);
+  /* 가입하다 나갔다 다시 온 분께 한 번 (2026-11-15 세중님) */
+  const 다시안내 = useRef(false);
+  useEffect(() => {
+    if (loading || 다시안내.current || justMade || !me || me.survey_at) return;
+    다시안내.current = true;
+    /* 줄은 직접 나눔 — 좁은 폰에서 말 가운데 안 잘리게 (토스트는 whitespace-pre-line) */
+    toast('다시 돌아오셨네요!\n회원가입을 마무리하고\n라포를 이용해 주세요!', { ms: 4500 });
+  }, [loading, me, justMade, toast]);
   const put = (p: Partial<초안>) => {
     const next = { ...d, ...p };
     setD(next);
@@ -143,7 +156,7 @@ export default function Welcome() {
     go('내정보');
   };
 
-  /* ── ② 직군·근무 경험 ── 줄이 이미 있는 옛 계정만 여기서 고칩니다 */
+  /* ── ② 직군·근무 경험 ── 가입 줄이 있으면(③ 뒤에 돌아온 분 · 옛 계정) 여기서 고칩니다 */
   const role: Role | null = 경험값 ? (경험값 === '있음' ? '현직' : '학생') : null;
   const saveWho = async () => {
     if (!job || !role) return;
@@ -153,7 +166,7 @@ export default function Welcome() {
     setBusy(false);
     if (error) { toast(`저장하지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
     await reload();
-    go('학교');
+    go('닉네임');
   };
 
   /* ── ③ 닉네임 = 가입 줄 만들기 (2026-10-11 창구 「가입하기」 그대로) ── */
@@ -163,6 +176,17 @@ export default function Welcome() {
     if (name.length < 2 || name.length > 12) { setNickErr('2자에서 12자까지 쓸 수 있어요'); return; }
     setBusy(true); setNickErr(null);
     const sb = browserSupabase();
+    /* 가입 줄이 이미 있음 — ③으로 돌아온 분. 닉네임만 고칩니다(가입 중 고침은 5번 셈에 안 들어감 · 금고 SQL_1113/ZX) */
+    if (me) {
+      if (name !== me.nickname) {
+        const r = await sb.from('profiles').update({ nickname: name }).eq('id', session.user.id);
+        if (r.error) { setBusy(false); setNickErr(r.error.code === '23505' ? '이미 쓰고 있는 닉네임이에요. 다른 것으로 해주세요' : `저장하지 못했어요 — ${r.error.message}`); return; }
+        await reload();
+      }
+      setBusy(false);
+      go('학교');
+      return;
+    }
     const { error } = await sb.rpc('가입하기', {
       p_닉네임: name, p_직군: job, p_역할: role, p_사진: defaultAvatar(session.user.id), p_약관판: TERMS_VERSION,
     });
@@ -198,11 +222,14 @@ export default function Welcome() {
   const 졸업 = !있음 && !학교없음 && d.학력 && 입학 && !입학미래 ? 졸업연월(d.학력, 입학) : null;
   const 끝날 = 무료끝날(졸업);
   const 끝남 = !!끝날 && 끝날 < todayKst();
-  const 학점수 = Number(d.학점);
-  const 학점틀림 = !!d.학점?.trim() && (!Number.isFinite(학점수) || 학점수 < 0 || 학점수 > 만점);
-  const 학점됨 = !학점틀림;   // 비워도 됨
   const 학교들 = 학교목록(job ?? me?.job_group);
   const 고른학교 = 학교들.find((x) => x.이름 === d.학교) ?? null;
+  /* 학점 — 학년별(3년제 3칸 · 4년제 4칸) + 평균 · 모두 선택 (2026-11-15 세중님) */
+  const 만점값 = d.만점 ?? '4.5';
+  const 학년수 = 학년수구하기(d.학력, 있음 ? null : 고른학교?.학제);
+  const 학점틀림 = 학점들틀렸나(d.학점 ?? '', d.학년별 ?? [], 학년수, 만점값);
+  const 학년별값 = 학년별담기(d.학년별 ?? [], 학년수);
+  const 학점됨 = !학점틀림;   // 비워도 됨
   const 학교됨 = 있음
     ? !!d.병원?.trim() && !!d.입사연도 && !!d.학력 && (학교없음 || 학점됨)
     : !!d.학력 && (학교없음 || (!!d.학교?.trim() && !!d.학적 && !!입학 && !입학미래 && 학점됨));
@@ -221,7 +248,7 @@ export default function Welcome() {
     school_type: d.학력 ?? null,
     grade: null,
     gpa: 학교없음 || !d.학점?.trim() ? null : Number(d.학점),
-    gpa_scale: 학교없음 || !d.학점?.trim() ? null : 만점,
+    gpa_scale: 학교없음 || (!d.학점?.trim() && !학년별값) ? null : Number(만점값), 학년별학점: 학교없음 ? null : 학년별값,
     학교: !있음 && !학교없음 ? d.학교?.trim() || null : null,
     관심대상: 있음 ? null : d.관심대상 ?? null,
     관심분야: 있음 ? null : d.관심분야 ?? [],
@@ -290,15 +317,15 @@ export default function Welcome() {
   const 뒤로 = () => {
     if (step === '급여' && 급여입력) { set급여입력(false); return; }
     const i = 순서.indexOf(step);
-    /* 가입 줄이 생긴 뒤에는 ②③으로 돌아가지 않습니다(닉네임을 두 번 만들 수 없음) */
-    if (i > 0 && !(me && i <= 3)) { go(순서[i - 1]); return; }
+    /* 가입 줄이 생긴 뒤에도 ②③으로 돌아갑니다 (2026-11-15 세중님) — ②는 직군·경험을 고치고 ③은 닉네임만 고칩니다 */
+    if (i > 0) { go(순서[i - 1]); return; }
     if (step === '동의' || confirm('처음부터 다시 할까요? 로그인 화면으로 돌아가요.')) void 다시하기();
   };
 
   const 아래단추 =
     step === '동의' ? <RapoButton onClick={베타동의남기기} disabled={!allRequired || busy} full>{busy ? '확인하는 중…' : allRequired ? '동의하고 다음' : '필수 항목에 모두 동의해 주세요'}</RapoButton>
     : step === '내정보' ? <RapoButton onClick={saveWho} disabled={busy || !job || !role} full>{busy ? '저장하는 중…' : (!job || !role) ? '둘 다 골라 주세요' : '다음'}</RapoButton>
-    : step === '닉네임' ? <RapoButton onClick={saveNickname} disabled={busy || nick.trim().length < 2} full>{busy ? '저장하는 중…' : '가입하기'}</RapoButton>
+    : step === '닉네임' ? <RapoButton onClick={saveNickname} disabled={busy || nick.trim().length < 2} full>{busy ? '저장하는 중…' : me ? '다음' : '가입하기'}</RapoButton>
     : step === '학교' ? <RapoButton onClick={() => go('스펙')} disabled={!학교됨} full>{학교됨 ? '다음' : '위 칸을 채워 주세요'}</RapoButton>
     : step === '스펙' ? <RapoButton onClick={() => go('희망')} disabled={!스펙됨} full>{스펙됨 ? '다음' : '위 칸을 채워 주세요'}</RapoButton>
     : step === '희망' ? <RapoButton onClick={() => go(있음 ? '급여' : '관심')} disabled={!희망됨} full>{!희망됨 ? '위 칸을 채워 주세요' : '다음'}</RapoButton>
@@ -413,22 +440,10 @@ export default function Welcome() {
               </>
             )}
 
-            {/* 학교 — 협회 목록의 작업치료·물리치료 학과 전부 (직군에 맞춰) · 고르면 아래에 「경기 · 3년제」 · 학력도 맞춰 채움 */}
+            {/* 학교 — 협회 목록의 작업치료·물리치료 학과 전부 (직군에 맞춰) · 이름을 조금 적으면 추천(드롭다운 아님 · 11/15 세중님) ·
+                고르면 아래에 「경기 · 3년제」 · 학력도 맞춰 채움 · 목록에 없으면 적은 이름 그대로 */}
             {!있음 && !학교없음 && (
-              <div className="flex flex-col gap-(--rapo-dimension-x2)">
-                {d.학교직접 ? (
-                  <label className="flex flex-col gap-(--rapo-dimension-x2)">
-                    <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">학교</span>
-                    <input value={d.학교 ?? ''} onChange={(e) => put({ 학교: e.target.value })} placeholder="학교와 학과 이름" className={칸} />
-                  </label>
-                ) : (
-                  <골라 label="학교" v={d.학교 ?? ''} opts={학교들.map((x) => x.이름)} ph="학교를 선택해 주세요"
-                    on={(v) => { const x = 학교들.find((y) => y.이름 === v); put({ 학교: v, ...(x?.학력 ? { 학력: x.학력 } : {}) }); }} />
-                )}
-                {고른학교 && 학교부연(고른학교) && <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{학교부연(고른학교)}</p>}
-                <button type="button" onClick={() => put({ 학교직접: !d.학교직접, 학교: '' })}
-                  className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">{d.학교직접 ? '목록에서 고르기 ›' : '목록에 없나요? 직접 입력 ›'}</button>
-              </div>
+              <학교찾기칸 학교들={학교들} v={d.학교 ?? ''} on={(이름, x) => put({ 학교: 이름, ...(x?.학력 ? { 학력: x.학력 } : {}) })} />
             )}
 
             <골라 label={있음 ? '입사 당시 학력' : '학력'} v={d.학력 ?? ''} opts={학력목록} ph="학력을 선택해 주세요" on={(v) => put({ 학력: v })} />
@@ -457,6 +472,7 @@ export default function Welcome() {
                         <>
                           <span className="block">{d.학적 === '졸업' ? '졸업 연월' : '졸업 예정'} {연월말(졸업)} · 자동 계산</span>
                           <span className="block">{끝남 ? '무료 열람 기간 종료' : `${날말(끝날!)}까지 무료 열람`} · 변경은 운영자 문의</span>
+                          <span className="block">{인증안내}</span>
                         </>
                       ) : '선택한 학력과 입학 연월로 졸업 예정일을 계산해요. 수정이 필요하면 운영자에게 문의해 주세요.'}
                   </p>
@@ -464,21 +480,8 @@ export default function Welcome() {
               </>
             )}
 
-            {!학교없음 && (
-              <label className="flex flex-col gap-(--rapo-dimension-x2)">
-                <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">
-                  {있음 ? '입사 당시 학점' : '누적 학점'} <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span>
-                </span>
-                <span className={'flex items-center rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) ' + (학점틀림 ? 'border-(color:--rapo-color-stroke-critical-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
-                  <input value={d.학점 ?? ''} onChange={(e) => put({ 학점: e.target.value })} inputMode="decimal" placeholder="예) 3.8"
-                    className="rapo-type-t5-regular h-(--rapo-dimension-x13) min-w-0 flex-1 rounded-(--rapo-radius-r3) bg-transparent px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) outline-none placeholder:text-(color:--rapo-color-fg-placeholder)" />
-                  <span className="rapo-type-t5-regular shrink-0 pr-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">/ 4.5</span>
-                </span>
-                <span className={'rapo-type-t3-regular break-keep ' + (학점틀림 ? 'text-(color:--rapo-color-fg-critical)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
-                  {학점틀림 ? '학점은 0부터 4.5까지 입력해 주세요.' : '4.5 만점 기준이에요. 입력하면 가입한 사람들과 학점을 비교할 수 있어요.'}
-                </span>
-              </label>
-            )}
+            {!학교없음 && <학점칸 label={있음 ? '입사 당시 학점' : '학점'} v={d.학점 ?? ''} on={(v) => put({ 학점: v })} 만점값={만점값} on만점={(v) => put({ 만점: v })}
+              학년수={학년수} 학년별={d.학년별 ?? []} on학년별={(v) => put({ 학년별: v })} 도움="입력하면 가입한 사람들과 학점을 비교할 수 있어요." />}
 
             {학교없음 && !있음 && (
               <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
@@ -528,7 +531,7 @@ export default function Welcome() {
                 {관심대상들.map((x) => <Choice key={x} on={d.관심대상 === x} go={() => put({ 관심대상: x })} small>{x}</Choice>)}
               </div>
             </div>
-            <고른칩 제목="관심 있는 분야는?" 덧="여러 개 골라도 돼요" 예시={예시고르기(관심분야예시, job ?? me?.job_group)} 고름={d.관심분야 ?? []} on={(v) => put({ 관심분야: v })} />
+            <고른칩 제목="관심 있는 분야는?" 덧="여러 개 골라도 돼요" 예시={예시고르기(관심분야예시, job ?? me?.job_group)} 고름={d.관심분야 ?? []} on={(v) => put({ 관심분야: v })} 없음="아직 없어요" />
             <고른칩 제목="듣고 싶은 교육의 종류는?" 덧="여러 개 골라도 돼요" 예시={예시고르기(듣고싶은교육예시, job ?? me?.job_group)} 고름={d.듣고싶은교육 ?? []} on={(v) => put({ 듣고싶은교육: v })} />
             {saveErr && <p role="alert" className="rapo-type-t4-medium break-keep text-(color:--rapo-color-fg-critical)">{saveErr}</p>}
           </section>
@@ -589,23 +592,31 @@ export default function Welcome() {
                 <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">근무 정보를 등록했어요</p>
                 <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">급여는 나중에 입력해도 괜찮아요. 이제 비교 정보와 커뮤니티를 이용할 수 있어요.</p>
               </>
-            ) : 끝날 && !끝남 ? (
-              <>
-                <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">{날말(끝날)}까지<br />무료로 이용해요</p>
-                <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">선택한 학력과 입학 연월로 계산한 졸업 시점을 기준으로 해요.</p>
-              </>
-            ) : 학교없음 ? (
-              <>
-                <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">공개된 정보부터<br />둘러보세요</p>
-                <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">졸업 기준 무료 열람 기간이 적용되지 않아요.</p>
-                <Link href="/contact" className="flex items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4)">
-                  <span className="rapo-type-t5-medium min-w-0 flex-1 text-(color:--rapo-color-fg-neutral)">아직 임상 경험이 없어요 / 문의</span>
-                  <span aria-hidden className="rapo-type-t8-regular text-(color:--rapo-color-fg-neutral)">›</span>
-                </Link>
-                <Link href="/me/convert" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">근무 경험이 생겼다면 정보 등록 ›</Link>
-              </>
             ) : (
-              <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">라포에서 동료들의<br />이야기를 만나보세요</p>
+              /* 학생·취준생 (2026-11-15 세중님) — 무료 열람 끝날 · 「1년 안 취업 인증」 안내 · 「우리들의 이야기」 · 추천 메뉴 셋 */
+              <>
+                {끝날 && !끝남 ? (
+                  <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">{날말(끝날)}까지<br />무료로 이용해요</p>
+                ) : 학교없음 ? (
+                  <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">졸업 기준 무료 열람 기간이 적용되지 않아요.</p>
+                ) : null}
+                {끝날 && (
+                  <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral)">
+                    {인증안내}
+                  </p>
+                )}
+                <p className="rapo-type-t6-bold break-keep text-(color:--rapo-color-fg-neutral)">이제부터 우리들의 이야기를 라포에서 자유롭게 나눠주세요!</p>
+                <div className="flex flex-col gap-(--rapo-dimension-x2)">
+                  <p className="rapo-type-t3-bold text-(color:--rapo-color-fg-neutral-muted)">추천 메뉴</p>
+                  {추천메뉴.map((m) => (
+                    <Link key={m.href} href={m.href} className="flex items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) active:bg-(--rapo-color-bg-neutral-weak-pressed)">
+                      <span className="rapo-type-t5-medium min-w-0 flex-1 break-keep text-(color:--rapo-color-fg-neutral)">{m.이름}</span>
+                      <span aria-hidden className="rapo-type-t8-regular text-(color:--rapo-color-fg-neutral)">›</span>
+                    </Link>
+                  ))}
+                </div>
+                {학교없음 && <Link href="/contact" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">아직 임상 경험이 없어요 / 문의 ›</Link>}
+              </>
             )}
           </section>
         )}
@@ -716,11 +727,15 @@ function 동의행({ a, on, set }: {
 }
 
 /* 여러 개 고르는 칩 + 직접 추가 (관심 분야 · 듣고 싶은 교육) */
-function 고른칩({ 제목, 덧, 예시, 고름, on }: { 제목: string; 덧?: string; 예시: readonly string[]; 고름: string[]; on: (v: string[]) => void }) {
+/* 없음 — 고르면 혼자 남고, 다른 것을 고르면 빠지는 칩 (관심 분야 「아직 없어요」 · 2026-11-15 세중님) */
+function 고른칩({ 제목, 덧, 예시, 고름, on, 없음 }: { 제목: string; 덧?: string; 예시: readonly string[]; 고름: string[]; on: (v: string[]) => void; 없음?: string }) {
   const [글, set글] = useState('');
-  const 모두 = [...예시, ...고름.filter((x) => !예시.includes(x))];
-  const 토글 = (x: string) => on(고름.includes(x) ? 고름.filter((y) => y !== x) : [...고름, x]);
-  const 더하기 = () => { const t = 글.trim().slice(0, 20); set글(''); if (t && !고름.includes(t)) on([...고름, t]); };
+  const 모두 = [...(없음 ? [없음] : []), ...예시, ...고름.filter((x) => !예시.includes(x) && x !== 없음)];
+  const 토글 = (x: string) => {
+    if (고름.includes(x)) { on(고름.filter((y) => y !== x)); return; }
+    on(x === 없음 ? [x] : [...고름.filter((y) => y !== 없음), x]);
+  };
+  const 더하기 = () => { const t = 글.trim().slice(0, 20); set글(''); if (t && !고름.includes(t)) on([...고름.filter((y) => y !== 없음), t]); };
   return (
     <div className="flex flex-col gap-(--rapo-dimension-x2)">
       <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">{제목}</span>

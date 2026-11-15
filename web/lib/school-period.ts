@@ -37,6 +37,9 @@ export function 졸업연월(학력: string, 입학: 연월 | null): 연월 | nu
   return 더하기(입학, 연한 * 12 - 1);
 }
 
+/** 무료 열람 뒤 안내 — 2026-11-15 세중님. 막는 장치는 아직 없습니다(보여 주기만) */
+export const 취업인증안내 = '무료 열람이 끝나고 나면 1년 이내에 취업 인증을 해 주셔야 이어서 무료로 이용할 수 있어요.';
+
 /** 무료 열람 끝날 — 졸업 다음 해 같은 달 말일 ('YYYY-MM-DD') */
 export function 무료끝날(졸업: 연월 | null): string | null {
   if (!졸업) return null;

@@ -1,10 +1,14 @@
 import Link from 'next/link';
 import { InquiryForm } from '@/components/inquiry-form';
+import { RapoAppBar } from '@/components/rapo/rapo-me';
 import { HELP_EMAIL } from '@/lib/contact';
 import { 문의폼_켰나 } from '@/lib/inquiry';
 import { 색인메타 } from '@/lib/seo';
 
 /* 문의하기 (2026-10-01 · 새 디자인 2026-11-13 세중님 「문의하기 누르면 옛날 화면이 나와 · 피그마 확인」).
+   ★ 2026-11-15 세중님 「문의하기도 바꿔야할듯」 — 피그마 「12 · 내 정보」 이용 문의 1442:1538 꼴로 다시 짰습니다:
+     앱 바 제목 「문의하기」 · 큰 제목 · 바로 아래 문의 폼 → 메일 안내는 아래 회색 칸 · 구제 기관은 접어 둠.
+     (아래 옛 설명은 11/13 판입니다)
 
    피그마 원본 — 「15 · 기본 화면 템플릿」 T05 / Mobile / 짧은 문의 안내 605:10494
    (본문 「짧은 문의 안내」 605:9256 · 문서 아이콘 32 · 화면 제목 26/35 · 본문 16/24 · 메일 t6 Bold brand-contrast ·
@@ -29,69 +33,47 @@ const 구제기관 = [
 export default function ContactPage() {
   return (
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
-      {/* 내 정보 아래 화면들과 같은 앱 바(라이트 · 56) — 제목은 본문의 화면 제목이 맡습니다(원본 T05) */}
-      <header className="sticky top-0 z-20 flex h-[56px] items-center bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x2)">
-        <Link href="/me" aria-label="뒤로"
-          className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2) active:bg-(--rapo-color-bg-transparent-pressed)">
-          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-          <img src="/rapo/detail/arrow-left-20.svg" alt="" width={20} height={20} />
-        </Link>
-      </header>
+      <RapoAppBar title="문의하기" back="/me" />
 
-      <main className="flex flex-col gap-(--rapo-dimension-x8) p-(--rapo-dimension-x5)">
-        {/* 짧은 문의 안내 605:9256 */}
+      <main className="flex flex-col gap-(--rapo-dimension-x8) px-(--rapo-dimension-x5) pb-(--rapo-dimension-x8)">
+        {/* 피그마 12 「이용 문의」 1442:1538 꼴 — 큰 제목 · 설명 · 문의 내용 · 보내기 */}
         <section className="flex flex-col gap-(--rapo-dimension-x6)">
-          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 「RAPO / Icon / 문서」 원본 SVG 그대로 */}
-          <img src="/rapo/contact/doc-32.svg" alt="" width={32} height={32} />
-          <h1 className="rapo-type-screen-title text-(color:--rapo-color-fg-neutral)">문의하기</h1>
-          <p className="rapo-type-article-body break-keep text-(color:--rapo-color-fg-neutral)">
-            서비스 이용 중 궁금한 점이나 불편한 점을 이메일로 보내주세요.
-          </p>
-          <p className="rapo-type-t6-bold break-all text-(color:--rapo-color-fg-brand-contrast)">{HELP_EMAIL}</p>
-          <a href={`mailto:${HELP_EMAIL}`}
-            className="rapo-type-t4-bold flex h-(--rapo-dimension-x10) w-[188px] max-w-full items-center justify-center rounded-(--rapo-radius-r2)
-                       bg-(--rapo-color-bg-navy-solid) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-on-navy-solid) active:bg-(--rapo-color-bg-navy-solid-pressed)">
-            이메일로 문의하기
-          </a>
-          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-            문의 내용을 확인할 수 있는 화면이나 정보를 함께 알려주세요.
-          </p>
-        </section>
-
-        <div aria-hidden className="h-px bg-(--rapo-color-stroke-neutral-muted)" />
-
-        {/* 앱 안에서 보내기 — 원본에 없음(머리 주석 ①). 끄는 스위치는 lib/inquiry.ts 그대로 */}
-        {문의폼_켰나 && (<>
-        <section aria-labelledby="문의-앱안" className="flex flex-col gap-(--rapo-dimension-x4)">
-          <div className="flex flex-col gap-(--rapo-dimension-x1)">
-            <h2 id="문의-앱안" className="rapo-type-t7-bold text-(color:--rapo-color-fg-neutral)">앱 안에서 보내기</h2>
+          <div className="flex flex-col gap-(--rapo-dimension-x2) pt-(--rapo-dimension-x6)">
+            <h1 className="rapo-type-t11-bold break-keep text-(color:--rapo-color-fg-neutral)">무엇을 도와드릴까요?</h1>
             <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-              여기로 보내시면 글이 대한민국 서울에만 저장돼요 (메일로 나가지 않아요)
+              궁금한 점이나 불편한 점을 알려 주세요. 평일에 확인하고 답을 드려요.
             </p>
           </div>
-          <InquiryForm />
+          {/* 앱 안 문의 폼 — 글은 대한민국 서울에만 저장(머리 주석 ①). 끄는 스위치는 lib/inquiry.ts 그대로 */}
+          {문의폼_켰나 && <InquiryForm />}
         </section>
-        </>)}
 
-        <div aria-hidden className="h-px bg-(--rapo-color-stroke-neutral-muted)" />
-
-        {/* 권익 침해 구제 — 원본에 없음(머리 주석 ②) */}
-        <section aria-labelledby="문의-구제" className="flex flex-col gap-(--rapo-dimension-x2)">
-          <h2 id="문의-구제" className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">여기 말고 도움을 청할 수 있는 곳</h2>
-          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
-            저희 답이 만족스럽지 않으시면 아래에 도움을 청하실 수 있어요.{' '}
-            <Link href="/terms/privacy" className="underline underline-offset-2">개인정보처리방침</Link>
-          </p>
-          <ul className="flex flex-col gap-(--rapo-dimension-x3)">
-            {구제기관.map((x) => (
-              /* 이름 한 줄 · 연락처 한 줄 — 한 줄에 이으면 「국번없이 / 118」처럼 끝이 잘려 넘어갔습니다 (2026-11-14 세중님 「글씨 잘리고」) */
-              <li key={x} className="rapo-type-t4-regular flex flex-col text-(color:--rapo-color-fg-neutral-muted)">
-                <span className="rapo-type-t4-medium break-keep text-(color:--rapo-color-fg-neutral)">{x.split(' — ')[0]}</span>
-                <span className="whitespace-nowrap">{x.split(' — ')[1]}</span>
-              </li>
-            ))}
-          </ul>
+        {/* 메일로 — 비회원·가입 전에도 쓸 수 있는 길 (원본 T05 의 메일 안내를 아래로) */}
+        <section className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
+          <h2 className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">메일로 보내기</h2>
+          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">문의 내용을 확인할 수 있는 화면이나 정보를 함께 알려 주세요.</p>
+          <a href={`mailto:${HELP_EMAIL}`} className="rapo-type-t5-bold self-start break-all text-(color:--rapo-color-fg-brand-contrast)">{HELP_EMAIL}</a>
         </section>
+
+        {/* 권익 침해 구제 — 원본에 없음(머리 주석 ②) · 접어 둠 */}
+        <details className="group">
+          <summary className="rapo-type-t4-bold cursor-pointer text-(color:--rapo-color-fg-neutral-muted)">여기 말고 도움을 청할 수 있는 곳</summary>
+          <div className="mt-(--rapo-dimension-x3) flex flex-col gap-(--rapo-dimension-x3)">
+            <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
+              저희 답이 만족스럽지 않으시면 아래에 도움을 청하실 수 있어요.{' '}
+              <Link href="/terms/privacy" className="underline underline-offset-2">개인정보처리방침</Link>
+            </p>
+            <ul className="flex flex-col gap-(--rapo-dimension-x3)">
+              {구제기관.map((x) => (
+                /* 이름 한 줄 · 연락처 한 줄 (2026-11-14 세중님 「글씨 잘리고」) */
+                <li key={x} className="rapo-type-t4-regular flex flex-col text-(color:--rapo-color-fg-neutral-muted)">
+                  <span className="rapo-type-t4-medium break-keep text-(color:--rapo-color-fg-neutral)">{x.split(' — ')[0]}</span>
+                  <span className="whitespace-nowrap">{x.split(' — ')[1]}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
       </main>
     </div>
   );
