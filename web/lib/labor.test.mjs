@@ -76,6 +76,20 @@ assert.equal(monthsBetween(d('2026-02-01'), d('2026-04-01')), 2);
   assert.equal(r.restDays, 184);
 }
 
+/* ⑤-2 퇴직일이 달 끝이고 석 달 전 달에 그날이 없을 때 (2026-11-15) —
+      퇴직일 2026-05-31 → 석 달 전 2026-02-28 (말일) · 2/28 ~ 5/31 = 92일 */
+{
+  const r = severance({ joined: d('2025-05-01'), left: d('2026-05-31'), monthlyWage: 3_000_000 });
+  assert.equal(r.months3Days, 92);
+}
+
+/* ⑤-3 화면 기준 — 마지막 근무일 2025-12-31 이면 퇴직일 2026-01-01 · 3개월 92일 · 재직 1,096일 (2024 윤년) */
+{
+  const r = severance({ joined: d('2023-01-01'), left: d('2026-01-01'), monthlyWage: 3_000_000 });
+  assert.equal(r.workedDays, 1096);
+  assert.equal(r.months3Days, 92);
+}
+
 /* ⑥ 연차 — 1년 미만은 한 달에 하루, 11일까지 */
 {
   assert.equal(leave(d('2026-01-01'), d('2026-01-15')).days, 0);   // 한 달을 못 채움

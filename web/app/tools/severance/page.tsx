@@ -21,10 +21,12 @@ export default function SeveranceTool() {
   const [leavePay, setLeavePay] = useState('');
 
   const ok = joined !== '' && left !== '';
+  const 다음날 = (x: string) => { const t = new Date(x + 'T00:00:00'); t.setDate(t.getDate() + 1); return t; };
   const r = ok
     ? severance({
         joined: new Date(joined + 'T00:00:00'),
-        left: new Date(left + 'T00:00:00'),
+        /* 화면은 「마지막으로 일한 날」을 받고, 계산은 그 다음 날(퇴직일)로 합니다 (lib/labor.ts) */
+        left: 다음날(left),
         monthlyWage: num(wage) * 10_000,
         bonusYear: num(bonus) * 10_000,
         leavePayYear: num(leavePay) * 10_000,

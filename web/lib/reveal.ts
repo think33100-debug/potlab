@@ -85,7 +85,8 @@ export function useCountTo(to: number, ms = 700) {
     const start = from.current;
     from.current = to;
     if (start === to) { setN(to); return; }
-    if (lessMotion()) { setN(to); return; }
+    /* 탭이 뒤에 있으면 굴림(requestAnimationFrame)이 멈춰 옛 숫자가 남습니다 — 바로 찍습니다 (2026-11-15 계산기 점검) */
+    if (lessMotion() || document.hidden) { setN(to); return; }
 
     let raf = 0;
     const t0 = performance.now();
@@ -96,7 +97,9 @@ export function useCountTo(to: number, ms = 700) {
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    /* 굴림이 중간에 멈춰도(탭 전환 등) 끝값은 반드시 찍습니다 */
+    const 끝 = setTimeout(() => setN(to), ms + 100);
+    return () => { cancelAnimationFrame(raf); clearTimeout(끝); };
   }, [to, ms]);
 
   return n;
