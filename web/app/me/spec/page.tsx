@@ -50,7 +50,8 @@ export default function MySpec() {
     setCerts(d.certs); setCourses(d.courses); setRows(d.rows); setRowsNone(d.f.rows_none === 'Y'); setLangs(d.langs);
   }, [v]);
 
-  const 경력 = !!v?.spec?.근무경험;
+  /* 옛 가입(근무경험 칸이 빈 현직)도 임상가 갈래로 — 2026-11-15 운영 점검에서 찾음 */
+  const 경력 = !!v?.spec?.근무경험 || me?.role === '현직';
   const job = me?.job_group ?? '작업치료사';
   const 학교들 = 학교목록(job);
   const 고른학교 = 학교들.find((x) => x.이름 === 학교) ?? null;
