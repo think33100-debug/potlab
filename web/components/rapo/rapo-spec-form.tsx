@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { RapoAppBar } from './rapo-me';
 import { toDraft, type Draft } from '@/lib/signup-fields';
+import { 학교부연, type 고를학교 } from '@/lib/signup-school';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 내 정보의 입력 화면들이 같이 쓰는 부품 (2026-11-15 · 피그마 「12 · 내 정보」 06 경험별 스펙 수정 · 경력 수정 · 희망 취업 조건).
@@ -243,3 +244,41 @@ export function 남은횟수({ n }: { n: number }) {
 
 /** 입사연도 고르기 목록 — 올해부터 40년 전까지 */
 export const 연도들 = (n = 41) => Array.from({ length: n }, (_, i) => String(new Date().getFullYear() - i));
+
+/* 학교 칸 — 이름을 조금 적으면 아래에 추천이 뜹니다 (2026-11-15 세중님 「드롭다운으로 찾게 하지 말고 · 물치 작치 전부」).
+   목록은 직군에 맞는 협회 학과 전부(lib/signup-school.ts 학교목록 · 작업치료 62 · 물리치료 83). 띄어쓰기는 무시하고 찾습니다.
+   추천을 안 고르고 그대로 두면 적은 글이 학교 이름으로 담깁니다(목록에 없는 학교). */
+export function 학교찾기칸({ 학교들, v, on }: {
+  학교들: readonly 고를학교[]; v: string; on: (이름: string, 고른: 고를학교 | null) => void;
+}) {
+  const [열림, set열림] = useState(false);
+  const 다듬 = (x: string) => x.replace(/\s+/g, '').toLowerCase();
+  const q = 다듬(v);
+  const 맞음 = 학교들.find((x) => x.이름 === v.trim()) ?? null;
+  const 후보 = q.length < 1 || 맞음 ? [] : 학교들.filter((x) => 다듬(x.이름).includes(q)).slice(0, 8);
+  return (
+    <div className="flex flex-col gap-(--rapo-dimension-x2)">
+      <label htmlFor="학교찾기" className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">학교</label>
+      <input id="학교찾기" value={v} autoComplete="off" placeholder="학교 이름을 적어 주세요 (예: 연세, 대구보건)"
+        onChange={(e) => { set열림(true); on(e.target.value, null); }} onFocus={() => set열림(true)}
+        className={칸} />
+      {열림 && 후보.length > 0 && (
+        <ul className="flex flex-col overflow-hidden rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak)">
+          {후보.map((x) => (
+            <li key={x.키}>
+              <button type="button" onClick={() => { on(x.이름, x); set열림(false); }}
+                className="flex w-full items-baseline gap-(--rapo-dimension-x2) px-(--rapo-dimension-x4) py-(--rapo-dimension-x3) text-left active:bg-(--rapo-color-bg-transparent-pressed)">
+                <span className="rapo-type-t5-medium min-w-0 flex-1 break-keep text-(color:--rapo-color-fg-neutral)">{x.이름}</span>
+                <span className="rapo-type-t3-regular shrink-0 whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">{학교부연(x)}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {맞음 && 학교부연(맞음) && <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{학교부연(맞음)}</p>}
+      {!맞음 && v.trim().length >= 2 && 후보.length === 0 && (
+        <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">목록에 없는 학교예요. 적은 이름 그대로 저장돼요.</p>
+      )}
+    </div>
+  );
+}

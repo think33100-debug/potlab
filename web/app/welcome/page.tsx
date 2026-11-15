@@ -9,7 +9,7 @@ import { 비교알림켜짐 } from '@/lib/beta-compare';
 import { defaultAvatar } from '@/lib/avatar';
 import { BETA_AGREEMENTS, 표없음 } from '@/lib/beta';
 import { RapoButton } from '@/components/rapo/rapo-ui';
-import { 학년별담기, 학년수구하기, 학점칸, 학점들틀렸나, 희망유형들 as 희망유형, 희망지역들 as 희망지역 } from '@/components/rapo/rapo-spec-form';
+import { 학년별담기, 학년수구하기, 학교찾기칸, 학점칸, 학점들틀렸나, 희망유형들 as 희망유형, 희망지역들 as 희망지역 } from '@/components/rapo/rapo-spec-form';
 import { clearAfterLogin, peekAfterLogin } from '@/lib/after-login';
 import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave, type LangRow, type WorkRow } from '@/lib/signup-fields';
 import { browserSupabase } from '@/lib/supabase-browser';
@@ -17,7 +17,7 @@ import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
 import { JOB_GROUPS, type JobGroup, type Role } from '@/lib/who';
 import { 날말, 무료끝날, 미래인가, 연월말, 졸업연월, 취업인증안내 as 인증안내, 학력목록 } from '@/lib/school-period';
 import { todayKst } from '@/lib/job-state';
-import { 관심대상들, 관심분야예시, 듣고싶은교육예시, 예시고르기, 학교목록, 학교부연 } from '@/lib/signup-school';
+import { 관심대상들, 관심분야예시, 듣고싶은교육예시, 예시고르기, 학교목록 } from '@/lib/signup-school';
 
 import { 설치안내남기기 } from '@/lib/install-hint';
 import { useAuth } from '../auth';
@@ -46,7 +46,7 @@ type 경험 = '없음' | '있음';
 
 /* 중간에 나갔다 와도 적은 게 남게 — 이 기기에만 둡니다 (옛 설문과 같은 결) */
 type 초안 = {
-  학교?: string; 학교직접?: boolean;
+  학교?: string;
   학력?: string; 학적?: '재학' | '졸업'; 입학년?: string; 입학월?: string; 학점?: string; 만점?: string; 학년별?: string[];
   관심대상?: string; 관심분야?: string[]; 듣고싶은교육?: string[];
   병원?: string; 입사연도?: string;
@@ -440,22 +440,10 @@ export default function Welcome() {
               </>
             )}
 
-            {/* 학교 — 협회 목록의 작업치료·물리치료 학과 전부 (직군에 맞춰) · 고르면 아래에 「경기 · 3년제」 · 학력도 맞춰 채움 */}
+            {/* 학교 — 협회 목록의 작업치료·물리치료 학과 전부 (직군에 맞춰) · 이름을 조금 적으면 추천(드롭다운 아님 · 11/15 세중님) ·
+                고르면 아래에 「경기 · 3년제」 · 학력도 맞춰 채움 · 목록에 없으면 적은 이름 그대로 */}
             {!있음 && !학교없음 && (
-              <div className="flex flex-col gap-(--rapo-dimension-x2)">
-                {d.학교직접 ? (
-                  <label className="flex flex-col gap-(--rapo-dimension-x2)">
-                    <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">학교</span>
-                    <input value={d.학교 ?? ''} onChange={(e) => put({ 학교: e.target.value })} placeholder="학교와 학과 이름" className={칸} />
-                  </label>
-                ) : (
-                  <골라 label="학교" v={d.학교 ?? ''} opts={학교들.map((x) => x.이름)} ph="학교를 선택해 주세요"
-                    on={(v) => { const x = 학교들.find((y) => y.이름 === v); put({ 학교: v, ...(x?.학력 ? { 학력: x.학력 } : {}) }); }} />
-                )}
-                {고른학교 && 학교부연(고른학교) && <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{학교부연(고른학교)}</p>}
-                <button type="button" onClick={() => put({ 학교직접: !d.학교직접, 학교: '' })}
-                  className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">{d.학교직접 ? '목록에서 고르기 ›' : '목록에 없나요? 직접 입력 ›'}</button>
-              </div>
+              <학교찾기칸 학교들={학교들} v={d.학교 ?? ''} on={(이름, x) => put({ 학교: 이름, ...(x?.학력 ? { 학력: x.학력 } : {}) })} />
             )}
 
             <골라 label={있음 ? '입사 당시 학력' : '학력'} v={d.학력 ?? ''} opts={학력목록} ph="학력을 선택해 주세요" on={(v) => put({ 학력: v })} />

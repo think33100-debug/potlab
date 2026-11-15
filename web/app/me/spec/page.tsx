@@ -7,10 +7,10 @@ import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
 import { Chips, Langs, Rows } from '@/components/signup-survey';
 import { RapoButton } from '@/components/rapo/rapo-ui';
-import { RapoFormFrame, RapoFormTitle, 골라, 기본칸, 남은횟수, 만점읽기, 학년별담기, 학년별읽기, 학년수구하기, 학점칸, 학점들틀렸나, use내스펙 } from '@/components/rapo/rapo-spec-form';
+import { RapoFormFrame, RapoFormTitle, 골라, 기본칸, 남은횟수, 만점읽기, 학년별담기, 학년별읽기, 학년수구하기, 학교찾기칸, 학점칸, 학점들틀렸나, use내스펙 } from '@/components/rapo/rapo-spec-form';
 import { 학력목록 } from '@/lib/school-period';
 import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave, type LangRow, type WorkRow } from '@/lib/signup-fields';
-import { 학교목록, 학교부연 } from '@/lib/signup-school';
+import { 학교목록 } from '@/lib/signup-school';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 스펙 확인·수정 — 피그마 「12 · 내 정보」 06 경험별 스펙 수정 (2026-11-15 세중님 「내정보 쪽이 예전 게 많은 거 같아 … 피그마 확인해서 수정」).
@@ -30,7 +30,7 @@ export default function MySpec() {
   const { v, err } = use내스펙();
   const [step, setStep] = useState<단계>('학력');
   const [학교, set학교] = useState('');
-  const [학교직접, set학교직접] = useState(false);
+
   const [학력, set학력] = useState('');
   const [학점, set학점] = useState('');
   const [만점값, set만점값] = useState('4.5');
@@ -111,21 +111,7 @@ export default function MySpec() {
               </dl>
             )}
             {!경력 && !학교없음 && (
-              <div className="flex flex-col gap-(--rapo-dimension-x2)">
-                {학교직접 ? (
-                  <label className="flex flex-col gap-(--rapo-dimension-x2)">
-                    <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">학교</span>
-                    <input value={학교} onChange={(e) => set학교(e.target.value)} placeholder="학교와 학과 이름"
-                      className="rapo-type-t5-regular h-(--rapo-dimension-x13) w-full rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) placeholder:text-(color:--rapo-color-fg-placeholder)" />
-                  </label>
-                ) : (
-                  <골라 label="학교" v={학교들.some((x) => x.이름 === 학교) ? 학교 : ''} opts={학교들.map((x) => x.이름)} ph={학교 || '학교를 선택해 주세요'}
-                    on={(n) => { set학교(n); const x = 학교들.find((y) => y.이름 === n); if (x?.학력) set학력(x.학력); }} />
-                )}
-                {고른학교 && 학교부연(고른학교) && <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{학교부연(고른학교)}</p>}
-                <button type="button" onClick={() => { set학교직접(!학교직접); }}
-                  className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">{학교직접 ? '목록에서 고르기 ›' : '목록에 없나요? 직접 입력 ›'}</button>
-              </div>
+              <학교찾기칸 학교들={학교들} v={학교} on={(n, x) => { set학교(n); if (x?.학력) set학력(x.학력); }} />
             )}
             <골라 label="학력" v={학력} opts={학력목록} ph="학력을 선택해 주세요" on={set학력} />
             {!학교없음 && <학점칸 label={경력 ? '입사 당시 학점' : '학점'} v={학점} on={set학점} 만점값={만점값} on만점={set만점값}
