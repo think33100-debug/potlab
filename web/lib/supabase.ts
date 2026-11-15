@@ -230,7 +230,10 @@ export type CommentRow = {
   parent_id: number | null;
   /* 회원번호는 더 안 받습니다 (2026-10-07) — 공개댓글 보기의 「내글」 칸을 봅니다 */
   내글?: boolean | null;
-  body: string;
+  /* 남의 비밀 댓글이면 null (2026-11-15 · 공개댓글 보기가 비움) */
+  body: string | null;
+  비밀?: boolean | null;
+  글쓴이?: boolean | null;
   created_at: string;
   profiles: { nickname: string; avatar: string | null; erased_at: string | null } | null;
 };

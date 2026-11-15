@@ -5,6 +5,7 @@ import {
   RapoCommunityEmpty, RapoCommunityPost, RapoCommunityTop, RapoCommunityWrite, 어둠, 직군탭, type 직군탭값, type 커뮤니티글,
 } from '@/components/rapo/rapo-community';
 import { RapoGuestPreview } from '@/components/rapo/rapo-guest-preview';
+import { CHANNELS } from '@/lib/channels';
 import { 색인메타 } from '@/lib/seo';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { daysAgoIso } from '@/lib/time';
@@ -50,7 +51,11 @@ export default async function Community({ searchParams }: { searchParams: Promis
   const sb = await serverSupabase();
   /* 비회원 — 맛보기 화면 (2026-11-13 세중님). 글은 한 줄도 안 내려보냅니다(익명 글 · components/rapo/rapo-guest-preview.tsx) */
   if (await serverWho(sb) === '비회원') return <RapoGuestPreview 갈래="community" />;
-  let q = sb.from('공개글').select('id,title,body,created_at,comment_count,profiles');
+  /* 2026-11-15 피그마 「학생·취준생 공간을 임상가 피드와 분리」 — 학생 방 글은 /community/student 에만 */
+  const 학생방 = CHANNELS.filter((c) => c.for === 'stu').map((c) => c.id);
+  const { data: 나 } = await sb.rpc('내프로필');
+  const 학생 = ((나 ?? []) as { role?: string | null }[])[0]?.role === '학생';
+  let q = sb.from('공개글').select('id,title,body,created_at,comment_count,profiles').not('channel', 'in', `(${학생방.join(',')})`);
   if (탭 !== '전체') q = q.eq('profiles->>job_group', 탭);
   q = 정렬 === 'hot'
     ? q.gte('created_at', daysAgoIso(7)).order('view_count', { ascending: false }).order('created_at', { ascending: false })
@@ -67,8 +72,8 @@ export default async function Community({ searchParams }: { searchParams: Promis
   if (댓글있는글.length) {
     const { data: cs } = await sb.from('공개댓글').select('post_id,body,created_at,profiles')
       .in('post_id', 댓글있는글).is('parent_id', null).order('created_at', { ascending: true }).limit(200);
-    for (const c of (cs ?? []) as unknown as { post_id: number; body: string; profiles: 줄['profiles'] }[]) {
-      if (!첫댓글.has(c.post_id)) 첫댓글.set(c.post_id, { 글쓴이: c.profiles, body: c.body });
+    for (const c of (cs ?? []) as unknown as { post_id: number; body: string | null; profiles: 줄['profiles'] }[]) {
+      if (!첫댓글.has(c.post_id)) 첫댓글.set(c.post_id, { 글쓴이: c.profiles, body: c.body ?? '비밀 댓글입니다.' });
     }
   }
 
@@ -80,7 +85,7 @@ export default async function Community({ searchParams }: { searchParams: Promis
   return (
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: 어둠.바탕 }}>
       <Hit kind="community" />
-      <RapoCommunityTop 탭={탭} 정렬={정렬} 주소={주소} />
+      <RapoCommunityTop 탭={탭} 정렬={정렬} 주소={주소} 학생={학생} />
       <main className="mt-[6px]">
         {error ? (
           <RapoCommunityEmpty>

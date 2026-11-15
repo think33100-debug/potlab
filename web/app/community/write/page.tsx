@@ -24,7 +24,9 @@ function Write() {
   const qs = useSearchParams();
   const { loading, session, me } = useAuth();
 
-  const [ch, setCh] = useState(qs.get('ch') ?? 'free');
+  /* 학생·취준생 공간의 「전용 글쓰기」(2026-11-15) — 학생 방만 고르고 첫 방은 첫직장 */
+  const 학생공간 = qs.get('space') === 'stu';
+  const [ch, setCh] = useState(qs.get('ch') ?? (학생공간 ? 'first' : 'free'));
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [picks, setPicks] = useState<Pick[]>([]);
@@ -72,7 +74,7 @@ function Write() {
   }
 
   /* 학생에게는 학생 방을, 현직에게는 현직 방을 보여줍니다 (옛 chFor_ 와 같게) */
-  const rooms = channelsFor(me.role);
+  const rooms = 학생공간 && me.role === '학생' ? channelsFor(me.role).filter((c) => c.for === 'stu') : channelsFor(me.role);
 
   const addFiles = (files: FileList) => {
     const room = MAX_POST_IMAGES - picks.length;

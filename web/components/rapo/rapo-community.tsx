@@ -59,8 +59,10 @@ function 직군소개카드({ 탭 }: { 탭: Exclude<직군탭값, '전체'> }) {
 
 /* 상단 — 「커뮤니티」 제목 · 직군 탭 · 이용 안내 · 「○○ 게시글」과 정렬.
    「병원 찾기」는 지금 있는 기관 찾기(/orgs)로 잇습니다 */
-export function RapoCommunityTop({ 탭, 정렬, 주소 }: {
+export function RapoCommunityTop({ 탭, 정렬, 주소, 학생 = false }: {
   탭: 직군탭값; 정렬: 'new' | 'hot'; 주소: (탭: 직군탭값, 정렬: 'new' | 'hot') => string;
+  /* 학생 회원이면 맨 아래에 「학생·취준생 공간 ›」 띠 (피그마 「학생 회원 · 공개 피드 상단」 1308:32004) */
+  학생?: boolean;
 }) {
   return (
     <header className="flex flex-col">
@@ -93,6 +95,14 @@ export function RapoCommunityTop({ 탭, 정렬, 주소 }: {
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/community/next-14.svg" alt="" width={14} height={14} />
       </Link>
+      {학생 && (
+        <Link href="/community/student" className="mx-[22px] mt-[8px] flex h-[52px] items-center gap-[12px] rounded-[8px] px-[16px]"
+          style={{ background: '#264e58' }}>
+          <span className="min-w-0 flex-1 text-[15px] font-bold leading-[22px] text-white">학생·취준생 공간</span>
+          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+          <img src="/rapo/community/next-14.svg" alt="" width={14} height={14} />
+        </Link>
+      )}
       <div className="mx-[22px] mt-[24px] flex h-[32px] items-center">
         <h2 className="min-w-0 flex-1 text-[22px] font-bold leading-[32px]" style={{ color: 어둠.글 }}>
           {/* 원본: 전체 피드는 「전체 게시글」, 직군 피드(U07)는 「최근 이야기」 */}
@@ -157,14 +167,14 @@ export function RapoCommunityPost({ p }: { p: 커뮤니티글 }) {
 }
 
 /* 글쓰기 (1266:1960) — 128×44 · 둥근 22 · 아래 탐색 위에 떠 있음 */
-export function RapoCommunityWrite({ href }: { href: string }) {
+export function RapoCommunityWrite({ href, 글 = '내 직군 글쓰기' }: { href: string; 글?: string }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-[calc(72px+12px+env(safe-area-inset-bottom))] z-30 mx-auto flex w-full max-w-3xl justify-end px-[22px]">
       <Link href={href} className="pointer-events-auto flex h-[44px] items-center gap-[7px] rounded-[22px] pl-[12px] pr-[16px] text-[14px] font-bold leading-[20px] shadow-(--rapo-shadow-s2)"
         style={{ background: 어둠.쓰기, color: 어둠.글 }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/community/pen-17.svg" alt="" width={17} height={17} />
-        내 직군 글쓰기
+        {글}
       </Link>
     </div>
   );
