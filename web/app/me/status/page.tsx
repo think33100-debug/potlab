@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { RapoMeFrame } from '@/components/rapo/rapo-me';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { todayKst } from '@/lib/job-state';
-import { 날말, 무료끝날, 연월말, 연월읽기, 졸업연월 } from '@/lib/school-period';
+import { 날말, 무료끝날, 연월말, 연월읽기, 졸업연월, 취업인증안내 } from '@/lib/school-period';
 
 /* 이용 상태 · 학적 정보 — 내 정보 (2026-11-15 · 피그마 12 「03 이용 상태와 학적」).
    가입 때 적은 학력·학적·입학 연월로 졸업 시점과 무료 열람 끝날을 보여 줍니다(lib/school-period.ts · 가입 화면과 같은 셈).
@@ -50,6 +50,7 @@ function Body({ role }: { role: string | null }) {
           {현직 ? '근무 정보를 등록해 비교 정보와 커뮤니티를 이용할 수 있어요.'
             : 끝날 ? '선택한 학력과 입학 연월로 계산한 졸업 시점을 기준으로 해요.' : '학적 정보가 없으면 졸업 기준 무료 열람 기간이 적용되지 않아요.'}
         </p>
+        {!현직 && 끝날 && <p className="rapo-type-t4-bold break-keep text-(color:--rapo-color-fg-neutral)">{취업인증안내}</p>}
       </div>
 
       <dl className="flex flex-col gap-(--rapo-dimension-x4) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">

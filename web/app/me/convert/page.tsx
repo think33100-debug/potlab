@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { Chips, Langs, Rows } from '@/components/signup-survey';
 import { RapoButton } from '@/components/rapo/rapo-ui';
-import { RapoFormFrame as Frame, 골라, 만점읽기, 칸, 학점칸, 학점틀렸나 } from '@/components/rapo/rapo-spec-form';
+import { RapoFormFrame as Frame, 골라, 만점읽기, 칸, 학년별담기, 학년별읽기, 학년수구하기, 학점칸, 학점들틀렸나 } from '@/components/rapo/rapo-spec-form';
 import { 둥근별 } from '@/components/rapo/rapo-org-reviews';
 import { 답다됨, 후기질문, type 후기답 } from '@/lib/work-review';
 import { todayKst } from '@/lib/job-state';
@@ -41,6 +41,7 @@ export default function Convert() {
   const [학력, set학력] = useState('');
   const [학점, set학점] = useState('');
   const [만점값, set만점값] = useState('4.5');
+  const [학년별, set학년별] = useState<string[]>([]);
   const [certs, setCerts] = useState<string[]>([]);
   const [courses, setCourses] = useState<string[]>([]);
   const [rows, setRows] = useState<WorkRow[]>([]);
@@ -68,7 +69,7 @@ export default function Convert() {
       set옛(s);
       const d = toDraft(null, s, (ls.data ?? []) as Record<string, unknown>[]);
       set학력(d.f.school_type ?? '');
-      set학점(d.f.gpa ?? ''); set만점값(만점읽기(d.f.gpa_scale));
+      set학점(d.f.gpa ?? ''); set만점값(만점읽기(d.f.gpa_scale)); set학년별(학년별읽기(s?.학년별학점));
       setCerts(d.certs); setCourses(d.courses); setRows(d.rows); setRowsNone(d.f.rows_none === 'Y'); setLangs(d.langs);
     })();
   }, [loading, session, me, router]);
@@ -112,7 +113,10 @@ export default function Convert() {
   const job = me.job_group ?? '작업치료사';
   const 학교없음 = 학력 === '학교 경험 없음';
   const 학점수 = Number(학점);
-  const 학점틀림 = !학교없음 && 학점틀렸나(학점, 만점값);
+  const 학년수 = 학년수구하기(학력);
+  const 학점틀림 = !학교없음 && 학점들틀렸나(학점, 학년별, 학년수, 만점값);
+  const 학년별값 = 학교없음 ? null : 학년별담기(학년별, 학년수);
+  const 학점있음 = !학교없음 && (!!학점.trim() || !!학년별값);
   const 병원됨 = !!병원.trim() && !!입사연도 && !!학력 && !학점틀림;
   const 스펙됨 = certs.length > 0 && courses.length > 0 && (rowsNone || rowsReady(rows)) && langs.every((r) => !langError(r));
   const 후기됨 = 별점 > 0 && 답다됨(답);
@@ -122,7 +126,7 @@ export default function Convert() {
     school_type: 학력 || null,
     grade: null,
     gpa: 학교없음 || !학점.trim() ? null : 학점수,
-    gpa_scale: 학교없음 || !학점.trim() ? null : Number(만점값),
+    gpa_scale: 학점있음 ? Number(만점값) : null, 학년별학점: 학년별값,
     licenses: certs.filter((x) => x !== NONE), trainings: courses.filter((x) => x !== NONE),
     practice: 실습, practice_months: 실습.reduce((s, r) => s + (Number(r.months) || 0), 0),
     career: null, career_months: null,
@@ -205,7 +209,7 @@ export default function Convert() {
             <골라 label="입사연도" v={입사연도} ph="입사연도를 선택해 주세요" 붙임="년"
               opts={Array.from({ length: 11 }, (_, i) => String(Number(todayKst().slice(0, 4)) - i))} on={set입사연도} />
             <골라 label="입사 당시 학력" v={학력} opts={학력목록} ph="학력을 선택해 주세요" on={set학력} />
-            {!학교없음 && <학점칸 label="입사 당시 학점" v={학점} on={set학점} 만점값={만점값} on만점={set만점값} 틀림={학점틀림} 도움="졸업 학점으로 바꿔 주세요." />}
+            {!학교없음 && <학점칸 label="입사 당시 학점" v={학점} on={set학점} 만점값={만점값} on만점={set만점값} 학년수={학년수} 학년별={학년별} on학년별={set학년별} 도움="졸업 학점으로 바꿔 주세요." />}
             <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
               병원과 스펙 정보는 게시글이나 댓글에 표시되지 않아요.
             </p>

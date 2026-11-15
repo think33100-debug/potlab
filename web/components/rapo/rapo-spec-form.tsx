@@ -11,7 +11,8 @@ import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 학점 만점 기준 — 보통 4.5, 4.0 학교도 있음 (2026-11-15 세중님 「만점 기준 고를 수 있어야 해」 · 피그마 06 「만점 기준」) */
 export const 만점들 = ['4.5', '4.0'] as const;
-export const 희망유형들 = ['대학병원', '종합병원', '재활병원'] as const;
+/* 희망 기관 유형 — 2026-11-15 세중님 「요양병원 아동센터 치매센터 방문센터 기타 추가」 · DB 내희망바꾸기() 목록과 짝(금고 SQL_1113/ZW) */
+export const 희망유형들 = ['대학병원', '종합병원', '재활병원', '요양병원', '아동센터', '치매센터', '방문센터', '기타'] as const;
 export const 희망지역들 = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
   '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'] as const;
 
@@ -75,33 +76,74 @@ export function 골라({ label, v, opts, ph, on, 붙임 = '' }: { label: string;
   );
 }
 
-/** 학점 칸 + 만점 기준 — 학점은 선택 (2026-11-15 세중님) */
-export function 학점칸({ label, v, on, 만점값, on만점, 틀림, 도움 }: {
-  label: string; v: string; on: (v: string) => void; 만점값: string; on만점: (v: string) => void; 틀림: boolean; 도움: string;
-}) {
+/* 학점 — 모두 선택 (2026-11-15 세중님 「학년별로 학점 · 4년제는 4개 3년제는 3개 · 제일 아래 평균 학점 · 선택사항」 · 「만점 기준 고를 수 있어야 해」).
+   학년별은 student_specs.학년별학점(jsonb 배열 · 금고 SQL_1113/ZW) · 평균은 gpa · 만점은 gpa_scale */
+
+/** 몇 학년까지 칸을 그리나 — 고른 학교의 학제가 먼저, 없으면 학력으로. 석사·박사·학교 경험 없음은 0(평균만) */
+export function 학년수구하기(학력: string | null | undefined, 학제?: '3년제' | '4년제' | null) {
+  if (학제 === '4년제') return 4;
+  if (학제 === '3년제') return 3;
+  return 학력 === '4년제 대학' ? 4 : 학력 === '전문대학' ? 3 : 0;
+}
+
+/** 담긴 배열 → 칸 글 */
+export const 학년별읽기 = (v: unknown): string[] => (Array.isArray(v) ? v.map((x) => (x == null ? '' : String(x))) : []);
+
+/** 칸 글 → 담을 배열 (학년 수만큼 · 다 비면 null) */
+export function 학년별담기(글: string[], 학년수: number): (number | null)[] | null {
+  const xs = Array.from({ length: 학년수 }, (_, i) => (글[i]?.trim() ? Number(글[i]) : null));
+  return xs.some((x) => x != null) ? xs : null;
+}
+
+const 틀렸나 = (v: string, 만점값: string) => { const n = Number(v); return !!v.trim() && (!Number.isFinite(n) || n < 0 || n > Number(만점값)); };
+/** 평균·학년별 가운데 하나라도 만점을 넘거나 숫자가 아니면 참 */
+export const 학점들틀렸나 = (평균: string, 학년별: string[], 학년수: number, 만점값: string) =>
+  틀렸나(평균, 만점값) || 학년별.slice(0, 학년수).some((x) => 틀렸나(x ?? '', 만점값));
+
+/** 담긴 만점(4 · 4.5 · null) → 고르는 칸 값 */
+export const 만점읽기 = (v: unknown) => (Number(v) === 4 ? '4.0' : '4.5');
+
+function 점수칸({ 이름, v, on, 만점값, 큰 = false }: { 이름: string; v: string; on: (v: string) => void; 만점값: string; 큰?: boolean }) {
+  const 틀림 = 틀렸나(v, 만점값);
   return (
-    <div className="flex flex-col gap-(--rapo-dimension-x5)">
-    <label className="flex flex-col gap-(--rapo-dimension-x2)">
-      <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">
-        {label} <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span>
-      </span>
+    <label className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
+      <span className={(큰 ? 'rapo-type-t5-bold' : 'rapo-type-t4-medium') + ' text-(color:--rapo-color-fg-neutral)'}>{이름}</span>
       <span className={'flex items-center rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) ' + (틀림 ? 'border-(color:--rapo-color-stroke-critical-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
-        <input value={v} onChange={(e) => on(e.target.value)} inputMode="decimal" placeholder="예) 3.8"
-          className="rapo-type-t5-regular h-(--rapo-dimension-x13) min-w-0 flex-1 rounded-(--rapo-radius-r3) bg-transparent px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) outline-none placeholder:text-(color:--rapo-color-fg-placeholder)" />
-        <span className="rapo-type-t5-regular shrink-0 pr-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">/ {만점값}</span>
-      </span>
-      <span className={'rapo-type-t3-regular break-keep ' + (틀림 ? 'text-(color:--rapo-color-fg-critical)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
-        {틀림 ? `학점은 0부터 ${만점값}까지 입력해 주세요.` : 도움}
+        <input value={v} onChange={(e) => on(e.target.value)} inputMode="decimal" placeholder="예) 3.8" aria-label={이름}
+          className="rapo-type-t5-regular h-(--rapo-dimension-x12) min-w-0 flex-1 rounded-(--rapo-radius-r3) bg-transparent px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) outline-none placeholder:text-(color:--rapo-color-fg-placeholder)" />
+        <span className="rapo-type-t4-regular shrink-0 pr-(--rapo-dimension-x3) text-(color:--rapo-color-fg-neutral-muted)">/ {만점값}</span>
       </span>
     </label>
-    <골라 label="만점 기준" v={만점값} opts={만점들} ph="만점 기준" on={on만점} />
-    </div>
   );
 }
 
-export const 학점틀렸나 = (v: string, 만점값: string = '4.5') => { const n = Number(v); return !!v.trim() && (!Number.isFinite(n) || n < 0 || n > Number(만점값)); };
-/** 담긴 만점(4 · 4.5 · null) → 고르는 칸 값 */
-export const 만점읽기 = (v: unknown) => (Number(v) === 4 ? '4.0' : '4.5');
+/** 학점 묶음 — 만점 기준 · 학년별(3·4칸) · 평균. 모두 선택 */
+export function 학점칸({ label, v, on, 만점값, on만점, 학년수, 학년별, on학년별, 도움 }: {
+  label: string; v: string; on: (v: string) => void; 만점값: string; on만점: (v: string) => void;
+  학년수: number; 학년별: string[]; on학년별: (v: string[]) => void; 도움: string;
+}) {
+  const 틀림 = 학점들틀렸나(v, 학년별, 학년수, 만점값);
+  return (
+    <div className="flex flex-col gap-(--rapo-dimension-x4)">
+      <p className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">
+        {label} <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span>
+      </p>
+      <골라 label="만점 기준" v={만점값} opts={만점들} ph="만점 기준" on={on만점} />
+      {학년수 > 0 && (
+        <div className="grid grid-cols-2 gap-(--rapo-dimension-x3)">
+          {Array.from({ length: 학년수 }, (_, i) => (
+            <점수칸 key={i} 이름={`${i + 1}학년`} 만점값={만점값} v={학년별[i] ?? ''}
+              on={(x) => { const n = [...학년별]; while (n.length < 학년수) n.push(''); n[i] = x; on학년별(n); }} />
+          ))}
+        </div>
+      )}
+      <점수칸 이름="평균 학점" 큰 v={v} on={on} 만점값={만점값} />
+      <p className={'rapo-type-t3-regular break-keep ' + (틀림 ? 'text-(color:--rapo-color-fg-critical)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
+        {틀림 ? `학점은 0부터 ${만점값}까지 입력해 주세요.` : 도움}
+      </p>
+    </div>
+  );
+}
 
 export type 내스펙 = {
   spec: (Record<string, unknown> & {
