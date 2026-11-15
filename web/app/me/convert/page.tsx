@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { Chips, Langs, Rows } from '@/components/signup-survey';
 import { RapoButton } from '@/components/rapo/rapo-ui';
-import { RapoFormFrame as Frame, 골라, 칸 } from '@/components/rapo/rapo-spec-form';
+import { RapoFormFrame as Frame, 골라, 만점읽기, 칸, 학점칸, 학점틀렸나 } from '@/components/rapo/rapo-spec-form';
 import { 둥근별 } from '@/components/rapo/rapo-org-reviews';
 import { 답다됨, 후기질문, type 후기답 } from '@/lib/work-review';
 import { todayKst } from '@/lib/job-state';
@@ -25,7 +25,6 @@ import { browserSupabase } from '@/lib/supabase-browser';
 type 단계 = '병원' | '스펙' | '후기' | '끝';
 const 순서: 단계[] = ['병원', '스펙', '후기'];
 const 단계이름: Record<단계, string> = { 병원: '근무 병원', 스펙: '입사 당시 스펙', 후기: '근무 후기', 끝: '' };
-const 만점 = 4.5;
 const 최대 = 5000;
 
 type 옛스펙 = Record<string, unknown> & { want_type?: string | null; want_region?: string | null; 근무경험?: boolean | null; 근무병원?: string | null };
@@ -41,6 +40,7 @@ export default function Convert() {
   const [입사연도, set입사연도] = useState('');
   const [학력, set학력] = useState('');
   const [학점, set학점] = useState('');
+  const [만점값, set만점값] = useState('4.5');
   const [certs, setCerts] = useState<string[]>([]);
   const [courses, setCourses] = useState<string[]>([]);
   const [rows, setRows] = useState<WorkRow[]>([]);
@@ -68,7 +68,7 @@ export default function Convert() {
       set옛(s);
       const d = toDraft(null, s, (ls.data ?? []) as Record<string, unknown>[]);
       set학력(d.f.school_type ?? '');
-      set학점(d.f.gpa ?? '');
+      set학점(d.f.gpa ?? ''); set만점값(만점읽기(d.f.gpa_scale));
       setCerts(d.certs); setCourses(d.courses); setRows(d.rows); setRowsNone(d.f.rows_none === 'Y'); setLangs(d.langs);
     })();
   }, [loading, session, me, router]);
@@ -112,7 +112,7 @@ export default function Convert() {
   const job = me.job_group ?? '작업치료사';
   const 학교없음 = 학력 === '학교 경험 없음';
   const 학점수 = Number(학점);
-  const 학점틀림 = !학교없음 && !!학점.trim() && (!Number.isFinite(학점수) || 학점수 < 0 || 학점수 > 만점);
+  const 학점틀림 = !학교없음 && 학점틀렸나(학점, 만점값);
   const 병원됨 = !!병원.trim() && !!입사연도 && !!학력 && !학점틀림;
   const 스펙됨 = certs.length > 0 && courses.length > 0 && (rowsNone || rowsReady(rows)) && langs.every((r) => !langError(r));
   const 후기됨 = 별점 > 0 && 답다됨(답);
@@ -122,7 +122,7 @@ export default function Convert() {
     school_type: 학력 || null,
     grade: null,
     gpa: 학교없음 || !학점.trim() ? null : 학점수,
-    gpa_scale: 학교없음 || !학점.trim() ? null : 만점,
+    gpa_scale: 학교없음 || !학점.trim() ? null : Number(만점값),
     licenses: certs.filter((x) => x !== NONE), trainings: courses.filter((x) => x !== NONE),
     practice: 실습, practice_months: 실습.reduce((s, r) => s + (Number(r.months) || 0), 0),
     career: null, career_months: null,
@@ -205,21 +205,7 @@ export default function Convert() {
             <골라 label="입사연도" v={입사연도} ph="입사연도를 선택해 주세요" 붙임="년"
               opts={Array.from({ length: 11 }, (_, i) => String(Number(todayKst().slice(0, 4)) - i))} on={set입사연도} />
             <골라 label="입사 당시 학력" v={학력} opts={학력목록} ph="학력을 선택해 주세요" on={set학력} />
-            {!학교없음 && (
-              <label className="flex flex-col gap-(--rapo-dimension-x2)">
-                <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">
-                  입사 당시 학점 <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span>
-                </span>
-                <span className={'flex items-center rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) ' + (학점틀림 ? 'border-(color:--rapo-color-stroke-critical-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
-                  <input value={학점} onChange={(e) => set학점(e.target.value)} inputMode="decimal" placeholder="예) 3.8"
-                    className="rapo-type-t5-regular h-(--rapo-dimension-x13) min-w-0 flex-1 rounded-(--rapo-radius-r3) bg-transparent px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) outline-none placeholder:text-(color:--rapo-color-fg-placeholder)" />
-                  <span className="rapo-type-t5-regular shrink-0 pr-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">/ 4.5</span>
-                </span>
-                <span className={'rapo-type-t3-regular break-keep ' + (학점틀림 ? 'text-(color:--rapo-color-fg-critical)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
-                  {학점틀림 ? '학점은 0부터 4.5까지 입력해 주세요.' : '졸업 학점으로 바꿔 주세요. 4.5 만점 기준이에요.'}
-                </span>
-              </label>
-            )}
+            {!학교없음 && <학점칸 label="입사 당시 학점" v={학점} on={set학점} 만점값={만점값} on만점={set만점값} 틀림={학점틀림} 도움="졸업 학점으로 바꿔 주세요." />}
             <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
               병원과 스펙 정보는 게시글이나 댓글에 표시되지 않아요.
             </p>

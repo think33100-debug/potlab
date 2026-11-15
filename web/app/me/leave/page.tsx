@@ -15,7 +15,7 @@ import { useToast } from '../../toast';
      reset_my_account() 가 auth.users 를 지우면 profiles(on delete cascade) → posts·comments·chat_messages(author/sender cascade)
      · 근무후기(회원 cascade) 가 연달아 지워집니다. 탈퇴한 3명(10/11~10/15) 모두 프로필 줄이 없습니다.
      남는 것은 erased_accounts(가입일·탈퇴일·30일 잠근 원래 닉네임)뿐입니다. 화면은 실제 동작대로 적었습니다.
-     글을 남길지는 세중님 몫 — 질문함 Q95.
+     2026-11-15 세중님 「다 지우자」(질문함 Q95) — 지금 동작 그대로 둡니다.
 
    ── 왜 앱 안에 있어야 하나 ───────────────────────────────────
    애플 심사 기준 5.1.1(v) — 앱에서 계정을 만들 수 있으면 **앱 안에서** 계정을 지울 수도 있어야 합니다.

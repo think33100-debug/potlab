@@ -9,7 +9,8 @@ import { browserSupabase } from '@/lib/supabase-browser';
    쓰는 곳: 임상가 전환(app/me/convert) · 스펙 확인·수정(app/me/spec) · 경력 수정(app/me/career) · 희망 취업 조건(app/me/pref).
    가입 화면(app/welcome)은 같은 꼴을 아직 제 안에 따로 둡니다. */
 
-export const 만점 = 4.5;
+/* 학점 만점 기준 — 보통 4.5, 4.0 학교도 있음 (2026-11-15 세중님 「만점 기준 고를 수 있어야 해」 · 피그마 06 「만점 기준」) */
+export const 만점들 = ['4.5', '4.0'] as const;
 export const 희망유형들 = ['대학병원', '종합병원', '재활병원'] as const;
 export const 희망지역들 = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
   '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'] as const;
@@ -74,9 +75,12 @@ export function 골라({ label, v, opts, ph, on, 붙임 = '' }: { label: string;
   );
 }
 
-/** 학점 칸 — 4.5 만점 · 선택 (2026-11-15 세중님) */
-export function 학점칸({ label, v, on, 틀림, 도움 }: { label: string; v: string; on: (v: string) => void; 틀림: boolean; 도움: string }) {
+/** 학점 칸 + 만점 기준 — 학점은 선택 (2026-11-15 세중님) */
+export function 학점칸({ label, v, on, 만점값, on만점, 틀림, 도움 }: {
+  label: string; v: string; on: (v: string) => void; 만점값: string; on만점: (v: string) => void; 틀림: boolean; 도움: string;
+}) {
   return (
+    <div className="flex flex-col gap-(--rapo-dimension-x5)">
     <label className="flex flex-col gap-(--rapo-dimension-x2)">
       <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">
         {label} <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span>
@@ -84,16 +88,20 @@ export function 학점칸({ label, v, on, 틀림, 도움 }: { label: string; v: 
       <span className={'flex items-center rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) ' + (틀림 ? 'border-(color:--rapo-color-stroke-critical-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
         <input value={v} onChange={(e) => on(e.target.value)} inputMode="decimal" placeholder="예) 3.8"
           className="rapo-type-t5-regular h-(--rapo-dimension-x13) min-w-0 flex-1 rounded-(--rapo-radius-r3) bg-transparent px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) outline-none placeholder:text-(color:--rapo-color-fg-placeholder)" />
-        <span className="rapo-type-t5-regular shrink-0 pr-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">/ 4.5</span>
+        <span className="rapo-type-t5-regular shrink-0 pr-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">/ {만점값}</span>
       </span>
       <span className={'rapo-type-t3-regular break-keep ' + (틀림 ? 'text-(color:--rapo-color-fg-critical)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
-        {틀림 ? '학점은 0부터 4.5까지 입력해 주세요.' : 도움}
+        {틀림 ? `학점은 0부터 ${만점값}까지 입력해 주세요.` : 도움}
       </span>
     </label>
+    <골라 label="만점 기준" v={만점값} opts={만점들} ph="만점 기준" on={on만점} />
+    </div>
   );
 }
 
-export const 학점틀렸나 = (v: string) => { const n = Number(v); return !!v.trim() && (!Number.isFinite(n) || n < 0 || n > 만점); };
+export const 학점틀렸나 = (v: string, 만점값: string = '4.5') => { const n = Number(v); return !!v.trim() && (!Number.isFinite(n) || n < 0 || n > Number(만점값)); };
+/** 담긴 만점(4 · 4.5 · null) → 고르는 칸 값 */
+export const 만점읽기 = (v: unknown) => (Number(v) === 4 ? '4.0' : '4.5');
 
 export type 내스펙 = {
   spec: (Record<string, unknown> & {

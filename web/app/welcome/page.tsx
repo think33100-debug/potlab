@@ -9,6 +9,7 @@ import { 비교알림켜짐 } from '@/lib/beta-compare';
 import { defaultAvatar } from '@/lib/avatar';
 import { BETA_AGREEMENTS, 표없음 } from '@/lib/beta';
 import { RapoButton } from '@/components/rapo/rapo-ui';
+import { 학점칸, 학점틀렸나 } from '@/components/rapo/rapo-spec-form';
 import { clearAfterLogin, peekAfterLogin } from '@/lib/after-login';
 import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave, type LangRow, type WorkRow } from '@/lib/signup-fields';
 import { browserSupabase } from '@/lib/supabase-browser';
@@ -44,13 +45,12 @@ type 경험 = '없음' | '있음';
 const 희망유형 = ['대학병원', '종합병원', '재활병원'] as const;
 const 희망지역 = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
   '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'] as const;
-/* 학점은 4.5 만점으로만 받고, 넣을지 말지는 선택 (2026-11-15 세중님 「학점 4.5 만점에 기입 · 학점은 선택 · 기입하면 가입한 사람들과 비교」) */
-const 만점 = 4.5;
+/* 학점은 선택 (2026-11-15 세중님 「학점은 선택 · 기입하면 가입한 사람들과 비교」) · 만점 기준은 4.5/4.0 고르기 (같은 날 「보통 4.5 인데 4.0 도 있어」) — 칸은 components/rapo/rapo-spec-form 의 학점칸 */
 
 /* 중간에 나갔다 와도 적은 게 남게 — 이 기기에만 둡니다 (옛 설문과 같은 결) */
 type 초안 = {
   학교?: string; 학교직접?: boolean;
-  학력?: string; 학적?: '재학' | '졸업'; 입학년?: string; 입학월?: string; 학점?: string;
+  학력?: string; 학적?: '재학' | '졸업'; 입학년?: string; 입학월?: string; 학점?: string; 만점?: string;
   관심대상?: string; 관심분야?: string[]; 듣고싶은교육?: string[];
   병원?: string; 입사연도?: string;
   certs?: string[]; courses?: string[]; rows?: WorkRow[]; rowsNone?: boolean; langs?: LangRow[];
@@ -198,8 +198,8 @@ export default function Welcome() {
   const 졸업 = !있음 && !학교없음 && d.학력 && 입학 && !입학미래 ? 졸업연월(d.학력, 입학) : null;
   const 끝날 = 무료끝날(졸업);
   const 끝남 = !!끝날 && 끝날 < todayKst();
-  const 학점수 = Number(d.학점);
-  const 학점틀림 = !!d.학점?.trim() && (!Number.isFinite(학점수) || 학점수 < 0 || 학점수 > 만점);
+  const 만점값 = d.만점 ?? '4.5';
+  const 학점틀림 = 학점틀렸나(d.학점 ?? '', 만점값);
   const 학점됨 = !학점틀림;   // 비워도 됨
   const 학교들 = 학교목록(job ?? me?.job_group);
   const 고른학교 = 학교들.find((x) => x.이름 === d.학교) ?? null;
@@ -221,7 +221,7 @@ export default function Welcome() {
     school_type: d.학력 ?? null,
     grade: null,
     gpa: 학교없음 || !d.학점?.trim() ? null : Number(d.학점),
-    gpa_scale: 학교없음 || !d.학점?.trim() ? null : 만점,
+    gpa_scale: 학교없음 || !d.학점?.trim() ? null : Number(만점값),
     학교: !있음 && !학교없음 ? d.학교?.trim() || null : null,
     관심대상: 있음 ? null : d.관심대상 ?? null,
     관심분야: 있음 ? null : d.관심분야 ?? [],
@@ -464,21 +464,8 @@ export default function Welcome() {
               </>
             )}
 
-            {!학교없음 && (
-              <label className="flex flex-col gap-(--rapo-dimension-x2)">
-                <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">
-                  {있음 ? '입사 당시 학점' : '누적 학점'} <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span>
-                </span>
-                <span className={'flex items-center rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) ' + (학점틀림 ? 'border-(color:--rapo-color-stroke-critical-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
-                  <input value={d.학점 ?? ''} onChange={(e) => put({ 학점: e.target.value })} inputMode="decimal" placeholder="예) 3.8"
-                    className="rapo-type-t5-regular h-(--rapo-dimension-x13) min-w-0 flex-1 rounded-(--rapo-radius-r3) bg-transparent px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) outline-none placeholder:text-(color:--rapo-color-fg-placeholder)" />
-                  <span className="rapo-type-t5-regular shrink-0 pr-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">/ 4.5</span>
-                </span>
-                <span className={'rapo-type-t3-regular break-keep ' + (학점틀림 ? 'text-(color:--rapo-color-fg-critical)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
-                  {학점틀림 ? '학점은 0부터 4.5까지 입력해 주세요.' : '4.5 만점 기준이에요. 입력하면 가입한 사람들과 학점을 비교할 수 있어요.'}
-                </span>
-              </label>
-            )}
+            {!학교없음 && <학점칸 label={있음 ? '입사 당시 학점' : '누적 학점'} v={d.학점 ?? ''} on={(v) => put({ 학점: v })} 만점값={만점값} on만점={(v) => put({ 만점: v })}
+              틀림={학점틀림} 도움="입력하면 가입한 사람들과 학점을 비교할 수 있어요." />}
 
             {학교없음 && !있음 && (
               <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">

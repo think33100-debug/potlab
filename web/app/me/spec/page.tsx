@@ -7,7 +7,7 @@ import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
 import { Chips, Langs, Rows } from '@/components/signup-survey';
 import { RapoButton } from '@/components/rapo/rapo-ui';
-import { RapoFormFrame, RapoFormTitle, 골라, 기본칸, 남은횟수, 만점, 학점칸, 학점틀렸나, use내스펙 } from '@/components/rapo/rapo-spec-form';
+import { RapoFormFrame, RapoFormTitle, 골라, 기본칸, 남은횟수, 만점읽기, 학점칸, 학점틀렸나, use내스펙 } from '@/components/rapo/rapo-spec-form';
 import { 학력목록 } from '@/lib/school-period';
 import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave, type LangRow, type WorkRow } from '@/lib/signup-fields';
 import { 학교목록, 학교부연 } from '@/lib/signup-school';
@@ -33,6 +33,7 @@ export default function MySpec() {
   const [학교직접, set학교직접] = useState(false);
   const [학력, set학력] = useState('');
   const [학점, set학점] = useState('');
+  const [만점값, set만점값] = useState('4.5');
   const [certs, setCerts] = useState<string[]>([]);
   const [courses, setCourses] = useState<string[]>([]);
   const [rows, setRows] = useState<WorkRow[]>([]);
@@ -44,7 +45,7 @@ export default function MySpec() {
   useEffect(() => {
     if (!v) return;
     const d = v.draft;
-    set학교(v.spec?.학교 ?? ''); set학력(d.f.school_type ?? ''); set학점(d.f.gpa ?? '');
+    set학교(v.spec?.학교 ?? ''); set학력(d.f.school_type ?? ''); set학점(d.f.gpa ?? ''); set만점값(만점읽기(d.f.gpa_scale));
     setCerts(d.certs); setCourses(d.courses); setRows(d.rows); setRowsNone(d.f.rows_none === 'Y'); setLangs(d.langs);
   }, [v]);
 
@@ -53,7 +54,7 @@ export default function MySpec() {
   const 학교들 = 학교목록(job);
   const 고른학교 = 학교들.find((x) => x.이름 === 학교) ?? null;
   const 학교없음 = 학력 === '학교 경험 없음';
-  const 학점틀림 = !학교없음 && 학점틀렸나(학점);
+  const 학점틀림 = !학교없음 && 학점틀렸나(학점, 만점값);
   const 학력됨 = !!학력 && !학점틀림;
   const 스펙됨 = certs.length > 0 && courses.length > 0 && (rowsNone || rowsReady(rows)) && langs.every((r) => !langError(r));
   const 남은 = v?.남은 ?? 0;
@@ -66,7 +67,7 @@ export default function MySpec() {
     const spec: Record<string, unknown> = {
       ...기본칸(v.spec),
       school_type: 학력 || null, grade: null,
-      gpa: 학교없음 || !학점.trim() ? null : Number(학점), gpa_scale: 학교없음 || !학점.trim() ? null : 만점,
+      gpa: 학교없음 || !학점.trim() ? null : Number(학점), gpa_scale: 학교없음 || !학점.trim() ? null : Number(만점값),
       licenses: certs.filter((x) => x !== NONE), trainings: courses.filter((x) => x !== NONE),
       practice: 실습, practice_months: 실습.reduce((s, r) => s + (Number(r.months) || 0), 0),
       ...(경력 ? {} : { 학교: 학교없음 ? null : 학교.trim() || null }),
@@ -123,7 +124,7 @@ export default function MySpec() {
               </div>
             )}
             <골라 label="학력" v={학력} opts={학력목록} ph="학력을 선택해 주세요" on={set학력} />
-            {!학교없음 && <학점칸 label={경력 ? '입사 당시 학점' : '누적 학점'} v={학점} on={set학점} 틀림={학점틀림} 도움="4.5 만점 기준이에요. 입력하면 가입한 사람들과 학점을 비교할 수 있어요." />}
+            {!학교없음 && <학점칸 label={경력 ? '입사 당시 학점' : '누적 학점'} v={학점} on={set학점} 만점값={만점값} on만점={set만점값} 틀림={학점틀림} 도움="입력하면 가입한 사람들과 학점을 비교할 수 있어요." />}
             {!경력 && <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">학적과 입학 연월은 이용 상태 · 학적 정보에서 볼 수 있어요. 바꾸려면 운영자에게 문의해 주세요.</p>}
           </section>
         </>
