@@ -17,7 +17,7 @@ import { browserSupabase } from '@/lib/supabase-browser';
 export default function MyCareer() {
   const router = useRouter();
   const toast = useToast();
-  const { loading, session, reload } = useAuth();
+  const { loading, session, me, reload } = useAuth();
   const { v, err } = use내스펙();
   const [병원, set병원] = useState('');
   const [연도, set연도] = useState('');
@@ -30,6 +30,8 @@ export default function MyCareer() {
     set연도(v.spec.입사연도 ? String(v.spec.입사연도) : '');
   }, [v]);
 
+  /* 옛 가입(근무경험 칸이 빈 현직)도 여기서 경력을 적습니다 — 전환 화면은 현직을 받지 않아 막다른 길이 됐음 (2026-11-15 운영 점검) */
+  const 경력 = !!v?.spec?.근무경험 || me?.role === '현직';
   const 됨 = !!병원.trim() && !!연도 && (v?.남은 ?? 0) > 0;
   const 저장 = async () => {
     if (!됨 || busy || !v) return;
@@ -45,10 +47,10 @@ export default function MyCareer() {
 
   return (
     <RapoFormFrame title="경력 수정" back="/me"
-      아래={v?.spec?.근무경험 ? <RapoButton full onClick={저장} disabled={!됨 || busy}>{busy ? '저장하는 중…' : '경력 저장하기'}</RapoButton> : undefined}>
+      아래={v?.spec && 경력 ? <RapoButton full onClick={저장} disabled={!됨 || busy}>{busy ? '저장하는 중…' : '경력 저장하기'}</RapoButton> : undefined}>
       {v === undefined ? (
         <p role="status" className="rapo-type-t4-regular pt-(--rapo-dimension-x6) text-(color:--rapo-color-fg-neutral-muted)">잠시만요…</p>
-      ) : !v?.spec?.근무경험 ? (
+      ) : !v?.spec || !경력 ? (
         <section className="flex flex-col gap-(--rapo-dimension-x4) pt-(--rapo-dimension-x6)">
           <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">등록한 근무 경력이 없어요</p>
           <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{err ?? '취업했다면 임상가 전환에서 근무 병원과 입사 당시 스펙을 등록해 주세요.'}</p>
