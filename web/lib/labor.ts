@@ -24,6 +24,14 @@ export function ymd(x: Date): string {
   return `${x.getFullYear()}-${p2(x.getMonth() + 1)}-${p2(x.getDate())}`;
 }
 
+/** N개월 전 같은 날 — 그 달에 같은 날이 없으면(5/31 → 2/31) 그 달 말일 (setMonth 는 3/3 으로 넘겨 버림 · 2026-11-15).
+    퇴직금·실업급여의 「퇴직 전 3개월」이 이 한 자리를 씁니다 */
+export function 개월전(d: Date, n: number): Date {
+  const 달 = d.getMonth() - n;
+  const 말일 = new Date(d.getFullYear(), 달 + 1, 0).getDate();
+  return new Date(d.getFullYear(), 달, Math.min(d.getDate(), 말일));
+}
+
 /** 만 N개월. 날짜가 안 찼으면 한 달 빼고 셉니다 (2/1 → 3/31 은 1개월) */
 export function monthsBetween(from: Date, to: Date): number {
   let m = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
@@ -54,7 +62,9 @@ export type Severance = {
 };
 
 export function severance(input: {
-  /** 입사일 · 퇴사일 (마지막 근무일 다음 날이 아니라 마지막 근무일) */
+  /** 입사일 · 퇴직일 = **마지막 근무일 다음 날** (근로자퇴직급여보장법 · 고용노동부 산정 방식).
+      화면이 「마지막으로 일한 날」을 받으면 하루 더해 넘깁니다(app/tools/severance · 2026-11-15 고침 —
+      전에는 그대로 넘겨 재직일수·3개월 일수가 하루씩 모자랐습니다) */
   joined: Date;
   left: Date;
   /** 월 평균 임금 (원). 퇴직 전 3개월 평균입니다 */
@@ -74,9 +84,8 @@ export function severance(input: {
     };
   }
 
-  /* 퇴직 전 3개월의 실제 달력 일수 */
-  const from3 = new Date(input.left);
-  from3.setMonth(from3.getMonth() - 퇴직금기준.평균임금_개월);
+  /* 퇴직 전 3개월의 실제 달력 일수 — 퇴직일의 석 달 전 같은 날부터 (개월전) */
+  const from3 = 개월전(input.left, 퇴직금기준.평균임금_개월);
   const months3Days = daysBetween(from3, input.left);
 
   const bonus = input.bonusYear ?? 0;

@@ -30,6 +30,8 @@
  *   버림한 91,304 에 곱하면 54,782 가 되어 1원 어긋납니다.
  */
 
+import { daysBetween, 개월전 } from './labor.ts';
+
 export type 실업급여설정 = {
   기준해: number;
   출처: string;
@@ -84,9 +86,8 @@ export type 실업급여결과 = {
 
 /** 퇴직 전 3개월의 실제 달력 일수 — 퇴직금과 같은 방식입니다 */
 export function 삼개월일수(퇴사: Date = new Date()): number {
-  const from = new Date(퇴사);
-  from.setMonth(from.getMonth() - 3);
-  return Math.round((퇴사.getTime() - from.getTime()) / 86_400_000);
+  /* 달 끝 넘침(5/31 → 3/3)을 막는 셈은 퇴직금과 한 자리 (lib/labor.ts 개월전 · 2026-11-15) */
+  return daysBetween(개월전(퇴사, 3), 퇴사);
 }
 
 export function 실업급여셈(input: {
