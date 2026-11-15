@@ -72,6 +72,9 @@ export function RapoHomeNotice() {
           <h2 id="home-notice-title" className="rapo-type-t6-bold break-keep">RAPO 는 순차적으로 오픈 중입니다</h2>
           <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">
             RAPO는 <span className="whitespace-nowrap">「모두의 창업」</span>의 지원을 받아 만들고 있는 채용·커뮤니티 통합 앱입니다.
+          </p>
+          {/* 2026-11-15 세중님 「통합 앱입니다 하고 한 문단 띄어줘」 */}
+          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">
             <span className="whitespace-nowrap">작업치료사·물리치료사를</span> 넘어 모든 의료기사가 함께 쓰는 곳을 만들고 있습니다.
           </p>
           <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">
