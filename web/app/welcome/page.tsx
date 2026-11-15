@@ -92,7 +92,8 @@ export default function Welcome() {
   useEffect(() => {
     if (loading || 다시안내.current || justMade || !me || me.survey_at) return;
     다시안내.current = true;
-    toast('다시 돌아오셨네요! 회원가입을 마무리하고 라포를 이용해 주세요!', { ms: 4500 });
+    /* 줄은 직접 나눔 — 좁은 폰에서 말 가운데 안 잘리게 (토스트는 whitespace-pre-line) */
+    toast('다시 돌아오셨네요!\n회원가입을 마무리하고\n라포를 이용해 주세요!', { ms: 4500 });
   }, [loading, me, justMade, toast]);
   const put = (p: Partial<초안>) => {
     const next = { ...d, ...p };
