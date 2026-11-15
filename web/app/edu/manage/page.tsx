@@ -363,13 +363,18 @@ export default function EduManage() {
                                           입금했다고 함
                                         </span>
                                       )}
-                                      {a.상태 !== '참여확정' && (
-                                        <button type="button"
-                                          onClick={() => 부르기('교육참여확정', { p_신청: a.신청id }, '참여를 확정했어요.')}
-                                          className="ml-auto rounded-md bg-brand-red px-5 py-2 text-lg font-bold text-white hover:bg-brand-red-dark">
-                                          참여 확정
-                                        </button>
-                                      )}
+                                      {/* 2026-11-15 피그마 「신청자 상태 관리」 — 신청·입금·수강 상태를 신청자별로 바꿉니다.
+                                          「수강 완료」로 바꾸면 그 사람이 이 회차 후기를 쓸 수 있어요 (DB 교육신청상태바꾸기 · 금고 SQL_1113/ZQ) */}
+                                      <label className="ml-auto flex items-center gap-2 text-lg">
+                                        <span className="sr-only">{a.nickname} 상태</span>
+                                        <select value={a.상태} disabled={도는중}
+                                          onChange={(e) => 부르기('교육신청상태바꾸기', { p_신청: a.신청id, p_상태: e.target.value }, '상태를 바꿨어요.')}
+                                          className="rounded-md border border-gray-200 px-3 py-2 text-lg">
+                                          {[['신청함', '신청 접수'], ['입금대기', '입금 확인 중'], ['참여확정', '참여 확정'], ['수강완료', '수강 완료'], ['미선정', '미선정']].map(([v, 글]) => (
+                                            <option key={v} value={v}>{글}</option>
+                                          ))}
+                                        </select>
+                                      </label>
                                     </li>
                                   ))}
                                 </ul>

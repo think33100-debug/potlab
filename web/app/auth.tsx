@@ -191,3 +191,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
+
+/* 개발 미리보기(/design-preview/*)에서만 씁니다 — 가짜 로그인 값으로 화면을 그립니다 (2026-11-15 · 가입 새 흐름 확인용).
+   배포에서는 미리보기 화면이 404 라 이 값이 회원 화면에 닿지 않습니다 */
+export function AuthPreview({ value, children }: { value: Partial<Auth>; children: React.ReactNode }) {
+  const base = useContext(Ctx);
+  return <Ctx.Provider value={{ ...base, loading: false, ...value }}>{children}</Ctx.Provider>;
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { RapoJobDetailView } from '@/components/rapo/rapo-job-detail-view';
+import { AuthPreview } from '@/app/auth';
 
 /* 새 디자인 공고 상세 — **디자인 견본으로** 상태를 보는 자리 (2026-11-11).
    개발 서버에서만 열립니다(배포에서는 404). 실제 상세는 app/jobs/[id]/page.tsx 입니다.
@@ -27,12 +28,13 @@ export default async function DesignPreviewJob({ searchParams }: {
   const closed = state === 'closed';
   const nodate = state === 'nodate';
   return (
-    <>
+    /* 회원 견본이면 가짜 로그인으로 감쌉니다 — 「공고 신고하기」 창을 열어 보려고 (2026-11-15) */
+    <AuthPreview value={who === 'member' ? { session: { user: { id: 'preview' } } as never } : {}}>
       <p className="rapo-type-t2-bold mx-auto max-w-3xl bg-(--rapo-color-bg-warning-weak) px-(--rapo-dimension-x5) py-(--rapo-dimension-x2) text-(color:--rapo-color-fg-warning-contrast)">
         미리보기 · 디자인 원본의 견본 공고입니다 (실제 공고 아님)
       </p>
       <RapoJobDetailView
-        id={null} who={who === 'member' ? '회원' : '비회원'} closed={closed}
+        id={who === 'member' ? 'preview-job' : null} who={who === 'member' ? '회원' : '비회원'} closed={closed}
         shareTitle="국립재활원 작업치료사 채용"
         identity={{
           org: '국립재활원', orgArt: '01', 상태: closed ? '모집 마감' : nodate ? '확인 필요' : '접수 중',
@@ -60,6 +62,6 @@ export default async function DesignPreviewJob({ searchParams }: {
           묶음키: '견본', 고용형태: '기간제', 회차: 8, 첫해: 2019, 끝해: 2026, 평균: 5.9, 가장낮음: 2, 가장높음: 13,
         }] : []}
       />
-    </>
+    </AuthPreview>
   );
 }

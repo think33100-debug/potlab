@@ -119,9 +119,39 @@ export function RapoEduRow({ href, 기관, 그림, 제목, 날짜 }: {
       <span className="flex items-center gap-[6px]">
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/edu/calendar-16.svg" alt="" width={16} height={16} className="shrink-0" />
-        <span className="rapo-type-t4-regular min-w-0 text-[#3f4c57]">{날짜}</span>
+        <span className="rapo-type-t4-regular min-w-0 flex-1 text-[#3f4c57]">{날짜}</span>
+        {/* 원본 「교육 목록 / 학회 원문 행」 1412:56114 오른쪽 「신청하기」 — 학회 원문으로 갑니다 */}
+        <span className="rapo-type-t4-medium shrink-0 whitespace-nowrap text-(color:--rapo-color-fg-brand-contrast)">신청하기</span>
       </span>
     </a>
+  );
+}
+
+/* 라포에서 신청하는 회차 한 줄 — 원본 「교육 목록 / 신청 회차 행」 1412:55076 (2026-11-15 세중님 「피그마댓글 대로」).
+   개인·작은 협회가 라포에 직접 등록한 교육입니다. 누르면 회차 화면(/edu/session/…)에서 신청합니다 */
+export function RapoEduSessionRow({ href, 주최, 제목, 날짜, 모집중 }: { href: string; 주최: string; 제목: string; 날짜: ReactNode; 모집중: boolean }) {
+  return (
+    <Link href={href} className="flex flex-col gap-(--rapo-dimension-x3) border-b border-[#dde4e6] py-(--rapo-dimension-x4) active:bg-(--rapo-color-bg-transparent-pressed)">
+      <span className="flex items-center gap-(--rapo-dimension-x2)">
+        <span className="flex size-(--rapo-dimension-x8) shrink-0 items-center justify-center rounded-(--rapo-radius-r1) bg-(--rapo-color-bg-neutral-weak)">
+          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+          <img src="/rapo/home/org-01.svg" alt="" width={32} height={32} />
+        </span>
+        <span className="rapo-type-t4-medium min-w-0 flex-1 truncate text-[#3f4c57]">{주최}</span>
+        <span className={'rapo-type-t3-bold flex shrink-0 items-center gap-[4px] whitespace-nowrap rounded-(--rapo-radius-r1) px-(--rapo-dimension-x2) py-[2px] '
+          + (모집중 ? 'bg-(--rapo-color-bg-brand-weak) text-(color:--rapo-color-fg-brand-contrast)' : 'bg-(--rapo-color-bg-brand-weak) text-(color:--rapo-color-fg-brand-contrast) opacity-80')}>
+          {모집중 && <span aria-hidden className="size-[8px] rounded-full bg-(--rapo-color-fg-brand-contrast)" />}
+          {모집중 ? '모집 중' : '모집 마감'}
+        </span>
+      </span>
+      <span className="rapo-type-t7-bold min-w-0 break-keep text-(color:--rapo-brand-color-navy)">{제목}</span>
+      <span className="flex items-center gap-[6px]">
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+        <img src="/rapo/edu/calendar-16.svg" alt="" width={16} height={16} className="shrink-0" />
+        <span className="rapo-type-t4-regular min-w-0 flex-1 text-[#3f4c57]">{날짜}</span>
+        {모집중 && <span className="rapo-type-t4-medium shrink-0 whitespace-nowrap text-(color:--rapo-color-fg-brand-contrast)">신청하기</span>}
+      </span>
+    </Link>
   );
 }
 

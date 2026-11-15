@@ -49,15 +49,15 @@ export function 새틀화면(pathname: string): boolean {
     /* 커뮤니티 피드(/community)도 2026-11-11 밤부터 새 틀(어두운 판). 방·글·글쓰기는 아직 옛 틀 */
     || pathname === '/community'
     /* 커뮤니티 글(/post/<번호>)도 2026-11-11 밤부터 새 틀(어두운 판 · 자기 앱 바) */
-    || pathname.startsWith('/post/') || pathname === '/community/write'
+    || pathname.startsWith('/post/') || pathname === '/community/write' || pathname.startsWith('/orgs/review')
     /* 내 정보(/me)와 그 아래 다섯 화면도 2026-11-11 밤부터 새 틀. 탈퇴(/me/leave)는 아직 옛 틀 */
-    || pathname === '/me' || ['/me/profile', '/me/spec', '/me/activity', '/me/notify', '/me/account', '/me/soon', '/me/saved', '/me/hidden', '/me/install', '/me/hospitals'].includes(pathname)
+    || pathname === '/me' || ['/me/profile', '/me/spec', '/me/activity', '/me/notify', '/me/account', '/me/soon', '/me/saved', '/me/hidden', '/me/install', '/me/hospitals', '/me/edu', '/me/reports', '/me/status'].includes(pathname)
     /* 가입(/welcome)도 2026-11-12 밤부터 새 틀(자기 앱 바 · 아래 고정 단추) */
     || pathname === '/welcome'
     /* 관리자 화면도 2026-11-12 부터 새 틀(왼쪽 운영 메뉴 · components/rapo/rapo-admin.tsx) */
     || pathname === '/admin' || pathname.startsWith('/admin/')
     /* 교육·학술 목록(/edu)도 2026-11-12 부터 새 틀(U12 · 자기 목록 상단). 회차·기관 화면은 아직 옛 틀 */
-    || pathname === '/edu'
+    || pathname === '/edu' || pathname.startsWith('/edu/session/')
     /* 병원 찾기(/orgs)도 2026-11-12 부터 새 틀(어두운 판 · 자기 앱 바). 기관 상세(?org=)는 밝은 앱 바만 */
     || pathname === '/orgs'
     /* 봉사활동·청년정책도 2026-11-12 부터 새 틀(교육 목록 틀을 빌림) */

@@ -25,6 +25,8 @@ export function PostComments({ postId }: { postId: number }) {
   const [body, setBody] = useState('');
   const [replyTo, setReplyTo] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  /* 비밀 댓글 (2026-11-15 피그마 1649:5252) — 쓴 사람과 게시글 작성자만 봅니다. 막는 자리는 DB (금고 SQL_1113/ZM) */
+  const [비밀, set비밀] = useState(false);
 
   /* 받아오는 일과 상태에 넣는 일을 갈라둡니다.
      effect 안에서 바로 setState 하면 그릴 때마다 한 번 더 그립니다 */
@@ -35,7 +37,7 @@ export function PostComments({ postId }: { postId: number }) {
          전에 쓰던 profiles(...) 묻어 읽기는 **회원에게도 실패**하고 있었습니다 —
          profiles 는 authenticated 에게 SELECT 권한이 아예 없습니다 */
       .from('공개댓글')
-      .select('id,post_id,parent_id,내글,body,created_at,profiles')
+      .select('id,post_id,parent_id,내글,body,created_at,profiles,비밀,글쓴이')
       .eq('post_id', postId)
       .order('created_at');
     return (data ?? []) as unknown as CommentRow[];
@@ -53,11 +55,11 @@ export function PostComments({ postId }: { postId: number }) {
     if (!body.trim()) return;
     setBusy(true);
     const { error } = await browserSupabase().from('comments').insert({
-      post_id: postId, parent_id: replyTo, author_id: me!.id, body: body.trim(),
+      post_id: postId, parent_id: replyTo, author_id: me!.id, body: body.trim(), 비밀,
     });
     setBusy(false);
     if (error) { toast(`달지 못했어요 — ${error.message}`, { tone: 'danger', ms: 4000 }); return; }
-    setBody(''); setReplyTo(null);
+    setBody(''); setReplyTo(null); set비밀(false);
     await load();
   };
 
@@ -170,6 +172,14 @@ export function PostComments({ postId }: { postId: number }) {
               <RapoMaskIcon src="/rapo/detail/send-21.svg" w={21} h={21} />
             </button>
           </div>
+          {/* 원본 「비밀 댓글」 체크와 안내 한 줄 */}
+          <label className="mt-[10px] flex cursor-pointer items-center gap-[8px] px-[4px]">
+            <input type="checkbox" className="sr-only" checked={비밀} onChange={(e) => set비밀(e.target.checked)} />
+            <span aria-hidden className="flex size-[20px] items-center justify-center rounded-[4px] border text-[12px] font-bold"
+              style={{ borderColor: 비밀 ? 어둠.글 : 어둠.흐린글, background: 비밀 ? 어둠.글 : 'transparent', color: 어둠.바탕 }}>{비밀 ? '✓' : ''}</span>
+            <span className="text-[14px] leading-[20px]" style={{ color: 어둠.글 }}>비밀 댓글</span>
+          </label>
+          <p className="mt-[6px] px-[4px] text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>비밀 댓글·답글은 쓴 사람과 게시글 작성자만 볼 수 있어요</p>
         </div>
       )}
     </section>
@@ -188,7 +198,7 @@ function One({
   /* 내 댓글이면 삭제하기 · 남의 댓글이면 신고하기 — 글 메뉴와 같은 가름입니다 (components/post-actions.tsx PostMenu) */
   /* ★ 2026-11-13 세중님 — 관리자에게는 남의 댓글에도 「삭제하기 (관리자)」. DB 규칙 「내 댓글만 지웁니다」가 글쓴이 또는 is_admin() 을 받습니다 */
   const { isAdmin } = useAuth();
-  const 항목 = mine
+  const 항목 = c.body == null && !mine ? (isAdmin ? [{ 글: '삭제하기 (관리자)', 할일: () => onRemove(c.id), 붉게: true }] : []) : mine
     ? [{ 글: '삭제하기', 할일: () => onRemove(c.id), 붉게: true }]
     : [...(onReport ? [{ 글: '신고하기', 할일: () => onReport(c.id) }] : []),
        ...(isAdmin ? [{ 글: '삭제하기 (관리자)', 할일: () => onRemove(c.id), 붉게: true }] : [])];
@@ -197,7 +207,7 @@ function One({
       <Avatar value={c.profiles?.avatar} size="c32" className="mt-[4px]" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-[8px]">
-          <span className="truncate text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{shownName(c.profiles)}</span>
+          <span className="truncate text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{shownName(c.profiles)}{c.글쓴이 ? ' · 글쓴이' : ''}</span>
           <span className="flex-1" />
           {/* 원본 「•••」 13 #afbfca — 누르면 아래 시트 */}
           {항목.length > 0 && (
@@ -209,8 +219,11 @@ function One({
           )}
           {열림 && <RapoSheet 제목={mine ? '내 댓글' : '댓글'} 항목={항목} 닫기={닫기} />}
         </div>
-        <p className="text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{ago(c.created_at)}</p>
-        <p className="mt-[7px] whitespace-pre-wrap break-words text-[15px] leading-[22px]" style={{ color: 어둠.글 }}>{c.body}</p>
+        <p className="text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{c.비밀 ? '비밀 · ' : ''}{ago(c.created_at)}</p>
+        {/* 남의 비밀 댓글은 DB 가 본문을 비워 보냅니다 */}
+        <p className="mt-[7px] whitespace-pre-wrap break-words text-[15px] leading-[22px]" style={{ color: c.body == null ? 어둠.흐린글 : 어둠.글 }}>
+          {c.body ?? '비밀 댓글입니다.'}
+        </p>
         {onReply && (
           <button type="button" onClick={onReply} className="mt-[12px] text-[14px] leading-[20px]" style={{ color: '#bacad4' }}>답글</button>
         )}

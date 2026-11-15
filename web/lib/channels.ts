@@ -45,11 +45,11 @@ export const CHANNEL_BY_ID = Object.fromEntries(CHANNELS.map((c) => [c.id, c]));
 export const channelName = (id: string | null) =>
   (id && CHANNEL_BY_ID[id]?.name) || id || '';
 
-/* 그 사람에게 보일 방만 골라냅니다.
-   옛 코드가 String(role||'')==='학생' 로 갈랐으므로, 비어 있으면 현직으로 봅니다 */
-export function channelsFor(role: string | null | undefined): Channel[] {
-  const stu = String(role ?? '') === '학생';
-  return CHANNELS.filter((c) => c.for === 'all' || c.for === (stu ? 'stu' : 'pro'));
+/* 그 사람에게 보일 방 — 2026-11-15 세중님 「한 곳에서 다 같이 · 학생 임상가 모두 다」부터 **모두에게 모든 방**입니다.
+   (전에는 학생은 학생 방, 현직은 치료사 방만. DB 방볼수있나·방에쓸수있나도 같은 날 풀었습니다 · 금고 SQL_1113/ZP) */
+export function channelsFor(_role: string | null | undefined): Channel[] {
+  void _role;
+  return CHANNELS;
 }
 
 export const GROUPS: { title: string; for: ChannelFor }[] = [

@@ -82,7 +82,7 @@ export default function AdminAds() {
       // eslint-disable-next-line react-hooks/purity -- 파일 이름이 겹치지 않게 시각을 붙입니다
       /* ★ 자리 이름이 「앱」·「커뮤니티」라 경로에 그대로 쓰면 InvalidKey 입니다
          (작업지침 6-2b). ad-images 가 0장인 까닭입니다 — 한 번도 안 올라갔습니다 */
-      const path = `${o.자리 === '앱' ? 'app' : 'community'}-${Date.now()}.webp`;
+      const path = `${o.자리 === '앱' ? 'app' : o.자리 === '학생피드' ? 'student' : 'community'}-${Date.now()}.webp`;
       const sb = browserSupabase();
       const { error } = await sb.storage.from('ad-images')
         .upload(path, webp, { contentType: 'image/webp', upsert: true });
@@ -139,7 +139,7 @@ export default function AdminAds() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-body-lg font-bold text-ink">
-                  {o.자리 === '앱' ? '앱 오픈 화면 (홈으로 들어올 때)' : '커뮤니티 오픈 화면'}
+                  {o.자리 === '앱' ? '앱 오픈 화면 (홈으로 들어올 때)' : o.자리 === '학생피드' ? '커뮤니티 글 사이 (라포 소개 · 2026-11-15)' : '커뮤니티 오픈 화면'}
                 </p>
                 <p className="mt-1 text-sm text-mute">
                   {o.지금나가나
