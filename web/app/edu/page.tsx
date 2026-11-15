@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
-import { RapoEduFilter, RapoEduPastToggle, RapoEduRow, RapoEduTop, RapoNotifyLink } from '@/components/rapo/rapo-edu';
+import { RapoEduFilter, RapoEduPastToggle, RapoEduRow, RapoEduSessionRow, RapoEduTop, RapoNotifyLink } from '@/components/rapo/rapo-edu';
 import { RapoGuestPreview } from '@/components/rapo/rapo-guest-preview';
 import { RapoPagination } from '@/components/rapo/rapo-ui';
 import { 기관그림 } from '@/lib/rapo-home';
@@ -145,7 +145,11 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
 
   /* 탭마다 건수를 보여줍니다. 교육셈() 이 int 하나만 주므로 탭 수만큼 부릅니다 —
      표가 작아서(백여 건) 이게 뷰를 새로 만드는 것보다 쌉니다 */
-  const [목록, ...셈들] = await Promise.all([
+  /* 2026-11-15 세중님 「피그마댓글 대로」 — 라포에 직접 등록한 회차(개인·작은 협회)를 학회 교육과 한 목록에.
+     「학회 전체」 첫 쪽 맨 위에 둡니다(피그마 U12 · 과정 목록 순서). 학회 하나를 고르면 그 학회 것만 */
+  const 직접 = tab.key === 'all' && page === 0;
+  const [직접목록, 목록, ...셈들] = await Promise.all([
+    직접 ? sb.rpc('신청가능교육', { p_직군: 고른직군, p_지난것: 지난것 }) : Promise.resolve({ data: [] }),
     sb.rpc('교육목록', { p_직군: 고른직군, p_출처: tab.출처, p_지난것: 지난것, p_page: page }),
     ...보일탭.map((t) => sb.rpc('교육셈', { p_직군: 고른직군, p_출처: t.출처, p_지난것: 지난것 })),
   ]);
@@ -188,7 +192,10 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
     수: 셈[t.key],
   }));
   const 직군글 = JOBS.find((j) => j.직군 === 고른직군 && j.직군)?.label ?? null;
-  const 건수 = 셈[tab.key] ?? 0;
+  type 회차줄 = { 회차id: number; 제목: string; 주최: string | null; 시작: string; 장소: string | null; 상태: string; 시험자료: boolean };
+  const 회차들 = ((직접목록.data ?? []) as unknown as 회차줄[]);
+  const 건수 = (셈[tab.key] ?? 0) + 회차들.length;
+  const 짧은날 = (s: string) => { const [, m, d] = s.split('-').map(Number); const [yy, mm, dd] = s.split('-').map(Number); const w = ['일', '월', '화', '수', '목', '금', '토'][new Date(Date.UTC(yy, mm - 1, dd)).getUTCDay()]; return `${m}.${String(d).padStart(2, '0')} (${w})`; };
 
   return (
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
@@ -212,7 +219,7 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
           </p>
         )}
 
-        {!목록.error && rows.length === 0 && (
+        {!목록.error && rows.length === 0 && 회차들.length === 0 && (
           <div className="flex flex-col items-center gap-(--rapo-dimension-x3) py-(--rapo-dimension-x12) text-center">
             <p className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">{지난것 ? '모아 둔 교육이 없어요' : '지금 열려 있는 교육이 없어요'}</p>
             {!지난것 && (
@@ -224,6 +231,12 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
         )}
 
         <ul>
+          {회차들.map((r) => (
+            <li key={'s' + r.회차id}>
+              <RapoEduSessionRow href={`/edu/session/${r.회차id}`} 주최={r.주최 ?? '교육 기관'} 제목={r.제목} 모집중={r.상태 === '모집중'}
+                날짜={<>{짧은날(r.시작)}{r.장소 && <>&nbsp;&nbsp;&nbsp;{r.장소}</>}</>} />
+            </li>
+          ))}
           {rows.map((v) => {
             const d = 날쓰기(v);
             /* 날짜가 없으면 올린 날을 「게시」로 밝힙니다 — 교육 날짜인 척 보이지 않게 (원본 「9월 14일 게시」) */
