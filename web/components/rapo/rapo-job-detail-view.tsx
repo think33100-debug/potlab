@@ -3,6 +3,7 @@ import { Hit } from '@/components/hit';
 import { JobDeadlineNotify } from '@/components/job-deadline-notify';
 import { JobOpenLink } from '@/components/job-open-link';
 import { JobHide } from '@/components/job-hide';
+import { JobReport } from '@/components/job-report';
 import { JobSave, RapoSaveBar } from '@/components/job-save';
 import { JobVeil } from '@/components/job-veil';
 import { LoginFirst } from '@/components/login-first';
@@ -114,7 +115,8 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
           ★ 06 업무·지원 자격 칸(필수 자격 · 담당 업무 · 근무 부서)은 같은 날 세중님 결정으로 뺐습니다 — 필수 자격은 위 03 핵심 조건에 그대로 있습니다 */}
       <div id="d-work" className="scroll-mt-[64px]">
         {/* 2026-11-12 밤 세중님 「근무 기간을 근무 조건으로 · 근무 장소 · 근무 기간 2개 · 아래 근무 기관은 없애자」 */}
-        <RapoDetailSection title="근무 조건">
+        {/* 2026-11-15 피그마 「공고 신고 위치」 — 본문 가운데 칸 제목 오른쪽 (그 칸이던 「업무·지원 자격」은 11/12 결정으로 빠져 이 칸이 이어받음) */}
+        <RapoDetailSection title="근무 조건" 옆={p.id ? <JobReport id={p.id} /> : undefined}>
           <div className="flex flex-col gap-(--rapo-dimension-x3)">
             <RapoGuideRow label="근무 장소">{p.주소 ? <span className="break-keep">{p.기관} · {p.주소}</span> : p.기관}</RapoGuideRow>
             <RapoGuideRow label="근무 기간">

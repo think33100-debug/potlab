@@ -195,11 +195,15 @@ export function RapoSectionGap() {
 }
 
 /* 07 지원 방법 / 08 근무 기관 / 비슷한 공고 — 제목 20/28 + 본문 (흰 판 · 20 여백) */
-export function RapoDetailSection({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
+/* 옆 — 제목 줄 오른쪽 끝(피그마 517:510 「공고 신고하기」 자리) */
+export function RapoDetailSection({ title, sub, 옆, children }: { title: string; sub?: string; 옆?: ReactNode; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-(--rapo-dimension-x5) bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x5)">
       <div className="flex flex-col gap-(--rapo-dimension-x1)">
-        <h2 className="rapo-type-section-title text-(color:--rapo-color-fg-neutral)">{title}</h2>
+        <div className="flex items-center justify-between gap-(--rapo-dimension-x3)">
+          <h2 className="rapo-type-section-title min-w-0 text-(color:--rapo-color-fg-neutral)">{title}</h2>
+          {옆}
+        </div>
         {sub && <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{sub}</p>}
       </div>
       {children}
