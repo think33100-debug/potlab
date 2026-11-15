@@ -40,6 +40,9 @@ export const EMPLOYMENTS = ['정규직', '무기계약직', '계약직', '인턴
 export const GRADES = ['1학년', '2학년', '3학년', '4학년', '졸업예정', '졸업(취준)'] as const;
 
 export const SCHOOLS: { group: string; items: string[] }[] = [
+  /* 2026-11-15 새 가입(피그마 07 B)의 학력 다섯 — 새로 가입한 분이 옛 수정 화면(/me/spec)에서 막히지 않게 맨 앞에 둡니다.
+     옛 여섯(서울·경기/지방 · 전공심화)은 옛 자료를 읽으려고 그대로 둡니다 */
+  { group: '학력', items: ['전문대학', '4년제 대학', '석사', '박사', '학교 경험 없음'] },
   { group: '전문학사 (3년제)', items: ['서울·경기 3년제', '지방 3년제'] },
   { group: '학사 (4년제)', items: ['서울·경기 4년제', '지방 4년제'] },
   { group: '전공심화', items: ['서울·경기 전공심화', '지방 전공심화'] },
@@ -189,7 +192,7 @@ export function langsPayload(rows: LangRow[]) {
    마이페이지에서 고칠 때 씁니다. 화면이 안 끼어 있어서 따로 시험할 수 있습니다
    (node lib/signup-fields.test.mjs) */
 export type Form = Record<string, string>;
-export type Draft = { f: Form; certs: string[]; courses: string[]; rows: WorkRow[]; langs: LangRow[] };
+export type Draft = { f: Form; certs: string[]; courses: string[]; rows: WorkRow[]; langs: LangRow[]; 새가입?: boolean };
 
 /* 빈 칸은 0 이 아니라 '안 적음' 입니다 */
 const num = (v: string | undefined) => (v && v.trim() !== '' ? Number(v) : null);
@@ -245,7 +248,9 @@ export function toDraft(
   const ls = (langs ?? []).map((r) => ({
     exam: s(r.exam), score: s(r.score), level: s(r.level),
   }));
-  return { f, certs: list(spec?.licenses), courses: list(spec?.trainings), rows, langs: ls };
+  return { f, certs: list(spec?.licenses), courses: list(spec?.trainings), rows, langs: ls,
+    /* 새 가입(2026-11-15 · 학적·입학 연월)으로 담긴 분 — 옛 수정 화면에서 학년을 묻지 않습니다 */
+    새가입: !!spec && (spec as { 근무경험?: boolean | null }).근무경험 != null };
 }
 
 /* ── 숫자 칸 검사 ──

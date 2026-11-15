@@ -47,10 +47,17 @@ const PANEL =
 /* 빈 칸은 0 이 아니라 '안 적음' 입니다. 0 으로 넣으면 평균이 내려갑니다 */
 const num = (v: string | undefined) => (v && v.trim() !== '' ? Number(v) : null);
 
+/* 가입 새 흐름(2026-11-15 · 피그마 07 B)에서 근무 경험이 있는 분이 「급여 직접 입력」을 고르면 이 모드로 엽니다.
+   스펙은 가입 화면이 이미 받았으니 급여 네 장만 묻고, 끝에서 스펙·어학과 **한 번에** 저장합니다
+   (save_my_survey 를 두 번 부르면 두 번째가 「1년 2번 고치기」 한 번으로 세어집니다) */
+export type 급여만 = { spec: Record<string, unknown>; langs: LangRow[]; 입사연도: number };
+const 급여장 = new Set(['어떤 곳에서 일하세요', '급여', '당직 · 주말근무', '나에 대해']);
+
 export function SignupSurvey({
-  userId, job, role, onDone, initial, editsLeft,
+  userId, job, role, onDone, initial, editsLeft, 급여만,
 }: {
   userId: string; job: string; role: Role; onDone: () => void | Promise<void>;
+  급여만?: 급여만;
   /* 마이페이지에서 고칠 때 — 이미 등록한 값으로 시작합니다 */
   initial?: Draft;
   editsLeft?: number;
@@ -133,7 +140,8 @@ export function SignupSurvey({
        2026-11-12 저녁 세중님 「급여는 선택」. 그 화면에서 「직접 입력하기」를 누르면 여기로 옵니다 */
     ...(stu ? [
       {
-        title: '학교', ok: has('grade') && has('school_type'),
+        /* 새 가입(2026-11-15)은 학년 대신 학적·입학 연월을 받습니다 — 그 분들은 학년이 비어도 넘어갑니다 */
+        title: '학교', ok: (has('grade') || !!initial?.새가입) && has('school_type'),
         body: (
           <>
             <Sel k="grade" label="학년" v={f.grade} on={set} opts={GRADES} req />
@@ -326,6 +334,10 @@ export function SignupSurvey({
     }] : []),
   ];
 
+  if (급여만) {
+    for (let k = steps.length - 1; k >= 0; k--) if (!급여장.has(steps[k].title)) steps.splice(k, 1);
+  }
+
   /* 남겨둔 자리가 지금 화면 수보다 클 수 있습니다 — 현직 8장, 학생 6장이라
      역할을 바꾸면 어긋납니다. 없는 화면을 그리면 그대로 터집니다 */
   const at = Math.min(i, steps.length - 1);
@@ -394,9 +406,10 @@ export function SignupSurvey({
     /* 표에 직접 안 씁니다 — 회원에게는 쓰기 권한이 없습니다.
        이 함수가 1년 2회를 세고, survey_at 을 찍고, 두 표를 같이 담습니다 */
     /* 어학은 표가 따로라 따로 보냅니다. 덜 채운 줄은 langsPayload 가 버립니다 */
-    const { error } = await sb.rpc('save_my_survey', {
-      p_salary: salaryRow, p_spec: spec, p_langs: langsPayload(langs),
-    });
+    const { error } = await sb.rpc('save_my_survey', 급여만
+      ? { p_salary: { ...salaryRow, hired_year: 급여만.입사연도, current_hired_year: 급여만.입사연도 },
+          p_spec: 급여만.spec, p_langs: langsPayload(급여만.langs) }
+      : { p_salary: salaryRow, p_spec: spec, p_langs: langsPayload(langs) });
     if (error) {
       setBusy(false);
       setErr(error.message.includes('1년에 2번')
@@ -553,7 +566,7 @@ const INPUT = `block ${SKIN} px-5 py-4 rapo-type-t5-regular`;
 /* 고르는 칸도 틀리면 테두리 색으로 알립니다 (BOX_BAD 와 같은 규칙) */
 const INPUT_BAD = INPUT.replace('border-(color:--rapo-color-stroke-neutral-weak)', 'border-(color:--rapo-color-stroke-critical-solid)').replace('', '');
 
-function Num({
+export function Num({
   k, label, hint, v, on, unit, ph, step, req, f, noWhy,
 }: {
   k: string; label: string; hint?: string; v?: string; on: (k: string, v: string) => void;
@@ -583,7 +596,7 @@ function Num({
   );
 }
 
-function Sel({
+export function Sel({
   k, label, hint, v, on, opts, req, blank,
 }: {
   k: string; label: string; hint?: string; v?: string; on: (k: string, v: string) => void;
@@ -651,7 +664,7 @@ function Two({
    이미 넣은 시험은 다음 줄에서 못 고르게 막습니다 — 같은 시험 두 줄은
    DB 의 spec_langs_one_per_exam 이 최종으로 막지만, 눌러 놓고 나중에
    거부당하는 것보다 아예 안 눌리는 편이 낫습니다. */
-function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
+export function Langs({ rows, on }: { rows: LangRow[]; on: (v: LangRow[]) => void }) {
   const taken = (i: number) => new Set(rows.filter((_, j) => j !== i).map((r) => r.exam));
   const edit = (i: number, patch: Partial<LangRow>) =>
     on(rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
@@ -792,7 +805,7 @@ function LangBands() {
   );
 }
 
-function Tick({ on }: { on: boolean }) {
+export function Tick({ on }: { on: boolean }) {
   return (
     <span aria-hidden className={'flex size-[22px] shrink-0 items-center justify-center rounded-(--rapo-radius-r2) border text-(color:--rapo-color-fg-on-navy-solid) '
       + (on ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-navy-solid)' : 'border-(color:--rapo-color-stroke-neutral-weak)')}>
@@ -817,7 +830,7 @@ function Area({
 
 /* 자격증·교육 — 묶음을 접었다 펴는 건 <details> 로 둡니다. 직접 만들 이유가 없어요.
    담기는 값은 옛 chips() 와 같게 '묶음 - 항목' 입니다 */
-function Chips({
+export function Chips({
   label, hint, none, groups, picked, on,
 }: {
   label: string; hint?: string; none: string;
@@ -919,7 +932,7 @@ function 비었어요({ children }: { children: React.ReactNode }) {
   return <p className="mt-1 rapo-type-t3-regular text-(color:--rapo-color-fg-critical)">{children}</p>;
 }
 
-function Rows({
+export function Rows({
   rows, on, none, noneOn, setNone,
 }: {
   rows: WorkRow[]; on: (v: WorkRow[]) => void;
