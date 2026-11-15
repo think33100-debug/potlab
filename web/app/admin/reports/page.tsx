@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { AdminJobReports } from '@/components/admin-job-reports';
+import { AdminReportDecide } from '@/components/admin-report-decide';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
 
@@ -56,8 +57,14 @@ export default function AdminReports() {
     }
     setErr(null);
     setRows(모두);
+    /* 결정·안내는 목록 창구에 없어 표에서 따로 (관리자는 reports 를 읽을 수 있음 · 2026-11-15) */
+    if (모두.length) {
+      const { data: 결 } = await browserSupabase().from('reports').select('id,결정,안내').in('id', 모두.map((r) => r.id));
+      set결정들(Object.fromEntries(((결 ?? []) as unknown as { id: number; 결정: string | null; 안내: string | null }[]).map((x) => [x.id, x])));
+    }
   }, []);
 
+  const [결정들, set결정들] = useState<Record<number, { 결정: string | null; 안내: string | null }>>({});
   useEffect(() => { load(처리전만); }, [load, 처리전만]);
 
   const 처리 = async (id: number) => {
@@ -156,14 +163,18 @@ export default function AdminReports() {
                   )}
                 </p>
 
+                {/* 2026-11-15 피그마 「운영자의 신고 처리」 — 원문 보기 · 숨김/그대로 · 신고자에게 안내 */}
+                {(!r.처리시각 || 결정들[r.id]?.결정) && (
+                  <AdminReportDecide 무엇="글" id={r.id} 결정={결정들[r.id]?.결정} 안내={결정들[r.id]?.안내} onDone={() => load(처리전만)} />
+                )}
                 {!r.처리시각 && (
                   <button
                     type="button"
                     onClick={() => 처리(r.id)}
                     disabled={busy === r.id}
-                    className="mt-3 rounded-md bg-teal-strong px-6 py-4 text-lg font-bold text-white hover:opacity-90 disabled:opacity-40"
+                    className="mt-3 text-lg text-mute underline underline-offset-4 disabled:opacity-40"
                   >
-                    {busy === r.id ? '표시하는 중…' : '처리 완료로 표시'}
+                    {busy === r.id ? '표시하는 중…' : '결정 없이 처리 완료로만 표시'}
                   </button>
                 )}
               </li>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { AdminReportDecide } from '@/components/admin-report-decide';
 import { useToast } from '@/app/toast';
 
 /* 공고 오류 신고 (2026-10-07).
@@ -55,6 +56,14 @@ export function AdminJobReports() {
   }, []);
 
   useEffect(() => { load(처리전만); }, [load, 처리전만]);
+  /* 결정·안내 (2026-11-15) — 목록 창구에 없어 표에서 따로 (관리자 읽기 정책 · 금고 SQL_1113/ZR) */
+  const [결정들, set결정들] = useState<Record<number, { 결정: string | null; 안내: string | null }>>({});
+  useEffect(() => {
+    const ids = (rows ?? []).map((r) => r.id);
+    if (!ids.length) return;
+    browserSupabase().from('공고신고').select('id,결정,안내').in('id', ids).then(({ data }) =>
+      set결정들(Object.fromEntries(((data ?? []) as unknown as { id: number; 결정: string | null; 안내: string | null }[]).map((x) => [x.id, x]))));
+  }, [rows]);
 
   const 처리 = async (id: number) => {
     setBusy(id);
@@ -150,6 +159,9 @@ export function AdminJobReports() {
                   {busy === r.id ? '처리 중…' : '처리 완료'}
                 </button>
               </div>
+            )}
+            {(!r.처리시각 || 결정들[r.id]?.결정) && (
+              <AdminReportDecide 무엇="공고" id={r.id} 결정={결정들[r.id]?.결정} 안내={결정들[r.id]?.안내} onDone={() => load(처리전만)} />
             )}
             {r.처리메모 && (
               <p className="mt-2 break-keep text-sm text-mute">처리 메모 — {r.처리메모}</p>
