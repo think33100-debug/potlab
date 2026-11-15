@@ -9,7 +9,7 @@ import { useAuth } from '../auth';
 
    전 화면에 한 장으로 있던 칸들을 메뉴 아래 화면으로 나눴습니다 — 하는 일은 그대로입니다.
      프로필 편집        /me/profile   사진 · 닉네임(5번) · 직군 · 역할
-     스펙 확인·수정     /me/spec      급여 · 스펙 (SurveyEdit)
+     스펙 확인·수정     /me/spec      현재(또는 입사 당시) 학력 → 자격·교육·실습 두 단계 (2026-11-15 피그마 06)
      내가 쓴 글 · 댓글   /me/activity  내 글 · 내 댓글 (MyLists)
      공고 알림 설정     /me/notify    알림 켜고 끄기 (NotifyToggle)
      개인정보·탈퇴      /me/account   차단한 분 · 로그아웃 · 개인정보처리방침 · 회원 탈퇴

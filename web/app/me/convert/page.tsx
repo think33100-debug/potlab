@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { Chips, Langs, Rows } from '@/components/signup-survey';
 import { RapoButton } from '@/components/rapo/rapo-ui';
+import { RapoFormFrame as Frame, 골라, 칸 } from '@/components/rapo/rapo-spec-form';
 import { 둥근별 } from '@/components/rapo/rapo-org-reviews';
 import { 답다됨, 후기질문, type 후기답 } from '@/lib/work-review';
 import { todayKst } from '@/lib/job-state';
@@ -284,53 +285,6 @@ export default function Convert() {
         </section>
       )}
     </Frame>
-  );
-}
-
-function Frame({ title, onBack, 아래, children }: { title: string; onBack?: () => void; 아래?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div data-rapo className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-(--rapo-color-bg-layer-default)">
-      <header className="sticky top-0 z-20 flex h-[56px] shrink-0 items-center gap-(--rapo-dimension-x2) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x2)">
-        {onBack ? (
-          <button type="button" onClick={onBack} aria-label="뒤로"
-            className="flex size-(--rapo-touch-min) shrink-0 items-center justify-center rounded-(--rapo-radius-r2) active:bg-(--rapo-color-bg-transparent-pressed)">
-            {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-            <img src="/rapo/detail/arrow-left-20.svg" alt="" width={20} height={20} />
-          </button>
-        ) : <span aria-hidden className="size-(--rapo-touch-min) shrink-0" />}
-        <p className="rapo-type-t5-bold min-w-0 flex-1 text-center text-(color:--rapo-color-fg-neutral)">{title}</p>
-        <span aria-hidden className="size-(--rapo-touch-min) shrink-0" />
-      </header>
-      <main className="flex-1 px-(--rapo-dimension-x5) pb-(--rapo-dimension-x6)">{children}</main>
-      {아래 && (
-        <div className="sticky bottom-0 bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x5) pt-(--rapo-dimension-x2) pb-[calc(var(--rapo-dimension-x4)+env(safe-area-inset-bottom))]">
-          {아래}
-        </div>
-      )}
-    </div>
-  );
-}
-
-const 칸 = 'rapo-type-t5-regular h-(--rapo-dimension-x13) w-full min-w-0 rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) '
-  + 'border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) '
-  + 'placeholder:text-(color:--rapo-color-fg-placeholder)';
-
-/* 고르는 칸 — 가입 화면(app/welcome)과 같은 꼴 */
-function 골라({ label, v, opts, ph, on, 붙임 = '' }: { label: string; v: string; opts: readonly string[]; ph: string; on: (v: string) => void; 붙임?: string }) {
-  return (
-    <label className="flex flex-col gap-(--rapo-dimension-x2)">
-      <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">{label}</span>
-      <span className="relative block">
-        <select value={v} onChange={(e) => on(e.target.value)}
-          className={칸 + ' appearance-none pr-(--rapo-dimension-x10) ' + (v ? '' : 'text-(color:--rapo-color-fg-placeholder)')}>
-          <option value="" disabled>{ph}</option>
-          {opts.map((o) => <option key={o} value={o}>{o}{붙임}</option>)}
-        </select>
-        <svg aria-hidden className="pointer-events-none absolute right-(--rapo-dimension-x4) top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M3 6l5 5 5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
-    </label>
   );
 }
 
