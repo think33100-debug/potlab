@@ -6,6 +6,8 @@ import { Suspense, useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
 import { 어둠 } from '@/components/rapo/rapo-community';
+import { 둥근별 } from '@/components/rapo/rapo-org-reviews';
+import { 답다됨, 후기질문, 후기칸글, type 후기답 } from '@/lib/work-review';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 근무 후기 쓰기·고치기 — 피그마 「근무 후기 · 작성」 1447:7164 · 「수정」 1312:8051 · 「작성 자격 안내」 1447:7292 (2026-11-15).
@@ -13,9 +15,7 @@ import { browserSupabase } from '@/lib/supabase-browser';
    — 막는 자리는 DB 규칙(근무후기_인증한_병원만_쓰기 · 금고 SQL_1113/ZN·ZT).
    인증이 없으면 「이 병원에서 일해 보셨나요?」 안내 → 재직 인증(/verify). 한 병원에 한 사람 한 후기(고치기는 같은 자리). */
 
-const 교육들 = ['충분해요', '보통이에요', '부족해요'] as const;
-const 일정들 = ['예측 가능해요', '자주 바뀌어요'] as const;
-const 휴게들 = ['확보돼요', '보통이에요', '어려워요'] as const;
+/* 객관식 일곱은 lib/work-review.ts 한 자리 (2026-11-15 세중님) */
 const 최대 = 5000;
 
 function Body() {
@@ -28,9 +28,7 @@ function Body() {
   const [인증됨, set인증됨] = useState<boolean | null>(null);
   const [내것, set내것] = useState<number | null>(null);
   const [별점, set별점] = useState(0);
-  const [교육, set교육] = useState('');
-  const [일정, set일정] = useState('');
-  const [휴게, set휴게] = useState('');
+  const [답, set답] = useState<후기답>({});
   const [글, set글] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -40,24 +38,24 @@ function Body() {
       const sb = browserSupabase();
       const [w, h, s] = await Promise.all([
         sb.from('재직인증').select('병원이름').eq('상태', '확인'),
-        sb.from('근무후기').select('id,별점,교육,일정,휴게,글').eq('기관', org).maybeSingle(),
+        sb.from('근무후기').select(`id,별점,${후기칸글},글`).eq('기관', org).maybeSingle(),
         sb.from('student_specs').select('근무병원').maybeSingle(),
       ]);
       const 내병원 = (s.data as unknown as { 근무병원: string | null } | null)?.근무병원 ?? null;
       set인증됨(내병원 === org || ((w.data ?? []) as unknown as { 병원이름: string | null }[]).some((x) => x.병원이름 === org));
-      const 옛 = h.data as { id: number; 별점: number; 교육: string; 일정: string; 휴게: string; 글: string | null } | null;
-      if (옛) { set내것(옛.id); set별점(옛.별점); set교육(옛.교육); set일정(옛.일정); set휴게(옛.휴게); set글(옛.글 ?? ''); }
+      const 옛 = h.data as unknown as (후기답 & { id: number; 별점: number; 글: string | null }) | null;
+      if (옛) { set내것(옛.id); set별점(옛.별점); set답(Object.fromEntries(후기질문.map((q) => [q.칸, 옛[q.칸] ?? '']))); set글(옛.글 ?? ''); }
     })();
   }, [loading, session, org]);
 
-  const 됨 = 별점 > 0 && !!교육 && !!일정 && !!휴게;
+  const 됨 = 별점 > 0 && 답다됨(답);
   const 게시판 = `/orgs?org=${encodeURIComponent(org)}&sido=${encodeURIComponent(sido)}&tab=review`;
 
   const 보내기 = async () => {
     if (!됨 || busy) return;
     setBusy(true);
     const sb = browserSupabase();
-    const 값 = { 별점, 교육, 일정, 휴게, 글: 글.trim() || null };
+    const 값 = { 별점, ...답, 글: 글.trim() || null };
     const { error } = 내것
       ? await sb.from('근무후기').update({ ...값, 고친때: new Date().toISOString() }).eq('id', 내것)
       : await sb.from('근무후기').insert({ 기관: org, ...값 });
@@ -70,10 +68,10 @@ function Body() {
   const 고르기 = (제목: string, 값들: readonly string[], 지금: string, 바꿈: (v: string) => void) => (
     <fieldset className="flex flex-col gap-[10px]">
       <legend className="mb-[10px] text-[14px] leading-[20px]" style={{ color: 어둠.흐린글 }}>{제목}</legend>
-      <div className="grid grid-cols-3 gap-[8px]">
+      <div className="flex flex-col gap-[8px]">
         {값들.map((v) => (
           <button key={v} type="button" aria-pressed={지금 === v} onClick={() => 바꿈(v)}
-            className="min-h-[42px] break-keep rounded-[8px] px-[6px] py-[8px] text-[14px] font-medium leading-[19px]"
+            className="min-h-[44px] break-keep rounded-[8px] px-[14px] py-[10px] text-left text-[15px] font-medium leading-[21px]"
             style={지금 === v ? { background: '#ffa691', color: '#112332' } : { background: 어둠.면, color: 어둠.글 }}>
             {v}
           </button>
@@ -117,18 +115,16 @@ function Body() {
           </div>
           <section className="flex flex-col gap-[16px]">
             <h2 className="text-[17px] font-bold leading-[24px]" style={{ color: 어둠.글 }}>종합 별점</h2>
-            <div className="flex gap-[12px]" role="radiogroup" aria-label="종합 별점">
+            <div className="flex gap-[4px]" role="radiogroup" aria-label="종합 별점">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button key={n} type="button" role="radio" aria-checked={별점 === n} aria-label={`${n}점`} onClick={() => set별점(n)}
-                  className="flex size-[36px] items-center justify-center text-[30px] leading-none" style={{ color: '#ffa691' }}>
-                  {n <= 별점 ? '★' : '☆'}
+                  className="flex size-[44px] items-center justify-center">
+                  <둥근별 켬={n <= 별점} 크기={34} />
                 </button>
               ))}
             </div>
             <p className="text-[13px] leading-[19px]" style={{ color: 어둠.흐린글 }}>{별점 ? `${별점}점` : '별점을 선택해 주세요.'}</p>
-            {고르기('교육·인수인계', 교육들, 교육, set교육)}
-            {고르기('근무 일정', 일정들, 일정, set일정)}
-            {고르기('휴게 시간', 휴게들, 휴게, set휴게)}
+            {후기질문.map((q) => <div key={q.칸}>{고르기(q.질문, q.값들, 답[q.칸] ?? '', (v) => set답((a) => ({ ...a, [q.칸]: v })))}</div>)}
           </section>
           <section className="flex flex-col gap-[10px]">
             <h2 className="text-[17px] font-bold leading-[24px]" style={{ color: 어둠.글 }}>자유 후기 (선택)</h2>

@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { Chips, Langs, Rows } from '@/components/signup-survey';
 import { RapoButton } from '@/components/rapo/rapo-ui';
+import { 둥근별 } from '@/components/rapo/rapo-org-reviews';
+import { 답다됨, 후기질문, type 후기답 } from '@/lib/work-review';
 import { todayKst } from '@/lib/job-state';
 import { 학력목록 } from '@/lib/school-period';
 import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave, toDraft, type LangRow, type WorkRow } from '@/lib/signup-fields';
@@ -23,9 +25,6 @@ type 단계 = '병원' | '스펙' | '후기' | '끝';
 const 순서: 단계[] = ['병원', '스펙', '후기'];
 const 단계이름: Record<단계, string> = { 병원: '근무 병원', 스펙: '입사 당시 스펙', 후기: '근무 후기', 끝: '' };
 const 만점 = 4.5;
-const 교육들 = ['충분해요', '보통이에요', '부족해요'] as const;
-const 일정들 = ['예측 가능해요', '자주 바뀌어요'] as const;
-const 휴게들 = ['확보돼요', '보통이에요', '어려워요'] as const;
 const 최대 = 5000;
 
 type 옛스펙 = Record<string, unknown> & { want_type?: string | null; want_region?: string | null; 근무경험?: boolean | null; 근무병원?: string | null };
@@ -47,9 +46,7 @@ export default function Convert() {
   const [rowsNone, setRowsNone] = useState(false);
   const [langs, setLangs] = useState<LangRow[]>([]);
   const [별점, set별점] = useState(0);
-  const [교육, set교육] = useState('');
-  const [일정, set일정] = useState('');
-  const [휴게, set휴게] = useState('');
+  const [답, set답] = useState<후기답>({});
   const [글, set글] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -117,7 +114,7 @@ export default function Convert() {
   const 학점틀림 = !학교없음 && !!학점.trim() && (!Number.isFinite(학점수) || 학점수 < 0 || 학점수 > 만점);
   const 병원됨 = !!병원.trim() && !!입사연도 && !!학력 && !학점틀림;
   const 스펙됨 = certs.length > 0 && courses.length > 0 && (rowsNone || rowsReady(rows)) && langs.every((r) => !langError(r));
-  const 후기됨 = 별점 > 0 && !!교육 && !!일정 && !!휴게;
+  const 후기됨 = 별점 > 0 && 답다됨(답);
 
   const 실습 = rowsNone ? [] : rowsToSave(rows);
   const spec: Record<string, unknown> = {
@@ -144,7 +141,7 @@ export default function Convert() {
       if (error) { setBusy(false); setErr(`저장하지 못했어요. 입력한 내용은 그대로예요 — ${error.message}`); return; }
       set전환됨(true);
     }
-    const { error } = await sb.from('근무후기').insert({ 기관: 병원.trim(), 별점, 교육, 일정, 휴게, 글: 글.trim() || null });
+    const { error } = await sb.from('근무후기').insert({ 기관: 병원.trim(), 별점, ...답, 글: 글.trim() || null });
     setBusy(false);
     if (error) {
       setErr(error.code === '23505' ? '이 병원에는 이미 후기를 쓰셨어요.' : `근무 정보는 저장했지만 후기를 담지 못했어요. 다시 눌러 주세요 — ${error.message}`);
@@ -159,7 +156,7 @@ export default function Convert() {
   const 아래단추 =
     step === '병원' ? <RapoButton onClick={() => go('스펙')} disabled={!병원됨} full>{병원됨 ? '다음' : '위 칸을 채워 주세요'}</RapoButton>
     : step === '스펙' ? <RapoButton onClick={() => go('후기')} disabled={!스펙됨} full>{스펙됨 ? '다음' : '위 칸을 채워 주세요'}</RapoButton>
-    : step === '후기' ? <RapoButton onClick={저장} disabled={!후기됨 || busy} full>{busy ? '저장하는 중…' : 후기됨 ? '임상가로 전환하기' : '별점과 세 가지를 골라 주세요'}</RapoButton>
+    : step === '후기' ? <RapoButton onClick={저장} disabled={!후기됨 || busy} full>{busy ? '저장하는 중…' : 후기됨 ? '임상가로 전환하기' : '별점과 일곱 가지를 골라 주세요'}</RapoButton>
     : <RapoButton onClick={() => router.push(`/orgs?org=${encodeURIComponent(병원.trim())}&tab=review`)} full>내 후기 보러 가기</RapoButton>;
 
   return (
@@ -256,15 +253,13 @@ export default function Convert() {
               <div className="flex gap-(--rapo-dimension-x3)" role="radiogroup" aria-label="종합 별점">
                 {[1, 2, 3, 4, 5].map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={별점 === k} aria-label={`${k}점`} onClick={() => set별점(k)}
-                    className="flex size-(--rapo-touch-min) items-center justify-center text-[30px] leading-none text-(color:--rapo-color-bg-identity)">
-                    {k <= 별점 ? '★' : '☆'}
+                    className="flex size-(--rapo-touch-min) items-center justify-center">
+                    <둥근별 켬={k <= 별점} 크기={32} 색="var(--rapo-color-bg-identity)" />
                   </button>
                 ))}
               </div>
             </div>
-            <셋 제목="교육·인수인계" 값들={교육들} 지금={교육} on={set교육} />
-            <셋 제목="근무 일정" 값들={일정들} 지금={일정} on={set일정} />
-            <셋 제목="휴게 시간" 값들={휴게들} 지금={휴게} on={set휴게} />
+            {후기질문.map((q) => <셋 key={q.칸} 제목={q.질문} 값들={q.값들} 지금={답[q.칸] ?? ''} on={(v) => set답((a) => ({ ...a, [q.칸]: v }))} />)}
             <label className="flex flex-col gap-(--rapo-dimension-x2)">
               <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">자유 후기 <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span></span>
               <textarea value={글} onChange={(e) => set글(e.target.value.slice(0, 최대))} rows={5}
@@ -339,15 +334,15 @@ function 골라({ label, v, opts, ph, on, 붙임 = '' }: { label: string; v: str
   );
 }
 
-/* 후기 객관식 한 줄 — 근무 후기 쓰기(app/orgs/review/write)와 같은 값 */
+/* 후기 객관식 한 묶음 — 값은 lib/work-review.ts (후기 쓰기와 같은 자리) */
 function 셋({ 제목, 값들, 지금, on }: { 제목: string; 값들: readonly string[]; 지금: string; on: (v: string) => void }) {
   return (
     <fieldset className="flex flex-col gap-(--rapo-dimension-x2)">
       <legend className="rapo-type-t5-bold mb-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral)">{제목}</legend>
-      <div className={(값들.length === 2 ? 'grid-cols-2' : 'grid-cols-3') + ' grid gap-(--rapo-dimension-x2)'}>
+      <div className="flex flex-col gap-(--rapo-dimension-x2)">
         {값들.map((x) => (
           <button key={x} type="button" aria-pressed={지금 === x} onClick={() => on(x)}
-            className={'rapo-type-t4-medium min-h-(--rapo-touch-min) break-keep rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) px-(--rapo-dimension-x2) py-(--rapo-dimension-x2) '
+            className={'rapo-type-t5-medium min-h-(--rapo-touch-min) break-keep rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) px-(--rapo-dimension-x4) py-(--rapo-dimension-x3) text-left '
               + (지금 === x ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak) text-(color:--rapo-color-fg-neutral)'
                            : 'border-(color:--rapo-color-stroke-neutral-weak) text-(color:--rapo-color-fg-neutral)')}>
             {x}

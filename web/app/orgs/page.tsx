@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Hit } from '@/components/hit';
 import { RapoOrgBoard } from '@/components/rapo/rapo-org-board';
 import { RapoOrgReviews, type 근무후기 } from '@/components/rapo/rapo-org-reviews';
+import { 후기칸글 } from '@/lib/work-review';
 import { OrgSearch } from '@/components/org-search';
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
 import { RapoGuestPreview } from '@/components/rapo/rapo-guest-preview';
@@ -183,7 +184,7 @@ export async function generateMetadata({ searchParams }: PageProps<'/orgs'>): Pr
 /* 근무 후기 탭 (2026-11-15 · 금고 SQL_1113/ZN) — 공개근무후기 보기 + 내 재직 인증(확인)이 이 병원인가 */
 async function 후기칸(sb: Awaited<ReturnType<typeof serverSupabase>>, org: string, sido: string | null) {
   const [h, w] = await Promise.all([
-    sb.from('공개근무후기').select('id,기관,별점,교육,일정,휴게,글,쓴때,내것,닉네임,그림,더있음,재직인증').eq('기관', org).order('쓴때', { ascending: false }).limit(100),
+    sb.from('공개근무후기').select(`id,기관,별점,${후기칸글},글,쓴때,내것,닉네임,그림,더있음,재직인증`).eq('기관', org).order('쓴때', { ascending: false }).limit(100),
     sb.from('재직인증').select('병원이름').eq('상태', '확인'),
   ]);
   const 인증됨 = ((w.data ?? []) as unknown as { 병원이름: string | null }[]).some((x) => x.병원이름 === org);
