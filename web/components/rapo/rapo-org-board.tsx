@@ -18,8 +18,10 @@ import { 어둠 } from './rapo-community';
 
 export type 병원탭 = 'info' | 'talk' | 'review';
 
-export function RapoOrgBoard({ name, sido, 탭, 있나, 정보 }: {
+export function RapoOrgBoard({ name, sido, 탭, 있나, 정보, 후기 }: {
   name: string; sido: string | null; 탭: 병원탭; 있나: boolean;
+  /* 「근무 후기」 탭 안 (2026-11-15 · components/rapo/rapo-org-reviews.tsx) — 없으면 옛 「준비 중」 */
+  후기?: ReactNode;
   /* 「병원 정보」 탭 안 — 서버가 그려서 넘깁니다(app/orgs/page.tsx). 숫자가 하나도 없으면 null */
   정보?: ReactNode;
 }) {
@@ -95,7 +97,7 @@ export function RapoOrgBoard({ name, sido, 탭, 있나, 정보 }: {
             커뮤니티로 가기
           </Link>
         </section>
-      ) : (
+      ) : 후기 ? 후기 : (
         /* 근무 후기 · 후기 없음 (1312:8087) — 「첫 근무 후기 쓰기」는 쓸 곳이 없어 잠가 둡니다 */
         <section className="flex flex-col gap-[16px] px-[22px] pt-[112px]">
           <h2 className="text-[22px] font-bold leading-[32px]" style={{ color: 어둠.글 }}>아직 등록된 후기가 없어요</h2>

@@ -18,7 +18,9 @@ const 안띄움 = (p: string) =>
   p === '/login' || p === '/welcome' || p.startsWith('/auth')
   /* 커뮤니티 쪽(피드·방·글쓰기·글)은 「내 직군 글쓰기」·댓글 입력과 걸려서 뺍니다 (2026-11-12 세중님 「커뮤니티에서는 빼자」) */
   || p === '/community' || p.startsWith('/community/') || p.startsWith('/post/')
-  || p === '/admin' || p.startsWith('/admin/');
+  || p === '/admin' || p.startsWith('/admin/')
+  /* 근무 후기 쓰기·상세는 아래가 큰 단추 (2026-11-15) */
+  || p.startsWith('/orgs/review');
 
 function 아래자리(p: string): string {
   if (p.startsWith('/jobs/')) return 'calc(112px + 16px + env(safe-area-inset-bottom))';
