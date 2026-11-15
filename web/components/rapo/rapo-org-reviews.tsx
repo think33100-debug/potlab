@@ -97,11 +97,12 @@ export function RapoOrgReviews({ name, sido, 후기들, 인증됨 }: { name: str
                 <후기쓴이 h={h} />
                 <span className="flex shrink-0 items-center gap-[4px] whitespace-nowrap text-[15px] font-bold" style={{ color: '#ffa691' }}><둥근별 크기={15} />{h.별점}점</span>
               </div>
-              <dl className="grid grid-cols-2 gap-x-[12px] gap-y-[10px] rounded-[8px] px-[12px] py-[10px]" style={{ background: '#132636' }}>
+              {/* 한 줄에 하나 (2026-11-15 세중님 「좌우로 하니깐 글이 짤리고 가독성이 안 좋다」) */}
+              <dl className="flex flex-col gap-[8px] rounded-[8px] px-[12px] py-[12px]" style={{ background: '#132636' }}>
                 {후기질문.map((q) => (
-                  <div key={q.칸} className="min-w-0">
-                    <dt className="text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{q.짧게}</dt>
-                    <dd className="mt-[2px] break-keep text-[13px] font-bold leading-[19px]" style={{ color: 어둠.글 }}>{h[q.칸] ?? '—'}</dd>
+                  <div key={q.칸} className="flex gap-[12px]">
+                    <dt className="w-[84px] shrink-0 break-keep text-[13px] leading-[20px]" style={{ color: 어둠.흐린글 }}>{q.짧게}</dt>
+                    <dd className="min-w-0 flex-1 break-keep text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{h[q.칸] ?? '—'}</dd>
                   </div>
                 ))}
               </dl>
