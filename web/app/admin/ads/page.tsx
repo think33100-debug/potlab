@@ -139,7 +139,7 @@ export default function AdminAds() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-body-lg font-bold text-ink">
-                  {o.자리 === '앱' ? '앱 오픈 화면 (홈으로 들어올 때)' : o.자리 === '학생피드' ? '학생·취준생 공간 글 사이 (라포 소개 · 2026-11-15)' : '커뮤니티 오픈 화면'}
+                  {o.자리 === '앱' ? '앱 오픈 화면 (홈으로 들어올 때)' : o.자리 === '학생피드' ? '커뮤니티 글 사이 (라포 소개 · 2026-11-15)' : '커뮤니티 오픈 화면'}
                 </p>
                 <p className="mt-1 text-sm text-mute">
                   {o.지금나가나

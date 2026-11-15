@@ -45,7 +45,7 @@ function Body() {
             <p className="break-keep text-[15px] leading-[23px]" style={{ color: 어둠.흐린글 }}>
               학생·취준생은 하루에 서로 다른 후기 {하루}개를 볼 수 있어요. 오늘 읽은 후기는 다시 볼 수 있어요.
             </p>
-            <Link href="/community/student" className="mt-[24px] flex items-center gap-[8px] text-[15px] font-bold" style={{ color: '#ffa691' }}>학생·취준생 공간으로 ›</Link>
+            <Link href="/community" className="mt-[24px] flex items-center gap-[8px] text-[15px] font-bold" style={{ color: '#ffa691' }}>커뮤니티로 ›</Link>
           </section>
         ) : h.없음 ? (
           <p className="text-[15px]" style={{ color: 어둠.흐린글 }}>후기를 찾지 못했어요. 지워졌거나 숨겨졌을 수 있어요.</p>

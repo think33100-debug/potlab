@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
-import { RapoCommunityPost, RapoCommunityTop, RapoCommunityWrite, 어둠, 직군탭, type 직군탭값, type 커뮤니티글 } from '@/components/rapo/rapo-community';
+import { Fragment } from 'react';
+import { RapoCommunityPost, RapoCommunityPromo, RapoCommunityTop, RapoCommunityWrite, 어둠, type 커뮤니티글 } from '@/components/rapo/rapo-community';
 
 /* 커뮤니티 피드 — **견본**(Figma 1328:2659 의 글 그대로 · 실제 글 아님). 개발 서버에서만 열립니다 */
 export const metadata: Metadata = { title: 'RAPO · 커뮤니티 미리보기', robots: { index: false } };
@@ -18,15 +19,18 @@ const 견본: 커뮤니티글[] = [
     댓글: { 글쓴이: { nickname: '씩씩한 여우', avatar: '🦊|#FED7AA', erased_at: null }, body: '저희도 점심 먹고 바로 올라가요.' } },
 ];
 
-/* ?job=작업치료사 · 물리치료사 면 직군 피드(U07) 모양 */
-export default async function DesignPreviewCommunity({ searchParams }: { searchParams: Promise<{ job?: string }> }) {
+/* 2026-11-15 — 직군 탭 없이 한 피드 · 첫 글 아래 라포 소개 그림 */
+export default function DesignPreviewCommunity() {
   if (process.env.NODE_ENV === 'production') notFound();
-  const j = (await searchParams).job ?? '';
-  const 탭: 직군탭값 = (직군탭 as readonly string[]).includes(j) ? (j as 직군탭값) : '전체';
   return (
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: 어둠.바탕 }}>
-      <RapoCommunityTop 탭={탭} 정렬="new" 주소={(t) => (t === '전체' ? '/design-preview/community' : `/design-preview/community?job=${t}`)} />
-      <main className="mt-[6px]">{견본.map((p) => <RapoCommunityPost key={p.id} p={p} />)}</main>
+      <RapoCommunityTop 정렬="new" 주소={() => '/design-preview/community'} />
+      <main className="mt-[6px]">{견본.map((p, i) => (
+        <Fragment key={p.id}>
+          <RapoCommunityPost p={p} />
+          {i === 0 && <RapoCommunityPromo 그림="/rapo/community/rapo-promo.svg" 링크="/toolkit" />}
+        </Fragment>
+      ))}</main>
       <div aria-hidden style={{ height: 'calc(72px + 68px + env(safe-area-inset-bottom))' }} />
       <RapoCommunityWrite href="/design-preview/community" />
       <RapoBottomNav current="/community" dark />

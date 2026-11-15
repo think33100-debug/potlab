@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { Hit } from '@/components/hit';
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
+import { Fragment } from 'react';
 import {
-  RapoCommunityEmpty, RapoCommunityPost, RapoCommunityTop, RapoCommunityWrite, 어둠, 직군탭, type 직군탭값, type 커뮤니티글,
+  RapoCommunityEmpty, RapoCommunityPost, RapoCommunityPromo, RapoCommunityTop, RapoCommunityWrite, 어둠, type 커뮤니티글,
 } from '@/components/rapo/rapo-community';
 import { RapoGuestPreview } from '@/components/rapo/rapo-guest-preview';
-import { CHANNELS } from '@/lib/channels';
 import { 색인메타 } from '@/lib/seo';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { daysAgoIso } from '@/lib/time';
@@ -34,33 +34,23 @@ export const metadata: Metadata = {
    ── 원본에 있지만 아직 못 넣은 것 ─────────────────────────────────
    병원 찾기 단추(병원 탐색 기능 없음) · 글 사이 광고 배너(원본이 「예시」) · 학생 공간 */
 
-type SP = { job?: string; sort?: string };
+type SP = { sort?: string };
 
 export default async function Community({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
-  const 탭: 직군탭값 = (직군탭 as readonly string[]).includes(sp.job ?? '') ? (sp.job as 직군탭값) : '전체';
   const 정렬 = sp.sort === 'hot' ? 'hot' : 'new';
-  const 주소 = (t: 직군탭값, s: 'new' | 'hot') => {
-    const u = new URLSearchParams();
-    if (t !== '전체') u.set('job', t);
-    if (s === 'hot') u.set('sort', 'hot');
-    const q = u.toString();
-    return q ? `/community?${q}` : '/community';
-  };
+  const 주소 = (s: 'new' | 'hot') => (s === 'hot' ? '/community?sort=hot' : '/community');
 
   const sb = await serverSupabase();
   /* 비회원 — 맛보기 화면 (2026-11-13 세중님). 글은 한 줄도 안 내려보냅니다(익명 글 · components/rapo/rapo-guest-preview.tsx) */
   if (await serverWho(sb) === '비회원') return <RapoGuestPreview 갈래="community" />;
-  /* 2026-11-15 피그마 「학생·취준생 공간을 임상가 피드와 분리」 — 학생 방 글은 /community/student 에만 */
-  const 학생방 = CHANNELS.filter((c) => c.for === 'stu').map((c) => c.id);
-  const { data: 나 } = await sb.rpc('내프로필');
-  const 학생 = ((나 ?? []) as { role?: string | null }[])[0]?.role === '학생';
-  let q = sb.from('공개글').select('id,title,body,created_at,comment_count,profiles').not('channel', 'in', `(${학생방.join(',')})`);
-  if (탭 !== '전체') q = q.eq('profiles->>job_group', 탭);
+  /* 2026-11-15 세중님 「한 곳에서 다 같이 · 학생 임상가 모두 다」 — 직군·학생으로 거르지 않습니다 (DB 방볼수있나 도 모두 참 · 금고 SQL_1113/ZP) */
+  let q = sb.from('공개글').select('id,title,body,created_at,comment_count,profiles');
   q = 정렬 === 'hot'
     ? q.gte('created_at', daysAgoIso(7)).order('view_count', { ascending: false }).order('created_at', { ascending: false })
     : q.order('created_at', { ascending: false });
-  const { data, error } = await q.limit(20);
+  const [{ data, error }, { data: 광고 }] = await Promise.all([q.limit(20), sb.rpc('지금광고', { p_자리: '학생피드' })]);
+  const 소개줄 = ((광고 ?? []) as { 그림: string | null; 링크: string | null }[])[0];
 
   type 줄 = { id: number; title: string | null; body: string; created_at: string; comment_count: number;
     profiles: { nickname: string; avatar: string | null; erased_at: string | null; job_group?: string | null } | null };
@@ -85,7 +75,7 @@ export default async function Community({ searchParams }: { searchParams: Promis
   return (
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: 어둠.바탕 }}>
       <Hit kind="community" />
-      <RapoCommunityTop 탭={탭} 정렬={정렬} 주소={주소} 학생={학생} />
+      <RapoCommunityTop 정렬={정렬} 주소={주소} />
       <main className="mt-[6px]">
         {error ? (
           <RapoCommunityEmpty>
@@ -94,7 +84,12 @@ export default async function Community({ searchParams }: { searchParams: Promis
         ) : 보일글.length === 0 ? (
           <RapoCommunityEmpty />
         ) : (
-          보일글.map((p) => <RapoCommunityPost key={p.id} p={p} />)
+          보일글.map((p, i) => (
+            <Fragment key={p.id}>
+              <RapoCommunityPost p={p} />
+              {i === 0 && 소개줄?.그림 && <RapoCommunityPromo 그림={소개줄.그림} 링크={소개줄.링크} />}
+            </Fragment>
+          ))
         )}
       </main>
       {/* 글쓰기 단추·하단 탐색에 마지막 글이 가리지 않게 */}

@@ -34,36 +34,10 @@ export function 지난때(iso: string): string {
   return iso.slice(0, 10).replaceAll('-', '.');
 }
 
-export const 직군탭 = ['전체', '작업치료사', '물리치료사'] as const;
-export type 직군탭값 = (typeof 직군탭)[number];
-
-/* 직군 게시판 소개 — 원본 「작업치료사 게시판 · 소개」 1301:903 · 「물리치료사 게시판 · 소개」 1305:995
-   (U07-01 · U07 물리치료사 피드 · 2026-11-12). 108 높이 · 둥근 14 · 제목 22 Bold · 설명 14 Medium · 오른쪽 그림 134×100.
-   바탕·글 색은 원본 값 그대로입니다(직군마다 바탕이 다름) */
-const 직군소개: Record<Exclude<직군탭값, '전체'>, { 바탕: string; 설명: [string, string]; 그림: string; 그림폭: number }> = {
-  작업치료사: { 바탕: '#203b41', 설명: ['치료실에서 써 본 도구부터', '일상생활 훈련 이야기까지'], 그림: '/rapo/community/intro-ot.svg', 그림폭: 134 },
-  물리치료사: { 바탕: '#26334d', 설명: ['보행 훈련 준비부터', '치료실에서 써 본 도구까지'], 그림: '/rapo/community/intro-pt.svg', 그림폭: 132 },
-};
-
-function 직군소개카드({ 탭 }: { 탭: Exclude<직군탭값, '전체'> }) {
-  const c = 직군소개[탭];
-  return (
-    <section aria-label={`${탭} 게시판 소개`} className="relative mx-[22px] mt-[16px] h-[108px] overflow-hidden rounded-[14px]" style={{ background: c.바탕 }}>
-      <p className="absolute left-[16px] top-[18px] text-[22px] font-bold leading-[28px] text-[#f4f8f5]">{탭} 게시판</p>
-      <p className="absolute left-[16px] top-[54px] text-[14px] font-medium leading-[20px] text-[#c8deda]">{c.설명[0]}<br />{c.설명[1]}</p>
-      {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-      <img src={c.그림} alt="" width={c.그림폭} height={100} className="absolute right-0 top-[7px]" />
-    </section>
-  );
-}
-
-/* 상단 — 「커뮤니티」 제목 · 직군 탭 · 이용 안내 · 「○○ 게시글」과 정렬.
-   「병원 찾기」는 지금 있는 기관 찾기(/orgs)로 잇습니다 */
-export function RapoCommunityTop({ 탭, 정렬, 주소, 학생 = false }: {
-  탭: 직군탭값; 정렬: 'new' | 'hot'; 주소: (탭: 직군탭값, 정렬: 'new' | 'hot') => string;
-  /* 학생 회원이면 맨 아래에 「학생·취준생 공간 ›」 띠 (피그마 「학생 회원 · 공개 피드 상단」 1308:32004) */
-  학생?: boolean;
-}) {
+/* 상단 — 「커뮤니티」 제목 · 이용 안내 · 「전체 게시글」과 정렬. 「병원 찾기」는 기관 찾기(/orgs)로.
+   ★ 2026-11-15 세중님 「작업치료사 물리치료사 나누지 말고 한 곳에서 다 같이 · 학생 임상가 모두 다」 —
+     직군 탭(전체·작업치료사·물리치료사)과 직군 소개 카드, 학생·취준생 공간을 뺐습니다. 글에는 「닉네임 · 직군 · 시간」만 */
+export function RapoCommunityTop({ 정렬, 주소 }: { 정렬: 'new' | 'hot'; 주소: (정렬: 'new' | 'hot') => string }) {
   return (
     <header className="flex flex-col">
       <div className="flex h-[56px] items-center px-[22px]">
@@ -74,20 +48,8 @@ export function RapoCommunityTop({ 탭, 정렬, 주소, 학생 = false }: {
           병원 찾기
         </Link>
       </div>
-      <nav aria-label="직군" className="mx-[22px] mt-[16px] flex h-[44px]">
-        {직군탭.map((t) => (
-          <Link key={t} href={주소(t, 정렬)} aria-current={t === 탭 ? 'page' : undefined}
-            className="relative flex min-w-0 flex-1 items-center justify-center text-[14px] font-bold leading-[20px]"
-            style={{ color: 어둠.글 }}>
-            {t}
-            {t === 탭 && <span aria-hidden className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: 어둠.밑줄 }} />}
-          </Link>
-        ))}
-      </nav>
-      {/* 직군 탭이면 그 직군 게시판 소개 카드 (원본 U07 순서: 탭 → 소개 → 이용 안내 → 최근 이야기) */}
-      {탭 !== '전체' && <직군소개카드 탭={탭} />}
       {/* RAPO / Callout / 공지 · 다크 — 커뮤니티 이용 규칙(/terms/community)으로 갑니다 */}
-      <Link href="/terms/community" className="mx-[22px] mt-[12px] flex h-[40px] items-center gap-[12px] rounded-[8px] px-[13px]"
+      <Link href="/terms/community" className="mx-[22px] mt-[16px] flex h-[40px] items-center gap-[12px] rounded-[8px] px-[13px]"
         style={{ background: 어둠.면 }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/community/notice-18.svg" alt="" width={18} height={18} />
@@ -95,21 +57,12 @@ export function RapoCommunityTop({ 탭, 정렬, 주소, 학생 = false }: {
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/community/next-14.svg" alt="" width={14} height={14} />
       </Link>
-      {학생 && (
-        <Link href="/community/student" className="mx-[22px] mt-[8px] flex h-[52px] items-center gap-[12px] rounded-[8px] px-[16px]"
-          style={{ background: '#264e58' }}>
-          <span className="min-w-0 flex-1 text-[15px] font-bold leading-[22px] text-white">학생·취준생 공간</span>
-          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-          <img src="/rapo/community/next-14.svg" alt="" width={14} height={14} />
-        </Link>
-      )}
       <div className="mx-[22px] mt-[24px] flex h-[32px] items-center">
         <h2 className="min-w-0 flex-1 text-[22px] font-bold leading-[32px]" style={{ color: 어둠.글 }}>
-          {/* 원본: 전체 피드는 「전체 게시글」, 직군 피드(U07)는 「최근 이야기」 */}
-          {탭 === '전체' ? '전체 게시글' : '최근 이야기'}
+          전체 게시글
         </h2>
         {/* 정렬 — 누르면 최신순 ↔ 인기순(최근 7일 조회 많은 순) */}
-        <Link href={주소(탭, 정렬 === 'new' ? 'hot' : 'new')}
+        <Link href={주소(정렬 === 'new' ? 'hot' : 'new')}
           className="flex h-[44px] items-center gap-[4px] text-[14px] leading-[20px]" style={{ color: 어둠.흐린글 }}
           aria-label={`정렬 바꾸기 · 지금 ${정렬 === 'new' ? '최신순' : '인기순'}`}>
           {정렬 === 'new' ? '최신순' : '인기순'}
@@ -167,7 +120,7 @@ export function RapoCommunityPost({ p }: { p: 커뮤니티글 }) {
 }
 
 /* 글쓰기 (1266:1960) — 128×44 · 둥근 22 · 아래 탐색 위에 떠 있음 */
-export function RapoCommunityWrite({ href, 글 = '내 직군 글쓰기' }: { href: string; 글?: string }) {
+export function RapoCommunityWrite({ href, 글 = '글쓰기' }: { href: string; 글?: string }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-[calc(72px+12px+env(safe-area-inset-bottom))] z-30 mx-auto flex w-full max-w-3xl justify-end px-[22px]">
       <Link href={href} className="pointer-events-auto flex h-[44px] items-center gap-[7px] rounded-[22px] pl-[12px] pr-[16px] text-[14px] font-bold leading-[20px] shadow-(--rapo-shadow-s2)"
@@ -187,6 +140,21 @@ export function RapoCommunityEmpty({ children }: { children?: ReactNode }) {
       <p className="text-[24px] font-bold leading-[35px]" style={{ color: 어둠.글 }}>아직 이야기가 없어요</p>
       <p className="text-[15px] leading-[23px]" style={{ color: 어둠.흐린글 }}>궁금한 점이나 나누고 싶은 경험을 첫 글로 남겨 보세요.</p>
       {children}
+    </div>
+  );
+}
+
+/* 글 사이 라포 소개 그림 — 광고배너 자리 「학생피드」(이름은 그대로 · 관리자 → 광고 「커뮤니티 글 사이」에서 바꿈).
+   2026-11-15 세중님 「광고는 넣지 말고 라포를 광고하는 이미지 하나 · 관리자에서 수정」 · 피드가 하나로 합쳐져 커뮤니티 피드 첫 글 아래에 둡니다 */
+export function RapoCommunityPromo({ 그림, 링크 }: { 그림: string; 링크: string | null }) {
+  const 몸 = (
+    /* eslint-disable-next-line @next/next/no-img-element -- 관리자가 올린 그림(또는 기본 라포 소개 그림) */
+    <img src={그림} alt="RAPO 소개" className="block h-auto w-full" />
+  );
+  return (
+    <div className="px-[22px] pb-[26px]">
+      <p className="mb-[8px] text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>RAPO 소개</p>
+      <div className="overflow-hidden rounded-[12px]">{링크 ? <Link href={링크}>{몸}</Link> : 몸}</div>
     </div>
   );
 }
