@@ -30,8 +30,9 @@ const 서류: Record<갈래, { 이름: string; 필수: boolean; 설명?: string 
     { 이름: '사업자등록증', 필수: true },
     { 이름: '사원증 또는 재직증명서', 필수: true, 설명: '둘 중 하나면 돼요' },
   ],
+  /* 2026-11-15 세중님 「교육기관·학회는 사업자등록증 없어도 돼 · 개인 강사와 마찬가지」 */
   기관: [
-    { 이름: '사업자등록증 또는 고유번호증', 필수: true, 설명: '학회·협회는 고유번호증' },
+    { 이름: '활동 이력', 필수: true, 설명: '학회·협회 소개 자료나 지난 교육 안내 하나면 돼요' },
   ],
   개인: [
     { 이름: '활동 이력', 필수: true, 설명: '교육 자료나 강의 사진 하나면 돼요' },
@@ -139,10 +140,10 @@ function Body() {
             </>
           )}
 
-          {g !== '개인' && (
+          {g === '채용' && (
             <div className="flex flex-col gap-(--rapo-dimension-x2)">
               <label className="flex flex-col gap-(--rapo-dimension-x2)">
-                <이름표 필수 덧={g === '기관' ? '고유번호증이면 고유번호를 넣어 주세요' : undefined}>사업자등록번호</이름표>
+                <이름표 필수>사업자등록번호</이름표>
                 <span className="flex gap-(--rapo-dimension-x2)">
                   <input className={칸 + ' flex-1'} inputMode="numeric" placeholder="숫자 10자리" defaultValue={채움 ? '1234567890' : ''} key={'b' + 채움} />
                   <button type="button"
