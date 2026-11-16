@@ -9,13 +9,14 @@ import { RapoInstallToastFace, type 설치갈래 } from '@/components/rapo/rapo-
    개발 서버에서만 열립니다(배포에서는 404).
      ?b=prompt       크롬·엣지 — 「설치하기」 단추
      ?b=mac-safari   맥 사파리 — 「파일 → Dock에 추가」 안내
-     ?b=ios          아이폰 사파리 — 「공유 → 홈 화면에 추가」 안내 */
+     ?b=ios          아이폰 사파리 — 「공유 → 홈 화면에 추가」 안내
+     ?b=kakao        카카오톡 안 — 「브라우저에서 열기」 단추 · ?b=inapp 다른 앱 안 · ?b=android 신호 없는 안드로이드 */
 export const metadata: Metadata = { title: 'RAPO · 설치 안내 미리보기', robots: { index: false } };
 
 export default async function DesignPreviewInstall({ searchParams }: { searchParams: Promise<{ b?: string }> }) {
   if (process.env.NODE_ENV === 'production') notFound();
   const { b } = await searchParams;
-  const 갈래: 설치갈래 = b === 'mac-safari' || b === 'ios' ? b : 'prompt';
+  const 갈래: 설치갈래 = b === 'mac-safari' || b === 'ios' || b === 'inapp' || b === 'kakao' || b === 'android' ? b : 'prompt';
   return (
     <>
       <HomeU01 jobs={<RapoJobList lists={견본공고} />} who="회원" sample />
