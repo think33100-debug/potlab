@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
-import { CompareNotify } from '@/components/compare-notify';
+import { CompareNotify, useCompareApplied } from '@/components/compare-notify';
 import { RapoMeFrame } from '@/components/rapo/rapo-me';
 import { RapoButton } from '@/components/rapo/rapo-ui';
 import { JOB_GROUPS, type JobGroup } from '@/lib/who';
@@ -46,6 +46,7 @@ function Soon() {
   const m: 꼴 = 메뉴[k] ?? { 제목: '준비 중', 큰글: '곧 열려요', 설명: '아직 비어 있는 화면이에요.' };
   const { session, me } = useAuth();
   const [창, set창] = useState(false);
+  const [신청됨, 다시읽기] = useCompareApplied(m.알림 ? session?.user.id : null);
   return (
     <RapoMeFrame title={m.제목}>
       {() => (
@@ -70,7 +71,13 @@ function Soon() {
 
           <div className="flex flex-col gap-(--rapo-dimension-x3)">
             <p className="rapo-type-t6-bold text-(color:--rapo-color-fg-neutral)">아직 오픈 전 기능이에요!</p>
-            {m.알림 && (
+            {/* 가입 때 신청한 분은 「이미 신청했어요」 (2026-11-16 세중님) — 본인 줄만 읽힙니다 */}
+            {m.알림 && 신청됨 === true && (
+              <p className="rapo-type-t4-medium break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral)">
+                이미 오픈 알림을 신청했어요. 서비스가 열리면 이메일로 알려 드릴게요.
+              </p>
+            )}
+            {m.알림 && 신청됨 === false && (
               <>
                 <p className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral-muted)">오픈 알림을 받고 싶다면 알림 신청을 눌러주세요.</p>
                 <RapoButton onClick={() => set창(true)} tone="deep-coral" full>알림 신청</RapoButton>
@@ -81,7 +88,7 @@ function Soon() {
           {창 && session && (
             <CompareNotify userId={session.user.id}
               job={(JOB_GROUPS as readonly string[]).includes(me?.job_group ?? '') ? (me!.job_group as JobGroup) : null}
-              email={session.user.email ?? null} onDone={() => set창(false)} />
+              email={session.user.email ?? null} 끝단추="확인" onDone={() => { set창(false); 다시읽기(); }} />
           )}
         </div>
       )}

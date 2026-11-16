@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useAuth } from '@/app/auth';
 import { 표없음 } from '@/lib/beta';
 import { RapoButton } from '@/components/rapo/rapo-ui';
 import { 비교알림동의, 비교창, 연락처꼴, 연봉구간, 연봉물음 } from '@/lib/beta-compare';
@@ -22,15 +23,19 @@ import { JOB_GROUPS, type JobGroup } from '@/lib/who';
 
    ── 누가 무엇을 보나 ─────────────────────────────────────────
    두 표 모두 **본인은 자기 줄을 넣기만**, 읽기는 관리자만입니다 (RLS).
+   ★ 2026-11-16 세중님 「가입 때 신청한 사람이 내 정보에서 이미 신청했어요가 안 떠」 — 비교알림신청은 **본인 줄의 사람·신청때 두 칸만** 읽게 열었습니다
+     (정책 「내 신청 줄만 봅니다」 · 연락처·직군·연봉 구간은 그대로 못 읽음 · 금고 SQL 은 대화에 적음).
    연락처는 회원 화면 어디에도 다시 그리지 않습니다. */
 export function CompareNotify({
-  userId, job, email, onDone,
+  userId, job, email, onDone, 끝단추 = '가입 이어서 하기',
 }: {
   userId: string;
   job: JobGroup | null;
   /** 로그인 수단이 준 이메일 — 연락처 칸을 미리 채우는 데만 씁니다 (고칠 수 있습니다) */
   email: string | null;
   onDone: () => void;
+  /** 신청을 마친 뒤 단추 글 — 내 정보에서 열 때는 「확인」 */
+  끝단추?: string;
 }) {
   const [단계, set단계] = useState<'묻기' | '적기' | '끝'>('묻기');
   const [연락처, set연락처] = useState(email ?? '');
@@ -176,11 +181,52 @@ export function CompareNotify({
           <>
             <h2 id="compare-notify-title" className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">{끝말}</h2>
             <div className="mt-(--rapo-dimension-x6)">
-              <RapoButton full onClick={onDone}>가입 이어서 하기</RapoButton>
+              <RapoButton full onClick={onDone}>{끝단추}</RapoButton>
             </div>
           </>
         )}
       </div>
     </div>
+  );
+}
+
+/** 연봉·스펙 비교 알림을 이미 신청했나 — null 은 아직 모름(읽는 중). 본인 줄만 읽힙니다 (정책 「내 신청 줄만 봅니다」) */
+export function useCompareApplied(userId: string | null | undefined): [boolean | null, () => void] {
+  /* 읽은 값은 「누구 것 · 몇 번째 읽기」와 함께 둡니다 — 사람이 바뀌면 옛 값을 안 씁니다 */
+  const [읽음, set읽음] = useState<{ 열쇠: string; 됨: boolean } | null>(null);
+  const [판, set판] = useState(0);
+  const 열쇠 = userId ? `${userId}:${판}` : '';
+  useEffect(() => {
+    if (!userId) return;
+    browserSupabase().from('비교알림신청').select('사람').eq('사람', userId).limit(1)
+      .then(({ data, error }) => set읽음({ 열쇠: `${userId}:${판}`, 됨: error ? false : (data ?? []).length > 0 }));
+  }, [userId, 판]);
+  const 됨 = !userId ? false : 읽음?.열쇠 === 열쇠 ? 읽음.됨 : null;
+  return [됨, () => set판((n) => n + 1)];
+}
+
+/* 내 정보 「알림 설정」과 준비 중 화면(/me/soon)의 연봉·스펙 비교 알림 칸 (2026-11-16 세중님 「내 정보에서도 신청 · 이미 신청했어요」).
+   앱 출시 알림 칸(rapo-install RapoAppLaunchNotify)과 같은 꼴입니다. 신청은 가입 때와 같은 창(CompareNotify) · 같은 표.
+   취소 단추는 없습니다 — 회원은 표에서 지울 수 없게 되어 있습니다(문의로 받음 · 처리방침 「신청 취소하면 바로 파기」) */
+export function RapoCompareNotifyCard({ 견본 = false }: { 견본?: boolean }) {
+  const { session, me } = useAuth();
+  const [됨, 다시] = useCompareApplied(견본 ? null : session?.user.id);
+  const [창, set창] = useState(false);
+  const 신청됨 = !견본 && 됨 === true;
+  return (
+    <section className="flex flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
+      <p className="rapo-type-t5-bold break-keep text-(color:--rapo-color-fg-neutral)">연봉 · 스펙 비교 오픈 알림</p>
+      <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
+        {신청됨 ? '이미 신청했어요. 서비스가 열리면 이메일로 알려 드릴게요' : '내 연봉과 스펙을 같은 직군·연차와 견주는 서비스예요. 열리면 이메일로 한 번 알려 드려요'}
+      </p>
+      {!신청됨 && (
+        <RapoButton tone="navy" size={52} full disabled={!견본 && 됨 === null} onClick={() => { if (!견본 && session) set창(true); }}>알림 신청하기</RapoButton>
+      )}
+      {창 && session && (
+        <CompareNotify userId={session.user.id}
+          job={(JOB_GROUPS as readonly string[]).includes(me?.job_group ?? '') ? (me!.job_group as JobGroup) : null}
+          email={session.user.email ?? null} 끝단추="확인" onDone={() => { set창(false); 다시(); }} />
+      )}
+    </section>
   );
 }
