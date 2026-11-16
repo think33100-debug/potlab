@@ -5,7 +5,7 @@
    열쇠   서버 .env 의 GDRIVE_CLIENT_ID · GDRIVE_CLIENT_SECRET · GDRIVE_REFRESH_TOKEN
           값은 화면에 안 찍습니다 (지침 8-11) — 길이와 앞 4글자만
 
-   node tools/reels/drive.mjs --인증     처음 한 번 (클라이언트 ID·비밀번호를 물어 .env 에 적고, 코드를 띄웁니다)
+   node tools/reels/drive.mjs --인증 [--새로]   처음 한 번 (--새로 = ID·비밀번호를 다시 넣음) (클라이언트 ID·비밀번호를 물어 .env 에 적고, 코드를 띄웁니다)
    node tools/reels/drive.mjs --시험     글 파일 하나를 올려 링크를 찍습니다
 
    ★ 2026-11-16 에 구글 문서 원문을 못 열었습니다 (이 세션에서 developers.google.com 막힘).
@@ -112,10 +112,17 @@ export async function 릴스올리기({ mp4, 표지, 캡션, 이름, 달 }) {
 
 /* ── 처음 한 번: 인증 ── */
 async function 인증() {
+  const 새로 = process.argv.includes('--새로');      /* 잘못 넣은 ID·비밀번호를 다시 넣을 때 */
   const cfg = env();
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  if (!cfg.GDRIVE_CLIENT_ID) env적기('GDRIVE_CLIENT_ID', (await rl.question('클라이언트 ID 를 붙여 넣으세요: ')).trim());
-  if (!cfg.GDRIVE_CLIENT_SECRET) env적기('GDRIVE_CLIENT_SECRET', (await rl.question('클라이언트 보안 비밀번호를 붙여 넣으세요: ')).trim());
+  if (새로 || !cfg.GDRIVE_CLIENT_ID) {
+    const id = (await rl.question('클라이언트 ID 를 붙여 넣으세요 (….apps.googleusercontent.com 으로 끝납니다): ')).trim();
+    if (!/^[0-9]+-[0-9a-z]+\.apps\.googleusercontent\.com$/.test(id)) {
+      console.error(`  ✗ 클라이언트 ID 모양이 아닙니다 · 길이 ${id.length} · 앞 4 ${id.slice(0, 4)} · 끝 ${id.slice(-12)} — 다시 복사해 주세요`); rl.close(); process.exit(1);
+    }
+    env적기('GDRIVE_CLIENT_ID', id);
+  }
+  if (새로 || !cfg.GDRIVE_CLIENT_SECRET) env적기('GDRIVE_CLIENT_SECRET', (await rl.question('클라이언트 보안 비밀번호를 붙여 넣으세요 (GOCSPX- 로 시작): ')).trim());
   rl.close();
   const c = env();
   const r = await fetch('https://oauth2.googleapis.com/device/code', {
