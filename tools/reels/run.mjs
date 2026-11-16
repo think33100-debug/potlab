@@ -22,7 +22,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { 릴스자료, 오늘KST, 일층인가, 같은공고묶기 } from './reel-data.mjs';
+import { 릴스자료, 오늘KST, 일층인가, 같은공고묶기, 사진찾기 } from './reel-data.mjs';
 import { 모두받기, 받아보기 } from '../쪽나눠받기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -57,6 +57,7 @@ const 한건 = 인수('id');
 const 오늘 = 오늘KST();
 const 나감 = 인수('나감', path.join(ROOT, 'log', 'reels', 오늘));
 const 기록파일 = path.join(ROOT, 'log', '릴스_올림.json');
+const 사진목록 = JSON.parse(fs.readFileSync(path.join(여기, 'photos.json'), 'utf8'));   /* 허락받은 기관만 */
 const 기록 = fs.existsSync(기록파일) ? JSON.parse(fs.readFileSync(기록파일, 'utf8')) : {};
 
 async function rest(길) {
@@ -105,6 +106,8 @@ for (const 공고 of 같은공고묶기(일층)) {
   const 자료 = 릴스자료(공고, 공고.기관, { 오늘, 사이트: 'rapojob.co.kr' });
   if (자료.건너뜀) { console.log('  건너뜀', 공고.id, 공고.org_name, '—', 자료.건너뜀); continue; }
   자료.묶은id = 공고.묶은id || [공고.id];
+  const 사진 = 사진찾기(자료.기관, 사진목록);
+  if (사진) { 자료.사진 = path.resolve(여기, 사진.파일); 자료.사진출처 = 사진.출처; }
   할것.push(자료);
 }
 /* 마감이 가까운 것부터 — 늦게 올리면 쓸모가 없어집니다 */

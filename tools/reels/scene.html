@@ -31,10 +31,29 @@
   .chip.weak { background: rgba(255,255,255,0.12); color: var(--white); }
 
   /* 1 · 걸기 */
-  #s1 .org { left: 80px; right: 120px; top: 560px; font-size: 92px; font-weight: 800; line-height: 1.18; }
-  #s1 .role { left: 80px; right: 120px; top: 0; font-size: 120px; font-weight: 800; color: var(--coral); line-height: 1.1; }
-  #s1 .chips { left: 80px; right: 120px; top: 440px; }
-  #s1 .sub { left: 80px; right: 120px; font-size: 44px; font-weight: 600; color: rgba(255,255,255,0.78); }
+  /* 1 · 걸기 — 0초 첫 프레임에 글이 다 보입니다 (릴스는 첫 프레임이 표지이자 걸기입니다) */
+  #bgphoto { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(28px) brightness(0.55); opacity: 0; }
+  #s1 .photo { left: 0; top: 0; width: 1080px; height: 1020px; overflow: hidden; display: none; }
+  #s1 .photo img { width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 60%; }
+  #s1 .photo::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(17,34,49,0.55) 0%, rgba(17,34,49,0) 28%, rgba(17,34,49,0) 55%, var(--navy) 100%); }
+  #s1 .hook { left: 80px; right: 120px; top: 560px; }
+  body.has-photo #s1 .hook { top: 860px; }
+  #s1 .small { display: inline-block; font-size: 46px; font-weight: 700; color: var(--white); background: rgba(255,255,255,0.14);
+    padding: 10px 22px; border-radius: 12px; }
+  #s1 .big { margin-top: 26px; font-size: 104px; font-weight: 800; line-height: 1.14; white-space: pre-line; }
+  #s1 .big .em { position: relative; color: var(--coral); }
+  #s1 .big .em i { position: absolute; left: -6px; right: -6px; bottom: 6px; height: 34px; background: rgba(255,79,64,0.28);
+    transform-origin: 0 50%; z-index: -1; }
+  #s1 .chips { margin-top: 34px; }
+  #s1 .dday { right: 70px; top: 360px; width: 230px; height: 230px; border-radius: 50%; background: var(--coral);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--white);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35); }
+  body.has-photo #s1 .dday { top: 700px; }
+  #s1 .dday b { font-size: 76px; font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
+  #s1 .dday span { font-size: 30px; font-weight: 700; margin-top: 6px; }
+  #draft { left: 0; right: 0; top: 1560px; text-align: center; font-size: 34px; font-weight: 800; color: #FFE600;
+    background: rgba(0,0,0,0.55); padding: 14px 0; display: none; }
 
   /* 흰 판 (2 · 3) — OG 의 열린 테두리 */
   .panel { left: 60px; width: 960px; top: 420px; min-height: 720px; background: var(--white); color: var(--ink); }
@@ -69,7 +88,8 @@
   #s4 .cta .b { font-size: 36px; font-weight: 600; color: var(--muted); margin-top: 18px; }
   #s4 .cta .go { display: inline-flex; margin-top: 30px; height: 84px; padding: 0 40px; align-items: center; border-radius: 16px; background: var(--coral); color: var(--white); font-size: 40px; font-weight: 800; }
 
-  #bar { left: 0; top: 0; height: 10px; background: var(--coral); }
+  #bar { left: 0; top: 0; height: 10px; background: var(--coral); z-index: 5; }
+  #top { z-index: 5; }
 </style>
 </head>
 <body>
@@ -80,11 +100,15 @@
   <div class="new" id="newtag"></div>
 </div>
 
+<div id="bgphoto"></div>
 <section id="s1" class="scene">
-  <div class="chips abs" id="s1chips"></div>
-  <div class="org abs" id="s1org"></div>
-  <div class="role abs" id="s1role"></div>
-  <div class="sub abs" id="s1sub"></div>
+  <div class="photo abs" id="s1photo"><img id="s1img" alt=""></div>
+  <div class="hook abs" id="s1hook">
+    <div class="small" id="s1small"></div>
+    <div class="big" id="s1big"></div>
+    <div class="chips" id="s1chips"></div>
+  </div>
+  <div class="dday abs" id="s1dday"><b id="s1ddayb"></b><span>마감</span></div>
 </section>
 
 <section id="s2" class="scene">
@@ -122,6 +146,7 @@
     <div class="go" id="s4go">프로필 링크 → RAPO</div>
   </div>
 </section>
+<div id="draft" class="abs">내부 시안 · 사진 사용 허가 확인 전 · 게시 금지</div>
 
 <script>
 /* ── 시간표 (밀리초) ── */
@@ -150,9 +175,19 @@ window.__setData = (d) => {
   LEN = T.s4[1]; window.__LEN = LEN;
   $('newtag').textContent = d.새공고 || '새 공고';
   $('s1chips').innerHTML = (d.분류 || []).map((k, i) => `<span class="chip${i ? ' weak' : ''}">${esc(k)}</span>`).join('');
-  $('s1org').textContent = d.기관;
-  $('s1role').textContent = d.걸기 || (d.직군 + ' 채용');
-  $('s1sub').textContent = d.한줄 || '';
+  const 훅 = d.훅 || { 작은: d.기관, 큰: d.기관 + '\n' + (d.걸기 || d.직군 + ' 채용'), 강조: d.직군 };
+  $('s1small').textContent = 훅.작은;
+  /* 큰 글 안의 강조 낱말에 형광펜 */
+  const 큰 = esc(훅.큰);
+  $('s1big').innerHTML = 훅.강조 && 큰.includes(esc(훅.강조))
+    ? 큰.replace(esc(훅.강조), `<span class="em"><i></i>${esc(훅.강조)}</span>`) : 큰;
+  $('s1ddayb').textContent = d.마감.큰글;
+  if (d.사진) {
+    document.body.classList.add('has-photo');
+    $('s1img').src = d.사진; $('s1photo').style.display = 'block';
+    $('bgphoto').style.backgroundImage = `url("${d.사진}")`;
+  }
+  if (d.시안) $('draft').style.display = 'block';
 
   $('s2org').textContent = d.기관;
   $('s2meta').textContent = (d.소개.메타 || []).join(' · ');
@@ -201,15 +236,20 @@ window.__seek = (t) => {
 
   /* 1 · 걸기 */
   const s1 = $('s1'); s1.style.opacity = sceneAlpha(t, T.s1, 0, 300);
-  slideUp($('s1chips'), t, 80);
-  slideUp($('s1org'), t, 220, 80);
-  const orgH = $('s1org').getBoundingClientRect().height || 110;
-  $('s1role').style.top = (560 + orgH + 16) + 'px';
-  slideUp($('s1role'), t, 420, 80);
-  $('s1sub').style.top = (560 + orgH + 16 + $('s1role').getBoundingClientRect().height + 40) + 'px';
-  slideUp($('s1sub'), t, 700);
-  const zoom = 1 + 0.03 * clamp(t / T.s1[1]);
-  s1.style.transform = `scale(${zoom})`; s1.style.transformOrigin = '0 50%';
+  /* 0초에 이미 다 보입니다 — 살짝 커졌다 자리 잡는 것만 */
+  const p0 = ease(t / 500);
+  $('s1hook').style.transform = `scale(${1.05 - 0.05 * p0})`; $('s1hook').style.transformOrigin = '0 0';
+  const 펜 = document.querySelector('#s1big .em i');
+  if (펜) 펜.style.transform = `scaleX(${ease((t - 250) / 450)})`;
+  /* D-day 딱지 — 튀어나옴(넘침) + 살짝 흔들 */
+  const pd = clamp((t - 350) / 420);
+  const 넘침 = pd < 1 ? 1 + 0.25 * Math.sin(pd * Math.PI) : 1;
+  const dd = $('s1dday');
+  dd.style.opacity = pd > 0 ? 1 : 0;
+  dd.style.transform = `scale(${ease(pd) * 넘침}) rotate(${-10 + 4 * Math.sin(t / 260)}deg)`;
+  if (D.사진) $('s1img').style.transform = `scale(${1.04 + 0.10 * clamp(t / T.s1[1])})`;
+  /* 흐린 사진 바탕은 소개 장면까지 남깁니다 */
+  $('bgphoto').style.opacity = D.사진 ? (t < (T.s2[1] > 0 ? T.s2[1] : T.s1[1]) ? 1 : Math.max(0, 1 - (t - (T.s2[1] > 0 ? T.s2[1] : T.s1[1])) / 400)) : 0;
 
   /* 2 · 기관 소개 */
   const s2 = $('s2'); s2.style.opacity = sceneAlpha(t, T.s2);

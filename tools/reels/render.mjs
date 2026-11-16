@@ -1,6 +1,6 @@
 /* 릴스 자료(JSON) → 1080×1920 · 30fps · H.264 + AAC mp4 (2026-11-16)
 
-   node tools/reels/render.mjs --자료 <reel.json> --나감 <out.mp4> [--음악 <음악파일>] [--표지 <cover.jpg>]
+   node tools/reels/render.mjs --자료 <reel.json> --나감 <out.mp4> [--음악 <음악파일>] [--표지 <cover.jpg>] [--시안사진 <사진>]
 
    · scene.html 을 Playwright 로 열고 __seek(t) 를 프레임마다 불러 JPEG 로 찍어 ffmpeg 에 바로 흘립니다
    · 음악이 없으면 music-placeholder.mjs 로 합성한 자리 채움 소리를 씁니다
@@ -27,6 +27,10 @@ const 표지 = 인수('표지');
 const FPS = 30;
 if (!자료파일) { console.error('--자료 <reel.json> 가 필요합니다'); process.exit(2); }
 const 자료 = JSON.parse(fs.readFileSync(자료파일, 'utf8'));
+/* --시안사진 <파일> — 허락 전 사진으로 **내부 시안**만. 화면에 「게시 금지」 도장이 찍힙니다 */
+const 시안사진 = 인수('시안사진');
+if (시안사진) { 자료.사진 = pathToFileURL(path.resolve(시안사진)).href; 자료.시안 = true; }
+else if (자료.사진 && !/^file:/.test(자료.사진)) 자료.사진 = pathToFileURL(path.resolve(path.dirname(자료파일), 자료.사진)).href;
 
 if (!음악) {
   음악 = path.join(os.tmpdir(), 'rapo-reel-placeholder.wav');
