@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/app/toast';
 import NotifyToggle from '@/components/notify-toggle';
 import { RapoAppLaunchNotify } from './rapo-install';
+import { RapoCompareNotifyCard } from '@/components/compare-notify';
 import { RapoButton, RapoDivider } from './rapo-ui';
 import { browserSupabase } from '@/lib/supabase-browser';
 
@@ -57,6 +58,8 @@ export function RapoNotifySettings({ 미리켬 = false }: { 미리켬?: boolean 
       <RapoDivider />
       {/* 앱 출시 알림 — 설치 화면과 같은 칸 (2026-11-14) */}
       <RapoAppLaunchNotify 견본={미리켬} />
+      {/* 연봉·스펙 비교 오픈 알림 — 가입 때와 같은 신청 (2026-11-16 세중님 「내 정보에서도 신청」) */}
+      <RapoCompareNotifyCard 견본={미리켬} />
     </div>
   );
 }
