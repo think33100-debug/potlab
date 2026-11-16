@@ -106,3 +106,4 @@ tools/능력시험/원문/
 log/
 tools/능력시험/*.json
 tools/능력시험/원문*/
+tools/reels/photo-cache/

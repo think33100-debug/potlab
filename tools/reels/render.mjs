@@ -1,6 +1,6 @@
 /* 릴스 자료(JSON) → 1080×1920 · 30fps · H.264 + AAC mp4 (2026-11-16)
 
-   node tools/reels/render.mjs --자료 <reel.json> --나감 <out.mp4> [--음악 <음악파일>] [--표지 <cover.jpg>] [--시안사진 <사진>]
+   node tools/reels/render.mjs --자료 <reel.json> --나감 <out.mp4> [--음악 <음악파일>] [--표지 <cover.jpg>] [--사진 <사진> --사진출처 <이름>]
 
    · scene.html 을 Playwright 로 열고 __seek(t) 를 프레임마다 불러 JPEG 로 찍어 ffmpeg 에 바로 흘립니다
    · 음악이 없으면 music-placeholder.mjs 로 합성한 자리 채움 소리를 씁니다
@@ -27,12 +27,15 @@ const 표지 = 인수('표지');
 const FPS = 30;
 if (!자료파일) { console.error('--자료 <reel.json> 가 필요합니다'); process.exit(2); }
 const 자료 = JSON.parse(fs.readFileSync(자료파일, 'utf8'));
-/* --시안사진 <파일> — 허락 전 사진으로 **내부 시안**만. 화면에 「게시 금지」 도장이 찍힙니다 */
-const 시안사진 = 인수('시안사진');
-if (시안사진) { 자료.사진 = pathToFileURL(path.resolve(시안사진)).href; 자료.시안 = true; }
-else if (자료.사진 && !/^file:/.test(자료.사진)) 자료.사진 = pathToFileURL(path.resolve(path.dirname(자료파일), 자료.사진)).href;
+/* --사진 <파일> [--사진출처 <이름>] — 손으로 사진을 대어 볼 때 */
+if (인수('사진')) { 자료.사진 = pathToFileURL(path.resolve(인수('사진'))).href; 자료.사진출처 = 인수('사진출처') || 자료.기관; }
+if (자료.사진 && /^file:/.test(자료.사진)) { /* 그대로 */ }
+else if (자료.사진) 자료.사진 = pathToFileURL(path.resolve(path.dirname(자료파일), 자료.사진)).href;
 
-if (!음악) {
+/* --무음 — 소리 없는 영상. 인스타 앱에서 손으로 올리며 그때 인기곡을 붙이는 길 (API 로는 인스타 음악을 못 붙입니다) */
+const 무음 = process.argv.includes('--무음');
+if (무음) 음악 = 'anullsrc=r=48000:cl=stereo';
+else if (!음악) {
   음악 = path.join(os.tmpdir(), 'rapo-reel-placeholder.wav');
   const r = spawnSync(process.execPath, [path.join(여기, 'music-placeholder.mjs'), 음악, '15'], { stdio: 'inherit' });
   if (r.status !== 0) process.exit(1);
@@ -49,13 +52,15 @@ if (!글꼴.some((x) => x.includes('PretendardV') && x.endsWith('loaded'))) {
   await page.evaluate(() => window.__seek(1000));
   await page.evaluate(() => document.fonts.ready);
 }
+/* 글꼴이 다 온 뒤에 한 번 더 — 긴 이름 줄이기가 실제 글꼴 폭으로 재도록 */
+await page.evaluate((d) => window.__setData(d), 자료);
 const LEN = await page.evaluate(() => window.__LEN);
 const 장수 = Math.round((LEN / 1000) * FPS);
 
 const ff = spawn('ffmpeg', [
   '-y', '-loglevel', 'error',
   '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-  '-i', 음악,
+  ...(무음 ? ['-f', 'lavfi', '-i', 음악] : ['-i', 음악]),
   '-map', '0:v', '-map', '1:a',
   '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-profile:v', 'high',
   '-r', String(FPS), '-g', String(FPS * 2),

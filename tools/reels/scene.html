@@ -41,7 +41,8 @@
   body.has-photo #s1 .hook { top: 860px; }
   #s1 .small { display: inline-block; font-size: 46px; font-weight: 700; color: var(--white); background: rgba(255,255,255,0.14);
     padding: 10px 22px; border-radius: 12px; }
-  #s1 .big { margin-top: 26px; font-size: 104px; font-weight: 800; line-height: 1.14; white-space: pre-line; }
+  #s1 .big { margin-top: 26px; font-size: 104px; font-weight: 800; line-height: 1.14; }
+  #s1 .big .ln { white-space: nowrap; overflow: visible; }
   #s1 .big .em { position: relative; color: var(--coral); }
   #s1 .big .em i { position: absolute; left: -6px; right: -6px; bottom: 6px; height: 34px; background: rgba(255,79,64,0.28);
     transform-origin: 0 50%; z-index: -1; }
@@ -52,8 +53,9 @@
   body.has-photo #s1 .dday { top: 700px; }
   #s1 .dday b { font-size: 76px; font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
   #s1 .dday span { font-size: 30px; font-weight: 700; margin-top: 6px; }
-  #draft { left: 0; right: 0; top: 1560px; text-align: center; font-size: 34px; font-weight: 800; color: #FFE600;
-    background: rgba(0,0,0,0.55); padding: 14px 0; display: none; }
+  /* 사진 출처 — 사진이 보이는 동안 맨 아래(인스타 글자가 덮기 전 줄) */
+  #credit { left: 80px; right: 140px; top: 1500px; font-size: 30px; font-weight: 600; color: rgba(255,255,255,0.82);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6); opacity: 0; }
 
   /* 흰 판 (2 · 3) — OG 의 열린 테두리 */
   .panel { left: 60px; width: 960px; top: 420px; min-height: 720px; background: var(--white); color: var(--ink); }
@@ -146,7 +148,7 @@
     <div class="go" id="s4go">프로필 링크 → RAPO</div>
   </div>
 </section>
-<div id="draft" class="abs">내부 시안 · 사진 사용 허가 확인 전 · 게시 금지</div>
+<div id="credit" class="abs"></div>
 
 <script>
 /* ── 시간표 (밀리초) ── */
@@ -178,16 +180,29 @@ window.__setData = (d) => {
   const 훅 = d.훅 || { 작은: d.기관, 큰: d.기관 + '\n' + (d.걸기 || d.직군 + ' 채용'), 강조: d.직군 };
   $('s1small').textContent = 훅.작은;
   /* 큰 글 안의 강조 낱말에 형광펜 */
-  const 큰 = esc(훅.큰);
-  $('s1big').innerHTML = 훅.강조 && 큰.includes(esc(훅.강조))
-    ? 큰.replace(esc(훅.강조), `<span class="em"><i></i>${esc(훅.강조)}</span>`) : 큰;
+  $('s1big').innerHTML = 훅.큰.split('\n').map((줄) => {
+    const e = esc(줄);
+    const 펜줄 = 훅.강조 && e.includes(esc(훅.강조)) ? e.replace(esc(훅.강조), `<span class="em"><i></i>${esc(훅.강조)}</span>`) : e;
+    return `<div class="ln">${펜줄}</div>`;
+  }).join('');
   $('s1ddayb').textContent = d.마감.큰글;
+  /* 띄어쓰기 없는 긴 이름(고려대학교의과대학부속구로병원)은 줄이 안 바뀝니다 — 폭에 맞을 때까지 글자를 줄입니다 */
+  for (const 줄 of document.querySelectorAll('#s1big .ln')) {
+    let 크기 = 104; 줄.style.fontSize = 크기 + 'px';
+    while (줄.scrollWidth > 줄.clientWidth + 1 && 크기 > 56) { 크기 -= 4; 줄.style.fontSize = 크기 + 'px'; }
+    if (줄.scrollWidth > 줄.clientWidth + 1) { 줄.style.whiteSpace = 'normal'; 줄.style.wordBreak = 'break-all'; }
+  }
+  for (const id of ['s2org']) {
+    const e = $(id); let k = 68; e.style.fontSize = k + 'px';
+    while (e.scrollWidth > e.clientWidth + 1 && k > 44) { k -= 4; e.style.fontSize = k + 'px'; }
+    if (e.scrollWidth > e.clientWidth + 1) e.style.wordBreak = 'break-all';
+  }
   if (d.사진) {
     document.body.classList.add('has-photo');
     $('s1img').src = d.사진; $('s1photo').style.display = 'block';
     $('bgphoto').style.backgroundImage = `url("${d.사진}")`;
   }
-  if (d.시안) $('draft').style.display = 'block';
+  $('credit').textContent = d.사진 ? `출처: ${d.사진출처 || d.기관}` : '';
 
   $('s2org').textContent = d.기관;
   $('s2meta').textContent = (d.소개.메타 || []).join(' · ');
@@ -249,6 +264,8 @@ window.__seek = (t) => {
   dd.style.transform = `scale(${ease(pd) * 넘침}) rotate(${-10 + 4 * Math.sin(t / 260)}deg)`;
   if (D.사진) $('s1img').style.transform = `scale(${1.04 + 0.10 * clamp(t / T.s1[1])})`;
   /* 흐린 사진 바탕은 소개 장면까지 남깁니다 */
+  const 사진끝 = T.s2[1] > 0 ? T.s2[1] : T.s1[1];
+  $('credit').style.opacity = D.사진 && t <= 사진끝 ? 1 : 0;
   $('bgphoto').style.opacity = D.사진 ? (t < (T.s2[1] > 0 ? T.s2[1] : T.s1[1]) ? 1 : Math.max(0, 1 - (t - (T.s2[1] > 0 ? T.s2[1] : T.s1[1])) / 400)) : 0;
 
   /* 2 · 기관 소개 */
