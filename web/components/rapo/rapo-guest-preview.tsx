@@ -1,6 +1,7 @@
 import { Hit } from '@/components/hit';
 import { RapoShell } from './rapo-shell';
 import { RapoButton, RapoDivider } from './rapo-ui';
+import { KAKAO_CHANNEL } from '@/lib/contact';
 
 /* 비회원 맛보기 화면 — 커뮤니티 · 교육·학술 · 병원 찾기 (2026-11-13 세중님
    「우리가 채용공고 보여주는 것처럼 만들자. 자세한 내용 보고 싶으면 회원가입」).
@@ -105,6 +106,8 @@ export function RapoGuestPreview({ 갈래, 셈 }: { 갈래: 맛보기갈래; 셈
           <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{c.권유}</p>
           <h2 id="rapo-guest-preview" className="rapo-type-t8-bold whitespace-pre-line break-keep text-(color:--rapo-color-fg-neutral)">{c.가입말}</h2>
           <RapoButton href={다음} tone="deep-coral" full>무료로 가입하기</RapoButton>
+          {/* 막는 화면이라 문의를 잘 보이게 (2026-11-16 세중님 · 카카오톡 채널) */}
+          <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" className="rapo-type-t4-bold self-center text-(color:--rapo-color-fg-neutral-muted)">카카오톡으로 문의하기 ›</a>
           <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">이미 회원이라면 같은 단추로 로그인돼요</p>
         </div>
       </section>

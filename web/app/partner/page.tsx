@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../auth';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { MAX_POST_IMAGES } from '@/lib/image';
+import { KAKAO_CHANNEL } from '@/lib/contact';
+import { TERMS_VERSION } from '@/lib/terms';
 
 /* 채용·교육 담당자 신청 (2026-10-09 · 뼈대 5·7절).
  *
@@ -48,7 +50,9 @@ type 신청 = {
 };
 
 export default function Partner() {
-  const { loading, session, isAdmin } = useAuth();
+  const { loading, session, me } = useAuth();
+  /* 2026-11-16 약관 확정 — 담당자 약관(채용·교육) 동의를 신청 때 받습니다 · 학생회원은 신청할 수 없습니다(DB 담당자신청 도 막음) */
+  const [약관동의, set약관동의] = useState(false);
   const [마스터, set마스터] = useState(false);
   const [내것, set내것] = useState<신청[]>([]);
   const [갈래, set갈래] = useState('채용담당자');
@@ -71,6 +75,20 @@ export default function Partner() {
   useEffect(() => { if (session) 읽기(); }, [session, 읽기]);
 
   if (loading) return <main className="mx-auto w-full max-w-2xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
+
+  /* 학생회원은 담당자가 될 수 없습니다 (채용·교육 약관 4조) — 막는 화면이라 문의(카카오톡 채널)를 잘 보이게 (11/16 세중님) */
+  if (me?.role === '학생' && !마스터) {
+    return (
+      <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
+        <h1 className="mt-5 break-keep text-h1 font-bold">학생회원은 담당자를 신청할 수 없어요</h1>
+        <p className="mt-3 break-keep text-lg text-mute">
+          취업한 뒤 내 정보의 「취업했어요 · 임상가 전환」을 마치면 신청할 수 있어요.
+        </p>
+        <Link href="/me/convert" className="mt-6 inline-block rounded-md bg-[#14181C] px-6 py-4 text-lg font-bold text-white">임상가 전환하기</Link>
+        <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" className="mt-4 block text-lg font-bold text-brand-red-dark">카카오톡으로 문의하기 ›</a>
+      </main>
+    );
+  }
 
   /* 아직 숨겨 둔 화면입니다 */
   /* ★ 2026-10-11 — 회원에게 열었습니다 (세중님 결정).
@@ -95,7 +113,11 @@ export default function Partner() {
   };
 
   const 내기 = async () => {
+    if (!약관동의) { set탈('담당자 이용약관에 동의해 주세요'); return; }
     set도는중(true); set탈(null);
+    await browserSupabase().rpc('동의남기기', {
+      p_판: TERMS_VERSION, p_문서들: { [갈래 === '채용담당자' ? 'recruiter' : 'edu']: true },
+    });
     const { data, error } = await browserSupabase().rpc('담당자신청', {
       p_갈래: 갈래,
       p_기관번호: null,
@@ -175,12 +197,21 @@ export default function Partner() {
         </p>
         <p className="mt-3 break-keep text-sm text-mute">
           올려 주신 자료는 소속 확인에만 씁니다. 「기관 회원 승인」 권한을 가진 운영진만
-          볼 수 있고, 열어 본 기록이 남습니다. 탈퇴하시면 지웁니다
-          (신고·분쟁이 진행 중이면 끝난 뒤에 지웁니다). 사진·PDF 는 {MAX_POST_IMAGES}장까지.
+          볼 수 있고, 열어 본 기록이 남습니다. 승인이나 반려로 확인이 끝나면 바로 지우고
+          확인 결과만 남깁니다. 사진·PDF 는 {MAX_POST_IMAGES}장까지.
         </p>
 
+        <label className="mt-4 flex cursor-pointer items-start gap-3">
+          <input type="checkbox" checked={약관동의} onChange={(e) => set약관동의(e.target.checked)} className="mt-1 size-5 shrink-0" />
+          <span className="break-keep text-lg">
+            <Link href={갈래 === '채용담당자' ? '/terms/recruiter' : '/terms/edu'} className="underline underline-offset-2">
+              {갈래 === '채용담당자' ? '채용담당자 이용약관' : '교육담당자 이용약관'}
+            </Link>에 동의합니다 (필수)
+          </span>
+        </label>
+
         <button
-          type="button" onClick={내기} disabled={도는중}
+          type="button" onClick={내기} disabled={도는중 || !약관동의}
           className="mt-5 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white
                      hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-50">
           신청하기

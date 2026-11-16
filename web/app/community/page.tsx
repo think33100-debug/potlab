@@ -45,14 +45,14 @@ export default async function Community({ searchParams }: { searchParams: Promis
   /* 비회원 — 맛보기 화면 (2026-11-13 세중님). 글은 한 줄도 안 내려보냅니다(익명 글 · components/rapo/rapo-guest-preview.tsx) */
   if (await serverWho(sb) === '비회원') return <RapoGuestPreview 갈래="community" />;
   /* 2026-11-15 세중님 「한 곳에서 다 같이 · 학생 임상가 모두 다」 — 직군·학생으로 거르지 않습니다 (DB 방볼수있나 도 모두 참 · 금고 SQL_1113/ZP) */
-  let q = sb.from('공개글').select('id,title,body,created_at,comment_count,profiles');
+  let q = sb.from('공개글').select('id,title,body,created_at,comment_count,profiles,운영진');
   q = 정렬 === 'hot'
     ? q.gte('created_at', daysAgoIso(7)).order('view_count', { ascending: false }).order('created_at', { ascending: false })
     : q.order('created_at', { ascending: false });
   const [{ data, error }, { data: 광고 }] = await Promise.all([q.limit(20), sb.rpc('지금광고', { p_자리: '학생피드' })]);
   const 소개줄 = ((광고 ?? []) as { 그림: string | null; 링크: string | null }[])[0];
 
-  type 줄 = { id: number; title: string | null; body: string; created_at: string; comment_count: number;
+  type 줄 = { id: number; title: string | null; body: string; created_at: string; comment_count: number; 운영진?: boolean;
     profiles: { nickname: string; avatar: string | null; erased_at: string | null; job_group?: string | null } | null };
   const 글들 = (data ?? []) as unknown as 줄[];
 
@@ -69,7 +69,7 @@ export default async function Community({ searchParams }: { searchParams: Promis
 
   const 보일글: 커뮤니티글[] = 글들.map((g) => ({
     id: g.id, title: g.title, body: g.body, created_at: g.created_at, comment_count: g.comment_count,
-    글쓴이: g.profiles, job_group: g.profiles?.job_group ?? null, 댓글: 첫댓글.get(g.id) ?? null,
+    글쓴이: g.profiles, 운영진: !!g.운영진, job_group: g.profiles?.job_group ?? null, 댓글: 첫댓글.get(g.id) ?? null,
   }));
 
   return (

@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { KAKAO_CHANNEL } from '@/lib/contact';
 import { RapoAppBar } from './rapo-me';
 import { RapoButton } from './rapo-ui';
 
 /* 회원 탈퇴 화면의 틀과 완료 화면 (app/me/leave · 미리보기 /design-preview/leave 가 같이 씁니다).
    피그마 「12 · 내 정보」 탈퇴 완료 1508:2517 — 남는 것 문구는 실제 동작대로(질문함 Q95) */
 
-export function RapoLeaveDone({ onHome }: { onHome: () => void }) {
+export function RapoLeaveDone({ onHome, 삭제코드 }: { onHome: () => void; 삭제코드?: string | null }) {
   return (
     <RapoLeaveFrame title="탈퇴 완료" 아래={<RapoButton full onClick={onHome}>공고·교육 둘러보기</RapoButton>}>
       <section className="flex flex-col items-center pt-[72px] text-center">
@@ -20,9 +21,21 @@ export function RapoLeaveDone({ onHome }: { onHome: () => void }) {
           <span className="block">이용해 주셔서 감사합니다.</span>
         </p>
       </section>
-      <div className="mt-[96px] flex flex-col gap-(--rapo-dimension-x4) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)">
-        <p className="rapo-type-t4-bold break-keep text-(color:--rapo-color-fg-neutral)">가입·탈퇴 기록과 30일 동안 잠가 두는 원래 닉네임만 남아 있어요.</p>
-        <Link href="/contact" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-positive)">남은 데이터 삭제 요청하기 ›</Link>
+      {/* 2026-11-16 약관 25조 ⑥ — 삭제 코드는 이 화면에만 한 번 보입니다(회사는 지문만 가짐) */}
+      {삭제코드 && (
+        <div className="mt-[56px] flex flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+          <p className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">삭제 코드</p>
+          <p className="select-all text-[24px] font-bold leading-[32px] tracking-[0.08em] text-(color:--rapo-color-fg-neutral)">{삭제코드}</p>
+          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
+            남아 있는 후기와 근무 정보를 지우고 싶을 때 이 코드를 카카오톡 채널이나 이메일로 보내 주세요. 이 화면을 나가면 다시 볼 수 없으니 캡처해 두세요.
+          </p>
+          <button type="button" onClick={() => { void navigator.clipboard?.writeText(삭제코드); }}
+            className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-brand-contrast)">코드 복사하기</button>
+        </div>
+      )}
+      <div className={(삭제코드 ? 'mt-(--rapo-dimension-x4)' : 'mt-[96px]') + ' flex flex-col gap-(--rapo-dimension-x4) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x5)'}>
+        <p className="rapo-type-t4-bold break-keep text-(color:--rapo-color-fg-neutral)">후기와 임상가 근무 정보는 누구 것인지 모르게 바꿔서 남아 있어요.</p>
+        <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-positive)">남은 데이터 삭제 요청하기 ›</a>
       </div>
     </RapoLeaveFrame>
   );

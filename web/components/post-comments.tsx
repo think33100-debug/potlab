@@ -37,7 +37,7 @@ export function PostComments({ postId }: { postId: number }) {
          전에 쓰던 profiles(...) 묻어 읽기는 **회원에게도 실패**하고 있었습니다 —
          profiles 는 authenticated 에게 SELECT 권한이 아예 없습니다 */
       .from('공개댓글')
-      .select('id,post_id,parent_id,내글,body,created_at,profiles,비밀,글쓴이')
+      .select('id,post_id,parent_id,내글,body,created_at,profiles,비밀,글쓴이,운영진')
       .eq('post_id', postId)
       .order('created_at');
     return (data ?? []) as unknown as CommentRow[];
@@ -207,7 +207,7 @@ function One({
       <Avatar value={c.profiles?.avatar} size="c32" className="mt-[4px]" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-[8px]">
-          <span className="truncate text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{shownName(c.profiles)}{c.글쓴이 ? ' · 글쓴이' : ''}</span>
+          <span className="truncate text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{shownName(c.profiles)}{c.운영진 ? ' · 운영진' : ''}{c.글쓴이 ? ' · 글쓴이' : ''}</span>
           <span className="flex-1" />
           {/* 원본 「•••」 13 #afbfca — 누르면 아래 시트 */}
           {항목.length > 0 && (

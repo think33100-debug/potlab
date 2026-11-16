@@ -7,6 +7,7 @@ import { SPLASH_SCRIPT, Splash } from "@/components/splash";
 import { PersonaBar } from "@/components/persona-bar";
 import { SplashAd } from "@/components/splash-ad";
 import { KakaoFab } from "@/components/kakao-fab";
+import { TermsReconsent } from "@/components/terms-reconsent";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
 import { RapoInstallToast } from "@/components/rapo/rapo-install-toast";
@@ -168,6 +169,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
           {/* 카카오톡 문의 단추 — 모든 화면 오른쪽 아래에 떠 있습니다 (2026-11-12 세중님) */}
           <KakaoFab />
+          {/* 새 약관 다시 동의 (2026-11-16 확정 · 시행 11/23 뒤 첫 로그인) */}
+          <TermsReconsent />
 
           {/* 마스터 계정에게만 보이는 역할 바꾸기 띠 (2026-10-09).
               탭바(z-40) 위에 얹습니다 — z-[60] */}

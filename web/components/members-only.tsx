@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { DiagTag } from '@/components/diag';
 import { Icon } from '@/components/icon';
 import { 한줄로, 이요청이들고온것 } from '@/lib/diag-server';
+import { KAKAO_CHANNEL } from '@/lib/contact';
 
 /* 「회원만 볼 수 있어요」 카드 한 벌.
 
@@ -50,6 +51,8 @@ export async function MembersOnly({
       <p className="mt-3 break-keep text-[12px] text-[#5F666C]">
         {note ?? '카카오 · 네이버로 3초 만에 시작해요'}
       </p>
+      {/* 막는 화면이라 문의를 잘 보이게 (2026-11-16 세중님 · 카카오톡 채널) */}
+      <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" className="mt-4 text-[14px] font-bold text-[#14181C] underline underline-offset-4">카카오톡으로 문의하기 ›</a>
 
       {/* 진단을 켰을 때만 — 이 벽을 그린 곳이 서버인지 화면인지 가릅니다 */}
       <DiagTag

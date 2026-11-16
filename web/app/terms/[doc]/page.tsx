@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { RapoBackButton } from '@/components/rapo/rapo-back';
 import { 색인메타 } from '@/lib/seo';
-import { TERMS, TERMS_VERSION, 초안띠보이나, type TermKey } from '@/lib/terms';
+import Link from 'next/link';
+import { TERMS, 초안띠보이나, type TermKey } from '@/lib/terms';
 
 export function generateStaticParams() {
   return Object.keys(TERMS).map((doc) => ({ doc }));
@@ -29,6 +30,8 @@ const 글머리 = /^(·|•|-|–|※|★|\d{1,2}[.)]|[①-⑳]|[㉠-㉯]|[가-�
 
 function 조각내기(body: string): 조각[] {
   const 줄들 = body.split('\n');
+  /* 2026-11-16 확정본(lib/terms-text.ts)은 제목 줄에 「## 」를 붙여 둡니다 — 그때는 그 줄만 제목으로 보고 짐작하지 않습니다 */
+  const 명시 = 줄들.some((l) => l.startsWith('## '));
   const out: 조각[] = [];
   let 앞빈줄 = true;
   줄들.forEach((원, i) => {
@@ -37,13 +40,15 @@ function 조각내기(body: string): 조각[] {
     const 들임 = 원.length - 원.trimStart().length;
     const m = 글머리.exec(글);
     const 앞 = out[out.length - 1];
-    if (m) {
+    if (명시 && 글.startsWith('## ')) {
+      out.push({ 꼴: '제목', 글: 글.slice(3), 들임: 0 });
+    } else if (m) {
       out.push({ 꼴: '항목', 머리: m[1], 글: 글.slice(m[0].length), 들임 });
     } else if (앞 && !앞빈줄 && 앞.꼴 !== '제목' && (들임 >= 2 || /[,，]$/.test(앞.글))) {
       앞.글 += ' ' + 글;                       /* 손으로 바꾼 줄 — 앞 줄에 잇습니다 */
     } else {
       const 다음 = 줄들.slice(i + 1).find((l) => l.trim()) ?? '';
-      const 제목인가 = 들임 === 0 && 글.length <= 24 && !/[.,:;」”"]$/.test(글)
+      const 제목인가 = !명시 && 들임 === 0 && 글.length <= 24 && !/[.,:;」”"]$/.test(글)
         && (!줄들[i + 1]?.trim() || 글머리.test(다음.trim()));
       out.push({ 꼴: 제목인가 ? '제목' : '문단', 글, 들임 });
     }
@@ -69,7 +74,17 @@ export default async function TermsPage({ params }: { params: Promise<{ doc: str
       <main className="flex flex-col gap-(--rapo-dimension-x6) p-(--rapo-dimension-x5) pb-(--rapo-dimension-x10)">
         <div className="flex flex-col gap-(--rapo-dimension-x2)">
           <h1 className="rapo-type-screen-title break-keep text-(color:--rapo-color-fg-neutral)">{t.title}</h1>
-          <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">{TERMS_VERSION} 판</p>
+          <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{t.lead ?? `${t.ver} 판`}</p>
+          {t.옛판 && (
+            <Link href={`/terms/${t.옛판}`} className="rapo-type-t3-regular self-start text-(color:--rapo-color-fg-neutral-muted) underline underline-offset-2">
+              이전 판(2026년 11월 10일) 보기
+            </Link>
+          )}
+          {t.새판 && (
+            <Link href={`/terms/${t.새판}`} className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-brand-contrast)">
+              2026년 11월 23일부터 시행하는 새 판 보기 ›
+            </Link>
+          )}
         </div>
 
         {t.draft && 초안띠보이나() && (

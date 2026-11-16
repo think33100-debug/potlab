@@ -78,12 +78,14 @@ type 사람 = { nickname: string; avatar: string | null; erased_at: string | nul
 export type 커뮤니티글 = {
   id: number; title: string | null; body: string; created_at: string; comment_count: number;
   글쓴이: 사람 | null; job_group: string | null;
+  /* 운영진이 쓴 글 표시 (2026-11-16 약관 · 운영정책 2조 ⑤) */
+  운영진?: boolean;
   댓글: { 글쓴이: 사람 | null; body: string } | null;
 };
 
 /* 공개 글 · 읽기 목록 (1266:1947) — 아바타 32 · 이름 · 「직군 · 시간」 · 제목 21/30 · 본문 15/27 · 댓글 미리보기 · 아래 선 */
 export function RapoCommunityPost({ p }: { p: 커뮤니티글 }) {
-  const 이름 = shownName(p.글쓴이);
+  const 이름 = shownName(p.글쓴이) + (p.운영진 ? ' · 운영진' : '');
   return (
     <article className="relative flex flex-col gap-[8px] px-[22px] pb-[24px] pt-[26px]">
       <Link href={`/post/${p.id}`} className="flex flex-col gap-[8px]">
