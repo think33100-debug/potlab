@@ -1,7 +1,10 @@
 /* 새 1층 공고 → 릴스 만들기 → (허락되면) 인스타 올리기 — 한 바퀴 (2026-11-16)
 
    node tools/reels/run.mjs                      마른 실행 — 고르고 만들기만. 올리지 않습니다
-   node tools/reels/run.mjs --올리기             열쇠(IG_USER_ID · IG_ACCESS_TOKEN)가 있을 때만 올립니다
+   node tools/reels/run.mjs --메일               ★ 지금 쓰는 길 (2026-11-16 세중님 「가요로」)
+                                                 소리 없는 릴스 + 캡션을 메일로 → 휴대폰 인스타 앱에서 인기 가요를 골라 올림
+                                                 (API 로는 인스타 음악을 못 붙이고, 가요를 파일에 넣으면 저작권 검사에 걸립니다)
+   node tools/reels/run.mjs --올리기             열쇠(IG_USER_ID · IG_ACCESS_TOKEN)가 있을 때만 올립니다 (저작권 없는 곡용)
    node tools/reels/run.mjs --id 306936          그 공고 하나만 (견본 · 다시 만들기)
    선택  --최대 2 (한 바퀴 최대 편수) · --며칠 3 (최근 며칠 게시분) · --음악 <파일> · --나감 <폴더>
 
@@ -49,9 +52,10 @@ const 깃발 = (이름) => process.argv.includes('--' + 이름);
 const cfg = env();
 for (const k of ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY']) if (!cfg[k]) { console.error(k + ' 가 없습니다'); process.exit(1); }
 const H = { apikey: cfg.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_SERVICE_KEY };
-const 가림 = (s) => String(s).split(cfg.SUPABASE_SERVICE_KEY).join('‹열쇠›').split(cfg.IG_ACCESS_TOKEN || '\u0000').join('‹IG열쇠›');
+const 가림 = (s) => String(s).split(cfg.SUPABASE_SERVICE_KEY).join('‹열쇠›').split(cfg.IG_ACCESS_TOKEN || '\u0000').join('‹IG열쇠›').split(cfg.RESEND_KEY || '\u0000').join('‹메일열쇠›');
 
 const 올리기 = 깃발('올리기');
+const 메일 = 깃발('메일');
 const 최대 = Number(인수('최대', 2));
 const 며칠 = Number(인수('며칠', 3));
 const 한건 = 인수('id');
@@ -123,11 +127,55 @@ for (const 자료 of 할것.slice(0, 최대)) {
   fs.writeFileSync(바탕 + '.json', JSON.stringify(자료, null, 2));
   fs.writeFileSync(바탕 + '.txt', 자료.캡션 + '\n');
   const a = ['--자료', 바탕 + '.json', '--나감', 바탕 + '.mp4', '--표지', 바탕 + '-cover.jpg'];
-  if (인수('음악')) a.push('--음악', 인수('음악'));
+  if (메일) a.push('--무음');
+  else if (인수('음악')) a.push('--음악', 인수('음악'));
   const r = spawnSync(process.execPath, [path.join(여기, 'render.mjs'), ...a], { stdio: 'inherit' });
   if (r.status !== 0) { console.error('  ✗ 렌더 실패', 자료.id); continue; }
-  만든것.push({ 자료, mp4: 바탕 + '.mp4' });
+  만든것.push({ 자료, mp4: 바탕 + '.mp4', 표지: 바탕 + '-cover.jpg' });
   console.log(`  ○ ${자료.id} · ${자료.기관} · ${자료.직군} · ${자료.마감.큰글}`);
+}
+
+/* ── 3-가 · 메일로 보내기 (휴대폰에서 받아 가요를 붙여 올림) ── */
+if (메일) {
+  if (!cfg.RESEND_KEY || !cfg.NOTIFY_EMAIL) { console.error('RESEND_KEY · NOTIFY_EMAIL 이 없습니다 — 보내지 않습니다'); process.exit(1); }
+  for (const { 자료, mp4, 표지 } of 만든것) {
+    const 글 = [
+      `${자료.기관} · ${자료.직군} · ${자료.마감.큰글} (${자료.마감.작은글})`,
+      '',
+      '올리는 법',
+      '1. 첨부 영상을 휴대폰에 저장',
+      '2. 인스타 → 새 릴스 → 이 영상 → 음악에서 지금 인기 가요 고르기',
+      '3. 아래 캡션을 그대로 붙여 넣고 공유',
+      '',
+      '── 캡션 (여기부터 복사) ──',
+      자료.캡션,
+      '── 캡션 끝 ──',
+      '',
+      `원문 공고: https://www.rapojob.co.kr/jobs/${자료.묶은id[0]}`,
+    ].join('\n');
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + cfg.RESEND_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: cfg.MAIL_FROM || 'potjob <onboarding@resend.dev>',
+        to: [cfg.NOTIFY_EMAIL],
+        subject: `[RAPO 릴스] ${자료.기관} ${자료.직군} · ${자료.마감.큰글}`,
+        text: 글,
+        attachments: [
+          { filename: `rapo-${자료.묶은id[0]}.mp4`, content: fs.readFileSync(mp4).toString('base64') },
+          ...(fs.existsSync(표지) ? [{ filename: `rapo-${자료.묶은id[0]}-cover.jpg`, content: fs.readFileSync(표지).toString('base64') }] : []),
+        ],
+      }),
+    });
+    const 답 = await r.text();
+    console.log(`  메일 ${자료.묶은id[0]} → ${r.status} · ${가림(답).slice(0, 600)}`);
+    if (!r.ok) continue;
+    /* 보낸 것은 다시 안 보냅니다 — 「올림」이 아니라 「메일보냄」으로 적습니다 (올렸는지는 사람이 압니다) */
+    for (const id of 자료.묶은id) 기록[id] = { 메일보낸때: new Date().toISOString(), 기관: 자료.기관, 직군: 자료.직군 };
+    fs.mkdirSync(path.dirname(기록파일), { recursive: true });
+    fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
+  }
+  process.exit(0);
 }
 
 if (!올리기) {
