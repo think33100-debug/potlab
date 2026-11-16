@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../auth';
 import { NoticeFiles } from '@/components/notice-files';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoPageFrame, RapoWait, 틀 } from '@/components/rapo/rapo-frame';
+import { RapoButton, RapoChip } from '@/components/rapo/rapo-ui';
 
 /* 채용 담당자 화면 (2026-10-09 · 뼈대 ⑧ · 공고 쓰기는 10-09 밤에 보탰습니다).
  *
@@ -143,7 +145,9 @@ export default function Biz() {
     set알림(null); set탈(null);
   };
 
-  if (loading) return <main className="mx-auto w-full max-w-3xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
+  /* 2026-11-16 세중님 테스터 점검 — 내 정보 메뉴 「채용 관리」가 옛 위쪽 줄(POTJOB 로고)이었습니다.
+     새 틀(components/rapo/rapo-frame.tsx · 하단 탐색 「채용」 칸)로 옮겼습니다. 창구·권한·확인 창은 그대로입니다 */
+  if (loading) return <RapoPageFrame title="채용 관리" back="/me" nav="/biz"><RapoWait /></RapoPageFrame>;
 
   /* ★ 2026-10-09 밤 — **채용담당자로 승인된 분에게만** 열립니다.
      교육담당자 페르소나로 주소를 쳐도 여기서 막힙니다.
@@ -151,159 +155,148 @@ export default function Biz() {
      서로 다른 기준을 쓰면 한쪽만 보이는 일이 생깁니다 */
   if (!관리.채용관리) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
-        <p className="break-keep text-h3 font-bold">아직 준비 중이에요</p>
-        <Link href="/" className="mt-7 inline-block rounded-md border border-gray-200 px-6 py-4
-                                  text-lg font-medium text-gray-600 hover:bg-gray-50">홈으로</Link>
-      </main>
+      <RapoPageFrame title="채용 관리" back="/me">
+        <p className={틀.소제목 + ' pt-(--rapo-dimension-x6)'}>아직 준비 중이에요</p>
+        <Link href="/" className={틀.큰단추}>홈으로</Link>
+      </RapoPageFrame>
     );
   }
 
   if (병원들.length === 0) {
     return (
-      <main className="mx-auto w-full max-w-3xl px-6 py-8 md:px-7">
-        <h1 className="break-keep text-h1 font-bold">채용 관리</h1>
-        <p className="mt-3 break-keep text-lg text-mute">
+      <RapoPageFrame title="채용 관리" back="/me" nav="/biz">
+        <p className={틀.흐린글 + ' pt-(--rapo-dimension-x6)'}>
           승인된 병원이 아직 없어요.
           {isAdmin && ' 담당자 신청을 승인하면 여기 나옵니다.'}
         </p>
-        <Link href={isAdmin ? '/admin/partners' : '/'}
-          className="mt-7 inline-block rounded-md border border-gray-200 px-6 py-4
-                     text-lg font-medium text-gray-600 hover:bg-gray-50">
+        <Link href={isAdmin ? '/admin/partners' : '/'} className={틀.큰단추}>
           {isAdmin ? '담당자 승인으로' : '홈으로'}
         </Link>
-      </main>
+      </RapoPageFrame>
     );
   }
 
   const 시험기관 = (고른곳 ?? '').startsWith('TEST:');
+  const 칸이름 = 'rapo-type-t4-bold block text-(color:--rapo-color-fg-neutral)';
+  const 칸묶음 = 'flex flex-col gap-(--rapo-dimension-x2)';
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <p className="rounded-sm bg-badge-teal-bg px-4 py-2 text-sm text-teal-strong">
+    <RapoPageFrame title="채용 관리" back="/me" nav="/biz">
+      <p className={틀.회색칸 + ' ' + 틀.작은글}>
         숨겨 둔 화면이에요 — 승인된 담당자와 관리자에게만 보입니다
       </p>
-      <h1 className="mt-5 break-keep text-h1 font-bold">채용 관리</h1>
 
-      {탈 && <p className="mt-4 rounded-sm border border-brand-red p-4 text-lg text-brand-red-dark">{탈}</p>}
-      {알림 && <p className="mt-4 rounded-sm border border-teal-strong p-4 text-lg text-teal-strong">{알림}</p>}
+      {탈 && <p role="alert" className={틀.오류칸}>{탈}</p>}
+      {알림 && <p role="status" className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-positive-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-positive-contrast)">{알림}</p>}
 
       {병원들.length > 1 && (
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
           {병원들.map((h) => (
-            <button key={h.기관번호} type="button" onClick={() => set고른곳(h.기관번호)}
-              className={'rounded-full px-4 py-2 text-sm ' +
-                (고른곳 === h.기관번호 ? 'bg-[#14181C] text-white' : 'border border-gray-200 text-gray-600')}>
-              {h.이름}
-            </button>
+            <RapoChip key={h.기관번호} on={고른곳 === h.기관번호} onClick={() => set고른곳(h.기관번호)} label={h.이름} />
           ))}
         </div>
       )}
 
       {시험기관 && (
-        <p className="mt-5 break-keep rounded-sm border border-warning p-4 text-lg">
+        <p className={틀.주의칸}>
           여기는 <b>시험병원</b>이에요. 여기 올린 공고는 <b>회원 공고 목록에 안 나옵니다</b> —
           화면을 확인하는 데만 쓰는 자리예요.
         </p>
       )}
 
-      <div className="mt-6">
-        <button type="button"
-          onClick={() => { set여는것(여는것 === '새것' ? null : '새것'); set값(빈것); set탈(null); }}
-          className="rounded-md bg-brand-red px-6 py-4 text-btn font-bold text-white hover:bg-brand-red-dark">
+      <div>
+        <RapoButton tone="deep-coral" size={40}
+          onClick={() => { set여는것(여는것 === '새것' ? null : '새것'); set값(빈것); set탈(null); }}>
           {여는것 === '새것' ? '접기' : '공고 쓰기'}
-        </button>
+        </RapoButton>
       </div>
 
       {여는것 && (
-        <section className="mt-5 rounded-sm border border-gray-200 p-5">
-          <p className="text-lg font-bold">{여는것 === '새것' ? '새 공고' : '공고 고치기'}</p>
+        <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x4)'}>
+          <p className={틀.소제목}>{여는것 === '새것' ? '새 공고' : '공고 고치기'}</p>
 
-          <label className="mt-4 block text-sm font-bold text-mute" htmlFor="제목">제목</label>
-          <input id="제목" value={값.제목} onChange={(e) => set값({ ...값, 제목: e.target.value })}
-            placeholder="작업치료사 채용 (정규직 2명)"
-            className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
-
-          <p className="mt-4 text-sm font-bold text-mute">직군</p>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {['작업치료사', '물리치료사'].map((g) => (
-              <button key={g} type="button" onClick={() => set값({ ...값, 직군: g })}
-                className={'rounded-md px-5 py-3 text-lg ' +
-                  (값.직군 === g ? 'bg-[#14181C] text-white' : 'border border-gray-200 text-gray-600')}>
-                {g}
-              </button>
-            ))}
+          <div className={칸묶음}>
+            <label className={칸이름} htmlFor="제목">제목</label>
+            <input id="제목" value={값.제목} onChange={(e) => set값({ ...값, 제목: e.target.value })}
+              placeholder="작업치료사 채용 (정규직 2명)" className={틀.입력} />
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-bold text-mute" htmlFor="고용형태">고용형태</label>
+          <div className={칸묶음}>
+            <p className={칸이름}>직군</p>
+            <div className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
+              {['작업치료사', '물리치료사'].map((g) => (
+                <RapoChip key={g} on={값.직군 === g} onClick={() => set값({ ...값, 직군: g })} label={g} />
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-(--rapo-dimension-x3) sm:grid-cols-2">
+            <div className={칸묶음}>
+              <label className={칸이름} htmlFor="고용형태">고용형태</label>
               <input id="고용형태" value={값.고용형태}
                 onChange={(e) => set값({ ...값, 고용형태: e.target.value })}
-                placeholder="정규직 · 계약직 등"
-                className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
+                placeholder="정규직 · 계약직 등" className={틀.입력} />
             </div>
-            <div>
-              <label className="block text-sm font-bold text-mute" htmlFor="근무지">근무 부서·장소</label>
+            <div className={칸묶음}>
+              <label className={칸이름} htmlFor="근무지">근무 부서·장소</label>
               <input id="근무지" value={값.근무지}
                 onChange={(e) => set값({ ...값, 근무지: e.target.value })}
-                placeholder="재활의학과"
-                className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
+                placeholder="재활의학과" className={틀.입력} />
             </div>
-            <div>
-              <label className="block text-sm font-bold text-mute" htmlFor="인원">뽑는 인원</label>
+            <div className={칸묶음}>
+              <label className={칸이름} htmlFor="인원">뽑는 인원</label>
               <input id="인원" type="number" min={1} value={값.인원}
                 onChange={(e) => set값({ ...값, 인원: e.target.value })}
-                className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg num" />
+                className={틀.입력 + ' num'} />
             </div>
-            <div>
-              <label className="block text-sm font-bold text-mute" htmlFor="접수부터">접수 시작</label>
+            <div className={칸묶음}>
+              <label className={칸이름} htmlFor="접수부터">접수 시작</label>
               <input id="접수부터" type="date" value={값.접수부터}
-                onChange={(e) => set값({ ...값, 접수부터: e.target.value })}
-                className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
+                onChange={(e) => set값({ ...값, 접수부터: e.target.value })} className={틀.입력} />
             </div>
-            <div>
-              <label className="block text-sm font-bold text-mute" htmlFor="접수까지">마감일</label>
+            <div className={칸묶음}>
+              <label className={칸이름} htmlFor="접수까지">마감일</label>
               <input id="접수까지" type="date" value={값.접수까지}
-                onChange={(e) => set값({ ...값, 접수까지: e.target.value })}
-                className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
+                onChange={(e) => set값({ ...값, 접수까지: e.target.value })} className={틀.입력} />
             </div>
-            <div>
-              <label className="block text-sm font-bold text-mute" htmlFor="마감시각">마감 시각</label>
+            <div className={칸묶음}>
+              <label className={칸이름} htmlFor="마감시각">마감 시각</label>
               <input id="마감시각" type="time" value={값.마감시각}
-                onChange={(e) => set값({ ...값, 마감시각: e.target.value })}
-                className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
+                onChange={(e) => set값({ ...값, 마감시각: e.target.value })} className={틀.입력} />
             </div>
           </div>
-          <p className="mt-2 break-keep text-sm text-mute">
+          <p className={틀.작은글}>
             마감일을 비워 두면 화면에 <b>「마감일 공고문 확인」</b>으로 나와요. 수시 채용이면 비워 두세요.
           </p>
 
-          <label className="mt-4 block text-sm font-bold text-mute" htmlFor="주소">지원 안내 주소</label>
-          <input id="주소" value={값.주소} onChange={(e) => set값({ ...값, 주소: e.target.value })}
-            placeholder="https://… (병원 채용 페이지나 공고 글 주소)"
-            className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
-          <p className="mt-1 break-keep text-sm text-mute">
-            회원이 「지원하러 가기」를 누르면 이 주소로 갑니다. 꼭 적어 주세요.
-          </p>
+          <div className={칸묶음}>
+            <label className={칸이름} htmlFor="주소">지원 안내 주소</label>
+            <input id="주소" value={값.주소} onChange={(e) => set값({ ...값, 주소: e.target.value })}
+              placeholder="https://… (병원 채용 페이지나 공고 글 주소)" className={틀.입력} />
+            <p className={틀.작은글}>
+              회원이 「지원하러 가기」를 누르면 이 주소로 갑니다. 꼭 적어 주세요.
+            </p>
+          </div>
 
-          <label className="mt-4 block text-sm font-bold text-mute" htmlFor="지원자격">지원 자격</label>
-          <textarea id="지원자격" rows={3} value={값.지원자격}
-            onChange={(e) => set값({ ...값, 지원자격: e.target.value })}
-            placeholder="작업치료사 면허 소지자"
-            className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-3 text-lg" />
+          <div className={칸묶음}>
+            <label className={칸이름} htmlFor="지원자격">지원 자격</label>
+            <textarea id="지원자격" rows={3} value={값.지원자격}
+              onChange={(e) => set값({ ...값, 지원자격: e.target.value })}
+              placeholder="작업치료사 면허 소지자" className={틀.긴입력} />
+          </div>
 
-          <label className="mt-4 block text-sm font-bold text-mute" htmlFor="예상연봉">예상 연봉</label>
-          <input id="예상연봉" value={값.예상연봉}
-            onChange={(e) => set값({ ...값, 예상연봉: e.target.value })}
-            placeholder="3,000만원 이상 · 내규에 따름 · 협의"
-            className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
-          <p className="mt-1 break-keep text-sm text-mute">
-            적으신 말 그대로 보여드려요. 「내규에 따름」·「협의」도 그대로 나갑니다 —
-            우리가 숫자를 만들지 않아요.
-          </p>
+          <div className={칸묶음}>
+            <label className={칸이름} htmlFor="예상연봉">예상 연봉</label>
+            <input id="예상연봉" value={값.예상연봉}
+              onChange={(e) => set값({ ...값, 예상연봉: e.target.value })}
+              placeholder="3,000만원 이상 · 내규에 따름 · 협의" className={틀.입력} />
+            <p className={틀.작은글}>
+              적으신 말 그대로 보여드려요. 「내규에 따름」·「협의」도 그대로 나갑니다 —
+              우리가 숫자를 만들지 않아요.
+            </p>
+          </div>
 
-          <p className="mt-5 break-keep rounded-sm bg-gray-50 p-4 text-sm text-mute dark:bg-gray-900">
+          <p className={틀.회색칸 + ' ' + 틀.작은글}>
             공고 상세에는 <b>일곱 칸만</b> 보입니다 — 모집인원 · 접수마감 · 근무지 ·
             지원자격 · 예상 연봉과, 우리가 심평원 자료로 그리는
             「얼마나 바쁜 곳인지」 · 「병원 뜯어보기」예요.
@@ -311,103 +304,88 @@ export default function Biz() {
             「지원 안내 주소」로 보여드립니다.
           </p>
 
-          <div className="mt-5 flex flex-wrap gap-2">
-            <button type="button" onClick={보내기} disabled={도는중}
-              className="rounded-md bg-brand-red px-6 py-4 text-btn font-bold text-white
-                         hover:bg-brand-red-dark disabled:opacity-50">
+          <div className="flex flex-wrap gap-(--rapo-dimension-x2)">
+            <RapoButton tone="navy" size={40} onClick={보내기} disabled={도는중}>
               {여는것 === '새것' ? '올리기' : '고치기'}
-            </button>
-            <button type="button" onClick={() => { set여는것(null); set값(빈것); }}
-              className="rounded-md border border-gray-200 px-6 py-4 text-lg text-gray-600 hover:bg-gray-50">
+            </RapoButton>
+            <RapoButton tone="outline" size={40} onClick={() => { set여는것(null); set값(빈것); }}>
               그만두기
-            </button>
+            </RapoButton>
           </div>
         </section>
       )}
 
-      <h2 className="mt-9 text-h3 font-bold">우리 병원 공고 {공고들.length}건</h2>
+      <section className="flex flex-col gap-(--rapo-dimension-x3)">
+        <h2 className={틀.소제목}>우리 병원 공고 <span className="whitespace-nowrap">{공고들.length}건</span></h2>
 
-      {공고들.length === 0
-        ? <p className="mt-4 break-keep text-lg text-mute">아직 올라온 공고가 없어요.</p>
-        : (
-          <ul className="mt-4 space-y-3">
-            {공고들.map((j) => (
-              <li key={j.id} className="rounded-sm border border-gray-200 p-5">
-                <p className="flex flex-wrap items-center gap-2">
-                  <b className="break-keep text-lg">{j.제목}</b>
-                  {j.source === 'BIZ'
-                    ? <span className="rounded-full bg-badge-teal-bg px-3 py-1 text-[13px] text-teal-strong">
-                        직접 올림
+        {공고들.length === 0
+          ? <p className={틀.흐린글}>아직 올라온 공고가 없어요.</p>
+          : (
+            <ul className="flex flex-col gap-(--rapo-dimension-x3)">
+              {공고들.map((j) => (
+                <li key={j.id} className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x2)'}>
+                  <p className="flex flex-wrap items-center gap-(--rapo-dimension-x2)">
+                    <b className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">{j.제목}</b>
+                    <span className={틀.표}>{j.source === 'BIZ' ? '직접 올림' : '모아 온 공고'}</span>
+                    {j.공식확인 && (
+                      <span className="rapo-type-t2-medium inline-flex items-center whitespace-nowrap rounded-(--rapo-radius-r1) bg-(--rapo-color-bg-positive-weak) px-(--rapo-dimension-x2) py-(--rapo-dimension-x1) text-(color:--rapo-color-fg-positive-contrast)">
+                        공식 확인
                       </span>
-                    : <span className="rounded-full bg-gray-100 px-3 py-1 text-[13px] text-gray-600 dark:bg-gray-800">
-                        모아 온 공고
-                      </span>}
-                  {j.공식확인 && (
-                    <span className="rounded-full bg-badge-teal-bg px-3 py-1 text-[13px] text-teal-strong">
-                      공식 확인
-                    </span>
+                    )}
+                    {(j.hidden || j.hold) && (
+                      <span className={틀.작은글}>{j.hidden ? '내려감' : '확인 중'}</span>
+                    )}
+                  </p>
+                  <p className={틀.작은글}>
+                    {[j.직군, j.고용형태, j.apply_to ? `~${j.apply_to}` : '마감일 없음']
+                      .filter(Boolean).join(' · ')}
+                  </p>
+                  <p className={틀.글}>
+                    <span className="whitespace-nowrap">조회 <b className="num">{j.조회수.toLocaleString('ko-KR')}</b></span>
+                    {' · '}
+                    <span className="whitespace-nowrap">지원하러 가기 <b className="num">{j.지원누름.toLocaleString('ko-KR')}</b></span>
+                  </p>
+                  {/* 첨부 — 담당자가 올린 공고에만 답니다 (모아 온 공고는 못 답니다) */}
+                  {j.source === 'BIZ' && (
+                    <NoticeFiles 갈래="채용" 공고={j.id} 고칠수있나
+                      읽어서채우기={() => set알림(
+                        '공고문 읽어서 칸 채우기는 내일 아침에 켭니다 (tools/공고칸채우기.mjs).')} />
                   )}
-                  {(j.hidden || j.hold) && (
-                    <span className="text-sm text-mute">{j.hidden ? '내려감' : '확인 중'}</span>
-                  )}
-                </p>
-                <p className="mt-1 text-sm text-mute">
-                  {[j.직군, j.고용형태, j.apply_to ? `~${j.apply_to}` : '마감일 없음']
-                    .filter(Boolean).join(' · ')}
-                </p>
-                <p className="mt-2 text-lg">
-                  조회 <b className="num">{j.조회수.toLocaleString('ko-KR')}</b>
-                  {' · 지원하러 가기 '}
-                  <b className="num">{j.지원누름.toLocaleString('ko-KR')}</b>
-                </p>
-                {/* 첨부 — 담당자가 올린 공고에만 답니다 (모아 온 공고는 못 답니다) */}
-                {j.source === 'BIZ' && (
-                  <NoticeFiles 갈래="채용" 공고={j.id} 고칠수있나
-                    읽어서채우기={() => set알림(
-                      '공고문 읽어서 칸 채우기는 내일 아침에 켭니다 (tools/공고칸채우기.mjs).')} />
-                )}
 
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Link href={`/jobs/${j.id}`}
-                    className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
-                    공고 보기
-                  </Link>
-                  {j.source === 'BIZ' ? (
-                    <>
-                      <button type="button" onClick={() => 고치러(j)}
-                        className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
-                        고치기
+                  <div className="flex flex-wrap gap-(--rapo-dimension-x2) pt-(--rapo-dimension-x1)">
+                    <Link href={`/jobs/${j.id}`} className={틀.선단추}>공고 보기</Link>
+                    {j.source === 'BIZ' ? (
+                      <>
+                        <button type="button" onClick={() => 고치러(j)} className={틀.선단추}>고치기</button>
+                        {!j.hidden && (
+                          <>
+                            <button type="button" onClick={() => 마감(j.id, false)} className={틀.선단추}>지금 마감</button>
+                            <button type="button" onClick={() => 마감(j.id, true)}
+                              className="rapo-type-t4-bold inline-flex h-(--rapo-dimension-x10) items-center justify-center whitespace-nowrap rounded-(--rapo-radius-r2) px-(--rapo-dimension-x4)
+                                         border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-critical-solid) text-(color:--rapo-color-fg-critical)
+                                         active:bg-(--rapo-color-bg-transparent-pressed)">
+                              내리기
+                            </button>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <button type="button" onClick={() => 도장(j)} className={틀.선단추}>
+                        {j.공식확인 ? '공식 확인 거두기' : '우리가 올린 것이 맞아요'}
                       </button>
-                      {!j.hidden && (
-                        <>
-                          <button type="button" onClick={() => 마감(j.id, false)}
-                            className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
-                            지금 마감
-                          </button>
-                          <button type="button" onClick={() => 마감(j.id, true)}
-                            className="rounded-md border border-brand-red px-5 py-2 text-lg text-brand-red-dark hover:bg-gray-50">
-                            내리기
-                          </button>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <button type="button" onClick={() => 도장(j)}
-                      className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
-                      {j.공식확인 ? '공식 확인 거두기' : '우리가 올린 것이 맞아요'}
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+      </section>
 
-      <p className="mt-8 break-keep text-sm text-mute">
+      <p className={틀.작은글}>
         <b>우리가 모아 온 공고는 담당자가 고치지 못합니다.</b> 보기와 「공식 확인」까지만 됩니다 —
         긁어 온 값과 담당자가 고친 값이 어긋났을 때 어느 쪽이 맞는지 정하는 규칙을 먼저 만들어야 해요.
         고칠 곳이 있으면 공고 화면의 「잘못된 내용 알려주기」로 보내 주세요.
       </p>
-    </main>
+    </RapoPageFrame>
   );
 }

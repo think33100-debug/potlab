@@ -78,5 +78,10 @@ export function 새틀화면(pathname: string): boolean {
     || pathname === '/toolkit'
     /* 계산기 넷(/tools/…)도 같은 날부터 새 틀(피그마 T03 · 계산 도구형) */
     || pathname.startsWith('/tools/')
+    /* 2026-11-16 세중님 테스터 점검 — 아직 옛 위쪽 줄(POTJOB 로고)이던 화면을 새 틀(components/rapo/rapo-frame.tsx)로.
+       새 화면에서 가는 곳: 재직 인증 · 교육기관(목록·하나) · 담당자 신청 · 채용 관리 · 교육 관리.
+       주소로만 가는 곳: 월급 확인 · 스펙쌓기 · 대화(목록·방) · 알림함 · 준비 중 · 커뮤니티 방(/community/<방> · 어두운 판) · 테스트 중 안내(/beta) */
+    || ['/verify', '/partner', '/biz', '/edu/manage', '/edu/org', '/pay', '/spec', '/talk', '/alarm', '/soon', '/beta'].includes(pathname)
+    || pathname.startsWith('/edu/org/') || pathname.startsWith('/talk/') || pathname.startsWith('/community/')
     || pathname.startsWith('/design-preview');
 }

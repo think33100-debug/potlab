@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth';
 import { Avatar } from '@/components/avatar';
-import { NothingHere } from '@/components/nothing-here';
+import { RapoClosed, RapoPageFrame, RapoWait, 틀 } from '@/components/rapo/rapo-frame';
+import { RapoButton } from '@/components/rapo/rapo-ui';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { 대화닫힘안내, 대화열렸나 } from '@/lib/talk';
 
@@ -37,7 +38,8 @@ const 날 = (s: string | null) => (!s ? '' : new Date(s).toLocaleString('ko-KR',
     그래서 **쪽을 감싸는 꼴**로 둡니다) */
 export default function Talk() {
   if (!대화열렸나) {
-    return <NothingHere title={대화닫힘안내.제목} body={대화닫힘안내.본문} />;
+    /* 2026-11-16 — 주소로 열면 옛 위쪽 줄(POTJOB 로고)이 보여 새 틀 안내로 바꿨습니다 */
+    return <RapoClosed title={대화닫힘안내.제목} body={대화닫힘안내.본문} />;
   }
   return <TalkList />;
 }
@@ -60,7 +62,7 @@ function TalkList() {
     return () => { 살아있나 = false; };
   }, [session, 다시]);
 
-  if (loading) return <main className="mx-auto w-full max-w-2xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
+  if (loading) return <RapoPageFrame title="대화" back="/me"><RapoWait /></RapoPageFrame>;
 
   /* ★ 2026-10-11 — 회원에게 열었습니다 (세중님 결정).
      1:1 대화 — 회원끼리 말합니다.
@@ -74,59 +76,46 @@ function TalkList() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <h1 className="mt-5 break-keep text-h1 font-bold">대화</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
+    <RapoPageFrame title="대화" back="/me" nav="/me">
+      <p className={틀.흐린글}>
         말을 걸면 상대가 받을지 고릅니다. 사진은 상대가 한 번 보면 사라져요.
       </p>
 
       {방들.length === 0
-        ? <p className="mt-7 break-keep text-lg text-mute">아직 대화가 없어요.</p>
+        ? <p className={틀.흐린글}>아직 대화가 없어요.</p>
         : (
-          <ul className="mt-7 space-y-2">
+          <ul className="flex flex-col gap-(--rapo-dimension-x2)">
             {방들.map((r) => (
-              <li key={r.방} className="rounded-sm border border-gray-200 p-5">
-                <div className="flex items-center gap-3">
+              <li key={r.방} className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x3)'}>
+                <div className="flex items-center gap-(--rapo-dimension-x3)">
                   <Avatar value={r.상대아바타} size="sm" />
                   <span className="min-w-0 flex-1">
-                    <span className="flex flex-wrap items-center gap-2">
-                      <b className="text-lg">{r.상대}</b>
+                    <span className="flex flex-wrap items-center gap-(--rapo-dimension-x2)">
+                      <b className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">{r.상대}</b>
                       {r.상태 === '신청' && (
-                        <span className="rounded-full bg-gray-100 px-3 py-1 text-[13px] dark:bg-gray-800">
-                          {r.건사람인가 ? '기다리는 중' : '받을까요'}
-                        </span>
+                        <span className={틀.표}>{r.건사람인가 ? '기다리는 중' : '받을까요'}</span>
                       )}
                       {r.안읽음 > 0 && (
-                        <span className="rounded-full bg-brand-red px-2 text-[13px] font-bold text-white">
+                        <span className="rapo-type-t2-bold rounded-(--rapo-radius-full) bg-(--rapo-color-bg-deep-coral) px-(--rapo-dimension-x2) text-(color:--rapo-color-fg-on-deep-coral)">
                           {r.안읽음}
                         </span>
                       )}
-                      <span className="text-sm text-mute">{날(r.마지막때)}</span>
+                      <span className="rapo-type-t3-regular whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">{날(r.마지막때)}</span>
                     </span>
                     {r.마지막 && (
-                      <span className="mt-1 block truncate text-lg text-mute">{r.마지막}</span>
+                      <span className="rapo-type-t4-regular mt-(--rapo-dimension-x1) block truncate text-(color:--rapo-color-fg-neutral-muted)">{r.마지막}</span>
                     )}
                   </span>
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-(--rapo-dimension-x2)">
                   {r.상태 === '수락' && (
-                    <Link href={`/talk/${r.방}`}
-                      className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
-                      열기
-                    </Link>
+                    <Link href={`/talk/${r.방}`} className={틀.선단추}>열기</Link>
                   )}
                   {r.상태 === '신청' && !r.건사람인가 && (
                     <>
-                      <button type="button" onClick={() => 정하기(r, true)}
-                        className="rounded-md bg-brand-red px-5 py-2 text-lg font-bold text-white
-                                   hover:bg-brand-red-dark">
-                        받기
-                      </button>
-                      <button type="button" onClick={() => 정하기(r, false)}
-                        className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
-                        안 받기
-                      </button>
+                      <RapoButton tone="navy" size={40} onClick={() => 정하기(r, true)}>받기</RapoButton>
+                      <button type="button" onClick={() => 정하기(r, false)} className={틀.선단추}>안 받기</button>
                     </>
                   )}
                 </div>
@@ -134,6 +123,6 @@ function TalkList() {
             ))}
           </ul>
         )}
-    </main>
+    </RapoPageFrame>
   );
 }

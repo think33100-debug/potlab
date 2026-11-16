@@ -274,7 +274,8 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
         </section>
       </main>
       <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
-      <RapoBottomNav current="/" />
+      {/* 툴킷 칸 (2026-11-16 · 11/12 에 「홈」으로 적었는데 11/14 툴킷 칸이 생겨 툴킷에서 오는 화면이 됐습니다) */}
+      <RapoBottomNav current="/toolkit" />
     </div>
   );
 }

@@ -73,8 +73,10 @@ export function RapoHomeNotice() {
           <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">
             {/* 「모두의 창업」 — 2026-11-15 세중님 「실제 로고 참고해서」 · 공식 누리집(modoo.or.kr) 머리 로고 logo-full.png 그대로 */}
             RAPO는{' '}
+            {/* 2026-11-16 세중님 테스터 점검 — 28px 로고가 글줄(t4 · 19px)보다 커서 그 줄만 벌어지고 문장이 어긋나 보였습니다.
+                글줄 높이(19px · 원본 1024×342 비율이라 폭 약 57px)에 맞추고 글자 바닥선에 앉힙니다 */}
             {/* eslint-disable-next-line @next/next/no-img-element -- 사업 공식 로고 원본 그대로 */}
-            <img src="/rapo/home/modoo-logo.png" alt="모두의 창업" width={84} height={28} className="mx-[2px] inline-block h-[28px] w-auto align-middle" />
+            <img src="/rapo/home/modoo-logo.png" alt="모두의 창업" width={57} height={19} className="mx-[2px] inline-block h-[19px] w-auto align-[-4px]" />
             의 지원을 받아 만들고 있는 채용·커뮤니티 통합 앱입니다.
           </p>
           {/* 2026-11-15 세중님 「통합 앱입니다 하고 한 문단 띄어줘」 */}

@@ -133,10 +133,12 @@ function ProfileForm({ me }: { me: NonNullable<ReturnType<typeof useAuth>['me']>
 
       <section className="flex flex-col gap-(--rapo-dimension-x3)">
         <h2 className={소제목}>배경색</h2>
-        <div className="flex flex-wrap gap-(--rapo-dimension-x3)">
+        {/* 여덟 색을 한 줄 고른 칸으로 (2026-11-16 세중님 테스터 점검 — 375 폭에서 36px 동그라미 여덟이 안 들어가
+            마지막 하나만 둘째 줄에 혼자 섰습니다). 칸 폭에 맞춰 줄고 36px 을 넘지 않습니다 — 320 폭에서 약 27px */}
+        <div className="grid grid-cols-8 justify-items-center gap-(--rapo-dimension-x2)">
           {AVATAR_COLORS.map((c) => (
             <button key={c} type="button" aria-label={'배경색 ' + c} aria-pressed={지금.color === c} disabled={busy} onClick={() => set그림(withColor(그림, c))}
-              className={'size-[36px] rounded-(--rapo-radius-full) disabled:opacity-40 ' + (지금.color === c ? 'ring-2 ring-(--rapo-color-fg-neutral) ring-offset-2' : '')}
+              className={'aspect-square w-full max-w-[36px] rounded-(--rapo-radius-full) disabled:opacity-40 ' + (지금.color === c ? 'ring-2 ring-(--rapo-color-fg-neutral) ring-offset-2' : '')}
               style={{ background: c }} />
           ))}
         </div>

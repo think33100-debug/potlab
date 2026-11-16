@@ -22,10 +22,12 @@ export type 기관 = {
   열린교육: number; 최근: string | null;
 };
 
+/* 2026-11-16 — 교육기관 화면(/edu/org)을 새 틀로 옮기며 카드도 RAPO 토큰으로 바꿨습니다(옛 teal·gray 를 남기지 않음 · 화면표시 규칙 6).
+   알림 종 동작·링크 갈래는 그대로입니다 */
 const 직군색: Record<string, string> = {
-  작업치료사: 'bg-badge-teal-bg text-gray-700',
-  물리치료사: 'bg-gray-100 text-gray-600',
-  공통: 'bg-gray-100 text-gray-600',
+  작업치료사: 'bg-(--rapo-brand-color-blush) text-(color:--rapo-color-fg-neutral)',
+  물리치료사: 'bg-(--rapo-color-bg-neutral-weak) text-(color:--rapo-color-fg-neutral)',
+  공통: 'bg-(--rapo-color-bg-neutral-weak) text-(color:--rapo-color-fg-neutral)',
 };
 
 /* 그림이 없을 때 쓰는 기본 카드 — 이름 첫 두 글자를 크게.
@@ -33,12 +35,15 @@ const 직군색: Record<string, string> = {
 function 글자카드({ 이름 }: { 이름: string }) {
   const 글 = 이름.replace(/^(대한|한국|국제)/, '').slice(0, 2) || 이름.slice(0, 2);
   return (
-    <div className="flex size-14 shrink-0 items-center justify-center rounded-sm
-                    bg-badge-teal-bg text-body-lg font-bold text-gray-700">
+    <div className="rapo-type-t5-bold flex size-14 shrink-0 items-center justify-center whitespace-nowrap rounded-(--rapo-radius-r2)
+                    bg-(--rapo-color-bg-neutral-weak) text-(color:--rapo-brand-color-navy)">
       {글}
     </div>
   );
 }
+
+const 카드 = 'block rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) '
+  + 'bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x5) active:bg-(--rapo-color-bg-layer-default-pressed)';
 
 export function EduOrgCard({ o, 켜짐, 로그인했나, 오늘 }: {
   o: 기관; 켜짐: boolean; 로그인했나: boolean;
@@ -66,26 +71,26 @@ export function EduOrgCard({ o, 켜짐, 로그인했나, 오늘 }: {
 
   const 속 = (
     <>
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-(--rapo-dimension-x3)">
         {o.그림
-          ? <img src={o.그림} alt="" className="size-14 shrink-0 rounded-sm object-cover" />
+          ? <img src={o.그림} alt="" className="size-14 shrink-0 rounded-(--rapo-radius-r2) object-cover" />
           : <글자카드 이름={o.이름} />}
 
         <div className="min-w-0 flex-1">
-          <p className="break-keep text-body-lg font-bold text-ink">{o.이름}</p>
-          <p className="mt-1 flex flex-wrap items-center gap-2 text-sm">
-            <span className={'rounded-xs px-3 py-1 ' + (직군색[o.직군] ?? 직군색.공통)}>
+          <p className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">{o.이름}</p>
+          <p className="rapo-type-t3-regular mt-(--rapo-dimension-x1) flex flex-wrap items-center gap-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral-muted)">
+            <span className={'rapo-type-t2-medium whitespace-nowrap rounded-(--rapo-radius-r1) px-(--rapo-dimension-x2) py-(--rapo-dimension-x1) ' + (직군색[o.직군] ?? 직군색.공통)}>
               {o.직군 === '공통' ? '작업·물리치료' : o.직군.replace(/사$/, '')}
             </span>
             {o.모음
-              ? <span className="text-mute">열린 교육 <b className="text-ink">{o.열린교육}</b></span>
-              : <span className="text-mute">링크만 겁니다</span>}
+              ? <span className="whitespace-nowrap">열린 교육 <b className="text-(color:--rapo-color-fg-neutral)">{o.열린교육}</b></span>
+              : <span className="whitespace-nowrap">링크만 겁니다</span>}
           </p>
           {/* 최근 = 그 기관 교육의 가장 늦은 「시작일(없으면 올린날)」입니다.
               앞으로 열릴 교육이면 그 날이 **오늘보다 뒤**라서,
               「최근 10월 19일」이라고 쓰면 거짓말이 됩니다 (2026-10-04 고침) */}
           {o.최근 && (
-            <p className="mt-1 text-sm text-mute">
+            <p className="rapo-type-t3-regular mt-(--rapo-dimension-x1) whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">
               {o.최근 > 오늘 ? '다음 일정' : '최근'}{' '}
               {Number(o.최근.slice(5, 7))}월 {Number(o.최근.slice(8, 10))}일
             </p>
@@ -97,32 +102,30 @@ export function EduOrgCard({ o, 켜짐, 로그인했나, 오늘 }: {
           onClick={종누름}
           aria-pressed={on}
           aria-label={on ? '알림 끄기' : '새 교육 알림 켜기'}
-          className={'shrink-0 rounded-xs border px-3 py-2 text-sm font-medium '
+          className={'rapo-type-t3-medium flex h-(--rapo-dimension-x8) shrink-0 items-center whitespace-nowrap rounded-(--rapo-radius-full) border-(length:--rapo-border-default) px-(--rapo-dimension-x3) '
             + (on
-              ? 'border-teal-strong bg-teal-strong text-white'
-              : 'border-line text-mute hover:bg-paper')}
+              ? 'border-(color:--rapo-color-bg-navy-solid) bg-(--rapo-color-bg-navy-solid) text-(color:--rapo-color-fg-on-navy-solid)'
+              : 'border-(color:--rapo-color-stroke-neutral-muted) text-(color:--rapo-color-fg-neutral-muted) active:bg-(--rapo-color-bg-transparent-pressed)')}
         >
           {on ? '알림 켜짐' : '알림'}
         </button>
       </div>
 
       {o.소개 && (
-        <p className="mt-3 line-clamp-2 break-keep text-lg text-mute">{o.소개}</p>
+        <p className="rapo-type-t4-regular mt-(--rapo-dimension-x3) line-clamp-2 break-keep text-(color:--rapo-color-fg-neutral-muted)">{o.소개}</p>
       )}
     </>
   );
 
   /* 모으는 기관은 우리 상세로, 링크만 거는 곳은 그 기관 화면으로 */
   return o.모음 ? (
-    <Link href={`/edu/org/${encodeURIComponent(o.이름)}`}
-      className="block rounded-sm border border-line bg-card p-6 hover:bg-paper">
+    <Link href={`/edu/org/${encodeURIComponent(o.이름)}`} className={카드}>
       {속}
     </Link>
   ) : (
-    <a href={o.링크주소 ?? o.누리집 ?? '#'} target="_blank" rel="noopener noreferrer"
-      className="block rounded-sm border border-line bg-card p-6 hover:bg-paper">
+    <a href={o.링크주소 ?? o.누리집 ?? '#'} target="_blank" rel="noopener noreferrer" className={카드}>
       {속}
-      <p className="mt-3 text-lg font-bold text-brand-red">기관 화면에서 보기 ›</p>
+      <p className="rapo-type-t4-bold mt-(--rapo-dimension-x3) text-(color:--rapo-color-fg-brand-contrast)">기관 화면에서 보기 ›</p>
     </a>
   );
 }

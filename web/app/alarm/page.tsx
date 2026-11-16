@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoPageFrame, RapoWait, 틀 } from '@/components/rapo/rapo-frame';
+import { RapoButton } from '@/components/rapo/rapo-ui';
 
 /* 알림함 (2026-10-09 · 뼈대 8절).
  *
@@ -38,20 +40,18 @@ export default function Alarm() {
     return () => { 살아있나 = false; };
   }, [session]);
 
+  /* 2026-11-16 — 옛 위쪽 줄(POTJOB 로고)의 종에서만 오던 화면이라 새 화면에서는 안 오지만, 주소로 열려서 새 틀로 옮겼습니다.
+     읽는 길(내알림 · 알림읽음)은 그대로입니다 */
   if (loading) {
-    return <main className="mx-auto w-full max-w-2xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
+    return <RapoPageFrame title="알림" back="/me"><RapoWait /></RapoPageFrame>;
   }
 
   if (!session) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
-        <h1 className="break-keep text-h1 font-bold">알림</h1>
-        <p className="mt-3 break-keep text-lg text-mute">로그인하시면 알림을 모아 보여드려요.</p>
-        <Link href="/login" className="mt-7 inline-block rounded-md bg-brand-red px-6 py-4
-                                       text-btn font-bold text-white hover:bg-brand-red-dark">
-          로그인
-        </Link>
-      </main>
+      <RapoPageFrame title="알림" back="/">
+        <p className={틀.흐린글 + ' pt-(--rapo-dimension-x6)'}>로그인하시면 알림을 모아 보여드려요.</p>
+        <RapoButton href="/login" tone="navy" full>로그인</RapoButton>
+      </RapoPageFrame>
     );
   }
 
@@ -59,33 +59,31 @@ export default function Alarm() {
      막는 자리는 창구입니다 — 내알림()·알림읽음() 이 auth.uid() 로 자기 것만 줍니다 */
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <h1 className="mt-5 break-keep text-h1 font-bold">알림</h1>
-
-      {줄들 === null ? <p className="mt-6 text-lg text-mute">잠시만요…</p>
+    <RapoPageFrame title="알림" back="/me" nav="/me">
+      {줄들 === null ? <RapoWait />
         : 줄들.length === 0
-          ? <p className="mt-6 break-keep text-lg text-mute">아직 알림이 없어요.</p>
+          ? <p className={틀.흐린글 + ' pt-(--rapo-dimension-x6)'}>아직 알림이 없어요.</p>
           : (
-            <ul className="mt-6 space-y-2">
+            <ul className="flex flex-col gap-(--rapo-dimension-x2)">
               {줄들.map((n) => {
                 const 속 = (
                   <>
-                    <p className="flex flex-wrap items-center gap-2">
-                      {!n.읽은때 && <span className="h-2 w-2 shrink-0 rounded-full bg-brand-red" />}
-                      <b className="break-keep text-lg">{n.제목}</b>
-                      <span className="text-sm text-mute">{날(n.만든때)}</span>
+                    <p className="flex flex-wrap items-center gap-(--rapo-dimension-x2)">
+                      {!n.읽은때 && <span aria-label="안 읽음" className="size-2 shrink-0 rounded-(--rapo-radius-full) bg-(--rapo-color-bg-deep-coral)" />}
+                      <b className="rapo-type-t5-bold break-keep text-(color:--rapo-color-fg-neutral)">{n.제목}</b>
+                      <span className="rapo-type-t3-regular whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">{날(n.만든때)}</span>
                     </p>
-                    {n.본문 && <p className="mt-1 break-keep text-lg text-mute">{n.본문}</p>}
+                    {n.본문 && <p className={틀.흐린글 + ' mt-(--rapo-dimension-x1)'}>{n.본문}</p>}
                   </>
                 );
                 return (
-                  <li key={n.id} className="rounded-sm border border-gray-200 p-5">
+                  <li key={n.id} className={틀.카드}>
                     {n.링크 ? <Link href={n.링크} className="block">{속}</Link> : 속}
                   </li>
                 );
               })}
             </ul>
           )}
-    </main>
+    </RapoPageFrame>
   );
 }

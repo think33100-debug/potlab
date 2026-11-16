@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { NoticeFiles } from '@/components/notice-files';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoPageFrame, RapoWait, 틀 } from '@/components/rapo/rapo-frame';
+import { RapoButton, RapoChip } from '@/components/rapo/rapo-ui';
 
 /* 교육 관리 — 담당자가 과정·회차를 만들고 신청자를 보는 곳 (2026-10-09 · 뼈대 ⑥).
  *
@@ -109,17 +111,18 @@ export default function EduManage() {
     return true;
   }, []);
 
+  /* 2026-11-16 세중님 테스터 점검 — 내 정보 메뉴 「교육 관리」가 옛 위쪽 줄(POTJOB 로고)에 「아직 준비 중이에요」만 보였습니다.
+     새 틀(components/rapo/rapo-frame.tsx · 하단 탐색 「교육」 칸)로 옮겼습니다. 창구·권한·확인 창은 그대로입니다 */
   if (loading) {
-    return <main className="mx-auto w-full max-w-3xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
+    return <RapoPageFrame title="교육 관리" back="/me" nav="/edu/manage"><RapoWait /></RapoPageFrame>;
   }
 
   if (!관리.교육관리) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 md:px-7">
-        <p className="break-keep text-h3 font-bold">아직 준비 중이에요</p>
-        <Link href="/" className="mt-7 inline-block rounded-md border border-gray-200 px-6 py-4
-                                  text-lg font-medium text-gray-600 hover:bg-gray-50">홈으로</Link>
-      </main>
+      <RapoPageFrame title="교육 관리" back="/me">
+        <p className={틀.소제목 + ' pt-(--rapo-dimension-x6)'}>아직 준비 중이에요</p>
+        <Link href="/" className={틀.큰단추}>홈으로</Link>
+      </RapoPageFrame>
     );
   }
 
@@ -151,285 +154,274 @@ export default function EduManage() {
     if (ok) { set회차열까(null); set새회차(빈회차); }
   };
 
+  const 칸이름 = 'rapo-type-t4-bold block text-(color:--rapo-color-fg-neutral)';
+  const 칸묶음 = 'flex flex-col gap-(--rapo-dimension-x2)';
+  const 흰단추 = 틀.선단추 + ' bg-(--rapo-color-bg-layer-default)';
+
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <p className="rounded-sm bg-badge-teal-bg px-4 py-2 text-sm text-teal-strong">
+    <RapoPageFrame title="교육 관리" back="/me" nav="/edu/manage">
+      <p className={틀.회색칸 + ' ' + 틀.작은글}>
         숨겨 둔 화면이에요 — 승인된 교육담당자와 마스터에게만 보입니다
       </p>
-      <h1 className="mt-5 break-keep text-h1 font-bold">교육 관리</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
+      <p className={틀.흐린글}>
         결제와 환불은 기관과 신청자 사이의 일이에요. RAPO 는 계좌 안내만 전달합니다.
       </p>
 
-      {탈 && <p className="mt-4 rounded-sm border border-brand-red p-4 text-lg text-brand-red-dark">{탈}</p>}
-      {알림 && <p className="mt-4 rounded-sm border border-teal-strong p-4 text-lg text-teal-strong">{알림}</p>}
+      {탈 && <p role="alert" className={틀.오류칸}>{탈}</p>}
+      {알림 && <p role="status" className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-positive-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-positive-contrast)">{알림}</p>}
 
-      <div className="mt-6">
-        <button type="button" onClick={() => { set과정열까((v) => !v); set탈(null); }}
-          className="rounded-md bg-brand-red px-6 py-4 text-btn font-bold text-white hover:bg-brand-red-dark">
+      <div>
+        <RapoButton tone="deep-coral" size={40} onClick={() => { set과정열까((v) => !v); set탈(null); }}>
           {과정열까 ? '접기' : '과정 만들기'}
-        </button>
+        </RapoButton>
       </div>
 
       {과정열까 && (
-        <section className="mt-5 rounded-sm border border-gray-200 p-5">
-          <label className="block text-sm font-bold text-mute" htmlFor="과정제목">과정 이름</label>
-          <input id="과정제목" value={새과정.제목}
-            onChange={(e) => set새과정({ ...새과정, 제목: e.target.value })}
-            placeholder="연하재활 기초 과정"
-            className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
-
-          <p className="mt-4 text-sm font-bold text-mute">직군</p>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {['작업치료사', '물리치료사'].map((g) => (
-              <button key={g} type="button" onClick={() => set새과정({ ...새과정, 직군: g })}
-                className={'rounded-md px-5 py-3 text-lg ' +
-                  (새과정.직군 === g ? 'bg-[#14181C] text-white' : 'border border-gray-200 text-gray-600')}>
-                {g}
-              </button>
-            ))}
+        <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x4)'}>
+          <div className={칸묶음}>
+            <label className={칸이름} htmlFor="과정제목">과정 이름</label>
+            <input id="과정제목" value={새과정.제목}
+              onChange={(e) => set새과정({ ...새과정, 제목: e.target.value })}
+              placeholder="연하재활 기초 과정" className={틀.입력} />
           </div>
 
-          <label className="mt-4 block text-sm font-bold text-mute" htmlFor="과정소개">소개</label>
-          <textarea id="과정소개" rows={3} value={새과정.소개}
-            onChange={(e) => set새과정({ ...새과정, 소개: e.target.value })}
-            className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-3 text-lg" />
+          <div className={칸묶음}>
+            <p className={칸이름}>직군</p>
+            <div className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
+              {['작업치료사', '물리치료사'].map((g) => (
+                <RapoChip key={g} on={새과정.직군 === g} onClick={() => set새과정({ ...새과정, 직군: g })} label={g} />
+              ))}
+            </div>
+          </div>
 
-          <button type="button" onClick={과정만들기} disabled={도는중}
-            className="mt-5 rounded-md bg-brand-red px-6 py-4 text-btn font-bold text-white
-                       hover:bg-brand-red-dark disabled:opacity-50">
-            만들기
-          </button>
+          <div className={칸묶음}>
+            <label className={칸이름} htmlFor="과정소개">소개</label>
+            <textarea id="과정소개" rows={3} value={새과정.소개}
+              onChange={(e) => set새과정({ ...새과정, 소개: e.target.value })} className={틀.긴입력} />
+          </div>
+
+          <div>
+            <RapoButton tone="navy" size={40} onClick={과정만들기} disabled={도는중}>만들기</RapoButton>
+          </div>
         </section>
       )}
 
-      <h2 className="mt-9 text-h3 font-bold">내 과정 {과정들?.length ?? 0}개</h2>
+      <section className="flex flex-col gap-(--rapo-dimension-x3)">
+        <h2 className={틀.소제목}>내 과정 <span className="whitespace-nowrap">{과정들?.length ?? 0}개</span></h2>
 
-      {과정들 === null ? <p className="mt-4 text-lg text-mute">잠시만요…</p>
-        : 과정들.length === 0
-          ? <p className="mt-4 break-keep text-lg text-mute">아직 만든 과정이 없어요.</p>
-          : (
-            <ul className="mt-4 space-y-5">
-              {과정들.map((c) => (
-                <li key={c.과정id} className="rounded-sm border border-gray-200 p-5">
-                  <p className="flex flex-wrap items-center gap-2">
-                    <b className="break-keep text-lg">{c.제목}</b>
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-[13px] dark:bg-gray-800">
-                      {c.직군 ?? '직군 안 적힘'}
-                    </span>
-                    {c.시험자료 && (
-                      <span className="rounded-full bg-badge-teal-bg px-3 py-1 text-[13px] text-teal-strong">
-                        예시 자료
-                      </span>
-                    )}
-                    {c.숨김 && <span className="text-sm text-mute">숨김</span>}
-                  </p>
-                  <p className="mt-1 text-sm text-mute">
-                    {c.주최갈래 === '기관' ? c.주최이름 : `개인 강사 · ${c.주최이름 ?? ''}`}
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button type="button"
-                      onClick={() => { set회차열까(회차열까 === c.과정id ? null : c.과정id); set새회차(빈회차); }}
-                      className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
-                      {회차열까 === c.과정id ? '접기' : '회차 열기'}
-                    </button>
-                    <button type="button"
-                      onClick={() => 부르기('교육과정고치기',
-                        { p_과정: c.과정id, p_숨길까: !c.숨김 },
-                        c.숨김 ? '다시 보이게 했어요.' : '숨겼어요.')}
-                      className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
-                      {c.숨김 ? '다시 보이게' : '숨기기'}
-                    </button>
-                  </div>
-
-                  {회차열까 === c.과정id && (
-                    <div className="mt-4 rounded-sm border border-gray-200 p-4">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {([
-                          ['시작', '교육 시작', 'date'], ['끝', '교육 끝', 'date'],
-                          ['접수시작', '접수 시작', 'date'], ['접수끝', '접수 마감', 'date'],
-                          ['장소', '장소', 'text'], ['정원', '정원', 'number'],
-                          ['수강료', '수강료(원)', 'number'],
-                          ['은행', '은행', 'text'], ['계좌번호', '계좌번호', 'text'],
-                          ['예금주', '예금주', 'text'], ['입금기한', '입금 기한', 'date'],
-                          ['입금자명규칙', '입금자명 규칙', 'text'],
-                          ['결제링크', '기관 결제 링크(없으면 비움)', 'text'],
-                        ] as const).map(([k, 라벨, 꼴]) => (
-                          <div key={k}>
-                            <label className="block text-sm font-bold text-mute" htmlFor={`회차-${k}`}>
-                              {라벨}
-                            </label>
-                            <input id={`회차-${k}`} type={꼴}
-                              value={새회차[k]}
-                              onChange={(e) => set새회차({ ...새회차, [k]: e.target.value })}
-                              className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-3 text-lg" />
-                          </div>
-                        ))}
-                      </div>
-                      <p className="mt-2 break-keep text-sm text-mute">
-                        접수 기간은 <b>최대 30일</b>이에요 (DB 가 막습니다).
+        {과정들 === null ? <RapoWait />
+          : 과정들.length === 0
+            ? <p className={틀.흐린글}>아직 만든 과정이 없어요.</p>
+            : (
+              <ul className="flex flex-col gap-(--rapo-dimension-x4)">
+                {과정들.map((c) => (
+                  <li key={c.과정id} className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x3)'}>
+                    <div className="flex flex-col gap-(--rapo-dimension-x1)">
+                      <p className="flex flex-wrap items-center gap-(--rapo-dimension-x2)">
+                        <b className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">{c.제목}</b>
+                        <span className={틀.표}>{c.직군 ?? '직군 안 적힘'}</span>
+                        {c.시험자료 && <span className={틀.표}>예시 자료</span>}
+                        {c.숨김 && <span className={틀.작은글}>숨김</span>}
                       </p>
+                      <p className={틀.작은글}>
+                        {c.주최갈래 === '기관' ? c.주최이름 : `개인 강사 · ${c.주최이름 ?? ''}`}
+                      </p>
+                    </div>
 
-                      <label className="mt-4 block text-sm font-bold text-mute" htmlFor="환불규정">
-                        환불 규정 (꼭 적어 주세요)
-                      </label>
-                      <textarea id="환불규정" rows={3} value={새회차.환불규정}
-                        onChange={(e) => set새회차({ ...새회차, 환불규정: e.target.value })}
-                        placeholder={'시작 7일 전까지 전액 환불\n3일 전까지 50%\n그 뒤에는 환불이 안 됩니다'}
-                        className="mt-1 w-full rounded-sm border border-gray-200 px-5 py-3 text-lg" />
-
-                      <button type="button" onClick={() => 회차열기(c.과정id)} disabled={도는중}
-                        className="mt-4 rounded-md bg-brand-red px-6 py-3 text-lg font-bold text-white
-                                   hover:bg-brand-red-dark disabled:opacity-50">
-                        회차 열기
+                    <div className="flex flex-wrap gap-(--rapo-dimension-x2)">
+                      <button type="button"
+                        onClick={() => { set회차열까(회차열까 === c.과정id ? null : c.과정id); set새회차(빈회차); }}
+                        className={틀.선단추}>
+                        {회차열까 === c.과정id ? '접기' : '회차 열기'}
+                      </button>
+                      <button type="button"
+                        onClick={() => 부르기('교육과정고치기',
+                          { p_과정: c.과정id, p_숨길까: !c.숨김 },
+                          c.숨김 ? '다시 보이게 했어요.' : '숨겼어요.')}
+                        className={틀.선단추}>
+                        {c.숨김 ? '다시 보이게' : '숨기기'}
                       </button>
                     </div>
-                  )}
 
-                  {c.회차.length > 0 && (
-                    <ul className="mt-4 space-y-2">
-                      {c.회차.map((s) => (
-                        <li key={s.회차id} className="rounded-sm bg-gray-50 p-4 dark:bg-gray-900">
-                          <p className="flex flex-wrap items-center gap-2">
-                            <b className="text-lg">{날(s.시작)}</b>
-                            <span className="rounded-full bg-white px-3 py-1 text-[13px] dark:bg-gray-800">
-                              {s.상태}
-                            </span>
-                            <span className="text-lg text-mute">
-                              확정 <b className="num">{s.확정수}</b>/{s.정원}명 · 신청{' '}
-                              <b className="num">{s.신청수}</b>명 · {돈(s.수강료)}
-                            </span>
-                            {s.입금눌렀는데대기 > 0 && (
-                              <span className="rounded-full bg-warning px-3 py-1 text-[13px] text-white">
-                                입금했다는 분 {s.입금눌렀는데대기}명
+                    {회차열까 === c.과정id && (
+                      <div className={틀.회색칸 + ' flex flex-col gap-(--rapo-dimension-x3)'}>
+                        <div className="grid gap-(--rapo-dimension-x3) sm:grid-cols-2">
+                          {([
+                            ['시작', '교육 시작', 'date'], ['끝', '교육 끝', 'date'],
+                            ['접수시작', '접수 시작', 'date'], ['접수끝', '접수 마감', 'date'],
+                            ['장소', '장소', 'text'], ['정원', '정원', 'number'],
+                            ['수강료', '수강료(원)', 'number'],
+                            ['은행', '은행', 'text'], ['계좌번호', '계좌번호', 'text'],
+                            ['예금주', '예금주', 'text'], ['입금기한', '입금 기한', 'date'],
+                            ['입금자명규칙', '입금자명 규칙', 'text'],
+                            ['결제링크', '기관 결제 링크(없으면 비움)', 'text'],
+                          ] as const).map(([k, 라벨, 꼴]) => (
+                            <div key={k} className={칸묶음}>
+                              <label className={칸이름} htmlFor={`회차-${k}`}>{라벨}</label>
+                              <input id={`회차-${k}`} type={꼴}
+                                value={새회차[k]}
+                                onChange={(e) => set새회차({ ...새회차, [k]: e.target.value })}
+                                className={틀.입력} />
+                            </div>
+                          ))}
+                        </div>
+                        <p className={틀.작은글}>
+                          접수 기간은 <b>최대 30일</b>이에요 (DB 가 막습니다).
+                        </p>
+
+                        <div className={칸묶음}>
+                          <label className={칸이름} htmlFor="환불규정">환불 규정 (꼭 적어 주세요)</label>
+                          <textarea id="환불규정" rows={3} value={새회차.환불규정}
+                            onChange={(e) => set새회차({ ...새회차, 환불규정: e.target.value })}
+                            placeholder={'시작 7일 전까지 전액 환불\n3일 전까지 50%\n그 뒤에는 환불이 안 됩니다'}
+                            className={틀.긴입력} />
+                        </div>
+
+                        <div>
+                          <RapoButton tone="navy" size={40} onClick={() => 회차열기(c.과정id)} disabled={도는중}>회차 열기</RapoButton>
+                        </div>
+                      </div>
+                    )}
+
+                    {c.회차.length > 0 && (
+                      <ul className="flex flex-col gap-(--rapo-dimension-x2)">
+                        {c.회차.map((s) => (
+                          <li key={s.회차id} className={틀.회색칸 + ' flex flex-col gap-(--rapo-dimension-x2)'}>
+                            <p className="flex flex-wrap items-center gap-(--rapo-dimension-x2)">
+                              <b className="rapo-type-t5-bold whitespace-nowrap text-(color:--rapo-color-fg-neutral)">{날(s.시작)}</b>
+                              <span className="rapo-type-t2-medium inline-flex items-center whitespace-nowrap rounded-(--rapo-radius-r1) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x2) py-(--rapo-dimension-x1) text-(color:--rapo-color-fg-neutral)">{s.상태}</span>
+                              <span className={틀.흐린글}>
+                                <span className="whitespace-nowrap">확정 <b className="num">{s.확정수}</b>/{s.정원}명</span>
+                                {' · '}<span className="whitespace-nowrap">신청 <b className="num">{s.신청수}</b>명</span>
+                                {' · '}<span className="whitespace-nowrap">{돈(s.수강료)}</span>
                               </span>
-                            )}
-                          </p>
-                          <p className="mt-1 text-sm text-mute">
-                            접수 {날(s.접수시작)} ~ {날(s.접수끝)} · {s.장소 ?? '장소 안 적힘'}
-                            {s.후기수 > 0 && ` · 후기 ${s.후기수}개`}
-                          </p>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            <button type="button"
-                              onClick={() => set신청본다(신청본다 === s.회차id ? null : s.회차id)}
-                              className="rounded-md border border-gray-200 bg-white px-5 py-2 text-lg text-gray-600 hover:bg-gray-50 dark:bg-gray-800">
-                              {신청본다 === s.회차id ? '신청자 접기' : '신청자 보기'}
-                            </button>
-                            <Link href={`/edu/session/${s.회차id}`}
-                              className="rounded-md border border-gray-200 bg-white px-5 py-2 text-lg text-gray-600 hover:bg-gray-50 dark:bg-gray-800">
-                              회원 화면으로
-                            </Link>
-                            {s.상태 !== '끝남' && (
+                              {s.입금눌렀는데대기 > 0 && (
+                                <span className="rapo-type-t2-bold inline-flex items-center whitespace-nowrap rounded-(--rapo-radius-full) bg-(--rapo-color-bg-warning-solid) px-(--rapo-dimension-x3) py-(--rapo-dimension-x1) text-(color:--rapo-color-fg-on-warning-solid)">
+                                  입금했다는 분 {s.입금눌렀는데대기}명
+                                </span>
+                              )}
+                            </p>
+                            <p className={틀.작은글}>
+                              접수 <span className="whitespace-nowrap">{날(s.접수시작)} ~ {날(s.접수끝)}</span> · {s.장소 ?? '장소 안 적힘'}
+                              {s.후기수 > 0 && ` · 후기 ${s.후기수}개`}
+                            </p>
+                            <div className="flex flex-wrap gap-(--rapo-dimension-x2)">
                               <button type="button"
-                                onClick={() => { if (confirm('모집을 끝냅니다. 확정이 안 된 분은 「미선정」이 되고 알림이 갑니다. 할까요?')) 부르기('교육모집끝내기', { p_회차: s.회차id }, '모집을 끝냈어요.'); }}
-                                className="rounded-md border border-brand-red bg-white px-5 py-2 text-lg text-brand-red-dark hover:bg-gray-50 dark:bg-gray-800">
-                                모집 끝내기
+                                onClick={() => set신청본다(신청본다 === s.회차id ? null : s.회차id)}
+                                className={흰단추}>
+                                {신청본다 === s.회차id ? '신청자 접기' : '신청자 보기'}
                               </button>
+                              <Link href={`/edu/session/${s.회차id}`} className={흰단추}>회원 화면으로</Link>
+                              {s.상태 !== '끝남' && (
+                                <button type="button"
+                                  onClick={() => { if (confirm('모집을 끝냅니다. 확정이 안 된 분은 「미선정」이 되고 알림이 갑니다. 할까요?')) 부르기('교육모집끝내기', { p_회차: s.회차id }, '모집을 끝냈어요.'); }}
+                                  className="rapo-type-t4-bold inline-flex h-(--rapo-dimension-x10) items-center justify-center whitespace-nowrap rounded-(--rapo-radius-r2) px-(--rapo-dimension-x4)
+                                             border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-critical-solid) bg-(--rapo-color-bg-layer-default) text-(color:--rapo-color-fg-critical)
+                                             active:bg-(--rapo-color-bg-transparent-pressed)">
+                                  모집 끝내기
+                                </button>
+                              )}
+                              <button type="button"
+                                onClick={() => {
+                                  const 시작 = prompt('새 회차의 교육 시작일 (2026-11-20 꼴)');
+                                  if (!시작) return;
+                                  const 접수시작 = prompt('접수 시작일', 시작) || 시작;
+                                  const 접수끝 = prompt('접수 마감일', 시작) || 시작;
+                                  부르기('교육재공고', {
+                                    p_회차: s.회차id, p_시작: 시작, p_끝: 시작,
+                                    p_접수시작: 접수시작, p_접수끝: 접수끝,
+                                  }, '같은 조건으로 새 회차를 열었어요.');
+                                }}
+                                className={흰단추}>
+                                재공고
+                              </button>
+                            </div>
+
+                            {/* 첨부 — 안내문·시간표를 답니다. 회원만 받습니다 */}
+                            <NoticeFiles 갈래="교육" 회차={s.회차id} 고칠수있나 />
+
+                            {신청본다 === s.회차id && (
+                              신청들?.회차 !== s.회차id
+                                ? <RapoWait />
+                                : 신청들.줄.length === 0
+                                ? <p className={틀.흐린글}>아직 신청자가 없어요.</p>
+                                : (
+                                  <ul className="flex flex-col gap-(--rapo-dimension-x2)">
+                                    {신청들.줄.map((a) => (
+                                      <li key={a.신청id}
+                                        className="flex flex-wrap items-center gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x3)">
+                                        <b className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">{a.nickname}</b>
+                                        <span className={틀.흐린글}>{a.상태}</span>
+                                        {a.입금눌렀나 && <span className={틀.표}>입금했다고 함</span>}
+                                        {/* 2026-11-15 피그마 「신청자 상태 관리」 — 신청·입금·수강 상태를 신청자별로 바꿉니다.
+                                            「수강 완료」로 바꾸면 그 사람이 이 회차 후기를 쓸 수 있어요 (DB 교육신청상태바꾸기 · 금고 SQL_1113/ZQ) */}
+                                        <label className="ml-auto flex items-center gap-(--rapo-dimension-x2)">
+                                          <span className="sr-only">{a.nickname} 상태</span>
+                                          <select value={a.상태} disabled={도는중}
+                                            onChange={(e) => 부르기('교육신청상태바꾸기', { p_신청: a.신청id, p_상태: e.target.value }, '상태를 바꿨어요.')}
+                                            className="rapo-type-t4-regular h-(--rapo-dimension-x10) rounded-(--rapo-radius-r2) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x3) text-(color:--rapo-color-fg-neutral)">
+                                            {[['신청함', '신청 접수'], ['입금대기', '입금 확인 중'], ['참여확정', '참여 확정'], ['수강완료', '수강 완료'], ['미선정', '미선정']].map(([v, 글]) => (
+                                              <option key={v} value={v}>{글}</option>
+                                            ))}
+                                          </select>
+                                        </label>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )
                             )}
-                            <button type="button"
-                              onClick={() => {
-                                const 시작 = prompt('새 회차의 교육 시작일 (2026-11-20 꼴)');
-                                if (!시작) return;
-                                const 접수시작 = prompt('접수 시작일', 시작) || 시작;
-                                const 접수끝 = prompt('접수 마감일', 시작) || 시작;
-                                부르기('교육재공고', {
-                                  p_회차: s.회차id, p_시작: 시작, p_끝: 시작,
-                                  p_접수시작: 접수시작, p_접수끝: 접수끝,
-                                }, '같은 조건으로 새 회차를 열었어요.');
-                              }}
-                              className="rounded-md border border-gray-200 bg-white px-5 py-2 text-lg text-gray-600 hover:bg-gray-50 dark:bg-gray-800">
-                              재공고
-                            </button>
-                          </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+      </section>
 
-                          {/* 첨부 — 안내문·시간표를 답니다. 회원만 받습니다 */}
-                          <NoticeFiles 갈래="교육" 회차={s.회차id} 고칠수있나 />
+      <section className="flex flex-col gap-(--rapo-dimension-x3)">
+        <div className="flex flex-col gap-(--rapo-dimension-x1)">
+          <h2 className={틀.소제목}>후기 <span className="whitespace-nowrap">{후기들.length}개</span></h2>
+          <p className={틀.흐린글}>후기는 지울 수 없어요. <b>답글만</b> 달 수 있습니다.</p>
+        </div>
 
-                          {신청본다 === s.회차id && (
-                            신청들?.회차 !== s.회차id
-                              ? <p className="mt-3 text-lg text-mute">잠시만요…</p>
-                              : 신청들.줄.length === 0
-                              ? <p className="mt-3 text-lg text-mute">아직 신청자가 없어요.</p>
-                              : (
-                                <ul className="mt-3 space-y-2">
-                                  {신청들.줄.map((a) => (
-                                    <li key={a.신청id}
-                                      className="flex flex-wrap items-center gap-2 rounded-sm bg-white p-3 dark:bg-gray-800">
-                                      <b className="text-lg">{a.nickname}</b>
-                                      <span className="text-lg text-mute">{a.상태}</span>
-                                      {a.입금눌렀나 && (
-                                        <span className="rounded-full bg-badge-teal-bg px-3 py-1 text-[13px] text-teal-strong">
-                                          입금했다고 함
-                                        </span>
-                                      )}
-                                      {/* 2026-11-15 피그마 「신청자 상태 관리」 — 신청·입금·수강 상태를 신청자별로 바꿉니다.
-                                          「수강 완료」로 바꾸면 그 사람이 이 회차 후기를 쓸 수 있어요 (DB 교육신청상태바꾸기 · 금고 SQL_1113/ZQ) */}
-                                      <label className="ml-auto flex items-center gap-2 text-lg">
-                                        <span className="sr-only">{a.nickname} 상태</span>
-                                        <select value={a.상태} disabled={도는중}
-                                          onChange={(e) => 부르기('교육신청상태바꾸기', { p_신청: a.신청id, p_상태: e.target.value }, '상태를 바꿨어요.')}
-                                          className="rounded-md border border-gray-200 px-3 py-2 text-lg">
-                                          {[['신청함', '신청 접수'], ['입금대기', '입금 확인 중'], ['참여확정', '참여 확정'], ['수강완료', '수강 완료'], ['미선정', '미선정']].map(([v, 글]) => (
-                                            <option key={v} value={v}>{글}</option>
-                                          ))}
-                                        </select>
-                                      </label>
-                                    </li>
-                                  ))}
-                                </ul>
-                              )
-                          )}
-                        </li>
-                      ))}
-                    </ul>
+        {후기들.length === 0
+          ? <p className={틀.흐린글}>아직 후기가 없어요.</p>
+          : (
+            <ul className="flex flex-col gap-(--rapo-dimension-x3)">
+              {후기들.map((r) => (
+                <li key={r.리뷰id} className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x2)'}>
+                  <p className="flex flex-wrap items-center gap-(--rapo-dimension-x2)">
+                    <b className="rapo-type-t4-bold whitespace-nowrap text-(color:--rapo-color-fg-brand-contrast)">{'★'.repeat(r.별점)}</b>
+                    <span className={틀.글}>{r.닉네임}</span>
+                    <span className={틀.작은글}>{r.제목}</span>
+                  </p>
+                  <p className={틀.글 + ' whitespace-pre-line'}>{r.글}</p>
+                  {r.답글 ? (
+                    <div className={틀.회색칸 + ' flex flex-col gap-(--rapo-dimension-x1)'}>
+                      <p className={틀.작은글}>내 답글</p>
+                      <p className={틀.글 + ' whitespace-pre-line'}>{r.답글}</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-(--rapo-dimension-x2)">
+                      <textarea rows={2} value={답글칸[r.리뷰id] ?? ''} aria-label="답글"
+                        onChange={(e) => set답글칸({ ...답글칸, [r.리뷰id]: e.target.value })}
+                        placeholder="답글을 적어 주세요" className={틀.긴입력} />
+                      <div>
+                        <RapoButton tone="navy" size={40} disabled={도는중 || !(답글칸[r.리뷰id] ?? '').trim()}
+                          onClick={() => 부르기('교육리뷰답글쓰기',
+                            { p_리뷰: r.리뷰id, p_글: (답글칸[r.리뷰id] ?? '').trim() }, '답글을 달았어요.')}>
+                          답글 달기
+                        </RapoButton>
+                      </div>
+                    </div>
                   )}
                 </li>
               ))}
             </ul>
           )}
-
-      <h2 className="mt-9 text-h3 font-bold">후기 {후기들.length}개</h2>
-      <p className="mt-1 break-keep text-lg text-mute">
-        후기는 지울 수 없어요. <b>답글만</b> 달 수 있습니다.
-      </p>
-
-      {후기들.length === 0
-        ? <p className="mt-4 break-keep text-lg text-mute">아직 후기가 없어요.</p>
-        : (
-          <ul className="mt-4 space-y-3">
-            {후기들.map((r) => (
-              <li key={r.리뷰id} className="rounded-sm border border-gray-200 p-5">
-                <p className="flex flex-wrap items-center gap-2">
-                  <b className="text-lg">{'★'.repeat(r.별점)}</b>
-                  <span className="text-lg">{r.닉네임}</span>
-                  <span className="text-sm text-mute">{r.제목}</span>
-                </p>
-                <p className="mt-2 whitespace-pre-line break-keep text-lg">{r.글}</p>
-                {r.답글 ? (
-                  <div className="mt-3 rounded-sm bg-gray-50 p-4 dark:bg-gray-900">
-                    <p className="text-sm text-mute">내 답글</p>
-                    <p className="mt-1 whitespace-pre-line break-keep text-lg">{r.답글}</p>
-                  </div>
-                ) : (
-                  <div className="mt-3">
-                    <textarea rows={2} value={답글칸[r.리뷰id] ?? ''}
-                      onChange={(e) => set답글칸({ ...답글칸, [r.리뷰id]: e.target.value })}
-                      placeholder="답글을 적어 주세요"
-                      className="w-full rounded-sm border border-gray-200 px-5 py-3 text-lg" />
-                    <button type="button" disabled={도는중 || !(답글칸[r.리뷰id] ?? '').trim()}
-                      onClick={() => 부르기('교육리뷰답글쓰기',
-                        { p_리뷰: r.리뷰id, p_글: (답글칸[r.리뷰id] ?? '').trim() }, '답글을 달았어요.')}
-                      className="mt-2 rounded-md bg-brand-red px-6 py-3 text-lg font-bold text-white
-                                 hover:bg-brand-red-dark disabled:opacity-50">
-                      답글 달기
-                    </button>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-    </main>
+      </section>
+    </RapoPageFrame>
   );
 }

@@ -54,7 +54,9 @@ export function RapoToolkit() {
       <RapoEduTop title="라포 올인원 툴킷" art="/rapo/home/toolkit.svg" />
       <main className="flex flex-col gap-(--rapo-dimension-x8) px-(--rapo-dimension-x5) pb-(--rapo-dimension-x8) pt-(--rapo-dimension-x2)">
         {/* 맨 위 — 홈 「라포 더 둘러보기」의 여섯 칸 틀 그대로 (2026-11-14 세중님 「미리 만들어 둔 저 틀을 넣자」) */}
-        <section aria-label="서비스 바로 가기" className="rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x3)">
+        {/* 회색 틀 안쪽 여백 12 → 8 (2026-11-16 · 이 틀 때문에 칸이 홈보다 좁아 「입사 스펙 비교」가 두 줄이 됐습니다.
+            재 보니 글 폭 81px · 360 폭에서 칸 글자리 86px · 344 폭에서 78px(t3 76px) — components/rapo/home-u01.tsx RapoServiceGrid) */}
+        <section aria-label="서비스 바로 가기" className="rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x2)">
           <RapoServiceGrid />
         </section>
 
