@@ -1,7 +1,8 @@
 /* 새 1층 공고 → 릴스 만들기 → (허락되면) 인스타 올리기 — 한 바퀴 (2026-11-16)
 
    node tools/reels/run.mjs                      마른 실행 — 고르고 만들기만. 올리지 않습니다
-   node tools/reels/run.mjs --메일               ★ 지금 쓰는 길 (2026-11-16 세중님 「가요로」)
+   node tools/reels/run.mjs --메일               ★ 지금 쓰는 길 (2026-11-16 세중님 「가요로」 · 「드라이브에」)
+                                                 드라이브 열쇠(drive.mjs --인증)가 있으면 드라이브에 올리고 링크만 메일, 없으면 첨부 메일
                                                  소리 없는 릴스 + 캡션을 메일로 → 휴대폰 인스타 앱에서 인기 가요를 골라 올림
                                                  (API 로는 인스타 음악을 못 붙이고, 가요를 파일에 넣으면 저작권 검사에 걸립니다)
    node tools/reels/run.mjs --올리기             열쇠(IG_USER_ID · IG_ACCESS_TOKEN)가 있을 때만 올립니다 (저작권 없는 곡용)
@@ -27,6 +28,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { 릴스자료, 오늘KST, 일층인가, 같은공고묶기 } from './reel-data.mjs';
 import { 기관사진 } from './photos.mjs';
+import { 드라이브되나, 릴스올리기 } from './drive.mjs';
 import { 모두받기, 받아보기 } from '../쪽나눠받기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -138,12 +140,23 @@ for (const 자료 of 할것.slice(0, 최대)) {
 /* ── 3-가 · 메일로 보내기 (휴대폰에서 받아 가요를 붙여 올림) ── */
 if (메일) {
   if (!cfg.RESEND_KEY || !cfg.NOTIFY_EMAIL) { console.error('RESEND_KEY · NOTIFY_EMAIL 이 없습니다 — 보내지 않습니다'); process.exit(1); }
+  const 드라이브 = 드라이브되나(cfg);
+  console.log(드라이브 ? '드라이브에 올리고 링크 메일' : '드라이브 열쇠 없음 — 첨부 메일');
   for (const { 자료, mp4, 표지 } of 만든것) {
+    /* 드라이브 「RAPO 릴스/<YYYY-MM>」 — 영상 · 표지 · 캡션 글 */
+    let 링크 = null;
+    if (드라이브) {
+      try {
+        링크 = await 릴스올리기({ mp4, 표지, 캡션: 자료.캡션, 이름: `${오늘}_${자료.기관}_${자료.직군}_${자료.마감.큰글}`, 달: 오늘.slice(0, 7) });
+        console.log(`  드라이브 ${자료.묶은id[0]} → ${링크}`);
+      } catch (e) { console.error(`  ✗ 드라이브 못 올림 ${자료.묶은id[0]} — ${가림(e.message || e)} · 첨부 메일로 대신 보냅니다`); }
+    }
     const 글 = [
       `${자료.기관} · ${자료.직군} · ${자료.마감.큰글} (${자료.마감.작은글})`,
       '',
+      ...(링크 ? ['영상 (드라이브)', 링크, ''] : []),
       '올리는 법',
-      '1. 첨부 영상을 휴대폰에 저장',
+      링크 ? '1. 위 링크 → 드라이브 앱 → 「기기에 저장」' : '1. 첨부 영상을 휴대폰에 저장',
       '2. 인스타 → 새 릴스 → 이 영상 → 음악에서 지금 인기 가요 고르기',
       '3. 아래 캡션을 그대로 붙여 넣고 공유',
       '',
@@ -161,7 +174,7 @@ if (메일) {
         to: [cfg.NOTIFY_EMAIL],
         subject: `[RAPO 릴스] ${자료.기관} ${자료.직군} · ${자료.마감.큰글}`,
         text: 글,
-        attachments: [
+        attachments: 링크 ? undefined : [
           { filename: `rapo-${자료.묶은id[0]}.mp4`, content: fs.readFileSync(mp4).toString('base64') },
           ...(fs.existsSync(표지) ? [{ filename: `rapo-${자료.묶은id[0]}-cover.jpg`, content: fs.readFileSync(표지).toString('base64') }] : []),
         ],
