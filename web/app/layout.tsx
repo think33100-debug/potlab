@@ -67,7 +67,10 @@ export const metadata: Metadata = {
 };
 
 /* 휴대폰 주소창 색 — 새 디자인 헤더가 흰색이라 흰색 (2026-11-11 · site.webmanifest 의 theme_color 와 한 쌍) */
-export const viewport: Viewport = { themeColor: "#FFFFFF" };
+/* colorScheme 'only light' — 폰이 다크모드여도 브라우저가 색을 제멋대로 뒤집지 않게 합니다.
+   우리 화면은 기기 설정을 안 따르고(globals.css 의 dark 규칙) 커뮤니티만 스스로 어둡게 칠합니다.
+   이 표시가 없으면 카톡 안 화면·크롬 자동 다크가 밝은 화면을 뒤집어 디자인이 깨졌습니다 (2026-11-16 세중님) */
+export const viewport: Viewport = { themeColor: "#FFFFFF", colorScheme: "only light" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
