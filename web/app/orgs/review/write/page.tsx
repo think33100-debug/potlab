@@ -7,7 +7,7 @@ import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
 import { 어둠 } from '@/components/rapo/rapo-community';
 import { 둥근별 } from '@/components/rapo/rapo-org-reviews';
-import { 답다됨, 후기질문, 후기칸글, type 후기답 } from '@/lib/work-review';
+import { 기타글, 기타글최대, 기타머리, 기타인가, 답다됨, 후기질문, 후기칸글, type 후기답 } from '@/lib/work-review';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 근무 후기 쓰기·고치기 — 피그마 「근무 후기 · 작성」 1447:7164 · 「수정」 1312:8051 · 「작성 자격 안내」 1447:7292 (2026-11-15).
@@ -69,13 +69,23 @@ function Body() {
     <fieldset className="flex flex-col gap-[10px]">
       <legend className="mb-[10px] text-[14px] leading-[20px]" style={{ color: 어둠.흐린글 }}>{제목}</legend>
       <div className="flex flex-col gap-[8px]">
-        {값들.map((v) => (
-          <button key={v} type="button" aria-pressed={지금 === v} onClick={() => 바꿈(v)}
-            className="min-h-[44px] break-keep rounded-[8px] px-[14px] py-[10px] text-left text-[15px] font-medium leading-[21px]"
-            style={지금 === v ? { background: '#ffa691', color: '#112332' } : { background: 어둠.면, color: 어둠.글 }}>
-            {v}
-          </button>
-        ))}
+        {값들.map((v) => {
+          /* 「기타」는 값이 「기타: 적은 글」이라 따로 가립니다 (lib/work-review.ts) */
+          const 켬 = v === '기타' ? 기타인가(지금) : 지금 === v;
+          return (
+            <button key={v} type="button" aria-pressed={켬} onClick={() => 바꿈(v === '기타' ? 기타머리 + 기타글(지금) : v)}
+              className="min-h-[44px] break-keep rounded-[8px] px-[14px] py-[10px] text-left text-[15px] font-medium leading-[21px]"
+              style={켬 ? { background: '#ffa691', color: '#112332' } : { background: 어둠.면, color: 어둠.글 }}>
+              {v}
+            </button>
+          );
+        })}
+        {값들.includes('기타') && 기타인가(지금) && (
+          <input value={기타글(지금)} onChange={(e) => 바꿈(기타머리 + e.target.value.slice(0, 기타글최대))}
+            aria-label={`${제목} — 기타 직접 입력`} placeholder="직접 적어 주세요 (예: 격주로 토요일)" autoFocus
+            className="h-[48px] w-full rounded-[8px] px-[14px] text-[15px] outline-none placeholder:text-[#8ea3b1]"
+            style={{ background: 어둠.면, color: 어둠.글 }} />
+        )}
       </div>
     </fieldset>
   );

@@ -8,7 +8,7 @@ import { Chips, Langs, Rows } from '@/components/signup-survey';
 import { RapoButton } from '@/components/rapo/rapo-ui';
 import { RapoFormFrame as Frame, 골라, 만점읽기, 칸, 학년별담기, 학년별읽기, 학년수구하기, 학점칸, 학점들틀렸나 } from '@/components/rapo/rapo-spec-form';
 import { 둥근별 } from '@/components/rapo/rapo-org-reviews';
-import { 답다됨, 후기질문, type 후기답 } from '@/lib/work-review';
+import { 기타글, 기타글최대, 기타머리, 기타인가, 답다됨, 후기질문, type 후기답 } from '@/lib/work-review';
 import { todayKst } from '@/lib/job-state';
 import { 학력목록 } from '@/lib/school-period';
 import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave, toDraft, type LangRow, type WorkRow } from '@/lib/signup-fields';
@@ -284,14 +284,23 @@ function 셋({ 제목, 값들, 지금, on }: { 제목: string; 값들: readonly 
     <fieldset className="flex flex-col gap-(--rapo-dimension-x2)">
       <legend className="rapo-type-t5-bold mb-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral)">{제목}</legend>
       <div className="flex flex-col gap-(--rapo-dimension-x2)">
-        {값들.map((x) => (
-          <button key={x} type="button" aria-pressed={지금 === x} onClick={() => on(x)}
-            className={'rapo-type-t5-medium min-h-(--rapo-touch-min) break-keep rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) px-(--rapo-dimension-x4) py-(--rapo-dimension-x3) text-left '
-              + (지금 === x ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak) text-(color:--rapo-color-fg-neutral)'
-                           : 'border-(color:--rapo-color-stroke-neutral-weak) text-(color:--rapo-color-fg-neutral)')}>
-            {x}
-          </button>
-        ))}
+        {값들.map((x) => {
+          /* 「기타」는 값이 「기타: 적은 글」이라 따로 가립니다 (lib/work-review.ts) */
+          const 켬 = x === '기타' ? 기타인가(지금) : 지금 === x;
+          return (
+            <button key={x} type="button" aria-pressed={켬} onClick={() => on(x === '기타' ? 기타머리 + 기타글(지금) : x)}
+              className={'rapo-type-t5-medium min-h-(--rapo-touch-min) break-keep rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) px-(--rapo-dimension-x4) py-(--rapo-dimension-x3) text-left '
+                + (켬 ? 'border-(color:--rapo-color-fg-brand-contrast) bg-(--rapo-color-bg-brand-weak) text-(color:--rapo-color-fg-neutral)'
+                     : 'border-(color:--rapo-color-stroke-neutral-weak) text-(color:--rapo-color-fg-neutral)')}>
+              {x}
+            </button>
+          );
+        })}
+        {값들.includes('기타') && 기타인가(지금) && (
+          <input value={기타글(지금)} onChange={(e) => on(기타머리 + e.target.value.slice(0, 기타글최대))}
+            aria-label={`${제목} — 기타 직접 입력`} placeholder="직접 적어 주세요 (예: 격주로 토요일)" autoFocus
+            className="rapo-type-t5-regular h-(--rapo-dimension-x13) w-full rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) placeholder:text-(color:--rapo-color-fg-placeholder)" />
+        )}
       </div>
     </fieldset>
   );
