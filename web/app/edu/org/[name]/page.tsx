@@ -1,14 +1,17 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { RapoPageFrame, 틀 } from '@/components/rapo/rapo-frame';
 import { serverSupabase } from '@/lib/supabase-server';
 
 /* 교육기관 하나 보기 (2026-10-04).
 
    그 기관이 여는 교육을 **열린 것 먼저** 늘어놓습니다.
    소개 글이 비어 있으면 그 칸을 **아예 숨깁니다** — 빈 상자를 보여주면
-   「아직 안 만든 화면」처럼 보입니다. */
+   「아직 안 만든 화면」처럼 보입니다.
+
+   2026-11-16 — 옛 위쪽 줄(POTJOB 로고)이 보여 새 틀로 옮겼습니다(앱 바 뒤로 = 교육기관 목록).
+   읽는 길(교육기관하나 · 교육목록)과 열린 것/끝난 것 가르기는 그대로입니다. */
 
 export const dynamic = 'force-dynamic';
 
@@ -52,42 +55,33 @@ export default async function EduOrgOne({ params }: { params: Promise<{ name: st
   const 끝난것 = 전부.filter((e) => e.끝 && e.끝 < 오늘);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <p className="text-sm text-mute">
-        <Link href="/edu/org" className="underline underline-offset-4">교육기관</Link>
-      </p>
-
-      <div className="mt-3 flex items-start gap-4">
+    <RapoPageFrame title="교육기관" back="/edu/org" nav="/toolkit">
+      <section className="flex items-start gap-(--rapo-dimension-x4)">
         {o.그림 && (
-          <img src={o.그림} alt="" className="size-20 shrink-0 rounded-sm object-cover" />
+          <img src={o.그림} alt="" className="size-20 shrink-0 rounded-(--rapo-radius-r3) object-cover" />
         )}
-        <div className="min-w-0">
-          <h1 className="break-keep text-h1 font-bold">{o.이름}</h1>
-          <p className="mt-2 text-lg text-mute">
+        <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x2)">
+          <h2 className={틀.큰제목}>{o.이름}</h2>
+          <p className={틀.흐린글}>
             {o.직군 === '공통' ? '작업치료 · 물리치료' : o.직군.replace(/사$/, '')}
-            {o.모음 && <> · 열린 교육 <b className="text-ink">{o.열린교육}</b></>}
+            {o.모음 && <> · <span className="whitespace-nowrap">열린 교육 <b className="text-(color:--rapo-color-fg-neutral)">{o.열린교육}</b></span></>}
           </p>
         </div>
-      </div>
+      </section>
 
       {/* 소개가 비면 이 칸을 통째로 숨깁니다 */}
-      {o.소개 && (
-        <p className="mt-5 break-keep rounded-sm border border-line bg-card p-6 text-lg leading-relaxed text-body">
-          {o.소개}
-        </p>
-      )}
+      {o.소개 && <p className={틀.회색칸 + ' ' + 틀.글}>{o.소개}</p>}
 
       {o.누리집 && (
-        <p className="mt-4">
-          <a href={o.누리집} target="_blank" rel="noopener noreferrer"
-            className="text-lg font-bold text-brand-red underline underline-offset-4">
+        <p>
+          <a href={o.누리집} target="_blank" rel="noopener noreferrer" className={틀.링크}>
             누리집 바로가기 ›
           </a>
         </p>
       )}
 
       {!o.모음 && (
-        <p className="mt-5 break-keep rounded-sm border border-line bg-card p-5 text-sm leading-relaxed text-mute">
+        <p className={틀.회색칸 + ' ' + 틀.작은글}>
           이곳은 홈페이지가 <b>자동 수집을 막아 두어</b> 교육을 모으지 않습니다.
           누리집에서 직접 보셔야 합니다.
         </p>
@@ -95,27 +89,25 @@ export default async function EduOrgOne({ params }: { params: Promise<{ name: st
 
       {o.모음 && (
         <>
-          <h2 className="mt-8 text-h2 font-bold">열린 교육 {열린것.length}건</h2>
-          {열린것.length === 0 && (
-            <p className="mt-3 break-keep rounded-sm border border-line bg-card p-6 text-lg text-mute">
-              지금 열려 있는 것이 없어요.
-            </p>
-          )}
-          <ul className="mt-3 flex flex-col gap-3">
-            {열린것.map((e) => <교육줄 key={e.번호} e={e} />)}
-          </ul>
+          <section className="flex flex-col gap-(--rapo-dimension-x3)">
+            <h2 className={틀.소제목}>열린 교육 {열린것.length}건</h2>
+            {열린것.length === 0 && <p className={틀.회색칸 + ' ' + 틀.흐린글}>지금 열려 있는 것이 없어요.</p>}
+            <ul className="flex flex-col gap-(--rapo-dimension-x3)">
+              {열린것.map((e) => <교육줄 key={e.번호} e={e} />)}
+            </ul>
+          </section>
 
           {끝난것.length > 0 && (
-            <>
-              <h2 className="mt-8 text-h2 font-bold text-mute">끝난 것 {끝난것.length}건</h2>
-              <ul className="mt-3 flex flex-col gap-3 opacity-70">
+            <section className="flex flex-col gap-(--rapo-dimension-x3)">
+              <h2 className="rapo-type-t6-bold break-keep text-(color:--rapo-color-fg-neutral-muted)">끝난 것 {끝난것.length}건</h2>
+              <ul className="flex flex-col gap-(--rapo-dimension-x3) opacity-70">
                 {끝난것.slice(0, 10).map((e) => <교육줄 key={e.번호} e={e} />)}
               </ul>
-            </>
+            </section>
           )}
         </>
       )}
-    </main>
+    </RapoPageFrame>
   );
 }
 
@@ -126,23 +118,23 @@ function 교육줄({ e }: { e: 교육 }) {
   return (
     <li>
       <a href={e.링크} target="_blank" rel="noopener noreferrer"
-        className="block rounded-sm border border-line bg-card p-6 hover:bg-paper">
-        <p className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="rounded-xs bg-badge-teal-bg px-3 py-1 text-gray-700">{e.갈래}</span>
+        className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x2) active:bg-(--rapo-color-bg-layer-default-pressed)'}>
+        <p className="flex flex-wrap items-center gap-(--rapo-dimension-x2)">
+          <span className={틀.표}>{e.갈래}</span>
           {e.상태 && e.상태 !== '모름' && (
-            <span className={'font-bold ' + (e.상태 === '접수마감' ? 'text-mute' : 'text-brand-red')}>
+            <span className={'rapo-type-t3-bold whitespace-nowrap ' + (e.상태 === '접수마감' ? 'text-(color:--rapo-color-fg-neutral-muted)' : 'text-(color:--rapo-color-fg-brand-contrast)')}>
               {e.상태}
             </span>
           )}
         </p>
-        <p className="mt-2 break-keep text-body-lg font-bold text-ink">{e.제목}</p>
+        <p className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">{e.제목}</p>
         {(기간 || e.장소) && (
-          <p className="mt-2 text-lg text-mute">
-            {기간}{기간 && e.장소 ? ' · ' : ''}{e.장소}
+          <p className={틀.흐린글}>
+            {기간 && <span className="whitespace-nowrap">{기간}</span>}{기간 && e.장소 ? ' · ' : ''}{e.장소}
           </p>
         )}
         {e.모집인원 && (
-          <p className="mt-1 text-sm text-mute">
+          <p className={틀.작은글}>
             {/^\d/.test(e.모집인원) ? '모집 ' + e.모집인원 : e.모집인원}
           </p>
         )}

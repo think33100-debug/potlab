@@ -7,6 +7,8 @@ import { browserSupabase } from '@/lib/supabase-browser';
 import { MAX_POST_IMAGES } from '@/lib/image';
 import { KAKAO_CHANNEL } from '@/lib/contact';
 import { TERMS_VERSION } from '@/lib/terms';
+import { RapoPageFrame, RapoWait, 틀 } from '@/components/rapo/rapo-frame';
+import { RapoChip } from '@/components/rapo/rapo-ui';
 
 /* 채용·교육 담당자 신청 (2026-10-09 · 뼈대 5·7절).
  *
@@ -74,19 +76,26 @@ export default function Partner() {
 
   useEffect(() => { if (session) 읽기(); }, [session, 읽기]);
 
-  if (loading) return <main className="mx-auto w-full max-w-2xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
+  /* 2026-11-16 세중님 테스터 점검 — 내 정보 메뉴에서 들어오는데 옛 위쪽 줄(POTJOB 로고)이었습니다.
+     새 틀(components/rapo/rapo-frame.tsx)로 옮겼습니다. 신청·국세청 확인·약관 동의 동작은 그대로입니다 */
+  if (loading) return <RapoPageFrame title="담당자 신청" back="/me"><RapoWait /></RapoPageFrame>;
 
   /* 학생회원은 담당자가 될 수 없습니다 (채용·교육 약관 4조) — 막는 화면이라 문의(카카오톡 채널)를 잘 보이게 (11/16 세중님) */
   if (me?.role === '학생' && !마스터) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-        <h1 className="mt-5 break-keep text-h1 font-bold">학생회원은 담당자를 신청할 수 없어요</h1>
-        <p className="mt-3 break-keep text-lg text-mute">
-          취업한 뒤 내 정보의 「취업했어요 · 임상가 전환」을 마치면 신청할 수 있어요.
-        </p>
-        <Link href="/me/convert" className="mt-6 inline-block rounded-md bg-[#14181C] px-6 py-4 text-lg font-bold text-white">임상가 전환하기</Link>
-        <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" className="mt-4 block text-lg font-bold text-brand-red-dark">카카오톡으로 문의하기 ›</a>
-      </main>
+      <RapoPageFrame title="담당자 신청" back="/me">
+        <section className="flex flex-col gap-(--rapo-dimension-x3) pt-(--rapo-dimension-x4)">
+          <h2 className={틀.큰제목}>학생회원은 담당자를 신청할 수 없어요</h2>
+          <p className={틀.흐린글}>
+            취업한 뒤 내 정보의 「취업했어요 · 임상가 전환」을 마치면 신청할 수 있어요.
+          </p>
+        </section>
+        <Link href="/me/convert" className={틀.큰단추}>임상가 전환하기</Link>
+        <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer"
+          className="rapo-type-t5-bold flex h-[52px] w-full items-center justify-center rounded-(--rapo-radius-r3) bg-[#FEE500] text-[#191919]">
+          카카오톡으로 문의하기
+        </a>
+      </RapoPageFrame>
     );
   }
 
@@ -132,118 +141,106 @@ export default function Partner() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
+    <RapoPageFrame title="담당자 신청" back="/me">
+      <section className="flex flex-col gap-(--rapo-dimension-x2)">
+        <h2 className={틀.큰제목}>채용 · 교육 담당자 신청</h2>
+        <p className={틀.흐린글}>소속을 확인한 뒤 공고를 올리거나 교육을 열 수 있어요.</p>
+      </section>
 
-      <h1 className="mt-5 break-keep text-h1 font-bold">채용 · 교육 담당자 신청</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
-        소속을 확인한 뒤 공고를 올리거나 교육을 열 수 있어요.
-      </p>
-
-      <section className="mt-7 rounded-sm border border-gray-200 p-5">
-        <h2 className="text-lg font-bold">어느 쪽이신가요</h2>
-        <div className="mt-3 flex flex-wrap gap-2">
+      <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x4)'}>
+        <h2 className={틀.소제목}>어느 쪽이신가요</h2>
+        <div className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
           {Object.keys(필요한것).map((k) => (
-            <button
-              key={k} type="button" onClick={() => set갈래(k)}
-              className={'rounded-full px-4 py-2 text-lg ' +
-                (갈래 === k ? 'bg-[#14181C] text-white' : 'border border-gray-200 text-gray-600')}>
-              {k === '채용담당자' ? '병원 채용 담당'
-                : k === '교육담당자기관' ? '교육 기관 · 학회' : '개인 강사'}
-            </button>
+            <RapoChip key={k} on={갈래 === k} onClick={() => set갈래(k)}
+              label={k === '채용담당자' ? '병원 채용 담당'
+                : k === '교육담당자기관' ? '교육 기관 · 학회' : '개인 강사'} />
           ))}
         </div>
-        <p className="mt-4 break-keep text-lg text-mute">{필요한것[갈래].설명}</p>
+        <p className={틀.흐린글}>{필요한것[갈래].설명}</p>
 
         {/* 사업자등록번호는 병원 채용 담당만 (2026-11-15 세중님) */}
         {갈래 === '채용담당자' && (
-          <>
+          <div className="flex flex-col gap-(--rapo-dimension-x2)">
             <input
               value={사업자번호}
               onChange={(e) => { set사업자번호(e.target.value); set국세청(null); }}
-              inputMode="numeric" placeholder="사업자등록번호 (숫자 10자리)"
-              className="mt-4 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
-            <div className="mt-2 flex flex-wrap items-center gap-3">
+              inputMode="numeric" placeholder="사업자등록번호 (숫자 10자리)" aria-label="사업자등록번호"
+              className={틀.입력} />
+            <div className="flex flex-wrap items-center gap-(--rapo-dimension-x3)">
               <button
                 type="button" onClick={국세청확인}
                 disabled={확인중 || 사업자번호.replace(/\D/g, '').length !== 10}
-                className="rounded-sm border border-gray-200 px-4 py-2 text-lg text-gray-600
-                           disabled:opacity-40 hover:bg-gray-50">
+                className={틀.선단추}>
                 {확인중 ? '보는 중…' : '국세청 확인'}
               </button>
               {국세청 && (
-                <span className={'break-keep text-lg '
-                  + (국세청 === '계속사업자' ? 'font-bold text-teal-strong'
+                <span className={'break-keep '
+                  + (국세청 === '계속사업자' ? 'rapo-type-t4-bold text-(color:--rapo-color-fg-positive-contrast)'
                      : 국세청 === '휴업자' || 국세청 === '폐업자' || 국세청 === '없는 번호'
-                       ? 'font-bold text-brand-red' : 'text-mute')}>
+                       ? 'rapo-type-t4-bold text-(color:--rapo-color-fg-critical)' : 'rapo-type-t4-regular text-(color:--rapo-color-fg-neutral-muted)')}>
                   {국세청}
                 </span>
               )}
             </div>
-            <p className="mt-1 break-keep text-sm text-mute">
+            <p className={틀.작은글}>
               국세청에 등록된 상태를 미리 보여 드려요. 승인은 관리자가 서류를 보고 정합니다.
             </p>
-          </>
+          </div>
         )}
         {갈래 === '교육담당자기관' && (
           <input
             value={교육기관} onChange={(e) => set교육기관(e.target.value)}
-            placeholder="교육기관 이름 (교육 화면에 적힌 그대로)"
-            className="mt-3 w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
+            placeholder="교육기관 이름 (교육 화면에 적힌 그대로)" aria-label="교육기관 이름"
+            className={틀.입력} />
         )}
 
-        <p className="mt-4 break-keep rounded-sm border border-warning p-4 text-lg">
+        <p className={틀.주의칸}>
           <b>주민등록번호는 받지 않아요.</b> 서류에 뒷자리가 보이면 가리고 올려 주세요 —
           보이면 반려하고 다시 부탁드립니다.
         </p>
-        <p className="mt-3 break-keep text-sm text-mute">
+        <p className={틀.작은글}>
           올려 주신 자료는 소속 확인에만 씁니다. 「기관 회원 승인」 권한을 가진 운영진만
           볼 수 있고, 열어 본 기록이 남습니다. 승인이나 반려로 확인이 끝나면 바로 지우고
           확인 결과만 남깁니다. 사진·PDF 는 {MAX_POST_IMAGES}장까지.
         </p>
 
-        <label className="mt-4 flex cursor-pointer items-start gap-3">
-          <input type="checkbox" checked={약관동의} onChange={(e) => set약관동의(e.target.checked)} className="mt-1 size-5 shrink-0" />
-          <span className="break-keep text-lg">
+        <label className="flex min-h-(--rapo-touch-min) cursor-pointer items-start gap-(--rapo-dimension-x3)">
+          <input type="checkbox" checked={약관동의} onChange={(e) => set약관동의(e.target.checked)}
+            className="mt-[2px] size-5 shrink-0 accent-(--rapo-color-bg-navy-solid)" />
+          <span className={틀.글}>
             <Link href={갈래 === '채용담당자' ? '/terms/recruiter' : '/terms/edu'} className="underline underline-offset-2">
               {갈래 === '채용담당자' ? '채용담당자 이용약관' : '교육담당자 이용약관'}
             </Link>에 동의합니다 (필수)
           </span>
         </label>
 
-        <button
-          type="button" onClick={내기} disabled={도는중 || !약관동의}
-          className="mt-5 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white
-                     hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-50">
+        <button type="button" onClick={내기} disabled={도는중 || !약관동의} className={틀.큰단추}>
           신청하기
         </button>
-        {탈 && <p className="mt-3 text-lg text-brand-red-dark">{탈}</p>}
+        {탈 && <p role="alert" className={틀.오류}>{탈}</p>}
       </section>
 
-      <section className="mt-8">
-        <h2 className="text-lg font-bold">내 신청</h2>
+      <section className="flex flex-col gap-(--rapo-dimension-x3)">
+        <h2 className={틀.소제목}>내 신청</h2>
         {내것.length === 0
-          ? <p className="mt-3 text-lg text-mute">아직 없어요.</p>
+          ? <p className={틀.흐린글}>아직 없어요.</p>
           : (
-            <ul className="mt-3 space-y-3">
+            <ul className="flex flex-col gap-(--rapo-dimension-x3)">
               {내것.map((q) => (
-                <li key={q.id} className="rounded-sm border border-gray-200 p-5">
-                  <p className="flex flex-wrap items-center gap-2">
-                    <b className="text-lg">{q.갈래}</b>
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-[13px] dark:bg-gray-800">
-                      {q.상태}
-                    </span>
-                    {q.사업자상태 && <span className="text-sm text-mute">{q.사업자상태}</span>}
+                <li key={q.id} className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x1)'}>
+                  <p className="flex flex-wrap items-center gap-(--rapo-dimension-x2)">
+                    <b className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">{q.갈래}</b>
+                    <span className={틀.표}>{q.상태}</span>
+                    {q.사업자상태 && <span className={틀.작은글}>{q.사업자상태}</span>}
                   </p>
-                  {q.교육기관 && <p className="mt-1 text-lg">{q.교육기관}</p>}
-                  <p className="mt-1 text-sm text-mute">자료 {q.자료.length}장</p>
-                  {q.반려까닭 && (
-                    <p className="mt-2 break-keep text-lg text-brand-red-dark">{q.반려까닭}</p>
-                  )}
+                  {q.교육기관 && <p className={틀.글}>{q.교육기관}</p>}
+                  <p className={틀.작은글}>자료 {q.자료.length}장</p>
+                  {q.반려까닭 && <p className={틀.오류}>{q.반려까닭}</p>}
                 </li>
               ))}
             </ul>
           )}
       </section>
-    </main>
+    </RapoPageFrame>
   );
 }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../auth';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoPageFrame, RapoWait, 틀 } from '@/components/rapo/rapo-frame';
 
 /* 재직 인증 신청 — 치료사 본인이 올립니다 (2026-10-09 · 뼈대 ⑪).
  *
@@ -61,7 +62,9 @@ export default function Verify() {
     set다시((n) => n + 1);
   }, [파일, 병원]);
 
-  if (loading) return <main className="mx-auto w-full max-w-2xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
+  /* 2026-11-16 세중님 테스터 점검 — 후기 쓰기 「근무 인증하기」·내 정보에서 들어오는데 옛 위쪽 줄(POTJOB 로고)이었습니다.
+     새 틀(components/rapo/rapo-frame.tsx)로 옮겼습니다. 올리기·읽기·안내 글은 그대로입니다 */
+  if (loading) return <RapoPageFrame title="재직 인증" back="/me"><RapoWait /></RapoPageFrame>;
 
   /* ★ 2026-10-11 — 회원에게 열었습니다 (세중님 결정).
      재직 인증 — 회원이 증빙을 올리고 관리자가 확인합니다.
@@ -70,13 +73,14 @@ export default function Verify() {
   const 지금 = 줄들.find((r) => r.상태 === '심사중' || r.상태 === '확인');
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <h1 className="mt-5 break-keep text-h1 font-bold">재직 인증</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
-        재직증명서나 사원증을 올려 주시면 확인하고 <b>「재직 확인」 배지</b>를 달아드려요.
-      </p>
+    <RapoPageFrame title="재직 인증" back="/me">
+      <section className="flex flex-col gap-(--rapo-dimension-x2)">
+        <p className={틀.흐린글}>
+          재직증명서나 사원증을 올려 주시면 확인하고 <b>「재직 확인」 배지</b>를 달아드려요.
+        </p>
+      </section>
 
-      <p className="mt-5 break-keep rounded-sm border border-warning p-4 text-lg">
+      <p className={틀.주의칸}>
         확인이 끝나면 <b>올려 주신 파일을 바로 지웁니다.</b> 배지만 남아요.
         주민등록번호 뒷자리는 가리고 올려 주세요.
       </p>
@@ -84,56 +88,50 @@ export default function Verify() {
       {/* 개인정보처리방침 — 증빙 파일을 받는 화면이라 이 자리에 링크를 둡니다
           (세중님 2026-11-02 · docs/약관점검_1025.md 7절 ④).
           꼬리말·문의·내 정보·가입 첫 화면과 **같은 주소**입니다 */}
-      <p className="mt-3 break-keep text-lg text-mute">
-        <Link href="/terms/privacy" className="underline underline-offset-4 hover:text-brand-red">
-          개인정보처리방침
-        </Link>
+      <p className={틀.흐린글}>
+        <Link href="/terms/privacy" className={틀.링크}>개인정보처리방침</Link>
         {' '}에서 무엇을 받고 언제 지우는지 보실 수 있어요.
       </p>
 
-      {탈 && <p className="mt-4 text-lg text-brand-red-dark">{탈}</p>}
+      {탈 && <p role="alert" className={틀.오류}>{탈}</p>}
 
       {지금?.상태 === '확인' ? (
-        <p className="mt-7 break-keep text-lg">
-          <b className="rounded-full bg-badge-teal-bg px-3 py-1 text-teal-strong">재직 확인</b>
+        <p className={틀.글}>
+          <span className="rapo-type-t3-bold rounded-(--rapo-radius-full) bg-(--rapo-color-bg-positive-weak) px-(--rapo-dimension-x3) py-(--rapo-dimension-x1) text-(color:--rapo-color-fg-positive-contrast)">재직 확인</span>
           {' '}배지가 붙어 있어요.
         </p>
       ) : 지금?.상태 === '심사중' ? (
-        <p className="mt-7 break-keep text-lg">확인하고 있어요. 끝나면 알림으로 알려드릴게요.</p>
+        <p className={틀.글}>확인하고 있어요. 끝나면 알림으로 알려드릴게요.</p>
       ) : (
-        <section className="mt-7 rounded-sm border border-gray-200 p-5">
+        <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x3)'}>
           <input value={병원} onChange={(e) => set병원(e.target.value)}
-            placeholder="일하시는 곳 이름"
-            className="w-full rounded-sm border border-gray-200 px-5 py-4 text-lg" />
-          <input type="file" accept="image/*,application/pdf"
+            placeholder="일하시는 곳 이름" aria-label="일하시는 곳 이름"
+            className={틀.입력} />
+          <input type="file" accept="image/*,application/pdf" aria-label="증빙 파일"
             onChange={(e) => set파일(e.target.files?.[0] ?? null)}
-            className="mt-3 w-full text-lg" />
-          <button type="button" onClick={내기} disabled={도는중}
-            className="mt-4 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white
-                       hover:bg-brand-red-dark disabled:opacity-50">
+            className="rapo-type-t4-regular w-full min-w-0 text-(color:--rapo-color-fg-neutral)" />
+          <button type="button" onClick={내기} disabled={도는중} className={틀.큰단추}>
             올리기
           </button>
         </section>
       )}
 
       {줄들.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-lg font-bold">지난 신청</h2>
-          <ul className="mt-3 space-y-2">
+        <section className="flex flex-col gap-(--rapo-dimension-x3)">
+          <h2 className={틀.소제목}>지난 신청</h2>
+          <ul className="flex flex-col gap-(--rapo-dimension-x2)">
             {줄들.map((r) => (
-              <li key={r.id} className="rounded-sm border border-gray-200 p-4">
-                <p className="flex flex-wrap items-center gap-2">
-                  <b className="text-lg">{r.상태}</b>
-                  <span className="text-sm text-mute">{r.병원이름 ?? ''}</span>
+              <li key={r.id} className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x1)'}>
+                <p className="flex flex-wrap items-center gap-(--rapo-dimension-x2)">
+                  <span className={틀.표}>{r.상태}</span>
+                  <span className={틀.작은글}>{r.병원이름 ?? ''}</span>
                 </p>
-                {r.반려까닭 && (
-                  <p className="mt-1 break-keep text-lg text-brand-red-dark">{r.반려까닭}</p>
-                )}
+                {r.반려까닭 && <p className={틀.오류}>{r.반려까닭}</p>}
               </li>
             ))}
           </ul>
         </section>
       )}
-    </main>
+    </RapoPageFrame>
   );
 }
