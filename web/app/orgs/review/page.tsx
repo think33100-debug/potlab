@@ -18,15 +18,20 @@ type 받음 = 근무후기 & { 학생?: boolean; 오늘?: number | null; 막힘?
 
 function Body() {
   const id = Number(useSearchParams().get('id'));
-  const { session } = useAuth();
-  const [h, setH] = useState<받음 | undefined>(undefined);
+  const { loading, session } = useAuth();
+  const [받은것, setH] = useState<받음 | undefined>(undefined);
+  /* 2026-11-16 세중님 테스터 점검 — 주소에 ?id= 가 없으면(또는 숫자가 아니면) 아래 effect 가 일찍 돌아가 받은것이 늘 비어
+     「불러오는 중…」에서 멈췄습니다. 번호가 틀렸거나 로그인 확인이 끝났는데 세션이 없으면 바로 「찾지 못했어요」로 보입니다 */
+  const 번호틀림 = !Number.isInteger(id) || id <= 0;
+  const h: 받음 | undefined = 번호틀림 || (!loading && !session) ? ({ 없음: true } as 받음) : 받은것;
 
   useEffect(() => {
-    if (!session || !id) return;
+    if (!session || 번호틀림) return;
     browserSupabase().rpc('근무후기보기', { p_id: id }).then(({ data, error }) => {
-      setH(error ? { 없음: true } as 받음 : (data as 받음));
+      /* 없는 번호면 함수가 빈 값(null)을 줄 수 있어 「찾지 못했어요」로 받습니다 (null 이면 아래 h.막힘 에서 화면이 깨집니다) */
+      setH(error || !data ? { 없음: true } as 받음 : (data as 받음));
     });
-  }, [session, id]);
+  }, [session, id, 번호틀림]);
 
   return (
     <div data-rapo className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col" style={{ background: 어둠.바탕 }}>

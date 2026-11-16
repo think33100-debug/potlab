@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Logo } from '@/components/logo';
+import { RapoHeader } from '@/components/rapo/rapo-header';
+import { RapoButton } from '@/components/rapo/rapo-ui';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { KAKAO_CHANNEL } from '@/lib/contact';
 
@@ -37,46 +37,43 @@ export default async function Beta({
     if (who === '회원') redirect('/');
   }
 
+  /* 2026-11-16 — 로그인 상태를 못 물어본 때(?r=1) middleware 가 여기로 보냅니다. 아직 살아 있는 화면이라
+     옛 위쪽 줄과 옛 POTJOB 워드마크(components/logo.tsx) 대신 홈의 RAPO 위쪽 줄(로고만)과 토큰으로 옮겼습니다. 글은 그대로입니다 */
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[88px] md:px-7 md:pb-8">
-      <div className="mx-auto w-full max-w-[22rem]">
-        <Logo className="!text-h1" />
-        <p className="mt-5 inline-block rounded-md bg-badge-teal-bg px-3 py-1 text-sm font-bold text-teal-strong">
+    <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
+      <RapoHeader who="모름" />
+      <main className="mx-auto flex w-full max-w-[22rem] flex-col gap-(--rapo-dimension-x3) px-(--rapo-dimension-x5) pb-[96px] pt-(--rapo-dimension-x6)">
+        <p className="rapo-type-t3-bold self-start rounded-(--rapo-radius-r1) bg-(--rapo-brand-color-blush) px-(--rapo-dimension-x2) py-(--rapo-dimension-x1) text-(color:--rapo-color-fg-brand-contrast)">
           테스트 중
         </p>
-        <h1 className="mt-3 text-h2 font-bold">RAPO 는 지금 테스트 중이에요</h1>
+        <h1 className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">RAPO 는 지금 테스트 중이에요</h1>
 
         {다시 ? (
           <>
-            <p className="mt-3 text-lg text-gray-700 dark:text-gray-300">
+            <p className="rapo-type-t5-regular break-keep text-(color:--rapo-color-fg-neutral)">
               로그인 상태를 확인하지 못했어요. 잠시 뒤 새로고침해 주세요.
             </p>
-            <p className="mt-2 text-sm text-mute">연결이 잠깐 끊겼을 수 있어요</p>
+            <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">연결이 잠깐 끊겼을 수 있어요</p>
           </>
         ) : (
           <>
-            <p className="mt-3 text-lg text-gray-700 dark:text-gray-300">
-              회원만 볼 수 있어요.
-            </p>
-            <p className="mt-2 text-lg text-gray-700 dark:text-gray-300">
+            <p className="rapo-type-t5-regular break-keep text-(color:--rapo-color-fg-neutral)">회원만 볼 수 있어요.</p>
+            <p className="rapo-type-t5-regular break-keep text-(color:--rapo-color-fg-neutral)">
               처음 오셨다면 <b>가입하고 바로 둘러보세요.</b>
             </p>
           </>
         )}
 
-        <Link
-          href="/login"
-          className="mt-7 block w-full rounded-md bg-brand-red px-6 py-5 text-center text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]"
-        >
-          로그인 · 회원가입
-        </Link>
+        <div className="pt-(--rapo-dimension-x4)">
+          <RapoButton href="/login" tone="navy" full>로그인 · 회원가입</RapoButton>
+        </div>
 
-        <p className="mt-7 text-sm text-mute">
+        <p className="rapo-type-t3-regular break-keep pt-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
           궁금한 점은{' '}
           <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" className="font-bold underline underline-offset-2">카카오톡으로 문의하기</a>
           로 남겨 주세요.
         </p>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

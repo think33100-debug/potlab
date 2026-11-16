@@ -20,7 +20,10 @@ const 안띄움 = (p: string) =>
   || p === '/community' || p.startsWith('/community/') || p.startsWith('/post/')
   || p === '/admin' || p.startsWith('/admin/')
   /* 근무 후기 쓰기·상세는 아래가 큰 단추 (2026-11-15) */
-  || p.startsWith('/orgs/review') || p.startsWith('/edu/session/') || ['/me/convert', '/me/leave', '/me/spec', '/me/career', '/me/pref'].includes(p);
+  || p.startsWith('/orgs/review') || p.startsWith('/edu/session/') || ['/me/convert', '/me/leave', '/me/spec', '/me/career', '/me/pref'].includes(p)
+  /* 2026-11-16 세중님 테스터 점검 — 알림 설정은 오른쪽 끝 켜고 끄기 단추 줄, 프로필 고치기는 배경색 줄·저장 단추가
+     이 단추 밑으로 들어가 마지막 것이 가렸습니다. 둘 다 내 정보 안이라 「문의하기」 메뉴가 바로 옆에 있습니다 */
+  || p === '/me/notify' || p === '/me/profile';
 
 function 아래자리(p: string): string {
   if (p.startsWith('/jobs/')) return 'calc(112px + 16px + env(safe-area-inset-bottom))';

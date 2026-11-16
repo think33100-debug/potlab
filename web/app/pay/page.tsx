@@ -9,6 +9,8 @@ import { EMPLOYMENTS, HOSPITAL_TYPES, REGIONS, shortType } from '@/lib/signup-fi
 import { BANDS, grow, man10 } from '@/lib/pay';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { JOB_GROUPS } from '@/lib/who';
+import { RapoPageFrame, 틀 } from '@/components/rapo/rapo-frame';
+import { RapoButton } from '@/components/rapo/rapo-ui';
 
 /* 월급 확인. 옛 앱의 「조회」 화면(pane-view)을 옮긴 것입니다.
 
@@ -53,16 +55,15 @@ export default function PayPage() {
   const me = res?.me ?? null;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <h1 className="text-h1 font-bold">월급 확인</h1>
-      <p className="mt-2 text-lg text-mute">
-        치료사들이 직접 올린 급여입니다. 같은 조건끼리만 비교해요
-      </p>
+    /* 2026-11-16 — 새 화면에서는 안 오지만 주소로 열려서 옛 위쪽 줄(POTJOB 로고) 대신 새 틀로 옮겼습니다.
+       pay_stats 를 읽는 길·3명 미만 숨김·근거 글은 그대로입니다. 내 위치 칸(components/pay-rank.tsx)은 안쪽 모양 그대로입니다 */
+    <RapoPageFrame title="월급 확인" back="/toolkit" nav="/toolkit">
+      <p className={틀.흐린글}>치료사들이 직접 올린 급여입니다. 같은 조건끼리만 비교해요</p>
 
       {/* ── 조건 ── */}
-      <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
+      <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x4)'}>
         <Sel label="직군" v={job} on={setJob} opts={JOB_GROUPS} all="내 직군" />
-        <div className="mt-5 grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-(--rapo-dimension-x2)">
           <Sel label="지역" v={region} on={setRegion} opts={REGIONS} all="전체" />
           <Sel label="기관 유형" v={type} on={setType} opts={HOSPITAL_TYPES} all="전체" />
           <Sel label="연차" v={band} on={setBand} opts={BANDS} all="전체" />
@@ -70,8 +71,8 @@ export default function PayPage() {
         </div>
       </section>
 
-      {err && <p className="mt-6 text-lg text-brand-red">{err}</p>}
-      {busy && !res && <p className="mt-7 text-lg text-mute">세는 중이에요…</p>}
+      {err && <p role="alert" className={틀.오류}>{err}</p>}
+      {busy && !res && <p role="status" className={틀.흐린글}>세는 중이에요…</p>}
 
       {res && s && (
         <>
@@ -79,9 +80,9 @@ export default function PayPage() {
           {me ? (
             <PayRank me={me} s={s} minN={res.min_n} />
           ) : (
-            <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-              <h2 className="text-h3 font-bold">내 위치도 보고 싶으세요?</h2>
-              <p className="mt-2 text-lg text-mute">
+            <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x2)'}>
+              <h2 className={틀.소제목}>내 위치도 보고 싶으세요?</h2>
+              <p className={틀.흐린글}>
                 {확인중 ? ''
                   : profile ? '급여를 등록하면 같은 조건에서 내가 몇 등인지 나와요'
                   : session ? '가입을 마저 하고 급여를 등록하면 같은 조건에서 내가 몇 등인지 나와요'
@@ -90,19 +91,20 @@ export default function PayPage() {
               {/* 확인 중에는 단추도 안 그립니다 — 글귀만 비우고 단추를 남기면
                   「시작하기 → /login」 이 회원에게 그대로 보입니다 */}
               {!확인중 && (
-                <Link href={profile ? '/me' : session ? '/welcome' : '/login'}
-                  className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark">
-                  {profile ? '내 정보에서 등록하기' : session ? '가입 마저 하기' : '시작하기'}
-                </Link>
+                <div className="pt-(--rapo-dimension-x2)">
+                  <RapoButton href={profile ? '/me' : session ? '/welcome' : '/login'} tone="navy" size={40}>
+                    {profile ? '내 정보에서 등록하기' : session ? '가입 마저 하기' : '시작하기'}
+                  </RapoButton>
+                </div>
               )}
             </section>
           )}
 
           {/* ── 통계 ── */}
           {s.n < res.min_n ? (
-            <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-              <h2 className="text-h3 font-bold">아직 숫자를 못 보여드려요</h2>
-              <p className="mt-2 text-lg text-mute">
+            <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x2)'}>
+              <h2 className={틀.소제목}>아직 숫자를 못 보여드려요</h2>
+              <p className={틀.흐린글}>
                 이 조건에 {s.n}명뿐이에요. {res.min_n}명이 안 되면 누가 적었는지 짐작될 수 있어서
                 숫자를 안 내보내요. 조건을 넓혀 보세요
               </p>
@@ -136,13 +138,13 @@ export default function PayPage() {
                   {Object.entries(s.emp_dist)
                     .sort((a, b) => b[1] - a[1])
                     .map(([k, v]) => (
-                      <div key={k} className="mt-2 first:mt-0">
-                        <div className="flex justify-between text-lg">
+                      <div key={k} className="mt-(--rapo-dimension-x2) first:mt-0">
+                        <div className="rapo-type-t4-regular flex justify-between text-(color:--rapo-color-fg-neutral)">
                           <span>{k}</span>
-                          <span className="text-mute">{v}명</span>
+                          <span className="whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">{v}명</span>
                         </div>
-                        <div className="mt-1 h-1 rounded-md bg-gray-100 dark:bg-gray-800">
-                          <div className="h-1 rounded-md bg-teal-strong"
+                        <div className="mt-(--rapo-dimension-x1) h-1 rounded-(--rapo-radius-full) bg-(--rapo-color-bg-neutral-weak)">
+                          <div className="h-1 rounded-(--rapo-radius-full) bg-(--rapo-color-bg-navy-solid)"
                             style={{ width: `${Math.round((v / s.n) * 100)}%` }} />
                         </div>
                       </div>
@@ -153,36 +155,33 @@ export default function PayPage() {
           )}
 
           {/* ── 표본이 늘수록 ── */}
-          <section className="mt-7 rounded-sm bg-gray-50 p-6 dark:bg-gray-950">
-            <p className="text-lg font-bold">지금 {s.n}명</p>
-            <div className="mt-2 h-1 rounded-md bg-gray-200 dark:bg-gray-800">
-              <div className="h-1 rounded-md bg-teal-strong" style={{ width: `${grow(s.n).pct}%` }} />
+          <section className={틀.회색칸 + ' flex flex-col gap-(--rapo-dimension-x2)'}>
+            <p className="rapo-type-t5-bold whitespace-nowrap text-(color:--rapo-color-fg-neutral)">지금 {s.n}명</p>
+            <div className="h-1 rounded-(--rapo-radius-full) bg-(--rapo-color-bg-neutral-muted)">
+              <div className="h-1 rounded-(--rapo-radius-full) bg-(--rapo-color-bg-navy-solid)" style={{ width: `${grow(s.n).pct}%` }} />
             </div>
-            <p className="mt-2 text-sm text-mute">{grow(s.n).msg}</p>
+            <p className={틀.작은글}>{grow(s.n).msg}</p>
           </section>
 
           <Link
             href="/tools"
-            className="mt-7 flex items-center justify-between gap-3 rounded-sm
-                       border border-gray-200 px-6 py-5 hover:bg-gray-50
-                       dark:border-gray-700 dark:hover:bg-gray-950"
+            className={틀.카드 + ' flex items-center justify-between gap-(--rapo-dimension-x3) active:bg-(--rapo-color-bg-layer-default-pressed)'}
           >
-            <span className="min-w-0">
-              <span className="block break-keep text-body-lg font-bold">계산기 보기</span>
-              <span className="mt-1 block break-keep text-sm text-mute">
-                세전·세후 · 퇴직금 · 연차. 로그인 없이 쓸 수 있어요
-              </span>
+            <span className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
+              <span className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">계산기 보기</span>
+              <span className={틀.작은글}>세전·세후 · 퇴직금 · 연차. 로그인 없이 쓸 수 있어요</span>
             </span>
-            <span aria-hidden className="shrink-0 text-mute">→</span>
+            {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+            <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0" />
           </Link>
 
-          <PayNote className="mt-6 text-mute" />
-          <p className="mt-1 text-sm text-mute">
-            치료사들이 직접 올린 자료입니다. 병원 이름은 받지 않아요
-          </p>
+          <div className="flex flex-col gap-(--rapo-dimension-x1)">
+            <PayNote className="text-(color:--rapo-color-fg-neutral-muted)" />
+            <p className={틀.작은글}>치료사들이 직접 올린 자료입니다. 병원 이름은 받지 않아요</p>
+          </div>
         </>
       )}
-    </main>
+    </RapoPageFrame>
   );
 }
 
@@ -190,10 +189,9 @@ function Sel({
   label, v, on, opts, all,
 }: { label: string; v: string; on: (v: string) => void; opts: readonly string[]; all: string }) {
   return (
-    <label className="block">
-      <span className="block text-sm font-bold text-mute">{label}</span>
-      <select value={v} onChange={(e) => on(e.target.value)}
-        className="mt-1 block w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950">
+    <label className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
+      <span className="rapo-type-t3-bold text-(color:--rapo-color-fg-neutral-muted)">{label}</span>
+      <select value={v} onChange={(e) => on(e.target.value)} className={틀.입력}>
         <option value="">{all}</option>
         {opts.map((o) => <option key={o}>{o}</option>)}
       </select>
@@ -203,19 +201,19 @@ function Sel({
 
 function Card({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
-    <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-      <h2 className="text-h3 font-bold">{title}</h2>
-      {sub && <p className="mt-1 text-sm text-mute">{sub}</p>}
-      <div className="mt-5">{children}</div>
+    <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x1)'}>
+      <h2 className={틀.소제목}>{title}</h2>
+      {sub && <p className={틀.작은글}>{sub}</p>}
+      <div className="mt-(--rapo-dimension-x3)">{children}</div>
     </section>
   );
 }
 
 function Row({ k, v, big }: { k: string; v: string; big?: boolean }) {
   return (
-    <div className="flex items-baseline justify-between border-b border-gray-50 py-4 last:border-0 dark:border-gray-800">
-      <span className="text-lg text-mute">{k}</span>
-      <span className={big ? 'text-h3 font-bold' : 'text-lg font-medium'}>{v}</span>
+    <div className="flex items-baseline justify-between gap-(--rapo-dimension-x3) border-b-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) py-(--rapo-dimension-x3) last:border-0">
+      <span className="rapo-type-t4-regular text-(color:--rapo-color-fg-neutral-muted)">{k}</span>
+      <span className={'whitespace-nowrap text-(color:--rapo-color-fg-neutral) ' + (big ? 'rapo-type-t7-bold' : 'rapo-type-t4-medium')}>{v}</span>
     </div>
   );
 }

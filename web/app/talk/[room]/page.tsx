@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
-import { NothingHere } from '@/components/nothing-here';
+import { RapoClosed, RapoPageFrame, RapoWait, 틀 } from '@/components/rapo/rapo-frame';
+import { RapoButton } from '@/components/rapo/rapo-ui';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { 대화닫힘안내, 대화열렸나 } from '@/lib/talk';
 
@@ -32,7 +32,8 @@ const 때 = (s: string) => new Date(s).toLocaleString('ko-KR',
    방 주소를 직접 쳐도 안내만 보이고 창구(대화읽기)를 안 부릅니다 */
 export default function TalkRoom() {
   if (!대화열렸나) {
-    return <NothingHere title={대화닫힘안내.제목} body={대화닫힘안내.본문} />;
+    /* 2026-11-16 — 주소로 열면 옛 위쪽 줄(POTJOB 로고)이 보여 새 틀 안내로 바꿨습니다 */
+    return <RapoClosed title={대화닫힘안내.제목} body={대화닫힘안내.본문} />;
   }
   return <TalkRoomInner />;
 }
@@ -60,7 +61,7 @@ function TalkRoomInner() {
     return () => { 살아있나 = false; };
   }, [session, 방, 다시]);
 
-  if (loading) return <main className="mx-auto w-full max-w-2xl px-6 py-8"><p className="text-lg text-mute">잠시만요…</p></main>;
+  if (loading) return <RapoPageFrame title="대화" back="/talk"><RapoWait /></RapoPageFrame>;
 
   const 보내기 = async () => {
     const t = 글.trim();
@@ -73,44 +74,36 @@ function TalkRoomInner() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-8 pb-[140px] md:px-7">
-      <Link href="/talk" className="text-lg text-interaction-blue hover:underline">← 대화 목록</Link>
+    <RapoPageFrame title="대화" back="/talk">
+      {탈 && <p role="alert" className={틀.오류칸}>{탈}</p>}
 
-      {탈 && <p className="mt-5 rounded-sm border border-brand-red p-4 text-lg text-brand-red-dark">{탈}</p>}
-
-      <ul className="mt-6 space-y-3">
+      <ul className="flex flex-col gap-(--rapo-dimension-x3) pb-[72px]">
         {줄들.map((m) => (
           <li key={m.id} className={m.나인가 ? 'text-right' : ''}>
-            <div className={'inline-block max-w-[80%] rounded-sm px-5 py-3 text-left ' +
-              (m.나인가 ? 'bg-brand-red-soft' : 'bg-gray-100 dark:bg-gray-800')}>
-              {m.글 && <p className="break-keep text-lg">{m.글}</p>}
-              {m.사진사라짐 && (
-                <p className="break-keep text-lg text-mute">사진이 사라졌어요</p>
-              )}
-              {m.사진 && !m.사진사라짐 && (
-                <p className="break-keep text-lg text-mute">사진 1장</p>
-              )}
-              <p className="mt-1 text-sm text-mute">{때(m.쓴때)}</p>
+            <div className={'inline-block max-w-[80%] rounded-(--rapo-radius-r3) px-(--rapo-dimension-x4) py-(--rapo-dimension-x3) text-left ' +
+              (m.나인가 ? 'bg-(--rapo-brand-color-blush)' : 'bg-(--rapo-color-bg-neutral-weak)')}>
+              {m.글 && <p className={틀.글}>{m.글}</p>}
+              {m.사진사라짐 && <p className={틀.흐린글}>사진이 사라졌어요</p>}
+              {m.사진 && !m.사진사라짐 && <p className={틀.흐린글}>사진 1장</p>}
+              <p className="rapo-type-t2-regular mt-(--rapo-dimension-x1) text-(color:--rapo-color-fg-neutral-muted)">{때(m.쓴때)}</p>
             </div>
           </li>
         ))}
       </ul>
 
-      <div className="fixed inset-x-0 bottom-[62px] border-t border-gray-200 bg-white/95 px-6 py-3
-                      backdrop-blur md:bottom-0 md:px-7 dark:bg-gray-900/95">
-        <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
+      {/* 새 틀에는 옛 탭바(62)가 없어 맨 아래에 붙입니다 (2026-11-16) */}
+      <div className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-3xl border-t-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak)
+                      bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x5) py-(--rapo-dimension-x3)"
+        style={{ paddingBottom: 'calc(var(--rapo-dimension-x3) + env(safe-area-inset-bottom))' }}>
+        <div className="flex w-full items-center gap-(--rapo-dimension-x3)">
           <input
             value={글} onChange={(e) => set글(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') 보내기(); }}
-            placeholder="할 말을 적어 주세요"
-            className="min-w-0 flex-1 rounded-sm border border-gray-200 px-5 py-3 text-lg" />
-          <button type="button" onClick={보내기}
-            className="shrink-0 rounded-md bg-brand-red px-6 py-3 text-lg font-bold text-white
-                       hover:bg-brand-red-dark">
-            보내기
-          </button>
+            placeholder="할 말을 적어 주세요" aria-label="할 말"
+            className={틀.입력 + ' flex-1'} />
+          <RapoButton tone="navy" size={52} onClick={보내기}>보내기</RapoButton>
         </div>
       </div>
-    </main>
+    </RapoPageFrame>
   );
 }

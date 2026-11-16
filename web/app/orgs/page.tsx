@@ -250,7 +250,9 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
         <OrgSearch facets={f} />
       </main>
       <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
-      <RapoBottomNav current="/" dark />
+      {/* 2026-11-16 — 「홈」이 켜져 있었습니다. 툴킷 「병원 둘러보기」와 커뮤니티 「병원 찾기」 두 곳에서 오는데,
+          어두운 커뮤니티 판이고 병원 하나(?org=)를 열면 「커뮤니티」가 켜지므로 목록도 같은 칸을 켭니다 */}
+      <RapoBottomNav current="/community" dark />
     </div>
   );
 }

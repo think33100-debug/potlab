@@ -7,6 +7,8 @@ import { useAuth } from '../auth';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { man10 } from '@/lib/pay';
 import { NEXT_WHY, PART_LABEL, PART_ORDER, cheerOf, nextUp, tierOf, type PartKey } from '@/lib/spec';
+import { RapoPageFrame, 틀 } from '@/components/rapo/rapo-frame';
+import { RapoButton } from '@/components/rapo/rapo-ui';
 
 /* 스펙쌓기. 옛 앱의 학생 결과 화면(getStudentResult)을 옮긴 것입니다.
 
@@ -57,34 +59,40 @@ export default function SpecPage() {
 
   const me = res?.me ?? null;
 
+  /* 2026-11-16 — 새 화면에서는 안 오지만 주소로 열려서 옛 위쪽 줄(POTJOB 로고) 대신 새 틀로 옮겼습니다.
+     spec_stats·rookie_salary 를 읽는 길과 「배점을 안 내보낸다」 규칙은 그대로입니다 */
+  const 막대 = 'h-1 rounded-(--rapo-radius-full) bg-(--rapo-color-bg-neutral-weak)';
+  const 채움 = 'h-1 rounded-(--rapo-radius-full) bg-(--rapo-color-bg-navy-solid)';
+
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-7 pb-[88px] md:px-7 md:pb-7">
-      <h1 className="break-keep text-h1 font-bold">스펙쌓기</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
-        피오티잡에서 실제로 취업을 준비하는 학생들을 조사해
+    <RapoPageFrame title="스펙쌓기" back="/toolkit" nav="/toolkit">
+      {/* 옛 이름(피오티잡)이 글에 남아 있어 RAPO 로 고쳤습니다 (2026-11-11 세중님 「서비스 이름은 RAPO」) */}
+      <p className={틀.흐린글}>
+        RAPO 에서 실제로 취업을 준비하는 학생들을 조사해
         자체적으로 만든 스펙 점수입니다
       </p>
 
-      {err && <p className="mt-6 text-lg text-brand-red">{err}</p>}
-      {!res && !err && <p className="mt-7 text-lg text-mute">세는 중이에요…</p>}
+      {err && <p role="alert" className={틀.오류}>{err}</p>}
+      {!res && !err && <p role="status" className={틀.흐린글}>세는 중이에요…</p>}
 
       {res && !me && (
-        <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-          <h2 className="text-h3 font-bold">스펙을 아직 안 적으셨어요</h2>
+        <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x2)'}>
+          <h2 className={틀.소제목}>스펙을 아직 안 적으셨어요</h2>
           {/* 글귀와 단추가 **같은 규칙**을 씁니다 (2026-09-25).
               전에는 글귀만 loading 을 보고 바로 아래 단추는 안 봤습니다 —
               글귀는 비어 있는데 단추만 「시작하기 → /login」 으로 뗴습니다 */}
-          <p className="mt-2 text-lg text-mute">
+          <p className={틀.흐린글}>
             {loading ? ''
               : profile ? '내 정보에서 스펙을 채우면 점수가 나와요'
               : session ? '가입을 마저 하고 스펙을 채우면 점수가 나와요'
               : '가입하면서 스펙을 채우면 점수가 나와요'}
           </p>
           {!loading && (
-            <Link href={profile ? '/me' : session ? '/welcome' : '/login'}
-              className="mt-5 inline-block rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark">
-              {profile ? '내 정보로 가기' : session ? '가입 마저 하기' : '시작하기'}
-            </Link>
+            <div className="pt-(--rapo-dimension-x2)">
+              <RapoButton href={profile ? '/me' : session ? '/welcome' : '/login'} tone="navy" size={40}>
+                {profile ? '내 정보로 가기' : session ? '가입 마저 하기' : '시작하기'}
+              </RapoButton>
+            </div>
           )}
         </section>
       )}
@@ -92,48 +100,47 @@ export default function SpecPage() {
       {res && me && (
         <>
           {/* ── 내 점수 ── */}
-          <section className="mt-7 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-            <p aria-hidden className="text-h1">{tierOf(me.score).emoji}</p>
-            <p className="mt-2 text-h2 font-bold">{tierOf(me.score).headline}</p>
-            <p className="mt-1 text-lg text-mute">{tierOf(me.score).comment}</p>
-            <p className="mt-1 text-lg text-mute">{tierOf(me.score).place}</p>
+          <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x2)'}>
+            <p aria-hidden className="rapo-type-t11-regular">{tierOf(me.score).emoji}</p>
+            <p className="rapo-type-t8-bold break-keep text-(color:--rapo-color-fg-neutral)">{tierOf(me.score).headline}</p>
+            <p className={틀.흐린글}>{tierOf(me.score).comment}</p>
+            <p className={틀.흐린글}>{tierOf(me.score).place}</p>
 
-            <p className="mt-6 text-h1 font-bold">
+            <p className="rapo-type-t11-bold whitespace-nowrap pt-(--rapo-dimension-x4) text-(color:--rapo-brand-color-navy)">
               {me.score}
-              <span className="ml-1 text-h3 font-medium text-mute">/ 100점</span>
+              <span className="rapo-type-t6-medium ml-(--rapo-dimension-x1) text-(color:--rapo-color-fg-neutral-muted)">/ 100점</span>
             </p>
-            <div className="mt-2 h-1 rounded-md bg-gray-100 dark:bg-gray-800">
-              <div className="h-1 rounded-md bg-teal-strong" style={{ width: `${me.score}%` }} />
+            <div className={막대}>
+              <div className={채움} style={{ width: `${me.score}%` }} />
             </div>
 
             {res.peer?.top != null ? (
-              <p className="mt-5 text-lg">
+              <p className={틀.글 + ' pt-(--rapo-dimension-x3)'}>
                 {me.role === '학생' ? `같은 ${me.grade ?? ''} ` : '같은 직군 현직 '}
-                {res.peer.n}명 중 <b>상위 {res.peer.top}%</b>
+                {res.peer.n}명 중 <b className="whitespace-nowrap">상위 {res.peer.top}%</b>
               </p>
             ) : (
-              <p className="mt-5 text-lg text-mute">
+              <p className={틀.흐린글 + ' pt-(--rapo-dimension-x3)'}>
                 같은 조건에 {res.min_peer}명이 모이면 또래 중 내 위치가 나와요.
                 지금은 {res.peer?.n ?? 0}명이에요
               </p>
             )}
 
-            <p className="mt-5 rounded-sm bg-gray-50 p-5 text-lg text-gray-600 dark:bg-gray-950 dark:text-gray-400">
+            <p className={틀.회색칸 + ' ' + 틀.글 + ' mt-(--rapo-dimension-x3)'}>
               {cheerOf(me.score, me.parts)}
             </p>
           </section>
 
           {/* ── 내가 넣은 것 ──
               점수도 막대도 안 붙입니다. 길이 하나만 있어도 배점이 역산됩니다 */}
-          <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-            <h2 className="break-keep text-h3 font-bold">내가 넣은 것</h2>
-            <dl className="mt-5">
+          <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x3)'}>
+            <h2 className={틀.소제목}>내가 넣은 것</h2>
+            <dl>
               {PART_ORDER.map((k) => (
                 <div key={k}
-                  className="flex items-baseline justify-between gap-5 border-b border-gray-50
-                             py-5 last:border-0 dark:border-gray-800">
-                  <dt className="break-keep text-lg font-bold">{PART_LABEL[k]}</dt>
-                  <dd className="shrink-0 break-keep text-right text-lg text-gray-600 dark:text-gray-400">
+                  className="flex items-baseline justify-between gap-(--rapo-dimension-x4) border-b-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) py-(--rapo-dimension-x4) last:border-0">
+                  <dt className="rapo-type-t4-bold break-keep text-(color:--rapo-color-fg-neutral)">{PART_LABEL[k]}</dt>
+                  <dd className="rapo-type-t4-regular shrink-0 break-keep text-right text-(color:--rapo-color-fg-neutral-muted)">
                     {rawOf(k, me)}
                   </dd>
                 </div>
@@ -141,47 +148,46 @@ export default function SpecPage() {
             </dl>
 
             {/* 어학은 우리 기준이라 밝혀 둡니다. 구간 값은 안 적습니다 */}
-            <p className="mt-5 break-keep text-sm text-mute">
+            <p className={틀.작은글}>
               어학은 시험끼리 환산한 게 아니라 각 시험이 발표한 등급을 그대로 따랐어요.
               여러 개 넣으면 제일 높은 것 하나만 써요
             </p>
           </section>
 
           {/* ── 합격한 사람들과 비교 ── */}
-          <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-            <h2 className="text-h3 font-bold">합격한 사람들과 비교</h2>
+          <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x2)'}>
+            <h2 className={틀.소제목}>합격한 사람들과 비교</h2>
             {res.reach?.enough ? (
               <>
-                <p className="mt-1 text-sm text-mute">
+                <p className={틀.작은글}>
                   그 기관에서 일하는 {res.reach.base}명 중 내 점수보다 낮은 사람이 몇 %인지 보여드려요.
                   높을수록 내 스펙이 그 자리에 가까워요
                 </p>
-                <div className="mt-5">
+                <div className="flex flex-col gap-(--rapo-dimension-x4) pt-(--rapo-dimension-x3)">
                   {res.reach.types.map((t) => (
-                    <div key={t.type} className={'mt-5 first:mt-0 '
-                      + (t.type === me.want_type ? 'rounded-sm bg-badge-teal-bg p-5 dark:bg-transparent dark:border dark:border-teal-strong/40' : '')}>
-                      <div className="flex items-baseline justify-between">
-                        <span className="text-lg font-medium">
+                    <div key={t.type} className={t.type === me.want_type ? 'rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x4)' : ''}>
+                      <div className="flex items-baseline justify-between gap-(--rapo-dimension-x3)">
+                        <span className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">
                           {t.type}
                           {t.type === me.want_type && (
-                            <span className="ml-2 text-sm text-teal-strong">희망</span>
+                            <span className="rapo-type-t3-bold ml-(--rapo-dimension-x2) text-(color:--rapo-color-fg-brand-contrast)">희망</span>
                           )}
                         </span>
-                        <span className="text-lg"><b>{t.rate}%</b>
-                          <span className="ml-2 text-sm text-mute">{t.n}명 기준</span></span>
+                        <span className="rapo-type-t4-regular whitespace-nowrap text-(color:--rapo-color-fg-neutral)"><b>{t.rate}%</b>
+                          <span className="rapo-type-t3-regular ml-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral-muted)">{t.n}명 기준</span></span>
                       </div>
-                      <div className="mt-2 h-1 rounded-md bg-gray-100 dark:bg-gray-800">
-                        <div className="h-1 rounded-md bg-teal-strong" style={{ width: `${t.rate}%` }} />
+                      <div className={막대 + ' mt-(--rapo-dimension-x2)'}>
+                        <div className={채움} style={{ width: `${t.rate}%` }} />
                       </div>
                     </div>
                   ))}
                 </div>
-                <p className="mt-6 text-sm text-mute">
+                <p className={틀.작은글 + ' pt-(--rapo-dimension-x3)'}>
                   위 등급 문구는 점수만 보고 적은 것이고, 실제 근거는 이 비율이에요
                 </p>
               </>
             ) : (
-              <p className="mt-2 text-lg text-mute">
+              <p className={틀.흐린글}>
                 현직 선배들 스펙이 {res.reach && !res.reach.enough ? res.reach.need : res.min_pro}명은
                 모여야 보여드릴 수 있어요. 지금은
                 {' '}{res.reach && !res.reach.enough ? res.reach.have : 0}명이에요.
@@ -195,7 +201,7 @@ export default function SpecPage() {
 
           {/* 「계산기 보기」 카드를 **여기서 뺐습니다** (2026-10-02 세중님 결정).
               계산기는 월급확인(/pay)에서 나와야 합니다. 그리고 거기에
-              app/pay/page.tsx:165 로 **똑같은 카드가 이미 있습니다** —
+              app/pay/page.tsx 로 **똑같은 카드가 이미 있습니다** —
               이건 같은 것을 한 번 더 둔 것이었습니다.
               게다가 이 자리는 {res && me} 안이라 스펙을 적은 회원만 보는데,
               카드 설명은 「로그인 없이 쓸 수 있어요」였습니다. /pay 쪽은
@@ -210,23 +216,19 @@ export default function SpecPage() {
           찾는 것이니까요. /volunteer 자체도 로그인 없이 열리게 만들었으니
           입구만 로그인 뒤에 두면 앞뒤가 안 맞습니다.
 
-          건수는 일부러 안 적습니다 — 날마다 바뀌어서 박아두면 낡습니다.
-          모양은 위 「계산기 보기」를 그대로 베꼈습니다. 새로 지은 색이 없습니다. */}
+          건수는 일부러 안 적습니다 — 날마다 바뀌어서 박아두면 낡습니다. */}
       <Link
         href="/volunteer"
-        className="mt-7 flex items-center justify-between gap-3 rounded-sm
-                   border border-gray-200 px-6 py-5 hover:bg-gray-50
-                   dark:border-gray-700 dark:hover:bg-gray-950"
+        className={틀.카드 + ' flex items-center justify-between gap-(--rapo-dimension-x3) active:bg-(--rapo-color-bg-layer-default-pressed)'}
       >
-        <span className="min-w-0">
-          <span className="block break-keep text-body-lg font-bold">봉사활동 찾기</span>
-          <span className="mt-1 block break-keep text-sm text-mute">
-            지역으로 좁혀 볼 수 있어요. 신청은 VMS 에서 해요
-          </span>
+        <span className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
+          <span className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">봉사활동 찾기</span>
+          <span className={틀.작은글}>지역으로 좁혀 볼 수 있어요. 신청은 VMS 에서 해요</span>
         </span>
-        <span aria-hidden className="shrink-0 text-mute">→</span>
+        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+        <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0" />
       </Link>
-    </main>
+    </RapoPageFrame>
   );
 }
 
@@ -246,38 +248,38 @@ function Rookie({ job }: { job: string | null }) {
   if (!d) return null;
 
   return (
-    <section className="mt-7 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-      <h2 className="text-h3 font-bold">여기 가면 얼마 받나요</h2>
-      <p className="mt-1 text-sm text-mute">
+    <section className={틀.카드 + ' flex flex-col gap-(--rapo-dimension-x2)'}>
+      <h2 className={틀.소제목}>여기 가면 얼마 받나요</h2>
+      <p className={틀.작은글}>
         {d.job ?? '치료사'} 중 <b>연차 2년 이하</b>가 적어준 연 총소득이에요
       </p>
 
       {d.types.length === 0 ? (
-        <p className="mt-5 text-lg text-mute">
+        <p className={틀.흐린글 + ' pt-(--rapo-dimension-x2)'}>
           신입 급여가 아직 {d.min_n}명은 모이지 않았어요. 지금은 {d.base}명이에요
         </p>
       ) : (
         <>
-          <div className="mt-5">
+          <div>
             {d.types.map((t) => (
               <div key={t.type}
-                className="flex items-baseline justify-between border-b border-gray-50 py-5 last:border-0 dark:border-gray-800">
-                <span className="min-w-0 text-lg font-medium">
+                className="flex items-baseline justify-between gap-(--rapo-dimension-x3) border-b-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) py-(--rapo-dimension-x4) last:border-0">
+                <span className="rapo-type-t4-medium min-w-0 text-(color:--rapo-color-fg-neutral)">
                   {t.type}
-                  <span className="ml-2 text-sm text-mute">{t.n}명</span>
+                  <span className="rapo-type-t3-regular ml-(--rapo-dimension-x2) whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">{t.n}명</span>
                 </span>
                 <span className="shrink-0 text-right">
-                  <b className="text-h3">{man10(t.median_year)}</b>
-                  <span className="block text-sm text-mute">
+                  <b className="rapo-type-t6-bold whitespace-nowrap text-(color:--rapo-color-fg-neutral)">{man10(t.median_year)}</b>
+                  <span className="rapo-type-t3-regular block whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">
                     고정 월급 {t.median_base}만원
                   </span>
                 </span>
               </div>
             ))}
           </div>
-          <PayNote className="mt-5 text-mute"
+          <PayNote className="text-(color:--rapo-color-fg-neutral-muted)"
                    source="연차 2년 이하 회원이 직접 올린 급여" />
-          <p className="mt-1 text-sm text-mute">
+          <p className={틀.작은글}>
             가운데 값(중위값)이에요. {d.min_n}명이 안 되는 유형은 안 보여드려요
           </p>
         </>
@@ -328,8 +330,8 @@ function NextUp({ parts }: { parts: Record<string, number> }) {
   if (!k) return null;
 
   return (
-    <section className="mt-7 rounded-sm bg-badge-teal-bg p-6 dark:border dark:border-teal-strong/40 dark:bg-transparent">
-      <p className="break-keep text-lg text-teal-strong">
+    <section className="rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x5)">
+      <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">
         다음엔 <b>{PART_LABEL[k]}</b>을 챙겨보세요. {NEXT_WHY[k]}
       </p>
     </section>

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { RapoBottomNav } from './rapo-bottom-nav';
 import { RapoAppBar } from './rapo-me';
+import { RapoButton } from './rapo-ui';
 
 /* 피그마 원본이 없는 화면의 새 틀 — 앱 바 · 본문 · (고르면) 하단 탐색 (2026-11-16).
 
@@ -20,7 +21,8 @@ export function RapoPageFrame({ title, back, nav, children }: {
   return (
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
       <RapoAppBar title={title} back={back} />
-      <main className="flex flex-col gap-(--rapo-dimension-x6) px-(--rapo-dimension-x5) pb-(--rapo-dimension-x8) pt-(--rapo-dimension-x4)">
+      {/* 아래 96 — 떠 있는 카카오 단추(52 + 위아래 16 · components/kakao-fab.tsx)에 마지막 단추가 가리지 않게 (2026-11-16) */}
+      <main className="flex flex-col gap-(--rapo-dimension-x6) px-(--rapo-dimension-x5) pb-[96px] pt-(--rapo-dimension-x4)">
         {children}
       </main>
       {nav && (
@@ -74,6 +76,22 @@ export const 틀 = {
       + 'border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-muted) text-(color:--rapo-color-fg-neutral) '
       + 'enabled:active:bg-(--rapo-color-bg-transparent-pressed) disabled:opacity-40',
 } as const;
+
+/* 닫아 둔 화면 안내 — 제목 · 설명 · 갈 곳 둘 (옛 components/nothing-here.tsx 의 새 틀 짝 · 1:1 대화가 씁니다) */
+export function RapoClosed({ title, body, nav }: { title: string; body: string; nav?: string }) {
+  return (
+    <RapoPageFrame title={title} back="/" nav={nav}>
+      <section className="flex flex-col gap-(--rapo-dimension-x3) pt-(--rapo-dimension-x8)">
+        <h2 className={틀.큰제목}>{title}</h2>
+        <p className={틀.흐린글}>{body}</p>
+      </section>
+      <div className="flex flex-col gap-(--rapo-dimension-x2) md:w-[360px]">
+        <RapoButton href="/community" tone="navy" full>커뮤니티 가기</RapoButton>
+        <RapoButton href="/jobs" tone="outline" full>채용공고 보기</RapoButton>
+      </div>
+    </RapoPageFrame>
+  );
+}
 
 /* 「잠시만요…」 — 틀 안에서 읽는 동안 */
 export function RapoWait() {
