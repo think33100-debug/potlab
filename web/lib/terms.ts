@@ -41,6 +41,7 @@ export const TERMS_VERSION = '2026-11-23';
 /* ★ 2026-11-16 세중님 「확정」 — 약관 다섯 문서 확정본 (금고 RAPO노트/약관/최종본_1116 · 공고 11/16 · 시행 11/23).
    글은 lib/terms-text.ts (금고의 글에서 만든 파일 — 손으로 고치지 않음).
    옛 판(2026-11-10)은 「…-1110」 열쇠로 그대로 남깁니다 — 처리방침이 「이전 버전을 열람할 수 있도록」 약속했습니다.
+   11/16 세중님 「예전 거 보기 빼」 — 세 문서 모두 「이전 판 보기」 줄을 뺍니다(옛 판 주소는 남음 · 처리방침 약속을 알려 드린 뒤 세중님 「그것도 빼」).
    시행 뒤 첫 로그인 때 다시 동의를 받습니다(components/terms-reconsent.tsx · 약관 부칙 ②). */
 export const 공고일말 = '2026년 11월 16일';
 export const 시행일말 = '2026년 11월 23일';
@@ -65,11 +66,11 @@ export type TermKey = 'service' | 'recruiter' | 'edu' | 'community' | 'privacy' 
 type 약관 = { title: string; draft: boolean; body: string; ver: string; lead?: string; 옛판?: TermKey; 새판?: TermKey };
 
 export const TERMS: Record<TermKey, 약관> = {
-  service: { title: '개인회원 이용약관', draft: false, ver: '2026-11-23', lead: 약관글.service.lead, body: 약관글.service.body, 옛판: 'service-1110' },
+  service: { title: '개인회원 이용약관', draft: false, ver: '2026-11-23', lead: 약관글.service.lead, body: 약관글.service.body },
   recruiter: { title: '채용담당자 이용약관', draft: false, ver: '2026-11-23', lead: 약관글.recruiter.lead, body: 약관글.recruiter.body },
   edu: { title: '교육담당자 이용약관', draft: false, ver: '2026-11-23', lead: 약관글.edu.lead, body: 약관글.edu.body },
-  community: { title: '커뮤니티 운영정책', draft: false, ver: '2026-11-23', lead: 약관글.community.lead, body: 약관글.community.body, 옛판: 'community-1110' },
-  privacy: { title: '개인정보처리방침', draft: false, ver: '2026-11-23', lead: 약관글.privacy.lead, body: 약관글.privacy.body, 옛판: 'privacy-1110' },
+  community: { title: '커뮤니티 운영정책', draft: false, ver: '2026-11-23', lead: 약관글.community.lead, body: 약관글.community.body },
+  privacy: { title: '개인정보처리방침', draft: false, ver: '2026-11-23', lead: 약관글.privacy.lead, body: 약관글.privacy.body },
 
   /* ── 옛 판 (2026-11-10 시행 · 11/22 까지 적용) — 글 그대로 ── */
   'service-1110': {
