@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<!-- RAPO 공고 릴스 한 편 (1080×1920 · 15초).
+     render.mjs 가 window.__setData(자료) → window.__seek(밀리초) 를 프레임마다 불러 찍습니다.
+     애니메이션은 CSS 가 아니라 시간 t 의 함수입니다 — 같은 t 면 늘 같은 그림이라 프레임이 안 튑니다.
+     틀은 OG 그림(web/lib/og-card.tsx)의 말을 세로로 옮긴 것입니다 — 남색 바탕 · 흰 판 · 빨간 열린 테두리 · 안쪽 화살표.
+     인스타 화면이 덮는 자리(위 ~220 · 아래 ~380 · 오른쪽 ~140)에는 글을 두지 않습니다. -->
+<style>
+  @font-face { font-family: "PretendardV"; src: url("fonts/PretendardVariable.woff2") format("woff2"); font-weight: 100 900; }
+  :root {
+    --navy: #112231; --coral: #FF4F40; --coral-weak: #FFF1EE; --ink: #1a1c20; --muted: #6B7380;
+    --line: #E6E8EB; --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--navy); }
+  body { font-family: "PretendardV", sans-serif; color: var(--white); word-break: keep-all; letter-spacing: -0.02em; }
+  .abs { position: absolute; }
+  .scene { position: absolute; inset: 0; }
+
+  /* 위 줄 — 로고 · 「새 공고」 */
+  #top { left: 80px; top: 230px; right: 80px; display: flex; align-items: center; justify-content: space-between; }
+  #top .logo { display: flex; align-items: center; gap: 18px; }
+  #top .logo img.sym { width: 72px; height: 71px; }
+  #top .logo img.word { height: 36px; }
+  #top .new { font-size: 38px; font-weight: 700; color: var(--white); }
+
+  .chip { display: inline-flex; align-items: center; height: 64px; padding: 0 26px; border-radius: 12px;
+          font-size: 34px; font-weight: 700; background: var(--coral); color: var(--white); margin-right: 14px; }
+  .chip.weak { background: rgba(255,255,255,0.12); color: var(--white); }
+
+  /* 1 · 걸기 */
+  /* 1 · 걸기 — 0초 첫 프레임에 글이 다 보입니다 (릴스는 첫 프레임이 표지이자 걸기입니다) */
+  #bgphoto { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(28px) brightness(0.55); opacity: 0; }
+  #s1 .photo { left: 0; top: 0; width: 1080px; height: 1020px; overflow: hidden; display: none; }
+  #s1 .photo img { width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 60%; }
+  #s1 .photo::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(17,34,49,0.55) 0%, rgba(17,34,49,0) 28%, rgba(17,34,49,0) 55%, var(--navy) 100%); }
+  #s1 .hook { left: 80px; right: 120px; top: 560px; }
+  body.has-photo #s1 .hook { top: 860px; }
+  #s1 .small { display: inline-block; font-size: 46px; font-weight: 700; color: var(--white); background: rgba(255,255,255,0.14);
+    padding: 10px 22px; border-radius: 12px; }
+  #s1 .big { margin-top: 26px; font-size: 104px; font-weight: 800; line-height: 1.14; }
+  #s1 .big .ln { white-space: nowrap; overflow: visible; }
+  #s1 .big .em { position: relative; color: var(--coral); }
+  #s1 .big .em i { position: absolute; left: -6px; right: -6px; bottom: 6px; height: 34px; background: rgba(255,79,64,0.28);
+    transform-origin: 0 50%; z-index: -1; }
+  #s1 .chips { margin-top: 34px; }
+  #s1 .dday { right: 70px; top: 360px; width: 230px; height: 230px; border-radius: 50%; background: var(--coral);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--white);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35); }
+  body.has-photo #s1 .dday { top: 700px; }
+  #s1 .dday b { font-size: 76px; font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
+  #s1 .dday span { font-size: 30px; font-weight: 700; margin-top: 6px; }
+  /* 사진 출처 — 사진이 보이는 동안 맨 아래(인스타 글자가 덮기 전 줄) */
+  #credit { left: 80px; right: 140px; top: 1500px; font-size: 30px; font-weight: 600; color: rgba(255,255,255,0.82);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6); opacity: 0; }
+
+  /* 흰 판 (2 · 3) — OG 의 열린 테두리 */
+  .panel { left: 60px; width: 960px; top: 420px; min-height: 720px; background: var(--white); color: var(--ink); }
+  .panel svg.frame { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+  .panel .arrow { position: absolute; right: 40px; top: 26px; width: 88px; height: 88px; transform: rotate(-90deg); }
+  .panel .in { position: relative; padding: 72px 64px 64px; }
+  .eyebrow { font-size: 36px; font-weight: 700; color: var(--coral); }
+  .h { font-size: 68px; font-weight: 800; line-height: 1.2; margin-top: 18px; }
+  .meta { font-size: 38px; font-weight: 500; color: var(--muted); margin-top: 20px; }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 56px; }
+  .stat { background: #F5F6F7; border-radius: 20px; padding: 34px 34px 30px; }
+  .stat .k { font-size: 32px; font-weight: 600; color: var(--muted); }
+  .stat .v { font-size: 76px; font-weight: 800; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .stat .v small { font-size: 40px; font-weight: 700; margin-left: 6px; }
+  .stat.wide { grid-column: span 2; }
+  .src { font-size: 28px; font-weight: 500; color: var(--muted); margin-top: 28px; }
+
+  .rows { margin-top: 48px; }
+  .row { display: flex; align-items: baseline; justify-content: space-between; padding: 34px 0; border-top: 2px solid var(--line); }
+  .row:last-child { border-bottom: 2px solid var(--line); }
+  .row .k { font-size: 38px; font-weight: 600; color: var(--muted); flex: none; }
+  .row .v { font-size: 50px; font-weight: 800; text-align: right; margin-left: 32px; }
+  .row .v.check { font-size: 40px; font-weight: 600; color: var(--muted); }
+  .row .v.hot { color: var(--coral); }
+
+  /* 4 · 마무리 */
+  #s4 .big { left: 80px; right: 120px; top: 560px; font-size: 220px; font-weight: 900; color: var(--coral); line-height: 1; letter-spacing: -0.04em; }
+  #s4 .when { left: 80px; right: 120px; top: 810px; font-size: 52px; font-weight: 700; }
+  #s4 .cta { left: 80px; right: 120px; top: 1060px; background: var(--white); color: var(--ink); border-radius: 28px; padding: 48px 52px; }
+  #s4 .cta .a { font-size: 54px; font-weight: 800; line-height: 1.25; }
+  #s4 .cta .b { font-size: 36px; font-weight: 600; color: var(--muted); margin-top: 18px; }
+  #s4 .cta .go { display: inline-flex; margin-top: 30px; height: 84px; padding: 0 40px; align-items: center; border-radius: 16px; background: var(--coral); color: var(--white); font-size: 40px; font-weight: 800; }
+
+  #bar { left: 0; top: 0; height: 10px; background: var(--coral); z-index: 5; }
+  #top { z-index: 5; }
+</style>
+</head>
+<body>
+<div id="bar" class="abs"></div>
+
+<div id="top" class="abs">
+  <div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div>
+  <div class="new" id="newtag"></div>
+</div>
+
+<div id="bgphoto"></div>
+<section id="s1" class="scene">
+  <div class="photo abs" id="s1photo"><img id="s1img" alt=""></div>
+  <div class="hook abs" id="s1hook">
+    <div class="small" id="s1small"></div>
+    <div class="big" id="s1big"></div>
+    <div class="chips" id="s1chips"></div>
+  </div>
+  <div class="dday abs" id="s1dday"><b id="s1ddayb"></b><span>마감</span></div>
+</section>
+
+<section id="s2" class="scene">
+  <div class="panel abs" id="p2">
+    <svg class="frame" viewBox="0 0 960 1080" preserveAspectRatio="none"><path id="f2" d="M640 6H6V1074H954V140" stroke="#FF4F40" stroke-width="12" fill="none" vector-effect="non-scaling-stroke"/></svg>
+    <img class="arrow" src="assets/arrow.svg" alt="">
+    <div class="in">
+      <div class="eyebrow">어떤 곳이에요?</div>
+      <div class="h" id="s2org"></div>
+      <div class="meta" id="s2meta"></div>
+      <div class="stats" id="s2stats"></div>
+      <div class="src" id="s2src"></div>
+    </div>
+  </div>
+</section>
+
+<section id="s3" class="scene">
+  <div class="panel abs" id="p3">
+    <svg class="frame" viewBox="0 0 960 1080" preserveAspectRatio="none"><path id="f3" d="M640 6H6V1074H954V140" stroke="#FF4F40" stroke-width="12" fill="none" vector-effect="non-scaling-stroke"/></svg>
+    <img class="arrow" src="assets/arrow.svg" alt="">
+    <div class="in">
+      <div class="eyebrow">공고 내용</div>
+      <div class="h" id="s3title"></div>
+      <div class="rows" id="s3rows"></div>
+    </div>
+  </div>
+</section>
+
+<section id="s4" class="scene">
+  <div class="big abs" id="s4big"></div>
+  <div class="when abs" id="s4when"></div>
+  <div class="cta abs">
+    <div class="a">원문 공고까지 한 번에</div>
+    <div class="b">공공 · 종합 · 대학병원 치료사 공고만 모았어요</div>
+    <div class="go" id="s4go">프로필 링크 → RAPO</div>
+  </div>
+</section>
+<div id="credit" class="abs"></div>
+
+<script>
+/* ── 시간표 (밀리초) ── */
+/* 기관 소개(공식 값)가 없으면 2 장면을 빼고 12초로 — 빈 판을 보여 주지 않습니다 */
+const T_길게 = { s1: [0, 3200], s2: [3200, 7600], s3: [7600, 11800], s4: [11800, 15000] };
+const T_짧게 = { s1: [0, 3200], s2: [-1, -1], s3: [3200, 8400], s4: [8400, 12000] };
+let T = T_길게;
+let LEN = 15000;
+window.__LEN = LEN;
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = (x) => 1 - Math.pow(1 - clamp(x), 3);            /* easeOutCubic */
+const easeIn = (x) => Math.pow(clamp(x), 2);
+const prog = (t, a, d) => clamp((t - a) / d);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const $ = (id) => document.getElementById(id);
+
+let D = null;
+const counters = [];   /* [요소, 끝값, 시작ms] — 숫자 올라가기 */
+const staggered = { s2: [], s3: [] };
+
+window.__setData = (d) => {
+  D = d;
+  const 소개있음 = (d.소개.숫자 || []).length > 0 || (d.소개.메타 || []).length > 0;
+  T = 소개있음 ? T_길게 : T_짧게;
+  LEN = T.s4[1]; window.__LEN = LEN;
+  $('newtag').textContent = d.새공고 || '새 공고';
+  $('s1chips').innerHTML = (d.분류 || []).map((k, i) => `<span class="chip${i ? ' weak' : ''}">${esc(k)}</span>`).join('');
+  const 훅 = d.훅 || { 작은: d.기관, 큰: d.기관 + '\n' + (d.걸기 || d.직군 + ' 채용'), 강조: d.직군 };
+  $('s1small').textContent = 훅.작은;
+  /* 큰 글 안의 강조 낱말에 형광펜 */
+  $('s1big').innerHTML = 훅.큰.split('\n').map((줄) => {
+    const e = esc(줄);
+    const 펜줄 = 훅.강조 && e.includes(esc(훅.강조)) ? e.replace(esc(훅.강조), `<span class="em"><i></i>${esc(훅.강조)}</span>`) : e;
+    return `<div class="ln">${펜줄}</div>`;
+  }).join('');
+  $('s1ddayb').textContent = d.마감.큰글;
+  /* 띄어쓰기 없는 긴 이름(고려대학교의과대학부속구로병원)은 줄이 안 바뀝니다 — 폭에 맞을 때까지 글자를 줄입니다 */
+  for (const 줄 of document.querySelectorAll('#s1big .ln')) {
+    let 크기 = 104; 줄.style.fontSize = 크기 + 'px';
+    while (줄.scrollWidth > 줄.clientWidth + 1 && 크기 > 56) { 크기 -= 4; 줄.style.fontSize = 크기 + 'px'; }
+    if (줄.scrollWidth > 줄.clientWidth + 1) { 줄.style.whiteSpace = 'normal'; 줄.style.wordBreak = 'break-all'; }
+  }
+  for (const id of ['s2org']) {
+    const e = $(id); let k = 68; e.style.fontSize = k + 'px';
+    while (e.scrollWidth > e.clientWidth + 1 && k > 44) { k -= 4; e.style.fontSize = k + 'px'; }
+    if (e.scrollWidth > e.clientWidth + 1) e.style.wordBreak = 'break-all';
+  }
+  if (d.사진) {
+    document.body.classList.add('has-photo');
+    $('s1img').src = d.사진; $('s1photo').style.display = 'block';
+    $('bgphoto').style.backgroundImage = `url("${d.사진}")`;
+  }
+  $('credit').textContent = d.사진 ? `출처: ${d.사진출처 || d.기관}` : '';
+
+  $('s2org').textContent = d.기관;
+  $('s2meta').textContent = (d.소개.메타 || []).join(' · ');
+  $('s2stats').innerHTML = (d.소개.숫자 || []).map((s, i) =>
+    `<div class="stat${s.넓게 ? ' wide' : ''}"><div class="k">${esc(s.이름)}</div><div class="v"><span data-n="${i}">${s.연도 ? s.값 : 0}</span><small>${esc(s.단위 || '')}</small></div></div>`).join('');
+  $('s2src').textContent = d.소개.출처 || '';
+
+  $('s3title').textContent = d.직군 + ' · ' + (d.공고.고용형태 || '고용형태 공고문 확인');
+  $('s3rows').innerHTML = d.공고.줄.map((r) =>
+    `<div class="row"><div class="k">${esc(r.이름)}</div><div class="v${r.값 ? (r.강조 ? ' hot' : '') : ' check'}">${esc(r.값 || '공고문 확인')}</div></div>`).join('');
+
+  $('s4big').textContent = d.마감.큰글;
+  $('s4when').textContent = d.마감.작은글;
+  if (d.링크글) $('s4go').textContent = d.링크글;
+
+  counters.length = 0;
+  document.querySelectorAll('#s2stats [data-n]').forEach((el, i) => { if (!d.소개.숫자[i].연도) counters.push([el, d.소개.숫자[i].값, T.s2[0] + 700 + i * 180]); });
+  staggered.s2 = [$('s2org'), $('s2meta'), ...document.querySelectorAll('#s2stats .stat'), $('s2src')];
+  staggered.s3 = [$('s3title'), ...document.querySelectorAll('#s3rows .row')];
+};
+
+/* 장면 하나의 들어옴·나감 투명도 */
+function sceneAlpha(t, [a, b], fadeIn = 260, fadeOut = 260) {
+  if (t < a || t > b) return 0;
+  const i = a === 0 ? 1 : ease((t - a) / fadeIn);
+  const o = b === LEN ? 1 : 1 - easeIn((t - (b - fadeOut)) / fadeOut);
+  return Math.min(i, o);
+}
+
+function slideUp(el, t, start, dist = 60, dur = 520) {
+  const p = ease((t - start) / dur);
+  el.style.opacity = p;
+  el.style.transform = `translateY(${(1 - p) * dist}px)`;
+}
+
+/* 열린 테두리가 그려지는 모습 — 선 길이로 */
+function drawFrame(path, t, start) {
+  const L = path.getTotalLength();
+  path.style.strokeDasharray = L;
+  path.style.strokeDashoffset = L * (1 - ease((t - start) / 700));
+}
+
+window.__seek = (t) => {
+  if (!D) return;
+  $('bar').style.width = (1080 * clamp(t / LEN)) + 'px';
+
+  /* 1 · 걸기 */
+  const s1 = $('s1'); s1.style.opacity = sceneAlpha(t, T.s1, 0, 300);
+  /* 0초에 이미 다 보입니다 — 살짝 커졌다 자리 잡는 것만 */
+  const p0 = ease(t / 500);
+  $('s1hook').style.transform = `scale(${1.05 - 0.05 * p0})`; $('s1hook').style.transformOrigin = '0 0';
+  const 펜 = document.querySelector('#s1big .em i');
+  if (펜) 펜.style.transform = `scaleX(${ease((t - 250) / 450)})`;
+  /* D-day 딱지 — 튀어나옴(넘침) + 살짝 흔들 */
+  const pd = clamp((t - 350) / 420);
+  const 넘침 = pd < 1 ? 1 + 0.25 * Math.sin(pd * Math.PI) : 1;
+  const dd = $('s1dday');
+  dd.style.opacity = pd > 0 ? 1 : 0;
+  dd.style.transform = `scale(${ease(pd) * 넘침}) rotate(${-10 + 4 * Math.sin(t / 260)}deg)`;
+  if (D.사진) $('s1img').style.transform = `scale(${1.04 + 0.10 * clamp(t / T.s1[1])})`;
+  /* 흐린 사진 바탕은 소개 장면까지 남깁니다 */
+  const 사진끝 = T.s2[1] > 0 ? T.s2[1] : T.s1[1];
+  $('credit').style.opacity = D.사진 && t <= 사진끝 ? 1 : 0;
+  $('bgphoto').style.opacity = D.사진 ? (t < (T.s2[1] > 0 ? T.s2[1] : T.s1[1]) ? 1 : Math.max(0, 1 - (t - (T.s2[1] > 0 ? T.s2[1] : T.s1[1])) / 400)) : 0;
+
+  /* 2 · 기관 소개 */
+  const s2 = $('s2'); s2.style.opacity = sceneAlpha(t, T.s2);
+  const p2 = $('p2'); p2.style.top = Math.max(400, 900 - p2.offsetHeight / 2) + 'px'; const e2 = ease((t - T.s2[0]) / 520);
+  p2.style.transform = `translateY(${(1 - e2) * 120}px)`;
+  drawFrame($('f2'), t, T.s2[0] + 120);
+  staggered.s2.forEach((el, i) => slideUp(el, t, T.s2[0] + 260 + i * 110, 40, 460));
+  counters.forEach(([el, end, st]) => {
+    const p = ease((t - st) / 900);
+    el.textContent = Math.round(end * p).toLocaleString('ko-KR');
+  });
+
+  /* 3 · 공고 내용 */
+  const s3 = $('s3'); s3.style.opacity = sceneAlpha(t, T.s3);
+  const p3 = $('p3'); p3.style.top = Math.max(400, 900 - p3.offsetHeight / 2) + 'px'; const e3 = ease((t - T.s3[0]) / 520);
+  p3.style.transform = `translateX(${(1 - e3) * 140}px)`;
+  drawFrame($('f3'), t, T.s3[0] + 120);
+  staggered.s3.forEach((el, i) => slideUp(el, t, T.s3[0] + 240 + i * 150, 40, 460));
+
+  /* 4 · 마무리 */
+  const s4 = $('s4'); s4.style.opacity = sceneAlpha(t, T.s4);
+  const big = $('s4big'); const pb = ease((t - T.s4[0]) / 600);
+  big.style.opacity = pb; big.style.transform = `scale(${0.85 + 0.15 * pb})`; big.style.transformOrigin = '0 100%';
+  slideUp($('s4when'), t, T.s4[0] + 250);
+  slideUp(document.querySelector('#s4 .cta'), t, T.s4[0] + 450, 80);
+  const pulse = t > T.s4[0] + 1200 ? 1 + 0.035 * Math.sin((t - T.s4[0] - 1200) / 180) : 1;
+  $('s4go').style.transform = `scale(${pulse})`;
+};
+</script>
+</body>
+</html>
