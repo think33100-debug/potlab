@@ -1,3 +1,5 @@
+import { 약관글 } from './terms-text';
+
 /* 가입할 때 받는 동의 묶음입니다.
 
    판(version)을 올리면 이미 동의한 분들께 다시 받아야 합니다.
@@ -34,7 +36,19 @@
      확실하지 않은 칸은 [확인 필요] 로 남겼습니다 (지어내지 않습니다).
    ★ 이 판으로 새로 가입하는 분은 약관동의 표에 판 '2026-11-10' 으로 남습니다.
      이미 동의한 분들의 줄(판 '2026-10-01')은 그대로 둡니다. */
-export const TERMS_VERSION = '2026-11-10';
+export const TERMS_VERSION = '2026-11-23';
+
+/* ★ 2026-11-16 세중님 「확정」 — 약관 다섯 문서 확정본 (금고 RAPO노트/약관/최종본_1116 · 공고 11/16 · 시행 11/23).
+   글은 lib/terms-text.ts (금고의 글에서 만든 파일 — 손으로 고치지 않음).
+   옛 판(2026-11-10)은 「…-1110」 열쇠로 그대로 남깁니다 — 처리방침이 「이전 버전을 열람할 수 있도록」 약속했습니다.
+   시행 뒤 첫 로그인 때 다시 동의를 받습니다(components/terms-reconsent.tsx · 약관 부칙 ②). */
+export const 공고일말 = '2026년 11월 16일';
+export const 시행일말 = '2026년 11월 23일';
+/** 새 약관 시행 시각 — 2026-11-23 00:00 KST */
+export const 새약관시행시각 = Date.parse('2026-11-22T15:00:00Z');
+export function 새약관시행됐나(지금: number = Date.now()): boolean {
+  return 지금 >= 새약관시행시각;
+}
 
 /* 「초안입니다」 띠는 **시행일 앞까지만** 보입니다 (세중님 2026-11-02).
    2026-11-10 00:00 (한국시각) = 2026-11-09 15:00 UTC — 한국은 UTC+9 이고
@@ -46,11 +60,21 @@ export function 초안띠보이나(지금: number = Date.now()): boolean {
   return 지금 < TERMS_EFFECTIVE_AT;
 }
 
-export type TermKey = 'service' | 'privacy' | 'community';
+export type TermKey = 'service' | 'recruiter' | 'edu' | 'community' | 'privacy' | 'service-1110' | 'privacy-1110' | 'community-1110';
 
-export const TERMS: Record<TermKey, { title: string; draft: boolean; body: string }> = {
-  service: {
-    title: '이용약관',
+type 약관 = { title: string; draft: boolean; body: string; ver: string; lead?: string; 옛판?: TermKey; 새판?: TermKey };
+
+export const TERMS: Record<TermKey, 약관> = {
+  service: { title: '개인회원 이용약관', draft: false, ver: '2026-11-23', lead: 약관글.service.lead, body: 약관글.service.body, 옛판: 'service-1110' },
+  recruiter: { title: '채용담당자 이용약관', draft: false, ver: '2026-11-23', lead: 약관글.recruiter.lead, body: 약관글.recruiter.body },
+  edu: { title: '교육담당자 이용약관', draft: false, ver: '2026-11-23', lead: 약관글.edu.lead, body: 약관글.edu.body },
+  community: { title: '커뮤니티 운영정책', draft: false, ver: '2026-11-23', lead: 약관글.community.lead, body: 약관글.community.body, 옛판: 'community-1110' },
+  privacy: { title: '개인정보처리방침', draft: false, ver: '2026-11-23', lead: 약관글.privacy.lead, body: 약관글.privacy.body, 옛판: 'privacy-1110' },
+
+  /* ── 옛 판 (2026-11-10 시행 · 11/22 까지 적용) — 글 그대로 ── */
+  'service-1110': {
+    title: '이용약관 (2026-11-10 판)',
+    ver: '2026-11-10', 새판: 'service',
     draft: true,
     body: `RAPO 는 작업치료사·물리치료사 채용공고를 모아 보여주고,
 치료사끼리 이야기할 자리를 제공합니다.
@@ -71,8 +95,9 @@ export const TERMS: Record<TermKey, { title: string; draft: boolean; body: strin
    다만 이미 올린 글과 댓글은 남을 수 있습니다 (지우고 탈퇴하실 수 있습니다).`,
   },
 
-  privacy: {
-    title: '개인정보 수집·이용 동의',
+  'privacy-1110': {
+    title: '개인정보 수집·이용 동의 (2026-11-10 판)',
+    ver: '2026-11-10', 새판: 'privacy',
     draft: true,
     body: `무엇을 받나요
 
@@ -191,8 +216,9 @@ export const TERMS: Record<TermKey, { title: string; draft: boolean; body: strin
 다만 로그인이 필요한 기능(글쓰기·댓글·찜)은 쓰실 수 없습니다.`,
   },
 
-  community: {
-    title: '커뮤니티 이용규칙',
+  'community-1110': {
+    title: '커뮤니티 이용규칙 (2026-11-10 판)',
+    ver: '2026-11-10', 새판: 'community',
     draft: false,
     body: `여기는 치료사끼리 편하게 이야기하는 곳입니다.
 다음 다섯 가지만 지켜 주세요.
@@ -215,12 +241,20 @@ export const TERMS: Record<TermKey, { title: string; draft: boolean; body: strin
 };
 
 /* 가입할 때 체크할 것들. 선택 항목은 required: false */
+/** 가입·다시 동의 화면에 같이 보이는 안내 — 탈퇴해도 남는 것 (약관 25조 · 처리방침 7항) */
+export const 탈퇴뒤남는것 = [
+  '탈퇴하면 계정과 글·댓글은 지워져요.',
+  '내가 남긴 후기(근무·교육 후기, 면접 후기·교육 후기·실습 게시판 글)와 임상가로 등록한 근무 기관·급여·연차·입사 당시 스펙은 누구 것인지 모르게 바꿔서 남아요.',
+  '탈퇴할 때 드리는 삭제 코드로 나중에 지워 달라고 할 수 있어요.',
+];
+
 export const AGREEMENTS: {
-  key: string; label: string; required: boolean; doc?: TermKey;
+  key: string; label: string; required: boolean; doc?: TermKey; lines?: string[];
 }[] = [
-  { key: 'age', label: '만 14세 이상입니다', required: true },
-  { key: 'service', label: '이용약관에 동의합니다', required: true, doc: 'service' },
+  /* 2026-11-16 세중님 확정 — 가입은 만 19세 이상 · 탈퇴해도 남는 것을 가입 때 알립니다 */
+  { key: 'age', label: '만 19세 이상입니다', required: true },
+  { key: 'service', label: '개인회원 이용약관에 동의합니다', required: true, doc: 'service', lines: 탈퇴뒤남는것 },
   { key: 'privacy', label: '개인정보 수집·이용에 동의합니다', required: true, doc: 'privacy' },
-  { key: 'community', label: '커뮤니티 이용규칙에 동의합니다', required: true, doc: 'community' },
+  { key: 'community', label: '커뮤니티 운영정책에 동의합니다', required: true, doc: 'community' },
   { key: 'notify', label: '채용공고 알림을 받겠습니다', required: false },
 ];

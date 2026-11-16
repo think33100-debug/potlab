@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Logo } from '@/components/logo';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
+import { KAKAO_CHANNEL } from '@/lib/contact';
 
 /* 테스트 기간 「회원 전용」 안내 (2026-11-11 세중님 결정 · 줄 A · 같은 날 밤 초대 코드 거둠).
 
@@ -72,7 +73,7 @@ export default async function Beta({
 
         <p className="mt-7 text-sm text-mute">
           궁금한 점은{' '}
-          <Link href="/contact" className="underline underline-offset-2">문의하기</Link>
+          <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" className="font-bold underline underline-offset-2">카카오톡으로 문의하기</a>
           로 남겨 주세요.
         </p>
       </div>

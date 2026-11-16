@@ -19,6 +19,8 @@ export type Me = {
   nickname_changes: number;
   /* 급여·스펙을 마친 시각. 비어 있으면 가입이 아직 안 끝났습니다 */
   survey_at: string | null;
+  /* 동의한 약관 판 (내프로필 창구가 같이 줍니다) — 새 약관 다시 동의 창이 봅니다 (components/terms-reconsent.tsx) */
+  terms_version?: string | null;
 };
 
 /* 가입 설문을 마쳤나. **세 값입니다** (2026-09-25).

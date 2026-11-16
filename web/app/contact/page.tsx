@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { InquiryForm } from '@/components/inquiry-form';
 import { RapoAppBar } from '@/components/rapo/rapo-me';
-import { HELP_EMAIL } from '@/lib/contact';
+import { HELP_EMAIL, KAKAO_CHANNEL } from '@/lib/contact';
 import { 문의폼_켰나 } from '@/lib/inquiry';
 import { 색인메타 } from '@/lib/seo';
 
@@ -44,8 +44,18 @@ export default function ContactPage() {
               궁금한 점이나 불편한 점을 알려 주세요. 평일에 확인하고 답을 드려요.
             </p>
           </div>
-          {/* 앱 안 문의 폼 — 글은 대한민국 서울에만 저장(머리 주석 ①). 끄는 스위치는 lib/inquiry.ts 그대로 */}
-          {문의폼_켰나 && <InquiryForm />}
+          {/* 2026-11-16 세중님 「문의하기는 카톡 채널로 오게」 — 카카오톡 채널을 맨 위 큰 단추로 (약관 26조 ③) */}
+          <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer"
+            className="rapo-type-t5-bold flex h-[52px] w-full items-center justify-center rounded-(--rapo-radius-r3) bg-[#FEE500] text-[#191919] md:max-w-[360px]">
+            카카오톡 채널로 문의하기
+          </a>
+          {/* 앱 안 문의 폼 — 개인정보·가림 요청처럼 기록이 필요한 요청용으로 남김(처리방침 3.2). 끄는 스위치는 lib/inquiry.ts 그대로 */}
+          {문의폼_켰나 && (
+            <details>
+              <summary className="rapo-type-t4-bold cursor-pointer text-(color:--rapo-color-fg-neutral-muted)">앱 안에서 글로 남기기 (개인정보·게시물 가림 요청)</summary>
+              <div className="mt-(--rapo-dimension-x3)"><InquiryForm /></div>
+            </details>
+          )}
         </section>
 
         {/* 메일로 — 비회원·가입 전에도 쓸 수 있는 길 (원본 T05 의 메일 안내를 아래로) */}

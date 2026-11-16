@@ -52,9 +52,17 @@ export default function AdminPartners() {
   const 정하기 = async (q: 신청, 새상태: string, 까닭?: string) => {
     if (!confirm(`${q.닉네임} 님의 신청을 「${새상태}」 로 합니다.`)) return;
     set도는중(true);
-    const { error } = await browserSupabase().rpc('admin_담당자정하기', {
+    const sb = browserSupabase();
+    const { data, error } = await sb.rpc('admin_담당자정하기', {
       p_자격id: q.id, p_상태: 새상태, p_까닭: 까닭 ?? null,
     });
+    /* 2026-11-16 약관 확정 — 승인·반려로 확인이 끝나면 서류를 바로 파기합니다.
+       창구가 표에 지운때를 적고 경로를 돌려주면, 여기서 저장소(proofs)의 파일을 지웁니다 (SQL 로는 못 지웁니다 · admin/verify 와 같은 길) */
+    const 지울 = ((data as { 지울경로?: string[] } | null)?.지울경로 ?? []).filter(Boolean);
+    if (!error && 지울.length > 0) {
+      const { error: 탈1 } = await sb.storage.from('proofs').remove(지울);
+      if (탈1) set탈(`상태는 바꿨지만 서류 파일 ${지울.length}개를 못 지웠어요 — ${탈1.message}`);
+    }
     set도는중(false);
     if (error) { set탈(error.message); return; }
     읽기();

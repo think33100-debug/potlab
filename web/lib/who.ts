@@ -41,7 +41,8 @@ export type Author = {
  *  탈퇴한 분은 「찾을 수 없는 회원」, 줄 자체가 없으면 「알 수 없음」입니다 */
 export function shownName(p: Author): string {
   if (!p) return '알 수 없음';
-  if (p.erased_at) return '찾을 수 없는 회원';
+  /* 2026-11-16 약관 확정 — 탈퇴해도 후기는 남고 작성자 칸이 비워집니다(보기의 profiles 가 닉네임 없는 꼴로 옵니다) */
+  if (p.erased_at || !p.nickname) return '찾을 수 없는 회원';
   return p.nickname;
 }
 

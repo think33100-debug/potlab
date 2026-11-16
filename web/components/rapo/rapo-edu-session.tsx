@@ -9,6 +9,7 @@ import { RapoAppBar } from '@/components/rapo/rapo-me';
 import { RapoButton } from '@/components/rapo/rapo-ui';
 import { setAfterLogin } from '@/lib/after-login';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { TERMS_VERSION } from '@/lib/terms';
 
 /* 교육 회차 한 건 — 피그마 「13 · 교육 과정과 회차 신청」 U13 (2026-11-15 세중님 「피그마댓글 대로」).
    원본: 회차 상세 1447:17478 · 신청 완료/입금 확인 중 1447:17608 · 참여 확정 1416:32228 · 후기 작성 가능 1416:32243 · 무료 회차 1416:32350.
@@ -57,6 +58,7 @@ export function EduSessionView({ 견본 }: { 견본?: { s: 회차; 리뷰들: �
   const [탈, set탈] = useState<string | null>(null);
   const [다시, set다시] = useState(0);
   const [확인, set확인] = useState(false);
+  const [제공동의, set제공동의] = useState(false);
   const [쓰기, set쓰기] = useState(false);
   const [별점, set별점] = useState(0);
   const [리뷰글, set리뷰글] = useState('');
@@ -232,8 +234,21 @@ export function EduSessionView({ 견본 }: { 견본?: { s: 회차; 리뷰들: �
               {유료 ? `수강료 ${돈(s.수강료)} · 신청하면 입금 안내가 보이고, 담당자가 입금을 확인하면 참여가 확정돼요.` : '무료 교육이에요. 담당자가 신청을 확인하면 참여가 확정돼요.'}
             </p>
             {s.환불규정 && 유료 && <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">환불 규정 · {s.환불규정.split('\n')[0]}</p>}
-            <RapoButton full tone="deep-coral" disabled={busy}
-              onClick={async () => { if (await 부르기('교육신청하기', { p_회차: s.회차id })) set확인(false); }}>{busy ? '신청하는 중…' : '신청하기'}</RapoButton>
+            {/* 2026-11-16 약관 확정 — 수강 계약은 회원과 교육담당자 사이 · 담당자에게 닉네임과 신청 상태가 보임(처리방침 8항 · 신청 화면에서 동의) */}
+            <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">
+              이 교육은 {s.주최 ?? '교육담당자'}가 열어요. 수강 계약과 환불은 교육담당자와 직접 하고, 라포는 수강료를 받지 않아요.
+            </p>
+            <label className="flex cursor-pointer items-start gap-(--rapo-dimension-x2)">
+              <input type="checkbox" checked={제공동의} onChange={(e) => set제공동의(e.target.checked)} className="mt-[2px] size-[18px] shrink-0" />
+              <span className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral)">
+                신청을 받기 위해 교육담당자에게 내 닉네임과 신청·입금 확인 상태가 보여요. 교육이 끝난 뒤 1년까지 보관해요. (필수)
+              </span>
+            </label>
+            <RapoButton full tone="deep-coral" disabled={busy || !제공동의}
+              onClick={async () => {
+                await browserSupabase().rpc('동의남기기', { p_판: TERMS_VERSION, p_문서들: { edu_provide: true } });
+                if (await 부르기('교육신청하기', { p_회차: s.회차id })) set확인(false);
+              }}>{busy ? '신청하는 중…' : '동의하고 신청하기'}</RapoButton>
             <button type="button" onClick={() => set확인(false)} className="rapo-type-t5-medium py-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral)">취소</button>
             <p className="rapo-type-t3-regular text-center text-(color:--rapo-color-fg-neutral-muted)"><Link href="/me/edu" className="underline underline-offset-2">내 교육 관리</Link>에서 신청한 회차를 다시 볼 수 있어요.</p>
           </div>

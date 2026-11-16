@@ -156,7 +156,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           <div className="mt-[16px] flex items-center gap-[10px]">
             <Avatar value={p.profiles?.avatar} size="c32" />
             <div>
-              <p className="text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{shownName(p.profiles)}</p>
+              <p className="text-[14px] font-bold leading-[20px]" style={{ color: 어둠.글 }}>{shownName(p.profiles)}{p.운영진 ? ' · 운영진' : ''}</p>
               <p className="text-[12px] leading-[17px]" style={{ color: 어둠.흐린글 }}>{지난때(p.created_at)}</p>
             </div>
           </div>

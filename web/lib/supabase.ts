@@ -199,6 +199,8 @@ export type PostRow = {
   거래상태?: string | null;
   /* 글 태그 — 3개까지 · # 없이 담습니다 (2026-11-12 세중님 「그냥 열어」 · 금고 SQL_1113/U) */
   태그?: string[] | null;
+  /* 운영진이 쓴 글 (2026-11-16 · 보기 공개글.운영진) */
+  운영진?: boolean;
 };
 
 /* 목록에서는 본문을 통째로 안 받습니다. 사진도 썸네일 경로만 받습니다.
@@ -222,7 +224,7 @@ export const POST_LIST_COLS =
 
 export const POST_ONE_COLS =
   'id,channel,title,body,comment_count,like_count,view_count,created_at,edited_at,'
-  + '내글,profiles,태그';
+  + '내글,profiles,태그,운영진';
 
 export type CommentRow = {
   id: number;
@@ -234,6 +236,7 @@ export type CommentRow = {
   body: string | null;
   비밀?: boolean | null;
   글쓴이?: boolean | null;
+  운영진?: boolean | null;
   created_at: string;
   profiles: { nickname: string; avatar: string | null; erased_at: string | null } | null;
 };
