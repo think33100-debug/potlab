@@ -23,13 +23,17 @@ import { RapoButton } from './rapo-ui';
 
 
 type 설치신호 = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> };
-export type 설치갈래 = 'prompt' | 'mac-safari' | 'ios';
+/* 2026-11-16 — 갤럭시에서 안 뜬다는 제보(카톡으로 받은 링크 → 카카오톡 안 브라우저는 설치 신호가 없어 아무것도 안 그렸음).
+   신호가 없는 안드로이드·앱 안 브라우저도 안내는 띄웁니다: 'inapp' 다른 브라우저로 열기 · 'android' 메뉴의 「홈 화면에 추가」 */
+export type 설치갈래 = 'prompt' | 'mac-safari' | 'ios' | 'inapp' | 'android';
 
 function 갈래읽기(): 설치갈래 | null {
   const ua = navigator.userAgent;
   if ((window as unknown as { __rapoInstall?: 설치신호 }).__rapoInstall) return 'prompt';
   if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+  if (/KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\//i.test(ua)) return 'inapp';
   if (/Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|Edg|Firefox/.test(ua)) return 'mac-safari';
+  if (/Android/.test(ua)) return 'android';
   return null;
 }
 const 앱창인가 = () => window.matchMedia?.('(display-mode: standalone)').matches
@@ -39,7 +43,8 @@ const 앱창인가 = () => window.matchMedia?.('(display-mode: standalone)').mat
 export function RapoInstallToast() {
   const [갈래, set갈래] = useState<설치갈래 | null>(null);
   /* 공고 상세는 아래에 저장·지원 단추 줄(112)이 있어 그 위로 올립니다. 나머지 화면은 하단 탐색(72) 위 */
-  const 아래 = /^\/jobs\/[^/]+$/.test(usePathname() ?? '') ? 124 : 84;
+  const 경로 = usePathname() ?? '';
+  const 아래 = /^\/jobs\/[^/]+$/.test(경로) ? 124 : 84;
   useEffect(() => {
     let 표식 = false;
     try { 표식 = localStorage.getItem(설치안내표식) === '1' && !localStorage.getItem(설치안내끝); } catch { /* 사생활 보호 창 */ }
@@ -64,9 +69,10 @@ export function RapoInstallToast() {
     닫기();
   };
 
-  if (!갈래) return null;
+  /* 설치 방법 화면에서는 겹쳐 띄우지 않습니다 */
+  if (!갈래 || 경로.startsWith('/me/install')) return null;
   /* 휴대폰(안드로이드 크롬 포함)은 「바탕화면」이 아니라 「홈 화면」 */
-  const 폰 = 갈래 === 'ios' || /Android|Mobi/.test(navigator.userAgent);
+  const 폰 = 갈래 === 'ios' || 갈래 === 'inapp' || 갈래 === 'android' || /Android|Mobi/.test(navigator.userAgent);
   return <RapoInstallToastFace 갈래={갈래} 폰={폰} 아래={아래} onInstall={설치} onClose={닫기} />;
 }
 
@@ -95,6 +101,8 @@ export function RapoInstallToastFace({ 갈래, 폰 = 갈래 === 'ios', 아래 = 
               {갈래 === 'prompt' ? '설치하면 앱처럼 아이콘 하나로 바로 열 수 있어요.'
                 /* 「…」 안의 메뉴 이름은 한 줄로 — 「홈 / 화면에 추가」처럼 갈리지 않게(화면표시 규칙 1) */
                 : 갈래 === 'mac-safari' ? <>사파리 위 메뉴의 <span className="whitespace-nowrap">「파일 → Dock에 추가」</span>를 누르면 앱처럼 열 수 있어요.</>
+                : 갈래 === 'inapp' ? <>카카오톡 같은 앱 안에서는 설치가 안 돼요. 메뉴(⋮)의 <span className="whitespace-nowrap">「다른 브라우저로 열기」</span>로 크롬이나 삼성 인터넷에서 열어 주세요.</>
+                : 갈래 === 'android' ? <>브라우저 메뉴(⋮ 또는 ☰)에서 <span className="whitespace-nowrap">「홈 화면에 추가」</span>를 누르면 앱처럼 열 수 있어요.</>
                 : <>아래 공유 단추를 누르고 <span className="whitespace-nowrap">「홈 화면에 추가」</span>를 고르면 앱처럼 열 수 있어요.</>}
             </p>
           </div>
@@ -115,6 +123,11 @@ export function RapoInstallToastFace({ 갈래, 폰 = 갈래 === 'ios', 아래 = 
           <div className="flex gap-(--rapo-dimension-x2)">
             <RapoButton tone="outline" onClick={onClose} className="w-[104px] shrink-0">나중에</RapoButton>
             <RapoButton onClick={onInstall} className="min-w-0 flex-1">설치하기</RapoButton>
+          </div>
+        ) : 갈래 === 'inapp' || 갈래 === 'android' ? (
+          <div className="flex gap-(--rapo-dimension-x2)">
+            <RapoButton tone="outline" onClick={onClose} className="w-[104px] shrink-0">닫기</RapoButton>
+            <RapoButton href="/me/install" className="min-w-0 flex-1">설치 방법 보기</RapoButton>
           </div>
         ) : (
           <RapoButton tone="outline" onClick={onClose} full>알겠어요</RapoButton>
