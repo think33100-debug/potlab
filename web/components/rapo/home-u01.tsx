@@ -297,10 +297,13 @@ export function RapoServiceGrid() {
                   {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
                   <img src={s.art.src} alt="" width={s.art.w} height={s.art.w} className="absolute max-w-none" style={{ left: s.art.l, top: s.art.t }} />
                 </span>
-                <span className="rapo-type-t4-medium min-w-0 flex-1 break-keep text-(color:--rapo-brand-color-navy)">{s.label}</span>
-                {/* 320 폭에서는 셰브런을 접습니다 — 「봉사 / 활동」처럼 말 가운데가 갈렸습니다 (2026-11-14) */}
+                {/* 2026-11-16 세중님 테스터 점검 — 툴킷 화면(바깥 회색 틀 안이라 칸이 더 좁음)에서 「공시 병원 급여」·「입사 스펙 비교」가
+                    375 폭에 두 줄이 됐습니다. 400 폭 아래에서는 셰브런(12+8)을 접어 글자 자리를 넓히고(360·375·390 한 줄),
+                    360 아래(320·344)에서는 글자를 한 단계(t3) 줄입니다(화면표시 규칙 1 · 그래도 넘치면 낱말 사이에서만 나뉨 — break-keep) */}
+                <span className="rapo-type-t4-medium min-w-0 flex-1 break-keep text-(color:--rapo-brand-color-navy) max-[359px]:text-(length:--rapo-font-size-t3)">{s.label}</span>
+                {/* 320 폭에서는 셰브런을 접습니다 — 「봉사 / 활동」처럼 말 가운데가 갈렸습니다 (2026-11-14 · 11/16 에 400 아래로 넓힘) */}
                 {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-                <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0 max-[359px]:hidden" />
+                <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0 max-[399px]:hidden" />
               </Link>
             </li>
           ))}

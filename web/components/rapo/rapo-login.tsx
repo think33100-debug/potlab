@@ -51,13 +51,15 @@ function useLoginPhotoSeconds(): number {
   return 초;
 }
 
-/* 사진 세 장 — 훅을 쓰므로 영어 이름 조각으로 둡니다 */
+/* 사진 세 장 — 훅을 쓰므로 영어 이름 조각으로 둡니다.
+   첫 장은 먼저 받습니다(fetchPriority high) — 미리 받기 줄은 app/login/layout.tsx (2026-11-16 · 사진이 1~2초 늦게 뜸) */
 function LoginPhotos() {
   const 초 = useLoginPhotoSeconds();
   return (
     <>
       {사진자리.map((p, i) => (
         <Image key={i} src="/rapo/login/photo-colleagues.webp" alt="" width={2172} height={2896} loading="eager" unoptimized
+          fetchPriority={i === 0 ? 'high' : 'auto'}
           className={'rapo-login-photo absolute max-w-none' + (i === 0 ? ' rapo-login-photo-first' : '')}
           style={{ width: '222.97%', height: 'auto', left: p.left, top: p.top,
             /* 한 바퀴 = 3장 × 초 · 첫 장이 처음부터 보이게 바뀜 구간(한 바퀴의 7%)만큼 당겨 시작 */

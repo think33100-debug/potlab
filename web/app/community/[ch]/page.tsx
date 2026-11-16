@@ -13,6 +13,13 @@ import { serverSupabase } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
+/* 탭 제목 — 방 이름 (2026-11-16 · 기본값 「RAPO · 채용공고」가 보였습니다) */
+export async function generateMetadata({ params }: { params: Promise<{ ch: string }> }) {
+  const { ch } = await params;
+  const room = CHANNEL_BY_ID[ch];
+  return { title: (room ? room.name + ' · 커뮤니티' : '커뮤니티') + ' · RAPO' };
+}
+
 export default async function ChannelPage({
   params, searchParams,
 }: {
