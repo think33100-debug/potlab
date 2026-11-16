@@ -81,9 +81,10 @@ function Body() {
           );
         })}
         {값들.includes('기타') && 기타인가(지금) && (
-          <input value={기타글(지금)} onChange={(e) => 바꿈(기타머리 + e.target.value.slice(0, 기타글최대))}
+          /* 두 줄 칸 — 긴 답이 칸 밖으로 잘리지 않고 낱말 사이에서 줄을 바꿉니다 (11/16 세중님 「문단 이상하게 안 끊기게」). 엔터는 띄어쓰기로 */
+          <textarea rows={2} value={기타글(지금)} onChange={(e) => 바꿈(기타머리 + e.target.value.replace(/\s*\n\s*/g, ' ').slice(0, 기타글최대))}
             aria-label={`${제목} — 기타 직접 입력`} placeholder="직접 적어 주세요 (예: 격주로 토요일)" autoFocus
-            className="h-[48px] w-full rounded-[8px] px-[14px] text-[15px] outline-none placeholder:text-[#8ea3b1]"
+            className="w-full resize-none break-keep rounded-[8px] px-[14px] py-[12px] text-[15px] leading-[21px] outline-none placeholder:text-[#8ea3b1]"
             style={{ background: 어둠.면, color: 어둠.글 }} />
         )}
       </div>

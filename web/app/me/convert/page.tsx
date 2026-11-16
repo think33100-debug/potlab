@@ -297,9 +297,10 @@ function 셋({ 제목, 값들, 지금, on }: { 제목: string; 값들: readonly 
           );
         })}
         {값들.includes('기타') && 기타인가(지금) && (
-          <input value={기타글(지금)} onChange={(e) => on(기타머리 + e.target.value.slice(0, 기타글최대))}
+          /* 두 줄 칸 — 긴 답이 잘리지 않고 낱말 사이에서 줄을 바꿉니다 · 엔터는 띄어쓰기로 */
+          <textarea rows={2} value={기타글(지금)} onChange={(e) => on(기타머리 + e.target.value.replace(/\s*\n\s*/g, ' ').slice(0, 기타글최대))}
             aria-label={`${제목} — 기타 직접 입력`} placeholder="직접 적어 주세요 (예: 격주로 토요일)" autoFocus
-            className="rapo-type-t5-regular h-(--rapo-dimension-x13) w-full rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) placeholder:text-(color:--rapo-color-fg-placeholder)" />
+            className="rapo-type-t5-regular w-full resize-none break-keep py-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) placeholder:text-(color:--rapo-color-fg-placeholder)" />
         )}
       </div>
     </fieldset>
