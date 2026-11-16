@@ -18,6 +18,7 @@ echo "── 4. 마른 실행 (만들기만 · 메일 안 보냄)"
 cd ../..
 node tools/reels/run.mjs --최대 1
 echo
-echo "끝. 메일 한 통 시험:  node tools/reels/run.mjs --메일 --최대 1"
+echo "끝. 드라이브 열쇠(처음 한 번):  node tools/reels/drive.mjs --인증  →  node tools/reels/drive.mjs --시험"
+echo "    메일 한 통 시험:  node tools/reels/run.mjs --메일 --최대 1"
 echo "크론 줄 (crontab -e 에 붙여 넣기):"
 echo "*/30 8-21 * * * mkdir -p ~/lock && flock -n ~/lock/reels.lock bash -c 'cd ~/potlab && node tools/reels/run.mjs --메일 --최대 2' >> ~/potlab/log/reels.log 2>&1"
