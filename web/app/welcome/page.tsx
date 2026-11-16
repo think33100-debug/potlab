@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { CompareNotify } from '@/components/compare-notify';
 import { SignupSurvey } from '@/components/signup-survey';
-import { 비교알림켜짐, 연락처꼴, 연봉구간 } from '@/lib/beta-compare';
+import { 비교알림켜짐 } from '@/lib/beta-compare';
 import { defaultAvatar } from '@/lib/avatar';
 import { BETA_AGREEMENTS, 표없음 } from '@/lib/beta';
 import { RapoButton } from '@/components/rapo/rapo-ui';
@@ -46,14 +46,7 @@ import { useToast } from '../toast';
    역할 값(profiles.role)은 그대로 「학생 / 현직」입니다 — 경험 없음 = 학생 · 경험 있음 = 현직 (커뮤니티 방이 이 값을 봅니다).
    스펙은 ⑥(경험 있음은 ⑦)에서 save_my_survey 한 번으로 담습니다. 두 번 부르면 두 번째가 「1년 2번 고치기」로 세어집니다. */
 
-/* ★ 2026-11-17 세중님 「회원가입 잠깐 간소화 — 근무 기관·연봉·병원 후기·API 마켓 쓰는 것은 모두 잠깐 빼고 가입 잘 받고 알림 받게.
-   학생도 여러 정보 받는 거 최대한 줄이고 대신 출시 알람 잘 뜨게」.
-   켜 두면 ① 동의 → ② 직군·근무 경험 → ③ 닉네임 → ④ 출시 알림 → 끝 입니다. 학력·스펙·희망·관심·급여 단계는 그리지 않고
-   (코드는 남겨 둡니다 — false 로 돌리면 11/16 흐름 그대로), 스펙은 비운 채 save_my_survey 한 번으로 가입을 마칩니다.
-   비워 마친 분은 나중에 내 정보 → 스펙에서 처음 채울 때 「1년 2번 고치기」 한 번이 세어집니다(함수 규칙 그대로) */
-const 간소화 = true;
-
-type 단계 = '동의' | '내정보' | '닉네임' | '학교' | '스펙' | '희망' | '관심' | '급여' | '알림' | '끝';
+type 단계 = '동의' | '내정보' | '닉네임' | '학교' | '스펙' | '희망' | '관심' | '급여' | '끝';
 type 경험 = '없음' | '있음';
 
 /* 학점은 선택 (2026-11-15 세중님 「학점은 선택 · 기입하면 가입한 사람들과 비교」) · 만점 기준은 4.5/4.0 고르기 (같은 날 「보통 4.5 인데 4.0 도 있어」) — 칸은 components/rapo/rapo-spec-form 의 학점칸 */
@@ -101,9 +94,6 @@ export default function Welcome() {
   const [병원화면, set병원화면] = useState<'찾기' | '직접' | null>(null);
   const [연월열림, set연월열림] = useState(false);
   const [나가기, set나가기] = useState(false);
-  /* ④ 출시 알림 (간소화 · 2026-11-17) — 받을 이메일 · 신청 결과 글 */
-  const [알림메일, set알림메일] = useState<string | null>(null);
-  const [알림끝말, set알림끝말] = useState<string | null>(null);
 
   useEffect(() => { if (session) setD(초안읽기(session.user.id)); }, [session]);
   /* 가입 줄이 생긴 뒤 ②③으로 돌아왔을 때 — 이미 고른 직군·닉네임을 채워 둡니다 (2026-11-15 세중님 「2-3으로도 돌아갈 수 있게」) */
@@ -126,23 +116,10 @@ export default function Welcome() {
   const 경험값: 경험 | null = exp ?? (me?.role === '현직' ? '있음' : me?.role === '학생' ? '없음' : null);
   const 있음 = 경험값 === '있음';
   /* 학생·취준생은 「관심」 한 장 더 (성인/소아 · 관심 분야 · 듣고 싶은 교육 · 2026-11-15 세중님) */
-  const 순서: 단계[] = 간소화 ? ['동의', '내정보', '닉네임', '알림']
-    : ['동의', '내정보', '닉네임', '학교', '스펙', '희망', ...(있음 ? ['급여' as const] : ['관심' as const])];
-  const 닉네임다음: 단계 = 간소화 ? '알림' : '학교';
-  const resume: 단계 = !me ? '동의' : (me.job_group && me.role) ? 닉네임다음 : '내정보';
+  const 순서: 단계[] = ['동의', '내정보', '닉네임', '학교', '스펙', '희망', ...(있음 ? ['급여' as const] : ['관심' as const])];
+  const resume: 단계 = !me ? '동의' : (me.job_group && me.role) ? '학교' : '내정보';
   const step = stepPick ?? resume;
   const go = (s: 단계) => { setStepPick(s); setSaveErr(null); window.scrollTo(0, 0); };
-
-  /* ④ 출시 알림 화면을 「본 것」 — 비교알림창 표에 한 줄 (보고서 「가입 N명 중 본 M명 중 신청 K명」 · components/compare-notify.tsx 와 같은 표) */
-  const 알림봄 = useRef(false);
-  const uid = session?.user.id;
-  useEffect(() => {
-    if (step !== '알림' || !uid || 알림봄.current) return;
-    알림봄.current = true;
-    browserSupabase().from('비교알림창').insert({ 사람: uid }).then(({ error }) => {
-      if (error && error.code !== '23505' && !표없음(error)) console.error('[RAPO] 출시 알림 화면을 본 기록을 못 남겼습니다 ·', error.code, error.message);
-    });
-  }, [step, uid]);
 
   useEffect(() => {
     if (loading) return;
@@ -206,7 +183,7 @@ export default function Welcome() {
         await reload();
       }
       setBusy(false);
-      go(닉네임다음);
+      go('학교');
       return;
     }
     const { error } = await sb.rpc('가입하기', {
@@ -234,7 +211,7 @@ export default function Welcome() {
     setJustMade(true);
     await reload();
     setBusy(false);
-    go(닉네임다음);
+    go('학교');
   };
 
   /* ── ④ 학력·학점 ── */
@@ -300,35 +277,6 @@ export default function Welcome() {
     go('끝');
   };
 
-  /* ── ④ 출시 알림 (간소화) — 신청은 lib/beta-compare 의 「비교알림신청」 표 그대로(새 SQL 없음).
-     연봉은 묻지 않습니다 — 칸이 비면 안 되는 표라 「가입 때 묻지 않음」(학생은 「아직 없어요」)을 적습니다.
-     신청하든 넘기든 끝에 스펙을 비운 채 save_my_survey 한 번 — 그래야 가입을 마친 사람(survey_at)이 됩니다 */
-  const 메일 = 알림메일 ?? session.user.email ?? '';
-  const 가입마치기 = async (신청: boolean) => {
-    setBusy(true); setSaveErr(null); window.scrollTo(0, 0);
-    const sb = browserSupabase();
-    if (신청) {
-      if (!연락처꼴(메일)) { setBusy(false); setSaveErr('알림 받을 이메일을 적어 주세요'); return; }
-      const 직군 = job ?? (me?.job_group as JobGroup | undefined) ?? null;
-      const r = 직군 ? await sb.from('비교알림신청').insert({
-        사람: session.user.id, 연락처: 메일.trim(), 직군, 연봉구간: 있음 ? '가입 때 묻지 않음' : 연봉구간[연봉구간.length - 1],
-      }) : null;
-      if (r?.error && r.error.code !== '23505' && !표없음(r.error)) {
-        setBusy(false); setSaveErr(`알림 신청을 저장하지 못했어요 — ${r.error.message}`); return;
-      }
-      set알림끝말(r?.error && 표없음(r.error) ? '지금은 알림 신청을 받지 못했어요. 열리기 전에 다시 여쭤볼게요.' : '알림 신청이 됐어요. 열리면 가장 먼저 알려 드릴게요.');
-    }
-    if (!me?.survey_at) {
-      const { error } = await sb.rpc('save_my_survey', { p_salary: null, p_spec: null, p_langs: null });
-      if (error) { setBusy(false); setSaveErr(`오류 내용: ${error.message}`); return; }
-    }
-    try { localStorage.removeItem(초안열쇠(session.user.id)); } catch { /* 없어도 그만 */ }
-    setJustMade(true);
-    await reload();
-    setBusy(false);
-    go('끝');
-  };
-
   const 가입끝 = async () => {
     await reload();
     설치안내남기기();
@@ -340,7 +288,7 @@ export default function Welcome() {
   /* ── 그리기 ── 피그마 07 B 화면을 하나씩 맞춤 (2026-11-16) — 본문 여백 24 · 진행 표시 → 제목 20 · 아래 고정 단추 위아래 24 */
   const 단계이름: Record<단계, string> = {
     동의: '이용 동의', 내정보: '내 정보', 닉네임: '닉네임', 학교: '학력·학점',
-    스펙: '자격·교육·실습', 희망: '희망 취업 조건', 관심: '관심 분야', 급여: '급여 정보 (선택)', 알림: '출시 알림', 끝: '',
+    스펙: '자격·교육·실습', 희망: '희망 취업 조건', 관심: '관심 분야', 급여: '급여 정보 (선택)', 끝: '',
   };
   const n = 순서.indexOf(step) + 1;
   /* 줄은 피그마 글상자 그대로 나눕니다 — 좁은 폰(320)에서는 break-keep 이 낱말 단위로 더 나눕니다 */
@@ -353,7 +301,6 @@ export default function Welcome() {
     희망: '어디로 가고 싶으세요?',
     관심: <>어떤 분야에<br />관심 있으세요?</>,
     급여: 급여입력 ? null : <>내 급여,<br />어느 정도일까요?</>,
-    알림: <>새 기능이 열리면<br />가장 먼저 알려 드릴게요</>,
   };
   const 설명: Partial<Record<단계, React.ReactNode>> = {
     학교: 있음 ? '현재 또는 가장 최근에 근무한 병원 한 곳을 기준으로 입력해 주세요.'
@@ -363,7 +310,6 @@ export default function Welcome() {
     희망: '희망 지역과 기관 유형에 맞는 공고를 먼저 보여드려요.',
     관심: '관심에 맞는 교육·공고 소식을 먼저 알려드려요.',
     급여: 급여입력 ? undefined : '급여를 입력하면 내 위치와 다른 근무 조건의 급여 차이를 확인할 수 있어요.',
-    알림: '지금은 공고와 커뮤니티부터 열었어요. 준비 중인 기능이 열리는 날 이메일로 한 번 알려 드려요.',
   };
 
   const 다시하기 = async () => {
@@ -398,13 +344,6 @@ export default function Welcome() {
     : step === '스펙' ? <RapoButton onClick={() => go('희망')} disabled={!스펙됨} full>다음</RapoButton>
     : step === '희망' ? <RapoButton onClick={() => go(있음 ? '급여' : '관심')} disabled={!희망됨} full>다음</RapoButton>
     : step === '관심' ? <RapoButton onClick={스펙저장} disabled={!관심됨 || busy} full>가입 완료</RapoButton>
-    : step === '알림' ? (
-      <div className="flex flex-col gap-(--rapo-dimension-x3)">
-        <RapoButton onClick={() => void 가입마치기(true)} disabled={busy} full>알림 받고 가입 완료</RapoButton>
-        <button type="button" onClick={() => void 가입마치기(false)} disabled={busy}
-          className="rapo-type-t4-medium self-center py-(--rapo-dimension-x1) text-(color:--rapo-color-fg-neutral-muted)">알림 없이 가입 완료</button>
-      </div>
-    )
     : step === '끝' ? <RapoButton onClick={가입끝} full>{끝단추글}</RapoButton>
     : null;
 
@@ -450,7 +389,7 @@ export default function Welcome() {
   }
 
   /* ── 저장 중 — 1246:2267 (스펙 한 번에 담는 동안) ── */
-  if (busy && (step === '관심' || step === '급여' || step === '알림')) {
+  if (busy && (step === '관심' || step === '급여')) {
     return 틀(() => {}, (
       <section className="flex flex-col gap-(--rapo-dimension-x2)" role="status">
         <h1 className="rapo-type-t11-bold break-keep text-(color:--rapo-color-fg-neutral)">가입 정보를<br />저장하고 있어요</h1>
@@ -462,7 +401,7 @@ export default function Welcome() {
   }
 
   /* ── 저장 실패 — 1246:2205 (입력한 것은 이 기기 초안에 그대로 남습니다) ── */
-  if (saveErr && (step === '관심' || step === '급여') && !간소화) {
+  if (saveErr && (step === '관심' || step === '급여')) {
     return 틀(() => setSaveErr(null), (
       <section className="flex flex-col gap-(--rapo-dimension-x2)" role="alert">
         <느낌표 />
@@ -734,44 +673,13 @@ export default function Welcome() {
       )}
 
       {/* 완료 — 1245:4005 (경험 있음) · 4053 · 4075 / 학생 무료 이용 1495:5010 · 공개 범위 1495:5033 */}
-      {/* ④ 출시 알림 (간소화 · 2026-11-17 세중님 「출시 알람 잘 뜨게」) — 이메일만 받습니다. 직군은 ②에서 고른 값 */}
-      {step === '알림' && (
-        <section className="mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x5)">
-          <ul className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x4)">
-            {(있음
-              ? ['내 연봉이 같은 연차 중 어디쯤인지', '병원별 근무 후기와 연봉', '합격한 사람들의 스펙과 내 스펙 비교']
-              : ['합격한 사람들의 스펙과 내 스펙 비교', '병원별 근무 후기', '실습·취업 준비 정보']
-            ).map((t) => (
-              <li key={t} className="rapo-type-t5-medium flex gap-(--rapo-dimension-x2) break-keep text-(color:--rapo-color-fg-neutral)">
-                <span aria-hidden className="text-(color:--rapo-color-fg-brand)">✓</span><span>{t}</span>
-              </li>
-            ))}
-          </ul>
-          <label className="flex flex-col gap-(--rapo-dimension-x2)">
-            <span className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">알림 받을 이메일</span>
-            <input type="email" value={메일} onChange={(e) => { set알림메일(e.target.value); setSaveErr(null); }}
-              inputMode="email" autoComplete="email" placeholder="example@email.com" className={칸} />
-          </label>
-          {saveErr && <p role="alert" className="rapo-type-t4-medium break-all text-(color:--rapo-color-fg-critical)">{saveErr}</p>}
-          <p className="rapo-type-t2-regular break-keep text-(color:--rapo-color-fg-neutral-subtle)">
-            「알림 받고 가입 완료」를 누르면 이메일·직군을 알림 발송을 위해 1년간 보관하는 데 동의하는 것으로 봅니다(신청을 취소하면 바로 파기). 이 밖의 일에는 쓰지 않아요.
-          </p>
-        </section>
-      )}
-
       {step === '끝' && (
         <section className="flex flex-col gap-(--rapo-dimension-x5)">
           <h1 className="rapo-type-t11-bold text-(color:--rapo-color-fg-neutral)">가입이 완료됐어요</h1>
           <span aria-hidden className="flex size-[96px] items-center justify-center rounded-(--rapo-radius-full) bg-(--rapo-color-bg-brand-weak)">
             <svg width="44" height="34" viewBox="0 0 44 34" fill="none"><path d="M3 17l13 13L41 4" stroke="var(--rapo-color-bg-brand-solid)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </span>
-          {간소화 ? (
-            /* 간소화 — 스펙을 안 받았으니 「근무 정보를 등록했어요」·무료 열람 끝날은 쓰지 않습니다 */
-            <>
-              {알림끝말 && <p className="rapo-type-t6-bold break-keep text-(color:--rapo-color-fg-neutral)">{알림끝말}</p>}
-              <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">이제 공고와 커뮤니티를 이용할 수 있어요. 스펙·근무 정보는 나중에 내 정보에서 넣을 수 있어요.</p>
-            </>
-          ) : 있음 ? (
+          {있음 ? (
             <>
               <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">근무 정보를 등록했어요</p>
               <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">급여는 나중에 입력해도 괜찮아요. 이제 비교 정보와 커뮤니티를 이용할 수 있어요.</p>
