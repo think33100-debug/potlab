@@ -282,9 +282,9 @@ export const RANGE: Record<string, Rule> = {
   weekend_pay:        { min: 0, max: 200, label: '주말근무 수당' },
   dependents:         { min: 1, max: 15, int: true, label: '부양가족 수' },
   bonus_yearly:       { min: 0, max: 9999, int: true, label: '연간 상여' },
-  duty_count:         { min: 0, max: 31, int: true, label: '당직 횟수' },
+  duty_count:         { min: 0, max: 31, label: '당직 횟수' },        // 2026-11-16 몇 달에 한 번(0.5·0.33…)도 받습니다
   duty_hours:         { min: 0, max: 24, label: '당직 시간' },
-  weekend_count:      { min: 0, max: 10, int: true, label: '주말근무 횟수' },
+  weekend_count:      { min: 0, max: 10, label: '주말근무 횟수' },
   weekend_hours:      { min: 0, max: 24, label: '주말근무 시간' },
   gpa:                { min: 0, max: 100, label: '학점' },
   gpa_scale:          { min: 1, max: 100, label: '만점 기준' },

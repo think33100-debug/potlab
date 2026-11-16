@@ -236,12 +236,12 @@ export function SignupSurvey({
           <>
             {/* 라벨 줄 수가 달라 칸이 좌우로 어긋났습니다. 묶음으로 싸서 줄을 맞춥니다 */}
             <Group title="당직" hint="퇴근 후 더 남는 근무 · 당직·주말을 넣어야 진짜 시급이 나와요">
-              <Num k="duty_count" label="한 달에" v={f.duty_count} on={set} unit="회" ph="0" f={f} noWhy />
+              <횟수칸 k="duty_count" v={f.duty_count} on={set} f={f} />
               <Num k="duty_hours" label="한 번에" v={f.duty_hours} on={set} unit="시간" ph="2" f={f} noWhy />
               <Num k="duty_pay" label="한 번에" v={f.duty_pay} on={set} unit="만원" ph="0" f={f} noWhy />
             </Group>
             <Group title="주말근무" hint="반나절이면 4시간">
-              <Num k="weekend_count" label="한 달에" v={f.weekend_count} on={set} unit="회" ph="0" f={f} noWhy />
+              <횟수칸 k="weekend_count" v={f.weekend_count} on={set} f={f} />
               <Num k="weekend_hours" label="한 번에" v={f.weekend_hours} on={set} unit="시간" ph="4" f={f} noWhy />
               <Num k="weekend_pay" label="한 번에" v={f.weekend_pay} on={set} unit="만원" ph="0" f={f} noWhy />
             </Group>
@@ -565,6 +565,25 @@ const BOX_BAD = BOX.replace('border-(color:--rapo-color-stroke-neutral-weak)', '
 const INPUT = `block ${SKIN} px-5 py-4 rapo-type-t5-regular`;
 /* 고르는 칸도 틀리면 테두리 색으로 알립니다 (BOX_BAD 와 같은 규칙) */
 const INPUT_BAD = INPUT.replace('border-(color:--rapo-color-stroke-neutral-weak)', 'border-(color:--rapo-color-stroke-critical-solid)').replace('', '');
+
+/* 당직·주말 횟수 — 「한 달에 N회」 또는 「N달에 한 번」 (2026-11-16 테스터 피드백 「몇 개월에 한 번 근무하는 경우도 있음」).
+   몇 달에 한 번이면 한 달 평균 횟수(1/N, 소수 둘째 자리)로 담습니다 — DB 칸은 numeric(5,2) (금고 SQL_1113/ZZ). */
+const 주기들 = [['매달', 0], ['2달에 한 번', 2], ['3달에 한 번', 3], ['4달에 한 번', 4], ['6달에 한 번', 6], ['1년에 한 번', 12]] as const;
+const 평균값 = (n: number) => String(Math.round((1 / n) * 100) / 100);
+function 횟수칸({ k, v, on, f }: { k: string; v?: string; on: (k: string, v: string) => void; f: Form }) {
+  const 지금 = 주기들.find(([, n]) => n > 0 && v === 평균값(n));
+  const [주기, set주기] = useState<number>(지금 ? 지금[1] : 0);
+  return (
+    <div className="mt-6 block first:mt-0">
+      <select value={주기} aria-label="얼마나 자주"
+        onChange={(e) => { const n = Number(e.target.value); set주기(n); on(k, n > 0 ? 평균값(n) : ''); }}
+        className={INPUT + ' w-full'}>
+        {주기들.map(([말, n]) => <option key={n} value={n}>{말}</option>)}
+      </select>
+      {주기 === 0 && <Num k={k} label="한 달에" v={v} on={on} unit="회" ph="0" f={f} noWhy />}
+    </div>
+  );
+}
 
 export function Num({
   k, label, hint, v, on, unit, ph, step, req, f, noWhy,
@@ -962,11 +981,18 @@ export function Rows({
                 지우기
               </button>
             </div>
-            <select value={r.hospital} onChange={(e) => edit(i, { hospital: e.target.value })}
+            <select value={r.hospital.startsWith('기타') ? '기타' : r.hospital} onChange={(e) => edit(i, { hospital: e.target.value })}
               className={(칸빈(r.hospital) ? INPUT_BAD : INPUT) + ' mt-2 w-full'}>
               <option value="">병원 유형</option>
               {HOSPITALS.map((h) => <option key={h}>{h}</option>)}
             </select>
+            {/* 「기타」면 실습지를 직접 적습니다 (2026-11-16 테스터 피드백 「기타에 실습지 적을 수 있게 ex) 치매센터」) — 「기타 · 치매센터」로 담습니다 */}
+            {r.hospital.startsWith('기타') && (
+              <input value={r.hospital.replace(/^기타( · )?/, '')} maxLength={30}
+                onChange={(e) => edit(i, { hospital: e.target.value.trim() ? `기타 · ${e.target.value}` : '기타' })}
+                placeholder="어디인지 적어 주세요 (예: 치매센터)" aria-label={`${i + 1}번째 기타 기관 이름`}
+                className={INPUT + ' mt-2 w-full'} />
+            )}
             {칸빈(r.hospital) && <비었어요>병원 유형을 골라 주세요</비었어요>}
 
             <div className="mt-2 flex gap-2">
