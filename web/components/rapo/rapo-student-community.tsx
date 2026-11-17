@@ -16,17 +16,20 @@ import { RapoButton } from './rapo-ui';
    신청은 앱 출시 알림과 같은 표(출시알림신청)에 갈래 「학생커뮤니티」·「임상가커뮤니티」 한 줄 — 연락처는 안 받습니다. 다시 누르면 풉니다.
    견본(app/design-preview/student)은 저장 없이 모양만 봅니다. */
 type 갈래 = '학생커뮤니티' | '임상가커뮤니티';
-const 글: Record<갈래, { 머리: string; 제목: React.ReactNode; 소개: string; 열림: string; 열릴때: string }> = {
+const 글: Record<갈래, { 머리: string; 제목: React.ReactNode; 소개: string; 물음: string; 열림: string; 열릴때: string }> = {
   학생커뮤니티: {
     머리: '학생 커뮤니티',
     제목: <>학생인증을<br />준비하고 있어요!</>,
     소개: '익명으로 여러 학교 학생들과 얘기를 나눌 수 있어요.',
+    물음: '알림을 받으시겠어요?',
     열림: '학생 커뮤니티가 열리면', 열릴때: '학생 커뮤니티가 열릴 때',
   },
   임상가커뮤니티: {
     머리: '커뮤니티',
     제목: <>연봉 인증과 병원 후기를<br />준비하고 있어요!</>,
-    소개: '연봉 인증과 병원 후기를 마친 치료사끼리 익명으로 이야기를 나누는 곳으로 열려요.',
+    /* 2026-11-17 세중님 문구 그대로 */
+    소개: '익명 커뮤니티는 추후에 연봉 인증과 병원 후기 서비스를 제공하면서 같이 오픈 예정입니다.',
+    물음: '서비스 시작할 때 바로 알려드릴까요?',
     열림: '커뮤니티가 열리면', 열릴때: '커뮤니티가 열릴 때',
   },
 };
@@ -67,7 +70,7 @@ export function RapoStudentCommunityNotice({ 견본 = false, 견본갈래 }: { �
 
       <div className="flex flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
         <p className="rapo-type-t7-bold break-keep text-(color:--rapo-color-fg-neutral)">
-          {on ? '알림을 신청했어요' : '알림을 받으시겠어요?'}
+          {on ? '알림을 신청했어요' : c.물음}
         </p>
         <RapoButton tone={on ? 'outline' : 'navy'} size={52} full loading={바쁨} onClick={누름}>
           {on ? '알림 신청됨 · 취소하기' : '알림 받기'}

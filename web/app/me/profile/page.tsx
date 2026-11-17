@@ -7,6 +7,8 @@ import { PhotoCropper } from '@/components/photo-cropper';
 import { RapoMeFrame } from '@/components/rapo/rapo-me';
 import { RapoButton } from '@/components/rapo/rapo-ui';
 import { AVATAR_ANIMALS, AVATAR_COLORS, isPhoto, parseAvatar, withAnimal, withColor, withPhoto } from '@/lib/avatar';
+import { RapoNicknameField } from '@/components/rapo/rapo-nickname-field';
+import { 닉네임문제 } from '@/lib/nickname';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useAuth } from '../../auth';
 import { useToast } from '../../toast';
@@ -53,8 +55,9 @@ function ProfileForm({ me }: { me: NonNullable<ReturnType<typeof useAuth>['me']>
     if (busy || (!닉바뀜 && !그림바뀜)) return;
     const name = nick.trim();
     if (닉바뀜) {
-      /* 4~12자 · 비속어·음란 용어는 DB 가 가립니다 (2026-11-17 세중님 · 금고 SQL_1113/ZZB) — 닉네임을 바꿀 때만 봅니다 */
-      if (name.length < 4 || name.length > 12) { setErr('4자에서 12자까지 쓸 수 있어요'); return; }
+      /* 4~10자 · 자음·모음 낱자 금지는 lib/nickname.ts · 비속어·음란 용어는 DB 가 가립니다 (2026-11-17 세중님 · 금고 SQL_1113/ZZD) — 닉네임을 바꿀 때만 봅니다 */
+      const 문제 = 닉네임문제(name);
+      if (문제 || !name) { setErr(문제 ?? '닉네임을 적어 주세요'); return; }
       if (!confirm(`닉네임은 앞으로 ${left}번 바꿀 수 있어요. 그다음부터는 유료로 바뀝니다. 바꿀까요?`)) return;
     }
     setBusy(true); setErr(null);
@@ -110,13 +113,11 @@ function ProfileForm({ me }: { me: NonNullable<ReturnType<typeof useAuth>['me']>
 
       <section className="flex flex-col gap-(--rapo-dimension-x2)">
         <label htmlFor="닉네임" className="rapo-type-t5-medium text-(color:--rapo-color-fg-neutral)">닉네임</label>
-        <input id="닉네임" value={nick} onChange={(e) => { setNick(e.target.value); setErr(null); }} disabled={locked} maxLength={12}
-          className="rapo-type-t5-regular h-(--rapo-dimension-x13) w-full rounded-(--rapo-radius-r3) border-(length:--rapo-border-default)
-                     border-(color:--rapo-color-stroke-neutral-weak) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) disabled:opacity-40" />
-        <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
-          {locked ? '무료로 바꿀 수 있는 5번을 다 쓰셨어요. 결제는 아직 준비 중이에요.' : `닉네임은 ${FREE_CHANGES}번 중 ${left}번 더 바꿀 수 있어요.`}
-        </p>
-        {!locked && <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">4~12자로 정해 주세요. 비속어나 선정적인 말은 쓸 수 없어요.</p>}
+        {/* 글자 수 · 규칙 안내 · 적는 동안 알림 — 가입 화면과 같은 칸 (2026-11-17 세중님 「적을 때 학생 임상가 모두」) */}
+        <RapoNicknameField v={nick} on={(v) => { setNick(v); setErr(null); }} 잠김={locked} 검사={닉바뀜}
+          덧={<p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
+            {locked ? '무료로 바꿀 수 있는 5번을 다 쓰셨어요. 결제는 아직 준비 중이에요.' : `닉네임은 ${FREE_CHANGES}번 중 ${left}번 더 바꿀 수 있어요.`}
+          </p>} />
       </section>
 
       <section className="flex flex-col gap-(--rapo-dimension-x3)">
