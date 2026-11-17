@@ -19,31 +19,63 @@ import { 라포소개 } from './reel-data.mjs';
 const require = createRequire(import.meta.url);
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(여기, '..', '..');
-export const 이름 = '브랜드소개_1';
+/* 판 — 브랜드 카드뉴스 여러 벌 (2026-11-17). 원격 id 가 영문이라 열쇠는 영문 · 기록 이름은 그대로 */
+const 인수 = (n) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : null; };
+export const 태그 = '#물리치료사 #작업치료사 #치료사채용 #병원취업';
+export const 판들 = {
+  /* 브랜드 소개 — 기능 (2026-11-17 첫 판 · 첫 장 사람 그림 뺀 판으로 바꿈) */
+  intro: {
+    이름: '브랜드소개_1', html: 'brand.html',
+    캡션: [
+      '치료사 채용, 라포 하나면 돼요!',
+      '',
+      '공고 하나 찾으려고 병원 홈페이지 여러 개 열어 보셨죠?',
+      '라포는 치료사를 포함한 의료기사 모두를 위한 채용 커뮤니티 앱이에요!',
+      '공공·종합·대학병원 공고를 한곳에 모아 뒀어요.',
+      '',
+      '✔ 공공기관 채용 경쟁률',
+      '✔ 이 병원 연봉 (정부 공시)',
+      '✔ 병원별 치료사 재직자 수',
+      '✔ 익명 커뮤니티',
+      '',
+      ...라포소개.slice(2),          /* 경쟁률·연봉 줄은 위 체크 목록과 겹쳐 뒤 두 줄만 */
+      '',
+      태그,
+      '',
+      '프로필 링크에서 라포를 시작해 보세요. 필요한 동료에게 공유도 부탁드려요!',
+    ],
+    첫댓글: '치료사 동료분들, 라포에 있었으면 하는 기능이 있으면 댓글로 남겨 주세요!',
+  },
+  /* 개발팀 인터뷰 — 만든 까닭 · 이름 · 미래 (2026-11-17 세중님 대사 확정 · 「라포 개발팀」) */
+  story: {
+    이름: '개발팀인터뷰_1', html: 'story.html',
+    캡션: [
+      '라포 개발팀에게 왜 만들었는지 물었어요',
+      '',
+      '공고가 떠도 얼마를 주는지, 하루에 몇 명을 보는지, 치료사는 몇 명인지…',
+      '결국 주변 사람한테 물어보는 게 전부였던 의료기사들이 모여 라포를 만들었어요.',
+      '',
+      '라포는 병원에서 환자와 치료사 사이에 가장 중요한 「관계」라는 뜻이에요.',
+      '이제는 병원에서 일하는 사람들끼리도 같이 라포를 쌓아 갔으면 해요.',
+      '',
+      '투명한 연봉 공개와 공유, 병원 후기로 우리 의료기사가 더 잘 일할 수 있는 곳을 만들고 싶어요.',
+      '라포는 이제 막 시작했어요. 지켜봐 주세요!',
+      '',
+      태그,
+      '',
+      '같이 만들어 갈 동료에게 공유해 주세요. 라포는 프로필 링크에서 만날 수 있어요!',
+    ],
+    첫댓글: '여러분이 병원 고를 때 가장 궁금했던 건 뭐였나요? 댓글로 알려 주세요!',
+  },
+};
+export const 판열쇠 = 인수('판') || 'intro';
+const 판 = 판들[판열쇠];
+if (!판) { console.error(`모르는 판 「${판열쇠}」 — ${Object.keys(판들).join(' · ')}`); process.exit(2); }
+export const 이름 = 판.이름;
+export const 캡션 = 판.캡션.join('\n');
+export const 첫댓글 = 판.첫댓글;
 const 나감 = path.join(ROOT, 'log', 'reels', 'brand', 이름);
 const 기록파일 = path.join(ROOT, 'log', '브랜드_올림.json');
-
-/* 캡션 — 첫 문장 35자 이내 · 사람 말투 · 기능은 앱에 있는 것만 */
-export const 태그 = '#물리치료사 #작업치료사 #치료사채용 #병원취업';
-export const 캡션 = [
-  '치료사 채용, 라포 하나면 돼요!',
-  '',
-  '공고 하나 찾으려고 병원 홈페이지 여러 개 열어 보셨죠?',
-  '라포는 치료사를 포함한 의료기사 모두를 위한 채용 커뮤니티 앱이에요!',
-  '공공·종합·대학병원 공고를 한곳에 모아 뒀어요.',
-  '',
-  '✔ 공공기관 채용 경쟁률',
-  '✔ 이 병원 연봉 (정부 공시)',
-  '✔ 병원별 치료사 재직자 수',
-  '✔ 익명 커뮤니티',
-  '',
-  ...라포소개.slice(2),          /* 경쟁률·연봉 줄은 위 체크 목록과 겹쳐 뒤 두 줄만 */
-  '',
-  태그,
-  '',
-  '프로필 링크에서 라포를 시작해 보세요. 필요한 동료에게 공유도 부탁드려요!',
-].join('\n');
-export const 첫댓글 = '치료사 동료분들, 라포에 있었으면 하는 기능이 있으면 댓글로 남겨 주세요!';
 
 export async function 만들기() {
   const { chromium } = require('playwright');
@@ -52,7 +84,7 @@ export async function 만들기() {
   const 장들 = [];
   try {
     const page = await browser.newPage({ viewport: { width: 1080, height: 1350 }, deviceScaleFactor: 1 });
-    await page.goto(pathToFileURL(path.join(여기, 'brand.html')).href);
+    await page.goto(pathToFileURL(path.join(여기, 판.html)).href);
     await page.evaluate(() => document.fonts.ready);
     const 수 = await page.evaluate(() => window.__장수);
     for (let i = 1; i <= 수; i++) {
@@ -90,7 +122,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   const 댓글 = await 댓글되나(cfg);
   const 올릴캡션 = 댓글 ? 캡션.split('\n').filter((l) => l.trim() !== 태그).join('\n').replace(/\n{3,}/g, '\n\n') : 캡션;
   console.log(댓글 ? '  ○ 댓글 권한 있음 — 태그는 대댓글로' : '  · 댓글 권한 없음 — 태그는 캡션에 · 첫 댓글은 안 답니다');
-  const 올림 = await 카드올리기IG(cfg, 장들, 올릴캡션, 'brand');
+  const 올림 = await 카드올리기IG(cfg, 장들, 올릴캡션, 'brand-' + 판열쇠);
   let 댓글기록 = null;
   if (댓글) {
     try { const 첫 = await 댓글달기(cfg, 올림.media_id, 첫댓글); const 답 = await 답글달기(cfg, 첫, 태그); 댓글기록 = { 첫, 답 }; console.log(`  ○ 첫 댓글 ${첫} · 태그 대댓글 ${답}`); }

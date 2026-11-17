@@ -26,9 +26,10 @@ const 할일표 = {
   올리기: (id) => (id ? ['tools/reels/올리기.mjs', '--id', id, '--실행'] : null),
   만들기: (id) => (id ? ['tools/reels/run.mjs', '--메일', '--id', id] : null),
   카드확인: (id) => (id ? ['tools/reels/올리기.mjs', '--id', id, '--카드'] : null),
-  브랜드확인: (id) => (id ? null : ['tools/reels/브랜드카드.mjs']),
-  브랜드올리기: (id) => (id ? null : ['tools/reels/브랜드카드.mjs', '--실행']),
-  브랜드바꾸기: (id) => (id ? null : ['tools/reels/브랜드카드.mjs', '--바꾸기']),
+  /* 브랜드 카드 — id 자리에 판 이름(intro · story). 비우면 intro */
+  브랜드확인: (id) => ['tools/reels/브랜드카드.mjs', ...(id ? ['--판', id] : [])],
+  브랜드올리기: (id) => ['tools/reels/브랜드카드.mjs', '--실행', ...(id ? ['--판', id] : [])],
+  브랜드바꾸기: (id) => ['tools/reels/브랜드카드.mjs', '--바꾸기', ...(id ? ['--판', id] : [])],
   카드올리기: (id) => (id ? ['tools/reels/올리기.mjs', '--id', id, '--카드', '--실행'] : null),
   /* 당기기 — 서버 코드를 main 에 맞춤 (지침 8-10: 서버 반영은 git pull 로만). node 가 아니라 git 이라 따로 돌립니다 */
   당기기: (id) => (id ? null : ['git', 'pull', '--ff-only']),
@@ -44,7 +45,7 @@ export function 풀기(글) {
   if (!할일표[할일]) return { 거절: `모르는 할일 「${낱[0]}」 — 목록 · 확인 · 올리기 · 만들기 · 당기기 · 카드확인 · 카드올리기 · 브랜드확인 · 브랜드올리기 · 브랜드바꾸기` };
   if (id && !/^[A-Za-z0-9_-]{1,40}$/.test(id)) return { 거절: '공고id 는 영문·숫자·-·_ 만' };
   const 인수 = 할일표[할일](id);
-  if (!인수) return { 거절: ['목록', '당기기', '브랜드확인', '브랜드올리기', '브랜드바꾸기'].includes(할일) ? `${할일}에는 공고id 를 붙이지 않습니다` : `${할일}에는 공고id 가 필요합니다` };
+  if (!인수) return { 거절: ['목록', '당기기'].includes(할일) ? `${할일}에는 공고id 를 붙이지 않습니다` : `${할일}에는 공고id 가 필요합니다` };
   return { 할일, id, 인수 };
 }
 
@@ -60,7 +61,7 @@ function 자기점검() {
   봐('거절 — 모르는 할일', !!풀기('bash').거절 && !!풀기('').거절);
   봐('거절 — id 없는 올리기 · id 붙은 목록', !!풀기('올리기').거절 && !!풀기('목록 A1').거절);
   봐('카드올리기 — --카드 --실행', 풀기('publish-cards A1').인수?.join(' ') === 'tools/reels/올리기.mjs --id A1 --카드 --실행' && !풀기('check-cards A1').인수.includes('--실행'));
-  봐('브랜드올리기 — --실행 · id 붙으면 거절', 풀기('brand-publish').인수?.join(' ') === 'tools/reels/브랜드카드.mjs --실행' && !!풀기('brand-publish A1').거절);
+  봐('브랜드올리기 — 판 없으면 intro · 판 있으면 --판', 풀기('brand-publish').인수?.join(' ') === 'tools/reels/브랜드카드.mjs --실행' && 풀기('brand-publish story').인수?.join(' ') === 'tools/reels/브랜드카드.mjs --실행 --판 story');
   봐('당기기 — git pull --ff-only · id 붙으면 거절', 풀기('당기기').인수?.join(' ') === 'git pull --ff-only' && 풀기('pull').할일 === '당기기' && !!풀기('당기기 main').거절);
   console.log(`\n견본 ${틀림.length ? '✗ 틀림 ' + 틀림.length : '틀림 0'}`);
   if (틀림.length) process.exit(1);
