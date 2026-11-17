@@ -120,6 +120,44 @@ function 마이다스줄(list, host) {
   }));
 }
 
+/** 마이다스 목록에서 담을 줄 고르기 — `receiptState` 한 자리 (2026-11-18 · 정답지 1차 고장 가르기 3번)
+ *
+ * 전에는 「접수중」이 든 줄만 담았습니다. 그래서 **접수 시작일이 앞날인 글**(접수 예정)은 접수가
+ * 열리는 날에야 들어와, 원문 게시일 대비 24시간 반영이 늦었습니다 (정답지 1차 · 전남대 2 · 충북대 1 · 아주대 1).
+ * 이제 「접수 예정」 줄도 담습니다. 닫힌 줄(마감·종료·완료·결과·발표·취소)은 전처럼 안 담습니다.
+ *
+ * ★ 예정 줄의 상태 글자를 **원문으로 본 적이 없습니다** — 저장소·노트에 receiptState 원값이 남은 응답이
+ *   없습니다(2026-11-18 grep). 정답지 노트의 화면 말은 「접수 예정」입니다. 그래서 글자 하나로 못 박지 않고
+ *   **「예정」이 들고 닫힘 말이 없는 것**만 잡습니다 (좁게 · 「마감 예정」 꼴은 닫힘 말에 걸려 안 담깁니다).
+ *   그 밖의 모르는 상태는 담지 않고 **수만 셉니다** (raw 에 「모르는 상태」로 · 지침 2절).
+ * ★ 「접수중」 판정은 전과 글자 하나 다르지 않습니다 — 접수중 줄은 닫힘 말을 보지 않고 그대로 담깁니다.
+ */
+export const 접수중꼴 = /접수중/;
+export const 접수예정꼴 = /예정/;
+export const 접수닫힘꼴 = /마감|종료|완료|결과|발표|취소/;
+export function 마이다스담을것(list) {
+  const 접수중 = [], 예정 = [], 모름 = new Map();
+  for (const x of list || []) {
+    const st = String((x && x.receiptState) || '');
+    if (접수중꼴.test(st)) { 접수중.push(x); continue; }
+    if (접수예정꼴.test(st) && !접수닫힘꼴.test(st)) { 예정.push(x); continue; }
+    if (!접수닫힘꼴.test(st)) 모름.set(st || '(빈칸)', (모름.get(st || '(빈칸)') || 0) + 1);
+  }
+  return { 접수중, 예정, 모름 };
+}
+/* raw 에 붙일 말 — 「접수중 n건」 앞꼴은 그대로 두고 뒤에 붙입니다 (다른 도구가 앞꼴을 읽습니다) */
+function 예정말(고른) {
+  const 모름 = [...고른.모름.entries()].map(([k, n]) => k.slice(0, 12) + ' ' + n).slice(0, 4).join(' · ');
+  return (고른.예정.length ? ' · 접수 예정 ' + 고른.예정.length + '건도 담음' : '')
+    + (모름 ? ' · 모르는 상태(안 담음) ' + 모름 : '');
+}
+/* 예정 줄에는 `접수상태: '예정'` 을 답니다 — 수집기가 근거(evidence)에 남기고, 앞날 시작일을 게시일로 안 씁니다.
+   접수 시작일(applyStartDate → from)·마감일(applyEndDate → to)은 마이다스줄() 이 그대로 나릅니다 */
+function 마이다스담을줄(고른, host) {
+  return 마이다스줄(고른.접수중, host)
+    .concat(마이다스줄(고른.예정, host).map((x) => ({ ...x, 접수상태: '예정' })));
+}
+
 /** 마이다스 구형 — 어느 길로 받나 (2026-11-11 세중님 Q86 「1번 하자」 · Q87 「① 지금 길 그대로」) ──
  *
  * 리크루터 채용관은 robots 가 두 꼴입니다 (2026-11-11 tools/robots.mjs 로 21곳 판정) —
@@ -214,7 +252,7 @@ export async function 사이트줄(s) {
 
   if (s.type === 'appsite' || s.type === 'listjson') {
     /* 2026-11-11 Q86 — robots 가 list.json 을 막고 /appsite/ 만 허락하면 getMainView 로 (위 마이다스길).
-       줄 꼴·링크는 list.json 과 같은 마이다스줄() 한 벌이고, 접수중만 쓰는 것도 같습니다.
+       줄 꼴·링크는 list.json 과 같은 마이다스줄() 한 벌이고, 담을 줄 고르기(접수중 + 접수 예정 · 2026-11-18)도 같습니다.
        상세(/app/jobnotice/view)도 그 robots 가 막으므로 `상세막힘` 을 달아 ③ 에서 안 엽니다
        (회원이 누르는 링크는 그대로 그 주소입니다 — 사람이 여는 것이라 robots 와 무관) */
     const 길 = await 마이다스길(s);
@@ -222,10 +260,10 @@ export async function 사이트줄(s) {
       const m = await 진행중원본(s.host, { sn: s.sn, st: s.settingType });
       /* 진행중원본 의 왜 에는 응답 앞 120자가 섞일 수 있어 안전글로만 냅니다 (실패 칸은 아직 없음 — PR 「다음」) */
       if (m.왜) return { err: 'getMainView 실패 · ' + 안전글(m.왜, 120) + ' (' + 길.왜 + ')' };
-      const 접수중 = m.줄.filter((x) => /접수중/.test(String(x.receiptState || '')));
-      const 줄 = 마이다스줄(접수중, s.host).map((x) => ({ ...x, 상세막힘: 'robots · /app/ 금지' }));
+      const 고른 = 마이다스담을것(m.줄);
+      const 줄 = 마이다스담을줄(고른, s.host).map((x) => ({ ...x, 상세막힘: 'robots · /app/ 금지' }));
       return 거르기(s, 줄,
-        'getMainView 진행중 ' + m.줄.length + '건 중 접수중 ' + 접수중.length + '건'
+        'getMainView 진행중 ' + m.줄.length + '건 중 접수중 ' + 고른.접수중.length + '건' + 예정말(고른)
           + (m.줄.length >= 6 ? ' ★첫 화면 6칸 꽉 참 — 더 있을 수 있음' : '') + ' · ' + 길.왜,
         [...new Set(m.줄.map((x) => x.recruitClassName).filter(Boolean))]);
     }
@@ -236,9 +274,10 @@ export async function 사이트줄(s) {
     if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + 앞글(r), 실패: 실패기록(r) };
     const 다 = j.list || [];
     if (!다.length) return { err: 'list.json 이 0건 · pageUtil ' + 안전글(JSON.stringify(j.pageUtil || {}), 90), 실패: 실패기록(r) };
-    const 접수중 = 다.filter((x) => /접수중/.test(String(x.receiptState || '')));
-    return 거르기(s, 마이다스줄(접수중, s.host),
-      '전체 ' + ((j.pageUtil || {}).recordCount || 다.length) + '건 중 접수중 ' + 접수중.length + '건 · ' + 길.왜,
+    const 고른 = 마이다스담을것(다);
+    return 거르기(s, 마이다스담을줄(고른, s.host),
+      '전체 ' + ((j.pageUtil || {}).recordCount || 다.length) + '건 중 접수중 ' + 고른.접수중.length + '건'
+        + 예정말(고른) + ' · ' + 길.왜,
       [...new Set(다.map((x) => x.recruitClassName).filter(Boolean))]);
   }
 
