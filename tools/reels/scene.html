@@ -39,6 +39,11 @@
     background: linear-gradient(180deg, rgba(17,34,49,0.55) 0%, rgba(17,34,49,0) 28%, rgba(17,34,49,0) 55%, var(--navy) 100%); }
   #s1 .hook { left: 80px; right: 120px; top: 560px; }
   body.has-photo #s1 .hook { top: 860px; }
+  /* 작은 사진(가로 300~600) — 화면 가득 키우면 흐려져서 **둥근 액자**로. 뒤에는 같은 사진이 흐리게 깔립니다 */
+  body.small-photo #s1 .photo { left: 80px; width: 920px; top: 330px; height: 600px; border-radius: 28px; box-shadow: 0 18px 50px rgba(0,0,0,0.35); }
+  body.small-photo #s1 .photo::after { display: none; }
+  body.small-photo #s1 .hook { top: 980px; }
+  body.small-photo #s1 .dday { top: 820px; }
   #s1 .small { display: inline-block; font-size: 46px; font-weight: 700; color: var(--white); background: rgba(255,255,255,0.14);
     padding: 10px 22px; border-radius: 12px; }
   #s1 .big { margin-top: 26px; font-size: 104px; font-weight: 800; line-height: 1.14; }
@@ -120,6 +125,9 @@
   body.card #s1 .logocard { top: 180px; height: 420px; }
   body.card.has-logo #s1 .dday { top: 560px; }
   body.card #s1 .rendtag { top: 180px; }
+  body.card.small-photo #s1 .photo { top: 170px; height: 560px; }
+  body.card.small-photo #s1 .hook { top: 800px; }
+  body.card.small-photo #s1 .dday { top: 610px; }
   body.card #s1 .big { font-size: 92px; }
   body.card #credit { top: 1292px; font-size: 26px; }
   body.card #s4 .big { top: 230px; font-size: 200px; }
@@ -236,6 +244,7 @@ window.__setData = (d) => {
   }
   if (d.사진) {
     document.body.classList.add('has-photo');
+    document.body.classList.toggle('small-photo', !!d.사진작게);
     $('s1img').src = d.사진; $('s1photo').style.display = 'block';
     $('bgphoto').style.backgroundImage = `url("${d.사진}")`;
   }
