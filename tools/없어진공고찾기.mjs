@@ -46,7 +46,7 @@ import fs from 'node:fs';
 import { 받아보기 } from './쪽나눠받기.mjs';
 import { 차례붙이기 } from './쪽나눠받기.mjs';
 import { 세기, 남기기, 막힘인가, 막힘적기, 막혔나 } from './고용24한도.mjs';
-import { 없어짐말, 알림상태, 제목마감 } from './hosp/hs_목록상태.mjs';
+import { 없어짐말, 없어짐찾기, 알림상태, 제목마감 } from './hosp/hs_목록상태.mjs';
 import { 워크넷상세칸 } from './워크넷상세칸.mjs';
 import { 고용형태판정 } from './공고문읽기.mjs';
 /* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
@@ -424,9 +424,9 @@ for (const [i, x] of 그밖.entries()) {
       || (buf.subarray(0, 2048).toString('latin1').match(/charset=["']?([\w-]+)/i) || [])[1] || 'utf-8';
     try { html = new TextDecoder(cs.toLowerCase()).decode(buf); } catch { html = buf.toString('utf8'); }
   } catch (e) { 오류.push({ ...x, 왜: '못 받음 · ' + String(e && e.message || e).slice(0, 34) }); continue; }
-  const m = html.match(없어짐말);
+  const m = 없어짐찾기(html);   /* 원본에 없어짐말을 바로 걸지 않습니다 (2026-11-17 · recruiter "notFound") */
   if (m) {
-    없어짐.push({ ...x, 왜: '쪽 — 없어짐말 「' + m[0] + '」', 앞부분: html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200) });
+    없어짐.push({ ...x, 왜: '쪽 — 없어짐말 「' + m + '」', 앞부분: html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200) });
   } else if (알림상태(html).결과 === 'closed') {
     없어짐.push({ ...x, 왜: '쪽 — ' + 알림상태(html).왜, 앞부분: String(알림상태(html).줄글).slice(0, 200) });
   } else if (제목마감(html, x.title).결과 === 'closed') {

@@ -165,6 +165,35 @@ const 알림찾기 = /\balert\s*\(\s*(['"])([\s\S]{1,200}?)\1\s*\)/g;
  *   그리고 「열람 가능 기간이 만료」(고신대·강진 꼴)도 함께 넣었습니다. */
 export const 없어짐말 = /존재하지\s*않는\s*(글|게시물|페이지)|삭제된\s*(글|게시물)|없는\s*게시물|잘못된\s*접근|접근할\s*수\s*없|페이지를\s*찾을\s*수\s*없|Not\s*Found|해당\s*게시물이\s*없|게시물이\s*존재하지|열람\s*가능\s*기간이\s*만료|구인정보를\s*확인할\s*수\s*없/i;
 
+/* ★ 2026-11-17 — **원본 HTML 에는 `없어짐말` 을 바로 걸지 말고 `없어짐찾기()` 를 씁니다.**
+ *   recruiter.co.kr(채용 대행 · Next.js)은 **모든** 공고 쪽 데이터(<script>)에
+ *   `"notFound":"$undefined"` 를 넣어 둡니다. `Not\s*Found` 가 `notFound` 에 걸려
+ *   마감 전 멀쩡한 고려대 안산병원 공고(HS1869100513)가 「없어짐」으로 판정됐습니다
+ *   (릴스 원문확인 · PR #180 에서 먼저 좁혔고, 이제 이 한 자리로 모읍니다 · 지침 6절).
+ *
+ *   영어 「Not Found」   → **보이는 글**(script·style 을 걷고 태그를 걷은 글)에서만
+ *   한글 안내             → **원본에서도** 찾습니다. 워크넷은 안내를 스크립트 변수
+ *                          `var msgStr = '구인정보를 확인할 수 없습니다.';` 에 넣습니다
+ *   한글 안내가 데이터 안 예비 틀로 들어 있는 사이트를 만나면 그때 여기서 좁힙니다. */
+export const 한글없어짐말 = new RegExp(없어짐말.source.replace('|Not\\s*Found', ''), 'i');
+
+/** 사람에게 **보이는 글** — script·style 을 걷고 태그를 걷은 글 */
+export function 보이는글(html) {
+  return String(html || '').replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/gi, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * 원본 HTML 이 「글이 없어졌다」고 말하나. 걸린 글귀를 돌려주고, 없으면 null.
+ * @param {string} html 원본 HTML (태그를 걷지 않은 것)
+ * @returns {string|null}
+ */
+export function 없어짐찾기(html) {
+  const 원본 = String(html || '');
+  const m = 보이는글(원본).match(없어짐말) || 원본.match(한글없어짐말);
+  return m ? m[0] : null;
+}
+
 /**
  * 쪽이 **알림창으로** 마감을 알리나. 태그를 걷지 않은 **원본 HTML** 을 줘야 합니다.
  * @param {string} html 원본 HTML
@@ -281,7 +310,8 @@ if (process.argv[1] && process.argv[1].endsWith('hs_목록상태.mjs')) {
     console.log(JSON.stringify(await 목록상태(기관, 제목), null, 1));
   } else {
     const 어겼나 = [];
-    const 봐 = (이름, 참) => { if (!참) 어겼나.push(이름); };
+    let 본수 = 0;
+    const 봐 = (이름, 참) => { 본수++; if (!참) 어겼나.push(이름); };
 
     /* 괄호를 살려야 엉뚱한 줄에 안 붙습니다 */
     봐('괄호를 살림', 견줄('직원 모집 공고(물리치료사 - 기간제)') !== 견줄('직원 모집 공고(기록물관리 전문요원 - 행정직)'));
@@ -356,9 +386,22 @@ if (process.argv[1] && process.argv[1].endsWith('hs_목록상태.mjs')) {
       !없어짐말.test('물리치료사 채용 공고입니다 접수기간 2026-10-20 까지'));
     봐('없어짐말 — 「구인정보 확인」 안내는 안 걸린다',
       !없어짐말.test('구인정보를 확인하시고 지원해 주세요'));
+    /* 없어짐찾기 — 원본 HTML 에 거는 판정 (2026-11-17) */
+    봐('없어짐찾기 — 한글없어짐말에서 Not Found 갈래만 빠졌다',
+      !/Not/.test(한글없어짐말.source) && 한글없어짐말.source.length === 없어짐말.source.length - '|Not\\s*Found'.length);
+    봐('없어짐찾기 — recruiter 데이터 속 "notFound" 는 살아 있음',
+      없어짐찾기('<html><body><h1>물리치료사 채용</h1><script>self.__next_f.push([1,"{\\"notFound\\":\\"$undefined\\"}"])</script>'
+        + '<script id="__NEXT_DATA__" type="application/json">{"props":{"notFound":"$undefined"}}</script></body></html>') === null);
+    봐('없어짐찾기 — 보이는 「404 Not Found」 는 없어짐',
+      없어짐찾기('<html><head><title>404 Not Found</title></head><body><h1>Not Found</h1></body></html>') === 'Not Found');
+    봐('없어짐찾기 — 워크넷 msgStr(스크립트 안 한글) 은 없어짐',
+      없어짐찾기("<script>var msgStr = '구인정보를 확인할 수 없습니다.';</script>") === '구인정보를 확인할 수 없');
+    봐('없어짐찾기 — 보이는 한글 안내도 없어짐',
+      없어짐찾기('<div class="msg">존재하지 않는 게시물입니다</div>') !== null);
+    봐('없어짐찾기 — 멀쩡한 공고는 null', 없어짐찾기('<td>물리치료사 채용 공고</td>') === null && 없어짐찾기(null) === null);
 
     if (어겼나.length) { console.error('✗ ' + 어겼나.join(' · ')); process.exit(1); }
-    console.log('○ 자기 점검 ' + 31 + '개 통과 (사이트를 두드리지 않았습니다)');
+    console.log('○ 자기 점검 ' + 본수 + '개 통과 (사이트를 두드리지 않았습니다)');
     console.log('   설정 ' + 설정().length + '곳 읽음 · html 갈래 '
       + 설정().filter((x) => x.type === 'html').length + '곳');
   }
