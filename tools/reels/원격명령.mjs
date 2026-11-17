@@ -28,11 +28,12 @@ const 할일표 = {
   카드확인: (id) => (id ? ['tools/reels/올리기.mjs', '--id', id, '--카드'] : null),
   브랜드확인: (id) => (id ? null : ['tools/reels/브랜드카드.mjs']),
   브랜드올리기: (id) => (id ? null : ['tools/reels/브랜드카드.mjs', '--실행']),
+  브랜드바꾸기: (id) => (id ? null : ['tools/reels/브랜드카드.mjs', '--바꾸기']),
   카드올리기: (id) => (id ? ['tools/reels/올리기.mjs', '--id', id, '--카드', '--실행'] : null),
   /* 당기기 — 서버 코드를 main 에 맞춤 (지침 8-10: 서버 반영은 git pull 로만). node 가 아니라 git 이라 따로 돌립니다 */
   당기기: (id) => (id ? null : ['git', 'pull', '--ff-only']),
 };
-const 영어 = { list: '목록', check: '확인', publish: '올리기', make: '만들기', pull: '당기기', 'check-cards': '카드확인', 'publish-cards': '카드올리기', 'brand-check': '브랜드확인', 'brand-publish': '브랜드올리기' };
+const 영어 = { list: '목록', check: '확인', publish: '올리기', make: '만들기', pull: '당기기', 'check-cards': '카드확인', 'publish-cards': '카드올리기', 'brand-check': '브랜드확인', 'brand-publish': '브랜드올리기', 'brand-replace': '브랜드바꾸기' };
 
 /** 들어온 글 → { 할일, id, 인수 } 또는 { 거절 } — 시험할 수 있게 갈라 둠 */
 export function 풀기(글) {
@@ -40,10 +41,10 @@ export function 풀기(글) {
   if (낱.length < 1 || 낱.length > 2) return { 거절: '「할일 [공고id]」 꼴만 받습니다' };
   const 할일 = 영어[낱[0]] || 낱[0];
   const id = 낱[1] || null;
-  if (!할일표[할일]) return { 거절: `모르는 할일 「${낱[0]}」 — 목록 · 확인 · 올리기 · 만들기 · 당기기 · 카드확인 · 카드올리기 · 브랜드확인 · 브랜드올리기` };
+  if (!할일표[할일]) return { 거절: `모르는 할일 「${낱[0]}」 — 목록 · 확인 · 올리기 · 만들기 · 당기기 · 카드확인 · 카드올리기 · 브랜드확인 · 브랜드올리기 · 브랜드바꾸기` };
   if (id && !/^[A-Za-z0-9_-]{1,40}$/.test(id)) return { 거절: '공고id 는 영문·숫자·-·_ 만' };
   const 인수 = 할일표[할일](id);
-  if (!인수) return { 거절: ['목록', '당기기', '브랜드확인', '브랜드올리기'].includes(할일) ? `${할일}에는 공고id 를 붙이지 않습니다` : `${할일}에는 공고id 가 필요합니다` };
+  if (!인수) return { 거절: ['목록', '당기기', '브랜드확인', '브랜드올리기', '브랜드바꾸기'].includes(할일) ? `${할일}에는 공고id 를 붙이지 않습니다` : `${할일}에는 공고id 가 필요합니다` };
   return { 할일, id, 인수 };
 }
 

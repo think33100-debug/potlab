@@ -2,6 +2,8 @@
 
    node tools/reels/브랜드카드.mjs                 만들기만 — log/reels/brand/<이름>/1.jpg … · 미리보기.jpg · 캡션을 찍음
    node tools/reels/브랜드카드.mjs --실행          만들어서 인스타 카드뉴스로 올림 (이미 올렸으면 멈춤 · --다시 로 다시)
+   node tools/reels/브랜드카드.mjs --바꾸기        새 판을 올린 **뒤** 전에 올린 게시물을 지움 (2026-11-17 세중님 「다시 올려 · 기존건 지워」)
+                                                  새로 올리기가 실패하면 기존 것은 그대로 둡니다
    원격  reels-remote · brand-check / brand-publish
 
    디자인 tools/reels/brand.html (디자인 지침의 브랜드 색 · 앱 자산 그대로) · 1080×1350 · 6장
@@ -11,7 +13,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { env, 인스타되나, 카드올리기IG, 댓글되나, 댓글달기, 답글달기 } from './ig.mjs';
+import { env, 인스타되나, 카드올리기IG, 댓글되나, 댓글달기, 답글달기, 게시물지우기 } from './ig.mjs';
 import { 라포소개 } from './reel-data.mjs';
 
 const require = createRequire(import.meta.url);
@@ -70,9 +72,11 @@ export async function 만들기() {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-  const 실행 = process.argv.includes('--실행');
+  const 바꾸기 = process.argv.includes('--바꾸기');
+  const 실행 = process.argv.includes('--실행') || 바꾸기;
   const 기록 = fs.existsSync(기록파일) ? JSON.parse(fs.readFileSync(기록파일, 'utf8')) : {};
-  if (실행 && 기록[이름]?.게시물ID && !process.argv.includes('--다시')) {
+  if (바꾸기 && !기록[이름]?.게시물ID) { console.error(`✗ 바꿀 기존 게시물이 없습니다 — ${이름}`); process.exit(1); }
+  if (실행 && !바꾸기 && 기록[이름]?.게시물ID && !process.argv.includes('--다시')) {
     console.error(`✗ 이미 올렸습니다 — ${이름} · 게시물 ${기록[이름].게시물ID} · ${기록[이름].주소 || ''} (다시 올리려면 --다시)`);
     process.exit(1);
   }
@@ -92,7 +96,15 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     try { const 첫 = await 댓글달기(cfg, 올림.media_id, 첫댓글); const 답 = await 답글달기(cfg, 첫, 태그); 댓글기록 = { 첫, 답 }; console.log(`  ○ 첫 댓글 ${첫} · 태그 대댓글 ${답}`); }
     catch (e) { console.error(`  ✗ 댓글을 못 달았습니다 — ${String(e.message || e).slice(0, 200)}\n    손으로: ${첫댓글} / ${태그}`); }
   }
-  기록[이름] = { 게시물ID: 올림.media_id, 주소: 올림.주소, 올린때: new Date().toISOString(), 댓글: 댓글기록 };
+  /* 바꾸기 — 새 판이 올라간 뒤에 전 게시물을 지웁니다 */
+  const 옛것들 = [...(기록[이름]?.옛것들 || [])];
+  if (바꾸기) {
+    const 옛 = 기록[이름];
+    const r = await 게시물지우기(cfg, 옛.게시물ID);
+    옛것들.push({ 게시물ID: 옛.게시물ID, 주소: 옛.주소, 올린때: 옛.올린때, 지움: r.ok, 지운때: new Date().toISOString(), 응답: r.응답 });
+    console.log(r.ok ? `  ○ 전 게시물 지움 — ${옛.게시물ID} (${옛.주소 || ''})` : `  ✗ 전 게시물을 못 지웠습니다 — ${옛.게시물ID} · ${r.응답} · 인스타에서 손으로 지워 주세요 (${옛.주소 || ''})`);
+  }
+  기록[이름] = { 게시물ID: 올림.media_id, 주소: 올림.주소, 올린때: new Date().toISOString(), 댓글: 댓글기록, 옛것들 };
   fs.mkdirSync(path.dirname(기록파일), { recursive: true });
   fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
   fs.appendFileSync(path.join(ROOT, 'log', '릴스_발행기록.jsonl'), JSON.stringify({ 때: new Date().toISOString(), 결과: '성공', 길: '브랜드 카드뉴스', 이름, 게시물ID: 올림.media_id, 게시물주소: 올림.주소 }) + '\n');
