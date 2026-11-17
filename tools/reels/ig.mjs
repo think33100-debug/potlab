@@ -58,7 +58,10 @@ export async function 그래프(cfg, 길, 옵션 = {}) {
 
 /** mp4 한 편을 릴스로 올립니다 → { media_id } (실패하면 던짐)
  *  커버(jpg)가 있으면 reels-cards 버킷에 잠깐 올려 cover_url 로 넘기고, 끝나면 지웁니다 (2026-11-17 세중님 「커버 따로」) */
-export async function 릴스올리기IG(cfg, mp4, 캡션, { 커버 = null, 열쇠 = 'reel' } = {}) {
+export async function 릴스올리기IG(cfg, mp4, 캡션, { 커버 = null, 열쇠 = 'reel', 스토리 = false } = {}) {
+  /* 스토리 = true — 같은 영상을 **스토리**로 (2026-11-17 세중님 「스토리에 영상은 못 올리나 · 홍성군 스토리로」)
+     media_type=STORIES · 글(캡션)·커버·share_to_feed 는 스토리에 없어 안 보냅니다. 링크 스티커는 API 로 못 붙입니다 */
+  if (스토리) 커버 = null;
   if (!인스타되나(cfg)) throw new Error('IG_USER_ID · IG_ACCESS_TOKEN 이 없습니다 (node tools/reels/ig.mjs --열쇠)');
   const 폼 = (o) => new URLSearchParams({ ...o, access_token: cfg.IG_ACCESS_TOKEN });
   let 커버길 = null;
@@ -72,7 +75,8 @@ export async function 릴스올리기IG(cfg, mp4, 캡션, { 커버 = null, 열�
   /* ★ 릴스는 **릴스 탭에만** — 프로필 그리드(피드)에 안 띄웁니다 (2026-11-17 세중님 「그리드에서 삭제해서 릴스 탭에만 · 계속 기억해」)
      share_to_feed=false → 「릴스 탭에만」. 그리드는 카드뉴스·브랜드 게시물 자리입니다 */
   const 컨 = await 그래프(cfg, `/${cfg.IG_USER_ID}/media`, { method: 'POST',
-    body: 폼({ media_type: 'REELS', upload_type: 'resumable', caption: 캡션, share_to_feed: 'false', ...덧 }) });
+    body: 폼(스토리 ? { media_type: 'STORIES', upload_type: 'resumable' }
+      : { media_type: 'REELS', upload_type: 'resumable', caption: 캡션, share_to_feed: 'false', ...덧 }) });
   const 크기 = fs.statSync(mp4).size;
   const up = await fetch(`https://rupload.facebook.com/ig-api-upload/${버전(cfg)}/${컨.id}`, { method: 'POST',
     headers: { Authorization: 'OAuth ' + cfg.IG_ACCESS_TOKEN, offset: '0', file_size: String(크기) }, body: fs.readFileSync(mp4) });
