@@ -26,7 +26,7 @@
      permission_confirmed 는 읽기만 합니다. 바꾸지 않습니다.
      운영 방침(출처 표시 · 요청 시 삭제 · 재게시 금지)은 「사용 허가」로 적지 않습니다.
 
-   게시 금지 — do_not_publish.json 을 **매 발행 직전에 다시** 읽습니다 (게시금지인가)
+   게시 금지 — 묶음 안 do_not_publish.json + 묶음 밖 ~/rapo777_게시금지.json 을 **매 발행 직전에 다시** 합쳐 읽습니다
      blocked_institutions 의 institution_ref 또는 key 가 같으면 그 기관은 **어떤 이미지로도** 안 냅니다.
 
    node tools/reels/rapo777.mjs --자기점검                 견본으로 규칙만 (어디서나)
@@ -173,18 +173,35 @@ export function 캡션출처줄(고른, 원문주소) {
 
 /* ── 게시 금지 ── */
 export function 금지파일(폴더) { return path.join(폴더, 'do_not_publish.json'); }
+/* ★ 2026-11-17 — 삭제 요청 목록은 **묶음 밖 한 곳**에 둡니다 (세중님: 드라이브 묶음이 계속 새로 쌓임).
+   묶음 폴더 안에만 두면 새 묶음으로 바꿀 때 삭제 요청 기록이 사라져 「재게시 금지」가 깨집니다.
+   게시중단.mjs 는 여기에만 씁니다. 읽을 때는 이 파일 + 묶음 안 do_not_publish.json 을 **합쳐** 봅니다 */
+export function 우리금지파일() { return process.env.RAPO777_BLOCK_FILE || path.join(os.homedir(), 'rapo777_게시금지.json'); }
+export function 우리금지읽기() {
+  const f = 우리금지파일();
+  if (!fs.existsSync(f)) return { schema_version: '1.0', blocked_institutions: [] };
+  const 몸 = JSON.parse(fs.readFileSync(f, 'utf8'));
+  if (!Array.isArray(몸.blocked_institutions)) throw new Error(`${f} 에 blocked_institutions 배열이 없습니다`);
+  return 몸;
+}
 export function 금지읽기(폴더) {
   const f = 금지파일(폴더);
   if (!fs.existsSync(f)) throw new Error(`do_not_publish.json 이 없습니다 — ${f}. 없이는 발행하지 않습니다`);
   const 몸 = JSON.parse(fs.readFileSync(f, 'utf8'));
   if (!Array.isArray(몸.blocked_institutions)) throw new Error('do_not_publish.json 에 blocked_institutions 배열이 없습니다');
-  return 몸;
+  return { blocked_institutions: [...몸.blocked_institutions, ...우리금지읽기().blocked_institutions] };
+}
+/** 같은 기관인가 — 묶음이 바뀌면 institution_ref 번호가 바뀔 수 있어 번호만으로 보지 않습니다.
+    ykiho 가 같거나 · key 가 같거나 · (번호가 같고 key 도 같으면). 이름이 같은 다른 병원까지 막힐 수 있는데,
+    그쪽은 「안 올림」이라 안전한 쪽입니다 */
+function 같은기관(b, 기관) {
+  if (b.ykiho && 기관.ykiho && b.ykiho === 기관.ykiho) return true;
+  if (b.key && b.key === 기관.key) return true;
+  return !!(b.institution_ref && b.institution_ref === 기관.institution_ref && (!b.key || b.key === 기관.key));
 }
 /** 매 발행 직전에 부릅니다 — 파일을 **그때** 다시 읽습니다 */
 export function 게시금지인가(폴더, 기관) {
-  const 몸 = 금지읽기(폴더);
-  const 걸림 = 몸.blocked_institutions.find((b) =>
-    (b.institution_ref && b.institution_ref === 기관.institution_ref) || (b.key && b.key === 기관.key));
+  const 걸림 = 금지읽기(폴더).blocked_institutions.find((b) => 같은기관(b, 기관));
   return 걸림 ? `게시 금지 (${걸림.requested_at || '때 미상'} · ${걸림.reason || '사유 없음'})` : null;
 }
 
@@ -290,8 +307,9 @@ function 자기점검() {
   봐('고르기 — missing 은 대기', /missing/.test(고('rapo777_0800').대기 || ''));
   봐('고르기 — 허가 미확인은 그대로 false', g1.허가확인 === false);
 
-  /* 게시 금지 — 실제 파일로 */
+  /* 게시 금지 — 실제 파일로 (묶음 밖 목록도 임시 자리로) */
   const 임시 = fs.mkdtempSync(path.join(os.tmpdir(), 'rapo777-'));
+  const 전 = process.env.RAPO777_BLOCK_FILE; process.env.RAPO777_BLOCK_FILE = path.join(임시, '우리.json');
   fs.writeFileSync(금지파일(임시), JSON.stringify({ blocked_institutions: [{ institution_ref: 'rapo777_0001', key: '강릉아산병원', reason: '시험', requested_at: '2026-11-17T00:00:00+09:00' }] }));
   봐('금지 — 등록된 기관은 걸림', !!게시금지인가(임시, 기관들[0]));
   봐('금지 — 다른 기관은 안 걸림', !게시금지인가(임시, 기관들[1]));
@@ -300,6 +318,13 @@ function 자기점검() {
   fs.rmSync(금지파일(임시));
   let 던짐 = false; try { 게시금지인가(임시, 기관들[0]); } catch { 던짐 = true; }
   봐('금지 — 파일이 없으면 발행하지 않음(던짐)', 던짐);
+  /* 묶음 밖 목록 — 새 묶음(번호가 바뀜)에서도 ykiho·key 로 막힘 · 묶음 안 목록이 비어도 막힘 */
+  fs.writeFileSync(금지파일(임시), JSON.stringify({ blocked_institutions: [] }));
+  fs.writeFileSync(path.join(임시, '우리.json'), JSON.stringify({ blocked_institutions: [{ institution_ref: 'rapo777_0001', key: '강릉아산병원', ykiho: 'YK1', reason: '요청' }] }));
+  봐('금지 — 묶음 밖 목록도 읽음', !!게시금지인가(임시, 기관들[0]));
+  봐('금지 — 새 묶음에서 번호가 바뀌어도 ykiho 로 막음', !!게시금지인가(임시, { ...기관들[0], institution_ref: 'rapo777_0999', key: '강릉아산병원(새)' }));
+  봐('금지 — 번호만 같은 다른 기관은 안 막음', !게시금지인가(임시, { institution_ref: 'rapo777_0001', key: '다른병원', ykiho: 'ZZ' }));
+  if (전) process.env.RAPO777_BLOCK_FILE = 전; else delete process.env.RAPO777_BLOCK_FILE;
   fs.rmSync(임시, { recursive: true });
 
   봐('중복 열쇠 — 기관 + 공고 id + 원문 주소', 발행열쇠들(기관들[0], ['A1'], 'https://u').join(' ') === 'YK1|id:A1 YK1|url:https://u');

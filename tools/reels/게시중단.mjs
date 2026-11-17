@@ -5,7 +5,7 @@
 
    하는 일 (CLAUDE_README 6절)
    ① 묶음(institutions.json)에서 그 기관을 **정확히 하나** 찾습니다 (institution_ref 또는 key 그대로)
-   ② do_not_publish.json 의 blocked_institutions 에 기관 참조번호 · key · 사유 · 요청 시각 · 기존 게시물ID 를 더합니다
+   ② 묶음 밖 ~/rapo777_게시금지.json 의 blocked_institutions 에 (새 묶음으로 바꿔도 남게 · ykiho 도 적음) 기관 참조번호 · key · 사유 · 요청 시각 · 기존 게시물ID 를 더합니다
       바꾸기 전 원본은 ~/되돌림/do_not_publish_<때>.json (지침 8-19)
    ③ 이미 올린 게시물 — IG 열쇠가 있으면 DELETE /{media_id} 를 부르고 응답 원문을 남깁니다.
       ★ 이 API 는 메타 블로그(2025-12)로만 확인했고 명세 원문은 못 열었습니다. 실패하면 「손으로 지울 것」으로 넘깁니다
@@ -17,7 +17,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 묶음폴더, 묶음읽기, 금지파일, 금지읽기 } from './rapo777.mjs';
+import { 묶음폴더, 묶음읽기, 금지읽기, 우리금지파일, 우리금지읽기 } from './rapo777.mjs';
 import { 게시물지우기 } from './ig.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -63,8 +63,9 @@ const 게시물ID = [...new Set(올린것.map(([, v]) => v.게시물ID))];
 
 console.log(`기관 ${기.institution_ref} · ${기.name} · ${기.address || '주소 없음'}`);
 console.log(`  올린 게시물 ${게시물ID.length} (${게시물ID.join(', ') || '없음'}) · 메일로 보낸 것 ${보낸것.length} · 발행 대기 ${대기것.length}`);
-const 금지 = 금지읽기(묶음.폴더);
-const 이미 = 금지.blocked_institutions.some((b) => b.institution_ref === 기.institution_ref);
+금지읽기(묶음.폴더);   /* 묶음 안 목록이 있나만 봅니다 — 쓰는 것은 묶음 밖 목록 하나 */
+const 금지 = 우리금지읽기();
+const 이미 = 금지.blocked_institutions.some((b) => b.institution_ref === 기.institution_ref && b.key === 기.key);
 console.log(`  제외 목록 — ${이미 ? '이미 있음 (게시물ID 만 보탭니다)' : '새로 더함'}`);
 if (!실행) { console.log('\n마른 실행 — 아무것도 바꾸지 않았습니다. --실행 을 붙이면 합니다'); process.exit(0); }
 
@@ -73,18 +74,19 @@ const 되돌림터 = path.join(os.homedir(), '되돌림');
 fs.mkdirSync(되돌림터, { recursive: true });
 const 때 = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace(/[-:T]/g, '').replace(/^(\d{8})/, '$1_');
 const 되돌림파일 = path.join(되돌림터, `do_not_publish_${때}.json`);
-fs.copyFileSync(금지파일(묶음.폴더), 되돌림파일);
+if (fs.existsSync(우리금지파일())) fs.copyFileSync(우리금지파일(), 되돌림파일); else fs.writeFileSync(되돌림파일, '{"blocked_institutions":[]}\n');
 if (이미) {
-  const b = 금지.blocked_institutions.find((x) => x.institution_ref === 기.institution_ref);
+  const b = 금지.blocked_institutions.find((x) => x.institution_ref === 기.institution_ref && x.key === 기.key);
   b.related_post_ids = [...new Set([...(b.related_post_ids || []), ...게시물ID])];
 } else {
-  금지.blocked_institutions.push({ institution_ref: 기.institution_ref, key: 기.key, reason: 사유, requested_at: 요청때, related_post_ids: 게시물ID });
+  /* ykiho 도 적습니다 — 새 묶음에서 institution_ref 번호가 바뀌어도 막히게 */
+  금지.blocked_institutions.push({ institution_ref: 기.institution_ref, key: 기.key, ykiho: 기.ykiho || null, name: 기.name, reason: 사유, requested_at: 요청때, related_post_ids: 게시물ID });
 }
 금지.updated_at = new Date().toISOString().slice(0, 10);
-fs.writeFileSync(금지파일(묶음.폴더), JSON.stringify(금지, null, 2));
-const 다시 = 금지읽기(묶음.폴더).blocked_institutions.filter((x) => x.institution_ref === 기.institution_ref).length;
+fs.writeFileSync(우리금지파일(), JSON.stringify(금지, null, 2));
+const 다시 = 우리금지읽기().blocked_institutions.filter((x) => x.institution_ref === 기.institution_ref && x.key === 기.key).length;
 if (다시 !== 1) { console.error(`✗ 제외 목록에 ${다시}줄 — 1줄이어야 합니다. 되돌림: ${되돌림파일}`); process.exit(1); }
-console.log(`  ○ 제외 목록 기록 · 되돌림 ${되돌림파일}`);
+console.log(`  ○ 제외 목록 기록 ${우리금지파일()} · 되돌림 ${되돌림파일}`);
 
 const 줄적기 = (줄) => fs.appendFileSync(발행기록파일, JSON.stringify({ 때: new Date().toISOString(), 기관ref: 기.institution_ref, 기관: 기.name, ...줄 }) + '\n');
 fs.mkdirSync(path.dirname(발행기록파일), { recursive: true });
