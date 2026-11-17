@@ -75,7 +75,13 @@ async function 돌리기({ argv = [], env = 기본환경, 늦음 = [늦은것()]
     },
     rmSync: (f) => { 결과.지움 += 1; 파일들.delete(f); },
   };
-  const 가짜받아보기 = async () => {
+  const 가짜받아보기 = async (주소) => {
+    /* 2026-11-18 — 메일 맨 위 쉬운 말 요약이 beat_health 를 한 번 더 읽습니다(보낼 것이 있을 때만).
+       판정 호출(hold_digest)만 RPC 로 세고, 요약 호출은 따로 셉니다 */
+    if (String(주소).includes('beat_health')) {
+      결과.요약RPC = (결과.요약RPC || 0) + 1;
+      return { ok: true, status: 200, text: async () => '[]' };
+    }
     결과.RPC += 1;
     return { ok: true, status: 200, text: async () => JSON.stringify({ '늦은 수집기': 늦음 }) };
   };
@@ -218,7 +224,11 @@ const 사례 = [
   ['--시험 성공 — 가짜 줄만 기록 1', async () => {
     const r = await 돌리기({ argv: ['--시험'], 늦음: [] });
     확인(r, { 발송: 1, 기록: 1, 종료: null, 저장본: { '시험(가짜)': 이제 } });
-    assert.ok(JSON.parse(r.메일요청.설정.body).subject.startsWith('[피오티잡 · 시험] '));
+    /* 2026-11-18 — 서비스 이름 RAPO (11/11 세중님 「POT JOB 쓰지 않기」) · 본문 맨 위는 쉬운 말 요약 */
+    const 보낸것 = JSON.parse(r.메일요청.설정.body);
+    assert.ok(보낸것.subject.startsWith('[RAPO · 시험] '));
+    assert.ok(보낸것.text.startsWith('■ 한눈에 — 1가지 자동 작업이 제때 안 돌았습니다'));
+    assert.ok(보낸것.text.includes('── 자세히 (개발용) ──'));
   }],
   ['--시험 설정 없음 — 기록 0', async () => {
     const r = await 돌리기({ argv: ['--시험'], 늦음: [], env: 키빼기('NOTIFY_EMAIL') });
