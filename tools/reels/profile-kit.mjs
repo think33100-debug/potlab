@@ -66,6 +66,20 @@ const 표지글 = (위, 아래, [바탕, 테, 큰, 작은]) => `<body style="wid
     ${아래 ? `<div style="font-size:${아래.length >= 4 ? 84 : 110}px;font-weight:800;line-height:1;margin-top:26px;color:${작은}">${아래}</div>` : ''}
   </div></body>`;
 
+/* R 로고 색 벌 (2026-11-17 세중님 「로고 R 을 색별로 · 프로필 사진을 색별로 만든다고 생각」)
+   [이름, 바탕, R 색] — 진한 바탕엔 흰 R, 연한 바탕엔 그 색의 R. 색은 RAPO 토큰 팔레트만 */
+const 로고색 = [
+  ['01-coral', '#FF4F40', '#FFFFFF'], ['02-navy', '#112231', '#FF4F40'], ['03-navy-white', '#112231', '#FFFFFF'],
+  ['04-blue', '#5E98FE', '#FFFFFF'], ['05-green', '#10AB7D', '#FFFFFF'], ['06-purple', '#9F84FB', '#FFFFFF'],
+  ['07-yellow', '#C49725', '#FFFFFF'], ['08-gray', '#2A3038', '#FFFFFF'],
+  ['11-coral-soft', '#FFF1EE', '#FF4F40'], ['12-blush', '#FFE9E6', '#FF4F40'], ['13-white', '#FFFFFF', '#FF4F40'],
+  ['14-blue-soft', '#EFF6FF', '#5E98FE'], ['15-green-soft', '#EDFAF6', '#10AB7D'], ['16-purple-soft', '#F5F3FE', '#9F84FB'],
+  ['17-yellow-soft', '#FFF7DE', '#C49725'], ['18-navy-soft', '#F5F8FA', '#112231'],
+];
+const R = (색) => 데이터(심볼.replace(/#FF4F40/gi, 색));
+const 로고판 = (바탕, 색, h) => `<body style="width:1080px;height:${h}px;background:${바탕};display:flex;align-items:center;justify-content:center">
+  <img src="${R(색)}" style="width:${h === 1080 ? 520 : 470}px;height:${h === 1080 ? 508 : 459}px;transform:translateX(8px)"></body>`;
+
 const browser = await chromium.launch();
 const page = await browser.newPage({ deviceScaleFactor: 1 });
 async function 찍기(이름, 몸, w, h) {
@@ -79,5 +93,11 @@ for (const [이름, 몸] of Object.entries(프로필)) await 찍기(이름, 몸,
 for (const [벌이름, 색고르기] of Object.entries(벌)) {
   fs.mkdirSync(path.join(나감, 'highlight-' + 벌이름), { recursive: true });
   for (const [이름, 위, 아래, 주제색] of 표지) await 찍기(path.join('highlight-' + 벌이름, 이름), 표지글(위, 아래, 색고르기(주제색)), 1080, 1920);
+}
+for (const [이름, 바탕, 색] of 로고색) {
+  fs.mkdirSync(path.join(나감, 'logo-profile'), { recursive: true });
+  fs.mkdirSync(path.join(나감, 'logo-highlight'), { recursive: true });
+  await 찍기(path.join('logo-profile', 이름), 로고판(바탕, 색, 1080), 1080, 1080);
+  await 찍기(path.join('logo-highlight', 이름), 로고판(바탕, 색, 1920), 1080, 1920);
 }
 await browser.close();
