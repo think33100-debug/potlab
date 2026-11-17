@@ -89,10 +89,14 @@ async function 돌기() {
   const 게시물 = (await 다받기(cfg, `/${cfg.IG_USER_ID}/media?fields=id,timestamp,permalink&limit=25&access_token=${열쇠}`))
     .filter((g) => 이제 - Date.parse(g.timestamp) < 창);
   console.log(`최근 7일 게시물 ${게시물.length}개`);
+  for (const g of 게시물) console.log(`  게시물 ${g.id} · ${g.timestamp} · ${g.permalink}`);
 
   const 할것 = [];
   for (const g of 게시물) {
     const 댓글 = await 다받기(cfg, `/${g.id}/comments?fields=id,text,username,timestamp&limit=50&access_token=${열쇠}`);
+    /* 진단 — 댓글 원문(앞 40자) · 받은 칸 이름 (지침 2절) */
+    console.log(`  ${g.permalink} 댓글 ${댓글.length}개`);
+    for (const c of 댓글) console.log(`    · ${c.id} · 칸 ${Object.keys(c).join(',')} · @${c.username ?? '?'} · ${c.timestamp} · 「${String(c.text ?? '').slice(0, 40)}」`);
     for (const c of 댓글) {
       if (c.username === 나.username) continue;                 /* 우리가 단 첫 댓글 */
       if (!링크말.test(c.text || '')) continue;
