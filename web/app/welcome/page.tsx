@@ -610,11 +610,10 @@ export default function Welcome() {
       {step === '학교' && (
         <section className="mt-(--rapo-dimension-x5) flex flex-col gap-(--rapo-dimension-x5)">
           {/* 왜 묻는지 — 임상가 ④ 맨 위 (2026-11-17 세중님 「이걸 왜 해야하는지 설명 · 이 정보를 모아 추후에 모두 투명하게 비교하면서
-              더 나은 근무환경을 만들 수 있게 할거라고 · 잘 보이게」). 졸업생 ⑤ 의 스펙 점수 안내와 같은 꼴(brand-weak 카드 · 48 그림 · t7 제목) */}
+              더 나은 근무환경을 만들 수 있게 할거라고 · 잘 보이게」). brand-weak 카드 · t7 제목 · 강조 말은 brand-contrast 굵게 */}
           {있음 && (
-            <div className="flex items-start gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
-              {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-              <img src="/rapo/home/graphic-pay-48.svg" alt="" width={48} height={48} className="shrink-0" />
+            /* 그림은 뺐습니다 — 글 폭이 좁아져서 (2026-11-17 세중님 「이미지에 토큰 빼 괜히 글이 쫍아지자너」) */
+            <div className="rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
               <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x2)">
                 <p className="rapo-type-t7-bold break-keep text-(color:--rapo-color-fg-neutral)">왜 입사 당시 정보를 묻나요?</p>
                 <p className="rapo-type-t5-regular break-keep text-(color:--rapo-color-fg-neutral)">
