@@ -44,6 +44,9 @@ export function 묶음폴더(cfg = {}) {
 export function 묶음읽기(폴더) {
   const f = path.join(폴더, 'institutions.json');
   if (!fs.existsSync(f)) throw new Error(`묶음이 없습니다 — ${f} (RAPO777_DIR 를 확인하세요)`);
+  /* ~/rapo777 은 링크입니다 — 실제 판 폴더로 풀어 둡니다. 한 바퀴 도는 사이에 묶음받기가 링크를 새 판으로 바꿔도
+     이 바퀴는 처음 읽은 판(목록과 그림이 맞는 한 벌)을 끝까지 씁니다 */
+  폴더 = fs.realpathSync(폴더);
   const 몸 = JSON.parse(fs.readFileSync(f, 'utf8'));
   const 기관들 = Array.isArray(몸) ? 몸 : 몸.institutions;
   if (!Array.isArray(기관들)) throw new Error('institutions.json 에 institutions 배열이 없습니다');

@@ -141,7 +141,12 @@ async function 본체() {
       if (옛 && fs.existsSync(옛)) { fs.mkdirSync(path.dirname(path.join(원본, f.경로)), { recursive: true }); fs.copyFileSync(옛, path.join(원본, f.경로)); }
       else p.받을.push(f);
     }
-    for (const f of p.받을) await 받기(cfg, f, path.join(원본, f.경로));
+    let 받은수 = 0;
+    for (const f of p.받을) {   /* 진행을 찍습니다 — 큰 ZIP 을 받는 몇 분 동안 멈춘 것처럼 보이지 않게 */
+      const t0 = Date.now();
+      await 받기(cfg, f, path.join(원본, f.경로));
+      console.log(`  ○ ${++받은수}/${p.받을.length} ${f.경로} · ${(f.크기 / 1e6).toFixed(1)}MB · ${((Date.now() - t0) / 1000).toFixed(0)}초`);
+    }
     /* ② 판 짜기 — ZIP 은 풀고, 나머지는 같은 자리로 복사 */
     const 색인f = path.join(원본, 'package_index.json');
     const 색인 = fs.existsSync(색인f) ? JSON.parse(fs.readFileSync(색인f, 'utf8')) : { archives: [] };
