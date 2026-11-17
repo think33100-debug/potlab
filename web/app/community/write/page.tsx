@@ -23,8 +23,12 @@ function Write() {
   const toast = useToast();
   const qs = useSearchParams();
   const { loading, session, me } = useAuth();
-  /* 학생·취준생은 글쓰기가 막혀 있습니다 — 커뮤니티 안내 화면으로 (2026-11-17 세중님 · DB 방에쓸수있나) */
-  useEffect(() => { if (me?.role === '학생') router.replace('/community'); }, [me, router]);
+  /* 커뮤니티는 지금 운영진만 씁니다 — 학생·취준생은 학생인증, 임상가는 연봉 인증·병원 후기가 열릴 때 엽니다 (2026-11-17 세중님 · DB 방에쓸수있나)
+     그 밖의 회원은 커뮤니티 안내 화면으로 보냅니다 */
+  useEffect(() => {
+    if (!me) return;
+    browserSupabase().rpc('방에쓸수있나', { p_방: 'free' }).then(({ data }) => { if (data === false) router.replace('/community'); });
+  }, [me, router]);
 
   const [ch, setCh] = useState(qs.get('ch') ?? 'free');
   const [title, setTitle] = useState('');

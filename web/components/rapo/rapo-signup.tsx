@@ -474,6 +474,22 @@ export function YearMonthSheet({ 년, 월, 연도들, on, 닫기 }: { 년?: stri
   );
 }
 
+/* 병원 후보 — 이름과 시군구가 같은 줄은 하나로 (2026-11-17 세중님 「광주보훈병원이 2개 나오고」).
+   까닭 — 2026년 광주·전남 통합으로 심평원 주소가 「전남광주통합특별시 광산구」가 되어, 같은 병원이 심평원 쪽은 「전남」·공공병원 목록 쪽은
+   「광주」로 갈려 병원 목록(org_group_mv)에 두 줄로 들어갑니다(광주 쪽 여덟 곳). 가입은 이름만 담으니 여기서 하나로 합칩니다.
+   둘 중 하나가 「광주」면 「광주」로 보여 줍니다. 「한국보훈복지의료공단」이 붙고 안 붙고는 심평원에 등록된 이름 그대로입니다 */
+export type 병원후보 = { name: string; 곳: string };
+export function 병원후보로(rs: { name: string; sido_std: string | null; sgg_std: string | null }[], 몇 = 5): 병원후보[] {
+  const 본 = new Map<string, { name: string; sido: string | null; sgg: string | null }>();
+  for (const r of rs) {
+    const 키 = r.name + '|' + (r.sgg_std ?? '');
+    const 있 = 본.get(키);
+    if (!있) 본.set(키, { name: r.name, sido: r.sido_std, sgg: r.sgg_std });
+    else if (r.sido_std === '광주') 있.sido = '광주';
+  }
+  return [...본.values()].slice(0, 몇).map((r) => ({ name: r.name, 곳: [r.sido, r.sgg].filter(Boolean).join(' ') }));
+}
+
 /* ── 근무한 병원 찾기 — 1245:3594(빈칸) · 3616(결과) · 3641/3665(직접 입력) · org_search(회원 권한) · 이름만 담습니다 ── */
 export function HospitalSearch({ 처음, 직접으로, on, 닫기 }: { 처음: string; 직접으로: boolean; on: (이름: string) => void; 닫기: () => void }) {
   const [직접, set직접] = useState(직접으로);
@@ -485,9 +501,8 @@ export function HospitalSearch({ 처음, 직접으로, on, 닫기 }: { 처음: s
     const t0 = q.trim();
     if (직접 || t0.length < 2) return;
     const t = setTimeout(async () => {
-      const { data } = await browserSupabase().rpc('org_search', { p_q: t0, p_tile: null, p_sido: null, p_sgg: null, p_sort: null, p_limit: 5, p_offset: 0 });
-      const rs = (data ?? []) as { name: string; sido_std: string | null; sgg_std: string | null }[];
-      set후보(rs.map((r) => ({ name: r.name, 곳: [r.sido_std, r.sgg_std].filter(Boolean).join(' ') })));
+      const { data } = await browserSupabase().rpc('org_search', { p_q: t0, p_tile: null, p_sido: null, p_sgg: null, p_sort: null, p_limit: 8, p_offset: 0 });
+      set후보(병원후보로((data ?? []) as { name: string; sido_std: string | null; sgg_std: string | null }[]));
     }, 250);
     return () => clearTimeout(t);
   }, [q, 직접]);

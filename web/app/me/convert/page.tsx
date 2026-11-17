@@ -6,8 +6,9 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { Chips, Langs, Rows } from '@/components/signup-survey';
 import { RapoButton } from '@/components/rapo/rapo-ui';
-import { RapoFormFrame as Frame, 골라, 만점읽기, 칸, 학년별담기, 학년별읽기, 학년수구하기, 학점칸, 학점들틀렸나 } from '@/components/rapo/rapo-spec-form';
+import { RapoFormFrame as Frame, 골라, 만점읽기, 칸, 학년별읽기, 학점칸, 학점들틀렸나 } from '@/components/rapo/rapo-spec-form';
 import { 둥근별 } from '@/components/rapo/rapo-org-reviews';
+import { 병원후보로 } from '@/components/rapo/rapo-signup';
 import { 기타글, 기타글최대, 기타머리, 기타인가, 답다됨, 후기질문, type 후기답 } from '@/lib/work-review';
 import { todayKst } from '@/lib/job-state';
 import { 학력목록 } from '@/lib/school-period';
@@ -80,10 +81,11 @@ export default function Convert() {
     if (step !== '병원' || 직접입력 || q.length < 2) { set병원후보([]); return; }
     const t = setTimeout(async () => {
       const { data } = await browserSupabase().rpc('org_search', {
-        p_q: q, p_tile: null, p_sido: null, p_sgg: null, p_sort: null, p_limit: 5, p_offset: 0,
+        p_q: q, p_tile: null, p_sido: null, p_sgg: null, p_sort: null, p_limit: 8, p_offset: 0,
       });
       const rs = (data ?? []) as { name: string; sido_std: string | null; sgg_std: string | null }[];
-      set병원후보(rs.filter((r) => r.name !== q).map((r) => ({ name: r.name, 곳: [r.sido_std, r.sgg_std].filter(Boolean).join(' ') })));
+      /* 같은 병원이 두 줄(광주·전남)로 오는 것을 하나로 — components/rapo/rapo-signup.tsx 병원후보로 */
+      set병원후보(병원후보로(rs.filter((r) => r.name !== q)));
     }, 250);
     return () => clearTimeout(t);
   }, [병원, step, 직접입력]);
@@ -113,11 +115,12 @@ export default function Convert() {
   const job = me.job_group ?? '작업치료사';
   const 학교없음 = 학력 === '학교 경험 없음';
   const 학점수 = Number(학점);
-  const 학년수 = 학년수구하기(학력);
+  /* 학년별 학점은 없앴습니다 — 평균 학점 하나 · 필수 (2026-11-17 세중님) */
+  const 학년수 = 0;
   const 학점틀림 = !학교없음 && 학점들틀렸나(학점, 학년별, 학년수, 만점값);
-  const 학년별값 = 학교없음 ? null : 학년별담기(학년별, 학년수);
-  const 학점있음 = !학교없음 && (!!학점.trim() || !!학년별값);
-  const 병원됨 = !!병원.trim() && !!입사연도 && !!학력 && !학점틀림;
+  const 학년별값 = null;
+  const 학점있음 = !학교없음 && !!학점.trim();
+  const 병원됨 = !!병원.trim() && !!입사연도 && !!학력 && !학점틀림 && (학교없음 || 학점수 > 0);
   const 스펙됨 = certs.length > 0 && courses.length > 0 && (rowsNone || rowsReady(rows)) && langs.every((r) => !langError(r));
   const 후기됨 = 별점 > 0 && 답다됨(답);
 
