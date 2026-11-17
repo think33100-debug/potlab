@@ -27,12 +27,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { 릴스자료, 오늘KST, 릴스대상, 같은공고묶기 } from './reel-data.mjs';
+import { 릴스자료, 오늘KST, 릴스대상, 같은공고묶기, 급여기준 } from './reel-data.mjs';
 /* 이미지 — RAPO 777기관 묶음 한 자리 (2026-11-17 · tools/reels/rapo777.mjs). 옛 photo-list.json 길은 쓰지 않습니다 */
 import { 묶음폴더, 묶음읽기, 이미지붙이기, 게시금지인가 } from './rapo777.mjs';
 import { 드라이브되나, 릴스올리기 } from './drive.mjs';
 import { 원문확인 } from './원문확인.mjs';
-import { 카드만들기 } from './카드.mjs';
+import { 카드만들기, 커버만들기 } from './카드.mjs';
 import { 인스타되나, 릴스올리기IG } from './ig.mjs';
 import crypto from 'node:crypto';
 import { 모두받기, 받아보기 } from '../쪽나눠받기.mjs';
@@ -102,6 +102,18 @@ async function rest(길) {
   if (!r.ok) throw new Error(길.slice(0, 60) + ' HTTP ' + r.status + ' ' + (await r.text()).slice(0, 300));
   return r.json();
 }
+/* 이 병원 공시 연봉 — 회원 화면 「이 병원 공시 연봉」과 같은 DB 함수 공고병원보수() (2026-11-17 세중님 「이런 건 참고해서 쓰면 돼」)
+   못 받으면 null — 그 공고는 급여가 없는 것으로 보고 넘어갑니다 */
+async function 공시보수(id) {
+  try {
+    const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('공고병원보수'),
+      { method: 'POST', headers: { ...H, 'content-type': 'application/json' }, body: JSON.stringify({ p_공고: id }) });
+    const 글 = await r.text();
+    if (!r.ok) { console.error(`  (공시 연봉을 못 받음 ${id} · HTTP ${r.status} · ${가림(글).slice(0, 200)})`); return null; }
+    const j = 글 ? JSON.parse(글) : null;
+    return (Array.isArray(j) ? j[0] : j) || null;
+  } catch (e) { console.error(`  (공시 연봉을 못 받음 ${id} · ${String(e.message || e).slice(0, 120)})`); return null; }
+}
 async function 분류(id) {
   const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('공고분류'),
     { method: 'POST', headers: { ...H, 'content-type': 'application/json' }, body: JSON.stringify({ p_id: id }) });
@@ -114,7 +126,9 @@ async function 분류(id) {
 const 칸 = 'id,title,원문제목,org_name,employ_type,headcount,apply_to,apply_to_time,job_group,조교연구,posted_at,url';
 const 시작일 = new Date(Date.parse(오늘) - 며칠 * 86400e3).toISOString().slice(0, 10);
 const 후보 = 한건
-  ? await rest(`job_posts_pub?select=${칸}&id=eq.${encodeURIComponent(한건)}`)
+  /* 번호만 주면(「306973」) 직군별 줄(…-PT · …-OT)을 함께 받아 한 편으로 묶습니다 (2026-11-17 건보 일산) */
+  ? (/-(PT|OT)$/.test(한건) ? await rest(`job_posts_pub?select=${칸}&id=eq.${encodeURIComponent(한건)}`)
+    : await rest(`job_posts_pub?select=${칸}&order=id.asc&id=in.(${encodeURIComponent(한건 + '-PT')},${encodeURIComponent(한건 + '-OT')},${encodeURIComponent(한건)})`))
   : await 모두받기(`${cfg.SUPABASE_URL}/rest/v1/job_posts_pub?select=${칸}&posted_at=gte.${시작일}`, H);
 console.log(`후보 ${후보.length}건 (게시 ${한건 ? '— id ' + 한건 : 시작일 + ' 이후'})`);
 
@@ -127,7 +141,9 @@ for (const 공고 of 후보) {
      중복 열쇠도 그 공고 것만 풀어 줍니다. 올린 것·취소된 것·삭제된 것은 그대로 막습니다 */
   if (한건 && 기록[공고.id]) {
     const 전 = 기록[공고.id];
-    if (전.게시물ID || 전.상태 !== '확인 대기') { console.log(`  건너뜀 ${공고.id} — 상태 「${전.상태 || (전.메일보낸때 ? '메일보냄' : '기록 있음')}」 라 다시 만들지 않습니다`); continue; }
+    /* 상태 칸이 없는 옛 기록(메일만 보낸 것 · 2026-11-17 오전)도 아직 안 올렸으면 다시 만듭니다 */
+    const 다시되나 = !전.게시물ID && !전.카드게시물ID && (전.상태 === '확인 대기' || (!전.상태 && 전.메일보낸때));
+    if (!다시되나) { console.log(`  건너뜀 ${공고.id} — 상태 「${전.상태 || (전.메일보낸때 ? '메일보냄' : '기록 있음')}」 라 다시 만들지 않습니다`); continue; }
     for (const [k, v] of Object.entries(기록.__발행열쇠)) if (v === 공고.id) delete 기록.__발행열쇠[k];
     console.log(`  다시 만들기 ${공고.id} — 확인 대기였던 것을 새로 만들어 덮어씁니다`);
   }
@@ -135,6 +151,8 @@ for (const 공고 of 후보) {
   /* 기관 공식 값 — 기관 표 → 심평원 · 급여 원문은 상세 화면과 같은 차례(뽑은값.예상연봉 → detail.연봉 → detail.예상연봉) */
   const [jp] = await rest(`job_posts?select=기관번호,뽑은값,detail&id=eq.${encodeURIComponent(공고.id)}`);
   공고.연봉원문 = (jp?.뽑은값?.['예상연봉'] ?? jp?.detail?.['연봉'] ?? jp?.detail?.['예상연봉'] ?? null) || null;
+  /* 공고에 읽을 수 있는 금액이 없으면 공시 연봉을 받아 둡니다 — 쓸지는 reel-data.mjs 의 급여고르기() 가 정합니다 */
+  if (!급여기준(공고.연봉원문)) 공고.공시보수 = await 공시보수(공고.id);
   let 기관 = null;
   if (jp?.기관번호) {
     const [g] = await rest(`기관?select=기관번호,이름,주소,종별이름,설립구분이름,상급종합인가,대학병원인가,ykiho&기관번호=eq.${encodeURIComponent(jp.기관번호)}`);
@@ -272,16 +290,20 @@ for (const 자료 of 통과) {
   /* 카드뉴스 — 같은 장면 3~4장 (2026-11-17 세중님 「릴스와 카드뉴스 둘 다」). 실패해도 릴스는 보냅니다 */
   let 카드 = [];
   try { 카드 = await 카드만들기(바탕 + '.json', 나감); } catch (e) { console.error(`  ✗ 카드 못 만듦 ${자료.id} — ${String(e.message || e).slice(0, 200)}`); }
+  /* 커버 (2026-11-17 세중님 「시그니처 컬러에 흰색 글」) — 릴스 커버 · 카드뉴스 첫 장. 못 만들면 영상 2.6초 화면을 표지로 */
+  let 커버 = null;
+  try { 커버 = await 커버만들기(바탕 + '.json', 나감); } catch (e) { console.error(`  ✗ 커버 못 만듦 ${자료.id} — ${String(e.message || e).slice(0, 200)}`); }
+  if (커버?.카드 && 카드.length) 카드 = [커버.카드, ...카드];
   /* 미리보기 — 표지 + 카드를 높이 320 으로 줄여 한 장에 (2026-11-17 세중님 「완성본 나오면 먼저 보여줘」)
      대화에서 이 한 장을 열어 먼저 보여 드리고 확인받은 뒤 올립니다 */
   const 미리보기 = 바탕 + '-미리보기.jpg';
-  const 장들 = [바탕 + '-cover.jpg', ...카드].filter((f) => fs.existsSync(f));
+  const 장들 = [커버?.릴스 || 바탕 + '-cover.jpg', ...카드].filter((f) => fs.existsSync(f));
   if (장들.length) {
     const 거름 = 장들.map((_, i) => `[${i}]scale=-2:320[v${i}]`).join(';') + ';' + 장들.map((_, i) => `[v${i}]`).join('') + `hstack=${장들.length}`;
     const m = spawnSync('ffmpeg', ['-loglevel', 'error', '-y', ...장들.flatMap((f) => ['-i', f]), '-filter_complex', 장들.length > 1 ? 거름 : '[0]scale=-2:320', '-q:v', '6', 미리보기]);
     if (m.status !== 0) console.error(`  ✗ 미리보기 못 만듦 ${자료.id} — ${String(m.stderr || '').slice(0, 200)}`);
   }
-  만든것.push({ 자료, mp4: 바탕 + '.mp4', 표지: 바탕 + '-cover.jpg', 카드, 미리보기: fs.existsSync(미리보기) ? 미리보기 : null });
+  만든것.push({ 자료, mp4: 바탕 + '.mp4', 표지: 커버?.릴스 || 바탕 + '-cover.jpg', 릴스커버: 커버?.릴스 || null, 카드, 미리보기: fs.existsSync(미리보기) ? 미리보기 : null });
   console.log(`  ○ ${자료.id} · ${자료.기관} · ${자료.직군} · ${자료.마감.큰글}`);
 }
 
@@ -290,7 +312,7 @@ if (메일) {
   if (!cfg.RESEND_KEY || !cfg.NOTIFY_EMAIL) { console.error('RESEND_KEY · NOTIFY_EMAIL 이 없습니다 — 보내지 않습니다'); process.exit(1); }
   const 드라이브 = 드라이브되나(cfg);
   console.log(드라이브 ? '드라이브에 올리고 링크 메일' : '드라이브 열쇠 없음 — 첨부 메일');
-  for (const { 자료, mp4, 표지, 카드, 미리보기 } of 만든것) {
+  for (const { 자료, mp4, 표지, 릴스커버, 카드, 미리보기 } of 만든것) {
     if (직전금지(자료)) continue;
     /* 드라이브 「RAPO 릴스/<YYYY-MM>」 — 영상 · 표지 · 캡션 글 */
     let 링크 = null;
@@ -345,7 +367,7 @@ if (메일) {
     /* 확인 뒤 올리기(올리기.mjs)가 **이 영상 그대로** 올리도록 경로·지문·캡션·마감·원문을 남깁니다 */
     낸것적기(자료, { 메일보낸때: new Date().toISOString(), 드라이브: 링크, 게시물ID: null, 상태: '확인 대기',
       영상: mp4, 영상지문: crypto.createHash('sha256').update(fs.readFileSync(mp4)).digest('hex'),
-      캡션: 자료.캡션, 마감일: 자료.원문.apply_to || null, 원문자료: 자료.원문, 카드 });
+      캡션: 자료.캡션, 마감일: 자료.원문.apply_to || null, 원문자료: 자료.원문, 카드, 커버: 릴스커버 });
   }
   process.exit(0);
 }

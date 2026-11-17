@@ -50,6 +50,31 @@ export async function 카드만들기(자료파일, 나감) {
   } finally { await browser.close(); }
 }
 
+/* 커버 (2026-11-17 세중님 「커버 이미지는 톤앤매너 맞게 따로 · 시그니처 컬러에 흰색 글」) — cover.html
+   → { 릴스: <id>-커버.jpg (1080×1920 · 릴스 커버) , 카드: <id>-커버카드.jpg (1080×1350 · 카드뉴스 첫 장) } */
+export async function 커버만들기(자료파일, 나감) {
+  const { chromium } = require('playwright');
+  const 자료 = JSON.parse(fs.readFileSync(자료파일, 'utf8'));
+  fs.mkdirSync(나감, { recursive: true });
+  const browser = await chromium.launch();
+  try {
+    const 나온것 = {};
+    for (const [판, 높이, 이름] of [['reel', 1920, '커버'], ['card', 1350, '커버카드']]) {
+      const page = await browser.newPage({ viewport: { width: 1080, height: 높이 }, deviceScaleFactor: 1 });
+      await page.goto(pathToFileURL(path.join(여기, 'cover.html')).href);
+      await page.evaluate(() => document.fonts.ready);
+      await page.evaluate(([d, p]) => window.__setData(d, p), [자료, 판]);
+      await page.evaluate(() => document.fonts.ready);
+      await page.evaluate(([d, p]) => window.__setData(d, p), [자료, 판]);   /* 글꼴이 온 뒤 다시 — 폭 재기 */
+      const f = path.join(나감, `${자료.id}-${이름}.jpg`);
+      await page.screenshot({ path: f, type: 'jpeg', quality: 92 });
+      나온것[판 === 'reel' ? '릴스' : '카드'] = f;
+      await page.close();
+    }
+    return 나온것;
+  } finally { await browser.close(); }
+}
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   const 인수 = (n) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : null; };
   if (!인수('자료') || !인수('나감')) { console.error('--자료 <reel.json> --나감 <폴더>'); process.exit(2); }

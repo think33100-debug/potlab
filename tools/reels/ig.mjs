@@ -56,12 +56,21 @@ async function 그래프(cfg, 길, 옵션 = {}) {
   return JSON.parse(글);
 }
 
-/** mp4 한 편을 릴스로 올립니다 → { media_id } (실패하면 던짐) */
-export async function 릴스올리기IG(cfg, mp4, 캡션) {
+/** mp4 한 편을 릴스로 올립니다 → { media_id } (실패하면 던짐)
+ *  커버(jpg)가 있으면 reels-cards 버킷에 잠깐 올려 cover_url 로 넘기고, 끝나면 지웁니다 (2026-11-17 세중님 「커버 따로」) */
+export async function 릴스올리기IG(cfg, mp4, 캡션, { 커버 = null, 열쇠 = 'reel' } = {}) {
   if (!인스타되나(cfg)) throw new Error('IG_USER_ID · IG_ACCESS_TOKEN 이 없습니다 (node tools/reels/ig.mjs --열쇠)');
   const 폼 = (o) => new URLSearchParams({ ...o, access_token: cfg.IG_ACCESS_TOKEN });
+  let 커버길 = null;
+  if (커버 && fs.existsSync(커버)) {
+    커버길 = `${String(열쇠).replace(/[^A-Za-z0-9_-]/g, '_')}/${Date.now()}/cover.jpg`;
+    try { await 저장소(cfg, 'POST', `object/${카드버킷}/${커버길}`, fs.readFileSync(커버), { 'content-type': 'image/jpeg', 'x-upsert': 'true' }); }
+    catch (e) { console.error(`    ✗ 커버를 못 올림 — 영상 2.6초 화면으로 · ${String(e.message || e).slice(0, 200)}`); 커버길 = null; }
+  }
+  try {
+  const 덧 = 커버길 ? { cover_url: `${cfg.SUPABASE_URL}/storage/v1/object/public/${카드버킷}/${커버길}` } : { thumb_offset: '2600' };
   const 컨 = await 그래프(cfg, `/${cfg.IG_USER_ID}/media`, { method: 'POST',
-    body: 폼({ media_type: 'REELS', upload_type: 'resumable', caption: 캡션, share_to_feed: 'true', thumb_offset: '2600' }) });
+    body: 폼({ media_type: 'REELS', upload_type: 'resumable', caption: 캡션, share_to_feed: 'true', ...덧 }) });
   const 크기 = fs.statSync(mp4).size;
   const up = await fetch(`https://rupload.facebook.com/ig-api-upload/${버전(cfg)}/${컨.id}`, { method: 'POST',
     headers: { Authorization: 'OAuth ' + cfg.IG_ACCESS_TOKEN, offset: '0', file_size: String(크기) }, body: fs.readFileSync(mp4) });
@@ -80,7 +89,10 @@ export async function 릴스올리기IG(cfg, mp4, 캡션) {
   const 올림 = await 그래프(cfg, `/${cfg.IG_USER_ID}/media_publish`, { method: 'POST', body: 폼({ creation_id: 컨.id }) });
   let 주소 = null;
   try { 주소 = (await 그래프(cfg, `/${올림.id}?fields=permalink&access_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}`)).permalink || null; } catch { /* 주소는 없어도 됩니다 */ }
-  return { media_id: 올림.id, 주소 };
+  return { media_id: 올림.id, 주소, 커버: !!커버길 };
+  } finally {
+    if (커버길) try { await 저장소(cfg, 'DELETE', `object/${카드버킷}`, JSON.stringify({ prefixes: [커버길] }), { 'content-type': 'application/json' }); } catch (e) { console.error(`    ✗ 커버를 버킷에서 못 지움 (${커버길}) — 손으로 지워 주세요`); }
+  }
 }
 
 /* ── 카드뉴스(캐러셀) 올리기 (2026-11-17 세중님 「카드뉴스도 · 저장소 만들어」) ──
