@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { RapoBannerCarousel } from './rapo-banner-carousel';
 import { SpecEntryArt, SpecEntryLabel, 스펙비교길 } from './rapo-spec-entry';
 import { RapoShell } from './rapo-shell';
+import { RapoStartScroller } from './rapo-start-scroller';
 import { RapoButton, RapoSectionTitle } from './rapo-ui';
 import type { ReactNode } from 'react';
 import type { Who } from '@/lib/supabase-server';
@@ -203,7 +204,8 @@ function StartHere() {
         <RapoSectionTitle id="rapo-home-start">라포에서 시작하기</RapoSectionTitle>
         <span className="rapo-type-t3-regular shrink-0 whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">옆으로 넘겨 보세요 ›</span>
       </div>
-      <ul className="flex snap-x snap-mandatory gap-(--rapo-dimension-x3) overflow-x-auto scroll-px-(--rapo-dimension-x5) px-(--rapo-dimension-x5)
+      {/* 마우스 기기에는 양옆에 흰 화살표가 뜹니다 (rapo-start-scroller.tsx · 2026-11-18) */}
+      <RapoStartScroller className="flex snap-x snap-mandatory gap-(--rapo-dimension-x3) overflow-x-auto scroll-px-(--rapo-dimension-x5) px-(--rapo-dimension-x5)
                      [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {시작카드들.map((c) => (
           <li key={c.href} className="w-[44%] min-w-[150px] max-w-[200px] shrink-0 snap-start">
@@ -226,7 +228,7 @@ function StartHere() {
             </Link>
           </li>
         ))}
-      </ul>
+      </RapoStartScroller>
     </section>
   );
 }
