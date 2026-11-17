@@ -11,6 +11,8 @@ import { RapoButton } from '@/components/rapo/rapo-ui';
 import { 만점들, 학교찾기칸, 학점들틀렸나, 희망유형들 as 희망유형, 희망지역들 as 희망지역 } from '@/components/rapo/rapo-spec-form';
 import { 가입진행, PickGroupField, 꺾쇠, 느낌표, HospitalSearch, PracticeField, LangField, 여는칸, YearMonthSheet, 저장점, 체크마크 } from '@/components/rapo/rapo-signup';
 import { 스펙비교길 } from '@/components/rapo/rapo-spec-entry';
+import { RapoNicknameField } from '@/components/rapo/rapo-nickname-field';
+import { 닉네임됨, 닉네임문제 } from '@/lib/nickname';
 import { RapoSpecScoreCard } from '@/components/rapo/rapo-spec-score';
 import { clearAfterLogin, peekAfterLogin } from '@/lib/after-login';
 import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave, type LangRow, type WorkRow } from '@/lib/signup-fields';
@@ -51,7 +53,7 @@ import { useToast } from '../toast';
      · 관심 「아직 모르겠어요」 · 듣고 싶은 교육 「취업 특강」 · 끝 화면 글과 추천 메뉴
 
    2026-11-17 (둘째) 세중님 「졸업생 수정 · 학생, 취준생 대상」
-     · 닉네임 4~12자 · 비속어·음란 용어 금지 (DB 가 막고 여기는 글만 맞춤 · 금고 SQL_1113/ZZB) · 동의 화면 「필수」 색
+     · 닉네임 4~10자(같은 날 세중님 「10글자 이내」) · 자음·모음 낱자 금지 · 비속어·음란 용어 금지 (DB 가 막고 여기는 글만 맞춤 · 금고 SQL_1113/ZZB) · 동의 화면 「필수」 색
      · 졸업을 누르면 입학 연월 아래 「취준생이시네요!」 · 무료 열람 안내는 색 상자로 강조 (재학·졸업 모두)
      · 학생·취준생은 학년별 학점 · 「아직 성적이 없어요」 없음. 졸업생의 학점(필수)은 ⑤ 자격·교육·실습 화면 맨 위로
      · ⑤ 의 단추는 「스펙 점수 확인하기」 — 저장 없이 총점을 받아(spec_preview) 점수 화면을 보여 주고 ⑥ 으로 이어 감
@@ -204,9 +206,9 @@ export default function Welcome() {
   const saveNickname = async () => {
     if (!job || !role) { go('내정보'); return; }
     const name = nick.trim();
-    /* 4~12자 (2026-11-17 세중님 「4글자 이상」) — 전에 정해 둔 닉네임을 그대로 두고 지나가는 것은 막지 않습니다(기존 것은 그대로).
+    /* 4~10자 · 자음·모음 낱자 금지 (2026-11-17 세중님 · 규칙은 lib/nickname.ts 한 자리) — 전에 정해 둔 닉네임을 그대로 두고 지나가는 것은 막지 않습니다(기존 것은 그대로).
        비속어·음란 용어는 DB 가 가립니다(닉네임규칙어김 · 금고 SQL_1113/ZZB) — 그 글(22023)을 그대로 보여 줍니다 */
-    if (name !== me?.nickname && (name.length < 4 || name.length > 12)) { setNickErr('4자에서 12자까지 쓸 수 있어요'); return; }
+    if (name !== me?.nickname && 닉네임문제(name)) { setNickErr(닉네임문제(name)); return; }
     setBusy(true); setNickErr(null);
     const sb = browserSupabase();
     /* 가입 줄이 이미 있음 — ③으로 돌아온 분. 닉네임만 고칩니다(가입 중 고침은 5번 셈에 안 들어감 · 금고 SQL_1113/ZX) */
@@ -408,7 +410,7 @@ export default function Welcome() {
   const 아래단추 =
     step === '동의' ? <RapoButton onClick={베타동의남기기} disabled={!allRequired || busy} full>{busy ? '확인하는 중…' : '동의하고 다음'}</RapoButton>
     : step === '내정보' ? <RapoButton onClick={saveWho} disabled={busy || !job || !role} full>{busy ? '저장하는 중…' : '다음'}</RapoButton>
-    : step === '닉네임' ? <RapoButton onClick={saveNickname} disabled={busy || (nick.trim().length < 4 && nick.trim() !== (me?.nickname ?? null))} full>{busy ? '저장하는 중…' : me ? '다음' : '가입하기'}</RapoButton>
+    : step === '닉네임' ? <RapoButton onClick={saveNickname} disabled={busy || (!닉네임됨(nick) && nick.trim() !== (me?.nickname ?? null))} full>{busy ? '저장하는 중…' : me ? '다음' : '가입하기'}</RapoButton>
     : step === '학교' ? <RapoButton onClick={() => go(재학 ? '희망' : '스펙')} disabled={!학교됨} full>다음</RapoButton>
     : step === '스펙' ? (졸업생
       ? <RapoButton onClick={점수보기} disabled={!스펙됨 || 점수중} full>{점수중 ? '점수를 계산하는 중…' : '스펙 점수 확인하기'}</RapoButton>
@@ -596,10 +598,8 @@ export default function Welcome() {
       {step === '닉네임' && (
         <section className="mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x3)">
           <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">라포에서 이 이름으로 보여요. 나중에 5번까지 바꿀 수 있어요.</p>
-          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">비속어나 선정적인 말은 쓸 수 없어요.</p>
-          <input value={nick} onChange={(e) => { setNick(e.target.value); setNickErr(null); }} maxLength={12} placeholder="4~12자" aria-label="닉네임"
-            className={칸 + ' h-[56px] ' + (nickErr ? 'border-(color:--rapo-color-stroke-critical-solid)' : '')} />
-          {nickErr && <p role="alert" className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-critical)">{nickErr}</p>}
+          {/* 글자 수 · 규칙 안내 · 적는 동안 알림 — components/rapo/rapo-nickname-field.tsx (2026-11-17 세중님 「글자수 제한에 대해서도 잘 알려줘」) */}
+          <RapoNicknameField v={nick} on={(v) => { setNick(v); setNickErr(null); }} err={nickErr} 검사={nick.trim() !== me?.nickname} />
         </section>
       )}
 
