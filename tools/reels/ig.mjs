@@ -48,7 +48,7 @@ const 버전 = (cfg) => cfg.IG_GRAPH_VERSION || 'v23.0';
 const 가리개 = (cfg) => (s) => [cfg.IG_ACCESS_TOKEN, cfg.META_APP_SECRET].filter(Boolean)
   .reduce((a, k) => a.split(k).join('‹열쇠›'), String(s));
 
-async function 그래프(cfg, 길, 옵션 = {}) {
+export async function 그래프(cfg, 길, 옵션 = {}) {
   const r = await fetch(`https://graph.facebook.com/${버전(cfg)}${길}`, 옵션);
   const 글 = await r.text();
   console.log(`    ${옵션.method || 'GET'} ${길.split('?')[0]} → ${r.status} · ${가리개(cfg)(글).slice(0, 600)}`);
