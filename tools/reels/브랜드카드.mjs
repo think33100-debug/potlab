@@ -63,9 +63,9 @@ export const 판들 = {
   guide: {
     이름: '사용설명서_1', html: 'guide.html',
     캡션: [
-      '라포, 이렇게 써요!',
-      '치료사 취업 준비할 때 필요한 걸 한 장씩 정리했어요.',
-      ['① 채용공고 — 공공·종합·대학병원 공고를 한곳에', '② 경쟁률 찾아보기 — 공공기관 지난 채용 경쟁률', '③ 병원 정보 — 치료사 인원 · 공시 연봉 · 근무 후기', '④ 월급 확인 · 계산기 — 세후 월급 · 퇴직금 · 연차 · 실업급여', '⑤ 커뮤니티 · 교육 · 봉사 · 청년정책'].join('\n'),
+      '이런 기능까지 있다고?',
+      '라포 사용설명서, 실제 화면으로 보여 드릴게요.',
+      ['① 채용공고 — 공공·종합·대학병원 공고를 한곳에', '② 공고 상세 — 모집인원 · 마감 · 자격 · 예상연봉 정리', '③ 경쟁률 찾아보기 — 공공기관 지난 채용 경쟁률', '④ 병원 정보 — 치료사 인원 · 공시 연봉 · 근무 후기', '⑤ 월급 확인 · 계산기 — 세후 월급 · 퇴직금 · 연차 · 실업급여', '⑥ 올인원 툴킷 — 교육 · 청년정책 · 봉사'].join('\n'),
       '급여 비교와 입사 스펙 비교도 곧 열려요.',
       '저장해 두고 필요할 때 꺼내 보세요!',
       태그,
@@ -138,6 +138,16 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   console.log(`브랜드 카드 ${이름} — ${장들.length}장 · 미리보기 ${미리}`);
   console.log('\n── 캡션 ──\n' + 캡션 + '\n── 캡션 끝 ──');
   console.log(`첫 댓글: ${첫댓글}`);
+  /* 만들기만일 때 — 미리보기를 드라이브 「RAPO 릴스/브랜드카드」 에 (서버에서 만든 판을 대화에서 확인하려고 · 2026-11-17) */
+  if (!실행 && process.argv.includes('--드라이브')) {
+    try {
+      const { 드라이브되나, 파일들올리기 } = await import('./drive.mjs');
+      const 작게 = path.join(나감, '미리보기_작게.jpg');
+      spawnSync('ffmpeg', ['-loglevel', 'error', '-y', ...장들.flatMap((f) => ['-i', f]), '-filter_complex',
+        장들.map((_, i) => `[${i}]scale=-2:400[v${i}]`).join(';') + ';' + 장들.map((_, i) => `[v${i}]`).join('') + `hstack=${장들.length}`, '-q:v', '5', 작게]);
+      if (드라이브되나()) for (const o of await 파일들올리기('브랜드카드', [{ 파일: 작게, 이름: `${이름}_미리보기_${Date.now()}.jpg` }])) console.log(`  드라이브 ${o.이름} → ${o.링크}`);
+    } catch (e) { console.log('  ✗ 드라이브 —', String(e.message || e).slice(0, 200)); }
+  }
   if (!실행) { console.log('\n만들기만 했습니다. --실행 을 붙이면 올립니다'); process.exit(0); }
   const cfg = env();
   if (!인스타되나(cfg)) { console.error('IG 열쇠가 없습니다'); process.exit(1); }
