@@ -151,7 +151,8 @@ export default function Welcome() {
   const 졸업생 = !있음 && d.학력 !== '학교 경험 없음' && d.학적 === '졸업';
   /* 학생·취준생은 「관심」 한 장 더 (성인/소아 · 관심 분야 · 듣고 싶은 교육 · 2026-11-15 세중님) */
   const 순서: 단계[] = ['동의', '내정보', '닉네임', '학교', ...(재학 ? [] : ['스펙' as const]), '희망', ...(있음 ? ['급여' as const] : ['관심' as const])];
-  const resume: 단계 = !me ? '동의' : (me.job_group && me.role) ? '학교' : '내정보';
+  /* 닉네임이 새 규칙(4~10자 · 낱자 금지)에 어긋난 채 멈춘 분은 ③ 닉네임부터 다시 (2026-11-17) */
+  const resume: 단계 = !me ? '동의' : !(me.job_group && me.role) ? '내정보' : 닉네임문제(me.nickname) ? '닉네임' : '학교';
   const step = stepPick ?? resume;
   const go = (s: 단계) => { setStepPick(s); setSaveErr(null); window.scrollTo(0, 0); };
 
@@ -206,9 +207,11 @@ export default function Welcome() {
   const saveNickname = async () => {
     if (!job || !role) { go('내정보'); return; }
     const name = nick.trim();
-    /* 4~10자 · 자음·모음 낱자 금지 (2026-11-17 세중님 · 규칙은 lib/nickname.ts 한 자리) — 전에 정해 둔 닉네임을 그대로 두고 지나가는 것은 막지 않습니다(기존 것은 그대로).
+    /* 4~10자 · 자음·모음 낱자 금지 (2026-11-17 세중님 · 규칙은 lib/nickname.ts 한 자리).
        비속어·음란 용어는 DB 가 가립니다(닉네임규칙어김 · 금고 SQL_1113/ZZB) — 그 글(22023)을 그대로 보여 줍니다 */
-    if (name !== me?.nickname && 닉네임문제(name)) { setNickErr(닉네임문제(name)); return; }
+    /* 가입 화면에 오는 것은 가입을 아직 못 마친 분뿐이라, 전에 정해 둔 닉네임도 새 규칙으로 봅니다 (2026-11-17 — 규칙 전에 「ㅇㅇㅇㅇㅇ」로 멈춘 계정이 있었음) */
+    const 문제 = 닉네임문제(name) ?? (name ? null : '닉네임을 적어 주세요');
+    if (문제) { setNickErr(문제); return; }
     setBusy(true); setNickErr(null);
     const sb = browserSupabase();
     /* 가입 줄이 이미 있음 — ③으로 돌아온 분. 닉네임만 고칩니다(가입 중 고침은 5번 셈에 안 들어감 · 금고 SQL_1113/ZX) */
@@ -410,7 +413,7 @@ export default function Welcome() {
   const 아래단추 =
     step === '동의' ? <RapoButton onClick={베타동의남기기} disabled={!allRequired || busy} full>{busy ? '확인하는 중…' : '동의하고 다음'}</RapoButton>
     : step === '내정보' ? <RapoButton onClick={saveWho} disabled={busy || !job || !role} full>{busy ? '저장하는 중…' : '다음'}</RapoButton>
-    : step === '닉네임' ? <RapoButton onClick={saveNickname} disabled={busy || (!닉네임됨(nick) && nick.trim() !== (me?.nickname ?? null))} full>{busy ? '저장하는 중…' : me ? '다음' : '가입하기'}</RapoButton>
+    : step === '닉네임' ? <RapoButton onClick={saveNickname} disabled={busy || !닉네임됨(nick)} full>{busy ? '저장하는 중…' : me ? '다음' : '가입하기'}</RapoButton>
     : step === '학교' ? <RapoButton onClick={() => go(재학 ? '희망' : '스펙')} disabled={!학교됨} full>다음</RapoButton>
     : step === '스펙' ? (졸업생
       ? <RapoButton onClick={점수보기} disabled={!스펙됨 || 점수중} full>{점수중 ? '점수를 계산하는 중…' : '스펙 점수 확인하기'}</RapoButton>
@@ -599,7 +602,7 @@ export default function Welcome() {
         <section className="mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x3)">
           <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">라포에서 이 이름으로 보여요. 나중에 5번까지 바꿀 수 있어요.</p>
           {/* 글자 수 · 규칙 안내 · 적는 동안 알림 — components/rapo/rapo-nickname-field.tsx (2026-11-17 세중님 「글자수 제한에 대해서도 잘 알려줘」) */}
-          <RapoNicknameField v={nick} on={(v) => { setNick(v); setNickErr(null); }} err={nickErr} 검사={nick.trim() !== me?.nickname} />
+          <RapoNicknameField v={nick} on={(v) => { setNick(v); setNickErr(null); }} err={nickErr} />
         </section>
       )}
 
