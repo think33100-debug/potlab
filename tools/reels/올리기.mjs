@@ -103,7 +103,7 @@ if (!process.argv.includes('--실행')) { console.log(`\n마른 실행 — ${무
 if (!인스타되나(cfg)) 멈춤('IG 열쇠가 없습니다 (node tools/reels/ig.mjs --열쇠)');
 
 try {
-  const 올림 = 카드길 ? await 카드올리기IG(cfg, v.카드, v.캡션, 같은편(v)[0]) : await 릴스올리기IG(cfg, v.영상, v.캡션);
+  const 올림 = 카드길 ? await 카드올리기IG(cfg, v.카드, v.캡션, 같은편(v)[0]) : await 릴스올리기IG(cfg, v.영상, v.캡션, { 커버: v.커버 || null, 열쇠: 같은편(v)[0] });
   const 때 = new Date().toISOString();
   for (const k of 같은편(v)) {
     기록[k] = 카드길 ? { ...기록[k], 카드상태: '올림', 카드올린때: 때, 카드게시물ID: 올림.media_id, 카드게시물주소: 올림.주소 }
