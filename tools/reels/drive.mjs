@@ -171,3 +171,18 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   else if (process.argv.includes('--시험')) await 시험();
   else console.log('--인증 또는 --시험');
 }
+
+/* 파일 여럿을 「RAPO 릴스/<폴더이름>/」 에 — [{ 파일, 이름, 종류 }] → [{ 이름, id, 링크 }] (2026-11-17 앱 화면 찍기 · 브랜드 카드 미리보기) */
+export async function 파일들올리기(폴더이름, 파일들) {
+  const cfg = env();
+  const tok = await 접근열쇠(cfg);
+  const 위 = await 폴더(tok, 'RAPO 릴스', null);
+  const 아래 = await 폴더(tok, 폴더이름, 위);
+  const 나온 = [];
+  for (const f of 파일들) {
+    if (!fs.existsSync(f.파일)) continue;
+    const r = await 파일올리기(tok, f.파일, f.이름, f.종류 || 'image/jpeg', 아래);
+    나온.push({ 이름: f.이름, id: r.id, 링크: r.webViewLink });
+  }
+  return 나온;
+}
