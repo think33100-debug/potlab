@@ -150,6 +150,27 @@ export async function 카드올리기IG(cfg, 장들, 캡션, 열쇠) {
   }
 }
 
+/* ── 댓글 (2026-11-17 세중님 「첫 댓글에 공고 관련 말 · 대댓글로 태그」) ──
+   POST /{media_id}/comments message → 댓글 id · POST /{comment_id}/replies message → 답글 id
+   권한 instagram_manage_comments 가 토큰에 있어야 합니다 (없으면 댓글되나() 가 false — 그때는 태그를 캡션에 둡니다)
+   ★ 명세 원문을 못 열었습니다. 응답 원문 600자를 찍습니다 */
+export async function 댓글되나(cfg) {
+  if (!인스타되나(cfg) || !cfg.META_APP_ID || !cfg.META_APP_SECRET) return false;
+  try {
+    const r = await fetch(`https://graph.facebook.com/${버전(cfg)}/debug_token?input_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}&access_token=${encodeURIComponent(cfg.META_APP_ID + '|' + cfg.META_APP_SECRET)}`);
+    const d = (await r.json())?.data || {};
+    return (d.scopes || []).includes('instagram_manage_comments');
+  } catch { return false; }
+}
+export async function 댓글달기(cfg, 게시물, 글) {
+  const r = await 그래프(cfg, `/${게시물}/comments`, { method: 'POST', body: new URLSearchParams({ message: 글, access_token: cfg.IG_ACCESS_TOKEN }) });
+  return r.id;
+}
+export async function 답글달기(cfg, 댓글, 글) {
+  const r = await 그래프(cfg, `/${댓글}/replies`, { method: 'POST', body: new URLSearchParams({ message: 글, access_token: cfg.IG_ACCESS_TOKEN }) });
+  return r.id;
+}
+
 /** 게시물 하나 지우기 → { ok, 응답 } (던지지 않음 — 실패는 「손으로 지울 것」으로 넘깁니다) */
 export async function 게시물지우기(cfg, id) {
   if (!인스타되나(cfg)) return { ok: false, 응답: 'IG 열쇠 없음' };
@@ -218,6 +239,7 @@ async function 열쇠확인() {
     const 권한 = d.scopes || [];
     console.log(`  권한 ${권한.join(', ')}`);
     for (const 꼭 of ['instagram_basic', 'instagram_content_publish', 'pages_show_list', 'pages_read_engagement']) if (!권한.includes(꼭)) console.log(`  ✗ ${꼭} 이 없습니다 — 올리기가 안 될 수 있습니다`);
+    if (!권한.includes('instagram_manage_comments')) console.log('  △ instagram_manage_comments 이 없습니다 — 첫 댓글·태그 대댓글을 못 달고 태그는 캡션에 둡니다');
     if (!권한.includes('instagram_manage_contents')) console.log('  △ instagram_manage_contents 이 없습니다 — 삭제 요청 때 API 로 못 지우고 손으로 지웁니다');
   } else console.log('  (META_APP_ID · META_APP_SECRET 이 없어 만료·권한은 못 봅니다)');
 }

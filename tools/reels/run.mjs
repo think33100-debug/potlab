@@ -367,7 +367,7 @@ if (메일) {
     /* 확인 뒤 올리기(올리기.mjs)가 **이 영상 그대로** 올리도록 경로·지문·캡션·마감·원문을 남깁니다 */
     낸것적기(자료, { 메일보낸때: new Date().toISOString(), 드라이브: 링크, 게시물ID: null, 상태: '확인 대기',
       영상: mp4, 영상지문: crypto.createHash('sha256').update(fs.readFileSync(mp4)).digest('hex'),
-      캡션: 자료.캡션, 마감일: 자료.원문.apply_to || null, 원문자료: 자료.원문, 카드, 커버: 릴스커버 });
+      캡션: 자료.캡션, 태그: 자료.태그 || null, 첫댓글: 자료.첫댓글 || null, 마감일: 자료.원문.apply_to || null, 원문자료: 자료.원문, 카드, 커버: 릴스커버 });
   }
   process.exit(0);
 }

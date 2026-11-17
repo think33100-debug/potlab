@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { env, 인스타되나, 릴스올리기IG, 카드올리기IG } from './ig.mjs';
+import { env, 인스타되나, 릴스올리기IG, 카드올리기IG, 댓글되나, 댓글달기, 답글달기 } from './ig.mjs';
 import { 묶음폴더, 묶음읽기, 게시금지인가 } from './rapo777.mjs';
 import { 원문확인 } from './원문확인.mjs';
 import { 오늘KST } from './reel-data.mjs';
@@ -102,12 +102,28 @@ if (카드길) console.log(`  카드 ${v.카드.length}장`);
 if (!process.argv.includes('--실행')) { console.log(`\n마른 실행 — ${무엇}를 올리지 않았습니다. --실행 을 붙이면 올립니다`); process.exit(0); }
 if (!인스타되나(cfg)) 멈춤('IG 열쇠가 없습니다 (node tools/reels/ig.mjs --열쇠)');
 
+/* 댓글 권한이 있으면 해시태그 줄을 캡션에서 빼고 대댓글로 옮깁니다. 없으면 태그는 캡션에 그대로 (태그가 빠진 채 올라가지 않게) */
+const 댓글 = !!(v.첫댓글 && v.태그) && await 댓글되나(cfg);
+const 올릴캡션 = 댓글 ? String(v.캡션).split('\n').filter((l) => l.trim() !== v.태그.trim()).join('\n').replace(/\n{3,}/g, '\n\n').trim() : v.캡션;
+console.log(댓글 ? '  ○ 댓글 권한 있음 — 첫 댓글 + 태그 대댓글 · 캡션에서 태그 뺌' : '  · 댓글 권한 없음 — 태그는 캡션에');
 try {
-  const 올림 = 카드길 ? await 카드올리기IG(cfg, v.카드, v.캡션, 같은편(v)[0]) : await 릴스올리기IG(cfg, v.영상, v.캡션, { 커버: v.커버 || null, 열쇠: 같은편(v)[0] });
+  const 올림 = 카드길 ? await 카드올리기IG(cfg, v.카드, 올릴캡션, 같은편(v)[0]) : await 릴스올리기IG(cfg, v.영상, 올릴캡션, { 커버: v.커버 || null, 열쇠: 같은편(v)[0] });
+  /* 첫 댓글 · 태그 대댓글 — 실패해도 게시물은 이미 올라갔습니다. 손으로 달 글을 찍어 둡니다 */
+  let 댓글기록 = null;
+  if (댓글) {
+    try {
+      const 첫 = await 댓글달기(cfg, 올림.media_id, v.첫댓글);
+      const 답 = await 답글달기(cfg, 첫, v.태그);
+      댓글기록 = { 첫댓글ID: 첫, 태그답글ID: 답 };
+      console.log(`  ○ 첫 댓글 ${첫} · 태그 대댓글 ${답}`);
+    } catch (e) {
+      console.error(`  ✗ 댓글을 못 달았습니다 — ${String(e.message || e).slice(0, 200)}\n    손으로 달아 주세요 →\n    첫 댓글: ${v.첫댓글}\n    대댓글: ${v.태그}`);
+    }
+  }
   const 때 = new Date().toISOString();
   for (const k of 같은편(v)) {
-    기록[k] = 카드길 ? { ...기록[k], 카드상태: '올림', 카드올린때: 때, 카드게시물ID: 올림.media_id, 카드게시물주소: 올림.주소 }
-      : { ...기록[k], 상태: '올림', 올린때: 때, 게시물ID: 올림.media_id, media_id: 올림.media_id, 게시물주소: 올림.주소 };
+    기록[k] = 카드길 ? { ...기록[k], 카드상태: '올림', 카드올린때: 때, 카드게시물ID: 올림.media_id, 카드게시물주소: 올림.주소, 카드댓글: 댓글기록 }
+      : { ...기록[k], 상태: '올림', 올린때: 때, 게시물ID: 올림.media_id, media_id: 올림.media_id, 게시물주소: 올림.주소, 댓글: 댓글기록 };
   }
   fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
   줄적기({ 결과: '성공', 공고: 같은편(v), 기관: v.기관, 기관ref: v.이미지?.기관ref, 이미지: v.이미지, 원문: v.원문, 게시물ID: 올림.media_id, 게시물주소: 올림.주소, 길: `확인 뒤 올림 · ${무엇}` });
