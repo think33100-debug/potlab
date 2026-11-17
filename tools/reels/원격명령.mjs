@@ -26,7 +26,7 @@ const 할일표 = {
   올리기: (id) => (id ? ['tools/reels/올리기.mjs', '--id', id, '--실행'] : null),
   만들기: (id) => (id ? ['tools/reels/run.mjs', '--메일', '--id', id] : null),
   카드확인: (id) => (id ? ['tools/reels/올리기.mjs', '--id', id, '--카드'] : null),
-  /* 브랜드 카드 — id 자리에 판 이름(intro · story). 비우면 intro */
+  /* 브랜드 카드 — id 자리에 판 이름(intro · story · guide). 비우면 intro */
   브랜드확인: (id) => ['tools/reels/브랜드카드.mjs', ...(id ? ['--판', id] : [])],
   브랜드올리기: (id) => ['tools/reels/브랜드카드.mjs', '--실행', ...(id ? ['--판', id] : [])],
   브랜드바꾸기: (id) => ['tools/reels/브랜드카드.mjs', '--바꾸기', ...(id ? ['--판', id] : [])],
