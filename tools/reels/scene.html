@@ -100,6 +100,8 @@
   .row .v { font-size: 50px; font-weight: 800; text-align: right; margin-left: 32px; }
   .row .v.check { font-size: 40px; font-weight: 600; color: var(--muted); }
   .row .v.hot { color: var(--coral); }
+  /* 급여가 공시 값일 때 꼬리말 (정부 공시 · 정규직 기준) */
+  .row .v small.dot { display: block; font-size: 28px; font-weight: 600; color: var(--muted); margin-top: 6px; }
 
   /* 4 · 마무리 */
   #s4 .big { left: 80px; right: 120px; top: 560px; font-size: 220px; font-weight: 900; color: var(--coral); line-height: 1; letter-spacing: -0.04em; }
@@ -273,7 +275,7 @@ window.__setData = (d) => {
 
   $('s3title').textContent = d.직군 + ' · ' + (d.공고.고용형태 || '고용형태 공고문 확인');
   $('s3rows').innerHTML = d.공고.줄.map((r) =>
-    `<div class="row"><div class="k">${esc(r.이름)}</div><div class="v${r.값 ? (r.강조 ? ' hot' : '') : ' check'}">${esc(r.값 || '공고문 확인')}</div></div>`).join('');
+    `<div class="row"><div class="k">${esc(r.이름)}</div><div class="v${r.값 ? (r.강조 ? ' hot' : '') : ' check'}">${esc(r.값 || '공고문 확인')}${r.덧 ? `<small class="dot">${esc(r.덧)}</small>` : ''}</div></div>`).join('');
 
   $('s4big').textContent = d.마감.큰글;
   $('s4when').textContent = d.마감.작은글;

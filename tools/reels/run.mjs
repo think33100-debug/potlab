@@ -27,7 +27,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { 릴스자료, 오늘KST, 릴스대상, 같은공고묶기 } from './reel-data.mjs';
+import { 릴스자료, 오늘KST, 릴스대상, 같은공고묶기, 급여기준 } from './reel-data.mjs';
 /* 이미지 — RAPO 777기관 묶음 한 자리 (2026-11-17 · tools/reels/rapo777.mjs). 옛 photo-list.json 길은 쓰지 않습니다 */
 import { 묶음폴더, 묶음읽기, 이미지붙이기, 게시금지인가 } from './rapo777.mjs';
 import { 드라이브되나, 릴스올리기 } from './drive.mjs';
@@ -102,6 +102,18 @@ async function rest(길) {
   if (!r.ok) throw new Error(길.slice(0, 60) + ' HTTP ' + r.status + ' ' + (await r.text()).slice(0, 300));
   return r.json();
 }
+/* 이 병원 공시 연봉 — 회원 화면 「이 병원 공시 연봉」과 같은 DB 함수 공고병원보수() (2026-11-17 세중님 「이런 건 참고해서 쓰면 돼」)
+   못 받으면 null — 그 공고는 급여가 없는 것으로 보고 넘어갑니다 */
+async function 공시보수(id) {
+  try {
+    const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('공고병원보수'),
+      { method: 'POST', headers: { ...H, 'content-type': 'application/json' }, body: JSON.stringify({ p_공고: id }) });
+    const 글 = await r.text();
+    if (!r.ok) { console.error(`  (공시 연봉을 못 받음 ${id} · HTTP ${r.status} · ${가림(글).slice(0, 200)})`); return null; }
+    const j = 글 ? JSON.parse(글) : null;
+    return (Array.isArray(j) ? j[0] : j) || null;
+  } catch (e) { console.error(`  (공시 연봉을 못 받음 ${id} · ${String(e.message || e).slice(0, 120)})`); return null; }
+}
 async function 분류(id) {
   const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('공고분류'),
     { method: 'POST', headers: { ...H, 'content-type': 'application/json' }, body: JSON.stringify({ p_id: id }) });
@@ -114,7 +126,9 @@ async function 분류(id) {
 const 칸 = 'id,title,원문제목,org_name,employ_type,headcount,apply_to,apply_to_time,job_group,조교연구,posted_at,url';
 const 시작일 = new Date(Date.parse(오늘) - 며칠 * 86400e3).toISOString().slice(0, 10);
 const 후보 = 한건
-  ? await rest(`job_posts_pub?select=${칸}&id=eq.${encodeURIComponent(한건)}`)
+  /* 번호만 주면(「306973」) 직군별 줄(…-PT · …-OT)을 함께 받아 한 편으로 묶습니다 (2026-11-17 건보 일산) */
+  ? (/-(PT|OT)$/.test(한건) ? await rest(`job_posts_pub?select=${칸}&id=eq.${encodeURIComponent(한건)}`)
+    : await rest(`job_posts_pub?select=${칸}&order=id.asc&id=in.(${encodeURIComponent(한건 + '-PT')},${encodeURIComponent(한건 + '-OT')},${encodeURIComponent(한건)})`))
   : await 모두받기(`${cfg.SUPABASE_URL}/rest/v1/job_posts_pub?select=${칸}&posted_at=gte.${시작일}`, H);
 console.log(`후보 ${후보.length}건 (게시 ${한건 ? '— id ' + 한건 : 시작일 + ' 이후'})`);
 
@@ -137,6 +151,8 @@ for (const 공고 of 후보) {
   /* 기관 공식 값 — 기관 표 → 심평원 · 급여 원문은 상세 화면과 같은 차례(뽑은값.예상연봉 → detail.연봉 → detail.예상연봉) */
   const [jp] = await rest(`job_posts?select=기관번호,뽑은값,detail&id=eq.${encodeURIComponent(공고.id)}`);
   공고.연봉원문 = (jp?.뽑은값?.['예상연봉'] ?? jp?.detail?.['연봉'] ?? jp?.detail?.['예상연봉'] ?? null) || null;
+  /* 공고에 읽을 수 있는 금액이 없으면 공시 연봉을 받아 둡니다 — 쓸지는 reel-data.mjs 의 급여고르기() 가 정합니다 */
+  if (!급여기준(공고.연봉원문)) 공고.공시보수 = await 공시보수(공고.id);
   let 기관 = null;
   if (jp?.기관번호) {
     const [g] = await rest(`기관?select=기관번호,이름,주소,종별이름,설립구분이름,상급종합인가,대학병원인가,ykiho&기관번호=eq.${encodeURIComponent(jp.기관번호)}`);

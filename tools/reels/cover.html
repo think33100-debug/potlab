@@ -29,6 +29,7 @@
   #rows { margin-top: auto; display: flex; flex-direction: column; gap: 18px; }
   .row { display: flex; align-items: baseline; gap: 22px; font-size: 46px; font-weight: 700; }
   .row .k { font-size: 34px; font-weight: 600; opacity: 0.85; width: 150px; flex: none; }
+  .row small { display: block; font-size: 28px; font-weight: 600; opacity: 0.85; margin-top: 4px; }
   #foot { margin-top: 56px; font-size: 32px; font-weight: 700; opacity: 0.92; }
   #dday { position: absolute; right: 110px; width: 210px; height: 210px; border-radius: 50%; background: var(--white); color: var(--coral);
           display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-8deg); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
@@ -65,10 +66,10 @@ window.__setData = (d, 판 = 'reel') => {
   const 값 = (이름) => (d.공고?.줄 || []).find((r) => r.이름 === 이름)?.값 || null;
   const 줄 = [
     ['접수', d.마감?.작은글?.replace(/ 마감$/, '까지') || null],
-    ['급여', 값('급여')],
+    ['급여', 값('급여'), (d.공고?.줄 || []).find((r) => r.이름 === '급여')?.덧 || null],
     ['모집', [값('모집인원'), d.공고?.고용형태].filter(Boolean).join(' · ') || null],
   ].filter(([, v]) => v);
-  $('rows').innerHTML = 줄.map(([k, v]) => `<div class="row"><span class="k">${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
+  $('rows').innerHTML = 줄.map(([k, v, 덧]) => `<div class="row"><span class="k">${esc(k)}</span><span>${esc(v)}${덧 ? `<small>${esc(덧)}</small>` : ''}</span></div>`).join('');
   /* 긴 이름은 폭에 맞을 때까지 줄입니다 (두 줄까지) */
   for (const id of ['org', 'job']) {
     const e = $(id); let k = 104; e.style.fontSize = k + 'px';
