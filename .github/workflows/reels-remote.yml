@@ -1,0 +1,49 @@
+# 릴스 원격 — 대화나 휴대폰에서 「목록 · 확인 · 올리기 · 만들기」를 서버에 시킵니다 (2026-11-17)
+#
+# 이 작업이 서버에 ssh 로 들어가면, 서버 authorized_keys 의 강제 명령이
+#   cd ~/potlab && node tools/reels/원격명령.mjs
+# 만 돌립니다. 그 열쇠로는 서버 셸을 못 엽니다 (tools/reels/원격명령.mjs 머리글).
+#
+# 비밀 셋 (저장소 Settings → Secrets and variables → Actions)
+#   REELS_SSH_KEY          이 작업 전용 열쇠(개인키) 전문
+#   REELS_SSH_HOST         ubuntu@<서버 공인 주소>
+#   REELS_SSH_KNOWN_HOSTS  서버 호스트 키 한 줄 — 남의 서버에 붙지 않게 (지침 8-5)
+name: reels-remote
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "할일 — list(목록) · check(확인·마른) · publish(올리기) · make(만들기)"
+        required: true
+        type: choice
+        options: [list, check, publish, make]
+      job_id:
+        description: "공고 id (list 는 비움) — 예 306973-PT"
+        required: false
+        type: string
+
+concurrency:
+  group: reels-remote
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 서버에 시키기
+        env:
+          KEY: ${{ secrets.REELS_SSH_KEY }}
+          HOST: ${{ secrets.REELS_SSH_HOST }}
+          KNOWN: ${{ secrets.REELS_SSH_KNOWN_HOSTS }}
+          ACTION: ${{ inputs.action }}
+          JOB_ID: ${{ inputs.job_id }}
+        run: |
+          set -eu
+          if [ -z "$KEY" ] || [ -z "$HOST" ] || [ -z "$KNOWN" ]; then echo "비밀 셋(REELS_SSH_KEY · REELS_SSH_HOST · REELS_SSH_KNOWN_HOSTS)이 다 있어야 합니다"; exit 1; fi
+          case "$JOB_ID" in *[!A-Za-z0-9_-]*) echo "공고 id 는 영문·숫자·-·_ 만"; exit 1;; esac
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/reels && chmod 600 ~/.ssh/reels
+          printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/reels -o StrictHostKeyChecking=yes -o BatchMode=yes -o ConnectTimeout=30 "$HOST" "$ACTION $JOB_ID"
