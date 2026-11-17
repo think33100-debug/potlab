@@ -95,6 +95,8 @@ function 자기점검() {
   봐('계획 — 바뀐 것·새 것은 받음', p.받을.map((x) => x.경로).join() === 'institutions.json,assets/new.png');
   봐('계획 — 드라이브에서 빠진 것을 셈', p.빠짐.join() === '옛.json');
   봐('계획 — 그대로면 바뀜 없음', !계획({ 'a': { md5: '1' } }, [{ 경로: 'a', md5: '1' }]).바뀜);
+  const 차례 = [{ 경로: 'institutions.json' }, { 경로: 'a.zip' }, { 경로: 'b.zip' }].sort((a, b) => Number(!/\.zip$/i.test(a.경로)) - Number(!/\.zip$/i.test(b.경로)));
+  봐('차례 — ZIP 을 먼저 풀고 목록 파일은 나중에 덮음', 차례.map((x) => x.경로).join() === 'a.zip,b.zip,institutions.json');
   봐('계획 — md5 없는 파일은 늘 받음', 계획({ 'a': { md5: null } }, [{ 경로: 'a', md5: null }]).바뀜);
   const 임시 = fs.mkdtempSync(path.join(os.tmpdir(), '묶음받기-'));
   fs.mkdirSync(path.join(임시, 'assets'));
@@ -116,7 +118,8 @@ async function 본체() {
   const cfg = env();
   for (const k of ['GDRIVE_API_KEY', 'RAPO777_DRIVE_FOLDER']) if (!cfg[k]) { console.error(`${k} 가 .env 에 없습니다`); process.exit(1); }
   const 전상태 = fs.existsSync(상태파일) ? JSON.parse(fs.readFileSync(상태파일, 'utf8')) : { 파일: {}, 판: null };
-  const 목록 = await 드라이브목록(cfg, cfg.RAPO777_DRIVE_FOLDER);
+  /* 보기용 html(작은 사진이 박힌 22MB)은 안 받습니다 — 사람이 드라이브에서 바로 엽니다 */
+  const 목록 = (await 드라이브목록(cfg, cfg.RAPO777_DRIVE_FOLDER)).filter((f) => !/\.html?$/i.test(f.경로));
   /* 보기용 html·README 는 받아도 쓰지 않지만 함께 둡니다 (사람이 서버에서 볼 때) */
   const p = 계획(전상태.파일 || {}, 목록);
   console.log(`드라이브 ${목록.length}개 · 받을 것 ${p.받을.length} · 그대로 ${p.그대로.length} · 드라이브에서 빠짐 ${p.빠짐.length}`);
@@ -142,7 +145,10 @@ async function 본체() {
     /* ② 판 짜기 — ZIP 은 풀고, 나머지는 같은 자리로 복사 */
     const 색인f = path.join(원본, 'package_index.json');
     const 색인 = fs.existsSync(색인f) ? JSON.parse(fs.readFileSync(색인f, 'utf8')) : { archives: [] };
-    for (const f of 목록) {
+    /* ★ ZIP 을 **먼저 다** 풀고, 낱개 파일(최신 institutions.json 등)을 그 위에 덮습니다 —
+       ZIP 안의 목록은 옛 판입니다 (README 1절 · 2026-11-17 갱신) */
+    const 차례 = [...목록].sort((a, b) => Number(!/\.zip$/i.test(a.경로)) - Number(!/\.zip$/i.test(b.경로)));
+    for (const f of 차례) {
       const 원 = path.join(원본, f.경로);
       if (/\.zip$/i.test(f.경로)) {
         const 적힌 = (색인.archives || []).find((a) => a.file_name === path.basename(f.경로));
@@ -176,9 +182,10 @@ async function 본체() {
   fs.renameSync(임시링크, 링크);
   fs.writeFileSync(상태파일, JSON.stringify({ 판: 새판, 받은때: new Date().toISOString(), 파일: Object.fromEntries(목록.map((f) => [f.경로, { md5: f.md5, 때: f.때 }])) }, null, 2));
   console.log(`● ~/rapo777 → ${새판}`);
-  /* ⑤ 전 판은 셋까지 */
+  /* ⑤ 전 판은 셋까지 · 지금 판이 아닌 판의 .받은파일(ZIP 원본 사본)은 지움 — 다음 판은 지금 판에서만 복사합니다 */
   const 판들 = fs.readdirSync(집).filter((n) => /^rapo777_\d{8}_\d{6}$/.test(n)).sort();
   for (const n of 판들.slice(0, Math.max(0, 판들.length - 3))) { fs.rmSync(path.join(집, n), { recursive: true, force: true }); console.log(`  옛 판 지움 ${n}`); }
+  for (const n of 판들) if (path.join(집, n) !== 새판) fs.rmSync(path.join(집, n, '.받은파일'), { recursive: true, force: true });
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {

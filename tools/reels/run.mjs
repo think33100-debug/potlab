@@ -69,6 +69,21 @@ const 한건 = 인수('id');
 const 오늘 = 오늘KST();
 const 나감 = 인수('나감', path.join(ROOT, 'log', 'reels', 오늘));
 const 기록파일 = path.join(ROOT, 'log', '릴스_올림.json');
+/* 한 번에 하나만 (2026-11-17) — 2026-11-17 13:33 에 같은 일산병원 릴스가 드라이브에 두 번 올라갔습니다.
+   두 바퀴가 겹치면 둘 다 기록을 「아직 안 보냄」으로 읽어 같은 공고를 두 번 보냅니다. 기록을 읽기 **전에** 잠급니다.
+   잠금 파일의 pid 가 죽어 있으면(바퀴가 탈나 끝남) 넘겨받습니다 */
+const 잠금 = path.join(ROOT, 'log', '릴스_돌기.lock');
+fs.mkdirSync(path.dirname(잠금), { recursive: true });
+try { fs.writeFileSync(잠금, String(process.pid), { flag: 'wx' }); }
+catch {
+  const 앞pid = Number(fs.readFileSync(잠금, 'utf8')) || 0;
+  let 살아있나 = false;
+  try { if (앞pid) { process.kill(앞pid, 0); 살아있나 = true; } } catch { /* 없는 pid */ }
+  if (살아있나) { console.log(`다른 바퀴(pid ${앞pid})가 돌고 있습니다 — 이번 바퀴는 건너뜁니다`); process.exit(0); }
+  fs.writeFileSync(잠금, String(process.pid));
+  console.log(`  (앞 바퀴 pid ${앞pid} 의 잠금이 남아 있어 넘겨받았습니다)`);
+}
+process.on('exit', () => { try { if (fs.readFileSync(잠금, 'utf8') === String(process.pid)) fs.rmSync(잠금); } catch { /* 이미 없음 */ } });
 const 기록 = fs.existsSync(기록파일) ? JSON.parse(fs.readFileSync(기록파일, 'utf8')) : {};
 기록.__발행열쇠 = 기록.__발행열쇠 || {};      /* 「기관|id:…」·「기관|url:…」 → 공고 id — 중복 발행 막기 */
 const 대기파일 = path.join(ROOT, 'log', '릴스_대기.json');

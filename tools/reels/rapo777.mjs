@@ -98,9 +98,25 @@ const 기관것 = (a) => a.scope === 'institution_specific';
 const 비율 = (a) => (a.width > 0 && a.height > 0 ? a.width / a.height : 0);
 export const 긴로고비율 = 6;
 
-function 쓸수있나(a, 폴더) {
+/* 권리 조건이 자동 사용을 막나 (2026-11-17 · README 4절) — 자산 줄 + sources_and_conditions 줄을 함께 봅니다
+   「미확인」은 막지 않습니다(세중님 운영 방침: 출처 표시 · 요청 시 삭제). 「허가 필요」라고 **적힌** 것은 막습니다 */
+export function 권리막힘(a, c = {}) {
+  const 상태 = [a.rights_status, c.rights_status].filter(Boolean).join(' ');
+  const 면허 = [a.license, c.license].filter(Boolean).join(' ');
+  const 글 = [a.rights_note, c.rights_note, 상태, 면허].filter(Boolean).join(' ');
+  if (/허가\s*필요/.test(상태)) return `권리 「${상태}」`;
+  if (/BY[-\s]?SA/i.test(면허 + ' ' + 상태)) return `CC BY-SA (동일조건 · 변경 표시 필요) — 영상에 자동으로 안 씀`;
+  if (/\b(NC|ND)\b|BY[-\s]?N[CD]/i.test(면허)) return `라이선스 ${면허} (비영리·변경금지)`;
+  if (/공공누리[^.]*(제?\s*[234]\s*유형)|비영리|변경\s*금지|무단\s*(전재|복제)|재배포\s*금지/.test(글)) return '명시된 사용 제한(비영리·변경금지·무단전재 금지)';
+  return null;
+}
+
+function 쓸수있나(a, 폴더, 조건) {
   if (a.historical_asset === true) return '과거 자료(historical_asset)';
   if (a.restricted_reference === true) return '참고 전용(restricted_reference)';
+  if (a.photo_requires_current_confirmation === true) return '현재 모습 확인 필요(photo_requires_current_confirmation)';
+  const 막힘 = 권리막힘(a, 조건?.get(a.asset_id) || {});
+  if (막힘) return 막힘;
   if (!a.render_path || !/\.(png|jpe?g)$/i.test(a.render_path)) return 'render_path 가 PNG/JPG 아님';
   if (폴더 && !fs.existsSync(path.join(폴더, a.render_path))) return `파일 없음 ${a.render_path} (두 ZIP 을 같은 폴더에 풀었나)`;
   return null;
@@ -113,6 +129,9 @@ function 출처찾기(a, 조건) {
     출처쪽: a.source_page || c.source_page || null,
     허가확인: (a.permission_confirmed ?? c.permission_confirmed) === true,
     권리: a.rights_status || c.rights_status || null,
+    라이선스: a.license || c.license || null,
+    라이선스주소: a.license_url || c.license_url || null,
+    저자: a.author || c.author || a.creator || c.creator || null,
   };
 }
 
@@ -124,11 +143,17 @@ export function 이미지고르기(묶음, 기관, { 파일확인 = true } = {})
   const 버린것 = [];
   const 후보 = [];
   for (const a of 기관.assets || []) {
-    const 왜 = 쓸수있나(a, 폴더);
+    const 왜 = 쓸수있나(a, 폴더, 묶음.조건);
     if (왜) 버린것.push(`${a.asset_id.slice(0, 10)} ${왜}`); else 후보.push(a);
   }
   if (!후보.length) return { 대기: `자동으로 고를 이미지 없음 — ${버린것.join(' / ') || '자산 0'}`, 버린것 };
-  const 점 = (a) => (a.asset_id === 기관.representative_asset_id ? 0 : 사진꼴(a.kind) ? 1 : 조감도꼴(a.kind) ? 2 : 기관것(a) ? 3 : 4);
+  /* 차례 (2026-11-17 README 3절 — 실제 사진은 preferred_photo_asset_id 로 찾음)
+     preferred 사진 → 외관 사진 → 배너·합성 → 실내 사진 → 조감도 → 대표 로고 → 기관 로고 → 공통 브랜드 */
+  const 장면점 = (a) => (a.photo_scene === 'interior' ? 3 : /banner|collage/.test(a.photo_scene || '') ? 2 : 1);
+  const 점 = (a) => (사진꼴(a.kind) && a.asset_id === 기관.preferred_photo_asset_id ? 0
+    : 사진꼴(a.kind) ? 장면점(a)
+    : 조감도꼴(a.kind) ? 4
+    : a.asset_id === 기관.representative_asset_id ? 5 : 기관것(a) ? 6 : 7);
   후보.sort((x, y) => 점(x) - 점(y));
   let 자산 = 후보[0];
   let 꼴 = 사진꼴(자산.kind) ? '사진' : 조감도꼴(자산.kind) ? '조감도' : '로고';
@@ -146,6 +171,11 @@ export function 이미지고르기(묶음, 기관, { 파일확인 = true } = {})
   return {
     자산, 꼴, 이름표, ...출처,
     파일: path.join(묶음.폴더, 자산.render_path),
+    장면: 자산.photo_scene || null,
+    장면글: 자산.photo_scene_note || null,
+    시점글: 자산.photo_date_note || null,
+    딱지: 꼴 === '조감도' ? '건축조감도' : 자산.photo_scene === 'interior' ? '실내 사진'
+      : /공동\s*청사|입주/.test(자산.photo_scene_note || '') ? '입주 건물' : null,
     투명: 자산.has_transparency === true,
     크기: { 가로: 자산.width || null, 세로: 자산.height || null },
     버린것,
@@ -155,7 +185,7 @@ export function 이미지고르기(묶음, 기관, { 파일확인 = true } = {})
 /* 화면 아래에 적을 짧은 출처 — attribution_text 에서 주소 앞까지 */
 export function 화면출처(고른) {
   const 앞 = String(고른.출처글 || '').split(/\s·\s*https?:\/\//)[0].trim();
-  return (고른.꼴 === '조감도' ? '건축조감도 · ' : '') + 앞;
+  return (고른.딱지 ? 고른.딱지 + ' · ' : 고른.꼴 === '조감도' ? '건축조감도 · ' : '') + 앞;
 }
 
 /* 캡션에 넣을 줄 — 원문 링크 + 고른 파일의 출처. 「허가」라는 말을 쓰지 않습니다 */
@@ -165,6 +195,9 @@ export function 캡션출처줄(고른, 원문주소) {
   if (고른) {
     줄.push(`📷 ${고른.출처글}${고른.꼴 === '조감도' ? ' (건축조감도 · 실제 사진 아님)' : ''}`);
     if (고른.출처쪽 && !String(고른.출처글).includes(고른.출처쪽)) 줄.push(`   출처 페이지: ${고른.출처쪽}`);
+    if (고른.라이선스) 줄.push(`   ${[고른.저자 && '저자 ' + 고른.저자, 고른.라이선스, 고른.라이선스주소].filter(Boolean).join(' · ')}`);
+    if (고른.딱지 && 고른.꼴 !== '조감도') 줄.push(`   (${고른.딱지})`);
+    if (고른.시점글) 줄.push(`   사진 시점: ${고른.시점글} — 현재 모습과 다를 수 있습니다`);
     if (고른.이름표) 줄.push(`   기관: ${고른.이름표}`);
     줄.push('   기관이 요청하면 이 게시물을 내리고 다시 올리지 않습니다.');
   }
@@ -231,6 +264,7 @@ export function 이미지붙이기(묶음, 자료, 앱, 원문주소, { 낸열�
   if ((고른.꼴 === '사진' || 고른.꼴 === '조감도') && (고른.크기.가로 || 0) >= 600) 자료.사진 = 고른.파일;
   else 자료.로고 = { 파일: 고른.파일, 이름표: 고른.이름표, 가로: 고른.크기.가로, 세로: 고른.크기.세로, 투명: 고른.투명 };
   if (고른.꼴 === '조감도') 자료.사진꼴 = '조감도';
+  if (고른.딱지) 자료.사진딱지 = 고른.딱지;
   자료.이미지출처 = 화면출처(고른);
   /* 캡션 — 「⚠️ 원문 확인」 줄 뒤에 원문 링크 + 고른 파일의 출처 (해시태그·CTA 는 그 뒤 그대로) */
   const 줄 = String(자료.캡션 || '').split('\n');
@@ -238,7 +272,8 @@ export function 이미지붙이기(묶음, 자료, 앱, 원문주소, { 낸열�
   줄.splice(자리 >= 0 ? 자리 + 1 : 줄.length, 0, '', ...캡션출처줄(고른, 원문주소));
   자료.캡션 = 줄.join('\n');
   자료.이미지 = { 기관ref: 기.institution_ref, key: 기.key, ykiho: 기.ykiho || null, 연결근거: 연결.근거, asset_id: 고른.자산.asset_id,
-    꼴: 고른.꼴, 파일: 고른.자산.render_path, 출처글: 고른.출처글, 출처쪽: 고른.출처쪽, permission_confirmed: 고른.허가확인 };
+    꼴: 고른.꼴, 딱지: 고른.딱지, 장면: 고른.장면, 파일: 고른.자산.render_path, 출처글: 고른.출처글, 출처쪽: 고른.출처쪽,
+    라이선스: 고른.라이선스, 권리: 고른.권리, permission_confirmed: 고른.허가확인 };
   자료.발행열쇠 = 열쇠들;
   자료.기관묶음 = 기;
   return { 자료 };
@@ -289,8 +324,11 @@ function 자기점검() {
   봐('연결 — 목록에 없으면 대기', /맞는 기관 없음/.test(기관연결(묶음, { ykiho: 'ZZ', 이름: '없는병원' }).대기 || ''));
 
   const g1 = 고('rapo777_0001');
-  봐('고르기 — 대표 파일 먼저 (로고)', g1.자산?.asset_id === 강릉로고.asset_id && g1.꼴 === '로고');
-  봐('출처 — 고른 파일의 attribution_text', g1.출처글 === 강릉로고.attribution_text);
+  봐('고르기 — 실제 사진이 있으면 대표 로고보다 사진', g1.자산?.asset_id === 강릉사진.asset_id && g1.꼴 === '사진');
+  봐('출처 — 고른 파일(사진)의 attribution_text — 대표 로고 것을 빌리지 않음', g1.출처글 === 강릉사진.attribution_text);
+  const 로고만 = { ...기관들[0], institution_ref: 'rapo777_0002', assets: [강릉로고] };
+  기관들.push(로고만);
+  봐('고르기 — 사진이 없으면 대표 로고', 고('rapo777_0002').자산?.asset_id === 강릉로고.asset_id);
   봐('고르기 — 과거 자료만이면 대기', /과거 자료/.test(고('rapo777_0356').대기 || ''));
   const g5 = 고('rapo777_0500');
   봐('고르기 — 공통 브랜드는 name_label 함께', g5.이름표 === '근로복지공단 창원병원');
@@ -304,6 +342,31 @@ function 자기점검() {
   봐('캡션 — 조감도를 실사라 하지 않음', 캡션출처줄(g7, 'https://x').some((s) => s.includes('실제 사진 아님')));
   봐('캡션 — 원문 링크가 들어감', 캡션출처줄(g1, 'https://recruit.example/1')[0] === '🔗 공고 원문: https://recruit.example/1');
   봐('캡션 — 「허가」라는 말을 안 씀', !캡션출처줄(g1, 'u').join('\n').includes('허가'));
+  /* 2026-11-17 README 갱신분 — preferred 사진 · 실내 딱지 · 권리 막힘 */
+  const 사진기관 = { institution_ref: 'rapo777_0900', key: '사진병원', name: '사진병원', ykiho: 'YK900', render_status: 'ready',
+    representative_asset_id: 'logo9', preferred_photo_asset_id: 'pin',
+    assets: [자산({ asset_id: 'logo9', kind: 'wordmark' }), 자산({ asset_id: 'pext', kind: 'photo', photo_scene: 'exterior', width: 1600, height: 900 }),
+      자산({ asset_id: 'pin', kind: 'photo', photo_scene: 'interior', width: 1600, height: 900, photo_date_note: '2017-07 기사; 촬영일 미표시', attribution_text: '이미지 출처: 사진병원 · https://in.kr/' }),
+      자산({ asset_id: 'psa', kind: 'photo', photo_scene: 'exterior', license: 'CC BY-SA 4.0', rights_status: 'CC BY-SA 4.0 조건 준수 필요' }),
+      자산({ asset_id: 'pneed', kind: 'photo', photo_scene: 'exterior', rights_status: '허가 필요·미확인' }),
+      자산({ asset_id: 'pconf', kind: 'photo', photo_scene: 'exterior', photo_requires_current_confirmation: true })] };
+  기관들.push(사진기관);
+  const g9 = 고('rapo777_0900');
+  봐('고르기 — preferred_photo_asset_id 가 먼저 (대표 로고보다)', g9.자산?.asset_id === 'pin' && g9.꼴 === '사진');
+  봐('고르기 — 실내 사진은 「실내 사진」 딱지', g9.딱지 === '실내 사진' && 화면출처(g9).startsWith('실내 사진 · '));
+  봐('캡션 — 사진 시점을 적음', 캡션출처줄(g9, 'u').some((x) => x.includes('사진 시점: 2017-07 기사')));
+  const 버림 = g9.버린것.join(' ');
+  봐('권리 — CC BY-SA 는 자동으로 안 씀', /psa.*BY-SA/.test(버림));
+  봐('권리 — 「허가 필요」로 적힌 것은 안 씀', /pneed.*허가 필요/.test(버림));
+  봐('권리 — photo_requires_current_confirmation 은 안 씀', /pconf.*현재 모습/.test(버림));
+  봐('권리 — 「미확인」은 막지 않음', !권리막힘({ rights_status: '미확인', rights_note: '인스타그램 재사용 허가 또는 적용 라이선스는 확인되지 않음.' }));
+  봐('권리 — CC0 은 막지 않음', !권리막힘({ license: 'CC0 1.0', rights_status: 'CC0 1.0 공개' }));
+  봐('권리 — 공공누리 제1유형(출처표시)은 막지 않음', !권리막힘({ rights_status: '공공누리 출처표시 조건 명시', rights_note: '공공누리 제1유형' }));
+  봐('권리 — 공공누리 제4유형은 막음', !!권리막힘({ rights_note: '공공누리 제4유형(출처표시+상업적 이용금지+변경금지)' }));
+  /* preferred 가 막히면 외관 사진으로 */
+  const 막힌pref = { ...사진기관, institution_ref: 'rapo777_0901', preferred_photo_asset_id: 'pneed' };
+  기관들.push(막힌pref);
+  봐('고르기 — preferred 가 막히면 외관 사진', 고('rapo777_0901').자산?.asset_id === 'pext');
   봐('고르기 — missing 은 대기', /missing/.test(고('rapo777_0800').대기 || ''));
   봐('고르기 — 허가 미확인은 그대로 false', g1.허가확인 === false);
 
