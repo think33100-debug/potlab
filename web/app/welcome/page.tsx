@@ -24,6 +24,7 @@ import { todayKst } from '@/lib/job-state';
 import { 관심대상들, 관심모름, 관심분야예시, 듣고싶은교육예시, 예시고르기, 학교목록 } from '@/lib/signup-school';
 
 import { 설치안내남기기 } from '@/lib/install-hint';
+import { useSignupPick } from '@/lib/signup-preview-context';
 import { useAuth } from '../auth';
 import { useToast } from '../toast';
 
@@ -104,8 +105,10 @@ export default function Welcome() {
   const { loading, session, me, reload } = useAuth();
 
   const [stepPick, setStepPick] = useState<단계 | null>(null);
-  const [job, setJob] = useState<JobGroup | null>(null);
-  const [exp, setExp] = useState<경험 | null>(null);
+  /* 관리자 가입 미리보기(/master/signup)가 미리 골라 둔 직군·경험 — 진짜 가입에서는 늘 null (lib/signup-preview-context.ts) */
+  const 미리 = useSignupPick();
+  const [job, setJob] = useState<JobGroup | null>(미리?.직군 ?? null);
+  const [exp, setExp] = useState<경험 | null>(미리?.경험 ?? null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [nick, setNick] = useState('');
   const [busy, setBusy] = useState(false);

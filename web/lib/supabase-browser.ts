@@ -3,6 +3,7 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { 비회원보기중 } from './guest-view';
+import { 가입시험중, 가입시험클라이언트 } from './signup-dryrun';
 
 /* 브라우저 쪽 열쇠꾸러미입니다.
 
@@ -76,6 +77,9 @@ function 진짜클라이언트(): SupabaseClient {
    페르소나 띠와 로그인 상태를 읽는 자리만 씁니다 — 그 둘은 비회원 보기
    중에도 「내가 마스터인가」를 알아야 하기 때문입니다. */
 export function browserSupabase(opts?: { 진짜?: boolean }): SupabaseClient {
+  /* 가입 미리보기(/master/signup) 중에는 **쓰기를 삼키는** 열쇠꾸러미를 줍니다 — 가입 화면을 끝까지 눌러도
+     DB 에 한 줄도 안 갑니다 (lib/signup-dryrun.ts · 2026-11-17). 진짜: true(페르소나 띠)는 여기도 그대로 지나갑니다 */
+  if (!opts?.진짜 && 가입시험중()) return 가입시험클라이언트(진짜클라이언트());
   if (!opts?.진짜 && 비회원보기중()) return 손님클라이언트();
   return 진짜클라이언트();
 }

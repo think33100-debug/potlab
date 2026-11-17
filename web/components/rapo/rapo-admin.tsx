@@ -53,6 +53,8 @@ export const 그밖도구: 메뉴[] = [
   { href: '/admin/ads', label: '오픈 화면 광고' },
   { href: '/admin/rival', label: '경쟁사 비교' },
   { href: '/admin/reset', label: '내 계정 초기화' },
+  /* 가입 첫 화면부터 저장 없이 따라가 보기 (2026-11-17 세중님 · app/master/signup) — 관리자 틀 밖의 화면입니다 */
+  { href: '/master/signup', label: '가입 화면 미리보기' },
 ];
 
 const 아이콘 = {
