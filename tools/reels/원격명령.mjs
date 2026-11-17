@@ -25,8 +25,10 @@ const 할일표 = {
   확인: (id) => (id ? ['tools/reels/올리기.mjs', '--id', id] : null),
   올리기: (id) => (id ? ['tools/reels/올리기.mjs', '--id', id, '--실행'] : null),
   만들기: (id) => (id ? ['tools/reels/run.mjs', '--메일', '--id', id] : null),
+  /* 당기기 — 서버 코드를 main 에 맞춤 (지침 8-10: 서버 반영은 git pull 로만). node 가 아니라 git 이라 따로 돌립니다 */
+  당기기: (id) => (id ? null : ['git', 'pull', '--ff-only']),
 };
-const 영어 = { list: '목록', check: '확인', publish: '올리기', make: '만들기' };
+const 영어 = { list: '목록', check: '확인', publish: '올리기', make: '만들기', pull: '당기기' };
 
 /** 들어온 글 → { 할일, id, 인수 } 또는 { 거절 } — 시험할 수 있게 갈라 둠 */
 export function 풀기(글) {
@@ -34,10 +36,10 @@ export function 풀기(글) {
   if (낱.length < 1 || 낱.length > 2) return { 거절: '「할일 [공고id]」 꼴만 받습니다' };
   const 할일 = 영어[낱[0]] || 낱[0];
   const id = 낱[1] || null;
-  if (!할일표[할일]) return { 거절: `모르는 할일 「${낱[0]}」 — 목록 · 확인 · 올리기 · 만들기` };
+  if (!할일표[할일]) return { 거절: `모르는 할일 「${낱[0]}」 — 목록 · 확인 · 올리기 · 만들기 · 당기기` };
   if (id && !/^[A-Za-z0-9_-]{1,40}$/.test(id)) return { 거절: '공고id 는 영문·숫자·-·_ 만' };
   const 인수 = 할일표[할일](id);
-  if (!인수) return { 거절: 할일 === '목록' ? '목록에는 공고id 를 붙이지 않습니다' : `${할일}에는 공고id 가 필요합니다` };
+  if (!인수) return { 거절: ['목록', '당기기'].includes(할일) ? `${할일}에는 공고id 를 붙이지 않습니다` : `${할일}에는 공고id 가 필요합니다` };
   return { 할일, id, 인수 };
 }
 
@@ -52,6 +54,7 @@ function 자기점검() {
   봐('거절 — 낱말 셋 이상', !!풀기('올리기 A1 --x').거절);
   봐('거절 — 모르는 할일', !!풀기('bash').거절 && !!풀기('').거절);
   봐('거절 — id 없는 올리기 · id 붙은 목록', !!풀기('올리기').거절 && !!풀기('목록 A1').거절);
+  봐('당기기 — git pull --ff-only · id 붙으면 거절', 풀기('당기기').인수?.join(' ') === 'git pull --ff-only' && 풀기('pull').할일 === '당기기' && !!풀기('당기기 main').거절);
   console.log(`\n견본 ${틀림.length ? '✗ 틀림 ' + 틀림.length : '틀림 0'}`);
   if (틀림.length) process.exit(1);
 }
@@ -63,7 +66,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   const 기록 = (o) => { fs.mkdirSync(path.join(ROOT, 'log'), { recursive: true }); fs.appendFileSync(path.join(ROOT, 'log', '릴스_원격.log'), JSON.stringify({ 때: new Date().toISOString(), ...o }) + '\n'); };
   if (줄.거절) { console.error('✗ 거절 — ' + 줄.거절); 기록({ 글: String(글).slice(0, 80), 거절: 줄.거절 }); process.exit(2); }
   console.log(`▶ ${줄.할일}${줄.id ? ' ' + 줄.id : ''} · 서버 ${new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace('T', ' ')} KST`);
-  const r = spawnSync(process.execPath, 줄.인수, { cwd: ROOT, stdio: 'inherit' });
+  const [머리, ...나머지] = 줄.인수[0] === 'git' ? 줄.인수 : [process.execPath, ...줄.인수];
+  const r = spawnSync(머리, 나머지, { cwd: ROOT, stdio: 'inherit' });
+  if (줄.할일 === '당기기' && r.status === 0) spawnSync('git', ['log', '--oneline', '-1'], { cwd: ROOT, stdio: 'inherit' });
   기록({ 할일: 줄.할일, id: 줄.id, 코드: r.status });
   process.exit(r.status ?? 1);
 }

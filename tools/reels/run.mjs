@@ -122,6 +122,14 @@ const 대상들 = [];
 let 비대상 = 0;
 for (const 공고 of 후보) {
   if (!한건 && 기록[공고.id]) continue;
+  /* --id 로 콕 집어 만들면 — 이미 올린 것은 막고, 아직 「확인 대기」인 것은 **새로 만들어 덮어씁니다** (2026-11-17 세중님 「만들기」)
+     중복 열쇠도 그 공고 것만 풀어 줍니다. 올린 것·취소된 것·삭제된 것은 그대로 막습니다 */
+  if (한건 && 기록[공고.id]) {
+    const 전 = 기록[공고.id];
+    if (전.게시물ID || 전.상태 !== '확인 대기') { console.log(`  건너뜀 ${공고.id} — 상태 「${전.상태 || (전.메일보낸때 ? '메일보냄' : '기록 있음')}」 라 다시 만들지 않습니다`); continue; }
+    for (const [k, v] of Object.entries(기록.__발행열쇠)) if (v === 공고.id) delete 기록.__발행열쇠[k];
+    console.log(`  다시 만들기 ${공고.id} — 확인 대기였던 것을 새로 만들어 덮어씁니다`);
+  }
   공고.분류 = await 분류(공고.id);
   /* 기관 공식 값 — 기관 표 → 심평원 · 급여 원문은 상세 화면과 같은 차례(뽑은값.예상연봉 → detail.연봉 → detail.예상연봉) */
   const [jp] = await rest(`job_posts?select=기관번호,뽑은값,detail&id=eq.${encodeURIComponent(공고.id)}`);
