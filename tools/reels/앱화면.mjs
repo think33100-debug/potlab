@@ -24,7 +24,13 @@ export const 나감 = path.join(ROOT, 'log', 'reels', 'screens');
 
 /* 찍을 화면 — 이름(영문 · 파일 이름) · 주소 · 아래로 내릴 만큼(px, 휴대폰 기준) */
 export const 화면들 = [
-  { 이름: 'home', 길: '/' },
+  { 이름: 'home', 길: '/', 닫기: true },
+  /* 공고 상세 · 병원 정보 상세 — 2026-11-17 전남대학교병원(상급종합 · 물리 12 · 작업 9 · 공고 306936 마감 11/25) */
+  { 이름: 'job-detail', 길: '/jobs/306936' },
+  { 이름: 'job-detail-2', 길: '/jobs/306936', 내림: 700 },
+  { 이름: 'org-detail', 길: '/orgs?org=' + encodeURIComponent('전남대학교병원') },
+  { 이름: 'org-detail-2', 길: '/orgs?org=' + encodeURIComponent('전남대학교병원'), 내림: 700 },
+  { 이름: 'compete-2', 길: '/compete', 내림: 500 },
   { 이름: 'jobs', 길: '/jobs' },
   { 이름: 'jobs-deadline', 길: '/jobs?sort=deadline' },
   { 이름: 'compete', 길: '/compete' },
@@ -33,7 +39,7 @@ export const 화면들 = [
   { 이름: 'tools', 길: '/tools' },
   { 이름: 'tools-pay', 길: '/tools/pay' },
   { 이름: 'tools-severance', 길: '/tools/severance' },
-  { 이름: 'community', 길: '/community' },
+  { 이름: 'community', 길: '/community', 더기다림: 5000 },
   { 이름: 'edu', 길: '/edu' },
   { 이름: 'toolkit', 길: '/toolkit' },
   { 이름: 'youth', 길: '/youth' },
@@ -90,7 +96,9 @@ async function 찍기(목록, 쿠키 = []) {
       const p = await ctx.newPage();
       try {
         const r = await p.goto(사이트 + h.길, { waitUntil: 'networkidle', timeout: 45000 });
-        await p.waitForTimeout(1500);
+        await p.waitForTimeout(1500 + (h.더기다림 || 0));
+        /* 첫 화면 안내 창(설치 안내 등) — 「닫기」를 누릅니다 */
+        if (h.닫기) { const 단추 = p.getByRole('button', { name: /닫기/ }).first(); if (await 단추.isVisible().catch(() => false)) { await 단추.click(); await p.waitForTimeout(800); } }
         if (h.내림) { await p.evaluate((y) => window.scrollTo(0, y), h.내림); await p.waitForTimeout(600); }
         const f = path.join(나감, h.이름 + '.png');
         await p.screenshot({ path: f });

@@ -2,116 +2,153 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<!-- RAPO 사용설명서 카드뉴스 (2026-11-17 세중님 「라포 사용설명서 컨셉 · 지금 틀 유지하고 색만 다르게 · 실제 기능 · 마지막엔 곧 오픈 예정」)
-     틀은 brand.html·story.html 과 같은 brand.css. 색은 미스트·흰색(첫 게시물은 코랄 · 인터뷰는 블러시·네이비)
-     기능 말은 앱에 **지금 있는 화면**만 (web/lib/routes.ts · web/app/*/page.tsx 의 제목·설명):
-       채용공고(/jobs · 마감 임박 · 저장 /me/saved · 알림 /alarm) · 경쟁률 찾아보기(/compete) ·
-       병원 정보 찾기(/orgs — 치료사 인원·병상·공시 연봉 · 근무 후기 /orgs/review) · 월급 확인(/pay) ·
-       계산기(/tools — 세후 월급·퇴직금·연차·실업급여) · 커뮤니티(/community) · 교육·학술(/edu) · 봉사(/volunteer) · 청년정책(/youth)
-     곧 오픈 예정 = /me/soon 의 「급여 비교」·「입사 스펙 비교」(알림 신청 받는 중) -->
+<!-- RAPO 사용설명서 카드뉴스 2판 (2026-11-17 세중님 「너무 전꺼랑 비슷하다 · 실제 어플 이용 화면을 넣어서 이런 기능도 있나 싶을 정도로」)
+     틀(로고 줄 · 라벨 · 큰 제목)은 brand.css 그대로, 각 장의 주인공은 **실제 앱 화면**입니다.
+     화면 그림 = tools/reels/앱화면.mjs 가 서버에서 www.rapojob.co.kr 을 휴대폰(390×844 ×3)으로 찍은 것 — log/reels/screens/<이름>.png
+       (임시 회원으로 로그인해 찍고 그 회원은 지웠습니다 · 내 정보 화면은 안 찍습니다)
+     기능 말은 앱에 지금 있는 화면만. 곧 오픈 예정 = /me/soon 의 급여 비교 · 입사 스펙 비교 -->
 <link rel="stylesheet" href="brand.css">
 <style>
-  /* 흰 장에서는 카드를 미스트로 — 흰 바탕에 흰 카드가 묻히지 않게 */
-  .white .item, .white .job { background: var(--mist); box-shadow: none; }
-  .step { font-size: 30px; font-weight: 800; color: var(--coral); letter-spacing: 0.04em; margin-top: 70px; }
-  .step + .eyebrow { margin-top: 18px; }
-  .navy .item { background: rgba(255,255,255,0.08); box-shadow: none; }
-  .navy .item .t { color: var(--white); }
-  .navy .item .d { color: rgba(255,255,255,0.72); }
-  .navy .cta { background: var(--coral); color: var(--white); }
-  .soon { display: inline-block; font-size: 26px; font-weight: 800; color: var(--navy); background: var(--white); border-radius: 10px; padding: 4px 12px; margin-left: 14px; vertical-align: middle; }
-  .item .ico { width: 128px; height: 128px; flex: none; border-radius: 28px; background: var(--white); display: flex; align-items: center; justify-content: center; }
-  .item .ico img { width: 72px; height: 72px; }
-  .navy .item .ico { background: var(--white); }
+  .slide { padding-bottom: 0; }
+  h2 { font-size: 76px; }
+  p.sub { font-size: 36px; margin-top: 24px; }
+  .step { font-size: 28px; font-weight: 800; color: var(--coral); letter-spacing: 0.06em; margin-top: 60px; }
+  .step + .eyebrow { margin-top: 14px; }
+  .navy .step { color: var(--coral); }
+
+  /* 휴대폰 — 실제 화면을 담는 틀 (아래로 잘려 나가게 둡니다) */
+  .phones { position: absolute; left: 0; right: 0; top: var(--top, 680px); display: flex; justify-content: center; align-items: flex-start; gap: 36px; }
+  .phone { width: 430px; flex: none; border-radius: 64px; background: var(--navy); padding: 16px; box-shadow: 0 30px 70px rgba(17,34,49,0.28); }
+  .phone .scr { border-radius: 50px; overflow: hidden; background: #fff; aspect-ratio: 1170 / 2532; }
+  .phone .scr img { width: 100%; display: block; }
+  .phone.sm { width: 330px; border-radius: 52px; padding: 12px; }
+  .phone.sm .scr { border-radius: 42px; }
+  .phone.tilt-l { transform: rotate(-5deg); }
+  .phone.tilt-r { transform: rotate(5deg); }
+  .phone.low { margin-top: 90px; }
+  .navy .phone { background: #000; box-shadow: 0 30px 70px rgba(0,0,0,0.45); }
+
+  /* 말풍선 — 화면 옆에 기능 이름 */
+  .chips { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
+  .chip { font-size: 30px; font-weight: 800; padding: 12px 22px; border-radius: 999px; background: var(--navy); color: var(--white); }
+  .chip.c { background: var(--coral); }
+  .mist .chip.w, .white .chip.w { background: var(--white); color: var(--navy); box-shadow: 0 6px 18px rgba(17,34,49,0.08); }
+  .navy .chip.w { background: rgba(255,255,255,0.14); }
+
   .white .eyebrow { background: var(--mist); }
-  .white .item .ico { background: var(--white); }
+
+  /* 곧 오픈 예정 */
+  .soonlist { margin-top: 48px; display: flex; flex-direction: column; gap: 22px; }
+  .soonitem { background: rgba(255,255,255,0.08); border-radius: 30px; padding: 38px 40px; }
+  .soonitem .t { font-size: 50px; font-weight: 800; }
+  .soonitem .d { font-size: 32px; color: rgba(255,255,255,0.72); margin-top: 10px; }
+  .soonitem .t small { font-size: 24px; font-weight: 800; color: var(--navy); background: var(--white); border-radius: 10px; padding: 4px 12px; margin-left: 14px; vertical-align: middle; }
+  .navy .cta { background: var(--coral); color: var(--white); margin-bottom: 30px; }
+  .foot { margin-bottom: 90px; }
 </style>
 </head>
 <body>
 
 <!-- 1 · 표지 -->
-<section class="slide mist on-light" data-n="1">
-  <div class="frame"><svg viewBox="0 0 960 1230" preserveAspectRatio="none"><path d="M640 6H6V1224H954V150" stroke="#112231" stroke-opacity="0.8" stroke-width="10" fill="none" vector-effect="non-scaling-stroke"/></svg></div>
-  <img class="art" src="../../web/public/rapo/og/arrow.svg" style="right:96px;top:96px;width:150px;height:150px;transform:rotate(180deg)" alt="">
-  <div class="top"><div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div></div>
-  <span class="eyebrow">라포 사용설명서</span>
-  <h1>라포,<br><span class="hl">이렇게</span> 써요!</h1>
-  <p class="sub">채용공고부터 병원 정보, 월급까지<br>한 장씩 넘기며 알려 드릴게요.</p>
-  <img class="art" src="assets/symbol.svg" style="right:-40px;bottom:-30px;width:600px;height:586px;opacity:.10" alt="">
-  <div class="swipe">넘겨서 보기 →</div>
+<section class="slide navy on-color" data-n="1" style="--top:700px">
+  <div class="top"><div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div><span class="page">사용설명서</span></div>
+  <span class="eyebrow" style="margin-top:56px">라포 사용설명서</span>
+  <h1 style="font-size:96px">이런 기능까지<br><span class="em">있다고?</span></h1>
+  <p class="sub">치료사 취업 준비, 라포 하나로 어디까지 되는지<br>실제 화면으로 보여 드릴게요.</p>
+  <div class="phones">
+    <div class="phone sm tilt-l" style="margin-top:120px"><div class="scr"><img src="../../log/reels/screens/jobs.png" alt=""></div></div>
+    <div class="phone"><div class="scr"><img src="../../log/reels/screens/org-detail.png" alt=""></div></div>
+    <div class="phone sm tilt-r" style="margin-top:120px"><div class="scr"><img src="../../log/reels/screens/tools-pay.png" alt=""></div></div>
+  </div>
 </section>
 
 <!-- 2 · 채용공고 -->
-<section class="slide white on-light" data-n="2">
+<section class="slide mist on-light" data-n="2">
   <div class="top"><div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div><span class="page">02</span></div>
   <div class="step">STEP 01</div>
   <span class="eyebrow">채용공고</span>
-  <h2>공고는<br><span class="em">한곳에서</span> 봐요</h2>
-  <p class="sub">공공·종합·대학병원 치료사 공고를 모아 뒀어요.<br>마감 임박순으로 보고, 저장하고,<br>알림도 받을 수 있어요.</p>
-  <div class="jobs">
-    <div class="job"><div class="l"><b>○○대학교병원 물리치료사</b><span>정규직 · 2명</span></div><span class="tag">D-3</span></div>
-    <div class="job"><div class="l"><b>○○의료원 작업치료사</b><span>계약직 · 1명</span></div><span class="tag">D-9</span></div>
+  <h2>병원 홈페이지<br>돌 필요 없어요</h2>
+  <div class="chips"><span class="chip c">공공·종합·대학병원</span><span class="chip w">마감 임박순</span><span class="chip w">저장 · 알림</span></div>
+  <div class="phones">
+    <div class="phone tilt-l low"><div class="scr"><img src="../../log/reels/screens/jobs.png" alt=""></div></div>
+    <div class="phone tilt-r"><div class="scr"><img src="../../log/reels/screens/jobs-deadline.png" alt=""></div></div>
   </div>
 </section>
 
-<!-- 3 · 경쟁률 -->
-<section class="slide mist on-light" data-n="3">
+<!-- 3 · 공고 상세 -->
+<section class="slide white on-light" data-n="3">
   <div class="top"><div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div><span class="page">03</span></div>
   <div class="step">STEP 02</div>
-  <span class="eyebrow">경쟁률 찾아보기</span>
-  <h2>지원 전에<br><span class="em">경쟁률</span>부터</h2>
-  <p class="sub">공공기관이 공개한 지난 채용 경쟁률을<br>자리별로 모았어요.</p>
-  <p class="sub">얼마나 몰렸는지 보고 지원할 곳을 골라요.</p>
-  <img class="art" src="../../web/public/rapo/home/graphic-spec-48.svg" style="right:90px;bottom:90px;width:300px;height:300px" alt="">
+  <span class="eyebrow">공고 상세</span>
+  <h2>공고 하나도<br><span class="em">한눈에</span> 정리</h2>
+  <div class="chips"><span class="chip">모집인원</span><span class="chip">접수마감</span><span class="chip">지원자격</span><span class="chip c">예상연봉</span><span class="chip">병원 뜯어보기</span></div>
+  <div class="phones">
+    <div class="phone low"><div class="scr"><img src="../../log/reels/screens/job-detail.png" alt=""></div></div>
+    <div class="phone"><div class="scr"><img src="../../log/reels/screens/job-detail-2.png" alt=""></div></div>
+  </div>
 </section>
 
-<!-- 4 · 병원 정보 -->
-<section class="slide white on-light" data-n="4">
+<!-- 4 · 경쟁률 -->
+<section class="slide mist on-light" data-n="4" style="--top:640px">
   <div class="top"><div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div><span class="page">04</span></div>
   <div class="step">STEP 03</div>
-  <span class="eyebrow">병원 정보 찾기</span>
-  <h2>가기 전에<br><span class="em">병원</span>을 알아봐요</h2>
-  <div class="list">
-    <div class="item"><span class="ico"><img src="../../web/public/rapo/home/graphic-hospital-28.svg" alt=""></span><div><div class="t">치료사 인원 · 병상</div><div class="d">물리·작업치료사가 몇 명 일하는지</div></div></div>
-    <div class="item"><span class="ico"><img src="../../web/public/rapo/home/graphic-pay-28.svg" alt=""></span><div><div class="t">공시 연봉</div><div class="d">정부에 공시된 신입 초임 · 직원 평균</div></div></div>
-    <div class="item"><span class="ico"><img src="../../web/public/rapo/home/graphic-jobspec-28.svg" alt=""></span><div><div class="t">근무 후기</div><div class="d">일해 본 사람이 남긴 이야기</div></div></div>
+  <span class="eyebrow">경쟁률 찾아보기</span>
+  <h2>지난 채용에<br><span class="em">몇 명</span> 지원했을까?</h2>
+  <p class="sub">공공기관이 공개한 경쟁률을 자리별로 모았어요.</p>
+  <div class="phones">
+    <div class="phone tilt-l"><div class="scr"><img src="../../log/reels/screens/compete.png" alt=""></div></div>
+    <div class="phone tilt-r low"><div class="scr"><img src="../../log/reels/screens/compete-2.png" alt=""></div></div>
   </div>
 </section>
 
-<!-- 5 · 월급 · 계산기 -->
-<section class="slide mist on-light" data-n="5">
+<!-- 5 · 병원 정보 -->
+<section class="slide white on-light" data-n="5">
   <div class="top"><div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div><span class="page">05</span></div>
   <div class="step">STEP 04</div>
-  <span class="eyebrow">월급 확인 · 계산기</span>
-  <h2>내 월급,<br><span class="em">계산</span>까지 한 번에</h2>
-  <div class="list">
-    <div class="item"><span class="ico"><img src="../../web/public/rapo/home/graphic-pay-28.svg" alt=""></span><div><div class="t">월급 확인</div><div class="d">회원들이 올린 초임과 실수령액</div></div></div>
-    <div class="item"><span class="ico"><img src="../../web/public/rapo/home/graphic-calc-28.svg" alt=""></span><div><div class="t">계산기</div><div class="d">세후 월급 · 퇴직금 · 연차 · 실업급여</div></div></div>
+  <span class="eyebrow">병원 정보 찾기</span>
+  <h2>치료사가 <span class="em">몇 명</span>인지,<br>연봉은 얼마인지</h2>
+  <div class="chips"><span class="chip">치료사 인원</span><span class="chip">병상 수</span><span class="chip c">공시 연봉</span><span class="chip">근무 후기</span></div>
+  <div class="phones">
+    <div class="phone low"><div class="scr"><img src="../../log/reels/screens/org-detail.png" alt=""></div></div>
+    <div class="phone"><div class="scr"><img src="../../log/reels/screens/org-detail-2.png" alt=""></div></div>
   </div>
 </section>
 
-<!-- 6 · 커뮤니티 · 더 찾기 -->
-<section class="slide white on-light" data-n="6">
+<!-- 6 · 계산기 -->
+<section class="slide mist on-light" data-n="6">
   <div class="top"><div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div><span class="page">06</span></div>
   <div class="step">STEP 05</div>
-  <span class="eyebrow">커뮤니티 · 더 찾기</span>
-  <h2>혼자 고민하지 말고<br><span class="em">같이</span> 찾아요</h2>
-  <div class="list">
-    <div class="item"><span class="ico"><img src="../../web/public/rapo/home/nav-community.svg" alt=""></span><div><div class="t">익명 커뮤니티</div><div class="d">병원 분위기 · 처우 · 이직 고민</div></div></div>
-    <div class="item"><span class="ico"><img src="../../web/public/rapo/home/graphic-edu-28.svg" alt=""></span><div><div class="t">교육 · 학술대회</div><div class="d">학회 교육 일정을 한자리에서</div></div></div>
-    <div class="item"><span class="ico"><img src="../../web/public/rapo/home/graphic-youth-28.svg" alt=""></span><div><div class="t">봉사 · 청년정책</div><div class="d">봉사할 곳과 청년 지원 정책</div></div></div>
+  <span class="eyebrow">월급 확인 · 계산기</span>
+  <h2>실수령액, 퇴직금<br><span class="em">바로 계산</span></h2>
+  <div class="chips"><span class="chip c">세후 월급</span><span class="chip w">퇴직금</span><span class="chip w">연차</span><span class="chip w">실업급여</span></div>
+  <div class="phones">
+    <div class="phone tilt-l"><div class="scr"><img src="../../log/reels/screens/tools-pay.png" alt=""></div></div>
+    <div class="phone tilt-r low"><div class="scr"><img src="../../log/reels/screens/pay.png" alt=""></div></div>
   </div>
 </section>
 
-<!-- 7 · 곧 오픈 예정 -->
-<section class="slide navy on-color" data-n="7">
-  <div class="frame"><svg viewBox="0 0 960 1230" preserveAspectRatio="none"><path d="M640 6H6V1224H954V150" stroke="#FF4F40" stroke-opacity="0.75" stroke-width="10" fill="none" vector-effect="non-scaling-stroke"/></svg></div>
+<!-- 7 · 더 찾기 -->
+<section class="slide white on-light" data-n="7" style="--top:560px">
   <div class="top"><div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div><span class="page">07</span></div>
-  <span class="eyebrow">COMING SOON</span>
-  <h2>곧<br><span class="em">오픈 예정</span>이에요</h2>
-  <div class="list">
-    <div class="item"><span class="ico"><img src="../../web/public/rapo/home/graphic-pay-28.svg" alt=""></span><div><div class="t">급여 비교</div><div class="d">같은 직군·연차 동료와 내 연봉 비교</div></div></div>
-    <div class="item"><span class="ico"><img src="../../web/public/rapo/home/graphic-cert-28.svg" alt=""></span><div><div class="t">입사 스펙 비교</div><div class="d">입사자 자격증 · 들은 교육과 나 비교</div></div></div>
+  <div class="step">STEP 06</div>
+  <span class="eyebrow">올인원 툴킷</span>
+  <h2>교육·청년정책·봉사도<br><span class="em">여기서</span></h2>
+  <div class="phones" style="gap:22px">
+    <div class="phone sm tilt-l"><div class="scr"><img src="../../log/reels/screens/edu.png" alt=""></div></div>
+    <div class="phone sm low"><div class="scr"><img src="../../log/reels/screens/toolkit.png" alt=""></div></div>
+    <div class="phone sm tilt-r"><div class="scr"><img src="../../log/reels/screens/youth.png" alt=""></div></div>
+  </div>
+</section>
+
+<!-- 8 · 곧 오픈 예정 -->
+<section class="slide navy on-color" data-n="8">
+  <div class="frame"><svg viewBox="0 0 960 1230" preserveAspectRatio="none"><path d="M640 6H6V1224H954V150" stroke="#FF4F40" stroke-opacity="0.75" stroke-width="10" fill="none" vector-effect="non-scaling-stroke"/></svg></div>
+  <div class="top"><div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div><span class="page">08</span></div>
+  <span class="eyebrow" style="margin-top:60px">COMING SOON</span>
+  <h2>그리고 곧<br><span class="em">오픈 예정</span>이에요</h2>
+  <div class="soonlist">
+    <div class="soonitem"><div class="t">급여 비교<small>곧 오픈</small></div><div class="d">같은 직군·연차 동료와 내 연봉 비교</div></div>
+    <div class="soonitem"><div class="t">입사 스펙 비교<small>곧 오픈</small></div><div class="d">입사자 자격증 · 들은 교육과 나 비교</div></div>
   </div>
   <div class="cta">프로필 링크 → RAPO</div>
   <div class="foot">@rapojob_hp</div>
