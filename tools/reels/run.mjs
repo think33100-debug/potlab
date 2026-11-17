@@ -7,6 +7,7 @@
                                                  (API 로는 인스타 음악을 못 붙이고, 가요를 파일에 넣으면 저작권 검사에 걸립니다)
    node tools/reels/run.mjs --올리기             열쇠(IG_USER_ID · IG_ACCESS_TOKEN)가 있을 때만 올립니다 (저작권 없는 곡용)
    node tools/reels/run.mjs --id 306936          그 공고 하나만 (견본 · 다시 만들기)
+   node tools/reels/run.mjs --확인만 --며칠 30   후보 전부의 원문만 열어 보고 숫자를 찍음 (만들기·메일·기록 없음)
    선택  --최대 2 (한 바퀴 최대 편수) · --며칠 3 (최근 며칠 게시분) · --음악 <파일> · --나감 <폴더>
 
    고르는 규칙 (CLAUDE.md 「1층」 · 0-0 「신뢰 셋」)
@@ -29,6 +30,7 @@ import { fileURLToPath } from 'node:url';
 import { 릴스자료, 오늘KST, 일층인가, 같은공고묶기 } from './reel-data.mjs';
 import { 기관사진 } from './photos.mjs';
 import { 드라이브되나, 릴스올리기 } from './drive.mjs';
+import { 원문확인 } from './원문확인.mjs';
 import { 모두받기, 받아보기 } from '../쪽나눠받기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -80,7 +82,7 @@ async function 분류(id) {
 }
 
 /* ── 1 · 후보 ── */
-const 칸 = 'id,title,원문제목,org_name,employ_type,headcount,apply_to,apply_to_time,job_group,조교연구,posted_at';
+const 칸 = 'id,title,원문제목,org_name,employ_type,headcount,apply_to,apply_to_time,job_group,조교연구,posted_at,url';
 const 시작일 = new Date(Date.parse(오늘) - 며칠 * 86400e3).toISOString().slice(0, 10);
 const 후보 = 한건
   ? await rest(`job_posts_pub?select=${칸}&id=eq.${encodeURIComponent(한건)}`)
@@ -112,6 +114,7 @@ for (const 공고 of 같은공고묶기(일층)) {
   const 자료 = 릴스자료(공고, 공고.기관, { 오늘, 사이트: 'rapojob.co.kr' });
   if (자료.건너뜀) { console.log('  건너뜀', 공고.id, 공고.org_name, '—', 자료.건너뜀); continue; }
   자료.묶은id = 공고.묶은id || [공고.id];
+  자료.원문 = { url: 공고.url, title: 공고.title, 원문제목: 공고.원문제목, org_name: 공고.org_name, 기관이름: 자료.기관, apply_to: 공고.apply_to, job_group: 공고.job_group };
   /* 전경 사진 — 있으면 씁니다 · 화면 맨 아래 「출처: 병원 이름」 (2026-11-16 세중님) */
   const 사진 = await 기관사진([자료.기관, 공고.org_name]);
   if (사진) { 자료.사진 = 사진.파일; 자료.사진출처 = 사진.출처; }
@@ -121,10 +124,53 @@ for (const 공고 of 같은공고묶기(일층)) {
 할것.sort((a, b) => Number(a.마감.큰글.slice(2)) - Number(b.마감.큰글.slice(2)));
 console.log(`1층 새 공고 ${할것.length}건 · 이번 바퀴 ${Math.min(최대, 할것.length)}건`);
 
+/* ── 1-가 · 원문 확인 (2026-11-17 세중님 「공고가 있는지 확인하고 올리자」) ──
+   만들기 직전에 원문 주소를 직접 엽니다. 통과한 것만 만듭니다 (tools/reels/원문확인.mjs)
+     보류  없어짐 · 마감 표시 · 엉뚱한 쪽 → 만들지 않고 기록 · 따로 메일
+     모름  사이트 장애 · 막힘 → 이번 바퀴만 건너뜀. 세 바퀴 연속이면 보류로 */
+const 확인만 = 깃발('확인만');       /* 후보 전부의 원문만 확인하고 끝 — 만들기·메일·기록 없음 */
+const 적기 = (메일 || 올리기) && !확인만;   /* 마른 실행은 기록을 남기지 않습니다 */
+기록.__모름 = 기록.__모름 || {};
+const 통과 = []; const 멈춤 = [];
+for (const 자료 of 할것) {
+  if (!확인만 && 통과.length >= 최대) break;
+  if (통과.length + 멈춤.length) await new Promise((z) => setTimeout(z, 1500));   /* 사이트를 줄줄이 때리지 않게 */
+  const r = await 원문확인(자료.원문);
+  const 열쇠 = 자료.묶은id[0];
+  console.log(`  원문 ${열쇠} ${자료.기관} → ${r.판정} · ${r.까닭}`);
+  if (r.판정 === '통과') { 자료.원문확인 = r.확인 || []; delete 기록.__모름[열쇠]; 통과.push(자료); continue; }
+  if (r.판정 === '모름') {
+    기록.__모름[열쇠] = (기록.__모름[열쇠] || 0) + 1;
+    if (기록.__모름[열쇠] < 3) continue;
+    r.까닭 = `세 바퀴 연속 확인 못 함 — ${r.까닭}`;
+  }
+  멈춤.push({ 자료, 까닭: r.까닭, 주소: 자료.원문.url });
+  if (적기) for (const id of 자료.묶은id) 기록[id] = { 원문보류때: new Date().toISOString(), 까닭: r.까닭, 기관: 자료.기관, 직군: 자료.직군 };
+}
+if (적기) { fs.mkdirSync(path.dirname(기록파일), { recursive: true }); fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2)); }
+console.log(`원문 확인 — 통과 ${통과.length} · 멈춤 ${멈춤.length}`);
+if (확인만) {
+  for (const 자료 of 통과) console.log(`  ○ ${자료.묶은id[0]} ${자료.기관} · ${자료.원문확인.join(' / ')}`);
+  process.exit(0);
+}
+
+/* 멈춘 공고는 따로 한 통 — 사람이 원문을 보고 공고를 고치거나 내립니다 */
+if (적기 && 메일 && 멈춤.length && cfg.RESEND_KEY && cfg.NOTIFY_EMAIL) {
+  const 글 = ['릴스를 만들기 전에 원문을 열어 봤더니 아래 공고가 이상합니다. 릴스는 만들지 않았습니다.', '',
+    ...멈춤.flatMap(({ 자료, 까닭, 주소 }) => [`· ${자료.기관} · ${자료.직군} · ${자료.마감.큰글}`, `  까닭: ${까닭}`, `  원문: ${주소 || '없음'}`,
+      `  RAPO: https://www.rapojob.co.kr/jobs/${자료.묶은id[0]}`, '']),
+    '회원 화면에서 내리거나 고칠지는 관리자 화면에서 정해 주세요. 이 공고들은 다시 확인하지 않습니다.'].join('\n');
+  const r = await fetch('https://api.resend.com/emails', { method: 'POST',
+    headers: { Authorization: 'Bearer ' + cfg.RESEND_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: cfg.MAIL_FROM || 'potjob <onboarding@resend.dev>', to: [cfg.NOTIFY_EMAIL],
+      subject: `[RAPO 릴스] 원문 확인에서 멈춘 공고 ${멈춤.length}건`, text: 글 }) });
+  console.log(`  멈춤 메일 → ${r.status}`);
+}
+
 /* ── 2 · 만들기 ── */
 fs.mkdirSync(나감, { recursive: true });
 const 만든것 = [];
-for (const 자료 of 할것.slice(0, 최대)) {
+for (const 자료 of 통과) {
   const 바탕 = path.join(나감, 자료.id);
   fs.writeFileSync(바탕 + '.json', JSON.stringify(자료, null, 2));
   fs.writeFileSync(바탕 + '.txt', 자료.캡션 + '\n');
@@ -154,6 +200,7 @@ if (메일) {
     const 글 = [
       `${자료.기관} · ${자료.직군} · ${자료.마감.큰글} (${자료.마감.작은글})`,
       '',
+      ...(자료.원문확인?.length ? ['원문 확인 (릴스 만들기 전에 원문을 열어 봤습니다)', ...자료.원문확인.map((x) => '  ' + x), '  원문: ' + (자료.원문.url || ''), ''] : []),
       ...(링크 ? ['영상 (드라이브)', 링크, ''] : []),
       '올리는 법',
       링크 ? '1. 위 링크 → 드라이브 앱 → 「기기에 저장」' : '1. 첨부 영상을 휴대폰에 저장',
