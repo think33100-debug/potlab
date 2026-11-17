@@ -345,7 +345,7 @@ export const 약관글 = {
 
 직업정보제공사업 신고번호 J1401020260007
 
-문의 카카오톡 채널 pf.kakao.com/_ybINX · 이메일 help@rapojob.co.kr`,
+문의 카카오톡 채널 pf.kakao.com/_ybINX · 이메일 ggnol235@gmail.com`,
   },
   recruiter: {
     lead: `공고 2026년 11월 16일 · 시행 2026년 11월 23일 · 병원·기관의 채용공고를 등록·관리하는 담당자에게 적용합니다.`,
@@ -639,7 +639,7 @@ export const 약관글 = {
 
 직업정보제공사업 신고번호 J1401020260007
 
-문의 카카오톡 채널 pf.kakao.com/_ybINX · 이메일 help@rapojob.co.kr`,
+문의 카카오톡 채널 pf.kakao.com/_ybINX · 이메일 ggnol235@gmail.com`,
   },
   edu: {
     lead: `공고 2026년 11월 16일 · 시행 2026년 11월 23일 · 서비스에 교육을 등록하고 수강 신청을 관리하는 교육기관·학회의 담당자와 개인 강사에게 적용합니다.`,
@@ -949,7 +949,7 @@ export const 약관글 = {
 
 직업정보제공사업 신고번호 J1401020260007
 
-문의 카카오톡 채널 pf.kakao.com/_ybINX · 이메일 help@rapojob.co.kr`,
+문의 카카오톡 채널 pf.kakao.com/_ybINX · 이메일 ggnol235@gmail.com`,
   },
   community: {
     lead: `공고 2026년 11월 16일 · 시행 2026년 11월 23일 · 개인회원 이용약관과 함께 적용합니다.`,
@@ -1103,7 +1103,7 @@ export const 약관글 = {
 
 ⑤ 정당한 권리 없이 중단이나 재개를 요청하면 관련 법령에 따른 책임을 질 수 있습니다. 회사는 명예훼손 임시조치와 저작권 중단·재개 절차를 구분하여 운영합니다.
 
-⑥ 복제·전송 중단 및 재개 요청은 주식회사 빈틈 운영팀이 받습니다. 요청은 이메일 help@rapojob.co.kr 또는 회사의 카카오톡 채널로 보낼 수 있습니다.
+⑥ 복제·전송 중단 및 재개 요청은 주식회사 빈틈 운영팀이 받습니다. 요청은 이메일 ggnol235@gmail.com 또는 회사의 카카오톡 채널로 보낼 수 있습니다.
 
 ## 제10조 조치의 종류와 기준
 
@@ -1155,7 +1155,7 @@ export const 약관글 = {
 
 운영자 주식회사 빈틈
 
-문의 카카오톡 채널 pf.kakao.com/_ybINX · 이메일 help@rapojob.co.kr`,
+문의 카카오톡 채널 pf.kakao.com/_ybINX · 이메일 ggnol235@gmail.com`,
   },
   privacy: {
     lead: `공고 2026년 11월 16일 · 시행 2026년 11월 23일`,
@@ -1435,7 +1435,7 @@ Supabase, Inc.와 Vercel Inc.는 미국 법인이며 회사의 자료는 대한�
 
 · 개인정보 보호책임자(담당 부서) — 내용: 주식회사 빈틈 운영팀
 
-· 이메일 — 내용: privacy@rapojob.co.kr
+· 이메일 — 내용: ggnol235@gmail.com
 
 · 카카오톡 채널 — 내용: pf.kakao.com/_ybINX
 
