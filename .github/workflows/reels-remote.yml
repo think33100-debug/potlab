@@ -19,7 +19,7 @@ on:
         type: choice
         options: [list, check, publish, check-cards, publish-cards, make, pull, brand-check, brand-publish, brand-replace]
       job_id:
-        description: "공고 id (list 는 비움) — 예 306973-PT"
+        description: "공고 id (list 는 비움) — 예 306973-PT · brand-* 는 판 이름(intro · story)"
         required: false
         type: string
 
