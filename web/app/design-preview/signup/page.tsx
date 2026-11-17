@@ -13,10 +13,11 @@ function Body() {
   const q = useSearchParams();
   const 있음 = q.get('e') === '있음';
   const 줄 = q.get('me');
+  const 닉 = q.get('nick') ?? '차분한 수달';   // ?nick= 로 다른 닉네임(규칙에 어긋난 옛 닉네임 시험)
   const me: Me | null = 줄 === 'who'
     ? { id: 'preview', nickname: '차분한 수달', avatar: null, job_group: null, role: null, nickname_changes: 0, survey_at: null }
     : 줄 === '1'
-    ? { id: 'preview', nickname: '차분한 수달', avatar: null, job_group: '작업치료사', role: 있음 ? '현직' : '학생', nickname_changes: 0, survey_at: null }
+    ? { id: 'preview', nickname: 닉, avatar: null, job_group: '작업치료사', role: 있음 ? '현직' : '학생', nickname_changes: 0, survey_at: null }
     : null;
   const session = { user: { id: 'preview-signup', email: null } } as unknown as Session;
   return <AuthPreview value={{ session, me }}><Welcome /></AuthPreview>;

@@ -7,12 +7,14 @@
 export const 닉네임최소 = 4;
 export const 닉네임최대 = 10;
 
-/** 「ㅋ」「ㅏ」처럼 자음·모음 낱자 — 완성된 한글 글자(가~힣)는 괜찮습니다 */
-const 낱자 = /[ㄱ-ㅎㅏ-ㅣ]/;
+/** 「ㅋ」「ㅏ」처럼 자음·모음 낱자 — 완성된 한글 글자(가~힣)는 괜찮습니다.
+    자판에 따라 같은 「ㅇ」이 다른 글자 번호로 들어옵니다 — 호환 자모(ㄱ~ㆎ) · 조합용 자모(U+1100~11FF · A960~A97F · D7B0~D7FF) · 반각(U+FFA0~FFDC) 모두 봅니다.
+    먼저 NFC 로 합쳐, 조합용 자모로 들어온 완성 글자(ᄋ+ᅡ = 아)는 통과시킵니다 (2026-11-17 세중님 「ㅇㅇㅇㅇㅇ 이게 통과되는디」) */
+const 낱자 = /[\u1100-\u11FF\u3131-\u318E\uA960-\uA97F\uD7B0-\uD7FF\uFFA0-\uFFDC]/;
 
 /** 적는 동안 보여 줄 문제 — 없으면 null. 비어 있을 때는 탓하지 않습니다 */
 export function 닉네임문제(v: string): string | null {
-  const t = v.trim();
+  const t = v.normalize('NFC').trim();
   if (!t) return null;
   if (낱자.test(t)) return 'ㅋ·ㅏ처럼 한글 자음이나 모음만 따로 쓸 수 없어요';
   if (t.length < 닉네임최소) return `${닉네임최소}자 이상 적어 주세요`;
