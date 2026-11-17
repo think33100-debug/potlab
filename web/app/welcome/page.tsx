@@ -367,6 +367,15 @@ export default function Welcome() {
   };
 
   const 다시하기 = async () => {
+    /* ★ 2026-11-17 세중님 「고쳐줘」 — 운영진 계정이 「가입중」 역할로 이 화면을 볼 때 「나가기」가 운영진 계정을
+       정말 로그아웃시켰습니다. 그러면 아래 역할 띠도 사라지고 카카오·네이버 화면만 남아 개인 계정으로 들어가 버립니다.
+       운영진이면 로그아웃하지 않고 창만 닫습니다 (돌아가는 길은 아래 띠의 「관리자」). 회원은 전과 같습니다 */
+    const { data: 나 } = await browserSupabase().rpc('내페르소나');
+    if ((나 as { 마스터?: boolean } | null)?.마스터) {
+      set나가기(false);
+      toast('운영진 계정은 로그아웃하지 않아요.\n아래 띠에서 「관리자」를 누르면 돌아가요', { ms: 4500 });
+      return;
+    }
     await browserSupabase().auth.signOut({ scope: 'local' });
     toast('처음부터 다시 해요');
     router.replace('/login');
