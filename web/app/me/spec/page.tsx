@@ -7,7 +7,7 @@ import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
 import { Chips, Langs, Rows } from '@/components/signup-survey';
 import { RapoButton } from '@/components/rapo/rapo-ui';
-import { RapoFormFrame, RapoFormTitle, 골라, 기본칸, 남은횟수, 만점읽기, 학년별담기, 학년별읽기, 학년수구하기, 학교찾기칸, 학점칸, 학점들틀렸나, use내스펙 } from '@/components/rapo/rapo-spec-form';
+import { RapoFormFrame, RapoFormTitle, 골라, 기본칸, 남은횟수, 만점읽기, 학년별읽기, 학교찾기칸, 학점칸, 학점들틀렸나, use내스펙 } from '@/components/rapo/rapo-spec-form';
 import { 학력목록 } from '@/lib/school-period';
 import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave, type LangRow, type WorkRow } from '@/lib/signup-fields';
 import { 학교목록 } from '@/lib/signup-school';
@@ -54,14 +54,13 @@ export default function MySpec() {
   const 경력 = !!v?.spec?.근무경험 || me?.role === '현직';
   const job = me?.job_group ?? '작업치료사';
   const 학교들 = 학교목록(job);
-  const 고른학교 = 학교들.find((x) => x.이름 === 학교) ?? null;
   const 학교없음 = 학력 === '학교 경험 없음';
-  /* 학년별 학점은 임상가(입사 당시)에만 — 학생·취준생은 평균 학점 하나 (2026-11-17 세중님 「학년별 학점 지우자」 · 가입 화면과 같게) */
-  const 학년수 = 경력 ? 학년수구하기(학력, null) : 0;
+  /* 학년별 학점은 없앴습니다 — 평균 학점 하나 · 필수 (2026-11-17 세중님 「학년별 학점 지우자 · 필수야. 성적.」 · 가입 화면과 같게) */
+  const 학년수 = 0;
   const 학점틀림 = !학교없음 && 학점들틀렸나(학점, 학년별, 학년수, 만점값);
-  const 학년별값 = 학교없음 ? null : 학년별담기(학년별, 학년수);
-  const 학점있음 = !학교없음 && (!!학점.trim() || !!학년별값);
-  const 학력됨 = !!학력 && !학점틀림;
+  const 학년별값 = null;
+  const 학점있음 = !학교없음 && !!학점.trim();
+  const 학력됨 = !!학력 && !학점틀림 && (학교없음 || Number(학점) > 0);
   const 스펙됨 = certs.length > 0 && courses.length > 0 && (rowsNone || rowsReady(rows)) && langs.every((r) => !langError(r));
   const 남은 = v?.남은 ?? 0;
   const go = (s: 단계) => { setStep(s); window.scrollTo(0, 0); };

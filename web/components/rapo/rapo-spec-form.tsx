@@ -127,10 +127,11 @@ export function 학점칸({ label, v, on, 만점값, on만점, 학년수, 학년
   return (
     <div className="flex flex-col gap-(--rapo-dimension-x4)">
       <p className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">
-        {label} <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span>
+        {/* 학점은 필수 · 학년별 칸은 없앴습니다 (2026-11-17 세중님 「학년별 학점지우자 · 필수야. 성적.」) — 학년수·학년별은 옛 부르는 곳 때문에 받기만 합니다 */}
+        {label} <span className="rapo-type-t3-bold text-(color:--rapo-color-fg-brand-contrast)">필수</span>
       </p>
       <골라 label="만점 기준" v={만점값} opts={만점들} ph="만점 기준" on={on만점} />
-      {학년수 > 0 && (
+      {false && 학년수 > 0 && (
         <div className="grid grid-cols-2 gap-(--rapo-dimension-x3)">
           {Array.from({ length: 학년수 }, (_, i) => (
             <점수칸 key={i} 이름={`${i + 1}학년`} 만점값={만점값} v={학년별[i] ?? ''}

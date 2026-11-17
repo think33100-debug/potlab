@@ -4,13 +4,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { CompareNotify } from '@/components/compare-notify';
-import { SignupSurvey } from '@/components/signup-survey';
 import { 비교알림켜짐 } from '@/lib/beta-compare';
 import { defaultAvatar } from '@/lib/avatar';
 import { BETA_AGREEMENTS, 표없음 } from '@/lib/beta';
 import { RapoButton } from '@/components/rapo/rapo-ui';
-import { 만점들, 학년별담기, 학년수구하기, 학교찾기칸, 학점들틀렸나, 희망유형들 as 희망유형, 희망지역들 as 희망지역 } from '@/components/rapo/rapo-spec-form';
-import { 가입진행, PickGroupField, 꺾쇠, 느낌표, HospitalSearch, PracticeField, LangField, 여는칸, YearMonthSheet, 저장점, 체크, 체크마크 } from '@/components/rapo/rapo-signup';
+import { 만점들, 학교찾기칸, 학점들틀렸나, 희망유형들 as 희망유형, 희망지역들 as 희망지역 } from '@/components/rapo/rapo-spec-form';
+import { 가입진행, PickGroupField, 꺾쇠, 느낌표, HospitalSearch, PracticeField, LangField, 여는칸, YearMonthSheet, 저장점, 체크마크 } from '@/components/rapo/rapo-signup';
 import { 스펙비교길 } from '@/components/rapo/rapo-spec-entry';
 import { RapoSpecScoreCard } from '@/components/rapo/rapo-spec-score';
 import { clearAfterLogin, peekAfterLogin } from '@/lib/after-login';
@@ -59,6 +58,12 @@ import { useToast } from '../toast';
      · 끝 화면 추천 메뉴: 커뮤니티 줄을 빼고 「취업 스펙 비교」 (학생·취준생 커뮤니티는 학생인증 뒤에 엶)
      · 임상가(경험 있음) 흐름은 그대로
 
+   2026-11-17 (셋째) 세중님 「임상가 — 작업치료사·물리치료사 모두 동일하게」
+     · 입사 당시 학점은 필수 · 학년별 학점과 「성적 없음」 없앰 (학생·취준생과 같게)
+     · ⑥ 은 먼저 「이직 계획이 있으세요?」 — 있으면 희망 조건을 묻고, 없으면 바로 넘어갑니다(희망 조건은 비워 담음)
+     · ⑦ 급여는 받지 않습니다 — 연봉 비교 서비스를 소개하고 「연봉 비교 서비스 오픈 알림 받기」 / 「알림 없이 가입 마치기」로 가입을 끝냅니다
+       (직접 입력·「1분 안에 불러오기」 단추는 뺐습니다). 입사 당시 자격·교육·실습은 그대로 담아 두고, 나중에 병원 인증·후기 때 다시 씁니다
+
    역할 값(profiles.role)은 그대로 「학생 / 현직」입니다 — 경험 없음 = 학생 · 경험 있음 = 현직 (커뮤니티 방이 이 값을 봅니다).
    스펙은 ⑥(경험 있음은 ⑦)에서 save_my_survey 한 번으로 담습니다. 두 번 부르면 두 번째가 「1년 2번 고치기」로 세어집니다. */
 
@@ -73,6 +78,8 @@ type 초안 = {
   학력?: string; 학적?: '재학' | '졸업'; 입학년?: string; 입학월?: string; 학점?: string; 만점?: string; 학년별?: string[];
   /* 「아직 성적이 없어요」 (피그마 1241:2076) — 화면 표시만. 켜면 학점을 비워 담습니다(gpa null) */
   성적없음?: boolean;
+  /* 임상가 ⑥ 「이직 계획이 있으세요?」 (2026-11-17) */
+  이직?: '있음' | '없음';
   관심대상?: string; 관심분야?: string[]; 듣고싶은교육?: string[];
   병원?: string; 입사연도?: string;
   certs?: string[]; courses?: string[]; rows?: WorkRow[]; rowsNone?: boolean; langs?: LangRow[];
@@ -104,7 +111,6 @@ export default function Welcome() {
   const [betaErr, setBetaErr] = useState<string | null>(null);
   const [saveErr, setSaveErr] = useState<string | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
-  const [급여입력, set급여입력] = useState(false);
   /* 방금 가입 줄을 만든 경우 — 줄이 생기는 순간 「이미 가입한 분」으로 몰려 홈으로 튕기지 않게 */
   const [justMade, setJustMade] = useState(false);
   const [d, setD] = useState<초안>({});
@@ -250,20 +256,19 @@ export default function Welcome() {
   const 끝날 = 무료끝날(졸업);
   const 끝남 = !!끝날 && 끝날 < todayKst();
   const 학교들 = 학교목록(job ?? me?.job_group);
-  const 고른학교 = 학교들.find((x) => x.이름 === d.학교) ?? null;
-  /* 학점 — 학년별(3년제 3칸 · 4년제 4칸) + 평균 · 모두 선택 (2026-11-15 세중님) */
+  /* 학점 — 평균 학점 하나 (11/17 학년별·「성적 없음」 없앰 · 필수) */
   /* 학점은 경험 있음(입사 당시)과 졸업한 분에게만 묻습니다 — 재학 중은 묻지 않고, 전에 적어 둔 값이 있어도 담지 않습니다 (2026-11-17 세중님) */
   const 학점받음 = !학교없음 && (있음 || 졸업생);
-  /* 학년별 학점 · 「성적 없음」은 임상가(입사 당시)에만 남깁니다 — 학생·취준생은 평균 학점 하나 (2026-11-17 세중님 「학년별 학점 지우자 · 아직 성적이 없어요도 지워」) */
-  const 성적없음 = 있음 && !!d.성적없음;
+  /* 학년별 학점 · 「성적 없음」은 모두 없앴습니다 — 학생·취준생·임상가 모두 평균 학점 하나 (2026-11-17 세중님) */
+  const 성적없음 = false;   // 「성적 없음」 칸은 없앴습니다 (2026-11-17 세중님)
   const 만점값 = d.만점 ?? '4.5';
-  const 학년수 = 있음 ? 학년수구하기(d.학력, null) : 0;
+  const 학년수 = 0;   // 학년별 학점은 없앴습니다 (2026-11-17 세중님 「학년별 학점지우자」)
   const 학점틀림 = 학점받음 && !성적없음 && 학점들틀렸나(d.학점 ?? '', 있음 ? d.학년별 ?? [] : [], 학년수, 만점값);
   const 평균틀림 = 학점받음 && !성적없음 && 학점들틀렸나(d.학점 ?? '', [], 0, 만점값);
-  const 학년별값 = !있음 || !학점받음 || 성적없음 ? null : 학년별담기(d.학년별 ?? [], 학년수);
+  const 학년별값 = null;
   /* ④ 에서 학점을 보는 것은 임상가뿐입니다(비워도 됨). 졸업생의 학점은 ⑤ 에서 필수로 받습니다 */
   const 학교됨 = 있음
-    ? !!d.병원?.trim() && !!d.입사연도 && !!d.학력 && (학교없음 || !학점틀림)
+    ? !!d.병원?.trim() && !!d.입사연도 && !!d.학력 && (학교없음 || (Number(d.학점) > 0 && !학점틀림))   // 입사 당시 학점 필수 (2026-11-17)
     : !!d.학력 && (학교없음 || (!!d.학교?.trim() && !!d.학적 && !!입학 && !입학미래));
 
   /* ── ⑤ 자격·교육·실습·어학 ── 「없음」도 답 — 고르거나 없음을 눌러야 넘어갑니다. 졸업생은 학점도 꼭 */
@@ -272,7 +277,9 @@ export default function Welcome() {
   const 스펙됨 = certs.length > 0 && courses.length > 0 && (d.rowsNone || rowsReady(rows)) && langs.every((r) => !langError(r)) && 졸업학점됨;
 
   /* ── ⑥ 희망 ── */
-  const 희망됨 = !!d.희망유형 && !!d.희망지역;
+  /* 임상가는 먼저 「이직 계획이 있으세요?」 — 없으면 희망 조건 없이 넘어갑니다 (2026-11-17 세중님) */
+  const 이직없음 = 있음 && d.이직 === '없음';
+  const 희망됨 = 있음 && !d.이직 ? false : 이직없음 || (!!d.희망유형 && !!d.희망지역);
   const 관심됨 = !!d.관심대상;
 
   /* 담는 꼴 — save_my_survey 의 p_spec (금고 SQL_1113/ZL)
@@ -290,7 +297,7 @@ export default function Welcome() {
     licenses: 재학 ? [] : certs.filter((x) => x !== NONE), trainings: 재학 ? [] : courses.filter((x) => x !== NONE),
     practice: 실습, practice_months: 실습.reduce((s, r) => s + (Number(r.months) || 0), 0),
     career: null, career_months: null,
-    want_type: d.희망유형 ?? null, want_region: d.희망지역 ?? null,
+    want_type: 이직없음 ? null : d.희망유형 ?? null, want_region: 이직없음 ? null : d.희망지역 ?? null,
     학적: !있음 && !학교없음 ? d.학적 ?? null : null,
     입학연월: !있음 && !학교없음 && 입학 ? `${입학.y}-${String(입학.m).padStart(2, '0')}-01` : null,
     근무경험: 있음,
@@ -340,7 +347,7 @@ export default function Welcome() {
   /* ── 그리기 ── 피그마 07 B 화면을 하나씩 맞춤 (2026-11-16) — 본문 여백 24 · 진행 표시 → 제목 20 · 아래 고정 단추 위아래 24 */
   const 단계이름: Record<단계, string> = {
     동의: '이용 동의', 내정보: '내 정보', 닉네임: '닉네임', 학교: 있음 || 학교없음 ? '학력·학점' : '학교·입학 연월',
-    스펙: '자격·교육·실습', 희망: '희망 취업 조건', 관심: '관심 분야', 급여: '급여 정보 (선택)', 끝: '',
+    스펙: '자격·교육·실습', 희망: 있음 ? '이직 계획' : '희망 취업 조건', 관심: '관심 분야', 급여: '연봉 비교 서비스', 끝: '',
   };
   const n = 순서.indexOf(step) + 1;
   /* 줄은 피그마 글상자 그대로 나눕니다 — 좁은 폰(320)에서는 break-keep 이 낱말 단위로 더 나눕니다 */
@@ -352,18 +359,18 @@ export default function Welcome() {
       /* 학생·취준생의 ④ 에는 학점이 없습니다(졸업생 학점은 ⑤ · 2026-11-17) */
       : <>학교와 입학 연월을<br />알려주세요</>,
     스펙: 있음 ? <>입사 당시 자격과<br />교육·실습을 알려주세요</> : <>자격·교육과 실습을<br />알려주세요</>,
-    희망: '어디로 가고 싶으세요?',
+    희망: 있음 ? '이직 계획이 있으세요?' : '어디로 가고 싶으세요?',
     관심: <>어떤 분야에<br />관심 있으세요?</>,
-    급여: 급여입력 ? null : <>내 급여,<br />어느 정도일까요?</>,
+    급여: <>내 연봉, 다른 치료사와<br />투명하게 비교해요</>,
   };
   const 설명: Partial<Record<단계, React.ReactNode>> = {
     학교: 있음 ? '현재 또는 가장 최근에 근무한 병원 한 곳을 기준으로 입력해 주세요.'
       : 학교없음 ? <>학적과 학점 입력 없이 계속할 수 있어요.<br />비교 정보가 없으면 ‘입력 정보 없음’으로 표시해요.</>
       : <>입학 연월로 졸업 예정일과<br />무료 이용 기간을 계산해요.</>,
     스펙: 있음 ? '입사할 때 보유했던 자격과 이수한 교육을 선택해 주세요.' : '입사자들이 어떤 자격과 교육을 갖췄는지 비교할 수 있어요.',
-    희망: '희망 지역과 기관 유형에 맞는 공고를 먼저 보여드려요.',
+    희망: 있음 ? '이직을 생각하고 있다면 원하는 조건에 맞는 공고를 먼저 보여드려요.' : '희망 지역과 기관 유형에 맞는 공고를 먼저 보여드려요.',
     관심: '관심에 맞는 교육·공고 소식을 먼저 알려드려요.',
-    급여: 급여입력 ? undefined : '급여를 입력하면 내 위치와 다른 근무 조건의 급여 차이를 확인할 수 있어요.',
+    급여: '라포가 연봉 비교 서비스를 준비하고 있어요.',
   };
 
   const 다시하기 = async () => {
@@ -381,7 +388,6 @@ export default function Welcome() {
     router.replace('/login');
   };
   const 뒤로 = () => {
-    if (step === '급여' && 급여입력) { set급여입력(false); return; }
     const i = 순서.indexOf(step);
     /* 가입 줄이 생긴 뒤에도 ②③으로 돌아갑니다 (2026-11-15 세중님) — ②는 직군·경험을 고치고 ③은 닉네임만 고칩니다 */
     if (i > 0) { go(순서[i - 1]); return; }
@@ -409,6 +415,16 @@ export default function Welcome() {
       : <RapoButton onClick={() => go('희망')} disabled={!스펙됨} full>다음</RapoButton>)
     : step === '희망' ? <RapoButton onClick={() => go(있음 ? '급여' : '관심')} disabled={!희망됨} full>다음</RapoButton>
     : step === '관심' ? <RapoButton onClick={스펙저장} disabled={!관심됨 || busy} full>가입 완료</RapoButton>
+    /* 연봉 비교 서비스 — 알림 신청과 가입 마침을 한 단추로 · 아래 글 단추는 알림 없이 (2026-11-17 세중님) */
+    : step === '급여' ? (
+      <div className="flex flex-col items-center gap-(--rapo-dimension-x2)">
+        <RapoButton tone="deep-coral" onClick={() => (비교알림켜짐 ? setCompareOpen(true) : void 스펙저장())} disabled={busy} full>연봉 비교 서비스 오픈 알림 받기</RapoButton>
+        <button type="button" onClick={() => void 스펙저장()} disabled={busy}
+          className="rapo-type-t4-bold py-(--rapo-dimension-x2) text-(color:--rapo-color-fg-neutral-muted) underline underline-offset-2 disabled:opacity-40">
+          알림 없이 가입 마치기
+        </button>
+      </div>
+    )
     : step === '끝' ? <RapoButton onClick={가입끝} full>{끝단추글}</RapoButton>
     : null;
 
@@ -512,44 +528,20 @@ export default function Welcome() {
     </div>
   );
 
-  /* 임상가(입사 당시)의 학점 묶음 — ④ 에 그대로 둡니다 */
+  /* 임상가(입사 당시)의 학점 — ④ · 필수 · 평균 학점과 만점 둘뿐 (2026-11-17 세중님 「학년별 학점지우자 · 성적없음 칸도 지워 · 필수야」) */
   const 학점묶음 = 있음 && 학점받음 && (
     <div className="flex flex-col gap-(--rapo-dimension-x2)">
-      {!d.성적없음 && (
-        <>
-          <div className="grid grid-cols-2 gap-(--rapo-dimension-x4)">
-            <label className="flex min-w-0 flex-col gap-(--rapo-dimension-x2)">
-              <span className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">{있음 ? '입사 당시 학점' : '누적 학점'}</span>
-              <input value={d.학점 ?? ''} onChange={(e) => put({ 학점: e.target.value })} inputMode="decimal"
-                placeholder={있음 ? '입사 당시 학점 입력' : '학점 입력'}
-                className={칸 + ' h-[56px] ' + (평균틀림 ? 'border-(color:--rapo-color-stroke-critical-solid)' : '')} />
-            </label>
-            <골라 label={있음 ? '만점' : '만점 기준'} v={d.만점 ?? ''} opts={만점들} ph="만점 선택" on={(v) => put({ 만점: v })} 작은이름 />
-          </div>
-          {학년수 > 0 && (
-            <div className="mt-(--rapo-dimension-x2) flex flex-col gap-(--rapo-dimension-x2)">
-              <p className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">학년별 학점 <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">(선택)</span></p>
-              <div className={'grid gap-(--rapo-dimension-x2) ' + (학년수 === 4 ? 'grid-cols-4' : 'grid-cols-3')}>
-                {Array.from({ length: 학년수 }, (_, i) => {
-                  const v = d.학년별?.[i] ?? '';
-                  const 칸틀림 = 학점들틀렸나('', [v], 1, 만점값);
-                  return (
-                    <input key={i} value={v} inputMode="decimal" placeholder={`${i + 1}학년`} aria-label={`${i + 1}학년 학점`}
-                      onChange={(e) => { const x = [...(d.학년별 ?? [])]; while (x.length < 학년수) x.push(''); x[i] = e.target.value; put({ 학년별: x }); }}
-                      className={칸 + ' px-(--rapo-dimension-x3) text-center ' + (칸틀림 ? 'border-(color:--rapo-color-stroke-critical-solid)' : '')} />
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          <p className={'rapo-type-t3-regular break-keep ' + (학점틀림 ? 'text-(color:--rapo-color-fg-critical)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
-            {학점틀림 ? '학점은 선택한 만점 이하로 입력해 주세요.' : '입력하면 가입한 사람들과 학점을 비교할 수 있어요.'}
-          </p>
-        </>
-      )}
-      <체크 on={!!d.성적없음} set={(b) => put(b ? { 성적없음: true, 학점: '', 학년별: [] } : { 성적없음: false })}>
-        {있음 ? '성적 없음' : '아직 성적이 없어요'}
-      </체크>
+      <div className="grid grid-cols-2 gap-(--rapo-dimension-x4)">
+        <label className="flex min-w-0 flex-col gap-(--rapo-dimension-x2)">
+          <span className="rapo-type-t4-medium text-(color:--rapo-color-fg-neutral)">입사 당시 학점 <span className="rapo-type-t3-bold text-(color:--rapo-color-fg-brand-contrast)">필수</span></span>
+          <input value={d.학점 ?? ''} onChange={(e) => put({ 학점: e.target.value })} inputMode="decimal" placeholder="학점 입력"
+            className={칸 + ' h-[56px] ' + (평균틀림 ? 'border-(color:--rapo-color-stroke-critical-solid)' : '')} />
+        </label>
+        <골라 label="만점" v={만점값} opts={만점들} ph="만점 선택" on={(v) => put({ 만점: v })} 작은이름 />
+      </div>
+      <p className={'rapo-type-t3-regular break-keep ' + (학점틀림 ? 'text-(color:--rapo-color-fg-critical)' : 'text-(color:--rapo-color-fg-neutral-muted)')}>
+        {학점틀림 ? '학점은 선택한 만점 이하로 입력해 주세요.' : '학점은 꼭 적어 주세요. 가입한 사람들과 학점을 비교할 수 있어요.'}
+      </p>
     </div>
   );
 
@@ -721,11 +713,24 @@ export default function Welcome() {
       {/* ⑥ 희망 취업 조건 — 1245:3784 · 3835 */}
       {step === '희망' && (
         <section className="mt-(--rapo-dimension-x5) flex flex-col gap-(--rapo-dimension-x5)">
+          {있음 && (
+            <div className="grid grid-cols-2 gap-(--rapo-dimension-x4)">
+              <Choice on={d.이직 === '있음'} go={() => put({ 이직: '있음' })} small>네, 있어요</Choice>
+              <Choice on={d.이직 === '없음'} go={() => put({ 이직: '없음' })} small>아니요</Choice>
+            </div>
+          )}
+          {(!있음 || d.이직 === '있음') && (<>
           <골라 label="희망 기관 유형" v={d.희망유형 ?? ''} opts={희망유형} ph="기관 유형 선택" on={(v) => put({ 희망유형: v })} />
           <골라 label="희망 지역" v={d.희망지역 ?? ''} opts={희망지역} ph="희망 지역 선택" on={(v) => put({ 희망지역: v })} />
           <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
             {있음 ? '지금 근무하는 조건과 별개로, 앞으로 일하고 싶은 곳의 조건을 알려주세요.' : '희망 조건은 가입 후 내 정보에서 바꿀 수 있어요.'}
           </p>
+          </>)}
+          {이직없음 && (
+            <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
+              이직을 생각하게 되면 내 정보 → 희망 취업 조건에서 언제든 적을 수 있어요.
+            </p>
+          )}
         </section>
       )}
 
@@ -748,11 +753,13 @@ export default function Welcome() {
         </section>
       )}
 
-      {/* ⑦ 급여 (경험 있음만 · 선택) — 1245:3886 「U05-05 급여 선택」 */}
-      {step === '급여' && !급여입력 && (
+      {/* ⑦ 연봉 비교 서비스 소개 (경험 있음만) — 급여는 받지 않습니다 (2026-11-17 세중님 「아직은 급여를 정확하게 안 받을거야 ·
+          광고 같은 느낌 · 결국 알람 신청 유도 · 알림 신청이랑 다음으로 넘어가기를 합쳐서 · 여기서 회원가입 마무리」).
+          아래 단추 둘: 「연봉 비교 서비스 오픈 알림 받기」(알림 창 → 가입 마침) · 「알림 없이 가입 마치기」. 소개 그림의 숫자는 「예시」로 밝힙니다 */}
+      {step === '급여' && (
         <section className="mt-(--rapo-dimension-x5) flex flex-col gap-(--rapo-dimension-x5)">
           <div className="flex flex-col gap-(--rapo-dimension-x4) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-navy-solid) p-(--rapo-dimension-x6)">
-            <p className="rapo-type-t5-medium text-(color:--rapo-color-fg-on-navy-solid)">비슷한 조건에서 내 위치</p>
+            <p className="rapo-type-t5-medium text-(color:--rapo-color-fg-on-navy-solid)">같은 연차·지역 치료사 중 내 연봉은</p>
             <p className="rapo-type-t13-bold whitespace-nowrap text-(color:--rapo-color-fg-on-navy-solid)">상위 23%</p>
             <div aria-hidden className="flex h-[65px] items-end gap-[6px]">
               {[20, 37, 52, 62, 65, 62, 52, 37, 20].map((h, k) => (
@@ -760,45 +767,26 @@ export default function Welcome() {
                   className={'flex-1 rounded-(--rapo-radius-r1) ' + (k === 6 ? 'bg-(--rapo-color-bg-brand-solid)' : 'bg-(--rapo-color-fg-on-navy-solid) opacity-30')} />
               ))}
             </div>
-            <p className="rapo-type-t2-regular text-(color:--rapo-color-fg-on-navy-solid) opacity-70">같은 조건 47명 기준 / 가상 예시</p>
+            <p className="rapo-type-t2-regular text-(color:--rapo-color-fg-on-navy-solid) opacity-70">화면 예시예요</p>
           </div>
-          <p className="rapo-type-t8-bold text-(color:--rapo-color-fg-neutral)">근무 조건이 달라지면?</p>
-          <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
-            지역과 기관 유형에 따른 급여 차이도 비교할 수 있어요. 실제 이직 시 받을 급여를 뜻하지 않아요.
-          </p>
-          {/* 「1분 안에 내 연봉 불러오기」 — 피그마에 있지만 자동 조회 기능이 아직 없어 잠가 둡니다 (2026-11-16) */}
-          <div className="flex flex-col gap-(--rapo-dimension-x2)">
-            <RapoButton full disabled onClick={() => {}}>1분 안에 내 연봉 불러오기</RapoButton>
-            <p className="rapo-type-t3-regular text-center text-(color:--rapo-color-fg-neutral-muted)">자동으로 불러오기는 준비 중이에요.</p>
-          </div>
-          {/* 연봉 비교 알림(베타 기능 · 피그마에 없음) — 남색 단추가 둘 서지 않게 회색 줄로 둡니다 */}
-          {비교알림켜짐 && (
-            <button type="button" onClick={() => setCompareOpen(true)}
-              className="flex items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-left active:bg-(--rapo-color-bg-neutral-weak-pressed)">
-              <span className="rapo-type-t5-medium min-w-0 flex-1 break-keep text-(color:--rapo-color-fg-neutral)">연봉 비교 알림 받기</span>
-              <span aria-hidden className="rapo-type-t7-regular shrink-0 text-(color:--rapo-color-fg-neutral)">›</span>
-            </button>
-          )}
-          <button type="button" onClick={() => set급여입력(true)}
-            className="flex items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-left active:bg-(--rapo-color-bg-neutral-weak-pressed)">
-            <span className="rapo-type-t5-medium min-w-0 flex-1 break-keep text-(color:--rapo-color-fg-neutral)">자동 조회가 어렵다면 직접 입력</span>
-            <span aria-hidden className="rapo-type-t7-regular shrink-0 text-(color:--rapo-color-fg-neutral)">›</span>
-          </button>
-          <button type="button" onClick={스펙저장} disabled={busy}
-            className="rapo-type-t4-bold self-start py-(--rapo-dimension-x1) text-(color:--rapo-color-fg-neutral) disabled:opacity-40">
-            나중에 입력하고 가입 완료
-          </button>
-          <p className="rapo-type-t4-regular -mt-(--rapo-dimension-x3) break-keep text-(color:--rapo-color-fg-neutral-muted)">
-            급여는 선택 항목이에요. 나중에 내 정보 → 스펙 확인·수정에서 입력할 수 있어요.
-          </p>
+          <ul className="flex flex-col gap-(--rapo-dimension-x3)">
+            {[
+              ['간편 인증 한 번이면 돼요', '직접 적지 않아도 간편한 인증으로 정확한 소득을 불러와요.'],
+              ['내 연봉을 정확하게 계산해요', '불러온 소득을 분석해 실제 연봉을 산출해요.'],
+              ['투명하게 서로 비교해요', '같은 직군·연차·지역 치료사와 이름 없이 견줘서, 내가 어디쯤인지 알 수 있어요.'],
+            ].map(([제, 글], k) => (
+              <li key={제} className="flex items-start gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4)">
+                <span aria-hidden className="rapo-type-t4-bold flex size-(--rapo-dimension-x6) shrink-0 items-center justify-center rounded-(--rapo-radius-full) bg-(--rapo-color-bg-navy-solid) text-(color:--rapo-color-fg-on-navy-solid)">{k + 1}</span>
+                <span className="flex min-w-0 flex-col gap-(--rapo-dimension-x1)">
+                  <span className="rapo-type-t5-bold break-keep text-(color:--rapo-color-fg-neutral)">{제}</span>
+                  <span className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{글}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="rapo-type-t6-bold break-keep text-(color:--rapo-color-fg-neutral)">낮은 급여, 이제 함께 바꿔요.<br />서비스가 열리면 가장 먼저 알려 드릴게요!</p>
+          <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">지금은 급여를 묻지 않아요. 연봉 인증은 서비스가 열릴 때 안내해 드려요.</p>
         </section>
-      )}
-      {step === '급여' && 급여입력 && (
-        <div className="mt-(--rapo-dimension-x6)">
-          <SignupSurvey userId={session.user.id} job={job ?? me?.job_group ?? '작업치료사'} role="현직"
-            급여만={{ spec, langs, 입사연도: Number(d.입사연도) }}
-            onDone={async () => { try { localStorage.removeItem(초안열쇠(session.user.id)); } catch { /* 없어도 그만 */ } await 가입끝(); }} />
-        </div>
       )}
 
       {/* 완료 — 1245:4005 (경험 있음) · 4053 · 4075 / 학생 무료 이용 1495:5010 · 공개 범위 1495:5033 */}
@@ -811,7 +799,8 @@ export default function Welcome() {
           {있음 ? (
             <>
               <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">근무 정보를 등록했어요</p>
-              <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">급여는 나중에 입력해도 괜찮아요. 이제 비교 정보와 커뮤니티를 이용할 수 있어요.</p>
+              <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">입사 당시 자격·교육·실습은 저장해 두었어요. 나중에 병원을 인증하고 후기를 남길 때 그대로 불러와요.</p>
+              <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral)">커뮤니티는 연봉 인증과 병원 후기가 열릴 때 함께 열려요.</p>
             </>
           ) : (
             /* 학생·취준생 (2026-11-15 세중님) — 무료 열람 끝날 · 「1년 안 취업 인증」 안내 · 「우리들의 이야기」 · 추천 메뉴 */
@@ -846,7 +835,8 @@ export default function Welcome() {
 
       {비교알림켜짐 && compareOpen && (
         <CompareNotify userId={session.user.id} job={job ?? (me?.job_group as JobGroup | undefined) ?? null}
-          email={session.user.email ?? null} onDone={() => setCompareOpen(false)} />
+          email={session.user.email ?? null} 끝단추="가입 마치기" 바로적기={step === '급여'}
+          onDone={() => { setCompareOpen(false); if (step === '급여') void 스펙저장(); }} />
       )}
     </>
   ), 아래단추);

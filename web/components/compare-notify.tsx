@@ -27,8 +27,10 @@ import { JOB_GROUPS, type JobGroup } from '@/lib/who';
      (정책 「내 신청 줄만 봅니다」 · 연락처·직군·연봉 구간은 그대로 못 읽음 · 금고 SQL 은 대화에 적음).
    연락처는 회원 화면 어디에도 다시 그리지 않습니다. */
 export function CompareNotify({
-  userId, job, email, onDone, 끝단추 = '가입 이어서 하기',
+  userId, job, email, onDone, 끝단추 = '가입 이어서 하기', 바로적기 = false,
 }: {
+  /** 「알림 받을래요?」를 건너뛰고 적는 칸부터 — 이미 「오픈 알림 받기」를 누르고 연 때 (가입 ⑦ · 2026-11-17) */
+  바로적기?: boolean;
   userId: string;
   job: JobGroup | null;
   /** 로그인 수단이 준 이메일 — 연락처 칸을 미리 채우는 데만 씁니다 (고칠 수 있습니다) */
@@ -37,7 +39,7 @@ export function CompareNotify({
   /** 신청을 마친 뒤 단추 글 — 내 정보에서 열 때는 「확인」 */
   끝단추?: string;
 }) {
-  const [단계, set단계] = useState<'묻기' | '적기' | '끝'>('묻기');
+  const [단계, set단계] = useState<'묻기' | '적기' | '끝'>(바로적기 ? '적기' : '묻기');
   const [연락처, set연락처] = useState(email ?? '');
   const [직군, set직군] = useState<JobGroup | null>(job);
   const [구간, set구간] = useState<string>('');
