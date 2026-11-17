@@ -282,7 +282,9 @@ if (적기 && 메일 && 멈춤.length && cfg.RESEND_KEY && cfg.NOTIFY_EMAIL) {
 /* 낸 것 적기 — 공고 id 마다 + 중복 열쇠 + 발행기록 한 줄 */
 function 낸것적기(자료, 더) {
   const 줄 = { 기관: 자료.기관, 직군: 자료.직군, 원문: 자료.원문.url || null, 이미지: 자료.이미지, ...더 };
-  for (const id of 자료.묶은id) 기록[id] = 줄;
+  /* 다시 만들 때 이미 올린 스토리 기록은 남깁니다 — 안 남기면 「스토리 바꾸기」가 전 스토리를 못 찾습니다 (2026-11-18) */
+  const 남길 = ['스토리게시물ID', '스토리올린때', '스토리주소'];
+  for (const id of 자료.묶은id) { const 전 = 기록[id] || {}; 기록[id] = { ...줄, ...Object.fromEntries(남길.filter((k) => 전[k]).map((k) => [k, 전[k]])) }; }
   for (const k of 자료.발행열쇠 || []) 기록.__발행열쇠[k] = 자료.묶은id[0];
   fs.mkdirSync(path.dirname(기록파일), { recursive: true });
   fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
