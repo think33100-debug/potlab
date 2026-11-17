@@ -27,7 +27,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { 릴스자료, 오늘KST, 일층인가, 같은공고묶기 } from './reel-data.mjs';
+import { 릴스자료, 오늘KST, 릴스대상, 같은공고묶기 } from './reel-data.mjs';
 /* 이미지 — RAPO 777기관 묶음 한 자리 (2026-11-17 · tools/reels/rapo777.mjs). 옛 photo-list.json 길은 쓰지 않습니다 */
 import { 묶음폴더, 묶음읽기, 이미지붙이기, 게시금지인가 } from './rapo777.mjs';
 import { 드라이브되나, 릴스올리기 } from './drive.mjs';
@@ -117,13 +117,23 @@ const 후보 = 한건
   : await 모두받기(`${cfg.SUPABASE_URL}/rest/v1/job_posts_pub?select=${칸}&posted_at=gte.${시작일}`, H);
 console.log(`후보 ${후보.length}건 (게시 ${한건 ? '— id ' + 한건 : 시작일 + ' 이후'})`);
 
-const 일층 = [];
+/* 대상 — 1층 전부 · 그밖은 허가 병상 400 이상 또는 급여 기준 (2026-11-17 세중님 · reel-data.mjs 의 릴스대상) */
+const 대상들 = [];
+let 비대상 = 0;
 for (const 공고 of 후보) {
   if (!한건 && 기록[공고.id]) continue;
+  /* --id 로 콕 집어 만들면 — 이미 올린 것은 막고, 아직 「확인 대기」인 것은 **새로 만들어 덮어씁니다** (2026-11-17 세중님 「만들기」)
+     중복 열쇠도 그 공고 것만 풀어 줍니다. 올린 것·취소된 것·삭제된 것은 그대로 막습니다 */
+  if (한건 && 기록[공고.id]) {
+    const 전 = 기록[공고.id];
+    if (전.게시물ID || 전.상태 !== '확인 대기') { console.log(`  건너뜀 ${공고.id} — 상태 「${전.상태 || (전.메일보낸때 ? '메일보냄' : '기록 있음')}」 라 다시 만들지 않습니다`); continue; }
+    for (const [k, v] of Object.entries(기록.__발행열쇠)) if (v === 공고.id) delete 기록.__발행열쇠[k];
+    console.log(`  다시 만들기 ${공고.id} — 확인 대기였던 것을 새로 만들어 덮어씁니다`);
+  }
   공고.분류 = await 분류(공고.id);
-  if (!일층인가(공고.분류)) continue;
-  /* 기관 공식 값 — 기관 표 → 심평원 */
-  const [jp] = await rest(`job_posts?select=기관번호&id=eq.${encodeURIComponent(공고.id)}`);
+  /* 기관 공식 값 — 기관 표 → 심평원 · 급여 원문은 상세 화면과 같은 차례(뽑은값.예상연봉 → detail.연봉 → detail.예상연봉) */
+  const [jp] = await rest(`job_posts?select=기관번호,뽑은값,detail&id=eq.${encodeURIComponent(공고.id)}`);
+  공고.연봉원문 = (jp?.뽑은값?.['예상연봉'] ?? jp?.detail?.['연봉'] ?? jp?.detail?.['예상연봉'] ?? null) || null;
   let 기관 = null;
   if (jp?.기관번호) {
     const [g] = await rest(`기관?select=기관번호,이름,주소,종별이름,설립구분이름,상급종합인가,대학병원인가,ykiho&기관번호=eq.${encodeURIComponent(jp.기관번호)}`);
@@ -135,11 +145,15 @@ for (const 공고 of 후보) {
     }
   }
   공고.기관 = 기관;
-  일층.push(공고);
+  const 판정 = 릴스대상(공고.분류, 기관, 공고.연봉원문);
+  if (!판정.대상) { 비대상++; continue; }
+  공고.대상까닭 = 판정.까닭;
+  대상들.push(공고);
 }
+console.log(`대상 ${대상들.length}건 · 대상 아님 ${비대상}건`);
 const 할것 = [];
 const 대기 = [];   /* 연결·이미지가 불확실해 발행을 미룬 것 — 까닭과 함께 log/릴스_대기.json */
-for (const 공고 of 같은공고묶기(일층)) {
+for (const 공고 of 같은공고묶기(대상들)) {
   const 자료 = 릴스자료(공고, 공고.기관, { 오늘, 사이트: 'rapojob.co.kr' });
   if (자료.건너뜀) { console.log('  건너뜀', 공고.id, 공고.org_name, '—', 자료.건너뜀); continue; }
   자료.묶은id = 공고.묶은id || [공고.id];
@@ -147,7 +161,9 @@ for (const 공고 of 같은공고묶기(일층)) {
   /* ── 이미지 — RAPO 777 묶음 (2026-11-17) ──
      ① 기관 연결(ykiho → org_id=기관번호 → 이름+주소) ② 게시 금지 ③ 이미지 고르기 ④ 중복 열쇠
      하나라도 불확실하면 **만들지 않고 대기** — 이미지 없이 내보내지도 않습니다 */
-  const 앱 = 공고.기관 ? { 기관번호: 공고.기관.기관번호, ykiho: 공고.기관.ykiho, 이름: 공고.기관.이름, 주소: 공고.기관.주소 } : null;
+  /* 기관 표 줄이 없으면 이름만 — 777 목록에 이름이 같은 곳이 있으면 대기, 없으면 이미지 없이 (rapo777.mjs 기관연결) */
+  const 앱 = 공고.기관 ? { 기관번호: 공고.기관.기관번호, ykiho: 공고.기관.ykiho, 이름: 공고.기관.이름, 주소: 공고.기관.주소 }
+    : { 기관번호: null, ykiho: null, 이름: 공고.org_name, 주소: null };
   const 붙임 = 이미지붙이기(묶음, 자료, 앱, 공고.url, { 낸열쇠: 기록.__발행열쇠, 옛내림 });
   if (붙임.겹침) { console.log('  건너뜀', 자료.묶은id[0], 자료.기관, '— 이미 낸 공고', 붙임.겹침); continue; }
   if (붙임.대기) { 대기.push({ 공고: 자료.묶은id, 기관: 자료.기관, 원문: 공고.url || null, 까닭: 붙임.대기, 기관ref: 붙임.기관ref || null, 제외: 붙임.제외 || false });
@@ -156,7 +172,7 @@ for (const 공고 of 같은공고묶기(일층)) {
 }
 /* 마감이 가까운 것부터 — 늦게 올리면 쓸모가 없어집니다 */
 할것.sort((a, b) => Number(a.마감.큰글.slice(2)) - Number(b.마감.큰글.slice(2)));
-console.log(`1층 새 공고 ${할것.length}건 · 이번 바퀴 ${Math.min(최대, 할것.length)}건`);
+console.log(`릴스 대상 새 공고 ${할것.length}건 · 이번 바퀴 ${Math.min(최대, 할것.length)}건`);
 
 /* ── 1-가 · 원문 확인 (2026-11-17 세중님 「공고가 있는지 확인하고 올리자」) ──
    만들기 직전에 원문 주소를 직접 엽니다. 통과한 것만 만듭니다 (tools/reels/원문확인.mjs)
@@ -276,7 +292,8 @@ if (메일) {
       '',
       ...(자료.원문확인?.length ? ['원문 확인 (릴스 만들기 전에 원문을 열어 봤습니다)', ...자료.원문확인.map((x) => '  ' + x), '  원문: ' + (자료.원문.url || ''), ''] : []),
       ...(링크 ? ['영상 (드라이브)', 링크, ''] : []),
-      `이미지: ${자료.이미지.꼴} · ${자료.이미지.출처글} · 파일 ${자료.이미지.asset_id.slice(0, 12)} · 연결 ${자료.이미지.연결근거} (${자료.이미지.기관ref})`,
+      자료.이미지.없음 ? `이미지: 없음 — ${자료.이미지.까닭} · 글자 디자인으로 만듦` : `이미지: ${자료.이미지.꼴} · ${자료.이미지.출처글} · 파일 ${자료.이미지.asset_id.slice(0, 12)} · 연결 ${자료.이미지.연결근거} (${자료.이미지.기관ref})`,
+      `대상: ${자료.대상까닭 || '1층'}`,
       '',
       ...(인스타되나(cfg) ? ['올리는 법 ① — 확인 뒤 자동 (가요 없이 · 이 영상·캡션 그대로)',
         `   ssh potjob 'cd ~/potlab && node tools/reels/올리기.mjs --id ${자료.묶은id[0]} --실행'`,
