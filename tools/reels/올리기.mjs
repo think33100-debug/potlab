@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { env, 인스타되나, 릴스올리기IG } from './ig.mjs';
+import { env, 인스타되나, 릴스올리기IG, 카드올리기IG } from './ig.mjs';
 import { 묶음폴더, 묶음읽기, 게시금지인가 } from './rapo777.mjs';
 import { 원문확인 } from './원문확인.mjs';
 import { 오늘KST } from './reel-data.mjs';
@@ -35,9 +35,13 @@ const 같은편 = (v) => Object.keys(기록).filter((k) => !k.startsWith('__') &
 if (process.argv.includes('--목록')) {
   const 본 = new Set();
   for (const [k, v] of Object.entries(기록)) {
-    if (k.startsWith('__') || v?.상태 !== '확인 대기' || 본.has(v.영상)) continue;
+    if (k.startsWith('__') || !v?.영상 || 본.has(v.영상)) continue;
+    const 릴스남음 = v.상태 === '확인 대기';
+    const 카드남음 = (v.카드 || []).length > 0 && !v.카드게시물ID && ['확인 대기', '올림'].includes(v.상태) && !/취소|삭제/.test(v.카드상태 || '');
+    if (!릴스남음 && !카드남음) continue;
     본.add(v.영상);
-    console.log(`  ${같은편(v).join('+')} · ${v.기관} · ${v.직군} · 마감 ${v.마감일 || '?'} · 메일 ${String(v.메일보낸때).slice(0, 16)}`);
+    const 남은것 = [릴스남음 && '릴스', 카드남음 && `카드 ${v.카드.length}장`].filter(Boolean).join(' · ');
+    console.log(`  ${같은편(v).join('+')} · ${v.기관} · ${v.직군} · 마감 ${v.마감일 || '?'} · 올릴 것 ${남은것} · 메일 ${String(v.메일보낸때).slice(0, 16)}`);
   }
   if (!본.size) console.log('확인 대기 중인 릴스가 없습니다');
   process.exit(0);
@@ -48,13 +52,26 @@ if (!id) { console.error('--id <공고 id> 또는 --목록'); process.exit(2); }
 const v = 기록[id];
 const 멈춤 = (까닭) => { console.error(`✗ 안 올립니다 — ${까닭}`); if (process.argv.includes('--실행')) 줄적기({ 결과: '실패', 공고: [id], 기관: v?.기관 || null, 까닭: '올리기 전 확인 — ' + 까닭 }); process.exit(1); };
 
+/* --카드 — 릴스 대신 카드뉴스(캐러셀)를 올립니다. 릴스와 카드는 **따로** 기록합니다 (세중님 (나) 둘 다) */
+const 카드길 = process.argv.includes('--카드');
+const 무엇 = 카드길 ? '카드뉴스' : '릴스';
+
 /* ① 기록 */
 if (!v) 멈춤(`기록에 ${id} 가 없습니다 (메일로 보낸 공고 id 를 주세요 · --목록)`);
-if (v.게시물ID) 멈춤(`이미 올렸습니다 — 게시물 ${v.게시물ID} (${v.올린때})`);
-if (v.상태 !== '확인 대기') 멈춤(`상태가 「${v.상태 || '없음'}」 — 확인 대기만 올립니다`);
-if (!v.영상 || !fs.existsSync(v.영상)) 멈춤(`영상 파일이 없습니다 — ${v.영상 || '경로 없음'}`);
-const 지문 = crypto.createHash('sha256').update(fs.readFileSync(v.영상)).digest('hex');
-if (v.영상지문 && 지문 !== v.영상지문) 멈춤('영상 파일이 메일로 보낸 것과 다릅니다 (지문 불일치)');
+if (/취소|삭제/.test(v.상태 || '') || /취소|삭제/.test(v.카드상태 || '')) 멈춤(`상태가 「${v.상태}${v.카드상태 ? ' · 카드 ' + v.카드상태 : ''}」 — 게시 중단된 공고입니다`);
+if (!['확인 대기', '올림'].includes(v.상태)) 멈춤(`상태가 「${v.상태 || '없음'}」 — 확인 대기(또는 릴스만 올린 것)만 올립니다`);
+if (!카드길 && v.게시물ID) 멈춤(`릴스는 이미 올렸습니다 — 게시물 ${v.게시물ID} (${v.올린때})`);
+if (카드길 && v.카드게시물ID) 멈춤(`카드뉴스는 이미 올렸습니다 — 게시물 ${v.카드게시물ID} (${v.카드올린때})`);
+if (!카드길) {
+  if (!v.영상 || !fs.existsSync(v.영상)) 멈춤(`영상 파일이 없습니다 — ${v.영상 || '경로 없음'}`);
+  const 지문 = crypto.createHash('sha256').update(fs.readFileSync(v.영상)).digest('hex');
+  if (v.영상지문 && 지문 !== v.영상지문) 멈춤('영상 파일이 메일로 보낸 것과 다릅니다 (지문 불일치)');
+} else {
+  const 없음 = (v.카드 || []).filter((f) => !fs.existsSync(f));
+  if (!(v.카드 || []).length) 멈춤('카드 기록이 없습니다 (카드뉴스가 생기기 전에 만든 공고 — 「만들기」로 다시 만드세요)');
+  if (없음.length) 멈춤(`카드 파일이 없습니다 — ${없음.join(', ')}`);
+}
+console.log(`[${무엇}] ` + `${같은편(v).join('+')} · ${v.기관} · ${v.직군} · 마감 ${v.마감일}`);
 console.log(`${같은편(v).join('+')} · ${v.기관} · ${v.직군} · 마감 ${v.마감일}`);
 console.log(`  영상 ${v.영상} · 이미지 ${v.이미지?.없음 ? '없음(777 목록 밖)' : `${v.이미지?.꼴 || '?'} (${v.이미지?.기관ref || '?'}) · ${v.이미지?.출처글 || ''}`}`);
 
@@ -81,16 +98,20 @@ if (v.원문자료) {
 } else 멈춤('원문 자료 기록이 없습니다');
 
 console.log('\n── 캡션 ──\n' + v.캡션 + '\n── 캡션 끝 ──');
-if (!process.argv.includes('--실행')) { console.log('\n마른 실행 — 올리지 않았습니다. --실행 을 붙이면 올립니다'); process.exit(0); }
+if (카드길) console.log(`  카드 ${v.카드.length}장`);
+if (!process.argv.includes('--실행')) { console.log(`\n마른 실행 — ${무엇}를 올리지 않았습니다. --실행 을 붙이면 올립니다`); process.exit(0); }
 if (!인스타되나(cfg)) 멈춤('IG 열쇠가 없습니다 (node tools/reels/ig.mjs --열쇠)');
 
 try {
-  const 올림 = await 릴스올리기IG(cfg, v.영상, v.캡션);
+  const 올림 = 카드길 ? await 카드올리기IG(cfg, v.카드, v.캡션, 같은편(v)[0]) : await 릴스올리기IG(cfg, v.영상, v.캡션);
   const 때 = new Date().toISOString();
-  for (const k of 같은편(v)) 기록[k] = { ...기록[k], 상태: '올림', 올린때: 때, 게시물ID: 올림.media_id, media_id: 올림.media_id, 게시물주소: 올림.주소 };
+  for (const k of 같은편(v)) {
+    기록[k] = 카드길 ? { ...기록[k], 카드상태: '올림', 카드올린때: 때, 카드게시물ID: 올림.media_id, 카드게시물주소: 올림.주소 }
+      : { ...기록[k], 상태: '올림', 올린때: 때, 게시물ID: 올림.media_id, media_id: 올림.media_id, 게시물주소: 올림.주소 };
+  }
   fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
-  줄적기({ 결과: '성공', 공고: 같은편(v), 기관: v.기관, 기관ref: v.이미지?.기관ref, 이미지: v.이미지, 원문: v.원문, 게시물ID: 올림.media_id, 게시물주소: 올림.주소, 길: '확인 뒤 올림' });
-  console.log(`\n● 올렸습니다 — 게시물 ${올림.media_id}${올림.주소 ? ' · ' + 올림.주소 : ''}`);
+  줄적기({ 결과: '성공', 공고: 같은편(v), 기관: v.기관, 기관ref: v.이미지?.기관ref, 이미지: v.이미지, 원문: v.원문, 게시물ID: 올림.media_id, 게시물주소: 올림.주소, 길: `확인 뒤 올림 · ${무엇}` });
+  console.log(`\n● ${무엇}를 올렸습니다 — 게시물 ${올림.media_id}${올림.주소 ? ' · ' + 올림.주소 : ''}`);
 } catch (e) {
   줄적기({ 결과: '실패', 공고: 같은편(v), 기관: v.기관, 까닭: String(e.message || e).slice(0, 300) });
   console.error(`✗ 못 올렸습니다 — ${String(e.message || e).slice(0, 300)}`);
