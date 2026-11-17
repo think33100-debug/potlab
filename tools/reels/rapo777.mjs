@@ -44,6 +44,9 @@ export function 묶음폴더(cfg = {}) {
 export function 묶음읽기(폴더) {
   const f = path.join(폴더, 'institutions.json');
   if (!fs.existsSync(f)) throw new Error(`묶음이 없습니다 — ${f} (RAPO777_DIR 를 확인하세요)`);
+  /* ~/rapo777 은 링크입니다 — 실제 판 폴더로 풀어 둡니다. 한 바퀴 도는 사이에 묶음받기가 링크를 새 판으로 바꿔도
+     이 바퀴는 처음 읽은 판(목록과 그림이 맞는 한 벌)을 끝까지 씁니다 */
+  폴더 = fs.realpathSync(폴더);
   const 몸 = JSON.parse(fs.readFileSync(f, 'utf8'));
   const 기관들 = Array.isArray(몸) ? 몸 : 몸.institutions;
   if (!Array.isArray(기관들)) throw new Error('institutions.json 에 institutions 배열이 없습니다');
@@ -115,8 +118,9 @@ function 쓸수있나(a, 폴더, 조건) {
   if (a.historical_asset === true) return '과거 자료(historical_asset)';
   if (a.restricted_reference === true) return '참고 전용(restricted_reference)';
   if (a.photo_requires_current_confirmation === true) return '현재 모습 확인 필요(photo_requires_current_confirmation)';
-  const 막힘 = 권리막힘(a, 조건?.get(a.asset_id) || {});
-  if (막힘) return 막힘;
+  /* ★ 2026-11-17 세중님 「사진 그냥 쓰지 출처 쓰고」 — 권리 조건(허가 필요·CC BY-SA·NC/ND·공공누리 2~4·무단전재)은
+     더 이상 빼지 않습니다. 고르는 차례에서 조건 없는 사진을 먼저 쓰고, 캡션에 출처·저자·라이선스·변경을 적습니다.
+     빼는 것은 「다른 병원·옛 모습일 수 있는」 위 세 가지(과거·참고 전용·현재 모습 확인 필요)뿐입니다 */
   if (!a.render_path || !/\.(png|jpe?g)$/i.test(a.render_path)) return 'render_path 가 PNG/JPG 아님';
   if (폴더 && !fs.existsSync(path.join(폴더, a.render_path))) return `파일 없음 ${a.render_path} (두 ZIP 을 같은 폴더에 풀었나)`;
   return null;
@@ -149,11 +153,12 @@ export function 이미지고르기(묶음, 기관, { 파일확인 = true } = {})
   if (!후보.length) return { 대기: `자동으로 고를 이미지 없음 — ${버린것.join(' / ') || '자산 0'}`, 버린것 };
   /* 차례 (2026-11-17 README 3절 — 실제 사진은 preferred_photo_asset_id 로 찾음)
      preferred 사진 → 외관 사진 → 배너·합성 → 실내 사진 → 조감도 → 대표 로고 → 기관 로고 → 공통 브랜드 */
+  /* 권리 조건이 붙은 사진은 같은 기관의 조건 없는 사진 **다음**에 씁니다 (그래도 로고보다는 먼저) */
+  const 조건붙음 = (a) => !!권리막힘(a, 묶음.조건?.get(a.asset_id) || {});
   const 장면점 = (a) => (a.photo_scene === 'interior' ? 3 : /banner|collage/.test(a.photo_scene || '') ? 2 : 1);
-  const 점 = (a) => (사진꼴(a.kind) && a.asset_id === 기관.preferred_photo_asset_id ? 0
-    : 사진꼴(a.kind) ? 장면점(a)
-    : 조감도꼴(a.kind) ? 4
-    : a.asset_id === 기관.representative_asset_id ? 5 : 기관것(a) ? 6 : 7);
+  const 점 = (a) => (사진꼴(a.kind) ? (조건붙음(a) ? 4 : 0) + (a.asset_id === 기관.preferred_photo_asset_id ? 0 : 장면점(a))
+    : 조감도꼴(a.kind) ? 8
+    : a.asset_id === 기관.representative_asset_id ? 9 : 기관것(a) ? 10 : 11);
   후보.sort((x, y) => 점(x) - 점(y));
   let 자산 = 후보[0];
   let 꼴 = 사진꼴(자산.kind) ? '사진' : 조감도꼴(자산.kind) ? '조감도' : '로고';
@@ -172,6 +177,7 @@ export function 이미지고르기(묶음, 기관, { 파일확인 = true } = {})
     자산, 꼴, 이름표, ...출처,
     파일: path.join(묶음.폴더, 자산.render_path),
     장면: 자산.photo_scene || null,
+    권리조건: 권리막힘(자산, 묶음.조건?.get(자산.asset_id) || {}),
     장면글: 자산.photo_scene_note || null,
     시점글: 자산.photo_date_note || null,
     딱지: 꼴 === '조감도' ? '건축조감도' : 자산.photo_scene === 'interior' ? '실내 사진'
@@ -196,6 +202,8 @@ export function 캡션출처줄(고른, 원문주소) {
     줄.push(`📷 ${고른.출처글}${고른.꼴 === '조감도' ? ' (건축조감도 · 실제 사진 아님)' : ''}`);
     if (고른.출처쪽 && !String(고른.출처글).includes(고른.출처쪽)) 줄.push(`   출처 페이지: ${고른.출처쪽}`);
     if (고른.라이선스) 줄.push(`   ${[고른.저자 && '저자 ' + 고른.저자, 고른.라이선스, 고른.라이선스주소].filter(Boolean).join(' · ')}`);
+    /* CC BY 계열은 변경 여부를 적어야 합니다 — 세로 화면에 맞게 잘라 씁니다 */
+    if (/CC\s*BY/i.test(고른.라이선스 || '')) 줄.push('   변경: 세로 영상 화면에 맞게 잘라 사용');
     if (고른.딱지 && 고른.꼴 !== '조감도') 줄.push(`   (${고른.딱지})`);
     if (고른.시점글) 줄.push(`   사진 시점: ${고른.시점글} — 현재 모습과 다를 수 있습니다`);
     if (고른.이름표) 줄.push(`   기관: ${고른.이름표}`);
@@ -356,8 +364,7 @@ function 자기점검() {
   봐('고르기 — 실내 사진은 「실내 사진」 딱지', g9.딱지 === '실내 사진' && 화면출처(g9).startsWith('실내 사진 · '));
   봐('캡션 — 사진 시점을 적음', 캡션출처줄(g9, 'u').some((x) => x.includes('사진 시점: 2017-07 기사')));
   const 버림 = g9.버린것.join(' ');
-  봐('권리 — CC BY-SA 는 자동으로 안 씀', /psa.*BY-SA/.test(버림));
-  봐('권리 — 「허가 필요」로 적힌 것은 안 씀', /pneed.*허가 필요/.test(버림));
+  봐('권리 — CC BY-SA·「허가 필요」 사진도 버리지 않음 (세중님 「사진 그냥 쓰지」)', !/psa|pneed/.test(버림));
   봐('권리 — photo_requires_current_confirmation 은 안 씀', /pconf.*현재 모습/.test(버림));
   봐('권리 — 「미확인」은 막지 않음', !권리막힘({ rights_status: '미확인', rights_note: '인스타그램 재사용 허가 또는 적용 라이선스는 확인되지 않음.' }));
   봐('권리 — CC0 은 막지 않음', !권리막힘({ license: 'CC0 1.0', rights_status: 'CC0 1.0 공개' }));
@@ -366,7 +373,15 @@ function 자기점검() {
   /* preferred 가 막히면 외관 사진으로 */
   const 막힌pref = { ...사진기관, institution_ref: 'rapo777_0901', preferred_photo_asset_id: 'pneed' };
   기관들.push(막힌pref);
-  봐('고르기 — preferred 가 막히면 외관 사진', 고('rapo777_0901').자산?.asset_id === 'pext');
+  봐('고르기 — preferred 에 권리 조건이 붙으면 조건 없는 외관 사진 먼저', 고('rapo777_0901').자산?.asset_id === 'pext');
+  const 조건사진만 = { institution_ref: 'rapo777_0902', key: '조건병원', name: '조건병원', ykiho: 'YK902', render_status: 'ready', representative_asset_id: 'lg',
+    assets: [자산({ asset_id: 'lg', kind: 'wordmark' }), 자산({ asset_id: 'sa', kind: 'photo', photo_scene: 'exterior', license: 'CC BY-SA 4.0', author: 'LittleT889',
+      license_url: 'https://creativecommons.org/licenses/by-sa/4.0/', rights_status: 'CC BY-SA 4.0 조건 준수 필요', attribution_text: '이미지 출처: Wikimedia Commons · https://commons.wikimedia.org/x' })] };
+  기관들.push(조건사진만);
+  const g92 = 고('rapo777_0902');
+  봐('고르기 — 조건 붙은 사진뿐이어도 로고보다 사진', g92.자산?.asset_id === 'sa' && g92.꼴 === '사진');
+  const 캡92 = 캡션출처줄(g92, 'u').join('\n');
+  봐('캡션 — CC BY-SA 는 저자·라이선스·링크·변경을 적음', /저자 LittleT889 · CC BY-SA 4.0 · https:\/\/creativecommons/.test(캡92) && 캡92.includes('변경: 세로 영상 화면에 맞게 잘라 사용'));
   봐('고르기 — missing 은 대기', /missing/.test(고('rapo777_0800').대기 || ''));
   봐('고르기 — 허가 미확인은 그대로 false', g1.허가확인 === false);
 
