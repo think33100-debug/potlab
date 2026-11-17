@@ -16,6 +16,8 @@ import { KAKAO_CHANNEL } from '@/lib/contact';
 
 const 안띄움 = (p: string) =>
   p === '/login' || p === '/welcome' || p.startsWith('/auth')
+  /* 관리자 가입 미리보기 — 가입 화면과 똑같이 보여야 해서 가입(/welcome)과 같이 뺍니다 (2026-11-17) */
+  || p === '/master/signup'
   /* 커뮤니티 쪽(피드·방·글쓰기·글)은 「내 직군 글쓰기」·댓글 입력과 걸려서 뺍니다 (2026-11-12 세중님 「커뮤니티에서는 빼자」) */
   || p === '/community' || p.startsWith('/community/') || p.startsWith('/post/')
   || p === '/admin' || p.startsWith('/admin/')

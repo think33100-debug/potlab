@@ -72,6 +72,8 @@ export function 새틀화면(pathname: string): boolean {
     || pathname === '/auth/callback'
     /* 운영 전용 계정 로그인(/master)도 2026-11-13 부터 새 틀 — 세중님 「마스터 키 모드 들어갈 때 예전 화면」 */
     || pathname === '/master'
+    /* 관리자 가입 미리보기(/master/signup · 2026-11-17) — 가입(/welcome) 화면을 그대로 그리므로 같은 새 틀 */
+    || pathname === '/master/signup'
     /* 안내 글(/guide/…)도 2026-11-13 부터 새 틀(홈의 위쪽 줄 · 글 화면 틀) */
     || pathname.startsWith('/guide/')
     /* 라포 올인원 툴킷(/toolkit)은 2026-11-14 새로 만든 화면이라 처음부터 새 틀 */

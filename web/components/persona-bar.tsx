@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { 비회원보기, 비회원보기중 } from '@/lib/guest-view';
@@ -39,6 +41,7 @@ export function PersonaBar() {
   const [도는중, set도는중] = useState(false);
   const [접음, set접음] = useState(false);
   const 손님 = 비회원보기중();
+  const 길 = usePathname();
 
   useEffect(() => {
     let 살아있나 = true;
@@ -55,6 +58,9 @@ export function PersonaBar() {
   }, []);
 
   if (!p?.마스터) return null;
+  /* 가입 미리보기(/master/signup) 안에서는 띠를 접습니다 — 가입 화면 아래 고정 단추를 띠가 가려서
+     새 회원이 보는 모양과 달라집니다. 그 화면 맨 위 남색 줄의 「다시 고르기」로 나옵니다 (2026-11-17) */
+  if (길 === '/master/signup') return null;
 
   const 바꾸기 = async (역할: string) => {
     set도는중(true);
@@ -95,6 +101,14 @@ export function PersonaBar() {
                   {r}
                 </button>
               ))}
+              {/* 가입 줄이 아직 없는 사람의 첫 화면(이용 동의)부터 — 역할을 바꾸지 않고 저장도 안 합니다.
+                  「비회원 보기」 중에는 서버가 로그인을 안 읽어 못 들어가므로 감춥니다 (2026-11-17 · app/master/signup) */}
+              {!손님 && (
+                <Link href="/master/signup"
+                  className="rounded-full border border-brand-red px-3 py-1 text-sm font-bold text-white hover:bg-gray-800">
+                  가입 처음부터 보기
+                </Link>
+              )}
               <span className="w-full text-sm text-gray-400">
                 {손님
                   ? '지금 비회원 화면이에요 — 로그인은 그대로 있어요. 「관리자」를 누르면 돌아옵니다.'
