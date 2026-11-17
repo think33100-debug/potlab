@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { PostItem } from '@/components/post-row';
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
 import { RapoCommunityEmpty, 어둠 } from '@/components/rapo/rapo-community';
+import { RapoShell } from '@/components/rapo/rapo-shell';
+import { RapoStudentCommunityNotice } from '@/components/rapo/rapo-student-community';
 import { CHANNEL_BY_ID } from '@/lib/channels';
 import { POST_LIST_COLS, type PostRow } from '@/lib/supabase';
 /* ★ 2026-10-09 — 세션 없는 열쇠꾸러미로 읽으면 **학생이 학생 방을 못 봅니다.**
@@ -33,6 +35,10 @@ export default async function ChannelPage({
 
   const hot = sort === 'hot';
   const sb = await serverSupabase();
+  /* 학생·취준생은 커뮤니티 대신 「학생인증을 준비하고 있어요」 안내와 알림 신청 (2026-11-17 세중님 · components/rapo/rapo-student-community.tsx).
+     막는 자리는 DB 입니다(방볼수있나 — 금고 SQL_1113/ZZB). 여기는 빈 화면 대신 까닭을 보여 줍니다 */
+  const { data: 볼수 } = await sb.rpc('방볼수있나', { p_방: ch });
+  if (볼수 === false) return <RapoShell who="회원" current="/community"><RapoStudentCommunityNotice /></RapoShell>;
 
   /* 이 방에 글을 쓸 수 있나 (2026-10-09). 막는 자리는 표의 정책이고,
      여기서는 못 쓸 단추를 안 보일 뿐입니다 —

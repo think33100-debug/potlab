@@ -3,6 +3,7 @@ import { Hit } from '@/components/hit';
 import { RapoBottomNav } from './rapo-bottom-nav';
 import { RapoServiceGrid } from './home-u01';
 import { RapoEduTop } from './rapo-edu';
+import { SpecEntryArt, SpecEntryDesc, SpecEntryLabel, 스펙비교길 } from './rapo-spec-entry';
 import { RapoDivider, RapoSectionTitle } from './rapo-ui';
 
 /* 라포 올인원 툴킷 (2026-11-14 세중님 「아래 핫키에 · 누르면 올인원 툴킷 페이지가 따로 나오고
@@ -13,7 +14,8 @@ import { RapoDivider, RapoSectionTitle } from './rapo-ui';
    가는 곳은 지금 앱에 있는 화면만 씁니다 — 새 기능을 여기서 약속하지 않습니다.
    로그인 없이 봅니다(안내 글이고 개인정보가 없습니다). 각 도구의 로그인 규칙은 그 화면이 정합니다. */
 
-type 도구 = { 이름: string; 설명: string; href: string; 그림: string };
+/* 스펙: true — 학생·취준생에게는 「취업 스펙 비교」로 이름·설명·그림이 바뀌는 줄 (2026-11-17 세중님 · components/rapo/rapo-spec-entry.tsx) */
+type 도구 = { 이름: string; 설명: string; href: string; 그림: string; 스펙?: boolean };
 type 묶음 = { id: string; 제목: string; 덧말: string; 도구: 도구[] };
 
 const 계산그림 = '/rapo/home/graphic-calc-28.svg';
@@ -32,7 +34,7 @@ const 묶음들: 묶음[] = [
       /* 2026-11-16 세중님 「병원 둘러보기 · 병원 우리 정보 보는 거」 — 병원 찾기(/orgs) 목록 → 병원 게시판 「병원 정보」 탭 */
       { 이름: '병원 둘러보기', 설명: '병원 규모와 치료사 수, 공고와 근무 후기를 병원별로 봐요', href: '/orgs', 그림: '/rapo/home/graphic-hospital-28.svg' },
       { 이름: '공시 병원 급여', 설명: '공공병원이 공개한 신입 연봉과 평균 연봉을 병원별로', href: '/guide/therapist-salary', 그림: '/rapo/home/graphic-pay-28.svg' },
-      { 이름: '입사 스펙 비교', 설명: '관심 병원 입사자와 내 스펙을 견주는 기능이에요. 준비 중이라 오픈 알림을 받을 수 있어요', href: '/me/soon?k=spec', 그림: '/rapo/home/graphic-spec-48.svg' },
+      { 이름: '입사 스펙 비교', 설명: '관심 병원 입사자와 내 스펙을 견주는 기능이에요. 준비 중이라 오픈 알림을 받을 수 있어요', href: 스펙비교길, 그림: '/rapo/home/graphic-spec-48.svg', 스펙: true },
       { 이름: '지난 채용 경쟁률', 설명: '공공기관이 공개한 회차별 경쟁률을 병원별로 봐요', href: '/compete', 그림: '/rapo/home/graphic-cert-28.svg' },
     ],
   },
@@ -73,11 +75,12 @@ export function RapoToolkit() {
                                active:bg-(--rapo-color-bg-transparent-pressed)">
                     <span className="flex size-(--rapo-dimension-x12) shrink-0 items-center justify-center rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak)">
                       {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-                      <img src={d.그림} alt="" width={28} height={28} className="size-(--rapo-dimension-x7)" />
+                      {d.스펙 ? <SpecEntryArt 기본={d.그림} className="size-(--rapo-dimension-x7)" />
+                        : <img src={d.그림} alt="" width={28} height={28} className="size-(--rapo-dimension-x7)" />}
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                      <span className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">{d.이름}</span>
-                      <span className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{d.설명}</span>
+                      <span className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">{d.스펙 ? <SpecEntryLabel /> : d.이름}</span>
+                      <span className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{d.스펙 ? <SpecEntryDesc /> : d.설명}</span>
                     </span>
                     {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
                     <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0" />

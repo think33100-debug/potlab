@@ -23,6 +23,8 @@ function Write() {
   const toast = useToast();
   const qs = useSearchParams();
   const { loading, session, me } = useAuth();
+  /* 학생·취준생은 글쓰기가 막혀 있습니다 — 커뮤니티 안내 화면으로 (2026-11-17 세중님 · DB 방에쓸수있나) */
+  useEffect(() => { if (me?.role === '학생') router.replace('/community'); }, [me, router]);
 
   const [ch, setCh] = useState(qs.get('ch') ?? 'free');
   const [title, setTitle] = useState('');

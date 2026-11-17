@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { RapoBannerCarousel } from './rapo-banner-carousel';
+import { SpecEntryArt, SpecEntryLabel, 스펙비교길 } from './rapo-spec-entry';
 import { RapoShell } from './rapo-shell';
 import { RapoButton, RapoSectionTitle } from './rapo-ui';
 import type { ReactNode } from 'react';
@@ -101,10 +102,10 @@ function Banners({ member }: { member: boolean }) {
         <p className="absolute left-[36px] top-[65px] w-[240px] text-[23px] font-bold leading-[30px] text-(color:--rapo-brand-color-white)">
           내 경력과 스펙을<br />한눈에 확인해요
         </p>
-        <Link href="/me/soon?k=spec"
+        <Link href={스펙비교길}
           className="absolute left-[36px] top-[185px] w-[220px] rounded-(--rapo-radius-r1) text-[14px] font-bold leading-[24px] text-(color:--rapo-brand-color-white)
                      active:bg-(--rapo-color-bg-transparent-pressed)">
-          입사 스펙 비교하기 →
+          <SpecEntryLabel 뒤="하기 →" />
         </Link>
       </div>
 
@@ -277,7 +278,7 @@ function JobCurations() {
    전에는 맞는 화면이 없어 병원 찾기(/orgs)로 보냈습니다. 병원 찾기는 그 글의 「병원별로 찾아보기」 단추로 이어집니다. */
 const 서비스 = [
   { label: '공시 병원 급여', href: '/guide/therapist-salary', art: { src: '/rapo/home/graphic-pay-28.svg',       w: 25.8461, l: 0.92, t: 2.42 } },
-  { label: '입사 스펙 비교', href: '/me/soon?k=spec', art: { src: '/rapo/home/graphic-cert-28.svg',      w: 28,      l: 0,    t: 0 } },
+  { label: '입사 스펙 비교', href: 스펙비교길, 스펙: true, art: { src: '/rapo/home/graphic-cert-28.svg',      w: 28,      l: 0,    t: 0 } },
   { label: '교육·학술',      href: '/edu',       art: { src: '/rapo/home/graphic-edu-28.svg',       w: 28.0002, l: 0,    t: -0.35 } },
   { label: '계산기',         href: '/toolkit#pay',     art: { src: '/rapo/home/graphic-calc-28.svg',      w: 27.0967, l: 0.11, t: 0.11 } },
   { label: '봉사활동',       href: '/volunteer', art: { src: '/rapo/home/graphic-volunteer-28.svg', w: 24.5215, l: 1.74, t: 1.82 } },
@@ -295,12 +296,14 @@ export function RapoServiceGrid() {
                            px-(--rapo-dimension-x3) active:bg-(--rapo-color-bg-layer-default-pressed)">
                 <span className="relative size-(--rapo-dimension-x7) shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-                  <img src={s.art.src} alt="" width={s.art.w} height={s.art.w} className="absolute max-w-none" style={{ left: s.art.l, top: s.art.t }} />
+                  {'스펙' in s && s.스펙
+                    ? <SpecEntryArt size={s.art.w} 기본={s.art.src} className="absolute max-w-none" style={{ left: s.art.l, top: s.art.t }} />
+                    : <img src={s.art.src} alt="" width={s.art.w} height={s.art.w} className="absolute max-w-none" style={{ left: s.art.l, top: s.art.t }} />}
                 </span>
                 {/* 2026-11-16 세중님 테스터 점검 — 툴킷 화면(바깥 회색 틀 안이라 칸이 더 좁음)에서 「공시 병원 급여」·「입사 스펙 비교」가
                     375 폭에 두 줄이 됐습니다. 400 폭 아래에서는 셰브런(12+8)을 접어 글자 자리를 넓히고(360·375·390 한 줄),
                     360 아래(320·344)에서는 글자를 한 단계(t3) 줄입니다(화면표시 규칙 1 · 그래도 넘치면 낱말 사이에서만 나뉨 — break-keep) */}
-                <span className="rapo-type-t4-medium min-w-0 flex-1 break-keep text-(color:--rapo-brand-color-navy) max-[359px]:text-(length:--rapo-font-size-t3)">{s.label}</span>
+                <span className="rapo-type-t4-medium min-w-0 flex-1 break-keep text-(color:--rapo-brand-color-navy) max-[359px]:text-(length:--rapo-font-size-t3)">{'스펙' in s && s.스펙 ? <SpecEntryLabel /> : s.label}</span>
                 {/* 320 폭에서는 셰브런을 접습니다 — 「봉사 / 활동」처럼 말 가운데가 갈렸습니다 (2026-11-14 · 11/16 에 400 아래로 넓힘) */}
                 {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
                 <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0 max-[399px]:hidden" />
