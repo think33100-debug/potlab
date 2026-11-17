@@ -18,6 +18,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 묶음폴더, 묶음읽기, 금지파일, 금지읽기 } from './rapo777.mjs';
+import { 게시물지우기 } from './ig.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(여기, '..', '..');
@@ -35,7 +36,6 @@ function env() {
 }
 const 인수 = (이름, 기본 = null) => { const i = process.argv.indexOf('--' + 이름); return i > 0 ? process.argv[i + 1] : 기본; };
 const cfg = env();
-const 가림 = (s) => String(s).split(cfg.IG_ACCESS_TOKEN || '\u0000').join('‹IG열쇠›');
 const 실행 = process.argv.includes('--실행');
 const 무엇 = 인수('기관'); const 사유 = 인수('사유');
 if (!무엇 || !사유) { console.error('--기관 <institution_ref|key> --사유 "<까닭>" 가 필요합니다'); process.exit(2); }
@@ -93,15 +93,9 @@ fs.mkdirSync(path.dirname(발행기록파일), { recursive: true });
 /* ③ 올린 게시물 삭제 */
 const 손으로 = [];
 for (const id of 게시물ID) {
-  if (!cfg.IG_ACCESS_TOKEN) { 손으로.push(`${id} (IG 열쇠 없음)`); continue; }
-  const VER = cfg.IG_GRAPH_VERSION || 'v23.0';
-  try {
-    const r = await fetch(`https://graph.facebook.com/${VER}/${encodeURIComponent(id)}?access_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}`, { method: 'DELETE' });
-    const 글 = 가림(await r.text()).slice(0, 600);
-    console.log(`    DELETE ${id} → ${r.status} · ${글}`);
-    if (r.ok) { 줄적기({ 결과: '삭제', 게시물ID: id, 응답: 글 }); for (const [k, v] of 올린것) if (v.게시물ID === id) 기록[k] = { ...v, 상태: '삭제됨', 삭제때: new Date().toISOString() }; }
-    else { 손으로.push(`${id} (HTTP ${r.status})`); 줄적기({ 결과: '삭제 실패', 게시물ID: id, 응답: 글 }); }
-  } catch (e) { 손으로.push(`${id} (${가림(e.message || e).slice(0, 80)})`); }
+  const r = await 게시물지우기(cfg, id);
+  if (r.ok) { 줄적기({ 결과: '삭제', 게시물ID: id, 응답: r.응답 }); for (const [k, v] of 올린것) if (v.게시물ID === id) 기록[k] = { ...v, 상태: '삭제됨', 삭제때: new Date().toISOString() }; }
+  else { 손으로.push(`${id} (${r.응답.slice(0, 80)})`); 줄적기({ 결과: '삭제 실패', 게시물ID: id, 응답: r.응답 }); }
 }
 /* 손으로 지울 것도 기록에 표시 — 「올림」으로 남겨 두지 않습니다 */
 for (const [k, v] of 올린것) if (기록[k]?.상태 !== '삭제됨') 기록[k] = { ...기록[k], 상태: '삭제 필요 — 손으로 (게시 중단 요청)' };

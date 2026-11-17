@@ -1,0 +1,96 @@
+/* 확인한 릴스를 인스타에 올립니다 — 「올려」 한 마디 길 (2026-11-17)
+
+   node tools/reels/올리기.mjs --목록                       확인 대기 중인 릴스 (메일로 받은 것)
+   node tools/reels/올리기.mjs --id HS1869100513            무엇을 올릴지 · 다시 확인한 결과만 (마른)
+   node tools/reels/올리기.mjs --id HS1869100513 --실행     올립니다
+
+   ★ 메일로 받아 **눈으로 본 그 영상·캡션 그대로** 올립니다 — 다시 만들지 않습니다 (영상 지문 sha256 이 같아야 함).
+   올리기 직전에 다시 봅니다. 하나라도 걸리면 올리지 않고 까닭을 찍습니다
+     ① 아직 안 올렸나 · 취소되지 않았나        log/릴스_올림.json
+     ② 게시 금지가 아닌가                       do_not_publish.json 을 **지금** 다시 읽음 (rapo777.mjs)
+     ③ 마감이 지나지 않았나 (오늘이면 안 올림)
+     ④ 원문이 아직 살아 있나                    원문확인() — 통과일 때만
+   결과는 log/릴스_올림.json (게시물ID · 상태 「올림」) · log/릴스_발행기록.jsonl 한 줄 */
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+import { env, 인스타되나, 릴스올리기IG } from './ig.mjs';
+import { 묶음폴더, 묶음읽기, 게시금지인가 } from './rapo777.mjs';
+import { 원문확인 } from './원문확인.mjs';
+import { 오늘KST } from './reel-data.mjs';
+
+const 여기 = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(여기, '..', '..');
+const 기록파일 = path.join(ROOT, 'log', '릴스_올림.json');
+const 발행기록파일 = path.join(ROOT, 'log', '릴스_발행기록.jsonl');
+const 인수 = (이름) => { const i = process.argv.indexOf('--' + 이름); return i > 0 ? process.argv[i + 1] : null; };
+const cfg = env();
+const 기록 = fs.existsSync(기록파일) ? JSON.parse(fs.readFileSync(기록파일, 'utf8')) : {};
+const 줄적기 = (줄) => { fs.mkdirSync(path.dirname(발행기록파일), { recursive: true }); fs.appendFileSync(발행기록파일, JSON.stringify({ 때: new Date().toISOString(), ...줄 }) + '\n'); };
+
+/* 같은 영상(묶은 공고)에 딸린 공고 id 들 — 메일 한 통이 공고 둘(PT·OT)일 수 있습니다 */
+const 같은편 = (v) => Object.keys(기록).filter((k) => !k.startsWith('__') && 기록[k]?.영상 && 기록[k].영상 === v.영상);
+
+if (process.argv.includes('--목록')) {
+  const 본 = new Set();
+  for (const [k, v] of Object.entries(기록)) {
+    if (k.startsWith('__') || v?.상태 !== '확인 대기' || 본.has(v.영상)) continue;
+    본.add(v.영상);
+    console.log(`  ${같은편(v).join('+')} · ${v.기관} · ${v.직군} · 마감 ${v.마감일 || '?'} · 메일 ${String(v.메일보낸때).slice(0, 16)}`);
+  }
+  if (!본.size) console.log('확인 대기 중인 릴스가 없습니다');
+  process.exit(0);
+}
+
+const id = 인수('id');
+if (!id) { console.error('--id <공고 id> 또는 --목록'); process.exit(2); }
+const v = 기록[id];
+const 멈춤 = (까닭) => { console.error(`✗ 안 올립니다 — ${까닭}`); if (process.argv.includes('--실행')) 줄적기({ 결과: '실패', 공고: [id], 기관: v?.기관 || null, 까닭: '올리기 전 확인 — ' + 까닭 }); process.exit(1); };
+
+/* ① 기록 */
+if (!v) 멈춤(`기록에 ${id} 가 없습니다 (메일로 보낸 공고 id 를 주세요 · --목록)`);
+if (v.게시물ID) 멈춤(`이미 올렸습니다 — 게시물 ${v.게시물ID} (${v.올린때})`);
+if (v.상태 !== '확인 대기') 멈춤(`상태가 「${v.상태 || '없음'}」 — 확인 대기만 올립니다`);
+if (!v.영상 || !fs.existsSync(v.영상)) 멈춤(`영상 파일이 없습니다 — ${v.영상 || '경로 없음'}`);
+const 지문 = crypto.createHash('sha256').update(fs.readFileSync(v.영상)).digest('hex');
+if (v.영상지문 && 지문 !== v.영상지문) 멈춤('영상 파일이 메일로 보낸 것과 다릅니다 (지문 불일치)');
+console.log(`${같은편(v).join('+')} · ${v.기관} · ${v.직군} · 마감 ${v.마감일}`);
+console.log(`  영상 ${v.영상} · 이미지 ${v.이미지?.꼴 || '?'} (${v.이미지?.기관ref || '?'}) · ${v.이미지?.출처글 || ''}`);
+
+/* ② 게시 금지 — 지금 다시 읽음 */
+const 묶음 = 묶음읽기(묶음폴더(cfg));
+const 기 = 묶음.기관들.find((x) => x.institution_ref === v.이미지?.기관ref);
+if (!기) 멈춤(`묶음에서 기관 ${v.이미지?.기관ref} 를 못 찾음`);
+const 금지 = 게시금지인가(묶음.폴더, 기);
+if (금지) 멈춤(금지);
+console.log('  ○ 게시 금지 아님');
+
+/* ③ 마감 */
+if (!v.마감일) 멈춤('마감일 기록이 없습니다');
+if (v.마감일 <= 오늘KST()) 멈춤(`마감 ${v.마감일} — 오늘이거나 지났습니다`);
+console.log(`  ○ 마감 ${v.마감일} (오늘 ${오늘KST()})`);
+
+/* ④ 원문 */
+if (v.원문자료) {
+  const r = await 원문확인(v.원문자료);
+  if (r.판정 !== '통과') 멈춤(`원문 확인 「${r.판정}」 — ${r.까닭}`);
+  console.log(`  ○ 원문 통과 · ${(r.확인 || []).join(' / ')}`);
+} else 멈춤('원문 자료 기록이 없습니다');
+
+console.log('\n── 캡션 ──\n' + v.캡션 + '\n── 캡션 끝 ──');
+if (!process.argv.includes('--실행')) { console.log('\n마른 실행 — 올리지 않았습니다. --실행 을 붙이면 올립니다'); process.exit(0); }
+if (!인스타되나(cfg)) 멈춤('IG 열쇠가 없습니다 (node tools/reels/ig.mjs --열쇠)');
+
+try {
+  const 올림 = await 릴스올리기IG(cfg, v.영상, v.캡션);
+  const 때 = new Date().toISOString();
+  for (const k of 같은편(v)) 기록[k] = { ...기록[k], 상태: '올림', 올린때: 때, 게시물ID: 올림.media_id, media_id: 올림.media_id, 게시물주소: 올림.주소 };
+  fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
+  줄적기({ 결과: '성공', 공고: 같은편(v), 기관: v.기관, 기관ref: v.이미지?.기관ref, 이미지: v.이미지, 원문: v.원문, 게시물ID: 올림.media_id, 게시물주소: 올림.주소, 길: '확인 뒤 올림' });
+  console.log(`\n● 올렸습니다 — 게시물 ${올림.media_id}${올림.주소 ? ' · ' + 올림.주소 : ''}`);
+} catch (e) {
+  줄적기({ 결과: '실패', 공고: 같은편(v), 기관: v.기관, 까닭: String(e.message || e).slice(0, 300) });
+  console.error(`✗ 못 올렸습니다 — ${String(e.message || e).slice(0, 300)}`);
+  process.exit(1);
+}

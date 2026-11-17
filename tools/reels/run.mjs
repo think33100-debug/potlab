@@ -32,6 +32,8 @@ import { 릴스자료, 오늘KST, 일층인가, 같은공고묶기 } from './ree
 import { 묶음폴더, 묶음읽기, 이미지붙이기, 게시금지인가 } from './rapo777.mjs';
 import { 드라이브되나, 릴스올리기 } from './drive.mjs';
 import { 원문확인 } from './원문확인.mjs';
+import { 인스타되나, 릴스올리기IG } from './ig.mjs';
+import crypto from 'node:crypto';
 import { 모두받기, 받아보기 } from '../쪽나눠받기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -261,7 +263,10 @@ if (메일) {
       ...(링크 ? ['영상 (드라이브)', 링크, ''] : []),
       `이미지: ${자료.이미지.꼴} · ${자료.이미지.출처글} · 파일 ${자료.이미지.asset_id.slice(0, 12)} · 연결 ${자료.이미지.연결근거} (${자료.이미지.기관ref})`,
       '',
-      '올리는 법',
+      ...(인스타되나(cfg) ? ['올리는 법 ① — 확인 뒤 자동 (가요 없이 · 이 영상·캡션 그대로)',
+        `   ssh potjob 'cd ~/potlab && node tools/reels/올리기.mjs --id ${자료.묶은id[0]} --실행'`,
+        '   (올리기 직전에 게시 금지·마감·원문을 다시 확인하고, 하나라도 걸리면 안 올립니다)', '',
+        '올리는 법 ② — 휴대폰에서 가요를 붙여 (①과 ② 중 하나만 하세요 · 둘 다 하면 두 번 올라갑니다)'] : ['올리는 법']),
       링크 ? '1. 위 링크 → 드라이브 앱 → 「기기에 저장」' : '1. 첨부 영상을 휴대폰에 저장',
       '2. 인스타 → 새 릴스 → 이 영상 → 음악에서 지금 인기 가요 고르기',
       '3. 아래 캡션을 그대로 붙여 넣고 공유',
@@ -290,7 +295,10 @@ if (메일) {
     console.log(`  메일 ${자료.묶은id[0]} → ${r.status} · ${가림(답).slice(0, 600)}`);
     if (!r.ok) { 발행기록({ 결과: '실패', 공고: 자료.묶은id, 기관: 자료.기관, 까닭: `메일 HTTP ${r.status} · ${가림(답).slice(0, 200)}` }); continue; }
     /* 보낸 것은 다시 안 보냅니다 — 「올림」이 아니라 「메일보냄」으로 적습니다 (게시물 id 는 휴대폰에서 올린 뒤 생깁니다) */
-    낸것적기(자료, { 메일보낸때: new Date().toISOString(), 드라이브: 링크, 게시물ID: null, 상태: '메일보냄 — 휴대폰 올림 대기' });
+    /* 확인 뒤 올리기(올리기.mjs)가 **이 영상 그대로** 올리도록 경로·지문·캡션·마감·원문을 남깁니다 */
+    낸것적기(자료, { 메일보낸때: new Date().toISOString(), 드라이브: 링크, 게시물ID: null, 상태: '확인 대기',
+      영상: mp4, 영상지문: crypto.createHash('sha256').update(fs.readFileSync(mp4)).digest('hex'),
+      캡션: 자료.캡션, 마감일: 자료.원문.apply_to || null, 원문자료: 자료.원문 });
   }
   process.exit(0);
 }
@@ -300,43 +308,14 @@ if (!올리기) {
   process.exit(0);
 }
 
-/* ── 3 · 올리기 ── */
-if (!cfg.IG_USER_ID || !cfg.IG_ACCESS_TOKEN) { console.error('IG_USER_ID · IG_ACCESS_TOKEN 이 없습니다 — 올리지 않습니다'); process.exit(1); }
-const VER = cfg.IG_GRAPH_VERSION || 'v23.0';
-const G = 'https://graph.facebook.com/' + VER;
-
-async function 그래프(길, 옵션 = {}) {
-  const r = await fetch(G + 길, 옵션);
-  const 글 = await r.text();
-  console.log(`    ${옵션.method || 'GET'} ${길.split('?')[0]} → ${r.status} · ${가림(글).slice(0, 600)}`);
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return JSON.parse(글);
-}
-const 폼 = (o) => new URLSearchParams({ ...o, access_token: cfg.IG_ACCESS_TOKEN });
-
+/* ── 3 · 올리기 — 사람 확인 없이 바로 (--올리기). 확인 뒤에 올리려면 --메일 → tools/reels/올리기.mjs ── */
+if (!인스타되나(cfg)) { console.error('IG_USER_ID · IG_ACCESS_TOKEN 이 없습니다 — 올리지 않습니다 (node tools/reels/ig.mjs --열쇠)'); process.exit(1); }
 for (const { 자료, mp4 } of 만든것) {
   if (직전금지(자료)) continue;
   try {
-    const 컨 = await 그래프(`/${cfg.IG_USER_ID}/media`, { method: 'POST',
-      body: 폼({ media_type: 'REELS', upload_type: 'resumable', caption: 자료.캡션, share_to_feed: 'true', 'thumb_offset': '2600' }) });
-    const 크기 = fs.statSync(mp4).size;
-    const up = await fetch(`https://rupload.facebook.com/ig-api-upload/${VER}/${컨.id}`, { method: 'POST',
-      headers: { Authorization: 'OAuth ' + cfg.IG_ACCESS_TOKEN, 'offset': '0', 'file_size': String(크기) }, body: fs.readFileSync(mp4) });
-    console.log(`    업로드 → ${up.status} · ${가림(await up.text()).slice(0, 600)}`);
-    if (!up.ok) throw new Error('업로드 HTTP ' + up.status);
-
-    let 상태 = '';
-    for (let i = 0; i < 30; i++) {           /* 최대 5분 */
-      await new Promise((z) => setTimeout(z, 10000));
-      const s = await 그래프(`/${컨.id}?fields=status_code,status&access_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}`);
-      상태 = s.status_code || '';
-      if (상태 === 'FINISHED') break;
-      if (상태 === 'ERROR' || 상태 === 'EXPIRED') throw new Error('컨테이너 ' + 상태 + ' · ' + (s.status || ''));
-    }
-    if (상태 !== 'FINISHED') throw new Error('5분 안에 안 끝남 · 마지막 ' + 상태);
-    const 올림 = await 그래프(`/${cfg.IG_USER_ID}/media_publish`, { method: 'POST', body: 폼({ creation_id: 컨.id }) });
-    낸것적기(자료, { 올린때: new Date().toISOString(), media_id: 올림.id, 게시물ID: 올림.id, 상태: '올림' });
-    console.log(`  ● 올림 ${자료.id} · media ${올림.id}`);
+    const 올림 = await 릴스올리기IG(cfg, mp4, 자료.캡션);
+    낸것적기(자료, { 올린때: new Date().toISOString(), media_id: 올림.media_id, 게시물ID: 올림.media_id, 게시물주소: 올림.주소, 상태: '올림' });
+    console.log(`  ● 올림 ${자료.id} · media ${올림.media_id}`);
   } catch (e) {
     console.error(`  ✗ 못 올림 ${자료.id} — ${가림(e.message || e)}`);
     발행기록({ 결과: '실패', 공고: 자료.묶은id, 기관: 자료.기관, 이미지: 자료.이미지, 까닭: 가림(e.message || e).slice(0, 300) });
