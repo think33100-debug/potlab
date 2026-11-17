@@ -1,4 +1,13 @@
-/* 댓글에 「링크」를 남긴 사람에게 DM 으로 링크를 보냅니다 (2026-11-17 세중님 「ㄱ 하자」 — 자동 응답 ㉠)
+/* 댓글에 **그 게시물의 단어**를 남긴 사람에게 DM 으로 링크를 보내고, 댓글에 「보내 드렸어요」 답글을 답니다
+   (2026-11-17 세중님 「ㄱ 하자」 → 「게시물마다 다르게 · 아직은 안 달 거야 · 나중에 이벤트 할 때 ·
+    링크 달면 그 댓글에도 대댓글로 보내 드렸어요 감사해요」)
+
+   ★ 단어를 정한 게시물에서만 돕니다. 공통 낱말(「링크」)은 없습니다 — 단어가 없으면 아무것도 안 보냅니다
+   단어 정하기  node tools/reels/댓글링크.mjs --단어 <게시물 짧은주소> <단어>     (예: Df1jEuVn4OG 이벤트)
+               node tools/reels/댓글링크.mjs --단어 <게시물 짧은주소> -          (지우기)
+               node tools/reels/댓글링크.mjs --단어목록
+               원격: dm-word (job_id = 짧은주소 · word = 단어 또는 -)
+   단어 기록   log/댓글링크_단어.json  { 짧은주소: { 단어, 정한때 } }
 
    node tools/reels/댓글링크.mjs            마른 실행 — 보낼 댓글과 보낼 글만 찍습니다
    node tools/reels/댓글링크.mjs --실행     보냅니다
@@ -23,7 +32,19 @@ const ROOT = path.resolve(여기, '..', '..');
 const 기록파일 = path.join(ROOT, 'log', '댓글링크_보냄.json');
 const 올림파일 = path.join(ROOT, 'log', '릴스_올림.json');
 const 사이트 = 'https://www.rapojob.co.kr';
-export const 링크말 = /링크|link/i;
+const 단어파일 = path.join(ROOT, 'log', '댓글링크_단어.json');
+/* 단어 꼴 — 한글·영문·숫자 1~20자 (원격으로 받으므로 셸 글자를 막습니다) */
+export const 단어꼴 = /^[가-힣A-Za-z0-9]{1,20}$/;
+export const 짧은주소 = (permalink) => (String(permalink || '').match(/\/(?:p|reel)\/([A-Za-z0-9_-]+)/) || [])[1] || null;
+export const 단어맞나 = (글, 단어) => !!단어 && String(글 || '').toLowerCase().includes(String(단어).toLowerCase());
+export function 단어들() { return fs.existsSync(단어파일) ? JSON.parse(fs.readFileSync(단어파일, 'utf8')) : {}; }
+/* 댓글에 다는 공개 답글 — 같은 글이 줄줄이 붙지 않게 댓글 id 로 돌려 씁니다 */
+const 답글꼴 = [
+  'DM으로 보내 드렸어요! 관심 가져 주셔서 감사해요 😊',
+  'DM 확인해 주세요! 댓글 남겨 주셔서 감사해요 🙌',
+  '방금 DM으로 보내 드렸어요. 감사해요!',
+];
+export const 답글고르기 = (id) => 답글꼴[[...String(id)].reduce((a, c) => a + c.charCodeAt(0), 0) % 답글꼴.length];
 const 창 = 7 * 86400e3;
 
 /** 게시물 id → 공고 id (릴스·카드뉴스로 올린 것) */
@@ -58,12 +79,27 @@ async function 다받기(cfg, 길) {
 
 function 자기점검() {
   const 틀림 = []; const 봐 = (n, c) => { console.log((c ? '○ ' : '✗ ') + n); if (!c) 틀림.push(n); };
-  봐('「링크」 · 「링크요!」 · 「Link」 걸림', ['링크', '링크요!', '링크 주세요', 'Link pls'].every((t) => 링크말.test(t)));
-  봐('그냥 댓글은 안 걸림', !['좋아요', '지원했어요', '저도 궁금해요'].some((t) => 링크말.test(t)));
+  봐('단어가 든 댓글은 걸림 (대소문자 무시)', 단어맞나('이벤트 참여해요!', '이벤트') && 단어맞나('Rapo!', 'rapo'));
+  봐('단어 없는 게시물 · 다른 댓글은 안 걸림', !단어맞나('링크', null) && !단어맞나('좋아요', '이벤트'));
+  봐('단어 꼴 — 셸 글자 막음', 단어꼴.test('일산') && 단어꼴.test('RAPO2') && !단어꼴.test('a;b') && !단어꼴.test('') && !단어꼴.test('$(id)'));
+  봐('짧은주소', 짧은주소('https://www.instagram.com/p/Df1jEuVn4OG/') === 'Df1jEuVn4OG' && 짧은주소('https://www.instagram.com/reel/AbC_1-x/') === 'AbC_1-x');
+  봐('답글은 늘 같은 댓글엔 같은 꼴', 답글고르기('123') === 답글고르기('123') && 답글꼴.includes(답글고르기('9')));
   봐('공고 게시물이면 그 공고 주소', 보낼글('306973-PT').includes('/jobs/306973-PT'));
   봐('아니면 첫 화면', 보낼글(null).includes(사이트 + '\n'));
   console.log(`\n견본 ${틀림.length ? '✗ 틀림 ' + 틀림.length : '틀림 0'}`);
   if (틀림.length) process.exit(1);
+}
+
+function 단어정하기() {
+  const i = process.argv.indexOf('--단어');
+  const 주소 = process.argv[i + 1], 단어 = process.argv[i + 2];
+  if (!/^[A-Za-z0-9_-]{5,40}$/.test(주소 || '')) { console.error('게시물 짧은주소가 필요합니다 (예: Df1jEuVn4OG)'); process.exit(2); }
+  const 표 = 단어들();
+  if (단어 === '-') { delete 표[주소]; console.log(`○ ${주소} 단어를 지웠습니다`); }
+  else if (단어꼴.test(단어 || '')) { 표[주소] = { 단어, 정한때: new Date().toISOString() }; console.log(`○ ${주소} 단어 「${단어}」`); }
+  else { console.error('단어는 한글·영문·숫자 1~20자 (지우기는 -)'); process.exit(2); }
+  fs.mkdirSync(path.dirname(단어파일), { recursive: true });
+  fs.writeFileSync(단어파일, JSON.stringify(표, null, 2));
 }
 
 async function 돌기() {
@@ -89,17 +125,20 @@ async function 돌기() {
   const 게시물 = (await 다받기(cfg, `/${cfg.IG_USER_ID}/media?fields=id,timestamp,permalink&limit=25&access_token=${열쇠}`))
     .filter((g) => 이제 - Date.parse(g.timestamp) < 창);
   console.log(`최근 7일 게시물 ${게시물.length}개`);
-  for (const g of 게시물) console.log(`  게시물 ${g.id} · ${g.timestamp} · ${g.permalink}`);
+  const 표 = 단어들();
+  for (const g of 게시물) console.log(`  게시물 ${g.id} · ${g.timestamp} · ${g.permalink} · 단어 ${표[짧은주소(g.permalink)]?.단어 ? '「' + 표[짧은주소(g.permalink)].단어 + '」' : '없음(안 봄)'}`);
 
   const 할것 = [];
   for (const g of 게시물) {
+    const 단어 = 표[짧은주소(g.permalink)]?.단어 || null;
+    if (!단어) continue;                                         /* 단어를 안 정한 게시물은 안 봅니다 */
     const 댓글 = await 다받기(cfg, `/${g.id}/comments?fields=id,text,username,timestamp&limit=50&access_token=${열쇠}`);
     /* 진단 — 댓글 원문(앞 40자) · 받은 칸 이름 (지침 2절) */
     console.log(`  ${g.permalink} 댓글 ${댓글.length}개`);
     for (const c of 댓글) console.log(`    · ${c.id} · 칸 ${Object.keys(c).join(',')} · @${c.username ?? '?'} · ${c.timestamp} · 「${String(c.text ?? '').slice(0, 40)}」`);
     for (const c of 댓글) {
       if (c.username === 나.username) continue;                 /* 우리가 단 첫 댓글 */
-      if (!링크말.test(c.text || '')) continue;
+      if (!단어맞나(c.text, 단어)) continue;
       if (이제 - Date.parse(c.timestamp) >= 창) continue;          /* 7일 지나면 못 보냅니다 */
       const 전 = 기록[c.id];
       if (전?.결과 === '보냄' || (전?.시도 || 0) >= 2) continue;
@@ -123,7 +162,13 @@ async function 돌기() {
       try { const r = await 그래프(cfg, 길, { method: 'POST', body: 몸 }); 결과 = '보냄'; 응답 = `${길} · ${JSON.stringify(r).slice(0, 200)}`; break; }
       catch (e) { 응답 = `${길} · ${String(e.message || e).slice(0, 300)}`; }
     }
-    기록[x.댓글.id] = { 때: new Date().toISOString(), 결과, 시도: (기록[x.댓글.id]?.시도 || 0) + 1, 게시물: x.게시물.id, 받는이: x.댓글.username, 공고: x.공고, 응답 };
+    /* DM 이 나간 댓글에만 공개 답글 — 실패해도 DM 은 이미 갔습니다 */
+    let 답글ID = null;
+    if (결과 === '보냄') {
+      try { 답글ID = (await 그래프(cfg, `/${x.댓글.id}/replies`, { method: 'POST', body: new URLSearchParams({ message: 답글고르기(x.댓글.id), access_token: cfg.IG_ACCESS_TOKEN }) })).id; }
+      catch (e) { console.error(`  ✗ 답글을 못 달았습니다 — ${String(e.message || e).slice(0, 200)}`); }
+    }
+    기록[x.댓글.id] = { 때: new Date().toISOString(), 결과, 답글ID, 시도: (기록[x.댓글.id]?.시도 || 0) + 1, 게시물: x.게시물.id, 받는이: x.댓글.username, 공고: x.공고, 응답 };
     console.log(`${결과 === '보냄' ? '  ○' : '  ✗'} @${x.댓글.username} — ${결과} · ${응답}`);
     fs.mkdirSync(path.dirname(기록파일), { recursive: true });
     fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
@@ -132,5 +177,7 @@ async function 돌기() {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   if (process.argv.includes('--자기점검')) 자기점검();
+  else if (process.argv.includes('--단어')) 단어정하기();
+  else if (process.argv.includes('--단어목록')) console.log(JSON.stringify(단어들(), null, 2));
   else await 돌기();
 }
