@@ -95,13 +95,15 @@ async function 파일올리기(tok, 파일, 이름, 종류, 부모) {
 }
 
 /* 릴스 한 편 — 영상 · 표지 · 캡션 글을 「RAPO 릴스/<YYYY-MM>/」 에. 영상 링크를 돌려줍니다 */
-export async function 릴스올리기({ mp4, 표지, 캡션, 이름, 달 }) {
+export async function 릴스올리기({ mp4, 표지, 카드 = [], 캡션, 이름, 달 }) {
   const cfg = env();
   const tok = await 접근열쇠(cfg);
   const 위 = await 폴더(tok, 'RAPO 릴스', null);
   const 아래 = await 폴더(tok, 달, 위);
   const 영상 = await 파일올리기(tok, mp4, 이름 + '.mp4', 'video/mp4', 아래);
   if (표지 && fs.existsSync(표지)) await 파일올리기(tok, 표지, 이름 + '-표지.jpg', 'image/jpeg', 아래);
+  /* 카드뉴스 (2026-11-17) — 같은 폴더에 「…-카드1.jpg」… */
+  for (const [i, f] of 카드.entries()) if (fs.existsSync(f)) await 파일올리기(tok, f, `${이름}-카드${i + 1}.jpg`, 'image/jpeg', 아래);
   if (캡션) {
     const f = mp4.replace(/\.mp4$/, '-캡션.txt');
     fs.writeFileSync(f, 캡션 + '\n');

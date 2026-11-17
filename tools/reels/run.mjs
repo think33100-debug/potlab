@@ -32,6 +32,7 @@ import { 릴스자료, 오늘KST, 릴스대상, 같은공고묶기 } from './ree
 import { 묶음폴더, 묶음읽기, 이미지붙이기, 게시금지인가 } from './rapo777.mjs';
 import { 드라이브되나, 릴스올리기 } from './drive.mjs';
 import { 원문확인 } from './원문확인.mjs';
+import { 카드만들기 } from './카드.mjs';
 import { 인스타되나, 릴스올리기IG } from './ig.mjs';
 import crypto from 'node:crypto';
 import { 모두받기, 받아보기 } from '../쪽나눠받기.mjs';
@@ -268,7 +269,10 @@ for (const 자료 of 통과) {
   else if (인수('음악')) a.push('--음악', 인수('음악'));
   const r = spawnSync(process.execPath, [path.join(여기, 'render.mjs'), ...a], { stdio: 'inherit' });
   if (r.status !== 0) { console.error('  ✗ 렌더 실패', 자료.id); continue; }
-  만든것.push({ 자료, mp4: 바탕 + '.mp4', 표지: 바탕 + '-cover.jpg' });
+  /* 카드뉴스 — 같은 장면 3~4장 (2026-11-17 세중님 「릴스와 카드뉴스 둘 다」). 실패해도 릴스는 보냅니다 */
+  let 카드 = [];
+  try { 카드 = await 카드만들기(바탕 + '.json', 나감); } catch (e) { console.error(`  ✗ 카드 못 만듦 ${자료.id} — ${String(e.message || e).slice(0, 200)}`); }
+  만든것.push({ 자료, mp4: 바탕 + '.mp4', 표지: 바탕 + '-cover.jpg', 카드 });
   console.log(`  ○ ${자료.id} · ${자료.기관} · ${자료.직군} · ${자료.마감.큰글}`);
 }
 
@@ -277,13 +281,13 @@ if (메일) {
   if (!cfg.RESEND_KEY || !cfg.NOTIFY_EMAIL) { console.error('RESEND_KEY · NOTIFY_EMAIL 이 없습니다 — 보내지 않습니다'); process.exit(1); }
   const 드라이브 = 드라이브되나(cfg);
   console.log(드라이브 ? '드라이브에 올리고 링크 메일' : '드라이브 열쇠 없음 — 첨부 메일');
-  for (const { 자료, mp4, 표지 } of 만든것) {
+  for (const { 자료, mp4, 표지, 카드 } of 만든것) {
     if (직전금지(자료)) continue;
     /* 드라이브 「RAPO 릴스/<YYYY-MM>」 — 영상 · 표지 · 캡션 글 */
     let 링크 = null;
     if (드라이브) {
       try {
-        링크 = await 릴스올리기({ mp4, 표지, 캡션: 자료.캡션, 이름: `${오늘}_${자료.기관}_${자료.직군}_${자료.마감.큰글}`, 달: 오늘.slice(0, 7) });
+        링크 = await 릴스올리기({ mp4, 표지, 카드, 캡션: 자료.캡션, 이름: `${오늘}_${자료.기관}_${자료.직군}_${자료.마감.큰글}`, 달: 오늘.slice(0, 7) });
         console.log(`  드라이브 ${자료.묶은id[0]} → ${링크}`);
       } catch (e) { console.error(`  ✗ 드라이브 못 올림 ${자료.묶은id[0]} — ${가림(e.message || e)} · 첨부 메일로 대신 보냅니다`); }
     }
@@ -302,6 +306,7 @@ if (메일) {
       링크 ? '1. 위 링크 → 드라이브 앱 → 「기기에 저장」' : '1. 첨부 영상을 휴대폰에 저장',
       '2. 인스타 → 새 릴스 → 이 영상 → 음악에서 지금 인기 가요 고르기',
       '3. 아래 캡션을 그대로 붙여 넣고 공유',
+      ...(카드.length ? ['', `카드뉴스 ${카드.length}장도 함께 만들었어요 (${링크 ? '드라이브 같은 폴더' : '첨부'}) — 인스타 새 게시물 → 여러 장 선택 → 같은 캡션`] : []),
       '',
       '── 캡션 (여기부터 복사) ──',
       자료.캡션,
@@ -320,6 +325,7 @@ if (메일) {
         attachments: 링크 ? undefined : [
           { filename: `rapo-${자료.묶은id[0]}.mp4`, content: fs.readFileSync(mp4).toString('base64') },
           ...(fs.existsSync(표지) ? [{ filename: `rapo-${자료.묶은id[0]}-cover.jpg`, content: fs.readFileSync(표지).toString('base64') }] : []),
+          ...카드.map((f, i) => ({ filename: `rapo-${자료.묶은id[0]}-card${i + 1}.jpg`, content: fs.readFileSync(f).toString('base64') })),
         ],
       }),
     });
@@ -330,7 +336,7 @@ if (메일) {
     /* 확인 뒤 올리기(올리기.mjs)가 **이 영상 그대로** 올리도록 경로·지문·캡션·마감·원문을 남깁니다 */
     낸것적기(자료, { 메일보낸때: new Date().toISOString(), 드라이브: 링크, 게시물ID: null, 상태: '확인 대기',
       영상: mp4, 영상지문: crypto.createHash('sha256').update(fs.readFileSync(mp4)).digest('hex'),
-      캡션: 자료.캡션, 마감일: 자료.원문.apply_to || null, 원문자료: 자료.원문 });
+      캡션: 자료.캡션, 마감일: 자료.원문.apply_to || null, 원문자료: 자료.원문, 카드 });
   }
   process.exit(0);
 }
