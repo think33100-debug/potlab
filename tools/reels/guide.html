@@ -6,7 +6,7 @@
      틀(로고 줄 · 라벨 · 큰 제목)은 brand.css 그대로, 각 장의 주인공은 **실제 앱 화면**입니다.
      화면 그림 = tools/reels/앱화면.mjs 가 서버에서 www.rapojob.co.kr 을 휴대폰(390×844 ×3)으로 찍은 것 — log/reels/screens/<이름>.png
        (임시 회원으로 로그인해 찍고 그 회원은 지웠습니다 · 내 정보 화면은 안 찍습니다)
-     기능 말은 앱에 지금 있는 화면만. 곧 오픈 예정 = /me/soon 의 급여 비교 · 입사 스펙 비교 -->
+     기능 말은 앱에 지금 있는 화면만. 곧 오픈 예정 = /me/soon 의 급여 비교 · 입사 스펙 비교 + 익명 커뮤니티(2026-11-17 세중님 「8번에 익명 커뮤니티도 오픈 예정에」) -->
 <link rel="stylesheet" href="brand.css">
 <style>
   .slide { padding-bottom: 0; }
@@ -38,13 +38,13 @@
   .white .eyebrow { background: var(--mist); }
 
   /* 곧 오픈 예정 */
-  .soonlist { margin-top: 48px; display: flex; flex-direction: column; gap: 22px; }
-  .soonitem { background: rgba(255,255,255,0.08); border-radius: 30px; padding: 38px 40px; }
+  .soonlist { margin-top: 34px; margin-bottom: 34px; display: flex; flex-direction: column; gap: 16px; }
+  .soonitem { background: rgba(255,255,255,0.08); border-radius: 30px; padding: 30px 40px; }
   .soonitem .t { font-size: 50px; font-weight: 800; }
   .soonitem .d { font-size: 32px; color: rgba(255,255,255,0.72); margin-top: 10px; }
   .soonitem .t small { font-size: 24px; font-weight: 800; color: var(--navy); background: var(--white); border-radius: 10px; padding: 4px 12px; margin-left: 14px; vertical-align: middle; }
   .navy .cta { background: var(--coral); color: var(--white); margin-bottom: 30px; }
-  .foot { margin-bottom: 90px; }
+  .foot { margin-bottom: 76px; margin-top: 20px; }
 </style>
 </head>
 <body>
@@ -144,11 +144,12 @@
 <section class="slide navy on-color" data-n="8">
   <div class="frame"><svg viewBox="0 0 960 1230" preserveAspectRatio="none"><path d="M640 6H6V1224H954V150" stroke="#FF4F40" stroke-opacity="0.75" stroke-width="10" fill="none" vector-effect="non-scaling-stroke"/></svg></div>
   <div class="top"><div class="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div><span class="page">08</span></div>
-  <span class="eyebrow" style="margin-top:60px">COMING SOON</span>
+  <span class="eyebrow" style="margin-top:44px">COMING SOON</span>
   <h2>그리고 곧<br><span class="em">오픈 예정</span>이에요</h2>
   <div class="soonlist">
     <div class="soonitem"><div class="t">급여 비교<small>곧 오픈</small></div><div class="d">같은 직군·연차 동료와 내 연봉 비교</div></div>
     <div class="soonitem"><div class="t">입사 스펙 비교<small>곧 오픈</small></div><div class="d">입사자 자격증 · 들은 교육과 나 비교</div></div>
+    <div class="soonitem"><div class="t">익명 커뮤니티<small>곧 오픈</small></div><div class="d">병원 분위기 · 처우 · 이직 고민을 편하게</div></div>
   </div>
   <div class="cta">프로필 링크 → RAPO</div>
   <div class="foot">@rapojob_hp</div>
