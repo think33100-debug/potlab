@@ -77,8 +77,9 @@ const 로고색 = [
   ['17-yellow-soft', '#FFF7DE', '#C49725'], ['18-navy-soft', '#F5F8FA', '#112231'],
 ];
 const R = (색) => 데이터(심볼.replace(/#FF4F40/gi, 색));
-const 로고판 = (바탕, 색, h) => `<body style="width:1080px;height:${h}px;background:${바탕};display:flex;align-items:center;justify-content:center">
-  <img src="${R(색)}" style="width:${h === 1080 ? 520 : 470}px;height:${h === 1080 ? 508 : 459}px;transform:translateX(8px)"></body>`;
+/* R 폭 — 프로필 520 · 하이라이트는 원에 잘리지 않게 작게 (2026-11-17 세중님 「하이라이트로 넣으니 로고가 잘린다」) */
+const 로고판 = (바탕, 색, h, 폭 = 520) => `<body style="width:1080px;height:${h}px;background:${바탕};display:flex;align-items:center;justify-content:center">
+  <img src="${R(색)}" style="width:${폭}px;height:${Math.round(폭 * 31.5 / 32.25)}px;transform:translateX(${Math.round(폭 / 65)}px)"></body>`;
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ deviceScaleFactor: 1 });
@@ -97,7 +98,9 @@ for (const [벌이름, 색고르기] of Object.entries(벌)) {
 for (const [이름, 바탕, 색] of 로고색) {
   fs.mkdirSync(path.join(나감, 'logo-profile'), { recursive: true });
   fs.mkdirSync(path.join(나감, 'logo-highlight'), { recursive: true });
+  fs.mkdirSync(path.join(나감, 'logo-highlight-square'), { recursive: true });
   await 찍기(path.join('logo-profile', 이름), 로고판(바탕, 색, 1080), 1080, 1080);
-  await 찍기(path.join('logo-highlight', 이름), 로고판(바탕, 색, 1920), 1080, 1920);
+  await 찍기(path.join('logo-highlight', 이름), 로고판(바탕, 색, 1920, 300), 1080, 1920);
+  await 찍기(path.join('logo-highlight-square', 이름), 로고판(바탕, 색, 1080, 360), 1080, 1080);
 }
 await browser.close();
