@@ -17,7 +17,7 @@ on:
         description: "할일 — list(목록) · check(확인·마른) · publish(릴스 올리기) · check-cards · publish-cards(카드뉴스) · make(만들기) · pull(서버 git pull) · dm-check(댓글 「링크」 찾기·마른) · dm-send(DM 보내기)"
         required: true
         type: choice
-        options: [list, check, publish, check-cards, publish-cards, make, pull, brand-check, brand-publish, brand-replace, brand-comment, dm-check, dm-send, dm-word]
+        options: [list, check, publish, check-cards, publish-cards, make, pull, brand-check, brand-publish, brand-replace, brand-comment, dm-check, dm-send, dm-word, app-shots]
       job_id:
         description: "공고 id (list 는 비움) — 예 306973-PT · brand-* 는 판 이름(intro · story · guide)"
         required: false
