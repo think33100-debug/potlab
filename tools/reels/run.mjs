@@ -129,6 +129,18 @@ async function 공시보수(id) {
     return (Array.isArray(j) ? j[0] : j) || null;
   } catch (e) { console.error(`  (공시 연봉을 못 받음 ${id} · ${String(e.message || e).slice(0, 120)})`); return null; }
 }
+/* 지난 채용 경쟁률 — 회원 화면 공고 상세와 같은 DB 함수 공고경쟁률요약() (2026-11-18 세중님 「기간 상관없이 같은 직군이면 무조건 · 장애 전형 제외」)
+   고르는 규칙은 reel-data.mjs 의 경쟁률고르기() 한 자리 */
+async function 경쟁률들(id) {
+  try {
+    const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('공고경쟁률요약'),
+      { method: 'POST', headers: { ...H, 'content-type': 'application/json' }, body: JSON.stringify({ p_공고: id }) });
+    const 글 = await r.text();
+    if (!r.ok) { console.error(`  (경쟁률을 못 받음 ${id} · HTTP ${r.status} · ${가림(글).slice(0, 200)})`); return []; }
+    const j = 글 ? JSON.parse(글) : [];
+    return Array.isArray(j) ? j : [];
+  } catch (e) { console.error(`  (경쟁률을 못 받음 ${id} · ${String(e.message || e).slice(0, 120)})`); return []; }
+}
 async function 분류(id) {
   const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('공고분류'),
     { method: 'POST', headers: { ...H, 'content-type': 'application/json' }, body: JSON.stringify({ p_id: id }) });
@@ -183,6 +195,7 @@ for (const 공고 of 후보) {
      (2026-11-17 세중님 「기관 사진이 안 들어갔다」 — 홍성군 보건소가 777 목록에 있는데 NAME: 꼴이라 못 이었습니다)
      조건 — 시도 앞말을 뗀 이름이 심평원 이름과 **글자까지 같고**, 그 시도 안에서 **딱 한 곳**일 때만. 판정(대상·종별)에는 안 씁니다 */
   if (!기관?.ykiho) 공고.사진ykiho = await 이름으로ykiho(공고.org_name);
+  공고.경쟁률들 = await 경쟁률들(공고.id);
   const 판정 = 릴스대상(공고.분류, 기관, 공고.연봉원문);
   if (!판정.대상) { 비대상++; continue; }
   공고.대상까닭 = 판정.까닭;
