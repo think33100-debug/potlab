@@ -69,8 +69,10 @@ export async function 릴스올리기IG(cfg, mp4, 캡션, { 커버 = null, 열�
   }
   try {
   const 덧 = 커버길 ? { cover_url: `${cfg.SUPABASE_URL}/storage/v1/object/public/${카드버킷}/${커버길}` } : { thumb_offset: '2600' };
+  /* ★ 릴스는 **릴스 탭에만** — 프로필 그리드(피드)에 안 띄웁니다 (2026-11-17 세중님 「그리드에서 삭제해서 릴스 탭에만 · 계속 기억해」)
+     share_to_feed=false → 「릴스 탭에만」. 그리드는 카드뉴스·브랜드 게시물 자리입니다 */
   const 컨 = await 그래프(cfg, `/${cfg.IG_USER_ID}/media`, { method: 'POST',
-    body: 폼({ media_type: 'REELS', upload_type: 'resumable', caption: 캡션, share_to_feed: 'true', ...덧 }) });
+    body: 폼({ media_type: 'REELS', upload_type: 'resumable', caption: 캡션, share_to_feed: 'false', ...덧 }) });
   const 크기 = fs.statSync(mp4).size;
   const up = await fetch(`https://rupload.facebook.com/ig-api-upload/${버전(cfg)}/${컨.id}`, { method: 'POST',
     headers: { Authorization: 'OAuth ' + cfg.IG_ACCESS_TOKEN, offset: '0', file_size: String(크기) }, body: fs.readFileSync(mp4) });
