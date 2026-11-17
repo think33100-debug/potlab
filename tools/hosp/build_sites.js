@@ -12,8 +12,8 @@ const jsonSites = [
   { name: '분당서울대학교병원', type: 'appsite', host: 'https://snubh.recruiter.co.kr', sn: 658, settingType: 'E', 천천히: true },
   { name: '아주대학교병원', type: 'appsite', host: 'https://ajoumc.recruiter.co.kr', sn: 3327, settingType: 'E', 천천히: true },
   { name: '부산대학교병원', type: 'listjson', host: 'https://pnuh.recruiter.co.kr' },
-  { name: '학교법인가톨릭학원가톨릭대학교서울성모병원', type: 'cmc', url: 'https://www.cmcseoul.or.kr/api/article/64?page=1&size=12', base: 'https://www.cmcseoul.or.kr' },
-  { name: '가톨릭대학교 성빈센트병원', type: 'cmc', url: 'https://www.cmcvincent.or.kr/api/article/167?page=1&size=12&vincentRecruitYn=Y', base: 'https://www.cmcvincent.or.kr' },
+  { name: '학교법인가톨릭학원가톨릭대학교서울성모병원', type: 'cmc', url: 'https://www.cmcseoul.or.kr/api/article/64?p=1&s=50&q=%7B%7D', base: 'https://www.cmcseoul.or.kr' },
+  { name: '가톨릭대학교 성빈센트병원', type: 'cmc', url: 'https://www.cmcvincent.or.kr/api/article/167?p=1&s=50&q=%7B%22vincentRecruitYn%22%3A%22Y%22%7D', base: 'https://www.cmcvincent.or.kr' },
   { name: '순천향대학교부속부천병원', type: 'schmc', host: 'https://jobapplication.schmc.ac.kr', dept: 190003 },
   /* 위탁 운영 공공병원 — 알리오·나라일터에 안 뜸. 그리팅(greetinghr) __NEXT_DATA__ openings (2026-09-12) */
   { name: '국립교통재활병원', type: 'greeting', host: 'https://ntrh.career.greetinghr.com', url: 'https://ntrh.career.greetinghr.com/ko/guide' }
