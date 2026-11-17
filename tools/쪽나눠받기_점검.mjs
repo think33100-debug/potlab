@@ -34,11 +34,13 @@ export const 차례있나꼴 = /order\s*=|order:\s*|차례붙이기|모두받기
 /* ★ 우리 쪽나눔이 **아닌** 자리 — 셈에서 뺍니다
      ㉠ 남의 사이트 주소 안의 offset (긁기 설정 · tools/hosp_sites.js 꼴)
      ㉡ DB 창구 인수 `p_offset`·`p_limit` (함수가 제 안에서 차례를 정합니다)
-     ㉢ Storage 목록 API (이름 차례로 옵니다) */
+     ㉢ Storage 목록 API (이름 차례로 옵니다)
+     ㉣ 인스타 업로드 — rupload 머리글 `offset: '0'`(올리는 바이트 자리) · 릴스 표지 `thumb_offset`(밀리초) (2026-11-17) */
 export const 우리것아님 = [
   /https?:\/\/[^'"`]*offset=/,
   /p_offset|p_limit/,
   /storage\s*\.\s*from|\.list\s*\(/,
+  /thumb_offset|'OAuth '\s*\+/,
 ];
 
 export function 파일보기(글, 이름) {
@@ -72,6 +74,9 @@ if (process.argv.includes('--자기점검')) {
     파일보기("headers: { 'Range': '0-99' }", 'a').걸림.length === 1);
   보('남의 주소 안 offset 은 안 본다',
     파일보기("url: 'https://x.or.kr/list?offset=0&board_no=1'", 'a').걸림.length === 0);
+  보('인스타 업로드 offset 머리글 · thumb_offset 은 안 본다',
+    파일보기("headers: { Authorization: 'OAuth ' + t, offset: '0', file_size: n }", 'a').걸림.length === 0
+    && 파일보기("const 덧 = { thumb_offset: '2600' }", 'a').걸림.length === 0);
   보('창구 인수 p_offset 은 안 본다',
     파일보기("sb.rpc('org_search', { p_offset: p * 20 })", 'a').걸림.length === 0);
   보('Storage 목록은 안 본다',
