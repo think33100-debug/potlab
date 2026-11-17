@@ -16,9 +16,9 @@ import { CERTS, NONE, coursesFor, langError, langsPayload, rowsReady, rowsToSave
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AGREEMENTS, TERMS_VERSION } from '@/lib/terms';
 import { JOB_GROUPS, type JobGroup, type Role } from '@/lib/who';
-import { 날말, 무료끝날, 미래인가, 연월말, 졸업연월, 취업인증안내 as 인증안내, 학력목록 } from '@/lib/school-period';
+import { 날말, 무료끝날, 미래인가, 연월말, 졸업연월, 취업인증안내 as 인증안내, 학력목록, 후기인증안내 } from '@/lib/school-period';
 import { todayKst } from '@/lib/job-state';
-import { 관심대상들, 관심분야예시, 듣고싶은교육예시, 예시고르기, 학교목록 } from '@/lib/signup-school';
+import { 관심대상들, 관심모름, 관심분야예시, 듣고싶은교육예시, 예시고르기, 학교목록 } from '@/lib/signup-school';
 
 import { 설치안내남기기 } from '@/lib/install-hint';
 import { useAuth } from '../auth';
@@ -43,6 +43,12 @@ import { useToast } from '../toast';
      · 피그마에 없는 학교 칸 · 학년별 학점 · 관심 단계는 세중님 11/15 결정이라 그대로 둡니다
      · 담는 값·save_my_survey 한 번 부르기는 바뀌지 않았습니다 (「아직 성적이 없어요」는 학점을 비워 담을 뿐)
 
+   2026-11-17 세중님 「회원가입 받는 절차를 간소화 — 일단 학생에서 재학중인 경우」
+     · 재학 중(경험 없음 · 학적 「재학 중」)이면 학점을 묻지 않고 ⑤ 자격·교육·실습·어학을 건너뜁니다
+       → ④ 학교·입학 연월 → ⑥ 희망 조건 → 관심 → 완료. 건너뛴 칸은 「없음」과 같은 꼴(빈 목록 · 학점 null)로 담습니다
+     · ④ 는 학교를 먼저 묻습니다 — 목록에서 고르면 학력이 채워져 따로 고를 일이 없습니다. 학점 칸은 「졸업」을 고른 뒤에만 보입니다
+     · 관심 「아직 모르겠어요」 · 듣고 싶은 교육 「취업 특강」 · 끝 화면 글과 추천 메뉴(커뮤니티)
+
    역할 값(profiles.role)은 그대로 「학생 / 현직」입니다 — 경험 없음 = 학생 · 경험 있음 = 현직 (커뮤니티 방이 이 값을 봅니다).
    스펙은 ⑥(경험 있음은 ⑦)에서 save_my_survey 한 번으로 담습니다. 두 번 부르면 두 번째가 「1년 2번 고치기」로 세어집니다. */
 
@@ -62,8 +68,10 @@ type 초안 = {
   certs?: string[]; courses?: string[]; rows?: WorkRow[]; rowsNone?: boolean; langs?: LangRow[];
   희망유형?: string; 희망지역?: string;
 };
-/* 학생 가입 끝 추천 메뉴 (2026-11-15 세중님) — 실습 후기는 커뮤니티 「실습」 방 */
+/* 학생 가입 끝 추천 메뉴 (2026-11-15 세중님) — 실습 후기는 커뮤니티 「실습」 방
+   · 「익명 학생 커뮤니티 둘러보기」 (2026-11-17 세중님) — 학생만의 공간은 따로 없어(11/15 「한 곳에서 다 같이」) 커뮤니티 피드를 엽니다 */
 const 추천메뉴 = [
+  { 이름: '익명 학생 커뮤니티 둘러보기', href: '/community' },
   { 이름: '실습 후기 확인하고 남기러 가기', href: '/community/prac' },
   { 이름: '봉사활동 찾아보기', href: '/volunteer' },
   { 이름: '청년 정책 찾아보기', href: '/youth' },
@@ -115,8 +123,10 @@ export default function Welcome() {
   /* 경험은 가입 줄이 생긴 뒤에는 role 에서 읽습니다 */
   const 경험값: 경험 | null = exp ?? (me?.role === '현직' ? '있음' : me?.role === '학생' ? '없음' : null);
   const 있음 = 경험값 === '있음';
+  /* 재학 중인 학생 — 학점과 ⑤ 자격·교육·실습·어학을 묻지 않습니다 (2026-11-17 세중님 「재학중이면 학점 빼기 · 입학연월, 학교만 · 자격 교육 실습은 빼기」) */
+  const 재학 = !있음 && d.학력 !== '학교 경험 없음' && d.학적 === '재학';
   /* 학생·취준생은 「관심」 한 장 더 (성인/소아 · 관심 분야 · 듣고 싶은 교육 · 2026-11-15 세중님) */
-  const 순서: 단계[] = ['동의', '내정보', '닉네임', '학교', '스펙', '희망', ...(있음 ? ['급여' as const] : ['관심' as const])];
+  const 순서: 단계[] = ['동의', '내정보', '닉네임', '학교', ...(재학 ? [] : ['스펙' as const]), '희망', ...(있음 ? ['급여' as const] : ['관심' as const])];
   const resume: 단계 = !me ? '동의' : (me.job_group && me.role) ? '학교' : '내정보';
   const step = stepPick ?? resume;
   const go = (s: 단계) => { setStepPick(s); setSaveErr(null); window.scrollTo(0, 0); };
@@ -224,11 +234,13 @@ export default function Welcome() {
   const 학교들 = 학교목록(job ?? me?.job_group);
   const 고른학교 = 학교들.find((x) => x.이름 === d.학교) ?? null;
   /* 학점 — 학년별(3년제 3칸 · 4년제 4칸) + 평균 · 모두 선택 (2026-11-15 세중님) */
+  /* 학점은 경험 있음(입사 당시)과 졸업한 분에게만 묻습니다 — 재학 중은 묻지 않고, 전에 적어 둔 값이 있어도 담지 않습니다 (2026-11-17 세중님) */
+  const 학점받음 = !학교없음 && (있음 || d.학적 === '졸업');
   const 만점값 = d.만점 ?? '4.5';
   const 학년수 = 학년수구하기(d.학력, 있음 ? null : 고른학교?.학제);
-  const 학점틀림 = !d.성적없음 && 학점들틀렸나(d.학점 ?? '', d.학년별 ?? [], 학년수, 만점값);
-  const 평균틀림 = !d.성적없음 && 학점들틀렸나(d.학점 ?? '', [], 0, 만점값);
-  const 학년별값 = d.성적없음 ? null : 학년별담기(d.학년별 ?? [], 학년수);
+  const 학점틀림 = 학점받음 && !d.성적없음 && 학점들틀렸나(d.학점 ?? '', d.학년별 ?? [], 학년수, 만점값);
+  const 평균틀림 = 학점받음 && !d.성적없음 && 학점들틀렸나(d.학점 ?? '', [], 0, 만점값);
+  const 학년별값 = !학점받음 || d.성적없음 ? null : 학년별담기(d.학년별 ?? [], 학년수);
   const 학점됨 = !학점틀림;   // 비워도 됨
   const 학교됨 = 있음
     ? !!d.병원?.trim() && !!d.입사연도 && !!d.학력 && (학교없음 || 학점됨)
@@ -242,18 +254,19 @@ export default function Welcome() {
   const 희망됨 = !!d.희망유형 && !!d.희망지역;
   const 관심됨 = !!d.관심대상;
 
-  /* 담는 꼴 — save_my_survey 의 p_spec (금고 SQL_1113/ZL) */
-  const 실습 = d.rowsNone ? [] : rowsToSave(rows);
+  /* 담는 꼴 — save_my_survey 의 p_spec (금고 SQL_1113/ZL)
+     재학 중은 ⑤ 를 건너뛰므로 자격·교육·실습·어학을 빈 목록으로 담습니다(「없음」을 고른 것과 같은 꼴 · 나중에 내 정보에서 채움) */
+  const 실습 = 재학 || d.rowsNone ? [] : rowsToSave(rows);
   const spec: Record<string, unknown> = {
     school_type: d.학력 ?? null,
     grade: null,
-    gpa: 학교없음 || d.성적없음 || !d.학점?.trim() ? null : Number(d.학점),
-    gpa_scale: 학교없음 || d.성적없음 || (!d.학점?.trim() && !학년별값) ? null : Number(만점값), 학년별학점: 학교없음 ? null : 학년별값,
+    gpa: !학점받음 || d.성적없음 || !d.학점?.trim() ? null : Number(d.학점),
+    gpa_scale: !학점받음 || d.성적없음 || (!d.학점?.trim() && !학년별값) ? null : Number(만점값), 학년별학점: 학년별값,
     학교: !있음 && !학교없음 ? d.학교?.trim() || null : null,
     관심대상: 있음 ? null : d.관심대상 ?? null,
     관심분야: 있음 ? null : d.관심분야 ?? [],
     듣고싶은교육: 있음 ? null : d.듣고싶은교육 ?? [],
-    licenses: certs.filter((x) => x !== NONE), trainings: courses.filter((x) => x !== NONE),
+    licenses: 재학 ? [] : certs.filter((x) => x !== NONE), trainings: 재학 ? [] : courses.filter((x) => x !== NONE),
     practice: 실습, practice_months: 실습.reduce((s, r) => s + (Number(r.months) || 0), 0),
     career: null, career_months: null,
     want_type: d.희망유형 ?? null, want_region: d.희망지역 ?? null,
@@ -267,7 +280,7 @@ export default function Welcome() {
 
   const 스펙저장 = async () => {
     setBusy(true); setSaveErr(null); window.scrollTo(0, 0);
-    const { error } = await browserSupabase().rpc('save_my_survey', { p_salary: null, p_spec: spec, p_langs: langsPayload(langs) });
+    const { error } = await browserSupabase().rpc('save_my_survey', { p_salary: null, p_spec: spec, p_langs: langsPayload(재학 ? [] : langs) });
     setBusy(false);
     /* 안내 글은 「저장 실패」 화면(1246:2205)이 냅니다 — 여기는 원인만 담아 작게 보여 줍니다 */
     if (error) { setSaveErr(`오류 내용: ${error.message}`); return; }
@@ -287,7 +300,7 @@ export default function Welcome() {
 
   /* ── 그리기 ── 피그마 07 B 화면을 하나씩 맞춤 (2026-11-16) — 본문 여백 24 · 진행 표시 → 제목 20 · 아래 고정 단추 위아래 24 */
   const 단계이름: Record<단계, string> = {
-    동의: '이용 동의', 내정보: '내 정보', 닉네임: '닉네임', 학교: '학력·학점',
+    동의: '이용 동의', 내정보: '내 정보', 닉네임: '닉네임', 학교: 재학 ? '학교·입학 연월' : '학력·학점',
     스펙: '자격·교육·실습', 희망: '희망 취업 조건', 관심: '관심 분야', 급여: '급여 정보 (선택)', 끝: '',
   };
   const n = 순서.indexOf(step) + 1;
@@ -296,7 +309,8 @@ export default function Welcome() {
     동의: <>이용약관을 확인하고<br />라포를 시작해요</>,
     내정보: <>직군과 근무 경험을<br />알려주세요</>,
     닉네임: <>닉네임을<br />정해 주세요</>,
-    학교: 있음 ? <>입사 당시 학력과<br />학점을 알려주세요</> : 학교없음 ? '학교 경험이 없어도 괜찮아요' : '학력과 학점을 알려주세요',
+    학교: 있음 ? <>입사 당시 학력과<br />학점을 알려주세요</> : 학교없음 ? '학교 경험이 없어도 괜찮아요'
+      : 재학 ? <>학교와 입학 연월을<br />알려주세요</> : '학력과 학점을 알려주세요',
     스펙: 있음 ? <>입사 당시 자격과<br />교육·실습을 알려주세요</> : <>자격·교육과 실습을<br />알려주세요</>,
     희망: '어디로 가고 싶으세요?',
     관심: <>어떤 분야에<br />관심 있으세요?</>,
@@ -305,6 +319,7 @@ export default function Welcome() {
   const 설명: Partial<Record<단계, React.ReactNode>> = {
     학교: 있음 ? '현재 또는 가장 최근에 근무한 병원 한 곳을 기준으로 입력해 주세요.'
       : 학교없음 ? <>학적과 학점 입력 없이 계속할 수 있어요.<br />비교 정보가 없으면 ‘입력 정보 없음’으로 표시해요.</>
+      : 재학 ? <>입학 연월로 졸업 예정일과<br />무료 이용 기간을 계산해요.</>
       : <>관심 병원 입사자 정보와<br />내 스펙을 비교할 수 있어요.</>,
     스펙: 있음 ? '입사할 때 보유했던 자격과 이수한 교육을 선택해 주세요.' : '입사자들이 어떤 자격과 교육을 갖췄는지 비교할 수 있어요.',
     희망: '희망 지역과 기관 유형에 맞는 공고를 먼저 보여드려요.',
@@ -340,7 +355,7 @@ export default function Welcome() {
     step === '동의' ? <RapoButton onClick={베타동의남기기} disabled={!allRequired || busy} full>{busy ? '확인하는 중…' : '동의하고 다음'}</RapoButton>
     : step === '내정보' ? <RapoButton onClick={saveWho} disabled={busy || !job || !role} full>{busy ? '저장하는 중…' : '다음'}</RapoButton>
     : step === '닉네임' ? <RapoButton onClick={saveNickname} disabled={busy || nick.trim().length < 2} full>{busy ? '저장하는 중…' : me ? '다음' : '가입하기'}</RapoButton>
-    : step === '학교' ? <RapoButton onClick={() => go('스펙')} disabled={!학교됨} full>다음</RapoButton>
+    : step === '학교' ? <RapoButton onClick={() => go(재학 ? '희망' : '스펙')} disabled={!학교됨} full>다음</RapoButton>
     : step === '스펙' ? <RapoButton onClick={() => go('희망')} disabled={!스펙됨} full>다음</RapoButton>
     : step === '희망' ? <RapoButton onClick={() => go(있음 ? '급여' : '관심')} disabled={!희망됨} full>다음</RapoButton>
     : step === '관심' ? <RapoButton onClick={스펙저장} disabled={!관심됨 || busy} full>가입 완료</RapoButton>
@@ -415,7 +430,7 @@ export default function Welcome() {
 
   /* 학점 묶음 — 피그마 「누적 학점 | 만점 기준」 한 줄 + 「아직 성적이 없어요」 (1241:1622 · 경험 있음 1245:1663 「입사 당시 학점 | 만점」 · 「성적 없음」).
      학년별 칸(3·4칸)은 피그마에 없지만 세중님이 11/15 에 넣으라고 하신 것이라 평균 아래에 둡니다 */
-  const 학점묶음 = !학교없음 && (
+  const 학점묶음 = 학점받음 && (
     <div className="flex flex-col gap-(--rapo-dimension-x2)">
       {!d.성적없음 && (
         <>
@@ -529,12 +544,13 @@ export default function Welcome() {
             </>
           )}
 
-          <골라 label={있음 ? '입사 당시 학력' : '학력'} v={d.학력 ?? ''} opts={학력목록} ph={있음 ? '입사 당시 학력 선택' : '학력을 선택해 주세요'} on={(v) => put({ 학력: v })} />
-
-          {/* 학교 — 피그마에는 없지만 세중님 11/15 「물치 작치 학과 전부 · 조금 적으면 추천」으로 넣은 칸 (고르면 학력도 맞춰 채움) */}
+          {/* 학교 — 피그마에는 없지만 세중님 11/15 「물치 작치 학과 전부 · 조금 적으면 추천」으로 넣은 칸 (고르면 학력도 맞춰 채움).
+              2026-11-17 학력보다 먼저 묻습니다 — 목록에서 고르면 학력이 채워져 따로 고를 일이 없습니다 (세중님 「입학연월, 학교만 정보 받기」) */}
           {!있음 && !학교없음 && (
             <학교찾기칸 학교들={학교들} v={d.학교 ?? ''} on={(이름, x) => put({ 학교: 이름, ...(x?.학력 ? { 학력: x.학력 } : {}) })} />
           )}
+
+          <골라 label={있음 ? '입사 당시 학력' : '학력'} v={d.학력 ?? ''} opts={학력목록} ph={있음 ? '입사 당시 학력 선택' : '학력을 선택해 주세요'} on={(v) => put({ 학력: v })} />
 
           {!있음 && !학교없음 && (
             <>
@@ -610,8 +626,13 @@ export default function Welcome() {
         <section className="mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x6)">
           <div className="flex flex-col gap-(--rapo-dimension-x2)">
             <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-neutral)">성인, 소아 중 더 관심 있는 분야는?</span>
-            <div className="grid grid-cols-3 gap-(--rapo-dimension-x2)">
-              {관심대상들.map((x) => <Choice key={x} on={d.관심대상 === x} go={() => put({ 관심대상: x })} small>{x}</Choice>)}
+            {/* 셋은 한 줄 · 「아직 모르겠어요」는 글이 길어 아래 한 줄을 다 씁니다 (2026-11-17 세중님).
+                좁은 폰(374 이하)은 세 칸이면 「성인」이 칸 안에서 두 줄로 갈려, 두 칸으로 놓고 「둘 다」도 한 줄을 다 씁니다 */}
+            <div className="grid grid-cols-3 gap-(--rapo-dimension-x2) max-[374px]:grid-cols-2">
+              {관심대상들.map((x) => (
+                <Choice key={x} on={d.관심대상 === x} go={() => put({ 관심대상: x })} small
+                  칸={x === 관심모름 ? 'col-span-full' : x === '둘 다' ? 'max-[374px]:col-span-full' : undefined}>{x}</Choice>
+              ))}
             </div>
           </div>
           <고른칩 제목="관심 있는 분야는?" 덧="여러 개 골라도 돼요" 예시={예시고르기(관심분야예시, job ?? me?.job_group)} 고름={d.관심분야 ?? []} on={(v) => put({ 관심분야: v })} 없음="아직 없어요" />
@@ -685,17 +706,19 @@ export default function Welcome() {
               <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">급여는 나중에 입력해도 괜찮아요. 이제 비교 정보와 커뮤니티를 이용할 수 있어요.</p>
             </>
           ) : (
-            /* 학생·취준생 (2026-11-15 세중님) — 무료 열람 끝날 · 「1년 안 취업 인증」 안내 · 「우리들의 이야기」 · 추천 메뉴 셋 */
+            /* 학생·취준생 (2026-11-15 세중님) — 무료 열람 끝날 · 「1년 안 취업 인증」 안내 · 「우리들의 이야기」 · 추천 메뉴 */
             <>
+              {/* 2026-11-17 세중님 「졸업 후 1년 뒤인 2031년 1월 31일까지 무료로 이용 가능합니다 · 아래에 후기 인증해 주면 평생 무료」 — 줄은 뜻 단위로 직접 나눕니다 */}
               {끝날 && !끝남 ? (
-                <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">{날말(끝날)}까지<br />무료로 이용해요</p>
+                <p className="rapo-type-t9-bold break-keep text-(color:--rapo-color-fg-neutral)">졸업 후 1년 뒤인<br /><span className="whitespace-nowrap">{날말(끝날)}까지</span><br />무료로 이용 가능합니다</p>
               ) : 학교없음 ? (
                 <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">졸업 기준 무료 열람 기간이 적용되지 않아요.</p>
               ) : null}
               {끝날 && (
-                <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral)">
-                  {인증안내}
-                </p>
+                <div className="flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4)">
+                  <p className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral)">{인증안내}</p>
+                  <p className="rapo-type-t4-bold break-keep text-(color:--rapo-color-fg-neutral)">{후기인증안내}</p>
+                </div>
               )}
               <p className="rapo-type-t6-bold break-keep text-(color:--rapo-color-fg-neutral)">이제부터 우리들의 이야기를 라포에서 자유롭게 나눠주세요!</p>
               <div className="flex flex-col gap-(--rapo-dimension-x2)">
@@ -750,10 +773,10 @@ function 골라({ label, v, opts, ph, on, aria, 붙임 = '', 작은이름 = fals
 
 /* 고르는 카드 — 피그마 「경험 선택 카드」(1211:25984 · 큰 것: 고르면 산호 테+연분홍, 안 고르면 진한 회색 테)
    · 「학적」(1241:1622 · 작은 것: 고르면 산호 테+연분홍, 안 고르면 회색 바탕 테 없음) */
-function Choice({ on, go, sub, small = false, children }: { on: boolean; go: () => void; sub?: string; small?: boolean; children: React.ReactNode }) {
+function Choice({ on, go, sub, small = false, 칸, children }: { on: boolean; go: () => void; sub?: string; small?: boolean; 칸?: string; children: React.ReactNode }) {
   return (
     <button type="button" onClick={go} aria-pressed={on}
-      className={'flex items-center gap-(--rapo-dimension-x3) border-(length:--rapo-border-default) text-left '
+      className={'flex items-center gap-(--rapo-dimension-x3) border-(length:--rapo-border-default) text-left ' + (칸 ? 칸 + ' ' : '')
         + (small ? 'h-(--rapo-dimension-x13) rounded-(--rapo-radius-r3) px-(--rapo-dimension-x4) ' : 'rounded-(--rapo-radius-r3) px-(--rapo-dimension-x5) py-(--rapo-dimension-x5) ')
         + (on ? 'border-(color:--rapo-color-stroke-brand-solid) bg-(--rapo-color-bg-brand-weak)'
           : small ? 'border-transparent bg-(--rapo-color-bg-neutral-weak) active:bg-(--rapo-color-bg-neutral-weak-pressed)'
