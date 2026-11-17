@@ -264,9 +264,11 @@ export function 게시금지인가(폴더, 기관) {
 }
 
 /* 중복 발행 열쇠 — 기관 식별값 + (공고 id · 원문 주소) */
-export function 발행열쇠들(기관, 공고ids = [], 원문주소 = null) {
+export function 발행열쇠들(기관, 공고ids = [], 원문주소 = null, 직군 = null) {
   const 기 = 기관.ykiho || 기관.institution_ref;
-  return [...공고ids.map((id) => `${기}|id:${id}`), ...(원문주소 ? [`${기}|url:${String(원문주소).trim()}`] : [])];
+  /* 원문 주소 열쇠에 직군을 붙입니다 — 통합 공고 하나(같은 주소)를 물리·작업 따로 만들 수 있게 (2026-11-18 세중님 「건보 일산 작업 물리 각각」).
+     같은 직군을 두 번 내는 것은 여전히 막힙니다 */
+  return [...공고ids.map((id) => `${기}|id:${id}`), ...(원문주소 ? [`${기}|url:${String(원문주소).trim()}${직군 ? '|' + 직군 : ''}`] : [])];
 }
 
 /* ── 릴스 자료에 붙이기 — run.mjs 가 공고마다 부릅니다 (같은 코드로 견본도 만듭니다) ──
@@ -282,7 +284,7 @@ export function 이미지붙이기(묶음, 자료, 앱, 원문주소, { 낸열�
     const 가짜 = { institution_ref: null, key: 앱?.이름 || null, ykiho: 앱?.ykiho || null, name: 앱?.이름 || null };
     const 금지 = 게시금지인가(묶음.폴더, 가짜) || ([가짜.key, 자료.기관].map(이름키).some((k) => k && 내림키.includes(k)) ? '옛 내림목록.json 에 있음' : null);
     if (금지) return { 대기: 금지, 제외: true };
-    const 열쇠들 = 발행열쇠들({ ykiho: 앱?.ykiho || null, institution_ref: 'name:' + 이름키(앱?.이름 || 자료.기관) }, 자료.묶은id || [자료.id], 원문주소);
+    const 열쇠들 = 발행열쇠들({ ykiho: 앱?.ykiho || null, institution_ref: 'name:' + 이름키(앱?.이름 || 자료.기관) }, 자료.묶은id || [자료.id], 원문주소, 자료.직군 || null);
     const 겹침 = 열쇠들.find((k) => 낸열쇠[k]);
     if (겹침) return { 겹침: `${겹침} → ${낸열쇠[겹침]}` };
     자료.캡션 = 출처자리채우기(자료.캡션, 캡션출처줄(null, 원문주소));
@@ -296,7 +298,7 @@ export function 이미지붙이기(묶음, 자료, 앱, 원문주소, { 낸열�
   if (금지) return { 대기: 금지, 기관ref: 기.institution_ref, 제외: true };
   const 고른 = 이미지고르기(묶음, 기);
   if (고른.대기) return { 대기: '이미지 — ' + 고른.대기, 기관ref: 기.institution_ref };
-  const 열쇠들 = 발행열쇠들(기, 자료.묶은id || [자료.id], 원문주소);
+  const 열쇠들 = 발행열쇠들(기, 자료.묶은id || [자료.id], 원문주소, 자료.직군 || null);
   const 겹침 = 열쇠들.find((k) => 낸열쇠[k]);
   if (겹침) return { 겹침: `${겹침} → ${낸열쇠[겹침]}` };
   /* 사진·조감도는 화면 가득(가로 600 이상일 때) · 그밖(로고·심볼·작은 사진)은 흰 판에 비율 그대로 */
@@ -439,6 +441,7 @@ function 자기점검() {
   fs.rmSync(임시, { recursive: true });
 
   봐('중복 열쇠 — 기관 + 공고 id + 원문 주소', 발행열쇠들(기관들[0], ['A1'], 'https://u').join(' ') === 'YK1|id:A1 YK1|url:https://u');
+  봐('중복 열쇠 — 같은 주소라도 직군이 다르면 다른 열쇠', 발행열쇠들(기관들[0], ['A1-PT'], 'https://u', '물리치료사')[1] !== 발행열쇠들(기관들[0], ['A1-OT'], 'https://u', '작업치료사')[1]);
   console.log(`\n견본 ${틀림.length ? '✗ 틀림 ' + 틀림.length : '틀림 0'}`);
   if (틀림.length) process.exit(1);
 }
