@@ -156,6 +156,34 @@ export async function 카드올리기IG(cfg, 장들, 캡션, 열쇠) {
   }
 }
 
+/* 사진 한 장을 스토리로 (2026-11-18 세중님 「하이라이트였던 로고 화면 4개 다시」) — jpg 를 버킷에 잠깐 올려 image_url 로 넘기고 지웁니다 */
+export async function 스토리사진올리기IG(cfg, jpg, 열쇠 = 'story') {
+  if (!인스타되나(cfg)) throw new Error('IG_USER_ID · IG_ACCESS_TOKEN 이 없습니다');
+  const 길 = `${String(열쇠).replace(/[^A-Za-z0-9_-]/g, '_')}/${Date.now()}/story.jpg`;
+  const 폼 = (o) => new URLSearchParams({ ...o, access_token: cfg.IG_ACCESS_TOKEN });
+  try {
+    await 저장소(cfg, 'POST', `object/${카드버킷}/${길}`, fs.readFileSync(jpg), { 'content-type': 'image/jpeg', 'x-upsert': 'true' });
+    const 컨 = await 그래프(cfg, `/${cfg.IG_USER_ID}/media`, { method: 'POST',
+      body: 폼({ media_type: 'STORIES', image_url: `${cfg.SUPABASE_URL}/storage/v1/object/public/${카드버킷}/${길}` }) });
+    let 상태 = '';
+    for (let i = 0; i < 18; i++) {
+      const s = await 그래프(cfg, `/${컨.id}?fields=status_code,status&access_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}`);
+      상태 = s.status_code || '';
+      if (상태 === 'FINISHED') break;
+      if (상태 === 'ERROR' || 상태 === 'EXPIRED') throw new Error('스토리 컨테이너 ' + 상태 + ' · ' + (s.status || ''));
+      await new Promise((z) => setTimeout(z, 5000));
+    }
+    if (상태 !== 'FINISHED') throw new Error('안 끝남 · 마지막 ' + 상태);
+    const 올림 = await 그래프(cfg, `/${cfg.IG_USER_ID}/media_publish`, { method: 'POST', body: 폼({ creation_id: 컨.id }) });
+    let 주소 = null;
+    try { 주소 = (await 그래프(cfg, `/${올림.id}?fields=permalink&access_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}`)).permalink || null; } catch { /* 없어도 됨 */ }
+    return { media_id: 올림.id, 주소 };
+  } finally {
+    try { await 저장소(cfg, 'DELETE', `object/${카드버킷}`, JSON.stringify({ prefixes: [길] }), { 'content-type': 'application/json' }); }
+    catch (e) { console.error(`    ✗ 저장소 사진을 못 지움 (${길}) — 손으로 지워 주세요`); }
+  }
+}
+
 /* ── 댓글 (2026-11-17 세중님 「첫 댓글에 공고 관련 말 · 대댓글로 태그」) ──
    POST /{media_id}/comments message → 댓글 id · POST /{comment_id}/replies message → 답글 id
    권한 instagram_manage_comments 가 토큰에 있어야 합니다 (없으면 댓글되나() 가 false — 그때는 태그를 캡션에 둡니다)
