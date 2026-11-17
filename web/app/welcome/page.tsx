@@ -609,6 +609,24 @@ export default function Welcome() {
       {/* ④ 학력·학점 — 경험 없음 1241:1622 · 1906 · 2001 · 2076 · 학교 경험 없음 1483:4796 / 경험 있음 1245:1663 · 1745 */}
       {step === '학교' && (
         <section className="mt-(--rapo-dimension-x5) flex flex-col gap-(--rapo-dimension-x5)">
+          {/* 왜 묻는지 — 임상가 ④ 맨 위 (2026-11-17 세중님 「이걸 왜 해야하는지 설명 · 이 정보를 모아 추후에 모두 투명하게 비교하면서
+              더 나은 근무환경을 만들 수 있게 할거라고 · 잘 보이게」). 졸업생 ⑤ 의 스펙 점수 안내와 같은 꼴(brand-weak 카드 · 48 그림 · t7 제목) */}
+          {있음 && (
+            <div className="flex items-start gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-brand-weak) p-(--rapo-dimension-x5)">
+              {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+              <img src="/rapo/home/graphic-pay-48.svg" alt="" width={48} height={48} className="shrink-0" />
+              <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x2)">
+                <p className="rapo-type-t7-bold break-keep text-(color:--rapo-color-fg-neutral)">왜 입사 당시 정보를 묻나요?</p>
+                <p className="rapo-type-t5-regular break-keep text-(color:--rapo-color-fg-neutral)">
+                  라포는 치료사들이 남긴 입사 당시 <span className="whitespace-nowrap">학력·학점·스펙을</span> 모아, 병원마다 어떤 사람이 들어갔는지 <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-brand-contrast)">모두 투명하게 비교</span>할 수 있게 만들 거예요.
+                </p>
+                <p className="rapo-type-t5-regular break-keep text-(color:--rapo-color-fg-neutral)">
+                  함께 모은 정보로 <span className="rapo-type-t5-bold text-(color:--rapo-color-fg-brand-contrast)">더 나은 근무환경</span>을 만들어 가요.
+                </p>
+                <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">이름 없이 모아서 보여 주고, 게시글이나 댓글에는 나오지 않아요.</p>
+              </div>
+            </div>
+          )}
           {있음 && (
             <>
               <div className="flex flex-col gap-(--rapo-dimension-x2)">
