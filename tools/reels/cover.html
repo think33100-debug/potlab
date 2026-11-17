@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<!-- RAPO 릴스·카드뉴스 커버 (2026-11-17 세중님 「커버 이미지는 톤앤매너 맞게 따로 · 시그니처 컬러에 흰색 글」)
+     tools/reels/카드.mjs 의 커버만들기() 가 window.__setData(자료, 판) 을 부르고 찍습니다.
+     판 = 'reel'(1080×1920 · 글은 가운데 1350 안 — 프로필 격자가 가운데만 보여 줌) · 'card'(1080×1350 · 카드뉴스 첫 장)
+     글은 전부 자료(공고·기관 공식 값)에서 옵니다 — 커버라고 따로 지어 쓰는 말이 없습니다 -->
+<style>
+  @font-face { font-family: "PretendardV"; src: url("fonts/PretendardVariable.woff2") format("woff2"); font-weight: 100 900; }
+  :root { --coral: #FF4F40; --navy: #112231; --white: #FFFFFF; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--coral); }
+  body { font-family: "PretendardV", sans-serif; color: var(--white); word-break: keep-all; letter-spacing: -0.02em; }
+  body.card, html.card { height: 1350px; }
+  /* 커다란 열린 테두리 — OG 그림·영상과 같은 말 (오른쪽 위가 열림) */
+  #frame { position: absolute; left: 60px; right: 60px; border: 0; }
+  #frame svg { width: 100%; height: 100%; overflow: visible; }
+  #box { position: absolute; left: 0; right: 0; top: 285px; height: 1350px; padding: 110px 110px 100px; display: flex; flex-direction: column; }
+  body.card #box { top: 0; }
+  #logo { display: flex; align-items: center; gap: 16px; }
+  #logo img.sym { width: 64px; height: 63px; filter: brightness(0) invert(1); }
+  #logo img.word { height: 32px; }
+  #eyebrow { margin-top: 120px; align-self: flex-start; font-size: 40px; font-weight: 700; background: rgba(255,255,255,0.2); padding: 10px 24px; border-radius: 12px; }
+  #org { margin-top: 30px; font-size: 104px; font-weight: 800; line-height: 1.12; }
+  #job { margin-top: 10px; font-size: 104px; font-weight: 800; line-height: 1.12; }
+  #job .em { position: relative; }
+  #job .em i { position: absolute; left: -6px; right: -6px; bottom: 8px; height: 30px; background: rgba(255,255,255,0.3); z-index: -1; }
+  #rows { margin-top: auto; display: flex; flex-direction: column; gap: 18px; }
+  .row { display: flex; align-items: baseline; gap: 22px; font-size: 46px; font-weight: 700; }
+  .row .k { font-size: 34px; font-weight: 600; opacity: 0.85; width: 150px; flex: none; }
+  #foot { margin-top: 56px; font-size: 32px; font-weight: 700; opacity: 0.92; }
+  #dday { position: absolute; right: 110px; width: 210px; height: 210px; border-radius: 50%; background: var(--white); color: var(--coral);
+          display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-8deg); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
+  #dday b { font-size: 72px; font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
+  #dday span { font-size: 28px; font-weight: 800; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="frame"><svg viewBox="0 0 960 1000" preserveAspectRatio="none"><path d="M640 6H6V994H954V140" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="10" fill="none" vector-effect="non-scaling-stroke"/></svg></div>
+<div id="box">
+  <div id="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div>
+  <div id="eyebrow"></div>
+  <div id="org"></div>
+  <div id="job"></div>
+  <div id="rows"></div>
+  <div id="foot">프로필 링크 → RAPO에서 원문 공고</div>
+</div>
+<div id="dday"><b id="ddayb"></b><span>마감</span></div>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+window.__setData = (d, 판 = 'reel') => {
+  const 카드 = 판 === 'card';
+  document.body.classList.toggle('card', 카드); document.documentElement.classList.toggle('card', 카드);
+  const 위 = 카드 ? 0 : 285;
+  /* 테두리 · D-day 는 상자 기준으로 놓습니다 */
+  $('frame').style.top = (위 + 50) + 'px'; $('frame').style.height = 1250 + 'px';
+  $('dday').style.top = (위 + 70) + 'px';      /* 로고 줄 오른쪽 위 — 이름을 가리지 않게 */
+  const 훅 = d.훅 || {};
+  $('eyebrow').textContent = 훅.작은 && 훅.작은 !== '새 공고' ? 훅.작은 : (d.분류 || []).join(' · ') || '새 공고';
+  $('org').textContent = String(d.기관 || '').replace(/^(학교법인|의료법인|사회복지법인|재단법인)\s*/, '');
+  $('job').innerHTML = `<span class="em"><i></i>${esc(d.걸기 || (d.직군 + ' 채용'))}</span>`;
+  $('ddayb').textContent = d.마감?.큰글 || '';
+  const 값 = (이름) => (d.공고?.줄 || []).find((r) => r.이름 === 이름)?.값 || null;
+  const 줄 = [
+    ['접수', d.마감?.작은글?.replace(/ 마감$/, '까지') || null],
+    ['급여', 값('급여')],
+    ['모집', [값('모집인원'), d.공고?.고용형태].filter(Boolean).join(' · ') || null],
+  ].filter(([, v]) => v);
+  $('rows').innerHTML = 줄.map(([k, v]) => `<div class="row"><span class="k">${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
+  /* 긴 이름은 폭에 맞을 때까지 줄입니다 (두 줄까지) */
+  for (const id of ['org', 'job']) {
+    const e = $(id); let k = 104; e.style.fontSize = k + 'px';
+    e.style.wordBreak = 'keep-all';
+    while ((e.scrollWidth > e.clientWidth + 1 || e.offsetHeight > k * 1.12 * 2 + 4) && k > 60) { k -= 4; e.style.fontSize = k + 'px'; }
+    /* 띄어쓰기 없는 긴 이름(고려대학교의과대학부속안산병원)은 글자 단위로 줄을 바꿉니다 */
+    if (e.scrollWidth > e.clientWidth + 1) e.style.wordBreak = 'break-all';
+  }
+};
+</script>
+</body>
+</html>
