@@ -194,7 +194,11 @@ function 만원말(값: number): { 글: string; 약: boolean } {
 
 export type 돈꼴값 = { 글: string; 갈래: '연' | '시급' | '일급' | '주급' | '월' };
 
-export function 돈꼴(원문: string | null | undefined): 돈꼴값 | null {
+/** 금액 글을 **숫자로** 읽은 것 — 돈꼴() 과 릴스 고르기(tools/reels/reel-data.mjs 의 급여기준)가 함께 씁니다.
+ *  읽는 규칙은 여기 한 자리입니다 (지침 6절). 못 읽으면 null — 숫자를 짐작하지 않습니다 */
+export type 돈읽은값 = { t: string; 갈래: 돈꼴값['갈래']; 값들: number[]; 라벨: string };
+
+export function 돈읽기(원문: string | null | undefined): 돈읽은값 | null {
   const 온글 = String(원문 || '').replace(/\s+/g, ' ').trim();
   if (!온글) return null;
   const t = 금액머리(온글);
@@ -222,18 +226,26 @@ export function 돈꼴(원문: string | null | undefined): 돈꼴값 | null {
   if (!값들.length) return null;
   if (값들.length > 2) return null;                /* 세 덩이 넘으면 문단입니다 */
 
-  /* 꼬리말이 둘이면(「이상 ~ 이하」) 범위가 이미 그 말을 하므로 안 붙입니다 */
-  const 꼬리들 = t.match(꼬리말) || [];
-  const 세 = (t.match(세전후) || [])[1] || '';
-  const 꼬리 = [꼬리들.length === 1 ? 꼬리들[0] : '', 세].filter(Boolean).join(' ');
   /* ★ 「기본급」은 **그대로 살립니다** (2026-10-28) — 떼면 「기본급 2,266,000원」이
      「약 227만원」이 되어 **연봉 227만원**으로 읽힙니다. 원문의 뜻을 지웁니다 */
   const 라벨 = (t.match(/기본급/) || [])[0] || '';
-  const 앞말 = 갈래 === '월' ? '월 ' : 갈래 !== '연' ? 갈래 + ' ' : 라벨 ? 라벨 + ' ' : '';
   /* ★ 울타리 — 연봉 칸인데 **1,000만원 미만**이고 무슨 돈인지 적혀 있지 않으면
      손대지 않습니다. 월급인지 연봉인지 **우리가 모르는 것**이고, 「약 227만원」으로
      적으면 회원이 연봉으로 읽습니다 (지침 10-3 — 짐작하지 않습니다) */
   if (갈래 === '연' && !라벨 && Math.max(...값들) < 10000000) return null;
+  return { t, 갈래, 값들, 라벨 };
+}
+
+export function 돈꼴(원문: string | null | undefined): 돈꼴값 | null {
+  const r = 돈읽기(원문);
+  if (!r) return null;
+  const { t, 갈래, 값들, 라벨 } = r;
+
+  /* 꼬리말이 둘이면(「이상 ~ 이하」) 범위가 이미 그 말을 하므로 안 붙입니다 */
+  const 꼬리들 = t.match(꼬리말) || [];
+  const 세 = (t.match(세전후) || [])[1] || '';
+  const 꼬리 = [꼬리들.length === 1 ? 꼬리들[0] : '', 세].filter(Boolean).join(' ');
+  const 앞말 = 갈래 === '월' ? '월 ' : 갈래 !== '연' ? 갈래 + ' ' : 라벨 ? 라벨 + ' ' : '';
 
   /* 시급·일급·주급은 **원 단위를 살립니다** (12,626원) */
   if (갈래 === '시급' || 갈래 === '일급' || 갈래 === '주급') {

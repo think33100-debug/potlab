@@ -119,7 +119,7 @@
 <div id="bgphoto"></div>
 <section id="s1" class="scene">
   <div class="photo abs" id="s1photo"><img id="s1img" alt=""></div>
-  <div class="rendtag abs">건축조감도</div>
+  <div class="rendtag abs" id="s1tag">건축조감도</div>
   <div class="logocard abs" id="s1logo"><img id="s1logoimg" alt=""><div class="label" id="s1logolabel"></div></div>
   <div class="hook abs" id="s1hook">
     <div class="small" id="s1small"></div>
@@ -229,7 +229,9 @@ window.__setData = (d) => {
     const img = $('s1logoimg'); img.src = d.로고.파일;
     img.style.width = Math.round(w0 * k) + 'px'; img.style.height = Math.round(h0 * k) + 'px';
   }
-  if (d.사진꼴 === '조감도') document.body.classList.add('is-rendering');
+  /* 딱지 — 건축조감도 · 실내 사진 · 입주 건물 (rapo777.mjs 의 고른.딱지) · 실사가 아닌 것·현재 외관이 아닌 것을 그렇게 읽히지 않게 */
+  const 딱지 = d.사진딱지 || (d.사진꼴 === '조감도' ? '건축조감도' : '');
+  if (딱지 && d.사진) { $('s1tag').textContent = 딱지; document.body.classList.add('is-rendering'); }
   /* 출처 — 고른 파일의 attribution_text 앞부분(rapo777.mjs 의 화면출처) · 없으면 옛 꼴 */
   $('credit').textContent = d.이미지출처 || (d.사진 ? `출처: ${d.사진출처 || d.기관}` : '');
 

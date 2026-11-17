@@ -56,11 +56,13 @@ if (!v.영상 || !fs.existsSync(v.영상)) 멈춤(`영상 파일이 없습니다
 const 지문 = crypto.createHash('sha256').update(fs.readFileSync(v.영상)).digest('hex');
 if (v.영상지문 && 지문 !== v.영상지문) 멈춤('영상 파일이 메일로 보낸 것과 다릅니다 (지문 불일치)');
 console.log(`${같은편(v).join('+')} · ${v.기관} · ${v.직군} · 마감 ${v.마감일}`);
-console.log(`  영상 ${v.영상} · 이미지 ${v.이미지?.꼴 || '?'} (${v.이미지?.기관ref || '?'}) · ${v.이미지?.출처글 || ''}`);
+console.log(`  영상 ${v.영상} · 이미지 ${v.이미지?.없음 ? '없음(777 목록 밖)' : `${v.이미지?.꼴 || '?'} (${v.이미지?.기관ref || '?'}) · ${v.이미지?.출처글 || ''}`}`);
 
 /* ② 게시 금지 — 지금 다시 읽음 */
 const 묶음 = 묶음읽기(묶음폴더(cfg));
-const 기 = 묶음.기관들.find((x) => x.institution_ref === v.이미지?.기관ref);
+/* 777 목록 밖(이미지 없이 만든 것)은 ykiho·이름으로 봅니다 */
+const 기 = v.이미지?.없음 ? { institution_ref: null, key: v.이미지.key || v.기관, ykiho: v.이미지.ykiho || null, name: v.기관 }
+  : 묶음.기관들.find((x) => x.institution_ref === v.이미지?.기관ref);
 if (!기) 멈춤(`묶음에서 기관 ${v.이미지?.기관ref} 를 못 찾음`);
 const 금지 = 게시금지인가(묶음.폴더, 기);
 if (금지) 멈춤(금지);

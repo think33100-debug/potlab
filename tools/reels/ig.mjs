@@ -139,6 +139,13 @@ async function 열쇠확인() {
     const d = (await 그래프(cfg, `/debug_token?input_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}&access_token=${encodeURIComponent(cfg.META_APP_ID + '|' + cfg.META_APP_SECRET)}`)).data || {};
     const 만료 = d.expires_at === 0 ? '만료 없음' : d.expires_at ? new Date(d.expires_at * 1000).toISOString().slice(0, 10) + ' 만료' : '모름';
     console.log(`○ 토큰 ${d.type || '?'} · ${만료} · 유효 ${d.is_valid}`);
+    /* 토큰이 「만료 없음」이어도 데이터 접근은 90일마다 다시 로그인해야 합니다 (2026-11-17 첫 확인에서 본 칸) */
+    if (d.data_access_expires_at) {
+      const 끝 = d.data_access_expires_at * 1000;
+      const 남은날 = Math.floor((끝 - Date.now()) / 86400e3);
+      const 날 = new Date(끝 + 9 * 3600e3).toISOString().slice(0, 16).replace('T', ' ');
+      console.log(`${남은날 <= 14 ? '  ★ ' : '  '}데이터 접근 ${날} KST 까지 (${남은날}일 남음)${남은날 <= 14 ? ' — 그 전에 그래프 API 탐색기에서 토큰을 다시 받아 --열쇠 를 돌리세요' : ''}`);
+    }
     const 권한 = d.scopes || [];
     console.log(`  권한 ${권한.join(', ')}`);
     for (const 꼭 of ['instagram_basic', 'instagram_content_publish', 'pages_show_list', 'pages_read_engagement']) if (!권한.includes(꼭)) console.log(`  ✗ ${꼭} 이 없습니다 — 올리기가 안 될 수 있습니다`);
