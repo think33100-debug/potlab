@@ -36,19 +36,34 @@ const 프로필 = {
     <img src="${데이터(글자로고)}" style="height:92px"></body>`,
 };
 
-/* 하이라이트 표지 — 남색 바탕 · 가운데 원 안에 코랄 테두리와 짧은 말 */
+/* 하이라이트 표지 — 가운데 원 안에 테두리와 짧은 말. 색은 RAPO 토큰 팔레트만 (web/app/rapo-tokens.css)
+   한 색 통일 네 벌 + 주제마다 색이 다른 두 벌 (2026-11-17 세중님 「라포 색을 변경하면서 쓰게 여러색 버전」) */
 const 표지 = [
-  ['hl-1-univ', '대학', '병원'],
-  ['hl-2-public', '공공', '기관'],
-  ['hl-3-dday', 'D-3', '마감임박'],
-  ['hl-4-compete', '경쟁률', ''],
-  ['hl-5-pay', '연봉', ''],
-  ['hl-6-guide', '이용법', ''],
+  ['1-univ', '대학', '병원', 'blue'],
+  ['2-public', '공공', '기관', 'green'],
+  ['3-dday', 'D-3', '마감임박', 'coral'],
+  ['4-compete', '경쟁률', '', 'purple'],
+  ['5-pay', '연봉', '', 'yellow'],
+  ['6-guide', '이용법', '', 'navy'],
 ];
-const 표지글 = (위, 아래) => `<body style="width:1080px;height:1920px;background:#112231;display:flex;align-items:center;justify-content:center">
-  <div style="width:640px;height:640px;border-radius:50%;border:22px solid #FF4F40;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff">
+const 팔레트 = {   /* [연한 100, 600, 진한 900] */
+  coral: ['#FFF1EE', '#FF4F40', '#851E17'], navy: ['#F5F8FA', '#112231', '#112231'],
+  blue: ['#EFF6FF', '#5E98FE', '#0B4596'], green: ['#EDFAF6', '#10AB7D', '#075445'],
+  purple: ['#F5F3FE', '#9F84FB', '#50379B'], yellow: ['#FFF7DE', '#C49725', '#4F3E1F'],
+};
+/* 벌마다 (주제색) → [바탕, 테두리, 큰 글, 작은 글] */
+const 벌 = {
+  'navy':        () => ['#112231', '#FF4F40', '#FFFFFF', '#FF4F40'],
+  'coral':       () => ['#FF4F40', '#FFFFFF', '#FFFFFF', '#112231'],
+  'blush':       () => ['#FFE9E6', '#FF4F40', '#112231', '#FF4F40'],
+  'white':       () => ['#FFFFFF', '#112231', '#112231', '#FF4F40'],
+  'color-soft':  (c) => [팔레트[c][0], 팔레트[c][1], 팔레트[c][2], 팔레트[c][1]],
+  'color-solid': (c) => [c === 'navy' ? '#112231' : 팔레트[c][1], '#FFFFFF', '#FFFFFF', c === 'navy' ? '#FF4F40' : 팔레트[c][2]],
+};
+const 표지글 = (위, 아래, [바탕, 테, 큰, 작은]) => `<body style="width:1080px;height:1920px;background:${바탕};display:flex;align-items:center;justify-content:center">
+  <div style="width:640px;height:640px;border-radius:50%;border:22px solid ${테};display:flex;flex-direction:column;align-items:center;justify-content:center;color:${큰}">
     <div style="font-size:${위.length >= 3 ? 150 : 190}px;font-weight:900;line-height:1">${위}</div>
-    ${아래 ? `<div style="font-size:${아래.length >= 4 ? 84 : 110}px;font-weight:800;line-height:1;margin-top:26px;color:#FF4F40">${아래}</div>` : ''}
+    ${아래 ? `<div style="font-size:${아래.length >= 4 ? 84 : 110}px;font-weight:800;line-height:1;margin-top:26px;color:${작은}">${아래}</div>` : ''}
   </div></body>`;
 
 const browser = await chromium.launch();
@@ -61,5 +76,8 @@ async function 찍기(이름, 몸, w, h) {
   console.log('그림', 이름 + '.png');
 }
 for (const [이름, 몸] of Object.entries(프로필)) await 찍기(이름, 몸, 1080, 1080);
-for (const [이름, 위, 아래] of 표지) await 찍기(이름, 표지글(위, 아래), 1080, 1920);
+for (const [벌이름, 색고르기] of Object.entries(벌)) {
+  fs.mkdirSync(path.join(나감, 'highlight-' + 벌이름), { recursive: true });
+  for (const [이름, 위, 아래, 주제색] of 표지) await 찍기(path.join('highlight-' + 벌이름, 이름), 표지글(위, 아래, 색고르기(주제색)), 1080, 1920);
+}
 await browser.close();
