@@ -272,7 +272,16 @@ for (const 자료 of 통과) {
   /* 카드뉴스 — 같은 장면 3~4장 (2026-11-17 세중님 「릴스와 카드뉴스 둘 다」). 실패해도 릴스는 보냅니다 */
   let 카드 = [];
   try { 카드 = await 카드만들기(바탕 + '.json', 나감); } catch (e) { console.error(`  ✗ 카드 못 만듦 ${자료.id} — ${String(e.message || e).slice(0, 200)}`); }
-  만든것.push({ 자료, mp4: 바탕 + '.mp4', 표지: 바탕 + '-cover.jpg', 카드 });
+  /* 미리보기 — 표지 + 카드를 높이 320 으로 줄여 한 장에 (2026-11-17 세중님 「완성본 나오면 먼저 보여줘」)
+     대화에서 이 한 장을 열어 먼저 보여 드리고 확인받은 뒤 올립니다 */
+  const 미리보기 = 바탕 + '-미리보기.jpg';
+  const 장들 = [바탕 + '-cover.jpg', ...카드].filter((f) => fs.existsSync(f));
+  if (장들.length) {
+    const 거름 = 장들.map((_, i) => `[${i}]scale=-2:320[v${i}]`).join(';') + ';' + 장들.map((_, i) => `[v${i}]`).join('') + `hstack=${장들.length}`;
+    const m = spawnSync('ffmpeg', ['-loglevel', 'error', '-y', ...장들.flatMap((f) => ['-i', f]), '-filter_complex', 장들.length > 1 ? 거름 : '[0]scale=-2:320', '-q:v', '6', 미리보기]);
+    if (m.status !== 0) console.error(`  ✗ 미리보기 못 만듦 ${자료.id} — ${String(m.stderr || '').slice(0, 200)}`);
+  }
+  만든것.push({ 자료, mp4: 바탕 + '.mp4', 표지: 바탕 + '-cover.jpg', 카드, 미리보기: fs.existsSync(미리보기) ? 미리보기 : null });
   console.log(`  ○ ${자료.id} · ${자료.기관} · ${자료.직군} · ${자료.마감.큰글}`);
 }
 
@@ -281,13 +290,13 @@ if (메일) {
   if (!cfg.RESEND_KEY || !cfg.NOTIFY_EMAIL) { console.error('RESEND_KEY · NOTIFY_EMAIL 이 없습니다 — 보내지 않습니다'); process.exit(1); }
   const 드라이브 = 드라이브되나(cfg);
   console.log(드라이브 ? '드라이브에 올리고 링크 메일' : '드라이브 열쇠 없음 — 첨부 메일');
-  for (const { 자료, mp4, 표지, 카드 } of 만든것) {
+  for (const { 자료, mp4, 표지, 카드, 미리보기 } of 만든것) {
     if (직전금지(자료)) continue;
     /* 드라이브 「RAPO 릴스/<YYYY-MM>」 — 영상 · 표지 · 캡션 글 */
     let 링크 = null;
     if (드라이브) {
       try {
-        링크 = await 릴스올리기({ mp4, 표지, 카드, 캡션: 자료.캡션, 이름: `${오늘}_${자료.기관}_${자료.직군}_${자료.마감.큰글}`, 달: 오늘.slice(0, 7) });
+        링크 = await 릴스올리기({ mp4, 표지, 카드, 미리보기, 캡션: 자료.캡션, 이름: `${오늘}_${자료.기관}_${자료.직군}_${자료.마감.큰글}`, 달: 오늘.slice(0, 7) });
         console.log(`  드라이브 ${자료.묶은id[0]} → ${링크}`);
       } catch (e) { console.error(`  ✗ 드라이브 못 올림 ${자료.묶은id[0]} — ${가림(e.message || e)} · 첨부 메일로 대신 보냅니다`); }
     }

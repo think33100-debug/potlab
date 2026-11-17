@@ -56,10 +56,10 @@ const 기록 = fs.existsSync(기록파일) ? JSON.parse(fs.readFileSync(기록�
 const 대기 = fs.existsSync(대기파일) ? JSON.parse(fs.readFileSync(대기파일, 'utf8')) : {};
 
 const 그기관 = Object.entries(기록).filter(([k, v]) => !k.startsWith('__') && v?.이미지?.기관ref === 기.institution_ref);
-const 올린것 = 그기관.filter(([, v]) => v.게시물ID);
+const 올린것 = 그기관.filter(([, v]) => v.게시물ID || v.카드게시물ID);   /* 릴스·카드뉴스 둘 다 */
 const 보낸것 = 그기관.filter(([, v]) => !v.게시물ID && v.메일보낸때 && !/취소|삭제/.test(v.상태 || ''));
 const 대기것 = Object.entries(대기).filter(([, v]) => v.기관ref === 기.institution_ref);
-const 게시물ID = [...new Set(올린것.map(([, v]) => v.게시물ID))];
+const 게시물ID = [...new Set(올린것.flatMap(([, v]) => [v.게시물ID, v.카드게시물ID]).filter(Boolean))];
 
 console.log(`기관 ${기.institution_ref} · ${기.name} · ${기.address || '주소 없음'}`);
 console.log(`  올린 게시물 ${게시물ID.length} (${게시물ID.join(', ') || '없음'}) · 메일로 보낸 것 ${보낸것.length} · 발행 대기 ${대기것.length}`);
@@ -96,11 +96,22 @@ fs.mkdirSync(path.dirname(발행기록파일), { recursive: true });
 const 손으로 = [];
 for (const id of 게시물ID) {
   const r = await 게시물지우기(cfg, id);
-  if (r.ok) { 줄적기({ 결과: '삭제', 게시물ID: id, 응답: r.응답 }); for (const [k, v] of 올린것) if (v.게시물ID === id) 기록[k] = { ...v, 상태: '삭제됨', 삭제때: new Date().toISOString() }; }
+  if (r.ok) {
+    줄적기({ 결과: '삭제', 게시물ID: id, 응답: r.응답 });
+    for (const [k] of 올린것) {
+      if (기록[k].게시물ID === id) 기록[k] = { ...기록[k], 상태: '삭제됨', 삭제때: new Date().toISOString() };
+      if (기록[k].카드게시물ID === id) 기록[k] = { ...기록[k], 카드상태: '삭제됨', 카드삭제때: new Date().toISOString() };
+    }
+  }
   else { 손으로.push(`${id} (${r.응답.slice(0, 80)})`); 줄적기({ 결과: '삭제 실패', 게시물ID: id, 응답: r.응답 }); }
 }
 /* 손으로 지울 것도 기록에 표시 — 「올림」으로 남겨 두지 않습니다 */
-for (const [k, v] of 올린것) if (기록[k]?.상태 !== '삭제됨') 기록[k] = { ...기록[k], 상태: '삭제 필요 — 손으로 (게시 중단 요청)' };
+for (const [k] of 올린것) {
+  if (기록[k].게시물ID && 기록[k].상태 !== '삭제됨') 기록[k] = { ...기록[k], 상태: '삭제 필요 — 손으로 (게시 중단 요청)' };
+  if (기록[k].카드게시물ID && 기록[k].카드상태 !== '삭제됨') 기록[k] = { ...기록[k], 카드상태: '삭제 필요 — 손으로 (게시 중단 요청)' };
+}
+/* 아직 안 올린 카드뉴스도 취소 */
+for (const [k, v] of 그기관) if ((v.카드 || []).length && !v.카드게시물ID) 기록[k] = { ...기록[k], 카드상태: '취소 — 게시 중단 요청' };
 /* ④ 메일로 보낸 것 — 취소 */
 for (const [k, v] of 보낸것) { 기록[k] = { ...v, 상태: '취소 — 게시 중단 요청', 취소때: new Date().toISOString() }; 줄적기({ 결과: '취소', 공고: [k] }); }
 /* ⑤ 발행 대기 — 제외 */

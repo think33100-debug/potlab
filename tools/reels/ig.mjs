@@ -31,7 +31,9 @@ export function env() {
       if (m && !out[m[1]]) out[m[1]] = m[2].replace(/^['"]|['"]$/g, '');
     }
   }
-  return { ...out, ...Object.fromEntries(Object.entries(process.env).filter(([, v]) => v)) };
+  const 다 = { ...out, ...Object.fromEntries(Object.entries(process.env).filter(([, v]) => v)) };
+  다.SUPABASE_URL = 다.SUPABASE_URL || 다.NEXT_PUBLIC_SUPABASE_URL;
+  return 다;
 }
 function env적기(이름, 값) {
   const 글 = fs.existsSync(ENV) ? fs.readFileSync(ENV, 'utf8') : '';
@@ -79,6 +81,61 @@ export async function 릴스올리기IG(cfg, mp4, 캡션) {
   let 주소 = null;
   try { 주소 = (await 그래프(cfg, `/${올림.id}?fields=permalink&access_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}`)).permalink || null; } catch { /* 주소는 없어도 됩니다 */ }
   return { media_id: 올림.id, 주소 };
+}
+
+/* ── 카드뉴스(캐러셀) 올리기 (2026-11-17 세중님 「카드뉴스도 · 저장소 만들어」) ──
+   인스타는 캐러셀 사진을 **공개 주소(image_url)** 로만 받습니다. 그래서
+     ① 카드를 Supabase Storage 공개 버킷 reels-cards 에 올리고 (열쇠는 ASCII — 지침 6-2b)
+     ② 장마다 POST /{IG}/media image_url · is_carousel_item=true → 자식 id
+     ③ POST /{IG}/media media_type=CAROUSEL · children · caption → 부모 → FINISHED 까지
+     ④ media_publish
+     ⑤ 성공이든 실패든 버킷의 그 사진은 지웁니다 (공개로 남겨 두지 않음)
+   ★ 명세 원문을 못 열어 검색 요약으로 맞췄습니다. 응답 원문 600자를 찍으니 첫 실제 호출에서 칸 이름을 맞춥니다 */
+export const 카드버킷 = 'reels-cards';
+async function 저장소(cfg, 방법, 길, 몸, 머리 = {}) {
+  const k = cfg.SUPABASE_SERVICE_KEY;
+  if (!cfg.SUPABASE_URL || !k) throw new Error('SUPABASE_URL · SUPABASE_SERVICE_KEY 가 없습니다');
+  const r = await fetch(`${cfg.SUPABASE_URL}/storage/v1/${길}`, { method: 방법, headers: { apikey: k, Authorization: 'Bearer ' + k, ...머리 }, body: 몸 });
+  const 글 = (await r.text()).split(k).join('‹열쇠›');
+  if (!r.ok) throw new Error(`저장소 ${방법} ${길.split('?')[0]} HTTP ${r.status} · ${글.slice(0, 300)}`);
+  return 글;
+}
+
+export async function 카드올리기IG(cfg, 장들, 캡션, 열쇠) {
+  if (!인스타되나(cfg)) throw new Error('IG_USER_ID · IG_ACCESS_TOKEN 이 없습니다 (node tools/reels/ig.mjs --열쇠)');
+  if (장들.length < 2 || 장들.length > 10) throw new Error(`캐러셀은 2~10장 — 지금 ${장들.length}장`);
+  const 앞 = `${String(열쇠).replace(/[^A-Za-z0-9_-]/g, '_')}/${Date.now()}`;
+  const 경로들 = 장들.map((_, i) => `${앞}/${i + 1}.jpg`);
+  const 폼 = (o) => new URLSearchParams({ ...o, access_token: cfg.IG_ACCESS_TOKEN });
+  try {
+    for (const [i, f] of 장들.entries()) {
+      await 저장소(cfg, 'POST', `object/${카드버킷}/${경로들[i]}`, fs.readFileSync(f), { 'content-type': 'image/jpeg', 'x-upsert': 'true' });
+    }
+    console.log(`    저장소 ${카드버킷}/${앞}/ — ${장들.length}장 올림`);
+    const 자식 = [];
+    for (const p of 경로들) {
+      const 주소 = `${cfg.SUPABASE_URL}/storage/v1/object/public/${카드버킷}/${p}`;
+      const c = await 그래프(cfg, `/${cfg.IG_USER_ID}/media`, { method: 'POST', body: 폼({ image_url: 주소, is_carousel_item: 'true' }) });
+      자식.push(c.id);
+    }
+    const 부모 = await 그래프(cfg, `/${cfg.IG_USER_ID}/media`, { method: 'POST', body: 폼({ media_type: 'CAROUSEL', children: 자식.join(','), caption: 캡션 }) });
+    let 상태 = '';
+    for (let i = 0; i < 18; i++) {           /* 최대 3분 */
+      const s = await 그래프(cfg, `/${부모.id}?fields=status_code,status&access_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}`);
+      상태 = s.status_code || '';
+      if (상태 === 'FINISHED') break;
+      if (상태 === 'ERROR' || 상태 === 'EXPIRED') throw new Error('캐러셀 컨테이너 ' + 상태 + ' · ' + (s.status || ''));
+      await new Promise((z) => setTimeout(z, 10000));
+    }
+    if (상태 !== 'FINISHED') throw new Error('3분 안에 안 끝남 · 마지막 ' + 상태);
+    const 올림 = await 그래프(cfg, `/${cfg.IG_USER_ID}/media_publish`, { method: 'POST', body: 폼({ creation_id: 부모.id }) });
+    let 주소 = null;
+    try { 주소 = (await 그래프(cfg, `/${올림.id}?fields=permalink&access_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}`)).permalink || null; } catch { /* 없어도 됨 */ }
+    return { media_id: 올림.id, 주소 };
+  } finally {
+    try { await 저장소(cfg, 'DELETE', `object/${카드버킷}`, JSON.stringify({ prefixes: 경로들 }), { 'content-type': 'application/json' }); console.log(`    저장소 ${카드버킷}/${앞}/ — 지움`); }
+    catch (e) { console.error(`    ✗ 저장소 사진을 못 지움 (${앞}) — ${String(e.message || e).slice(0, 200)} · 손으로 지워 주세요`); }
+  }
 }
 
 /** 게시물 하나 지우기 → { ok, 응답 } (던지지 않음 — 실패는 「손으로 지울 것」으로 넘깁니다) */

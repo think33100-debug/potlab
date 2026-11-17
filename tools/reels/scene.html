@@ -299,6 +299,7 @@ function drawFrame(path, t, start) {
 
 window.__seek = (t) => {
   if (!D) return;
+  const 카드 = document.body.classList.contains('card');
   $('bar').style.width = (1080 * clamp(t / LEN)) + 'px';
 
   /* 1 · 걸기 */
@@ -320,10 +321,11 @@ window.__seek = (t) => {
   $('credit').style.opacity = (D.사진 || D.로고) && t <= 사진끝 ? 1 : 0;
   /* 카드는 장면마다 한 장 — 이미지 출처는 첫 장(사진이 보이는 장)에만 */
   $('bgphoto').style.opacity = D.사진 ? (t < (T.s2[1] > 0 ? T.s2[1] : T.s1[1]) ? 1 : Math.max(0, 1 - (t - (T.s2[1] > 0 ? T.s2[1] : T.s1[1])) / 400)) : 0;
+  /* 카드뉴스는 장마다 따로 넘겨 보므로 **모든 장**에 그 병원 사진을 흐리게 깝니다 (2026-11-17 세중님 「왜 이미지는 안 써?」) */
+  if (카드 && D.사진) { $('bgphoto').style.opacity = 1; $('credit').style.opacity = 1; }   /* 사진이 보이는 장에는 출처도 늘 */
 
   /* 2 · 기관 소개 */
   const s2 = $('s2'); s2.style.opacity = sceneAlpha(t, T.s2);
-  const 카드 = document.body.classList.contains('card');
   const 판위 = (h) => (카드 ? Math.max(170, 700 - h / 2) : Math.max(400, 900 - h / 2)) + 'px';
   const p2 = $('p2'); p2.style.top = 판위(p2.offsetHeight); const e2 = ease((t - T.s2[0]) / 520);
   p2.style.transform = `translateY(${(1 - e2) * 120}px)`;
