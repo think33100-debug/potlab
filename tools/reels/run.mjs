@@ -97,6 +97,21 @@ console.log(`이미지 묶음 ${묶음.폴더} · 기관 ${묶음.기관들.leng
 const 옛내림파일 = path.join(여기, '내림목록.json');
 const 옛내림 = fs.existsSync(옛내림파일) ? JSON.parse(fs.readFileSync(옛내림파일, 'utf8')) : [];
 
+const 시도전체 = ['서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원특별자치도', '강원도', '충청북도', '충청남도', '전북특별자치도', '전라북도', '전라남도', '경상북도', '경상남도', '제주특별자치도'];
+/** 공고의 기관 이름 → 심평원 { ykiho, 이름, 주소 } — 시도 앞말을 떼고 빈칸을 걷은 이름이 **글자까지 같은 곳이 그 시도에 한 곳**일 때만 */
+export function 이름다듬기(이름) {
+  const 원 = String(이름 || '').trim();
+  const 시도 = 시도전체.find((x) => 원.startsWith(x + ' ')) || null;
+  return { 시도, 이름: (시도 ? 원.slice(시도.length) : 원).replace(/\s+/g, '') };
+}
+async function 이름으로ykiho(이름) {
+  const { 시도, 이름: 짧은 } = 이름다듬기(이름);
+  if (!짧은 || 짧은.length < 4) return null;
+  const 줄 = await rest(`hira_org?select=ykiho,yadm_nm,addr&yadm_nm=eq.${encodeURIComponent(짧은)}`);
+  const 맞음 = (줄 || []).filter((x) => !시도 || String(x.addr || '').startsWith(시도));
+  return 맞음.length === 1 ? { ykiho: 맞음[0].ykiho, 이름: 맞음[0].yadm_nm, 주소: 맞음[0].addr } : null;
+}
+
 async function rest(길) {
   const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
   if (!r.ok) throw new Error(길.slice(0, 60) + ' HTTP ' + r.status + ' ' + (await r.text()).slice(0, 300));
@@ -164,6 +179,10 @@ for (const 공고 of 후보) {
     }
   }
   공고.기관 = 기관;
+  /* 기관 표에 ykiho 가 없으면(나라일터 「NAME:」 꼴 등) 심평원 이름으로 ykiho 를 찾아 **사진 연결에만** 씁니다
+     (2026-11-17 세중님 「기관 사진이 안 들어갔다」 — 홍성군 보건소가 777 목록에 있는데 NAME: 꼴이라 못 이었습니다)
+     조건 — 시도 앞말을 뗀 이름이 심평원 이름과 **글자까지 같고**, 그 시도 안에서 **딱 한 곳**일 때만. 판정(대상·종별)에는 안 씁니다 */
+  if (!기관?.ykiho) 공고.사진ykiho = await 이름으로ykiho(공고.org_name);
   const 판정 = 릴스대상(공고.분류, 기관, 공고.연봉원문);
   if (!판정.대상) { 비대상++; continue; }
   공고.대상까닭 = 판정.까닭;
@@ -181,8 +200,9 @@ for (const 공고 of 같은공고묶기(대상들)) {
      ① 기관 연결(ykiho → org_id=기관번호 → 이름+주소) ② 게시 금지 ③ 이미지 고르기 ④ 중복 열쇠
      하나라도 불확실하면 **만들지 않고 대기** — 이미지 없이 내보내지도 않습니다 */
   /* 기관 표 줄이 없으면 이름만 — 777 목록에 이름이 같은 곳이 있으면 대기, 없으면 이미지 없이 (rapo777.mjs 기관연결) */
-  const 앱 = 공고.기관 ? { 기관번호: 공고.기관.기관번호, ykiho: 공고.기관.ykiho, 이름: 공고.기관.이름, 주소: 공고.기관.주소 }
-    : { 기관번호: null, ykiho: null, 이름: 공고.org_name, 주소: null };
+  const 앱 = 공고.기관 ? { 기관번호: 공고.기관.기관번호, ykiho: 공고.기관.ykiho || 공고.사진ykiho?.ykiho || null, 이름: 공고.기관.이름, 주소: 공고.기관.주소 }
+    : { 기관번호: null, ykiho: 공고.사진ykiho?.ykiho || null, 이름: 공고.org_name, 주소: 공고.사진ykiho?.주소 || null };
+  if (공고.사진ykiho) console.log(`  사진 연결 ${자료.묶은id[0]} — 심평원 「${공고.사진ykiho.이름}」 ykiho 로 이음 (기관 표에 ykiho 없음)`);
   const 붙임 = 이미지붙이기(묶음, 자료, 앱, 공고.url, { 낸열쇠: 기록.__발행열쇠, 옛내림 });
   if (붙임.겹침) { console.log('  건너뜀', 자료.묶은id[0], 자료.기관, '— 이미 낸 공고', 붙임.겹침); continue; }
   if (붙임.대기) { 대기.push({ 공고: 자료.묶은id, 기관: 자료.기관, 원문: 공고.url || null, 까닭: 붙임.대기, 기관ref: 붙임.기관ref || null, 제외: 붙임.제외 || false });
