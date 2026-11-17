@@ -53,7 +53,8 @@ function ProfileForm({ me }: { me: NonNullable<ReturnType<typeof useAuth>['me']>
     if (busy || (!닉바뀜 && !그림바뀜)) return;
     const name = nick.trim();
     if (닉바뀜) {
-      if (name.length < 2 || name.length > 12) { setErr('2자에서 12자까지 쓸 수 있어요'); return; }
+      /* 4~12자 · 비속어·음란 용어는 DB 가 가립니다 (2026-11-17 세중님 · 금고 SQL_1113/ZZB) — 닉네임을 바꿀 때만 봅니다 */
+      if (name.length < 4 || name.length > 12) { setErr('4자에서 12자까지 쓸 수 있어요'); return; }
       if (!confirm(`닉네임은 앞으로 ${left}번 바꿀 수 있어요. 그다음부터는 유료로 바뀝니다. 바꿀까요?`)) return;
     }
     setBusy(true); setErr(null);
@@ -62,6 +63,7 @@ function ProfileForm({ me }: { me: NonNullable<ReturnType<typeof useAuth>['me']>
     setBusy(false);
     if (error) {
       setErr(error.code === '23505' ? '이미 쓰고 있는 닉네임이에요'
+        : error.code === '22023' ? error.message
         : error.message.includes('5번') ? '닉네임을 더 바꾸려면 결제가 필요해요'
         : `저장하지 못했어요 — ${error.message}`);
       return;
@@ -114,6 +116,7 @@ function ProfileForm({ me }: { me: NonNullable<ReturnType<typeof useAuth>['me']>
         <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">
           {locked ? '무료로 바꿀 수 있는 5번을 다 쓰셨어요. 결제는 아직 준비 중이에요.' : `닉네임은 ${FREE_CHANGES}번 중 ${left}번 더 바꿀 수 있어요.`}
         </p>
+        {!locked && <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">4~12자로 정해 주세요. 비속어나 선정적인 말은 쓸 수 없어요.</p>}
       </section>
 
       <section className="flex flex-col gap-(--rapo-dimension-x3)">

@@ -9,6 +9,8 @@ import { ViewBump } from '@/components/view-bump';
 import { Avatar } from '@/components/avatar';
 import { 어둠, 지난때 } from '@/components/rapo/rapo-community';
 import { RapoMaskIcon } from '@/components/rapo/rapo-ui';
+import { RapoShell } from '@/components/rapo/rapo-shell';
+import { RapoStudentCommunityNotice } from '@/components/rapo/rapo-student-community';
 import { channelName } from '@/lib/channels';
 import { POST_ONE_COLS, type PostRow } from '@/lib/supabase';
 import { serverSupabase } from '@/lib/supabase-server';
@@ -113,7 +115,12 @@ export async function generateMetadata({
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   /* 쿠키에 실려 온 세션으로 읽습니다 — 그래야 「내글」 이 참이 됩니다 */
-  const p = await getPost(await serverSupabase(), id);
+  const sb = await serverSupabase();
+  /* 학생·취준생은 커뮤니티 대신 「학생인증을 준비하고 있어요」 안내와 알림 신청 (2026-11-17 세중님 · components/rapo/rapo-student-community.tsx).
+     막는 자리는 DB 입니다(방볼수있나 — 금고 SQL_1113/ZZB). 여기는 빈 화면 대신 까닭을 보여 줍니다 */
+  const { data: 볼수 } = await sb.rpc('방볼수있나', { p_방: 'free' });
+  if (볼수 === false) return <RapoShell who="회원" current="/community"><RapoStudentCommunityNotice /></RapoShell>;
+  const p = await getPost(sb, id);
 
   /* 404 를 내는 대신 화면을 보여줍니다. 받은 사람이 왜 안 보이는지는
      알게 해야 합니다 — 빈 화면은 「서비스가 고장 났다」로 읽힙니다 */

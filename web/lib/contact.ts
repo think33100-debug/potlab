@@ -12,8 +12,11 @@
 /** 개인정보 보호책임자 메일 — 열람·정정·삭제·처리정지 */
 export const PRIVACY_EMAIL = 'privacy@rapojob.co.kr';
 
-/** 일반 문의 메일 */
-export const HELP_EMAIL = 'help@rapojob.co.kr';
+/** 일반 문의 메일
+    ★ 2026-11-17 세중님 「이메일 문의는 일단 여기로」 — 회사 도메인(rapojob.co.kr)에 메일 받는 서버(MX) 설정이 아직 없어
+      help@ 로 보낸 메일이 도착하지 않습니다. 도메인 메일이 열리면 다시 help@ 로 돌립니다.
+      (약관 글 속의 help@ · 아래 privacy@ 는 세중님 결정을 기다립니다 — 법 문서라 따로 여쭘) */
+export const HELP_EMAIL = 'ggnol235@gmail.com';
 
 /* 카카오톡 문의 채널 — 모든 화면 오른쪽 아래 단추(components/kakao-fab.tsx)가 엽니다 (2026-11-12 세중님) */
 export const KAKAO_CHANNEL = 'https://pf.kakao.com/_ybINX';

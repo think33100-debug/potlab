@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Avatar } from '@/components/avatar';
+import { 연월읽기, 졸업연월 } from '@/lib/school-period';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { RapoInstallCard } from './rapo-install';
 import { RapoMeRow, RapoMeSection } from './rapo-me';
+import { 스펙비교길 } from './rapo-spec-entry';
 
 /* 내 정보 첫 화면의 몸통 — app/me/page.tsx 와 견본(app/design-preview/me)이 같이 씁니다.
    피그마 「U14-01 / 내 정보」 1375:160 의 메뉴를 **전부** 둡니다 (2026-11-11 밤 대표 「부실한데」).
@@ -29,6 +31,19 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
     });
   }, [me.role]);
   const 연차 = 경력?.입사 ? new Date().getFullYear() - 경력.입사 + 1 : null;
+  /* 학생·취준생 — 졸업하는 해가 됐는데(또는 이미 졸업) 스펙(학점)을 아직 안 넣었으면 「취업 스펙 입력하고 비교하기」를 띄웁니다
+     (2026-11-17 세중님 「재학생은 졸업년도가 되면 내정보에 취업 스펙 입력하고 비교하기 떠야해」 · 재학 중 가입은 스펙을 건너뜁니다) */
+  const [스펙넣기, set스펙넣기] = useState(false);
+  useEffect(() => {
+    if (me.role !== '학생') return;
+    browserSupabase().from('student_specs').select('학적,입학연월,school_type,gpa').maybeSingle().then(({ data }) => {
+      const d = data as unknown as { 학적: string | null; 입학연월: string | null; school_type: string | null; gpa: number | null } | null;
+      if (!d || d.gpa != null) return;
+      const 졸업 = 졸업연월(d.school_type ?? '', 연월읽기(d.입학연월));
+      const 올해 = new Date(Date.now() + 9 * 3600_000).getUTCFullYear();
+      set스펙넣기(d.학적 === '졸업' || (!!졸업 && 졸업.y <= 올해));
+    });
+  }, [me.role]);
   return (
     <div className="flex flex-col gap-(--rapo-dimension-x5) pt-(--rapo-dimension-x2)">
       {/* 프로필 요약 (1376:37165) — 아바타 56 · 닉네임 28 · 직군 · 프로필 편집 */}
@@ -53,6 +68,17 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
 
       {/* 설치 유도 — 아직 홈 화면에 안 둔 분에게만 (2026-11-14 세중님) */}
       <RapoInstallCard />
+
+      {스펙넣기 && (
+        <Link href="/me/spec" className="flex items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-brand-weak) px-(--rapo-dimension-x5) py-(--rapo-dimension-x4)">
+          <div className="min-w-0 flex-1">
+            <p className="rapo-type-t7-bold break-keep text-(color:--rapo-color-fg-neutral)">취업 스펙 입력하고 비교하기</p>
+            <p className="rapo-type-t4-regular mt-(--rapo-dimension-x1) break-keep text-(color:--rapo-color-fg-neutral-muted)">스펙을 넣으면 내 취업 스펙 점수가 나와요</p>
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+          <img src="/rapo/home/graphic-spec-48.svg" alt="" width={48} height={48} className="shrink-0" />
+        </Link>
+      )}
 
       {/* 내 급여 요약 (1441:1459) — 급여는 아직 오픈 전이라 금액 대신 안내 · 누르면 알림 신청으로 */}
       <Link href={준비('pay')} className="flex items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-brand-weak) px-(--rapo-dimension-x5) py-(--rapo-dimension-x4)">
@@ -79,7 +105,10 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
         {/* 학생·취준생 → 임상가 전환 (2026-11-15 세중님 · 근무 병원·입사 당시 스펙·근무 후기) */}
         {me.role === '학생' && <RapoMeRow icon="/rapo/me/work-24.svg" href="/me/convert">취업했어요 · 임상가 전환</RapoMeRow>}
         <RapoMeRow icon="/rapo/me/spec-24.svg" href="/me/spec">스펙 확인·수정</RapoMeRow>
-        <RapoMeRow icon="/rapo/me/compare-24.svg" href={준비('spec')}>입사 스펙 비교</RapoMeRow>
+        {/* 학생·취준생은 「취업 스펙 비교」(학생끼리 · app/spec/compare), 임상가는 「입사 스펙 비교」(준비 중) — 2026-11-17 세중님 */}
+        {me.role === '학생'
+          ? <RapoMeRow icon="/rapo/me/jobspec-24.svg" href={스펙비교길}>취업 스펙 비교</RapoMeRow>
+          : <RapoMeRow icon="/rapo/me/compare-24.svg" href={준비('spec')}>입사 스펙 비교</RapoMeRow>}
         <RapoMeRow icon="/rapo/me/pay-24.svg" href={준비('paycmp')}>내 급여 비교</RapoMeRow>
       </RapoMeSection>
 

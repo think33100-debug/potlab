@@ -6,6 +6,8 @@ import {
   RapoCommunityEmpty, RapoCommunityPost, RapoCommunityPromo, RapoCommunityTop, RapoCommunityWrite, 어둠, type 커뮤니티글,
 } from '@/components/rapo/rapo-community';
 import { RapoGuestPreview } from '@/components/rapo/rapo-guest-preview';
+import { RapoShell } from '@/components/rapo/rapo-shell';
+import { RapoStudentCommunityNotice } from '@/components/rapo/rapo-student-community';
 import { 색인메타 } from '@/lib/seo';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { daysAgoIso } from '@/lib/time';
@@ -44,6 +46,10 @@ export default async function Community({ searchParams }: { searchParams: Promis
   const sb = await serverSupabase();
   /* 비회원 — 맛보기 화면 (2026-11-13 세중님). 글은 한 줄도 안 내려보냅니다(익명 글 · components/rapo/rapo-guest-preview.tsx) */
   if (await serverWho(sb) === '비회원') return <RapoGuestPreview 갈래="community" />;
+  /* 학생·취준생은 커뮤니티 대신 「학생인증을 준비하고 있어요」 안내와 알림 신청 (2026-11-17 세중님 · components/rapo/rapo-student-community.tsx).
+     막는 자리는 DB 입니다(방볼수있나 — 금고 SQL_1113/ZZB). 여기는 빈 화면 대신 까닭을 보여 줍니다 */
+  const { data: 볼수 } = await sb.rpc('방볼수있나', { p_방: 'free' });
+  if (볼수 === false) return <RapoShell who="회원" current="/community"><RapoStudentCommunityNotice /></RapoShell>;
   /* 2026-11-15 세중님 「한 곳에서 다 같이 · 학생 임상가 모두 다」 — 직군·학생으로 거르지 않습니다 (DB 방볼수있나 도 모두 참 · 금고 SQL_1113/ZP) */
   let q = sb.from('공개글').select('id,title,body,created_at,comment_count,profiles,운영진');
   q = 정렬 === 'hot'
