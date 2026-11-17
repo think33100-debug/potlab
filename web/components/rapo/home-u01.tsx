@@ -165,32 +165,69 @@ function Arrow({ right, top }: { right: number; top: number }) {
   );
 }
 
-/* ── 라포에서 시작하기 · 「RAPO / Home / 주요 서비스 영역」 1210:1139 ──────── */
+/* ── 라포에서 시작하기 · 「RAPO / Home / 주요 서비스 영역」 1210:1139 ────────
+   2026-11-18 세중님 「오른쪽으로 넘기는 식으로 · 경쟁률·봉사활동·청년정책 바로 갈 수 있는 창」 → 「ㄱㄱ」.
+   카드 틀은 원본 그대로(높이 216 · r3 · 안쪽 x4 · 제목 t6-bold · 설명 12/17 · 그림 오른쪽 아래)이고,
+   두 칸 격자를 가로 넘기기(scroll-snap)로 바꿔 카드 넷을 더했습니다. 카드 폭 44% 라 다음 카드가 살짝 보입니다.
+   새 카드 그림은 3D 그림이 아직 없어 툴킷 28px 그림을 크게 씁니다 — 디자이너 그림이 오면 그림.src 만 바꿉니다. */
+type 시작카드 = {
+  제목: string; 설명: [string, string?]; href: string; bg: string; 글색: string; 눌림: string;
+  그림: { src: string; 큰것?: '위' | '가운데' };
+};
+const 시작카드들: 시작카드[] = [
+  { 제목: '커뮤니티 보기', 설명: ['어디서도 나눌 수 없던', '우리만의 이야기'], href: '/community',
+    bg: 'bg-(--rapo-brand-color-navy)', 글색: 'text-(color:--rapo-brand-color-white)', 눌림: 'active:bg-(--rapo-color-bg-navy-solid-pressed)',
+    그림: { src: '/rapo/home/start-community.png', 큰것: '위' } },
+  { 제목: '공고 찾기', 설명: ['내게 맞는 일을 찾아요'], href: '/jobs',
+    bg: 'bg-(--rapo-brand-color-mist)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:bg-(--rapo-color-bg-neutral-weak-pressed)',
+    그림: { src: '/rapo/home/start-jobs.png', 큰것: '가운데' } },
+  { 제목: '지난 채용 경쟁률', 설명: ['공공병원이 공개한', '회차별 경쟁률'], href: '/compete',
+    bg: 'bg-(--rapo-brand-color-blush)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
+    그림: { src: '/rapo/home/graphic-cert-28.svg' } },
+  { 제목: '봉사활동', 설명: ['지역별로 모집 중인', '봉사를 찾아요'], href: '/volunteer',
+    bg: 'bg-(--rapo-color-palette-green-100)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
+    그림: { src: '/rapo/home/graphic-volunteer-28.svg' } },
+  { 제목: '청년정책', 설명: ['받을 수 있는 청년 지원', '지역별로 한눈에'], href: '/youth',
+    bg: 'bg-(--rapo-color-palette-blue-100)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
+    그림: { src: '/rapo/home/graphic-youth-28.svg' } },
+  { 제목: '병원 둘러보기', 설명: ['병원 규모와 치료사 수,', '근무 후기까지'], href: '/orgs',
+    bg: 'bg-(--rapo-color-palette-coral-100)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
+    그림: { src: '/rapo/home/graphic-hospital-28.svg' } },
+];
+/* 큰 그림의 왼쪽·위 20px 를 흐리게 감춥니다 (원본 그대로) */
+const 그림가림 = '[mask-image:linear-gradient(to_right,transparent,#000_20px),linear-gradient(to_bottom,transparent,#000_20px)] [mask-composite:intersect]';
+
 function StartHere() {
   return (
-    <section aria-labelledby="rapo-home-start"
-      className="flex flex-col gap-(--rapo-dimension-x4) px-(--rapo-dimension-x5) py-(--rapo-dimension-x6)">
-      <RapoSectionTitle id="rapo-home-start">라포에서 시작하기</RapoSectionTitle>
-      <div className="grid h-[216px] grid-cols-2 gap-(--rapo-dimension-x3)">
-        <Link href="/community"
-          className="relative flex flex-col gap-(--rapo-dimension-x1_5) overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-navy)
-                     p-(--rapo-dimension-x4) active:bg-(--rapo-color-bg-navy-solid-pressed)">
-          <span className="rapo-type-t6-bold text-(color:--rapo-brand-color-white)">커뮤니티 보기</span>
-          <span className="text-[12px] leading-[17px] text-(color:--rapo-brand-color-white)">어디서도 나눌 수 없던<br />우리만의 이야기</span>
-          <span aria-hidden className="absolute bottom-0 right-0 flex h-[124px] w-[160px] items-start overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_20px),linear-gradient(to_bottom,transparent,#000_20px)] [mask-composite:intersect]">
-            <Image src="/rapo/home/start-community.png" alt="" width={160} height={160} className="size-[160px] shrink-0 object-contain" />
-          </span>
-        </Link>
-        <Link href="/jobs"
-          className="relative flex flex-col gap-(--rapo-dimension-x1_5) overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-mist)
-                     p-(--rapo-dimension-x4) active:bg-(--rapo-color-bg-neutral-weak-pressed)">
-          <span className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">공고 찾기</span>
-          <span className="text-[12px] leading-[17px] text-(color:--rapo-brand-color-navy)">내게 맞는 일을 찾아요</span>
-          <span aria-hidden className="absolute bottom-0 right-0 flex h-[124px] w-[160px] items-center justify-center overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_20px),linear-gradient(to_bottom,transparent,#000_20px)] [mask-composite:intersect]">
-            <Image src="/rapo/home/start-jobs.png" alt="" width={160} height={160} className="size-[160px] shrink-0 object-contain" />
-          </span>
-        </Link>
+    <section aria-labelledby="rapo-home-start" className="flex flex-col gap-(--rapo-dimension-x4) py-(--rapo-dimension-x6)">
+      <div className="flex items-end justify-between gap-(--rapo-dimension-x3) px-(--rapo-dimension-x5)">
+        <RapoSectionTitle id="rapo-home-start">라포에서 시작하기</RapoSectionTitle>
+        <span className="rapo-type-t3-regular shrink-0 whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">옆으로 넘겨 보세요 ›</span>
       </div>
+      <ul className="flex snap-x snap-mandatory gap-(--rapo-dimension-x3) overflow-x-auto scroll-px-(--rapo-dimension-x5) px-(--rapo-dimension-x5)
+                     [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {시작카드들.map((c) => (
+          <li key={c.href} className="w-[44%] min-w-[150px] max-w-[200px] shrink-0 snap-start">
+            <Link href={c.href}
+              className={`relative flex h-[216px] flex-col gap-(--rapo-dimension-x1_5) overflow-hidden rounded-(--rapo-radius-r3) p-(--rapo-dimension-x4) ${c.bg} ${c.눌림}`}>
+              <span className={`rapo-type-t6-bold break-keep ${c.글색}`}>{c.제목}</span>
+              <span className={`text-[12px] leading-[17px] ${c.글색}`}>
+                <span className="block">{c.설명[0]}</span>
+                {c.설명[1] && <span className="block">{c.설명[1]}</span>}
+              </span>
+              {c.그림.큰것 ? (
+                <span aria-hidden className={`absolute bottom-0 right-0 flex h-[124px] w-[160px] overflow-hidden ${c.그림.큰것 === '위' ? 'items-start' : 'items-center justify-center'} ${그림가림}`}>
+                  <Image src={c.그림.src} alt="" width={160} height={160} className="size-[160px] shrink-0 object-contain" />
+                </span>
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element -- 툴킷 SVG 그림을 크게 */
+                <img aria-hidden src={c.그림.src} alt="" width={84} height={84}
+                  className="absolute bottom-(--rapo-dimension-x4) right-(--rapo-dimension-x4) size-[84px]" />
+              )}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
