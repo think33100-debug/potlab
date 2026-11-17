@@ -4,7 +4,7 @@
  *   node tools/긁기/표준게시판.mjs --몇개 20
  *   node tools/긁기/표준게시판.mjs --진짜        보류함으로 담습니다
  *   node tools/긁기/표준게시판.mjs --자기점검
- *   node tools/긁기/표준게시판.mjs --시간 600   이 초를 넘으면 남은 곳은 건너뛰고 리포트·담기로 (기본 900 · 2026-11-18)
+ *   node tools/긁기/표준게시판.mjs --시간 600   이 초를 넘으면 남은 곳은 건너뛰고 리포트·담기로 (기본 600 · 2026-11-18)
  *
  * ── 왜 한 읽기로 묶나 ───────────────────────────────────────
  * ①HTML 게시판 139곳에서 그누보드(19)·경기도의료원(3)을 빼면 **117곳**이 남는데,
@@ -302,9 +302,9 @@ const 상태자리 = path.join(리포트자리, 'hs4-board-state.json');
 let 상태 = { 곳별: [] };
 try { 상태 = JSON.parse(fs.readFileSync(상태자리, 'utf8')); } catch { /* 처음이면 빈 상태 */ }
 const 상태표 = new Map((상태.곳별 || []).map((s) => [s.꼴 + '|' + s.이름, s]));
-/* 시간 상한(초) — `--시간 N` · 없으면 서버 .env 의 POTJOB_HS4_SECONDS · 없으면 900 (크론 1200 안에서 상세읽기 몫을 남김) */
+/* 시간 상한(초) — `--시간 N` · 없으면 서버 .env 의 POTJOB_HS4_SECONDS · 없으면 600 (크론 1200 하나에 경기도의료원·그누보드·이 파일·상세읽기 넷이 줄지어 돕니다 — 앞 둘과 상세읽기 몫을 남김 · 못 본 곳은 다음 바퀴에 먼저) */
 const 시작때 = Date.now();
-const 상한초 = Number(argv.includes('--시간') ? argv[argv.indexOf('--시간') + 1] : process.env.POTJOB_HS4_SECONDS) || 900;
+const 상한초 = Number(argv.includes('--시간') ? argv[argv.indexOf('--시간') + 1] : process.env.POTJOB_HS4_SECONDS) || 600;
 let 시간끝 = 0;
 const 차례곳들 = 오래된차례(곳들, (x) => (상태표.get(x.꼴 + '|' + x.이름) || {}).마지막날);
 for (const 곳 of 차례곳들.slice(0, 몇개)) {
