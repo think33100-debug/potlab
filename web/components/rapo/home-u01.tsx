@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { RapoBannerCarousel } from './rapo-banner-carousel';
 import { SpecEntryArt, SpecEntryLabel, 스펙비교길 } from './rapo-spec-entry';
 import { RapoShell } from './rapo-shell';
+import { RapoStartScroller } from './rapo-start-scroller';
 import { RapoButton, RapoSectionTitle } from './rapo-ui';
 import type { ReactNode } from 'react';
 import type { Who } from '@/lib/supabase-server';
@@ -43,8 +44,7 @@ export function HomeU01({ jobs, who, sample = false, 관리덮기 }: {
         <StartHere />
         <AnonymousTalk />
         <div aria-hidden className="h-[6px] bg-(--rapo-color-bg-layer-default)" />
-        <JobCurations />
-        <div aria-hidden className="h-[6px] bg-(--rapo-color-bg-layer-default)" />
+        {/* 「조건으로 공고 찾기」는 2026-11-18 세중님 「빼자」로 뺐습니다 */}
         {sample && (
           <p className="rapo-type-t2-bold bg-(--rapo-color-bg-warning-weak) px-(--rapo-dimension-x5) py-(--rapo-dimension-x2)
                         text-(color:--rapo-color-fg-warning-contrast)">
@@ -73,11 +73,11 @@ function Banners({ member }: { member: boolean }) {
             (390 폭 휴대폰에서 보임 · 2026-11-11 대표 지적). 이제 오른쪽·아래를 틀에 붙여 두고,
             화면이 좁으면 사진을 같은 비율로 줄입니다 — 왼쪽 끝은 원본과 같은 221px 에 머뭅니다.
             414 이상에서는 원본 크기 그대로입니다. */}
-        <div className="absolute bottom-[27px] right-[31px] aspect-[162/172] w-[clamp(110px,calc(100%-252px),162px)]">
-          {/* 첫 화면에 바로 보이는 그림이라 늦게 받지 않습니다 (Next 16 문서 — loading="eager") */}
-          <Image src="/rapo/home/banner1-therapist.png" alt="" fill sizes="162px" loading="eager"
-            className="object-cover object-bottom" />
-        </div>
+        {/* 2026-11-18 세중님 「저 여자 둘 지우고 우리 로고 흰색으로 연하게」 — 치료사 사진 대신 RAPO 로고(R 상징)를 흰색으로 옅게.
+            자리는 사진이 있던 오른쪽 아래 그대로(틀 안 · 오른쪽 31 · 아래 27) · 좁은 화면에서 같은 식으로 줄어듭니다 */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- 로고 SVG 그대로 */}
+        <img src="/rapo/home/logo-symbol.svg" alt="" aria-hidden width={150} height={146}
+          className="pointer-events-none absolute bottom-[40px] right-[40px] h-auto w-[clamp(96px,calc(100%-262px),150px)] opacity-25 [filter:brightness(0)_invert(1)]" />
         <Frame tone="white" />
         <Arrow right={20} top={25} /><Arrow right={20} top={52} /><Arrow right={48} top={25} />
         <p className="absolute left-[40px] top-[57px] w-[239px] text-[23px] font-bold leading-[28px] text-(color:--rapo-brand-color-white)">
@@ -204,7 +204,8 @@ function StartHere() {
         <RapoSectionTitle id="rapo-home-start">라포에서 시작하기</RapoSectionTitle>
         <span className="rapo-type-t3-regular shrink-0 whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">옆으로 넘겨 보세요 ›</span>
       </div>
-      <ul className="flex snap-x snap-mandatory gap-(--rapo-dimension-x3) overflow-x-auto scroll-px-(--rapo-dimension-x5) px-(--rapo-dimension-x5)
+      {/* 마우스 기기에는 양옆에 흰 화살표가 뜹니다 (rapo-start-scroller.tsx · 2026-11-18) */}
+      <RapoStartScroller className="flex snap-x snap-mandatory gap-(--rapo-dimension-x3) overflow-x-auto scroll-px-(--rapo-dimension-x5) px-(--rapo-dimension-x5)
                      [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {시작카드들.map((c) => (
           <li key={c.href} className="w-[44%] min-w-[150px] max-w-[200px] shrink-0 snap-start">
@@ -227,7 +228,7 @@ function StartHere() {
             </Link>
           </li>
         ))}
-      </ul>
+      </RapoStartScroller>
     </section>
   );
 }
@@ -263,48 +264,6 @@ function AnonymousTalk() {
           ))}
         </ul>
       </div>
-    </section>
-  );
-}
-
-/* ── 조건으로 공고 찾기 · 「RAPO / Home / 조건별 공고 탐색 영역」 1210:1147 ─────
-   ⚠ 지금 /jobs 에 「급여 공개」·「신입 지원」 거르기가 없습니다. 새 거르기를 만들지 않고
-     둘 다 /jobs 로 보냅니다 — 거르기를 만들지는 대표 확인 자리입니다. */
-const 조건카드 = [
-  { title: '급여 공개 공고', text: ['급여가 표시된 공고를', '먼저 비교해보세요'], bg: 'bg-(--rapo-color-palette-coral-400)',
-    art: { src: '/rapo/home/graphic-pay-48.svg', w: 44.3077, l: 1.58, t: 4.15 } },
-  { title: '신입 지원 공고', text: ['경력 조건부터 확인하고', '첫 지원을 준비해보세요'], bg: 'bg-(--rapo-color-palette-navy-500)',
-    art: { src: '/rapo/home/graphic-spec-48.svg', w: 43.2, l: 1.95, t: 3.3 } },
-];
-
-function JobCurations() {
-  return (
-    <section aria-labelledby="rapo-home-curation"
-      className="flex flex-col gap-(--rapo-dimension-x4) bg-(--rapo-color-bg-neutral-weak) py-(--rapo-dimension-x5) pl-(--rapo-dimension-x5)">
-      <div className="flex flex-col gap-(--rapo-dimension-x1) pr-(--rapo-dimension-x5)">
-        <RapoSectionTitle id="rapo-home-curation">조건으로 공고 찾기</RapoSectionTitle>
-        <p className="text-[13px] leading-[19px] text-(color:--rapo-color-fg-neutral-muted)">비교하고 싶은 조건부터 골라보세요</p>
-      </div>
-      <ul className="flex snap-x gap-(--rapo-dimension-x3) overflow-x-auto pr-(--rapo-dimension-x5) [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {조건카드.map((c) => (
-          <li key={c.title} className="w-[244px] shrink-0 [flex-grow:1] snap-start">
-            <Link href="/jobs"
-              className={`flex h-full flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) p-(--rapo-dimension-x4) ${c.bg}`}>
-              <span className="flex items-center gap-(--rapo-dimension-x3)">
-                <span className="flex size-(--rapo-dimension-x14) shrink-0 items-center justify-center rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-layer-default)">
-                  <span className="relative size-(--rapo-dimension-x12) overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
-                    <img src={c.art.src} alt="" width={c.art.w} height={c.art.w} className="absolute" style={{ left: c.art.l, top: c.art.t }} />
-                  </span>
-                </span>
-                <span className="min-w-0 flex-1 text-[17px] font-bold leading-[24px] text-(color:--rapo-brand-color-navy)">{c.title}</span>
-              </span>
-              <span className="text-[13px] leading-[19px] text-(color:--rapo-brand-color-navy)">{c.text[0]}<br />{c.text[1]}</span>
-              <span className="text-[13px] font-medium leading-[20px] text-(color:--rapo-brand-color-navy)">공고 보기</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }
