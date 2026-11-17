@@ -8,6 +8,7 @@ const jsonSites = [
   { name: '화순전남대학교병원', type: 'appsite', host: 'https://cnuh.recruiter.co.kr', sn: 4978, settingType: 'E', only: '화순', 천천히: true },
   { name: '전북대학교병원', type: 'appsite', host: 'https://jbuh.recruiter.co.kr', sn: 13192, settingType: 'A', 천천히: true },
   { name: '충북대학교병원', type: 'appsite', host: 'https://cbnuh.recruiter.co.kr', sn: 9932, settingType: 'E', 천천히: true },
+  { name: '계명대학교동산병원', type: 'appsite', host: 'https://dongsan.recruiter.co.kr', sn: 9489, settingType: 'E', 천천히: '하루1' }, /* 2026-11-18 새 리크루터 채용관(11/12 글부터) · 옛 게시판 줄은 그대로 · 정답지 1차 못 읽은 2건 */
   { name: '의료법인 길의료재단 길병원', type: 'appsite', host: 'https://gilhospital.recruiter.co.kr', sn: 2714, settingType: 'E', 천천히: true },
   { name: '분당서울대학교병원', type: 'appsite', host: 'https://snubh.recruiter.co.kr', sn: 658, settingType: 'E', 천천히: true },
   { name: '아주대학교병원', type: 'appsite', host: 'https://ajoumc.recruiter.co.kr', sn: 3327, settingType: 'E', 천천히: true },
