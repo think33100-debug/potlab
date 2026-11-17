@@ -27,7 +27,7 @@ import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { 붙여받기 } from './certs/index.mjs';
-import { 목록상태, 목록상태셈, 본문상태, 알림상태, 없어짐말, 제목마감 } from './hosp/hs_목록상태.mjs';
+import { 목록상태, 목록상태셈, 본문상태, 알림상태, 없어짐찾기, 제목마감 } from './hosp/hs_목록상태.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 /* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
@@ -91,7 +91,10 @@ async function 하나(x) {
   let html;
   try { html = new TextDecoder(cs.toLowerCase()).decode(buf); } catch { html = buf.toString('utf8'); }
 
-  if (없어짐말.test(html)) return { 결과: 'gone', 왜: '「' + (html.match(없어짐말) || [''])[0] + '」' };
+  /* ★ 2026-11-17 — 원본에 `없어짐말` 을 바로 걸지 않습니다. recruiter.co.kr 데이터의 "notFound" 가
+     걸렸습니다. 영어 Not Found 는 보이는 글에서만 · 한글 안내는 원본에서도 (hs_목록상태.mjs 한 자리) */
+  const 없음 = 없어짐찾기(html);
+  if (없음) return { 결과: 'gone', 왜: '「' + 없음 + '」' };
   /* ── ⑦ 알림창으로만 마감을 알리는 곳 (2026-10-17) ───────────
      태그를 **걷기 전에** 봅니다 — alert 은 <script> 안이라 걷으면 사라지고,
      쪽이 메뉴뿐이어도 200자를 넘어 아래 「판단 못 함」 에도 안 걸립니다.

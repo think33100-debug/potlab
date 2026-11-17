@@ -53,6 +53,20 @@
   body.has-photo #s1 .dday { top: 700px; }
   #s1 .dday b { font-size: 76px; font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
   #s1 .dday span { font-size: 30px; font-weight: 700; margin-top: 6px; }
+  /* 로고 판 (2026-11-17 · RAPO 777 묶음) — 로고는 **자르지 않고** 비율 그대로(contain).
+     원래 크기의 1.5배까지만 키웁니다 (낮은 해상도 로고가 뭉개지지 않게). 투명본은 흰 판 위에 그대로.
+     공통 브랜드·심볼이면 전체 기관명(이름표)을 로고 아래에 함께 적습니다 */
+  #s1 .logocard { left: 80px; right: 80px; top: 330px; height: 390px; background: var(--white); border-radius: 28px; display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 40px 56px; box-shadow: 0 18px 50px rgba(0,0,0,0.25); }
+  #s1 .logocard img { display: block; object-fit: contain; }
+  #s1 .logocard .label { font-size: 46px; font-weight: 800; color: var(--ink); text-align: center; line-height: 1.2; word-break: keep-all; }
+  body.has-logo #s1 .logocard { display: flex; }
+  body.has-logo #s1 .hook { top: 880px; }
+  body.has-logo #s1 .dday { top: 735px; }
+  /* 건축조감도 — 실사로 읽히지 않게 사진 위에 딱지 */
+  #s1 .rendtag { left: 80px; top: 330px; display: none; font-size: 32px; font-weight: 800; color: var(--white);
+    background: rgba(17,34,49,0.78); padding: 10px 20px; border-radius: 10px; z-index: 3; }
+  body.is-rendering #s1 .rendtag { display: block; }
   /* 사진 출처 — 사진이 보이는 동안 맨 아래(인스타 글자가 덮기 전 줄) */
   #credit { left: 80px; right: 140px; top: 1500px; font-size: 30px; font-weight: 600; color: rgba(255,255,255,0.82);
     text-shadow: 0 1px 6px rgba(0,0,0,0.6); opacity: 0; }
@@ -105,6 +119,8 @@
 <div id="bgphoto"></div>
 <section id="s1" class="scene">
   <div class="photo abs" id="s1photo"><img id="s1img" alt=""></div>
+  <div class="rendtag abs">건축조감도</div>
+  <div class="logocard abs" id="s1logo"><img id="s1logoimg" alt=""><div class="label" id="s1logolabel"></div></div>
   <div class="hook abs" id="s1hook">
     <div class="small" id="s1small"></div>
     <div class="big" id="s1big"></div>
@@ -202,7 +218,20 @@ window.__setData = (d) => {
     $('s1img').src = d.사진; $('s1photo').style.display = 'block';
     $('bgphoto').style.backgroundImage = `url("${d.사진}")`;
   }
-  $('credit').textContent = d.사진 ? `출처: ${d.사진출처 || d.기관}` : '';
+  /* 로고 — 상자(944×390 · 이름표가 있으면 세로를 줄임) 안에서 비율 그대로, 원래 크기의 1.5배까지만 */
+  if (d.로고) {
+    document.body.classList.add('has-logo');
+    const 이름표 = d.로고.이름표 || '';
+    $('s1logolabel').textContent = 이름표; $('s1logolabel').style.display = 이름표 ? 'block' : 'none';
+    const 상자가로 = 920 - 112, 상자세로 = 이름표 ? 200 : 310;
+    const w0 = d.로고.가로 || 상자가로, h0 = d.로고.세로 || 상자세로;
+    const k = Math.min(상자가로 / w0, 상자세로 / h0, 1.5);
+    const img = $('s1logoimg'); img.src = d.로고.파일;
+    img.style.width = Math.round(w0 * k) + 'px'; img.style.height = Math.round(h0 * k) + 'px';
+  }
+  if (d.사진꼴 === '조감도') document.body.classList.add('is-rendering');
+  /* 출처 — 고른 파일의 attribution_text 앞부분(rapo777.mjs 의 화면출처) · 없으면 옛 꼴 */
+  $('credit').textContent = d.이미지출처 || (d.사진 ? `출처: ${d.사진출처 || d.기관}` : '');
 
   $('s2org').textContent = d.기관;
   $('s2meta').textContent = (d.소개.메타 || []).join(' · ');
@@ -265,7 +294,7 @@ window.__seek = (t) => {
   if (D.사진) $('s1img').style.transform = `scale(${1.04 + 0.10 * clamp(t / T.s1[1])})`;
   /* 흐린 사진 바탕은 소개 장면까지 남깁니다 */
   const 사진끝 = T.s2[1] > 0 ? T.s2[1] : T.s1[1];
-  $('credit').style.opacity = D.사진 && t <= 사진끝 ? 1 : 0;
+  $('credit').style.opacity = (D.사진 || D.로고) && t <= 사진끝 ? 1 : 0;
   $('bgphoto').style.opacity = D.사진 ? (t < (T.s2[1] > 0 ? T.s2[1] : T.s1[1]) ? 1 : Math.max(0, 1 - (t - (T.s2[1] > 0 ? T.s2[1] : T.s1[1])) / 400)) : 0;
 
   /* 2 · 기관 소개 */

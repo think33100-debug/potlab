@@ -28,9 +28,12 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { 릴스자료, 오늘KST, 일층인가, 같은공고묶기 } from './reel-data.mjs';
-import { 기관사진 } from './photos.mjs';
+/* 이미지 — RAPO 777기관 묶음 한 자리 (2026-11-17 · tools/reels/rapo777.mjs). 옛 photo-list.json 길은 쓰지 않습니다 */
+import { 묶음폴더, 묶음읽기, 이미지붙이기, 게시금지인가 } from './rapo777.mjs';
 import { 드라이브되나, 릴스올리기 } from './drive.mjs';
 import { 원문확인 } from './원문확인.mjs';
+import { 인스타되나, 릴스올리기IG } from './ig.mjs';
+import crypto from 'node:crypto';
 import { 모두받기, 받아보기 } from '../쪽나눠받기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -67,6 +70,16 @@ const 오늘 = 오늘KST();
 const 나감 = 인수('나감', path.join(ROOT, 'log', 'reels', 오늘));
 const 기록파일 = path.join(ROOT, 'log', '릴스_올림.json');
 const 기록 = fs.existsSync(기록파일) ? JSON.parse(fs.readFileSync(기록파일, 'utf8')) : {};
+기록.__발행열쇠 = 기록.__발행열쇠 || {};      /* 「기관|id:…」·「기관|url:…」 → 공고 id — 중복 발행 막기 */
+const 대기파일 = path.join(ROOT, 'log', '릴스_대기.json');
+const 발행기록파일 = path.join(ROOT, 'log', '릴스_발행기록.jsonl');   /* 시도마다 한 줄 (성공·실패·제외) */
+const 발행기록 = (줄) => { fs.mkdirSync(path.dirname(발행기록파일), { recursive: true }); fs.appendFileSync(발행기록파일, JSON.stringify({ 때: new Date().toISOString(), ...줄 }) + '\n'); };
+/* 묶음이 없으면 멈춥니다 — 이미지 없이 몰래 내보내지 않습니다 */
+const 묶음 = 묶음읽기(묶음폴더(cfg));
+console.log(`이미지 묶음 ${묶음.폴더} · 기관 ${묶음.기관들.length}곳 · 스냅샷 ${묶음.스냅샷}`);
+/* 옛 내림목록(이름) — 묶음 전에 내려 달라고 한 곳도 계속 막습니다 */
+const 옛내림파일 = path.join(여기, '내림목록.json');
+const 옛내림 = fs.existsSync(옛내림파일) ? JSON.parse(fs.readFileSync(옛내림파일, 'utf8')) : [];
 
 async function rest(길) {
   const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
@@ -98,7 +111,7 @@ for (const 공고 of 후보) {
   const [jp] = await rest(`job_posts?select=기관번호&id=eq.${encodeURIComponent(공고.id)}`);
   let 기관 = null;
   if (jp?.기관번호) {
-    const [g] = await rest(`기관?select=이름,종별이름,설립구분이름,상급종합인가,대학병원인가,ykiho&기관번호=eq.${encodeURIComponent(jp.기관번호)}`);
+    const [g] = await rest(`기관?select=기관번호,이름,주소,종별이름,설립구분이름,상급종합인가,대학병원인가,ykiho&기관번호=eq.${encodeURIComponent(jp.기관번호)}`);
     기관 = g || null;
     if (g?.ykiho) {
       const [d] = await rest(`hira_detail?select=perm_sbd,pt,ot&ykiho=eq.${encodeURIComponent(g.ykiho)}`);
@@ -110,14 +123,20 @@ for (const 공고 of 후보) {
   일층.push(공고);
 }
 const 할것 = [];
+const 대기 = [];   /* 연결·이미지가 불확실해 발행을 미룬 것 — 까닭과 함께 log/릴스_대기.json */
 for (const 공고 of 같은공고묶기(일층)) {
   const 자료 = 릴스자료(공고, 공고.기관, { 오늘, 사이트: 'rapojob.co.kr' });
   if (자료.건너뜀) { console.log('  건너뜀', 공고.id, 공고.org_name, '—', 자료.건너뜀); continue; }
   자료.묶은id = 공고.묶은id || [공고.id];
   자료.원문 = { url: 공고.url, title: 공고.title, 원문제목: 공고.원문제목, org_name: 공고.org_name, 기관이름: 자료.기관, apply_to: 공고.apply_to, job_group: 공고.job_group };
-  /* 전경 사진 — 있으면 씁니다 · 화면 맨 아래 「출처: 병원 이름」 (2026-11-16 세중님) */
-  const 사진 = await 기관사진([자료.기관, 공고.org_name]);
-  if (사진) { 자료.사진 = 사진.파일; 자료.사진출처 = 사진.출처; }
+  /* ── 이미지 — RAPO 777 묶음 (2026-11-17) ──
+     ① 기관 연결(ykiho → org_id=기관번호 → 이름+주소) ② 게시 금지 ③ 이미지 고르기 ④ 중복 열쇠
+     하나라도 불확실하면 **만들지 않고 대기** — 이미지 없이 내보내지도 않습니다 */
+  const 앱 = 공고.기관 ? { 기관번호: 공고.기관.기관번호, ykiho: 공고.기관.ykiho, 이름: 공고.기관.이름, 주소: 공고.기관.주소 } : null;
+  const 붙임 = 이미지붙이기(묶음, 자료, 앱, 공고.url, { 낸열쇠: 기록.__발행열쇠, 옛내림 });
+  if (붙임.겹침) { console.log('  건너뜀', 자료.묶은id[0], 자료.기관, '— 이미 낸 공고', 붙임.겹침); continue; }
+  if (붙임.대기) { 대기.push({ 공고: 자료.묶은id, 기관: 자료.기관, 원문: 공고.url || null, 까닭: 붙임.대기, 기관ref: 붙임.기관ref || null, 제외: 붙임.제외 || false });
+    console.log('  대기', 자료.묶은id[0], 자료.기관, '—', 붙임.대기); continue; }
   할것.push(자료);
 }
 /* 마감이 가까운 것부터 — 늦게 올리면 쓸모가 없어집니다 */
@@ -149,6 +168,29 @@ for (const 자료 of 할것) {
 }
 if (적기) { fs.mkdirSync(path.dirname(기록파일), { recursive: true }); fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2)); }
 console.log(`원문 확인 — 통과 ${통과.length} · 멈춤 ${멈춤.length}`);
+/* 발행 대기 — 덮어쓰지 않고 공고 id 로 쌓습니다 (사람이 보고 지울 때까지) */
+console.log(`발행 대기 ${대기.length}건`);
+if (적기 && 대기.length) {
+  const 옛 = fs.existsSync(대기파일) ? JSON.parse(fs.readFileSync(대기파일, 'utf8')) : {};
+  const 새것 = [];
+  for (const x of 대기) {
+    const 전 = 옛[x.공고[0]];
+    if (!전 || 전.까닭 !== x.까닭) { 새것.push(x); 발행기록({ 결과: x.제외 ? '제외' : '대기', 공고: x.공고, 기관: x.기관, 기관ref: x.기관ref || null, 까닭: x.까닭 }); }
+    옛[x.공고[0]] = { ...x, 마지막때: new Date().toISOString(), 처음때: 전?.처음때 || new Date().toISOString() };
+  }
+  fs.writeFileSync(대기파일, JSON.stringify(옛, null, 2));
+  /* 새로 생긴 대기만 한 통 — 사람이 기관 연결·이미지를 확인합니다 */
+  if (메일 && 새것.length && cfg.RESEND_KEY && cfg.NOTIFY_EMAIL) {
+    const 글 = ['아래 공고는 기관 연결이나 이미지가 확실하지 않아 릴스를 만들지 않았습니다 (발행 대기).', '',
+      ...새것.flatMap((x) => [`· ${x.기관} · 공고 ${x.공고.join('+')}`, `  까닭: ${x.까닭}`, `  원문: ${x.원문 || '없음'}`, '']),
+      '대기 목록 전체: 서버 log/릴스_대기.json'].join('\n');
+    const r = await fetch('https://api.resend.com/emails', { method: 'POST',
+      headers: { Authorization: 'Bearer ' + cfg.RESEND_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: cfg.MAIL_FROM || 'potjob <onboarding@resend.dev>', to: [cfg.NOTIFY_EMAIL],
+        subject: `[RAPO 릴스] 발행 대기 ${새것.length}건 (기관 연결·이미지 확인)`, text: 글 }) });
+    console.log(`  대기 메일 → ${r.status}`);
+  }
+}
 if (확인만) {
   for (const 자료 of 통과) console.log(`  ○ ${자료.묶은id[0]} ${자료.기관} · ${자료.원문확인.join(' / ')}`);
   process.exit(0);
@@ -165,6 +207,22 @@ if (적기 && 메일 && 멈춤.length && cfg.RESEND_KEY && cfg.NOTIFY_EMAIL) {
     body: JSON.stringify({ from: cfg.MAIL_FROM || 'potjob <onboarding@resend.dev>', to: [cfg.NOTIFY_EMAIL],
       subject: `[RAPO 릴스] 원문 확인에서 멈춘 공고 ${멈춤.length}건`, text: 글 }) });
   console.log(`  멈춤 메일 → ${r.status}`);
+}
+
+/* 낸 것 적기 — 공고 id 마다 + 중복 열쇠 + 발행기록 한 줄 */
+function 낸것적기(자료, 더) {
+  const 줄 = { 기관: 자료.기관, 직군: 자료.직군, 원문: 자료.원문.url || null, 이미지: 자료.이미지, ...더 };
+  for (const id of 자료.묶은id) 기록[id] = 줄;
+  for (const k of 자료.발행열쇠 || []) 기록.__발행열쇠[k] = 자료.묶은id[0];
+  fs.mkdirSync(path.dirname(기록파일), { recursive: true });
+  fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
+  발행기록({ 결과: '성공', 공고: 자료.묶은id, ...줄 });
+}
+/* 보내기·올리기 **직전**에 게시 금지를 다시 읽습니다 (그사이 삭제 요청이 들어왔을 수 있음) */
+function 직전금지(자료) {
+  const 왜 = 게시금지인가(묶음.폴더, 자료.기관묶음);
+  if (왜) { console.log(`  ✗ 제외 ${자료.묶은id[0]} ${자료.기관} — ${왜}`); 발행기록({ 결과: '제외', 공고: 자료.묶은id, 기관: 자료.기관, 기관ref: 자료.이미지.기관ref, 까닭: 왜 }); }
+  return 왜;
 }
 
 /* ── 2 · 만들기 ── */
@@ -189,6 +247,7 @@ if (메일) {
   const 드라이브 = 드라이브되나(cfg);
   console.log(드라이브 ? '드라이브에 올리고 링크 메일' : '드라이브 열쇠 없음 — 첨부 메일');
   for (const { 자료, mp4, 표지 } of 만든것) {
+    if (직전금지(자료)) continue;
     /* 드라이브 「RAPO 릴스/<YYYY-MM>」 — 영상 · 표지 · 캡션 글 */
     let 링크 = null;
     if (드라이브) {
@@ -202,7 +261,12 @@ if (메일) {
       '',
       ...(자료.원문확인?.length ? ['원문 확인 (릴스 만들기 전에 원문을 열어 봤습니다)', ...자료.원문확인.map((x) => '  ' + x), '  원문: ' + (자료.원문.url || ''), ''] : []),
       ...(링크 ? ['영상 (드라이브)', 링크, ''] : []),
-      '올리는 법',
+      `이미지: ${자료.이미지.꼴} · ${자료.이미지.출처글} · 파일 ${자료.이미지.asset_id.slice(0, 12)} · 연결 ${자료.이미지.연결근거} (${자료.이미지.기관ref})`,
+      '',
+      ...(인스타되나(cfg) ? ['올리는 법 ① — 확인 뒤 자동 (가요 없이 · 이 영상·캡션 그대로)',
+        `   ssh potjob 'cd ~/potlab && node tools/reels/올리기.mjs --id ${자료.묶은id[0]} --실행'`,
+        '   (올리기 직전에 게시 금지·마감·원문을 다시 확인하고, 하나라도 걸리면 안 올립니다)', '',
+        '올리는 법 ② — 휴대폰에서 가요를 붙여 (①과 ② 중 하나만 하세요 · 둘 다 하면 두 번 올라갑니다)'] : ['올리는 법']),
       링크 ? '1. 위 링크 → 드라이브 앱 → 「기기에 저장」' : '1. 첨부 영상을 휴대폰에 저장',
       '2. 인스타 → 새 릴스 → 이 영상 → 음악에서 지금 인기 가요 고르기',
       '3. 아래 캡션을 그대로 붙여 넣고 공유',
@@ -229,11 +293,12 @@ if (메일) {
     });
     const 답 = await r.text();
     console.log(`  메일 ${자료.묶은id[0]} → ${r.status} · ${가림(답).slice(0, 600)}`);
-    if (!r.ok) continue;
-    /* 보낸 것은 다시 안 보냅니다 — 「올림」이 아니라 「메일보냄」으로 적습니다 (올렸는지는 사람이 압니다) */
-    for (const id of 자료.묶은id) 기록[id] = { 메일보낸때: new Date().toISOString(), 기관: 자료.기관, 직군: 자료.직군 };
-    fs.mkdirSync(path.dirname(기록파일), { recursive: true });
-    fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
+    if (!r.ok) { 발행기록({ 결과: '실패', 공고: 자료.묶은id, 기관: 자료.기관, 까닭: `메일 HTTP ${r.status} · ${가림(답).slice(0, 200)}` }); continue; }
+    /* 보낸 것은 다시 안 보냅니다 — 「올림」이 아니라 「메일보냄」으로 적습니다 (게시물 id 는 휴대폰에서 올린 뒤 생깁니다) */
+    /* 확인 뒤 올리기(올리기.mjs)가 **이 영상 그대로** 올리도록 경로·지문·캡션·마감·원문을 남깁니다 */
+    낸것적기(자료, { 메일보낸때: new Date().toISOString(), 드라이브: 링크, 게시물ID: null, 상태: '확인 대기',
+      영상: mp4, 영상지문: crypto.createHash('sha256').update(fs.readFileSync(mp4)).digest('hex'),
+      캡션: 자료.캡션, 마감일: 자료.원문.apply_to || null, 원문자료: 자료.원문 });
   }
   process.exit(0);
 }
@@ -243,44 +308,16 @@ if (!올리기) {
   process.exit(0);
 }
 
-/* ── 3 · 올리기 ── */
-if (!cfg.IG_USER_ID || !cfg.IG_ACCESS_TOKEN) { console.error('IG_USER_ID · IG_ACCESS_TOKEN 이 없습니다 — 올리지 않습니다'); process.exit(1); }
-const VER = cfg.IG_GRAPH_VERSION || 'v23.0';
-const G = 'https://graph.facebook.com/' + VER;
-
-async function 그래프(길, 옵션 = {}) {
-  const r = await fetch(G + 길, 옵션);
-  const 글 = await r.text();
-  console.log(`    ${옵션.method || 'GET'} ${길.split('?')[0]} → ${r.status} · ${가림(글).slice(0, 600)}`);
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return JSON.parse(글);
-}
-const 폼 = (o) => new URLSearchParams({ ...o, access_token: cfg.IG_ACCESS_TOKEN });
-
+/* ── 3 · 올리기 — 사람 확인 없이 바로 (--올리기). 확인 뒤에 올리려면 --메일 → tools/reels/올리기.mjs ── */
+if (!인스타되나(cfg)) { console.error('IG_USER_ID · IG_ACCESS_TOKEN 이 없습니다 — 올리지 않습니다 (node tools/reels/ig.mjs --열쇠)'); process.exit(1); }
 for (const { 자료, mp4 } of 만든것) {
+  if (직전금지(자료)) continue;
   try {
-    const 컨 = await 그래프(`/${cfg.IG_USER_ID}/media`, { method: 'POST',
-      body: 폼({ media_type: 'REELS', upload_type: 'resumable', caption: 자료.캡션, share_to_feed: 'true', 'thumb_offset': '2600' }) });
-    const 크기 = fs.statSync(mp4).size;
-    const up = await fetch(`https://rupload.facebook.com/ig-api-upload/${VER}/${컨.id}`, { method: 'POST',
-      headers: { Authorization: 'OAuth ' + cfg.IG_ACCESS_TOKEN, 'offset': '0', 'file_size': String(크기) }, body: fs.readFileSync(mp4) });
-    console.log(`    업로드 → ${up.status} · ${가림(await up.text()).slice(0, 600)}`);
-    if (!up.ok) throw new Error('업로드 HTTP ' + up.status);
-
-    let 상태 = '';
-    for (let i = 0; i < 30; i++) {           /* 최대 5분 */
-      await new Promise((z) => setTimeout(z, 10000));
-      const s = await 그래프(`/${컨.id}?fields=status_code,status&access_token=${encodeURIComponent(cfg.IG_ACCESS_TOKEN)}`);
-      상태 = s.status_code || '';
-      if (상태 === 'FINISHED') break;
-      if (상태 === 'ERROR' || 상태 === 'EXPIRED') throw new Error('컨테이너 ' + 상태 + ' · ' + (s.status || ''));
-    }
-    if (상태 !== 'FINISHED') throw new Error('5분 안에 안 끝남 · 마지막 ' + 상태);
-    const 올림 = await 그래프(`/${cfg.IG_USER_ID}/media_publish`, { method: 'POST', body: 폼({ creation_id: 컨.id }) });
-    for (const id of 자료.묶은id) 기록[id] = { 올린때: new Date().toISOString(), media_id: 올림.id, 기관: 자료.기관, 직군: 자료.직군 };
-    fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
-    console.log(`  ● 올림 ${자료.id} · media ${올림.id}`);
+    const 올림 = await 릴스올리기IG(cfg, mp4, 자료.캡션);
+    낸것적기(자료, { 올린때: new Date().toISOString(), media_id: 올림.media_id, 게시물ID: 올림.media_id, 게시물주소: 올림.주소, 상태: '올림' });
+    console.log(`  ● 올림 ${자료.id} · media ${올림.media_id}`);
   } catch (e) {
     console.error(`  ✗ 못 올림 ${자료.id} — ${가림(e.message || e)}`);
+    발행기록({ 결과: '실패', 공고: 자료.묶은id, 기관: 자료.기관, 이미지: 자료.이미지, 까닭: 가림(e.message || e).slice(0, 300) });
   }
 }

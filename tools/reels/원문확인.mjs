@@ -20,7 +20,7 @@
    node tools/reels/원문확인.mjs --자기점검                  견본 HTML 로 판정 시험 (어디서나) */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 없어짐말, 알림상태, 제목마감 } from '../hosp/hs_목록상태.mjs';
+import { 없어짐찾기, 보이는글, 알림상태, 제목마감 } from '../hosp/hs_목록상태.mjs';
 import { 붙여받기 } from '../certs/index.mjs';
 import { 칸판정, 글자만 } from '../칸대조.mjs';
 import { 이름표 } from '../수집기이름표.mjs';
@@ -43,16 +43,14 @@ function 기관있나(글자, 이름들) {
 /** HTML 하나로 판정합니다 (받기와 갈라 두어 견본으로 시험할 수 있게) */
 export function 쪽판정(html, 공고) {
   const 원본 = String(html || '');
-  const 글 = 원본.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/gi, ' ').replace(/\s+/g, ' ').trim();
+  const 글 = 보이는글(원본);
   /* ★ 2026-11-17 — 「Not Found」 같은 영어 말은 **보이는 글에서만** 찾습니다.
      recruiter.co.kr(채용 대행 · Next.js)은 모든 쪽의 데이터에 "notFound":… 를 넣어 둡니다.
      원본 HTML 에 걸었더니 마감 하루 전 멀쩡한 고려대 안산병원 공고(HS1869100513)가 보류됐습니다.
      한글 안내(워크넷 「구인정보를 확인할 수 없습니다」 처럼 스크립트 변수에 든 것)는 원본에서도 계속 찾습니다.
-     공용 없어짐말(hs_목록상태.mjs)은 정찰(alive.mjs)도 쓰는 자리라 여기서만 좁혔습니다 */
-  const 한글없어짐말 = new RegExp(없어짐말.source.replace(/\|Not\\s\*Found/i, ''), 'i');
-  const 보이는없어짐 = 글.match(없어짐말) || 원본.match(한글없어짐말);
-  if (보이는없어짐) return { 판정: '보류', 까닭: '원문이 없어졌습니다 「' + 보이는없어짐[0] + '」' };
+     ★ 같은 날 공용 `없어짐찾기()`(hs_목록상태.mjs) 한 자리로 옮겼습니다 — 정찰·원문링크점검도 같이 씁니다 */
+  const 보이는없어짐 = 없어짐찾기(원본);
+  if (보이는없어짐) return { 판정: '보류', 까닭: '원문이 없어졌습니다 「' + 보이는없어짐 + '」' };
   /* recruiter.co.kr 이 끝난 공고에서 보여 주는 말 — 데이터 안 예비 틀이 아니라 **보이는 글**에 있을 때만 */
   const 종료말 = /이미\s*종료된\s*채용\s*공고/;
   if (종료말.test(글)) return { 판정: '보류', 까닭: '원문이 「이미 종료된 채용 공고」라고 합니다' };

@@ -27,7 +27,7 @@
  */
 import fs from 'node:fs';
 import { 차례붙이기 } from './쪽나눠받기.mjs';
-import { 알림상태, 없어짐말 } from './hosp/hs_목록상태.mjs';
+import { 알림상태, 없어짐말, 없어짐찾기 } from './hosp/hs_목록상태.mjs';
 /* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
 import { 이름표 } from './수집기이름표.mjs';
 const 정찰UA = 이름표('Mozilla/5.0 (compatible; potjob/1.0)');
@@ -175,8 +175,9 @@ for (const [i, x] of 볼것.entries()) {
   }
 
   if (알림상태(html).결과 === 'closed') { 결과.push({ x, 판정: '알림창이 마감', code }); continue; }
-  if (없어짐말.test(html)) {
-    결과.push({ x, 판정: '없어짐말 — 「' + (html.match(없어짐말) || [''])[0] + '」', code });
+  const 없음 = 없어짐찾기(html);   /* 원본에 없어짐말을 바로 걸지 않습니다 (2026-11-17 · recruiter "notFound") */
+  if (없음) {
+    결과.push({ x, 판정: '없어짐말 — 「' + 없음 + '」', code });
     continue;
   }
   const 있나 = 쪽에있나(html, x.title);

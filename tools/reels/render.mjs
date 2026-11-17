@@ -31,6 +31,8 @@ const 자료 = JSON.parse(fs.readFileSync(자료파일, 'utf8'));
 if (인수('사진')) { 자료.사진 = pathToFileURL(path.resolve(인수('사진'))).href; 자료.사진출처 = 인수('사진출처') || 자료.기관; }
 if (자료.사진 && /^file:/.test(자료.사진)) { /* 그대로 */ }
 else if (자료.사진) 자료.사진 = pathToFileURL(path.resolve(path.dirname(자료파일), 자료.사진)).href;
+/* 로고(RAPO 777 묶음) — 사진과 같이 파일 주소로 */
+if (자료.로고?.파일 && !/^file:/.test(자료.로고.파일)) 자료.로고.파일 = pathToFileURL(path.resolve(path.dirname(자료파일), 자료.로고.파일)).href;
 
 /* --무음 — 소리 없는 영상. 인스타 앱에서 손으로 올리며 그때 인기곡을 붙이는 길 (API 로는 인스타 음악을 못 붙입니다) */
 const 무음 = process.argv.includes('--무음');
