@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { RapoBannerCarousel } from './rapo-banner-carousel';
+import { RapoBrandStory } from './rapo-brand-story';
+import { RapoStudentCorner } from './rapo-student-corner';
 import { SpecEntryArt, SpecEntryLabel, 스펙비교길 } from './rapo-spec-entry';
 import { RapoShell } from './rapo-shell';
 import { RapoStartScroller } from './rapo-start-scroller';
@@ -42,6 +44,12 @@ export function HomeU01({ jobs, who, sample = false, 관리덮기 }: {
         <h1 className="sr-only">RAPO 홈</h1>
         <Banners member={who === '회원'} />
         <StartHere />
+        <div aria-hidden className="h-[6px] bg-(--rapo-color-bg-layer-default)" />
+        {/* 「라포 이야기」 · 2026-11-18 세중님 「시작하기 아래에」 */}
+        <RapoBrandStory />
+        <div aria-hidden className="h-[6px] bg-(--rapo-color-bg-layer-default)" />
+        {/* 「학생·취준생이라면」 · 2026-11-18 세중님 「학생들도 주 타겟」 */}
+        <RapoStudentCorner />
         <AnonymousTalk />
         <div aria-hidden className="h-[6px] bg-(--rapo-color-bg-layer-default)" />
         {/* 「조건으로 공고 찾기」는 2026-11-18 세중님 「빼자」로 뺐습니다 */}
@@ -80,8 +88,13 @@ function Banners({ member }: { member: boolean }) {
           className="pointer-events-none absolute bottom-[40px] right-[40px] h-auto w-[clamp(96px,calc(100%-262px),150px)] opacity-25 [filter:brightness(0)_invert(1)]" />
         <Frame tone="white" />
         <Arrow right={20} top={25} /><Arrow right={20} top={52} /><Arrow right={48} top={25} />
-        <p className="absolute left-[40px] top-[57px] w-[239px] text-[23px] font-bold leading-[28px] text-(color:--rapo-brand-color-white)">
-          궁금한 병원 이야기부터<br />내가 찾던 일자리까지
+        {/* 2026-11-18 세중님 「첫 배너에 라포 이야기를 · 밝은 주황 배경 · 흰 글씨」 — 글은 Figma 브랜드 소개(32:17) 머리와 존재 이유.
+            전 글: 「궁금한 병원 이야기부터 / 내가 찾던 일자리까지」 */}
+        <p className="absolute left-[40px] top-[52px] w-[239px] text-[23px] font-bold leading-[29px] text-(color:--rapo-brand-color-white)">
+          우리가 나눈 정보,<br />우리가 바꿀 내일
+        </p>
+        <p className="absolute left-[40px] top-[118px] w-[239px] text-[14px] font-medium leading-[20px] text-white/90">
+          정보와 경험을 나누어<br />더 나은 일터를 함께 만들어요
         </p>
         <Link href={member ? '/jobs' : '/login'}
           className="absolute left-[40px] top-[168px] flex h-[36px] w-[180px] items-center
