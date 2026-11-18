@@ -129,6 +129,11 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
           {관리.교육관리 && <RapoMeRow icon="/rapo/me/class-24.svg" href="/edu/manage">교육 관리</RapoMeRow>}
           {운영진 && <RapoMeRow icon="/rapo/me/apply-24.svg" href="/partner">담당자 신청</RapoMeRow>}
           {운영진 && <RapoMeRow icon="/rapo/me/verify-24.svg" href="/verify">재직 인증</RapoMeRow>}
+          {/* 2026-11-19 세중님 「내 정보에서 통계 바로 가는 방법」 — 관리자로 가는 옛 위쪽 줄 「관리자」 단추가
+              새 틀 화면(lib/nav.ts 새틀화면)에서는 안 그려져서, 주소를 직접 쳐야만 들어갈 수 있었습니다.
+              보이는 것은 운영진뿐이고, 막는 자리는 여기가 아니라 관리자 화면·DB(is_admin) 입니다 */}
+          {운영진 && <RapoMeRow icon="/rapo/me/compare-24.svg" href="/admin/stats">통계</RapoMeRow>}
+          {운영진 && <RapoMeRow icon="/rapo/me/pref-24.svg" href="/admin">관리자 화면</RapoMeRow>}
         </RapoMeSection>
       )}
 

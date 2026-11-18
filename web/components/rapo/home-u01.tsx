@@ -190,13 +190,17 @@ type 시작카드 = {
   /* 크기 — 그림 판 안에서 그림 한 변(px). 피사체가 판을 꽉 채운 3D 원본은 작게 둡니다(기본 160) */
   그림: { src: string; 큰것?: '위' | '가운데'; 크기?: number };
 };
+/* ★ 2026-11-18 세중님 「블랙 모드에서 이상하게 변환」 — 그림 넷 모두 **바탕이 투명한** 파일입니다.
+   삼성 인터넷은 어두운 폰에서 카드 바탕색은 어둡게 바꾸고 그림은 그대로 둡니다. 그림에 바탕색이 같이 구워져 있으면
+   카드 안에 밝은 네모가 떠 보였습니다(공고 찾기 · 커뮤니티). 새 그림을 넣을 때도 바탕 없는 PNG 로 넣습니다.
+   바탕 빼는 코드는 금고 RAPO노트/시안_브랜드이야기_1118/바탕빼기.js */
 const 시작카드들: 시작카드[] = [
   { 제목: '커뮤니티 보기', 설명: ['어디서도 나눌 수 없던', '우리만의 이야기'], href: '/community',
     bg: 'bg-(--rapo-brand-color-navy)', 글색: 'text-(color:--rapo-brand-color-white)', 눌림: 'active:bg-(--rapo-color-bg-navy-solid-pressed)',
-    그림: { src: '/rapo/home/start-community.png', 큰것: '위' } },
+    그림: { src: '/rapo/home/start-community-cut.png', 큰것: '위' } },
   { 제목: '공고 찾기', 설명: ['내게 맞는 일을 찾아요'], href: '/jobs',
     bg: 'bg-(--rapo-brand-color-mist)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:bg-(--rapo-color-bg-neutral-weak-pressed)',
-    그림: { src: '/rapo/home/start-jobs.png', 큰것: '가운데' } },
+    그림: { src: '/rapo/home/start-jobs-cut.png', 큰것: '가운데' } },
   /* 2026-11-18 세중님 「공고 찾기 다음에 교육 확인하기, 채용경쟁률 확인하기 — 총 4개」.
      봉사활동·청년정책·병원 둘러보기 카드는 뺐습니다(「라포 더 둘러보기」와 홈 「학생·취준생이라면」에 있습니다).
      색은 브랜드 가이드 다섯 색 안에서 고릅니다(네이비 · 미스트 · 블러시) */

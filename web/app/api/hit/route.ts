@@ -55,6 +55,10 @@ function 하루번호(ip: string, ua: string, day: string, target: string): stri
 const 재방문값 = /^rv:(first|back[1-7]|d7)$/;
 const 재방문키 = 'revisit';
 
+/* 공유 누름이 보낼 수 있는 꼴 — sh:share|copy:/주소 (lib/share-hit.ts). 64자까지(아래 target 자르기와 같음).
+   ※ DB 쪽 짝: sql/초안_1119/공유_이탈률.sql 의 admin_stats_shares() 가 'sh:%' 를 셉니다 */
+const 공유값 = /^sh:(share|copy):\/[A-Za-z0-9_\-./%?=&]{0,55}$/;
+
 function seoulDay(): string {
   /* 한국 날짜로 셉니다. 서버는 UTC 라 그냥 두면 아침 9시에 날이 바뀝니다 */
   return new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 10);
@@ -101,6 +105,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false }, { status: 500 });
     }
     return NextResponse.json({ ok: true, counted: true });
+  }
+
+  /* ★ 2026-11-19 — 공유 단추 누름 (lib/share-hit.ts). 정해진 꼴만 받아 kind 'other' 로 담고,
+     하루번호는 아래 화면 기록과 같은 길(아이피 해시)이라 같은 날 같은 주소·수단은 한 번만 셉니다 */
+  if (body.kind === 'share') {
+    const t = typeof body.target === 'string' ? body.target : '';
+    if (!공유값.test(t)) return NextResponse.json({ ok: false, counted: false }, { status: 400 });
+    body = { ...body, kind: 'other', target: t };
   }
 
   const kind = (KINDS as readonly string[]).includes(body.kind ?? '')

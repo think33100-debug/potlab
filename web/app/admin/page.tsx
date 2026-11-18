@@ -11,11 +11,14 @@ import { browserSupabase } from '@/lib/supabase-browser';
    카드 셋 가운데 값이 있는 것만 진짜 숫자로 채웁니다 — 지어낸 숫자는 넣지 않습니다.
      방문자 수        admin_stats_daily 의 visits(그날 방문자 · 관리자 제외)를 기간만큼 더한 값.
                      ★ 날마다 센 방문자의 합이라 같은 사람이 이틀 오면 두 번 셉니다 — 카드 아래에 그 뜻을 적습니다
-     가입 이탈률      가입을 시작한 사람을 세는 자리가 아직 없습니다 → 「아직 세지 않아요」
-     공유 버튼 클릭 수 공유 누름을 세는 자리가 아직 없습니다 → 「아직 세지 않아요」
+     가입 이탈률      (2026-11-19) admin_stats_now 의 signup — 소셜 로그인까지 한 계정 중 profiles 가 없는 비율.
+                     로그인 단추 전에 나간 분은 못 셉니다 · 30분 안 계정은 하는 중이라 뺍니다
+     공유 버튼 클릭 수 (2026-11-19) admin_stats_shares — 공유창·링크 복사 누름 (lib/share-hit.ts). 그 전은 못 셉니다
    원본의 시작일·종료일 고르기는 두 단추(최근 1일 · 최근 7일)로 정해지는 날짜를 보여 주기만 합니다. */
 
 type Daily = { day: string; visits: number };
+type 가입셈 = { d1: { started: number; done: number }; d7: { started: number; done: number } };
+type 공유줄 = { day: string; shares: number; copies: number };
 type 보류줄 = { id: string; title: string | null; org_name: string | null; collected_at: string | null; evidence: Record<string, unknown> | null };
 
 const 날 = (s: string | null) => (s ? s.slice(0, 10).replaceAll('-', '.') : '—');
@@ -26,10 +29,21 @@ export default function AdminHome() {
   const [보류, set보류] = useState<{ rows: 보류줄[]; count: number } | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
+  const [가입, set가입] = useState<가입셈 | null>(null);
+  const [공유, set공유] = useState<공유줄[] | null>(null);
+
   useEffect(() => {
     const sb = browserSupabase();
     sb.rpc('admin_stats_daily', { p_days: 7 }).then(({ data, error }) => {
       if (error) setErr(error.message); else setDaily((data ?? []) as Daily[]);
+    });
+    /* 가입 이탈 · 공유 누름 (2026-11-19) — 실패하면 그 카드만 「못 셌어요」 */
+    sb.rpc('admin_stats_now').then(({ data, error }) => {
+      const s = (data as { signup?: 가입셈 } | null)?.signup;
+      set가입(error || !s ? { d1: { started: -1, done: 0 }, d7: { started: -1, done: 0 } } : s);
+    });
+    sb.rpc('admin_stats_shares', { p_days: 7 }).then(({ data, error }) => {
+      set공유(error ? [] : ((data ?? []) as 공유줄[]));
     });
     sb.from('admin_jobs').select('id,title,org_name,collected_at,evidence', { count: 'exact' })
       .eq('hold', true).order('collected_at', { ascending: false }).order('id').limit(5)
@@ -40,6 +54,17 @@ export default function AdminHome() {
 
   const 고른날 = daily ? daily.slice(-기간) : null;
   const 방문합 = 고른날?.reduce((a, d) => a + Number(d.visits ?? 0), 0) ?? null;
+
+  /* 가입 이탈률 = 로그인까지 했는데 가입을 못 마친 비율 (admin_stats_now 의 signup) */
+  const 가입칸 = 가입 ? (기간 === 1 ? 가입.d1 : 가입.d7) : null;
+  const 시작 = 가입칸 ? Number(가입칸.started) : null;
+  const 못마침 = 가입칸 ? Number(가입칸.started) - Number(가입칸.done) : 0;
+  const 이탈값 = 시작 == null ? null : 시작 < 0 ? '못 셌어요' : 시작 === 0 ? '—' : `${Math.round((못마침 / 시작) * 100)}`;
+
+  /* 공유 누름 (admin_stats_shares) — 2026-11-19 부터 셉니다 */
+  const 공유날 = 공유 ? 공유.slice(-기간) : null;
+  const 공유창 = 공유날?.reduce((a, d) => a + Number(d.shares ?? 0), 0) ?? 0;
+  const 복사 = 공유날?.reduce((a, d) => a + Number(d.copies ?? 0), 0) ?? 0;
 
   return (
     <div className="max-w-[932px]">
@@ -72,10 +97,14 @@ export default function AdminHome() {
             값={방문합 == null ? null : 방문합.toLocaleString('ko-KR')} 단위="명"
             설명={기간 === 1 ? '오늘 방문자 (관리자 제외)' : '날마다 센 방문자의 합 (관리자 제외)'}
             그래프={고른날 && 고른날.length > 1 ? <꺾은선 값들={고른날.map((d) => Number(d.visits ?? 0))} /> : null} />
-          <지표카드 그림="/rapo/admin/metric-leave.svg" 이름="가입 이탈률" 값={null} 빈말="아직 세지 않아요"
-            설명="가입을 시작한 사람을 세는 자리가 아직 없어요" />
-          <지표카드 그림="/rapo/admin/metric-share.svg" 이름="공유 버튼 클릭 수" 값={null} 빈말="아직 세지 않아요"
-            설명="공유 단추 누름을 세는 자리가 아직 없어요" />
+          <지표카드 그림="/rapo/admin/metric-leave.svg" 이름="가입 이탈률"
+            값={이탈값 == null || 이탈값 === '못 셌어요' ? null : 이탈값} 단위={이탈값 === '—' ? '' : '%'}
+            빈말={이탈값 === '못 셌어요' ? '못 셌어요' : undefined}
+            설명={시작 == null || 시작 < 0 ? '로그인까지 했는데 가입을 못 마친 비율'
+              : `로그인 ${시작}명 중 ${못마침}명이 가입을 못 마침 · 로그인 전에 나간 분은 못 세요`} />
+          <지표카드 그림="/rapo/admin/metric-share.svg" 이름="공유 버튼 클릭 수"
+            값={공유 == null ? null : (공유창 + 복사).toLocaleString('ko-KR')} 단위="번"
+            설명={`공유창 ${공유창} · 링크 복사 ${복사} · 11/19 부터 셈 (관리자 제외)`} />
         </div>
       </section>
 
