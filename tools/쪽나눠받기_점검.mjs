@@ -41,6 +41,9 @@ export const 우리것아님 = [
   /p_offset|p_limit/,
   /storage\s*\.\s*from|\.list\s*\(/,
   /thumb_offset|'OAuth '\s*\+/,
+  /* ㉤ sitemap_jobs() — 창구 안에서 order by posted_at desc, id 로 차례를 정합니다
+        (2026-11-18 확인 · 사이트맵의 공고 279 = 마감 전 공고 279) */
+  /rpc\('sitemap_jobs'\)\.range\(/,
 ];
 
 export function 파일보기(글, 이름) {
