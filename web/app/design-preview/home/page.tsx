@@ -13,20 +13,21 @@ import { RapoJobList, RapoJobsError, RapoJobsLoading } from '@/components/rapo/r
    주소 끝에 붙여 상태를 봅니다 —
      ?state=loading   공고 받는 중       ?state=empty   공고 0건
      ?state=error     공고를 못 받음      ?who=member    회원 헤더·배너 글자
-     ?manage=1        담당자 메뉴(채용 관리·교육 관리)가 붙은 하단 탐색 */
+     ?manage=1        담당자 메뉴(채용 관리·교육 관리)가 붙은 하단 탐색
+     ?brand=1         「라포 이야기」 브랜드 시안 (2026-11-18 · 실제 홈에는 아직 없음) */
 export const metadata: Metadata = { title: 'RAPO · 홈 미리보기', robots: { index: false } };
 
 export default async function DesignPreviewHome({ searchParams }: {
-  searchParams: Promise<{ state?: string; who?: string; manage?: string }>;
+  searchParams: Promise<{ state?: string; who?: string; manage?: string; brand?: string }>;
 }) {
   if (process.env.NODE_ENV === 'production') notFound();
-  const { state, who, manage } = await searchParams;
+  const { state, who, manage, brand } = await searchParams;
   const jobs = state === 'loading' ? <RapoJobsLoading />
     : state === 'error' ? <RapoJobsError />
     : state === 'empty' ? <RapoJobList lists={{ new: [], views: [], deadline: [] }} />
     : <RapoJobList lists={견본공고} />;
   return (
     <HomeU01 jobs={jobs} who={who === 'member' ? '회원' : '비회원'} sample={!state}
-      관리덮기={manage ? { 채용관리: true, 교육관리: true } : undefined} />
+      관리덮기={manage ? { 채용관리: true, 교육관리: true } : undefined} 브랜드={!!brand} />
   );
 }

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { RapoBannerCarousel } from './rapo-banner-carousel';
+import { RapoBrandStory } from './rapo-brand-story';
 import { SpecEntryArt, SpecEntryLabel, 스펙비교길 } from './rapo-spec-entry';
 import { RapoShell } from './rapo-shell';
 import { RapoStartScroller } from './rapo-start-scroller';
@@ -33,8 +34,9 @@ import type { Who } from '@/lib/supabase-server';
    옛 위쪽 줄·옛 탭바는 이 화면에서 그려지지 않습니다 (lib/nav.ts 새틀화면 ·
    components/chrome-switch.tsx). 전에 쓰던 CSS 가리기(rapo-home.css)는 없앴습니다.
    키보드 포커스 테두리는 이 틀 안에서만 새 토큰 색을 씁니다 (app/globals.css). */
-export function HomeU01({ jobs, who, sample = false, 관리덮기 }: {
+export function HomeU01({ jobs, who, sample = false, 관리덮기, 브랜드 = false }: {
   jobs: ReactNode; who: Who; sample?: boolean;
+  브랜드?: boolean;   // 「라포 이야기」 시안 (2026-11-18 · 미리보기에서만 켭니다)
   관리덮기?: { 채용관리: boolean; 교육관리: boolean };   // 미리보기 전용 (rapo-bottom-nav.tsx)
 }) {
   return (
@@ -52,6 +54,7 @@ export function HomeU01({ jobs, who, sample = false, 관리덮기 }: {
           </p>
         )}
         {jobs}
+        {브랜드 && <RapoBrandStory />}
         <MoreServices />
     </RapoShell>
   );
