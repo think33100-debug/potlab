@@ -391,6 +391,15 @@ for (const [cd, 이름] of SIDO) {
 }
 if (못받은시도 === SIDO.length) {
   console.error('\n시도 17곳을 하나도 못 받았습니다 — 열쇠나 막힘을 보세요');
+  /* 2026-11-18 멘토-1.7-2 — 실패한 바퀴도 박동을 남깁니다(ok:false). 전에는 박동 없이 끝나
+     「두 번 연속 실패」를 셀 기록이 없었습니다 */
+  if (!dry) {
+    try {
+      await rpc(cfg, 'collect_beat', { p_secret: cfg.COLLECT_KEY_CE2, p_source: SOURCE,
+        p_beat: { took_ms: Date.now() - t0, ok: false, 본곳: 0, 못받음: 못받은시도,
+          왜: '시도 ' + SIDO.length + '곳을 하나도 못 받음', 메모: { 모드: 순찰 ? '순찰' : '전체', 의료: 0, 실패: '목록' } } });
+    } catch (e) { console.error('실패 박동 못 남김 · ' + String(e.message).slice(0, 120)); }
+  }
   process.exit(1);
 }
 const 의료 = 전부.filter((o) => o.ENT_KIND === '의료');

@@ -23,15 +23,13 @@ export const HELP_EMAIL = 'ggnol235@gmail.com';
 /* 카카오톡 문의 채널 — 모든 화면 오른쪽 아래 단추(components/kakao-fab.tsx)가 엽니다 (2026-11-12 세중님) */
 export const KAKAO_CHANNEL = 'https://pf.kakao.com/_ybINX';
 
-/* 개인정보 보호책임자 — **사람 이름을 적지 않습니다** (2026-10-05 세중님 지시).
-
-   법이 요구하는 것은 「책임자를 밝히고 연락이 닿게 하는 것」이지
-   개인 이름을 거는 것이 아닙니다. 회원에게 보이는 화면에는 팀 이름과
-   연락처만 둡니다. 연락처(CONTACT_EMAIL)는 그대로라 닿는 길은 같습니다.
+/* 개인정보 보호책임자 — 2026-11-18 세중님 「빈틈 운영팀 → 빈틈 김민지」로 바꿈.
+   (전에는 2026-10-05 지시로 팀 이름만 적었습니다. 이 값을 쓰는 곳 — 꼬리말(app/layout.tsx) ·
+    약관 글 lib/terms.ts · lib/terms-text.ts 는 글에 직접 적혀 있어 함께 고칩니다.)
 
    ⚠ 유료 서비스(광고 등)를 시작하면 전자상거래법상 **대표자 성명**을
      적어야 할 수 있습니다 — 변호사 검토 질문 목록에 올려 두었습니다. */
-export const PRIVACY_OFFICER = { 이름: '주식회사 빈틈 운영팀', 직책: null } as const;
+export const PRIVACY_OFFICER = { 이름: '주식회사 빈틈 김민지', 직책: null } as const;
 
 /** 사업자 */
 export const COMPANY = {

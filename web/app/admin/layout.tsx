@@ -7,6 +7,7 @@ import { RouteHealth } from '@/components/route-health';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AdminRoleGate } from '@/components/admin-role-gate';
 import { RapoAdminShell } from '@/components/rapo/rapo-admin';
+import { MfaBanner, MfaCodeForm, useAdminMfa } from '@/components/admin-mfa-gate';
 
 /* 관리자 화면의 껍데기입니다.
 
@@ -30,8 +31,19 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
   const [다시물음, set다시물음] = useState<'아직' | '하는중' | '끝'>('아직');
   const [다시본결과, set다시본결과] = useState(false);
 
+  /* ★ 2026-11-18 관리자 2단계 인증 (멘토-추가-보안5 ④ · components/admin-mfa-gate.tsx).
+     **관리자인지 묻기 전에** 봅니다 — DB SQL(sql/초안_1118/관리자_2단계.sql)이 올라가면
+     수단이 있는 사람의 aal1 로그인에서는 is_admin() 이 거짓이라, 순서가 뒤면
+     코드 칸 대신 「관리자가 아니에요」가 뜹니다.
+       확인필요  안쪽 대신 코드 칸
+       없음      막지 않고 「켜 주세요」 띠만
+       통과·모름 지금처럼 (모름은 막지 않습니다 — 진짜 벽은 DB) */
+  const 이단계 = useAdminMfa(session);
+
   useEffect(() => {
     if (loading || !session || isAdmin || 다시물음 !== '아직') return;
+    /* 코드를 넣기 전에는 다시 묻지 않습니다 — aal1 토큰으로 물어 「아니에요」로 굳으면 안 됩니다 */
+    if (이단계.상태 === '확인중' || 이단계.상태 === '확인필요') return;
     set다시물음('하는중');
     const sb = browserSupabase();
     (async () => {
@@ -42,15 +54,24 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
       } catch { set다시본결과(false); }
       set다시물음('끝');
     })();
-  }, [loading, session, isAdmin, 다시물음]);
+  }, [loading, session, isAdmin, 다시물음, 이단계.상태]);
 
   const 관리자인가 = isAdmin || 다시본결과;
 
-  if (loading) {
+  if (loading || (session && 이단계.상태 === '확인중')) {
     return (
       <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
         <p className="text-lg text-mute">잠시만요…</p>
       </main>
+    );
+  }
+
+  /* 수단이 있는데 이번 로그인이 aal1 — 코드를 넣으면 aal2 가 되고, 관리자인지 다시 묻습니다 */
+  if (session && 이단계.상태 === '확인필요') {
+    return (
+      <MfaCodeForm
+        onDone={() => { 이단계.통과로(); set다시본결과(false); set다시물음('아직'); }}
+      />
     );
   }
 
@@ -85,6 +106,9 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
       {/* 공고가 안 들어오는 경로가 있으면 여기 빨간 줄이 뜹니다 (2026-09-25).
           조용한 실패를 우연히 발견하는 일이 없게 하려고 맨 위에 둡니다 */}
       <RouteHealth />
+
+      {/* ★ 2026-11-18 — 2단계 인증을 아직 안 켠 관리자에게만. 막지 않습니다 */}
+      {이단계.상태 === '없음' && <MfaBanner />}
 
       {/* ★ 2026-10-28 세중님 1번 — 역할이 관리자가 아니면 띠를 보이고 안쪽을 잠급니다.
           한 자리에 두면 관리자 화면 **전부**에 걸립니다 (지침 6절) */}

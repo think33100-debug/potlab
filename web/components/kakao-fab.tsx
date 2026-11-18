@@ -8,10 +8,9 @@ import { KAKAO_CHANNEL } from '@/lib/contact';
    누르면 RAPO 카카오톡 채널이 새 창으로 열립니다(주소는 lib/contact.ts 한 자리).
 
    자리 — 본문 기둥(max-w-3xl) 오른쪽 끝에 맞춥니다(PC 에서 화면 끝까지 밀려나지 않게).
-     기본          하단 탐색(72) 위 16
-     공고 상세     고정 행동(저장·지원 112) 위 16
+     하단 탐색(72) 위 16
    안 띄우는 곳 — 아래쪽이 큰 단추로 꽉 찬 화면과 운영 화면
-     로그인 · 가입 · 로그인 확인 · 커뮤니티 쪽 전부 · 관리자
+     로그인 · 가입 · 로그인 확인 · 커뮤니티 쪽 전부 · 관리자 · 공고 상세(11/18)
    모양 — 카카오 노랑(#FEE500) 동그라미 52 + 카카오 말풍선(로그인 단추와 같은 원본 SVG). 피그마에 원본이 없는 단추입니다. */
 
 const 안띄움 = (p: string) =>
@@ -23,10 +22,12 @@ const 안띄움 = (p: string) =>
   || p.startsWith('/orgs/review') || p.startsWith('/edu/session/') || ['/me/convert', '/me/leave', '/me/spec', '/me/career', '/me/pref'].includes(p)
   /* 2026-11-16 세중님 테스터 점검 — 알림 설정은 오른쪽 끝 켜고 끄기 단추 줄, 프로필 고치기는 배경색 줄·저장 단추가
      이 단추 밑으로 들어가 마지막 것이 가렸습니다. 둘 다 내 정보 안이라 「문의하기」 메뉴가 바로 옆에 있습니다 */
-  || p === '/me/notify' || p === '/me/profile';
+  || p === '/me/notify' || p === '/me/profile'
+  /* 공고 상세 — 아래 고정 줄(알림받기·저장·숨기기·지원하기) 바로 위에 떠서 「…이 공고를 저장해요」 줄 끝과
+     구분선을 덮었습니다 (2026-11-18 세중님 갤럭시 캡처 · 「1번만 하자」) */
+  || p.startsWith('/jobs/');
 
-function 아래자리(p: string): string {
-  if (p.startsWith('/jobs/')) return 'calc(112px + 16px + env(safe-area-inset-bottom))';
+function 아래자리(): string {
   return 'calc(72px + 16px + env(safe-area-inset-bottom))';
 }
 
@@ -35,7 +36,7 @@ export function KakaoFab() {
   if (안띄움(p)) return null;
   return (
     <div className="pointer-events-none fixed inset-x-0 z-30 mx-auto flex w-full max-w-3xl justify-end px-(--rapo-dimension-x4)"
-      style={{ bottom: 아래자리(p) }}>
+      style={{ bottom: 아래자리() }}>
       <a href={KAKAO_CHANNEL} target="_blank" rel="noopener noreferrer" aria-label="카카오톡으로 문의하기 (새 창)"
         className="pointer-events-auto flex size-[52px] items-center justify-center rounded-full bg-[#FEE500]
                    shadow-[0_4px_12px_rgba(0,0,0,0.18)] transition-transform duration-[120ms] active:scale-90

@@ -21,6 +21,21 @@
  *    ✗ kaot.org          「Disallow: /」 전면 → **긁지 않습니다**
  *       (세중님이 넣으라 하신 곳이지만 robots 가 막습니다. 결정 대기)
  *
+ *  ── robots.txt (2026-11-18 에 직접 확인 · 이름표 RAPO-edu) ────────
+ *    ○ ksnr.or.kr        http→https 넘김 뒤 「User-agent: * / Allow: /」 → 긁습니다 (EUC-KR)
+ *       공지(code=notice)만. code=conference 는 「역대 학술대회」라 안 받습니다
+ *    ○ kcbot.co.kr       없음 — /robots.txt 가 302 → error.html (없는 주소와 똑같이) → 긁습니다
+ *       공지(/notice/)만. board01(주요행사)은 지난 행사 사진글이라 안 받습니다
+ *    ○ fmt.or.kr         「User-agent: * / Allow: /」 → 긁습니다 (EUC-KR)
+ *       강좌안내(ibd03_01)·공지(ibd02_notice1). 다음 카페(cafe.daum.net/ksfmt)는
+ *       로그인 구역이라 **안 갑니다**
+ *    ○ kasiorg.org       「User-agent: Yeti / Allow:/」 뿐 — 다른 로봇을 막는 줄 없음 → 긁습니다
+ *       공지·교육일정(board02). 교육신청(e_conference)은 그날 0건이라 안 넣었습니다
+ *    ○ ksot.kr           없음(404) → 긁습니다. /board/notice · /board/education (그날 0건)
+ *    ✗ 대한재활의학회 NDT  못 찾음 — rm.or.kr 은 「대한재활의학과의사회」(다른 단체)이고
+ *       첫 화면·공지에 NDT 가 없습니다. karm.or.kr(대한재활의학회 · robots 404)도
+ *       첫 화면·사이트맵에 NDT 가 없습니다. 두 번씩 보고 멈췄습니다 (지침 3절)
+ *
  *  ── 출처 이름을 함부로 바꾸지 마세요 ─────────────────────────
  *  `출처` 는 COURSES_OT 의 학회 이름과 **글자 그대로 같아야** 합니다.
  *  그래야 화면에서 「내가 고른 교육」과 이어집니다.
@@ -110,7 +125,9 @@ export function 갈래보기(제목) {
      이것들을 교육으로 찍으면 회원이 신청하러 갔다 헛걸음하고,
      그러면 「교육」 딱지 자체를 못 믿게 됩니다.
      「2026 … 교육과정 안내」 처럼 진짜 모집 글은 **안내**만으로 안 걸립니다 */
-  if (/발표|취소|환불|안내사항|리뉴얼|등급|변경 안내|연기|마감 안내/.test(t)) return '공지';
+  /* 2026-11-18 세중님 — 「우수논문공모전 수상 결과」가 「공모」 때문에 학술대회로 떠 교육 화면에 나왔습니다.
+     결과·수상·당선·합격 글은 모집이 아니라 알림입니다 */
+  if (/발표|취소|환불|안내사항|리뉴얼|등급|변경 안내|연기|마감 안내|결과|수상|당선|합격/.test(t)) return '공지';
   if (/학술대회|집담회|심포지|학술집|총회|학회지|논문|공모/.test(t)) return '학술대회';
   /* 물리치료 쪽 학회는 과정 이름을 영어로 적는 일이 많습니다 —
      「Intermediate course of Lumbar spine 접수안내」 「BLP&IPG코스 신청안내」.
@@ -408,6 +425,121 @@ export function 수중치료(html) {
   return out;
 }
 
+/* ═══ 2026-11-18 에 더한 다섯 학회 — 전부 robots.txt 를 먼저 받아 보고 넣었습니다 (머리말) ═══ */
+
+/* ⑩ 대한뇌신경재활학회 공지 (EUC-KR · 연하장애와 같은 board/list.html 이지만 목록 꼴이 다릅니다).
+      li 하나에 bo_list_title 링크와 bol_date 가 있습니다.
+      ★ 이 게시판에는 **다른 학회 행사 안내**(대한노인병학회 학술대회 등)도 올라옵니다.
+        학회가 자기 공지판에 올린 것이라 그대로 담고, 출처는 이 학회로 둡니다 */
+export function 뇌신경재활(html) {
+  const out = [];
+  for (const m of html.matchAll(/<li>([\s\S]*?)<\/li>/g)) {
+    const c = m[1];
+    const a = c.match(/<a class="bo_list_title" href="\?num=(\d+)[^"]*code=notice[^"]*">([\s\S]*?)<\/a>/);
+    if (!a) continue;
+    const 제목 = 제목정리(a[2]);
+    if (!제목) continue;
+    out.push({
+      번호: '뇌신경재활:' + a[1], 출처: '대한뇌신경재활학회', 직군: '작업치료사',
+      갈래: 갈래보기(제목), 제목,
+      시작: '', 끝: '', 장소: '', 모집인원: '', 상태: '모름',
+      올린날: 날짜꼴((c.match(/<span class="bol_date">([\s\S]*?)<\/span>/) || [])[1]),
+      링크: 'https://www.ksnr.or.kr/board/view.html?code=notice&num=' + a[1],   /* 글 화면 (2026-11-18 · 200 확인) */
+      원문: 제목,
+    });
+  }
+  const 본것 = new Set();
+  return out.filter((x) => !본것.has(x.번호) && 본것.add(x.번호));
+}
+
+/* ⑪ view.php?idx= 표 (지역사회작업치료 · 감각통합) — 운전재활(③)과 같은 틀(NFUpload)인데
+      tr 에 속성이 붙어 있어(`<tr height=32 …>`) ③의 `<tr>` 로는 안 잡힙니다.
+      ★ 줄마다 `<!-- <td><a href="javascript:get_view('130','1');">…` 주석이 있습니다 —
+        view.php 링크만 보므로 주석 줄에는 안 걸립니다.
+      날짜는 줄의 마지막 YYYY-MM-DD (첨부 이름의 20240405101247 에 안 속습니다) */
+export function 번호표(html, 출처, 꼬리, 기본주소, 직군, 갈래정하기 = 갈래보기) {
+  const out = [];
+  for (const m of html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)) {
+    const c = m[1];
+    const a = c.match(/<a href="(view\.php\?idx=(\d+)[^"]*)"[^>]*>([\s\S]*?)<\/a>/);
+    if (!a) continue;
+    const 제목 = 제목정리(a[3]);
+    if (!제목) continue;
+    const 날 = [...c.matchAll(/\d{4}-\d{2}-\d{2}/g)].map((x) => 날짜만(x[0])).filter(Boolean);
+    out.push({
+      번호: 꼬리 + ':' + a[2], 출처, 직군,
+      갈래: 갈래정하기(제목), 제목,
+      시작: '', 끝: '', 장소: '', 모집인원: '', 상태: '모름',
+      올린날: 날[날.length - 1] || '',
+      링크: 기본주소 + 풀기(a[1]),
+      원문: 제목,
+    });
+  }
+  const 본것 = new Set();
+  return out.filter((x) => !본것.has(x.번호) && 본것.add(x.번호));
+}
+
+/* 감각통합 공지의 갈래 — 이 학회는 교육 모집 글 앞에 **과정 번호**를 붙입니다
+   「[2026-5-015] 감각통합을 이해하기 위한 신경과학(전정, 고유, 촉각)」.
+   제목에 「교육·과정」 낱말이 없어 갈래보기() 로는 공지로 떨어집니다.
+   거꾸로 「[최종명단] 2026-6코스 …」 는 「코스」 때문에 교육으로 뜹니다 — 뽑힌 사람 명단이라 공지입니다.
+   (2026-11-18 목록 원문에서 본 두 꼴만 정합니다. 나머지는 갈래보기() 그대로) */
+export function 감각통합갈래(제목) {
+  const t = String(제목 || '');
+  if (/^\[[^\]]*명단[^\]]*\]/.test(t)) return '공지';
+  if (/^\[\d{4}-\d{1,2}-\d{1,3}\]/.test(t)) return '교육';
+  return 갈래보기(t);
+}
+
+/* ⑫ 대한기능도수물리치료학회 (EUC-KR · inobbs) — 글 하나가 table 하나입니다.
+      제목은 ino_comm_title_text(_top) 칸, 날짜는 「26/11/01」(yy/mm/dd) 꼴입니다.
+      한 쪽에 다른 게시판 링크가 섞일 수 있어 **code= 가 맞는 글만** 담습니다 */
+export function 기능도수(html, 판, 꼬리) {
+  const out = [];
+  for (const m of html.matchAll(/<tr>([\s\S]*?)<\/tr>/g)) {
+    const c = m[1];
+    const a = c.match(/<a href="(https?:\/\/www\.fmt\.or\.kr\/inobbs\/bbs_read\d?\.php\?[^"]*)"[^>]*>([\s\S]*?)<\/a>/);
+    if (!a) continue;
+    const 주소 = 풀기(a[1]);
+    if (!주소.includes('code=' + 판 + '&')) continue;
+    const uid = (주소.match(/[?&]uid=(\d+)/) || [])[1];
+    if (!uid) continue;
+    const 제목 = 제목정리((a[2].match(/<span[^>]*class=['"]ino_comm_title_text(?:_top)?['"][^>]*>([\s\S]*?)<\/span>/) || [])[1] || a[2]);
+    if (!제목) continue;
+    out.push({
+      번호: 꼬리 + ':' + uid, 출처: '대한기능도수물리치료학회', 직군: '물리치료사',
+      갈래: 갈래보기(제목), 제목,
+      시작: '', 끝: '', 장소: '', 모집인원: '', 상태: '모름',
+      올린날: 날짜꼴((c.match(/>\s*(\d{2}\/\d{2}\/\d{2})\s*</) || [])[1]),
+      링크: 주소, 원문: 제목,
+    });
+  }
+  const 본것 = new Set();
+  return out.filter((x) => !본것.has(x.번호) && 본것.add(x.번호));
+}
+
+/* ⑬ 대한작업치료학회 (Next.js · 서버가 목록을 그려서 보냅니다) —
+      /board/<판>/<uuid> 링크 안에 제목 span 과 날짜(2026.11.17) span 이 있습니다 */
+export function 작업치료학회(html, 판) {
+  const out = [];
+  const 판식 = 판.replace(/[^a-z0-9_-]/gi, '');
+  const r = new RegExp('<a [^>]*href="(\\/board\\/' + 판식 + '\\/([0-9a-f-]{36}))"[^>]*>([\\s\\S]*?)<\\/a>', 'g');
+  for (const m of html.matchAll(r)) {
+    const c = m[3];
+    const 제목 = 글만((c.match(/<span class="flex-1[^"]*">([\s\S]*?)<\/span>/) || [])[1]);
+    if (!제목) continue;
+    out.push({
+      번호: '작업치료학회:' + m[2], 출처: '대한작업치료학회', 직군: '작업치료사',
+      갈래: 갈래보기(제목), 제목,
+      시작: '', 끝: '', 장소: '', 모집인원: '', 상태: '모름',
+      올린날: 날짜꼴((c.match(/<span class="shrink-0 text-xs[^"]*">([\s\S]*?)<\/span>/) || [])[1]),
+      링크: 'https://www.ksot.kr' + m[1], 원문: 제목,
+    });
+  }
+  const 본것 = new Set();
+  return out.filter((x) => !본것.has(x.번호) && 본것.add(x.번호));
+}
+
 /* ═══ 자가검사 — 2026-10-03 에 받은 원문 조각으로 돕니다 ═══ */
 if (시험) {
   let 참 = 0, 거짓 = 0;
@@ -451,6 +583,10 @@ if (시험) {
   봐('합격자 발표는 그대로 공지', 갈래보기('2025년 정형도수전문물리치료사 합격자 발표'), '공지');
   봐('연회비 안내는 그대로 공지', 갈래보기('연회비 입금 안내'), '공지');
   봐('취소 공지는 그대로 공지', 갈래보기('26년 8월 서울/경기 하지 기본과정 취소공지'), '공지');
+  /* 2026-11-18 — 「공모」가 든 결과 글이 학술대회로 갔습니다 */
+  봐('공모전 수상 결과는 공지', 갈래보기('2026년 대한PNF학회 우수논문공모전 수상 결과'), '공지');
+  봐('강사공모제 결과는 공지', 갈래보기('2026년 강사공모제 결과 발표'), '공지');
+  봐('논문 공모 안내는 그대로 학술대회', 갈래보기('2026년 우수논문 공모 안내'), '학술대회');
 
   console.log('\n연하재활 교육 카드 (받은 원문 그대로)');
   const 카드 = `<div class="card_right_contents">
@@ -601,6 +737,121 @@ if (시험) {
   봐('올린날 (2026.01.06 꼴)', i1.올린날, '2026-01-06');
   봐('갈래', i1.갈래, '교육');
 
+  /* ── 2026-11-18 에 더한 곳 — 그날 받은 목록 원문에서 잘라 왔습니다 (메일 주소 칸은 뺐습니다) ── */
+  console.log('\n대한뇌신경재활학회 공지');
+  const ns = `<div class="list_skin1"><ul><li>
+	<div class="box_checked"></div>
+	<div class="box_col1">
+		<span class="bol_subject"><a class="bo_list_title" href="?num=3032&amp;start=0&amp;sort=top desc,reg_dt desc&amp;code=notice&amp;key=&amp;keyword="><b><font color="blue">대한뇌신경재활학회 2026년도 일정 안내</font></b></a></span>
+	</div>
+	<div class="box_col2">
+		<span class="bol_date"><i class="fa fa-calendar"></i> 2025-12-30</span>
+		<span class="bol_hit"><i class="fa fa-eye"></i> 4537</span>
+	</div>
+</li><li>
+	<div class="box_checked"></div>
+	<div class="box_col1">
+		<span class="bol_subject"><a class="bo_list_title" href="?num=32326&amp;start=0&amp;sort=top desc,reg_dt desc&amp;code=notice&amp;key=&amp;keyword=">[대한뇌신경재활학회] 제7회 뇌신경재활 리뷰코스 안내</a></span>
+	</div>
+	<div class="box_col2">
+		<span class="bol_date"><i class="fa fa-calendar"></i> 2026-10-06</span>
+		<span class="bol_hit"><i class="fa fa-eye"></i> 166</span>
+	</div>
+</li></ul></div>`;
+  const ns1 = 뇌신경재활(ns);
+  봐('두 줄', ns1.length, 2);
+  봐('제목 (b·font 걷기)', ns1[0] && ns1[0].제목, '대한뇌신경재활학회 2026년도 일정 안내');
+  봐('올린날 (달력 아이콘 뒤)', ns1[0] && ns1[0].올린날, '2025-12-30');
+  봐('번호', ns1[1] && ns1[1].번호, '뇌신경재활:32326');
+  봐('링크', ns1[1] && ns1[1].링크, 'https://www.ksnr.or.kr/board/view.html?code=notice&num=32326');
+  봐('리뷰코스는 교육', ns1[1] && ns1[1].갈래, '교육');
+  봐('출처는 고르는 목록 이름으로', ns1[1] && ns1[1].출처, '대한뇌신경재활학회');
+
+  console.log('\n대한지역사회작업치료학회 공지 (tr 에 속성 · 주석 줄)');
+  const kc = `<tr height=32>
+					<td class="text_center">31</td>
+					<!-- <td><a href="javascript:get_view('130','1');">2025년 대한지역사회작업치료학회 춘계학술대회</a></td> -->
+					<td><a href="view.php?idx=130&page=1&search=&find=">2025년 대한지역사회작업치료학회 춘계학술대회</a></td>
+                    <td class="text_center">관리자</td>
+					<td class="text_center">
+											</td>
+					<td class="text_center">1695</td>
+					<td class="text_center">2025-04-15</td>
+				</tr>`;
+  const kc1 = 번호표(kc, '대한지역사회작업치료학회', '지역사회작업', 'http://kcbot.co.kr/notice/', '작업치료사');
+  봐('한 줄만 (주석 줄에 안 걸림)', kc1.length, 1);
+  봐('번호', kc1[0] && kc1[0].번호, '지역사회작업:130');
+  봐('제목', kc1[0] && kc1[0].제목, '2025년 대한지역사회작업치료학회 춘계학술대회');
+  봐('올린날', kc1[0] && kc1[0].올린날, '2025-04-15');
+  봐('링크', kc1[0] && kc1[0].링크, 'http://kcbot.co.kr/notice/view.php?idx=130&page=1&search=&find=');
+  봐('갈래', kc1[0] && kc1[0].갈래, '학술대회');
+
+  console.log('\n대한감각통합치료학회 공지 (과정 번호 · 최종명단)');
+  const ka = `<tr>
+                            <td>227</td>
+                            <td class="title"><a href="view.php?idx=598&page=1&search=&find=">[2026-5-015] 감각통합을 이해하기 위한 신경과학(전정, 고유, 촉각) </a></td>
+                            <td></td>
+                            <td>
+                                <a href="../NFUpload/nfupload_down.php?tmp_name=20261027071312_755e27c4_0.pdf&name=x.pdf"><img src="../images/common/files.jpg" border=0 alt="파일다운로드"></a>
+                            </td>
+                            <td>363</td>
+                            <td>2026-10-27</td>
+                        </tr>
+                        <tr>
+                            <td>226</td>
+                            <td class="title"><a href="view.php?idx=597&page=1&search=&find=">[최종명단] 2026-6코스 감각통합 중재 심화와 사례 연구 (온라인+오프라인)</a></td>
+                            <td></td>
+                            <td>
+                                                            </td>
+                            <td>457</td>
+                            <td>2026-10-14</td>
+                        </tr>`;
+  const ka1 = 번호표(ka, '대한감각통합치료학회', '감각통합', 'http://www.kasiorg.org/notice/', '작업치료사', 감각통합갈래);
+  봐('두 줄', ka1.length, 2);
+  봐('제목 (끝 빈칸 걷기)', ka1[0] && ka1[0].제목, '[2026-5-015] 감각통합을 이해하기 위한 신경과학(전정, 고유, 촉각)');
+  봐('과정 번호 글은 교육', ka1[0] && ka1[0].갈래, '교육');
+  봐('올린날 — 첨부 이름 20261027… 에 안 속음', ka1[0] && ka1[0].올린날, '2026-10-27');
+  봐('최종명단은 공지 (「코스」가 있어도)', ka1[1] && ka1[1].갈래, '공지');
+  봐('링크', ka1[1] && ka1[1].링크, 'http://www.kasiorg.org/notice/view.php?idx=597&page=1&search=&find=');
+  봐('과정 번호 없는 글은 갈래보기 그대로', 감각통합갈래('[모집] 2026 대한감각통합치료학회 지역스터디 참여자 모집'), '교육');
+
+  console.log('\n대한기능도수물리치료학회 강좌안내 (yy/mm/dd)');
+  const fm = `<table width="100%" border="0" style="table-layout:fixed;" cellspacing="0" cellpadding="4">
+	    <tr>
+	    	<td width="60" nowrap align="center">63</td>
+			    	<td width=10 nowrap><img src='/images/bbs_com_img/old.gif' border=0></td>
+	        <td align=left>
+	             <div class="ino_comm_text_width" style="width:100%;">
+			  		     <span></span>
+				<a href="http://www.fmt.or.kr/inobbs/bbs_read3.php?code=ibd03_01&nbd=ibd03_01&dbcal=no&lng=kor&uid=374&page=1&start=0&thread=294&no=63&field=&key=&mode=&login_mode=&list_count=&left_sub_menu_chk=">
+					 						<span  class="ino_comm_title_text">
+							HSA 2 Course - 독일인증 MT 교육 과정 2026/2027					</span>
+				</a>
+		 </td>
+		 <td width="60" nowrap align="center"  class="inorp_l">129</font></td>
+		 <td width="60" nowrap align="center"  class="inorp_m">129</font></td>
+		<td width="60" nowrap align="center"  class="inorp_l"><img src='/images/bbs_com_img/file_image_o.gif' border=0></td>
+		 <td width="80" nowrap align="center">26/11/01</font></td>
+	    </tr>
+</table>`;
+  const fm1 = 기능도수(fm, 'ibd03_01', '기능도수강좌')[0] || {};
+  봐('번호 (uid)', fm1.번호, '기능도수강좌:374');
+  봐('제목', fm1.제목, 'HSA 2 Course - 독일인증 MT 교육 과정 2026/2027');
+  봐('올린날 (26/11/01 → 2026-11-01 · 조회수 129 에 안 속음)', fm1.올린날, '2026-11-01');
+  봐('갈래', fm1.갈래, '교육');
+  봐('직군', fm1.직군, '물리치료사');
+  봐('다른 게시판 글은 안 담음', 기능도수(fm, 'ibd02_notice1', '기능도수공지').length, 0);
+
+  console.log('\n대한작업치료학회 공지 (Next.js 목록)');
+  const ks = `<ul><li><a class="flex items-center gap-3 px-5 py-4 transition hover:bg-[#F8FAFC]" href="/board/notice/7c118b33-a3bd-4ec5-8b7b-18484bdf25d3"><span class="flex-1 truncate text-sm font-medium text-[#1A2B4C]">2026년 제34회 대한작업치료학회 학술대회 접수 연장 안내(학생)</span><span class="shrink-0 text-xs text-muted">2026.08.30</span></a></li></ul>`;
+  const ks1 = 작업치료학회(ks, 'notice')[0] || {};
+  봐('번호 (uuid)', ks1.번호, '작업치료학회:7c118b33-a3bd-4ec5-8b7b-18484bdf25d3');
+  봐('제목', ks1.제목, '2026년 제34회 대한작업치료학회 학술대회 접수 연장 안내(학생)');
+  봐('올린날 (점 꼴)', ks1.올린날, '2026-08-30');
+  봐('링크', ks1.링크, 'https://www.ksot.kr/board/notice/7c118b33-a3bd-4ec5-8b7b-18484bdf25d3');
+  봐('갈래', ks1.갈래, '학술대회');
+  봐('다른 판 이름으로는 안 잡힘', 작업치료학회(ks, 'education').length, 0);
+
   console.log('\n' + (거짓 ? '★ ' + 거짓 + '개 틀렸습니다 (' + 참 + '개 맞음)' : '○ ' + 참 + '개 다 맞았습니다'));
   process.exit(거짓 ? 1 : 0);
 }
@@ -626,6 +877,21 @@ const 곳 = [
   /* ★ https 는 인증서가 자기서명이라 연결이 끊깁니다. 검증은 **끄지 않고**
      http 로 읽습니다 (2026-10-03 확인). robots.txt 는 없습니다 */
   { 이름: '수중치료 교육일정', u: 'http://www.iatakorea.org/bbs/list.php?b_id=8&ffid=03-02', f: 수중치료 },
+
+  /* ── 2026-11-18 에 더한 곳 (robots 는 머리말) ── */
+  { 이름: '뇌신경재활 공지', u: 'https://www.ksnr.or.kr/board/list.html?code=notice', f: 뇌신경재활 },
+  { 이름: '지역사회작업 공지', u: 'http://kcbot.co.kr/notice/list.php',
+    f: (h) => 번호표(h, '대한지역사회작업치료학회', '지역사회작업', 'http://kcbot.co.kr/notice/', '작업치료사') },
+  { 이름: '감각통합 공지', u: 'http://www.kasiorg.org/notice/list.php',
+    f: (h) => 번호표(h, '대한감각통합치료학회', '감각통합', 'http://www.kasiorg.org/notice/', '작업치료사', 감각통합갈래) },
+  { 이름: '감각통합 교육일정', u: 'http://www.kasiorg.org/board02/list.php',
+    f: (h) => 번호표(h, '대한감각통합치료학회', '감각통합일정', 'http://www.kasiorg.org/board02/', '작업치료사', 감각통합갈래) },
+  { 이름: '기능도수 강좌안내', u: 'http://www.fmt.or.kr/inobbs/bbs_list3.php?code=ibd03_01&nbd=ibd03_01&dbcal=no&lng=kor',
+    f: (h) => 기능도수(h, 'ibd03_01', '기능도수강좌') },
+  { 이름: '기능도수 공지', u: 'http://www.fmt.or.kr/inobbs/bbs_list2.php?code=ibd02_notice1&nbd=ibd02_notice1&dbcal=no&lng=kor',
+    f: (h) => 기능도수(h, 'ibd02_notice1', '기능도수공지') },
+  { 이름: '작업치료학회 공지', u: 'https://www.ksot.kr/board/notice', f: (h) => 작업치료학회(h, 'notice') },
+  { 이름: '작업치료학회 보수교육', u: 'https://www.ksot.kr/board/education', f: (h) => 작업치료학회(h, 'education') },
 ];
 
 /* 서버(클라우드) 주소를 막는 곳.

@@ -296,9 +296,11 @@ describe('목록 보고 연결 — 사이트줄', () => {
       headers: { 'Content-Type': 'application/json' },
     }, { type: 'json', name: 'x', url: 'https://a.example.invalid/d' });
     assert.equal(부름.length, 1);
+    /* 2026-11-18 멘토-요약-1 — 성공에 「게시판 모든 글 수 · 가장 최근 날」 두 칸이 더해졌습니다 (실패 칸은 여전히 없음) */
     assert.deepEqual(g, {
       rows: [{ title: '합성 공고', url: 'https://a.example.invalid/1', from: null, to: null, posted: null, cls: '' }],
       raw: '전체 1건 · 쓸 수 있는 줄 1건',
+      전체: 1, 전체최근: null,
     });
     assert.deepEqual((await 돌리기({
       status: 200,

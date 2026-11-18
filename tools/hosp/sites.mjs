@@ -24,9 +24,30 @@ import { createRequire } from 'node:module';
 import { 글받기, 붙여받기 } from '../certs/index.mjs';
 import { 진행중원본 } from './midas.mjs';
 import { 실패기록, 안전글, 안전왜 } from './failure-report.mjs';
+/* 2026-11-18 멘토 지시문4 — 차단·로그인·오류 화면 서명은 PR #13 의 관측 모듈 한 자리에서 읽습니다.
+   돌려주는 것은 고정 코드(BLOCK_SCREEN 등)뿐이라 응답 글이 밖으로 안 나갑니다 */
+import { observeList } from './list-observation.mjs';
 
 /* err 에 붙는 짧은 앞글 — 앞 80자 꼴은 그대로이고, 가린 뒤에 자릅니다 */
 const 앞글 = (r) => (r.왜 ? 안전왜(r.왜) : 안전글(r.text, 80));
+
+/* 응답 글의 화면 서명 — 고정 코드 또는 null. 던지지 않습니다 */
+function 서명(r) {
+  try {
+    const t = r && (r.html ?? r.text ?? (r.buf ? r.buf.toString('utf8') : null));
+    if (typeof t !== 'string' || !Number.isInteger(r.code) || r.code < 100) return null;
+    return observeList({ status: r.code, html: t, rowCount: 0 }).errorSignature;
+  } catch { return null; }
+}
+/* 실패 칸 = PR #17 기록 + 화면 서명 (아침 가르기가 「차단」을 가리는 데 씁니다) */
+const 실패칸 = (r) => ({ ...실패기록(r), 서명: 서명(r) });
+
+/* 2026-11-18 멘토-요약-1 — 게시판이 준 **모든 글**(접수중·우리 직군으로 거르기 전)의 수와 가장 최근 날짜.
+   글 수 0 이면 아침 가르기에서 「고장」, 최근 날짜가 60일 넘게 묵으면 「의심」입니다 */
+function 전체칸(줄들) {
+  const 날들 = (줄들 || []).map((x) => 날짜(String((x && (x.posted || x.from || x.to)) || ''))).filter(Boolean).sort();
+  return { 전체: (줄들 || []).length, 전체최근: 날들.length ? 날들[날들.length - 1].replace(/\./g, '-') : null };
+}
 
 const require = createRequire(import.meta.url);
 const { hospParseHtml, UA } = require('./hs_test.js');
@@ -120,6 +141,44 @@ function 마이다스줄(list, host) {
   }));
 }
 
+/** 마이다스 목록에서 담을 줄 고르기 — `receiptState` 한 자리 (2026-11-18 · 정답지 1차 고장 가르기 3번)
+ *
+ * 전에는 「접수중」이 든 줄만 담았습니다. 그래서 **접수 시작일이 앞날인 글**(접수 예정)은 접수가
+ * 열리는 날에야 들어와, 원문 게시일 대비 24시간 반영이 늦었습니다 (정답지 1차 · 전남대 2 · 충북대 1 · 아주대 1).
+ * 이제 「접수 예정」 줄도 담습니다. 닫힌 줄(마감·종료·완료·결과·발표·취소)은 전처럼 안 담습니다.
+ *
+ * ★ 예정 줄의 상태 글자를 **원문으로 본 적이 없습니다** — 저장소·노트에 receiptState 원값이 남은 응답이
+ *   없습니다(2026-11-18 grep). 정답지 노트의 화면 말은 「접수 예정」입니다. 그래서 글자 하나로 못 박지 않고
+ *   **「예정」이 들고 닫힘 말이 없는 것**만 잡습니다 (좁게 · 「마감 예정」 꼴은 닫힘 말에 걸려 안 담깁니다).
+ *   그 밖의 모르는 상태는 담지 않고 **수만 셉니다** (raw 에 「모르는 상태」로 · 지침 2절).
+ * ★ 「접수중」 판정은 전과 글자 하나 다르지 않습니다 — 접수중 줄은 닫힘 말을 보지 않고 그대로 담깁니다.
+ */
+export const 접수중꼴 = /접수중/;
+export const 접수예정꼴 = /예정/;
+export const 접수닫힘꼴 = /마감|종료|완료|결과|발표|취소/;
+export function 마이다스담을것(list) {
+  const 접수중 = [], 예정 = [], 모름 = new Map();
+  for (const x of list || []) {
+    const st = String((x && x.receiptState) || '');
+    if (접수중꼴.test(st)) { 접수중.push(x); continue; }
+    if (접수예정꼴.test(st) && !접수닫힘꼴.test(st)) { 예정.push(x); continue; }
+    if (!접수닫힘꼴.test(st)) 모름.set(st || '(빈칸)', (모름.get(st || '(빈칸)') || 0) + 1);
+  }
+  return { 접수중, 예정, 모름 };
+}
+/* raw 에 붙일 말 — 「접수중 n건」 앞꼴은 그대로 두고 뒤에 붙입니다 (다른 도구가 앞꼴을 읽습니다) */
+function 예정말(고른) {
+  const 모름 = [...고른.모름.entries()].map(([k, n]) => k.slice(0, 12) + ' ' + n).slice(0, 4).join(' · ');
+  return (고른.예정.length ? ' · 접수 예정 ' + 고른.예정.length + '건도 담음' : '')
+    + (모름 ? ' · 모르는 상태(안 담음) ' + 모름 : '');
+}
+/* 예정 줄에는 `접수상태: '예정'` 을 답니다 — 수집기가 근거(evidence)에 남기고, 앞날 시작일을 게시일로 안 씁니다.
+   접수 시작일(applyStartDate → from)·마감일(applyEndDate → to)은 마이다스줄() 이 그대로 나릅니다 */
+function 마이다스담을줄(고른, host) {
+  return 마이다스줄(고른.접수중, host)
+    .concat(마이다스줄(고른.예정, host).map((x) => ({ ...x, 접수상태: '예정' })));
+}
+
 /** 마이다스 구형 — 어느 길로 받나 (2026-11-11 세중님 Q86 「1번 하자」 · Q87 「① 지금 길 그대로」) ──
  *
  * 리크루터 채용관은 robots 가 두 꼴입니다 (2026-11-11 tools/robots.mjs 로 21곳 판정) —
@@ -145,14 +204,15 @@ export async function 사이트줄(s) {
   /* ── html — 261줄 ── */
   if (s.type === 'html') {
     const g = await 글받기(s.url, { headers: 기본머리, enc: s.enc });
-    if (g.왜) return { err: '못 받음 · ' + 안전왜(g.왜), 실패: 실패기록(g) };
+    if (g.왜) return { err: '못 받음 · ' + 안전왜(g.왜), 실패: 실패칸(g) };
     if (g.code !== 200 || (g.html || '').length < 300) {
-      return { err: 'HTTP ' + g.code + ' · ' + (g.html || '').length + '자', 실패: 실패기록(g) };
+      return { err: 'HTTP ' + g.code + ' · ' + (g.html || '').length + '자', 실패: 실패칸(g) };
     }
     let rows;
     try { rows = hospParseHtml(g.html, s); }
-    catch (e) { return { err: '규칙이 깨졌습니다 · ' + 안전글(e.message, 80), 실패: 실패기록(g) }; }
-    return { rows, raw: g.바이트 + '바이트 · ' + (g.cs || '') };
+    catch (e) { return { err: '규칙이 깨졌습니다 · ' + 안전글(e.message, 80), 실패: 실패칸(g) }; }
+    /* 0줄이면 화면 서명도 남깁니다 — 200 으로 온 차단·로그인 화면(Cloudflare 「Just a moment...」 등)을 가르려고 */
+    return { rows, raw: g.바이트 + '바이트 · ' + (g.cs || ''), ...전체칸(rows), ...(rows.length ? {} : { 서명: 서명(g) }) };
   }
 
   /* ── 마이다스 구형 (appsite · listjson) — 13줄 ──
@@ -185,16 +245,16 @@ export async function 사이트줄(s) {
         .then((g) => ({ code: g.왜 ? 0 : g.code, text: g.html || '', 왜: g.왜, buf: g.buf, headers: g.headers }))
       : await 보내기(s.url, { body: s['몸'] || '', headers: { ...(s['머리'] || {}) } });
     const j = 제이슨(r);
-    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + 앞글(r), 실패: 실패기록(r) };
+    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + 앞글(r), 실패: 실패칸(r) };
     const 다 = 길따라(j, s['줄경로'] || 'list');
     if (!Array.isArray(다)) {
       return { err: '줄경로 「' + (s['줄경로'] || 'list') + '」 가 배열이 아닙니다 · 받은 것 '
-        + 안전글(JSON.stringify(j), 120), 실패: 실패기록(r) };
+        + 안전글(JSON.stringify(j), 120), 실패: 실패칸(r) };
     }
     const 셈 = s['셈경로'] ? 길따라(j, s['셈경로']) : 다.length;
     /* 0건은 **탈이 아닙니다** — 그 게시판에 글이 없을 수 있습니다.
        빈 목록을 그대로 돌려주어 「오늘 0건」으로 적히게 합니다 */
-    const 줄들 = 다.map((x) => {
+    const 모두 = 다.map((x) => {
       const 꼴 = String(s['링크꼴'] || '');
       const url = 꼴
         ? 꼴.replace(/\{([^}]+)\}/g, (_, k) => encodeURIComponent(String(x[k] ?? '')))
@@ -207,14 +267,15 @@ export async function 사이트줄(s) {
         posted: s['날짜열쇠'] ? String(x[s['날짜열쇠']] || '') || null : null,
         cls: s['갈래열쇠'] ? String(x[s['갈래열쇠']] || '') : '',
       };
-    }).filter((x) => x.title && x.url);
-    return 거르기(s, 줄들, '전체 ' + 셈 + '건 · 쓸 수 있는 줄 ' + 줄들.length + '건',
-      [...new Set(줄들.map((x) => x.cls).filter(Boolean))]);
+    });
+    const 줄들 = 모두.filter((x) => x.title && x.url);
+    return { ...거르기(s, 줄들, '전체 ' + 셈 + '건 · 쓸 수 있는 줄 ' + 줄들.length + '건',
+      [...new Set(줄들.map((x) => x.cls).filter(Boolean))]), ...전체칸(모두) };
   }
 
   if (s.type === 'appsite' || s.type === 'listjson') {
     /* 2026-11-11 Q86 — robots 가 list.json 을 막고 /appsite/ 만 허락하면 getMainView 로 (위 마이다스길).
-       줄 꼴·링크는 list.json 과 같은 마이다스줄() 한 벌이고, 접수중만 쓰는 것도 같습니다.
+       줄 꼴·링크는 list.json 과 같은 마이다스줄() 한 벌이고, 담을 줄 고르기(접수중 + 접수 예정 · 2026-11-18)도 같습니다.
        상세(/app/jobnotice/view)도 그 robots 가 막으므로 `상세막힘` 을 달아 ③ 에서 안 엽니다
        (회원이 누르는 링크는 그대로 그 주소입니다 — 사람이 여는 것이라 robots 와 무관) */
     const 길 = await 마이다스길(s);
@@ -222,33 +283,34 @@ export async function 사이트줄(s) {
       const m = await 진행중원본(s.host, { sn: s.sn, st: s.settingType });
       /* 진행중원본 의 왜 에는 응답 앞 120자가 섞일 수 있어 안전글로만 냅니다 (실패 칸은 아직 없음 — PR 「다음」) */
       if (m.왜) return { err: 'getMainView 실패 · ' + 안전글(m.왜, 120) + ' (' + 길.왜 + ')' };
-      const 접수중 = m.줄.filter((x) => /접수중/.test(String(x.receiptState || '')));
-      const 줄 = 마이다스줄(접수중, s.host).map((x) => ({ ...x, 상세막힘: 'robots · /app/ 금지' }));
-      return 거르기(s, 줄,
-        'getMainView 진행중 ' + m.줄.length + '건 중 접수중 ' + 접수중.length + '건'
+      const 고른 = 마이다스담을것(m.줄);
+      const 줄 = 마이다스담을줄(고른, s.host).map((x) => ({ ...x, 상세막힘: 'robots · /app/ 금지' }));
+      return { ...거르기(s, 줄,
+        'getMainView 진행중 ' + m.줄.length + '건 중 접수중 ' + 고른.접수중.length + '건' + 예정말(고른)
           + (m.줄.length >= 6 ? ' ★첫 화면 6칸 꽉 참 — 더 있을 수 있음' : '') + ' · ' + 길.왜,
-        [...new Set(m.줄.map((x) => x.recruitClassName).filter(Boolean))]);
+        [...new Set(m.줄.map((x) => x.recruitClassName).filter(Boolean))]), ...전체칸(마이다스줄(m.줄, s.host)) };
     }
     const r = await 보내기(s.host + '/app/jobnotice/list.json', {
       body: new URLSearchParams({ currentPage: '1', pageSize: '100', keyword: '', recruitClassName: '' }).toString(),
     });
     const j = 제이슨(r);
-    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + 앞글(r), 실패: 실패기록(r) };
+    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + 앞글(r), 실패: 실패칸(r) };
     const 다 = j.list || [];
-    if (!다.length) return { err: 'list.json 이 0건 · pageUtil ' + 안전글(JSON.stringify(j.pageUtil || {}), 90), 실패: 실패기록(r) };
-    const 접수중 = 다.filter((x) => /접수중/.test(String(x.receiptState || '')));
-    return 거르기(s, 마이다스줄(접수중, s.host),
-      '전체 ' + ((j.pageUtil || {}).recordCount || 다.length) + '건 중 접수중 ' + 접수중.length + '건 · ' + 길.왜,
-      [...new Set(다.map((x) => x.recruitClassName).filter(Boolean))]);
+    if (!다.length) return { err: 'list.json 이 0건 · pageUtil ' + 안전글(JSON.stringify(j.pageUtil || {}), 90), 실패: 실패칸(r) };
+    const 고른 = 마이다스담을것(다);
+    return { ...거르기(s, 마이다스담을줄(고른, s.host),
+      '전체 ' + ((j.pageUtil || {}).recordCount || 다.length) + '건 중 접수중 ' + 고른.접수중.length + '건'
+        + 예정말(고른) + ' · ' + 길.왜,
+      [...new Set(다.map((x) => x.recruitClassName).filter(Boolean))]), ...전체칸(마이다스줄(다, s.host)) };
   }
 
   /* ── 가톨릭중앙의료원 — 6줄 ── */
   if (s.type === 'cmc') {
     const g = await 붙여받기(s.url, { headers: 기본머리 });
-    if (g.왜) return { err: '못 받음 · ' + 안전왜(g.왜), 실패: 실패기록(g) };
+    if (g.왜) return { err: '못 받음 · ' + 안전왜(g.왜), 실패: 실패칸(g) };
     let j;
     try { j = JSON.parse(g.buf.toString('utf8')); } catch { j = null; }
-    if (!Array.isArray(j)) return { err: 'HTTP ' + g.code + ' 배열 아님 · ' + 안전글(g.buf, 80), 실패: 실패기록(g) };
+    if (!Array.isArray(j)) return { err: 'HTTP ' + g.code + ' 배열 아님 · ' + 안전글(g.buf, 80), 실패: 실패칸(g) };
     return {
       rows: j.filter((x) => String(x.recruitStatus || '') !== '마감' && String(x.delYn || 'N') !== 'Y')
         .map((x) => ({
@@ -267,6 +329,7 @@ export async function 사이트줄(s) {
           글: String(x.content || ''),
         })),
       raw: '배열 ' + j.length + '건',
+      ...전체칸(j.map((x) => ({ from: 밀리초날짜(x && x.createdDt) }))),
     };
   }
 
@@ -281,7 +344,7 @@ export async function 사이트줄(s) {
       }),
     });
     const j = 제이슨(r);
-    if (!Array.isArray(j)) return { err: 'HTTP ' + r.code + ' 배열 아님 · ' + 앞글(r), 실패: 실패기록(r) };
+    if (!Array.isArray(j)) return { err: 'HTTP ' + r.code + ' 배열 아님 · ' + 앞글(r), 실패: 실패칸(r) };
     return {
       rows: j.filter((x) => String(x.isclosed) !== '1').map((x) => ({
         title: String(x.jobtitle || '').trim(),
@@ -289,6 +352,7 @@ export async function 사이트줄(s) {
         url: s.host + '/?departmentidx=' + s.dept,
       })),
       raw: '배열 ' + j.length + '건',
+      ...전체칸(j.map((x) => ({ from: 날짜(x && x.sdate) }))),
     };
   }
 
@@ -322,9 +386,9 @@ export async function 사이트줄(s) {
       headers: { Accept: 'application/json, text/plain, */*', Referer: s.host + '/page.ckd' },
     });
     const j = 제이슨(r);
-    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + 앞글(r), 실패: 실패기록(r) };
+    if (!j) return { err: 'HTTP ' + r.code + ' JSON 아님 · ' + 앞글(r), 실패: 실패칸(r) };
     const 다 = j.recruitAnnouncementListMain || [];
-    if (!다.length) return { err: '목록이 0건 · result ' + 안전글(j.result, 80), 실패: 실패기록(r) };
+    if (!다.length) return { err: '목록이 0건 · result ' + 안전글(j.result, 80), 실패: 실패칸(r) };
     const 접수중 = 다.filter((x) => String(x.closYn || '') !== 'Y');
     const 줄 = 접수중.map((x) => ({
       title: String(x.recrNm || '').trim(),
@@ -334,21 +398,22 @@ export async function 사이트줄(s) {
       접수문장: '접수기간 ' + (x.rcritStaDt || '') + ' ~ ' + (x.rcritEndDt || ''),
       url: s.host + '/page.ckd#/recruit/announcement/' + x.recrId,
     }));
-    return 거르기(s, 줄, '전체 ' + 다.length + '건 중 접수중 ' + 접수중.length + '건');
+    return { ...거르기(s, 줄, '전체 ' + 다.length + '건 중 접수중 ' + 접수중.length + '건'),
+      ...전체칸(다.map((x) => ({ from: 날짜(String((x && x.rcritStaDt) || '')) }))) };
   }
 
   if (s.type === 'greeting') {
     const g = await 글받기(s.url, { headers: 기본머리 });
-    if (g.왜) return { err: '못 받음 · ' + 안전왜(g.왜), 실패: 실패기록(g) };
-    if (g.code !== 200) return { err: 'HTTP ' + g.code, 실패: 실패기록(g) };
+    if (g.왜) return { err: '못 받음 · ' + 안전왜(g.왜), 실패: 실패칸(g) };
+    if (g.code !== 200) return { err: 'HTTP ' + g.code, 실패: 실패칸(g) };
     const m = g.html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-    if (!m) return { err: '__NEXT_DATA__ 없음 · ' + g.html.length + '자', 실패: 실패기록(g) };
+    if (!m) return { err: '__NEXT_DATA__ 없음 · ' + g.html.length + '자', 실패: 실패칸(g) };
     let nd;
-    try { nd = JSON.parse(m[1]); } catch { return { err: 'NEXT_DATA 가 JSON 이 아닙니다', 실패: 실패기록(g) }; }
+    try { nd = JSON.parse(m[1]); } catch { return { err: 'NEXT_DATA 가 JSON 이 아닙니다', 실패: 실패칸(g) }; }
     const qs = (((nd.props || {}).pageProps || {}).dehydratedState || {}).queries || [];
     const q = qs.find((x) => JSON.stringify(x.queryKey) === '["openings"]');
     if (!q) {
-      return { err: 'openings 질의 없음 · 질의 ' + qs.map((x) => 안전글(JSON.stringify(x.queryKey), 40)).join(' | '), 실패: 실패기록(g) };
+      return { err: 'openings 질의 없음 · 질의 ' + qs.map((x) => 안전글(JSON.stringify(x.queryKey), 40)).join(' | '), 실패: 실패칸(g) };
     }
     const list = (q.state && Array.isArray(q.state.data)) ? q.state.data : ((q.state && q.state.data && q.state.data.data) || []);
     const 한국날 = (iso) => {
@@ -363,6 +428,7 @@ export async function 사이트줄(s) {
         url: s.host + '/ko/o/' + x.openingId,
       })),
       raw: '목록 ' + list.length + '건',
+      ...전체칸(list.map((x) => ({ from: 한국날(x && x.openDate) }))),
     };
   }
 

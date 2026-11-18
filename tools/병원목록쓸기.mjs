@@ -121,8 +121,8 @@ function 상태재기(html, 제목들) {
 }
 
 const 읽는법 = {
-  appsite: 'receiptState 가 「접수중」 인 것만',
-  listjson: 'receiptState 가 「접수중」 인 것만',
+  appsite: 'receiptState 가 「접수중」·「접수 예정」 인 것만 (2026-11-18 · sites.mjs 마이다스담을것)',
+  listjson: 'receiptState 가 「접수중」·「접수 예정」 인 것만 (2026-11-18 · sites.mjs 마이다스담을것)',
   cmc: 'recruitStatus ≠ 마감 · delYn ≠ Y',
   schmc: 'isclosed ≠ 1',
   greeting: 'deploy ≠ false',
