@@ -14,6 +14,7 @@
  * ★ 마감일이 **두 해 넘으면** 창구가 비웁니다 (collect_put 의 뚜껑). 우리는 안 고칩니다.
  * ★ 직군이 안 보이면 **비웁니다** — 짐작하지 않습니다 (지침 10-3).
  */
+import { 칸검사들 } from '../칸검사.mjs';
 import fs from 'node:fs';
 /* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
    지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
@@ -176,6 +177,7 @@ console.log('본문 담음 ' + 글담음 + '건 (job_body · 회원 화면에 �
 
 await 첨부.끝내기(cfg);
 
+칸검사들(공고줄, 출처);   /* 저장 직전 칸 검사 한 자리 (tools/칸검사.mjs · 2026-11-19) */
 if (공고줄.length) {
   const r = await rpc('collect_put', { p_secret: 열쇠, p_source: 출처, p_rows: 공고줄 });
   console.log('공고 칸 담음 — ' + JSON.stringify(r).slice(0, 200));
