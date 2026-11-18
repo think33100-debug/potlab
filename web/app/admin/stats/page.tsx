@@ -194,9 +194,6 @@ export default function AdminStats() {
         </div>
       </section>
 
-      {/* ── 회원 재방문 (2026-11-18 · 멘토-5-2 · 사업계획서) ── */}
-      <ReturnVisits />
-
       {/* ── 화면별 ── */}
       <section>
         <h2 className="text-h3 font-bold">화면별 <span className="text-sm font-medium text-mute">최근 7일</span></h2>
@@ -294,89 +291,6 @@ export default function AdminStats() {
 }
 
 /* ─────────────────────────────────────── */
-
-/* 회원 재방문 — 최근 14일 (2026-11-18 · 멘토-5-2 · 사업계획서 12/1).
-
-   위의 「방문 수」(page_hits)와 **다른 자**입니다 — 그쪽은 하루마다 바뀌는 번호로 센 브라우저 수,
-   이쪽은 **회원** 수입니다(visit_mark() 가 회원·날짜 한 쌍만 남깁니다 · 관리자 뺌).
-   숫자는 DB 의 admin_stats_return_visits() 가 셉니다. 안에서 is_admin() 으로 잠겨 있습니다.
-
-   따로 불러옵니다 — 이 함수가 아직 없거나 실패해도 위 통계는 그대로 보이게 */
-type ReturnRow = {
-  day: string; visitors: number; returned: number; return_done: boolean;
-  return_pct: number | null; out_members: number; out_pct: number | null;
-};
-
-function ReturnVisits() {
-  const [rows, setRows] = useState<ReturnRow[] | null>(null);
-  const [err, setErr] = useState<string | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-    browserSupabase().rpc('admin_stats_return_visits', { p_days: 14 }).then(({ data, error }) => {
-      if (!alive) return;
-      if (error) setErr(error.message);
-      else setRows((data ?? []) as ReturnRow[]);
-    });
-    return () => { alive = false; };
-  }, []);
-
-  const pct = (v: number | string | null) => (v == null ? '—' : `${Number(v)}%`);
-
-  return (
-    <section>
-      <h2 className="break-keep text-h3 font-bold">
-        회원 재방문
-        <span className="ml-2 text-sm font-medium text-mute">최근 14일</span>
-      </h2>
-      <p className="mt-1 break-keep text-sm text-mute">
-        방문 회원 = 그날 온 회원 수(관리자 뺌) · 재방문 = 그중 다음 7일 안에 다시 온 비율 ·
-        원문 = 그중 그날 「공고 원문」을 누른 비율
-      </p>
-
-      {err ? (
-        <p className="mt-5 break-keep text-lg text-mute">아직 못 읽어요 — {err}</p>
-      ) : !rows ? (
-        <p className="mt-5 text-lg text-mute">세는 중…</p>
-      ) : rows.every((r) => Number(r.visitors) === 0) ? (
-        <p className="mt-5 break-keep text-lg text-mute">아직 기록이 없어요</p>
-      ) : (
-        <table className="mt-5 w-full break-keep text-left tabular-nums">
-          <thead className="text-sm text-mute">
-            <tr>
-              <th className="py-2 font-medium">날짜</th>
-              <th className="py-2 text-right font-medium">방문 회원</th>
-              <th className="py-2 text-right font-medium">7일 안 재방문</th>
-              <th className="py-2 text-right font-medium">원문 누름</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {[...rows].reverse().map((r) => (
-              <tr key={r.day} className="text-lg">
-                <td className="py-3">{r.day.slice(5)}</td>
-                <td className="py-3 text-right font-bold">{Number(r.visitors)}</td>
-                <td className="py-3 text-right">
-                  {r.return_done ? pct(r.return_pct) : <span className="text-mute">셈 중</span>}
-                  <span className="ml-2 text-sm text-mute">{Number(r.returned)}</span>
-                </td>
-                <td className="py-3 text-right">
-                  {pct(r.out_pct)}
-                  <span className="ml-2 text-sm text-mute">{Number(r.out_members)}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      <p className="mt-5 break-keep text-sm text-mute">
-        재방문은 그날부터 7일이 다 지나야 확정돼요. 그 전에는 「셈 중」과 지금까지 다시 온 회원 수만 보여요.
-        작은 회색 숫자는 비율의 분자(회원 수)예요.
-        기록은 이 장치를 켠 날부터 쌓여요 — 그 전 날은 0 이에요
-      </p>
-    </section>
-  );
-}
 
 function Big({
   label, v, prev, sub, note,

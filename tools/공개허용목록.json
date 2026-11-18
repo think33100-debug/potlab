@@ -1354,10 +1354,6 @@
         "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
       },
       {
-        "이름": "admin_stats_return_visits(p_days integer)",
-        "왜": "관리자 통계(/admin/stats 회원 재방문)가 로그인 상태로 부릅니다. SECURITY INVOKER · 안에서 is_admin() 을 보고, 표 RLS 도 관리자만 읽게 합니다 (2026-11-18 초안 sql/초안_1118/방문기록.sql)"
-      },
-      {
         "이름": "admin_stats_screens(p_days integer)",
         "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
       },
@@ -1704,10 +1700,6 @@
       {
         "이름": "unread_count(p_room bigint)",
         "왜": "회원이 자기 것을 손보는 자리입니다. 안에서 auth.uid() 를 봅니다"
-      },
-      {
-        "이름": "visit_mark()",
-        "왜": "회원 화면(components/visit-mark.tsx)이 하루 한 번 부릅니다. SECURITY INVOKER — member_visit_days RLS 가 자기 줄·오늘 날짜만 받습니다 (2026-11-18 초안)"
       }
     ],
     "표": [
@@ -1794,10 +1786,6 @@
       {
         "이름": "job_trash",
         "왜": "(왜 열어 두는지 적으십시오)"
-      },
-      {
-        "이름": "member_visit_days",
-        "왜": "visit_mark() 가 INVOKER 라 회원에게 넣기(칸 둘)가 필요합니다. 규칙 — 넣기는 자기 줄·오늘 날짜만, 읽기는 관리자만 (2026-11-18 초안)"
       },
       {
         "이름": "notification_settings",
