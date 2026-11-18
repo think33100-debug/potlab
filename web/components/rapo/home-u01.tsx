@@ -122,18 +122,20 @@ function Banners({ member }: { member: boolean }) {
         </Link>
       </div>
 
-      {/* 3 · 실사 · 교육학술 */}
+      {/* 3 · 실사 · 공시 병원 급여 — 2026-11-18 세중님 「겹치는 것 정리」로 교육학술에서 바꿈
+          (교육은 시작하기·학생 칸에 있습니다). 가는 곳은 연봉 안내 글(공공병원이 공시한 보수 · /guide/therapist-salary).
+          그림(banner3.png)은 그대로입니다 */}
       <div role="group" aria-roledescription="slide" aria-label="3 / 3"
         className="relative h-[246px] w-full shrink-0 snap-start overflow-hidden bg-[#edf6f0]">
         <배너사진 src="/rapo/home/banner3.png" />
         <Frame tone="navy" />
         <p className="absolute left-[36px] top-[65px] w-[240px] text-[23px] font-bold leading-[30px] text-(color:--rapo-brand-color-navy)">
-          {member ? <>다음 배움을<br />찾아보세요</> : <>내 직군에 맞는<br />교육·학술 일정</>}
+          공공병원<br />치료사 연봉
         </p>
-        <Link href="/edu"
+        <Link href="/guide/therapist-salary"
           className="absolute left-[36px] top-[185px] w-[220px] rounded-(--rapo-radius-r1) text-[14px] font-bold leading-[24px] text-(color:--rapo-brand-color-navy)
                      active:bg-(--rapo-color-bg-transparent-pressed)">
-          교육학술 보기 →
+          공시된 급여 보기 →
         </Link>
       </div>
     </RapoBannerCarousel>
@@ -185,7 +187,8 @@ function Arrow({ right, top }: { right: number; top: number }) {
    새 카드 그림은 3D 그림이 아직 없어 툴킷 28px 그림을 크게 씁니다 — 디자이너 그림이 오면 그림.src 만 바꿉니다. */
 type 시작카드 = {
   제목: string; 설명: [string, string?]; href: string; bg: string; 글색: string; 눌림: string;
-  그림: { src: string; 큰것?: '위' | '가운데' };
+  /* 크기 — 그림 판 안에서 그림 한 변(px). 피사체가 판을 꽉 채운 3D 원본은 작게 둡니다(기본 160) */
+  그림: { src: string; 큰것?: '위' | '가운데'; 크기?: number };
 };
 const 시작카드들: 시작카드[] = [
   { 제목: '커뮤니티 보기', 설명: ['어디서도 나눌 수 없던', '우리만의 이야기'], href: '/community',
@@ -194,18 +197,18 @@ const 시작카드들: 시작카드[] = [
   { 제목: '공고 찾기', 설명: ['내게 맞는 일을 찾아요'], href: '/jobs',
     bg: 'bg-(--rapo-brand-color-mist)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:bg-(--rapo-color-bg-neutral-weak-pressed)',
     그림: { src: '/rapo/home/start-jobs.png', 큰것: '가운데' } },
-  { 제목: '지난 채용 경쟁률', 설명: ['공공병원이 공개한', '회차별 경쟁률'], href: '/compete',
+  /* 2026-11-18 세중님 「공고 찾기 다음에 교육 확인하기, 채용경쟁률 확인하기 — 총 4개」.
+     봉사활동·청년정책·병원 둘러보기 카드는 뺐습니다(「라포 더 둘러보기」와 홈 「학생·취준생이라면」에 있습니다).
+     색은 브랜드 가이드 다섯 색 안에서 고릅니다(네이비 · 미스트 · 블러시) */
+  { 제목: '교육 확인하기', 설명: ['학회 교육 일정을', '한곳에서 봐요'], href: '/edu',
     bg: 'bg-(--rapo-brand-color-blush)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
-    그림: { src: '/rapo/home/graphic-cert-28.svg' } },
-  { 제목: '봉사활동', 설명: ['지역별로 모집 중인', '봉사를 찾아요'], href: '/volunteer',
-    bg: 'bg-(--rapo-color-palette-green-100)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
-    그림: { src: '/rapo/home/graphic-volunteer-28.svg' } },
-  { 제목: '청년정책', 설명: ['받을 수 있는 청년 지원', '지역별로 한눈에'], href: '/youth',
-    bg: 'bg-(--rapo-color-palette-blue-100)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
-    그림: { src: '/rapo/home/graphic-youth-28.svg' } },
-  { 제목: '병원 둘러보기', 설명: ['병원 규모와 치료사 수,', '근무 후기까지'], href: '/orgs',
-    bg: 'bg-(--rapo-color-palette-coral-100)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
-    그림: { src: '/rapo/home/graphic-hospital-28.svg' } },
+    /* 3D 그림 — Figma 「RAPO / 이미지 / 임상 실습 교재와 교육 일정」(1414:50888 · 원본 320px) */
+    그림: { src: '/rapo/home/start-edu.png', 큰것: '가운데', 크기: 112 } },
+  { 제목: '채용 경쟁률 확인하기', 설명: ['공공기관 경쟁률을', '정리했어요'], href: '/compete',
+    bg: 'bg-(--rapo-brand-color-mist)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:bg-(--rapo-color-bg-neutral-weak-pressed)',
+    /* 3D 그래프 그림 — 2026-11-18 세중님 「경쟁률은 그래프 모양으로 다시」. 브랜드 색(코럴·네이비·미스트 계열)으로 그린 막대 셋과 오르는 화살표.
+       Figma 에 맞는 원본이 없어 직접 그렸습니다(320px · 그린 코드는 금고 RAPO노트/시안_브랜드이야기_1118/경쟁률_그래프_그리기.js) */
+    그림: { src: '/rapo/home/start-compete-chart.png', 큰것: '가운데', 크기: 112 } },
 ];
 /* 큰 그림의 왼쪽·위 20px 를 흐리게 감춥니다 (원본 그대로) */
 const 그림가림 = '[mask-image:linear-gradient(to_right,transparent,#000_20px),linear-gradient(to_bottom,transparent,#000_20px)] [mask-composite:intersect]';
@@ -231,7 +234,8 @@ function StartHere() {
               </span>
               {c.그림.큰것 ? (
                 <span aria-hidden className={`absolute bottom-0 right-0 flex h-[124px] w-[160px] overflow-hidden ${c.그림.큰것 === '위' ? 'items-start' : 'items-center justify-center'} ${그림가림}`}>
-                  <Image src={c.그림.src} alt="" width={160} height={160} className="size-[160px] shrink-0 object-contain" />
+                  <Image src={c.그림.src} alt="" width={c.그림.크기 ?? 160} height={c.그림.크기 ?? 160} className="shrink-0 object-contain"
+                    style={{ width: c.그림.크기 ?? 160, height: c.그림.크기 ?? 160 }} />
                 </span>
               ) : (
                 /* eslint-disable-next-line @next/next/no-img-element -- 툴킷 SVG 그림을 크게 */
@@ -338,7 +342,9 @@ function MoreServices() {
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/home/toolkit.svg" alt="" width={72} height={72} className="shrink-0" />
       </Link>
-      <RapoServiceGrid />
+      {/* 여섯 칸(RapoServiceGrid)은 홈에서 뺐습니다 — 2026-11-18 세중님 「겹치는 것 정리 · 둘 다 고쳐」.
+          스펙·교육·봉사·청년정책이 위(시작하기·학생 칸)에 이미 있었습니다. 공시 병원 급여는 세 번째 배너로 옮겼고,
+          여섯 칸은 툴킷 화면(rapo-toolkit.tsx)에 그대로 있습니다 */}
       {/* 2026-11-14 세중님 「더 둘러보기 아래 버튼 CTA · 누르면 올인원 툴킷」 */}
       <RapoButton href="/toolkit" tone="navy" size={52} full>라포 올인원 툴킷 둘러보기</RapoButton>
     </section>
