@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { RapoBannerCarousel } from './rapo-banner-carousel';
 import { RapoBrandStory } from './rapo-brand-story';
+import { RapoStudentCorner } from './rapo-student-corner';
 import { SpecEntryArt, SpecEntryLabel, 스펙비교길 } from './rapo-spec-entry';
 import { RapoShell } from './rapo-shell';
 import { RapoStartScroller } from './rapo-start-scroller';
@@ -46,6 +47,9 @@ export function HomeU01({ jobs, who, sample = false, 관리덮기 }: {
         <div aria-hidden className="h-[6px] bg-(--rapo-color-bg-layer-default)" />
         {/* 「라포 이야기」 · 2026-11-18 세중님 「시작하기 아래에」 */}
         <RapoBrandStory />
+        <div aria-hidden className="h-[6px] bg-(--rapo-color-bg-layer-default)" />
+        {/* 「학생·취준생이라면」 · 2026-11-18 세중님 「학생들도 주 타겟」 */}
+        <RapoStudentCorner />
         <AnonymousTalk />
         <div aria-hidden className="h-[6px] bg-(--rapo-color-bg-layer-default)" />
         {/* 「조건으로 공고 찾기」는 2026-11-18 세중님 「빼자」로 뺐습니다 */}

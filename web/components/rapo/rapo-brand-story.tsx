@@ -91,12 +91,12 @@ export function RapoBrandStory() {
       </ul>
 
       {/* 라포의 약속 — 치료사 사진 · 「무엇이든 익명으로」
-          사진은 Figma 「04 · 사진 가이드 › AI 생성 예시 / 업무인계」(63:191 · 720×480) 그대로입니다.
-          2026-11-18 세중님 「저 아줌마들 별로 · 다른 것」 — 전에 쓰던 오린 그림(banner1-therapist.png)을 바꿈 */}
+          사진은 세중님이 ChatGPT 로 만든 「새끼손가락 약속」(1536×1024 · Figma 사진 가이드 공통 글 · 2026-11-18 「이걸로 해보자」).
+          그 전 — Figma 업무인계 사진(promise-talk.png) · 그 전 — 오린 그림(banner1-therapist.png, 세중님 「별로」) */}
       <div className="overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush)">
         <div className="relative aspect-[16/9] w-full min-[560px]:aspect-[5/2]">
-          <Image src="/rapo/home/promise-talk.png" alt="" fill sizes="(min-width: 768px) 728px, 100vw" aria-hidden
-            className="object-cover object-[50%_35%] min-[560px]:object-[50%_15%]" />
+          <Image src="/rapo/home/promise-pinky.webp" alt="" fill sizes="(min-width: 768px) 728px, 100vw" aria-hidden
+            className="object-cover object-[50%_45%] min-[560px]:object-[50%_48%]" />
         </div>
         <div className="px-(--rapo-dimension-x5) pt-(--rapo-dimension-x5)">
           <p className="rapo-type-t3-bold text-(color:--rapo-brand-color-coral)">라포의 약속</p>
