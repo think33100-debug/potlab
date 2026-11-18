@@ -141,8 +141,11 @@ export async function 모두받기(주소, 머리, 옵션 = {}) {
    함수 쪽은 **함수 자체가 쪽을 받게** 만들어야 합니다 (봉사목록·교육목록처럼
    `p_page` 를 받는 꼴). 그래서 여기서는 표만 다룹니다. */
 
-/* 스스로 검사 — node tools/쪽나눠받기.mjs --시험 */
-if (process.argv.includes('--시험')) {
+/* 스스로 검사 — node tools/쪽나눠받기.mjs --시험
+   ★ 2026-11-18 — **이 파일을 직접 돌릴 때만** 합니다. 전에는 이 파일을 가져다 쓰는 도구를
+     `--시험` 으로 돌려도 여기서 먼저 검사하고 끝나(process.exit), 그 도구 자기 검사가 안 돌았습니다
+     (collect-edu.mjs --시험 이 이 검사 23개만 찍고 끝났습니다) */
+if (process.argv.includes('--시험') && /쪽나눠받기\.mjs$/.test(String(process.argv[1] || '').replace(/\\/g, '/'))) {
   let 참 = 0, 거짓 = 0;
   const 봐 = (이름, 된것, 바란것) => {
     const ok = JSON.stringify(된것) === JSON.stringify(바란것);
