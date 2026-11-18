@@ -51,8 +51,84 @@ import { fileURLToPath } from 'node:url';
 import { 열린것견주기 } from './보안_열린것.mjs';
 import { 오늘셈 as 고용24셈, 오늘막힘 as 고용24막힘 } from './고용24한도.mjs';
 import { 그림OCR준비됐나 } from './그림OCR점검.mjs';
+/* ★ 2026-11-18 멘토-1.15-3 · 추가-지시문4 — 「병원 게시판 고장 n · 의심 n · 정상 n」과 고장 목록.
+   수집기(collect-hosp)가 바퀴마다 쌓는 기록을 읽기만 합니다. 가르는 규칙은 hosp/게시판건강.mjs 한 자리 */
+import os from 'node:os';
+import { 아침가르기, 아침줄 as 게시판아침줄, 기록파일이름, 기록환경이름 } from './hosp/게시판건강.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
+
+/** 병원 게시판 가름 — 기록이 없거나 깨졌으면 null (메일은 그대로 나갑니다) */
+function 게시판가름() {
+  try {
+    const p = process.env[기록환경이름] || path.join(os.homedir(), 기록파일이름);
+    if (!fs.existsSync(p)) return null;
+    return 아침가르기(JSON.parse(fs.readFileSync(p, 'utf8')), Date.now());
+  } catch (e) {
+    console.error('게시판 건강 기록을 못 읽었습니다 — ' + String(e.message || e).slice(0, 80));
+    return null;
+  }
+}
+const 게시판 = 게시판가름();
+const 게시판줄 = () => [...게시판아침줄(게시판), ''];
+
+/* ★ 2026-11-18 멘토-추가-지시문7 — 메일 **맨 위 다섯 줄**. 숫자는 이 메일이 이미 재는 것을 다시 씁니다.
+   글로()·아침글() 은 sync 라 글을 만들기 **전에** 재서 담습니다 (아래 샌것 과 같은 꼴). 줄 꼴은 tools/아침다섯줄.mjs */
+import { 다섯줄, 올린것제목, 나눔 as 기록나눔, 칸나눔 as 기록칸나눔 } from './아침다섯줄.mjs';
+import { 지금것 as 승인지금것 } from './승인대기읽기.mjs';
+let 다섯 = [];
+const 다섯기록파일 = process.env.POTJOB_FIVE_STATE || path.join(os.homedir(), '아침다섯줄기록.json');
+
+/** 줄 수만 — Content-Range 뒷자리 · 못 세면 null */
+async function 줄수만(cfg, 길) {
+  const k = cfg.SUPABASE_SERVICE_KEY;
+  if (!k) return null;
+  try {
+    const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + 길 + '&limit=1',
+      { headers: { apikey: k, Authorization: 'Bearer ' + k, Prefer: 'count=exact' } });
+    if (!r.ok) return null;
+    const m = String(r.headers.get('content-range') || '').match(/\/(\d+)\s*$/);
+    return m ? Number(m[1]) : null;
+  } catch { return null; }
+}
+
+async function 다섯줄만들기(cfg, d, 보안, 적기) {
+  /* 1 — 서버 저장소의 main 기록 (서버는 server-auto-pull 로 main 을 당깁니다) */
+  let git출력 = null;
+  try {
+    git출력 = execFileSync('git', ['-C', path.join(여기, '..'), 'log', '--first-parent', '--since=24 hours ago',
+      '--format=%s' + 기록칸나눔 + '%b' + 기록나눔, 'HEAD'], { encoding: 'utf8', timeout: 10e3 });
+  } catch { git출력 = null; }
+  /* 2 — 보안: 허용 목록 밖 열린 창구 (전날 값은 서버 파일에) */
+  const 오늘 = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  let 지난 = {};
+  try { if (fs.existsSync(다섯기록파일)) 지난 = JSON.parse(fs.readFileSync(다섯기록파일, 'utf8')) || {}; } catch { 지난 = {}; }
+  const 앞날 = Object.keys(지난).filter((k) => k < 오늘).sort().pop();
+  const 보 = 보안 && Number.isFinite(보안.밖합) ? { 밖합: 보안.밖합, 못봄수: (보안.못봄 || []).length } : null;
+  if (적기 && 보) {
+    try {
+      지난[오늘] = { 보안밖: 보.밖합 };
+      for (const k of Object.keys(지난)) if (k < new Date(Date.now() - 40 * 86400e3).toISOString().slice(0, 10)) delete 지난[k];
+      fs.writeFileSync(다섯기록파일, JSON.stringify(지난, null, 1) + '\n', 'utf8');
+    } catch (e) { console.error('다섯 줄 기록을 못 썼습니다 — ' + String(e.message || e).slice(0, 80)); }
+  }
+  /* 3·4 — 새 공고(24시간) · 보류함 */
+  const 하루전 = encodeURIComponent(new Date(Date.now() - 86400e3).toISOString());
+  const 새공고 = await 줄수만(cfg, 'job_posts?select=id&db_insert_at=gte.' + 하루전);
+  const 보류 = await 줄수만(cfg, 'job_posts?select=id&hold=is.true&hidden=is.false');
+  let 승인 = null;
+  try { 승인 = 승인지금것().것들.length; } catch { 승인 = null; }
+  /* 5 — 고용24 호출 수(이미 세는 것) · 공공데이터 하루 한도 줄 */
+  const 고 = 고용24셈();
+  const 어 = 고.어제 ? { ...고.어제, 합: Number(고.어제.목록 || 0) + Number(고.어제.상세 || 0) } : null;
+  return 다섯줄({
+    올린것: 올린것제목(git출력),
+    보안: 보, 보안전날: 앞날 && 지난[앞날] ? 지난[앞날].보안밖 : null,
+    게시판, 새공고, 보류, 새보류: Number.isFinite(Number(d['새 보류 건수'])) ? Number(d['새 보류 건수']) : null, 승인,
+    고용24: { 오늘: 고, 어제: 어 },
+    한도: ((d['하루 한도'] || {})['줄'] || []).map((x) => ({ 서비스: x['서비스'], 쓴양: x['쓴양'], 한도: x['한도'] })),
+  });
+}
 const SOURCE = 'HS3';
 
 function env() {
@@ -567,6 +643,8 @@ function 아침글(네, 늦음, 구멍, 잠금, 의심, 못담음, 역할) {
   const 놓침 = 네 ? 네['①놓친공고'] : null;
   줄.push('피오티잡 아침 숫자 — ' + new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' }).slice(0, 16));
   줄.push('');
+  /* ★ 2026-11-18 멘토-추가-지시문7 — 맨 위 다섯 줄 (긴 메일 글로() 맨 위에도 같은 줄) */
+  줄.push(...다섯);
   /* ★ 2026-10-23 세중님 3번 — **맨 위**입니다. 페르소나 상태인 것을 잊기 쉽습니다 */
   줄.push(...역할줄(역할));
   줄.push(...신뢰셋줄(네));
@@ -682,6 +760,8 @@ function 아침글(네, 늦음, 구멍, 잠금, 의심, 못담음, 역할) {
   줄.push('');
   줄.push('멈춘 수집기   ' + (늦음.length ? '⚠ ' + 늦음.length + '곳 — '
     + 늦음.map((x) => (x['출처'] || x['수집기'] || '?')).join(' · ') : '0곳'));
+  /* ★ 2026-11-18 멘토-1.15-3 — 병원 게시판 고장·의심·정상 (긴 메일 글로() 에도 같은 줄이 있습니다) */
+  줄.push(...게시판줄());
   줄.push('오래 쥔 잠금   ' + (잠금.length ? '⚠ ' + 잠금.map((x) => x.수집기 + ' ' + x.분 + '분').join(' · ') : '0'));
   /* ★ 2026-10-19 세중님 2번 — 고용24 하루 한도가 **신청 화면에 안 적혀 있습니다.**
      그래서 한도를 짐작하지 않고 **호출 수를 세어 여기 한 줄**로 적습니다.
@@ -802,6 +882,8 @@ function 오래쥔잠금(분기준 = 30) {
 /** 사람이 읽을 글로 */
 function 글로(d, 관리자주소, 잠금, 보안, 구멍, 네, 역할) {
   const 줄 = [];
+  /* ★ 2026-11-18 멘토-추가-지시문7 — 맨 위 다섯 줄 (아침글() 맨 위에도 같은 줄) */
+  줄.push(...다섯);
 
   /* ★ 2026-10-23 세중님 3번 — **맨 위**입니다. 페르소나 상태인 것을 잊기 쉽습니다.
      아침글() 과 **여기 둘 다** 겁니다 — 보류 공고가 있는 날에는 아침글() 이 안 돕니다 */
@@ -829,6 +911,9 @@ function 글로(d, 관리자주소, 잠금, 보안, 구멍, 네, 역할) {
   }
   줄.push(...고용24줄());
   줄.push('');
+  /* ★ 2026-11-18 멘토-1.15-3 — 병원 게시판 고장·의심·정상. 보류 공고가 있는 날에는 아침글() 이 안 도니
+     여기에도 겁니다 (위 신뢰셋줄·고용24줄 과 같은 까닭) */
+  줄.push(...게시판줄());
 
   /* ★ 2026-10-12 — 허용 목록 밖에 열린 창구 (세중님 지시).
      점검 자체는 GitHub 워크플로 anon-check.yml 이 날마다 돌며 **빌드를 떨굽니다.**
@@ -1047,6 +1132,9 @@ const 결과공고 = await 결과공고세기(cfg);
 const 매칭 = await 매칭재기(cfg);
 /* 긁기 (2026-10-24 · 읽기만 · 못 재면 null 이라 줄이 빠집니다) */
 const 긁기 = await 긁기재기(cfg);
+/* ★ 2026-11-18 멘토-추가-지시문7 — 맨 위 다섯 줄. 못 만들면 빈 채로 메일은 그대로 나갑니다 */
+try { 다섯 = await 다섯줄만들기(cfg, d, 보안, !보기만); }
+catch (e) { console.error('다섯 줄을 못 만들었습니다 — ' + String(e.message || e).slice(0, 120)); 다섯 = []; }
 
 if (조용한척 || (!d['보낼것있나'] && !잠금.length && !(보안 && 보안.밖합))) {
   if (!아침인가) {
@@ -1088,7 +1176,8 @@ if (조용한척 || (!d['보낼것있나'] && !잠금.length && !(보안 && 보�
     + (구멍 ? 구멍.사각 + '곳' : '?') + ' · 마감인데 보임 '
     + (네 ? 네['②마감인데보임'] + '건' : '?') + ' · 멈춘 수집기 '
     + ((d['늦은 수집기'] || []).length) + '곳'
-    + ' · 직군 의심 ' + ((d['직군 의심'] || {})['의심'] ?? '?') + '건';
+    + ' · 직군 의심 ' + ((d['직군 의심'] || {})['의심'] ?? '?') + '건'
+    + ' · 게시판 고장 ' + (게시판 && 게시판.곳수 ? 게시판.고장.length + '곳' : '?');
   if (보기만) { console.log('제목: ' + 짧은제목 + '\n'); console.log(짧은본문); process.exit(0); }
   if (cfg.RESEND_KEY && cfg.NOTIFY_EMAIL) {
     const r = await fetch('https://api.resend.com/emails', {
@@ -1149,7 +1238,8 @@ const 제목 = '[피오티잡] 확인할 공고 ' + d['새 보류 건수'] + '�
   + ((d['늦은 수집기'] || []).length ? ' · ⚠ 수집기 멈춤' : '')
   + (((d['공고마름'] || {})['마름']) ? ' · ⚠ 새 공고 마름' : '')
   + ((d['회원 화면'] || {})['샘'] ? ' · ⚠ 회원 화면에 샘' : '')
-  + (d['오류 신고'] ? ' · ⚠ 오류 신고 ' + d['오류 신고'] + '건' : '');
+  + (d['오류 신고'] ? ' · ⚠ 오류 신고 ' + d['오류 신고'] + '건' : '')
+  + (게시판 && 게시판.고장.length ? ' · 게시판 고장 ' + 게시판.고장.length + '곳' : '');
 
 if (보기만) {
   console.log('제목: ' + 제목 + '\n');

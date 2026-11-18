@@ -542,6 +542,16 @@ if (덧켬 && !이상) {
 if (이상) {
   console.error('\n★ 이상한 응답을 받아 멈춥니다 — 담지 않았습니다');
   console.error('   원문은 ' + 로그터 + '/워크넷_이상.log 에 남겼습니다');
+  /* 2026-11-18 멘토-1.7-2 — 실패한 바퀴도 박동을 남깁니다(ok:false). 전에는 박동 없이 끝나
+     「두 번 연속 실패」를 셀 기록이 없었습니다. 응답 글은 안 싣습니다(로그에만) */
+  if (!dry) {
+    try {
+      await rpc('collect_beat', { p_secret: cfg.COLLECT_KEY_WN2, p_source: SOURCE,
+        p_beat: { took_ms: Date.now() - t0, ok: false, 본곳: 1, 못받음: 셈.못받은쪽,
+          왜: '목록 이상한 응답 · 못 받은 쪽 ' + 셈.못받은쪽 + ' · 담지 않음',
+          메모: { 읽은줄: 셈.읽은줄, 실패: '목록' } } });
+    } catch (e) { console.error('실패 박동 못 남김 · ' + String(e.message).slice(0, 120)); }
+  }
   process.exit(1);
 }
 
