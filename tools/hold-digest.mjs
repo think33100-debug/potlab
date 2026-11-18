@@ -55,22 +55,29 @@ import { 그림OCR준비됐나 } from './그림OCR점검.mjs';
    수집기(collect-hosp)가 바퀴마다 쌓는 기록을 읽기만 합니다. 가르는 규칙은 hosp/게시판건강.mjs 한 자리 */
 import os from 'node:os';
 import { 아침가르기, 아침줄 as 게시판아침줄, 기록파일이름, 기록환경이름 } from './hosp/게시판건강.mjs';
+/* ★ 2026-11-18 멘토-1.15-2 — 주 1회 기준 공고 판정(찾음 · 못 찾음 · 판정 전 · 고르는 중)과 못 찾은 곳 목록.
+   못 찾은 곳은 위 아침가르기 가 「의심」으로도 셉니다. 같은 기록 파일의 `기준` 칸 · 규칙은 hosp/기준공고.mjs */
+import { 기준가르기, 기준줄 } from './hosp/기준공고.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 
 /** 병원 게시판 가름 — 기록이 없거나 깨졌으면 null (메일은 그대로 나갑니다) */
+let 기준가름 = null;
 function 게시판가름() {
   try {
     const p = process.env[기록환경이름] || path.join(os.homedir(), 기록파일이름);
     if (!fs.existsSync(p)) return null;
-    return 아침가르기(JSON.parse(fs.readFileSync(p, 'utf8')), Date.now());
+    const 기록 = JSON.parse(fs.readFileSync(p, 'utf8'));
+    try { 기준가름 = 기준가르기(기록, Date.now()); } catch { 기준가름 = null; }
+    return 아침가르기(기록, Date.now());
   } catch (e) {
     console.error('게시판 건강 기록을 못 읽었습니다 — ' + String(e.message || e).slice(0, 80));
     return null;
   }
 }
 const 게시판 = 게시판가름();
-const 게시판줄 = () => [...게시판아침줄(게시판), ''];
+/* 기준 공고 줄은 게시판 기록이 있을 때만 (없으면 위 줄이 「아직 기록이 없습니다」라고 말합니다) */
+const 게시판줄 = () => [...게시판아침줄(게시판), ...(게시판 && 게시판.곳수 ? 기준줄(기준가름) : []), ''];
 
 /* ★ 2026-11-18 멘토-추가-지시문7 — 메일 **맨 위 다섯 줄**. 숫자는 이 메일이 이미 재는 것을 다시 씁니다.
    글로()·아침글() 은 sync 라 글을 만들기 **전에** 재서 담습니다 (아래 샌것 과 같은 꼴). 줄 꼴은 tools/아침다섯줄.mjs */
