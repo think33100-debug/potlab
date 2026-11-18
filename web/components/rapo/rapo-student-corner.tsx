@@ -1,91 +1,81 @@
 import Link from 'next/link';
 
+import { RapoOpenFrame } from './rapo-open-frame';
 import { 스펙비교길 } from './rapo-spec-entry';
+import { RapoButton, RapoSectionTitle } from './rapo-ui';
 
 /* 홈 「학생·취준생이라면」 — 2026-11-18 세중님 「학생들도 주 타겟이라 학생들이 이용할 수 있는 기능이랑
-   학생들이 보고 이용하고 싶어지는 것도 넣어야」.
-   자리 — 홈 「라포 이야기」 바로 아래 (home-u01.tsx).
+   학생들이 보고 이용하고 싶어지는 것도 넣어야」. 자리 — 홈 「라포 이야기」 바로 아래 (home-u01.tsx).
 
-   **지금 앱에 열려 있는 것만** 모았습니다 (새 기능 없음 · 새 주소 없음) —
-     취업 스펙 비교   /spec/compare (학생끼리 · 20명부터 상위 % · 2026-11-17)
-     신입 가능 공고   /jobs?new=1 (2026-11-14)
-     지난 채용 경쟁률  /compete
-     봉사활동 · 청년정책  /volunteer · /youth
-     졸업 후 1년 무료  lib/school-period.ts 무료끝날 — 가입 끝 화면이 이미 보여 주는 말입니다
+   2판 (같은 날 세중님 「디자인 지침에 맞게 · 피그마 디자인 요소 확인」) — Figma 「02 · 브랜드·BI·콘텐츠 가이드」를 따릅니다.
+     · 스펙 비교  「프레임 활용 C · 질문 둘레에 배치」(91:283) — 네이비 바탕 + 코럴 열린 프레임 + 질문 하나.
+                 단추는 공통 「RAPO / Button / Filled · BI coral · 40」(172:18). 전의 그라데이션 막대는 가이드에 없어 뺐습니다
+     · 네 줄     「06 · 콘텐츠 적용 › 정보형」(102:1876) 꼴 — 01·02·… 번호와 한 줄 설명. 전의 연두·하늘색 칸과 3D 그림은
+                 브랜드 색(코럴·네이비·화이트·블러시·미스트) 밖이라 뺐습니다
+     · 무료 안내  블러시 = 「강조 문구의 배경」(34:159)
+     · 말투      브랜드 보이스(32:21) — 막연한 장점 대신 확인할 수 있는 것을 짚습니다
+
+   **지금 앱에 열려 있는 것만** 이었습니다 (새 기능 · 새 주소 없음) —
+     취업 스펙 비교 /spec/compare · 신입 가능 공고 /jobs?new=1 · 지난 채용 경쟁률 /compete ·
+     봉사활동 /volunteer · 청년정책 /youth · 졸업 후 1년 무료(lib/school-period.ts — 가입 끝 화면이 이미 보여 주는 말)
    안 적은 것 — 실습 후기·학생 커뮤니티(학생인증 뒤에 엶 · 아직 안 열림). */
 
-const 칸들 = [
-  { 제목: '신입 가능 공고', 설명: '경력 없이 지원해요', href: '/jobs?new=1',
-    bg: 'bg-(--rapo-brand-color-mist)', 그림: '/rapo/home/graphic-hospital-28.svg' },
-  { 제목: '지난 채용 경쟁률', 설명: '공공병원 공개 자료', href: '/compete',
-    bg: 'bg-(--rapo-brand-color-blush)', 그림: '/rapo/home/graphic-cert-28.svg' },
-  { 제목: '봉사활동', 설명: '지역별 모집 봉사', href: '/volunteer',
-    bg: 'bg-(--rapo-color-palette-green-100)', 그림: '/rapo/home/graphic-volunteer-28.svg' },
-  { 제목: '청년정책', 설명: '받을 수 있는 지원', href: '/youth',
-    bg: 'bg-(--rapo-color-palette-blue-100)', 그림: '/rapo/home/graphic-youth-28.svg' },
+const 줄들 = [
+  { 번호: '01', 제목: '신입 가능 공고', 설명: '경력 없이 지원할 수 있어요.', href: '/jobs?new=1' },
+  { 번호: '02', 제목: '지난 채용 경쟁률', 설명: '공공병원이 공개한 경쟁률이에요.', href: '/compete' },
+  { 번호: '03', 제목: '봉사활동', 설명: '지역별 모집 중인 봉사를 찾아요.', href: '/volunteer' },
+  { 번호: '04', 제목: '청년정책', 설명: '받을 수 있는 청년 지원을 봐요.', href: '/youth' },
 ];
 
 export function RapoStudentCorner() {
   return (
     <section aria-labelledby="rapo-home-student"
-      className="flex flex-col gap-(--rapo-dimension-x5) bg-(--rapo-brand-color-white) px-(--rapo-dimension-x5) py-(--rapo-dimension-x8)">
+      className="flex flex-col gap-(--rapo-dimension-x6) bg-(--rapo-brand-color-white) px-(--rapo-dimension-x5) py-(--rapo-dimension-x8)">
 
       {/* 머리 */}
       <header className="flex flex-col gap-(--rapo-dimension-x2)">
-        <p className="rapo-type-t3-bold text-(color:--rapo-brand-color-coral)">학생·취준생이라면</p>
-        <h2 id="rapo-home-student" className="rapo-type-t9-bold text-(color:--rapo-brand-color-navy)">
-          <span className="block">첫 직장,</span>
-          <span className="block">미리 보고 준비해요</span>
-        </h2>
-        <p className="rapo-type-t3-bold mt-(--rapo-dimension-x1) self-start rounded-full bg-(--rapo-brand-color-blush) px-(--rapo-dimension-x3) py-(--rapo-dimension-x1) text-(color:--rapo-brand-color-coral)">
-          졸업 후 1년까지 무료로 써요
+        <p className="rapo-type-t2-bold text-(color:--rapo-brand-color-coral)">학생·취준생이라면</p>
+        <RapoSectionTitle id="rapo-home-student">첫 직장, 미리 보고 준비해요</RapoSectionTitle>
+        <p className="rapo-type-t4-medium mt-(--rapo-dimension-x1) break-keep rounded-(--rapo-radius-r1) bg-(--rapo-brand-color-blush) px-(--rapo-dimension-x4) py-(--rapo-dimension-x3) text-(color:--rapo-brand-color-navy)">
+          학생·취준생은 <b className="font-bold text-(color:--rapo-brand-color-coral)">졸업 후 1년까지 무료</b>로 써요.
         </p>
       </header>
 
-      {/* 큰 카드 — 취업 스펙 비교 */}
-      <Link href={스펙비교길}
-        className="flex flex-col gap-(--rapo-dimension-x4) rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-navy) p-(--rapo-dimension-x5) active:bg-(--rapo-color-bg-navy-solid-pressed)">
-        <span className="flex flex-col gap-(--rapo-dimension-x1)">
-          <span className="rapo-type-t3-bold text-(color:--rapo-brand-color-coral)">취업 스펙 비교</span>
-          <span className="rapo-type-t8-bold text-(color:--rapo-brand-color-white)">
-            <span className="block">내 스펙,</span>
-            <span className="block">준비생 중 어디쯤일까?</span>
-          </span>
-          {/* 줄은 뜻 단위로 직접 나눕니다 — 「봐요」만 혼자 떨어졌습니다 (2026-11-18 · 375 폭) */}
-          <span className="rapo-type-t3-regular break-keep text-white/80">
+      {/* 취업 스펙 비교 — 프레임 활용 C (질문 둘레에 배치) */}
+      <div className="relative rounded-(--rapo-radius-r1) bg-(--rapo-brand-color-navy) px-(--rapo-dimension-x8) pb-(--rapo-dimension-x10) pt-(--rapo-dimension-x10)">
+        <RapoOpenFrame className="inset-(--rapo-dimension-x4)" />
+        <div className="relative flex flex-col gap-(--rapo-dimension-x3)">
+          <p className="rapo-type-t2-regular text-(color:--rapo-brand-color-white) opacity-80">라포 취업 스펙 비교</p>
+          <h3 className="rapo-type-t8-bold text-(color:--rapo-brand-color-white)">
+            <span className="block">내 스펙은</span>
+            <span className="block">준비생 중 어디쯤일까요?</span>
+          </h3>
+          <p className="rapo-type-t4-regular break-keep text-(color:--rapo-brand-color-white)">
             <span className="block">학점·자격·실습·어학을 넣으면</span>
-            <span className="block">같은 직군 준비생과 견줘 봐요</span>
-          </span>
-        </span>
+            <span className="block">같은 직군 준비생과 견줘 볼 수 있어요.</span>
+          </p>
+          <RapoButton href={스펙비교길} tone="coral" size={40} className="mt-(--rapo-dimension-x2) self-start">
+            내 스펙 점수 보기
+          </RapoButton>
+        </div>
+      </div>
 
-        {/* 꾸밈 — 막대 위 「나」 (숫자 없음 · 실제 점수 아님) */}
-        <span aria-hidden className="relative block pb-(--rapo-dimension-x1) pt-(--rapo-dimension-x6)">
-          <span className="absolute left-[62%] top-0 -translate-x-1/2 rounded-full bg-(--rapo-brand-color-coral) px-(--rapo-dimension-x2) text-[11px] font-bold leading-[18px] text-(color:--rapo-brand-color-white)">나</span>
-          <span className="absolute left-[62%] top-[18px] h-[6px] w-[2px] -translate-x-1/2 bg-(--rapo-brand-color-coral)" />
-          <span className="block h-[8px] w-full overflow-hidden rounded-full bg-white/15">
-            <span className="block h-full w-[62%] rounded-full bg-gradient-to-r from-white/30 to-(--rapo-brand-color-coral)" />
-          </span>
-        </span>
-
-        <span className="rapo-type-t4-bold self-start rounded-full bg-(--rapo-brand-color-white) px-(--rapo-dimension-x4) py-(--rapo-dimension-x2) text-(color:--rapo-brand-color-navy)">
-          내 스펙 점수 보기 →
-        </span>
-      </Link>
-
-      {/* 작은 칸 넷 */}
-      <ul className="grid grid-cols-2 gap-(--rapo-dimension-x2)">
-        {칸들.map((c) => (
-          <li key={c.href}>
-            <Link href={c.href}
-              className={`flex h-full flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) p-(--rapo-dimension-x4) active:brightness-95 ${c.bg}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element -- 툴킷 SVG 그림 */}
-              <img aria-hidden src={c.그림} alt="" width={32} height={32} className="size-[32px]" />
-              <span className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">{c.제목}</span>
-              <span className="rapo-type-t3-regular break-keep text-[#3F4C57]">{c.설명}</span>
+      {/* 정보형 — 번호와 한 줄 설명 (102:1876 꼴) */}
+      <ol className="flex flex-col rounded-(--rapo-radius-r1) bg-(--rapo-brand-color-mist) px-(--rapo-dimension-x5) py-(--rapo-dimension-x2)">
+        {줄들.map((r, i) => (
+          <li key={r.href} className={i > 0 ? 'border-t-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak)' : ''}>
+            <Link href={r.href} className="flex items-center gap-(--rapo-dimension-x3) py-(--rapo-dimension-x4) active:opacity-70">
+              <span className="flex min-w-0 flex-1 flex-col gap-(--rapo-dimension-x1)">
+                <span className="rapo-type-t6-bold flex gap-(--rapo-dimension-x2) text-(color:--rapo-brand-color-navy)">
+                  <span>{r.번호}</span><span>{r.제목}</span>
+                </span>
+                <span className="rapo-type-t4-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{r.설명}</span>
+              </span>
+              <span aria-hidden className="rapo-type-t8-regular shrink-0 text-(color:--rapo-brand-color-navy)">›</span>
             </Link>
           </li>
         ))}
-      </ul>
+      </ol>
     </section>
   );
 }
