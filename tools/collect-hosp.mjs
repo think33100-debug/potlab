@@ -249,6 +249,21 @@ function 주소맞추기(u) {
       .replace(/\/+$/, '').toLowerCase();
   }
 }
+/* ── 세션 값 떼기 (2026-11-18) ─────────────────────────────
+   희명병원 게시판은 글 주소 끝에 `PHPSESSID=…` 를 붙여 줍니다. 바퀴마다 값이 바뀌어
+   공고ID(기관|주소|제목 해시)가 바퀴마다 새로 생겼고, 같은 공고 하나가 쓰레기통에
+   800줄 넘게 쌓였습니다(11/18 DB). 세션 값 없이도 상세가 그대로 열리는 것을 확인했습니다.
+   **공고ID 규칙은 그대로** 두고, 설정에 `세션떼기: true` 를 단 곳만 주소에서 뗍니다
+   (다른 곳 번호는 안 바뀝니다). 떼는 것 — PHPSESSID · JSESSIONID · sessionid 칸과 `;jsessionid=…` */
+export function 세션값떼기(u) {
+  /* URL 객체로 다시 쓰면 `bbs_data=…=||` 같은 값의 글자가 %3D·%7C 로 바뀌어 번호가 또 갈립니다 —
+     글자 그대로 그 칸만 뗍니다 */
+  return String(u || '')
+    .replace(/;jsessionid=[^/?#&]*/gi, '')
+    .replace(/([?&])(?:phpsessid|jsessionid|sessionid)=[^&#]*&?/gi, '$1')
+    .replace(/[?&]+(#|$)/, '$1');
+}
+
 /* 대조용 열쇠 — 주소가 있으면 주소로, 없으면 옛날처럼 번호로 */
 const 대조키 = (기관, url, id) => (url ? 붙이기(기관) + '|' + 주소맞추기(url) : 'ID:' + String(id));
 
@@ -452,7 +467,7 @@ for (let i = 0; i < 볼것.length; i += 동시) {
       /* ★ 2026-11-18 멘토-추가-지시문5 — 설정이 증명 못 한 「목록 날짜 = 마감」은 거둡니다 (hosp/목록마감.mjs 한 자리) */
       const r = 목록날짜고르기(r0, s, 오늘);
       if (r !== r0) { 셈.목록마감거둠++; 목록마감거둔곳.set(s.name, (목록마감거둔곳.get(s.name) || 0) + 1); }
-      if (r.title && r.url) { 모은것.push({ ...r, 곳: s }); return; }
+      if (r.title && r.url) { 모은것.push({ ...r, url: s['세션떼기'] ? 세션값떼기(r.url) : r.url, 곳: s }); return; }
       셈.주소없음++;
       주소없는곳.set(s.name, (주소없는곳.get(s.name) || 0) + 1);
     });
