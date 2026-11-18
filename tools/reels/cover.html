@@ -33,23 +33,35 @@
   .row .k { font-size: 34px; font-weight: 600; color: #5E6B73; width: 150px; flex: none; }
   .row small { display: block; font-size: 28px; font-weight: 600; color: #5E6B73; margin-top: 4px; }
   #foot { margin-top: 56px; font-size: 32px; font-weight: 700; color: #5E6B73; }
-  #dday { position: absolute; right: 110px; width: 210px; height: 210px; border-radius: 50%; background: var(--navy); color: var(--white);
-          display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-8deg); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
-  #dday b { font-size: 72px; font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
-  #dday span { font-size: 28px; font-weight: 800; margin-top: 4px; }
+  /* 2026-11-18 세중님 「D-7 동그라미가 AI 티가 남 · 공고 쪽으로 화살표 · D-7 은 고급스럽게」
+     → 오른쪽 위는 브랜드 카드와 같은 화살표(공고 글을 가리킴) · D-day 는 아래 줄 오른쪽에 가는 글자로 */
+  #arrow { position: absolute; right: 110px; width: 120px; height: 120px; transform: rotate(-90deg); filter: saturate(0.62) brightness(1.05); }
+  #bottom { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; }
+  #bottom #rows { margin-top: 0; }
+  #dday { flex: none; text-align: right; color: var(--navy); padding-left: 34px; border-left: 2px solid rgba(44,62,76,0.18); }
+  #dday span { display: block; font-size: 26px; font-weight: 600; letter-spacing: 0.12em; color: #5E6B73; }
+  #dday b { display: block; font-size: 128px; font-weight: 300; line-height: 0.95; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; margin-top: 8px; }
+  /* 직군 색 — 하이라이트(PT 파랑 · OT 초록 · 공통 모래)와 같은 결로 바탕을 아주 옅게 · 작은 직군 칩 (2026-11-18 「OT PT 두 공고가 겹쳐 보일까」) */
+  body[data-job="pt"] { --sage: #E5EBF2; --tag: #8FA6BF; }
+  body[data-job="ot"] { --sage: #E7EEE9; --tag: #8DB09C; }
+  body[data-job="both"] { --sage: #EFEAE2; --tag: #C7AE7E; }
+  html:has(body[data-job]) { background: var(--sage); }
+  #tags { margin-top: 120px; display: flex; gap: 14px; align-items: center; }
+  #tags #eyebrow { margin-top: 0; }
+  #jobtag { font-size: 40px; font-weight: 800; color: var(--white); background: var(--tag, #8DB09C); padding: 10px 22px; border-radius: 12px; }
 </style>
 </head>
 <body>
 <div id="frame"><svg viewBox="0 0 960 1000" preserveAspectRatio="none"><path d="M640 6H6V994H954V140" stroke="#2C3E4C" stroke-opacity="0.35" stroke-width="10" fill="none" vector-effect="non-scaling-stroke"/></svg></div>
 <div id="box">
   <div id="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div>
-  <div id="eyebrow"></div>
+  <div id="tags"><div id="jobtag"></div><div id="eyebrow"></div></div>
   <div id="org"></div>
   <div id="job"></div>
-  <div id="rows"></div>
+  <div id="bottom"><div id="rows"></div><div id="dday"><span>마감까지</span><b id="ddayb"></b></div></div>
   <div id="foot">프로필 링크 → RAPO에서 원문 공고</div>
 </div>
-<div id="dday"><b id="ddayb"></b><span>마감</span></div>
+<img id="arrow" src="assets/arrow.svg" alt="">
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -59,7 +71,11 @@ window.__setData = (d, 판 = 'reel') => {
   const 위 = 카드 ? 0 : 285;
   /* 테두리 · D-day 는 상자 기준으로 놓습니다 */
   $('frame').style.top = (위 + 50) + 'px'; $('frame').style.height = 1250 + 'px';
-  $('dday').style.top = (위 + 70) + 'px';      /* 로고 줄 오른쪽 위 — 이름을 가리지 않게 */
+  $('arrow').style.top = (위 + 105) + 'px';     /* 로고 줄 오른쪽 위 — 공고 글을 가리킴 */
+  const 직군 = String(d.직군 || '');
+  const 갈래 = /물리/.test(직군) && /작업/.test(직군) ? 'both' : /물리/.test(직군) ? 'pt' : /작업/.test(직군) ? 'ot' : 'both';
+  document.body.dataset.job = 갈래;
+  $('jobtag').textContent = { pt: 'PT', ot: 'OT', both: 'PT · OT' }[갈래];
   const 훅 = d.훅 || {};
   $('eyebrow').textContent = 훅.작은 && 훅.작은 !== '새 공고' ? 훅.작은 : (d.분류 || []).join(' · ') || '새 공고';
   $('org').textContent = String(d.기관 || '').replace(/^(학교법인|의료법인|사회복지법인|재단법인)\s*/, '');
