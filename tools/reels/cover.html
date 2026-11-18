@@ -8,10 +8,11 @@
      글은 전부 자료(공고·기관 공식 값)에서 옵니다 — 커버라고 따로 지어 쓰는 말이 없습니다 -->
 <style>
   @font-face { font-family: "PretendardV"; src: url("fonts/PretendardVariable.woff2") format("woff2"); font-weight: 100 900; }
-  :root { --coral: #FF4F40; --navy: #112231; --white: #FFFFFF; }
+  /* 2026-11-18 세중님 「눈이 아프다 · 추천대로」 — ② 세이지 + 네이비: 넓은 바탕은 연한 세이지, 코랄은 강조 글자에만 (차분한 #D9776C) */
+  :root { --coral: #D9776C; --navy: #2C3E4C; --ink: #22313D; --sage: #E7EEE9; --white: #FFFFFF; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--coral); }
-  body { font-family: "PretendardV", sans-serif; color: var(--white); word-break: keep-all; letter-spacing: -0.02em; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--sage); }
+  body { font-family: "PretendardV", sans-serif; color: var(--ink); word-break: keep-all; letter-spacing: -0.02em; }
   body.card, html.card { height: 1350px; }
   /* 커다란 열린 테두리 — OG 그림·영상과 같은 말 (오른쪽 위가 열림) */
   #frame { position: absolute; left: 60px; right: 60px; border: 0; }
@@ -19,26 +20,27 @@
   #box { position: absolute; left: 0; right: 0; top: 285px; height: 1350px; padding: 110px 110px 100px; display: flex; flex-direction: column; }
   body.card #box { top: 0; }
   #logo { display: flex; align-items: center; gap: 16px; }
-  #logo img.sym { width: 64px; height: 63px; filter: brightness(0) invert(1); }
+  #logo img.sym { width: 64px; height: 63px; filter: saturate(0.62) brightness(1.05); }
+  #logo img.word { filter: brightness(0) saturate(100%) invert(16%) sepia(18%) saturate(900%) hue-rotate(165deg); }
   #logo img.word { height: 32px; }
-  #eyebrow { margin-top: 120px; align-self: flex-start; font-size: 40px; font-weight: 700; background: rgba(255,255,255,0.2); padding: 10px 24px; border-radius: 12px; }
+  #eyebrow { margin-top: 120px; align-self: flex-start; font-size: 40px; font-weight: 700; background: var(--white); color: var(--coral); padding: 10px 24px; border-radius: 12px; }
   #org { margin-top: 30px; font-size: 104px; font-weight: 800; line-height: 1.12; }
   #job { margin-top: 10px; font-size: 104px; font-weight: 800; line-height: 1.12; }
-  #job .em { position: relative; }
-  #job .em i { position: absolute; left: -6px; right: -6px; bottom: 8px; height: 30px; background: rgba(255,255,255,0.3); z-index: -1; }
+  #job .em { position: relative; color: var(--coral); }
+  #job .em i { position: absolute; left: -6px; right: -6px; bottom: 8px; height: 30px; background: rgba(217,119,108,0.18); z-index: -1; }
   #rows { margin-top: auto; display: flex; flex-direction: column; gap: 18px; }
   .row { display: flex; align-items: baseline; gap: 22px; font-size: 46px; font-weight: 700; }
-  .row .k { font-size: 34px; font-weight: 600; opacity: 0.85; width: 150px; flex: none; }
-  .row small { display: block; font-size: 28px; font-weight: 600; opacity: 0.85; margin-top: 4px; }
-  #foot { margin-top: 56px; font-size: 32px; font-weight: 700; opacity: 0.92; }
-  #dday { position: absolute; right: 110px; width: 210px; height: 210px; border-radius: 50%; background: var(--white); color: var(--coral);
+  .row .k { font-size: 34px; font-weight: 600; color: #5E6B73; width: 150px; flex: none; }
+  .row small { display: block; font-size: 28px; font-weight: 600; color: #5E6B73; margin-top: 4px; }
+  #foot { margin-top: 56px; font-size: 32px; font-weight: 700; color: #5E6B73; }
+  #dday { position: absolute; right: 110px; width: 210px; height: 210px; border-radius: 50%; background: var(--navy); color: var(--white);
           display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-8deg); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
   #dday b { font-size: 72px; font-weight: 900; line-height: 1; letter-spacing: -0.04em; }
   #dday span { font-size: 28px; font-weight: 800; margin-top: 4px; }
 </style>
 </head>
 <body>
-<div id="frame"><svg viewBox="0 0 960 1000" preserveAspectRatio="none"><path d="M640 6H6V994H954V140" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="10" fill="none" vector-effect="non-scaling-stroke"/></svg></div>
+<div id="frame"><svg viewBox="0 0 960 1000" preserveAspectRatio="none"><path d="M640 6H6V994H954V140" stroke="#2C3E4C" stroke-opacity="0.35" stroke-width="10" fill="none" vector-effect="non-scaling-stroke"/></svg></div>
 <div id="box">
   <div id="logo"><img class="sym" src="assets/symbol.svg" alt=""><img class="word" src="assets/wordmark.svg" alt=""></div>
   <div id="eyebrow"></div>

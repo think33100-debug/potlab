@@ -10,7 +10,7 @@
 <style>
   @font-face { font-family: "PretendardV"; src: url("fonts/PretendardVariable.woff2") format("woff2"); font-weight: 100 900; }
   :root {
-    --navy: #112231; --coral: #FF4F40; --coral-weak: #FFF1EE; --ink: #1a1c20; --muted: #6B7380;
+    --navy: #2C3E4C; --coral: #D9776C; --coral-weak: #F6E7E4;   /* 2026-11-18 ② 세이지+네이비 — 차분한 네이비 · 코랄 */ --ink: #1a1c20; --muted: #6B7380;
     --line: #E6E8EB; --white: #FFFFFF;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,7 +22,7 @@
   /* 위 줄 — 로고 · 「새 공고」 */
   #top { left: 80px; top: 230px; right: 80px; display: flex; align-items: center; justify-content: space-between; }
   #top .logo { display: flex; align-items: center; gap: 18px; }
-  #top .logo img.sym { width: 72px; height: 71px; }
+  #top .logo img.sym { width: 72px; height: 71px; filter: saturate(0.62) brightness(1.05); }   /* 코랄 R 을 차분하게 (2026-11-18) */
   #top .logo img.word { height: 36px; }
   #top .new { font-size: 38px; font-weight: 700; color: var(--white); }
 
@@ -36,7 +36,7 @@
   #s1 .photo { left: 0; top: 0; width: 1080px; height: 1020px; overflow: hidden; display: none; }
   #s1 .photo img { width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 60%; }
   #s1 .photo::after { content: ""; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(17,34,49,0.55) 0%, rgba(17,34,49,0) 28%, rgba(17,34,49,0) 55%, var(--navy) 100%); }
+    background: linear-gradient(180deg, rgba(44,62,76,0.55) 0%, rgba(44,62,76,0) 28%, rgba(44,62,76,0) 55%, var(--navy) 100%); }
   #s1 .hook { left: 80px; right: 120px; top: 560px; }
   body.has-photo #s1 .hook { top: 860px; }
   /* 작은 사진(가로 300~600) — 화면 가득 키우면 흐려져서 **둥근 액자**로. 뒤에는 같은 사진이 흐리게 깔립니다 */
@@ -70,7 +70,7 @@
   body.has-logo #s1 .dday { top: 735px; }
   /* 건축조감도 — 실사로 읽히지 않게 사진 위에 딱지 */
   #s1 .rendtag { left: 80px; top: 330px; display: none; font-size: 32px; font-weight: 800; color: var(--white);
-    background: rgba(17,34,49,0.78); padding: 10px 20px; border-radius: 10px; z-index: 3; }
+    background: rgba(44,62,76,0.78); padding: 10px 20px; border-radius: 10px; z-index: 3; }
   body.is-rendering #s1 .rendtag { display: block; }
   /* 사진 출처 — 사진이 보이는 동안 맨 아래(인스타 글자가 덮기 전 줄) */
   #credit { left: 80px; right: 140px; top: 1500px; font-size: 30px; font-weight: 600; color: rgba(255,255,255,0.82);
@@ -79,7 +79,7 @@
   /* 흰 판 (2 · 3) — OG 의 열린 테두리 */
   .panel { left: 60px; width: 960px; top: 420px; min-height: 720px; background: var(--white); color: var(--ink); }
   .panel svg.frame { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
-  .panel .arrow { position: absolute; right: 40px; top: 26px; width: 88px; height: 88px; transform: rotate(-90deg); }
+  .panel .arrow { position: absolute; right: 40px; top: 26px; width: 88px; height: 88px; transform: rotate(-90deg); filter: saturate(0.62) brightness(1.05); }
   .panel .in { position: relative; padding: 72px 64px 64px; }
   .eyebrow { font-size: 36px; font-weight: 700; color: var(--coral); }
   .h { font-size: 68px; font-weight: 800; line-height: 1.2; margin-top: 18px; }
@@ -161,7 +161,7 @@
 
 <section id="s2" class="scene">
   <div class="panel abs" id="p2">
-    <svg class="frame" viewBox="0 0 960 1080" preserveAspectRatio="none"><path id="f2" d="M640 6H6V1074H954V140" stroke="#FF4F40" stroke-width="12" fill="none" vector-effect="non-scaling-stroke"/></svg>
+    <svg class="frame" viewBox="0 0 960 1080" preserveAspectRatio="none"><path id="f2" d="M640 6H6V1074H954V140" stroke="#D9776C" stroke-width="12" fill="none" vector-effect="non-scaling-stroke"/></svg>
     <img class="arrow" src="assets/arrow.svg" alt="">
     <div class="in">
       <div class="eyebrow">어떤 곳이에요?</div>
@@ -175,7 +175,7 @@
 
 <section id="s3" class="scene">
   <div class="panel abs" id="p3">
-    <svg class="frame" viewBox="0 0 960 1080" preserveAspectRatio="none"><path id="f3" d="M640 6H6V1074H954V140" stroke="#FF4F40" stroke-width="12" fill="none" vector-effect="non-scaling-stroke"/></svg>
+    <svg class="frame" viewBox="0 0 960 1080" preserveAspectRatio="none"><path id="f3" d="M640 6H6V1074H954V140" stroke="#D9776C" stroke-width="12" fill="none" vector-effect="non-scaling-stroke"/></svg>
     <img class="arrow" src="assets/arrow.svg" alt="">
     <div class="in">
       <div class="eyebrow">공고 내용</div>
