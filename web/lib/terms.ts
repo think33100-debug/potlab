@@ -209,7 +209,7 @@ export const TERMS: Record<TermKey, 약관> = {
   · 열람 · 정정 · 삭제 · 처리정지를 요청하실 수 있습니다 (아래 문의처)
 
 개인정보 보호책임자
-  · 주식회사 빈틈 운영팀 · privacy@rapojob.co.kr
+  · 주식회사 빈틈 김민지 · privacy@rapojob.co.kr
   · 그 밖의 문의 · help@rapojob.co.kr
   · 우편 — 대구 북구 동북로 291, 901-A156호
 
