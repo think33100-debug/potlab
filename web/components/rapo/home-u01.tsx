@@ -122,18 +122,20 @@ function Banners({ member }: { member: boolean }) {
         </Link>
       </div>
 
-      {/* 3 · 실사 · 교육학술 */}
+      {/* 3 · 실사 · 공시 병원 급여 — 2026-11-18 세중님 「겹치는 것 정리」로 교육학술에서 바꿈
+          (교육은 시작하기·학생 칸에 있습니다). 가는 곳은 연봉 안내 글(공공병원이 공시한 보수 · /guide/therapist-salary).
+          그림(banner3.png)은 그대로입니다 */}
       <div role="group" aria-roledescription="slide" aria-label="3 / 3"
         className="relative h-[246px] w-full shrink-0 snap-start overflow-hidden bg-[#edf6f0]">
         <배너사진 src="/rapo/home/banner3.png" />
         <Frame tone="navy" />
         <p className="absolute left-[36px] top-[65px] w-[240px] text-[23px] font-bold leading-[30px] text-(color:--rapo-brand-color-navy)">
-          {member ? <>다음 배움을<br />찾아보세요</> : <>내 직군에 맞는<br />교육·학술 일정</>}
+          공공병원<br />치료사 연봉
         </p>
-        <Link href="/edu"
+        <Link href="/guide/therapist-salary"
           className="absolute left-[36px] top-[185px] w-[220px] rounded-(--rapo-radius-r1) text-[14px] font-bold leading-[24px] text-(color:--rapo-brand-color-navy)
                      active:bg-(--rapo-color-bg-transparent-pressed)">
-          교육학술 보기 →
+          공시된 급여 보기 →
         </Link>
       </div>
     </RapoBannerCarousel>
@@ -340,7 +342,9 @@ function MoreServices() {
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/home/toolkit.svg" alt="" width={72} height={72} className="shrink-0" />
       </Link>
-      <RapoServiceGrid />
+      {/* 여섯 칸(RapoServiceGrid)은 홈에서 뺐습니다 — 2026-11-18 세중님 「겹치는 것 정리 · 둘 다 고쳐」.
+          스펙·교육·봉사·청년정책이 위(시작하기·학생 칸)에 이미 있었습니다. 공시 병원 급여는 세 번째 배너로 옮겼고,
+          여섯 칸은 툴킷 화면(rapo-toolkit.tsx)에 그대로 있습니다 */}
       {/* 2026-11-14 세중님 「더 둘러보기 아래 버튼 CTA · 누르면 올인원 툴킷」 */}
       <RapoButton href="/toolkit" tone="navy" size={52} full>라포 올인원 툴킷 둘러보기</RapoButton>
     </section>
