@@ -142,6 +142,18 @@ if (process.env.POTJOB_SIGNUP_ALARM !== 'off') {
       + (r.error ? String(r.error.message).slice(0, 80) : 'exit ' + r.status) + ') — 멈춤 경보는 이어서 봅니다');
   } catch (e) { console.error('  ⚠ 가입알림을 못 불렀습니다 — ' + String(e.message).slice(0, 80)); }
 }
+/* ★ 2026-11-18 멘토-1.7-2 · 1.7-3 · 1.7-4 — 공공 API 네 출처(WN2·AL2·GJ2·CE2) 경보를 **여기서 함께** 부릅니다.
+   ① 두 번 연속 실패 ② 받은 건수가 4주 같은 요일 평균의 절반 이하 ③ 평일 알리오·워크넷 새 공고 0.
+   위 두 알림과 같은 결 — 크론 줄을 새로 안 만들고 · 따로 떨어진 프로세스 · 2분에서 끊음 · 읽기 + 메일뿐.
+   같은 출처는 6시간에 한 번. 끄려면 POTJOB_SOURCE_ALARM=off */
+if (process.env.POTJOB_SOURCE_ALARM !== 'off') {
+  try {
+    const r = spawnSync(process.execPath, [path.join(여기, '공공출처경보.mjs'), ...(보기만 ? ['--보기'] : [])],
+      { stdio: 'inherit', timeout: 120e3, env: process.env });
+    if (r.error || r.status !== 0) console.error('  ⚠ 공공출처경보가 끝까지 못 돌았습니다 ('
+      + (r.error ? String(r.error.message).slice(0, 80) : 'exit ' + r.status) + ') — 멈춤 경보는 이어서 봅니다');
+  } catch (e) { console.error('  ⚠ 공공출처경보를 못 불렀습니다 — ' + String(e.message).slice(0, 80)); }
+}
 
 if (!cfg.COLLECT_KEY_HS3) { console.error('COLLECT_KEY_HS3 가 없습니다'); process.exit(1); }
 
