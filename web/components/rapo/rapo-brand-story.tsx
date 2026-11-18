@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
        그래서 여기 머리는 「열고, 모으고, 연결하다」입니다
      · 세 낱말마다 작은 그림 — 로고 뜻(열린 네모 · 들어오는 움직임 · 이어짐)을 빌려 그렸습니다
      · 끝의 남색 카드는 뺐습니다(배너와 겹침)
-     · 라포의 약속에 치료사 그림(Figma 원본 · public/rapo/home/banner1-therapist.png) · 「무엇이든 익명으로」를 크게
+     · 라포의 약속에 치료사 사진(Figma 사진 가이드 · public/rapo/home/promise-talk.png) · 「무엇이든 익명으로」를 크게
 
    글의 뿌리 — Figma 「02 · 브랜드·BI·콘텐츠 가이드 › 01 · 브랜드 소개」(32:17).
    세 줄의 제목·설명 · 약속 첫 줄은 새로 쓴 글입니다. 아직 안 열린 기능(연봉 비교)은 안 적습니다. */
@@ -90,19 +90,22 @@ export function RapoBrandStory() {
         ))}
       </ul>
 
-      {/* 라포의 약속 — 치료사 그림 · 「무엇이든 익명으로」 */}
-      <div className="relative overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush)">
-        <div className="relative min-h-[176px] px-(--rapo-dimension-x5) pt-(--rapo-dimension-x5) pr-[132px]">
+      {/* 라포의 약속 — 치료사 사진 · 「무엇이든 익명으로」
+          사진은 Figma 「04 · 사진 가이드 › AI 생성 예시 / 업무인계」(63:191 · 720×480) 그대로입니다.
+          2026-11-18 세중님 「저 아줌마들 별로 · 다른 것」 — 전에 쓰던 오린 그림(banner1-therapist.png)을 바꿈 */}
+      <div className="overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush)">
+        <div className="relative aspect-[16/9] w-full min-[560px]:aspect-[5/2]">
+          <Image src="/rapo/home/promise-talk.png" alt="" fill sizes="(min-width: 768px) 728px, 100vw" aria-hidden
+            className="object-cover object-[50%_35%] min-[560px]:object-[50%_15%]" />
+        </div>
+        <div className="px-(--rapo-dimension-x5) pt-(--rapo-dimension-x5)">
           <p className="rapo-type-t3-bold text-(color:--rapo-brand-color-coral)">라포의 약속</p>
           <h3 className="rapo-type-t8-bold mt-(--rapo-dimension-x2) text-(color:--rapo-brand-color-navy)">
-            <span className="block text-(color:--rapo-brand-color-coral)">무엇이든</span>
-            <span className="block text-(color:--rapo-brand-color-coral)">익명으로</span>
+            <span className="block text-(color:--rapo-brand-color-coral)">무엇이든 익명으로</span>
             <span className="block">물어봐요</span>
           </h3>
-          <Image src="/rapo/home/banner1-therapist.png" alt="" width={140} height={175} aria-hidden
-            className="pointer-events-none absolute bottom-0 right-(--rapo-dimension-x3) h-[168px] w-auto" />
         </div>
-        <ul className="flex flex-col gap-(--rapo-dimension-x2) bg-white/60 px-(--rapo-dimension-x5) py-(--rapo-dimension-x4)">
+        <ul className="flex flex-col gap-(--rapo-dimension-x2) px-(--rapo-dimension-x5) pb-(--rapo-dimension-x5) pt-(--rapo-dimension-x4)">
           {약속.map((t) => (
             <li key={t} className="rapo-type-t4-medium flex items-start gap-(--rapo-dimension-x2) text-(color:--rapo-brand-color-navy)">
               <CheckMark />{t}
