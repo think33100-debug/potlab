@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { 이단계상태읽기 } from '@/lib/admin-mfa';
+import { MfaCodeForm } from '@/components/admin-mfa-gate';
 
 /* 마스터 계정 로그인 — 운영 전용입니다 (2026-10-09).
  *
@@ -37,6 +39,12 @@ export default function Master() {
   const [탈, set탈] = useState<string | null>(null);
   const [도는중, set도는중] = useState(false);
   const [남은초, set남은초] = useState(0);
+  /* ★ 2026-11-18 관리자 2단계 인증 — 비밀번호가 맞았는데 이 계정에 인증 앱이 등록돼 있으면
+     홈으로 가기 전에 6자리 코드를 묻습니다 (components/admin-mfa-gate.tsx).
+     등록이 없으면 지금처럼 바로 들어갑니다 — 막지 않습니다.
+     코드 칸에서 나가 버려도 로그인은 aal1 로 남지만, DB SQL(sql/초안_1118/관리자_2단계.sql)이
+     올라간 뒤에는 그 로그인으로 관리자 일이 안 됩니다 */
+  const [코드묻기, set코드묻기] = useState(false);
 
   /* 잠겼나 — 1초마다 남은 시간을 셉니다 */
   useEffect(() => {
@@ -55,14 +63,18 @@ export default function Master() {
     set도는중(true); set탈(null);
     const { error } = await browserSupabase().auth
       .signInWithPassword({ email: 메일.trim(), password: 비번 });
-    set도는중(false);
 
     if (!error) {
       try { localStorage.removeItem(센칸); localStorage.removeItem(잠금칸); } catch { /* 무시 */ }
       set비번('');
+      /* 모름(연결 끊김)은 막지 않습니다 — 관리자 화면에 들어가면 그 껍데기가 다시 봅니다 */
+      const 상태 = await 이단계상태읽기();
+      set도는중(false);
+      if (상태 === '확인필요') { set코드묻기(true); return; }
       router.replace('/');
       return;
     }
+    set도는중(false);
 
     let 센 = 0;
     try {
@@ -85,6 +97,15 @@ export default function Master() {
   const 칸꼴 = 'rapo-type-t5-regular h-(--rapo-dimension-x13) w-full rounded-(--rapo-radius-r3) border-(length:--rapo-border-default) '
     + 'border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral) '
     + 'placeholder:text-(color:--rapo-color-fg-placeholder) focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-(--rapo-color-stroke-focus-ring)';
+
+  if (코드묻기) {
+    return (
+      <div data-rapo className="flex min-h-dvh w-full items-center justify-center bg-(--rapo-color-bg-layer-default)">
+        <MfaCodeForm onDone={() => router.replace('/')} />
+      </div>
+    );
+  }
+
   return (
     <main data-rapo className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col items-center justify-center bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x6)">
       <div className="flex w-full max-w-[340px] flex-col gap-(--rapo-dimension-x6)">
