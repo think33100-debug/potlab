@@ -12,12 +12,11 @@ import { RapoButton, RapoSectionTitle } from './rapo-ui';
                  단추는 공통 「RAPO / Button / Filled · BI coral · 40」(172:18). 전의 그라데이션 막대는 가이드에 없어 뺐습니다
      · 네 줄     「06 · 콘텐츠 적용 › 정보형」(102:1876) 꼴 — 01·02·… 번호와 한 줄 설명. 전의 연두·하늘색 칸과 3D 그림은
                  브랜드 색(코럴·네이비·화이트·블러시·미스트) 밖이라 뺐습니다
-     · 무료 안내  블러시 = 「강조 문구의 배경」(34:159)
      · 말투      브랜드 보이스(32:21) — 막연한 장점 대신 확인할 수 있는 것을 짚습니다
 
    **지금 앱에 열려 있는 것만** 이었습니다 (새 기능 · 새 주소 없음) —
      라포 스펙 쌓기(/spec/compare) · 병원 둘러보기 /orgs · 교육·학술 /edu ·
-     봉사활동 /volunteer · 청년정책 /youth · 졸업 후 1년 무료(lib/school-period.ts — 가입 끝 화면이 이미 보여 주는 말)
+     봉사활동 /volunteer · 청년정책 /youth
    안 적은 것 — 실습 후기·학생 커뮤니티(학생인증 뒤에 엶 · 아직 안 열림). */
 
 const 줄들 = [
@@ -44,9 +43,7 @@ export function RapoStudentCorner() {
           <span className="block">첫 직장 준비,</span>
           <span className="block">라포에서 함께 시작해요.</span>
         </p>
-        <p className="rapo-type-t4-medium mt-(--rapo-dimension-x1) break-keep rounded-(--rapo-radius-r1) bg-(--rapo-brand-color-blush) px-(--rapo-dimension-x4) py-(--rapo-dimension-x3) text-(color:--rapo-brand-color-navy)">
-          학생·취준생은 <b className="font-bold text-(color:--rapo-brand-color-coral)">졸업 후 1년까지 무료</b>로 써요.
-        </p>
+        {/* 「학생·취준생은 졸업 후 1년까지 무료로 써요」 줄은 뺐습니다 — 2026-11-18 세중님 「이 말은 빼버리고」 */}
       </header>
 
       {/* 라포 스펙 쌓기 — 프레임 활용 C (질문 둘레에 배치)
