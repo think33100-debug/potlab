@@ -55,10 +55,12 @@ export function RapoBrandStory() {
       </ol>
 
       {/* 라포의 약속 — 프레임 활용 A(사진 둘레에 배치) · 「무엇이든 익명으로」
-          사진은 세중님이 ChatGPT 로 만든 「새끼손가락 약속」(1536×1024 · 사진 가이드 공통 글 · 2026-11-18 「이걸로 해보자」) */}
+          사진은 세중님이 ChatGPT 로 만든 「새끼손가락 약속」(1536×1024 · 사진 가이드 공통 글 · 2026-11-18 「이걸로 해보자」)
+          unoptimized — 2026-11-18 세중님 「폰으로 보니 화질이 구리다」. 원본이 이미 압축된 webp(144KB)인데 Next 이미지 변환이
+          품질 75 로 한 번 더 눌러 얼굴이 뭉갰습니다. 원본 그대로 보냅니다(폰 3배 화면에 필요한 폭 ~1000px 보다 원본 1536px 이 큼) */}
       <div className="relative overflow-hidden rounded-(--rapo-radius-r1) bg-(--rapo-brand-color-mist)">
         <div className="relative aspect-[16/9] w-full min-[560px]:aspect-[5/2]">
-          <Image src="/rapo/home/promise-pinky.webp" alt="" fill sizes="(min-width: 768px) 728px, 100vw" aria-hidden
+          <Image src="/rapo/home/promise-pinky.webp" alt="" fill unoptimized aria-hidden
             className="object-cover object-[50%_45%] min-[560px]:object-[50%_48%]" />
         </div>
         <div className="flex flex-col gap-(--rapo-dimension-x2) px-(--rapo-dimension-x8) pb-(--rapo-dimension-x10) pt-(--rapo-dimension-x6)">
