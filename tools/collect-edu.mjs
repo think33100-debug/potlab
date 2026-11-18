@@ -444,7 +444,7 @@ export function 뇌신경재활(html) {
       갈래: 갈래보기(제목), 제목,
       시작: '', 끝: '', 장소: '', 모집인원: '', 상태: '모름',
       올린날: 날짜꼴((c.match(/<span class="bol_date">([\s\S]*?)<\/span>/) || [])[1]),
-      링크: 'https://www.ksnr.or.kr/board/list.html?num=' + a[1] + '&code=notice',
+      링크: 'https://www.ksnr.or.kr/board/view.html?code=notice&num=' + a[1],   /* 글 화면 (2026-11-18 · 200 확인) */
       원문: 제목,
     });
   }
@@ -763,7 +763,7 @@ if (시험) {
   봐('제목 (b·font 걷기)', ns1[0] && ns1[0].제목, '대한뇌신경재활학회 2026년도 일정 안내');
   봐('올린날 (달력 아이콘 뒤)', ns1[0] && ns1[0].올린날, '2025-12-30');
   봐('번호', ns1[1] && ns1[1].번호, '뇌신경재활:32326');
-  봐('링크', ns1[1] && ns1[1].링크, 'https://www.ksnr.or.kr/board/list.html?num=32326&code=notice');
+  봐('링크', ns1[1] && ns1[1].링크, 'https://www.ksnr.or.kr/board/view.html?code=notice&num=32326');
   봐('리뷰코스는 교육', ns1[1] && ns1[1].갈래, '교육');
   봐('출처는 고르는 목록 이름으로', ns1[1] && ns1[1].출처, '대한뇌신경재활학회');
 
