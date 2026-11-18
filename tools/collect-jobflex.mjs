@@ -40,6 +40,7 @@
  * 제목만으로 안 갈리는 것은 보류함으로 보냅니다 (sortJob 2·3단계).
  * 상세 열기는 사이트당 하루 50건 규칙으로 따로 붙일 자리입니다.
  */
+import { 칸검사들 } from './칸검사.mjs';
 import fs from 'node:fs';
 /* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
    지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
@@ -282,6 +283,7 @@ const 버릴것 = (백필 ? 쓰레기 : 쓰레기.filter((x) => x.접수중)).ma
 if (dry) {
   console.log('\n--dry 라 담지 않았습니다. ' + Math.round((Date.now() - t0) / 1000) + '초');
 } else {
+  칸검사들(담을것, SOURCE);   /* 저장 직전 칸 검사 한 자리 (tools/칸검사.mjs · 2026-11-19) */
   let 담음 = 0, 건너뜀 = 0;
   for (let i = 0; i < 담을것.length; i += 200) {
     const r = await rpc(cfg, 'collect_put', {

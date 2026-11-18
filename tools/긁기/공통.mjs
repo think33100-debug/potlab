@@ -15,6 +15,7 @@
  *   ★ 기관번호를 **직접** 적어 담습니다 — 긁기는 어느 기관인지 알고 시작하므로
  *     이름 매칭을 거치지 않습니다 (세중님 C3 · docs/매칭규칙_1024.md)
  */
+import { 칸검사들 } from '../칸검사.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -261,6 +262,7 @@ export async function 담기(cfg, 출처, 줄들, { 진짜 = false } = {}) {
     연결근거: '긁기 설정',
   }));
   if (!진짜) return { 됨: true, 마른: true, 줄: 줄.length, 겹침: 겹친것.length };
+  칸검사들(줄, 출처);   /* 저장 직전 칸 검사 한 자리 (tools/칸검사.mjs · 2026-11-19) */
   /* ★ `collect_put` 은 **service_role 에만** 열려 있습니다 (ACL 확인 —
      {postgres,service_role}). anon 으로 부르면 42501 입니다. 기존 수집기도
      service_role 로 부릅니다 (collect-hosp.mjs:117) — 권한은 그 위에
