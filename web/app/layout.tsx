@@ -10,6 +10,7 @@ import { KakaoFab } from "@/components/kakao-fab";
 import { TermsReconsent } from "@/components/terms-reconsent";
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
+import { RevisitMark } from "@/components/revisit-mark";
 import { RapoInstallToast } from "@/components/rapo/rapo-install-toast";
 import { INSTALL_SCRIPT } from "@/lib/install-hint";
 import { COMPANY, PRIVACY_EMAIL, PRIVACY_OFFICER } from "@/lib/contact";
@@ -174,6 +175,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <KakaoFab />
           {/* 새 약관 다시 동의 (2026-11-16 확정 · 시행 11/23 뒤 첫 로그인) */}
           <TermsReconsent />
+          {/* 재방문 근사치 — 첫 방문일은 브라우저에만 두고 D0·D1~D7 첫 재방문·D7 당일에 한 번씩 알립니다.
+              아무것도 안 그립니다. 로그인한 화면에서만 돕니다 (2026-11-18 · 질문함 Q5) */}
+          <RevisitMark />
 
           {/* 마스터 계정에게만 보이는 역할 바꾸기 띠 (2026-10-09).
               탭바(z-40) 위에 얹습니다 — z-[60] */}
