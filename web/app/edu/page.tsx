@@ -80,13 +80,6 @@ const JOBS = [
   { key: 'pt', label: '물리치료', 직군: '물리치료사' },
 ];
 
-/* robots.txt 가 긁기를 막은 곳 — **모으지 않고 링크만 겁니다** (세중님 결정).
-   둘 다 교육 안내가 살아 있는 곳이라, 길은 열어 두고 자료는 안 가져옵니다 */
-const 링크만 = [
-  { 이름: '한국작업치료사협회', 주소: 'http://www.kaot.org/board/index.jsp?code=course_notice', 직군: '작업치료사' },
-  { 이름: '국제의과학아카데미 (INDT)', 주소: 'https://www.imsacademy.net/Edu_Notice', 직군: '물리치료사' },
-];
-
 type SP = { tab?: string; job?: string; p?: string; past?: string };
 
 type 줄 = {
@@ -163,8 +156,6 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
   const 받은것 = (목록.data ?? []) as unknown as 줄[];
   const rows = 지난것 ? 받은것 : 받은것.filter((v) => !교육지났나(v, todayKst()));
   const 셈 = Object.fromEntries(보일탭.map((t, i) => [t.key, (셈들[i]?.data as number | null) ?? 0]));
-
-  const 링크칸 = 링크만.filter((x) => !고른직군 || x.직군 === 고른직군);
 
   const 길 = (next: Partial<SP>) => {
     const q = new URLSearchParams();
@@ -255,21 +246,9 @@ export default async function Edu({ searchParams }: { searchParams: Promise<SP> 
           <RapoPagination page={page} pages={Math.max(1, Math.ceil(건수 / 20))} href={(p) => 길({ p: String(p) })} />
         </div>
 
-        {/* 출처와 한계 — 원본에 없지만 지침 15절대로 맨 아래에 작게 둡니다 */}
-        <section aria-label="자료 안내" className="rapo-type-t3-regular mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-[#3f4c57]">
-          <p className="break-keep">학회 홈페이지에 공개된 안내를 모았어요. <b>신청·문의는 학회에서</b> 해 주세요.</p>
-          <p className="break-keep">대한인지재활학회는 홈페이지가 수집을 막아 두어 첫 화면의 제목과 날짜만 가져와요.</p>
-          {링크칸.length > 0 && (
-            <p className="break-keep">
-              수집을 막아 둔 곳은 직접 들어가서 보세요 —{' '}
-              {링크칸.map((x, i) => (
-                <span key={x.주소}>
-                  {i > 0 && ' · '}
-                  <a href={x.주소} target="_blank" rel="noopener noreferrer" className="font-bold underline underline-offset-4">{x.이름}</a>
-                </span>
-              ))}
-            </p>
-          )}
+        {/* 2026-11-18 세중님 「글은 지우고」 — 수집 안내 글 셋(학회 공개 안내 · 인지재활 첫 화면만 · 수집 막은 곳 링크)을
+            뺐습니다. 수집을 막은 곳은 「교육기관으로 보기」(/edu/org)에서 그 기관 화면으로 갑니다 */}
+        <section aria-label="교육기관" className="rapo-type-t3-regular mt-(--rapo-dimension-x6) flex flex-col gap-(--rapo-dimension-x2) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-[#3f4c57]">
           <p><Link href="/edu/org" className="font-bold underline underline-offset-4">교육기관으로 보기</Link></p>
         </section>
       </main>
