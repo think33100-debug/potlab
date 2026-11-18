@@ -113,14 +113,11 @@ export async function POST(req: Request) {
   const key = 하루번호(who, ua, day, target ?? '');
 
   /* 같은 날 · 같은 자리 · 같은 사람은 **한 번만** 셉니다 (세중님 2026-10-11).
-     유일 제약을 걸려면 이미 쌓인 줄을 먼저 지워야 하는데, 지우는 것은
-     승인 창이 뜹니다 (작업지침 8-7). 그래서 넣기 전에 한 번 묻습니다.
-     ponytail: 두 번 두드립니다. 줄이 많아지면 그때 제약으로 옮깁니다 */
-  let 물음 = supabase.from('page_hits').select('id')
-    .eq('day', day).eq('kind', kind).eq('day_key', key).limit(1);
-  물음 = target === null ? 물음.is('target', null) : 물음.eq('target', target);
-  const { data: 이미 } = await 물음;
-  if (이미 && 이미.length) return NextResponse.json({ ok: true, counted: false });
+     ★ 2026-11-18 — 전에는 넣기 전에 select 로 물었는데, 이 열쇠(비회원)는 page_hits 에
+     insert 만 있어 **늘 빈 결과**였습니다 → 4,240줄 중 2,992줄이 겹친 줄(11/18 셈).
+     이제 DB 의 「하루 한 번」 유일 색인(새 줄만 · sql/초안_1118/조회_하루한번_색인.sql)이
+     겹침을 막고, 여기서는 그 23505 를 「이미 셈」으로 받습니다.
+     이미 쌓인 겹친 줄은 지우지 않고 세는 함수가 distinct 로 거릅니다(RAPO노트 SQL_1113/ZZH) */
 
   const { error } = await supabase.from('page_hits').insert({
     day,
@@ -136,7 +133,9 @@ export async function POST(req: Request) {
   });
 
   if (error) {
-    console.error('[POTJOB] 조회 기록 실패:', error.message);
+    /* 23505 = 하루 한 번 색인에 걸림 — 오늘 이미 센 것입니다(탈이 아님) */
+    if (error.code === '23505') return NextResponse.json({ ok: true, counted: false });
+    console.error('[RAPO] 조회 기록 실패:', error.message);
     return NextResponse.json({ ok: false }, { status: 500 });
   }
   return NextResponse.json({ ok: true, counted: true });
