@@ -46,6 +46,15 @@ function 하루번호(ip: string, ua: string, day: string, target: string): stri
     .digest('hex').slice(0, 32);
 }
 
+/* 재방문 근사치가 보낼 수 있는 값 — 이 밖은 버립니다 (아래 POST 의 revisit 갈래).
+     rv:first     이 브라우저의 첫 방문 날 (D0)
+     rv:back1~7   D1~D7 가운데 **처음** 다시 온 날 (숫자 = 첫 방문에서 며칠 뒤)
+     rv:d7        D7 **당일**에 왔다
+   묶음 날짜(첫 방문일)는 DB 가 「받은 날 − 숫자」로 거꾸로 셉니다 — 브라우저는 날짜를 안 보냅니다.
+   ※ DB 쪽 짝: sql/초안_1118/재방문_근사치.sql 의 admin_stats_revisit() 가 같은 값 목록을 씁니다 */
+const 재방문값 = /^rv:(first|back[1-7]|d7)$/;
+const 재방문키 = 'revisit';
+
 function seoulDay(): string {
   /* 한국 날짜로 셉니다. 서버는 UTC 라 그냥 두면 아침 9시에 날이 바뀝니다 */
   return new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 10);
@@ -66,6 +75,32 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ ok: false, why: '몸통을 못 읽었습니다' }, { status: 400 });
+  }
+
+  /* ★ 2026-11-18 — 재방문 근사치 (질문함 Q5 · 11/4 세중님 승인 · RAPO노트/수집기/지표장치_1104.md 5번).
+     브라우저가 첫 방문일을 **자기만** 들고 있다가 첫 방문·D1~D7 첫 재방문·D7 당일에
+     한 번씩 알려 줍니다 (components/revisit-mark.tsx). 여기서는 **정해진 값만** 받습니다 —
+     첫 방문 날짜·회원 번호·주소는 오지도 않고 담지도 않습니다.
+     담는 것: 날짜(서버 시각) · kind 'other' · target 'rv:…' · 기기 한 낱말 · 관리자 표시.
+     하루번호 자리에는 **고정 글자 'revisit'** 을 넣습니다 — 아이피 해시를 만들지 않아
+     같은 날 다른 화면 기록과도 이어지지 않습니다.
+     page_hits.kind 는 DB 가 여덟 값만 받으므로(check 제약) 새 kind 를 만들지 않고 'other' 에 담습니다 */
+  if (body.kind === 'revisit') {
+    const t = typeof body.target === 'string' ? body.target : '';
+    if (!재방문값.test(t)) return NextResponse.json({ ok: false, counted: false }, { status: 400 });
+    const { error: 재방문오류 } = await supabase.from('page_hits').insert({
+      day: seoulDay(),
+      kind: 'other',
+      device: MOBILE.test(ua) ? 'mobile' : 'desktop',
+      target: t,
+      day_key: 재방문키,
+      by_admin: body.admin === true,
+    });
+    if (재방문오류) {
+      console.error('[RAPO] 재방문 기록 실패:', 재방문오류.message);
+      return NextResponse.json({ ok: false }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true, counted: true });
   }
 
   const kind = (KINDS as readonly string[]).includes(body.kind ?? '')

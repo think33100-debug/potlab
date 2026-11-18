@@ -1354,6 +1354,10 @@
         "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
       },
       {
+        "이름": "admin_stats_revisit(p_days integer)",
+        "왜": "관리자 통계(/admin/stats 재방문 근사치)가 로그인 상태로 부릅니다. SECURITY INVOKER · 안에서 is_admin() 을 보고, page_hits 읽기 규칙도 관리자만 (2026-11-18 초안 sql/초안_1118/재방문_근사치.sql)"
+      },
+      {
         "이름": "admin_stats_screens(p_days integer)",
         "왜": "관리자 화면이 로그인 상태로 부릅니다. 안에서 is_admin() 을 봅니다"
       },

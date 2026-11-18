@@ -194,6 +194,9 @@ export default function AdminStats() {
         </div>
       </section>
 
+      {/* ── 재방문 근사치 (2026-11-18 · 멘토-5-2 · Q5) — DB 함수가 없으면 통째로 안 그립니다 ── */}
+      <Revisit />
+
       {/* ── 화면별 ── */}
       <section>
         <h2 className="text-h3 font-bold">화면별 <span className="text-sm font-medium text-mute">최근 7일</span></h2>
@@ -291,6 +294,84 @@ export default function AdminStats() {
 }
 
 /* ─────────────────────────────────────── */
+
+/* 재방문 근사치 — 브라우저 자기보고 (2026-11-18 · 멘토-5-2 · 질문함 Q5 · RAPO노트/수집기/지표장치_1104.md 5번).
+
+   첫 방문일은 브라우저에만 있고(components/revisit-mark.tsx), 서버에는 「첫 방문」·「D1~D7 첫 재방문」·
+   「D7 당일」 이벤트만 옵니다. 숫자는 DB 의 admin_stats_revisit() 가 셉니다(초안 sql/초안_1118/재방문_근사치.sql).
+   **회원 유지율이 아닙니다** — 저장을 지우거나 기기를 바꾸면 새 사람으로 셉니다.
+
+   따로 불러옵니다. 함수가 아직 없거나 실패하면 **이 칸만 조용히 빠집니다** */
+type RevisitRow = {
+  day: string; first_browsers: number; back_browsers: number; back_done: boolean;
+  back_pct: number | string | null; d7_browsers: number; d7_pct: number | string | null;
+};
+
+function Revisit() {
+  const [rows, setRows] = useState<RevisitRow[] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    browserSupabase().rpc('admin_stats_revisit', { p_days: 21 }).then(({ data, error }) => {
+      if (alive && !error) setRows((data ?? []) as RevisitRow[]);
+    }, () => { /* 조용히 빠집니다 */ });
+    return () => { alive = false; };
+  }, []);
+
+  if (!rows) return null;
+  const 있는날 = rows.filter((r) => Number(r.first_browsers) > 0);
+  const pct = (v: number | string | null) => (v == null ? '셈 중' : `${Number(v)}%`);
+
+  return (
+    <section>
+      <h2 className="break-keep text-h3 font-bold">
+        재방문 근사치
+        <span className="ml-2 text-sm font-medium text-mute">브라우저 자기보고 · 최근 21일</span>
+      </h2>
+      <p className="mt-1 break-keep text-sm text-mute">
+        그날 처음 온 브라우저 가운데 다음 7일 안에 다시 온 비율이에요.
+        정확한 회원 유지율이 아니에요 — 저장을 지우거나 기기를 바꾸면 새로 온 것으로 세요
+      </p>
+
+      {있는날.length === 0 ? (
+        <p className="mt-5 break-keep text-lg text-mute">아직 기록이 없어요</p>
+      ) : (
+        <table className="mt-5 w-full break-keep text-left tabular-nums">
+          <thead className="text-sm text-mute">
+            <tr>
+              <th className="py-2 font-medium">첫 방문</th>
+              <th className="py-2 text-right font-medium">브라우저</th>
+              <th className="py-2 text-right font-medium">7일 안 재방문</th>
+              <th className="py-2 text-right font-medium">7일째</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            {[...있는날].reverse().map((r) => (
+              <tr key={r.day} className="text-lg">
+                <td className="py-3">{r.day.slice(5)}</td>
+                <td className="py-3 text-right font-bold">{Number(r.first_browsers)}</td>
+                <td className="py-3 text-right">
+                  {pct(r.back_pct)}
+                  <span className="ml-2 text-sm text-mute">{Number(r.back_browsers)}</span>
+                </td>
+                <td className="py-3 text-right">
+                  {pct(r.d7_pct)}
+                  <span className="ml-2 text-sm text-mute">{Number(r.d7_browsers)}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <p className="mt-5 break-keep text-sm text-mute">
+        「7일 안 재방문」은 1~7일째 중 한 번이라도 다시 온 것, 「7일째」는 딱 7일째 날에 온 것이에요.
+        첫 방문 뒤 7일이 다 지나야 비율이 나오고, 그 전에는 「셈 중」이에요. 작은 회색 숫자는 브라우저 수예요.
+        이 장치를 켠 첫날 묶음에는 그 전부터 오던 분이 섞여 있어요
+      </p>
+    </section>
+  );
+}
 
 function Big({
   label, v, prev, sub, note,
