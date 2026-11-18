@@ -1,15 +1,45 @@
-/* 홈 「라포 이야기」 — 브랜드 가치·스토리 시안 (2026-11-18 세중님 「라포가 뭐고 라포를 써야 하는 이유」).
+import Image from 'next/image';
+import type { ReactNode } from 'react';
 
-   2판 (같은 날 세중님 「위가 글이 많아 가독성이 떨어짐 · 더 세련되게 · 읽기 좋게」) —
-     ① 머리: 어두운 판을 걷고, 제목 두 줄 + 한 문장만
-     ② 「열고 · 모으고 · 연결하다」 세 줄: 왼쪽 낱말(코럴) · 오른쪽 제목 한 줄 + 짧은 설명
-     ③ 라포의 약속 두 줄(체크)
-     ④ 끝 카드 — 존재 이유 한 문장 (네이비 · 흰 로고 연하게)
+/* 홈 「라포 이야기」 — 브랜드 가치·스토리 (2026-11-18 세중님 「라포가 뭐고 라포를 써야 하는 이유」).
+   자리 — 홈 「라포에서 시작하기」 바로 아래 (home-u01.tsx).
 
-   글의 뿌리 — Figma 「02 · 브랜드·BI·콘텐츠 가이드 › 01 · 브랜드 소개」(32:17):
-     제목 「우리가 나눈 정보, 우리가 바꿀 내일」 · 「열고, 모으고, 연결하다.」 · 존재 이유 · 지키는 태도.
-   세 줄의 제목·설명과 머리 한 문장은 이번에 새로 줄여 쓴 글입니다. 아직 안 열린 기능(연봉 비교)은 안 적습니다.
-   ★ 시안입니다. 실제 홈에는 아직 안 붙였습니다 (design-preview/home?brand=1 에서만 보입니다). */
+   3판 (같은 날 세중님) —
+     · 「우리가 나눈 정보, 우리가 바꿀 내일」은 **첫 배너**로 올렸습니다(home-u01.tsx Banners 1).
+       그래서 여기 머리는 「열고, 모으고, 연결하다」입니다
+     · 세 낱말마다 작은 그림 — 로고 뜻(열린 네모 · 들어오는 움직임 · 이어짐)을 빌려 그렸습니다
+     · 끝의 남색 카드는 뺐습니다(배너와 겹침)
+     · 라포의 약속에 치료사 그림(Figma 원본 · public/rapo/home/banner1-therapist.png) · 「무엇이든 익명으로」를 크게
+
+   글의 뿌리 — Figma 「02 · 브랜드·BI·콘텐츠 가이드 › 01 · 브랜드 소개」(32:17).
+   세 줄의 제목·설명 · 약속 첫 줄은 새로 쓴 글입니다. 아직 안 열린 기능(연봉 비교)은 안 적습니다. */
+
+/* 그림 셋 — 24px 칸, 코럴 선 2px. 색은 currentColor 로 받습니다 */
+const 그림: Record<string, ReactNode> = {
+  /* 열고 — 오른쪽 위가 열린 네모(로고의 열린 네모) + 밖으로 나가는 화살표 */
+  열고: (
+    <>
+      <path d="M14 5H5v14h14v-9" />
+      <path d="M12 12l8-8M15 4h5v5" />
+    </>
+  ),
+  /* 모으고 — 세 갈래가 한 칸으로 모임 */
+  모으고: (
+    <>
+      <path d="M5 4l5 7M19 4l-5 7M12 3v8" />
+      <path d="M4 14v6h16v-6" />
+    </>
+  ),
+  /* 연결하다 — 두 사람을 잇는 선 */
+  연결하다: (
+    <>
+      <circle cx="6.5" cy="7.5" r="2.5" />
+      <circle cx="17.5" cy="7.5" r="2.5" />
+      <path d="M2.5 19c0-3 1.8-5 4-5s4 2 4 5M13.5 19c0-3 1.8-5 4-5s4 2 4 5" />
+      <path d="M9 7.5h6" strokeDasharray="1.5 2" />
+    </>
+  ),
+};
 
 const 세줄 = [
   { 낱말: '열고', 제목: '현장의 조건을 열어 봐요', 설명: '병원별 근무 후기와 조건을 살펴봐요' },
@@ -22,7 +52,7 @@ const 약속 = ['정보는 정확하게 전해요', '서로 다른 경험은 존
 function CheckMark() {
   return (
     <svg aria-hidden width="18" height="18" viewBox="0 0 20 20" fill="none" className="mt-[1px] shrink-0">
-      <circle cx="10" cy="10" r="10" className="fill-(--rapo-brand-color-blush)" />
+      <circle cx="10" cy="10" r="10" className="fill-(--rapo-brand-color-white)" />
       <path d="M6 10.2l2.6 2.6L14 7.4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         className="stroke-(--rapo-brand-color-coral)" />
     </svg>
@@ -34,57 +64,51 @@ export function RapoBrandStory() {
     <section aria-labelledby="rapo-home-brand"
       className="flex flex-col gap-(--rapo-dimension-x6) bg-(--rapo-brand-color-white) px-(--rapo-dimension-x5) py-(--rapo-dimension-x8)">
 
-      {/* ① 머리 */}
+      {/* 머리 */}
       <header className="flex flex-col gap-(--rapo-dimension-x2)">
         <p className="rapo-type-t3-bold text-(color:--rapo-brand-color-coral)">라포 이야기</p>
-        <h2 id="rapo-home-brand" className="rapo-type-t9-bold text-(color:--rapo-brand-color-navy)">
-          <span className="block">우리가 나눈 정보,</span>
-          <span className="block">우리가 바꿀 내일</span>
-        </h2>
+        <h2 id="rapo-home-brand" className="rapo-type-t9-bold text-(color:--rapo-brand-color-navy)">열고, 모으고, 연결하다</h2>
         <p className="rapo-type-t4-regular break-keep text-[#3F4C57]">
           재활치료 현장의 일자리 정보와 경험을 나누는 곳이에요.
         </p>
       </header>
 
-      {/* ② 열고 · 모으고 · 연결하다 */}
-      <div className="flex flex-col gap-(--rapo-dimension-x3)">
-        <h3 className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">열고, 모으고, 연결하다</h3>
-        <ul className="divide-y divide-(--rapo-brand-color-line) rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-mist) px-(--rapo-dimension-x4)">
-          {세줄.map((r) => (
-            <li key={r.낱말} className="flex items-start gap-(--rapo-dimension-x3) py-(--rapo-dimension-x4)">
-              <span className="rapo-type-t5-bold w-[64px] shrink-0 text-(color:--rapo-brand-color-coral)">{r.낱말}</span>
-              <span className="flex min-w-0 flex-col gap-(--rapo-dimension-x0_5)">
-                <span className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">{r.제목}</span>
-                <span className="rapo-type-t3-regular break-keep text-[#3F4C57]">{r.설명}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* 세 낱말 */}
+      <ul className="flex flex-col gap-(--rapo-dimension-x2)">
+        {세줄.map((r) => (
+          <li key={r.낱말} className="flex items-center gap-(--rapo-dimension-x4) rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-mist) p-(--rapo-dimension-x4)">
+            <span aria-hidden className="flex size-[48px] shrink-0 items-center justify-center rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-white) text-(color:--rapo-brand-color-coral)">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round">{그림[r.낱말]}</svg>
+            </span>
+            <span className="flex min-w-0 flex-col gap-(--rapo-dimension-x0_5)">
+              <span className="rapo-type-t2-bold text-(color:--rapo-brand-color-coral)">{r.낱말}</span>
+              <span className="rapo-type-t5-bold break-keep text-(color:--rapo-brand-color-navy)">{r.제목}</span>
+              <span className="rapo-type-t3-regular break-keep text-[#3F4C57]">{r.설명}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
 
-      {/* ③ 라포의 약속 */}
-      <div className="flex flex-col gap-(--rapo-dimension-x3)">
-        <h3 className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">라포의 약속</h3>
-        <ul className="flex flex-col gap-(--rapo-dimension-x2)">
+      {/* 라포의 약속 — 치료사 그림 · 「무엇이든 익명으로」 */}
+      <div className="relative overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush)">
+        <div className="relative min-h-[176px] px-(--rapo-dimension-x5) pt-(--rapo-dimension-x5) pr-[132px]">
+          <p className="rapo-type-t3-bold text-(color:--rapo-brand-color-coral)">라포의 약속</p>
+          <h3 className="rapo-type-t8-bold mt-(--rapo-dimension-x2) text-(color:--rapo-brand-color-navy)">
+            <span className="block text-(color:--rapo-brand-color-coral)">무엇이든</span>
+            <span className="block text-(color:--rapo-brand-color-coral)">익명으로</span>
+            <span className="block">물어봐요</span>
+          </h3>
+          <Image src="/rapo/home/banner1-therapist.png" alt="" width={140} height={175} aria-hidden
+            className="pointer-events-none absolute bottom-0 right-(--rapo-dimension-x3) h-[168px] w-auto" />
+        </div>
+        <ul className="flex flex-col gap-(--rapo-dimension-x2) bg-white/60 px-(--rapo-dimension-x5) py-(--rapo-dimension-x4)">
           {약속.map((t) => (
             <li key={t} className="rapo-type-t4-medium flex items-start gap-(--rapo-dimension-x2) text-(color:--rapo-brand-color-navy)">
               <CheckMark />{t}
             </li>
           ))}
         </ul>
-      </div>
-
-      {/* ④ 끝 카드 — 존재 이유 */}
-      <div className="relative overflow-hidden rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-navy) px-(--rapo-dimension-x5) py-(--rapo-dimension-x6)">
-        {/* eslint-disable-next-line @next/next/no-img-element -- 로고 심볼 SVG 를 흰색으로 연하게 */}
-        <img aria-hidden src="/rapo/home/logo-symbol.svg" alt="" width={110} height={110}
-          className="pointer-events-none absolute -bottom-[14px] -right-[10px] h-auto w-[110px] opacity-15 [filter:brightness(0)_invert(1)]" />
-        <p className="rapo-type-t2-bold relative text-(color:--rapo-brand-color-coral)">라포가 있는 이유</p>
-        <p className="rapo-type-t6-bold relative mt-(--rapo-dimension-x2) pr-[72px] text-(color:--rapo-brand-color-white)">
-          <span className="block">정보와 경험을 나누어,</span>
-          <span className="block">더 나은 선택과 일터를</span>
-          <span className="block">함께 만들어 갑니다.</span>
-        </p>
       </div>
     </section>
   );
