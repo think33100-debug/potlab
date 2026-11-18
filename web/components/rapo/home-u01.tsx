@@ -185,7 +185,8 @@ function Arrow({ right, top }: { right: number; top: number }) {
    새 카드 그림은 3D 그림이 아직 없어 툴킷 28px 그림을 크게 씁니다 — 디자이너 그림이 오면 그림.src 만 바꿉니다. */
 type 시작카드 = {
   제목: string; 설명: [string, string?]; href: string; bg: string; 글색: string; 눌림: string;
-  그림: { src: string; 큰것?: '위' | '가운데' };
+  /* 크기 — 그림 판 안에서 그림 한 변(px). 피사체가 판을 꽉 채운 3D 원본은 작게 둡니다(기본 160) */
+  그림: { src: string; 큰것?: '위' | '가운데'; 크기?: number };
 };
 const 시작카드들: 시작카드[] = [
   { 제목: '커뮤니티 보기', 설명: ['어디서도 나눌 수 없던', '우리만의 이야기'], href: '/community',
@@ -199,10 +200,12 @@ const 시작카드들: 시작카드[] = [
      색은 브랜드 가이드 다섯 색 안에서 고릅니다(네이비 · 미스트 · 블러시) */
   { 제목: '교육 확인하기', 설명: ['학회 교육 일정을', '한곳에서 봐요'], href: '/edu',
     bg: 'bg-(--rapo-brand-color-blush)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
-    그림: { src: '/rapo/home/graphic-edu-28.svg' } },
+    /* 3D 그림 — Figma 「RAPO / 이미지 / 임상 실습 교재와 교육 일정」(1414:50888 · 원본 320px) */
+    그림: { src: '/rapo/home/start-edu.png', 큰것: '가운데', 크기: 112 } },
   { 제목: '채용 경쟁률 확인하기', 설명: ['공공기관 경쟁률을', '정리했어요'], href: '/compete',
     bg: 'bg-(--rapo-brand-color-mist)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:bg-(--rapo-color-bg-neutral-weak-pressed)',
-    그림: { src: '/rapo/home/graphic-cert-28.svg' } },
+    /* 3D 그림 — Figma 「RAPO / 이미지 / hero-graphic」(1414:50886 · 서류와 메달 · 원본 144px — 더 큰 원본이 오면 src 만 바꿉니다) */
+    그림: { src: '/rapo/home/start-compete.png', 큰것: '가운데', 크기: 112 } },
 ];
 /* 큰 그림의 왼쪽·위 20px 를 흐리게 감춥니다 (원본 그대로) */
 const 그림가림 = '[mask-image:linear-gradient(to_right,transparent,#000_20px),linear-gradient(to_bottom,transparent,#000_20px)] [mask-composite:intersect]';
@@ -228,7 +231,8 @@ function StartHere() {
               </span>
               {c.그림.큰것 ? (
                 <span aria-hidden className={`absolute bottom-0 right-0 flex h-[124px] w-[160px] overflow-hidden ${c.그림.큰것 === '위' ? 'items-start' : 'items-center justify-center'} ${그림가림}`}>
-                  <Image src={c.그림.src} alt="" width={160} height={160} className="size-[160px] shrink-0 object-contain" />
+                  <Image src={c.그림.src} alt="" width={c.그림.크기 ?? 160} height={c.그림.크기 ?? 160} className="shrink-0 object-contain"
+                    style={{ width: c.그림.크기 ?? 160, height: c.그림.크기 ?? 160 }} />
                 </span>
               ) : (
                 /* eslint-disable-next-line @next/next/no-img-element -- 툴킷 SVG 그림을 크게 */
