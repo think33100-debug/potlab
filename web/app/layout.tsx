@@ -70,8 +70,16 @@ export const metadata: Metadata = {
 /* 휴대폰 주소창 색 — 새 디자인 헤더가 흰색이라 흰색 (2026-11-11 · site.webmanifest 의 theme_color 와 한 쌍) */
 /* colorScheme 'only light' — 폰이 다크모드여도 브라우저가 색을 제멋대로 뒤집지 않게 합니다.
    우리 화면은 기기 설정을 안 따르고(globals.css 의 dark 규칙) 커뮤니티만 스스로 어둡게 칠합니다.
-   이 표시가 없으면 카톡 안 화면·크롬 자동 다크가 밝은 화면을 뒤집어 디자인이 깨졌습니다 (2026-11-16 세중님) */
-export const viewport: Viewport = { themeColor: "#FFFFFF", colorScheme: "only light" };
+   이 표시가 없으면 카톡 안 화면·크롬 자동 다크가 밝은 화면을 뒤집어 디자인이 깨졌습니다 (2026-11-16 세중님)
+
+   ★ 2026-11-18 세중님 「블랙 모드에서도 이상하게 안 변환되게」 — 'only light' → 'light dark' 로 바꿉니다.
+     'only light' 를 11/16 에 넣었는데도 삼성 인터넷에서는 계속 뒤집혔습니다. 삼성 인터넷은 「어두운 화면을
+     스스로 준비한 사이트」(이 표시에 dark 가 든 사이트)만 강제 변환에서 빼 줍니다 — 밝게만 쓰겠다는 표시는
+     빼 주는 근거로 안 씁니다 (삼성 개발자 글 「Dark Mode in Samsung Internet」· 크롬·카톡 안 화면도 dark 가 들면 안 뒤집습니다).
+     그래서 표시는 「어두운 화면도 준비했다」로 내고, **실제 색은 밝게 못 박습니다** — 아래 <html> 의 colorScheme 과
+     globals.css 의 html 규칙이 그 짝입니다. 셋 중 하나만 고치면 어두운 폰에서 입력칸·바탕이 검게 나옵니다.
+     ⚠ 삼성 인터넷은 이 PC 에서 못 돌려 봅니다 — 세중님 폰에서 확인한 것만 「됐다」고 적습니다 */
+export const viewport: Viewport = { themeColor: "#FFFFFF", colorScheme: "light dark" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -79,7 +87,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
        next/font 의 Geist 는 뺐습니다 — teamsparta.md 의 글꼴이 아닙니다 */
     /* 아래 script 가 그리기 전에 html 에 표시를 답니다.
        서버가 보낸 것과 달라지는 게 정상이라 리액트에게 미리 알려 둡니다 */
-    <html lang="ko" className="h-full antialiased" suppressHydrationWarning>
+    /* colorScheme 'only light' — 위 viewport 의 'light dark' 와 한 쌍입니다. CSS 가 오기 전에도 밝게 그리도록 태그에 직접 답니다 */
+    <html lang="ko" className="h-full antialiased" style={{ colorScheme: "only light" }} suppressHydrationWarning>
       <head>
         {/* 커뮤니티로 바로 들어온 사람이 흰 화면을 한 번 보지 않게,
             리액트가 그리기 전에 바탕을 정합니다 */}
