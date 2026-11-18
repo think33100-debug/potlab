@@ -194,18 +194,15 @@ const 시작카드들: 시작카드[] = [
   { 제목: '공고 찾기', 설명: ['내게 맞는 일을 찾아요'], href: '/jobs',
     bg: 'bg-(--rapo-brand-color-mist)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:bg-(--rapo-color-bg-neutral-weak-pressed)',
     그림: { src: '/rapo/home/start-jobs.png', 큰것: '가운데' } },
-  { 제목: '지난 채용 경쟁률', 설명: ['공공병원이 공개한', '회차별 경쟁률'], href: '/compete',
+  /* 2026-11-18 세중님 「공고 찾기 다음에 교육 확인하기, 채용경쟁률 확인하기 — 총 4개」.
+     봉사활동·청년정책·병원 둘러보기 카드는 뺐습니다(「라포 더 둘러보기」와 홈 「학생·취준생이라면」에 있습니다).
+     색은 브랜드 가이드 다섯 색 안에서 고릅니다(네이비 · 미스트 · 블러시) */
+  { 제목: '교육 확인하기', 설명: ['학회 교육 일정을', '한곳에서 봐요'], href: '/edu',
     bg: 'bg-(--rapo-brand-color-blush)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
+    그림: { src: '/rapo/home/graphic-edu-28.svg' } },
+  { 제목: '채용 경쟁률 확인하기', 설명: ['공공기관 경쟁률을', '정리했어요'], href: '/compete',
+    bg: 'bg-(--rapo-brand-color-mist)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:bg-(--rapo-color-bg-neutral-weak-pressed)',
     그림: { src: '/rapo/home/graphic-cert-28.svg' } },
-  { 제목: '봉사활동', 설명: ['지역별로 모집 중인', '봉사를 찾아요'], href: '/volunteer',
-    bg: 'bg-(--rapo-color-palette-green-100)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
-    그림: { src: '/rapo/home/graphic-volunteer-28.svg' } },
-  { 제목: '청년정책', 설명: ['받을 수 있는 청년 지원', '지역별로 한눈에'], href: '/youth',
-    bg: 'bg-(--rapo-color-palette-blue-100)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
-    그림: { src: '/rapo/home/graphic-youth-28.svg' } },
-  { 제목: '병원 둘러보기', 설명: ['병원 규모와 치료사 수,', '근무 후기까지'], href: '/orgs',
-    bg: 'bg-(--rapo-color-palette-coral-100)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:brightness-95',
-    그림: { src: '/rapo/home/graphic-hospital-28.svg' } },
 ];
 /* 큰 그림의 왼쪽·위 20px 를 흐리게 감춥니다 (원본 그대로) */
 const 그림가림 = '[mask-image:linear-gradient(to_right,transparent,#000_20px),linear-gradient(to_bottom,transparent,#000_20px)] [mask-composite:intersect]';
