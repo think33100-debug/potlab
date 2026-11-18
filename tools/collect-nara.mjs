@@ -464,6 +464,7 @@ for (const v of 볼것) {
      온전히() 가 &amp; 를 이미 풀어 둔 값입니다 (지침 5절) */
   첨부모음.더하기({ job_id: 'GJ' + String(v.x.idx || ''), kind: '공고문',
                   name: 고른것.includes('.hwp') ? '공고문.hwp' : '공고문.pdf', url: 고른것 });
+  v.첨부담음 = true;
   const 이름 = 고른것.includes('.hwp') ? '공고문.hwp' : '공고문.pdf';
   const a = await 파일글자(고른것, 이름);
 
@@ -561,6 +562,43 @@ if (셈.통합공고로열었다) {
   console.log('  그중 통합공고 말 때문에 연 것 ' + 셈.통합공고로열었다 + '건');
 }
 console.log('  ★ 상세를 읽고 가린 ' + 셈.상세로가림 + '건 · 첨부를 읽고 가린 ' + 셈.첨부로가림 + '건');
+
+/* ★ 2026-11-18 세중님 「다른 api 수집기도 다 첨부를 봐야 하지 않을까?」 —
+   제목이나 상세 글로 직군을 가린 공고는 첨부 목록(getItemFile)을 **한 번도 안 받았습니다**
+   (위 `열까: !직군` · 「상세로 가림」 뒤 continue). 그래서 첨부 줄이 하루 두 번(05:30·15:30)
+   tools/나라일터첨부채우기.mjs 로만 생겼습니다 — 최근 30일 늦게 담긴 178건 중 144건이 그 두 시각이었습니다.
+   → 직군을 가린 공고 가운데 **DB 에 첨부 줄이 아직 없는 것만** 첨부 주소를 담습니다 (글은 안 읽음 ·
+     읽기는 첨부되메우기가 곧 합니다). 한 바퀴 30건까지 · 사이 200ms. 알리오와 같은 결 (PR #247). */
+if (!dry) {
+  const 필요 = 볼것.filter((v) => v.직군 && !v.첨부담음 && v.x && v.x.idx);
+  const 열쇠 = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;
+  if (필요.length && cfg.SUPABASE_URL && 열쇠) {
+    let 있음 = null;
+    try {
+      const 번호들 = 필요.map((v) => 'GJ' + String(v.x.idx));
+      const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/job_attachments?select=job_id&job_id=in.('
+        + 번호들.map(encodeURIComponent).join(',') + ')',
+        { headers: { apikey: 열쇠, Authorization: 'Bearer ' + 열쇠 } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      있음 = new Set((await r.json()).map((x) => String(x.job_id)));
+    } catch (e) { console.error('  첨부 줄 있나 못 물었습니다 — 이번에는 건너뜁니다 · ' + String(e.message).slice(0, 100)); }
+    if (있음) {
+      const 없는것 = 필요.filter((v) => !있음.has('GJ' + String(v.x.idx))).slice(0, 30);
+      let 담음 = 0;
+      for (const v of 없는것) {
+        const f = await 첨부받기(v.x.idx);
+        const 고른것 = f.pdf || f.hwp;
+        if (고른것) {
+          첨부모음.더하기({ job_id: 'GJ' + String(v.x.idx), kind: '공고문',
+                          name: 고른것.includes('.hwp') ? '공고문.hwp' : '공고문.pdf', url: 고른것 });
+          v.첨부담음 = true; 담음++;
+        }
+        await 쉼(200);
+      }
+      console.log('  첨부 주소만 담음 ' + 담음 + '건 (직군을 가렸는데 첨부 줄이 없던 ' + 없는것.length + '건 중)');
+    }
+  }
+}
 /* ★ 2026-10-11 — kordoc 이 얼마나 읽었나. 안 찍으면 돌았는지 알 수 없습니다 (지침 2절) */
 console.log('  kordoc  읽음 ' + (셈.kordoc읽음 ?? 0) + '건 · 빈손 ' + (셈.kordoc빈손 ?? 0) + '건'
   + ' · 걸린 시간 합 ' + (셈.kordoc초 ?? 0) + '초'
