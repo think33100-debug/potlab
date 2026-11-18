@@ -16,13 +16,14 @@ import { RapoButton, RapoSectionTitle } from './rapo-ui';
      · 말투      브랜드 보이스(32:21) — 막연한 장점 대신 확인할 수 있는 것을 짚습니다
 
    **지금 앱에 열려 있는 것만** 이었습니다 (새 기능 · 새 주소 없음) —
-     취업 스펙 비교 /spec/compare · 신입 가능 공고 /jobs?new=1 · 지난 채용 경쟁률 /compete ·
+     취업 스펙 비교 /spec/compare · 병원 둘러보기 /orgs · 지난 채용 경쟁률 /compete ·
      봉사활동 /volunteer · 청년정책 /youth · 졸업 후 1년 무료(lib/school-period.ts — 가입 끝 화면이 이미 보여 주는 말)
    안 적은 것 — 실습 후기·학생 커뮤니티(학생인증 뒤에 엶 · 아직 안 열림). */
 
 const 줄들 = [
-  { 번호: '01', 제목: '신입 가능 공고', 설명: '경력 없이 지원할 수 있어요.', href: '/jobs?new=1' },
-  { 번호: '02', 제목: '지난 채용 경쟁률', 설명: '공공병원이 공개한 경쟁률이에요.', href: '/compete' },
+  /* 2026-11-18 세중님 「1번 신입 가능 공고를 병원 둘러보기로 · 경쟁률 설명은 「공공기관 경쟁률을 정리했어요」」 */
+  { 번호: '01', 제목: '병원 둘러보기', 설명: '병원 규모와 치료사 수를 살펴봐요.', href: '/orgs' },
+  { 번호: '02', 제목: '지난 채용 경쟁률', 설명: '공공기관 경쟁률을 정리했어요.', href: '/compete' },
   { 번호: '03', 제목: '봉사활동', 설명: '지역별 모집 중인 봉사를 찾아요.', href: '/volunteer' },
   { 번호: '04', 제목: '청년정책', 설명: '받을 수 있는 청년 지원을 봐요.', href: '/youth' },
 ];
@@ -32,10 +33,16 @@ export function RapoStudentCorner() {
     <section aria-labelledby="rapo-home-student"
       className="flex flex-col gap-(--rapo-dimension-x6) bg-(--rapo-brand-color-white) px-(--rapo-dimension-x5) py-(--rapo-dimension-x8)">
 
-      {/* 머리 */}
+      {/* 머리 — 2026-11-18 세중님 「학생·취준생이라면 단어를 더 키워서 학생·취준생도 이용할 수 있게 이끌기」
+          작은 표제였던 「학생·취준생이라면」을 섹션 제목으로 올리고, 「학생·취준생」을 코럴(강조 표시)로 둡니다 */}
       <header className="flex flex-col gap-(--rapo-dimension-x2)">
-        <p className="rapo-type-t2-bold text-(color:--rapo-brand-color-coral)">학생·취준생이라면</p>
-        <RapoSectionTitle id="rapo-home-student">첫 직장, 미리 보고 준비해요</RapoSectionTitle>
+        <RapoSectionTitle id="rapo-home-student">
+          <span className="text-(color:--rapo-brand-color-coral)">학생·취준생</span>이라면
+        </RapoSectionTitle>
+        <p className="rapo-type-t5-regular break-keep text-(color:--rapo-brand-color-navy)">
+          <span className="block">첫 직장 준비,</span>
+          <span className="block">라포에서 함께 시작해요.</span>
+        </p>
         <p className="rapo-type-t4-medium mt-(--rapo-dimension-x1) break-keep rounded-(--rapo-radius-r1) bg-(--rapo-brand-color-blush) px-(--rapo-dimension-x4) py-(--rapo-dimension-x3) text-(color:--rapo-brand-color-navy)">
           학생·취준생은 <b className="font-bold text-(color:--rapo-brand-color-coral)">졸업 후 1년까지 무료</b>로 써요.
         </p>
