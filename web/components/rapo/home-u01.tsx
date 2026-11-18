@@ -204,8 +204,9 @@ const 시작카드들: 시작카드[] = [
     그림: { src: '/rapo/home/start-edu.png', 큰것: '가운데', 크기: 112 } },
   { 제목: '채용 경쟁률 확인하기', 설명: ['공공기관 경쟁률을', '정리했어요'], href: '/compete',
     bg: 'bg-(--rapo-brand-color-mist)', 글색: 'text-(color:--rapo-brand-color-navy)', 눌림: 'active:bg-(--rapo-color-bg-neutral-weak-pressed)',
-    /* 3D 그림 — Figma 「RAPO / 이미지 / hero-graphic」(1414:50886 · 서류와 메달 · 원본 144px — 더 큰 원본이 오면 src 만 바꿉니다) */
-    그림: { src: '/rapo/home/start-compete.png', 큰것: '가운데', 크기: 112 } },
+    /* 3D 그래프 그림 — 2026-11-18 세중님 「경쟁률은 그래프 모양으로 다시」. 브랜드 색(코럴·네이비·미스트 계열)으로 그린 막대 셋과 오르는 화살표.
+       Figma 에 맞는 원본이 없어 직접 그렸습니다(320px · 그린 코드는 금고 RAPO노트/시안_브랜드이야기_1118/경쟁률_그래프_그리기.js) */
+    그림: { src: '/rapo/home/start-compete-chart.png', 큰것: '가운데', 크기: 112 } },
 ];
 /* 큰 그림의 왼쪽·위 20px 를 흐리게 감춥니다 (원본 그대로) */
 const 그림가림 = '[mask-image:linear-gradient(to_right,transparent,#000_20px),linear-gradient(to_bottom,transparent,#000_20px)] [mask-composite:intersect]';
