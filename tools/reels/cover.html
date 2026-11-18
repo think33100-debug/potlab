@@ -19,10 +19,10 @@
   #frame svg { width: 100%; height: 100%; overflow: visible; }
   #box { position: absolute; left: 0; right: 0; top: 285px; height: 1350px; padding: 110px 110px 100px; display: flex; flex-direction: column; }
   body.card #box { top: 0; }
-  #logo { display: flex; align-items: center; gap: 16px; }
-  #logo img.sym { width: 64px; height: 63px; filter: saturate(0.62) brightness(1.05); }
+  #logo { display: flex; align-items: center; gap: 22px; }
+  #logo img.sym { width: 92px; height: 90px; filter: saturate(0.62) brightness(1.05); }
   #logo img.word { filter: brightness(0) saturate(100%) invert(16%) sepia(18%) saturate(900%) hue-rotate(165deg); }
-  #logo img.word { height: 32px; }
+  #logo img.word { height: 46px; }   /* 로고 키움 (2026-11-18 세중님) */
   #eyebrow { margin-top: 120px; align-self: flex-start; font-size: 40px; font-weight: 700; background: var(--white); color: var(--coral); padding: 10px 24px; border-radius: 12px; }
   #org { margin-top: 30px; font-size: 104px; font-weight: 800; line-height: 1.12; }
   #job { margin-top: 10px; font-size: 104px; font-weight: 800; line-height: 1.12; }
@@ -42,9 +42,11 @@
   #dday span { display: block; font-size: 26px; font-weight: 600; letter-spacing: 0.12em; color: #5E6B73; }
   #dday b { display: block; font-size: 128px; font-weight: 300; line-height: 0.95; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; margin-top: 8px; }
   /* 직군 색 — 하이라이트(PT 파랑 · OT 초록 · 공통 모래)와 같은 결로 바탕을 아주 옅게 · 작은 직군 칩 (2026-11-18 「OT PT 두 공고가 겹쳐 보일까」) */
-  body[data-job="pt"] { --sage: #E5EBF2; --tag: #8FA6BF; }
-  body[data-job="ot"] { --sage: #E7EEE9; --tag: #8DB09C; }
-  body[data-job="both"] { --sage: #EFEAE2; --tag: #C7AE7E; }
+  /* 바탕은 직군 상관없이 하나 — PT 쪽 옅은 파랑기 #E5EBF2 (2026-11-18 세중님 「작업치료사도 똑같이」) · 칩 색만 직군별 */
+  body { --sage: #E5EBF2; }
+  body[data-job="pt"] { --tag: #8FA6BF; }
+  body[data-job="ot"] { --tag: #8DB09C; }
+  body[data-job="both"] { --tag: #C7AE7E; }
   html:has(body[data-job]) { background: var(--sage); }
   #tags { margin-top: 120px; display: flex; gap: 14px; align-items: center; }
   #tags #eyebrow { margin-top: 0; }
