@@ -8,6 +8,8 @@ import { shrinkToWebp } from '@/lib/image';
 import { ROUTES } from '@/lib/routes';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { 관, AdminSection } from '@/components/rapo/rapo-admin-ui';
 
 /* 홈 꾸미기.
 
@@ -68,7 +70,7 @@ export default function AdminHome() {
     return () => { alive = false; };
   }, [fetchAll]);
 
-  if (!blocks) return <p className="text-lg text-mute">불러오는 중…</p>;
+  if (!blocks) return <p className={관.muted}>불러오는 중…</p>;
 
   const of = (kind: HomeBlock['kind']) =>
     blocks.filter((b) => b.kind === kind).sort((a, c) => a.sort - c.sort);
@@ -136,29 +138,31 @@ export default function AdminHome() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-[932px]">
+      {/* 2026-11-19 새 관리자 디자인(Figma 16 · 공고 상세 꼴)으로 겉모양만 다시 입힘 */}
+      <RapoAdminHeader title="홈 꾸미기" />
       {/* ── 상단 배너 ── */}
       <Section
         title="상단 배너"
         note={`켜진 것만 홈에 나와요 · 제목이 비면 안 나와요 · 지금 ${of('top').filter((b) => b.enabled && b.title).length}개`}
       >
-        <div className="mb-6 flex flex-wrap items-end gap-3 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-          <label className="text-sm font-bold text-mute">
+        <div className={'flex flex-wrap items-end gap-[12px] ' + 관.card}>
+          <label className="text-[14px] font-bold leading-[19px] text-[#304f65]">
             넘어가는 속도 <span className="font-normal">(새 홈 맨 위 배너도 이 값으로 넘어가요)</span>
-            <div className="mt-2 flex gap-2">
+            <div className="mt-[6px] flex gap-[8px]">
               <input
                 type="number" min={2} max={60}
                 value={seconds}
                 onChange={(e) => setSeconds(e.target.value)}
-                className="w-[88px] rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
+                className={관.input + ' w-[88px] text-center'}
               />
-              <span className="self-center text-lg text-mute">초</span>
+              <span className={'self-center ' + 관.muted}>초</span>
             </div>
           </label>
           <button
             type="button" onClick={() => saveSeconds('top_banner_seconds', seconds, setSavedSeconds)}
             disabled={seconds === savedSeconds}
-            className="rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
+            className={관.btn + ' h-[44px]'}
           >
             속도 저장
           </button>
@@ -194,24 +198,24 @@ export default function AdminHome() {
         title="커뮤니티 배너"
         note={`커뮤니티 맨 위에 옆으로 밀리는 줄 · 제목이 비면 안 나와요 · 지금 ${of('comm').filter((b) => b.enabled && b.title).length}개`}
       >
-        <div className="mb-6 flex flex-wrap items-end gap-3 rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-          <label className="text-sm font-bold text-mute">
+        <div className={'flex flex-wrap items-end gap-[12px] ' + 관.card}>
+          <label className="text-[14px] font-bold leading-[19px] text-[#304f65]">
             넘어가는 속도
-            <div className="mt-2 flex gap-2">
+            <div className="mt-[6px] flex gap-[8px]">
               <input
                 type="number" min={2} max={60}
                 value={commSeconds}
                 onChange={(e) => setCommSeconds(e.target.value)}
-                className="w-[88px] rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
+                className={관.input + ' w-[88px] text-center'}
               />
-              <span className="self-center text-lg text-mute">초</span>
+              <span className={'self-center ' + 관.muted}>초</span>
             </div>
           </label>
           <button
             type="button"
             onClick={() => saveSeconds('comm_banner_seconds', commSeconds, setSavedCommSeconds)}
             disabled={commSeconds === savedCommSeconds}
-            className="rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
+            className={관.btn + ' h-[44px]'}
           >
             속도 저장
           </button>
@@ -235,11 +239,11 @@ export default function AdminHome() {
             onPatch={patch} onSave={save} onMove={move} onUpload={upload}>
             <Field label="제목" v={b.title} set={(v) => patch(b.id, { title: v })} />
             <label className="block">
-              <span className="text-sm font-bold text-mute">안에 넣을 숫자</span>
+              <span className={관.fieldLabel}>안에 넣을 숫자</span>
               <select
                 value={b.metric ?? ''}
                 onChange={(e) => patch(b.id, { metric: (e.target.value || null) as HomeBlock['metric'] })}
-                className="mt-1 w-full appearance-none rounded-xs border border-gray-200 bg-gray-50 py-4 pl-5 pr-[36px] text-lg dark:border-gray-700 dark:bg-gray-950"
+                className={관.select + ' w-full'}
               >
                 {METRICS.map((m) => <option key={m.v} value={m.v}>{m.label}</option>)}
               </select>
@@ -258,11 +262,9 @@ export default function AdminHome() {
 
 function Section({ title, note, children }: { title: string; note: string; children: React.ReactNode }) {
   return (
-    <section>
-      <h2 className="text-h3 font-bold">{title}</h2>
-      <p className="mt-1 text-sm text-mute">{note}</p>
-      <div className="mt-5 space-y-5">{children}</div>
-    </section>
+    <AdminSection title={title} sub={note}>
+      <div className="flex flex-col gap-[16px]">{children}</div>
+    </AdminSection>
   );
 }
 
@@ -277,37 +279,37 @@ function Row({
   children: React.ReactNode;
 }) {
   return (
-    <div className={'rounded-sm border p-6 ' + (b.enabled ? 'border-gray-200 dark:border-gray-700' : 'border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-950')}>
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <label className="flex cursor-pointer items-center gap-3">
+    <div className={'rounded-[12px] border border-[#dde4e6] p-[20px] md:p-[24px] ' + (b.enabled ? 'bg-white' : 'bg-[#f6f8f9]')}>
+      <div className="mb-[20px] flex flex-wrap items-center gap-[12px] border-b border-[#dde4e6] pb-[16px]">
+        <label className="flex min-h-[40px] cursor-pointer items-center gap-[10px]">
           <input
             type="checkbox" className="sr-only"
             checked={b.enabled}
             onChange={(e) => onPatch(b.id, { enabled: e.target.checked })}
           />
           <span className={
-            'flex size-[22px] items-center justify-center rounded-xs border text-white ' +
-            (b.enabled ? 'border-teal-strong bg-teal-strong' : 'border-gray-300 dark:border-gray-600')
+            'flex size-[22px] items-center justify-center rounded-[6px] border text-[13px] text-white ' +
+            (b.enabled ? 'border-[#112231] bg-[#112231]' : 'border-[#c7d1d9] bg-white')
           }>{b.enabled ? '✓' : ''}</span>
-          <span className="text-lg font-medium">{b.enabled ? '켜짐' : '꺼짐'}</span>
+          <span className={'text-[16px] font-bold ' + (b.enabled ? 'text-[#112231]' : 'text-[#555d6d]')}>{b.enabled ? '켜짐' : '꺼짐'}</span>
         </label>
 
-        <span className="text-sm text-mute">{i + 1}번째</span>
+        <span className={관.sub}>{i + 1}번째</span>
 
         <button type="button" onClick={() => onMove(b, -1)} disabled={i === 0}
-          aria-label="위로" className="rounded-md border border-gray-200 px-4 py-1 text-lg disabled:opacity-30 dark:border-gray-700">↑</button>
+          aria-label="위로" className={관.btnSm + ' w-[36px] px-0'}>↑</button>
         <button type="button" onClick={() => onMove(b, 1)} disabled={i === last}
-          aria-label="아래로" className="rounded-md border border-gray-200 px-4 py-1 text-lg disabled:opacity-30 dark:border-gray-700">↓</button>
+          aria-label="아래로" className={관.btnSm + ' w-[36px] px-0'}>↓</button>
 
         <span className="flex-1" />
 
         <button type="button" onClick={() => onSave(b)}
-          className="rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98]">
+          className={관.btn + ' min-w-[96px]'}>
           저장
         </button>
       </div>
 
-      <div className="space-y-5">{children}</div>
+      <div className="grid gap-[16px]">{children}</div>
     </div>
   );
 }
@@ -317,13 +319,13 @@ function Field({
 }: { label: string; v: string; set: (v: string) => void; wide?: boolean }) {
   return (
     <label className="block">
-      <span className="text-sm font-bold text-mute">{label}</span>
+      <span className={관.fieldLabel}>{label}</span>
       <input
         value={v}
         onChange={(e) => set(e.target.value)}
         className={
-          'mt-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950 '
-          + (wide ? 'w-full' : 'w-[88px] text-center')
+          관.input + ' '
+          + (wide ? '' : 'max-w-[88px] text-center')
         }
       />
     </label>
@@ -335,15 +337,15 @@ function Field({
 function IconField({ v, set }: { v: string; set: (v: string) => void }) {
   return (
     <label className="block">
-      <span className="text-sm font-bold text-mute">아이콘</span>
-      <span className="mt-1 flex items-center gap-3">
-        <span className="flex size-[44px] shrink-0 items-center justify-center rounded-xs border border-gray-200 dark:border-gray-700">
+      <span className={관.fieldLabel}>아이콘</span>
+      <span className="flex items-center gap-[12px]">
+        <span className="flex size-[44px] shrink-0 items-center justify-center rounded-[8px] border border-[#dde4e6] bg-[#f6f8f9] text-[#112231]">
           <Icon name={v} size={20} />
         </span>
         <select
           value={v}
           onChange={(e) => set(e.target.value)}
-          className="min-w-0 flex-1 appearance-none rounded-xs border border-gray-200 bg-gray-50 py-4 pl-5 pr-[36px] text-lg dark:border-gray-700 dark:bg-gray-950"
+          className={관.select + ' flex-1'}
         >
           <option value="">없음 (점으로 보여요)</option>
           {ICON_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
@@ -357,11 +359,11 @@ function IconField({ v, set }: { v: string; set: (v: string) => void }) {
 function Href({ b, set }: { b: HomeBlock; set: (v: string) => void }) {
   return (
     <label className="block">
-      <span className="text-sm font-bold text-mute">누르면 갈 곳</span>
+      <span className={관.fieldLabel}>누르면 갈 곳</span>
       <select
         value={b.href ?? ''}
         onChange={(e) => set(e.target.value)}
-        className="mt-1 w-full appearance-none rounded-xs border border-gray-200 bg-gray-50 py-4 pl-5 pr-[36px] text-lg dark:border-gray-700 dark:bg-gray-950"
+        className={관.select + ' w-full'}
       >
         <option value="">안 눌리게</option>
         {ROUTES.map((r) => (
@@ -383,16 +385,16 @@ function Picture({
 
   return (
     <div>
-      <span className="text-sm font-bold text-mute">그림 (없으면 teal 바탕에 글씨만)</span>
-      <div className="mt-2 flex flex-wrap items-center gap-3">
+      <span className={관.fieldLabel}>그림 (없으면 teal 바탕에 글씨만)</span>
+      <div className="flex flex-wrap items-center gap-[12px]">
         {url && (
           // eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다
-          <img src={url} alt="" className="h-[56px] w-[100px] rounded-xs object-cover" />
+          <img src={url} alt="" className="h-[56px] w-[100px] rounded-[8px] border border-[#dde4e6] object-cover" />
         )}
         <PhotoPicker label={url ? '그림 바꾸기' : '그림 넣기'} onPick={(f) => onUpload(b, f)} />
         {url && (
           <button type="button" onClick={onClear}
-            className="text-sm text-mute hover:underline">
+            className={관.btnTextDanger}>
             그림 빼기 (저장을 눌러야 적용돼요)
           </button>
         )}

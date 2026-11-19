@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminBadge, 관, 칩꼴 } from '@/components/rapo/rapo-admin-ui';
 
 /* 운영진 글 모아보기 — 권한 「운영진글」 이 있어야 봅니다 (2026-10-09).
  *
@@ -65,65 +67,61 @@ export default function AdminOps() {
 
   const 역할들 = [...new Set((줄들 ?? []).map((x) => x.쓴역할))].sort();
 
+  /* 2026-11-19 — 새 관리자 디자인(역할 칩 · 흰 목록 카드)으로 다시 입혔습니다 */
   return (
-    <div className="mt-6">
-      <h1 className="text-h2 font-bold text-[#14181C]">운영진 글</h1>
-      <p className="mt-2 text-lg text-mute">
-        마스터 계정이 페르소나로 쓴 글과 댓글입니다. 회원 화면에는 <b>그 역할의 글로 그대로</b> 보입니다
+    <div className="max-w-[1100px]">
+      <RapoAdminHeader title="운영진 글" />
+      <p className={관.muted + ' -mt-[16px] mb-[24px] break-keep'}>
+        마스터 계정이 페르소나로 쓴 글과 댓글입니다. 회원 화면에는 <b className="text-[#112231]">그 역할의 글로 그대로</b> 보입니다
         — 「운영진 작성」 표시는 여기서만 보입니다.
       </p>
 
       {탈 && (
-        <p className="mt-4 rounded-sm border border-brand-red p-4 text-lg text-brand-red-dark">{탈}</p>
+        <p className={관.error + ' mb-[16px]'}>{탈}</p>
       )}
 
-      <div className="mt-5 flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-[8px]">
         <button
-          type="button" onClick={() => set역할('')}
-          className={'rounded-full px-4 py-2 text-sm ' +
-            (역할 === '' ? 'bg-[#14181C] text-white' : 'border border-gray-200 text-gray-600')}>
+          type="button" onClick={() => set역할('')} aria-pressed={역할 === ''}
+          className={칩꼴(역할 === '')}>
           모두
         </button>
         {역할들.map((r) => (
           <button
-            key={r} type="button" onClick={() => set역할(r)}
-            className={'rounded-full px-4 py-2 text-sm ' +
-              (역할 === r ? 'bg-[#14181C] text-white' : 'border border-gray-200 text-gray-600')}>
+            key={r} type="button" onClick={() => set역할(r)} aria-pressed={역할 === r}
+            className={칩꼴(역할 === r)}>
             {r}
           </button>
         ))}
         <button
           type="button" onClick={감추기} disabled={도는중 || 고른것.size === 0}
-          className="ml-auto rounded-md bg-brand-red px-6 py-2 text-lg font-bold text-white
-                     hover:bg-brand-red-dark disabled:opacity-40">
+          className={관.btnDanger + ' ml-auto'}>
           고른 {고른것.size}개 감추기
         </button>
       </div>
 
-      {줄들 === null ? <p className="mt-6 text-lg text-mute">잠시만요…</p>
-        : 줄들.length === 0 ? <p className="mt-6 text-lg text-mute">아직 없어요.</p>
+      {줄들 === null ? <p className={관.muted + ' mt-[16px]'}>잠시만요…</p>
+        : 줄들.length === 0 ? <p className={관.cardTight + ' ' + 관.empty + ' mt-[16px]'}>아직 없어요.</p>
           : (
-            <ul className="mt-5 space-y-2">
+            <ul className={관.list + ' mt-[16px]'}>
               {줄들.map((x) => (
                 <li key={열쇠(x)}
-                  className={'rounded-sm border border-gray-200 p-4 ' + (x.감춤 ? 'opacity-55' : '')}>
-                  <label className="flex cursor-pointer items-start gap-3">
+                  className={관.row + (x.감춤 ? ' bg-[#f6f8f9] opacity-60' : '')}>
+                  <label className="flex cursor-pointer items-start gap-[12px]">
                     <input
                       type="checkbox" checked={고른것.has(열쇠(x))}
                       onChange={() => 토글(x)} disabled={x.감춤}
-                      className="mt-1 h-5 w-5" />
+                      className="mt-[4px] size-[18px] shrink-0 accent-[#112231]" />
                     <span className="min-w-0 flex-1">
-                      <span className="flex flex-wrap items-center gap-2">
-                        <b className="rounded-full bg-badge-teal-bg px-3 py-1 text-[13px] text-teal-strong">
-                          {x.쓴역할}
-                        </b>
-                        <span className="text-sm text-mute">{x.갈래} · {x.방 ?? '방 모름'} · {날(x.쓴때)}</span>
-                        {x.감춤 && <span className="text-sm text-brand-red-dark">감춰짐</span>}
+                      <span className="flex flex-wrap items-center gap-[8px]">
+                        <AdminBadge tone="neutral">{x.쓴역할}</AdminBadge>
+                        {x.감춤 && <AdminBadge tone="coral">감춰짐</AdminBadge>}
+                        <span className={관.sub}>{x.갈래} · {x.방 ?? '방 모름'} · {날(x.쓴때)}</span>
                       </span>
-                      <span className="mt-1 block break-keep text-lg">
+                      <span className={관.body + ' mt-[8px] block break-keep'}>
                         {x.제목 ? <b>{x.제목}</b> : null}
                         {x.제목 && x.미리 ? ' — ' : ''}
-                        <span className="text-gray-600 dark:text-gray-400">{x.미리}</span>
+                        <span className="text-[#555d6d]">{x.미리}</span>
                       </span>
                     </span>
                   </label>

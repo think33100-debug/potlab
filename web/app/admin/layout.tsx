@@ -60,8 +60,8 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
 
   if (loading || (session && 이단계.상태 === '확인중')) {
     return (
-      <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
-        <p className="text-lg text-mute">잠시만요…</p>
+      <main className="min-h-dvh bg-[#f6f8f9] px-[20px] py-[32px]">
+        <p className="text-[16px] text-[#555d6d]">잠시만요…</p>
       </main>
     );
   }
@@ -78,22 +78,23 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
   /* 다시 묻는 동안에는 거절하지 않습니다 — 깜빡였다 사라지면 더 헷갈립니다 */
   if (session && !관리자인가 && 다시물음 !== '끝') {
     return (
-      <main className="mx-auto w-full max-w-3xl px-6 py-7 md:px-7">
-        <p className="text-lg text-mute">로그인을 확인하고 있어요…</p>
+      <main className="min-h-dvh bg-[#f6f8f9] px-[20px] py-[32px]">
+        <p className="text-[16px] text-[#555d6d]">로그인을 확인하고 있어요…</p>
       </main>
     );
   }
 
   if (!session || !관리자인가) {
     return (
-      <main className="mx-auto w-full max-w-3xl px-6 py-8 md:px-7">
-        <h1 className="text-h2 font-bold">관리자만 볼 수 있어요</h1>
-        <p className="mt-2 text-lg text-mute">
+      <main className="min-h-dvh bg-[#f6f8f9] px-[20px] py-[32px] text-[#112231]">
+        {/* 2026-11-19 — 관리자 새 디자인 색으로 (navy 글자 · navy 단추) */}
+        <h1 className="rapo-type-t12-bold">관리자만 볼 수 있어요</h1>
+        <p className="mt-[8px] text-[16px] text-[#555d6d]">
           {session ? '이 계정은 관리자가 아니에요' : '먼저 로그인해 주세요'}
         </p>
         <Link
           href={session ? '/' : '/login'}
-          className="mt-6 inline-block rounded-md bg-brand-red px-7 py-5 text-btn font-bold text-white hover:bg-brand-red-dark"
+          className="mt-[24px] inline-flex h-[44px] items-center rounded-[8px] bg-[#112231] px-[20px] text-[15px] font-bold text-white hover:bg-[#223d51]"
         >
           {session ? '홈으로' : '로그인하기'}
         </Link>

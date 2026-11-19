@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminBadge, AdminSearchField, 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 쓰레기통 — 버림 단어만 있어 아예 안 담은 공고 (2026-09-25).
 
@@ -97,90 +99,86 @@ export default function AdminTrash() {
     setRows(await fetchRows());
   };
 
+  /* 2026-11-19 — 새 관리자 디자인으로 겉모양만 바꿨습니다 (검색칸 · 흰 카드 목록 · 배지 · 단추) */
   return (
-    <section>
-      <h1 className="text-h2 font-bold">쓰레기통</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
-        제목에 버림 단어만 있어 아예 안 담은 공고예요. <b>자동으로 안 비워요.</b>
+    <section className="max-w-[932px]">
+      <RapoAdminHeader title="쓰레기통" />
+      <p className={관.muted + ' -mt-[16px] break-keep'}>
+        제목에 버림 단어만 있어 아예 안 담은 공고예요. <b className="text-[#112231]">자동으로 안 비워요.</b>
         <br />
         진짜 공고가 잘못 버려졌으면 「잘못 버림」 을 눌러 주세요.
       </p>
 
       {/* 다시 볼 단어 — 되돌린 것들의 걸린 단어 */}
       {다시볼단어.length > 0 && (
-        <div className="mt-6 rounded-sm border-2 border-brand-red/40 bg-brand-red-soft/30 p-5">
-          <p className="text-body-lg font-bold text-brand-red-dark">다시 볼 단어</p>
-          <p className="mt-1 break-keep text-sm text-gray-600">
+        <div className="mt-[24px] rounded-[12px] border border-[#ffd4cf] bg-[#fff5f3] p-[20px]">
+          <p className="text-[16px] font-bold text-[#b42a21]">다시 볼 단어</p>
+          <p className="mt-[4px] break-keep text-[13px] text-[#555d6d]">
             되돌린 공고에서 걸렸던 단어예요. 두 번 넘게 나오면 그 단어가 진짜 공고를
             죽이고 있는 거예요 — 버림 목록에서 빼는 걸 생각해 보세요.
           </p>
-          <ul className="mt-3 flex flex-wrap gap-2">
+          <ul className="mt-[12px] flex flex-wrap gap-[8px]">
             {다시볼단어.map(([w, n]) => (
               <li key={w}
-                className={'rounded-md px-4 py-1 text-sm font-medium '
-                  + (n >= 2 ? 'bg-brand-red text-white' : 'bg-white text-gray-700')}>
-                {w} <span className="num tabular-nums">{n}</span>
+                className={'inline-flex h-[30px] items-center gap-[6px] rounded-full px-[12px] text-[13px] font-bold '
+                  + (n >= 2 ? 'bg-[#b42a21] text-white' : 'border border-[#dde4e6] bg-white text-[#304f65]')}>
+                {w} <span className="tabular-nums">{n}</span>
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="제목 · 기관명 · 걸린 단어"
-          aria-label="쓰레기통에서 찾기"
-          className="min-w-[16rem] flex-1 rounded-sm border border-gray-200 px-5 py-3 text-lg dark:border-gray-700"
-        />
-        <label className="flex items-center gap-2 text-lg">
-          <input type="checkbox" checked={되돌린것만}
+      <div className="mt-[24px] flex flex-wrap items-center gap-[12px]">
+        <AdminSearchField value={q} onChange={setQ}
+          placeholder="제목 · 기관명 · 걸린 단어" label="쓰레기통에서 찾기" />
+        <label className="flex items-center gap-[8px] text-[14px] font-bold text-[#304f65]">
+          <input type="checkbox" checked={되돌린것만} className="size-[18px] accent-[#112231]"
             onChange={(e) => set되돌린것만(e.target.checked)} />
           되돌린 것만
         </label>
       </div>
 
-      {rows === null && <p className="mt-8 text-lg text-mute">잠시만요…</p>}
+      {rows === null && <p className={관.muted + ' mt-[16px]'}>잠시만요…</p>}
       {rows !== null && rows.length === 0 && (
-        <p className="mt-8 text-lg text-mute">
-          {되돌린것만 ? '되돌린 공고가 없어요' : '쓰레기통이 비었어요'}
-        </p>
+        <div className={관.cardTight + ' mt-[16px]'}>
+          <p className={관.empty}>
+            {되돌린것만 ? '되돌린 공고가 없어요' : '쓰레기통이 비었어요'}
+          </p>
+        </div>
       )}
 
       {rows !== null && rows.length > 0 && (
         <>
-          <p className="mt-6 text-sm text-mute">
-            <span className="num tabular-nums">{rows.length}</span>건
+          <p className={관.sub + ' mt-[16px]'}>
+            <span className="tabular-nums">{rows.length}</span>건
             {rows.length >= 500 && ' (500건까지만 보여요)'}
           </p>
-          <ul className="mt-3 space-y-3">
+          <ul className={관.list + ' mt-[8px]'}>
             {rows.map((r) => (
               <li key={r.id}
-                className={'rounded-sm border p-5 '
-                  + (r.restored ? 'border-brand-red/40 bg-brand-red-soft/20' : 'border-gray-200 dark:border-gray-700')}>
-                <p className="break-keep text-body-lg font-bold">
-                  {r.restored && <span className="mr-2 text-brand-red">되돌림</span>}
+                className={관.row + (r.restored ? ' bg-[#fff5f3]' : '')}>
+                <p className="flex flex-wrap items-center gap-[8px] break-keep text-[16px] font-bold leading-[22px] text-[#112231]">
+                  {r.restored && <AdminBadge tone="coral">되돌림</AdminBadge>}
                   {r.title}
                 </p>
-                <p className="mt-1 text-sm text-mute">
+                <p className="mt-[4px] text-[13px] text-[#555d6d]">
                   {[r.source, r.org_name, r.id, r.trashed_at?.slice(0, 16).replace('T', ' ')]
                     .filter(Boolean).join(' · ')}
                 </p>
-                <p className="mt-1 break-keep text-sm font-medium text-brand-red-dark">
+                <p className="mt-[4px] break-keep text-[13px] font-bold text-[#b42a21]">
                   버린 이유 — {r.why}
                 </p>
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-[12px] flex flex-wrap gap-[8px]">
                   {!r.restored && (
                     <button type="button" disabled={busy === r.id} onClick={() => 되돌리기(r)}
-                      className="rounded-md border border-brand-red px-5 py-2 text-sm font-bold text-brand-red disabled:opacity-40">
+                      className={관.btnDanger}>
                       {busy === r.id ? '…' : '잘못 버림'}
                     </button>
                   )}
                   {r.url && (
-                    <a href={r.url} target="_blank" rel="noreferrer"
-                      className="rounded-md border border-gray-200 px-5 py-2 text-sm text-gray-600 dark:border-gray-700">
-                      원문 보기
+                    <a href={r.url} target="_blank" rel="noreferrer" className={관.btnLine}>
+                      원문 보기 ↗
                     </a>
                   )}
                 </div>

@@ -6,6 +6,8 @@ import { ago } from '@/components/post-row';
 import { channelName } from '@/lib/channels';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminBadge, AdminTabs, 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 커뮤니티 글 — 감춘 글까지 봅니다.
 
@@ -181,90 +183,71 @@ export default function AdminPosts() {
       : '관리자 ' + nameOf(r.hider, r.hidden_by ?? undefined) + ' 가 내렸어요';
   };
 
+  /* 2026-11-19 — 새 관리자 디자인(상태 탭 · 흰 목록 카드)으로 다시 입혔습니다 */
   return (
-    <div>
-      <h2 className="text-h3 font-bold">커뮤니티 글</h2>
-      <p className="mt-1 break-keep text-sm text-mute">
+    <div className="max-w-[1100px]">
+      <RapoAdminHeader title="커뮤니티 글" />
+      <p className={관.muted + ' -mt-[16px] mb-[24px] break-keep'}>
         글은 지우지 않고 감춥니다. 감춘 글도 표에 남아서, 이미 나간 공유 링크가
         「지워진 글이에요」라고 말해줄 수 있어요
       </p>
 
-      <nav className="mt-5 flex flex-wrap gap-2" aria-label="거르기">
-        {STATES.map((s) => (
-          <button
-            key={s.key}
-            type="button"
-            onClick={() => setState(s.key)}
-            aria-pressed={state === s.key}
-            className={
-              'rounded-md border px-6 py-4 text-lg font-medium ' +
-              (state === s.key
-                ? 'border-teal-strong bg-teal-strong text-white'
-                : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400')
-            }
-          >
-            {s.label}
-            <span className={'ml-2 text-sm ' + (state === s.key ? 'text-white/70' : 'text-mute')}>
-              {counts[s.key]}
-            </span>
-          </button>
-        ))}
-      </nav>
+      <AdminTabs label="거르기" value={state} onChange={setState}
+        tabs={STATES.map((s) => ({ key: s.key, label: s.label, count: counts[s.key] }))} />
 
-      {err && (
-        <p className="mt-6 break-keep rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
-          불러오지 못했어요 — {err}
-        </p>
-      )}
+      <div className="mt-[16px] flex flex-col gap-[16px]">
+        {err && (
+          <p className={관.error + ' break-keep'}>
+            불러오지 못했어요 — {err}
+          </p>
+        )}
 
-      {rows === null && <p className="mt-6 text-lg text-mute">불러오는 중…</p>}
+        {rows === null && <p className={관.muted}>불러오는 중…</p>}
 
-      {rows && rows.length === 0 && !err && (
-        <p className="mt-8 text-center text-lg text-mute">여기 해당하는 글이 없어요</p>
-      )}
+        {rows && rows.length === 0 && !err && (
+          <p className={관.cardTight + ' ' + 관.empty}>여기 해당하는 글이 없어요</p>
+        )}
 
-      <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
-        {(rows ?? []).map((r) => (
-          <li key={r.id} className="py-6">
-            <div className="flex flex-wrap items-center gap-3 text-sm text-mute">
-              <span className="rounded-md bg-badge-blue-bg px-3 font-medium text-interaction-blue">
-                {channelName(r.channel)}
-              </span>
-              <span>{nameOf(r.author, r.author_id)}</span>
-              <span className="text-mute">{ago(r.created_at)}</span>
-              {r.hidden && (
-                <span className="rounded-md bg-gray-100 px-3 font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                  감춤
-                </span>
-              )}
-            </div>
+        {(rows ?? []).length > 0 && (
+          <ul className={관.list}>
+            {(rows ?? []).map((r) => (
+              <li key={r.id} className={관.row + (r.hidden ? ' bg-[#f6f8f9]' : '')}>
+                <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px]">
+                  <AdminBadge tone="info">{channelName(r.channel)}</AdminBadge>
+                  {r.hidden && <AdminBadge tone="neutral">감춤</AdminBadge>}
+                  <span className={관.sub}>{nameOf(r.author, r.author_id)} · {ago(r.created_at)}</span>
+                </div>
 
-            <Link href={`/post/${r.id}`} className="mt-2 block hover:underline">
-              <p className="break-keep text-body-lg font-medium">
-                {r.title || r.body.slice(0, 40)}
-              </p>
-            </Link>
+                <div className="mt-[8px] flex flex-wrap items-start justify-between gap-[12px]">
+                  <Link href={`/post/${r.id}`} className="min-w-0 flex-1 basis-[220px] hover:underline">
+                    <p className={관.h3 + ' break-keep'}>
+                      {r.title || r.body.slice(0, 40)}
+                    </p>
+                  </Link>
 
-            {/* 누가 언제 감췄는지 — 분쟁이 생기면 이 한 줄이 근거입니다 */}
-            {r.hidden && (
-              <p className="mt-2 break-keep text-sm text-mute">
-                {r.hidden_at ? r.hidden_at.slice(0, 16).replace('T', ' ') : '시각 모름'}
-                {' · '}
-                {who(r)}
-              </p>
-            )}
+                  <button
+                    type="button"
+                    onClick={() => flip(r)}
+                    disabled={busy === r.id}
+                    className={r.hidden ? 관.btnLine : 관.btnDanger}
+                  >
+                    {busy === r.id ? '바꾸는 중…' : r.hidden ? '다시 보이기' : '감추기'}
+                  </button>
+                </div>
 
-            <button
-              type="button"
-              onClick={() => flip(r)}
-              disabled={busy === r.id}
-              className="mt-3 rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:text-gray-400"
-            >
-              {busy === r.id ? '바꾸는 중…' : r.hidden ? '다시 보이기' : '감추기'}
-            </button>
-          </li>
-        ))}
-      </ul>
+                {/* 누가 언제 감췄는지 — 분쟁이 생기면 이 한 줄이 근거입니다 */}
+                {r.hidden && (
+                  <p className={관.sub + ' mt-[6px] break-keep'}>
+                    {r.hidden_at ? r.hidden_at.slice(0, 16).replace('T', ' ') : '시각 모름'}
+                    {' · '}
+                    {who(r)}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

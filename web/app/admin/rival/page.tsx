@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { 관, AdminBadge, AdminSection, 배지꼴, type 배지색 } from '@/components/rapo/rapo-admin-ui';
 
 /* 경쟁사 비교 — 관리자만 (2026-09-30).
  *
@@ -31,11 +33,11 @@ type 짐 = {
   수집후보: 후보[];
 };
 
-const 판정색 = (p: string | null) =>
-  p === '우리가 빠름' ? 'bg-badge-green-bg text-gray-900'
-    : p === '우리가 늦음' ? 'bg-brand-red-soft text-brand-red-dark'
-      : p && p.includes('없음') ? 'text-gray-900 ring-1 ring-warning dark:text-gray-100'
-        : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+const 판정색 = (p: string | null): 배지색 =>
+  p === '우리가 빠름' ? 'ok'
+    : p === '우리가 늦음' ? 'coral'
+      : p && p.includes('없음') ? 'warn'
+        : 'neutral';
 
 const 상태들 = ['미처리', '원인 확인', '수정 완료'];
 const 원인들 = ['수집 목록에 없는 기관', '수집 주기 탓', '직군 못 가림', '보류함 대기', '막힌 병원', '모름'];
@@ -83,170 +85,175 @@ export default function AdminRival() {
     읽기();
   };
 
-  if (err) return <p className="text-lg text-brand-red">{err}</p>;
-  if (!d) return <p className="text-lg text-mute">잠시만요…</p>;
+  if (err) return <p role="alert" className={관.error}>{err}</p>;
+  if (!d) return <p className={관.muted}>잠시만요…</p>;
 
   const s = d.요약 || {};
+  const 작은칸 = 'h-[36px] rounded-[8px] border border-[#dde4e6] bg-white px-[10px] text-[13px] text-[#112231] focus:border-[#304f65] focus:outline-none';
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold">경쟁사 비교</h1>
-        <p className="mt-1 text-sm text-mute">
-          <b>관리자만 봅니다. 회원 화면에는 쓰지 않습니다.</b> 경쟁사 공고를 우리 공고로
-          옮겨 싣지 않습니다 — 쓰는 것은 「이 기관을 우리도 봐야겠다」는 신호뿐입니다.
-          공고는 그 기관에서 직접 긁습니다.
-        </p>
-      </header>
+    <div className="max-w-[1100px]">
+      {/* 2026-11-19 새 관리자 디자인(Figma 16)으로 겉모양만 다시 입힘 */}
+      <RapoAdminHeader title="경쟁사 비교" />
+      <p className={'-mt-[20px] mb-[24px] break-keep ' + 관.muted}>
+        <b className="text-[#112231]">관리자만 봅니다. 회원 화면에는 쓰지 않습니다.</b> 경쟁사 공고를 우리 공고로
+        옮겨 싣지 않습니다 — 쓰는 것은 「이 기관을 우리도 봐야겠다」는 신호뿐입니다.
+        공고는 그 기관에서 직접 긁습니다.
+      </p>
 
       {/* ── 요약 ── */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
-        {[
-          ['이번 주 비교', s['이번 주 비교'], 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100'],
-          ['우리가 빠름', s['우리가 빠름'], 'bg-badge-green-bg text-gray-900'],
-          ['우리가 늦음', s['우리가 늦음'], 'bg-brand-red-soft text-brand-red-dark'],
-          ['우리에게 없음', s['우리에게 없음'], 'bg-gray-50 text-gray-900 ring-1 ring-warning dark:bg-gray-950 dark:text-gray-100'],
-          ['평균 늦은 시간', s['평균 늦은 시간'], 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100'],
-          ['미처리', s['미처리'], 'bg-badge-blue-bg text-gray-900'],
-        ].map(([라벨, 값, 색]) => (
-          <div key={String(라벨)} className={'rounded-xl p-3 ' + 색}>
-            <div className="text-xs font-bold">{라벨}</div>
-            <div className="text-2xl font-bold">
-              {값 ?? 0}{라벨 === '평균 늦은 시간' ? <span className="text-sm font-normal"> 시간</span> : null}
+      <AdminSection title="이번 주 요약">
+        <div className="grid grid-cols-2 gap-[12px] md:grid-cols-3 lg:grid-cols-6">
+          {([
+            ['이번 주 비교', s['이번 주 비교'], 'neutral'],
+            ['우리가 빠름', s['우리가 빠름'], 'ok'],
+            ['우리가 늦음', s['우리가 늦음'], 'coral'],
+            ['우리에게 없음', s['우리에게 없음'], 'warn'],
+            ['평균 늦은 시간', s['평균 늦은 시간'], 'neutral'],
+            ['미처리', s['미처리'], 'info'],
+          ] as [string, number | undefined, 배지색][]).map(([라벨, 값, 색]) => (
+            <div key={라벨} className="flex min-h-[96px] flex-col justify-between rounded-[12px] border border-[#dde4e6] bg-white px-[15px] py-[12px]">
+              <span className={배지꼴(색) + ' self-start'}>{라벨}</span>
+              <div className="text-[28px] font-bold leading-none text-[#112231] tabular-nums">
+                {값 ?? 0}{라벨 === '평균 늦은 시간' ? <span className="text-[14px] font-normal"> 시간</span> : null}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950 p-3 text-sm">
-        <b>원인별</b>{' '}
-        {Object.entries(d.원인별 || {}).length === 0
-          ? <span className="text-mute">아직 없습니다</span>
-          : Object.entries(d.원인별).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
-            <span key={k} className="mr-2 inline-block rounded bg-gray-100 px-2 py-0.5 dark:bg-gray-800">{k} {v}</span>
           ))}
-        <span className="ml-2 text-xs text-mute">
-          · 「기존」 {s['기존 (셈에서 뺌)'] ?? 0}건은 켤 때 이미 목록에 있어 빠름·늦음 셈에서 뺐습니다
-        </span>
-      </div>
+        </div>
+
+        <div className={관.card + ' text-[14px] text-[#112231]'}>
+          <b>원인별</b>{' '}
+          {Object.entries(d.원인별 || {}).length === 0
+            ? <span className="text-[#555d6d]">아직 없습니다</span>
+            : Object.entries(d.원인별).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
+              <span key={k} className={배지꼴('neutral') + ' mr-[6px] mt-[4px]'}>{k} {v}</span>
+            ))}
+          <span className={'ml-[6px] ' + 관.sub}>
+            · 「기존」 {s['기존 (셈에서 뺌)'] ?? 0}건은 켤 때 이미 목록에 있어 빠름·늦음 셈에서 뺐습니다
+          </span>
+        </div>
+      </AdminSection>
 
       {/* ── 손으로 넣기 (굿잡피티) ── */}
-      <section className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950 p-4">
-        <h2 className="font-bold">굿잡피티 — 손으로 넣기</h2>
-        <p className="mt-1 text-xs text-mute">
+      <section className={'mb-[32px] ' + 관.card}>
+        <h2 className="rapo-type-t7-bold text-[#112231]">굿잡피티 — 손으로 넣기</h2>
+        <p className={'mt-[6px] break-keep ' + 관.sub}>
           굿잡피티는 이용약관에 「회사의 사전 승락없이 복제 또는 유통시키거나 상업적으로
           이용하는 경우」가 이용제한 사유로 적혀 있어 <b>자동으로 보지 않습니다.</b>
           세중님이 눈으로 보신 것만 여기 적습니다.
         </p>
-        <div className="mt-3 grid gap-2 md:grid-cols-5">
-          <input className="rounded-lg border px-2 py-1.5 text-sm" placeholder="기관명"
+        <div className="mt-[16px] grid gap-[12px] md:grid-cols-5">
+          <input className={관.input} placeholder="기관명" aria-label="기관명"
             value={손.기관명} onChange={(e) => set손({ ...손, 기관명: e.target.value })} />
-          <input className="rounded-lg border px-2 py-1.5 text-sm md:col-span-2" placeholder="제목"
+          <input className={관.input + ' md:col-span-2'} placeholder="제목" aria-label="제목"
             value={손.제목} onChange={(e) => set손({ ...손, 제목: e.target.value })} />
-          <input className="rounded-lg border px-2 py-1.5 text-sm" type="datetime-local"
+          <input className={관.input} type="datetime-local" aria-label="본 날짜"
             value={손.본날짜} onChange={(e) => set손({ ...손, 본날짜: e.target.value })} />
-          <input className="rounded-lg border px-2 py-1.5 text-sm" placeholder="링크"
+          <input className={관.input} placeholder="링크" aria-label="링크"
             value={손.링크} onChange={(e) => set손({ ...손, 링크: e.target.value })} />
         </div>
-        <button onClick={손넣기}
-          className="mt-2 rounded-lg bg-gray-900 px-4 py-1.5 text-sm text-white hover:bg-gray-700">
-          넣기
-        </button>
+        <div className="mt-[12px] flex justify-end">
+          <button type="button" onClick={손넣기} className={관.btn + ' min-w-[120px]'}>
+            넣기
+          </button>
+        </div>
       </section>
 
       {/* ── 줄 ── */}
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-gray-700 dark:bg-gray-900 dark:text-gray-300">
-            <tr>
-              <th className="px-3 py-2">경쟁사 공고</th>
-              <th className="px-3 py-2">우리 것</th>
-              <th className="px-3 py-2">판정</th>
-              <th className="px-3 py-2">원인</th>
-              <th className="px-3 py-2">상태 · 메모</th>
-            </tr>
-          </thead>
-          <tbody>
-            {d.줄.map((x) => (
-              <tr key={x.경쟁사 + x.글번호} className="border-t border-gray-100 align-top">
-                <td className="px-3 py-2">
-                  <div className="flex items-center gap-1">
-                    <span className="rounded bg-gray-100 px-1.5 text-xs dark:bg-gray-800">{x.경쟁사}</span>
-                    {x.기관분류 && <span className="rounded bg-badge-teal-bg px-1.5 text-xs text-gray-900">{x.기관분류}</span>}
-                    {x.기존 && <span className="rounded bg-gray-100 px-1.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">기존</span>}
-                    {x.넣은이 === '손' && <span className="rounded bg-badge-blue-bg px-1.5 text-xs text-gray-900">손 입력</span>}
-                  </div>
-                  <div className="mt-1 max-w-md">
-                    {x.링크
-                      ? <a href={x.링크} target="_blank" rel="noreferrer"
-                        className="text-interaction-blue underline decoration-dotted">{x.제목}</a>
-                      : x.제목}
-                  </div>
-                  <div className="text-xs text-mute">
-                    {x.기관명 ? x.기관명 + ' (어림)' : ''} {x.지역 ?? ''} {x.고용형태 ?? ''} · 처음 본 때 {x.처음본때}
-                  </div>
-                </td>
-                <td className="px-3 py-2">
-                  {x.우리것
-                    ? <>
-                      <div className="max-w-xs text-xs">{x.우리제목}</div>
-                      <div className="text-xs text-mute">{x.우리경로} · {x.우리것}</div>
-                    </>
-                    : <span className="font-bold text-brand-red-dark">없습니다</span>}
-                </td>
-                <td className="whitespace-nowrap px-3 py-2">
-                  <span className={'rounded px-1.5 py-0.5 text-xs ' + 판정색(x.판정)}>{x.판정 ?? '-'}</span>
-                  {x.차이시간 != null && (
-                    <div className="text-xs text-mute">
-                      {x.차이시간 >= 0 ? '+' : ''}{x.차이시간} 시간
-                    </div>
-                  )}
-                </td>
-                <td className="px-3 py-2">
-                  <select className="rounded-lg border px-1.5 py-1 text-xs"
-                    value={x.원인 ?? ''} onChange={(e) => 바꾸기(x, undefined, undefined, e.target.value)}>
-                    <option value="">(없음)</option>
-                    {원인들.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  {x.원인 === '수집 목록에 없는 기관' && (
-                    <button onClick={() => 후보로(x)}
-                      className="mt-1 block rounded-lg bg-interaction-blue px-2 py-1 text-xs text-white hover:opacity-80">
-                      수집 후보로 올리기
-                    </button>
-                  )}
-                </td>
-                <td className="px-3 py-2">
-                  <select className="rounded-lg border px-1.5 py-1 text-xs"
-                    value={x.상태 ?? '미처리'} onChange={(e) => 바꾸기(x, e.target.value)}>
-                    {상태들.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <input className="mt-1 w-44 rounded-lg border px-2 py-1 text-xs" placeholder="메모"
-                    defaultValue={x.메모 ?? ''}
-                    onBlur={(e) => { if (e.target.value !== (x.메모 ?? '')) 바꾸기(x, undefined, e.target.value); }} />
-                </td>
+      <AdminSection title="경쟁사 공고 대조">
+        <div className={관.tableWrap}>
+          <table className={관.table + ' min-w-[880px]'}>
+            <thead className={관.thead}>
+              <tr>
+                <th className={관.th}>경쟁사 공고</th>
+                <th className={관.th}>우리 것</th>
+                <th className={관.th}>판정</th>
+                <th className={관.th}>원인</th>
+                <th className={관.th}>상태 · 메모</th>
               </tr>
-            ))}
-            {d.줄.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-mute">아직 없습니다</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {d.줄.map((x) => (
+                <tr key={x.경쟁사 + x.글번호} className={관.tr + ' align-top'}>
+                  <td className={관.td}>
+                    <div className="flex flex-wrap items-center gap-[4px]">
+                      <span className={배지꼴('neutral')}>{x.경쟁사}</span>
+                      {x.기관분류 && <span className={배지꼴('info')}>{x.기관분류}</span>}
+                      {x.기존 && <span className={배지꼴('neutral')}>기존</span>}
+                      {x.넣은이 === '손' && <span className={배지꼴('info')}>손 입력</span>}
+                    </div>
+                    <div className="mt-[6px] max-w-md text-[14px] font-bold text-[#112231]">
+                      {x.링크
+                        ? <a href={x.링크} target="_blank" rel="noreferrer"
+                          className="underline decoration-dotted underline-offset-2 hover:decoration-solid">{x.제목}</a>
+                        : x.제목}
+                    </div>
+                    <div className={관.sub}>
+                      {x.기관명 ? x.기관명 + ' (어림)' : ''} {x.지역 ?? ''} {x.고용형태 ?? ''} · 처음 본 때 {x.처음본때}
+                    </div>
+                  </td>
+                  <td className={관.td}>
+                    {x.우리것
+                      ? <>
+                        <div className="max-w-xs text-[13px] text-[#112231]">{x.우리제목}</div>
+                        <div className={관.sub}>{x.우리경로} · {x.우리것}</div>
+                      </>
+                      : <AdminBadge tone="coral">없습니다</AdminBadge>}
+                  </td>
+                  <td className={관.td + ' whitespace-nowrap'}>
+                    <span className={배지꼴(판정색(x.판정))}>{x.판정 ?? '-'}</span>
+                    {x.차이시간 != null && (
+                      <div className={'mt-[4px] ' + 관.sub}>
+                        {x.차이시간 >= 0 ? '+' : ''}{x.차이시간} 시간
+                      </div>
+                    )}
+                  </td>
+                  <td className={관.td}>
+                    <select className={작은칸} aria-label="원인"
+                      value={x.원인 ?? ''} onChange={(e) => 바꾸기(x, undefined, undefined, e.target.value)}>
+                      <option value="">(없음)</option>
+                      {원인들.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    {x.원인 === '수집 목록에 없는 기관' && (
+                      <div className="mt-[6px]">
+                        <button type="button" onClick={() => 후보로(x)} className={관.btnSm}>
+                          수집 후보로 올리기
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                  <td className={관.td}>
+                    <select className={작은칸} aria-label="상태"
+                      value={x.상태 ?? '미처리'} onChange={(e) => 바꾸기(x, e.target.value)}>
+                      {상태들.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <input className={작은칸 + ' mt-[6px] block w-44'} placeholder="메모" aria-label="메모"
+                      defaultValue={x.메모 ?? ''}
+                      onBlur={(e) => { if (e.target.value !== (x.메모 ?? '')) 바꾸기(x, undefined, e.target.value); }} />
+                  </td>
+                </tr>
+              ))}
+              {d.줄.length === 0 && (
+                <tr><td colSpan={5} className={관.empty}>아직 없습니다</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </AdminSection>
 
       {/* ── 수집 후보 ── */}
       {d.수집후보.length > 0 && (
-        <section className="rounded-xl border border-gray-200 bg-badge-blue-bg p-4 dark:border-gray-700">
-          <h2 className="font-bold text-gray-900">수집 대상 후보 {d.수집후보.length}곳</h2>
-          <ul className="mt-2 space-y-1 text-sm text-gray-900">
+        <AdminSection title={`수집 대상 후보 ${d.수집후보.length}곳`}>
+          <ul className={관.list}>
             {d.수집후보.map((c) => (
-              <li key={c.기관명}>
+              <li key={c.기관명} className={관.row + ' flex flex-wrap items-center gap-[8px] text-[14px] text-[#112231]'}>
                 <b>{c.기관명}</b>
-                <span className="ml-2 rounded bg-white px-1.5 text-xs">{c.상태}</span>
-                <span className="ml-2 text-xs text-gray-700">{c.어디서}</span>
+                <span className={배지꼴('info')}>{c.상태}</span>
+                <span className={관.sub}>{c.어디서}</span>
               </li>
             ))}
           </ul>
-        </section>
+        </AdminSection>
       )}
     </div>
   );

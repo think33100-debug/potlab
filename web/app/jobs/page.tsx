@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 import { Hit } from '@/components/hit';
 import { RapoJobFilters, RapoJobSearch, RapoKindRemember, type 조건 } from '@/components/rapo/rapo-job-filters';
 import { RapoJobGuestWall } from '@/components/rapo/rapo-job-guest-wall';
-import { 고용형태들, 공고정렬들, 기본정렬, 분류읽기, 분류쿠키, type 공고정렬 } from '@/lib/rapo-job-options';
+import { 고용형태들, 공고정렬들, 기본정렬, 분류읽기, 분류쿠키, 시도글, 지역칩읽기, type 공고정렬 } from '@/lib/rapo-job-options';
 import type { RapoJob } from '@/components/rapo/rapo-job-row';
 import { 받는중, 목록, 못받음, 없음 } from '@/components/rapo/rapo-job-results';
 import { RapoShell } from '@/components/rapo/rapo-shell';
@@ -74,7 +74,10 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
   }
   const 고른직군 = sp.job === '전체' ? null : (sp.job ?? 내직군);
   const 기본직군 = !sp.job && !!내직군;           // 「내 직군: …」 줄로 보일지
-  const 고른시도 = sp.sido || null;
+  /* 지역 — 여러 개 · 아는 시·도만 남겨 「서울,대구,경북」 꼴로 (2026-11-19 세중님 · DB sido_has 가 쉼표를 풂).
+     옛 주소의 sido=대구 · sido=경북 은 「대구·경북」 칩으로 읽혀 둘 다 걸립니다 */
+  const 고른지역칩 = 지역칩읽기(sp.sido);
+  const 고른시도 = 시도글(고른지역칩);
   /* 고용형태 — 시트의 칩 값만 받습니다 (다른 글자는 무시) */
   const 고른고용 = sp.type && sp.type !== '전체' && (고용형태들 as readonly string[]).includes(sp.type) ? sp.type : null;
   /* 정렬 — 정해 둔 셋만 받고 나머지(옛 주소의 top 등)는 기본(인기순)으로 */
@@ -87,7 +90,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
   const 지금: 조건 = { q, job: 고른직군, sido: 고른시도, type: 고른고용, sort: 고른정렬, kinds: 고른분류 };
 
   /* 적용 조건 줄 (RAPO / List / 적용 조건 506:107) — 실제로 건 조건만 씁니다 */
-  const 조건말 = [고른직군, 고른시도, 고른고용, ...고른분류].filter(Boolean).join(' · ');
+  const 조건말 = [고른직군, 고른지역칩.join(', '), 고른고용, ...고른분류].filter(Boolean).join(' · ');
   const 적용줄 = !회원 ? null
     : 기본직군 && !고른시도 && !고른고용 && !고른분류.length ? `내 직군: ${고른직군}`
     : 조건말 ? `적용 조건: ${조건말}` : null;

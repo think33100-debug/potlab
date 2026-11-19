@@ -1,5 +1,7 @@
 'use client';
 
+/* 2026-11-19 — 새 관리자 디자인(Figma 16)의 coral·warning 색으로 띠만 다시 입힘. 판정·문구는 그대로 */
+
 import { useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
 
@@ -67,23 +69,23 @@ function 샘경보({ leak }: { leak: Leak }) {
   ].filter((x) => x.수 > 0);
 
   return (
-    <div role="alert" className="mb-6 rounded-[14px] border-2 border-[#FF3B30] bg-[#FFF1F0] p-5">
-      <p className="break-keep text-[15px] font-bold text-[#FF3B30]">
+    <div role="alert" className="mb-[16px] rounded-[12px] border border-[#ffd4cf] border-l-4 border-l-[#ff4f40] bg-[#fff5f3] px-[16px] py-[14px]">
+      <p className="break-keep text-[16px] font-bold leading-[22px] text-[#b42a21]">
         회원 화면에 있으면 안 될 공고가 {칸.reduce((a, x) => a + x.수, 0)}건 있어요
       </p>
-      <ul className="mt-3 space-y-2">
+      <ul className="mt-[10px] space-y-[6px]">
         {칸.map((x) => (
-          <li key={x.이름} className="break-keep text-[14px] text-[#1B2025]">
+          <li key={x.이름} className="break-keep text-[14px] text-[#112231]">
             <span className="font-bold">{x.이름}</span>
             {' — '}
             <span className="num tabular-nums">{x.수}</span>
             건
-            {x.덧 && <span className="block text-[13px] text-[#5F666C]">{x.덧}</span>}
+            {x.덧 && <span className="block text-[13px] text-[#555d6d]">{x.덧}</span>}
           </li>
         ))}
       </ul>
       {/* 무엇을 해야 하는지 한 줄 — 빨간 줄만 보고 무엇을 할지 모르면 소용없습니다 */}
-      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#5F666C]">
+      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#555d6d]">
         감추는 규칙(hide_stale_posts)이 안 돌았거나 다리가 숨김을 되돌린 것이에요.
         다리를 한 번 더 돌려 보고, 그래도 남으면 규칙을 봐야 해요.
         회원 화면 전체 <span className="num tabular-nums">{leak['회원 화면 전체']}</span>건 중입니다.
@@ -104,13 +106,13 @@ type Beat = {
 
 function 박동경보({ beats }: { beats: Beat[] }) {
   return (
-    <div role="alert" className="mb-6 rounded-[14px] border-2 border-[#FF3B30] bg-[#FFF1F0] p-5">
-      <p className="break-keep text-[15px] font-bold text-[#FF3B30]">
+    <div role="alert" className="mb-[16px] rounded-[12px] border border-[#ffd4cf] border-l-4 border-l-[#ff4f40] bg-[#fff5f3] px-[16px] py-[14px]">
+      <p className="break-keep text-[16px] font-bold leading-[22px] text-[#b42a21]">
         수집기가 제때 안 돈 곳이 {beats.length}곳 있어요
       </p>
-      <ul className="mt-3 space-y-2">
+      <ul className="mt-[10px] space-y-[6px]">
         {beats.map((b) => (
-          <li key={b.경로} className="break-keep text-[14px] text-[#1B2025]">
+          <li key={b.경로} className="break-keep text-[14px] text-[#112231]">
             <span className="font-bold">{b.이름}</span>
             {' — '}
             {b.왜}
@@ -122,7 +124,7 @@ function 박동경보({ beats }: { beats: Beat[] }) {
               </>
             )}
             {/* 왜 빨간지 — 근거를 같이 보여줘야 다음 사람이 기준을 안 고칩니다 */}
-            <span className="block text-[13px] text-[#5F666C]">
+            <span className="block text-[13px] text-[#555d6d]">
               {b.평소간격시간 != null && b.평소간격시간 > 0 && (
                 <>
                   {'평소 '}
@@ -137,7 +139,7 @@ function 박동경보({ beats }: { beats: Beat[] }) {
           </li>
         ))}
       </ul>
-      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#5F666C]">
+      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#555d6d]">
         서버가 멈췄거나 cron 이 안 돈 것이에요. 서울 서버에 들어가
         <span className="font-bold">{' journalctl -u potjob-hosp -n 50 '}</span>
         을 봐 주세요.
@@ -156,18 +158,18 @@ type 모르는코드 = {
 
 function 코드경보({ 코드 }: { 코드: 모르는코드 }) {
   return (
-    <div role="alert" className="mb-6 rounded-[14px] border-2 border-[#FF9500] bg-[#FFF8EF] p-5">
-      <p className="break-keep text-[15px] font-bold text-[#B36200]">
+    <div role="alert" className="mb-[16px] rounded-[12px] border border-[#fde7c2] border-l-4 border-l-[#d4ab28] bg-[#fff8ec] px-[16px] py-[14px]">
+      <p className="break-keep text-[16px] font-bold leading-[22px] text-[#6f3807]">
         처음 보는 코드 값이 {코드.가짓수}가지 있어요 (공고 {코드.공고수}건)
       </p>
-      <ul className="mt-3 space-y-2">
+      <ul className="mt-[10px] space-y-[6px]">
         {코드.줄.map((x) => (
-          <li key={x.칸 + x.출처 + x.값} className="break-keep text-[14px] text-[#1B2025]">
+          <li key={x.칸 + x.출처 + x.값} className="break-keep text-[14px] text-[#112231]">
             <span className="font-bold">{x.값}</span>
             {' — '}{x.출처}{' · '}{x.칸}{' · 공고 '}
             <span className="num tabular-nums">{x.공고수}</span>{'건'}
             {x.살아있음 > 0 && (
-              <span className="block text-[13px] text-[#B36200]">
+              <span className="block text-[13px] text-[#6f3807]">
                 {'그중 '}<span className="num tabular-nums">{x.살아있음}</span>
                 {'건이 회원 화면에 있어요 (「공고문 참고」 로 보입니다)'}
               </span>
@@ -175,7 +177,7 @@ function 코드경보({ 코드 }: { 코드: 모르는코드 }) {
           </li>
         ))}
       </ul>
-      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#5F666C]">
+      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#555d6d]">
         회원 화면에는 영문이 안 나갑니다 — 한글이 없는 값은 비워서 「공고문 참고」 로
         보입니다. 뜻을 알아내면 수집기의 코드표(예: tools/hosp/jobflex.mjs 의
         경력조건)와 DB 의 고용형태보임() 에 한 줄씩 더해 주세요.
@@ -238,15 +240,15 @@ export function RouteHealth() {
     {코드띠}
     <div
       role="alert"
-      className="mb-6 rounded-[14px] border-2 border-[#FF3B30] bg-[#FFF1F0] p-5"
+      className="mb-[16px] rounded-[12px] border border-[#ffd4cf] border-l-4 border-l-[#ff4f40] bg-[#fff5f3] px-[16px] py-[14px]"
     >
-      <p className="break-keep text-[15px] font-bold text-[#FF3B30]">
+      <p className="break-keep text-[16px] font-bold leading-[22px] text-[#b42a21]">
         공고가 안 들어오는 경로가 {빨간것.length}곳 있어요
       </p>
 
-      <ul className="mt-3 space-y-2">
+      <ul className="mt-[10px] space-y-[6px]">
         {빨간것.map((r) => (
-          <li key={r.경로} className="break-keep text-[14px] text-[#1B2025]">
+          <li key={r.경로} className="break-keep text-[14px] text-[#112231]">
             <span className="font-bold">{r.경로}</span>
             {' — '}
             <span className="num tabular-nums">{r.며칠째}</span>
@@ -259,7 +261,7 @@ export function RouteHealth() {
             )}
             {/* 왜 빨간지 — 근거를 같이 보여줘야 다음 사람이 기준을 안 고칩니다 */}
             {r.평소간격 != null && r.평소간격 > 0 && (
-              <span className="block text-[13px] text-[#5F666C]">
+              <span className="block text-[13px] text-[#555d6d]">
                 {'평소 '}
                 <span className="num tabular-nums">{r.평소간격}</span>
                 {'일에 한 번'}
@@ -291,13 +293,13 @@ export function RouteHealth() {
             · 「(옛)」·「(구글)」 줄은 **2026-10-11 에 일부러 멈춘** 옛 Apps Script
               길입니다 (다리 은퇴 · 세중님 승인 · docs/다리_은퇴_1011.md).
               그 줄이 빨개도 **고칠 것이 없습니다** */}
-      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#5F666C]">
+      <p className="mt-3 break-keep text-[13px] leading-relaxed text-[#555d6d]">
         수집기가 멈췄는지, 그 API 열쇠가 만료됐는지, 사이트가 막혔는지 봐야 해요.
         지금 수집기는 <b>서울 서버 크론</b>(나라일터·홈페이지·워크넷·치매센터·알리오·
         클린아이·잡플렉스)과 <b>GitHub Actions</b>(알리오·클린아이 전체 바퀴)로 돌아요.
         먼저 <b>수집기 상태</b> 화면의 박동 표를 보세요.
       </p>
-      <p className="mt-2 break-keep text-[13px] leading-relaxed text-[#5F666C]">
+      <p className="mt-2 break-keep text-[13px] leading-relaxed text-[#555d6d]">
         ★ 이름에 <b>(옛)</b> · <b>(구글)</b> 이 붙은 줄은 옛 Apps Script 길이고
         2026-10-11 에 <b>일부러 멈췄어요</b> (다리 은퇴). 새 길이 같은 공고를 직접
         받고 있어서 <b>고칠 것이 없어요</b> — 아직 경고에서 빼지 못한 것뿐이에요.

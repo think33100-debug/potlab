@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { AdminMerge } from '@/components/admin-merge';
 import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { 관 } from '@/components/rapo/rapo-admin-ui';
 import { SOURCE_NAME } from '@/lib/supabase';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
@@ -37,8 +38,8 @@ function 공고칸({ x, 쪽 }: { x: 줄; 쪽: '남긴' | '숨긴' }) {
   const 남김 = 쪽 === '남긴';
   return (
     <div className={'min-w-0 flex-1 rounded-(--rapo-radius-r2) border p-(--rapo-dimension-x4) '
-      + (남김 ? 'border-[#9fd4b8] bg-[#f2fbf6]' : 'border-[#dde4e6] bg-[#f6f8f9] text-[#5c6b77]')}>
-      <p className="text-[12px] font-bold">
+      + (남김 ? 'border-[#9fd4b8] bg-[#ebfdf2] text-[#112231]' : 'border-[#dde4e6] bg-[#f6f8f9] text-[#555d6d]')}>
+      <p className="text-[13px] font-bold">
         {남김 ? '회원에게 보이는 쪽' : '숨긴 쪽'} · {출처말(x.출처)}
         {남김 && x.보임 === false && <span className="ml-1 text-[#b42a21]">(지금은 이쪽도 안 보여요 — 마감·보류)</span>}
       </p>
@@ -93,25 +94,25 @@ export default function AdminDups() {
 
       <section aria-labelledby="dups-hidden" className="mb-[32px] flex flex-col gap-(--rapo-dimension-x4)">
         <div>
-          <h2 id="dups-hidden" className="rapo-type-t6-bold">숨긴 중복 · 최근 30일 {짝들 ? `${짝들.length}쌍` : ''}</h2>
-          <p className="mt-1 text-[14px] text-[#5c6b77]">
+          <h2 id="dups-hidden" className={관.h2}>숨긴 중복 · 최근 30일 {짝들 ? `${짝들.length}쌍` : ''}</h2>
+          <p className={관.muted + ' mt-[6px]'}>
             같은 공고가 두 곳에서 들어와 한쪽을 숨겼어요. 초록 칸이 회원에게 보이는 쪽이에요.
             둘이 다른 공고면 「다른 공고예요」를 눌러 주세요.
           </p>
         </div>
 
-        {err && <p role="alert" className="rounded-(--rapo-radius-r2) bg-[#fff5f3] p-(--rapo-dimension-x4) text-[14px] text-[#b42a21]">못 불러왔어요 — {err}</p>}
-        {!짝들 && !err && <p className="text-[14px] text-[#5c6b77]">불러오는 중…</p>}
-        {짝들 && 짝들.length === 0 && <p className="text-[14px] text-[#5c6b77]">최근 30일에 숨긴 중복이 없어요.</p>}
+        {err && <p role="alert" className={관.error}>못 불러왔어요 — {err}</p>}
+        {!짝들 && !err && <p className={관.muted}>불러오는 중…</p>}
+        {짝들 && 짝들.length === 0 && <div className={관.cardTight}><p className={관.empty}>최근 30일에 숨긴 중복이 없어요.</p></div>}
 
         {짝들?.map((p) => (
-          <article key={p.숨긴.id} className="rounded-(--rapo-radius-r2) border border-[#dde4e6] bg-white p-(--rapo-dimension-x4)">
+          <article key={p.숨긴.id} className="rounded-[12px] border border-[#dde4e6] bg-white p-(--rapo-dimension-x4)">
             <p className="mb-(--rapo-dimension-x2) text-[13px] text-[#304f65]">
               <b>{p.자동 ? '자동으로 숨김' : '손으로 묶음'}</b> · {날(p.숨긴날)} · {p.왜 ?? ''}
             </p>
             <div className="flex flex-col gap-(--rapo-dimension-x2) md:flex-row">
               {p.남긴 ? <공고칸 x={p.남긴} 쪽="남긴" /> : (
-                <div className="min-w-0 flex-1 rounded-(--rapo-radius-r2) border border-dashed border-[#dde4e6] p-(--rapo-dimension-x4) text-[13px] text-[#5c6b77]">
+                <div className="min-w-0 flex-1 rounded-(--rapo-radius-r2) border border-dashed border-[#dde4e6] p-(--rapo-dimension-x4) text-[13px] text-[#555d6d]">
                   남긴 쪽 기록이 없어요 (11/12 전에 자동으로 숨긴 줄)
                 </div>
               )}
@@ -120,7 +121,7 @@ export default function AdminDups() {
             {p.남긴 && (
               <div className="mt-(--rapo-dimension-x2) flex justify-end">
                 <button type="button" disabled={busy !== null} onClick={() => 다른공고(p)}
-                  className="rounded-(--rapo-radius-r2) border border-[#dde4e6] px-(--rapo-dimension-x4) py-(--rapo-dimension-x2) text-[14px] font-bold hover:bg-[#f6f8f9] disabled:opacity-50">
+                  className={관.btnLine}>
                   {busy === p.숨긴.id ? '올리는 중…' : '다른 공고예요 — 다시 올리기'}
                 </button>
               </div>
@@ -130,8 +131,8 @@ export default function AdminDups() {
       </section>
 
       <section aria-labelledby="dups-candidates" className="flex flex-col gap-(--rapo-dimension-x2)">
-        <h2 id="dups-candidates" className="rapo-type-t6-bold">묶을 후보 — 사람이 볼 짝</h2>
-        <p className="text-[14px] text-[#5c6b77]">자동 규칙이 못 잡은 짝이에요. 같은 공고면 「묶기」, 아니면 「묶지 않음」을 눌러 주세요.</p>
+        <h2 id="dups-candidates" className={관.h2}>묶을 후보 — 사람이 볼 짝</h2>
+        <p className={관.muted}>자동 규칙이 못 잡은 짝이에요. 같은 공고면 「묶기」, 아니면 「묶지 않음」을 눌러 주세요.</p>
         <AdminMerge />
       </section>
     </div>

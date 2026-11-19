@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { SOURCE_NAME } from '@/lib/supabase';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '@/app/toast';
+import { AdminBadge, 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 묶을 후보 (2026-10-04).
 
@@ -136,9 +137,9 @@ export function AdminMerge() {
 
   if (err) {
     return (
-      <section className="mb-8 rounded-sm border border-brand-red/40 bg-brand-red-soft p-6">
-        <p className="text-lg text-brand-red-dark">묶을 후보를 불러오지 못했어요 — {err}</p>
-        <p className="mt-1 text-sm text-brand-red-dark">
+      <section role="alert" className={관.error + ' mb-[24px]'}>
+        <p className="font-bold">묶을 후보를 불러오지 못했어요 — {err}</p>
+        <p className="mt-[4px] text-[13px]">
           함수가 아직 없으면 sql/2026-10-04_묶을후보.sql 을 올려 주십시오
         </p>
       </section>
@@ -148,23 +149,24 @@ export function AdminMerge() {
   const 후보수 = 후보들?.length ?? null;
 
   return (
-    <section className="mb-8">
-      <button type="button" onClick={() => set열림(!열림)}
-        className="flex w-full items-center justify-between rounded-sm border border-gray-200 px-6 py-5 text-left hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-950">
-        <span className="break-keep text-h3 font-bold">
+    /* 2026-11-19 — 새 관리자 디자인으로 겉모양만 바꿨습니다 (접는 흰 카드 · 단추 · 배지) */
+    <section className="mb-[24px]">
+      <button type="button" onClick={() => set열림(!열림)} aria-expanded={열림}
+        className="flex w-full items-center justify-between gap-[12px] rounded-[12px] border border-[#dde4e6] bg-white px-[20px] py-[16px] text-left hover:bg-[#f6f8f9]">
+        <span className="break-keep text-[16px] font-bold text-[#112231]">
           묶을 후보
-          <span className="ml-3 text-lg font-medium text-mute">
+          <span className="ml-[10px] text-[14px] font-normal text-[#555d6d]">
             {후보수 === null ? '세는 중…' : 후보수 + '짝'}
             {묶은것들 && 묶은것들.length > 0 && ' · 묶은 것 ' + 묶은것들.length}
             {안묶음들 && 안묶음들.length > 0 ? ' · 다른 공고로 정한 것 ' + 안묶음들.length : ''}
           </span>
         </span>
-        <span className="shrink-0 text-lg text-mute">{열림 ? '접기' : '펼치기'}</span>
+        <span className="shrink-0 text-[14px] font-bold text-[#304f65]">{열림 ? '접기 ▴' : '펼치기 ▾'}</span>
       </button>
 
       {열림 && (
         <>
-          <p className="mt-3 break-keep text-sm leading-relaxed text-mute">
+          <p className={관.sub + ' mt-[12px] break-keep leading-relaxed'}>
             같은 기관 · 같은 마감 · 다른 출처인 짝입니다. <b>제목은 안 봤습니다</b> —
             글자로는 한 공고인지 못 가립니다. <b>직군이 다른 짝은 아래쪽</b>에
             있고, 대개 서로 다른 공고입니다.
@@ -174,46 +176,44 @@ export function AdminMerge() {
           </p>
 
           {후보수 === 0 && (
-            <p className="mt-4 rounded-sm border border-gray-100 p-6 text-lg text-mute dark:border-gray-800">
-              묶을 후보가 없어요.
-            </p>
+            <div className={관.cardTight + ' mt-[12px]'}>
+              <p className={관.empty}>묶을 후보가 없어요.</p>
+            </div>
           )}
 
-          <ul className="mt-4 flex flex-col gap-4">
+          <ul className="mt-[12px] flex flex-col gap-[12px]">
             {(후보들 ?? []).map((c) => (
               <li key={c.왼쪽 + '|' + c.오른쪽}
-                className="rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-                <p className="flex flex-wrap items-center gap-2 text-sm">
-                  <b className="text-ink">{c.기관}</b>
-                  <span className="text-mute">{c.마감 ? c.마감 + ' 마감' : '마감 모름'}</span>
+                className={관.card}>
+                <p className="flex flex-wrap items-center gap-[8px] text-[14px]">
+                  <b className="text-[#112231]">{c.기관}</b>
+                  <span className="text-[#555d6d]">{c.마감 ? c.마감 + ' 마감' : '마감 모름'}</span>
                   {c.직군다름 && (
-                    <span className="rounded-xs bg-brand-red-soft px-3 py-1 text-brand-red-dark">
-                      직군이 다릅니다 — 다른 공고일 수 있습니다
-                    </span>
+                    <AdminBadge tone="coral">직군이 다릅니다 — 다른 공고일 수 있습니다</AdminBadge>
                   )}
                 </p>
 
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div className="mt-[12px] grid gap-[12px] sm:grid-cols-2">
                   {([['왼쪽', c.왼쪽, c.왼쪽출처, c.왼쪽제목, c.왼쪽직군, c.왼쪽링크, c.왼쪽올린날],
                      ['오른쪽', c.오른쪽, c.오른쪽출처, c.오른쪽제목, c.오른쪽직군, c.오른쪽링크, c.오른쪽올린날],
                     ] as const).map(([쪽, id, 출처, 제목, 직군, 링크, 올린날]) => (
-                    <div key={쪽} className="rounded-xs border border-gray-100 p-5 dark:border-gray-800">
-                      <p className="text-sm text-mute">
+                    <div key={쪽} className="flex min-w-0 flex-col rounded-[8px] border border-[#dde4e6] bg-[#f6f8f9] p-[16px]">
+                      <p className="text-[13px] text-[#555d6d]">
                         {출처말(출처)} · {직군 ?? '직군 모름'}
                         {올린날 ? ' · ' + 올린날 : ''}
                       </p>
-                      <p className="mt-1 break-keep text-lg font-bold">{제목}</p>
-                      <p className="mt-1 flex flex-wrap gap-3 text-sm">
+                      <p className="mt-[4px] break-keep text-[16px] font-bold leading-[22px] text-[#112231]">{제목}</p>
+                      <p className="mt-[6px] flex flex-wrap gap-[12px] text-[13px]">
                         <a href={`/jobs/${id}`} target="_blank" rel="noopener noreferrer"
-                          className="text-mute underline underline-offset-2">우리 화면</a>
+                          className="font-bold text-[#304f65] underline underline-offset-2">우리 화면 ↗</a>
                         {링크 && (
                           <a href={링크} target="_blank" rel="noopener noreferrer"
-                            className="text-mute underline underline-offset-2">원문</a>
+                            className="font-bold text-[#304f65] underline underline-offset-2">원문 ↗</a>
                         )}
                       </p>
                       <button type="button" disabled={busy === c.왼쪽}
                         onClick={() => 묶기(c, id)}
-                        className="mt-3 w-full rounded-md bg-brand-red px-5 py-3 text-lg font-bold text-white hover:bg-brand-red-dark disabled:opacity-40">
+                        className={관.btn + ' mt-[12px] w-full'}>
                         이쪽을 남기고 묶기
                       </button>
                     </div>
@@ -221,7 +221,7 @@ export function AdminMerge() {
                 </div>
 
                 <button type="button" disabled={busy === c.왼쪽} onClick={() => 묶지않기(c)}
-                  className="mt-3 rounded-md border border-gray-200 px-6 py-3 text-lg font-medium text-mute hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-950">
+                  className={관.btnLine + ' mt-[12px]'}>
                   묶지 않음 (다른 공고입니다)
                 </button>
               </li>
@@ -230,23 +230,22 @@ export function AdminMerge() {
 
           {묶은것들 && 묶은것들.length > 0 && (
             <>
-              <h3 className="mt-8 text-h3 font-bold">묶은 것 {묶은것들.length}</h3>
-              <ul className="mt-3 flex flex-col gap-3">
+              <h3 className={관.h3 + ' mt-[24px]'}>묶은 것 {묶은것들.length}</h3>
+              <ul className={관.list + ' mt-[8px]'}>
                 {묶은것들.map((m) => (
-                  <li key={m.연결한줄}
-                    className="rounded-sm border border-gray-100 p-5 dark:border-gray-800">
-                    <p className="text-sm text-mute">
+                  <li key={m.연결한줄} className={관.row}>
+                    <p className="text-[13px] text-[#555d6d]">
                       {m.기관} · {m.묶은날 ?? '날짜 모름'}
                     </p>
-                    <p className="mt-1 break-keep text-lg">
+                    <p className={관.body + ' mt-[4px] break-keep'}>
                       <b>{출처말(m.연결한출처)}</b> {m.연결한제목}
                       <span className="text-mute"> → 감춤</span>
                     </p>
-                    <p className="mt-1 break-keep text-sm text-mute">
+                    <p className={관.sub + ' mt-[4px] break-keep'}>
                       남긴 쪽 — {출처말(m.남긴출처)} {m.남긴제목 ?? m.남긴줄 ?? '(남긴 줄을 못 찾음)'}
                     </p>
                     <button type="button" disabled={busy === m.연결한줄} onClick={() => 풀기(m)}
-                      className="mt-3 rounded-md border border-gray-200 px-6 py-3 text-lg font-medium hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-950">
+                      className={관.btnSm + ' mt-[10px]'}>
                       풀기
                     </button>
                   </li>
@@ -257,27 +256,26 @@ export function AdminMerge() {
 
           {안묶음들 && 안묶음들.length > 0 && (
             <>
-              <h3 className="mt-8 text-h3 font-bold text-mute">
+              <h3 className={관.h3 + ' mt-[24px]'}>
                 다른 공고로 정한 것 {안묶음들.length}
               </h3>
-              <p className="mt-1 break-keep text-sm text-mute">
+              <p className={관.sub + ' mt-[4px] break-keep'}>
                 후보 목록에 다시 안 올라옵니다. 잘못 눌렀으면 되돌리세요 —
                 <b> 공고는 손대지 않습니다.</b>
               </p>
-              <ul className="mt-3 flex flex-col gap-3">
+              <ul className={관.list + ' mt-[8px]'}>
                 {안묶음들.map((x) => (
-                  <li key={x.왼쪽 + '|' + x.오른쪽}
-                    className="rounded-sm border border-gray-100 p-5 dark:border-gray-800">
-                    <p className="text-sm text-mute">
+                  <li key={x.왼쪽 + '|' + x.오른쪽} className={관.row}>
+                    <p className="text-[13px] text-[#555d6d]">
                       {x.기관 ?? '기관 모름'} · {String(x.정한때).slice(0, 10)}
                     </p>
-                    <p className="mt-1 break-keep text-lg">
+                    <p className={관.body + ' mt-[4px] break-keep'}>
                       {출처말(x.왼쪽출처)} {x.왼쪽제목 ?? x.왼쪽}
                       <span className="text-mute"> ↔ </span>
                       {출처말(x.오른쪽출처)} {x.오른쪽제목 ?? x.오른쪽}
                     </p>
                     <button type="button" disabled={busy === x.왼쪽} onClick={() => 되돌리기(x)}
-                      className="mt-3 rounded-md border border-gray-200 px-6 py-3 text-lg font-medium hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-950">
+                      className={관.btnSm + ' mt-[10px]'}>
                       되돌리기
                     </button>
                   </li>

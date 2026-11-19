@@ -5,6 +5,8 @@ import { AdminJobReports } from '@/components/admin-job-reports';
 import { AdminReportDecide } from '@/components/admin-report-decide';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminBadge, AdminSection, 관, 칩꼴 } from '@/components/rapo/rapo-admin-ui';
 
 /* 신고 (2026-10-01).
  *
@@ -80,108 +82,104 @@ export default function AdminReports() {
 
   const 안끝난것 = (rows ?? []).filter((r) => !r.처리시각).length;
 
+  /* 2026-11-19 — 새 디자인 「신고 관리」 1513:1013 꼴로 다시 입혔습니다 */
   return (
-    <div>
-      <h2 className="text-h3 font-bold">신고</h2>
-      <p className="mt-2 break-keep text-lg text-mute">
+    <div className="max-w-[1100px]">
+      <RapoAdminHeader title="신고 관리" />
+      <p className={관.muted + ' -mt-[16px] mb-[24px] break-keep'}>
         읽고 「처리 완료」를 눌러주세요. 눌러야 1년 뒤 자동으로 지워지고,
         신고당한 글쓴이가 탈퇴했을 때 그 사람 닉네임 보관도 끝납니다
       </p>
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        {[
-          { on: true, label: '처리 안 한 것' },
-          { on: false, label: '전체' },
-        ].map((t) => (
-          <button key={String(t.on)} type="button"
-            onClick={() => set처리전만(t.on)}
-            aria-pressed={처리전만 === t.on}
-            className={'rounded-md border px-6 py-4 text-lg font-medium '
-              + (처리전만 === t.on
-                ? 'border-teal-strong bg-teal-strong text-white'
-                : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400')}>
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {err && (
-        <p role="alert" className="mt-6 rounded-sm bg-brand-red-soft p-5 text-lg text-brand-red-dark">
-          못 불러왔어요 — {err}
-        </p>
-      )}
-      {rows === null && <p className="mt-6 text-lg text-mute">잠시만요…</p>}
-
-      {rows !== null && rows.length === 0 && (
-        <div className="mt-6 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-          <p className="break-keep text-lg font-bold">신고가 없어요</p>
-          <p className="mt-2 break-keep text-lg text-mute">
-            {처리전만 ? '처리 안 한 신고가 없습니다' : '아직 신고가 한 건도 없습니다'}
-          </p>
-        </div>
-      )}
-
-      {(rows ?? []).length > 0 && (
-        <>
-          {안끝난것 > 0 && (
-            <p className="mt-6 rounded-sm bg-brand-red-soft p-5 text-lg font-bold text-brand-red-dark">
-              처리 안 한 신고가 <span className="num tabular-nums">{안끝난것}</span>건 있어요
-            </p>
-          )}
-          <ul className="mt-6 space-y-3">
-            {(rows ?? []).map((r) => (
-              <li key={r.id}
-                className={'rounded-sm border p-5 '
-                  + (r.처리시각 ? 'border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-950'
-                               : 'border-brand-red/40')}>
-                <p className="flex flex-wrap items-baseline gap-x-3 text-lg">
-                  <span className="rounded-xs bg-gray-100 px-2 py-1 text-sm dark:bg-gray-800">
-                    {r.무엇 === 'post' ? '글' : r.무엇 === 'comment' ? '댓글' : r.무엇}
-                  </span>
-                  <span className="num tabular-nums text-mute">{때(r.신고시각)}</span>
-                  {r.처리시각
-                    ? <span className="text-sm text-mute">처리 완료 {때(r.처리시각)}</span>
-                    : <span className="text-sm font-bold text-brand-red">처리 안 함</span>}
-                </p>
-
-                <p className="mt-2 break-keep text-lg">
-                  <span className="font-bold">사유</span> — {r.사유}
-                </p>
-                <p className="mt-1 break-keep text-lg text-gray-600 dark:text-gray-400">
-                  신고한 사람 {r.신고한사람}
-                  <span className="block">
-                    신고당한 글 —{' '}
-                    {r.대상글있나
-                      ? <>「{r.대상글제목}」 · 쓴이 {r.대상글쓴이}</>
-                      : <span className="text-mute">이미 지워진 글입니다</span>}
-                  </span>
-                  {r.처리한사람 && (
-                    <span className="block text-sm">
-                      처리 {r.처리한사람}
-                      {r.처리메모 && ` · ${r.처리메모}`}
-                    </span>
-                  )}
-                </p>
-
-                {/* 2026-11-15 피그마 「운영자의 신고 처리」 — 원문 보기 · 숨김/그대로 · 신고자에게 안내 */}
-                {(!r.처리시각 || 결정들[r.id]?.결정) && (
-                  <AdminReportDecide 무엇="글" id={r.id} 결정={결정들[r.id]?.결정} 안내={결정들[r.id]?.안내} onDone={() => load(처리전만)} />
-                )}
-                {!r.처리시각 && (
-                  <button
-                    type="button"
-                    onClick={() => 처리(r.id)}
-                    disabled={busy === r.id}
-                    className="mt-3 text-lg text-mute underline underline-offset-4 disabled:opacity-40"
-                  >
-                    {busy === r.id ? '표시하는 중…' : '결정 없이 처리 완료로만 표시'}
-                  </button>
-                )}
-              </li>
+      <AdminSection title="커뮤니티 신고"
+        right={
+          <div className="flex flex-wrap gap-[8px]">
+            {[
+              { on: true, label: '처리 안 한 것' },
+              { on: false, label: '전체' },
+            ].map((t) => (
+              <button key={String(t.on)} type="button"
+                onClick={() => set처리전만(t.on)}
+                aria-pressed={처리전만 === t.on}
+                className={칩꼴(처리전만 === t.on)}>
+                {t.label}
+              </button>
             ))}
-          </ul>
-        </>
-      )}
+          </div>
+        }>
+        {err && (
+          <p role="alert" className={관.error}>못 불러왔어요 — {err}</p>
+        )}
+        {rows === null && <p className={관.muted}>잠시만요…</p>}
+
+        {rows !== null && rows.length === 0 && (
+          <div className={관.card}>
+            <p className={관.h3 + ' break-keep'}>신고가 없어요</p>
+            <p className={관.muted + ' mt-[6px] break-keep'}>
+              {처리전만 ? '처리 안 한 신고가 없습니다' : '아직 신고가 한 건도 없습니다'}
+            </p>
+          </div>
+        )}
+
+        {(rows ?? []).length > 0 && (
+          <>
+            {안끝난것 > 0 && (
+              <p className={관.error + ' font-bold'}>
+                처리 안 한 신고가 <span className="num tabular-nums">{안끝난것}</span>건 있어요
+              </p>
+            )}
+            <ul className={관.list}>
+              {(rows ?? []).map((r) => (
+                <li key={r.id} className={관.row + (r.처리시각 ? ' bg-[#f6f8f9]' : '')}>
+                  <p className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px]">
+                    <AdminBadge tone="neutral">
+                      {r.무엇 === 'post' ? '글' : r.무엇 === 'comment' ? '댓글' : r.무엇}
+                    </AdminBadge>
+                    {r.처리시각
+                      ? <AdminBadge tone="ok">처리 완료 {때(r.처리시각)}</AdminBadge>
+                      : <AdminBadge tone="warn">처리 안 함</AdminBadge>}
+                    <span className={관.sub + ' num tabular-nums'}>접수 {때(r.신고시각)}</span>
+                  </p>
+
+                  <p className={관.body + ' mt-[10px] break-keep text-[16px] leading-[22px]'}>
+                    <span className="font-bold">사유</span> — {r.사유}
+                  </p>
+                  <p className={관.muted + ' mt-[6px] break-keep'}>
+                    신고한 사람 {r.신고한사람}
+                    <span className="block">
+                      신고당한 글 —{' '}
+                      {r.대상글있나
+                        ? <>「{r.대상글제목}」 · 쓴이 {r.대상글쓴이}</>
+                        : <span className="text-[#868b94]">이미 지워진 글입니다</span>}
+                    </span>
+                    {r.처리한사람 && (
+                      <span className="block text-[13px]">
+                        처리 {r.처리한사람}
+                        {r.처리메모 && ` · ${r.처리메모}`}
+                      </span>
+                    )}
+                  </p>
+
+                  {/* 2026-11-15 피그마 「운영자의 신고 처리」 — 원문 보기 · 숨김/그대로 · 신고자에게 안내 */}
+                  {(!r.처리시각 || 결정들[r.id]?.결정) && (
+                    <AdminReportDecide 무엇="글" id={r.id} 결정={결정들[r.id]?.결정} 안내={결정들[r.id]?.안내} onDone={() => load(처리전만)} />
+                  )}
+                  {!r.처리시각 && (
+                    <button
+                      type="button"
+                      onClick={() => 처리(r.id)}
+                      disabled={busy === r.id}
+                      className={관.btnText + ' mt-[8px] font-normal text-[#555d6d] underline underline-offset-4'}
+                    >
+                      {busy === r.id ? '표시하는 중…' : '결정 없이 처리 완료로만 표시'}
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </AdminSection>
 
       {/* 공고 오류 신고 (2026-10-07). 같은 「신고」 메뉴 아래에 둡니다 —
           관리자가 신고를 찾으러 두 곳을 돌지 않게 */}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useToast } from '@/app/toast';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 운영자 신고 처리 — 원문 보기 · 결정(숨김/유지) · 신고자에게 보낼 안내 (2026-11-15 · 피그마 16 「운영자의 신고 처리」).
    「신고자 설명과 원문을 함께 확인한 뒤 처리 결과 결정 · 처리 완료 후 신고자에게 보낸 안내 확인 가능」.
@@ -22,9 +23,9 @@ export function AdminReportDecide({ 무엇, id, 결정, 안내, onDone }: {
 
   if (결정) {
     return (
-      <p className="mt-3 break-keep rounded-sm bg-gray-50 p-4 text-lg dark:bg-gray-900">
-        <b>결정 · {결정}</b>
-        <span className="mt-1 block text-mute">신고자에게 보낸 안내 — {안내 ?? (결정 === '숨김' ? '운영 정책에 따라 신고하신 내용을 숨겼어요.' : '확인했지만 운영 정책에 어긋나지 않아 그대로 두었어요.')}</span>
+      <p className={관.info + ' mt-[12px] break-keep'}>
+        <b className="text-[#112231]">결정 · {결정}</b>
+        <span className="mt-[4px] block text-[#555d6d]">신고자에게 보낸 안내 — {안내 ?? (결정 === '숨김' ? '운영 정책에 따라 신고하신 내용을 숨겼어요.' : '확인했지만 운영 정책에 어긋나지 않아 그대로 두었어요.')}</span>
       </p>
     );
   }
@@ -51,37 +52,37 @@ export function AdminReportDecide({ 무엇, id, 결정, 안내, onDone }: {
   };
 
   return (
-    <div className="mt-3 flex flex-col gap-3">
-      <button type="button" onClick={원문보기} className="self-start text-lg text-interaction-blue hover:underline">
+    <div className="mt-[12px] flex flex-col gap-[10px]">
+      <button type="button" onClick={원문보기} className={관.btnText + ' self-start'}>
         {원 ? '원문 접기' : '원문 보기'}
       </button>
       {원 && (
-        <div className="rounded-sm border border-gray-200 p-4 dark:border-gray-700">
-          {원.없음 ? <p className="text-lg text-mute">원문을 찾지 못했어요 (지워졌을 수 있어요)</p> : (
+        <div className="rounded-[8px] border border-[#dde4e6] bg-[#f6f8f9] p-[16px]">
+          {원.없음 ? <p className={관.muted}>원문을 찾지 못했어요 (지워졌을 수 있어요)</p> : (
             <>
-              <p className="text-sm text-mute">{원.갈래 ?? '공고'}{원.숨김 ? ' · 지금 숨겨져 있음' : ''}{원.org_name ? ` · ${원.org_name}` : ''}</p>
-              {원.제목 && <p className="mt-1 break-keep text-lg font-bold">{원.제목}</p>}
-              {원.본문 && <p className="mt-2 whitespace-pre-wrap break-keep text-lg">{원.본문}</p>}
-              {원.url && <a href={원.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-interaction-blue hover:underline">기관 원문 열기</a>}
+              <p className={관.sub}>{원.갈래 ?? '공고'}{원.숨김 ? ' · 지금 숨겨져 있음' : ''}{원.org_name ? ` · ${원.org_name}` : ''}</p>
+              {원.제목 && <p className={관.h3 + ' mt-[4px] break-keep'}>{원.제목}</p>}
+              {원.본문 && <p className={관.body + ' mt-[8px] whitespace-pre-wrap break-keep'}>{원.본문}</p>}
+              {원.url && <a href={원.url} target="_blank" rel="noopener noreferrer" className={관.btnText + ' mt-[8px]'}>기관 원문 열기 ↗</a>}
             </>
           )}
         </div>
       )}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-[8px]">
         {(['숨김', '유지'] as const).map((k) => (
           <button key={k} type="button" aria-pressed={고름 === k} onClick={() => { set고름(k); set글(기본안내(k)); }}
-            className={'rounded-md px-5 py-3 text-lg font-bold ' + (고름 === k ? 'bg-gray-900 text-white' : 'border border-gray-200 text-gray-700')}>
+            className={고름 === k ? 관.btn : 관.btnLine}>
             {k === '숨김' ? (무엇 === '공고' ? '문제 있음' : '숨기기') : '그대로 두기'}
           </button>
         ))}
       </div>
       {고름 && (
         <>
-          <label className="text-sm text-mute" htmlFor={`안내${무엇}${id}`}>신고자에게 보낼 안내 (신고 센터·앱 알림에 그대로 보여요)</label>
+          <label className={관.fieldLabel + ' mb-0'} htmlFor={`안내${무엇}${id}`}>신고자에게 보낼 안내 (신고 센터·앱 알림에 그대로 보여요)</label>
           <textarea id={`안내${무엇}${id}`} value={글} onChange={(e) => set글(e.target.value.slice(0, 300))} rows={3}
-            className="rounded-sm border border-gray-200 px-4 py-3 text-lg dark:border-gray-700 dark:bg-gray-950" />
+            className={관.textarea} />
           <button type="button" onClick={보내기} disabled={busy}
-            className="self-start rounded-md bg-teal-strong px-6 py-3 text-lg font-bold text-white disabled:opacity-40">
+            className={관.btn + ' self-start'}>
             {busy ? '보내는 중…' : '결정하고 알리기'}
           </button>
         </>

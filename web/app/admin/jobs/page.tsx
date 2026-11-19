@@ -11,6 +11,8 @@ import {
 import { SOURCE_NAME, TABS, tabLabel } from '@/lib/supabase';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminSearchField, AdminTabs, 관, 배지꼴 } from '@/components/rapo/rapo-admin-ui';
 
 /* 관리자 공고 화면.
 
@@ -172,95 +174,76 @@ export default function AdminJobs() {
   const go = (s: StateKey) => 주소로({ state: s === 'hold' ? null : s, page: null });
   const search = () => 주소로({ q: typed.trim() || null, page: null });
 
+  /* 2026-11-19 — 새 관리자 디자인 「공고 관리」(Figma 1406:492)로 겉모양만 바꿨습니다.
+     검색칸 → 밑줄 상태 탭 → 흰 카드 목록. 상태·주소·단추가 하는 일은 그대로입니다 */
   return (
-    <div>
-      <AdminTabCards />
-      {/* 같은 공고가 둘로 올라온 짝. 접어 두고, 펼쳐서 하나씩 가립니다 */}
-      <AdminMerge />
-      {/* 상태 칸 */}
-      <nav className="flex flex-wrap gap-2" aria-label="공고 상태">
-        {STATES.map((s) => (
-          <button
-            key={s.key} type="button" onClick={() => go(s.key)}
-            aria-current={state === s.key ? 'true' : undefined}
-            className={
-              'rounded-md border px-6 py-4 text-lg font-medium ' +
-              (state === s.key
-                ? 'border-teal-strong bg-teal-strong text-white'
-                : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400')
-            }
-          >
-            {s.label}
-            <span className={'ml-2 text-sm ' + (state === s.key ? 'text-white/70' : 'text-mute')}>
-              {counts[s.key] ?? '…'}
-            </span>
-          </button>
-        ))}
-      </nav>
-      {STATES.find((s) => s.key === state)?.hint && (
-        <p className="mt-2 text-sm text-mute">{STATES.find((s) => s.key === state)!.hint}</p>
-      )}
-
-      {state === 'hold' && <HoldCleanup onDone={reload} />}
+    <div className="max-w-[932px]">
+      <RapoAdminHeader title="공고 관리" />
 
       {/* 찾기 · 탭 거르기 */}
-      <div className="mt-6 flex flex-wrap gap-2">
-        <input
-          value={typed}
-          onChange={(e) => setTyped(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) search(); }}
-          placeholder="기관명 · 공고명 · 공고ID"
-          aria-label="공고 찾기"
-          className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
-        />
-        <button type="button" onClick={search}
-          className="shrink-0 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark">
-          찾기
-        </button>
+      <AdminSearchField value={typed} onChange={setTyped} onSubmit={search}
+        placeholder="기관명 · 공고명 · 공고ID" label="공고 찾기">
         <select
           value={tab}
           onChange={(e) => 주소로({ tab: e.target.value || null, page: null })}
           aria-label="탭으로 거르기"
-          className="appearance-none rounded-xs border border-gray-200 bg-gray-50 py-4 pl-5 pr-[36px] text-lg dark:border-gray-700 dark:bg-gray-950"
+          className={관.select + ' h-[46px]'}
         >
           <option value="">탭 전체</option>
           {TABS.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
         </select>
-      </div>
+      </AdminSearchField>
 
       {q && (
-        <p className="mt-2 text-sm text-mute">
+        <p className={관.sub + ' mt-[8px]'}>
           「{q}」로 찾은 {total}건{' '}
           <button type="button" onClick={() => { setTyped(''); 주소로({ q: null, page: null }); }}
-            className="text-interaction-blue hover:underline">검색 지우기</button>
+            className="font-bold text-[#112231] hover:underline">검색 지우기</button>
         </p>
       )}
 
+      {/* 같은 공고가 둘로 올라온 짝. 접어 두고, 펼쳐서 하나씩 가립니다 */}
+      <div className="mt-[24px]"><AdminMerge /></div>
+
+      {/* 상태 칸 — 원본 「상태 탭」(밑줄 · coral) */}
+      <nav className="mt-[24px]" aria-label="공고 상태">
+        <AdminTabs label="공고 상태" value={state} onChange={go}
+          tabs={STATES.map((s) => ({ key: s.key as StateKey, label: s.label, count: counts[s.key] ?? null }))} />
+      </nav>
+      {STATES.find((s) => s.key === state)?.hint && (
+        <p className={관.sub + ' mt-[8px]'}>{STATES.find((s) => s.key === state)!.hint}</p>
+      )}
+
+      {state === 'hold' && <HoldCleanup onDone={reload} />}
+
       {/* 목록 */}
       {rows === null ? (
-        <p className="mt-7 text-lg text-mute">불러오는 중…</p>
+        <p className={관.muted + ' mt-[16px]'}>불러오는 중…</p>
       ) : rows.length === 0 ? (
-        <p className="mt-7 py-8 text-center text-lg text-mute">
-          {state === 'hold' ? '보류함이 비었어요. 좋은 신호죠' : '해당하는 공고가 없어요'}
-        </p>
+        <div className={관.cardTight + ' mt-[16px]'}>
+          <p className={관.empty}>
+            {state === 'hold' ? '보류함이 비었어요. 좋은 신호죠' : '해당하는 공고가 없어요'}
+          </p>
+        </div>
       ) : (
-        <ul className="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
+        <ul className={관.list + ' mt-[16px]'}>
           {rows.map((r) => (
-            <li key={r.id} className="py-6">
-              <div className="flex flex-wrap items-center gap-2 text-sm text-mute">
+            <li key={r.id} className={관.row}>
+              <div className="flex flex-wrap items-center gap-[8px] text-[13px] text-[#555d6d]">
                 {r.hold && <Badge tone="red">보류</Badge>}
                 {r.hidden && <Badge tone="gray">숨김</Badge>}
+                {!r.hold && !r.hidden && <Badge tone="green">게시 중</Badge>}
                 {r.tab && <Badge tone="blue">{tabLabel(r.tab)}</Badge>}
-                <span>{r.org_name}</span>
+                <span className="font-bold text-[#304f65]">{r.org_name}</span>
                 <span className="flex-1" />
                 <span>{SOURCE_NAME[r.source] ?? r.source} · 수집 {r.collected_at?.slice(0, 10)}</span>
               </div>
 
-              <Link href={`/admin/jobs/${r.id}`} className="mt-1 block text-body-lg font-medium hover:underline">
+              <Link href={`/admin/jobs/${r.id}`} className="mt-[8px] block text-[16px] font-bold leading-[22px] text-[#112231] hover:underline">
                 {r.title}
               </Link>
 
-              <p className="mt-1 text-sm text-mute">
+              <p className="mt-[4px] text-[13px] leading-[18px] text-[#555d6d]">
                 {/* ★ 2026-10-19 — `r.headcount ?` 는 **0 을 떨어뜨립니다.**
                     「0명」도 원문에 적힌 값이라 그대로 보여 줍니다 (세중님 결정).
                     회원 화면(jobs/[id])은 `!= null` 로 봐서 멀쩡했는데 여기만
@@ -276,34 +259,34 @@ export default function AdminJobs() {
                   시트의 「보류사유」 칸이 evidence 에 실려 옵니다 */}
               {/* 왜 감췄는지 — 되살릴지 정하려면 까닭이 보여야 합니다 (2026-09-28) */}
               {r.hidden && r.hidden_why && (
-                <p className="mt-1 break-keep text-[13px] text-[#8b979d]">
+                <p className="mt-[4px] break-keep text-[13px] text-[#555d6d]">
                   감춘 까닭 — {r.hidden_why}
                 </p>
               )}
               {/* 관리자가 정한 것 — 규칙이 못 덮어씁니다 */}
               {r.admin_locked && (
-                <p className="mt-1 break-keep text-[13px] font-bold text-[#0d5c4f]">
+                <p className="mt-[4px] break-keep text-[13px] font-bold text-[#065a2e]">
                   관리자가 정한 공고 — 규칙·재판정·동기화가 못 바꿉니다
                   {r.admin_note ? ' · ' + r.admin_note : ''}
                 </p>
               )}
               {r.hold && r.evidence?.['보류사유'] && (
-                <p className="mt-1 break-keep text-sm font-medium text-brand-red-dark">
+                <p className="mt-[8px] break-keep rounded-[8px] bg-[#fff8ec] px-[12px] py-[8px] text-[14px] font-bold text-[#6f3807]">
                   보류 이유 — {r.evidence['보류사유']}
                 </p>
               )}
 
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-[12px] flex flex-wrap items-center gap-[8px]">
                 {/* 살리기 · 숨기기 · 보류함으로 — 셋 중 하나. 지금 상태인 것은 안 보입니다 */}
                 {(r.hold || r.hidden) && 고를공고?.id !== r.id && (
-                  <Act onClick={() => 살리기(r.id, r.title)} busy={busy === r.id}>회원 화면에 올리기</Act>
+                  <Act onClick={() => 살리기(r.id, r.title)} busy={busy === r.id} primary>회원 화면에 올리기</Act>
                 )}
                 {고를공고?.id === r.id && (
                   <>
-                    <span className="self-center text-sm text-mute">어느 직군으로 올릴까요?</span>
-                    <Act onClick={() => 직군고름('물리치료사')} busy={busy === r.id}>물리치료사</Act>
-                    <Act onClick={() => 직군고름('작업치료사')} busy={busy === r.id}>작업치료사</Act>
-                    <Act onClick={() => 직군고름('공통')} busy={busy === r.id}>공통(둘 다)</Act>
+                    <span className="self-center text-[13px] text-[#555d6d]">어느 직군으로 올릴까요?</span>
+                    <Act onClick={() => 직군고름('물리치료사')} busy={busy === r.id} primary>물리치료사</Act>
+                    <Act onClick={() => 직군고름('작업치료사')} busy={busy === r.id} primary>작업치료사</Act>
+                    <Act onClick={() => 직군고름('공통')} busy={busy === r.id} primary>공통(둘 다)</Act>
                     <Act onClick={() => set고를공고(null)} busy={false}>그만</Act>
                   </>
                 )}
@@ -316,13 +299,11 @@ export default function AdminJobs() {
                 {r.admin_locked && (
                   <Act onClick={() => decide(r.id, '잠금풀기')} busy={busy === r.id}>잠금 풀기</Act>
                 )}
-                <Link href={`/admin/jobs/${r.id}`}
-                  className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">
+                <Link href={`/admin/jobs/${r.id}`} className={관.btnLine}>
                   수정
                 </Link>
-                <Link href={`/jobs/${r.id}`} target="_blank"
-                  className="rounded-md border border-gray-200 px-6 py-4 text-lg font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">
-                  회원 화면
+                <Link href={`/jobs/${r.id}`} target="_blank" className={관.btnLine}>
+                  회원 화면 ↗
                 </Link>
                 <span className="flex-1" />
                 <Act onClick={() => remove(r.id, r.title)} busy={busy === r.id} danger>삭제</Act>
@@ -334,29 +315,31 @@ export default function AdminJobs() {
 
       {/* 쪽 넘기기 */}
       {total > PAGE && (
-        <div className="mt-7 flex items-center justify-between gap-5">
+        <div className="mt-[16px] flex items-center justify-between gap-[12px]">
           <button type="button" disabled={page === 0} onClick={() => 주소로({ page: page - 1 })}
-            className="rounded-md border border-gray-200 px-6 py-4 text-lg disabled:opacity-30 dark:border-gray-700">
+            className={관.btnLine}>
             ← 이전
           </button>
-          <span className="text-sm text-mute">
+          <span className={관.sub}>
             {page * PAGE + 1}–{Math.min((page + 1) * PAGE, total)} / {total}건
           </span>
           <button type="button" disabled={(page + 1) * PAGE >= total} onClick={() => 주소로({ page: page + 1 })}
-            className="rounded-md border border-gray-200 px-6 py-4 text-lg disabled:opacity-30 dark:border-gray-700">
+            className={관.btnLine}>
             다음 →
           </button>
         </div>
       )}
+
+      {/* 공고 목록 분류 카드의 그림 — 자주 안 고치는 설정이라 아래로 */}
+      <div className="mt-[32px]"><AdminTabCards /></div>
     </div>
   );
 }
 
-function Badge({ tone, children }: { tone: 'red' | 'gray' | 'blue'; children: React.ReactNode }) {
-  const cls = tone === 'red' ? 'bg-brand-red-soft text-brand-red-dark'
-    : tone === 'blue' ? 'bg-badge-blue-bg text-interaction-blue'
-    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
-  return <span className={'rounded-md px-3 font-medium ' + cls}>{children}</span>;
+/* 상태 배지 — 원본 「RAPO / Badge」: 보류=warning · 게시 중=success · 숨김=neutral · 탭=info */
+function Badge({ tone, children }: { tone: 'red' | 'gray' | 'blue' | 'green'; children: React.ReactNode }) {
+  const 색 = tone === 'red' ? 'warn' : tone === 'blue' ? 'info' : tone === 'green' ? 'ok' : 'neutral';
+  return <span className={배지꼴(색)}>{children}</span>;
 }
 
 /* 보류함에서 **마감 지난 것만** 한 번에 치웁니다 (2026-10-07 세중님).
@@ -392,41 +375,35 @@ function HoldCleanup({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <div className="mt-3 rounded-md border border-gray-200 p-4 dark:border-gray-700">
+    <div className="mt-[12px] rounded-[12px] border border-[#dde4e6] bg-white px-[16px] py-[12px]">
       {셀것 === null ? (
         <Act onClick={세기} busy={도는중}>마감 지난 것 한 번에 치우기</Act>
       ) : 셀것 === 0 ? (
-        <p className="text-lg text-mute">
+        <p className={관.muted}>
           마감 지난 보류함 공고가 없습니다.
           <button type="button" onClick={() => set셀것(null)}
-            className="ml-3 text-sm text-interaction-blue hover:underline">닫기</button>
+            className="ml-[12px] font-bold text-[#112231] hover:underline">닫기</button>
         </p>
       ) : (
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-lg">
+        <div className="flex flex-wrap items-center gap-[12px]">
+          <p className={관.body}>
             마감 지난 공고 <b>{셀것}건</b>을 보류함에서 치웁니다. 지우지 않고 감춥니다
           </p>
           <Act onClick={치우기} busy={도는중} danger>정말 치우기</Act>
-          <button type="button" onClick={() => set셀것(null)}
-            className="text-sm text-interaction-blue hover:underline">그만두기</button>
+          <button type="button" onClick={() => set셀것(null)} className={관.btnText}>그만두기</button>
         </div>
       )}
-      {끝난말 && <p className="mt-2 text-sm text-mute">{끝난말}</p>}
+      {끝난말 && <p className={관.sub + ' mt-[8px]'}>{끝난말}</p>}
     </div>
   );
 }
 
 function Act({
-  onClick, busy, danger, children,
-}: { onClick: () => void; busy: boolean; danger?: boolean; children: React.ReactNode }) {
+  onClick, busy, danger, primary, children,
+}: { onClick: () => void; busy: boolean; danger?: boolean; primary?: boolean; children: React.ReactNode }) {
   return (
     <button type="button" onClick={onClick} disabled={busy}
-      className={
-        'rounded-md border px-6 py-4 text-lg font-medium disabled:opacity-40 ' +
-        (danger
-          ? 'border-gray-200 text-mute hover:border-brand-red hover:text-brand-red dark:border-gray-700'
-          : 'border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300')
-      }>
+      className={danger ? 관.btnDanger : primary ? 관.btn : 관.btnLine}>
       {children}
     </button>
   );
