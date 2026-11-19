@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/app/auth';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { 관, 배지꼴, 칩꼴 } from '@/components/rapo/rapo-admin-ui';
 
 /* 빈칸 공고 — 상세 일곱 칸 중 **비어 있는 칸이 있는 공고** (2026-10-09).
  *
@@ -63,80 +65,80 @@ export default function Blanks() {
     set고치는것(null); set값(''); set다시((n) => n + 1);
   }, [고치는것, 값]);
 
-  if (loading) return <p className="text-lg text-mute">잠시만요…</p>;
-  if (!isAdmin) return <p className="text-lg text-mute">관리자만 볼 수 있어요.</p>;
+  if (loading) return <p className={관.muted}>잠시만요…</p>;
+  if (!isAdmin) return <p className={관.muted}>관리자만 볼 수 있어요.</p>;
 
   return (
-    <div>
-      <h1 className="break-keep text-h2 font-bold">빈칸 공고</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
+    /* 2026-11-19 — 새 관리자 디자인으로 겉모양만 바꿨습니다 (칩 · 흰 카드 목록 · 단추) */
+    <div className="max-w-[932px]">
+      <RapoAdminHeader title="빈칸 공고" />
+      <p className={관.muted + ' -mt-[16px] break-keep'}>
         상세 일곱 칸 중 비어 있는 칸이 있는 공고예요. 채우면 그 칸이 잠겨서
         다음 수집 때 안 덮입니다.
       </p>
 
-      {탈 && <p className="mt-4 rounded-sm border border-brand-red p-4 text-lg text-brand-red-dark">{탈}</p>}
+      {탈 && <p role="alert" className={관.error + ' mt-[16px]'}>{탈}</p>}
 
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-[20px] flex flex-wrap gap-[8px]">
         {[null, '작업치료사', '물리치료사'].map((g) => (
           <button key={g ?? '전체'} type="button" onClick={() => { set직군(g); set쪽(0); }}
-            className={'rounded-full px-4 py-2 text-sm ' +
-              (직군 === g ? 'bg-[#14181C] text-white' : 'border border-gray-200 text-gray-600')}>
+            aria-pressed={직군 === g} className={칩꼴(직군 === g)}>
             {g ?? '전체'}
           </button>
         ))}
       </div>
 
-      {줄들 === null ? <p className="mt-6 text-lg text-mute">잠시만요…</p>
+      {줄들 === null ? <p className={관.muted + ' mt-[16px]'}>잠시만요…</p>
         : 줄들.length === 0
-          ? <p className="mt-6 break-keep text-lg text-mute">빈칸 있는 공고가 없어요.</p>
+          ? <div className={관.cardTight + ' mt-[16px]'}><p className={관.empty}>빈칸 있는 공고가 없어요.</p></div>
           : (
-            <ul className="mt-6 space-y-3">
+            <ul className={관.list + ' mt-[16px]'}>
               {줄들.map((r) => (
-                <li key={r.id} className="rounded-sm border border-gray-200 p-5">
-                  <p className="flex flex-wrap items-center gap-2">
-                    <b className="break-keep text-lg">{r.title}</b>
-                    <span className="text-sm text-mute">{r.org_name}</span>
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-[13px] dark:bg-gray-800">
+                <li key={r.id} className={관.row}>
+                  <p className="flex flex-wrap items-center gap-[8px]">
+                    <b className="break-keep text-[16px] leading-[22px] text-[#112231]">{r.title}</b>
+                    <span className="text-[13px] text-[#555d6d]">{r.org_name}</span>
+                    <span className={배지꼴('neutral')}>
                       {r.source}
                     </span>
                   </p>
-                  <p className="mt-2 flex flex-wrap gap-2">
+                  <p className="mt-[10px] flex flex-wrap items-center gap-[8px]">
                     {r.빈칸.map((k) => (
                       <button key={k} type="button"
                         onClick={() => { set고치는것({ id: r.id, 칸: k }); set값(''); }}
-                        className="rounded-full border border-brand-red px-3 py-1 text-[13px] text-brand-red-dark hover:bg-gray-50">
+                        className="inline-flex h-[30px] items-center rounded-full border border-[#ffb1a5] bg-[#fff5f3] px-[12px] text-[13px] font-bold text-[#b42a21] hover:bg-[#ffe9e6]">
                         {k} 채우기
                       </button>
                     ))}
                     {(r.잠긴칸 ?? []).length > 0 && (
-                      <span className="text-sm text-mute">
+                      <span className="text-[13px] text-[#555d6d]">
                         잠김 — {(r.잠긴칸 ?? []).join(' · ')}
                       </span>
                     )}
                   </p>
 
                   {고치는것?.id === r.id && (
-                    <div className="mt-3 rounded-sm bg-gray-50 p-4 dark:bg-gray-900">
-                      <p className="text-sm font-bold text-mute">
+                    <div className="mt-[12px] rounded-[8px] bg-[#f6f8f9] p-[16px]">
+                      <p className={관.label}>
                         {고치는것.칸} — {칸설명[고치는것.칸] ?? ''}
                       </p>
                       <input value={값} onChange={(e) => set값(e.target.value)}
-                        className="mt-2 w-full rounded-sm border border-gray-200 px-5 py-3 text-lg" />
-                      <div className="mt-3 flex gap-2">
+                        className={관.input + ' mt-[8px]'} />
+                      <div className="mt-[12px] flex flex-wrap gap-[8px]">
                         <button type="button" onClick={채우기}
-                          className="rounded-md bg-brand-red px-5 py-2 text-lg font-bold text-white hover:bg-brand-red-dark">
+                          className={관.btn}>
                           저장
                         </button>
                         <button type="button" onClick={() => set고치는것(null)}
-                          className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
+                          className={관.btnLine}>
                           그만두기
                         </button>
                       </div>
                     </div>
                   )}
 
-                  <p className="mt-3">
-                    <Link href={`/jobs/${r.id}`} className="text-lg text-interaction-blue hover:underline">
+                  <p className="mt-[10px]">
+                    <Link href={`/jobs/${r.id}`} className={관.btnText}>
                       공고 보기 →
                     </Link>
                   </p>
@@ -145,13 +147,13 @@ export default function Blanks() {
             </ul>
           )}
 
-      <div className="mt-6 flex gap-2">
+      <div className="mt-[16px] flex gap-[8px]">
         <button type="button" disabled={쪽 === 0} onClick={() => set쪽((p) => Math.max(0, p - 1))}
-          className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 disabled:opacity-50">
+          className={관.btnLine}>
           이전
         </button>
         <button type="button" disabled={(줄들?.length ?? 0) < 50} onClick={() => set쪽((p) => p + 1)}
-          className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 disabled:opacity-50">
+          className={관.btnLine}>
           다음
         </button>
       </div>

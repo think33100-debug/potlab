@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminSection, 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 알림 신청 현황 (2026-11-14 세중님 「알람 신청 누른 사람들 다 한 곳에 볼 수 있나? 종류별로」 → 「현황 만들고」).
 
@@ -34,70 +36,82 @@ export default function AdminNotify() {
   const 종류들 = 값?.종류 ?? [];
   const 가장큰 = Math.max(1, ...종류들.map((x) => x.사람));
 
+  /* 2026-11-19 — 새 관리자 디자인(흰 카드 · 막대 · 표)으로 다시 입혔습니다 */
   return (
-    <>
-      <h2 className="text-h3 font-bold">알림 신청 현황</h2>
-      <p className="mt-2 break-keep text-lg text-mute">
+    <div className="max-w-[1100px]">
+      <RapoAdminHeader title="알림 신청 현황">
+        {종류들.length > 0 && (
+          <div className="flex items-center gap-[12px]">
+            <p className={관.sub}>{때(값?.잰때)} 기준</p>
+            <button type="button" onClick={load} className={관.btnLine}>다시 세기</button>
+          </div>
+        )}
+      </RapoAdminHeader>
+      <p className={관.muted + ' -mt-[16px] mb-[24px] break-keep'}>
         종류별로 알림을 신청한 사람 수예요. 누가 신청했는지는 여기에 나오지 않아요
       </p>
 
-      {err && <p role="alert" className="mt-6 rounded-sm bg-brand-red-soft p-5 text-lg text-brand-red-dark">불러오지 못했어요 — {err}</p>}
-      {값?.왜 && <p role="alert" className="mt-6 rounded-sm bg-brand-red-soft p-5 text-lg text-brand-red-dark">{값.왜} 볼 수 있어요</p>}
-      {값 === null && !err && <p className="mt-6 text-lg text-mute">잠시만요…</p>}
+      {err && <p role="alert" className={관.error + ' mb-[16px]'}>불러오지 못했어요 — {err}</p>}
+      {값?.왜 && <p role="alert" className={관.error + ' mb-[16px]'}>{값.왜} 볼 수 있어요</p>}
+      {값 === null && !err && <p className={관.muted}>잠시만요…</p>}
 
       {종류들.length > 0 && (
         <>
-          <div className="mt-5 flex items-center justify-between gap-3">
-            <p className="text-sm text-mute">{때(값?.잰때)} 기준</p>
-            <button type="button" onClick={load} className="rounded-md border border-gray-200 px-5 py-3 text-sm font-medium dark:border-gray-700">다시 세기</button>
+          <AdminSection title="종류별">
+            <ul className="grid gap-[16px] md:grid-cols-2">
+              {종류들.map((x) => (
+                <li key={x.이름} className={관.card}>
+                  <div className="flex items-baseline justify-between gap-[16px]">
+                    <p className={관.h3 + ' min-w-0 break-keep text-[#304f65]'}>{x.이름}</p>
+                    <p className="shrink-0 whitespace-nowrap text-[28px] font-bold leading-none text-[#112231] tabular-nums">{x.사람.toLocaleString('ko-KR')}<span className="ml-[3px] text-[15px]">명</span></p>
+                  </div>
+                  <div aria-hidden className="mt-[12px] h-[8px] rounded-full bg-[#f1f5f8]">
+                    <div className="h-full rounded-full bg-[#304f65]" style={{ width: `${(x.사람 / 가장큰) * 100}%` }} />
+                  </div>
+                  <p className={관.sub + ' mt-[8px] break-keep'}>
+                    <span className="whitespace-nowrap">마지막 신청 {때(x.최근)}</span>
+                    {x.덧 && <span className="whitespace-nowrap"> · {x.덧}</span>}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </AdminSection>
+
+          <div className="grid gap-[16px] md:grid-cols-2">
+            <div className={관.card}>
+              <h3 className={관.h3}>교육 · 학회별</h3>
+              {(값?.학회별 ?? []).length === 0
+                ? <p className={관.sub + ' mt-[8px]'}>아직 신청한 사람이 없어요</p>
+                : (
+                  <ul className="mt-[8px]">
+                    {(값?.학회별 ?? []).map((x) => (
+                      <li key={x.이름} className={관.body + ' flex items-baseline justify-between gap-[16px] border-b border-[#dde4e6] py-[12px] last:border-0'}>
+                        <span className="min-w-0 break-keep text-[#304f65]">{x.이름}</span>
+                        <span className="shrink-0 font-bold tabular-nums">{x.사람}명</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+            </div>
+
+            <div className={관.card}>
+              <h3 className={관.h3}>봉사 · 청년정책 지역별</h3>
+              {(값?.지역별 ?? []).length === 0
+                ? <p className={관.sub + ' mt-[8px]'}>아직 신청한 사람이 없어요</p>
+                : (
+                  <ul className="mt-[8px]">
+                    {(값?.지역별 ?? []).map((x) => (
+                      <li key={x.갈래 + x.이름} className={관.body + ' flex items-baseline justify-between gap-[16px] border-b border-[#dde4e6] py-[12px] last:border-0'}>
+                        <span className="min-w-0 break-keep text-[#304f65]">{x.갈래} · {x.이름 === '전남광주' ? '광주·전남' : x.이름}</span>
+                        <span className="shrink-0 font-bold tabular-nums">{x.사람}명</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+            </div>
           </div>
-          <ul className="mt-4 flex flex-col gap-3">
-            {종류들.map((x) => (
-              <li key={x.이름} className="rounded-sm border border-gray-200 p-5 dark:border-gray-700">
-                <div className="flex items-baseline justify-between gap-4">
-                  <p className="min-w-0 break-keep text-lg font-bold">{x.이름}</p>
-                  <p className="shrink-0 whitespace-nowrap text-h3 font-bold tabular-nums">{x.사람.toLocaleString('ko-KR')}<span className="ml-1 text-sm font-medium text-mute">명</span></p>
-                </div>
-                <div aria-hidden className="mt-3 h-[6px] rounded-full bg-gray-100 dark:bg-gray-800">
-                  <div className="h-full rounded-full bg-teal-strong" style={{ width: `${(x.사람 / 가장큰) * 100}%` }} />
-                </div>
-                <p className="mt-2 break-keep text-sm text-mute">
-                  <span className="whitespace-nowrap">마지막 신청 {때(x.최근)}</span>
-                  {x.덧 && <span className="whitespace-nowrap"> · {x.덧}</span>}
-                </p>
-              </li>
-            ))}
-          </ul>
-
-          <h3 className="mt-8 text-lg font-bold">교육 · 학회별</h3>
-          {(값?.학회별 ?? []).length === 0
-            ? <p className="mt-2 text-sm text-mute">아직 신청한 사람이 없어요</p>
-            : (
-              <ul className="mt-2">
-                {(값?.학회별 ?? []).map((x) => (
-                  <li key={x.이름} className="flex items-baseline justify-between gap-4 border-b border-gray-100 py-3 last:border-0 dark:border-gray-800">
-                    <span className="min-w-0 break-keep">{x.이름}</span>
-                    <span className="shrink-0 font-bold tabular-nums">{x.사람}명</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-          <h3 className="mt-8 text-lg font-bold">봉사 · 청년정책 지역별</h3>
-          {(값?.지역별 ?? []).length === 0
-            ? <p className="mt-2 text-sm text-mute">아직 신청한 사람이 없어요</p>
-            : (
-              <ul className="mt-2">
-                {(값?.지역별 ?? []).map((x) => (
-                  <li key={x.갈래 + x.이름} className="flex items-baseline justify-between gap-4 border-b border-gray-100 py-3 last:border-0 dark:border-gray-800">
-                    <span className="min-w-0 break-keep">{x.갈래} · {x.이름 === '전남광주' ? '광주·전남' : x.이름}</span>
-                    <span className="shrink-0 font-bold tabular-nums">{x.사람}명</span>
-                  </li>
-                ))}
-              </ul>
-            )}
         </>
       )}
-    </>
+    </div>
   );
 }

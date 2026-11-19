@@ -1,5 +1,6 @@
 import { IconEditor } from '@/components/icon-editor';
 import { iconSlots } from '@/lib/icons';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,11 +14,14 @@ export const dynamic = 'force-dynamic';
 export default async function AdminIcons() {
   const slots = await iconSlots();
   return (
-    <>
-      <p className="mb-6 break-keep text-lg text-mute">
+    <div className="max-w-[1100px]">
+      {/* 2026-11-19 새 관리자 디자인(Figma 16)으로 겉모양만 다시 입힘 */}
+      <RapoAdminHeader title="아이콘" />
+      {/* 서버 화면이라 관(클라이언트 모듈 값) 대신 같은 값을 그대로 적습니다 */}
+      <p className="-mt-[20px] mb-[24px] break-keep text-[14px] leading-[19px] text-[#555d6d]">
         화면에 쓰이는 아이콘을 바꿉니다. 바꾸면 바로 반영돼요
       </p>
       <IconEditor slots={slots} />
-    </>
+    </div>
   );
 }

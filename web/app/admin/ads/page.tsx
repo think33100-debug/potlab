@@ -6,6 +6,8 @@ import { shrinkToWebp } from '@/lib/image';
 import { 올리기탈 } from '@/lib/upload-error';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { 관, AdminBadge } from '@/components/rapo/rapo-admin-ui';
 
 /* 오픈 화면 광고 (2026-10-04).
 
@@ -99,31 +101,34 @@ export default function AdminAds() {
 
   if (err) {
     return (
-      <p className="rounded-sm border border-brand-red/40 bg-brand-red-soft p-6 text-lg text-brand-red-dark">
+      <p role="alert" className={관.error}>
         불러오지 못했어요 — {err}
-        <span className="mt-1 block text-sm">app/admin/ads · admin_광고배너()</span>
+        <span className="mt-1 block text-[13px]">app/admin/ads · admin_광고배너()</span>
       </p>
     );
   }
-  if (!rows) return <p className="text-lg text-mute">불러오는 중…</p>;
+  if (!rows) return <p className={관.muted}>불러오는 중…</p>;
 
   return (
-    <div>
-      <h1 className="text-h1 font-bold">오픈 화면 광고</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
-        들어올 때 한 번 보이는 화면입니다. <b>자리마다 따로</b> 설정합니다.
-        꺼 두면 짧은 오픈 화면만 나갑니다
-      </p>
-      <p className="mt-2 break-keep text-sm text-mute">
-        그림은 <b>1MB · jpg·png·webp</b> 까지입니다. 표시 수와 누른 수는
-        개인 식별 정보 없이 숫자만 셉니다
-      </p>
+    <div className="max-w-[932px]">
+      {/* 2026-11-19 새 관리자 디자인(Figma 16 · 공고 상세 꼴)으로 겉모양만 다시 입힘 */}
+      <RapoAdminHeader title="오픈 화면 광고" />
+      <div className="-mt-[20px] mb-[24px] flex flex-col gap-[6px]">
+        <p className={'break-keep ' + 관.muted}>
+          들어올 때 한 번 보이는 화면입니다. <b className="text-[#112231]">자리마다 따로</b> 설정합니다.
+          꺼 두면 짧은 오픈 화면만 나갑니다
+        </p>
+        <p className={'break-keep ' + 관.sub}>
+          그림은 <b>1MB · jpg·png·webp</b> 까지입니다. 표시 수와 누른 수는
+          개인 식별 정보 없이 숫자만 셉니다
+        </p>
+      </div>
 
-      <div className="mt-6 flex flex-col gap-5">
+      <div className="flex flex-col gap-[24px]">
         {rows.map((o) => (
           <form
             key={o.자리}
-            className="rounded-sm border border-line bg-card p-6"
+            className={관.card}
             onSubmit={(e) => {
               e.preventDefault();
               const f = new FormData(e.currentTarget);
@@ -136,33 +141,33 @@ export default function AdminAds() {
               });
             }}
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-body-lg font-bold text-ink">
+            <div className="flex flex-wrap items-center justify-between gap-[12px]">
+              <div className="min-w-0">
+                <p className="rapo-type-t7-bold break-keep text-[#112231]">
                   {o.자리 === '앱' ? '앱 오픈 화면 (홈으로 들어올 때)' : o.자리 === '학생피드' ? '커뮤니티 글 사이 (라포 소개 · 2026-11-15)' : '커뮤니티 오픈 화면'}
                 </p>
-                <p className="mt-1 text-sm text-mute">
+                <p className={'mt-[6px] flex flex-wrap items-center gap-x-[8px] gap-y-[4px] ' + 관.sub}>
                   {o.지금나가나
-                    ? <b className="text-brand-red">지금 나가고 있습니다</b>
-                    : '지금은 안 나갑니다'}
-                  {' · 오늘 '}{o.오늘봄}회 보임 · {o.오늘누름}회 눌림
-                  {' · 누적 '}{o.다봄} / {o.다누름}
+                    ? <AdminBadge tone="ok">지금 나가고 있습니다</AdminBadge>
+                    : <AdminBadge tone="neutral">지금은 안 나갑니다</AdminBadge>}
+                  <span>
+                    {'오늘 '}{o.오늘봄}회 보임 · {o.오늘누름}회 눌림
+                    {' · 누적 '}{o.다봄} / {o.다누름}
+                  </span>
                 </p>
               </div>
               <button type="button" disabled={busy === o.자리}
                 onClick={() => 저장(o, { 켜짐: !o.켜짐 })}
-                className={'rounded-md px-6 py-3 text-lg font-bold disabled:opacity-40 '
-                  + (o.켜짐
-                    ? 'bg-brand-red text-white hover:bg-brand-red-dark'
-                    : 'border border-line text-mute hover:bg-paper')}>
+                aria-pressed={o.켜짐}
+                className={o.켜짐 ? 관.btn : 관.btnLine}>
                 {o.켜짐 ? '켜져 있음 — 끄기' : '꺼져 있음 — 켜기'}
               </button>
             </div>
 
-            <div className="mt-5 flex flex-wrap items-center gap-4">
+            <div className="mt-[20px] flex flex-wrap items-center gap-[12px]">
               {o.그림 && (
                 // eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다
-                <img src={o.그림} alt="" className="h-[120px] w-auto rounded-xs border border-line object-contain" />
+                <img src={o.그림} alt="" className="h-[120px] w-auto rounded-[8px] border border-[#dde4e6] object-contain" />
               )}
               <PhotoPicker
                 label={o.그림 ? '그림 바꾸기' : '그림 넣기'}
@@ -170,52 +175,48 @@ export default function AdminAds() {
                 onPick={(f) => 그림올리기(o, f)}
               />
               {o.그림 && (
-                <button type="button" onClick={() => 저장(o, { 그림: '' })}
-                  className="text-sm text-mute hover:underline">
+                <button type="button" onClick={() => 저장(o, { 그림: '' })} className={관.btnTextDanger}>
                   그림 빼기 (배너가 안 나갑니다)
                 </button>
               )}
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="mt-[20px] grid gap-[16px] sm:grid-cols-2">
               <label className="block">
-                <span className="block text-sm font-bold text-mute">광고주·메모 (회원에게 안 보임)</span>
-                <input name="이름" defaultValue={o.이름 ?? ''}
-                  className="mt-1 w-full rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink" />
+                <span className={관.fieldLabel}>광고주·메모 (회원에게 안 보임)</span>
+                <input name="이름" defaultValue={o.이름 ?? ''} className={관.input} />
               </label>
               <label className="block">
-                <span className="block text-sm font-bold text-mute">누르면 갈 곳 (비우면 못 누름)</span>
-                <input name="링크" defaultValue={o.링크 ?? ''} placeholder="https://"
-                  className="mt-1 w-full rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink" />
+                <span className={관.fieldLabel}>누르면 갈 곳 (비우면 못 누름)</span>
+                <input name="링크" defaultValue={o.링크 ?? ''} placeholder="https://" className={관.input} />
               </label>
               <label className="block">
-                <span className="block text-sm font-bold text-mute">보여줄 시간 (1~5초)</span>
+                <span className={관.fieldLabel}>보여줄 시간 (1~5초)</span>
                 <input name="표시초" type="number" min={1} max={5} defaultValue={o.표시초}
-                  className="mt-1 w-28 rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink" />
+                  className={관.input + ' max-w-[140px]'} />
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-[12px]">
                 <label className="block">
-                  <span className="block text-sm font-bold text-mute">시작일</span>
-                  <input name="시작일" type="date" defaultValue={o.시작일 ?? ''}
-                    className="mt-1 w-full rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink" />
+                  <span className={관.fieldLabel}>시작일</span>
+                  <input name="시작일" type="date" defaultValue={o.시작일 ?? ''} className={관.input} />
                 </label>
                 <label className="block">
-                  <span className="block text-sm font-bold text-mute">끝일</span>
-                  <input name="끝일" type="date" defaultValue={o.끝일 ?? ''}
-                    className="mt-1 w-full rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink" />
+                  <span className={관.fieldLabel}>끝일</span>
+                  <input name="끝일" type="date" defaultValue={o.끝일 ?? ''} className={관.input} />
                 </label>
               </div>
             </div>
 
-            <button type="submit" disabled={busy === o.자리}
-              className="mt-5 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark disabled:opacity-40">
-              저장하기
-            </button>
+            <div className="mt-[20px] flex justify-end">
+              <button type="submit" disabled={busy === o.자리} className={관.btn + ' min-w-[148px]'}>
+                저장하기
+              </button>
+            </div>
           </form>
         ))}
       </div>
 
-      <p className="mt-6 break-keep rounded-sm border border-line bg-card p-5 text-sm leading-relaxed text-mute">
+      <p className={'mt-[24px] break-keep ' + 관.info}>
         다시 보려면 <b>탭을 닫고 새로 열어야</b> 합니다 — 한 방문에 한 번만 뜨게
         해 두었습니다. 바로 보려면 주소창에서 새 탭으로 여십시오.
       </p>

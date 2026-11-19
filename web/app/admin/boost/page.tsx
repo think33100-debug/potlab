@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminBadge, 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 추천 올린 공고 (2026-10-07).
  *
@@ -64,85 +66,90 @@ export default function AdminBoost() {
 
   const 도는것 = (rows ?? []).filter((r) => r.지금도는가).length;
 
+  /* 2026-11-19 — 새 관리자 디자인으로 겉모양만 바꿨습니다 (흰 카드 목록 · 배지 · 단추) */
   return (
-    <div>
-      <h2 className="text-h3 font-bold">추천 올린 공고</h2>
-      <p className="mt-2 break-keep text-lg text-mute">
+    <div className="max-w-[932px]">
+      <RapoAdminHeader title="추천 올린 공고" />
+      <p className={관.muted + ' -mt-[16px] break-keep'}>
         공고 목록의 「추천순」 맨 위에 올라가는 공고입니다. 올리고 내리는 것은
         공고 화면의 관리자 줄에서 합니다 — 여기는 무엇이 올라가 있는지 보는 곳입니다.
         회원 화면에는 「추천」 이라고 표시됩니다.
       </p>
 
-      <div className="mt-5 flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 text-lg">
-          <input type="checkbox" checked={지난것} onChange={(e) => set지난것(e.target.checked)} />
+      <div className="mt-[20px] flex flex-wrap items-center gap-[16px]">
+        <label className="flex items-center gap-[8px] text-[14px] font-bold text-[#304f65]">
+          <input type="checkbox" checked={지난것} className="size-[18px] accent-[#112231]"
+            onChange={(e) => set지난것(e.target.checked)} />
           지난 것도 보기
         </label>
-        {rows && <span className="text-lg text-mute">지금 올라가 있는 것 {도는것}건</span>}
+        {rows && <span className={관.muted}>지금 올라가 있는 것 <b className="text-[#112231]">{도는것}건</b></span>}
       </div>
 
       {err && (
-        <p className="mt-5 break-keep text-lg text-brand-red">불러오지 못했어요 — {err}</p>
+        <p role="alert" className={관.error + ' mt-[16px] break-keep'}>불러오지 못했어요 — {err}</p>
       )}
-      {rows === null && !err && <p className="mt-5 text-lg text-mute">불러오는 중…</p>}
+      {rows === null && !err && <p className={관.muted + ' mt-[16px]'}>불러오는 중…</p>}
       {rows && rows.length === 0 && !err && (
-        <p className="mt-5 break-keep text-lg text-mute">
-          아직 올린 공고가 없습니다. 공고 화면의 관리자 줄에서 「추천순 올리기」 를 눌러 주세요
-        </p>
+        <div className={관.cardTight + ' mt-[16px]'}>
+          <p className={관.empty + ' break-keep'}>
+            아직 올린 공고가 없습니다. 공고 화면의 관리자 줄에서 「추천순 올리기」 를 눌러 주세요
+          </p>
+        </div>
       )}
 
-      <ul className="mt-5 space-y-4">
-        {(rows ?? []).map((r) => (
-          <li key={r.id} className="rounded-sm border border-line bg-card p-5">
-            <div className="flex flex-wrap items-baseline gap-2">
-              {r.지금도는가
-                ? <span className="text-sm font-bold text-interaction-blue">지금 올라가 있음</span>
-                : <span className="text-sm text-mute">끝났음</span>}
-              <span className="text-sm text-mute">· 순서 {r.순서}</span>
-              <span className="text-sm text-mute">· {날(r.부터)} ~ {날(r.까지)}</span>
-            </div>
-
-            <p className="mt-2 break-keep text-body-lg font-medium">
-              {r.기관 ?? '(지워진 공고)'} — {r.제목 ?? r.job_id}
-            </p>
-            <p className="mt-2 break-keep text-lg">왜 — {r.왜}</p>
-            <p className="mt-1 break-keep text-sm text-mute">
-              올린 사람 {r.올린사람} · {때(r.만든때)}
-              {r.끝낸때 && (
-                <span className="block">
-                  끝낸 사람 {r.끝낸사람} · {때(r.끝낸때)}
-                  {r.끝낸까닭 && ` · ${r.끝낸까닭}`}
-                </span>
-              )}
-            </p>
-
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-              <Link href={`/jobs/${r.job_id}`} className="text-interaction-blue hover:underline">
-                공고 보기
-              </Link>
-            </div>
-
-            {r.지금도는가 && (
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <input
-                  value={왜[r.job_id] ?? ''}
-                  onChange={(e) => set왜((m) => ({ ...m, [r.job_id]: e.target.value }))}
-                  placeholder="왜 내리나요? (꼭 적습니다)"
-                  className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-4 py-3 text-lg
-                             dark:border-gray-700 dark:bg-gray-950"
-                />
-                <button
-                  type="button" onClick={() => 내리기(r.job_id)} disabled={busy === r.job_id}
-                  className="shrink-0 rounded-md bg-gray-900 px-6 py-3 text-btn font-bold text-white
-                             disabled:opacity-50"
-                >
-                  {busy === r.job_id ? '내리는 중…' : '내리기'}
-                </button>
+      {(rows ?? []).length > 0 && (
+        <ul className={관.list + ' mt-[16px]'}>
+          {(rows ?? []).map((r) => (
+            <li key={r.id} className={관.row}>
+              <div className="flex flex-wrap items-center gap-[8px] text-[13px] text-[#555d6d]">
+                {r.지금도는가
+                  ? <AdminBadge tone="ok">지금 올라가 있음</AdminBadge>
+                  : <AdminBadge tone="neutral">끝났음</AdminBadge>}
+                <span>순서 {r.순서}</span>
+                <span>· {날(r.부터)} ~ {날(r.까지)}</span>
               </div>
-            )}
-          </li>
-        ))}
-      </ul>
+
+              <p className="mt-[8px] break-keep text-[16px] font-bold leading-[22px] text-[#112231]">
+                {r.기관 ?? '(지워진 공고)'} — {r.제목 ?? r.job_id}
+              </p>
+              <p className={관.body + ' mt-[6px] break-keep'}>왜 — {r.왜}</p>
+              <p className={관.sub + ' mt-[4px] break-keep'}>
+                올린 사람 {r.올린사람} · {때(r.만든때)}
+                {r.끝낸때 && (
+                  <span className="block">
+                    끝낸 사람 {r.끝낸사람} · {때(r.끝낸때)}
+                    {r.끝낸까닭 && ` · ${r.끝낸까닭}`}
+                  </span>
+                )}
+              </p>
+
+              <div className="mt-[8px] flex flex-wrap items-center gap-[12px]">
+                <Link href={`/jobs/${r.job_id}`} className={관.btnText}>
+                  공고 보기 →
+                </Link>
+              </div>
+
+              {r.지금도는가 && (
+                <div className="mt-[12px] flex flex-wrap items-center gap-[8px]">
+                  <input
+                    value={왜[r.job_id] ?? ''}
+                    onChange={(e) => set왜((m) => ({ ...m, [r.job_id]: e.target.value }))}
+                    placeholder="왜 내리나요? (꼭 적습니다)"
+                    aria-label="내리는 까닭"
+                    className={관.input + ' flex-1 basis-[200px]'}
+                  />
+                  <button
+                    type="button" onClick={() => 내리기(r.job_id)} disabled={busy === r.job_id}
+                    className={관.btn + ' h-[44px]'}
+                  >
+                    {busy === r.job_id ? '내리는 중…' : '내리기'}
+                  </button>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

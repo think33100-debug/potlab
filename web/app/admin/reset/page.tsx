@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useAuth } from '../../auth';
 import { useToast } from '../../toast';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 내 계정의 개인정보를 지웁니다.
 
@@ -53,16 +55,17 @@ export default function ResetMe() {
     router.replace('/login');
   };
 
+  /* 2026-11-19 — 새 관리자 디자인(흰 카드 · coral 경고 띠 · 단추)으로 다시 입혔습니다 */
   return (
-    <div>
-      <h2 className="text-h3 font-bold">내 계정 초기화</h2>
-      <p className="mt-2 break-keep text-lg text-mute">
+    <div className="max-w-[720px]">
+      <RapoAdminHeader title="내 계정 초기화" />
+      <p className={관.muted + ' -mt-[16px] mb-[24px] break-keep'}>
         가입 화면을 다시 보려고 쓰는 자리입니다. 지금 로그인한 계정의 개인정보를 지웁니다
       </p>
 
-      <div className="mt-6 rounded-sm bg-brand-red-soft p-6">
-        <p className="text-lg font-bold text-brand-red-dark">지워지는 것 — 되돌릴 수 없어요</p>
-        <ul className="mt-2 space-y-1 text-lg text-brand-red-dark">
+      <div className="rounded-[12px] border border-[#ffd4cf] bg-[#fff5f3] p-[20px] md:p-[24px]">
+        <p className="text-[16px] font-bold text-[#b42a21]">지워지는 것 — 되돌릴 수 없어요</p>
+        <ul className="mt-[8px] space-y-[4px] text-[14px] text-[#b42a21]">
           <li>· 로그인 수단 (카카오 · 네이버 연결)</li>
           <li>· 닉네임 · 프로필 사진</li>
           <li>· 급여 · 스펙</li>
@@ -70,25 +73,25 @@ export default function ResetMe() {
         </ul>
       </div>
 
-      <div className="mt-3 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-        <p className="text-lg font-bold">남는 것</p>
-        <ul className="mt-2 space-y-1 break-keep text-lg text-gray-600 dark:text-gray-400">
+      <div className={관.card + ' mt-[12px]'}>
+        <p className={관.h3}>남는 것</p>
+        <ul className={관.muted + ' mt-[8px] space-y-[4px] break-keep'}>
           <li>· 내가 쓴 글과 댓글 — 글쓴이만 「알 수 없음」이 돼요</li>
           <li>· 원래 누구였는지 (관리자만 볼 수 있어요)</li>
         </ul>
-        <p className="mt-5 break-keep text-sm text-mute">
+        <p className={관.sub + ' mt-[16px] break-keep'}>
           글까지 지우면 남이 받아 둔 공유 링크가 죽고, 그 글에 달린 남의 댓글이
           누구한테 한 말인지 알 수 없게 됩니다. 그래서 글은 남깁니다
         </p>
       </div>
 
-      <p className="mt-6 text-lg text-gray-700 dark:text-gray-300">
+      <p className={관.body + ' mt-[24px]'}>
         지금 계정: <span className="font-bold">{me?.nickname ?? '(가입 전)'}</span>
-        <span className="ml-2 text-sm text-mute">{session?.user.id.slice(0, 8)}…</span>
+        <span className={관.sub + ' ml-[8px]'}>{session?.user.id.slice(0, 8)}…</span>
       </p>
 
-      <label className="mt-6 block">
-        <span className="text-sm font-bold text-mute">
+      <label className="mt-[16px] block">
+        <span className={관.fieldLabel}>
           맞으면 「{SURE}」 라고 쳐주세요
         </span>
         <input
@@ -96,7 +99,7 @@ export default function ResetMe() {
           onChange={(e) => setTyped(e.target.value)}
           placeholder={SURE}
           aria-label="확인 글자"
-          className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
+          className={관.input}
         />
       </label>
 
@@ -104,12 +107,12 @@ export default function ResetMe() {
         type="button"
         onClick={run}
         disabled={busy || typed.trim() !== SURE}
-        className="mt-6 w-full rounded-md bg-brand-red px-6 py-5 text-btn font-bold text-white hover:bg-brand-red-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-[16px] inline-flex h-[48px] w-full items-center justify-center rounded-[8px] bg-[#b42a21] px-[18px] text-[16px] font-bold text-white hover:bg-[#9a231b] disabled:cursor-not-allowed disabled:opacity-40"
       >
         {busy ? '지우는 중…' : typed.trim() === SURE ? '내 개인정보 지우기' : `「${SURE}」 라고 쳐주세요`}
       </button>
 
-      <p className="mt-5 text-sm text-mute">
+      <p className={관.sub + ' mt-[16px]'}>
         지운 뒤 같은 수단(카카오·네이버)으로 다시 로그인하면 새 계정으로 가입 ①번부터 시작해요.
         올렸던 프로필 사진 파일은 저장소에 남습니다 — tools/clean_orphan_files.js 로 치웁니다
       </p>

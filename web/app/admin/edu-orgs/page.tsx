@@ -6,6 +6,8 @@ import { shrinkToWebp } from '@/lib/image';
 import { 올리기탈 } from '@/lib/upload-error';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { 관, AdminBadge } from '@/components/rapo/rapo-admin-ui';
 
 /* 교육기관 꾸미기 (2026-10-04).
 
@@ -90,52 +92,54 @@ export default function AdminEduOrgs() {
 
   if (err) {
     return (
-      <p className="rounded-sm border border-brand-red/40 bg-brand-red-soft p-6 text-lg text-brand-red-dark">
+      <p role="alert" className={관.error}>
         불러오지 못했어요 — {err}
-        <span className="mt-1 block text-sm">app/admin/edu-orgs · admin_교육기관()</span>
+        <span className="mt-1 block text-[13px]">app/admin/edu-orgs · admin_교육기관()</span>
       </p>
     );
   }
-  if (!rows) return <p className="text-lg text-mute">불러오는 중…</p>;
+  if (!rows) return <p className={관.muted}>불러오는 중…</p>;
 
   return (
-    <div>
-      <h1 className="text-h1 font-bold">교육기관</h1>
-      <p className="mt-2 break-keep text-lg text-mute">
-        회원이 보는 <b>교육기관 카드</b>를 꾸밉니다. 소개 글은 비어 있으면
-        회원 화면에서 그 칸이 아예 안 보입니다.
-      </p>
-      <p className="mt-2 break-keep text-sm text-mute">
-        ⚷ 대표 그림은 <b>직접 올린 그림 주소</b>만 넣으십시오.
-        남의 누리집 로고를 가져오면 안 됩니다. 비워 두면 이름 글자로 된
-        기본 카드가 나갑니다.
-      </p>
+    <div className="max-w-[932px]">
+      {/* 2026-11-19 새 관리자 디자인(Figma 16 · 공고 상세 꼴)으로 겉모양만 다시 입힘 */}
+      <RapoAdminHeader title="교육기관" />
+      <div className="-mt-[20px] mb-[24px] flex flex-col gap-[8px]">
+        <p className={'break-keep ' + 관.muted}>
+          회원이 보는 <b className="text-[#112231]">교육기관 카드</b>를 꾸밉니다. 소개 글은 비어 있으면
+          회원 화면에서 그 칸이 아예 안 보입니다.
+        </p>
+        <p className={'break-keep ' + 관.warn}>
+          ⚷ 대표 그림은 <b>직접 올린 그림 주소</b>만 넣으십시오.
+          남의 누리집 로고를 가져오면 안 됩니다. 비워 두면 이름 글자로 된
+          기본 카드가 나갑니다.
+        </p>
+      </div>
 
-      <ul className="mt-6 flex flex-col gap-3">
+      <ul className={관.list}>
         {rows.map((o) => {
           const 열림 = 열린곳 === o.이름;
           return (
-            <li key={o.이름} className="rounded-sm border border-line bg-card p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <li key={o.이름} className={관.row + (열림 ? ' bg-[#f6f8f9]' : '')}>
+              <div className="flex flex-wrap items-center justify-between gap-[12px]">
                 <div className="min-w-0">
-                  <p className="break-keep text-body-lg font-bold text-ink">
+                  <p className="flex flex-wrap items-center gap-[8px] break-keep text-[16px] font-bold text-[#112231]">
                     {o.이름}
-                    {!o.보임 && <span className="ml-2 text-sm text-mute">(숨김)</span>}
-                    {!o.모음 && <span className="ml-2 text-sm text-mute">· 링크만</span>}
+                    {!o.보임 && <AdminBadge tone="neutral">숨김</AdminBadge>}
+                    {!o.모음 && <AdminBadge tone="info">링크만</AdminBadge>}
                   </p>
-                  <p className="mt-1 text-sm text-mute">
+                  <p className={'mt-[4px] ' + 관.sub}>
                     {o.직군} · 차례 {o.차례} · 담긴 교육 {o.교육수}건
                     {o.소개 ? ' · 소개 있음' : ' · 소개 없음'}
                     {o.그림 ? ' · 그림 있음' : ' · 그림 없음'}
                   </p>
                 </div>
-                <div className="flex shrink-0 gap-2">
-                  <button type="button" onClick={() => 저장(o, { 보임: !o.보임 })}
-                    className="rounded-xs border border-line px-4 py-2 text-sm font-medium text-mute hover:bg-paper">
+                <div className="flex shrink-0 gap-[8px]">
+                  <button type="button" onClick={() => 저장(o, { 보임: !o.보임 })} className={관.btnSm}>
                     {o.보임 ? '숨기기' : '보이기'}
                   </button>
-                  <button type="button" onClick={() => set열린곳(열림 ? null : o.이름)}
-                    className="rounded-xs border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-paper">
+                  <button type="button" onClick={() => set열린곳(열림 ? null : o.이름)} aria-expanded={열림}
+                    className={관.btnSm}>
                     {열림 ? '닫기' : '고치기'}
                   </button>
                 </div>
@@ -143,7 +147,7 @@ export default function AdminEduOrgs() {
 
               {열림 && (
                 <form
-                  className="mt-4 flex flex-col gap-3"
+                  className={'mt-[16px] flex flex-col gap-[16px] ' + 관.card}
                   onSubmit={(e) => {
                     e.preventDefault();
                     const f = new FormData(e.currentTarget);
@@ -156,20 +160,20 @@ export default function AdminEduOrgs() {
                   }}
                 >
                   <label className="block">
-                    <span className="block text-sm font-bold text-mute">소개 글</span>
+                    <span className={관.fieldLabel}>소개 글</span>
                     <textarea name="소개" rows={3} defaultValue={o.소개 ?? ''}
                       placeholder="비워 두면 회원 화면에서 소개 칸이 안 보입니다"
-                      className="mt-1 w-full rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink" />
+                      className={관.textarea} />
                   </label>
                   {/* ★ 주소를 적게 두지 않습니다 (2026-10-04).
                       칸을 두면 남의 누리집 로고 주소를 붙여 넣을 수 있습니다.
                       **올린 그림만** 쓰이게 올리는 단추만 둡니다 */}
                   <div>
-                    <span className="block text-sm font-bold text-mute">대표 그림</span>
-                    <div className="mt-1 flex flex-wrap items-center gap-3">
+                    <span className={관.fieldLabel}>대표 그림</span>
+                    <div className="flex flex-wrap items-center gap-[12px]">
                       {o.그림 && (
                         // eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다
-                        <img src={o.그림} alt="" className="size-16 rounded-xs border border-line object-cover" />
+                        <img src={o.그림} alt="" className="size-16 rounded-[8px] border border-[#dde4e6] object-cover" />
                       )}
                       <PhotoPicker
                         label={o.그림 ? '그림 바꾸기' : '그림 넣기'}
@@ -177,29 +181,27 @@ export default function AdminEduOrgs() {
                         onPick={(f) => 그림올리기(o, f)}
                       />
                       {o.그림 && (
-                        <button type="button" onClick={() => 저장(o, { 그림: '' })}
-                          className="text-sm text-mute hover:underline">
+                        <button type="button" onClick={() => 저장(o, { 그림: '' })} className={관.btnTextDanger}>
                           그림 빼기 (이름 글자 카드로 보입니다)
                         </button>
                       )}
                     </div>
-                    <p className="mt-1 text-sm text-mute">
+                    <p className={'mt-[6px] ' + 관.sub}>
                       남의 누리집 로고를 쓰면 안 됩니다. 비워 두면 이름 글자 카드가 나갑니다
                     </p>
                   </div>
-                  <label className="block">
-                    <span className="block text-sm font-bold text-mute">누리집 주소</span>
-                    <input name="누리집" defaultValue={o.누리집 ?? ''}
-                      className="mt-1 w-full rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink" />
-                  </label>
-                  <label className="block">
-                    <span className="block text-sm font-bold text-mute">차례 (작을수록 위)</span>
-                    <input name="차례" type="number" defaultValue={o.차례}
-                      className="mt-1 w-32 rounded-xs border border-line bg-white px-4 py-3 text-lg text-ink" />
-                  </label>
-                  <div>
-                    <button type="submit" disabled={busy}
-                      className="rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark disabled:opacity-40">
+                  <div className="grid gap-[16px] md:grid-cols-[minmax(0,1fr)_160px]">
+                    <label className="block">
+                      <span className={관.fieldLabel}>누리집 주소</span>
+                      <input name="누리집" defaultValue={o.누리집 ?? ''} className={관.input} />
+                    </label>
+                    <label className="block">
+                      <span className={관.fieldLabel}>차례 (작을수록 위)</span>
+                      <input name="차례" type="number" defaultValue={o.차례} className={관.input} />
+                    </label>
+                  </div>
+                  <div className="flex justify-end">
+                    <button type="submit" disabled={busy} className={관.btn + ' min-w-[148px]'}>
                       저장하기
                     </button>
                   </div>

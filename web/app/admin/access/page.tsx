@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminBadge, AdminSearchField, AdminSection, 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 개인정보 접속기록 — 관리자가 회원 개인정보를 만진 기록 (2026-10-01).
  *
@@ -90,89 +92,92 @@ export default function AdminAccessLog() {
     return rows.filter((r) => r.언제.slice(0, 7) === 이달).length;
   }, [rows]);
 
+  /* 2026-11-19 — 새 관리자 디자인(검색칸 · 흰 표)으로 다시 입혔습니다 */
   return (
-    <div>
-      <h2 className="text-h3 font-bold">개인정보 접속기록</h2>
-      <p className="mt-2 break-keep text-lg text-mute">
+    <div className="max-w-[1100px]">
+      <RapoAdminHeader title="개인정보 접속기록" />
+      <p className={관.muted + ' -mt-[16px] mb-[24px] break-keep'}>
         관리자가 회원의 급여·스펙·어학이나 탈퇴 회원의 원래 이름을 열어본 기록입니다.
-        법이 <span className="font-bold">월 1회 이상 점검</span>하라고 합니다
+        법이 <span className="font-bold text-[#112231]">월 1회 이상 점검</span>하라고 합니다
         (개인정보의 안전성 확보조치 기준 제8조)
       </p>
 
-      <div className="mt-5 rounded-sm bg-badge-teal-bg p-5 dark:border dark:border-teal-strong/40 dark:bg-transparent">
-        <p className="break-keep text-lg">
-          이번 달 <span className="num tabular-nums font-bold">{이번달}</span>건 ·
-          최근 <span className="num tabular-nums font-bold">{rows?.length ?? 0}</span>건을 보여줍니다
+      <div className={관.info + ' break-keep'}>
+        <p>
+          이번 달 <b className="num tabular-nums text-[#112231]">{이번달}</b>건 ·
+          최근 <b className="num tabular-nums text-[#112231]">{rows?.length ?? 0}</b>건을 보여줍니다
           (최대 500)
         </p>
-        <p className="mt-2 break-keep text-sm text-mute">
+        <p className="mt-[4px] text-[13px] text-[#555d6d]">
           보관 기간 <span className="font-bold">1년</span> — 매일 밤 11시에 1년 지난 것을 지웁니다.
           회원이 5만 명을 넘으면 2년으로 바꿔야 합니다
         </p>
       </div>
 
-      <label className="mt-6 block">
-        <span className="text-sm font-bold text-mute">찾기 (회원번호·닉네임·무엇·어느 표)</span>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="예: 급여 · 탈퇴이름 · #00003"
-          aria-label="찾기"
-          className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
-        />
-      </label>
+      <div className="mt-[24px]">
+        <AdminSearchField value={q} onChange={setQ} label="찾기 (회원번호·닉네임·무엇·어느 표)"
+          placeholder="예: 급여 · 탈퇴이름 · #00003" />
+      </div>
 
-      {err && (
-        <p role="alert" className="mt-6 rounded-sm bg-brand-red-soft p-5 text-lg text-brand-red-dark">
-          못 불러왔어요 — {err}
-        </p>
-      )}
+      <AdminSection title="접속 기록" className="mt-[32px]">
+        {err && (
+          <p role="alert" className={관.error}>못 불러왔어요 — {err}</p>
+        )}
 
-      {rows === null && <p className="mt-6 text-lg text-mute">잠시만요…</p>}
+        {rows === null && <p className={관.muted}>잠시만요…</p>}
 
-      {rows !== null && 보일것.length === 0 && (
-        <div className="mt-6 rounded-sm border border-gray-200 p-6 dark:border-gray-700">
-          <p className="break-keep text-lg font-bold">기록이 없어요</p>
-          <p className="mt-2 break-keep text-lg text-mute">
-            {q
-              ? '찾는 말과 맞는 줄이 없어요'
-              : '아직 아무도 회원 개인정보를 열어보지 않았어요. 비어 있는 것이 정상입니다'}
-          </p>
-        </div>
-      )}
+        {rows !== null && 보일것.length === 0 && (
+          <div className={관.card}>
+            <p className={관.h3 + ' break-keep'}>기록이 없어요</p>
+            <p className={관.muted + ' mt-[6px] break-keep'}>
+              {q
+                ? '찾는 말과 맞는 줄이 없어요'
+                : '아직 아무도 회원 개인정보를 열어보지 않았어요. 비어 있는 것이 정상입니다'}
+            </p>
+          </div>
+        )}
 
-      {보일것.length > 0 && (
-        <ul className="mt-6 space-y-3">
-          {보일것.map((r, i) => (
-            <li key={r.언제 + i}
-              className="rounded-sm border border-gray-200 p-5 dark:border-gray-700">
-              <p className="flex flex-wrap items-baseline gap-x-3 text-lg">
-                <span className="num tabular-nums text-mute">{때(r.언제)}</span>
-                <span className="font-bold">{r.누가}</span>
-                <span className="rounded-xs bg-gray-100 px-2 py-1 text-sm dark:bg-gray-800">
-                  {r.무엇}
-                </span>
-              </p>
-              <p className="mt-2 break-keep text-lg text-gray-600 dark:text-gray-400">
-                {r.어느표}
-                {r.누구것 && (
-                  <span className="block text-sm">
-                    누구 것 — <span className="font-bold">{r.누구 ?? r.누구것}</span>
-                  </span>
-                )}
-                {r.몇명 != null && r.몇명 > 1 && (
-                  <span className="block text-sm">
-                    한 번에 <span className="num tabular-nums">{r.몇명}</span>명
-                  </span>
-                )}
-                <span className="block text-sm text-mute">
-                  접속지 {r.어디서 ?? '(모름 — 데이터베이스에서 직접 부른 것)'}
-                </span>
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
+        {보일것.length > 0 && (
+          <div className={관.tableWrap}>
+            <table className={관.table + ' min-w-[760px]'}>
+              <thead className={관.thead}>
+                <tr>
+                  <th className={관.th}>언제</th>
+                  <th className={관.th}>누가</th>
+                  <th className={관.th}>무엇</th>
+                  <th className={관.th}>어느 표 · 누구 것</th>
+                  <th className={관.th}>접속지</th>
+                </tr>
+              </thead>
+              <tbody>
+                {보일것.map((r, i) => (
+                  <tr key={r.언제 + i} className={관.tr}>
+                    <td className={관.td + ' num whitespace-nowrap tabular-nums'}>{때(r.언제)}</td>
+                    <td className={관.tdMain + ' text-[14px]'}>{r.누가}</td>
+                    <td className={관.td}><AdminBadge tone="neutral">{r.무엇}</AdminBadge></td>
+                    <td className={관.td + ' break-keep'}>
+                      {r.어느표}
+                      {r.누구것 && (
+                        <span className="block text-[13px]">
+                          누구 것 — <span className="font-bold text-[#112231]">{r.누구 ?? r.누구것}</span>
+                        </span>
+                      )}
+                      {r.몇명 != null && r.몇명 > 1 && (
+                        <span className="block text-[13px]">
+                          한 번에 <span className="num tabular-nums">{r.몇명}</span>명
+                        </span>
+                      )}
+                    </td>
+                    <td className={관.td + ' text-[13px]'}>
+                      {r.어디서 ?? '(모름 — 데이터베이스에서 직접 부른 것)'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </AdminSection>
     </div>
   );
 }

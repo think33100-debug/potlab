@@ -1,7 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminBadge, AdminSearchField, AdminSection, 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 회원 목록 (2026-10-01).
  *
@@ -76,99 +78,102 @@ export default function AdminMembers() {
     set속내용(error ? { 오류: error.message } : (data as Record<string, unknown>));
   };
 
+  /* 2026-11-19 — 새 디자인 「회원 관리 · PC UI」 1406:640 꼴로 다시 입혔습니다 (검색칸 → 회원 목록 표) */
   return (
-    <div>
-      <h2 className="text-h3 font-bold">회원 목록</h2>
-      <p className="mt-2 break-keep text-lg text-mute">
-        회원번호는 가입 순서대로 붙고 바뀌지 않아요. 회원 화면에는 안 보여요
-      </p>
+    <div className="max-w-[1100px]">
+      <RapoAdminHeader title="회원 관리" />
 
-      <div className="mt-5 rounded-sm bg-badge-teal-bg p-5 dark:border dark:border-teal-strong/40 dark:bg-transparent">
-        <p className="break-keep text-lg">
-          쓰는 중 <span className="num tabular-nums font-bold">{살아있음}</span>명 ·
-          탈퇴 <span className="num tabular-nums font-bold">{나감}</span>명
+      {/* ★ 예시에 **실제 회원의 번호·닉네임**을 적어 두었었습니다 (2026-10-10 캡처
+          검사에서 찾았습니다). 안내문은 지어낸 값으로 씁니다.
+          주석을 **속성 자리**에 두면 빌드가 깨집니다 — 태그 밖에 둡니다 */}
+      <AdminSearchField value={q} onChange={setQ} label="찾기 (회원번호·닉네임·직군)"
+        placeholder="예: #00001 · 닉네임 · 물리치료사" />
+
+      <div className={관.info + ' mt-[16px] break-keep'}>
+        <p>
+          쓰는 중 <b className="num tabular-nums text-[#112231]">{살아있음}</b>명 ·
+          탈퇴 <b className="num tabular-nums text-[#112231]">{나감}</b>명
+          <span className="ml-[8px] text-[#555d6d]">회원번호는 가입 순서대로 붙고 바뀌지 않아요. 회원 화면에는 안 보여요</span>
         </p>
-        <p className="mt-2 break-keep text-sm text-mute">
-          이 화면을 연 것도 「개인정보 접속기록」 에 남습니다
-        </p>
+        <p className="mt-[4px] text-[13px] text-[#555d6d]">이 화면을 연 것도 「개인정보 접속기록」 에 남습니다</p>
       </div>
 
-      <label className="mt-6 block">
-        <span className="text-sm font-bold text-mute">찾기 (회원번호·닉네임·직군)</span>
-        {/* ★ 예시에 **실제 회원의 번호·닉네임**을 적어 두었었습니다 (2026-10-10 캡처
-            검사에서 찾았습니다). 안내문은 지어낸 값으로 씁니다.
-            주석을 **속성 자리**에 두면 빌드가 깨집니다 — 태그 밖에 둡니다 */}
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="예: #00001 · 닉네임 · 물리치료사"
-          aria-label="찾기"
-          className="mt-1 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
-        />
-      </label>
+      <AdminSection title="회원 목록" className="mt-[32px]">
+        {err && (
+          <p role="alert" className={관.error}>못 불러왔어요 — {err}</p>
+        )}
+        {rows === null && <p className={관.muted}>잠시만요…</p>}
 
-      {err && (
-        <p role="alert" className="mt-6 rounded-sm bg-brand-red-soft p-5 text-lg text-brand-red-dark">
-          못 불러왔어요 — {err}
-        </p>
-      )}
-      {rows === null && <p className="mt-6 text-lg text-mute">잠시만요…</p>}
+        {보일것.length > 0 && (
+          <div className={관.tableWrap}>
+            <table className={관.table + ' min-w-[880px]'}>
+              <thead className={관.thead}>
+                <tr>
+                  <th className={관.th}>회원</th>
+                  <th className={관.th}>직군 · 역할</th>
+                  <th className={관.th}>가입 상태</th>
+                  <th className={관.th}>가입일</th>
+                  <th className={관.th}>활동</th>
+                  <th className={관.th}>동의</th>
+                  <th className={관.th}><span className="sr-only">급여·스펙</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {보일것.map((r) => (
+                  <Fragment key={r.id}>
+                    <tr className={관.tr + (r.탈퇴일 ? ' bg-[#f6f8f9]' : '')}>
+                      <td className={관.tdMain}>
+                        <span className="num tabular-nums">{r.회원번호}</span>
+                        <span className="ml-[8px]">{r.닉네임}</span>
+                      </td>
+                      <td className={관.td + ' break-keep'}>{r.직군} · {r.역할}</td>
+                      <td className={관.td}>
+                        {r.탈퇴일
+                          ? <AdminBadge tone="neutral">탈퇴 {날(r.탈퇴일)}</AdminBadge>
+                          : <AdminBadge tone="ok">이용 중</AdminBadge>}
+                      </td>
+                      <td className={관.td + ' whitespace-nowrap'}>{날(r.가입일)}</td>
+                      <td className={관.td + ' text-[13px]'}>
+                        글 <span className="num tabular-nums">{r.글}</span> ·
+                        댓글 <span className="num tabular-nums">{r.댓글}</span>
+                        <span className="block">
+                          급여 {r.급여넣음 ? '넣음' : '안 넣음'} ·
+                          스펙 {r.스펙넣음 ? '넣음' : '안 넣음'} ·
+                          알림 {r.알림받음 ? '받음' : '안 받음'}
+                        </span>
+                      </td>
+                      <td className={관.td + ' text-[13px]'}>
+                        {r.동의판 ?? '(기록 없음)'}
+                        {r.동의시각 && <span className="block">{날(r.동의시각)}</span>}
+                      </td>
+                      <td className={관.td}>
+                        {(r.급여넣음 || r.스펙넣음) && !r.탈퇴일 && (
+                          <button type="button" onClick={() => 열기(r.id)} className={관.btnSm + ' whitespace-nowrap'}>
+                            {연사람 === r.id ? '닫기' : '급여·스펙 열기 (기록 남아요)'}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                    {연사람 === r.id && (
+                      <tr className={관.tr}>
+                        <td colSpan={7} className="px-[18px] py-[12px]">
+                          <pre className="overflow-x-auto rounded-[8px] bg-[#f1f5f8] p-[16px] text-[13px] text-[#112231]">
+                            {속내용 ? JSON.stringify(속내용, null, 1) : '여는 중…'}
+                          </pre>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-      {보일것.length > 0 && (
-        <ul className="mt-6 space-y-3">
-          {보일것.map((r) => (
-            <li key={r.id}
-              className={'rounded-sm border p-5 '
-                + (r.탈퇴일 ? 'border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-950'
-                           : 'border-gray-200 dark:border-gray-700')}>
-              <p className="flex flex-wrap items-baseline gap-x-3">
-                <span className="num tabular-nums text-lg font-bold">{r.회원번호}</span>
-                <span className="text-lg font-bold">{r.닉네임}</span>
-                {r.탈퇴일 && (
-                  <span className="rounded-xs bg-gray-200 px-2 py-1 text-sm dark:bg-gray-800">
-                    탈퇴 {날(r.탈퇴일)}
-                  </span>
-                )}
-              </p>
-
-              <p className="mt-2 break-keep text-lg text-gray-600 dark:text-gray-400">
-                {r.직군} · {r.역할} · 가입 {날(r.가입일)}
-                <span className="block text-sm">
-                  글 <span className="num tabular-nums">{r.글}</span> ·
-                  댓글 <span className="num tabular-nums">{r.댓글}</span> ·
-                  급여 {r.급여넣음 ? '넣음' : '안 넣음'} ·
-                  스펙 {r.스펙넣음 ? '넣음' : '안 넣음'} ·
-                  알림 {r.알림받음 ? '받음' : '안 받음'}
-                </span>
-                <span className="block text-sm text-mute">
-                  동의 {r.동의판 ?? '(기록 없음)'}
-                  {r.동의시각 && ' · ' + 날(r.동의시각)}
-                </span>
-              </p>
-
-              {(r.급여넣음 || r.스펙넣음) && !r.탈퇴일 && (
-                <button
-                  type="button"
-                  onClick={() => 열기(r.id)}
-                  className="mt-3 rounded-xs border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-900"
-                >
-                  {연사람 === r.id ? '닫기' : '급여·스펙 열기 (기록 남아요)'}
-                </button>
-              )}
-
-              {연사람 === r.id && (
-                <pre className="mt-3 overflow-x-auto rounded-xs bg-gray-50 p-4 text-sm dark:bg-gray-950">
-                  {속내용 ? JSON.stringify(속내용, null, 1) : '여는 중…'}
-                </pre>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {rows !== null && 보일것.length === 0 && (
-        <p className="mt-6 text-lg text-mute">찾는 회원이 없어요</p>
-      )}
+        {rows !== null && 보일것.length === 0 && (
+          <p className={관.cardTight + ' ' + 관.empty}>찾는 회원이 없어요</p>
+        )}
+      </AdminSection>
     </div>
   );
 }

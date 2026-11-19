@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '@/app/toast';
+import { 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 제목 때문에 사람이 봐야 하는 것 (2026-10-05).
 
@@ -77,8 +78,8 @@ export function AdminTitleCheck() {
 
   if (err) {
     return (
-      <section className="rounded-sm border border-brand-red/40 bg-brand-red-soft p-6">
-        <p className="text-lg text-brand-red-dark">제목 확인 목록을 못 읽었어요 — {err}</p>
+      <section role="alert" className={관.error}>
+        <p>제목 확인 목록을 못 읽었어요 — {err}</p>
       </section>
     );
   }
@@ -97,53 +98,55 @@ export function AdminTitleCheck() {
   ];
 
   return (
-    <section className="rounded-sm border border-line bg-card p-6">
-      <h2 className="text-h3 font-bold">제목 — 사람이 봐야 하는 것</h2>
-      <p className="mt-1 break-keep text-sm text-mute">
+    /* 2026-11-19 — 새 관리자 디자인으로 겉모양만 바꿨습니다 (흰 카드 · 갈래 줄 · 단추) */
+    <section className={관.card}>
+      <h2 className="rapo-type-t7-bold text-[#112231]">제목 — 사람이 봐야 하는 것</h2>
+      <p className={관.sub + ' mt-[4px] break-keep'}>
         「보여 줄 제목」을 이어 붙일 때 <b>지어내지 않고 자리를 비운</b> 것들입니다
       </p>
 
-      <ul className="mt-4 flex flex-col gap-3">
+      <ul className="mt-[16px] flex flex-col gap-[12px]">
         {칸.map((c) => {
           const 열림 = !닫힌갈래.includes(c.열쇠);
           return (
-            <li key={c.열쇠} className="rounded-xs border border-gray-100 p-5 dark:border-gray-800">
+            <li key={c.열쇠} className="rounded-[8px] border border-[#dde4e6] p-[16px]">
               <button type="button"
                 onClick={() => set닫힌갈래((v) =>
                   열림 ? [...v, c.열쇠] : v.filter((k) => k !== c.열쇠))}
-                className="flex w-full items-center justify-between gap-3 text-left">
+                aria-expanded={열림}
+                className="flex w-full items-center justify-between gap-[12px] text-left">
                 <span>
-                  <b className="text-body-lg text-ink">{c.이름}</b>
-                  <span className={'ml-3 text-lg font-bold '
-                    + (c.갈래.수 > 0 ? 'text-brand-red' : 'text-mute')}>
+                  <b className="text-[16px] text-[#112231]">{c.이름}</b>
+                  <span className={'ml-[10px] text-[16px] font-bold '
+                    + (c.갈래.수 > 0 ? 'text-[#b42a21]' : 'text-[#555d6d]')}>
                     {c.갈래.수}건
                   </span>
-                  <span className="mt-1 block break-keep text-sm text-mute">{c.설명}</span>
+                  <span className="mt-[4px] block break-keep text-[13px] text-[#555d6d]">{c.설명}</span>
                 </span>
-                <span className="shrink-0 text-sm text-mute">{열림 ? '접기' : '보기'}</span>
+                <span className="shrink-0 text-[14px] font-bold text-[#304f65]">{열림 ? '접기 ▴' : '보기 ▾'}</span>
               </button>
 
               {열림 && c.갈래.보기.length > 0 && (
-                <ul className="mt-3 flex flex-col gap-2">
+                <ul className="mt-[12px] flex flex-col gap-[8px]">
                   {c.갈래.보기.map((x, i) => (
                     <li key={(x.id ?? x.원래이름 ?? '') + i}
-                      className="rounded-xs bg-paper p-4 text-sm dark:bg-gray-950">
+                      className="rounded-[8px] bg-[#f6f8f9] px-[14px] py-[12px] text-[14px] text-[#304f65]">
                       {c.열쇠 === '기관이름줄임확인' ? (
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <span className="break-keep">
-                            <b className="text-ink">{x.원래이름}</b>
-                            <span className="text-mute"> → </span>
-                            <b className="text-brand-red">{x.줄인이름}</b>
+                            <b className="text-[#112231]">{x.원래이름}</b>
+                            <span className="text-[#555d6d]"> → </span>
+                            <b className="text-[#b42a21]">{x.줄인이름}</b>
                           </span>
-                          <span className="flex shrink-0 gap-2">
+                          <span className="flex shrink-0 gap-[8px]">
                             <button type="button" disabled={busy === x.원래이름}
                               onClick={() => 정하기(x.원래이름!, true)}
-                              className="rounded-xs bg-brand-red px-4 py-2 font-bold text-white disabled:opacity-40">
+                              className={관.btn + ' h-[36px]'}>
                               줄여 쓰기
                             </button>
                             <button type="button" disabled={busy === x.원래이름}
                               onClick={() => 정하기(x.원래이름!, false)}
-                              className="rounded-xs border border-line px-4 py-2 text-mute disabled:opacity-40">
+                              className={관.btnLine + ' h-[36px]'}>
                               그대로 두기
                             </button>
                           </span>
@@ -153,45 +156,46 @@ export function AdminTitleCheck() {
                            그 기관의 다음 공고에도 쓰입니다 */
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <span className="break-keep">
-                            <b className="text-ink">{x.기관}</b>
-                            <span className="text-mute"> · {x.출처} · 공고 {x.공고수}건</span>
+                            <b className="text-[#112231]">{x.기관}</b>
+                            <span className="text-[#555d6d]"> · {x.출처} · 공고 {x.공고수}건</span>
                             {x.보기id && (
                               <a href={`/jobs/${x.보기id}`} target="_blank" rel="noopener noreferrer"
-                                className="ml-2 underline underline-offset-2 text-mute">보기</a>
+                                className="ml-[8px] font-bold text-[#304f65] underline underline-offset-2">보기 ↗</a>
                             )}
                           </span>
                           <select
                             disabled={busy === x.기관}
                             defaultValue=""
                             onChange={(e) => { if (e.target.value) 지역정하기(x.기관!, e.target.value); }}
-                            className="shrink-0 rounded-xs border border-line bg-white px-3 py-2 text-sm text-ink disabled:opacity-40"
+                            aria-label={`${x.기관} 시·도 고르기`}
+                            className={관.select + ' h-[36px] shrink-0 text-[14px] disabled:opacity-40'}
                           >
                             <option value="">시·도 고르기</option>
                             {시도들.map((s) => <option key={s} value={s}>{s}</option>)}
                           </select>
                         </div>
                       ) : (
-                        <span className="break-keep text-mute">
-                          <b className="text-ink">{x.기관}</b>
+                        <span className="break-keep text-[#555d6d]">
+                          <b className="text-[#112231]">{x.기관}</b>
                           {x.근무지 ? ` · 근무지 「${x.근무지}」` : ''}
                           {x.원문 ? ` · ${x.원문}` : ''}
                           {x.id && (
                             <a href={`/jobs/${x.id}`} target="_blank" rel="noopener noreferrer"
-                              className="ml-2 underline underline-offset-2">보기</a>
+                              className="ml-[8px] font-bold text-[#304f65] underline underline-offset-2">보기 ↗</a>
                           )}
                         </span>
                       )}
                     </li>
                   ))}
                   {c.갈래.수 > c.갈래.보기.length && (
-                    <li className="px-4 text-sm text-mute">
+                    <li className="px-[14px] text-[13px] text-[#555d6d]">
                       … 그 밖에 {c.갈래.수 - c.갈래.보기.length}건 (앞 20건만 보여줍니다)
                     </li>
                   )}
                 </ul>
               )}
               {열림 && c.갈래.보기.length === 0 && (
-                <p className="mt-3 text-sm text-mute">없습니다.</p>
+                <p className="mt-[12px] text-[13px] text-[#555d6d]">없습니다.</p>
               )}
             </li>
           );

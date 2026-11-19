@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminBadge, AdminTabs, 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 채용·교육 담당자 승인 — 권한 「기관승인」 이 있어야 합니다 (2026-10-09).
  *
@@ -68,63 +70,52 @@ export default function AdminPartners() {
     읽기();
   };
 
+  /* 2026-11-19 — 새 관리자 디자인(상태 탭 · 흰 목록 카드)으로 다시 입혔습니다 */
   return (
-    <div className="mt-6">
-      <h1 className="text-h2 font-bold text-[#14181C]">담당자 승인</h1>
-      <p className="mt-2 text-lg text-mute">
-        소속을 확인하고 승인합니다. 자료를 열면 <b>열람 기록이 남습니다</b>.
+    <div className="max-w-[1100px]">
+      <RapoAdminHeader title="담당자 승인" />
+      <p className={관.muted + ' -mt-[16px] mb-[24px] break-keep'}>
+        소속을 확인하고 승인합니다. 자료를 열면 <b className="text-[#112231]">열람 기록이 남습니다</b>.
         서류에 주민등록번호가 보이면 반려해 주세요.
       </p>
 
-      {탈 && <p className="mt-4 rounded-sm border border-brand-red p-4 text-lg text-brand-red-dark">{탈}</p>}
+      {탈 && <p className={관.error + ' mb-[16px]'}>{탈}</p>}
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        {['심사중', '승인', '반려', '정지'].map((s) => (
-          <button key={s} type="button" onClick={() => set상태(s)}
-            className={'rounded-full px-4 py-2 text-sm ' +
-              (상태 === s ? 'bg-[#14181C] text-white' : 'border border-gray-200 text-gray-600')}>
-            {s}
-          </button>
-        ))}
-      </div>
+      <AdminTabs label="신청 상태" value={상태} onChange={set상태}
+        tabs={['심사중', '승인', '반려', '정지'].map((s) => ({ key: s, label: s }))} />
 
-      {줄들 === null ? <p className="mt-6 text-lg text-mute">잠시만요…</p>
-        : 줄들.length === 0 ? <p className="mt-6 text-lg text-mute">없어요.</p>
+      {줄들 === null ? <p className={관.muted + ' mt-[16px]'}>잠시만요…</p>
+        : 줄들.length === 0 ? <p className={관.cardTight + ' ' + 관.empty + ' mt-[16px]'}>없어요.</p>
           : (
-            <ul className="mt-5 space-y-3">
+            <ul className={관.list + ' mt-[16px]'}>
               {줄들.map((q) => (
-                <li key={q.id} className="rounded-sm border border-gray-200 p-5">
-                  <p className="flex flex-wrap items-center gap-2">
-                    <b className="text-lg">{q.닉네임}</b>
-                    <span className="text-sm text-mute">회원번호 {q.회원번호} · {날(q.신청때)}</span>
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-[13px] dark:bg-gray-800">
-                      {q.갈래}
-                    </span>
+                <li key={q.id} className={관.row}>
+                  <p className="flex flex-wrap items-center gap-[8px]">
+                    <b className={관.h3}>{q.닉네임}</b>
+                    <AdminBadge tone="neutral">{q.갈래}</AdminBadge>
+                    <span className={관.sub}>회원번호 {q.회원번호} · {날(q.신청때)}</span>
                   </p>
-                  <p className="mt-1 text-lg">
+                  <p className={관.body + ' mt-[6px]'}>
                     {q.기관이름 ?? q.교육기관 ?? '(소속 안 적힘)'}
                     {q.사업자번호 ? ` · 사업자 ${q.사업자번호}` : ''}
                     {q.사업자상태 ? ` (${q.사업자상태})` : ' (수동 확인)'}
                   </p>
-                  <p className="mt-1 text-sm text-mute">올린 자료 {q.자료수}장</p>
+                  <p className={관.sub + ' mt-[4px]'}>올린 자료 {q.자료수}장</p>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-[12px] flex flex-wrap gap-[8px]">
                     <button type="button" disabled={도는중 || q.상태 === '승인'}
                       onClick={() => 정하기(q, '승인')}
-                      className="rounded-md bg-brand-red px-5 py-2 text-lg font-bold text-white
-                                 hover:bg-brand-red-dark disabled:opacity-40">
+                      className={관.btn}>
                       승인
                     </button>
                     <button type="button" disabled={도는중}
                       onClick={() => 정하기(q, '반려', prompt('반려 까닭', 주민번호반려) ?? undefined)}
-                      className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600
-                                 hover:bg-gray-50 disabled:opacity-40">
+                      className={관.btnDanger}>
                       반려
                     </button>
                     <button type="button" disabled={도는중 || q.상태 !== '승인'}
                       onClick={() => 정하기(q, '정지')}
-                      className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600
-                                 hover:bg-gray-50 disabled:opacity-40">
+                      className={관.btnLine}>
                       정지
                     </button>
                   </div>

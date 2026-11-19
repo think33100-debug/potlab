@@ -5,6 +5,9 @@ import { useToast } from '@/app/toast';
 import { Icon, ICON_NAMES } from '@/components/icon';
 import { browserSupabase } from '@/lib/supabase-browser';
 import type { IconSlot } from '@/lib/icons';
+import { 관 } from '@/components/rapo/rapo-admin-ui';
+
+/* 2026-11-19 — 관리자 화면(/admin/icons)에서만 씁니다. 새 관리자 디자인(Figma 16)으로 겉모양만 다시 입힘 */
 
 /* 아이콘 이름을 한글로도 찾을 수 있게. 안 적힌 이름은 영어로만 찾아집니다 */
 const KO: Record<string, string> = {
@@ -93,25 +96,26 @@ export function IconEditor({ slots }: { slots: IconSlot[] }) {
   }
 
   return (
-    <div className="grid gap-7 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+    <div className="grid gap-[24px] md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       {/* 왼쪽 — 아이콘이 쓰이는 자리 */}
       <div>
         {areas.map(([area, list]) => (
-          <section key={area} className="mb-6">
-            <h2 className="text-lg font-bold">{area}</h2>
-            <ul className="mt-2 divide-y divide-gray-100 rounded-md border border-gray-200 dark:divide-gray-800 dark:border-gray-700">
+          <section key={area} className="mb-[24px]">
+            <h2 className={관.h3}>{area}</h2>
+            <ul className={'mt-[8px] ' + 관.list}>
               {list.map((r) => (
                 <li key={r.slot}>
                   <button
                     type="button"
                     onClick={() => { setPick(r.slot); setDraft(null); }}
-                    className={'flex w-full items-center gap-4 px-5 py-4 text-left '
-                      + (r.slot === pick ? 'bg-teal-strong/10' : 'hover:bg-gray-50 dark:hover:bg-gray-950')}
+                    aria-pressed={r.slot === pick}
+                    className={'flex w-full items-center gap-[14px] px-[18px] py-[12px] text-left '
+                      + (r.slot === pick ? 'bg-[#fff5f3]' : 'hover:bg-[#f6f8f9]')}
                   >
-                    <Icon name={r.icon} size={22} className="shrink-0 text-gray-600 dark:text-gray-300" />
+                    <Icon name={r.icon} size={22} className={'shrink-0 ' + (r.slot === pick ? 'text-[#b42a21]' : 'text-[#304f65]')} />
                     <span className="min-w-0 flex-1">
-                      <span className="block break-keep text-lg">{r.label}</span>
-                      <span className="block truncate text-sm text-mute">{r.icon}</span>
+                      <span className={'block break-keep text-[16px] ' + (r.slot === pick ? 'font-bold text-[#b42a21]' : 'text-[#112231]')}>{r.label}</span>
+                      <span className={'block truncate ' + 관.sub}>{r.icon}</span>
                     </span>
                   </button>
                 </li>
@@ -124,58 +128,59 @@ export function IconEditor({ slots }: { slots: IconSlot[] }) {
       {/* 오른쪽 — 고른 자리 바꾸기 */}
       <div>
         {!cur ? (
-          <p className="text-lg text-mute">왼쪽에서 자리를 골라 주세요</p>
+          <p className={관.muted}>왼쪽에서 자리를 골라 주세요</p>
         ) : (
-          <div className="rounded-md border border-gray-200 p-6 dark:border-gray-700">
-            <p className="text-sm text-mute">{cur.area}</p>
-            <p className="break-keep text-h3 font-bold">{cur.label}</p>
+          <div className={관.card + ' md:sticky md:top-[24px]'}>
+            <p className={관.sub}>{cur.area}</p>
+            <p className="rapo-type-t7-bold break-keep text-[#112231]">{cur.label}</p>
 
-            <div className="mt-5 flex items-center gap-5">
-              <div className="flex h-[76px] w-[76px] items-center justify-center rounded-md border border-gray-200 dark:border-gray-700">
+            <div className="mt-[16px] flex items-center gap-[16px]">
+              <div className="flex h-[76px] w-[76px] items-center justify-center rounded-[12px] border border-[#dde4e6] bg-[#f6f8f9] text-[#112231]">
                 <Icon name={shown} size={40} />
               </div>
               <div className="min-w-0">
-                <p className="truncate text-lg font-medium">{shown}</p>
-                {dirty && <p className="text-sm text-brand-red">아직 저장 전이에요</p>}
+                <p className="truncate text-[16px] font-bold text-[#112231]">{shown}</p>
+                {dirty && <p className="text-[13px] font-bold text-[#b42a21]">아직 저장 전이에요</p>}
               </div>
             </div>
 
-            <label className="mt-6 block">
+            <label className="mt-[20px] block">
               <span className="sr-only">아이콘 찾기</span>
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="찾기 — 병상, 시계, clock …"
-                className="w-full rounded-md border border-gray-200 px-5 py-4 text-lg dark:border-gray-700 dark:bg-transparent"
+                className={관.input}
               />
             </label>
 
-            <div className="mt-4 grid max-h-[320px] grid-cols-[repeat(auto-fill,62px)] gap-2 overflow-y-auto">
+            <div className="mt-[12px] grid max-h-[320px] grid-cols-[repeat(auto-fill,56px)] gap-[8px] overflow-y-auto">
               {found.map((n) => (
                 <button
                   key={n}
                   type="button"
                   title={n}
                   onClick={() => setDraft(n)}
-                  className={'flex h-[62px] w-[62px] items-center justify-center rounded-md border-2 '
+                  aria-pressed={n === shown}
+                  className={'flex h-[56px] w-[56px] items-center justify-center rounded-[8px] border-2 '
                     + (n === shown
-                      ? 'border-brand-red text-brand-red'
-                      : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-950')}
+                      ? 'border-[#ff4f40] bg-[#fff5f3] text-[#b42a21]'
+                      : 'border-[#dde4e6] bg-white text-[#304f65] hover:bg-[#f6f8f9]')}
                 >
                   <Icon name={n} size={26} />
                 </button>
               ))}
               {found.length === 0 && (
-                <p className="col-span-full text-lg text-mute">그런 아이콘은 없어요</p>
+                <p className={'col-span-full ' + 관.muted}>그런 아이콘은 없어요</p>
               )}
             </div>
 
-            <div className="mt-6 flex gap-2">
+            <div className="mt-[20px] flex flex-wrap items-center justify-end gap-[16px]">
               <button
                 type="button"
                 onClick={save}
                 disabled={!dirty || busy}
-                className="rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white disabled:opacity-40"
+                className={관.btn + ' order-2 min-w-[120px]'}
               >
                 {busy ? '저장 중…' : '저장하기'}
               </button>
@@ -183,7 +188,7 @@ export function IconEditor({ slots }: { slots: IconSlot[] }) {
                 type="button"
                 onClick={() => setDraft(null)}
                 disabled={!dirty}
-                className="rounded-md border border-gray-200 px-7 py-4 text-lg font-medium text-gray-600 disabled:opacity-40 dark:border-gray-700 dark:text-gray-400"
+                className={관.btnText + ' order-1'}
               >
                 되돌리기
               </button>
@@ -191,7 +196,7 @@ export function IconEditor({ slots }: { slots: IconSlot[] }) {
           </div>
         )}
 
-        <p className="mt-5 break-keep text-sm leading-relaxed text-mute">
+        <p className={'mt-[16px] break-keep ' + 관.sub}>
           이름이 잘못 들어가면 기본 아이콘으로 보여요. 화면이 깨지지는 않습니다
         </p>
       </div>

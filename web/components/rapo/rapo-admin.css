@@ -1,0 +1,46 @@
+/* 관리자 틀 안에서만 옛 토큰을 새 디자인 값으로 갈아 끼웁니다 (2026-11-19 · 관리자 다시 입히기).
+
+   관리자 화면은 원래 옛 웹 토큰(text-mute · bg-gray-50 · rounded-md=50px 알약 · text-btn=19px …)으로
+   그려졌습니다. 화면마다 새 부품(components/rapo/rapo-admin-ui.tsx)으로 옮기되, 옮기다 남은 자리도
+   새 디자인과 어긋나지 않게 **이 구역에서 값만** 바꿉니다 — 어두운 구역(globals.css 의
+   html[data-surface="dark"])과 같은 방식입니다. 회원 화면에는 닿지 않습니다(.rapo-admin 안쪽만).
+
+   값은 Figma 「16 · 관리자 운영 화면」 변수 그대로입니다. */
+.rapo-admin {
+  /* 색 — 잉크·보조·선·바탕 */
+  --color-ink: #112231;
+  --color-body: #304f65;
+  --color-mute: #555d6d;
+  --color-line: #dde4e6;
+  --color-paper: #f6f8f9;
+  --color-gray-50: #f6f8f9;
+  --color-gray-100: #f1f5f8;
+  --color-gray-200: #dde4e6;
+  --color-gray-300: #c7d1d9;
+  --color-gray-600: #555d6d;
+  --color-gray-700: #304f65;
+  --color-gray-900: #112231;
+  --color-teal-strong: #304f65;
+  --color-interaction-blue: #135fcd;
+  --color-interaction-blue-soft: #eff6ff;
+
+  /* 빨강 — 새 디자인의 coral. 글자로 쓰는 자리는 대비가 나오는 coral-700 */
+  --color-brand-red: #ff4f40;
+  --color-brand-red-dark: #b42a21;
+  --color-brand-red-soft: #fff5f3;
+  --color-danger: #b42a21;
+
+  /* 모서리 — 옛 알약(50px)·큰 카드(16px)를 새 r2 8 · r3 12 로 */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 8px;
+
+  /* 글자 — 옛 큰 단추 글자(19px)·작은 글자(12px)를 새 t4 14 · t3 13 으로 */
+  --text-sm: 13px;
+  --text-sm--line-height: 1.4;
+  --text-btn: 15px;
+  --text-h3: 20px;
+  --text-h2: 24px;
+
+  color: #112231;
+}

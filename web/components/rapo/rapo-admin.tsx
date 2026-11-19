@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { RapoMaskIcon } from './rapo-ui';
+import './rapo-admin.css';
 
 /* 관리자 화면 틀 — 새 디자인 「16 · 관리자 운영 화면」 (2026-11-12 세중님 「관리자 페이지도 적용 시작」).
    원본: 「RAPO / 운영 / 공통 탐색」 1406:337 (왼쪽 204 · 흰 바탕 · 오른쪽 경계선) + 본문(neutral-50 · 32 여백).
@@ -78,7 +79,7 @@ function 통계그림() {
 function 메뉴줄({ m, 켜짐 }: { m: 메뉴; 켜짐: boolean }) {
   return (
     <Link href={m.href} aria-current={켜짐 ? 'page' : undefined}
-      className={'rapo-type-t4-bold flex h-[44px] w-full items-center gap-[15px] rounded-(--rapo-radius-r2) pl-[14px] '
+      className={'rapo-type-t4-bold flex h-[44px] shrink-0 items-center gap-[10px] whitespace-nowrap rounded-(--rapo-radius-r2) px-[12px] md:w-full md:gap-[15px] md:pl-[14px] md:pr-0 '
         + (켜짐 ? 'bg-[#fff5f3] text-[#b42a21]'
           : 'text-[#112231] hover:bg-[#f6f8f9]')}>
       <span className="flex size-[20px] shrink-0 items-center justify-center">
@@ -111,7 +112,7 @@ function DashboardLink() {
   if (!주소) return null;
   return (
     <a href={주소} target="_blank" rel="noopener noreferrer"
-      className="rapo-type-t4-bold flex h-[44px] w-full items-center gap-[15px] rounded-(--rapo-radius-r2) pl-[14px] text-[#112231] hover:bg-[#f6f8f9]">
+      className="rapo-type-t4-bold flex h-[44px] shrink-0 items-center gap-[10px] whitespace-nowrap rounded-(--rapo-radius-r2) px-[12px] text-[#112231] hover:bg-[#f6f8f9] md:w-full md:gap-[15px] md:pl-[14px] md:pr-0">
       <span aria-hidden className="flex size-[20px] shrink-0 items-center justify-center"><통계그림 /></span>
       근무 현황판 ↗
       <span className="sr-only">(새 창 · Tailscale 연결이 필요해요)</span>
@@ -122,9 +123,9 @@ function DashboardLink() {
 export function RapoAdminShell({ children }: { children: ReactNode }) {
   const path = usePathname();
   return (
-    <div data-rapo className="min-h-dvh bg-[#f6f8f9] text-[#112231] md:flex">
+    <div data-rapo className="rapo-admin min-h-dvh bg-[#f6f8f9] text-[#112231] md:flex">
       <aside className="shrink-0 border-b border-[#dde4e6] bg-white md:sticky md:top-0 md:h-dvh md:w-[204px] md:overflow-y-auto md:border-b-0 md:border-r">
-        <div className="flex items-center gap-(--rapo-dimension-x2) px-[20px] pb-[20px] pt-[30px]">
+        <div className="flex items-center gap-(--rapo-dimension-x2) px-[16px] pb-[12px] pt-[16px] md:px-[20px] md:pb-[20px] md:pt-[30px]">
           <Link href="/" aria-label="RAPO 홈" className="flex h-[27.7px] w-[105.6px] shrink-0 items-center gap-[8px]">
             {/* eslint-disable @next/next/no-img-element -- Figma 원본 SVG 그대로 (가로형 105.6 × 27.7) */}
             <img src="/rapo/home/logo-symbol.svg" alt="" className="h-[27.7px] w-[28.4px] shrink-0" />
@@ -133,11 +134,12 @@ export function RapoAdminShell({ children }: { children: ReactNode }) {
           </Link>
           <span className="rapo-type-t4-bold text-[#304f65]">관리자</span>
         </div>
-        <div aria-hidden className="mx-[20px] h-px bg-[#dde4e6]" />
-        <nav aria-label="관리자 메뉴" className="flex flex-col gap-[6px] px-[16px] py-[24px]">
+        <div aria-hidden className="mx-[20px] hidden h-px bg-[#dde4e6] md:block" />
+        {/* 폰(768 아래)에서는 원본 일곱을 가로로 밀어 보는 한 줄로 — 메뉴가 본문을 한 화면 넘게 밀어내지 않게 (2026-11-19) */}
+        <nav aria-label="관리자 메뉴" className="flex gap-[4px] overflow-x-auto px-[12px] pb-[8px] md:flex-col md:gap-[6px] md:overflow-visible md:px-[16px] md:py-[24px]">
           {원본메뉴.map((m) => <메뉴줄 key={m.href} m={m} 켜짐={켜졌나(path, m.href)} />)}
           <DashboardLink />
-          <details className="mt-(--rapo-dimension-x4)" open={그밖도구.some((m) => 켜졌나(path, m.href))}>
+          <details className="hidden md:mt-(--rapo-dimension-x4) md:block" open={그밖도구.some((m) => 켜졌나(path, m.href))}>
             <summary className="rapo-type-t3-bold cursor-pointer list-none px-[14px] py-(--rapo-dimension-x2) text-[#304f65]">
               그 밖의 도구 ▾
             </summary>
@@ -146,6 +148,14 @@ export function RapoAdminShell({ children }: { children: ReactNode }) {
             </div>
           </details>
         </nav>
+        <details className="border-t border-[#dde4e6] px-[12px] md:hidden" open={그밖도구.some((m) => 켜졌나(path, m.href))}>
+          <summary className="rapo-type-t3-bold flex h-[40px] cursor-pointer list-none items-center px-[12px] text-[#304f65]">
+            그 밖의 도구 ▾
+          </summary>
+          <div className="grid grid-cols-2 gap-[2px] pb-[8px]">
+            {그밖도구.map((m) => <메뉴줄 key={m.href} m={m} 켜짐={켜졌나(path, m.href)} />)}
+          </div>
+        </details>
       </aside>
       <div className="min-w-0 flex-1 p-(--rapo-dimension-x5) md:p-[32px]">{children}</div>
     </div>

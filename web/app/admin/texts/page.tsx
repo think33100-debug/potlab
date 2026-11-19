@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '../../toast';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 홈 랜딩 글 고치기.
 
@@ -70,36 +72,37 @@ export default function AdminTexts() {
 
   if (err) {
     return (
-      <p className="break-keep rounded-sm bg-brand-red-soft p-6 text-lg text-brand-red-dark">
+      <p role="alert" className={'break-keep ' + 관.error}>
         불러오지 못했어요 — {err}
       </p>
     );
   }
-  if (!rows) return <p className="text-lg text-mute">불러오는 중…</p>;
+  if (!rows) return <p className={관.muted}>불러오는 중…</p>;
 
   /* 구역 순서는 sort 가 정합니다 — 화면에 나오는 차례와 같습니다 */
   const areas: string[] = [];
   rows.forEach((r) => { if (!areas.includes(r.area)) areas.push(r.area); });
 
   return (
-    <div className="space-y-8">
-      <p className="break-keep text-sm text-mute">
+    <div className="max-w-[932px]">
+      {/* 2026-11-19 새 관리자 디자인(Figma 16 · 공고 상세 꼴)으로 겉모양만 다시 입힘 */}
+      <RapoAdminHeader title="화면 글" />
+      <p className={'-mt-[20px] mb-[24px] break-keep ' + 관.muted}>
         고치면 바로 홈에 나가요. 가는 곳(링크)과 아이콘 이름은 여기서 안 고칩니다 —
         엉뚱한 값이 들어가면 화면이 깨져요. 「{'{min}'}」 같은 자리는 화면이 숫자로 채웁니다
       </p>
 
       {areas.map((area) => (
-        <section key={area}>
-          <h2 className="break-keep text-h3 font-bold">{area}</h2>
-          <div className="mt-5 space-y-5">
+        <section key={area} className={'mb-[24px] ' + 관.card}>
+          <h2 className="rapo-type-t7-bold break-keep text-[#112231]">{area}</h2>
+          <div className="mt-[16px] flex flex-col gap-[20px]">
             {rows.filter((r) => r.area === area).map((r) => {
               const dirty = r.value !== (saved[r.key] ?? '');
               return (
-                <div key={r.key}
-                  className="rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-                  <div className="flex flex-wrap items-baseline justify-between gap-3">
-                    <span className="break-keep text-sm font-bold text-mute">{r.label}</span>
-                    <span className="text-sm text-mute">{r.key}</span>
+                <div key={r.key}>
+                  <div className="mb-[6px] flex flex-wrap items-baseline justify-between gap-[12px]">
+                    <span className={'break-keep ' + 관.label + ' text-[14px]'}>{r.label}</span>
+                    <span className={관.sub}>{r.key}</span>
                   </div>
 
                   {r.multiline ? (
@@ -108,14 +111,14 @@ export default function AdminTexts() {
                       onChange={(e) => patch(r.key, e.target.value)}
                       rows={Math.max(2, r.value.split('\n').length + 1)}
                       aria-label={r.label}
-                      className="mt-2 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
+                      className={관.textarea}
                     />
                   ) : (
                     <input
                       value={r.value}
                       onChange={(e) => patch(r.key, e.target.value)}
                       aria-label={r.label}
-                      className="mt-2 w-full rounded-xs border border-gray-200 bg-gray-50 px-5 py-4 text-lg dark:border-gray-700 dark:bg-gray-950"
+                      className={관.input}
                     />
                   )}
 
@@ -123,7 +126,7 @@ export default function AdminTexts() {
                     type="button"
                     onClick={() => save(r)}
                     disabled={busy === r.key || !dirty}
-                    className="mt-3 rounded-md bg-brand-red px-7 py-4 text-btn font-bold text-white hover:bg-brand-red-dark disabled:opacity-40"
+                    className={'mt-[10px] ' + 관.btn}
                   >
                     {busy === r.key ? '저장하는 중…' : '저장'}
                   </button>

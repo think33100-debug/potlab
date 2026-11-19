@@ -6,6 +6,7 @@ import { shrinkToWebp } from '@/lib/image';
 import { TABS } from '@/lib/supabase';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { useToast } from '@/app/toast';
+import { 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 공고 목록 분류 카드의 그림.
 
@@ -65,14 +66,15 @@ export function AdminTabCards() {
   if (!paths) return null;
 
   return (
-    <section className="mb-8">
-      <h2 className="break-keep text-h3 font-bold">분류 카드 그림</h2>
-      <p className="mt-1 break-keep text-sm text-mute">
+    /* 2026-11-19 — 새 관리자 디자인으로 겉모양만 바꿨습니다 (섹션 제목 · 흰 카드 목록) */
+    <section className="mb-[32px]">
+      <h2 className={관.h2 + ' break-keep'}>분류 카드 그림</h2>
+      <p className={관.sub + ' mt-[4px] break-keep'}>
         공고 목록 맨 위에 옆으로 밀리는 카드입니다. 이름과 가는 곳은 코드에 있어서
         여기서는 그림만 바꿉니다
       </p>
 
-      <div className="mt-5 space-y-5">
+      <div className={관.list + ' mt-[16px]'}>
         {TABS.map((t) => {
           const path = paths[t.key] ?? null;
           const url = path
@@ -80,13 +82,12 @@ export function AdminTabCards() {
             : null;
 
           return (
-            <div key={t.key}
-              className="rounded-sm border border-gray-100 p-6 dark:border-gray-800">
-              <p className="break-keep text-lg font-bold">{t.label}</p>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
+            <div key={t.key} className={관.row}>
+              <p className="break-keep text-[16px] font-bold text-[#112231]">{t.label}</p>
+              <div className="mt-[10px] flex flex-wrap items-center gap-[12px]">
                 {url && (
                   // eslint-disable-next-line @next/next/no-img-element -- 저장소 주소는 next/image 에 안 걸어뒀습니다
-                  <img src={url} alt="" className="h-[56px] w-[100px] rounded-xs object-cover" />
+                  <img src={url} alt="" className="h-[56px] w-[100px] rounded-[8px] border border-[#dde4e6] object-cover" />
                 )}
                 <PhotoPicker
                   label={url ? '그림 바꾸기' : '그림 넣기'}
@@ -95,7 +96,7 @@ export function AdminTabCards() {
                 />
                 {url && (
                   <button type="button" onClick={() => put(t.key, null)}
-                    className="text-sm text-mute hover:underline">
+                    className={관.btnTextDanger}>
                     그림 빼기
                   </button>
                 )}
