@@ -24,6 +24,29 @@ export const 기본정렬: 공고정렬 = 'views';
 export const 기관분류들 = ['대학병원', '종합병원', '공공기관', '재활', '요양병원', '복지관', '요양원', '아동센터'] as const;
 export const 분류쿠키 = 'rapo_kind';
 
+/** 지역 조건 — 여러 개 고를 수 있습니다 (2026-11-19 세중님 「대구랑 경북은 합치고 여러 지역 선택」).
+    칩 이름 차례는 원본(509:5320) 그대로이고, 「대구」 자리에 「대구·경북」 하나를 두고 「경북」 칩은 뺐습니다.
+    주소는 sido=서울,대구,경북 (진짜 시·도 이름을 쉼표로) · DB 는 job_list(p_sido) → sido_has() 가 쉼표를 풀어 하나라도 맞으면 냅니다
+    (금고 RAPO노트/SQL_1119/지역여러개.sql) */
+export const 지역칩들 = ['서울', '경기', '인천', '부산', '대구·경북', '광주', '대전', '울산', '세종',
+  '강원', '충북', '충남', '전북', '전남', '경남', '제주'] as const;
+const 칩시도: Record<string, string[]> = { '대구·경북': ['대구', '경북'] };
+
+/** 칩 이름들 → 주소에 적을 시·도 글 (「서울,대구,경북」) · 없으면 null(전국) */
+export function 시도글(칩들: readonly string[]): string | null {
+  const 시도 = 지역칩들.filter((k) => 칩들.includes(k)).flatMap((k) => 칩시도[k] ?? [k]);
+  return 시도.length ? 시도.join(',') : null;
+}
+
+/** 주소의 sido= 글 → 켜진 칩 이름들 (차례는 지역칩들 차례). 「대구」나 「경북」 하나만 와도(옛 주소) 「대구·경북」이 켜집니다 */
+export function 지역칩읽기(글: string | null | undefined): string[] {
+  if (!글) return [];
+  let 풀린 = 글;
+  try { 풀린 = decodeURIComponent(글); } catch { /* 이미 풀린 글 */ }
+  const 고른 = new Set(풀린.split(',').map((x) => x.trim()));
+  return 지역칩들.filter((k) => (칩시도[k] ?? [k]).some((s) => 고른.has(s)));
+}
+
 /** 「대학병원,요양원」 꼴 글 → 아는 분류만 남긴 목록 (차례는 기관분류들 차례) */
 export function 분류읽기(글: string | null | undefined): string[] {
   if (!글) return [];
