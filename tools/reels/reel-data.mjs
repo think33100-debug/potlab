@@ -276,7 +276,9 @@ export function 부서이름(제목, 기관이름 = '') {
   /* 앞 낱말 하나까지 (「일차의료 거점지원센터」) — 단 앞 낱말이 연월·고용말이면 뺌 */
   for (const m of 글.matchAll(/((?:[가-힣]{2,}\s)?[가-힣]{3,}(?:센터|사업단|재활원|복지관))/g)) {
     const x = m[1].replace(/^(?:\S*(?:년|월|계약직|기간제|정규직|모집|채용)\s)/, '');
-    if (/^(채용|고객|콜|상담)센터$/.test(x) || 기.includes(x)) continue;
+    const 붙 = x.replace(/\s+/g, '');
+    /* 기관 이름이 이미 든 것도 뺌 — 「시립서울장애인종합복지관」 ⊃ 「서울장애인종합복지관」 (2026-11-19) */
+    if (/^(채용|고객|콜|상담)센터$/.test(x) || 기.includes(붙) || (기 && 붙.includes(기))) continue;
     return x;
   }
   return null;
