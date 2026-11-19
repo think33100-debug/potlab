@@ -118,10 +118,10 @@ const 법인떼기 = (s) => String(s || '').replace(/\(\s*(?:재|사|주|복)\s*
 const 견줄이름 = (s) => 법인떼기(s).replace(/[^가-힣A-Za-z0-9]/g, '');
 if (회원공고) {
   if (!DB || !DB열쇠) { console.error('SUPABASE_URL·SUPABASE_SERVICE_KEY 가 없습니다 — 서버 ~/potlab 에서 돌려 주세요'); process.exit(2); }
-  const r = await fetch(DB + '/rest/v1/rpc/' + encodeURIComponent('국민연금찾을기관'), {
-    method: 'POST', headers: { apikey: DB열쇠, Authorization: 'Bearer ' + DB열쇠, 'Content-Type': 'application/json' }, body: '{}' });
-  if (!r.ok) { console.error('국민연금찾을기관 HTTP ' + r.status + ' · ' + (await r.text()).slice(0, 200)); process.exit(1); }
-  const 줄 = await r.json();
+  /* ★ 2026-11-19 첫 실행 — DB 가 한 번에 100줄만 줘서 263곳 중 100곳만 왔습니다. 공용 모두받기()(차례 붙여 쪽 넘김 · 지침 8-20) */
+  const { 모두받기 } = await import('./쪽나눠받기.mjs');
+  const 줄 = await 모두받기(DB + '/rest/v1/rpc/' + encodeURIComponent('국민연금찾을기관') + '?select=*',
+    { apikey: DB열쇠, Authorization: 'Bearer ' + DB열쇠 }, { 차례: '기관번호' });
   대상 = 줄.filter((x) => x['이름']).map((x) => {
     const 이름 = String(x['이름']);
     const 뗀 = 법인떼기(이름);
@@ -154,6 +154,7 @@ function 줄들(text) {
 /* 칸 이름을 아직 원문으로 확인하지 못했습니다 — 알려진 이름을 차례로 봅니다(--원문 으로 확인) */
 const 칸이름 = {
   seq: ['seq'],
+  자료월: ['dataCrtYm'],
   사업장명: ['wkplNm'],
   주소: ['wkplRoadNmDtlAddr', 'wkplRoadNmAddr', 'wkplLtnoDtlAddr'],
   사업자번호: ['bzowrRgstNo'],
@@ -209,6 +210,19 @@ for (const h of 대상) {
     ? /어린이집|새마을금고|노동조합|노조|식당|장례|주차|매점|용역|파견/      /* 요양원·재활병원은 주식회사·협동조합이 운영하는 곳도 있어 그 말은 안 뺌 */
     : /어린이집|새마을금고|노동조합|노조|공사|일용|상용|식당|장례|주차|매점|용역|파견|협동조합|주식회사|\(주\)/;
   후보 = 후보.filter((c) => !부속.test(String(칸(c, '사업장명') ?? '')));
+  /* ★ 2026-11-19 첫 실행 — 국민연금 자료는 **같은 사업장이 달마다 한 줄씩**(seq 만 다름) 나옵니다.
+     「동래 센트럴 정형외과 의원」 이 같은 주소로 다섯 줄 → 「후보 5곳 · 애매함」 으로 버려졌습니다.
+     이름·주소가 같으면 한 곳으로 묶고 **가장 최근 달**(dataCrtYm · 없으면 큰 seq) 한 줄만 남깁니다 */
+  {
+    const 묶음 = new Map();
+    for (const c of 후보) {
+      const 열쇠 = 견줄이름(칸(c, '사업장명')) + '|' + String(칸(c, '주소') ?? '').replace(/\s+/g, '');
+      const 달 = Number(칸(c, '자료월') ?? 0) * 1e8 + Number(칸(c, 'seq') ?? 0);
+      const 전 = 묶음.get(열쇠);
+      if (!전 || 달 > 전.달) 묶음.set(열쇠, { c, 달 });
+    }
+    후보 = [...묶음.values()].map((x) => x.c);
+  }
   const 상세들 = [];
   for (const c of 후보.slice(0, h.갈래 === '회원공고' ? 5 : 8)) {
     const seq = 칸(c, 'seq');
