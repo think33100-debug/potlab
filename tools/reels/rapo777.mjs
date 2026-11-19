@@ -150,6 +150,9 @@ export function 이미지고르기(묶음, 기관, { 파일확인 = true } = {})
   const 버린것 = [];
   const 후보 = [];
   for (const a of 기관.assets || []) {
+    /* ★ 기관을 알아볼 수 있는 사진만 (2026-11-19 세중님 「서울아산에 실내 강당 사진이 들어감」) — 실내 사진은 안 씀.
+       외관 → 배너(이름이 박힌 것) → 조감도 → 로고 차례로 내려갑니다 */
+    if (사진꼴(a.kind) && a.photo_scene === 'interior') { 버린것.push(`${a.asset_id.slice(0, 10)} 실내 사진(기관을 알아볼 수 없음)`); continue; }
     const 왜 = 쓸수있나(a, 폴더, 묶음.조건);
     if (왜) 버린것.push(`${a.asset_id.slice(0, 10)} ${왜}`); else 후보.push(a);
   }
@@ -396,9 +399,15 @@ function 자기점검() {
       자산({ asset_id: 'pconf', kind: 'photo', photo_scene: 'exterior', photo_requires_current_confirmation: true })] };
   기관들.push(사진기관);
   const g9 = 고('rapo777_0900');
-  봐('고르기 — preferred_photo_asset_id 가 먼저 (대표 로고보다)', g9.자산?.asset_id === 'pin' && g9.꼴 === '사진');
-  봐('고르기 — 실내 사진은 「실내 사진」 딱지', g9.딱지 === '실내 사진' && 화면출처(g9).startsWith('실내 사진 · '));
-  봐('캡션 — 사진 시점을 적음', 캡션출처줄(g9, 'u').some((x) => x.includes('사진 시점 2017-07 기사')));
+  봐('고르기 — 실내 사진은 preferred 여도 안 씀 · 외관 사진으로 (2026-11-19)', g9.자산?.asset_id === 'pext' && g9.꼴 === '사진' && /pin.*실내/.test(g9.버린것.join(' ')));
+  { const 외관만 = { ...사진기관, institution_ref: 'rapo777_0903', preferred_photo_asset_id: 'pext2',
+      assets: [자산({ asset_id: 'logo9', kind: 'wordmark' }), 자산({ asset_id: 'pext2', kind: 'photo', photo_scene: 'exterior', width: 1600, height: 900, photo_date_note: '2017-07 기사; 촬영일 미표시', attribution_text: '이미지 출처: 사진병원 · https://in.kr/' })] };
+    기관들.push(외관만); const g = 고('rapo777_0903');
+    봐('캡션 — 사진 시점을 적음', 캡션출처줄(g, 'u').some((x) => x.includes('사진 시점 2017-07 기사'))); }
+  { const 실내만 = { ...사진기관, institution_ref: 'rapo777_0904', preferred_photo_asset_id: 'pin',
+      assets: [자산({ asset_id: 'logo9', kind: 'wordmark' }), 자산({ asset_id: 'pin', kind: 'photo', photo_scene: 'interior', width: 1600, height: 900 })] };
+    기관들.push(실내만);
+    봐('고르기 — 실내 사진뿐이면 로고로', 고('rapo777_0904').꼴 === '로고'); }
   const 버림 = g9.버린것.join(' ');
   봐('권리 — CC BY-SA·「허가 필요」 사진도 버리지 않음 (세중님 「사진 그냥 쓰지」)', !/psa|pneed/.test(버림));
   봐('권리 — photo_requires_current_confirmation 은 안 씀', /pconf.*현재 모습/.test(버림));
