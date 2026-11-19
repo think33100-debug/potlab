@@ -104,6 +104,34 @@ const 이름들 = 값('--이름');
 let 대상 = 이름들
   ? 이름들.split(',').map((s) => s.trim()).filter(Boolean).map((s) => ({ 이름: s, 시도: null, 찾는말: [s], 갈래: '직접' }))
   : 견본;
+/* ★ 2026-11-19 세중님 「1번으로 · 전직원 평균 추정 연봉(의사 포함)」 — **회원 화면 공고의 기관**(연봉 자료가 없는 곳)으로 넓힙니다.
+ *   node tools/nps-병원평균.mjs --회원공고            찾기만(표 · tmp json)
+ *   node tools/nps-병원평균.mjs --회원공고 --담기     맞은 곳을 대기 표 「국민연금추정」 에 담음(화면용 「병원보수」 로는 앱 Claude 가 확인 뒤 옮김)
+ *   대상은 DB 국민연금찾을기관() 한 자리 · 입사·퇴사(기간별 12번)는 이 갈래에서 안 부릅니다(호출을 아끼려고)
+ *   잘못 잇지 않게 — 사업장 주소에 그 공고의 **시군구**가 있어야 · 업종이 의료·요양·복지여야 · 가입자 10명 이상 ·
+ *   이름이 서로 들어가거나, 그 조건을 넘는 곳이 **딱 하나**일 때만 고릅니다 (애매하면 안 고름) */
+const 회원공고 = argv.includes('--회원공고');
+const 담기 = argv.includes('--담기');
+const DB = cfg.SUPABASE_URL || cfg.NEXT_PUBLIC_SUPABASE_URL || '';
+const DB열쇠 = cfg.SUPABASE_SERVICE_KEY || '';
+const 법인떼기 = (s) => String(s || '').replace(/\(\s*(?:재|사|주|복)\s*\)|주식회사|유한회사|의료법인|사회복지법인|재단법인|사단법인|학교법인|의료재단|복지재단/g, ' ').replace(/\s+/g, ' ').trim();
+const 견줄이름 = (s) => 법인떼기(s).replace(/[^가-힣A-Za-z0-9]/g, '');
+if (회원공고) {
+  if (!DB || !DB열쇠) { console.error('SUPABASE_URL·SUPABASE_SERVICE_KEY 가 없습니다 — 서버 ~/potlab 에서 돌려 주세요'); process.exit(2); }
+  /* ★ 2026-11-19 첫 실행 — DB 가 한 번에 100줄만 줘서 263곳 중 100곳만 왔습니다. 공용 모두받기()(차례 붙여 쪽 넘김 · 지침 8-20) */
+  const { 모두받기 } = await import('./쪽나눠받기.mjs');
+  const 줄 = await 모두받기(DB + '/rest/v1/rpc/' + encodeURIComponent('국민연금찾을기관') + '?select=*',
+    { apikey: DB열쇠, Authorization: 'Bearer ' + DB열쇠 }, { 차례: '기관번호' });
+  대상 = 줄.filter((x) => x['이름']).map((x) => {
+    const 이름 = String(x['이름']);
+    const 뗀 = 법인떼기(이름);
+    const 끝말 = 뗀.split(' ').pop();
+    const 시도 = Object.keys(시도코드).find((k) => String(x['시도'] || '').startsWith(k)) || null;
+    return { 이름, 시도, 찾는말: [...new Set([뗀, 끝말].filter((s) => s && s.length >= 2))], 갈래: '회원공고',
+      기관번호: x['기관번호'], 시군구: String(x['시군구'] || '').split(' ').pop() || null, 공고주소: x['주소'] || null };
+  });
+  console.log('회원 공고 기관 ' + 대상.length + '곳 (연봉 자료 없는 곳)');
+}
 if (원문보기) 대상 = 대상.slice(0, 1);
 if (n) 대상 = 대상.slice(0, n);
 
@@ -126,6 +154,7 @@ function 줄들(text) {
 /* 칸 이름을 아직 원문으로 확인하지 못했습니다 — 알려진 이름을 차례로 봅니다(--원문 으로 확인) */
 const 칸이름 = {
   seq: ['seq'],
+  자료월: ['dataCrtYm'],
   사업장명: ['wkplNm'],
   주소: ['wkplRoadNmDtlAddr', 'wkplRoadNmAddr', 'wkplLtnoDtlAddr'],
   사업자번호: ['bzowrRgstNo'],
@@ -177,10 +206,25 @@ for (const h of 대상) {
   /* ② 후보마다 상세 — 가입자 수가 가장 큰 「병원 업종」 사업장을 그 병원으로 봅니다. 후보 목록은 다 남깁니다
      2026-11-12 첫 실행: 분당서울대가 「어린이집」(45명)으로, 서울대병원 후보에 새마을금고·공사 현장이 섞였습니다 →
      이름으로 부속 사업장을 먼저 빼고, 업종이 병원·의료가 아니면 고르지 않습니다(못 찾음으로 남김) */
-  const 부속 = /어린이집|새마을금고|노동조합|노조|공사|일용|상용|식당|장례|주차|매점|용역|파견|협동조합|주식회사|\(주\)/;
+  const 부속 = h.갈래 === '회원공고'
+    ? /어린이집|새마을금고|노동조합|노조|식당|장례|주차|매점|용역|파견/      /* 요양원·재활병원은 주식회사·협동조합이 운영하는 곳도 있어 그 말은 안 뺌 */
+    : /어린이집|새마을금고|노동조합|노조|공사|일용|상용|식당|장례|주차|매점|용역|파견|협동조합|주식회사|\(주\)/;
   후보 = 후보.filter((c) => !부속.test(String(칸(c, '사업장명') ?? '')));
+  /* ★ 2026-11-19 첫 실행 — 국민연금 자료는 **같은 사업장이 달마다 한 줄씩**(seq 만 다름) 나옵니다.
+     「동래 센트럴 정형외과 의원」 이 같은 주소로 다섯 줄 → 「후보 5곳 · 애매함」 으로 버려졌습니다.
+     이름·주소가 같으면 한 곳으로 묶고 **가장 최근 달**(dataCrtYm · 없으면 큰 seq) 한 줄만 남깁니다 */
+  {
+    const 묶음 = new Map();
+    for (const c of 후보) {
+      const 열쇠 = 견줄이름(칸(c, '사업장명')) + '|' + String(칸(c, '주소') ?? '').replace(/\s+/g, '');
+      const 달 = Number(칸(c, '자료월') ?? 0) * 1e8 + Number(칸(c, 'seq') ?? 0);
+      const 전 = 묶음.get(열쇠);
+      if (!전 || 달 > 전.달) 묶음.set(열쇠, { c, 달 });
+    }
+    후보 = [...묶음.values()].map((x) => x.c);
+  }
   const 상세들 = [];
-  for (const c of 후보.slice(0, 8)) {
+  for (const c of 후보.slice(0, h.갈래 === '회원공고' ? 5 : 8)) {
     const seq = 칸(c, 'seq');
     if (!seq) continue;
     const d = await 부르기('getDetailInfoSearchV2', { seq: String(seq) });
@@ -189,6 +233,29 @@ for (const h of 대상) {
       업종: 칸(x, '업종'), 가입자수: 수(칸(x, '가입자수')), 고지금액: 수(칸(x, '고지금액')) });
   }
   상세들.sort((a, b) => (b.가입자수 ?? -1) - (a.가입자수 ?? -1));
+  if (h.갈래 === '회원공고') {
+    /* 회원 공고 기관 — 시군구·업종·10명 이상을 넘는 곳 가운데 이름이 맞는 곳, 없으면 딱 하나일 때만 */
+    const 넘음 = 상세들.filter((x) => (!h.시군구 || String(x.주소 ?? '').includes(h.시군구))
+      && /병원|의원|의료|요양|복지|노인|재활|보건|간호|치료/.test(String(x.업종 ?? '') + ' ' + String(x.사업장명 ?? ''))
+      && (x.가입자수 ?? 0) >= 10 && (x.고지금액 ?? 0) > 0);
+    const 내이름 = 견줄이름(h.이름);
+    const 이름맞음 = 넘음.filter((x) => { const 저 = 견줄이름(x.사업장명); return 저 && (저.includes(내이름) || 내이름.includes(저)); });
+    const 고름 = 이름맞음.length === 1 ? 이름맞음[0] : (이름맞음.length === 0 && 넘음.length === 1 ? 넘음[0] : null);
+    if (!고름) {
+      결과.push({ 이름: h.이름, 기관번호: h.기관번호, 갈래: h.갈래, 찾음: false, 애매: true, 넘음수: 넘음.length, 이름맞음수: 이름맞음.length, 후보: 상세들 });
+      console.log(`✗ ${h.이름} — ${넘음.length ? '애매함(조건 넘는 곳 ' + 넘음.length + ' · 이름 맞는 곳 ' + 이름맞음.length + ')' : '조건 넘는 사업장 없음(후보 ' + 상세들.length + ')'}`);
+      await new Promise((y) => setTimeout(y, 150));
+      continue;
+    }
+    const 월평균 = 고름.고지금액 / 고름.가입자수 / 보험료율;
+    const 상한근처 = 월평균 >= 상한월액 * 0.85;
+    const 맞춤근거 = (h.시군구 ? '시군구 「' + h.시군구 + '」 · ' : '') + '업종 「' + (고름.업종 ?? '') + '」 · '
+      + (이름맞음.length ? '이름 맞음' : '조건 넘는 곳 하나') + ' · 사업장 「' + 고름.사업장명 + '」';
+    결과.push({ 이름: h.이름, 기관번호: h.기관번호, 갈래: h.갈래, 찾음: true, ...고름, 월평균: Math.round(월평균), 추정연봉: Math.round(월평균 * 12), 상한근처, 맞춤근거 });
+    console.log(`○ ${h.이름} — ${고름.사업장명} · 가입자 ${고름.가입자수}명 · 추정 연봉 ${(월평균 * 12 / 1e4).toFixed(0)}만 원${상한근처 ? ' (상한 근처)' : ''} · ${맞춤근거}`);
+    await new Promise((y) => setTimeout(y, 150));
+    continue;
+  }
   const 고른 = 상세들.find((x) => /병원|의원|의료/.test(String(x.업종 ?? '')));
   if (!고른) { 결과.push({ 이름: h.이름, 갈래: h.갈래, 찾음: false, 본체못찾음: true, 후보: 상세들 }); console.log(`✗ ${h.이름} — 병원 업종 사업장이 후보에 없음 (후보 ${상세들.length}곳: ${상세들.map((x) => x.사업장명).join(' / ')})`); continue; }
   if (!고른.가입자수 || !고른.고지금액) { 결과.push({ 이름: h.이름, 갈래: h.갈래, 찾음: true, 후보: 상세들, 값없음: true }); console.log(`△ ${h.이름} — 찾았지만 가입자 수·고지금액이 비어 있음`); continue; }
@@ -215,3 +282,19 @@ const 남길곳 = path.join(ROOT, 'tmp', `nps-병원평균_${날}.json`);
 fs.mkdirSync(path.dirname(남길곳), { recursive: true });
 fs.writeFileSync(남길곳, JSON.stringify({ 만든때: new Date().toISOString(), 보험료율, 상한월액, 부른수, 결과 }, null, 1));
 console.log(`\n부른 수 ${부른수}번 · 결과 ${결과.length}곳 → ${path.relative(ROOT, 남길곳)}`);
+
+/* ── 담기 (2026-11-19) — 맞은 곳만 대기 표 「국민연금추정」 에. 화면용 「병원보수」 로는 앱 Claude 가 확인 뒤 옮깁니다 ── */
+if (회원공고) {
+  const 맞음 = 결과.filter((x) => x.찾음 && x.기관번호 && x.추정연봉);
+  console.log(`맞음 ${맞음.length}곳 · 못 고름 ${결과.length - 맞음.length}곳` + (담기 ? '' : ' (--담기 를 붙이면 대기 표에 담습니다)'));
+  if (담기 && 맞음.length) {
+    const 줄들 = 맞음.map((x) => ({ '기관번호': x.기관번호, '기관이름': x.이름, '사업장명': x.사업장명, seq: String(x.seq), '주소': x.주소 ?? null,
+      '업종': x.업종 ?? null, '가입자수': x.가입자수, '고지금액': x.고지금액, '추정연봉': x.추정연봉, '상한근처': !!x.상한근처,
+      '맞춤근거': x.맞춤근거, '찾은때': new Date().toISOString() }));
+    const r = await fetch(DB + '/rest/v1/' + encodeURIComponent('국민연금추정'), {
+      method: 'POST',
+      headers: { apikey: DB열쇠, Authorization: 'Bearer ' + DB열쇠, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(줄들) });
+    console.log(r.ok ? `대기 표에 ${줄들.length}줄 담음` : `담기 HTTP ${r.status} · ${(await r.text()).slice(0, 200)}`);
+  }
+}

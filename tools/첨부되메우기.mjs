@@ -32,7 +32,7 @@ import { 그누보드새주소, 고친주소 } from './첨부주소고치기.mjs
 import { 쓴메모리MB, 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
 import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이간격 } from './cleaneye-file.mjs';
 import { 첨부받기 as 나라일터첨부받기, 기본간격 as 나라일터간격 } from './gojobs-file.mjs';
-import { 점수 } from './hosp/hs_files.js';
+import { 점수, 본문박힌그림 } from './hosp/hs_files.js';
 import { 칸검사들 } from './칸검사.mjs';
 
 /* ★ 2026-10-22 — 읽은 글에서 **널 글자와 홀로 남은 서러게이트를 뺍니다.**
@@ -554,6 +554,26 @@ for (const j of 볼것) {
       const 왜c = String((rc && rc.왜) || '못 받음').slice(0, 44);
       클린아이셈.set(왜c, (클린아이셈.get(왜c) || 0) + 1);
       못받음++; 한줄.왜 = '클린아이 — ' + 왜c;
+      못받음까닭.set(한줄.왜, (못받음까닭.get(한줄.왜) ?? 0) + 1);
+      표시할것.push({ job_id: j.id, url: 고른것.url, 왜: 한줄.왜 });
+      continue;
+    }
+  }
+
+  /* ★ 2026-11-19 — **쪽에 박힌 그림**(`#본문그림-N` 주소 · hosp/hs_files.js 본문박힌그림()).
+   *   인천세종병원처럼 공고 본문이 `<img src="data:image/png;base64, …">` 한 장이면 그림에 주소가 없어
+   *   쪽 주소를 담아 두었습니다. 여기서 쪽을 다시 열어 N 번째 박힌 그림을 꺼내 kordoc OCR 로 읽습니다 */
+  if (!받음클린아이 && /#본문그림-\d+(?:-[0-9a-f]{10})?$/.test(String(고른것.url || ''))) {
+    const [쪽주소, 꼬리] = String(고른것.url).split('#본문그림-');
+    const [n, 지문] = String(꼬리 || '').split('-');          /* 「N-지문」 · 옛 주소는 「N」 만 (2026-11-19) */
+    const r쪽 = await 틈두고받기(쪽주소);
+    const 그림 = r쪽.buf ? 본문박힌그림(r쪽.buf.toString('utf8'), n, 지문 || '') : { 왜: r쪽.왜 || '쪽을 못 받음' };
+    if (그림.바뀜) console.log('  ★ 쪽에 박힌 그림이 바뀌었습니다(지문 다름) — 가장 큰 그림을 읽습니다 · ' + j.id);
+    if (그림.buf) {
+      받음클린아이 = { buf: 그림.buf };
+      고른것.name = '공고문 그림.' + 그림.꼴;
+    } else {
+      못받음++; 한줄.왜 = '쪽에 박힌 그림 — ' + String(그림.왜).slice(0, 50);
       못받음까닭.set(한줄.왜, (못받음까닭.get(한줄.왜) ?? 0) + 1);
       표시할것.push({ job_id: j.id, url: 고른것.url, 왜: 한줄.왜 });
       continue;

@@ -45,7 +45,7 @@ import { fileURLToPath } from 'node:url';
 
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
-import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 더담을칸 } from './공고문읽기.mjs';
+import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 더담을칸, 고용형태고르기 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
@@ -202,6 +202,61 @@ for (let 쪽 = 1; 쪽 <= 최대쪽; 쪽++) {
 console.log('  접수중 ' + 셈.읽은줄 + '건 · 마감 ' + 셈.마감 + '건'
   + (셈.못받은쪽 ? ' · 못 받은 쪽 ' + 셈.못받은쪽 : ''));
 
+/* ── ①-2 서울 구 센터 게시판 (2026-11-19 세중님) ─────────────────
+ * 「강서구 치매안심센터 공고 떴는데 우린 없네」 — 중앙 게시판(www)에 **안 올린** 공고였습니다.
+ *   https://gangseo.nid.or.kr/notice/recruit_view.aspx?no=1073 (작업치료사 포함 8명 · 12/6 마감)
+ *   https://dongjak.nid.or.kr/notice/recruit_view.aspx?no=1066 (작업치료사만 · 11/27 마감)
+ * 서울 25개 구 센터는 **○○.nid.or.kr 에 저마다 게시판**이 있고, 중앙 게시판에는
+ * 센터가 따로 올릴 때만 뜹니다. 그날 진행중 6건 가운데 중앙에 있는 것은 4건이었습니다.
+ * 구 게시판 번호는 **25곳이 한 줄로 이어 씁니다**(1066 동작 · 1073 강서 · 아무 곳 주소로
+ * 열어도 같은 글) — 그래서 열쇠는 'NDA' + 번호입니다 (중앙 'ND' + 번호와 안 겹침).
+ * 목록 꼴 (2026-11-19 원문) —
+ *   <a href="javascript:page_move( 'recruit_view', { 'no': '1073' } )"> 강서구치매안심센터 채용 공고 (팀원)</a>
+ *   <li><strong>진행현황</strong>2026-11-18 ~ 2026-12-06</li> <li><font color='red'>진행중<font/></li>
+ * 1쪽(10줄)의 **진행중**만 봅니다. 중앙 게시판에도 있는 같은 공고는 ③ 뒤에 뺍니다 */
+const 구센터 = {
+  gangnam: '강남구', gangdong: '강동구', gangbuk: '강북구', gangseo: '강서구', gwanak: '관악구',
+  gwangjin: '광진구', guro: '구로구', geumcheon: '금천구', nowon: '노원구', dobong: '도봉구',
+  dongdaemun: '동대문구', dongjak: '동작구', mapo: '마포구', seodaemun: '서대문구', seocho: '서초구',
+  seongdong: '성동구', seongbuk: '성북구', songpa: '송파구', yangcheon: '양천구', yeongdeungpo: '영등포구',
+  yongsan: '용산구', eunpyeong: '은평구', jongno: '종로구', junggu: '중구', jungnang: '중랑구',
+  /* seoul(서울광역)은 이 주소가 「페이지를 찾을 수 없습니다」 입니다 (2026-11-19) — 넣으면
+     「못 받은 곳 1」 이 날마다 떠서 정찰이 늘 건너뜁니다. 서울광역 공고는 중앙 게시판에 옵니다 */
+};
+const 구주소 = (곳) => 'https://' + 곳 + '.nid.or.kr/notice/recruit_view.aspx';
+셈.구게시판 = 0; 셈.구진행중 = 0; 셈.못받은구 = 0;
+if (!argv.includes('--구센터끔')) {
+  console.log('\n①-2 서울 구 센터 게시판 — ' + Object.keys(구센터).length + '곳 1쪽 (진행중만)');
+  for (const [곳, 구] of Object.entries(구센터)) {
+    const r = await 받기('https://' + 곳 + '.nid.or.kr/notice/recruit_list.aspx');
+    await 쉼(600);
+    if (r.code !== 200 || !r.글 || !/page_move|등록된 게시물이 없습니다/.test(r.글)) {
+      셈.못받은구++;
+      console.error('  ' + 곳 + ' HTTP ' + r.code + ' · ' + (r.왜 || '')
+        + ' · 응답 앞 500자 — ' + String(r.글).replace(/\s+/g, ' ').slice(0, 500));
+      continue;
+    }
+    셈.구게시판++;
+    const 이름 = 구 + '치매안심센터';
+    for (const d of r.글.split(/<tr>/i).slice(1)) {
+      const a = d.match(/'no'\s*:\s*'(\d+)'\s*\}\s*\)\s*"\s*>([\s\S]*?)<\/a>/i);
+      if (!a || !/진행중/.test(d)) continue;
+      const 기간 = (d.match(/진행현황\s*<\/strong>\s*(\d{4}-\d{2}-\d{2})\s*~\s*(\d{4}-\d{2}-\d{2})?/) || []);
+      let 제목 = 풀기(a[2]);
+      /* 중앙 게시판과 같은 꼴 「[기관] 제목」 으로 맞춥니다 — ④ 가 거기서 기관을 뗍니다 */
+      if (!/^\[/.test(제목)) 제목 = '[' + 이름 + '] ' + 제목.replace(new RegExp('^' + 이름 + '\\s*'), '');
+      모은것.push({ no: a[1], 제목, 상태: '채용중', 날: 기간[1] || null, 끝: 기간[2] || null,
+        첨부있나: null, 구: { 곳, 이름 } });
+      셈.구진행중++;
+    }
+  }
+  console.log('  읽은 게시판 ' + 셈.구게시판 + '곳 · 진행중 ' + 셈.구진행중 + '건'
+    + (셈.못받은구 ? ' · 못 받은 곳 ' + 셈.못받은구 : ''));
+}
+/* 열쇠·주소는 이 둘로만 냅니다 — 중앙 ND+번호 · 구 NDA+번호 */
+const 열쇠 = (x) => (x.구 ? 'NDA' : 'ND') + x.no;
+const 원문주소 = (x) => (x.구 ? 구주소(x.구.곳) : 상세URL) + '?no=' + x.no;
+
 /* ── ② 제목 판정 ──────────────────────────────────────────── */
 const 볼것 = [];
 for (const x of 모은것) {
@@ -224,7 +279,7 @@ console.log('\n③ 상세 — ' + 볼것.length + '건을 전부 엽니다 (직�
 for (const v of 볼것) {
   if (Date.now() - t0 > 15 * 60000) { console.log('  15분이 넘어 여기서 멈춥니다'); break; }
   셈.상세연것++;
-  const r = await 받기(상세URL + '?no=' + v.x.no);
+  const r = await 받기(원문주소(v.x));
   await 쉼(600);
   if (r.code !== 200 || !r.글) {
     if (v.열까) v.보류 = '상세를 못 받았습니다 (HTTP ' + r.code + ')';
@@ -248,9 +303,19 @@ for (const v of 볼것) {
     console.log('    날짜 거름 no=' + v.x.no + ' 읽은값 ' + JSON.stringify(dd)
       + ' · 올린날 ' + (v.x.날 || '모름'));
   }
+  /* 구 게시판은 목록의 「진행현황 시작 ~ 끝」 이 곧 접수기간입니다 (강서·동작 원문과 같음 · 2026-11-19).
+     본문에서 못 읽었을 때만 씁니다 */
+  if (!v.to && v.x.구 && v.x.끝) {
+    const to2 = 날짜쓸만한가({ from: v.x.날, to: v.x.끝 }, v.x.날, 오늘점ND);
+    if (to2) { v.to = to2; v.from = v.x.날 || ''; v.날짜출처 = '목록 · 진행현황'; 셈.날짜채움 = (셈.날짜채움 || 0) + 1; }
+  }
 
-  /* 직군을 이미 제목으로 가렸으면 여기서 끝 — 첨부까지 열지 않습니다 */
-  if (!v.열까) continue;
+  /* ★ 2026-11-19 세중님 「ⓐ부터 고쳐」 — 직군을 제목·본문으로 이미 가렸어도 **첨부를 엽니다.**
+     전에는 여기서 끝냈습니다(「첨부까지 열지 않습니다」). 그래서 동작 NDA1066 처럼 본문에 「작업치료사」가
+     있는 공고는 공고문을 안 열어 근무기간·모집인원·지원자격이 비었습니다.
+     **칸만** 읽을 때는 직군을 바꾸지 않고, 첨부가 없거나 못 읽어도 보류함으로 보내지 않습니다 */
+  let 칸만 = !v.열까;
+  const 막힘 = (왜) => { if (칸만) 셈.칸만못읽음 = (셈.칸만못읽음 ?? 0) + 1; else v.보류 = 왜; };
 
   /* ★ 2026-10-14 — `matchJob` → `본문직군`. 본문은 **페이지 전체 글**이라
      사이트 메뉴·응시자격의 「○○치료학」까지 들어옵니다. `matchJob` 은 맨
@@ -258,8 +323,10 @@ for (const v of 볼것) {
      응시자격의 「… 사회복지학, **작업치료학** 등의 분야 전공자」에 걸려
      「작업치료사 계약직 채용공고」로 회원 화면에 떠 있었습니다.
      `본문직군` 은 「치료사」를 요구합니다 (기준은 공고문읽기.mjs 한 자리 · 지침 6절) */
-  const j = 본문직군(v.본문);
-  if (j) { v.직군 = j; v.근거 = '상세'; 셈.상세로++; continue; }
+  if (!칸만) {
+    const j = 본문직군(v.본문);
+    if (j) { v.직군 = j; v.근거 = '상세'; 셈.상세로++; 칸만 = true; }
+  }
 
   /* 첨부 — ⚠ **href 가 아니라 onclick 안에 있습니다.**
        <a href='javascript:return false;'
@@ -269,18 +336,22 @@ for (const v of 볼것) {
   const 첨부 = [...r.글.matchAll(/onclick\s*=\s*'[^']*location\.href\s*=\s*"([^"]+)"[^']*'[^>]*>([\s\S]{0,140}?)</gi)]
     .map((m) => ({ url: m[1], 이름: 풀기(m[2]) }))
     .filter((f) => /download|\.(pdf|hwpx?)(\?|&|$)/i.test(f.url));
-  if (!첨부.length) { v.보류 = '첨부를 못 찾았습니다 (상세에 직군이 없습니다)'; continue; }
+  if (!첨부.length) { 막힘('첨부를 못 찾았습니다 (상세에 직군이 없습니다)'); continue; }
   /* 공고문으로 보이는 것을 먼저. 이름이 비면 주소의 filename 을 씁니다 */
   const 이름내기 = (f) => f.이름
     || decodeURIComponent((f.url.match(/filename=([^&]*)/) || [])[1] || '').replace(/\+/g, ' ');
   const 고른것 = 첨부.find((f) => /공고|모집|채용/.test(이름내기(f))) || 첨부[0];
   고른것.이름 = 이름내기(고른것);
   let u = 고른것.url.replace(/&amp;/g, '&');
-  if (!u.startsWith('http')) u = 바탕 + (u.startsWith('/') ? u : '/notification/' + u);
+  /* 구 게시판도 첨부는 www.nid.or.kr/download/… 절대주소입니다 (2026-11-19 원문).
+     상대주소면 그 글을 연 쪽 자리에 붙입니다 */
+  const 연곳 = v.x.구 ? 'https://' + v.x.구.곳 + '.nid.or.kr' : 바탕;
+  if (!u.startsWith('http')) u = 연곳 + (u.startsWith('/') ? u : (v.x.구 ? '/notice/' : '/notification/') + u);
 
   셈.첨부연것++;
+  if (칸만) 셈.칸만첨부 = (셈.칸만첨부 ?? 0) + 1;
   try {
-    const f = await fetch(u, { headers: { 'User-Agent': UA, Referer: 상세URL } });
+    const f = await fetch(u, { headers: { 'User-Agent': UA, Referer: 원문주소(v.x) } });
     const buf = Buffer.from(await f.arrayBuffer());
     const 이름 = 고른것.이름 || '공고문';
     let 글 = '';
@@ -292,6 +363,7 @@ for (const v of 볼것) {
       const k = await 첨부읽기(buf, 이름);
       if (k.글 && k.글.length > 80) {
         글 = k.글; md = k.md; 블록 = k.blocks;
+        v.md = md;   /* 고용형태는 줄이 살아 있는 md 로 가립니다 (④) */
         셈.kordoc읽음 = (셈.kordoc읽음 ?? 0) + 1;
         셈.kordoc초 = Math.round(((셈.kordoc초 ?? 0) + k.초) * 100) / 100;
       } else { 셈.kordoc빈손 = (셈.kordoc빈손 ?? 0) + 1; }
@@ -304,14 +376,14 @@ for (const v of 볼것) {
       /* ★ 2026-10-20 세중님 5번 — 옛 Apps Script OCR 호출을 끊었습니다.
          kordoc 이 빈손이면 `첨부읽기()` 가 ocr: 'force' 로 다시 봅니다 —
          옛 길은 404·500 으로 죽어 있습니다. gas/ 는 손대지 않았습니다 */
-      v.보류 = 'PDF 인데 kordoc 이 빈손이고 OCR(force)로도 글자가 안 나왔습니다';
+      막힘('PDF 인데 kordoc 이 빈손이고 OCR(force)로도 글자가 안 나왔습니다');
       continue;
     } else {
-      v.보류 = '첨부가 모르는 꼴입니다 (' + buf.length + '바이트 · 앞5 「'
-        + buf.subarray(0, 5).toString('latin1') + '」)';
+      막힘('첨부가 모르는 꼴입니다 (' + buf.length + '바이트 · 앞5 「'
+        + buf.subarray(0, 5).toString('latin1') + '」)');
       continue;
     }
-    if (!글) { v.보류 = '첨부를 못 읽었습니다'; continue; }
+    if (!글) { 막힘('첨부를 못 읽었습니다'); continue; }
 
     /* ★ 2026-10-12 — 읽은 글을 **보관합니다** (세중님 지시).
        전에는 직군만 뽑고 버렸습니다. 그래서 2026-10-11 에 hs_dates 버그
@@ -326,13 +398,15 @@ for (const v of 볼것) {
     if (md) {
       try {
         const 칸 = 칸뽑기(블록?.length ? 블록 : md, 글);
-        const 뭐든 = 칸.접수마감 || 칸.지원자격 || 칸.근무지 || 칸.예상연봉
+        const 뭐든 = 칸.접수마감 || 칸.지원자격 || 칸.근무지 || 칸.예상연봉 || 칸.근무기간
           || Object.keys(칸.모집인원 || {}).length;
         if (뭐든) { v.칸 = 칸; 셈.칸뽑음 = (셈.칸뽑음 ?? 0) + 1; }
       } catch (e) { 셈.칸탈 = (셈.칸탈 ?? 0) + 1; }
     }
-    const g = 첨부직군(글);
-    if (g.직군) { v.직군 = g.직군; v.근거 = '첨부 공고문 · 모집 부분'; v.걸린줄 = g.줄; 셈.첨부로++; }
+    /* 칸만 읽은 것은 직군을 다시 가리지 않습니다 — 제목·본문이 이미 정했습니다 */
+    const g = 칸만 ? {} : 첨부직군(글);
+    if (칸만) { /* 칸만 */ }
+    else if (g.직군) { v.직군 = g.직군; v.근거 = '첨부 공고문 · 모집 부분'; v.걸린줄 = g.줄; 셈.첨부로++; }
     else if (g.어디 === '가산점') {
       셈.가산점거름++;
       v.가산점뿐 = '첨부의 가산점·우대 부분에만 「' + (g.후보 || '') + '」 가 있었습니다 · ' + g.까닭;
@@ -342,9 +416,11 @@ for (const v of 볼것) {
       v.보류 = '첨부에 「' + (g.후보 || '') + '」 가 있는데 모집 부분인지 못 가렸습니다';
       v.걸린줄 = g.줄;
     }
-  } catch (e) { v.보류 = '첨부를 못 받았습니다 · ' + String(e.message).slice(0, 80); }
+  } catch (e) { 막힘('첨부를 못 받았습니다 · ' + String(e.message).slice(0, 80)); }
 }
-console.log('  연 것 ' + 셈.상세연것 + '건 · 첨부까지 ' + 셈.첨부연것 + '건');
+console.log('  연 것 ' + 셈.상세연것 + '건 · 첨부까지 ' + 셈.첨부연것 + '건'
+  + ' (직군은 이미 가리고 칸만 읽으려고 연 것 ' + (셈.칸만첨부 ?? 0) + '건'
+  + (셈.칸만못읽음 ? ' · 그중 못 읽음 ' + 셈.칸만못읽음 + '건(보류 안 함)' : '') + ')');
 console.log('  ★ 상세에서 마감일을 채운 공고 ' + (셈.날짜채움 || 0) + '건'
   + (셈.날짜버림 ? ' · 읽었지만 거른 것 ' + 셈.날짜버림 + '건' : ''));
 console.log('  ★ 상세로 가린 ' + 셈.상세로 + '건 · 첨부로 가린 ' + 셈.첨부로
@@ -355,12 +431,31 @@ console.log('  kordoc 읽음 ' + (셈.kordoc읽음 ?? 0) + ' · 빈손 ' + (셈.
   + ' · 일곱 칸 뽑은 공고 ' + (셈.칸뽑음 ?? 0) + '건'
   + (셈.칸탈 ? ' · 칸 뽑다 탈 ' + 셈.칸탈 + '건' : ''));
 
+/* ── ③-2 같은 공고 빼기 (2026-11-19) ─────────────────────────
+ * 센터가 구 게시판과 중앙 게시판 **둘 다** 올리면 같은 공고가 두 벌입니다
+ * (그날 양천·서대문·서초 셋이 그랬고, 셋 다 같은 기관 · 같은 마감일이었습니다).
+ * 중앙 쪽(ND+번호)이 이미 담겨 온 열쇠라 **중앙을 남기고 구 쪽을 뺍니다.**
+ * 같다고 보는 것 — 같은 기관 + 같은 마감일. 어느 쪽이든 마감일이 없으면 올린 날 사흘 안 */
+const 기관떼기 = (t) => (String(t).match(/^\[([^\]]{2,30})\]/) || [])[1] || '';
+const 날차 = (a, b) => (a && b) ? Math.abs((Date.parse(a) - Date.parse(b)) / 864e5) : 99;
+const 점선 = (s) => String(s || '').replace(/\./g, '-');
+const 중앙들 = 볼것.filter((v) => !v.x.구);
+const 뺀구 = new Set();
+for (const v of 볼것.filter((w) => w.x.구)) {
+  const 짝 = 중앙들.find((c) => 기관떼기(c.제목) === v.x.구.이름
+    && ((c.to && v.to) ? 점선(c.to) === 점선(v.to) : 날차(c.x.날, v.x.날) <= 3));
+  if (짝) { 뺀구.add(v); console.log('  같은 공고라 뺌 — NDA' + v.x.no + ' = ND' + 짝.x.no + ' · ' + v.제목.slice(0, 40)); }
+}
+셈.구중복 = 뺀구.size;
+for (let i = 볼것.length - 1; i >= 0; i--) if (뺀구.has(볼것[i])) 볼것.splice(i, 1);
+console.log('  ★ 구 게시판에만 있는 공고 ' + 볼것.filter((v) => v.x.구).length + '건 · 중앙과 같아 뺀 것 ' + 셈.구중복 + '건');
+
 /* ── ④ 갈래 ───────────────────────────────────────────────── */
 const 회원 = [], 보류 = [], 쓰레기 = [];
 for (const v of 볼것) {
   const 기관 = (v.제목.match(/^\[([^\]]{2,30})\]/) || [])[1] || '중앙치매센터';
   const 줄 = {
-    id: 'ND' + v.x.no,                 /* 옛 수집기와 같은 규칙 — 겹치면 덮지 않습니다 */
+    id: 열쇠(v.x),                     /* 중앙 ND+번호(옛 수집기와 같은 규칙) · 구 게시판 NDA+번호 */
     external_id: v.x.no,
     org_name: 기관,
     title: v.제목,
@@ -372,9 +467,14 @@ for (const v of 볼것) {
     /* 마감일을 어디서 얻었나 (2026-10-13). 전에는 창구가 이 칸을 안 받아
        evidence.날짜출처 에만 적었습니다. 이제 둘 다 보냅니다 */
     deadline_src: v.날짜출처 || (v.to ? '본문' : null),
-    url: 상세URL + '?no=' + v.x.no,
+    url: 원문주소(v.x),
     job_group: v.직군 || '',
     org_kind: '공공',
+    /* ★ 2026-11-19 세중님 「다음 규칙도 고쳐」 — 이 수집기만 고용형태를 안 읽어 회원 화면 치매센터 3건이 다 비었습니다.
+       판정은 공고문읽기.mjs 고용형태고르기() 한 자리(우리 직군 줄 → 제목 → 글 전체 · 섞이면 비움) ·
+       줄이 살아 있는 공고문 md → 공고문 글 → 상세 본문 차례. 못 가리면 칸을 안 보냅니다(빈 값으로 덮지 않게) */
+    ...(() => { const r = 고용형태고르기(v.제목, v.md || v.원문 || v.본문 || '');
+      return r && r.값 ? { employ_type: r.값 } : {}; })(),
     detail: { 근거: v.근거 || '제목', ...(v.걸린줄 ? { 걸린줄: String(v.걸린줄).slice(0, 300) } : {}) },
     evidence: {
       ...(v.보류 ? { 보류사유: v.보류 } : {}),
@@ -429,8 +529,8 @@ for (const v of 볼것) {
 if (!dry) {
   const 본번호 = new Set();
   const 줄들 = 볼것.filter((v) => v.__판정 && v.x && v.x.no)
-    .filter((v) => { const k = String(v.x.no); if (본번호.has(k)) return false; 본번호.add(k); return true; })
-    .map((v) => ({ 번호: String(v.x.no), 판정: v.__판정,
+    .filter((v) => { const k = (v.x.구 ? 'A' : '') + v.x.no; if (본번호.has(k)) return false; 본번호.add(k); return true; })
+    .map((v) => ({ 번호: (v.x.구 ? 'A' : '') + v.x.no, 판정: v.__판정,
       지문: 지문({ t: v.제목, d: v.x.날 || '' }) }));
   await 판정남기기(cfg, { 열쇠: cfg.COLLECT_KEY_ND2 || cfg.COLLECT_KEY_HS3 || '', source: SOURCE, 줄들 });
 }
@@ -438,7 +538,13 @@ console.log('\n④ 갈래 — 회원 목록 ' + 셈.회원 + ' · 보류함 ' + 
 if (회원.length) {
   console.log('\n  ★ 회원 목록에 올라갈 것 —');
   회원.slice(0, 12).forEach((r) => console.log('     ' + String(r.job_group).padEnd(8)
-    + String(r.posted_at || '날짜없음').padEnd(12) + r.org_name.slice(0, 20).padEnd(22) + r.title.slice(0, 44)));
+    + String(r.posted_at || '날짜없음').padEnd(12) + r.org_name.slice(0, 20).padEnd(22) + r.title.slice(0, 44)
+    + ' · 고용 ' + (r.employ_type || '-') + ' · 근무기간 ' + (r.뽑은값?.근무기간 || '-') + ' · 인원 ' + (r.headcount ?? '-')));
+}
+if (보류.length) {
+  console.log('\n  보류함으로 갈 것 —');
+  보류.slice(0, 12).forEach((r) => console.log('     ' + r.id.padEnd(9) + r.title.slice(0, 40)
+    + ' · ' + String(r.evidence?.보류사유 || '갈래 규칙').slice(0, 60)));
 }
 
 /* ── ⑤ 담기 · 박동 ────────────────────────────────────────── */
@@ -472,8 +578,8 @@ if (dry) {
      담긴 공고만 보관합니다 (쓰레기통 줄은 FK 가 없습니다) */
   const 담은번호 = new Set(넣을것.map((x) => x.id));
   const 원문들 = 볼것
-    .filter((v) => v.원문 && v.x && v.x.no && 담은번호.has('ND' + v.x.no))
-    .map((v) => ({ job_id: 'ND' + v.x.no, kind: '첨부', ord: 0,
+    .filter((v) => v.원문 && v.x && v.x.no && 담은번호.has(열쇠(v.x)))
+    .map((v) => ({ job_id: 열쇠(v.x), kind: '첨부', ord: 0,
       url: v.첨부주소 || null, file_name: v.첨부이름 || null,
       body: String(v.원문).slice(0, 400000) }));
   if (원문들.length) {
@@ -505,13 +611,14 @@ if (dry) {
      「어제 있던 번호가 오늘 접수중 목록에 없다 = 마감됐거나 내려갔다」 입니다.
      요청을 한 번도 더 하지 않는 공짜 정찰입니다.
      ⚠ 쪽을 하나라도 못 받았으면 건너뜁니다 — 그 쪽 공고가 전부 「빠졌다」 가 됩니다 */
-  if (셈.못받은쪽) {
-    console.log('정찰        건너뜀 — 쪽을 ' + 셈.못받은쪽 + '개 못 받았습니다');
+  /* 구 게시판을 하나라도 못 받았으면 그곳 공고가 「빠졌다」 가 되니 같이 건너뜁니다 (2026-11-19) */
+  if (셈.못받은쪽 || 셈.못받은구) {
+    console.log('정찰        건너뜀 — 쪽을 ' + 셈.못받은쪽 + '개 · 구 게시판을 ' + 셈.못받은구 + '곳 못 받았습니다');
   } else {
     try {
       const r = await rpc('목록빠짐표시', {
         p_secret: cfg.COLLECT_KEY_ND2, p_source: SOURCE,
-        p_본것: 모은것.map((x) => 'ND' + x.no),
+        p_본것: 모은것.map(열쇠),
       });
       console.log('정찰        ' + Object.entries(r || {})
         .filter(([k]) => !/기준일/.test(k)).map(([k, v]) => k + ' ' + v).join(' · '));
