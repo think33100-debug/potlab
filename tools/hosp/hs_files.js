@@ -159,6 +159,23 @@ function hs첨부주소(html, 바탕주소) {
     더하기(src, alt || '공고문 그림', true, null, true);
   }
 
+  /* ★ 2026-11-19 세중님 「그것도 고쳐」 — **쪽에 글자로 박힌 그림**(data:image/…;base64) 공고문.
+     인천세종병원(HS69368144 · recruit.sejongh.co.kr/_page/notice/view)은 공고 본문이
+     `<img id="photoImage" src="data:image/png;base64, …">` 한 장(820KB png)뿐이라, 글만 읽던 우리는
+     「부서 · 모집분야」 두 줄만 가져와 근무기간·자격·보수가 다 비었습니다.
+     그림에 주소가 없으므로 **쪽 주소 + `#본문그림-N`** 을 첨부 주소로 담고, 첨부되메우기가 받을 때
+     쪽을 다시 열어 N 번째 박힌 그림을 꺼냅니다(나라일터 「쪽 주소를 담아 두는」 꼴과 같음 · 본문박힌그림() 한 자리).
+     작은 꾸밈 그림은 뺍니다 — base64 55,000자(≈40KB · 첨부읽기 그림최소바이트) 미만 */
+  {
+    let n = 0;
+    for (const m of s.matchAll(박힌그림꼴)) {
+      n++;
+      if (m[2].replace(/\s+/g, '').length < 55000) continue;
+      const u = String(바탕주소 || '').split('#')[0] + '#본문그림-' + n;
+      if (!모은것.has(u)) 모은것.set(u, { name: '공고문 그림(쪽에 박힌 그림 ' + n + ')', 점수: 2, 이름믿음: true });
+    }
+  }
+
   /* ① <a href="…"> 글 </a> — 가장 흔한 꼴 (충주의료원이 이것입니다) */
   for (const m of s.matchAll(/<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]{0,300}?)<\/a>/gi)) {
     const 속글 = m[2].replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
@@ -193,6 +210,22 @@ function hs첨부주소(html, 바탕주소) {
   return [...모은것].map(([url, v]) => ({ url, name: v.name, 점수: v.점수,
     ...(v.받는법 ? { 받는법: v.받는법 } : {}) }))
     .sort((a, b) => b.점수 - a.점수);
+}
+
+/* 쪽에 박힌 그림 — `<img … src="data:image/png;base64, …">` (2026-11-19 · 인천세종병원) */
+const 박힌그림꼴 = /<img\b[^>]*?\bsrc\s*=\s*["']data:image\/(png|jpe?g|webp);base64,([A-Za-z0-9+/=\s]+)["']/gi;
+
+/** 쪽 HTML 에서 N 번째(1부터) 박힌 그림을 꺼냅니다 — 첨부되메우기가 `#본문그림-N` 주소를 받을 때 씁니다.
+ *  @returns { buf, 꼴 } 또는 { 왜 } */
+function 본문박힌그림(html, n) {
+  let i = 0;
+  for (const m of String(html || '').matchAll(박힌그림꼴)) {
+    i++;
+    if (i !== Number(n)) continue;
+    const buf = Buffer.from(m[2].replace(/\s+/g, ''), 'base64');
+    return buf.length ? { buf, 꼴: m[1].toLowerCase().replace('jpeg', 'jpg') } : { 왜: '박힌 그림이 비었습니다' };
+  }
+  return { 왜: '쪽에 ' + n + '번째 박힌 그림이 없습니다 (' + i + '개)' };
 }
 
 /** **공고가 아닌 첨부**인가 — 쪽 꼬리말의 인증서·배너 (2026-10-21)
@@ -249,11 +282,19 @@ if (require.main === module && process.argv.includes('--자기점검')) {
   봐('공고문 글귀는 받는다', 그림공고문인가({ src: '/x/n.jpg', alt: '2026년 채용 공고문' }) === true);
   봐('아이콘 길은 뺀다', 그림공고문인가({ src: '/img/icon_file.gif', alt: '채용 공고문', width: 900, height: 900 }) === false);
   봐('웹접근성 인증서는 공고가 아니다', 공고아닌첨부('wa_qualith_certificate.pdf') === true);
-  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 7가지');
+  /* 2026-11-19 쪽에 박힌 그림 (인천세종병원 HS69368144 꼴) */
+  const 큰그림 = Buffer.concat([Buffer.from('89504e470d0a1a0a', 'hex'), Buffer.alloc(50000, 7)]).toString('base64');
+  const 쪽 = '<div class="view_con"><img id="photoImage" src="data:image/png;base64, ' + 큰그림 + '" /></div>';
+  const 잡은것 = hs첨부주소(쪽, 'http://recruit.example.kr/_page/notice/view?id=26215');
+  봐('쪽에 박힌 큰 그림 → 쪽 주소#본문그림-1', 잡은것.length === 1 && 잡은것[0].url.endsWith('view?id=26215#본문그림-1') && 잡은것[0].점수 === 2);
+  봐('박힌 그림을 다시 꺼내면 PNG', (본문박힌그림(쪽, 1).buf || Buffer.alloc(0)).subarray(0, 4).toString('hex') === '89504e47');
+  봐('작은 박힌 그림(꾸밈)은 안 담는다', hs첨부주소('<img src="data:image/png;base64,iVBORw0KGgo=">', 'http://x.kr/v?id=1').length === 0);
+  봐('없는 번호는 왜를 낸다', !!본문박힌그림(쪽, 2).왜);
+  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 11가지');
   process.exit(틀림 ? 1 : 0);
 }
 
-module.exports = { hs첨부주소, 점수, 서식말, 공고아닌첨부, 그림공고문인가 };
+module.exports = { hs첨부주소, 점수, 서식말, 공고아닌첨부, 그림공고문인가, 본문박힌그림 };
 
 /* ── 자기 점검 ───────────────────────────────────────────────── */
 if (require.main === module) {
