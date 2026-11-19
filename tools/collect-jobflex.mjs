@@ -49,7 +49,8 @@ import { 받아보기 } from './쪽나눠받기.mjs';
 import { 고용형태코드 } from './공고문읽기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 곳들, 목록, 풀기, 상세, 꼬리표가르기, 경력조건 } from './hosp/jobflex.mjs';
+import { 곳들, 목록, 풀기, 상세, 꼬리표가르기, 경력조건, 본문첫그림 } from './hosp/jobflex.mjs';
+import { 그림공고문인가 } from './hosp/hs_files.js';
 import { 첨부모으기 } from './첨부담기.mjs';   /* 첨부 주소는 이 창구 한 자리 (2026-10-22) */
 import { sortJob } from './sort-rule.mjs';
 import { mixedTitle, 구운날 } from './gas-rules.mjs';
@@ -326,6 +327,14 @@ if (dry) {
     for (const x of 후보) {
       const d = 상세모음.get(x.id);
       if (!d) continue;
+      /* ★ 2026-11-20 — 본문이 **그림뿐**이면 첫 그림을 공고문으로 **먼저** 담습니다 (일산병원 JF134744).
+         이름에 「채용공고」를 넣어 점수 2 · 먼저 담겨 id 가 앞서 [별첨] 서식보다 먼저 골립니다.
+         첨부되메우기가 그림을 kordoc OCR 로 읽어 **빈 칸만** 채웁니다 */
+      const 그림 = 본문첫그림(d.글, 그림공고문인가);
+      if (그림) {
+        첨부.더하기({ job_id: x.id, kind: '공고문', name: '채용공고 본문그림-1.' + 그림.꼴, url: 그림.주소 });
+        첨부줄++;
+      }
       for (const f of d.첨부) {
         첨부.더하기({ job_id: x.id, kind: '공고문', name: f.이름, url: f.주소 });
         첨부줄++;

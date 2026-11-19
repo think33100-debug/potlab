@@ -152,6 +152,27 @@ export async function 상세(호스트, sn) {
   };
 }
 
+/** 본문이 **그림뿐**일 때 첫 공고문 그림 — { 주소, 꼴 } 하나 또는 null (2026-11-20)
+ *
+ *  일산병원 JF134744 는 jobDescription 이 `<img src="https://nhimc.recruiter.co.kr/upload/79640/image/202611/<uuid>.jpg">`
+ *  여덟 장뿐이라 글이 0자였습니다. collect-jobflex 가 「글 60자 넘을 때만」 본문을 담아 아무것도 안 남았고,
+ *  모집인원·자격이 「공고문 확인」으로 떴습니다 (첫 그림 표에 「작업치료사 · 어린이재활치료부 · 1명」).
+ *  첨부되메우기는 공고 하나에 첨부 **하나**를 읽으므로 **첫 그림만** 냅니다 — 채용분야·인원 표가 첫 장에 옵니다.
+ *  그림 고르기는 hs_files 의 그림공고문인가() 한 자리입니다 (아주대 편집기 그림과 같은 꼴). */
+export function 본문첫그림(글, 그림공고문인가) {
+  const html = String(글 || '');
+  const 글만 = html.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  if (글만.length > 60) return null;
+  for (const m of html.matchAll(/<img\b[^>]*>/gi)) {
+    const src = (m[0].match(/\bsrc\s*=\s*["']([^"']+)["']/i) || [])[1] || '';
+    const alt = (m[0].match(/\balt\s*=\s*["']([^"']*)["']/i) || [])[1] || '';
+    if (!/^https?:\/\//i.test(src) || !그림공고문인가({ src, alt })) continue;
+    const 꼴 = (src.match(/[.](jpe?g|png|webp)(?:$|[?#&])/i) || [])[1] || 'jpg';
+    return { 주소: src.replace(/&amp;/g, '&'), 꼴: 꼴.toLowerCase().replace('jpeg', 'jpg') };
+  }
+  return null;
+}
+
 /** 한 곳의 공고를 **전부** 받습니다 (쪽 넘김까지) */
 export async function 목록(호스트, 최대쪽 = 20) {
   const 첫 = await 한쪽(호스트, 1, 100);
