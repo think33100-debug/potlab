@@ -212,10 +212,13 @@ export function 돈읽기(원문: string | null | undefined): 돈읽은값 | nul
     /* 「급여 **월 3,152,600원**」 처럼 **월 뒤에 바로 숫자**가 오면 달마다 주는 돈입니다 */
     : /월\s*(급|지급|액|평균|기본|약)|월\s*[0-9]|^월/.test(t) ? '월' : '연';
 
+  /* ★ 2026-11-19 — 「약 4,447 ~ 4,759만원」 처럼 **범위 앞 숫자에 단위가 없으면** 뒤 단위를 앞에도 물립니다.
+     안 물리면 앞 숫자가 맨 숫자 울타리에 걸려 버려지고 화면에 **뒤 금액 하나**(「4,759만원」)만 보였습니다 (아주대 HS1196586464 · 외부 검토) */
+  const 읽을글 = t.replace(/([0-9][0-9,]*)\s*([~∼～])\s*([0-9][0-9,]*)\s*(만|천|억)\s*원/g, '$1$4원 $2 $3$4원');
   돈토막.lastIndex = 0;
   const 값들: number[] = [];
   let m: RegExpExecArray | null;
-  while ((m = 돈토막.exec(t))) {
+  while ((m = 돈토막.exec(읽을글))) {
     if (!m[1]) continue;
     const 수 = Number(m[1].replace(/,/g, ''));
     if (!Number.isFinite(수) || 수 === 0) continue;
@@ -258,7 +261,8 @@ export function 돈꼴(원문: string | null | undefined): 돈꼴값 | null {
     const b = 만원말(값들[1]);
     /* 둘 다 만원 꼴일 때만 뒤에 한 번 붙입니다 */
     if (a.글.endsWith('만원') && b.글.endsWith('만원')) {
-      const 약 = a.약 || b.약 ? '약 ' : '';
+      /* 원문에 「약」 이 적혀 있으면 살립니다 (2026-11-19) */
+      const 약 = a.약 || b.약 || /약\s*[0-9]/.test(t) ? '약 ' : '';
       return { 글: (앞말 + 약 + a.글.replace('만원', '') + '~' + b.글
         + (꼬리 ? ' ' + 꼬리 : '')).trim(), 갈래 };
     }
