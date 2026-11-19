@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { 권한들, type 권한코드 } from '@/lib/permissions';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminBadge, AdminSection, 관, 칩꼴 } from '@/components/rapo/rapo-admin-ui';
 
 /* 직원과 권한 — **대표만** 고칠 수 있습니다 (2026-10-09 · 뼈대 2절).
  *
@@ -79,90 +81,83 @@ export default function AdminStaff() {
 
   const 대표 = !!내?.대표;
 
+  /* 2026-11-19 — 새 관리자 디자인(흰 카드 · 권한 칩 · 기록 목록)으로 다시 입혔습니다 */
   if (탈 && !내) {
-    return <p className="mt-6 rounded-sm border border-brand-red p-5 text-lg text-brand-red-dark">{탈}</p>;
+    return <p className={관.error}>{탈}</p>;
   }
-  if (!내) return <p className="mt-6 text-lg text-mute">잠시만요…</p>;
+  if (!내) return <p className={관.muted}>잠시만요…</p>;
 
   return (
-    <div className="mt-6">
-      <h1 className="text-h2 font-bold text-[#14181C]">직원과 권한</h1>
-      <p className="mt-2 text-lg text-mute">
+    <div className="max-w-[1100px]">
+      <RapoAdminHeader title="직원과 권한" />
+      <p className={관.muted + ' -mt-[16px] mb-[24px] break-keep'}>
         {대표
           ? '대표입니다 — 직원을 넣고 권한을 주고 거둘 수 있어요.'
           : '직원입니다 — 보기만 됩니다. 넣고 거두는 것은 대표만 합니다.'}
       </p>
 
       {탈 && (
-        <p className="mt-4 rounded-sm border border-brand-red p-4 text-lg text-brand-red-dark">{탈}</p>
+        <p className={관.error + ' mb-[16px]'}>{탈}</p>
       )}
 
       {대표 && (
-        <section className="mt-7 rounded-sm border border-gray-200 p-5">
-          <h2 className="text-lg font-bold">직원 넣기</h2>
-          <p className="mt-1 text-sm text-mute">
+        <section className={관.card + ' mb-[32px]'}>
+          <h2 className={관.h3}>직원 넣기</h2>
+          <p className={관.sub + ' mt-[4px]'}>
             회원번호로 넣습니다. 번호는 <b>회원</b> 화면에 있어요. 넣은 뒤 권한을 따로 줍니다.
           </p>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="mt-[16px] flex flex-wrap items-center gap-[8px]">
             <input
               value={새번호} onChange={(e) => set새번호(e.target.value)}
-              inputMode="numeric" placeholder="회원번호"
-              className="w-[9rem] rounded-sm border border-gray-200 px-4 py-3 text-lg" />
+              inputMode="numeric" placeholder="회원번호" aria-label="회원번호"
+              className={관.input + ' w-[9rem] flex-none'} />
             <input
               value={메모} onChange={(e) => set메모(e.target.value)}
-              placeholder="메모 (안 써도 됩니다)"
-              className="min-w-[14rem] flex-1 rounded-sm border border-gray-200 px-4 py-3 text-lg" />
+              placeholder="메모 (안 써도 됩니다)" aria-label="메모"
+              className={관.input + ' flex-1 basis-[200px]'} />
             <button
               type="button" onClick={넣기} disabled={도는중}
-              className="rounded-md bg-brand-red px-6 py-3 text-lg font-bold text-white
-                         hover:bg-brand-red-dark active:scale-[0.98] disabled:opacity-50">
+              className={관.btn + ' h-[44px]'}>
               넣기
             </button>
           </div>
         </section>
       )}
 
-      <section className="mt-7">
-        <h2 className="text-lg font-bold">운영진 {목록 ? 목록.length : 0}명</h2>
-        <div className="mt-3 space-y-4">
+      <AdminSection title={`운영진 ${목록 ? 목록.length : 0}명`}>
+        <div className="flex flex-col gap-[12px]">
           {(목록 ?? []).map((s) => (
             <article key={s.profile_id}
-              className={'rounded-sm border p-5 ' + (s.끈때 ? 'border-gray-200 opacity-55' : 'border-gray-200')}>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-gray-100 px-3 py-1 text-[13px] font-bold dark:bg-gray-800">
-                  {s.갈래}
-                </span>
-                <b className="text-lg">{s.닉네임}</b>
-                <span className="text-sm text-mute">회원번호 {s.회원번호} · 넣은날 {날(s.넣은때)}</span>
-                {s.끈때 && <span className="text-sm text-brand-red-dark">뺐습니다 · {날(s.끈때)}</span>}
+              className={관.card + (s.끈때 ? ' opacity-60' : '')}>
+              <div className="flex flex-wrap items-center gap-[8px]">
+                <AdminBadge tone={s.갈래 === '대표' ? 'coral' : 'neutral'}>{s.갈래}</AdminBadge>
+                <b className={관.h3}>{s.닉네임}</b>
+                <span className={관.sub}>회원번호 {s.회원번호} · 넣은날 {날(s.넣은때)}</span>
+                {s.끈때 && <span className="text-[13px] font-bold text-[#b42a21]">뺐습니다 · {날(s.끈때)}</span>}
                 {대표 && s.갈래 !== '대표' && !s.끈때 && (
                   <button
                     type="button" disabled={도는중}
                     onClick={() => 부르기('admin_직원빼기', { p_회원번호: s.회원번호, p_까닭: null })}
-                    className="ml-auto rounded-md border border-gray-200 px-4 py-2 text-sm
-                               text-gray-600 hover:bg-gray-50 disabled:opacity-50">
+                    className={관.btnSm + ' ml-auto'}>
                     직원에서 빼기
                   </button>
                 )}
               </div>
 
               {s.갈래 === '대표' ? (
-                <p className="mt-3 text-sm text-mute">대표는 열두 가지를 모두 할 수 있습니다.</p>
+                <p className={관.sub + ' mt-[12px]'}>대표는 열두 가지를 모두 할 수 있습니다.</p>
               ) : (
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-[16px] flex flex-wrap gap-[8px]">
                   {권한들.map((p) => {
                     const 가짐 = s.권한.includes(p.코드);
                     return (
                       <button
-                        key={p.코드} type="button" title={p.설명}
+                        key={p.코드} type="button" title={p.설명} aria-pressed={가짐}
                         disabled={!대표 || 도는중 || !!s.끈때}
                         onClick={() => 부르기(가짐 ? 'admin_권한거두기' : 'admin_권한주기',
                           { p_회원번호: s.회원번호, p_코드: p.코드, p_까닭: null })}
-                        className={'rounded-full px-4 py-2 text-sm font-medium ' +
-                          (가짐
-                            ? 'bg-badge-teal-bg text-teal-strong'
-                            : 'border border-gray-200 text-gray-500') +
-                          (대표 && !s.끈때 ? ' hover:opacity-80' : ' cursor-default')}>
+                        className={칩꼴(가짐) + ' disabled:opacity-100' +
+                          (대표 && !s.끈때 ? '' : ' cursor-default')}>
                         {가짐 ? '✓ ' : ''}{p.이름}
                       </button>
                     );
@@ -172,18 +167,16 @@ export default function AdminStaff() {
             </article>
           ))}
         </div>
-      </section>
+      </AdminSection>
 
-      <section className="mt-9">
-        <h2 className="text-lg font-bold">준 기록</h2>
-        <p className="mt-1 text-sm text-mute">지우지 않습니다. 누가 언제 무엇을 주고 거뒀는지 남습니다.</p>
+      <AdminSection title="준 기록" sub="지우지 않습니다. 누가 언제 무엇을 주고 거뒀는지 남습니다.">
         {기록들.length === 0
-          ? <p className="mt-3 text-lg text-mute">아직 없어요.</p>
+          ? <p className={관.cardTight + ' ' + 관.empty}>아직 없어요.</p>
           : (
-            <ul className="mt-3 space-y-2">
+            <ul className={관.list}>
               {기록들.map((r, i) => (
-                <li key={i} className="text-sm text-gray-700 dark:text-gray-300">
-                  <span className="text-mute">{날(r.언제)}</span>{' · '}
+                <li key={i} className={관.row + ' ' + 관.body + ' py-[12px]'}>
+                  <span className="text-[#555d6d]">{날(r.언제)}</span>{' · '}
                   <b>{r.누가 ?? '(모름)'}</b>
                   {r.준것인가 ? ' 가 ' : ' 가 '}
                   <b>{r.누구에게 ?? '(모름)'}</b>
@@ -193,7 +186,7 @@ export default function AdminStaff() {
               ))}
             </ul>
           )}
-      </section>
+      </AdminSection>
     </div>
   );
 }

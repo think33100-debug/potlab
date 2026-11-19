@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminMetricCard } from '@/components/rapo/rapo-admin-ui';
 import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 관리자 홈 — 새 디자인 「관리자 홈 · PC UI」 1406:399 (2026-11-12 세중님 「관리자 페이지도 적용 시작」).
@@ -14,7 +15,12 @@ import { browserSupabase } from '@/lib/supabase-browser';
      가입 이탈률      (2026-11-19) admin_stats_now 의 signup — 소셜 로그인까지 한 계정 중 profiles 가 없는 비율.
                      로그인 단추 전에 나간 분은 못 셉니다 · 30분 안 계정은 하는 중이라 뺍니다
      공유 버튼 클릭 수 (2026-11-19) admin_stats_shares — 공유창·링크 복사 누름 (lib/share-hit.ts). 그 전은 못 셉니다
-   원본의 시작일·종료일 고르기는 두 단추(최근 1일 · 최근 7일)로 정해지는 날짜를 보여 주기만 합니다. */
+   원본의 시작일·종료일 고르기는 두 단추(최근 1일 · 최근 7일)로 정해지는 날짜를 보여 주기만 합니다.
+
+   ★ 2026-11-19 「처리할 일」 줄을 더했습니다 (「지표도 더 넣자」) — 머릿수만 셉니다(head: true · 줄은 안 받습니다).
+     처리 전 신고   reports 의 handled_at 이 빈 것 (RLS: 관리자만 읽음) · 회원 이름·글은 안 받습니다
+     오늘 새 공고   admin_jobs 의 collected_at 이 오늘(한국 시각) · 보류·숨김 포함 전부
+     보류 공고     아래 표의 그 숫자 */
 
 type Daily = { day: string; visits: number };
 type 가입셈 = { d1: { started: number; done: number }; d7: { started: number; done: number } };
@@ -31,6 +37,7 @@ export default function AdminHome() {
 
   const [가입, set가입] = useState<가입셈 | null>(null);
   const [공유, set공유] = useState<공유줄[] | null>(null);
+  const [할일, set할일] = useState<{ 신고: number | null; 새공고: number | null } | null>(null);
 
   useEffect(() => {
     const sb = browserSupabase();
@@ -45,6 +52,14 @@ export default function AdminHome() {
     sb.rpc('admin_stats_shares', { p_days: 7 }).then(({ data, error }) => {
       set공유(error ? [] : ((data ?? []) as 공유줄[]));
     });
+    /* 처리할 일 (2026-11-19) — 머릿수만. 실패하면 그 칸만 「못 셌어요」 */
+    /* 한국 시각 오늘 0시 — 'sv-SE' 는 YYYY-MM-DD 로 찍습니다 */
+    const 오늘시작 = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }) + 'T00:00:00+09:00';
+    Promise.all([
+      sb.from('reports').select('id', { count: 'exact', head: true }).is('handled_at', null),
+      sb.from('admin_jobs').select('id', { count: 'exact', head: true }).gte('collected_at', 오늘시작),
+    ]).then(([r, j]) => set할일({ 신고: r.error ? null : r.count ?? 0, 새공고: j.error ? null : j.count ?? 0 }),
+      () => set할일({ 신고: null, 새공고: null }));
     sb.from('admin_jobs').select('id,title,org_name,collected_at,evidence', { count: 'exact' })
       .eq('hold', true).order('collected_at', { ascending: false }).order('id').limit(5)
       .then(({ data, count, error }) => {
@@ -93,18 +108,28 @@ export default function AdminHome() {
       <section aria-labelledby="admin-metrics" className="mb-[32px] flex flex-col gap-(--rapo-dimension-x4)">
         <h2 id="admin-metrics" className="rapo-type-t6-bold">선택 기간 주요 지표</h2>
         <div className="grid gap-(--rapo-dimension-x4) md:grid-cols-3">
-          <지표카드 그림="/rapo/admin/metric-visitors.svg" 이름="방문자 수"
+          <AdminMetricCard 그림="/rapo/admin/metric-visitors.svg" 이름="방문자 수"
             값={방문합 == null ? null : 방문합.toLocaleString('ko-KR')} 단위="명"
             설명={기간 === 1 ? '오늘 방문자 (관리자 제외)' : '날마다 센 방문자의 합 (관리자 제외)'}
             그래프={고른날 && 고른날.length > 1 ? <꺾은선 값들={고른날.map((d) => Number(d.visits ?? 0))} /> : null} />
-          <지표카드 그림="/rapo/admin/metric-leave.svg" 이름="가입 이탈률"
+          <AdminMetricCard 그림="/rapo/admin/metric-leave.svg" 이름="가입 이탈률"
             값={이탈값 == null || 이탈값 === '못 셌어요' ? null : 이탈값} 단위={이탈값 === '—' ? '' : '%'}
             빈말={이탈값 === '못 셌어요' ? '못 셌어요' : undefined}
             설명={시작 == null || 시작 < 0 ? '로그인까지 했는데 가입을 못 마친 비율'
               : `로그인 ${시작}명 중 ${못마침}명이 가입을 못 마침 · 로그인 전에 나간 분은 못 세요`} />
-          <지표카드 그림="/rapo/admin/metric-share.svg" 이름="공유 버튼 클릭 수"
-            값={공유 == null ? null : (공유창 + 복사).toLocaleString('ko-KR')} 단위="번"
+          <AdminMetricCard 그림="/rapo/admin/metric-share.svg" 이름="공유 버튼 클릭 수"
+            값={공유 == null ? null : (공유창 + 복사).toLocaleString('ko-KR')} 단위="회"
             설명={`공유창 ${공유창} · 링크 복사 ${복사} · 11/19 부터 셈 (관리자 제외)`} />
+        </div>
+      </section>
+
+      {/* 처리할 일 (2026-11-19) — 숫자를 누르면 그 화면으로 */}
+      <section aria-labelledby="admin-todo" className="mb-[32px] flex flex-col gap-(--rapo-dimension-x4)">
+        <h2 id="admin-todo" className="rapo-type-t6-bold">처리할 일</h2>
+        <div className="grid gap-(--rapo-dimension-x4) sm:grid-cols-3">
+          <할일칸 이름="보류 공고" n={보류 ? 보류.count : err ? null : undefined} 단위="건" 설명="관리자 확인을 기다리는 공고" href="/admin/jobs?state=hold" 급함={(보류?.count ?? 0) > 0} />
+          <할일칸 이름="처리 전 신고" n={할일 ? 할일.신고 : undefined} 단위="건" 설명="커뮤니티 글·댓글 신고 중 처리 안 한 것" href="/admin/reports" 급함={(할일?.신고 ?? 0) > 0} />
+          <할일칸 이름="오늘 새 공고" n={할일 ? 할일.새공고 : undefined} 단위="건" 설명="오늘(한국 시각) 수집기가 담은 공고 · 보류·숨김 포함" href="/admin/jobs" />
         </div>
       </section>
 
@@ -116,7 +141,7 @@ export default function AdminHome() {
           </h2>
           <Link href="/admin/jobs?state=hold" className="rapo-type-t4-bold flex h-(--rapo-touch-min) items-center">보류함 보기&nbsp;&nbsp;→</Link>
         </div>
-        <div className="overflow-x-auto rounded-[12px] border border-[#dde4e6] bg-white">
+        <div className="relative overflow-x-auto rounded-[12px] border border-[#dde4e6] bg-white">
           <table className="w-full min-w-[640px] text-left">
             <thead className="bg-[#f1f5f8] text-[13px] font-bold text-[#304f65]">
               <tr>
@@ -149,28 +174,6 @@ export default function AdminHome() {
   );
 }
 
-/* 원본 「RAPO / 운영 / 지표 카드」 1406:386 — 흰 바탕 · 테두리 · radius 12 · 높이 114 */
-function 지표카드({ 그림, 이름, 값, 단위, 설명, 그래프, 빈말 }: {
-  그림: string; 이름: string; 값: string | null; 단위?: string; 설명: string; 그래프?: React.ReactNode; 빈말?: string;
-}) {
-  return (
-    <div className="relative flex min-h-[114px] flex-col justify-between rounded-[12px] border border-[#dde4e6] bg-white px-[15px] py-[12px]">
-      <p className="flex items-center gap-[6px] text-[16px] font-bold text-[#304f65]">
-        {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG */}
-        <img src={그림} alt="" width={19} height={19} />
-        {이름}
-      </p>
-      <div className="flex items-end justify-between gap-(--rapo-dimension-x3)">
-        {값 != null
-          ? <p className="flex items-baseline gap-[3px] font-bold text-[#112231]"><span className="text-[32px] leading-none">{값}</span><span className="text-[15px]">{단위}</span></p>
-          : <p className="text-[16px] font-bold text-[#304f65]">{빈말 ?? '불러오는 중…'}</p>}
-        {그래프}
-      </div>
-      <p className="text-[13px] text-[#304f65]">{설명}</p>
-    </div>
-  );
-}
-
 /* 방문자 꺾은선 — 원본 Vector 114×26 자리. 진짜 날별 값으로 그립니다 */
 function 꺾은선({ 값들 }: { 값들: number[] }) {
   const w = 114, h = 26, 큰 = Math.max(1, ...값들);
@@ -179,5 +182,22 @@ function 꺾은선({ 값들 }: { 값들: number[] }) {
     <svg width={w} height={h + 2} viewBox={`0 -1 ${w} ${h + 2}`} aria-hidden className="shrink-0">
       <polyline points={점} fill="none" stroke="#223d51" strokeWidth={1.8} strokeLinejoin="round" strokeLinecap="round" />
     </svg>
+  );
+}
+
+/* 처리할 일 한 칸 — 값이 없으면(undefined) 불러오는 중, null 이면 못 셌어요 */
+function 할일칸({ 이름, n, 단위, 설명, href, 급함 }: {
+  이름: string; n: number | null | undefined; 단위: string; 설명: string; href: string; 급함?: boolean;
+}) {
+  return (
+    <Link href={href}
+      className="flex min-h-[96px] flex-col justify-between gap-[6px] rounded-[12px] border border-[#dde4e6] bg-white px-[15px] py-[12px] hover:border-[#304f65]">
+      <p className="flex items-center justify-between text-[16px] font-bold text-[#304f65]">{이름}<span aria-hidden>→</span></p>
+      {n === undefined ? <p className="text-[16px] font-bold text-[#304f65]">불러오는 중…</p>
+        : n === null ? <p className="text-[16px] font-bold text-[#304f65]">못 셌어요</p>
+        : <p className={'flex items-baseline gap-[3px] font-bold ' + (급함 ? 'text-[#b42a21]' : 'text-[#112231]')}>
+            <span className="text-[28px] leading-none tabular-nums">{n.toLocaleString('ko-KR')}</span><span className="text-[15px]">{단위}</span></p>}
+      <p className="text-[13px] text-[#555d6d]">{설명}</p>
+    </Link>
   );
 }

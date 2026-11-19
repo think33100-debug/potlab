@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { browserSupabase } from '@/lib/supabase-browser';
 import { AdminReportDecide } from '@/components/admin-report-decide';
 import { useToast } from '@/app/toast';
+import { AdminBadge, AdminSection, 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 공고 오류 신고 (2026-10-07).
  *
@@ -78,83 +79,81 @@ export function AdminJobReports() {
   const 안끝난것 = (rows ?? []).filter((r) => !r.처리시각).length;
 
   return (
-    <section className="mt-12 border-t border-line pt-10">
-      <h2 className="text-h3 font-bold">공고 오류 신고</h2>
-      <p className="mt-2 break-keep text-lg text-mute">
+    /* 2026-11-19 — 새 관리자 디자인(AdminSection · 흰 목록 카드)으로 다시 입혔습니다 */
+    <AdminSection title="공고 오류 신고"
+      right={rows ? <span className={관.sub}>처리 안 한 것 {안끝난것}건</span> : undefined}>
+      <p className={관.muted + ' -mt-[8px] break-keep'}>
         회원이 「이 공고에 잘못된 내용이 있어요」로 보낸 것입니다.
         공고를 고치거나 내리는 것은 「공고」 화면에서 하고, 여기서는 읽고 처리 표시만 합니다.
         처리 안 한 건수는 하루 한 번 오는 요약 메일에도 들어갑니다.
       </p>
 
-      <div className="mt-5 flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 text-lg">
-          <input type="checkbox" checked={처리전만}
+      <div className="flex flex-wrap items-center gap-[16px]">
+        <label className={관.body + ' flex items-center gap-[8px] font-bold'}>
+          <input type="checkbox" checked={처리전만} className="size-[18px] accent-[#112231]"
                  onChange={(e) => set처리전만(e.target.checked)} />
           처리 안 한 것만
         </label>
-        {rows && <span className="text-lg text-mute">처리 안 한 것 {안끝난것}건</span>}
       </div>
 
       {err && (
-        <p className="mt-5 break-keep text-lg text-brand-red">
+        <p className={관.error + ' break-keep'}>
           불러오지 못했어요 — {err}
         </p>
       )}
-      {rows === null && !err && <p className="mt-5 text-lg text-mute">불러오는 중…</p>}
+      {rows === null && !err && <p className={관.muted}>불러오는 중…</p>}
       {rows && rows.length === 0 && !err && (
-        <p className="mt-5 text-lg text-mute">
+        <p className={관.cardTight + ' ' + 관.empty}>
           {처리전만 ? '처리할 신고가 없습니다' : '신고가 아직 없습니다'}
         </p>
       )}
 
-      <ul className="mt-5 space-y-4">
+      {(rows ?? []).length > 0 && (
+      <ul className={관.list}>
         {(rows ?? []).map((r) => (
-          <li key={r.id} className="rounded-sm border border-line bg-card p-5">
-            <div className="flex flex-wrap items-baseline gap-2">
-              <span className="text-sm text-mute">{때(r.신고시각)}</span>
-              <span className="text-sm text-mute">· 보낸이 {r.신고한사람}</span>
+          <li key={r.id} className={관.row + (r.처리시각 ? ' bg-[#f6f8f9]' : '')}>
+            <div className="flex flex-wrap items-center gap-x-[8px] gap-y-[6px]">
+              {r.처리시각
+                ? <AdminBadge tone="ok">처리 {때(r.처리시각)}</AdminBadge>
+                : <AdminBadge tone="warn">처리 안 함</AdminBadge>}
               {r.이공고신고수 > 1 && (
-                <span className="text-sm font-bold text-brand-red">
-                  · 이 공고에 신고 {r.이공고신고수}건
-                </span>
+                <AdminBadge tone="coral">이 공고에 신고 {r.이공고신고수}건</AdminBadge>
               )}
-              {r.내린것 && <span className="text-sm text-mute">· 이미 내려간 공고</span>}
-              {r.처리시각 && <span className="text-sm text-mute">· 처리 {때(r.처리시각)}</span>}
+              {r.내린것 && <AdminBadge tone="neutral">이미 내려간 공고</AdminBadge>}
+              <span className={관.sub}>{때(r.신고시각)} · 보낸이 {r.신고한사람}</span>
             </div>
 
-            <p className="mt-2 break-keep text-body-lg font-medium">
+            <p className={관.h3 + ' mt-[10px] break-keep'}>
               {r.기관 ?? '(지워진 공고)'} — {r.제목 ?? r.job_id}
             </p>
-            <p className="mt-2 whitespace-pre-wrap break-keep text-lg">{r.사유}</p>
+            <p className={관.body + ' mt-[6px] whitespace-pre-wrap break-keep'}>{r.사유}</p>
 
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-              <Link href={`/jobs/${r.job_id}`} className="text-interaction-blue hover:underline">
-                우리 화면에서 보기
+            <div className="mt-[8px] flex flex-wrap items-center gap-x-[16px]">
+              <Link href={`/jobs/${r.job_id}`} className={관.btnText}>
+                우리 화면에서 보기 ↗
               </Link>
-              <Link href={`/admin/jobs/${r.job_id}`} className="text-interaction-blue hover:underline">
-                관리자 화면에서 고치기
+              <Link href={`/admin/jobs/${r.job_id}`} className={관.btnText}>
+                관리자 화면에서 고치기 →
               </Link>
               {r.주소 && (
                 <a href={r.주소} target="_blank" rel="noopener noreferrer"
-                   className="text-interaction-blue hover:underline">
-                  기관 원문 열기
+                   className={관.btnText}>
+                  기관 원문 열기 ↗
                 </a>
               )}
             </div>
 
             {!r.처리시각 && (
-              <div className="mt-4 flex flex-wrap items-center gap-2">
+              <div className="mt-[12px] flex flex-wrap items-center gap-[8px]">
                 <input
                   value={메모[r.id] ?? ''}
                   onChange={(e) => set메모((m) => ({ ...m, [r.id]: e.target.value }))}
                   placeholder="처리 메모 (비워도 됩니다)"
-                  className="min-w-0 flex-1 rounded-xs border border-gray-200 bg-gray-50 px-4 py-3 text-lg
-                             dark:border-gray-700 dark:bg-gray-950"
+                  className={관.input + ' flex-1 basis-[200px]'}
                 />
                 <button
                   type="button" onClick={() => 처리(r.id)} disabled={busy === r.id}
-                  className="shrink-0 rounded-md bg-gray-900 px-6 py-3 text-btn font-bold text-white
-                             disabled:opacity-50"
+                  className={관.btn}
                 >
                   {busy === r.id ? '처리 중…' : '처리 완료'}
                 </button>
@@ -164,11 +163,12 @@ export function AdminJobReports() {
               <AdminReportDecide 무엇="공고" id={r.id} 결정={결정들[r.id]?.결정} 안내={결정들[r.id]?.안내} onDone={() => load(처리전만)} />
             )}
             {r.처리메모 && (
-              <p className="mt-2 break-keep text-sm text-mute">처리 메모 — {r.처리메모}</p>
+              <p className={관.sub + ' mt-[8px] break-keep'}>처리 메모 — {r.처리메모}</p>
             )}
           </li>
         ))}
       </ul>
-    </section>
+      )}
+    </AdminSection>
   );
 }

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { AdminBadge, AdminTabs, 관 } from '@/components/rapo/rapo-admin-ui';
 
 /* 치료사 재직 확인 — 권한 「회원 관리」 (2026-10-09 · 뼈대 ⑪).
  *
@@ -86,54 +88,49 @@ export default function AdminVerify() {
     set다시((n) => n + 1);
   };
 
+  /* 2026-11-19 — 새 관리자 디자인(상태 탭 · 흰 목록 카드)으로 다시 입혔습니다 */
   return (
-    <div className="mt-6">
-      <h1 className="text-h2 font-bold text-[#14181C]">재직 확인</h1>
-      <p className="mt-2 text-lg text-mute">
-        확인하거나 반려하면 <b>파일이 바로 지워집니다</b>. 배지만 남아요.
+    <div className="max-w-[1100px]">
+      <RapoAdminHeader title="재직 확인" />
+      <p className={관.muted + ' -mt-[16px] mb-[24px] break-keep'}>
+        확인하거나 반려하면 <b className="text-[#112231]">파일이 바로 지워집니다</b>. 배지만 남아요.
         여는 순간 개인정보 접속기록에 남습니다.
       </p>
 
-      {탈 && <p className="mt-4 rounded-sm border border-brand-red p-4 text-lg text-brand-red-dark">{탈}</p>}
+      {탈 && <p className={관.error + ' mb-[16px]'}>{탈}</p>}
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        {['심사중', '확인', '반려'].map((s) => (
-          <button key={s} type="button" onClick={() => set상태(s)}
-            className={'rounded-full px-4 py-2 text-sm ' +
-              (상태 === s ? 'bg-[#14181C] text-white' : 'border border-gray-200 text-gray-600')}>
-            {s}
-          </button>
-        ))}
-      </div>
+      <AdminTabs label="확인 상태" value={상태} onChange={set상태}
+        tabs={['심사중', '확인', '반려'].map((s) => ({ key: s, label: s }))} />
 
-      {줄들 === null ? <p className="mt-6 text-lg text-mute">잠시만요…</p>
-        : 줄들.length === 0 ? <p className="mt-6 text-lg text-mute">없어요.</p>
+      {줄들 === null ? <p className={관.muted + ' mt-[16px]'}>잠시만요…</p>
+        : 줄들.length === 0 ? <p className={관.cardTight + ' ' + 관.empty + ' mt-[16px]'}>없어요.</p>
           : (
-            <ul className="mt-5 space-y-3">
+            <ul className={관.list + ' mt-[16px]'}>
               {줄들.map((r) => (
-                <li key={r.id} className="rounded-sm border border-gray-200 p-5">
-                  <p className="flex flex-wrap items-center gap-2">
-                    <b className="text-lg">{r.닉네임}</b>
-                    <span className="text-sm text-mute">
+                <li key={r.id} className={관.row}>
+                  <p className="flex flex-wrap items-center gap-[8px]">
+                    <b className={관.h3}>{r.닉네임}</b>
+                    <AdminBadge tone={r.상태 === '확인' ? 'ok' : r.상태 === '반려' ? 'coral' : 'warn'}>{r.상태}</AdminBadge>
+                    <span className={관.sub}>
                       회원번호 {r.회원번호} · {r.직군 ?? '직군 안 정함'} · {날(r.신청때)}
                     </span>
                   </p>
-                  <p className="mt-1 text-lg">{r.병원이름 ?? '(병원 안 적힘)'}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <p className={관.body + ' mt-[6px]'}>{r.병원이름 ?? '(병원 안 적힘)'}</p>
+                  <div className="mt-[12px] flex flex-wrap gap-[8px]">
                     {r.파일있나 && (
                       <button type="button" onClick={() => 열기(r)}
-                        className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
+                        className={관.btnLine}>
                         서류 열기
                       </button>
                     )}
                     {r.상태 === '심사중' && (
                       <>
                         <button type="button" onClick={() => 정하기(r, '확인')}
-                          className="rounded-md bg-brand-red px-5 py-2 text-lg font-bold text-white hover:bg-brand-red-dark">
+                          className={관.btn}>
                           확인
                         </button>
                         <button type="button" onClick={() => 정하기(r, '반려')}
-                          className="rounded-md border border-gray-200 px-5 py-2 text-lg text-gray-600 hover:bg-gray-50">
+                          className={관.btnDanger}>
                           반려
                         </button>
                       </>

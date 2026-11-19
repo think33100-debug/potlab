@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { browserSupabase } from '@/lib/supabase-browser';
+import { RapoAdminHeader } from '@/components/rapo/rapo-admin';
+import { 관, AdminBadge, AdminSection } from '@/components/rapo/rapo-admin-ui';
 
 /* 수집기 상태 — 「돌고 있나」를 한 화면에서 (2026-10-02).
  *
@@ -85,17 +87,19 @@ export default function AdminBeat() {
     + (흐름 ?? []).filter((r) => r.빨간줄).length;
 
   return (
-    <div>
-      <h2 className="text-h3 font-bold">수집기 상태</h2>
-      <p className="mt-2 break-keep text-lg text-mute">
-        수집기가 <span className="font-bold">돌았나</span>와 공고가{' '}
-        <span className="font-bold">들어왔나</span>는 다릅니다. 둘을 나란히 놓습니다.
+    <div className="max-w-[1100px]">
+      {/* 2026-11-19 새 관리자 디자인(Figma 16)으로 겉모양만 다시 입힘 */}
+      <RapoAdminHeader title="수집기 상태">
+        <button type="button" onClick={load} className={관.btnLine}>다시 불러오기</button>
+      </RapoAdminHeader>
+      <p className={'-mt-[20px] mb-[24px] break-keep ' + 관.muted}>
+        수집기가 <span className="font-bold text-[#112231]">돌았나</span>와 공고가{' '}
+        <span className="font-bold text-[#112231]">들어왔나</span>는 다릅니다. 둘을 나란히 놓습니다.
       </p>
 
       {/* 마지막으로 보낸 알림 — 한 줄 */}
       {알림 && !알림.왜 && (
-        <p className="mt-4 break-keep rounded-sm border border-gray-200 px-5 py-4 text-lg
-                      dark:border-gray-700">
+        <p className={'mb-[16px] break-keep ' + 관.card + ' ' + 관.body}>
           <b>마지막으로 보낸 알림</b>{' · '}
           {알림.마지막때
             ? new Date(알림.마지막때).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
@@ -103,108 +107,95 @@ export default function AdminBeat() {
           {' · 오늘 '}<span className="num tabular-nums">{알림.오늘보냄 ?? 0}</span>건
           {' · 모두 '}<span className="num tabular-nums">{알림.모두보냄 ?? 0}</span>건
           {' · 켜 둔 기기 '}<span className="num tabular-nums">{알림.켜진기기 ?? 0}</span>대
-          {(알림.꺼진기기 ?? 0) > 0 && <span className="text-mute">{' (꺼진 것 ' + 알림.꺼진기기 + '대)'}</span>}
+          {(알림.꺼진기기 ?? 0) > 0 && <span className="text-[#555d6d]">{' (꺼진 것 ' + 알림.꺼진기기 + '대)'}</span>}
         </p>
       )}
 
-      {err && <p className="mt-4 text-lg text-brand-red">{err}</p>}
+      {err && <p role="alert" className={'mb-[16px] ' + 관.error}>{err}</p>}
 
       {박동 === null || 흐름 === null
-        ? <p className="mt-6 text-lg text-mute">잠시만요…</p>
+        ? <p className={관.muted}>잠시만요…</p>
         : (
           <>
-            <div className={'mt-5 rounded-sm p-5 '
-              + (빨간것
-                ? 'bg-brand-red-soft dark:border dark:border-brand-red/40 dark:bg-transparent'
-                : 'bg-badge-green-bg dark:border dark:border-success/40 dark:bg-transparent')}>
-              <p className="break-keep text-lg">
-                {빨간것
-                  ? <>빨간줄 <span className="num tabular-nums font-bold">{빨간것}</span>개 — 아래에서 보십시오</>
-                  : <>빨간줄 없습니다. 수집기 {박동.length}곳이 제때 돌고 있습니다</>}
-              </p>
-            </div>
-
-            <h3 className="mt-8 font-bold">① 돌았나 — 수집기가 남긴 박동</h3>
-            <p className="mt-1 break-keep text-sm text-mute">
-              한 바퀴 돌 때마다 <span className="font-bold">collect_beat()</span> 로 남깁니다.
-              박동을 안 부르는 수집기는 실제로 돌아도 빨간줄이 섭니다
+            <p className={'mb-[32px] break-keep ' + (빨간것 ? 관.error : 관.ok)}>
+              {빨간것
+                ? <>빨간줄 <span className="num font-bold tabular-nums">{빨간것}</span>개 — 아래에서 보십시오</>
+                : <>빨간줄 없습니다. 수집기 {박동.length}곳이 제때 돌고 있습니다</>}
             </p>
-            <div className="mt-3 overflow-x-auto rounded-sm border border-gray-200 dark:border-gray-700">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-left text-gray-700 dark:bg-gray-900 dark:text-gray-300">
-                  <tr>
-                    <th className="px-3 py-2">수집기</th>
-                    <th className="px-3 py-2">마지막</th>
-                    <th className="px-3 py-2 text-right">몇 시간째</th>
-                    <th className="px-3 py-2 text-right">평소 간격</th>
-                    <th className="px-3 py-2 text-right">기대 간격</th>
-                    <th className="px-3 py-2">판정</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {박동.map((r) => (
-                    <tr key={r.경로} className="border-t border-gray-200 dark:border-gray-700">
-                      <td className="px-3 py-2">
-                        <span className="font-bold">{r.이름}</span>
-                        <span className="ml-1 text-xs text-mute">{r.경로}</span>
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap">{때(r.마지막)}</td>
-                      <td className="num px-3 py-2 text-right tabular-nums">{수(r.몇시간째)}</td>
-                      <td className="num px-3 py-2 text-right tabular-nums text-gray-600 dark:text-gray-400">{수(r.평소간격시간)}</td>
-                      <td className="num px-3 py-2 text-right tabular-nums text-gray-600 dark:text-gray-400">{수(r.기대간격시간)}</td>
-                      <td className="px-3 py-2">
-                        {r.빨간줄
-                          ? <span className="rounded px-2 py-0.5 text-xs font-bold bg-brand-red-soft text-brand-red-dark">{r.왜 || '늦었습니다'}</span>
-                          : <span className="rounded bg-badge-green-bg px-2 py-0.5 text-xs text-gray-900">제때</span>}
-                        {r.마지막탈 ? <span className="ml-2 text-xs text-gray-600 dark:text-gray-400">{r.마지막탈}</span> : null}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
 
-            <h3 className="mt-8 font-bold">② 들어왔나 — 공고 흐름</h3>
-            <p className="mt-1 break-keep text-sm text-mute">
-              <span className="font-bold">지난 24시간</span> 새 공고가 7일 하루평균의 절반보다
-              적으면 빨간줄입니다. 잰 날수가 모자라면 판단을 미룹니다
-            </p>
-            <div className="mt-3 overflow-x-auto rounded-sm border border-gray-200 dark:border-gray-700">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-left text-gray-700 dark:bg-gray-900 dark:text-gray-300">
-                  <tr>
-                    <th className="px-3 py-2">수집기</th>
-                    <th className="px-3 py-2 text-right">지난 24시간</th>
-                    <th className="px-3 py-2 text-right">7일 하루평균</th>
-                    <th className="px-3 py-2 text-right">알림선</th>
-                    <th className="px-3 py-2 text-right">잰 날수</th>
-                    <th className="px-3 py-2">판정</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {흐름.map((r) => (
-                    <tr key={r.수집기} className="border-t border-gray-200 dark:border-gray-700">
-                      <td className="px-3 py-2 font-bold">{r.수집기}</td>
-                      <td className="num px-3 py-2 text-right tabular-nums">{r.지난24시간 ?? '-'}</td>
-                      <td className="num px-3 py-2 text-right tabular-nums text-gray-600 dark:text-gray-400">{수(r['7일 하루평균'])}</td>
-                      <td className="num px-3 py-2 text-right tabular-nums text-gray-600 dark:text-gray-400">{수(r['알림선(평균의 절반)'])}</td>
-                      <td className="num px-3 py-2 text-right tabular-nums text-gray-600 dark:text-gray-400">{r['잰 날수'] ?? '-'}</td>
-                      <td className="px-3 py-2">
-                        {r.빨간줄
-                          ? <span className="rounded px-2 py-0.5 text-xs font-bold bg-brand-red-soft text-brand-red-dark">{r.왜 || '줄었습니다'}</span>
-                          : <span className="rounded bg-badge-green-bg px-2 py-0.5 text-xs text-gray-900">{r.왜 || '보통'}</span>}
-                      </td>
+            <AdminSection title="① 돌았나 — 수집기가 남긴 박동"
+              sub={<>한 바퀴 돌 때마다 <span className="font-bold">collect_beat()</span> 로 남깁니다.
+                박동을 안 부르는 수집기는 실제로 돌아도 빨간줄이 섭니다</>}>
+              <div className={관.tableWrap}>
+                <table className={관.table + ' min-w-[720px]'}>
+                  <thead className={관.thead}>
+                    <tr>
+                      <th className={관.th}>수집기</th>
+                      <th className={관.th}>마지막</th>
+                      <th className={관.th + ' text-right'}>몇 시간째</th>
+                      <th className={관.th + ' text-right'}>평소 간격</th>
+                      <th className={관.th + ' text-right'}>기대 간격</th>
+                      <th className={관.th}>판정</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {박동.map((r) => (
+                      <tr key={r.경로} className={관.tr}>
+                        <td className={관.td}>
+                          <span className="font-bold text-[#112231]">{r.이름}</span>
+                          <span className="ml-1 text-[13px] text-[#555d6d]">{r.경로}</span>
+                        </td>
+                        <td className={관.td + ' whitespace-nowrap'}>{때(r.마지막)}</td>
+                        <td className={관.td + ' num text-right tabular-nums text-[#112231]'}>{수(r.몇시간째)}</td>
+                        <td className={관.td + ' num text-right tabular-nums'}>{수(r.평소간격시간)}</td>
+                        <td className={관.td + ' num text-right tabular-nums'}>{수(r.기대간격시간)}</td>
+                        <td className={관.td}>
+                          {r.빨간줄
+                            ? <AdminBadge tone="coral">{r.왜 || '늦었습니다'}</AdminBadge>
+                            : <AdminBadge tone="ok">제때</AdminBadge>}
+                          {r.마지막탈 ? <span className="ml-2 text-[13px] text-[#555d6d]">{r.마지막탈}</span> : null}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </AdminSection>
 
-            <button
-              onClick={load}
-              className="mt-6 rounded-xs border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-900">
-              다시 불러오기
-            </button>
+            <AdminSection title="② 들어왔나 — 공고 흐름"
+              sub={<><span className="font-bold">지난 24시간</span> 새 공고가 7일 하루평균의 절반보다
+                적으면 빨간줄입니다. 잰 날수가 모자라면 판단을 미룹니다</>}>
+              <div className={관.tableWrap}>
+                <table className={관.table + ' min-w-[640px]'}>
+                  <thead className={관.thead}>
+                    <tr>
+                      <th className={관.th}>수집기</th>
+                      <th className={관.th + ' text-right'}>지난 24시간</th>
+                      <th className={관.th + ' text-right'}>7일 하루평균</th>
+                      <th className={관.th + ' text-right'}>알림선</th>
+                      <th className={관.th + ' text-right'}>잰 날수</th>
+                      <th className={관.th}>판정</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {흐름.map((r) => (
+                      <tr key={r.수집기} className={관.tr}>
+                        <td className={관.td + ' font-bold text-[#112231]'}>{r.수집기}</td>
+                        <td className={관.td + ' num text-right tabular-nums text-[#112231]'}>{r.지난24시간 ?? '-'}</td>
+                        <td className={관.td + ' num text-right tabular-nums'}>{수(r['7일 하루평균'])}</td>
+                        <td className={관.td + ' num text-right tabular-nums'}>{수(r['알림선(평균의 절반)'])}</td>
+                        <td className={관.td + ' num text-right tabular-nums'}>{r['잰 날수'] ?? '-'}</td>
+                        <td className={관.td}>
+                          {r.빨간줄
+                            ? <AdminBadge tone="coral">{r.왜 || '줄었습니다'}</AdminBadge>
+                            : <AdminBadge tone="ok">{r.왜 || '보통'}</AdminBadge>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </AdminSection>
           </>
         )}
     </div>
