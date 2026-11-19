@@ -310,8 +310,12 @@ for (const v of 볼것) {
     if (to2) { v.to = to2; v.from = v.x.날 || ''; v.날짜출처 = '목록 · 진행현황'; 셈.날짜채움 = (셈.날짜채움 || 0) + 1; }
   }
 
-  /* 직군을 이미 제목으로 가렸으면 여기서 끝 — 첨부까지 열지 않습니다 */
-  if (!v.열까) continue;
+  /* ★ 2026-11-19 세중님 「ⓐ부터 고쳐」 — 직군을 제목·본문으로 이미 가렸어도 **첨부를 엽니다.**
+     전에는 여기서 끝냈습니다(「첨부까지 열지 않습니다」). 그래서 동작 NDA1066 처럼 본문에 「작업치료사」가
+     있는 공고는 공고문을 안 열어 근무기간·모집인원·지원자격이 비었습니다.
+     **칸만** 읽을 때는 직군을 바꾸지 않고, 첨부가 없거나 못 읽어도 보류함으로 보내지 않습니다 */
+  let 칸만 = !v.열까;
+  const 막힘 = (왜) => { if (칸만) 셈.칸만못읽음 = (셈.칸만못읽음 ?? 0) + 1; else v.보류 = 왜; };
 
   /* ★ 2026-10-14 — `matchJob` → `본문직군`. 본문은 **페이지 전체 글**이라
      사이트 메뉴·응시자격의 「○○치료학」까지 들어옵니다. `matchJob` 은 맨
@@ -319,8 +323,10 @@ for (const v of 볼것) {
      응시자격의 「… 사회복지학, **작업치료학** 등의 분야 전공자」에 걸려
      「작업치료사 계약직 채용공고」로 회원 화면에 떠 있었습니다.
      `본문직군` 은 「치료사」를 요구합니다 (기준은 공고문읽기.mjs 한 자리 · 지침 6절) */
-  const j = 본문직군(v.본문);
-  if (j) { v.직군 = j; v.근거 = '상세'; 셈.상세로++; continue; }
+  if (!칸만) {
+    const j = 본문직군(v.본문);
+    if (j) { v.직군 = j; v.근거 = '상세'; 셈.상세로++; 칸만 = true; }
+  }
 
   /* 첨부 — ⚠ **href 가 아니라 onclick 안에 있습니다.**
        <a href='javascript:return false;'
@@ -330,7 +336,7 @@ for (const v of 볼것) {
   const 첨부 = [...r.글.matchAll(/onclick\s*=\s*'[^']*location\.href\s*=\s*"([^"]+)"[^']*'[^>]*>([\s\S]{0,140}?)</gi)]
     .map((m) => ({ url: m[1], 이름: 풀기(m[2]) }))
     .filter((f) => /download|\.(pdf|hwpx?)(\?|&|$)/i.test(f.url));
-  if (!첨부.length) { v.보류 = '첨부를 못 찾았습니다 (상세에 직군이 없습니다)'; continue; }
+  if (!첨부.length) { 막힘('첨부를 못 찾았습니다 (상세에 직군이 없습니다)'); continue; }
   /* 공고문으로 보이는 것을 먼저. 이름이 비면 주소의 filename 을 씁니다 */
   const 이름내기 = (f) => f.이름
     || decodeURIComponent((f.url.match(/filename=([^&]*)/) || [])[1] || '').replace(/\+/g, ' ');
@@ -343,6 +349,7 @@ for (const v of 볼것) {
   if (!u.startsWith('http')) u = 연곳 + (u.startsWith('/') ? u : (v.x.구 ? '/notice/' : '/notification/') + u);
 
   셈.첨부연것++;
+  if (칸만) 셈.칸만첨부 = (셈.칸만첨부 ?? 0) + 1;
   try {
     const f = await fetch(u, { headers: { 'User-Agent': UA, Referer: 원문주소(v.x) } });
     const buf = Buffer.from(await f.arrayBuffer());
@@ -368,14 +375,14 @@ for (const v of 볼것) {
       /* ★ 2026-10-20 세중님 5번 — 옛 Apps Script OCR 호출을 끊었습니다.
          kordoc 이 빈손이면 `첨부읽기()` 가 ocr: 'force' 로 다시 봅니다 —
          옛 길은 404·500 으로 죽어 있습니다. gas/ 는 손대지 않았습니다 */
-      v.보류 = 'PDF 인데 kordoc 이 빈손이고 OCR(force)로도 글자가 안 나왔습니다';
+      막힘('PDF 인데 kordoc 이 빈손이고 OCR(force)로도 글자가 안 나왔습니다');
       continue;
     } else {
-      v.보류 = '첨부가 모르는 꼴입니다 (' + buf.length + '바이트 · 앞5 「'
-        + buf.subarray(0, 5).toString('latin1') + '」)';
+      막힘('첨부가 모르는 꼴입니다 (' + buf.length + '바이트 · 앞5 「'
+        + buf.subarray(0, 5).toString('latin1') + '」)');
       continue;
     }
-    if (!글) { v.보류 = '첨부를 못 읽었습니다'; continue; }
+    if (!글) { 막힘('첨부를 못 읽었습니다'); continue; }
 
     /* ★ 2026-10-12 — 읽은 글을 **보관합니다** (세중님 지시).
        전에는 직군만 뽑고 버렸습니다. 그래서 2026-10-11 에 hs_dates 버그
@@ -390,13 +397,15 @@ for (const v of 볼것) {
     if (md) {
       try {
         const 칸 = 칸뽑기(블록?.length ? 블록 : md, 글);
-        const 뭐든 = 칸.접수마감 || 칸.지원자격 || 칸.근무지 || 칸.예상연봉
+        const 뭐든 = 칸.접수마감 || 칸.지원자격 || 칸.근무지 || 칸.예상연봉 || 칸.근무기간
           || Object.keys(칸.모집인원 || {}).length;
         if (뭐든) { v.칸 = 칸; 셈.칸뽑음 = (셈.칸뽑음 ?? 0) + 1; }
       } catch (e) { 셈.칸탈 = (셈.칸탈 ?? 0) + 1; }
     }
-    const g = 첨부직군(글);
-    if (g.직군) { v.직군 = g.직군; v.근거 = '첨부 공고문 · 모집 부분'; v.걸린줄 = g.줄; 셈.첨부로++; }
+    /* 칸만 읽은 것은 직군을 다시 가리지 않습니다 — 제목·본문이 이미 정했습니다 */
+    const g = 칸만 ? {} : 첨부직군(글);
+    if (칸만) { /* 칸만 */ }
+    else if (g.직군) { v.직군 = g.직군; v.근거 = '첨부 공고문 · 모집 부분'; v.걸린줄 = g.줄; 셈.첨부로++; }
     else if (g.어디 === '가산점') {
       셈.가산점거름++;
       v.가산점뿐 = '첨부의 가산점·우대 부분에만 「' + (g.후보 || '') + '」 가 있었습니다 · ' + g.까닭;
@@ -406,9 +415,11 @@ for (const v of 볼것) {
       v.보류 = '첨부에 「' + (g.후보 || '') + '」 가 있는데 모집 부분인지 못 가렸습니다';
       v.걸린줄 = g.줄;
     }
-  } catch (e) { v.보류 = '첨부를 못 받았습니다 · ' + String(e.message).slice(0, 80); }
+  } catch (e) { 막힘('첨부를 못 받았습니다 · ' + String(e.message).slice(0, 80)); }
 }
-console.log('  연 것 ' + 셈.상세연것 + '건 · 첨부까지 ' + 셈.첨부연것 + '건');
+console.log('  연 것 ' + 셈.상세연것 + '건 · 첨부까지 ' + 셈.첨부연것 + '건'
+  + ' (직군은 이미 가리고 칸만 읽으려고 연 것 ' + (셈.칸만첨부 ?? 0) + '건'
+  + (셈.칸만못읽음 ? ' · 그중 못 읽음 ' + 셈.칸만못읽음 + '건(보류 안 함)' : '') + ')');
 console.log('  ★ 상세에서 마감일을 채운 공고 ' + (셈.날짜채움 || 0) + '건'
   + (셈.날짜버림 ? ' · 읽었지만 거른 것 ' + 셈.날짜버림 + '건' : ''));
 console.log('  ★ 상세로 가린 ' + 셈.상세로 + '건 · 첨부로 가린 ' + 셈.첨부로
@@ -521,7 +532,8 @@ console.log('\n④ 갈래 — 회원 목록 ' + 셈.회원 + ' · 보류함 ' + 
 if (회원.length) {
   console.log('\n  ★ 회원 목록에 올라갈 것 —');
   회원.slice(0, 12).forEach((r) => console.log('     ' + String(r.job_group).padEnd(8)
-    + String(r.posted_at || '날짜없음').padEnd(12) + r.org_name.slice(0, 20).padEnd(22) + r.title.slice(0, 44)));
+    + String(r.posted_at || '날짜없음').padEnd(12) + r.org_name.slice(0, 20).padEnd(22) + r.title.slice(0, 44)
+    + ' · 근무기간 ' + (r.뽑은값?.근무기간 || '-') + ' · 인원 ' + (r.headcount ?? '-')));
 }
 if (보류.length) {
   console.log('\n  보류함으로 갈 것 —');
