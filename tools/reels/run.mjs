@@ -131,6 +131,7 @@ async function 공시보수(id) {
 }
 /* 지난 채용 경쟁률 — 회원 화면 공고 상세와 같은 DB 함수 공고경쟁률요약() (2026-11-18 세중님 「기간 상관없이 같은 직군이면 무조건 · 장애 전형 제외」)
    고르는 규칙은 reel-data.mjs 의 경쟁률고르기() 한 자리 */
+const 급여예외 = (() => { try { return JSON.parse(fs.readFileSync(path.join(여기, '급여예외.json'), 'utf8')).map((x) => x.id); } catch { return []; } })();
 async function 경쟁률들(id) {
   try {
     const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('공고경쟁률요약'),
@@ -198,6 +199,8 @@ for (const 공고 of 후보) {
      조건 — 시도 앞말을 뗀 이름이 심평원 이름과 **글자까지 같고**, 그 시도 안에서 **딱 한 곳**일 때만. 판정(대상·종별)에는 안 씁니다 */
   if (!기관?.ykiho) 공고.사진ykiho = await 이름으로ykiho(공고.org_name);
   공고.경쟁률들 = await 경쟁률들(공고.id);
+  /* 급여 예외 — 원문에 급여가 없어도 세중님이 「만들자」 한 공고만 「내규에 따름」으로 (2026-11-19 서울아산) */
+  공고.급여예외 = 급여예외.includes(공고.id);
   const 판정 = 릴스대상(공고.분류, 기관, 공고.연봉원문);
   if (!판정.대상) { 비대상++; continue; }
   공고.대상까닭 = 판정.까닭;
