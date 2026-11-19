@@ -45,7 +45,7 @@ import { fileURLToPath } from 'node:url';
 
 import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 /* ★ kordoc — 표를 살려 읽습니다. 뽑는 규칙도 저기 한 벌입니다 (지침 6절) */
-import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 더담을칸 } from './공고문읽기.mjs';
+import { 첨부읽기, 칸뽑기, kordoc있나, 본문직군, 더담을칸, 고용형태고르기 } from './공고문읽기.mjs';
 import { sortJob } from './sort-rule.mjs';
 import { 판정남기기, 지문 } from './순찰기억.mjs';
 import { matchJob, notOurs, titleOtherOnly, 구운날 } from './gas-rules.mjs';
@@ -363,6 +363,7 @@ for (const v of 볼것) {
       const k = await 첨부읽기(buf, 이름);
       if (k.글 && k.글.length > 80) {
         글 = k.글; md = k.md; 블록 = k.blocks;
+        v.md = md;   /* 고용형태는 줄이 살아 있는 md 로 가립니다 (④) */
         셈.kordoc읽음 = (셈.kordoc읽음 ?? 0) + 1;
         셈.kordoc초 = Math.round(((셈.kordoc초 ?? 0) + k.초) * 100) / 100;
       } else { 셈.kordoc빈손 = (셈.kordoc빈손 ?? 0) + 1; }
@@ -469,6 +470,11 @@ for (const v of 볼것) {
     url: 원문주소(v.x),
     job_group: v.직군 || '',
     org_kind: '공공',
+    /* ★ 2026-11-19 세중님 「다음 규칙도 고쳐」 — 이 수집기만 고용형태를 안 읽어 회원 화면 치매센터 3건이 다 비었습니다.
+       판정은 공고문읽기.mjs 고용형태고르기() 한 자리(우리 직군 줄 → 제목 → 글 전체 · 섞이면 비움) ·
+       줄이 살아 있는 공고문 md → 공고문 글 → 상세 본문 차례. 못 가리면 칸을 안 보냅니다(빈 값으로 덮지 않게) */
+    ...(() => { const r = 고용형태고르기(v.제목, v.md || v.원문 || v.본문 || '');
+      return r && r.값 ? { employ_type: r.값 } : {}; })(),
     detail: { 근거: v.근거 || '제목', ...(v.걸린줄 ? { 걸린줄: String(v.걸린줄).slice(0, 300) } : {}) },
     evidence: {
       ...(v.보류 ? { 보류사유: v.보류 } : {}),
@@ -533,7 +539,7 @@ if (회원.length) {
   console.log('\n  ★ 회원 목록에 올라갈 것 —');
   회원.slice(0, 12).forEach((r) => console.log('     ' + String(r.job_group).padEnd(8)
     + String(r.posted_at || '날짜없음').padEnd(12) + r.org_name.slice(0, 20).padEnd(22) + r.title.slice(0, 44)
-    + ' · 근무기간 ' + (r.뽑은값?.근무기간 || '-') + ' · 인원 ' + (r.headcount ?? '-')));
+    + ' · 고용 ' + (r.employ_type || '-') + ' · 근무기간 ' + (r.뽑은값?.근무기간 || '-') + ' · 인원 ' + (r.headcount ?? '-')));
 }
 if (보류.length) {
   console.log('\n  보류함으로 갈 것 —');
