@@ -171,7 +171,10 @@ function hs첨부주소(html, 바탕주소) {
     for (const m of s.matchAll(박힌그림꼴)) {
       n++;
       if (m[2].replace(/\s+/g, '').length < 55000) continue;
-      const u = String(바탕주소 || '').split('#')[0] + '#본문그림-' + n;
+      /* ★ 2026-11-19 검토(지피) 반영 — 번호만 담으면 병원이 위에 배너를 하나 더할 때 **다른 그림**을 읽습니다.
+         그림 지문(sha1 앞 10자)을 함께 담고, 받을 때 지문이 같은 그림을 먼저 찾습니다 */
+      const 지문 = 그림지문(Buffer.from(m[2].replace(/\s+/g, ''), 'base64'));
+      const u = String(바탕주소 || '').split('#')[0] + '#본문그림-' + n + '-' + 지문;
       if (!모은것.has(u)) 모은것.set(u, { name: '공고문 그림(쪽에 박힌 그림 ' + n + ')', 점수: 2, 이름믿음: true });
     }
   }
@@ -215,17 +218,27 @@ function hs첨부주소(html, 바탕주소) {
 /* 쪽에 박힌 그림 — `<img … src="data:image/png;base64, …">` (2026-11-19 · 인천세종병원) */
 const 박힌그림꼴 = /<img\b[^>]*?\bsrc\s*=\s*["']data:image\/(png|jpe?g|webp);base64,([A-Za-z0-9+/=\s]+)["']/gi;
 
-/** 쪽 HTML 에서 N 번째(1부터) 박힌 그림을 꺼냅니다 — 첨부되메우기가 `#본문그림-N` 주소를 받을 때 씁니다.
- *  @returns { buf, 꼴 } 또는 { 왜 } */
-function 본문박힌그림(html, n) {
-  let i = 0;
+const 그림지문 = (buf) => require('node:crypto').createHash('sha1').update(buf).digest('hex').slice(0, 10);
+
+/** 쪽 HTML 에서 박힌 그림을 꺼냅니다 — 첨부되메우기가 `#본문그림-N-지문` 주소를 받을 때 씁니다.
+ *  차례: ① 지문이 같은 그림 ② (지문이 없던 옛 주소면) N 번째 ③ 지문이 안 맞으면 **그림이 바뀐 것** — 40KB 이상 가운데 가장 큰 것
+ *  @returns { buf, 꼴, 바뀜? } 또는 { 왜 } */
+function 본문박힌그림(html, n, 지문 = '') {
+  const 다 = [];
   for (const m of String(html || '').matchAll(박힌그림꼴)) {
-    i++;
-    if (i !== Number(n)) continue;
     const buf = Buffer.from(m[2].replace(/\s+/g, ''), 'base64');
-    return buf.length ? { buf, 꼴: m[1].toLowerCase().replace('jpeg', 'jpg') } : { 왜: '박힌 그림이 비었습니다' };
+    다.push({ buf, 꼴: m[1].toLowerCase().replace('jpeg', 'jpg') });
   }
-  return { 왜: '쪽에 ' + n + '번째 박힌 그림이 없습니다 (' + i + '개)' };
+  if (!다.length) return { 왜: '쪽에 박힌 그림이 없습니다' };
+  if (지문) {
+    const 같은것 = 다.find((g) => 그림지문(g.buf) === 지문);
+    if (같은것) return 같은것;
+    const 큰것 = 다.filter((g) => g.buf.length >= 40 * 1024).sort((a, b) => b.buf.length - a.buf.length)[0];
+    return 큰것 ? { ...큰것, 바뀜: true } : { 왜: '지문이 같은 그림이 없고 큰 그림도 없습니다 (' + 다.length + '개)' };
+  }
+  const g = 다[Number(n) - 1];
+  if (!g) return { 왜: '쪽에 ' + n + '번째 박힌 그림이 없습니다 (' + 다.length + '개)' };
+  return g.buf.length ? g : { 왜: '박힌 그림이 비었습니다' };
 }
 
 /** **공고가 아닌 첨부**인가 — 쪽 꼬리말의 인증서·배너 (2026-10-21)
@@ -290,13 +303,17 @@ if (require.main === module && process.argv.includes('--자기점검')) {
   const 큰그림 = Buffer.concat([Buffer.from('89504e470d0a1a0a', 'hex'), Buffer.alloc(50000, 7)]).toString('base64');
   const 쪽 = '<div class="view_con"><img id="photoImage" src="data:image/png;base64, ' + 큰그림 + '" /></div>';
   const 잡은것 = hs첨부주소(쪽, 'http://recruit.example.kr/_page/notice/view?id=26215');
-  봐('쪽에 박힌 큰 그림 → 쪽 주소#본문그림-1', 잡은것.length === 1 && 잡은것[0].url.endsWith('view?id=26215#본문그림-1') && 잡은것[0].점수 === 2);
+  봐('쪽에 박힌 큰 그림 → 쪽 주소#본문그림-1-지문', 잡은것.length === 1 && /view\?id=26215#본문그림-1-[0-9a-f]{10}$/.test(잡은것[0].url) && 잡은것[0].점수 === 2);
+  const 지문1 = 잡은것[0].url.split('-').pop();
+  const 배너더함 = '<img src="data:image/png;base64, ' + Buffer.concat([Buffer.from('89504e47', 'hex'), Buffer.alloc(45000, 3)]).toString('base64') + '">' + 쪽;
+  봐('위에 배너가 더해져도 지문으로 원래 그림을 찾는다', (본문박힌그림(배너더함, 1, 지문1).buf || Buffer.alloc(0)).length === 50008);
+  봐('지문이 안 맞으면 가장 큰 그림 · 바뀜 표시', 본문박힌그림(배너더함, 1, '0000000000').바뀜 === true);
   봐('박힌 그림을 다시 꺼내면 PNG', (본문박힌그림(쪽, 1).buf || Buffer.alloc(0)).subarray(0, 4).toString('hex') === '89504e47');
   봐('작은 박힌 그림(꾸밈)은 안 담는다', hs첨부주소('<img src="data:image/png;base64,iVBORw0KGgo=">', 'http://x.kr/v?id=1').length === 0);
   봐('없는 번호는 왜를 낸다', !!본문박힌그림(쪽, 2).왜);
   봐('편집기로 올린 설명 없는 그림(아주대)은 받는다', 그림공고문인가({ src: 'https://ajoumc.recruiter.co.kr/upload/76922/image/202611/e3e3f814.jpg', alt: '' }) === true);
   봐('편집기 그림이라도 설명이 메뉴 글귀면 뺀다', 그림공고문인가({ src: '/upload/1/image/m.jpg', alt: '채용안내' }) === false);
-  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 13가지');
+  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 15가지');
   process.exit(틀림 ? 1 : 0);
 }
 

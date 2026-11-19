@@ -563,10 +563,12 @@ for (const j of 볼것) {
   /* ★ 2026-11-19 — **쪽에 박힌 그림**(`#본문그림-N` 주소 · hosp/hs_files.js 본문박힌그림()).
    *   인천세종병원처럼 공고 본문이 `<img src="data:image/png;base64, …">` 한 장이면 그림에 주소가 없어
    *   쪽 주소를 담아 두었습니다. 여기서 쪽을 다시 열어 N 번째 박힌 그림을 꺼내 kordoc OCR 로 읽습니다 */
-  if (!받음클린아이 && /#본문그림-\d+$/.test(String(고른것.url || ''))) {
-    const [쪽주소, n] = String(고른것.url).split('#본문그림-');
+  if (!받음클린아이 && /#본문그림-\d+(?:-[0-9a-f]{10})?$/.test(String(고른것.url || ''))) {
+    const [쪽주소, 꼬리] = String(고른것.url).split('#본문그림-');
+    const [n, 지문] = String(꼬리 || '').split('-');          /* 「N-지문」 · 옛 주소는 「N」 만 (2026-11-19) */
     const r쪽 = await 틈두고받기(쪽주소);
-    const 그림 = r쪽.buf ? 본문박힌그림(r쪽.buf.toString('utf8'), n) : { 왜: r쪽.왜 || '쪽을 못 받음' };
+    const 그림 = r쪽.buf ? 본문박힌그림(r쪽.buf.toString('utf8'), n, 지문 || '') : { 왜: r쪽.왜 || '쪽을 못 받음' };
+    if (그림.바뀜) console.log('  ★ 쪽에 박힌 그림이 바뀌었습니다(지문 다름) — 가장 큰 그림을 읽습니다 · ' + j.id);
     if (그림.buf) {
       받음클린아이 = { buf: 그림.buf };
       고른것.name = '공고문 그림.' + 그림.꼴;
