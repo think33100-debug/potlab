@@ -11,16 +11,17 @@ import { 공고정렬들, 기본정렬 } from '@/lib/rapo-job-options';
 /* 새 디자인 공고 목록 — **디자인 견본으로** 상태를 보는 자리 (2026-11-11).
    개발 서버에서만 열립니다(배포에서는 404). 실제 목록은 app/jobs/page.tsx 입니다.
      ?state=loading · empty(조건 결과 없음) · none(전체 공고 없음) · error
-     ?who=member    회원 헤더와 「내 직군: 작업치료사」 줄 */
+     ?who=member    회원 헤더와 「내 직군: 작업치료사」 줄
+     ?sido=서울,대구,경북  고른 지역 칩 (여러 개 · 2026-11-19) */
 export const metadata: Metadata = { title: 'RAPO · 공고 목록 미리보기', robots: { index: false } };
 
 export default async function DesignPreviewJobs({ searchParams }: {
-  searchParams: Promise<{ state?: string; who?: string; new?: string }>;
+  searchParams: Promise<{ state?: string; who?: string; new?: string; sido?: string }>;
 }) {
   if (process.env.NODE_ENV === 'production') notFound();
-  const { state, who, new: 신입 } = await searchParams;
+  const { state, who, new: 신입, sido } = await searchParams;
   const 회원 = who === 'member';
-  const 지금 = { q: '', job: 회원 ? '작업치료사' : null, sido: null };
+  const 지금 = { q: '', job: 회원 ? '작업치료사' : null, sido: sido ?? null };
   const rows = 견본공고.new.map((j, i) => ({ ...j, id: undefined, deadline: j.deadline, likes: null, views: null, tags: i % 2 === 0 ? [...j.tags, '신입 가능'] : j.tags }));
   const 결과 = state === 'loading' ? <받는중 />
     : state === 'error' ? <못받음 />

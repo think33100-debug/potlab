@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useAuth } from '@/app/auth';
 import { setAfterLogin } from '@/lib/after-login';
 import { CompareNotify } from '@/components/compare-notify';
-import { 고용형태들, 기관분류들, 기본정렬, 분류쿠키 } from '@/lib/rapo-job-options';
+import { 고용형태들, 기관분류들, 기본정렬, 분류쿠키, 시도글, 지역칩들, 지역칩읽기 } from '@/lib/rapo-job-options';
 import { JOB_GROUPS, type JobGroup } from '@/lib/who';
 import { RapoButton, RapoChip, RapoMaskIcon } from './rapo-ui';
 
@@ -31,9 +31,13 @@ import { RapoButton, RapoChip, RapoMaskIcon } from './rapo-ui';
    로그인하면 그 주소로 돌아옵니다(lib/after-login.ts setAfterLogin · 2026-11-13 옛 after_login 쪽지는 아무도 안 읽었음). */
 
 export const 직군들 = ['전체', '작업치료사', '물리치료사'] as const;
-/* 원본(509:5320) 차례 그대로입니다 — lib/org.ts 의 SIDOS 와 같은 이름 · 다른 차례 */
-export const 지역들 = ['전국', '서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
-  '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'] as const;
+/* 지역 칩은 lib/rapo-job-options.ts 지역칩들 — 여러 개 · 대구·경북 한 칩 (2026-11-19 세중님) */
+
+/* 고른 지역을 칩 한 칸에 적는 말 — 하나면 그 이름, 여럿이면 「N개 지역」(360 폭 칩에 들어가는 길이) */
+function 지역칩말(sido: string | null): string | null {
+  const 칩들 = 지역칩읽기(sido);
+  return 칩들.length === 0 ? null : 칩들.length === 1 ? 칩들[0] : `${칩들.length}개 지역`;
+}
 /* 고용형태 목록은 서버 화면도 써서 lib/rapo-job-options.ts 에 둡니다 ('use client' 파일에서 내보내면 서버에서 깨집니다) */
 
 type 분류 = '직군' | '지역' | '급여' | '상세';
@@ -130,7 +134,7 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
   const 연단추 = useRef<HTMLButtonElement | null>(null);
   const [탭, set탭] = useState<분류>('직군');
   const [직군, set직군] = useState<string>(지금.job ?? '전체');
-  const [지역, set지역] = useState<string>(지금.sido ?? '전국');
+  const [지역, set지역] = useState<string[]>(지역칩읽기(지금.sido));
   const [고용, set고용] = useState<string>(지금.type ?? '전체');
   const [분류, set분류] = useState<string[]>(지금.kinds ?? []);
   /* 급여 「알림 신청」 — 시트를 닫고 연봉 비교 알림 신청 창을 띄웁니다 (시트는 맨 위 층이라 그 위에 창을 못 띄웁니다) */
@@ -145,16 +149,16 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
   const 켜짐: Record<분류, boolean> = { 직군: !!지금.job, 지역: !!지금.sido, 급여: false, 상세: !!지금.type || !!지금.kinds?.length };
   /* 칩에 적는 글 (2026-11-13 세중님 「물리치료사 선택하면 그 칸에 물리치료사 · 상세보단 필터」).
      직군·지역은 고른 값이 있으면 그 값을 적습니다. 「상세」는 화면 글만 「필터」로 바꿉니다(안쪽 이름은 그대로) */
-  const 칩글: Record<분류, string> = { 직군: 지금.job ?? '직군', 지역: 지금.sido ?? '지역', 급여: '급여', 상세: '필터' };
+  const 칩글: Record<분류, string> = { 직군: 지금.job ?? '직군', 지역: 지역칩말(지금.sido) ?? '지역', 급여: '급여', 상세: '필터' };
   const 값적힘: Record<분류, boolean> = { 직군: !!지금.job, 지역: !!지금.sido, 급여: false, 상세: false };
 
   const 열기 = (k: 분류) => {
-    set탭(k); set직군(지금.job ?? '전체'); set지역(지금.sido ?? '전국'); set고용(지금.type ?? '전체'); set분류(지금.kinds ?? []);
+    set탭(k); set직군(지금.job ?? '전체'); set지역(지역칩읽기(지금.sido)); set고용(지금.type ?? '전체'); set분류(지금.kinds ?? []);
     창.current?.showModal();
   };
   const 닫기 = () => 창.current?.close();
   const 적용 = () => {
-    const 주소 = 목록주소({ q: 지금.q, job: 직군, sido: 지역, type: 고용, sort: 지금.sort, kinds: 분류 }, 회원);
+    const 주소 = 목록주소({ q: 지금.q, job: 직군, sido: 시도글(지역), type: 고용, sort: 지금.sort, kinds: 분류 }, 회원);
     /* 기억해 둔 분류를 모두 뺐으면 「kind=」을 실어 보냅니다 — 안 실으면 주소가 전과 같아 목록을 다시 안 받을 수 있습니다 */
     const 갈곳 = !분류.length && 지금.kinds?.length ? 주소 + (주소.includes('?') ? '&' : '?') + 'kind=' : 주소;
     닫기();
@@ -226,8 +230,19 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
           )}
 
           {탭 === '지역' && (
-            <div role="group" aria-label="지역" className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
-              {지역들.map((s) => <RapoChip key={s} label={s} on={지역 === s} onClick={() => set지역(s)} />)}
+            /* 여러 개 (2026-11-19 세중님). 아무것도 안 고른 것 = 전국. 다 고르면 전국으로 돌아옵니다 */
+            <div className="flex flex-col gap-(--rapo-dimension-x4)">
+              <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">여러 개 고를 수 있어요</p>
+              <div role="group" aria-label="지역" className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
+                <RapoChip label="전국" on={지역.length === 0} onClick={() => set지역([])} />
+                {지역칩들.map((s) => (
+                  <RapoChip key={s} label={s} on={지역.includes(s)}
+                    onClick={() => {
+                      const 다음 = 지역.includes(s) ? 지역.filter((x) => x !== s) : 지역칩들.filter((x) => x === s || 지역.includes(x));
+                      set지역(다음.length === 지역칩들.length ? [] : 다음);
+                    }} />
+                ))}
+              </div>
             </div>
           )}
 
@@ -257,7 +272,7 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
 
           {탭 === '급여' ? <급여오픈전 onApply={알림신청} /> : (
             <div className="flex gap-(--rapo-dimension-x3)">
-              <RapoButton tone="outline" onClick={() => { set직군('전체'); set지역('전국'); set고용('전체'); set분류([]); }} className="w-[104px] shrink-0">초기화</RapoButton>
+              <RapoButton tone="outline" onClick={() => { set직군('전체'); set지역([]); set고용('전체'); set분류([]); }} className="w-[104px] shrink-0">초기화</RapoButton>
               <RapoButton onClick={적용} className="min-w-0 flex-1">조건 적용</RapoButton>
             </div>
           )}
