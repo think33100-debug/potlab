@@ -267,6 +267,10 @@ function 그림공고문인가({ src, alt, width, height }) {
   /* 크기가 적혀 있으면 **큰 것만** 봅니다 (메뉴 그림은 작습니다).
      크기가 없으면 공고문 꼴 글귀로만 받습니다 */
   if (재어둠) return 큼;
+  /* ★ 2026-11-19 — **편집기로 올린 그림**은 설명 글(alt)도 크기도 없이 옵니다 — 아주대 리크루터 채용관
+     `<img src="…/upload/76922/image/202611/<uuid>.jpg" style="max-width: 100%…">` (HS1196586464 · 본문이 이 그림 한 장).
+     설명 글이 없고 **올린 그림 자리(upload·editor 의 image)** 면 받습니다. 작은 꾸밈 그림은 읽을 때 40KB 뚜껑에서 걸러집니다 */
+  if (!a && /\/(?:upload|uploads|data)\/[^?#]*(?:\/image\/|\/editor\/|\/images\/)/i.test(u)) return true;
   return 말 || 큼;
 }
 
@@ -290,7 +294,9 @@ if (require.main === module && process.argv.includes('--자기점검')) {
   봐('박힌 그림을 다시 꺼내면 PNG', (본문박힌그림(쪽, 1).buf || Buffer.alloc(0)).subarray(0, 4).toString('hex') === '89504e47');
   봐('작은 박힌 그림(꾸밈)은 안 담는다', hs첨부주소('<img src="data:image/png;base64,iVBORw0KGgo=">', 'http://x.kr/v?id=1').length === 0);
   봐('없는 번호는 왜를 낸다', !!본문박힌그림(쪽, 2).왜);
-  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 11가지');
+  봐('편집기로 올린 설명 없는 그림(아주대)은 받는다', 그림공고문인가({ src: 'https://ajoumc.recruiter.co.kr/upload/76922/image/202611/e3e3f814.jpg', alt: '' }) === true);
+  봐('편집기 그림이라도 설명이 메뉴 글귀면 뺀다', 그림공고문인가({ src: '/upload/1/image/m.jpg', alt: '채용안내' }) === false);
+  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 13가지');
   process.exit(틀림 ? 1 : 0);
 }
 
