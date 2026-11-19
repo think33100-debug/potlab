@@ -21,6 +21,7 @@
  * gas 는 예산을 쪼개 며칠에 나눠 돌았습니다. 여기서는 한 번에 다 봅니다.
  * 「어디까지 봤는지 기억하기」 구조를 안 옮긴 까닭입니다.
  */
+import { 칸검사들 } from './칸검사.mjs';
 import fs from 'node:fs';
 /* ★ 2026-10-26 세중님 3번 — DB·저장소 조회는 **공용 받아보기()** 로 합니다.
    지나가는 401(`PGRST303 "JWT issued at future"`)·408·429·5xx·연결 탈을 1·2초 뒤 다시
@@ -870,6 +871,7 @@ if (dry) {
   }
   console.log('\n--dry 라 담지 않았습니다. ' + Math.round((Date.now() - t0) / 1000) + '초');
 } else {
+  칸검사들(담을것, SOURCE);   /* 저장 직전 칸 검사 한 자리 (tools/칸검사.mjs · 2026-11-19) */
   let 담음 = 0, 건너뜀2 = 0;
   for (let i = 0; i < 담을것.length; i += 200) {
     const r = await rpc(cfg, 'collect_put', {

@@ -6,6 +6,7 @@ import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
 import { RapoSheet } from '@/components/rapo/rapo-sheet';
 import { setAfterLogin } from '@/lib/after-login';
+import { 공유셈 } from '@/lib/share-hit';
 import { 공유주소 } from '@/lib/site-url';
 import { browserSupabase } from '@/lib/supabase-browser';
 
@@ -105,6 +106,7 @@ export function PostMenu({ id, mine, title }: {
 
   const copyLink = async () => {
     const u = url();
+    공유셈('copy', `/post/${id}`, isAdmin);
     try {
       await navigator.clipboard.writeText(u);
       toast('링크를 복사했어요!');
@@ -118,6 +120,7 @@ export function PostMenu({ id, mine, title }: {
   const share = async () => {
     const data = { title: `${title} · RAPO`, text: title, url: url() };
     if (navigator.share && navigator.canShare?.(data)) {
+      공유셈('share', `/post/${id}`, isAdmin);
       try { await navigator.share(data); } catch { /* 취소는 잘못이 아닙니다 */ }
       return;
     }

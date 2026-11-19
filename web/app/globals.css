@@ -300,6 +300,14 @@
 @layer base {
   html {
     font-family: var(--font-sans);
+
+    /* ★ 2026-11-18 세중님 「블랙 모드에서도 이상하게 안 변환되게」 — 밝게 못 박습니다.
+       app/layout.tsx 의 viewport 가 「어두운 화면도 준비했다」(light dark)고 알려 브라우저의 강제 변환을 끕니다.
+       그 대신 **여기서** 실제 색을 밝게 고정합니다 — 이 줄이 없으면 어두운 폰에서 입력칸·스크롤바·빈 바탕이 검게 나옵니다.
+       바탕·글자색도 비워 두지 않습니다. 비어 있으면 브라우저가 기본 바탕을 검게 바꿉니다 (body 의 bg-paper 와 같은 값) */
+    color-scheme: only light;
+    background-color: var(--color-paper);
+    color: var(--color-gray-900);
   }
 
   /* 숫자는 대시보드에서 훑는 대상입니다 — 자리를 고정합니다 */

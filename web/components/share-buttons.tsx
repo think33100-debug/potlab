@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icon';
+import { useAuth } from '@/app/auth';
 import { useToast } from '@/app/toast';
+import { 공유셈 } from '@/lib/share-hit';
 import { 공유주소 } from '@/lib/site-url';
 
 /* 공유 · 링크 복사.
@@ -32,6 +34,7 @@ export function ShareButtons({
   compact?: boolean;
 }) {
   const toast = useToast();
+  const { isAdmin } = useAuth();
 
   /* 늘 RAPO 대표 주소로 — 옛 이름 주소(potjob-web.vercel.app)에서 눌러도 (lib/site-url.ts 공유주소) */
   const url = () => 공유주소(path);
@@ -40,6 +43,7 @@ export function ShareButtons({
     const data = { title: `${title} · RAPO`, text: text ?? title, url: url() };
 
     if (navigator.share && navigator.canShare?.(data)) {
+      공유셈('share', path, isAdmin);
       try { await navigator.share(data); return; }
       catch { /* 취소는 잘못이 아닙니다 */ return; }
     }
@@ -48,6 +52,7 @@ export function ShareButtons({
 
   const copyLink = async () => {
     const u = url();
+    공유셈('copy', path, isAdmin);
     try {
       await navigator.clipboard.writeText(u);
       toast('링크를 복사했어요!');
@@ -57,7 +62,7 @@ export function ShareButtons({
     }
   };
 
-  if (look === 'rapo') return <RapoShare share={share} url={url} />;
+  if (look === 'rapo') return <RapoShare share={share} url={url} 복사셈={() => 공유셈('copy', path, isAdmin)} />;
 
   if (compact) {
     return (
@@ -103,7 +108,7 @@ export function ShareButtons({
    ★ 카카오톡 — 카카오 공유 SDK 는 JavaScript 키가 있어야 해서(지금은 로그인용 REST 키뿐), 휴대폰의 공유창으로 보냅니다.
      공유창에 카카오톡이 들어 있습니다. 공유창이 없는 기기(대개 PC)에서는 원본 S-07 안내를 띄웁니다.
    ★ 결과 안내는 원본처럼 아래 고정 행동(저장·지원 112) 바로 위에 남색 띠로 2.5초 띄웁니다 */
-function RapoShare({ share, url }: { share: () => Promise<void>; url: () => string }) {
+function RapoShare({ share, url, 복사셈 }: { share: () => Promise<void>; url: () => string; 복사셈: () => void }) {
   const [열림, set열림] = useState(false);
   const [알림, set알림] = useState<{ 글: string; 잘됨: boolean } | null>(null);
   const 시계 = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -121,6 +126,7 @@ function RapoShare({ share, url }: { share: () => Promise<void>; url: () => stri
   };
   const 복사 = async () => {
     set열림(false);
+    복사셈();
     try { await navigator.clipboard.writeText(url()); 띄우기('링크를 복사했어요', true); }
     catch { 띄우기('링크를 복사하지 못했어요. 잠시 뒤 다시 눌러 주세요', false); }
   };

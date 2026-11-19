@@ -54,6 +54,7 @@
  *   · 원문·지원은 고용24 원본 링크(wantedInfoUrl)로 보냅니다
  *   · 내용을 임의로 고치거나 재가공해 팔지 않습니다
  */
+import { 칸검사들 } from './칸검사.mjs';
 import fs from 'node:fs';
 /* ★ 2026-10-26 세중님 3번 — DB 조회는 **공용 받아보기()** 로 합니다.
    지나가는 401(PGRST303 "JWT issued at future")·408·429·5xx·연결 탈을 1·2초 뒤 다시
@@ -937,6 +938,7 @@ if (dry) {
 } else {
   let 담음 = 0;
   const 넣을것 = [...회원, ...보류];
+  칸검사들(넣을것, SOURCE);   /* 저장 직전 칸 검사 한 자리 (tools/칸검사.mjs · 2026-11-19) */
   for (let i = 0; i < 넣을것.length; i += 100) {
     const r = await rpc('collect_put', { p_secret: cfg.COLLECT_KEY_WN2, p_source: SOURCE, p_rows: 넣을것.slice(i, i + 100) });
     담음 += r['담음'] || 0;
