@@ -16,8 +16,9 @@ import { RapoSectionTitle } from './rapo-ui';
      · 색     코럴(강조·프레임) · 네이비(제목·본문) · 화이트(바탕) · 미스트·블러시만 */
 
 const 세줄 = [
-  { 번호: '01', 낱말: '열고', 제목: '현장의 조건을 열어 봐요', 설명: '병원별 근무 후기와 조건을 살펴봐요.' },
-  { 번호: '02', 낱말: '모으고', 제목: '흩어진 공고를 한곳에', 설명: '공공기관·종합병원·대학병원 공고를 모아요.' },
+  /* 01·02 순서 — 2026-11-20 세중님 「한 곳에 모으고 조건을 열어준다는 표현이 더 자연스러울 듯」 (전: 열고 → 모으고) */
+  { 번호: '01', 낱말: '모으고', 제목: '흩어진 공고를 한곳에', 설명: '공공기관·종합병원·대학병원 공고를 모아요.' },
+  { 번호: '02', 낱말: '열고', 제목: '현장의 조건을 열어 봐요', 설명: '병원별 근무 후기와 조건을 살펴봐요.' },
   { 번호: '03', 낱말: '연결하다', 제목: '동료의 경험을 나눠요', 설명: '익명으로 묻고 답하며 서로의 선택을 도와요.' },
 ];
 
@@ -31,7 +32,8 @@ export function RapoBrandStory() {
       {/* 머리 — 작은 코럴 표제 + 섹션 제목 + 브랜드 스토리 첫 줄(33:30 원문) */}
       <header className="flex flex-col gap-(--rapo-dimension-x2)">
         <p className="rapo-type-t2-bold text-(color:--rapo-brand-color-coral)">라포 이야기</p>
-        <RapoSectionTitle id="rapo-home-brand">열고, 모으고, 연결하다.</RapoSectionTitle>
+        {/* 2026-11-20 세중님 「제목도 바꿔」 — 카드 순서와 맞춤 (Figma 원문은 「열고, 모으고, 연결하다.」) */}
+        <RapoSectionTitle id="rapo-home-brand">모으고, 열고, 연결하다.</RapoSectionTitle>
         <p className="rapo-type-t5-regular mt-(--rapo-dimension-x1) break-keep text-(color:--rapo-brand-color-navy)">
           <span className="block">같은 현장에서 일해도,</span>
           <span className="block">알고 있는 정보와 얻을 수 있는 기회는</span>
