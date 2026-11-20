@@ -39,6 +39,7 @@ export type RapoJobDetailProps = {
   기간: { 달: string | null; 날: string | null; 기간: string; 강조: string | null; 덧말: string | null };
   접수방법: { 낱말: string[]; 채용페이지: string | null };
   모집인원없음: boolean;
+  모집인원덧말?: string | null;
   기관: string;
   주소: string | null;
   비슷한: RapoJob[];
@@ -158,7 +159,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       <RapoDetailSection title="지원 방법">
         <RapoPeriodCard {...p.기간} />
         {p.마감알림 && p.id && <JobDeadlineNotify id={p.id} />}
-        {봄 && (p.접수방법.낱말.length > 0 || p.모집인원없음) && (
+        {봄 && (p.접수방법.낱말.length > 0 || p.모집인원없음 || !!p.모집인원덧말) && (
           <div className="flex flex-col gap-(--rapo-dimension-x3)">
             {p.접수방법.낱말.length > 0 && (
               <RapoGuideRow label="접수 방법">
@@ -170,6 +171,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
               </RapoGuideRow>
             )}
             {p.모집인원없음 && <RapoGuideRow label="모집인원"><원문칸 url={p.url} /></RapoGuideRow>}
+            {!p.모집인원없음 && p.모집인원덧말 && <RapoGuideRow label="모집인원"><span className="break-keep">{p.모집인원덧말}</span></RapoGuideRow>}
           </div>
         )}
         <RapoDivider />
