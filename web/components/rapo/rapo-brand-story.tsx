@@ -32,7 +32,8 @@ export function RapoBrandStory() {
       {/* 머리 — 작은 코럴 표제 + 섹션 제목 + 브랜드 스토리 첫 줄(33:30 원문) */}
       <header className="flex flex-col gap-(--rapo-dimension-x2)">
         <p className="rapo-type-t2-bold text-(color:--rapo-brand-color-coral)">라포 이야기</p>
-        <RapoSectionTitle id="rapo-home-brand">열고, 모으고, 연결하다.</RapoSectionTitle>
+        {/* 2026-11-20 세중님 「제목도 바꿔」 — 카드 순서와 맞춤 (Figma 원문은 「열고, 모으고, 연결하다.」) */}
+        <RapoSectionTitle id="rapo-home-brand">모으고, 열고, 연결하다.</RapoSectionTitle>
         <p className="rapo-type-t5-regular mt-(--rapo-dimension-x1) break-keep text-(color:--rapo-brand-color-navy)">
           <span className="block">같은 현장에서 일해도,</span>
           <span className="block">알고 있는 정보와 얻을 수 있는 기회는</span>
