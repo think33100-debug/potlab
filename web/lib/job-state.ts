@@ -209,26 +209,44 @@ function 괄호밖자르기(t: string, 자를자리: RegExp): string[] {
   out.push(t.slice(앞));
   return out;
 }
-/* 끝이 「우대」 인 토막에 「필수」 라는 말이 같이 있을 때 —
-   괄호 밖 「필수」 뒤의 첫 쉼표에서만 가릅니다(「면허 필수, 경력자 우대」). 쉼표가 없으면 '모름'.
-   ★ 「필수」 글자가 있다고 다 필수 조건은 아닙니다(Codex 재검토) — 「필수과목 이수자 우대」·「필수는 아니나 … 우대」 는 우대입니다.
-     필수 조건으로 치는 꼴은 둘뿐: ㉠ 「필수,」「필수이며,」 처럼 바로 뒤에서 말이 끊김 ㉡ 「면허 필수 경력자 우대」 처럼 면허·자격·경력 말 바로 뒤 */
+/* 끝이 「우대」 인 토막에 「필수」 조건이 같이 있을 때 — **쉼표 마디마다** 가릅니다 (Codex 검토 2026-11-20).
+   「작업치료사 면허 필수, 경력자 우대, 운전면허 필수, 소아 경력자 우대」 → 필수 마디는 필수로, 우대 마디는 우대로.
+   표식 없는 마디(「초대졸 이상, 면허 필수」 의 앞 마디)는 **뒤따르는 표식**을 따릅니다.
+   한 마디 안에 둘이 섞였으면(「면허 필수 경력자 우대」) 가르지 않고 '모름' — 부르는 쪽이 원문 그대로 필수 칸에 둡니다.
+   ★ 「필수」 글자가 있다고 다 필수 조건은 아닙니다 — 「필수과목 이수자 우대」·「필수는 아니나 …」·「경력 필수 아님」 은 필수로 안 칩니다 */
 function 필수우대갈림(t: string): '우대' | '모름' | { 필수: string; 우대: string } {
   const 깊이 = 괄호깊이(t);
-  let 자리 = -1;
-  for (const m of t.matchAll(/필수/g)) {
+  const 마디: string[] = []; let 앞 = 0;
+  for (let i = 0; i < t.length; i++) {
+    if (깊이[i] === 0 && ',，、;'.includes(t[i])) { 마디.push(t.slice(앞, i).trim()); 앞 = i + 1; }
+  }
+  마디.push(t.slice(앞).trim());
+  const 갈래 = 마디.map(마디갈래);
+  if (갈래.includes('섞임')) return '모름';
+  if (!갈래.includes('필수')) return '우대';
+  const 필수: string[] = []; const 우대: string[] = []; let 밀린: string[] = [];
+  마디.forEach((글, i) => {
+    if (!글) return;
+    if (갈래[i] === '없음') { 밀린.push(글); return; }
+    (갈래[i] === '필수' ? 필수 : 우대).push(...밀린, 글); 밀린 = [];
+  });
+  if (밀린.length || !필수.length || !우대.length) return '모름';
+  return { 필수: 필수.join(', '), 우대: 우대.join(', ') };
+}
+/* 쉼표 마디 하나의 갈래 — 끝이 「필수」(·필수이며·필수임)면 필수 · 끝이 「우대」 면 우대 ·
+   우대로 끝나는데 「면허 필수 …」 처럼 면허·자격·경력 말 바로 뒤에 필수가 있으면 섞임 · 그 밖은 없음 */
+function 마디갈래(s: string): '필수' | '우대' | '섞임' | '없음' {
+  const 깊이 = 괄호깊이(s);
+  const 끝필수 = /필수(?:이며|이고|임|입니다|이나|이지만)?\.?$/.exec(s);
+  if (끝필수 && 깊이[끝필수.index] === 0) return '필수';
+  if (!/우대\.?$/.test(s)) return '없음';
+  for (const m of s.matchAll(/필수/g)) {
     if (깊이[m.index] !== 0) continue;
-    const 앞말 = t.slice(0, m.index); const 뒷말 = t.slice(m.index + 2);
-    if (/^(?:이며|이고|임|입니다|이나|이지만)?\s*(?:[,，、;]|$)/.test(뒷말)) 자리 = m.index;
-    else if (/^\s/.test(뒷말) && /(?:면허|자격|증|소지|경력)\s*$/.test(앞말)) 자리 = m.index;
+    const 앞말 = s.slice(0, m.index); const 뒷말 = s.slice(m.index + 2);
+    if (/^\s*(?:은|는|이|가)?\s*(?:아님|아니|아닌|없)/.test(뒷말)) continue;      /* 「필수 아님」「필수는 아니나」 */
+    if (/^\s/.test(뒷말) && /(?:면허|자격|증|소지|경력)\s*$/.test(앞말)) return '섞임';
   }
-  if (자리 < 0) return '우대';
-  for (let i = 자리 + 2; i < t.length; i++) {
-    if (깊이[i] !== 0 || !',，、;'.includes(t[i])) continue;
-    const 앞 = t.slice(0, i).trim(); const 뒤 = t.slice(i + 1).trim();
-    return 앞 && 뒤 ? { 필수: 앞, 우대: 뒤 } : '모름';
-  }
-  return '모름';
+  return '우대';
 }
 /** 금액 없는 보수 칸 말인가 — 「내규에 따름」·「공고문 확인」 둘 다 (공시 연봉을 대신 올릴지 가리는 자리에서 씀) */
 export const 금액없는보수말 = (v: string | null | undefined) => v === 내규말 || v === 보수확인말;
