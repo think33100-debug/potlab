@@ -211,6 +211,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const 식별인원 = 한직군.length === 1
     ? { 인원: `${한직군[0][1]}명`, 인원이름: `${한직군[0][0]} 모집` }
     : { 인원: 모집인원 || 못읽은칸말 };
+  /* 인원이 여러 곳을 합친 값일 때 나눈 말 — 「대구병원 3명 · 구미의원 1명」 (2026-11-21 세중님 「덧말로 나눠 적어」) */
+  const 모집인원덧말 = ((뽑은값?.['모집인원덧말'] as string | undefined) || null);
 
   /* 날짜 */
   const 끝 = 날짜꼴(j.apply_to);
@@ -251,7 +253,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       근무기간={근무기간} 근무기간덧말={근무기간덧말}
       지원자격={지원자격} url={병원?.주소 ?? (j.url || null)}
       기간={{ 달: 끝?.달 ?? null, 날: 끝?.날 ?? null, 기간, 강조, 덧말: 기간덧말 }}
-      접수방법={지원방법} 모집인원없음={모집인원 == null}
+      접수방법={지원방법} 모집인원없음={모집인원 == null} 모집인원덧말={모집인원덧말}
       기관={기관} 주소={주소}
       비슷한={비슷한} 비슷한주소={비슷한주소}
       비슷한제목말={[j.job_group, j.지역보임?.split(' ')[0]].filter(Boolean).join(' · ') || undefined}
