@@ -2,7 +2,7 @@
  *
  *   node tools/collect-rival-insta.mjs --dry   담지 않고 보기만 (처음에 이걸로 되는지 봅니다)
  *   node tools/collect-rival-insta.mjs         담고 견줍니다
- *   선택  --계정 pt_review (기본) · --몇개 12
+ *   선택  --계정 pt__review (기본) · --몇개 12
  *
  * ── 읽는 길 ──────────────────────────────────────────────────
  * 인스타 **공식 창구**(Graph API 의 business_discovery)만 씁니다. 우리 계정의 열쇠로 「다른 비즈니스·크리에이터 계정의
@@ -20,7 +20,7 @@ import { env, 인스타되나 } from './reels/ig.mjs';
 
 const 인수 = (이름, 기본 = null) => { const i = process.argv.indexOf('--' + 이름); return i > 0 ? process.argv[i + 1] : 기본; };
 const dry = process.argv.includes('--dry');
-const 계정 = String(인수('계정', 'pt_review')).replace(/[^A-Za-z0-9._]/g, '');
+const 계정 = String(인수('계정', 'pt__review')).replace(/[^A-Za-z0-9._]/g, '');   /* 밑줄 두 개 — pt_review(밑줄 하나)는 다른 비공개 계정입니다 */
 const 몇개 = Math.min(Math.max(Number(인수('몇개', 12)) || 12, 1), 25);
 const 경쟁사 = 계정 + '(인스타)';
 const SOURCE = 'HS3';                 /* 열쇠는 서버 전용 값을 함께 씁니다 (collect-rival.mjs 와 같음) */
@@ -70,7 +70,10 @@ for (const m of 게시물) {
   const 캡션 = String(m.caption || '');
   if (!/(채용|모집|구인|공고|선발)/.test(캡션) || !/(물리치료|작업치료|치료사)/.test(캡션)) continue;
   const 첫줄 = (캡션.split(/\r?\n/).map((s) => s.trim()).find((s) => s) || '').replace(/\s+/g, ' ').slice(0, 80);
-  const 기관 = 기관어림(첫줄) || 기관어림(캡션.replace(/\s+/g, ' ').slice(0, 300));
+  /* 공고 글은 첫 줄이 「[지역] ○○병원 … 채용공고(~마감)」 꼴입니다. 첫 줄에 채용·모집 말과 기관 이름이 **둘 다** 있어야 담습니다 —
+     본문에서 기관을 찾으면 「채용공고, 꼼꼼하게 확인하고 계신가요?」 같은 안내 글이 섞입니다 (2026-11-21 시험) */
+  if (!/(채용|모집)/.test(첫줄) || /[?？]\s*\S{0,3}$/.test(첫줄)) continue;
+  const 기관 = 기관어림(첫줄.replace(/^\[[^\]]*\]\s*/, ''));
   if (!기관) continue;
   const 번호 = (String(m.permalink || '').match(/\/(?:p|reel|tv)\/([^/?#]+)/) || [])[1] || String(m.id);
   볼것.push({ 경쟁사, 글번호: 번호, 제목: 첫줄 || 기관 + ' 채용', 기관분류: '인스타', 기관명: 기관, 지역: '', 고용형태: '', 링크: m.permalink || '', 때: m.timestamp });
