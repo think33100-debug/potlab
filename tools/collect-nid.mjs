@@ -616,9 +616,13 @@ if (dry) {
     console.log('정찰        건너뜀 — 쪽을 ' + 셈.못받은쪽 + '개 · 구 게시판을 ' + 셈.못받은구 + '곳 못 받았습니다');
   } else {
     try {
+      /* ★ 2026-11-20 — 중앙과 같아 뺀 구 게시판 공고(③-2)는 「본 것」에서도 뺍니다.
+         구 게시판에 하루 먼저 올라와 이미 담긴 줄(강서구 NDA1073 ↔ ND1741)은 ③-2 가 이번 바퀴에서
+         안 담을 뿐 DB 에 남아 회원 화면에 두 벌로 보였습니다. 본 것에서 빼면 두 바퀴 뒤 내려갑니다 */
+      const 뺀구열쇠 = new Set([...뺀구].map((v) => 열쇠(v.x)));
       const r = await rpc('목록빠짐표시', {
         p_secret: cfg.COLLECT_KEY_ND2, p_source: SOURCE,
-        p_본것: 모은것.map(열쇠),
+        p_본것: 모은것.map(열쇠).filter((k) => !뺀구열쇠.has(k)),
       });
       console.log('정찰        ' + Object.entries(r || {})
         .filter(([k]) => !/기준일/.test(k)).map(([k, v]) => k + ' ' + v).join(' · '));
