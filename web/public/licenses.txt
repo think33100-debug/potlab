@@ -1,30 +1,20 @@
 RAPO — 쓰는 오픈소스와 라이선스 (Third-party notices)
 
-RAPO 는 아래 오픈소스를 씁니다. 각 저작권 표시와 라이선스 글을 여기에 남깁니다.
-확인한 날: 2026-11-20 (web/package-lock.json · tools/kordoc/package-lock.json 기준)
+RAPO 화면은 아래 오픈소스를 씁니다. 각 저작권 표시와 라이선스 글을 여기에 남깁니다.
+확인한 날: 2026-11-20
 
-== 1. 주요 꾸러미 ==
+== 1. 화면을 만드는 데 쓴 것 ==
 
 Next.js (MIT) — Copyright (c) Vercel, Inc.
 React · React DOM (MIT) — Copyright (c) Meta Platforms, Inc. and affiliates.
 @supabase/supabase-js · @supabase/ssr (MIT) — Copyright (c) Supabase
 Tailwind CSS (MIT) — Copyright (c) Tailwind Labs, Inc.
-TypeScript (Apache-2.0) — Copyright (c) Microsoft Corporation
-kordoc (MIT) — Copyright (c) 2026 chrisryugj — https://github.com/chrisryugj/kordoc
-PDF.js / pdfjs-dist (Apache-2.0) — Copyright (c) Mozilla Foundation
-sharp (Apache-2.0) — Copyright (c) Lovell Fuller and others
-  sharp 가 함께 쓰는 libvips 묶음은 LGPL-3.0-or-later 입니다 (고치지 않고 그대로 불러 씁니다).
-Playwright (Apache-2.0) — Copyright (c) Microsoft Corporation
-web-push (MPL-2.0) — https://github.com/web-push-libs/web-push (고치지 않고 씁니다)
-JSZip (MIT 또는 GPL-3.0 가운데 MIT 로 씁니다) — Copyright (c) Stuart Knightley and others
 
-MIT · Apache-2.0 · ISC · BSD 라이선스 전문은 각 꾸러미의 LICENSE 파일과
-https://opensource.org/licenses 에 있습니다.
+MIT 라이선스 전문은 각 꾸러미의 LICENSE 파일과 https://opensource.org/license/mit 에 있습니다.
 
 == 2. 아이콘 — Lucide ==
 
-화면의 선 아이콘은 Lucide (https://lucide.dev) 의 모양을 옮겨 적은 것입니다
-(web/components/icon.tsx). 「id-card-lanyard」 한 개는 같은 이름으로 직접 그렸습니다.
+화면의 선 아이콘은 Lucide (https://lucide.dev) 의 모양을 옮겨 적은 것입니다.
 아래는 Lucide 의 LICENSE 원문입니다.
 
 ----------------------------------------------------------------------
