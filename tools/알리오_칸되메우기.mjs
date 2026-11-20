@@ -266,7 +266,7 @@ for (const [i, x] of 볼것.entries()) {
   const 단계이름 = (Array.isArray(box.steps) ? box.steps : [])
     .map((s) => String(s.recrutPbancTtl || '').trim()).filter(Boolean);
   if (x.headcount == null && 단계이름.length) {
-    const 센것 = 직군인원(단계이름);
+    const 센것 = 직군인원(단계이름, Number(box.recrutNope) || null);
     const 합 = 센것 && 센것.셈
       ? (Number(센것.셈.물리치료사 || 0) + Number(센것.셈.작업치료사 || 0)) : 0;
     const n = 인원칸(합);
