@@ -169,6 +169,9 @@ export function 자격나누기(글: string | null | undefined): { 필수: strin
     /* 「필수사항」 처럼 표식 낱말이 있어야 표식입니다 — 「필수적으로 …」 같은 말은 아님 */
     const m = 괄호표식.exec(t) ?? 맨표식.exec(t);
     if (m) {
+      /* 「우대 없음」·「우대사항: 해당 없음」 — 조건이 없다는 말입니다. 칸에 「없음」 을 적지 않고, 뒤 토막을 우대로 돌리지도 않습니다
+         (Codex 검토 — 「○ 우대 없음」 뒤의 「○ 면허 소지자」 가 우대 칸으로 갔습니다) */
+      if (/^(?:해당\s*(?:사항)?\s*)?(?:없음|없습니다|없슴|무관)\.?$/.test(t.slice(m[0].length).replace(머리기호, '').trim())) continue;
       지금 = m[1] === '우대' ? '우대' : '필수';
       t = t.slice(m[0].length);
     }
@@ -244,6 +247,7 @@ function 마디갈래(s: string): '필수' | '우대' | '섞임' | '없음' {
     if (깊이[m.index] !== 0) continue;
     const 앞말 = s.slice(0, m.index); const 뒷말 = s.slice(m.index + 2);
     if (/^\s*(?:은|는|이|가)?\s*(?:아님|아니|아닌|없)/.test(뒷말)) continue;      /* 「필수 아님」「필수는 아니나」 */
+    if (/^\s*(?:과목|교과|교육|과정|학점|이수)/.test(뒷말)) continue;               /* 「자격 필수 과목 이수자 우대」 — 필수가 과목을 꾸미는 말 */
     if (/^\s/.test(뒷말) && /(?:면허|자격|증|소지|경력)\s*$/.test(앞말)) return '섞임';
   }
   return '우대';
