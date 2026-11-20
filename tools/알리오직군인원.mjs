@@ -120,7 +120,7 @@ for (const j of 할것) {
   호출++;
   if (!box || box.탈) { 결과.push({ j, 왜: box?.탈 || '상세를 못 받았습니다' }); continue; }
   const 이름들 = (box.steps || []).map((s) => String(s.recrutPbancTtl || '').trim()).filter(Boolean);
-  const r = 직군인원(이름들);
+  const r = 직군인원(이름들, Number(box.recrutNope) || null);
   결과.push({ j, box, 이름들, ...r });
   if (호출 % 25 === 0) console.log(`   … ${호출}건` + (한도글() ? ' · ' + 한도글() : ''));
 }
