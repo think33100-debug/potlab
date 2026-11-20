@@ -161,7 +161,8 @@ export function 자격나누기(글: string | null | undefined): { 필수: strin
   const 맨표식 = /^(우대|필수|공통)\s*(?:사항|조건|자격|요건)?(?:\s*[:：-]\s*|\s+|$)/;
   const 머리기호 = /^[\s:：·\-–—○●◦•▪■□◆◇▶▷]+/;
   const 토막: string[] = [];
-  for (const t of 원.split(/\s+·\s+|\n+/)) for (const u of 괄호밖자르기(t, 앞자르기)) if (u.trim()) 토막.push(u.trim());
+  /* 「 · 」·줄바꿈도 괄호 밖에서만 — 괄호 안 설명이 여러 줄이면 그 안의 「(우대)」 가 표식으로 읽혔습니다 (Codex 검토) */
+  for (const t of 괄호밖자르기(원, /\s+·\s+|\n+/)) for (const u of 괄호밖자르기(t, 앞자르기)) if (u.trim()) 토막.push(u.trim());
   const 필수: string[] = []; const 우대: string[] = [];
   let 지금: '필수' | '우대' = '필수';
   for (let t of 토막) {
@@ -198,14 +199,17 @@ function 괄호깊이(t: string): number[] {
     if ('([（'.includes(t[i])) d++;
     else if (')]）'.includes(t[i])) d = Math.max(0, d - 1);
   }
+  깊이.push(d);      /* 맨 끝 칸 = 다 읽고 난 뒤 열려 있는 괄호 수 (0 이면 짝이 맞음) */
   return 깊이;
 }
-/* 자를자리(빈칸 한 글자 + 뒤보기)에 맞는 곳 가운데 **괄호 밖**인 곳에서만 자릅니다 */
+/* 자를자리에 맞는 곳 가운데 **괄호 밖**인 곳에서만 자릅니다.
+   괄호 짝이 안 맞는 글(여는 괄호만 있고 안 닫힘)은 깊이를 믿을 수 없으니 전처럼 맞는 곳마다 자릅니다 */
 function 괄호밖자르기(t: string, 자를자리: RegExp): string[] {
   const 깊이 = 괄호깊이(t);
+  const 짝맞음 = 깊이[t.length] === 0;
   const out: string[] = []; let 앞 = 0;
   for (const m of t.matchAll(new RegExp(자를자리.source, 'g'))) {
-    if (깊이[m.index] !== 0) continue;
+    if (짝맞음 && 깊이[m.index] !== 0) continue;
     out.push(t.slice(앞, m.index));
     앞 = m.index + m[0].length;
   }
@@ -240,10 +244,11 @@ function 필수우대갈림(t: string): '우대' | '모름' | { 필수: string; 
    우대로 끝나는데 「면허 필수 …」 처럼 면허·자격·경력 말 바로 뒤에 필수가 있으면 섞임 · 그 밖은 없음 */
 function 마디갈래(s: string): '필수' | '우대' | '섞임' | '없음' {
   const 깊이 = 괄호깊이(s);
-  const 끝필수 = /필수(?:이며|이고|임|입니다|이나|이지만)?\.?$/.exec(s);
+  /* 「불필수」·「비필수」 는 필수가 아니라는 말입니다 (Codex 검토) */
+  const 끝필수 = /(?<![불비])필수(?:이며|이고|임|입니다|이나|이지만)?\.?$/.exec(s);
   if (끝필수 && 깊이[끝필수.index] === 0) return '필수';
   if (!/우대\.?$/.test(s)) return '없음';
-  for (const m of s.matchAll(/필수/g)) {
+  for (const m of s.matchAll(/(?<![불비])필수/g)) {
     if (깊이[m.index] !== 0) continue;
     const 앞말 = s.slice(0, m.index); const 뒷말 = s.slice(m.index + 2);
     if (/^\s*(?:은|는|이|가)?\s*(?:아님|아니|아닌|없)/.test(뒷말)) continue;      /* 「필수 아님」「필수는 아니나」 */
