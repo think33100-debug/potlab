@@ -142,8 +142,10 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     /* 그림·글꼴·파비콘에는 안 걸립니다. 걸어두면 요청마다 헛일을 합니다.
-       _next(빌드 산출물) · api(자기 열쇠로 돕니다) · 확장자가 붙은 파일 제외 */
-    '/((?!_next/static|_next/image|api/|favicon|icons/|robots\\.txt|sitemap\\.xml|site\\.webmanifest|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|css|js)$).*)',
+       _next(빌드 산출물) · api(자기 열쇠로 돕니다) · 확장자가 붙은 파일 제외
+       ★ 2026-11-20 — 오픈소스 라이선스 고지 글 둘(licenses.txt · Pretendard-LICENSE.txt)은 비회원도 읽습니다.
+         글꼴 파일(woff)이 열려 있으니 그 라이선스 글도 같이 열려 있어야 합니다. 그 두 파일 이름만 뺍니다 */
+    '/((?!_next/static|_next/image|api/|favicon|icons/|robots\\.txt|sitemap\\.xml|site\\.webmanifest|licenses\\.txt|Pretendard-LICENSE\\.txt|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|css|js)$).*)',
     /* ★ 2026-11-11 — 비회원에게 막는 API 둘은 따로 겁니다 (베타 · 위 막는API) */
     '/api/og/:path*',
     '/api/post-image/:path*',
