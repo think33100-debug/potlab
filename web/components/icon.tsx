@@ -3,7 +3,7 @@
    Lucide/Heroicons 계열의 1.5px outline 을 기준으로 하며,
    filled 와 outline 을 같은 표면에서 섞지 않는다」.
 
-   ★ Lucide 는 ISC 라이선스입니다 — 저작권 표시와 라이선스 글은 web/public/licenses.txt
+   ★ Lucide 는 ISC 라이선스입니다 — 저작권 표시와 라이선스 글은 web/public/licenses.txt(화면에 실려 나가는 것만)
      (저장소 THIRD_PARTY_NOTICES.txt)에 남깁니다. 아이콘을 더하면 그 글은 그대로 두면 됩니다 (2026-11-20).
 
    이름은 Lucide 이름을 그대로 씁니다. 자체 이름을 지으면 나중에
