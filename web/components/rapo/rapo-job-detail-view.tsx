@@ -8,7 +8,7 @@ import { JobSave, RapoSaveBar } from '@/components/job-save';
 import { JobVeil } from '@/components/job-veil';
 import { LoginFirst } from '@/components/login-first';
 import { ShareButtons } from '@/components/share-buttons';
-import { 내규말 } from '@/lib/job-state';
+import { 금액없는보수말, 자격나누기 } from '@/lib/job-state';
 import type { Who } from '@/lib/supabase-server';
 import {
   RapoDetailHeader, RapoDetailIdentity, RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoKeyRow,
@@ -75,7 +75,9 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
      회원만 남는 것: 저장(로그인으로 보냄) · 가입 덜 마친 회원 흐림(JobVeil) · 비슷한 공고(목록 창구가 회원만) */
   const 봄 = p.who !== '모름';
   /* 공고에 금액이 없으면 공시 연봉을 보수 칸으로 올립니다 — 올렸으면 아래 「병원 한눈에」 연봉 칸은 다시 안 그립니다 */
-  const 위공시 = 봄 && p.pay.값 === 내규말 ? 공시줄(p.보수) : null;
+  const 위공시 = 봄 && 금액없는보수말(p.pay.값) ? 공시줄(p.보수) : null;
+  /* 필수와 우대를 가릅니다 (2026-11-19 세중님 · lib/job-state.ts 자격나누기 한 자리) */
+  const 자격 = 자격나누기(p.지원자격);
 
   const 본문 = (
     <>
@@ -85,10 +87,19 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         <RapoKeyRow icon="/rapo/detail/file-text-20.svg" label="필수 자격">
           {!봄 ? (
             <p className="rapo-type-t5-bold">로그인 후 볼 수 있어요</p>
-          ) : p.지원자격 ? (
-            <p className={`${p.지원자격.length > 40 ? 'rapo-type-article-body' : 'rapo-type-t5-bold'} whitespace-pre-wrap break-keep [overflow-wrap:anywhere]`}>
-              {p.지원자격}
-            </p>
+          ) : 자격.필수 || 자격.우대 ? (
+            <>
+              {자격.필수 ? (
+                <p className={`${자격.필수.length > 40 ? 'rapo-type-article-body' : 'rapo-type-t5-bold'} whitespace-pre-wrap break-keep [overflow-wrap:anywhere]`}>
+                  {자격.필수}
+                </p>
+              ) : <원문칸 url={p.url} />}
+              {자격.우대 && (
+                <p className="rapo-type-t3-regular mt-(--rapo-dimension-x1) whitespace-pre-wrap break-keep [overflow-wrap:anywhere] text-(color:--rapo-color-fg-neutral-muted)">
+                  우대 · {자격.우대}
+                </p>
+              )}
+            </>
           ) : (
             <원문칸 url={p.url} />
           )}

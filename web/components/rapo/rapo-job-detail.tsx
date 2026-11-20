@@ -163,7 +163,8 @@ export function RapoPayCard({ 잠김, 값, 덧말, 공시 }: { 잠김: boolean; 
         <Link href={(() => { const 보수 = 공시씀 ? null : 보수금액뽑기(값); return 보수 ? `/tools/pay?${보수.종류}=${보수.원}` : '/tools/pay'; })()}
           className="rapo-type-t3-medium mt-(--rapo-dimension-x1) flex w-fit items-center gap-(--rapo-dimension-x1) break-keep
                      text-(color:--rapo-color-fg-neutral) underline decoration-(--rapo-color-stroke-neutral-muted) underline-offset-4">
-          연봉이 얼마인지 궁금하세요?
+          {/* ★ 2026-11-19 세중님 「세후 월급이 궁금하세요? 로 바꿔야 해」 */}
+          세후 월급이 궁금하세요?
           {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
           <img src="/rapo/home/chevron.svg" alt="" width={12} height={12} className="shrink-0" />
         </Link>
@@ -303,7 +304,8 @@ function 연봉칸({ 보수 }: { 보수: 병원보수 }) {
     ? [['신입 초임', 보수.신입초임, false], ['직원 평균', 보수.평균보수, false]]
     : 보수.출처 === '알리미'
     ? [['신입 평균', 보수.신입초임, false], ['보건직 평균', 보수.보건직평균 ?? null, false]]
-    : [['병원 전체 평균 (추정)', 보수.평균보수, 보수.상한근처]]) as [string, number | null, boolean][];
+    /* 2026-11-19 세중님 「전직원 평균 추정 연봉(의사 포함) 이렇게」 — 국민연금 추정(요양병원·요양원 등 2층 기관까지 넓힘) */
+    : [['전직원 평균 추정 연봉(의사 포함)', 보수.평균보수, 보수.상한근처]]) as [string, number | null, boolean][];
   const 보일칸 = 칸.filter(([, v]) => v != null && v > 0);
   if (보일칸.length === 0) return null;
   return (
