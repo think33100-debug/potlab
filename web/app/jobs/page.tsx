@@ -51,7 +51,7 @@ export const metadata: Metadata = {
    급여 조건(오픈 전 안내).
    고용형태 조건은 2026-11-11 밤 DB 에 p_employ 를 더해 열었습니다 (주소 type= · RAPO노트/SQL_1113/F_고용형태_조건.sql). */
 
-type SP = { job?: string; sido?: string; q?: string; p?: string; type?: string; sort?: string; kind?: string; new?: string };
+type SP = { job?: string; sido?: string; q?: string; p?: string; type?: string; sort?: string; kind?: string; new?: string; noopen?: string };
 
 const PAGE = 20;   // DB 의 job_list() 와 같아야 합니다
 const 맛보기수 = 5;  // 비회원에게 보이는 공고 수 (2026-11-12 밤 · 세중님이 정할 값)
@@ -87,12 +87,14 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
   const 고른분류 = 주소에분류 ? 분류읽기(sp.kind) : 분류읽기((await cookies()).get(분류쿠키)?.value);
   /* 신입 가능만 — 주소 new=1 · DB job_list(p_new) (2026-11-14 세중님) */
   const 신입만 = sp.new === '1';
-  const 지금: 조건 = { q, job: 고른직군, sido: 고른시도, type: 고른고용, sort: 고른정렬, kinds: 고른분류 };
+  /* 「채용 시 마감」 공고 빼기 — 주소 noopen=1 · DB job_list(p_skip_open) (2026-11-21 세중님) */
+  const 채용시빼기 = sp.noopen === '1';
+  const 지금: 조건 = { q, job: 고른직군, sido: 고른시도, type: 고른고용, sort: 고른정렬, kinds: 고른분류, noopen: 채용시빼기 };
 
   /* 적용 조건 줄 (RAPO / List / 적용 조건 506:107) — 실제로 건 조건만 씁니다 */
-  const 조건말 = [고른직군, 고른지역칩.join(', '), 고른고용, ...고른분류].filter(Boolean).join(' · ');
+  const 조건말 = [고른직군, 고른지역칩.join(', '), 고른고용, ...고른분류, 채용시빼기 && '채용 시 마감 빼기'].filter(Boolean).join(' · ');
   const 적용줄 = !회원 ? null
-    : 기본직군 && !고른시도 && !고른고용 && !고른분류.length ? `내 직군: ${고른직군}`
+    : 기본직군 && !고른시도 && !고른고용 && !고른분류.length && !채용시빼기 ? `내 직군: ${고른직군}`
     : 조건말 ? `적용 조건: ${조건말}` : null;
   /* 초기화 = 조건을 모두 뺀 목록. 회원은 job=전체 로 적어야 가입 직군이 다시 안 걸립니다 */
   /* 「kind=」(빈 값)는 기억해 둔 기관 분류도 지우라는 뜻입니다 (RapoKindRemember) */
@@ -107,6 +109,7 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
     if (고른정렬 !== 기본정렬) u.set('sort', 고른정렬);
     if (고른분류.length) u.set('kind', 고른분류.join(','));
     if (신입만) u.set('new', '1');
+    if (채용시빼기) u.set('noopen', '1');
     if (p > 0) u.set('p', String(p));
     const s = u.toString();
     return s ? `/jobs?${s}` : '/jobs';
@@ -128,10 +131,12 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       {적용줄 && (
         <div className="flex items-center gap-(--rapo-dimension-x2) px-(--rapo-dimension-x5)">
           <p className="rapo-type-t4-medium min-w-0 flex-1 text-(color:--rapo-color-fg-neutral)">{적용줄}</p>
+          {/* 초기화 — 회색 글자만이라 안 보였습니다 → 선 있는 작은 단추 (2026-11-21 세중님 「초기화 버튼도 잘 보이게」) · 누르는 자리는 44 그대로 */}
           <Link href={초기화주소}
-            className="rapo-type-t2-medium flex h-(--rapo-touch-min) w-(--rapo-dimension-x16) items-center justify-end
-                       rounded-(--rapo-radius-r1) text-(color:--rapo-color-fg-neutral-muted) active:bg-(--rapo-color-bg-transparent-pressed)">
-            초기화
+            className="group flex h-(--rapo-touch-min) shrink-0 items-center justify-end">
+            <span className="rapo-type-t2-bold flex h-(--rapo-dimension-x8) items-center rounded-(--rapo-radius-full)
+                             border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-contrast) px-(--rapo-dimension-x3)
+                             text-(color:--rapo-color-fg-neutral) group-active:bg-(--rapo-color-bg-transparent-pressed)">초기화</span>
           </Link>
         </div>
       )}
@@ -150,16 +155,16 @@ export default async function Jobs({ searchParams }: { searchParams: Promise<SP>
       )}
 
       {/* 공고 칸만 늦게 채웁니다 — 받는 동안 위쪽(검색·조건)은 먼저 보입니다 */}
-      <Suspense key={`${q}|${sp.job ?? ''}|${고른시도 ?? ''}|${고른고용 ?? ''}|${고른분류.join(',')}|${고른정렬}|${신입만}|${page}`} fallback={<받는중 />}>
-        <결과 sb={sb} 고른직군={고른직군} 고른시도={고른시도} 고른고용={고른고용} 고른분류={고른분류} 고른정렬={고른정렬} 신입만={신입만} q={q} page={page}
-          조건있음={!!(신입만 || q || 고른시도 || 고른직군 || 고른고용 || 고른분류.length)} 초기화주소={초기화주소} 쪽주소={쪽주소} />
+      <Suspense key={`${q}|${sp.job ?? ''}|${고른시도 ?? ''}|${고른고용 ?? ''}|${고른분류.join(',')}|${고른정렬}|${신입만}|${채용시빼기}|${page}`} fallback={<받는중 />}>
+        <결과 sb={sb} 고른직군={고른직군} 고른시도={고른시도} 고른고용={고른고용} 고른분류={고른분류} 고른정렬={고른정렬} 신입만={신입만} 채용시빼기={채용시빼기} q={q} page={page}
+          조건있음={!!(신입만 || 채용시빼기 || q || 고른시도 || 고른직군 || 고른고용 || 고른분류.length)} 초기화주소={초기화주소} 쪽주소={쪽주소} />
       </Suspense>
     </RapoShell>
   );
 }
 
-async function 결과({ sb, 고른직군, 고른시도, 고른고용, 고른분류, 고른정렬, 신입만, q, page, 조건있음, 초기화주소, 쪽주소 }: {
-  sb: SupabaseClient; 고른직군: string | null; 고른시도: string | null; 고른고용: string | null; 고른분류: string[]; 고른정렬: 공고정렬; 신입만: boolean; q: string; page: number;
+async function 결과({ sb, 고른직군, 고른시도, 고른고용, 고른분류, 고른정렬, 신입만, 채용시빼기, q, page, 조건있음, 초기화주소, 쪽주소 }: {
+  sb: SupabaseClient; 고른직군: string | null; 고른시도: string | null; 고른고용: string | null; 고른분류: string[]; 고른정렬: 공고정렬; 신입만: boolean; 채용시빼기: boolean; q: string; page: number;
   조건있음: boolean; 초기화주소: string; 쪽주소: (p: number) => string;
 }) {
   const list = await sb.rpc('job_list', {
@@ -168,6 +173,8 @@ async function 결과({ sb, 고른직군, 고른시도, 고른고용, 고른분�
     /* 기관 분류 — 고른 게 없으면 null(전체) · 금고 SQL_1113/T */
     p_kinds: 고른분류.length ? 고른분류 : null,
     p_new: 신입만,
+    /* 켰을 때만 보냅니다 — DB 에 이 인수가 아직 없어도 끈 채로는 전과 똑같이 돕니다 */
+    ...(채용시빼기 ? { p_skip_open: true } : {}),
   });
 
   /* 42501 = 권한 없음 = 로그인 안 한 분 → 맛보기 몇 건 + 가입 권유 (2026-11-12 밤 세중님).
