@@ -8,7 +8,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "kordoc": "4.19.1",
+    "kordoc": "4.24.42",
     "pdfjs-dist": "4.10.38",
     "sharp": "0.35.4"
   }
