@@ -79,15 +79,18 @@ export default function Convert() {
   useEffect(() => {
     const q = 병원.trim();
     if (step !== '병원' || 직접입력 || q.length < 2) { set병원후보([]); return; }
+    /* 늦게 온 옛 결과가 새 결과를 덮지 않게 (2026-11-21 · 가입 화면 병원 찾기와 같은 고침) */
+    let 지남 = false;
     const t = setTimeout(async () => {
       const { data } = await browserSupabase().rpc('org_search', {
         p_q: q, p_tile: null, p_sido: null, p_sgg: null, p_sort: null, p_limit: 8, p_offset: 0,
       });
+      if (지남) return;
       const rs = (data ?? []) as { name: string; sido_std: string | null; sgg_std: string | null }[];
       /* 같은 병원이 두 줄(광주·전남)로 오는 것을 하나로 — components/rapo/rapo-signup.tsx 병원후보로 */
       set병원후보(병원후보로(rs.filter((r) => r.name !== q)));
     }, 250);
-    return () => clearTimeout(t);
+    return () => { 지남 = true; clearTimeout(t); };
   }, [병원, step, 직접입력]);
 
   const go = (s: 단계) => { setStep(s); setErr(null); window.scrollTo(0, 0); };

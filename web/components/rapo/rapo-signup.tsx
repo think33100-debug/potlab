@@ -494,18 +494,27 @@ export function 병원후보로(rs: { name: string; sido_std: string | null; sgg
 export function HospitalSearch({ 처음, 직접으로, on, 닫기 }: { 처음: string; 직접으로: boolean; on: (이름: string) => void; 닫기: () => void }) {
   const [직접, set직접] = useState(직접으로);
   const [q, setQ] = useState(처음);
-  const [받은후보, set후보] = useState<{ name: string; 곳: string }[]>([]);
-  /* 두 글자 아래이거나 직접 입력 중이면 받은 것을 안 보여 줍니다 (효과 안에서 비우지 않음) */
-  const 후보 = 직접 || q.trim().length < 2 ? [] : 받은후보;
+  /* 받은 결과는 어떤 말로 찾은 것인지 함께 둡니다 — 지금 칸의 말과 같을 때만 보여 줍니다 (2026-11-21 세중님 「추천이 안 뜨는 느낌」).
+     전에는 ① 늦게 온 옛 결과가 새 결과를 덮었고 ② 찾는 중·0곳·못 불러옴이 모두 같은 안내 글로 보여 추천이 안 뜬 것처럼 보였습니다 */
+  const [받은, set받은] = useState<{ 말: string; 후보: { name: string; 곳: string }[]; 오류: boolean } | null>(null);
+  const 말 = q.trim();
+  const 찾을때 = !직접 && 말.length >= 2;
+  const 이번 = 찾을때 && 받은?.말 === 말 ? 받은 : null;
+  const 후보 = 이번?.후보 ?? [];
   useEffect(() => {
-    const t0 = q.trim();
-    if (직접 || t0.length < 2) return;
+    if (!찾을때) return;
+    let 지남 = false;
     const t = setTimeout(async () => {
-      const { data } = await browserSupabase().rpc('org_search', { p_q: t0, p_tile: null, p_sido: null, p_sgg: null, p_sort: null, p_limit: 8, p_offset: 0 });
-      set후보(병원후보로((data ?? []) as { name: string; sido_std: string | null; sgg_std: string | null }[]));
+      const { data, error } = await browserSupabase().rpc('org_search', { p_q: 말, p_tile: null, p_sido: null, p_sgg: null, p_sort: null, p_limit: 8, p_offset: 0 });
+      if (지남) return;
+      set받은({ 말, 오류: !!error, 후보: error ? [] : 병원후보로((data ?? []) as { name: string; sido_std: string | null; sgg_std: string | null }[]) });
     }, 250);
-    return () => clearTimeout(t);
-  }, [q, 직접]);
+    return () => { 지남 = true; clearTimeout(t); };
+  }, [말, 찾을때]);
+  const 안내 = !찾을때 ? '병원명으로 검색한 뒤 지역을 함께 확인해 주세요.'
+    : !이번 ? '찾는 중이에요…'
+    : 이번.오류 ? '병원 목록을 못 불러왔어요. 잠시 뒤 다시 적어 주세요.'
+    : `「${말}」(으)로 찾은 병원이 없어요. 이름을 줄여 적거나 직접 입력해 주세요.`;
   return (
     <div data-rapo className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col bg-(--rapo-color-bg-layer-default)">
       <header className="sticky top-0 z-20 flex h-[56px] shrink-0 items-center gap-(--rapo-dimension-x2) bg-(--rapo-color-bg-layer-default) px-(--rapo-dimension-x2)">
@@ -555,8 +564,8 @@ export function HospitalSearch({ 처음, 직접으로, on, 닫기 }: { 처음: s
                 ))}
               </ul>
             ) : (
-              <p className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
-                병원명으로 검색한 뒤 지역을 함께 확인해 주세요.
+              <p role="status" className="rapo-type-t4-regular break-keep rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x4) text-(color:--rapo-color-fg-neutral-muted)">
+                {안내}
               </p>
             )}
             <button type="button" onClick={() => set직접(true)} className="rapo-type-t4-bold self-start text-(color:--rapo-color-fg-neutral)">
