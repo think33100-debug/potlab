@@ -200,20 +200,31 @@ for (const [이름, 바이트, 형식] of [
 }
 
 /* 7b. 커뮤니티 사진 — 같은 「저장소에 올라가나」 질문이라 여기서 같이 봅니다.
-   경로 꼴은 web/app/community/write/page.tsx 와 같게 (<내번호>/<글번호>/0.webp).
-   규칙은 **내 폴더만**이라 남의 폴더에 못 올리는 것도 함께 봅니다.
-   넣은 파일은 바로 치웁니다 (post-images 에는 지우기 규칙이 있습니다). */
+   ★ 2026-11-11 — 경로 꼴은 web/lib/post-image-path.ts 한 자리 것을 씁니다
+   (`i/<uuid>.webp`). 남의 폴더(옛 꼴)에 못 올리는 것과 목록 규칙도 함께 봅니다.
+   넣은 파일은 바로 치웁니다 (지우기 규칙은 「올린 사람」 기준입니다). */
 {
+  const { 새글사진경로 } = await import('../web/lib/post-image-path.ts');
   const 나 = await (await fetch(`${URL_}/auth/v1/user`, { headers: 머리() })).json();
   const 내번호 = 나?.id;
-  적기(!!내번호, '커뮤니티 사진 — 내 회원번호 받기');
+  적기(!!내번호, '커뮤니티 사진 — 로그인 확인');
+
+  /* 비회원(anon 열쇠만)으로 목록 — 비어 있어야 합니다 */
+  const 목록 = await fetch(`${URL_}/storage/v1/object/list/post-images`, {
+    method: 'POST', headers: { apikey: ANON, Authorization: 'Bearer ' + ANON, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prefix: '', limit: 5, offset: 0, sortBy: { column: 'name', order: 'asc' } }),
+  });
+  const 목록줄 = 목록.ok ? await 목록.json().catch(() => []) : [];
+  적기(!목록.ok || (Array.isArray(목록줄) && 목록줄.length === 0),
+    `  비회원은 글 사진 목록을 못 받음 (${목록.status} · ${Array.isArray(목록줄) ? 목록줄.length : '?'}줄)`);
+
   if (내번호) {
-    const 자리 = `${내번호}/0/시험.webp`.replace('시험', 'test');
+    const 자리 = 새글사진경로().큰것;
     const r = await fetch(`${URL_}/storage/v1/object/post-images/${자리}`, {
       method: 'POST', headers: { ...머리(), 'Content-Type': 'image/webp' },
       body: Buffer.from('UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==', 'base64'),
     });
-    적기(r.ok, '  내 폴더에 사진 올리기' + (r.ok ? '' : ' — ' + r.status + ' ' + (await r.text()).slice(0, 120)));
+    적기(r.ok, '  새 꼴 경로로 사진 올리기' +(r.ok ? '' : ' — ' + r.status + ' ' + (await r.text()).slice(0, 120)));
 
     const 남 = await fetch(`${URL_}/storage/v1/object/post-images/00000000-0000-0000-0000-000000000000/0/test.webp`, {
       method: 'POST', headers: { ...머리(), 'Content-Type': 'image/webp' },
