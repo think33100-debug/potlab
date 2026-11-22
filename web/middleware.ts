@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { 가입중길, 길에있나, 비회원길 } from '@/lib/beta';
 import { GUEST_COOKIE } from '@/lib/guest-view';
 import { 색인되나 } from '@/lib/seo';
+import { 대표주소 } from '@/lib/site-url';
 
 /* 로그인 토큰을 이어주는 자리입니다 (2026-09-25).
 
@@ -45,6 +46,19 @@ export async function middleware(req: NextRequest) {
      비회원길(lib/beta.ts)에 넣지 않은 까닭 — 거기 넣으면 배포에서도 비회원에게 열립니다 */
   if (process.env.NODE_ENV !== 'production' && req.nextUrl.pathname.startsWith('/design-preview')) {
     return NextResponse.next({ request: req });
+  }
+
+  /* ★ 2026-11-22 — 「카카오 로그인을 계속 다시 하라고 한다」 (아이폰 사파리 회원 제보).
+     로그인 서버(Supabase)의 「돌아와도 되는 주소」 목록에 www.rapojob.co.kr 이 없어서,
+     www 에서 누른 로그인은 늘 기본 주소(potjob-web.vercel.app/?code=…)로 돌아왔습니다.
+     로그인 확인 쪽지(code-verifier)는 www 에만 있으니 거기서는 못 마치고, 회원은 옛 주소에서 한 번 더 눌러
+     **옛 주소에만** 로그인됐습니다 → 다음에 rapojob.co.kr 을 열면 또 비회원 (auth.flow_state: www 로 돌아온 줄 0).
+     옛 주소 첫 화면에 로그인 값(code·error)을 들고 오면 www 의 돌아오는 자리로 그대로 넘겨 거기서 마칩니다.
+     로그인 서버 목록에 www 를 넣으면(세중님 손) 이 줄은 안 걸립니다 — 그래도 남겨 둡니다 */
+  const 호스트 = (req.headers.get('host') ?? req.nextUrl.hostname).split(':')[0].toLowerCase();
+  if (호스트 === 'potjob-web.vercel.app' && req.nextUrl.pathname === '/'
+      && (req.nextUrl.searchParams.has('code') || req.nextUrl.searchParams.has('error'))) {
+    return NextResponse.redirect(`${대표주소}/auth/callback${req.nextUrl.search}`, 307);
   }
 
   let res = NextResponse.next({ request: req });
