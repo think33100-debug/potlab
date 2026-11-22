@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { 설치안내끝, 설치안내표식 } from '@/lib/install-hint';
+import { 설치안내끝, 설치안내표식, 설치넘김표, 앱안갈래 } from '@/lib/install-hint';
 import { RapoButton } from './rapo-ui';
 
 /* 설치 안내 토스트 — 가입을 막 마친 분에게 한 번 (2026-11-13 세중님
@@ -30,7 +30,7 @@ type 설치신호 = Event & { prompt: () => Promise<void>; userChoice: Promise<{
 export type 설치갈래 = 'prompt' | 'mac-safari' | 'ios' | 'inapp' | 'kakao' | 'android';
 
 /** 넘어간 브라우저에서도 토스트가 뜨게 주소에 붙이는 표 — 표식은 기기·브라우저마다 따로라 카톡 안의 표식이 따라가지 않습니다 */
-const 넘김표 = 'install-hint';
+const 넘김표 = 설치넘김표;
 
 function 갈래읽기(): 설치갈래 | null {
   const ua = navigator.userAgent;
@@ -61,7 +61,9 @@ export function RapoInstallToast() {
     }
     let 표식 = false;
     try { 표식 = localStorage.getItem(설치안내표식) === '1' && !localStorage.getItem(설치안내끝); } catch { /* 사생활 보호 창 */ }
-    if (!표식 || 앱창인가()) return;
+    /* 2026-11-22 — 카톡·앱 안 브라우저에서는 rapo-inapp-escape 의 아래 팝업이 설치·로그인 안내를 맡습니다(두 팝업이 겹치지 않게).
+       표식은 그대로 둡니다 — 기본 브라우저로 넘어가면 거기서 이 토스트가 뜹니다 */
+    if (!표식 || 앱창인가() || 앱안갈래(navigator.userAgent)) return;
     /* 설치 신호는 조금 늦게 올 수 있어 한 번 더 봅니다 */
     const 보기 = () => set갈래(갈래읽기());
     const 늦게 = window.setTimeout(보기, 1200);
