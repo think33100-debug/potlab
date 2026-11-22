@@ -15,6 +15,8 @@ import {
   RapoPayCard, RapoPeriodCard, RapoSectionGap, RapoStickyActions, 지원단추꼴, 잠긴단추꼴, type 경쟁률줄, type 모집상태, type 병원보수, type 공시한줄,
 } from './rapo-job-detail';
 import { RapoJobRow, type RapoJob } from './rapo-job-row';
+import { RapoPastJobsBrief } from './rapo-past-jobs';
+import { 지난공고주소, type 지난공고묶음 } from '@/lib/past-jobs';
 import { RapoButton, RapoDivider } from './rapo-ui';
 
 /* 공고 상세 한 화면을 **값만 받아** 그립니다 (2026-11-11).
@@ -57,6 +59,8 @@ export type RapoJobDetailProps = {
   경쟁률?: 경쟁률줄[];
   /* 이 병원 연봉 — 알리오 공시 또는 국민연금 추정 (2026-11-12 · 금고 SQL_1113/P) */
   보수?: 병원보수 | null;
+  /* 이 병원 지난 공고 (2026-11-22 세중님) — 회원만 · 두 줄 · 더 있으면 병원 화면으로 */
+  지난공고?: 지난공고묶음 | null;
 };
 
 /* 2026-11-14 — 공고에 금액이 없을 때 보수 칸에 올릴 공시 연봉. 아래 「이 병원 연봉」 칸과 같은 이름·같은 값입니다 */
@@ -149,6 +153,18 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         <>
           <RapoSectionGap />
           <RapoHospitalFacts 치료사={p.치료사 ?? null} 바쁨={p.바쁨 ?? null} 시설={p.시설 ?? null} 경쟁률={p.경쟁률 ?? []} 인턴={p.인턴} 보수={위공시 ? null : p.보수 ?? null} />
+        </>
+      )}
+
+      {/* 이 병원 지난 공고 — 병원 한눈에 바로 아래 (2026-11-22 세중님 「언제 · 고용형태 · 몇 명 · 직군 간략하게 · 보기는 2개만」) */}
+      {p.지난공고 && p.지난공고.줄.length > 0 && (
+        <>
+          <RapoSectionGap />
+          <RapoPastJobsBrief 줄={p.지난공고.줄} 더보기={
+            p.지난공고.전체 > p.지난공고.줄.length && p.지난공고.기관이름 ? (
+              <RapoButton href={지난공고주소(p.지난공고.기관이름)} tone="outline" full>병원 둘러보기에서 지난 공고 전부 보기</RapoButton>
+            ) : undefined
+          } />
         </>
       )}
 
