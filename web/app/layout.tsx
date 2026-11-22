@@ -7,7 +7,7 @@ import { SPLASH_SCRIPT, Splash } from "@/components/splash";
 import { PersonaBar } from "@/components/persona-bar";
 import { SplashAd } from "@/components/splash-ad";
 import { KakaoFab } from "@/components/kakao-fab";
-import { TermsReconsent } from "@/components/terms-reconsent";
+/* 새 약관 다시 동의 창은 끕니다 (2026-11-23 세중님 「하지마 받지마」) — components/terms-reconsent.tsx 는 남겨 둡니다 */
 import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
 import { RevisitMark } from "@/components/revisit-mark";
@@ -186,8 +186,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
           {/* 카카오톡 문의 단추 — 모든 화면 오른쪽 아래에 떠 있습니다 (2026-11-12 세중님) */}
           <KakaoFab />
-          {/* 새 약관 다시 동의 (2026-11-16 확정 · 시행 11/23 뒤 첫 로그인) */}
-          <TermsReconsent />
+          {/* 새 약관 다시 동의 창 — 2026-11-23 세중님 결정으로 끔 (맨 위 import 자리 주석) */}
           {/* 재방문 근사치 — 첫 방문일은 브라우저에만 두고 D0·D1~D7 첫 재방문·D7 당일에 한 번씩 알립니다.
               아무것도 안 그립니다. 로그인한 화면에서만 돕니다 (2026-11-18 · 질문함 Q5) */}
           <RevisitMark />
