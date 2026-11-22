@@ -12,6 +12,8 @@ import { orgJobs, orgPublic, ourNumbers, place, TILE_NAME, type OrgFacets, type 
 import { hospitalStat, type HospitalStat, type 시설숫자 } from '@/lib/hospital';
 import { RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoSectionGap, type 경쟁률줄, type 병원보수 } from '@/components/rapo/rapo-job-detail';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
+import { RapoPastJobs } from '@/components/rapo/rapo-past-jobs';
+import { 지난공고받기, 지난공고주소 } from '@/lib/past-jobs';
 
 export const dynamic = 'force-dynamic';
 
@@ -207,11 +209,28 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
     const 탭 = sp.tab === 'review' ? 'review' : sp.tab === 'talk' ? 'talk' : 'info';
     const 숫자 = 탭 === 'info' && 기관 ? await 병원정보받기(sb, org, sido) : null;
     const 위칸 = 탭 === 'info' && 기관 ? 기관정보칸(기관, await 운영기관받기(sb, org, sido)) : null;
-    const 정보 = 위칸 || 숫자 ? (
+    /* 지난 공고 (2026-11-22 세중님) — 맨 아래 · 처음 5줄, 「더 보기」(?past=all)면 20줄까지.
+       기관 표 이름으로 기관번호를 찾아 잇습니다(DB 지난공고) — 병원 자료(orgPublic)에 없는 곳도 공고가 있으면 그립니다 */
+    const 다 = sp.past === 'all';
+    const 지난 = 탭 === 'info' ? await 지난공고받기(sb, { 이름: org, 시도: sido, n: 다 ? 20 : 5 }) : null;
+    const 지난칸 = 지난 && 지난.줄.length > 0 ? (
+      <RapoPastJobs 줄={지난.줄} 더있음={!다 && 지난.전체 > 지난.줄.length} 더보기={
+        <Link href={지난공고주소(org, sido)}
+          className="rapo-type-t4-bold flex h-(--rapo-touch-min) items-center justify-center rounded-(--rapo-radius-r2)
+                     border border-(--rapo-color-stroke-neutral-contrast) text-(color:--rapo-color-fg-neutral)">
+          지난 공고 더 보기 ({(지난.전체 - 지난.줄.length).toLocaleString('ko-KR')}건)
+        </Link>
+      } />
+    ) : null;
+    const 칸들 = [위칸, 숫자, 지난칸].filter(Boolean);
+    const 정보 = 칸들.length > 0 ? (
       <>
-        {위칸}
-        {위칸 && 숫자 && <RapoSectionGap />}
-        {숫자}
+        {칸들.map((c, i) => (
+          <div key={i}>
+            {i > 0 && <RapoSectionGap />}
+            {c}
+          </div>
+        ))}
       </>
     ) : null;
     return (

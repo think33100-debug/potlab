@@ -7,6 +7,7 @@ import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말
   보수요약, 근무기간말, 인턴태그, 기관태그, 직군띄어쓰기, 보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
 import type { HospitalStat } from '@/lib/hospital';
 import { jobViews } from '@/lib/job-views';
+import { 지난공고받기 } from '@/lib/past-jobs';
 import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
 import { 색인메타 } from '@/lib/seo';
 import { siteUrl, 그림판 } from '@/lib/site-url';
@@ -149,7 +150,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
   const closed = isClosed(j.apply_to, todayKst(), j.apply_to_time);
   const detail = j.detail ?? {};
 
-  const [views, 뽑은값, 병원, 비슷한, 병원숫자, 경쟁률, 보수] = await Promise.all([
+  const [views, 뽑은값, 병원, 비슷한, 병원숫자, 경쟁률, 보수, 지난] = await Promise.all([
     jobViews([j.id]),
     뽑은값받기(sb, id),
     봄 ? 병원주소받기(sb, id) : Promise.resolve(null),
@@ -158,6 +159,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     봄 ? 병원숫자받기(sb, id) : Promise.resolve(null),
     봄 ? 경쟁률받기(sb, id) : Promise.resolve([]),
     봄 ? 병원보수받기(sb, id) : Promise.resolve(null),
+    /* 이 병원 지난 공고 (2026-11-22 세중님 「간략하게 · 보기는 2개만」) — 회원만 · 같은 기관번호 · 지금 공고는 뺌 */
+    member ? 지난공고받기(sb, { 공고: id, n: 2 }) : Promise.resolve(null),
   ]);
   /* 병원이 아닌 곳(복지관·치매센터·요양원)은 「시설」 칸으로 옵니다 — 그때는 병원 칸(구분·병상·치료사)을 안 씁니다 */
   const 시설 = 병원숫자?.시설 ?? null;
@@ -259,6 +262,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       비슷한제목말={[j.job_group, j.지역보임?.split(' ')[0]].filter(Boolean).join(' · ') || undefined}
       지원주소={지원.주소}
       치료사={치료사} 바쁨={시설 ? null : 병원숫자} 시설={시설} 경쟁률={경쟁률} 보수={보수}
+      지난공고={지난}
       인턴={!!j.is_intern || /인턴/.test(j.employ_type ?? '')}
       마감알림={봄 && !closed && !!j.apply_to}
     />
