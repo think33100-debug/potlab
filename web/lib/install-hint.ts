@@ -15,3 +15,19 @@ export const INSTALL_SCRIPT = `window.addEventListener('beforeinstallprompt',fun
 export function 설치안내남기기() {
   try { if (!localStorage.getItem(설치안내끝)) localStorage.setItem(설치안내표식, '1'); } catch { /* 사생활 보호 창 */ }
 }
+
+/** 다른 브라우저로 넘길 때 주소에 붙이는 표 — 넘어간 브라우저에서 설치 토스트가 뜹니다.
+    표식은 기기·브라우저마다 따로라 카톡 안의 표식이 따라가지 않습니다 (rapo-install-toast · rapo-inapp-escape 가 같이 씀) */
+export const 설치넘김표 = 'install-hint';
+
+export type 앱안 = 'kakao' | 'android-inapp' | 'ios-inapp';
+
+/** 카카오톡·인스타·네이버 같은 **앱 안 브라우저**인지 (2026-11-22). 그 안에서는 설치도, 로그인 유지도 안 됩니다.
+    설치 토스트는 여기서 안 뜨고 rapo-inapp-escape 의 아래 팝업이 맡습니다 */
+export function 앱안갈래(ua: string): 앱안 | null {
+  if (/KAKAOTALK/i.test(ua)) return 'kakao';
+  if (/NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|everytimeApp|DaumApps|BAND\//i.test(ua)) {
+    return /Android/i.test(ua) ? 'android-inapp' : 'ios-inapp';
+  }
+  return null;
+}

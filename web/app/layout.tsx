@@ -12,6 +12,7 @@ import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
 import { RevisitMark } from "@/components/revisit-mark";
 import { RapoInstallToast } from "@/components/rapo/rapo-install-toast";
+import { RapoInappEscape } from "@/components/rapo/rapo-inapp-escape";
 import { INSTALL_SCRIPT } from "@/lib/install-hint";
 import { COMPANY, PRIVACY_EMAIL, PRIVACY_OFFICER } from "@/lib/contact";
 import { 안내글들 } from "@/lib/seo";
@@ -113,6 +114,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <SplashAd />
           {/* 가입을 막 마친 분에게 한 번 — 바탕화면(휴대폰은 홈 화면) 설치 안내 (2026-11-13 세중님) */}
           <RapoInstallToast />
+          {/* 카카오톡·인스타 같은 앱 안 브라우저 — 로그인도 설치도 안 돼 기본 브라우저로 보내고 설치를 권합니다 (2026-11-22 세중님).
+              아래에서 올라오는 팝업 · 보통 브라우저에서는 아무것도 안 그립니다 */}
+          <RapoInappEscape />
 
           {/* 탑바 56px · 그림자 없이 아래 보더만 — teamsparta.md.
               새 디자인 화면(홈)은 자기 헤더를 그리므로 거기서는 이 줄을 그리지 않습니다
