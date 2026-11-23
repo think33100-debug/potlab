@@ -1,0 +1,13 @@
+{
+ "name": "대전세종충남·넥슨후원 공공어린이재활병원",
+ "type": "html",
+ "url": "https://www.dpcrh.or.kr/bbs/BBSMSTR_000000000364/list.do",
+ "base": "https://www.dpcrh.or.kr",
+ "row": "<tr[^>]*>[\\s\\S]*?<\\/tr>",
+ "title": "<strong class=\"bbs-subject-txt\">([\\s\\S]*?)<\\/strong>",
+ "link": "fn_search_detail\\('([^']+)'\\)",
+ "linkFmt": "https://www.dpcrh.or.kr/bbs/BBSMSTR_000000000364/view.do?nttId={1}",
+ "date": "(20\\d{2}-\\d{1,2}-\\d{1,2})",
+ "skip": "면접|합격|결과|발표",
+ "note": "2026-11-23 · 대전세종충남·넥슨후원 공공어린이재활병원 홈페이지(dpcrh.or.kr) 소식/참여>채용정보. 땡큐오티 글 신호로 만듦. 목록은 서버가 그려 주며 제목은 button onclick fn_search_detail(nttId) 이고 글 보기는 GET view.do?nttId= 로도 열림(HTTP 200 확인). 날짜는 등록일 하나(올린 날). 제목에 직군이 없고 첨부에만 있어 PT/OT 는 본문·첨부에서 가림. robots: User-agent * Allow / (2026-11-23)."
+}
