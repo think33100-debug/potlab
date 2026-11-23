@@ -26,6 +26,10 @@ export type 기관사진 = {
   너비: number;
   높이: number;
   출처: { 누가: string; 어디: string; 주소: string };
+  /* 기관 마크 (2026-11-23 세중님 「기관이름 옆에는 마크」) — 기관 이름 옆 흰 칸에 그립니다.
+     그림은 공통 로고와 같은 길(Supabase 「기관로고」 표 → /api/org-logo/<열쇠> · lib/org-logo.ts)로 내보냅니다 — 표에 줄 넣기는 승인 뒤.
+     Codex 자료에 아주대는 「이름이 들어간 로고」(142×50) 하나뿐이라 그것을 고치지 않고 그대로 씁니다 */
+  로고?: { 열쇠: string; 원본주소: string; 너비: number; 높이: number; 출처: { 누가: string; 어디: string; 주소: string } };
 };
 
 const 사진표: 기관사진[] = [
@@ -40,8 +44,26 @@ const 사진표: 기관사진[] = [
     너비: 750,
     높이: 478,
     출처: { 누가: '아주대학교병원', 어디: '병원 누리집 보도자료', 주소: 'https://hosp.ajoumc.or.kr/board/commBoardNewsView.do?no=69294' },
+    로고: {
+      열쇠: 'ajou-hosp',
+      원본주소: 'https://hosp.ajoumc.or.kr/common/front/kor/images/layout/logo_hd.png',
+      너비: 142, 높이: 50,
+      출처: { 누가: '아주대학교병원', 어디: '병원 누리집', 주소: 'https://hosp.ajoumc.or.kr/' },
+    },
   },
 ];
+
+/** 기관 마크 주소 — 없으면 null (화면은 원래 기본 그림) */
+export function 로고주소(s: 기관사진 | null): string | null {
+  if (!s?.로고) return null;
+  if (process.env.NEXT_PUBLIC_ORG_PHOTO_SOURCE === '1') return s.로고.원본주소;
+  return `/api/org-logo/${s.로고.열쇠}`;
+}
+
+/** 맨 아래 출처 줄에 적을 것 — 사진 · 로고 */
+export function 출처들(s: 기관사진): { 말: string; 누가: string; 어디: string; 주소: string }[] {
+  return [{ 말: '사진', ...s.출처 }, ...(s.로고 ? [{ 말: '로고', ...s.로고.출처 }] : [])];
+}
 
 export function 사진주소(s: 기관사진): string {
   if (process.env.NEXT_PUBLIC_ORG_PHOTO_SOURCE === '1') return s.원본주소;

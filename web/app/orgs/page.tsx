@@ -14,7 +14,7 @@ import { RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoSectionGap, typ
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { RapoPastJobs } from '@/components/rapo/rapo-past-jobs';
 import { 지난공고받기, 지난공고주소 } from '@/lib/past-jobs';
-import { 기관사진찾기, 사진주소 } from '@/lib/org-photo';
+import { 기관사진찾기, 로고주소, 사진주소, 출처들 } from '@/lib/org-photo';
 import { RapoOrgPhoto, RapoPhotoCredit } from '@/components/rapo/rapo-org-photo';
 
 export const dynamic = 'force-dynamic';
@@ -242,9 +242,9 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
         <Hit kind="org" target={org} />
         <RapoOrgBoard name={org} sido={sido} 탭={탭} 있나={있나} 정보={정보}
           후기={탭 === 'review' ? await 후기칸(sb, org, sido) : undefined}
-          사진={사진 ? <RapoOrgPhoto src={사진주소(사진)} alt={사진.설명} /> : undefined} />
-        {/* 사진 출처 — 화면 맨 아래 작게 (2026-11-23 세중님) */}
-        {사진 && <RapoPhotoCredit {...사진.출처} 어두움 />}
+          사진={사진 ? <RapoOrgPhoto src={사진주소(사진)} alt={사진.설명} /> : undefined} 로고={로고주소(사진)} />
+        {/* 사진·로고 출처 — 화면 맨 아래 작게 (2026-11-23 세중님) */}
+        {사진 && <RapoPhotoCredit 줄={출처들(사진)} 어두움 />}
         <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
         <RapoBottomNav current="/community" dark />
       </div>

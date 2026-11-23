@@ -18,7 +18,9 @@ import { 어둠 } from './rapo-community';
 
 export type 병원탭 = 'info' | 'talk' | 'review';
 
-export function RapoOrgBoard({ name, sido, 탭, 있나, 정보, 후기, 사진 }: {
+export function RapoOrgBoard({ name, sido, 탭, 있나, 정보, 후기, 사진, 로고 }: {
+  /* 기관 마크 (2026-11-23 세중님) — 있으면 「병원 기본 이미지」 대신 */
+  로고?: string | null;
   name: string; sido: string | null; 탭: 병원탭; 있나: boolean;
   /* 기관 사진 띠 (2026-11-23 세중님 시범 · lib/org-photo.ts) — 앱 바 바로 아래. 없으면 안 그립니다 */
   사진?: ReactNode;
@@ -48,7 +50,8 @@ export function RapoOrgBoard({ name, sido, 탭, 있나, 정보, 후기, 사진 }
         <Link href={주소('info')} replace className="flex min-w-0 flex-1 items-center gap-[20px] rounded-[14px] active:opacity-80">
           <span className="flex size-[64px] shrink-0 items-center justify-center rounded-[14px] bg-[#ddecf2]">
             {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 「병원 기본 이미지」 */}
-            <img src="/rapo/orgs/hospital-40.webp" alt="" width={52} height={52} />
+            <img src={로고 ?? '/rapo/orgs/hospital-40.webp'} alt={로고 ? `${name} 로고` : ''} width={52} height={52}
+              className={로고 ? 'size-[56px] object-contain' : undefined} />
           </span>
           <span className="min-w-0 flex-1">
             <h1 className="break-keep text-[24px] font-bold leading-[32px] text-[#f4f6f8] [overflow-wrap:anywhere]">{name}</h1>
