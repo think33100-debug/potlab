@@ -158,7 +158,11 @@ function hs첨부주소(html, 바탕주소) {
       const g = 토막.match(new RegExp(이름 + '\\s*=\\s*["\']([^"\']*)["\']', 'i'));
       return g ? g[1] : '';
     };
-    const src = 집('src'); const alt = 집('alt');
+    const src = 집('src'); let alt = 집('alt');
+    /* ★ 2026-11-23 세중님 「그림 공고도 수집기가 스스로 읽고 있지 않아?」 — 설명이 alt 가 아니라 **title** 에 있는 꼴 (원광대학교병원 HS1506666763).
+       `<img src="/data/userfiles/<uuid>.jpg" title="%ED%98%84…채용공고문_20261123001.jpg">` — 주소 글자로 바뀐(퍼센트) 파일 이름입니다.
+       alt 가 비었으면 title 을 풀어 설명으로 씁니다. 그래야 「공고문」 글귀로 받고, 이름에 쪽 번호(001·002…)가 남아 여러 장을 이어 읽습니다 */
+    if (!alt) { const t = 집('title'); if (t) { try { alt = decodeURIComponent(t); } catch { alt = t; } } }
     if (!그림공고문인가({ src, alt, width: 집('width'), height: 집('height') })) continue;
     더하기(src, alt || '공고문 그림', true, null, true);
   }
@@ -217,6 +221,26 @@ function hs첨부주소(html, 바탕주소) {
   return [...모은것].map(([url, v]) => ({ url, name: v.name, 점수: v.점수,
     ...(v.받는법 ? { 받는법: v.받는법 } : {}) }))
     .sort((a, b) => b.점수 - a.점수);
+}
+
+/** **공고문이 그림 여러 장일 때 같은 묶음** (2026-11-23 · 원광대학교병원 HS1506666763 — 쪽마다 한 장, 넉 장).
+ *  첨부되메우기는 첨부 하나만 골라 읽습니다. 그림 공고문은 1쪽에 자격, 2쪽에 근무조건·보수가 있어 한 장만 읽으면 반쪽입니다.
+ *  고른 것이 그림이면 **같은 자리(주소의 폴더)에 있고 이름이 숫자만 다른 그림**을 쪽 차례(이름 차례)로 돌려줍니다 — 고른 것 포함, 많아야 6장.
+ *  쪽에 박힌 그림(`#본문그림-N`)은 주소가 쪽 주소라 여기 안 듭니다 */
+const 그림파일꼴 = /[.](jpe?g|png|webp)(?:$|[?#&])/i;
+function 그림쪽묶음(첨부들, 고른것) {
+  const 그림인가 = (a) => !!a && !/#본문그림-/.test(String(a.url || ''))
+    && (그림파일꼴.test(String(a.url || '')) || 그림파일꼴.test(String(a.name || '')));
+  if (!그림인가(고른것)) return [];
+  const 자리 = (u) => String(u || '').split(/[?#]/)[0].replace(/[^/]*$/, '');
+  const 꼴 = (n) => String(n || '').replace(/\d+/g, '#');
+  const 묶음 = (첨부들 || []).filter((a) => 그림인가(a) && 자리(a.url) === 자리(고른것.url) && 꼴(a.name) === 꼴(고른것.name));
+  if (!묶음.some((a) => a.url === 고른것.url)) 묶음.push(고른것);
+  if (묶음.length < 2) return [];
+  /* 이름이 다 같으면(설명 없는 그림 — 「공고문 그림」) 받은 차례 그대로 · 다르면 숫자를 수로 견줘 쪽 차례 */
+  const 이름다름 = new Set(묶음.map((a) => String(a.name || ''))).size > 1;
+  const 차례 = 이름다름 ? [...묶음].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ko', { numeric: true })) : 묶음;
+  return 차례.slice(0, 6);
 }
 
 /* 쪽에 박힌 그림 — `<img … src="data:image/png;base64, …">` (2026-11-19 · 인천세종병원) */
@@ -311,6 +335,22 @@ if (require.main === module && process.argv.includes('--자기점검')) {
   봐('메뉴 글귀(채용안내)는 뺀다', 그림공고문인가({ src: '/x/m.jpg', alt: '채용안내' }) === false);
   봐('ENGLISH 는 뺀다', 그림공고문인가({ src: '/x/e.jpg', alt: 'ENGLISH' }) === false);
   봐('공고문 글귀는 받는다', 그림공고문인가({ src: '/x/n.jpg', alt: '2026년 채용 공고문' }) === true);
+  /* 2026-11-23 설명이 title 에 퍼센트 글자로 (원광대학교병원 HS1506666763 — 넉 장) */
+  {
+    const t = encodeURIComponent('현대자동차(주)의원물리치료사채용공고문_2026112300');
+    const 쪽4 = [1, 2, 3, 4].map((n) => '<img src="/data/userfiles/aaaa-' + n + '.jpg" title="' + t + n + '.jpg" />').join('<br>') + '<img src="/data/builder/logo.jpg" title="logo">';
+    const 잡 = hs첨부주소(쪽4, 'https://www.wkuh.org/recruit/jobs/recruit_notice.do?rc_idx=1');
+    {
+      const 뒤섞음 = [잡[2], 잡[0], 잡[3], 잡[1]];
+      const 묶 = 그림쪽묶음(뒤섞음, 뒤섞음[0]);
+      봐('그림 넉 장을 쪽 차례로 묶는다', 묶.length === 4 && 묶.map((a) => a.name.slice(-7, -4)).join(',') === '001,002,003,004');
+      봐('pdf 를 골랐으면 묶지 않는다', 그림쪽묶음([...잡, { url: 'https://www.wkuh.org/data/a.pdf', name: '공고문.pdf' }], { url: 'https://www.wkuh.org/data/a.pdf', name: '공고문.pdf' }).length === 0);
+      봐('그림이 한 장이면 묶지 않는다', 그림쪽묶음([잡[0]], 잡[0]).length === 0);
+      봐('다른 폴더·다른 이름 꼴은 안 묶는다', 그림쪽묶음([잡[0], { url: 'https://www.wkuh.org/other/x.jpg', name: 잡[1].name }, { url: 'https://www.wkuh.org/data/userfiles/y.jpg', name: '지원서 양식.jpg' }], 잡[0]).length === 0);
+      봐('쪽에 박힌 그림은 안 묶는다', 그림쪽묶음([{ url: 'https://a.kr/v?id=1#본문그림-1-abc', name: '공고문 그림.png' }, { url: 'https://a.kr/v?id=1#본문그림-2-abd', name: '공고문 그림.png' }], { url: 'https://a.kr/v?id=1#본문그림-1-abc', name: '공고문 그림.png' }).length === 0);
+    }
+    봐('title 의 공고문 이름으로 그림 넉 장을 받는다', 잡.length === 4 && 잡.every((a) => /채용공고문_2026112300[1-4][.]jpg$/.test(a.name)) && /userfiles[/]aaaa-1[.]jpg$/.test(잡.map((a) => a.url).sort()[0]));
+  }
   봐('아이콘 길은 뺀다', 그림공고문인가({ src: '/img/icon_file.gif', alt: '채용 공고문', width: 900, height: 900 }) === false);
   봐('웹접근성 인증서는 공고가 아니다', 공고아닌첨부('wa_qualith_certificate.pdf') === true);
   /* 2026-11-19 쪽에 박힌 그림 (인천세종병원 HS69368144 꼴) */
@@ -338,11 +378,11 @@ if (require.main === module && process.argv.includes('--자기점검')) {
   봐('#7 블라인드 채용 모집요강은 공고문', 점수('2026 블라인드 채용 모집요강.pdf') === 2);
   봐('#7 그냥 이름(cccc.hwp)은 그대로 1', 점수('cccc.hwp') === 1);
   봐('#7 입사지원서는 그대로 0', 점수('●충주의료원입사지원서.hwp') === 0);
-  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 15가지 · 공통 파일 가름 10가지');
+  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 15가지 · 그림 여러 장(title 이름 · 쪽 묶음) 6가지 · 공통 파일 가름 10가지');
   process.exit(틀림 ? 1 : 0);
 }
 
-module.exports = { hs첨부주소, 점수, 서식말, 공고아닌첨부, 그림공고문인가, 본문박힌그림 };
+module.exports = { hs첨부주소, 점수, 서식말, 공고아닌첨부, 그림공고문인가, 본문박힌그림, 그림쪽묶음 };
 
 /* ── 자기 점검 ───────────────────────────────────────────────── */
 if (require.main === module) {

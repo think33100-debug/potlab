@@ -32,7 +32,7 @@ import { 그누보드새주소, 고친주소 } from './첨부주소고치기.mjs
 import { 쓴메모리MB, 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
 import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이간격 } from './cleaneye-file.mjs';
 import { 첨부받기 as 나라일터첨부받기, 기본간격 as 나라일터간격 } from './gojobs-file.mjs';
-import { 점수, 본문박힌그림, 공고아닌첨부 } from './hosp/hs_files.js';
+import { 점수, 본문박힌그림, 공고아닌첨부, 그림쪽묶음 } from './hosp/hs_files.js';
 import { 칸검사들 } from './칸검사.mjs';
 
 /* ★ 2026-10-22 — 읽은 글에서 **널 글자와 홀로 남은 서러게이트를 뺍니다.**
@@ -633,6 +633,34 @@ for (const j of 볼것) {
 
   const k = await 첨부읽기(buf, 고른것.name || '공고문');
   초합 += k.초 || 0;
+
+  /* ★ 2026-11-23 세중님 「그림 공고도 수집기가 스스로 읽고 있지 않아?」 — **공고문이 그림 여러 장**이면 이어 읽습니다.
+     원광대학교병원(HS1506666763)은 공고문을 쪽마다 한 장씩 넉 장으로 올립니다 — 1쪽에 자격, 2쪽에 계약기간·근무지·보수.
+     하나만 골라 읽으면 반쪽이라, 같은 묶음(hosp/hs_files.js 그림쪽묶음() 한 자리)의 나머지를 쪽 차례로 읽어 글을 잇습니다.
+     받는 틈(틈두고받기)은 그대로 지킵니다 · 많아야 6장 · 한 장이 안 읽혀도 읽힌 것만으로 갑니다 · 읽음 표시는 장마다 남깁니다 */
+  if (!받음클린아이) {
+    const 묶음 = 그림쪽묶음(쓸만한, 고른것);
+    if (묶음.length > 1) {
+      const 쪽글 = new Map([[고른것.url, { 글: k.글 || '', md: k.md || k.글 || '' }]]);
+      for (const 쪽 of 묶음) {
+        if (쪽.url === 고른것.url) continue;
+        const 고친쪽 = 고친주소(쪽.url, j.url || '');
+        if (고친쪽.버릴것 || (고친쪽.받는법 && 고친쪽.받는법.꼴 === 'POST못함')) continue;
+        const 받은쪽 = await 틈두고받기(고친쪽.url, 고친쪽.받는법);
+        if (받은쪽.왜 || !받은쪽.buf) { 표시할것.push({ job_id: j.id, url: 쪽.url, 왜: 받은쪽.왜 || '못 받음' }); continue; }
+        const k쪽 = await 첨부읽기(받은쪽.buf, 쪽.name || '공고문');
+        초합 += k쪽.초 || 0;
+        표시할것.push({ job_id: j.id, url: 쪽.url, 왜: k쪽.글 ? '' : (k쪽.왜 || '빈손') });
+        if (k쪽.글) 쪽글.set(쪽.url, { 글: k쪽.글, md: k쪽.md || k쪽.글 });
+      }
+      const 이은 = 묶음.map((쪽) => 쪽글.get(쪽.url)).filter((x) => x && x.글);
+      if (이은.length > 1 || (이은.length === 1 && !k.글)) {
+        k.글 = 이은.map((x) => x.글).join('\n\n');
+        k.md = 이은.map((x) => x.md).join('\n\n');
+        console.log('  그림 공고문 ' + 묶음.length + '장 가운데 ' + 이은.length + '장을 이어 읽었습니다 · ' + j.id);
+      }
+    }
+  }
   if (!k.글) {
     빈손++; 한줄.왜 = k.왜 || '빈손';
     빈손까닭.set(한줄.왜, (빈손까닭.get(한줄.왜) ?? 0) + 1);
