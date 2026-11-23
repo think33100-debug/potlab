@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useAuth } from '@/app/auth';
+import { browserSupabase } from '@/lib/supabase-browser';
 
 /* 재방문 근사치 — 브라우저 자기보고 (2026-11-18 · 멘토-5-2 · 사업계획서 12/1).
 
@@ -105,8 +106,30 @@ async function 보내기(t: string, admin: boolean) {
   쓰기(뒤);
 }
 
+/* ★ 2026-11-24 — 회원 재방문 (세중님 「같은 아이디가 다시 들어왔나」 · sql/초안_1124/회원_재방문.sql).
+   위 브라우저 근사치와 따로, **회원 한 명이 들어온 한국 날짜**를 하루 한 줄 회원방문일 표에 넣습니다.
+   담는 것은 회원 번호·날짜·관리자 표시뿐입니다(시각·화면·기기 없음). 읽는 사람은 관리자뿐이고,
+   DB 규칙이 「오늘 · 자기 줄 · 관리자 표시가 참값」만 받습니다. 같은 날 두 번째는 DB 가 막습니다(23505).
+   이 브라우저가 오늘 이미 찍었으면 다시 안 보냅니다 — 저장이 막힌 창은 이 탭이 열려 있는 동안 한 번만 */
+const 방문키 = 'rapo.memberday';
+let 찍은날 = '';
+
+async function 회원방문찍기(uid: string, admin: boolean, 오늘: string) {
+  const 표 = uid + ':' + 오늘;
+  if (찍은날 === 표) return;
+  try { if (localStorage.getItem(방문키) === 표) { 찍은날 = 표; return; } } catch { /* 저장 막힘 — 아래로 */ }
+  찍은날 = 표;   // 보내는 중에 다시 부르지 않게 먼저 찍습니다
+  const { error } = await browserSupabase().from('회원방문일').insert({ profile_id: uid, 날: 오늘, 제외: admin });
+  if (error && error.code !== '23505') {
+    찍은날 = '';   // 실패 — 다음에 다시 해 봅니다
+    return;
+  }
+  try { localStorage.setItem(방문키, 표); } catch { /* 저장 막힘 — 이 탭에서만 기억합니다 */ }
+}
+
 export function RevisitMark() {
-  const { loading, who, isAdmin } = useAuth();
+  const { loading, who, isAdmin, session } = useAuth();
+  const uid = session?.user?.id ?? '';
 
   useEffect(() => {
     if (loading || who !== '회원') return;
@@ -114,6 +137,7 @@ export function RevisitMark() {
     const 살피기 = () => {
       if (document.visibilityState === 'hidden') return;
       const 오늘 = 한국날();
+      if (uid) void 회원방문찍기(uid, isAdmin, 오늘);
       let r = 읽기();
       if (r === undefined) return;               // 저장을 못 씀 → 아무것도 안 보냄
       if (r === null || 날차(r.first, 오늘) < 0) {
@@ -127,7 +151,7 @@ export function RevisitMark() {
     살피기();
     document.addEventListener('visibilitychange', 살피기);
     return () => document.removeEventListener('visibilitychange', 살피기);
-  }, [loading, who, isAdmin]);
+  }, [loading, who, isAdmin, uid]);
 
   return null;
 }
