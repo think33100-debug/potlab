@@ -169,7 +169,8 @@ async function 공시보수(id) {
 }
 /* 지난 채용 경쟁률 — 회원 화면 공고 상세와 같은 DB 함수 공고경쟁률요약() (2026-11-18 세중님 「기간 상관없이 같은 직군이면 무조건 · 장애 전형 제외」)
    고르는 규칙은 reel-data.mjs 의 경쟁률고르기() 한 자리 */
-const 급여예외 = (() => { try { return JSON.parse(fs.readFileSync(path.join(여기, '급여예외.json'), 'utf8')).map((x) => x.id); } catch { return []; } })();
+const 급여예외줄 = (() => { try { return JSON.parse(fs.readFileSync(path.join(여기, '급여예외.json'), 'utf8')); } catch { return []; } })();
+const 급여예외 = 급여예외줄.map((x) => x.id);
 /* 공고 손질 — 원문에 없는 칸을 「공고문 확인」으로 · 근무지가 공고 낸 기관과 다를 때 근무지 (2026-11-23 원광대 · 세중님이 정한 공고만) */
 const 공고손질 = (() => { try { return Object.fromEntries(JSON.parse(fs.readFileSync(path.join(여기, '공고손질.json'), 'utf8')).map((x) => [x.id, x])); } catch { return {}; } })();
 /* 대상 예외 — 1층·병상·급여 기준 밖이어도 세중님이 직접 고른 공고만 (2026-11-19 서울장애인종합복지관) · 급여 규칙은 그대로 탑니다 */
@@ -243,6 +244,8 @@ for (const 공고 of 후보) {
   공고.경쟁률들 = await 경쟁률들(공고.id);
   /* 급여 예외 — 원문에 급여가 없어도 세중님이 「만들자」 한 공고만 「내규에 따름」으로 (2026-11-19 서울아산) */
   공고.급여예외 = 급여예외.includes(공고.id);
+  /* 줄에 「급여글」이 있으면 그 말 그대로 (2026-11-23 세중님 부천성모 「내부협의로 하고」) · 없으면 「내규에 따름」 */
+  공고.급여예외글 = 급여예외줄.find((x) => x.id === 공고.id)?.급여글 || null;
   const 손 = 공고손질[공고.id];
   if (손?.모집인원 && 공고.headcount == null && !공고.모집인원글) 공고.모집인원글 = 손.모집인원;
   if (손?.근무지) 공고.근무지글 = 손.근무지;
