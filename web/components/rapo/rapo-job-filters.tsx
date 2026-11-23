@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useAuth } from '@/app/auth';
 import { setAfterLogin } from '@/lib/after-login';
 import { CompareNotify } from '@/components/compare-notify';
-import { 고용형태들, 기관분류들, 기본정렬, 분류쿠키, 시도글, 지역칩들, 지역칩읽기 } from '@/lib/rapo-job-options';
+import { 고용형태들, 기관분류들, 기본정렬, 분류쿠키, 시도글, 지역칩들, 지역칩읽기, 칩누름 } from '@/lib/rapo-job-options';
 import { JOB_GROUPS, type JobGroup } from '@/lib/who';
 import { RapoButton, RapoChip, RapoMaskIcon } from './rapo-ui';
 
@@ -250,14 +250,16 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
 
           {탭 === '지역' && (
             /* 여러 개 (2026-11-19 세중님). 칩이 다 켜진 것 = 전국.
-               「전국」을 누르면 다 꺼지고, 다시 누르면 다 켜집니다 (2026-11-21 세중님) · 칩 하나는 눌러서 켜고 끕니다 */
+               「전국」을 누르면 다 꺼지고, 다시 누르면 다 켜집니다 (2026-11-21 세중님) · 칩 하나는 눌러서 켜고 끕니다.
+               ★ 2026-11-23 세중님 「뭘 눌러도 전국이 체크된다」 — **전국인 채로 지역 하나를 누르면 그 지역만** 고릅니다
+               (전에는 그 지역만 꺼지고 15곳이 남았습니다). 규칙은 lib/rapo-job-options.ts 칩누름() 한 자리 · 기관 분류도 같은 규칙 */
             <div className="flex flex-col gap-(--rapo-dimension-x3)">
               <여럿안내 제목="지역" />
               <div role="group" aria-label="지역" className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
                 <RapoChip label="전국" on={지역다} onClick={() => set지역(지역다 ? [] : [...지역칩들])} />
                 {지역칩들.map((s) => (
                   <RapoChip key={s} label={s} on={지역.includes(s)}
-                    onClick={() => set지역(지역.includes(s) ? 지역.filter((x) => x !== s) : 지역칩들.filter((x) => x === s || 지역.includes(x)))} />
+                    onClick={() => set지역(칩누름(지역칩들, 지역, s))} />
                 ))}
               </div>
             </div>
@@ -273,13 +275,14 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
                   아무것도 안 고른 것 = 전체(거름 없음)이고, 그때는 「전체」와 모든 분류가 다 켜진 모양으로 그립니다.
                   전체에서 하나를 누르면 그것만 · 다 골라지면 다시 전체로 돌아옵니다 */}
               {/* 2026-11-21 세중님 「전체 누르면 다 지워지고 다시 누르면 다 생기게」 — 칩이 다 켜진 것 = 전체(거름 없음).
-                  옛 「전체에서 하나 누르면 그것만」은 거둡니다 */}
+                  옛 「전체에서 하나 누르면 그것만」은 거둡니다
+                  ★ 2026-11-23 — 다시 살립니다(지역과 같은 까닭 · 칩누름() 한 자리). 「전체」 칩은 그대로: 누르면 다 꺼지고 다시 누르면 다 켜짐 */}
               <여럿안내 제목="기관 분류" />
               <div role="group" aria-label="기관 분류" className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
                 <RapoChip label="전체" on={분류다} onClick={() => set분류(분류다 ? [] : [...기관분류들])} />
                 {기관분류들.map((k) => (
                   <RapoChip key={k} label={k} on={분류.includes(k)}
-                    onClick={() => set분류(분류.includes(k) ? 분류.filter((x) => x !== k) : 기관분류들.filter((x) => x === k || 분류.includes(x)))} />
+                    onClick={() => set분류(칩누름(기관분류들, 분류, k))} />
                 ))}
               </div>
               {/* 마감 — 「채용 시 마감」(사람을 뽑으면 닫는 공고) 빼기 (2026-11-21 세중님) */}
