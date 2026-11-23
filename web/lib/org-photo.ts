@@ -19,7 +19,7 @@ export type 기관사진 = {
   기관번호: string;
   ref?: string;
   이름들: string[];
-  /* 사진을 붙일 직군 — null 이면 그 기관 모든 공고 */
+  /* 사진을 붙일 직군 — null 이면 그 기관 모든 공고 (11/23 세중님 「모든 공고에」 — 기본은 null) */
   직군: string | null;
   설명: string;
   배경: 그림;
