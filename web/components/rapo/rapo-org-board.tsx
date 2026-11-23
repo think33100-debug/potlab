@@ -18,8 +18,10 @@ import { 어둠 } from './rapo-community';
 
 export type 병원탭 = 'info' | 'talk' | 'review';
 
-export function RapoOrgBoard({ name, sido, 탭, 있나, 정보, 후기 }: {
+export function RapoOrgBoard({ name, sido, 탭, 있나, 정보, 후기, 사진 }: {
   name: string; sido: string | null; 탭: 병원탭; 있나: boolean;
+  /* 기관 사진 띠 (2026-11-23 세중님 시범 · lib/org-photo.ts) — 앱 바 바로 아래. 없으면 안 그립니다 */
+  사진?: ReactNode;
   /* 「근무 후기」 탭 안 (2026-11-15 · components/rapo/rapo-org-reviews.tsx) — 없으면 옛 「준비 중」 */
   후기?: ReactNode;
   /* 「병원 정보」 탭 안 — 서버가 그려서 넘깁니다(app/orgs/page.tsx). 숫자가 하나도 없으면 null */
@@ -37,6 +39,8 @@ export function RapoOrgBoard({ name, sido, 탭, 있나, 정보, 후기 }: {
         </Link>
         <p className="min-w-0 flex-1 text-[18px] font-bold leading-[26px] text-[#f6f8fa]">병원 게시판</p>
       </header>
+
+      {사진}
 
       {/* 병원 프로필 · 탐색 (1312:7741) — 124 높이 · 그림 64 · 이름 24 Bold · 「병원 게시판」 · 책갈피 48 */}
       <section className="flex min-h-[124px] items-center gap-[20px] bg-[#1b3344] px-[22px] py-[20px]">

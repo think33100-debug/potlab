@@ -18,6 +18,7 @@ import { RapoJobRow, type RapoJob } from './rapo-job-row';
 import { RapoPastJobsBrief } from './rapo-past-jobs';
 import { 지난공고주소, type 지난공고묶음 } from '@/lib/past-jobs';
 import { RapoButton, RapoDivider } from './rapo-ui';
+import { RapoOrgPhoto, RapoPhotoCredit } from './rapo-org-photo';
 
 /* 공고 상세 한 화면을 **값만 받아** 그립니다 (2026-11-11).
    실제 공고(app/jobs/[id]/page.tsx)와 디자인 견본(app/design-preview/job)이 같이 씁니다 —
@@ -61,6 +62,8 @@ export type RapoJobDetailProps = {
   보수?: 병원보수 | null;
   /* 이 병원 지난 공고 (2026-11-22 세중님) — 회원만 · 두 줄 · 더 있으면 병원 화면으로 */
   지난공고?: 지난공고묶음 | null;
+  /* 기관 사진 (2026-11-23 세중님 시범 · lib/org-photo.ts) — 위에 띠, 출처는 맨 아래 작게. 없으면 안 그립니다 */
+  사진?: { src: string; alt: string; 출처: { 누가: string; 어디: string; 주소: string } } | null;
 };
 
 /* 2026-11-14 — 공고에 금액이 없을 때 보수 칸에 올릴 공시 연봉. 아래 「이 병원 연봉」 칸과 같은 이름·같은 값입니다 */
@@ -214,6 +217,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       } />
 
       <main>
+        {p.사진 && <RapoOrgPhoto src={p.사진.src} alt={p.사진.alt} />}
         <RapoDetailIdentity {...p.identity} />
 
         {/* 가입을 덜 마친 회원만 흐립니다. 비회원은 DB 가 본문을 안 주므로 덮을 것이 없습니다 */}
@@ -270,6 +274,9 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         )}
 
         {p.id && <div className="px-(--rapo-dimension-x5)"><AdminJobTools id={p.id} /></div>}
+
+        {/* 사진 출처 — 화면 맨 아래 작게 (2026-11-23 세중님) */}
+        {p.사진 && <RapoPhotoCredit {...p.사진.출처} />}
       </main>
 
       {/* 마지막 줄이 고정 행동(112 + 안전 여백, 마감이면 안내 한 줄 더)에 가리지 않게 */}
