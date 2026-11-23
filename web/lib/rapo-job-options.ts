@@ -38,6 +38,17 @@ export function 시도글(칩들: readonly string[]): string | null {
   return 시도.length ? 시도.join(',') : null;
 }
 
+/** 여러 개 고르는 칩을 **한 번 눌렀을 때** 켜진 목록 (지역 · 기관 분류가 같이 씁니다 · 2026-11-23).
+    세중님 「뭘 눌러도 전국이 체크된다」 — 처음엔 칩이 다 켜져 있어서(= 전국), 원하는 지역을 누르면 그 지역만 **꺼지고**
+    나머지 15곳이 남았습니다(회원 제보 화면 「15개 지역」). 고르려고 누른 것이 빼기가 된 것입니다.
+      다 켜진 상태(전국·전체)에서 하나를 누르면  → **그것만** 켭니다
+      그 밖에는                                  → 누른 칩을 켜고 끕니다 (차례는 `모두` 차례 · 다 켜지면 다시 전국·전체)
+    「전국」·「전체」 칩 자체는 전과 같습니다 — 누르면 다 꺼지고 다시 누르면 다 켜집니다 (11/21 세중님) */
+export function 칩누름<T extends string>(모두: readonly T[], 켜진: readonly string[], 누른: T): T[] {
+  if (켜진.length >= 모두.length) return [누른];
+  return 켜진.includes(누른) ? 모두.filter((x) => x !== 누른 && 켜진.includes(x)) : 모두.filter((x) => x === 누른 || 켜진.includes(x));
+}
+
 /** 주소의 sido= 글 → 켜진 칩 이름들 (차례는 지역칩들 차례). 「대구」나 「경북」 하나만 와도(옛 주소) 「대구·경북」이 켜집니다 */
 export function 지역칩읽기(글: string | null | undefined): string[] {
   if (!글) return [];
