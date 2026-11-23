@@ -27,11 +27,12 @@
  *   앞 바이트까지 본 것이고(`%PDF`), 나머지는 **버리는** 규칙입니다.
  */
 
-/** 뷰어 주소에 든 참 파일 경로 — `viewer.html?file=/경로/파일.PDF` */
+/** 뷰어 주소에 든 참 파일 경로 — `viewer.html?file=/경로/파일.PDF`
+    ★ 2026-11-23 — `pdf.jsp?pdfFilePath=/경로/파일.pdf` 도 (대전세종충남 공공어린이재활병원 dpcrh · 그 주소는 274바이트 HTML 을 줌) */
 export function 뷰어속참경로(주소) {
   const s = String(주소 || '');
-  if (!/viewer\.html/i.test(s)) return null;
-  const m = s.match(/[?&]file=([^&]+)/i);
+  if (!/(viewer\.html|pdf\.jsp)/i.test(s)) return null;
+  const m = s.match(/[?&](?:file|pdfFilePath)=([^&]+)/i);
   if (!m) return null;
   let v = m[1];
   try { v = decodeURIComponent(v); } catch { /* 그대로 */ }
@@ -179,6 +180,12 @@ if (import.meta.url === ('file://' + process.argv[1]) || process.argv[1]?.endsWi
     v.url === 'https://www.jejunuh.co.kr/thumbnail/rcrutPbanc/x_202609290104075100.PDF');
   봐('뷰어 — %2F 로 감싼 것도 푼다',
     고친주소('https://a.kr/web/viewer.html?file=%2Fupload%2Fa.pdf').url === 'https://a.kr/upload/a.pdf');
+  봐('pdf.jsp?pdfFilePath= 도 참 경로로 (세션 표 붙은 것 · dpcrh)',
+    고친주소('https://www.dpcrh.or.kr/tmpl/pdf.jsp;jsessionid=02BC5E116CA9928A09AB9410B04C911D?pdfFilePath=/thumbnail/crossuploader/BBS_20261120170011791Hc80.pdf').url
+      === 'https://www.dpcrh.or.kr/thumbnail/crossuploader/BBS_20261120170011791Hc80.pdf');
+  봐('세션 표 붙은 viewer.html 도 (dpcrh)',
+    고친주소('https://www.dpcrh.or.kr/module/pdf.js/web/viewer.html;jsessionid=02BC5E116CA9928A09AB9410B04C911D?file=/thumbnail/crossuploader/BBS_20261120170011791Hc80.pdf').url
+      === 'https://www.dpcrh.or.kr/thumbnail/crossuploader/BBS_20261120170011791Hc80.pdf');
 
   봐('그냥 파일 주소는 그대로',
     고친주소('https://cjmct.or.kr/board/download/syfsx/7141/file/1/8496/a/b/c.hwp').url
