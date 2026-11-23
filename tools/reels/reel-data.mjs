@@ -165,6 +165,7 @@ export function 릴스자료(공고, 기관 = null, { 오늘 = 오늘KST(), 사�
   const 마감글 = 날짜말(공고.apply_to, 공고.apply_to_time, 오늘);
   const 줄 = [
     { 이름: '직군', 값: 직군말 },
+    ...(공고.근무지글 ? [{ 이름: '근무지', 값: 공고.근무지글 }] : []),   /* 공고손질.json — 공고 낸 기관과 근무지가 다를 때 */
     { 이름: '고용형태', 값: 공고.employ_type || null },
     { 이름: '모집인원', 값: 공고.모집인원글 || (공고.headcount != null ? `${공고.headcount}명` : null) },
     { 이름: '접수마감', 값: 마감글, 강조: true },
@@ -341,7 +342,7 @@ const CTA꼴 = [
 
 export function 캡션({ 공고, 기관이름, 본이름 = null, 부서 = null, 직군, 직군말, 갈래, 마감글, 남은날, 분류, 기관, 메타 = [], 급여글 = null, 급여덧 = null, 급여높음 = false }) {
   const 인원 = 공고.모집인원글 || (공고.headcount != null ? 공고.headcount + '명' : null);
-  const 조건 = [직군말, 공고.employ_type, 인원].filter(Boolean).join(' · ');
+  const 조건 = [직군말, 공고.employ_type, 인원 === '공고문 확인' ? '인원은 공고문 확인' : 인원, 공고.근무지글 ? `근무지 ${공고.근무지글}` : null].filter(Boolean).join(' · ');
   /* 덩어리마다 한 줄 띄웁니다 — 문장 하나가 한 덩어리 (2026-11-17 세중님 「문장과 문장 사이 잘 띄어줘」).
      공고 정보 세 줄(기관 · 조건 · 접수)만 한 덩어리로 붙여 둡니다 */
   const 덩어리 = [
