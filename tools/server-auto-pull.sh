@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # 서버 자동 반영 (2026-11-08 세중님 「가」 결정)
 #
-# 크론이 매시 40분에 부릅니다 (HS3 수집은 정시 · 겹치지 않게).
+# 크론이 부릅니다 — 시각은 crontab 한 자리 (11/23 까지 매시 40분 · HS3 수집은 정시라 겹치지 않게).
+# 새 수집 설정이 들어오면 아래 「급행」 이 그 곳만 바로 수집합니다 (2026-11-23).
 # 하는 일 — origin/main 을 fast-forward 로만 받습니다. 그 밖은 하지 않습니다.
 #   · main 이 아니거나 추적 파일이 고쳐져 있으면(작업나무 더러움) 손대지 않고 끝냅니다.
 #     더러움은 05:00 tools/작업나무점검.mjs 가 따로 알립니다 (지침 8-10).
@@ -54,3 +55,22 @@ fi
 
 n=$(git rev-list --count "$before..HEAD")
 echo "$(now) PULLED ${before:0:7} -> $(git rev-parse --short HEAD) ($n commits)"
+
+# ── 급행 — 새 수집 설정이 들어오면 그 곳만 바로 수집 (2026-11-23 세중님 「바로 바로 들어올 수 있게 · 급행으로」) ──
+# 경쟁사 신호(땡큐오티 4319 등)로 만든 새 병원 설정(tools/hosp/cfgs/*.json)이 병합돼도
+# 정시 수집(매시 정각)과 첨부 읽기를 기다려야 해서 회원 화면까지 한두 시간이 걸렸습니다.
+# 이번 당기기에서 **새로 생긴** 설정 파일만 골라, 그 병원 이름으로 collect-hosp 를 한 번 돌립니다
+# (정시 크론 줄과 같은 꼴 · 첨부 읽기 포함 · 한 번에 3곳까지). 기록은 hosp.log 와 이 로그 한 줄.
+# 되돌림 — 이 덩어리를 지우거나 POTLAB_EXPRESS=0 으로 크론을 부르면 꺼집니다.
+if [ "${POTLAB_EXPRESS:-1}" = 1 ]; then
+  added=$(git diff --name-only --diff-filter=A "$before" HEAD -- 'tools/hosp/cfgs/*.json' | head -3)
+  for f in $added; do
+    nm=$("$NODE" -e "process.stdout.write(String(JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')).name||''))" "$f" 2>/dev/null)
+    if [ -z "$nm" ]; then echo "$(now) EXPRESS-SKIP no-name $f"; continue; fi
+    if [ "${POTLAB_EXPRESS_DRY:-0}" = 1 ]; then echo "$(now) EXPRESS-DRY $f · $nm"; continue; fi
+    ( set -a; . ./.env; set +a
+      POTJOB_ATTACH_WRITE=1 POTJOB_ATTACH_MAX=300 timeout -k 30 600 "$NODE" tools/collect-hosp.mjs "$nm" \
+        >> /home/ubuntu/log/hosp.log 2>&1 )
+    echo "$(now) EXPRESS $f · $nm · exit $?"
+  done
+fi
