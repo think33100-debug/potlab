@@ -1,7 +1,8 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, DEFAULT_COOKIE_OPTIONS } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { 가입중길, 길에있나, 비회원길 } from '@/lib/beta';
 import { GUEST_COOKIE } from '@/lib/guest-view';
+import { 굽기표, 굽는길, 로그인쿠키인가, 쿠키지문 } from '@/lib/keep-login';
 import { 색인되나 } from '@/lib/seo';
 import { 대표주소 } from '@/lib/site-url';
 
@@ -106,6 +107,29 @@ export async function middleware(req: NextRequest) {
      그 밖의 오류는 못 물어본 것이라 「모름」입니다 */
   const 아이디 = 비회원보기 ? null : ((data?.claims?.sub as string | undefined) ?? null);
   const 모름 = !비회원보기 && !아이디 && !!error && error.name !== 'AuthSessionMissingError';
+
+  /* ★ 2026-11-23 세중님 「사파리 아직도 해결 안 되고 있다」 — 로그인 쿠키를 **서버가 다시 구워 줍니다** (lib/keep-login.ts).
+     로그인은 브라우저에서 끝나서 쿠키를 자바스크립트가 씁니다. 사파리는 그런 쿠키를 7일까지만 둡니다(400일로 적어도) —
+     서버 응답으로 쓴 쿠키는 안 줄입니다. 그래서 회원이 확인된 요청에서 **같은 값을 한 번 더** 내려보냅니다.
+     값이 바뀔 때마다 한 번(로그인 직후 · 토큰 갱신 직후) — 지문이 표(굽기표)와 같으면 안 씁니다.
+     빈 값(지워지는 조각)은 건드리지 않습니다 — 건드리면 지운 쿠키가 되살아납니다 */
+  if (아이디) {
+    const 지금쿠키 = req.cookies.getAll();
+    const 지문 = 쿠키지문(지금쿠키);
+    if (지문 && req.cookies.get(굽기표)?.value !== 지문) {
+      지금쿠키.filter((c) => 로그인쿠키인가(c.name) && c.value)
+        .forEach((c) => res.cookies.set(c.name, c.value, DEFAULT_COOKIE_OPTIONS));
+      /* 표는 비밀이 아닙니다(값이 바뀌었나만 가리는 8글자) — 화면에서도 읽혀서 「구워졌나」를 눈으로 확인할 수 있습니다 */
+      res.cookies.set(굽기표, 지문, DEFAULT_COOKIE_OPTIONS);
+    }
+  }
+  /* 굽는길(/auth/keep)은 화면이 없습니다 — 브라우저가 토큰을 스스로 갱신한 뒤 한 번 부르는 자리(lib/supabase-browser.ts).
+     위에서 구운 쿠키만 싣고 204 로 답합니다. 비회원이 불러도 아무것도 안 나갑니다 */
+  if (path === 굽는길) {
+    const 답 = new NextResponse(null, { status: 204 });
+    답.headers.set('Cache-Control', 'private, no-store');
+    return 쿠키싣기(답);
+  }
 
   if (!아이디) {
     if (!모름 && 길에있나(path, 비회원길)) return 쿠키싣기(res);
