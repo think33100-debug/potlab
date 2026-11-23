@@ -1,0 +1,24 @@
+[
+  {
+    "기관번호": "HIRA:JDQ4MTYyMiM1MSMkMSMkMCMkODkkMzgxMzUxIzExIyQxIyQzIyQ2MiQzNjE4MzIjNTEjJDEjJDYjJDgz",
+    "ref": "rapo777_0005",
+    "이름들": [
+      "아주대학교병원"
+    ],
+    "직군": "작업치료사",
+    "설명": "아주대학교병원 건물 전경",
+    "배경": {
+      "파일": "org-7e2e618ac1-bg.jpg",
+      "sha256": "52b0e075af58d5dbf0de7da1bbfd8da996bc623ccc5681d4ee0ab8e97c56e297",
+      "출처글": "아주대학교병원 병원 누리집 보도자료",
+      "출처주소": "https://hosp.ajoumc.or.kr/board/commBoardNewsView.do?no=69294"
+    },
+    "로고": {
+      "파일": "org-7e2e618ac1-logo.png",
+      "sha256": "e6bc7a2115fb17d85ec5c195a98afd0f422d44a4070dca4edb9bd49d7a061e71",
+      "출처글": "아주대학교병원 병원 누리집",
+      "출처주소": "https://hosp.ajoumc.or.kr/"
+    },
+    "넣은날": "2026-11-23"
+  }
+]
