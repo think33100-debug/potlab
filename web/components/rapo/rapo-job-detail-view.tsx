@@ -8,13 +8,15 @@ import { JobSave, RapoSaveBar } from '@/components/job-save';
 import { JobVeil } from '@/components/job-veil';
 import { LoginFirst } from '@/components/login-first';
 import { ShareButtons } from '@/components/share-buttons';
-import { 내규말 } from '@/lib/job-state';
+import { 금액없는보수말, 자격나누기 } from '@/lib/job-state';
 import type { Who } from '@/lib/supabase-server';
 import {
   RapoDetailHeader, RapoDetailIdentity, RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoKeyRow,
   RapoPayCard, RapoPeriodCard, RapoSectionGap, RapoStickyActions, 지원단추꼴, 잠긴단추꼴, type 경쟁률줄, type 모집상태, type 병원보수, type 공시한줄,
 } from './rapo-job-detail';
 import { RapoJobRow, type RapoJob } from './rapo-job-row';
+import { RapoPastJobsBrief } from './rapo-past-jobs';
+import { 지난공고주소, type 지난공고묶음 } from '@/lib/past-jobs';
 import { RapoButton, RapoDivider } from './rapo-ui';
 
 /* 공고 상세 한 화면을 **값만 받아** 그립니다 (2026-11-11).
@@ -39,6 +41,7 @@ export type RapoJobDetailProps = {
   기간: { 달: string | null; 날: string | null; 기간: string; 강조: string | null; 덧말: string | null };
   접수방법: { 낱말: string[]; 채용페이지: string | null };
   모집인원없음: boolean;
+  모집인원덧말?: string | null;
   기관: string;
   주소: string | null;
   비슷한: RapoJob[];
@@ -56,6 +59,8 @@ export type RapoJobDetailProps = {
   경쟁률?: 경쟁률줄[];
   /* 이 병원 연봉 — 알리오 공시 또는 국민연금 추정 (2026-11-12 · 금고 SQL_1113/P) */
   보수?: 병원보수 | null;
+  /* 이 병원 지난 공고 (2026-11-22 세중님) — 회원만 · 두 줄 · 더 있으면 병원 화면으로 */
+  지난공고?: 지난공고묶음 | null;
 };
 
 /* 2026-11-14 — 공고에 금액이 없을 때 보수 칸에 올릴 공시 연봉. 아래 「이 병원 연봉」 칸과 같은 이름·같은 값입니다 */
@@ -75,7 +80,9 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
      회원만 남는 것: 저장(로그인으로 보냄) · 가입 덜 마친 회원 흐림(JobVeil) · 비슷한 공고(목록 창구가 회원만) */
   const 봄 = p.who !== '모름';
   /* 공고에 금액이 없으면 공시 연봉을 보수 칸으로 올립니다 — 올렸으면 아래 「병원 한눈에」 연봉 칸은 다시 안 그립니다 */
-  const 위공시 = 봄 && p.pay.값 === 내규말 ? 공시줄(p.보수) : null;
+  const 위공시 = 봄 && 금액없는보수말(p.pay.값) ? 공시줄(p.보수) : null;
+  /* 필수와 우대를 가릅니다 (2026-11-19 세중님 · lib/job-state.ts 자격나누기 한 자리) */
+  const 자격 = 자격나누기(p.지원자격);
 
   const 본문 = (
     <>
@@ -85,10 +92,19 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         <RapoKeyRow icon="/rapo/detail/file-text-20.svg" label="필수 자격">
           {!봄 ? (
             <p className="rapo-type-t5-bold">로그인 후 볼 수 있어요</p>
-          ) : p.지원자격 ? (
-            <p className={`${p.지원자격.length > 40 ? 'rapo-type-article-body' : 'rapo-type-t5-bold'} whitespace-pre-wrap break-keep [overflow-wrap:anywhere]`}>
-              {p.지원자격}
-            </p>
+          ) : 자격.필수 || 자격.우대 ? (
+            <>
+              {자격.필수 ? (
+                <p className={`${자격.필수.length > 40 ? 'rapo-type-article-body' : 'rapo-type-t5-bold'} whitespace-pre-wrap break-keep [overflow-wrap:anywhere]`}>
+                  {자격.필수}
+                </p>
+              ) : <원문칸 url={p.url} />}
+              {자격.우대 && (
+                <p className="rapo-type-t3-regular mt-(--rapo-dimension-x1) whitespace-pre-wrap break-keep [overflow-wrap:anywhere] text-(color:--rapo-color-fg-neutral-muted)">
+                  우대 · {자격.우대}
+                </p>
+              )}
+            </>
           ) : (
             <원문칸 url={p.url} />
           )}
@@ -140,6 +156,18 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
         </>
       )}
 
+      {/* 이 병원 지난 공고 — 병원 한눈에 바로 아래 (2026-11-22 세중님 「언제 · 고용형태 · 몇 명 · 직군 간략하게 · 보기는 2개만」) */}
+      {p.지난공고 && p.지난공고.줄.length > 0 && (
+        <>
+          <RapoSectionGap />
+          <RapoPastJobsBrief 줄={p.지난공고.줄} 더보기={
+            p.지난공고.전체 > p.지난공고.줄.length && p.지난공고.기관이름 ? (
+              <RapoButton href={지난공고주소(p.지난공고.기관이름)} tone="outline" full>병원 둘러보기에서 지난 공고 전부 보기</RapoButton>
+            ) : undefined
+          } />
+        </>
+      )}
+
       <RapoSectionGap />
 
       {/* 07 지원 방법 */}
@@ -147,7 +175,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
       <RapoDetailSection title="지원 방법">
         <RapoPeriodCard {...p.기간} />
         {p.마감알림 && p.id && <JobDeadlineNotify id={p.id} />}
-        {봄 && (p.접수방법.낱말.length > 0 || p.모집인원없음) && (
+        {봄 && (p.접수방법.낱말.length > 0 || p.모집인원없음 || !!p.모집인원덧말) && (
           <div className="flex flex-col gap-(--rapo-dimension-x3)">
             {p.접수방법.낱말.length > 0 && (
               <RapoGuideRow label="접수 방법">
@@ -159,6 +187,7 @@ export function RapoJobDetailView(p: RapoJobDetailProps) {
               </RapoGuideRow>
             )}
             {p.모집인원없음 && <RapoGuideRow label="모집인원"><원문칸 url={p.url} /></RapoGuideRow>}
+            {!p.모집인원없음 && p.모집인원덧말 && <RapoGuideRow label="모집인원"><span className="break-keep">{p.모집인원덧말}</span></RapoGuideRow>}
           </div>
         )}
         <RapoDivider />

@@ -19,6 +19,14 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+/* 2026-11-20 개발 환경(dev → prd) — 이 배포가 **어느 DB** 를 보는지 밖에서 확인하는 자리.
+   미리보기(preview)는 개발 DB, 운영(production)은 운영 DB 여야 합니다.
+   프로젝트 이름은 화면 코드에 이미 실려 나가는 공개 값이고, 앞 6글자만 냅니다 */
+function 디비이름() {
+  try { return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').hostname.split('.')[0].slice(0, 6); }
+  catch { return ''; }
+}
+
 export async function GET() {
   const sha = process.env.VERCEL_GIT_COMMIT_SHA ?? '';
   return NextResponse.json({
@@ -26,5 +34,6 @@ export async function GET() {
     짧게: sha.slice(0, 7),
     갈래: process.env.VERCEL_GIT_COMMIT_REF ?? '',
     자리: process.env.VERCEL_ENV ?? 'local',
+    디비: 디비이름(),
   }, { headers: { 'cache-control': 'no-store' } });
 }

@@ -147,6 +147,9 @@ if (!판.됨) {
 }
 
 /* ── ② 목록 한 번 ─────────────────────────────────────────── */
+/* ★ 2026-11-21 세중님 「각 동작마다 1~2초」 — 두 요청(robots.txt · 목록) 사이를 1~2초 쉽니다.
+   한 바퀴에 요청은 이 둘뿐이고, 바퀴는 1시간에 한 번입니다 */
+await new Promise((끝) => setTimeout(끝, 1000 + Math.floor(Math.random() * 1000)));
 const r = await fetch(목록주소, { headers: { 'User-Agent': UA } });
 if (!r.ok) {
   console.error('② 목록 HTTP ' + r.status + ' · 응답 앞 500자 — '

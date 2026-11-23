@@ -6,6 +6,8 @@
                                                  소리 없는 릴스 + 캡션을 메일로 → 휴대폰 인스타 앱에서 인기 가요를 골라 올림
                                                  (API 로는 인스타 음악을 못 붙이고, 가요를 파일에 넣으면 저작권 검사에 걸립니다)
    node tools/reels/run.mjs --올리기             열쇠(IG_USER_ID · IG_ACCESS_TOKEN)가 있을 때만 올립니다 (저작권 없는 곡용)
+   node tools/reels/run.mjs --메일 --카드자동    ★ 2026-11-21 세중님 — 메일은 그대로 보내고, **사진 대조를 통과한 공고**(job_posts.뽑은값.사진대조.통과)의
+                                                 카드뉴스는 확인 없이 올립니다 (올리기.mjs --카드 --실행). 통과 표시가 없으면 전처럼 「확인 대기」
    node tools/reels/run.mjs --id 306936          그 공고 하나만 (견본 · 다시 만들기)
    node tools/reels/run.mjs --확인만 --며칠 30   후보 전부의 원문만 열어 보고 숫자를 찍음 (만들기·메일·기록 없음)
    선택  --최대 2 (한 바퀴 최대 편수) · --며칠 3 (최근 며칠 게시분) · --음악 <파일> · --나감 <폴더>
@@ -64,6 +66,7 @@ const 가림 = (s) => String(s).split(cfg.SUPABASE_SERVICE_KEY).join('‹열쇠�
 
 const 올리기 = 깃발('올리기');
 const 메일 = 깃발('메일');
+const 카드자동 = 깃발('카드자동');     /* --메일 과 함께 — 사진 대조를 통과한 공고의 카드뉴스를 확인 없이 올립니다 (2026-11-21 세중님) */
 const 최대 = Number(인수('최대', 2));
 const 며칠 = Number(인수('며칠', 3));
 const 한건 = 인수('id');
@@ -116,6 +119,41 @@ async function rest(길) {
   const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: H });
   if (!r.ok) throw new Error(길.slice(0, 60) + ' HTTP ' + r.status + ' ' + (await r.text()).slice(0, 300));
   return r.json();
+}
+/* 사진 대조를 통과했나 — --카드자동 의 문 (2026-11-21).
+   PC 의 「새 공고 지킴이」가 공고문 사진(Codex 가 읽음)과 우리 값을 칸마다 견줘, 다 같을 때만 job_posts.뽑은값.사진대조.통과 = true 를 적습니다.
+   묶은 공고(PT·OT)는 **전부** 통과해야 참 · 못 읽으면 거짓(올리지 않는 쪽) */
+/* 카드만든때(ISO)를 주면 — **카드가 확인된 값으로 그려졌는지**도 봅니다 (Codex 검토 11/21):
+   지킴이가 값을 고친 공고(고친칸수 > 0)는, 통과 표시가 카드보다 **앞서** 있어야 합니다(고친 뒤 값으로 그린 카드).
+   그렇지 않으면 옛 값으로 그린 카드이므로 올리지 않습니다 — 다음 공고 때 다시 만들어집니다 */
+async function 사진대조통과(ids, 카드만든때 = null) {
+  try {
+    if (!Array.isArray(ids) || !ids.length) return false;
+    const 줄 = await rest(`job_posts?select=id,${encodeURIComponent('뽑은값')}&id=in.(${ids.map((x) => encodeURIComponent('"' + x + '"')).join(',')})`);
+    return 줄.length === ids.length && 줄.every((x) => {
+      const p = x['뽑은값']?.['사진대조'];
+      if (p?.['통과'] !== true) return false;
+      if (!카드만든때) return true;
+      if (Number(p['고친칸수'] || 0) === 0) return true;
+      const 통과때 = Date.parse(p['때'] || '');
+      return Number.isFinite(통과때) && 통과때 < Date.parse(카드만든때);
+    });
+  } catch (e) {
+    console.error('  사진 대조 통과 여부를 못 읽음 — ' + 가림(e.message || e).slice(0, 160));
+    return false;
+  }
+}
+/* 올리기.mjs 가 기록 파일(log/릴스_올림.json)을 고친 뒤에는 **다시 읽습니다** — 안 읽으면 이 프로세스가 쥐고 있던 옛 기록으로
+   덮어써 카드게시물ID 가 사라지고, 다음 바퀴가 같은 카드뉴스를 또 올립니다 */
+function 기록다시읽기() {
+  try { if (fs.existsSync(기록파일)) Object.assign(기록, JSON.parse(fs.readFileSync(기록파일, 'utf8'))); } catch (e) { console.error('  기록을 다시 못 읽음 — ' + String(e.message || e).slice(0, 120)); }
+}
+/* 카드 자동 올리기 — 한 바퀴에 올리는 편수(--최대)를 두 길(밀린 것 · 새로 만든 것)이 **함께** 씁니다 (Codex 검토 11/21) */
+let 자동올림 = 0;
+/* 자동 올리기가 실패하면 그 공고에 실패 횟수를 적습니다 — 두 번 실패하면 자동에서 빠지고 세중님이 메일로 봅니다 */
+function 자동실패적기(ids) {
+  for (const k of ids) if (기록[k] && typeof 기록[k] === 'object') 기록[k].카드자동실패 = Number(기록[k].카드자동실패 || 0) + 1;
+  try { fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2)); } catch (e) { console.error('  실패 횟수를 못 적음 — ' + String(e.message || e).slice(0, 120)); }
 }
 /* 이 병원 공시 연봉 — 회원 화면 「이 병원 공시 연봉」과 같은 DB 함수 공고병원보수() (2026-11-17 세중님 「이런 건 참고해서 쓰면 돼」)
    못 받으면 null — 그 공고는 급여가 없는 것으로 보고 넘어갑니다 */
@@ -364,6 +402,30 @@ if (메일) {
   if (!cfg.RESEND_KEY || !cfg.NOTIFY_EMAIL) { console.error('RESEND_KEY · NOTIFY_EMAIL 이 없습니다 — 보내지 않습니다'); process.exit(1); }
   const 드라이브 = 드라이브되나(cfg);
   console.log(드라이브 ? '드라이브에 올리고 링크 메일' : '드라이브 열쇠 없음 — 첨부 메일');
+  /* ★ --카드자동: **뒤늦게 통과한 것** 먼저 — 메일을 보낸 뒤에 사진 대조가 끝난 공고입니다.
+     (지킴이는 새 공고가 뜬 뒤 몇 분~한 시간 뒤에 돌 수 있어, 이 바퀴가 먼저 지나갔을 수 있습니다) 한 바퀴에 --최대 편까지 */
+  /* --id 로 한 건만 돌 때는 밀린 것을 보지 않습니다 (Codex 검토 11/21 — 엉뚱한 공고를 올리지 않게) */
+  if (카드자동 && 인스타되나(cfg) && !한건) {
+    const 본묶음 = new Set();
+    for (const [id, v] of Object.entries(기록)) {
+      if (자동올림 >= 최대) break;
+      if (id.startsWith('__') || !v || typeof v !== 'object') continue;
+      const 카드남음 = (v.카드 || []).length >= 2 && !v.카드게시물ID && ['확인 대기', '올림'].includes(v.상태) && !/취소|삭제/.test(v.카드상태 || '');
+      if (!카드남음 || (v.마감일 && v.마감일 <= 오늘)) continue;
+      if (Number(v.카드자동실패 || 0) >= 2) continue;      /* 두 번 실패한 것은 건너뜁니다 — 뒤의 것을 막지 않게 (세중님은 메일로 봄) */
+      if (!(v.카드 || []).every((f) => fs.existsSync(f))) continue;   /* 카드 파일이 없으면 못 올림 — 자리만 차지하지 않게 */
+      const 열쇠 = v.카드[0];
+      if (본묶음.has(열쇠)) continue;      /* 묶은 공고(PT·OT)는 같은 카드 — 한 번만 */
+      본묶음.add(열쇠);
+      const 같은묶음 = Object.entries(기록).filter(([k, w]) => !k.startsWith('__') && w && typeof w === 'object' && (w.카드 || [])[0] === 열쇠).map(([k]) => k);
+      if (!(await 사진대조통과(같은묶음, v.메일보낸때 || null))) continue;
+      console.log(`  카드자동(뒤늦게 통과) ${id} — 올리기.mjs --카드 --실행`);
+      const o = spawnSync(process.execPath, [path.join(여기, '올리기.mjs'), '--id', id, '--카드', '--실행'], { stdio: 'inherit' });
+      기록다시읽기();
+      if (o.status !== 0) { 발행기록({ 결과: '실패', 공고: 같은묶음, 기관: v.기관, 까닭: `카드자동(뒤늦게) — 올리기.mjs 끝값 ${o.status}` }); 자동실패적기(같은묶음); }
+      자동올림++;
+    }
+  }
   for (const { 자료, mp4, 표지, 릴스커버, 카드, 미리보기 } of 만든것) {
     if (직전금지(자료)) continue;
     /* 드라이브 「RAPO 릴스/<YYYY-MM>」 — 영상 · 표지 · 캡션 글 */
@@ -420,6 +482,22 @@ if (메일) {
     낸것적기(자료, { 메일보낸때: new Date().toISOString(), 드라이브: 링크, 게시물ID: null, 상태: '확인 대기',
       영상: mp4, 영상지문: crypto.createHash('sha256').update(fs.readFileSync(mp4)).digest('hex'),
       캡션: 자료.캡션, 태그: 자료.태그 || null, 첫댓글: 자료.첫댓글 || null, 마감일: 자료.원문.apply_to || null, 원문자료: 자료.원문, 카드, 커버: 릴스커버 });
+    /* ★ 2026-11-21 세중님 「정답지를 통과한 공고는 묻지 않고 카드뉴스로 올린다」 — --카드자동.
+       사진 대조(공고문 사진 ↔ 우리 값)가 통과한 공고만 · 묶은 공고(PT·OT)는 전부 통과해야 · 카드가 2장 이상일 때만.
+       올리는 일은 기존 길(올리기.mjs --카드 --실행)을 그대로 탑니다 — 게시 금지·마감·원문 다시 보기·첫 댓글·기록이 거기 있습니다.
+       릴스는 여기서 올리지 않습니다(메일로 받아 휴대폰에서 · 전과 같음) */
+    if (카드자동) {
+      if (자동올림 >= 최대) { console.log(`  카드자동 건너뜀 ${자료.묶은id[0]} — 이 바퀴 한도(--최대 ${최대}) 다 씀 · 다음 바퀴가 올림`); continue; }
+      if (!인스타되나(cfg)) { console.log(`  카드자동 건너뜀 ${자료.묶은id[0]} — IG 열쇠 없음`); continue; }
+      if (!Array.isArray(카드) || 카드.length < 2) { console.log(`  카드자동 건너뜀 ${자료.묶은id[0]} — 카드 ${카드?.length ?? 0}장`); continue; }
+      const 통과 = await 사진대조통과(자료.묶은id);
+      if (!통과) { console.log(`  카드자동 건너뜀 ${자료.묶은id[0]} — 사진 대조 통과 표시가 없습니다`); continue; }
+      console.log(`  카드자동 ${자료.묶은id[0]} — 사진 대조 통과 · 올리기.mjs --카드 --실행`);
+      const o = spawnSync(process.execPath, [path.join(여기, '올리기.mjs'), '--id', 자료.묶은id[0], '--카드', '--실행'], { stdio: 'inherit' });
+      기록다시읽기();
+      if (o.status !== 0) { 발행기록({ 결과: '실패', 공고: 자료.묶은id, 기관: 자료.기관, 까닭: `카드자동 — 올리기.mjs 끝값 ${o.status}` }); 자동실패적기(자료.묶은id); }
+      자동올림++;
+    }
   }
   process.exit(0);
 }

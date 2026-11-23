@@ -73,6 +73,10 @@ const 버튼색 = {
   /* RAPO / Button / Outline 172:67 — 선 1px(stroke/neutral-muted) · 글자 fg/neutral */
   outline: 'border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-muted) bg-(--rapo-color-bg-transparent) ' +
            'text-(color:--rapo-color-fg-neutral) enabled:active:bg-(--rapo-color-bg-transparent-pressed)',
+  /* 진한 선 — 시트의 「초기화」처럼 옅은 선이 안 보이는 자리 (2026-11-21 세중님 「초기화 버튼도 잘 보이게」) ·
+     선 stroke/neutral-contrast(선택 칩과 같은 선) */
+  'outline-strong': 'border-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-contrast) bg-(--rapo-color-bg-transparent) ' +
+           'text-(color:--rapo-color-fg-neutral) enabled:active:bg-(--rapo-color-bg-transparent-pressed)',
 } as const;
 const 버튼크기 = {
   40: 'rapo-type-t4-bold h-(--rapo-dimension-x10) px-(--rapo-dimension-x4) py-(--rapo-dimension-x2_5) rounded-(--rapo-radius-r2)',

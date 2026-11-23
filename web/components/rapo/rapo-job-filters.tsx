@@ -51,7 +51,9 @@ const 분류들: { key: 분류; icon: string; w: number; h: number; 내림: bool
 /* 화면에 적는 분류 이름 — 「상세」는 「필터」로 적습니다 (2026-11-13 세중님) */
 const 분류이름: Record<분류, string> = { 직군: '직군', 지역: '지역', 급여: '급여', 상세: '필터' };
 
-export type 조건 = { q: string; job: string | null; sido: string | null; type?: string | null; sort?: string | null; kinds?: string[] };
+export type 조건 = { q: string; job: string | null; sido: string | null; type?: string | null; sort?: string | null; kinds?: string[];
+  /* 「채용 시 마감」 공고 빼기 — 주소 noopen=1 · DB job_list(p_skip_open) (2026-11-21 세중님) */
+  noopen?: boolean };
 
 /* 고른 기관 분류를 이 기기에 1년 기억합니다 — 빈 목록이면 지웁니다 (lib/rapo-job-options.ts 분류쿠키) */
 export function 분류기억(kinds: string[]) {
@@ -71,6 +73,7 @@ export function 목록주소(c: 조건, 회원: boolean): string {
   if (c.type && c.type !== '전체') p.set('type', c.type);
   if (c.sort && c.sort !== 기본정렬) p.set('sort', c.sort);   // 기본(인기순)은 주소에 안 적습니다
   if (c.kinds?.length) p.set('kind', c.kinds.join(','));
+  if (c.noopen) p.set('noopen', '1');
   const s = p.toString();
   return s ? `/jobs?${s}` : '/jobs';
 }
@@ -134,9 +137,17 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
   const 연단추 = useRef<HTMLButtonElement | null>(null);
   const [탭, set탭] = useState<분류>('직군');
   const [직군, set직군] = useState<string>(지금.job ?? '전체');
-  const [지역, set지역] = useState<string[]>(지역칩읽기(지금.sido));
+  /* 지역·기관 분류는 「켜진 칩」을 그대로 담습니다 — 다 켜짐 = 전국/전체(거름 없음) · 다 꺼짐 = 아직 안 고름.
+     2026-11-21 세중님 「전체 누르면 다 지워지고 다시 누르면 다 생기게 · 지역도 마찬가지」 */
+  const 지역처음 = (sido: string | null) => { const v = 지역칩읽기(sido); return v.length ? v : [...지역칩들]; };
+  const 분류처음 = (kinds?: string[]) => {
+    const v = (kinds ?? []).filter((k) => (기관분류들 as readonly string[]).includes(k));
+    return v.length ? v : [...기관분류들];
+  };
+  const [지역, set지역] = useState<string[]>(() => 지역처음(지금.sido));
   const [고용, set고용] = useState<string>(지금.type ?? '전체');
-  const [분류, set분류] = useState<string[]>(지금.kinds ?? []);
+  const [분류, set분류] = useState<string[]>(() => 분류처음(지금.kinds));
+  const [채용시빼기, set채용시빼기] = useState<boolean>(!!지금.noopen);
   /* 급여 「알림 신청」 — 시트를 닫고 연봉 비교 알림 신청 창을 띄웁니다 (시트는 맨 위 층이라 그 위에 창을 못 띄웁니다) */
   const { session, me } = useAuth();
   const [알림창, set알림창] = useState(false);
@@ -146,23 +157,31 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
     set알림창(true);
   };
 
-  const 켜짐: Record<분류, boolean> = { 직군: !!지금.job, 지역: !!지금.sido, 급여: false, 상세: !!지금.type || !!지금.kinds?.length };
+  const 켜짐: Record<분류, boolean> = { 직군: !!지금.job, 지역: !!지금.sido, 급여: false, 상세: !!지금.type || !!지금.kinds?.length || !!지금.noopen };
   /* 칩에 적는 글 (2026-11-13 세중님 「물리치료사 선택하면 그 칸에 물리치료사 · 상세보단 필터」).
      직군·지역은 고른 값이 있으면 그 값을 적습니다. 「상세」는 화면 글만 「필터」로 바꿉니다(안쪽 이름은 그대로) */
   const 칩글: Record<분류, string> = { 직군: 지금.job ?? '직군', 지역: 지역칩말(지금.sido) ?? '지역', 급여: '급여', 상세: '필터' };
   const 값적힘: Record<분류, boolean> = { 직군: !!지금.job, 지역: !!지금.sido, 급여: false, 상세: false };
 
   const 열기 = (k: 분류) => {
-    set탭(k); set직군(지금.job ?? '전체'); set지역(지역칩읽기(지금.sido)); set고용(지금.type ?? '전체'); set분류(지금.kinds ?? []);
+    set탭(k); set직군(지금.job ?? '전체'); set지역(지역처음(지금.sido)); set고용(지금.type ?? '전체'); set분류(분류처음(지금.kinds)); set채용시빼기(!!지금.noopen);
     창.current?.showModal();
   };
   const 닫기 = () => 창.current?.close();
+  /* 다 켜짐 = 거름 없음 */
+  const 지역다 = 지역.length === 지역칩들.length;
+  const 분류다 = 분류.length === 기관분류들.length;
+  const 보낼지역 = 지역다 ? [] : 지역;
+  const 보낼분류 = 분류다 ? [] : 분류;
+  /* 다 꺼진 채로는 적용하지 않습니다 — 고른 것이 없으면 공고가 0건이 됩니다 */
+  const 빈것 = !지역.length ? '지역을' : !분류.length ? '기관 분류를' : null;
   const 적용 = () => {
-    const 주소 = 목록주소({ q: 지금.q, job: 직군, sido: 시도글(지역), type: 고용, sort: 지금.sort, kinds: 분류 }, 회원);
+    if (빈것) return;
+    const 주소 = 목록주소({ q: 지금.q, job: 직군, sido: 시도글(보낼지역), type: 고용, sort: 지금.sort, kinds: 보낼분류, noopen: 채용시빼기 }, 회원);
     /* 기억해 둔 분류를 모두 뺐으면 「kind=」을 실어 보냅니다 — 안 실으면 주소가 전과 같아 목록을 다시 안 받을 수 있습니다 */
-    const 갈곳 = !분류.length && 지금.kinds?.length ? 주소 + (주소.includes('?') ? '&' : '?') + 'kind=' : 주소;
+    const 갈곳 = !보낼분류.length && 지금.kinds?.length ? 주소 + (주소.includes('?') ? '&' : '?') + 'kind=' : 주소;
     닫기();
-    분류기억(분류);
+    분류기억(보낼분류);
     if (!회원) return 로그인으로(router, 갈곳);
     router.push(갈곳);
   };
@@ -230,17 +249,15 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
           )}
 
           {탭 === '지역' && (
-            /* 여러 개 (2026-11-19 세중님). 아무것도 안 고른 것 = 전국. 다 고르면 전국으로 돌아옵니다 */
-            <div className="flex flex-col gap-(--rapo-dimension-x4)">
-              <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">여러 개 고를 수 있어요</p>
+            /* 여러 개 (2026-11-19 세중님). 칩이 다 켜진 것 = 전국.
+               「전국」을 누르면 다 꺼지고, 다시 누르면 다 켜집니다 (2026-11-21 세중님) · 칩 하나는 눌러서 켜고 끕니다 */
+            <div className="flex flex-col gap-(--rapo-dimension-x3)">
+              <여럿안내 제목="지역" />
               <div role="group" aria-label="지역" className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
-                <RapoChip label="전국" on={지역.length === 0} onClick={() => set지역([])} />
+                <RapoChip label="전국" on={지역다} onClick={() => set지역(지역다 ? [] : [...지역칩들])} />
                 {지역칩들.map((s) => (
                   <RapoChip key={s} label={s} on={지역.includes(s)}
-                    onClick={() => {
-                      const 다음 = 지역.includes(s) ? 지역.filter((x) => x !== s) : 지역칩들.filter((x) => x === s || 지역.includes(x));
-                      set지역(다음.length === 지역칩들.length ? [] : 다음);
-                    }} />
+                    onClick={() => set지역(지역.includes(s) ? 지역.filter((x) => x !== s) : 지역칩들.filter((x) => x === s || 지역.includes(x)))} />
                 ))}
               </div>
             </div>
@@ -255,25 +272,33 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
               {/* 기관 분류 — 여러 개 (2026-11-12 밤 세중님). 2026-11-14 세중님 「기관 분류에도 전체 · 전체 누르면 다 누른 느낌」 —
                   아무것도 안 고른 것 = 전체(거름 없음)이고, 그때는 「전체」와 모든 분류가 다 켜진 모양으로 그립니다.
                   전체에서 하나를 누르면 그것만 · 다 골라지면 다시 전체로 돌아옵니다 */}
-              <p className="rapo-type-t5-medium text-(color:--rapo-color-fg-neutral)">기관 분류 <span className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">여러 개 고를 수 있어요</span></p>
+              {/* 2026-11-21 세중님 「전체 누르면 다 지워지고 다시 누르면 다 생기게」 — 칩이 다 켜진 것 = 전체(거름 없음).
+                  옛 「전체에서 하나 누르면 그것만」은 거둡니다 */}
+              <여럿안내 제목="기관 분류" />
               <div role="group" aria-label="기관 분류" className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
-                <RapoChip label="전체" on={분류.length === 0} onClick={() => set분류([])} />
+                <RapoChip label="전체" on={분류다} onClick={() => set분류(분류다 ? [] : [...기관분류들])} />
                 {기관분류들.map((k) => (
-                  <RapoChip key={k} label={k} on={분류.length === 0 || 분류.includes(k)}
-                    onClick={() => {
-                      if (분류.length === 0) { set분류([k]); return; }
-                      const 다음 = 분류.includes(k) ? 분류.filter((x) => x !== k) : 기관분류들.filter((x) => x === k || 분류.includes(x));
-                      set분류(다음.length === 기관분류들.length ? [] : 다음);
-                    }} />
+                  <RapoChip key={k} label={k} on={분류.includes(k)}
+                    onClick={() => set분류(분류.includes(k) ? 분류.filter((x) => x !== k) : 기관분류들.filter((x) => x === k || 분류.includes(x)))} />
                 ))}
+              </div>
+              {/* 마감 — 「채용 시 마감」(사람을 뽑으면 닫는 공고) 빼기 (2026-11-21 세중님) */}
+              <p className="rapo-type-t5-medium text-(color:--rapo-color-fg-neutral)">마감</p>
+              <div role="group" aria-label="마감" className="flex flex-wrap gap-x-(--rapo-dimension-x2)">
+                <RapoChip label="채용 시 마감 공고 빼기" on={채용시빼기} onClick={() => set채용시빼기(!채용시빼기)} />
               </div>
             </div>
           )}
 
           {탭 === '급여' ? <급여오픈전 onApply={알림신청} /> : (
-            <div className="flex gap-(--rapo-dimension-x3)">
-              <RapoButton tone="outline" onClick={() => { set직군('전체'); set지역([]); set고용('전체'); set분류([]); }} className="w-[104px] shrink-0">초기화</RapoButton>
-              <RapoButton onClick={적용} className="min-w-0 flex-1">조건 적용</RapoButton>
+            <div className="flex flex-col gap-(--rapo-dimension-x2)">
+              {빈것 && <p role="status" className="rapo-type-t3-medium text-(color:--rapo-color-fg-critical)">{빈것} 하나 이상 골라 주세요</p>}
+              <div className="flex gap-(--rapo-dimension-x3)">
+                {/* 초기화 — 선을 진하게 (2026-11-21 세중님 「초기화 버튼도 잘 보이게」) */}
+                <RapoButton tone="outline-strong" onClick={() => { set직군('전체'); set지역([...지역칩들]); set고용('전체'); set분류([...기관분류들]); set채용시빼기(false); }}
+                  className="w-[104px] shrink-0">초기화</RapoButton>
+                <RapoButton onClick={적용} disabled={!!빈것} className="min-w-0 flex-1">조건 적용</RapoButton>
+              </div>
             </div>
           )}
         </div>
@@ -288,6 +313,18 @@ export function RapoJobFilters({ 지금, 회원 }: { 지금: 조건; 회원: boo
         />
       )}
     </>
+  );
+}
+
+/* 「여러 개 고를 수 있어요」 — 제목 옆 작은 표(브랜드 옅은 바탕) (2026-11-21 세중님 「디자인 지침에 맞게 잘 보이게」).
+   옛 회색 작은 글은 칩 사이에 묻혀 안 보였습니다 */
+function 여럿안내({ 제목 }: { 제목: string }) {
+  return (
+    <div className="flex items-center gap-(--rapo-dimension-x2)">
+      <p className="rapo-type-t5-medium text-(color:--rapo-color-fg-neutral)">{제목}</p>
+      <span className="rapo-type-t2-medium rounded-(--rapo-radius-full) bg-(--rapo-color-bg-brand-weak) px-(--rapo-dimension-x2) py-(--rapo-dimension-x1)
+                       text-(color:--rapo-color-fg-brand-contrast)">여러 개 고를 수 있어요</span>
+    </div>
   );
 }
 
