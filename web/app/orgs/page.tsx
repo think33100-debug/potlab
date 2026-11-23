@@ -14,6 +14,8 @@ import { RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoSectionGap, typ
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { RapoPastJobs } from '@/components/rapo/rapo-past-jobs';
 import { 지난공고받기, 지난공고주소 } from '@/lib/past-jobs';
+import { 기관사진찾기, 로고주소, 사진주소, 출처들 } from '@/lib/org-photo';
+import { RapoOrgPhoto, RapoPhotoCredit } from '@/components/rapo/rapo-org-photo';
 
 export const dynamic = 'force-dynamic';
 
@@ -205,6 +207,8 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
     if (await serverWho(sb) === '비회원') return <RapoGuestPreview 갈래="orgs" 셈={await 곳수말()} />;
     const 기관 = await orgPublic(sb, org, sido);
     const 있나 = !!기관;
+    /* 기관 사진 — 시범은 아주대학교병원만 (2026-11-23 세중님 · lib/org-photo.ts 한 자리) */
+    const 사진 = 기관사진찾기(org);
     /* 처음 열면 「병원 정보」 (2026-11-13 세중님) — 맨 위 기관 정보(종류·주소), 그 아래 한눈에 숫자 */
     const 탭 = sp.tab === 'review' ? 'review' : sp.tab === 'talk' ? 'talk' : 'info';
     const 숫자 = 탭 === 'info' && 기관 ? await 병원정보받기(sb, org, sido) : null;
@@ -237,7 +241,10 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
       <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: '#112332' }}>
         <Hit kind="org" target={org} />
         <RapoOrgBoard name={org} sido={sido} 탭={탭} 있나={있나} 정보={정보}
-          후기={탭 === 'review' ? await 후기칸(sb, org, sido) : undefined} />
+          후기={탭 === 'review' ? await 후기칸(sb, org, sido) : undefined}
+          사진={사진 ? <RapoOrgPhoto src={사진주소(사진)} alt={사진.설명} /> : undefined} 로고={로고주소(사진)} />
+        {/* 사진·로고 출처 — 화면 맨 아래 작게 (2026-11-23 세중님) */}
+        {사진 && <RapoPhotoCredit 줄={출처들(사진)} 어두움 />}
         <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
         <RapoBottomNav current="/community" dark />
       </div>
