@@ -857,5 +857,25 @@ if (표시할것.length) {
   if (표시) console.log('읽음 표시 — ' + JSON.stringify(표시));
 }
 
+/* ── 공고문에서 우리 직군을 찾은 보류함 공고를 올립니다 (2026-11-23 세중님 「규칙도 같이 만들어」) ──
+   병원 홈페이지 수집(HS3)은 갈래를 정할 때 첨부 글을 안 넘겨서, 「첨부를 읽어야 합니다」로 보낸 공고가
+   이 바퀴에서 작업·물리치료사를 찾아도 보류함에 그대로 있었습니다(공공어린이재활병원 HS1776643019).
+   규칙은 DB 「첨부로보류풀기」 한 자리입니다 — 보류 까닭 · 인원표+지원자격 둘 다 우리 직군 · 마감 안 지남 ·
+   회원 화면에 같은 공고 없음 (RAPO노트/SQL_1123/첨부로보류풀기.sql). 탈이 나도 바퀴는 그대로 끝냅니다 */
+try {
+  const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent('첨부로보류풀기'), {
+    method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_마른: false }),
+  });
+  const t = await r.text();
+  if (!r.ok) console.error('✗ 보류 풀기 창구가 막혔습니다 — HTTP ' + r.status + ' · ' + t.slice(0, 200));
+  else {
+    const 풀림 = JSON.parse(t) || {};
+    console.log('보류 풀기 — 올림 ' + (풀림['올림'] || 0) + '건'
+      + ((풀림['목록'] || []).length ? ' · ' + 풀림['목록'].map((x) => x.id + ' ' + x.직군).join(' · ') : ''));
+    끝.보류풀림 = 풀림['올림'] || 0;
+  }
+} catch (e) { console.error('✗ 보류 풀기 탈 — ' + String((e && e.message) || e).slice(0, 160)); }
+
 /* 끝남 한 줄의 까닭을 마무리합니다 — 여기까지 왔으면 곱게 끝난 것입니다 */
 끝.까닭 = 끝.까닭 + ' · 끝까지 돌았습니다';
