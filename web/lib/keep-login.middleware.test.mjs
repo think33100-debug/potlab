@@ -88,4 +88,28 @@ assert.deepEqual(내려온(res), []);
 res = await middleware(요청('/jobs', { ...세션, 'sb-abc-auth-token-code-verifier': 'vvv' }));
 assert.equal(내려온(res).some((c) => c.이름.includes('code-verifier')), false);
 
-console.log('문지기 다시 굽기 점검 통과 (여섯 가지)');
+/* ⑦ 주소 하나로 — 옛 주소로 온 화면 요청은 같은 길 그대로 대표 주소로 (2026-11-23) */
+const 옛 = (길, 더 = {}) => new NextRequest('https://potjob-web.vercel.app' + 길, { headers: { host: 'potjob-web.vercel.app', cookie: Object.entries(세션).map(([k, v]) => `${k}=${v}`).join('; ') }, ...더 });
+for (const [길, 갈곳] of [['/', 'https://www.rapojob.co.kr/'], ['/jobs/HS123?tab=a&b=1', 'https://www.rapojob.co.kr/jobs/HS123?tab=a&b=1'], ['/login?next=%2Fme', 'https://www.rapojob.co.kr/login?next=%2Fme'], ['/community/%EC%9E%84%EC%83%81', 'https://www.rapojob.co.kr/community/%EC%9E%84%EC%83%81']]) {
+  res = await middleware(옛(길));
+  assert.equal(res.status, 307, 길);
+  assert.equal(res.headers.get('location'), 갈곳, 길);
+  assert.deepEqual(내려온(res), []);            // 옛 주소에는 쿠키를 새로 굽지 않습니다
+}
+/* 옛 주소의 로그인 마치는 자리 · 굽는 길 · 로그인 값 들고 온 첫 화면은 전처럼 */
+res = await middleware(옛('/auth/callback?code=abc'));
+assert.notEqual(res.status, 307);
+res = await middleware(옛('/auth/keep'));
+assert.equal(res.status, 204);
+res = await middleware(옛('/?code=abc'));
+assert.equal(res.headers.get('location'), 'https://www.rapojob.co.kr/auth/callback?code=abc');
+/* 화면 요청이 아닌 것(POST)은 안 보냅니다 */
+res = await middleware(옛('/jobs', { method: 'POST' }));
+assert.notEqual(res.status, 307);
+/* 대표 주소·미리보기 주소는 안 보냅니다 */
+res = await middleware(요청('/jobs', 세션));
+assert.notEqual(res.status, 307);
+res = await middleware(new NextRequest('https://potjob-abc-projects.vercel.app/jobs', { headers: { host: 'potjob-abc-projects.vercel.app' } }));
+assert.equal(res.headers.get('location')?.startsWith('https://www.rapojob.co.kr') ?? false, false);
+
+console.log('문지기 점검 통과 (다시 굽기 여섯 + 주소 하나로)');
