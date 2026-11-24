@@ -63,7 +63,7 @@ import { hwp글자, 한글파일인가 } from './hwp/index.mjs';
 import { 첨부읽기, 칸뽑기, kordoc있나, 고용형태코드,
   그림OCR인가, OCR근거, OCR보류사유, 더담을칸, 공통자격 } from './공고문읽기.mjs';
 import { 공공부르기, 한도알리기, 한도들 } from './공공데이터부르기.mjs';
-import { 첨부받기, 기본간격, 통크기, 통쉼, 쉼 } from './cleaneye-file.mjs';
+import { 첨부받기, 기본간격, 통크기, 통쉼, 쉼, 자료없음인가, 목록못받음까닭 } from './cleaneye-file.mjs';
 /* 공고문 주소를 job_attachments 에 담습니다 (2026-10-10 · tools/첨부담기.mjs) */
 import { 첨부모으기 } from './첨부담기.mjs';
 
@@ -144,6 +144,12 @@ async function 시도한곳(cfg, cd, 이름, 떠들기) {
     return null;
   }
   const code = (txt.match(/<resultCode>\s*([^<]*)<\/resultCode>/) || [])[1];
+  /* ★ 2026-11-25 — 코드 3(자료 없음)은 못 받은 것이 아니라 0건입니다. 광주가 늘 이 답이라
+     (서버 로그 10,060번 전부 광주) 바퀴마다 「시도 1곳 못 받음」이 되어 정찰을 건너뛰었습니다 */
+  if (자료없음인가(txt)) {
+    if (떠들기) console.log('  ' + 이름.padEnd(4) + '   0건 (자료 없음)');
+    return [];
+  }
   if (code && !/^0+$/.test(code.trim())) {
     console.error('  ' + 이름 + ' resultCode ' + code.trim()
       + ' · ' + (txt.match(/<resultMsg>\s*([^<]*)<\/resultMsg>/) || [])[1]
@@ -400,15 +406,17 @@ for (const [cd, 이름] of SIDO) {
   전부 = 전부.concat(got);
   await 쉼(150);
 }
-if (못받은시도 === SIDO.length) {
-  console.error('\n시도 17곳을 하나도 못 받았습니다 — 열쇠나 막힘을 보세요');
+/* ★ 2026-11-25 — 17곳이 모두 「정상 · 0건」으로 오는 때가 있습니다(11/24 18:36~19:01). 그것도 못 받은 것입니다 */
+const 목록탈 = 목록못받음까닭({ 시도수: SIDO.length, 못받은시도, 받은수: 전부.length });
+if (목록탈) {
+  console.error('\n' + 목록탈 + ' — 열쇠나 막힘을 보세요');
   /* 2026-11-18 멘토-1.7-2 — 실패한 바퀴도 박동을 남깁니다(ok:false). 전에는 박동 없이 끝나
      「두 번 연속 실패」를 셀 기록이 없었습니다 */
   if (!dry) {
     try {
       await rpc(cfg, 'collect_beat', { p_secret: cfg.COLLECT_KEY_CE2, p_source: SOURCE,
         p_beat: { took_ms: Date.now() - t0, ok: false, 본곳: 0, 못받음: 못받은시도,
-          왜: '시도 ' + SIDO.length + '곳을 하나도 못 받음', 메모: { 모드: 순찰 ? '순찰' : '전체', 의료: 0, 실패: '목록' } } });
+          왜: 목록탈, 메모: { 모드: 순찰 ? '순찰' : '전체', 의료: 0, 실패: '목록' } } });
     } catch (e) { console.error('실패 박동 못 남김 · ' + String(e.message).slice(0, 120)); }
   }
   process.exit(1);
@@ -674,16 +682,17 @@ if (dry) {
 }
 
 /* ── 정찰 (목록에서 빠진 것) ───────────────────────────────
-   목록은 순찰도 전체를 받으므로(시도 17곳 한 번씩) 순찰에서도 봅니다.
-   두 번 연속 빠지면 「병원이 내림」 입니다 */
-if (!dry && 받은번호전부) {
+   두 번 연속 빠지면 「병원이 내림」 입니다.
+   ★ 2026-11-25 — **전체 바퀴(4시간마다)에서만** 봅니다 (알리오와 같음). 순찰은 5분마다라
+   API 가 잠깐 비어 오면 두 바퀴(10분) 만에 멀쩡한 공고를 내립니다 */
+if (!dry && !순찰 && 받은번호전부) {
   try {
     const r = await rpc(cfg, '목록빠짐표시',
       { p_secret: cfg.COLLECT_KEY_CE2, p_source: SOURCE, p_본것: 받은번호전부 });
     console.log('정찰        ' + Object.entries(r || {})
       .filter(([k]) => !/기준일/.test(k)).map(([k, v]) => k + ' ' + v).join(' · '));
   } catch (e) { console.error('정찰 못 함 · ' + String(e.message).slice(0, 150)); }
-} else if (!dry) {
+} else if (!dry && !순찰) {
   console.log('정찰        건너뜀 — 시도를 ' + 못받은시도 + '곳 못 받았습니다');
 }
 

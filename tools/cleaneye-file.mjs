@@ -142,3 +142,14 @@ export async function 첨부받기(공고주소, opt) {
     return { buf, 이름, code, ctype, 다시받음: t };
   }
 }
+
+/* ── 목록 API 답 읽기 (collect-cleaneye.mjs 가 씁니다 · 2026-11-25) ── */
+/** 그 시도에 공고가 없다는 정상 답인가 — resultCode 3 · NONOTEXISTDATA_ERROR 둘 다 맞을 때만 */
+export const 자료없음인가 = (xml) => /<resultCode>\s*0*3\s*<\/resultCode>/.test(String(xml || ''))
+  && /<resultMsg>\s*NONOTEXISTDATA/i.test(String(xml || ''));
+/** 목록을 통째로 못 받았으면 까닭, 아니면 '' */
+export function 목록못받음까닭({ 시도수, 못받은시도, 받은수 }) {
+  if (못받은시도 >= 시도수) return '시도 ' + 시도수 + '곳을 하나도 못 받음';
+  if (!받은수) return '시도 ' + 시도수 + '곳이 모두 0건 (API 탈)';
+  return '';
+}
