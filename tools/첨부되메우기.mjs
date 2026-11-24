@@ -30,7 +30,8 @@ import { fileURLToPath } from 'node:url';
 import { 첨부읽기, 칸뽑기, kordoc있나, 더담을칸, 공통자격 } from './공고문읽기.mjs';
 import { 그누보드새주소, 고친주소 } from './첨부주소고치기.mjs';
 import { 쓴메모리MB, 바퀴중단인가, 워커셈 } from './kordoc워커.mjs';
-import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이간격 } from './cleaneye-file.mjs';
+import { 첨부받기 as 클린아이첨부받기, 기본간격 as 클린아이간격,
+  못여는까닭 as 클린아이못여는까닭, 클린아이주소인가 } from './cleaneye-file.mjs';
 import { 첨부받기 as 나라일터첨부받기, 기본간격 as 나라일터간격 } from './gojobs-file.mjs';
 import { 점수, 본문박힌그림, 공고아닌첨부, 그림쪽묶음 } from './hosp/hs_files.js';
 import { 칸검사들 } from './칸검사.mjs';
@@ -187,8 +188,18 @@ const 보임 = 회원만 ? new Set((await 전부('job_posts_pub?select=id')).map
 const 글있는공고 = 글없는것
   ? new Set((await 전부('job_body?select=job_id')).map((b) => b.job_id))
   : null;
+/* ★ 2026-11-25 세중님 「하루 1번만 계속」 — 클린아이 공고는 하루 한 번(17:50~19:00)만 열고,
+   이미 잘 읽은 것은 다시 안 엽니다. 지금 못 여는 공고는 볼 것에서 빼 자리를 안 먹습니다 */
+const 클린아이쪽 = (j) => [j.url, ...(공고별첨부.get(j.id) || []).map((a) => a.url)].find(클린아이주소인가) || '';
+const 지금열수있나 = (j) => {
+  const 쪽 = 클린아이쪽(j);
+  if (!쪽) return true;
+  if ((공고별첨부.get(j.id) || []).every((a) => a.parsed_at && !a['읽기탈'])) return false;
+  return !클린아이못여는까닭(쪽);
+};
 const 볼것 = 공고들
   .filter((j) => !출처 || j.source === 출처)
+  .filter(지금열수있나)
   .filter((j) => !회원만 || 보임.has(j.id))
   .filter((j) => !워크넷빼기 || !/^WN/.test(String(j.source || '')))
   .filter((j) => !j.admin_locked)
@@ -554,6 +565,9 @@ for (const j of 볼것) {
       받음클린아이 = { buf: rc.buf };
       고른것.name = rc.이름 || 고른것.name || '공고문';
       클린아이셈.set('받음', (클린아이셈.get('받음') || 0) + 1);
+    } else if (rc && rc.창밖) {
+      한줄.왜 = rc.왜;   /* 바퀴 도중 창이 닫힘 — 읽기탈로 안 적습니다 */
+      continue;
     } else {
       const 왜c = String((rc && rc.왜) || '못 받음').slice(0, 44);
       클린아이셈.set(왜c, (클린아이셈.get(왜c) || 0) + 1);
