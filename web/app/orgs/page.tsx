@@ -8,8 +8,8 @@ import { OrgSearch } from '@/components/org-search';
 import { RapoBottomNav } from '@/components/rapo/rapo-bottom-nav';
 import { RapoGuestPreview } from '@/components/rapo/rapo-guest-preview';
 import { 색인메타 } from '@/lib/seo';
-import { orgJobs, orgPublic, ourNumbers, place, TILE_NAME, type OrgFacets, type OrgPublic } from '@/lib/org';
-import { hospitalStat, type HospitalStat, type 시설숫자 } from '@/lib/hospital';
+import { orgJobs, orgPublic, orgStat, ourNumbers, place, TILE_NAME, type OrgFacets, type OrgPublic } from '@/lib/org';
+import type { HospitalStat, 시설숫자 } from '@/lib/hospital';
 import { RapoDetailSection, RapoGuideRow, RapoHospitalFacts, RapoSectionGap, type 경쟁률줄, type 병원보수 } from '@/components/rapo/rapo-job-detail';
 import { serverSupabase, serverWho } from '@/lib/supabase-server';
 import { RapoPastJobs } from '@/components/rapo/rapo-past-jobs';
@@ -45,9 +45,10 @@ function 어두운앱바() {
 }
 
 /* 병원 게시판 「병원 정보」 탭 (2026-11-13 세중님 「채용공고 상세에 나오는 병원 정보 저기 뜨게」).
-   공고 상세 「병원 한눈에」와 **같은 창구**를 씁니다 — 새 DB 함수를 만들지 않았습니다.
-     이 기관 공고가 있으면  그 공고 하나로 공고병원숫자 · 공고병원보수 · 공고경쟁률요약 (공고 상세와 글자까지 같은 값)
-     공고가 없으면          org_hospital_by_name(이름) — 심평원 구분·병상·재활의학과 전문의·치료사만 (연봉·경쟁률·시설은 공고로만 찾습니다)
+   ★ 2026-11-24 세중님 「보여지는 인원이 달라 들어가서 보니깐」 — 병상·전문의·치료사 수는 **병원 찾기 줄과 같은 줄**(orgStat)에서만 읽습니다.
+     전에는 공고나 이름으로 다시 찾아, 병원 찾기(분기 파일)와 다른 표(심평원 API)의 숫자가 나오고 같은 이름 다른 지역 병원 숫자도 붙었습니다.
+     공고 상세(공고병원숫자)도 DB 안에서 같은 표("병원인원")를 봅니다.
+   연봉·경쟁률은 전처럼 이 기관 공고 하나로 찾습니다. 병원 찾기 줄에 인원이 없으면 복지관·치매센터 표만 봅니다.
    숫자가 하나도 없으면 null — 탭은 「아직 모은 정보가 없어요」를 그립니다 */
 /* 공고가 없는 복지관·치매센터 — 기관 이름으로 인원 표를 바로 읽습니다 (2026-11-13 세중님 「복지관이랑 치매센터 인원정보는 안 뜨네?」).
    공고 쪽(DB 공고시설찾기)과 같은 표·같은 칸이고, 화면 글은 공고 상세와 같은 조각(시설보임)이 만듭니다.
@@ -88,20 +89,28 @@ async function 시설숫자받기(sb: Awaited<ReturnType<typeof serverSupabase>>
   return null;
 }
 
-async function 병원정보받기(sb: Awaited<ReturnType<typeof serverSupabase>>, name: string, sido: string | null) {
-  const 공고 = (await orgJobs(sb, name))[0]?.id ?? null;
-  const [숫자, 보수, 경쟁률] = 공고
+async function 병원정보받기(sb: Awaited<ReturnType<typeof serverSupabase>>, o: OrgPublic, name: string, sido: string | null) {
+  const [줄, 공고] = await Promise.all([orgStat(sb, o), orgJobs(sb, name).then((js) => js[0]?.id ?? null)]);
+  const [보수, 경쟁률, 공고시설] = 공고
     ? await Promise.all([
-        sb.rpc('공고병원숫자', { p_공고: 공고 }).maybeSingle().then(({ data }) => (data as unknown as HospitalStat | null) ?? null),
         sb.rpc('공고병원보수', { p_공고: 공고 }).maybeSingle().then(({ data }) => (data as unknown as 병원보수 | null) ?? null),
         sb.rpc('공고경쟁률요약', { p_공고: 공고 }).then(({ data }) => (Array.isArray(data) ? data as 경쟁률줄[] : [])),
+        o.staffed ? null
+          : sb.rpc('공고병원숫자', { p_공고: 공고 }).maybeSingle().then(({ data }) => (data as unknown as HospitalStat | null)?.시설 ?? null),
       ])
-    : [await hospitalStat(sb, name), null, [] as 경쟁률줄[]];
-  /* 공고로 못 찾은 병원 숫자는 이름으로 한 번 더 */
-  const 병원숫자 = 숫자 ?? (공고 ? await hospitalStat(sb, name) : null);
-  /* 병원으로도 공고로도 못 찾았으면 복지관·치매센터 표를 이름으로 */
-  const 시설 = 병원숫자?.시설 ?? (병원숫자 ? null : await 시설숫자받기(sb, name, sido));
-  const 치료사 = 병원숫자 && !시설 && (병원숫자.pt != null || 병원숫자.ot != null)
+    : [null, [] as 경쟁률줄[], null];
+  /* 요양원·주야간보호는 「병원 한눈에」가 아니라 「기관 한눈에」(공고 상세의 장기요양 칸과 같은 글) */
+  const 인원줄 = o.staffed ? 줄 : null;
+  const 요양 = 인원줄 && (!인원줄.hosp_kind || 인원줄.hosp_kind === '요양원') ? 인원줄 : null;
+  const 병원숫자: HospitalStat | null = 인원줄 && !요양 ? {
+    name: 인원줄.name, kind: 인원줄.hosp_kind ?? '', bed: 인원줄.bed ?? 0, rehab: 인원줄.rehab, ot: 인원줄.ot, pt: 인원줄.pt,
+    per_bed: 인원줄.per_bed ?? 0, kind_med: 인원줄.kind_med, kind_p25: 인원줄.kind_p25, kind_p75: 인원줄.kind_p75, kind_n: 인원줄.kind_n,
+    band: 인원줄.band, data_version: 인원줄.data_version,
+  } : null;
+  const 시설: 시설숫자 | null = 요양
+    ? { 갈래: '장기요양', 이름: 요양.name, 정원: 요양.capacity ?? 요양.bed, pt: 요양.pt, ot: 요양.ot, 출처: '국민건강보험공단 장기요양기관 현황' }
+    : 병원숫자 ? null : 공고시설 ?? await 시설숫자받기(sb, name, sido);
+  const 치료사 = 병원숫자 && (병원숫자.pt != null || 병원숫자.ot != null)
     ? { pt: 병원숫자.pt, ot: 병원숫자.ot, 기준: 병원숫자.data_version?.replace(/^심평원\s*/, '') ?? null } : null;
   return RapoHospitalFacts({ 치료사, 바쁨: 시설 ? null : 병원숫자, 시설, 경쟁률, 보수, 공고없이: true });
 }
@@ -171,9 +180,11 @@ export async function generateMetadata({ searchParams }: PageProps<'/orgs'>): Pr
     };
   }
   const sido = typeof sp.sido === 'string' && sp.sido ? sp.sido : null;
+  /* 없으면 모름 · 빈 값이면 시군구가 없는 곳 (lib/org.ts orgHref) */
+  const sgg = typeof sp.sgg === 'string' ? sp.sgg : null;
   /* 회원이 공유한 링크면 제목이 제대로 붙고, 아니면 이름만 붙습니다 —
      기관 자료는 회원만 읽을 수 있습니다 */
-  const o = await orgPublic(await serverSupabase(), org, sido);
+  const o = await orgPublic(await serverSupabase(), org, sido, null, null, sgg);
   if (!o) return { title: `${org} · RAPO` };
 
   const desc = [TILE_NAME[o.tile] ?? '기관', place(o.sido_std, o.sgg_std)]
@@ -199,19 +210,21 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
   const sp = await searchParams;
   const org = typeof sp.org === 'string' ? sp.org : null;
   const sido = typeof sp.sido === 'string' && sp.sido ? sp.sido : null;
+  /* 없으면 모름 · 빈 값이면 시군구가 없는 곳 (lib/org.ts orgHref) */
+  const sgg = typeof sp.sgg === 'string' ? sp.sgg : null;
 
   if (org) {
     /* 병원 이름이 자료에 있는지만 봅니다(없으면 책갈피를 안 그리고 안내 한 줄). 회원만 읽히는 창구입니다.
        ★ 2026-11-13 — 문지기가 /orgs 를 비회원에게 열면서 /orgs?org=… 도 같이 열립니다. 비회원은 맛보기로 돌립니다 */
     const sb = await serverSupabase();
     if (await serverWho(sb) === '비회원') return <RapoGuestPreview 갈래="orgs" 셈={await 곳수말()} />;
-    const 기관 = await orgPublic(sb, org, sido);
+    const 기관 = await orgPublic(sb, org, sido, null, null, sgg);
     const 있나 = !!기관;
     /* 기관 사진 — 시범은 아주대학교병원만 (2026-11-23 세중님 · lib/org-photo.ts 한 자리) */
     const 사진 = 기관사진찾기(org);
     /* 처음 열면 「병원 정보」 (2026-11-13 세중님) — 맨 위 기관 정보(종류·주소), 그 아래 한눈에 숫자 */
     const 탭 = sp.tab === 'review' ? 'review' : sp.tab === 'talk' ? 'talk' : 'info';
-    const 숫자 = 탭 === 'info' && 기관 ? await 병원정보받기(sb, org, sido) : null;
+    const 숫자 = 탭 === 'info' && 기관 ? await 병원정보받기(sb, 기관, org, sido) : null;
     const 위칸 = 탭 === 'info' && 기관 ? 기관정보칸(기관, await 운영기관받기(sb, org, sido)) : null;
     /* 지난 공고 (2026-11-22 세중님) — 맨 아래 · 처음 5줄, 「더 보기」(?past=all)면 20줄까지.
        기관 표 이름으로 기관번호를 찾아 잇습니다(DB 지난공고) — 병원 자료(orgPublic)에 없는 곳도 공고가 있으면 그립니다 */
@@ -219,7 +232,7 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
     const 지난 = 탭 === 'info' ? await 지난공고받기(sb, { 이름: org, 시도: sido, n: 다 ? 20 : 5 }) : null;
     const 지난칸 = 지난 && 지난.줄.length > 0 ? (
       <RapoPastJobs 줄={지난.줄} 더있음={!다 && 지난.전체 > 지난.줄.length} 더보기={
-        <Link href={지난공고주소(org, sido)}
+        <Link href={지난공고주소(org, sido, sgg)}
           className="rapo-type-t4-bold flex h-(--rapo-touch-min) items-center justify-center rounded-(--rapo-radius-r2)
                      border border-(--rapo-color-stroke-neutral-contrast) text-(color:--rapo-color-fg-neutral)">
           지난 공고 더 보기 ({(지난.전체 - 지난.줄.length).toLocaleString('ko-KR')}건)
@@ -240,7 +253,7 @@ export default async function OrgsPage({ searchParams }: PageProps<'/orgs'>) {
     return (
       <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl" style={{ background: '#112332' }}>
         <Hit kind="org" target={org} />
-        <RapoOrgBoard name={org} sido={sido} 탭={탭} 있나={있나} 정보={정보}
+        <RapoOrgBoard name={org} sido={sido} sgg={sgg ?? undefined} 탭={탭} 있나={있나} 정보={정보}
           후기={탭 === 'review' ? await 후기칸(sb, org, sido) : undefined}
           사진={사진 ? <RapoOrgPhoto src={사진주소(사진)} alt={사진.설명} /> : undefined} 로고={로고주소(사진)} />
         {/* 사진·로고 출처 — 화면 맨 아래 작게 (2026-11-23 세중님) */}
