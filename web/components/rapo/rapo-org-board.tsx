@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { OrgSave } from '@/components/org-save';
+import { orgHref } from '@/lib/org';
 import { 어둠 } from './rapo-community';
 
 /* 병원 게시판 — 새 디자인 「08 · C / 05 병원 탐색」 (2026-11-12 세중님 「다 피그마 기준으로」).
@@ -18,10 +19,12 @@ import { 어둠 } from './rapo-community';
 
 export type 병원탭 = 'info' | 'talk' | 'review';
 
-export function RapoOrgBoard({ name, sido, 탭, 있나, 정보, 후기, 사진, 로고 }: {
+export function RapoOrgBoard({ name, sido, sgg, 탭, 있나, 정보, 후기, 사진, 로고 }: {
   /* 기관 마크 (2026-11-23 세중님) — 있으면 「병원 기본 이미지」 대신 */
   로고?: string | null;
   name: string; sido: string | null; 탭: 병원탭; 있나: boolean;
+  /* 같은 시도에 이름이 같은 곳을 가립니다 (2026-11-24) — 탭을 오가도 같은 병원에 머물게 주소에 넣습니다 */
+  sgg?: string;
   /* 기관 사진 띠 (2026-11-23 세중님 시범 · lib/org-photo.ts) — 앱 바 바로 아래. 없으면 안 그립니다 */
   사진?: ReactNode;
   /* 「근무 후기」 탭 안 (2026-11-15 · components/rapo/rapo-org-reviews.tsx) — 없으면 옛 「준비 중」 */
@@ -29,7 +32,7 @@ export function RapoOrgBoard({ name, sido, 탭, 있나, 정보, 후기, 사진, 
   /* 「병원 정보」 탭 안 — 서버가 그려서 넘깁니다(app/orgs/page.tsx). 숫자가 하나도 없으면 null */
   정보?: ReactNode;
 }) {
-  const 주소 = (t: 병원탭) => `/orgs?org=${encodeURIComponent(name)}&sido=${encodeURIComponent(sido ?? '')}${t === 'info' ? '' : '&tab=' + t}`;
+  const 주소 = (t: 병원탭) => `${orgHref(name, sido, sgg)}${t === 'info' ? '' : '&tab=' + t}`;
   return (
     <>
       {/* RAPO / App Bar — 어두운 판 · 「병원 게시판」 */}

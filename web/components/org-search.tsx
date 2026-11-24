@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { OrgRegion } from '@/components/org-region';
 import { browserSupabase } from '@/lib/supabase-browser';
 import {
-  TILES, TILE_NAME, place, shortKinds,
+  TILES, TILE_NAME, orgHref, place, shortKinds,
   type OrgFacets, type OrgListRow,
 } from '@/lib/org';
 
@@ -84,7 +84,7 @@ export function OrgSearch({
       {/* ① 병원 검색과 조건 — 원본 1312:7463 */}
       <h1 className="break-keep text-[25px] font-bold leading-[36px] text-[#f4f6f8]">어떤 병원이 궁금하세요?</h1>
       <p className="mt-(--rapo-dimension-x1) break-keep text-[14px] leading-[20px] text-[#bacad4]">
-        치료사가 일하는 {facets.total.toLocaleString('ko-KR')}곳을 모았어요
+        {facets.total > 0 ? `병원·기관 ${facets.total.toLocaleString('ko-KR')}곳의 정보를 모았어요` : '병원·기관 정보를 모았어요'}
       </p>
 
       <form className="mt-(--rapo-dimension-x4)" onSubmit={(e) => { e.preventDefault(); setQ(typed.trim()); }}>
@@ -208,7 +208,7 @@ function Card({ r }: { r: OrgListRow }) {
     ? [r.ot != null && `작업 ${r.ot}`, r.pt != null && `물리 ${r.pt}`, r.rehab != null && `재활의학과 전문의 ${r.rehab}`].filter(Boolean).join(' · ')
     : '인력 정보 없음';
   return (
-    <Link href={`/orgs?org=${encodeURIComponent(r.name)}&sido=${encodeURIComponent(r.sido_std ?? '')}`}
+    <Link href={orgHref(r.name, r.sido_std, r.sgg_std)}
       className="flex items-center gap-[14px] border-b border-[#344957] py-[13px] active:bg-white/5">
       <span className="flex size-[48px] shrink-0 items-center justify-center rounded-[12px] bg-[#ddecf2]">
         {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 「병원 기본 이미지」 */}
