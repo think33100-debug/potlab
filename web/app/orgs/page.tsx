@@ -117,7 +117,7 @@ async function 병원정보받기(sb: Awaited<ReturnType<typeof serverSupabase>>
 
 /* 「병원 정보」 탭 맨 위 — 어떤 곳이고 어디 있는지 (2026-11-13 세중님 「주소 정도만 같이 추가되면 어디에 있는 거군아 정도 알 것 같아」).
    종류는 기관 표의 kinds 에서 더 넓은 말(「복지관」 ⊂ 「장애인복지관」)을 빼고 남은 것 · 없으면 타일 이름.
-   주소는 자료에 따라 시도가 빠져 있어(「강동구 고덕로 201」) 시도를 앞에 붙입니다. 공고 상세 「근무 장소」와 같은 줄 모양.
+   주소는 자료에 따라 시도가 빠져 있어(「강동구 고덕로 201」) 시도를 앞에 붙입니다. 「전남광주통합특별시 …」 에는 안 붙입니다(2026-11-24). 공고 상세 「근무 장소」와 같은 줄 모양.
    운영 기관 — 어느 병원·법인이 맡아 운영하는지 (2026-11-13 세중님 「운영 기관으로 명칭 통일하고 장애인 복지관이랑 치매센터 둘 다」).
      장애인복지관  welfare_centers.corp (266곳 모두 있음 · 누구나 읽힘)
      치매센터      dementia_centers.operator (317곳 모두 있음 · 회원에게 이 칸만 열었음 · 금고 SQL_1113/Y2 · 대표자·전화는 막힘)
@@ -138,7 +138,7 @@ function 기관정보칸(o: OrgPublic, 운영기관: string | null) {
   const 종류들 = (o.kinds ?? []).filter((k, _, 모두) => !모두.some((x) => x !== k && x.includes(k)));
   const 종류 = 종류들.slice(0, 2).join(' · ') || TILE_NAME[o.tile] || null;
   const 시도 = o.sido_std ?? '';
-  const 주소 = o.addr ? (시도 && !o.addr.startsWith(시도) ? `${시도} ${o.addr}` : o.addr) : place(o.sido_std, o.sgg_std) || null;
+  const 주소 = o.addr ? (시도 && !o.addr.startsWith(시도) && !o.addr.startsWith('전남광주') ? `${시도} ${o.addr}` : o.addr) : place(o.sido_std, o.sgg_std) || null;
   if (!종류 && !주소) return null;
   return (
     <RapoDetailSection title="기관 정보">
