@@ -7,6 +7,7 @@ import { isClosed, todayKst, 금액있나, 기관이름말, 시각말, 연봉말
   보수요약, 근무기간말, 인턴태그, 기관태그, 직군띄어쓰기, 보여줄기관이름, 지원링크, 지원방법말, type 병원주소꼴 } from '@/lib/job-state';
 import type { HospitalStat } from '@/lib/hospital';
 import { jobViews } from '@/lib/job-views';
+import { 공고사진찾기, 로고주소, 사진주소, 출처들 } from '@/lib/org-photo';
 import { 지난공고받기 } from '@/lib/past-jobs';
 import { 기관그림, 목록줄, 태그 } from '@/lib/rapo-home';
 import { 색인메타 } from '@/lib/seo';
@@ -237,6 +238,8 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
     : !끝 && !마감글 ? '접수 기간을 아직 확인하지 못했어요. 원문 공고에서 꼭 확인해 주세요.' : null;
 
   const 기관 = 보여줄기관이름(j.org_name, null);
+  /* 기관 사진 — 시범은 아주대학교병원 작업치료사 공고만 (2026-11-23 세중님 · lib/org-photo.ts 한 자리) */
+  const 사진 = 공고사진찾기(j.org_name, j.job_group);
   const 주소 = j.work_place && j.work_place !== j.지역보임 ? j.work_place : j.지역보임;
   const 비슷한주소 = `/jobs?${new URLSearchParams({
     ...(j.job_group ? { job: j.job_group } : {}),
@@ -248,7 +251,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       id={j.id} who={who} closed={closed}
       shareTitle={공유제목(기관이름말(j.org_name), j.job_group, detail['조교연구'] as string | undefined, j.title)}
       identity={{
-        org: 기관, orgArt: 기관그림(j.org_name || j.id), 상태, title: j.title,
+        org: 기관, orgArt: 기관그림(j.org_name || j.id), 로고: 로고주소(사진), 상태, title: j.title,
         tags: 태그(...기관태그(detail['기관분류']), j.employ_type || '공고문 참고', 조교연구말(detail['조교연구']), 인턴태그(j.is_intern, j.employ_type), 직군태그(j.job_group, detail['조교연구'] as string | undefined)),
         views: views[j.id] ?? null, ...식별인원, 마감: 식별마감,
       }}
@@ -263,6 +266,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       지원주소={지원.주소}
       치료사={치료사} 바쁨={시설 ? null : 병원숫자} 시설={시설} 경쟁률={경쟁률} 보수={보수}
       지난공고={지난}
+      사진={사진 ? { src: 사진주소(사진), alt: 사진.설명, 출처: 출처들(사진) } : null}
       인턴={!!j.is_intern || /인턴/.test(j.employ_type ?? '')}
       마감알림={봄 && !closed && !!j.apply_to}
     />

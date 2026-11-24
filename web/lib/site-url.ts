@@ -27,6 +27,8 @@ export function siteUrl(): string {
    사이트는 Vercel 의 옛 이름 주소(potjob-web.vercel.app)로도 열립니다. 거기서 공유하면 location.origin 이
    그 주소라 링크에 potjob 이 찍혔습니다. 내 컴퓨터(localhost)에서만 지금 주소를 씁니다 — 개발 서버에서 눌러 보게. */
 export const 대표주소 = 'https://www.rapojob.co.kr';
+/* Vercel 이 처음 준 옛 이름 주소 — 여기로 온 화면 요청은 middleware 가 대표 주소로 보냅니다 (2026-11-23 · 로그인이 주소마다 따로였음) */
+export const 옛주소호스트 = 'potjob-web.vercel.app';
 
 export function 공유주소(path: string): string {
   if (typeof location !== 'undefined' && /^(localhost|127\.|\[::1\])/.test(location.hostname)) return location.origin + path;

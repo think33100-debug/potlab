@@ -3,6 +3,7 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { 비회원보기중 } from './guest-view';
+import { 굽는길 } from './keep-login';
 
 /* 브라우저 쪽 열쇠꾸러미입니다.
 
@@ -64,6 +65,13 @@ function 진짜클라이언트(): SupabaseClient {
         },
       },
     );
+    /* ★ 2026-11-23 — 브라우저가 토큰을 **스스로** 갱신하면(화면을 한 시간 넘게 열어 둘 때) 새 쿠키를 자바스크립트가 씁니다.
+       사파리는 그런 쿠키를 7일까지만 둡니다. 서버를 한 번 불러 같은 값을 서버 쿠키로 다시 굽게 합니다 (lib/keep-login.ts).
+       실패해도 괜찮습니다 — 다음에 화면을 옮길 때 middleware 가 굽습니다. 이 안에서 auth 함수를 부르지 않습니다(멈춤) */
+    client.auth.onAuthStateChange((일) => {
+      if (일 !== 'TOKEN_REFRESHED') return;
+      try { void fetch(굽는길, { cache: 'no-store', credentials: 'same-origin' }).catch(() => {}); } catch { /* 무시 */ }
+    });
   }
   return client;
 }

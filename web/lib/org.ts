@@ -127,12 +127,25 @@ export type OrgJob = {
    어느 주소가 어느 분원인지는 org_alias(kind='호스트')에 손으로 적습니다. */
 export async function orgPublic(
   sb: SupabaseClient, name: string, sido: string | null,
-  title?: string | null, src?: string | null,
+  title?: string | null, src?: string | null, sgg?: string | null,
 ): Promise<OrgPublic | null> {
   const { data } = await sb.rpc('org_public',
-    { p_name: name, p_sido: sido, p_title: title ?? null, p_src: src ?? null });
+    { p_name: name, p_sido: sido, p_title: title ?? null, p_src: src ?? null, p_sgg: sgg ?? null });
   return ((data ?? []) as OrgPublic[])[0] ?? null;
 }
+
+/* 병원 찾기 줄과 **같은 줄**의 숫자 (2026-11-24 세중님 「보여지는 인원이 달라」).
+   병원 찾기는 org_group_mv 를, 병원 게시판은 다른 표를 읽어 같은 병원의 치료사 수가 달랐습니다 — 이제 둘 다 이 줄입니다.
+   같은 시도에 이름이 같은 곳이 있어 시군구까지 넘깁니다 */
+export async function orgStat(sb: SupabaseClient, o: Pick<OrgPublic, 'name' | 'sido_std' | 'sgg_std'>): Promise<OrgStat | null> {
+  const { data } = await sb.rpc('org_detail', { p_name: o.name, p_sido: o.sido_std, p_sgg: o.sgg_std });
+  return ((data ?? []) as OrgStat[])[0] ?? null;
+}
+
+/* 병원 화면 주소 — 시군구까지 넣어야 같은 시도 같은 이름을 가립니다.
+   시군구를 **모르면** 안 넣고(undefined), 시군구가 **없는 곳**(세종 등)이면 빈 값으로 넣습니다(null) */
+export const orgHref = (name: string, sido?: string | null, sgg?: string | null) =>
+  `/orgs?org=${encodeURIComponent(name)}&sido=${encodeURIComponent(sido ?? '')}${sgg === undefined ? '' : `&sgg=${encodeURIComponent(sgg ?? '')}`}`;
 
 export async function orgNearby(sb: SupabaseClient, name: string, sido: string | null) {
   const { data } = await sb.rpc('org_nearby', { p_name: name, p_sido: sido, p_n: 3 });

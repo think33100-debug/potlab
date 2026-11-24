@@ -48,8 +48,10 @@ export type 모집상태 = '접수 중' | '모집 마감' | '확인 필요';
 
 /* 02 공고 식별 — 남색 판. 기관 · 모집 상태 · 제목 · 태그 · 조회 · 모집인원과 접수 마감.
    원본의 기관 공식 로고·부서 줄은 자료가 없어 기관 기본 그림을 흰 상자에 둡니다(로고는 오픈 뒤 · 11/5) */
-export function RapoDetailIdentity({ org, orgArt, 상태, title, tags, views, 인원, 인원이름, 마감 }: {
+export function RapoDetailIdentity({ org, orgArt, 로고, 상태, title, tags, views, 인원, 인원이름, 마감 }: {
   org: string; orgArt: string; 상태: 모집상태; title: string; tags: string[];
+  /* 그 기관 마크 (2026-11-23 세중님 · lib/org-photo.ts) — 있으면 기본 그림 대신 흰 칸에 꽉 차게 */
+  로고?: string | null;
   views: number | null; 인원: string; 마감: string;
   /* 직군이 하나면 「작업치료사 모집 · 1명」처럼 직군을 이름 줄로 올립니다 — 값에 같이 쓰면 「1명」이 다음 줄로 떨어졌습니다 (11/12 세중님) */
   인원이름?: string;
@@ -61,7 +63,8 @@ export function RapoDetailIdentity({ org, orgArt, 상태, title, tags, views, �
         <div className="flex size-[96px] shrink-0 items-center justify-center rounded-(--rapo-radius-r2)
                         bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x2)">
           {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 · 공통 로고(보건소·치매센터)가 있으면 그것 (2026-11-13) */}
-          <img src={기관로고(org) ?? `/rapo/home/org-${orgArt}.svg`} alt="" className={기관로고(org) ? 'size-14 object-contain' : 'size-full object-contain'} />
+          <img src={로고 ?? 기관로고(org) ?? `/rapo/home/org-${orgArt}.svg`} alt={로고 ? `${org} 로고` : ''}
+            className={!로고 && 기관로고(org) ? 'size-14 object-contain' : 'size-full object-contain'} />
         </div>
         <p className="rapo-type-t5-bold min-w-0 flex-1 break-keep">{org}</p>
         {/* 모집 상태 — 접수 중 · 모집 마감(D-03) · 확인 필요(D-04 · 마감일을 못 읽은 공고) */}

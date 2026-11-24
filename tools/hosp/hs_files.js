@@ -158,7 +158,11 @@ function hs첨부주소(html, 바탕주소) {
       const g = 토막.match(new RegExp(이름 + '\\s*=\\s*["\']([^"\']*)["\']', 'i'));
       return g ? g[1] : '';
     };
-    const src = 집('src'); const alt = 집('alt');
+    const src = 집('src'); let alt = 집('alt');
+    /* ★ 2026-11-23 세중님 「그림 공고도 수집기가 스스로 읽고 있지 않아?」 — 설명이 alt 가 아니라 **title** 에 있는 꼴 (원광대학교병원 HS1506666763).
+       `<img src="/data/userfiles/<uuid>.jpg" title="%ED%98%84…채용공고문_20261123001.jpg">` — 주소 글자로 바뀐(퍼센트) 파일 이름입니다.
+       alt 가 비었으면 title 을 풀어 설명으로 씁니다. 그래야 「공고문」 글귀로 받고, 이름에 쪽 번호(001·002…)가 남아 여러 장을 이어 읽습니다 */
+    if (!alt) { const t = 집('title'); if (t) { try { alt = decodeURIComponent(t); } catch { alt = t; } } }
     if (!그림공고문인가({ src, alt, width: 집('width'), height: 집('height') })) continue;
     더하기(src, alt || '공고문 그림', true, null, true);
   }
@@ -217,6 +221,39 @@ function hs첨부주소(html, 바탕주소) {
   return [...모은것].map(([url, v]) => ({ url, name: v.name, 점수: v.점수,
     ...(v.받는법 ? { 받는법: v.받는법 } : {}) }))
     .sort((a, b) => b.점수 - a.점수);
+}
+
+/** **공고문이 그림 여러 장일 때 같은 묶음** (2026-11-23 · 원광대학교병원 HS1506666763 — 쪽마다 한 장, 넉 장).
+ *  첨부되메우기는 첨부 하나만 골라 읽습니다. 그림 공고문은 1쪽에 자격, 2쪽에 근무조건·보수가 있어 한 장만 읽으면 반쪽입니다.
+ *  고른 것이 그림이면 **같은 자리(주소의 폴더)에 있고 이름이 숫자만 다른 그림**을 쪽 차례(이름 차례)로 돌려줍니다 — 고른 것 포함, 많아야 6장.
+ *  쪽에 박힌 그림(`#본문그림-N`)은 주소가 쪽 주소라 여기 안 듭니다 */
+const 그림파일꼴 = /[.](jpe?g|png|webp)(?:$|[?#&])/i;
+/** **확장자 없는 편집기 그림 주소인가** (2026-11-23 · 가톨릭중앙의료원 여섯 곳 — 확인한 꼴만 적습니다 · 지침 3절)
+ *  `/api/attach/editor/view/<기관>/<년>/<월>/<난수>_1_` — 끝 토막에 점(확장자)이 없습니다 */
+function 편집기그림인가(주소) {
+  const 길 = String(주소 || '').split(/[?#]/)[0];
+  return /\/attach\/editor\/view\/[^.]+$/i.test(길);
+}
+function 그림쪽묶음(첨부들, 고른것) {
+  const 그림인가 = (a) => !!a && !/#본문그림-/.test(String(a.url || ''))
+    && (그림파일꼴.test(String(a.url || '')) || 그림파일꼴.test(String(a.name || '')) || 편집기그림인가(a.url));
+  if (!그림인가(고른것)) return [];
+  const 자리 = (u) => String(u || '').split(/[?#]/)[0].replace(/[^/]*$/, '');
+  const 꼴 = (n) => String(n || '').replace(/\d+/g, '#');
+  /* 편집기 그림은 설명 글(alt)이 장마다 조금씩 다릅니다(부천성모 「호흡기내과 」·「호흡 」) — 같은 자리의 편집기 그림이면 이름을 안 보고 묶고,
+     차례는 받은 차례(= 공고문에 놓인 차례) 그대로입니다 */
+  if (편집기그림인가(고른것.url)) {
+    const 편집묶음 = (첨부들 || []).filter((a) => 그림인가(a) && 편집기그림인가(a.url) && 자리(a.url) === 자리(고른것.url));
+    if (!편집묶음.some((a) => a.url === 고른것.url)) 편집묶음.push(고른것);
+    return 편집묶음.length < 2 ? [] : 편집묶음.slice(0, 6);
+  }
+  const 묶음 = (첨부들 || []).filter((a) => 그림인가(a) && 자리(a.url) === 자리(고른것.url) && 꼴(a.name) === 꼴(고른것.name));
+  if (!묶음.some((a) => a.url === 고른것.url)) 묶음.push(고른것);
+  if (묶음.length < 2) return [];
+  /* 이름이 다 같으면(설명 없는 그림 — 「공고문 그림」) 받은 차례 그대로 · 다르면 숫자를 수로 견줘 쪽 차례 */
+  const 이름다름 = new Set(묶음.map((a) => String(a.name || ''))).size > 1;
+  const 차례 = 이름다름 ? [...묶음].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ko', { numeric: true })) : 묶음;
+  return 차례.slice(0, 6);
 }
 
 /* 쪽에 박힌 그림 — `<img … src="data:image/png;base64, …">` (2026-11-19 · 인천세종병원) */
@@ -284,7 +321,12 @@ function 그림공고문인가({ src, alt, width, height }) {
   if (!u) return false;
   if (/icon|logo|btn|button|banner|sprite|blank|spacer|thumb/i.test(u)) return false;
   const 그림꼴 = /[.](jpe?g|png|webp)(\b|$|[?&])/i.test(u);
-  if (!그림꼴) return false;
+  /* ★ 2026-11-23 세중님 「이거 또 왜 이러냐 수집 상태가」 — **확장자 없는 편집기 그림** (가톨릭중앙의료원 여섯 곳).
+     부천성모 HS49364075 는 공고 본문이 `<img alt="작업치료 " height="1403" src="/api/attach/editor/view/5/2026/11/<난수>_1_" width="992">`
+     한 장뿐인데, 주소에 .png 꼬리가 없어 그림으로 안 봤습니다 → 자격·우대가 다 비었습니다 (받아 보니 image/png 216KB · 앞 글자 PNG).
+     여섯 곳 목록의 그림 19장이 **전부** 이 꼴입니다(꼬리 있는 것 0). 크기가 적혀 있으면 큰 것만, 없으면 받습니다(작은 꾸밈은 읽을 때 40KB 뚜껑) */
+  const 편집기 = 편집기그림인가(u);
+  if (!그림꼴 && !편집기) return false;
   /* ★ 2026-10-22 — **글귀만으로는 안 됩니다.** 「공고|채용|모집」 으로 봤더니
      메뉴 그림(alt 「채용안내」·「채용사이트」·「ENGLISH」)이 섞였습니다.
      글귀는 **공고문 꼴**만 봅니다 */
@@ -294,6 +336,7 @@ function 그림공고문인가({ src, alt, width, height }) {
   /* 크기가 적혀 있으면 **큰 것만** 봅니다 (메뉴 그림은 작습니다).
      크기가 없으면 공고문 꼴 글귀로만 받습니다 */
   if (재어둠) return 큼;
+  if (편집기) return true;
   /* ★ 2026-11-19 — **편집기로 올린 그림**은 설명 글(alt)도 크기도 없이 옵니다 — 아주대 리크루터 채용관
      `<img src="…/upload/76922/image/202611/<uuid>.jpg" style="max-width: 100%…">` (HS1196586464 · 본문이 이 그림 한 장).
      설명 글이 없고 **올린 그림 자리(upload·editor 의 image)** 면 받습니다. 작은 꾸밈 그림은 읽을 때 40KB 뚜껑에서 걸러집니다 */
@@ -311,6 +354,22 @@ if (require.main === module && process.argv.includes('--자기점검')) {
   봐('메뉴 글귀(채용안내)는 뺀다', 그림공고문인가({ src: '/x/m.jpg', alt: '채용안내' }) === false);
   봐('ENGLISH 는 뺀다', 그림공고문인가({ src: '/x/e.jpg', alt: 'ENGLISH' }) === false);
   봐('공고문 글귀는 받는다', 그림공고문인가({ src: '/x/n.jpg', alt: '2026년 채용 공고문' }) === true);
+  /* 2026-11-23 설명이 title 에 퍼센트 글자로 (원광대학교병원 HS1506666763 — 넉 장) */
+  {
+    const t = encodeURIComponent('현대자동차(주)의원물리치료사채용공고문_2026112300');
+    const 쪽4 = [1, 2, 3, 4].map((n) => '<img src="/data/userfiles/aaaa-' + n + '.jpg" title="' + t + n + '.jpg" />').join('<br>') + '<img src="/data/builder/logo.jpg" title="logo">';
+    const 잡 = hs첨부주소(쪽4, 'https://www.wkuh.org/recruit/jobs/recruit_notice.do?rc_idx=1');
+    {
+      const 뒤섞음 = [잡[2], 잡[0], 잡[3], 잡[1]];
+      const 묶 = 그림쪽묶음(뒤섞음, 뒤섞음[0]);
+      봐('그림 넉 장을 쪽 차례로 묶는다', 묶.length === 4 && 묶.map((a) => a.name.slice(-7, -4)).join(',') === '001,002,003,004');
+      봐('pdf 를 골랐으면 묶지 않는다', 그림쪽묶음([...잡, { url: 'https://www.wkuh.org/data/a.pdf', name: '공고문.pdf' }], { url: 'https://www.wkuh.org/data/a.pdf', name: '공고문.pdf' }).length === 0);
+      봐('그림이 한 장이면 묶지 않는다', 그림쪽묶음([잡[0]], 잡[0]).length === 0);
+      봐('다른 폴더·다른 이름 꼴은 안 묶는다', 그림쪽묶음([잡[0], { url: 'https://www.wkuh.org/other/x.jpg', name: 잡[1].name }, { url: 'https://www.wkuh.org/data/userfiles/y.jpg', name: '지원서 양식.jpg' }], 잡[0]).length === 0);
+      봐('쪽에 박힌 그림은 안 묶는다', 그림쪽묶음([{ url: 'https://a.kr/v?id=1#본문그림-1-abc', name: '공고문 그림.png' }, { url: 'https://a.kr/v?id=1#본문그림-2-abd', name: '공고문 그림.png' }], { url: 'https://a.kr/v?id=1#본문그림-1-abc', name: '공고문 그림.png' }).length === 0);
+    }
+    봐('title 의 공고문 이름으로 그림 넉 장을 받는다', 잡.length === 4 && 잡.every((a) => /채용공고문_2026112300[1-4][.]jpg$/.test(a.name)) && /userfiles[/]aaaa-1[.]jpg$/.test(잡.map((a) => a.url).sort()[0]));
+  }
   봐('아이콘 길은 뺀다', 그림공고문인가({ src: '/img/icon_file.gif', alt: '채용 공고문', width: 900, height: 900 }) === false);
   봐('웹접근성 인증서는 공고가 아니다', 공고아닌첨부('wa_qualith_certificate.pdf') === true);
   /* 2026-11-19 쪽에 박힌 그림 (인천세종병원 HS69368144 꼴) */
@@ -327,6 +386,20 @@ if (require.main === module && process.argv.includes('--자기점검')) {
   봐('없는 번호는 왜를 낸다', !!본문박힌그림(쪽, 2).왜);
   봐('편집기로 올린 설명 없는 그림(아주대)은 받는다', 그림공고문인가({ src: 'https://ajoumc.recruiter.co.kr/upload/76922/image/202611/e3e3f814.jpg', alt: '' }) === true);
   봐('편집기 그림이라도 설명이 메뉴 글귀면 뺀다', 그림공고문인가({ src: '/upload/1/image/m.jpg', alt: '채용안내' }) === false);
+  /* 2026-11-23 — 확장자 없는 편집기 그림 (가톨릭중앙의료원 · 부천성모 목록 API content 원문 그대로) */
+  {
+    const 한장 = '<p><img alt="작업치료 " height="1403" src="/api/attach/editor/view/5/2026/11/YWb11yg5FtKqDibVnaxM_1_" width="992" /></p>';
+    const 잡1 = hs첨부주소(한장, 'https://www.cmcbucheon.or.kr/page/board/recruit?articleNo=551150');
+    봐('확장자 없는 편집기 그림 한 장을 받는다', 잡1.length === 1 && 잡1[0].url === 'https://www.cmcbucheon.or.kr/api/attach/editor/view/5/2026/11/YWb11yg5FtKqDibVnaxM_1_' && 잡1[0].name === '작업치료' && 잡1[0].점수 >= 0);
+    const 두장 = '<p><img alt="호흡기내과 " height="1403" src="/api/attach/editor/view/5/2026/09/RJocsnZpmqDwLn9d5T2p_1_" width="992" /></p>'
+      + '<p><img alt="호흡 " height="1403" src="/api/attach/editor/view/5/2026/09/TyicUIUGTYTaDTroZwXw_1_" width="992" /></p>';
+    const 잡2 = hs첨부주소(두장, 'https://www.cmcbucheon.or.kr/page/board/recruit?articleNo=549686');
+    const 묶2 = 그림쪽묶음(잡2, 잡2[0]);
+    봐('편집기 그림 두 장을 놓인 차례로 묶는다', 잡2.length === 2 && 묶2.length === 2 && /RJocsnZp/.test(묶2[0].url) && /TyicUIUG/.test(묶2[1].url));
+    봐('편집기 그림이라도 작다고 적혀 있으면 뺀다', 그림공고문인가({ src: '/api/attach/editor/view/5/2026/11/abc_1_', alt: '', width: 120, height: 40 }) === false);
+    봐('편집기 자리가 아니면 확장자 없는 그림은 안 받는다', 그림공고문인가({ src: '/api/banner/view/123', alt: '채용 공고문', width: 992, height: 1403 }) === false);
+    봐('편집기 자리라도 점 붙은 다른 파일(.gif)은 편집기 그림 꼴이 아니다', 편집기그림인가('/api/attach/editor/view/5/2026/11/a.gif') === false);
+  }
   /* 2026-11-21 규칙숙제 #7 — 사진 대조에서 「공고문」으로 골라 읽은 공통 파일 (운영 job_attachments 이름 그대로) */
   봐('#7 wa_ 는 주소 끝으로도 가린다', 공고아닌첨부('첨부파일', 'https://www.busanmc.or.kr/busanmc/_Img/Content/wa_busanmc2026.pdf') === true);
   봐('#7 wa_busanmc2026.pdf 점수 -1', 점수('wa_busanmc2026.pdf') === -1);
@@ -338,11 +411,11 @@ if (require.main === module && process.argv.includes('--자기점검')) {
   봐('#7 블라인드 채용 모집요강은 공고문', 점수('2026 블라인드 채용 모집요강.pdf') === 2);
   봐('#7 그냥 이름(cccc.hwp)은 그대로 1', 점수('cccc.hwp') === 1);
   봐('#7 입사지원서는 그대로 0', 점수('●충주의료원입사지원서.hwp') === 0);
-  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 15가지 · 공통 파일 가름 10가지');
+  console.log(틀림 ? '★ 자기 점검 ' + 틀림 + '가지 실패' : '○ 자기 점검 통과 — 그림 공고문 가름 15가지 · 그림 여러 장(title 이름 · 쪽 묶음) 6가지 · 확장자 없는 편집기 그림 5가지 · 공통 파일 가름 10가지');
   process.exit(틀림 ? 1 : 0);
 }
 
-module.exports = { hs첨부주소, 점수, 서식말, 공고아닌첨부, 그림공고문인가, 본문박힌그림 };
+module.exports = { hs첨부주소, 점수, 서식말, 공고아닌첨부, 그림공고문인가, 본문박힌그림, 그림쪽묶음 };
 
 /* ── 자기 점검 ───────────────────────────────────────────────── */
 if (require.main === module) {

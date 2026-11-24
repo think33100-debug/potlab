@@ -27,5 +27,5 @@ export async function 지난공고받기(
 }
 
 /* 병원 화면 주소 — 「병원 정보」 탭의 지난 공고 자리로 바로 갑니다 */
-export const 지난공고주소 = (기관이름: string, 시도?: string | null) =>
-  `/orgs?org=${encodeURIComponent(기관이름)}${시도 ? `&sido=${encodeURIComponent(시도)}` : ''}&past=all#past-jobs`;
+export const 지난공고주소 = (기관이름: string, 시도?: string | null, 시군구?: string | null) =>
+  `/orgs?org=${encodeURIComponent(기관이름)}${시도 ? `&sido=${encodeURIComponent(시도)}` : ''}${시군구 != null ? `&sgg=${encodeURIComponent(시군구)}` : ''}&past=all#past-jobs`;
