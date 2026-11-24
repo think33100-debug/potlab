@@ -35,7 +35,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { 읽기, kordoc있나, 워커끝내기, 워커셈 } from './kordoc워커.mjs';
-import { 목록, 꺼내기, 묶음갈래, 공고문먼저, 역사선바로잡기, 서식말, 묶기 } from './묶음파일.mjs';
+import { 목록, 꺼내기, 묶음갈래, 공고문먼저, 역사선바로잡기, 서식말, 묶기, 파일이름만 } from './묶음파일.mjs';
 import { createRequire } from 'node:module';
 import { 표머리말 } from './칸검사.mjs';
 import { fileURLToPath } from 'node:url';
@@ -250,7 +250,7 @@ async function 묶음읽기(buf, 이름, 옵션 = {}, 깊이 = 0) {
     rssMB = Math.max(rssMB, r.rssMB || 0);
     OCR썼나 = OCR썼나 || !!r.OCR썼나;
     조각.push({ 이름: x.이름, 글자수: String(r.md || '').length, 왜: r.왜 || '',
-      md: String(r.md || ''), 서식인가: 서식말.test(x.이름) });
+      md: String(r.md || ''), 서식인가: 서식말.test(파일이름만(x.이름)) });   /* 폴더 이름은 안 봅니다 — 2026-11-24 규칙숙제 #49 */
   }
   const 읽힌것 = 조각.filter((c) => c.md);
   const md = 읽힌것.map((c) => '\n\n## [묶음 속] ' + c.이름 + '\n\n' + c.md).join('');
