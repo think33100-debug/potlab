@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const 기록 = path.join(fs.mkdtempSync(path.join(os.tmpdir(), '클린아이-')), '연것.json');
 process.env.POTJOB_CLEANEYE_STATE = 기록;
-const { 첨부받기, 열때인가, 오늘열었나, 못여는까닭, 클린아이주소인가 } = await import('./cleaneye-file.mjs');
+const { 첨부받기, 열때인가, 오늘열었나, 못여는까닭, 클린아이주소인가, 자료없음인가, 목록못받음까닭 } = await import('./cleaneye-file.mjs');
 
 let 탈 = 0; let 수 = 0;
 const 봐 = (말, 됨) => { 수++; if (!됨) { 탈++; console.log('✗ ' + 말); } };
@@ -64,6 +64,20 @@ const 읽 = (f) => fs.readFileSync(new URL('./' + f, import.meta.url), 'utf8');
 봐('수집기 — 전체도 새것만 엶', /옵션\.새것 && !옵션\.새것\.has\(id\)/.test(읽('collect-cleaneye.mjs')));
 봐('되메우기 — 못 여는 공고는 볼 것에서 뺌', /\.filter\(지금열수있나\)/.test(읽('첨부되메우기.mjs')));
 봐('없어진공고찾기 — 클린아이 화면을 안 엶', /!클린아이주소인가\(x\.url\)/.test(읽('없어진공고찾기.mjs')));
+
+/* 목록 답 — 광주 원문(서버 로그) */
+const 머리 = (c, m) => '<?xml version="1.0" encoding="UTF-8"?> <response> <openXmlEmployInfo-header> <resultCode>' + c
+  + '</resultCode> <resultMsg>' + m + '</resultMsg> </openXmlEmployInfo-header> </response>';
+봐('광주 원문은 자료 없음', 자료없음인가(머리('3', 'NONOTEXISTDATA_ERROR')));
+봐('정상 답은 아님', !자료없음인가(머리('00', 'NORMAL_SERVICE')));
+봐('다른 탈(22 한도)은 아님', !자료없음인가(머리('22', 'LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR')));
+봐('코드 3 이어도 말이 다르면 아님', !자료없음인가(머리('3', 'UNKNOWN_ERROR')));
+봐('빈 답은 아님', !자료없음인가('') && !자료없음인가(null));
+봐('17곳 다 못 받으면 탈', !!목록못받음까닭({ 시도수: 17, 못받은시도: 17, 받은수: 0 }));
+봐('17곳이 정상인데 모두 0건이어도 탈 (11/24 18:36)', !!목록못받음까닭({ 시도수: 17, 못받은시도: 0, 받은수: 0 }));
+봐('한 곳 못 받은 것은 그대로 감', 목록못받음까닭({ 시도수: 17, 못받은시도: 1, 받은수: 400 }) === '');
+봐('다 받으면 그대로 감', 목록못받음까닭({ 시도수: 17, 못받은시도: 0, 받은수: 430 }) === '');
+봐('정찰은 전체 바퀴에서만', /if \(!dry && !순찰 && 받은번호전부\)/.test(읽('collect-cleaneye.mjs')));
 
 Date.now = 진짜지금;
 console.log((탈 ? '✗ ' + 탈 + '건 탈 · ' : '○ ') + (수 - 탈) + '/' + 수);
