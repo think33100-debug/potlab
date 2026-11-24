@@ -25,10 +25,16 @@
  *    YOUTH_KEY              온통청년 인증키
  *    COLLECT_KEY_YTH        청년담기() 가 보는 열쇠 (없으면 서버 열쇠로 읽음)
  *    SUPABASE_URL · SUPABASE_SERVICE_KEY
+ *
+ *  ── 예약·박동 (2026-11-25 세중님) ─────────────────────────────
+ *    서버 크론 매일 06:42. 10/3 에 한 번 받은 뒤 예약 줄이 없어 멈춰 있었습니다.
+ *    받은 바퀴도 못 받은 바퀴도 박동(collect_source 「YTH」)을 남깁니다 — 48시간 안 오면 늦음입니다.
+ *    화면은 마지막 수집 때 온 정책만 보입니다(DB 청년목록·청년셈). 그래서 **덜 받은 바퀴는 담지 않습니다.**
  * ═══════════════════════════════════════════════════════════════ */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { 이름표 } from './수집기이름표.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const 읽기 = (p) => {
@@ -214,11 +220,51 @@ const KEY = cfg.YOUTH_KEY;
 if (!KEY) { console.error('YOUTH_KEY 가 없습니다 (.env.server 를 보십시오)'); process.exit(1); }
 const 쪽크기 = 200;          // 창구가 200 까지 받습니다 (2026-10-04 확인)
 
+/* ── DB 창구 — 받기 전에 준비합니다 (못 받은 바퀴도 박동으로 남기려고) ── */
+const URL_ = cfg.SUPABASE_URL || cfg.NEXT_PUBLIC_SUPABASE_URL;
+const SK = cfg.SUPABASE_SERVICE_KEY;
+if (!dry && (!URL_ || !SK)) { console.error('SUPABASE_URL · SUPABASE_SERVICE_KEY 가 없습니다'); process.exit(1); }
+const 부르기 = async (fn, body) => {
+  const r = await fetch(URL_ + '/rest/v1/rpc/' + encodeURIComponent(fn), {
+    method: 'POST',
+    headers: { apikey: SK, Authorization: 'Bearer ' + SK, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(30_000),
+  });
+  const t = await r.text();
+  if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + t.slice(0, 300));
+  return t ? JSON.parse(t) : null;
+};
+
+let 열쇠 = cfg.COLLECT_KEY_YTH;
+if (!dry && !열쇠) {
+  const r = await fetch(URL_ + '/rest/v1/collect_secret?source=eq.YTH&select=secret',
+    { headers: { apikey: SK, Authorization: 'Bearer ' + SK }, signal: AbortSignal.timeout(30_000) });
+  열쇠 = ((await r.json())[0] || {}).secret;
+  if (!열쇠) { console.error('YTH 열쇠가 collect_secret 에 없습니다'); process.exit(1); }
+  console.log('열쇠를 .env 에서 못 찾아 collect_secret 에서 읽었습니다 (값은 안 찍습니다).');
+}
+
+/* 박동 — 박동이 실패해도 수집 결과는 그대로입니다 */
+const 박동 = async (ok, 담음, 왜, 메모) => {
+  if (dry) return;
+  try {
+    await 부르기('collect_beat', {
+      p_secret: 열쇠, p_source: 'YTH',
+      p_beat: { took_ms: Date.now() - 시작한때, ok, 본곳: 메모.전체, 담음, 왜, 메모 },
+    });
+  } catch (e) { console.log('박동을 못 남겼습니다 — ' + String(e.message).slice(0, 160)); }
+};
+/* 오류 글에 열쇠가 섞여도 남기지 않습니다 */
+const 가림 = (e) => String(e?.message || e)
+  .split(KEY).join('(가림)').split(encodeURIComponent(KEY)).join('(가림)').slice(0, 300);
+const 멈춤 = async (왜, 메모) => { console.error('★ ' + 왜); await 박동(false, 0, 왜, 메모); process.exit(1); };
+
 const 받기 = async (쪽) => {
   const u = 'https://www.youthcenter.go.kr/go/ythip/getPlcy'
     + '?apiKeyNm=' + encodeURIComponent(KEY)
     + '&pageNum=' + 쪽 + '&pageSize=' + 쪽크기 + '&rtnType=json';
-  const r = await fetch(u, { headers: { 'User-Agent': 'POTJOB/1.0 (+https://potjob.co.kr)' } });
+  const r = await fetch(u, { headers: { 'User-Agent': 이름표('RAPO-collector/1.0') }, signal: AbortSignal.timeout(30_000) });
   const t = await r.text();
   if (!r.ok) throw new Error('HTTP ' + r.status + ' · 앞 300자 — ' + t.slice(0, 300).replace(/\s+/g, ' '));
   const j = JSON.parse(t);
@@ -229,7 +275,10 @@ const 받기 = async (쪽) => {
 const 모두 = new Map();
 let 전체 = 0;
 for (let 쪽 = 1; 쪽 <= 100; 쪽++) {
-  const res = await 받기(쪽);
+  let res;
+  try { res = await 받기(쪽); } catch (e) {
+    await 멈춤(쪽 + '쪽을 못 받았습니다 — ' + 가림(e), { 전체, 받은것: 모두.size });
+  }
   전체 = res.pagging?.totCount ?? 전체;
   const 줄 = res.youthPolicyList || [];
   for (const x of 줄) { const v = 한줄(x); if (v.번호) 모두.set(v.번호, v); }
@@ -249,38 +298,27 @@ console.log('  상시 ' + 줄들.filter((x) => x.상시).length + '건 · 기간
 const 오늘 = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
 console.log('  신청 끝난 것 ' + 줄들.filter((x) => x.신청끝 && x.신청끝 < 오늘).length + '건 (회원 화면에서 숨깁니다)');
 
+/* 덜 받았으면 담지 않습니다 — 0건이거나 창구가 말한 전체의 95% 아래.
+   화면은 마지막 수집 때 온 정책만 보여서, 덜 담으면 못 받은 정책이 화면에서 빠집니다 */
+if (!줄들.length || 줄들.length < 전체 * 0.95) {
+  await 멈춤('덜 받아 담지 않았습니다 — ' + 줄들.length + ' / ' + 전체, { 전체, 받은것: 줄들.length });
+}
+
 if (dry) { console.log('\n--dry 라 담지 않았습니다.'); process.exit(0); }
 
 /* ── 담기 ── */
-const URL_ = cfg.SUPABASE_URL || cfg.NEXT_PUBLIC_SUPABASE_URL;
-const SK = cfg.SUPABASE_SERVICE_KEY;
-if (!URL_ || !SK) { console.error('SUPABASE_URL · SUPABASE_SERVICE_KEY 가 없습니다'); process.exit(1); }
-const 부르기 = async (fn, body) => {
-  const r = await fetch(URL_ + '/rest/v1/rpc/' + encodeURIComponent(fn), {
-    method: 'POST',
-    headers: { apikey: SK, Authorization: 'Bearer ' + SK, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const t = await r.text();
-  if (!r.ok) throw new Error('HTTP ' + r.status + ' ' + t.slice(0, 300));
-  return t ? JSON.parse(t) : null;
-};
-
-let 열쇠 = cfg.COLLECT_KEY_YTH;
-if (!열쇠) {
-  const r = await fetch(URL_ + '/rest/v1/collect_secret?source=eq.YTH&select=secret',
-    { headers: { apikey: SK, Authorization: 'Bearer ' + SK } });
-  열쇠 = ((await r.json())[0] || {}).secret;
-  if (!열쇠) { console.error('YTH 열쇠가 collect_secret 에 없습니다'); process.exit(1); }
-  console.log('\n열쇠를 .env 에서 못 찾아 collect_secret 에서 읽었습니다 (값은 안 찍습니다).');
-}
-
 let 담음 = 0;
-for (let i = 0; i < 줄들.length; i += 200) {
-  const r = await 부르기('청년담기', { p_secret: 열쇠, p_정책: 줄들.slice(i, i + 200) });
-  담음 += (r && r.정책) || 0;
+let 센것 = null;
+try {
+  for (let i = 0; i < 줄들.length; i += 200) {
+    const r = await 부르기('청년담기', { p_secret: 열쇠, p_정책: 줄들.slice(i, i + 200) });
+    담음 += (r && r.정책) || 0;
+  }
+  센것 = await 부르기('청년셈', { p_시도: null, p_지난것: false });
+} catch (e) {
+  await 멈춤('담다가 멈췄습니다 (' + 담음 + '건까지) — ' + 가림(e), { 전체, 담음 });
 }
-const 센것 = await 부르기('청년셈', { p_시도: null, p_지난것: false });
+await 박동(true, 담음, '', { 전체, 보이는것: 센것.전체 });
 console.log('\n담았습니다 — 보낸 것 ' + 담음 + '건 · 지금 보이는 것 ' + 센것.전체 + '건');
 console.log('  갈래별 ' + JSON.stringify(센것.갈래));
 console.log('  걸린 시간 ' + Math.round((Date.now() - 시작한때) / 1000) + '초');
