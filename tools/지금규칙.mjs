@@ -24,6 +24,7 @@
 import fs from 'node:fs';
 import { 칸뽑기, 더담을칸, 고용형태고르기 } from './공고문읽기.mjs';
 import hs from './hosp/hs_files.js';
+import hsd from './hosp/hs_dates.js';
 
 export const 일곱 = ['headcount', '뽑_인원', 'employ_type', 'apply_to', 'apply_to_time', '근무기간', '기간덧말', '근무지', '자격', '보수'];
 const 빔 = (v) => v == null || String(v).trim() === '';
@@ -72,6 +73,13 @@ export function 지금읽기(j) {
   for (const b of 상세) {
     담기(본문칸(b, j), true);
     const h = (고용형태고르기(j.제목 || '', b.body) || {}).값;
+    if (h) 넣기('employ_type', h, true);
+    /* 2026-11-25 #75 — 상세 화면의 마감 시각은 collect-hosp 가 접수문장에서 hs_dates 마감시각() 으로 뽑습니다 (빈 칸만) */
+    if (빔(값.apply_to_time) && 값.apply_to) 넣기('apply_to_time', hsd.마감시각(hsd.hs접수문장(b.body), 값.apply_to) || null, false);
+  }
+  /* 2026-11-25 #74 — 치매센터(ND)는 collect-nid 가 공고문에서 고용형태를 읽습니다 (못 읽은 칸은 담긴 값 그대로) */
+  if (/^ND/.test(출처) && 첨부.length) {
+    const h = (고용형태고르기(j.제목 || '', 첨부[0].body) || {}).값;
     if (h) 넣기('employ_type', h, true);
   }
   /* 첨부 — 첫 첨부가 읽은 칸은 다음 첨부가 안 덮습니다 */
