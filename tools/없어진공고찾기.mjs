@@ -51,6 +51,7 @@ import { 워크넷상세칸 } from './워크넷상세칸.mjs';
 import { 고용형태판정 } from './공고문읽기.mjs';
 /* 이름표 — 서버 .env 의 RAPO_UA_CONTACT 가 정해지기 전에는 이 옛 값 그대로 (tools/수집기이름표.mjs 한 자리) */
 import { 이름표 } from './수집기이름표.mjs';
+import { 클린아이주소인가 } from './cleaneye-file.mjs';
 const 정찰UA = 이름표('Mozilla/5.0 (compatible; potjob/1.0)');
 
 const argv = process.argv.slice(2);
@@ -189,7 +190,8 @@ for (let i = 0; i < 보이는.length; i += 60) {
   공.push(...await 다('job_posts?select=id,source,org_name,title,url,employ_type,뽑은값&id=in.(' + 조각 + ')&url=not.is.null'));
 }
 const 워크넷 = 공.filter((x) => ['WN', 'WN2'].includes(x.source));
-const 그밖 = 공.filter((x) => !['WN', 'WN2'].includes(x.source));
+/* ★ 2026-11-25 세중님 「하루 1번만 계속」 — 클린아이(robots 가 전부 막음) 화면은 여기서 안 엽니다 */
+const 그밖 = 공.filter((x) => !['WN', 'WN2'].includes(x.source) && !클린아이주소인가(x.url));
 console.log(바퀴 + '바퀴 · 회원 화면 ' + 공.length + '건 — 워크넷 ' + 워크넷.length + '건(상세 API) · 그밖 ' + 그밖.length + '건(쪽 열기)');
 console.log(new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace('T', ' ') + ' KST\n');
 
