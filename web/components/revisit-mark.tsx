@@ -128,8 +128,11 @@ async function 회원방문찍기(uid: string, admin: boolean, 오늘: string) {
 }
 
 export function RevisitMark() {
-  const { loading, who, isAdmin, session } = useAuth();
-  const uid = session?.user?.id ?? '';
+  const { loading, who, isAdmin, session, me } = useAuth();
+  /* ★ 2026-11-25 — 회원 줄(profiles)이 **있을 때만** 찍습니다. 가입하는 중(로그인만 됨)에는 줄이 없어
+     외래키에 걸리고, 다시 시도하는 자리가 없어 가입한 날이 통째로 빠졌습니다(배포 뒤 가입 11명 중 3명).
+     가입을 마치면 me 가 채워지며 아래 effect 가 다시 돕니다 */
+  const uid = me?.id && me.id === session?.user?.id ? me.id : '';
 
   useEffect(() => {
     if (loading || who !== '회원') return;
