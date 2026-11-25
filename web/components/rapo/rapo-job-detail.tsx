@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { HospitalStat, 시설숫자 } from '@/lib/hospital';
-import { 보수금액뽑기, 정부자료연봉말 } from '@/lib/job-state';
+import { 보수금액뽑기, 정부자료연봉말, 추정연봉말 } from '@/lib/job-state';
 import { 기관로고 } from '@/lib/org-logo';
 import { RapoBadge, RapoMaskIcon } from './rapo-ui';
 
@@ -326,7 +326,7 @@ function 연봉칸({ 보수 }: { 보수: 병원보수 }) {
         ))}
       </div>
       {/* 출처 글은 한 자리(정부자료연봉말) — 2026-11-14 세중님 「엄청 구체적으로 쓸 이유는 없을 듯」 */}
-      <p className="rapo-type-t3-regular whitespace-pre-line break-keep text-(color:--rapo-color-fg-neutral-muted)">{정부자료연봉말}</p>
+      <p className="rapo-type-t3-regular whitespace-pre-line break-keep text-(color:--rapo-color-fg-neutral-muted)">{보수.출처 === '국민연금' ? 추정연봉말 : 정부자료연봉말}</p>
     </div>
   );
 }
