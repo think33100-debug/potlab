@@ -316,7 +316,7 @@ async function 긁기재기(cfg) {
     /* 창구가 100줄에서 끊습니다 — 쪽을 넘깁니다 (지침 8-20 ③) */
     const 다 = [];
     for (let off = 0; ; off += 100) {
-      const a = await 받아('job_posts?select=id,hold,hidden,hidden_why,job_group,apply_to,'
+      const a = await 받아('job_posts?select=id,hold,hidden,hidden_why,job_group,apply_to,evidence,edited_fields,'
         + encodeURIComponent('기관번호') + '&source=eq.HS4&order=id.asc&limit=100&offset=' + off);
       다.push(...a);
       if (a.length < 100) break;
@@ -348,6 +348,12 @@ async function 긁기재기(cfg) {
          HS3 와 겹쳐 숨긴 19건이 마감 지난 것처럼 보입니다 (까닭을 틀리게 적는 것입니다) */
       겹침숨김: 다.filter((x) => x.hidden && /같은 공고/.test(x.hidden_why || '')).length,
       회원화면: 다.filter((x) => !x.hold && !x.hidden).length,
+      /* ★ 2026-11-26 세중님 「이런 공고 앞으로 다 받을 수 있게」 — HS4 도 공고문으로 우리 직군을 확인하면
+         첨부로보류풀기() 가 올리고, 사람이 손으로 풀기도 합니다. 그래서 회원 화면 0 이 더는 정답이 아닙니다.
+         **까닭 없이** 올라간 것(직군근거도 손으로 푼 표시도 없는 것)만 경고합니다 */
+      까닭없이: 다.filter((x) => !x.hold && !x.hidden
+        && !/보류 풀기|지원가능|여러 면허/.test(String((x.evidence || {})['직군근거'] || ''))
+        && !(x.edited_fields || []).includes('hold')).length,
       직군, 첨부대기, 남의직군, 후보: 직군 + 첨부대기,
       마감: 다.filter((x) => x.apply_to).length,
       기관: 다.filter((x) => x['기관번호']).length };
@@ -394,7 +400,8 @@ function 긁기줄(g) {
     + ' · 마감 ' + 퍼(g.마감) + ' · 기관 ' + 퍼(g.기관)
     + ' · 숨김 ' + g.숨김 + (g.겹침숨김 ? '(HS3 겹침 ' + g.겹침숨김 + ' · 마감 지남 '
       + (g.숨김 - g.겹침숨김) + ')' : '(마감 지남)')
-    + (g.회원화면 ? '  ★ **회원 화면에 ' + g.회원화면 + '건 있습니다**' : '  (회원 화면 0 ✓)')];
+    + ' · 회원 화면 ' + (g.회원화면 || 0) + '건(공고문 확인)'
+    + (g.까닭없이 ? '  ★ **까닭 없이 회원 화면에 ' + g.까닭없이 + '건 있습니다**' : '  ✓')];
 }
 
 /** 아침 메일에 넣을 줄 */
