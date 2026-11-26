@@ -78,7 +78,9 @@ const 기록파일 = path.join(ROOT, 'log', '릴스_올림.json');
    잠금 파일의 pid 가 죽어 있으면(바퀴가 탈나 끝남) 넘겨받습니다 */
 const 잠금 = path.join(ROOT, 'log', '릴스_돌기.lock');
 fs.mkdirSync(path.dirname(잠금), { recursive: true });
-try { fs.writeFileSync(잠금, String(process.pid), { flag: 'wx' }); }
+/* 돌고 있는 바퀴가 직접 띄운 다시 그리기(카드자동 옛 카드)는 잠금을 안 잡습니다 — 부모가 이미 쥐고 기다립니다 (2026-11-26 · 잠금에 걸려 아무것도 못 그리던 것) */
+const 자식바퀴 = process.env.REELS_CHILD === '1';
+if (!자식바퀴) try { fs.writeFileSync(잠금, String(process.pid), { flag: 'wx' }); }
 catch {
   const 앞pid = Number(fs.readFileSync(잠금, 'utf8')) || 0;
   let 살아있나 = false;
@@ -434,7 +436,7 @@ if (메일) {
           console.log(`  카드자동(옛 카드 다시 그림) ${바탕} — 원문 대조가 값을 고친 뒤라 카드를 새 값으로 다시 만듭니다 · 다음 바퀴에 올림`);
           for (const k of 같은묶음) if (기록[k] && typeof 기록[k] === 'object') 기록[k].옛카드다시만든때 = new Date().toISOString();
           try { fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2)); } catch (e) { console.error('  다시 그린 때를 못 적음 — ' + String(e.message || e).slice(0, 120)); }
-          spawnSync(process.execPath, [path.join(여기, 'run.mjs'), '--메일', '--id', 바탕], { stdio: 'inherit' });
+          spawnSync(process.execPath, [path.join(여기, 'run.mjs'), '--메일', '--id', 바탕], { stdio: 'inherit', env: { ...process.env, REELS_CHILD: '1' } });
           기록다시읽기();
           자동올림++;
         }
