@@ -199,7 +199,10 @@ export default function AdminStats() {
   return (
     <div className="max-w-[932px]">
       <RapoAdminHeader title="통계">
-        <기간고르기 고름={고름} set고름={set고름} 직접={직접} set직접={set직접} 오늘={오늘} 기간말={기간말} />
+        <div className="flex flex-col items-start gap-[8px]">
+          <기간고르기 고름={고름} set고름={set고름} 직접={직접} set직접={set직접} 오늘={오늘} 기간말={기간말} />
+          <CSV단추 받기={() => 통계CSV({ from, to, now, ads, cover, jobs, posts, shares })} />
+        </div>
       </RapoAdminHeader>
 
       {기간오류 && <p role="alert" className={관.error}>기간 숫자를 못 읽었어요 — {기간오류}</p>}
@@ -424,6 +427,134 @@ function 기간고르기({ 고름, set고름, 직접, set직접, 오늘, 기간�
           <span className="text-[13px] text-[#555d6d]">기록은 {점날(첫날)}부터 있어요</span>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── CSV 내려받기 (2026-11-27 세중님 「csv 도 만들어서 누르면 통계데이터가 싹 다」) ──
+   고른 기간의 통계를 한 파일에 구역별로 담습니다. 엑셀에서 한글이 안 깨지게 BOM 을 붙입니다.
+   일별·월별·연별 추이와 회원 재방문은 누를 때 DB 에 다시 물어 담습니다(화면에 안 펼친 묶음까지).
+   **모두 센 숫자뿐입니다** — 회원 한 명 한 명의 기록이나 회원 번호는 들어가지 않습니다 */
+const csv칸 = (v: unknown) => {
+  const s = v == null ? '' : String(v);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+const csv줄 = (...vs: unknown[]) => vs.map(csv칸).join(',');
+
+async function 통계CSV(c: {
+  from: string; to: string; now: Now; ads: Ad[] | null; cover: Cover[] | null;
+  jobs: TopJob[] | null; posts: TopPost[] | null; shares: Share[] | null;
+}) {
+  const sb = browserSupabase();
+  const [d, m, y, mr] = await Promise.all([
+    sb.rpc('admin_stats_period', { p_from: c.from, p_to: c.to, p_unit: 'day' }),
+    sb.rpc('admin_stats_period', { p_from: c.from, p_to: c.to, p_unit: 'month' }),
+    sb.rpc('admin_stats_period', { p_from: c.from, p_to: c.to, p_unit: 'year' }),
+    sb.rpc('admin_stats_member_revisit', { p_days: 90 }),
+  ]);
+  const err = [d, m, y].find((r) => r.error)?.error;
+  if (err) throw new Error(err.message);
+  const 일 = d.data as Period, 월 = m.data as Period, 연 = y.data as Period;
+  const L: string[] = [];
+  const 구역 = (이름: string, 머리: string[]) => { if (L.length) L.push(''); L.push(csv줄(`[${이름}]`)); L.push(csv줄(...머리)); };
+
+  구역('정보', ['항목', '값']);
+  L.push(csv줄('기간', `${일.from} ~ ${일.to}`));
+  L.push(csv줄('만든 때', new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })));
+  L.push(csv줄('기준', '한국 시각 · 관리자 제외 · 조회는 하루·같은 기기·같은 화면 한 번'));
+  L.push(csv줄('방문 기기', '같은 기기 하루 한 번 · 달·해 묶음은 날마다 센 것의 합 · 「어림」=11/27 전(목록 화면을 연 기기로 어림)'));
+  L.push(csv줄('회원', '아이디 기준 · 달·해 묶음은 그 기간에 한 번이라도 들어온 회원(겹침 없이)'));
+  L.push(csv줄('회원 갈래별', `${일.who_since ?? '아직 없음'} 부터 쌓임`));
+
+  const t = 일.total;
+  const 공유 = (c.shares ?? []).filter((s) => s.day >= c.from && s.day <= c.to);
+  구역('요약', ['항목', '값', '설명']);
+  L.push(csv줄('방문 기기(날마다 센 합)', t.visits, '대'));
+  L.push(csv줄('들어온 회원(겹침 없이)', t.members, '명'));
+  L.push(csv줄('들어온 회원(날마다 센 합)', t.member_days, '명'));
+  L.push(csv줄('화면 조회', t.views, '회'));
+  L.push(csv줄('공유 버튼 클릭', 공유.reduce((a, s) => a + Number(s.shares) + Number(s.copies), 0), '공유창+링크 복사 · 11/19 부터'));
+  if (c.now.signup) {
+    L.push(csv줄('가입 시작(오늘)', c.now.signup.d1.started, '로그인'));
+    L.push(csv줄('가입 완료(오늘)', c.now.signup.d1.done, ''));
+    L.push(csv줄('가입 시작(최근 7일)', c.now.signup.d7.started, '로그인'));
+    L.push(csv줄('가입 완료(최근 7일)', c.now.signup.d7.done, ''));
+  }
+
+  for (const [이름, P] of [['일별', 일], ['월별', 월], ['연별', 연]] as const) {
+    구역(`${이름} 방문`, ['때', '방문 기기', '회원', '회원(날마다 센 합)', '화면 조회', '어림']);
+    for (const s of P.series) L.push(csv줄(s.at, s.visits, s.members, s.member_days, s.views, s.exact ? '' : '어림'));
+  }
+
+  구역('화면별 조회', ['화면', '조회']);
+  for (const s of 일.screens) L.push(csv줄(화면이름(s.screen), s.views));
+
+  구역('기기별 조회', ['기기', '조회']);
+  for (const s of 일.devices) L.push(csv줄(DEVICE_NAME[s.device] ?? s.device, s.views));
+
+  구역('회원 갈래별 화면 조회', ['갈래', '화면', '조회', '그 갈래 안 비율(%)']);
+  const 갈래합: Record<string, number> = {};
+  for (const r of 일.who) 갈래합[r.who] = (갈래합[r.who] ?? 0) + Number(r.views);
+  for (const r of [...일.who].sort((a, b) => a.who.localeCompare(b.who) || Number(b.views) - Number(a.views))) {
+    L.push(csv줄(갈래말[r.who] ?? r.who, 화면이름(r.screen), r.views, Math.round((Number(r.views) / (갈래합[r.who] || 1)) * 1000) / 10));
+  }
+
+  구역(`많이 본 공고 (${c.from} ~ 오늘)`, ['공고명', '기관명', '조회', '열기(원문 누름)', '공고 번호']);
+  for (const j of c.jobs ?? []) L.push(csv줄(j.title, j.org_name, j.views, j.outs, j.id));
+
+  구역(`많이 본 글 (${c.from} ~ 오늘)`, ['글 제목', '게시판', '조회', '글 번호']);
+  for (const p of c.posts ?? []) L.push(csv줄(p.title, channelName(p.channel), p.views, p.id));
+
+  구역('공유 버튼 일별', ['날', '공유창', '링크 복사']);
+  for (const s of 공유) L.push(csv줄(s.day, s.shares, s.copies));
+
+  구역('회원 재방문 (최근 90일 · 아이디 기준)', ['날', '들어온 회원', '처음 온 회원', '7일 안 다시 온 회원', '7일 안 재방문(%)']);
+  if (!mr.error) {
+    for (const r of (mr.data ?? []) as MemberRevisitRow[]) {
+      if (Number(r.visit_members) > 0 || Number(r.new_members) > 0) {
+        L.push(csv줄(r.day, r.visit_members, r.new_members, r.back_members, r.back_pct ?? (Number(r.new_members) > 0 ? '셈 중' : '')));
+      }
+    }
+  }
+
+  구역(`회원 구성 (${c.now.today} 기준)`, ['갈래', '이름', '회원']);
+  for (const [k, n] of Object.entries(c.now.job_groups ?? {})) L.push(csv줄('직군', k, n));
+  for (const [k, n] of Object.entries(c.now.roles ?? {})) L.push(csv줄('사용자 구분', k, n));
+  for (const [k, n] of Object.entries(c.now.providers ?? {})) L.push(csv줄('로그인 수단', PROVIDER_NAME[k] ?? k, n));
+
+  구역(`쌓여 있는 것 (${c.now.today} 기준)`, ['항목', '값']);
+  L.push(csv줄('회원', c.now.members), csv줄('이번 주 가입', c.now.members_week), csv줄('오늘 가입', c.now.members_today),
+    csv줄('올라간 공고', c.now.jobs), csv줄('접수 중 공고', c.now.jobs_open), csv줄('오늘 새 공고', c.now.jobs_today),
+    csv줄('보류함', c.now.jobs_hold), csv줄('기관 자료', c.now.orgs), csv줄('알림 켠 사람', c.now.notify_on),
+    csv줄('커뮤니티 글', c.now.posts), csv줄('댓글', c.now.comments));
+
+  구역('광고 배너 (기간과 따로)', ['자리', '이름', '켜짐', '오늘 보임', '오늘 누름', '누적 보임', '누적 누름']);
+  for (const a of c.ads ?? []) L.push(csv줄(a.자리, a.이름, a.켜짐 ? '켬' : '끔', a.오늘봄, a.오늘누름, a.다봄, a.다누름));
+
+  구역('수집 · 1층 기관 커버리지 (최근 30일)', ['갈래', '대상', '30일 안 들어옴', '비율(%)', '분모에 넣나']);
+  for (const v of c.cover ?? []) L.push(csv줄(v.갈래, v.대상, v.들어온곳, v.퍼센트, v.분모인가 ? '넣음' : `뺌 · ${v.어떻게}`));
+
+  const blob = new Blob(['﻿' + L.join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `RAPO_통계_${일.from}_${일.to}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function CSV단추({ 받기 }: { 받기: () => Promise<void> }) {
+  const [상태, set상태] = useState<'쉼' | '만드는 중' | string>('쉼');
+  return (
+    <div className="flex items-center gap-[8px]">
+      <button type="button" disabled={상태 === '만드는 중'}
+        onClick={() => { set상태('만드는 중'); 받기().then(() => set상태('쉼'), (e: unknown) => set상태(`못 만들었어요 — ${e instanceof Error ? e.message : String(e)}`)); }}
+        className="rounded-[8px] border border-[#304f65] bg-white px-[12px] py-[6px] text-[14px] font-bold text-[#304f65] hover:bg-[#f1f5f8] disabled:opacity-60">
+        {상태 === '만드는 중' ? 'CSV 만드는 중…' : '고른 기간 CSV 내려받기'}
+      </button>
+      {상태 !== '쉼' && 상태 !== '만드는 중' && <span role="alert" className="text-[13px] text-[#b42a21]">{상태}</span>}
     </div>
   );
 }
