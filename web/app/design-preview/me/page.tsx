@@ -14,8 +14,10 @@ export default async function DesignPreviewMe({ searchParams }: { searchParams: 
   const role = q.role === '학생' ? '학생' : '현직';
   return (
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
-      <RapoAppBar title="내 정보" />
+      {/* 실제 /me 의 RapoMeFrame(nav) 과 같은 꼴 — PC(1040↑)는 앱 바 대신 왼쪽 큰 제목 */}
+      <div data-rapo-mobile-header><RapoAppBar title="내 정보" /></div>
       <main className="px-(--rapo-dimension-x6) pb-(--rapo-dimension-x8)">
+        <p aria-hidden className="rapo-type-t9-bold hidden pb-(--rapo-dimension-x4) pt-(--rapo-dimension-x6) text-(color:--rapo-color-fg-neutral) min-[1040px]:block">내 정보</p>
         <RapoMeMenu me={{ avatar: '🦦|#FED7AA', nickname: '차분한 수달', job_group: '작업치료사', role }}
           관리={{ 채용관리: m, 교육관리: m }} 운영진={false} />
       </main>

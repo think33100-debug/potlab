@@ -30,6 +30,7 @@ export type RapoJob = {
 /* PC 표 — 피그마 「17 · 1 depth UI」 「공고 비교 목록」(1936:2201 · PC 1040 · 본문 800 · 2026-11-26).
    칸: 기관 · 채용 공고(남는 폭) | 지역 · 직군 94 | 급여 126 | 마감 72 | 저장 44 · 사이 16 · 줄 위아래 12 · 왼 12 · 오 8.
    피그마 마감 칸은 46 이지만 우리 마감 말(「마감일 공고문 확인」 등)이 길어 72 로 둡니다.
+   조건 딱지(추천 · 체험형 인턴 · 조교·연구 등)는 PC 에서도 제목 아래에 둡니다 — 피그마 표엔 없지만 공고를 잘못 읽지 않게 하는 표시라 빼지 않습니다.
    1039 이하는 지금 카드 모양 그대로입니다 — 같은 줄을 CSS 격자로만 바꿔서 저장 단추는 하나입니다(저장 여부를 두 번 묻지 않게). */
 export const PC표칸 = 'min-[1040px]:grid min-[1040px]:grid-cols-[minmax(0,1fr)_94px_126px_72px_44px] min-[1040px]:items-center min-[1040px]:gap-x-(--rapo-dimension-x4) min-[1040px]:pl-(--rapo-dimension-x3) min-[1040px]:pr-(--rapo-dimension-x2)';
 const PC작은글 = 'min-[1040px]:text-(length:--rapo-font-size-t3) min-[1040px]:leading-(--rapo-line-height-t3)';
@@ -63,7 +64,7 @@ export function RapoJobRow({ job, variant }: { job: RapoJob; variant: 'home' | '
             <img src={로고 ?? `/rapo/home/org-${job.orgArt}.svg`} alt="" width={32} height={32} className={로고 ? 'size-6 object-contain' : undefined} />
           </span>
           <p className={`rapo-type-t4-medium min-w-0 flex-1 truncate text-(color:--rapo-color-fg-neutral-muted) min-[1040px]:col-start-1 min-[1040px]:row-start-1 min-[1040px]:font-normal ${PC작은글}`}>{job.org}</p>
-          <span className="flex shrink-0 min-[1040px]:col-start-5 min-[1040px]:row-span-2 min-[1040px]:row-start-1 min-[1040px]:justify-self-end">
+          <span className="flex shrink-0 min-[1040px]:col-start-5 min-[1040px]:row-span-3 min-[1040px]:row-start-1 min-[1040px]:justify-self-end">
             {job.id ? <JobSave id={job.id} look="rapo" /> : <RapoSaveFace />}
           </span>
         </div>
@@ -84,7 +85,7 @@ export function RapoJobRow({ job, variant }: { job: RapoJob; variant: 'home' | '
 
 
         {job.tags.length > 0 && (
-          <ul aria-label="조건" className="flex flex-wrap gap-(--rapo-dimension-x2) min-[1040px]:hidden">
+          <ul aria-label="조건" className="flex flex-wrap gap-(--rapo-dimension-x2) min-[1040px]:col-start-1 min-[1040px]:row-start-3 min-[1040px]:pt-(--rapo-dimension-x1)">
             {job.tags.map((t) => <li key={t} className="flex"><RapoBadge>{t}</RapoBadge></li>)}
           </ul>
         )}
@@ -93,15 +94,15 @@ export function RapoJobRow({ job, variant }: { job: RapoJob; variant: 'home' | '
       {/* 좋아요·조회 13/20 Medium · 마감 12/20 Regular — 원본에 글자 스타일이 없는 값입니다(원본확인 B) */}
       {/* PC 표 칸 셋 — 지역·직군 · 급여(+조회) · 마감. 1039 이하에서는 안 보입니다.
           목록 창구는 급여를 안 줘서(pay 없음) 「상세에서 확인」으로 적습니다 */}
-      <div className={`hidden flex-col gap-[3px] text-(color:--rapo-color-fg-neutral-muted) min-[1040px]:col-start-2 min-[1040px]:row-span-2 min-[1040px]:row-start-1 min-[1040px]:flex ${PC작은글}`}>
+      <div className={`hidden flex-col gap-[3px] text-(color:--rapo-color-fg-neutral-muted) min-[1040px]:col-start-2 min-[1040px]:row-span-3 min-[1040px]:row-start-1 min-[1040px]:flex ${PC작은글}`}>
         {job.지역 && <span className="truncate">{job.지역}</span>}
         {job.직군 && <span className="break-keep">{job.직군}</span>}
       </div>
-      <div className={`hidden flex-col gap-[3px] text-(color:--rapo-color-fg-neutral-muted) min-[1040px]:col-start-3 min-[1040px]:row-span-2 min-[1040px]:row-start-1 min-[1040px]:flex ${PC작은글}`}>
+      <div className={`hidden flex-col gap-[3px] text-(color:--rapo-color-fg-neutral-muted) min-[1040px]:col-start-3 min-[1040px]:row-span-3 min-[1040px]:row-start-1 min-[1040px]:flex ${PC작은글}`}>
         <span className={'break-keep ' + (job.pay?.kind === 'value' ? 'text-(color:--rapo-color-fg-neutral)' : '')}>{job.pay ? job.pay.text : '상세에서 확인'}</span>
         {job.views != null && <span>조회 {job.views}</span>}
       </div>
-      <p className={`hidden break-keep text-(color:--rapo-color-fg-neutral-muted) min-[1040px]:col-start-4 min-[1040px]:row-span-2 min-[1040px]:row-start-1 min-[1040px]:block ${PC작은글}`}>{job.deadline}</p>
+      <p className={`hidden break-keep text-(color:--rapo-color-fg-neutral-muted) min-[1040px]:col-start-4 min-[1040px]:row-span-3 min-[1040px]:row-start-1 min-[1040px]:block ${PC작은글}`}>{job.deadline}</p>
 
       {variant === 'home' && <div className="flex min-h-(--rapo-dimension-x6) items-center justify-between gap-(--rapo-dimension-x3) min-[1040px]:hidden">
         <div className="flex gap-(--rapo-dimension-x3)">

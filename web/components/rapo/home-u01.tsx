@@ -305,7 +305,7 @@ const 서비스 = [
 /* 여섯 서비스 두 줄 틀 — 홈 「라포 더 둘러보기」와 툴킷 화면이 같이 씁니다 (2026-11-14 세중님 「미리 만들어 둔 저 틀을 넣자」) */
 export function RapoServiceGrid() {
   return (
-     <ul className="grid grid-cols-2 gap-x-(--rapo-dimension-x3) gap-y-(--rapo-dimension-x2)">
+     <ul className="grid grid-cols-2 gap-x-(--rapo-dimension-x3) gap-y-(--rapo-dimension-x2) min-[1040px]:grid-cols-3">
           {서비스.map((s) => (
             <li key={s.href}>
               <Link href={s.href}
