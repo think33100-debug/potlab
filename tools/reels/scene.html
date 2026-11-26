@@ -192,7 +192,6 @@
     <!-- 2026-11-26 세중님 「댓글에 남겨 주시면 공고 링크 보내 드릴게요 — 이것도 넣자」 · 링크는 댓글링크.mjs 가 DM 으로 -->
     <div class="a">댓글에 「라포」 남겨 주시면</div>
     <div class="b">이 공고 링크를 DM으로 바로 보내 드릴게요!</div>
-    <div class="go" id="s4go">프로필 링크 → RAPO</div>
   </div>
 </section>
 <div id="credit" class="abs"></div>
@@ -280,7 +279,6 @@ window.__setData = (d) => {
 
   $('s4big').textContent = d.마감.큰글;
   $('s4when').textContent = d.마감.작은글;
-  if (d.링크글) $('s4go').textContent = d.링크글;
 
   counters.length = 0;
   document.querySelectorAll('#s2stats [data-n]').forEach((el, i) => { if (!d.소개.숫자[i].연도) counters.push([el, d.소개.숫자[i].값, T.s2[0] + 700 + i * 180]); });
@@ -361,8 +359,6 @@ window.__seek = (t) => {
   big.style.opacity = pb; big.style.transform = `scale(${0.85 + 0.15 * pb})`; big.style.transformOrigin = '0 100%';
   slideUp($('s4when'), t, T.s4[0] + 250);
   slideUp(document.querySelector('#s4 .cta'), t, T.s4[0] + 450, 80);
-  const pulse = t > T.s4[0] + 1200 ? 1 + 0.035 * Math.sin((t - T.s4[0] - 1200) / 180) : 1;
-  $('s4go').style.transform = `scale(${pulse})`;
 };
 </script>
 </body>
