@@ -12,6 +12,7 @@ import { TabBar, TopNav } from "@/components/tab-bar";
 import { TopbarUser } from "@/components/topbar-user";
 import { RevisitMark } from "@/components/revisit-mark";
 import { RapoInstallToast } from "@/components/rapo/rapo-install-toast";
+import { RapoPcNav } from "@/components/rapo/rapo-pc-nav";
 import { RapoInappEscape } from "@/components/rapo/rapo-inapp-escape";
 import { INSTALL_SCRIPT } from "@/lib/install-hint";
 import { COMPANY, PRIVACY_EMAIL, PRIVACY_OFFICER } from "@/lib/contact";
@@ -134,6 +135,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </div>
           </header>
           </LegacyChrome>
+
+          {/* PC(폭 1040↑) 위쪽 탐색 — 아래 탐색이 있는 화면에서만 보입니다 (components/rapo/rapo-pc-nav.tsx · globals.css) */}
+          <RapoPcNav />
 
           {children}
 
