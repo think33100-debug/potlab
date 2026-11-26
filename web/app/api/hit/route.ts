@@ -46,6 +46,22 @@ function 하루번호(ip: string, ua: string, day: string, target: string): stri
     .digest('hex').slice(0, 32);
 }
 
+/* ★ 2026-11-27 — 하루 **방문 기기**를 세는 열쇠 (세중님 「하루에 몇 명 들어오나」).
+   위 하루번호는 본 자리(target)까지 넣어서, 한 사람이 공고 다섯 개를 보면 다섯으로 셉니다 —
+   「같은 자리 하루 한 번」에는 맞지만 「몇 명」에는 안 맞습니다. 본 자리를 뺀 해시를 따로 둡니다.
+   이것도 아이피·UA 를 저장하지 않고 되짚을 수 없습니다 (DB page_hits.사람키 · RAPO노트/SQL_261127) */
+function 사람키(ip: string, ua: string, day: string): string {
+  const 소금 = process.env.HIT_SALT ?? 'potjob-hit';
+  return createHash('sha256')
+    .update([소금, 'person', day, ip, ua.slice(0, 80)].join('|'))
+    .digest('hex').slice(0, 32);
+}
+
+/* ★ 2026-11-27 — 본 사람의 갈래 (세중님 「학생 임상가들 다르게 움직이나」).
+   브라우저가 말해 주는 값이라 관리자 표시(admin)와 같은 믿음입니다 — 거짓말할 까닭이 없는 자리입니다.
+   이 넷 밖은 버립니다(null). 회원 번호·직군은 오지도 않고 담지도 않습니다 */
+const 갈래들 = ['비회원', '학생', '현직', '미정'] as const;
+
 /* 재방문 근사치가 보낼 수 있는 값 — 이 밖은 버립니다 (아래 POST 의 revisit 갈래).
      rv:first     이 브라우저의 첫 방문 날 (D0)
      rv:back1~7   D1~D7 가운데 **처음** 다시 온 날 (숫자 = 첫 방문에서 며칠 뒤)
@@ -74,7 +90,7 @@ export async function POST(req: Request) {
   const purpose = req.headers.get('purpose') ?? req.headers.get('sec-purpose') ?? '';
   if (purpose.includes('prefetch')) return NextResponse.json({ ok: true, counted: false });
 
-  let body: { kind?: string; target?: string | null; key?: string; admin?: boolean };
+  let body: { kind?: string; target?: string | null; key?: string; admin?: boolean; who?: string };
   try {
     body = await req.json();
   } catch {
@@ -142,6 +158,8 @@ export async function POST(req: Request) {
        다만 「내가 관리자다」라고 거짓말할 이유가 없는 자리라 이걸로 둡니다.
        광고 숫자에 우리가 섞이는 것만 막으면 됩니다 */
     by_admin: body.admin === true,
+    회원갈래: (갈래들 as readonly string[]).includes(body.who ?? '') ? body.who : null,
+    사람키: 사람키(who, ua, day),
   });
 
   if (error) {

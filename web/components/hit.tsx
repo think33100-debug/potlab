@@ -16,7 +16,9 @@ export function Hit({
   kind: 'home' | 'jobs' | 'job' | 'community' | 'post' | 'orgs' | 'org' | 'other';
   target?: string | number | null;
 }) {
-  const { loading, isAdmin } = useAuth();
+  const { loading, isAdmin, session, me } = useAuth();
+  /* ★ 2026-11-27 — 갈래만 보냅니다(학생·현직·비회원·미정). 회원 번호는 안 보냅니다 (app/api/hit 갈래들) */
+  const 갈래 = !session ? '비회원' : me?.role === '학생' ? '학생' : me?.role === '현직' ? '현직' : '미정';
 
   useEffect(() => {
     /* 관리자인지 알아야 숫자에서 뺄 수 있습니다. 알 때까지 기다립니다 */
@@ -27,6 +29,7 @@ export function Hit({
       target: target == null ? null : String(target),
       key: dayKey(),
       admin: isAdmin,
+      who: 갈래,
     });
 
     fetch('/api/hit', {
@@ -37,7 +40,7 @@ export function Hit({
     }).catch(() => {
       /* 조용히 넘어갑니다 */
     });
-  }, [kind, target, loading, isAdmin]);
+  }, [kind, target, loading, isAdmin, 갈래]);
 
   return null;
 }
