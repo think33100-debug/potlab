@@ -489,3 +489,17 @@ html[data-splash="on"] #splash .splash-line { animation: splash-in 0.7s 1.25s cu
   .rapo-login-photo { animation: none; }
   .rapo-login-photo-first { opacity: 1; }
 }
+
+/* PC 틀 — 피그마 「17 · 1 depth UI」 PC 1040 · 본문 800 (2026-11-26 세중님 「최근 PC 화면 적용」).
+   창 폭 1040 이상이고 그 화면에 아래 탐색이 있을 때만 — 위쪽 탐색(rapo-pc-nav.tsx)을 켜고,
+   아래 탐색 · 휴대폰 위쪽 줄과 그 밑 선을 숨기고, 새 틀 기둥(max-w-3xl · 768)을 800 으로 넓힙니다.
+   @layer 밖 규칙이라 Tailwind 의 hidden·max-w 보다 앞섭니다. 1039 이하는 아무것도 안 바뀝니다 */
+@media (min-width: 1040px) {
+  body:has([data-rapo-bottom-nav]) [data-rapo-pc-nav] { display: block; }
+  /* 피그마 PC 틀은 1040 전체가 흰 바탕입니다 — 기둥 바깥 종이색을 흰색으로 */
+  body:has([data-rapo-bottom-nav]) { background: var(--rapo-color-bg-layer-default); }
+  body:has([data-rapo-pc-nav]) [data-rapo-bottom-nav] { display: none; }
+  body:has([data-rapo-bottom-nav]) [data-rapo-mobile-header],
+  body:has([data-rapo-bottom-nav]) [data-rapo-mobile-header] + hr { display: none; }
+  body:has([data-rapo-bottom-nav]) [data-rapo].max-w-3xl { max-width: 800px; }
+}

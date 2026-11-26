@@ -13,7 +13,7 @@ export function RapoHeader({ who }: { who: Who }) {
   const 단추 = who === '회원' ? { href: '/me', label: '내 정보' }
     : who === '비회원' ? { href: '/login', label: '로그인' } : null;
   return (
-    <header className="flex h-(--rapo-dimension-x16) items-center gap-(--rapo-dimension-x2_5) px-(--rapo-dimension-x5) py-(--rapo-dimension-x2_5)">
+    <header data-rapo-mobile-header className="flex h-(--rapo-dimension-x16) items-center gap-(--rapo-dimension-x2_5) px-(--rapo-dimension-x5) py-(--rapo-dimension-x2_5)">
       <Link href="/" aria-label="RAPO 홈" className="relative block h-[31.5px] w-[120px] shrink-0">
         {/* eslint-disable @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
         <img src="/rapo/home/logo-symbol.svg" alt="" className="absolute left-0 top-0 h-[31.5px] w-[32.25px]" />
