@@ -1,14 +1,14 @@
 {
-  “permissions”: {
-    “allow”: [
-      “mcp__Supabase”,
-      “mcp__github”,
-      “mcp__claude-code-remote”,
-      “Bash”,
-      “Edit”,
-      “Write”,
-      “WebFetch”,
-      “WebSearch”
-    ]
-  }
+  "permissions": {
+    "allow": [
+      "mcp__Supabase",
+      "mcp__github",
+      "mcp__claude-code-remote",
+      "Bash",
+      "Edit",
+      "Write",
+      "WebFetch",
+      "WebSearch"
+    ]
+  }
 }
