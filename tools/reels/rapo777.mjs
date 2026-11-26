@@ -208,7 +208,9 @@ export function 캡션출처줄(고른, 원문주소, 공고id = null) {
   /* 공고 원문 주소는 안 적습니다 — 라포로 오게 (2026-11-19 세중님 「원문은 굳이 주지 마 · 라포에서 확인해 보세요 · 링크는 프로필에」) */
   /* 2026-11-26 세중님 「링크 누르면 해당 공고 라포로 바로 · 회원 가입 안 해도 볼 수 있게」 — 공유 링크(/jobs/<id> · 비회원도 열림)를 적습니다.
      공고 id 를 모를 때만 옛 안내(프로필 링크)로 */
-  if (공고id && /^[A-Za-z0-9_-]+$/.test(공고id)) 줄.push(`공고 바로 보기 (가입 없이 볼 수 있어요)\nhttps://www.rapojob.co.kr/jobs/${공고id}`);
+  /* 같은 날 고침 — 인스타는 글 속 주소를 못 누르므로 주소 대신 「댓글로 라포」 안내 (세중님 「댓글로 라포 남겨주시면 바로 볼 수 있는 링크 보내드릴게요」).
+     링크는 댓글링크.mjs 가 DM 으로 보냅니다 (공고 게시물 기본 단어 「라포」) */
+  if (공고id && /^[A-Za-z0-9_-]+$/.test(공고id)) 줄.push('댓글로 「라포」 남겨 주시면 바로 볼 수 있는 링크 보내 드릴게요!');
   else if (원문주소) 줄.push('공고 원문은 라포에서 확인해 보세요. 링크는 프로필에 있어요!');
   if (고른) {
     const 덧 = [
@@ -391,7 +393,7 @@ function 자기점검() {
   봐('캡션 — 조감도를 실사라 하지 않음', 캡션출처줄(g7, 'https://x').some((s) => s.includes('건축조감도라 실제 사진은 아니에요')));
   봐('캡션 — 원문 주소는 안 넣고 「라포에서 확인」 안내 (2026-11-19)', !캡션출처줄(g1, 'https://recruit.example/1').join(' ').includes('recruit.example') && /라포에서 확인/.test(캡션출처줄(g1, 'https://recruit.example/1')[0]));
   봐('캡션 — 출처 자리를 채움 · 자리 없으면 끝에', 출처자리채우기('가\n[[출처]]\n#태그', ['원문 u']) === '가\n원문 u\n#태그' && 출처자리채우기('가', ['원문 u']) === '가\n\n원문 u');
-  봐('캡션 — 공고 id 가 있으면 라포 공유 링크 (2026-11-26)', 캡션출처줄(g1, 'https://recruit.example/1', '307310-PT')[0].includes('https://www.rapojob.co.kr/jobs/307310-PT') && !캡션출처줄(g1, 'https://recruit.example/1', '307310').join(' ').includes('recruit.example') && !캡션출처줄(g1, 'u', 'a b;c')[0].includes('rapojob'));
+  봐('캡션 — 공고 id 가 있으면 「댓글로 라포」 안내 · 주소는 안 적음 (2026-11-26)', /댓글로 「라포」/.test(캡션출처줄(g1, 'https://recruit.example/1', '307310-PT')[0]) && !/https?:\/\/(recruit|www\.rapojob)/.test(캡션출처줄(g1, 'https://recruit.example/1', '307310')[0]) && /프로필/.test(캡션출처줄(g1, 'u', null)[0]));
   봐('캡션 — 「허가」라는 말을 안 씀', !캡션출처줄(g1, 'u').join('\n').includes('허가'));
   /* 2026-11-17 README 갱신분 — preferred 사진 · 실내 딱지 · 권리 막힘 */
   const 사진기관 = { institution_ref: 'rapo777_0900', key: '사진병원', name: '사진병원', ykiho: 'YK900', render_status: 'ready',

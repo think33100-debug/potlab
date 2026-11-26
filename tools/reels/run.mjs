@@ -195,6 +195,13 @@ async function 분류(id) {
   return JSON.parse(글) || [];
 }
 
+/* ── 0 · 댓글 「라포」 → DM 링크 (2026-11-26 세중님) — 크론 바퀴(--카드자동)마다 먼저 한 번 훑습니다.
+   새 크론 줄 없이 이 바퀴(30분 · 08~21시)에 얹었습니다. 실패해도 바퀴는 계속 돕니다 */
+if (카드자동 && !한건 && !자식바퀴) {
+  try { spawnSync(process.execPath, [path.join(여기, '댓글링크.mjs'), '--실행'], { stdio: 'inherit', timeout: 180e3 }); }
+  catch (e) { console.error('  댓글링크를 못 돌림 — ' + String(e.message || e).slice(0, 160)); }
+}
+
 /* ── 1 · 후보 ── */
 const 칸 = 'id,title,원문제목,org_name,employ_type,headcount,apply_to,apply_to_time,job_group,조교연구,posted_at,url';
 const 시작일 = new Date(Date.parse(오늘) - 며칠 * 86400e3).toISOString().slice(0, 10);

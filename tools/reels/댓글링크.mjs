@@ -34,6 +34,11 @@ const 올림파일 = path.join(ROOT, 'log', '릴스_올림.json');
 const 사이트 = 'https://www.rapojob.co.kr';
 const 단어파일 = path.join(ROOT, 'log', '댓글링크_단어.json');
 /* 단어 꼴 — 한글·영문·숫자 1~20자 (원격으로 받으므로 셸 글자를 막습니다) */
+/* 공고 게시물의 기본 단어 — 따로 단어를 안 정한 **공고 게시물**(릴스·카드뉴스)은 이 단어를 봅니다
+   (2026-11-26 세중님 「댓글로 라포 남겨주시면 바로 볼 수 있는 링크 보내드릴게요 · 각 공고의 링크를 보내도록」)
+   브랜드 게시물처럼 공고가 아닌 것은 전처럼 단어를 정한 것만 */
+export const 기본단어 = '라포';
+export const 게시물단어 = (정한단어, 공고게시물인가) => 정한단어 || (공고게시물인가 ? 기본단어 : null);
 export const 단어꼴 = /^[가-힣A-Za-z0-9]{1,20}$/;
 export const 짧은주소 = (permalink) => (String(permalink || '').match(/\/(?:p|reel)\/([A-Za-z0-9_-]+)/) || [])[1] || null;
 export const 단어맞나 = (글, 단어) => !!단어 && String(글 || '').toLowerCase().includes(String(단어).toLowerCase());
@@ -61,7 +66,7 @@ function 게시물공고() {
 
 export function 보낼글(공고id) {
   return 공고id
-    ? `안녕하세요, 라포예요! 말씀하신 공고 링크예요.\n\n${사이트}/jobs/${공고id}\n\n지원 전에 원문 공고도 꼭 한 번 확인해 주세요!`
+    ? `안녕하세요, 라포예요! 말씀하신 공고 링크예요. 가입 없이 바로 볼 수 있어요.\n\n${사이트}/jobs/${공고id}\n\n지원 전에 원문 공고도 꼭 한 번 확인해 주세요!`
     : `안녕하세요, 라포예요! 말씀하신 링크예요.\n\n${사이트}\n\n치료사 채용 공고를 한곳에 모아 두고 있어요!`;
 }
 
@@ -84,6 +89,7 @@ function 자기점검() {
   봐('단어 꼴 — 셸 글자 막음', 단어꼴.test('일산') && 단어꼴.test('RAPO2') && !단어꼴.test('a;b') && !단어꼴.test('') && !단어꼴.test('$(id)'));
   봐('짧은주소', 짧은주소('https://www.instagram.com/p/Df1jEuVn4OG/') === 'Df1jEuVn4OG' && 짧은주소('https://www.instagram.com/reel/AbC_1-x/') === 'AbC_1-x');
   봐('답글은 늘 같은 댓글엔 같은 꼴', 답글고르기('123') === 답글고르기('123') && 답글꼴.includes(답글고르기('9')));
+  봐('공고 게시물은 기본 단어 「라포」 · 정한 단어가 먼저 · 공고 아닌 게시물은 안 봄', 게시물단어(null, true) === '라포' && 게시물단어('이벤트', true) === '이벤트' && 게시물단어(null, false) === null);
   봐('공고 게시물이면 그 공고 주소', 보낼글('306973-PT').includes('/jobs/306973-PT'));
   봐('아니면 첫 화면', 보낼글(null).includes(사이트 + '\n'));
   console.log(`\n견본 ${틀림.length ? '✗ 틀림 ' + 틀림.length : '틀림 0'}`);
@@ -126,11 +132,11 @@ async function 돌기() {
     .filter((g) => 이제 - Date.parse(g.timestamp) < 창);
   console.log(`최근 7일 게시물 ${게시물.length}개`);
   const 표 = 단어들();
-  for (const g of 게시물) console.log(`  게시물 ${g.id} · ${g.timestamp} · ${g.permalink} · 단어 ${표[짧은주소(g.permalink)]?.단어 ? '「' + 표[짧은주소(g.permalink)].단어 + '」' : '없음(안 봄)'}`);
+  for (const g of 게시물) console.log(`  게시물 ${g.id} · ${g.timestamp} · ${g.permalink} · 단어 ${게시물단어(표[짧은주소(g.permalink)]?.단어 || null, 공고들.has(String(g.id))) ? '「' + 게시물단어(표[짧은주소(g.permalink)]?.단어 || null, 공고들.has(String(g.id))) + '」' : '없음(안 봄)'}`);
 
   const 할것 = [];
   for (const g of 게시물) {
-    const 단어 = 표[짧은주소(g.permalink)]?.단어 || null;
+    const 단어 = 게시물단어(표[짧은주소(g.permalink)]?.단어 || null, 공고들.has(String(g.id)));
     if (!단어) continue;                                         /* 단어를 안 정한 게시물은 안 봅니다 */
     const 댓글 = await 다받기(cfg, `/${g.id}/comments?fields=id,text,username,timestamp&limit=50&access_token=${열쇠}`);
     /* 진단 — 댓글 원문(앞 40자) · 받은 칸 이름 (지침 2절) */
