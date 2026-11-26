@@ -108,40 +108,50 @@ function 단어정하기() {
   fs.writeFileSync(단어파일, JSON.stringify(표, null, 2));
 }
 
+/* --빠르게 (2026-11-26 세중님 「댓글 달면 바로 가야지」) — 1분마다 도는 길.
+   게시물 목록 한 번(comments_count 포함)만 묻고, **댓글 수가 바뀐 게시물만** 댓글을 읽습니다 (평소 호출 1번).
+   권한 확인·계정 이름은 상태 파일에 적어 둔 것을 씁니다. 못 보낸 댓글이 있으면 그 게시물은 다음에도 다시 봅니다 */
+const 상태파일 = path.join(ROOT, 'log', '댓글링크_상태.json');
 async function 돌기() {
   const 실행 = process.argv.includes('--실행');
+  const 빠르게 = process.argv.includes('--빠르게');
+  const 상태 = fs.existsSync(상태파일) ? JSON.parse(fs.readFileSync(상태파일, 'utf8')) : {};
+  상태.댓글수 = 상태.댓글수 || {};
   const cfg = env();
   if (!인스타되나(cfg)) { console.error('IG 열쇠가 없습니다 (node tools/reels/ig.mjs --열쇠)'); process.exit(1); }
   const 열쇠 = encodeURIComponent(cfg.IG_ACCESS_TOKEN);
 
   /* 권한 */
-  let 권한 = [];
-  if (cfg.META_APP_ID && cfg.META_APP_SECRET) {
+  let 권한 = 빠르게 && 상태.DM권한 ? ['instagram_manage_messages'] : [];
+  if (!권한.length && cfg.META_APP_ID && cfg.META_APP_SECRET) {
     const d = (await 그래프(cfg, `/debug_token?input_token=${열쇠}&access_token=${encodeURIComponent(cfg.META_APP_ID + '|' + cfg.META_APP_SECRET)}`)).data || {};
     권한 = d.scopes || [];
   }
   const DM권한 = 권한.includes('instagram_manage_messages');
-  console.log(DM권한 ? '○ instagram_manage_messages 있음' : '✗ instagram_manage_messages 없음 — 토큰을 다시 받아야 보낼 수 있습니다 (지금은 찾기만)');
+  상태.DM권한 = DM권한;
+  if (!빠르게) console.log(DM권한 ? '○ instagram_manage_messages 있음' : '✗ instagram_manage_messages 없음 — 토큰을 다시 받아야 보낼 수 있습니다 (지금은 찾기만)');
 
-  const 나 = await 그래프(cfg, `/${cfg.IG_USER_ID}?fields=username&access_token=${열쇠}`);
+  const 나 = 빠르게 && 상태.나 ? { username: 상태.나 } : await 그래프(cfg, `/${cfg.IG_USER_ID}?fields=username&access_token=${열쇠}`);
+  상태.나 = 나.username;
   const 기록 = fs.existsSync(기록파일) ? JSON.parse(fs.readFileSync(기록파일, 'utf8')) : {};
   const 공고들 = 게시물공고();
   const 이제 = Date.now();
 
-  const 게시물 = (await 다받기(cfg, `/${cfg.IG_USER_ID}/media?fields=id,timestamp,permalink&limit=25&access_token=${열쇠}`))
+  const 게시물 = (await 다받기(cfg, `/${cfg.IG_USER_ID}/media?fields=id,timestamp,permalink,comments_count&limit=25&access_token=${열쇠}`))
     .filter((g) => 이제 - Date.parse(g.timestamp) < 창);
-  console.log(`최근 7일 게시물 ${게시물.length}개`);
+  if (!빠르게) console.log(`최근 7일 게시물 ${게시물.length}개`);
   const 표 = 단어들();
-  for (const g of 게시물) console.log(`  게시물 ${g.id} · ${g.timestamp} · ${g.permalink} · 단어 ${게시물단어(표[짧은주소(g.permalink)]?.단어 || null, 공고들.has(String(g.id))) ? '「' + 게시물단어(표[짧은주소(g.permalink)]?.단어 || null, 공고들.has(String(g.id))) + '」' : '없음(안 봄)'}`);
+  if (!빠르게) for (const g of 게시물) console.log(`  게시물 ${g.id} · ${g.timestamp} · ${g.permalink} · 단어 ${게시물단어(표[짧은주소(g.permalink)]?.단어 || null, 공고들.has(String(g.id))) ? '「' + 게시물단어(표[짧은주소(g.permalink)]?.단어 || null, 공고들.has(String(g.id))) + '」' : '없음(안 봄)'}`);
 
   const 할것 = [];
   for (const g of 게시물) {
     const 단어 = 게시물단어(표[짧은주소(g.permalink)]?.단어 || null, 공고들.has(String(g.id)));
     if (!단어) continue;                                         /* 단어를 안 정한 게시물은 안 봅니다 */
+    if (빠르게 && 상태.댓글수[g.id] === (g.comments_count ?? -1)) continue;   /* 빠르게 — 댓글 수가 그대로면 안 읽습니다 */
     const 댓글 = await 다받기(cfg, `/${g.id}/comments?fields=id,text,username,timestamp&limit=50&access_token=${열쇠}`);
     /* 진단 — 댓글 원문(앞 40자) · 받은 칸 이름 (지침 2절) */
-    console.log(`  ${g.permalink} 댓글 ${댓글.length}개`);
-    for (const c of 댓글) console.log(`    · ${c.id} · 칸 ${Object.keys(c).join(',')} · @${c.username ?? '?'} · ${c.timestamp} · 「${String(c.text ?? '').slice(0, 40)}」`);
+    if (!빠르게) console.log(`  ${g.permalink} 댓글 ${댓글.length}개`);
+    if (!빠르게) for (const c of 댓글) console.log(`    · ${c.id} · 칸 ${Object.keys(c).join(',')} · @${c.username ?? '?'} · ${c.timestamp} · 「${String(c.text ?? '').slice(0, 40)}」`);
     for (const c of 댓글) {
       if (c.username === 나.username) continue;                 /* 우리가 단 첫 댓글 */
       if (!단어맞나(c.text, 단어)) continue;
@@ -151,11 +161,18 @@ async function 돌기() {
       할것.push({ 게시물: g, 댓글: c, 공고: 공고들.get(String(g.id)) || null });
     }
   }
-  console.log(`보낼 댓글 ${할것.length}개`);
+  const 상태적기 = (다시볼 = new Set()) => {
+    for (const g of 게시물) if (!다시볼.has(g.id)) 상태.댓글수[g.id] = g.comments_count ?? -1;
+    for (const k of Object.keys(상태.댓글수)) if (!게시물.some((g) => g.id === k)) delete 상태.댓글수[k];
+    fs.mkdirSync(path.dirname(상태파일), { recursive: true }); fs.writeFileSync(상태파일, JSON.stringify(상태));
+  };
+  if (빠르게 && !할것.length) { if (실행) 상태적기(); return; }      /* 할 일 없으면 조용히 */
+  console.log(`${빠르게 ? new Date().toISOString() + ' ' : ''}보낼 댓글 ${할것.length}개`);
   for (const x of 할것) console.log(`  · @${x.댓글.username} 「${String(x.댓글.text).slice(0, 40)}」 · ${x.게시물.permalink} · ${x.공고 ? '공고 ' + x.공고 : '첫 화면'}`);
   if (!실행) { console.log('\n마른 실행 — 보내지 않았습니다. --실행 을 붙이면 보냅니다'); return; }
   if (!DM권한) { console.error('✗ 권한이 없어 보내지 않습니다'); process.exit(1); }
 
+  const 못보냄 = new Set();
   for (const x of 할것) {
     const 몸 = new URLSearchParams({
       recipient: JSON.stringify({ comment_id: x.댓글.id }),
@@ -178,7 +195,10 @@ async function 돌기() {
     console.log(`${결과 === '보냄' ? '  ○' : '  ✗'} @${x.댓글.username} — ${결과} · ${응답}`);
     fs.mkdirSync(path.dirname(기록파일), { recursive: true });
     fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
+    if (결과 !== '보냄') 못보냄.add(x.게시물.id);
   }
+  /* 못 보낸 게시물만 다음 바퀴에 다시 읽습니다. 보낸 게시물은 답글로 댓글 수가 늘어 한 번 더 읽히고(기록에 있어 다시 안 보냄) 조용해집니다 */
+  상태적기(못보냄);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
