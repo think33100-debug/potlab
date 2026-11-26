@@ -203,14 +203,27 @@ function cfgs더하기(S) {
   if (!fs.existsSync(터)) return S;
   const 이름 = new Set(S.map((x) => x.name));
   const 더한것 = [];
+  const 바꾼것 = [];
   for (const f of fs.readdirSync(터).filter((x) => x.endsWith('.json')).sort()) {
     let c;
     try { c = JSON.parse(fs.readFileSync(path.join(터, f), 'utf8')); } catch { continue; }
-    if (!c || !c.name || 이름.has(c.name)) continue;
+    if (!c || !c.name) continue;
     if (!c.type) c.type = 'html';
+    /* 2026-11-26 — 이미 있는 곳의 **옛 주소 줄 하나만** 바꿉니다 (`바꿀주소` = 그 줄의 url 글자 그대로).
+       창원파티마병원이 채용을 따로 만든 채용 사이트로 옮겼는데 옛 게시판 줄이 wage.js 에 남아 새 공고를 놓쳤습니다.
+       줄을 못 찾으면 **더하지 않고** 알립니다 — 같은 이름 줄이 둘 생기면 같은 공고가 두 벌 됩니다 */
+    if (c.바꿀주소) {
+      const i = S.findIndex((x) => x.name === c.name && x.url === c.바꿀주소);
+      if (i < 0) { console.log('  cfgs 바꾸기 못 함 — ' + c.name + ' 옛 줄(' + c.바꿀주소 + ')이 없습니다 · ' + f); continue; }
+      const 새것 = { ...c }; delete 새것.바꿀주소;
+      S[i] = 새것; 바꾼것.push(c.name);
+      continue;
+    }
+    if (이름.has(c.name)) continue;
     이름.add(c.name); S.push(c); 더한것.push(c.name);
   }
   if (더한것.length) console.log('  cfgs 에서 더함  ' + 더한것.length + '곳 — ' + 더한것.join(' · '));
+  if (바꾼것.length) console.log('  cfgs 로 바꿈  ' + 바꾼것.length + '곳 — ' + 바꾼것.join(' · '));
   return S;
 }
 
