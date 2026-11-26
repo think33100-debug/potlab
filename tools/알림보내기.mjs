@@ -46,7 +46,12 @@ import fs from 'node:fs';
 import { 받아보기 } from './쪽나눠받기.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import webpush from 'web-push';
+/* ★ 2026-11-25 — web-push 는 **판이 달라도 돌게** 부릅니다.
+   3.x 는 통째로 default 에, 4.0.0(11/6) 은 default 없이 낱이름으로 내놓습니다.
+   `import webpush from` 이라고 적어 두었더니 4.0.0 이 깔린 서버에서 첫 줄부터 죽어
+   서버 쪽 발송이 한 번도 안 돌았습니다 (GitHub 쪽은 3.6.7 로 못박아 살아 있었음). */
+import * as 웹푸시묶음 from 'web-push';
+const webpush = 웹푸시묶음.default ?? 웹푸시묶음;
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(여기, '..');
@@ -132,7 +137,10 @@ if (argv.includes('--자가시험')) {
   같나(글('2026-11-16').제목, '서울대학교병원 내일 마감이에요', '1일 전 제목');
   같나(글('2026-11-16').몸, '물리치료사 채용 · 11/17(화) 마감 · 놓치지 말고 지원하세요!', '1일 전 내용');
   같나(글('2026-11-17').제목, '서울대학교병원 오늘 마감이에요', '당일');
-  console.log('\n자가시험 13개 다 통과');
+  /* 2026-11-25 — 부품이 판이 바뀌어 이름이 없어지면 여기서 먼저 걸립니다 */
+  같나(typeof webpush.setVapidDetails, 'function', 'web-push 에 열쇠 넣는 함수가 있다');
+  같나(typeof webpush.sendNotification, 'function', 'web-push 에 보내는 함수가 있다');
+  console.log('\n자가시험 15개 다 통과');
   process.exit(0);
 }
 

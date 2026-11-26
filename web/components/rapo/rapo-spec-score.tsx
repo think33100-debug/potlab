@@ -10,7 +10,7 @@ import { tierOf } from '@/lib/spec';
    등급 글(lib/spec.ts 의 tierOf — 옛 스펙쌓기와 같은 글)만 그립니다. 항목별 점수·배점은 화면에 내보내지 않습니다. */
 
 /** 0 에서 점수까지 올라가는 숫자 — 움직임 줄이기를 켠 기기에서는 바로 보여 줍니다 */
-function 올라가는수({ 끝 }: { 끝: number }) {
+export function 올라가는수({ 끝 }: { 끝: number }) {
   const [n, setN] = useState(0);
   useEffect(() => {
     const 바로 = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;

@@ -293,6 +293,7 @@ export default function AdminStats() {
       </AdminSection>
 
       {/* ── 재방문 근사치 (2026-11-18 · 멘토-5-2 · Q5) — DB 함수가 없으면 통째로 안 그립니다 ── */}
+      <MemberRevisit />
       <Revisit />
 
       {/* ── 수집 (2026-11-19 더함) ── */}
@@ -578,18 +579,93 @@ function useRevisit() {
   return { rows, 없음 };
 }
 
-/* 주요 지표 넷째 칸 — 원본은 「평균 체류 시간」이지만 머문 시간은 기록하지 않아 재방문으로 둡니다 */
+/* 회원 재방문 — 같은 아이디가 다시 들어왔나 (2026-11-24 세중님 · sql/초안_1124/회원_재방문.sql).
+   회원방문일 표(회원 한 명 · 하루 한 줄)를 admin_stats_member_revisit() 가 셉니다.
+   11/24 이전 날은 로그인·글·댓글 등 남은 흔적으로 채운 것(출처 '옛기록')이라 **빠진 날이 있을 수 있습니다** */
+type MemberRevisitRow = {
+  day: string; visit_members: number; new_members: number; back_members: number;
+  back_done: boolean; back_pct: number | string | null;
+};
+
+function useMemberRevisit() {
+  const [rows, setRows] = useState<MemberRevisitRow[] | null>(null);
+  const [없음, set없음] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    browserSupabase().rpc('admin_stats_member_revisit', { p_days: 30 }).then(({ data, error }) => {
+      if (!alive) return;
+      if (error) set없음(true); else setRows((data ?? []) as MemberRevisitRow[]);
+    }, () => { if (alive) set없음(true); });
+    return () => { alive = false; };
+  }, []);
+  return { rows, 없음 };
+}
+
+/* 주요 지표 넷째 칸 — 원본은 「평균 체류 시간」이지만 머문 시간은 기록하지 않아 재방문으로 둡니다.
+   ★ 11/24 — 브라우저 근사치에서 **회원(아이디) 기준**으로 바꿨습니다 */
 function RevisitCard() {
-  const { rows, 없음 } = useRevisit();
-  const 다잰 = (rows ?? []).filter((r) => r.back_done && Number(r.first_browsers) > 0);
-  const 첫 = 다잰.reduce((a, r) => a + Number(r.first_browsers), 0);
-  const 다시 = 다잰.reduce((a, r) => a + Number(r.back_browsers), 0);
+  const { rows, 없음 } = useMemberRevisit();
+  const 다잰 = (rows ?? []).filter((r) => r.back_done && Number(r.new_members) > 0);
+  const 첫 = 다잰.reduce((a, r) => a + Number(r.new_members), 0);
+  const 다시 = 다잰.reduce((a, r) => a + Number(r.back_members), 0);
   return (
-    <AdminMetricCard 그림="/rapo/admin/metric-stay.svg" 이름="7일 안 재방문"
+    <AdminMetricCard 그림="/rapo/admin/metric-stay.svg" 이름="7일 안 재방문 (회원)"
       값={rows == null || 첫 === 0 ? null : String(Math.round((다시 / 첫) * 100))} 단위="%"
       빈말={없음 ? '못 셌어요' : rows != null && 첫 === 0 ? '셈 중' : undefined}
-      설명={첫 > 0 ? `첫 방문 브라우저 ${첫.toLocaleString('ko-KR')} 중 ${다시.toLocaleString('ko-KR')} · 7일이 다 지난 날만 · 근사치`
-        : '첫 방문 뒤 7일이 지나야 나와요 · 브라우저 기준 근사치'} />
+      설명={첫 > 0 ? `처음 들어온 회원 ${첫.toLocaleString('ko-KR')}명 중 ${다시.toLocaleString('ko-KR')}명이 7일 안에 다시 옴 · 최근 30일 · 7일이 다 지난 날만`
+        : '처음 들어온 날부터 7일이 지나야 나와요 · 회원(아이디) 기준'} />
+  );
+}
+
+function MemberRevisit() {
+  const { rows, 없음 } = useMemberRevisit();
+  if (없음) return null;
+  if (!rows) return null;
+  const 있는날 = rows.filter((r) => Number(r.visit_members) > 0 || Number(r.new_members) > 0);
+  const pct = (r: MemberRevisitRow) => (r.back_pct == null ? (Number(r.new_members) > 0 ? '셈 중' : '—') : `${Number(r.back_pct)}%`);
+
+  return (
+    <AdminSection id="stats-member-revisit" title="회원 재방문" sub="회원(아이디) 기준 · 최근 30일">
+      <p className={관.sub}>
+        같은 아이디가 다른 날 다시 들어왔는지 세요. 폰·PC 를 바꿔도 같은 회원이면 한 명이에요.
+        하루에 여러 번 와도 그날은 한 번으로 세요
+      </p>
+      {있는날.length === 0 ? <p className={관.muted}>아직 기록이 없어요</p> : (
+        <div className={관.tableWrap}>
+          <table className={관.table + ' min-w-[420px] tabular-nums'}>
+            <thead className={관.thead}>
+              <tr>
+                <th className={관.th}>날</th>
+                <th className={관.th + ' text-right'}>들어온 회원</th>
+                <th className={관.th + ' text-right'}>처음 온 회원</th>
+                <th className={관.th + ' text-right'}>7일 안 재방문</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...있는날].reverse().map((r) => (
+                <tr key={r.day} className={관.tr}>
+                  <td className={관.td}>{r.day.slice(5)}</td>
+                  <td className={관.td + ' text-right font-bold text-[#112231]'}>{Number(r.visit_members)}</td>
+                  <td className={관.td + ' text-right'}>{Number(r.new_members)}</td>
+                  <td className={관.td + ' text-right'}>
+                    {pct(r)}
+                    {Number(r.new_members) > 0 && (
+                      <span className="ml-[8px] text-[13px] text-[#555d6d]">{Number(r.back_members)}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      <p className={관.sub}>
+        「7일 안 재방문」은 그날 처음 들어온 회원 가운데 1~7일째에 한 번이라도 다시 들어온 비율이에요.
+        7일이 다 지나야 비율이 나오고, 그 전에는 「셈 중」이에요. 작은 회색 숫자는 다시 온 회원 수예요.
+        11/24 전 날은 로그인·글·댓글 같은 남은 흔적으로 채워서, 둘러보기만 한 날은 빠져 있을 수 있어요(실제보다 낮게 나와요).
+        관리자는 빼고 세요
+      </p>
+    </AdminSection>
   );
 }
 

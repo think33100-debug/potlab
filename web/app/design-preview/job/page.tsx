@@ -11,6 +11,7 @@ import { AuthPreview } from '@/app/auth';
      ?state=nodate  마감일을 못 읽은 공고 (원본 D-04 「확인 필요」)
      ?pay=alimi     공고에 금액 없음 + 공공병원 알리미 공시 (2026-11-14 시안 · 부산의료원 2025 공시 숫자)
      ?pay=alio      공고에 금액 없음 + 알리오 공시 (부산대학교병원 2025 결산 숫자)
+     ?pay=nps       공고에 금액 없음 + 국민연금 추정 (2026-11-25 · 지어낸 숫자)
      ?pay=none      공고에 금액 없음 + 공시도 없음 (지금 모습 그대로) */
 export const metadata: Metadata = { title: 'RAPO · 공고 상세 미리보기', robots: { index: false } };
 
@@ -24,6 +25,8 @@ export default async function DesignPreviewJob({ searchParams }: {
     ? { 출처: '알리미' as const, 공시기관: '부산의료원', 신입초임: 37967000, 평균보수: 68602000, 기준해: 2025, 가입자수: null, 상한근처: false, 보건직평균: 61495000 }
     : pay === 'alio'
     ? { 출처: '알리오' as const, 공시기관: '부산대학교병원', 신입초임: 45002000, 평균보수: 77120000, 기준해: 2025, 가입자수: null, 상한근처: false }
+    : pay === 'nps'
+    ? { 출처: '국민연금' as const, 공시기관: null, 신입초임: null, 평균보수: 53740000, 기준해: null, 가입자수: 320, 상한근처: false }
     : null;
   const closed = state === 'closed';
   const nodate = state === 'nodate';
