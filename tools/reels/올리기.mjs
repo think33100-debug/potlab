@@ -19,6 +19,8 @@ import { env, 인스타되나, 릴스올리기IG, 카드올리기IG, 댓글되�
 import { 묶음폴더, 묶음읽기, 게시금지인가 } from './rapo777.mjs';
 import { 원문확인 } from './원문확인.mjs';
 import { 오늘KST } from './reel-data.mjs';
+import { 중복찾기, 값바뀜 } from './올리기전확인.mjs';
+import { 받아보기 } from '../쪽나눠받기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(여기, '..', '..');
@@ -104,6 +106,39 @@ if (v.원문자료) {
   if (r.판정 !== '통과') 멈춤(`원문 확인 「${r.판정}」 — ${r.까닭}`);
   console.log(`  ○ 원문 통과 · ${(r.확인 || []).join(' / ')}`);
 } else 멈춤('원문 자료 기록이 없습니다');
+
+/* ⑤ 값 · ⑥ 중복 — 2026-11-26 세중님 「올릴 때 항상 중복 있는지 확인하고 정확한지 확인하고 올리자」 (판정은 올리기전확인.mjs)
+   DB 를 못 읽으면 **안 올립니다** (확인 못 한 채 올리지 않음) */
+{
+  const K = cfg.SUPABASE_SERVICE_KEY;
+  if (!cfg.SUPABASE_URL || !K) 멈춤('DB 열쇠가 없어 값·중복을 확인하지 못했습니다');
+  const 읽기 = async (길) => {
+    const r = await 받아보기(cfg.SUPABASE_URL + '/rest/v1/' + 길, { headers: { apikey: K, Authorization: 'Bearer ' + K } });
+    if (!r.ok) 멈춤(`DB 를 못 읽어 값·중복을 확인하지 못했습니다 — HTTP ${r.status}`);
+    return r.json();
+  };
+  const 안 = (ids) => `in.(${ids.map((x) => encodeURIComponent('"' + x + '"')).join(',')})`;
+  const 내id = 같은편(v);
+  /* ⑤ 값 — 만든 뒤 회원 화면 값이 바뀌었으면 옛 값으로 그린 카드·영상입니다 */
+  const 지금 = await 읽기(`job_posts_pub?select=id,apply_to,employ_type,headcount&id=${안(내id)}`);
+  const 바뀜 = 값바뀜({ ids: 내id, 마감일: v.마감일, 캡션: v.캡션, 인원글안봄: /인원은 공고문 확인/.test(v.캡션 || '') }, 지금);
+  if (바뀜.length) 멈춤(`만든 뒤 값이 바뀌었습니다 — ${바뀜.join(' / ')} · 「만들기」로 다시 만든 뒤 올리세요`);
+  console.log('  ○ 값 그대로 — 회원 화면의 마감일·고용형태·모집인원이 글과 같음');
+  /* ⑥ 중복 — 같은 기관·같은 마감일·겹치는 직군을 이미 올렸나 (스토리는 안 봄 · 바꾸기는 자기 것을 뺌) */
+  if (!스토리길) {
+    const 칸 = 카드길 ? '카드게시물ID' : '게시물ID';
+    const 올린id = Object.entries(기록).filter(([k, w]) => !k.startsWith('__') && w && typeof w === 'object' && w[칸] && !내id.includes(k)).map(([k]) => k);
+    if (올린id.length) {
+      const 고르기 = `select=id,org_name,job_group,apply_to,${encodeURIComponent('기관번호')}`;
+      const 내줄 = await 읽기(`job_posts?${고르기}&id=${안(내id)}`);
+      const 올린줄 = [];
+      for (let i = 0; i < 올린id.length; i += 40) 올린줄.push(...await 읽기(`job_posts?${고르기}&id=${안(올린id.slice(i, i + 40))}`));
+      const 겹 = 중복찾기(내줄, 올린줄);
+      if (겹) 멈춤(`이미 올린 공고와 겹칩니다 — ${겹.id} ${겹.org_name} · ${겹.job_group} · 마감 ${겹.apply_to} (${기록[겹.id]?.[카드길 ? '카드게시물주소' : '게시물주소'] || 기록[겹.id]?.[칸]})`);
+    }
+    console.log(`  ○ 중복 없음 — 이미 올린 ${무엇} ${올린id.length}건과 견줌 (같은 기관·마감일·직군)`);
+  }
+}
 
 console.log('\n── 캡션 ──\n' + v.캡션 + '\n── 캡션 끝 ──');
 if (카드길) console.log(`  카드 ${v.카드.length}장`);
