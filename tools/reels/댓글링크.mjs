@@ -41,7 +41,8 @@ export const 기본단어 = '라포';
 export const 게시물단어 = (정한단어, 공고게시물인가) => 정한단어 || (공고게시물인가 ? 기본단어 : null);
 export const 단어꼴 = /^[가-힣A-Za-z0-9]{1,20}$/;
 export const 짧은주소 = (permalink) => (String(permalink || '').match(/\/(?:p|reel)\/([A-Za-z0-9_-]+)/) || [])[1] || null;
-export const 단어맞나 = (글, 단어) => !!단어 && String(글 || '').toLowerCase().includes(String(단어).toLowerCase());
+/* 기본 단어(「라포」)를 보는 게시물은 「링크」라고 남겨도 보냅니다 (2026-11-26 세중님 「댓글에 링크 남겨주시면」) */
+export const 단어맞나 = (글, 단어) => !!단어 && [단어, ...(단어 === '라포' ? ['링크'] : [])].some((w) => String(글 || '').toLowerCase().includes(String(w).toLowerCase()));
 export function 단어들() { return fs.existsSync(단어파일) ? JSON.parse(fs.readFileSync(단어파일, 'utf8')) : {}; }
 /* 댓글에 다는 공개 답글 — 같은 글이 줄줄이 붙지 않게 댓글 id 로 돌려 씁니다 */
 const 답글꼴 = [
@@ -89,6 +90,7 @@ function 자기점검() {
   봐('단어 꼴 — 셸 글자 막음', 단어꼴.test('일산') && 단어꼴.test('RAPO2') && !단어꼴.test('a;b') && !단어꼴.test('') && !단어꼴.test('$(id)'));
   봐('짧은주소', 짧은주소('https://www.instagram.com/p/Df1jEuVn4OG/') === 'Df1jEuVn4OG' && 짧은주소('https://www.instagram.com/reel/AbC_1-x/') === 'AbC_1-x');
   봐('답글은 늘 같은 댓글엔 같은 꼴', 답글고르기('123') === 답글고르기('123') && 답글꼴.includes(답글고르기('9')));
+  봐('기본 단어 게시물은 「링크」도 받음 · 따로 정한 단어 게시물은 그 단어만', 단어맞나('링크 주세요', '라포') && 단어맞나('라포!', '라포') && !단어맞나('링크', '이벤트'));
   봐('공고 게시물은 기본 단어 「라포」 · 정한 단어가 먼저 · 공고 아닌 게시물은 안 봄', 게시물단어(null, true) === '라포' && 게시물단어('이벤트', true) === '이벤트' && 게시물단어(null, false) === null);
   봐('공고 게시물이면 그 공고 주소', 보낼글('306973-PT').includes('/jobs/306973-PT'));
   봐('아니면 첫 화면', 보낼글(null).includes(사이트 + '\n'));
