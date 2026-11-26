@@ -68,7 +68,7 @@ export function RapoJobList({ lists }: { lists: RapoJobLists }) {
           {shown.map((j, i) => (
             <li key={j.id ?? `${j.org}-${j.title}`} className="flex flex-col gap-(--rapo-dimension-x3) min-[1040px]:gap-0">
               {i > 0 && <RapoDivider className="min-[1040px]:hidden" />}
-              <RapoJobRow job={j} variant="home" />
+              <RapoJobRow job={j} variant="home" 표 />
             </li>
           ))}
         </ul>

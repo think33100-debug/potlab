@@ -46,7 +46,7 @@ export function 목록({ rows, 제목, 쪽 }: { rows: RapoJob[]; 제목: string;
         {rows.map((j, i) => (
           <li key={j.id ?? `${j.org}-${j.title}-${i}`}>
             {i > 0 && <RapoDivider className="min-[1040px]:hidden" />}
-            <RapoJobRow job={j} variant="list" />
+            <RapoJobRow job={j} variant="list" 표 />
           </li>
         ))}
       </ul>
