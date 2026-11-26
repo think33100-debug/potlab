@@ -19,7 +19,7 @@ import { env, 인스타되나, 릴스올리기IG, 카드올리기IG, 댓글되�
 import { 묶음폴더, 묶음읽기, 게시금지인가 } from './rapo777.mjs';
 import { 원문확인 } from './원문확인.mjs';
 import { 오늘KST } from './reel-data.mjs';
-import { 중복찾기, 값바뀜 } from './올리기전확인.mjs';
+import { 중복찾기, 값바뀜, 대조안됨 } from './올리기전확인.mjs';
 import { 받아보기 } from '../쪽나눠받기.mjs';
 
 const 여기 = path.dirname(fileURLToPath(import.meta.url));
@@ -137,6 +137,14 @@ if (v.원문자료) {
       if (겹) 멈춤(`이미 올린 공고와 겹칩니다 — ${겹.id} ${겹.org_name} · ${겹.job_group} · 마감 ${겹.apply_to} (${기록[겹.id]?.[카드길 ? '카드게시물주소' : '게시물주소'] || 기록[겹.id]?.[칸]})`);
     }
     console.log(`  ○ 중복 없음 — 이미 올린 ${무엇} ${올린id.length}건과 견줌 (같은 기관·마감일·직군)`);
+  }
+  /* ⑦ 확실한가 — Codex 원문 대조(뽑은값.사진대조)를 통과한 공고만 올립니다. 손으로 「올려」 해도 같습니다
+     (2026-11-26 세중님 「겹치면 안 됨 · 확실하지 않은 거 안 됨 · 둘 다 맞으면 올림 · 코덱스가 오케이하면」) */
+  {
+    const 대조줄 = await 읽기(`job_posts?select=id,${encodeURIComponent('뽑은값')}&id=${안(내id)}`);
+    const 안됨 = 대조안됨(내id, 대조줄, v.메일보낸때 || null);
+    if (안됨.length) 멈춤(`확실하지 않아 안 올립니다 — ${안됨.join(' / ')}`);
+    console.log('  ○ 원문 대조(Codex) 통과');
   }
 }
 
