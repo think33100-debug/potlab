@@ -55,6 +55,7 @@ const 할일표 = {
   크론보기: (id) => (id ? null : ['tools/reels/크론카드자동.mjs']),
   로그보기: (id) => (id ? null : ['tools/reels/로그꼬리.mjs']),
   게시물목록: (id) => (id ? null : ['tools/reels/게시물목록.mjs']),
+  원문보기: (id) => (id ? ['tools/reels/원문보기.mjs', '--id', id] : null),
   /* 댓글 「라포」 → DM 을 1분마다 (2026-11-26 세중님 「댓글 달면 바로 가야지」) */
   디엠크론보기: (id) => (id ? null : ['tools/reels/크론댓글.mjs']),
   디엠바로켜기: (id) => (id ? null : ['tools/reels/크론댓글.mjs', '--켜기']),
@@ -62,7 +63,7 @@ const 할일표 = {
   카드자동켜기: (id) => (id ? null : ['tools/reels/크론카드자동.mjs', '--켜기']),
   카드자동끄기: (id) => (id ? null : ['tools/reels/크론카드자동.mjs', '--끄기']),
 };
-const 영어 = { list: '목록', check: '확인', publish: '올리기', make: '만들기', pull: '당기기', 'check-cards': '카드확인', 'publish-cards': '카드올리기', 'brand-check': '브랜드확인', 'brand-publish': '브랜드올리기', 'brand-replace': '브랜드바꾸기', 'brand-comment': '브랜드댓글', 'dm-check': '디엠확인', 'dm-send': '디엠보내기', 'dm-word': '디엠단어', 'app-shots': '앱화면', 'check-story': '스토리확인', 'publish-story': '스토리올리기', 'replace-story': '스토리바꾸기', 'delete-post': '게시물지우기', 'logo-stories': '로고스토리', 'sound-check': '소리확인', 'replace-cards': '카드바꾸기', 'cron-check': '크론보기', 'log-tail': '로그보기', 'post-list': '게시물목록', 'dm-cron-check': '디엠크론보기', 'dm-fast-on': '디엠바로켜기', 'dm-fast-off': '디엠바로끄기', 'cards-auto-on': '카드자동켜기', 'cards-auto-off': '카드자동끄기' };
+const 영어 = { list: '목록', check: '확인', publish: '올리기', make: '만들기', pull: '당기기', 'check-cards': '카드확인', 'publish-cards': '카드올리기', 'brand-check': '브랜드확인', 'brand-publish': '브랜드올리기', 'brand-replace': '브랜드바꾸기', 'brand-comment': '브랜드댓글', 'dm-check': '디엠확인', 'dm-send': '디엠보내기', 'dm-word': '디엠단어', 'app-shots': '앱화면', 'check-story': '스토리확인', 'publish-story': '스토리올리기', 'replace-story': '스토리바꾸기', 'delete-post': '게시물지우기', 'logo-stories': '로고스토리', 'sound-check': '소리확인', 'replace-cards': '카드바꾸기', 'cron-check': '크론보기', 'log-tail': '로그보기', 'post-list': '게시물목록', 'source-view': '원문보기', 'dm-cron-check': '디엠크론보기', 'dm-fast-on': '디엠바로켜기', 'dm-fast-off': '디엠바로끄기', 'cards-auto-on': '카드자동켜기', 'cards-auto-off': '카드자동끄기' };
 
 /** 들어온 글 → { 할일, id, 인수 } 또는 { 거절 } — 시험할 수 있게 갈라 둠 */
 export function 풀기(글) {
