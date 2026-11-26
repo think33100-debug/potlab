@@ -419,9 +419,27 @@ if (메일) {
       if (!(v.카드 || []).every((f) => fs.existsSync(f))) continue;   /* 카드 파일이 없으면 못 올림 — 자리만 차지하지 않게 */
       const 열쇠 = v.카드[0];
       if (본묶음.has(열쇠)) continue;      /* 묶은 공고(PT·OT)는 같은 카드 — 한 번만 */
+      /* ★ 2026-11-26 — 같은 기관·같은 직군·같은 마감일 카드가 이미 올라갔으면 자동으로는 안 올립니다
+         (경인권역 물리치료사(1)(2)(3) 처럼 번호만 다른 공고 — 같은 카드가 세 번 올라감). 사람이 「올려」 하면 그대로 올라감 */
+      const 겹침 = `${v.기관}|${v.직군}|${v.마감일}`;
+      if (Object.entries(기록).some(([k, w]) => !k.startsWith('__') && w && typeof w === 'object' && w.카드게시물ID && `${w.기관}|${w.직군}|${w.마감일}` === 겹침)) continue;
       본묶음.add(열쇠);
       const 같은묶음 = Object.entries(기록).filter(([k, w]) => !k.startsWith('__') && w && typeof w === 'object' && (w.카드 || [])[0] === 열쇠).map(([k]) => k);
-      if (!(await 사진대조통과(같은묶음, v.메일보낸때 || null))) continue;
+      if (!(await 사진대조통과(같은묶음, v.메일보낸때 || null))) {
+        /* ★ 2026-11-26 — 통과했는데 **값을 고친 뒤라 옛 카드**인 것은 카드를 다시 그립니다 (전에는 영영 건너뛰었습니다 · 적십자 307310~313).
+           다시 그리면 메일보낸때가 통과때 뒤가 되어 **다음 바퀴**가 올립니다. 같은 공고는 6시간에 한 번만 다시 그립니다 */
+        if (await 사진대조통과(같은묶음) && !(v.옛카드다시만든때 && Date.now() - Date.parse(v.옛카드다시만든때) < 6 * 3600e3)) {
+          const 바탕 = 같은묶음.every((k) => /-(PT|OT)$/.test(k)) && new Set(같은묶음.map((k) => k.replace(/-(PT|OT)$/, ''))).size === 1
+            ? 같은묶음[0].replace(/-(PT|OT)$/, '') : id;
+          console.log(`  카드자동(옛 카드 다시 그림) ${바탕} — 원문 대조가 값을 고친 뒤라 카드를 새 값으로 다시 만듭니다 · 다음 바퀴에 올림`);
+          for (const k of 같은묶음) if (기록[k] && typeof 기록[k] === 'object') 기록[k].옛카드다시만든때 = new Date().toISOString();
+          try { fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2)); } catch (e) { console.error('  다시 그린 때를 못 적음 — ' + String(e.message || e).slice(0, 120)); }
+          spawnSync(process.execPath, [path.join(여기, 'run.mjs'), '--메일', '--id', 바탕], { stdio: 'inherit' });
+          기록다시읽기();
+          자동올림++;
+        }
+        continue;
+      }
       console.log(`  카드자동(뒤늦게 통과) ${id} — 올리기.mjs --카드 --실행`);
       const o = spawnSync(process.execPath, [path.join(여기, '올리기.mjs'), '--id', id, '--카드', '--실행'], { stdio: 'inherit' });
       기록다시읽기();
