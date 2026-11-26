@@ -49,6 +49,7 @@ export function 목록줄(r: JobListItem): RapoJob {
     pay: null,
     tags: 태그(...기관태그(r.분류), r.올림 && '추천', 인턴태그(r.is_intern, r.employ_type), 조교연구말(r.조교연구), r.지역보임, r.employ_type || '공고문 참고', r.신입가능 && '신입 가능', 직군태그(r.job_group, r.조교연구)),
     deadline: 마감배지(r.apply_to, r.마감표시, r.apply_to_time).text,
+    지역: r.지역보임, 직군: 직군태그(r.job_group, r.조교연구),
   };
 }
 
@@ -90,6 +91,7 @@ export async function getRapoHomeJobs(sb: SupabaseClient): Promise<RapoHomeJobs>
       likes: null,
       views: 본수(views, r.id),
       deadline: 마감배지(r.apply_to, r.마감표시, r.apply_to_time).text,
+      지역: r.지역보임, 직군: 직군태그(r.job_group, r.조교연구),
     });
     return { status: 'ok', lists: { new: rows.new.map(꼴), views: rows.views.map(꼴), deadline: rows.deadline.map(꼴) } };
   } catch {
@@ -115,6 +117,7 @@ async function 비회원줄(): Promise<RapoHomeJobs> {
     likes: null,
     views: 본수(views, r.id),
     deadline: 마감배지(r.apply_to).text,
+    지역: r.sido, 직군: r.job_group,
   });
   /* 맛보기는 최신 차례로 옵니다. 인기·마감 차례는 **받은 줄 안에서만** 다시 늘어놓습니다.
      조회수를 못 받았으면 인기 차례를 지어내지 않고 최신 차례 그대로 둡니다 */

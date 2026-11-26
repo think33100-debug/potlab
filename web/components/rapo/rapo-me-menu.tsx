@@ -45,11 +45,16 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
     });
   }, [me.role]);
   return (
-    <div className="flex flex-col gap-(--rapo-dimension-x5) pt-(--rapo-dimension-x2)">
+    /* PC(1040↑) — 피그마 「내 정보 · 회원 / PC 1040」(1930:1850): 왼쪽 회색 카드(폭 244 · 프로필 · 급여) + 오른쪽 메뉴 · 사이 32.
+       1039 이하는 지금처럼 위에서 아래로 한 줄입니다. 피그마 왼쪽 카드의 「내 급여 3,960만원」은 값이 없어 지금 「오픈 전」 카드 그대로 */
+    <div className="flex flex-col gap-(--rapo-dimension-x5) pt-(--rapo-dimension-x2)
+                    min-[1040px]:grid min-[1040px]:grid-cols-[244px_minmax(0,1fr)] min-[1040px]:items-start min-[1040px]:gap-x-(--rapo-dimension-x8)">
+      <div className="flex flex-col gap-(--rapo-dimension-x5) min-[1040px]:sticky min-[1040px]:top-(--rapo-dimension-x4) min-[1040px]:gap-(--rapo-dimension-x4)
+                      min-[1040px]:rounded-(--rapo-radius-r4) min-[1040px]:bg-(--rapo-color-bg-layer-default-pressed) min-[1040px]:p-(--rapo-dimension-x4)">
       {/* 프로필 요약 (1376:37165) — 아바타 56 · 닉네임 28 · 직군 · 프로필 편집 */}
-      <div className="flex items-center gap-(--rapo-dimension-x3_5) py-(--rapo-dimension-x2_5)">
+      <div className="flex items-center gap-(--rapo-dimension-x3_5) py-(--rapo-dimension-x2_5) min-[1040px]:flex-col min-[1040px]:items-start min-[1040px]:gap-(--rapo-dimension-x3)">
         <Avatar value={me.avatar} size="profile" />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 min-[1040px]:w-full">
           <p className="truncate text-[28px] font-bold leading-[34px] text-(color:--rapo-color-fg-neutral)">{me.nickname}</p>
           {/* 피그마 1375:43209 — 직군 딱지 하나 (2026-11-15 · 전에는 「작업치료사 · 현직」 글) */}
           {me.job_group && (
@@ -67,7 +72,8 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
       </div>
 
       {/* 설치 유도 — 아직 홈 화면에 안 둔 분에게만 (2026-11-14 세중님) */}
-      <RapoInstallCard />
+      {/* PC(1040↑)는 왼쪽 칸이 좁아 글이 깨집니다 — 같은 길이 아래 「설정 · 핸드폰에 설치하기」에 있어 PC 에서는 이 카드만 접습니다 */}
+      <div className="empty:hidden min-[1040px]:hidden"><RapoInstallCard /></div>
 
       {스펙넣기 && (
         <Link href="/me/spec" className="flex items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-brand-weak) px-(--rapo-dimension-x5) py-(--rapo-dimension-x4)">
@@ -92,6 +98,9 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
       </Link>
 
       {/* 2026-11-14 세중님 「토큰 중복되는 것들도 바꿔줘」 — 줄마다 다른 아이콘. 피그마에 없는 일곱은 같은 선 규칙(24 · 1.6 · 둥근 끝 · #465568)으로 그렸습니다 */}
+      </div>
+
+      <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x5)">
       <RapoMeSection title="경력과 스펙" first>
         {경력 && (
           <dl className="grid grid-cols-2 gap-(--rapo-dimension-x3) pb-(--rapo-dimension-x2)">
@@ -154,6 +163,7 @@ export function RapoMeMenu({ me, 관리, 운영진, onSignOut }: {
           로그아웃
         </button>
       )}
+      </div>
     </div>
   );
 }

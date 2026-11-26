@@ -194,6 +194,7 @@ async function 결과({ sb, 고른직군, 고른시도, 고른고용, 고른분�
       id: r.id, org: 기관이름말(r.org_name), orgArt: 기관그림(r.org_name || r.id), title: r.title,
       pay: { text: '이용 권한 확인 후 공개', kind: 'value' },   // 원본 비회원 문구
       tags: 태그(r.sido, r.job_group, r.is_intern && '체험형 인턴'),
+      지역: r.sido, 직군: r.job_group,   // PC 표 「지역 · 직군」 칸 (2026-11-26)
       deadline: 마감배지(r.apply_to).text,
     }));
     if (rows.length === 0) return <없음 조건있음={false} 초기화주소={초기화주소} />;

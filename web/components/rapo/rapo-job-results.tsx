@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { RapoJobRow, type RapoJob } from './rapo-job-row';
+import { RapoJobRow, RapoJobTableHead, type RapoJob } from './rapo-job-row';
 import { RapoRetryButton } from './rapo-retry';
 import { RapoButton, RapoDivider, RapoSkeleton, RapoStatusPanel } from './rapo-ui';
 
@@ -42,10 +42,11 @@ export function 목록({ rows, 제목, 쪽 }: { rows: RapoJob[]; 제목: string;
   return (
     <결과칸 제목={제목}>
       <ul className="flex flex-col">
+        <li aria-hidden className="hidden min-[1040px]:block"><RapoJobTableHead /></li>
         {rows.map((j, i) => (
           <li key={j.id ?? `${j.org}-${j.title}-${i}`}>
-            {i > 0 && <RapoDivider />}
-            <RapoJobRow job={j} variant="list" />
+            {i > 0 && <RapoDivider className="min-[1040px]:hidden" />}
+            <RapoJobRow job={j} variant="list" 표 />
           </li>
         ))}
       </ul>

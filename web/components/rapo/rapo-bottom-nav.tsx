@@ -45,6 +45,7 @@ export function RapoBottomNav({ current, 관리덮기, dark = false }: {
   return (
     <nav
       aria-label="아래 탐색"
+      data-rapo-bottom-nav
       className={'fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-3xl ' + (dark ? ''
         : 'border-t-(length:--rapo-border-default) border-(color:--rapo-color-stroke-neutral-weak) bg-(--rapo-color-bg-layer-default)')}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)', ...(dark ? { background: '#0d1d29' } : {}) }}

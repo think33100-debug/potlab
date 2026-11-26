@@ -72,7 +72,12 @@ function LoginPhotos() {
 export function 로그인틀({ 아래 }: { 아래: ReactNode }) {
   return (
     <div data-rapo className="min-h-dvh bg-(--rapo-color-bg-navy-solid)">
-      <main className="relative mx-auto flex min-h-dvh w-full max-w-[480px] flex-col overflow-hidden text-(color:--rapo-color-fg-on-neutral-solid)">
+      {/* PC(1040↑) — 피그마 「로그인 · 툴킷·내 정보 진입 / PC 1040」(1930:1806): 폭 800 · 왼쪽 사진 칸 376 · 오른쪽 단추 칸 · 사이 24.
+          1039 이하는 지금처럼 사진 위에 단추가 겹치는 한 칸입니다 */}
+      <main className="relative mx-auto flex min-h-dvh w-full max-w-[480px] flex-col overflow-hidden text-(color:--rapo-color-fg-on-neutral-solid)
+                       min-[1040px]:grid min-[1040px]:max-w-[800px] min-[1040px]:grid-cols-[376px_minmax(0,1fr)] min-[1040px]:content-center min-[1040px]:items-center min-[1040px]:gap-x-(--rapo-dimension-x6)">
+        {/* 사진 칸 — 휴대폰에서는 상자 없이(contents) main 기준으로 깔리고, PC 에서는 왼쪽 칸 안에 갇힙니다 */}
+        <div className="contents min-[1040px]:relative min-[1040px]:block min-[1040px]:h-[680px] min-[1040px]:overflow-hidden">
         {/* 사진 — 원본 「사진 2·3·4 / 커뮤니티」: 같은 사진(923.1×1230.8)을 414×560 틀에 세 군데로 잘라 번갈아 보입니다
             (2026-11-12 세중님 「그림이 더 나오지 않았나」). 폭 비율로 옮김. 움직임 줄이기를 켠 기기에서는 첫 장만 */}
         <div aria-hidden className="absolute inset-x-0 top-[120px] h-[560px] overflow-hidden">
@@ -98,8 +103,9 @@ export function 로그인틀({ 아래 }: { 아래: ReactNode }) {
           <h1 className="rapo-type-t12-bold">동료의 이야기를<br />더 가까이</h1>
           <p className="rapo-type-t5-regular">로그인하고 대화를 이어가세요.</p>
         </div>
+        </div>
 
-        <div className="flex-1" />
+        <div className="flex-1 min-[1040px]:hidden" />
 
         {/* 로그인 행동 — 원본 「RAPO / B / 로그인 행동 / 투명」 1232:555 (24 여백 · 16 간격) */}
         <div className="relative flex flex-col gap-(--rapo-dimension-x4) p-(--rapo-dimension-x6) pb-[calc(var(--rapo-dimension-x6)+env(safe-area-inset-bottom))]">

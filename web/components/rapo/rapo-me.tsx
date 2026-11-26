@@ -70,8 +70,10 @@ export function RapoMeFrame({ title, back = '/me', nav = false, children }: {
 
   return (
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
-      <RapoAppBar title={title} back={nav ? undefined : back} />
+      {/* 아래 탐색이 있는 화면(내 정보)은 PC(1040↑)에서 앱 바 대신 왼쪽 큰 제목 — 위쪽 탐색이 길 안내를 맡습니다 (globals.css 의 data-rapo-mobile-header) */}
+      {nav ? <div data-rapo-mobile-header><RapoAppBar title={title} /></div> : <RapoAppBar title={title} back={back} />}
       <main className="px-(--rapo-dimension-x6) pb-(--rapo-dimension-x8)">
+        {nav && <p aria-hidden className="rapo-type-t9-bold hidden pb-(--rapo-dimension-x4) pt-(--rapo-dimension-x6) text-(color:--rapo-color-fg-neutral) min-[1040px]:block">{title}</p>}
         {loading || !me
           ? <p role="status" className="rapo-type-t4-regular py-(--rapo-dimension-x8) text-(color:--rapo-color-fg-neutral-muted)">잠시만요…</p>
           : children(me)}

@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { RapoRetryButton } from './rapo-retry';
-import { RapoJobRow, type RapoJob } from './rapo-job-row';
+import { RapoJobRow, RapoJobTableHead, type RapoJob } from './rapo-job-row';
 import { RapoButton, RapoDivider, RapoSectionTitle, RapoSortTabs, RapoStatusPanel, RapoTextAction } from './rapo-ui';
 import { 공고정렬들, 기본정렬, type 공고정렬 } from '@/lib/rapo-job-options';
 
@@ -63,11 +63,12 @@ export function RapoJobList({ lists }: { lists: RapoJobLists }) {
           action={<RapoButton href="/jobs" full>공고 전체 보기</RapoButton>}
         />
       ) : (
-        <ul className="flex flex-col gap-(--rapo-dimension-x3)">
+        <ul className="flex flex-col gap-(--rapo-dimension-x3) min-[1040px]:gap-0">
+          <li aria-hidden className="hidden min-[1040px]:block"><RapoJobTableHead /></li>
           {shown.map((j, i) => (
-            <li key={j.id ?? `${j.org}-${j.title}`} className="flex flex-col gap-(--rapo-dimension-x3)">
-              {i > 0 && <RapoDivider />}
-              <RapoJobRow job={j} variant="home" />
+            <li key={j.id ?? `${j.org}-${j.title}`} className="flex flex-col gap-(--rapo-dimension-x3) min-[1040px]:gap-0">
+              {i > 0 && <RapoDivider className="min-[1040px]:hidden" />}
+              <RapoJobRow job={j} variant="home" 표 />
             </li>
           ))}
         </ul>

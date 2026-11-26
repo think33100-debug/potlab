@@ -85,9 +85,12 @@ export function RapoGuestPreview({ 갈래, 셈 }: { 갈래: 맛보기갈래; 셈
       </section>
 
       {/* 가입 권유 카드는 흐린 줄 위로 **흐름 안에서** 끌어올립니다(-mt). 절대 위치로 두면 글이 길어질 때 카드가 칸 밖으로 잘렸습니다(360 폭) */}
-      <section aria-labelledby="rapo-guest-preview" className="relative px-(--rapo-dimension-x5) pb-(--rapo-dimension-x6)">
+      {/* PC(1040↑) — 피그마 「커뮤니티 · 비회원 / PC 1040」(1930:1765): 왼쪽 흐린 줄 · 오른쪽 가입 카드 두 칸(346 : 394 · 사이 20) */}
+      <section aria-labelledby="rapo-guest-preview"
+        className="relative px-(--rapo-dimension-x5) pb-(--rapo-dimension-x6)
+                   min-[1040px]:grid min-[1040px]:grid-cols-[minmax(0,346fr)_minmax(0,394fr)] min-[1040px]:items-start min-[1040px]:gap-x-(--rapo-dimension-x5)">
         {/* 흐린 견본 줄 — 읽는 도구에는 숨기고, 누를 수 없습니다 */}
-        <ul aria-hidden className="pointer-events-none flex select-none flex-col blur-[4px]">
+        <ul aria-hidden className="pointer-events-none flex select-none flex-col blur-[4px] min-[1040px]:[mask-image:linear-gradient(to_bottom,#000_55%,transparent)]">
           {c.줄.map((j, i) => (
             <li key={i}>
               <RapoDivider />
@@ -99,9 +102,9 @@ export function RapoGuestPreview({ 갈래, 셈 }: { 갈래: 맛보기갈래; 셈
             </li>
           ))}
         </ul>
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-linear-to-b from-transparent from-30% to-(--rapo-color-bg-layer-default)" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-linear-to-b from-transparent from-30% to-(--rapo-color-bg-layer-default) min-[1040px]:hidden" />
 
-        <div className="relative -mt-[256px] flex flex-col gap-(--rapo-dimension-x3)
+        <div className="relative -mt-[256px] flex flex-col gap-(--rapo-dimension-x3) min-[1040px]:mt-0
                         rounded-(--rapo-radius-r4) bg-(--rapo-color-bg-layer-default) p-(--rapo-dimension-x6) text-center shadow-(--rapo-shadow-s2)">
           <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-brand-contrast)">{c.권유}</p>
           <h2 id="rapo-guest-preview" className="rapo-type-t8-bold whitespace-pre-line break-keep text-(color:--rapo-color-fg-neutral)">{c.가입말}</h2>

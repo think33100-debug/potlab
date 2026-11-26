@@ -53,14 +53,38 @@ export function RapoToolkit() {
   return (
     <div data-rapo className="mx-auto min-h-dvh w-full max-w-3xl bg-(--rapo-color-bg-layer-default)">
       <Hit kind="other" target="toolkit" />
-      <RapoEduTop title="라포 올인원 툴킷" art="/rapo/home/toolkit.svg" />
-      <main className="flex flex-col gap-(--rapo-dimension-x8) px-(--rapo-dimension-x5) pb-(--rapo-dimension-x8) pt-(--rapo-dimension-x2)">
+      {/* PC(1040↑)는 위쪽 탐색이 있어 뒤로 줄 대신 회색 띠의 소개 카드가 제목입니다 (피그마 「툴킷 · 회원 / PC 1040」 1930:1808) */}
+      <div className="min-[1040px]:hidden"><RapoEduTop title="라포 올인원 툴킷" art="/rapo/home/toolkit.svg" /></div>
+      <main className="flex flex-col gap-(--rapo-dimension-x8) px-(--rapo-dimension-x5) pb-(--rapo-dimension-x8) pt-(--rapo-dimension-x2) min-[1040px]:pt-0">
         {/* 맨 위 — 홈 「라포 더 둘러보기」의 여섯 칸 틀 그대로 (2026-11-14 세중님 「미리 만들어 둔 저 틀을 넣자」) */}
         {/* 회색 틀 안쪽 여백 12 → 8 (2026-11-16 · 이 틀 때문에 칸이 홈보다 좁아 「입사 스펙 비교」가 두 줄이 됐습니다.
             재 보니 글 폭 81px · 360 폭에서 칸 글자리 86px · 344 폭에서 78px(t3 76px) — components/rapo/home-u01.tsx RapoServiceGrid) */}
-        <section aria-label="서비스 바로 가기" className="rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x2)">
+        {/* PC — 기둥 끝까지 닿는 회색 띠 · 위아래 24 · 좌우 20 · 소개 카드(블러시 · 높이 128) 아래 여섯 칸 세 줄 */}
+        <section aria-label="서비스 바로 가기"
+          className="flex flex-col gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x2)
+                     min-[1040px]:-mx-(--rapo-dimension-x5) min-[1040px]:rounded-none min-[1040px]:px-(--rapo-dimension-x5) min-[1040px]:py-(--rapo-dimension-x6)">
+          <div className="hidden min-h-[128px] items-center gap-(--rapo-dimension-x3) rounded-(--rapo-radius-r3) bg-(--rapo-brand-color-blush) p-(--rapo-dimension-x4) min-[1040px]:flex">
+            <div className="flex min-w-0 flex-1 flex-col gap-(--rapo-dimension-x1)">
+              <h1 className="rapo-type-t6-bold text-(color:--rapo-brand-color-navy)">라포 올인원 툴킷</h1>
+              <p className="rapo-type-t3-regular text-(color:--rapo-color-fg-neutral-muted)">입사 준비부터 배움과 생활 정보까지<br />필요한 도구를 한곳에서 찾아보세요</p>
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG 그대로 */}
+            <img src="/rapo/home/toolkit.svg" alt="" width={96} height={96} className="size-[96px] shrink-0" />
+          </div>
           <RapoServiceGrid />
         </section>
+
+        {/* PC — 왼쪽 목차(폭 180 · 칸 사이 48) + 오른쪽 묶음. 1039 이하는 목차 없이 위에서 아래로 */}
+        <div className="flex flex-col gap-(--rapo-dimension-x8) min-[1040px]:grid min-[1040px]:grid-cols-[180px_minmax(0,1fr)] min-[1040px]:items-start">
+        <nav aria-label="툴킷 목차" className="sticky top-(--rapo-dimension-x4) hidden flex-col pl-(--rapo-dimension-x3) pt-(--rapo-dimension-x4) min-[1040px]:flex">
+          {[...묶음들.map((m) => ({ id: m.id, 제목: m.제목 })), { id: 'notify', 제목: '알림 받기' }].map((m) => (
+            <a key={m.id} href={'#' + m.id}
+              className="rapo-type-t5-bold flex h-(--rapo-dimension-x12) items-center text-(color:--rapo-brand-color-navy) hover:text-(color:--rapo-color-fg-brand-contrast)">
+              {m.제목}
+            </a>
+          ))}
+        </nav>
+        <div className="flex min-w-0 flex-col gap-(--rapo-dimension-x8)">
 
         {묶음들.map((m) => (
           <section key={m.id} id={m.id} aria-labelledby={'toolkit-' + m.id} className="flex scroll-mt-(--rapo-dimension-x4) flex-col gap-(--rapo-dimension-x1)">
@@ -102,6 +126,8 @@ export function RapoToolkit() {
             알림 고르기
           </Link>
         </section>
+        </div>
+        </div>
       </main>
       <div aria-hidden style={{ height: 'calc(73px + env(safe-area-inset-bottom))' }} />
       <RapoBottomNav current="/toolkit" />

@@ -222,15 +222,15 @@ function StartHere() {
     <section aria-labelledby="rapo-home-start" className="flex flex-col gap-(--rapo-dimension-x4) py-(--rapo-dimension-x6)">
       <div className="flex items-end justify-between gap-(--rapo-dimension-x3) px-(--rapo-dimension-x5)">
         <RapoSectionTitle id="rapo-home-start">라포에서 시작하기</RapoSectionTitle>
-        <span className="rapo-type-t3-regular shrink-0 whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted)">옆으로 넘겨 보세요 ›</span>
+        <span className="rapo-type-t3-regular shrink-0 whitespace-nowrap text-(color:--rapo-color-fg-neutral-muted) min-[1040px]:hidden">옆으로 넘겨 보세요 ›</span>
       </div>
       {/* 마우스 기기에는 양옆에 흰 화살표가 뜹니다 (rapo-start-scroller.tsx · 2026-11-18) */}
       <RapoStartScroller className="flex snap-x snap-mandatory gap-(--rapo-dimension-x3) overflow-x-auto scroll-px-(--rapo-dimension-x5) px-(--rapo-dimension-x5)
                      [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {시작카드들.map((c) => (
-          <li key={c.href} className="w-[44%] min-w-[150px] max-w-[200px] shrink-0 snap-start">
+          <li key={c.href} className="w-[44%] min-w-[150px] max-w-[200px] shrink-0 snap-start min-[1040px]:w-auto min-[1040px]:max-w-none min-[1040px]:flex-1 min-[1040px]:shrink">
             <Link href={c.href}
-              className={`relative flex h-[216px] flex-col gap-(--rapo-dimension-x1_5) overflow-hidden rounded-(--rapo-radius-r3) p-(--rapo-dimension-x4) ${c.bg} ${c.눌림}`}>
+              className={`relative flex h-[216px] min-[1040px]:h-[208px] flex-col gap-(--rapo-dimension-x1_5) overflow-hidden rounded-(--rapo-radius-r3) p-(--rapo-dimension-x4) ${c.bg} ${c.눌림}`}>
               <span className={`rapo-type-t6-bold break-keep ${c.글색}`}>{c.제목}</span>
               <span className={`text-[12px] leading-[17px] ${c.글색}`}>
                 <span className="block">{c.설명[0]}</span>
@@ -305,7 +305,7 @@ const 서비스 = [
 /* 여섯 서비스 두 줄 틀 — 홈 「라포 더 둘러보기」와 툴킷 화면이 같이 씁니다 (2026-11-14 세중님 「미리 만들어 둔 저 틀을 넣자」) */
 export function RapoServiceGrid() {
   return (
-     <ul className="grid grid-cols-2 gap-x-(--rapo-dimension-x3) gap-y-(--rapo-dimension-x2)">
+     <ul className="grid grid-cols-2 gap-x-(--rapo-dimension-x3) gap-y-(--rapo-dimension-x2) min-[1040px]:grid-cols-3">
           {서비스.map((s) => (
             <li key={s.href}>
               <Link href={s.href}
