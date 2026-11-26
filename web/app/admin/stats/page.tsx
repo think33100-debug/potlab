@@ -19,13 +19,21 @@ import { AdminMetricCard, AdminSection, 관 } from '@/components/rapo/rapo-admin
    ★ 2026-11-19 새 디자인 「통계 · PC UI」 1406:720 으로 다시 그렸습니다 (「지표도 더 넣자」).
      원본 칸 가운데 **우리 DB 가 아직 못 세는 것은 지어내지 않고** 셀 수 있는 것으로 바꿨습니다 —
        평균 체류 시간        → 재방문 근사치 (머문 시간은 기록하지 않습니다)
-       가입 이탈률 일별 추이  → 화면 조회 일별 추이 (가입 셈은 1일·7일 묶음만 있습니다)
        가입 퍼널 5단계       → 로그인 → 가입 완료 2단계 (약관·근무 경험·정보 입력 단계 기록이 없습니다)
        방문자 구성           → 회원 구성 (방문자는 직군을 모릅니다 · 회원 기준)
        공유 유입·커뮤니티 경로 → 화면별 조회 · 기기 (어디서 왔는지는 기록하지 않습니다)
      더한 것 — 커뮤니티 방문 수 · 광고 배너 클릭 수 · 1층 기관 커버리지(커버리지()) ·
        수집 신뢰 셋(admin_네숫자() — 아직 DB 에 없으면 그 칸만 빠집니다 · RAPO노트/SQL_1119/관리자_수집지표.sql)
-     모든 숫자 옆에 분모와 날짜(기간)를 적습니다. */
+     모든 숫자 옆에 분모와 날짜(기간)를 적습니다.
+
+   ★ 2026-11-27 세중님 「날짜 선택이 안 된다 · 월별 일별 연별 · 기간 선택 · 하루에 몇 명 들어오나 ·
+     회원별 조회에 라포툴킷도 · 학생 임상가들 다르게 움직이나」
+     기간 — 최근 1일 · 7일 · 30일 · 직접(시작~끝) · 묶음 — 일별 · 월별 · 연별.
+     기간을 따르는 숫자는 DB admin_stats_period() 한 자리가 셉니다 (RAPO노트/SQL_261127/통계_기간_회원갈래.sql).
+     ★ 자가 바뀌었습니다 — 전 「방문자 수」는 본 자리마다 따로 센 키라 한 사람이 공고 다섯을 보면 다섯이었습니다
+       (11/19~26 에 목록 화면 키의 약 2배). 이제 「방문 기기」는 본 자리를 뺀 사람키(11/27 부터)로 세고,
+       그 전 날은 목록 화면을 연 기기 수로 어림합니다. 회원은 회원방문일(아이디)로 정확히 셉니다.
+     회원 갈래(학생·현직·비회원)별 화면 조회는 11/27 부터 쌓입니다 — 그 전 기록에는 갈래가 없습니다. */
 
 type 가입칸 = { started: number; done: number };
 type Now = {
@@ -39,20 +47,34 @@ type Now = {
   notify_on: number; orgs: number;
   signup?: { d1: 가입칸; d7: 가입칸 };
 };
-type Daily = { day: string; visits: number; views: number; admin_visits: number };
-type Screen = { kind: string; views: number; visits: number };
-type Device = { device: string; visits: number; views: number };
 type TopJob = { id: string; title: string; org_name: string; views: number; outs: number };
 type TopPost = { id: number; title: string; channel: string; views: number };
 type Share = { day: string; shares: number; copies: number };
 type Ad = { 자리: string; 이름: string; 켜짐: boolean; 오늘봄: number; 오늘누름: number; 다봄: number; 다누름: number };
 type Cover = { 갈래: string; 대상: number; 들어온곳: number; 퍼센트: number; 분모인가: boolean; 어떻게: string };
 
+type 단위 = 'day' | 'month' | 'year';
+type 기간칸 = 1 | 7 | 30 | '직접';
+type 묶음줄 = { at: string; visits: number; views: number; members: number; member_days: number; exact: boolean };
+type Period = {
+  from: string; to: string; unit: 단위; 사람키시작: string | null; who_since: string | null;
+  series: 묶음줄[];
+  total: { visits: number; views: number; members: number; member_days: number };
+  screens: { screen: string; views: number; visits: number }[];
+  devices: { device: string; views: number; visits: number }[];
+  who: { who: string; screen: string; views: number; visits: number }[];
+};
+
 const SCREEN_NAME: Record<string, string> = {
   home: '홈', jobs: '공고 목록', job: '공고 상세',
   community: '커뮤니티', post: '글 상세',
   orgs: '병원정보 찾기', org: '기관 상세', other: '그 밖에',
+  toolkit: '툴킷',
+  'tool:tools/pay': '툴킷 · 실수령액', 'tool:tools/severance': '툴킷 · 퇴직금',
+  'tool:tools/leave': '툴킷 · 연차', 'tool:tools-unemployment': '툴킷 · 실업급여',
+  'tool:tools': '툴킷 · 옛 도구 목록',
 };
+const 화면이름 = (k: string) => SCREEN_NAME[k] ?? (k.startsWith('tool:') ? `툴킷 · ${k.slice(5)}` : k);
 
 /* 기기는 2026-09-23 부터 담습니다. 그 전 자료에는 가릴 근거가 없습니다 */
 const DEVICE_NAME: Record<string, string> = {
@@ -63,51 +85,53 @@ const PROVIDER_NAME: Record<string, string> = {
   kakao: '카카오', 'custom:naver': '네이버', apple: '애플', email: '이메일',
 };
 
+const 갈래차례 = ['학생', '현직', '비회원', '미정'] as const;
+const 갈래말: Record<string, string> = { 학생: '학생', 현직: '현직(임상가)', 비회원: '비회원', 미정: '가입 덜 함' };
+
 const 수 = (n: number | null | undefined) => Number(n ?? 0).toLocaleString('ko-KR');
 const 점날 = (s: string) => s.slice(5).replace('-', '.');
+/* 기록 첫날 — 이 앞은 고를 수 없습니다 */
+const 첫날 = '2026-09-19';
+const 오늘날 = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
+const 날더하기 = (s: string, n: number) => {
+  const d = new Date(`${s}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+const 날차 = (a: string, b: string) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86_400_000);
+/* 묶음 이름 — 2026-11-27 · 2026-11 · 2026 */
+const 묶음말 = (at: string, u: 단위) =>
+  u === 'day' ? `${Number(at.slice(5, 7))}.${Number(at.slice(8, 10))}` : u === 'month' ? `${at.slice(0, 4)}.${at.slice(5, 7)}` : `${at}년`;
 
 export default function AdminStats() {
-  const [기간, set기간] = useState<1 | 7>(7);
+  const [오늘] = useState(오늘날);
+  const [고름, set고름] = useState<기간칸>(7);
+  const [직접, set직접] = useState({ from: 날더하기(오늘날(), -29), to: 오늘날() });
+  const [단위, set단위] = useState<단위>('day');
+  const 범위 = 고름 === '직접' ? 직접 : { from: 날더하기(오늘, -(고름 - 1)), to: 오늘 };
+
   const [now, setNow] = useState<Now | null>(null);
-  const [daily, setDaily] = useState<Daily[] | null>(null);
-  const [screens, setScreens] = useState<Screen[] | null>(null);
-  const [screens1, setScreens1] = useState<Screen[] | null>(null);
-  const [jobs, setJobs] = useState<TopJob[] | null>(null);
-  const [posts, setPosts] = useState<TopPost[] | null>(null);
-  const [devices, setDevices] = useState<Device[] | null>(null);
-  const [shares, setShares] = useState<Share[] | null>(null);
   const [ads, setAds] = useState<Ad[] | null>(null);
   const [cover, setCover] = useState<Cover[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
-  const fetchAll = useCallback(async () => {
+  const [기간자료, set기간자료] = useState<Period | null>(null);
+  const [기간오류, set기간오류] = useState<string | null>(null);
+  const [jobs, setJobs] = useState<TopJob[] | null>(null);
+  const [posts, setPosts] = useState<TopPost[] | null>(null);
+  const [shares, setShares] = useState<Share[] | null>(null);
+
+  /* 기간과 상관없는 것 — 한 번만 */
+  const fetchFixed = useCallback(async () => {
     const sb = browserSupabase();
-    const [n, d, s, tj, tp, dv] = await Promise.all([
+    const [n, ad, cv] = await Promise.all([
       sb.rpc('admin_stats_now'),
-      sb.rpc('admin_stats_daily', { p_days: 30 }),
-      sb.rpc('admin_stats_screens', { p_days: 7 }),
-      sb.rpc('admin_stats_top_jobs', { p_days: 7, p_limit: 10 }),
-      sb.rpc('admin_stats_top_posts', { p_days: 7, p_limit: 10 }),
-      sb.rpc('admin_stats_devices', { p_days: 7 }),
-    ]);
-    const bad = [n, d, s, tj, tp, dv].find((r) => r.error);
-    /* 2026-11-19 더한 것 — 실패해도 화면 전체를 막지 않고 그 칸만 「못 셌어요」 */
-    const [s1, sh, ad, cv] = await Promise.all([
-      sb.rpc('admin_stats_screens', { p_days: 1 }),
-      sb.rpc('admin_stats_shares', { p_days: 7 }),
       sb.rpc('admin_광고배너'),
       sb.rpc('커버리지'),
     ]);
     return {
-      err: bad?.error?.message ?? null,
+      err: n.error?.message ?? null,
       now: n.data as Now | null,
-      daily: (d.data ?? []) as Daily[],
-      screens: (s.data ?? []) as Screen[],
-      jobs: (tj.data ?? []) as TopJob[],
-      posts: (tp.data ?? []) as TopPost[],
-      devices: (dv.data ?? []) as Device[],
-      screens1: s1.error ? null : (s1.data ?? []) as Screen[],
-      shares: sh.error ? [] : (sh.data ?? []) as Share[],
       ads: ad.error ? [] : (ad.data ?? []) as Ad[],
       cover: cv.error ? [] : (cv.data ?? []) as Cover[],
     };
@@ -115,96 +139,120 @@ export default function AdminStats() {
 
   useEffect(() => {
     let alive = true;
-    fetchAll().then((r) => {
+    fetchFixed().then((r) => {
       if (!alive) return;
-      setErr(r.err); setNow(r.now); setDaily(r.daily);
-      setScreens(r.screens); setJobs(r.jobs); setPosts(r.posts);
-      setDevices(r.devices); setScreens1(r.screens1); setShares(r.shares);
-      setAds(r.ads); setCover(r.cover);
+      setErr(r.err); setNow(r.now); setAds(r.ads); setCover(r.cover);
     });
     return () => { alive = false; };
-  }, [fetchAll]);
+  }, [fetchFixed]);
+
+  /* 기간을 따르는 것 — 고를 때마다.
+     많이 본 공고·글과 공유는 「며칠 전부터 오늘까지」만 받는 옛 창구라 시작일부터 오늘까지로 셉니다 */
+  const { from, to } = 범위;
+  useEffect(() => {
+    let alive = true;
+    const sb = browserSupabase();
+    const 며칠 = Math.max(1, 날차(from, 오늘) + 1);
+    Promise.all([
+      sb.rpc('admin_stats_period', { p_from: from, p_to: to, p_unit: 단위 }),
+      sb.rpc('admin_stats_top_jobs', { p_days: 며칠, p_limit: 10 }),
+      sb.rpc('admin_stats_top_posts', { p_days: 며칠, p_limit: 10 }),
+      sb.rpc('admin_stats_shares', { p_days: Math.min(90, 며칠) }),
+    ]).then(([p, tj, tp, sh]) => {
+      if (!alive) return;
+      set기간오류(p.error ? p.error.message : null);
+      if (!p.error) set기간자료(p.data as Period);
+      setJobs(tj.error ? [] : (tj.data ?? []) as TopJob[]);
+      setPosts(tp.error ? [] : (tp.data ?? []) as TopPost[]);
+      setShares(sh.error ? null : (sh.data ?? []) as Share[]);
+    }, (e: unknown) => { if (alive) set기간오류(String(e)); });
+    return () => { alive = false; };
+  }, [from, to, 단위, 오늘]);
 
   if (err) {
     return <p role="alert" className={관.error}>통계를 못 읽었어요 — {err}</p>;
   }
-  if (!now || !daily) return <p className={관.muted}>세는 중…</p>;
+  if (!now) return <p className={관.muted}>세는 중…</p>;
 
-  const today = daily[daily.length - 1];
-  const yday = daily[daily.length - 2];
-  const max = Math.max(1, ...daily.map((d) => d.visits));
-  const sum = (k: keyof Daily) => daily.reduce((a, d) => a + Number(d[k] ?? 0), 0);
+  const 기간말 = `${점날(from)} – ${점날(to)}`;
+  const 끝이오늘 = to === 오늘;
+  const p = 기간자료;
+  const 어림있음 = (p?.series ?? []).some((s) => !s.exact);
 
   /* ── 기간 지표 ── */
-  const 고른날 = daily.slice(-기간);
-  const 방문합 = 고른날.reduce((a, d) => a + Number(d.visits ?? 0), 0);
-  const 기간말 = 고른날.length > 0 ? `${점날(고른날[0].day)} – ${점날(고른날[고른날.length - 1].day)}` : '';
-
-  const 가입 = now.signup ? (기간 === 1 ? now.signup.d1 : now.signup.d7) : null;
+  const 가입 = now.signup ? (고름 === 1 ? now.signup.d1 : now.signup.d7) : null;
   const 시작 = 가입 ? Number(가입.started) : null;
   const 못마침 = 가입 ? Number(가입.started) - Number(가입.done) : 0;
   const 이탈 = 시작 == null ? null : 시작 === 0 ? '—' : String(Math.round((못마침 / 시작) * 100));
 
-  const 공유날 = (shares ?? []).slice(-기간);
+  const 공유날 = (shares ?? []).filter((d) => d.day >= from && d.day <= to);
   const 공유합 = 공유날.reduce((a, d) => a + Number(d.shares ?? 0) + Number(d.copies ?? 0), 0);
 
-  const 커뮤 = (기간 === 1 ? screens1 : screens)?.find((s) => s.kind === 'community') ?? null;
-  const 커뮤방문 = (기간 === 1 ? screens1 : screens) == null ? null : Number(커뮤?.visits ?? 0);
+  const 커뮤 = p?.screens.find((s) => s.screen === 'community') ?? null;
 
-  const 배너봄 = (ads ?? []).reduce((a, o) => a + Number(기간 === 1 ? o.오늘봄 : o.다봄), 0);
-  const 배너누름 = (ads ?? []).reduce((a, o) => a + Number(기간 === 1 ? o.오늘누름 : o.다누름), 0);
+  const 하루 = 고름 === 1;
+  const 배너봄 = (ads ?? []).reduce((a, o) => a + Number(하루 ? o.오늘봄 : o.다봄), 0);
+  const 배너누름 = (ads ?? []).reduce((a, o) => a + Number(하루 ? o.오늘누름 : o.다누름), 0);
 
-  /* ── 추이(최근 7일) ── */
-  const 칠일 = daily.slice(-7);
-  const 공유칠일 = (shares ?? []).slice(-7);
+  const 작은추이 = (p?.series ?? []).slice(-14);
 
   return (
     <div className="max-w-[932px]">
       <RapoAdminHeader title="통계">
-        <기간고르기 기간={기간} set기간={set기간} 기간말={기간말} />
+        <div className="flex flex-col items-start gap-[8px]">
+          <기간고르기 고름={고름} set고름={set고름} 직접={직접} set직접={set직접} 오늘={오늘} 기간말={기간말} />
+          <CSV단추 받기={() => 통계CSV({ from, to, now, ads, cover, jobs, posts, shares })} />
+        </div>
       </RapoAdminHeader>
 
-      {/* ── 주요 지표 (원본 6칸) ── */}
+      {기간오류 && <p role="alert" className={관.error}>기간 숫자를 못 읽었어요 — {기간오류}</p>}
+
+      {/* ── 주요 지표 ── */}
       <AdminSection id="stats-main" title="주요 지표" sub={`${기간말} · 한국 시각 · 관리자 제외`}>
         <div className="grid gap-[12px] sm:grid-cols-2 lg:grid-cols-3">
-          <AdminMetricCard 그림="/rapo/admin/metric-visitors.svg" 이름="방문자 수"
-            값={수(방문합)} 단위="명"
-            설명={기간 === 1 ? '오늘 방문자 · 같은 분이 폰·PC로 보면 2로 세요' : '날마다 센 방문자의 합 · 이틀 오면 두 번 세요'}
-            그래프={칠일.length > 1 ? <작은꺾은선 값들={칠일.map((d) => Number(d.visits ?? 0))} /> : null} />
+          <AdminMetricCard 그림="/rapo/admin/metric-visitors.svg" 이름="방문 기기"
+            값={p ? 수(p.total.visits) : null} 단위="대"
+            빈말={p ? undefined : '세는 중'}
+            설명={`날마다 센 기기의 합 · 이틀 오면 두 번 세요${어림있음 ? ' · 11/27 전 날은 목록 화면을 연 기기로 어림' : ''}`}
+            그래프={작은추이.length > 1 ? <작은꺾은선 값들={작은추이.map((d) => Number(d.visits ?? 0))} /> : null} />
+          <AdminMetricCard 그림="/rapo/admin/metric-visitors.svg" 이름="들어온 회원"
+            값={p ? 수(p.total.members) : null} 단위="명"
+            빈말={p ? undefined : '세는 중'}
+            설명={p ? `아이디 기준 · 기간 안 겹침 없이 · 날마다 센 합 ${수(p.total.member_days)}` : '아이디 기준'}
+            그래프={작은추이.length > 1 ? <작은꺾은선 값들={작은추이.map((d) => Number(d.members ?? 0))} /> : null} />
           <AdminMetricCard 그림="/rapo/admin/metric-leave.svg" 이름="가입 이탈률"
             값={이탈 == null || 이탈 === '—' ? (이탈 ?? null) : 이탈} 단위={이탈 && 이탈 !== '—' ? '%' : ''}
             빈말={now.signup ? undefined : '못 셌어요'}
-            설명={시작 == null ? '로그인까지 했는데 가입을 못 마친 비율'
-              : `로그인 ${시작}명 중 ${못마침}명이 못 마침 · 로그인 전에 나간 분은 못 세요`}
+            설명={(시작 == null ? '로그인까지 했는데 가입을 못 마친 비율'
+              : `로그인 ${시작}명 중 ${못마침}명이 못 마침 · 로그인 전에 나간 분은 못 세요`)
+              + (고름 === 1 ? '' : ' · 가입 셈은 오늘·최근 7일만 있어 최근 7일로 보여요')}
             그래프={시작 ? <비율막대 비율={못마침 / 시작} /> : null} />
           <AdminMetricCard 그림="/rapo/admin/metric-share.svg" 이름="공유 버튼 클릭 수"
             값={shares == null ? null : 수(공유합)} 단위="회"
+            빈말={shares == null ? '못 셌어요' : undefined}
             설명="공유창 + 링크 복사 · 11/19 부터 셈"
-            그래프={공유칠일.length > 1 ? <작은막대 값들={공유칠일.map((d) => Number(d.shares) + Number(d.copies))} /> : null} />
+            그래프={공유날.length > 1 ? <작은막대 값들={공유날.slice(-14).map((d) => Number(d.shares) + Number(d.copies))} /> : null} />
           <RevisitCard />
-          <AdminMetricCard 그림="/rapo/admin/metric-community.svg" 이름="커뮤니티 방문 수"
-            값={커뮤방문 == null ? null : 수(커뮤방문)} 단위="명"
-            빈말={커뮤방문 == null ? '못 셌어요' : undefined}
-            설명={`커뮤니티 목록을 연 사람(날마다 센 합) · 조회 ${수(커뮤?.views)}회`} />
+          <AdminMetricCard 그림="/rapo/admin/metric-community.svg" 이름="커뮤니티 조회 수"
+            값={p ? 수(커뮤?.views) : null} 단위="회"
+            빈말={p ? undefined : '세는 중'}
+            설명="커뮤니티 목록을 연 횟수 · 하루·같은 기기 한 번" />
           <AdminMetricCard 그림="/rapo/admin/metric-ad.svg" 이름="광고 배너 클릭 수"
             값={ads == null ? null : 수(배너누름)} 단위="회"
-            설명={`${기간 === 1 ? '오늘' : '켠 뒤 누적'} · 보인 ${수(배너봄)}회 중`
+            설명={`${하루 ? '오늘' : '켠 뒤 누적(기간과 따로)'} · 보인 ${수(배너봄)}회 중`
               + (배너봄 > 0 ? ` ${((배너누름 / 배너봄) * 100).toFixed(1)}%` : '')
               + ' · 자리별은 오픈 화면 광고에서'} />
         </div>
       </AdminSection>
 
-      {/* ── 추이 ── */}
-      <AdminSection id="stats-trend" title="최근 7일 추이" sub={칠일.length ? `${점날(칠일[0].day)} – ${점날(칠일[칠일.length - 1].day)}` : ''}>
-        <div className="grid gap-[12px] md:grid-cols-3">
-          <추이카드 이름="방문자 수" 단위="명" 값들={칠일.map((d) => Number(d.visits ?? 0))} 날들={칠일.map((d) => d.day)} 꼴="선" />
-          <추이카드 이름="화면 조회 수" 단위="회" 값들={칠일.map((d) => Number(d.views ?? 0))} 날들={칠일.map((d) => d.day)} 꼴="선" />
-          <추이카드 이름="공유 버튼 클릭 수" 단위="회" 값들={공유칠일.map((d) => Number(d.shares) + Number(d.copies))} 날들={공유칠일.map((d) => d.day)} 꼴="막대" />
-        </div>
-      </AdminSection>
+      {/* ── 방문 추이 — 하루(달·해)마다 몇 명 ── */}
+      <방문추이 p={p} 단위={단위} set단위={set단위} 끝이오늘={끝이오늘} 기간말={기간말} />
+
+      {/* ── 회원 갈래별 ── */}
+      <갈래별 p={p} 기간말={기간말} />
 
       {/* ── 가입 ── */}
-      <AdminSection id="stats-signup" title="가입 흐름" sub="로그인 → 가입 완료 · 30분 안 계정은 하는 중이라 뺍니다">
+      <AdminSection id="stats-signup" title="가입 흐름" sub="로그인 → 가입 완료 · 30분 안 계정은 하는 중이라 뺍니다 · 기간 고르기와 따로">
         <div className={관.card}>
           {!now.signup ? <p className={관.muted}>못 셌어요</p> : (
             <div className="grid gap-[20px] sm:grid-cols-2">
@@ -237,57 +285,26 @@ export default function AdminStats() {
       </AdminSection>
 
       {/* ── 화면별 · 기기 ── */}
-      <AdminSection id="stats-screens" title="어디를 보나" sub="최근 7일 · 조회는 하루·같은 사람·같은 화면 한 번">
+      <AdminSection id="stats-screens" title="어디를 보나" sub={`${기간말} · 조회는 하루·같은 기기·같은 화면 한 번`}>
         <div className="grid gap-[12px] md:grid-cols-2">
           <div className={관.card}>
             <p className={관.h3 + ' mb-[14px]'}>화면별 조회</p>
-            {!screens || screens.length === 0 ? <p className={관.muted}>아직 기록이 없어요</p> : (
-              <가로막대들 줄들={screens.map((s) => ({ 이름: SCREEN_NAME[s.kind] ?? s.kind, n: Number(s.views), 덧: `방문 ${수(s.visits)}` }))} 단위="회" />
+            {!p ? <p className={관.muted}>세는 중…</p> : p.screens.length === 0 ? <p className={관.muted}>아직 기록이 없어요</p> : (
+              <가로막대들 줄들={p.screens.map((s) => ({ 이름: 화면이름(s.screen), n: Number(s.views) }))} 단위="회" />
             )}
+            <p className={관.sub + ' mt-[14px]'}>툴킷은 첫 화면(툴킷)과 도구별(실수령액·퇴직금·연차·실업급여)로 나눠 세요</p>
           </div>
           <div className={관.card}>
             <p className={관.h3 + ' mb-[14px]'}>피시 · 휴대폰</p>
-            {!devices || devices.length === 0 ? <p className={관.muted}>아직 기록이 없어요</p> : (() => {
-              const all = devices.reduce((a, x) => a + Number(x.visits), 0) || 1;
-              return <가로막대들 줄들={devices.map((d) => ({
-                이름: DEVICE_NAME[d.device] ?? d.device, n: Number(d.visits),
-                덧: `${Math.round((Number(d.visits) / all) * 100)}% · 조회 ${수(d.views)}` }))} 단위="명" />;
+            {!p ? <p className={관.muted}>세는 중…</p> : p.devices.length === 0 ? <p className={관.muted}>아직 기록이 없어요</p> : (() => {
+              const all = p.devices.reduce((a, x) => a + Number(x.views), 0) || 1;
+              return <가로막대들 줄들={p.devices.map((d) => ({
+                이름: DEVICE_NAME[d.device] ?? d.device, n: Number(d.views),
+                덧: `${Math.round((Number(d.views) / all) * 100)}%` }))} 단위="회" />;
             })()}
             <p className={관.sub + ' mt-[14px]'}>
-              기기는 2026-09-23 부터 담습니다. 그 전은 「2026-09-23 이전」으로 묶여요. 태블릿은 휴대폰 쪽으로 셉니다
+              화면 조회 수로 나눠요. 기기는 2026-09-23 부터 담습니다. 그 전은 「2026-09-23 이전」으로 묶여요. 태블릿은 휴대폰 쪽으로 셉니다
             </p>
-          </div>
-        </div>
-      </AdminSection>
-
-      {/* ── 30일 ── */}
-      <AdminSection id="stats-30" title="최근 30일 방문"
-        sub={`방문 ${수(sum('visits'))} · 화면 조회 ${수(sum('views'))}${sum('visits') === 0 ? ' · 오늘부터 쌓기 시작했어요' : ''}`}>
-        <div className={관.card}>
-          <div className="flex items-baseline gap-[16px]">
-            <p className="text-[32px] font-bold leading-none tabular-nums text-[#112231]">{수(today?.visits)}<span className="ml-[3px] text-[15px]">명</span></p>
-            {yday && <어제견줌 v={Number(today?.visits ?? 0)} prev={Number(yday.visits)} />}
-          </div>
-          <p className={관.sub + ' mt-[6px]'}>오늘 방문 · 화면 조회 {수(today?.views)}
-            {(today?.admin_visits ?? 0) > 0 && ` · 관리자 방문 ${today.admin_visits}은 뺐어요`}</p>
-          {/* 라이브러리 없이 막대 30개. 값이 적어 이걸로 충분합니다 */}
-          <div className="mt-[16px] flex h-[120px] items-end gap-[3px]" role="img"
-               aria-label={`최근 30일 방문 수. 가장 많은 날 ${max}`}>
-            {daily.map((d, i) => (
-              <div key={d.day} className="group relative flex-1">
-                <div
-                  className={'w-full rounded-t-[3px] transition-colors hover:bg-[#ff4f40] ' + (i === daily.length - 1 ? 'bg-[#223d51]' : 'bg-[#c7d1d9]')}
-                  style={{ height: Math.max(2, (d.visits / max) * 120) }}
-                />
-                <span className="pointer-events-none absolute bottom-full left-1/2 mb-[4px] hidden -translate-x-1/2 whitespace-nowrap rounded-[6px] bg-[#112231] px-[8px] py-[4px] text-[12px] text-white group-hover:block">
-                  {d.day.slice(5)} · {d.visits}
-                </span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-[6px] flex justify-between text-[13px] text-[#555d6d]">
-            <span>{daily[0]?.day.slice(5)}</span>
-            <span>{daily[daily.length - 1]?.day.slice(5)}</span>
           </div>
         </div>
       </AdminSection>
@@ -313,7 +330,7 @@ export default function AdminStats() {
       </AdminSection>
 
       {/* ── 많이 본 공고 ── */}
-      <AdminSection id="stats-topjobs" title="많이 본 공고" sub="최근 7일 · 「열기」는 원문 공고를 누른 수 — 광고 값을 매길 때 제일 단단해요">
+      <AdminSection id="stats-topjobs" title="많이 본 공고" sub={`${점날(from)} – 오늘 · 「열기」는 원문 공고를 누른 수 — 광고 값을 매길 때 제일 단단해요`}>
         {!jobs || jobs.length === 0 ? <p className={관.muted}>아직 기록이 없어요</p> : (
           <div className={관.tableWrap}>
             <table className={관.table + ' min-w-[560px]'}>
@@ -336,7 +353,7 @@ export default function AdminStats() {
       </AdminSection>
 
       {/* ── 많이 본 글 ── */}
-      <AdminSection id="stats-topposts" title="많이 본 글" sub="최근 7일">
+      <AdminSection id="stats-topposts" title="많이 본 글" sub={`${점날(from)} – 오늘`}>
         {!posts || posts.length === 0 ? <p className={관.muted}>아직 기록이 없어요</p> : (
           <div className={관.tableWrap}>
             <table className={관.table + ' min-w-[480px]'}>
@@ -367,24 +384,177 @@ export default function AdminStats() {
 
 /* ─────────────────────────────────────── */
 
-/* 원본 「운영 / 조회 기간」 — 최근 1일 · 최근 7일 + 고른 날짜 */
-function 기간고르기({ 기간, set기간, 기간말 }: { 기간: 1 | 7; set기간: (n: 1 | 7) => void; 기간말: string }) {
+/* 원본 「운영 / 조회 기간」 — 최근 1일 · 7일 · 30일 + 직접(시작~끝) (2026-11-27 세중님 「기간 선택도 있어야」) */
+function 기간고르기({ 고름, set고름, 직접, set직접, 오늘, 기간말 }: {
+  고름: 기간칸; set고름: (n: 기간칸) => void;
+  직접: { from: string; to: string }; set직접: (v: { from: string; to: string }) => void;
+  오늘: string; 기간말: string;
+}) {
+  const 단추 = (on: boolean) => 'rounded-[5px] px-[8px] py-[5px] text-[14px] text-[#112231] ' + (on ? 'bg-[#dde7ee] font-bold' : '');
+  /* 시작이 끝보다 늦으면 다른 쪽을 따라 옮깁니다 — 거꾸로 된 기간을 만들지 않습니다 */
+  const 시작바꿈 = (v: string) => { if (v) set직접({ from: v, to: v > 직접.to ? v : 직접.to }); };
+  const 끝바꿈 = (v: string) => { if (v) set직접({ from: v < 직접.from ? v : 직접.from, to: v }); };
   return (
-    <div role="group" aria-label="조회 기간"
-      className="flex flex-wrap items-center gap-[8px] rounded-[8px] border border-[#dde4e6] bg-white px-[8px] py-[5px]">
-      {([1, 7] as const).map((n) => (
-        <button key={n} type="button" aria-pressed={기간 === n} onClick={() => set기간(n)}
-          className={'rounded-[5px] px-[8px] py-[5px] text-[14px] text-[#112231] ' + (기간 === n ? 'bg-[#dde7ee] font-bold' : '')}>
-          최근 {n}일
+    <div className="flex flex-col items-start gap-[8px]">
+      <div role="group" aria-label="조회 기간"
+        className="flex flex-wrap items-center gap-[6px] rounded-[8px] border border-[#dde4e6] bg-white px-[8px] py-[5px]">
+        {([1, 7, 30] as const).map((n) => (
+          <button key={n} type="button" aria-pressed={고름 === n} onClick={() => set고름(n)} className={단추(고름 === n)}>
+            최근 {n}일
+          </button>
+        ))}
+        <button type="button" aria-pressed={고름 === '직접'} onClick={() => set고름('직접')} className={단추(고름 === '직접')}>
+          기간 고르기
         </button>
-      ))}
-      {기간말 && (
-        <span className="flex items-center gap-[8px] px-[8px] text-[14px] text-[#112231]">
+        <span className="flex items-center gap-[8px] px-[6px] text-[14px] text-[#112231]">
           {/* eslint-disable-next-line @next/next/no-img-element -- Figma 원본 SVG */}
           <img src="/rapo/admin/calendar.svg" alt="" width={16} height={16} />
-          {기간말}
+          <span className="whitespace-nowrap">{기간말}</span>
         </span>
+      </div>
+      {고름 === '직접' && (
+        <div className="flex flex-wrap items-center gap-[8px] text-[14px] text-[#112231]">
+          <label className="flex items-center gap-[6px]">
+            <span>시작</span>
+            <input type="date" value={직접.from} min={첫날} max={오늘} onChange={(e) => 시작바꿈(e.target.value)}
+              className="rounded-[6px] border border-[#dde4e6] bg-white px-[8px] py-[4px] tabular-nums" />
+          </label>
+          <label className="flex items-center gap-[6px]">
+            <span>끝</span>
+            <input type="date" value={직접.to} min={첫날} max={오늘} onChange={(e) => 끝바꿈(e.target.value)}
+              className="rounded-[6px] border border-[#dde4e6] bg-white px-[8px] py-[4px] tabular-nums" />
+          </label>
+          <span className="text-[13px] text-[#555d6d]">기록은 {점날(첫날)}부터 있어요</span>
+        </div>
       )}
+    </div>
+  );
+}
+
+/* ── CSV 내려받기 (2026-11-27 세중님 「csv 도 만들어서 누르면 통계데이터가 싹 다」) ──
+   고른 기간의 통계를 한 파일에 구역별로 담습니다. 엑셀에서 한글이 안 깨지게 BOM 을 붙입니다.
+   일별·월별·연별 추이와 회원 재방문은 누를 때 DB 에 다시 물어 담습니다(화면에 안 펼친 묶음까지).
+   **모두 센 숫자뿐입니다** — 회원 한 명 한 명의 기록이나 회원 번호는 들어가지 않습니다 */
+const csv칸 = (v: unknown) => {
+  const s = v == null ? '' : String(v);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+const csv줄 = (...vs: unknown[]) => vs.map(csv칸).join(',');
+
+async function 통계CSV(c: {
+  from: string; to: string; now: Now; ads: Ad[] | null; cover: Cover[] | null;
+  jobs: TopJob[] | null; posts: TopPost[] | null; shares: Share[] | null;
+}) {
+  const sb = browserSupabase();
+  const [d, m, y, mr] = await Promise.all([
+    sb.rpc('admin_stats_period', { p_from: c.from, p_to: c.to, p_unit: 'day' }),
+    sb.rpc('admin_stats_period', { p_from: c.from, p_to: c.to, p_unit: 'month' }),
+    sb.rpc('admin_stats_period', { p_from: c.from, p_to: c.to, p_unit: 'year' }),
+    sb.rpc('admin_stats_member_revisit', { p_days: 90 }),
+  ]);
+  const err = [d, m, y].find((r) => r.error)?.error;
+  if (err) throw new Error(err.message);
+  const 일 = d.data as Period, 월 = m.data as Period, 연 = y.data as Period;
+  const L: string[] = [];
+  const 구역 = (이름: string, 머리: string[]) => { if (L.length) L.push(''); L.push(csv줄(`[${이름}]`)); L.push(csv줄(...머리)); };
+
+  구역('정보', ['항목', '값']);
+  L.push(csv줄('기간', `${일.from} ~ ${일.to}`));
+  L.push(csv줄('만든 때', new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })));
+  L.push(csv줄('기준', '한국 시각 · 관리자 제외 · 조회는 하루·같은 기기·같은 화면 한 번'));
+  L.push(csv줄('방문 기기', '같은 기기 하루 한 번 · 달·해 묶음은 날마다 센 것의 합 · 「어림」=11/27 전(목록 화면을 연 기기로 어림)'));
+  L.push(csv줄('회원', '아이디 기준 · 달·해 묶음은 그 기간에 한 번이라도 들어온 회원(겹침 없이)'));
+  L.push(csv줄('회원 갈래별', `${일.who_since ?? '아직 없음'} 부터 쌓임`));
+
+  const t = 일.total;
+  const 공유 = (c.shares ?? []).filter((s) => s.day >= c.from && s.day <= c.to);
+  구역('요약', ['항목', '값', '설명']);
+  L.push(csv줄('방문 기기(날마다 센 합)', t.visits, '대'));
+  L.push(csv줄('들어온 회원(겹침 없이)', t.members, '명'));
+  L.push(csv줄('들어온 회원(날마다 센 합)', t.member_days, '명'));
+  L.push(csv줄('화면 조회', t.views, '회'));
+  L.push(csv줄('공유 버튼 클릭', 공유.reduce((a, s) => a + Number(s.shares) + Number(s.copies), 0), '공유창+링크 복사 · 11/19 부터'));
+  if (c.now.signup) {
+    L.push(csv줄('가입 시작(오늘)', c.now.signup.d1.started, '로그인'));
+    L.push(csv줄('가입 완료(오늘)', c.now.signup.d1.done, ''));
+    L.push(csv줄('가입 시작(최근 7일)', c.now.signup.d7.started, '로그인'));
+    L.push(csv줄('가입 완료(최근 7일)', c.now.signup.d7.done, ''));
+  }
+
+  for (const [이름, P] of [['일별', 일], ['월별', 월], ['연별', 연]] as const) {
+    구역(`${이름} 방문`, ['때', '방문 기기', '회원', '회원(날마다 센 합)', '화면 조회', '어림']);
+    for (const s of P.series) L.push(csv줄(s.at, s.visits, s.members, s.member_days, s.views, s.exact ? '' : '어림'));
+  }
+
+  구역('화면별 조회', ['화면', '조회']);
+  for (const s of 일.screens) L.push(csv줄(화면이름(s.screen), s.views));
+
+  구역('기기별 조회', ['기기', '조회']);
+  for (const s of 일.devices) L.push(csv줄(DEVICE_NAME[s.device] ?? s.device, s.views));
+
+  구역('회원 갈래별 화면 조회', ['갈래', '화면', '조회', '그 갈래 안 비율(%)']);
+  const 갈래합: Record<string, number> = {};
+  for (const r of 일.who) 갈래합[r.who] = (갈래합[r.who] ?? 0) + Number(r.views);
+  for (const r of [...일.who].sort((a, b) => a.who.localeCompare(b.who) || Number(b.views) - Number(a.views))) {
+    L.push(csv줄(갈래말[r.who] ?? r.who, 화면이름(r.screen), r.views, Math.round((Number(r.views) / (갈래합[r.who] || 1)) * 1000) / 10));
+  }
+
+  구역(`많이 본 공고 (${c.from} ~ 오늘)`, ['공고명', '기관명', '조회', '열기(원문 누름)', '공고 번호']);
+  for (const j of c.jobs ?? []) L.push(csv줄(j.title, j.org_name, j.views, j.outs, j.id));
+
+  구역(`많이 본 글 (${c.from} ~ 오늘)`, ['글 제목', '게시판', '조회', '글 번호']);
+  for (const p of c.posts ?? []) L.push(csv줄(p.title, channelName(p.channel), p.views, p.id));
+
+  구역('공유 버튼 일별', ['날', '공유창', '링크 복사']);
+  for (const s of 공유) L.push(csv줄(s.day, s.shares, s.copies));
+
+  구역('회원 재방문 (최근 90일 · 아이디 기준)', ['날', '들어온 회원', '처음 온 회원', '7일 안 다시 온 회원', '7일 안 재방문(%)']);
+  if (!mr.error) {
+    for (const r of (mr.data ?? []) as MemberRevisitRow[]) {
+      if (Number(r.visit_members) > 0 || Number(r.new_members) > 0) {
+        L.push(csv줄(r.day, r.visit_members, r.new_members, r.back_members, r.back_pct ?? (Number(r.new_members) > 0 ? '셈 중' : '')));
+      }
+    }
+  }
+
+  구역(`회원 구성 (${c.now.today} 기준)`, ['갈래', '이름', '회원']);
+  for (const [k, n] of Object.entries(c.now.job_groups ?? {})) L.push(csv줄('직군', k, n));
+  for (const [k, n] of Object.entries(c.now.roles ?? {})) L.push(csv줄('사용자 구분', k, n));
+  for (const [k, n] of Object.entries(c.now.providers ?? {})) L.push(csv줄('로그인 수단', PROVIDER_NAME[k] ?? k, n));
+
+  구역(`쌓여 있는 것 (${c.now.today} 기준)`, ['항목', '값']);
+  L.push(csv줄('회원', c.now.members), csv줄('이번 주 가입', c.now.members_week), csv줄('오늘 가입', c.now.members_today),
+    csv줄('올라간 공고', c.now.jobs), csv줄('접수 중 공고', c.now.jobs_open), csv줄('오늘 새 공고', c.now.jobs_today),
+    csv줄('보류함', c.now.jobs_hold), csv줄('기관 자료', c.now.orgs), csv줄('알림 켠 사람', c.now.notify_on),
+    csv줄('커뮤니티 글', c.now.posts), csv줄('댓글', c.now.comments));
+
+  구역('광고 배너 (기간과 따로)', ['자리', '이름', '켜짐', '오늘 보임', '오늘 누름', '누적 보임', '누적 누름']);
+  for (const a of c.ads ?? []) L.push(csv줄(a.자리, a.이름, a.켜짐 ? '켬' : '끔', a.오늘봄, a.오늘누름, a.다봄, a.다누름));
+
+  구역('수집 · 1층 기관 커버리지 (최근 30일)', ['갈래', '대상', '30일 안 들어옴', '비율(%)', '분모에 넣나']);
+  for (const v of c.cover ?? []) L.push(csv줄(v.갈래, v.대상, v.들어온곳, v.퍼센트, v.분모인가 ? '넣음' : `뺌 · ${v.어떻게}`));
+
+  const blob = new Blob(['﻿' + L.join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `RAPO_통계_${일.from}_${일.to}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function CSV단추({ 받기 }: { 받기: () => Promise<void> }) {
+  const [상태, set상태] = useState<'쉼' | '만드는 중' | string>('쉼');
+  return (
+    <div className="flex items-center gap-[8px]">
+      <button type="button" disabled={상태 === '만드는 중'}
+        onClick={() => { set상태('만드는 중'); 받기().then(() => set상태('쉼'), (e: unknown) => set상태(`못 만들었어요 — ${e instanceof Error ? e.message : String(e)}`)); }}
+        className="rounded-[8px] border border-[#304f65] bg-white px-[12px] py-[6px] text-[14px] font-bold text-[#304f65] hover:bg-[#f1f5f8] disabled:opacity-60">
+        {상태 === '만드는 중' ? 'CSV 만드는 중…' : '고른 기간 CSV 내려받기'}
+      </button>
+      {상태 !== '쉼' && 상태 !== '만드는 중' && <span role="alert" className="text-[13px] text-[#b42a21]">{상태}</span>}
     </div>
   );
 }
@@ -418,50 +588,150 @@ function 비율막대({ 비율 }: { 비율: number }) {
   );
 }
 
-/* 원본 「방문자 수 일별 그래프」 300×278 — 진짜 날별 값으로 그립니다 */
-function 추이카드({ 이름, 단위, 값들, 날들, 꼴 }: { 이름: string; 단위: string; 값들: number[]; 날들: string[]; 꼴: '선' | '막대' }) {
-  const W = 260, H = 120;
-  const 큰 = Math.max(1, ...값들);
-  const 위 = Math.max(1, Math.ceil(큰 / 4) * 4);
-  const 마지막 = 값들.length ? 값들[값들.length - 1] : null;
-  const 차 = 값들.length > 1 ? 값들[값들.length - 1] - 값들[0] : null;
-  const x = (i: number) => (값들.length <= 1 ? W / 2 : 8 + (i / (값들.length - 1)) * (W - 16));
-  const y = (v: number) => H - (v / 위) * H;
+/* 방문 추이 — 날(달·해)마다 몇 대·몇 명 (2026-11-27 세중님 「하루에 몇 명 들어오나 · 월별 일별 연별」).
+   전 「최근 30일 방문」 칸을 대신합니다. 그 칸의 큰 숫자는 「오늘 지금까지」였고 기간을 못 골랐습니다 */
+const 단위말: Record<단위, string> = { day: '일별', month: '월별', year: '연별' };
+function 방문추이({ p, 단위, set단위, 끝이오늘, 기간말 }: {
+  p: Period | null; 단위: 단위; set단위: (u: 단위) => void; 끝이오늘: boolean; 기간말: string;
+}) {
+  const 줄 = p?.series ?? [];
+  const 큰 = Math.max(1, ...줄.map((d) => Number(d.visits)));
+  const 마지막 = 줄.length ? 줄[줄.length - 1] : null;
+  const 앞 = 줄.length > 1 ? 줄[줄.length - 2] : null;
+  const 칸이름 = 단위 === 'day' ? '날' : 단위 === 'month' ? '달' : '해';
+  const 앞말 = 단위 === 'day' ? '전날' : 단위 === 'month' ? '전달' : '전해';
+  const 어림 = 줄.some((d) => !d.exact);
   return (
-    <div className={관.card + ' !p-[18px]'}>
-      <div className="flex items-start justify-between gap-[8px]">
-        <div>
-          <p className="text-[16px] font-bold text-[#304f65]">{이름}</p>
-          <p className="mt-[4px] text-[24px] font-bold leading-[30px] text-[#112231] tabular-nums">{마지막 == null ? '—' : `${마지막.toLocaleString('ko-KR')}${단위}`}</p>
+    <AdminSection id="stats-trend" title="방문 추이" sub={`${기간말} · ${단위말[단위]} · 관리자 제외`}>
+      <div className={관.card}>
+        <div role="group" aria-label="묶음 단위" className="mb-[16px] inline-flex gap-[4px] rounded-[8px] border border-[#dde4e6] bg-white p-[3px]">
+          {(['day', 'month', 'year'] as const).map((u) => (
+            <button key={u} type="button" aria-pressed={단위 === u} onClick={() => set단위(u)}
+              className={'rounded-[5px] px-[10px] py-[4px] text-[14px] text-[#112231] ' + (단위 === u ? 'bg-[#dde7ee] font-bold' : '')}>
+              {단위말[u]}
+            </button>
+          ))}
         </div>
-        {차 != null && <p className="mt-[30px] text-[13px] text-[#555d6d]">첫날 대비 {차 >= 0 ? '+' : '−'}{Math.abs(차).toLocaleString('ko-KR')}{단위}</p>}
+        {!p ? <p className={관.muted}>세는 중…</p> : 줄.length === 0 || !마지막 ? <p className={관.muted}>아직 기록이 없어요</p> : (
+          <>
+            <div className="flex flex-wrap items-baseline gap-x-[16px] gap-y-[4px]">
+              <p className="text-[32px] font-bold leading-none tabular-nums text-[#112231]">{수(마지막.visits)}<span className="ml-[3px] text-[15px]">대</span></p>
+              {앞 && <어제견줌 v={Number(마지막.visits)} prev={Number(앞.visits)} 앞말={앞말} 진행중={끝이오늘} />}
+            </div>
+            <p className={관.sub + ' mt-[6px]'}>
+              {끝이오늘 ? (단위 === 'day' ? '오늘(지금까지)' : `${묶음말(마지막.at, 단위)}(지금까지)`) : 묶음말(마지막.at, 단위)} 방문 기기
+              {' · '}회원 {수(마지막.members)}명 · 화면 조회 {수(마지막.views)}
+            </p>
+            {/* 라이브러리 없이 막대. 날이 많으면 막대가 가늘어집니다 */}
+            <div className="mt-[16px] flex h-[120px] items-end gap-[2px]" role="img"
+                 aria-label={`${단위말[단위]} 방문 기기 · ${줄.map((d) => `${묶음말(d.at, 단위)} ${d.visits}`).join(', ')}`}>
+              {줄.map((d, i) => (
+                <div key={d.at} className="group relative min-w-0 flex-1">
+                  <div
+                    className={'w-full rounded-t-[3px] transition-colors hover:bg-[#ff4f40] ' + (i === 줄.length - 1 ? 'bg-[#223d51]' : 'bg-[#c7d1d9]')}
+                    style={{ height: Math.max(2, (Number(d.visits) / 큰) * 120) }}
+                  />
+                  <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-[4px] hidden -translate-x-1/2 whitespace-nowrap rounded-[6px] bg-[#112231] px-[8px] py-[4px] text-[12px] text-white group-hover:block">
+                    {묶음말(d.at, 단위)} · {d.visits}대 · 회원 {d.members}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-[6px] flex justify-between text-[13px] text-[#555d6d]">
+              <span>{묶음말(줄[0].at, 단위)}</span>
+              <span>{묶음말(마지막.at, 단위)}</span>
+            </div>
+            <div className={관.tableWrap + ' mt-[16px] max-h-[360px] overflow-y-auto'}>
+              <table className={관.table + ' min-w-[360px] tabular-nums'}>
+                <thead className={관.thead}>
+                  <tr>
+                    <th className={관.th}>{칸이름}</th>
+                    <th className={관.th + ' text-right'}>방문 기기</th>
+                    <th className={관.th + ' text-right'}>회원</th>
+                    <th className={관.th + ' text-right'}>화면 조회</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...줄].reverse().map((d) => (
+                    <tr key={d.at} className={관.tr}>
+                      <td className={관.td}>{묶음말(d.at, 단위)}{!d.exact && <span className="ml-[4px] text-[12px] text-[#555d6d]">어림</span>}</td>
+                      <td className={관.td + ' text-right font-bold text-[#112231]'}>{수(d.visits)}</td>
+                      <td className={관.td + ' text-right'}>{수(d.members)}</td>
+                      <td className={관.td + ' text-right'}>{수(d.views)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+        <p className={관.sub + ' mt-[14px]'}>
+          방문 기기 — 같은 기기는 하루 한 번 세요(폰·PC 로 보면 둘). 달·해로 묶으면 날마다 센 것을 더해요(이틀 오면 두 번).
+          회원 — 아이디 기준이에요. 달·해로 묶으면 그 기간에 한 번이라도 들어온 회원 수예요(겹침 없이).
+          {어림 && ' 「어림」 표시가 있는 날(11/27 전)은 목록 화면(홈·공고 목록 등)을 연 기기로 어림했어요 — 공고 상세만 바로 연 분은 빠져요. 전에 이 자리의 「방문자 수」는 본 화면마다 따로 세어 실제보다 약 2배 컸어요.'}
+        </p>
       </div>
-      {값들.length === 0 ? <p className={관.muted + ' mt-[16px]'}>아직 기록이 없어요</p> : (
-        <svg viewBox={`-30 -8 ${W + 48} ${H + 30}`} className="mt-[12px] w-full" role="img"
-          aria-label={`${이름} 일별 · ${날들.map((d, i) => `${점날(d)} ${값들[i]}`).join(', ')}`}>
-          {[0, 0.5, 1].map((t) => (
-            <g key={t}>
-              <line x1={0} x2={W} y1={y(위 * t)} y2={y(위 * t)} stroke="#dde4e6" strokeWidth={1} />
-              <text x={-6} y={y(위 * t) + 4} textAnchor="end" fontSize={10} fill="#555d6d">{Math.round(위 * t)}</text>
-            </g>
-          ))}
-          {꼴 === '선' ? (
-            <>
-              <polyline points={값들.map((v, i) => `${x(i)},${y(v)}`).join(' ')} fill="none" stroke="#b42a21" strokeWidth={2} strokeLinejoin="round" />
-              <circle cx={x(0)} cy={y(값들[0])} r={3} fill="#b42a21" />
-              <circle cx={x(값들.length - 1)} cy={y(값들[값들.length - 1])} r={3} fill="#b42a21" />
-            </>
-          ) : 값들.map((v, i) => {
-            const bw = Math.min(22, (W - 16) / 값들.length - 6);
-            return <rect key={i} x={x(i) - bw / 2} y={y(v)} width={bw} height={Math.max(1, H - y(v))} rx={2}
-              fill={i === 값들.length - 1 ? '#223d51' : '#c7d1d9'} />;
-          })}
-          {[0, Math.floor((날들.length - 1) / 2), 날들.length - 1].filter((v, i, a) => a.indexOf(v) === i).map((i) => (
-            <text key={i} x={x(i)} y={H + 18} textAnchor="middle" fontSize={10} fill="#555d6d">{날들[i] ? 점날(날들[i]) : ''}</text>
-          ))}
-        </svg>
+    </AdminSection>
+  );
+}
+
+/* 회원 갈래별로 어디를 보나 (2026-11-27 세중님 「학생 임상가들 다르게 움직이나 · 라포툴킷도」).
+   갈래는 page_hits.회원갈래 — 11/27 부터 쌓입니다. % 는 **그 갈래가 본 화면 가운데** 몇 % 인지라
+   사람 수가 달라도 「어디를 더 보나」를 견줄 수 있습니다 */
+function 갈래별({ p, 기간말 }: { p: Period | null; 기간말: string }) {
+  const 줄 = p?.who ?? [];
+  const 합: Record<string, number> = {};
+  const 화면합: Record<string, number> = {};
+  const 칸: Record<string, number> = {};
+  for (const r of 줄) {
+    합[r.who] = (합[r.who] ?? 0) + Number(r.views);
+    화면합[r.screen] = (화면합[r.screen] ?? 0) + Number(r.views);
+    칸[`${r.who}|${r.screen}`] = Number(r.views);
+  }
+  const 갈래들 = 갈래차례.filter((g) => (합[g] ?? 0) > 0);
+  const 화면들 = Object.keys(화면합).sort((a, b) => 화면합[b] - 화면합[a]);
+  return (
+    <AdminSection id="stats-who" title="회원 갈래별로 어디를 보나" sub={`${기간말} · 화면 조회 · 관리자 제외`}>
+      {!p ? <p className={관.muted}>세는 중…</p> : 갈래들.length === 0 ? (
+        <p className={관.muted}>아직 기록이 없어요 — 11/27 부터 쌓아요</p>
+      ) : (
+        <div className={관.tableWrap}>
+          <table className={관.table + ' min-w-[480px] tabular-nums'}>
+            <thead className={관.thead}>
+              <tr>
+                <th className={관.th}>화면</th>
+                {갈래들.map((g) => <th key={g} className={관.th + ' text-right'}>{갈래말[g]}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {화면들.map((s) => (
+                <tr key={s} className={관.tr}>
+                  <td className={관.tdMain}>{화면이름(s)}</td>
+                  {갈래들.map((g) => {
+                    const n = 칸[`${g}|${s}`] ?? 0;
+                    return (
+                      <td key={g} className={관.td + ' text-right'}>
+                        <b className="text-[#112231]">{수(n)}</b>
+                        <span className="ml-[6px] text-[12px] text-[#555d6d]">{Math.round((n / 합[g]) * 100)}%</span>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+              <tr className={관.tr}>
+                <td className={관.tdMain}>합계</td>
+                {갈래들.map((g) => <td key={g} className={관.td + ' text-right font-bold text-[#112231]'}>{수(합[g])}</td>)}
+              </tr>
+            </tbody>
+          </table>
+        </div>
       )}
-    </div>
+      <p className={관.sub}>
+        % 는 그 갈래가 본 화면 가운데 몇 % 인지예요 — 사람 수가 달라도 학생과 현직이 어디를 더 보는지 견줄 수 있어요.
+        {p?.who_since ? ` ${점날(p.who_since)}부터 쌓기 시작했어요 — 그 전 조회에는 갈래가 없어요.` : ' 11/27 부터 쌓아요 — 그 전 조회에는 갈래가 없어요.'}
+        {' '}「가입 덜 함」은 로그인했지만 학생·현직을 아직 안 고른 분이에요. 관리자가 「학생」 등으로 바꿔 본 화면은 빼요
+      </p>
+    </AdminSection>
   );
 }
 
@@ -541,14 +811,19 @@ function 작은수({ 이름, n, 덧, href }: { 이름: string; n: number; 덧?: 
   return href ? <Link href={href} className={꼴 + ' block hover:border-[#304f65]'}>{안}</Link> : <div className={꼴}>{안}</div>;
 }
 
-function 어제견줌({ v, prev }: { v: number; prev: number }) {
+/* 앞 칸과 견줌. ★ 2026-11-27 — 마지막 칸이 「지금까지」(오늘·이번 달)면 화살표를 안 그립니다.
+   새벽에 「오늘 12 ▼194(−94%) 어제 206」처럼 보여 줄어든 것으로 읽혔습니다 — 하루가 안 끝난 것입니다 */
+function 어제견줌({ v, prev, 앞말 = '어제', 진행중 = false }: { v: number; prev: number; 앞말?: string; 진행중?: boolean }) {
+  if (진행중) {
+    return <p className="text-[14px] text-[#555d6d]">{앞말} {prev.toLocaleString('ko-KR')} · 아직 안 끝나 견주지 않아요</p>;
+  }
   const diff = v - prev;
   const pct = prev ? Math.round((diff / prev) * 100) : null;
   return (
     <p className={'text-[14px] font-bold ' + (diff > 0 ? 'text-[#065a2e]' : diff < 0 ? 'text-[#b42a21]' : 'text-[#555d6d]')}>
-      {diff > 0 ? '▲' : diff < 0 ? '▼' : '='} {Math.abs(diff)}
+      {diff > 0 ? '▲' : diff < 0 ? '▼' : '='} {Math.abs(diff).toLocaleString('ko-KR')}
       {pct != null && ` (${pct > 0 ? '+' : ''}${pct}%)`}
-      <span className="ml-[8px] font-normal text-[#555d6d]">어제 {prev}</span>
+      <span className="ml-[8px] font-normal text-[#555d6d]">{앞말} {prev.toLocaleString('ko-KR')}</span>
     </p>
   );
 }
