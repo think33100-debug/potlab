@@ -409,7 +409,22 @@ function 숫자칸들({ 칸 }: { 칸: 숫자칸[] }) {
 
 /* 「얼마나 바쁜 곳인지」는 일단 뺐습니다 (2026-11-12 저녁 세중님 「일단 빼자」). 계산은 lib/hospital.ts busyWord 에 그대로 있고,
    그리던 조각은 이 파일의 11/12 낮 판(커밋 5fe1f19)에 있습니다 */
-export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false, 보수 = null, 시설 = null, 공고없이 = false }: {
+/* 공립 위탁이란? (2026-11-28 세중님 「나라에서 만든 거지만 운영은 개인? 병원 한눈에 인력표 아래에 넣어줘 · 너가 정리해서」).
+   태그 「공립 위탁」(DB 공고분류() · 기관."운영" 손확인)이 붙은 공고에만 그립니다. 말은 이 한 자리 */
+export const 공립위탁말 = {
+  제목: '공립 위탁이란?',
+  글: '나라나 지자체가 세운 병원이지만, 운영은 민간 법인(의료재단·학교법인 등)이 맡고 있어요. 직원은 운영하는 법인이 뽑기 때문에 급여와 근무 조건도 그 법인이 정해요. 공무원이나 공공기관 직원과는 처우가 달라요.',
+};
+function 공립위탁칸() {
+  return (
+    <div className="flex flex-col gap-(--rapo-dimension-x1) rounded-(--rapo-radius-r2) bg-(--rapo-color-bg-neutral-weak) p-(--rapo-dimension-x3)">
+      <p className="rapo-type-t4-bold text-(color:--rapo-color-fg-neutral)">{공립위탁말.제목}</p>
+      <p className="rapo-type-t3-regular break-keep text-(color:--rapo-color-fg-neutral-muted)">{공립위탁말.글}</p>
+    </div>
+  );
+}
+
+export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false, 보수 = null, 시설 = null, 공고없이 = false, 공립위탁 = false }: {
   치료사: { pt: number | null; ot: number | null; 기준: string | null } | null;
   /* 병원이 아닌 곳 — 복지관 · 치매센터 · 요양원 (2026-11-12 밤 세중님 · 옛 앱 「이 복지관은 이런 곳입니다」) */
   시설?: 시설숫자 | null;
@@ -421,6 +436,8 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
   /* 병원 게시판 「병원 정보」 탭 (2026-11-13) — 이번 공고가 없으니 「이번 공고와 같은 고용형태」 안내 줄을 안 그립니다.
      종류 배지도 안 그립니다(위 「기관 정보」 칸에 종류가 있음) */
   공고없이?: boolean;
+  /* 태그 「공립 위탁」이 붙은 공고 — 인력표 아래에 「공립 위탁이란?」 (2026-11-28) */
+  공립위탁?: boolean;
 }) {
   /* 구분·병상 — 옛 웹 공고 상세의 「종별 · 병상」을 다시 넣습니다 (2026-11-12 세중님 「병상, 구분 이런 것도 넣자」).
      자료는 치료사 인원과 같은 심평원 행(org_hospital_by_name)이라 새 창구가 없습니다. 0·빈 값은 칸을 안 그립니다 */
@@ -430,7 +447,7 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
     { 이름: '재활의학과 전문의', 수: 바쁨.rehab, 단위: '명' },
   ]) : [];
   const 곳 = 시설 ? 시설보임(시설) : null;
-  if (!치료사 && !보수 && 경쟁률.length === 0 && 개요.length === 0 && !구분 && !곳) return null;
+  if (!치료사 && !보수 && 경쟁률.length === 0 && 개요.length === 0 && !구분 && !곳 && !공립위탁) return null;
   const 짧은배 = (n: number | null) => (n == null ? '—' : `${Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}:1`);
   return (
     <RapoDetailSection title={곳 ? '기관 한눈에' : '병원 한눈에'} sub="공개된 자료로 모은 숫자예요">
@@ -481,6 +498,8 @@ export function RapoHospitalFacts({ 치료사, 바쁨, 경쟁률, 인턴 = false
           </p>
         </div>
       )}
+      {/* 인력표 바로 아래 (인력표가 없으면 병상 칸 아래) */}
+      {공립위탁 && <공립위탁칸 />}
       {보수 && <연봉칸 보수={보수} />}
       {/* 이번 공고와 같은 고용형태 자료가 없으면 한 줄로 밝힙니다 (11/12 세중님 — 청년인턴 공고에 공무직·기간제만 보였음) */}
       {!공고없이 && 경쟁률.length > 0 && !경쟁률.some((g) => g.같은형태) && (
