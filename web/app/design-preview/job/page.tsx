@@ -12,14 +12,15 @@ import { AuthPreview } from '@/app/auth';
      ?pay=alimi     공고에 금액 없음 + 공공병원 알리미 공시 (2026-11-14 시안 · 부산의료원 2025 공시 숫자)
      ?pay=alio      공고에 금액 없음 + 알리오 공시 (부산대학교병원 2025 결산 숫자)
      ?pay=nps       공고에 금액 없음 + 국민연금 추정 (2026-11-25 · 지어낸 숫자)
-     ?pay=none      공고에 금액 없음 + 공시도 없음 (지금 모습 그대로) */
+     ?pay=none      공고에 금액 없음 + 공시도 없음 (지금 모습 그대로)
+     ?wt=1          공립 위탁 공고 — 태그 「공립 위탁」 + 병원 한눈에 인력표 아래 「공립 위탁이란?」 (2026-11-28) */
 export const metadata: Metadata = { title: 'RAPO · 공고 상세 미리보기', robots: { index: false } };
 
 export default async function DesignPreviewJob({ searchParams }: {
-  searchParams: Promise<{ who?: string; state?: string; pay?: string }>;
+  searchParams: Promise<{ who?: string; state?: string; pay?: string; wt?: string }>;
 }) {
   if (process.env.NODE_ENV === 'production') notFound();
-  const { who, state, pay } = await searchParams;
+  const { who, state, pay, wt } = await searchParams;
   /* ?pay=below — 공고에 금액이 있고 공시도 있는 공고 (공시는 아래 「병원 한눈에 › 이 병원 연봉」에만) */
   const 보수 = pay === 'alimi' || pay === 'below'
     ? { 출처: '알리미' as const, 공시기관: '부산의료원', 신입초임: 37967000, 평균보수: 68602000, 기준해: 2025, 가입자수: null, 상한근처: false, 보건직평균: 61495000 }
@@ -41,7 +42,7 @@ export default async function DesignPreviewJob({ searchParams }: {
         shareTitle="국립재활원 작업치료사 채용"
         identity={{
           org: '국립재활원', orgArt: '01', 상태: closed ? '모집 마감' : nodate ? '확인 필요' : '접수 중',
-          title: '작업치료사 채용', tags: ['기간제', '휴직대체'], views: 318, 인원: '2명',
+          title: '작업치료사 채용', tags: wt === '1' ? ['공립 위탁', '요양병원', '기간제'] : ['기간제', '휴직대체'], views: 318, 인원: '2명',
           마감: nodate ? '마감일 공고문 확인' : '10.30(금)',
         }}
         pay={pay && pay !== 'below' ? { 값: '내규에 따름', 덧말: null } : { 값: '2,458,000원', 덧말: '2026년 기준 · 원천징수 전 · 제수당 포함\n초과근무수당·명절휴가비 별도' }}
@@ -61,6 +62,7 @@ export default async function DesignPreviewJob({ searchParams }: {
         지원주소="https://example.com/"
         /* 병원 한눈에 (2026-11-12) — 견본 숫자입니다. 실제 화면은 심평원 인원·알리오 경쟁률을 씁니다 */
         치료사={who === 'member' ? { pt: 20, ot: 6, 기준: '2026-09-25' } : null}
+        공립위탁={wt === '1'}
         경쟁률={who === 'member' ? [{
           묶음키: '견본', 고용형태: '기간제', 회차: 8, 첫해: 2019, 끝해: 2026, 평균: 5.9, 가장낮음: 2, 가장높음: 13,
         }] : []}

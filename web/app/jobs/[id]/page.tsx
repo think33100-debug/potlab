@@ -265,6 +265,7 @@ export default async function JobDetail({ params }: { params: Promise<{ id: stri
       비슷한제목말={[j.job_group, j.지역보임?.split(' ')[0]].filter(Boolean).join(' · ') || undefined}
       지원주소={지원.주소}
       치료사={치료사} 바쁨={시설 ? null : 병원숫자} 시설={시설} 경쟁률={경쟁률} 보수={보수}
+      공립위탁={Array.isArray(detail['기관분류']) && (detail['기관분류'] as unknown[]).includes('공립 위탁')}
       지난공고={지난}
       사진={사진 ? { src: 사진주소(사진), alt: 사진.설명, 출처: 출처들(사진) } : null}
       인턴={!!j.is_intern || /인턴/.test(j.employ_type ?? '')}
