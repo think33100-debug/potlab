@@ -46,6 +46,19 @@ type Now = {
   posts: number; posts_today: number; comments: number; comments_today: number;
   notify_on: number; orgs: number;
   signup?: { d1: 가입칸; d7: 가입칸 };
+  people?: People;
+};
+/* 회원 인구 통계 — DB 회원인구통계() (admin_stats_now 안 'people') · 센 숫자만 · 금액은 3명 미만이면 null (2026-11-27) */
+type 셈 = Record<string, number>;
+type People = {
+  기준: { 회원: number; 학생: number; 현직: number; 설문마침: number; 설문줄: number; 연봉줄: number };
+  직군역할: 셈; 가입월: 셈; 학력: 셈; 학적_학생: 셈; 입학연도_학생: 셈; 입사연도_현직: 셈; 근무경험: 셈;
+  학점: { 사람: number; 평균_45환산: number | null };
+  희망유형: 셈; 희망지역: 셈; 관심대상: 셈; 관심분야: 셈; 듣고싶은교육: 셈; 자격: 셈; 교육: 셈; 어학: 셈;
+  성별: 셈; 나이대: 셈;
+  연봉: { 사람: number; 평균: number | null; 가운데: number | null; 실수령_사람: number; 실수령_평균: number | null };
+  연봉_갈래: { 갈래: string; 값: string; 사람: number; 평균: number | null }[];
+  연봉구간_알림신청: 셈;
 };
 type TopJob = { id: string; title: string; org_name: string; views: number; outs: number };
 type TopPost = { id: number; title: string; channel: string; views: number };
@@ -284,6 +297,9 @@ export default function AdminStats() {
         </div>
       </AdminSection>
 
+      {/* ── 회원 인구 통계 (2026-11-27 세중님 「남 여 몇 명 · 연봉 얼마 · 회원가입할 때 적는 거 다」) ── */}
+      {now.people && <회원인구 p={now.people} />}
+
       {/* ── 화면별 · 기기 ── */}
       <AdminSection id="stats-screens" title="어디를 보나" sub={`${기간말} · 조회는 하루·같은 기기·같은 화면 한 번`}>
         <div className="grid gap-[12px] md:grid-cols-2">
@@ -521,6 +537,32 @@ async function 통계CSV(c: {
   for (const [k, n] of Object.entries(c.now.job_groups ?? {})) L.push(csv줄('직군', k, n));
   for (const [k, n] of Object.entries(c.now.roles ?? {})) L.push(csv줄('사용자 구분', k, n));
   for (const [k, n] of Object.entries(c.now.providers ?? {})) L.push(csv줄('로그인 수단', PROVIDER_NAME[k] ?? k, n));
+
+  /* 회원 인구 통계 (2026-11-27) — 금액은 3명 미만이면 비움 */
+  const pp = c.now.people;
+  if (pp) {
+    구역(`회원 인구 통계 · 기준 (${c.now.today} · 운영진·탈퇴 제외)`, ['항목', '값']);
+    L.push(csv줄('회원', pp.기준.회원), csv줄('학생', pp.기준.학생), csv줄('현직', pp.기준.현직),
+      csv줄('가입 설문', pp.기준.설문줄), csv줄('연봉 입력', pp.기준.연봉줄),
+      csv줄('학점 평균(4.5 환산)', pp.학점.평균_45환산 ?? ''), csv줄('학점 적은 사람', pp.학점.사람));
+    구역('회원 인구 통계 · 연봉 (연봉 입력한 회원 · 만 원)', ['항목', '값']);
+    L.push(csv줄('사람', pp.연봉.사람), csv줄('평균 연봉', pp.연봉.평균 ?? '3명 미만 숨김'),
+      csv줄('가운데 연봉', pp.연봉.가운데 ?? '3명 미만 숨김'), csv줄('세후 월 실수령 사람', pp.연봉.실수령_사람),
+      csv줄('세후 월 실수령 평균', pp.연봉.실수령_평균 ?? '3명 미만 숨김'));
+    구역('회원 인구 통계 · 연봉 나눠 보기 (만 원)', ['나눔', '값', '사람', '평균 연봉']);
+    for (const r of pp.연봉_갈래) L.push(csv줄(r.갈래, r.값, r.사람, r.평균 ?? '3명 미만 숨김'));
+    const 분포: [string, Record<string, number>][] = [
+      ['성별(연봉 입력)', pp.성별], ['나이대(연봉 입력)', pp.나이대], ['직군·역할', pp.직군역할], ['가입한 달', pp.가입월],
+      ['학력', pp.학력], ['학적(학생)', pp.학적_학생], ['입학 연도(학생)', pp.입학연도_학생], ['입사 연도(현직)', pp.입사연도_현직],
+      ['근무 경험', pp.근무경험], ['희망 병원 유형', pp.희망유형], ['희망 지역', pp.희망지역], ['관심 대상', pp.관심대상],
+      ['관심 분야(여러 개)', pp.관심분야], ['듣고 싶은 교육(여러 개)', pp.듣고싶은교육], ['자격증(많은 25개)', pp.자격],
+      ['들은 교육(많은 25개)', pp.교육], ['어학', pp.어학], ['연봉 비교 알림 신청 · 연봉 구간', pp.연봉구간_알림신청],
+    ];
+    구역('회원 인구 통계 · 분포', ['칸', '값', '사람']);
+    for (const [칸이름, o] of 분포) {
+      for (const [k, n] of Object.entries(o ?? {}).sort((a, b) => b[1] - a[1])) L.push(csv줄(칸이름, k, n));
+    }
+  }
 
   구역(`쌓여 있는 것 (${c.now.today} 기준)`, ['항목', '값']);
   L.push(csv줄('회원', c.now.members), csv줄('이번 주 가입', c.now.members_week), csv줄('오늘 가입', c.now.members_today),
@@ -771,8 +813,12 @@ function 가로막대들({ 줄들, 단위 }: { 줄들: { 이름: string; n: numb
 }
 
 /* 원본 「구성 비율」 — 제목 · 이름 n명(%) · 막대 */
-function 구성카드({ 제목, data, rename }: { 제목: string; data: Record<string, number>; rename?: Record<string, string> }) {
-  const rows = Object.entries(data ?? {}).sort((a, b) => b[1] - a[1]);
+function 구성카드({ 제목, data, rename, 이름순 = false, 덧 }: {
+  제목: string; data: Record<string, number>; rename?: Record<string, string>;
+  이름순?: boolean;   // 연도·달처럼 이름 차례가 뜻 있는 칸 (2026-11-27)
+  덧?: string;
+}) {
+  const rows = Object.entries(data ?? {}).sort((a, b) => (이름순 ? a[0].localeCompare(b[0]) : b[1] - a[1]));
   const 합계 = rows.reduce((a, [, n]) => a + Number(n), 0) || 1;
   return (
     <div className={관.card}>
@@ -784,8 +830,8 @@ function 구성카드({ 제목, data, rename }: { 제목: string; data: Record<s
             return (
               <li key={k}>
                 <div className="flex items-baseline justify-between gap-[8px] text-[14px]">
-                  <span className="text-[#112231]">{rename?.[k] ?? k}</span>
-                  <span className="tabular-nums text-[#304f65]"><b className="text-[#112231]">{Number(n).toLocaleString('ko-KR')}명</b> ({pct}%)</span>
+                  <span className="min-w-0 break-keep text-[#112231]">{rename?.[k] ?? k}</span>
+                  <span className="shrink-0 whitespace-nowrap tabular-nums text-[#304f65]"><b className="text-[#112231]">{Number(n).toLocaleString('ko-KR')}명</b> ({pct}%)</span>
                 </div>
                 <div className="mt-[4px] h-[8px] overflow-hidden rounded-full bg-[#dde4e6]">
                   <div className={'h-full rounded-full ' + (i === 0 ? 'bg-[#304f65]' : 'bg-[#728394]')} style={{ width: `${pct}%` }} />
@@ -795,7 +841,79 @@ function 구성카드({ 제목, data, rename }: { 제목: string; data: Record<s
           })}
         </ul>
       )}
+      {덧 && <p className={관.sub + ' mt-[12px]'}>{덧}</p>}
     </div>
+  );
+}
+
+/* 회원 인구 통계 (2026-11-27 세중님 「남 여 몇 명 · 연봉 얼마 · 회원가입할 때 적는 거 다 보이게」).
+   지금 회원 기준(기간 고르기와 따로) · 운영진 표시·탈퇴는 뺌 · 한 사람이 여러 번 적었으면 마지막 것.
+   성별·나이·연봉은 가입 때 묻지 않고 **연봉 입력**(급여 비교)에서만 받습니다 — 그래서 사람 수가 적습니다 */
+const 만원 = (v: number | null | undefined) => (v == null ? '3명 미만이라 숨김' : `${Math.round(Number(v)).toLocaleString('ko-KR')}만 원`);
+function 회원인구({ p }: { p: People }) {
+  const b = p.기준;
+  const 연 = p.연봉;
+  const 여럿 = '여러 개 고르는 칸이라 % 는 고른 수 합계 기준이에요';
+  return (
+    <AdminSection id="stats-people" title="회원 인구 통계"
+      sub={`지금 회원 ${수(b.회원)}명 기준(학생 ${수(b.학생)} · 현직 ${수(b.현직)}) · 가입 설문 ${수(b.설문줄)}명 · 연봉 입력 ${수(b.연봉줄)}명 · 운영진·탈퇴 제외 · 기간 고르기와 따로`}>
+      <p className={관.sub}>
+        성별·나이·연봉은 가입 때 묻지 않아요 — 「연봉 입력」을 한 {수(b.연봉줄)}명만 있어요. 남·여를 회원 전체로 보려면 가입 때 성별을 물어야 해요.
+        학력·학적·입학/입사 연도·자격·교육·희망·관심은 가입 설문에서 받은 값이에요
+      </p>
+
+      <div className="grid gap-[12px] md:grid-cols-3">
+        <div className={관.card}>
+          <p className={관.h3 + ' mb-[10px]'}>연봉 (연봉 입력한 회원)</p>
+          <p className="text-[28px] font-bold leading-none tabular-nums text-[#112231]">{만원(연.평균)}</p>
+          <p className={관.sub + ' mt-[6px]'}>평균 · {수(연.사람)}명 · 가운데값 {만원(연.가운데)}</p>
+          <p className={관.sub + ' mt-[4px]'}>세후 월 실수령 평균 {만원(연.실수령_평균)} ({수(연.실수령_사람)}명)</p>
+          <p className={관.sub + ' mt-[4px]'}>연봉구간은 아래 「연봉 비교 알림 신청」에도 있어요</p>
+        </div>
+        <구성카드 제목="성별 (연봉 입력한 회원)" data={p.성별} />
+        <구성카드 제목="나이대 (연봉 입력한 회원)" data={p.나이대} 이름순 />
+      </div>
+
+      {p.연봉_갈래.length > 0 && (
+        <div className={관.tableWrap}>
+          <table className={관.table + ' min-w-[420px] tabular-nums'}>
+            <thead className={관.thead}>
+              <tr><th className={관.th}>나눔</th><th className={관.th}>값</th><th className={관.th + ' text-right'}>사람</th><th className={관.th + ' text-right'}>평균 연봉</th></tr>
+            </thead>
+            <tbody>
+              {p.연봉_갈래.map((r) => (
+                <tr key={`${r.갈래}|${r.값}`} className={관.tr}>
+                  <td className={관.td}>{r.갈래}</td>
+                  <td className={관.tdMain}>{r.값}</td>
+                  <td className={관.td + ' text-right'}>{수(r.사람)}</td>
+                  <td className={관.td + ' text-right font-bold text-[#112231]'}>{r.평균 == null ? <span className="font-normal text-[#555d6d]">3명 미만 숨김</span> : 만원(r.평균)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className="grid gap-[12px] md:grid-cols-3">
+        <구성카드 제목="직군 · 역할" data={p.직군역할} />
+        <구성카드 제목="가입한 달" data={p.가입월} 이름순 />
+        <구성카드 제목="학력" data={p.학력}
+          덧={p.학점.평균_45환산 == null ? undefined : `학점 평균 ${p.학점.평균_45환산} (4.5 만점으로 환산 · ${수(p.학점.사람)}명)`} />
+        <구성카드 제목="학적 (학생)" data={p.학적_학생} />
+        <구성카드 제목="입학 연도 (학생)" data={p.입학연도_학생} 이름순 />
+        <구성카드 제목="입사 연도 (현직)" data={p.입사연도_현직} 이름순 />
+        <구성카드 제목="근무 경험" data={p.근무경험} />
+        <구성카드 제목="희망 병원 유형" data={p.희망유형} />
+        <구성카드 제목="희망 지역" data={p.희망지역} />
+        <구성카드 제목="관심 대상" data={p.관심대상} />
+        <구성카드 제목="관심 분야" data={p.관심분야} 덧={여럿} />
+        <구성카드 제목="듣고 싶은 교육" data={p.듣고싶은교육} 덧={여럿} />
+        <구성카드 제목="자격증 (많은 25개)" data={p.자격} 덧={여럿} />
+        <구성카드 제목="들은 교육 (많은 25개)" data={p.교육} 덧={여럿} />
+        <구성카드 제목="어학" data={p.어학} />
+        <구성카드 제목="연봉 비교 알림 신청 · 연봉 구간" data={p.연봉구간_알림신청} 덧="연봉 비교 알림을 신청할 때 고른 구간이에요 · 연봉 입력과 다른 사람일 수 있어요" />
+      </div>
+    </AdminSection>
   );
 }
 
