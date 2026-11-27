@@ -75,6 +75,17 @@ const 재방문키 = 'revisit';
    ※ DB 쪽 짝: sql/초안_1119/공유_이탈률.sql 의 admin_stats_shares() 가 'sh:%' 를 셉니다 */
 const 공유값 = /^sh:(share|copy):\/[A-Za-z0-9_\-./%?=&]{0,55}$/;
 
+/* ★ 2026-11-27 — 「같은 기기가 하루에 몇 번 오나」 (세중님). page_hits 는 같은 날·같은 화면을 한 번만
+   남겨서 저녁에 다시 와도 줄이 안 생깁니다 → 활동 때를 따로 한 줄씩 남깁니다 (DB 기기활동).
+   담는 것: 사람키(날마다 바뀌는 해시) · 관리자 표시 — 때는 DB 가 now() 로 정합니다(여기서 못 보냄).
+   마지막 활동에서 30분 넘게 떨어지면 새 방문으로 세는 것은 DB admin_stats_period 한 자리입니다.
+   넣는 것: 화면 보기 · 공유 누름 · 숨은 탭을 처음 볼 때('active'). 안 넣는 것: 재방문 근사치(자동 요청) ·
+   숨은 탭에서 저절로 열린 화면(bg) — 실패해도 조회 기록과 응답에는 아무 일 없습니다 */
+async function 활동남기기(사람: string, admin: boolean) {
+  const { error } = await supabase.from('기기활동').insert({ 사람키: 사람, by_admin: admin });
+  if (error) console.error('[RAPO] 활동 기록 실패:', error.message);
+}
+
 function seoulDay(): string {
   /* 한국 날짜로 셉니다. 서버는 UTC 라 그냥 두면 아침 9시에 날이 바뀝니다 */
   return new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 10);
@@ -90,7 +101,7 @@ export async function POST(req: Request) {
   const purpose = req.headers.get('purpose') ?? req.headers.get('sec-purpose') ?? '';
   if (purpose.includes('prefetch')) return NextResponse.json({ ok: true, counted: false });
 
-  let body: { kind?: string; target?: string | null; key?: string; admin?: boolean; who?: string };
+  let body: { kind?: string; target?: string | null; key?: string; admin?: boolean; who?: string; bg?: boolean };
   try {
     body = await req.json();
   } catch {
@@ -125,6 +136,14 @@ export async function POST(req: Request) {
 
   /* ★ 2026-11-19 — 공유 단추 누름 (lib/share-hit.ts). 정해진 꼴만 받아 kind 'other' 로 담고,
      하루번호는 아래 화면 기록과 같은 길(아이피 해시)이라 같은 날 같은 주소·수단은 한 번만 셉니다 */
+  /* ★ 2026-11-27 — 숨은 탭에서 열렸던 화면을 사람이 처음 볼 때 (components/hit.tsx). 조회는 이미 셌으니
+     활동 때만 남깁니다 */
+  if (body.kind === 'active') {
+    const who = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    await 활동남기기(사람키(who, ua, seoulDay()), body.admin === true);
+    return NextResponse.json({ ok: true, counted: false });
+  }
+
   if (body.kind === 'share') {
     const t = typeof body.target === 'string' ? body.target : '';
     if (!공유값.test(t)) return NextResponse.json({ ok: false, counted: false }, { status: 400 });
@@ -147,7 +166,8 @@ export async function POST(req: Request) {
      겹침을 막고, 여기서는 그 23505 를 「이미 셈」으로 받습니다.
      이미 쌓인 겹친 줄은 지우지 않고 세는 함수가 distinct 로 거릅니다(RAPO노트 SQL_1113/ZZH) */
 
-  const { error } = await supabase.from('page_hits').insert({
+  const 사람 = 사람키(who, ua, day);
+  const [{ error }] = await Promise.all([supabase.from('page_hits').insert({
     day,
     kind,
     device: MOBILE.test(ua) ? 'mobile' : 'desktop',
@@ -159,8 +179,8 @@ export async function POST(req: Request) {
        광고 숫자에 우리가 섞이는 것만 막으면 됩니다 */
     by_admin: body.admin === true,
     회원갈래: (갈래들 as readonly string[]).includes(body.who ?? '') ? body.who : null,
-    사람키: 사람키(who, ua, day),
-  });
+    사람키: 사람,
+  }), body.bg === true ? Promise.resolve() : 활동남기기(사람, body.admin === true)]);
 
   if (error) {
     /* 23505 = 하루 한 번 색인에 걸림 — 오늘 이미 센 것입니다(탈이 아님) */
