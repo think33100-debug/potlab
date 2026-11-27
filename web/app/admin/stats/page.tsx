@@ -68,11 +68,15 @@ type Cover = { 갈래: string; 대상: number; 들어온곳: number; 퍼센트: 
 
 type 단위 = 'day' | 'month' | 'year';
 type 기간칸 = 1 | 7 | 30 | '직접';
-type 묶음줄 = { at: string; visits: number; views: number; members: number; member_days: number; exact: boolean };
+/* sessions = 총 방문 횟수(30분 넘게 쉬면 새 방문) · multi = 그날 2회 이상 온 기기 — null 은 「집계 전」 */
+type 묶음줄 = {
+  at: string; visits: number; views: number; members: number; member_days: number; exact: boolean;
+  sessions?: number | null; multi?: number | null;
+};
 type Period = {
-  from: string; to: string; unit: 단위; 사람키시작: string | null; who_since: string | null;
+  from: string; to: string; unit: 단위; 사람키시작: string | null; who_since: string | null; 방문첫날?: string | null;
   series: 묶음줄[];
-  total: { visits: number; views: number; members: number; member_days: number };
+  total: { visits: number; views: number; members: number; member_days: number; sessions?: number | null; multi?: number | null };
   screens: { screen: string; views: number; visits: number }[];
   devices: { device: string; views: number; visits: number }[];
   who: { who: string; screen: string; views: number; visits: number }[];
@@ -102,6 +106,20 @@ const 갈래차례 = ['학생', '현직', '비회원', '미정'] as const;
 const 갈래말: Record<string, string> = { 학생: '학생', 현직: '현직(임상가)', 비회원: '비회원', 미정: '가입 덜 함' };
 
 const 수 = (n: number | null | undefined) => Number(n ?? 0).toLocaleString('ko-KR');
+
+/* ★ 2026-11-27 세중님 「같은 기기가 하루에 몇 번」 — 화면 표와 CSV 가 **이 한 자리**로 셉니다.
+   기기당 평균 = 총 방문 ÷ 순방문 기기(소수 한 자리) · 2회 이상 비율 = 2회 이상 기기 ÷ 순방문 기기.
+   DB 가 null 을 주면(첫 기록 날·그 전·그런 날이 섞인 달/해) 숫자 대신 「집계 전」 */
+const 집계전 = '집계 전';
+function 방문셈(d: { visits: number; sessions?: number | null; multi?: number | null }) {
+  if (d.sessions == null || d.multi == null) return null;
+  const 기기 = Number(d.visits), 회 = Number(d.sessions), 두번 = Number(d.multi);
+  return {
+    회, 두번,
+    평균: 기기 > 0 ? (Math.round((회 / 기기) * 10) / 10).toFixed(1) : '-',
+    비율: 기기 > 0 ? String(Math.round((두번 / 기기) * 1000) / 10) : '-',
+  };
+}
 const 점날 = (s: string) => s.slice(5).replace('-', '.');
 /* 기록 첫날 — 이 앞은 고를 수 없습니다 */
 const 첫날 = '2026-09-19';
@@ -478,14 +496,20 @@ async function 통계CSV(c: {
   L.push(csv줄('기간', `${일.from} ~ ${일.to}`));
   L.push(csv줄('만든 때', new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })));
   L.push(csv줄('기준', '한국 시각 · 관리자 제외 · 조회는 하루·같은 기기·같은 화면 한 번'));
-  L.push(csv줄('방문 기기', '같은 기기 하루 한 번 · 달·해 묶음은 날마다 센 것의 합 · 「어림」=11/27 전(목록 화면을 연 기기로 어림)'));
+  L.push(csv줄('순방문 기기', '같은 기기 하루 한 번 · 달·해 묶음은 날마다 센 것의 합 · 「어림」=11/27 전(목록 화면을 연 기기로 어림)'));
+  L.push(csv줄('총 방문', `같은 기기라도 마지막 활동 뒤 30분 이상 지나 다시 쓰면 새 방문 · 한국 자정에서 끊음 · ${일.방문첫날 ?? '아직 기록 없음'} 부터 셈(그 전은 「집계 전」)`));
+  L.push(csv줄('기기당 평균 방문', '총 방문 ÷ 순방문 기기(소수 한 자리) · 2회 이상 비율 = 2회 이상 방문한 기기 ÷ 순방문 기기 · 달·해 묶음은 날마다 센 것의 합으로 나눔'));
   L.push(csv줄('회원', '아이디 기준 · 달·해 묶음은 그 기간에 한 번이라도 들어온 회원(겹침 없이)'));
   L.push(csv줄('회원 갈래별', `${일.who_since ?? '아직 없음'} 부터 쌓임`));
 
   const t = 일.total;
   const 공유 = (c.shares ?? []).filter((s) => s.day >= c.from && s.day <= c.to);
   구역('요약', ['항목', '값', '설명']);
-  L.push(csv줄('방문 기기(날마다 센 합)', t.visits, '대'));
+  L.push(csv줄('순방문 기기(날마다 센 합)', t.visits, '대'));
+  const 합셈 = 방문셈(t);
+  L.push(csv줄('총 방문', 합셈 ? 합셈.회 : 집계전, '회 · 기간에 집계 전 날이 있으면 「집계 전」'));
+  L.push(csv줄('기기당 평균 방문', 합셈 ? 합셈.평균 : 집계전, '회'));
+  L.push(csv줄('2회 이상 방문한 기기(날마다 센 합)', 합셈 ? 합셈.두번 : 집계전, 합셈 ? `대 · ${합셈.비율}%` : ''));
   L.push(csv줄('들어온 회원(겹침 없이)', t.members, '명'));
   L.push(csv줄('들어온 회원(날마다 센 합)', t.member_days, '명'));
   L.push(csv줄('화면 조회', t.views, '회'));
@@ -498,8 +522,13 @@ async function 통계CSV(c: {
   }
 
   for (const [이름, P] of [['일별', 일], ['월별', 월], ['연별', 연]] as const) {
-    구역(`${이름} 방문`, ['때', '방문 기기', '회원', '회원(날마다 센 합)', '화면 조회', '어림']);
-    for (const s of P.series) L.push(csv줄(s.at, s.visits, s.members, s.member_days, s.views, s.exact ? '' : '어림'));
+    구역(`${이름} 방문`, ['때', '순방문 기기', '총 방문', '기기당 평균 방문', '2회 이상 방문 기기', '2회 이상 비율(%)',
+      '회원', '회원(날마다 센 합)', '화면 조회', '어림']);
+    for (const s of P.series) {
+      const v = 방문셈(s);
+      L.push(csv줄(s.at, s.visits, v ? v.회 : 집계전, v ? v.평균 : 집계전, v ? v.두번 : 집계전, v ? v.비율 : 집계전,
+        s.members, s.member_days, s.views, s.exact ? '' : '어림'));
+    }
   }
 
   구역('화면별 조회', ['화면', '조회']);
@@ -684,31 +713,44 @@ function 방문추이({ p, 단위, set단위, 끝이오늘, 기간말 }: {
               <span>{묶음말(마지막.at, 단위)}</span>
             </div>
             <div className={관.tableWrap + ' mt-[16px] max-h-[360px] overflow-y-auto'}>
-              <table className={관.table + ' min-w-[360px] tabular-nums'}>
+              <table className={관.table + ' min-w-[620px] tabular-nums'}>
                 <thead className={관.thead}>
                   <tr>
                     <th className={관.th}>{칸이름}</th>
-                    <th className={관.th + ' text-right'}>방문 기기</th>
+                    <th className={관.th + ' text-right whitespace-nowrap'}>순방문 기기</th>
+                    <th className={관.th + ' text-right whitespace-nowrap'}>총 방문</th>
+                    <th className={관.th + ' text-right whitespace-nowrap'}>기기당 평균</th>
+                    <th className={관.th + ' text-right whitespace-nowrap'}>2회 이상 방문</th>
                     <th className={관.th + ' text-right'}>회원</th>
-                    <th className={관.th + ' text-right'}>화면 조회</th>
+                    <th className={관.th + ' text-right whitespace-nowrap'}>화면 조회</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[...줄].reverse().map((d) => (
-                    <tr key={d.at} className={관.tr}>
-                      <td className={관.td}>{묶음말(d.at, 단위)}{!d.exact && <span className="ml-[4px] text-[12px] text-[#555d6d]">어림</span>}</td>
-                      <td className={관.td + ' text-right font-bold text-[#112231]'}>{수(d.visits)}</td>
-                      <td className={관.td + ' text-right'}>{수(d.members)}</td>
-                      <td className={관.td + ' text-right'}>{수(d.views)}</td>
-                    </tr>
-                  ))}
+                  {[...줄].reverse().map((d) => {
+                    const v = 방문셈(d);
+                    const 전 = <span className="whitespace-nowrap text-[13px] text-[#555d6d]">{집계전}</span>;
+                    return (
+                      <tr key={d.at} className={관.tr}>
+                        <td className={관.td + ' whitespace-nowrap'}>{묶음말(d.at, 단위)}{!d.exact && <span className="ml-[4px] text-[12px] text-[#555d6d]">어림</span>}</td>
+                        <td className={관.td + ' text-right font-bold text-[#112231]'}>{수(d.visits)}</td>
+                        <td className={관.td + ' text-right'}>{v ? `${수(v.회)}회` : 전}</td>
+                        <td className={관.td + ' text-right'}>{v ? `${v.평균}회` : 전}</td>
+                        <td className={관.td + ' text-right whitespace-nowrap'}>{v ? `${수(v.두번)}대 (${v.비율}%)` : 전}</td>
+                        <td className={관.td + ' text-right'}>{수(d.members)}</td>
+                        <td className={관.td + ' text-right'}>{수(d.views)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           </>
         )}
         <p className={관.sub + ' mt-[14px]'}>
-          방문 기기 — 같은 기기는 하루 한 번 세요(폰·PC 로 보면 둘). 달·해로 묶으면 날마다 센 것을 더해요(이틀 오면 두 번).
+          순방문 기기 — 같은 기기는 하루 한 번 세요(폰·PC 로 보면 둘). 달·해로 묶으면 날마다 센 것을 더해요(이틀 오면 두 번).
+          총 방문 — 같은 기기라도 마지막 활동 뒤 30분 넘게 쉬었다 다시 쓰면 새 방문이에요. 30분 안에 화면을 옮기거나 새로고침·새 탭을 열면 같은 방문이고, 자정이 지나면 새 날의 첫 방문이에요.
+          기기당 평균 = 총 방문 ÷ 순방문 기기 · 2회 이상 방문 = 그날 두 번 넘게 온 기기(괄호는 순방문 기기 가운데 비율).
+          「집계 전」 — 이 셈은 {p?.방문첫날 ? `${묶음말(p.방문첫날, 'day')}부터` : '기록이 쌓인 다음 날부터'} 해요. 그 전 기록으로는 다시 셀 수 없어요(달·해는 그런 날이 섞이면 집계 전).
           회원 — 아이디 기준이에요. 달·해로 묶으면 그 기간에 한 번이라도 들어온 회원 수예요(겹침 없이).
           {어림 && ' 「어림」 표시가 있는 날(11/27 전)은 목록 화면(홈·공고 목록 등)을 연 기기로 어림했어요 — 공고 상세만 바로 연 분은 빠져요. 전에 이 자리의 「방문자 수」는 본 화면마다 따로 세어 실제보다 약 2배 컸어요.'}
         </p>

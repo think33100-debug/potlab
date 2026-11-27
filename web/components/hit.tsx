@@ -24,22 +24,36 @@ export function Hit({
     /* 관리자인지 알아야 숫자에서 뺄 수 있습니다. 알 때까지 기다립니다 */
     if (loading) return;
 
+    /* ★ 2026-11-27 — 숨은 탭(뒤에서 연 탭·브라우저가 되살린 탭)에서 열린 화면은 사람이 아직 안 본 것입니다.
+       조회는 전처럼 세되 「활동」(하루 몇 번 오나)에는 안 넣고(bg), 그 탭을 처음 볼 때 한 번 알립니다(active) */
+    const 숨음 = typeof document !== 'undefined' && document.visibilityState === 'hidden';
     const body = JSON.stringify({
       kind,
       target: target == null ? null : String(target),
       key: dayKey(),
       admin: isAdmin,
       who: 갈래,
+      bg: 숨음,
     });
 
-    fetch('/api/hit', {
+    const 보내기 = (b: string) => fetch('/api/hit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body,
+      body: b,
       keepalive: true,
     }).catch(() => {
       /* 조용히 넘어갑니다 */
     });
+    보내기(body);
+
+    if (!숨음) return;
+    const 보임 = () => {
+      if (document.visibilityState !== 'visible') return;
+      document.removeEventListener('visibilitychange', 보임);
+      보내기(JSON.stringify({ kind: 'active', admin: isAdmin }));
+    };
+    document.addEventListener('visibilitychange', 보임);
+    return () => document.removeEventListener('visibilitychange', 보임);
   }, [kind, target, loading, isAdmin, 갈래]);
 
   return null;
