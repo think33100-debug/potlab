@@ -100,7 +100,7 @@ export function 로그인틀({ 아래 }: { 아래: ReactNode }) {
               className="absolute bottom-[24.37%] left-[34.21%] right-[0.04%] top-[24.67%]" />
             {/* eslint-enable @next/next/no-img-element */}
           </Link>
-          <h1 className="rapo-type-t12-bold">동료의 이야기를<br />더 가까이</h1>
+          <h1 className="rapo-type-t12-bold">치료사가 만든<br />진짜 채용어플</h1>
           <p className="rapo-type-t5-regular">로그인하고 대화를 이어가세요.</p>
         </div>
         </div>
