@@ -34,6 +34,7 @@ const 할일표 = {
   /* 댓글 「링크」 → DM (2026-11-17 ㉠) — id 없음 */
   디엠확인: (id) => (id ? null : ['tools/reels/댓글링크.mjs']),
   디엠보내기: (id) => (id ? null : ['tools/reels/댓글링크.mjs', '--실행']),
+  디엠다시보내기: (id) => (id ? ['tools/reels/단추다시보내기.mjs', '--이름', id, '--실행'] : null),
   /* 게시물 단어 정하기 — id = 게시물 짧은주소 · 셋째 낱말 = 단어(또는 - 지우기). 없으면 목록 */
   디엠단어: (id, 단어) => (!id ? ['tools/reels/댓글링크.mjs', '--단어목록'] : 단어 ? ['tools/reels/댓글링크.mjs', '--단어', id, 단어] : null),
   /* 앱 실제 화면 찍기 (사용설명서 재료) — id 없음 */
@@ -63,7 +64,7 @@ const 할일표 = {
   카드자동켜기: (id) => (id ? null : ['tools/reels/크론카드자동.mjs', '--켜기']),
   카드자동끄기: (id) => (id ? null : ['tools/reels/크론카드자동.mjs', '--끄기']),
 };
-const 영어 = { list: '목록', check: '확인', publish: '올리기', make: '만들기', pull: '당기기', 'check-cards': '카드확인', 'publish-cards': '카드올리기', 'brand-check': '브랜드확인', 'brand-publish': '브랜드올리기', 'brand-replace': '브랜드바꾸기', 'brand-comment': '브랜드댓글', 'dm-check': '디엠확인', 'dm-send': '디엠보내기', 'dm-word': '디엠단어', 'app-shots': '앱화면', 'check-story': '스토리확인', 'publish-story': '스토리올리기', 'replace-story': '스토리바꾸기', 'delete-post': '게시물지우기', 'logo-stories': '로고스토리', 'sound-check': '소리확인', 'replace-cards': '카드바꾸기', 'cron-check': '크론보기', 'log-tail': '로그보기', 'post-list': '게시물목록', 'source-view': '원문보기', 'dm-cron-check': '디엠크론보기', 'dm-fast-on': '디엠바로켜기', 'dm-fast-off': '디엠바로끄기', 'cards-auto-on': '카드자동켜기', 'cards-auto-off': '카드자동끄기' };
+const 영어 = { list: '목록', check: '확인', publish: '올리기', make: '만들기', pull: '당기기', 'check-cards': '카드확인', 'publish-cards': '카드올리기', 'brand-check': '브랜드확인', 'brand-publish': '브랜드올리기', 'brand-replace': '브랜드바꾸기', 'brand-comment': '브랜드댓글', 'dm-check': '디엠확인', 'dm-send': '디엠보내기', 'dm-word': '디엠단어', 'app-shots': '앱화면', 'check-story': '스토리확인', 'publish-story': '스토리올리기', 'replace-story': '스토리바꾸기', 'delete-post': '게시물지우기', 'logo-stories': '로고스토리', 'sound-check': '소리확인', 'replace-cards': '카드바꾸기', 'cron-check': '크론보기', 'log-tail': '로그보기', 'post-list': '게시물목록', 'dm-resend': '디엠다시보내기', 'source-view': '원문보기', 'dm-cron-check': '디엠크론보기', 'dm-fast-on': '디엠바로켜기', 'dm-fast-off': '디엠바로끄기', 'cards-auto-on': '카드자동켜기', 'cards-auto-off': '카드자동끄기' };
 
 /** 들어온 글 → { 할일, id, 인수 } 또는 { 거절 } — 시험할 수 있게 갈라 둠 */
 export function 풀기(글) {
