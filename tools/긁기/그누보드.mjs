@@ -22,7 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { 받기, 설정, 담기, 최근인가, HS3가긁나 } from './공통.mjs';
+import { 받기, 설정, 담기, 버림담기, 버림줄, 최근인가, HS3가긁나 } from './공통.mjs';
 import { sortJob } from '../sort-rule.mjs';
 import { 그누읽기, 꼬리말, 엔티티풀기 } from './읽기들.mjs';
 
@@ -76,7 +76,7 @@ if (!fs.existsSync(설정자리)) {
 }
 const { 곳들 } = JSON.parse(fs.readFileSync(설정자리, 'utf8'));
 const cfg = 설정();
-const 담을것 = [];
+const 담을것 = []; const 버릴것 = [];
 const 안담음 = [];
 let 건너뜀 = 0;
 let 열린곳 = 0; let 못연곳 = 0;
@@ -111,6 +111,12 @@ for (const 곳 of 곳들.slice(0, 몇개)) {
       기관번호: 곳.기관번호 || null,
     });
   }
+  /* ★ 2026-11-28 — 우리 직군이 아니라 버린 줄(90일 안)도 버림 표에 (표준게시판.mjs 와 같음) */
+  for (const x of 줄들) {
+    if (sortJob(x.제목, null, null).갈래 !== '쓰레기통' || !최근인가(x.올린날, 90)) continue;
+    버릴것.push(버림줄({ id: 'HS4-' + 표(x) + '-' + x.wr, org_name: 곳.이름, title: x.제목, url: x.주소 },
+      '긁기 · 우리 직군 아님(제목 규칙)'));
+  }
 }
 console.log('\nHS3 가 긁어 건너뜀 ' + 건너뜀 + ' (세중님 ㉩) · 열린 곳 ' + 열린곳 + ' · 못 연 곳 ' + 못연곳 + ' · 담을 것 ' + 담을것.length
   + '건 (hold=true 고정 · 기관 붙는 것 ' + 담을것.filter((x) => x.기관번호).length + '건)');
@@ -119,3 +125,7 @@ const 결과 = await 담기(cfg, 출처, 담을것, { 진짜 });
 if (!결과.됨) { console.log('✗ 담지 못했습니다 — ' + (결과.왜 || 결과.답)); process.exit(1); }
 console.log(결과.마른 ? '[마른] 아무것도 안 담았습니다 — --진짜 로 담습니다'
   : '○ 담았습니다 — ' + 결과.답 + ' · 기관번호 붙임 ' + 결과.기관붙임 + '건');
+const 버림 = await 버림담기(cfg, 출처, 버릴것, { 진짜 });
+console.log(버림.마른 ? '[마른] 버림 표에 남길 줄 ' + 버림.줄 + '건'
+  : 버림.됨 ? '○ 버림 표 — 남김 ' + (버림.담음 ?? 0) + ' · 건너뜀 ' + (버림.건너뜀 ?? 0)
+  : '✗ 버림 표에 못 남김 — ' + (버림.왜 || 버림.답));

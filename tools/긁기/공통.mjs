@@ -295,6 +295,32 @@ export async function 담기(cfg, 출처, 줄들, { 진짜 = false } = {}) {
   return { 됨: true, 코드: r.status, 답: t.slice(0, 300), 기관붙임, 겹침: 겹친것.length };
 }
 
+/* ★ 2026-11-28 — **버린 글도 남깁니다** (세중님 「고쳐」 · 정답지 2차).
+   긁기는 「우리 직군 아님」 글을 조용히 버려서, 정답지와 견줄 때 「보고 버림」 인지 「못 봄」 인지 못 갈랐습니다
+   (구미시보건소 11/13~26 글 셋). 다른 수집기(HS3·나라일터·치매센터…)처럼 `collect_trash` 로 버림 표에 한 줄씩 적습니다.
+   회원 화면·보류함과 무관합니다 — 버림 표에만 들어갑니다. 열쇠는 담기와 같은 출처 열쇠입니다 */
+export async function 버림담기(cfg, 출처, 줄들, { 진짜 = false } = {}) {
+  const 열쇠 = cfg['COLLECT_KEY_' + 출처];
+  if (!줄들.length) return { 됨: true, 줄: 0 };
+  if (!열쇠) return { 됨: false, 왜: 'COLLECT_KEY_' + 출처 + ' 가 없습니다' };
+  if (!진짜) return { 됨: true, 마른: true, 줄: 줄들.length };
+  const 창구열쇠 = cfg.SUPABASE_SERVICE_KEY || cfg.SUPABASE_ANON_KEY;
+  let 담음 = 0; let 건너뜀 = 0;
+  for (let i = 0; i < 줄들.length; i += 200) {
+    const r = await fetch(cfg.SUPABASE_URL + '/rest/v1/rpc/collect_trash', {
+      method: 'POST',
+      headers: { apikey: 창구열쇠, Authorization: 'Bearer ' + 창구열쇠, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_secret: 열쇠, p_source: 출처, p_rows: 줄들.slice(i, i + 200) }),
+    });
+    const t = await r.text();
+    if (!r.ok) return { 됨: false, 코드: r.status, 답: t.slice(0, 300), 담음 };
+    try { const j = JSON.parse(t); 담음 += j.담음 || 0; 건너뜀 += j.건너뜀 || 0; } catch { /* 답 꼴이 다름 */ }
+  }
+  return { 됨: true, 담음, 건너뜀 };
+}
+/* 버림 표 한 줄 꼴 — 담을 줄과 **같은 id** 로 (나중에 규칙이 바뀌어 담기면 같은 공고로 이어지게) */
+export const 버림줄 = (담을줄, 왜) => ({ id: 담을줄.id, org_name: 담을줄.org_name, title: 담을줄.title, url: 담을줄.url, why: 왜 });
+
 /* ★ 2026-10-24 — **오래된 공고는 안 담습니다.** 게시판에는 2022년 글까지 남아 있어서
    (포천우리병원 2022-05 · 단원병원 2024-10), 그대로 담으면 **보류함에 옛 공고가
    쌓입니다** — 보류함은 사람이 한 건씩 보는 자리입니다 (CLAUDE.md 15절).
