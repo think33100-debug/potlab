@@ -31,14 +31,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 200    # web/ 를 마지막으로 바꾼 커밋을 찾으려고
 
       - name: 운영 화면이 어느 커밋인지 묻습니다
         env:
           BUILD_URL: https://potjob-web.vercel.app/api/build
-          EXPECTED_SHA: ${{ github.sha }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -u
+          # ★ 2026-11-28 — tools/·docs/ 만 바꾼 커밋은 Vercel 이 짓지 않습니다(web/vercel.json ignoreCommand).
+          #   그래서 운영 화면은 **web/ 를 마지막으로 바꾼 커밋**에 머뭅니다. 전에는 main 끝과 견줘
+          #   11/26 인스타 PR 넷(tools/ 만)마다 「안 떴다」로 헛경보가 났습니다.
+          #   견줄 것 = web/ 를 마지막으로 바꾼 커밋 · 운영 화면이 그것이거나 그 뒤 커밋이면 통과.
+          EXPECTED_SHA=$(git log -1 --format=%H -- web)
+          echo "견줄 커밋(web/ 마지막) = ${EXPECTED_SHA:0:7} · main 끝 = $(git rev-parse --short HEAD)"
           # 밀고 나면 Vercel 이 짓는 데 시간이 걸립니다. 15초마다 20분까지 기다립니다.
           # 날마다 도는 쪽은 기다릴 까닭이 없으니 한 번만 봅니다.
           if [ "$EVENT_NAME" = "push" ]; then MAX_ATTEMPTS=80; else MAX_ATTEMPTS=1; fi
@@ -52,12 +59,14 @@ jobs:
             else
               echo "[$i] /api/build 가 아직 답하지 않습니다 — $body"
             fi
-            if [ "$EVENT_NAME" != "push" ]; then
-              # 날마다 도는 쪽 — 지금 main 끝과 같은지만 봅니다
-              EXPECTED_SHA=$(git rev-parse HEAD)
-            fi
             if [ "$current_sha" = "$EXPECTED_SHA" ]; then
               echo "○ 운영 화면이 ${EXPECTED_SHA:0:7} 입니다"
+              exit 0
+            fi
+            # 운영 화면이 그 뒤 커밋(web/ 를 안 바꾼 것 포함)이어도 web/ 는 같습니다
+            if [ -n "$current_sha" ] && git cat-file -e "$current_sha^{commit}" 2>/dev/null \
+               && git merge-base --is-ancestor "$EXPECTED_SHA" "$current_sha"; then
+              echo "○ 운영 화면 ${current_sha:0:7} 은 ${EXPECTED_SHA:0:7} 뒤 커밋입니다 (web/ 같음)"
               exit 0
             fi
             [ "$i" -lt "$MAX_ATTEMPTS" ] && sleep 15
