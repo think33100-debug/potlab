@@ -19,7 +19,7 @@ export function RapoOrgPhoto({ src, alt }: { src: string; alt: string }) {
 }
 
 /** 맨 아래 작은 출처 — 「사진 출처 · 아주대학교병원 병원 누리집 보도자료」 한 줄씩 (출처 쪽으로 링크) */
-export function RapoPhotoCredit({ 줄, 어두움 = false }: { 줄: { 말: string; 누가: string; 어디: string; 주소: string }[]; 어두움?: boolean }) {
+export function RapoPhotoCredit({ 줄, 어두움 = false }: { 줄: { 말: string; 글: string; 주소: string }[]; 어두움?: boolean }) {
   return (
     <div className={'rapo-type-t2-regular flex flex-col gap-(--rapo-dimension-x1) break-keep px-(--rapo-dimension-x5) py-(--rapo-dimension-x3) ' +
       (어두움 ? 'text-[#8fa3b0]' : 'text-(color:--rapo-color-fg-neutral-subtle)')}>
@@ -27,7 +27,7 @@ export function RapoPhotoCredit({ 줄, 어두움 = false }: { 줄: { 말: string
         <p key={c.말}>
           {c.말} 출처 ·{' '}
           <a href={c.주소} target="_blank" rel="noopener noreferrer"
-            className="underline decoration-current/40 underline-offset-2">{c.누가} {c.어디}</a>
+            className="underline decoration-current/40 underline-offset-2">{c.글}</a>
         </p>
       ))}
     </div>

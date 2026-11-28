@@ -65,7 +65,7 @@ export type RapoJobDetailProps = {
   /* 이 병원 지난 공고 (2026-11-22 세중님) — 회원만 · 두 줄 · 더 있으면 병원 화면으로 */
   지난공고?: 지난공고묶음 | null;
   /* 기관 사진 (2026-11-23 세중님 시범 · lib/org-photo.ts) — 위에 띠, 출처는 맨 아래 작게. 없으면 안 그립니다 */
-  사진?: { src: string; alt: string; 출처: { 말: string; 누가: string; 어디: string; 주소: string }[] } | null;
+  사진?: { src: string; alt: string; 출처: { 말: string; 글: string; 주소: string }[] } | null;
 };
 
 /* 2026-11-14 — 공고에 금액이 없을 때 보수 칸에 올릴 공시 연봉. 아래 「이 병원 연봉」 칸과 같은 이름·같은 값입니다 */
