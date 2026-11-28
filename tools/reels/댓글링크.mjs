@@ -213,5 +213,17 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   if (process.argv.includes('--자기점검')) 자기점검();
   else if (process.argv.includes('--단어')) 단어정하기();
   else if (process.argv.includes('--단어목록')) console.log(JSON.stringify(단어들(), null, 2));
-  else await 돌기();
+  else if (process.argv.includes('--빠르게') && process.argv.includes('--실행')) {
+    /* 크론은 1분에 한 번이라 댓글 뒤 40~55초가 걸렸습니다 (2026-11-28 로그 — 42초 · 53초 · 42초 · 세중님 「바로 디엠 오게」).
+       그 1분 안에서 8초마다 다시 봅니다 (0 · 8 · … · 48초 = 일곱 번 · 다음 크론과 안 겹치게 55초 안에 끝냄 — 겹쳐도 flock 이 막음).
+       한 번 보는 데 호출 1번(게시물 목록)입니다. 호출이 막히면(한도·오류) 그 분은 거기서 멈춥니다 */
+    const 시작 = Date.now();
+    for (let n = 0; n < 7; n++) {
+      const 기다림 = 시작 + n * 8000 - Date.now();
+      if (기다림 > 0) await new Promise((r) => setTimeout(r, 기다림));
+      if (Date.now() - 시작 > 52000) break;
+      try { await 돌기(); }
+      catch (e) { console.error(`${new Date().toISOString()} ✗ 이 분은 여기서 멈춤 — ${String(e.message || e).slice(0, 200)}`); break; }
+    }
+  } else await 돌기();
 }
