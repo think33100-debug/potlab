@@ -71,6 +71,14 @@ export function 보낼글(공고id) {
     : `안녕하세요, 라포예요! 말씀하신 링크예요.\n\n${사이트}\n\n치료사 채용 공고를 한곳에 모아 두고 있어요!`;
 }
 
+/** 누르는 단추가 달린 꼴 (button template · web_url) — 글 속 주소가 안 눌린다는 분이 있어서 (2026-11-28 세중님 화면 · rebodypt 「링크가 안 눌리는데요」).
+    글에도 주소를 그대로 둡니다(단추가 안 보이는 앱에서는 길게 눌러 복사). 댓글 답장(comment_id)에서 이 꼴을 받는지는 명세에 안 적혀 있어
+    **먼저 이 꼴로 보내 보고, 거절되면 전처럼 글로** 보냅니다 */
+export function 보낼단추(공고id) {
+  return { attachment: { type: 'template', payload: { template_type: 'button', text: 보낼글(공고id),
+    buttons: [{ type: 'web_url', url: 공고id ? `${사이트}/jobs/${공고id}` : 사이트, title: 공고id ? '공고 보러 가기' : '라포 열기' }] } } };
+}
+
 async function 다받기(cfg, 길) {
   const 줄 = [];
   let 다음 = `https://graph.facebook.com/${cfg.IG_GRAPH_VERSION || 'v23.0'}${길}`;
@@ -176,16 +184,14 @@ async function 돌기() {
 
   const 못보냄 = new Set();
   for (const x of 할것) {
-    const 몸 = new URLSearchParams({
-      recipient: JSON.stringify({ comment_id: x.댓글.id }),
-      message: JSON.stringify({ text: 보낼글(x.공고) }),
-      access_token: cfg.IG_ACCESS_TOKEN,
-    });
-    let 결과 = '실패', 응답 = '';
-    /* 길 두 가지 — 명세 원문을 못 봐서 IG 계정 쪽을 먼저, 안 되면 페이지 쪽(/me = 페이지 토큰의 페이지) */
-    for (const 길 of [`/${cfg.IG_USER_ID}/messages`, '/me/messages']) {
-      try { const r = await 그래프(cfg, 길, { method: 'POST', body: 몸 }); 결과 = '보냄'; 응답 = `${길} · ${JSON.stringify(r).slice(0, 200)}`; break; }
-      catch (e) { 응답 = `${길} · ${String(e.message || e).slice(0, 300)}`; }
+    let 결과 = '실패', 응답 = '', 꼴 = null;
+    /* 꼴 두 가지(단추 → 글) × 길 두 가지 — 명세 원문을 못 봐서 IG 계정 쪽을 먼저, 안 되면 페이지 쪽(/me = 페이지 토큰의 페이지) */
+    보내기: for (const [이름, 말] of [['단추', 보낼단추(x.공고)], ['글', { text: 보낼글(x.공고) }]]) {
+      const 몸 = () => new URLSearchParams({ recipient: JSON.stringify({ comment_id: x.댓글.id }), message: JSON.stringify(말), access_token: cfg.IG_ACCESS_TOKEN });
+      for (const 길 of [`/${cfg.IG_USER_ID}/messages`, '/me/messages']) {
+        try { const r = await 그래프(cfg, 길, { method: 'POST', body: 몸() }); 결과 = '보냄'; 꼴 = 이름; 응답 = `${이름} · ${길} · ${JSON.stringify(r).slice(0, 200)}`; break 보내기; }
+        catch (e) { 응답 = `${이름} · ${길} · ${String(e.message || e).slice(0, 300)}`; console.log(`    (${이름} 꼴 안 됨 — ${응답.slice(0, 200)})`); }
+      }
     }
     /* DM 이 나간 댓글에만 공개 답글 — 실패해도 DM 은 이미 갔습니다 */
     let 답글ID = null;
@@ -193,7 +199,7 @@ async function 돌기() {
       try { 답글ID = (await 그래프(cfg, `/${x.댓글.id}/replies`, { method: 'POST', body: new URLSearchParams({ message: 답글고르기(x.댓글.id), access_token: cfg.IG_ACCESS_TOKEN }) })).id; }
       catch (e) { console.error(`  ✗ 답글을 못 달았습니다 — ${String(e.message || e).slice(0, 200)}`); }
     }
-    기록[x.댓글.id] = { 때: new Date().toISOString(), 결과, 답글ID, 시도: (기록[x.댓글.id]?.시도 || 0) + 1, 게시물: x.게시물.id, 받는이: x.댓글.username, 공고: x.공고, 응답 };
+    기록[x.댓글.id] = { 때: new Date().toISOString(), 결과, 꼴, 답글ID, 시도: (기록[x.댓글.id]?.시도 || 0) + 1, 게시물: x.게시물.id, 받는이: x.댓글.username, 공고: x.공고, 응답 };
     console.log(`${결과 === '보냄' ? '  ○' : '  ✗'} @${x.댓글.username} — ${결과} · ${응답}`);
     fs.mkdirSync(path.dirname(기록파일), { recursive: true });
     fs.writeFileSync(기록파일, JSON.stringify(기록, null, 2));
