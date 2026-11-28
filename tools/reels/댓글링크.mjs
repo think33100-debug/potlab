@@ -178,7 +178,7 @@ async function 돌기() {
   };
   if (빠르게 && !할것.length) { if (실행) 상태적기(); return; }      /* 할 일 없으면 조용히 */
   console.log(`${빠르게 ? new Date().toISOString() + ' ' : ''}보낼 댓글 ${할것.length}개`);
-  for (const x of 할것) console.log(`  · @${x.댓글.username} 「${String(x.댓글.text).slice(0, 40)}」 · ${x.게시물.permalink} · ${x.공고 ? '공고 ' + x.공고 : '첫 화면'}`);
+  for (const x of 할것) console.log(`  · @${x.댓글.username} 「${String(x.댓글.text).slice(0, 40)}」 · ${x.게시물.permalink} · ${x.공고 ? '공고 ' + x.공고 : '첫 화면'} · 댓글 단 때 ${x.댓글.timestamp} · 찾기까지 ${Math.round((Date.now() - Date.parse(x.댓글.timestamp)) / 1000)}초`);
   if (!실행) { console.log('\n마른 실행 — 보내지 않았습니다. --실행 을 붙이면 보냅니다'); return; }
   if (!DM권한) { console.error('✗ 권한이 없어 보내지 않습니다'); process.exit(1); }
 
